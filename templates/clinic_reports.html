@@ -1,0 +1,503 @@
+{% extends "base.html" %}
+
+{% block title %}تقارير العيادات{% endblock %}
+
+{% block extra_css %}
+<style>
+    .report-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        margin-bottom: 20px;
+    }
+    
+    .report-header {
+        background: linear-gradient(135deg, #fd7e14 0%, #e83e8c 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 15px 15px 0 0;
+    }
+    
+    .chart-container {
+        position: relative;
+        height: 400px;
+        margin: 20px 0;
+    }
+    
+    .metric-card {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+        border-left: 4px solid #fd7e14;
+    }
+    
+    .metric-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #fd7e14;
+        margin-bottom: 5px;
+    }
+    
+    .metric-label {
+        color: #666;
+        font-size: 0.9rem;
+    }
+    
+    .metric-change {
+        font-size: 0.8rem;
+        margin-top: 5px;
+    }
+    
+    .metric-increase { color: #28a745; }
+    .metric-decrease { color: #dc3545; }
+    .metric-stable { color: #6c757d; }
+    
+    .report-filter {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .btn-report {
+        background: linear-gradient(135deg, #fd7e14 0%, #e83e8c 100%);
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 25px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-report:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(253, 126, 20, 0.4);
+        color: white;
+    }
+    
+    .report-table {
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .table th {
+        background: #f8f9fa;
+        border: none;
+        font-weight: 600;
+        color: #495057;
+    }
+    
+    .progress-ring {
+        width: 120px;
+        height: 120px;
+        margin: 0 auto;
+    }
+    
+    .progress-ring-circle {
+        stroke: #e9ecef;
+        stroke-width: 8;
+        fill: transparent;
+        r: 52;
+        cx: 60;
+        cy: 60;
+    }
+    
+    .progress-ring-meter {
+        stroke: #fd7e14;
+        stroke-width: 8;
+        stroke-linecap: round;
+        fill: transparent;
+        r: 52;
+        cx: 60;
+        cy: 60;
+        transform: rotate(-90deg);
+        transform-origin: 60px 60px;
+        stroke-dasharray: 326.73;
+        stroke-dashoffset: 326.73;
+        transition: stroke-dashoffset 0.5s ease;
+    }
+    
+    .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .report-section {
+        background: white;
+        border-radius: 10px;
+        padding: 25px;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .section-title {
+        color: #fd7e14;
+        font-weight: 600;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #f8f9fa;
+    }
+    
+    .trend-indicator {
+        display: inline-flex;
+        align-items: center;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+    
+    .trend-up {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .trend-down {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .trend-stable {
+        background: #e2e3e5;
+        color: #383d41;
+    }
+    
+    .export-buttons {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .modal-header {
+        background: linear-gradient(135deg, #fd7e14 0%, #e83e8c 100%);
+        color: white;
+        border-radius: 10px 10px 0 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Header Section -->
+    <div class="report-header text-center mb-4">
+        <div class="report-icon">
+            <i class="fas fa-chart-line fa-3x mb-3"></i>
+        </div>
+        <h2>تقارير العيادات</h2>
+        <p class="mb-0">تحليلات شاملة وتقارير مفصلة لأداء العيادات المتخصصة</p>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="report-filter">
+        <div class="row align-items-end">
+            <div class="col-md-2">
+                <label class="form-label">فترة التقرير</label>
+                <select class="form-control" id="reportPeriod">
+                    <option value="week">الأسبوع الحالي</option>
+                    <option value="month" selected>الشهر الحالي</option>
+                    <option value="quarter">الربع الحالي</option>
+                    <option value="year">السنة الحالية</option>
+                    <option value="custom">فترة مخصصة</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">من تاريخ</label>
+                <input type="date" class="form-control" id="startDate">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">إلى تاريخ</label>
+                <input type="date" class="form-control" id="endDate">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">العيادة</label>
+                <select class="form-control" id="filterClinic">
+                    <option value="">جميع العيادات</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">الأخصائي</label>
+                <select class="form-control" id="filterSpecialist">
+                    <option value="">جميع الأخصائيين</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button class="btn btn-report w-100" onclick="generateReport()">
+                    <i class="fas fa-chart-bar"></i> إنشاء التقرير
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- KPI Grid -->
+    <div class="kpi-grid">
+        <div class="metric-card">
+            <div class="metric-number" id="totalAppointments">0</div>
+            <div class="metric-label">إجمالي المواعيد</div>
+            <div class="metric-change metric-increase" id="appointmentsChange">
+                <i class="fas fa-arrow-up"></i> +0%
+            </div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-number" id="completedSessions">0</div>
+            <div class="metric-label">الجلسات المكتملة</div>
+            <div class="metric-change metric-increase" id="sessionsChange">
+                <i class="fas fa-arrow-up"></i> +0%
+            </div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-number" id="activePatients">0</div>
+            <div class="metric-label">المرضى النشطون</div>
+            <div class="metric-change metric-stable" id="patientsChange">
+                <i class="fas fa-minus"></i> 0%
+            </div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-number" id="satisfactionRate">0%</div>
+            <div class="metric-label">معدل الرضا</div>
+            <div class="metric-change metric-increase" id="satisfactionChange">
+                <i class="fas fa-arrow-up"></i> +0%
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Buttons -->
+    <div class="export-buttons">
+        <button class="btn btn-outline-success" onclick="exportToPDF()">
+            <i class="fas fa-file-pdf"></i> تصدير PDF
+        </button>
+        <button class="btn btn-outline-primary" onclick="exportToExcel()">
+            <i class="fas fa-file-excel"></i> تصدير Excel
+        </button>
+        <button class="btn btn-outline-info" onclick="printReport()">
+            <i class="fas fa-print"></i> طباعة
+        </button>
+        <button class="btn btn-outline-secondary" onclick="scheduleReport()">
+            <i class="fas fa-clock"></i> جدولة التقرير
+        </button>
+    </div>
+
+    <div class="row">
+        <!-- Appointments Overview -->
+        <div class="col-md-8">
+            <div class="report-section">
+                <h5 class="section-title">
+                    <i class="fas fa-calendar-alt"></i> نظرة عامة على المواعيد
+                </h5>
+                <div class="chart-container">
+                    <canvas id="appointmentsChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Clinic Performance -->
+        <div class="col-md-4">
+            <div class="report-section">
+                <h5 class="section-title">
+                    <i class="fas fa-hospital"></i> أداء العيادات
+                </h5>
+                <div class="chart-container">
+                    <canvas id="clinicPerformanceChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Treatment Progress -->
+        <div class="col-md-6">
+            <div class="report-section">
+                <h5 class="section-title">
+                    <i class="fas fa-chart-line"></i> تقدم العلاج
+                </h5>
+                <div class="chart-container">
+                    <canvas id="treatmentProgressChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Specialist Workload -->
+        <div class="col-md-6">
+            <div class="report-section">
+                <h5 class="section-title">
+                    <i class="fas fa-user-md"></i> عبء العمل للأخصائيين
+                </h5>
+                <div class="chart-container">
+                    <canvas id="specialistWorkloadChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Statistics Table -->
+    <div class="report-section">
+        <h5 class="section-title">
+            <i class="fas fa-table"></i> إحصائيات مفصلة
+        </h5>
+        <div class="report-table">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>العيادة</th>
+                        <th>الأخصائي</th>
+                        <th>المواعيد المجدولة</th>
+                        <th>المواعيد المكتملة</th>
+                        <th>معدل الإنجاز</th>
+                        <th>متوسط مدة الجلسة</th>
+                        <th>تقييم الأداء</th>
+                    </tr>
+                </thead>
+                <tbody id="detailedStatsTable">
+                    <!-- Data will be loaded here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Treatment Outcomes -->
+    <div class="report-section">
+        <h5 class="section-title">
+            <i class="fas fa-trophy"></i> نتائج العلاج
+        </h5>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="text-center">
+                    <svg class="progress-ring">
+                        <circle class="progress-ring-circle"></circle>
+                        <circle class="progress-ring-meter" id="improvementRing"></circle>
+                    </svg>
+                    <div class="mt-2">
+                        <div class="h4 text-success" id="improvementRate">0%</div>
+                        <div class="text-muted">معدل التحسن</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="text-center">
+                    <svg class="progress-ring">
+                        <circle class="progress-ring-circle"></circle>
+                        <circle class="progress-ring-meter" id="completionRing"></circle>
+                    </svg>
+                    <div class="mt-2">
+                        <div class="h4 text-primary" id="completionRate">0%</div>
+                        <div class="text-muted">معدل الإكمال</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="text-center">
+                    <svg class="progress-ring">
+                        <circle class="progress-ring-circle"></circle>
+                        <circle class="progress-ring-meter" id="attendanceRing"></circle>
+                    </svg>
+                    <div class="mt-2">
+                        <div class="h4 text-info" id="attendanceRate">0%</div>
+                        <div class="text-muted">معدل الحضور</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="text-center">
+                    <svg class="progress-ring">
+                        <circle class="progress-ring-circle"></circle>
+                        <circle class="progress-ring-meter" id="retentionRing"></circle>
+                    </svg>
+                    <div class="mt-2">
+                        <div class="h4 text-warning" id="retentionRate">0%</div>
+                        <div class="text-muted">معدل الاستمرار</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Performers -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="report-section">
+                <h5 class="section-title">
+                    <i class="fas fa-star"></i> أفضل الأخصائيين أداءً
+                </h5>
+                <div id="topSpecialists">
+                    <!-- Top specialists will be loaded here -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="report-section">
+                <h5 class="section-title">
+                    <i class="fas fa-chart-pie"></i> توزيع أنواع الجلسات
+                </h5>
+                <div class="chart-container">
+                    <canvas id="sessionTypesChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monthly Trends -->
+    <div class="report-section">
+        <h5 class="section-title">
+            <i class="fas fa-trending-up"></i> الاتجاهات الشهرية
+        </h5>
+        <div class="chart-container">
+            <canvas id="monthlyTrendsChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Schedule Report Modal -->
+<div class="modal fade" id="scheduleReportModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">جدولة التقرير</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="scheduleReportForm">
+                    <div class="mb-3">
+                        <label class="form-label">اسم التقرير</label>
+                        <input type="text" class="form-control" id="reportName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">تكرار الإرسال</label>
+                        <select class="form-control" id="reportFrequency">
+                            <option value="daily">يومي</option>
+                            <option value="weekly">أسبوعي</option>
+                            <option value="monthly">شهري</option>
+                            <option value="quarterly">ربع سنوي</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">البريد الإلكتروني</label>
+                        <input type="email" class="form-control" id="reportEmail" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">تاريخ البدء</label>
+                        <input type="date" class="form-control" id="scheduleStartDate" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-report" onclick="saveScheduledReport()">حفظ الجدولة</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='js/clinic_reports.js') }}"></script>
+{% endblock %}

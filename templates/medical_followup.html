@@ -1,0 +1,607 @@
+{% extends "base.html" %}
+
+{% block title %}المتابعة الطبية والعلاج الطبيعي - مراكز الأوائل للرعاية النهارية{% endblock %}
+
+{% block extra_css %}
+<style>
+    .medical-card {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        background: white;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .medical-card:hover {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        transform: translateY(-2px);
+    }
+    
+    .record-type {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.85em;
+        font-weight: 500;
+    }
+    
+    .type-medical { background: #e7f3ff; color: #0066cc; }
+    .type-therapy { background: #fff0e6; color: #cc6600; }
+    .type-medication { background: #f0f8e6; color: #4d8000; }
+    .type-consultation { background: #f5e6ff; color: #8000cc; }
+    
+    .status-indicator {
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.8em;
+        font-weight: 500;
+    }
+    
+    .status-scheduled { background: #fff3cd; color: #856404; }
+    .status-completed { background: #d4edda; color: #155724; }
+    .status-cancelled { background: #f8d7da; color: #721c24; }
+    .status-ongoing { background: #d1ecf1; color: #0c5460; }
+    
+    .priority-indicator {
+        width: 4px;
+        height: 100%;
+        position: absolute;
+        right: 0;
+        top: 0;
+        border-radius: 0 8px 8px 0;
+    }
+    
+    .priority-urgent { background: #dc3545; }
+    .priority-high { background: #fd7e14; }
+    .priority-normal { background: #28a745; }
+    .priority-low { background: #6c757d; }
+    
+    .stats-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    
+    .stats-card h3 {
+        font-size: 2.5em;
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+    
+    .filter-section {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+    
+    .sidebar {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        width: 280px;
+        position: fixed;
+        right: 0;
+        top: 0;
+        overflow-y: auto;
+        z-index: 1000;
+    }
+    
+    .main-content {
+        margin-right: 280px;
+        padding: 20px;
+    }
+    
+    .nav-link {
+        color: rgba(255,255,255,0.8);
+        padding: 12px 20px;
+        border-radius: 8px;
+        margin-bottom: 5px;
+        transition: all 0.3s ease;
+    }
+    
+    .nav-link:hover, .nav-link.active {
+        background: rgba(255,255,255,0.1);
+        color: white;
+    }
+    
+    .medication-list {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 10px;
+    }
+    
+    .medication-item {
+        background: #fff;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        padding: 10px;
+        margin-bottom: 8px;
+        display: flex;
+        justify-content: between;
+        align-items: center;
+    }
+    
+    .therapy-session {
+        background: #fff;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        padding: 15px;
+        margin-bottom: 10px;
+    }
+    
+    .vital-signs {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 10px;
+        margin-top: 10px;
+    }
+    
+    .vital-item {
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 6px;
+        text-align: center;
+    }
+    
+    .vital-value {
+        font-size: 1.2em;
+        font-weight: bold;
+        color: #495057;
+    }
+    
+    .vital-label {
+        font-size: 0.8em;
+        color: #6c757d;
+    }
+    
+    @media (max-width: 768px) {
+        .sidebar {
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+        
+        .sidebar.show {
+            transform: translateX(0);
+        }
+        
+        .main-content {
+            margin-right: 0;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex">
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="p-3">
+            <!-- Logo and Center Name -->
+            <div class="text-center mb-4">
+                <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="شعار المركز" width="60" height="60" class="mb-2">
+                <h5 class="text-white">المتابعة الطبية</h5>
+                <p class="text-white-50 small">والعلاج الطبيعي</p>
+            </div>
+            
+            <!-- Navigation Menu -->
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#medical-records" onclick="showSection('medical-records')">
+                        <i class="fas fa-file-medical me-2"></i>
+                        السجلات الطبية
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#therapy-sessions" onclick="showSection('therapy-sessions')">
+                        <i class="fas fa-dumbbell me-2"></i>
+                        جلسات العلاج
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#medications" onclick="showSection('medications')">
+                        <i class="fas fa-pills me-2"></i>
+                        الأدوية
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#appointments" onclick="showSection('appointments')">
+                        <i class="fas fa-calendar-check me-2"></i>
+                        المواعيد
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#reports" onclick="showSection('reports')">
+                        <i class="fas fa-chart-line me-2"></i>
+                        التقارير الطبية
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/dashboard">
+                        <i class="fas fa-arrow-right me-2"></i>
+                        العودة للوحة التحكم
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2><i class="fas fa-stethoscope text-primary me-2"></i>المتابعة الطبية والعلاج الطبيعي</h2>
+                <p class="text-muted">إدارة السجلات الطبية وجلسات العلاج الطبيعي للمستفيدين</p>
+            </div>
+            <div>
+                <button class="btn btn-primary" onclick="medicalManager.showAddRecordModal()">
+                    <i class="fas fa-plus me-2"></i>سجل طبي جديد
+                </button>
+                <button class="btn btn-success" onclick="medicalManager.showAddSessionModal()">
+                    <i class="fas fa-plus me-2"></i>جلسة علاج
+                </button>
+                <button class="btn btn-outline-secondary" onclick="medicalManager.exportRecords()">
+                    <i class="fas fa-download me-2"></i>تصدير
+                </button>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <h3 id="totalRecords">0</h3>
+                    <p class="mb-0">السجلات الطبية</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+                    <h3 id="totalSessions">0</h3>
+                    <p class="mb-0">جلسات العلاج</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card" style="background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);">
+                    <h3 id="activeMedications">0</h3>
+                    <p class="mb-0">الأدوية النشطة</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);">
+                    <h3 id="upcomingAppointments">0</h3>
+                    <p class="mb-0">المواعيد القادمة</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filter-section">
+            <div class="row">
+                <div class="col-md-3">
+                    <label class="form-label">البحث</label>
+                    <input type="text" class="form-control" id="searchInput" placeholder="البحث في السجلات...">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">النوع</label>
+                    <select class="form-select" id="typeFilter">
+                        <option value="">جميع الأنواع</option>
+                        <option value="medical">طبي</option>
+                        <option value="therapy">علاج طبيعي</option>
+                        <option value="medication">دواء</option>
+                        <option value="consultation">استشارة</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">الحالة</label>
+                    <select class="form-select" id="statusFilter">
+                        <option value="">جميع الحالات</option>
+                        <option value="scheduled">مجدول</option>
+                        <option value="completed">مكتمل</option>
+                        <option value="cancelled">ملغي</option>
+                        <option value="ongoing">جاري</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">الأولوية</label>
+                    <select class="form-select" id="priorityFilter">
+                        <option value="">جميع الأولويات</option>
+                        <option value="urgent">عاجل</option>
+                        <option value="high">عالية</option>
+                        <option value="normal">عادية</option>
+                        <option value="low">منخفضة</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">الطبيب</label>
+                    <select class="form-select" id="doctorFilter">
+                        <option value="">جميع الأطباء</option>
+                    </select>
+                </div>
+                <div class="col-md-1">
+                    <label class="form-label">&nbsp;</label>
+                    <button class="btn btn-outline-secondary w-100" onclick="medicalManager.clearFilters()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Container -->
+        <div id="contentContainer">
+            <!-- Medical records will be loaded here -->
+        </div>
+
+        <!-- Pagination -->
+        <nav aria-label="تنقل السجلات">
+            <ul class="pagination justify-content-center" id="recordsPagination">
+                <!-- Pagination will be generated here -->
+            </ul>
+        </nav>
+    </div>
+</div>
+
+<!-- Add Medical Record Modal -->
+<div class="modal fade" id="addRecordModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">إضافة سجل طبي جديد</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addRecordForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">المستفيد</label>
+                            <select class="form-select" name="beneficiary_id" required>
+                                <option value="">اختر المستفيد</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">نوع السجل</label>
+                            <select class="form-select" name="record_type" required>
+                                <option value="medical">فحص طبي</option>
+                                <option value="therapy">جلسة علاج طبيعي</option>
+                                <option value="consultation">استشارة طبية</option>
+                                <option value="emergency">طوارئ</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <label class="form-label">التاريخ</label>
+                            <input type="datetime-local" class="form-control" name="record_date" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">الطبيب المعالج</label>
+                            <input type="text" class="form-control" name="doctor_name" required>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <label class="form-label">التشخيص</label>
+                            <input type="text" class="form-control" name="diagnosis" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">الأولوية</label>
+                            <select class="form-select" name="priority">
+                                <option value="normal">عادية</option>
+                                <option value="high">عالية</option>
+                                <option value="urgent">عاجل</option>
+                                <option value="low">منخفضة</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <label class="form-label">العلاج المقترح</label>
+                        <textarea class="form-control" name="treatment" rows="3" required></textarea>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <label class="form-label">الأدوية (JSON)</label>
+                        <textarea class="form-control" name="medications" rows="3" placeholder='[{"name": "اسم الدواء", "dosage": "الجرعة", "frequency": "عدد المرات"}]'></textarea>
+                        <small class="text-muted">أدخل الأدوية بصيغة JSON</small>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <label class="form-label">ملاحظات</label>
+                        <textarea class="form-control" name="notes" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary" onclick="medicalManager.saveRecord()">حفظ السجل</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Therapy Session Modal -->
+<div class="modal fade" id="addSessionModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">إضافة جلسة علاج طبيعي</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addSessionForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">المستفيد</label>
+                            <select class="form-select" name="beneficiary_id" required>
+                                <option value="">اختر المستفيد</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">نوع العلاج</label>
+                            <select class="form-select" name="therapy_type" required>
+                                <option value="physical">علاج طبيعي</option>
+                                <option value="occupational">علاج وظيفي</option>
+                                <option value="speech">علاج النطق</option>
+                                <option value="behavioral">علاج سلوكي</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <label class="form-label">تاريخ ووقت الجلسة</label>
+                            <input type="datetime-local" class="form-control" name="session_date" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">المدة (بالدقائق)</label>
+                            <input type="number" class="form-control" name="duration" min="15" max="180" value="60" required>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <label class="form-label">المعالج</label>
+                            <input type="text" class="form-control" name="therapist_name" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">الحالة</label>
+                            <select class="form-select" name="status">
+                                <option value="scheduled">مجدولة</option>
+                                <option value="completed">مكتملة</option>
+                                <option value="cancelled">ملغية</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <label class="form-label">الأهداف</label>
+                        <textarea class="form-control" name="goals" rows="3" required></textarea>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <label class="form-label">التمارين المنفذة</label>
+                        <textarea class="form-control" name="exercises" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <label class="form-label">ملاحظات الجلسة</label>
+                        <textarea class="form-control" name="session_notes" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-success" onclick="medicalManager.saveSession()">حفظ الجلسة</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Record Details Modal -->
+<div class="modal fade" id="recordDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">تفاصيل السجل الطبي</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="recordDetailsContent">
+                <!-- Record details will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                <button type="button" class="btn btn-primary" id="editRecordBtn" onclick="medicalManager.editRecord()">تعديل</button>
+                <button type="button" class="btn btn-info" onclick="medicalManager.printRecord()">طباعة</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Medication Modal -->
+<div class="modal fade" id="addMedicationModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">إضافة دواء</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addMedicationForm">
+                    <input type="hidden" name="record_id">
+                    
+                    <div class="mb-3">
+                        <label class="form-label">اسم الدواء</label>
+                        <input type="text" class="form-control" name="medication_name" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">الجرعة</label>
+                        <input type="text" class="form-control" name="dosage" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">عدد المرات يومياً</label>
+                        <input type="number" class="form-control" name="frequency" min="1" max="10" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">مدة العلاج (أيام)</label>
+                        <input type="number" class="form-control" name="duration_days" min="1">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">تعليمات خاصة</label>
+                        <textarea class="form-control" name="instructions" rows="2"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary" onclick="medicalManager.saveMedication()">حفظ</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/medical_followup.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        medicalManager.init();
+    });
+    
+    function showSection(section) {
+        // Update active nav link
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.classList.remove('active');
+        });
+        event.target.classList.add('active');
+        
+        // Show relevant content based on section
+        switch(section) {
+            case 'medical-records':
+                medicalManager.loadMedicalRecords();
+                break;
+            case 'therapy-sessions':
+                medicalManager.loadTherapySessions();
+                break;
+            case 'medications':
+                medicalManager.loadMedications();
+                break;
+            case 'appointments':
+                medicalManager.loadAppointments();
+                break;
+            case 'reports':
+                medicalManager.showReportsSection();
+                break;
+        }
+    }
+</script>
+{% endblock %}

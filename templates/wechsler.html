@@ -1,0 +1,394 @@
+{% extends "base.html" %}
+
+{% block title %}مقاييس وكسلر للذكاء{% endblock %}
+
+{% block content %}
+<div class="container-fluid" dir="rtl">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="fas fa-puzzle-piece text-primary me-2"></i>
+                        مقاييس وكسلر للذكاء
+                    </h2>
+                    <p class="text-muted mb-0">Wechsler Intelligence Scales (WISC-V, WAIS-IV, WPPSI-IV)</p>
+                </div>
+                <div>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newWechslerAssessmentModal">
+                        <i class="fas fa-plus me-2"></i>
+                        تقييم جديد
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-primary bg-gradient rounded-3 p-3">
+                                <i class="fas fa-clipboard-list text-white"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">إجمالي التقييمات</h6>
+                            <h4 class="mb-0" id="totalWechslerAssessments">0</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-success bg-gradient rounded-3 p-3">
+                                <i class="fas fa-check-circle text-white"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">التقييمات المكتملة</h6>
+                            <h4 class="mb-0" id="completedWechslerAssessments">0</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-warning bg-gradient rounded-3 p-3">
+                                <i class="fas fa-clock text-white"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">قيد التنفيذ</h6>
+                            <h4 class="mb-0" id="inProgressWechslerAssessments">0</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-info bg-gradient rounded-3 p-3">
+                                <i class="fas fa-calculator text-white"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="text-muted mb-1">متوسط معامل الذكاء</h6>
+                            <h4 class="mb-0" id="averageWechslerIQ">0</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scale Type Tabs -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <ul class="nav nav-pills nav-justified" id="scaleTypeTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="all-scales-tab" data-bs-toggle="pill" data-bs-target="#all-scales" type="button" role="tab">
+                                <i class="fas fa-list me-2"></i>جميع المقاييس
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="wisc-v-tab" data-bs-toggle="pill" data-bs-target="#wisc-v" type="button" role="tab">
+                                <i class="fas fa-child me-2"></i>WISC-V (6-16 سنة)
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="wais-iv-tab" data-bs-toggle="pill" data-bs-target="#wais-iv" type="button" role="tab">
+                                <i class="fas fa-user-graduate me-2"></i>WAIS-IV (16+ سنة)
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="wppsi-iv-tab" data-bs-toggle="pill" data-bs-target="#wppsi-iv" type="button" role="tab">
+                                <i class="fas fa-baby me-2"></i>WPPSI-IV (2.5-7 سنة)
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters and Search -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label">البحث عن طالب</label>
+                            <input type="text" class="form-control" id="wechslerStudentSearch" placeholder="اسم الطالب أو رقم الهوية">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">نوع المقياس</label>
+                            <select class="form-select" id="scaleTypeFilter">
+                                <option value="">جميع الأنواع</option>
+                                <option value="WISC-V">WISC-V</option>
+                                <option value="WAIS-IV">WAIS-IV</option>
+                                <option value="WPPSI-IV">WPPSI-IV</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">حالة التقييم</label>
+                            <select class="form-select" id="wechslerStatusFilter">
+                                <option value="">جميع الحالات</option>
+                                <option value="in_progress">قيد التنفيذ</option>
+                                <option value="completed">مكتمل</option>
+                                <option value="cancelled">ملغي</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">من تاريخ</label>
+                            <input type="date" class="form-control" id="wechslerDateFrom">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">&nbsp;</label>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-primary" onclick="filterWechslerAssessments()">
+                                    <i class="fas fa-search me-2"></i>بحث
+                                </button>
+                                <button class="btn btn-outline-secondary" onclick="clearWechslerFilters()">
+                                    <i class="fas fa-times me-2"></i>مسح
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assessments Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-list me-2"></i>
+                        قائمة التقييمات
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th>الطالب</th>
+                                    <th>نوع المقياس</th>
+                                    <th>تاريخ التقييم</th>
+                                    <th>الفاحص</th>
+                                    <th>الحالة</th>
+                                    <th>نسبة الإنجاز</th>
+                                    <th>معامل الذكاء الكلي</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="wechslerAssessmentsTableBody">
+                                <!-- سيتم ملء البيانات عبر JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="noWechslerAssessments" class="text-center py-5" style="display: none;">
+                        <i class="fas fa-puzzle-piece fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">لا توجد تقييمات</h5>
+                        <p class="text-muted">ابدأ بإنشاء تقييم جديد</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- New Wechsler Assessment Modal -->
+<div class="modal fade" id="newWechslerAssessmentModal" tabindex="-1" dir="rtl">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus me-2"></i>
+                    تقييم جديد - مقاييس وكسلر للذكاء
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="newWechslerAssessmentForm">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">الطالب <span class="text-danger">*</span></label>
+                            <select class="form-select" id="wechslerStudentSelect" required>
+                                <option value="">اختر الطالب</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">الفاحص <span class="text-danger">*</span></label>
+                            <select class="form-select" id="wechslerAssessorSelect" required>
+                                <option value="">اختر الفاحص</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">نوع المقياس <span class="text-danger">*</span></label>
+                            <select class="form-select" id="scaleTypeSelect" required onchange="updateScaleInfo()">
+                                <option value="">اختر نوع المقياس</option>
+                                <option value="WISC-V">WISC-V - مقياس وكسلر للذكاء للأطفال (6-16 سنة)</option>
+                                <option value="WAIS-IV">WAIS-IV - مقياس وكسلر للذكاء للراشدين (16+ سنة)</option>
+                                <option value="WPPSI-IV">WPPSI-IV - مقياس وكسلر للذكاء لما قبل المدرسة (2.5-7 سنة)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">إصدار المقياس</label>
+                            <input type="text" class="form-control" id="scaleVersionInput" placeholder="مثل: الطبعة العربية 2023">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">تاريخ التقييم <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="wechslerAssessmentDate" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">وقت التقييم</label>
+                            <input type="time" class="form-control" id="wechslerAssessmentTime">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">مكان التقييم</label>
+                            <input type="text" class="form-control" id="wechslerAssessmentLocation" placeholder="مثل: غرفة التقييم 1">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">لغة التطبيق</label>
+                            <select class="form-select" id="languageUsed">
+                                <option value="arabic">العربية</option>
+                                <option value="english">الإنجليزية</option>
+                                <option value="bilingual">ثنائية اللغة</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">جودة العلاقة مع المفحوص</label>
+                            <select class="form-select" id="wechslerRapportQuality">
+                                <option value="">اختر</option>
+                                <option value="excellent">ممتازة</option>
+                                <option value="good">جيدة</option>
+                                <option value="fair">مقبولة</option>
+                                <option value="poor">ضعيفة</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">مستوى الانتباه</label>
+                            <select class="form-select" id="wechslerAttentionLevel">
+                                <option value="">اختر</option>
+                                <option value="high">عالي</option>
+                                <option value="moderate">متوسط</option>
+                                <option value="low">منخفض</option>
+                                <option value="variable">متغير</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">ظروف التطبيق</label>
+                            <textarea class="form-control" id="wechslerTestingConditions" rows="3" placeholder="وصف ظروف التطبيق والبيئة المحيطة"></textarea>
+                        </div>
+                        <div class="col-12" id="scaleInfoAlert" style="display: none;">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <span id="scaleInfoText"></span>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary" onclick="createWechslerAssessment()">
+                    <i class="fas fa-save me-2"></i>إنشاء التقييم
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Wechsler Assessment Details Modal -->
+<div class="modal fade" id="wechslerAssessmentDetailsModal" tabindex="-1" dir="rtl">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-puzzle-piece me-2"></i>
+                    تفاصيل التقييم - مقاييس وكسلر
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="wechslerAssessmentDetailsContent">
+                    <!-- سيتم ملء المحتوى عبر JavaScript -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                <button type="button" class="btn btn-primary" id="continueWechslerAssessmentBtn" style="display: none;">
+                    <i class="fas fa-play me-2"></i>متابعة التقييم
+                </button>
+                <button type="button" class="btn btn-success" id="generateWechslerReportBtn" style="display: none;">
+                    <i class="fas fa-file-alt me-2"></i>إنشاء التقرير
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Wechsler Subtest Administration Modal -->
+<div class="modal fade" id="wechslerSubtestModal" tabindex="-1" dir="rtl">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-tasks me-2"></i>
+                    <span id="wechslerSubtestTitle">تطبيق الاختبار الفرعي</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="wechslerSubtestContent">
+                    <!-- سيتم ملء المحتوى عبر JavaScript -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                <button type="button" class="btn btn-outline-primary" id="pauseWechslerSubtestBtn">
+                    <i class="fas fa-pause me-2"></i>إيقاف مؤقت
+                </button>
+                <button type="button" class="btn btn-success" id="completeWechslerSubtestBtn">
+                    <i class="fas fa-check me-2"></i>إنهاء الاختبار الفرعي
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Spinner -->
+<div id="wechslerLoadingSpinner" class="d-none">
+    <div class="d-flex justify-content-center align-items-center position-fixed top-0 start-0 w-100 h-100" style="background: rgba(0,0,0,0.5); z-index: 9999;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">جاري التحميل...</span>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/wechsler.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بوابة الأسرة - مراكز الأوائل</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            direction: rtl;
+        }
+        
+        .navbar-brand {
+            font-weight: bold;
+            color: #2c5aa0 !important;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .stat-card.messages {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        .stat-card.homework {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        
+        .stat-card.sessions {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+        
+        .nav-pills .nav-link {
+            border-radius: 25px;
+            margin: 0 5px;
+            transition: all 0.3s;
+        }
+        
+        .nav-pills .nav-link.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .message-item {
+            border-right: 4px solid #667eea;
+            transition: all 0.3s;
+        }
+        
+        .message-item:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .message-item.unread {
+            background-color: #fff3cd;
+            border-right-color: #ffc107;
+        }
+        
+        .homework-item {
+            border-right: 4px solid #28a745;
+        }
+        
+        .homework-item.overdue {
+            border-right-color: #dc3545;
+        }
+        
+        .progress-circle {
+            width: 80px;
+            height: 80px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 25px;
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
+            border: none;
+            border-radius: 25px;
+        }
+        
+        .alert {
+            border-radius: 15px;
+            border: none;
+        }
+        
+        .loading {
+            display: none;
+        }
+        
+        .spinner-border-sm {
+            width: 1rem;
+            height: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-home me-2"></i>
+                بوابة الأسرة - مراكز الأوائل
+            </a>
+            <div class="navbar-nav ms-auto">
+                <span class="navbar-text me-3">
+                    <i class="fas fa-user-circle me-1"></i>
+                    <span id="familyMemberName">مرحباً</span>
+                </span>
+                <button class="btn btn-outline-danger btn-sm" onclick="logout()">
+                    <i class="fas fa-sign-out-alt me-1"></i>
+                    تسجيل الخروج
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Dashboard Statistics -->
+        <div class="row mb-4" id="dashboardStats">
+            <div class="col-md-3 mb-3">
+                <div class="card stat-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-envelope fa-2x mb-2"></i>
+                        <h4 id="unreadMessages">0</h4>
+                        <p class="mb-0">رسائل غير مقروءة</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card stat-card homework">
+                    <div class="card-body text-center">
+                        <i class="fas fa-tasks fa-2x mb-2"></i>
+                        <h4 id="pendingHomework">0</h4>
+                        <p class="mb-0">واجبات معلقة</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card stat-card sessions">
+                    <div class="card-body text-center">
+                        <i class="fas fa-calendar-check fa-2x mb-2"></i>
+                        <h4 id="nextSessionDays">-</h4>
+                        <p class="mb-0">أيام للجلسة القادمة</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card stat-card messages">
+                    <div class="card-body text-center">
+                        <i class="fas fa-chart-line fa-2x mb-2"></i>
+                        <h4 id="progressScore">-</h4>
+                        <p class="mb-0">نقاط التقدم</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <ul class="nav nav-pills mb-4" id="mainTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="dashboard-tab" data-bs-toggle="pill" data-bs-target="#dashboard" type="button" role="tab">
+                    <i class="fas fa-tachometer-alt me-2"></i>لوحة التحكم
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="messages-tab" data-bs-toggle="pill" data-bs-target="#messages" type="button" role="tab">
+                    <i class="fas fa-envelope me-2"></i>الرسائل
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="progress-tab" data-bs-toggle="pill" data-bs-target="#progress" type="button" role="tab">
+                    <i class="fas fa-chart-line me-2"></i>تقارير التقدم
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="homework-tab" data-bs-toggle="pill" data-bs-target="#homework" type="button" role="tab">
+                    <i class="fas fa-tasks me-2"></i>الواجبات المنزلية
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="feedback-tab" data-bs-toggle="pill" data-bs-target="#feedback" type="button" role="tab">
+                    <i class="fas fa-star me-2"></i>التقييم
+                </button>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="mainTabContent">
+            <!-- Dashboard Tab -->
+            <div class="tab-pane fade show active" id="dashboard" role="tabpanel">
+                <div class="row">
+                    <!-- Beneficiary Info -->
+                    <div class="col-md-4 mb-4">
+                        <div class="card">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0"><i class="fas fa-user me-2"></i>معلومات المستفيد</h5>
+                            </div>
+                            <div class="card-body" id="beneficiaryInfo">
+                                <div class="loading text-center">
+                                    <div class="spinner-border text-primary" role="status"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Upcoming Sessions -->
+                    <div class="col-md-8 mb-4">
+                        <div class="card">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>الجلسات القادمة</h5>
+                            </div>
+                            <div class="card-body" id="upcomingSessions">
+                                <div class="loading text-center">
+                                    <div class="spinner-border text-success" role="status"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Latest Progress Report -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header bg-info text-white">
+                                <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>آخر تقرير تقدم</h5>
+                            </div>
+                            <div class="card-body" id="latestProgressReport">
+                                <div class="loading text-center">
+                                    <div class="spinner-border text-info" role="status"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Messages Tab -->
+            <div class="tab-pane fade" id="messages" role="tabpanel">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <h5 class="mb-0"><i class="fas fa-envelope me-2"></i>الرسائل</h5>
+                            </div>
+                            <div class="col-auto">
+                                <select class="form-select form-select-sm" id="messageTypeFilter">
+                                    <option value="">جميع الرسائل</option>
+                                    <option value="progress_update">تحديثات التقدم</option>
+                                    <option value="appointment_reminder">تذكير المواعيد</option>
+                                    <option value="general_info">معلومات عامة</option>
+                                    <option value="homework_assignment">واجبات منزلية</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body" id="messagesList">
+                        <div class="loading text-center">
+                            <div class="spinner-border text-primary" role="status"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Reports Tab -->
+            <div class="tab-pane fade" id="progress" role="tabpanel">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>تقارير التقدم</h5>
+                    </div>
+                    <div class="card-body" id="progressReportsList">
+                        <div class="loading text-center">
+                            <div class="spinner-border text-primary" role="status"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Homework Tab -->
+            <div class="tab-pane fade" id="homework" role="tabpanel">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <h5 class="mb-0"><i class="fas fa-tasks me-2"></i>الواجبات المنزلية</h5>
+                            </div>
+                            <div class="col-auto">
+                                <select class="form-select form-select-sm" id="homeworkStatusFilter">
+                                    <option value="all">جميع الواجبات</option>
+                                    <option value="pending">معلقة</option>
+                                    <option value="completed">مكتملة</option>
+                                    <option value="overdue">متأخرة</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body" id="homeworkList">
+                        <div class="loading text-center">
+                            <div class="spinner-border text-primary" role="status"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feedback Tab -->
+            <div class="tab-pane fade" id="feedback" role="tabpanel">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-star me-2"></i>تقديم تقييم</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="feedbackForm">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">نوع التقييم</label>
+                                    <select class="form-select" id="feedbackType" required>
+                                        <option value="">اختر نوع التقييم</option>
+                                        <option value="session_feedback">تقييم الجلسة</option>
+                                        <option value="program_feedback">تقييم البرنامج</option>
+                                        <option value="therapist_feedback">تقييم المعالج</option>
+                                        <option value="facility_feedback">تقييم المرفق</option>
+                                        <option value="general_feedback">تقييم عام</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">التقييم العام</label>
+                                    <select class="form-select" id="overallRating" required>
+                                        <option value="">اختر التقييم</option>
+                                        <option value="5">ممتاز (5 نجوم)</option>
+                                        <option value="4">جيد جداً (4 نجوم)</option>
+                                        <option value="3">جيد (3 نجوم)</option>
+                                        <option value="2">مقبول (نجمتان)</option>
+                                        <option value="1">ضعيف (نجمة واحدة)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">تقييم التواصل</label>
+                                    <select class="form-select" id="communicationRating">
+                                        <option value="">اختياري</option>
+                                        <option value="5">ممتاز</option>
+                                        <option value="4">جيد جداً</option>
+                                        <option value="3">جيد</option>
+                                        <option value="2">مقبول</option>
+                                        <option value="1">ضعيف</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">تقييم المهنية</label>
+                                    <select class="form-select" id="professionalismRating">
+                                        <option value="">اختياري</option>
+                                        <option value="5">ممتاز</option>
+                                        <option value="4">جيد جداً</option>
+                                        <option value="3">جيد</option>
+                                        <option value="2">مقبول</option>
+                                        <option value="1">ضعيف</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">التعليقات الإيجابية</label>
+                                <textarea class="form-control" id="positiveFeedback" rows="3" placeholder="ما الذي أعجبك؟"></textarea>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">مجالات التحسين</label>
+                                <textarea class="form-control" id="improvementAreas" rows="3" placeholder="ما الذي يمكن تحسينه؟"></textarea>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">اقتراحات</label>
+                                <textarea class="form-control" id="suggestions" rows="3" placeholder="اقتراحاتك لتحسين الخدمة"></textarea>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="anonymousFeedback">
+                                    <label class="form-check-label" for="anonymousFeedback">
+                                        تقديم التقييم بشكل مجهول
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane me-2"></i>إرسال التقييم
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Container -->
+    <div id="alertContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 1050;"></div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Family Portal JS -->
+    <script src="{{ url_for('static', filename='js/family_portal.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>قوالب سير العمل - مراكز الأوائل</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <style>
+        .template-card {
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            border-left: 4px solid #007bff;
+        }
+        .template-card:hover {
+            transform: translateY(-5px);
+        }
+        .template-card.therapy { border-left-color: #28a745; }
+        .template-card.assessment { border-left-color: #17a2b8; }
+        .template-card.documentation { border-left-color: #ffc107; }
+        .template-card.administrative { border-left-color: #6c757d; }
+        
+        .workflow-step {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+        }
+        .step-connector {
+            text-align: center;
+            color: #6c757d;
+            margin: 10px 0;
+        }
+        .instance-status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+        .status-active { background: #d4edda; color: #155724; }
+        .status-completed { background: #cce5ff; color: #004085; }
+        .status-cancelled { background: #f8d7da; color: #721c24; }
+        .progress-ring {
+            width: 60px;
+            height: 60px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-2 sidebar">
+                {% include 'sidebar.html' %}
+            </div>
+            
+            <!-- Main Content -->
+            <div class="col-md-10 main-content">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2><i class="fas fa-project-diagram me-2"></i>قوالب سير العمل</h2>
+                    <div class="btn-group">
+                        <button class="btn btn-primary" id="createTemplateBtn">
+                            <i class="fas fa-plus"></i> إنشاء قالب
+                        </button>
+                        <button class="btn btn-success" id="importTemplateBtn">
+                            <i class="fas fa-upload"></i> استيراد
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Summary Cards -->
+                <div class="row mb-4" id="summaryCards">
+                    <div class="col-md-3">
+                        <div class="card bg-primary text-white">
+                            <div class="card-body text-center">
+                                <i class="fas fa-layer-group fa-2x mb-2"></i>
+                                <h5>إجمالي القوالب</h5>
+                                <div class="h3" id="totalTemplates">0</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-success text-white">
+                            <div class="card-body text-center">
+                                <i class="fas fa-play-circle fa-2x mb-2"></i>
+                                <h5>القوالب النشطة</h5>
+                                <div class="h3" id="activeTemplates">0</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-info text-white">
+                            <div class="card-body text-center">
+                                <i class="fas fa-tasks fa-2x mb-2"></i>
+                                <h5>سير العمل النشط</h5>
+                                <div class="h3" id="activeInstances">0</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-warning text-white">
+                            <div class="card-body text-center">
+                                <i class="fas fa-check-circle fa-2x mb-2"></i>
+                                <h5>معدل الإنجاز</h5>
+                                <div class="h3" id="completionRate">0%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation Tabs -->
+                <ul class="nav nav-tabs mb-4" id="mainTabs">
+                    <li class="nav-item">
+                        <a class="nav-link active" data-bs-toggle="tab" href="#templatesTab">
+                            <i class="fas fa-layer-group"></i> القوالب
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" href="#instancesTab">
+                            <i class="fas fa-tasks"></i> سير العمل
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" href="#builderTab">
+                            <i class="fas fa-tools"></i> منشئ القوالب
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" href="#analyticsTab">
+                            <i class="fas fa-chart-bar"></i> التحليلات
+                        </a>
+                    </li>
+                </ul>
+
+                <!-- Tab Content -->
+                <div class="tab-content">
+                    <!-- Templates Tab -->
+                    <div class="tab-pane fade show active" id="templatesTab">
+                        <div class="row mb-3">
+                            <div class="col-md-3">
+                                <input type="text" class="form-control" id="templatesSearch" placeholder="البحث في القوالب...">
+                            </div>
+                            <div class="col-md-2">
+                                <select class="form-select" id="categoryFilter">
+                                    <option value="">جميع الفئات</option>
+                                    <option value="therapy_session">جلسة علاجية</option>
+                                    <option value="assessment">تقييم</option>
+                                    <option value="treatment_plan">خطة علاجية</option>
+                                    <option value="family_communication">تواصل عائلي</option>
+                                    <option value="documentation">توثيق</option>
+                                    <option value="administrative">إداري</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <select class="form-select" id="statusFilter">
+                                    <option value="">جميع الحالات</option>
+                                    <option value="active">نشط</option>
+                                    <option value="draft">مسودة</option>
+                                    <option value="inactive">غير نشط</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row" id="templatesGrid">
+                            <!-- Templates will be loaded here -->
+                        </div>
+                        
+                        <nav id="templatesPagination"></nav>
+                    </div>
+
+                    <!-- Instances Tab -->
+                    <div class="tab-pane fade" id="instancesTab">
+                        <div class="row mb-3">
+                            <div class="col-md-3">
+                                <input type="text" class="form-control" id="instancesSearch" placeholder="البحث في سير العمل...">
+                            </div>
+                            <div class="col-md-2">
+                                <select class="form-select" id="instanceStatusFilter">
+                                    <option value="">جميع الحالات</option>
+                                    <option value="active">نشط</option>
+                                    <option value="completed">مكتمل</option>
+                                    <option value="cancelled">ملغي</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <select class="form-select" id="priorityFilter">
+                                    <option value="">جميع الأولويات</option>
+                                    <option value="urgent">عاجل</option>
+                                    <option value="high">عالي</option>
+                                    <option value="medium">متوسط</option>
+                                    <option value="low">منخفض</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="table-responsive">
+                            <table class="table table-striped" id="instancesTable">
+                                <thead>
+                                    <tr>
+                                        <th>اسم سير العمل</th>
+                                        <th>القالب</th>
+                                        <th>الحالة</th>
+                                        <th>التقدم</th>
+                                        <th>الأولوية</th>
+                                        <th>تاريخ البدء</th>
+                                        <th>الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="instancesTableBody">
+                                    <!-- Instances will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <nav id="instancesPagination"></nav>
+                    </div>
+
+                    <!-- Builder Tab -->
+                    <div class="tab-pane fade" id="builderTab">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5><i class="fas fa-info-circle"></i> معلومات القالب</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <form id="templateBuilderForm">
+                                            <div class="mb-3">
+                                                <label class="form-label">اسم القالب</label>
+                                                <input type="text" class="form-control" name="name_ar" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">الوصف</label>
+                                                <textarea class="form-control" name="description_ar" rows="3"></textarea>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">الفئة</label>
+                                                <select class="form-select" name="category" required>
+                                                    <option value="therapy_session">جلسة علاجية</option>
+                                                    <option value="assessment">تقييم</option>
+                                                    <option value="treatment_plan">خطة علاجية</option>
+                                                    <option value="family_communication">تواصل عائلي</option>
+                                                    <option value="documentation">توثيق</option>
+                                                    <option value="administrative">إداري</option>
+                                                </select>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">مستوى التعقيد</label>
+                                                <select class="form-select" name="complexity_level">
+                                                    <option value="low">منخفض</option>
+                                                    <option value="medium" selected>متوسط</option>
+                                                    <option value="high">عالي</option>
+                                                </select>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">المدة المقدرة (دقيقة)</label>
+                                                <input type="number" class="form-control" name="estimated_duration" min="1">
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                                
+                                <div class="card mt-3">
+                                    <div class="card-header">
+                                        <h5><i class="fas fa-puzzle-piece"></i> عناصر سير العمل</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="d-grid gap-2">
+                                            <button class="btn btn-outline-primary btn-sm" data-step-type="task">
+                                                <i class="fas fa-tasks"></i> مهمة
+                                            </button>
+                                            <button class="btn btn-outline-info btn-sm" data-step-type="form">
+                                                <i class="fas fa-wpforms"></i> نموذج
+                                            </button>
+                                            <button class="btn btn-outline-warning btn-sm" data-step-type="decision">
+                                                <i class="fas fa-code-branch"></i> قرار
+                                            </button>
+                                            <button class="btn btn-outline-success btn-sm" data-step-type="approval">
+                                                <i class="fas fa-check-circle"></i> موافقة
+                                            </button>
+                                            <button class="btn btn-outline-secondary btn-sm" data-step-type="notification">
+                                                <i class="fas fa-bell"></i> إشعار
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-8">
+                                <div class="card">
+                                    <div class="card-header d-flex justify-content-between">
+                                        <h5><i class="fas fa-sitemap"></i> مخطط سير العمل</h5>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-primary" id="saveTemplateBtn">
+                                                <i class="fas fa-save"></i> حفظ
+                                            </button>
+                                            <button class="btn btn-outline-secondary" id="previewTemplateBtn">
+                                                <i class="fas fa-eye"></i> معاينة
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="card-body" id="workflowCanvas" style="min-height: 500px; background: #f8f9fa;">
+                                        <div class="text-center text-muted mt-5">
+                                            <i class="fas fa-mouse-pointer fa-3x mb-3"></i>
+                                            <p>اسحب العناصر من الشريط الجانبي لبناء سير العمل</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Analytics Tab -->
+                    <div class="tab-pane fade" id="analyticsTab">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5><i class="fas fa-chart-pie"></i> توزيع القوالب حسب الفئة</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="categoryChart" style="max-height: 300px;"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5><i class="fas fa-chart-line"></i> معدل الإنجاز الشهري</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="completionChart" style="max-height: 300px;"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-4">
+                            <div class="col-md-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5><i class="fas fa-trophy"></i> أفضل القوالب أداءً</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table class="table table-sm">
+                                                <thead>
+                                                    <tr>
+                                                        <th>القالب</th>
+                                                        <th>عدد الاستخدامات</th>
+                                                        <th>معدل النجاح</th>
+                                                        <th>متوسط وقت الإنجاز</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="topTemplatesTable">
+                                                    <!-- Top templates will be loaded here -->
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Template Details Modal -->
+    <div class="modal fade" id="templateDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">تفاصيل القالب</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="templateDetailsContent">
+                    <!-- Template details will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                    <button type="button" class="btn btn-primary" id="useTemplateBtn">استخدام القالب</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Instance Modal -->
+    <div class="modal fade" id="createInstanceModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">إنشاء سير عمل جديد</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createInstanceForm">
+                        <input type="hidden" name="template_id" id="instanceTemplateId">
+                        <div class="mb-3">
+                            <label class="form-label">اسم سير العمل</label>
+                            <input type="text" class="form-control" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">المرجع</label>
+                            <input type="text" class="form-control" name="reference_id" placeholder="رقم المريض، رقم الجلسة، إلخ">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">الأولوية</label>
+                            <select class="form-select" name="priority">
+                                <option value="low">منخفض</option>
+                                <option value="medium" selected>متوسط</option>
+                                <option value="high">عالي</option>
+                                <option value="urgent">عاجل</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">تاريخ الاستحقاق</label>
+                            <input type="datetime-local" class="form-control" name="due_date">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-primary" id="saveInstanceBtn">إنشاء سير العمل</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ url_for('static', filename='js/workflow_templates.js') }}"></script>
+</body>
+</html>

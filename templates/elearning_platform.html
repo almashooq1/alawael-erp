@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة التعلم الإلكتروني المتقدمة - مراكز الأوائل</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .stats-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .stats-card.success {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        .stats-card.warning {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        .stats-card.info {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+        .course-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            overflow: hidden;
+        }
+        .course-card:hover {
+            transform: translateY(-5px);
+        }
+        .course-image {
+            height: 200px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+        }
+        .difficulty-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 0.8em;
+        }
+        .rating-stars {
+            color: #ffc107;
+        }
+        .nav-pills .nav-link {
+            border-radius: 25px;
+            margin: 0 5px;
+            font-weight: 500;
+        }
+        .nav-pills .nav-link.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .category-card {
+            border: none;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+        .category-card:hover {
+            transform: translateY(-3px);
+        }
+        .progress-ring {
+            width: 60px;
+            height: 60px;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 20px 0;
+        }
+        .lesson-item {
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+        .lesson-item:hover {
+            background: #f8f9fa;
+            border-color: #007bff;
+        }
+        .lesson-type-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        .video-lesson { background: #dc3545; }
+        .text-lesson { background: #28a745; }
+        .quiz-lesson { background: #ffc107; }
+        .interactive-lesson { background: #17a2b8; }
+    </style>
+</head>
+<body>
+    <div class="container-fluid mt-4">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2><i class="fas fa-graduation-cap me-3"></i>منصة التعلم الإلكتروني المتقدمة</h2>
+                        <p class="text-muted">نظام شامل للتعلم الإلكتروني والدورات التدريبية</p>
+                    </div>
+                    <div>
+                        <button class="btn btn-primary me-2" onclick="elearning.showCreateCourseModal()">
+                            <i class="fas fa-plus me-2"></i>إضافة دورة
+                        </button>
+                        <button class="btn btn-outline-primary" onclick="elearning.refreshDashboard()">
+                            <i class="fas fa-sync-alt me-2"></i>تحديث
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row mb-4" id="statisticsCards">
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 id="totalCourses">0</h3>
+                            <p class="mb-0">إجمالي الدورات</p>
+                        </div>
+                        <i class="fas fa-book fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card success">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 id="totalStudents">0</h3>
+                            <p class="mb-0">إجمالي الطلاب</p>
+                        </div>
+                        <i class="fas fa-users fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card info">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 id="totalEnrollments">0</h3>
+                            <p class="mb-0">إجمالي التسجيلات</p>
+                        </div>
+                        <i class="fas fa-user-graduate fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card warning">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 id="completionRate">0%</h3>
+                            <p class="mb-0">معدل الإكمال</p>
+                        </div>
+                        <i class="fas fa-chart-line fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <ul class="nav nav-pills mb-4" id="elearningTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="courses-tab" data-bs-toggle="pill" data-bs-target="#courses" type="button" role="tab">
+                    <i class="fas fa-book me-2"></i>الدورات
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="categories-tab" data-bs-toggle="pill" data-bs-target="#categories" type="button" role="tab">
+                    <i class="fas fa-tags me-2"></i>الفئات
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="enrollments-tab" data-bs-toggle="pill" data-bs-target="#enrollments" type="button" role="tab">
+                    <i class="fas fa-user-graduate me-2"></i>التسجيلات
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="analytics-tab" data-bs-toggle="pill" data-bs-target="#analytics" type="button" role="tab">
+                    <i class="fas fa-chart-bar me-2"></i>التحليلات
+                </button>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="elearningTabsContent">
+            <!-- Courses Tab -->
+            <div class="tab-pane fade show active" id="courses" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-9">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="row align-items-center">
+                                    <div class="col-md-6">
+                                        <h5><i class="fas fa-book me-2"></i>الدورات التعليمية</h5>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <select class="form-select form-select-sm" id="categoryFilter" onchange="elearning.filterCourses()">
+                                                    <option value="">جميع الفئات</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <select class="form-select form-select-sm" id="difficultyFilter" onchange="elearning.filterCourses()">
+                                                    <option value="">جميع المستويات</option>
+                                                    <option value="beginner">مبتدئ</option>
+                                                    <option value="intermediate">متوسط</option>
+                                                    <option value="advanced">متقدم</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <input type="text" class="form-control form-control-sm" id="searchInput" placeholder="البحث..." onkeyup="elearning.searchCourses()">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <!-- Courses Grid -->
+                                <div id="coursesList" class="row">
+                                    <!-- Courses will be loaded here -->
+                                </div>
+                                
+                                <!-- Pagination -->
+                                <nav id="coursesPagination" class="mt-3">
+                                    <!-- Pagination will be loaded here -->
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h6><i class="fas fa-fire me-2"></i>الدورات الأكثر شعبية</h6>
+                            </div>
+                            <div class="card-body">
+                                <div id="popularCoursesList">
+                                    <!-- Popular courses will be loaded here -->
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <h6><i class="fas fa-chart-pie me-2"></i>توزيع الدورات</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="coursesCategoryChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Categories Tab -->
+            <div class="tab-pane fade" id="categories" role="tabpanel">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5><i class="fas fa-tags me-2"></i>فئات الدورات</h5>
+                        <button class="btn btn-primary btn-sm" onclick="elearning.showCreateCategoryModal()">
+                            <i class="fas fa-plus me-2"></i>إضافة فئة
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="categoriesList" class="row">
+                            <!-- Categories will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enrollments Tab -->
+            <div class="tab-pane fade" id="enrollments" role="tabpanel">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-user-graduate me-2"></i>التسجيلات الأخيرة</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="enrollmentsList">
+                            <!-- Enrollments will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics Tab -->
+            <div class="tab-pane fade" id="analytics" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6><i class="fas fa-chart-line me-2"></i>إحصائيات التسجيل</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="enrollmentTrendChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6><i class="fas fa-star me-2"></i>تقييمات الدورات</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="ratingsChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Course Modal -->
+    <div class="modal fade" id="createCourseModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">إضافة دورة جديدة</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createCourseForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">عنوان الدورة *</label>
+                                    <input type="text" class="form-control" name="title" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">رمز الدورة</label>
+                                    <input type="text" class="form-control" name="course_code" placeholder="سيتم توليده تلقائياً">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">الفئة *</label>
+                                    <select class="form-select" name="category_id" required id="courseCategorySelect">
+                                        <option value="">اختر الفئة</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">مستوى الصعوبة *</label>
+                                    <select class="form-select" name="difficulty_level" required>
+                                        <option value="">اختر المستوى</option>
+                                        <option value="beginner">مبتدئ</option>
+                                        <option value="intermediate">متوسط</option>
+                                        <option value="advanced">متقدم</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">المدة (ساعات)</label>
+                                    <input type="number" class="form-control" name="duration_hours" min="1">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">السعر</label>
+                                    <input type="number" class="form-control" name="price" min="0" step="0.01" value="0">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">وصف الدورة</label>
+                            <textarea class="form-control" name="description" rows="3"></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">تاريخ البداية</label>
+                                    <input type="datetime-local" class="form-control" name="start_date">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">تاريخ النهاية</label>
+                                    <input type="datetime-local" class="form-control" name="end_date">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="is_free" id="isFreeCheck" checked>
+                                <label class="form-check-label" for="isFreeCheck">
+                                    دورة مجانية
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-primary" onclick="elearning.createCourse()">إنشاء الدورة</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Course Details Modal -->
+    <div class="modal fade" id="courseDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="courseDetailsTitle">تفاصيل الدورة</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="courseDetailsContent">
+                        <!-- Course details will be loaded here -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                    <button type="button" class="btn btn-primary" id="enrollButton" onclick="elearning.enrollInCourse()">التسجيل في الدورة</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="d-none">
+        <div class="d-flex justify-content-center align-items-center position-fixed top-0 start-0 w-100 h-100" style="background: rgba(0,0,0,0.5); z-index: 9999;">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">جاري التحميل...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/elearning_platform.js') }}"></script>
+    <script>
+        // Initialize the E-Learning Platform
+        document.addEventListener('DOMContentLoaded', function() {
+            window.elearning = new ELearningManager();
+        });
+    </script>
+</body>
+</html>

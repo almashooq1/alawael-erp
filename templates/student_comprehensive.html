@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الملف الشامل للطالب - مراكز الأوائل</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .comprehensive-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .file-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .file-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .assessment-card {
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: #f8f9fa;
+        }
+        
+        .assessment-card.completed {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+        
+        .assessment-card.pending {
+            border-color: #ffc107;
+            background: #fff3cd;
+        }
+        
+        .ai-analysis-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        
+        .ai-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .ai-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .ai-not-requested {
+            background: #e2e3e5;
+            color: #383d41;
+        }
+        
+        .score-indicator {
+            display: inline-block;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        
+        .score-high {
+            background: #28a745;
+        }
+        
+        .score-average {
+            background: #ffc107;
+            color: #212529;
+        }
+        
+        .score-low {
+            background: #dc3545;
+        }
+        
+        .export-options {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .print-preview {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .progress-timeline {
+            position: relative;
+            padding: 20px 0;
+        }
+        
+        .timeline-item {
+            position: relative;
+            padding: 15px 0 15px 40px;
+            border-left: 2px solid #dee2e6;
+        }
+        
+        .timeline-item:before {
+            content: '';
+            position: absolute;
+            left: -6px;
+            top: 20px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #667eea;
+        }
+        
+        .timeline-item:last-child {
+            border-left: none;
+        }
+        
+        .ai-insights {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .confidence-meter {
+            width: 100%;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #dc3545 0%, #ffc107 50%, #28a745 100%);
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid mt-4">
+        <!-- Header -->
+        <div class="comprehensive-header">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h2><i class="fas fa-folder-open"></i> الملف الشامل للطالب</h2>
+                    <p class="mb-0">إدارة شاملة للاختبارات والمقاييس مع الذكاء الاصطناعي</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <button class="btn btn-light me-2" onclick="createNewFile()">
+                        <i class="fas fa-plus"></i> ملف جديد
+                    </button>
+                    <button class="btn btn-outline-light" onclick="refreshData()">
+                        <i class="fas fa-sync-alt"></i> تحديث
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Stats -->
+        <div class="row mb-4" id="dashboardStats">
+            <div class="col-md-3">
+                <div class="file-card text-center">
+                    <div class="h3 text-primary mb-1" id="totalFiles">0</div>
+                    <div class="text-muted">إجمالي الملفات</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="file-card text-center">
+                    <div class="h3 text-success mb-1" id="activeFiles">0</div>
+                    <div class="text-muted">الملفات النشطة</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="file-card text-center">
+                    <div class="h3 text-info mb-1" id="totalAssessments">0</div>
+                    <div class="text-muted">إجمالي التقييمات</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="file-card text-center">
+                    <div class="h3 text-warning mb-1" id="aiAnalyses">0</div>
+                    <div class="text-muted">تحليلات الذكاء الاصطناعي</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Tabs -->
+        <ul class="nav nav-tabs" id="mainTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="files-tab" data-bs-toggle="tab" data-bs-target="#files" type="button">
+                    <i class="fas fa-folder"></i> الملفات الشاملة
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="assessments-tab" data-bs-toggle="tab" data-bs-target="#assessments" type="button">
+                    <i class="fas fa-clipboard-list"></i> الاختبارات والمقاييس
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="ai-analysis-tab" data-bs-toggle="tab" data-bs-target="#ai-analysis" type="button">
+                    <i class="fas fa-brain"></i> التحليل بالذكاء الاصطناعي
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="export-import-tab" data-bs-toggle="tab" data-bs-target="#export-import" type="button">
+                    <i class="fas fa-exchange-alt"></i> التصدير والاستيراد
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="printing-tab" data-bs-toggle="tab" data-bs-target="#printing" type="button">
+                    <i class="fas fa-print"></i> الطباعة
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content mt-4" id="mainTabsContent">
+            <!-- Files Tab -->
+            <div class="tab-pane fade show active" id="files" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-8">
+                        <!-- Search and Filters -->
+                        <div class="file-card">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <input type="text" class="form-control" id="searchFiles" placeholder="البحث في الملفات...">
+                                </div>
+                                <div class="col-md-3">
+                                    <select class="form-select" id="statusFilter">
+                                        <option value="">جميع الحالات</option>
+                                        <option value="active">نشط</option>
+                                        <option value="archived">مؤرشف</option>
+                                        <option value="transferred">محول</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <button class="btn btn-primary" onclick="searchFiles()">
+                                        <i class="fas fa-search"></i> بحث
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Files List -->
+                        <div id="filesList"></div>
+                        
+                        <!-- Pagination -->
+                        <nav id="filesPagination"></nav>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <!-- File Details -->
+                        <div class="file-card" id="fileDetails" style="display: none;">
+                            <h5><i class="fas fa-info-circle"></i> تفاصيل الملف</h5>
+                            <div id="fileDetailsContent"></div>
+                        </div>
+                        
+                        <!-- Recent Assessments -->
+                        <div class="file-card">
+                            <h5><i class="fas fa-clock"></i> التقييمات الأخيرة</h5>
+                            <div id="recentAssessments"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Assessments Tab -->
+            <div class="tab-pane fade" id="assessments" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="file-card">
+                            <h5><i class="fas fa-plus-circle"></i> إضافة تقييم جديد</h5>
+                            <form id="newAssessmentForm">
+                                <div class="mb-3">
+                                    <label class="form-label">الملف الشامل</label>
+                                    <select class="form-select" id="assessmentFileId" required>
+                                        <option value="">اختر الملف</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">قالب الاختبار</label>
+                                    <select class="form-select" id="assessmentTemplateId" required>
+                                        <option value="">اختر القالب</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">تاريخ التقييم</label>
+                                    <input type="date" class="form-control" id="assessmentDate" required>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="requestAIAnalysis">
+                                        <label class="form-check-label" for="requestAIAnalysis">
+                                            طلب تحليل بالذكاء الاصطناعي
+                                        </label>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> حفظ التقييم
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="file-card">
+                            <h5><i class="fas fa-list"></i> قوالب الاختبارات</h5>
+                            <div id="assessmentTemplates"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Assessment Results -->
+                <div class="file-card mt-4">
+                    <h5><i class="fas fa-chart-bar"></i> نتائج التقييمات</h5>
+                    <div id="assessmentResults"></div>
+                </div>
+            </div>
+
+            <!-- AI Analysis Tab -->
+            <div class="tab-pane fade" id="ai-analysis" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="ai-insights">
+                            <h5><i class="fas fa-brain"></i> تحليلات الذكاء الاصطناعي</h5>
+                            <p>اختر ملف طالب لعرض التحليلات والتنبؤات</p>
+                        </div>
+                        
+                        <div class="file-card">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label class="form-label">اختر الملف للتحليل</label>
+                                    <select class="form-select" id="aiAnalysisFileId">
+                                        <option value="">اختر الملف</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">نوع التحليل</label>
+                                    <select class="form-select" id="aiAnalysisType">
+                                        <option value="comprehensive">تحليل شامل</option>
+                                        <option value="longitudinal">مقارنة طولية</option>
+                                        <option value="predictive">تحليل تنبؤي</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <button class="btn btn-primary" onclick="performAIAnalysis()">
+                                    <i class="fas fa-magic"></i> إجراء التحليل
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- AI Results -->
+                        <div id="aiAnalysisResults"></div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <!-- AI Confidence Meter -->
+                        <div class="file-card">
+                            <h6><i class="fas fa-tachometer-alt"></i> مقياس الثقة</h6>
+                            <div class="confidence-meter">
+                                <div class="confidence-fill" id="confidenceFill" style="width: 0%"></div>
+                            </div>
+                            <div class="text-center mt-2">
+                                <span id="confidenceText">0%</span>
+                            </div>
+                        </div>
+                        
+                        <!-- AI Recommendations -->
+                        <div class="file-card">
+                            <h6><i class="fas fa-lightbulb"></i> التوصيات الذكية</h6>
+                            <div id="aiRecommendations"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Export/Import Tab -->
+            <div class="tab-pane fade" id="export-import" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="export-options">
+                            <h5><i class="fas fa-download"></i> تصدير الملفات</h5>
+                            <form id="exportForm">
+                                <div class="mb-3">
+                                    <label class="form-label">اختر الملف</label>
+                                    <select class="form-select" id="exportFileId" required>
+                                        <option value="">اختر الملف للتصدير</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">تنسيق التصدير</label>
+                                    <select class="form-select" id="exportFormat" required>
+                                        <option value="pdf">PDF</option>
+                                        <option value="excel">Excel</option>
+                                        <option value="json">JSON</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">الأقسام المطلوبة</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="includePersonalInfo" checked>
+                                        <label class="form-check-label">المعلومات الشخصية</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="includeAssessments" checked>
+                                        <label class="form-check-label">الاختبارات والمقاييس</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="includeMedicalHistory">
+                                        <label class="form-check-label">التاريخ الطبي</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="includeAIAnalysis">
+                                        <label class="form-check-label">تحليلات الذكاء الاصطناعي</label>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">الغرض من التصدير</label>
+                                    <input type="text" class="form-control" id="exportPurpose" placeholder="مثال: تقرير طبي، نقل ملف...">
+                                </div>
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-download"></i> تصدير الملف
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="export-options">
+                            <h5><i class="fas fa-upload"></i> استيراد الملفات</h5>
+                            <form id="importForm">
+                                <div class="mb-3">
+                                    <label class="form-label">اختر الملف للاستيراد</label>
+                                    <input type="file" class="form-control" id="importFile" accept=".json,.xlsx,.pdf">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">نوع الاستيراد</label>
+                                    <select class="form-select" id="importType">
+                                        <option value="new">ملف جديد</option>
+                                        <option value="update">تحديث ملف موجود</option>
+                                        <option value="merge">دمج مع ملف موجود</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3" id="existingFileSelect" style="display: none;">
+                                    <label class="form-label">الملف الموجود</label>
+                                    <select class="form-select" id="existingFileId">
+                                        <option value="">اختر الملف</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-upload"></i> استيراد الملف
+                                </button>
+                            </form>
+                        </div>
+                        
+                        <!-- Import/Export History -->
+                        <div class="file-card mt-4">
+                            <h6><i class="fas fa-history"></i> سجل العمليات</h6>
+                            <div id="operationHistory"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Printing Tab -->
+            <div class="tab-pane fade" id="printing" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="file-card">
+                            <h5><i class="fas fa-print"></i> إعداد الطباعة</h5>
+                            <form id="printForm">
+                                <div class="mb-3">
+                                    <label class="form-label">اختر الملف للطباعة</label>
+                                    <select class="form-select" id="printFileId" required>
+                                        <option value="">اختر الملف</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">نوع الوثيقة</label>
+                                    <select class="form-select" id="printDocumentType">
+                                        <option value="full_file">الملف الكامل</option>
+                                        <option value="assessment_report">تقرير التقييم</option>
+                                        <option value="progress_report">تقرير التقدم</option>
+                                        <option value="summary">ملخص</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">عدد النسخ</label>
+                                    <input type="number" class="form-control" id="printCopies" value="1" min="1" max="10">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">مستوى السرية</label>
+                                    <select class="form-select" id="printConfidentiality">
+                                        <option value="standard">عادي</option>
+                                        <option value="confidential">سري</option>
+                                        <option value="restricted">مقيد</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">علامة مائية (اختياري)</label>
+                                    <input type="text" class="form-control" id="printWatermark" placeholder="مثال: سري، نسخة أصلية...">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">الغرض من الطباعة</label>
+                                    <input type="text" class="form-control" id="printPurpose" placeholder="مثال: اجتماع فريق، تقرير طبي...">
+                                </div>
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-print"></i> إرسال للطباعة
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <!-- Print Preview -->
+                        <div class="file-card">
+                            <h6><i class="fas fa-eye"></i> معاينة الطباعة</h6>
+                            <div class="print-preview" id="printPreview">
+                                <p class="text-muted text-center">اختر ملف لمعاينة الطباعة</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Print Jobs -->
+                        <div class="file-card">
+                            <h6><i class="fas fa-tasks"></i> مهام الطباعة</h6>
+                            <div id="printJobs"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- New File Modal -->
+    <div class="modal fade" id="newFileModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">إنشاء ملف شامل جديد</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="newFileForm">
+                        <div class="mb-3">
+                            <label class="form-label">اختر الطالب</label>
+                            <select class="form-select" id="newFileStudentId" required>
+                                <option value="">اختر الطالب</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">المعلومات الشخصية</label>
+                            <textarea class="form-control" id="newFilePersonalInfo" rows="3" placeholder="معلومات إضافية..."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">التاريخ الطبي</label>
+                            <textarea class="form-control" id="newFileMedicalHistory" rows="3" placeholder="التاريخ الطبي..."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">معلومات الأسرة</label>
+                            <textarea class="form-control" id="newFileFamilyInfo" rows="3" placeholder="معلومات الأسرة..."></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-primary" onclick="saveNewFile()">حفظ الملف</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/student_comprehensive.js') }}"></script>
+</body>
+</html>

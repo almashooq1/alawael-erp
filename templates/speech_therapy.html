@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام برامج النطق والتخاطب - مراكز الأوائل</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            direction: rtl;
+        }
+        
+        .main-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            border-radius: 0 0 20px 20px;
+        }
+        
+        .stats-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: none;
+            transition: transform 0.3s ease;
+            margin-bottom: 1rem;
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stats-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            margin-bottom: 1rem;
+        }
+        
+        .nav-tabs .nav-link {
+            border-radius: 10px 10px 0 0;
+            border: none;
+            background-color: #f8f9fa;
+            color: #6c757d;
+            margin-left: 5px;
+            font-weight: 600;
+        }
+        
+        .nav-tabs .nav-link.active {
+            background-color: #667eea;
+            color: white;
+        }
+        
+        .tab-content {
+            background: white;
+            border-radius: 0 15px 15px 15px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 0.5rem 1.5rem;
+            font-weight: 600;
+        }
+        
+        .btn-outline-primary {
+            border: 2px solid #667eea;
+            color: #667eea;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+        
+        .btn-outline-primary:hover {
+            background: #667eea;
+            border-color: #667eea;
+        }
+        
+        .table {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .table thead th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            font-weight: 600;
+        }
+        
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            padding: 0.75rem;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+        }
+        
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px 15px 0 0;
+        }
+        
+        .badge {
+            border-radius: 20px;
+            padding: 0.5rem 1rem;
+            font-weight: 600;
+        }
+        
+        .client-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .client-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        .progress {
+            height: 8px;
+            border-radius: 10px;
+        }
+        
+        .alert {
+            border-radius: 10px;
+            border: none;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-bottom: 2rem;
+        }
+        
+        .filter-section {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="main-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h2 class="page-title mb-0">
+                        <i class="fas fa-comments text-primary me-2"></i>
+                        برامج النطق والتخاطب
+                        <img src="{{ url_for('static', filename='images/awail-logo.svg') }}" alt="شعار مراكز الأوائل" class="page-title-logo">
+                    </h2>
+                    <p class="mb-0 mt-2">إدارة شاملة لبرامج علاج النطق والتخاطب</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <button class="btn btn-light btn-lg" onclick="refreshData()">
+                        <i class="fas fa-sync-alt me-2"></i>
+                        تحديث البيانات
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid py-4 assessment-page">
+        <!-- Assessment Header with Logo -->
+        <div class="assessment-form-header text-center mb-4">
+            <img src="{{ url_for('static', filename='images/awail-logo.svg') }}" alt="شعار مراكز الأوائل" class="assessment-logo">
+            <h2 class="mb-0">برامج النطق والتخاطب</h2>
+            <p class="text-muted">إدارة شاملة لبرامج النطق والتخاطب</p>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row mb-4" id="statsCards">
+            <div class="col-lg-3 col-md-6">
+                <div class="stats-card">
+                    <div class="stats-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3 class="mb-1" id="totalClients">0</h3>
+                    <p class="text-muted mb-0">إجمالي المستفيدين</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stats-card">
+                    <div class="stats-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    <h3 class="mb-1" id="totalAssessments">0</h3>
+                    <p class="text-muted mb-0">إجمالي التقييمات</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stats-card">
+                    <div class="stats-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                        <i class="fas fa-tasks"></i>
+                    </div>
+                    <h3 class="mb-1" id="activeTherapyPlans">0</h3>
+                    <p class="text-muted mb-0">الخطط العلاجية النشطة</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="stats-card">
+                    <div class="stats-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <h3 class="mb-1" id="sessionsThisMonth">0</h3>
+                    <p class="text-muted mb-0">جلسات هذا الشهر</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Tabs -->
+        <ul class="nav nav-tabs" id="mainTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="clients-tab" data-bs-toggle="tab" data-bs-target="#clients" type="button" role="tab">
+                    <i class="fas fa-users me-2"></i>المستفيدين
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="assessments-tab" data-bs-toggle="tab" data-bs-target="#assessments" type="button" role="tab">
+                    <i class="fas fa-clipboard-list me-2"></i>التقييمات
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="therapy-plans-tab" data-bs-toggle="tab" data-bs-target="#therapy-plans" type="button" role="tab">
+                    <i class="fas fa-tasks me-2"></i>الخطط العلاجية
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="sessions-tab" data-bs-toggle="tab" data-bs-target="#sessions" type="button" role="tab">
+                    <i class="fas fa-calendar-check me-2"></i>الجلسات
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="analytics-tab" data-bs-toggle="tab" data-bs-target="#analytics" type="button" role="tab">
+                    <i class="fas fa-chart-bar me-2"></i>التحليلات
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="mainTabContent">
+            <!-- Clients Tab -->
+            <div class="tab-pane fade show active" id="clients" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4><i class="fas fa-users me-2"></i>إدارة المستفيدين</h4>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addClientModal">
+                        <i class="fas fa-plus me-2"></i>إضافة مستفيد جديد
+                    </button>
+                </div>
+
+                <!-- Filters -->
+                <div class="filter-section">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label class="form-label">البحث</label>
+                            <input type="text" class="form-control" id="clientSearch" placeholder="البحث بالاسم أو رقم المستفيد">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">الحالة</label>
+                            <select class="form-select" id="clientStatusFilter">
+                                <option value="">جميع الحالات</option>
+                                <option value="true">نشط</option>
+                                <option value="false">غير نشط</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">الجنس</label>
+                            <select class="form-select" id="clientGenderFilter">
+                                <option value="">جميع الأجناس</option>
+                                <option value="male">ذكر</option>
+                                <option value="female">أنثى</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">&nbsp;</label>
+                            <button class="btn btn-outline-primary w-100" onclick="applyClientFilters()">
+                                <i class="fas fa-filter me-2"></i>تطبيق
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Clients List -->
+                <div id="clientsList" class="row">
+                    <!-- Clients will be loaded here -->
+                </div>
+
+                <!-- Pagination -->
+                <nav aria-label="Client pagination">
+                    <ul class="pagination justify-content-center" id="clientsPagination">
+                        <!-- Pagination will be loaded here -->
+                    </ul>
+                </nav>
+            </div>
+
+            <!-- Assessments Tab -->
+            <div class="tab-pane fade" id="assessments" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4><i class="fas fa-clipboard-list me-2"></i>إدارة التقييمات</h4>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAssessmentModal">
+                        <i class="fas fa-plus me-2"></i>إضافة تقييم جديد
+                    </button>
+                </div>
+
+                <!-- Assessments Table -->
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>رقم التقييم</th>
+                                <th>اسم المستفيد</th>
+                                <th>المعالج</th>
+                                <th>نوع التقييم</th>
+                                <th>تاريخ التقييم</th>
+                                <th>الاضطراب الأساسي</th>
+                                <th>مستوى الشدة</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="assessmentsTableBody">
+                            <!-- Assessments will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Assessments Pagination -->
+                <nav aria-label="Assessments pagination">
+                    <ul class="pagination justify-content-center" id="assessmentsPagination">
+                        <!-- Pagination will be loaded here -->
+                    </ul>
+                </nav>
+            </div>
+
+            <!-- Therapy Plans Tab -->
+            <div class="tab-pane fade" id="therapy-plans" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4><i class="fas fa-tasks me-2"></i>الخطط العلاجية</h4>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTherapyPlanModal">
+                        <i class="fas fa-plus me-2"></i>إضافة خطة علاجية
+                    </button>
+                </div>
+
+                <div id="therapyPlansList">
+                    <!-- Therapy plans will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Sessions Tab -->
+            <div class="tab-pane fade" id="sessions" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4><i class="fas fa-calendar-check me-2"></i>الجلسات العلاجية</h4>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addSessionModal">
+                        <i class="fas fa-plus me-2"></i>إضافة جلسة جديدة
+                    </button>
+                </div>
+
+                <div id="sessionsList">
+                    <!-- Sessions will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Analytics Tab -->
+            <div class="tab-pane fade" id="analytics" role="tabpanel">
+                <h4><i class="fas fa-chart-bar me-2"></i>التحليلات والإحصائيات</h4>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="chart-container">
+                            <canvas id="disorderChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="chart-container">
+                            <canvas id="severityChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Client Modal -->
+    <div class="modal fade" id="addClientModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">إضافة مستفيد جديد</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addClientForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">الاسم الأول *</label>
+                                    <input type="text" class="form-control" name="first_name" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">اسم العائلة *</label>
+                                    <input type="text" class="form-control" name="last_name" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">الاسم بالعربية</label>
+                                    <input type="text" class="form-control" name="arabic_name">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">تاريخ الميلاد *</label>
+                                    <input type="date" class="form-control" name="date_of_birth" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">الجنس *</label>
+                                    <select class="form-select" name="gender" required>
+                                        <option value="">اختر الجنس</option>
+                                        <option value="male">ذكر</option>
+                                        <option value="female">أنثى</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">رقم الهوية</label>
+                                    <input type="text" class="form-control" name="national_id">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">رقم الهاتف</label>
+                                    <input type="tel" class="form-control" name="phone">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">البريد الإلكتروني</label>
+                                    <input type="email" class="form-control" name="email">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">العنوان</label>
+                            <textarea class="form-control" name="address" rows="2"></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">اسم ولي الأمر</label>
+                                    <input type="text" class="form-control" name="guardian_name">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">هاتف ولي الأمر</label>
+                                    <input type="tel" class="form-control" name="guardian_phone">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">التاريخ الطبي</label>
+                            <textarea class="form-control" name="medical_history" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-primary" onclick="saveClient()">حفظ المستفيد</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Assessment Modal -->
+    <div class="modal fade" id="addAssessmentModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">إضافة تقييم جديد</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addAssessmentForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">المستفيد *</label>
+                                    <select class="form-select" name="client_id" required id="assessmentClientSelect">
+                                        <option value="">اختر المستفيد</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">نوع التقييم *</label>
+                                    <select class="form-select" name="assessment_type" required>
+                                        <option value="">اختر نوع التقييم</option>
+                                        <option value="initial">تقييم أولي</option>
+                                        <option value="progress">تقييم تقدم</option>
+                                        <option value="final">تقييم نهائي</option>
+                                        <option value="diagnostic">تقييم تشخيصي</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">تاريخ التقييم *</label>
+                                    <input type="date" class="form-control" name="assessment_date" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">الاضطراب الأساسي *</label>
+                                    <select class="form-select" name="primary_disorder" required>
+                                        <option value="">اختر الاضطراب</option>
+                                        <option value="articulation">اضطراب النطق</option>
+                                        <option value="language">اضطراب اللغة</option>
+                                        <option value="fluency">اضطراب الطلاقة</option>
+                                        <option value="voice">اضطراب الصوت</option>
+                                        <option value="hearing">اضطراب السمع</option>
+                                        <option value="swallowing">اضطراب البلع</option>
+                                        <option value="cognitive">اضطراب معرفي</option>
+                                        <option value="autism">طيف التوحد</option>
+                                        <option value="developmental">تأخر نمائي</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">مستوى الشدة *</label>
+                                    <select class="form-select" name="severity_level" required>
+                                        <option value="">اختر مستوى الشدة</option>
+                                        <option value="mild">خفيف</option>
+                                        <option value="moderate">متوسط</option>
+                                        <option value="severe">شديد</option>
+                                        <option value="profound">شديد جداً</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">الملاحظات</label>
+                            <textarea class="form-control" name="observations" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">التوصيات</label>
+                            <textarea class="form-control" name="recommendations" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-primary" onclick="saveAssessment()">حفظ التقييم</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="/static/js/speech_therapy.js"></script>
+</body>
+</html>

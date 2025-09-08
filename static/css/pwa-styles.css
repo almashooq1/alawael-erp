@@ -1,0 +1,423 @@
+/**
+ * PWA Styles - تنسيقات التطبيق المحمول
+ */
+
+/* تنسيقات عامة للـ PWA */
+.pwa-install-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    border-radius: 50px;
+    padding: 12px 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+}
+
+.pwa-install-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* بانر التثبيت */
+.pwa-install-banner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    z-index: 1001;
+    transform: translateY(-100%);
+    transition: transform 0.3s ease;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.pwa-install-banner.show {
+    transform: translateY(0);
+}
+
+.banner-content {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    gap: 15px;
+}
+
+.banner-icon {
+    font-size: 1.5em;
+    flex-shrink: 0;
+}
+
+.banner-text {
+    flex: 1;
+}
+
+.banner-text h4 {
+    margin: 0 0 5px 0;
+    font-size: 1.1em;
+    font-weight: 600;
+}
+
+.banner-text p {
+    margin: 0;
+    font-size: 0.9em;
+    opacity: 0.9;
+}
+
+.banner-actions {
+    display: flex;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.banner-actions .btn {
+    font-size: 0.85em;
+    padding: 6px 12px;
+}
+
+/* بانر التحديث */
+.update-banner {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #28a745;
+    color: white;
+    padding: 15px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1002;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+}
+
+.update-banner.show {
+    transform: translateX(0);
+}
+
+.update-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.update-content i {
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* مودال PWA */
+.pwa-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1003;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.pwa-modal.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 12px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    transform: scale(0.7);
+    transition: transform 0.3s ease;
+}
+
+.pwa-modal.show .modal-content {
+    transform: scale(1);
+}
+
+.modal-header {
+    padding: 20px 20px 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 20px;
+}
+
+.modal-header h5 {
+    margin: 0;
+    color: #333;
+    font-weight: 600;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 1.2em;
+    color: #999;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+
+.close-btn:hover {
+    background: #f5f5f5;
+    color: #333;
+}
+
+.modal-body {
+    padding: 0 20px 20px 20px;
+}
+
+.modal-body ol {
+    padding-right: 20px;
+}
+
+.modal-body li {
+    margin-bottom: 8px;
+    line-height: 1.5;
+}
+
+/* إشعارات PWA */
+.pwa-notification {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100%);
+    background: white;
+    color: #333;
+    padding: 15px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1004;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    max-width: 400px;
+    transition: transform 0.3s ease;
+}
+
+.pwa-notification.show {
+    transform: translateX(-50%) translateY(0);
+}
+
+.pwa-notification.success {
+    border-left: 4px solid #28a745;
+}
+
+.pwa-notification.error {
+    border-left: 4px solid #dc3545;
+}
+
+.pwa-notification.warning {
+    border-left: 4px solid #ffc107;
+}
+
+.pwa-notification.info {
+    border-left: 4px solid #17a2b8;
+}
+
+.pwa-notification i {
+    font-size: 1.2em;
+}
+
+.pwa-notification.success i {
+    color: #28a745;
+}
+
+.pwa-notification.error i {
+    color: #dc3545;
+}
+
+.pwa-notification.warning i {
+    color: #ffc107;
+}
+
+.pwa-notification.info i {
+    color: #17a2b8;
+}
+
+/* تحسينات للأجهزة المحمولة */
+@media (max-width: 768px) {
+    .pwa-install-banner {
+        position: relative;
+        transform: none;
+    }
+    
+    .pwa-install-banner.show {
+        transform: none;
+    }
+    
+    .banner-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+    }
+    
+    .banner-actions {
+        justify-content: center;
+    }
+    
+    .pwa-install-btn {
+        bottom: 10px;
+        right: 10px;
+        left: 10px;
+        border-radius: 8px;
+        text-align: center;
+    }
+    
+    .update-banner {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        transform: translateY(-100%);
+    }
+    
+    .update-banner.show {
+        transform: translateY(0);
+    }
+    
+    .pwa-notification {
+        left: 10px;
+        right: 10px;
+        transform: translateY(-100%);
+        max-width: none;
+    }
+    
+    .pwa-notification.show {
+        transform: translateY(0);
+    }
+}
+
+/* تحسينات للأجهزة اللوحية */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .banner-content {
+        padding: 20px 30px;
+    }
+    
+    .pwa-install-btn {
+        bottom: 30px;
+        right: 30px;
+    }
+    
+    .update-banner {
+        top: 30px;
+        right: 30px;
+    }
+}
+
+/* تحسينات لوضع الـ Standalone */
+@media (display-mode: standalone) {
+    .pwa-install-btn,
+    .pwa-install-banner {
+        display: none !important;
+    }
+    
+    /* إضافة padding للتعامل مع status bar */
+    body {
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+    
+    /* تحسين الهيدر للـ standalone mode */
+    .navbar {
+        padding-top: calc(env(safe-area-inset-top) + 10px);
+    }
+}
+
+/* تحسينات للوضع الأفقي */
+@media (orientation: landscape) and (max-height: 500px) {
+    .pwa-install-banner .banner-content {
+        padding: 10px 20px;
+    }
+    
+    .banner-text h4 {
+        font-size: 1em;
+    }
+    
+    .banner-text p {
+        font-size: 0.8em;
+    }
+}
+
+/* تأثيرات التحميل */
+.pwa-loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* تحسينات للوضع المظلم */
+@media (prefers-color-scheme: dark) {
+    .pwa-modal .modal-content {
+        background: #2d3748;
+        color: white;
+    }
+    
+    .modal-header {
+        border-bottom-color: #4a5568;
+    }
+    
+    .modal-header h5 {
+        color: white;
+    }
+    
+    .close-btn {
+        color: #a0aec0;
+    }
+    
+    .close-btn:hover {
+        background: #4a5568;
+        color: white;
+    }
+    
+    .pwa-notification {
+        background: #2d3748;
+        color: white;
+    }
+}
+
+/* تحسينات الأداء */
+.pwa-install-btn,
+.pwa-install-banner,
+.update-banner,
+.pwa-modal,
+.pwa-notification {
+    will-change: transform, opacity;
+}
+
+/* تحسينات إمكانية الوصول */
+.pwa-install-btn:focus,
+.banner-actions .btn:focus,
+.close-btn:focus {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+}
+
+/* تحسينات للطباعة */
+@media print {
+    .pwa-install-btn,
+    .pwa-install-banner,
+    .update-banner,
+    .pwa-modal,
+    .pwa-notification {
+        display: none !important;
+    }
+}

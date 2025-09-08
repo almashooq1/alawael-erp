@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مقياس أريزونا لتقييم النطق - مراكز الأوائل</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            direction: rtl;
+        }
+        
+        .main-header {
+            background: linear-gradient(135deg, #fd7e14 0%, #e63946 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            border-radius: 0 0 20px 20px;
+        }
+        
+        .stats-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            border-right: 4px solid;
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stats-card.total { border-right-color: #007bff; }
+        .stats-card.completed { border-right-color: #28a745; }
+        .stats-card.in-progress { border-right-color: #ffc107; }
+        .stats-card.severe { border-right-color: #dc3545; }
+        
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, #fd7e14, #e63946);
+            border: none;
+            border-radius: 25px;
+            padding: 0.5rem 1.5rem;
+        }
+        
+        .btn-success {
+            background: linear-gradient(45deg, #28a745, #1e7e34);
+            border: none;
+            border-radius: 25px;
+        }
+        
+        .btn-warning {
+            background: linear-gradient(45deg, #ffc107, #e0a800);
+            border: none;
+            border-radius: 25px;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(45deg, #dc3545, #c82333);
+            border: none;
+            border-radius: 25px;
+        }
+        
+        .table {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .table thead th {
+            background: linear-gradient(45deg, #fd7e14, #e63946);
+            color: white;
+            border: none;
+            font-weight: 600;
+        }
+        
+        .badge {
+            border-radius: 20px;
+            padding: 0.5rem 1rem;
+        }
+        
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+        }
+        
+        .modal-header {
+            background: linear-gradient(45deg, #fd7e14, #e63946);
+            color: white;
+            border-radius: 15px 15px 0 0;
+        }
+        
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #fd7e14;
+            box-shadow: 0 0 0 0.2rem rgba(253, 126, 20, 0.25);
+        }
+        
+        .sound-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 2px solid #e9ecef;
+        }
+        
+        .position-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid #dee2e6;
+        }
+        
+        .error-buttons {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .error-btn {
+            min-width: 80px;
+            height: 40px;
+            border-radius: 20px;
+            border: 2px solid #dee2e6;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.85em;
+        }
+        
+        .error-btn:hover {
+            background: #f8f9fa;
+            border-color: #fd7e14;
+        }
+        
+        .error-btn.active {
+            background: #fd7e14;
+            color: white;
+            border-color: #fd7e14;
+        }
+        
+        .progress-bar {
+            border-radius: 10px;
+        }
+        
+        .loading-spinner {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 9999;
+        }
+        
+        .nav-tabs .nav-link {
+            border-radius: 10px 10px 0 0;
+            border: none;
+            background: #f8f9fa;
+            color: #6c757d;
+            margin-left: 0.25rem;
+        }
+        
+        .nav-tabs .nav-link.active {
+            background: #fd7e14;
+            color: white;
+        }
+        
+        .sound-progress {
+            height: 8px;
+            border-radius: 4px;
+            background: #e9ecef;
+            overflow: hidden;
+        }
+        
+        .sound-progress-bar {
+            height: 100%;
+            background: linear-gradient(45deg, #fd7e14, #e63946);
+            transition: width 0.3s ease;
+        }
+        
+        .severity-display {
+            background: linear-gradient(45deg, #17a2b8, #138496);
+            color: white;
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+        }
+        
+        .phonetic-symbol {
+            font-family: 'Times New Roman', serif;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #fd7e14;
+        }
+        
+        .error-pattern {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .intelligibility-scale {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 8px;
+            padding: 0.75rem;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="main-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="mb-0">
+                        <i class="fas fa-microphone me-3"></i>
+                        مقياس أريزونا لتقييم النطق (AAAT)
+                    </h1>
+                    <p class="mb-0 mt-2">تقييم شامل لاضطرابات النطق والكلام</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <button class="btn btn-light btn-lg" onclick="showNewAssessmentModal()">
+                        <i class="fas fa-plus me-2"></i>
+                        تقييم جديد
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="container mb-4">
+        <div class="row">
+            <div class="col-md-3 mb-3">
+                <div class="stats-card total">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="mb-0" id="totalAssessments">0</h3>
+                            <p class="text-muted mb-0">إجمالي التقييمات</p>
+                        </div>
+                        <i class="fas fa-clipboard-list fa-2x text-primary"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stats-card completed">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="mb-0" id="completedAssessments">0</h3>
+                            <p class="text-muted mb-0">مكتملة</p>
+                        </div>
+                        <i class="fas fa-check-circle fa-2x text-success"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stats-card in-progress">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="mb-0" id="inProgressAssessments">0</h3>
+                            <p class="text-muted mb-0">قيد التنفيذ</p>
+                        </div>
+                        <i class="fas fa-clock fa-2x text-warning"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stats-card severe">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="mb-0" id="severeAssessments">0</h3>
+                            <p class="text-muted mb-0">شديد</p>
+                        </div>
+                        <i class="fas fa-exclamation-triangle fa-2x text-danger"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters and Search -->
+    <div class="container mb-4">
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">الطالب</label>
+                        <select class="form-select" id="studentFilter">
+                            <option value="">جميع الطلاب</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">المقيم</label>
+                        <select class="form-select" id="assessorFilter">
+                            <option value="">جميع المقيمين</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">الحالة</label>
+                        <select class="form-select" id="statusFilter">
+                            <option value="">جميع الحالات</option>
+                            <option value="in_progress">قيد التنفيذ</option>
+                            <option value="completed">مكتمل</option>
+                            <option value="draft">مسودة</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">مستوى الشدة</label>
+                        <select class="form-select" id="severityFilter">
+                            <option value="">جميع المستويات</option>
+                            <option value="mild">بسيط</option>
+                            <option value="moderate">متوسط</option>
+                            <option value="severe">شديد</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">من تاريخ</label>
+                        <input type="date" class="form-control" id="dateFromFilter">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">إلى تاريخ</label>
+                        <input type="date" class="form-control" id="dateToFilter">
+                    </div>
+                </div>
+                <div class="text-center">
+                    <button class="btn btn-primary me-2" onclick="applyFilters()">
+                        <i class="fas fa-search me-2"></i>بحث
+                    </button>
+                    <button class="btn btn-secondary" onclick="clearFilters()">
+                        <i class="fas fa-times me-2"></i>مسح الفلاتر
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assessments List -->
+    <div class="container mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-list me-2"></i>
+                    قائمة التقييمات
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>الطالب</th>
+                                <th>المقيم</th>
+                                <th>تاريخ التقييم</th>
+                                <th>الحالة</th>
+                                <th>إجمالي الأخطاء</th>
+                                <th>مستوى الشدة</th>
+                                <th>الوضوح</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="assessmentsTableBody">
+                            <!-- سيتم ملء البيانات بواسطة JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Assessment Modal -->
+    <div class="modal fade" id="newAssessmentModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-plus me-2"></i>
+                        تقييم جديد - مقياس أريزونا لتقييم النطق
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="newAssessmentForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">الطالب *</label>
+                                <select class="form-select" id="newStudentId" required>
+                                    <option value="">اختر الطالب</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">المقيم *</label>
+                                <select class="form-select" id="newAssessorId" required>
+                                    <option value="">اختر المقيم</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">تاريخ التقييم</label>
+                                <input type="date" class="form-control" id="newAssessmentDate" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">العمر الزمني (سنوات)</label>
+                                <input type="number" class="form-control" id="newAgeYears" min="2" max="18">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">العمر الزمني (شهور)</label>
+                                <input type="number" class="form-control" id="newAgeMonths" min="0" max="11">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">اللغة الأساسية</label>
+                                <select class="form-select" id="newPrimaryLanguage">
+                                    <option value="arabic">العربية</option>
+                                    <option value="english">الإنجليزية</option>
+                                    <option value="bilingual">ثنائي اللغة</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">بيئة التقييم</label>
+                                <select class="form-select" id="newAssessmentEnvironment">
+                                    <option value="quiet">هادئة</option>
+                                    <option value="normal">طبيعية</option>
+                                    <option value="noisy">مشتتة</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">مدة الجلسة (دقيقة)</label>
+                                <input type="number" class="form-control" id="newSessionDuration" min="15" max="90" value="30">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">الملاحظات السلوكية الأولية</label>
+                            <textarea class="form-control" id="newBehavioralObservations" rows="3" placeholder="ملاحظات حول التعاون، الانتباه، القلق..."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">ملاحظات إضافية</label>
+                            <textarea class="form-control" id="newNotes" rows="2"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-primary" onclick="createNewAssessment()">
+                        <i class="fas fa-save me-2"></i>إنشاء التقييم
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assessment Execution Modal -->
+    <div class="modal fade" id="assessmentExecutionModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-microphone me-2"></i>
+                        تنفيذ مقياس أريزونا لتقييم النطق
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Assessment Progress -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span>التقدم الإجمالي</span>
+                            <span id="overallProgress">0%</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar" id="overallProgressBar" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Severity Display -->
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="severity-display">
+                                <h6>إجمالي الأخطاء</h6>
+                                <h4 id="totalErrors">0</h4>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="severity-display">
+                                <h6>مستوى الشدة</h6>
+                                <h4 id="severityLevel">-</h4>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="severity-display">
+                                <h6>تقييم الوضوح</h6>
+                                <h4 id="intelligibilityRating">-</h4>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sound Categories -->
+                    <ul class="nav nav-tabs mb-4" id="soundTabs">
+                        <li class="nav-item">
+                            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#consonants">
+                                الأصوات الساكنة
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#vowels">
+                                الأصوات المتحركة
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#blends">
+                                التجمعات الصوتية
+                            </button>
+                        </li>
+                    </ul>
+
+                    <!-- Sound Content -->
+                    <div class="tab-content" id="soundTabContent">
+                        <!-- Sound tabs will be populated by JavaScript -->
+                    </div>
+
+                    <!-- Assessment Summary -->
+                    <div class="mt-4" id="assessmentSummary" style="display: none;">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">ملخص النتائج</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <table class="table table-sm">
+                                            <tr>
+                                                <td>إجمالي الأخطاء:</td>
+                                                <td id="summaryTotalErrors">-</td>
+                                            </tr>
+                                            <tr>
+                                                <td>أخطاء الأصوات الساكنة:</td>
+                                                <td id="consonantErrors">-</td>
+                                            </tr>
+                                            <tr>
+                                                <td>أخطاء الأصوات المتحركة:</td>
+                                                <td id="vowelErrors">-</td>
+                                            </tr>
+                                            <tr>
+                                                <td>أخطاء التجمعات:</td>
+                                                <td id="blendErrors">-</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="text-center">
+                                            <h4>التفسير الإكلينيكي</h4>
+                                            <p id="clinicalInterpretation" class="text-muted">-</p>
+                                            <h6>التوصيات</h6>
+                                            <p id="recommendations" class="text-muted">-</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                    <button type="button" class="btn btn-warning me-2" onclick="saveAssessmentProgress()">
+                        <i class="fas fa-save me-2"></i>حفظ التقدم
+                    </button>
+                    <button type="button" class="btn btn-success" onclick="completeAssessment()" id="completeAssessmentBtn" style="display: none;">
+                        <i class="fas fa-check me-2"></i>إكمال التقييم
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div class="loading-spinner">
+        <div class="spinner-border text-warning" role="status">
+            <span class="visually-hidden">جاري التحميل...</span>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/arizona.js') }}"></script>
+    
+    <script>
+        // تهيئة الصفحة عند التحميل
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStatistics();
+            loadAssessments();
+            loadStudents();
+            loadAssessors();
+            
+            // تعيين التاريخ الحالي
+            document.getElementById('newAssessmentDate').value = new Date().toISOString().split('T')[0];
+        });
+    </script>
+</body>
+</html>

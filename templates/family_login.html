@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل دخول الأسرة - مراكز الأوائل</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            direction: rtl;
+        }
+        
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .login-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            max-width: 400px;
+            width: 100%;
+        }
+        
+        .login-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .login-header i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .login-body {
+            padding: 2rem;
+        }
+        
+        .form-control {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        .btn-login {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 0.75rem 2rem;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .alert {
+            border-radius: 10px;
+            border: none;
+        }
+        
+        .loading {
+            display: none;
+        }
+        
+        .input-group-text {
+            background: transparent;
+            border: 2px solid #e9ecef;
+            border-left: none;
+            color: #6c757d;
+        }
+        
+        .input-group .form-control {
+            border-right: none;
+        }
+        
+        .input-group:focus-within .input-group-text {
+            border-color: #667eea;
+        }
+        
+        .footer-text {
+            text-align: center;
+            margin-top: 2rem;
+            color: #6c757d;
+        }
+        
+        .language-switch {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+        }
+        
+        .language-switch .btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            border-radius: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Language Switch -->
+    <div class="language-switch">
+        <button class="btn btn-sm" onclick="toggleLanguage()">
+            <i class="fas fa-globe me-1"></i>
+            English
+        </button>
+    </div>
+
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <i class="fas fa-users"></i>
+                <h3 class="mb-0">بوابة الأسرة</h3>
+                <p class="mb-0 opacity-75">مراكز الأوائل للتأهيل</p>
+            </div>
+            
+            <div class="login-body">
+                <!-- Alert Container -->
+                <div id="alertContainer"></div>
+                
+                <form id="loginForm">
+                    <div class="mb-3">
+                        <label class="form-label">اسم المستخدم أو البريد الإلكتروني</label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-user"></i>
+                            </span>
+                            <input type="text" class="form-control" id="username" required 
+                                   placeholder="أدخل اسم المستخدم أو البريد الإلكتروني">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">كلمة المرور</label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-lock"></i>
+                            </span>
+                            <input type="password" class="form-control" id="password" required 
+                                   placeholder="أدخل كلمة المرور">
+                            <button class="btn btn-outline-secondary" type="button" onclick="togglePassword()">
+                                <i class="fas fa-eye" id="passwordToggleIcon"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="rememberMe">
+                        <label class="form-check-label" for="rememberMe">
+                            تذكرني
+                        </label>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-login text-white w-100 mb-3">
+                        <span class="login-text">تسجيل الدخول</span>
+                        <span class="loading">
+                            <i class="fas fa-spinner fa-spin me-2"></i>
+                            جاري تسجيل الدخول...
+                        </span>
+                    </button>
+                </form>
+                
+                <div class="text-center">
+                    <a href="#" class="text-decoration-none" onclick="showForgotPassword()">
+                        نسيت كلمة المرور؟
+                    </a>
+                </div>
+                
+                <div class="footer-text">
+                    <small>
+                        <i class="fas fa-shield-alt me-1"></i>
+                        جميع البيانات محمية ومشفرة
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div class="modal fade" id="forgotPasswordModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">استعادة كلمة المرور</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="forgotPasswordForm">
+                        <div class="mb-3">
+                            <label class="form-label">البريد الإلكتروني</label>
+                            <input type="email" class="form-control" id="resetEmail" required 
+                                   placeholder="أدخل بريدك الإلكتروني">
+                        </div>
+                        <div class="text-muted small mb-3">
+                            سيتم إرسال رابط استعادة كلمة المرور إلى بريدك الإلكتروني
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">
+                            إرسال رابط الاستعادة
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        class FamilyLogin {
+            constructor() {
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+                this.checkExistingLogin();
+            }
+
+            setupEventListeners() {
+                document.getElementById('loginForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.handleLogin();
+                });
+
+                document.getElementById('forgotPasswordForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.handleForgotPassword();
+                });
+
+                // Enter key support
+                document.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        const activeModal = document.querySelector('.modal.show');
+                        if (!activeModal) {
+                            this.handleLogin();
+                        }
+                    }
+                });
+            }
+
+            checkExistingLogin() {
+                const token = localStorage.getItem('family_token');
+                if (token) {
+                    // Verify token is still valid
+                    this.verifyToken(token);
+                }
+            }
+
+            async verifyToken(token) {
+                try {
+                    const response = await fetch('/api/family-portal/dashboard', {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (response.ok) {
+                        // Token is valid, redirect to portal
+                        window.location.href = '/family-portal';
+                    } else {
+                        // Token is invalid, remove it
+                        localStorage.removeItem('family_token');
+                    }
+                } catch (error) {
+                    console.error('Token verification failed:', error);
+                    localStorage.removeItem('family_token');
+                }
+            }
+
+            async handleLogin() {
+                const username = document.getElementById('username').value.trim();
+                const password = document.getElementById('password').value;
+                const rememberMe = document.getElementById('rememberMe').checked;
+
+                if (!username || !password) {
+                    this.showAlert('يرجى إدخال اسم المستخدم وكلمة المرور', 'danger');
+                    return;
+                }
+
+                this.setLoading(true);
+
+                try {
+                    const response = await fetch('/api/family-portal/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            username: username,
+                            password: password,
+                            remember_me: rememberMe
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        // Store token
+                        localStorage.setItem('family_token', data.access_token);
+                        
+                        this.showAlert('تم تسجيل الدخول بنجاح', 'success');
+                        
+                        // Redirect to family portal
+                        setTimeout(() => {
+                            window.location.href = '/family-portal';
+                        }, 1000);
+                    } else {
+                        this.showAlert(data.message || 'خطأ في تسجيل الدخول', 'danger');
+                    }
+                } catch (error) {
+                    console.error('Login error:', error);
+                    this.showAlert('خطأ في الاتصال بالخادم', 'danger');
+                } finally {
+                    this.setLoading(false);
+                }
+            }
+
+            async handleForgotPassword() {
+                const email = document.getElementById('resetEmail').value.trim();
+
+                if (!email) {
+                    this.showAlert('يرجى إدخال البريد الإلكتروني', 'danger');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/family-portal/forgot-password', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            email: email
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        this.showAlert('تم إرسال رابط استعادة كلمة المرور إلى بريدك الإلكتروني', 'success');
+                        bootstrap.Modal.getInstance(document.getElementById('forgotPasswordModal')).hide();
+                    } else {
+                        this.showAlert(data.message || 'خطأ في إرسال رابط الاستعادة', 'danger');
+                    }
+                } catch (error) {
+                    console.error('Forgot password error:', error);
+                    this.showAlert('خطأ في الاتصال بالخادم', 'danger');
+                }
+            }
+
+            setLoading(loading) {
+                const loginText = document.querySelector('.login-text');
+                const loadingText = document.querySelector('.loading');
+                const submitButton = document.querySelector('button[type="submit"]');
+
+                if (loading) {
+                    loginText.style.display = 'none';
+                    loadingText.style.display = 'inline';
+                    submitButton.disabled = true;
+                } else {
+                    loginText.style.display = 'inline';
+                    loadingText.style.display = 'none';
+                    submitButton.disabled = false;
+                }
+            }
+
+            showAlert(message, type = 'info') {
+                const alertContainer = document.getElementById('alertContainer');
+                const alertId = 'alert-' + Date.now();
+                
+                const alertHtml = `
+                    <div id="${alertId}" class="alert alert-${type} alert-dismissible fade show" role="alert">
+                        ${message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                `;
+                
+                alertContainer.innerHTML = alertHtml;
+                
+                // Auto dismiss after 5 seconds
+                setTimeout(() => {
+                    const alert = document.getElementById(alertId);
+                    if (alert) {
+                        const bsAlert = new bootstrap.Alert(alert);
+                        bsAlert.close();
+                    }
+                }, 5000);
+            }
+        }
+
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleIcon = document.getElementById('passwordToggleIcon');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        }
+
+        function showForgotPassword() {
+            const modal = new bootstrap.Modal(document.getElementById('forgotPasswordModal'));
+            modal.show();
+        }
+
+        function toggleLanguage() {
+            // This would switch to English version
+            alert('English version will be available soon / النسخة الإنجليزية ستكون متاحة قريباً');
+        }
+
+        // Initialize the login system
+        document.addEventListener('DOMContentLoaded', function() {
+            new FamilyLogin();
+        });
+    </script>
+</body>
+</html>

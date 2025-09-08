@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة الأمان والامتثال - مراكز الأوائل</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <style>
+        .security-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        .security-card:hover {
+            transform: translateY(-5px);
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .stat-card.success {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        .stat-card.warning {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        .stat-card.danger {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+        }
+        .nav-pills .nav-link {
+            border-radius: 25px;
+            margin: 0 5px;
+            font-weight: 600;
+        }
+        .nav-pills .nav-link.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .table-responsive {
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        .btn-security {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            font-weight: 600;
+        }
+        .btn-security:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            color: white;
+        }
+        .alert-item {
+            border-radius: 10px;
+            margin-bottom: 10px;
+            padding: 15px;
+        }
+        .mfa-setup {
+            text-align: center;
+            padding: 30px;
+        }
+        .qr-code {
+            max-width: 200px;
+            margin: 20px auto;
+        }
+        .backup-codes {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .loading-spinner {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    {% block content %}
+    <div class="container-fluid py-4 assessment-page">
+        <!-- Assessment Header with Logo -->
+        <div class="assessment-form-header text-center mb-4">
+            <img src="{{ url_for('static', filename='images/awail-logo.svg') }}" alt="شعار مراكز الأوائل" class="assessment-logo">
+            <h2 class="mb-0">الأمان والامتثال</h2>
+            <p class="text-muted">نظام شامل لإدارة الأمان والحماية</p>
+        </div>
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-2 sidebar">
+                <div class="sidebar-header">
+                    <h4><i class="fas fa-shield-alt"></i> الأمان والامتثال</h4>
+                </div>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard') }}">
+                            <i class="fas fa-home"></i> الرئيسية
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-10 main-content">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="page-title mb-0">
+                        <i class="fas fa-shield-alt text-primary me-2"></i>
+                        الأمان والامتثال
+                        <img src="{{ url_for('static', filename='images/awail-logo.svg') }}" alt="شعار مراكز الأوائل" class="page-title-logo">
+                    </h2>
+                    <button class="btn btn-security" onclick="refreshDashboard()">
+                        <i class="fas fa-sync-alt"></i> تحديث البيانات
+                    </button>
+                </div>
+
+                <!-- Statistics Cards -->
+                <div class="row mb-4" id="statisticsCards">
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6>المستخدمون النشطون</h6>
+                                    <h3 id="activeUsers">0</h3>
+                                </div>
+                                <i class="fas fa-users fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card success">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6>المصادقة متعددة العوامل</h6>
+                                    <h3 id="mfaUsers">0</h3>
+                                </div>
+                                <i class="fas fa-key fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card warning">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6>حوادث الأمان المفتوحة</h6>
+                                    <h3 id="openIncidents">0</h3>
+                                </div>
+                                <i class="fas fa-exclamation-triangle fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card danger">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6>التنبيهات غير المؤكدة</h6>
+                                    <h3 id="unacknowledgedAlerts">0</h3>
+                                </div>
+                                <i class="fas fa-bell fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation Tabs -->
+                <ul class="nav nav-pills mb-4" id="securityTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="mfa-tab" data-bs-toggle="pill" data-bs-target="#mfa" type="button" role="tab">
+                            <i class="fas fa-key"></i> المصادقة متعددة العوامل
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="audit-tab" data-bs-toggle="pill" data-bs-target="#audit" type="button" role="tab">
+                            <i class="fas fa-clipboard-list"></i> سجلات المراجعة
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="incidents-tab" data-bs-toggle="pill" data-bs-target="#incidents" type="button" role="tab">
+                            <i class="fas fa-exclamation-triangle"></i> حوادث الأمان
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="alerts-tab" data-bs-toggle="pill" data-bs-target="#alerts" type="button" role="tab">
+                            <i class="fas fa-bell"></i> التنبيهات
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="backups-tab" data-bs-toggle="pill" data-bs-target="#backups" type="button" role="tab">
+                            <i class="fas fa-database"></i> النسخ الاحتياطي
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Tab Content -->
+                <div class="tab-content" id="securityTabContent">
+                    <!-- MFA Tab -->
+                    <div class="tab-pane fade show active" id="mfa" role="tabpanel">
+                        <div class="card security-card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-key"></i> إعداد المصادقة متعددة العوامل</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6>اختر طريقة المصادقة:</h6>
+                                        <div class="form-check mb-3">
+                                            <input class="form-check-input" type="radio" name="mfaMethod" id="totpMethod" value="totp" checked>
+                                            <label class="form-check-label" for="totpMethod">
+                                                <i class="fas fa-mobile-alt"></i> تطبيق المصادقة (TOTP)
+                                            </label>
+                                        </div>
+                                        <div class="form-check mb-3">
+                                            <input class="form-check-input" type="radio" name="mfaMethod" id="smsMethod" value="sms">
+                                            <label class="form-check-label" for="smsMethod">
+                                                <i class="fas fa-sms"></i> رسالة نصية (SMS)
+                                            </label>
+                                        </div>
+                                        <div class="form-check mb-3">
+                                            <input class="form-check-input" type="radio" name="mfaMethod" id="emailMethod" value="email">
+                                            <label class="form-check-label" for="emailMethod">
+                                                <i class="fas fa-envelope"></i> البريد الإلكتروني
+                                            </label>
+                                        </div>
+                                        <button class="btn btn-security" onclick="setupMFA()">
+                                            <i class="fas fa-cog"></i> إعداد المصادقة
+                                        </button>
+                                    </div>
+                                    <div class="col-md-6" id="mfaSetupResult" style="display: none;">
+                                        <div class="mfa-setup">
+                                            <h6>امسح رمز QR باستخدام تطبيق المصادقة:</h6>
+                                            <div id="qrCodeContainer" class="qr-code"></div>
+                                            <div class="backup-codes" id="backupCodes" style="display: none;">
+                                                <h6>رموز الاسترداد الاحتياطية:</h6>
+                                                <div id="backupCodesList"></div>
+                                                <small class="text-muted">احفظ هذه الرموز في مكان آمن</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Audit Logs Tab -->
+                    <div class="tab-pane fade" id="audit" role="tabpanel">
+                        <div class="card security-card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5><i class="fas fa-clipboard-list"></i> سجلات المراجعة</h5>
+                                <div>
+                                    <input type="date" class="form-control d-inline-block" id="auditDateFrom" style="width: auto;">
+                                    <input type="date" class="form-control d-inline-block mx-2" id="auditDateTo" style="width: auto;">
+                                    <button class="btn btn-outline-primary" onclick="filterAuditLogs()">
+                                        <i class="fas fa-filter"></i> فلترة
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead class="table-dark">
+                                            <tr>
+                                                <th>المستخدم</th>
+                                                <th>نوع العملية</th>
+                                                <th>المورد</th>
+                                                <th>الوصف</th>
+                                                <th>عنوان IP</th>
+                                                <th>مستوى المخاطر</th>
+                                                <th>التاريخ</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="auditLogsTable">
+                                            <!-- سيتم تحميل البيانات هنا -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <nav id="auditPagination"></nav>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Security Incidents Tab -->
+                    <div class="tab-pane fade" id="incidents" role="tabpanel">
+                        <div class="card security-card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5><i class="fas fa-exclamation-triangle"></i> حوادث الأمان</h5>
+                                <button class="btn btn-security" data-bs-toggle="modal" data-bs-target="#newIncidentModal">
+                                    <i class="fas fa-plus"></i> إضافة حادث
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead class="table-dark">
+                                            <tr>
+                                                <th>النوع</th>
+                                                <th>العنوان</th>
+                                                <th>الخطورة</th>
+                                                <th>الحالة</th>
+                                                <th>تاريخ الاكتشاف</th>
+                                                <th>الإجراءات</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="incidentsTable">
+                                            <!-- سيتم تحميل البيانات هنا -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <nav id="incidentsPagination"></nav>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Security Alerts Tab -->
+                    <div class="tab-pane fade" id="alerts" role="tabpanel">
+                        <div class="card security-card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-bell"></i> تنبيهات الأمان</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="alertsList">
+                                    <!-- سيتم تحميل التنبيهات هنا -->
+                                </div>
+                                <nav id="alertsPagination"></nav>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Backups Tab -->
+                    <div class="tab-pane fade" id="backups" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card security-card">
+                                    <div class="card-header">
+                                        <h5><i class="fas fa-calendar-alt"></i> جداول النسخ الاحتياطي</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="backupSchedules">
+                                            <!-- سيتم تحميل الجداول هنا -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card security-card">
+                                    <div class="card-header">
+                                        <h5><i class="fas fa-history"></i> تاريخ النسخ الاحتياطي</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table class="table table-sm">
+                                                <thead>
+                                                    <tr>
+                                                        <th>اسم النسخة</th>
+                                                        <th>الحالة</th>
+                                                        <th>التاريخ</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="backupHistoryTable">
+                                                    <!-- سيتم تحميل البيانات هنا -->
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Incident Modal -->
+    <div class="modal fade" id="newIncidentModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">إضافة حادث أمان جديد</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="newIncidentForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">نوع الحادث</label>
+                                    <select class="form-select" name="incident_type" required>
+                                        <option value="">اختر النوع</option>
+                                        <option value="unauthorized_access">وصول غير مصرح</option>
+                                        <option value="data_breach">تسريب بيانات</option>
+                                        <option value="malware">برمجيات خبيثة</option>
+                                        <option value="phishing">تصيد إلكتروني</option>
+                                        <option value="ddos">هجوم حجب الخدمة</option>
+                                        <option value="other">أخرى</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">مستوى الخطورة</label>
+                                    <select class="form-select" name="severity" required>
+                                        <option value="">اختر المستوى</option>
+                                        <option value="low">منخفض</option>
+                                        <option value="medium">متوسط</option>
+                                        <option value="high">عالي</option>
+                                        <option value="critical">حرج</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">عنوان الحادث</label>
+                            <input type="text" class="form-control" name="title" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">وصف الحادث</label>
+                            <textarea class="form-control" name="description" rows="4"></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">عنوان IP المصدر</label>
+                                    <input type="text" class="form-control" name="source_ip">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">طريقة الاكتشاف</label>
+                                    <select class="form-select" name="detection_method">
+                                        <option value="">اختر الطريقة</option>
+                                        <option value="automated">تلقائي</option>
+                                        <option value="manual">يدوي</option>
+                                        <option value="user_report">بلاغ مستخدم</option>
+                                        <option value="external_report">بلاغ خارجي</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-security" onclick="createIncident()">حفظ الحادث</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div class="loading-spinner position-fixed top-50 start-50 translate-middle" style="z-index: 9999;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">جاري التحميل...</span>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/security_management.js') }}"></script>
+</body>
+</html>

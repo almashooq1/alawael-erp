@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة تخصيص الموظفين - مراكز الأوائل</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <style>
+        .assignment-card {
+            border-right: 4px solid #007bff;
+            transition: all 0.3s ease;
+        }
+        .assignment-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .status-badge {
+            font-size: 0.8rem;
+            padding: 0.25rem 0.5rem;
+        }
+        .workload-progress {
+            height: 8px;
+            border-radius: 4px;
+        }
+        .filter-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .stats-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+        }
+        .assignment-type-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin: 0.25rem;
+        }
+        .program-assignment {
+            background-color: #e3f2fd;
+            color: #1976d2;
+        }
+        .assessment-assignment {
+            background-color: #f3e5f5;
+            color: #7b1fa2;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <i class="fas fa-graduation-cap me-2"></i>
+                مراكز الأوائل
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}">
+                            <i class="fas fa-home"></i> الرئيسية
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('staff_assignments') }}">
+                            <i class="fas fa-user-tie"></i> تخصيص الموظفين
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2><i class="fas fa-user-tie text-primary"></i> إدارة تخصيص الموظفين</h2>
+                        <p class="text-muted">إدارة تخصيص الموظفين والأخصائيين للبرامج والمقاييس</p>
+                    </div>
+                    <div>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#assignmentModal">
+                            <i class="fas fa-plus"></i> تخصيص جديد
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h3 id="totalAssignments">0</h3>
+                            <p class="mb-0">إجمالي التخصيصات</p>
+                        </div>
+                        <i class="fas fa-clipboard-list fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h3 id="activeAssignments">0</h3>
+                            <p class="mb-0">التخصيصات النشطة</p>
+                        </div>
+                        <i class="fas fa-check-circle fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h3 id="programAssignments">0</h3>
+                            <p class="mb-0">تخصيصات البرامج</p>
+                        </div>
+                        <i class="fas fa-project-diagram fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h3 id="assessmentAssignments">0</h3>
+                            <p class="mb-0">تخصيصات المقاييس</p>
+                        </div>
+                        <i class="fas fa-clipboard-check fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filter-section">
+            <div class="row">
+                <div class="col-md-3">
+                    <label class="form-label">نوع التخصيص</label>
+                    <select class="form-select" id="assignmentTypeFilter">
+                        <option value="">جميع الأنواع</option>
+                        <option value="program">تخصيصات البرامج</option>
+                        <option value="assessment">تخصيصات المقاييس</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">الموظف</label>
+                    <select class="form-select" id="staffFilter">
+                        <option value="">جميع الموظفين</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">الحالة</label>
+                    <select class="form-select" id="statusFilter">
+                        <option value="">جميع الحالات</option>
+                        <option value="active">نشط</option>
+                        <option value="inactive">غير نشط</option>
+                        <option value="suspended">معلق</option>
+                        <option value="completed">مكتمل</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">البحث</label>
+                    <input type="text" class="form-control" id="searchInput" placeholder="البحث في التخصيصات...">
+                </div>
+            </div>
+        </div>
+
+        <!-- Assignments Tabs -->
+        <ul class="nav nav-tabs" id="assignmentTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="program-tab" data-bs-toggle="tab" data-bs-target="#program-assignments" type="button" role="tab">
+                    <i class="fas fa-project-diagram"></i> تخصيصات البرامج
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="assessment-tab" data-bs-toggle="tab" data-bs-target="#assessment-assignments" type="button" role="tab">
+                    <i class="fas fa-clipboard-check"></i> تخصيصات المقاييس
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="assignmentTabsContent">
+            <!-- Program Assignments Tab -->
+            <div class="tab-pane fade show active" id="program-assignments" role="tabpanel">
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-project-diagram"></i> تخصيصات البرامج</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="programAssignmentsList" class="row">
+                            <!-- Program assignments will be loaded here -->
+                        </div>
+                        <div id="programPagination" class="d-flex justify-content-center mt-4">
+                            <!-- Pagination will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Assessment Assignments Tab -->
+            <div class="tab-pane fade" id="assessment-assignments" role="tabpanel">
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h5><i class="fas fa-clipboard-check"></i> تخصيصات المقاييس</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="assessmentAssignmentsList" class="row">
+                            <!-- Assessment assignments will be loaded here -->
+                        </div>
+                        <div id="assessmentPagination" class="d-flex justify-content-center mt-4">
+                            <!-- Pagination will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assignment Modal -->
+    <div class="modal fade" id="assignmentModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-user-plus"></i> <span id="modalTitle">تخصيص جديد</span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="assignmentForm">
+                        <input type="hidden" id="assignmentId">
+                        <input type="hidden" id="assignmentType">
+                        
+                        <!-- Assignment Type Selection -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label class="form-label">نوع التخصيص</label>
+                                <div class="btn-group w-100" role="group">
+                                    <input type="radio" class="btn-check" name="typeSelection" id="programType" value="program" checked>
+                                    <label class="btn btn-outline-primary" for="programType">
+                                        <i class="fas fa-project-diagram"></i> تخصيص برنامج
+                                    </label>
+                                    <input type="radio" class="btn-check" name="typeSelection" id="assessmentType" value="assessment">
+                                    <label class="btn btn-outline-primary" for="assessmentType">
+                                        <i class="fas fa-clipboard-check"></i> تخصيص مقياس
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Common Fields -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="staffId" class="form-label">الموظف/المتطوع</label>
+                                <select class="form-select" id="staffId" required>
+                                    <option value="">اختر الموظف...</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="assignmentDate" class="form-label">تاريخ التخصيص</label>
+                                <input type="date" class="form-control" id="assignmentDate" required>
+                            </div>
+                        </div>
+
+                        <!-- Program Assignment Fields -->
+                        <div id="programFields">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="programId" class="form-label">البرنامج</label>
+                                    <select class="form-select" id="programId">
+                                        <option value="">اختر البرنامج...</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="role" class="form-label">الدور</label>
+                                    <select class="form-select" id="role">
+                                        <option value="">اختر الدور...</option>
+                                        <option value="therapist">معالج</option>
+                                        <option value="assistant">مساعد معالج</option>
+                                        <option value="supervisor">مشرف</option>
+                                        <option value="coordinator">منسق</option>
+                                        <option value="specialist">أخصائي</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="workloadHours" class="form-label">ساعات العمل الأسبوعية</label>
+                                    <input type="number" class="form-control" id="workloadHours" min="1" max="40">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="endDate" class="form-label">تاريخ الانتهاء</label>
+                                    <input type="date" class="form-control" id="endDate">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="responsibilities" class="form-label">المسؤوليات</label>
+                                <textarea class="form-control" id="responsibilities" rows="3" placeholder="اكتب المسؤوليات والمهام..."></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Assessment Assignment Fields -->
+                        <div id="assessmentFields" style="display: none;">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="assessmentTypeSelect" class="form-label">نوع المقياس</label>
+                                    <select class="form-select" id="assessmentTypeSelect">
+                                        <option value="">اختر نوع المقياس...</option>
+                                        <option value="cognitive">تقييم إدراكي</option>
+                                        <option value="behavioral">تقييم سلوكي</option>
+                                        <option value="developmental">تقييم نمائي</option>
+                                        <option value="academic">تقييم أكاديمي</option>
+                                        <option value="social">تقييم اجتماعي</option>
+                                        <option value="motor">تقييم حركي</option>
+                                        <option value="communication">تقييم تواصلي</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="specialization" class="form-label">التخصص</label>
+                                    <input type="text" class="form-control" id="specialization" placeholder="مثال: علم النفس التربوي">
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="certificationLevel" class="form-label">مستوى الشهادة</label>
+                                    <select class="form-select" id="certificationLevel">
+                                        <option value="">اختر المستوى...</option>
+                                        <option value="basic">أساسي</option>
+                                        <option value="intermediate">متوسط</option>
+                                        <option value="advanced">متقدم</option>
+                                        <option value="expert">خبير</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="maxAssessments" class="form-label">الحد الأقصى للتقييمات شهرياً</label>
+                                    <input type="number" class="form-control" id="maxAssessments" min="1" max="100">
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="expiryDate" class="form-label">تاريخ انتهاء الصلاحية</label>
+                                    <input type="date" class="form-control" id="expiryDate">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="currentWorkload" class="form-label">عبء العمل الحالي</label>
+                                    <input type="number" class="form-control" id="currentWorkload" min="0" value="0">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Common Fields -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="status" class="form-label">الحالة</label>
+                                <select class="form-select" id="status">
+                                    <option value="active">نشط</option>
+                                    <option value="inactive">غير نشط</option>
+                                    <option value="suspended">معلق</option>
+                                    <option value="completed">مكتمل</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="notes" class="form-label">ملاحظات</label>
+                            <textarea class="form-control" id="notes" rows="3" placeholder="ملاحظات إضافية..."></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-primary" id="saveAssignment">
+                        <i class="fas fa-save"></i> حفظ
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-exclamation-triangle text-danger"></i> تأكيد الحذف
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>هل أنت متأكد من حذف هذا التخصيص؟</p>
+                    <p class="text-muted">لا يمكن التراجع عن هذا الإجراء.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-danger" id="confirmDelete">
+                        <i class="fas fa-trash"></i> حذف
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/staff_assignments.js') }}"></script>
+</body>
+</html>

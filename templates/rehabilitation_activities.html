@@ -1,0 +1,503 @@
+{% extends "base.html" %}
+
+{% block title %}إدارة الأنشطة التأهيلية - مراكز الأوائل{% endblock %}
+
+{% block extra_css %}
+<style>
+    .activities-header {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+        border-radius: 15px;
+    }
+    
+    .activity-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        margin-bottom: 1.5rem;
+        transition: transform 0.3s ease;
+        border-right: 4px solid #28a745;
+    }
+    
+    .activity-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    }
+    
+    .activity-header {
+        display: flex;
+        justify-content: between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .activity-type-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+    
+    .type-physical { background: #d4edda; color: #155724; }
+    .type-occupational { background: #d1ecf1; color: #0c5460; }
+    .type-speech { background: #f8d7da; color: #721c24; }
+    .type-behavioral { background: #fff3cd; color: #856404; }
+    .type-educational { background: #e2e3e5; color: #383d41; }
+    .type-social { background: #cce5ff; color: #004085; }
+    .type-cognitive { background: #f0e6ff; color: #6f42c1; }
+    
+    .difficulty-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+    
+    .difficulty-easy { background: #d4edda; color: #155724; }
+    .difficulty-medium { background: #fff3cd; color: #856404; }
+    .difficulty-hard { background: #f8d7da; color: #721c24; }
+    
+    .skill-tag {
+        display: inline-block;
+        background: #e9ecef;
+        color: #495057;
+        padding: 0.25rem 0.5rem;
+        border-radius: 10px;
+        font-size: 0.75rem;
+        margin: 0.25rem 0.25rem 0.25rem 0;
+    }
+    
+    .material-item {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 0.5rem;
+        margin-bottom: 0.5rem;
+        border-right: 3px solid #6c757d;
+        font-size: 0.9rem;
+    }
+    
+    .instruction-step {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 0.75rem;
+        margin-bottom: 0.5rem;
+        border-right: 3px solid #007bff;
+        position: relative;
+    }
+    
+    .step-number {
+        position: absolute;
+        right: -15px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: #007bff;
+        color: white;
+        width: 25px;
+        height: 25px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+    
+    .activity-stats {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-top: 1rem;
+        display: flex;
+        justify-content: space-around;
+        text-align: center;
+    }
+    
+    .stat-item {
+        flex: 1;
+    }
+    
+    .stat-number {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #28a745;
+    }
+    
+    .stat-label {
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+    
+    .activity-actions {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+    
+    .btn-activity {
+        border-radius: 20px;
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+        border: none;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-activity:hover {
+        transform: scale(1.05);
+    }
+    
+    .filter-section {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .search-box {
+        border-radius: 25px;
+        border: 1px solid #dee2e6;
+        padding: 0.75rem 1.5rem;
+    }
+    
+    .search-box:focus {
+        border-color: #28a745;
+        box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+    }
+    
+    .participation-modal .modal-dialog {
+        max-width: 800px;
+    }
+    
+    .participation-card {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-right: 4px solid #17a2b8;
+    }
+    
+    .attendance-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+    
+    .attendance-present { background: #d4edda; color: #155724; }
+    .attendance-absent { background: #f8d7da; color: #721c24; }
+    .attendance-late { background: #fff3cd; color: #856404; }
+    
+    .rating-stars {
+        color: #ffc107;
+        font-size: 1.2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="activities-header text-center">
+        <h1><i class="fas fa-puzzle-piece me-3"></i>إدارة الأنشطة التأهيلية</h1>
+        <p class="mb-0">تصميم وتنفيذ الأنشطة التأهيلية المتخصصة</p>
+    </div>
+
+    <!-- Filters and Search -->
+    <div class="filter-section">
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <input type="text" class="form-control search-box" id="searchActivities" placeholder="البحث في الأنشطة...">
+            </div>
+            <div class="col-md-2 mb-3">
+                <select class="form-select" id="filterType">
+                    <option value="">جميع الأنواع</option>
+                    <option value="physical">علاج طبيعي</option>
+                    <option value="occupational">علاج وظيفي</option>
+                    <option value="speech">علاج النطق</option>
+                    <option value="behavioral">تعديل السلوك</option>
+                    <option value="educational">تعليمي</option>
+                    <option value="social">اجتماعي</option>
+                    <option value="cognitive">معرفي</option>
+                </select>
+            </div>
+            <div class="col-md-2 mb-3">
+                <select class="form-select" id="filterDifficulty">
+                    <option value="">جميع المستويات</option>
+                    <option value="easy">سهل</option>
+                    <option value="medium">متوسط</option>
+                    <option value="hard">صعب</option>
+                </select>
+            </div>
+            <div class="col-md-2 mb-3">
+                <select class="form-select" id="sortBy">
+                    <option value="created_at">تاريخ الإنشاء</option>
+                    <option value="name">الاسم</option>
+                    <option value="activity_type">النوع</option>
+                    <option value="difficulty_level">المستوى</option>
+                </select>
+            </div>
+            <div class="col-md-2 mb-3">
+                <button class="btn btn-success w-100" onclick="openCreateActivityModal()">
+                    <i class="fas fa-plus me-2"></i>نشاط جديد
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Activities Grid -->
+    <div class="row" id="activitiesContainer">
+        <!-- Activities will be loaded here -->
+    </div>
+
+    <!-- Pagination -->
+    <nav aria-label="صفحات الأنشطة" class="mt-4">
+        <ul class="pagination justify-content-center" id="activitiesPagination">
+            <!-- Pagination will be loaded here -->
+        </ul>
+    </nav>
+</div>
+
+<!-- Create/Edit Activity Modal -->
+<div class="modal fade" id="activityModal" tabindex="-1" aria-labelledby="activityModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="activityModalLabel">إنشاء نشاط تأهيلي جديد</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="activityForm">
+                    <input type="hidden" id="activityId">
+                    
+                    <!-- Basic Information -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="text-success mb-3">المعلومات الأساسية</h6>
+                        </div>
+                        <div class="col-md-8 mb-3">
+                            <label for="activityName" class="form-label">اسم النشاط *</label>
+                            <input type="text" class="form-control" id="activityName" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="activityType" class="form-label">نوع النشاط *</label>
+                            <select class="form-select" id="activityType" required>
+                                <option value="">اختر النوع</option>
+                                <option value="physical">علاج طبيعي</option>
+                                <option value="occupational">علاج وظيفي</option>
+                                <option value="speech">علاج النطق</option>
+                                <option value="behavioral">تعديل السلوك</option>
+                                <option value="educational">تعليمي</option>
+                                <option value="social">اجتماعي</option>
+                                <option value="cognitive">معرفي</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-4 mb-3">
+                            <label for="activityDuration" class="form-label">المدة (بالدقائق)</label>
+                            <input type="number" class="form-control" id="activityDuration" min="5" max="180">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="activityDifficulty" class="form-label">مستوى الصعوبة</label>
+                            <select class="form-select" id="activityDifficulty">
+                                <option value="easy">سهل</option>
+                                <option value="medium" selected>متوسط</option>
+                                <option value="hard">صعب</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="activityStatus" class="form-label">الحالة</label>
+                            <select class="form-select" id="activityStatus">
+                                <option value="active" selected>نشط</option>
+                                <option value="inactive">غير نشط</option>
+                                <option value="draft">مسودة</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="activityDescription" class="form-label">وصف النشاط *</label>
+                        <textarea class="form-control" id="activityDescription" rows="3" required></textarea>
+                    </div>
+
+                    <!-- Target Skills -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="text-success mb-3">المهارات المستهدفة</h6>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label for="activitySkills" class="form-label">المهارات</label>
+                            <textarea class="form-control" id="activitySkills" rows="2" placeholder="أدخل كل مهارة في سطر منفصل"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Materials -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="text-success mb-3">المواد والأدوات المطلوبة</h6>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label for="activityMaterials" class="form-label">قائمة المواد</label>
+                            <textarea class="form-control" id="activityMaterials" rows="3" placeholder="أدخل كل مادة في سطر منفصل"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Instructions -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="text-success mb-3">تعليمات التنفيذ</h6>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label for="activityInstructions" class="form-label">خطوات التنفيذ</label>
+                            <textarea class="form-control" id="activityInstructions" rows="4" placeholder="أدخل كل خطوة في سطر منفصل"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Assessment Criteria -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="text-success mb-3">معايير التقييم</h6>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label for="activityCriteria" class="form-label">معايير النجاح</label>
+                            <textarea class="form-control" id="activityCriteria" rows="3" placeholder="أدخل كل معيار في سطر منفصل"></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-success" onclick="saveActivity()">حفظ النشاط</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Activity Details Modal -->
+<div class="modal fade" id="activityDetailsModal" tabindex="-1" aria-labelledby="activityDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="activityDetailsModalLabel">تفاصيل النشاط التأهيلي</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="activityDetailsContent">
+                <!-- Activity details will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                <button type="button" class="btn btn-warning" id="editActivityBtn">تعديل النشاط</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Participation Modal -->
+<div class="modal fade participation-modal" id="participationModal" tabindex="-1" aria-labelledby="participationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="participationModalLabel">مشاركات النشاط</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="participationContent">
+                <!-- Participation data will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                <button type="button" class="btn btn-success" onclick="openAddParticipationModal()">إضافة مشاركة</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Participation Modal -->
+<div class="modal fade" id="addParticipationModal" tabindex="-1" aria-labelledby="addParticipationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addParticipationModalLabel">تسجيل مشاركة جديدة</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="participationForm">
+                    <input type="hidden" id="participationActivityId">
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="participationBeneficiary" class="form-label">المستفيد *</label>
+                            <select class="form-select" id="participationBeneficiary" required>
+                                <option value="">اختر المستفيد</option>
+                                <!-- Options will be loaded dynamically -->
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="participationDate" class="form-label">تاريخ المشاركة *</label>
+                            <input type="date" class="form-control" id="participationDate" required>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="attendanceStatus" class="form-label">حالة الحضور</label>
+                            <select class="form-select" id="attendanceStatus">
+                                <option value="present" selected>حاضر</option>
+                                <option value="absent">غائب</option>
+                                <option value="late">متأخر</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="performanceRating" class="form-label">تقييم الأداء (1-5)</label>
+                            <select class="form-select" id="performanceRating">
+                                <option value="">غير محدد</option>
+                                <option value="1">1 - ضعيف</option>
+                                <option value="2">2 - مقبول</option>
+                                <option value="3">3 - جيد</option>
+                                <option value="4">4 - جيد جداً</option>
+                                <option value="5">5 - ممتاز</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="engagementLevel" class="form-label">مستوى المشاركة</label>
+                        <select class="form-select" id="engagementLevel">
+                            <option value="">غير محدد</option>
+                            <option value="low">منخفض</option>
+                            <option value="medium">متوسط</option>
+                            <option value="high">عالي</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="goalsAchieved" class="form-label">الأهداف المحققة</label>
+                        <textarea class="form-control" id="goalsAchieved" rows="2" placeholder="أدخل كل هدف في سطر منفصل"></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="participationNotes" class="form-label">ملاحظات</label>
+                        <textarea class="form-control" id="participationNotes" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-success" onclick="saveParticipation()">حفظ المشاركة</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/rehabilitation_activities.js') }}"></script>
+{% endblock %}

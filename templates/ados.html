@@ -1,0 +1,479 @@
+{% extends "base.html" %}
+
+{% block title %}مقياس ADOS - مراكز الأوائل{% endblock %}
+
+{% block extra_css %}
+<style>
+.assessment-page {
+    position: relative;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 assessment-page">
+    <!-- Assessment Header with Logo -->
+    <div class="assessment-form-header text-center mb-4">
+        <img src="{{ url_for('static', filename='images/awail-logo.svg') }}" alt="شعار مراكز الأوائل" class="assessment-logo">
+        <h2 class="mb-0">مقياس ADOS</h2>
+        <p class="text-muted">جدول ملاحظة تشخيص طيف التوحد</p>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="page-header d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="page-title mb-1">
+                        <i class="fas fa-puzzle-piece me-2"></i>
+                        مقياس ادوس (ADOS)
+                    </h2>
+                    <p class="text-muted mb-0">جدولة الملاحظة التشخيصية للتوحد - الطبعة الثانية</p>
+                </div>
+                <button class="btn btn-primary" onclick="showNewAssessmentModal()">
+                    <i class="fas fa-plus me-2"></i>
+                    تقييم جديد
+                </button>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="mb-0" id="totalAssessments">0</h4>
+                                    <p class="mb-0">إجمالي التقييمات</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-clipboard-list fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-success text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="mb-0" id="completedAssessments">0</h4>
+                                    <p class="mb-0">التقييمات المكتملة</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-check-circle fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-warning text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="mb-0" id="inProgressAssessments">0</h4>
+                                    <p class="mb-0">قيد التطبيق</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-clock fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-danger text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="mb-0" id="autismDiagnoses">0</h4>
+                                    <p class="mb-0">تشخيص التوحد</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-exclamation-triangle fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-2">
+                            <label class="form-label">الطالب</label>
+                            <select class="form-select" id="studentFilter">
+                                <option value="">جميع الطلاب</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">المقيم</label>
+                            <select class="form-select" id="assessorFilter">
+                                <option value="">جميع المقيمين</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">الوحدة</label>
+                            <select class="form-select" id="moduleFilter">
+                                <option value="">جميع الوحدات</option>
+                                <option value="1">الوحدة 1</option>
+                                <option value="2">الوحدة 2</option>
+                                <option value="3">الوحدة 3</option>
+                                <option value="4">الوحدة 4</option>
+                                <option value="T">الوحدة T</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">حالة التقييم</label>
+                            <select class="form-select" id="statusFilter">
+                                <option value="">جميع الحالات</option>
+                                <option value="in_progress">قيد التطبيق</option>
+                                <option value="completed">مكتمل</option>
+                                <option value="cancelled">ملغي</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">التصنيف</label>
+                            <select class="form-select" id="classificationFilter">
+                                <option value="">جميع التصنيفات</option>
+                                <option value="autism">توحد</option>
+                                <option value="autism_spectrum">طيف التوحد</option>
+                                <option value="non_spectrum">خارج الطيف</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">&nbsp;</label>
+                            <div>
+                                <button class="btn btn-outline-primary me-2" onclick="applyFilters()">
+                                    <i class="fas fa-filter me-1"></i>
+                                    تطبيق
+                                </button>
+                                <button class="btn btn-outline-secondary" onclick="clearFilters()">
+                                    <i class="fas fa-times me-1"></i>
+                                    مسح
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Assessments Table -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped" id="assessmentsTable">
+                            <thead>
+                                <tr>
+                                    <th>الطالب</th>
+                                    <th>المقيم</th>
+                                    <th>تاريخ التقييم</th>
+                                    <th>الوحدة</th>
+                                    <th>الحالة</th>
+                                    <th>التأثير الاجتماعي</th>
+                                    <th>السلوك المتكرر</th>
+                                    <th>المجموع الكلي</th>
+                                    <th>التصنيف</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="assessmentsTableBody">
+                                <!-- سيتم ملء البيانات بواسطة JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- New Assessment Modal -->
+<div class="modal fade" id="newAssessmentModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">تقييم جديد - مقياس ادوس</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="newAssessmentForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">الطالب *</label>
+                                <select class="form-select" id="studentId" required>
+                                    <option value="">اختر الطالب</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">المقيم *</label>
+                                <select class="form-select" id="assessorId" required>
+                                    <option value="">اختر المقيم</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">تاريخ التقييم *</label>
+                                <input type="date" class="form-control" id="assessmentDate" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">نوع التقييم</label>
+                                <select class="form-select" id="assessmentType">
+                                    <option value="diagnostic">تشخيصي</option>
+                                    <option value="research">بحثي</option>
+                                    <option value="clinical">إكلينيكي</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">الوحدة المستخدمة *</label>
+                                <select class="form-select" id="moduleUsed" required>
+                                    <option value="">اختر الوحدة</option>
+                                    <option value="1">الوحدة 1 - لا يتكلم أو يتكلم كلمات قليلة</option>
+                                    <option value="2">الوحدة 2 - يتكلم جمل قصيرة</option>
+                                    <option value="3">الوحدة 3 - يتكلم بطلاقة (أطفال)</option>
+                                    <option value="4">الوحدة 4 - يتكلم بطلاقة (مراهقين وبالغين)</option>
+                                    <option value="T">الوحدة T - الأطفال الصغار</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">مكان التقييم</label>
+                                <select class="form-select" id="assessmentSetting">
+                                    <option value="">اختر المكان</option>
+                                    <option value="clinic">العيادة</option>
+                                    <option value="school">المدرسة</option>
+                                    <option value="home">المنزل</option>
+                                    <option value="hospital">المستشفى</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label class="form-label">العمر الزمني (سنوات)</label>
+                                <input type="number" class="form-control" id="chronologicalAgeYears" min="0" max="25">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label class="form-label">العمر الزمني (شهور)</label>
+                                <input type="number" class="form-control" id="chronologicalAgeMonths" min="0" max="11">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label class="form-label">مدة الجلسة (دقائق)</label>
+                                <input type="number" class="form-control" id="sessionDuration" min="30" max="120" value="60">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label class="form-label">لغة التقييم</label>
+                                <select class="form-select" id="languageUsed">
+                                    <option value="arabic">العربية</option>
+                                    <option value="english">الإنجليزية</option>
+                                    <option value="mixed">مختلط</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label class="form-label">مستوى الانتباه</label>
+                                <select class="form-select" id="attentionLevel">
+                                    <option value="">غير محدد</option>
+                                    <option value="excellent">ممتاز</option>
+                                    <option value="good">جيد</option>
+                                    <option value="fair">مقبول</option>
+                                    <option value="poor">ضعيف</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label class="form-label">مستوى التعاون</label>
+                                <select class="form-select" id="cooperationLevel">
+                                    <option value="">غير محدد</option>
+                                    <option value="excellent">ممتاز</option>
+                                    <option value="good">جيد</option>
+                                    <option value="fair">مقبول</option>
+                                    <option value="poor">ضعيف</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label class="form-label">مستوى القلق</label>
+                                <select class="form-select" id="anxietyLevel">
+                                    <option value="">غير محدد</option>
+                                    <option value="none">لا يوجد</option>
+                                    <option value="mild">خفيف</option>
+                                    <option value="moderate">متوسط</option>
+                                    <option value="severe">شديد</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="mb-3">
+                                <label class="form-label">مستوى التعب</label>
+                                <select class="form-select" id="fatigueLevel">
+                                    <option value="">غير محدد</option>
+                                    <option value="none">لا يوجد</option>
+                                    <option value="mild">خفيف</option>
+                                    <option value="moderate">متوسط</option>
+                                    <option value="severe">شديد</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">ملاحظات سلوكية أولية</label>
+                        <textarea class="form-control" id="behavioralObservations" rows="3" placeholder="ملاحظات حول السلوك والتفاعل الأولي"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary" onclick="createAssessment()">إنشاء التقييم</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Assessment Details Modal -->
+<div class="modal fade" id="assessmentDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">تفاصيل التقييم - مقياس ادوس</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="assessmentDetailsContent">
+                    <!-- سيتم ملء المحتوى بواسطة JavaScript -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                <button type="button" class="btn btn-primary" id="continueAssessmentBtn" onclick="continueAssessment()" style="display: none;">
+                    <i class="fas fa-play me-2"></i>
+                    متابعة التقييم
+                </button>
+                <button type="button" class="btn btn-success" id="generateReportBtn" onclick="generateReport()" style="display: none;">
+                    <i class="fas fa-file-alt me-2"></i>
+                    إنشاء تقرير
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Activity Assessment Modal -->
+<div class="modal fade" id="activityAssessmentModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="activityAssessmentTitle">تقييم الأنشطة</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Activity Tabs -->
+                <ul class="nav nav-tabs mb-3" id="activityTabs">
+                    <!-- سيتم ملء التبويبات بواسطة JavaScript -->
+                </ul>
+                
+                <!-- Activity Content -->
+                <div class="tab-content" id="activityTabContent">
+                    <!-- سيتم ملء المحتوى بواسطة JavaScript -->
+                </div>
+                
+                <!-- Progress Bar -->
+                <div class="mt-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>التقدم في التقييم</span>
+                        <span id="progressText">0%</span>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar" id="progressBar" role="progressbar" style="width: 0%"></div>
+                    </div>
+                </div>
+                
+                <!-- Scoring Summary -->
+                <div class="mt-4">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h6>التأثير الاجتماعي</h6>
+                                    <h4 id="socialAffectScore">0</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h6>السلوك المتكرر والمحدود</h6>
+                                    <h4 id="restrictedRepetitiveScore">0</h4>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h6>المجموع الكلي</h6>
+                                    <h4 id="overallTotalScore">0</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                <button type="button" class="btn btn-outline-primary" id="prevActivityBtn" onclick="previousActivity()" disabled>
+                    <i class="fas fa-arrow-right me-2"></i>
+                    النشاط السابق
+                </button>
+                <button type="button" class="btn btn-primary" id="nextActivityBtn" onclick="nextActivity()">
+                    النشاط التالي
+                    <i class="fas fa-arrow-left ms-2"></i>
+                </button>
+                <button type="button" class="btn btn-success" id="completeAssessmentBtn" onclick="completeAssessment()" style="display: none;">
+                    <i class="fas fa-check me-2"></i>
+                    إكمال التقييم
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Spinner -->
+<div class="d-none" id="loadingSpinner">
+    <div class="d-flex justify-content-center align-items-center" style="height: 200px;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">جاري التحميل...</span>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/ados.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,563 @@
+{% extends "base.html" %}
+
+{% block title %}إدارة الأجهزة المساعدة{% endblock %}
+
+{% block extra_css %}
+<style>
+    .device-card {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 15px;
+        transition: all 0.3s ease;
+    }
+    
+    .device-card:hover {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+    }
+    
+    .device-status {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.85em;
+        font-weight: 500;
+    }
+    
+    .status-available { background-color: #d4edda; color: #155724; }
+    .status-assigned { background-color: #fff3cd; color: #856404; }
+    .status-maintenance { background-color: #f8d7da; color: #721c24; }
+    .status-retired { background-color: #e2e3e5; color: #383d41; }
+    
+    .condition-excellent { color: #28a745; }
+    .condition-good { color: #17a2b8; }
+    .condition-fair { color: #ffc107; }
+    .condition-poor { color: #dc3545; }
+    
+    .stats-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .filter-section {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+    
+    .device-image {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+    
+    .maintenance-alert {
+        background-color: #fff3cd;
+        border: 1px solid #ffeaa7;
+        border-radius: 6px;
+        padding: 10px;
+        margin-top: 10px;
+    }
+    
+    .assignment-info {
+        background-color: #e3f2fd;
+        border-radius: 6px;
+        padding: 10px;
+        margin-top: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid" dir="rtl">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2><i class="fas fa-wheelchair me-2"></i>إدارة الأجهزة المساعدة</h2>
+                    <p class="text-muted">إدارة شاملة للأجهزة المساعدة والمعدات التأهيلية</p>
+                </div>
+                <div>
+                    <button class="btn btn-primary" onclick="deviceManager.showAddDeviceModal()">
+                        <i class="fas fa-plus me-2"></i>إضافة جهاز جديد
+                    </button>
+                    <button class="btn btn-success" onclick="deviceManager.showAddCategoryModal()">
+                        <i class="fas fa-tags me-2"></i>إضافة فئة
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 id="totalDevices">0</h4>
+                        <p class="mb-0">إجمالي الأجهزة</p>
+                    </div>
+                    <i class="fas fa-wheelchair fa-2x"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 id="availableDevices">0</h4>
+                        <p class="mb-0">متاح</p>
+                    </div>
+                    <i class="fas fa-check-circle fa-2x"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 id="assignedDevices">0</h4>
+                        <p class="mb-0">مخصص</p>
+                    </div>
+                    <i class="fas fa-user-check fa-2x"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card" style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); color: #333;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 id="maintenanceDevices">0</h4>
+                        <p class="mb-0">تحت الصيانة</p>
+                    </div>
+                    <i class="fas fa-tools fa-2x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filter-section">
+        <div class="row">
+            <div class="col-md-3">
+                <label class="form-label">البحث</label>
+                <input type="text" class="form-control" id="searchInput" placeholder="البحث في الأجهزة...">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">الفئة</label>
+                <select class="form-select" id="categoryFilter">
+                    <option value="">جميع الفئات</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">الحالة</label>
+                <select class="form-select" id="statusFilter">
+                    <option value="">جميع الحالات</option>
+                    <option value="available">متاح</option>
+                    <option value="assigned">مخصص</option>
+                    <option value="maintenance">تحت الصيانة</option>
+                    <option value="retired">متقاعد</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">الحالة الفنية</label>
+                <select class="form-select" id="conditionFilter">
+                    <option value="">جميع الحالات</option>
+                    <option value="excellent">ممتاز</option>
+                    <option value="good">جيد</option>
+                    <option value="fair">مقبول</option>
+                    <option value="poor">ضعيف</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">&nbsp;</label>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-primary" onclick="deviceManager.applyFilters()">
+                        <i class="fas fa-search me-1"></i>بحث
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="deviceManager.clearFilters()">
+                        <i class="fas fa-times me-1"></i>مسح
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Devices List -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">قائمة الأجهزة</h5>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-outline-primary" onclick="deviceManager.toggleView()">
+                            <i class="fas fa-th-list me-1"></i>تغيير العرض
+                        </button>
+                        <button class="btn btn-sm btn-outline-success" onclick="deviceManager.exportDevices()">
+                            <i class="fas fa-download me-1"></i>تصدير
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="devicesContainer">
+                        <!-- Devices will be loaded here -->
+                    </div>
+                    
+                    <!-- Pagination -->
+                    <nav aria-label="Device pagination" class="mt-4">
+                        <ul class="pagination justify-content-center" id="devicesPagination">
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Device Modal -->
+<div class="modal fade" id="addDeviceModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">إضافة جهاز مساعد جديد</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addDeviceForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">اسم الجهاز *</label>
+                                <input type="text" class="form-control" name="name" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">الفئة *</label>
+                                <select class="form-select" name="category_id" required>
+                                    <option value="">اختر الفئة</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">الطراز</label>
+                                <input type="text" class="form-control" name="model">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">الشركة المصنعة</label>
+                                <input type="text" class="form-control" name="manufacturer">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">الرقم التسلسلي</label>
+                                <input type="text" class="form-control" name="serial_number">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">الباركود</label>
+                                <input type="text" class="form-control" name="barcode">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">تاريخ الشراء</label>
+                                <input type="date" class="form-control" name="purchase_date">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">سعر الشراء</label>
+                                <input type="number" class="form-control" name="purchase_price" step="0.01">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">المورد</label>
+                                <input type="text" class="form-control" name="supplier">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">انتهاء الضمان</label>
+                                <input type="date" class="form-control" name="warranty_expires">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">الحالة الفنية</label>
+                                <select class="form-select" name="condition">
+                                    <option value="excellent">ممتاز</option>
+                                    <option value="good">جيد</option>
+                                    <option value="fair">مقبول</option>
+                                    <option value="poor">ضعيف</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">الموقع</label>
+                                <input type="text" class="form-control" name="location">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">المواصفات التقنية</label>
+                        <textarea class="form-control" name="specifications" rows="3" placeholder="أدخل المواصفات بصيغة JSON أو نص"></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">الميزات</label>
+                        <textarea class="form-control" name="features" rows="2" placeholder="أدخل الميزات مفصولة بفواصل"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary" onclick="deviceManager.saveDevice()">حفظ الجهاز</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Device Assignment Modal -->
+<div class="modal fade" id="assignDeviceModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">تخصيص جهاز لمستفيد</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="assignDeviceForm">
+                    <input type="hidden" name="device_id">
+                    
+                    <div class="mb-3">
+                        <label class="form-label">المستفيد *</label>
+                        <select class="form-select" name="beneficiary_id" required>
+                            <option value="">اختر المستفيد</option>
+                        </select>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">تاريخ التخصيص</label>
+                                <input type="date" class="form-control" name="assignment_date">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">تاريخ الإرجاع المتوقع</label>
+                                <input type="date" class="form-control" name="expected_return_date">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">سبب التخصيص</label>
+                        <textarea class="form-control" name="assignment_reason" rows="2"></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">تعليمات الاستخدام</label>
+                        <textarea class="form-control" name="usage_instructions" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">ملاحظات</label>
+                        <textarea class="form-control" name="notes" rows="2"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary" onclick="deviceManager.assignDevice()">تخصيص الجهاز</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Device Return Modal -->
+<div class="modal fade" id="returnDeviceModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">إرجاع جهاز</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="returnDeviceForm">
+                    <input type="hidden" name="device_id">
+                    
+                    <div class="mb-3">
+                        <label class="form-label">الحالة الفنية عند الإرجاع</label>
+                        <select class="form-select" name="condition_at_return" required>
+                            <option value="excellent">ممتاز</option>
+                            <option value="good">جيد</option>
+                            <option value="fair">مقبول</option>
+                            <option value="poor">ضعيف</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">ملاحظات الإرجاع</label>
+                        <textarea class="form-control" name="return_notes" rows="3" placeholder="أي ملاحظات حول حالة الجهاز أو مشاكل واجهت المستفيد"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary" onclick="deviceManager.returnDevice()">إرجاع الجهاز</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Maintenance Modal -->
+<div class="modal fade" id="maintenanceModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">إضافة سجل صيانة</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="maintenanceForm">
+                    <input type="hidden" name="device_id">
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">نوع الصيانة *</label>
+                                <select class="form-select" name="maintenance_type" required>
+                                    <option value="preventive">وقائية</option>
+                                    <option value="corrective">إصلاحية</option>
+                                    <option value="emergency">طارئة</option>
+                                    <option value="calibration">معايرة</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">تاريخ الصيانة *</label>
+                                <input type="date" class="form-control" name="maintenance_date" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">وصف الصيانة *</label>
+                        <textarea class="form-control" name="description" rows="3" required></textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">التكلفة</label>
+                                <input type="number" class="form-control" name="cost" step="0.01">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">مقدم الخدمة</label>
+                                <input type="text" class="form-control" name="service_provider">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">اسم الفني</label>
+                                <input type="text" class="form-control" name="technician_name">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">تكلفة القطع</label>
+                                <input type="number" class="form-control" name="parts_cost" step="0.01">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">نتيجة الصيانة</label>
+                                <select class="form-select" name="maintenance_result">
+                                    <option value="completed">مكتملة</option>
+                                    <option value="partial">جزئية</option>
+                                    <option value="failed">فاشلة</option>
+                                    <option value="pending">معلقة</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">الحالة بعد الصيانة</label>
+                                <select class="form-select" name="device_condition_after">
+                                    <option value="excellent">ممتاز</option>
+                                    <option value="good">جيد</option>
+                                    <option value="fair">مقبول</option>
+                                    <option value="poor">ضعيف</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">تاريخ الصيانة القادمة</label>
+                        <input type="date" class="form-control" name="next_maintenance_date">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">القطع المستبدلة</label>
+                        <textarea class="form-control" name="parts_replaced" rows="2" placeholder="أدخل القطع مفصولة بفواصل"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary" onclick="deviceManager.saveMaintenance()">حفظ الصيانة</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/assistive_devices.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        deviceManager.init();
+    });
+</script>
+{% endblock %}

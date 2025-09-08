@@ -1,0 +1,385 @@
+{% extends "base.html" %}
+
+{% block title %}إدارة العيادات المتخصصة{% endblock %}
+
+{% block extra_css %}
+<style>
+    .clinic-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        margin-bottom: 20px;
+    }
+    
+    .clinic-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    
+    .clinic-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 15px 15px 0 0;
+    }
+    
+    .clinic-icon {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+    }
+    
+    .stats-card {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+    
+    .stats-number {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #667eea;
+    }
+    
+    .stats-label {
+        color: #666;
+        font-size: 0.9rem;
+    }
+    
+    .specialist-badge {
+        background: #e3f2fd;
+        color: #1976d2;
+        padding: 5px 10px;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        margin: 2px;
+        display: inline-block;
+    }
+    
+    .appointment-status {
+        padding: 3px 8px;
+        border-radius: 10px;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+    
+    .status-scheduled { background: #e8f5e8; color: #2e7d32; }
+    .status-completed { background: #e3f2fd; color: #1976d2; }
+    .status-cancelled { background: #ffebee; color: #c62828; }
+    .status-no-show { background: #fff3e0; color: #f57c00; }
+    
+    .btn-clinic {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 25px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-clinic:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
+    
+    .modal-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 10px 10px 0 0;
+    }
+    
+    .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: #f8f9ff;
+    }
+    
+    .clinic-type-color {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-left: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Header Section -->
+    <div class="clinic-header text-center mb-4">
+        <div class="clinic-icon">
+            <i class="fas fa-hospital-alt"></i>
+        </div>
+        <h2>إدارة العيادات المتخصصة</h2>
+        <p class="mb-0">نظام شامل لإدارة العيادات والأخصائيين والمواعيد</p>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stats-number" id="totalClinics">0</div>
+                <div class="stats-label">إجمالي العيادات</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stats-number" id="totalSpecialists">0</div>
+                <div class="stats-label">عدد الأخصائيين</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stats-number" id="todayAppointments">0</div>
+                <div class="stats-label">مواعيد اليوم</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stats-number" id="activeSessions">0</div>
+                <div class="stats-label">الجلسات النشطة</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="row mb-4">
+        <div class="col-12 text-center">
+            <button class="btn btn-clinic mx-2" onclick="showAddClinicModal()">
+                <i class="fas fa-plus"></i> إضافة عيادة جديدة
+            </button>
+            <button class="btn btn-clinic mx-2" onclick="showAddSpecialistModal()">
+                <i class="fas fa-user-md"></i> إضافة أخصائي
+            </button>
+            <button class="btn btn-clinic mx-2" onclick="showAppointmentsModal()">
+                <i class="fas fa-calendar-alt"></i> إدارة المواعيد
+            </button>
+            <button class="btn btn-clinic mx-2" onclick="showReportsModal()">
+                <i class="fas fa-chart-bar"></i> التقارير
+            </button>
+        </div>
+    </div>
+
+    <!-- Clinics Grid -->
+    <div class="row" id="clinicsContainer">
+        <!-- Clinics will be loaded here dynamically -->
+    </div>
+
+    <!-- Recent Appointments Table -->
+    <div class="card clinic-card mt-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">
+                <i class="fas fa-calendar-check"></i> المواعيد الأخيرة
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>التاريخ</th>
+                            <th>الوقت</th>
+                            <th>العيادة</th>
+                            <th>الأخصائي</th>
+                            <th>الطالب</th>
+                            <th>الحالة</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recentAppointmentsTable">
+                        <!-- Appointments will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Clinic Modal -->
+<div class="modal fade" id="addClinicModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">إضافة عيادة جديدة</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addClinicForm">
+                    <div class="mb-3">
+                        <label class="form-label">اسم العيادة</label>
+                        <input type="text" class="form-control" id="clinicName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">الوصف</label>
+                        <textarea class="form-control" id="clinicDescription" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">الأيقونة</label>
+                        <select class="form-control" id="clinicIcon">
+                            <option value="fas fa-stethoscope">سماعة طبية</option>
+                            <option value="fas fa-brain">دماغ</option>
+                            <option value="fas fa-comments">تخاطب</option>
+                            <option value="fas fa-running">علاج طبيعي</option>
+                            <option value="fas fa-hands-helping">علاج وظيفي</option>
+                            <option value="fas fa-heart">قلب</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">اللون</label>
+                        <input type="color" class="form-control" id="clinicColor" value="#007bff">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-clinic" onclick="addClinic()">إضافة العيادة</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Specialist Modal -->
+<div class="modal fade" id="addSpecialistModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">إضافة أخصائي جديد</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addSpecialistForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">العيادة</label>
+                                <select class="form-control" id="specialistClinic" required>
+                                    <!-- Options will be loaded dynamically -->
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">الموظف</label>
+                                <select class="form-control" id="specialistEmployee" required>
+                                    <!-- Options will be loaded dynamically -->
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">التخصص</label>
+                                <input type="text" class="form-control" id="specialization">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">رقم الترخيص</label>
+                                <input type="text" class="form-control" id="licenseNumber">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">سنوات الخبرة</label>
+                                <input type="number" class="form-control" id="experienceYears" min="0">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">الحد الأقصى للمواعيد اليومية</label>
+                                <input type="number" class="form-control" id="maxAppointments" value="8" min="1">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">مدة الموعد (دقيقة)</label>
+                                <input type="number" class="form-control" id="appointmentDuration" value="30" min="15">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">المؤهلات</label>
+                        <textarea class="form-control" id="qualifications" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-clinic" onclick="addSpecialist()">إضافة الأخصائي</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Appointments Management Modal -->
+<div class="modal fade" id="appointmentsModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">إدارة المواعيد</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <button class="btn btn-clinic w-100" onclick="showNewAppointmentForm()">
+                            <i class="fas fa-plus"></i> موعد جديد
+                        </button>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-control" id="filterClinic">
+                            <option value="">جميع العيادات</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <input type="date" class="form-control" id="filterDate">
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-control" id="filterStatus">
+                            <option value="">جميع الحالات</option>
+                            <option value="scheduled">مجدول</option>
+                            <option value="completed">مكتمل</option>
+                            <option value="cancelled">ملغي</option>
+                            <option value="no-show">لم يحضر</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>التاريخ</th>
+                                <th>الوقت</th>
+                                <th>العيادة</th>
+                                <th>الأخصائي</th>
+                                <th>الطالب</th>
+                                <th>الحالة</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="appointmentsTable">
+                            <!-- Appointments will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/clinics.js') }}"></script>
+{% endblock %}

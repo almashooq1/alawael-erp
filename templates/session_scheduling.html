@@ -1,0 +1,564 @@
+{% extends "base.html" %}
+
+{% block title %}جدولة الجلسات والتقويم{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css' rel='stylesheet' />
+<style>
+    .calendar-container {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+    
+    .scheduling-sidebar {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 20px;
+        height: fit-content;
+        position: sticky;
+        top: 20px;
+    }
+    
+    .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .action-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+        border: none;
+    }
+    
+    .action-card:hover {
+        transform: translateY(-3px);
+        color: white;
+    }
+    
+    .action-icon {
+        font-size: 2rem;
+        margin-bottom: 10px;
+        display: block;
+    }
+    
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 10px;
+        padding: 15px;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        border-left: 4px solid #007bff;
+    }
+    
+    .stat-number {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #007bff;
+        margin-bottom: 5px;
+    }
+    
+    .stat-label {
+        color: #666;
+        font-size: 0.85rem;
+    }
+    
+    .filter-section {
+        background: white;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .therapist-list {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+    
+    .therapist-item {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        border-radius: 8px;
+        margin-bottom: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    
+    .therapist-item:hover {
+        background-color: #e9ecef;
+    }
+    
+    .therapist-item.active {
+        background-color: #007bff;
+        color: white;
+    }
+    
+    .therapist-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #007bff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        margin-left: 10px;
+    }
+    
+    .room-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 15px;
+        margin-top: 15px;
+    }
+    
+    .room-card {
+        background: white;
+        border-radius: 10px;
+        padding: 15px;
+        border: 2px solid #e9ecef;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .room-card:hover {
+        border-color: #007bff;
+        transform: translateY(-2px);
+    }
+    
+    .room-card.occupied {
+        border-color: #dc3545;
+        background-color: #fff5f5;
+    }
+    
+    .room-card.available {
+        border-color: #28a745;
+        background-color: #f8fff8;
+    }
+    
+    .fc-event {
+        border-radius: 6px !important;
+        border: none !important;
+        padding: 2px 6px !important;
+        font-size: 0.85rem !important;
+    }
+    
+    .fc-event-title {
+        font-weight: 600 !important;
+    }
+    
+    .conflict-indicator {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        width: 15px;
+        height: 15px;
+        background: #dc3545;
+        border-radius: 50%;
+        border: 2px solid white;
+    }
+    
+    .session-details-panel {
+        position: fixed;
+        right: -400px;
+        top: 0;
+        width: 400px;
+        height: 100vh;
+        background: white;
+        box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+        transition: right 0.3s ease;
+        z-index: 1050;
+        overflow-y: auto;
+    }
+    
+    .session-details-panel.open {
+        right: 0;
+    }
+    
+    .panel-header {
+        background: #007bff;
+        color: white;
+        padding: 20px;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
+    
+    .panel-content {
+        padding: 20px;
+    }
+    
+    .time-slot {
+        display: flex;
+        align-items: center;
+        padding: 8px 12px;
+        margin: 4px 0;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    
+    .time-slot:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .time-slot.available {
+        border-left: 4px solid #28a745;
+    }
+    
+    .time-slot.occupied {
+        border-left: 4px solid #dc3545;
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+    
+    .loading-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+    
+    .drag-helper {
+        background: #007bff;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        z-index: 1000;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">جدولة الجلسات والتقويم</h2>
+            <p class="text-muted mb-0">نظام متقدم لجدولة الجلسات العلاجية مع التقويم التفاعلي</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-primary" onclick="openScheduleModal()">
+                <i class="fas fa-plus me-2"></i>جلسة جديدة
+            </button>
+            <button class="btn btn-success" onclick="openBulkScheduleModal()">
+                <i class="fas fa-calendar-plus me-2"></i>جدولة متعددة
+            </button>
+            <button class="btn btn-info" onclick="optimizeSchedule()">
+                <i class="fas fa-magic me-2"></i>تحسين الجدولة
+            </button>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <button class="action-card" onclick="showTodaySessions()">
+            <i class="fas fa-calendar-day action-icon"></i>
+            <div>جلسات اليوم</div>
+            <small id="todaySessionsCount">0 جلسة</small>
+        </button>
+        <button class="action-card" onclick="showConflicts()">
+            <i class="fas fa-exclamation-triangle action-icon"></i>
+            <div>التعارضات</div>
+            <small id="conflictsCount">0 تعارض</small>
+        </button>
+        <button class="action-card" onclick="showAvailableRooms()">
+            <i class="fas fa-door-open action-icon"></i>
+            <div>الغرف المتاحة</div>
+            <small id="availableRoomsCount">0 غرفة</small>
+        </button>
+        <button class="action-card" onclick="showPendingConfirmations()">
+            <i class="fas fa-clock action-icon"></i>
+            <div>في انتظار التأكيد</div>
+            <small id="pendingCount">0 جلسة</small>
+        </button>
+    </div>
+
+    <!-- Statistics -->
+    <div class="stats-row" id="statsRow">
+        <!-- Statistics will be loaded here -->
+    </div>
+
+    <div class="row">
+        <!-- Calendar Section -->
+        <div class="col-lg-9">
+            <!-- Filters -->
+            <div class="filter-section">
+                <div class="row">
+                    <div class="col-md-3">
+                        <label class="form-label">المعالج</label>
+                        <select class="form-select" id="therapistFilter" onchange="filterCalendar()">
+                            <option value="">جميع المعالجين</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">الغرفة</label>
+                        <select class="form-select" id="roomFilter" onchange="filterCalendar()">
+                            <option value="">جميع الغرف</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">نوع الجلسة</label>
+                        <select class="form-select" id="sessionTypeFilter" onchange="filterCalendar()">
+                            <option value="">جميع الأنواع</option>
+                            <option value="individual">فردية</option>
+                            <option value="group">جماعية</option>
+                            <option value="assessment">تقييم</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">الحالة</label>
+                        <select class="form-select" id="statusFilter" onchange="filterCalendar()">
+                            <option value="">جميع الحالات</option>
+                            <option value="draft">مسودة</option>
+                            <option value="confirmed">مؤكدة</option>
+                            <option value="in_progress">قيد التنفيذ</option>
+                            <option value="completed">مكتملة</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Calendar -->
+            <div class="calendar-container">
+                <div id="calendar"></div>
+                <div class="loading-overlay d-none" id="calendarLoading">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">جاري التحميل...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-3">
+            <div class="scheduling-sidebar">
+                <!-- Today's Schedule -->
+                <div class="mb-4">
+                    <h5 class="mb-3">
+                        <i class="fas fa-calendar-day me-2"></i>جدول اليوم
+                    </h5>
+                    <div id="todaySchedule">
+                        <!-- Today's sessions will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Available Therapists -->
+                <div class="mb-4">
+                    <h5 class="mb-3">
+                        <i class="fas fa-user-md me-2"></i>المعالجون المتاحون
+                    </h5>
+                    <div class="therapist-list" id="therapistList">
+                        <!-- Therapists will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Room Status -->
+                <div class="mb-4">
+                    <h5 class="mb-3">
+                        <i class="fas fa-door-open me-2"></i>حالة الغرف
+                    </h5>
+                    <div class="room-grid" id="roomStatus">
+                        <!-- Room status will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Quick Time Slots -->
+                <div>
+                    <h5 class="mb-3">
+                        <i class="fas fa-clock me-2"></i>الأوقات المتاحة
+                    </h5>
+                    <div id="availableTimeSlots">
+                        <!-- Available time slots will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Session Details Panel -->
+<div class="session-details-panel" id="sessionDetailsPanel">
+    <div class="panel-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">تفاصيل الجلسة</h5>
+            <button class="btn btn-sm btn-light" onclick="closeSessionPanel()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+    <div class="panel-content" id="sessionPanelContent">
+        <!-- Session details will be loaded here -->
+    </div>
+</div>
+
+<!-- Schedule Session Modal -->
+<div class="modal fade" id="scheduleSessionModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">جدولة جلسة جديدة</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="scheduleSessionForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">المستفيد *</label>
+                            <select class="form-select" id="beneficiarySelect" required>
+                                <option value="">اختر المستفيد</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">البرنامج *</label>
+                            <select class="form-select" id="programSelect" required>
+                                <option value="">اختر البرنامج</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <label class="form-label">المعالج *</label>
+                            <select class="form-select" id="therapistSelect" required>
+                                <option value="">اختر المعالج</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">المعالج المساعد</label>
+                            <select class="form-select" id="assistantTherapistSelect">
+                                <option value="">اختر المعالج المساعد</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-4">
+                            <label class="form-label">التاريخ *</label>
+                            <input type="date" class="form-control" id="sessionDate" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">وقت البداية *</label>
+                            <input type="time" class="form-control" id="sessionStartTime" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">المدة (دقيقة) *</label>
+                            <input type="number" class="form-control" id="sessionDuration" value="60" min="15" max="180" required>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <label class="form-label">الغرفة</label>
+                            <select class="form-select" id="roomSelect">
+                                <option value="">اختر الغرفة</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">نوع الجلسة</label>
+                            <select class="form-select" id="sessionType">
+                                <option value="individual">فردية</option>
+                                <option value="group">جماعية</option>
+                                <option value="assessment">تقييم</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <label class="form-label">أهداف الجلسة</label>
+                        <textarea class="form-control" id="sessionObjectives" rows="3" placeholder="أدخل أهداف الجلسة..."></textarea>
+                    </div>
+                    <div class="mt-3">
+                        <label class="form-label">ملاحظات التحضير</label>
+                        <textarea class="form-control" id="preparationNotes" rows="2" placeholder="ملاحظات للتحضير للجلسة..."></textarea>
+                    </div>
+                    
+                    <!-- Recurrence Settings -->
+                    <div class="mt-4">
+                        <h6>إعدادات التكرار</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label">نوع التكرار</label>
+                                <select class="form-select" id="recurrenceType" onchange="toggleRecurrenceSettings()">
+                                    <option value="none">بدون تكرار</option>
+                                    <option value="daily">يومي</option>
+                                    <option value="weekly">أسبوعي</option>
+                                    <option value="biweekly">كل أسبوعين</option>
+                                    <option value="monthly">شهري</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6" id="recurrenceEndDiv" style="display: none;">
+                                <label class="form-label">تاريخ انتهاء التكرار</label>
+                                <input type="date" class="form-control" id="recurrenceEndDate">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                
+                <!-- Conflict Warnings -->
+                <div id="conflictWarnings" class="mt-3" style="display: none;">
+                    <div class="alert alert-warning">
+                        <h6><i class="fas fa-exclamation-triangle me-2"></i>تحذيرات التعارض</h6>
+                        <ul id="conflictList"></ul>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-warning" onclick="checkConflicts()">
+                    <i class="fas fa-search me-2"></i>فحص التعارضات
+                </button>
+                <button type="button" class="btn btn-primary" onclick="saveSession()">
+                    <i class="fas fa-save me-2"></i>حفظ الجلسة
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bulk Schedule Modal -->
+<div class="modal fade" id="bulkScheduleModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">الجدولة المتعددة</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Bulk scheduling interface will be implemented here -->
+                <p class="text-muted">واجهة الجدولة المتعددة قيد التطوير...</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/locales/ar.js'></script>
+<script src="{{ url_for('static', filename='js/session_scheduling.js') }}"></script>
+{% endblock %}

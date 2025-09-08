@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مقياس رسم الرجل - مراكز الأوائل</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <style>
+        .drawing-canvas {
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            background: white;
+            cursor: crosshair;
+        }
+        .drawing-tools {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .scoring-item {
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 10px;
+            background: white;
+        }
+        .scoring-item.scored {
+            background: #d4edda;
+            border-color: #c3e6cb;
+        }
+        .drawing-preview {
+            max-width: 200px;
+            max-height: 200px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+        }
+        .assessment-card {
+            transition: all 0.3s ease;
+        }
+        .assessment-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .score-badge {
+            font-size: 0.9rem;
+            padding: 0.4rem 0.8rem;
+        }
+        .progress-ring {
+            width: 60px;
+            height: 60px;
+        }
+        .progress-ring circle {
+            fill: transparent;
+            stroke: #e9ecef;
+            stroke-width: 4;
+        }
+        .progress-ring .progress {
+            stroke: #28a745;
+            stroke-linecap: round;
+            transition: stroke-dasharray 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2><i class="fas fa-palette text-primary me-2"></i>مقياس رسم الرجل</h2>
+                        <p class="text-muted mb-0">تقييم التطور المعرفي والعاطفي من خلال رسوم الأطفال</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="showNewAssessmentModal()">
+                        <i class="fas fa-plus me-2"></i>تقييم جديد
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0">
+                                <div class="bg-primary bg-opacity-10 p-3 rounded">
+                                    <i class="fas fa-clipboard-list text-primary fa-lg"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h3 class="mb-0" id="totalAssessments">0</h3>
+                                <p class="text-muted mb-0 small">إجمالي التقييمات</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0">
+                                <div class="bg-success bg-opacity-10 p-3 rounded">
+                                    <i class="fas fa-check-circle text-success fa-lg"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h3 class="mb-0" id="completedAssessments">0</h3>
+                                <p class="text-muted mb-0 small">التقييمات المكتملة</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0">
+                                <div class="bg-warning bg-opacity-10 p-3 rounded">
+                                    <i class="fas fa-clock text-warning fa-lg"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h3 class="mb-0" id="inProgressAssessments">0</h3>
+                                <p class="text-muted mb-0 small">قيد التنفيذ</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0">
+                                <div class="bg-info bg-opacity-10 p-3 rounded">
+                                    <i class="fas fa-chart-line text-info fa-lg"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h3 class="mb-0" id="averageScore">0</h3>
+                                <p class="text-muted mb-0 small">متوسط الدرجات</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label class="form-label">الطالب</label>
+                                <select class="form-select" id="studentFilter">
+                                    <option value="">جميع الطلاب</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">المقيم</label>
+                                <select class="form-select" id="assessorFilter">
+                                    <option value="">جميع المقيمين</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">الحالة</label>
+                                <select class="form-select" id="statusFilter">
+                                    <option value="">جميع الحالات</option>
+                                    <option value="in_progress">قيد التنفيذ</option>
+                                    <option value="completed">مكتمل</option>
+                                    <option value="cancelled">ملغي</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">نوع الاختبار</label>
+                                <select class="form-select" id="versionFilter">
+                                    <option value="">جميع الأنواع</option>
+                                    <option value="goodenough_harris">جودإنف-هاريس</option>
+                                    <option value="koppitz">كوبيتز</option>
+                                    <option value="naglieri">ناجليري</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="d-flex gap-2 align-items-end h-100">
+                                    <button class="btn btn-outline-primary" onclick="applyFilters()">
+                                        <i class="fas fa-filter me-1"></i>تطبيق
+                                    </button>
+                                    <button class="btn btn-outline-secondary" onclick="clearFilters()">
+                                        <i class="fas fa-times me-1"></i>مسح
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assessments List -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white border-bottom">
+                        <h5 class="mb-0">قائمة التقييمات</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>الطالب</th>
+                                        <th>المقيم</th>
+                                        <th>تاريخ التقييم</th>
+                                        <th>نوع الاختبار</th>
+                                        <th>الحالة</th>
+                                        <th>الدرجة الإجمالية</th>
+                                        <th>معدل الذكاء المقدر</th>
+                                        <th>الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="assessmentsTableBody">
+                                    <!-- سيتم تحميل البيانات هنا -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Assessment Modal -->
+    <div class="modal fade" id="newAssessmentModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">تقييم جديد - مقياس رسم الرجل</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="newAssessmentForm">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">الطالب <span class="text-danger">*</span></label>
+                                <select class="form-select" id="studentSelect" required>
+                                    <option value="">اختر الطالب</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">المقيم <span class="text-danger">*</span></label>
+                                <select class="form-select" id="assessorSelect" required>
+                                    <option value="">اختر المقيم</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">تاريخ التقييم <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control" id="assessmentDate" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">نوع الاختبار <span class="text-danger">*</span></label>
+                                <select class="form-select" id="testVersion" required>
+                                    <option value="goodenough_harris">جودإنف-هاريس</option>
+                                    <option value="koppitz">كوبيتز</option>
+                                    <option value="naglieri">ناجليري</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">العمر الزمني (سنوات)</label>
+                                <input type="number" class="form-control" id="ageYears" min="3" max="18">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">العمر الزمني (شهور)</label>
+                                <input type="number" class="form-control" id="ageMonths" min="0" max="11">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">بيئة التقييم</label>
+                                <input type="text" class="form-control" id="assessmentEnvironment" placeholder="مثل: غرفة هادئة، إضاءة طبيعية">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">ترتيب الجلوس</label>
+                                <select class="form-select" id="seatingArrangement">
+                                    <option value="">اختر ترتيب الجلوس</option>
+                                    <option value="face_to_face">وجهاً لوجه</option>
+                                    <option value="side_by_side">جنباً إلى جنب</option>
+                                    <option value="across_table">عبر الطاولة</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">المواد المستخدمة</label>
+                                <input type="text" class="form-control" id="materialsUsed" placeholder="قلم رصاص، ورق أبيض، ممحاة">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">ملاحظات أولية</label>
+                                <textarea class="form-control" id="initialNotes" rows="3" placeholder="أي ملاحظات حول الطالب أو بيئة التقييم"></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-primary" onclick="createAssessment()">إنشاء التقييم</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assessment Details Modal -->
+    <div class="modal fade" id="assessmentDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">تفاصيل التقييم</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="assessmentDetailsContent">
+                        <!-- سيتم تحميل المحتوى هنا -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Drawing Assessment Modal -->
+    <div class="modal fade" id="drawingAssessmentModal" tabindex="-1">
+        <div class="modal-dialog modal-fullscreen">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">تقييم الرسم - <span id="currentDrawingType"></span></h5>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="progress-ring">
+                            <svg width="60" height="60">
+                                <circle cx="30" cy="30" r="26" stroke-width="4" stroke="#e9ecef" fill="transparent"/>
+                                <circle cx="30" cy="30" r="26" stroke-width="4" stroke="#28a745" fill="transparent" 
+                                        class="progress" stroke-dasharray="0 163.36" stroke-linecap="round"/>
+                            </svg>
+                            <div class="position-absolute top-50 start-50 translate-middle">
+                                <small class="fw-bold" id="progressPercent">0%</small>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                </div>
+                <div class="modal-body p-0">
+                    <div class="row g-0 h-100">
+                        <!-- Drawing Area -->
+                        <div class="col-md-8 border-end">
+                            <div class="p-4">
+                                <!-- Drawing Tools -->
+                                <div class="drawing-tools mb-4">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-6">
+                                            <h6 class="mb-2">أدوات الرسم</h6>
+                                            <div class="btn-group" role="group">
+                                                <button type="button" class="btn btn-outline-primary active" id="penTool">
+                                                    <i class="fas fa-pen"></i> قلم
+                                                </button>
+                                                <button type="button" class="btn btn-outline-primary" id="eraserTool">
+                                                    <i class="fas fa-eraser"></i> ممحاة
+                                                </button>
+                                                <button type="button" class="btn btn-outline-danger" id="clearCanvas">
+                                                    <i class="fas fa-trash"></i> مسح الكل
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h6 class="mb-2">التحكم</h6>
+                                            <div class="d-flex gap-2">
+                                                <button class="btn btn-success" id="saveDrawing">
+                                                    <i class="fas fa-save"></i> حفظ الرسم
+                                                </button>
+                                                <button class="btn btn-info" id="uploadDrawing">
+                                                    <i class="fas fa-upload"></i> رفع صورة
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Canvas -->
+                                <div class="text-center">
+                                    <canvas id="drawingCanvas" class="drawing-canvas" width="600" height="400"></canvas>
+                                    <input type="file" id="imageUpload" accept="image/*" style="display: none;">
+                                </div>
+
+                                <!-- Drawing Instructions -->
+                                <div class="mt-4">
+                                    <div class="alert alert-info">
+                                        <h6><i class="fas fa-info-circle me-2"></i>تعليمات الرسم</h6>
+                                        <p class="mb-0" id="drawingInstructions">
+                                            اطلب من الطالب رسم شخص كامل. لا تعطي تفاصيل إضافية أو توجيهات محددة.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Scoring Panel -->
+                        <div class="col-md-4">
+                            <div class="p-4">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 class="mb-0">التسجيل والتقييم</h6>
+                                    <span class="badge bg-primary" id="currentScore">0 نقطة</span>
+                                </div>
+
+                                <!-- Drawing Tabs -->
+                                <ul class="nav nav-pills nav-fill mb-3" id="drawingTabs">
+                                    <li class="nav-item">
+                                        <button class="nav-link active" data-drawing="man" onclick="switchDrawing('man')">
+                                            رسم الرجل
+                                        </button>
+                                    </li>
+                                    <li class="nav-item">
+                                        <button class="nav-link" data-drawing="woman" onclick="switchDrawing('woman')">
+                                            رسم المرأة
+                                        </button>
+                                    </li>
+                                    <li class="nav-item">
+                                        <button class="nav-link" data-drawing="self" onclick="switchDrawing('self')">
+                                            رسم الذات
+                                        </button>
+                                    </li>
+                                </ul>
+
+                                <!-- Scoring Items -->
+                                <div class="scoring-items" style="max-height: 500px; overflow-y: auto;">
+                                    <div id="scoringItemsContainer">
+                                        <!-- سيتم تحميل عناصر التسجيل هنا -->
+                                    </div>
+                                </div>
+
+                                <!-- Action Buttons -->
+                                <div class="mt-4 d-grid gap-2">
+                                    <button class="btn btn-success" onclick="completeDrawing()">
+                                        <i class="fas fa-check"></i> إكمال هذا الرسم
+                                    </button>
+                                    <button class="btn btn-primary" onclick="nextDrawing()">
+                                        <i class="fas fa-arrow-left"></i> الرسم التالي
+                                    </button>
+                                    <button class="btn btn-warning" onclick="completeAssessment()">
+                                        <i class="fas fa-flag-checkered"></i> إنهاء التقييم
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div class="position-fixed top-50 start-50 translate-middle" id="loadingSpinner" style="display: none; z-index: 9999;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">جاري التحميل...</span>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/dap.js') }}"></script>
+</body>
+</html>

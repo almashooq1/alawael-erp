@@ -1,0 +1,613 @@
+{% extends "base.html" %}
+
+{% block title %}إدارة الحالات الطارئة والأزمات - مراكز الأوائل للرعاية النهارية{% endblock %}
+
+{% block extra_css %}
+<style>
+    .emergency-card {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        background: white;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .emergency-card:hover {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        transform: translateY(-2px);
+    }
+    
+    .emergency-level {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.85em;
+        font-weight: 500;
+    }
+    
+    .level-critical { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    .level-high { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+    .level-medium { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+    .level-low { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+    
+    .status-indicator {
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.8em;
+        font-weight: 500;
+    }
+    
+    .status-active { background: #f8d7da; color: #721c24; }
+    .status-resolved { background: #d4edda; color: #155724; }
+    .status-monitoring { background: #fff3cd; color: #856404; }
+    .status-investigating { background: #d1ecf1; color: #0c5460; }
+    
+    .priority-indicator {
+        width: 4px;
+        height: 100%;
+        position: absolute;
+        right: 0;
+        top: 0;
+        border-radius: 0 8px 8px 0;
+    }
+    
+    .priority-critical { background: #dc3545; }
+    .priority-high { background: #fd7e14; }
+    .priority-medium { background: #ffc107; }
+    .priority-low { background: #28a745; }
+    
+    .stats-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    
+    .stats-card h3 {
+        font-size: 2.5em;
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+    
+    .filter-section {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+    
+    .sidebar {
+        background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+        min-height: 100vh;
+        width: 280px;
+        position: fixed;
+        right: 0;
+        top: 0;
+        overflow-y: auto;
+        z-index: 1000;
+    }
+    
+    .main-content {
+        margin-right: 280px;
+        padding: 20px;
+    }
+    
+    .nav-link {
+        color: rgba(255,255,255,0.8);
+        padding: 12px 20px;
+        border-radius: 8px;
+        margin-bottom: 5px;
+        transition: all 0.3s ease;
+    }
+    
+    .nav-link:hover, .nav-link.active {
+        background: rgba(255,255,255,0.1);
+        color: white;
+    }
+    
+    .emergency-timeline {
+        border-right: 2px solid #dee2e6;
+        padding-right: 20px;
+        margin-right: 20px;
+    }
+    
+    .timeline-item {
+        position: relative;
+        margin-bottom: 20px;
+        padding-bottom: 20px;
+    }
+    
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        right: -26px;
+        top: 5px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #007bff;
+        border: 2px solid white;
+        box-shadow: 0 0 0 2px #dee2e6;
+    }
+    
+    .response-team {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+        margin-top: 15px;
+    }
+    
+    .team-member {
+        display: inline-block;
+        background: #e9ecef;
+        color: #495057;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.85em;
+        margin: 2px;
+    }
+    
+    .emergency-alert {
+        background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+        color: white;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.7; }
+        100% { opacity: 1; }
+    }
+    
+    .evacuation-plan {
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        border-radius: 8px;
+        padding: 15px;
+        margin-top: 15px;
+    }
+    
+    @media (max-width: 768px) {
+        .sidebar {
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+        
+        .sidebar.show {
+            transform: translateX(0);
+        }
+        
+        .main-content {
+            margin-right: 0;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex">
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="p-3">
+            <!-- Logo and Center Name -->
+            <div class="text-center mb-4">
+                <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="شعار المركز" width="60" height="60" class="mb-2">
+                <h5 class="text-white">إدارة الطوارئ</h5>
+                <p class="text-white-50 small">والأزمات</p>
+            </div>
+            
+            <!-- Emergency Alert Button -->
+            <div class="mb-4">
+                <button class="btn btn-danger w-100 btn-lg" onclick="emergencyManager.triggerEmergencyAlert()">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    إنذار طوارئ
+                </button>
+            </div>
+            
+            <!-- Navigation Menu -->
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#incidents" onclick="showSection('incidents')">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        الحوادث النشطة
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#protocols" onclick="showSection('protocols')">
+                        <i class="fas fa-clipboard-list me-2"></i>
+                        بروتوكولات الطوارئ
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#evacuation" onclick="showSection('evacuation')">
+                        <i class="fas fa-running me-2"></i>
+                        خطط الإخلاء
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#response-teams" onclick="showSection('response-teams')">
+                        <i class="fas fa-users me-2"></i>
+                        فرق الاستجابة
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#drills" onclick="showSection('drills')">
+                        <i class="fas fa-dumbbell me-2"></i>
+                        التدريبات
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#reports" onclick="showSection('reports')">
+                        <i class="fas fa-chart-line me-2"></i>
+                        التقارير
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/dashboard">
+                        <i class="fas fa-arrow-right me-2"></i>
+                        العودة للوحة التحكم
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Emergency Alert Banner -->
+        <div id="emergencyAlertBanner" class="emergency-alert d-none">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="mb-1"><i class="fas fa-exclamation-triangle me-2"></i>تنبيه طوارئ نشط</h5>
+                    <p class="mb-0" id="alertMessage">يتم التعامل مع حالة طوارئ حالياً</p>
+                </div>
+                <button class="btn btn-outline-light" onclick="emergencyManager.dismissAlert()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2><i class="fas fa-shield-alt text-danger me-2"></i>إدارة الحالات الطارئة والأزمات</h2>
+                <p class="text-muted">نظام شامل لإدارة الطوارئ وضمان سلامة المستفيدين والموظفين</p>
+            </div>
+            <div>
+                <button class="btn btn-danger" onclick="emergencyManager.showReportIncidentModal()">
+                    <i class="fas fa-plus me-2"></i>تسجيل حادث
+                </button>
+                <button class="btn btn-warning" onclick="emergencyManager.showDrillModal()">
+                    <i class="fas fa-dumbbell me-2"></i>تدريب طوارئ
+                </button>
+                <button class="btn btn-outline-secondary" onclick="emergencyManager.exportReports()">
+                    <i class="fas fa-download me-2"></i>تصدير
+                </button>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="stats-card" style="background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);">
+                    <h3 id="activeIncidents">0</h3>
+                    <p class="mb-0">حوادث نشطة</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
+                    <h3 id="resolvedIncidents">0</h3>
+                    <p class="mb-0">حوادث محلولة</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card" style="background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);">
+                    <h3 id="responseTime">0</h3>
+                    <p class="mb-0">متوسط وقت الاستجابة (دقيقة)</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card" style="background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);">
+                    <h3 id="trainedPersonnel">0</h3>
+                    <p class="mb-0">موظفين مدربين</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-bolt me-2"></i>إجراءات سريعة</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <button class="btn btn-outline-danger w-100 mb-2" onclick="emergencyManager.activateFireProtocol()">
+                                    <i class="fas fa-fire me-2"></i>بروتوكول الحريق
+                                </button>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-outline-warning w-100 mb-2" onclick="emergencyManager.activateMedicalEmergency()">
+                                    <i class="fas fa-ambulance me-2"></i>طوارئ طبية
+                                </button>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-outline-info w-100 mb-2" onclick="emergencyManager.activateEvacuation()">
+                                    <i class="fas fa-running me-2"></i>إخلاء فوري
+                                </button>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-outline-secondary w-100 mb-2" onclick="emergencyManager.activateLockdown()">
+                                    <i class="fas fa-lock me-2"></i>إغلاق أمني
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filter-section">
+            <div class="row">
+                <div class="col-md-3">
+                    <label class="form-label">البحث</label>
+                    <input type="text" class="form-control" id="searchInput" placeholder="البحث في الحوادث...">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">مستوى الطوارئ</label>
+                    <select class="form-select" id="levelFilter">
+                        <option value="">جميع المستويات</option>
+                        <option value="critical">حرج</option>
+                        <option value="high">عالي</option>
+                        <option value="medium">متوسط</option>
+                        <option value="low">منخفض</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">الحالة</label>
+                    <select class="form-select" id="statusFilter">
+                        <option value="">جميع الحالات</option>
+                        <option value="active">نشط</option>
+                        <option value="investigating">قيد التحقيق</option>
+                        <option value="monitoring">مراقبة</option>
+                        <option value="resolved">محلول</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">نوع الحادث</label>
+                    <select class="form-select" id="typeFilter">
+                        <option value="">جميع الأنواع</option>
+                        <option value="fire">حريق</option>
+                        <option value="medical">طبي</option>
+                        <option value="security">أمني</option>
+                        <option value="natural">كارثة طبيعية</option>
+                        <option value="technical">تقني</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">المسؤول</label>
+                    <select class="form-select" id="responsibleFilter">
+                        <option value="">جميع المسؤولين</option>
+                    </select>
+                </div>
+                <div class="col-md-1">
+                    <label class="form-label">&nbsp;</label>
+                    <button class="btn btn-outline-secondary w-100" onclick="emergencyManager.clearFilters()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Container -->
+        <div id="contentContainer">
+            <!-- Emergency incidents will be loaded here -->
+        </div>
+
+        <!-- Pagination -->
+        <nav aria-label="تنقل الحوادث">
+            <ul class="pagination justify-content-center" id="incidentsPagination">
+                <!-- Pagination will be generated here -->
+            </ul>
+        </nav>
+    </div>
+</div>
+
+<!-- Report Incident Modal -->
+<div class="modal fade" id="reportIncidentModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">تسجيل حادث طوارئ</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="reportIncidentForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">نوع الحادث</label>
+                            <select class="form-select" name="incident_type" required>
+                                <option value="">اختر نوع الحادث</option>
+                                <option value="fire">حريق</option>
+                                <option value="medical">طوارئ طبية</option>
+                                <option value="security">حادث أمني</option>
+                                <option value="natural">كارثة طبيعية</option>
+                                <option value="technical">عطل تقني</option>
+                                <option value="accident">حادث</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">مستوى الطوارئ</label>
+                            <select class="form-select" name="emergency_level" required>
+                                <option value="low">منخفض</option>
+                                <option value="medium">متوسط</option>
+                                <option value="high">عالي</option>
+                                <option value="critical">حرج</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <label class="form-label">الموقع</label>
+                            <input type="text" class="form-control" name="location" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">وقت الحادث</label>
+                            <input type="datetime-local" class="form-control" name="incident_time" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <label class="form-label">وصف الحادث</label>
+                        <textarea class="form-control" name="description" rows="4" required placeholder="اكتب وصفاً مفصلاً للحادث..."></textarea>
+                    </div>
+                    
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <label class="form-label">الأشخاص المتأثرون</label>
+                            <input type="number" class="form-control" name="affected_persons" min="0">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">الإصابات</label>
+                            <input type="number" class="form-control" name="injuries" min="0">
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <label class="form-label">الإجراءات المتخذة</label>
+                        <textarea class="form-control" name="actions_taken" rows="3" placeholder="اكتب الإجراءات التي تم اتخاذها..."></textarea>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <label class="form-label">فريق الاستجابة</label>
+                        <input type="text" class="form-control" name="response_team" placeholder="أسماء أعضاء فريق الاستجابة">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-danger" onclick="emergencyManager.saveIncident()">تسجيل الحادث</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Emergency Drill Modal -->
+<div class="modal fade" id="drillModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">تدريب طوارئ</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="drillForm">
+                    <div class="mb-3">
+                        <label class="form-label">نوع التدريب</label>
+                        <select class="form-select" name="drill_type" required>
+                            <option value="">اختر نوع التدريب</option>
+                            <option value="fire">تدريب حريق</option>
+                            <option value="evacuation">تدريب إخلاء</option>
+                            <option value="medical">تدريب طوارئ طبية</option>
+                            <option value="security">تدريب أمني</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">تاريخ ووقت التدريب</label>
+                        <input type="datetime-local" class="form-control" name="drill_datetime" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">المدة المتوقعة (دقيقة)</label>
+                        <input type="number" class="form-control" name="duration" min="5" max="120" value="30">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">المشاركون</label>
+                        <textarea class="form-control" name="participants" rows="3" placeholder="قائمة بالمشاركين في التدريب..."></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">الأهداف</label>
+                        <textarea class="form-control" name="objectives" rows="3" placeholder="أهداف التدريب..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-warning" onclick="emergencyManager.scheduleDrill()">جدولة التدريب</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Incident Details Modal -->
+<div class="modal fade" id="incidentDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">تفاصيل الحادث</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="incidentDetailsContent">
+                <!-- Incident details will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                <button type="button" class="btn btn-primary" id="updateIncidentBtn" onclick="emergencyManager.updateIncident()">تحديث</button>
+                <button type="button" class="btn btn-success" id="resolveIncidentBtn" onclick="emergencyManager.resolveIncident()">حل الحادث</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/emergency_management.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        emergencyManager.init();
+    });
+    
+    function showSection(section) {
+        // Update active nav link
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.classList.remove('active');
+        });
+        event.target.classList.add('active');
+        
+        // Show relevant content based on section
+        switch(section) {
+            case 'incidents':
+                emergencyManager.loadIncidents();
+                break;
+            case 'protocols':
+                emergencyManager.showProtocolsSection();
+                break;
+            case 'evacuation':
+                emergencyManager.showEvacuationSection();
+                break;
+            case 'response-teams':
+                emergencyManager.showResponseTeamsSection();
+                break;
+            case 'drills':
+                emergencyManager.showDrillsSection();
+                break;
+            case 'reports':
+                emergencyManager.showReportsSection();
+                break;
+        }
+    }
+</script>
+{% endblock %}

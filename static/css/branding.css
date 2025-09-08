@@ -1,0 +1,448 @@
+/* 
+ * Branding and Logo Styles for Awail Centers ERP System
+ * نمط العلامة التجارية والشعار لنظام ERP مراكز الأوائل
+ */
+
+/* Logo Watermark Background */
+.logo-watermark {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 150px;
+    height: 60px;
+    opacity: 0.05;
+    z-index: -1;
+    pointer-events: none;
+    background-image: url('/static/images/awail-logo.svg');
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center;
+}
+
+/* Header Logo */
+.header-logo {
+    height: 40px;
+    width: auto;
+    margin-left: 15px;
+}
+
+/* Sidebar Logo */
+.sidebar-logo {
+    height: 35px;
+    width: auto;
+    margin-bottom: 10px;
+}
+
+/* Page Title Logo */
+.page-title-logo {
+    height: 30px;
+    width: auto;
+    margin-left: 10px;
+    vertical-align: middle;
+}
+
+/* Print Logo */
+.print-logo {
+    height: 60px;
+    width: auto;
+    margin-bottom: 20px;
+}
+
+/* Card Header Logo */
+.card-header-logo {
+    height: 25px;
+    width: auto;
+    margin-left: 8px;
+}
+
+/* Modal Header Logo */
+.modal-header-logo {
+    height: 28px;
+    width: auto;
+    margin-left: 10px;
+}
+
+/* Assessment Report Logo */
+.assessment-logo {
+    height: 80px;
+    width: auto;
+    margin-bottom: 15px;
+}
+
+/* Footer Logo */
+.footer-logo {
+    height: 45px;
+    width: auto;
+    opacity: 0.8;
+}
+
+/* Login Page Logo */
+.login-logo {
+    height: 100px;
+    width: auto;
+    margin-bottom: 30px;
+}
+
+/* Dashboard Stats Card Logo */
+.stats-card-logo {
+    height: 20px;
+    width: auto;
+    margin-left: 5px;
+    opacity: 0.7;
+}
+
+/* Floating Logo for Large Screens */
+@media (min-width: 1200px) {
+    .floating-logo {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 300px;
+        height: 120px;
+        opacity: 0.03;
+        z-index: -2;
+        pointer-events: none;
+        background-image: url('/static/images/awail-logo.svg');
+        background-repeat: no-repeat;
+        background-size: contain;
+        background-position: center;
+    }
+}
+
+/* Report Header with Logo */
+.report-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 30px;
+    padding: 20px;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.report-header .logo-section {
+    display: flex;
+    align-items: center;
+}
+
+.report-header .info-section {
+    text-align: right;
+    flex-grow: 1;
+}
+
+/* Branded Button Styles */
+.btn-awail-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-awail-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: -10px;
+    width: 20px;
+    height: 100%;
+    background-image: url('/static/images/awail-logo.svg');
+    background-size: 15px;
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 0.2;
+}
+
+/* Branded Card Headers */
+.card-header-awail {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    position: relative;
+}
+
+.card-header-awail::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 10px;
+    transform: translateY(-50%);
+    width: 25px;
+    height: 25px;
+    background-image: url('/static/images/awail-logo.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    opacity: 0.3;
+}
+
+/* Assessment Form Branding */
+.assessment-form-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.assessment-form-header::before {
+    content: '';
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 60px;
+    height: 24px;
+    background-image: url('/static/images/awail-logo.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    opacity: 0.4;
+}
+
+/* Print Styles */
+@media print {
+    .logo-watermark {
+        display: none;
+    }
+    
+    .floating-logo {
+        display: none;
+    }
+    
+    .print-header {
+        display: flex !important;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #000;
+    }
+    
+    .print-header .print-logo {
+        height: 60px;
+        width: auto;
+    }
+    
+    .print-header .company-info {
+        text-align: right;
+        flex-grow: 1;
+    }
+    
+    .print-footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        text-align: center;
+        padding: 10px;
+        border-top: 1px solid #ccc;
+        background: white;
+    }
+    
+    .print-footer .footer-logo {
+        height: 30px;
+        opacity: 0.6;
+    }
+}
+
+/* Mobile Responsive Logo */
+@media (max-width: 768px) {
+    .header-logo {
+        height: 30px;
+    }
+    
+    .sidebar-logo {
+        height: 25px;
+    }
+    
+    .logo-watermark {
+        width: 100px;
+        height: 40px;
+        bottom: 10px;
+        right: 10px;
+    }
+    
+    .assessment-logo {
+        height: 60px;
+    }
+    
+    .login-logo {
+        height: 80px;
+    }
+}
+
+/* Dark Mode Logo Adjustments */
+@media (prefers-color-scheme: dark) {
+    .logo-watermark {
+        opacity: 0.03;
+        filter: invert(1);
+    }
+    
+    .floating-logo {
+        opacity: 0.02;
+        filter: invert(1);
+    }
+}
+
+/* Animation for Logo Appearance */
+@keyframes logoFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.logo-animated {
+    animation: logoFadeIn 0.5s ease-out;
+}
+
+/* Hover Effects for Interactive Logos */
+.interactive-logo {
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.interactive-logo:hover {
+    transform: scale(1.05);
+    opacity: 0.8;
+}
+
+/* Special Branding for Assessment Pages */
+.assessment-page {
+    position: relative;
+}
+
+.assessment-page::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('/static/images/awail-logo.svg');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 400px;
+    opacity: 0.02;
+    z-index: -1;
+    pointer-events: none;
+}
+
+/* Branded Loading Spinner */
+.awail-spinner {
+    width: 40px;
+    height: 40px;
+    background-image: url('/static/images/awail-logo.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Certificate/Report Template Branding */
+.certificate-template {
+    position: relative;
+    background: white;
+    padding: 40px;
+    margin: 20px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.certificate-template::before {
+    content: '';
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 80px;
+    height: 32px;
+    background-image: url('/static/images/awail-logo.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    opacity: 0.8;
+}
+
+.certificate-template::after {
+    content: '';
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+    height: 80px;
+    background-image: url('/static/images/awail-logo.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    opacity: 0.1;
+}
+
+/* System Designer Credit */
+.designer-credit {
+    position: fixed;
+    bottom: 5px;
+    left: 10px;
+    font-size: 10px;
+    color: rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    font-family: 'Cairo', sans-serif;
+    pointer-events: none;
+}
+
+.designer-credit::before {
+    content: 'تصميم وتطوير: عبدالله المعشوق';
+}
+
+/* Footer Designer Credit */
+.footer-designer-credit {
+    text-align: center;
+    padding: 10px;
+    font-size: 12px;
+    color: #6c757d;
+    border-top: 1px solid #e9ecef;
+    margin-top: 20px;
+    font-family: 'Cairo', sans-serif;
+}
+
+.footer-designer-credit .designer-name {
+    color: #495057;
+    font-weight: 500;
+}
+
+/* Print Designer Credit */
+@media print {
+    .designer-credit {
+        display: none;
+    }
+    
+    .print-designer-credit {
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+        font-size: 8px;
+        color: #666;
+    }
+    
+    .print-designer-credit::before {
+        content: 'تصميم: عبدالله المعشوق | مراكز الأوائل';
+    }
+}
+
+/* Dark Mode Designer Credit */
+@media (prefers-color-scheme: dark) {
+    .designer-credit {
+        color: rgba(255, 255, 255, 0.3);
+    }
+    
+    .footer-designer-credit {
+        color: #adb5bd;
+        border-top-color: #495057;
+    }
+    
+    .footer-designer-credit .designer-name {
+        color: #f8f9fa;
+    }
+}

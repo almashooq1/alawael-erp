@@ -1,0 +1,375 @@
+{% extends "base.html" %}
+
+{% block title %}نظام التأهيل لذوي الإعاقة - مراكز الأوائل{% endblock %}
+
+{% block extra_css %}
+<style>
+    .rehabilitation-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+        border-radius: 15px;
+    }
+    
+    .stats-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+        border-right: 4px solid;
+    }
+    
+    .stats-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .stats-card.beneficiaries { border-right-color: #28a745; }
+    .stats-card.programs { border-right-color: #007bff; }
+    .stats-card.plans { border-right-color: #ffc107; }
+    .stats-card.assessments { border-right-color: #dc3545; }
+    
+    .stats-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stats-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    
+    .action-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border: 2px solid transparent;
+    }
+    
+    .action-card:hover {
+        transform: translateY(-3px);
+        border-color: #667eea;
+    }
+    
+    .action-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: #667eea;
+    }
+    
+    .section-title {
+        color: #495057;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        border-bottom: 2px solid #e9ecef;
+        padding-bottom: 0.5rem;
+    }
+    
+    .quick-access-btn {
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        border: none;
+        border-radius: 25px;
+        padding: 0.75rem 1.5rem;
+        color: white;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .quick-access-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .disability-type-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        margin: 0.25rem;
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 20px;
+        font-size: 0.85rem;
+    }
+    
+    .recent-activity {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .activity-item {
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .activity-item:last-child {
+        border-bottom: none;
+    }
+    
+    .activity-time {
+        color: #6c757d;
+        font-size: 0.8rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="rehabilitation-header text-center">
+        <h1><i class="fas fa-heart-pulse me-3"></i>نظام التأهيل لذوي الإعاقة</h1>
+        <p class="mb-0">إدارة شاملة لبرامج التأهيل والخطط الفردية</p>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="stats-card beneficiaries">
+                <div class="stats-number text-success" id="beneficiariesCount">0</div>
+                <div class="stats-label">المستفيدون المسجلون</div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stats-card programs">
+                <div class="stats-number text-primary" id="programsCount">0</div>
+                <div class="stats-label">البرامج التأهيلية</div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stats-card plans">
+                <div class="stats-number text-warning" id="plansCount">0</div>
+                <div class="stats-label">الخطط الفردية</div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stats-card assessments">
+                <div class="stats-number text-danger" id="assessmentsCount">0</div>
+                <div class="stats-label">التقييمات المنجزة</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h3 class="section-title">الإجراءات السريعة</h3>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="action-card" onclick="openBeneficiariesModal()">
+                <div class="action-icon">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+                <h5>إضافة مستفيد جديد</h5>
+                <p class="text-muted">تسجيل مستفيد جديد في النظام</p>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="action-card" onclick="openProgramsModal()">
+                <div class="action-icon">
+                    <i class="fas fa-clipboard-list"></i>
+                </div>
+                <h5>إنشاء برنامج تأهيلي</h5>
+                <p class="text-muted">تصميم برنامج تأهيلي جديد</p>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="action-card" onclick="openPlansModal()">
+                <div class="action-icon">
+                    <i class="fas fa-route"></i>
+                </div>
+                <h5>إعداد خطة فردية</h5>
+                <p class="text-muted">وضع خطة تأهيلية مخصصة</p>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="action-card" onclick="openAssessmentModal()">
+                <div class="action-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h5>إجراء تقييم</h5>
+                <p class="text-muted">تقييم تقدم المستفيد</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Tabs -->
+    <div class="row">
+        <div class="col-12">
+            <ul class="nav nav-tabs" id="rehabilitationTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="beneficiaries-tab" data-bs-toggle="tab" data-bs-target="#beneficiaries" type="button" role="tab">
+                        <i class="fas fa-users me-2"></i>المستفيدون
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="programs-tab" data-bs-toggle="tab" data-bs-target="#programs" type="button" role="tab">
+                        <i class="fas fa-clipboard-list me-2"></i>البرامج التأهيلية
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="plans-tab" data-bs-toggle="tab" data-bs-target="#plans" type="button" role="tab">
+                        <i class="fas fa-route me-2"></i>الخطط الفردية
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="assessments-tab" data-bs-toggle="tab" data-bs-target="#assessments" type="button" role="tab">
+                        <i class="fas fa-chart-line me-2"></i>التقييمات
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="progress-tab" data-bs-toggle="tab" data-bs-target="#progress" type="button" role="tab">
+                        <i class="fas fa-chart-bar me-2"></i>سجلات التقدم
+                    </button>
+                </li>
+            </ul>
+            
+            <div class="tab-content mt-3" id="rehabilitationTabsContent">
+                <!-- Beneficiaries Tab -->
+                <div class="tab-pane fade show active" id="beneficiaries" role="tabpanel">
+                    <div class="recent-activity">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5>قائمة المستفيدين</h5>
+                            <button class="btn quick-access-btn" onclick="openBeneficiariesModal()">
+                                <i class="fas fa-plus me-2"></i>إضافة مستفيد
+                            </button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="beneficiariesTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>الاسم</th>
+                                        <th>العمر</th>
+                                        <th>نوع الإعاقة</th>
+                                        <th>تاريخ التسجيل</th>
+                                        <th>الحالة</th>
+                                        <th>الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="beneficiariesTableBody">
+                                    <!-- Data will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Programs Tab -->
+                <div class="tab-pane fade" id="programs" role="tabpanel">
+                    <div class="recent-activity">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5>البرامج التأهيلية</h5>
+                            <button class="btn quick-access-btn" onclick="openProgramsModal()">
+                                <i class="fas fa-plus me-2"></i>إضافة برنامج
+                            </button>
+                        </div>
+                        <div class="row" id="programsGrid">
+                            <!-- Programs will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Plans Tab -->
+                <div class="tab-pane fade" id="plans" role="tabpanel">
+                    <div class="recent-activity">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5>الخطط التأهيلية الفردية</h5>
+                            <button class="btn quick-access-btn" onclick="openPlansModal()">
+                                <i class="fas fa-plus me-2"></i>إنشاء خطة
+                            </button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="plansTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>المستفيد</th>
+                                        <th>البرنامج</th>
+                                        <th>تاريخ البداية</th>
+                                        <th>تاريخ المراجعة</th>
+                                        <th>الحالة</th>
+                                        <th>الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="plansTableBody">
+                                    <!-- Data will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Assessments Tab -->
+                <div class="tab-pane fade" id="assessments" role="tabpanel">
+                    <div class="recent-activity">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5>التقييمات التأهيلية</h5>
+                            <button class="btn quick-access-btn" onclick="openAssessmentModal()">
+                                <i class="fas fa-plus me-2"></i>إجراء تقييم
+                            </button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="assessmentsTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>المستفيد</th>
+                                        <th>نوع التقييم</th>
+                                        <th>التاريخ</th>
+                                        <th>النتيجة الإجمالية</th>
+                                        <th>المقيم</th>
+                                        <th>الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="assessmentsTableBody">
+                                    <!-- Data will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress Tab -->
+                <div class="tab-pane fade" id="progress" role="tabpanel">
+                    <div class="recent-activity">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5>سجلات التقدم</h5>
+                            <button class="btn quick-access-btn" onclick="openProgressModal()">
+                                <i class="fas fa-plus me-2"></i>إضافة سجل تقدم
+                            </button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="progressTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>المستفيد</th>
+                                        <th>التاريخ</th>
+                                        <th>مجال التقدم</th>
+                                        <th>مستوى التقدم</th>
+                                        <th>المسؤول</th>
+                                        <th>الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="progressTableBody">
+                                    <!-- Data will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modals will be included here -->
+{% include 'rehabilitation_modals.html' %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/rehabilitation.js') }}"></script>
+{% endblock %}

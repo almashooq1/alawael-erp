@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>التحليلات المتقدمة بالذكاء الاصطناعي - مراكز الأوائل</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .stats-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .stats-card.success {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        .stats-card.warning {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        .stats-card.info {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        .model-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        .model-card:hover {
+            transform: translateY(-5px);
+        }
+        .performance-bar {
+            height: 8px;
+            border-radius: 4px;
+            background: #e9ecef;
+            overflow: hidden;
+        }
+        .performance-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        .nav-pills .nav-link {
+            border-radius: 25px;
+            margin: 0 5px;
+            font-weight: 500;
+        }
+        .nav-pills .nav-link.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .prediction-card {
+            border-left: 4px solid #007bff;
+            background: #f8f9fa;
+        }
+        .insight-card {
+            border-right: 4px solid #28a745;
+            background: #f8f9fa;
+        }
+        .alert-card {
+            border-top: 4px solid #dc3545;
+            background: #fff5f5;
+        }
+        .confidence-badge {
+            font-size: 0.8em;
+            padding: 4px 8px;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid mt-4">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2><i class="fas fa-brain me-3"></i>التحليلات المتقدمة بالذكاء الاصطناعي</h2>
+                        <p class="text-muted">نظام شامل للتحليلات الذكية والتنبؤات المتقدمة</p>
+                    </div>
+                    <div>
+                        <button class="btn btn-primary" onclick="mlAnalytics.refreshDashboard()">
+                            <i class="fas fa-sync-alt me-2"></i>تحديث البيانات
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row mb-4" id="statisticsCards">
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 id="totalModels">0</h3>
+                            <p class="mb-0">إجمالي النماذج</p>
+                        </div>
+                        <i class="fas fa-robot fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card success">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 id="activeModels">0</h3>
+                            <p class="mb-0">النماذج النشطة</p>
+                        </div>
+                        <i class="fas fa-check-circle fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card info">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 id="totalPredictions">0</h3>
+                            <p class="mb-0">إجمالي التنبؤات</p>
+                        </div>
+                        <i class="fas fa-crystal-ball fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card warning">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 id="activeAlerts">0</h3>
+                            <p class="mb-0">التنبيهات النشطة</p>
+                        </div>
+                        <i class="fas fa-exclamation-triangle fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <ul class="nav nav-pills mb-4" id="mlTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="models-tab" data-bs-toggle="pill" data-bs-target="#models" type="button" role="tab">
+                    <i class="fas fa-robot me-2"></i>النماذج
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="predictions-tab" data-bs-toggle="pill" data-bs-target="#predictions" type="button" role="tab">
+                    <i class="fas fa-crystal-ball me-2"></i>التنبؤات
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="patterns-tab" data-bs-toggle="pill" data-bs-target="#patterns" type="button" role="tab">
+                    <i class="fas fa-search me-2"></i>تحليل الأنماط
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="insights-tab" data-bs-toggle="pill" data-bs-target="#insights" type="button" role="tab">
+                    <i class="fas fa-lightbulb me-2"></i>الرؤى الذكية
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="alerts-tab" data-bs-toggle="pill" data-bs-target="#alerts" type="button" role="tab">
+                    <i class="fas fa-bell me-2"></i>التنبيهات
+                </button>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="mlTabsContent">
+            <!-- Models Tab -->
+            <div class="tab-pane fade show active" id="models" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5><i class="fas fa-robot me-2"></i>نماذج الذكاء الاصطناعي</h5>
+                                <button class="btn btn-primary btn-sm" onclick="mlAnalytics.showCreateModelModal()">
+                                    <i class="fas fa-plus me-2"></i>إضافة نموذج
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <!-- Filters -->
+                                <div class="row mb-3">
+                                    <div class="col-md-4">
+                                        <select class="form-select" id="modelTypeFilter" onchange="mlAnalytics.filterModels()">
+                                            <option value="">جميع الأنواع</option>
+                                            <option value="classification">تصنيف</option>
+                                            <option value="regression">انحدار</option>
+                                            <option value="clustering">تجميع</option>
+                                            <option value="forecasting">تنبؤ</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <select class="form-select" id="modelStatusFilter" onchange="mlAnalytics.filterModels()">
+                                            <option value="">جميع الحالات</option>
+                                            <option value="training">قيد التدريب</option>
+                                            <option value="ready">جاهز</option>
+                                            <option value="deployed">مُنشر</option>
+                                            <option value="deprecated">مُهمل</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="text" class="form-control" id="modelSearchInput" placeholder="البحث في النماذج..." onkeyup="mlAnalytics.searchModels()">
+                                    </div>
+                                </div>
+                                
+                                <!-- Models List -->
+                                <div id="modelsList" class="row">
+                                    <!-- Models will be loaded here -->
+                                </div>
+                                
+                                <!-- Pagination -->
+                                <nav id="modelsPagination" class="mt-3">
+                                    <!-- Pagination will be loaded here -->
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6><i class="fas fa-chart-pie me-2"></i>توزيع النماذج حسب النوع</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="modelsTypeChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Predictions Tab -->
+            <div class="tab-pane fade" id="predictions" role="tabpanel">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5><i class="fas fa-crystal-ball me-2"></i>التنبؤات</h5>
+                        <button class="btn btn-primary btn-sm" onclick="mlAnalytics.showCreatePredictionModal()">
+                            <i class="fas fa-plus me-2"></i>إنشاء تنبؤ
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <!-- Predictions List -->
+                        <div id="predictionsList">
+                            <!-- Predictions will be loaded here -->
+                        </div>
+                        
+                        <!-- Pagination -->
+                        <nav id="predictionsPagination" class="mt-3">
+                            <!-- Pagination will be loaded here -->
+                        </nav>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Patterns Tab -->
+            <div class="tab-pane fade" id="patterns" role="tabpanel">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5><i class="fas fa-search me-2"></i>تحليل الأنماط</h5>
+                        <button class="btn btn-primary btn-sm" onclick="mlAnalytics.showAnalyzePatternsModal()">
+                            <i class="fas fa-play me-2"></i>تشغيل تحليل
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <!-- Patterns List -->
+                        <div id="patternsList">
+                            <!-- Patterns will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Insights Tab -->
+            <div class="tab-pane fade" id="insights" role="tabpanel">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-lightbulb me-2"></i>الرؤى الذكية</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Insights List -->
+                        <div id="insightsList">
+                            <!-- Insights will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alerts Tab -->
+            <div class="tab-pane fade" id="alerts" role="tabpanel">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-bell me-2"></i>التنبيهات</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Alerts List -->
+                        <div id="alertsList">
+                            <!-- Alerts will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Model Modal -->
+    <div class="modal fade" id="createModelModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">إنشاء نموذج جديد</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createModelForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">اسم النموذج *</label>
+                                    <input type="text" class="form-control" name="name" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">نوع النموذج *</label>
+                                    <select class="form-select" name="model_type" required>
+                                        <option value="">اختر النوع</option>
+                                        <option value="classification">تصنيف</option>
+                                        <option value="regression">انحدار</option>
+                                        <option value="clustering">تجميع</option>
+                                        <option value="forecasting">تنبؤ</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">الخوارزمية *</label>
+                                    <select class="form-select" name="algorithm" required>
+                                        <option value="">اختر الخوارزمية</option>
+                                        <option value="random_forest">Random Forest</option>
+                                        <option value="neural_network">Neural Network</option>
+                                        <option value="svm">SVM</option>
+                                        <option value="linear_regression">Linear Regression</option>
+                                        <option value="k_means">K-Means</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">الإصدار</label>
+                                    <input type="text" class="form-control" name="version" value="1.0">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">الوصف</label>
+                            <textarea class="form-control" name="description" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-primary" onclick="mlAnalytics.createModel()">إنشاء النموذج</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Prediction Modal -->
+    <div class="modal fade" id="createPredictionModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">إنشاء تنبؤ جديد</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createPredictionForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">النموذج *</label>
+                                    <select class="form-select" name="model_id" required id="predictionModelSelect">
+                                        <option value="">اختر النموذج</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">نوع التنبؤ *</label>
+                                    <select class="form-select" name="prediction_type" required>
+                                        <option value="">اختر النوع</option>
+                                        <option value="student_progress">تقدم الطالب</option>
+                                        <option value="risk_assessment">تقييم المخاطر</option>
+                                        <option value="outcome_prediction">توقع النتائج</option>
+                                        <option value="performance_forecast">توقع الأداء</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">بيانات الإدخال (JSON) *</label>
+                            <textarea class="form-control" name="input_data" rows="4" placeholder='{"feature1": "value1", "feature2": "value2"}' required></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">نوع الكيان المستهدف</label>
+                                    <select class="form-select" name="target_entity_type">
+                                        <option value="">اختر النوع</option>
+                                        <option value="student">طالب</option>
+                                        <option value="program">برنامج</option>
+                                        <option value="assessment">تقييم</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">معرف الكيان المستهدف</label>
+                                    <input type="number" class="form-control" name="target_entity_id">
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-primary" onclick="mlAnalytics.createPrediction()">إنشاء التنبؤ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analyze Patterns Modal -->
+    <div class="modal fade" id="analyzePatternsModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">تشغيل تحليل أنماط</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="analyzePatternsForm">
+                        <div class="mb-3">
+                            <label class="form-label">اسم التحليل *</label>
+                            <input type="text" class="form-control" name="analysis_name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">نوع التحليل *</label>
+                            <select class="form-select" name="analysis_type" required>
+                                <option value="">اختر النوع</option>
+                                <option value="clustering">تجميع</option>
+                                <option value="association_rules">قواعد الارتباط</option>
+                                <option value="anomaly_detection">كشف الشذوذ</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">مصدر البيانات *</label>
+                            <select class="form-select" name="data_source" required>
+                                <option value="">اختر المصدر</option>
+                                <option value="students">الطلاب</option>
+                                <option value="assessments">التقييمات</option>
+                                <option value="programs">البرامج</option>
+                                <option value="skills">المهارات</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">حجم العينة</label>
+                            <input type="number" class="form-control" name="sample_size" value="1000">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-primary" onclick="mlAnalytics.analyzePatterns()">تشغيل التحليل</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="d-none">
+        <div class="d-flex justify-content-center align-items-center position-fixed top-0 start-0 w-100 h-100" style="background: rgba(0,0,0,0.5); z-index: 9999;">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">جاري التحميل...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/ml_analytics.js') }}"></script>
+    <script>
+        // Initialize the ML Analytics system
+        document.addEventListener('DOMContentLoaded', function() {
+            window.mlAnalytics = new MLAnalyticsManager();
+        });
+    </script>
+</body>
+</html>

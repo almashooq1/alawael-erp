@@ -1,0 +1,512 @@
+{% extends "base.html" %}
+
+{% block title %}التقييم النفسي والاجتماعي - مراكز الأوائل للرعاية النهارية{% endblock %}
+
+{% block extra_css %}
+<style>
+    .assessment-card {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        background: white;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .assessment-card:hover {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        transform: translateY(-2px);
+    }
+    
+    .assessment-status {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.85em;
+        font-weight: 500;
+    }
+    
+    .status-pending { background: #fff3cd; color: #856404; }
+    .status-in_progress { background: #d1ecf1; color: #0c5460; }
+    .status-completed { background: #d4edda; color: #155724; }
+    .status-follow_up { background: #f8d7da; color: #721c24; }
+    
+    .assessment-type {
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.8em;
+        font-weight: 500;
+    }
+    
+    .type-psychological { background: #e7f3ff; color: #0066cc; }
+    .type-social { background: #fff0e6; color: #cc6600; }
+    .type-behavioral { background: #f0f8e6; color: #4d8000; }
+    .type-cognitive { background: #f5e6ff; color: #8000cc; }
+    
+    .priority-indicator {
+        width: 4px;
+        height: 100%;
+        position: absolute;
+        right: 0;
+        top: 0;
+        border-radius: 0 8px 8px 0;
+    }
+    
+    .priority-high { background: #dc3545; }
+    .priority-medium { background: #ffc107; }
+    .priority-low { background: #28a745; }
+    
+    .stats-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    
+    .stats-card h3 {
+        font-size: 2.5em;
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+    
+    .filter-section {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+    
+    .sidebar {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        width: 280px;
+        position: fixed;
+        right: 0;
+        top: 0;
+        overflow-y: auto;
+        z-index: 1000;
+    }
+    
+    .main-content {
+        margin-right: 280px;
+        padding: 20px;
+    }
+    
+    .nav-link {
+        color: rgba(255,255,255,0.8);
+        padding: 12px 20px;
+        border-radius: 8px;
+        margin-bottom: 5px;
+        transition: all 0.3s ease;
+    }
+    
+    .nav-link:hover, .nav-link.active {
+        background: rgba(255,255,255,0.1);
+        color: white;
+    }
+    
+    .assessment-details {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 10px;
+    }
+    
+    .barrier-tag {
+        display: inline-block;
+        background: #e9ecef;
+        color: #495057;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.8em;
+        margin: 2px;
+    }
+    
+    .recommendation-item {
+        background: #fff;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        padding: 10px;
+        margin-bottom: 8px;
+    }
+    
+    @media (max-width: 768px) {
+        .sidebar {
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+        
+        .sidebar.show {
+            transform: translateX(0);
+        }
+        
+        .main-content {
+            margin-right: 0;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex">
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="p-3">
+            <!-- Logo and Center Name -->
+            <div class="text-center mb-4">
+                <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="شعار المركز" width="60" height="60" class="mb-2">
+                <h5 class="text-white">التقييم النفسي</h5>
+                <p class="text-white-50 small">والاجتماعي</p>
+            </div>
+            
+            <!-- Navigation Menu -->
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#assessments" onclick="showSection('assessments')">
+                        <i class="fas fa-brain me-2"></i>
+                        التقييمات
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#assessment-types" onclick="showSection('assessment-types')">
+                        <i class="fas fa-list me-2"></i>
+                        أنواع التقييم
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#reports" onclick="showSection('reports')">
+                        <i class="fas fa-chart-line me-2"></i>
+                        التقارير
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#statistics" onclick="showSection('statistics')">
+                        <i class="fas fa-chart-bar me-2"></i>
+                        الإحصائيات
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/dashboard">
+                        <i class="fas fa-arrow-right me-2"></i>
+                        العودة للوحة التحكم
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2><i class="fas fa-brain text-primary me-2"></i>التقييم النفسي والاجتماعي</h2>
+                <p class="text-muted">إدارة وتتبع التقييمات النفسية والاجتماعية للمستفيدين</p>
+            </div>
+            <div>
+                <button class="btn btn-primary" onclick="assessmentManager.showAddAssessmentModal()">
+                    <i class="fas fa-plus me-2"></i>تقييم جديد
+                </button>
+                <button class="btn btn-outline-secondary" onclick="assessmentManager.exportAssessments()">
+                    <i class="fas fa-download me-2"></i>تصدير
+                </button>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <h3 id="totalAssessments">0</h3>
+                    <p class="mb-0">إجمالي التقييمات</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+                    <h3 id="completedAssessments">0</h3>
+                    <p class="mb-0">تقييمات مكتملة</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card" style="background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);">
+                    <h3 id="pendingAssessments">0</h3>
+                    <p class="mb-0">تقييمات معلقة</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);">
+                    <h3 id="followUpAssessments">0</h3>
+                    <p class="mb-0">تحتاج متابعة</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filter-section">
+            <div class="row">
+                <div class="col-md-3">
+                    <label class="form-label">البحث</label>
+                    <input type="text" class="form-control" id="searchInput" placeholder="البحث في التقييمات...">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">نوع التقييم</label>
+                    <select class="form-select" id="typeFilter">
+                        <option value="">جميع الأنواع</option>
+                        <option value="psychological">نفسي</option>
+                        <option value="social">اجتماعي</option>
+                        <option value="behavioral">سلوكي</option>
+                        <option value="cognitive">معرفي</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">الحالة</label>
+                    <select class="form-select" id="statusFilter">
+                        <option value="">جميع الحالات</option>
+                        <option value="pending">معلق</option>
+                        <option value="in_progress">قيد التنفيذ</option>
+                        <option value="completed">مكتمل</option>
+                        <option value="follow_up">يحتاج متابعة</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">الأولوية</label>
+                    <select class="form-select" id="priorityFilter">
+                        <option value="">جميع الأولويات</option>
+                        <option value="high">عالية</option>
+                        <option value="medium">متوسطة</option>
+                        <option value="low">منخفضة</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">المقيم</label>
+                    <select class="form-select" id="assessorFilter">
+                        <option value="">جميع المقيمين</option>
+                    </select>
+                </div>
+                <div class="col-md-1">
+                    <label class="form-label">&nbsp;</label>
+                    <button class="btn btn-outline-secondary w-100" onclick="assessmentManager.clearFilters()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assessments List -->
+        <div id="assessmentsContainer">
+            <!-- Assessments will be loaded here -->
+        </div>
+
+        <!-- Pagination -->
+        <nav aria-label="تنقل التقييمات">
+            <ul class="pagination justify-content-center" id="assessmentsPagination">
+                <!-- Pagination will be generated here -->
+            </ul>
+        </nav>
+    </div>
+</div>
+
+<!-- Add Assessment Modal -->
+<div class="modal fade" id="addAssessmentModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">إضافة تقييم جديد</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addAssessmentForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">المستفيد</label>
+                            <select class="form-select" name="beneficiary_id" required>
+                                <option value="">اختر المستفيد</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">نوع التقييم</label>
+                            <select class="form-select" name="assessment_type_id" required>
+                                <option value="">اختر نوع التقييم</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <label class="form-label">تاريخ التقييم</label>
+                            <input type="date" class="form-control" name="assessment_date" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">الأولوية</label>
+                            <select class="form-select" name="priority" required>
+                                <option value="medium">متوسطة</option>
+                                <option value="high">عالية</option>
+                                <option value="low">منخفضة</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <label class="form-label">الهدف من التقييم</label>
+                        <textarea class="form-control" name="purpose" rows="3" placeholder="اكتب الهدف من إجراء هذا التقييم..."></textarea>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <label class="form-label">ملاحظات أولية</label>
+                        <textarea class="form-control" name="initial_notes" rows="3" placeholder="أي ملاحظات أولية حول المستفيد..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary" onclick="assessmentManager.saveAssessment()">حفظ التقييم</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Assessment Details Modal -->
+<div class="modal fade" id="assessmentDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">تفاصيل التقييم</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="assessmentDetailsContent">
+                <!-- Assessment details will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                <button type="button" class="btn btn-primary" id="editAssessmentBtn" onclick="assessmentManager.editAssessment()">تعديل</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Complete Assessment Modal -->
+<div class="modal fade" id="completeAssessmentModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">إكمال التقييم</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="completeAssessmentForm">
+                    <input type="hidden" name="assessment_id">
+                    
+                    <div class="mb-3">
+                        <label class="form-label">النتائج</label>
+                        <textarea class="form-control" name="results" rows="4" placeholder="اكتب نتائج التقييم..." required></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">التوصيات</label>
+                        <textarea class="form-control" name="recommendations" rows="4" placeholder="اكتب التوصيات..." required></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">العوائق الاجتماعية (JSON)</label>
+                        <textarea class="form-control" name="social_barriers" rows="3" placeholder='{"family_support": "ضعيف", "economic_status": "متوسط"}'></textarea>
+                        <small class="text-muted">أدخل البيانات بصيغة JSON</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">الدرجة (من 100)</label>
+                        <input type="number" class="form-control" name="score" min="0" max="100">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">ملاحظات إضافية</label>
+                        <textarea class="form-control" name="notes" rows="3" placeholder="أي ملاحظات إضافية..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-success" onclick="assessmentManager.completeAssessment()">إكمال التقييم</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Assessment Type Modal -->
+<div class="modal fade" id="addAssessmentTypeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">إضافة نوع تقييم جديد</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addAssessmentTypeForm">
+                    <div class="mb-3">
+                        <label class="form-label">اسم النوع</label>
+                        <input type="text" class="form-control" name="name" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">الوصف</label>
+                        <textarea class="form-control" name="description" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">الفئة</label>
+                        <select class="form-select" name="category" required>
+                            <option value="psychological">نفسي</option>
+                            <option value="social">اجتماعي</option>
+                            <option value="behavioral">سلوكي</option>
+                            <option value="cognitive">معرفي</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">المدة المتوقعة (بالدقائق)</label>
+                        <input type="number" class="form-control" name="duration_minutes" min="1">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary" onclick="assessmentManager.saveAssessmentType()">حفظ</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/psychological_assessment.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        assessmentManager.init();
+    });
+    
+    function showSection(section) {
+        // Update active nav link
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.classList.remove('active');
+        });
+        event.target.classList.add('active');
+        
+        // Show relevant content based on section
+        switch(section) {
+            case 'assessments':
+                assessmentManager.loadAssessments();
+                break;
+            case 'assessment-types':
+                assessmentManager.showAssessmentTypesSection();
+                break;
+            case 'reports':
+                assessmentManager.showReportsSection();
+                break;
+            case 'statistics':
+                assessmentManager.showStatisticsSection();
+                break;
+        }
+    }
+</script>
+{% endblock %}

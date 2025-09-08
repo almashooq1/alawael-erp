@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تقييم مهارات الطلاب - مراكز الأوائل</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    
+    <style>
+        .skill-card {
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            margin-bottom: 15px;
+        }
+        
+        .skill-card:hover {
+            border-color: #007bff;
+            box-shadow: 0 4px 8px rgba(0,123,255,0.1);
+        }
+        
+        .skill-status {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-left: 10px;
+        }
+        
+        .status-completed { background-color: #28a745; }
+        .status-maybe { background-color: #ffc107; }
+        .status-not-completed { background-color: #dc3545; }
+        .status-not-assessed { background-color: #6c757d; }
+        
+        .category-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #dc3545;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .assessment-modal .modal-body {
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+        
+        .progress-ring {
+            width: 120px;
+            height: 120px;
+        }
+        
+        .progress-ring circle {
+            fill: transparent;
+            stroke-width: 8;
+            stroke-linecap: round;
+        }
+        
+        .progress-ring .background {
+            stroke: #e9ecef;
+        }
+        
+        .progress-ring .progress {
+            stroke: #007bff;
+            stroke-dasharray: 283;
+            stroke-dashoffset: 283;
+            transition: stroke-dashoffset 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('dashboard') }}">
+                <i class="fas fa-graduation-cap ms-2"></i>
+                مراكز الأوائل
+            </a>
+            
+            <div class="navbar-nav ms-auto">
+                <div class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle position-relative" href="#" id="notificationsDropdown" role="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-bell"></i>
+                        <span id="notificationBadge" class="notification-badge" style="display: none;">0</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" id="notificationsList">
+                        <li><h6 class="dropdown-header">الإشعارات</h6></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><span class="dropdown-item-text text-muted">لا توجد إشعارات جديدة</span></li>
+                    </ul>
+                </div>
+                
+                <a class="nav-link" href="{{ url_for('logout') }}">
+                    <i class="fas fa-sign-out-alt ms-1"></i>
+                    تسجيل الخروج
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <h2><i class="fas fa-star text-warning ms-2"></i>تقييم مهارات الطلاب</h2>
+                <p class="text-muted">تقييم وتتبع تقدم الطلاب في المهارات المختلفة</p>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-light">
+                    <div class="card-body text-center">
+                        <div class="progress-ring">
+                            <svg width="120" height="120">
+                                <circle class="background" cx="60" cy="60" r="45"></circle>
+                                <circle class="progress" cx="60" cy="60" r="45" id="progressCircle"></circle>
+                            </svg>
+                            <div class="position-absolute top-50 start-50 translate-middle">
+                                <h4 id="completionPercentage">0%</h4>
+                                <small class="text-muted">مكتملة</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Student Selection -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <label for="studentSelect" class="form-label">اختر الطالب</label>
+                        <select class="form-select" id="studentSelect">
+                            <option value="">-- اختر طالب --</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="categoryFilter" class="form-label">فلترة حسب الفئة</label>
+                        <select class="form-select" id="categoryFilter">
+                            <option value="">جميع الفئات</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Skills Categories and Skills -->
+        <div id="skillsContainer">
+            <!-- Skills will be loaded here -->
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row mb-4" id="statsCards" style="display: none;">
+            <div class="col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 id="completedSkills">0</h4>
+                                <p class="mb-0">مهارات مكتملة</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-check-circle fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 id="inProgressSkills">0</h4>
+                                <p class="mb-0">قيد التطوير</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-clock fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-danger text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 id="notCompletedSkills">0</h4>
+                                <p class="mb-0">غير مكتملة</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-times-circle fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 id="totalAssessments">0</h4>
+                                <p class="mb-0">إجمالي التقييمات</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-chart-bar fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assessment Modal -->
+    <div class="modal fade assessment-modal" id="assessmentModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">تقييم المهارة</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="assessmentForm">
+                        <input type="hidden" id="studentId" name="student_id">
+                        <input type="hidden" id="skillId" name="skill_id">
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">اسم الطالب</label>
+                                <input type="text" class="form-control" id="studentName" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">تاريخ التقييم</label>
+                                <input type="date" class="form-control" id="assessmentDate" name="assessment_date" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">اسم المهارة</label>
+                            <textarea class="form-control" id="skillName" rows="2" readonly></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">وصف المهارة</label>
+                            <textarea class="form-control" id="skillDescription" rows="3" readonly></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">حالة التقييم <span class="text-danger">*</span></label>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="assessment_status" id="statusCompleted" value="completed">
+                                        <label class="form-check-label text-success" for="statusCompleted">
+                                            <i class="fas fa-check-circle ms-1"></i>
+                                            تم إتمام المهارة
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="assessment_status" id="statusMaybe" value="maybe">
+                                        <label class="form-check-label text-warning" for="statusMaybe">
+                                            <i class="fas fa-clock ms-1"></i>
+                                            ربما / قيد التطوير
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="assessment_status" id="statusNotCompleted" value="not_completed">
+                                        <label class="form-check-label text-danger" for="statusNotCompleted">
+                                            <i class="fas fa-times-circle ms-1"></i>
+                                            لم يتم إتمام المهارة
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="proficiencyLevel" class="form-label">مستوى الإتقان (1-5)</label>
+                            <input type="range" class="form-range" id="proficiencyLevel" name="proficiency_level" min="1" max="5" value="3">
+                            <div class="d-flex justify-content-between">
+                                <small>ضعيف</small>
+                                <small>متوسط</small>
+                                <small>ممتاز</small>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="observations" class="form-label">الملاحظات</label>
+                            <textarea class="form-control" id="observations" name="observations" rows="3" placeholder="اكتب ملاحظاتك حول أداء الطالب..."></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="recommendations" class="form-label">التوصيات</label>
+                            <textarea class="form-control" id="recommendations" name="recommendations" rows="3" placeholder="اكتب توصياتك لتحسين المهارة..."></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="assessmentMethod" class="form-label">طريقة التقييم</label>
+                            <select class="form-select" id="assessmentMethod" name="assessment_method">
+                                <option value="observation">الملاحظة المباشرة</option>
+                                <option value="test">اختبار</option>
+                                <option value="activity">نشاط تطبيقي</option>
+                                <option value="interview">مقابلة</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="nextAssessmentDate" class="form-label">تاريخ التقييم التالي</label>
+                            <input type="date" class="form-control" id="nextAssessmentDate" name="next_assessment_date">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-primary" onclick="saveAssessment()">
+                        <i class="fas fa-save ms-1"></i>
+                        حفظ التقييم
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/student_skills.js') }}"></script>
+</body>
+</html>

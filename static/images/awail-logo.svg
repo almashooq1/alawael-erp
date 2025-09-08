@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="80" viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="textGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#2c3e50;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#34495e;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background Circle -->
+  <circle cx="40" cy="40" r="30" fill="url(#logoGradient)" opacity="0.1"/>
+  
+  <!-- Main Logo Symbol -->
+  <g transform="translate(20, 20)">
+    <!-- Star/Excellence Symbol -->
+    <path d="M20 5 L25 15 L35 15 L27.5 22.5 L30 32.5 L20 27.5 L10 32.5 L12.5 22.5 L5 15 L15 15 Z" 
+          fill="url(#logoGradient)" stroke="#fff" stroke-width="1"/>
+    
+    <!-- Inner Circle -->
+    <circle cx="20" cy="20" r="8" fill="#fff" opacity="0.9"/>
+    
+    <!-- Arabic Letter "أ" stylized -->
+    <path d="M20 12 L20 28 M16 20 L24 20 M20 12 L18 10" 
+          stroke="url(#logoGradient)" stroke-width="2" stroke-linecap="round" fill="none"/>
+  </g>
+  
+  <!-- Company Name in Arabic -->
+  <text x="85" y="30" font-family="Arial, sans-serif" font-size="18" font-weight="bold" 
+        fill="url(#textGradient)" text-anchor="start">مراكز الأوائل</text>
+  
+  <!-- Company Name in English -->
+  <text x="85" y="50" font-family="Arial, sans-serif" font-size="12" 
+        fill="#7f8c8d" text-anchor="start">Awail Centers</text>
+    
+    <!-- Tagline -->
+    <text x="200" y="42" text-anchor="middle" font-family="Cairo, Arial, sans-serif" font-size="7" fill="#6c757d">
+        مراكز متخصصة للرعاية النهارية وذوي الإعاقة
+    </text>
+    
+    <!-- Designer Credit -->
+    <text x="200" y="52" text-anchor="middle" font-family="Cairo, Arial, sans-serif" font-size="5" fill="#adb5bd">
+        تصميم وتطوير: عبدالله المعشوق
+    </text>
+</svg>

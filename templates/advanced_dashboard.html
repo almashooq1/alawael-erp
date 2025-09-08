@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم التفاعلية المتقدمة - مراكز الأوائل</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- GridStack for drag & drop -->
+    <link href="https://cdn.jsdelivr.net/npm/gridstack@9.2.0/dist/gridstack.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/gridstack@9.2.0/dist/gridstack-all.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .dashboard-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .dashboard-header {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.3);
+        }
+        
+        .dashboard-header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        
+        .dashboard-header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+        
+        .widget-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            border: none;
+            transition: all 0.3s ease;
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        .widget-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+        
+        .widget-header {
+            background: linear-gradient(45deg, #2196F3, #1976D2);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 15px 15px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .widget-title {
+            font-weight: 600;
+            margin: 0;
+            font-size: 1.1rem;
+        }
+        
+        .widget-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .widget-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .widget-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.05);
+        }
+        
+        .widget-content {
+            padding: 20px;
+            height: calc(100% - 60px);
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .stat-label {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+        
+        .alert-item {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-right: 4px solid #ff9800;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+        }
+        
+        .alert-item:hover {
+            transform: translateX(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .alert-critical {
+            border-right-color: #f44336;
+        }
+        
+        .alert-warning {
+            border-right-color: #ff9800;
+        }
+        
+        .alert-info {
+            border-right-color: #2196F3;
+        }
+        
+        .alert-success {
+            border-right-color: #4CAF50;
+        }
+        
+        .toolbar {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .toolbar-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .btn-custom {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+        
+        .btn-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4);
+            color: white;
+        }
+        
+        .btn-secondary-custom {
+            background: linear-gradient(45deg, #2196F3, #1976D2);
+            box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+        }
+        
+        .btn-secondary-custom:hover {
+            box-shadow: 0 8px 25px rgba(33, 150, 243, 0.4);
+        }
+        
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+            padding: 10px 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 0.2rem rgba(76, 175, 80, 0.25);
+        }
+        
+        .grid-stack {
+            background: transparent;
+        }
+        
+        .grid-stack-item-content {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .grid-stack-item:hover .grid-stack-item-content {
+            border-color: #4CAF50;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+        
+        .loading-spinner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+        }
+        
+        .spinner-border {
+            color: #4CAF50;
+        }
+        
+        .notification-badge {
+            background: #f44336;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 0.8rem;
+            position: absolute;
+            top: -5px;
+            left: -5px;
+        }
+        
+        .theme-selector {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .theme-option {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .theme-option.active {
+            border-color: #4CAF50;
+            transform: scale(1.1);
+        }
+        
+        .theme-light { background: linear-gradient(45deg, #fff, #f5f5f5); }
+        .theme-dark { background: linear-gradient(45deg, #333, #000); }
+        .theme-blue { background: linear-gradient(45deg, #2196F3, #1976D2); }
+        .theme-green { background: linear-gradient(45deg, #4CAF50, #45a049); }
+        
+        @media (max-width: 768px) {
+            .dashboard-container {
+                margin: 10px;
+                padding: 20px;
+            }
+            
+            .dashboard-header h1 {
+                font-size: 2rem;
+            }
+            
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .toolbar-section {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1><i class="fas fa-tachometer-alt me-3"></i>لوحة التحكم التفاعلية المتقدمة</h1>
+                    <p>إدارة شاملة ومتطورة لجميع جوانب مراكز الأوائل</p>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <div class="position-relative">
+                        <button class="btn btn-light btn-sm" id="alertsBtn">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-badge" id="alertsBadge">0</span>
+                        </button>
+                    </div>
+                    <div class="position-relative">
+                        <button class="btn btn-light btn-sm" id="notificationsBtn">
+                            <i class="fas fa-envelope"></i>
+                            <span class="notification-badge" id="notificationsBadge">0</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="toolbar">
+            <div class="toolbar-section">
+                <button class="btn btn-custom" id="addWidgetBtn">
+                    <i class="fas fa-plus me-2"></i>إضافة ودجة
+                </button>
+                <button class="btn btn-secondary-custom" id="saveLayoutBtn">
+                    <i class="fas fa-save me-2"></i>حفظ التخطيط
+                </button>
+                <button class="btn btn-secondary-custom" id="exportDashboardBtn">
+                    <i class="fas fa-download me-2"></i>تصدير
+                </button>
+            </div>
+            
+            <div class="toolbar-section">
+                <select class="form-select" id="layoutSelector" style="width: 200px;">
+                    <option value="">اختر تخطيط...</option>
+                </select>
+                
+                <div class="theme-selector">
+                    <span class="me-2">السمة:</span>
+                    <div class="theme-option theme-light active" data-theme="light"></div>
+                    <div class="theme-option theme-dark" data-theme="dark"></div>
+                    <div class="theme-option theme-blue" data-theme="blue"></div>
+                    <div class="theme-option theme-green" data-theme="green"></div>
+                </div>
+                
+                <button class="btn btn-outline-secondary btn-sm" id="refreshBtn">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Dashboard Grid -->
+        <div class="grid-stack" id="dashboardGrid">
+            <!-- Widgets will be dynamically added here -->
+        </div>
+
+        <!-- Loading Overlay -->
+        <div class="loading-spinner d-none" id="loadingOverlay">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">جاري التحميل...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Widget Modal -->
+    <div class="modal fade" id="addWidgetModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">إضافة ودجة جديدة</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addWidgetForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">نوع الودجة</label>
+                                    <select class="form-select" id="widgetType" required>
+                                        <option value="">اختر نوع الودجة...</option>
+                                        <option value="students_stats">إحصائيات الطلاب</option>
+                                        <option value="appointments_chart">مخطط المواعيد</option>
+                                        <option value="revenue_chart">مخطط الإيرادات</option>
+                                        <option value="recent_activities">الأنشطة الأخيرة</option>
+                                        <option value="performance_metrics">مقاييس الأداء</option>
+                                        <option value="calendar_view">عرض التقويم</option>
+                                        <option value="alerts_summary">ملخص التنبيهات</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">عنوان الودجة</label>
+                                    <input type="text" class="form-control" id="widgetTitle" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">وصف الودجة</label>
+                            <textarea class="form-control" id="widgetDescription" rows="3"></textarea>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label class="form-label">العرض</label>
+                                    <select class="form-select" id="widgetWidth">
+                                        <option value="3">ربع العرض</option>
+                                        <option value="4" selected>ثلث العرض</option>
+                                        <option value="6">نصف العرض</option>
+                                        <option value="8">ثلثي العرض</option>
+                                        <option value="12">العرض الكامل</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label class="form-label">الارتفاع</label>
+                                    <select class="form-select" id="widgetHeight">
+                                        <option value="2">قصير</option>
+                                        <option value="3" selected>متوسط</option>
+                                        <option value="4">طويل</option>
+                                        <option value="5">طويل جداً</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">فترة التحديث (ثانية)</label>
+                                    <input type="number" class="form-control" id="widgetRefresh" value="300" min="30">
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-custom" id="saveWidgetBtn">حفظ الودجة</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Save Layout Modal -->
+    <div class="modal fade" id="saveLayoutModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">حفظ التخطيط</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="saveLayoutForm">
+                        <div class="mb-3">
+                            <label class="form-label">اسم التخطيط</label>
+                            <input type="text" class="form-control" id="layoutName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">وصف التخطيط</label>
+                            <textarea class="form-control" id="layoutDescription" rows="3"></textarea>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="layoutDefault">
+                            <label class="form-check-label" for="layoutDefault">
+                                جعل هذا التخطيط افتراضي
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="layoutPublic">
+                            <label class="form-check-label" for="layoutPublic">
+                                مشاركة التخطيط مع المستخدمين الآخرين
+                            </label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-custom" id="confirmSaveLayoutBtn">حفظ التخطيط</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Modal -->
+    <div class="modal fade" id="exportModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">تصدير لوحة التحكم</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="exportForm">
+                        <div class="mb-3">
+                            <label class="form-label">نوع التصدير</label>
+                            <select class="form-select" id="exportType" required>
+                                <option value="">اختر نوع التصدير...</option>
+                                <option value="pdf">ملف PDF</option>
+                                <option value="excel">ملف Excel</option>
+                                <option value="csv">ملف CSV</option>
+                                <option value="image">صورة PNG</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">اسم الملف</label>
+                            <input type="text" class="form-control" id="exportName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">الودجات المراد تصديرها</label>
+                            <div id="exportWidgets">
+                                <!-- سيتم ملء هذا القسم ديناميكياً -->
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-custom" id="confirmExportBtn">بدء التصدير</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alerts Modal -->
+    <div class="modal fade" id="alertsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">التنبيهات</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="alertsList">
+                        <!-- سيتم ملء التنبيهات هنا -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Dashboard JS -->
+    <script src="{{ url_for('static', filename='js/advanced_dashboard.js') }}"></script>
+</body>
+</html>

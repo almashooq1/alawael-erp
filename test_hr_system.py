@@ -15,9 +15,13 @@ import time
 # إضافة مسار المشروع
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from app import app, db
+from app_factory import create_app
+from database import db
 from hr_models import Employee, Department, Position, AttendanceRecord, LeaveRequest, SalaryRecord
 from hr_ai_services import HRAnalytics, TurnoverPredictor, SalaryRecommendationAI, TrainingRecommendationAI, RecruitmentAI
+
+# Create app instance
+app = create_app()
 
 class HRSystemTester:
     def __init__(self):
@@ -47,6 +51,9 @@ class HRSystemTester:
         
         # اختبار الأداء
         self.test_performance()
+        
+        # اختبار إمكانية الوصول للواجهة
+        self.test_ui_accessibility()
         
         # إنشاء تقرير شامل
         self.generate_report()
@@ -293,16 +300,24 @@ class HRSystemTester:
                 print(f"✅ سرعة الاستعلامات - الموظفين: {employees_time:.3f}ث, الحضور: {attendance_time:.3f}ث")
                 
                 # اختبار استهلاك الذاكرة
-                import psutil
-                process = psutil.Process()
-                memory_usage = process.memory_info().rss / 1024 / 1024  # MB
-                
-                self.test_results['performance_tests'].append({
-                    'test': 'استهلاك الذاكرة',
-                    'status': 'نجح' if memory_usage < 500 else 'تحذير',
-                    'message': f'{memory_usage:.1f} MB'
-                })
-                print(f"✅ استهلاك الذاكرة: {memory_usage:.1f} MB")
+                try:
+                    import psutil
+                    process = psutil.Process()
+                    memory_usage = process.memory_info().rss / 1024 / 1024  # MB
+                    
+                    self.test_results['performance_tests'].append({
+                        'test': 'استهلاك الذاكرة',
+                        'status': 'نجح' if memory_usage < 500 else 'تحذير',
+                        'message': f'{memory_usage:.1f} MB'
+                    })
+                    print(f"✅ استهلاك الذاكرة: {memory_usage:.1f} MB")
+                except ImportError:
+                    self.test_results['performance_tests'].append({
+                        'test': 'استهلاك الذاكرة',
+                        'status': 'تخطي',
+                        'message': 'مكتبة psutil غير متوفرة'
+                    })
+                    print("⚠️ استهلاك الذاكرة: تم التخطي (psutil غير متوفرة)")
                 
             except Exception as e:
                 self.test_results['performance_tests'].append({

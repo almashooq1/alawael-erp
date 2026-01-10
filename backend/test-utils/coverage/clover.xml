@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coverage generated="1764483334470" clover="3.2.0">
+  <project timestamp="1764483334470" name="All files">
+    <metrics statements="24" coveredstatements="24" conditionals="12" coveredconditionals="12" methods="11" coveredmethods="11" elements="47" coveredelements="47" complexity="0" loc="24" ncloc="24" packages="1" files="1" classes="1"/>
+    <file name="withMetricsServer.js" path="C:\Users\x-be\OneDrive\المستندات\04-10-2025\66666\backend\test-utils\withMetricsServer.js">
+      <metrics statements="24" coveredstatements="24" conditionals="12" coveredconditionals="12" methods="11" coveredmethods="11"/>
+      <line num="4" count="5" type="cond" truecount="2" falsecount="0"/>
+      <line num="5" count="5" type="stmt"/>
+      <line num="8" count="8" type="stmt"/>
+      <line num="9" count="8" type="stmt"/>
+      <line num="10" count="8" type="cond" truecount="2" falsecount="0"/>
+      <line num="11" count="2" type="stmt"/>
+      <line num="12" count="2" type="stmt"/>
+      <line num="14" count="8" type="cond" truecount="2" falsecount="0"/>
+      <line num="18" count="6" type="stmt"/>
+      <line num="19" count="5" type="stmt"/>
+      <line num="23" count="3" type="cond" truecount="2" falsecount="0"/>
+      <line num="25" count="2" type="stmt"/>
+      <line num="26" count="2" type="stmt"/>
+      <line num="27" count="2" type="stmt"/>
+      <line num="28" count="4" type="stmt"/>
+      <line num="29" count="4" type="stmt"/>
+      <line num="30" count="4" type="stmt"/>
+      <line num="31" count="4" type="cond" truecount="2" falsecount="0"/>
+      <line num="32" count="1" type="stmt"/>
+      <line num="35" count="3" type="stmt"/>
+      <line num="37" count="1" type="stmt"/>
+      <line num="41" count="2" type="stmt"/>
+      <line num="42" count="2" type="stmt"/>
+      <line num="46" count="5" type="stmt"/>
+    </file>
+  </project>
+</coverage>

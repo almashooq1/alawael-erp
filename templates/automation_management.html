@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة الأتمتة والرسائل المجدولة - مراكز الأوائل</title>
+    
+    <!-- Bootstrap 5 RTL -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+        }
+        .main-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+        .stats-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: none;
+            transition: transform 0.3s ease;
+        }
+        .stats-card:hover {
+            transform: translateY(-5px);
+        }
+        .nav-pills .nav-link {
+            border-radius: 25px;
+            margin: 0 0.25rem;
+            font-weight: 500;
+        }
+        .nav-pills .nav-link.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .workflow-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+        }
+        .workflow-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        .status-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+        }
+        .btn-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            border-radius: 25px;
+            padding: 0.5rem 1.5rem;
+            font-weight: 500;
+        }
+        .btn-gradient:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+            color: white;
+        }
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        .table-hover tbody tr:hover {
+            background-color: rgba(102, 126, 234, 0.1);
+        }
+        .loading-spinner {
+            display: none;
+        }
+        .alert {
+            border-radius: 15px;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="main-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="mb-0">
+                        <i class="fas fa-robot me-3"></i>
+                        إدارة الأتمتة والرسائل المجدولة
+                    </h1>
+                    <p class="mb-0 mt-2 opacity-75">نظام متقدم لأتمتة المهام وجدولة الرسائل</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <button class="btn btn-light btn-lg" onclick="automationManager.showCreateWorkflowModal()">
+                        <i class="fas fa-plus me-2"></i>
+                        إنشاء سير عمل جديد
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <!-- Statistics Cards -->
+        <div class="row mb-4" id="statsCards">
+            <!-- سيتم تحميل الإحصائيات هنا -->
+        </div>
+
+        <!-- Navigation Tabs -->
+        <ul class="nav nav-pills mb-4" id="mainTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="workflows-tab" data-bs-toggle="pill" data-bs-target="#workflows" type="button" role="tab">
+                    <i class="fas fa-project-diagram me-2"></i>
+                    سير العمل الآلي
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="messages-tab" data-bs-toggle="pill" data-bs-target="#messages" type="button" role="tab">
+                    <i class="fas fa-envelope-open-text me-2"></i>
+                    الرسائل المجدولة
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="templates-tab" data-bs-toggle="pill" data-bs-target="#templates" type="button" role="tab">
+                    <i class="fas fa-file-alt me-2"></i>
+                    قوالب الرسائل
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="rules-tab" data-bs-toggle="pill" data-bs-target="#rules" type="button" role="tab">
+                    <i class="fas fa-cogs me-2"></i>
+                    قواعد الأتمتة
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="logs-tab" data-bs-toggle="pill" data-bs-target="#logs" type="button" role="tab">
+                    <i class="fas fa-list-alt me-2"></i>
+                    السجلات والتقارير
+                </button>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="mainTabContent">
+            <!-- Workflows Tab -->
+            <div class="tab-pane fade show active" id="workflows" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">فلترة سير العمل</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label class="form-label">البحث</label>
+                                    <input type="text" class="form-control" id="workflowSearch" placeholder="البحث في سير العمل...">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">الحالة</label>
+                                    <select class="form-select" id="workflowStatusFilter">
+                                        <option value="">جميع الحالات</option>
+                                        <option value="active">نشط</option>
+                                        <option value="inactive">غير نشط</option>
+                                        <option value="paused">متوقف مؤقتاً</option>
+                                        <option value="completed">مكتمل</option>
+                                        <option value="failed">فشل</option>
+                                        <option value="draft">مسودة</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">نوع المحفز</label>
+                                    <select class="form-select" id="workflowTriggerFilter">
+                                        <option value="">جميع الأنواع</option>
+                                        <option value="time_based">مبني على الوقت</option>
+                                        <option value="event_based">مبني على الأحداث</option>
+                                        <option value="condition_based">مبني على الشروط</option>
+                                        <option value="user_action">إجراء المستخدم</option>
+                                        <option value="system_event">حدث النظام</option>
+                                    </select>
+                                </div>
+                                <button class="btn btn-gradient w-100" onclick="automationManager.loadWorkflows()">
+                                    <i class="fas fa-search me-2"></i>
+                                    تطبيق الفلاتر
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">قائمة سير العمل الآلي</h5>
+                                <button class="btn btn-gradient" onclick="automationManager.showCreateWorkflowModal()">
+                                    <i class="fas fa-plus me-2"></i>
+                                    إضافة جديد
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div id="workflowsList">
+                                    <!-- سيتم تحميل قائمة سير العمل هنا -->
+                                </div>
+                                <div id="workflowsPagination" class="mt-3">
+                                    <!-- ترقيم الصفحات -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Messages Tab -->
+            <div class="tab-pane fade" id="messages" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">فلترة الرسائل</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label class="form-label">نوع الرسالة</label>
+                                    <select class="form-select" id="messageTypeFilter">
+                                        <option value="">جميع الأنواع</option>
+                                        <option value="email">بريد إلكتروني</option>
+                                        <option value="sms">رسالة نصية</option>
+                                        <option value="push">إشعار فوري</option>
+                                        <option value="whatsapp">واتساب</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">حالة الرسالة</label>
+                                    <select class="form-select" id="messageStatusFilter">
+                                        <option value="">جميع الحالات</option>
+                                        <option value="scheduled">مجدولة</option>
+                                        <option value="sending">قيد الإرسال</option>
+                                        <option value="sent">مرسلة</option>
+                                        <option value="failed">فشل</option>
+                                        <option value="cancelled">ملغية</option>
+                                    </select>
+                                </div>
+                                <button class="btn btn-gradient w-100" onclick="automationManager.loadMessages()">
+                                    <i class="fas fa-search me-2"></i>
+                                    تطبيق الفلاتر
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">الرسائل المجدولة</h5>
+                                <button class="btn btn-gradient" onclick="automationManager.showCreateMessageModal()">
+                                    <i class="fas fa-plus me-2"></i>
+                                    إضافة رسالة جديدة
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div id="messagesList">
+                                    <!-- سيتم تحميل قائمة الرسائل هنا -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Templates Tab -->
+            <div class="tab-pane fade" id="templates" role="tabpanel">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">قوالب الرسائل</h5>
+                        <button class="btn btn-gradient" onclick="automationManager.showCreateTemplateModal()">
+                            <i class="fas fa-plus me-2"></i>
+                            إضافة قالب جديد
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="templatesList">
+                            <!-- سيتم تحميل قائمة القوالب هنا -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rules Tab -->
+            <div class="tab-pane fade" id="rules" role="tabpanel">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">قواعد الأتمتة</h5>
+                        <button class="btn btn-gradient" onclick="automationManager.showCreateRuleModal()">
+                            <i class="fas fa-plus me-2"></i>
+                            إضافة قاعدة جديدة
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="rulesList">
+                            <!-- سيتم تحميل قائمة القواعد هنا -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Logs Tab -->
+            <div class="tab-pane fade" id="logs" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">الرسائل القادمة</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="upcomingMessages">
+                                    <!-- الرسائل القادمة -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">التنفيذات الأخيرة</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="recentExecutions">
+                                    <!-- التنفيذات الأخيرة -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div class="loading-spinner position-fixed top-50 start-50 translate-middle" style="z-index: 9999;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">جاري التحميل...</span>
+        </div>
+    </div>
+
+    <!-- Alert Container -->
+    <div id="alertContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 9999;"></div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="/static/js/automation_management.js"></script>
+    
+    <script>
+        // تهيئة المدير عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            window.automationManager = new AutomationManager();
+            automationManager.init();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تطبيق السائق - مراكز الأوائل</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            direction: rtl;
+        }
+        
+        .app-container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        .app-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .app-header h1 {
+            font-size: 1.5rem;
+            margin: 0;
+        }
+        
+        .driver-info {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+        
+        .login-form {
+            padding: 40px 20px;
+            text-align: center;
+        }
+        
+        .login-form .logo {
+            width: 80px;
+            height: 80px;
+            background: #667eea;
+            border-radius: 50%;
+            margin: 0 auto 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+        }
+        
+        .student-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-right: 5px solid #667eea;
+        }
+        
+        .student-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .student-info {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+        
+        .status-badge {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            display: inline-block;
+            margin: 5px 5px 5px 0;
+        }
+        
+        .status-waiting {
+            background: #ffc107;
+            color: #000;
+        }
+        
+        .status-picked {
+            background: #28a745;
+            color: white;
+        }
+        
+        .status-dropped {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .status-late {
+            background: #fd7e14;
+            color: white;
+        }
+        
+        .status-absent {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .btn-pickup {
+            background: #28a745;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            flex: 1;
+            font-size: 0.9rem;
+        }
+        
+        .btn-dropoff {
+            background: #17a2b8;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            flex: 1;
+            font-size: 0.9rem;
+        }
+        
+        .btn-absent {
+            background: #dc3545;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            flex: 1;
+            font-size: 0.9rem;
+        }
+        
+        .floating-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            width: 60px;
+            height: 60px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            z-index: 1000;
+        }
+        
+        .date-selector {
+            background: white;
+            padding: 15px;
+            margin: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .stats-row {
+            display: flex;
+            justify-content: space-around;
+            background: white;
+            margin: 15px;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            color: #666;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+        
+        .empty-state i {
+            font-size: 4rem;
+            color: #ddd;
+            margin-bottom: 20px;
+        }
+        
+        .alert {
+            margin: 15px;
+            border-radius: 10px;
+            border: none;
+        }
+        
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+        }
+        
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            padding: 12px 15px;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        .btn {
+            border-radius: 10px;
+            padding: 12px 25px;
+            font-weight: 600;
+        }
+        
+        .gps-info {
+            font-size: 0.8rem;
+            color: #28a745;
+            margin-top: 10px;
+        }
+        
+        .offline-indicator {
+            background: #dc3545;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 480px) {
+            .app-container {
+                max-width: 100%;
+            }
+            
+            .student-card {
+                margin: 10px;
+                padding: 15px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .action-buttons button {
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Offline Indicator -->
+        <div id="offlineIndicator" class="offline-indicator" style="display: none;">
+            <i class="fas fa-wifi-slash"></i> غير متصل بالإنترنت
+        </div>
+        
+        <!-- Login Screen -->
+        <div id="loginScreen">
+            <div class="login-form">
+                <div class="logo">
+                    <i class="fas fa-bus"></i>
+                </div>
+                <h2 class="mb-4">تطبيق السائق</h2>
+                <p class="text-muted mb-4">مراكز الأوائل للرعاية النهارية</p>
+                
+                <form id="loginForm">
+                    <div class="mb-3">
+                        <input type="tel" class="form-control" id="phoneNumber" placeholder="رقم الهاتف" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-sign-in-alt me-2"></i>
+                        تسجيل الدخول
+                    </button>
+                </form>
+                
+                <div id="loginAlert" class="alert" style="display: none;"></div>
+            </div>
+        </div>
+        
+        <!-- Main App Screen -->
+        <div id="appScreen" style="display: none;">
+            <!-- Header -->
+            <div class="app-header">
+                <h1><i class="fas fa-bus me-2"></i>تطبيق السائق</h1>
+                <div class="driver-info">
+                    <div><strong id="driverName">السائق</strong></div>
+                    <div><small id="vehicleInfo">مركبة</small></div>
+                    <div class="gps-info" id="gpsStatus">
+                        <i class="fas fa-map-marker-alt"></i> تحديد الموقع متاح
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Date Selector -->
+            <div class="date-selector">
+                <label class="form-label">التاريخ:</label>
+                <input type="date" class="form-control" id="selectedDate">
+            </div>
+            
+            <!-- Statistics -->
+            <div class="stats-row">
+                <div class="stat-item">
+                    <div class="stat-number" id="totalStudents">0</div>
+                    <div class="stat-label">إجمالي الطلاب</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="pickedStudents">0</div>
+                    <div class="stat-label">تم الاستلام</div>
+                </div>
+                <div class="stats-card">
+                    <div class="stats-number" id="droppedStudents">0</div>
+                    <div class="stats-label">تم التوصيل</div>
+                </div>
+            </div>
+            
+            <!-- قسم تتبع المركبة -->
+            <div class="vehicle-tracking-section mb-4">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0"><i class="fas fa-route me-2"></i>تتبع المركبة</h6>
+                        <span id="trackingStatus" class="badge bg-secondary">التتبع متوقف</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <button id="startTrackingBtn" class="btn btn-success btn-sm w-100">
+                                    <i class="fas fa-play me-1"></i>بدء التتبع
+                                </button>
+                            </div>
+                            <div class="col-6">
+                                <button id="endTrackingBtn" class="btn btn-danger btn-sm w-100" style="display: none;">
+                                    <i class="fas fa-stop me-1"></i>إنهاء التتبع
+                                </button>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <button id="emergencyBtn" class="btn btn-warning btn-sm w-100">
+                                <i class="fas fa-exclamation-triangle me-1"></i>تنبيه طوارئ
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Students List -->
+            <div id="studentsContainer">
+                <div class="loading" id="loadingIndicator">
+                    <i class="fas fa-spinner fa-spin fa-2x"></i>
+                    <p>جاري تحميل قائمة الطلاب...</p>
+                </div>
+                
+                <div class="empty-state" id="emptyState" style="display: none;">
+                    <i class="fas fa-users"></i>
+                    <h4>لا توجد طلاب مسجلين</h4>
+                    <p>لا يوجد طلاب مسجلين في هذه المركبة لهذا التاريخ</p>
+                </div>
+                
+                <div id="studentsList"></div>
+            </div>
+        </div>
+        
+        <!-- Floating Refresh Button -->
+        <button class="floating-btn" onclick="refreshData()" title="تحديث البيانات">
+            <i class="fas fa-sync-alt"></i>
+        </button>
+    </div>
+    
+    <!-- Action Modal -->
+    <div class="modal fade" id="actionModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="actionModalTitle">تسجيل الاستلام</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="actionForm">
+                        <input type="hidden" id="actionStudentId">
+                        <input type="hidden" id="actionType">
+                        
+                        <div class="mb-3">
+                            <label class="form-label">اسم الطالب:</label>
+                            <p class="fw-bold" id="actionStudentName"></p>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="actionStatus" class="form-label">الحالة:</label>
+                            <select class="form-select" id="actionStatus" required>
+                                <option value="">اختر الحالة</option>
+                                <option value="تم الاستلام">تم الاستلام</option>
+                                <option value="تم التوصيل">تم التوصيل</option>
+                                <option value="متأخر">متأخر</option>
+                                <option value="غائب">غائب</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="actionNotes" class="form-label">ملاحظات:</label>
+                            <textarea class="form-control" id="actionNotes" rows="3" placeholder="أضف أي ملاحظات إضافية..."></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="useGPS" checked>
+                                <label class="form-check-label" for="useGPS">
+                                    تسجيل الموقع الحالي
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div id="gpsLocation" class="text-muted small"></div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-primary" onclick="submitAction()">
+                        <i class="fas fa-save me-2"></i>حفظ
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/driver_app.js') }}"></script>
+</body>
+</html>

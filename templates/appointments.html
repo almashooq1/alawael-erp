@@ -1,0 +1,512 @@
+{% extends "base.html" %}
+
+{% block title %}حجز وإدارة المواعيد{% endblock %}
+
+{% block extra_css %}
+<style>
+    .appointment-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        margin-bottom: 20px;
+    }
+    
+    .appointment-header {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 15px 15px 0 0;
+    }
+    
+    .time-slot {
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        padding: 10px;
+        margin: 5px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+    }
+    
+    .time-slot:hover {
+        border-color: #28a745;
+        background-color: #f8f9fa;
+    }
+    
+    .time-slot.available {
+        border-color: #28a745;
+        background-color: #d4edda;
+        color: #155724;
+    }
+    
+    .time-slot.booked {
+        border-color: #dc3545;
+        background-color: #f8d7da;
+        color: #721c24;
+        cursor: not-allowed;
+    }
+    
+    .time-slot.selected {
+        border-color: #007bff;
+        background-color: #cce7ff;
+        color: #004085;
+    }
+    
+    .calendar-day {
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 10px;
+        margin: 2px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+        min-height: 60px;
+    }
+    
+    .calendar-day:hover {
+        background-color: #e3f2fd;
+        border-color: #2196f3;
+    }
+    
+    .calendar-day.selected {
+        background-color: #2196f3;
+        color: white;
+        border-color: #1976d2;
+    }
+    
+    .calendar-day.disabled {
+        background-color: #f8f9fa;
+        color: #6c757d;
+        cursor: not-allowed;
+    }
+    
+    .specialist-card {
+        border: 1px solid #dee2e6;
+        border-radius: 10px;
+        padding: 15px;
+        margin: 10px 0;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .specialist-card:hover {
+        border-color: #28a745;
+        box-shadow: 0 2px 10px rgba(40, 167, 69, 0.2);
+    }
+    
+    .specialist-card.selected {
+        border-color: #28a745;
+        background-color: #d4edda;
+    }
+    
+    .appointment-status {
+        padding: 5px 10px;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+    
+    .status-scheduled { background: #d4edda; color: #155724; }
+    .status-confirmed { background: #cce7ff; color: #004085; }
+    .status-completed { background: #e2e3e5; color: #383d41; }
+    .status-cancelled { background: #f8d7da; color: #721c24; }
+    .status-no-show { background: #fff3cd; color: #856404; }
+    
+    .btn-appointment {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 25px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-appointment:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        color: white;
+    }
+    
+    .priority-high { border-left: 4px solid #dc3545; }
+    .priority-medium { border-left: 4px solid #ffc107; }
+    .priority-normal { border-left: 4px solid #28a745; }
+    
+    .modal-header {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        color: white;
+        border-radius: 10px 10px 0 0;
+    }
+    
+    .form-control:focus {
+        border-color: #28a745;
+        box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+    }
+    
+    .appointment-details {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 15px;
+        margin: 10px 0;
+    }
+    
+    .step-indicator {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 30px;
+    }
+    
+    .step {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #e9ecef;
+        color: #6c757d;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 10px;
+        font-weight: bold;
+        position: relative;
+    }
+    
+    .step.active {
+        background: #28a745;
+        color: white;
+    }
+    
+    .step.completed {
+        background: #20c997;
+        color: white;
+    }
+    
+    .step:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 100%;
+        width: 20px;
+        height: 2px;
+        background: #e9ecef;
+        transform: translateY(-50%);
+    }
+    
+    .step.completed:not(:last-child)::after {
+        background: #20c997;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Header Section -->
+    <div class="appointment-header text-center mb-4">
+        <div class="appointment-icon">
+            <i class="fas fa-calendar-plus fa-3x mb-3"></i>
+        </div>
+        <h2>حجز وإدارة المواعيد</h2>
+        <p class="mb-0">نظام متكامل لحجز المواعيد مع الأخصائيين</p>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12 text-center">
+            <button class="btn btn-appointment mx-2" onclick="showNewAppointmentModal()">
+                <i class="fas fa-plus"></i> حجز موعد جديد
+            </button>
+            <button class="btn btn-appointment mx-2" onclick="showTodayAppointments()">
+                <i class="fas fa-calendar-day"></i> مواعيد اليوم
+            </button>
+            <button class="btn btn-appointment mx-2" onclick="showUpcomingAppointments()">
+                <i class="fas fa-calendar-week"></i> المواعيد القادمة
+            </button>
+            <button class="btn btn-appointment mx-2" onclick="showAppointmentHistory()">
+                <i class="fas fa-history"></i> سجل المواعيد
+            </button>
+        </div>
+    </div>
+
+    <!-- Appointments Calendar View -->
+    <div class="row">
+        <div class="col-md-8">
+            <div class="appointment-card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-calendar-alt"></i> التقويم الشهري
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <button class="btn btn-outline-secondary" onclick="previousMonth()">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                        <h4 id="currentMonth">يناير 2024</h4>
+                        <button class="btn btn-outline-secondary" onclick="nextMonth()">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                    </div>
+                    <div id="calendarGrid" class="row">
+                        <!-- Calendar will be generated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <!-- Today's Appointments -->
+            <div class="appointment-card">
+                <div class="card-header bg-success text-white">
+                    <h6 class="mb-0">
+                        <i class="fas fa-clock"></i> مواعيد اليوم
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div id="todayAppointmentsList">
+                        <!-- Today's appointments will be loaded here -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Stats -->
+            <div class="appointment-card">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0">
+                        <i class="fas fa-chart-pie"></i> إحصائيات سريعة
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="h4 text-primary" id="totalAppointments">0</div>
+                            <small>إجمالي المواعيد</small>
+                        </div>
+                        <div class="col-6">
+                            <div class="h4 text-success" id="completedAppointments">0</div>
+                            <small>مواعيد مكتملة</small>
+                        </div>
+                    </div>
+                    <div class="row text-center mt-3">
+                        <div class="col-6">
+                            <div class="h4 text-warning" id="pendingAppointments">0</div>
+                            <small>مواعيد معلقة</small>
+                        </div>
+                        <div class="col-6">
+                            <div class="h4 text-danger" id="cancelledAppointments">0</div>
+                            <small>مواعيد ملغاة</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Appointments List -->
+    <div class="appointment-card mt-4">
+        <div class="card-header bg-light">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list"></i> قائمة المواعيد
+                    </h5>
+                </div>
+                <div class="col-md-6">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <select class="form-control form-control-sm" id="filterClinicType">
+                                <option value="">جميع العيادات</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <select class="form-control form-control-sm" id="filterStatus">
+                                <option value="">جميع الحالات</option>
+                                <option value="scheduled">مجدول</option>
+                                <option value="confirmed">مؤكد</option>
+                                <option value="completed">مكتمل</option>
+                                <option value="cancelled">ملغي</option>
+                                <option value="no-show">لم يحضر</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <input type="date" class="form-control form-control-sm" id="filterDate">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>التاريخ والوقت</th>
+                            <th>العيادة</th>
+                            <th>الأخصائي</th>
+                            <th>الطالب</th>
+                            <th>نوع الموعد</th>
+                            <th>الحالة</th>
+                            <th>الأولوية</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="appointmentsTableBody">
+                        <!-- Appointments will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- New Appointment Modal -->
+<div class="modal fade" id="newAppointmentModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">حجز موعد جديد</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Step Indicator -->
+                <div class="step-indicator">
+                    <div class="step active" id="step1">1</div>
+                    <div class="step" id="step2">2</div>
+                    <div class="step" id="step3">3</div>
+                    <div class="step" id="step4">4</div>
+                </div>
+                
+                <!-- Step 1: Select Clinic and Specialist -->
+                <div id="appointmentStep1" class="appointment-step">
+                    <h6>الخطوة 1: اختيار العيادة والأخصائي</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">نوع العيادة</label>
+                            <select class="form-control" id="appointmentClinicType" onchange="loadSpecialistsForAppointment()">
+                                <option value="">اختر نوع العيادة</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">الأخصائي</label>
+                            <div id="specialistsList">
+                                <!-- Specialists will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Step 2: Select Student -->
+                <div id="appointmentStep2" class="appointment-step" style="display: none;">
+                    <h6>الخطوة 2: اختيار الطالب</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">البحث عن الطالب</label>
+                            <input type="text" class="form-control" id="studentSearch" placeholder="ابحث بالاسم أو الرقم التعريفي" onkeyup="searchStudents()">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">الطالب المحدد</label>
+                            <div id="selectedStudent" class="appointment-details">
+                                لم يتم اختيار طالب بعد
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div id="studentsSearchResults">
+                                <!-- Search results will appear here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Step 3: Select Date and Time -->
+                <div id="appointmentStep3" class="appointment-step" style="display: none;">
+                    <h6>الخطوة 3: اختيار التاريخ والوقت</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">التاريخ</label>
+                            <input type="date" class="form-control" id="appointmentDate" onchange="loadAvailableSlots()">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">الأوقات المتاحة</label>
+                            <div id="availableTimeSlots" class="row">
+                                <!-- Time slots will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Step 4: Appointment Details -->
+                <div id="appointmentStep4" class="appointment-step" style="display: none;">
+                    <h6>الخطوة 4: تفاصيل الموعد</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">نوع الموعد</label>
+                                <select class="form-control" id="appointmentType">
+                                    <option value="consultation">استشارة</option>
+                                    <option value="follow-up">متابعة</option>
+                                    <option value="assessment">تقييم</option>
+                                    <option value="therapy">جلسة علاج</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">الأولوية</label>
+                                <select class="form-control" id="appointmentPriority">
+                                    <option value="normal">عادية</option>
+                                    <option value="medium">متوسطة</option>
+                                    <option value="high">عالية</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">السبب/الملاحظات</label>
+                        <textarea class="form-control" id="appointmentReason" rows="3" placeholder="اذكر سبب الموعد أو أي ملاحظات مهمة"></textarea>
+                    </div>
+                    
+                    <!-- Appointment Summary -->
+                    <div class="appointment-details">
+                        <h6>ملخص الموعد:</h6>
+                        <div id="appointmentSummary">
+                            <!-- Summary will be generated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="prevStepBtn" onclick="previousStep()" style="display: none;">السابق</button>
+                <button type="button" class="btn btn-appointment" id="nextStepBtn" onclick="nextStep()">التالي</button>
+                <button type="button" class="btn btn-appointment" id="confirmAppointmentBtn" onclick="confirmAppointment()" style="display: none;">تأكيد الحجز</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Appointment Details Modal -->
+<div class="modal fade" id="appointmentDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">تفاصيل الموعد</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="appointmentDetailsContent">
+                <!-- Appointment details will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                <button type="button" class="btn btn-warning" id="editAppointmentBtn">تعديل</button>
+                <button type="button" class="btn btn-success" id="startSessionBtn">بدء الجلسة</button>
+                <button type="button" class="btn btn-danger" id="cancelAppointmentBtn">إلغاء الموعد</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/appointments.js') }}"></script>
+{% endblock %}

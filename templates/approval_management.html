@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة الموافقات متعدد المستويات - مراكز الأوائل</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            direction: rtl;
+        }
+        
+        .navbar-brand {
+            font-weight: bold;
+            color: #2c3e50 !important;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            padding: 1rem 1.5rem;
+        }
+        
+        .stats-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .stats-card.pending {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+        }
+        
+        .stats-card.approved {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        }
+        
+        .stats-card.rejected {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+        }
+        
+        .stats-card h3 {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .nav-tabs .nav-link {
+            border-radius: 10px 10px 0 0;
+            margin-left: 5px;
+            border: none;
+            background-color: #e9ecef;
+            color: #495057;
+        }
+        
+        .nav-tabs .nav-link.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 25px;
+            padding: 0.5rem 1.5rem;
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
+            border: none;
+            border-radius: 25px;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+            border: none;
+            border-radius: 25px;
+        }
+        
+        .table {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .table thead th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            font-weight: 600;
+        }
+        
+        .badge {
+            border-radius: 20px;
+            padding: 0.5rem 1rem;
+        }
+        
+        .status-pending {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
+            color: #2d3436;
+        }
+        
+        .status-approved {
+            background: linear-gradient(135deg, #55efc4 0%, #81ecec 100%);
+            color: #2d3436;
+        }
+        
+        .status-rejected {
+            background: linear-gradient(135deg, #fd79a8 0%, #fdcb6e 100%);
+            color: #2d3436;
+        }
+        
+        .status-expired {
+            background: linear-gradient(135deg, #636e72 0%, #b2bec3 100%);
+            color: white;
+        }
+        
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px 15px 0 0;
+        }
+        
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            padding: 0.75rem;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .spinner-border {
+            color: #667eea;
+        }
+        
+        .alert {
+            border-radius: 10px;
+            border: none;
+        }
+        
+        .workflow-step {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .workflow-step.active {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+        
+        .priority-high {
+            color: #dc3545;
+        }
+        
+        .priority-medium {
+            color: #ffc107;
+        }
+        
+        .priority-low {
+            color: #28a745;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/dashboard">
+                <i class="fas fa-check-circle me-2"></i>
+                إدارة الموافقات متعدد المستويات
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard">
+                            <i class="fas fa-home me-1"></i>
+                            الرئيسية
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <!-- إحصائيات سريعة -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <h3 id="totalRequests">0</h3>
+                    <p class="mb-0">إجمالي الطلبات</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card pending">
+                    <h3 id="pendingRequests">0</h3>
+                    <p class="mb-0">طلبات معلقة</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card approved">
+                    <h3 id="approvedRequests">0</h3>
+                    <p class="mb-0">طلبات موافق عليها</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card rejected">
+                    <h3 id="rejectedRequests">0</h3>
+                    <p class="mb-0">طلبات مرفوضة</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- التبويبات الرئيسية -->
+        <div class="card">
+            <div class="card-header">
+                <ul class="nav nav-tabs card-header-tabs" id="mainTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="requests-tab" data-bs-toggle="tab" data-bs-target="#requests" type="button" role="tab">
+                            <i class="fas fa-file-alt me-2"></i>
+                            الطلبات
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="workflows-tab" data-bs-toggle="tab" data-bs-target="#workflows" type="button" role="tab">
+                            <i class="fas fa-sitemap me-2"></i>
+                            سير العمل
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="delegates-tab" data-bs-toggle="tab" data-bs-target="#delegates" type="button" role="tab">
+                            <i class="fas fa-user-friends me-2"></i>
+                            التفويضات
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="notifications-tab" data-bs-toggle="tab" data-bs-target="#notifications" type="button" role="tab">
+                            <i class="fas fa-bell me-2"></i>
+                            الإشعارات
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="analytics-tab" data-bs-toggle="tab" data-bs-target="#analytics" type="button" role="tab">
+                            <i class="fas fa-chart-bar me-2"></i>
+                            التحليلات
+                        </button>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="card-body">
+                <div class="tab-content" id="mainTabsContent">
+                    <!-- تبويب الطلبات -->
+                    <div class="tab-pane fade show active" id="requests" role="tabpanel">
+                        <div class="row mb-3">
+                            <div class="col-md-8">
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-outline-primary" id="allRequestsBtn">
+                                        جميع الطلبات
+                                    </button>
+                                    <button type="button" class="btn btn-outline-primary" id="myRequestsBtn">
+                                        طلباتي
+                                    </button>
+                                    <button type="button" class="btn btn-outline-primary" id="pendingForMeBtn">
+                                        معلقة لي
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-start">
+                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newRequestModal">
+                                    <i class="fas fa-plus me-2"></i>
+                                    طلب جديد
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- فلاتر البحث -->
+                        <div class="row mb-3">
+                            <div class="col-md-3">
+                                <select class="form-select" id="statusFilter">
+                                    <option value="">جميع الحالات</option>
+                                    <option value="pending">معلق</option>
+                                    <option value="approved">موافق عليه</option>
+                                    <option value="rejected">مرفوض</option>
+                                    <option value="expired">منتهي الصلاحية</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <select class="form-select" id="entityTypeFilter">
+                                    <option value="">جميع الأنواع</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <input type="text" class="form-control" id="searchInput" placeholder="البحث في العنوان أو الوصف...">
+                            </div>
+                        </div>
+
+                        <!-- جدول الطلبات -->
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>العنوان</th>
+                                        <th>النوع</th>
+                                        <th>المقدم</th>
+                                        <th>الحالة</th>
+                                        <th>المبلغ</th>
+                                        <th>تاريخ الإنشاء</th>
+                                        <th>الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="requestsTableBody">
+                                    <tr>
+                                        <td colspan="7" class="text-center">
+                                            <div class="loading">
+                                                <div class="spinner-border" role="status">
+                                                    <span class="visually-hidden">جاري التحميل...</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- ترقيم الصفحات -->
+                        <nav>
+                            <ul class="pagination justify-content-center" id="requestsPagination">
+                            </ul>
+                        </nav>
+                    </div>
+
+                    <!-- تبويب سير العمل -->
+                    <div class="tab-pane fade" id="workflows" role="tabpanel">
+                        <div class="row mb-3">
+                            <div class="col-md-8">
+                                <h5>إدارة سير العمل</h5>
+                            </div>
+                            <div class="col-md-4 text-start">
+                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newWorkflowModal">
+                                    <i class="fas fa-plus me-2"></i>
+                                    سير عمل جديد
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>الاسم</th>
+                                        <th>نوع الكيان</th>
+                                        <th>نوع الموافقة</th>
+                                        <th>عدد الخطوات</th>
+                                        <th>الحالة</th>
+                                        <th>الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="workflowsTableBody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- تبويب التفويضات -->
+                    <div class="tab-pane fade" id="delegates" role="tabpanel">
+                        <div class="row mb-3">
+                            <div class="col-md-8">
+                                <h5>إدارة التفويضات</h5>
+                            </div>
+                            <div class="col-md-4 text-start">
+                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newDelegateModal">
+                                    <i class="fas fa-plus me-2"></i>
+                                    تفويض جديد
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>المفوض</th>
+                                        <th>المفوض إليه</th>
+                                        <th>تاريخ البداية</th>
+                                        <th>تاريخ النهاية</th>
+                                        <th>الحالة</th>
+                                        <th>الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="delegatesTableBody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- تبويب الإشعارات -->
+                    <div class="tab-pane fade" id="notifications" role="tabpanel">
+                        <div class="row mb-3">
+                            <div class="col-md-8">
+                                <h5>الإشعارات</h5>
+                            </div>
+                            <div class="col-md-4 text-start">
+                                <button class="btn btn-outline-primary" id="markAllReadBtn">
+                                    <i class="fas fa-check-double me-2"></i>
+                                    تحديد الكل كمقروء
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="notificationsList">
+                        </div>
+                    </div>
+
+                    <!-- تبويب التحليلات -->
+                    <div class="tab-pane fade" id="analytics" role="tabpanel">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">توزيع الطلبات حسب الحالة</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="statusChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">اتجاه الطلبات الشهرية</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="trendChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal طلب جديد -->
+    <div class="modal fade" id="newRequestModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">طلب موافقة جديد</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="newRequestForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">نوع الكيان *</label>
+                                    <select class="form-select" id="entityType" required>
+                                        <option value="">اختر النوع</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">معرف الكيان *</label>
+                                    <input type="number" class="form-control" id="entityId" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">العنوان *</label>
+                            <input type="text" class="form-control" id="requestTitle" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">الوصف</label>
+                            <textarea class="form-control" id="requestDescription" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">المبلغ</label>
+                            <input type="number" class="form-control" id="requestAmount" step="0.01">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-primary" id="submitRequestBtn">تقديم الطلب</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal تفاصيل الطلب -->
+    <div class="modal fade" id="requestDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">تفاصيل الطلب</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="requestDetailsContent">
+                </div>
+                <div class="modal-footer" id="requestDetailsActions">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal الموافقة/الرفض -->
+    <div class="modal fade" id="approvalModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="approvalModalTitle">إجراء الموافقة</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="approvalForm">
+                        <div class="mb-3">
+                            <label class="form-label" id="approvalCommentLabel">التعليقات</label>
+                            <textarea class="form-control" id="approvalComment" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-primary" id="confirmApprovalBtn">تأكيد</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="/static/js/approval_management.js"></script>
+</body>
+</html>

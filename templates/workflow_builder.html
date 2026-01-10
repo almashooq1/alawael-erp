@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منشئ سير العمل المرئي - مراكز الأوائل</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/dragula@3.7.3/dist/dragula.min.css" rel="stylesheet">
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8f9fa; }
+        .workflow-canvas { 
+            background: linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px),
+                       linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+            min-height: 600px;
+            border: 2px dashed #dee2e6;
+            position: relative;
+            overflow: auto;
+        }
+        .workflow-node {
+            position: absolute;
+            background: white;
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            padding: 15px;
+            min-width: 180px;
+            cursor: move;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        .workflow-node:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .workflow-node.start { border-color: #28a745; background: linear-gradient(135deg, #d4edda, #c3e6cb); }
+        .workflow-node.action { border-color: #007bff; background: linear-gradient(135deg, #d1ecf1, #bee5eb); }
+        .workflow-node.condition { border-color: #ffc107; background: linear-gradient(135deg, #fff3cd, #ffeaa7); }
+        .workflow-node.end { border-color: #dc3545; background: linear-gradient(135deg, #f8d7da, #f5c6cb); }
+        .node-header { font-weight: bold; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .node-controls { display: flex; gap: 5px; }
+        .node-controls button { padding: 2px 6px; font-size: 12px; }
+        .toolbox { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .tool-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            margin: 5px 0;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            cursor: grab;
+            transition: all 0.2s ease;
+        }
+        .tool-item:hover { background: #e9ecef; transform: translateX(-3px); }
+        .tool-item i { margin-left: 10px; width: 20px; text-align: center; }
+        .execution-monitor {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .execution-step {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 6px;
+            border-right: 4px solid #007bff;
+        }
+        .execution-step.running { background: #fff3cd; border-color: #ffc107; }
+        .execution-step.completed { background: #d4edda; border-color: #28a745; }
+        .execution-step.failed { background: #f8d7da; border-color: #dc3545; }
+        .connection-line {
+            position: absolute;
+            height: 2px;
+            background: #007bff;
+            z-index: 1;
+            pointer-events: none;
+        }
+        .connection-arrow {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 6px solid #007bff;
+            border-top: 4px solid transparent;
+            border-bottom: 4px solid transparent;
+            z-index: 2;
+        }
+        .workflow-controls {
+            position: sticky;
+            top: 0;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            z-index: 100;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status-running { background: #fff3cd; color: #856404; }
+        .status-completed { background: #d4edda; color: #155724; }
+        .status-failed { background: #f8d7da; color: #721c24; }
+        .status-paused { background: #e2e3e5; color: #383d41; }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- شريط التحكم العلوي -->
+            <div class="col-12">
+                <div class="workflow-controls">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4 class="mb-0">
+                                <i class="fas fa-project-diagram text-primary"></i>
+                                منشئ سير العمل المرئي
+                            </h4>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-secondary btn-sm" onclick="newWorkflow()">
+                                <i class="fas fa-file-plus"></i> جديد
+                            </button>
+                            <button class="btn btn-outline-primary btn-sm" onclick="loadWorkflow()">
+                                <i class="fas fa-folder-open"></i> فتح
+                            </button>
+                            <button class="btn btn-success btn-sm" onclick="saveWorkflow()">
+                                <i class="fas fa-save"></i> حفظ
+                            </button>
+                            <button class="btn btn-primary btn-sm" onclick="executeWorkflow()">
+                                <i class="fas fa-play"></i> تنفيذ
+                            </button>
+                            <button class="btn btn-warning btn-sm" onclick="pauseWorkflow()" id="pauseBtn" disabled>
+                                <i class="fas fa-pause"></i> إيقاف
+                            </button>
+                            <button class="btn btn-info btn-sm" onclick="resumeWorkflow()" id="resumeBtn" disabled>
+                                <i class="fas fa-play"></i> استئناف
+                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="cancelWorkflow()" id="cancelBtn" disabled>
+                                <i class="fas fa-stop"></i> إلغاء
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <span class="status-badge" id="workflowStatus">غير نشط</span>
+                        <span class="ms-3 text-muted" id="executionInfo"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- صندوق الأدوات -->
+            <div class="col-md-3">
+                <div class="toolbox">
+                    <h5><i class="fas fa-toolbox text-primary"></i> صندوق الأدوات</h5>
+                    <div class="tool-items">
+                        <div class="tool-item" data-type="start">
+                            <i class="fas fa-play-circle text-success"></i>
+                            <span>نقطة البداية</span>
+                        </div>
+                        <div class="tool-item" data-type="send_message">
+                            <i class="fas fa-envelope text-primary"></i>
+                            <span>إرسال رسالة</span>
+                        </div>
+                        <div class="tool-item" data-type="make_call">
+                            <i class="fas fa-phone text-info"></i>
+                            <span>مكالمة صوتية</span>
+                        </div>
+                        <div class="tool-item" data-type="condition">
+                            <i class="fas fa-code-branch text-warning"></i>
+                            <span>شرط</span>
+                        </div>
+                        <div class="tool-item" data-type="wait">
+                            <i class="fas fa-clock text-secondary"></i>
+                            <span>انتظار</span>
+                        </div>
+                        <div class="tool-item" data-type="update_record">
+                            <i class="fas fa-edit text-primary"></i>
+                            <span>تحديث بيانات</span>
+                        </div>
+                        <div class="tool-item" data-type="api_call">
+                            <i class="fas fa-link text-info"></i>
+                            <span>استدعاء API</span>
+                        </div>
+                        <div class="tool-item" data-type="end">
+                            <i class="fas fa-stop-circle text-danger"></i>
+                            <span>نقطة النهاية</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- مراقب التنفيذ -->
+                <div class="execution-monitor mt-3">
+                    <h5><i class="fas fa-eye text-primary"></i> مراقب التنفيذ</h5>
+                    <div id="executionSteps">
+                        <div class="text-muted text-center py-3">
+                            <i class="fas fa-info-circle"></i>
+                            لا يوجد تنفيذ نشط
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- لوحة سير العمل -->
+            <div class="col-md-9">
+                <div class="workflow-canvas" id="workflowCanvas">
+                    <div class="text-center text-muted mt-5 pt-5">
+                        <i class="fas fa-mouse-pointer fa-3x mb-3"></i>
+                        <h5>اسحب العناصر من صندوق الأدوات لبناء سير العمل</h5>
+                        <p>يمكنك ترتيب العناصر وربطها لإنشاء سير عمل متكامل</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة خصائص العقدة -->
+    <div class="modal fade" id="nodePropertiesModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">خصائص العقدة</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="nodePropertiesBody">
+                    <!-- سيتم ملء المحتوى ديناميكياً -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-primary" onclick="saveNodeProperties()">حفظ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dragula@3.7.3/dist/dragula.min.js"></script>
+    <script src="{{ url_for('static', filename='js/workflow_builder.js') }}"></script>
+</body>
+</html>

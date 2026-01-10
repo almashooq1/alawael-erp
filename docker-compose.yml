@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - DATABASE_URL=postgresql://alawael_user:alawael_pass@db:5432/alawael_erp
+      - SECRET_KEY=your-super-secret-production-key-here
+      - JWT_SECRET_KEY=your-jwt-secret-production-key-here
+      - FLASK_ENV=production
+    depends_on:
+      - db
+    volumes:
+      - ./static:/app/static
+      - ./templates:/app/templates
+
+  db:
+    image: postgres:13
+    environment:
+      - POSTGRES_DB=alawael_erp
+      - POSTGRES_USER=alawael_user
+      - POSTGRES_PASSWORD=alawael_pass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./static:/var/www/static
+    depends_on:
+      - web
+
+volumes:
+  postgres_data:

@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام الواقع المعزز والافتراضي - مراكز الأوائل</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    <style>
+        .ar-vr-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px 0;
+        }
+        
+        .ar-vr-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            transition: transform 0.3s ease;
+        }
+        
+        .ar-vr-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .ar-vr-header {
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+            color: white;
+            padding: 20px;
+            border-radius: 15px 15px 0 0;
+            text-align: center;
+        }
+        
+        .content-card {
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            background: white;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .content-card:hover {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-color: #007bff;
+        }
+        
+        .experience-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        
+        .badge-ar {
+            background: #007bff;
+            color: white;
+        }
+        
+        .badge-vr {
+            background: #28a745;
+            color: white;
+        }
+        
+        .badge-mr {
+            background: #6f42c1;
+            color: white;
+        }
+        
+        .difficulty-badge {
+            padding: 3px 8px;
+            border-radius: 15px;
+            font-size: 0.7em;
+        }
+        
+        .difficulty-beginner {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .difficulty-intermediate {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .difficulty-advanced {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .session-status {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        
+        .status-active {
+            background: #28a745;
+            color: white;
+        }
+        
+        .status-completed {
+            background: #007bff;
+            color: white;
+        }
+        
+        .status-paused {
+            background: #ffc107;
+            color: #212529;
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .metric-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .metric-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #007bff;
+        }
+        
+        .metric-label {
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+        
+        .device-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            color: white;
+            margin: 0 auto 10px;
+        }
+        
+        .device-hmd {
+            background: #007bff;
+        }
+        
+        .device-mobile {
+            background: #28a745;
+        }
+        
+        .device-tablet {
+            background: #ffc107;
+            color: #212529;
+        }
+        
+        .safety-alert {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .safety-alert .alert-icon {
+            color: #856404;
+            font-size: 1.2em;
+            margin-left: 10px;
+        }
+        
+        .progress-ring {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto;
+        }
+        
+        .progress-ring circle {
+            stroke-width: 8;
+            fill: transparent;
+            r: 30;
+            cx: 40;
+            cy: 40;
+        }
+        
+        .progress-ring .progress-ring-bg {
+            stroke: #e9ecef;
+        }
+        
+        .progress-ring .progress-ring-fill {
+            stroke: #007bff;
+            stroke-linecap: round;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+            transition: stroke-dasharray 0.3s ease;
+        }
+        
+        .filter-tabs {
+            background: white;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .filter-tabs .nav-link {
+            border: none;
+            border-radius: 8px;
+            color: #6c757d;
+            font-weight: 500;
+        }
+        
+        .filter-tabs .nav-link.active {
+            background: #007bff;
+            color: white;
+        }
+        
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+        
+        .empty-state i {
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+        
+        .btn-ar-vr {
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+            border: none;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-ar-vr:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="ar-vr-container">
+        <div class="container-fluid">
+            <!-- Header -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="ar-vr-card">
+                        <div class="ar-vr-header">
+                            <h1><i class="fas fa-vr-cardboard me-3"></i>نظام الواقع المعزز والافتراضي</h1>
+                            <p class="mb-0">تجارب تعليمية وعلاجية تفاعلية باستخدام أحدث تقنيات الواقع المعزز والافتراضي</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="filter-tabs">
+                        <ul class="nav nav-pills justify-content-center" id="mainTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="dashboard-tab" data-bs-toggle="pill" data-bs-target="#dashboard" type="button" role="tab">
+                                    <i class="fas fa-chart-bar me-2"></i>لوحة التحكم
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="content-tab" data-bs-toggle="pill" data-bs-target="#content" type="button" role="tab">
+                                    <i class="fas fa-cube me-2"></i>مكتبة المحتوى
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="sessions-tab" data-bs-toggle="pill" data-bs-target="#sessions" type="button" role="tab">
+                                    <i class="fas fa-play-circle me-2"></i>الجلسات
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="devices-tab" data-bs-toggle="pill" data-bs-target="#devices" type="button" role="tab">
+                                    <i class="fas fa-headset me-2"></i>الأجهزة
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="safety-tab" data-bs-toggle="pill" data-bs-target="#safety" type="button" role="tab">
+                                    <i class="fas fa-shield-alt me-2"></i>الأمان
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Content -->
+            <div class="tab-content" id="mainTabContent">
+                <!-- Dashboard Tab -->
+                <div class="tab-pane fade show active" id="dashboard" role="tabpanel">
+                    <div class="row">
+                        <!-- Metrics Cards -->
+                        <div class="col-12 mb-4">
+                            <div class="ar-vr-card">
+                                <div class="card-body">
+                                    <h5 class="card-title mb-4">إحصائيات عامة</h5>
+                                    <div class="metrics-grid" id="dashboardMetrics">
+                                        <!-- Metrics will be loaded here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Charts -->
+                        <div class="col-md-6 mb-4">
+                            <div class="ar-vr-card">
+                                <div class="card-body">
+                                    <h5 class="card-title">توزيع أنواع المحتوى</h5>
+                                    <canvas id="contentDistributionChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-4">
+                            <div class="ar-vr-card">
+                                <div class="card-body">
+                                    <h5 class="card-title">المحتوى الأكثر استخداماً</h5>
+                                    <canvas id="popularContentChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Content Library Tab -->
+                <div class="tab-pane fade" id="content" role="tabpanel">
+                    <div class="row mb-3">
+                        <div class="col-md-3">
+                            <select class="form-select" id="experienceTypeFilter">
+                                <option value="">جميع الأنواع</option>
+                                <option value="ar">الواقع المعزز</option>
+                                <option value="vr">الواقع الافتراضي</option>
+                                <option value="mr">الواقع المختلط</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" id="categoryFilter">
+                                <option value="">جميع الفئات</option>
+                                <option value="educational">تعليمي</option>
+                                <option value="therapeutic">علاجي</option>
+                                <option value="social_skills">مهارات اجتماعية</option>
+                                <option value="life_skills">مهارات حياتية</option>
+                                <option value="motor_skills">مهارات حركية</option>
+                                <option value="communication">تواصل</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" id="difficultyFilter">
+                                <option value="">جميع المستويات</option>
+                                <option value="beginner">مبتدئ</option>
+                                <option value="intermediate">متوسط</option>
+                                <option value="advanced">متقدم</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <button class="btn btn-ar-vr" onclick="loadContentLibrary()">
+                                <i class="fas fa-search me-2"></i>بحث
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="row" id="contentLibrary">
+                        <!-- Content will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Sessions Tab -->
+                <div class="tab-pane fade" id="sessions" role="tabpanel">
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <select class="form-select" id="studentSelect">
+                                <option value="">-- اختر طالب --</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <button class="btn btn-ar-vr" onclick="startNewSession()">
+                                <i class="fas fa-play me-2"></i>بدء جلسة جديدة
+                            </button>
+                        </div>
+                        <div class="col-md-4">
+                            <button class="btn btn-outline-primary" onclick="loadStudentSessions()">
+                                <i class="fas fa-history me-2"></i>عرض الجلسات السابقة
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="row" id="sessionsContainer">
+                        <div class="col-12">
+                            <div class="empty-state">
+                                <i class="fas fa-play-circle"></i>
+                                <h3>اختر طالباً لعرض جلساته</h3>
+                                <p>يمكنك بدء جلسة جديدة أو عرض الجلسات السابقة</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Devices Tab -->
+                <div class="tab-pane fade" id="devices" role="tabpanel">
+                    <div class="row">
+                        <div class="col-md-4 mb-4">
+                            <div class="ar-vr-card">
+                                <div class="card-body text-center">
+                                    <div class="device-icon device-hmd">
+                                        <i class="fas fa-vr-cardboard"></i>
+                                    </div>
+                                    <h5>نظارات VR</h5>
+                                    <p class="text-muted">أجهزة الواقع الافتراضي</p>
+                                    <button class="btn btn-outline-primary" onclick="calibrateDevice('hmd')">
+                                        <i class="fas fa-cog me-2"></i>معايرة
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4 mb-4">
+                            <div class="ar-vr-card">
+                                <div class="card-body text-center">
+                                    <div class="device-icon device-mobile">
+                                        <i class="fas fa-mobile-alt"></i>
+                                    </div>
+                                    <h5>الأجهزة المحمولة</h5>
+                                    <p class="text-muted">هواتف وأجهزة لوحية</p>
+                                    <button class="btn btn-outline-primary" onclick="calibrateDevice('mobile')">
+                                        <i class="fas fa-cog me-2"></i>معايرة
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4 mb-4">
+                            <div class="ar-vr-card">
+                                <div class="card-body text-center">
+                                    <div class="device-icon device-tablet">
+                                        <i class="fas fa-tablet-alt"></i>
+                                    </div>
+                                    <h5>الأجهزة اللوحية</h5>
+                                    <p class="text-muted">أجهزة لوحية للواقع المعزز</p>
+                                    <button class="btn btn-outline-primary" onclick="calibrateDevice('tablet')">
+                                        <i class="fas fa-cog me-2"></i>معايرة
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="ar-vr-card">
+                                <div class="card-body">
+                                    <h5 class="card-title">سجل المعايرات</h5>
+                                    <div id="calibrationHistory">
+                                        <!-- Calibration history will be loaded here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Safety Tab -->
+                <div class="tab-pane fade" id="safety" role="tabpanel">
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="ar-vr-card">
+                                <div class="card-body">
+                                    <h5 class="card-title">إرشادات الأمان العامة</h5>
+                                    <div id="generalSafetyGuidelines">
+                                        <!-- Guidelines will be loaded here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-4">
+                            <div class="ar-vr-card">
+                                <div class="card-body">
+                                    <h5 class="card-title">إرشادات حسب العمر</h5>
+                                    <div id="ageSafetyGuidelines">
+                                        <!-- Age-specific guidelines will be loaded here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-12 mb-4">
+                            <div class="ar-vr-card">
+                                <div class="card-body">
+                                    <h5 class="card-title">إرشادات حسب نوع الإعاقة</h5>
+                                    <div id="disabilitySafetyGuidelines">
+                                        <!-- Disability-specific guidelines will be loaded here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading Spinner -->
+            <div class="loading-spinner" id="loadingSpinner">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">جاري التحميل...</span>
+                </div>
+                <p class="mt-3">جاري تحميل البيانات...</p>
+            </div>
+
+            <!-- Session Modal -->
+            <div class="modal fade" id="sessionModal" tabindex="-1">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="sessionModalTitle">تفاصيل الجلسة</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body" id="sessionModalBody">
+                            <!-- Session details will be loaded here -->
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                            <button type="button" class="btn btn-danger" id="endSessionBtn" onclick="endCurrentSession()">
+                                <i class="fas fa-stop me-2"></i>إنهاء الجلسة
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Details Modal -->
+            <div class="modal fade" id="contentModal" tabindex="-1">
+                <div class="modal-dialog modal-xl">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="contentModalTitle">تفاصيل المحتوى</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body" id="contentModalBody">
+                            <!-- Content details will be loaded here -->
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                            <button type="button" class="btn btn-ar-vr" onclick="startSessionWithContent()">
+                                <i class="fas fa-play me-2"></i>بدء جلسة
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Device Calibration Modal -->
+            <div class="modal fade" id="calibrationModal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">معايرة الجهاز</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="calibrationForm">
+                                <div class="mb-3">
+                                    <label for="deviceId" class="form-label">معرف الجهاز:</label>
+                                    <input type="text" class="form-control" id="deviceId" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="ipdMeasurement" class="form-label">المسافة بين البؤبؤين (مم):</label>
+                                    <input type="number" class="form-control" id="ipdMeasurement" min="50" max="80" step="0.5">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="heightAdjustment" class="form-label">تعديل الارتفاع (سم):</label>
+                                    <input type="number" class="form-control" id="heightAdjustment" min="100" max="200">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="calibrationQuality" class="form-label">جودة المعايرة:</label>
+                                    <select class="form-select" id="calibrationQuality">
+                                        <option value="excellent">ممتازة</option>
+                                        <option value="good" selected>جيدة</option>
+                                        <option value="fair">مقبولة</option>
+                                        <option value="poor">ضعيفة</option>
+                                    </select>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                            <button type="button" class="btn btn-primary" onclick="saveCalibration()">حفظ المعايرة</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/ar_vr_dashboard.js') }}"></script>
+</body>
+</html>

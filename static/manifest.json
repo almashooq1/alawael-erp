@@ -1,0 +1,118 @@
+{
+  "name": "نظام مراكز الأوائل ERP",
+  "short_name": "الأوائل ERP",
+  "description": "نظام إدارة شامل لمراكز التأهيل لذوي الاحتياجات الخاصة",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2196F3",
+  "orientation": "portrait-primary",
+  "dir": "rtl",
+  "lang": "ar",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/static/images/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/static/images/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/static/images/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/static/images/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/static/images/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/static/images/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/static/images/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/static/images/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "لوحة التحكم",
+      "short_name": "لوحة التحكم",
+      "description": "الوصول السريع للوحة التحكم الرئيسية",
+      "url": "/dashboard",
+      "icons": [{ "src": "/static/images/dashboard-icon.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "الطلاب",
+      "short_name": "الطلاب",
+      "description": "إدارة الطلاب والمستفيدين",
+      "url": "/students",
+      "icons": [{ "src": "/static/images/students-icon.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "التقييمات",
+      "short_name": "التقييمات",
+      "description": "التقييمات والاختبارات",
+      "url": "/assessments",
+      "icons": [{ "src": "/static/images/assessments-icon.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "التقارير",
+      "short_name": "التقارير",
+      "description": "التقارير والإحصائيات",
+      "url": "/reports",
+      "icons": [{ "src": "/static/images/reports-icon.png", "sizes": "96x96" }]
+    }
+  ],
+  "categories": ["education", "healthcare", "productivity", "utilities"],
+  "screenshots": [
+    {
+      "src": "/static/images/screenshot1.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "platform": "wide",
+      "label": "لوحة التحكم الرئيسية"
+    },
+    {
+      "src": "/static/images/screenshot2.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "platform": "narrow",
+      "label": "واجهة الهاتف المحمول"
+    }
+  ],
+  "prefer_related_applications": false,
+  "related_applications": [],
+  "protocol_handlers": [
+    {
+      "protocol": "web+awail",
+      "url": "/handle?type=%s"
+    }
+  ]
+}

@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تحليل أنماط التعلم والسلوك - مراكز الأوائل</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    <style>
+        .learning-analysis-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px 0;
+        }
+        
+        .analysis-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            transition: transform 0.3s ease;
+        }
+        
+        .analysis-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .analysis-header {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            padding: 20px;
+            border-radius: 15px 15px 0 0;
+            text-align: center;
+        }
+        
+        .student-selector {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .learning-style-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            color: white;
+            font-size: 0.9em;
+            margin: 5px;
+        }
+        
+        .behavior-observation {
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        
+        .positive-behavior {
+            border-left-color: #28a745;
+        }
+        
+        .negative-behavior {
+            border-left-color: #dc3545;
+        }
+        
+        .neutral-behavior {
+            border-left-color: #ffc107;
+        }
+        
+        .progress-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin: 0 auto;
+        }
+        
+        .recommendation-card {
+            border-left: 4px solid #17a2b8;
+            background: #e7f3ff;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        
+        .high-priority {
+            border-left-color: #dc3545;
+            background: #ffe6e6;
+        }
+        
+        .medium-priority {
+            border-left-color: #ffc107;
+            background: #fff8e1;
+        }
+        
+        .analytics-metric {
+            text-align: center;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            margin: 10px 0;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .metric-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+        
+        .metric-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .tab-content {
+            padding: 20px;
+        }
+        
+        .nav-tabs .nav-link {
+            color: #495057;
+            border: none;
+            border-bottom: 3px solid transparent;
+            padding: 12px 20px;
+        }
+        
+        .nav-tabs .nav-link.active {
+            color: #4CAF50;
+            border-bottom-color: #4CAF50;
+            background: none;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 20px 0;
+        }
+        
+        .intervention-status {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-completed {
+            background: #cce7ff;
+            color: #004085;
+        }
+        
+        .status-paused {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .btn-analyze {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            border: none;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-analyze:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="learning-analysis-container">
+        <div class="container-fluid">
+            <!-- Header -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="analysis-card">
+                        <div class="analysis-header">
+                            <h1><i class="fas fa-brain me-3"></i>تحليل أنماط التعلم والسلوك</h1>
+                            <p class="mb-0">نظام ذكي لتحليل وفهم أنماط التعلم والسلوك لتحسين العملية التعليمية</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Student Selector -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="student-selector">
+                        <div class="row align-items-center">
+                            <div class="col-md-4">
+                                <label for="studentSelect" class="form-label fw-bold">اختر الطالب:</label>
+                                <select class="form-select" id="studentSelect">
+                                    <option value="">-- اختر طالب --</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="periodSelect" class="form-label fw-bold">فترة التحليل:</label>
+                                <select class="form-select" id="periodSelect">
+                                    <option value="30">آخر 30 يوم</option>
+                                    <option value="60">آخر 60 يوم</option>
+                                    <option value="90" selected>آخر 90 يوم</option>
+                                    <option value="180">آخر 6 أشهر</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-analyze mt-4" onclick="analyzeStudent()">
+                                    <i class="fas fa-chart-line me-2"></i>بدء التحليل
+                                </button>
+                            </div>
+                            <div class="col-md-2">
+                                <button class="btn btn-outline-primary mt-4" onclick="exportReport()">
+                                    <i class="fas fa-download me-2"></i>تصدير التقرير
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading Spinner -->
+            <div class="loading-spinner" id="loadingSpinner">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">جاري التحليل...</span>
+                </div>
+                <p class="mt-3">جاري تحليل البيانات، يرجى الانتظار...</p>
+            </div>
+
+            <!-- Analysis Results -->
+            <div id="analysisResults" style="display: none;">
+                <!-- Tabs Navigation -->
+                <ul class="nav nav-tabs" id="analysisTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab">
+                            <i class="fas fa-chart-pie me-2"></i>نظرة عامة
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="learning-tab" data-bs-toggle="tab" data-bs-target="#learning" type="button" role="tab">
+                            <i class="fas fa-graduation-cap me-2"></i>أنماط التعلم
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="behavior-tab" data-bs-toggle="tab" data-bs-target="#behavior" type="button" role="tab">
+                            <i class="fas fa-user-check me-2"></i>السلوك
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="interventions-tab" data-bs-toggle="tab" data-bs-target="#interventions" type="button" role="tab">
+                            <i class="fas fa-tools me-2"></i>التدخلات
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="recommendations-tab" data-bs-toggle="tab" data-bs-target="#recommendations" type="button" role="tab">
+                            <i class="fas fa-lightbulb me-2"></i>التوصيات
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Tab Content -->
+                <div class="tab-content" id="analysisTabContent">
+                    <!-- Overview Tab -->
+                    <div class="tab-pane fade show active" id="overview" role="tabpanel">
+                        <div class="row">
+                            <!-- Key Metrics -->
+                            <div class="col-md-3">
+                                <div class="analytics-metric">
+                                    <div class="metric-value" id="progressScore">--</div>
+                                    <div class="metric-label">درجة التقدم</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="analytics-metric">
+                                    <div class="metric-value" id="engagementLevel">--</div>
+                                    <div class="metric-label">مستوى المشاركة</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="analytics-metric">
+                                    <div class="metric-value" id="attentionScore">--</div>
+                                    <div class="metric-label">ثبات الانتباه</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="analytics-metric">
+                                    <div class="metric-value" id="socialScore">--</div>
+                                    <div class="metric-label">التفاعل الاجتماعي</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-4">
+                            <!-- Progress Chart -->
+                            <div class="col-md-6">
+                                <div class="analysis-card">
+                                    <div class="card-header bg-primary text-white">
+                                        <h5><i class="fas fa-chart-line me-2"></i>تطور الأداء</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="chart-container">
+                                            <canvas id="progressChart"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Behavior Distribution -->
+                            <div class="col-md-6">
+                                <div class="analysis-card">
+                                    <div class="card-header bg-success text-white">
+                                        <h5><i class="fas fa-chart-pie me-2"></i>توزيع السلوكيات</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="chart-container">
+                                            <canvas id="behaviorChart"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Learning Patterns Tab -->
+                    <div class="tab-pane fade" id="learning" role="tabpanel">
+                        <div class="row">
+                            <!-- Learning Profile -->
+                            <div class="col-md-6">
+                                <div class="analysis-card">
+                                    <div class="card-header bg-info text-white">
+                                        <h5><i class="fas fa-user-graduate me-2"></i>ملف التعلم</h5>
+                                    </div>
+                                    <div class="card-body" id="learningProfile">
+                                        <!-- Learning profile content will be loaded here -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Learning Analytics -->
+                            <div class="col-md-6">
+                                <div class="analysis-card">
+                                    <div class="card-header bg-warning text-white">
+                                        <h5><i class="fas fa-analytics me-2"></i>تحليلات التعلم</h5>
+                                    </div>
+                                    <div class="card-body" id="learningAnalytics">
+                                        <!-- Learning analytics content will be loaded here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Learning Preferences -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="analysis-card">
+                                    <div class="card-header bg-secondary text-white">
+                                        <h5><i class="fas fa-heart me-2"></i>تفضيلات التعلم</h5>
+                                    </div>
+                                    <div class="card-body" id="learningPreferences">
+                                        <!-- Learning preferences content will be loaded here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Behavior Tab -->
+                    <div class="tab-pane fade" id="behavior" role="tabpanel">
+                        <div class="row">
+                            <!-- Recent Observations -->
+                            <div class="col-md-8">
+                                <div class="analysis-card">
+                                    <div class="card-header bg-primary text-white">
+                                        <h5><i class="fas fa-eye me-2"></i>الملاحظات الأخيرة</h5>
+                                    </div>
+                                    <div class="card-body" id="recentObservations">
+                                        <!-- Recent observations will be loaded here -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Behavior Summary -->
+                            <div class="col-md-4">
+                                <div class="analysis-card">
+                                    <div class="card-header bg-success text-white">
+                                        <h5><i class="fas fa-chart-bar me-2"></i>ملخص السلوك</h5>
+                                    </div>
+                                    <div class="card-body" id="behaviorSummary">
+                                        <!-- Behavior summary will be loaded here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Interventions Tab -->
+                    <div class="tab-pane fade" id="interventions" role="tabpanel">
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="analysis-card">
+                                    <div class="card-header bg-warning text-white d-flex justify-content-between align-items-center">
+                                        <h5><i class="fas fa-tools me-2"></i>التدخلات السلوكية</h5>
+                                        <button class="btn btn-light btn-sm" onclick="addIntervention()">
+                                            <i class="fas fa-plus me-2"></i>إضافة تدخل
+                                        </button>
+                                    </div>
+                                    <div class="card-body" id="interventionsList">
+                                        <!-- Interventions list will be loaded here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recommendations Tab -->
+                    <div class="tab-pane fade" id="recommendations" role="tabpanel">
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="analysis-card">
+                                    <div class="card-header bg-info text-white">
+                                        <h5><i class="fas fa-lightbulb me-2"></i>التوصيات الذكية</h5>
+                                    </div>
+                                    <div class="card-body" id="recommendationsList">
+                                        <!-- Recommendations will be loaded here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Observation Modal -->
+    <div class="modal fade" id="addObservationModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">إضافة ملاحظة سلوك</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="observationForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="behaviorPattern" class="form-label">نمط السلوك</label>
+                                    <select class="form-select" id="behaviorPattern" required>
+                                        <option value="">-- اختر نمط السلوك --</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="observationContext" class="form-label">السياق</label>
+                                    <select class="form-select" id="observationContext" required>
+                                        <option value="classroom">الفصل الدراسي</option>
+                                        <option value="playground">الملعب</option>
+                                        <option value="therapy">جلسة العلاج</option>
+                                        <option value="cafeteria">المقصف</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="behaviorDescription" class="form-label">وصف السلوك</label>
+                            <textarea class="form-control" id="behaviorDescription" rows="3" required></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="intensity" class="form-label">الشدة</label>
+                                    <select class="form-select" id="intensity">
+                                        <option value="low">منخفضة</option>
+                                        <option value="medium" selected>متوسطة</option>
+                                        <option value="high">عالية</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="duration" class="form-label">المدة (دقائق)</label>
+                                    <input type="number" class="form-control" id="duration" min="1">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="frequency" class="form-label">التكرار</label>
+                                    <input type="number" class="form-control" id="frequency" min="1" value="1">
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-primary" onclick="saveObservation()">حفظ الملاحظة</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/learning_behavior_analysis.js') }}"></script>
+</body>
+</html>

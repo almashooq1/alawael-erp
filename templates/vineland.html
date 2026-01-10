@@ -1,0 +1,393 @@
+{% extends "base.html" %}
+
+{% block title %}مقياس فاين لاند للسلوك التكيفي{% endblock %}
+
+{% block content %}
+<div class="container-fluid" dir="rtl">
+    <div class="row">
+        <div class="col-12">
+            <!-- العنوان الرئيسي -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">
+                    <i class="fas fa-user-check text-success me-2"></i>
+                    مقياس فاين لاند للسلوك التكيفي
+                </h1>
+                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#newAssessmentModal">
+                    <i class="fas fa-plus me-2"></i>
+                    تقييم جديد
+                </button>
+            </div>
+
+            <!-- بطاقات الإحصائيات -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title" id="totalAssessments">0</h4>
+                                    <p class="card-text">إجمالي التقييمات</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-clipboard-list fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-success text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title" id="completedAssessments">0</h4>
+                                    <p class="card-text">التقييمات المكتملة</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-check-circle fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-warning text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title" id="inProgressAssessments">0</h4>
+                                    <p class="card-text">قيد التنفيذ</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-clock fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-info text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title" id="activeStudents">0</h4>
+                                    <p class="card-text">الطلاب النشطون</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-users fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- أدوات التصفية والبحث -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label for="studentFilter" class="form-label">الطالب</label>
+                            <select class="form-select" id="studentFilter">
+                                <option value="">جميع الطلاب</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="assessorFilter" class="form-label">المقيم</label>
+                            <select class="form-select" id="assessorFilter">
+                                <option value="">جميع المقيمين</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="statusFilter" class="form-label">الحالة</label>
+                            <select class="form-select" id="statusFilter">
+                                <option value="">جميع الحالات</option>
+                                <option value="in_progress">قيد التنفيذ</option>
+                                <option value="completed">مكتمل</option>
+                                <option value="cancelled">ملغي</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="formTypeFilter" class="form-label">نوع النموذج</label>
+                            <select class="form-select" id="formTypeFilter">
+                                <option value="">جميع الأنواع</option>
+                                <option value="comprehensive">شامل</option>
+                                <option value="survey">مسح</option>
+                                <option value="teacher">معلم</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="d-flex align-items-end">
+                                <button class="btn btn-outline-primary me-2" onclick="applyFilters()">
+                                    <i class="fas fa-filter"></i> تصفية
+                                </button>
+                                <button class="btn btn-outline-secondary" onclick="clearFilters()">
+                                    <i class="fas fa-times"></i> مسح
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- جدول التقييمات -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-list me-2"></i>
+                        قائمة التقييمات
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover" id="assessmentsTable">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>رقم التقييم</th>
+                                    <th>الطالب</th>
+                                    <th>المقيم</th>
+                                    <th>تاريخ التقييم</th>
+                                    <th>نوع النموذج</th>
+                                    <th>المجيب</th>
+                                    <th>الحالة</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="assessmentsTableBody">
+                                <!-- سيتم تحميل البيانات بواسطة JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- نموذج إنشاء تقييم جديد -->
+<div class="modal fade" id="newAssessmentModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus me-2"></i>
+                    إنشاء تقييم جديد - مقياس فاين لاند
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="newAssessmentForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="studentSelect" class="form-label">الطالب *</label>
+                                <select class="form-select" id="studentSelect" required>
+                                    <option value="">اختر الطالب</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="assessorSelect" class="form-label">المقيم *</label>
+                                <select class="form-select" id="assessorSelect" required>
+                                    <option value="">اختر المقيم</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="assessmentDate" class="form-label">تاريخ التقييم *</label>
+                                <input type="date" class="form-control" id="assessmentDate" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="assessmentType" class="form-label">نوع التقييم *</label>
+                                <select class="form-select" id="assessmentType" required>
+                                    <option value="interview">مقابلة</option>
+                                    <option value="parent_caregiver">والد/مقدم رعاية</option>
+                                    <option value="teacher">معلم</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="formType" class="form-label">نوع النموذج *</label>
+                                <select class="form-select" id="formType" required>
+                                    <option value="comprehensive">شامل</option>
+                                    <option value="survey">مسح</option>
+                                    <option value="teacher">معلم</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="assessmentSetting" class="form-label">مكان التقييم</label>
+                                <input type="text" class="form-control" id="assessmentSetting" placeholder="مثال: المدرسة، المنزل، العيادة">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="respondentName" class="form-label">اسم المجيب</label>
+                                <input type="text" class="form-control" id="respondentName" placeholder="اسم الشخص الذي سيجيب على الأسئلة">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="respondentRelationship" class="form-label">علاقة المجيب بالطالب</label>
+                                <input type="text" class="form-control" id="respondentRelationship" placeholder="مثال: الأم، الأب، المعلم">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="assessmentNotes" class="form-label">ملاحظات</label>
+                        <textarea class="form-control" id="assessmentNotes" rows="3" placeholder="أي ملاحظات إضافية حول التقييم"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-success" onclick="createAssessment()">
+                    <i class="fas fa-save me-2"></i>
+                    إنشاء التقييم
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- نموذج تفاصيل التقييم -->
+<div class="modal fade" id="assessmentDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-info-circle me-2"></i>
+                    تفاصيل التقييم
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="assessmentDetailsContent">
+                    <!-- سيتم تحميل المحتوى بواسطة JavaScript -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                <button type="button" class="btn btn-primary" id="continueAssessmentBtn" onclick="continueAssessment()">
+                    <i class="fas fa-play me-2"></i>
+                    متابعة التقييم
+                </button>
+                <button type="button" class="btn btn-success" id="generateReportBtn" onclick="generateReport()">
+                    <i class="fas fa-file-alt me-2"></i>
+                    إنشاء تقرير
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- نموذج إدارة المجالات -->
+<div class="modal fade" id="domainAssessmentModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-tasks me-2"></i>
+                    تقييم المجالات - مقياس فاين لاند
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <!-- تبويبات المجالات -->
+                <ul class="nav nav-tabs" id="domainTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="communication-tab" data-bs-toggle="tab" data-bs-target="#communication" type="button" role="tab">
+                            <i class="fas fa-comments me-2"></i>
+                            التواصل
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="daily-living-tab" data-bs-toggle="tab" data-bs-target="#daily-living" type="button" role="tab">
+                            <i class="fas fa-home me-2"></i>
+                            المهارات الحياتية اليومية
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="socialization-tab" data-bs-toggle="tab" data-bs-target="#socialization" type="button" role="tab">
+                            <i class="fas fa-users me-2"></i>
+                            التنشئة الاجتماعية
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="motor-skills-tab" data-bs-toggle="tab" data-bs-target="#motor-skills" type="button" role="tab">
+                            <i class="fas fa-running me-2"></i>
+                            المهارات الحركية
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- محتوى التبويبات -->
+                <div class="tab-content mt-3" id="domainTabContent">
+                    <div class="tab-pane fade show active" id="communication" role="tabpanel">
+                        <div id="communicationItems">
+                            <!-- سيتم تحميل عناصر التواصل -->
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="daily-living" role="tabpanel">
+                        <div id="dailyLivingItems">
+                            <!-- سيتم تحميل عناصر المهارات الحياتية -->
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="socialization" role="tabpanel">
+                        <div id="socializationItems">
+                            <!-- سيتم تحميل عناصر التنشئة الاجتماعية -->
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="motor-skills" role="tabpanel">
+                        <div id="motorSkillsItems">
+                            <!-- سيتم تحميل عناصر المهارات الحركية -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                <button type="button" class="btn btn-primary" onclick="saveDomainProgress()">
+                    <i class="fas fa-save me-2"></i>
+                    حفظ التقدم
+                </button>
+                <button type="button" class="btn btn-success" onclick="completeDomainAssessment()">
+                    <i class="fas fa-check me-2"></i>
+                    إكمال التقييم
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- مؤشر التحميل -->
+<div class="modal fade" id="loadingModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">جاري التحميل...</span>
+                </div>
+                <p class="mt-2 mb-0">جاري المعالجة...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/vineland.js') }}"></script>
+{% endblock %}

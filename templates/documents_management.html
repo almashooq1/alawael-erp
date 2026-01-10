@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة الوثائق والرخص - مراكز الأوائل</title>
+    
+    <!-- Bootstrap 5 RTL CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+        }
+        
+        .main-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+        
+        .stats-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: none;
+            transition: transform 0.3s ease;
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stats-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .icon-primary { background: linear-gradient(45deg, #667eea, #764ba2); }
+        .icon-success { background: linear-gradient(45deg, #56ab2f, #a8e6cf); }
+        .icon-warning { background: linear-gradient(45deg, #f093fb, #f5576c); }
+        .icon-danger { background: linear-gradient(45deg, #ff9a9e, #fecfef); }
+        
+        .nav-pills .nav-link {
+            border-radius: 25px;
+            margin: 0 0.25rem;
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-pills .nav-link.active {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .document-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-right: 4px solid #667eea;
+            transition: all 0.3s ease;
+        }
+        
+        .document-card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+        
+        .document-card.expired {
+            border-right-color: #dc3545;
+        }
+        
+        .document-card.expiring-soon {
+            border-right-color: #ffc107;
+        }
+        
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .status-active { background: #d4edda; color: #155724; }
+        .status-expired { background: #f8d7da; color: #721c24; }
+        .status-expiring { background: #fff3cd; color: #856404; }
+        .status-pending { background: #cce7ff; color: #004085; }
+        
+        .priority-badge {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-left: 0.5rem;
+        }
+        
+        .priority-1 { background: #28a745; }
+        .priority-2 { background: #ffc107; }
+        .priority-3 { background: #dc3545; }
+        
+        .filter-section {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-gradient {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border: none;
+            color: white;
+            border-radius: 25px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            color: white;
+        }
+        
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .alert-container {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            min-width: 300px;
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .document-meta {
+            font-size: 0.875rem;
+            color: #6c757d;
+            margin-top: 0.5rem;
+        }
+        
+        .days-remaining {
+            font-weight: bold;
+        }
+        
+        .days-remaining.critical { color: #dc3545; }
+        .days-remaining.warning { color: #ffc107; }
+        .days-remaining.normal { color: #28a745; }
+        
+        .modal-header {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 10px 10px 0 0;
+        }
+        
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        .table-responsive {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .table th {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            font-weight: 500;
+        }
+        
+        .pagination .page-link {
+            border-radius: 50%;
+            margin: 0 0.25rem;
+            border: 1px solid #667eea;
+            color: #667eea;
+        }
+        
+        .pagination .page-item.active .page-link {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-color: #667eea;
+        }
+        
+        @media (max-width: 768px) {
+            .main-header {
+                padding: 1rem 0;
+            }
+            
+            .stats-card {
+                margin-bottom: 1rem;
+            }
+            
+            .filter-section {
+                padding: 1rem;
+            }
+            
+            .document-card {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- حاوي التنبيهات -->
+    <div class="alert-container" id="alertContainer"></div>
+    
+    <!-- الرأس الرئيسي -->
+    <div class="main-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h1 class="mb-0">
+                        <i class="fas fa-file-contract me-3"></i>
+                        إدارة الوثائق والرخص
+                    </h1>
+                    <p class="mb-0 mt-2 opacity-75">
+                        نظام شامل لإدارة السجلات التجارية والرخص والإقامات وبطاقات الأحوال ورخص المركبات
+                    </p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <button class="btn btn-light btn-lg" onclick="documentsManager.showCreateModal()">
+                        <i class="fas fa-plus me-2"></i>
+                        إضافة وثيقة جديدة
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <!-- بطاقات الإحصائيات -->
+        <div class="row mb-4" id="statsCards">
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="stats-card text-center">
+                    <div class="stats-icon icon-primary mx-auto">
+                        <i class="fas fa-file-alt text-white"></i>
+                    </div>
+                    <h3 class="mb-1" id="totalDocuments">0</h3>
+                    <p class="text-muted mb-0">إجمالي الوثائق</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="stats-card text-center">
+                    <div class="stats-icon icon-success mx-auto">
+                        <i class="fas fa-check-circle text-white"></i>
+                    </div>
+                    <h3 class="mb-1" id="activeDocuments">0</h3>
+                    <p class="text-muted mb-0">وثائق سارية</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="stats-card text-center">
+                    <div class="stats-icon icon-warning mx-auto">
+                        <i class="fas fa-exclamation-triangle text-white"></i>
+                    </div>
+                    <h3 class="mb-1" id="expiringSoon">0</h3>
+                    <p class="text-muted mb-0">تنتهي قريباً</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="stats-card text-center">
+                    <div class="stats-icon icon-danger mx-auto">
+                        <i class="fas fa-times-circle text-white"></i>
+                    </div>
+                    <h3 class="mb-1" id="expiredDocuments">0</h3>
+                    <p class="text-muted mb-0">منتهية الصلاحية</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- التبويبات الرئيسية -->
+        <ul class="nav nav-pills justify-content-center mb-4" id="mainTabs">
+            <li class="nav-item">
+                <a class="nav-link active" data-bs-toggle="pill" href="#documentsTab">
+                    <i class="fas fa-file-alt me-2"></i>الوثائق
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="pill" href="#remindersTab">
+                    <i class="fas fa-bell me-2"></i>التذكيرات
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="pill" href="#renewalsTab">
+                    <i class="fas fa-sync-alt me-2"></i>التجديدات
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="pill" href="#reportsTab">
+                    <i class="fas fa-chart-bar me-2"></i>التقارير
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="pill" href="#categoriesTab">
+                    <i class="fas fa-tags me-2"></i>الفئات
+                </a>
+            </li>
+        </ul>
+        
+        <!-- محتوى التبويبات -->
+        <div class="tab-content">
+            <!-- تبويب الوثائق -->
+            <div class="tab-pane fade show active" id="documentsTab">
+                <!-- قسم الفلترة -->
+                <div class="filter-section">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">البحث</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="searchInput" placeholder="البحث في الوثائق...">
+                                <button class="btn btn-outline-secondary" type="button" onclick="documentsManager.searchDocuments()">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <label class="form-label">نوع الوثيقة</label>
+                            <select class="form-select" id="documentTypeFilter">
+                                <option value="">جميع الأنواع</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <label class="form-label">الحالة</label>
+                            <select class="form-select" id="statusFilter">
+                                <option value="">جميع الحالات</option>
+                                <option value="active">سارية</option>
+                                <option value="expired">منتهية</option>
+                                <option value="expiring_soon">تنتهي قريباً</option>
+                                <option value="pending">قيد المراجعة</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <label class="form-label">نوع الكيان</label>
+                            <select class="form-select" id="entityTypeFilter">
+                                <option value="">جميع الكيانات</option>
+                                <option value="employee">موظف</option>
+                                <option value="vehicle">مركبة</option>
+                                <option value="business">نشاط تجاري</option>
+                                <option value="individual">فرد</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <label class="form-label">الفئة</label>
+                            <select class="form-select" id="categoryFilter">
+                                <option value="">جميع الفئات</option>
+                            </select>
+                        </div>
+                        <div class="col-md-1 mb-3">
+                            <label class="form-label">&nbsp;</label>
+                            <button class="btn btn-gradient w-100" onclick="documentsManager.applyFilters()">
+                                <i class="fas fa-filter"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- قائمة الوثائق -->
+                <div id="documentsContainer">
+                    <div class="loading-spinner" id="documentsLoading">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">جاري التحميل...</span>
+                        </div>
+                        <p class="mt-2">جاري تحميل الوثائق...</p>
+                    </div>
+                    <div id="documentsList"></div>
+                </div>
+                
+                <!-- الترقيم -->
+                <nav aria-label="ترقيم الصفحات" class="mt-4">
+                    <ul class="pagination justify-content-center" id="documentsPagination"></ul>
+                </nav>
+            </div>
+            
+            <!-- تبويب التذكيرات -->
+            <div class="tab-pane fade" id="remindersTab">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>الوثيقة</th>
+                                        <th>نوع التذكير</th>
+                                        <th>تاريخ التذكير</th>
+                                        <th>الحالة</th>
+                                        <th>الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="remindersTableBody">
+                                    <!-- سيتم ملؤها بـ JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="chart-container">
+                            <h5>إحصائيات التذكيرات</h5>
+                            <canvas id="remindersChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- تبويب التجديدات -->
+            <div class="tab-pane fade" id="renewalsTab">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>الوثيقة</th>
+                                <th>تاريخ التجديد</th>
+                                <th>تاريخ الانتهاء السابق</th>
+                                <th>تاريخ الانتهاء الجديد</th>
+                                <th>التكلفة</th>
+                                <th>الجهة المجددة</th>
+                            </tr>
+                        </thead>
+                        <tbody id="renewalsTableBody">
+                            <!-- سيتم ملؤها بـ JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- تبويب التقارير -->
+            <div class="tab-pane fade" id="reportsTab">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="chart-container">
+                            <h5>توزيع الوثائق حسب النوع</h5>
+                            <canvas id="documentsTypeChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="chart-container">
+                            <h5>توزيع الوثائق حسب الحالة</h5>
+                            <canvas id="documentsStatusChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="chart-container">
+                            <h5>الوثائق العاجلة المنتهية قريباً</h5>
+                            <div id="urgentDocumentsList"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- تبويب الفئات -->
+            <div class="tab-pane fade" id="categoriesTab">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5>فئات الوثائق</h5>
+                            <button class="btn btn-gradient" onclick="documentsManager.showCreateCategoryModal()">
+                                <i class="fas fa-plus me-2"></i>إضافة فئة جديدة
+                            </button>
+                        </div>
+                        <div id="categoriesList"></div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="chart-container">
+                            <h5>إحصائيات الفئات</h5>
+                            <canvas id="categoriesChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- نموذج إضافة/تعديل وثيقة -->
+    <div class="modal fade" id="documentModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="documentModalTitle">إضافة وثيقة جديدة</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="documentForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">رقم الوثيقة *</label>
+                                <input type="text" class="form-control" id="documentNumber" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">نوع الوثيقة *</label>
+                                <select class="form-select" id="documentType" required>
+                                    <option value="">اختر نوع الوثيقة</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">عنوان الوثيقة *</label>
+                            <input type="text" class="form-control" id="documentTitle" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">الوصف</label>
+                            <textarea class="form-control" id="documentDescription" rows="3"></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">نوع الكيان *</label>
+                                <select class="form-select" id="entityType" required>
+                                    <option value="">اختر نوع الكيان</option>
+                                    <option value="employee">موظف</option>
+                                    <option value="vehicle">مركبة</option>
+                                    <option value="business">نشاط تجاري</option>
+                                    <option value="individual">فرد</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">معرف الكيان *</label>
+                                <input type="number" class="form-control" id="entityId" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">اسم الكيان</label>
+                            <input type="text" class="form-control" id="entityName">
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">تاريخ الإصدار *</label>
+                                <input type="date" class="form-control" id="issueDate" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">تاريخ الانتهاء *</label>
+                                <input type="date" class="form-control" id="expiryDate" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-8 mb-3">
+                                <label class="form-label">الجهة المصدرة</label>
+                                <input type="text" class="form-control" id="issuingAuthority">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">الأولوية</label>
+                                <select class="form-select" id="priority">
+                                    <option value="1">عادي</option>
+                                    <option value="2">مهم</option>
+                                    <option value="3">عاجل</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">التكلفة</label>
+                                <input type="number" step="0.01" class="form-control" id="cost">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">العملة</label>
+                                <select class="form-select" id="currency">
+                                    <option value="SAR">ريال سعودي</option>
+                                    <option value="USD">دولار أمريكي</option>
+                                    <option value="EUR">يورو</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">ملاحظات</label>
+                            <textarea class="form-control" id="notes" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="reminderEnabled" checked>
+                                <label class="form-check-label" for="reminderEnabled">
+                                    تفعيل التذكيرات
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-gradient" onclick="documentsManager.saveDocument()">
+                        <i class="fas fa-save me-2"></i>حفظ
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- نموذج إضافة فئة -->
+    <div class="modal fade" id="categoryModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">إضافة فئة جديدة</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="categoryForm">
+                        <div class="mb-3">
+                            <label class="form-label">اسم الفئة *</label>
+                            <input type="text" class="form-control" id="categoryName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">الاسم بالإنجليزية</label>
+                            <input type="text" class="form-control" id="categoryNameEn">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">الوصف</label>
+                            <textarea class="form-control" id="categoryDescription" rows="3"></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">الأيقونة</label>
+                                <input type="text" class="form-control" id="categoryIcon" placeholder="fas fa-file">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">اللون</label>
+                                <input type="color" class="form-control" id="categoryColor" value="#667eea">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-gradient" onclick="documentsManager.saveCategory()">
+                        <i class="fas fa-save me-2"></i>حفظ
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- ملف JavaScript المخصص -->
+    <script src="{{ url_for('static', filename='js/documents_management.js') }}"></script>
+    
+    <script>
+        // تهيئة النظام عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            documentsManager.init();
+        });
+    </script>
+</body>
+</html>

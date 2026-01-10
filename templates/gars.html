@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% extends "base.html" %}
+
+{% block title %}مقياس جيليام لتشخيص التوحد - مراكز الأوائل{% endblock %}
+
+{% block extra_css %}
+<style>
+.assessment-page {
+    position: relative;
+}
+</style>
+{% endblock %}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            direction: rtl;
+        }
+        
+        .main-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            border-radius: 0 0 20px 20px;
+        }
+        
+        .stats-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            border-right: 4px solid;
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stats-card.total { border-right-color: #007bff; }
+        .stats-card.completed { border-right-color: #28a745; }
+        .stats-card.in-progress { border-right-color: #ffc107; }
+        .stats-card.high-risk { border-right-color: #dc3545; }
+        
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            border: none;
+            border-radius: 25px;
+            padding: 0.5rem 1.5rem;
+        }
+        
+        .btn-success {
+            background: linear-gradient(45deg, #28a745, #1e7e34);
+            border: none;
+            border-radius: 25px;
+        }
+        
+        .btn-warning {
+            background: linear-gradient(45deg, #ffc107, #e0a800);
+            border: none;
+            border-radius: 25px;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(45deg, #dc3545, #c82333);
+            border: none;
+            border-radius: 25px;
+        }
+        
+        .table {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .table thead th {
+            background: linear-gradient(45deg, #6c757d, #495057);
+            color: white;
+            border: none;
+            font-weight: 600;
+        }
+        
+        .badge {
+            border-radius: 20px;
+            padding: 0.5rem 1rem;
+        }
+        
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+        }
+        
+        .modal-header {
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            color: white;
+            border-radius: 15px 15px 0 0;
+        }
+        
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+        
+        .assessment-item {
+            background: white;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-right: 4px solid #007bff;
+        }
+        
+        .domain-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 2px solid #e9ecef;
+        }
+        
+        .item-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid #dee2e6;
+        }
+        
+        .score-buttons {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+        
+        .score-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid #dee2e6;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .score-btn:hover {
+            background: #f8f9fa;
+            border-color: #007bff;
+        }
+        
+        .score-btn.active {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+        
+        .progress-bar {
+            border-radius: 10px;
+        }
+        
+        .loading-spinner {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 9999;
+        }
+        
+        .nav-tabs .nav-link {
+            border-radius: 10px 10px 0 0;
+            border: none;
+            background: #f8f9fa;
+            color: #6c757d;
+            margin-left: 0.25rem;
+        }
+        
+        .nav-tabs .nav-link.active {
+            background: #007bff;
+            color: white;
+        }
+        
+        .domain-progress {
+            height: 8px;
+            border-radius: 4px;
+            background: #e9ecef;
+            overflow: hidden;
+        }
+        
+        .domain-progress-bar {
+            height: 100%;
+            background: linear-gradient(45deg, #28a745, #20c997);
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="main-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="mb-0">
+                        <i class="fas fa-brain me-3"></i>
+                        مقياس جيليام للتوحد (GARS-3)
+                    </h1>
+                    <p class="mb-0 mt-2">نظام تقييم شامل لاضطراب طيف التوحد</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <button class="btn btn-light btn-lg" onclick="showNewAssessmentModal()">
+                        <i class="fas fa-plus me-2"></i>
+                        تقييم جديد
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="container mb-4">
+        <div class="row">
+            <div class="col-md-3 mb-3">
+                <div class="stats-card total">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="mb-0" id="totalAssessments">0</h3>
+                            <p class="text-muted mb-0">إجمالي التقييمات</p>
+                        </div>
+                        <i class="fas fa-clipboard-list fa-2x text-primary"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stats-card completed">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="mb-0" id="completedAssessments">0</h3>
+                            <p class="text-muted mb-0">مكتملة</p>
+                        </div>
+                        <i class="fas fa-check-circle fa-2x text-success"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stats-card in-progress">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="mb-0" id="inProgressAssessments">0</h3>
+                            <p class="text-muted mb-0">قيد التنفيذ</p>
+                        </div>
+                        <i class="fas fa-clock fa-2x text-warning"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="stats-card high-risk">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="mb-0" id="highRiskAssessments">0</h3>
+                            <p class="text-muted mb-0">عالي الخطورة</p>
+                        </div>
+                        <i class="fas fa-exclamation-triangle fa-2x text-danger"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters and Search -->
+    <div class="container mb-4">
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">الطالب</label>
+                        <select class="form-select" id="studentFilter">
+                            <option value="">جميع الطلاب</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">المقيم</label>
+                        <select class="form-select" id="assessorFilter">
+                            <option value="">جميع المقيمين</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">الحالة</label>
+                        <select class="form-select" id="statusFilter">
+                            <option value="">جميع الحالات</option>
+                            <option value="in_progress">قيد التنفيذ</option>
+                            <option value="completed">مكتمل</option>
+                            <option value="draft">مسودة</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">إصدار المقياس</label>
+                        <select class="form-select" id="versionFilter">
+                            <option value="">جميع الإصدارات</option>
+                            <option value="gars_3">GARS-3</option>
+                            <option value="gars_2">GARS-2</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">من تاريخ</label>
+                        <input type="date" class="form-control" id="dateFromFilter">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">إلى تاريخ</label>
+                        <input type="date" class="form-control" id="dateToFilter">
+                    </div>
+                </div>
+                <div class="text-center">
+                    <button class="btn btn-primary me-2" onclick="applyFilters()">
+                        <i class="fas fa-search me-2"></i>بحث
+                    </button>
+                    <button class="btn btn-secondary" onclick="clearFilters()">
+                        <i class="fas fa-times me-2"></i>مسح الفلاتر
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assessments List -->
+    <div class="container mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-list me-2"></i>
+                    قائمة التقييمات
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>الطالب</th>
+                                <th>المقيم</th>
+                                <th>تاريخ التقييم</th>
+                                <th>الحالة</th>
+                                <th>مؤشر التوحد</th>
+                                <th>مستوى الخطورة</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="assessmentsTableBody">
+                            <!-- سيتم ملء البيانات بواسطة JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Assessment Modal -->
+    <div class="modal fade" id="newAssessmentModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-plus me-2"></i>
+                        تقييم جديد - مقياس جيليام للتوحد
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="newAssessmentForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">الطالب *</label>
+                                <select class="form-select" id="newStudentId" required>
+                                    <option value="">اختر الطالب</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">المقيم *</label>
+                                <select class="form-select" id="newAssessorId" required>
+                                    <option value="">اختر المقيم</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">تاريخ التقييم</label>
+                                <input type="date" class="form-control" id="newAssessmentDate" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">إصدار المقياس</label>
+                                <select class="form-select" id="newScaleVersion">
+                                    <option value="gars_3">GARS-3</option>
+                                    <option value="gars_2">GARS-2</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">العمر الزمني (سنوات)</label>
+                                <input type="number" class="form-control" id="newAgeYears" min="0" max="30">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">العمر الزمني (شهور)</label>
+                                <input type="number" class="form-control" id="newAgeMonths" min="0" max="11">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">اسم المستجيب</label>
+                            <input type="text" class="form-control" id="newRespondentName">
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">علاقة المستجيب</label>
+                                <select class="form-select" id="newRespondentRelationship">
+                                    <option value="">اختر العلاقة</option>
+                                    <option value="parent">والد/والدة</option>
+                                    <option value="teacher">معلم</option>
+                                    <option value="therapist">معالج</option>
+                                    <option value="caregiver">مقدم رعاية</option>
+                                    <option value="other">أخرى</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">سنوات معرفة الطالب</label>
+                                <input type="number" class="form-control" id="newYearsKnown" min="0">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">ساعات التواصل اليومي</label>
+                            <select class="form-select" id="newContactHours">
+                                <option value="">اختر المدة</option>
+                                <option value="less_than_1">أقل من ساعة</option>
+                                <option value="1_to_3">1-3 ساعات</option>
+                                <option value="3_to_6">3-6 ساعات</option>
+                                <option value="more_than_6">أكثر من 6 ساعات</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">بيئة التقييم</label>
+                            <input type="text" class="form-control" id="newAssessmentSetting" placeholder="مثل: المنزل، المدرسة، العيادة">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">ملاحظات إضافية</label>
+                            <textarea class="form-control" id="newNotes" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-primary" onclick="createNewAssessment()">
+                        <i class="fas fa-save me-2"></i>إنشاء التقييم
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assessment Details Modal -->
+    <div class="modal fade" id="assessmentDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-eye me-2"></i>
+                        تفاصيل التقييم
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="assessmentDetailsContent">
+                        <!-- سيتم ملء المحتوى بواسطة JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assessment Execution Modal -->
+    <div class="modal fade" id="assessmentExecutionModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-brain me-2"></i>
+                        تنفيذ مقياس جيليام للتوحد
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Assessment Progress -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span>التقدم الإجمالي</span>
+                            <span id="overallProgress">0%</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar" id="overallProgressBar" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Domain Tabs -->
+                    <ul class="nav nav-tabs mb-4" id="domainTabs">
+                        <li class="nav-item">
+                            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#stereotypedBehaviors">
+                                السلوكيات النمطية
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#communication">
+                                التواصل
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#socialInteraction">
+                                التفاعل الاجتماعي
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#developmentalDisturbances">
+                                الاضطرابات النمائية
+                            </button>
+                        </li>
+                    </ul>
+
+                    <!-- Domain Content -->
+                    <div class="tab-content" id="domainTabContent">
+                        <!-- Domain tabs will be populated by JavaScript -->
+                    </div>
+
+                    <!-- Assessment Summary -->
+                    <div class="mt-4" id="assessmentSummary" style="display: none;">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">ملخص النتائج</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <table class="table table-sm">
+                                            <tr>
+                                                <td>السلوكيات النمطية:</td>
+                                                <td id="stereotypedScore">-</td>
+                                            </tr>
+                                            <tr>
+                                                <td>التواصل:</td>
+                                                <td id="communicationScore">-</td>
+                                            </tr>
+                                            <tr>
+                                                <td>التفاعل الاجتماعي:</td>
+                                                <td id="socialScore">-</td>
+                                            </tr>
+                                            <tr>
+                                                <td>الاضطرابات النمائية:</td>
+                                                <td id="developmentalScore">-</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="text-center">
+                                            <h4>مؤشر التوحد</h4>
+                                            <h2 class="text-primary" id="autismIndex">-</h2>
+                                            <p class="text-muted" id="autismProbability">-</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                    <button type="button" class="btn btn-warning me-2" onclick="saveAssessmentProgress()">
+                        <i class="fas fa-save me-2"></i>حفظ التقدم
+                    </button>
+                    <button type="button" class="btn btn-success" onclick="completeAssessment()" id="completeAssessmentBtn" style="display: none;">
+                        <i class="fas fa-check me-2"></i>إكمال التقييم
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div class="loading-spinner">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">جاري التحميل...</span>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/gars.js') }}"></script>
+    
+    <script>
+        // تهيئة الصفحة عند التحميل
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStatistics();
+            loadAssessments();
+            loadStudents();
+            loadAssessors();
+            
+            // تعيين التاريخ الحالي
+            document.getElementById('newAssessmentDate').value = new Date().toISOString().split('T')[0];
+        });
+    </script>
+</body>
+</html>

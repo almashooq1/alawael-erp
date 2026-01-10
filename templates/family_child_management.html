@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة الأطفال والأسر - مراكز الأوائل</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            direction: rtl;
+        }
+        
+        .main-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+        
+        .stats-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid;
+            margin-bottom: 1rem;
+            transition: transform 0.3s ease;
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stats-card.children { border-left-color: #28a745; }
+        .stats-card.families { border-left-color: #007bff; }
+        .stats-card.appointments { border-left-color: #ffc107; }
+        .stats-card.communications { border-left-color: #dc3545; }
+        
+        .stats-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stats-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        
+        .nav-tabs .nav-link {
+            border-radius: 10px 10px 0 0;
+            margin-left: 5px;
+            border: none;
+            background-color: #e9ecef;
+            color: #495057;
+        }
+        
+        .nav-tabs .nav-link.active {
+            background-color: #007bff;
+            color: white;
+        }
+        
+        .tab-content {
+            background: white;
+            border-radius: 0 15px 15px 15px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            border: none;
+            border-radius: 25px;
+            padding: 0.5rem 1.5rem;
+        }
+        
+        .btn-success {
+            background: linear-gradient(45deg, #28a745, #1e7e34);
+            border: none;
+            border-radius: 25px;
+            padding: 0.5rem 1.5rem;
+        }
+        
+        .table {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .table thead th {
+            background-color: #f8f9fa;
+            border: none;
+            font-weight: 600;
+        }
+        
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+        }
+        
+        .modal-header {
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            color: white;
+            border-radius: 15px 15px 0 0;
+        }
+        
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+        
+        .alert {
+            border-radius: 10px;
+            border: none;
+        }
+        
+        .badge {
+            border-radius: 20px;
+            padding: 0.5rem 1rem;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-bottom: 2rem;
+        }
+        
+        .quick-actions {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .action-btn {
+            display: inline-block;
+            padding: 1rem;
+            margin: 0.5rem;
+            background: white;
+            border: 2px solid #dee2e6;
+            border-radius: 15px;
+            text-decoration: none;
+            color: #495057;
+            transition: all 0.3s ease;
+            text-align: center;
+            min-width: 150px;
+        }
+        
+        .action-btn:hover {
+            border-color: #007bff;
+            color: #007bff;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .action-btn i {
+            font-size: 2rem;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="main-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h1><i class="fas fa-users me-3"></i>إدارة الأطفال والأسر</h1>
+                    <p class="mb-0">نظام شامل لإدارة ملفات الأطفال والأسر وتتبع التقدم</p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <button class="btn btn-light btn-lg" onclick="refreshDashboard()">
+                        <i class="fas fa-sync-alt me-2"></i>تحديث البيانات
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <!-- Statistics Cards -->
+        <div class="row mb-4" id="statisticsCards">
+            <div class="col-md-3">
+                <div class="stats-card children">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="stats-number text-success" id="totalChildren">0</div>
+                            <div class="stats-label">إجمالي الأطفال</div>
+                        </div>
+                        <i class="fas fa-child fa-3x text-success opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card families">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="stats-number text-primary" id="totalFamilies">0</div>
+                            <div class="stats-label">إجمالي الأسر</div>
+                        </div>
+                        <i class="fas fa-home fa-3x text-primary opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card appointments">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="stats-number text-warning" id="todayAppointments">0</div>
+                            <div class="stats-label">مواعيد اليوم</div>
+                        </div>
+                        <i class="fas fa-calendar-check fa-3x text-warning opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card communications">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="stats-number text-danger" id="todayCommunications">0</div>
+                            <div class="stats-label">تواصل اليوم</div>
+                        </div>
+                        <i class="fas fa-comments fa-3x text-danger opacity-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <h5 class="mb-3"><i class="fas fa-bolt me-2"></i>الإجراءات السريعة</h5>
+            <div class="row text-center">
+                <div class="col-md-2">
+                    <a href="#" class="action-btn" onclick="showAddChildModal()">
+                        <i class="fas fa-plus-circle text-success"></i>
+                        <div>إضافة طفل جديد</div>
+                    </a>
+                </div>
+                <div class="col-md-2">
+                    <a href="#" class="action-btn" onclick="showAddFamilyModal()">
+                        <i class="fas fa-home text-primary"></i>
+                        <div>إضافة أسرة جديدة</div>
+                    </a>
+                </div>
+                <div class="col-md-2">
+                    <a href="#" class="action-btn" onclick="showAddAppointmentModal()">
+                        <i class="fas fa-calendar-plus text-warning"></i>
+                        <div>حجز موعد</div>
+                    </a>
+                </div>
+                <div class="col-md-2">
+                    <a href="#" class="action-btn" onclick="showProgressTrackingModal()">
+                        <i class="fas fa-chart-line text-info"></i>
+                        <div>تتبع التقدم</div>
+                    </a>
+                </div>
+                <div class="col-md-2">
+                    <a href="#" class="action-btn" onclick="showCommunicationModal()">
+                        <i class="fas fa-envelope text-danger"></i>
+                        <div>إرسال رسالة</div>
+                    </a>
+                </div>
+                <div class="col-md-2">
+                    <a href="#" class="action-btn" onclick="showSurveyModal()">
+                        <i class="fas fa-poll text-secondary"></i>
+                        <div>استطلاع رضا</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Tabs -->
+        <ul class="nav nav-tabs" id="mainTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab">
+                    <i class="fas fa-tachometer-alt me-2"></i>نظرة عامة
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="children-tab" data-bs-toggle="tab" data-bs-target="#children" type="button" role="tab">
+                    <i class="fas fa-child me-2"></i>ملفات الأطفال
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="families-tab" data-bs-toggle="tab" data-bs-target="#families" type="button" role="tab">
+                    <i class="fas fa-home me-2"></i>ملفات الأسر
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="progress-tab" data-bs-toggle="tab" data-bs-target="#progress" type="button" role="tab">
+                    <i class="fas fa-chart-line me-2"></i>تتبع التقدم
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="appointments-tab" data-bs-toggle="tab" data-bs-target="#appointments" type="button" role="tab">
+                    <i class="fas fa-calendar me-2"></i>المواعيد الذكية
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="communication-tab" data-bs-toggle="tab" data-bs-target="#communication" type="button" role="tab">
+                    <i class="fas fa-comments me-2"></i>التواصل مع الأهالي
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="surveys-tab" data-bs-toggle="tab" data-bs-target="#surveys" type="button" role="tab">
+                    <i class="fas fa-poll me-2"></i>استطلاعات الرضا
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="mainTabContent">
+            <!-- Overview Tab -->
+            <div class="tab-pane fade show active" id="overview" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="chart-container">
+                            <canvas id="childrenStatusChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="chart-container">
+                            <canvas id="appointmentsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="chart-container">
+                            <canvas id="familiesChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="chart-container">
+                            <canvas id="communicationsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Children Tab -->
+            <div class="tab-pane fade" id="children" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4><i class="fas fa-child me-2"></i>ملفات الأطفال</h4>
+                    <button class="btn btn-success" onclick="showAddChildModal()">
+                        <i class="fas fa-plus me-2"></i>إضافة طفل جديد
+                    </button>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <input type="text" class="form-control" id="childrenSearch" placeholder="البحث في ملفات الأطفال...">
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="childrenStatusFilter">
+                            <option value="">جميع الحالات</option>
+                            <option value="active">نشط</option>
+                            <option value="inactive">غير نشط</option>
+                            <option value="graduated">متخرج</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-primary" onclick="loadChildren()">
+                            <i class="fas fa-search me-2"></i>بحث
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>الاسم الكامل</th>
+                                <th>تاريخ الميلاد</th>
+                                <th>الجنس</th>
+                                <th>التشخيص الأساسي</th>
+                                <th>الحالة</th>
+                                <th>تاريخ التسجيل</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="childrenTableBody">
+                            <!-- سيتم تحميل البيانات هنا -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <nav id="childrenPagination">
+                    <!-- سيتم إنشاء الترقيم هنا -->
+                </nav>
+            </div>
+
+            <!-- Families Tab -->
+            <div class="tab-pane fade" id="families" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4><i class="fas fa-home me-2"></i>ملفات الأسر</h4>
+                    <button class="btn btn-success" onclick="showAddFamilyModal()">
+                        <i class="fas fa-plus me-2"></i>إضافة أسرة جديدة
+                    </button>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <input type="text" class="form-control" id="familiesSearch" placeholder="البحث في ملفات الأسر...">
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-primary" onclick="loadFamilies()">
+                            <i class="fas fa-search me-2"></i>بحث
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>رمز الأسرة</th>
+                                <th>اسم الأسرة</th>
+                                <th>الهاتف الأساسي</th>
+                                <th>البريد الإلكتروني</th>
+                                <th>المدينة</th>
+                                <th>عدد الأطفال</th>
+                                <th>تاريخ التسجيل</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="familiesTableBody">
+                            <!-- سيتم تحميل البيانات هنا -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <nav id="familiesPagination">
+                    <!-- سيتم إنشاء الترقيم هنا -->
+                </nav>
+            </div>
+
+            <!-- Progress Tracking Tab -->
+            <div class="tab-pane fade" id="progress" role="tabpanel">
+                <h4><i class="fas fa-chart-line me-2"></i>تتبع التقدم والتطور</h4>
+                <p class="text-muted">سيتم تطوير هذا القسم لاحقاً</p>
+            </div>
+
+            <!-- Appointments Tab -->
+            <div class="tab-pane fade" id="appointments" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4><i class="fas fa-calendar me-2"></i>المواعيد الذكية</h4>
+                    <button class="btn btn-success" onclick="showAddAppointmentModal()">
+                        <i class="fas fa-plus me-2"></i>حجز موعد جديد
+                    </button>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>رمز الموعد</th>
+                                <th>العنوان</th>
+                                <th>نوع الموعد</th>
+                                <th>التاريخ</th>
+                                <th>الوقت</th>
+                                <th>اسم الطفل</th>
+                                <th>اسم الأسرة</th>
+                                <th>الحالة</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="appointmentsTableBody">
+                            <!-- سيتم تحميل البيانات هنا -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Communication Tab -->
+            <div class="tab-pane fade" id="communication" role="tabpanel">
+                <h4><i class="fas fa-comments me-2"></i>التواصل مع الأهالي</h4>
+                <p class="text-muted">سيتم تطوير هذا القسم لاحقاً</p>
+            </div>
+
+            <!-- Surveys Tab -->
+            <div class="tab-pane fade" id="surveys" role="tabpanel">
+                <h4><i class="fas fa-poll me-2"></i>استطلاعات الرضا</h4>
+                <p class="text-muted">سيتم تطوير هذا القسم لاحقاً</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading" id="loadingOverlay">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">جاري التحميل...</span>
+        </div>
+        <p class="mt-3">جاري تحميل البيانات...</p>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/family_child_management.js') }}"></script>
+</body>
+</html>

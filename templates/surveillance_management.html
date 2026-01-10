@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة نظام كاميرات المراقبة - مراكز الأوائل</title>
+    
+    <!-- Bootstrap 5 RTL -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+        }
+        
+        .navbar-brand {
+            font-weight: bold;
+            color: #2c3e50 !important;
+        }
+        
+        .stats-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stats-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .camera-card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .camera-card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        .status-badge {
+            font-size: 0.8rem;
+            padding: 0.25rem 0.5rem;
+        }
+        
+        .alert-card {
+            border-left: 4px solid;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .alert-critical {
+            border-left-color: #dc3545;
+            background-color: #f8d7da;
+        }
+        
+        .alert-high {
+            border-left-color: #fd7e14;
+            background-color: #fff3cd;
+        }
+        
+        .alert-medium {
+            border-left-color: #ffc107;
+            background-color: #fff3cd;
+        }
+        
+        .alert-low {
+            border-left-color: #20c997;
+            background-color: #d1ecf1;
+        }
+        
+        .live-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background-color: #dc3545;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .recording-indicator {
+            color: #dc3545;
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        
+        .nav-pills .nav-link.active {
+            background-color: #0d6efd;
+            border-radius: 25px;
+        }
+        
+        .nav-pills .nav-link {
+            border-radius: 25px;
+            margin: 0 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-pills .nav-link:hover {
+            background-color: #e9ecef;
+        }
+        
+        .table th {
+            border-top: none;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .btn-action {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+            margin: 0 2px;
+        }
+        
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px 10px 0 0;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        .video-preview {
+            background-color: #000;
+            border-radius: 8px;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-video me-2"></i>
+                نظام كاميرات المراقبة المترابطة
+            </a>
+            <div class="navbar-nav ms-auto">
+                <span class="navbar-text">
+                    <i class="fas fa-user me-1"></i>
+                    مرحباً، المدير
+                </span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3 mb-3">
+                <div class="card stats-card text-center bg-primary text-white">
+                    <div class="card-body">
+                        <i class="fas fa-video stats-icon"></i>
+                        <h3 class="card-title mb-0" id="totalCameras">0</h3>
+                        <p class="card-text">إجمالي الكاميرات</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card stats-card text-center bg-success text-white">
+                    <div class="card-body">
+                        <i class="fas fa-circle stats-icon"></i>
+                        <h3 class="card-title mb-0" id="onlineCameras">0</h3>
+                        <p class="card-text">كاميرات متصلة</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card stats-card text-center bg-danger text-white">
+                    <div class="card-body">
+                        <i class="fas fa-exclamation-triangle stats-icon"></i>
+                        <h3 class="card-title mb-0" id="activeAlerts">0</h3>
+                        <p class="card-text">تنبيهات نشطة</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card stats-card text-center bg-info text-white">
+                    <div class="card-body">
+                        <i class="fas fa-eye stats-icon"></i>
+                        <h3 class="card-title mb-0" id="activeSessions">0</h3>
+                        <p class="card-text">جلسات مشاهدة نشطة</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <ul class="nav nav-pills mb-4" id="surveillanceTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="cameras-tab" data-bs-toggle="pill" data-bs-target="#cameras" type="button" role="tab">
+                    <i class="fas fa-video me-2"></i>إدارة الكاميرات
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="live-tab" data-bs-toggle="pill" data-bs-target="#live" type="button" role="tab">
+                    <i class="fas fa-eye me-2"></i>المشاهدة المباشرة
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="recordings-tab" data-bs-toggle="pill" data-bs-target="#recordings" type="button" role="tab">
+                    <i class="fas fa-film me-2"></i>التسجيلات
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="alerts-tab" data-bs-toggle="pill" data-bs-target="#alerts" type="button" role="tab">
+                    <i class="fas fa-bell me-2"></i>التنبيهات
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="reports-tab" data-bs-toggle="pill" data-bs-target="#reports" type="button" role="tab">
+                    <i class="fas fa-chart-bar me-2"></i>التقارير
+                </button>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="surveillanceTabContent">
+            <!-- Cameras Tab -->
+            <div class="tab-pane fade show active" id="cameras" role="tabpanel">
+                <div class="row mb-3">
+                    <div class="col-md-8">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-search"></i></span>
+                            <input type="text" class="form-control" id="cameraSearch" placeholder="البحث في الكاميرات...">
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-select" id="cameraStatusFilter">
+                            <option value="">جميع الحالات</option>
+                            <option value="online">متصلة</option>
+                            <option value="offline">منقطعة</option>
+                            <option value="maintenance">صيانة</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#addCameraModal">
+                            <i class="fas fa-plus me-2"></i>إضافة كاميرا
+                        </button>
+                    </div>
+                </div>
+
+                <div class="row" id="camerasGrid">
+                    <!-- Cameras will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Live View Tab -->
+            <div class="tab-pane fade" id="live" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">اختيار الكاميرا</h6>
+                            </div>
+                            <div class="card-body">
+                                <select class="form-select mb-3" id="liveViewCameraSelect">
+                                    <option value="">اختر كاميرا...</option>
+                                </select>
+                                <button class="btn btn-success w-100 mb-2" id="startLiveViewBtn">
+                                    <i class="fas fa-play me-2"></i>بدء المشاهدة
+                                </button>
+                                <button class="btn btn-danger w-100" id="stopLiveViewBtn" disabled>
+                                    <i class="fas fa-stop me-2"></i>إيقاف المشاهدة
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="card mt-3">
+                            <div class="card-header">
+                                <h6 class="mb-0">الجلسات النشطة</h6>
+                            </div>
+                            <div class="card-body" id="activeSessionsList">
+                                <!-- Active sessions will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0">المشاهدة المباشرة</h6>
+                                <span class="live-indicator me-2" id="liveIndicator" style="display: none;"></span>
+                            </div>
+                            <div class="card-body">
+                                <div class="video-preview" id="liveVideoContainer">
+                                    <div class="text-center">
+                                        <i class="fas fa-video fa-3x mb-3"></i>
+                                        <p>اختر كاميرا لبدء المشاهدة المباشرة</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recordings Tab -->
+            <div class="tab-pane fade" id="recordings" role="tabpanel">
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <select class="form-select" id="recordingCameraFilter">
+                            <option value="">جميع الكاميرات</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="date" class="form-control" id="recordingStartDate">
+                    </div>
+                    <div class="col-md-2">
+                        <input type="date" class="form-control" id="recordingEndDate">
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-select" id="recordingTypeFilter">
+                            <option value="">جميع الأنواع</option>
+                            <option value="continuous">مستمر</option>
+                            <option value="motion">حركة</option>
+                            <option value="alert">تنبيه</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-primary" id="searchRecordingsBtn">
+                            <i class="fas fa-search me-2"></i>البحث
+                        </button>
+                        <button class="btn btn-success" id="startRecordingBtn">
+                            <i class="fas fa-record-vinyl me-2"></i>بدء تسجيل
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>الكاميرا</th>
+                                        <th>تاريخ البداية</th>
+                                        <th>المدة</th>
+                                        <th>النوع</th>
+                                        <th>الحجم</th>
+                                        <th>الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recordingsTable">
+                                    <!-- Recordings will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alerts Tab -->
+            <div class="tab-pane fade" id="alerts" role="tabpanel">
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <select class="form-select" id="alertSeverityFilter">
+                            <option value="">جميع المستويات</option>
+                            <option value="critical">حرج</option>
+                            <option value="high">عالي</option>
+                            <option value="medium">متوسط</option>
+                            <option value="low">منخفض</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="alertStatusFilter">
+                            <option value="active">تنبيهات نشطة</option>
+                            <option value="acknowledged">تم الإقرار بها</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <button class="btn btn-warning" id="acknowledgeAllBtn">
+                            <i class="fas fa-check-double me-2"></i>الإقرار بالكل
+                        </button>
+                    </div>
+                </div>
+
+                <div id="alertsList">
+                    <!-- Alerts will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Reports Tab -->
+            <div class="tab-pane fade" id="reports" role="tabpanel">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">إنشاء تقرير جديد</h6>
+                            </div>
+                            <div class="card-body">
+                                <form id="reportForm">
+                                    <div class="mb-3">
+                                        <label class="form-label">نوع التقرير</label>
+                                        <select class="form-select" id="reportType">
+                                            <option value="activity">تقرير النشاط</option>
+                                            <option value="alerts">تقرير التنبيهات</option>
+                                            <option value="usage">تقرير الاستخدام</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">الفرع</label>
+                                        <select class="form-select" id="reportBranch">
+                                            <option value="">جميع الفروع</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">من تاريخ</label>
+                                        <input type="date" class="form-control" id="reportStartDate">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">إلى تاريخ</label>
+                                        <input type="date" class="form-control" id="reportEndDate">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="fas fa-file-alt me-2"></i>إنشاء التقرير
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">التقارير المحفوظة</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>عنوان التقرير</th>
+                                                <th>النوع</th>
+                                                <th>الفترة</th>
+                                                <th>تاريخ الإنشاء</th>
+                                                <th>الإجراءات</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="reportsTable">
+                                            <!-- Reports will be loaded here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Camera Modal -->
+    <div class="modal fade" id="addCameraModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">إضافة كاميرا جديدة</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addCameraForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">اسم الكاميرا</label>
+                                    <input type="text" class="form-control" name="name" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">معرف الكاميرا</label>
+                                    <input type="text" class="form-control" name="camera_id" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">نوع الكاميرا</label>
+                                    <select class="form-select" name="camera_type">
+                                        <option value="fixed">ثابتة</option>
+                                        <option value="ptz">متحركة (PTZ)</option>
+                                        <option value="dome">قبة</option>
+                                        <option value="bullet">أسطوانية</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">الموقع</label>
+                                    <input type="text" class="form-control" name="location">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">عنوان IP</label>
+                                    <input type="text" class="form-control" name="ip_address">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">المنفذ</label>
+                                    <input type="number" class="form-control" name="port" value="554">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">رابط RTSP</label>
+                            <input type="text" class="form-control" name="rtsp_url">
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">اسم المستخدم</label>
+                                    <input type="text" class="form-control" name="username">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">كلمة المرور</label>
+                                    <input type="password" class="form-control" name="password">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">الوصف</label>
+                            <textarea class="form-control" name="description" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-primary" id="saveCameraBtn">حفظ الكاميرا</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/surveillance_management.js') }}"></script>
+</body>
+</html>

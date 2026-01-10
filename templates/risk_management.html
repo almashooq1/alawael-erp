@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة المخاطر - مراكز الأوائل</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #f8f9fa;
+            direction: rtl;
+        }
+        .navbar-brand {
+            font-weight: 700;
+            color: #2c3e50 !important;
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .stat-card.danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+        }
+        .stat-card.warning {
+            background: linear-gradient(135deg, #feca57 0%, #ff9ff3 100%);
+        }
+        .stat-card.success {
+            background: linear-gradient(135deg, #48cab2 0%, #2dd4bf 100%);
+        }
+        .stat-card.info {
+            background: linear-gradient(135deg, #3742fa 0%, #2f3542 100%);
+        }
+        .nav-pills .nav-link {
+            border-radius: 25px;
+            margin: 0 5px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .nav-pills .nav-link.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 25px;
+            padding: 10px 25px;
+            font-weight: 600;
+        }
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .table {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .table thead th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            font-weight: 600;
+        }
+        .badge {
+            border-radius: 20px;
+            padding: 8px 15px;
+            font-weight: 600;
+        }
+        .risk-level-critical {
+            background-color: #dc3545;
+            color: white;
+        }
+        .risk-level-high {
+            background-color: #fd7e14;
+            color: white;
+        }
+        .risk-level-medium {
+            background-color: #ffc107;
+            color: #000;
+        }
+        .risk-level-low {
+            background-color: #198754;
+            color: white;
+        }
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+        }
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px 15px 0 0;
+        }
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 20px 0;
+        }
+        .filter-section {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/dashboard">
+                <i class="fas fa-shield-alt me-2"></i>
+                نظام إدارة المخاطر - مراكز الأوائل
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard">
+                            <i class="fas fa-home me-1"></i>
+                            الرئيسية
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="stat-card danger">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="mb-0" id="criticalRisksCount">0</h3>
+                            <p class="mb-0">مخاطر حرجة</p>
+                        </div>
+                        <i class="fas fa-exclamation-triangle fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card warning">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="mb-0" id="highRisksCount">0</h3>
+                            <p class="mb-0">مخاطر عالية</p>
+                        </div>
+                        <i class="fas fa-exclamation-circle fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card info">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="mb-0" id="totalIncidentsCount">0</h3>
+                            <p class="mb-0">إجمالي الحوادث</p>
+                        </div>
+                        <i class="fas fa-clipboard-list fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card success">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="mb-0" id="emergencyPlansCount">0</h3>
+                            <p class="mb-0">خطط الطوارئ</p>
+                        </div>
+                        <i class="fas fa-file-medical fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <ul class="nav nav-pills" id="mainTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="risks-tab" data-bs-toggle="pill" data-bs-target="#risks" type="button" role="tab">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    تقييم المخاطر
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="emergency-tab" data-bs-toggle="pill" data-bs-target="#emergency" type="button" role="tab">
+                                    <i class="fas fa-file-medical me-2"></i>
+                                    خطط الطوارئ
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="incidents-tab" data-bs-toggle="pill" data-bs-target="#incidents" type="button" role="tab">
+                                    <i class="fas fa-clipboard-list me-2"></i>
+                                    تقارير الحوادث
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="inspections-tab" data-bs-toggle="pill" data-bs-target="#inspections" type="button" role="tab">
+                                    <i class="fas fa-search me-2"></i>
+                                    تفتيش السلامة
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="preventive-tab" data-bs-toggle="pill" data-bs-target="#preventive" type="button" role="tab">
+                                    <i class="fas fa-shield-alt me-2"></i>
+                                    التدابير الوقائية
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="analytics-tab" data-bs-toggle="pill" data-bs-target="#analytics" type="button" role="tab">
+                                    <i class="fas fa-chart-bar me-2"></i>
+                                    التحليلات
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content" id="mainTabsContent">
+                            <!-- Risk Assessment Tab -->
+                            <div class="tab-pane fade show active" id="risks" role="tabpanel">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                                        تقييم المخاطر
+                                    </h5>
+                                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addRiskModal">
+                                        <i class="fas fa-plus me-2"></i>
+                                        إضافة تقييم مخاطر
+                                    </button>
+                                </div>
+
+                                <!-- Risk Filters -->
+                                <div class="filter-section">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <select class="form-select" id="riskLevelFilter">
+                                                <option value="">جميع مستويات المخاطر</option>
+                                                <option value="critical">حرجة</option>
+                                                <option value="high">عالية</option>
+                                                <option value="medium">متوسطة</option>
+                                                <option value="low">منخفضة</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <select class="form-select" id="riskStatusFilter">
+                                                <option value="">جميع الحالات</option>
+                                                <option value="identified">محددة</option>
+                                                <option value="assessed">مقيمة</option>
+                                                <option value="mitigated">مخففة</option>
+                                                <option value="closed">مغلقة</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <select class="form-select" id="riskCategoryFilter">
+                                                <option value="">جميع الفئات</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <button class="btn btn-outline-primary w-100" onclick="riskManager.loadRisks()">
+                                                <i class="fas fa-search me-2"></i>
+                                                بحث
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Risks Table -->
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>رمز المخاطر</th>
+                                                <th>العنوان</th>
+                                                <th>الفئة</th>
+                                                <th>الموقع</th>
+                                                <th>مستوى المخاطر</th>
+                                                <th>نتيجة المخاطر</th>
+                                                <th>الحالة</th>
+                                                <th>المسؤول</th>
+                                                <th>الإجراءات</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="risksTableBody">
+                                            <!-- Risks will be loaded here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- Pagination -->
+                                <nav>
+                                    <ul class="pagination justify-content-center" id="risksPagination">
+                                        <!-- Pagination will be loaded here -->
+                                    </ul>
+                                </nav>
+                            </div>
+
+                            <!-- Emergency Plans Tab -->
+                            <div class="tab-pane fade" id="emergency" role="tabpanel">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-file-medical text-success me-2"></i>
+                                        خطط الطوارئ
+                                    </h5>
+                                    <button class="btn btn-primary">
+                                        <i class="fas fa-plus me-2"></i>
+                                        إضافة خطة طوارئ
+                                    </button>
+                                </div>
+
+                                <!-- Emergency Plans Table -->
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>رمز الخطة</th>
+                                                <th>العنوان</th>
+                                                <th>نوع الطوارئ</th>
+                                                <th>النطاق</th>
+                                                <th>الإصدار</th>
+                                                <th>حالة الموافقة</th>
+                                                <th>المنسق</th>
+                                                <th>آخر تدريب</th>
+                                                <th>الإجراءات</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="emergencyPlansTableBody">
+                                            <!-- Emergency plans will be loaded here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Incidents Tab -->
+                            <div class="tab-pane fade" id="incidents" role="tabpanel">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-clipboard-list text-danger me-2"></i>
+                                        تقارير الحوادث
+                                    </h5>
+                                    <button class="btn btn-primary">
+                                        <i class="fas fa-plus me-2"></i>
+                                        إضافة تقرير حادث
+                                    </button>
+                                </div>
+
+                                <!-- Incidents Table -->
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>رقم الحادث</th>
+                                                <th>العنوان</th>
+                                                <th>النوع</th>
+                                                <th>الخطورة</th>
+                                                <th>التاريخ</th>
+                                                <th>الموقع</th>
+                                                <th>الإصابات</th>
+                                                <th>الحالة</th>
+                                                <th>المبلغ</th>
+                                                <th>الإجراءات</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="incidentsTableBody">
+                                            <!-- Incidents will be loaded here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Safety Inspections Tab -->
+                            <div class="tab-pane fade" id="inspections" role="tabpanel">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-search text-info me-2"></i>
+                                        تفتيش السلامة
+                                    </h5>
+                                    <button class="btn btn-primary">
+                                        <i class="fas fa-plus me-2"></i>
+                                        إضافة تفتيش
+                                    </button>
+                                </div>
+
+                                <!-- Inspections Table -->
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>رقم التفتيش</th>
+                                                <th>العنوان</th>
+                                                <th>النوع</th>
+                                                <th>التاريخ</th>
+                                                <th>التقييم العام</th>
+                                                <th>نسبة الامتثال</th>
+                                                <th>المفتش الرئيسي</th>
+                                                <th>الحالة</th>
+                                                <th>الإجراءات</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="inspectionsTableBody">
+                                            <!-- Inspections will be loaded here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Preventive Measures Tab -->
+                            <div class="tab-pane fade" id="preventive" role="tabpanel">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-shield-alt text-primary me-2"></i>
+                                        التدابير الوقائية
+                                    </h5>
+                                    <button class="btn btn-primary">
+                                        <i class="fas fa-plus me-2"></i>
+                                        إضافة تدبير وقائي
+                                    </button>
+                                </div>
+
+                                <!-- Preventive Measures Table -->
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>رمز التدبير</th>
+                                                <th>العنوان</th>
+                                                <th>الفئة</th>
+                                                <th>النوع</th>
+                                                <th>الحالة</th>
+                                                <th>الأولوية</th>
+                                                <th>المسؤول</th>
+                                                <th>تاريخ التنفيذ</th>
+                                                <th>التكلفة المقدرة</th>
+                                                <th>الإجراءات</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="preventiveMeasuresTableBody">
+                                            <!-- Preventive measures will be loaded here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Analytics Tab -->
+                            <div class="tab-pane fade" id="analytics" role="tabpanel">
+                                <h5 class="mb-4">
+                                    <i class="fas fa-chart-bar text-info me-2"></i>
+                                    تحليلات المخاطر
+                                </h5>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <h6 class="mb-0">توزيع المخاطر حسب الفئة</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="chart-container">
+                                                    <canvas id="riskByCategoryChart"></canvas>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <h6 class="mb-0">اتجاه الحوادث الشهرية</h6>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="chart-container">
+                                                    <canvas id="incidentsTrendChart"></canvas>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/risk_management.js') }}"></script>
+    <script>
+        // Initialize the risk management system
+        const riskManager = new RiskManager();
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            riskManager.init();
+        });
+    </script>
+</body>
+</html>

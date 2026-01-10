@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة الأعطال والصيانة - مراكز الأوائل</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            direction: rtl;
+        }
+        
+        .sidebar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+        
+        .sidebar .nav-link {
+            color: white;
+            padding: 12px 20px;
+            margin: 5px 0;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            background-color: rgba(255,255,255,0.2);
+            color: white;
+            transform: translateX(-5px);
+        }
+        
+        .main-content {
+            padding: 20px;
+        }
+        
+        .stats-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stats-card .icon {
+            font-size: 2.5rem;
+            opacity: 0.8;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            padding: 15px 20px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .table {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .table thead th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px;
+        }
+        
+        .table tbody tr {
+            transition: all 0.3s ease;
+        }
+        
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+            transform: scale(1.01);
+        }
+        
+        .badge {
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+        
+        .priority-critical { background-color: #dc3545; }
+        .priority-high { background-color: #fd7e14; }
+        .priority-normal { background-color: #198754; }
+        .priority-low { background-color: #6c757d; }
+        
+        .status-reported { background-color: #17a2b8; }
+        .status-acknowledged { background-color: #ffc107; color: #000; }
+        .status-assigned { background-color: #fd7e14; }
+        .status-in_progress { background-color: #007bff; }
+        .status-completed { background-color: #28a745; }
+        .status-closed { background-color: #6c757d; }
+        
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+        }
+        
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px 15px 0 0;
+        }
+        
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 2px solid #e9ecef;
+            padding: 10px 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        .nav-tabs .nav-link {
+            border-radius: 10px 10px 0 0;
+            border: none;
+            background-color: #f8f9fa;
+            color: #6c757d;
+            margin-left: 5px;
+        }
+        
+        .nav-tabs .nav-link.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner-border {
+            color: #667eea;
+        }
+        
+        .alert {
+            border-radius: 10px;
+            border: none;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                top: 0;
+                right: -250px;
+                width: 250px;
+                height: 100vh;
+                z-index: 1000;
+                transition: right 0.3s ease;
+            }
+            
+            .sidebar.show {
+                right: 0;
+            }
+            
+            .main-content {
+                margin-right: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 sidebar">
+                <div class="p-3">
+                    <h5 class="text-white mb-4">
+                        <i class="fas fa-tools me-2"></i>
+                        إدارة الصيانة
+                    </h5>
+                    <nav class="nav flex-column">
+                        <a class="nav-link active" href="#" data-tab="dashboard">
+                            <i class="fas fa-tachometer-alt me-2"></i>
+                            لوحة التحكم
+                        </a>
+                        <a class="nav-link" href="#" data-tab="fault-reports">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            تقارير الأعطال
+                        </a>
+                        <a class="nav-link" href="#" data-tab="maintenance-requests">
+                            <i class="fas fa-clipboard-list me-2"></i>
+                            طلبات الصيانة
+                        </a>
+                        <a class="nav-link" href="#" data-tab="maintenance-schedules">
+                            <i class="fas fa-calendar-alt me-2"></i>
+                            جداول الصيانة
+                        </a>
+                        <a class="nav-link" href="#" data-tab="equipment-inventory">
+                            <i class="fas fa-boxes me-2"></i>
+                            جرد المعدات
+                        </a>
+                        <a class="nav-link" href="#" data-tab="maintenance-logs">
+                            <i class="fas fa-history me-2"></i>
+                            سجلات الصيانة
+                        </a>
+                        <a class="nav-link" href="#" data-tab="reports">
+                            <i class="fas fa-chart-bar me-2"></i>
+                            التقارير والإحصائيات
+                        </a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10 main-content">
+                <!-- Dashboard Tab -->
+                <div id="dashboard-tab" class="tab-content active">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2><i class="fas fa-tachometer-alt me-2"></i>لوحة تحكم الصيانة والأعطال</h2>
+                        <button class="btn btn-primary" onclick="refreshDashboard()">
+                            <i class="fas fa-sync-alt me-2"></i>تحديث
+                        </button>
+                    </div>
+
+                    <!-- Statistics Cards -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="stats-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h3 id="total-fault-reports">0</h3>
+                                        <p class="mb-0">إجمالي تقارير الأعطال</p>
+                                    </div>
+                                    <i class="fas fa-exclamation-triangle icon"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h3 id="open-fault-reports">0</h3>
+                                        <p class="mb-0">الأعطال المفتوحة</p>
+                                    </div>
+                                    <i class="fas fa-clock icon"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h3 id="pending-requests">0</h3>
+                                        <p class="mb-0">طلبات الصيانة المعلقة</p>
+                                    </div>
+                                    <i class="fas fa-hourglass-half icon"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h3 id="total-equipment">0</h3>
+                                        <p class="mb-0">إجمالي المعدات</p>
+                                    </div>
+                                    <i class="fas fa-boxes icon"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Row -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">توزيع الأعطال حسب النوع</h5>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="faultTypeChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">حالة طلبات الصيانة</h5>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="maintenanceStatusChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activities -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">الأنشطة الأخيرة</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="recent-activities">
+                                <div class="loading">
+                                    <div class="spinner-border" role="status">
+                                        <span class="visually-hidden">جاري التحميل...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fault Reports Tab -->
+                <div id="fault-reports-tab" class="tab-content">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2><i class="fas fa-exclamation-triangle me-2"></i>تقارير الأعطال</h2>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#faultReportModal">
+                            <i class="fas fa-plus me-2"></i>إضافة تقرير عطل
+                        </button>
+                    </div>
+
+                    <!-- Filters -->
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <select class="form-select" id="fault-branch-filter">
+                                        <option value="">جميع الفروع</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <select class="form-select" id="fault-type-filter">
+                                        <option value="">جميع الأنواع</option>
+                                        <option value="electrical">كهربائي</option>
+                                        <option value="plumbing">سباكة</option>
+                                        <option value="hvac">تكييف وتهوية</option>
+                                        <option value="equipment">معدات</option>
+                                        <option value="structural">إنشائي</option>
+                                        <option value="it">تقنية معلومات</option>
+                                        <option value="safety">سلامة</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <select class="form-select" id="fault-status-filter">
+                                        <option value="">جميع الحالات</option>
+                                        <option value="reported">مُبلغ عنه</option>
+                                        <option value="acknowledged">مُستلم</option>
+                                        <option value="assigned">مُكلف</option>
+                                        <option value="in_progress">قيد التنفيذ</option>
+                                        <option value="completed">مكتمل</option>
+                                        <option value="closed">مغلق</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <select class="form-select" id="fault-priority-filter">
+                                        <option value="">جميع الأولويات</option>
+                                        <option value="critical">حرجة</option>
+                                        <option value="high">عالية</option>
+                                        <option value="normal">عادية</option>
+                                        <option value="low">منخفضة</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fault Reports Table -->
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>رقم التقرير</th>
+                                            <th>الفرع</th>
+                                            <th>نوع العطل</th>
+                                            <th>العنوان</th>
+                                            <th>الأولوية</th>
+                                            <th>الحالة</th>
+                                            <th>تاريخ الإبلاغ</th>
+                                            <th>الإجراءات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="fault-reports-table">
+                                        <tr>
+                                            <td colspan="8" class="text-center">
+                                                <div class="loading">
+                                                    <div class="spinner-border" role="status">
+                                                        <span class="visually-hidden">جاري التحميل...</span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <!-- Pagination -->
+                            <nav aria-label="صفحات تقارير الأعطال">
+                                <ul class="pagination justify-content-center" id="fault-reports-pagination">
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Other tabs content will be similar structure... -->
+                <!-- For brevity, I'll include the basic structure for other tabs -->
+                
+                <div id="maintenance-requests-tab" class="tab-content">
+                    <h2><i class="fas fa-clipboard-list me-2"></i>طلبات الصيانة</h2>
+                    <!-- Content similar to fault reports -->
+                </div>
+
+                <div id="maintenance-schedules-tab" class="tab-content">
+                    <h2><i class="fas fa-calendar-alt me-2"></i>جداول الصيانة</h2>
+                    <!-- Content for maintenance schedules -->
+                </div>
+
+                <div id="equipment-inventory-tab" class="tab-content">
+                    <h2><i class="fas fa-boxes me-2"></i>جرد المعدات</h2>
+                    <!-- Content for equipment inventory -->
+                </div>
+
+                <div id="maintenance-logs-tab" class="tab-content">
+                    <h2><i class="fas fa-history me-2"></i>سجلات الصيانة</h2>
+                    <!-- Content for maintenance logs -->
+                </div>
+
+                <div id="reports-tab" class="tab-content">
+                    <h2><i class="fas fa-chart-bar me-2"></i>التقارير والإحصائيات</h2>
+                    <!-- Content for reports and analytics -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fault Report Modal -->
+    <div class="modal fade" id="faultReportModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">إضافة تقرير عطل جديد</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="faultReportForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">الفرع</label>
+                                    <select class="form-select" name="branch_id" required>
+                                        <option value="">اختر الفرع</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">نوع العطل</label>
+                                    <select class="form-select" name="fault_type" required>
+                                        <option value="">اختر نوع العطل</option>
+                                        <option value="electrical">كهربائي</option>
+                                        <option value="plumbing">سباكة</option>
+                                        <option value="hvac">تكييف وتهوية</option>
+                                        <option value="equipment">معدات</option>
+                                        <option value="structural">إنشائي</option>
+                                        <option value="it">تقنية معلومات</option>
+                                        <option value="safety">سلامة</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">فئة العطل</label>
+                                    <select class="form-select" name="fault_category" required>
+                                        <option value="">اختر الفئة</option>
+                                        <option value="critical">حرجة</option>
+                                        <option value="urgent">عاجلة</option>
+                                        <option value="normal">عادية</option>
+                                        <option value="minor">طفيفة</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">مستوى الأولوية</label>
+                                    <select class="form-select" name="priority_level">
+                                        <option value="normal">عادية</option>
+                                        <option value="high">عالية</option>
+                                        <option value="critical">حرجة</option>
+                                        <option value="low">منخفضة</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">عنوان العطل</label>
+                            <input type="text" class="form-control" name="fault_title" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">وصف العطل</label>
+                            <textarea class="form-control" name="fault_description" rows="3" required></textarea>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">تفاصيل الموقع</label>
+                                    <input type="text" class="form-control" name="location_details">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">المنطقة المتأثرة</label>
+                                    <input type="text" class="form-control" name="affected_area">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">الشخص المسؤول</label>
+                                    <input type="text" class="form-control" name="contact_person">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">رقم الهاتف</label>
+                                    <input type="tel" class="form-control" name="contact_phone">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" name="safety_risk" id="safety_risk">
+                                    <label class="form-check-label" for="safety_risk">
+                                        يشكل خطراً على السلامة
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" name="service_disruption" id="service_disruption">
+                                    <label class="form-check-label" for="service_disruption">
+                                        يعطل الخدمة
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">ملاحظات إضافية</label>
+                            <textarea class="form-control" name="notes" rows="2"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-primary" onclick="submitFaultReport()">
+                        <i class="fas fa-save me-2"></i>حفظ التقرير
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="/static/js/maintenance_management.js"></script>
+</body>
+</html>

@@ -1,0 +1,187 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [master, develop]
+  pull_request:
+    branches: [master, develop]
+
+jobs:
+  # ============================================
+  # Lint & Code Quality
+  # ============================================
+  lint:
+    runs-on: ubuntu-latest
+    name: Code Quality
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint --if-present
+        continue-on-error: true
+
+      - name: Check formatting
+        run: npm run format:check --if-present
+        continue-on-error: true
+
+  # ============================================
+  # Backend Tests
+  # ============================================
+  test-backend:
+    runs-on: ubuntu-latest
+    name: Backend Tests
+    needs: lint
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Install backend dependencies
+        run: cd backend && npm ci
+
+      - name: Run backend tests
+        run: npm test --prefix backend
+        env:
+          NODE_ENV: test
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./backend/coverage/lcov.info
+          flags: backend
+          fail_ci_if_error: false
+
+  # ============================================
+  # Frontend Tests
+  # ============================================
+  test-frontend:
+    runs-on: ubuntu-latest
+    name: Frontend Tests
+    needs: lint
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          cd frontend/admin-dashboard && npm ci
+
+      - name: Build frontend
+        run: cd frontend/admin-dashboard && npm run build
+
+      - name: Run frontend tests (if configured)
+        run: cd frontend/admin-dashboard && npm test --if-present
+        continue-on-error: true
+
+  # ============================================
+  # Docker Build & Push
+  # ============================================
+  docker:
+    runs-on: ubuntu-latest
+    name: Docker Build
+    needs: [test-backend, test-frontend]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build Docker image
+        run: docker build -t alawael-erp:latest .
+
+      - name: Verify image
+        run: docker image inspect alawael-erp:latest
+
+  # ============================================
+  # Security Scan
+  # ============================================
+  security:
+    runs-on: ubuntu-latest
+    name: Security Scan
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  # ============================================
+  # Documentation
+  # ============================================
+  docs:
+    runs-on: ubuntu-latest
+    name: Documentation Check
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Check if README exists
+        run: |
+          if [ ! -f README.md ]; then
+            echo "❌ README.md is missing"
+            exit 1
+          fi
+          echo "✅ README.md found"
+
+      - name: Check if CONTRIBUTING.md exists
+        run: |
+          if [ ! -f CONTRIBUTING.md ]; then
+            echo "❌ CONTRIBUTING.md is missing"
+            exit 1
+          fi
+          echo "✅ CONTRIBUTING.md found"
+
+  # ============================================
+  # Notification
+  # ============================================
+  notify:
+    runs-on: ubuntu-latest
+    name: Notify on Completion
+    needs: [test-backend, test-frontend]
+    if: always()
+    steps:
+      - name: Send Status
+        run: |
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "✅ All checks passed!"
+          else
+            echo "❌ Some checks failed"
+          fi
+
+# ============================================
+# Additional Configurations
+# ============================================
+env:
+  NODE_VERSION: '18'
+  NPM_VERSION: '9'

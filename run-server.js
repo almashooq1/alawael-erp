@@ -33,17 +33,17 @@ console.log('');
 const server = spawn('node', ['server.js'], {
   cwd: backendDir,
   stdio: 'inherit',
-  env: { ...process.env, NODE_ENV: 'development' }
+  env: { ...process.env, NODE_ENV: 'development' },
 });
 
 // Handle process exit
-server.on('exit', (code) => {
+server.on('exit', code => {
   console.log(`\n⛔ Server process exited with code ${code}`);
   process.exit(code);
 });
 
 // Handle errors
-server.on('error', (err) => {
+server.on('error', err => {
   console.error('❌ Error starting server:', err);
   process.exit(1);
 });

@@ -12,6 +12,18 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  const fetchUser = async () => {
+    try {
+      const response = await axios.get('http://localhost:3001/api/auth/me');
+      setCurrentUser(response.data.user);
+    } catch (err) {
+      console.error('Error fetching user:', err);
+      logout();
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Set up axios defaults
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -22,35 +34,34 @@ export function AuthProvider({ children }) {
     } else {
       setLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const fetchUser = async () => {
-    try {
-      const response = await axios.get('http://localhost:5000/api/me');
-      setCurrentUser(response.data.user);
-    } catch (err) {
-      console.error('Error fetching user:', err);
-      logout();
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const login = async (email, password) => {
     try {
       setError('');
-      const response = await axios.post('http://localhost:5000/api/login', {
+      console.log('🔐 Login attempt:', { email, url: 'http://localhost:3001/api/auth/login' });
+
+      const response = await axios.post('http://localhost:3001/api/auth/login', {
         email,
         password,
       });
-      
-      const { access_token, user } = response.data;
-      localStorage.setItem('token', access_token);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
+
+      console.log('📥 Login response:', response.data);
+
+      const { accessToken, user } = response.data.data;
+      localStorage.setItem('token', accessToken);
+      axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
       setCurrentUser(user);
+
+      console.log('✅ Login successful:', { user: user.email, role: user.role });
       return { success: true };
     } catch (err) {
-      const errorMessage = err.response?.data?.error || 'Login failed. Please try again.';
+      console.error('❌ Login error:', err);
+      console.error('Response data:', err.response?.data);
+      console.error('Response status:', err.response?.status);
+
+      const errorMessage = err.response?.data?.message || 'Login failed. Please try again.';
       setError(errorMessage);
       return { success: false, error: errorMessage };
     }
@@ -59,14 +70,14 @@ export function AuthProvider({ children }) {
   const register = async (name, email, password) => {
     try {
       setError('');
-      await axios.post('http://localhost:5000/api/register', {
-        name,
+      await axios.post('http://localhost:3001/api/auth/register', {
+        fullName: name,
         email,
         password,
       });
       return { success: true };
     } catch (err) {
-      const errorMessage = err.response?.data?.error || 'Registration failed. Please try again.';
+      const errorMessage = err.response?.data?.message || 'Registration failed. Please try again.';
       setError(errorMessage);
       return { success: false, error: errorMessage };
     }
@@ -86,11 +97,7 @@ export function AuthProvider({ children }) {
     logout,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {!loading && children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>;
 }
 
 export default AuthContext;

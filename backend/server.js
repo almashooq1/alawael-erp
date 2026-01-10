@@ -2,15 +2,69 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
+const helmet = require('helmet');
+
+// Security middleware
+const securityHeaders = require('./middleware/securityHeaders');
+const sanitizeInput = require('./middleware/sanitize');
+const { apiLimiter } = require('./middleware/rateLimiter');
+const { suspiciousActivityDetector } = require('./utils/security');
+const responseHandler = require('./middleware/responseHandler');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Middleware
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Trust proxy (for rate limiting behind reverse proxy)
+app.set('trust proxy', 1);
+
+// Security Middleware (MUST be first)
+app.use(securityHeaders);
+app.use(suspiciousActivityDetector);
+
+// CORS configuration
+const corsOptions = {
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  credentials: true,
+  optionsSuccessStatus: 200,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
+app.use(cors(corsOptions));
+
+// Body parsing middleware with size limits
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Input sanitization (protects against NoSQL injection, XSS, HPP)
+app.use(sanitizeInput);
+
+// Response handler middleware (provides res.success, res.error, etc.)
+app.use(responseHandler);
+
+// Request logging
 app.use(morgan('dev'));
+
+// Rate limiting for all API routes
+app.use('/api', apiLimiter);
+
+// API Routes
+const authRoutes = require('./api/routes/auth.routes');
+const usersRoutes = require('./api/routes/users.routes');
+const hrRoutes = require('./routes/hr.routes');
+const hropsRoutes = require('./routes/hrops.routes');
+const reportsRoutes = require('./routes/reports.routes');
+const financeRoutes = require('./routes/finance.routes');
+const notificationsRoutes = require('./routes/notifications.routes');
+const aiRoutes = require('./routes/ai.routes');
+
+app.use('/api/auth', authRoutes);
+app.use('/api/users', usersRoutes);
+app.use('/api/employees', hrRoutes);
+app.use('/api/hr', hropsRoutes);
+app.use('/api/reports', reportsRoutes);
+app.use('/api/finance', financeRoutes);
+app.use('/api/notifications', notificationsRoutes);
+app.use('/api/ai', aiRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {

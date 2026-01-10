@@ -16,6 +16,7 @@ A comprehensive, full-stack **Enterprise Resource Planning (ERP)** system design
 ## ✨ Features | المميزات
 
 ### 🔐 Authentication & Security
+
 - ✅ **JWT Authentication** - Secure login with access & refresh tokens
 - ✅ **Role-Based Access Control** - Admin, Manager, Employee roles
 - ✅ **Token Refresh Mechanism** - 24h access, 7-day refresh tokens
@@ -23,35 +24,41 @@ A comprehensive, full-stack **Enterprise Resource Planning (ERP)** system design
 - ✅ **Security Middleware** - Helmet, rate limiting, input sanitization
 
 ### 👥 User Management
+
 - ✅ **User Registration & Login** - Complete authentication flow
 - ✅ **User Profiles** - Manage user information and settings
 - ✅ **Employee Directory** - Comprehensive employee database
 - ✅ **Permission Management** - Fine-grained access control
 
 ### 🏢 HR Management
+
 - ✅ **Attendance Tracking** - Clock in/out system with reports
 - ✅ **Leave Management** - Request, approve, and track leave requests
 - ✅ **Employee Records** - Complete HR database with history
 - ✅ **Performance Tracking** - Monitor employee performance
 
 ### 💰 Finance Management
+
 - ✅ **Invoicing System** - Create and manage invoices
 - ✅ **Expense Tracking** - Record and categorize expenses
 - ✅ **Financial Reports** - Comprehensive financial analytics
 - ✅ **Budget Management** - Track and control budgets
 
 ### 📊 Analytics & Reporting
+
 - ✅ **Dashboard** - Real-time KPIs and statistics
 - ✅ **Custom Reports** - Generate detailed reports
 - ✅ **Data Visualization** - Charts and graphs
 - ✅ **AI-Powered Insights** - Predictive analytics
 
 ### 🔔 Notifications
+
 - ✅ **Real-time Notifications** - Instant updates
 - ✅ **Email Notifications** - Automated email alerts
 - ✅ **Activity Feed** - Track system activities
 
 ### 🌐 Modern UI/UX
+
 - ✅ **Material-UI Design** - Beautiful, responsive interface
 - ✅ **Arabic Language Support** - RTL layout support
 - ✅ **Mobile Responsive** - Works on all devices
@@ -62,6 +69,7 @@ A comprehensive, full-stack **Enterprise Resource Planning (ERP)** system design
 ## 🛠️ Tech Stack | التقنيات المستخدمة
 
 ### Backend
+
 - **Node.js** v18.x - JavaScript runtime
 - **Express.js** v4.18 - Web framework
 - **JWT** - JSON Web Tokens for authentication
@@ -71,6 +79,7 @@ A comprehensive, full-stack **Enterprise Resource Planning (ERP)** system design
 - **Express Validator** - Input validation
 
 ### Frontend
+
 - **React** v18.2 - UI library
 - **Material-UI** v5.13 - Component library
 - **React Router** v6.11 - Client-side routing
@@ -79,6 +88,7 @@ A comprehensive, full-stack **Enterprise Resource Planning (ERP)** system design
 - **Yup** v1.2 - Schema validation
 
 ### Database
+
 - **In-Memory JSON Database** - Fast development database
 - **Modular Design** - Easy to migrate to MongoDB/PostgreSQL
 
@@ -95,26 +105,30 @@ A comprehensive, full-stack **Enterprise Resource Planning (ERP)** system design
 ### Installation Steps | خطوات التثبيت
 
 1. **Clone the repository:**
+
    ```bash
    git clone https://github.com/almashooq1/alawael-erp.git
    cd alawael-erp
    ```
 
 2. **Backend Setup:**
+
    ```bash
    cd backend
    npm install
    ```
 
 3. **Frontend Setup:**
+
    ```bash
    cd ../frontend
    npm install
    ```
 
 4. **Environment Variables:**
-   
+
    **Backend** (`backend/.env`):
+
    ```env
    PORT=3001
    NODE_ENV=development
@@ -126,6 +140,7 @@ A comprehensive, full-stack **Enterprise Resource Planning (ERP)** system design
    ```
 
    **Frontend** (`frontend/.env`):
+
    ```env
    REACT_APP_API_URL=http://localhost:3001
    REACT_APP_API_BASE=/api
@@ -134,6 +149,7 @@ A comprehensive, full-stack **Enterprise Resource Planning (ERP)** system design
    ```
 
 5. **Start the Backend Server:**
+
    ```bash
    cd backend
    npm start
@@ -205,6 +221,7 @@ alawael-erp/
 ## 🔌 API Endpoints | نقاط النهاية
 
 ### Authentication
+
 ```
 POST   /api/auth/register      - Register new user
 POST   /api/auth/login         - Login user
@@ -213,6 +230,7 @@ POST   /api/auth/logout        - Logout user
 ```
 
 ### Users
+
 ```
 GET    /api/users              - Get all users (Admin)
 GET    /api/users/:id          - Get user by ID
@@ -221,6 +239,7 @@ DELETE /api/users/:id          - Delete user (Admin)
 ```
 
 ### Employees
+
 ```
 GET    /api/employees          - Get all employees
 POST   /api/employees          - Create employee
@@ -230,6 +249,7 @@ DELETE /api/employees/:id      - Delete employee
 ```
 
 ### HR Management
+
 ```
 GET    /api/hr/attendance      - Get attendance records
 POST   /api/hr/attendance      - Clock in/out
@@ -239,6 +259,7 @@ PUT    /api/hr/leaves/:id      - Approve/reject leave
 ```
 
 ### Finance
+
 ```
 GET    /api/finance/invoices   - Get all invoices
 POST   /api/finance/invoices   - Create invoice
@@ -247,6 +268,7 @@ POST   /api/finance/expenses   - Create expense
 ```
 
 ### Reports & Analytics
+
 ```
 GET    /api/reports/dashboard  - Dashboard statistics
 GET    /api/reports/financial  - Financial reports
@@ -256,6 +278,7 @@ GET    /api/ai/insights        - Business insights
 ```
 
 ### Notifications
+
 ```
 GET    /api/notifications      - Get user notifications
 POST   /api/notifications      - Create notification
@@ -270,18 +293,21 @@ For detailed API documentation, see [API.md](API.md)
 ## 🧪 Testing | الاختبار
 
 ### Run Backend Tests:
+
 ```bash
 cd backend
 npm test
 ```
 
 ### Test All APIs:
+
 ```powershell
 # Windows PowerShell
 .\TEST_ALL_APIS.ps1
 ```
 
 ### Manual Testing:
+
 1. Start both Backend and Frontend servers
 2. Navigate to `http://localhost:3000`
 3. Login with default credentials
@@ -294,6 +320,7 @@ npm test
 ### Backend Deployment (Node.js)
 
 **Recommended platforms:**
+
 - Railway
 - Render
 - Heroku
@@ -301,6 +328,7 @@ npm test
 - AWS Elastic Beanstalk
 
 **Steps:**
+
 1. Set production environment variables
 2. Use `npm run start:prod` for production
 3. Configure database connection (PostgreSQL/MongoDB)
@@ -310,12 +338,14 @@ npm test
 ### Frontend Deployment (React)
 
 **Recommended platforms:**
+
 - Vercel (Recommended)
 - Netlify
 - GitHub Pages
 - AWS S3 + CloudFront
 
 **Steps:**
+
 1. Update `.env.production` with backend URL
 2. Build: `npm run build`
 3. Deploy build folder
@@ -341,6 +371,7 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 ## 👥 Authors | المؤلفون
 
 **AlAwael Team**
+
 - GitHub: [@almashooq1](https://github.com/almashooq1)
 - Repository: [alawael-erp](https://github.com/almashooq1/alawael-erp)
 
@@ -384,11 +415,13 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 ### Frontend Setup
 
 1. Navigate to the frontend directory:
+
    ```bash
    cd frontend
    ```
 
 2. Install dependencies:
+
    ```bash
    npm install
    ```

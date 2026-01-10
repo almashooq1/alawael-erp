@@ -3,9 +3,11 @@
 ## ✅ ملفات النشر المُنشأة | Deployment Files Created
 
 ### 1. 📚 HOSTINGER_DEPLOYMENT.md
+
 **دليل شامل لنشر المشروع على Hostinger**
 
 يتضمن:
+
 - ✅ متطلبات Hostinger
 - ✅ خطوة بخطوة للإعداد
 - ✅ إعداد Backend
@@ -17,9 +19,11 @@
 - ✅ استكشاف الأخطاء
 
 ### 2. 🚀 deploy-hostinger.sh
+
 **سكريبت تلقائي لنشر كامل النظام**
 
 الخطوات التلقائية:
+
 1. استنسخ من GitHub
 2. ثبّت Backend dependencies
 3. أنشئ .env للـ Backend
@@ -31,9 +35,11 @@
 9. اعرض الحالة
 
 ### 3. ⚙️ nginx-hostinger.conf
+
 **إعدادات Nginx الكاملة**
 
 يتضمن:
+
 - Frontend server block
 - Backend API server block
 - Redirect HTTP → HTTPS
@@ -48,6 +54,7 @@
 ## 🎯 الخطوات الرئيسية | Main Steps
 
 ### المرحلة 1: التحضير على Hostinger
+
 ```bash
 1. تفعيل Node.js في لوحة التحكم
 2. الحصول على بيانات SSH
@@ -55,12 +62,14 @@
 ```
 
 ### المرحلة 2: استنساخ المشروع
+
 ```bash
 git clone https://github.com/almashooq1/alawael-erp.git
 cd alawael-erp
 ```
 
 ### المرحلة 3: إعداد Backend
+
 ```bash
 cd backend
 npm install --production
@@ -69,6 +78,7 @@ pm2 start server.js --name "alawael-backend"
 ```
 
 ### المرحلة 4: إعداد Frontend
+
 ```bash
 cd ../frontend
 npm install --production
@@ -77,6 +87,7 @@ pm2 start "npm start" --name "alawael-frontend"
 ```
 
 ### المرحلة 5: إعداد Domain
+
 ```
 • وجه yourdomain.com إلى frontend/build
 • وجه api.yourdomain.com إلى localhost:3001
@@ -84,6 +95,7 @@ pm2 start "npm start" --name "alawael-frontend"
 ```
 
 ### المرحلة 6: اختبر
+
 ```bash
 curl https://api.yourdomain.com/api/auth/login
 # يجب أن ترجع token بنجاح
@@ -94,6 +106,7 @@ curl https://api.yourdomain.com/api/auth/login
 ## 🔑 ملفات البيئة المطلوبة | Required Env Files
 
 ### backend/.env
+
 ```env
 PORT=3001
 NODE_ENV=production
@@ -105,6 +118,7 @@ FRONTEND_URL=https://yourdomain.com
 ```
 
 ### frontend/.env.production
+
 ```env
 REACT_APP_API_URL=https://api.yourdomain.com
 REACT_APP_API_BASE=/api
@@ -127,6 +141,7 @@ chmod +x deploy-hostinger.sh
 ```
 
 السكريبت سيقوم بـ:
+
 - ✅ استنساخ من GitHub
 - ✅ تثبيت جميع dependencies
 - ✅ إنشاء ملفات .env
@@ -139,13 +154,13 @@ chmod +x deploy-hostinger.sh
 
 ## 📊 مقارنة خيارات الاستضافة | Hosting Options Comparison
 
-| الخيار | Frontend | Backend | السعر | المميزات |
-|---------|----------|---------|-------|-----------|
-| **Hostinger** ✅ | ✅ | ✅ | $$ | رخيص، كل شيء في مكان واحد |
-| **Vercel** | ✅✅ | ⚠️ (API) | $ | سريع جداً، مشهور |
-| **Netlify** | ✅✅ | ❌ | $ | سهل جداً |
-| **Railway** | ⚠️ | ✅✅ | $$ | بسيط وسريع |
-| **Render** | ✅ | ✅ | $$ | موثوق |
+| الخيار           | Frontend | Backend  | السعر | المميزات                  |
+| ---------------- | -------- | -------- | ----- | ------------------------- |
+| **Hostinger** ✅ | ✅       | ✅       | $$    | رخيص، كل شيء في مكان واحد |
+| **Vercel**       | ✅✅     | ⚠️ (API) | $     | سريع جداً، مشهور          |
+| **Netlify**      | ✅✅     | ❌       | $     | سهل جداً                  |
+| **Railway**      | ⚠️       | ✅✅     | $$    | بسيط وسريع                |
+| **Render**       | ✅       | ✅       | $$    | موثوق                     |
 
 ---
 
@@ -169,6 +184,7 @@ chmod +x deploy-hostinger.sh
    - .env مجلد محلي فقط
 
 2. **استخدم قيم JWT فريدة**
+
    ```bash
    # على السيرفر فقط:
    JWT_SECRET=generate-long-random-string-here
@@ -244,22 +260,26 @@ pm2 restart alawael-backend alawael-frontend
 ### ستكون لديك:
 
 ✅ **Frontend**
+
 - https://yourdomain.com
 - واجهة المستخدم كاملة
 - تسجيل دخول سهل
 
 ✅ **Backend API**
+
 - https://api.yourdomain.com
 - جميع Endpoints تعمل
 - قاعدة بيانات في الذاكرة
 
 ✅ **Security**
+
 - SSL Certificate مثبت
 - JWT Authentication
 - Password Hashing
 - Rate Limiting
 
 ✅ **Monitoring**
+
 - PM2 يراقب الخدمات
 - Auto-restart on crash
 - Logs كاملة
@@ -293,24 +313,27 @@ pm2 restart alawael-backend alawael-frontend
 ## 🎉 تم إعداد كل شيء!
 
 ### الآن لديك:
+
 - ✅ دليل شامل للنشر
 - ✅ سكريبت تلقائي
 - ✅ إعدادات Nginx
 - ✅ أمثلة على البيئة
 
 ### ابدأ بـ:
+
 ```bash
 chmod +x deploy-hostinger.sh
 ./deploy-hostinger.sh
 ```
 
 ### أو اتبع الدليل يدويًا:
+
 [HOSTINGER_DEPLOYMENT.md](HOSTINGER_DEPLOYMENT.md)
 
 </div>
 
 ---
 
-*آخر تحديث: يناير 2026*
+_آخر تحديث: يناير 2026_
 
-*Generated for AlAwael ERP System*
+_Generated for AlAwael ERP System_

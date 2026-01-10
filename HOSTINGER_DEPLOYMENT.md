@@ -326,10 +326,10 @@ sudo nano /etc/nginx/sites-enabled/yourdomain.com
 server {
     listen 80;
     server_name yourdomain.com www.yourdomain.com;
-    
+
     root /home/username/domains/yourdomain.com/frontend/build;
     index index.html;
-    
+
     location / {
         try_files $uri /index.html;
     }
@@ -339,7 +339,7 @@ server {
 server {
     listen 80;
     server_name api.yourdomain.com;
-    
+
     location / {
         proxy_pass http://localhost:3001;
         proxy_http_version 1.1;
@@ -553,11 +553,13 @@ kill -9 PID
 ### إذا أردت استضافة أسهل:
 
 **للـ Frontend (مجاني):**
+
 - ✅ Vercel: `vercel.com` (Recommended)
 - ✅ Netlify: `netlify.com`
 - ✅ GitHub Pages
 
 **للـ Backend:**
+
 - ✅ Railway: `railway.app`
 - ✅ Render: `render.com`
 - ✅ Fly.io: `fly.io`

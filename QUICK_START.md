@@ -44,13 +44,14 @@ cp .env.example .env
 ```
 
 **محتوى `.env` الأساسي:**
+
 ```env
 # Backend
 NODE_ENV=development
 PORT=3001
 API_URL=http://localhost:3001
 
-# Frontend  
+# Frontend
 VITE_API_URL=http://localhost:3001
 VITE_APP_TITLE=AlAwael ERP
 
@@ -85,7 +86,7 @@ cd backend
 npm start
 # 🟢 Server running on http://localhost:3001
 
-# نافذة Terminal 2: Frontend  
+# نافذة Terminal 2: Frontend
 cd frontend/admin-dashboard
 npm run dev
 # 🟢 Frontend running on http://localhost:5173
@@ -106,24 +107,26 @@ curl http://localhost:3001/health
 
 ## 📌 الأوامر الأساسية
 
-| الأمر | الوصف |
-|------|-------|
-| `npm test` | تشغيل جميع الاختبارات |
-| `npm run lint` | فحص جودة الكود |
-| `npm run build` | بناء للإنتاج |
-| `docker-compose up` | تشغيل جميع الخدمات |
+| الأمر               | الوصف                 |
+| ------------------- | --------------------- |
+| `npm test`          | تشغيل جميع الاختبارات |
+| `npm run lint`      | فحص جودة الكود        |
+| `npm run build`     | بناء للإنتاج          |
+| `docker-compose up` | تشغيل جميع الخدمات    |
 
 ---
 
 ## 🐛 استكشاف الأخطاء الشائعة
 
 ### ❌ "Cannot find module"
+
 ```bash
 rm -rf node_modules package-lock.json
 npm install
 ```
 
 ### ❌ "Port already in use"
+
 ```bash
 # على Windows
 netstat -ano | findstr :3001
@@ -135,6 +138,7 @@ kill -9 <PID>
 ```
 
 ### ❌ "Database connection error"
+
 ```bash
 # تأكد من وجود مجلد data
 mkdir -p ./data

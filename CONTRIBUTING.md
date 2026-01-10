@@ -1,6 +1,7 @@
 # Contributing to AlAwael ERP System
 
 ## المحتويات
+
 - [قبل البدء](#قبل-البدء)
 - [Development Setup](#development-setup)
 - [Git Workflow](#git-workflow)
@@ -13,12 +14,14 @@
 ## قبل البدء
 
 ### المتطلبات
+
 - **Node.js** 16+ (LTS recommended)
 - **npm** 7+
 - **Git** 2.35+
 - **Docker** (optional, for services)
 
 ### الأدوات الموصى بها
+
 - VS Code with ESLint, Prettier
 - Git GUI (GitKraken, GitHub Desktop)
 - Postman/Thunder Client (API testing)
@@ -28,6 +31,7 @@
 ## Development Setup
 
 ### 1. Clone و Setup
+
 ```bash
 # Clone repository
 git clone https://github.com/almashooq1/alawael-erp.git
@@ -49,6 +53,7 @@ cd ../../
 ```
 
 ### 2. Environment Configuration
+
 ```bash
 # Copy template
 cp .env.example .env
@@ -58,6 +63,7 @@ cp .env.example .env
 ```
 
 ### 3. Start Development
+
 ```bash
 # Terminal 1: Backend
 cd backend
@@ -74,6 +80,7 @@ npm test --watch
 ```
 
 ### 4. Verify Setup
+
 ```bash
 # Health check
 curl http://localhost:3001/health
@@ -90,6 +97,7 @@ curl http://localhost:3001/health
 ## Git Workflow
 
 ### Feature Development
+
 ```bash
 # 1. Create feature branch from master
 git checkout master
@@ -112,6 +120,7 @@ git push origin feature/user-authentication
 ```
 
 ### Commit Message Format
+
 ```
 <type>(<scope>): <subject>
 
@@ -138,6 +147,7 @@ Examples:
 ```
 
 ### Branch Naming
+
 ```
 ✅ feature/user-management
 ✅ fix/memory-leak-in-cache
@@ -153,20 +163,22 @@ Examples:
 ## Code Standards
 
 ### JavaScript/TypeScript
+
 ```javascript
 // ✅ Good
-const calculateTherapyScore = (sessionData) => {
+const calculateTherapyScore = sessionData => {
   const { duration, intensity, feedback } = sessionData;
   return (duration * intensity * feedback) / 100;
 };
 
 // ❌ Bad
-const calc = (s) => {
+const calc = s => {
   return (s.d * s.i * s.f) / 100;
 };
 ```
 
 ### File Structure
+
 ```
 service/
 ├── __tests__/
@@ -179,6 +191,7 @@ service/
 ```
 
 ### Swagger Documentation
+
 ```javascript
 /**
  * @swagger
@@ -205,6 +218,7 @@ router.get('/therapy-sessions', (req, res) => {
 ```
 
 ### Error Handling
+
 ```javascript
 // ✅ Good - specific error
 try {
@@ -212,7 +226,7 @@ try {
   if (!patient) {
     return res.status(404).json({
       error: 'PATIENT_NOT_FOUND',
-      message: 'Patient record not found'
+      message: 'Patient record not found',
     });
   }
 } catch (err) {
@@ -231,6 +245,7 @@ if (!patient) {
 ## Testing
 
 ### Unit Tests
+
 ```bash
 # Run tests
 npm test
@@ -246,6 +261,7 @@ npm test -- --watch
 ```
 
 ### Writing Tests
+
 ```javascript
 describe('Rehabilitation Service', () => {
   it('should calculate therapy progress correctly', () => {
@@ -261,11 +277,13 @@ describe('Rehabilitation Service', () => {
 ```
 
 ### Test Coverage Requirements
+
 - Minimum 80% code coverage
 - All public functions must have tests
 - Critical paths: 100% coverage
 
 ### API Testing
+
 ```bash
 # Using Postman or Thunder Client
 # 1. Import OpenAPI spec: http://localhost:3001/api-spec.json
@@ -278,6 +296,7 @@ describe('Rehabilitation Service', () => {
 ## Pull Requests
 
 ### Before Creating PR
+
 - [ ] All tests pass: `npm test`
 - [ ] Code formatted: `npm run lint` (if configured)
 - [ ] No console.log statements (except dev)
@@ -286,29 +305,36 @@ describe('Rehabilitation Service', () => {
 - [ ] Branch is up-to-date with master
 
 ### PR Template
+
 ```markdown
 ## Description
+
 Brief description of changes
 
 ## Type of Change
+
 - [ ] Bug fix
 - [ ] New feature
 - [ ] Breaking change
 - [ ] Documentation
 
 ## Testing
+
 Describe tests performed and results
 
 ## Screenshots/Videos
+
 If applicable, add visual proof
 
 ## Checklist
+
 - [ ] Tests pass
 - [ ] Code reviewed
 - [ ] Documentation updated
 ```
 
 ### Code Review
+
 - Keep PRs focused (1 feature per PR)
 - Respond to feedback within 24 hours
 - Minimum 1 approval required before merge
@@ -319,6 +345,7 @@ If applicable, add visual proof
 ## Common Issues & Solutions
 
 ### Port Already in Use
+
 ```bash
 # Find process on port 3001
 lsof -i :3001  # macOS/Linux
@@ -330,6 +357,7 @@ taskkill /PID <PID> /F  # Windows
 ```
 
 ### Dependency Conflicts
+
 ```bash
 # Clear and reinstall
 rm -rf node_modules package-lock.json
@@ -337,6 +365,7 @@ npm install
 ```
 
 ### Database Issues
+
 ```bash
 # Reset database
 npm run db:reset

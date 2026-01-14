@@ -1,4 +1,5 @@
 # دليل النشر الشامل - AlAwael ERP System
+
 ## Complete Deployment Guide
 
 📅 **تاريخ:** 10 يناير 2026  
@@ -11,6 +12,7 @@
 ### ✅ ما تم إنجازه
 
 #### 1. تطوير النظام
+
 - ✅ Backend API كامل (Node.js + Express)
 - ✅ Frontend كامل (React)
 - ✅ قاعدة بيانات MongoDB
@@ -18,6 +20,7 @@
 - ✅ جميع الخدمات (Employees, Users, Reports, Finance, etc.)
 
 #### 2. التوثيق
+
 - ✅ README.md شامل مع badges احترافية
 - ✅ CONTRIBUTING.md
 - ✅ MIT License
@@ -25,12 +28,14 @@
 - ✅ دليل استخدام USAGE_GUIDE.md
 
 #### 3. ملفات النشر
+
 - ✅ deploy-hostinger.sh (سكريبت bash للنشر التلقائي)
 - ✅ deploy-to-hostinger.ps1 (سكريبت PowerShell)
 - ✅ nginx-hostinger.conf (إعدادات Nginx)
 - ✅ HOSTINGER_CONNECT_GUIDE.ps1 (دليل الاتصال)
 
 #### 4. GitHub Repository
+
 - ✅ الكود محمل على: https://github.com/almashooq1/alawael-erp
 - ✅ جميع الملفات محدثة
 - ✅ 8+ commits للنشر
@@ -40,6 +45,7 @@
 ## 🔧 المتطلبات التقنية
 
 ### النظام المحلي (Windows)
+
 ```
 ✅ Node.js: v22.20.0
 ✅ npm: v10.9.3
@@ -49,6 +55,7 @@
 ```
 
 ### Hostinger Server
+
 ```
 ⚠️ يحتاج تفعيل:
   - Node.js (من cPanel)
@@ -62,6 +69,7 @@
 ## 🌐 معلومات Hostinger
 
 ### بيانات الاتصال
+
 ```
 Host:     82.25.96.160
 Port:     65002
@@ -92,6 +100,7 @@ Password: Be@101010
 ### الطريقة 1: PuTTY (الأسهل - موصى بها)
 
 #### أ. تحميل وإعداد PuTTY
+
 ```
 1. حمّل PuTTY من: https://www.putty.org/
 2. شغّل putty.exe
@@ -170,6 +179,7 @@ pm2 logs alawael-frontend --lines 20
 ```
 
 #### ج. التحقق من التشغيل
+
 ```bash
 # فحص Backend
 curl http://localhost:3001/health
@@ -206,6 +216,7 @@ Install-Module -Name Posh-SSH -Force -Scope CurrentUser
 إذا واجهت صعوبات مع Hostinger، استخدم:
 
 #### Frontend: Vercel
+
 ```bash
 # في مجلد frontend
 npm install -g vercel
@@ -214,6 +225,7 @@ vercel --prod
 ```
 
 #### Backend: Railway
+
 ```bash
 # في مجلد backend
 npm install -g railway
@@ -230,6 +242,7 @@ railway up
 ## 🔐 إعداد الدومين و SSL
 
 ### 1. ربط الدومين (بعد النشر)
+
 ```
 1. اذهب إلى Hostinger Control Panel
 2. Domains → Manage
@@ -241,6 +254,7 @@ railway up
 ```
 
 ### 2. تثبيت SSL Certificate
+
 ```bash
 # على Hostinger عبر SSH
 sudo certbot --nginx -d yourdomain.com -d www.yourdomain.com
@@ -250,6 +264,7 @@ sudo certbot --nginx -d yourdomain.com -d www.yourdomain.com
 ```
 
 ### 3. إعداد Nginx
+
 ```bash
 # نسخ إعدادات Nginx
 cd /etc/nginx/sites-available/
@@ -269,6 +284,7 @@ sudo systemctl reload nginx
 ## 🧪 اختبار النظام بعد النشر
 
 ### 1. Backend API Test
+
 ```bash
 # Health Check
 curl http://yourdomain.com:3001/health
@@ -280,6 +296,7 @@ curl -X POST http://yourdomain.com:3001/api/auth/login \
 ```
 
 ### 2. Frontend Test
+
 ```
 افتح المتصفح: http://yourdomain.com
 
@@ -289,6 +306,7 @@ curl -X POST http://yourdomain.com:3001/api/auth/login \
 ```
 
 ### 3. PM2 Monitoring
+
 ```bash
 # حالة الخدمات
 pm2 status
@@ -344,6 +362,7 @@ pm2 status
 ## 🚨 حل المشاكل الشائعة
 
 ### مشكلة 1: Node.js not found
+
 ```
 الحل:
 1. ادخل cPanel
@@ -353,6 +372,7 @@ pm2 status
 ```
 
 ### مشكلة 2: Port 3001 in use
+
 ```bash
 # إيجاد العملية
 lsof -i :3001
@@ -366,6 +386,7 @@ pm2 start server.js --name alawael-backend
 ```
 
 ### مشكلة 3: MongoDB connection failed
+
 ```bash
 # تحقق من MongoDB
 sudo systemctl status mongodb
@@ -379,6 +400,7 @@ sudo systemctl start mongodb
 ```
 
 ### مشكلة 4: Frontend build fails
+
 ```bash
 # امسح cache وأعد البناء
 cd frontend
@@ -388,13 +410,16 @@ npm run build
 ```
 
 ### مشكلة 5: CORS errors
+
 ```javascript
 // في backend/server.js تأكد من:
 const cors = require('cors');
-app.use(cors({
-  origin: 'http://yourdomain.com',
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: 'http://yourdomain.com',
+    credentials: true,
+  }),
+);
 ```
 
 ---
@@ -402,6 +427,7 @@ app.use(cors({
 ## 📈 مراقبة الأداء
 
 ### PM2 Monitoring
+
 ```bash
 # Dashboard تفاعلي
 pm2 monit
@@ -414,6 +440,7 @@ pm2 logs --lines 100
 ```
 
 ### Log Files
+
 ```bash
 # Backend logs
 tail -f ~/.pm2/logs/alawael-backend-out.log
@@ -428,6 +455,7 @@ tail -f ~/.pm2/logs/alawael-frontend-out.log
 ## 🔒 أمان النظام
 
 ### 1. تغيير كلمة السر الافتراضية
+
 ```javascript
 // في backend, غيّر:
 // - JWT_SECRET في .env
@@ -435,6 +463,7 @@ tail -f ~/.pm2/logs/alawael-frontend-out.log
 ```
 
 ### 2. تفعيل Firewall
+
 ```bash
 # السماح بالمنافذ الضرورية فقط
 sudo ufw allow 22/tcp
@@ -444,6 +473,7 @@ sudo ufw enable
 ```
 
 ### 3. تحديثات الأمان
+
 ```bash
 # تحديث النظام
 sudo apt update && sudo apt upgrade -y
@@ -458,6 +488,7 @@ npm audit fix
 ## 📊 ملخص الأوامر السريعة
 
 ### التشغيل المحلي (Windows)
+
 ```powershell
 # Backend
 cd backend
@@ -469,6 +500,7 @@ npm start
 ```
 
 ### النشر على Hostinger
+
 ```bash
 # PuTTY → SSH
 ssh -p 65002 u799444911@82.25.96.160
@@ -478,6 +510,7 @@ ssh -p 65002 u799444911@82.25.96.160
 ```
 
 ### إدارة الخدمات
+
 ```bash
 pm2 list          # عرض الحالة
 pm2 restart all   # إعادة تشغيل
@@ -491,12 +524,14 @@ pm2 monit         # مراقبة
 ## 📞 الدعم والمساعدة
 
 ### الملفات المرجعية
+
 - 📄 `HOSTINGER_DEPLOYMENT.md` - دليل النشر المفصل
 - 📄 `HOSTINGER_CONNECT_GUIDE.ps1` - دليل الاتصال
 - 📄 `deploy-hostinger.sh` - سكريبت النشر التلقائي
 - 📄 `nginx-hostinger.conf` - إعدادات Nginx
 
 ### الروابط المفيدة
+
 - 🔗 GitHub: https://github.com/almashooq1/alawael-erp
 - 🔗 PuTTY: https://www.putty.org/
 - 🔗 PM2 Docs: https://pm2.keymetrics.io/
@@ -507,12 +542,14 @@ pm2 monit         # مراقبة
 ## ✅ Checklist النشر
 
 قبل النشر:
+
 - [ ] Node.js مفعّل على Hostinger
 - [ ] SSH Access مفعّل
 - [ ] معلومات الاتصال صحيحة
 - [ ] GitHub repository محدث
 
 أثناء النشر:
+
 - [ ] المشروع استُنسخ بنجاح
 - [ ] Dependencies مثبتة
 - [ ] ملفات .env تم إنشاؤها
@@ -521,6 +558,7 @@ pm2 monit         # مراقبة
 - [ ] PM2 يعمل ومحفوظ
 
 بعد النشر:
+
 - [ ] Health check ناجح
 - [ ] Login API يعمل
 - [ ] Dashboard يظهر

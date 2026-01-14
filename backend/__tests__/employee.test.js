@@ -8,6 +8,7 @@ describe('Employee Model', () => {
       employees: [],
       attendances: [],
       leaves: [],
+      performance: [],
     });
   });
 

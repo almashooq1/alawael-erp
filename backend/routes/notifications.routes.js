@@ -8,6 +8,12 @@ const {
   NotificationPreferences,
 } = require('../models/Notification.memory');
 const { authenticateToken } = require('../middleware/auth');
+const SmartNotificationService = require('../services/smartNotificationService');
+const AdvancedMessagingAlertSystem = require('../services/advancedMessagingAlertSystem');
+
+// Initialize services
+const smartNotificationService = new SmartNotificationService();
+const advancedMessagingAlertSystem = new AdvancedMessagingAlertSystem();
 
 router.use(authenticateToken);
 
@@ -277,6 +283,353 @@ router.post('/preferences', (req, res) => {
       success: true,
       data: preferences,
     });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+});
+
+// ==================== SMART NOTIFICATION SERVICE ====================
+
+/**
+ * @route   POST /api/notifications/smart/create
+ * @desc    إنشاء إشعار ذكي موجه
+ */
+router.post('/smart/create', (req, res) => {
+  try {
+    const { workflow, type, userId } = req.body;
+
+    if (!workflow || !type || !userId) {
+      return res.status(400).json({
+        success: false,
+        message: 'workflow, type, userId مطلوبة',
+      });
+    }
+
+    const notification = smartNotificationService.createSmartNotification(workflow, type, userId);
+    const result = smartNotificationService.sendNotification(userId, notification);
+
+    res.json({
+      success: result.success,
+      data: {
+        notification,
+        sentAt: result.sentAt,
+        channels: result.channels,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+});
+
+/**
+ * @route   GET /api/notifications/smart/:userId
+ * @desc    الحصول على الإشعارات الذكية للمستخدم
+ */
+router.get('/smart/:userId', (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { type = 'all', limit = 50 } = req.query;
+
+    let notifications;
+    if (type === 'unread') {
+      notifications = smartNotificationService.getUnreadNotifications(userId);
+    } else {
+      notifications = smartNotificationService.getAllNotifications(userId, parseInt(limit));
+    }
+
+    const stats = smartNotificationService.getNotificationStats(userId);
+
+    res.json({
+      success: true,
+      data: {
+        notifications,
+        stats,
+        total: notifications.length,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+});
+
+/**
+ * @route   PUT /api/notifications/smart/:id/read
+ * @desc    وضع علامة على إشعار ذكي كمقروء
+ */
+router.put('/smart/:id/read', (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user._id;
+
+    smartNotificationService.markAsRead(id, userId);
+
+    res.json({
+      success: true,
+      message: 'تم وضع علامة على الإشعار كمقروء',
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+});
+
+/**
+ * @route   DELETE /api/notifications/smart/:id
+ * @desc    حذف إشعار ذكي
+ */
+router.delete('/smart/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user._id;
+
+    smartNotificationService.deleteNotification(id, userId);
+
+    res.json({
+      success: true,
+      message: 'تم حذف الإشعار بنجاح',
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+});
+
+/**
+ * @route   DELETE /api/notifications/smart/clear/:userId
+ * @desc    حذف جميع الإشعارات
+ */
+router.delete('/smart/clear/:userId', (req, res) => {
+  try {
+    const { userId } = req.params;
+    const count = smartNotificationService.clearAllNotifications(userId);
+
+    res.json({
+      success: true,
+      message: `تم حذف ${count} إشعارات`,
+      deletedCount: count,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+});
+
+/**
+ * @route   POST /api/notifications/smart/schedule
+ * @desc    جدولة إشعار للإرسال لاحقاً
+ */
+router.post('/smart/schedule', (req, res) => {
+  try {
+    const { notification, scheduledTime, userId } = req.body;
+
+    if (!notification || !scheduledTime || !userId) {
+      return res.status(400).json({
+        success: false,
+        message: 'notification, scheduledTime, userId مطلوبة',
+      });
+    }
+
+    const result = smartNotificationService.scheduleNotification(notification, new Date(scheduledTime), userId);
+
+    res.json({
+      success: result.success,
+      data: {
+        scheduleId: result.scheduleId,
+        scheduledTime: scheduledTime,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+});
+
+// ==================== ADVANCED MESSAGING & ALERTS ====================
+
+/**
+ * @route   POST /api/notifications/messages/send
+ * @desc    إرسال رسالة باستخدام القوالب
+ */
+router.post('/messages/send', async (req, res) => {
+  try {
+    const { recipientId, messageType, data, options } = req.body;
+
+    if (!recipientId || !messageType || !data) {
+      return res.status(400).json({
+        success: false,
+        message: 'recipientId, messageType, data مطلوبة',
+      });
+    }
+
+    const result = await advancedMessagingAlertSystem.sendMessage(recipientId, messageType, data, options || {});
+
+    res.json({
+      success: result.success,
+      data: {
+        messageId: result.messageId,
+        channels: result.results.successful,
+        failed: result.results.failed,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+});
+
+/**
+ * @route   POST /api/notifications/alerts/create
+ * @desc    إنشاء قاعدة إنذار جديدة
+ */
+router.post('/alerts/create', (req, res) => {
+  try {
+    const { name, rule, action } = req.body;
+
+    if (!name || !rule || !action) {
+      return res.status(400).json({
+        success: false,
+        message: 'name, rule, action مطلوبة',
+      });
+    }
+
+    const alert = advancedMessagingAlertSystem.createAlert(name, rule, action);
+
+    res.json({
+      success: true,
+      data: alert,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+});
+
+/**
+ * @route   GET /api/notifications/alerts
+ * @desc    الحصول على قائمة الإنذارات
+ */
+router.get('/alerts', (req, res) => {
+  try {
+    const alerts = Array.from(advancedMessagingAlertSystem.alertRules.values());
+    const stats = advancedMessagingAlertSystem.getAlertStats();
+
+    res.json({
+      success: true,
+      data: {
+        alerts,
+        stats,
+        total: alerts.length,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+});
+
+/**
+ * @route   POST /api/notifications/alerts/check
+ * @desc    التحقق من قواعس الإنذارات وتطبيقها
+ */
+router.post('/alerts/check', (req, res) => {
+  try {
+    const { workflows } = req.body;
+
+    if (!Array.isArray(workflows)) {
+      return res.status(400).json({
+        success: false,
+        message: 'workflows مطلوبة (صفيف)',
+      });
+    }
+
+    const triggeredAlerts = advancedMessagingAlertSystem.checkAndTriggerAlerts(workflows);
+    const stats = advancedMessagingAlertSystem.getAlertStats();
+
+    res.json({
+      success: true,
+      data: {
+        triggeredAlerts,
+        triggeredCount: triggeredAlerts.length,
+        stats,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+});
+
+/**
+ * @route   GET /api/notifications/messages/stats/:userId
+ * @desc    الحصول على إحصائيات الرسائل والإنذارات
+ */
+router.get('/messages/stats/:userId', (req, res) => {
+  try {
+    const { userId } = req.params;
+    const messageStats = advancedMessagingAlertSystem.getMessageStats(userId);
+    const alertStats = advancedMessagingAlertSystem.getAlertStats();
+
+    res.json({
+      success: true,
+      data: {
+        messages: messageStats,
+        alerts: alertStats,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+});
+
+/**
+ * @route   DELETE /api/notifications/alerts/:id
+ * @desc    حذف قاعدة إنذار
+ */
+router.delete('/alerts/:id', (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (advancedMessagingAlertSystem.alertRules.has(id)) {
+      advancedMessagingAlertSystem.alertRules.delete(id);
+
+      res.json({
+        success: true,
+        message: 'تم حذف القاعدة بنجاح',
+      });
+    } else {
+      res.status(404).json({
+        success: false,
+        message: 'القاعدة غير موجودة',
+      });
+    }
   } catch (error) {
     res.status(500).json({
       success: false,

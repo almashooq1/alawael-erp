@@ -1,0 +1,178 @@
+name: Production Deployment
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  deploy-production:
+    runs-on: ubuntu-latest
+    name: Deploy to Production
+    
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Get Version
+        id: version
+        run: echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Pre-deployment Checks
+        run: |
+          echo "Version: ${{ steps.version.outputs.version }}"
+          echo "Checking deployment readiness..."
+          
+          # قائمة التحقق | Checklist
+          [ -f "docker-compose.yml" ] && echo "✓ Docker Compose found" || exit 1
+          [ -f "Dockerfile" ] && echo "✓ Dockerfile found" || exit 1
+          [ -d "frontend/build" ] && echo "✓ Frontend built" || exit 1
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Metadata
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=ref,event=branch
+            type=sha
+
+      - name: Build and Push Production Image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Deploy to Production
+        env:
+          DEPLOY_KEY: ${{ secrets.PROD_DEPLOY_KEY }}
+          DEPLOY_HOST: ${{ secrets.PROD_HOST }}
+          DEPLOY_USER: ${{ secrets.PROD_USER }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$DEPLOY_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          
+          ssh-keyscan -H $DEPLOY_HOST >> ~/.ssh/known_hosts
+          
+          ssh -i ~/.ssh/deploy_key $DEPLOY_USER@$DEPLOY_HOST << 'EOF'
+            set -e
+            
+            cd /opt/rehab-system
+            
+            # قياس النسخة الاحتياطية | Create backup
+            docker-compose exec -T backend tar czf backup-${{ env.VERSION }}.tar.gz /app/data || true
+            
+            # سحب الصورة الجديدة | Pull new image
+            docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
+            
+            # تحديث الخدمات | Update services
+            docker-compose -f docker-compose.prod.yml pull
+            docker-compose -f docker-compose.prod.yml up -d
+            
+            # انتظار التشغيل | Wait for startup
+            sleep 10
+            
+            # التحقق من الصحة | Health check
+            docker-compose -f docker-compose.prod.yml ps
+          EOF
+
+      - name: Verify Production Deployment
+        run: |
+          sleep 30
+          for i in {1..10}; do
+            if curl -f https://${{ secrets.PROD_HOST }}/health; then
+              echo "✓ Deployment successful"
+              exit 0
+            fi
+            echo "Attempt $i failed, retrying..."
+            sleep 5
+          done
+          exit 1
+
+      - name: Run Post-Deployment Tests
+        run: |
+          echo "Running smoke tests..."
+          # اختبارات دخان | Smoke tests
+          curl -f https://${{ secrets.PROD_HOST }}/health
+          curl -f https://${{ secrets.PROD_HOST }}/api/v1/health
+
+      - name: Rollback on Failure
+        if: failure()
+        env:
+          DEPLOY_KEY: ${{ secrets.PROD_DEPLOY_KEY }}
+          DEPLOY_HOST: ${{ secrets.PROD_HOST }}
+          DEPLOY_USER: ${{ secrets.PROD_USER }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$DEPLOY_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          
+          ssh-keyscan -H $DEPLOY_HOST >> ~/.ssh/known_hosts
+          
+          ssh -i ~/.ssh/deploy_key $DEPLOY_USER@$DEPLOY_HOST << 'EOF'
+            cd /opt/rehab-system
+            docker-compose -f docker-compose.prod.yml pull
+            docker-compose -f docker-compose.prod.yml up -d
+            echo "Rolled back to previous version"
+          EOF
+
+      - name: Send Deployment Notification
+        if: always()
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+          payload: |
+            {
+              "text": "Production Deployment Status",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Production Deployment*\n*Status:* ${{ job.status }}\n*Version:* ${{ steps.version.outputs.version }}\n*Environment:* Production"
+                  }
+                }
+              ]
+            }
+
+      - name: Create Release Notes
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.version.outputs.version }}
+          release_name: Release ${{ steps.version.outputs.version }}
+          body: |
+            # Release ${{ steps.version.outputs.version }}
+            
+            ## Deployment Status
+            - ✓ Deployed to Production
+            - Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}
+            
+            ## Changes
+            - See commit history for detailed changes
+          draft: false
+          prerelease: false

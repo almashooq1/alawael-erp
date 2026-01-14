@@ -5,7 +5,6 @@ import {
   Typography,
   Paper,
   Button,
-  Divider,
   List,
   ListItem,
   ListItemText,
@@ -23,7 +22,6 @@ import {
   FormControl,
   InputLabel,
   Chip,
-  CircularProgress,
   Grid,
 } from '@mui/material';
 import {
@@ -119,7 +117,7 @@ const Groups = () => {
     members: [],
   });
   const [newMemberEmail, setNewMemberEmail] = useState('');
-  const [contacts, setContacts] = useState(mockContacts);
+  const [contacts] = useState(mockContacts);
 
   // Filter groups based on search term
   useEffect(() => {

@@ -1,7 +1,18 @@
 {
   "users": [],
   "employees": [],
-  "attendance": [],
-  "leaves": [],
+  "attendances": [],
+  "leaves": [
+    {
+      "_id": "leave_1768381829004",
+      "employeeId": 1,
+      "type": "annual",
+      "startDate": "2024-01-15",
+      "endDate": "2024-01-20",
+      "status": "approved",
+      "createdAt": "2026-01-14T09:10:29.004Z",
+      "updatedAt": "2026-01-14T09:10:29.004Z"
+    }
+  ],
   "performance": []
 }

@@ -13,7 +13,7 @@ function read() {
       const emptyDB = {
         users: [],
         employees: [],
-        attendance: [],
+        attendances: [],
         leaves: [],
         performance: [],
       };
@@ -27,7 +27,7 @@ function read() {
     return {
       users: [],
       employees: [],
-      attendance: [],
+      attendances: [],
       leaves: [],
       performance: [],
     };

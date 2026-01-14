@@ -1,22 +1,23 @@
 import React from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { 
-  Box, 
-  CssBaseline, 
-  AppBar, 
-  Toolbar, 
-  Typography, 
-  Drawer, 
-  List, 
-  ListItem, 
-  ListItemIcon, 
-  ListItemText, 
-  Divider, 
-  Avatar, 
-  IconButton, 
+import {
+  Box,
+  CssBaseline,
+  AppBar,
+  Toolbar,
+  Typography,
+  Drawer,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Divider,
+  Avatar,
+  IconButton,
   Tooltip,
   useTheme,
-  useMediaQuery
+  useMediaQuery,
+  ListSubheader,
 } from '@mui/material';
 import {
   Dashboard as DashboardIcon,
@@ -28,34 +29,46 @@ import {
   Menu as MenuIcon,
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
-  Add as AddIcon
+  Add as AddIcon,
+  QueryStats as QueryStatsIcon,
+  Shield as ShieldIcon,
+  Science as ScienceIcon,
+  Engineering as EngineeringIcon,
+  Groups as GroupsIcon,
+  SupportAgent as SupportAgentIcon,
+  Business as BusinessIcon,
+  AccessTime as AccessTimeIcon,
+  Chat as ChatIcon,
+  Archive as ArchiveIcon,
 } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
 import { useAuth } from '../contexts/AuthContext';
+import QuickSearch from './QuickSearch';
+import NotificationsPopover from './NotificationsPopover';
+import SmartNotificationPanel from './SmartNotificationPanel';
+import BreadcrumbsNav from './BreadcrumbsNav';
 
 const drawerWidth = 240;
 
-const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
-  ({ theme, open }) => ({
-    flexGrow: 1,
-    padding: theme.spacing(3),
-    transition: theme.transitions.create('margin', {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    }),
-    marginLeft: `-${drawerWidth}px`,
-    ...(open && {
-      transition: theme.transitions.create('margin', {
-        easing: theme.transitions.easing.easeOut,
-        duration: theme.transitions.duration.enteringScreen,
-      }),
-      marginLeft: 0,
-    }),
+const Main = styled('main', { shouldForwardProp: prop => prop !== 'open' })(({ theme, open }) => ({
+  flexGrow: 1,
+  padding: theme.spacing(3),
+  transition: theme.transitions.create('margin', {
+    easing: theme.transitions.easing.sharp,
+    duration: theme.transitions.duration.leavingScreen,
   }),
-);
+  marginLeft: `-${drawerWidth}px`,
+  ...(open && {
+    transition: theme.transitions.create('margin', {
+      easing: theme.transitions.easing.easeOut,
+      duration: theme.transitions.duration.enteringScreen,
+    }),
+    marginLeft: 0,
+  }),
+}));
 
 const AppBarStyled = styled(AppBar, {
-  shouldForwardProp: (prop) => prop !== 'open',
+  shouldForwardProp: prop => prop !== 'open',
 })(({ theme, open }) => ({
   transition: theme.transitions.create(['margin', 'width'], {
     easing: theme.transitions.easing.sharp,
@@ -80,12 +93,118 @@ const DrawerHeader = styled('div')(({ theme }) => ({
   justifyContent: 'flex-end',
 }));
 
-const menuItems = [
-  { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
-  { text: 'Groups', icon: <GroupIcon />, path: '/groups' },
-  { text: 'Expenses', icon: <ReceiptIcon />, path: '/expenses' },
-  { text: 'Balances', icon: <WalletIcon />, path: '/balances' },
-  { text: 'Activity', icon: <ReceiptIcon />, path: '/activity' },
+const navGroups = [
+  {
+    label: 'التشغيل والقياس',
+    items: [
+      { text: 'الرئيسية', icon: <DashboardIcon />, path: '/home' },
+      { text: 'لوحة التشغيل', icon: <DashboardIcon />, path: '/dashboard' },
+      { text: 'التقارير والتحليلات', icon: <QueryStatsIcon />, path: '/reports' },
+      { text: 'النشاط اللحظي', icon: <ReceiptIcon />, path: '/activity' },
+    ],
+  },
+  {
+    label: 'الأعمال والمالية',
+    items: [
+      { text: 'إدارة علاقات العملاء', icon: <GroupsIcon />, path: '/crm' },
+      { text: 'المالية والمحاسبة', icon: <BusinessIcon />, path: '/finance' },
+      { text: 'المشتريات والمخزون', icon: <WalletIcon />, path: '/procurement' },
+      { text: 'الأرصدة والتسويات', icon: <WalletIcon />, path: '/balances' },
+    ],
+  },
+  {
+    label: 'الموارد والفرق',
+    items: [
+      { text: 'الموارد البشرية', icon: <GroupIcon />, path: '/hr' },
+      { text: 'الحضور والإجازات', icon: <ReceiptIcon />, path: '/attendance' },
+      { text: 'الرواتب', icon: <WalletIcon />, path: '/payroll' },
+    ],
+  },
+  {
+    label: 'التعلم والرعاية',
+    items: [
+      { text: 'التعلم الإلكتروني', icon: <ScienceIcon />, path: '/elearning' },
+      { text: 'الجلسات والمواعيد', icon: <AccessTimeIcon />, path: '/sessions' },
+      { text: 'إعادة التأهيل', icon: <SupportAgentIcon />, path: '/rehab' },
+      { text: 'المساعد الذكي', icon: <SupportAgentIcon />, path: '/ai-assistant' },
+    ],
+  },
+  {
+    label: 'الاتصالات الإدارية',
+    items: [
+      { text: 'نظام الاتصالات', icon: <ChatIcon />, path: '/communications' },
+      { text: 'إدارة المستندات', icon: <ChatIcon />, path: '/documents' },
+      { text: '🗂️ نظام الأرشفة', icon: <ArchiveIcon />, path: '/archiving' },
+    ],
+  },
+  {
+    label: 'بوابة الطالب',
+    items: [
+      { text: 'لوحة المعلومات', icon: <DashboardIcon />, path: '/student-portal' },
+      { text: 'الجدول الدراسي', icon: <AccessTimeIcon />, path: '/student-portal/schedule' },
+      { text: 'الدرجات والتقييمات', icon: <QueryStatsIcon />, path: '/student-portal/grades' },
+      { text: 'سجل الحضور', icon: <ReceiptIcon />, path: '/student-portal/attendance' },
+      { text: 'الواجبات والمشاريع', icon: <ReceiptIcon />, path: '/student-portal/assignments' },
+      { text: 'المكتبة الرقمية', icon: <ScienceIcon />, path: '/student-portal/library' },
+      { text: 'الإعلانات', icon: <ChatIcon />, path: '/student-portal/announcements' },
+      { text: 'الرسائل', icon: <ChatIcon />, path: '/student-portal/messages' },
+    ],
+  },
+  {
+    label: 'بوابة المعالجين والموظفين',
+    items: [
+      { text: 'لوحة المعلومات', icon: <DashboardIcon />, path: '/therapist-portal' },
+      { text: 'إدارة المرضى', icon: <GroupIcon />, path: '/therapist-portal/patients' },
+      { text: 'جدول المواعيد', icon: <AccessTimeIcon />, path: '/therapist-portal/schedule' },
+      { text: 'تقارير الجلسات', icon: <ReceiptIcon />, path: '/therapist-portal/sessions' },
+      { text: 'إدارة الحالات', icon: <SupportAgentIcon />, path: '/therapist-portal/cases' },
+      { text: 'المستندات والملفات', icon: <ScienceIcon />, path: '/therapist-portal/documents' },
+      { text: 'الإحصائيات والتقارير', icon: <QueryStatsIcon />, path: '/therapist-portal/reports' },
+      { text: 'الرسائل والتواصل', icon: <ChatIcon />, path: '/therapist-portal/messages' },
+    ],
+  },
+  {
+    label: 'بوابة الإدارة والتحكم',
+    items: [
+      { text: 'لوحة المعلومات', icon: <DashboardIcon />, path: '/admin-portal' },
+      { text: 'إدارة المستخدمين', icon: <GroupIcon />, path: '/admin-portal/users' },
+      { text: 'إعدادات النظام', icon: <EngineeringIcon />, path: '/admin-portal/settings' },
+      { text: 'التقارير والتحليلات', icon: <QueryStatsIcon />, path: '/admin-portal/reports' },
+      { text: 'سجلات التدقيق', icon: <ShieldIcon />, path: '/admin-portal/audit-logs' },
+      { text: 'إدارة العيادات', icon: <BusinessIcon />, path: '/admin-portal/clinics' },
+      { text: 'المدفوعات والفواتير', icon: <WalletIcon />, path: '/admin-portal/payments' },
+      { text: 'إدارة الإشعارات', icon: <ChatIcon />, path: '/admin-portal/notifications' },
+    ],
+  },
+  {
+    label: 'بوابة الآباء والأولياء',
+    items: [
+      { text: 'لوحة المعلومات', icon: <DashboardIcon />, path: '/parent-portal' },
+      { text: 'تتبع التقدم', icon: <QueryStatsIcon />, path: '/parent-portal/children-progress' },
+      { text: 'تقارير الحضور', icon: <ReceiptIcon />, path: '/parent-portal/attendance-reports' },
+      { text: 'التواصل مع المعالجين', icon: <ChatIcon />, path: '/parent-portal/therapist-communications' },
+      { text: 'الدفعات والفواتير', icon: <WalletIcon />, path: '/parent-portal/payments-history' },
+      { text: 'المستندات والتقارير', icon: <ScienceIcon />, path: '/parent-portal/documents-reports' },
+      { text: 'جدولة الجلسات', icon: <AccessTimeIcon />, path: '/parent-portal/appointments-scheduling' },
+      { text: 'الرسائل والإشعارات', icon: <ChatIcon />, path: '/parent-portal/messages' },
+    ],
+  },
+  {
+    label: 'الأمن والتشغيل',
+    items: [
+      { text: 'الأمن والحماية', icon: <ShieldIcon />, path: '/security' },
+      { text: 'المراقبة والكاميرات', icon: <ShieldIcon />, path: '/surveillance' },
+      { text: 'الصيانة والتشغيل', icon: <EngineeringIcon />, path: '/maintenance' },
+    ],
+  },
+  {
+    label: 'اجتماعي وحسابي',
+    items: [
+      { text: 'المجموعات', icon: <GroupsIcon />, path: '/groups' },
+      { text: 'الأصدقاء', icon: <GroupsIcon />, path: '/friends' },
+      { text: 'الملف الشخصي', icon: <ProfileIcon />, path: '/profile' },
+    ],
+  },
 ];
 
 const Layout = () => {
@@ -95,6 +214,8 @@ const Layout = () => {
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  const isActive = path => location.pathname === path || location.pathname.startsWith(`${path}/`);
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -109,7 +230,7 @@ const Layout = () => {
     navigate('/login');
   };
 
-  const handleNavigation = (path) => {
+  const handleNavigation = path => {
     navigate(path);
     if (isMobile) {
       setOpen(false);
@@ -130,19 +251,20 @@ const Layout = () => {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            Splitwise
+          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 0, mr: 3 }}>
+            المنصة الموحدة
           </Typography>
+          <Box sx={{ flexGrow: 1, display: { xs: 'none', sm: 'block' } }}>
+            <QuickSearch />
+          </Box>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Tooltip title="Add an expense">
-              <IconButton 
-                color="inherit" 
-                onClick={() => navigate('/expenses/new')}
-                sx={{ mr: 1 }}
-              >
+              <IconButton color="inherit" onClick={() => navigate('/expenses/new')} sx={{ mr: 1 }}>
                 <AddIcon />
               </IconButton>
             </Tooltip>
+            <SmartNotificationPanel userId={currentUser?._id} />
+            <NotificationsPopover />
             <Tooltip title="Profile">
               <IconButton color="inherit" onClick={() => navigate('/profile')}>
                 <ProfileIcon />
@@ -151,7 +273,7 @@ const Layout = () => {
           </Box>
         </Toolbar>
       </AppBarStyled>
-      
+
       <Drawer
         sx={{
           width: drawerWidth,
@@ -172,9 +294,7 @@ const Layout = () => {
         <DrawerHeader>
           <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}>
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <Avatar sx={{ bgcolor: theme.palette.primary.main, mr: 1 }}>
-                {currentUser?.name?.charAt(0) || 'U'}
-              </Avatar>
+              <Avatar sx={{ bgcolor: theme.palette.primary.main, mr: 1 }}>{currentUser?.name?.charAt(0) || 'U'}</Avatar>
               <Box>
                 <Typography variant="subtitle2" noWrap>
                   {currentUser?.name || 'User'}
@@ -184,35 +304,41 @@ const Layout = () => {
                 </Typography>
               </Box>
             </Box>
-            <IconButton onClick={handleDrawerClose}>
-              {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
-            </IconButton>
+            <IconButton onClick={handleDrawerClose}>{theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}</IconButton>
           </Box>
         </DrawerHeader>
         <Divider />
-        <List>
-          {menuItems.map((item) => (
-            <ListItem 
-              button 
-              key={item.text} 
-              onClick={() => handleNavigation(item.path)}
-              selected={location.pathname === item.path}
-              sx={{
-                '&.Mui-selected': {
-                  backgroundColor: theme.palette.action.selected,
-                },
-                '&:hover': {
-                  backgroundColor: theme.palette.action.hover,
-                },
-              }}
-            >
-              <ListItemIcon sx={{ color: location.pathname === item.path ? 'primary.main' : 'inherit' }}>
-                {item.icon}
-              </ListItemIcon>
-              <ListItemText primary={item.text} />
-            </ListItem>
-          ))}
-        </List>
+        {navGroups.map(group => (
+          <List
+            key={group.label}
+            subheader={
+              <ListSubheader component="div" disableSticky sx={{ bgcolor: 'transparent', color: 'text.secondary', fontWeight: 600 }}>
+                {group.label}
+              </ListSubheader>
+            }
+          >
+            {group.items.map(item => (
+              <ListItem
+                button
+                key={item.text}
+                onClick={() => handleNavigation(item.path)}
+                selected={isActive(item.path)}
+                sx={{
+                  '&.Mui-selected': {
+                    backgroundColor: theme.palette.action.selected,
+                  },
+                  '&:hover': {
+                    backgroundColor: theme.palette.action.hover,
+                  },
+                }}
+              >
+                <ListItemIcon sx={{ color: location.pathname === item.path ? 'primary.main' : 'inherit' }}>{item.icon}</ListItemIcon>
+                <ListItemText primary={item.text} />
+              </ListItem>
+            ))}
+            <Divider sx={{ my: 0.5 }} />
+          </List>
+        ))}
         <Divider />
         <List>
           <ListItem button onClick={handleLogout}>
@@ -223,10 +349,11 @@ const Layout = () => {
           </ListItem>
         </List>
       </Drawer>
-      
+
       <Main open={open}>
         <DrawerHeader />
         <Box sx={{ mt: 2 }}>
+          <BreadcrumbsNav />
           <Outlet />
         </Box>
       </Main>

@@ -10,6 +10,7 @@ describe('Authentication Routes', () => {
       employees: [],
       attendances: [],
       leaves: [],
+      performance: [],
     });
   });
 

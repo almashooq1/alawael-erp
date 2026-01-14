@@ -1,0 +1,1237 @@
+﻿
+> alawael-erp-backend@1.0.0 test
+> jest --coverage advancedReporting.test.js
+
+node.exe : FAIL api/tests/advancedReporting.test.js
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program 
+Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (FAIL api/t 
+   ests/advancedReporting.test.js:String) [], RemoteEx  
+  ception
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  AdvancedReportingService Tests
+    Template Management
+      ظêأ should create new report template (1 ms)
+      ظêأ should retrieve template by ID
+      ظêأ should update existing template (1 ms)
+      ظêأ should delete template
+      ظêأ should list all templates
+      ├ù should validate template structure (1 ms)
+    Report Generation
+      ├ù should generate basic report (19 ms)
+      ├ù should generate report with filters (1 ms)
+      ├ù should generate report in different formats (1 
+ms)
+      ├ù should generate report with aggregations
+      ├ù should include section headers in report
+      ├ù should handle empty data in report
+    Report Scheduling
+      ├ù should schedule recurring report (2 ms)
+      ├ù should support different frequencies
+      ظêأ should calculate next run time correctly (1 
+ms)
+      ├ù should get scheduled report details
+      ├ù should pause scheduled report
+      ├ù should resume paused schedule
+      ├ù should delete schedule
+    Export Functionality
+      ├ù should export report to CSV
+      ظêأ should export report to Excel
+      ظêأ should export report to PDF (1 ms)
+      ظêأ should export with custom filename
+      ظêأ should include metadata in export
+      ├ù should support partial exports
+    Filtering and Aggregation
+      ├ù should apply filters during report generation 
+(1 ms)
+      ├ù should calculate sum aggregation
+      ├ù should calculate average aggregation
+      ├ù should calculate count aggregation
+      ├ù should group data for aggregation (1 ms)
+    Charts and Visualization
+      ├ù should generate chart data for bar chart
+      ├ù should generate chart data for pie chart
+      ├ù should generate chart data for line chart
+      ├ù should support chart customization
+    Email Distribution
+      ├ù should send report via email
+      ├ù should send to multiple recipients
+      ├ù should include attachments in email
+      ├ù should support email templates
+    Caching and Performance
+      ظêأ should cache generated report
+      ظêأ should clear report cache
+      ├ù should handle large dataset efficiently (7 ms)
+    Error Handling
+      ظêأ should handle invalid template (1 ms)
+      ├ù should handle invalid data format
+      ├ù should handle missing required fields
+      ├ù should validate filter conditions
+    Report History
+      ├ù should save report to history
+      ├ù should retrieve report from history
+      ظêأ should list report history
+      ├ù should delete from history
+
+  ظù AdvancedReportingService Tests ظ║ Template 
+Management ظ║ should validate template structure
+
+    TypeError: reportingService.validateTemplate is not 
+a function
+
+    [0m [90m 78 |[39m     test([32m'should validate 
+template structure'[39m[33m,[39m () [33m=>[39m {
+     [90m 79 |[39m       [36mconst[39m 
+invalidTemplate [33m=[39m { name[33m:[39m 
+[32m'Invalid'[39m }[33m;[39m [90m// Missing 
+required fields[39m
+    [31m[1m>[22m[39m[90m 80 |[39m       
+[36mconst[39m result [33m=[39m reportingService[33m
+.[39mvalidateTemplate(invalidTemplate)[33m;[39m
+     [90m    |[39m                                    
+   [31m[1m^[22m[39m
+     [90m 81 |[39m       
+assert([33m![39mresult[33m.[39mvalid[33m,[39m 
+[32m'Should identify invalid template'[39m)[33m;[39m
+     [90m 82 |[39m     })[33m;[39m
+     [90m 83 |[39m   })[33m;[39m[0m
+
+      at Object.validateTemplate 
+(api/tests/advancedReporting.test.js:80:39)
+
+  ظù AdvancedReportingService Tests ظ║ Report 
+Generation ظ║ should generate basic report
+
+    assert(received)
+
+    Expected value to be equal to:
+      true
+    Received:
+      undefined
+
+    Message:
+      Report should have content
+
+    Difference:
+
+      Comparing two different types of values. Expected 
+boolean but received undefined.
+
+    [0m [90m 89 |[39m     test([32m'should generate 
+basic report'[39m[33m,[39m () [33m=>[39m {
+     [90m 90 |[39m       [36mconst[39m report 
+[33m=[39m reportingService[33m.[39mgenerateReport(re
+portTemplate[33m,[39m sampleData)[33m;[39m
+    [31m[1m>[22m[39m[90m 91 |[39m       
+assert(report[33m.[39mcontent[33m,[39m [32m'Report 
+should have content'[39m)[33m;[39m
+     [90m    |[39m       [31m[1m^[22m[39m
+     [90m 92 |[39m       
+assert(report[33m.[39mgeneratedAt[33m,[39m 
+[32m'Report should have generation 
+timestamp'[39m)[33m;[39m
+     [90m 93 |[39m     })[33m;[39m
+     [90m 94 |[39m[0m
+
+      at Object.assert 
+(api/tests/advancedReporting.test.js:91:7)
+
+  ظù AdvancedReportingService Tests ظ║ Report 
+Generation ظ║ should generate report with filters
+
+    assert(received)
+
+    Expected value to be equal to:
+      true
+    Received:
+      undefined
+
+    Message:
+      Report should be generated with filters
+
+    Difference:
+
+      Comparing two different types of values. Expected 
+boolean but received undefined.
+
+    [0m [90m  97 |[39m         filters[33m:[39m [{ 
+field[33m:[39m [32m'department'[39m[33m,[39m 
+operator[33m:[39m [32m'equals'[39m[33m,[39m 
+value[33m:[39m [32m'Engineering'[39m }][33m,[39m
+     [90m  98 |[39m       })[33m;[39m
+    [31m[1m>[22m[39m[90m  99 |[39m       
+assert(report[33m.[39mcontent[33m,[39m [32m'Report 
+should be generated with filters'[39m)[33m;[39m
+     [90m     |[39m       [31m[1m^[22m[39m
+     [90m 100 |[39m     })[33m;[39m
+     [90m 101 |[39m
+     [90m 102 |[39m     test([32m'should generate 
+report in different formats'[39m[33m,[39m () 
+[33m=>[39m {[0m
+
+      at Object.assert 
+(api/tests/advancedReporting.test.js:99:7)
+
+  ظù AdvancedReportingService Tests ظ║ Report 
+Generation ظ║ should generate report in different 
+formats
+
+    assert(received)
+
+    Expected value to be equal to:
+      true
+    Received:
+      undefined
+
+    Message:
+      HTML report should be generated
+
+    Difference:
+
+      Comparing two different types of values. Expected 
+boolean but received undefined.
+
+    [0m [90m 103 |[39m       [36mconst[39m 
+htmlReport [33m=[39m 
+reportingService[33m.[39mgenerateReport({ 
+[33m...[39mreportTemplate[33m,[39m 
+format[33m:[39m [32m'html'[39m }[33m,[39m 
+sampleData)[33m;[39m
+     [90m 104 |[39m       [36mconst[39m csvReport 
+[33m=[39m reportingService[33m.[39mgenerateReport({ 
+[33m...[39mreportTemplate[33m,[39m 
+format[33m:[39m [32m'csv'[39m }[33m,[39m 
+sampleData)[33m;[39m
+    [31m[1m>[22m[39m[90m 105 |[39m       
+assert(htmlReport[33m.[39mcontent[33m,[39m 
+[32m'HTML report should be generated'[39m)[33m;[39m
+     [90m     |[39m       [31m[1m^[22m[39m
+     [90m 106 |[39m       
+assert(csvReport[33m.[39mcontent[33m,[39m [32m'CSV 
+report should be generated'[39m)[33m;[39m
+     [90m 107 |[39m     })[33m;[39m
+     [90m 108 |[39m[0m
+
+      at Object.assert 
+(api/tests/advancedReporting.test.js:105:7)
+
+  ظù AdvancedReportingService Tests ظ║ Report 
+Generation ظ║ should generate report with aggregations
+
+    assert(received)
+
+    Expected value to be equal to:
+      true
+    Received:
+      undefined
+
+    Message:
+      Report should include aggregations
+
+    Difference:
+
+      Comparing two different types of values. Expected 
+boolean but received undefined.
+
+    [0m [90m 115 |[39m         }[33m,[39m
+     [90m 116 |[39m       })[33m;[39m
+    [31m[1m>[22m[39m[90m 117 |[39m       
+assert(report[33m.[39maggregations[33m,[39m 
+[32m'Report should include 
+aggregations'[39m)[33m;[39m
+     [90m     |[39m       [31m[1m^[22m[39m
+     [90m 118 |[39m     })[33m;[39m
+     [90m 119 |[39m
+     [90m 120 |[39m     test([32m'should include 
+section headers in report'[39m[33m,[39m () 
+[33m=>[39m {[0m
+
+      at Object.assert 
+(api/tests/advancedReporting.test.js:117:7)
+
+  ظù AdvancedReportingService Tests ظ║ Report 
+Generation ظ║ should include section headers in report
+
+    TypeError: Cannot read properties of undefined 
+(reading 'toLowerCase')
+
+    [0m [90m 120 |[39m     test([32m'should include 
+section headers in report'[39m[33m,[39m () 
+[33m=>[39m {
+     [90m 121 |[39m       [36mconst[39m report 
+[33m=[39m reportingService[33m.[39mgenerateReport(re
+portTemplate[33m,[39m sampleData)[33m;[39m
+    [31m[1m>[22m[39m[90m 122 |[39m       
+[36mconst[39m content [33m=[39m report[33m.[39mcon
+tent[33m.[39mtoLowerCase()[33m;[39m
+     [90m     |[39m                                   
+   [31m[1m^[22m[39m
+     [90m 123 |[39m       
+assert(content[33m.[39mincludes([32m'monthly'[39m) 
+[33m||[39m content[33m.[39mincludes([32m'sales'[39
+m)[33m,[39m [32m'Report should contain template 
+sections'[39m)[33m;[39m
+     [90m 124 |[39m     })[33m;[39m
+     [90m 125 |[39m[0m
+
+      at Object.toLowerCase 
+(api/tests/advancedReporting.test.js:122:38)
+
+  ظù AdvancedReportingService Tests ظ║ Report 
+Generation ظ║ should handle empty data in report
+
+    assert(received)
+
+    Expected value to be equal to:
+      true
+    Received:
+      undefined
+
+    Message:
+      Report should be generated even with empty data
+
+    Difference:
+
+      Comparing two different types of values. Expected 
+boolean but received undefined.
+
+    [0m [90m 126 |[39m     test([32m'should handle 
+empty data in report'[39m[33m,[39m () [33m=>[39m {
+     [90m 127 |[39m       [36mconst[39m report 
+[33m=[39m reportingService[33m.[39mgenerateReport(re
+portTemplate[33m,[39m [])[33m;[39m
+    [31m[1m>[22m[39m[90m 128 |[39m       
+assert(report[33m.[39mcontent[33m,[39m [32m'Report 
+should be generated even with empty 
+data'[39m)[33m;[39m
+     [90m     |[39m       [31m[1m^[22m[39m
+     [90m 129 |[39m     })[33m;[39m
+     [90m 130 |[39m   })[33m;[39m
+     [90m 131 |[39m[0m
+
+      at Object.assert 
+(api/tests/advancedReporting.test.js:128:7)
+
+  ظù AdvancedReportingService Tests ظ║ Report 
+Scheduling ظ║ should schedule recurring report
+
+    assert(received)
+
+    Expected value to be equal to:
+      true
+    Received:
+      undefined
+
+    Message:
+      Schedule should have an ID
+
+    Difference:
+
+      Comparing two different types of values. Expected 
+boolean but received undefined.
+
+    [0m [90m 144 |[39m       }[33m;[39m
+     [90m 145 |[39m       [36mconst[39m result 
+[33m=[39m reportingService[33m.[39mscheduleReport(sc
+hedule)[33m;[39m
+    [31m[1m>[22m[39m[90m 146 |[39m       
+assert(result[33m.[39mscheduleId[33m,[39m 
+[32m'Schedule should have an ID'[39m)[33m;[39m
+     [90m     |[39m       [31m[1m^[22m[39m
+     [90m 147 |[39m       
+assert(result[33m.[39mnextRun[33m,[39m 
+[32m'Schedule should have next run 
+time'[39m)[33m;[39m
+     [90m 148 |[39m     })[33m;[39m
+     [90m 149 |[39m[0m
+
+      at Object.assert 
+(api/tests/advancedReporting.test.js:146:7)
+
+  ظù AdvancedReportingService Tests ظ║ Report 
+Scheduling ظ║ should support different frequencies
+
+    assert(received)
+
+    Expected value to be equal to:
+      true
+    Received:
+      false
+
+    Message:
+      Should support daily frequency
+
+    [0m [90m 157 |[39m         }[33m;[39m
+     [90m 158 |[39m         [36mconst[39m result 
+[33m=[39m reportingService[33m.[39mscheduleReport(sc
+hedule)[33m;[39m
+    [31m[1m>[22m[39m[90m 159 |[39m         
+assert(result[33m.[39mfrequency [33m===[39m 
+freq[33m,[39m [32m`Should support ${freq} 
+frequency`[39m)[33m;[39m
+     [90m     |[39m         [31m[1m^[22m[39m
+     [90m 160 |[39m       })[33m;[39m
+     [90m 161 |[39m     })[33m;[39m
+     [90m 162 |[39m[0m
+
+      at assert 
+(api/tests/advancedReporting.test.js:159:9)
+          at Array.forEach (<anonymous>)
+      at Object.forEach 
+(api/tests/advancedReporting.test.js:152:19)
+
+  ظù AdvancedReportingService Tests ظ║ Report 
+Scheduling ظ║ should get scheduled report details
+
+    TypeError: reportingService.getSchedule is not a 
+function
+
+    [0m [90m 181 |[39m       }[33m;[39m
+     [90m 182 |[39m       [36mconst[39m created 
+[33m=[39m reportingService[33m.[39mscheduleReport(sc
+hedule)[33m;[39m
+    [31m[1m>[22m[39m[90m 183 |[39m       
+[36mconst[39m retrieved [33m=[39m reportingService[
+33m.[39mgetSchedule(created[33m.[39mscheduleId)[33m;
+[39m
+     [90m     |[39m                                   
+       [31m[1m^[22m[39m
+     [90m 184 |[39m       
+assert(retrieved[33m.[39mfrequency [33m===[39m 
+[32m'weekly'[39m)[33m;[39m
+     [90m 185 |[39m     })[33m;[39m
+     [90m 186 |[39m[0m
+
+      at Object.getSchedule 
+(api/tests/advancedReporting.test.js:183:42)
+
+  ظù AdvancedReportingService Tests ظ║ Report 
+Scheduling ظ║ should pause scheduled report
+
+    TypeError: reportingService.pauseSchedule is not a 
+function
+
+    [0m [90m 192 |[39m       }[33m;[39m
+     [90m 193 |[39m       [36mconst[39m created 
+[33m=[39m reportingService[33m.[39mscheduleReport(sc
+hedule)[33m;[39m
+    [31m[1m>[22m[39m[90m 194 |[39m       
+[36mconst[39m paused [33m=[39m reportingService[33m
+.[39mpauseSchedule(created[33m.[39mscheduleId)[33m;
+[39m
+     [90m     |[39m                                   
+    [31m[1m^[22m[39m
+     [90m 195 |[39m       
+assert(paused[33m.[39mstatus [33m===[39m 
+[32m'paused'[39m)[33m;[39m
+     [90m 196 |[39m     })[33m;[39m
+     [90m 197 |[39m[0m
+
+      at Object.pauseSchedule 
+(api/tests/advancedReporting.test.js:194:39)
+
+  ظù AdvancedReportingService Tests ظ║ Report 
+Scheduling ظ║ should resume paused schedule
+
+    TypeError: reportingService.pauseSchedule is not a 
+function
+
+    [0m [90m 203 |[39m       }[33m;[39m
+     [90m 204 |[39m       [36mconst[39m created 
+[33m=[39m reportingService[33m.[39mscheduleReport(sc
+hedule)[33m;[39m
+    [31m[1m>[22m[39m[90m 205 |[39m       reporting
+Service[33m.[39mpauseSchedule(created[33m.[39mschedu
+leId)[33m;[39m
+     [90m     |[39m                        
+[31m[1m^[22m[39m
+     [90m 206 |[39m       [36mconst[39m resumed 
+[33m=[39m reportingService[33m.[39mresumeSchedule(cr
+eated[33m.[39mscheduleId)[33m;[39m
+     [90m 207 |[39m       
+assert(resumed[33m.[39mstatus [33m===[39m 
+[32m'active'[39m)[33m;[39m
+     [90m 208 |[39m     })[33m;[39m[0m
+
+      at Object.pauseSchedule 
+(api/tests/advancedReporting.test.js:205:24)
+
+  ظù AdvancedReportingService Tests ظ║ Report 
+Scheduling ظ║ should delete schedule
+
+    TypeError: reportingService.deleteSchedule is not a 
+function
+
+    [0m [90m 215 |[39m       }[33m;[39m
+     [90m 216 |[39m       [36mconst[39m created 
+[33m=[39m reportingService[33m.[39mscheduleReport(sc
+hedule)[33m;[39m
+    [31m[1m>[22m[39m[90m 217 |[39m       
+[36mconst[39m deleted [33m=[39m reportingService[33
+m.[39mdeleteSchedule(created[33m.[39mscheduleId)[33m
+;[39m
+     [90m     |[39m                                   
+     [31m[1m^[22m[39m
+     [90m 218 |[39m       assert(deleted[33m,[39m 
+[32m'Should return true when schedule is 
+deleted'[39m)[33m;[39m
+     [90m 219 |[39m     })[33m;[39m
+     [90m 220 |[39m   })[33m;[39m[0m
+
+      at Object.deleteSchedule 
+(api/tests/advancedReporting.test.js:217:40)
+
+  ظù AdvancedReportingService Tests ظ║ Export 
+Functionality ظ║ should export report to CSV
+
+    assert(received)
+
+    Expected value to be equal to:
+      true
+    Received:
+      false
+
+    Message:
+      CSV should contain data
+
+    [0m [90m 227 |[39m       [36mconst[39m report 
+[33m=[39m reportingService[33m.[39mgenerateReport(re
+portTemplate[33m,[39m sampleData)[33m;[39m
+     [90m 228 |[39m       [36mconst[39m csv 
+[33m=[39m reportingService[33m.[39mexportToCSV(repor
+t)[33m;[39m
+    [31m[1m>[22m[39m[90m 229 |[39m       
+assert(csv[33m.[39mincludes([32m'name'[39m) 
+[33m||[39m csv[33m.[39mincludes([32m'department'[3
+9m)[33m,[39m [32m'CSV should contain 
+data'[39m)[33m;[39m
+     [90m     |[39m       [31m[1m^[22m[39m
+     [90m 230 |[39m     })[33m;[39m
+     [90m 231 |[39m
+     [90m 232 |[39m     test([32m'should export 
+report to Excel'[39m[33m,[39m () [33m=>[39m {[0m
+
+      at Object.assert 
+(api/tests/advancedReporting.test.js:229:7)
+
+  ظù AdvancedReportingService Tests ظ║ Export 
+Functionality ظ║ should support partial exports
+
+    assert(received)
+
+    Expected value to be equal to:
+      true
+    Received:
+      false
+
+    Message:
+      Export should include selected columns only
+
+    [0m [90m 260 |[39m         columns[33m:[39m 
+[[32m'name'[39m[33m,[39m 
+[32m'sales'[39m][33m,[39m
+     [90m 261 |[39m       })[33m;[39m
+    [31m[1m>[22m[39m[90m 262 |[39m       assert(cs
+v[33m.[39mincludes([32m'sales'[39m)[33m,[39m 
+[32m'Export should include selected columns 
+only'[39m)[33m;[39m
+     [90m     |[39m       [31m[1m^[22m[39m
+     [90m 263 |[39m     })[33m;[39m
+     [90m 264 |[39m   })[33m;[39m
+     [90m 265 |[39m[0m
+
+      at Object.assert 
+(api/tests/advancedReporting.test.js:262:7)
+
+  ظù AdvancedReportingService Tests ظ║ Filtering and 
+Aggregation ظ║ should apply filters during report 
+generation
+
+    assert(received)
+
+    Expected value to be equal to:
+      true
+    Received:
+      undefined
+
+    Message:
+      Report should be generated with filters
+
+    Difference:
+
+      Comparing two different types of values. Expected 
+boolean but received undefined.
+
+    [0m [90m 272 |[39m         filters[33m:[39m [{ 
+field[33m:[39m [32m'department'[39m[33m,[39m 
+operator[33m:[39m [32m'equals'[39m[33m,[39m 
+value[33m:[39m [32m'Engineering'[39m }][33m,[39m
+     [90m 273 |[39m       })[33m;[39m
+    [31m[1m>[22m[39m[90m 274 |[39m       
+assert(report[33m.[39mcontent[33m,[39m [32m'Report 
+should be generated with filters'[39m)[33m;[39m
+     [90m     |[39m       [31m[1m^[22m[39m
+     [90m 275 |[39m     })[33m;[39m
+     [90m 276 |[39m
+     [90m 277 |[39m     test([32m'should calculate 
+sum aggregation'[39m[33m,[39m () [33m=>[39m {[0m
+
+      at Object.assert 
+(api/tests/advancedReporting.test.js:274:7)
+
+  ظù AdvancedReportingService Tests ظ║ Filtering and 
+Aggregation ظ║ should calculate sum aggregation
+
+    TypeError: reportingService.aggregate is not a 
+function
+
+    [0m [90m 276 |[39m
+     [90m 277 |[39m     test([32m'should calculate 
+sum aggregation'[39m[33m,[39m () [33m=>[39m {
+    [31m[1m>[22m[39m[90m 278 |[39m       
+[36mconst[39m result [33m=[39m reportingService[33m
+.[39maggregate(sampleData[33m,[39m {
+     [90m     |[39m                                   
+    [31m[1m^[22m[39m
+     [90m 279 |[39m         type[33m:[39m 
+[32m'sum'[39m[33m,[39m
+     [90m 280 |[39m         field[33m:[39m 
+[32m'sales'[39m[33m,[39m
+     [90m 281 |[39m       })[33m;[39m[0m
+
+      at Object.aggregate 
+(api/tests/advancedReporting.test.js:278:39)
+
+  ظù AdvancedReportingService Tests ظ║ Filtering and 
+Aggregation ظ║ should calculate average aggregation
+
+    TypeError: reportingService.aggregate is not a 
+function
+
+    [0m [90m 284 |[39m
+     [90m 285 |[39m     test([32m'should calculate 
+average aggregation'[39m[33m,[39m () [33m=>[39m {
+    [31m[1m>[22m[39m[90m 286 |[39m       
+[36mconst[39m result [33m=[39m reportingService[33m
+.[39maggregate(sampleData[33m,[39m {
+     [90m     |[39m                                   
+    [31m[1m^[22m[39m
+     [90m 287 |[39m         type[33m:[39m 
+[32m'avg'[39m[33m,[39m
+     [90m 288 |[39m         field[33m:[39m 
+[32m'sales'[39m[33m,[39m
+     [90m 289 |[39m       })[33m;[39m[0m
+
+      at Object.aggregate 
+(api/tests/advancedReporting.test.js:286:39)
+
+  ظù AdvancedReportingService Tests ظ║ Filtering and 
+Aggregation ظ║ should calculate count aggregation
+
+    TypeError: reportingService.aggregate is not a 
+function
+
+    [0m [90m 292 |[39m
+     [90m 293 |[39m     test([32m'should calculate 
+count aggregation'[39m[33m,[39m () [33m=>[39m {
+    [31m[1m>[22m[39m[90m 294 |[39m       
+[36mconst[39m result [33m=[39m reportingService[33m
+.[39maggregate(sampleData[33m,[39m {
+     [90m     |[39m                                   
+    [31m[1m^[22m[39m
+     [90m 295 |[39m         type[33m:[39m 
+[32m'count'[39m[33m,[39m
+     [90m 296 |[39m       })[33m;[39m
+     [90m 297 |[39m       assert(result [33m===[39m 
+[35m4[39m[33m,[39m [32m'Count should be 
+4'[39m)[33m;[39m[0m
+
+      at Object.aggregate 
+(api/tests/advancedReporting.test.js:294:39)
+
+  ظù AdvancedReportingService Tests ظ║ Filtering and 
+Aggregation ظ║ should group data for aggregation
+
+    TypeError: reportingService.groupAndAggregate is 
+not a function
+
+    [0m [90m 299 |[39m
+     [90m 300 |[39m     test([32m'should group data 
+for aggregation'[39m[33m,[39m () [33m=>[39m {
+    [31m[1m>[22m[39m[90m 301 |[39m       
+[36mconst[39m grouped [33m=[39m reportingService[33
+m.[39mgroupAndAggregate(sampleData[33m,[39m {
+     [90m     |[39m                                   
+     [31m[1m^[22m[39m
+     [90m 302 |[39m         groupBy[33m:[39m 
+[32m'department'[39m[33m,[39m
+     [90m 303 |[39m         aggregations[33m:[39m {
+     [90m 304 |[39m           totalSales[33m:[39m { 
+type[33m:[39m [32m'sum'[39m[33m,[39m 
+field[33m:[39m [32m'sales'[39m }[33m,[39m[0m
+
+      at Object.groupAndAggregate 
+(api/tests/advancedReporting.test.js:301:40)
+
+  ظù AdvancedReportingService Tests ظ║ Charts and 
+Visualization ظ║ should generate chart data for bar 
+chart
+
+    TypeError: reportingService.generateChartData is 
+not a function
+
+    [0m [90m 315 |[39m   describe([32m'Charts and 
+Visualization'[39m[33m,[39m () [33m=>[39m {
+     [90m 316 |[39m     test([32m'should generate 
+chart data for bar chart'[39m[33m,[39m () 
+[33m=>[39m {
+    [31m[1m>[22m[39m[90m 317 |[39m       
+[36mconst[39m chartData [33m=[39m reportingService[
+33m.[39mgenerateChartData(sampleData[33m,[39m {
+     [90m     |[39m                                   
+       [31m[1m^[22m[39m
+     [90m 318 |[39m         type[33m:[39m 
+[32m'bar'[39m[33m,[39m
+     [90m 319 |[39m         xField[33m:[39m 
+[32m'name'[39m[33m,[39m
+     [90m 320 |[39m         yField[33m:[39m 
+[32m'sales'[39m[33m,[39m[0m
+
+      at Object.generateChartData 
+(api/tests/advancedReporting.test.js:317:42)
+
+  ظù AdvancedReportingService Tests ظ║ Charts and 
+Visualization ظ║ should generate chart data for pie 
+chart
+
+    TypeError: reportingService.generateChartData is 
+not a function
+
+    [0m [90m 325 |[39m
+     [90m 326 |[39m     test([32m'should generate 
+chart data for pie chart'[39m[33m,[39m () 
+[33m=>[39m {
+    [31m[1m>[22m[39m[90m 327 |[39m       
+[36mconst[39m chartData [33m=[39m reportingService[
+33m.[39mgenerateChartData(sampleData[33m,[39m {
+     [90m     |[39m                                   
+       [31m[1m^[22m[39m
+     [90m 328 |[39m         type[33m:[39m 
+[32m'pie'[39m[33m,[39m
+     [90m 329 |[39m         field[33m:[39m 
+[32m'department'[39m[33m,[39m
+     [90m 330 |[39m       })[33m;[39m[0m
+
+      at Object.generateChartData 
+(api/tests/advancedReporting.test.js:327:42)
+
+  ظù AdvancedReportingService Tests ظ║ Charts and 
+Visualization ظ║ should generate chart data for line 
+chart
+
+    TypeError: reportingService.generateChartData is 
+not a function
+
+    [0m [90m 333 |[39m
+     [90m 334 |[39m     test([32m'should generate 
+chart data for line chart'[39m[33m,[39m () 
+[33m=>[39m {
+    [31m[1m>[22m[39m[90m 335 |[39m       
+[36mconst[39m chartData [33m=[39m reportingService[
+33m.[39mgenerateChartData(sampleData[33m,[39m {
+     [90m     |[39m                                   
+       [31m[1m^[22m[39m
+     [90m 336 |[39m         type[33m:[39m 
+[32m'line'[39m[33m,[39m
+     [90m 337 |[39m         xField[33m:[39m 
+[32m'date'[39m[33m,[39m
+     [90m 338 |[39m         yField[33m:[39m 
+[32m'sales'[39m[33m,[39m[0m
+
+      at Object.generateChartData 
+(api/tests/advancedReporting.test.js:335:42)
+
+  ظù AdvancedReportingService Tests ظ║ Charts and 
+Visualization ظ║ should support chart customization
+
+    TypeError: reportingService.generateChartData is 
+not a function
+
+    [0m [90m 342 |[39m
+     [90m 343 |[39m     test([32m'should support 
+chart customization'[39m[33m,[39m () [33m=>[39m {
+    [31m[1m>[22m[39m[90m 344 |[39m       
+[36mconst[39m chartData [33m=[39m reportingService[
+33m.[39mgenerateChartData(sampleData[33m,[39m {
+     [90m     |[39m                                   
+       [31m[1m^[22m[39m
+     [90m 345 |[39m         type[33m:[39m 
+[32m'bar'[39m[33m,[39m
+     [90m 346 |[39m         xField[33m:[39m 
+[32m'name'[39m[33m,[39m
+     [90m 347 |[39m         yField[33m:[39m 
+[32m'sales'[39m[33m,[39m[0m
+
+      at Object.generateChartData 
+(api/tests/advancedReporting.test.js:344:42)
+
+  ظù AdvancedReportingService Tests ظ║ Email 
+Distribution ظ║ should send report via email
+
+    assert(received)
+
+    Expected value to be equal to:
+      true
+    Received:
+      undefined
+
+    Message:
+      Should return email ID
+
+    Difference:
+
+      Comparing two different types of values. Expected 
+boolean but received undefined.
+
+    [0m [90m 365 |[39m         format[33m:[39m 
+[32m'pdf'[39m[33m,[39m
+     [90m 366 |[39m       })[33m;[39m
+    [31m[1m>[22m[39m[90m 367 |[39m       
+assert(result[33m.[39memailId[33m,[39m [32m'Should 
+return email ID'[39m)[33m;[39m
+     [90m     |[39m       [31m[1m^[22m[39m
+     [90m 368 |[39m       
+assert(result[33m.[39mstatus [33m===[39m 
+[32m'sent'[39m)[33m;[39m
+     [90m 369 |[39m     })[33m;[39m
+     [90m 370 |[39m[0m
+
+      at Object.assert 
+(api/tests/advancedReporting.test.js:367:7)
+
+  ظù AdvancedReportingService Tests ظ║ Email 
+Distribution ظ║ should send to multiple recipients
+
+    assert(received)
+
+    Expected value to be equal to:
+      true
+    Received:
+      false
+
+    Message:
+      Should send to 2 recipients
+
+    [0m [90m 375 |[39m         subject[33m:[39m 
+[32m'Monthly Report'[39m[33m,[39m
+     [90m 376 |[39m       })[33m;[39m
+    [31m[1m>[22m[39m[90m 377 |[39m       
+assert(result[33m.[39mrecipientCount [33m===[39m 
+[35m2[39m[33m,[39m [32m'Should send to 2 
+recipients'[39m)[33m;[39m
+     [90m     |[39m       [31m[1m^[22m[39m
+     [90m 378 |[39m     })[33m;[39m
+     [90m 379 |[39m
+     [90m 380 |[39m     test([32m'should include 
+attachments in email'[39m[33m,[39m () [33m=>[39m 
+{[0m
+
+      at Object.assert 
+(api/tests/advancedReporting.test.js:377:7)
+
+  ظù AdvancedReportingService Tests ظ║ Email 
+Distribution ظ║ should include attachments in email
+
+    assert(received)
+
+    Expected value to be equal to:
+      true
+    Received:
+      false
+
+    Message:
+      Email should be sent with attachments
+
+    [0m [90m 385 |[39m         
+attachments[33m:[39m [{ filename[33m:[39m 
+[32m'data.csv'[39m[33m,[39m data[33m:[39m 
+[32m'csv content'[39m }][33m,[39m
+     [90m 386 |[39m       })[33m;[39m
+    [31m[1m>[22m[39m[90m 387 |[39m       
+assert(result[33m.[39mstatus [33m===[39m 
+[32m'sent'[39m[33m,[39m [32m'Email should be sent 
+with attachments'[39m)[33m;[39m
+     [90m     |[39m       [31m[1m^[22m[39m
+     [90m 388 |[39m     })[33m;[39m
+     [90m 389 |[39m
+     [90m 390 |[39m     test([32m'should support 
+email templates'[39m[33m,[39m () [33m=>[39m {[0m
+
+      at Object.assert 
+(api/tests/advancedReporting.test.js:387:7)
+
+  ظù AdvancedReportingService Tests ظ║ Email 
+Distribution ظ║ should support email templates
+
+    assert(received)
+
+    Expected value to be equal to:
+      true
+    Received:
+      false
+
+    Message:
+      Should use email template
+
+    [0m [90m 394 |[39m         templateId[33m:[39m 
+[32m'report-email-template'[39m[33m,[39m
+     [90m 395 |[39m       })[33m;[39m
+    [31m[1m>[22m[39m[90m 396 |[39m       
+assert(result[33m.[39mstatus [33m===[39m 
+[32m'sent'[39m[33m,[39m [32m'Should use email 
+template'[39m)[33m;[39m
+     [90m     |[39m       [31m[1m^[22m[39m
+     [90m 397 |[39m     })[33m;[39m
+     [90m 398 |[39m   })[33m;[39m
+     [90m 399 |[39m[0m
+
+      at Object.assert 
+(api/tests/advancedReporting.test.js:396:7)
+
+  ظù AdvancedReportingService Tests ظ║ Caching and 
+Performance ظ║ should handle large dataset efficiently
+
+    assert(received)
+
+    Expected value to be equal to:
+      true
+    Received:
+      undefined
+
+    Message:
+      Report should be generated
+
+    Difference:
+
+      Comparing two different types of values. Expected 
+boolean but received undefined.
+
+    [0m [90m 426 |[39m       [36mconst[39m 
+duration [33m=[39m [33mDate[39m[33m.[39mnow() 
+[33m-[39m start[33m;[39m
+     [90m 427 |[39m
+    [31m[1m>[22m[39m[90m 428 |[39m       
+assert(report[33m.[39mcontent[33m,[39m [32m'Report 
+should be generated'[39m)[33m;[39m
+     [90m     |[39m       [31m[1m^[22m[39m
+     [90m 429 |[39m       assert(duration [33m<[39m 
+[35m5000[39m[33m,[39m [32m'Should generate large 
+report within 5 seconds'[39m)[33m;[39m
+     [90m 430 |[39m     })[33m;[39m
+     [90m 431 |[39m   })[33m;[39m[0m
+
+      at Object.assert 
+(api/tests/advancedReporting.test.js:428:7)
+
+  ظù AdvancedReportingService Tests ظ║ Error Handling 
+ظ║ should handle invalid data format
+
+    TypeError: data.reduce is not a function
+
+    [0m [90m 204 |[39m
+     [90m 205 |[39m     [90m// ╪ص╪│╪د╪ذ 
+╪د┘┘à╪ز┘ê╪│╪╖[39m
+    [31m[1m>[22m[39m[90m 206 |[39m     
+[36mconst[39m sum [33m=[39m 
+data[33m.[39mreduce((s[33m,[39m d) [33m=>[39m s 
+[33m+[39m ([33mNumber[39m(d[33m.[39mvalue) 
+[33m||[39m [35m0[39m)[33m,[39m 
+[35m0[39m)[33m;[39m
+     [90m     |[39m                      
+[31m[1m^[22m[39m
+     [90m 207 |[39m     stats[33m.[39maverage 
+[33m=[39m sum [33m/[39m 
+data[33m.[39mlength[33m;[39m
+     [90m 208 |[39m
+     [90m 209 |[39m     [90m// ╪ص╪│╪د╪ذ 
+╪د┘┘ê╪│┘è╪╖[39m[0m
+
+      at AdvancedReportingService.reduce [as 
+calculateStatistics] 
+(services/advancedReportingService.js:206:22)
+      at AdvancedReportingService.calculateStatistics 
+[as generateReport] 
+(services/advancedReportingService.js:79:30)
+      at Object.generateReport 
+(api/tests/advancedReporting.test.js:443:39)
+
+  ظù AdvancedReportingService Tests ظ║ Error Handling 
+ظ║ should handle missing required fields
+
+    assert(received)
+
+    Expected value to be equal to:
+      true
+    Received:
+      undefined
+
+    Message:
+      Should handle missing fields gracefully
+
+    Difference:
+
+      Comparing two different types of values. Expected 
+boolean but received undefined.
+
+    [0m [90m 448 |[39m       [36mconst[39m 
+invalidTemplate [33m=[39m { name[33m:[39m 
+[32m'Report'[39m }[33m;[39m [90m// Missing 
+sections[39m
+     [90m 449 |[39m       [36mconst[39m result 
+[33m=[39m reportingService[33m.[39mgenerateReport(in
+validTemplate[33m,[39m sampleData)[33m;[39m
+    [31m[1m>[22m[39m[90m 450 |[39m       
+assert(result[33m.[39merror [33m||[39m 
+result[33m.[39mcontent[33m,[39m [32m'Should handle 
+missing fields gracefully'[39m)[33m;[39m
+     [90m     |[39m       [31m[1m^[22m[39m
+     [90m 451 |[39m     })[33m;[39m
+     [90m 452 |[39m
+     [90m 453 |[39m     test([32m'should validate 
+filter conditions'[39m[33m,[39m () [33m=>[39m {[0m
+
+      at Object.assert 
+(api/tests/advancedReporting.test.js:450:7)
+
+  ظù AdvancedReportingService Tests ظ║ Error Handling 
+ظ║ should validate filter conditions
+
+    assert(received)
+
+    Expected value to be equal to:
+      true
+    Received:
+      undefined
+
+    Message:
+      Should handle invalid filters
+
+    Difference:
+
+      Comparing two different types of values. Expected 
+boolean but received undefined.
+
+    [0m [90m 455 |[39m         filters[33m:[39m [{ 
+field[33m:[39m [32m'invalid'[39m[33m,[39m 
+operator[33m:[39m [32m'equals'[39m[33m,[39m 
+value[33m:[39m [32m'test'[39m }][33m,[39m
+     [90m 456 |[39m       })[33m;[39m
+    [31m[1m>[22m[39m[90m 457 |[39m       
+assert(report[33m.[39mcontent[33m,[39m [32m'Should 
+handle invalid filters'[39m)[33m;[39m
+     [90m     |[39m       [31m[1m^[22m[39m
+     [90m 458 |[39m     })[33m;[39m
+     [90m 459 |[39m   })[33m;[39m
+     [90m 460 |[39m[0m
+
+      at Object.assert 
+(api/tests/advancedReporting.test.js:457:7)
+
+  ظù AdvancedReportingService Tests ظ║ Report History 
+ظ║ should save report to history
+
+    assert(received)
+
+    Expected value to be equal to:
+      true
+    Received:
+      undefined
+
+    Message:
+      Should save to history
+
+    Difference:
+
+      Comparing two different types of values. Expected 
+boolean but received undefined.
+
+    [0m [90m 466 |[39m       [36mconst[39m report 
+[33m=[39m reportingService[33m.[39mgenerateReport(re
+portTemplate[33m,[39m sampleData)[33m;[39m
+     [90m 467 |[39m       [36mconst[39m saved 
+[33m=[39m reportingService[33m.[39msaveToHistory(rep
+ort)[33m;[39m
+    [31m[1m>[22m[39m[90m 468 |[39m       
+assert(saved[33m.[39mhistoryId[33m,[39m 
+[32m'Should save to history'[39m)[33m;[39m
+     [90m     |[39m       [31m[1m^[22m[39m
+     [90m 469 |[39m     })[33m;[39m
+     [90m 470 |[39m
+     [90m 471 |[39m     test([32m'should retrieve 
+report from history'[39m[33m,[39m () [33m=>[39m 
+{[0m
+
+      at Object.assert 
+(api/tests/advancedReporting.test.js:468:7)
+
+  ظù AdvancedReportingService Tests ظ║ Report History 
+ظ║ should retrieve report from history
+
+    TypeError: reportingService.getFromHistory is not a 
+function
+
+    [0m [90m 472 |[39m       [36mconst[39m report 
+[33m=[39m reportingService[33m.[39mgenerateReport(re
+portTemplate[33m,[39m sampleData)[33m;[39m
+     [90m 473 |[39m       [36mconst[39m saved 
+[33m=[39m reportingService[33m.[39msaveToHistory(rep
+ort)[33m;[39m
+    [31m[1m>[22m[39m[90m 474 |[39m       
+[36mconst[39m retrieved [33m=[39m reportingService[
+33m.[39mgetFromHistory(saved[33m.[39mhistoryId)[33m;
+[39m
+     [90m     |[39m                                   
+       [31m[1m^[22m[39m
+     [90m 475 |[39m       
+assert(retrieved[33m.[39mid [33m===[39m 
+report[33m.[39mid [33m||[39m 
+retrieved[33m.[39mcontent [33m===[39m 
+report[33m.[39mcontent)[33m;[39m
+     [90m 476 |[39m     })[33m;[39m
+     [90m 477 |[39m[0m
+
+      at Object.getFromHistory 
+(api/tests/advancedReporting.test.js:474:42)
+
+  ظù AdvancedReportingService Tests ظ║ Report History 
+ظ║ should delete from history
+
+    assert(received)
+
+    Expected value to be equal to:
+      true
+    Received:
+      false
+
+    Message:
+      Should delete from history
+
+    [0m [90m 486 |[39m       [36mconst[39m saved 
+[33m=[39m reportingService[33m.[39msaveToHistory(rep
+ort)[33m;[39m
+     [90m 487 |[39m       [36mconst[39m deleted 
+[33m=[39m reportingService[33m.[39mdeleteFromHistory
+(saved[33m.[39mhistoryId)[33m;[39m
+    [31m[1m>[22m[39m[90m 488 |[39m       
+assert(deleted[33m,[39m [32m'Should delete from 
+history'[39m)[33m;[39m
+     [90m     |[39m       [31m[1m^[22m[39m
+     [90m 489 |[39m     })[33m;[39m
+     [90m 490 |[39m   })[33m;[39m
+     [90m 491 |[39m })[33m;[39m[0m
+
+      at Object.assert 
+(api/tests/advancedReporting.test.js:488:7)
+
+----------------------------------|---------|----------|---------|---------|-------------------
+File                              | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+----------------------------------|---------|----------|---------|---------|-------------------
+All files                         |       0 |        0 |       0 |       0 |                   
+ backend                          |       0 |        0 |       0 |       0 |                   
+  server.js                       |       0 |        0 |       0 |       0 | 1-370             
+  start.js                        |       0 |      100 |     100 |       0 | 3-4               
+ backend/api/routes               |       0 |        0 |       0 |       0 |                   
+  ai.routes.js                    |       0 |        0 |       0 |       0 | 6-151             
+  auth.routes.js                  |       0 |        0 |       0 |       0 | 1-380             
+  crm.routes.js                   |       0 |        0 |       0 |       0 | 15-664            
+  documents.routes.js             |       0 |        0 |       0 |       0 | 16-667            
+  integration.routes.js           |       0 |        0 |       0 |       0 | 6-124             
+  modules.routes.js               |       0 |        0 |       0 |       0 | 1-314             
+  project.routes.js               |       0 |        0 |       0 |       0 | 6-167             
+  reporting.routes.js             |       0 |        0 |       0 |       0 | 6-119             
+  search.routes.js                |       0 |        0 |       0 |       0 | 6-200             
+  setupRoutes.js                  |       0 |      100 |       0 |       0 | 10-97             
+  transport.routes.js             |       0 |        0 |       0 |       0 | 6-653             
+  users.routes.js                 |       0 |        0 |       0 |       0 | 1-249             
+  workflows.routes.js             |       0 |        0 |       0 |       0 | 6-553             
+ backend/config                   |       0 |        0 |       0 |       0 |                   
+  database.js                     |       0 |        0 |       0 |       0 | 2-86              
+  in-memory-db.js                 |       0 |        0 |       0 |       0 | 4-122             
+  inMemoryDB.js                   |       0 |        0 |       0 |       0 | 1-50              
+ backend/middleware               |       0 |        0 |       0 |       0 |                   
+  auth.js                         |       0 |        0 |       0 |       0 | 1-105             
+  auth.middleware.js              |       0 |        0 |       0 |       0 | 11-270            
+  rateLimiter.js                  |       0 |        0 |       0 |       0 | 1-57              
+  responseHandler.js              |       0 |        0 |       0 |       0 | 4-41              
+  sanitize.js                     |       0 |      100 |       0 |       0 | 1-27              
+  securityHeaders.js              |       0 |      100 |     100 |       0 | 1-69              
+  uploadMiddleware.js             |       0 |        0 |       0 |       0 | 6-78              
+  validation.js                   |       0 |        0 |       0 |       0 | 1-200             
+  validator.middleware.js         |       0 |        0 |       0 |       0 | 1-97              
+ backend/models                   |       0 |        0 |       0 |       0 |                   
+  AI.memory.js                    |       0 |        0 |       0 |       0 | 1-284             
+  Attendance.memory.js            |       0 |        0 |       0 |       0 | 1-76              
+  Document.js                     |       0 |        0 |       0 |       0 | 6-280             
+  Driver.js                       |       0 |        0 |       0 |       0 | 11-250            
+  Employee.memory.js              |       0 |        0 |       0 |       0 | 1-131             
+  Finance.memory.js               |       0 |        0 |       0 |       0 | 2-248             
+  Leave.memory.js                 |       0 |        0 |       0 |       0 | 1-112             
+  Notification.memory.js          |       0 |        0 |       0 |       0 | 1-211             
+  Product.js                      |       0 |      100 |       0 |       0 | 1-47              
+  Trip.js                         |       0 |        0 |       0 |       0 | 11-226            
+  User.js                         |       0 |      100 |       0 |       0 | 1-59              
+  User.memory.js                  |       0 |        0 |       0 |       0 | 1-155             
+  Vehicle.js                      |       0 |        0 |       0 |       0 | 13-454            
+  Vehicle_SaudiCompliant.js       |       0 |        0 |       0 |       0 | 13-841            
+  analytics.model.js              |       0 |        0 |       0 |       0 | 1-113             
+  conversation.model.js           |       0 |        0 |       0 |       0 | 13-356            
+  disability-assessment.model.js  |       0 |        0 |       0 |       0 | 13-427            
+  employee.model.js               |       0 |        0 |       0 |       0 | 13-464            
+  message.model.js                |       0 |        0 |       0 |       0 | 13-239            
+  payroll.model.js                |       0 |        0 |       0 |       0 | 6-219             
+  performance.model.js            |       0 |        0 |       0 |       0 | 6-173             
+  prediction.model.js             |       0 |        0 |       0 |       0 | 1-133             
+  rehabilitation-program.model.js |       0 |        0 |       0 |       0 | 14-511            
+  training.model.js               |       0 |        0 |       0 |       0 | 6-121             
+  transport.models.js             |       0 |      100 |     100 |       0 | 6-749             
+ backend/routes                   |       0 |        0 |       0 |       0 |                   
+  ai.routes.js                    |       0 |        0 |       0 |       0 | 1-284             
+  archivingRoutes.js              |       0 |        0 |       0 |       0 | 6-415             
+  complianceRoutes.js             |       0 |        0 |       0 |       0 | 12-476            
+  documentRoutes.js               |       0 |      100 |     100 |       0 | 6-60              
+  driverRoutes.js                 |       0 |        0 |       0 |       0 | 10-308            
+  finance.routes.js               |       0 |        0 |       0 |       0 | 1-373             
+  hr-advanced.routes.js           |       0 |        0 |       0 |       0 | 6-439             
+  hr.routes.js                    |       0 |        0 |       0 |       0 | 1-188             
+  hrops.routes.js                 |       0 |        0 |       0 |       0 | 1-151             
+  messaging.routes.js             |       0 |        0 |       0 |       0 | 21-318            
+  notifications.routes.js         |       0 |        0 |       0 |       0 | 1-641             
+  predictions.routes.js           |       0 |        0 |       0 |       0 | 1-137             
+  rehabilitation.routes.js        |       0 |      100 |       0 |       0 | 8-324             
+  reports.routes.js               |       0 |        0 |       0 |       0 | 1-312             
+  vehicleRoutes.js                |       0 |      100 |       0 |       0 | 10-262            
+ backend/utils                    |       0 |        0 |       0 |       0 |                   
+  errorHandler.js                 |       0 |        0 |       0 |       0 | 5-91              
+  logger.js                       |       0 |        0 |       0 |       0 | 4-24              
+  security.js                     |       0 |        0 |       0 |       0 | 1-141             
+  seedDatabase.js                 |       0 |        0 |       0 |       0 | 2-38              
+  validators.js                   |       0 |        0 |       0 |       0 | 2-106             
+----------------------------------|---------|----------|---------|---------|-------------------
+Jest: "global" coverage threshold for statements (25%) 
+not met: 0%
+Jest: "global" coverage threshold for branches (25%) 
+not met: 0%
+Jest: "global" coverage threshold for lines (25%) not 
+met: 0%
+Jest: "global" coverage threshold for functions (25%) 
+not met: 0%
+Test Suites: 1 failed, 1 total
+Tests:       35 failed, 14 passed, 49 total
+Snapshots:   0 total
+Time:        1.892 s
+Ran all test suites matching 
+/advancedReporting.test.js/i.

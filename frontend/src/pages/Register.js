@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { 
-  Container, 
-  Box, 
-  Typography, 
-  TextField, 
-  Button, 
+import {
+  Container,
+  Box,
+  Typography,
+  TextField,
+  Button,
   Paper,
   Link as MuiLink,
   Alert,
   CircularProgress,
   FormControlLabel,
-  Checkbox
+  Checkbox,
 } from '@mui/material';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
@@ -24,15 +24,9 @@ const Register = () => {
   const [termsAccepted, setTermsAccepted] = useState(false);
 
   const validationSchema = Yup.object().shape({
-    name: Yup.string()
-      .required('Name is required')
-      .min(2, 'Name must be at least 2 characters'),
-    email: Yup.string()
-      .email('Invalid email address')
-      .required('Email is required'),
-    password: Yup.string()
-      .required('Password is required')
-      .min(6, 'Password must be at least 6 characters'),
+    name: Yup.string().required('Name is required').min(2, 'Name must be at least 2 characters'),
+    email: Yup.string().email('Invalid email address').required('Email is required'),
+    password: Yup.string().required('Password is required').min(6, 'Password must be at least 6 characters'),
     confirmPassword: Yup.string()
       .oneOf([Yup.ref('password'), null], 'Passwords must match')
       .required('Please confirm your password'),
@@ -47,17 +41,13 @@ const Register = () => {
 
     try {
       setIsSubmitting(true);
-      const { success, error } = await register(
-        values.name,
-        values.email,
-        values.password
-      );
-      
+      const { success } = await register(values.name, values.email, values.password);
+
       if (success) {
-        navigate('/login', { 
-          state: { 
-            message: 'Registration successful! Please log in.' 
-          } 
+        navigate('/login', {
+          state: {
+            message: 'Registration successful! Please log in.',
+          },
         });
       }
     } catch (error) {
@@ -85,20 +75,20 @@ const Register = () => {
         <Typography variant="body1" color="text.secondary" sx={{ mb: 4, textAlign: 'center' }}>
           Join Splitwise to easily share expenses with friends and family
         </Typography>
-        
+
         <Paper elevation={3} sx={{ p: 4, width: '100%' }}>
           {error && (
             <Alert severity="error" sx={{ mb: 3 }}>
               {error}
             </Alert>
           )}
-          
+
           <Formik
-            initialValues={{ 
+            initialValues={{
               name: '',
               email: '',
               password: '',
-              confirmPassword: ''
+              confirmPassword: '',
             }}
             validationSchema={validationSchema}
             onSubmit={handleSubmit}
@@ -118,7 +108,7 @@ const Register = () => {
                   helperText={touched.name && errors.name}
                   sx={{ mb: 2 }}
                 />
-                
+
                 <Field
                   as={TextField}
                   margin="normal"
@@ -131,7 +121,7 @@ const Register = () => {
                   helperText={touched.email && errors.email}
                   sx={{ mb: 2 }}
                 />
-                
+
                 <Field
                   as={TextField}
                   margin="normal"
@@ -145,7 +135,7 @@ const Register = () => {
                   helperText={touched.password && errors.password}
                   sx={{ mb: 2 }}
                 />
-                
+
                 <Field
                   as={TextField}
                   margin="normal"
@@ -159,15 +149,10 @@ const Register = () => {
                   helperText={touched.confirmPassword && errors.confirmPassword}
                   sx={{ mb: 3 }}
                 />
-                
+
                 <FormControlLabel
                   control={
-                    <Checkbox 
-                      value="terms" 
-                      color="primary" 
-                      checked={termsAccepted}
-                      onChange={(e) => setTermsAccepted(e.target.checked)}
-                    />
+                    <Checkbox value="terms" color="primary" checked={termsAccepted} onChange={e => setTermsAccepted(e.target.checked)} />
                   }
                   label={
                     <Typography variant="body2">
@@ -183,37 +168,25 @@ const Register = () => {
                   }
                   sx={{ mb: 3 }}
                 />
-                
+
                 {touched.terms && errors.terms && (
                   <Typography color="error" variant="body2" sx={{ mt: -2, mb: 2 }}>
                     {errors.terms}
                   </Typography>
                 )}
-                
-                <Button
-                  type="submit"
-                  fullWidth
-                  variant="contained"
-                  size="large"
-                  disabled={isSubmitting}
-                  sx={{ py: 1.5, mb: 2 }}
-                >
+
+                <Button type="submit" fullWidth variant="contained" size="large" disabled={isSubmitting} sx={{ py: 1.5, mb: 2 }}>
                   {isSubmitting ? <CircularProgress size={24} /> : 'Create Account'}
                 </Button>
               </Form>
             )}
           </Formik>
         </Paper>
-        
+
         <Box sx={{ mt: 3, textAlign: 'center' }}>
           <Typography variant="body2" color="text.secondary">
             Already have an account?{' '}
-            <MuiLink 
-              component={Link} 
-              to="/login" 
-              variant="body2"
-              sx={{ textDecoration: 'none', fontWeight: 'medium' }}
-            >
+            <MuiLink component={Link} to="/login" variant="body2" sx={{ textDecoration: 'none', fontWeight: 'medium' }}>
               Log in
             </MuiLink>
           </Typography>

@@ -63,8 +63,9 @@ const getClientIP = req => {
   return (
     req.headers['x-forwarded-for']?.split(',')[0] ||
     req.headers['x-real-ip'] ||
-    req.connection.remoteAddress ||
-    req.socket.remoteAddress ||
+    req.ip ||
+    req.connection?.remoteAddress ||
+    req.socket?.remoteAddress ||
     'unknown'
   );
 };
@@ -72,12 +73,18 @@ const getClientIP = req => {
 /**
  * Log security event
  */
-const logSecurityEvent = (event, details = {}) => {
+const logSecurityEvent = (eventName, details = {}) => {
   const timestamp = new Date().toISOString();
-  console.log(`🔒 [SECURITY] ${timestamp} - ${event}`, details);
+  const event = {
+    eventName,
+    timestamp,
+    details,
+  };
+  console.log(`🔒 [SECURITY] ${timestamp} - ${eventName}`, details);
 
   // In production, this should write to a dedicated security log file
   // or send to a security monitoring service
+  return event;
 };
 
 /**

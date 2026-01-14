@@ -1,0 +1,1454 @@
+﻿
+> alawael-erp-backend@1.0.0 test
+> jest --coverage aiAnalytics.test.js
+
+node.exe : FAIL api/tests/aiAnalytics.test.js
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program 
+Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (FAIL api/t 
+   ests/aiAnalytics.test.js:String) [], RemoteExceptio  
+  n
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  AIAnalyticsService Tests
+    Attendance Prediction
+      ├ù should predict attendance for next period (13 
+ms)
+      ├ù should predict with historical trend (1 ms)
+      ├ù should forecast attendance for multiple periods
+      ├ù should handle seasonal patterns in attendance
+      ├ù should calculate prediction confidence
+      ├ù should handle missing data points (2 ms)
+    Performance Prediction
+      ├ù should predict performance score (1 ms)
+      ├ù should identify performance factors (1 ms)
+      ├ù should forecast performance trend
+      ├ù should detect performance anomalies
+      ├ù should compare against baseline
+      ├ù should predict performance improvement
+    Anomaly Detection
+      ├ù should detect unusual patterns (1 ms)
+      ├ù should classify anomaly severity
+      ├ù should explain anomalies
+      ├ù should detect gradual drift
+      ├ù should handle threshold customization (1 ms)
+    Recommendations
+      ├ù should generate smart recommendations
+      ├ù should provide actionable recommendations
+      ├ù should rank recommendations by priority
+      ├ù should tailor recommendations to user
+      ├ù should estimate recommendation impact
+      ├ù should provide confidence in recommendations
+    Trend Analysis
+      ├ù should analyze data trends
+      ├ù should identify trend inflection points
+      ├ù should calculate trend slope
+      ├ù should forecast based on trends
+      ├ù should detect seasonality
+      ├ù should compare trends over periods
+    Model Management
+      ├ù should list available models
+      ├ù should get model information
+      ├ù should train custom model
+      ├ù should evaluate model performance
+      ├ù should provide model metrics (1 ms)
+      ├ù should handle model versioning
+    Correlation Analysis
+      ├ù should find correlations between variables
+      ├ù should identify strong correlations
+      ├ù should distinguish causation from correlation
+    Data Quality
+      ├ù should validate data quality (1 ms)
+      ├ù should detect missing values
+      ├ù should identify outliers
+    Error Handling
+      ├ù should handle empty data (1 ms)
+      ظêأ should handle single data point
+      ├ù should handle all identical values
+      ├ù should handle extreme values (1 ms)
+    Performance
+      ظêأ should process large datasets efficiently (3 
+ms)
+      ظêأ should cache predictions
+    Batch Operations
+      ├ù should process batch predictions
+      ├ù should handle mixed batch requests
+
+  ظù AIAnalyticsService Tests ظ║ Attendance 
+Prediction ظ║ should predict attendance for next period
+
+    assert(received)
+
+    Expected value to be equal to:
+      true
+    Received:
+      false
+
+    [0m [90m 30 |[39m     test([32m'should predict 
+attendance for next period'[39m[33m,[39m () 
+[33m=>[39m {
+     [90m 31 |[39m       [36mconst[39m prediction 
+[33m=[39m aiService[33m.[39mpredictAttendance(traini
+ngData)[33m;[39m
+    [31m[1m>[22m[39m[90m 32 |[39m       
+assert(prediction[33m.[39mnextPeriod [33m>=[39m 
+[35m0[39m [33m&&[39m 
+prediction[33m.[39mnextPeriod [33m<=[39m 
+[35m100[39m)[33m;[39m
+     [90m    |[39m       [31m[1m^[22m[39m
+     [90m 33 |[39m       
+assert(prediction[33m.[39mconfidence [33m>=[39m 
+[35m0[39m [33m&&[39m 
+prediction[33m.[39mconfidence [33m<=[39m 
+[35m100[39m)[33m;[39m
+     [90m 34 |[39m     })[33m;[39m
+     [90m 35 |[39m[0m
+
+      at Object.assert 
+(api/tests/aiAnalytics.test.js:32:7)
+
+  ظù AIAnalyticsService Tests ظ║ Attendance 
+Prediction ظ║ should predict with historical trend
+
+    assert(received)
+
+    Expected value to be equal to:
+      true
+    Received:
+      undefined
+
+    Message:
+      Should indicate trend
+
+    Difference:
+
+      Comparing two different types of values. Expected 
+boolean but received undefined.
+
+    [0m [90m 38 |[39m         
+considerTrend[33m:[39m [36mtrue[39m[33m,[39m
+     [90m 39 |[39m       })[33m;[39m
+    [31m[1m>[22m[39m[90m 40 |[39m       
+assert(prediction[33m.[39mtrend[33m,[39m 
+[32m'Should indicate trend'[39m)[33m;[39m
+     [90m    |[39m       [31m[1m^[22m[39m
+     [90m 41 |[39m       
+assert([[32m'increasing'[39m[33m,[39m 
+[32m'decreasing'[39m[33m,[39m [32m'stable'[39m][3
+3m.[39mincludes(prediction[33m.[39mtrend))[33m;[39m
+     [90m 42 |[39m     })[33m;[39m
+     [90m 43 |[39m[0m
+
+      at Object.assert 
+(api/tests/aiAnalytics.test.js:40:7)
+
+  ظù AIAnalyticsService Tests ظ║ Attendance 
+Prediction ظ║ should forecast attendance for multiple 
+periods
+
+    TypeError: Cannot read properties of undefined 
+(reading 'length')
+
+    [0m [90m 46 |[39m         periods[33m:[39m 
+[35m5[39m[33m,[39m
+     [90m 47 |[39m       })[33m;[39m
+    [31m[1m>[22m[39m[90m 48 |[39m       
+assert(forecast[33m.[39mforecasts[33m.[39mlength 
+[33m===[39m [35m5[39m)[33m;[39m
+     [90m    |[39m                                 
+[31m[1m^[22m[39m
+     [90m 49 |[39m       
+forecast[33m.[39mforecasts[33m.[39mforEach(f 
+[33m=>[39m {
+     [90m 50 |[39m         assert(f[33m.[39mvalue 
+[33m>=[39m [35m0[39m [33m&&[39m f[33m.[39mvalue 
+[33m<=[39m [35m100[39m)[33m;[39m
+     [90m 51 |[39m       })[33m;[39m[0m
+
+      at Object.length 
+(api/tests/aiAnalytics.test.js:48:33)
+
+  ظù AIAnalyticsService Tests ظ║ Attendance 
+Prediction ظ║ should handle seasonal patterns in 
+attendance
+
+    assert(received)
+
+    Expected value to be equal to:
+      true
+    Received:
+      undefined
+
+    Message:
+      Should detect seasonality
+
+    Difference:
+
+      Comparing two different types of values. Expected 
+boolean but received undefined.
+
+    [0m [90m 62 |[39m         seasonal[33m:[39m 
+[36mtrue[39m[33m,[39m
+     [90m 63 |[39m       })[33m;[39m
+    [31m[1m>[22m[39m[90m 64 |[39m       
+assert(prediction[33m.[39mseasonalPattern[33m,[39m 
+[32m'Should detect seasonality'[39m)[33m;[39m
+     [90m    |[39m       [31m[1m^[22m[39m
+     [90m 65 |[39m     })[33m;[39m
+     [90m 66 |[39m
+     [90m 67 |[39m     test([32m'should calculate 
+prediction confidence'[39m[33m,[39m () [33m=>[39m 
+{[0m
+
+      at Object.assert 
+(api/tests/aiAnalytics.test.js:64:7)
+
+  ظù AIAnalyticsService Tests ظ║ Attendance 
+Prediction ظ║ should calculate prediction confidence
+
+    assert(received)
+
+    Expected value to be equal to:
+      true
+    Received:
+      undefined
+
+    Message:
+      Should explain confidence
+
+    Difference:
+
+      Comparing two different types of values. Expected 
+boolean but received undefined.
+
+    [0m [90m 68 |[39m       [36mconst[39m 
+prediction [33m=[39m aiService[33m.[39mpredictAttend
+ance(trainingData)[33m;[39m
+     [90m 69 |[39m       
+assert(prediction[33m.[39mconfidence [33m<=[39m 
+[35m100[39m [33m&&[39m 
+prediction[33m.[39mconfidence [33m>=[39m 
+[35m0[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 70 |[39m       
+assert(prediction[33m.[39mconfidenceReason[33m,[39m 
+[32m'Should explain confidence'[39m)[33m;[39m
+     [90m    |[39m       [31m[1m^[22m[39m
+     [90m 71 |[39m     })[33m;[39m
+     [90m 72 |[39m
+     [90m 73 |[39m     test([32m'should handle 
+missing data points'[39m[33m,[39m () [33m=>[39m 
+{[0m
+
+      at Object.assert 
+(api/tests/aiAnalytics.test.js:70:7)
+
+  ظù AIAnalyticsService Tests ظ║ Attendance 
+Prediction ظ║ should handle missing data points
+
+    assert(received)
+
+    Expected value to be equal to:
+      true
+    Received:
+      undefined
+
+    Message:
+      Should handle missing data
+
+    Difference:
+
+      Comparing two different types of values. Expected 
+boolean but received undefined.
+
+    [0m [90m 79 |[39m
+     [90m 80 |[39m       [36mconst[39m prediction 
+[33m=[39m aiService[33m.[39mpredictAttendance(incomp
+leteData)[33m;[39m
+    [31m[1m>[22m[39m[90m 81 |[39m       
+assert(prediction[33m.[39mnextPeriod[33m,[39m 
+[32m'Should handle missing data'[39m)[33m;[39m
+     [90m    |[39m       [31m[1m^[22m[39m
+     [90m 82 |[39m     })[33m;[39m
+     [90m 83 |[39m   })[33m;[39m
+     [90m 84 |[39m[0m
+
+      at Object.assert 
+(api/tests/aiAnalytics.test.js:81:7)
+
+  ظù AIAnalyticsService Tests ظ║ Performance 
+Prediction ظ║ should predict performance score
+
+    assert(received)
+
+    Expected value to be equal to:
+      true
+    Received:
+      false
+
+    [0m [90m 89 |[39m     test([32m'should predict 
+performance score'[39m[33m,[39m () [33m=>[39m {
+     [90m 90 |[39m       [36mconst[39m prediction 
+[33m=[39m aiService[33m.[39mpredictPerformance(train
+ingData)[33m;[39m
+    [31m[1m>[22m[39m[90m 91 |[39m       
+assert(prediction[33m.[39mnextScore [33m>=[39m 
+[35m0[39m [33m&&[39m prediction[33m.[39mnextScore 
+[33m<=[39m [35m100[39m)[33m;[39m
+     [90m    |[39m       [31m[1m^[22m[39m
+     [90m 92 |[39m       
+assert(prediction[33m.[39mconfidence [33m>=[39m 
+[35m0[39m)[33m;[39m
+     [90m 93 |[39m     })[33m;[39m
+     [90m 94 |[39m[0m
+
+      at Object.assert 
+(api/tests/aiAnalytics.test.js:91:7)
+
+  ظù AIAnalyticsService Tests ظ║ Performance 
+Prediction ظ║ should identify performance factors
+
+    assert(received)
+
+    Expected value to be equal to:
+      true
+    Received:
+      false
+
+    Message:
+      Should list contributing factors
+
+    [0m [90m  95 |[39m     test([32m'should 
+identify performance factors'[39m[33m,[39m () 
+[33m=>[39m {
+     [90m  96 |[39m       [36mconst[39m prediction 
+[33m=[39m aiService[33m.[39mpredictPerformance(train
+ingData)[33m;[39m
+    [31m[1m>[22m[39m[90m  97 |[39m       assert([
+33mArray[39m[33m.[39misArray(prediction[33m.[39mfac
+tors)[33m,[39m [32m'Should list contributing 
+factors'[39m)[33m;[39m
+     [90m     |[39m       [31m[1m^[22m[39m
+     [90m  98 |[39m     })[33m;[39m
+     [90m  99 |[39m
+     [90m 100 |[39m     test([32m'should forecast 
+performance trend'[39m[33m,[39m () [33m=>[39m {[0m
+
+      at Object.assert 
+(api/tests/aiAnalytics.test.js:97:7)
+
+  ظù AIAnalyticsService Tests ظ║ Performance 
+Prediction ظ║ should forecast performance trend
+
+    TypeError: aiService.forecastPerformance is not a 
+function
+
+    [0m [90m  99 |[39m
+     [90m 100 |[39m     test([32m'should forecast 
+performance trend'[39m[33m,[39m () [33m=>[39m {
+    [31m[1m>[22m[39m[90m 101 |[39m       
+[36mconst[39m forecast [33m=[39m aiService[33m.[39
+mforecastPerformance(trainingData[33m,[39m {
+     [90m     |[39m                                  
+[31m[1m^[22m[39m
+     [90m 102 |[39m         periods[33m:[39m 
+[35m10[39m[33m,[39m
+     [90m 103 |[39m       })[33m;[39m
+     [90m 104 |[39m       
+assert(forecast[33m.[39mforecasts[33m.[39mlength 
+[33m===[39m [35m10[39m)[33m;[39m[0m
+
+      at Object.forecastPerformance 
+(api/tests/aiAnalytics.test.js:101:34)
+
+  ظù AIAnalyticsService Tests ظ║ Performance 
+Prediction ظ║ should detect performance anomalies
+
+    TypeError: aiService.detectPerformanceAnomalies is 
+not a function
+
+    [0m [90m 108 |[39m       [36mconst[39m 
+dataWithAnomaly [33m=[39m 
+[[33m...[39mtrainingData[33m,[39m { date[33m:[39m 
+[32m'2024-01-06'[39m[33m,[39m attendance[33m:[39m 
+[35m50[39m[33m,[39m performance[33m:[39m 
+[35m20[39m[33m,[39m score[33m:[39m [35m30[39m 
+}][33m;[39m
+     [90m 109 |[39m
+    [31m[1m>[22m[39m[90m 110 |[39m       
+[36mconst[39m anomalies [33m=[39m aiService[33m.[3
+9mdetectPerformanceAnomalies(dataWithAnomaly)[33m;[39m
+     [90m     |[39m                                   
+[31m[1m^[22m[39m
+     [90m 111 |[39m       
+assert(anomalies[33m.[39mlength [33m>[39m 
+[35m0[39m[33m,[39m [32m'Should detect 
+anomalies'[39m)[33m;[39m
+     [90m 112 |[39m     })[33m;[39m
+     [90m 113 |[39m[0m
+
+      at Object.detectPerformanceAnomalies 
+(api/tests/aiAnalytics.test.js:110:35)
+
+  ظù AIAnalyticsService Tests ظ║ Performance 
+Prediction ظ║ should compare against baseline
+
+    TypeError: aiService.comparePerformance is not a 
+function
+
+    [0m [90m 113 |[39m
+     [90m 114 |[39m     test([32m'should compare 
+against baseline'[39m[33m,[39m () [33m=>[39m {
+    [31m[1m>[22m[39m[90m 115 |[39m       
+[36mconst[39m comparison [33m=[39m aiService[33m.[
+39mcomparePerformance(trainingData[33m,[39m {
+     [90m     |[39m                                   
+ [31m[1m^[22m[39m
+     [90m 116 |[39m         baseline[33m:[39m 
+[35m85[39m[33m,[39m
+     [90m 117 |[39m       })[33m;[39m
+     [90m 118 |[39m       
+assert(comparison[33m.[39maboveBaseline [33m!==[39m 
+undefined)[33m;[39m[0m
+
+      at Object.comparePerformance 
+(api/tests/aiAnalytics.test.js:115:36)
+
+  ظù AIAnalyticsService Tests ظ║ Performance 
+Prediction ظ║ should predict performance improvement
+
+    TypeError: aiService.predictImprovement is not a 
+function
+
+    [0m [90m 121 |[39m
+     [90m 122 |[39m     test([32m'should predict 
+performance improvement'[39m[33m,[39m () 
+[33m=>[39m {
+    [31m[1m>[22m[39m[90m 123 |[39m       
+[36mconst[39m prediction [33m=[39m aiService[33m.[
+39mpredictImprovement(trainingData)[33m;[39m
+     [90m     |[39m                                   
+ [31m[1m^[22m[39m
+     [90m 124 |[39m       
+assert(prediction[33m.[39mprojectedImprovement 
+[33m!==[39m undefined)[33m;[39m
+     [90m 125 |[39m       
+assert(prediction[33m.[39mtimeToTarget [33m!==[39m 
+undefined)[33m;[39m
+     [90m 126 |[39m     })[33m;[39m[0m
+
+      at Object.predictImprovement 
+(api/tests/aiAnalytics.test.js:123:36)
+
+  ظù AIAnalyticsService Tests ظ║ Anomaly Detection 
+ظ║ should detect unusual patterns
+
+    assert(received)
+
+    Expected value to be equal to:
+      true
+    Received:
+      false
+
+    Message:
+      Should return array of anomalies
+
+    [0m [90m 135 |[39m
+     [90m 136 |[39m       [36mconst[39m anomalies 
+[33m=[39m aiService[33m.[39mdetectAnomalies(dataWith
+Anomaly)[33m;[39m
+    [31m[1m>[22m[39m[90m 137 |[39m       assert([
+33mArray[39m[33m.[39misArray(anomalies)[33m,[39m 
+[32m'Should return array of anomalies'[39m)[33m;[39m
+     [90m     |[39m       [31m[1m^[22m[39m
+     [90m 138 |[39m       
+assert(anomalies[33m.[39mlength [33m>[39m 
+[35m0[39m[33m,[39m [32m'Should detect 
+anomalies'[39m)[33m;[39m
+     [90m 139 |[39m     })[33m;[39m
+     [90m 140 |[39m[0m
+
+      at Object.assert 
+(api/tests/aiAnalytics.test.js:137:7)
+
+  ظù AIAnalyticsService Tests ظ║ Anomaly Detection 
+ظ║ should classify anomaly severity
+
+    TypeError: anomalies.forEach is not a function
+
+    [0m [90m 143 |[39m
+     [90m 144 |[39m       [36mconst[39m anomalies 
+[33m=[39m aiService[33m.[39mdetectAnomalies(dataWith
+Anomaly)[33m;[39m
+    [31m[1m>[22m[39m[90m 145 |[39m       
+anomalies[33m.[39mforEach(a [33m=>[39m {
+     [90m     |[39m                 
+[31m[1m^[22m[39m
+     [90m 146 |[39m         
+assert([[32m'low'[39m[33m,[39m 
+[32m'medium'[39m[33m,[39m 
+[32m'high'[39m[33m,[39m [32m'critical'[39m][33m.
+[39mincludes(a[33m.[39mseverity))[33m;[39m
+     [90m 147 |[39m       })[33m;[39m
+     [90m 148 |[39m     })[33m;[39m[0m
+
+      at Object.forEach 
+(api/tests/aiAnalytics.test.js:145:17)
+
+  ظù AIAnalyticsService Tests ظ║ Anomaly Detection 
+ظ║ should explain anomalies
+
+    TypeError: anomalies.forEach is not a function
+
+    [0m [90m 152 |[39m
+     [90m 153 |[39m       [36mconst[39m anomalies 
+[33m=[39m aiService[33m.[39mdetectAnomalies(dataWith
+Anomaly)[33m;[39m
+    [31m[1m>[22m[39m[90m 154 |[39m       
+anomalies[33m.[39mforEach(a [33m=>[39m {
+     [90m     |[39m                 
+[31m[1m^[22m[39m
+     [90m 155 |[39m         
+assert(a[33m.[39mreason[33m,[39m [32m'Should 
+explain anomaly'[39m)[33m;[39m
+     [90m 156 |[39m       })[33m;[39m
+     [90m 157 |[39m     })[33m;[39m[0m
+
+      at Object.forEach 
+(api/tests/aiAnalytics.test.js:154:17)
+
+  ظù AIAnalyticsService Tests ظ║ Anomaly Detection 
+ظ║ should detect gradual drift
+
+    TypeError: aiService.detectDrift is not a function
+
+    [0m [90m 163 |[39m       }))[33m;[39m
+     [90m 164 |[39m
+    [31m[1m>[22m[39m[90m 165 |[39m       
+[36mconst[39m drift [33m=[39m 
+aiService[33m.[39mdetectDrift(driftData)[33m;[39m
+     [90m     |[39m                               
+[31m[1m^[22m[39m
+     [90m 166 |[39m       
+assert(drift[33m.[39mdriftDetected [33m!==[39m 
+undefined)[33m;[39m
+     [90m 167 |[39m       [36mif[39m 
+(drift[33m.[39mdriftDetected) {
+     [90m 168 |[39m         
+assert(drift[33m.[39mdirection[33m,[39m 
+[32m'Should indicate drift 
+direction'[39m)[33m;[39m[0m
+
+      at Object.detectDrift 
+(api/tests/aiAnalytics.test.js:165:31)
+
+  ظù AIAnalyticsService Tests ظ║ Anomaly Detection 
+ظ║ should handle threshold customization
+
+    assert(received)
+
+    Expected value to be equal to:
+      true
+    Received:
+      false
+
+    [0m [90m 174 |[39m         threshold[33m:[39m 
+[35m2.5[39m[33m,[39m [90m// Custom threshold[39m
+     [90m 175 |[39m       })[33m;[39m
+    [31m[1m>[22m[39m[90m 176 |[39m       assert([
+33mArray[39m[33m.[39misArray(anomalies))[33m;[39m
+     [90m     |[39m       [31m[1m^[22m[39m
+     [90m 177 |[39m     })[33m;[39m
+     [90m 178 |[39m   })[33m;[39m
+     [90m 179 |[39m[0m
+
+      at Object.assert 
+(api/tests/aiAnalytics.test.js:176:7)
+
+  ظù AIAnalyticsService Tests ظ║ Recommendations ظ║ 
+should generate smart recommendations
+
+    TypeError: aiService.generateRecommendations is not 
+a function
+
+    [0m [90m 183 |[39m   
+describe([32m'Recommendations'[39m[33m,[39m () 
+[33m=>[39m {
+     [90m 184 |[39m     test([32m'should generate 
+smart recommendations'[39m[33m,[39m () [33m=>[39m {
+    [31m[1m>[22m[39m[90m 185 |[39m       
+[36mconst[39m recommendations [33m=[39m aiService[3
+3m.[39mgenerateRecommendations(trainingData)[33m;[39m
+     [90m     |[39m                                   
+      [31m[1m^[22m[39m
+     [90m 186 |[39m       assert([33mArray[39m[33m.
+[39misArray(recommendations)[33m,[39m [32m'Should 
+return array'[39m)[33m;[39m
+     [90m 187 |[39m       
+assert(recommendations[33m.[39mlength [33m>[39m 
+[35m0[39m[33m,[39m [32m'Should have 
+recommendations'[39m)[33m;[39m
+     [90m 188 |[39m     })[33m;[39m[0m
+
+      at Object.generateRecommendations 
+(api/tests/aiAnalytics.test.js:185:41)
+
+  ظù AIAnalyticsService Tests ظ║ Recommendations ظ║ 
+should provide actionable recommendations
+
+    TypeError: aiService.generateRecommendations is not 
+a function
+
+    [0m [90m 189 |[39m
+     [90m 190 |[39m     test([32m'should provide 
+actionable recommendations'[39m[33m,[39m () 
+[33m=>[39m {
+    [31m[1m>[22m[39m[90m 191 |[39m       
+[36mconst[39m recommendations [33m=[39m aiService[3
+3m.[39mgenerateRecommendations(trainingData)[33m;[39m
+     [90m     |[39m                                   
+      [31m[1m^[22m[39m
+     [90m 192 |[39m       
+recommendations[33m.[39mforEach(r [33m=>[39m {
+     [90m 193 |[39m         
+assert(r[33m.[39maction[33m,[39m [32m'Should have 
+action'[39m)[33m;[39m
+     [90m 194 |[39m         
+assert(r[33m.[39mpriority[33m,[39m [32m'Should 
+have priority'[39m)[33m;[39m[0m
+
+      at Object.generateRecommendations 
+(api/tests/aiAnalytics.test.js:191:41)
+
+  ظù AIAnalyticsService Tests ظ║ Recommendations ظ║ 
+should rank recommendations by priority
+
+    TypeError: aiService.generateRecommendations is not 
+a function
+
+    [0m [90m 198 |[39m
+     [90m 199 |[39m     test([32m'should rank 
+recommendations by priority'[39m[33m,[39m () 
+[33m=>[39m {
+    [31m[1m>[22m[39m[90m 200 |[39m       
+[36mconst[39m recommendations [33m=[39m aiService[3
+3m.[39mgenerateRecommendations(trainingData)[33m;[39m
+     [90m     |[39m                                   
+      [31m[1m^[22m[39m
+     [90m 201 |[39m       [36mconst[39m priorities 
+[33m=[39m recommendations[33m.[39mmap(r 
+[33m=>[39m r[33m.[39mpriority)[33m;[39m
+     [90m 202 |[39m       
+assert(priorities[[35m0[39m] [33m===[39m 
+[32m'high'[39m [33m||[39m priorities[33m.[39minclu
+des([32m'high'[39m))[33m;[39m
+     [90m 203 |[39m     })[33m;[39m[0m
+
+      at Object.generateRecommendations 
+(api/tests/aiAnalytics.test.js:200:41)
+
+  ظù AIAnalyticsService Tests ظ║ Recommendations ظ║ 
+should tailor recommendations to user
+
+    TypeError: aiService.generateRecommendations is not 
+a function
+
+    [0m [90m 204 |[39m
+     [90m 205 |[39m     test([32m'should tailor 
+recommendations to user'[39m[33m,[39m () 
+[33m=>[39m {
+    [31m[1m>[22m[39m[90m 206 |[39m       
+[36mconst[39m recommendations [33m=[39m aiService[3
+3m.[39mgenerateRecommendations(trainingData[33m,[39m 
+{
+     [90m     |[39m                                   
+      [31m[1m^[22m[39m
+     [90m 207 |[39m         userId[33m:[39m 
+[32m'user123'[39m[33m,[39m
+     [90m 208 |[39m         department[33m:[39m 
+[32m'engineering'[39m[33m,[39m
+     [90m 209 |[39m       })[33m;[39m[0m
+
+      at Object.generateRecommendations 
+(api/tests/aiAnalytics.test.js:206:41)
+
+  ظù AIAnalyticsService Tests ظ║ Recommendations ظ║ 
+should estimate recommendation impact
+
+    TypeError: aiService.generateRecommendations is not 
+a function
+
+    [0m [90m 212 |[39m
+     [90m 213 |[39m     test([32m'should estimate 
+recommendation impact'[39m[33m,[39m () [33m=>[39m {
+    [31m[1m>[22m[39m[90m 214 |[39m       
+[36mconst[39m recommendations [33m=[39m aiService[3
+3m.[39mgenerateRecommendations(trainingData)[33m;[39m
+     [90m     |[39m                                   
+      [31m[1m^[22m[39m
+     [90m 215 |[39m       
+recommendations[33m.[39mforEach(r [33m=>[39m {
+     [90m 216 |[39m         
+assert(r[33m.[39mestimatedImprovement [33m!==[39m 
+undefined)[33m;[39m
+     [90m 217 |[39m         
+assert(r[33m.[39mtimeToSeeResults [33m!==[39m 
+undefined)[33m;[39m[0m
+
+      at Object.generateRecommendations 
+(api/tests/aiAnalytics.test.js:214:41)
+
+  ظù AIAnalyticsService Tests ظ║ Recommendations ظ║ 
+should provide confidence in recommendations
+
+    TypeError: aiService.generateRecommendations is not 
+a function
+
+    [0m [90m 220 |[39m
+     [90m 221 |[39m     test([32m'should provide 
+confidence in recommendations'[39m[33m,[39m () 
+[33m=>[39m {
+    [31m[1m>[22m[39m[90m 222 |[39m       
+[36mconst[39m recommendations [33m=[39m aiService[3
+3m.[39mgenerateRecommendations(trainingData)[33m;[39m
+     [90m     |[39m                                   
+      [31m[1m^[22m[39m
+     [90m 223 |[39m       
+recommendations[33m.[39mforEach(r [33m=>[39m {
+     [90m 224 |[39m         
+assert(r[33m.[39mconfidence [33m>=[39m [35m0[39m 
+[33m&&[39m r[33m.[39mconfidence [33m<=[39m 
+[35m100[39m)[33m;[39m
+     [90m 225 |[39m       })[33m;[39m[0m
+
+      at Object.generateRecommendations 
+(api/tests/aiAnalytics.test.js:222:41)
+
+  ظù AIAnalyticsService Tests ظ║ Trend Analysis ظ║ 
+should analyze data trends
+
+    assert(received)
+
+    Expected value to be equal to:
+      true
+    Received:
+      undefined
+
+    Message:
+      Should have trend direction
+
+    Difference:
+
+      Comparing two different types of values. Expected 
+boolean but received undefined.
+
+    [0m [90m 233 |[39m     test([32m'should analyze 
+data trends'[39m[33m,[39m () [33m=>[39m {
+     [90m 234 |[39m       [36mconst[39m trends 
+[33m=[39m aiService[33m.[39manalyzeTrends(trainingDa
+ta)[33m;[39m
+    [31m[1m>[22m[39m[90m 235 |[39m       
+assert(trends[33m.[39mdirection[33m,[39m 
+[32m'Should have trend direction'[39m)[33m;[39m
+     [90m     |[39m       [31m[1m^[22m[39m
+     [90m 236 |[39m       
+assert([[32m'up'[39m[33m,[39m 
+[32m'down'[39m[33m,[39m [32m'stable'[39m][33m.[3
+9mincludes(trends[33m.[39mdirection))[33m;[39m
+     [90m 237 |[39m     })[33m;[39m
+     [90m 238 |[39m[0m
+
+      at Object.assert 
+(api/tests/aiAnalytics.test.js:235:7)
+
+  ظù AIAnalyticsService Tests ظ║ Trend Analysis ظ║ 
+should identify trend inflection points
+
+    assert(received)
+
+    Expected value to be equal to:
+      true
+    Received:
+      undefined
+
+    Message:
+      Should detect inflection points
+
+    Difference:
+
+      Comparing two different types of values. Expected 
+boolean but received undefined.
+
+    [0m [90m 247 |[39m
+     [90m 248 |[39m       [36mconst[39m trends 
+[33m=[39m 
+aiService[33m.[39manalyzeTrends(trendData)[33m;[39m
+    [31m[1m>[22m[39m[90m 249 |[39m       
+assert(trends[33m.[39minflectionPoints[33m,[39m 
+[32m'Should detect inflection points'[39m)[33m;[39m
+     [90m     |[39m       [31m[1m^[22m[39m
+     [90m 250 |[39m     })[33m;[39m
+     [90m 251 |[39m
+     [90m 252 |[39m     test([32m'should calculate 
+trend slope'[39m[33m,[39m () [33m=>[39m {[0m
+
+      at Object.assert 
+(api/tests/aiAnalytics.test.js:249:7)
+
+  ظù AIAnalyticsService Tests ظ║ Trend Analysis ظ║ 
+should calculate trend slope
+
+    assert(received)
+
+    Expected value to be equal to:
+      true
+    Received:
+      false
+
+    Message:
+      Should calculate slope
+
+    [0m [90m 252 |[39m     test([32m'should 
+calculate trend slope'[39m[33m,[39m () [33m=>[39m {
+     [90m 253 |[39m       [36mconst[39m trends 
+[33m=[39m aiService[33m.[39manalyzeTrends(trainingDa
+ta)[33m;[39m
+    [31m[1m>[22m[39m[90m 254 |[39m       
+assert(trends[33m.[39mslope [33m!==[39m 
+undefined[33m,[39m [32m'Should calculate 
+slope'[39m)[33m;[39m
+     [90m     |[39m       [31m[1m^[22m[39m
+     [90m 255 |[39m       assert([36mtypeof[39m 
+trends[33m.[39mslope [33m===[39m 
+[32m'number'[39m)[33m;[39m
+     [90m 256 |[39m     })[33m;[39m
+     [90m 257 |[39m[0m
+
+      at Object.assert 
+(api/tests/aiAnalytics.test.js:254:7)
+
+  ظù AIAnalyticsService Tests ظ║ Trend Analysis ظ║ 
+should forecast based on trends
+
+    TypeError: projected.toFixed is not a function
+
+    [0m [90m 446 |[39m
+     [90m 447 |[39m     [36mreturn[39m {
+    [31m[1m>[22m[39m[90m 448 |[39m       
+nextPeriod[33m:[39m 
+projected[33m.[39mtoFixed([35m2[39m)[33m,[39m
+     [90m     |[39m                             
+[31m[1m^[22m[39m
+     [90m 449 |[39m       confidence[33m:[39m 
+[32m'75%'[39m[33m,[39m
+     [90m 450 |[39m       direction[33m:[39m slope 
+[33m>[39m [35m0[39m [33m?[39m [32m'upward'[39m 
+[33m:[39m [32m'downward'[39m[33m,[39m
+     [90m 451 |[39m     }[33m;[39m[0m
+
+      at AIAnalyticsService.toFixed [as forecastTrend] 
+(services/aiAnalyticsService.js:448:29)
+      at Object.forecastTrend 
+(api/tests/aiAnalytics.test.js:259:34)
+
+  ظù AIAnalyticsService Tests ظ║ Trend Analysis ظ║ 
+should detect seasonality
+
+    assert(received)
+
+    Expected value to be equal to:
+      true
+    Received:
+      false
+
+    [0m [90m 268 |[39m
+     [90m 269 |[39m       [36mconst[39m analysis 
+[33m=[39m aiService[33m.[39manalyzeTrends(seasonalDa
+ta)[33m;[39m
+    [31m[1m>[22m[39m[90m 270 |[39m       
+assert(analysis[33m.[39mseasonal [33m!==[39m 
+undefined)[33m;[39m
+     [90m     |[39m       [31m[1m^[22m[39m
+     [90m 271 |[39m     })[33m;[39m
+     [90m 272 |[39m
+     [90m 273 |[39m     test([32m'should compare 
+trends over periods'[39m[33m,[39m () [33m=>[39m 
+{[0m
+
+      at Object.assert 
+(api/tests/aiAnalytics.test.js:270:7)
+
+  ظù AIAnalyticsService Tests ظ║ Trend Analysis ظ║ 
+should compare trends over periods
+
+    TypeError: aiService.compareTrends is not a function
+
+    [0m [90m 272 |[39m
+     [90m 273 |[39m     test([32m'should compare 
+trends over periods'[39m[33m,[39m () [33m=>[39m {
+    [31m[1m>[22m[39m[90m 274 |[39m       
+[36mconst[39m comparison [33m=[39m aiService[33m.[
+39mcompareTrends(trainingData[33m.[39mslice([35m0[39
+m[33m,[39m [35m3[39m)[33m,[39m 
+trainingData[33m.[39mslice([35m2[39m[33m,[39m 
+[35m5[39m))[33m;[39m
+     [90m     |[39m                                   
+ [31m[1m^[22m[39m
+     [90m 275 |[39m       
+assert(comparison[33m.[39mtrend1Direction[33m,[39m 
+[32m'Should analyze first trend'[39m)[33m;[39m
+     [90m 276 |[39m       
+assert(comparison[33m.[39mtrend2Direction[33m,[39m 
+[32m'Should analyze second trend'[39m)[33m;[39m
+     [90m 277 |[39m     })[33m;[39m[0m
+
+      at Object.compareTrends 
+(api/tests/aiAnalytics.test.js:274:36)
+
+  ظù AIAnalyticsService Tests ظ║ Model Management ظ║ 
+should list available models
+
+    TypeError: aiService.listModels is not a function
+
+    [0m [90m 283 |[39m   describe([32m'Model 
+Management'[39m[33m,[39m () [33m=>[39m {
+     [90m 284 |[39m     test([32m'should list 
+available models'[39m[33m,[39m () [33m=>[39m {
+    [31m[1m>[22m[39m[90m 285 |[39m       
+[36mconst[39m models [33m=[39m 
+aiService[33m.[39mlistModels()[33m;[39m
+     [90m     |[39m                                
+[31m[1m^[22m[39m
+     [90m 286 |[39m       assert([33mArray[39m[33m.
+[39misArray(models))[33m;[39m
+     [90m 287 |[39m       
+assert(models[33m.[39mlength [33m>[39m 
+[35m0[39m)[33m;[39m
+     [90m 288 |[39m     })[33m;[39m[0m
+
+      at Object.listModels 
+(api/tests/aiAnalytics.test.js:285:32)
+
+  ظù AIAnalyticsService Tests ظ║ Model Management ظ║ 
+should get model information
+
+    TypeError: aiService.listModels is not a function
+
+    [0m [90m 289 |[39m
+     [90m 290 |[39m     test([32m'should get model 
+information'[39m[33m,[39m () [33m=>[39m {
+    [31m[1m>[22m[39m[90m 291 |[39m       
+[36mconst[39m models [33m=[39m 
+aiService[33m.[39mlistModels()[33m;[39m
+     [90m     |[39m                                
+[31m[1m^[22m[39m
+     [90m 292 |[39m       [36mconst[39m modelInfo 
+[33m=[39m aiService[33m.[39mgetModelInfo(models[[35
+m0[39m][33m.[39mid)[33m;[39m
+     [90m 293 |[39m       
+assert(modelInfo[33m.[39mname[33m,[39m [32m'Should 
+have model name'[39m)[33m;[39m
+     [90m 294 |[39m       
+assert(modelInfo[33m.[39mversion[33m,[39m 
+[32m'Should have version'[39m)[33m;[39m[0m
+
+      at Object.listModels 
+(api/tests/aiAnalytics.test.js:291:32)
+
+  ظù AIAnalyticsService Tests ظ║ Model Management ظ║ 
+should train custom model
+
+    TypeError: aiService.trainModel is not a function
+
+    [0m [90m 296 |[39m
+     [90m 297 |[39m     test([32m'should train 
+custom model'[39m[33m,[39m () [33m=>[39m {
+    [31m[1m>[22m[39m[90m 298 |[39m       
+[36mconst[39m training [33m=[39m 
+aiService[33m.[39mtrainModel(trainingData[33m,[39m {
+     [90m     |[39m                                  
+[31m[1m^[22m[39m
+     [90m 299 |[39m         modelType[33m:[39m 
+[32m'regression'[39m[33m,[39m
+     [90m 300 |[39m         features[33m:[39m 
+[[32m'attendance'[39m[33m,[39m 
+[32m'performance'[39m][33m,[39m
+     [90m 301 |[39m         target[33m:[39m 
+[32m'score'[39m[33m,[39m[0m
+
+      at Object.trainModel 
+(api/tests/aiAnalytics.test.js:298:34)
+
+  ظù AIAnalyticsService Tests ظ║ Model Management ظ║ 
+should evaluate model performance
+
+    TypeError: aiService.evaluateModel is not a function
+
+    [0m [90m 307 |[39m
+     [90m 308 |[39m     test([32m'should evaluate 
+model performance'[39m[33m,[39m () [33m=>[39m {
+    [31m[1m>[22m[39m[90m 309 |[39m       
+[36mconst[39m evaluation [33m=[39m aiService[33m.[
+39mevaluateModel([32m'default-model'[39m[33m,[39m 
+trainingData)[33m;[39m
+     [90m     |[39m                                   
+ [31m[1m^[22m[39m
+     [90m 310 |[39m       
+assert(evaluation[33m.[39maccuracy [33m>=[39m 
+[35m0[39m [33m&&[39m evaluation[33m.[39maccuracy 
+[33m<=[39m [35m100[39m)[33m;[39m
+     [90m 311 |[39m       
+assert(evaluation[33m.[39mprecision [33m!==[39m 
+undefined)[33m;[39m
+     [90m 312 |[39m       
+assert(evaluation[33m.[39mrecall [33m!==[39m 
+undefined)[33m;[39m[0m
+
+      at Object.evaluateModel 
+(api/tests/aiAnalytics.test.js:309:36)
+
+  ظù AIAnalyticsService Tests ظ║ Model Management ظ║ 
+should provide model metrics
+
+    TypeError: aiService.getModelMetrics is not a 
+function
+
+    [0m [90m 314 |[39m
+     [90m 315 |[39m     test([32m'should provide 
+model metrics'[39m[33m,[39m () [33m=>[39m {
+    [31m[1m>[22m[39m[90m 316 |[39m       
+[36mconst[39m metrics [33m=[39m aiService[33m.[39m
+getModelMetrics([32m'default-model'[39m)[33m;[39m
+     [90m     |[39m                                 
+[31m[1m^[22m[39m
+     [90m 317 |[39m       
+assert(metrics[33m.[39maccuracy[33m,[39m 
+[32m'Should have accuracy'[39m)[33m;[39m
+     [90m 318 |[39m       
+assert(metrics[33m.[39mprecision[33m,[39m 
+[32m'Should have precision'[39m)[33m;[39m
+     [90m 319 |[39m       
+assert(metrics[33m.[39mrecall[33m,[39m [32m'Should 
+have recall'[39m)[33m;[39m[0m
+
+      at Object.getModelMetrics 
+(api/tests/aiAnalytics.test.js:316:33)
+
+  ظù AIAnalyticsService Tests ظ║ Model Management ظ║ 
+should handle model versioning
+
+    TypeError: aiService.getModelVersions is not a 
+function
+
+    [0m [90m 322 |[39m
+     [90m 323 |[39m     test([32m'should handle 
+model versioning'[39m[33m,[39m () [33m=>[39m {
+    [31m[1m>[22m[39m[90m 324 |[39m       
+[36mconst[39m versions [33m=[39m aiService[33m.[39
+mgetModelVersions([32m'default-model'[39m)[33m;[39m
+     [90m     |[39m                                  
+[31m[1m^[22m[39m
+     [90m 325 |[39m       assert([33mArray[39m[33m.
+[39misArray(versions))[33m;[39m
+     [90m 326 |[39m       
+assert(versions[33m.[39mlength [33m>[39m 
+[35m0[39m)[33m;[39m
+     [90m 327 |[39m     })[33m;[39m[0m
+
+      at Object.getModelVersions 
+(api/tests/aiAnalytics.test.js:324:34)
+
+  ظù AIAnalyticsService Tests ظ║ Correlation Analysis 
+ظ║ should find correlations between variables
+
+    TypeError: aiService.findCorrelations is not a 
+function
+
+    [0m [90m 333 |[39m   describe([32m'Correlation 
+Analysis'[39m[33m,[39m () [33m=>[39m {
+     [90m 334 |[39m     test([32m'should find 
+correlations between variables'[39m[33m,[39m () 
+[33m=>[39m {
+    [31m[1m>[22m[39m[90m 335 |[39m       
+[36mconst[39m correlations [33m=[39m aiService[33m.
+[39mfindCorrelations(trainingData)[33m;[39m
+     [90m     |[39m                                   
+   [31m[1m^[22m[39m
+     [90m 336 |[39m       assert([33mArray[39m[33m.
+[39misArray(correlations))[33m;[39m
+     [90m 337 |[39m       
+correlations[33m.[39mforEach(c [33m=>[39m {
+     [90m 338 |[39m         
+assert(c[33m.[39mvariable1[33m,[39m [32m'Should 
+have first variable'[39m)[33m;[39m[0m
+
+      at Object.findCorrelations 
+(api/tests/aiAnalytics.test.js:335:38)
+
+  ظù AIAnalyticsService Tests ظ║ Correlation Analysis 
+ظ║ should identify strong correlations
+
+    TypeError: aiService.findCorrelations is not a 
+function
+
+    [0m [90m 343 |[39m
+     [90m 344 |[39m     test([32m'should identify 
+strong correlations'[39m[33m,[39m () [33m=>[39m {
+    [31m[1m>[22m[39m[90m 345 |[39m       
+[36mconst[39m correlations [33m=[39m aiService[33m.
+[39mfindCorrelations(trainingData[33m,[39m {
+     [90m     |[39m                                   
+   [31m[1m^[22m[39m
+     [90m 346 |[39m         minStrength[33m:[39m 
+[35m0.7[39m[33m,[39m
+     [90m 347 |[39m       })[33m;[39m
+     [90m 348 |[39m       
+correlations[33m.[39mforEach(c [33m=>[39m {[0m
+
+      at Object.findCorrelations 
+(api/tests/aiAnalytics.test.js:345:38)
+
+  ظù AIAnalyticsService Tests ظ║ Correlation Analysis 
+ظ║ should distinguish causation from correlation
+
+    TypeError: aiService.analyzeRelationship is not a 
+function
+
+    [0m [90m 352 |[39m
+     [90m 353 |[39m     test([32m'should distinguish 
+causation from correlation'[39m[33m,[39m () 
+[33m=>[39m {
+    [31m[1m>[22m[39m[90m 354 |[39m       
+[36mconst[39m analysis [33m=[39m aiService[33m.[39
+manalyzeRelationship(trainingData[33m,[39m 
+[32m'attendance'[39m[33m,[39m 
+[32m'performance'[39m)[33m;[39m
+     [90m     |[39m                                  
+[31m[1m^[22m[39m
+     [90m 355 |[39m       
+assert(analysis[33m.[39mcorrelation [33m!==[39m 
+undefined)[33m;[39m
+     [90m 356 |[39m       
+assert(analysis[33m.[39mlikelyCausal [33m!==[39m 
+undefined)[33m;[39m
+     [90m 357 |[39m     })[33m;[39m[0m
+
+      at Object.analyzeRelationship 
+(api/tests/aiAnalytics.test.js:354:34)
+
+  ظù AIAnalyticsService Tests ظ║ Data Quality ظ║ 
+should validate data quality
+
+    TypeError: aiService.checkDataQuality is not a 
+function
+
+    [0m [90m 363 |[39m   describe([32m'Data 
+Quality'[39m[33m,[39m () [33m=>[39m {
+     [90m 364 |[39m     test([32m'should validate 
+data quality'[39m[33m,[39m () [33m=>[39m {
+    [31m[1m>[22m[39m[90m 365 |[39m       
+[36mconst[39m quality [33m=[39m aiService[33m.[39m
+checkDataQuality(trainingData)[33m;[39m
+     [90m     |[39m                                 
+[31m[1m^[22m[39m
+     [90m 366 |[39m       
+assert(quality[33m.[39mscore [33m>=[39m [35m0[39m 
+[33m&&[39m quality[33m.[39mscore [33m<=[39m 
+[35m100[39m)[33m;[39m
+     [90m 367 |[39m       
+assert(quality[33m.[39missues[33m,[39m [32m'Should 
+list issues'[39m)[33m;[39m
+     [90m 368 |[39m     })[33m;[39m[0m
+
+      at Object.checkDataQuality 
+(api/tests/aiAnalytics.test.js:365:33)
+
+  ظù AIAnalyticsService Tests ظ║ Data Quality ظ║ 
+should detect missing values
+
+    TypeError: aiService.checkDataQuality is not a 
+function
+
+    [0m [90m 371 |[39m       [36mconst[39m 
+incompleteData [33m=[39m 
+[[33m...[39mtrainingData[33m,[39m { date[33m:[39m 
+[32m'2024-01-06'[39m[33m,[39m attendance[33m:[39m 
+[36mnull[39m[33m,[39m performance[33m:[39m 
+[35m85[39m }][33m;[39m
+     [90m 372 |[39m
+    [31m[1m>[22m[39m[90m 373 |[39m       
+[36mconst[39m quality [33m=[39m aiService[33m.[39m
+checkDataQuality(incompleteData)[33m;[39m
+     [90m     |[39m                                 
+[31m[1m^[22m[39m
+     [90m 374 |[39m       
+assert(quality[33m.[39mmissingValueCount [33m>=[39m 
+[35m0[39m)[33m;[39m
+     [90m 375 |[39m     })[33m;[39m
+     [90m 376 |[39m[0m
+
+      at Object.checkDataQuality 
+(api/tests/aiAnalytics.test.js:373:33)
+
+  ظù AIAnalyticsService Tests ظ║ Data Quality ظ║ 
+should identify outliers
+
+    TypeError: aiService.checkDataQuality is not a 
+function
+
+    [0m [90m 378 |[39m       [36mconst[39m 
+dataWithOutliers [33m=[39m 
+[[33m...[39mtrainingData[33m,[39m { date[33m:[39m 
+[32m'2024-01-06'[39m[33m,[39m attendance[33m:[39m 
+[35m200[39m[33m,[39m performance[33m:[39m 
+[35m250[39m[33m,[39m score[33m:[39m [35m300[39m 
+}][33m;[39m
+     [90m 379 |[39m
+    [31m[1m>[22m[39m[90m 380 |[39m       
+[36mconst[39m quality [33m=[39m aiService[33m.[39m
+checkDataQuality(dataWithOutliers)[33m;[39m
+     [90m     |[39m                                 
+[31m[1m^[22m[39m
+     [90m 381 |[39m       
+assert(quality[33m.[39moutlierCount [33m>=[39m 
+[35m0[39m)[33m;[39m
+     [90m 382 |[39m     })[33m;[39m
+     [90m 383 |[39m   })[33m;[39m[0m
+
+      at Object.checkDataQuality 
+(api/tests/aiAnalytics.test.js:380:33)
+
+  ظù AIAnalyticsService Tests ظ║ Error Handling ظ║ 
+should handle empty data
+
+    assert(received)
+
+    Expected value to be equal to:
+      true
+    Received:
+      false
+
+    [0m [90m 389 |[39m     test([32m'should handle 
+empty data'[39m[33m,[39m () [33m=>[39m {
+     [90m 390 |[39m       [36mconst[39m prediction 
+[33m=[39m 
+aiService[33m.[39mpredictAttendance([])[33m;[39m
+    [31m[1m>[22m[39m[90m 391 |[39m       
+assert(prediction[33m.[39merror [33m||[39m 
+prediction[33m.[39mnextPeriod [33m!==[39m 
+undefined)[33m;[39m
+     [90m     |[39m       [31m[1m^[22m[39m
+     [90m 392 |[39m     })[33m;[39m
+     [90m 393 |[39m
+     [90m 394 |[39m     test([32m'should handle 
+single data point'[39m[33m,[39m () [33m=>[39m {[0m
+
+      at Object.assert 
+(api/tests/aiAnalytics.test.js:391:7)
+
+  ظù AIAnalyticsService Tests ظ║ Error Handling ظ║ 
+should handle all identical values
+
+    assert(received)
+
+    Expected value to be equal to:
+      true
+    Received:
+      undefined
+
+    Message:
+      Should handle constant data
+
+    Difference:
+
+      Comparing two different types of values. Expected 
+boolean but received undefined.
+
+    [0m [90m 405 |[39m
+     [90m 406 |[39m       [36mconst[39m prediction 
+[33m=[39m aiService[33m.[39mpredictAttendance(consta
+ntData)[33m;[39m
+    [31m[1m>[22m[39m[90m 407 |[39m       
+assert(prediction[33m.[39mnextPeriod[33m,[39m 
+[32m'Should handle constant data'[39m)[33m;[39m
+     [90m     |[39m       [31m[1m^[22m[39m
+     [90m 408 |[39m     })[33m;[39m
+     [90m 409 |[39m
+     [90m 410 |[39m     test([32m'should handle 
+extreme values'[39m[33m,[39m () [33m=>[39m {[0m
+
+      at Object.assert 
+(api/tests/aiAnalytics.test.js:407:7)
+
+  ظù AIAnalyticsService Tests ظ║ Error Handling ظ║ 
+should handle extreme values
+
+    assert(received)
+
+    Expected value to be equal to:
+      true
+    Received:
+      false
+
+    [0m [90m 412 |[39m
+     [90m 413 |[39m       [36mconst[39m prediction 
+[33m=[39m aiService[33m.[39mpredictAttendance(extrem
+eData)[33m;[39m
+    [31m[1m>[22m[39m[90m 414 |[39m       
+assert(prediction[33m.[39merror [33m||[39m 
+prediction[33m.[39mnextPeriod [33m!==[39m 
+undefined)[33m;[39m
+     [90m     |[39m       [31m[1m^[22m[39m
+     [90m 415 |[39m     })[33m;[39m
+     [90m 416 |[39m   })[33m;[39m
+     [90m 417 |[39m[0m
+
+      at Object.assert 
+(api/tests/aiAnalytics.test.js:414:7)
+
+  ظù AIAnalyticsService Tests ظ║ Batch Operations ظ║ 
+should process batch predictions
+
+    TypeError: aiService.batchPredict is not a function
+
+    [0m [90m 450 |[39m     test([32m'should process 
+batch predictions'[39m[33m,[39m () [33m=>[39m {
+     [90m 451 |[39m       [36mconst[39m batches 
+[33m=[39m [trainingData[33m,[39m 
+trainingData][33m;[39m
+    [31m[1m>[22m[39m[90m 452 |[39m       
+[36mconst[39m results [33m=[39m 
+aiService[33m.[39mbatchPredict(batches[33m,[39m 
+[32m'attendance'[39m)[33m;[39m
+     [90m     |[39m                                 
+[31m[1m^[22m[39m
+     [90m 453 |[39m
+     [90m 454 |[39m       
+assert(results[33m.[39mlength [33m===[39m 
+[35m2[39m)[33m;[39m
+     [90m 455 |[39m       results[33m.[39mforEach(r 
+[33m=>[39m {[0m
+
+      at Object.batchPredict 
+(api/tests/aiAnalytics.test.js:452:33)
+
+  ظù AIAnalyticsService Tests ظ║ Batch Operations ظ║ 
+should handle mixed batch requests
+
+    TypeError: aiService.batchAnalyze is not a function
+
+    [0m [90m 464 |[39m       ][33m;[39m
+     [90m 465 |[39m
+    [31m[1m>[22m[39m[90m 466 |[39m       
+[36mconst[39m results [33m=[39m 
+aiService[33m.[39mbatchAnalyze(requests)[33m;[39m
+     [90m     |[39m                                 
+[31m[1m^[22m[39m
+     [90m 467 |[39m       
+assert(results[33m.[39mlength [33m===[39m 
+[35m2[39m)[33m;[39m
+     [90m 468 |[39m     })[33m;[39m
+     [90m 469 |[39m   })[33m;[39m[0m
+
+      at Object.batchAnalyze 
+(api/tests/aiAnalytics.test.js:466:33)
+
+----------------------------------|---------|----------|---------|---------|-------------------
+File                              | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+----------------------------------|---------|----------|---------|---------|-------------------
+All files                         |       0 |        0 |       0 |       0 |                   
+ backend                          |       0 |        0 |       0 |       0 |                   
+  server.js                       |       0 |        0 |       0 |       0 | 1-370             
+  start.js                        |       0 |      100 |     100 |       0 | 3-4               
+ backend/api/routes               |       0 |        0 |       0 |       0 |                   
+  ai.routes.js                    |       0 |        0 |       0 |       0 | 6-151             
+  auth.routes.js                  |       0 |        0 |       0 |       0 | 1-380             
+  crm.routes.js                   |       0 |        0 |       0 |       0 | 15-664            
+  documents.routes.js             |       0 |        0 |       0 |       0 | 16-667            
+  integration.routes.js           |       0 |        0 |       0 |       0 | 6-124             
+  modules.routes.js               |       0 |        0 |       0 |       0 | 1-314             
+  project.routes.js               |       0 |        0 |       0 |       0 | 6-167             
+  reporting.routes.js             |       0 |        0 |       0 |       0 | 6-119             
+  search.routes.js                |       0 |        0 |       0 |       0 | 6-200             
+  setupRoutes.js                  |       0 |      100 |       0 |       0 | 10-97             
+  transport.routes.js             |       0 |        0 |       0 |       0 | 6-653             
+  users.routes.js                 |       0 |        0 |       0 |       0 | 1-249             
+  workflows.routes.js             |       0 |        0 |       0 |       0 | 6-553             
+ backend/config                   |       0 |        0 |       0 |       0 |                   
+  database.js                     |       0 |        0 |       0 |       0 | 2-86              
+  in-memory-db.js                 |       0 |        0 |       0 |       0 | 4-122             
+  inMemoryDB.js                   |       0 |        0 |       0 |       0 | 1-50              
+ backend/middleware               |       0 |        0 |       0 |       0 |                   
+  auth.js                         |       0 |        0 |       0 |       0 | 1-105             
+  auth.middleware.js              |       0 |        0 |       0 |       0 | 11-270            
+  rateLimiter.js                  |       0 |        0 |       0 |       0 | 1-57              
+  responseHandler.js              |       0 |        0 |       0 |       0 | 4-41              
+  sanitize.js                     |       0 |      100 |       0 |       0 | 1-27              
+  securityHeaders.js              |       0 |      100 |     100 |       0 | 1-69              
+  uploadMiddleware.js             |       0 |        0 |       0 |       0 | 6-78              
+  validation.js                   |       0 |        0 |       0 |       0 | 1-200             
+  validator.middleware.js         |       0 |        0 |       0 |       0 | 1-97              
+ backend/models                   |       0 |        0 |       0 |       0 |                   
+  AI.memory.js                    |       0 |        0 |       0 |       0 | 1-284             
+  Attendance.memory.js            |       0 |        0 |       0 |       0 | 1-76              
+  Document.js                     |       0 |        0 |       0 |       0 | 6-280             
+  Driver.js                       |       0 |        0 |       0 |       0 | 11-250            
+  Employee.memory.js              |       0 |        0 |       0 |       0 | 1-131             
+  Finance.memory.js               |       0 |        0 |       0 |       0 | 2-248             
+  Leave.memory.js                 |       0 |        0 |       0 |       0 | 1-112             
+  Notification.memory.js          |       0 |        0 |       0 |       0 | 1-211             
+  Product.js                      |       0 |      100 |       0 |       0 | 1-47              
+  Trip.js                         |       0 |        0 |       0 |       0 | 11-226            
+  User.js                         |       0 |      100 |       0 |       0 | 1-59              
+  User.memory.js                  |       0 |        0 |       0 |       0 | 1-155             
+  Vehicle.js                      |       0 |        0 |       0 |       0 | 13-454            
+  Vehicle_SaudiCompliant.js       |       0 |        0 |       0 |       0 | 13-841            
+  analytics.model.js              |       0 |        0 |       0 |       0 | 1-113             
+  conversation.model.js           |       0 |        0 |       0 |       0 | 13-356            
+  disability-assessment.model.js  |       0 |        0 |       0 |       0 | 13-427            
+  employee.model.js               |       0 |        0 |       0 |       0 | 13-464            
+  message.model.js                |       0 |        0 |       0 |       0 | 13-239            
+  payroll.model.js                |       0 |        0 |       0 |       0 | 6-219             
+  performance.model.js            |       0 |        0 |       0 |       0 | 6-173             
+  prediction.model.js             |       0 |        0 |       0 |       0 | 1-133             
+  rehabilitation-program.model.js |       0 |        0 |       0 |       0 | 14-511            
+  training.model.js               |       0 |        0 |       0 |       0 | 6-121             
+  transport.models.js             |       0 |      100 |     100 |       0 | 6-749             
+ backend/routes                   |       0 |        0 |       0 |       0 |                   
+  ai.routes.js                    |       0 |        0 |       0 |       0 | 1-284             
+  archivingRoutes.js              |       0 |        0 |       0 |       0 | 6-415             
+  complianceRoutes.js             |       0 |        0 |       0 |       0 | 12-476            
+  documentRoutes.js               |       0 |      100 |     100 |       0 | 6-60              
+  driverRoutes.js                 |       0 |        0 |       0 |       0 | 10-308            
+  finance.routes.js               |       0 |        0 |       0 |       0 | 1-373             
+  hr-advanced.routes.js           |       0 |        0 |       0 |       0 | 6-439             
+  hr.routes.js                    |       0 |        0 |       0 |       0 | 1-188             
+  hrops.routes.js                 |       0 |        0 |       0 |       0 | 1-151             
+  messaging.routes.js             |       0 |        0 |       0 |       0 | 21-318            
+  notifications.routes.js         |       0 |        0 |       0 |       0 | 1-641             
+  predictions.routes.js           |       0 |        0 |       0 |       0 | 1-137             
+  rehabilitation.routes.js        |       0 |      100 |       0 |       0 | 8-324             
+  reports.routes.js               |       0 |        0 |       0 |       0 | 1-312             
+  vehicleRoutes.js                |       0 |      100 |       0 |       0 | 10-262            
+ backend/utils                    |       0 |        0 |       0 |       0 |                   
+  errorHandler.js                 |       0 |        0 |       0 |       0 | 5-91              
+  logger.js                       |       0 |        0 |       0 |       0 | 4-24              
+  security.js                     |       0 |        0 |       0 |       0 | 1-141             
+  seedDatabase.js                 |       0 |        0 |       0 |       0 | 2-38              
+  validators.js                   |       0 |        0 |       0 |       0 | 2-106             
+----------------------------------|---------|----------|---------|---------|-------------------
+Jest: "global" coverage threshold for statements (25%) 
+not met: 0%
+Jest: "global" coverage threshold for branches (25%) 
+not met: 0%
+Jest: "global" coverage threshold for lines (25%) not 
+met: 0%
+Jest: "global" coverage threshold for functions (25%) 
+not met: 0%
+Test Suites: 1 failed, 1 total
+Tests:       46 failed, 3 passed, 49 total
+Snapshots:   0 total
+Time:        1.922 s
+Ran all test suites matching /aiAnalytics.test.js/i.

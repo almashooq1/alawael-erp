@@ -1,321 +1,253 @@
-import React from 'react';
-import { 
-  Box, 
-  Typography, 
-  Grid, 
-  Paper, 
-  Button, 
-  Divider, 
-  List, 
-  ListItem, 
-  ListItemText, 
-  ListItemAvatar, 
-  Avatar, 
-  ListItemSecondaryAction,
-  IconButton,
-  Card,
-  CardContent,
-  CardActions
-} from '@mui/material';
-import { 
-  Add as AddIcon, 
+import React, { useState, useEffect } from 'react';
+import { Box, Typography, Grid, Card, CardContent, Button, Divider, Stack, Chip, IconButton } from '@mui/material';
+import {
+  TrendingUp as TrendingUpIcon,
+  Shield as ShieldIcon,
+  Business as BusinessIcon,
+  Groups as GroupsIcon,
+  School as SchoolIcon,
+  LocalHospital as LocalHospitalIcon,
   ArrowForward as ArrowForwardIcon,
-  Group as GroupIcon,
-  Receipt as ReceiptIcon,
-  AccountBalance as BalanceIcon
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { dashboardAPI, withMockFallback } from '../services/api';
+import { useRealtimeDashboard } from '../contexts/SocketContext';
+import moduleMocks from '../data/moduleMocks';
+import Sparkline from '../components/Sparkline';
 
 const Dashboard = () => {
-  const { currentUser } = useAuth();
   const navigate = useNavigate();
+  const [summaryCards, setSummaryCards] = useState([]);
+  const [topKPIs, setTopKPIs] = useState([]);
 
-  // Mock data - in a real app, this would come from an API
-  const recentActivity = [
-    { id: 1, user: 'Alex Johnson', amount: 24.50, description: 'Dinner', date: '2 hours ago', type: 'owed' },
-    { id: 2, user: 'Maria Garcia', amount: 15.00, description: 'Movie tickets', date: '1 day ago', type: 'owes' },
-    { id: 3, user: 'Sam Wilson', amount: 45.00, description: 'Groceries', date: '3 days ago', type: 'owed' },
+  // Real-time dashboard updates from WebSocket
+  const { summaryCards: realtimeSummaryCards, topKPIs: realtimeTopKPIs, lastUpdate: dashboardLastUpdate } = useRealtimeDashboard();
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        // Fetch summary cards and top KPIs from API
+        const [summarySystems, topKpisData] = await Promise.all([
+          withMockFallback(() => dashboardAPI.getSummarySystems(), []),
+          withMockFallback(() => dashboardAPI.getTopKPIs(4), []),
+        ]);
+
+        // Fallback to mock data if API doesn't return structured data
+        if (!summarySystems || summarySystems.length === 0) {
+          setSummaryCards(getMockSummaryCards());
+        } else {
+          setSummaryCards(summarySystems);
+        }
+
+        if (!topKpisData || topKpisData.length === 0) {
+          setTopKPIs(getMockTopKPIs());
+        } else {
+          setTopKPIs(topKpisData);
+        }
+      } catch (err) {
+        console.error('Failed to fetch dashboard data:', err);
+        // Fallback to mock data
+        setSummaryCards(getMockSummaryCards());
+        setTopKPIs(getMockTopKPIs());
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
+  // Update with real-time data when available
+  useEffect(() => {
+    if (realtimeSummaryCards && realtimeSummaryCards.length > 0) {
+      setSummaryCards(realtimeSummaryCards);
+    }
+    if (realtimeTopKPIs && realtimeTopKPIs.length > 0) {
+      setTopKPIs(realtimeTopKPIs);
+    }
+  }, [realtimeSummaryCards, realtimeTopKPIs]);
+
+  const getMockSummaryCards = () => [
+    {
+      title: 'الأعمال والمالية',
+      icon: <BusinessIcon sx={{ fontSize: 40 }} />,
+      color: 'primary',
+      stats: [
+        { label: 'صفقات مفتوحة', value: moduleMocks.crm.kpis[0].value },
+        { label: 'فواتير مستحقة', value: moduleMocks.finance.kpis[0].value },
+      ],
+      path: '/finance',
+    },
+    {
+      title: 'الموارد البشرية',
+      icon: <GroupsIcon sx={{ fontSize: 40 }} />,
+      color: 'secondary',
+      stats: [
+        { label: 'معدل الحضور', value: moduleMocks.hr.kpis[0].value },
+        { label: 'طلبات إجازة', value: moduleMocks.hr.kpis[1].value },
+      ],
+      path: '/hr',
+    },
+    {
+      title: 'التعلم والتطوير',
+      icon: <SchoolIcon sx={{ fontSize: 40 }} />,
+      color: 'primary',
+      stats: [
+        { label: 'دورات نشطة', value: moduleMocks.elearning.kpis[0].value },
+        { label: 'إكمال الأسبوع', value: moduleMocks.elearning.kpis[1].value },
+      ],
+      path: '/elearning',
+    },
+    {
+      title: 'الرعاية والتأهيل',
+      icon: <LocalHospitalIcon sx={{ fontSize: 40 }} />,
+      color: 'secondary',
+      stats: [
+        { label: 'جلسات اليوم', value: moduleMocks.rehab.kpis[0].value },
+        { label: 'خطط نشطة', value: moduleMocks.rehab.kpis[1].value },
+      ],
+      path: '/rehab',
+    },
+    {
+      title: 'الأمن والحماية',
+      icon: <ShieldIcon sx={{ fontSize: 40 }} />,
+      color: 'primary',
+      stats: [
+        { label: 'تنبيهات أمنية', value: moduleMocks.security.kpis[0].value },
+        { label: 'حالة الكاميرات', value: moduleMocks.security.kpis[1].value },
+      ],
+      path: '/security',
+    },
+    {
+      title: 'التقارير والتحليلات',
+      icon: <TrendingUpIcon sx={{ fontSize: 40 }} />,
+      color: 'secondary',
+      stats: [
+        { label: 'تقارير محدثة', value: moduleMocks.reports.kpis[0].value },
+        { label: 'اكتمال البيانات', value: moduleMocks.reports.kpis[2].value },
+      ],
+      path: '/reports',
+    },
   ];
 
-  const groups = [
-    { id: 1, name: 'Roommates', members: 4, totalExpenses: 1250.75 },
-    { id: 2, name: 'Trip to Paris', members: 6, totalExpenses: 3250.20 },
+  const getMockTopKPIs = () => [
+    { ...moduleMocks.finance.kpis[0], icon: <BusinessIcon />, path: '/finance' },
+    { ...moduleMocks.hr.kpis[0], icon: <GroupsIcon />, path: '/hr' },
+    { ...moduleMocks.security.kpis[0], icon: <ShieldIcon />, path: '/security' },
+    { ...moduleMocks.reports.kpis[2], icon: <TrendingUpIcon />, path: '/reports' },
   ];
-
-  const balances = {
-    totalOwed: 125.50,
-    totalOwe: 65.75,
-  };
-
-  const handleAddExpense = () => {
-    navigate('/expenses/new');
-  };
-
-  const handleViewAllActivity = () => {
-    navigate('/activity');
-  };
-
-  const handleViewGroup = (groupId) => {
-    navigate(`/groups/${groupId}`);
-  };
 
   return (
     <Box>
-      <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold' }}>
-          Welcome back, {currentUser?.name?.split(' ')[0] || 'there'}!
-        </Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={handleAddExpense}
-          sx={{ textTransform: 'none', borderRadius: 2, px: 3, py: 1 }}
+      <Card sx={{ p: { xs: 2, md: 3 }, borderRadius: 3, mb: 3 }}>
+        <Stack
+          direction={{ xs: 'column', md: 'row' }}
+          alignItems={{ xs: 'flex-start', md: 'center' }}
+          justifyContent="space-between"
+          spacing={2}
         >
-          Add an expense
-        </Button>
-      </Box>
+          <Box>
+            <Chip label="لوحة التشغيل الموحدة" color="primary" variant="outlined" sx={{ mb: 1 }} />
+            <Typography variant="h3" sx={{ fontWeight: 700, mb: 1 }}>
+              نظرة شاملة على الأنظمة
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              عرض سريع لأهم المؤشرات عبر كافة الأنظمة. انقر على أي بطاقة للمزيد من التفاصيل.
+            </Typography>
+          </Box>
+          <Button variant="contained" onClick={() => navigate('/reports')} endIcon={<ArrowForwardIcon />}>
+            التقارير الكاملة
+          </Button>
+        </Stack>
+      </Card>
 
-      {/* Balance Overview */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} md={6} lg={4}>
-          <Card elevation={3} sx={{ height: '100%', borderRadius: 2, bgcolor: 'background.paper' }}>
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <BalanceIcon color="primary" sx={{ mr: 1 }} />
-                <Typography variant="h6" component="h2">
-                  Your Balance
+      {dashboardLastUpdate && (
+        <Chip
+          label={`آخر تحديث: ${new Date(dashboardLastUpdate).toLocaleTimeString('ar-SA')}`}
+          size="small"
+          variant="outlined"
+          color="primary"
+          sx={{ mb: 2 }}
+        />
+      )}
+
+      <Grid container spacing={2} sx={{ mb: 3 }}>
+        {topKPIs.map((kpi, idx) => (
+          <Grid item xs={12} sm={6} md={3} key={idx}>
+            <Card sx={{ p: 2, cursor: 'pointer', '&:hover': { boxShadow: 6 } }} onClick={() => navigate(kpi.path)}>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                <IconButton size="small" sx={{ bgcolor: 'primary.main', color: '#fff', mr: 1 }}>
+                  {kpi.icon}
+                </IconButton>
+                <Typography variant="overline" color="text.secondary">
+                  {kpi.label}
                 </Typography>
               </Box>
-              <Divider sx={{ mb: 2 }} />
-              <Box sx={{ textAlign: 'center', py: 2 }}>
-                <Typography variant="h4" component="div" color="success.main" sx={{ fontWeight: 'bold' }}>
-                  ${(balances.totalOwed - balances.totalOwe).toFixed(2)}
+              <Stack direction="row" alignItems="center" justifyContent="space-between">
+                <Typography variant="h4" sx={{ fontWeight: 700 }}>
+                  {kpi.value}
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {balances.totalOwed > balances.totalOwe ? 'You are owed' : 'You owe'} ${Math.abs(balances.totalOwed - balances.totalOwe).toFixed(2)}
-                </Typography>
-              </Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
-                <Box sx={{ textAlign: 'center' }}>
-                  <Typography variant="body2" color="text.secondary">
-                    You owe
-                  </Typography>
-                  <Typography variant="h6" color="error">
-                    ${balances.totalOwe.toFixed(2)}
-                  </Typography>
-                </Box>
-                <Box sx={{ textAlign: 'center' }}>
-                  <Typography variant="body2" color="text.secondary">
-                    You are owed
-                  </Typography>
-                  <Typography variant="h6" color="success.main">
-                    ${balances.totalOwed.toFixed(2)}
-                  </Typography>
-                </Box>
-              </Box>
-            </CardContent>
-            <CardActions sx={{ justifyContent: 'center', pb: 2 }}>
-              <Button 
-                size="small" 
-                color="primary"
-                onClick={() => navigate('/balances')}
+                {kpi.chartData && (
+                  <Sparkline
+                    data={kpi.chartData}
+                    color={kpi.tone === 'error' ? '#dc2626' : kpi.tone === 'warning' ? '#ea580c' : '#0f766e'}
+                    width={60}
+                    height={24}
+                  />
+                )}
+              </Stack>
+              <Typography
+                variant="body2"
+                color={kpi.tone === 'error' ? 'error.main' : kpi.tone === 'warning' ? 'warning.main' : 'success.main'}
               >
-                View all balances
-              </Button>
-            </CardActions>
-          </Card>
-        </Grid>
-
-        {/* Recent Activity */}
-        <Grid item xs={12} md={6} lg={8}>
-          <Paper elevation={3} sx={{ p: 3, borderRadius: 2, height: '100%' }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="h6" component="h2">
-                Recent Activity
+                {kpi.trend}
               </Typography>
-              <Button 
-                size="small" 
-                endIcon={<ArrowForwardIcon />}
-                onClick={handleViewAllActivity}
-              >
-                View All
-              </Button>
-            </Box>
-            <Divider sx={{ mb: 2 }} />
-            <List>
-              {recentActivity.map((activity) => (
-                <React.Fragment key={activity.id}>
-                  <ListItem alignItems="flex-start">
-                    <ListItemAvatar>
-                      <Avatar>{activity.user.charAt(0)}</Avatar>
-                    </ListItemAvatar>
-                    <ListItemText
-                      primary={activity.description}
-                      secondary={
-                        <>
-                          <Typography
-                            component="span"
-                            variant="body2"
-                            color="text.primary"
-                          >
-                            {activity.user}
-                          </Typography>
-                          {` — ${activity.date}`}
-                        </>
-                      }
-                    />
-                    <ListItemSecondaryAction>
-                      <Typography 
-                        variant="body1" 
-                        color={activity.type === 'owed' ? 'success.main' : 'error'}
-                        sx={{ fontWeight: 'medium' }}
-                      >
-                        {activity.type === 'owed' ? '+' : '-'}${activity.amount.toFixed(2)}
-                      </Typography>
-                    </ListItemSecondaryAction>
-                  </ListItem>
-                  <Divider variant="inset" component="li" />
-                </React.Fragment>
-              ))}
-            </List>
-          </Paper>
-        </Grid>
+            </Card>
+          </Grid>
+        ))}
       </Grid>
 
-      {/* Groups */}
-      <Paper elevation={3} sx={{ p: 3, mb: 4, borderRadius: 2 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Typography variant="h6" component="h2">
-            Your Groups
-          </Typography>
-          <Button 
-            size="small" 
-            startIcon={<AddIcon />}
-            onClick={() => navigate('/groups/new')}
-          >
-            New Group
-          </Button>
-        </Box>
-        <Divider sx={{ mb: 3 }} />
-        <Grid container spacing={3}>
-          {groups.map((group) => (
-            <Grid item xs={12} sm={6} key={group.id}>
-              <Card 
-                elevation={0} 
-                sx={{ 
-                  p: 2, 
-                  borderRadius: 2, 
-                  border: '1px solid', 
-                  borderColor: 'divider',
-                  '&:hover': {
-                    boxShadow: 1,
-                    cursor: 'pointer',
-                  },
-                }}
-                onClick={() => handleViewGroup(group.id)}
-              >
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                  <GroupIcon color="primary" sx={{ mr: 1 }} />
-                  <Typography variant="subtitle1" sx={{ fontWeight: 'medium' }}>
-                    {group.name}
-                  </Typography>
+      <Grid container spacing={2}>
+        {summaryCards.map((card, idx) => (
+          <Grid item xs={12} md={6} lg={4} key={idx}>
+            <Card
+              sx={{ height: '100%', borderRadius: 2, cursor: 'pointer', '&:hover': { boxShadow: 6 } }}
+              onClick={() => navigate(card.path)}
+            >
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                  <Chip label={card.title} color={card.color} variant="outlined" />
+                  <IconButton size="small" color={card.color}>
+                    {card.icon}
+                  </IconButton>
                 </Box>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
-                  <Typography variant="body2" color="text.secondary">
-                    {group.members} {group.members === 1 ? 'member' : 'members'}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    ${group.totalExpenses.toFixed(2)} total
-                  </Typography>
-                </Box>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
-      </Paper>
-
-      {/* Quick Actions */}
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
-          <Paper elevation={3} sx={{ p: 3, borderRadius: 2, height: '100%' }}>
-            <Typography variant="h6" component="h2" sx={{ mb: 2 }}>
-              Quick Actions
-            </Typography>
-            <Divider sx={{ mb: 3 }} />
-            <Grid container spacing={2}>
-              <Grid item xs={6}>
-                <Button 
-                  fullWidth 
-                  variant="outlined" 
-                  startIcon={<ReceiptIcon />}
-                  onClick={() => navigate('/expenses/new')}
-                  sx={{ py: 2, borderRadius: 2 }}
+                <Divider sx={{ mb: 2 }} />
+                <Stack spacing={1.5}>
+                  {card.stats.map((stat, statIdx) => (
+                    <Box key={statIdx} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Typography variant="body2" color="text.secondary">
+                        {stat.label}
+                      </Typography>
+                      <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                        {stat.value}
+                      </Typography>
+                    </Box>
+                  ))}
+                </Stack>
+                <Button
+                  fullWidth
+                  variant="text"
+                  endIcon={<ArrowForwardIcon />}
+                  sx={{ mt: 2 }}
+                  onClick={e => {
+                    e.stopPropagation();
+                    navigate(card.path);
+                  }}
                 >
-                  Add Expense
+                  عرض التفاصيل
                 </Button>
-              </Grid>
-              <Grid item xs={6}>
-                <Button 
-                  fullWidth 
-                  variant="outlined" 
-                  startIcon={<GroupIcon />}
-                  onClick={() => navigate('/groups/new')}
-                  sx={{ py: 2, borderRadius: 2 }}
-                >
-                  Create Group
-                </Button>
-              </Grid>
-              <Grid item xs={6}>
-                <Button 
-                  fullWidth 
-                  variant="outlined" 
-                  startIcon={<BalanceIcon />}
-                  onClick={() => navigate('/balances')}
-                  sx={{ py: 2, borderRadius: 2 }}
-                >
-                  View Balances
-                </Button>
-              </Grid>
-              <Grid item xs={6}>
-                <Button 
-                  fullWidth 
-                  variant="outlined" 
-                  startIcon={<ReceiptIcon />}
-                  onClick={() => navigate('/activity')}
-                  sx={{ py: 2, borderRadius: 2 }}
-                >
-                  View Activity
-                </Button>
-              </Grid>
-            </Grid>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Paper elevation={3} sx={{ p: 3, borderRadius: 2, height: '100%' }}>
-            <Typography variant="h6" component="h2" sx={{ mb: 2 }}>
-              Upcoming Settlements
-            </Typography>
-            <Divider sx={{ mb: 3 }} />
-            <Box sx={{ textAlign: 'center', py: 4 }}>
-              <ReceiptIcon color="action" sx={{ fontSize: 48, mb: 1, opacity: 0.3 }} />
-              <Typography variant="body1" color="text.secondary">
-                No upcoming settlements
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 1, mb: 2 }}>
-                Settlements will appear here when you have expenses to settle.
-              </Typography>
-              <Button 
-                variant="contained" 
-                color="primary"
-                onClick={() => navigate('/balances')}
-                sx={{ textTransform: 'none', borderRadius: 2, px: 3 }}
-              >
-                View All Balances
-              </Button>
-            </Box>
-          </Paper>
-        </Grid>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
       </Grid>
     </Box>
   );

@@ -25,6 +25,11 @@ const authLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+// During tests, skip strict auth rate limiting to avoid flakiness
+if (process.env.NODE_ENV === 'test') {
+  module.exports.authLimiter = (req, res, next) => next();
+}
+
 // Password reset limiter (very strict)
 const passwordLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour

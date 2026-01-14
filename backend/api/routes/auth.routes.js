@@ -2,7 +2,16 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const User = require('../../models/User.memory'); // Using in-memory DB
+
+// Use in-memory User model when using mock DB
+let User;
+if (process.env.USE_MOCK_DB === 'true') {
+  console.log('📝 Auth routes using In-Memory User model');
+  User = require('../../models/User.memory');
+} else {
+  console.log('🗄️  Auth routes using MongoDB User model');
+  User = require('../../models/User');
+}
 const { authLimiter, passwordLimiter, createAccountLimiter } = require('../../middleware/rateLimiter');
 const { validateRegistration, validatePasswordChange } = require('../../middleware/validation');
 const { logSecurityEvent, getClientIP } = require('../../utils/security');
@@ -45,33 +54,32 @@ router.post('/register', createAccountLimiter, validateRegistration, async (req,
       email,
       password: hashedPassword,
       fullName,
-      role: 'user', // First user can be changed to admin manually
+      role: 'user',
     });
 
     logSecurityEvent('USER_REGISTERED', {
-      userId: user._id,
+      userId: user.id,
       email: user.email,
       ip: getClientIP(req),
     });
 
-    // Generate tokens
-    const accessToken = jwt.sign({ userId: user._id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRY });
-
-    const refreshToken = jwt.sign({ userId: user._id }, JWT_REFRESH_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
+    // Generate token
+    const accessToken = jwt.sign({ userId: user.id, email: user.email, role: user.role }, process.env.JWT_SECRET, {
+      expiresIn: process.env.JWT_EXPIRY || '7d',
+    });
 
     res.status(201).json({
       success: true,
+      statusCode: 201,
       message: 'Registration successful',
       data: {
+        accessToken,
         user: {
-          _id: user._id,
+          id: user.id,
           email: user.email,
           fullName: user.fullName,
           role: user.role,
-          createdAt: user.createdAt,
         },
-        accessToken,
-        refreshToken,
       },
     });
   } catch (error) {
@@ -79,7 +87,6 @@ router.post('/register', createAccountLimiter, validateRegistration, async (req,
     res.status(500).json({
       success: false,
       message: 'Registration failed',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
     });
   }
 });
@@ -103,7 +110,24 @@ router.post('/login', authLimiter, async (req, res) => {
     // Find user
     const user = await User.findOne({ email });
     if (!user) {
-      logSecurityEvent('LOGIN_FAILED_USER_NOT_FOUND', {
+      console.error('❌ Login failed: User not found for email:', email);
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid email or password',
+      });
+    }
+
+    console.log('✅ User found:', email);
+    console.log('   Has password field:', !!user.password);
+    console.log('   Password length:', user.password ? user.password.length : 0);
+
+    // Check password
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    console.log('   Password valid:', isPasswordValid);
+
+    if (!isPasswordValid) {
+      console.error('❌ Login failed: Invalid password for email:', email);
+      logSecurityEvent('FAILED_LOGIN', {
         email,
         ip: getClientIP(req),
       });
@@ -113,57 +137,36 @@ router.post('/login', authLimiter, async (req, res) => {
       });
     }
 
-    // Check password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      logSecurityEvent('LOGIN_FAILED_WRONG_PASSWORD', {
-        userId: user._id,
-        email: user.email,
-        ip: getClientIP(req),
-      });
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid email or password',
-      });
-    }
+    // Generate token
+    const accessToken = jwt.sign({ userId: user.id, email: user.email, role: user.role }, process.env.JWT_SECRET, {
+      expiresIn: process.env.JWT_EXPIRY || '7d',
+    });
 
-    // Update last login
-    user.lastLogin = new Date();
-    await user.save();
-
-    logSecurityEvent('USER_LOGIN_SUCCESS', {
-      userId: user._id,
-      email: user.email,
+    logSecurityEvent('LOGIN_SUCCESS', {
+      email,
       ip: getClientIP(req),
     });
 
-    // Generate tokens
-    const accessToken = jwt.sign({ userId: user._id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRY });
-
-    const refreshToken = jwt.sign({ userId: user._id }, JWT_REFRESH_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
-
-    res.json({
+    res.status(200).json({
       success: true,
+      statusCode: 200,
       message: 'Login successful',
       data: {
+        accessToken,
         user: {
-          _id: user._id,
+          id: user.id,
           email: user.email,
           fullName: user.fullName,
           role: user.role,
-          createdAt: user.createdAt,
-          lastLogin: user.lastLogin,
         },
-        accessToken,
-        refreshToken,
       },
     });
   } catch (error) {
-    console.error('Login error:', error);
+    console.error('❌ Login error:', error.message);
+    console.error('Stack:', error.stack);
     res.status(500).json({
       success: false,
-      message: 'Login failed',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      message: 'Login failed: ' + error.message,
     });
   }
 });
@@ -249,7 +252,7 @@ router.post('/logout', authenticateToken, (req, res) => {
  */
 router.get('/profile', authenticateToken, async (req, res) => {
   try {
-    const user = await User.findById(req.user.userId).select('-password');
+    const user = await User.findById(req.user.userId);
 
     if (!user) {
       return res.status(404).json({
@@ -260,14 +263,18 @@ router.get('/profile', authenticateToken, async (req, res) => {
 
     res.json({
       success: true,
-      data: user,
+      data: {
+        id: user.id,
+        email: user.email,
+        fullName: user.fullName,
+        role: user.role,
+      },
     });
   } catch (error) {
     console.error('Get profile error:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch profile',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      message: 'Failed to get profile',
     });
   }
 });
@@ -293,7 +300,7 @@ router.put('/profile', authenticateToken, async (req, res) => {
     await user.save();
 
     logSecurityEvent('PROFILE_UPDATED', {
-      userId: user._id,
+      userId: user.id,
       ip: getClientIP(req),
     });
 
@@ -301,7 +308,7 @@ router.put('/profile', authenticateToken, async (req, res) => {
       success: true,
       message: 'Profile updated successfully',
       data: {
-        _id: user._id,
+        id: user.id,
         email: user.email,
         fullName: user.fullName,
         role: user.role,
@@ -312,7 +319,6 @@ router.put('/profile', authenticateToken, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to update profile',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
     });
   }
 });
@@ -337,8 +343,8 @@ router.post('/change-password', authenticateToken, passwordLimiter, validatePass
     // Verify current password
     const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
     if (!isPasswordValid) {
-      logSecurityEvent('PASSWORD_CHANGE_FAILED_WRONG_CURRENT', {
-        userId: user._id,
+      logSecurityEvent('PASSWORD_CHANGE_FAILED', {
+        userId: user.id,
         ip: getClientIP(req),
       });
       return res.status(401).json({
@@ -353,12 +359,13 @@ router.post('/change-password', authenticateToken, passwordLimiter, validatePass
     await user.save();
 
     logSecurityEvent('PASSWORD_CHANGED', {
-      userId: user._id,
+      userId: user.id,
       ip: getClientIP(req),
     });
 
     res.json({
       success: true,
+      statusCode: 200,
       message: 'Password changed successfully',
     });
   } catch (error) {
@@ -366,7 +373,6 @@ router.post('/change-password', authenticateToken, passwordLimiter, validatePass
     res.status(500).json({
       success: false,
       message: 'Failed to change password',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
     });
   }
 });

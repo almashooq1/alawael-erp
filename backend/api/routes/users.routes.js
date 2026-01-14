@@ -1,6 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../../models/User.memory'); // Using in-memory DB
+let User;
+
+// Use in-memory model when in mock mode
+if (process.env.USE_MOCK_DB === 'true') {
+  User = require('../../models/User.memory');
+} else {
+  User = require('../../models/User');
+}
 const { authenticateToken, requireAdmin } = require('../../middleware/auth');
 const { validateProfileUpdate } = require('../../middleware/validation');
 const { logSecurityEvent, getClientIP } = require('../../utils/security');
@@ -12,7 +19,15 @@ const { logSecurityEvent, getClientIP } = require('../../utils/security');
  */
 router.get('/', authenticateToken, requireAdmin, async (req, res) => {
   try {
-    const users = await User.find();
+    const users = await User.find({});
+
+    if (!users || !Array.isArray(users)) {
+      return res.status(200).json({
+        success: true,
+        data: [],
+      });
+    }
+
     // Remove password from response
     const sanitizedUsers = users.map(u => ({
       _id: u._id,

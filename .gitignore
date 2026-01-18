@@ -35,6 +35,9 @@ backend/build/
 stats.html
 bundle-report.html
 
+# Archive directory (legacy code)
+archive/
+
 # IDE & Editor
 .idea/
 .vs/

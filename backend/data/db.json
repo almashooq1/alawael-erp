@@ -1,18 +1,28 @@
 {
   "users": [],
-  "employees": [],
-  "attendances": [],
-  "leaves": [
+  "employees": [
     {
-      "_id": "leave_1768381829004",
-      "employeeId": 1,
-      "type": "annual",
-      "startDate": "2024-01-15",
-      "endDate": "2024-01-20",
-      "status": "approved",
-      "createdAt": "2026-01-14T09:10:29.004Z",
-      "updatedAt": "2026-01-14T09:10:29.004Z"
+      "_id": "emp_1768388807311",
+      "fullName": "نشط 1",
+      "email": "active1@company.com",
+      "department": "hr",
+      "position": "Manager",
+      "status": "active",
+      "createdAt": "2026-01-14T11:06:47.311Z",
+      "updatedAt": "2026-01-14T11:06:47.311Z"
+    },
+    {
+      "_id": "emp_1768388807312",
+      "fullName": "غير نشط",
+      "email": "inactive@company.com",
+      "department": "it",
+      "position": "Developer",
+      "status": "inactive",
+      "createdAt": "2026-01-14T11:06:47.312Z",
+      "updatedAt": "2026-01-14T11:06:47.312Z"
     }
   ],
+  "attendances": [],
+  "leaves": [],
   "performance": []
 }

@@ -662,7 +662,7 @@ class ProjectManagementService {
       phaseId = projectIdOrPhaseId;
       updates = phaseIdOrUpdates;
     }
-    
+
     const phase = this.phases.get(phaseId);
     if (!phase) return null;
     const updated = { ...phase, ...updates };
@@ -749,7 +749,7 @@ class ProjectManagementService {
       taskId = projectIdOrTaskId;
       userId = taskIdOrUserId;
     }
-    
+
     const task = this.tasks.get(taskId);
     if (task) {
       task.assignedTo = userId;
@@ -762,15 +762,15 @@ class ProjectManagementService {
   addTaskDependency(projectId, taskId, dependencyTaskId) {
     const task = this.tasks.get(taskId);
     if (!task) return null;
-    
+
     if (!task.dependencies) {
       task.dependencies = [];
     }
-    
+
     if (!task.dependencies.includes(dependencyTaskId)) {
       task.dependencies.push(dependencyTaskId);
     }
-    
+
     this.tasks.set(taskId, task);
     return task;
   }
@@ -778,13 +778,13 @@ class ProjectManagementService {
   getTaskProgress(projectId, taskId) {
     const task = this.tasks.get(taskId);
     if (!task) return { percentage: 0 };
-    
+
     if (task.subtasks && task.subtasks.length > 0) {
       const completed = task.subtasks.filter(st => st.status === 'completed').length;
       const percentage = Math.round((completed / task.subtasks.length) * 100);
       return { percentage, completed, total: task.subtasks.length };
     }
-    
+
     return { percentage: task.progress || 0 };
   }
 
@@ -811,12 +811,12 @@ class ProjectManagementService {
       return Array.from(this.tasks.values());
     }
     let tasks = Array.from(this.tasks.values()).filter(task => task.projectId === projectId);
-    
+
     // Apply status filter if provided
     if (filters.status) {
       tasks = tasks.filter(task => task.status === filters.status);
     }
-    
+
     return tasks;
   }
 
@@ -831,7 +831,7 @@ class ProjectManagementService {
       projectId = projectIdOrResource.projectId;
       resource = projectIdOrResource;
     }
-    
+
     const resourceId = `resource_${Date.now()}`;
     const allocated = { ...resource, id: resourceId, projectId, allocatedAt: new Date() };
     if (!this.resources) this.resources = new Map();
@@ -851,9 +851,9 @@ class ProjectManagementService {
   updateResourceAllocation(projectIdOrResourceId, resourceIdOrUpdates, updatesOrAllocation) {
     // Support signatures: (projectId, resourceId, allocation) or (resourceId, updates)
     if (!this.resources) this.resources = new Map();
-    
+
     let resource, updated;
-    
+
     if (typeof resourceIdOrUpdates === 'object') {
       // (resourceId, updates) signature
       const resourceId = projectIdOrResourceId;
@@ -867,7 +867,7 @@ class ProjectManagementService {
       if (!resource) return null;
       updated = { ...resource, allocation: updatesOrAllocation };
     }
-    
+
     this.resources.set(updated.id, updated);
     return updated;
   }
@@ -876,11 +876,11 @@ class ProjectManagementService {
     if (!this.resources) return { totalAllocation: 0 };
     const resources = Array.from(this.resources.values()).filter(r => r.projectId === projectId);
     const totalAllocation = resources.reduce((sum, r) => sum + (r.allocation || 0), 0);
-    return { 
-      totalAllocation, 
+    return {
+      totalAllocation,
       available: totalAllocation < 100,
       resources: resources.length,
-      utilizationRate: totalAllocation / 100 * 100
+      utilizationRate: (totalAllocation / 100) * 100,
     };
   }
 
@@ -898,7 +898,7 @@ class ProjectManagementService {
   addRisk(projectId, risk) {
     if (!this.risks) this.risks = new Map();
     const riskId = `risk_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
+
     // Calculate severity based on probability and impact
     let severity = 'low';
     if (risk.probability === 'high' && risk.impact === 'high') {
@@ -908,14 +908,14 @@ class ProjectManagementService {
     } else if (risk.probability === 'medium' || risk.impact === 'medium') {
       severity = 'medium';
     }
-    
-    const newRisk = { 
-      ...risk, 
-      id: riskId, 
-      projectId, 
-      status: 'active', 
+
+    const newRisk = {
+      ...risk,
+      id: riskId,
+      projectId,
+      status: 'active',
       severity: risk.severity || severity,
-      createdAt: new Date() 
+      createdAt: new Date(),
     };
     this.risks.set(riskId, newRisk);
     return newRisk;
@@ -925,9 +925,9 @@ class ProjectManagementService {
     // Analyze project and identify potential risks
     const project = this.getProject(projectId);
     if (!project) return [];
-    
+
     const risks = [];
-    
+
     // Check budget risk
     if (project.budget < 50000) {
       risks.push({
@@ -936,7 +936,7 @@ class ProjectManagementService {
         description: 'Low budget may impact project delivery',
       });
     }
-    
+
     // Check timeline risk
     const startDate = new Date(project.startDate);
     const endDate = new Date(project.endDate);
@@ -948,18 +948,18 @@ class ProjectManagementService {
         description: 'Short timeline may lead to rushed delivery',
       });
     }
-    
+
     return risks;
   }
 
   getRiskSeverity(projectIdOrRiskId, riskIdOrNull) {
     // Support two signatures: (projectId, riskId) and (riskId)
     const riskId = riskIdOrNull !== undefined ? riskIdOrNull : projectIdOrRiskId;
-    
+
     if (!this.risks) return 'unknown';
     const risk = this.risks.get(riskId);
     if (!risk) return 'unknown';
-    
+
     // Return severity string directly
     return risk.severity || 'medium';
   }
@@ -974,7 +974,7 @@ class ProjectManagementService {
       riskId = projectIdOrRiskId;
       status = riskIdOrStatus;
     }
-    
+
     if (!this.risks) this.risks = new Map();
     const risk = this.risks.get(riskId);
     if (!risk) return null;
@@ -995,7 +995,7 @@ class ProjectManagementService {
   deleteRisk(projectIdOrRiskId, riskIdOrNull) {
     // Support two signatures: (projectId, riskId) and (riskId)
     const riskId = riskIdOrNull !== undefined ? riskIdOrNull : projectIdOrRiskId;
-    
+
     if (!this.risks) return false;
     return this.risks.delete(riskId);
   }
@@ -1022,9 +1022,9 @@ class ProjectManagementService {
   recordExpense(projectIdOrBudgetId, budgetIdOrExpense, expenseDataOrNull) {
     // Support signatures: (projectId, budgetId, expenseData) or (projectId, expenseData)
     if (!this.budgets) this.budgets = new Map();
-    
+
     let projectId, budgetId, expenseData;
-    
+
     if (expenseDataOrNull !== undefined) {
       // (projectId, budgetId, expenseData) signature
       projectId = projectIdOrBudgetId;
@@ -1036,12 +1036,10 @@ class ProjectManagementService {
       budgetId = null;
       expenseData = budgetIdOrExpense;
     }
-    
+
     const budgets = Array.from(this.budgets.values());
-    let budget = budgetId 
-      ? budgets.find(b => b.id === budgetId)
-      : budgets.find(b => b.projectId === projectId);
-    
+    let budget = budgetId ? budgets.find(b => b.id === budgetId) : budgets.find(b => b.projectId === projectId);
+
     // Create budget if it doesn't exist
     if (!budget) {
       const newBudgetId = `budget_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -1054,7 +1052,7 @@ class ProjectManagementService {
       };
       this.budgets.set(newBudgetId, budget);
     }
-    
+
     const expenseRecord = {
       id: `expense_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       amount: expenseData.amount || 0,
@@ -1062,7 +1060,7 @@ class ProjectManagementService {
       category: expenseData.category || 'general',
       date: new Date(),
     };
-    
+
     budget.expenses.push(expenseRecord);
     this.budgets.set(budget.id, budget);
     return expenseRecord;
@@ -1071,7 +1069,7 @@ class ProjectManagementService {
   getBudgetUsage(projectIdOrBudgetId, budgetIdOrNull) {
     // Support signatures: (projectId, budgetId) or (projectId)
     let projectId, budgetId;
-    
+
     if (budgetIdOrNull !== undefined) {
       // (projectId, budgetId) signature
       projectId = projectIdOrBudgetId;
@@ -1081,18 +1079,16 @@ class ProjectManagementService {
       projectId = projectIdOrBudgetId;
       budgetId = null;
     }
-    
+
     if (!this.budgets) return { usage: 0, percentage: 0, overBudget: false, remaining: 0 };
     const budgets = Array.from(this.budgets.values());
-    const budget = budgetId 
-      ? budgets.find(b => b.id === budgetId) 
-      : budgets.find(b => b.projectId === projectId);
-    
+    const budget = budgetId ? budgets.find(b => b.id === budgetId) : budgets.find(b => b.projectId === projectId);
+
     if (!budget) return { usage: 0, percentage: 0, overBudget: false, remaining: 0 };
-    
+
     const totalExpenses = budget.expenses.reduce((sum, e) => sum + (e.amount || 0), 0);
     const percentage = budget.amount > 0 ? (totalExpenses / budget.amount) * 100 : 0;
-    
+
     return {
       total: budget.amount,
       spent: totalExpenses,
@@ -1107,7 +1103,7 @@ class ProjectManagementService {
     const usage = this.getBudgetUsage(projectId);
     const budgets = Array.from(this.budgets.values());
     const budget = budgets.find(b => b.projectId === projectId);
-    
+
     // Calculate by category
     const byCategory = {};
     if (budget?.expenses) {
@@ -1116,7 +1112,7 @@ class ProjectManagementService {
         byCategory[category] = (byCategory[category] || 0) + (exp.amount || 0);
       });
     }
-    
+
     return {
       projectId,
       budget: budget?.amount || 0,
@@ -1145,12 +1141,12 @@ class ProjectManagementService {
     const project = this.getProject(projectId);
     const phases = this.getPhases(projectId);
     const tasks = this.getTasks(projectId);
-    
+
     const phaseProgress = phases.reduce((sum, p) => sum + (p.progress || 0), 0) / (phases.length || 1);
     const taskProgress = tasks.reduce((sum, t) => sum + (t.progress || 0), 0) / (tasks.length || 1);
-    
+
     const overallProgress = phases.length > 0 ? phaseProgress : taskProgress;
-    
+
     return {
       projectId,
       overall: Math.round(overallProgress),
@@ -1171,7 +1167,7 @@ class ProjectManagementService {
   getProjectTimeline(projectId) {
     const project = this.getProject(projectId);
     const phases = this.getPhases(projectId);
-    
+
     return {
       projectId,
       start: project?.startDate,
@@ -1191,7 +1187,7 @@ class ProjectManagementService {
     const budget = this.getBudgetReport(projectId);
     const risks = this.listProjectRisks(projectId);
     const tasks = this.getTasks(projectId);
-    
+
     return {
       project: {
         id: projectId,
@@ -1215,7 +1211,7 @@ class ProjectManagementService {
       metrics: {
         progressPercentage: progress.overall,
         budgetUtilization: budget.percentage,
-        taskCompletionRate: tasks.length > 0 ? (tasks.filter(t => t.status === 'completed').length / tasks.length * 100) : 0,
+        taskCompletionRate: tasks.length > 0 ? (tasks.filter(t => t.status === 'completed').length / tasks.length) * 100 : 0,
       },
       generatedAt: new Date(),
     };
@@ -1226,18 +1222,18 @@ class ProjectManagementService {
     const budget = this.checkBudgetOverrun(projectId);
     const risks = this.listProjectRisks(projectId);
     const activeRisks = risks.filter(r => r.status === 'active' && r.severity === 'high');
-    
-    let status = 'green';  // Changed from 'healthy' to 'green'
+
+    let status = 'green'; // Changed from 'healthy' to 'green'
     if (budget.isOverrun || activeRisks.length > 2) {
-      status = 'red';  // Changed from 'critical' to 'red'
+      status = 'red'; // Changed from 'critical' to 'red'
     } else if (budget.warning || activeRisks.length > 0 || progress.overall < 30) {
-      status = 'yellow';  // Changed from 'at-risk' to 'yellow'
+      status = 'yellow'; // Changed from 'at-risk' to 'yellow'
     }
-    
+
     return {
       projectId,
       status,
-      health: status,  // Keep both for compatibility
+      health: status, // Keep both for compatibility
       score: budget.isOverrun ? 40 : budget.warning ? 70 : 90,
       factors: {
         budget: budget.warning ? 'warning' : 'ok',
@@ -1251,11 +1247,11 @@ class ProjectManagementService {
   closeProject(projectId) {
     const project = this.getProject(projectId);
     if (!project) return null;
-    
-    project.status = 'closed';  // Changed from 'completed' to 'closed'
+
+    project.status = 'closed'; // Changed from 'completed' to 'closed'
     project.completedAt = new Date();
     this.projects.set(projectId, project);
-    
+
     return project;
   }
 
@@ -1263,17 +1259,17 @@ class ProjectManagementService {
     const project = this.getProject(projectId);
     const report = this.generateProjectReport(projectId);
     const progress = this.calculateProjectProgress(projectId);
-    
+
     const closureReport = {
       ...report,
       closureDate: new Date(),
       finalStatus: project?.status,
       completionPercentage: progress.overall || 0,
       lessonsLearned: [],
-      lessons: [],  // Add lessons as alias
+      lessons: [], // Add lessons as alias
       achievements: [],
     };
-    
+
     return closureReport;
   }
 
@@ -1284,13 +1280,13 @@ class ProjectManagementService {
   archiveProject(projectId) {
     const project = this.getProject(projectId);
     if (!project) return false;
-    
-    project.status = 'archived';  // Set status to 'archived'
+
+    project.status = 'archived'; // Set status to 'archived'
     project.archived = true;
     project.archivedAt = new Date();
     this.projects.set(projectId, project);
-    
-    return project;  // Return the project instead of true
+
+    return project; // Return the project instead of true
   }
 }
 

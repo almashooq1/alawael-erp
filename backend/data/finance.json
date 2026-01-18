@@ -6350,6 +6350,916 @@
       "status": "pending",
       "attachments": [],
       "createdAt": "2026-01-14T09:10:26.871Z"
+    },
+    {
+      "_id": "EXP-1768381919897",
+      "expenseNumber": "EXP-636",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T09:11:59.897Z"
+    },
+    {
+      "_id": "EXP-1768386287633",
+      "expenseNumber": "EXP-637",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:24:47.633Z"
+    },
+    {
+      "_id": "EXP-1768386296298",
+      "expenseNumber": "EXP-638",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:24:56.298Z"
+    },
+    {
+      "_id": "EXP-1768386304096",
+      "expenseNumber": "EXP-639",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:25:04.096Z"
+    },
+    {
+      "_id": "EXP-1768386311975",
+      "expenseNumber": "EXP-640",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:25:11.975Z"
+    },
+    {
+      "_id": "EXP-1768386320995",
+      "expenseNumber": "EXP-641",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:25:20.995Z"
+    },
+    {
+      "_id": "EXP-1768386331270",
+      "expenseNumber": "EXP-642",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:25:31.270Z"
+    },
+    {
+      "_id": "EXP-1768386338282",
+      "expenseNumber": "EXP-643",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:25:38.282Z"
+    },
+    {
+      "_id": "EXP-1768386367319",
+      "expenseNumber": "EXP-644",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:26:07.319Z"
+    },
+    {
+      "_id": "EXP-1768386378978",
+      "expenseNumber": "EXP-645",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:26:18.978Z"
+    },
+    {
+      "_id": "EXP-1768386385325",
+      "expenseNumber": "EXP-646",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:26:25.325Z"
+    },
+    {
+      "_id": "EXP-1768386391583",
+      "expenseNumber": "EXP-647",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:26:31.583Z"
+    },
+    {
+      "_id": "EXP-1768386397728",
+      "expenseNumber": "EXP-648",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:26:37.728Z"
+    },
+    {
+      "_id": "EXP-1768386403249",
+      "expenseNumber": "EXP-649",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:26:43.249Z"
+    },
+    {
+      "_id": "EXP-1768386409152",
+      "expenseNumber": "EXP-650",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:26:49.152Z"
+    },
+    {
+      "_id": "EXP-1768386414054",
+      "expenseNumber": "EXP-651",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:26:54.054Z"
+    },
+    {
+      "_id": "EXP-1768386419197",
+      "expenseNumber": "EXP-652",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:26:59.197Z"
+    },
+    {
+      "_id": "EXP-1768386424466",
+      "expenseNumber": "EXP-653",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:27:04.466Z"
+    },
+    {
+      "_id": "EXP-1768386429418",
+      "expenseNumber": "EXP-654",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:27:09.418Z"
+    },
+    {
+      "_id": "EXP-1768386434371",
+      "expenseNumber": "EXP-655",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:27:14.371Z"
+    },
+    {
+      "_id": "EXP-1768386439365",
+      "expenseNumber": "EXP-656",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:27:19.365Z"
+    },
+    {
+      "_id": "EXP-1768386444838",
+      "expenseNumber": "EXP-657",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:27:24.838Z"
+    },
+    {
+      "_id": "EXP-1768386451203",
+      "expenseNumber": "EXP-658",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:27:31.203Z"
+    },
+    {
+      "_id": "EXP-1768386456251",
+      "expenseNumber": "EXP-659",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:27:36.251Z"
+    },
+    {
+      "_id": "EXP-1768386461029",
+      "expenseNumber": "EXP-660",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:27:41.029Z"
+    },
+    {
+      "_id": "EXP-1768386466174",
+      "expenseNumber": "EXP-661",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:27:46.174Z"
+    },
+    {
+      "_id": "EXP-1768386471359",
+      "expenseNumber": "EXP-662",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:27:51.359Z"
+    },
+    {
+      "_id": "EXP-1768386476256",
+      "expenseNumber": "EXP-663",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:27:56.256Z"
+    },
+    {
+      "_id": "EXP-1768386481398",
+      "expenseNumber": "EXP-664",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:28:01.398Z"
+    },
+    {
+      "_id": "EXP-1768386486628",
+      "expenseNumber": "EXP-665",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:28:06.628Z"
+    },
+    {
+      "_id": "EXP-1768386491822",
+      "expenseNumber": "EXP-666",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:28:11.822Z"
+    },
+    {
+      "_id": "EXP-1768386497883",
+      "expenseNumber": "EXP-667",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:28:17.883Z"
+    },
+    {
+      "_id": "EXP-1768386503000",
+      "expenseNumber": "EXP-668",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:28:23.000Z"
+    },
+    {
+      "_id": "EXP-1768386509924",
+      "expenseNumber": "EXP-669",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:28:29.924Z"
+    },
+    {
+      "_id": "EXP-1768386521164",
+      "expenseNumber": "EXP-670",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:28:41.164Z"
+    },
+    {
+      "_id": "EXP-1768386527388",
+      "expenseNumber": "EXP-671",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:28:47.388Z"
+    },
+    {
+      "_id": "EXP-1768386533484",
+      "expenseNumber": "EXP-672",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:28:53.484Z"
+    },
+    {
+      "_id": "EXP-1768386554302",
+      "expenseNumber": "EXP-673",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:29:14.302Z"
+    },
+    {
+      "_id": "EXP-1768386558843",
+      "expenseNumber": "EXP-674",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:29:18.843Z"
+    },
+    {
+      "_id": "EXP-1768386564229",
+      "expenseNumber": "EXP-675",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:29:24.229Z"
+    },
+    {
+      "_id": "EXP-1768386570398",
+      "expenseNumber": "EXP-676",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:29:30.398Z"
+    },
+    {
+      "_id": "EXP-1768386575376",
+      "expenseNumber": "EXP-677",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:29:35.376Z"
+    },
+    {
+      "_id": "EXP-1768386580468",
+      "expenseNumber": "EXP-678",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:29:40.468Z"
+    },
+    {
+      "_id": "EXP-1768386585712",
+      "expenseNumber": "EXP-679",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:29:45.712Z"
+    },
+    {
+      "_id": "EXP-1768386590575",
+      "expenseNumber": "EXP-680",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:29:50.575Z"
+    },
+    {
+      "_id": "EXP-1768386597002",
+      "expenseNumber": "EXP-681",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:29:57.002Z"
+    },
+    {
+      "_id": "EXP-1768386651490",
+      "expenseNumber": "EXP-682",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:30:51.490Z"
+    },
+    {
+      "_id": "EXP-1768386657101",
+      "expenseNumber": "EXP-683",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:30:57.101Z"
+    },
+    {
+      "_id": "EXP-1768386683663",
+      "expenseNumber": "EXP-684",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:31:23.663Z"
+    },
+    {
+      "_id": "EXP-1768386690538",
+      "expenseNumber": "EXP-685",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:31:30.538Z"
+    },
+    {
+      "_id": "EXP-1768386696448",
+      "expenseNumber": "EXP-686",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:31:36.448Z"
+    },
+    {
+      "_id": "EXP-1768386701946",
+      "expenseNumber": "EXP-687",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:31:41.946Z"
+    },
+    {
+      "_id": "EXP-1768386707365",
+      "expenseNumber": "EXP-688",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:31:47.365Z"
+    },
+    {
+      "_id": "EXP-1768386712965",
+      "expenseNumber": "EXP-689",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:31:52.965Z"
+    },
+    {
+      "_id": "EXP-1768386718424",
+      "expenseNumber": "EXP-690",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:31:58.424Z"
+    },
+    {
+      "_id": "EXP-1768386724001",
+      "expenseNumber": "EXP-691",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:32:04.001Z"
+    },
+    {
+      "_id": "EXP-1768386730180",
+      "expenseNumber": "EXP-692",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:32:10.180Z"
+    },
+    {
+      "_id": "EXP-1768386817771",
+      "expenseNumber": "EXP-693",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:33:37.771Z"
+    },
+    {
+      "_id": "EXP-1768386823469",
+      "expenseNumber": "EXP-694",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:33:43.469Z"
+    },
+    {
+      "_id": "EXP-1768386830351",
+      "expenseNumber": "EXP-695",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:33:50.351Z"
+    },
+    {
+      "_id": "EXP-1768386842002",
+      "expenseNumber": "EXP-696",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:34:02.002Z"
+    },
+    {
+      "_id": "EXP-1768386849288",
+      "expenseNumber": "EXP-697",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:34:09.288Z"
+    },
+    {
+      "_id": "EXP-1768386854567",
+      "expenseNumber": "EXP-698",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:34:14.567Z"
+    },
+    {
+      "_id": "EXP-1768386864280",
+      "expenseNumber": "EXP-699",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:34:24.280Z"
+    },
+    {
+      "_id": "EXP-1768386871121",
+      "expenseNumber": "EXP-700",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:34:31.121Z"
+    },
+    {
+      "_id": "EXP-1768386876450",
+      "expenseNumber": "EXP-701",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:34:36.450Z"
+    },
+    {
+      "_id": "EXP-1768387496083",
+      "expenseNumber": "EXP-702",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:44:56.083Z"
+    },
+    {
+      "_id": "EXP-1768387500797",
+      "expenseNumber": "EXP-703",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:45:00.797Z"
+    },
+    {
+      "_id": "EXP-1768387505592",
+      "expenseNumber": "EXP-704",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:45:05.592Z"
+    },
+    {
+      "_id": "EXP-1768387510476",
+      "expenseNumber": "EXP-705",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:45:10.476Z"
+    },
+    {
+      "_id": "EXP-1768387515436",
+      "expenseNumber": "EXP-706",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:45:15.436Z"
+    },
+    {
+      "_id": "EXP-1768387520244",
+      "expenseNumber": "EXP-707",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:45:20.244Z"
+    },
+    {
+      "_id": "EXP-1768387525118",
+      "expenseNumber": "EXP-708",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:45:25.118Z"
+    },
+    {
+      "_id": "EXP-1768387531372",
+      "expenseNumber": "EXP-709",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:45:31.372Z"
+    },
+    {
+      "_id": "EXP-1768387535966",
+      "expenseNumber": "EXP-710",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:45:35.966Z"
+    },
+    {
+      "_id": "EXP-1768387541008",
+      "expenseNumber": "EXP-711",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:45:41.008Z"
+    },
+    {
+      "_id": "EXP-1768387545979",
+      "expenseNumber": "EXP-712",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:45:45.979Z"
+    },
+    {
+      "_id": "EXP-1768387551004",
+      "expenseNumber": "EXP-713",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:45:51.004Z"
+    },
+    {
+      "_id": "EXP-1768387555787",
+      "expenseNumber": "EXP-714",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:45:55.787Z"
+    },
+    {
+      "_id": "EXP-1768387560617",
+      "expenseNumber": "EXP-715",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:46:00.617Z"
+    },
+    {
+      "_id": "EXP-1768387565876",
+      "expenseNumber": "EXP-716",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:46:05.876Z"
+    },
+    {
+      "_id": "EXP-1768387570748",
+      "expenseNumber": "EXP-717",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:46:10.748Z"
+    },
+    {
+      "_id": "EXP-1768387575711",
+      "expenseNumber": "EXP-718",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:46:15.711Z"
+    },
+    {
+      "_id": "EXP-1768387582208",
+      "expenseNumber": "EXP-719",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:46:22.208Z"
+    },
+    {
+      "_id": "EXP-1768387590143",
+      "expenseNumber": "EXP-720",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T10:46:30.143Z"
+    },
+    {
+      "_id": "EXP-1768388634822",
+      "expenseNumber": "EXP-721",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T11:03:54.822Z"
+    },
+    {
+      "_id": "EXP-1768388649106",
+      "expenseNumber": "EXP-722",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T11:04:09.106Z"
+    },
+    {
+      "_id": "EXP-1768388668552",
+      "expenseNumber": "EXP-723",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T11:04:28.552Z"
+    },
+    {
+      "_id": "EXP-1768388730033",
+      "expenseNumber": "EXP-724",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T11:05:30.033Z"
+    },
+    {
+      "_id": "EXP-1768388767578",
+      "expenseNumber": "EXP-725",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T11:06:07.578Z"
+    },
+    {
+      "_id": "EXP-1768388784970",
+      "expenseNumber": "EXP-726",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-14T11:06:24.970Z"
     }
   ],
   "budgets": [],

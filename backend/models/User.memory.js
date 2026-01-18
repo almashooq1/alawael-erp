@@ -130,6 +130,7 @@ InMemoryUser.prototype.select = function (fields) {
 };
 
 // Initialize with admin user (only if no users exist and not in test mode)
+// Completely skip initialization in test mode
 if (process.env.NODE_ENV !== 'test') {
   (async () => {
     const data = db.read();

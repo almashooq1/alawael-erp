@@ -49,6 +49,20 @@ const moduleMocks = {
       { label: 'نسبة اكتمال البيانات', value: '94%', trend: '+1%', tone: 'success', chartData: [88, 90, 91, 92, 93, 94] },
     ],
   },
+  appeals: {
+    kpis: [
+      { label: 'استئناف ناجح', value: '88%', trend: '+5%', tone: 'success', chartData: [80, 82, 84, 85, 87, 88] },
+      { label: 'إيرادات مستردة', value: '$45k', trend: '+12%', tone: 'success', chartData: [32, 35, 38, 40, 42, 45] },
+      { label: 'رسائل مولدة', value: '142', trend: '+15', tone: 'info', chartData: [110, 115, 120, 128, 135, 142] },
+    ],
+  },
+  biometrics: {
+    kpis: [
+      { label: 'مصادقة صوتية', value: '1280', trend: '+45', tone: 'info', chartData: [1100, 1150, 1200, 1230, 1250, 1280] },
+      { label: 'محاولات احتيال', value: '0', trend: 'آمن', tone: 'success', chartData: [1, 0, 0, 1, 0, 0] },
+      { label: 'تحقق Liveness', value: '99.9%', trend: 'ممتاز', tone: 'success', chartData: [99, 99, 99, 99, 99, 99] },
+    ],
+  },
 };
 
 module.exports = moduleMocks;

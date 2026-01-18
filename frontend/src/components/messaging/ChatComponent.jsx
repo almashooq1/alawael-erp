@@ -40,10 +40,8 @@ import {
   Check as CheckIcon,
   DoneAll as DoneAllIcon,
 } from '@mui/icons-material';
-import { useSocket } from '../contexts/SocketContext';
-import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+import { useSocket } from '../../contexts/SocketContext';
+import messagingService from '../../services/messaging.service';
 
 const ChatComponent = () => {
   const { socket, isConnected, joinConversation, leaveConversation, on, off } = useSocket();
@@ -144,13 +142,10 @@ const ChatComponent = () => {
 
   const loadConversations = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get(`${API_URL}/api/messages/conversations`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const data = await messagingService.getConversations();
 
-      if (response.data.success) {
-        setConversations(response.data.data.conversations);
+      if (data.success) {
+        setConversations(data.data.conversations);
       }
     } catch (error) {
       console.error('Error loading conversations:', error);
@@ -160,22 +155,13 @@ const ChatComponent = () => {
   const loadMessages = async conversationId => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
-      const response = await axios.get(`${API_URL}/api/messages/conversation/${conversationId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const data = await messagingService.getMessages(conversationId);
 
-      if (response.data.success) {
-        setMessages(response.data.data.messages.reverse());
+      if (data.success) {
+        setMessages(data.data.messages.reverse());
 
         // تحديد الرسائل كمقروءة
-        await axios.post(
-          `${API_URL}/api/messages/mark-read/${conversationId}`,
-          {},
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+        await messagingService.markAsRead(conversationId);
       }
     } catch (error) {
       console.error('Error loading messages:', error);
@@ -188,17 +174,7 @@ const ChatComponent = () => {
     if (!messageInput.trim() || !selectedConversation) return;
 
     try {
-      const token = localStorage.getItem('token');
-      await axios.post(
-        `${API_URL}/api/messages/send`,
-        {
-          conversationId: selectedConversation._id,
-          content: messageInput,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      await messagingService.sendMessage(selectedConversation._id, messageInput);
 
       setMessageInput('');
       handleStopTyping();

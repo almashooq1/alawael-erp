@@ -36,6 +36,7 @@ const employeeSchema = new mongoose.Schema(
       unique: true,
       lowercase: true,
       required: true,
+      // index: true - removed to avoid duplicate with schema.index({ email: 1 })
     },
     phone: String,
     dateOfBirth: Date,
@@ -252,7 +253,7 @@ const employeeSchema = new mongoose.Schema(
 employeeSchema.index({ department: 1, status: 1 });
 employeeSchema.index({ hireDate: 1 });
 employeeSchema.index({ manager: 1 });
-employeeSchema.index({ email: 1 });
+// email already has unique: true which creates an index automatically
 
 // Virtual: Full Name
 employeeSchema.virtual('fullName').get(function () {
@@ -461,4 +462,4 @@ employeeSchema.statics.getContractExpiringEmployees = function (daysThreshold = 
   });
 };
 
-module.exports = mongoose.model('Employee', employeeSchema);
+module.exports = mongoose.models.Employee || mongoose.model('Employee', employeeSchema);

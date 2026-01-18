@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/17</span>
+                <span class='fraction'>17/17</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/17</span>
+                <span class='fraction'>17/17</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -128,8 +128,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">13x</span>
+<span class="cline-any cline-yes">13x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -143,53 +143,53 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">13x</span>
+<span class="cline-any cline-yes">13x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">13x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">13x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">13x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">13x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">13x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">13x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">13x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">13x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">13x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">13x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">13x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">13x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">13x</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">/**
  * Document Routes
  * مسارات إدارة المستندات
  */
 &nbsp;
-const express = <span class="cstat-no" title="statement not covered" >require('express');</span>
-const router = <span class="cstat-no" title="statement not covered" >express.Router();</span>
+const express = require('express');
+const router = express.Router();
 const {
   uploadDocument,
   getAllDocuments,
@@ -203,46 +203,46 @@ const {
   getDocumentStats,
   searchDocuments,
   getFolders,
-} = <span class="cstat-no" title="statement not covered" >require('../controllers/documentController');</span>
-const { upload, handleUploadError } = <span class="cstat-no" title="statement not covered" >require('../middleware/uploadMiddleware');</span>
+} = require('../controllers/documentController');
+const { upload, handleUploadError } = require('../middleware/uploadMiddleware');
 &nbsp;
 // 📤 تحميل مستند
-<span class="cstat-no" title="statement not covered" >router.post('/upload', upload, handleUploadError, uploadDocument);</span>
+router.post('/upload', upload, handleUploadError, uploadDocument);
 &nbsp;
 // 📋 الحصول على جميع المستندات
-<span class="cstat-no" title="statement not covered" >router.get('/', getAllDocuments);</span>
+router.get('/', getAllDocuments);
 &nbsp;
 // 📁 الحصول على المجلدات
-<span class="cstat-no" title="statement not covered" >router.get('/folders', getFolders);</span>
+router.get('/folders', getFolders);
 &nbsp;
 // 📊 الحصول على الإحصائيات
-<span class="cstat-no" title="statement not covered" >router.get('/stats', getDocumentStats);</span>
+router.get('/stats', getDocumentStats);
 &nbsp;
 // 🔍 البحث المتقدم
-<span class="cstat-no" title="statement not covered" >router.get('/search', searchDocuments);</span>
+router.get('/search', searchDocuments);
 &nbsp;
 // 📄 الحصول على مستند واحد
-<span class="cstat-no" title="statement not covered" >router.get('/:id', getDocumentById);</span>
+router.get('/:id', getDocumentById);
 &nbsp;
 // ✏️ تحديث المستند
-<span class="cstat-no" title="statement not covered" >router.put('/:id', updateDocument);</span>
+router.put('/:id', updateDocument);
 &nbsp;
 // 📥 تنزيل المستند
-<span class="cstat-no" title="statement not covered" >router.get('/:id/download', downloadDocument);</span>
+router.get('/:id/download', downloadDocument);
 &nbsp;
 // 🔗 مشاركة المستند
-<span class="cstat-no" title="statement not covered" >router.post('/:id/share', shareDocument);</span>
+router.post('/:id/share', shareDocument);
 &nbsp;
 // 🚫 إزالة الوصول
-<span class="cstat-no" title="statement not covered" >router.delete('/:id/share/:shareId', revokeAccess);</span>
+router.delete('/:id/share/:shareId', revokeAccess);
 &nbsp;
 // 🗑️ حذف المستند
-<span class="cstat-no" title="statement not covered" >router.delete('/:id', deleteDocument);</span>
+router.delete('/:id', deleteDocument);
 &nbsp;
 // ♻️ استرجاع المستند
-<span class="cstat-no" title="statement not covered" >router.post('/:id/restore', restoreDocument);</span>
+router.post('/:id/restore', restoreDocument);
 &nbsp;
-<span class="cstat-no" title="statement not covered" >module.exports = router;</span>
+module.exports = router;
 &nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
@@ -250,7 +250,7 @@ const { upload, handleUploadError } = <span class="cstat-no" title="statement no
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-01-14T08:34:10.085Z
+                at 2026-01-17T11:40:09.432Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

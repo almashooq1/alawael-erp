@@ -1,0 +1,27 @@
+# Use official Node.js LTS image
+FROM node:18-alpine
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+COPY backend/package*.json ./backend/
+
+# Install dependencies
+RUN npm install
+# Install backend specific dependencies if needed
+cd backend && npm install
+
+# Copy source code
+COPY . .
+
+# Expose the Smart Server port
+EXPOSE 3001
+
+# Environment Variables (Overridable at runtime)
+ENV PORT=3001
+ENV NODE_ENV=production
+
+# Start Command
+CMD ["node", "backend/server_smart.js"]

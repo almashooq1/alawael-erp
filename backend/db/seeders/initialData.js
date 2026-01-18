@@ -1,11 +1,19 @@
 // backend/db/seeders/initialData.js
 const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 const seedDatabase = async () => {
   try {
     // Check if admin already exists
-    const User = require('../../models/User');
+    let User;
+    if (process.env.USE_MOCK_DB === 'true') {
+      console.log('📝 Seeding check using In-Memory User model');
+      User = require('../../models/User.memory');
+    } else {
+      console.log('🗄️  Seeding check using MongoDB User model');
+      User = require('../../models/User');
+    }
+
     const existingAdmin = await User.findOne({ email: 'admin@alawael.com' });
 
     if (existingAdmin) {

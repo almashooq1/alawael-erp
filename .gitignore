@@ -17,6 +17,24 @@ yarn.lock
 out/
 *.tsbuildinfo
 
+# Frontend Build Outputs
+frontend/*/dist/
+frontend/*/build/
+frontend/*/.vite/
+frontend/*/node_modules/
+
+# Backend Build
+backend/dist/
+backend/build/
+
+# Source Maps (exclude from production)
+*.js.map
+*.css.map
+
+# Bundle Analysis
+stats.html
+bundle-report.html
+
 # IDE & Editor
 .idea/
 .vs/

@@ -190,10 +190,10 @@ const rehabilitationProgramSchema = new Schema(
     // Program Identification
     program_id: { type: String, unique: true, sparse: true },
     program_title: { type: String, required: true },
-    program_code: { type: String, required: true, index: true },
+    program_code: { type: String, required: true }, // index removed
 
     // Client Information
-    beneficiary_id: { type: String, required: true, index: true },
+    beneficiary_id: { type: String, required: true }, // index removed
     beneficiary_name: { type: String, required: true },
     age_at_enrollment: Number,
 

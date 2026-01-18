@@ -213,7 +213,7 @@ router.post('/workflows/:id/approve', authenticateToken, async (req, res) => {
 
     // Update workflow based on decision
     switch (decision) {
-      case 'approve':
+      case 'approve': {
         stage.status = 'approved';
         stage.endTime = new Date();
 
@@ -232,6 +232,7 @@ router.post('/workflows/:id/approve', authenticateToken, async (req, res) => {
           workflow.completedAt = new Date();
         }
         break;
+      }
 
       case 'reject':
         workflow.status = 'rejected';

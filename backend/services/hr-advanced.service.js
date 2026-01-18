@@ -364,4 +364,4 @@ class HRService {
   }
 }
 
-module.exports = new HRService();
+module.exports = HRService;

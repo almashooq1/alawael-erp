@@ -523,4 +523,4 @@ class RehabilitationService {
   }
 }
 
-module.exports = new RehabilitationService();
+module.exports = RehabilitationService;

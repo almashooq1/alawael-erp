@@ -149,7 +149,7 @@ describe('ProjectManagementService Tests', () => {
       });
 
       assert(task.id, 'Should have task ID');
-      assert(task.status === 'open');
+      assert(task.status === 'todo');
     });
 
     test('should update task status', () => {
@@ -178,7 +178,7 @@ describe('ProjectManagementService Tests', () => {
       projectService.updateTaskStatus(project.id, task1.id, 'completed');
       projectService.addTask(project.id, { title: 'Task 2' });
 
-      const openTasks = projectService.getTasks(project.id, { status: 'open' });
+      const openTasks = projectService.getTasks(project.id, { status: 'todo' });
       assert(openTasks.length >= 1);
     });
 

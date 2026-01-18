@@ -30,7 +30,7 @@ import {
   MenuItem,
 } from '@mui/material';
 import { DirectionsBus, Person, LocationOn, Add, Dashboard, Receipt, People, Warning } from '@mui/icons-material';
-import api from '../../services/api';
+import api from '../services/api';
 
 const AdminTransportPage = () => {
   const [tabValue, setTabValue] = useState(0);

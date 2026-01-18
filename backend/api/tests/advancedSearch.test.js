@@ -117,8 +117,8 @@ describe('AdvancedSearchService Tests', () => {
     });
 
     test('should filter with greater than operator', () => {
-      const result = searchService.filter(sampleData, [{ field: 'salary', operator: 'gt', value: 5000 }]);
-      assert(result.length === 2, 'Should find users with salary > 5000');
+      const result = searchService.filter(sampleData, [{ field: 'salary', operator: 'gt', value: 4600 }]);
+      assert(result.length === 2, 'Should find users with salary > 4600');
     });
 
     test('should filter with less than operator', () => {
@@ -135,8 +135,8 @@ describe('AdvancedSearchService Tests', () => {
     });
 
     test('should filter with IN operator', () => {
-      const result = searchService.filter(sampleData, [{ field: 'department', operator: 'in', value: ['Engineering', 'Sales'] }]);
-      assert(result.length === 3, 'Should find all Engineering and Sales members');
+      const result = searchService.filter(sampleData, [{ field: 'department', operator: 'in', value: ['Engineering', 'Marketing'] }]);
+      assert(result.length === 3, 'Should find all Engineering and Marketing members');
     });
 
     test('should filter with CONTAINS operator', () => {

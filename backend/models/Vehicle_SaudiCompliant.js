@@ -124,7 +124,7 @@ const vehicleSchema = new mongoose.Schema(
       expiryDate: {
         type: Date,
         required: [true, 'تاريخ انتهاء التسجيل مطلوب'],
-        index: true,
+        // index: true - removed to avoid duplicate
         comment: 'تاريخ انتهاء التسجيل في المرور',
       },
       officeCode: {
@@ -175,6 +175,7 @@ const vehicleSchema = new mongoose.Schema(
         unique: true,
         match: [/^\d{10}$/, 'رقم الهوية يجب أن يكون 10 أرقام'],
         comment: 'رقم الهوية الوطنية السعودية',
+        // index removed to avoid duplicate with schema.index
       },
       phone: {
         type: String,
@@ -263,7 +264,7 @@ const vehicleSchema = new mongoose.Schema(
       expiryDate: {
         type: Date,
         required: [true, 'تاريخ انتهاء التأمين مطلوب'],
-        index: true,
+        // index: true - removed to avoid duplicate
         comment: 'تاريخ انتهاء التأمين',
       },
       coverageAmount: {
@@ -304,7 +305,7 @@ const vehicleSchema = new mongoose.Schema(
     inspection: {
       nextInspectionDate: {
         type: Date,
-        index: true,
+        // index: true - removed to avoid duplicate
         comment: 'موعد الفحص الدوري القادم',
       },
       lastInspectionDate: Date,
@@ -689,7 +690,7 @@ const vehicleSchema = new mongoose.Schema(
 );
 
 // ====== الفهارس ======
-vehicleSchema.index({ 'owner.nationalId': 1 });
+// owner.nationalId already has unique: true which creates an index
 vehicleSchema.index({ 'gpsTracking.currentLocation': '2dsphere' });
 vehicleSchema.index({ 'registration.expiryDate': 1 });
 vehicleSchema.index({ 'insurance.expiryDate': 1 });
@@ -838,4 +839,4 @@ vehicleSchema.methods.getComplianceReport = function () {
   };
 };
 
-module.exports = mongoose.model('Vehicle', vehicleSchema);
+module.exports = mongoose.models.Vehicle || mongoose.model('Vehicle', vehicleSchema);

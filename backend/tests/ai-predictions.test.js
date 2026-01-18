@@ -1,8 +1,11 @@
 const request = require('supertest');
 const { app } = require('../server');
-const aiService = require('../services/ai-predictions.service');
+const AIPredictionsServiceClass = require('../services/ai-predictions.service');
 const Prediction = require('../models/prediction.model');
 const Analytics = require('../models/analytics.model');
+
+// Create instance for direct use in tests
+const aiService = new AIPredictionsServiceClass();
 
 // Mock user token (in real app, use actual authentication)
 const mockToken = 'Bearer test-token';

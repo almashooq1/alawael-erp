@@ -472,4 +472,4 @@ class VehicleTrackingService {
   }
 }
 
-module.exports = new VehicleTrackingService();
+module.exports = VehicleTrackingService;

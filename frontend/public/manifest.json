@@ -1,15 +1,17 @@
 {
-    "short_name": "AlAwael ERP",
-    "name": "AlAwael ERP System",
+    "short_name": "الأوائل للتأهيل",
+    "name": "مركز الأوائل للتأهيل - نظام إدارة التأهيل المتكامل",
+    "description": "Al-Awael Rehabilitation Center - Integrated Rehabilitation Management System",
     "icons": [
         {
-            "src": "favicon.ico",
-            "sizes": "64x64 32x32 24x24 16x16",
-            "type": "image/x-icon"
+            "src": "logo.svg",
+            "sizes": "any",
+            "type": "image/svg+xml"
         }
     ],
     "start_url": ".",
     "display": "standalone",
-    "theme_color": "#000000",
-    "background_color": "#ffffff"
+    "theme_color": "#667eea",
+    "background_color": "#ffffff",
+    "orientation": "portrait-primary"
 }

@@ -1,6 +1,6 @@
 // backend/utils/seedDatabase.js
 const bcrypt = require('bcryptjs');
-const User = require('../api/models/User');
+const User = require('../models/User');
 
 const seedDatabase = async () => {
   try {

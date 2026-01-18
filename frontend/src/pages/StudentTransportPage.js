@@ -27,7 +27,7 @@ import {
   Tab,
 } from '@mui/material';
 import { DirectionsBus, LocationOn } from '@mui/icons-material';
-import api from '../../services/api';
+import api from '../services/api';
 
 const StudentTransportPage = () => {
   const [registrations, setRegistrations] = useState([]);

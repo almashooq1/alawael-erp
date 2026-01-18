@@ -1,0 +1,23 @@
+[
+    {
+        "title": "مراجعة عقود الشراكة",
+        "priority": "High",
+        "duration_minutes": 60,
+        "due": "2026-01-17T12:00:00",
+        "completed": false
+    },
+    {
+        "title": "تحضير عرض تقديمي للعميل",
+        "priority": "Medium",
+        "duration_minutes": 90,
+        "due": "2026-01-20T09:00:00",
+        "completed": false
+    },
+    {
+        "title": "متابعة بريد إلكتروني",
+        "priority": "Low",
+        "duration_minutes": 30,
+        "due": "2026-01-19T10:00:00",
+        "completed": false
+    }
+]

@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: therapy-api
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=production
+      - FLASK_APP=app.py
+      - DATABASE_URL=sqlite:///therapy.db
+      - REDIS_URL=redis://redis:6379/0
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-your-secret-key-change-in-production}
+    volumes:
+      - ./backend:/app
+      - ./data:/app/data
+    depends_on:
+      - redis
+    networks:
+      - therapy-network
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: therapy-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - therapy-network
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    container_name: therapy-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./backend/static:/var/www/static:ro
+    depends_on:
+      - api
+    networks:
+      - therapy-network
+    restart: unless-stopped
+
+volumes:
+  redis-data:
+
+networks:
+  therapy-network:
+    driver: bridge

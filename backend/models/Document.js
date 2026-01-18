@@ -144,6 +144,20 @@ const DocumentSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
     },
+    // Phase 8: Enhanced Features
+    signatures: [
+      {
+        signedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        signedAt: { type: Date, default: Date.now },
+        signatureHash: String, // Digital signature hash
+        status: { type: String, enum: ['pending', 'signed', 'rejected'], default: 'signed' },
+      },
+    ],
+    isEncrypted: { type: Boolean, default: false },
+    encryptionKeyId: String,
+    ocrStatus: { type: String, enum: ['pending', 'completed', 'failed', 'none'], default: 'none' },
+    extractedText: String, // OCR Result
+
     downloadCount: {
       type: Number,
       default: 0,

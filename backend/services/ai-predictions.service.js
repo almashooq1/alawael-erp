@@ -302,4 +302,5 @@ class AIPredictionsService {
   }
 }
 
-module.exports = new AIPredictionsService();
+module.exports = AIPredictionsService;
+module.exports.instance = new AIPredictionsService();

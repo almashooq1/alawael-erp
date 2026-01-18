@@ -60,8 +60,8 @@ import {
   WhatsApp as WhatsAppIcon,
   ExpandMore as ExpandMoreIcon,
 } from '@mui/icons-material';
-import { ALERT_LEVELS, NOTIFICATION_CHANNELS, formatGregorianDate, getAlertLevel } from '../../config/saudiLicenseTypes';
-import licenseService from '../../services/licenseService';
+import { ALERT_LEVELS, NOTIFICATION_CHANNELS, formatGregorianDate, getAlertLevel } from '../config/saudiLicenseTypes';
+import licenseService from '../services/licenseService';
 
 const LicenseAlertsSystem = ({ licenses, onRefresh }) => {
   const [activeTab, setActiveTab] = useState(0);

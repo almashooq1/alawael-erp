@@ -40,7 +40,7 @@ router.post('/save', async (req, res) => {
  * POST /api/archive/classify
  * تصنيف ذكي للمستند
  */
-router.post('/classify', (req, res) => {
+router.post('/classify', async (req, res) => {
   try {
     const { document } = req.body;
 
@@ -51,7 +51,7 @@ router.post('/classify', (req, res) => {
       });
     }
 
-    const classification = archivingSystem.smartClassify(document);
+    const classification = await archivingSystem.classifyDocument(document);
 
     res.json({
       success: true,

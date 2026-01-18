@@ -152,7 +152,7 @@ const functionalAbilitySchema = new Schema(
 const disabilityAssessmentSchema = new Schema(
   {
     // Basic Information
-    beneficiary_id: { type: String, required: true, unique: true, index: true },
+    beneficiary_id: { type: String, required: true, unique: true }, // index removed to avoid duplicate
     beneficiary_name: { type: String, required: true },
     date_of_birth: { type: Date, required: true },
     gender: { type: String, enum: ['male', 'female', 'other'], required: true },
@@ -276,7 +276,7 @@ const disabilityAssessmentSchema = new Schema(
 );
 
 // Indexes
-disabilityAssessmentSchema.index({ beneficiary_id: 1 });
+// beneficiary_id already has unique: true which creates an index automatically
 disabilityAssessmentSchema.index({ 'disability_profile.type': 1 });
 disabilityAssessmentSchema.index({ 'disability_profile.severity': 1 });
 disabilityAssessmentSchema.index({ assessment_status: 1 });

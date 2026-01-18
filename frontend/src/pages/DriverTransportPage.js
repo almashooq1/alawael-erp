@@ -27,7 +27,7 @@ import {
   Tab,
 } from '@mui/material';
 import { DirectionsBus, LocationOn, MapRounded, EventNote, Assessment, GpsFixed, People as Group, CheckCircle } from '@mui/icons-material';
-import api from '../../services/api';
+import api from '../services/api';
 
 const DriverTransportPage = () => {
   const [assignedBus, setAssignedBus] = useState(null);

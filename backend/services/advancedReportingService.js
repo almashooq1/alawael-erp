@@ -112,6 +112,7 @@ class AdvancedReportingService {
       statistics: this.calculateStatistics(filteredData),
       recommendations: this.generateRecommendations({ sections: template.sections }, filteredData),
       aggregations: Object.keys(aggregations).length > 0 ? aggregations : undefined,
+      data: filteredData, // Include the actual data for export functions
     };
 
     // Store in reports map
@@ -396,16 +397,34 @@ class AdvancedReportingService {
   /**
    * جدولة تقرير دوري
    */
-  scheduleReport(templateId, frequency, recipients) {
+  scheduleReport(scheduleConfig) {
+    // Support both old style (templateId, frequency, recipients) and new style (object)
+    let config = scheduleConfig;
+
+    if (typeof scheduleConfig === 'string') {
+      // Old style - templateId as first param
+      config = {
+        templateId: scheduleConfig,
+        frequency: arguments[1] || 'daily',
+        recipients: arguments[2] || [],
+      };
+    }
+
     const scheduleId = `schedule_${Date.now()}`;
     const schedule = {
+      scheduleId,
       id: scheduleId,
-      templateId,
-      frequency, // 'daily', 'weekly', 'monthly'
-      recipients,
+      templateId: config.templateId,
+      frequency: config.frequency || 'daily',
+      recipients: config.recipients || [],
       createdAt: new Date(),
-      nextRun: this.calculateNextRun(frequency),
+      nextRun: this.calculateNextRun(config.frequency, config.time),
+      status: 'active',
       isActive: true,
+      dayOfWeek: config.dayOfWeek,
+      dayOfMonth: config.dayOfMonth,
+      time: config.time,
+      format: config.format,
     };
 
     this.schedules.set(scheduleId, schedule);
@@ -415,19 +434,83 @@ class AdvancedReportingService {
   /**
    * حساب موعد التشغيل التالي
    */
-  calculateNextRun(frequency) {
+  calculateNextRun(frequency, time) {
     const now = new Date();
 
+    let nextRun;
     switch (frequency) {
       case 'daily':
-        return new Date(now.getTime() + 24 * 60 * 60 * 1000);
+        nextRun = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+        break;
       case 'weekly':
-        return new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+        nextRun = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+        break;
       case 'monthly':
-        return new Date(now.getFullYear(), now.getMonth() + 1, now.getDate());
+        nextRun = new Date(now.getFullYear(), now.getMonth() + 1, now.getDate());
+        break;
+      case 'quarterly':
+        nextRun = new Date(now.getFullYear(), now.getMonth() + 3, now.getDate());
+        break;
+      case 'yearly':
+        nextRun = new Date(now.getFullYear() + 1, now.getMonth(), now.getDate());
+        break;
       default:
-        return new Date(now.getTime() + 24 * 60 * 60 * 1000);
+        nextRun = new Date(now.getTime() + 24 * 60 * 60 * 1000);
     }
+
+    // Set specific time if provided
+    if (time) {
+      const [hours, minutes] = time.split(':').map(Number);
+      nextRun.setHours(hours || 0, minutes || 0, 0, 0);
+
+      // If the time has already passed today, set it for tomorrow
+      if (nextRun <= now && frequency === 'daily') {
+        nextRun = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+        nextRun.setHours(hours || 0, minutes || 0, 0, 0);
+      }
+    }
+
+    return nextRun;
+  }
+
+  /**
+   * Get schedule details
+   */
+  getSchedule(scheduleId) {
+    return this.schedules.get(scheduleId);
+  }
+
+  /**
+   * Pause a scheduled report
+   */
+  pauseSchedule(scheduleId) {
+    const schedule = this.schedules.get(scheduleId);
+    if (schedule) {
+      schedule.status = 'paused';
+      schedule.isActive = false;
+      this.schedules.set(scheduleId, schedule);
+    }
+    return schedule;
+  }
+
+  /**
+   * Resume a paused schedule
+   */
+  resumeSchedule(scheduleId) {
+    const schedule = this.schedules.get(scheduleId);
+    if (schedule) {
+      schedule.status = 'active';
+      schedule.isActive = true;
+      this.schedules.set(scheduleId, schedule);
+    }
+    return schedule;
+  }
+
+  /**
+   * Delete a schedule
+   */
+  deleteSchedule(scheduleId) {
+    return this.schedules.delete(scheduleId);
   }
 
   /**
@@ -517,14 +600,40 @@ class AdvancedReportingService {
   /**
    * تصدير إلى CSV
    */
-  exportToCSV(report) {
-    const rows = [
-      ['التقرير', report.title],
-      ['التاريخ', report.generatedAt],
-      [],
-      ['الملخص'],
-      ...Object.entries(report.summary).map(([key, value]) => [key, value]),
-    ];
+  exportToCSV(report, filename, options = {}) {
+    let rows = [];
+
+    // Include metadata if requested
+    if (options.includeMetadata) {
+      rows.push(['Report Title', report.title || '']);
+      rows.push(['Generated At', report.generatedAt || '']);
+      rows.push(['']);
+    }
+
+    // Determine which columns to include
+    let columns = options.columns;
+    if (!columns && report.data && Array.isArray(report.data) && report.data.length > 0) {
+      columns = Object.keys(report.data[0]);
+    }
+
+    // Add header row
+    if (columns) {
+      rows.push(columns);
+
+      // Add data rows
+      if (report.data && Array.isArray(report.data)) {
+        report.data.forEach(item => {
+          const row = columns.map(col => item[col] || '');
+          rows.push(row);
+        });
+      }
+    } else {
+      // Fallback if no data
+      rows.push(['Report Summary']);
+      if (report.summary) {
+        rows.push(...Object.entries(report.summary).map(([key, value]) => [key, value]));
+      }
+    }
 
     return rows.map(row => row.join(',')).join('\n');
   }
@@ -671,11 +780,19 @@ class AdvancedReportingService {
   }
 
   emailReport(report, options = {}) {
+    const emailId = `email_${Date.now()}`;
+    const recipients = options.recipients || [];
+    const status = 'sent';
+
     return {
       success: true,
-      messageId: `email_${Date.now()}`,
-      recipients: options.recipients || [],
+      emailId,
+      messageId: emailId,
+      status,
+      recipientCount: recipients.length,
+      recipients,
       subject: options.subject || 'Report',
+      sentAt: new Date().toISOString(),
     };
   }
 
@@ -735,100 +852,6 @@ class AdvancedReportingService {
     return {
       valid: errors.length === 0,
       errors: errors.length > 0 ? errors : undefined,
-    };
-  }
-
-  scheduleReport(schedule) {
-    const scheduleId = `schedule_${Date.now()}`;
-    const nextRun = this.calculateNextRun(schedule);
-
-    const scheduled = {
-      scheduleId,
-      ...schedule,
-      nextRun,
-      status: 'active',
-      createdAt: new Date(),
-    };
-
-    this.schedules.set(scheduleId, scheduled);
-    return scheduled;
-  }
-
-  calculateNextRun(schedule) {
-    const now = new Date();
-    const next = new Date(now);
-
-    if (schedule.frequency === 'daily') {
-      next.setDate(next.getDate() + 1);
-    } else if (schedule.frequency === 'weekly') {
-      next.setDate(next.getDate() + 7);
-    } else if (schedule.frequency === 'monthly') {
-      next.setMonth(next.getMonth() + 1);
-    } else if (schedule.frequency === 'quarterly') {
-      next.setMonth(next.getMonth() + 3);
-    } else if (schedule.frequency === 'yearly') {
-      next.setFullYear(next.getFullYear() + 1);
-    }
-
-    return next;
-  }
-
-  getSchedule(scheduleId) {
-    return this.schedules.get(scheduleId);
-  }
-
-  pauseSchedule(scheduleId) {
-    const schedule = this.schedules.get(scheduleId);
-    if (!schedule) return null;
-    schedule.status = 'paused';
-    this.schedules.set(scheduleId, schedule);
-    return schedule;
-  }
-
-  resumeSchedule(scheduleId) {
-    const schedule = this.schedules.get(scheduleId);
-    if (!schedule) return null;
-    schedule.status = 'active';
-    this.schedules.set(scheduleId, schedule);
-    return schedule;
-  }
-
-  deleteSchedule(scheduleId) {
-    return this.schedules.delete(scheduleId);
-  }
-
-  exportToCSV(report, filename = 'report.csv') {
-    if (!report || !report.content) return '';
-
-    let csv = '';
-    if (typeof report.content === 'string') {
-      csv = report.content;
-    } else if (Array.isArray(report.content)) {
-      const headers = Object.keys(report.content[0] || {});
-      csv = headers.join(',') + '\n';
-      csv += report.content
-        .map(row =>
-          headers
-            .map(h => {
-              const val = row[h];
-              return typeof val === 'string' && val.includes(',') ? `"${val}"` : val;
-            })
-            .join(','),
-        )
-        .join('\n');
-    }
-
-    return csv || 'name,value\ndata,1\n';
-  }
-
-  exportToExcel(report, filename = 'report.xlsx') {
-    if (!report) return null;
-
-    return {
-      format: 'excel',
-      fileName: filename,
-      data: report.content,
-      sheetName: 'Report',
     };
   }
 
@@ -923,20 +946,6 @@ class AdvancedReportingService {
 
   getFromHistory(historyId) {
     return this.reports.get(historyId);
-  }
-
-  emailReport(report, options = {}) {
-    if (!report || !options.recipients) {
-      return { error: 'Report and recipients required' };
-    }
-
-    return {
-      emailId: `email_${Date.now()}`,
-      status: 'sent',
-      recipientCount: Array.isArray(options.recipients) ? options.recipients.length : 1,
-      recipients: options.recipients,
-      subject: options.subject || 'Report',
-    };
   }
 }
 

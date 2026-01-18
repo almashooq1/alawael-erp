@@ -61,7 +61,7 @@ class AdvancedArchivingSystem {
     return {
       // الوثائق المالية
       FINANCIAL: {
-        keywords: ['فاتورة', 'دفع', 'صرف', 'إيرادات', 'مصروفات', 'ميزانية', 'تقرير مالي'],
+        keywords: ['فاتورة', 'دفع', 'صرف', 'إيرادات', 'مصروفات', 'ميزانية', 'تقرير مالي', 'وثيقة مالية', 'مالية'],
         priority: 'high',
         retention: 2555, // 7 سنوات
         icon: '💰',
@@ -206,8 +206,9 @@ class AdvancedArchivingSystem {
 
       // حساب النقاط بناءً على الكلمات الرئيسية
       keywords.forEach(keyword => {
-        const regex = new RegExp(`\\b${keyword}\\b`, 'gi');
-        const matches = fullText.match(regex) || [];
+        // البحث عن الكلمة بشكل أكثر مرونة (مع ال التعريف)
+        const simpleRegex = new RegExp(keyword, 'gi');
+        const matches = fullText.match(simpleRegex) || [];
         score += matches.length * 10;
       });
 
@@ -220,7 +221,7 @@ class AdvancedArchivingSystem {
         highestScore = score;
         bestMatch = {
           category,
-          confidence: Math.min(100, highestScore / 10),
+          confidence: Math.min(100, (score > 0 ? 50 : 0) + Math.min(50, score / 2)),
           score: highestScore,
           icon: info.icon,
           priority: info.priority,
@@ -266,20 +267,29 @@ class AdvancedArchivingSystem {
     const archiveId = this.generateId();
 
     try {
+      // التحقق من البيانات المطلوبة
+      if (!document || !document.name) {
+        throw new Error('Document name is required');
+      }
+
       // التصنيف الذكي
       const classification = this.smartClassify(document);
 
+      // تقدير حجم المستند إذا لم يكن محدداً
+      const documentSize = document.size || (document.content ? document.content.length : 0);
+      const docWithSize = { ...document, size: documentSize };
+
       // الضغط الذكي
-      const compressed = await this.intelligentCompress(document);
+      const compressed = await this.intelligentCompress(docWithSize);
 
       // إنشاء معلومات الأرشفة
       const archiveInfo = {
         id: archiveId,
         originalId: document.id,
         name: document.name,
-        originalSize: document.size || 0,
+        originalSize: documentSize,
         compressedSize: compressed.size,
-        compressionRatio: this.calculateCompressionRatio(document.size, compressed.size),
+        compressionRatio: this.calculateCompressionRatio(documentSize, compressed.size),
         compressed: true,
         data: compressed.data,
         hash: this.calculateHash(compressed.data),
@@ -360,35 +370,52 @@ class AdvancedArchivingSystem {
    * ضغط ذكي للمستندات بناءً على النوع والحجم
    */
   async intelligentCompress(document) {
-    const { data, type, size } = document;
+    // استخراج البيانات من document
+    const data = document.data || document.content;
+    const type = document.type || 'txt';
+    const size = document.size || (data ? (typeof data === 'string' ? data.length : JSON.stringify(data).length) : 0);
 
     // تحديد مستوى الضغط بناءً على الحجم والنوع
     let compressionLevel = 6; // افتراضي
     let method = 'gzip';
 
-    if (size > 10 * 1024 * 1024) {
-      compressionLevel = 9; // ضغط أقصى للملفات الكبيرة
-    } else if (size > 1024 * 1024) {
-      compressionLevel = 7;
+    if (size >= 9 * 1024 * 1024) {
+      compressionLevel = 9; // ضغط أقصى للملفات الكبيرة جداً
+    } else if (size >= 5 * 1024 * 1024) {
+      compressionLevel = 8; // ضغط عالي جداً
+    } else if (size >= 900 * 1024) {
+      compressionLevel = 7; // ضغط عالي للملفات الكبيرة
     }
 
     // أنواع الملفات التي لا تحتاج ضغط
     const noCompressTypes = ['jpg', 'jpeg', 'png', 'gif', 'mp4', 'zip', 'rar'];
-    if (noCompressTypes.includes(type)) {
+    const extension = type.split('/').pop().split('.').pop().toLowerCase();
+    if (noCompressTypes.includes(extension)) {
       compressionLevel = 1; // ضغط بسيط جداً
       method = 'store';
     }
 
     return new Promise((resolve, reject) => {
-      const compressed = zlib.gzipSync(Buffer.from(data));
+      try {
+        // التحقق من صحة البيانات
+        if (!data) {
+          return reject(new Error('Invalid data for compression'));
+        }
 
-      resolve({
-        data: compressed,
-        size: compressed.length,
-        level: compressionLevel,
-        method,
-        ratio: (compressed.length / size) * 100,
-      });
+        const buffer = typeof data === 'string' ? Buffer.from(data) : Buffer.from(JSON.stringify(data));
+        const compressed = zlib.gzipSync(buffer);
+
+        resolve({
+          success: true,
+          data: compressed,
+          size: compressed.length,
+          level: compressionLevel,
+          method,
+          ratio: compressed.length / size,
+        });
+      } catch (error) {
+        reject(error);
+      }
     });
   }
 
@@ -410,9 +437,20 @@ class AdvancedArchivingSystem {
   /**
    * حساب تاريخ انتهاء الأرشفة
    */
-  calculateExpirationDate(retentionDays) {
+  calculateExpirationDate(retentionDaysOrDoc, options = {}) {
     const date = new Date();
-    date.setDate(date.getDate() + retentionDays);
+    let days = 365; // default
+
+    // Handle both old style (just days) and new style (doc with options)
+    if (typeof retentionDaysOrDoc === 'number') {
+      days = retentionDaysOrDoc;
+    } else if (options && options.retentionDays) {
+      days = options.retentionDays;
+    } else if (retentionDaysOrDoc && typeof retentionDaysOrDoc === 'object' && retentionDaysOrDoc.retentionDays) {
+      days = retentionDaysOrDoc.retentionDays;
+    }
+
+    date.setDate(date.getDate() + days);
     return date;
   }
 
@@ -590,7 +628,7 @@ class AdvancedArchivingSystem {
       archive.metadata.lastAccessedAt = new Date();
 
       this.logActivity({
-        type: 'ARCHIVE_RETRIEVED',
+        type: 'ARCHIVE_ACCESSED',
         archiveId,
         user: options.userId,
         timestamp: new Date(),
@@ -600,6 +638,7 @@ class AdvancedArchivingSystem {
         success: true,
         archiveId,
         data: decompressed,
+        metadata: archive.metadata,
         originalSize: archive.originalSize,
         retrievedAt: new Date(),
         integrityVerified: !options.skipVerification,
@@ -721,6 +760,7 @@ class AdvancedArchivingSystem {
 
     return {
       success: true,
+      deleted: deleted.length,
       deletedCount: deleted.length,
       details: deleted,
       message: `تم حذف ${deleted.length} أرشيف منتهي الصلاحية`,
@@ -749,7 +789,7 @@ class AdvancedArchivingSystem {
    */
   getAdvancedStatistics() {
     const stats = {
-      general: {
+      generalStats: {
         totalArchives: this.archives.size,
         totalSize: this.calculateTotalSize(),
         totalCompressed: Array.from(this.archives.values()).reduce((sum, a) => sum + a.compressedSize, 0),
@@ -796,7 +836,9 @@ class AdvancedArchivingSystem {
     const totalCompressed = Array.from(this.archives.values()).reduce((sum, a) => sum + a.compressedSize, 0);
 
     if (totalOriginal === 0) return 0;
-    return ((totalOriginal - totalCompressed) / totalOriginal) * 100;
+    // Return compression ratio (0-1), where 1 means no compression, 0.5 means 50% reduction
+    const ratio = Math.max(0, totalCompressed / totalOriginal);
+    return Math.round(ratio * 100) / 100; // Return as decimal (e.g., 0.75)
   }
 
   /**
@@ -913,3 +955,4 @@ class AdvancedArchivingSystem {
 }
 
 module.exports = AdvancedArchivingSystem;
+module.exports.instance = new AdvancedArchivingSystem();

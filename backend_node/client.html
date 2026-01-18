@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ar">
+  <head>
+    <meta charset="utf-8" />
+    <title>Secretary Notifications</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 0 20px;
+      }
+      pre {
+        background: #f7f7f9;
+        padding: 12px;
+        border: 1px solid #eee;
+        border-radius: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>إشعارات السكرتير الذكي</h1>
+    <p>سيتم عرض الإشعارات الواردة عبر WebSocket هنا.</p>
+    <div id="log"></div>
+
+    <script
+      src="https://cdn.socket.io/4.7.5/socket.io.min.js"
+      integrity="sha384-8zQwJxWZkJ1G8Y+4Yp6LAwCnXfVfT+l0X9wH2A2lQPpVjQmzdJXvDPLcQv2e7Xfl"
+      crossorigin="anonymous"
+    ></script>
+    <script>
+      const log = msg => {
+        const div = document.getElementById('log');
+        const pre = document.createElement('pre');
+        pre.textContent = msg;
+        div.prepend(pre);
+      };
+
+      const socket = io('http://localhost:3000');
+      socket.on('connect', () => log('WS connected: ' + socket.id));
+      socket.on('disconnect', () => log('WS disconnected'));
+
+      socket.on('secretary.notifications.push', data => {
+        log('Notification:\n' + JSON.stringify(data, null, 2));
+      });
+    </script>
+  </body>
+</html>

@@ -24,7 +24,7 @@ import {
   CircularProgress,
 } from '@mui/material';
 import { CloudUpload as CloudUploadIcon, Close as CloseIcon } from '@mui/icons-material';
-import documentService from '../../services/documentService';
+import documentService from '../services/documentService';
 
 const DocumentUploader = ({ onSuccess, onClose }) => {
   const fileInputRef = useRef(null);

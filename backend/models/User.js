@@ -23,13 +23,26 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['user', 'admin'],
+    enum: ['user', 'admin', 'manager', 'hr', 'accountant', 'doctor', 'therapist', 'receptionist', 'parent'],
     default: 'user',
   },
   lastLogin: {
     type: Date,
     default: null,
   },
+  mfa: {
+    enabled: { type: Boolean, default: false },
+    secret: String,
+    backupCodes: [String],
+  },
+  loginHistory: [
+    {
+      date: { type: Date, default: Date.now },
+      ip: String,
+      device: String,
+      location: String,
+    },
+  ],
   createdAt: {
     type: Date,
     default: Date.now,

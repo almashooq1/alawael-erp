@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/15</span>
+                <span class='fraction'>15/15</span>
             </div>
         
             
@@ -37,16 +37,16 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/1</span>
+                <span class='fraction'>1/1</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/15</span>
+                <span class='fraction'>15/15</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -169,36 +169,36 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -253,10 +253,10 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">/**
  * Routes Registration
  * تسجيل جميع المسارات الجديدة
@@ -266,36 +266,36 @@
  * setupNewRoutes(app);
  */
 &nbsp;
-const searchRoutes = <span class="cstat-no" title="statement not covered" >require('./search.routes');</span>
-const reportingRoutes = <span class="cstat-no" title="statement not covered" >require('./reporting.routes');</span>
-const integrationRoutes = <span class="cstat-no" title="statement not covered" >require('./integration.routes');</span>
-const projectRoutes = <span class="cstat-no" title="statement not covered" >require('./project.routes');</span>
-const aiRoutes = <span class="cstat-no" title="statement not covered" >require('./ai.routes');</span>
+const searchRoutes = require('./search.routes');
+const reportingRoutes = require('./reporting.routes');
+const integrationRoutes = require('./integration.routes');
+const projectRoutes = require('./project.routes');
+const aiRoutes = require('./ai.routes');
 &nbsp;
 /**
  * Setup all new routes
  */
-function <span class="fstat-no" title="function not covered" >setupNewRoutes(</span>app) {
+function setupNewRoutes(app) {
   // Search routes
-<span class="cstat-no" title="statement not covered" >  app.use('/api', searchRoutes);</span>
+  app.use('/api', searchRoutes);
 &nbsp;
   // Reporting routes
-<span class="cstat-no" title="statement not covered" >  app.use('/api', reportingRoutes);</span>
+  app.use('/api', reportingRoutes);
 &nbsp;
   // Integration routes
-<span class="cstat-no" title="statement not covered" >  app.use('/api', integrationRoutes);</span>
+  app.use('/api', integrationRoutes);
 &nbsp;
   // Project routes
-<span class="cstat-no" title="statement not covered" >  app.use('/api', projectRoutes);</span>
+  app.use('/api', projectRoutes);
 &nbsp;
   // AI routes
-<span class="cstat-no" title="statement not covered" >  app.use('/api', aiRoutes);</span>
+  app.use('/api', aiRoutes);
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  console.log('✅ جميع المسارات الجديدة تم تسجيلها بنجاح');</span>
-<span class="cstat-no" title="statement not covered" >  console.log('✅ All new routes registered successfully');</span>
+  console.log('✅ جميع المسارات الجديدة تم تسجيلها بنجاح');
+  console.log('✅ All new routes registered successfully');
 &nbsp;
   // Print available routes
-  const routes = <span class="cstat-no" title="statement not covered" >[</span>
+  const routes = [
     '🔍 Search Routes:',
     '   POST /api/search',
     '   POST /api/search/filters',
@@ -350,10 +350,10 @@ function <span class="fstat-no" title="function not covered" >setupNewRoutes(</s
     '   GET /api/ai/models/:id/info',
   ];
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  console.log('\n' + routes.join('\n'));</span>
+  console.log('\n' + routes.join('\n'));
 }
 &nbsp;
-<span class="cstat-no" title="statement not covered" >module.exports = setupNewRoutes;</span>
+module.exports = setupNewRoutes;
 &nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
@@ -361,7 +361,7 @@ function <span class="fstat-no" title="function not covered" >setupNewRoutes(</s
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-01-14T08:34:10.085Z
+                at 2026-01-17T11:40:09.432Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

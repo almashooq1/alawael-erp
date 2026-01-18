@@ -23,22 +23,15 @@ class SocketManager {
 
   /**
    * تهيئة Socket.IO
+   * @param {Object} io - Socket.IO instance
    */
-  initialize(server) {
-    this.io = socketIO(server, {
-      cors: {
-        origin: process.env.FRONTEND_URL || 'http://localhost:5173',
-        methods: ['GET', 'POST'],
-        credentials: true,
-      },
-      pingTimeout: 60000,
-      pingInterval: 25000,
-    });
+  initialize(io) {
+    this.io = io;
 
     this.setupMiddleware();
     this.setupEventHandlers();
 
-    console.log('✅ Socket.IO initialized successfully');
+    console.log('✅ Socket.IO initialized for Messaging');
   }
 
   /**

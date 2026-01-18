@@ -39,13 +39,13 @@ router.get('/', authenticateToken, requireAdmin, async (req, res) => {
       updatedAt: u.updatedAt,
     }));
 
-    res.json({
+    return res.json({
       success: true,
       data: sanitizedUsers,
     });
   } catch (error) {
     console.error('Get users error:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Failed to fetch users',
       error: process.env.NODE_ENV === 'development' ? error.message : undefined,
@@ -80,13 +80,13 @@ router.get('/:id', authenticateToken, requireAdmin, async (req, res) => {
       updatedAt: user.updatedAt,
     };
 
-    res.json({
+    return res.json({
       success: true,
       data: sanitizedUser,
     });
   } catch (error) {
     console.error('Get user error:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Failed to fetch user',
       error: process.env.NODE_ENV === 'development' ? error.message : undefined,
@@ -131,7 +131,7 @@ router.post('/', authenticateToken, requireAdmin, async (req, res) => {
       ip: getClientIP(req),
     });
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       message: 'User created successfully',
       data: {
@@ -144,7 +144,7 @@ router.post('/', authenticateToken, requireAdmin, async (req, res) => {
     });
   } catch (error) {
     console.error('Create user error:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Failed to create user',
       error: process.env.NODE_ENV === 'development' ? error.message : undefined,
@@ -180,7 +180,7 @@ router.put('/:id', authenticateToken, requireAdmin, validateProfileUpdate, async
       ip: getClientIP(req),
     });
 
-    res.json({
+    return res.json({
       success: true,
       message: 'User updated successfully',
       data: {
@@ -192,7 +192,7 @@ router.put('/:id', authenticateToken, requireAdmin, validateProfileUpdate, async
     });
   } catch (error) {
     console.error('Update user error:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Failed to update user',
       error: process.env.NODE_ENV === 'development' ? error.message : undefined,
@@ -232,13 +232,13 @@ router.delete('/:id', authenticateToken, requireAdmin, async (req, res) => {
       ip: getClientIP(req),
     });
 
-    res.json({
+    return res.json({
       success: true,
       message: 'User deleted successfully',
     });
   } catch (error) {
     console.error('Delete user error:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Failed to delete user',
       error: process.env.NODE_ENV === 'development' ? error.message : undefined,

@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  smart-core:
+    build:
+      context: .
+      dockerfile: Dockerfile.smart
+    container_name: scalehealth-smart-core
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - NODE_ENV=production
+      # - MONGODB_URI=mongodb://mongo:27017/scalehealth (Optional integration)
+    restart: always
+
+  # Optional: MongoDB for full stack persistence
+  # mongo:
+  #   image: mongo:latest
+  #   ports:
+  #     - "27017:27017"

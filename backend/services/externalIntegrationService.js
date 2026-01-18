@@ -482,19 +482,34 @@ class ExternalIntegrationService {
   /**
    * الحصول على حالة الاتصالات
    */
-  getConnectionStatus() {
-    const status = {};
-
-    for (const [name, integration] of this.integrations) {
-      status[name] = {
-        enabled: integration.enabled,
-        connected: this.connectionStatus.get(name)?.connected || false,
-        lastChecked: this.connectionStatus.get(name)?.lastChecked || null,
-        error: this.connectionStatus.get(name)?.error || null,
-      };
+  getConnectionStatus(integrationName) {
+    // If no parameter provided, return all statuses
+    if (!integrationName) {
+      const status = {};
+      for (const [name, integration] of this.integrations) {
+        status[name] = {
+          enabled: integration.enabled,
+          connected: this.connectionStatus.get(name)?.connected || false,
+          lastChecked: this.connectionStatus.get(name)?.lastChecked || null,
+          error: this.connectionStatus.get(name)?.error || null,
+        };
+      }
+      return status;
     }
 
-    return status;
+    // If specific integration requested
+    const integration = this.integrations.get(integrationName);
+    if (!integration) {
+      return undefined;
+    }
+
+    return {
+      name: integrationName,
+      enabled: integration.enabled,
+      connected: this.connectionStatus.get(integrationName)?.connected || false,
+      lastChecked: this.connectionStatus.get(integrationName)?.lastChecked || null,
+      error: this.connectionStatus.get(integrationName)?.error || null,
+    };
   }
 
   /**
@@ -653,7 +668,7 @@ class ExternalIntegrationService {
   /**
    * الحصول على حالة الاتصال
    */
-  getConnectionStatus(integrationName) {
+  getConnectionStatusByName(integrationName) {
     return (
       this.connectionStatus.get(integrationName) || {
         connected: false,

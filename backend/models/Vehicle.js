@@ -451,4 +451,27 @@ VehicleSchema.methods.updateLocation = function (latitude, longitude, address, s
   return this.save();
 };
 
-module.exports = mongoose.model('Vehicle', VehicleSchema);
+// ================================
+// DATABASE INDEXES FOR OPTIMIZATION
+// ================================
+// Primary Lookup Indexes
+VehicleSchema.index({ registrationNumber: 1 });
+VehicleSchema.index({ plateNumber: 1 });
+VehicleSchema.index({ owner: 1 });
+VehicleSchema.index({ assignedDriver: 1 });
+VehicleSchema.index({ status: 1 });
+VehicleSchema.index({ createdAt: -1 });
+
+// Compound Indexes (for complex queries)
+VehicleSchema.index({ owner: 1, registrationNumber: 1 });
+VehicleSchema.index({ status: 1, createdAt: -1 });
+VehicleSchema.index({ assignedDriver: 1, status: 1 });
+
+// Date Range Indexes
+VehicleSchema.index({ 'registration.expiryDate': 1 });
+VehicleSchema.index({ 'inspection.nextInspectionDate': 1 });
+
+// Location Tracking Index
+VehicleSchema.index({ 'tracking.lastLocation.timestamp': -1 });
+
+module.exports = mongoose.models.Vehicle || mongoose.model('Vehicle', VehicleSchema);

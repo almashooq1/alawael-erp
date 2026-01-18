@@ -3,10 +3,24 @@
  * ملف إعداد Jest
  */
 
-// Set test environment variables
+// Set test environment variables FIRST
 process.env.NODE_ENV = 'test';
 process.env.MONGODB_URI = 'mongodb://localhost:27017/vehicle-management-test';
 process.env.JWT_SECRET = 'test-secret-key-for-testing-only';
+
+// In-memory database reset after every test to avoid cross-suite contamination
+const db = require('./config/inMemoryDB');
+const EMPTY_DB = {
+  users: [],
+  employees: [],
+  attendances: [],
+  leaves: [],
+  performance: [],
+};
+
+afterEach(() => {
+  db.write(EMPTY_DB);
+});
 
 // Mock timers
 jest.useFakeTimers();
@@ -82,10 +96,10 @@ expect.extend({
 });
 
 // Mock database
-jest.mock('../db/connection', () => ({
-  connect: jest.fn(),
-  disconnect: jest.fn(),
-}));
+// jest.mock('../db/connection', () => ({
+//   connect: jest.fn(),
+//   disconnect: jest.fn(),
+// }));
 
 // Clean up after all tests
 afterAll(async () => {

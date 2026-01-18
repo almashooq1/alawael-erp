@@ -1,52 +1,66 @@
 version: '3.9'
 
 services:
-  # Frontend - Vue 3 App
-  frontend:
-    build:
-      context: ./alawael-erp-frontend
-      dockerfile: Dockerfile
-    container_name: alawael-frontend
-    ports:
-      - "5173:5173"
-    environment:
-      - VITE_API_URL=http://localhost:3001/api
-    volumes:
-      - ./alawael-erp-frontend:/app
-      - /app/node_modules
-    command: npm run dev
-    networks:
-      - alawael-network
-    depends_on:
-      - backend
-
-  # Backend - Node.js/Express API
+  # ==========================================
+  # 🔵 Backend API (Node.js)
+  # ==========================================
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
     container_name: alawael-backend
-    ports:
-      - "3001:3001"
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=production
       - PORT=3001
-      - FRONTEND_URL=http://localhost:5173
-      - JWT_SECRET=your_jwt_secret_key
+      - MONGODB_URI=mongodb://admin:${MONGO_PASSWORD:-password123}@mongodb:27017/alawael_erp?authSource=admin
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=${JWT_SECRET:-secure_production_secret_change_in_production}
       - JWT_EXPIRE=24h
       - REFRESH_TOKEN_EXPIRE=7d
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3000}
     volumes:
       - ./backend:/app
       - /app/node_modules
       - ./backend/data:/app/data
-    command: npm run dev
+      - ./logs:/app/logs
+    ports:
+      - "3001:3001"
     networks:
       - alawael-network
     depends_on:
-      - mongodb
-      - redis
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
-  # MongoDB Database
+  # ==========================================
+  # 🟢 Frontend (React)
+  # ==========================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: alawael-frontend
+    ports:
+      - "3000:80"
+    environment:
+      - REACT_APP_API_URL=http://localhost:3001/api/v1
+    networks:
+      - alawael-network
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  # ==========================================
+  # 🍃 Database (MongoDB)
+  # ==========================================
   mongodb:
     image: mongo:7.0
     container_name: alawael-mongodb
@@ -54,20 +68,23 @@ services:
       - "27017:27017"
     environment:
       - MONGO_INITDB_ROOT_USERNAME=admin
-      - MONGO_INITDB_ROOT_PASSWORD=password123
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD:-password123}
       - MONGO_INITDB_DATABASE=alawael_erp
     volumes:
       - mongodb_data:/data/db
       - mongodb_config:/data/configdb
     networks:
       - alawael-network
+    restart: unless-stopped
     healthcheck:
       test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
       interval: 10s
       timeout: 5s
       retries: 5
 
-  # Redis Cache
+  # ==========================================
+  # ⚡ Cache (Redis)
+  # ==========================================
   redis:
     image: redis:7-alpine
     container_name: alawael-redis
@@ -78,13 +95,16 @@ services:
       - redis_data:/data
     networks:
       - alawael-network
+    restart: unless-stopped
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  # Mongo Express (MongoDB Admin UI)
+  # ==========================================
+  # 📊 MongoDB Admin UI (Optional)
+  # ==========================================
   mongo-express:
     image: mongo-express:latest
     container_name: alawael-mongo-express
@@ -92,16 +112,21 @@ services:
       - "8081:8081"
     environment:
       - ME_CONFIG_MONGODB_ADMINUSERNAME=admin
-      - ME_CONFIG_MONGODB_ADMINPASSWORD=password123
-      - ME_CONFIG_MONGODB_URL=mongodb://admin:password123@mongodb:27017/
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=${MONGO_PASSWORD:-password123}
+      - ME_CONFIG_MONGODB_URL=mongodb://admin:${MONGO_PASSWORD:-password123}@mongodb:27017/
       - ME_CONFIG_BASICAUTH_USERNAME=admin
       - ME_CONFIG_BASICAUTH_PASSWORD=admin123
     networks:
       - alawael-network
     depends_on:
       - mongodb
+    restart: unless-stopped
+    profiles:
+      - tools
 
-  # Redis Commander (Redis Admin UI)
+  # ==========================================
+  # 🔧 Redis Admin UI (Optional)
+  # ==========================================
   redis-commander:
     image: rediscommander/redis-commander:latest
     container_name: alawael-redis-commander
@@ -113,27 +138,20 @@ services:
       - alawael-network
     depends_on:
       - redis
+    restart: unless-stopped
+    profiles:
+      - tools
 
-  # Nginx Reverse Proxy
-  nginx:
-    image: nginx:alpine
-    container_name: alawael-nginx
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/ssl:/etc/nginx/ssl:ro
-    networks:
-      - alawael-network
-    depends_on:
-      - frontend
-      - backend
-
+# ==========================================
+# Networks
+# ==========================================
 networks:
   alawael-network:
     driver: bridge
 
+# ==========================================
+# Persistent Volumes
+# ==========================================
 volumes:
   mongodb_data:
     driver: local

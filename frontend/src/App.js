@@ -19,6 +19,13 @@ import NotFound from './pages/NotFound';
 import Communications from './pages/Communications';
 import Documents from './pages/Documents';
 import DocumentsPage from './pages/DocumentsPage';
+import SmartDocumentsPage from './pages/SmartDocumentsPage';
+import PaymentDashboard from './pages/PaymentDashboard';
+import MessagingPage from './pages/MessagingPage';
+import ProjectManagementDashboard from './pages/ProjectManagementDashboard';
+import CarePlansDashboard from './pages/IntegratedCare/CarePlansDashboard';
+import CreateCarePlan from './pages/IntegratedCare/CreateCarePlan';
+import RecordSession from './pages/IntegratedCare/RecordSession';
 import StudentPortal from './pages/StudentPortal';
 import StudentSchedule from './pages/StudentSchedule';
 import StudentGrades from './pages/StudentGrades';
@@ -41,6 +48,7 @@ import AdminSystemSettings from './pages/AdminSystemSettings';
 import AdminReportsAnalytics from './pages/AdminReportsAnalytics';
 import AdminAuditLogs from './pages/AdminAuditLogs';
 import AdminClinicManagement from './pages/AdminClinicManagement';
+import ExecutiveDashboard from './pages/ExecutiveDashboard'; // Phase 11 Dashboard
 import AdminPaymentsBilling from './pages/AdminPaymentsBilling';
 import AdminNotifications from './pages/AdminNotifications';
 import ParentDashboard from './pages/ParentDashboard';
@@ -52,12 +60,23 @@ import DocumentsReports from './pages/DocumentsReports';
 import AppointmentsScheduling from './pages/AppointmentsScheduling';
 import ParentMessages from './pages/ParentMessages';
 import AIAnalyticsDashboard from './pages/AIAnalyticsDashboard';
+import ELearningDashboard from './pages/ELearningDashboard';
+import HRAdvancedDashboard from './pages/HRAdvancedDashboard';
+import SecuritySettings from './pages/SecuritySettings';
+import CourseViewer from './pages/CourseViewer';
+
+// Enhanced UI Components
+import BeneficiariesManagementPage from './pages/Beneficiaries/BeneficiariesManagementPage';
+import EnhancedAdminDashboard from './pages/Dashboard/EnhancedAdminDashboard';
+import AdvancedReportsPage from './pages/Reports/AdvancedReportsPage';
+import EnhancedBeneficiariesTable from './pages/Beneficiaries/EnhancedBeneficiariesTable';
 
 // Components
 import Layout from './components/Layout';
 import Home from './pages/Home';
 import ModulePage from './pages/ModulePage';
 import ArchivingDashboard from './components/ArchivingDashboard';
+import OrganizationChart from './pages/OrganizationChart'; // NEW: Organization Structure
 
 // Protected Route component
 const ProtectedRoute = ({ children }) => {
@@ -106,7 +125,6 @@ function App() {
                   </PublicRoute>
                 }
               />
-
               {/* Protected Routes */}
               <Route
                 path="/"
@@ -124,18 +142,29 @@ function App() {
 
                 {/* Business / Operations */}
                 <Route path="crm" element={<ModulePage title="إدارة علاقات العملاء (CRM)" moduleKey="crm" />} />
-                <Route path="finance" element={<ModulePage title="المالية والمحاسبة" moduleKey="finance" />} />
+                <Route path="finance" element={<PaymentDashboard />} />
+                <Route path="messages" element={<MessagingPage />} />
+                <Route path="projects" element={<ProjectManagementDashboard />} />
                 <Route path="procurement" element={<ModulePage title="المشتريات والمخزون" moduleKey="finance" />} />
 
+                {/* Security */}
+                <Route path="security" element={<SecuritySettings />} />
+
                 {/* People */}
-                <Route path="hr" element={<ModulePage title="الموارد البشرية" moduleKey="hr" />} />
-                <Route path="attendance" element={<ModulePage title="الحضور والإجازات" moduleKey="hr" />} />
-                <Route path="payroll" element={<ModulePage title="الرواتب" moduleKey="hr" />} />
+                <Route path="hr" element={<HRAdvancedDashboard />} />
+                <Route path="attendance" element={<HRAdvancedDashboard />} />
+                <Route path="payroll" element={<HRAdvancedDashboard />} />
+                <Route path="organization" element={<OrganizationChart />} />
 
                 {/* Learning / Care */}
-                <Route path="elearning" element={<ModulePage title="التعلم الإلكتروني" moduleKey="elearning" />} />
+                <Route path="elearning" element={<Navigate to="/lms" replace />} />
+                <Route path="lms" element={<ELearningDashboard />} />
+                <Route path="lms/course/:id" element={<CourseViewer />} />
                 <Route path="sessions" element={<ModulePage title="الجلسات والمواعيد" moduleKey="rehab" />} />
                 <Route path="rehab" element={<ModulePage title="إعادة التأهيل والعلاج" moduleKey="rehab" />} />
+                <Route path="integrated-care" element={<CarePlansDashboard />} />
+                <Route path="integrated-care/create" element={<CreateCarePlan />} />
+                <Route path="integrated-care/session" element={<RecordSession />} />
                 <Route path="ai-assistant" element={<ModulePage title="المساعد الذكي بالذكاء الاصطناعي" moduleKey="reports" />} />
                 <Route path="ai-analytics" element={<AIAnalyticsDashboard />} />
 
@@ -145,6 +174,7 @@ function App() {
                 {/* Document Management */}
                 <Route path="documents" element={<Documents />} />
                 <Route path="documents-management" element={<DocumentsPage />} />
+                <Route path="smart-documents" element={<SmartDocumentsPage />} />
                 <Route path="archiving" element={<ArchivingDashboard />} />
 
                 {/* Student Portal */}
@@ -169,13 +199,20 @@ function App() {
 
                 {/* Admin Portal */}
                 <Route path="admin-portal" element={<AdminDashboard />} />
+                <Route path="admin-portal/enhanced" element={<EnhancedAdminDashboard />} />
                 <Route path="admin-portal/users" element={<AdminUsersManagement />} />
                 <Route path="admin-portal/settings" element={<AdminSystemSettings />} />
                 <Route path="admin-portal/reports" element={<AdminReportsAnalytics />} />
+                <Route path="admin-portal/advanced-reports" element={<AdvancedReportsPage />} />
                 <Route path="admin-portal/audit-logs" element={<AdminAuditLogs />} />
                 <Route path="admin-portal/clinics" element={<AdminClinicManagement />} />
                 <Route path="admin-portal/payments" element={<AdminPaymentsBilling />} />
                 <Route path="admin-portal/notifications" element={<AdminNotifications />} />
+
+                {/* Beneficiaries Management - Enhanced UI */}
+                <Route path="beneficiaries" element={<BeneficiariesManagementPage />} />
+                <Route path="beneficiaries/manage" element={<BeneficiariesManagementPage />} />
+                <Route path="beneficiaries/table" element={<EnhancedBeneficiariesTable />} />
 
                 {/* Parent Portal */}
                 <Route path="parent-portal" element={<ParentDashboard />} />
@@ -201,8 +238,8 @@ function App() {
                 <Route path="expenses/new" element={<ModulePage title="إضافة مصروف" moduleKey="finance" />} />
                 <Route path="profile" element={<Profile />} />
               </Route>
-
               {/* 404 - Not Found */}
+              <Route path="/executive-dashboard" element={<ExecutiveDashboard />} /> {/* Phase 11 Route */}
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Router>

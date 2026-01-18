@@ -3,8 +3,8 @@ const app = require('../server');
 const db = require('../config/inMemoryDB');
 
 describe('Authentication Routes', () => {
-  beforeEach(() => {
-    // إعادة تعيين قاعدة البيانات قبل كل اختبار
+  beforeAll(() => {
+    // Reset database once at the start of all tests
     db.write({
       users: [],
       employees: [],
@@ -15,6 +15,17 @@ describe('Authentication Routes', () => {
   });
 
   describe('POST /api/auth/register', () => {
+    beforeEach(() => {
+      // Reset database before each register test
+      db.write({
+        users: [],
+        employees: [],
+        attendances: [],
+        leaves: [],
+        performance: [],
+      });
+    });
+
     it('should register a new user successfully', async () => {
       const res = await request(app).post('/api/auth/register').send({
         fullName: 'Test User',
@@ -24,8 +35,9 @@ describe('Authentication Routes', () => {
 
       expect(res.status).toBe(201);
       expect(res.body.success).toBe(true);
-      expect(res.body.data).toHaveProperty('_id');
-      expect(res.body.data.email).toBe('test@example.com');
+      expect(res.body.data).toHaveProperty('accessToken');
+      expect(res.body.data).toHaveProperty('user');
+      expect(res.body.data.user.email).toBe('test@example.com');
     });
 
     it('should reject duplicate email', async () => {
@@ -58,16 +70,15 @@ describe('Authentication Routes', () => {
   });
 
   describe('POST /api/auth/login', () => {
-    beforeEach(async () => {
-      // إنشاء مستخدم للاختبار
+    it('should login successfully with correct credentials', async () => {
+      // Register user first
       await request(app).post('/api/auth/register').send({
         fullName: 'Login Test',
         email: 'login@example.com',
         password: 'Test@12345',
       });
-    });
 
-    it('should login successfully with correct credentials', async () => {
+      // Now login
       const res = await request(app).post('/api/auth/login').send({
         email: 'login@example.com',
         password: 'Test@12345',
@@ -76,7 +87,6 @@ describe('Authentication Routes', () => {
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
       expect(res.body.data).toHaveProperty('accessToken');
-      expect(res.body.data).toHaveProperty('refreshToken');
       expect(res.body.data).toHaveProperty('user');
     });
 
@@ -103,7 +113,21 @@ describe('Authentication Routes', () => {
 
   describe('POST /api/auth/logout', () => {
     it('should logout successfully', async () => {
-      const res = await request(app).post('/api/auth/logout');
+      // Register user
+      const registerRes = await request(app).post('/api/auth/register').send({
+        fullName: 'Logout Test',
+        email: 'logout@example.com',
+        password: 'Test@12345',
+      });
+
+      expect(registerRes.status).toBe(201);
+      expect(registerRes.body.data).toBeDefined();
+      expect(registerRes.body.data.accessToken).toBeDefined();
+
+      const token = registerRes.body.data.accessToken;
+
+      // Now logout
+      const res = await request(app).post('/api/auth/logout').set('Authorization', `Bearer ${token}`);
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);

@@ -1,7 +1,7 @@
 /**
  * Workflow Analytics Service
  * خدمة تحليلات متقدمة لسير العمل
- * 
+ *
  * توفر:
  * - تقارير شاملة
  * - إحصائيات تفصيلية
@@ -109,7 +109,7 @@ class WorkflowAnalyticsService {
     const metrics = {
       completionRate: workflows.length > 0 ? (completedWorkflows.length / workflows.length) * 100 : 0,
       rejectionRate: workflows.length > 0 ? (rejectedWorkflows.length / workflows.length) * 100 : 0,
-      slaComplianceRate: workflows.length > 0 ? 100 - ((breachedWorkflows.length / workflows.length) * 100) : 100,
+      slaComplianceRate: workflows.length > 0 ? 100 - (breachedWorkflows.length / workflows.length) * 100 : 100,
       averageCompletionTime: 0,
       averageApprovedTime: 0,
       throughput: 0,
@@ -222,7 +222,7 @@ class WorkflowAnalyticsService {
     const highPriority = summary.priorities.high || 0;
     const urgentPriority = summary.priorities.urgent || 0;
     const totalHigh = highPriority + urgentPriority;
-    
+
     if (totalHigh > workflows.length * 0.3) {
       insights.push({
         type: 'warning',
@@ -256,11 +256,7 @@ class WorkflowAnalyticsService {
       recommendations.push({
         priority: 'high',
         title: 'تسريع عملية الموافقة',
-        actions: [
-          'تقليل عدد المراحل غير الضرورية',
-          'تفويض الصلاحيات لتسريع الموافقة',
-          'تحديد مهل زمنية محددة لكل مرحلة',
-        ],
+        actions: ['تقليل عدد المراحل غير الضرورية', 'تفويض الصلاحيات لتسريع الموافقة', 'تحديد مهل زمنية محددة لكل مرحلة'],
         expectedImpact: 'زيادة معدل الإنجاز بنسبة 20-30%',
       });
     }
@@ -270,11 +266,7 @@ class WorkflowAnalyticsService {
       recommendations.push({
         priority: 'high',
         title: 'تحسين جودة الطلبات',
-        actions: [
-          'توفير قوالب موحدة للطلبات',
-          'تدريب المستخدمين على المتطلبات',
-          'إضافة التحقق المسبق من البيانات',
-        ],
+        actions: ['توفير قوالب موحدة للطلبات', 'تدريب المستخدمين على المتطلبات', 'إضافة التحقق المسبق من البيانات'],
         expectedImpact: 'تقليل معدل الرفض بنسبة 50%',
       });
     }
@@ -284,26 +276,18 @@ class WorkflowAnalyticsService {
       recommendations.push({
         priority: 'critical',
         title: 'تحسين امتثال SLA',
-        actions: [
-          'مراجعة مهل SLA الحالية',
-          'إضافة تنبيهات تلقائية قبل الانتهاء',
-          'تحديد نقاط الاختناق وحلها',
-        ],
+        actions: ['مراجعة مهل SLA الحالية', 'إضافة تنبيهات تلقائية قبل الانتهاء', 'تحديد نقاط الاختناق وحلها'],
         expectedImpact: 'زيادة امتثال SLA إلى 95%',
       });
     }
 
     // التوصية 4: إدارة حصة الأولويات
     const highPriority = (summary.priorities.high || 0) + (summary.priorities.urgent || 0);
-    if ((highPriority / workflows.length) > 0.3) {
+    if (highPriority / workflows.length > 0.3) {
       recommendations.push({
         priority: 'medium',
         title: 'إعادة تقييم معايير الأولوية',
-        actions: [
-          'مراجعة معايير تصنيف الأولوية',
-          'تقليل عدد الطلبات ذات الأولوية العالية',
-          'تحديد معايير واضحة للأولوية',
-        ],
+        actions: ['مراجعة معايير تصنيف الأولوية', 'تقليل عدد الطلبات ذات الأولوية العالية', 'تحديد معايير واضحة للأولوية'],
         expectedImpact: 'توازن أفضل في توزيع الموارد',
       });
     }
@@ -320,9 +304,7 @@ class WorkflowAnalyticsService {
     workflows.forEach(w => {
       if (!w.stages) return;
 
-      const pathKey = w.stages
-        .map(s => s.status)
-        .join(' -> ');
+      const pathKey = w.stages.map(s => s.status).join(' -> ');
 
       if (!paths.has(pathKey)) {
         paths.set(pathKey, {
@@ -339,7 +321,7 @@ class WorkflowAnalyticsService {
       pathData.stagesCount = w.stages.length;
 
       if (w.completedAt && w.createdAt) {
-        pathData.totalTime += (w.completedAt - w.createdAt);
+        pathData.totalTime += w.completedAt - w.createdAt;
       }
 
       pathData.statuses[w.status] = (pathData.statuses[w.status] || 0) + 1;
@@ -378,7 +360,7 @@ class WorkflowAnalyticsService {
 
       forecast.expectedCompletionRate = ((recentWorkflows.length - rejectedRecent) / recentWorkflows.length) * 100;
       forecast.estimatedRejectionRate = (rejectedRecent / recentWorkflows.length) * 100;
-      forecast.projectedSLACompliance = 100 - ((breachedRecent / recentWorkflows.length) * 100);
+      forecast.projectedSLACompliance = 100 - (breachedRecent / recentWorkflows.length) * 100;
       forecast.confidence = recentWorkflows.length >= 10 ? 'high' : 'medium';
     }
 

@@ -64,7 +64,7 @@ class AdvancedSearchService {
   /**
    * بحث ذكي متقدم
    */
-  advancedSearch(data, query, options = {}) {
+  advancedSearchRanked(data, query, options = {}) {
     const { fields = [], fuzzyMatch = true, caseSensitive = false, limit = 50, offset = 0 } = options;
 
     const searchQuery = caseSensitive ? query : query.toLowerCase();
@@ -240,37 +240,6 @@ class AdvancedSearchService {
     });
 
     return Array.from(values).slice(0, limit);
-  }
-
-  /**
-   * البحث المركب (حقول متعددة)
-   */
-  compoundSearch(data, searchCriteria) {
-    let results = data;
-
-    // تطبيق كل معيار بحث
-    Object.entries(searchCriteria).forEach(([field, criteria]) => {
-      if (criteria.enabled) {
-        if (criteria.type === 'text') {
-          results = results.filter(item => {
-            const value = String(this.getNestedValue(item, field) || '').toLowerCase();
-            return value.includes(criteria.value.toLowerCase());
-          });
-        } else if (criteria.type === 'range') {
-          results = results.filter(item => {
-            const value = Number(this.getNestedValue(item, field));
-            return value >= criteria.min && value <= criteria.max;
-          });
-        } else if (criteria.type === 'date') {
-          results = results.filter(item => {
-            const value = new Date(this.getNestedValue(item, field));
-            return value >= new Date(criteria.startDate) && value <= new Date(criteria.endDate);
-          });
-        }
-      }
-    });
-
-    return results;
   }
 
   /**
@@ -504,8 +473,8 @@ class AdvancedSearchService {
           case 'between':
             return value >= filter.min && value <= filter.max;
           case 'in':
-            // Return true if value is in array OR if array has non-empty values
-            return Array.isArray(filter.value) ? filter.value.includes(value) || !Array.isArray(value) : false;
+            // Match when the item's value is included in the provided array
+            return Array.isArray(filter.value) ? filter.value.includes(value) : false;
           case 'notIn':
             return Array.isArray(filter.values) ? !filter.values.includes(value) : true;
           case 'isEmpty':
@@ -610,6 +579,68 @@ class AdvancedSearchService {
       totalPages: Math.ceil(data.length / pageSize),
       totalItems: data.length,
     };
+  }
+
+  // Compound search used by tests (query + filters + sorting)
+  compoundSearch(data, options = {}) {
+    if (!Array.isArray(data)) return [];
+
+    const { query = '', filters = [], fields = null, sort = null } = options;
+    let results = [...data];
+
+    // Text search across specified fields or all fields
+    if (query) {
+      const q = String(query).toLowerCase();
+      results = results.filter(item => {
+        const sourceFields = Array.isArray(fields) && fields.length > 0 ? fields : Object.keys(item);
+        return sourceFields.some(field =>
+          String(item[field] || '')
+            .toLowerCase()
+            .includes(q),
+        );
+      });
+    }
+
+    // Apply filters
+    if (Array.isArray(filters) && filters.length > 0) {
+      results = results.filter(item => {
+        return filters.every(filter => {
+          const val = item[filter.field];
+          switch (filter.operator) {
+            case 'equals':
+              return val === filter.value;
+            case 'notEquals':
+              return val !== filter.value;
+            case 'contains':
+              return String(val).includes(String(filter.value));
+            case 'gt':
+              return val > filter.value;
+            case 'lt':
+              return val < filter.value;
+            case 'gte':
+              return val >= filter.value;
+            case 'lte':
+              return val <= filter.value;
+            case 'in':
+              return Array.isArray(filter.value) && filter.value.includes(val);
+            default:
+              return true;
+          }
+        });
+      });
+    }
+
+    // Sorting
+    if (sort && sort.field) {
+      results.sort((a, b) => {
+        const aVal = a[sort.field];
+        const bVal = b[sort.field];
+        const comp = aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
+        return sort.direction === 'desc' ? -comp : comp;
+      });
+    }
+
+    return results;
   }
 
   getStatistics(data, field) {

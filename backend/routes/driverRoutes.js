@@ -9,8 +9,9 @@
 
 const express = require('express');
 const router = express.Router();
-const authenticate = require('../middleware/authenticate');
-const authorize = require('../middleware/authorize');
+const { authenticateToken, requireRole } = require('../middleware/auth.middleware');
+const authenticate = authenticateToken;
+const authorize = requireRole;
 const driverService = require('../services/driverService');
 const logger = require('../utils/logger');
 

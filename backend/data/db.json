@@ -1,28 +1,79 @@
 {
-  "users": [],
-  "employees": [
+  "users": [
     {
-      "_id": "emp_1768388807311",
-      "fullName": "نشط 1",
-      "email": "active1@company.com",
-      "department": "hr",
-      "position": "Manager",
-      "status": "active",
-      "createdAt": "2026-01-14T11:06:47.311Z",
-      "updatedAt": "2026-01-14T11:06:47.311Z"
+      "_id": "1",
+      "email": "admin@alawael.com",
+      "password": "$2a$10$ctR3vl8FEm2MMg44Fg6ujugGRUvoJWK6F4xOp1qotme8Kh4JLFujK",
+      "fullName": "System Administrator",
+      "role": "admin",
+      "createdAt": "2026-01-15T21:51:21.578Z",
+      "updatedAt": "2026-01-15T21:51:21.579Z",
+      "lastLogin": null
     },
     {
-      "_id": "emp_1768388807312",
-      "fullName": "غير نشط",
-      "email": "inactive@company.com",
-      "department": "it",
-      "position": "Developer",
-      "status": "inactive",
-      "createdAt": "2026-01-14T11:06:47.312Z",
-      "updatedAt": "2026-01-14T11:06:47.312Z"
+      "_id": "2",
+      "email": "hr@alawael.com",
+      "password": "$2a$10$ctR3vl8FEm2MMg44Fg6uju98A/WJfztrj4AZv83FAIoT6CCTlcD/a",
+      "fullName": "HR Manager",
+      "role": "hr",
+      "createdAt": "2026-01-15T21:51:21.579Z",
+      "updatedAt": "2026-01-15T21:51:21.579Z",
+      "lastLogin": null
+    },
+    {
+      "_id": "3",
+      "email": "finance@alawael.com",
+      "password": "$2a$10$ctR3vl8FEm2MMg44Fg6uju98A/WJfztrj4AZv83FAIoT6CCTlcD/a",
+      "fullName": "Chief Accountant",
+      "role": "accountant",
+      "createdAt": "2026-01-15T21:51:21.579Z",
+      "updatedAt": "2026-01-15T21:51:21.579Z",
+      "lastLogin": null
+    },
+    {
+      "_id": "4",
+      "email": "teacher@alawael.com",
+      "password": "$2a$10$ctR3vl8FEm2MMg44Fg6uju98A/WJfztrj4AZv83FAIoT6CCTlcD/a",
+      "fullName": "Lead Teacher",
+      "role": "teacher",
+      "createdAt": "2026-01-15T21:51:21.579Z",
+      "updatedAt": "2026-01-15T21:51:21.579Z",
+      "lastLogin": null
+    },
+    {
+      "_id": "5",
+      "email": "driver@alawael.com",
+      "password": "$2a$10$ctR3vl8FEm2MMg44Fg6uju98A/WJfztrj4AZv83FAIoT6CCTlcD/a",
+      "fullName": "Transport Captain",
+      "role": "driver",
+      "createdAt": "2026-01-15T21:51:21.579Z",
+      "updatedAt": "2026-01-15T21:51:21.579Z",
+      "lastLogin": null
+    },
+    {
+      "_id": "6",
+      "email": "parent@alawael.com",
+      "password": "$2a$10$ctR3vl8FEm2MMg44Fg6uju98A/WJfztrj4AZv83FAIoT6CCTlcD/a",
+      "fullName": "Parent Demo",
+      "role": "parent",
+      "createdAt": "2026-01-15T21:51:21.579Z",
+      "updatedAt": "2026-01-15T21:51:21.579Z",
+      "lastLogin": null
     }
   ],
+  "employees": [],
   "attendances": [],
-  "leaves": [],
+  "leaves": [
+    {
+      "_id": "leave_1768459742618",
+      "employeeId": 1,
+      "type": "annual",
+      "startDate": "2024-01-15",
+      "endDate": "2024-01-20",
+      "status": "approved",
+      "createdAt": "2026-01-15T06:49:02.618Z",
+      "updatedAt": "2026-01-15T06:49:02.619Z"
+    }
+  ],
   "performance": []
 }

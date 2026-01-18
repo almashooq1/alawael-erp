@@ -29,12 +29,40 @@ import {
 } from 'recharts';
 import axios from 'axios';
 
+const DEMO_PREDICTIONS = {
+  prediction: { value: 85, confidence: 0.92 },
+  factors: [
+    { factor: 'الحضور المنتظم', weight: 0.4 },
+    { factor: 'المشاركة الفعالة', weight: 0.3 },
+    { factor: 'إنجاز المهام', weight: 0.3 },
+  ],
+  predictionType: 'performance_demo',
+  modelVersion: '1.0.0-demo',
+  accuracy: 0.89,
+};
+
+const DEMO_RECOMMENDATIONS = [
+  {
+    title: 'حافظ على الزخم',
+    description: 'أداؤك ممتاز هذا الأسبوع، استمر في الحضور بنفس الوتيرة.',
+    priority: 'low',
+    expectedImpact: 0.05,
+  },
+  {
+    title: 'تفاعل أكثر في الأنشطة الجماعية',
+    description: 'زيادة المشاركة قد ترفع تقييمك بنسبة 10%.',
+    priority: 'medium',
+    expectedImpact: 0.1,
+  },
+];
+
 const AIAnalyticsDashboard = () => {
   const [predictions, setPredictions] = useState(null);
   const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [userId, setUserId] = useState(null);
+  const [usingDemo, setUsingDemo] = useState(false);
 
   useEffect(() => {
     // Get user ID from localStorage
@@ -43,8 +71,9 @@ const AIAnalyticsDashboard = () => {
       setUserId(uid);
       loadAnalytics(uid);
     } else {
-      setError('معرف المستخدم غير متاح');
-      setLoading(false);
+      // If no user ID, try to load demo anyway for preview
+      setUserId('demo-user');
+      loadAnalytics('demo-user');
     }
   }, []);
 
@@ -52,21 +81,41 @@ const AIAnalyticsDashboard = () => {
     try {
       setLoading(true);
       setError(null);
+      setUsingDemo(false);
 
       const token = localStorage.getItem('token');
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
+      // Attempt to fetch real data
       const [predRes, recRes] = await Promise.all([
-        axios.get(`/api/ai-predictions/predictions/${uid}`, { headers }).catch(() => ({ data: { data: [] } })),
-        axios.get(`/api/ai-predictions/recommendations/${uid}`, { headers }).catch(() => ({ data: { data: [] } })),
+        axios.get(`/api/ai-predictions/predictions/${uid}`, { headers }),
+        axios.get(`/api/ai-predictions/recommendations/${uid}`, { headers }),
       ]);
 
       const predData = predRes.data?.data || [];
-      setPredictions(predData.length > 0 ? predData[0] : null);
-      setRecommendations(recRes.data?.data || []);
+      const recData = recRes.data?.data || [];
+      
+      if (predData.length > 0) {
+        setPredictions(predData[0]);
+      } else {
+         // Fallback to Demo if API returns empty
+         setUsingDemo(true);
+         setPredictions(DEMO_PREDICTIONS);
+      }
+      
+      if (recData.length > 0) {
+         setRecommendations(recData);
+      } else {
+         setRecommendations(DEMO_RECOMMENDATIONS);
+      }
+
     } catch (err) {
-      console.error('خطأ في تحميل التحليلات:', err);
-      setError('فشل تحميل البيانات');
+      console.warn('Backend connection failed, using demo data.', err);
+      // Fallback to Demo Data on Error
+      setUsingDemo(true);
+      setPredictions(DEMO_PREDICTIONS);
+      setRecommendations(DEMO_RECOMMENDATIONS);
+      // Don't set error here, just show demo mode warning
     } finally {
       setLoading(false);
     }
@@ -105,6 +154,12 @@ const AIAnalyticsDashboard = () => {
         🤖 لوحة تحكم الذكاء الاصطناعي والتحليلات
       </Typography>
 
+      {usingDemo && (
+        <Alert severity="warning" sx={{ mb: 3 }}>
+          ⚠️ يتم عرض بيانات تجريبية (Demo Mode) نظراً لعدم توفر اتصال بالخادم المباشر.
+        </Alert>
+      )}
+
       {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
 
       <Grid container spacing={3}>
@@ -118,7 +173,7 @@ const AIAnalyticsDashboard = () => {
                   <Box sx={{ position: 'relative', display: 'inline-flex', mb: 2 }}>
                     <CircularProgress
                       variant="determinate"
-                      value={predictions.prediction?.value || 75}
+                      value={predictions.prediction?.value || 0}
                       size={150}
                       thickness={4}
                       sx={{ color: 'primary.main' }}
@@ -133,12 +188,12 @@ const AIAnalyticsDashboard = () => {
                       }}
                     >
                       <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
-                        {(predictions.prediction?.value || 75).toFixed(0)}%
+                        {(predictions.prediction?.value || 0).toFixed(0)}%
                       </Typography>
                     </Box>
                   </Box>
                   <Typography variant="caption" display="block" sx={{ mt: 2, color: 'text.secondary' }}>
-                    موثوقية: {((predictions.prediction?.confidence || 0.85) * 100).toFixed(0)}%
+                    موثوقية: {((predictions.prediction?.confidence || 0) * 100).toFixed(0)}%
                   </Typography>
                 </Box>
               ) : (
@@ -286,7 +341,7 @@ const AIAnalyticsDashboard = () => {
                     الدقة
                   </Typography>
                   <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                    {((predictions?.accuracy || 0.85) * 100).toFixed(0)}%
+                    {((predictions?.accuracy || 0) * 100).toFixed(0)}%
                   </Typography>
                 </Box>
               </Grid>

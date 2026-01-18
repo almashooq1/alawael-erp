@@ -34,7 +34,7 @@ import {
   Rating,
 } from '@mui/material';
 import { DirectionsBus, Timer, CreditCard, Warning, CheckCircle, StarRate } from '@mui/icons-material';
-import api from '../../services/api';
+import api from '../services/api';
 
 const ParentTransportPage = () => {
   const [registrations, setRegistrations] = useState([]);

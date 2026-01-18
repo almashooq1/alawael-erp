@@ -5,7 +5,7 @@
  * 35+ اختبار شامل
  */
 
-const AdvancedReportingService = require('../../services/advancedReportingService');
+const AdvancedReportingServiceClass = require('../../services/advancedReportingService');
 const assert = require('assert');
 
 describe('AdvancedReportingService Tests', () => {
@@ -14,7 +14,7 @@ describe('AdvancedReportingService Tests', () => {
   let reportTemplate;
 
   beforeEach(() => {
-    reportingService = new AdvancedReportingService();
+    reportingService = new AdvancedReportingServiceClass();
 
     // Sample data for testing
     sampleData = [
@@ -33,7 +33,7 @@ describe('AdvancedReportingService Tests', () => {
         { type: 'title', content: 'Monthly Sales Report' },
         { type: 'summary', fields: ['sales'] },
         { type: 'table', columns: ['name', 'department', 'sales'] },
-        { type: 'chart', type: 'bar', field: 'sales' },
+        { type: 'chart', chartType: 'bar', field: 'sales' },
       ],
     };
   });

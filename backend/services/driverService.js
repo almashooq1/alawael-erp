@@ -553,4 +553,4 @@ class DriverService {
   }
 }
 
-module.exports = new DriverService();
+module.exports = DriverService;

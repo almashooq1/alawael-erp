@@ -74,7 +74,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
-import workflowService from '../../services/workflowService';
+import workflowService from '../services/workflowService';
 
 const WorkflowManagementSystem = () => {
   // State Management

@@ -415,4 +415,4 @@ class MessagingService {
   }
 }
 
-module.exports = new MessagingService();
+module.exports = MessagingService;

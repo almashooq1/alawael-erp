@@ -3,6 +3,18 @@ describe('Memory Models - Simplified Tests', () => {
   const Attendance = require('../models/Attendance.memory');
   const Leave = require('../models/Leave.memory');
 
+  beforeAll(() => {
+    // Clear database at start of test suite to handle contamination from other suites
+    const db = require('../config/inMemoryDB');
+    db.write({
+      users: [],
+      employees: [],
+      attendances: [],
+      leaves: [],
+      performance: [],
+    });
+  });
+
   beforeEach(() => {
     // Reset in-memory database before each test
     const db = require('../config/inMemoryDB');

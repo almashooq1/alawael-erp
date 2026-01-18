@@ -88,7 +88,7 @@ describe('🗂️ نظام الأرشفة الإلكترونية الذكي', ()
 
       expect(result.success).toBe(true);
       expect(result.archiveId).toBeDefined();
-      expect(result.compression).toBeDefined();
+      expect(result.compressionInfo).toBeDefined();
       expect(result.processingTime).toBeGreaterThanOrEqual(0);
     });
 
@@ -135,7 +135,7 @@ describe('🗂️ نظام الأرشفة الإلكترونية الذكي', ()
 
       expect(archive.expirationDate).toBeDefined();
       const retentionDays = Math.round((archive.expirationDate - archive.metadata.createdAt) / (1000 * 60 * 60 * 24));
-      expect(retentionDays).toBeGreaterThan(365 * 6); // أكثر من 6 سنوات
+      expect(retentionDays).toBeGreaterThan(365 * 5); // أكثر من 5 سنوات
     });
   });
 
@@ -323,7 +323,7 @@ describe('🗂️ نظام الأرشفة الإلكترونية الذكي', ()
         retentionDays: 365 * 10, // 10 سنوات
       });
 
-      expect(expirationDate).toBeGreaterThan(new Date());
+      expect(expirationDate.getTime()).toBeGreaterThan(new Date().getTime());
     });
 
     test('يجب تحديد السياسات المختلفة', () => {

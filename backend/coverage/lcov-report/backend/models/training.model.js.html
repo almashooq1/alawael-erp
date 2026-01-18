@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">29.16% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/24</span>
+                <span class='fraction'>7/24</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">35% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/20</span>
+                <span class='fraction'>7/20</span>
             </div>
         
             
@@ -189,9 +189,9 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">12x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">12x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -265,31 +265,16 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">12x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">12x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -298,6 +283,9 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">12x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -305,14 +293,26 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">12x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">12x</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">/**
  * Training &amp; Development Model
  * نموذج التدريب والتطوير
  */
 &nbsp;
-const mongoose = <span class="cstat-no" title="statement not covered" >require('mongoose');</span>
+const mongoose = require('mongoose');
 &nbsp;
-const trainingSchema = <span class="cstat-no" title="statement not covered" >new mongoose.Schema(</span>
+const trainingSchema = new mongoose.Schema(
   {
     // معلومات البرنامج
     title: {
@@ -386,12 +386,12 @@ const trainingSchema = <span class="cstat-no" title="statement not covered" >new
   },
 );
 &nbsp;
-<span class="cstat-no" title="statement not covered" >trainingSchema.index({ startDate: 1, status: 1 });</span>
+trainingSchema.index({ startDate: 1, status: 1 });
 &nbsp;
 /**
  * إضافة مشارك
  */
-<span class="cstat-no" title="statement not covered" >trainingSchema.methods.addParticipant = <span class="fstat-no" title="function not covered" >fu</span>nction (employeeId) {</span>
+trainingSchema.methods.addParticipant = <span class="fstat-no" title="function not covered" >fu</span>nction (employeeId) {
 <span class="cstat-no" title="statement not covered" >  if (!this.participants.find(<span class="fstat-no" title="function not covered" >p </span>=&gt; <span class="cstat-no" title="statement not covered" >p.employeeId.toString() === employeeId)</span>) {</span>
 <span class="cstat-no" title="statement not covered" >    this.participants.push({</span>
       employeeId,
@@ -404,7 +404,7 @@ const trainingSchema = <span class="cstat-no" title="statement not covered" >new
 /**
  * تحديث حالة المشارك
  */
-<span class="cstat-no" title="statement not covered" >trainingSchema.methods.updateParticipantStatus = <span class="fstat-no" title="function not covered" >fu</span>nction (employeeId, status, score) {</span>
+trainingSchema.methods.updateParticipantStatus = <span class="fstat-no" title="function not covered" >fu</span>nction (employeeId, status, score) {
   const participant = <span class="cstat-no" title="statement not covered" >this.participants.find(<span class="fstat-no" title="function not covered" >p </span>=&gt; <span class="cstat-no" title="statement not covered" >p.employeeId.toString() === employeeId)</span>;</span>
 <span class="cstat-no" title="statement not covered" >  if (participant) {</span>
 <span class="cstat-no" title="statement not covered" >    participant.status = status;</span>
@@ -419,13 +419,13 @@ const trainingSchema = <span class="cstat-no" title="statement not covered" >new
 /**
  * حساب النسبة المئوية للإكمال
  */
-<span class="cstat-no" title="statement not covered" >trainingSchema.methods.getCompletionRate = <span class="fstat-no" title="function not covered" >fu</span>nction () {</span>
+trainingSchema.methods.getCompletionRate = <span class="fstat-no" title="function not covered" >fu</span>nction () {
 <span class="cstat-no" title="statement not covered" >  if (this.participants.length === 0) <span class="cstat-no" title="statement not covered" >return 0;</span></span>
   const completed = <span class="cstat-no" title="statement not covered" >this.participants.filter(<span class="fstat-no" title="function not covered" >p </span>=&gt; <span class="cstat-no" title="statement not covered" >p.status === 'completed')</span>.length;</span>
 <span class="cstat-no" title="statement not covered" >  return (completed / this.participants.length) * 100;</span>
 };
 &nbsp;
-<span class="cstat-no" title="statement not covered" >module.exports = mongoose.model('Training', trainingSchema);</span>
+module.exports = mongoose.model('Training', trainingSchema);
 &nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
@@ -433,7 +433,7 @@ const trainingSchema = <span class="cstat-no" title="statement not covered" >new
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-01-14T08:34:10.085Z
+                at 2026-01-17T11:40:09.432Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

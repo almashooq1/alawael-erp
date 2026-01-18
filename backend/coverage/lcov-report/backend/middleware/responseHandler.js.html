@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/9</span>
+                <span class='fraction'>9/9</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/6</span>
+                <span class='fraction'>6/6</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/4</span>
+                <span class='fraction'>4/4</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/9</span>
+                <span class='fraction'>9/9</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -107,19 +107,10 @@
 <a name='L42'></a><a href='#L42'>42</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">13x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">213x</span>
+<span class="cline-any cline-yes">12x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -127,10 +118,17 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">213x</span>
+<span class="cline-any cline-yes">13x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">213x</span>
+<span class="cline-any cline-yes">9x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -141,17 +139,19 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">213x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">13x</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// Response Handler Middleware
 // Provides standard response methods for all routes
 &nbsp;
-const responseHandler = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(r</span>eq, res, next) =&gt; {</span>
+const responseHandler = (req, res, next) =&gt; {
   // Success response
-<span class="cstat-no" title="statement not covered" >  res.success = <span class="fstat-no" title="function not covered" >(d</span>ata, message = <span class="branch-0 cbranch-no" title="branch not covered" >'Success',</span> statusCode = <span class="branch-0 cbranch-no" title="branch not covered" >200)</span> =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >    return res.status(statusCode).json({</span>
+  res.success = (data, message = 'Success', statusCode = 200) =&gt; {
+    return res.status(statusCode).json({
       success: true,
       message,
       data,
@@ -159,8 +159,8 @@ const responseHandler = <span class="cstat-no" title="statement not covered" ><s
   };
 &nbsp;
   // Error response
-<span class="cstat-no" title="statement not covered" >  res.error = <span class="fstat-no" title="function not covered" >(m</span>essage = <span class="branch-0 cbranch-no" title="branch not covered" >'Error',</span> statusCode = <span class="branch-0 cbranch-no" title="branch not covered" >500,</span> data = <span class="branch-0 cbranch-no" title="branch not covered" >null)</span> =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >    return res.status(statusCode).json({</span>
+  res.error = (message = 'Error', statusCode = 500, data = null) =&gt; {
+    return res.status(statusCode).json({
       success: false,
       message,
       data,
@@ -168,8 +168,8 @@ const responseHandler = <span class="cstat-no" title="statement not covered" ><s
   };
 &nbsp;
   // Paginated response
-<span class="cstat-no" title="statement not covered" >  res.paginated = <span class="fstat-no" title="function not covered" >(d</span>ata, total, limit, offset, message = <span class="branch-0 cbranch-no" title="branch not covered" >'Success')</span> =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >    return res.status(200).json({</span>
+  res.paginated = (data, total, limit, offset, message = 'Success') =&gt; {
+    return res.status(200).json({
       success: true,
       message,
       data,
@@ -182,10 +182,10 @@ const responseHandler = <span class="cstat-no" title="statement not covered" ><s
     });
   };
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  next();</span>
+  next();
 };
 &nbsp;
-<span class="cstat-no" title="statement not covered" >module.exports = responseHandler;</span>
+module.exports = responseHandler;
 &nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
@@ -193,7 +193,7 @@ const responseHandler = <span class="cstat-no" title="statement not covered" ><s
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-01-14T08:34:10.085Z
+                at 2026-01-17T11:40:09.432Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

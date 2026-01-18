@@ -40,6 +40,8 @@ import {
   AccessTime as AccessTimeIcon,
   Chat as ChatIcon,
   Archive as ArchiveIcon,
+  School as SchoolIcon,
+  HealthAndSafety as HealthIcon,
 } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
 import { useAuth } from '../contexts/AuthContext';
@@ -118,12 +120,14 @@ const navGroups = [
       { text: 'الموارد البشرية', icon: <GroupIcon />, path: '/hr' },
       { text: 'الحضور والإجازات', icon: <ReceiptIcon />, path: '/attendance' },
       { text: 'الرواتب', icon: <WalletIcon />, path: '/payroll' },
+      { text: '🏢 الهيكل التنظيمي', icon: <BusinessIcon />, path: '/organization' },
     ],
   },
   {
     label: 'التعلم والرعاية',
     items: [
       { text: 'التعلم الإلكتروني', icon: <ScienceIcon />, path: '/elearning' },
+      { text: 'النظام الشامل (الخطط)', icon: <SupportAgentIcon />, path: '/integrated-care' },
       { text: 'الجلسات والمواعيد', icon: <AccessTimeIcon />, path: '/sessions' },
       { text: 'إعادة التأهيل', icon: <SupportAgentIcon />, path: '/rehab' },
       { text: 'المساعد الذكي', icon: <SupportAgentIcon />, path: '/ai-assistant' },
@@ -134,6 +138,7 @@ const navGroups = [
     items: [
       { text: 'نظام الاتصالات', icon: <ChatIcon />, path: '/communications' },
       { text: 'إدارة المستندات', icon: <ChatIcon />, path: '/documents' },
+      { text: '🤖 المنشئ الذكي (Enterprise)', icon: <EngineeringIcon />, path: '/smart-documents' },
       { text: '🗂️ نظام الأرشفة', icon: <ArchiveIcon />, path: '/archiving' },
     ],
   },
@@ -167,6 +172,8 @@ const navGroups = [
     label: 'بوابة الإدارة والتحكم',
     items: [
       { text: 'لوحة المعلومات', icon: <DashboardIcon />, path: '/admin-portal' },
+      { text: '🎨 لوحة التحكم المتقدمة', icon: <DashboardIcon />, path: '/admin-portal/enhanced' },
+      { text: '📊 التقارير المتقدمة', icon: <QueryStatsIcon />, path: '/admin-portal/advanced-reports' },
       { text: 'إدارة المستخدمين', icon: <GroupIcon />, path: '/admin-portal/users' },
       { text: 'إعدادات النظام', icon: <EngineeringIcon />, path: '/admin-portal/settings' },
       { text: 'التقارير والتحليلات', icon: <QueryStatsIcon />, path: '/admin-portal/reports' },
@@ -174,6 +181,13 @@ const navGroups = [
       { text: 'إدارة العيادات', icon: <BusinessIcon />, path: '/admin-portal/clinics' },
       { text: 'المدفوعات والفواتير', icon: <WalletIcon />, path: '/admin-portal/payments' },
       { text: 'إدارة الإشعارات', icon: <ChatIcon />, path: '/admin-portal/notifications' },
+    ],
+  },
+  {
+    label: '🎯 إدارة المستفيدين',
+    items: [
+      { text: '🎨 لوحة المستفيدين', icon: <GroupsIcon />, path: '/beneficiaries' },
+      { text: '📊 جدول المستفيدين المتقدم', icon: <GroupsIcon />, path: '/beneficiaries/table' },
     ],
   },
   {
@@ -251,9 +265,29 @@ const Layout = () => {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 0, mr: 3 }}>
-            المنصة الموحدة
-          </Typography>
+
+          {/* شعار واسم النظام - Logo and System Name */}
+          <Box sx={{ display: 'flex', alignItems: 'center', mr: 3 }}>
+            <Box
+              component="img"
+              src="/logo.svg"
+              alt="مركز الأوائل"
+              sx={{
+                width: 40,
+                height: 40,
+                mr: 1.5,
+                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))',
+              }}
+            />
+            <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
+              <Typography variant="h6" noWrap sx={{ fontWeight: 700, lineHeight: 1.2 }}>
+                مركز الأوائل للتأهيل
+              </Typography>
+              <Typography variant="caption" noWrap sx={{ color: 'rgba(255,255,255,0.8)', display: 'block', lineHeight: 1 }}>
+                نظام إدارة التأهيل المتكامل
+              </Typography>
+            </Box>
+          </Box>
           <Box sx={{ flexGrow: 1, display: { xs: 'none', sm: 'block' } }}>
             <QuickSearch />
           </Box>
@@ -291,20 +325,61 @@ const Layout = () => {
           keepMounted: true, // Better open performance on mobile.
         }}
       >
+        {/* شعار المركز في القائمة الجانبية - Logo in Sidebar */}
+        <Box
+          sx={{
+            p: 2,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            color: 'white',
+            position: 'relative',
+          }}
+        >
+          <IconButton
+            onClick={handleDrawerClose}
+            sx={{
+              position: 'absolute',
+              right: 8,
+              top: 8,
+              color: 'white',
+            }}
+          >
+            {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+          </IconButton>
+
+          <Box
+            component="img"
+            src="/logo.svg"
+            alt="مركز الأوائل"
+            sx={{
+              width: 100,
+              height: 100,
+              mb: 2,
+              filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.2))',
+            }}
+          />
+          <Typography variant="caption" sx={{ opacity: 0.9, textAlign: 'center' }}>
+            Al-Awael Rehabilitation Center
+          </Typography>
+        </Box>
+
+        <Divider />
+
         <DrawerHeader>
           <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
               <Avatar sx={{ bgcolor: theme.palette.primary.main, mr: 1 }}>{currentUser?.name?.charAt(0) || 'U'}</Avatar>
-              <Box>
+              <Box sx={{ flexGrow: 1, minWidth: 0 }}>
                 <Typography variant="subtitle2" noWrap>
                   {currentUser?.name || 'User'}
                 </Typography>
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant="caption" color="text.secondary" noWrap>
                   {currentUser?.email || ''}
                 </Typography>
               </Box>
             </Box>
-            <IconButton onClick={handleDrawerClose}>{theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}</IconButton>
           </Box>
         </DrawerHeader>
         <Divider />

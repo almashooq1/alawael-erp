@@ -30,7 +30,7 @@ const REFRESH_TOKEN_EXPIRY = '7d';
  */
 router.post('/register', createAccountLimiter, validateRegistration, async (req, res) => {
   try {
-    const { email, password, fullName } = req.body;
+    const { email, password, fullName, role } = req.body;
 
     // Check if user exists
     const existingUser = await User.findOne({ email });
@@ -49,12 +49,12 @@ router.post('/register', createAccountLimiter, validateRegistration, async (req,
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Create user
+    // Create user (role defaults to 'user', but can be overridden for testing)
     const user = await User.create({
       email,
       password: hashedPassword,
       fullName,
-      role: 'user',
+      role: role || 'user',
     });
 
     logSecurityEvent('USER_REGISTERED', {
@@ -68,7 +68,7 @@ router.post('/register', createAccountLimiter, validateRegistration, async (req,
       expiresIn: process.env.JWT_EXPIRY || '7d',
     });
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       statusCode: 201,
       message: 'Registration successful',
@@ -84,7 +84,7 @@ router.post('/register', createAccountLimiter, validateRegistration, async (req,
     });
   } catch (error) {
     console.error('Registration error:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Registration failed',
     });
@@ -147,7 +147,7 @@ router.post('/login', authLimiter, async (req, res) => {
       ip: getClientIP(req),
     });
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       statusCode: 200,
       message: 'Login successful',
@@ -164,7 +164,7 @@ router.post('/login', authLimiter, async (req, res) => {
   } catch (error) {
     console.error('❌ Login error:', error.message);
     console.error('Stack:', error.stack);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Login failed: ' + error.message,
     });
@@ -204,7 +204,7 @@ router.post('/refresh', async (req, res) => {
       expiresIn: ACCESS_TOKEN_EXPIRY,
     });
 
-    res.json({
+    return res.json({
       success: true,
       message: 'Token refreshed',
       data: {
@@ -220,7 +220,7 @@ router.post('/refresh', async (req, res) => {
     }
 
     console.error('Token refresh error:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Token refresh failed',
       error: process.env.NODE_ENV === 'development' ? error.message : undefined,
@@ -239,7 +239,7 @@ router.post('/logout', authenticateToken, (req, res) => {
     ip: getClientIP(req),
   });
 
-  res.json({
+  return res.json({
     success: true,
     message: 'Logout successful',
   });
@@ -261,7 +261,7 @@ router.get('/profile', authenticateToken, async (req, res) => {
       });
     }
 
-    res.json({
+    return res.json({
       success: true,
       data: {
         id: user.id,
@@ -272,7 +272,7 @@ router.get('/profile', authenticateToken, async (req, res) => {
     });
   } catch (error) {
     console.error('Get profile error:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Failed to get profile',
     });
@@ -304,7 +304,7 @@ router.put('/profile', authenticateToken, async (req, res) => {
       ip: getClientIP(req),
     });
 
-    res.json({
+    return res.json({
       success: true,
       message: 'Profile updated successfully',
       data: {
@@ -316,7 +316,7 @@ router.put('/profile', authenticateToken, async (req, res) => {
     });
   } catch (error) {
     console.error('Update profile error:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Failed to update profile',
     });
@@ -363,14 +363,14 @@ router.post('/change-password', authenticateToken, passwordLimiter, validatePass
       ip: getClientIP(req),
     });
 
-    res.json({
+    return res.json({
       success: true,
       statusCode: 200,
       message: 'Password changed successfully',
     });
   } catch (error) {
     console.error('Change password error:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Failed to change password',
     });

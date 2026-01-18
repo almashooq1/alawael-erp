@@ -458,4 +458,4 @@ class WorkflowEnhancementService {
   }
 }
 
-module.exports = new WorkflowEnhancementService();
+module.exports = WorkflowEnhancementService;

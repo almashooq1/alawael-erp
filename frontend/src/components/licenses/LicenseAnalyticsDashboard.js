@@ -69,7 +69,7 @@ import {
   Info as InfoIcon,
   Refresh as RefreshIcon,
 } from '@mui/icons-material';
-import licenseService from '../../services/licenseService';
+import licenseService from '../services/licenseService';
 
 const COLORS = ['#4caf50', '#ff9800', '#f44336', '#2196f3', '#9c27b0', '#00bcd4'];
 

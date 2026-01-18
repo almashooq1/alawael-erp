@@ -1,0 +1,68 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Contact {
+  id         String          @id @default(cuid())
+  waId       String          @unique
+  locale     String?
+  tags       String[]
+  optIn      Boolean         @default(true)
+  optOutReason String?
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+  conversations Conversation[]
+}
+
+model Conversation {
+  id             String    @id @default(cuid())
+  contact        Contact   @relation(fields: [contactId], references: [id])
+  contactId      String
+  windowExpiresAt DateTime
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  messages       Message[]
+}
+
+model Message {
+  id             String    @id @default(cuid())
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  conversationId String
+  direction      String    // inbound | outbound
+  type           String    // text | template | media
+  body           String?
+  templateName   String?
+  status         String    // queued | sent | delivered | read | failed
+  waMessageId    String?
+  errorCode      String?
+  media          Media?
+  createdAt      DateTime  @default(now())
+}
+
+model Template {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  locale    String   // e.g. en, ar
+  category  String   // service, marketing, authentication
+  body      String
+  status    String   // pending, approved, rejected
+  variables String[] // placeholders like {{name}}
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Media {
+  id        String   @id @default(cuid())
+  message   Message  @relation(fields: [messageId], references: [id])
+  messageId String   @unique
+  type      String   // image, video, document, audio
+  url       String?
+  mimeType  String?
+  fileSize  Int?
+  createdAt DateTime @default(now())
+}

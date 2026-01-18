@@ -10,13 +10,13 @@ const passwordPolicy = {
   requireLowercase: true,
   requireNumbers: true,
   requireSpecialChars: true,
-  specialChars: '!@#$%^&*()_+-=[]{}|;:,.<>?'
+  specialChars: '!@#$%^&*()_+-=[]{}|;:,.<>?',
 };
 
 /**
  * Validate password against policy
  */
-const validatePassword = (password) => {
+const validatePassword = password => {
   const errors = [];
 
   if (!password || typeof password !== 'string') {
@@ -52,14 +52,14 @@ const validatePassword = (password) => {
 
   return {
     valid: errors.length === 0,
-    errors
+    errors,
   };
 };
 
 /**
  * Validate email format
  */
-const validateEmail = (email) => {
+const validateEmail = email => {
   if (!email || typeof email !== 'string') {
     return { valid: false, error: 'Email is required' };
   }
@@ -78,7 +78,7 @@ const validateEmail = (email) => {
 /**
  * Validate full name
  */
-const validateFullName = (fullName) => {
+const validateFullName = fullName => {
   if (!fullName || typeof fullName !== 'string') {
     return { valid: false, error: 'Full name is required' };
   }
@@ -106,15 +106,15 @@ const validateFullName = (fullName) => {
  */
 const sanitizeString = (str, maxLength = 255) => {
   if (!str || typeof str !== 'string') return '';
-  
+
   // Trim whitespace
   let sanitized = str.trim();
-  
+
   // Limit length
   if (sanitized.length > maxLength) {
     sanitized = sanitized.substring(0, maxLength);
   }
-  
+
   return sanitized;
 };
 
@@ -129,7 +129,7 @@ const validateRegistration = (req, res, next) => {
   if (!emailValidation.valid) {
     return res.status(400).json({
       success: false,
-      message: emailValidation.error
+      message: emailValidation.error,
     });
   }
 
@@ -139,7 +139,7 @@ const validateRegistration = (req, res, next) => {
     return res.status(400).json({
       success: false,
       message: 'Password does not meet requirements',
-      errors: passwordValidation.errors
+      errors: passwordValidation.errors,
     });
   }
 
@@ -148,7 +148,7 @@ const validateRegistration = (req, res, next) => {
   if (!nameValidation.valid) {
     return res.status(400).json({
       success: false,
-      message: nameValidation.error
+      message: nameValidation.error,
     });
   }
 
@@ -170,7 +170,7 @@ const validateProfileUpdate = (req, res, next) => {
     if (!nameValidation.valid) {
       return res.status(400).json({
         success: false,
-        message: nameValidation.error
+        message: nameValidation.error,
       });
     }
     req.body.fullName = sanitizeString(fullName, 100);
@@ -190,7 +190,7 @@ const validatePasswordChange = (req, res, next) => {
     return res.status(400).json({
       success: false,
       message: 'New password does not meet requirements',
-      errors: passwordValidation.errors
+      errors: passwordValidation.errors,
     });
   }
 
@@ -205,5 +205,5 @@ module.exports = {
   sanitizeString,
   validateRegistration,
   validateProfileUpdate,
-  validatePasswordChange
+  validatePasswordChange,
 };

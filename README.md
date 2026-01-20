@@ -5,6 +5,7 @@ A modern, full-stack ERP system built with React, Node.js, Express, and MongoDB.
 ## ✨ Features
 
 ### 🤖 AI Predictions
+
 - Sales forecasting (Exponential Smoothing - 87% accuracy)
 - Performance prediction (Weighted Scoring)
 - Attendance prediction (Logistic Regression)
@@ -12,6 +13,7 @@ A modern, full-stack ERP system built with React, Node.js, Express, and MongoDB.
 - Inventory management (EOQ Model)
 
 ### 📊 Advanced Reporting
+
 - Dynamic report generation
 - Multiple export formats (CSV, JSON, Excel, PDF)
 - Interactive charts and visualizations
@@ -19,6 +21,7 @@ A modern, full-stack ERP system built with React, Node.js, Express, and MongoDB.
 - Scheduled reports
 
 ### 🔔 Multi-Channel Notifications
+
 - Email notifications
 - SMS alerts
 - In-app notifications
@@ -31,22 +34,26 @@ A modern, full-stack ERP system built with React, Node.js, Express, and MongoDB.
 ## 🏗️ Tech Stack
 
 ### Frontend
+
 - React 18
 - Modern CSS with Gradients
 - Responsive Design
 - Real-time updates
 
 ### Backend
+
 - Node.js + Express.js
 - RESTful API architecture
 - JWT authentication
 - CORS enabled
 
 ### Database
+
 - MongoDB (primary)
 - Redis (caching)
 
 ### DevOps
+
 - Docker & Docker Compose
 - Kubernetes ready
 - CI/CD with GitHub Actions
@@ -58,11 +65,13 @@ A modern, full-stack ERP system built with React, Node.js, Express, and MongoDB.
 ### Development Mode
 
 #### Prerequisites
+
 - Node.js 18+
 - npm or yarn
 - MongoDB (optional - uses in-memory for dev)
 
 #### Backend
+
 ```bash
 cd backend
 npm install
@@ -71,6 +80,7 @@ npm run dev
 ```
 
 #### Frontend
+
 ```bash
 cd frontend
 npm install
@@ -96,6 +106,7 @@ docker-compose down
 ## 📡 API Documentation
 
 ### Base URL
+
 ```
 http://localhost:3005/api
 ```
@@ -105,6 +116,7 @@ http://localhost:3005/api
 #### AI Predictions
 
 **1. Sales Forecasting**
+
 ```http
 POST /api/predictions/sales
 Content-Type: application/json
@@ -119,6 +131,7 @@ Content-Type: application/json
 ```
 
 Response:
+
 ```json
 {
   "success": true,
@@ -130,6 +143,7 @@ Response:
 ```
 
 **2. Performance Prediction**
+
 ```http
 POST /api/predictions/performance
 
@@ -143,6 +157,7 @@ POST /api/predictions/performance
 ```
 
 **3. Attendance Prediction**
+
 ```http
 POST /api/predictions/attendance
 
@@ -156,6 +171,7 @@ POST /api/predictions/attendance
 ```
 
 **4. Churn Prediction**
+
 ```http
 POST /api/predictions/churn
 
@@ -169,6 +185,7 @@ POST /api/predictions/churn
 ```
 
 **5. Inventory Management**
+
 ```http
 POST /api/predictions/inventory
 
@@ -184,6 +201,7 @@ POST /api/predictions/inventory
 #### Reports
 
 **1. Generate Report**
+
 ```http
 POST /api/reports/generate
 
@@ -194,6 +212,7 @@ POST /api/reports/generate
 ```
 
 **2. Export to CSV**
+
 ```http
 POST /api/reports/export/csv
 
@@ -203,6 +222,7 @@ POST /api/reports/export/csv
 ```
 
 **3. Export to JSON**
+
 ```http
 POST /api/reports/export/json
 
@@ -212,6 +232,7 @@ POST /api/reports/export/json
 ```
 
 **4. Export to Excel**
+
 ```http
 POST /api/reports/export/excel
 
@@ -221,11 +242,13 @@ POST /api/reports/export/excel
 ```
 
 **5. Get All Reports**
+
 ```http
 GET /api/reports/all?limit=50
 ```
 
 **6. Delete Report**
+
 ```http
 DELETE /api/reports/{reportId}
 ```
@@ -233,6 +256,7 @@ DELETE /api/reports/{reportId}
 #### Notifications
 
 **1. Send Notification**
+
 ```http
 POST /api/notifications/send
 
@@ -248,26 +272,31 @@ POST /api/notifications/send
 ```
 
 **2. Get User Notifications**
+
 ```http
 GET /api/notifications/user/{userId}?limit=50&unread=true
 ```
 
 **3. Mark as Read**
+
 ```http
 PUT /api/notifications/{notificationId}/read
 ```
 
 **4. Delete Notification**
+
 ```http
 DELETE /api/notifications/{notificationId}
 ```
 
 **5. Delete All User Notifications**
+
 ```http
 DELETE /api/notifications/user/{userId}/all
 ```
 
 **6. Schedule Notification**
+
 ```http
 POST /api/notifications/schedule
 
@@ -360,16 +389,16 @@ docker-compose run backend npm test
 
 ## 📊 Performance
 
-| Metric | Value |
-|--------|-------|
-| API Response Time | < 50ms |
-| Uptime | 99.9% |
-| Concurrent Users | 1000+ |
-| Request Throughput | 1000+ req/s |
-| Memory Usage | ~60MB |
-| CPU Usage | < 5% |
-| AI Prediction Accuracy | 82-89% |
-| Notification Delivery | 98.5% |
+| Metric                 | Value       |
+| ---------------------- | ----------- |
+| API Response Time      | < 50ms      |
+| Uptime                 | 99.9%       |
+| Concurrent Users       | 1000+       |
+| Request Throughput     | 1000+ req/s |
+| Memory Usage           | ~60MB       |
+| CPU Usage              | < 5%        |
+| AI Prediction Accuracy | 82-89%      |
+| Notification Delivery  | 98.5%       |
 
 ---
 
@@ -391,6 +420,7 @@ docker-compose run backend npm test
 ## 🌍 Environment Variables
 
 ### Backend (.env)
+
 ```env
 PORT=3005
 NODE_ENV=development
@@ -402,6 +432,7 @@ CORS_ORIGIN=http://localhost:3000
 ```
 
 ### Frontend (.env)
+
 ```env
 REACT_APP_API_URL=http://localhost:3005/api
 REACT_APP_ENV=development
@@ -412,6 +443,7 @@ REACT_APP_ENV=development
 ## 📈 Roadmap
 
 ### Phase 1: Core Features ✅ (Complete)
+
 - [x] Backend API
 - [x] AI Predictions
 - [x] Reports System
@@ -420,6 +452,7 @@ REACT_APP_ENV=development
 - [x] Docker Setup
 
 ### Phase 2: Enhanced Features (Q1 2026)
+
 - [ ] User authentication & authorization
 - [ ] Role-based access control (RBAC)
 - [ ] Advanced AI models (TensorFlow, XGBoost)
@@ -428,6 +461,7 @@ REACT_APP_ENV=development
 - [ ] Advanced analytics
 
 ### Phase 3: Enterprise Features (Q2 2026)
+
 - [ ] Multi-tenancy
 - [ ] API Gateway
 - [ ] Microservices architecture
@@ -436,6 +470,7 @@ REACT_APP_ENV=development
 - [ ] Advanced reporting with BI tools
 
 ### Phase 4: Scale & Optimization (Q3 2026)
+
 - [ ] Kubernetes deployment
 - [ ] Auto-scaling
 - [ ] CDN integration
@@ -456,6 +491,7 @@ We welcome contributions! Please follow these steps:
 5. Open a Pull Request
 
 ### Code Style
+
 - Follow ESLint rules
 - Write meaningful commit messages
 - Add tests for new features
@@ -465,7 +501,8 @@ We welcome contributions! Please follow these steps:
 
 ## 📝 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
+for details.
 
 ---
 

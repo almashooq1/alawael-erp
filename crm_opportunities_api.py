@@ -1,3 +1,10 @@
+from auth_rbac_decorator import (
+    check_permission,
+    check_multiple_permissions,
+    guard_payload_size,
+    validate_json,
+    log_audit
+)
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
@@ -46,6 +53,8 @@ def get_current_user_id():
 # Opportunity Management APIs
 @opportunities_bp.route('/opportunities', methods=['GET'])
 @jwt_required()
+@check_permission('view_crm_opportunities')
+@log_audit('GET_OPPORTUNITIES')
 def get_opportunities():
     """الحصول على قائمة الفرص التجارية"""
     try:
@@ -132,6 +141,9 @@ def get_opportunities():
 
 @opportunities_bp.route('/opportunities', methods=['POST'])
 @jwt_required()
+@check_permission('manage_crm_opportunities')
+@guard_payload_size()
+@log_audit('CREATE_OPPORTUNITY')
 def create_opportunity():
     """إنشاء فرصة تجارية جديدة"""
     try:
@@ -185,6 +197,8 @@ def create_opportunity():
 
 @opportunities_bp.route('/opportunities/<int:opportunity_id>', methods=['GET'])
 @jwt_required()
+@check_permission('view_crm_opportunities')
+@log_audit('GET_OPPORTUNITY')
 def get_opportunity(opportunity_id):
     """الحصول على تفاصيل فرصة تجارية"""
     try:
@@ -230,6 +244,9 @@ def get_opportunity(opportunity_id):
 
 @opportunities_bp.route('/opportunities/<int:opportunity_id>', methods=['PUT'])
 @jwt_required()
+@check_permission('manage_crm_opportunities')
+@guard_payload_size()
+@log_audit('UPDATE_OPPORTUNITY')
 def update_opportunity(opportunity_id):
     """تحديث بيانات فرصة تجارية"""
     try:
@@ -280,6 +297,9 @@ def update_opportunity(opportunity_id):
 
 @opportunities_bp.route('/opportunities/<int:opportunity_id>/stage', methods=['PUT'])
 @jwt_required()
+@check_permission('manage_crm_opportunities')
+@guard_payload_size()
+@log_audit('UPDATE_OPPORTUNITY_STAGE')
 def update_opportunity_stage(opportunity_id):
     """تحديث مرحلة الفرصة التجارية"""
     try:
@@ -334,6 +354,8 @@ def update_opportunity_stage(opportunity_id):
 # Sales Pipeline APIs
 @opportunities_bp.route('/sales-pipeline', methods=['GET'])
 @jwt_required()
+@check_permission('view_crm_opportunities')
+@log_audit('GET_SALES_PIPELINE')
 def get_sales_pipeline():
     """الحصول على بيانات خط المبيعات"""
     try:
@@ -416,6 +438,8 @@ def get_sales_pipeline():
 # Activity Management APIs for Opportunities
 @opportunities_bp.route('/opportunities/<int:opportunity_id>/activities', methods=['GET'])
 @jwt_required()
+@check_permission('view_crm_opportunities')
+@log_audit('GET_OPPORTUNITY_ACTIVITIES')
 def get_opportunity_activities(opportunity_id):
     """الحصول على أنشطة فرصة تجارية"""
     try:
@@ -452,6 +476,9 @@ def get_opportunity_activities(opportunity_id):
 
 @opportunities_bp.route('/opportunities/<int:opportunity_id>/activities', methods=['POST'])
 @jwt_required()
+@check_permission('manage_crm_opportunities')
+@guard_payload_size()
+@log_audit('CREATE_OPPORTUNITY_ACTIVITY')
 def create_opportunity_activity(opportunity_id):
     """إنشاء نشاط لفرصة تجارية"""
     try:
@@ -494,6 +521,8 @@ def create_opportunity_activity(opportunity_id):
 # Sales Analytics APIs
 @opportunities_bp.route('/sales-analytics', methods=['GET'])
 @jwt_required()
+@check_permission('view_crm_opportunities')
+@log_audit('GET_SALES_ANALYTICS')
 def get_sales_analytics():
     """الحصول على تحليلات المبيعات"""
     try:

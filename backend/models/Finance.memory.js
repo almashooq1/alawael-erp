@@ -92,7 +92,9 @@ class Invoice {
 
   static getTotalRevenue() {
     const finance = readFinance();
-    return finance.invoices.filter(inv => inv.status === 'paid').reduce((sum, inv) => sum + (inv.amount || 0), 0);
+    return finance.invoices
+      .filter(inv => inv.status === 'paid')
+      .reduce((sum, inv) => sum + (inv.amount || 0), 0);
   }
 }
 
@@ -193,7 +195,15 @@ class Budget {
     const now = new Date();
     const finance = readFinance();
 
-    return finance.budgets.find(b => b.year === now.getFullYear() && b.month === now.getMonth() + 1 && b.status === 'active') || null;
+    return (
+      finance.budgets.find(
+        b => b.year === now.getFullYear() && b.month === now.getMonth() + 1 && b.status === 'active'
+      ) || null
+    );
+  }
+
+  static findAll() {
+    return readFinance().budgets;
   }
 
   static getTotalBudget() {

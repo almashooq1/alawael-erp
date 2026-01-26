@@ -45,3 +45,4 @@ router.post('/optimize-rooms', authorizeRole(['ADMIN', 'FACILITY_MANAGER']), asy
 });
 
 module.exports = router;
+

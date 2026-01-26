@@ -28,3 +28,4 @@ router.get('/snapshot/:patientId', mockAuth, async (req, res) => {
 });
 
 module.exports = router;
+

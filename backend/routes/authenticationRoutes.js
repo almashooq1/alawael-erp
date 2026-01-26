@@ -26,6 +26,8 @@
 const express = require('express');
 const router = express.Router();
 const AuthenticationService = require('../services/AuthenticationService');
+const Session = require('../models/Session');
+const { generateTokenWithSession, revokeToken } = require('../middleware/auth.middleware');
 
 /**
  * ====================================
@@ -48,9 +50,26 @@ router.post('/login', async (req, res) => {
     const result = await AuthenticationService.smartLogin(credential, password);
 
     // تسجيل نشاط الدخول
-    AuthenticationService.logLoginActivity(result.user.id, 'auto-detected', req.ip, req.get('user-agent'));
+    AuthenticationService.logLoginActivity(result.user.id, 'smart', req.ip, req.get('user-agent'));
 
-    return res.status(200).json(result);
+    // Create session with tracking
+    const { token, refreshToken } = await generateTokenWithSession(
+      {
+        id: result.user.id,
+        email: result.user.email,
+        role: result.user.role,
+        permissions: result.user.permissions || [],
+      },
+      req.ip,
+      req.get('user-agent')
+    );
+
+    return res.status(200).json({
+      ...result,
+      token,
+      refreshToken,
+      message: 'تم تسجيل الدخول بنجاح',
+    });
   } catch (error) {
     return res.status(401).json({
       success: false,
@@ -59,6 +78,7 @@ router.post('/login', async (req, res) => {
     });
   }
 });
+// (duplicate code removed) - login handled above
 
 /**
  * ====================================
@@ -141,7 +161,12 @@ router.post('/login/idnumber', async (req, res) => {
 
     const result = await AuthenticationService.loginWithIDNumber(idNumber, password);
 
-    AuthenticationService.logLoginActivity(result.user.id, 'idNumber', req.ip, req.get('user-agent'));
+    AuthenticationService.logLoginActivity(
+      result.user.id,
+      'idNumber',
+      req.ip,
+      req.get('user-agent')
+    );
 
     return res.status(200).json(result);
   } catch (error) {
@@ -172,7 +197,12 @@ router.post('/login/username', async (req, res) => {
 
     const result = await AuthenticationService.loginWithUsername(username, password);
 
-    AuthenticationService.logLoginActivity(result.user.id, 'username', req.ip, req.get('user-agent'));
+    AuthenticationService.logLoginActivity(
+      result.user.id,
+      'username',
+      req.ip,
+      req.get('user-agent')
+    );
 
     return res.status(200).json(result);
   } catch (error) {
@@ -213,23 +243,36 @@ router.post('/register', async (req, res) => {
 /**
  * ====================================
  * 7. تسجيل الخروج
- * Logout
+ * Logout with session termination
  * ====================================
  */
-router.post('/logout', (req, res) => {
+router.post('/logout', async (req, res) => {
   try {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
     const { userId } = req.body;
 
-    if (!userId) {
+    if (!userId && !token) {
       return res.status(400).json({
         success: false,
-        message: 'معرف المستخدم مفقود',
+        message: 'معرف المستخدم أو التوكن مفقود',
       });
     }
 
-    const result = AuthenticationService.logout(userId);
+    // Terminate session
+    if (token) {
+      await revokeToken(token);
+    }
 
-    return res.status(200).json(result);
+    // Legacy logout for compatibility
+    if (userId) {
+      const result = AuthenticationService.logout(userId);
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'تم تسجيل الخروج بنجاح',
+    });
   } catch (error) {
     return res.status(500).json({
       success: false,
@@ -317,7 +360,11 @@ router.post('/password/reset', async (req, res) => {
       });
     }
 
-    const result = await AuthenticationService.resetPassword(resetToken, newPassword, confirmPassword);
+    const result = await AuthenticationService.resetPassword(
+      resetToken,
+      newPassword,
+      confirmPassword
+    );
 
     return res.status(200).json(result);
   } catch (error) {
@@ -346,7 +393,12 @@ router.post('/password/change', async (req, res) => {
       });
     }
 
-    const result = await AuthenticationService.changePassword(userId, oldPassword, newPassword, confirmPassword);
+    const result = await AuthenticationService.changePassword(
+      userId,
+      oldPassword,
+      newPassword,
+      confirmPassword
+    );
 
     return res.status(200).json(result);
   } catch (error) {

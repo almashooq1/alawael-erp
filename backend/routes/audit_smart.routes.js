@@ -35,3 +35,4 @@ router.post('/check-consent', async (req, res) => {
 });
 
 module.exports = router;
+

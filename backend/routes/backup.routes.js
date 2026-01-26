@@ -3,6 +3,10 @@ const router = express.Router();
 const fs = require('fs');
 const path = require('path');
 const { spawn } = require('child_process');
+const { body, param, validationResult } = require('express-validator');
+const { authenticateToken, authorizeRole } = require('../middleware/auth.middleware');
+const { apiLimiter } = require('../middleware/rateLimiter');
+const sanitizeInput = require('../middleware/sanitize');
 
 // Directory for backups
 const BACKUP_DIR = path.join(__dirname, '../../backups');
@@ -10,53 +14,81 @@ if (!fs.existsSync(BACKUP_DIR)) {
   fs.mkdirSync(BACKUP_DIR, { recursive: true });
 }
 
+// Global middleware
+router.use(authenticateToken);
+router.use(authorizeRole('admin'));
+router.use(apiLimiter);
+router.use(sanitizeInput);
+
+// Validation error handler
+const handleValidationErrors = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res
+      .status(400)
+      .json({ success: false, message: 'Validation error', errors: errors.array() });
+  }
+  next();
+};
+
 /**
  * @route POST /api/backup/create
  * @desc Create a new backup of the database
  */
-router.post('/create', (req, res) => {
-  try {
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const filename = `backup-${timestamp}.json`;
-    const backupPath = path.join(BACKUP_DIR, filename);
+router.post(
+  '/create',
+  body('backupName').optional().isLength({ max: 200 }),
+  body('includeFiles').optional().isBoolean(),
+  handleValidationErrors,
+  (req, res) => {
+    try {
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const backupName = req.body.backupName || `backup-${timestamp}`;
+      const filename = `${backupName}.json`;
+      const backupPath = path.join(BACKUP_DIR, filename);
 
-    // Simple in-memory backup for development
-    const backupData = JSON.stringify(
-      {
-        timestamp: new Date().toISOString(),
-        type: 'alawael-erp-backup',
-        version: '2.1.0',
-        database: 'in-memory',
-        status: 'completed',
-        collections: {
-          users: { count: 0, size: 0 },
-          organizations: { count: 0, size: 0 },
-          documents: { count: 0, size: 0 },
+      // Simple in-memory backup for development
+      const backupData = JSON.stringify(
+        {
+          name: backupName,
+          timestamp: new Date().toISOString(),
+          type: 'alawael-erp-backup',
+          version: '2.1.0',
+          database: 'in-memory',
+          status: 'completed',
+          includeFiles: req.body.includeFiles || false,
+          collections: {
+            users: { count: 0, size: 0 },
+            organizations: { count: 0, size: 0 },
+            documents: { count: 0, size: 0 },
+          },
         },
-      },
-      null,
-      2,
-    );
+        null,
+        2
+      );
 
-    fs.writeFileSync(backupPath, backupData);
-    const stats = fs.statSync(backupPath);
+      fs.writeFileSync(backupPath, backupData);
+      const stats = fs.statSync(backupPath);
 
-    res.json({
-      success: true,
-      message: 'Backup created successfully',
-      filename: filename,
-      path: backupPath,
-      size: stats.size,
-      timestamp: new Date().toISOString(),
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error creating backup',
-      error: error.message,
-    });
+      res.status(201).json({
+        success: true,
+        message: 'Backup created successfully',
+        data: {
+          filename: filename,
+          path: backupPath,
+          size: stats.size,
+          timestamp: new Date().toISOString(),
+        },
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: 'Error creating backup',
+        error: error.message,
+      });
+    }
   }
-});
+);
 
 /**
  * @route GET /api/backup/list
@@ -67,7 +99,7 @@ router.get('/list', (req, res) => {
     if (!fs.existsSync(BACKUP_DIR)) {
       return res.json({
         success: true,
-        backups: [],
+        data: [],
         message: 'No backups found',
       });
     }
@@ -90,8 +122,8 @@ router.get('/list', (req, res) => {
 
     res.json({
       success: true,
-      backups: files,
-      total: files.length,
+      data: files,
+      count: files.length,
       totalSize: files.reduce((sum, f) => sum + f.size, 0),
     });
   } catch (error) {
@@ -107,40 +139,50 @@ router.get('/list', (req, res) => {
  * @route POST /api/backup/restore/:filename
  * @desc Restore from a specific backup
  */
-router.post('/restore/:filename', (req, res) => {
-  try {
-    const filename = req.params.filename;
-    const backupPath = path.join(BACKUP_DIR, filename);
+router.post(
+  '/restore/:filename',
+  param('filename')
+    .trim()
+    .isLength({ min: 3, max: 200 })
+    .matches(/^[a-zA-Z0-9-_.]+\.json$/),
+  handleValidationErrors,
+  (req, res) => {
+    try {
+      const filename = req.params.filename;
+      const backupPath = path.join(BACKUP_DIR, filename);
 
-    // Security: prevent directory traversal
-    if (!backupPath.startsWith(BACKUP_DIR)) {
-      return res.status(400).json({
+      // Security: prevent directory traversal
+      if (!backupPath.startsWith(BACKUP_DIR)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid backup file',
+        });
+      }
+
+      if (!fs.existsSync(backupPath)) {
+        return res.status(404).json({
+          success: false,
+          message: 'Backup file not found',
+        });
+      }
+
+      res.json({
+        success: true,
+        message: 'Restore functionality available via backend',
+        data: {
+          backup: filename,
+          path: backupPath,
+        },
+      });
+    } catch (error) {
+      res.status(500).json({
         success: false,
-        message: 'Invalid backup file',
+        message: 'Error accessing backup',
+        error: error.message,
       });
     }
-
-    if (!fs.existsSync(backupPath)) {
-      return res.status(404).json({
-        success: false,
-        message: 'Backup file not found',
-      });
-    }
-
-    res.json({
-      success: true,
-      message: 'Restore functionality available via backend',
-      backup: filename,
-      path: backupPath,
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error accessing backup',
-      error: error.message,
-    });
   }
-});
+);
 
 /**
  * @route DELETE /api/backup/delete/:filename
@@ -221,7 +263,10 @@ router.get('/stats', (req, res) => {
         totalSize: files.reduce((sum, f) => sum + f.size, 0),
         oldestBackup: sortedByDate.length > 0 ? sortedByDate[0] : null,
         latestBackup: sortedByDate.length > 0 ? sortedByDate[sortedByDate.length - 1] : null,
-        averageSize: files.length > 0 ? Math.round(files.reduce((sum, f) => sum + f.size, 0) / files.length) : 0,
+        averageSize:
+          files.length > 0
+            ? Math.round(files.reduce((sum, f) => sum + f.size, 0) / files.length)
+            : 0,
       },
     });
   } catch (error) {
@@ -234,3 +279,4 @@ router.get('/stats', (req, res) => {
 });
 
 module.exports = router;
+

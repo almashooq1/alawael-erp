@@ -1,3 +1,10 @@
+from auth_rbac_decorator import (
+    check_permission,
+    check_multiple_permissions,
+    guard_payload_size,
+    validate_json,
+    log_audit
+)
 # -*- coding: utf-8 -*-
 """
 API endpoints للمساعد الذكي المتقدم
@@ -23,6 +30,9 @@ ai_service = IntelligentAssistantService()
 
 @intelligent_assistant_bp.route('/start-conversation', methods=['POST'])
 @jwt_required()
+@check_permission('manage_intelligent_assistant')
+@guard_payload_size()
+@log_audit('START_CONVERSATION')
 def start_conversation():
     """بدء محادثة جديدة مع المساعد الذكي"""
     try:
@@ -45,6 +55,9 @@ def start_conversation():
 
 @intelligent_assistant_bp.route('/send-message', methods=['POST'])
 @jwt_required()
+@check_permission('send_intelligent_assistant')
+@guard_payload_size()
+@log_audit('SEND_MESSAGE')
 def send_message():
     """إرسال رسالة للمساعد الذكي"""
     try:
@@ -70,6 +83,8 @@ def send_message():
 
 @intelligent_assistant_bp.route('/conversation-history/<session_id>', methods=['GET'])
 @jwt_required()
+@check_permission('view_intelligent_assistant')
+@log_audit('GET_CONVERSATION_HISTORY')
 def get_conversation_history(session_id):
     """الحصول على تاريخ المحادثة"""
     try:
@@ -86,6 +101,9 @@ def get_conversation_history(session_id):
 
 @intelligent_assistant_bp.route('/rate-conversation', methods=['POST'])
 @jwt_required()
+@check_permission('manage_intelligent_assistant')
+@guard_payload_size()
+@log_audit('RATE_CONVERSATION')
 def rate_conversation():
     """تقييم المحادثة"""
     try:
@@ -112,6 +130,8 @@ def rate_conversation():
 
 @intelligent_assistant_bp.route('/user-conversations', methods=['GET'])
 @jwt_required()
+@check_permission('view_intelligent_assistant')
+@log_audit('GET_USER_CONVERSATIONS')
 def get_user_conversations():
     """الحصول على محادثات المستخدم"""
     try:
@@ -141,6 +161,8 @@ def get_user_conversations():
 
 @intelligent_assistant_bp.route('/knowledge-base', methods=['GET'])
 @jwt_required()
+@check_permission('view_intelligent_assistant')
+@log_audit('GET_KNOWLEDGE_BASE')
 def get_knowledge_base():
     """الحصول على قاعدة المعرفة"""
     try:
@@ -182,6 +204,9 @@ def get_knowledge_base():
 
 @intelligent_assistant_bp.route('/knowledge-base', methods=['POST'])
 @jwt_required()
+@check_permission('manage_intelligent_assistant')
+@guard_payload_size()
+@log_audit('ADD_KNOWLEDGE')
 def add_knowledge():
     """إضافة معرفة جديدة"""
     try:
@@ -215,6 +240,8 @@ def add_knowledge():
 
 @intelligent_assistant_bp.route('/intent-patterns', methods=['GET'])
 @jwt_required()
+@check_permission('view_intelligent_assistant')
+@log_audit('GET_INTENT_PATTERNS')
 def get_intent_patterns():
     """الحصول على أنماط النوايا"""
     try:
@@ -232,6 +259,9 @@ def get_intent_patterns():
 
 @intelligent_assistant_bp.route('/intent-patterns', methods=['POST'])
 @jwt_required()
+@check_permission('manage_intelligent_assistant')
+@guard_payload_size()
+@log_audit('ADD_INTENT_PATTERN')
 def add_intent_pattern():
     """إضافة نمط نية جديد"""
     try:
@@ -264,6 +294,8 @@ def add_intent_pattern():
 
 @intelligent_assistant_bp.route('/user-preferences', methods=['GET'])
 @jwt_required()
+@check_permission('view_intelligent_assistant')
+@log_audit('GET_USER_PREFERENCES')
 def get_user_preferences():
     """الحصول على تفضيلات المستخدم"""
     try:
@@ -287,6 +319,9 @@ def get_user_preferences():
 
 @intelligent_assistant_bp.route('/user-preferences', methods=['POST'])
 @jwt_required()
+@check_permission('manage_intelligent_assistant')
+@guard_payload_size()
+@log_audit('SAVE_USER_PREFERENCES')
 def save_user_preferences():
     """حفظ تفضيلات المستخدم"""
     try:
@@ -335,6 +370,8 @@ def save_user_preferences():
 
 @intelligent_assistant_bp.route('/analytics', methods=['GET'])
 @jwt_required()
+@check_permission('view_intelligent_assistant')
+@log_audit('GET_ANALYTICS')
 def get_analytics():
     """الحصول على تحليلات المساعد الذكي"""
     try:
@@ -351,6 +388,9 @@ def get_analytics():
 
 @intelligent_assistant_bp.route('/feedback', methods=['POST'])
 @jwt_required()
+@check_permission('manage_intelligent_assistant')
+@guard_payload_size()
+@log_audit('SUBMIT_FEEDBACK')
 def submit_feedback():
     """إرسال تقييم أو ملاحظة"""
     try:
@@ -382,6 +422,8 @@ def submit_feedback():
 
 @intelligent_assistant_bp.route('/dashboard', methods=['GET'])
 @jwt_required()
+@check_permission('view_dashboard')
+@log_audit('GET_DASHBOARD')
 def get_dashboard():
     """لوحة تحكم المساعد الذكي"""
     try:
@@ -446,6 +488,8 @@ def get_dashboard():
 
 @intelligent_assistant_bp.route('/quick-responses', methods=['GET'])
 @jwt_required()
+@check_permission('view_intelligent_assistant')
+@log_audit('GET_QUICK_RESPONSES')
 def get_quick_responses():
     """الحصول على الردود السريعة"""
     try:

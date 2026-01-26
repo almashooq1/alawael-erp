@@ -7,6 +7,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import db
 from models.assessment import Assessment
 from datetime import datetime
+from lib.auth_rbac_decorator import check_permission, require_role, log_audit, guard_payload_size, validate_json
 
 bp = Blueprint('assessments', __name__, url_prefix='/api/assessments')
 
@@ -48,7 +49,9 @@ def list_assessments():
 
 
 @bp.route('/<int:id>', methods=['GET'])
-@jwt_required()
+
+@check_permission('view_assessment')
+@log_audit('GET_GET_ASSESSMENT')
 def get_assessment(id):
     """تفاصيل تقييم"""
     try:
@@ -100,7 +103,10 @@ def create_assessment():
 
 
 @bp.route('/<int:id>', methods=['PUT'])
-@jwt_required()
+
+@check_permission('manage_assessment')
+@guard_payload_size()
+@log_audit('PUT_UPDATE_ASSESSMENT')
 def update_assessment(id):
     """تحديث تقييم"""
     try:
@@ -129,7 +135,9 @@ def update_assessment(id):
 
 
 @bp.route('/<int:id>/compare', methods=['GET'])
-@jwt_required()
+
+@check_permission('view_compare_assessment')
+@log_audit('GET_COMPARE_ASSESSMENT')
 def compare_assessment(id):
     """مقارنة مع التقييم السابق"""
     try:

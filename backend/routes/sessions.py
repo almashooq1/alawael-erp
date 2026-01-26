@@ -8,6 +8,7 @@ from models import db
 from models.session import TherapySession
 from datetime import datetime, timedelta
 from sqlalchemy import and_
+from lib.auth_rbac_decorator import check_permission, require_role, log_audit, guard_payload_size, validate_json
 
 bp = Blueprint('sessions', __name__, url_prefix='/api/sessions')
 
@@ -61,7 +62,9 @@ def list_sessions():
 
 
 @bp.route('/<int:id>', methods=['GET'])
-@jwt_required()
+
+@check_permission('view_session')
+@log_audit('GET_GET_SESSION')
 def get_session(id):
     """تفاصيل جلسة"""
     try:
@@ -108,7 +111,10 @@ def create_session():
 
 
 @bp.route('/<int:id>', methods=['PUT'])
-@jwt_required()
+
+@check_permission('manage_session')
+@guard_payload_size()
+@log_audit('PUT_UPDATE_SESSION')
 def update_session(id):
     """تحديث جلسة"""
     try:
@@ -137,7 +143,11 @@ def update_session(id):
 
 
 @bp.route('/<int:id>/complete', methods=['POST'])
-@jwt_required()
+
+@check_permission('manage_completesession')
+@guard_payload_size()
+@validate_json()
+@log_audit('POST_COMPLETE_SESSION')
 def complete_session(id):
     """إكمال جلسة"""
     try:
@@ -154,7 +164,11 @@ def complete_session(id):
 
 
 @bp.route('/<int:id>/cancel', methods=['POST'])
-@jwt_required()
+
+@check_permission('manage_cancelsession')
+@guard_payload_size()
+@validate_json()
+@log_audit('POST_CANCEL_SESSION')
 def cancel_session(id):
     """إلغاء جلسة"""
     try:
@@ -173,7 +187,9 @@ def cancel_session(id):
 
 
 @bp.route('/upcoming', methods=['GET'])
-@jwt_required()
+
+@check_permission('view_upcoming_sessions')
+@log_audit('GET_GET_UPCOMING_SESSIONS')
 def get_upcoming_sessions():
     """الجلسات القادمة"""
     try:

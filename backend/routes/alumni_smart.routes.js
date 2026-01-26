@@ -32,3 +32,4 @@ router.post('/story', authorizeRole(['ADMIN', 'MARKETING']), async (req, res) =>
 });
 
 module.exports = router;
+

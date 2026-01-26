@@ -1,6 +1,9 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 
+// Use a configurable API base (falls back to port 3001)
+const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+
 const AuthContext = createContext();
 
 export function useAuth() {
@@ -14,8 +17,9 @@ export function AuthProvider({ children }) {
 
   const fetchUser = async () => {
     try {
-      const response = await axios.get('http://localhost:3001/api/auth/me');
-      setCurrentUser(response.data.user);
+      const response = await axios.get(`${API_BASE}/auth/me`);
+      const user = response.data?.user || response.data?.data?.user;
+      setCurrentUser(user || null);
     } catch (err) {
       console.error('Error fetching user:', err);
       logout();
@@ -26,6 +30,7 @@ export function AuthProvider({ children }) {
 
   // Set up axios defaults
   useEffect(() => {
+    axios.defaults.baseURL = API_BASE;
     const token = localStorage.getItem('token');
     if (token) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -40,19 +45,31 @@ export function AuthProvider({ children }) {
   const login = async (email, password) => {
     try {
       setError('');
-      console.log('🔐 Login attempt:', { email, url: 'http://localhost:3001/api/auth/login' });
+      console.log('🔐 Login attempt:', { email, url: `${API_BASE}/auth/login` });
 
-      const response = await axios.post('http://localhost:3001/api/auth/login', {
+      const response = await axios.post(`${API_BASE}/auth/login`, {
         email,
         password,
       });
 
       console.log('📥 Login response:', response.data);
 
-      const { accessToken, user } = response.data.data;
+      // Support both original and simple backend response shapes
+      const accessToken =
+        response.data?.accessToken ||
+        response.data?.token ||
+        response.data?.data?.accessToken ||
+        response.data?.data?.token;
+
+      const user = response.data?.user || response.data?.data?.user;
+
+      if (!accessToken) {
+        throw new Error('Missing access token from login response');
+      }
+
       localStorage.setItem('token', accessToken);
       axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
-      setCurrentUser(user);
+      setCurrentUser(user || null);
 
       console.log('✅ Login successful:', { user: user.email, role: user.role });
       return { success: true };
@@ -70,7 +87,7 @@ export function AuthProvider({ children }) {
   const register = async (name, email, password) => {
     try {
       setError('');
-      await axios.post('http://localhost:3001/api/auth/register', {
+      await axios.post(`${API_BASE}/auth/register`, {
         fullName: name,
         email,
         password,

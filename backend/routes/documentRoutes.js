@@ -58,3 +58,4 @@ router.delete('/:id', deleteDocument);
 router.post('/:id/restore', restoreDocument);
 
 module.exports = router;
+

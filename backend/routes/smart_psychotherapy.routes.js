@@ -59,3 +59,4 @@ router.post('/thought-record', mockAuth, async (req, res) => {
 });
 
 module.exports = router;
+

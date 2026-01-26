@@ -46,3 +46,4 @@ router.post('/resolve', authorizeRole(['ADMIN', 'MANAGER', 'SECURITY_HEAD']), as
 });
 
 module.exports = router;
+

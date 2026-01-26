@@ -35,3 +35,4 @@ router.post('/nfc-scan', async (req, res) => {
 });
 
 module.exports = router;
+

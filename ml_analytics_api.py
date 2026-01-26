@@ -1,3 +1,10 @@
+from auth_rbac_decorator import (
+    check_permission,
+    check_multiple_permissions,
+    guard_payload_size,
+    validate_json,
+    log_audit
+)
 """
 API endpoints لنظام التحليلات المتقدمة بالذكاء الاصطناعي
 Advanced Machine Learning Analytics API
@@ -22,6 +29,8 @@ ml_analytics_bp = Blueprint('ml_analytics', __name__, url_prefix='/api/ml-analyt
 
 @ml_analytics_bp.route('/models', methods=['GET'])
 @jwt_required()
+@check_permission('view_ml_analytics')
+@log_audit('GET_MODELS')
 def get_models():
     """الحصول على قائمة النماذج مع الفلترة والترقيم"""
     try:
@@ -96,6 +105,9 @@ def get_models():
 
 @ml_analytics_bp.route('/models', methods=['POST'])
 @jwt_required()
+@check_permission('manage_ml_analytics')
+@guard_payload_size()
+@log_audit('CREATE_MODEL')
 def create_model():
     """إنشاء نموذج جديد"""
     try:
@@ -127,6 +139,9 @@ def create_model():
 
 @ml_analytics_bp.route('/models/<int:model_id>/train', methods=['POST'])
 @jwt_required()
+@check_permission('manage_ml_analytics')
+@guard_payload_size()
+@log_audit('TRAIN_MODEL')
 def train_model(model_id):
     """تدريب النموذج"""
     try:
@@ -175,6 +190,8 @@ def train_model(model_id):
 
 @ml_analytics_bp.route('/predictions', methods=['GET'])
 @jwt_required()
+@check_permission('view_ml_analytics')
+@log_audit('GET_PREDICTIONS')
 def get_predictions():
     """الحصول على قائمة التنبؤات"""
     try:
@@ -228,6 +245,9 @@ def get_predictions():
 
 @ml_analytics_bp.route('/predictions', methods=['POST'])
 @jwt_required()
+@check_permission('manage_ml_analytics')
+@guard_payload_size()
+@log_audit('CREATE_PREDICTION')
 def create_prediction():
     """إنشاء تنبؤ جديد"""
     try:
@@ -290,6 +310,8 @@ def create_prediction():
 
 @ml_analytics_bp.route('/patterns', methods=['GET'])
 @jwt_required()
+@check_permission('view_ml_analytics')
+@log_audit('GET_PATTERNS')
 def get_patterns():
     """الحصول على تحليلات الأنماط"""
     try:
@@ -340,6 +362,9 @@ def get_patterns():
 
 @ml_analytics_bp.route('/patterns/analyze', methods=['POST'])
 @jwt_required()
+@check_permission('manage_ml_analytics')
+@guard_payload_size()
+@log_audit('ANALYZE_PATTERNS')
 def analyze_patterns():
     """تشغيل تحليل أنماط جديد"""
     try:
@@ -400,6 +425,8 @@ def analyze_patterns():
 
 @ml_analytics_bp.route('/insights', methods=['GET'])
 @jwt_required()
+@check_permission('view_ml_analytics')
+@log_audit('GET_INSIGHTS')
 def get_insights():
     """الحصول على الرؤى الذكية"""
     try:
@@ -460,6 +487,8 @@ def get_insights():
 
 @ml_analytics_bp.route('/alerts', methods=['GET'])
 @jwt_required()
+@check_permission('view_ml_analytics')
+@log_audit('GET_ALERTS')
 def get_alerts():
     """الحصول على تنبيهات الذكاء الاصطناعي"""
     try:
@@ -513,6 +542,9 @@ def get_alerts():
 
 @ml_analytics_bp.route('/alerts/<int:alert_id>/acknowledge', methods=['POST'])
 @jwt_required()
+@check_permission('manage_ml_analytics')
+@guard_payload_size()
+@log_audit('ACKNOWLEDGE_ALERT')
 def acknowledge_alert(alert_id):
     """تأكيد التنبيه"""
     try:
@@ -538,6 +570,8 @@ def acknowledge_alert(alert_id):
 
 @ml_analytics_bp.route('/dashboard', methods=['GET'])
 @jwt_required()
+@check_permission('view_dashboard')
+@log_audit('GET_DASHBOARD')
 def get_dashboard():
     """الحصول على بيانات لوحة التحكم"""
     try:
@@ -619,6 +653,9 @@ def get_dashboard():
 
 @ml_analytics_bp.route('/automl/pipelines', methods=['POST'])
 @jwt_required()
+@check_permission('manage_ml_analytics')
+@guard_payload_size()
+@log_audit('CREATE_AUTOML_PIPELINE')
 def create_automl_pipeline():
     """إنشاء خط أنابيب AutoML"""
     try:

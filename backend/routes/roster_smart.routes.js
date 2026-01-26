@@ -32,3 +32,4 @@ router.get('/fatigue', authorizeRole(['ADMIN', 'HR']), async (req, res) => {
 });
 
 module.exports = router;
+

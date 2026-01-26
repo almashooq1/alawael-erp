@@ -19,6 +19,11 @@ const express = require('express');
 
 // Mock auth to always allow access during tests
 jest.mock('../middleware/auth', () => ({
+  authenticateToken: (req, _res, next) => {
+    req.user = { id: '507f1f77bcf86cd799439011', role: 'admin', name: 'Admin' };
+    next();
+  },
+  requireAdmin: (_req, _res, next) => next(),
   authenticate: (req, _res, next) => {
     req.user = { id: '507f1f77bcf86cd799439011', role: 'admin', name: 'Admin' };
     next();
@@ -264,7 +269,9 @@ describe('Compliance API Routes', () => {
     };
 
     test('should record a valid violation or require auth', async () => {
-      const res = await request(app).post('/api/compliance/violations/record').send(validViolationPayload);
+      const res = await request(app)
+        .post('/api/compliance/violations/record')
+        .send(validViolationPayload);
 
       if (res.status === 401) {
         expect(res.status).toBe(401);
@@ -308,7 +315,9 @@ describe('Compliance API Routes', () => {
         },
       };
 
-      const res = await request(app).post('/api/compliance/violations/record').send(invalidCodePayload);
+      const res = await request(app)
+        .post('/api/compliance/violations/record')
+        .send(invalidCodePayload);
 
       if (res.status === 401) {
         expect(res.status).toBe(401);
@@ -327,7 +336,9 @@ describe('Compliance API Routes', () => {
     const validVehicleId = '507f1f77bcf86cd799439011';
 
     test('should return registration validity check', async () => {
-      const res = await request(app).get(`/api/compliance/vehicle/${validVehicleId}/registration-validity`).expect(200);
+      const res = await request(app)
+        .get(`/api/compliance/vehicle/${validVehicleId}/registration-validity`)
+        .expect(200);
 
       expect(res.body).toHaveProperty('success');
       if (res.body.success) {
@@ -340,7 +351,9 @@ describe('Compliance API Routes', () => {
     test('should handle non-existent vehicle gracefully', async () => {
       const fakeId = '000000000000000000000000';
 
-      const res = await request(app).get(`/api/compliance/vehicle/${fakeId}/registration-validity`).expect(404);
+      const res = await request(app)
+        .get(`/api/compliance/vehicle/${fakeId}/registration-validity`)
+        .expect(404);
 
       expect(res.body).toHaveProperty('success', false);
     });
@@ -348,7 +361,9 @@ describe('Compliance API Routes', () => {
     test('should validate vehicle ID format', async () => {
       const invalidId = 'invalid-id';
 
-      const res = await request(app).get(`/api/compliance/vehicle/${invalidId}/registration-validity`).expect(404);
+      const res = await request(app)
+        .get(`/api/compliance/vehicle/${invalidId}/registration-validity`)
+        .expect(404);
 
       expect(res.body).toHaveProperty('success', false);
     });
@@ -358,7 +373,9 @@ describe('Compliance API Routes', () => {
     const validVehicleId = '507f1f77bcf86cd799439011';
 
     test('should return insurance validity check', async () => {
-      const res = await request(app).get(`/api/compliance/vehicle/${validVehicleId}/insurance-validity`).expect(200);
+      const res = await request(app)
+        .get(`/api/compliance/vehicle/${validVehicleId}/insurance-validity`)
+        .expect(200);
 
       expect(res.body).toHaveProperty('success');
       if (res.body.success) {
@@ -368,7 +385,9 @@ describe('Compliance API Routes', () => {
     });
 
     test('should validate insurance provider', async () => {
-      const res = await request(app).get(`/api/compliance/vehicle/${validVehicleId}/insurance-validity`).expect(200);
+      const res = await request(app)
+        .get(`/api/compliance/vehicle/${validVehicleId}/insurance-validity`)
+        .expect(200);
 
       if (res.body.success && res.body.data.provider) {
         const validProviders = ['الأهلية', 'صقر', 'تكافل الراجحي', 'ميدغلف'];
@@ -381,7 +400,9 @@ describe('Compliance API Routes', () => {
     const validVehicleId = '507f1f77bcf86cd799439011';
 
     test('should return inspection validity check', async () => {
-      const res = await request(app).get(`/api/compliance/vehicle/${validVehicleId}/inspection-validity`).expect(200);
+      const res = await request(app)
+        .get(`/api/compliance/vehicle/${validVehicleId}/inspection-validity`)
+        .expect(200);
 
       expect(res.body).toHaveProperty('success');
       if (res.body.success) {
@@ -391,7 +412,9 @@ describe('Compliance API Routes', () => {
     });
 
     test('should return inspection schedule', async () => {
-      const res = await request(app).get(`/api/compliance/vehicle/${validVehicleId}/inspection-validity`).expect(200);
+      const res = await request(app)
+        .get(`/api/compliance/vehicle/${validVehicleId}/inspection-validity`)
+        .expect(200);
 
       if (res.body.success) {
         expect(res.body.data).toHaveProperty('schedule');
@@ -403,7 +426,9 @@ describe('Compliance API Routes', () => {
     const validVehicleId = '507f1f77bcf86cd799439011';
 
     test('should return complete compliance check', async () => {
-      const res = await request(app).get(`/api/compliance/vehicle/${validVehicleId}/full-check`).expect(200);
+      const res = await request(app)
+        .get(`/api/compliance/vehicle/${validVehicleId}/full-check`)
+        .expect(200);
 
       expect(res.body).toHaveProperty('success');
       if (res.body.success) {
@@ -415,7 +440,9 @@ describe('Compliance API Routes', () => {
     });
 
     test('should aggregate all checks into summary', async () => {
-      const res = await request(app).get(`/api/compliance/vehicle/${validVehicleId}/full-check`).expect(200);
+      const res = await request(app)
+        .get(`/api/compliance/vehicle/${validVehicleId}/full-check`)
+        .expect(200);
 
       if (res.body.success && res.body.data.summary) {
         expect(res.body.data.summary).toHaveProperty('status');
@@ -428,7 +455,9 @@ describe('Compliance API Routes', () => {
     const validVehicleId = '507f1f77bcf86cd799439011';
 
     test('should generate comprehensive compliance report', async () => {
-      const res = await request(app).get(`/api/compliance/vehicle/${validVehicleId}/compliance-report`).expect(200);
+      const res = await request(app)
+        .get(`/api/compliance/vehicle/${validVehicleId}/compliance-report`)
+        .expect(200);
 
       expect(res.body).toHaveProperty('success');
       if (res.body.success) {
@@ -440,7 +469,9 @@ describe('Compliance API Routes', () => {
     });
 
     test('should calculate compliance score between 0-100', async () => {
-      const res = await request(app).get(`/api/compliance/vehicle/${validVehicleId}/compliance-report`).expect(200);
+      const res = await request(app)
+        .get(`/api/compliance/vehicle/${validVehicleId}/compliance-report`)
+        .expect(200);
 
       if (res.body.success && res.body.data.score !== undefined) {
         expect(res.body.data.score).toBeGreaterThanOrEqual(0);
@@ -449,7 +480,9 @@ describe('Compliance API Routes', () => {
     });
 
     test('should provide actionable recommendations', async () => {
-      const res = await request(app).get(`/api/compliance/vehicle/${validVehicleId}/compliance-report`).expect(200);
+      const res = await request(app)
+        .get(`/api/compliance/vehicle/${validVehicleId}/compliance-report`)
+        .expect(200);
 
       if (res.body.success && res.body.data.recommendations) {
         expect(Array.isArray(res.body.data.recommendations)).toBe(true);
@@ -463,7 +496,10 @@ describe('Compliance API Routes', () => {
     };
 
     test('should generate fleet compliance report', async () => {
-      const res = await request(app).post('/api/compliance/fleet/compliance-report').send(validPayload).expect(200);
+      const res = await request(app)
+        .post('/api/compliance/fleet/compliance-report')
+        .send(validPayload)
+        .expect(200);
 
       expect(res.body).toHaveProperty('success');
       if (res.body.success) {
@@ -477,7 +513,10 @@ describe('Compliance API Routes', () => {
         vehicleIds: 'not-an-array',
       };
 
-      const res = await request(app).post('/api/compliance/fleet/compliance-report').send(invalidPayload).expect(400);
+      const res = await request(app)
+        .post('/api/compliance/fleet/compliance-report')
+        .send(invalidPayload)
+        .expect(400);
 
       expect(res.body).toHaveProperty('success', false);
     });
@@ -523,7 +562,10 @@ describe('Compliance API Routes', () => {
     };
 
     test('should validate correct vehicle data', async () => {
-      const res = await request(app).post('/api/compliance/vehicle/validate-data').send(validVehicleData).expect(200);
+      const res = await request(app)
+        .post('/api/compliance/vehicle/validate-data')
+        .send(validVehicleData)
+        .expect(200);
 
       expect(res.body).toHaveProperty('success');
       if (res.body.success) {
@@ -538,7 +580,10 @@ describe('Compliance API Routes', () => {
         // missing owner and registration
       };
 
-      const res = await request(app).post('/api/compliance/vehicle/validate-data').send(incompleteData).expect(200);
+      const res = await request(app)
+        .post('/api/compliance/vehicle/validate-data')
+        .send(incompleteData)
+        .expect(200);
 
       if (res.body.success) {
         expect(res.body.data.missingFields.length).toBeGreaterThan(0);
@@ -546,7 +591,10 @@ describe('Compliance API Routes', () => {
     });
 
     test('should report completion percentage', async () => {
-      const res = await request(app).post('/api/compliance/vehicle/validate-data').send(validVehicleData).expect(200);
+      const res = await request(app)
+        .post('/api/compliance/vehicle/validate-data')
+        .send(validVehicleData)
+        .expect(200);
 
       if (res.body.success) {
         expect(res.body.data).toHaveProperty('completionPercentage');
@@ -574,7 +622,9 @@ describe('Compliance API Routes', () => {
     });
 
     test('should handle invalid vehicle types', async () => {
-      const res = await request(app).get('/api/compliance/inspection-schedule/invalid_type').expect(404);
+      const res = await request(app)
+        .get('/api/compliance/inspection-schedule/invalid_type')
+        .expect(404);
 
       expect(res.body).toHaveProperty('success', false);
     });
@@ -582,7 +632,9 @@ describe('Compliance API Routes', () => {
 
   describe('GET /api/compliance/statistics/vehicles-compliance', () => {
     test('should return compliance statistics', async () => {
-      const res = await request(app).get('/api/compliance/statistics/vehicles-compliance').expect(200);
+      const res = await request(app)
+        .get('/api/compliance/statistics/vehicles-compliance')
+        .expect(200);
 
       expect(res.body).toHaveProperty('success');
       if (res.body.success) {
@@ -601,7 +653,9 @@ describe('Compliance API Routes', () => {
   describe('Error Handling', () => {
     test('should return 400 for server errors', async () => {
       // Mock a service error
-      const res = await request(app).get('/api/compliance/vehicle/invalid/compliance-report').expect(400);
+      const res = await request(app)
+        .get('/api/compliance/vehicle/invalid/compliance-report')
+        .expect(400);
 
       expect(res.body).toHaveProperty('success', false);
     });
@@ -630,9 +684,10 @@ describe('Compliance API Routes', () => {
 
       // Every response should have success and data/message
       expect(res.body).toHaveProperty('success');
-      expect(Object.prototype.hasOwnProperty.call(res.body, 'data') || Object.prototype.hasOwnProperty.call(res.body, 'message')).toBe(
-        true,
-      );
+      expect(
+        Object.prototype.hasOwnProperty.call(res.body, 'data') ||
+          Object.prototype.hasOwnProperty.call(res.body, 'message')
+      ).toBe(true);
     });
 
     test('should include timestamps in responses', async () => {

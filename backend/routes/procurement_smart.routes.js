@@ -32,3 +32,4 @@ router.post('/rfq', authorizeRole(['ADMIN', 'FINANCE']), async (req, res) => {
 });
 
 module.exports = router;
+

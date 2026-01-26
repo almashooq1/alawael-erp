@@ -14,6 +14,13 @@ import json
 from app import app, db
 from hr_models import *
 from hr_ai_services import HRAnalyticsAI, RecruitmentAI, TrainingRecommendationAI
+from auth_rbac_decorator import (
+    check_permission,
+    check_multiple_permissions,
+    guard_payload_size,
+    validate_json,
+    log_audit
+)
 
 # إنشاء خدمات الذكاء الاصطناعي
 hr_analytics = HRAnalyticsAI()
@@ -24,6 +31,8 @@ training_ai = TrainingRecommendationAI()
 
 @app.route('/api/hr/employees', methods=['GET'])
 @jwt_required()
+@check_permission('view_employees')
+@log_audit('LIST_EMPLOYEES')
 def get_employees():
     """عرض قائمة الموظفين مع الفلترة والبحث"""
     try:
@@ -83,6 +92,10 @@ def get_employees():
 
 @app.route('/api/hr/employees', methods=['POST'])
 @jwt_required()
+@check_permission('manage_employees')
+@guard_payload_size()
+@validate_json('employee_id', 'national_id', 'first_name', 'last_name', 'email', 'hire_date')
+@log_audit('CREATE_EMPLOYEE')
 def create_employee():
     """إضافة موظف جديد"""
     try:
@@ -145,6 +158,8 @@ def create_employee():
 
 @app.route('/api/hr/employees/<int:employee_id>', methods=['GET'])
 @jwt_required()
+@check_permission('view_employees')
+@log_audit('VIEW_EMPLOYEE')
 def get_employee(employee_id):
     """عرض تفاصيل موظف محدد"""
     try:
@@ -203,6 +218,8 @@ def get_employee(employee_id):
 
 @app.route('/api/hr/attendance', methods=['GET'])
 @jwt_required()
+@check_permission('view_attendance')
+@log_audit('LIST_ATTENDANCE')
 def get_attendance():
     """عرض سجلات الحضور والانصراف"""
     try:
@@ -258,6 +275,9 @@ def get_attendance():
 
 @app.route('/api/hr/attendance/check-in', methods=['POST'])
 @jwt_required()
+@check_permission('manage_attendance')
+@guard_payload_size()
+@log_audit('CHECK_IN')
 def check_in():
     """تسجيل الحضور"""
     try:
@@ -312,6 +332,8 @@ def check_in():
 
 @app.route('/api/hr/leave-requests', methods=['GET'])
 @jwt_required()
+@check_permission('view_leave_requests')
+@log_audit('LIST_LEAVE_REQUESTS')
 def get_leave_requests():
     """عرض طلبات الإجازات"""
     try:
@@ -368,6 +390,10 @@ def get_leave_requests():
 
 @app.route('/api/hr/leave-requests', methods=['POST'])
 @jwt_required()
+@check_permission('manage_leave_requests')
+@guard_payload_size()
+@validate_json('employee_id', 'leave_type_id', 'start_date', 'end_date', 'reason')
+@log_audit('CREATE_LEAVE_REQUEST')
 def create_leave_request():
     """إنشاء طلب إجازة جديد"""
     try:
@@ -412,6 +438,8 @@ def create_leave_request():
 
 @app.route('/api/hr/ai/analyze-performance/<int:employee_id>', methods=['POST'])
 @jwt_required()
+@check_permission('ai_analysis')
+@log_audit('AI_ANALYZE_PERFORMANCE')
 def analyze_employee_performance(employee_id):
     """تحليل أداء الموظف بالذكاء الاصطناعي"""
     try:
@@ -458,6 +486,8 @@ def analyze_employee_performance(employee_id):
 
 @app.route('/api/hr/ai/predict-turnover/<int:employee_id>', methods=['POST'])
 @jwt_required()
+@check_permission('ai_analysis')
+@log_audit('AI_PREDICT_TURNOVER')
 def predict_turnover_risk(employee_id):
     """التنبؤ بمخاطر ترك الموظف للعمل"""
     try:
@@ -507,6 +537,8 @@ def predict_turnover_risk(employee_id):
 
 @app.route('/api/hr/dashboard', methods=['GET'])
 @jwt_required()
+@check_permission('view_hr_dashboard')
+@log_audit('VIEW_HR_DASHBOARD')
 def hr_dashboard():
     """لوحة تحكم الموارد البشرية"""
     try:
@@ -558,6 +590,8 @@ def hr_dashboard():
 
 @app.route('/api/hr/salary-records', methods=['GET'])
 @jwt_required()
+@check_permission('view_salaries')
+@log_audit('LIST_SALARY_RECORDS')
 def get_salary_records():
     """عرض سجلات الرواتب"""
     try:
@@ -615,6 +649,10 @@ def get_salary_records():
 
 @app.route('/api/hr/salary-records', methods=['POST'])
 @jwt_required()
+@check_permission('manage_salaries')
+@guard_payload_size()
+@validate_json('employee_id', 'month', 'year', 'basic_salary')
+@log_audit('CREATE_SALARY_RECORD')
 def create_salary_record():
     """إنشاء سجل راتب جديد"""
     try:
@@ -684,6 +722,8 @@ def create_salary_record():
 
 @app.route('/api/hr/ai/recommend-salary/<int:employee_id>', methods=['POST'])
 @jwt_required()
+@check_permission('access_hr')
+@log_audit('RECOMMEND_SALARY_ADJUSTMENT')
 def recommend_salary_adjustment(employee_id):
     """توصية تعديل الراتب بالذكاء الاصطناعي"""
     try:
@@ -726,6 +766,8 @@ def recommend_salary_adjustment(employee_id):
 
 @app.route('/api/hr/performance-reviews', methods=['GET'])
 @jwt_required()
+@check_permission('view_hr')
+@log_audit('GET_PERFORMANCE_REVIEWS')
 def get_performance_reviews():
     """عرض تقييمات الأداء"""
     try:
@@ -782,6 +824,9 @@ def get_performance_reviews():
 
 @app.route('/api/hr/performance-reviews', methods=['POST'])
 @jwt_required()
+@check_permission('manage_hr')
+@guard_payload_size()
+@log_audit('CREATE_PERFORMANCE_REVIEW')
 def create_performance_review():
     """إنشاء تقييم أداء جديد"""
     try:
@@ -824,6 +869,8 @@ def create_performance_review():
 
 @app.route('/api/hr/training-programs', methods=['GET'])
 @jwt_required()
+@check_permission('view_hr')
+@log_audit('GET_TRAINING_PROGRAMS')
 def get_training_programs():
     """عرض برامج التدريب"""
     try:
@@ -873,6 +920,9 @@ def get_training_programs():
 
 @app.route('/api/hr/ai/recommend-training/<int:employee_id>', methods=['POST'])
 @jwt_required()
+@check_permission('manage_hr')
+@guard_payload_size()
+@log_audit('RECOMMEND_TRAINING')
 def recommend_training(employee_id):
     """توصية برامج التدريب بالذكاء الاصطناعي"""
     try:
@@ -908,6 +958,8 @@ def recommend_training(employee_id):
 
 @app.route('/api/hr/job-applications', methods=['GET'])
 @jwt_required()
+@check_permission('view_hr')
+@log_audit('GET_JOB_APPLICATIONS')
 def get_job_applications():
     """عرض طلبات التوظيف"""
     try:
@@ -958,6 +1010,9 @@ def get_job_applications():
 
 @app.route('/api/hr/ai/analyze-resume/<int:application_id>', methods=['POST'])
 @jwt_required()
+@check_permission('manage_hr')
+@guard_payload_size()
+@log_audit('ANALYZE_RESUME')
 def analyze_resume(application_id):
     """تحليل السيرة الذاتية بالذكاء الاصطناعي"""
     try:

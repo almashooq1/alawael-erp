@@ -1,3 +1,10 @@
+from auth_rbac_decorator import (
+    check_permission,
+    check_multiple_permissions,
+    guard_payload_size,
+    validate_json,
+    log_audit
+)
 """
 واجهة برمجة التطبيقات لنظام ربط الفروع
 Branch Integration API
@@ -26,6 +33,8 @@ logger = logging.getLogger(__name__)
 
 @branch_integration_bp.route('/branches', methods=['GET'])
 @jwt_required()
+@check_permission('view_branch_integration')
+@log_audit('GET_BRANCHES')
 def get_branches():
     """الحصول على جميع الفروع"""
     try:
@@ -41,6 +50,9 @@ def get_branches():
 
 @branch_integration_bp.route('/branches', methods=['POST'])
 @jwt_required()
+@check_permission('manage_branch_integration')
+@guard_payload_size()
+@log_audit('CREATE_BRANCH')
 def create_branch():
     """إنشاء فرع جديد"""
     try:
@@ -66,6 +78,8 @@ def create_branch():
 
 @branch_integration_bp.route('/branches/<int:branch_id>', methods=['GET'])
 @jwt_required()
+@check_permission('view_branch_integration')
+@log_audit('GET_BRANCH')
 def get_branch(branch_id):
     """الحصول على تفاصيل فرع"""
     try:
@@ -83,6 +97,9 @@ def get_branch(branch_id):
 
 @branch_integration_bp.route('/branches/<int:branch_id>/status', methods=['PUT'])
 @jwt_required()
+@check_permission('manage_branch_integration')
+@guard_payload_size()
+@log_audit('UPDATE_BRANCH_STATUS')
 def update_branch_status(branch_id):
     """تحديث حالة الفرع"""
     try:
@@ -107,6 +124,8 @@ def update_branch_status(branch_id):
 
 @branch_integration_bp.route('/connections', methods=['GET'])
 @jwt_required()
+@check_permission('view_branch_integration')
+@log_audit('GET_CONNECTIONS')
 def get_connections():
     """الحصول على جميع الاتصالات"""
     try:
@@ -128,6 +147,9 @@ def get_connections():
 
 @branch_integration_bp.route('/connections', methods=['POST'])
 @jwt_required()
+@check_permission('manage_branch_integration')
+@guard_payload_size()
+@log_audit('CREATE_CONNECTION')
 def create_connection():
     """إنشاء اتصال بين فرعين"""
     try:
@@ -153,6 +175,9 @@ def create_connection():
 
 @branch_integration_bp.route('/connections/<int:connection_id>/toggle', methods=['PUT'])
 @jwt_required()
+@check_permission('manage_branch_integration')
+@guard_payload_size()
+@log_audit('TOGGLE_CONNECTION')
 def toggle_connection(connection_id):
     """تفعيل/إلغاء تفعيل الاتصال"""
     try:
@@ -171,6 +196,9 @@ def toggle_connection(connection_id):
 
 @branch_integration_bp.route('/sync/<int:connection_id>', methods=['POST'])
 @jwt_required()
+@check_permission('manage_branch_integration')
+@guard_payload_size()
+@log_audit('SYNC_DATA')
 def sync_data(connection_id):
     """تنفيذ مزامنة البيانات"""
     try:
@@ -191,6 +219,8 @@ def sync_data(connection_id):
 
 @branch_integration_bp.route('/sync/history/<int:connection_id>', methods=['GET'])
 @jwt_required()
+@check_permission('view_branch_integration')
+@log_audit('GET_SYNC_HISTORY')
 def get_sync_history(connection_id):
     """الحصول على تاريخ المزامنة"""
     try:
@@ -208,6 +238,8 @@ def get_sync_history(connection_id):
 
 @branch_integration_bp.route('/sync/pending', methods=['GET'])
 @jwt_required()
+@check_permission('view_branch_integration')
+@log_audit('GET_PENDING_SYNCS')
 def get_pending_syncs():
     """الحصول على المزامنات المعلقة"""
     try:
@@ -226,6 +258,8 @@ def get_pending_syncs():
 
 @branch_integration_bp.route('/transfers', methods=['GET'])
 @jwt_required()
+@check_permission('view_branch_integration')
+@log_audit('GET_TRANSFERS')
 def get_transfers():
     """الحصول على طلبات النقل"""
     try:
@@ -254,6 +288,9 @@ def get_transfers():
 
 @branch_integration_bp.route('/transfers', methods=['POST'])
 @jwt_required()
+@check_permission('manage_branch_integration')
+@guard_payload_size()
+@log_audit('REQUEST_TRANSFER')
 def request_transfer():
     """طلب نقل طالب"""
     try:
@@ -280,6 +317,9 @@ def request_transfer():
 
 @branch_integration_bp.route('/transfers/<int:transfer_id>/approve', methods=['PUT'])
 @jwt_required()
+@check_permission('manage_branch_integration')
+@guard_payload_size()
+@log_audit('APPROVE_TRANSFER')
 def approve_transfer(transfer_id):
     """الموافقة على نقل الطالب"""
     try:
@@ -300,6 +340,9 @@ def approve_transfer(transfer_id):
 
 @branch_integration_bp.route('/transfers/<int:transfer_id>/execute', methods=['PUT'])
 @jwt_required()
+@check_permission('manage_branch_integration')
+@guard_payload_size()
+@log_audit('EXECUTE_TRANSFER')
 def execute_transfer(transfer_id):
     """تنفيذ نقل الطالب"""
     try:
@@ -318,6 +361,8 @@ def execute_transfer(transfer_id):
 
 @branch_integration_bp.route('/resources', methods=['GET'])
 @jwt_required()
+@check_permission('view_branch_integration')
+@log_audit('GET_RESOURCES')
 def get_resources():
     """الحصول على الموارد المشتركة"""
     try:
@@ -343,6 +388,9 @@ def get_resources():
 
 @branch_integration_bp.route('/resources', methods=['POST'])
 @jwt_required()
+@check_permission('manage_branch_integration')
+@guard_payload_size()
+@log_audit('CREATE_RESOURCE')
 def create_resource():
     """إنشاء مورد مشترك"""
     try:
@@ -371,6 +419,9 @@ def create_resource():
 
 @branch_integration_bp.route('/resources/<int:resource_id>/access', methods=['POST'])
 @jwt_required()
+@check_permission('manage_branch_integration')
+@guard_payload_size()
+@log_audit('REQUEST_RESOURCE_ACCESS')
 def request_resource_access(resource_id):
     """طلب الوصول لمورد"""
     try:
@@ -396,6 +447,9 @@ def request_resource_access(resource_id):
 
 @branch_integration_bp.route('/resources/access/<int:access_id>/approve', methods=['PUT'])
 @jwt_required()
+@check_permission('manage_branch_integration')
+@guard_payload_size()
+@log_audit('APPROVE_RESOURCE_ACCESS')
 def approve_resource_access(access_id):
     """الموافقة على طلب الوصول للمورد"""
     try:
@@ -415,6 +469,8 @@ def approve_resource_access(access_id):
 
 @branch_integration_bp.route('/reports', methods=['GET'])
 @jwt_required()
+@check_permission('view_reports')
+@log_audit('GET_REPORTS')
 def get_reports():
     """الحصول على التقارير المشتركة"""
     try:
@@ -436,6 +492,9 @@ def get_reports():
 
 @branch_integration_bp.route('/reports', methods=['POST'])
 @jwt_required()
+@check_permission('manage_branch_integration')
+@guard_payload_size()
+@log_audit('CREATE_REPORT')
 def create_report():
     """إنشاء تقرير مشترك"""
     try:
@@ -468,6 +527,8 @@ def create_report():
 
 @branch_integration_bp.route('/dashboard/<int:branch_id>', methods=['GET'])
 @jwt_required()
+@check_permission('view_dashboard')
+@log_audit('GET_BRANCH_DASHBOARD')
 def get_branch_dashboard(branch_id):
     """الحصول على لوحة تحكم الفرع"""
     try:
@@ -483,6 +544,8 @@ def get_branch_dashboard(branch_id):
 
 @branch_integration_bp.route('/network-topology', methods=['GET'])
 @jwt_required()
+@check_permission('view_branch_integration')
+@log_audit('GET_NETWORK_TOPOLOGY')
 def get_network_topology():
     """الحصول على طوبولوجيا شبكة الفروع"""
     try:

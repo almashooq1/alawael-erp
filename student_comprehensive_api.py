@@ -13,11 +13,18 @@ import json
 import os
 import io
 import pandas as pd
+from functools import wraps
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfbase import pdfmetrics
+
+# استيراد نظام RBAC المركزي
+from auth_rbac_decorator import (
+    check_permission, check_multiple_permissions,
+    guard_payload_size, validate_json, log_audit
+)
 
 # استيراد النماذج
 from student_comprehensive_models import (
@@ -31,10 +38,15 @@ from ai_communications_services import AIService
 # إنشاء Blueprint
 student_comprehensive_bp = Blueprint('student_comprehensive', __name__, url_prefix='/api/student-comprehensive')
 
+
+# ===== ملاحظة: نظام RBAC الآن مركزي في auth_rbac_decorator.py =====
+
 # ===== إدارة الملفات الشاملة =====
 
 @student_comprehensive_bp.route('/files', methods=['GET'])
 @jwt_required()
+@check_permission('view_files')
+@log_audit('LIST_COMPREHENSIVE_FILES')
 def get_comprehensive_files():
     """الحصول على قائمة الملفات الشاملة"""
     try:
@@ -79,6 +91,8 @@ def get_comprehensive_files():
 
 @student_comprehensive_bp.route('/files/<int:file_id>', methods=['GET'])
 @jwt_required()
+@check_permission('view_files')
+@log_audit('VIEW_COMPREHENSIVE_FILE')
 def get_comprehensive_file(file_id):
     """الحصول على ملف شامل محدد"""
     try:
@@ -117,9 +131,13 @@ def get_comprehensive_file(file_id):
 
 @student_comprehensive_bp.route('/files', methods=['POST'])
 @jwt_required()
+@roles_required('manage_files')
 def create_comprehensive_file():
     """إنشاء ملف شامل جديد"""
     try:
+        size_error = _ensure_payload_size()
+        if size_error:
+            return size_error
         data = request.get_json()
         current_user_id = get_jwt_identity()
         
@@ -149,10 +167,62 @@ def create_comprehensive_file():
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
+
+@student_comprehensive_bp.route('/files/<int:file_id>', methods=['PATCH'])
+@jwt_required()
+@roles_required('manage_files')
+def update_comprehensive_file(file_id):
+    """تحديث بيانات الملف الشامل"""
+    try:
+        size_error = _ensure_payload_size()
+        if size_error:
+            return size_error
+
+        data = request.get_json() or {}
+        file = StudentComprehensiveFile.query.get_or_404(file_id)
+
+        allowed_fields = ['personal_info', 'medical_history', 'family_info', 'educational_background', 'status']
+        for field in allowed_fields:
+            if field in data:
+                setattr(file, field, data[field])
+
+        file.updated_by = get_jwt_identity()
+        db.session.commit()
+
+        return jsonify({'message': 'تم تحديث الملف الشامل بنجاح'})
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+
+@student_comprehensive_bp.route('/files/<int:file_id>', methods=['DELETE'])
+@jwt_required()
+@roles_required('manage_files')
+def delete_comprehensive_file(file_id):
+    """أرشفة أو حذف ملف شامل"""
+    try:
+        file = StudentComprehensiveFile.query.get_or_404(file_id)
+        action = request.args.get('action', 'archive')
+
+        if action == 'delete':
+            db.session.delete(file)
+        else:
+            file.status = 'archived'
+            file.updated_by = get_jwt_identity()
+
+        db.session.commit()
+        return jsonify({'message': 'تمت معالجة الملف الشامل بنجاح', 'action': action})
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
 # ===== إدارة قوالب الاختبارات =====
 
 @student_comprehensive_bp.route('/assessment-templates', methods=['GET'])
 @jwt_required()
+@roles_required('view_files')
 def get_assessment_templates():
     """الحصول على قوالب الاختبارات"""
     try:
@@ -191,9 +261,13 @@ def get_assessment_templates():
 
 @student_comprehensive_bp.route('/assessment-templates', methods=['POST'])
 @jwt_required()
+@roles_required('manage_assessments')
 def create_assessment_template():
     """إنشاء قالب اختبار جديد"""
     try:
+        size_error = _ensure_payload_size()
+        if size_error:
+            return size_error
         data = request.get_json()
         current_user_id = get_jwt_identity()
         
@@ -235,6 +309,10 @@ def create_assessment_template():
 
 @student_comprehensive_bp.route('/assessments', methods=['POST'])
 @jwt_required()
+@check_permission('manage_assessments')
+@guard_payload_size()
+@validate_json('comprehensive_file_id', 'template_id', 'assessment_date')
+@log_audit('CREATE_ASSESSMENT')
 def create_assessment_record():
     """إنشاء سجل اختبار جديد"""
     try:
@@ -281,8 +359,57 @@ def create_assessment_record():
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
+
+@student_comprehensive_bp.route('/assessments/<int:record_id>', methods=['PATCH'])
+@jwt_required()
+@check_permission('manage_assessments')
+@guard_payload_size()
+@log_audit('UPDATE_ASSESSMENT')
+def update_assessment_record(record_id):
+    """تحديث سجل اختبار"""
+    try:
+        data = request.get_json() or {}
+        record = StudentAssessmentRecord.query.get_or_404(record_id)
+
+        mutable_fields = ['assessment_date', 'session_number', 'duration_actual', 'responses', 'raw_scores', 'standard_scores', 'percentiles', 'interpretation', 'recommendations', 'testing_conditions', 'behavioral_observations', 'status', 'ai_analysis_requested']
+
+        if 'assessment_date' in data:
+            record.assessment_date = datetime.strptime(data['assessment_date'], '%Y-%m-%d').date()
+
+        for field in mutable_fields:
+            if field != 'assessment_date' and field in data:
+                setattr(record, field, data[field])
+
+        record.updated_date = datetime.utcnow()
+        db.session.commit()
+
+        return jsonify({'message': 'تم تحديث سجل الاختبار بنجاح'})
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+
+@student_comprehensive_bp.route('/assessments/<int:record_id>', methods=['DELETE'])
+@jwt_required()
+@check_permission('manage_assessments')
+@log_audit('DELETE_ASSESSMENT')
+def delete_assessment_record(record_id):
+    """حذف سجل اختبار"""
+    try:
+        record = StudentAssessmentRecord.query.get_or_404(record_id)
+        db.session.delete(record)
+        db.session.commit()
+        return jsonify({'message': 'تم حذف سجل الاختبار بنجاح'})
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
 @student_comprehensive_bp.route('/assessments/<int:record_id>/ai-analysis', methods=['POST'])
 @jwt_required()
+@check_permission('ai_analysis')
+@log_audit('REQUEST_AI_ANALYSIS')
 def request_ai_analysis(record_id):
     """طلب تحليل الذكاء الاصطناعي للاختبار"""
     try:
@@ -330,6 +457,9 @@ def request_ai_analysis(record_id):
 
 @student_comprehensive_bp.route('/files/<int:file_id>/export', methods=['POST'])
 @jwt_required()
+@check_permission('export_files')
+@guard_payload_size()
+@log_audit('EXPORT_FILE')
 def export_comprehensive_file(file_id):
     """تصدير الملف الشامل"""
     try:
@@ -376,6 +506,64 @@ def export_comprehensive_file(file_id):
             export_log.status = 'failed'
             export_log.error_message = str(e)
             db.session.commit()
+        return jsonify({'error': str(e)}), 500
+
+
+@student_comprehensive_bp.route('/files/<int:file_id>/documents', methods=['POST'])
+@jwt_required()
+@check_permission('manage_files')
+@guard_payload_size()
+@validate_json('title', 'document_type')
+@log_audit('ADD_DOCUMENT')
+def add_document(file_id):
+    """إضافة مستند مرتبط بالملف الشامل (بيانات وصفية فقط)."""
+    try:
+        data = request.get_json() or {}
+
+        document_date = None
+        if data.get('document_date'):
+            document_date = datetime.strptime(data['document_date'], '%Y-%m-%d').date()
+
+        document = StudentDocument(
+            comprehensive_file_id=file_id,
+            title=data['title'],
+            document_type=data['document_type'],
+            description=data.get('description'),
+            file_name=data.get('file_name', data['title']),
+            file_path=data.get('file_path', ''),
+            file_size=data.get('file_size'),
+            mime_type=data.get('mime_type'),
+            document_date=document_date,
+            source=data.get('source'),
+            confidentiality_level=data.get('confidentiality_level', 'standard'),
+            requires_signature=data.get('requires_signature', False),
+            uploaded_by=get_jwt_identity()
+        )
+
+        db.session.add(document)
+        db.session.commit()
+
+        return jsonify({'message': 'تم إضافة المستند بنجاح', 'document_id': document.id}), 201
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+
+@student_comprehensive_bp.route('/documents/<int:document_id>', methods=['DELETE'])
+@jwt_required()
+@check_permission('manage_files')
+@log_audit('DELETE_DOCUMENT')
+def delete_document(document_id):
+    """حذف مستند"""
+    try:
+        document = StudentDocument.query.get_or_404(document_id)
+        db.session.delete(document)
+        db.session.commit()
+        return jsonify({'message': 'تم حذف المستند بنجاح'})
+
+    except Exception as e:
+        db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
 def generate_pdf_report(file, sections):
@@ -500,6 +688,8 @@ def generate_json_export(file, sections):
 
 @student_comprehensive_bp.route('/files/<int:file_id>/print', methods=['POST'])
 @jwt_required()
+@check_permission('print_files')
+@log_audit('CREATE_PRINT_JOB')
 def create_print_job(file_id):
     """إنشاء مهمة طباعة"""
     try:
@@ -535,6 +725,8 @@ def create_print_job(file_id):
 
 @student_comprehensive_bp.route('/dashboard', methods=['GET'])
 @jwt_required()
+@check_permission('view_files')
+@log_audit('VIEW_DASHBOARD')
 def get_dashboard_stats():
     """إحصائيات لوحة التحكم"""
     try:

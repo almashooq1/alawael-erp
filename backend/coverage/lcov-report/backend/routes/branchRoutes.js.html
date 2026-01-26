@@ -353,7 +353,8 @@
 <a name='L288'></a><a href='#L288'>288</a>
 <a name='L289'></a><a href='#L289'>289</a>
 <a name='L290'></a><a href='#L290'>290</a>
-<a name='L291'></a><a href='#L291'>291</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L291'></a><a href='#L291'>291</a>
+<a name='L292'></a><a href='#L292'>292</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -643,6 +644,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">/**
  * Branch Routes - مسارات إدارة الفروع
  */
@@ -651,7 +653,7 @@ const express = <span class="cstat-no" title="statement not covered" >require('e
 const router = <span class="cstat-no" title="statement not covered" >express.Router();</span>
 const Branch = <span class="cstat-no" title="statement not covered" >require('../models/Branch');</span>
 const Camera = <span class="cstat-no" title="statement not covered" >require('../models/Camera');</span>
-const { authenticate, authorize } = <span class="cstat-no" title="statement not covered" >require('../middleware/auth');</span>
+const { authenticateToken } = <span class="cstat-no" title="statement not covered" >require('../middleware/auth');</span>
 &nbsp;
 /**
  * الحصول على جميع الفروع
@@ -725,7 +727,7 @@ const { authenticate, authorize } = <span class="cstat-no" title="statement not 
 /**
  * إنشاء فرع جديد
  */
-<span class="cstat-no" title="statement not covered" >router.post('/', authenticate, authorize(['admin']), <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >router.post('/', authenticate, <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
     const { name, code, description, location, contact, settings } = <span class="cstat-no" title="statement not covered" >req.body;</span>
 &nbsp;
@@ -763,7 +765,7 @@ const { authenticate, authorize } = <span class="cstat-no" title="statement not 
 /**
  * تحديث فرع
  */
-<span class="cstat-no" title="statement not covered" >router.put('/:id', authenticate, authorize(['admin']), <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >router.put('/:id', authenticate, <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
     const { name, description, location, contact, settings, status } = <span class="cstat-no" title="statement not covered" >req.body;</span>
 &nbsp;
@@ -801,7 +803,7 @@ const { authenticate, authorize } = <span class="cstat-no" title="statement not 
 /**
  * حذف فرع (Soft Delete)
  */
-<span class="cstat-no" title="statement not covered" >router.delete('/:id', authenticate, authorize(['admin']), <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >router.delete('/:id', authenticate, <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
     const branch = <span class="cstat-no" title="statement not covered" >await Branch.findById(req.params.id);</span>
 <span class="cstat-no" title="statement not covered" >    if (!branch || branch.deletedAt) {</span>
@@ -829,7 +831,7 @@ const { authenticate, authorize } = <span class="cstat-no" title="statement not 
 /**
  * إضافة مستخدم للفرع
  */
-<span class="cstat-no" title="statement not covered" >router.post('/:id/users', authenticate, authorize(['admin']), <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >router.post('/:id/users', authenticate, <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
     const { userId, role } = <span class="cstat-no" title="statement not covered" >req.body;</span>
 &nbsp;
@@ -856,7 +858,7 @@ const { authenticate, authorize } = <span class="cstat-no" title="statement not 
 /**
  * إزالة مستخدم من الفرع
  */
-<span class="cstat-no" title="statement not covered" >router.delete('/:id/users/:userId', authenticate, authorize(['admin']), <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >router.delete('/:id/users/:userId', authenticate, <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
     const branch = <span class="cstat-no" title="statement not covered" >await Branch.findById(req.params.id);</span>
 <span class="cstat-no" title="statement not covered" >    if (!branch) {</span>
@@ -933,6 +935,7 @@ const { authenticate, authorize } = <span class="cstat-no" title="statement not 
 });
 &nbsp;
 <span class="cstat-no" title="statement not covered" >module.exports = router;</span>
+&nbsp;
 &nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
@@ -940,7 +943,7 @@ const { authenticate, authorize } = <span class="cstat-no" title="statement not 
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-01-17T11:40:09.432Z
+                at 2026-01-20T12:49:09.932Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

@@ -1,3 +1,10 @@
+from auth_rbac_decorator import (
+    check_permission,
+    check_multiple_permissions,
+    guard_payload_size,
+    validate_json,
+    log_audit
+)
 """
 API endpoints لنظام كاميرات المراقبة المترابطة
 Surveillance System API
@@ -31,6 +38,8 @@ surveillance_bp = Blueprint('surveillance', __name__, url_prefix='/api/surveilla
 
 @surveillance_bp.route('/cameras', methods=['GET'])
 @jwt_required()
+@check_permission('view_surveillance_system')
+@log_audit('GET_CAMERAS')
 def get_cameras():
     """الحصول على قائمة الكاميرات"""
     try:
@@ -63,6 +72,9 @@ def get_cameras():
 
 @surveillance_bp.route('/cameras', methods=['POST'])
 @jwt_required()
+@check_permission('manage_surveillance_system')
+@guard_payload_size()
+@log_audit('REGISTER_CAMERA')
 def register_camera():
     """تسجيل كاميرا جديدة"""
     try:
@@ -85,6 +97,9 @@ def register_camera():
 
 @surveillance_bp.route('/cameras/<int:camera_id>', methods=['PUT'])
 @jwt_required()
+@check_permission('manage_surveillance_system')
+@guard_payload_size()
+@log_audit('UPDATE_CAMERA')
 def update_camera(camera_id):
     """تحديث بيانات الكاميرا"""
     try:
@@ -111,6 +126,9 @@ def update_camera(camera_id):
 
 @surveillance_bp.route('/cameras/<int:camera_id>/status', methods=['PUT'])
 @jwt_required()
+@check_permission('manage_surveillance_system')
+@guard_payload_size()
+@log_audit('UPDATE_CAMERA_STATUS')
 def update_camera_status(camera_id):
     """تحديث حالة الكاميرا"""
     try:
@@ -132,6 +150,9 @@ def update_camera_status(camera_id):
 
 @surveillance_bp.route('/cameras/<int:camera_id>/share', methods=['POST'])
 @jwt_required()
+@check_permission('manage_surveillance_system')
+@guard_payload_size()
+@log_audit('SHARE_CAMERA')
 def share_camera(camera_id):
     """مشاركة كاميرا مع فروع أخرى"""
     try:
@@ -152,6 +173,9 @@ def share_camera(camera_id):
 
 @surveillance_bp.route('/access', methods=['POST'])
 @jwt_required()
+@check_permission('manage_surveillance_system')
+@guard_payload_size()
+@log_audit('GRANT_ACCESS')
 def grant_access():
     """منح صلاحية وصول للكاميرا"""
     try:
@@ -171,6 +195,8 @@ def grant_access():
 
 @surveillance_bp.route('/access/<int:access_id>', methods=['DELETE'])
 @jwt_required()
+@check_permission('manage_surveillance_system')
+@log_audit('REVOKE_ACCESS')
 def revoke_access(access_id):
     """إلغاء صلاحية الوصول"""
     try:
@@ -186,6 +212,8 @@ def revoke_access(access_id):
 
 @surveillance_bp.route('/cameras/<int:camera_id>/access/check', methods=['GET'])
 @jwt_required()
+@check_permission('view_surveillance_system')
+@log_audit('CHECK_CAMERA_ACCESS')
 def check_camera_access(camera_id):
     """التحقق من صلاحية الوصول للكاميرا"""
     try:
@@ -207,6 +235,9 @@ def check_camera_access(camera_id):
 
 @surveillance_bp.route('/live/start', methods=['POST'])
 @jwt_required()
+@check_permission('manage_surveillance_system')
+@guard_payload_size()
+@log_audit('START_LIVE_VIEW')
 def start_live_view():
     """بدء جلسة مشاهدة مباشرة"""
     try:
@@ -232,6 +263,9 @@ def start_live_view():
 
 @surveillance_bp.route('/live/end', methods=['POST'])
 @jwt_required()
+@check_permission('manage_surveillance_system')
+@guard_payload_size()
+@log_audit('END_LIVE_VIEW')
 def end_live_view():
     """إنهاء جلسة مشاهدة مباشرة"""
     try:
@@ -251,6 +285,8 @@ def end_live_view():
 
 @surveillance_bp.route('/live/sessions', methods=['GET'])
 @jwt_required()
+@check_permission('view_surveillance_system')
+@log_audit('GET_ACTIVE_SESSIONS')
 def get_active_sessions():
     """الحصول على الجلسات النشطة"""
     try:
@@ -270,6 +306,8 @@ def get_active_sessions():
 
 @surveillance_bp.route('/recordings', methods=['GET'])
 @jwt_required()
+@check_permission('view_surveillance_system')
+@log_audit('GET_RECORDINGS')
 def get_recordings():
     """الحصول على قائمة التسجيلات مع التحليلات"""
     try:
@@ -305,6 +343,9 @@ def get_recordings():
 
 @surveillance_bp.route('/recordings/start', methods=['POST'])
 @jwt_required()
+@check_permission('manage_surveillance_system')
+@guard_payload_size()
+@log_audit('START_RECORDING')
 def start_recording():
     """بدء تسجيل جديد مع دعم Hikvision"""
     try:
@@ -348,6 +389,9 @@ def start_recording():
 
 @surveillance_bp.route('/recordings/stop', methods=['POST'])
 @jwt_required()
+@check_permission('manage_surveillance_system')
+@guard_payload_size()
+@log_audit('STOP_RECORDING')
 def stop_recording():
     """إيقاف التسجيل مع معالجة Claude AI"""
     try:
@@ -385,6 +429,9 @@ def stop_recording():
 
 @surveillance_bp.route('/recordings/<int:recording_id>/analyze', methods=['POST'])
 @jwt_required()
+@check_permission('manage_surveillance_system')
+@guard_payload_size()
+@log_audit('ANALYZE_RECORDING')
 def analyze_recording(recording_id):
     """تحليل التسجيل باستخدام Claude AI"""
     try:
@@ -401,6 +448,8 @@ def analyze_recording(recording_id):
 
 @surveillance_bp.route('/alerts', methods=['GET'])
 @jwt_required()
+@check_permission('view_surveillance_system')
+@log_audit('GET_ALERTS')
 def get_alerts():
     """الحصول على التنبيهات"""
     try:
@@ -424,6 +473,9 @@ def get_alerts():
 
 @surveillance_bp.route('/alerts', methods=['POST'])
 @jwt_required()
+@check_permission('manage_surveillance_system')
+@guard_payload_size()
+@log_audit('CREATE_ALERT')
 def create_alert():
     """إنشاء تنبيه جديد"""
     try:
@@ -449,6 +501,9 @@ def create_alert():
 
 @surveillance_bp.route('/alerts/<int:alert_id>/acknowledge', methods=['POST'])
 @jwt_required()
+@check_permission('manage_surveillance_system')
+@guard_payload_size()
+@log_audit('ACKNOWLEDGE_ALERT')
 def acknowledge_alert(alert_id):
     """الإقرار بالتنبيه"""
     try:
@@ -470,6 +525,8 @@ def acknowledge_alert(alert_id):
 
 @surveillance_bp.route('/system/health', methods=['GET'])
 @jwt_required()
+@check_permission('view_surveillance_system')
+@log_audit('GET_SYSTEM_HEALTH')
 def get_system_health():
     """الحصول على صحة النظام"""
     try:
@@ -485,6 +542,8 @@ def get_system_health():
 
 @surveillance_bp.route('/dashboard', methods=['GET'])
 @jwt_required()
+@check_permission('view_dashboard')
+@log_audit('GET_DASHBOARD_DATA')
 def get_dashboard_data():
     """الحصول على بيانات لوحة التحكم"""
     try:
@@ -541,6 +600,9 @@ def get_dashboard_data():
 
 @surveillance_bp.route('/reports/activity', methods=['POST'])
 @jwt_required()
+@check_permission('generate_surveillance_system')
+@guard_payload_size()
+@log_audit('GENERATE_ACTIVITY_REPORT')
 def generate_activity_report():
     """إنشاء تقرير النشاط"""
     try:
@@ -564,6 +626,8 @@ def generate_activity_report():
 
 @surveillance_bp.route('/reports', methods=['GET'])
 @jwt_required()
+@check_permission('view_reports')
+@log_audit('GET_REPORTS')
 def get_reports():
     """الحصول على التقارير"""
     try:

@@ -24,14 +24,16 @@ const seedDatabase = async () => {
     // Hash password
     const hashedPassword = await bcrypt.hash('Admin@123456', 10);
 
-    // Create admin user
-    const admin = await User.create({
+    // Create admin user directly without middleware
+    const admin = new User({
       email: 'admin@alawael.com',
       password: hashedPassword,
       fullName: 'مسؤول النظام',
       role: 'admin',
       lastLogin: new Date(),
     });
+
+    await admin.save();
 
     console.log('✅ Database seeded successfully');
     console.log('📧 Admin Email: admin@alawael.com');

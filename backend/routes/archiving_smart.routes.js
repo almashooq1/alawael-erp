@@ -32,3 +32,4 @@ router.get('/research-export', authorizeRole(['ADMIN', 'CLINICAL_DIRECTOR']), as
 });
 
 module.exports = router;
+

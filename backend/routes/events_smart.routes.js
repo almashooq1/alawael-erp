@@ -45,3 +45,4 @@ router.get('/certificate', async (req, res) => {
 });
 
 module.exports = router;
+

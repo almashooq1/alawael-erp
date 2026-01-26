@@ -50,3 +50,4 @@ router.post('/activity', mockAuth, async (req, res) => {
 });
 
 module.exports = router;
+

@@ -8,6 +8,10 @@ jest.mock('../../middleware/auth.middleware', () => ({
     req.user = { id: 'user-1', role: 'admin' };
     next();
   },
+  requireAdmin: (req, res, next) => {
+    req.user = { id: 'user-1', role: 'admin' };
+    next();
+  },
   requireRole:
     (...roles) =>
     (req, res, next) => {
@@ -24,6 +28,10 @@ jest.mock('../../middleware/auth.middleware', () => ({
 
 jest.mock('../../middleware/auth', () => ({
   authenticateToken: (req, res, next) => {
+    req.user = { _id: 'user-1', role: 'admin' };
+    next();
+  },
+  requireAdmin: (req, res, next) => {
     req.user = { _id: 'user-1', role: 'admin' };
     next();
   },
@@ -102,7 +110,7 @@ jest.mock(
       sendNotification: async () => ({ success: true }),
     },
   }),
-  { virtual: true },
+  { virtual: true }
 );
 
 jest.mock('../../models/Notification.memory', () => ({
@@ -125,7 +133,9 @@ jest.mock('../../models/Notification.memory', () => ({
 }));
 
 jest.mock('../../services/smartNotificationService', () => {
-  return jest.fn().mockImplementation(() => ({ sendSmartNotification: async () => ({ ok: true }) }));
+  return jest
+    .fn()
+    .mockImplementation(() => ({ sendSmartNotification: async () => ({ ok: true }) }));
 });
 
 jest.mock('../../services/advancedMessagingAlertSystem', () => {
@@ -205,7 +215,9 @@ describe('Project routes smoke', () => {
   let phaseId;
 
   beforeAll(async () => {
-    const created = await request(app).post('/projects').send({ name: 'Smoke Project', startDate: '2025-01-01', endDate: '2025-02-01' });
+    const created = await request(app)
+      .post('/projects')
+      .send({ name: 'Smoke Project', startDate: '2025-01-01', endDate: '2025-02-01' });
     projectId = created.body.id;
   });
 
@@ -225,7 +237,9 @@ describe('Project routes smoke', () => {
   });
 
   test('allocate resource', async () => {
-    const res = await request(app).post(`/projects/${projectId}/resources`).send({ name: 'Designer', allocation: 25 });
+    const res = await request(app)
+      .post(`/projects/${projectId}/resources`)
+      .send({ name: 'Designer', allocation: 25 });
     expect(res.status).toBe(201);
   });
 
@@ -253,7 +267,9 @@ describe('Integration routes smoke', () => {
   });
 
   test('register webhook and trigger', async () => {
-    const created = await request(app).post('/webhooks/register').send({ event: 'user.created', url: 'http://example.com/hook' });
+    const created = await request(app)
+      .post('/webhooks/register')
+      .send({ event: 'user.created', url: 'http://example.com/hook' });
     expect(created.status).toBe(201);
     const webhookId = created.body.id;
     const trigger = await request(app)
@@ -317,7 +333,9 @@ describe('Search routes smoke', () => {
 
   test('filters and facets', async () => {
     const filters = [{ field: 'category', operator: 'eq', value: 'x' }];
-    const filterRes = await request(app).post('/search/filters').send({ data: sampleData, filters });
+    const filterRes = await request(app)
+      .post('/search/filters')
+      .send({ data: sampleData, filters });
     expect(filterRes.status).toBe(200);
 
     const facetRes = await request(app).get('/search/facets/name').send({ data: sampleData });
@@ -325,7 +343,9 @@ describe('Search routes smoke', () => {
   });
 
   test('autocomplete and stats', async () => {
-    const autoRes = await request(app).post('/search/autocomplete').send({ data: sampleData, query: 'a', field: 'name' });
+    const autoRes = await request(app)
+      .post('/search/autocomplete')
+      .send({ data: sampleData, query: 'a', field: 'name' });
     expect(autoRes.status).toBe(200);
 
     const statsRes = await request(app).get('/search/stats');
@@ -338,7 +358,9 @@ describe('Search routes smoke', () => {
       .send({ data: sampleData, searchCriteria: [{ field: 'category', value: 'x' }] });
     expect(compoundRes.status).toBe(200);
 
-    const exportRes = await request(app).post('/search/export').send({ results: sampleData, format: 'json' });
+    const exportRes = await request(app)
+      .post('/search/export')
+      .send({ results: sampleData, format: 'json' });
     expect(exportRes.status).toBe(200);
   });
 });
@@ -354,7 +376,10 @@ describe('Setup routes registration smoke', () => {
 describe('Transport routes smoke', () => {
   const router = require('../routes/transport.routes');
   const app = buildApp(router);
-  const token = jwt.sign({ id: 'user-1', role: 'admin' }, process.env.JWT_SECRET || 'your-secret-key');
+  const token = jwt.sign(
+    { id: 'user-1', role: 'admin' },
+    process.env.JWT_SECRET || 'your-secret-key'
+  );
   const authHeader = { Authorization: `Bearer ${token}` };
 
   test('list buses', async () => {
@@ -371,10 +396,16 @@ describe('Transport routes smoke', () => {
 describe('Messaging routes smoke', () => {
   const router = require('../../routes/messaging.routes');
   const app = buildApp(router);
-  const token = jwt.sign({ id: 'user-1', role: 'admin' }, process.env.JWT_SECRET || 'your-secret-key');
+  const token = jwt.sign(
+    { id: 'user-1', role: 'admin' },
+    process.env.JWT_SECRET || 'your-secret-key'
+  );
 
   test('send message', async () => {
-    const res = await request(app).post('/send').set('Authorization', `Bearer ${token}`).send({ conversationId: 'c1', content: 'hello' });
+    const res = await request(app)
+      .post('/send')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ conversationId: 'c1', content: 'hello' });
     expect(res.status).toBe(200);
   });
 });
@@ -382,10 +413,16 @@ describe('Messaging routes smoke', () => {
 describe('SMS routes smoke', () => {
   const router = require('../../routes/smsRoutes');
   const app = buildApp(router);
-  const token = jwt.sign({ id: 'user-1', role: 'admin' }, process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this-in-production');
+  const token = jwt.sign(
+    { id: 'user-1', role: 'admin' },
+    process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this-in-production'
+  );
 
   test('send SMS notification', async () => {
-    const res = await request(app).post('/send').set('Authorization', `Bearer ${token}`).send({ toNumber: '+100000000', message: 'hi' });
+    const res = await request(app)
+      .post('/send')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ toNumber: '+100000000', message: 'hi' });
     expect(res.status).toBe(200);
   });
 });
@@ -393,7 +430,10 @@ describe('SMS routes smoke', () => {
 describe('Notifications routes smoke', () => {
   const router = require('../../routes/notifications.routes');
   const app = buildApp(router);
-  const token = jwt.sign({ _id: 'user-1', role: 'admin' }, process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this-in-production');
+  const token = jwt.sign(
+    { _id: 'user-1', role: 'admin' },
+    process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this-in-production'
+  );
 
   test('list notifications', async () => {
     const res = await request(app).get('/').set('Authorization', `Bearer ${token}`);

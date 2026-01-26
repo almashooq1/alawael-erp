@@ -20,11 +20,20 @@ from finance_models import (
     Budget, BudgetItem, FixedAsset, AssetCategory, TaxReturn,
     FinancialReport, FinanceSettings, FinanceAuditLog
 )
+from auth_rbac_decorator import (
+    check_permission,
+    check_multiple_permissions,
+    guard_payload_size,
+    validate_json,
+    log_audit
+)
 
 # ===== دليل الحسابات =====
 
 @app.route('/api/finance/chart-of-accounts', methods=['GET'])
 @jwt_required()
+@check_permission('view_accounts')
+@log_audit('LIST_CHART_OF_ACCOUNTS')
 def get_chart_of_accounts():
     """عرض دليل الحسابات"""
     try:
@@ -62,6 +71,10 @@ def get_chart_of_accounts():
 
 @app.route('/api/finance/chart-of-accounts', methods=['POST'])
 @jwt_required()
+@check_permission('manage_accounts')
+@guard_payload_size()
+@validate_json('account_code', 'account_name', 'account_type')
+@log_audit('CREATE_ACCOUNT')
 def create_account():
     """إنشاء حساب جديد"""
     try:
@@ -109,6 +122,8 @@ def create_account():
 
 @app.route('/api/finance/journal-entries', methods=['GET'])
 @jwt_required()
+@check_permission('access_finance')
+@log_audit('GET_JOURNAL_ENTRIES')
 def get_journal_entries():
     """عرض القيود اليومية"""
     try:
@@ -159,6 +174,9 @@ def get_journal_entries():
 
 @app.route('/api/finance/journal-entries', methods=['POST'])
 @jwt_required()
+@check_permission('manage_finance')
+@guard_payload_size()
+@log_audit('CREATE_JOURNAL_ENTRY')
 def create_journal_entry():
     """إنشاء قيد يومي جديد"""
     try:
@@ -222,6 +240,8 @@ def create_journal_entry():
 
 @app.route('/api/finance/invoices', methods=['GET'])
 @jwt_required()
+@check_permission('view_finance')
+@log_audit('GET_INVOICES')
 def get_invoices():
     """عرض الفواتير"""
     try:
@@ -271,6 +291,8 @@ def get_invoices():
 
 @app.route('/api/finance/payments', methods=['GET'])
 @jwt_required()
+@check_permission('view_finance')
+@log_audit('GET_PAYMENTS')
 def get_payments():
     """عرض المدفوعات"""
     try:
@@ -313,6 +335,8 @@ def get_payments():
 
 @app.route('/api/finance/expenses', methods=['GET'])
 @jwt_required()
+@check_permission('view_finance')
+@log_audit('GET_EXPENSES')
 def get_expenses():
     """عرض المصروفات"""
     try:
@@ -359,6 +383,8 @@ def get_expenses():
 
 @app.route('/api/finance/dashboard', methods=['GET'])
 @jwt_required()
+@check_permission('view_dashboard')
+@log_audit('FINANCE_DASHBOARD')
 def finance_dashboard():
     """لوحة التحكم المالية"""
     try:
@@ -415,6 +441,8 @@ def finance_dashboard():
 
 @app.route('/api/finance/reports/balance-sheet', methods=['GET'])
 @jwt_required()
+@check_permission('view_finance')
+@log_audit('GENERATE_BALANCE_SHEET')
 def generate_balance_sheet():
     """إنشاء تقرير الميزانية العمومية"""
     try:
@@ -478,6 +506,8 @@ def generate_balance_sheet():
 
 @app.route('/api/finance/reports/income-statement', methods=['GET'])
 @jwt_required()
+@check_permission('view_finance')
+@log_audit('GENERATE_INCOME_STATEMENT')
 def generate_income_statement():
     """إنشاء تقرير قائمة الدخل"""
     try:
@@ -537,6 +567,8 @@ def generate_income_statement():
 
 @app.route('/api/finance/reports/cash-flow', methods=['GET'])
 @jwt_required()
+@check_permission('view_finance')
+@log_audit('GENERATE_CASH_FLOW')
 def generate_cash_flow():
     """إنشاء تقرير التدفق النقدي"""
     try:
@@ -596,6 +628,8 @@ def generate_cash_flow():
 
 @app.route('/api/finance/reports/tax-summary', methods=['GET'])
 @jwt_required()
+@check_permission('view_finance')
+@log_audit('GENERATE_TAX_SUMMARY')
 def generate_tax_summary():
     """إنشاء ملخص ضريبي"""
     try:
@@ -667,6 +701,8 @@ def generate_tax_summary():
 
 @app.route('/api/finance/fixed-assets', methods=['GET'])
 @jwt_required()
+@check_permission('view_finance')
+@log_audit('GET_FIXED_ASSETS')
 def get_fixed_assets():
     """عرض الأصول الثابتة"""
     try:
@@ -714,6 +750,9 @@ def get_fixed_assets():
 
 @app.route('/api/finance/fixed-assets/depreciation', methods=['POST'])
 @jwt_required()
+@check_permission('manage_finance')
+@guard_payload_size()
+@log_audit('CALCULATE_DEPRECIATION')
 def calculate_depreciation():
     """حساب الاستهلاك للأصول الثابتة"""
     try:
@@ -760,6 +799,8 @@ def calculate_depreciation():
 
 @app.route('/api/finance/budgets', methods=['GET'])
 @jwt_required()
+@check_permission('view_finance')
+@log_audit('GET_BUDGETS')
 def get_budgets():
     """عرض الموازنات"""
     try:
@@ -806,6 +847,8 @@ def get_budgets():
 
 @app.route('/api/finance/budgets/<int:budget_id>/variance', methods=['GET'])
 @jwt_required()
+@check_permission('view_finance')
+@log_audit('BUDGET_VARIANCE_ANALYSIS')
 def budget_variance_analysis(budget_id):
     """تحليل انحراف الموازنة"""
     try:
@@ -858,6 +901,8 @@ def budget_variance_analysis(budget_id):
 
 @app.route('/api/finance/bank-accounts', methods=['GET'])
 @jwt_required()
+@check_permission('view_finance')
+@log_audit('GET_BANK_ACCOUNTS')
 def get_bank_accounts():
     """عرض الحسابات البنكية"""
     try:
@@ -890,6 +935,8 @@ def get_bank_accounts():
 
 @app.route('/api/finance/bank-transactions', methods=['GET'])
 @jwt_required()
+@check_permission('view_finance')
+@log_audit('GET_BANK_TRANSACTIONS')
 def get_bank_transactions():
     """عرض المعاملات البنكية"""
     try:
@@ -940,6 +987,9 @@ def get_bank_transactions():
 
 @app.route('/api/finance/bank-reconciliation', methods=['POST'])
 @jwt_required()
+@check_permission('manage_finance')
+@guard_payload_size()
+@log_audit('BANK_RECONCILIATION')
 def bank_reconciliation():
     """تسوية البنك"""
     try:

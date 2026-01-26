@@ -1,3 +1,10 @@
+from auth_rbac_decorator import (
+    check_permission,
+    check_multiple_permissions,
+    guard_payload_size,
+    validate_json,
+    log_audit
+)
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
@@ -23,6 +30,8 @@ quality_bp = Blueprint('quality', __name__, url_prefix='/api/quality')
 # Quality Standards Management
 @quality_bp.route('/standards', methods=['GET'])
 @jwt_required()
+@check_permission('view_quality_management')
+@log_audit('GET_QUALITY_STANDARDS')
 def get_quality_standards():
     """الحصول على معايير الجودة"""
     try:
@@ -59,6 +68,9 @@ def get_quality_standards():
 
 @quality_bp.route('/standards', methods=['POST'])
 @jwt_required()
+@check_permission('manage_quality_management')
+@guard_payload_size()
+@log_audit('CREATE_QUALITY_STANDARD')
 def create_quality_standard():
     """إنشاء معيار جودة جديد"""
     try:
@@ -93,6 +105,8 @@ def create_quality_standard():
 # Quality Audits Management
 @quality_bp.route('/audits', methods=['GET'])
 @jwt_required()
+@check_permission('view_quality_management')
+@log_audit('GET_QUALITY_AUDITS')
 def get_quality_audits():
     """الحصول على تدقيقات الجودة"""
     try:
@@ -134,6 +148,9 @@ def get_quality_audits():
 
 @quality_bp.route('/audits', methods=['POST'])
 @jwt_required()
+@check_permission('manage_quality_management')
+@guard_payload_size()
+@log_audit('CREATE_QUALITY_AUDIT')
 def create_quality_audit():
     """إنشاء تدقيق جودة جديد"""
     try:
@@ -165,6 +182,8 @@ def create_quality_audit():
 # Performance Indicators
 @quality_bp.route('/indicators', methods=['GET'])
 @jwt_required()
+@check_permission('view_quality_management')
+@log_audit('GET_PERFORMANCE_INDICATORS')
 def get_performance_indicators():
     """الحصول على مؤشرات الأداء"""
     try:
@@ -187,6 +206,8 @@ def get_performance_indicators():
 # Dashboard Analytics
 @quality_bp.route('/dashboard', methods=['GET'])
 @jwt_required()
+@check_permission('view_dashboard')
+@log_audit('GET_QUALITY_DASHBOARD')
 def get_quality_dashboard():
     """لوحة تحكم الجودة"""
     try:
@@ -224,6 +245,8 @@ def get_quality_dashboard():
 # Compliance Checklists
 @quality_bp.route('/checklists', methods=['GET'])
 @jwt_required()
+@check_permission('view_quality_management')
+@log_audit('GET_COMPLIANCE_CHECKLISTS')
 def get_compliance_checklists():
     """الحصول على قوائم الامتثال"""
     try:
@@ -244,6 +267,9 @@ def get_compliance_checklists():
 
 @quality_bp.route('/checklists/<int:checklist_id>/submit', methods=['POST'])
 @jwt_required()
+@check_permission('manage_quality_management')
+@guard_payload_size()
+@log_audit('SUBMIT_CHECKLIST')
 def submit_checklist(checklist_id):
     """تقديم قائمة امتثال"""
     try:

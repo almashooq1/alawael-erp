@@ -1,3 +1,10 @@
+from auth_rbac_decorator import (
+    check_permission,
+    check_multiple_permissions,
+    guard_payload_size,
+    validate_json,
+    log_audit
+)
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
@@ -30,6 +37,8 @@ session_scheduling_bp = Blueprint('session_scheduling', __name__, url_prefix='/a
 # Therapy Rooms Management
 @session_scheduling_bp.route('/rooms', methods=['GET'])
 @jwt_required()
+@check_permission('view_session_scheduling')
+@log_audit('GET_THERAPY_ROOMS')
 def get_therapy_rooms():
     """Get all therapy rooms with filtering"""
     try:
@@ -78,6 +87,9 @@ def get_therapy_rooms():
 
 @session_scheduling_bp.route('/rooms', methods=['POST'])
 @jwt_required()
+@check_permission('manage_session_scheduling')
+@guard_payload_size()
+@log_audit('CREATE_THERAPY_ROOM')
 def create_therapy_room():
     """Create a new therapy room"""
     try:
@@ -115,6 +127,8 @@ def create_therapy_room():
 # Session Scheduling
 @session_scheduling_bp.route('/sessions', methods=['GET'])
 @jwt_required()
+@check_permission('view_session_scheduling')
+@log_audit('GET_SCHEDULED_SESSIONS')
 def get_scheduled_sessions():
     """Get scheduled sessions with filtering and calendar view"""
     try:
@@ -201,6 +215,9 @@ def get_scheduled_sessions():
 
 @session_scheduling_bp.route('/sessions', methods=['POST'])
 @jwt_required()
+@check_permission('manage_session_scheduling')
+@guard_payload_size()
+@log_audit('CREATE_SESSION_SCHEDULE')
 def create_session_schedule():
     """Create a new session schedule"""
     try:
@@ -297,6 +314,9 @@ def create_session_schedule():
 
 @session_scheduling_bp.route('/sessions/<int:session_id>', methods=['PUT'])
 @jwt_required()
+@check_permission('manage_session_scheduling')
+@guard_payload_size()
+@log_audit('UPDATE_SESSION_SCHEDULE')
 def update_session_schedule(session_id):
     """Update session schedule"""
     try:
@@ -346,6 +366,9 @@ def update_session_schedule(session_id):
 
 @session_scheduling_bp.route('/sessions/<int:session_id>/cancel', methods=['POST'])
 @jwt_required()
+@check_permission('manage_session_scheduling')
+@guard_payload_size()
+@log_audit('CANCEL_SESSION')
 def cancel_session(session_id):
     """Cancel a scheduled session"""
     try:
@@ -387,6 +410,9 @@ def cancel_session(session_id):
 
 @session_scheduling_bp.route('/api/session-scheduling/bulk-schedule', methods=['POST'])
 @jwt_required()
+@check_permission('manage_session_scheduling')
+@guard_payload_size()
+@log_audit('BULK_SCHEDULE_SESSIONS')
 def bulk_schedule_sessions():
     """جدولة مجموعة من الجلسات تلقائياً"""
     try:
@@ -495,6 +521,9 @@ def bulk_schedule_sessions():
 
 @session_scheduling_bp.route('/api/session-scheduling/optimize-schedule', methods=['POST'])
 @jwt_required()
+@check_permission('manage_session_scheduling')
+@guard_payload_size()
+@log_audit('OPTIMIZE_WEEKLY_SCHEDULE')
 def optimize_weekly_schedule():
     """تحسين الجدول الأسبوعي"""
     try:
@@ -519,6 +548,8 @@ def optimize_weekly_schedule():
 
 @session_scheduling_bp.route('/api/session-scheduling/scheduling-templates', methods=['GET'])
 @jwt_required()
+@check_permission('view_session_scheduling')
+@log_audit('GET_SCHEDULING_TEMPLATES')
 def get_scheduling_templates():
     """الحصول على قوالب الجدولة"""
     try:
@@ -552,6 +583,9 @@ def get_scheduling_templates():
 
 @session_scheduling_bp.route('/api/session-scheduling/apply-template', methods=['POST'])
 @jwt_required()
+@check_permission('manage_session_scheduling')
+@guard_payload_size()
+@log_audit('APPLY_SCHEDULING_TEMPLATE')
 def apply_scheduling_template():
     """تطبيق قالب جدولة على مستفيد"""
     try:
@@ -657,6 +691,8 @@ def apply_scheduling_template():
 # Calendar Integration
 @session_scheduling_bp.route('/calendar/events', methods=['GET'])
 @jwt_required()
+@check_permission('view_session_scheduling')
+@log_audit('GET_CALENDAR_EVENTS')
 def get_calendar_events():
     """Get calendar events for calendar view"""
     try:

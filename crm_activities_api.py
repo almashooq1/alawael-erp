@@ -1,3 +1,10 @@
+from auth_rbac_decorator import (
+    check_permission,
+    check_multiple_permissions,
+    guard_payload_size,
+    validate_json,
+    log_audit
+)
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
@@ -24,6 +31,8 @@ def get_current_user_id():
 # Activity Management APIs
 @activities_bp.route('/activities', methods=['GET'])
 @jwt_required()
+@check_permission('view_crm_activities')
+@log_audit('GET_ACTIVITIES')
 def get_activities():
     """الحصول على قائمة الأنشطة"""
     try:
@@ -126,6 +135,9 @@ def get_activities():
 
 @activities_bp.route('/activities', methods=['POST'])
 @jwt_required()
+@check_permission('manage_crm_activities')
+@guard_payload_size()
+@log_audit('CREATE_ACTIVITY')
 def create_activity():
     """إنشاء نشاط جديد"""
     try:
@@ -167,6 +179,8 @@ def create_activity():
 
 @activities_bp.route('/activities/<int:activity_id>', methods=['GET'])
 @jwt_required()
+@check_permission('view_crm_activities')
+@log_audit('GET_ACTIVITY')
 def get_activity(activity_id):
     """الحصول على تفاصيل نشاط"""
     try:
@@ -219,6 +233,9 @@ def get_activity(activity_id):
 
 @activities_bp.route('/activities/<int:activity_id>', methods=['PUT'])
 @jwt_required()
+@check_permission('manage_crm_activities')
+@guard_payload_size()
+@log_audit('UPDATE_ACTIVITY')
 def update_activity(activity_id):
     """تحديث بيانات نشاط"""
     try:
@@ -258,6 +275,9 @@ def update_activity(activity_id):
 
 @activities_bp.route('/activities/<int:activity_id>/complete', methods=['PUT'])
 @jwt_required()
+@check_permission('manage_crm_activities')
+@guard_payload_size()
+@log_audit('COMPLETE_ACTIVITY')
 def complete_activity(activity_id):
     """إكمال نشاط"""
     try:
@@ -283,6 +303,8 @@ def complete_activity(activity_id):
 # Task Analytics APIs
 @activities_bp.route('/activities/analytics', methods=['GET'])
 @jwt_required()
+@check_permission('view_crm_activities')
+@log_audit('GET_ACTIVITIES_ANALYTICS')
 def get_activities_analytics():
     """الحصول على تحليلات الأنشطة"""
     try:
@@ -364,6 +386,8 @@ def get_activities_analytics():
 
 @activities_bp.route('/activities/upcoming', methods=['GET'])
 @jwt_required()
+@check_permission('view_crm_activities')
+@log_audit('GET_UPCOMING_ACTIVITIES')
 def get_upcoming_activities():
     """الحصول على الأنشطة القادمة"""
     try:

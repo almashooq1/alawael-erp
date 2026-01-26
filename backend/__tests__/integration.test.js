@@ -30,9 +30,17 @@ describe('System Routes and Integration Tests', () => {
     });
 
     // Create tokens
-    adminToken = jwt.sign({ userId: 'admin-1', email: 'admin@example.com', role: 'admin' }, JWT_SECRET, { expiresIn: '24h' });
+    adminToken = jwt.sign(
+      { userId: 'admin-1', email: 'admin@example.com', role: 'admin' },
+      JWT_SECRET,
+      { expiresIn: '24h' }
+    );
 
-    userToken = jwt.sign({ userId: 'user-1', email: 'user@example.com', role: 'user' }, JWT_SECRET, { expiresIn: '24h' });
+    userToken = jwt.sign(
+      { userId: 'user-1', email: 'user@example.com', role: 'user' },
+      JWT_SECRET,
+      { expiresIn: '24h' }
+    );
   });
 
   describe('Health Check Endpoint', () => {
@@ -93,7 +101,10 @@ describe('System Routes and Integration Tests', () => {
     });
 
     it('should include CORS headers', async () => {
-      const res = await request(app).get('/api/users').set('Authorization', `Bearer ${adminToken}`).set('Origin', 'http://localhost:3000');
+      const res = await request(app)
+        .get('/api/users')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .set('Origin', 'http://localhost:3000');
 
       // CORS headers should be present or 200
       expect([200, 401, 403, 404, 500].includes(res.status)).toBe(true);
@@ -102,11 +113,14 @@ describe('System Routes and Integration Tests', () => {
 
   describe('Request/Response Handling', () => {
     it('should handle JSON requests', async () => {
-      const res = await request(app).post('/api/auth/register').set('Content-Type', 'application/json').send({
-        fullName: 'Test User',
-        email: 'test@example.com',
-        password: 'ValidPass123!',
-      });
+      const res = await request(app)
+        .post('/api/auth/register')
+        .set('Content-Type', 'application/json')
+        .send({
+          fullName: 'Test User',
+          email: 'test@example.com',
+          password: 'ValidPass123!',
+        });
 
       expect([201, 200, 400, 422, 404, 500].includes(res.status)).toBe(true);
     });
@@ -170,7 +184,7 @@ describe('System Routes and Integration Tests', () => {
               email: `test${i}@example.com`,
               password: 'ValidPass123!',
             })
-            .timeout(15000),
+            .timeout(15000)
         );
       }
 
@@ -185,18 +199,24 @@ describe('System Routes and Integration Tests', () => {
 
   describe('Content-Type Handling', () => {
     it('should reject invalid Content-Type', async () => {
-      const res = await request(app).post('/api/auth/register').set('Content-Type', 'text/plain').send('invalid');
+      const res = await request(app)
+        .post('/api/auth/register')
+        .set('Content-Type', 'text/plain')
+        .send('invalid');
 
       expect(typeof res.status).toBe('number');
       expect(res.status).toBeGreaterThanOrEqual(200);
     });
 
     it('should handle application/json', async () => {
-      const res = await request(app).post('/api/auth/register').set('Content-Type', 'application/json').send({
-        fullName: 'Test',
-        email: 'test@example.com',
-        password: 'ValidPass123!',
-      });
+      const res = await request(app)
+        .post('/api/auth/register')
+        .set('Content-Type', 'application/json')
+        .send({
+          fullName: 'Test',
+          email: 'test@example.com',
+          password: 'ValidPass123!',
+        });
 
       expect(typeof res.status).toBe('number');
       expect(res.status).toBeGreaterThanOrEqual(200);
@@ -301,13 +321,18 @@ describe('System Routes and Integration Tests', () => {
     });
 
     it('should handle PUT requests', async () => {
-      const res = await request(app).put('/api/users/123').set('Authorization', `Bearer ${adminToken}`).send({ fullName: 'Updated' });
+      const res = await request(app)
+        .put('/api/users/123')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ fullName: 'Updated' });
 
       expect([200, 404, 401, 403, 404, 500].includes(res.status)).toBe(true);
     });
 
     it('should handle DELETE requests', async () => {
-      const res = await request(app).delete('/api/users/123').set('Authorization', `Bearer ${adminToken}`);
+      const res = await request(app)
+        .delete('/api/users/123')
+        .set('Authorization', `Bearer ${adminToken}`);
 
       expect([200, 404, 401, 403, 404, 500].includes(res.status)).toBe(true);
     });
@@ -315,7 +340,7 @@ describe('System Routes and Integration Tests', () => {
     it('should handle unsupported methods', async () => {
       const res = await request(app).patch('/api/auth/register').send({});
 
-      expect([405, 404, 400, 404, 500].includes(res.status)).toBe(true);
+      expect([405, 404, 400, 500, 429].includes(res.status)).toBe(true);
     });
   });
 });

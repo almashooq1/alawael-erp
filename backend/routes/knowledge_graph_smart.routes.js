@@ -32,3 +32,4 @@ router.post('/connect', authorizeRole(['ADMIN', 'SECURITY']), async (req, res) =
 });
 
 module.exports = router;
+

@@ -32,3 +32,4 @@ router.get('/track/:studentId', authorizeRole(['PARENT', 'ADMIN']), async (req, 
 });
 
 module.exports = router;
+

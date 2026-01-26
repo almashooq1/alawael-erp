@@ -1,3 +1,10 @@
+from auth_rbac_decorator import (
+    check_permission,
+    check_multiple_permissions,
+    guard_payload_size,
+    validate_json,
+    log_audit
+)
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
@@ -24,6 +31,8 @@ def get_current_user_id():
 # Communication Management APIs
 @communications_bp.route('/communications', methods=['GET'])
 @jwt_required()
+@check_permission('view_crm_communications')
+@log_audit('GET_COMMUNICATIONS')
 def get_communications():
     """الحصول على قائمة الاتصالات"""
     try:
@@ -114,6 +123,9 @@ def get_communications():
 
 @communications_bp.route('/communications', methods=['POST'])
 @jwt_required()
+@check_permission('manage_crm_communications')
+@guard_payload_size()
+@log_audit('CREATE_COMMUNICATION')
 def create_communication():
     """إنشاء سجل اتصال جديد"""
     try:
@@ -158,6 +170,8 @@ def create_communication():
 
 @communications_bp.route('/communications/<int:communication_id>', methods=['GET'])
 @jwt_required()
+@check_permission('view_crm_communications')
+@log_audit('GET_COMMUNICATION')
 def get_communication(communication_id):
     """الحصول على تفاصيل اتصال"""
     try:
@@ -203,6 +217,9 @@ def get_communication(communication_id):
 
 @communications_bp.route('/communications/<int:communication_id>', methods=['PUT'])
 @jwt_required()
+@check_permission('manage_crm_communications')
+@guard_payload_size()
+@log_audit('UPDATE_COMMUNICATION')
 def update_communication(communication_id):
     """تحديث بيانات اتصال"""
     try:
@@ -243,6 +260,8 @@ def update_communication(communication_id):
 # Customer Communication History
 @communications_bp.route('/customers/<int:customer_id>/communications', methods=['GET'])
 @jwt_required()
+@check_permission('view_crm_communications')
+@log_audit('GET_CUSTOMER_COMMUNICATIONS')
 def get_customer_communications(customer_id):
     """الحصول على تاريخ اتصالات عميل"""
     try:
@@ -284,6 +303,8 @@ def get_customer_communications(customer_id):
 # Lead Communication History
 @communications_bp.route('/leads/<int:lead_id>/communications', methods=['GET'])
 @jwt_required()
+@check_permission('view_crm_communications')
+@log_audit('GET_LEAD_COMMUNICATIONS')
 def get_lead_communications(lead_id):
     """الحصول على تاريخ اتصالات عميل محتمل"""
     try:
@@ -325,6 +346,8 @@ def get_lead_communications(lead_id):
 # Communication Analytics
 @communications_bp.route('/communications/analytics', methods=['GET'])
 @jwt_required()
+@check_permission('view_crm_communications')
+@log_audit('GET_COMMUNICATIONS_ANALYTICS')
 def get_communications_analytics():
     """الحصول على تحليلات الاتصالات"""
     try:
@@ -403,6 +426,8 @@ def get_communications_analytics():
 # Follow-up Management
 @communications_bp.route('/follow-ups', methods=['GET'])
 @jwt_required()
+@check_permission('view_crm_communications')
+@log_audit('GET_FOLLOW_UPS')
 def get_follow_ups():
     """الحصول على المتابعات المطلوبة"""
     try:
@@ -452,6 +477,9 @@ def get_follow_ups():
 
 @communications_bp.route('/follow-ups/schedule', methods=['POST'])
 @jwt_required()
+@check_permission('manage_crm_communications')
+@guard_payload_size()
+@log_audit('SCHEDULE_FOLLOW_UP')
 def schedule_follow_up():
     """جدولة متابعة"""
     try:

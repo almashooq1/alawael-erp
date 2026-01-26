@@ -358,3 +358,4 @@ router.get('/:automationId/logs', authMiddleware, async (req, res) => {
 });
 
 module.exports = router;
+

@@ -1,3 +1,10 @@
+from auth_rbac_decorator import (
+    check_permission,
+    check_multiple_permissions,
+    guard_payload_size,
+    validate_json,
+    log_audit
+)
 # -*- coding: utf-8 -*-
 """
 واجهة برمجة التطبيقات لنظام التنبؤ بالنتائج والتقدم بالذكاء الاصطناعي
@@ -23,6 +30,8 @@ prediction_service = AIProgressPredictionService()
 
 @ai_prediction_bp.route('/models', methods=['GET'])
 @jwt_required()
+@check_permission('view_ai_progress_prediction')
+@log_audit('GET_PREDICTION_MODELS')
 def get_prediction_models():
     """الحصول على قائمة نماذج التنبؤ"""
     try:
@@ -33,6 +42,9 @@ def get_prediction_models():
 
 @ai_prediction_bp.route('/models', methods=['POST'])
 @jwt_required()
+@check_permission('manage_ai_progress_prediction')
+@guard_payload_size()
+@log_audit('CREATE_PREDICTION_MODEL')
 def create_prediction_model():
     """إنشاء نموذج تنبؤ جديد"""
     try:
@@ -52,6 +64,9 @@ def create_prediction_model():
 
 @ai_prediction_bp.route('/models/<int:model_id>/train', methods=['POST'])
 @jwt_required()
+@check_permission('manage_ai_progress_prediction')
+@guard_payload_size()
+@log_audit('TRAIN_MODEL')
 def train_model():
     """تدريب نموذج التنبؤ"""
     try:
@@ -65,6 +80,9 @@ def train_model():
 
 @ai_prediction_bp.route('/predict', methods=['POST'])
 @jwt_required()
+@check_permission('generate_ai_progress_prediction')
+@guard_payload_size()
+@log_audit('GENERATE_PREDICTION')
 def generate_prediction():
     """إنشاء تنبؤ جديد"""
     try:
@@ -92,6 +110,8 @@ def generate_prediction():
 
 @ai_prediction_bp.route('/student/<int:student_id>/predictions', methods=['GET'])
 @jwt_required()
+@check_permission('view_ai_progress_prediction')
+@log_audit('GET_STUDENT_PREDICTIONS')
 def get_student_predictions():
     """الحصول على تنبؤات الطالب"""
     try:
@@ -117,6 +137,8 @@ def get_student_predictions():
 
 @ai_prediction_bp.route('/predictions/<int:prediction_id>', methods=['GET'])
 @jwt_required()
+@check_permission('view_ai_progress_prediction')
+@log_audit('GET_PREDICTION_DETAILS')
 def get_prediction_details():
     """الحصول على تفاصيل التنبؤ"""
     try:
@@ -132,6 +154,9 @@ def get_prediction_details():
 
 @ai_prediction_bp.route('/predictions/<int:prediction_id>/validate', methods=['POST'])
 @jwt_required()
+@check_permission('manage_ai_progress_prediction')
+@guard_payload_size()
+@log_audit('VALIDATE_PREDICTION')
 def validate_prediction():
     """التحقق من صحة التنبؤ"""
     try:
@@ -153,6 +178,8 @@ def validate_prediction():
 
 @ai_prediction_bp.route('/dashboard', methods=['GET'])
 @jwt_required()
+@check_permission('view_dashboard')
+@log_audit('GET_PREDICTION_DASHBOARD')
 def get_prediction_dashboard():
     """الحصول على بيانات لوحة تحكم التنبؤات"""
     try:
@@ -169,6 +196,8 @@ def get_prediction_dashboard():
 
 @ai_prediction_bp.route('/alerts', methods=['GET'])
 @jwt_required()
+@check_permission('view_ai_progress_prediction')
+@log_audit('GET_PREDICTION_ALERTS')
 def get_prediction_alerts():
     """الحصول على تنبيهات التنبؤات"""
     try:
@@ -186,6 +215,9 @@ def get_prediction_alerts():
 
 @ai_prediction_bp.route('/alerts/<int:alert_id>/acknowledge', methods=['PUT'])
 @jwt_required()
+@check_permission('manage_ai_progress_prediction')
+@guard_payload_size()
+@log_audit('ACKNOWLEDGE_ALERT')
 def acknowledge_alert():
     """الإقرار بالتنبيه"""
     try:
@@ -208,6 +240,9 @@ def acknowledge_alert():
 
 @ai_prediction_bp.route('/alerts/<int:alert_id>/resolve', methods=['PUT'])
 @jwt_required()
+@check_permission('manage_ai_progress_prediction')
+@guard_payload_size()
+@log_audit('RESOLVE_ALERT')
 def resolve_alert():
     """حل التنبيه"""
     try:
@@ -230,6 +265,8 @@ def resolve_alert():
 
 @ai_prediction_bp.route('/features', methods=['GET'])
 @jwt_required()
+@check_permission('view_ai_progress_prediction')
+@log_audit('GET_PREDICTION_FEATURES')
 def get_prediction_features():
     """الحصول على خصائص التنبؤ"""
     try:
@@ -240,6 +277,9 @@ def get_prediction_features():
 
 @ai_prediction_bp.route('/features', methods=['POST'])
 @jwt_required()
+@check_permission('manage_ai_progress_prediction')
+@guard_payload_size()
+@log_audit('CREATE_PREDICTION_FEATURE')
 def create_prediction_feature():
     """إنشاء خاصية تنبؤ جديدة"""
     try:
@@ -276,6 +316,8 @@ def create_prediction_feature():
 
 @ai_prediction_bp.route('/reports', methods=['GET'])
 @jwt_required()
+@check_permission('view_reports')
+@log_audit('GET_PREDICTION_REPORTS')
 def get_prediction_reports():
     """الحصول على تقارير التنبؤات"""
     try:
@@ -295,6 +337,9 @@ def get_prediction_reports():
 
 @ai_prediction_bp.route('/reports', methods=['POST'])
 @jwt_required()
+@check_permission('generate_ai_progress_prediction')
+@guard_payload_size()
+@log_audit('GENERATE_PREDICTION_REPORT')
 def generate_prediction_report():
     """إنشاء تقرير تنبؤات"""
     try:
@@ -345,6 +390,8 @@ def generate_prediction_report():
 
 @ai_prediction_bp.route('/analytics/accuracy', methods=['GET'])
 @jwt_required()
+@check_permission('view_ai_progress_prediction')
+@log_audit('GET_ACCURACY_ANALYTICS')
 def get_accuracy_analytics():
     """تحليلات دقة التنبؤات"""
     try:
@@ -388,6 +435,8 @@ def get_accuracy_analytics():
 
 @ai_prediction_bp.route('/analytics/trends', methods=['GET'])
 @jwt_required()
+@check_permission('view_ai_progress_prediction')
+@log_audit('GET_PREDICTION_TRENDS')
 def get_prediction_trends():
     """تحليل اتجاهات التنبؤات"""
     try:

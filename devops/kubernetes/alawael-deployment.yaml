@@ -1,0 +1,354 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: alawael-erp
+---
+# ConfigMap for environment variables
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alawael-backend-config
+  namespace: alawael-erp
+data:
+  NODE_ENV: "production"
+  LOG_LEVEL: "info"
+  REDIS_ENABLED: "true"
+  SOCKET_IO_ENABLED: "true"
+  MONITORING_ENABLED: "true"
+---
+# Secret for sensitive data
+apiVersion: v1
+kind: Secret
+metadata:
+  name: alawael-secrets
+  namespace: alawael-erp
+type: Opaque
+stringData:
+  MONGODB_URI: "mongodb://admin:password@mongo-service:27017/alawael"
+  REDIS_PASSWORD: "redis-password-here"
+  JWT_SECRET: "jwt-secret-key-here"
+  API_SECRET: "api-secret-key-here"
+---
+# Backend Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alawael-backend
+  namespace: alawael-erp
+  labels:
+    app: alawael-backend
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: alawael-backend
+  template:
+    metadata:
+      labels:
+        app: alawael-backend
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9091"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: alawael-backend
+      containers:
+      - name: backend
+        image: alawael-backend:1.0.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 3001
+          protocol: TCP
+        - name: metrics
+          containerPort: 9091
+          protocol: TCP
+        
+        env:
+        - name: NODE_ENV
+          valueFrom:
+            configMapKeyRef:
+              name: alawael-backend-config
+              key: NODE_ENV
+        - name: MONGODB_URI
+          valueFrom:
+            secretKeyRef:
+              name: alawael-secrets
+              key: MONGODB_URI
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: alawael-secrets
+              key: REDIS_PASSWORD
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: alawael-secrets
+              key: JWT_SECRET
+        
+        # Resource requests and limits
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        
+        # Health checks
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3001
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3001
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        
+        # Lifecycle hooks
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/bin/sh", "-c", "sleep 15"]
+---
+# Frontend Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alawael-frontend
+  namespace: alawael-erp
+  labels:
+    app: alawael-frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: alawael-frontend
+  template:
+    metadata:
+      labels:
+        app: alawael-frontend
+    spec:
+      containers:
+      - name: frontend
+        image: alawael-frontend:1.0.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 3000
+        
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+---
+# Backend Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: alawael-backend-service
+  namespace: alawael-erp
+  labels:
+    app: alawael-backend
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 3001
+    targetPort: 3001
+    protocol: TCP
+  - name: metrics
+    port: 9091
+    targetPort: 9091
+    protocol: TCP
+  selector:
+    app: alawael-backend
+---
+# Frontend Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: alawael-frontend-service
+  namespace: alawael-erp
+  labels:
+    app: alawael-frontend
+spec:
+  type: ClusterIP
+  ports:
+  - port: 3000
+    targetPort: 3000
+    protocol: TCP
+  selector:
+    app: alawael-frontend
+---
+# Horizontal Pod Autoscaler for Backend
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: alawael-backend-hpa
+  namespace: alawael-erp
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: alawael-backend
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+---
+# Ingress for external access
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: alawael-ingress
+  namespace: alawael-erp
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  tls:
+  - hosts:
+    - api.alawael.com
+    - alawael.com
+    secretName: alawael-tls
+  rules:
+  - host: api.alawael.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: alawael-backend-service
+            port:
+              number: 3001
+  - host: alawael.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: alawael-frontend-service
+            port:
+              number: 3000
+---
+# ServiceAccount
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: alawael-backend
+  namespace: alawael-erp
+---
+# Role for backend pods
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: alawael-backend-role
+  namespace: alawael-erp
+rules:
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get"]
+---
+# RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: alawael-backend-rolebinding
+  namespace: alawael-erp
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: alawael-backend-role
+subjects:
+- kind: ServiceAccount
+  name: alawael-backend
+  namespace: alawael-erp
+---
+# PersistentVolumeClaim for backups
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: alawael-backups-pvc
+  namespace: alawael-erp
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 50Gi
+---
+# NetworkPolicy for security
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: alawael-network-policy
+  namespace: alawael-erp
+spec:
+  podSelector:
+    matchLabels:
+      app: alawael-backend
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: ingress-nginx
+    ports:
+    - protocol: TCP
+      port: 3001
+    - protocol: TCP
+      port: 9091
+  egress:
+  - to:
+    - namespaceSelector: {}
+    ports:
+    - protocol: TCP
+      port: 27017  # MongoDB
+    - protocol: TCP
+      port: 6379   # Redis
+    - protocol: TCP
+      port: 53     # DNS
+    - protocol: UDP
+      port: 53     # DNS

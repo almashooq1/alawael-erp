@@ -55,3 +55,4 @@ router.put('/resolve/:id', authorizeRole(['ADMIN', 'HR']), async (req, res) => {
 });
 
 module.exports = router;
+

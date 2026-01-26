@@ -1,77 +1,101 @@
 /**
- * Payment Gateway Integration Service
+ * Payment Gateway Integration Service (DB-backed)
  * Supports Stripe, PayPal, and KNET (Saudi)
  */
 
-// In-memory storage (replace with MongoDB)
-let payments = new Map();
-let invoices = new Map();
-let paymentMethods = new Map();
+const mongoose = require('mongoose');
+const Payment = require('../models/payment.model');
+const Invoice = require('../models/invoice.model');
+const AuditLogger = require('./audit-logger');
+const NotificationService = require('./notification.service');
+
+const PaymentMethodSchema = new mongoose.Schema(
+  {
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    type: {
+      type: String,
+      enum: ['card', 'paypal', 'knet', 'bank_transfer', 'other'],
+      required: true,
+    },
+    lastFour: { type: String, required: true },
+    expiryDate: String,
+    isDefault: { type: Boolean, default: false },
+    metadata: { type: Map, of: String },
+  },
+  { timestamps: true }
+);
+
+const PaymentMethod =
+  mongoose.models.PaymentMethod || mongoose.model('PaymentMethod', PaymentMethodSchema);
 
 class PaymentService {
-  /**
-   * Initialize payment with Stripe
-   */
-  async initializeStripePayment(userId, amount, currency = 'SAR', metadata = {}) {
-    try {
-      const paymentId = `stripe_${Date.now()}`;
+  constructor() {
+    this.defaultCurrency = 'SAR';
+  }
 
-      const payment = {
-        id: paymentId,
-        provider: 'stripe',
+  async initializeStripePayment(userId, amount, currency = this.defaultCurrency, metadata = {}) {
+    try {
+      if (!amount || amount <= 0) throw new Error('Invalid amount');
+
+      const transactionId = `stripe_${Date.now()}`;
+
+      const payment = await Payment.create({
+        transactionId,
         userId,
         amount,
         currency,
+        paymentMethod: 'card',
         status: 'pending',
+        stripePaymentIntentId: transactionId,
         metadata,
-        createdAt: new Date(),
-        expiresAt: new Date(Date.now() + 30 * 60 * 1000), // 30 minutes
-      };
+      });
 
-      payments.set(paymentId, payment);
-
-      // In production, call Stripe API
-      // const intent = await stripe.paymentIntents.create({...})
+      await this._logAudit(userId, 'PAYMENT_INIT', 'payment', payment._id, 'CREATE');
 
       return {
         success: true,
         message: 'Payment initialized',
-        paymentId,
-        clientSecret: 'pi_' + Math.random().toString(36).substr(2, 20),
+        paymentId: transactionId,
+        clientSecret:
+          payment.stripePaymentIntentId || `pi_${Math.random().toString(36).slice(2, 18)}`,
         amount,
         currency,
       };
     } catch (error) {
-      return {
-        success: false,
-        error: error.message,
-      };
+      await this._logAudit(
+        userId,
+        'PAYMENT_INIT_FAILED',
+        'payment',
+        undefined,
+        'CREATE',
+        'failure',
+        error.message
+      );
+      return { success: false, error: error.message };
     }
   }
 
-  /**
-   * Confirm Stripe payment
-   */
-  async confirmStripePayment(paymentId, paymentMethod) {
+  async confirmStripePayment(paymentId, paymentMethodId) {
     try {
-      const payment = payments.get(paymentId);
-
-      if (!payment) {
-        return {
-          success: false,
-          error: 'Payment not found',
-        };
-      }
-
-      // In production, confirm with Stripe
-      // const confirmed = await stripe.paymentIntents.confirm(...)
+      const payment = await Payment.findOne({ transactionId: paymentId });
+      if (!payment) throw new Error('Payment not found');
 
       payment.status = 'completed';
       payment.completedAt = new Date();
-      payment.paymentMethod = paymentMethod;
-      payment.transactionId = 'txn_' + Math.random().toString(36).substr(2, 15);
+      payment.cardDetails = payment.cardDetails || {};
+      payment.cardDetails.last4 =
+        (paymentMethodId && paymentMethodId.slice(-4)) || payment.cardDetails.last4;
+      payment.metadata = payment.metadata || new Map();
+      payment.metadata.set('paymentMethodId', paymentMethodId || 'unknown');
 
-      payments.set(paymentId, payment);
+      await payment.save();
+
+      await this._logAudit(payment.userId, 'PAYMENT_CONFIRM', 'payment', payment._id, 'UPDATE');
+      await this._notify(payment.userId, {
+        title: 'Payment completed',
+        message: `Payment ${payment.transactionId} completed successfully`,
+        type: 'PAYMENT',
+      });
 
       return {
         success: true,
@@ -81,109 +105,100 @@ class PaymentService {
         currency: payment.currency,
       };
     } catch (error) {
-      return {
-        success: false,
-        error: error.message,
-      };
+      return { success: false, error: error.message };
     }
   }
 
-  /**
-   * Initialize PayPal payment
-   */
-  async initializePayPalPayment(userId, amount, currency = 'SAR', metadata = {}) {
+  async initializePayPalPayment(userId, amount, currency = this.defaultCurrency, metadata = {}) {
     try {
-      const paymentId = `paypal_${Date.now()}`;
+      if (!amount || amount <= 0) throw new Error('Invalid amount');
 
-      const payment = {
-        id: paymentId,
-        provider: 'paypal',
+      const transactionId = `paypal_${Date.now()}`;
+
+      const payment = await Payment.create({
+        transactionId,
         userId,
         amount,
         currency,
+        paymentMethod: 'paypal',
         status: 'pending',
+        paypalTransactionId: transactionId,
         metadata,
-        createdAt: new Date(),
-      };
+      });
 
-      payments.set(paymentId, payment);
-
-      // In production, call PayPal API
-      // const order = await client.execute(request)
+      await this._logAudit(userId, 'PAYPAL_INIT', 'payment', payment._id, 'CREATE');
 
       return {
         success: true,
         message: 'PayPal payment initialized',
-        paymentId,
-        approvalUrl: 'https://www.paypal.com/checkoutnow?token=ec-xxx',
+        paymentId: transactionId,
+        approvalUrl: `https://www.paypal.com/checkoutnow?token=${transactionId}`,
       };
     } catch (error) {
-      return {
-        success: false,
-        error: error.message,
-      };
+      await this._logAudit(
+        userId,
+        'PAYPAL_INIT_FAILED',
+        'payment',
+        undefined,
+        'CREATE',
+        'failure',
+        error.message
+      );
+      return { success: false, error: error.message };
     }
   }
 
-  /**
-   * Initialize KNET payment (Saudi Arabia)
-   */
-  async initializeKNETPayment(userId, amount, currency = 'SAR', metadata = {}) {
+  async initializeKNETPayment(userId, amount, currency = this.defaultCurrency, metadata = {}) {
     try {
-      const paymentId = `knet_${Date.now()}`;
+      if (!amount || amount <= 0) throw new Error('Invalid amount');
 
-      const payment = {
-        id: paymentId,
-        provider: 'knet',
+      const transactionId = `knet_${Date.now()}`;
+
+      const payment = await Payment.create({
+        transactionId,
         userId,
         amount,
         currency,
+        paymentMethod: 'knet',
         status: 'pending',
         metadata,
-        createdAt: new Date(),
-      };
+      });
 
-      payments.set(paymentId, payment);
-
-      // In production, call KNET API
-      // const response = await knetGateway.initiateTransaction(...)
+      await this._logAudit(userId, 'KNET_INIT', 'payment', payment._id, 'CREATE');
 
       return {
         success: true,
         message: 'KNET payment initialized',
-        paymentId,
-        redirectUrl: 'https://knet.gateway.com/payment?ref=' + paymentId,
+        paymentId: transactionId,
+        redirectUrl: `https://knet.gateway.com/payment?ref=${transactionId}`,
         amount,
-        currency: 'SAR',
+        currency,
       };
     } catch (error) {
-      return {
-        success: false,
-        error: error.message,
-      };
+      await this._logAudit(
+        userId,
+        'KNET_INIT_FAILED',
+        'payment',
+        undefined,
+        'CREATE',
+        'failure',
+        error.message
+      );
+      return { success: false, error: error.message };
     }
   }
 
-  /**
-   * Get payment status
-   */
   async getPaymentStatus(paymentId) {
     try {
-      const payment = payments.get(paymentId);
-
-      if (!payment) {
-        return {
-          success: false,
-          error: 'Payment not found',
-        };
-      }
+      const payment = await Payment.findOne({ transactionId: paymentId }).lean();
+      if (!payment) throw new Error('Payment not found');
 
       return {
         success: true,
         payment: {
-          id: payment.id,
+          id: payment.transactionId,
           status: payment.status,
-          provider: payment.provider,
+          provider: payment.paymentMethod,
           amount: payment.amount,
           currency: payment.currency,
           createdAt: payment.createdAt,
@@ -192,73 +207,80 @@ class PaymentService {
         },
       };
     } catch (error) {
-      return {
-        success: false,
-        error: error.message,
-      };
+      return { success: false, error: error.message };
     }
   }
 
-  /**
-   * Create invoice
-   */
   async createInvoice(userId, items, metadata = {}) {
     try {
-      const invoiceId = `inv_${Date.now()}`;
+      const safeItems = (items || []).map(item => ({
+        description: item.description || item.name || 'Item',
+        quantity: item.quantity || 1,
+        unitPrice: item.price || item.unitPrice || 0,
+        total: (item.price || item.unitPrice || 0) * (item.quantity || 1),
+      }));
 
-      const totalAmount = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+      if (!safeItems.length) throw new Error('Items required');
 
-      const invoice = {
-        id: invoiceId,
+      const subtotal = safeItems.reduce((sum, item) => sum + item.total, 0);
+      const tax = metadata.tax != null ? Number(metadata.tax) : subtotal * 0.0;
+      const discount = metadata.discount != null ? Number(metadata.discount) : 0;
+      const total = subtotal + tax - discount;
+
+      const invoice = await Invoice.create({
+        invoiceNumber: metadata.invoiceNumber || `INV-${Date.now()}`,
         userId,
-        items,
-        totalAmount,
-        currency: metadata.currency || 'SAR',
+        items: safeItems,
+        subtotal,
+        tax,
+        discount,
+        total,
         status: 'draft',
-        createdAt: new Date(),
         dueDate: metadata.dueDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-        metadata,
-      };
+        notes: metadata.notes,
+      });
 
-      invoices.set(invoiceId, invoice);
+      await this._logAudit(userId, 'INVOICE_CREATE', 'invoice', invoice._id, 'CREATE');
 
       return {
         success: true,
         message: 'Invoice created',
-        invoiceId,
-        totalAmount,
-        currency: invoice.currency,
+        invoiceId: invoice._id,
+        invoiceNumber: invoice.invoiceNumber,
+        totalAmount: invoice.total,
+        currency: metadata.currency || this.defaultCurrency,
       };
     } catch (error) {
-      return {
-        success: false,
-        error: error.message,
-      };
+      await this._logAudit(
+        userId,
+        'INVOICE_CREATE_FAILED',
+        'invoice',
+        undefined,
+        'CREATE',
+        'failure',
+        error.message
+      );
+      return { success: false, error: error.message };
     }
   }
 
-  /**
-   * Send invoice
-   */
   async sendInvoice(invoiceId, recipientEmail) {
     try {
-      const invoice = invoices.get(invoiceId);
-
-      if (!invoice) {
-        return {
-          success: false,
-          error: 'Invoice not found',
-        };
-      }
+      const invoice = await Invoice.findById(invoiceId);
+      if (!invoice) throw new Error('Invoice not found');
 
       invoice.status = 'sent';
       invoice.sentAt = new Date();
-      invoice.sentTo = recipientEmail;
+      invoice.notes = invoice.notes || '';
+      await invoice.save();
 
-      // In production, send via email service
-      // await emailService.sendInvoice(recipientEmail, invoice)
-
-      invoices.set(invoiceId, invoice);
+      await this._logAudit(invoice.userId, 'INVOICE_SEND', 'invoice', invoice._id, 'UPDATE');
+      await this._notify(invoice.userId, {
+        title: 'Invoice sent',
+        message: `Invoice ${invoice.invoiceNumber} sent to ${recipientEmail}`,
+        type: 'INVOICE',
+        meta: { recipientEmail },
+      });
 
       return {
         success: true,
@@ -266,199 +288,206 @@ class PaymentService {
         sentTo: recipientEmail,
       };
     } catch (error) {
-      return {
-        success: false,
-        error: error.message,
-      };
+      return { success: false, error: error.message };
     }
   }
 
-  /**
-   * Save payment method
-   */
   async savePaymentMethod(userId, paymentMethod, metadata = {}) {
     try {
-      const methodId = `pm_${Date.now()}`;
-
-      const method = {
-        id: methodId,
+      const method = await PaymentMethod.create({
         userId,
-        type: paymentMethod.type, // 'card', 'paypal', 'knet'
+        type: paymentMethod.type,
         lastFour: paymentMethod.lastFour,
         expiryDate: paymentMethod.expiryDate,
         isDefault: paymentMethod.isDefault || false,
         metadata,
-        createdAt: new Date(),
-      };
+      });
 
-      paymentMethods.set(methodId, method);
+      if (method.isDefault) {
+        await PaymentMethod.updateMany({ userId, _id: { $ne: method._id } }, { isDefault: false });
+      }
 
-      return {
-        success: true,
-        message: 'Payment method saved',
-        methodId,
-      };
+      await this._logAudit(userId, 'PAYMENT_METHOD_SAVE', 'payment_method', method._id, 'CREATE');
+
+      return { success: true, message: 'Payment method saved', methodId: method._id };
     } catch (error) {
-      return {
-        success: false,
-        error: error.message,
-      };
+      return { success: false, error: error.message };
     }
   }
 
-  /**
-   * Get saved payment methods
-   */
   async getSavedPaymentMethods(userId) {
     try {
-      const methods = Array.from(paymentMethods.values())
-        .filter(m => m.userId === userId)
-        .map(m => ({
-          id: m.id,
-          type: m.type,
-          lastFour: m.lastFour,
-          expiryDate: m.expiryDate,
-          isDefault: m.isDefault,
-          createdAt: m.createdAt,
-        }));
-
-      return {
-        success: true,
-        methods,
-        count: methods.length,
-      };
+      const methods = await PaymentMethod.find({ userId }).sort({ createdAt: -1 }).lean();
+      return { success: true, methods, count: methods.length };
     } catch (error) {
-      return {
-        success: false,
-        error: error.message,
-      };
+      return { success: false, error: error.message };
     }
   }
 
-  /**
-   * Delete payment method
-   */
   async deletePaymentMethod(methodId) {
     try {
-      paymentMethods.delete(methodId);
-
-      return {
-        success: true,
-        message: 'Payment method deleted',
-      };
+      await PaymentMethod.deleteOne({ _id: methodId });
+      return { success: true, message: 'Payment method deleted' };
     } catch (error) {
-      return {
-        success: false,
-        error: error.message,
-      };
+      return { success: false, error: error.message };
     }
   }
 
-  /**
-   * Refund payment
-   */
   async refundPayment(paymentId, reason = '') {
     try {
-      const payment = payments.get(paymentId);
-
-      if (!payment) {
-        return {
-          success: false,
-          error: 'Payment not found',
-        };
-      }
-
-      if (payment.status !== 'completed') {
-        return {
-          success: false,
-          error: 'Payment cannot be refunded',
-        };
-      }
-
-      const refundId = `ref_${Date.now()}`;
+      const payment = await Payment.findOne({ transactionId: paymentId });
+      if (!payment) throw new Error('Payment not found');
+      if (payment.status !== 'completed') throw new Error('Payment cannot be refunded');
 
       payment.status = 'refunded';
-      payment.refundId = refundId;
-      payment.refundReason = reason;
-      payment.refundedAt = new Date();
+      payment.metadata = payment.metadata || new Map();
+      payment.metadata.set('refundReason', reason || 'No reason provided');
+      payment.metadata.set('refundDate', new Date().toISOString());
+      await payment.save();
 
-      payments.set(paymentId, payment);
-
-      // In production, call payment provider API
+      await this._logAudit(payment.userId, 'PAYMENT_REFUND', 'payment', payment._id, 'UPDATE');
 
       return {
         success: true,
         message: 'Payment refunded successfully',
-        refundId,
+        refundId: `ref_${Date.now()}`,
         amount: payment.amount,
       };
     } catch (error) {
-      return {
-        success: false,
-        error: error.message,
-      };
+      return { success: false, error: error.message };
     }
   }
 
-  /**
-   * Get payment history
-   */
   async getPaymentHistory(userId, limit = 50) {
     try {
-      const userPayments = Array.from(payments.values())
-        .filter(p => p.userId === userId)
-        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-        .slice(0, limit);
-
-      return {
-        success: true,
-        payments: userPayments,
-        count: userPayments.length,
-      };
+      const payments = await Payment.find({ userId }).sort({ createdAt: -1 }).limit(limit).lean();
+      return { success: true, payments, count: payments.length };
     } catch (error) {
-      return {
-        success: false,
-        error: error.message,
-      };
+      return { success: false, error: error.message };
     }
   }
 
-  /**
-   * Calculate payment statistics
-   */
   async getPaymentStats(userId) {
     try {
-      const userPayments = Array.from(payments.values()).filter(p => p.userId === userId);
+      const userPayments = await Payment.find({ userId }).lean();
+      const completed = userPayments.filter(p => p.status === 'completed');
+      const totalAmount = completed.reduce((sum, p) => sum + (p.amount || 0), 0);
 
-      const stats = {
-        totalPayments: userPayments.length,
-        completedPayments: userPayments.filter(p => p.status === 'completed').length,
-        totalAmount: userPayments.filter(p => p.status === 'completed').reduce((sum, p) => sum + p.amount, 0),
-        averageAmount: 0,
-        byProvider: {},
-      };
-
-      // Calculate average
-      if (stats.completedPayments > 0) {
-        stats.averageAmount = stats.totalAmount / stats.completedPayments;
-      }
-
-      // Count by provider
-      userPayments.forEach(p => {
-        stats.byProvider[p.provider] = (stats.byProvider[p.provider] || 0) + 1;
-      });
+      const byProvider = userPayments.reduce((acc, p) => {
+        const key = p.paymentMethod || 'unknown';
+        acc[key] = (acc[key] || 0) + 1;
+        return acc;
+      }, {});
 
       return {
         success: true,
-        stats,
+        stats: {
+          totalPayments: userPayments.length,
+          completedPayments: completed.length,
+          totalAmount,
+          averageAmount: completed.length ? totalAmount / completed.length : 0,
+          byProvider,
+        },
       };
     } catch (error) {
-      return {
-        success: false,
-        error: error.message,
-      };
+      return { success: false, error: error.message };
+    }
+  }
+
+  async handleStripeWebhook(eventPayload, signature) {
+    // NOTE: Signature verification can be added when Stripe webhook secret is configured.
+    const intentId = eventPayload?.data?.object?.id;
+    const status = eventPayload?.data?.object?.status;
+    if (!intentId || !status) return { success: false, error: 'Invalid payload' };
+
+    const normalizedStatus = status === 'succeeded' ? 'completed' : status;
+    return this.updatePaymentStatus(intentId, normalizedStatus, 'card', { signature });
+  }
+
+  async handlePayPalWebhook(eventPayload) {
+    const resource = eventPayload?.resource || {};
+    const txnId = resource.id || resource.parent_payment || resource.billing_agreement_id;
+    const status = resource.state || resource.status;
+    if (!txnId || !status) return { success: false, error: 'Invalid payload' };
+
+    const normalizedStatus =
+      status.toLowerCase() === 'completed' ? 'completed' : status.toLowerCase();
+    return this.updatePaymentStatus(txnId, normalizedStatus, 'paypal');
+  }
+
+  async handleKNETWebhook(eventPayload) {
+    const ref = eventPayload?.paymentId || eventPayload?.transactionId || eventPayload?.ref;
+    const status = eventPayload?.status || 'completed';
+    if (!ref) return { success: false, error: 'Invalid payload' };
+
+    return this.updatePaymentStatus(ref, status, 'knet');
+  }
+
+  async updatePaymentStatus(transactionId, status, provider = 'card', metadata = {}) {
+    try {
+      const payment = await Payment.findOne({ transactionId });
+      if (!payment) throw new Error('Payment not found');
+
+      payment.status = status;
+      if (status === 'completed' && !payment.completedAt) payment.completedAt = new Date();
+      if (metadata && Object.keys(metadata).length) {
+        payment.metadata = payment.metadata || new Map();
+        Object.entries(metadata).forEach(([k, v]) => payment.metadata.set(k, String(v)));
+      }
+      await payment.save();
+
+      await this._logAudit(
+        payment.userId,
+        'PAYMENT_STATUS_UPDATE',
+        'payment',
+        payment._id,
+        'UPDATE',
+        'success',
+        `provider=${provider};status=${status}`
+      );
+      await this._notify(payment.userId, {
+        title: 'Payment status updated',
+        message: `Payment ${transactionId} is now ${status}`,
+        type: 'PAYMENT',
+        meta: { provider, status },
+      });
+
+      return { success: true, status };
+    } catch (error) {
+      await this._logAudit(
+        null,
+        'PAYMENT_STATUS_UPDATE_FAILED',
+        'payment',
+        undefined,
+        'UPDATE',
+        'failure',
+        error.message
+      );
+      return { success: false, error: error.message };
+    }
+  }
+
+  async _logAudit(userId, action, resource, resourceId, operation, status = 'success', details) {
+    await AuditLogger.log({
+      userId,
+      action,
+      resource,
+      resourceId,
+      operation,
+      status,
+      details,
+      dataClassification: 'confidential',
+    });
+  }
+
+  async _notify(recipientId, data) {
+    try {
+      if (!recipientId) return;
+      await NotificationService.send(null, recipientId, data);
+    } catch (error) {
+      // Notification failures should not break the flow
     }
   }
 }
 
-module.exports = PaymentService;
+module.exports = new PaymentService();

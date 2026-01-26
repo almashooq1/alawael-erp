@@ -10,6 +10,7 @@ from datetime import datetime
 import json
 from app import socketio, db, redis_client
 from models import User, Beneficiary, Session
+from lib.auth_rbac_decorator import check_permission, require_role, log_audit, guard_payload_size, validate_json
 
 # Connected users tracking
 connected_users = {}

@@ -3,11 +3,25 @@ const path = require('path');
 const { spawn } = require('child_process');
 const AuditService = require('./audit.service');
 
-const BACKUP_DIR = path.join(__dirname, '../../backups/auto');
+// Resolve a writable backup directory and fall back gracefully if the first choice fails.
+const DEFAULT_BACKUP_DIR = path.join(__dirname, '../../backups/auto');
+const FALLBACK_BACKUP_DIR = '/tmp/backups/auto';
 
-// Ensure backup dir exists
-if (!fs.existsSync(BACKUP_DIR)) {
-  fs.mkdirSync(BACKUP_DIR, { recursive: true });
+const ensureBackupDir = targetDir => {
+  try {
+    fs.mkdirSync(targetDir, { recursive: true });
+    return targetDir;
+  } catch (err) {
+    console.error(`⚠️  Backup dir not writable (${targetDir}): ${err.message}`);
+    return null;
+  }
+};
+
+let BACKUP_DIR = process.env.BACKUP_DIR || DEFAULT_BACKUP_DIR;
+BACKUP_DIR = ensureBackupDir(BACKUP_DIR) || ensureBackupDir(FALLBACK_BACKUP_DIR);
+
+if (!BACKUP_DIR) {
+  console.error('❌ Backup directory unavailable; backup operations will be disabled.');
 }
 
 class BackupService {
@@ -16,6 +30,9 @@ class BackupService {
    * @returns {Promise<string>} Path to the backup file
    */
   static async createBackup(triggeredBy = 'SYSTEM') {
+    if (!BACKUP_DIR) {
+      return Promise.reject(new Error('Backup directory unavailable'));
+    }
     return new Promise((resolve, reject) => {
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
       const fileName = `backup-${timestamp}.gz`;
@@ -46,7 +63,7 @@ class BackupService {
             { type: 'Backup', id: fileName },
             null,
             'SUCCESS',
-            `Backup created successfully: ${fileName}`,
+            `Backup created successfully: ${fileName}`
           );
           resolve({ fileName, filePath, size: fs.statSync(filePath).size });
         } else {
@@ -64,7 +81,7 @@ class BackupService {
    * List all available backups
    */
   static async listBackups() {
-    if (!fs.existsSync(BACKUP_DIR)) return [];
+    if (!BACKUP_DIR || !fs.existsSync(BACKUP_DIR)) return [];
 
     const files = fs
       .readdirSync(BACKUP_DIR)
@@ -88,6 +105,7 @@ class BackupService {
    * Delete a backup
    */
   static async deleteBackup(fileName) {
+    if (!BACKUP_DIR) return false;
     const filePath = path.join(BACKUP_DIR, fileName);
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);

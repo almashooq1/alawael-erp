@@ -117,11 +117,11 @@ const branchSchema = new mongoose.Schema(
   {
     timestamps: true,
     collection: 'branches',
-  },
+  }
 );
 
 // الفهارس
-branchSchema.index({ code: 1 });
+// Note: code already has unique:true (creates automatic index)
 branchSchema.index({ status: 1 });
 branchSchema.index({ 'location.city': 1 });
 branchSchema.index({ createdAt: -1 });

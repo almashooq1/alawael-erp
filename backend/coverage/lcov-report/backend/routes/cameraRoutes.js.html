@@ -375,7 +375,8 @@
 <a name='L310'></a><a href='#L310'>310</a>
 <a name='L311'></a><a href='#L311'>311</a>
 <a name='L312'></a><a href='#L312'>312</a>
-<a name='L313'></a><a href='#L313'>313</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L313'></a><a href='#L313'>313</a>
+<a name='L314'></a><a href='#L314'>314</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -687,6 +688,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">/**
  * Camera Routes - مسارات إدارة الكاميرات
  */
@@ -696,7 +698,7 @@ const router = <span class="cstat-no" title="statement not covered" >express.Rou
 const Camera = <span class="cstat-no" title="statement not covered" >require('../models/Camera');</span>
 const Branch = <span class="cstat-no" title="statement not covered" >require('../models/Branch');</span>
 const hikvisionService = <span class="cstat-no" title="statement not covered" >require('../services/hikvisionService');</span>
-const { authenticate, authorize } = <span class="cstat-no" title="statement not covered" >require('../middleware/auth');</span>
+const { authenticateToken } = <span class="cstat-no" title="statement not covered" >require('../middleware/auth');</span>
 &nbsp;
 /**
  * الحصول على جميع الكاميرات
@@ -752,7 +754,7 @@ const { authenticate, authorize } = <span class="cstat-no" title="statement not 
 /**
  * إنشاء كاميرا جديدة
  */
-<span class="cstat-no" title="statement not covered" >router.post('/', authenticate, authorize(['admin']), <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >router.post('/', authenticate, <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
     const { name, branchId, hikvision, recording, motionDetection, cloudSettings } = <span class="cstat-no" title="statement not covered" >req.body;</span>
 &nbsp;
@@ -816,7 +818,7 @@ const { authenticate, authorize } = <span class="cstat-no" title="statement not 
 /**
  * تحديث كاميرا
  */
-<span class="cstat-no" title="statement not covered" >router.put('/:id', authenticate, authorize(['admin']), <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >router.put('/:id', authenticate, <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
     const { name, location, recording, motionDetection, cloudSettings, status } = <span class="cstat-no" title="statement not covered" >req.body;</span>
 &nbsp;
@@ -848,7 +850,7 @@ const { authenticate, authorize } = <span class="cstat-no" title="statement not 
 /**
  * حذف كاميرا
  */
-<span class="cstat-no" title="statement not covered" >router.delete('/:id', authenticate, authorize(['admin']), <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >router.delete('/:id', authenticate, <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
     const camera = <span class="cstat-no" title="statement not covered" >await Camera.findById(req.params.id);</span>
 <span class="cstat-no" title="statement not covered" >    if (!camera || camera.deletedAt) {</span>
@@ -934,7 +936,7 @@ const { authenticate, authorize } = <span class="cstat-no" title="statement not 
 /**
  * تفعيل/تعطيل كشف الحركة
  */
-<span class="cstat-no" title="statement not covered" >router.put('/:id/motion-detection', authenticate, authorize(['admin']), <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >router.put('/:id/motion-detection', authenticate, <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
     const { enabled, sensitivity } = <span class="cstat-no" title="statement not covered" >req.body;</span>
     const camera = <span class="cstat-no" title="statement not covered" >await Camera.findById(req.params.id);</span>
@@ -999,6 +1001,7 @@ const { authenticate, authorize } = <span class="cstat-no" title="statement not 
 });
 &nbsp;
 <span class="cstat-no" title="statement not covered" >module.exports = router;</span>
+&nbsp;
 &nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
@@ -1006,7 +1009,7 @@ const { authenticate, authorize } = <span class="cstat-no" title="statement not 
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-01-17T11:40:09.432Z
+                at 2026-01-20T12:49:09.932Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

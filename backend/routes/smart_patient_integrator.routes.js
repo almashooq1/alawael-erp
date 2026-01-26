@@ -16,3 +16,4 @@ router.get('/digital-twin/:patientId', async (req, res) => {
 });
 
 module.exports = router;
+

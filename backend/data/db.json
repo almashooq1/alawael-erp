@@ -3,7 +3,7 @@
     {
       "_id": "1",
       "email": "admin@alawael.com",
-      "password": "$2a$10$ctR3vl8FEm2MMg44Fg6ujugGRUvoJWK6F4xOp1qotme8Kh4JLFujK",
+      "password": "$2b$10$0cxPX0zdi16CGh34pDygMefdXiErC18JCxieFv4BMaNDusCs6yPOK",
       "fullName": "System Administrator",
       "role": "admin",
       "createdAt": "2026-01-15T21:51:21.578Z",
@@ -13,7 +13,7 @@
     {
       "_id": "2",
       "email": "hr@alawael.com",
-      "password": "$2a$10$ctR3vl8FEm2MMg44Fg6uju98A/WJfztrj4AZv83FAIoT6CCTlcD/a",
+      "password": "$2b$10$0cxPX0zdi16CGh34pDygMefdXiErC18JCxieFv4BMaNDusCs6yPOK",
       "fullName": "HR Manager",
       "role": "hr",
       "createdAt": "2026-01-15T21:51:21.579Z",
@@ -23,7 +23,7 @@
     {
       "_id": "3",
       "email": "finance@alawael.com",
-      "password": "$2a$10$ctR3vl8FEm2MMg44Fg6uju98A/WJfztrj4AZv83FAIoT6CCTlcD/a",
+      "password": "$2b$10$0cxPX0zdi16CGh34pDygMefdXiErC18JCxieFv4BMaNDusCs6yPOK",
       "fullName": "Chief Accountant",
       "role": "accountant",
       "createdAt": "2026-01-15T21:51:21.579Z",
@@ -33,7 +33,7 @@
     {
       "_id": "4",
       "email": "teacher@alawael.com",
-      "password": "$2a$10$ctR3vl8FEm2MMg44Fg6uju98A/WJfztrj4AZv83FAIoT6CCTlcD/a",
+      "password": "$2b$10$0cxPX0zdi16CGh34pDygMefdXiErC18JCxieFv4BMaNDusCs6yPOK",
       "fullName": "Lead Teacher",
       "role": "teacher",
       "createdAt": "2026-01-15T21:51:21.579Z",
@@ -43,7 +43,7 @@
     {
       "_id": "5",
       "email": "driver@alawael.com",
-      "password": "$2a$10$ctR3vl8FEm2MMg44Fg6uju98A/WJfztrj4AZv83FAIoT6CCTlcD/a",
+      "password": "$2b$10$0cxPX0zdi16CGh34pDygMefdXiErC18JCxieFv4BMaNDusCs6yPOK",
       "fullName": "Transport Captain",
       "role": "driver",
       "createdAt": "2026-01-15T21:51:21.579Z",
@@ -53,12 +53,22 @@
     {
       "_id": "6",
       "email": "parent@alawael.com",
-      "password": "$2a$10$ctR3vl8FEm2MMg44Fg6uju98A/WJfztrj4AZv83FAIoT6CCTlcD/a",
+      "password": "$2b$10$0cxPX0zdi16CGh34pDygMefdXiErC18JCxieFv4BMaNDusCs6yPOK",
       "fullName": "Parent Demo",
       "role": "parent",
       "createdAt": "2026-01-15T21:51:21.579Z",
       "updatedAt": "2026-01-15T21:51:21.579Z",
       "lastLogin": null
+    },
+    {
+      "_id": "7",
+      "email": "admin@test.com",
+      "password": "$2b$10$8OXho5UBGXa.EoKjKjI.X.mdphhpKN9soQ2gzw5s8pjfmFtP1X9qq",
+      "fullName": "Test Admin User",
+      "role": "admin",
+      "lastLogin": null,
+      "createdAt": "2026-01-24T02:30:53.914Z",
+      "updatedAt": "2026-01-24T02:30:53.914Z"
     }
   ],
   "employees": [],

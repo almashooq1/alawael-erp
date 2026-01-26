@@ -1,3 +1,10 @@
+from auth_rbac_decorator import (
+    check_permission,
+    check_multiple_permissions,
+    guard_payload_size,
+    validate_json,
+    log_audit
+)
 # -*- coding: utf-8 -*-
 """
 نظام إدارة الحملات التسويقية - CRM Marketing Campaigns API
@@ -37,6 +44,8 @@ def generate_campaign_code():
 
 @campaigns_bp.route('', methods=['GET'])
 @jwt_required()
+@check_permission('view_crm_campaigns')
+@log_audit('GET_CAMPAIGNS')
 def get_campaigns():
     """قائمة الحملات التسويقية مع الفلترة والترقيم"""
     try:
@@ -142,6 +151,9 @@ def get_campaigns():
 
 @campaigns_bp.route('', methods=['POST'])
 @jwt_required()
+@check_permission('manage_crm_campaigns')
+@guard_payload_size()
+@log_audit('CREATE_CAMPAIGN')
 def create_campaign():
     """إنشاء حملة تسويقية جديدة"""
     try:
@@ -197,6 +209,8 @@ def create_campaign():
 
 @campaigns_bp.route('/<int:campaign_id>', methods=['GET'])
 @jwt_required()
+@check_permission('view_crm_campaigns')
+@log_audit('GET_CAMPAIGN')
 def get_campaign(campaign_id):
     """الحصول على تفاصيل حملة محددة"""
     try:
@@ -264,6 +278,9 @@ def get_campaign(campaign_id):
 
 @campaigns_bp.route('/<int:campaign_id>', methods=['PUT'])
 @jwt_required()
+@check_permission('manage_crm_campaigns')
+@guard_payload_size()
+@log_audit('UPDATE_CAMPAIGN')
 def update_campaign(campaign_id):
     """تحديث حملة تسويقية"""
     try:
@@ -312,6 +329,8 @@ def update_campaign(campaign_id):
 
 @campaigns_bp.route('/<int:campaign_id>', methods=['DELETE'])
 @jwt_required()
+@check_permission('manage_crm_campaigns')
+@log_audit('DELETE_CAMPAIGN')
 def delete_campaign(campaign_id):
     """حذف حملة تسويقية"""
     try:
@@ -341,6 +360,8 @@ def delete_campaign(campaign_id):
 
 @campaigns_bp.route('/<int:campaign_id>/targets', methods=['GET'])
 @jwt_required()
+@check_permission('view_crm_campaigns')
+@log_audit('GET_CAMPAIGN_TARGETS')
 def get_campaign_targets(campaign_id):
     """قائمة أهداف الحملة"""
     try:
@@ -389,6 +410,9 @@ def get_campaign_targets(campaign_id):
 
 @campaigns_bp.route('/<int:campaign_id>/targets', methods=['POST'])
 @jwt_required()
+@check_permission('manage_crm_campaigns')
+@guard_payload_size()
+@log_audit('ADD_CAMPAIGN_TARGETS')
 def add_campaign_targets(campaign_id):
     """إضافة أهداف للحملة"""
     try:
@@ -435,6 +459,8 @@ def add_campaign_targets(campaign_id):
 
 @campaigns_bp.route('/<int:campaign_id>/activities', methods=['GET'])
 @jwt_required()
+@check_permission('view_crm_campaigns')
+@log_audit('GET_CAMPAIGN_ACTIVITIES')
 def get_campaign_activities(campaign_id):
     """قائمة أنشطة الحملة"""
     try:
@@ -466,6 +492,9 @@ def get_campaign_activities(campaign_id):
 
 @campaigns_bp.route('/<int:campaign_id>/activities', methods=['POST'])
 @jwt_required()
+@check_permission('manage_crm_campaigns')
+@guard_payload_size()
+@log_audit('CREATE_CAMPAIGN_ACTIVITY')
 def create_campaign_activity(campaign_id):
     """إنشاء نشاط جديد للحملة"""
     try:
@@ -510,6 +539,8 @@ def create_campaign_activity(campaign_id):
 
 @campaigns_bp.route('/analytics', methods=['GET'])
 @jwt_required()
+@check_permission('view_crm_campaigns')
+@log_audit('GET_CAMPAIGNS_ANALYTICS')
 def get_campaigns_analytics():
     """تحليلات شاملة للحملات التسويقية"""
     try:
@@ -585,6 +616,8 @@ def get_campaigns_analytics():
 
 @campaigns_bp.route('/<int:campaign_id>/metrics', methods=['GET'])
 @jwt_required()
+@check_permission('view_crm_campaigns')
+@log_audit('GET_CAMPAIGN_METRICS')
 def get_campaign_metrics(campaign_id):
     """مقاييس أداء حملة محددة"""
     try:
@@ -623,6 +656,9 @@ def get_campaign_metrics(campaign_id):
 
 @campaigns_bp.route('/<int:campaign_id>/launch', methods=['POST'])
 @jwt_required()
+@check_permission('manage_crm_campaigns')
+@guard_payload_size()
+@log_audit('LAUNCH_CAMPAIGN')
 def launch_campaign(campaign_id):
     """إطلاق الحملة التسويقية"""
     try:

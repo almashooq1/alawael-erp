@@ -64,3 +64,4 @@ router.get('/goal-trend/:goalId', async (req, res) => {
 });
 
 module.exports = router;
+

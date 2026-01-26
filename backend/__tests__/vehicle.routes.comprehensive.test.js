@@ -8,7 +8,7 @@ const mockFleetService = {
   addVehicle: jest.fn(),
   updateVehicle: jest.fn(),
   deleteVehicle: jest.fn(),
-  scheduleMaintenance: jest.fn(),
+  addMaintenanceRecord: jest.fn(),
   getMaintenanceHistory: jest.fn(),
 };
 
@@ -57,7 +57,9 @@ describe('Vehicle Routes Comprehensive Tests', () => {
 
   describe('GET /api/vehicles', () => {
     it('should return all vehicles', async () => {
-      mockFleetService.getAllVehicles.mockResolvedValue([{ id: 'v1', make: 'Toyota', model: 'Camry' }]);
+      mockFleetService.getAllVehicles.mockResolvedValue([
+        { id: 'v1', make: 'Toyota', model: 'Camry' },
+      ]);
 
       const res = await request(app).get('/api/vehicles');
 
@@ -70,7 +72,9 @@ describe('Vehicle Routes Comprehensive Tests', () => {
       mockFleetService.getAllVehicles.mockResolvedValue([]);
       const res = await request(app).get('/api/vehicles?status=active');
       expect(res.status).toBe(200);
-      expect(mockFleetService.getAllVehicles).toHaveBeenCalledWith(expect.objectContaining({ status: 'active' }));
+      expect(mockFleetService.getAllVehicles).toHaveBeenCalledWith(
+        expect.objectContaining({ status: 'active' })
+      );
     });
   });
 
@@ -117,24 +121,19 @@ describe('Vehicle Routes Comprehensive Tests', () => {
     });
   });
 
-  describe('POST /api/vehicles/maintenance', () => {
-    // Warning: This route path is a guess based on typical patterns.
-    // If the path in file is different, this measurement will fail 404.
-    // I will assume it is POST /api/vehicles/maintenance or POST /api/vehicles/:id/maintenance
-    // Let's assume the router has router.post('/maintenance', ...) or similar.
-    // If not, I can fix it later.
+  describe('POST /api/vehicles/:id/maintenance', () => {
     it('should schedule maintenance', async () => {
-      mockFleetService.scheduleMaintenance.mockResolvedValue({ id: 'm1', vehicleId: 'v1' });
+      mockFleetService.addMaintenanceRecord.mockResolvedValue({ id: 'm1', vehicleId: 'v1' });
 
-      // Trying generic endpoint
-      const res = await request(app).post('/api/vehicles/maintenance').send({ vehicleId: 'v1', type: 'Oil Change', date: '2026-01-20' });
+      const res = await request(app)
+        .post('/api/vehicles/v1/maintenance')
+        .send({ type: 'Oil Change', date: '2026-01-20' });
 
-      if (res.status === 404) {
-        // Fallback: maybe it's under ID?
-        // We'll leave this test but allow failure to learn
-      } else {
-        expect(res.status).toBe(201);
-      }
+      expect(res.status).toBe(201);
+      expect(mockFleetService.addMaintenanceRecord).toHaveBeenCalledWith('v1', {
+        type: 'Oil Change',
+        date: '2026-01-20',
+      });
     });
   });
 });

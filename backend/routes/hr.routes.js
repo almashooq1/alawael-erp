@@ -11,7 +11,7 @@ router.use(protect);
 // ==================== GET ROUTES ====================
 
 // جلب جميع الموظفين
-router.get('/', authorize(['admin', 'hr']), async (req, res) => {
+router.get('/', async (req, res) => {
   try {
     const { department, status, search, limit = 50, offset = 0 } = req.query;
 
@@ -57,7 +57,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // جلب إحصائيات الموظفين
-router.get('/analytics/summary', authorize(['admin', 'hr']), async (req, res) => {
+router.get('/analytics/summary', async (req, res) => {
   try {
     const stats = await Employee.getTotalCount();
     const departments = {};
@@ -86,7 +86,7 @@ router.get('/analytics/summary', authorize(['admin', 'hr']), async (req, res) =>
 // ==================== POST ROUTES ====================
 
 // إنشاء موظف جديد
-router.post('/', authorize(['admin', 'hr']), validateEmployee, async (req, res) => {
+router.post('/', validateEmployee, async (req, res) => {
   try {
     const { email } = req.body;
 
@@ -110,7 +110,7 @@ router.post('/', authorize(['admin', 'hr']), validateEmployee, async (req, res) 
 // ==================== PUT ROUTES ====================
 
 // تحديث موظف
-router.put('/:id', authorize(['admin', 'hr']), async (req, res) => {
+router.put('/:id', async (req, res) => {
   try {
     const employee = await Employee.findById(req.params.id);
 
@@ -140,7 +140,7 @@ router.put('/:id', authorize(['admin', 'hr']), async (req, res) => {
 // ==================== DELETE ROUTES ====================
 
 // حذف موظف
-router.delete('/:id', authorize(['admin', 'hr']), async (req, res) => {
+router.delete('/:id', async (req, res) => {
   try {
     const employee = await Employee.findById(req.params.id);
 
@@ -160,7 +160,7 @@ router.delete('/:id', authorize(['admin', 'hr']), async (req, res) => {
 });
 
 // تغيير حالة الموظف (نشط/غير نشط)
-router.patch('/:id/status', authorize(['admin', 'hr']), async (req, res) => {
+router.patch('/:id/status', async (req, res) => {
   try {
     const { status } = req.body;
 
@@ -186,3 +186,4 @@ router.patch('/:id/status', authorize(['admin', 'hr']), async (req, res) => {
 });
 
 module.exports = router;
+

@@ -73,7 +73,7 @@ class FleetService {
       const vehicle = await Vehicle.findById(vehicleId)
         .populate('owner')
         .populate('assignedDriver')
-        .populate('relatedLicenses')
+        // .populate('relatedLicenses') // معطل - License model غير موجود
         .populate('documents');
 
       if (!vehicle) {
@@ -142,25 +142,33 @@ class FleetService {
    */
   async addMaintenanceRecord(vehicleId, maintenanceData) {
     try {
-      const vehicle = await Vehicle.findById(vehicleId);
+      // إنشاء سجل الصيانة الجديد
+      const newRecord = {
+        date: maintenanceData.date || new Date(),
+        type: maintenanceData.type,
+        description: maintenanceData.description,
+        cost: maintenanceData.cost || 0,
+        provider: maintenanceData.provider,
+        mileage: maintenanceData.mileage,
+      };
+
+      // تحديث المركبة باستخدام $push
+      const vehicle = await Vehicle.findByIdAndUpdate(
+        vehicleId,
+        {
+          $push: { 'maintenance.maintenanceHistory': newRecord },
+          $inc: { 'maintenance.totalMaintenanceCost': newRecord.cost },
+          $set: {
+            'maintenance.lastMaintenanceDate': new Date(),
+            'maintenance.nextMaintenanceDate': new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+          },
+        },
+        { new: true, runValidators: true }
+      );
 
       if (!vehicle) {
         throw new Error('المركبة غير موجودة');
       }
-
-      vehicle.maintenance.maintenanceHistory.push({
-        date: new Date(),
-        ...maintenanceData,
-      });
-
-      vehicle.maintenance.totalMaintenanceCost += maintenanceData.cost || 0;
-      vehicle.maintenance.lastMaintenanceDate = new Date();
-
-      // حساب الصيانة التالية
-      vehicle.maintenance.nextMaintenanceDate = new Date();
-      vehicle.maintenance.nextMaintenanceDate.setDate(vehicle.maintenance.nextMaintenanceDate.getDate() + 30);
-
-      await vehicle.save();
 
       logger.info(`تمت إضافة سجل صيانة للمركبة: ${vehicle.registrationNumber}`);
       return {
@@ -245,7 +253,9 @@ class FleetService {
 
       vehicle.inspection.lastInspectionDate = new Date();
       vehicle.inspection.nextInspectionDate = new Date();
-      vehicle.inspection.nextInspectionDate.setFullYear(vehicle.inspection.nextInspectionDate.getFullYear() + 1);
+      vehicle.inspection.nextInspectionDate.setFullYear(
+        vehicle.inspection.nextInspectionDate.getFullYear() + 1
+      );
 
       vehicle.inspection.status = inspectionData.result || 'معايير';
 
@@ -360,7 +370,8 @@ class FleetService {
           totalFines,
           costPerKm: totalDistance > 0 ? (totalCosts / totalDistance).toFixed(2) : 0,
           profit: totalRevenue - totalCosts,
-          profitMargin: totalRevenue > 0 ? (((totalRevenue - totalCosts) / totalRevenue) * 100).toFixed(2) : 0,
+          profitMargin:
+            totalRevenue > 0 ? (((totalRevenue - totalCosts) / totalRevenue) * 100).toFixed(2) : 0,
           vehiclesByStatus,
           driversByStatus,
         },
@@ -391,7 +402,9 @@ class FleetService {
             vehicleIssues.push({
               type: 'تسجيل',
               description: 'الترخيص منتهي الصلاحية',
-              daysOverdue: Math.floor((new Date() - vehicle.registration.expiryDate) / (1000 * 60 * 60 * 24)),
+              daysOverdue: Math.floor(
+                (new Date() - vehicle.registration.expiryDate) / (1000 * 60 * 60 * 24)
+              ),
             });
           }
 
@@ -448,7 +461,12 @@ class FleetService {
       const totalRevenue = trips.reduce((sum, trip) => sum + (trip.revenue || 0), 0);
       const totalCosts = vehicle.stats.totalCost || 0;
       const averageSafetyScore =
-        trips.length > 0 ? (trips.reduce((sum, trip) => sum + (trip.drivingQuality.safetyScore || 0), 0) / trips.length).toFixed(2) : 0;
+        trips.length > 0
+          ? (
+              trips.reduce((sum, trip) => sum + (trip.drivingQuality.safetyScore || 0), 0) /
+              trips.length
+            ).toFixed(2)
+          : 0;
 
       return {
         success: true,
@@ -507,8 +525,14 @@ class FleetService {
           tollCost: totalTollCost,
           parkingCost: totalParkingCost,
           maintenanceCost: vehicle.maintenance.totalMaintenanceCost || 0,
-          insuranceCost: vehicle.insurance.monthlyPremium * ((endDate - startDate) / (1000 * 60 * 60 * 24 * 30)) || 0,
-          totalCost: totalFuelCost + totalTollCost + totalParkingCost + vehicle.maintenance.totalMaintenanceCost,
+          insuranceCost:
+            vehicle.insurance.monthlyPremium *
+              ((endDate - startDate) / (1000 * 60 * 60 * 24 * 30)) || 0,
+          totalCost:
+            totalFuelCost +
+            totalTollCost +
+            totalParkingCost +
+            vehicle.maintenance.totalMaintenanceCost,
         },
       };
     } catch (error) {
@@ -518,4 +542,4 @@ class FleetService {
   }
 }
 
-module.exports = FleetService;
+module.exports = new FleetService();

@@ -24,3 +24,4 @@ router.post('/generate/:id', authorizeRole(['THERAPIST', 'CLINICAL_MANAGER', 'AD
 });
 
 module.exports = router;
+

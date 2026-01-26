@@ -1,3 +1,10 @@
+from auth_rbac_decorator import (
+    check_permission,
+    check_multiple_permissions,
+    guard_payload_size,
+    validate_json,
+    log_audit
+)
 """
 API endpoints لمنصة التعلم الإلكتروني المتقدمة
 Advanced E-Learning Platform API
@@ -24,6 +31,8 @@ elearning_bp = Blueprint('elearning', __name__, url_prefix='/api/elearning')
 
 @elearning_bp.route('/courses', methods=['GET'])
 @jwt_required()
+@check_permission('view_elearning')
+@log_audit('GET_COURSES')
 def get_courses():
     """الحصول على قائمة الدورات مع الفلترة والترقيم"""
     try:
@@ -96,6 +105,9 @@ def get_courses():
 
 @elearning_bp.route('/courses', methods=['POST'])
 @jwt_required()
+@check_permission('manage_elearning')
+@guard_payload_size()
+@log_audit('CREATE_COURSE')
 def create_course():
     """إنشاء دورة جديدة"""
     try:
@@ -138,6 +150,8 @@ def create_course():
 
 @elearning_bp.route('/courses/<int:course_id>', methods=['GET'])
 @jwt_required()
+@check_permission('view_elearning')
+@log_audit('GET_COURSE_DETAILS')
 def get_course_details(course_id):
     """الحصول على تفاصيل الدورة"""
     try:
@@ -200,6 +214,9 @@ def get_course_details(course_id):
 
 @elearning_bp.route('/courses/<int:course_id>/enroll', methods=['POST'])
 @jwt_required()
+@check_permission('manage_elearning')
+@guard_payload_size()
+@log_audit('ENROLL_IN_COURSE')
 def enroll_in_course(course_id):
     """التسجيل في دورة"""
     try:
@@ -255,6 +272,8 @@ def enroll_in_course(course_id):
 
 @elearning_bp.route('/courses/<int:course_id>/lessons', methods=['GET'])
 @jwt_required()
+@check_permission('view_elearning')
+@log_audit('GET_COURSE_LESSONS')
 def get_course_lessons(course_id):
     """الحصول على دروس الدورة"""
     try:
@@ -286,6 +305,9 @@ def get_course_lessons(course_id):
 
 @elearning_bp.route('/lessons', methods=['POST'])
 @jwt_required()
+@check_permission('manage_elearning')
+@guard_payload_size()
+@log_audit('CREATE_LESSON')
 def create_lesson():
     """إنشاء درس جديد"""
     try:
@@ -330,6 +352,9 @@ def create_lesson():
 
 @elearning_bp.route('/quizzes', methods=['POST'])
 @jwt_required()
+@check_permission('manage_elearning')
+@guard_payload_size()
+@log_audit('CREATE_QUIZ')
 def create_quiz():
     """إنشاء اختبار جديد"""
     try:
@@ -371,6 +396,8 @@ def create_quiz():
 
 @elearning_bp.route('/categories', methods=['GET'])
 @jwt_required()
+@check_permission('view_elearning')
+@log_audit('GET_CATEGORIES')
 def get_categories():
     """الحصول على فئات الدورات"""
     try:
@@ -400,6 +427,8 @@ def get_categories():
 
 @elearning_bp.route('/dashboard', methods=['GET'])
 @jwt_required()
+@check_permission('view_dashboard')
+@log_audit('GET_DASHBOARD')
 def get_dashboard():
     """الحصول على بيانات لوحة التحكم"""
     try:
@@ -467,6 +496,8 @@ def get_dashboard():
 
 @elearning_bp.route('/enrollments/<int:enrollment_id>/progress', methods=['GET'])
 @jwt_required()
+@check_permission('view_elearning')
+@log_audit('GET_ENROLLMENT_PROGRESS')
 def get_enrollment_progress(enrollment_id):
     """الحصول على تقدم الطالب في الدورة"""
     try:

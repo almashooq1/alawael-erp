@@ -33,3 +33,4 @@ router.post('/payroll/preview', authorizeRole(['ADMIN', 'HR_MANAGER']), async (r
 });
 
 module.exports = router;
+

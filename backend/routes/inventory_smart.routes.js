@@ -32,3 +32,4 @@ router.get('/maintenance', authorizeRole(['ADMIN', 'INVENTORY_MANAGER']), async 
 });
 
 module.exports = router;
+

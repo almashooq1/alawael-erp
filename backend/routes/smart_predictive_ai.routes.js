@@ -33,3 +33,4 @@ router.get('/forecast/:patientId', mockAuth, async (req, res) => {
 });
 
 module.exports = router;
+

@@ -7,6 +7,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import db
 from models.goal import Goal, GoalProgress
 from datetime import datetime
+from lib.auth_rbac_decorator import check_permission, require_role, log_audit, guard_payload_size, validate_json
 
 bp = Blueprint('goals', __name__, url_prefix='/api/goals')
 
@@ -52,7 +53,9 @@ def list_goals():
 
 
 @bp.route('/<int:id>', methods=['GET'])
-@jwt_required()
+
+@check_permission('view_goal')
+@log_audit('GET_GET_GOAL')
 def get_goal(id):
     """تفاصيل هدف"""
     try:
@@ -111,7 +114,11 @@ def create_goal():
 
 
 @bp.route('/<int:id>/progress', methods=['POST'])
-@jwt_required()
+
+@check_permission('manage_goal_progress')
+@guard_payload_size()
+@validate_json()
+@log_audit('POST_UPDATE_GOAL_PROGRESS')
 def update_goal_progress(id):
     """تحديث تقدم هدف"""
     try:
@@ -135,7 +142,9 @@ def update_goal_progress(id):
 
 
 @bp.route('/<int:id>/progress', methods=['GET'])
-@jwt_required()
+
+@check_permission('view_goal_progress_history')
+@log_audit('GET_GET_GOAL_PROGRESS_HISTORY')
 def get_goal_progress_history(id):
     """سجل تقدم الهدف"""
     try:

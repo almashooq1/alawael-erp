@@ -34,3 +34,4 @@ router.post('/intervention', authorizeRole(['HR', 'CLINICAL_MANAGER']), async (r
 });
 
 module.exports = router;
+

@@ -55,3 +55,4 @@ router.get('/profile/:patientId', requireRole(['THERAPIST', 'ADMIN', 'DOCTOR']),
 });
 
 module.exports = router;
+

@@ -1,0 +1,593 @@
+{
+    "rbac_system": {
+        "name": "نظام التحكم بالوصول القائم على الأدوار",
+        "version": "1.0.0",
+        "status": "production",
+        "created_at": "2025-01-20",
+        "description": "نظام شامل لإدارة الأدوار والصلاحيات في التطبيق"
+    },
+    "roles": {
+        "super_admin": {
+            "level": 10,
+            "arabic_name": "مسؤول النظام",
+            "description": "صلاحيات كاملة - يمكن فعل أي شيء",
+            "permissions": [
+                "*"
+            ],
+            "use_case": "المسؤول الأول للنظام",
+            "can_manage": [
+                "users",
+                "roles",
+                "system_settings",
+                "all_data"
+            ]
+        },
+        "admin": {
+            "level": 9,
+            "arabic_name": "المدير العام",
+            "description": "صلاحيات إدارية شاملة",
+            "permissions": [
+                "view_students",
+                "manage_students",
+                "view_files",
+                "manage_files",
+                "view_assessments",
+                "manage_assessments",
+                "export_files",
+                "create_reports",
+                "manage_users",
+                "audit_logs"
+            ],
+            "use_case": "الإدارة العليا للنظام",
+            "can_manage": [
+                "users",
+                "data",
+                "reports"
+            ]
+        },
+        "manager": {
+            "level": 8,
+            "arabic_name": "مدير البرامج",
+            "description": "إدارة البيانات والملفات",
+            "permissions": [
+                "view_students",
+                "manage_students",
+                "view_files",
+                "manage_files",
+                "view_assessments",
+                "manage_assessments",
+                "export_files",
+                "print_files",
+                "create_reports",
+                "manage_documents",
+                "ai_analysis"
+            ],
+            "use_case": "إدارة برامج وملفات الطلاب",
+            "can_manage": [
+                "student_files",
+                "assessments",
+                "reports"
+            ]
+        },
+        "supervisor": {
+            "level": 7,
+            "arabic_name": "المشرف",
+            "description": "الإشراف على البيانات والعمليات",
+            "permissions": [
+                "view_students",
+                "view_files",
+                "view_assessments",
+                "view_reports",
+                "view_analytics"
+            ],
+            "use_case": "الإشراف على العمليات",
+            "can_manage": [
+                "monitoring",
+                "reports"
+            ]
+        },
+        "teacher": {
+            "level": 6,
+            "arabic_name": "المعلم",
+            "description": "إدارة التقييمات والتوصيات",
+            "permissions": [
+                "view_students",
+                "view_files",
+                "view_assessments",
+                "manage_assessments",
+                "ai_analysis",
+                "create_recommendations",
+                "export_files",
+                "print_files"
+            ],
+            "use_case": "التعليم وتقييم الطلاب",
+            "can_manage": [
+                "assessments",
+                "recommendations"
+            ]
+        },
+        "therapist": {
+            "level": 6,
+            "arabic_name": "المعالج",
+            "description": "إدارة التقييمات والتحليلات",
+            "permissions": [
+                "view_students",
+                "view_files",
+                "view_assessments",
+                "manage_assessments",
+                "ai_analysis",
+                "export_files"
+            ],
+            "use_case": "العلاج والتقييمات الخاصة",
+            "can_manage": [
+                "assessments",
+                "analysis"
+            ]
+        },
+        "counselor": {
+            "level": 5,
+            "arabic_name": "المستشار",
+            "description": "عرض البيانات والتقارير",
+            "permissions": [
+                "view_students",
+                "view_files",
+                "view_assessments",
+                "view_reports",
+                "create_recommendations"
+            ],
+            "use_case": "الاستشارة والتوجيه",
+            "can_manage": [
+                "recommendations",
+                "reports"
+            ]
+        },
+        "staff": {
+            "level": 4,
+            "arabic_name": "الموظف",
+            "description": "عرض محدود وطباعة",
+            "permissions": [
+                "view_students",
+                "view_files",
+                "print_files"
+            ],
+            "use_case": "العاملين الإداريين",
+            "can_manage": []
+        },
+        "user": {
+            "level": 1,
+            "arabic_name": "مستخدم عام",
+            "description": "لا توجد صلاحيات خاصة",
+            "permissions": [],
+            "use_case": "المستخدمين العاديين",
+            "can_manage": []
+        }
+    },
+    "permissions": {
+        "view_students": {
+            "arabic_name": "عرض بيانات الطلاب",
+            "description": "الحق في عرض معلومات الطلاب",
+            "endpoints": [
+                "GET /api/students",
+                "GET /api/students/<id>"
+            ],
+            "allowed_roles": [
+                "super_admin",
+                "admin",
+                "manager",
+                "supervisor",
+                "teacher",
+                "therapist",
+                "counselor",
+                "staff"
+            ]
+        },
+        "manage_students": {
+            "arabic_name": "إدارة الطلاب",
+            "description": "إنشاء وتحديث وحذف بيانات الطلاب",
+            "endpoints": [
+                "POST /api/students",
+                "PATCH /api/students/<id>",
+                "DELETE /api/students/<id>"
+            ],
+            "allowed_roles": [
+                "super_admin",
+                "admin",
+                "manager"
+            ]
+        },
+        "view_files": {
+            "arabic_name": "عرض الملفات",
+            "description": "الحق في عرض الملفات الشاملة",
+            "endpoints": [
+                "GET /api/comprehensive/files",
+                "GET /api/comprehensive/files/<id>"
+            ],
+            "allowed_roles": [
+                "super_admin",
+                "admin",
+                "manager",
+                "supervisor",
+                "teacher",
+                "therapist",
+                "counselor",
+                "staff"
+            ]
+        },
+        "manage_files": {
+            "arabic_name": "إدارة الملفات",
+            "description": "إنشاء وتحديث وحذف الملفات",
+            "endpoints": [
+                "POST /api/comprehensive/files",
+                "PATCH /api/comprehensive/files/<id>",
+                "DELETE /api/comprehensive/files/<id>"
+            ],
+            "allowed_roles": [
+                "super_admin",
+                "admin",
+                "manager"
+            ]
+        },
+        "view_assessments": {
+            "arabic_name": "عرض التقييمات",
+            "description": "الحق في عرض التقييمات",
+            "endpoints": [
+                "GET /api/comprehensive/assessments"
+            ],
+            "allowed_roles": [
+                "super_admin",
+                "admin",
+                "manager",
+                "supervisor",
+                "teacher",
+                "therapist",
+                "counselor"
+            ]
+        },
+        "manage_assessments": {
+            "arabic_name": "إدارة التقييمات",
+            "description": "إنشاء وتحديث وحذف التقييمات",
+            "endpoints": [
+                "POST /api/comprehensive/assessments",
+                "PATCH /api/comprehensive/assessments/<id>",
+                "DELETE /api/comprehensive/assessments/<id>"
+            ],
+            "allowed_roles": [
+                "super_admin",
+                "admin",
+                "manager",
+                "teacher",
+                "therapist"
+            ]
+        },
+        "manage_templates": {
+            "arabic_name": "إدارة قوالب التقييم",
+            "description": "إنشاء وتحديث قوالس التقييم",
+            "endpoints": [
+                "POST /api/comprehensive/assessment-templates"
+            ],
+            "allowed_roles": [
+                "super_admin",
+                "admin",
+                "manager"
+            ]
+        },
+        "export_files": {
+            "arabic_name": "تصدير الملفات",
+            "description": "تصدير الملفات بصيغ مختلفة",
+            "endpoints": [
+                "POST /api/comprehensive/files/<id>/export"
+            ],
+            "allowed_roles": [
+                "super_admin",
+                "admin",
+                "manager",
+                "teacher",
+                "therapist"
+            ]
+        },
+        "print_files": {
+            "arabic_name": "طباعة الملفات",
+            "description": "طباعة الملفات",
+            "endpoints": [
+                "POST /api/comprehensive/files/<id>/print"
+            ],
+            "allowed_roles": [
+                "super_admin",
+                "admin",
+                "manager",
+                "teacher",
+                "therapist",
+                "staff"
+            ]
+        },
+        "ai_analysis": {
+            "arabic_name": "تحليل الذكاء الاصطناعي",
+            "description": "طلب تحليل بالذكاء الاصطناعي",
+            "endpoints": [
+                "POST /api/comprehensive/assessments/<id>/ai-analysis"
+            ],
+            "allowed_roles": [
+                "super_admin",
+                "admin",
+                "manager",
+                "teacher",
+                "therapist"
+            ]
+        },
+        "create_recommendations": {
+            "arabic_name": "إنشاء توصيات",
+            "description": "إنشاء توصيات للطلاب",
+            "endpoints": [
+                "POST /api/recommendations"
+            ],
+            "allowed_roles": [
+                "super_admin",
+                "admin",
+                "teacher",
+                "therapist",
+                "counselor"
+            ]
+        },
+        "create_reports": {
+            "arabic_name": "إنشاء التقارير",
+            "description": "إنشاء وتصدير التقارير",
+            "endpoints": [
+                "POST /api/reports",
+                "POST /api/reports/export"
+            ],
+            "allowed_roles": [
+                "super_admin",
+                "admin",
+                "manager"
+            ]
+        },
+        "manage_documents": {
+            "arabic_name": "إدارة المستندات",
+            "description": "رفع وحذف المستندات",
+            "endpoints": [
+                "POST /api/comprehensive/files/<id>/documents",
+                "DELETE /api/documents/<id>"
+            ],
+            "allowed_roles": [
+                "super_admin",
+                "admin",
+                "manager"
+            ]
+        },
+        "manage_users": {
+            "arabic_name": "إدارة المستخدمين",
+            "description": "إنشاء وتحديث وحذف المستخدمين",
+            "endpoints": [
+                "POST /api/users",
+                "PATCH /api/users/<id>",
+                "DELETE /api/users/<id>"
+            ],
+            "allowed_roles": [
+                "super_admin",
+                "admin"
+            ]
+        },
+        "view_users": {
+            "arabic_name": "عرض المستخدمين",
+            "description": "عرض قائمة المستخدمين",
+            "endpoints": [
+                "GET /api/users"
+            ],
+            "allowed_roles": [
+                "super_admin",
+                "admin"
+            ]
+        },
+        "view_reports": {
+            "arabic_name": "عرض التقارير",
+            "description": "عرض التقارير",
+            "endpoints": [
+                "GET /api/reports"
+            ],
+            "allowed_roles": [
+                "super_admin",
+                "admin",
+                "manager",
+                "supervisor",
+                "counselor"
+            ]
+        },
+        "view_analytics": {
+            "arabic_name": "عرض التحليلات",
+            "description": "عرض لوحة التحليلات",
+            "endpoints": [
+                "GET /api/comprehensive/dashboard"
+            ],
+            "allowed_roles": [
+                "super_admin",
+                "admin",
+                "manager",
+                "supervisor"
+            ]
+        },
+        "admin_access": {
+            "arabic_name": "الوصول الإداري الكامل",
+            "description": "الوصول الإداري الشامل للنظام",
+            "endpoints": [
+                "*"
+            ],
+            "allowed_roles": [
+                "super_admin",
+                "admin"
+            ]
+        },
+        "audit_logs": {
+            "arabic_name": "سجلات التدقيق",
+            "description": "عرض سجلات التدقيق والعمليات",
+            "endpoints": [
+                "GET /api/audit/logs"
+            ],
+            "allowed_roles": [
+                "super_admin",
+                "admin"
+            ]
+        },
+        "system_health": {
+            "arabic_name": "فحص صحة النظام",
+            "description": "فحص صحة النظام والموارد",
+            "endpoints": [
+                "GET /api/system/health"
+            ],
+            "allowed_roles": [
+                "super_admin"
+            ]
+        }
+    },
+    "decorators": {
+        "jwt_required": {
+            "name": "jwt_required",
+            "library": "flask_jwt_extended",
+            "usage": "التحقق من JWT token",
+            "required": true,
+            "position": 1,
+            "example": "@jwt_required()"
+        },
+        "check_permission": {
+            "name": "check_permission",
+            "library": "auth_rbac_decorator",
+            "usage": "التحقق من صلاحية واحدة",
+            "required": true,
+            "position": 2,
+            "example": "@check_permission('view_files')"
+        },
+        "guard_payload_size": {
+            "name": "guard_payload_size",
+            "library": "auth_rbac_decorator",
+            "usage": "حماية من الطلبات الكبيرة",
+            "required": false,
+            "position": 3,
+            "applied_to": [
+                "POST",
+                "PATCH",
+                "PUT"
+            ],
+            "example": "@guard_payload_size(max_bytes=2_000_000)"
+        },
+        "validate_json": {
+            "name": "validate_json",
+            "library": "auth_rbac_decorator",
+            "usage": "التحقق من الحقول المطلوبة",
+            "required": false,
+            "position": 4,
+            "applied_to": [
+                "POST",
+                "PATCH",
+                "PUT"
+            ],
+            "example": "@validate_json('field1', 'field2')"
+        },
+        "log_audit": {
+            "name": "log_audit",
+            "library": "auth_rbac_decorator",
+            "usage": "تسجيل العملية في سجل التدقيق",
+            "required": false,
+            "position": 5,
+            "example": "@log_audit('ACTION_NAME')"
+        }
+    },
+    "error_codes": {
+        "400": {
+            "status": "Bad Request",
+            "arabic_message": "طلب غير صحيح",
+            "causes": [
+                "حقول مطلوبة مفقودة",
+                "صيغة JSON غير صحيحة"
+            ],
+            "solution": "تأكد من جميع الحقول المطلوبة والصيغة الصحيحة"
+        },
+        "401": {
+            "status": "Unauthorized",
+            "arabic_message": "غير مصرح - يجب تسجيل الدخول",
+            "causes": [
+                "لا توجد توكن JWT",
+                "التوكن منتهي الصلاحية",
+                "التوكن غير صحيح"
+            ],
+            "solution": "أضف توكن JWT صحيح في رأس Authorization"
+        },
+        "403": {
+            "status": "Forbidden",
+            "arabic_message": "صلاحيات غير كافية",
+            "causes": [
+                "المستخدم لا يملك الصلاحية المطلوبة",
+                "الدور غير كافي"
+            ],
+            "solution": "تحقق من دور المستخدم والصلاحيات المطلوبة"
+        },
+        "413": {
+            "status": "Payload Too Large",
+            "arabic_message": "حجم الطلب كبير جداً",
+            "causes": [
+                "الملف المرفوع أكبر من الحد الأقصى"
+            ],
+            "solution": "قلل حجم الملف أو البيانات المرسلة"
+        },
+        "500": {
+            "status": "Internal Server Error",
+            "arabic_message": "خطأ في الخادم",
+            "causes": [
+                "خطأ في قاعدة البيانات",
+                "خطأ في المنطق البرمجي"
+            ],
+            "solution": "تحقق من سجلات الخادم والأخطاء"
+        }
+    },
+    "testing_scenarios": {
+        "basic_test": {
+            "description": "اختبار أساسي للصلاحيات",
+            "steps": [
+                "سجل دخول كـ admin",
+                "جرب GET /api/files (يجب أن ينجح)",
+                "جرب POST /api/files (يجب أن ينجح)",
+                "سجل دخول كـ staff",
+                "جرب GET /api/files (يجب أن ينجح)",
+                "جرب POST /api/files (يجب أن يفشل مع 403)"
+            ]
+        },
+        "permission_check": {
+            "description": "التحقق من الصلاحيات المختلفة",
+            "endpoints": [
+                "GET /api/comprehensive/files - requires view_files",
+                "POST /api/comprehensive/files - requires manage_files",
+                "POST /api/comprehensive/files/<id>/export - requires export_files",
+                "POST /api/comprehensive/assessments/<id>/ai-analysis - requires ai_analysis"
+            ]
+        },
+        "error_handling": {
+            "description": "التعامل مع الأخطاء",
+            "test_cases": [
+                "بدون JWT token (توقع 401)",
+                "بدون صلاحيات (توقع 403)",
+                "بدون حقول مطلوبة (توقع 400)",
+                "ملف كبير جداً (توقع 413)"
+            ]
+        }
+    },
+    "deployment_checklist": {
+        "pre_deployment": [
+            "✓ مراجعة جميع الـ endpoints",
+            "✓ التحقق من الصلاحيات الصحيحة",
+            "✓ اختبار شامل مع أدوار مختلفة",
+            "✓ فحص الأداء والحمل",
+            "✓ نسخ احتياطية من قاعدة البيانات"
+        ],
+        "during_deployment": [
+            "✓ تحديث ملفات API",
+            "✓ تشغيل الاختبارات",
+            "✓ التحقق من السجلات",
+            "✓ مراقبة الأخطاء"
+        ],
+        "post_deployment": [
+            "✓ التحقق من جميع الوظائف",
+            "✓ قراءة سجلات التدقيق",
+            "✓ فحص الأداء",
+            "✓ توثيق التغييرات",
+            "✓ إبلاغ الفريق"
+        ]
+    }
+}

@@ -269,3 +269,4 @@ router.post('/clear-old-data', authMiddleware, async (req, res) => {
 });
 
 module.exports = router;
+

@@ -1,7 +1,7 @@
 const ComplianceLog = require('../models/ComplianceLog');
 const Employee = require('../models/Employee');
 const TherapySession = require('../models/TherapySession');
-const Vehicle = require('../models/Vehicle_SaudiCompliant'); // Updated name
+const Vehicle = require('../models/Vehicle'); // تغيير إلى Vehicle.js الأساسي
 const SmartNotificationService = require('./smartNotificationService');
 
 class SmartQualityService {
@@ -23,7 +23,7 @@ class SmartQualityService {
         'Quality Scan Complete',
         `Found ${totalIssues} compliance issues manually. Check Dashboard.`,
         'WARNING',
-        '/quality/dashboard',
+        '/quality/dashboard'
       );
     }
 
@@ -42,7 +42,8 @@ class SmartQualityService {
 
     for (const emp of employees) {
       // Check Current Contract
-      const currentContract = emp.contracts && emp.contracts.length > 0 ? emp.contracts[emp.contracts.length - 1] : null;
+      const currentContract =
+        emp.contracts && emp.contracts.length > 0 ? emp.contracts[emp.contracts.length - 1] : null;
 
       if (currentContract && currentContract.endDate) {
         if (currentContract.endDate < thirtyDaysFromNow) {
@@ -52,7 +53,7 @@ class SmartQualityService {
             `Contract for ${emp.fullName} expires soon (${currentContract.endDate.toISOString().split('T')[0]})`,
             emp._id,
             'Employee',
-            'WARNING',
+            'WARNING'
           );
           count++;
         }
@@ -63,7 +64,7 @@ class SmartQualityService {
           `Active employee ${emp.fullName} has no recorded contract.`,
           emp._id,
           'Employee',
-          'CRITICAL',
+          'CRITICAL'
         );
         count++;
       }
@@ -86,7 +87,14 @@ class SmartQualityService {
         // Simulate checking logic if fields vary, keeping it safe
         // In real app, we check v.insurance.expiryDate
         if (v.insuranceExpiry && v.insuranceExpiry < now) {
-          await this.logIssue('FLEET', 'EXPIRED_INSURANCE', `Vehicle ${v.plateNumber} insurance expired.`, v._id, 'Vehicle', 'CRITICAL');
+          await this.logIssue(
+            'FLEET',
+            'EXPIRED_INSURANCE',
+            `Vehicle ${v.plateNumber} insurance expired.`,
+            v._id,
+            'Vehicle',
+            'CRITICAL'
+          );
           count++;
         }
       }
@@ -119,7 +127,10 @@ class SmartQualityService {
 
       if (subLen < 10 || objLen < 10) {
         // Check if already logged to avoid dupes
-        const exists = await ComplianceLog.findOne({ relatedId: session._id, issueType: 'POOR_DOCUMENTATION' });
+        const exists = await ComplianceLog.findOne({
+          relatedId: session._id,
+          issueType: 'POOR_DOCUMENTATION',
+        });
         if (!exists) {
           await this.logIssue(
             'CLINICAL',
@@ -127,7 +138,7 @@ class SmartQualityService {
             `Session on ${session.date.toISOString().split('T')[0]} by ${session.therapist.firstName} has clear/missing notes.`,
             session._id,
             'TherapySession',
-            'WARNING',
+            'WARNING'
           );
           count++;
         }
@@ -164,7 +175,10 @@ class SmartQualityService {
    * Get Dashboard Stats
    */
   static async getStats() {
-    return await ComplianceLog.aggregate([{ $match: { status: 'OPEN' } }, { $group: { _id: '$domain', count: { $sum: 1 } } }]);
+    return await ComplianceLog.aggregate([
+      { $match: { status: 'OPEN' } },
+      { $group: { _id: '$domain', count: { $sum: 1 } } },
+    ]);
   }
 }
 

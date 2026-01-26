@@ -4,7 +4,7 @@ const hrService = require('../services/hrPhase6Service');
 const { authenticateToken: protect, authorizeRole: authorize } = require('../middleware/auth.middleware');
 
 // Middleware to ensure user is authenticated
-// In real scenario, add 'authorize("hr_manager")' for write operations
+// In real scenario, add '' for write operations
 router.use(protect);
 
 // --- Payroll Routes ---
@@ -112,3 +112,4 @@ router.get('/performance/:employeeId', async (req, res) => {
 });
 
 module.exports = router;
+

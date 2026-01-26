@@ -1,3 +1,10 @@
+from auth_rbac_decorator import (
+    check_permission,
+    check_multiple_permissions,
+    guard_payload_size,
+    validate_json,
+    log_audit
+)
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
@@ -25,6 +32,8 @@ rehabilitation_bp = Blueprint('rehabilitation_programs', __name__)
 
 @rehabilitation_bp.route('/api/rehabilitation/beneficiaries', methods=['GET'])
 @jwt_required()
+@check_permission('view_rehabilitation_programs')
+@log_audit('GET_BENEFICIARIES')
 def get_beneficiaries():
     """عرض قائمة المستفيدين"""
     try:
@@ -76,6 +85,9 @@ def get_beneficiaries():
 
 @rehabilitation_bp.route('/api/rehabilitation/beneficiaries', methods=['POST'])
 @jwt_required()
+@check_permission('manage_rehabilitation_programs')
+@guard_payload_size()
+@log_audit('CREATE_BENEFICIARY')
 def create_beneficiary():
     """إضافة مستفيد جديد"""
     try:
@@ -126,6 +138,8 @@ def create_beneficiary():
 
 @rehabilitation_bp.route('/api/rehabilitation/programs', methods=['GET'])
 @jwt_required()
+@check_permission('view_rehabilitation_programs')
+@log_audit('GET_PROGRAMS')
 def get_programs():
     """عرض قائمة برامج التأهيل"""
     try:
@@ -163,6 +177,9 @@ def get_programs():
 
 @rehabilitation_bp.route('/api/rehabilitation/programs', methods=['POST'])
 @jwt_required()
+@check_permission('manage_rehabilitation_programs')
+@guard_payload_size()
+@log_audit('CREATE_PROGRAM')
 def create_program():
     """إضافة برنامج تأهيل جديد"""
     try:
@@ -213,6 +230,8 @@ def create_program():
 
 @rehabilitation_bp.route('/api/rehabilitation/sessions', methods=['GET'])
 @jwt_required()
+@check_permission('view_rehabilitation_programs')
+@log_audit('GET_SESSIONS')
 def get_sessions():
     """عرض قائمة الجلسات"""
     try:
@@ -268,6 +287,8 @@ def get_sessions():
 
 @rehabilitation_bp.route('/api/rehabilitation/dashboard', methods=['GET'])
 @jwt_required()
+@check_permission('view_dashboard')
+@log_audit('GET_DASHBOARD')
 def get_dashboard():
     """لوحة تحكم برامج التأهيل"""
     try:
@@ -322,6 +343,9 @@ def get_dashboard():
 
 @rehabilitation_bp.route('/api/rehabilitation/enroll', methods=['POST'])
 @jwt_required()
+@check_permission('manage_rehabilitation_programs')
+@guard_payload_size()
+@log_audit('ENROLL_BENEFICIARY')
 def enroll_beneficiary():
     """تسجيل مستفيد في برنامج"""
     try:

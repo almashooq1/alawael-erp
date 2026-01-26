@@ -29,7 +29,7 @@ const Login = () => {
   const { loading, error } = useSelector((state) => state.auth);
 
   const [formData, setFormData] = useState({
-    username: '',
+    email: '',
     password: ''
   });
   const [showPassword, setShowPassword] = useState(false);
@@ -85,9 +85,10 @@ const Login = () => {
           <form onSubmit={handleSubmit}>
             <TextField
               fullWidth
-              label="اسم المستخدم أو البريد الإلكتروني"
-              name="username"
-              value={formData.username}
+              label="البريد الإلكتروني"
+              name="email"
+              type="email"
+              value={formData.email}
               onChange={handleChange}
               margin="normal"
               required

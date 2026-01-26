@@ -1,0 +1,559 @@
+{
+    "info": {
+        "name": "AlAwael Integration System API",
+        "description": "Complete test suite for Government, Insurance, and Laboratory integrations",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "auth": {
+        "type": "apikey",
+        "apikey": [
+            {
+                "key": "key",
+                "value": "X-API-Key",
+                "type": "string"
+            },
+            {
+                "key": "value",
+                "value": "{{api_key}}",
+                "type": "string"
+            }
+        ]
+    },
+    "item": [
+        {
+            "name": "Health & Metrics",
+            "item": [
+                {
+                    "name": "Health Check",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{base_url}}/api/integrations/health",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "integrations",
+                                "health"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Metrics",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{base_url}}/api/integrations/metrics",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "integrations",
+                                "metrics"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Reset Metrics",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{base_url}}/api/integrations/reset-metrics",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "integrations",
+                                "reset-metrics"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Government Integration",
+            "item": [
+                {
+                    "name": "Verify Citizen",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"nationalId\": \"1234567890\",\n  \"fullName\": \"محمد علي محمد\",\n  \"dateOfBirth\": \"1990-01-15\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/integrations/government/verify-citizen",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "integrations",
+                                "government",
+                                "verify-citizen"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Request Consent",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"citizenId\": \"2199123456\",\n  \"consentType\": \"health-data\",\n  \"scope\": [\"medical\", \"financial\"]\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/integrations/government/request-consent",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "integrations",
+                                "government",
+                                "request-consent"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Health Records",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{base_url}}/api/integrations/government/health-records/1234567890?consentToken={{consent_token}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "integrations",
+                                "government",
+                                "health-records",
+                                "1234567890"
+                            ],
+                            "query": [
+                                {
+                                    "key": "consentToken",
+                                    "value": "{{consent_token}}"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Report Incident",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"incidentType\": \"medical-incident\",\n  \"description\": \"وصف الحادثة\",\n  \"severity\": \"high\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/integrations/government/report-incident",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "integrations",
+                                "government",
+                                "report-incident"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Insurance Integration",
+            "item": [
+                {
+                    "name": "Verify Eligibility",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"policyNumber\": \"POL-2026-001\",\n  \"patientId\": \"PAT-123\",\n  \"serviceType\": \"rehabilitation\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/integrations/insurance/verify-eligibility",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "integrations",
+                                "insurance",
+                                "verify-eligibility"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Submit Claim",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"patientId\": \"PAT-123\",\n  \"policyNumber\": \"POL-2026-001\",\n  \"serviceDetails\": {\n    \"type\": \"service\",\n    \"code\": \"PT001\",\n    \"description\": \"Physiotherapy Session\",\n    \"date\": \"2026-01-23\",\n    \"provider\": \"AlAwael Center\",\n    \"grossAmount\": 500,\n    \"copayAmount\": 50,\n    \"documents\": []\n  }\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/integrations/insurance/submit-claim",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "integrations",
+                                "insurance",
+                                "submit-claim"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Track Claim",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{base_url}}/api/integrations/insurance/claim/CLM-2026-001",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "integrations",
+                                "insurance",
+                                "claim",
+                                "CLM-2026-001"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Verify Provider",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"providerId\": \"PROV-001\",\n  \"insurerId\": \"INS-001\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/integrations/insurance/verify-provider",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "integrations",
+                                "insurance",
+                                "verify-provider"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Register Webhook",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"events\": [\"claim.approved\", \"claim.rejected\", \"claim.pending\"]\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/integrations/insurance/register-webhook",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "integrations",
+                                "insurance",
+                                "register-webhook"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Laboratory Integration",
+            "item": [
+                {
+                    "name": "Submit Lab Order",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"orderId\": \"ORD-2026-001\",\n  \"patientId\": \"PAT-123\",\n  \"tests\": [\n    {\n      \"code\": \"03020\",\n      \"name\": \"Complete Blood Count\",\n      \"specimen\": \"serum\"\n    },\n    {\n      \"code\": \"04018\",\n      \"name\": \"Glucose Fasting\",\n      \"specimen\": \"plasma\"\n    }\n  ],\n  \"priority\": \"normal\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/integrations/lab/submit-order",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "integrations",
+                                "lab",
+                                "submit-order"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Results (JSON)",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{base_url}}/api/integrations/lab/results/ORD-2026-001?format=json",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "integrations",
+                                "lab",
+                                "results",
+                                "ORD-2026-001"
+                            ],
+                            "query": [
+                                {
+                                    "key": "format",
+                                    "value": "json"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Results (HL7)",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{base_url}}/api/integrations/lab/results/ORD-2026-001?format=hl7",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "integrations",
+                                "lab",
+                                "results",
+                                "ORD-2026-001"
+                            ],
+                            "query": [
+                                {
+                                    "key": "format",
+                                    "value": "hl7"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Results (FHIR)",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{base_url}}/api/integrations/lab/results/ORD-2026-001?format=fhir",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "integrations",
+                                "lab",
+                                "results",
+                                "ORD-2026-001"
+                            ],
+                            "query": [
+                                {
+                                    "key": "format",
+                                    "value": "fhir"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Track Lab Order",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{base_url}}/api/integrations/lab/order/ORD-2026-001",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "integrations",
+                                "lab",
+                                "order",
+                                "ORD-2026-001"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Cancel Lab Order",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"orderId\": \"ORD-2026-001\",\n  \"reason\": \"Patient request\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/integrations/lab/cancel-order",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "integrations",
+                                "lab",
+                                "cancel-order"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Reconcile Pending Orders",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{base_url}}/api/integrations/lab/reconcile",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "integrations",
+                                "lab",
+                                "reconcile"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Background Tasks",
+            "item": [
+                {
+                    "name": "Start Background Tasks",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{base_url}}/api/integrations/start-background-tasks",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "integrations",
+                                "start-background-tasks"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Stop Background Tasks",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{base_url}}/api/integrations/stop-background-tasks",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "integrations",
+                                "stop-background-tasks"
+                            ]
+                        }
+                    }
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:3001",
+            "type": "string"
+        },
+        {
+            "key": "api_key",
+            "value": "your-api-key-here",
+            "type": "string"
+        },
+        {
+            "key": "consent_token",
+            "value": "token-from-consent-request",
+            "type": "string"
+        }
+    ]
+}

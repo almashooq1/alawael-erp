@@ -23,7 +23,17 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['user', 'admin', 'manager', 'hr', 'accountant', 'doctor', 'therapist', 'receptionist', 'parent'],
+    enum: [
+      'user',
+      'admin',
+      'manager',
+      'hr',
+      'accountant',
+      'doctor',
+      'therapist',
+      'receptionist',
+      'parent',
+    ],
     default: 'user',
   },
   lastLogin: {
@@ -34,6 +44,56 @@ const userSchema = new mongoose.Schema({
     enabled: { type: Boolean, default: false },
     secret: String,
     backupCodes: [String],
+    smsCode: String,
+    smsCodeExpires: Date,
+    trustedDevices: [
+      {
+        fingerprint: String,
+        token: String,
+        createdAt: Date,
+        expiresAt: Date,
+      },
+    ],
+    enabledAt: Date,
+  },
+  passwordChangedAt: {
+    type: Date,
+    default: Date.now,
+  },
+  passwordHistory: {
+    type: [String],
+    select: false,
+    default: [],
+  },
+  requirePasswordChange: {
+    type: Boolean,
+    default: false,
+  },
+  passwordResetReason: {
+    type: String,
+  },
+  notificationPreferences: {
+    channels: {
+      email: { type: Boolean, default: true },
+      sms: { type: Boolean, default: true },
+      whatsapp: { type: Boolean, default: true },
+      push: { type: Boolean, default: true },
+      'in-app': { type: Boolean, default: true },
+    },
+    types: {
+      payment: { type: Boolean, default: true },
+      security: { type: Boolean, default: true },
+      system: { type: Boolean, default: true },
+      marketing: { type: Boolean, default: false },
+      reminder: { type: Boolean, default: true },
+      alert: { type: Boolean, default: true },
+      info: { type: Boolean, default: true },
+    },
+    quietHours: {
+      enabled: { type: Boolean, default: false },
+      start: { type: Number, default: 22 }, // 10 PM
+      end: { type: Number, default: 8 }, // 8 AM
+    },
   },
   loginHistory: [
     {
@@ -56,9 +116,19 @@ const userSchema = new mongoose.Schema({
 // Update timestamp on save
 userSchema.pre('save', function (next) {
   this.updatedAt = Date.now();
-  next();
+  if (typeof next === 'function') {
+    next();
+  }
 });
-
+// Method to compare passwords
+userSchema.methods.comparePassword = async function (candidatePassword) {
+  const bcrypt = require('bcrypt');
+  try {
+    return await bcrypt.compare(candidatePassword, this.password);
+  } catch (error) {
+    throw new Error('Password comparison failed');
+  }
+};
 // Method to get user without password
 userSchema.methods.toJSON = function () {
   const user = this.toObject();

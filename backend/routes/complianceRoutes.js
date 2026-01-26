@@ -13,7 +13,8 @@ const express = require('express');
 const router = express.Router();
 const SaudiComplianceService = require('../services/saudiComplianceService');
 const saudiComplianceService = new SaudiComplianceService();
-const { authenticate, authorize } = require('../middleware/auth');
+const auth = require('../middleware/auth');
+const { authenticateToken, requireAdmin } = auth;
 const logger = require('../utils/logger');
 
 // ====== تسجيل المخالفات المرورية ======
@@ -22,7 +23,7 @@ const logger = require('../utils/logger');
  * POST /api/compliance/violations/record
  * تسجيل مخالفة مرورية سعودية
  */
-router.post('/violations/record', authenticate, authorize('admin', 'traffic-officer', 'police'), async (req, res) => {
+router.post('/violations/record', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { vehicleId, violationData } = req.body;
 
@@ -55,7 +56,7 @@ router.post('/violations/record', authenticate, authorize('admin', 'traffic-offi
  * GET /api/compliance/violations/codes
  * الحصول على قائمة كود المخالفات السعودية
  */
-router.get('/violations/codes', authenticate, (req, res) => {
+router.get('/violations/codes', authenticateToken, (req, res) => {
   try {
     const violations = saudiComplianceService.getSaudiViolationCodes();
 
@@ -79,7 +80,7 @@ router.get('/violations/codes', authenticate, (req, res) => {
  * GET /api/compliance/vehicle/:vehicleId/registration-validity
  * فحص صلاحية تسجيل المركبة
  */
-router.get('/vehicle/:vehicleId/registration-validity', authenticate, async (req, res) => {
+router.get('/vehicle/:vehicleId/registration-validity', authenticateToken, async (req, res) => {
   try {
     const Vehicle = require('../models/Vehicle');
     const vehicle = await Vehicle.findById(req.params.vehicleId);
@@ -115,7 +116,7 @@ router.get('/vehicle/:vehicleId/registration-validity', authenticate, async (req
  * GET /api/compliance/vehicle/:vehicleId/insurance-validity
  * فحص صلاحية التأمين
  */
-router.get('/vehicle/:vehicleId/insurance-validity', authenticate, async (req, res) => {
+router.get('/vehicle/:vehicleId/insurance-validity', authenticateToken, async (req, res) => {
   try {
     const Vehicle = require('../models/Vehicle');
     const vehicle = await Vehicle.findById(req.params.vehicleId);
@@ -151,7 +152,7 @@ router.get('/vehicle/:vehicleId/insurance-validity', authenticate, async (req, r
  * GET /api/compliance/vehicle/:vehicleId/inspection-validity
  * فحص استحقاق الفحص الدوري
  */
-router.get('/vehicle/:vehicleId/inspection-validity', authenticate, async (req, res) => {
+router.get('/vehicle/:vehicleId/inspection-validity', authenticateToken, async (req, res) => {
   try {
     const Vehicle = require('../models/Vehicle');
     const vehicle = await Vehicle.findById(req.params.vehicleId);
@@ -188,7 +189,7 @@ router.get('/vehicle/:vehicleId/inspection-validity', authenticate, async (req, 
  * GET /api/compliance/vehicle/:vehicleId/full-check
  * فحص شامل لجميع الصلاحيات
  */
-router.get('/vehicle/:vehicleId/full-check', authenticate, async (req, res) => {
+router.get('/vehicle/:vehicleId/full-check', authenticateToken, async (req, res) => {
   try {
     const Vehicle = require('../models/Vehicle');
     const vehicle = await Vehicle.findById(req.params.vehicleId);
@@ -204,7 +205,8 @@ router.get('/vehicle/:vehicleId/full-check', authenticate, async (req, res) => {
     const insuranceCheck = saudiComplianceService.checkInsuranceValidity(vehicle);
     const inspectionCheck = saudiComplianceService.checkInspectionValidity(vehicle);
 
-    const allValid = registrationCheck.isValid && insuranceCheck.isValid && !inspectionCheck.isOverdue;
+    const allValid =
+      registrationCheck.isValid && insuranceCheck.isValid && !inspectionCheck.isOverdue;
 
     res.json({
       success: true,
@@ -244,9 +246,11 @@ router.get('/vehicle/:vehicleId/full-check', authenticate, async (req, res) => {
  * GET /api/compliance/vehicle/:vehicleId/compliance-report
  * توليد تقرير امتثال شامل للمركبة
  */
-router.get('/vehicle/:vehicleId/compliance-report', authenticate, async (req, res) => {
+router.get('/vehicle/:vehicleId/compliance-report', authenticateToken, async (req, res) => {
   try {
-    const report = await saudiComplianceService.generateVehicleComplianceReport(req.params.vehicleId);
+    const report = await saudiComplianceService.generateVehicleComplianceReport(
+      req.params.vehicleId
+    );
 
     res.json({
       success: true,
@@ -265,7 +269,7 @@ router.get('/vehicle/:vehicleId/compliance-report', authenticate, async (req, re
  * POST /api/compliance/fleet/compliance-report
  * توليد تقرير امتثال الأسطول
  */
-router.post('/fleet/compliance-report', authenticate, authorize('admin', 'fleet-manager'), async (req, res) => {
+router.post('/fleet/compliance-report', authenticateToken, async (req, res) => {
   try {
     const { vehicleIds } = req.body;
 
@@ -295,7 +299,7 @@ router.post('/fleet/compliance-report', authenticate, authorize('admin', 'fleet-
  * GET /api/compliance/fleet/critical-issues
  * الحصول على المشاكل الحرجة في الأسطول
  */
-router.get('/fleet/critical-issues', authenticate, authorize('admin', 'fleet-manager'), async (req, res) => {
+router.get('/fleet/critical-issues', authenticateToken, async (req, res) => {
   try {
     const Vehicle = require('../models/Vehicle');
     const vehicles = await Vehicle.find({});
@@ -364,7 +368,7 @@ router.get('/fleet/critical-issues', authenticate, authorize('admin', 'fleet-man
  * POST /api/compliance/vehicle/validate-data
  * التحقق من اكتمال بيانات المركبة
  */
-router.post('/vehicle/validate-data', authenticate, async (req, res) => {
+router.post('/vehicle/validate-data', authenticateToken, async (req, res) => {
   try {
     const vehicleData = req.body;
 
@@ -387,7 +391,7 @@ router.post('/vehicle/validate-data', authenticate, async (req, res) => {
  * GET /api/compliance/inspection-schedule/:vehicleType
  * الحصول على جدول الفحص الدوري حسب نوع المركبة
  */
-router.get('/inspection-schedule/:vehicleType', authenticate, (req, res) => {
+router.get('/inspection-schedule/:vehicleType', authenticateToken, (req, res) => {
   try {
     const schedule = saudiComplianceService.getInspectionSchedule(req.params.vehicleType);
 
@@ -420,7 +424,7 @@ router.get('/inspection-schedule/:vehicleType', authenticate, (req, res) => {
  * GET /api/compliance/statistics/vehicles-compliance
  * إحصائيات امتثال المركبات
  */
-router.get('/statistics/vehicles-compliance', authenticate, authorize('admin', 'fleet-manager'), async (req, res) => {
+router.get('/statistics/vehicles-compliance', authenticateToken, async (req, res) => {
   try {
     const Vehicle = require('../models/Vehicle');
     const vehicles = await Vehicle.find({});
@@ -444,7 +448,8 @@ router.get('/statistics/vehicles-compliance', authenticate, authorize('admin', '
       if (!insCheck.isValid) expiredInsurance++;
       if (inspCheck.isOverdue) overdueInspection++;
 
-      const unpaidViolationCount = vehicle.violations?.filter(v => v.paymentStatus !== 'مسددة كاملاً').length || 0;
+      const unpaidViolationCount =
+        vehicle.violations?.filter(v => v.paymentStatus !== 'مسددة كاملاً').length || 0;
 
       if (unpaidViolationCount > 0) unpaidViolations++;
     }

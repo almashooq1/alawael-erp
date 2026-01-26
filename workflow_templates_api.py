@@ -1,3 +1,10 @@
+from auth_rbac_decorator import (
+    check_permission,
+    check_multiple_permissions,
+    guard_payload_size,
+    validate_json,
+    log_audit
+)
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
@@ -26,6 +33,8 @@ workflow_templates_bp = Blueprint('workflow_templates', __name__, url_prefix='/a
 
 @workflow_templates_bp.route('/templates', methods=['GET'])
 @jwt_required()
+@check_permission('view_workflow_templates')
+@log_audit('GET_TEMPLATES')
 def get_templates():
     """Get workflow templates with filtering"""
     try:
@@ -97,6 +106,9 @@ def get_templates():
 
 @workflow_templates_bp.route('/templates', methods=['POST'])
 @jwt_required()
+@check_permission('manage_workflow_templates')
+@guard_payload_size()
+@log_audit('CREATE_TEMPLATE')
 def create_template():
     """Create a new workflow template"""
     try:
@@ -170,6 +182,8 @@ def create_template():
 
 @workflow_templates_bp.route('/templates/<int:template_id>', methods=['GET'])
 @jwt_required()
+@check_permission('view_workflow_templates')
+@log_audit('GET_TEMPLATE')
 def get_template(template_id):
     """Get template details with steps"""
     try:
@@ -224,6 +238,9 @@ def get_template(template_id):
 
 @workflow_templates_bp.route('/instances', methods=['POST'])
 @jwt_required()
+@check_permission('manage_workflow_templates')
+@guard_payload_size()
+@log_audit('CREATE_INSTANCE')
 def create_instance():
     """Create a new workflow instance"""
     try:
@@ -284,6 +301,8 @@ def create_instance():
 
 @workflow_templates_bp.route('/instances', methods=['GET'])
 @jwt_required()
+@check_permission('view_workflow_templates')
+@log_audit('GET_INSTANCES')
 def get_instances():
     """Get workflow instances"""
     try:
@@ -342,6 +361,8 @@ def get_instances():
 
 @workflow_templates_bp.route('/dashboard', methods=['GET'])
 @jwt_required()
+@check_permission('view_dashboard')
+@log_audit('GET_DASHBOARD')
 def get_dashboard():
     """Get workflow dashboard data"""
     try:

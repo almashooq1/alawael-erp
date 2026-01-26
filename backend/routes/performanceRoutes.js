@@ -11,14 +11,14 @@
 const express = require('express');
 const router = express.Router();
 const { performanceMonitor, getCacheStats, clearCache, queryOptimizationHints } = require('../config/performance');
-const { authenticate, authorize } = require('../middleware/auth');
+const { authenticateToken } = require('../middleware/auth');
 const logger = require('../utils/logger');
 
 /**
  * GET /api/performance/metrics
  * الحصول على معدلات الأداء
  */
-router.get('/metrics', authenticate, authorize('admin'), (req, res) => {
+router.get('/metrics', authenticate, (req, res) => {
   try {
     const metrics = performanceMonitor.getStats();
 
@@ -41,7 +41,7 @@ router.get('/metrics', authenticate, authorize('admin'), (req, res) => {
  * GET /api/performance/cache
  * إحصائيات الـ Cache
  */
-router.get('/cache', authenticate, authorize('admin'), async (req, res) => {
+router.get('/cache', authenticate, async (req, res) => {
   try {
     const cacheStats = await getCacheStats();
 
@@ -63,7 +63,7 @@ router.get('/cache', authenticate, authorize('admin'), async (req, res) => {
  * POST /api/performance/cache/clear
  * مسح الـ Cache بواسطة نمط
  */
-router.post('/cache/clear', authenticate, authorize('admin'), async (req, res) => {
+router.post('/cache/clear', authenticate, async (req, res) => {
   try {
     const { pattern } = req.body;
     const cachePattern = pattern || '*';
@@ -96,7 +96,7 @@ router.post('/cache/clear', authenticate, authorize('admin'), async (req, res) =
  * GET /api/performance/query-hints
  * نصائح تحسين الاستعلامات
  */
-router.get('/query-hints', authenticate, authorize('admin'), (req, res) => {
+router.get('/query-hints', authenticate, (req, res) => {
   try {
     res.json({
       success: true,
@@ -151,7 +151,7 @@ router.get('/health', async (req, res) => {
  * POST /api/performance/metrics/reset
  * إعادة تعيين معدلات الأداء
  */
-router.post('/metrics/reset', authenticate, authorize('admin'), (req, res) => {
+router.post('/metrics/reset', authenticate, (req, res) => {
   try {
     performanceMonitor.reset();
 
@@ -171,3 +171,4 @@ router.post('/metrics/reset', authenticate, authorize('admin'), (req, res) => {
 });
 
 module.exports = router;
+

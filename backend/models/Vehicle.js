@@ -59,7 +59,16 @@ const VehicleSchema = new Schema(
       color: String, // اللون
       type: {
         type: String,
-        enum: ['سيارة ركوب', 'سيارة نقل', 'حافلة', 'شاحنة', 'دراجة نارية', 'جرار', 'معدات ثقيلة', 'أخرى'],
+        enum: [
+          'سيارة ركوب',
+          'سيارة نقل',
+          'حافلة',
+          'شاحنة',
+          'دراجة نارية',
+          'جرار',
+          'معدات ثقيلة',
+          'أخرى',
+        ],
         required: true,
       },
       fuelType: {
@@ -234,13 +243,13 @@ const VehicleSchema = new Schema(
     totalViolations: { type: Number, default: 0 },
     totalFines: { type: Number, default: 0 },
 
-    // الرخص والتصاريح المرتبطة
-    relatedLicenses: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: 'License',
-      },
-    ],
+    // الرخص والتصاريح المرتبطة - معطل مؤقتاً لحين إنشاء License model
+    // relatedLicenses: [
+    //   {
+    //     type: Schema.Types.ObjectId,
+    //     ref: 'License',
+    //   },
+    // ],
 
     // الملفات والمستندات
     documents: [
@@ -332,18 +341,10 @@ const VehicleSchema = new Schema(
     timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
-  },
+  }
 );
 
-// الفهارس
-VehicleSchema.index({ registrationNumber: 1 });
-VehicleSchema.index({ plateNumber: 1 });
-VehicleSchema.index({ owner: 1 });
-VehicleSchema.index({ assignedDriver: 1 });
-VehicleSchema.index({ 'registration.expiryDate': 1 });
-VehicleSchema.index({ 'inspection.nextInspectionDate': 1 });
-VehicleSchema.index({ status: 1 });
-VehicleSchema.index({ createdAt: -1 });
+// Note: Indexes consolidated below to avoid duplication
 
 // الحقول المحسوبة الافتراضية
 VehicleSchema.virtual('age').get(function () {
@@ -455,10 +456,9 @@ VehicleSchema.methods.updateLocation = function (latitude, longitude, address, s
 // DATABASE INDEXES FOR OPTIMIZATION
 // ================================
 // Primary Lookup Indexes
-VehicleSchema.index({ registrationNumber: 1 });
-VehicleSchema.index({ plateNumber: 1 });
+// Note: registrationNumber and plateNumber have unique: true (creates automatic index)
 VehicleSchema.index({ owner: 1 });
-VehicleSchema.index({ assignedDriver: 1 });
+// Note: assignedDriver single index removed - covered by compound index below
 VehicleSchema.index({ status: 1 });
 VehicleSchema.index({ createdAt: -1 });
 

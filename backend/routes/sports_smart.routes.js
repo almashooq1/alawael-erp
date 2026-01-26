@@ -32,3 +32,4 @@ router.get('/scout', authorizeRole(['COACH', 'ADMIN']), async (req, res) => {
 });
 
 module.exports = router;
+

@@ -7,6 +7,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import db
 from models.beneficiary import Beneficiary
 from models.user import User
+from lib.auth_rbac_decorator import check_permission, log_audit, guard_payload_size, validate_json
 from datetime import datetime
 from sqlalchemy import or_
 
@@ -14,6 +15,8 @@ bp = Blueprint('beneficiaries', __name__, url_prefix='/api/beneficiaries')
 
 @bp.route('', methods=['GET'])
 @jwt_required()
+@check_permission('view_students')
+@log_audit('LIST_BENEFICIARIES')
 def list_beneficiaries():
     """قائمة المستفيدين مع البحث والتصفية"""
     try:

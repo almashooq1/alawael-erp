@@ -32,10 +32,11 @@ const attendanceSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  },
+  }
 );
 
 // Prevent duplicate attendance records for the same employee on the same day
 attendanceSchema.index({ employeeId: 1, date: 1 }, { unique: true });
 
-module.exports = mongoose.model('Attendance', attendanceSchema);
+// Reuse compiled model in watch/test environments to avoid OverwriteModelError
+module.exports = mongoose.models.Attendance || mongoose.model('Attendance', attendanceSchema);

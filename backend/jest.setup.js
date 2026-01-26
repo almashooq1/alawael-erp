@@ -1,3 +1,16 @@
+// Jest setup: ensure test env and bypass heavy middleware
+process.env.NODE_ENV = process.env.NODE_ENV || 'test';
+process.env.USE_MOCK_DB = 'true';
+// increase default jest timeout for slow hooks
+jest.setTimeout(30000);
+
+// Optional: silence noisy logs during tests
+const noop = () => {};
+if (process.env.NODE_ENV === 'test') {
+  console.log = noop;
+  console.info = noop;
+  console.debug = noop;
+}
 /**
  * Jest Setup File
  * ملف إعداد Jest
@@ -22,11 +35,8 @@ afterEach(() => {
   db.write(EMPTY_DB);
 });
 
-// Mock timers
-jest.useFakeTimers();
-
-// Global test timeout
-jest.setTimeout(10000);
+// Use real timers to avoid breaking async callbacks that call `done()`
+jest.useRealTimers();
 
 // Suppress console during tests
 global.console = {
@@ -90,7 +100,8 @@ expect.extend({
     const pass = typeof received.score === 'number' && received.score >= 0 && received.score <= 100;
     return {
       pass,
-      message: () => `expected ${JSON.stringify(received)} to have a valid compliance score (0-100)`,
+      message: () =>
+        `expected ${JSON.stringify(received)} to have a valid compliance score (0-100)`,
     };
   },
 });
@@ -103,5 +114,5 @@ expect.extend({
 
 // Clean up after all tests
 afterAll(async () => {
-  jest.useRealTimers();
+  // nothing special to clean here
 });

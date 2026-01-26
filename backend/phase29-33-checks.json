@@ -1,0 +1,76 @@
+﻿{
+    "timestamp":  "2026-01-24T23:36:20",
+    "allOk":  false,
+    "checks":  [
+                   {
+                       "name":  "Health",
+                       "url":  "http://localhost:3001/health",
+                       "ok":  true,
+                       "status":  200,
+                       "message":  ""
+                   },
+                   {
+                       "name":  "Test-First",
+                       "url":  "http://localhost:3001/test-first",
+                       "ok":  false,
+                       "status":  404,
+                       "message":  "أرجع الملقم البعيد الخطأ: (404) لم يتم العثور عليه."
+                   },
+                   {
+                       "name":  "Phase29-33 Base",
+                       "url":  "http://localhost:3001/api/phases-29-33",
+                       "ok":  false,
+                       "status":  404,
+                       "message":  "أرجع الملقم البعيد الخطأ: (404) لم يتم العثور عليه."
+                   },
+                   {
+                       "name":  "Phase29-33 Index",
+                       "url":  "http://localhost:3001/api/phases-29-33/",
+                       "ok":  false,
+                       "status":  404,
+                       "message":  "أرجع الملقم البعيد الخطأ: (404) لم يتم العثور عليه."
+                   },
+                   {
+                       "name":  "Phase 29 (AI)",
+                       "url":  "http://localhost:3001/api/phases-29-33/ai/llm/providers",
+                       "ok":  false,
+                       "status":  404,
+                       "message":  "أرجع الملقم البعيد الخطأ: (404) لم يتم العثور عليه."
+                   },
+                   {
+                       "name":  "Phase 30 (Quantum)",
+                       "url":  "http://localhost:3001/api/phases-29-33/quantum/crypto/key-status/test",
+                       "ok":  false,
+                       "status":  404,
+                       "message":  "أرجع الملقم البعيد الخطأ: (404) لم يتم العثور عليه."
+                   },
+                   {
+                       "name":  "Phase 31 (XR)",
+                       "url":  "http://localhost:3001/api/phases-29-33/xr/hologram/status/test",
+                       "ok":  false,
+                       "status":  404,
+                       "message":  "أرجع الملقم البعيد الخطأ: (404) لم يتم العثور عليه."
+                   },
+                   {
+                       "name":  "Phase 32 (DevOps)",
+                       "url":  "http://localhost:3001/api/phases-29-33/devops/k8s/metrics/test",
+                       "ok":  false,
+                       "status":  404,
+                       "message":  "أرجع الملقم البعيد الخطأ: (404) لم يتم العثور عليه."
+                   },
+                   {
+                       "name":  "Phase 33 (Optimization)",
+                       "url":  "http://localhost:3001/api/phases-29-33/optimization/performance/report/test",
+                       "ok":  false,
+                       "status":  404,
+                       "message":  "أرجع الملقم البعيد الخطأ: (404) لم يتم العثور عليه."
+                   },
+                   {
+                       "name":  "HTML Docs",
+                       "url":  "http://localhost:3001/phase29-33-docs.html",
+                       "ok":  false,
+                       "status":  404,
+                       "message":  "أرجع الملقم البعيد الخطأ: (404) لم يتم العثور عليه."
+                   }
+               ]
+}

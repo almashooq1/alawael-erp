@@ -42,3 +42,4 @@ router.get('/fhir/patient/:id', async (req, res) => {
 });
 
 module.exports = router;
+

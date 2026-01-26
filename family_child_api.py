@@ -2,6 +2,13 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import db, User, Student
 from family_child_models import (
+from auth_rbac_decorator import (
+    check_permission,
+    check_multiple_permissions,
+    guard_payload_size,
+    validate_json,
+    log_audit
+)
     ChildProfile, FamilyProfile, FamilyMember, ChildFamilyRelation,
     ProgressTracking, SmartAppointment, ParentCommunication,
     SatisfactionSurvey, SurveyResponse
@@ -16,6 +23,8 @@ family_child_bp = Blueprint('family_child', __name__)
 
 @family_child_bp.route('/api/child-profiles', methods=['GET'])
 @jwt_required()
+@check_permission('view_family_child')
+@log_audit('GET_CHILD_PROFILES')
 def get_child_profiles():
     """استرجاع قائمة ملفات الأطفال"""
     try:
@@ -58,6 +67,9 @@ def get_child_profiles():
 
 @family_child_bp.route('/api/child-profiles', methods=['POST'])
 @jwt_required()
+@check_permission('manage_family_child')
+@guard_payload_size()
+@log_audit('CREATE_CHILD_PROFILE')
 def create_child_profile():
     """إنشاء ملف طفل جديد"""
     try:
@@ -117,6 +129,8 @@ def create_child_profile():
 
 @family_child_bp.route('/api/child-profiles/<int:profile_id>', methods=['GET'])
 @jwt_required()
+@check_permission('view_family_child')
+@log_audit('GET_CHILD_PROFILE')
 def get_child_profile(profile_id):
     """استرجاع ملف طفل محدد"""
     try:
@@ -173,6 +187,8 @@ def get_child_profile(profile_id):
 
 @family_child_bp.route('/api/family-profiles', methods=['GET'])
 @jwt_required()
+@check_permission('view_family_child')
+@log_audit('GET_FAMILY_PROFILES')
 def get_family_profiles():
     """استرجاع قائمة ملفات الأسر"""
     try:
@@ -212,6 +228,9 @@ def get_family_profiles():
 
 @family_child_bp.route('/api/family-profiles', methods=['POST'])
 @jwt_required()
+@check_permission('manage_family_child')
+@guard_payload_size()
+@log_audit('CREATE_FAMILY_PROFILE')
 def create_family_profile():
     """إنشاء ملف أسرة جديد"""
     try:
@@ -267,6 +286,8 @@ def create_family_profile():
 
 @family_child_bp.route('/api/smart-appointments', methods=['GET'])
 @jwt_required()
+@check_permission('view_family_child')
+@log_audit('GET_SMART_APPOINTMENTS')
 def get_smart_appointments():
     """استرجاع قائمة المواعيد الذكية"""
     try:
@@ -319,6 +340,9 @@ def get_smart_appointments():
 
 @family_child_bp.route('/api/smart-appointments', methods=['POST'])
 @jwt_required()
+@check_permission('manage_family_child')
+@guard_payload_size()
+@log_audit('CREATE_SMART_APPOINTMENT')
 def create_smart_appointment():
     """إنشاء موعد ذكي جديد"""
     try:
@@ -375,6 +399,8 @@ def create_smart_appointment():
 
 @family_child_bp.route('/api/family-child-dashboard', methods=['GET'])
 @jwt_required()
+@check_permission('view_dashboard')
+@log_audit('GET_DASHBOARD_DATA')
 def get_dashboard_data():
     """استرجاع بيانات لوحة التحكم"""
     try:

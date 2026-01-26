@@ -9,12 +9,15 @@ from datetime import datetime, timedelta
 from sqlalchemy import func, extract
 from app import db
 from models import User, Beneficiary, Session
+from lib.auth_rbac_decorator import check_permission, require_role, log_audit, guard_payload_size, validate_json
 
 analytics_bp = Blueprint('analytics', __name__, url_prefix='/api/analytics')
 
 
 @analytics_bp.route('/dashboard', methods=['GET'])
-@jwt_required()
+
+@check_permission('view_analytics_dashboard')
+@log_audit('GET_GET_ANALYTICS_DASHBOARD')
 def get_analytics_dashboard():
     """
     Get comprehensive analytics dashboard
@@ -83,7 +86,9 @@ def get_analytics_dashboard():
 
 
 @analytics_bp.route('/sessions/stats', methods=['GET'])
-@jwt_required()
+
+@check_permission('view_sessions_statistics')
+@log_audit('GET_GET_SESSIONS_STATISTICS')
 def get_sessions_statistics():
     """
     Get detailed session statistics
@@ -136,7 +141,9 @@ def get_sessions_statistics():
 
 
 @analytics_bp.route('/beneficiaries/stats', methods=['GET'])
-@jwt_required()
+
+@check_permission('view_beneficiaries_statistics')
+@log_audit('GET_GET_BENEFICIARIES_STATISTICS')
 def get_beneficiaries_statistics():
     """
     Get beneficiary statistics
@@ -203,7 +210,9 @@ def get_beneficiaries_statistics():
 
 
 @analytics_bp.route('/usage-trends', methods=['GET'])
-@jwt_required()
+
+@check_permission('view_usage_trends')
+@log_audit('GET_GET_USAGE_TRENDS')
 def get_usage_trends():
     """
     Get usage trends over time
@@ -245,7 +254,9 @@ def get_usage_trends():
 
 
 @analytics_bp.route('/export/csv', methods=['GET'])
-@jwt_required()
+
+@check_permission('view_export_to_csv')
+@log_audit('GET_EXPORT_TO_CSV')
 def export_to_csv():
     """
     Export beneficiary data and sessions to CSV

@@ -7,16 +7,23 @@ import api from '../utils/api';
 export const login = createAsyncThunk('auth/login', async (credentials, { rejectWithValue }) => {
   try {
     const response = await api.post('/auth/login', credentials);
-    const { access_token, refresh_token, user } = response.data.data;
+    const accessToken = response.data.data?.accessToken || response.data.data?.token;
+    const user = response.data.data?.user;
+
+    if (!accessToken) {
+      throw new Error('No access token received');
+    }
 
     // حفظ التوكنات
-    localStorage.setItem('access_token', access_token);
-    localStorage.setItem('refresh_token', refresh_token);
-    localStorage.setItem('user', JSON.stringify(user));
+    localStorage.setItem('access_token', accessToken);
+    if (user) {
+      localStorage.setItem('user', JSON.stringify(user));
+    }
 
-    return response.data;
+    return { success: true, data: { user, accessToken } };
   } catch (error) {
-    return rejectWithValue(error.response?.data?.message || 'فشل تسجيل الدخول');
+    console.error('Login error:', error);
+    return rejectWithValue(error.response?.data?.message || error.message || 'فشل تسجيل الدخول');
   }
 });
 
@@ -34,36 +41,45 @@ export const logout = createAsyncThunk('auth/logout', async (_, { rejectWithValu
 });
 
 // جلب معلومات المستخدم الحالي
-export const getCurrentUser = createAsyncThunk('auth/getCurrentUser', async (_, { rejectWithValue }) => {
-  try {
-    const response = await api.get('/auth/me');
-    return response.data;
-  } catch (error) {
-    return rejectWithValue(error.response?.data?.message);
+export const getCurrentUser = createAsyncThunk(
+  'auth/getCurrentUser',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get('/auth/me');
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message);
+    }
   }
-});
+);
 
 // تحديث معلومات المستخدم
-export const updateProfile = createAsyncThunk('auth/updateProfile', async (profileData, { rejectWithValue }) => {
-  try {
-    const response = await api.put('/auth/me', profileData);
-    const user = response.data.data;
-    localStorage.setItem('user', JSON.stringify(user));
-    return response.data;
-  } catch (error) {
-    return rejectWithValue(error.response?.data?.message);
+export const updateProfile = createAsyncThunk(
+  'auth/updateProfile',
+  async (profileData, { rejectWithValue }) => {
+    try {
+      const response = await api.put('/auth/me', profileData);
+      const user = response.data.data;
+      localStorage.setItem('user', JSON.stringify(user));
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message);
+    }
   }
-});
+);
 
 // تغيير كلمة المرور
-export const changePassword = createAsyncThunk('auth/changePassword', async (passwordData, { rejectWithValue }) => {
-  try {
-    const response = await api.post('/auth/change-password', passwordData);
-    return response.data;
-  } catch (error) {
-    return rejectWithValue(error.response?.data?.message);
+export const changePassword = createAsyncThunk(
+  'auth/changePassword',
+  async (passwordData, { rejectWithValue }) => {
+    try {
+      const response = await api.post('/auth/change-password', passwordData);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message);
+    }
   }
-});
+);
 
 const initialState = {
   user: JSON.parse(localStorage.getItem('user')) || null,
@@ -94,7 +110,7 @@ const authSlice = createSlice({
       .addCase(login.fulfilled, (state, action) => {
         state.loading = false;
         state.isAuthenticated = true;
-        state.user = action.payload.data.user;
+        state.user = action.payload.data?.user || null;
         state.error = null;
       })
       .addCase(login.rejected, (state, action) => {

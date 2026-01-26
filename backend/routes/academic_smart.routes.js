@@ -32,3 +32,4 @@ router.get('/case-study/:patientId', authorizeRole(['DOCTOR', 'THERAPIST']), asy
 });
 
 module.exports = router;
+

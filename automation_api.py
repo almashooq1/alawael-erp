@@ -1,3 +1,10 @@
+from auth_rbac_decorator import (
+    check_permission,
+    check_multiple_permissions,
+    guard_payload_size,
+    validate_json,
+    log_audit
+)
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
@@ -32,6 +39,9 @@ automation_bp = Blueprint('automation', __name__, url_prefix='/api/automation')
 
 @automation_bp.route('/reports/generate', methods=['POST'])
 @jwt_required()
+@check_permission('generate_automation')
+@guard_payload_size()
+@log_audit('GENERATE_REPORT')
 def generate_report():
     """توليد تقرير"""
     try:
@@ -73,6 +83,8 @@ def generate_report():
 
 @automation_bp.route('/reports/types', methods=['GET'])
 @jwt_required()
+@check_permission('view_reports')
+@log_audit('GET_REPORT_TYPES')
 def get_report_types():
     """الحصول على أنواع التقارير المتاحة"""
     try:
@@ -140,6 +152,9 @@ def get_report_types():
 
 @automation_bp.route('/reports/schedule', methods=['POST'])
 @jwt_required()
+@check_permission('manage_automation')
+@guard_payload_size()
+@log_audit('SCHEDULE_REPORT')
 def schedule_report():
     """جدولة تقرير دوري"""
     try:
@@ -182,6 +197,8 @@ def schedule_report():
 
 @automation_bp.route('/reports/scheduled', methods=['GET'])
 @jwt_required()
+@check_permission('view_reports')
+@log_audit('GET_SCHEDULED_REPORTS')
 def get_scheduled_reports():
     """الحصول على التقارير المجدولة"""
     try:
@@ -203,6 +220,8 @@ def get_scheduled_reports():
 
 @automation_bp.route('/reports/scheduled/<report_id>', methods=['DELETE'])
 @jwt_required()
+@check_permission('manage_automation')
+@log_audit('CANCEL_SCHEDULED_REPORT')
 def cancel_scheduled_report(report_id):
     """إلغاء تقرير مجدول"""
     try:
@@ -224,6 +243,8 @@ def cancel_scheduled_report(report_id):
 
 @automation_bp.route('/reports/statistics', methods=['GET'])
 @jwt_required()
+@check_permission('view_stats')
+@log_audit('GET_REPORT_STATISTICS')
 def get_report_statistics():
     """الحصول على إحصائيات سريعة للتقارير"""
     try:
@@ -282,6 +303,8 @@ def get_report_statistics():
 
 @automation_bp.route('/workflows', methods=['GET'])
 @jwt_required()
+@check_permission('view_automation')
+@log_audit('GET_WORKFLOWS')
 def get_workflows():
     """الحصول على قائمة سير العمل الآلي"""
     try:
@@ -346,6 +369,9 @@ def get_workflows():
 
 @automation_bp.route('/workflows', methods=['POST'])
 @jwt_required()
+@check_permission('manage_automation')
+@guard_payload_size()
+@log_audit('CREATE_WORKFLOW')
 def create_workflow():
     """إنشاء سير عمل آلي جديد"""
     try:
@@ -392,6 +418,8 @@ def create_workflow():
 
 @automation_bp.route('/workflows/<int:workflow_id>', methods=['GET'])
 @jwt_required()
+@check_permission('view_automation')
+@log_audit('GET_WORKFLOW')
 def get_workflow(workflow_id):
     """الحصول على تفاصيل سير عمل محدد"""
     try:
@@ -447,6 +475,9 @@ def get_workflow(workflow_id):
 
 @automation_bp.route('/workflows/<int:workflow_id>', methods=['PUT'])
 @jwt_required()
+@check_permission('manage_automation')
+@guard_payload_size()
+@log_audit('UPDATE_WORKFLOW')
 def update_workflow(workflow_id):
     """تحديث سير عمل آلي"""
     try:
@@ -492,6 +523,9 @@ def update_workflow(workflow_id):
 
 @automation_bp.route('/workflows/<int:workflow_id>/execute', methods=['POST'])
 @jwt_required()
+@check_permission('manage_automation')
+@guard_payload_size()
+@log_audit('EXECUTE_WORKFLOW')
 def execute_workflow(workflow_id):
     """تنفيذ سير عمل آلي يدوياً"""
     try:
@@ -528,6 +562,8 @@ def execute_workflow(workflow_id):
 
 @automation_bp.route('/workflows/<int:workflow_id>/actions', methods=['GET'])
 @jwt_required()
+@check_permission('view_automation')
+@log_audit('GET_WORKFLOW_ACTIONS')
 def get_workflow_actions(workflow_id):
     """الحصول على إجراءات سير عمل محدد"""
     try:
@@ -560,6 +596,9 @@ def get_workflow_actions(workflow_id):
 
 @automation_bp.route('/workflows/<int:workflow_id>/actions', methods=['POST'])
 @jwt_required()
+@check_permission('manage_automation')
+@guard_payload_size()
+@log_audit('CREATE_ACTION')
 def create_action(workflow_id):
     """إضافة إجراء جديد لسير العمل"""
     try:
@@ -610,6 +649,8 @@ def create_action(workflow_id):
 
 @automation_bp.route('/messages', methods=['GET'])
 @jwt_required()
+@check_permission('view_automation')
+@log_audit('GET_SCHEDULED_MESSAGES')
 def get_scheduled_messages():
     """الحصول على قائمة الرسائل المجدولة"""
     try:
@@ -664,6 +705,9 @@ def get_scheduled_messages():
 
 @automation_bp.route('/messages', methods=['POST'])
 @jwt_required()
+@check_permission('manage_automation')
+@guard_payload_size()
+@log_audit('CREATE_SCHEDULED_MESSAGE')
 def create_scheduled_message():
     """إنشاء رسالة مجدولة جديدة"""
     try:
@@ -719,6 +763,9 @@ def create_scheduled_message():
 
 @automation_bp.route('/messages/<int:message_id>/send', methods=['POST'])
 @jwt_required()
+@check_permission('send_automation')
+@guard_payload_size()
+@log_audit('SEND_MESSAGE_NOW')
 def send_message_now(message_id):
     """إرسال رسالة مجدولة فوراً"""
     try:
@@ -745,6 +792,8 @@ def send_message_now(message_id):
 
 @automation_bp.route('/templates', methods=['GET'])
 @jwt_required()
+@check_permission('view_automation')
+@log_audit('GET_MESSAGE_TEMPLATES')
 def get_message_templates():
     """الحصول على قوالب الرسائل"""
     try:
@@ -780,6 +829,9 @@ def get_message_templates():
 
 @automation_bp.route('/templates', methods=['POST'])
 @jwt_required()
+@check_permission('manage_automation')
+@guard_payload_size()
+@log_audit('CREATE_MESSAGE_TEMPLATE')
 def create_message_template():
     """إنشاء قالب رسالة جديد"""
     try:
@@ -825,6 +877,9 @@ def create_message_template():
 
 @automation_bp.route('/workflows/<int:workflow_id>/pause', methods=['POST'])
 @jwt_required()
+@check_permission('manage_automation')
+@guard_payload_size()
+@log_audit('PAUSE_WORKFLOW_EXECUTION')
 def pause_workflow_execution():
     """إيقاف تنفيذ سير عمل مؤقتاً"""
     try:
@@ -846,6 +901,9 @@ def pause_workflow_execution():
 
 @automation_bp.route('/workflows/<int:workflow_id>/resume', methods=['POST'])
 @jwt_required()
+@check_permission('manage_automation')
+@guard_payload_size()
+@log_audit('RESUME_WORKFLOW_EXECUTION')
 def resume_workflow_execution():
     """استئناف تنفيذ سير عمل متوقف"""
     try:
@@ -867,6 +925,9 @@ def resume_workflow_execution():
 
 @automation_bp.route('/workflows/<int:workflow_id>/cancel', methods=['POST'])
 @jwt_required()
+@check_permission('manage_automation')
+@guard_payload_size()
+@log_audit('CANCEL_WORKFLOW_EXECUTION')
 def cancel_workflow_execution():
     """إلغاء تنفيذ سير عمل"""
     try:
@@ -888,6 +949,9 @@ def cancel_workflow_execution():
 
 @automation_bp.route('/workflows/<int:workflow_id>/schedule', methods=['POST'])
 @jwt_required()
+@check_permission('manage_automation')
+@guard_payload_size()
+@log_audit('SCHEDULE_WORKFLOW')
 def schedule_workflow():
     """جدولة سير عمل"""
     try:
@@ -922,6 +986,9 @@ def schedule_workflow():
 
 @automation_bp.route('/rules/<int:rule_id>/evaluate', methods=['POST'])
 @jwt_required()
+@check_permission('manage_automation')
+@guard_payload_size()
+@log_audit('EVALUATE_RULE')
 def evaluate_rule(rule_id):
     """تقييم قاعدة أتمتة"""
     try:
@@ -940,6 +1007,9 @@ def evaluate_rule(rule_id):
 
 @automation_bp.route('/rules/evaluate-all', methods=['POST'])
 @jwt_required()
+@check_permission('manage_automation')
+@guard_payload_size()
+@log_audit('EVALUATE_ALL_RULES')
 def evaluate_all_rules():
     """تقييم جميع القواعد النشطة"""
     try:
@@ -962,6 +1032,9 @@ def evaluate_all_rules():
 
 @automation_bp.route('/messages/schedule', methods=['POST'])
 @jwt_required()
+@check_permission('manage_automation')
+@guard_payload_size()
+@log_audit('SCHEDULE_MESSAGE')
 def schedule_message():
     """جدولة رسالة"""
     try:
@@ -998,6 +1071,9 @@ def schedule_message():
 
 @automation_bp.route('/engine/start', methods=['POST'])
 @jwt_required()
+@check_permission('manage_automation')
+@guard_payload_size()
+@log_audit('START_WORKFLOW_ENGINE')
 def start_workflow_engine():
     """بدء محرك سير العمل"""
     try:
@@ -1013,6 +1089,9 @@ def start_workflow_engine():
 
 @automation_bp.route('/engine/stop', methods=['POST'])
 @jwt_required()
+@check_permission('manage_automation')
+@guard_payload_size()
+@log_audit('STOP_WORKFLOW_ENGINE')
 def stop_workflow_engine():
     """إيقاف محرك سير العمل"""
     try:
@@ -1028,6 +1107,8 @@ def stop_workflow_engine():
 
 @automation_bp.route('/engine/status', methods=['GET'])
 @jwt_required()
+@check_permission('view_automation')
+@log_audit('GET_ENGINE_STATUS')
 def get_engine_status():
     """الحصول على حالة محرك سير العمل"""
     try:
@@ -1046,6 +1127,8 @@ def get_engine_status():
 
 @automation_bp.route('/executions', methods=['GET'])
 @jwt_required()
+@check_permission('view_automation')
+@log_audit('GET_WORKFLOW_EXECUTIONS')
 def get_workflow_executions():
     """الحصول على تنفيذات سير العمل"""
     try:
@@ -1094,6 +1177,8 @@ def get_workflow_executions():
 
 @automation_bp.route('/executions/<int:execution_id>', methods=['GET'])
 @jwt_required()
+@check_permission('view_automation')
+@log_audit('GET_EXECUTION_DETAILS')
 def get_execution_details(execution_id):
     """الحصول على تفاصيل تنفيذ محدد"""
     try:
@@ -1132,6 +1217,8 @@ def get_execution_details(execution_id):
 
 @automation_bp.route('/logs', methods=['GET'])
 @jwt_required()
+@check_permission('view_automation')
+@log_audit('GET_AUTOMATION_LOGS')
 def get_automation_logs():
     """الحصول على سجلات الأتمتة"""
     try:
@@ -1183,6 +1270,8 @@ def get_automation_logs():
 
 @automation_bp.route('/dashboard', methods=['GET'])
 @jwt_required()
+@check_permission('view_dashboard')
+@log_audit('GET_DASHBOARD_STATS')
 def get_dashboard_stats():
     """الحصول على إحصائيات لوحة التحكم"""
     try:
@@ -1261,6 +1350,8 @@ def get_dashboard_stats():
 
 @automation_bp.route('/rules', methods=['GET'])
 @jwt_required()
+@check_permission('view_automation')
+@log_audit('GET_AUTOMATION_RULES')
 def get_automation_rules():
     """الحصول على قواعد الأتمتة"""
     try:
@@ -1286,6 +1377,9 @@ def get_automation_rules():
 
 @automation_bp.route('/rules', methods=['POST'])
 @jwt_required()
+@check_permission('manage_automation')
+@guard_payload_size()
+@log_audit('CREATE_AUTOMATION_RULE')
 def create_automation_rule():
     """إنشاء قاعدة أتمتة جديدة"""
     try:

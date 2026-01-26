@@ -1,3 +1,10 @@
+from auth_rbac_decorator import (
+    check_permission,
+    check_multiple_permissions,
+    guard_payload_size,
+    validate_json,
+    log_audit
+)
 # -*- coding: utf-8 -*-
 """
 واجهة برمجة التطبيقات للتوصيات الذكية للبرامج العلاجية
@@ -21,6 +28,9 @@ smart_therapy_bp = Blueprint('smart_therapy', __name__, url_prefix='/api/smart-t
 
 @smart_therapy_bp.route('/generate-recommendations/<int:student_id>', methods=['POST'])
 @jwt_required()
+@check_permission('generate_smart_therapy_recommendations')
+@guard_payload_size()
+@log_audit('GENERATE_RECOMMENDATIONS')
 def generate_recommendations(student_id):
     """إنشاء توصيات ذكية للطالب"""
     try:
@@ -41,6 +51,8 @@ def generate_recommendations(student_id):
 
 @smart_therapy_bp.route('/recommendations', methods=['GET'])
 @jwt_required()
+@check_permission('view_smart_therapy_recommendations')
+@log_audit('GET_RECOMMENDATIONS')
 def get_recommendations():
     """الحصول على التوصيات"""
     try:
@@ -88,6 +100,8 @@ def get_recommendations():
 
 @smart_therapy_bp.route('/recommendations/<int:recommendation_id>', methods=['GET'])
 @jwt_required()
+@check_permission('view_smart_therapy_recommendations')
+@log_audit('GET_RECOMMENDATION_DETAILS')
 def get_recommendation_details(recommendation_id):
     """الحصول على تفاصيل توصية محددة"""
     try:
@@ -124,6 +138,9 @@ def get_recommendation_details(recommendation_id):
 
 @smart_therapy_bp.route('/recommendations/<int:recommendation_id>/approve', methods=['POST'])
 @jwt_required()
+@check_permission('manage_smart_therapy_recommendations')
+@guard_payload_size()
+@log_audit('APPROVE_RECOMMENDATION')
 def approve_recommendation(recommendation_id):
     """الموافقة على توصية"""
     try:
@@ -145,6 +162,9 @@ def approve_recommendation(recommendation_id):
 
 @smart_therapy_bp.route('/recommendations/<int:recommendation_id>/reject', methods=['POST'])
 @jwt_required()
+@check_permission('manage_smart_therapy_recommendations')
+@guard_payload_size()
+@log_audit('REJECT_RECOMMENDATION')
 def reject_recommendation(recommendation_id):
     """رفض توصية"""
     try:
@@ -186,6 +206,9 @@ def reject_recommendation(recommendation_id):
 
 @smart_therapy_bp.route('/recommendations/<int:recommendation_id>/implement', methods=['POST'])
 @jwt_required()
+@check_permission('manage_smart_therapy_recommendations')
+@guard_payload_size()
+@log_audit('IMPLEMENT_RECOMMENDATION')
 def implement_recommendation(recommendation_id):
     """تنفيذ توصية"""
     try:
@@ -224,6 +247,9 @@ def implement_recommendation(recommendation_id):
 
 @smart_therapy_bp.route('/recommendations/<int:recommendation_id>/feedback', methods=['POST'])
 @jwt_required()
+@check_permission('manage_smart_therapy_recommendations')
+@guard_payload_size()
+@log_audit('ADD_RECOMMENDATION_FEEDBACK')
 def add_recommendation_feedback(recommendation_id):
     """إضافة تقييم للتوصية"""
     try:
@@ -244,6 +270,9 @@ def add_recommendation_feedback(recommendation_id):
 
 @smart_therapy_bp.route('/recommendations/<int:recommendation_id>/metrics', methods=['POST'])
 @jwt_required()
+@check_permission('manage_smart_therapy_recommendations')
+@guard_payload_size()
+@log_audit('ADD_RECOMMENDATION_METRICS')
 def add_recommendation_metrics(recommendation_id):
     """إضافة مقاييس للتوصية"""
     try:
@@ -286,6 +315,8 @@ def add_recommendation_metrics(recommendation_id):
 
 @smart_therapy_bp.route('/dashboard', methods=['GET'])
 @jwt_required()
+@check_permission('view_dashboard')
+@log_audit('GET_RECOMMENDATIONS_DASHBOARD')
 def get_recommendations_dashboard():
     """لوحة تحكم التوصيات"""
     try:
@@ -306,6 +337,8 @@ def get_recommendations_dashboard():
 
 @smart_therapy_bp.route('/templates', methods=['GET'])
 @jwt_required()
+@check_permission('view_smart_therapy_recommendations')
+@log_audit('GET_RECOMMENDATION_TEMPLATES')
 def get_recommendation_templates():
     """الحصول على قوالب التوصيات"""
     try:
@@ -331,6 +364,9 @@ def get_recommendation_templates():
 
 @smart_therapy_bp.route('/templates', methods=['POST'])
 @jwt_required()
+@check_permission('manage_smart_therapy_recommendations')
+@guard_payload_size()
+@log_audit('CREATE_RECOMMENDATION_TEMPLATE')
 def create_recommendation_template():
     """إنشاء قالب توصية جديد"""
     try:
@@ -369,6 +405,8 @@ def create_recommendation_template():
 
 @smart_therapy_bp.route('/rules', methods=['GET'])
 @jwt_required()
+@check_permission('view_smart_therapy_recommendations')
+@log_audit('GET_RECOMMENDATION_RULES')
 def get_recommendation_rules():
     """الحصول على قواعد التوصيات"""
     try:
@@ -394,6 +432,9 @@ def get_recommendation_rules():
 
 @smart_therapy_bp.route('/rules', methods=['POST'])
 @jwt_required()
+@check_permission('manage_smart_therapy_recommendations')
+@guard_payload_size()
+@log_audit('CREATE_RECOMMENDATION_RULE')
 def create_recommendation_rule():
     """إنشاء قاعدة توصية جديدة"""
     try:
@@ -432,6 +473,8 @@ def create_recommendation_rule():
 
 @smart_therapy_bp.route('/alerts', methods=['GET'])
 @jwt_required()
+@check_permission('view_smart_therapy_recommendations')
+@log_audit('GET_RECOMMENDATION_ALERTS')
 def get_recommendation_alerts():
     """الحصول على تنبيهات التوصيات"""
     try:
@@ -465,6 +508,9 @@ def get_recommendation_alerts():
 
 @smart_therapy_bp.route('/alerts/<int:alert_id>/mark-read', methods=['POST'])
 @jwt_required()
+@check_permission('manage_smart_therapy_recommendations')
+@guard_payload_size()
+@log_audit('MARK_ALERT_AS_READ')
 def mark_alert_as_read(alert_id):
     """تمييز التنبيه كمقروء"""
     try:
@@ -489,6 +535,8 @@ def mark_alert_as_read(alert_id):
 
 @smart_therapy_bp.route('/reports/effectiveness', methods=['GET'])
 @jwt_required()
+@check_permission('view_reports')
+@log_audit('GET_EFFECTIVENESS_REPORT')
 def get_effectiveness_report():
     """تقرير فعالية التوصيات"""
     try:

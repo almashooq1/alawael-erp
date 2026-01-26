@@ -1,13 +1,18 @@
-// Main App Component - App.jsx
+// Main App Component - App.jsx (Phase 12 Updated)
 
-import React, { useEffect } from 'react';
-import { BrowserRouter as Router } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { ThemeProvider, createTheme, CssBaseline, Box } from '@mui/material';
 import { useDispatch } from 'react-redux';
+import { FiBarChart2, FiSearch, FiCheckCircle, FiSettings, FiMenu, FiX } from 'react-icons/fi';
 import store from './store';
 import AppRoutes from './routes/Router';
 import { verifyToken } from './store/slices/authSlice';
+import Dashboard from './pages/Dashboard';
+import Search from './pages/Search';
+import Validation from './pages/Validation';
+import Admin from './pages/Admin';
 
 // Material-UI Theme Configuration
 const theme = createTheme({

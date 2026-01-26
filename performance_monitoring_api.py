@@ -1,3 +1,10 @@
+from auth_rbac_decorator import (
+    check_permission,
+    check_multiple_permissions,
+    guard_payload_size,
+    validate_json,
+    log_audit
+)
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
@@ -79,6 +86,8 @@ def detect_trend(data_points, days=7):
 
 @performance_monitoring_bp.route('/metrics', methods=['GET'])
 @jwt_required()
+@check_permission('view_performance_monitoring')
+@log_audit('GET_METRICS')
 def get_metrics():
     """Get all performance metrics with filtering"""
     try:
@@ -173,6 +182,9 @@ def get_metrics():
 
 @performance_monitoring_bp.route('/metrics', methods=['POST'])
 @jwt_required()
+@check_permission('manage_performance_monitoring')
+@guard_payload_size()
+@log_audit('CREATE_METRIC')
 def create_metric():
     """Create a new performance metric"""
     try:
@@ -229,6 +241,8 @@ def create_metric():
 
 @performance_monitoring_bp.route('/metrics/<int:metric_id>/data', methods=['GET'])
 @jwt_required()
+@check_permission('view_performance_monitoring')
+@log_audit('GET_METRIC_DATA')
 def get_metric_data(metric_id):
     """Get data points for a specific metric"""
     try:
@@ -309,6 +323,9 @@ def get_metric_data(metric_id):
 
 @performance_monitoring_bp.route('/metrics/<int:metric_id>/data', methods=['POST'])
 @jwt_required()
+@check_permission('manage_performance_monitoring')
+@guard_payload_size()
+@log_audit('ADD_METRIC_DATA')
 def add_metric_data(metric_id):
     """Add data point to a metric"""
     try:
@@ -376,6 +393,8 @@ def add_metric_data(metric_id):
 
 @performance_monitoring_bp.route('/dashboards', methods=['GET'])
 @jwt_required()
+@check_permission('view_dashboard')
+@log_audit('GET_DASHBOARDS')
 def get_dashboards():
     """Get all performance dashboards"""
     try:
@@ -417,6 +436,8 @@ def get_dashboards():
 
 @performance_monitoring_bp.route('/dashboards/<int:dashboard_id>', methods=['GET'])
 @jwt_required()
+@check_permission('view_dashboard')
+@log_audit('GET_DASHBOARD')
 def get_dashboard(dashboard_id):
     """Get dashboard with widgets and data"""
     try:
@@ -517,6 +538,8 @@ def get_dashboard(dashboard_id):
 
 @performance_monitoring_bp.route('/alerts', methods=['GET'])
 @jwt_required()
+@check_permission('view_performance_monitoring')
+@log_audit('GET_ALERTS')
 def get_alerts():
     """Get performance alerts"""
     try:
@@ -578,6 +601,9 @@ def get_alerts():
 
 @performance_monitoring_bp.route('/alerts/<int:alert_id>/acknowledge', methods=['POST'])
 @jwt_required()
+@check_permission('manage_performance_monitoring')
+@guard_payload_size()
+@log_audit('ACKNOWLEDGE_ALERT')
 def acknowledge_alert(alert_id):
     """Acknowledge an alert"""
     try:
@@ -603,6 +629,8 @@ def acknowledge_alert(alert_id):
 
 @performance_monitoring_bp.route('/health', methods=['GET'])
 @jwt_required()
+@check_permission('view_performance_monitoring')
+@log_audit('GET_SYSTEM_HEALTH')
 def get_system_health():
     """Get system health status"""
     try:
@@ -645,6 +673,8 @@ def get_system_health():
 
 @performance_monitoring_bp.route('/dashboard', methods=['GET'])
 @jwt_required()
+@check_permission('view_dashboard')
+@log_audit('GET_ANALYTICS_DASHBOARD')
 def get_analytics_dashboard():
     """Get performance monitoring dashboard data"""
     try:
@@ -712,6 +742,8 @@ def get_analytics_dashboard():
 
 @performance_monitoring_bp.route('/export/metrics', methods=['GET'])
 @jwt_required()
+@check_permission('view_performance_monitoring')
+@log_audit('EXPORT_METRICS_DATA')
 def export_metrics_data():
     """Export metrics data"""
     try:

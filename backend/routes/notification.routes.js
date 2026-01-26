@@ -35,3 +35,4 @@ router.put('/mark-all-read', async (req, res) => {
 });
 
 module.exports = router;
+

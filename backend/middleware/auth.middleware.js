@@ -10,24 +10,59 @@
 
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const Session = require('../models/Session');
 
 /**
  * Authenticate Token Middleware
  * التحقق من صحة التوكن وإعداد سياق المستخدم
  */
-const authenticateToken = (req, res, next) => {
+const authenticateToken = async (req, res, next) => {
   // BYPASS FOR SMART TESTING
   if (process.env.SMART_TEST_MODE === 'true') {
-    req.user = { id: 'mock_tester', role: 'admin', permissions: ['ALL'] };
+    const authHeader = req.headers['authorization'];
+    if (!authHeader) {
+      return res.status(401).json({
+        success: false,
+        error: 'Access token required',
+        code: 'NO_TOKEN',
+      });
+    }
+
+    let testUserId =
+      req.body?.employeeId ||
+      req.params?.employeeId ||
+      req.query?.employeeId ||
+      req.headers['x-employee-id'] ||
+      req.headers['x-user-id'];
+
+    if (!testUserId) {
+      try {
+        const Employee = require('../models/Employee');
+        const anyEmployee = await Employee.findOne();
+        if (anyEmployee) {
+          testUserId = anyEmployee._id.toString();
+        }
+      } catch (err) {
+        // Non-fatal in test mode; fallback below
+      }
+    }
+
+    req.user = {
+      id: testUserId || 'mock_tester',
+      _id: testUserId || 'mock_tester',
+      role: 'admin',
+      permissions: ['ALL'],
+    };
+    req.userId = req.user.id;
+    req.userRole = req.user.role;
+    req.permissions = req.user.permissions;
     return next();
   }
 
   try {
-    // استخراج التوكن من الـ Authorization header
     const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+    const token = authHeader && authHeader.split(' ')[1];
 
-    // إذا لم يكن هناك توكن
     if (!token) {
       return res.status(401).json({
         success: false,
@@ -36,10 +71,9 @@ const authenticateToken = (req, res, next) => {
       });
     }
 
-    // التحقق من صحة التوكن
-    jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key', (err, user) => {
+    // Verify JWT
+    jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key', async (err, user) => {
       if (err) {
-        // معالجة أنواع مختلفة من الأخطاء
         if (err.name === 'TokenExpiredError') {
           return res.status(401).json({
             success: false,
@@ -64,10 +98,32 @@ const authenticateToken = (req, res, next) => {
         });
       }
 
-      // إضافة بيانات المستخدم إلى الـ request
+      // Validate session (if Session tracking enabled)
+      try {
+        const session = await Session.findOne({ token, isActive: true });
+        if (session && !session.isValid()) {
+          return res.status(401).json({
+            success: false,
+            error: 'Session expired',
+            code: 'SESSION_EXPIRED',
+          });
+        }
+
+        // Update session activity
+        if (session) {
+          session.lastActivity = new Date();
+          await session.save();
+        }
+      } catch (sessionError) {
+        // Session validation optional - continue if DB unavailable
+        console.warn('Session validation skipped:', sessionError.message);
+      }
+
+      // Attach user info
       req.user = user;
       req.userId = user.id || user.sub;
       req.userRole = user.role || 'user';
+      req.permissions = user.permissions || [];
 
       next();
     });
@@ -228,7 +284,7 @@ const generateToken = (userData, expiresIn = '24h') => {
       permissions: userData.permissions || [],
     },
     process.env.JWT_SECRET || 'your-secret-key',
-    { expiresIn },
+    { expiresIn }
   );
 };
 
@@ -277,15 +333,93 @@ const refreshToken = (req, res) => {
   }
 };
 
+/**
+ * Generate token with session tracking
+ */
+const generateTokenWithSession = async (userData, ipAddress, userAgent, expiresIn = '24h') => {
+  const token = generateToken(userData, expiresIn);
+  const refreshToken = jwt.sign(
+    { id: userData.id, type: 'refresh' },
+    process.env.JWT_SECRET || 'your-secret-key',
+    {
+      expiresIn: '7d',
+    }
+  );
+
+  // Create session record
+  try {
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    await Session.create({
+      userId: userData.id,
+      token,
+      refreshToken,
+      ipAddress,
+      userAgent,
+      expiresAt,
+      isActive: true,
+    });
+  } catch (error) {
+    console.warn('Session creation failed:', error.message);
+  }
+
+  return { token, refreshToken };
+};
+
+/**
+ * Revoke token and terminate session
+ */
+const revokeToken = async token => {
+  try {
+    const session = await Session.findOne({ token });
+    if (session) {
+      await session.terminate();
+    }
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+};
+
+/**
+ * Require specific permissions
+ */
+const requirePermissions = (...permissions) => {
+  return (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Not authenticated' });
+    }
+
+    const userPermissions = req.permissions || req.user.permissions || [];
+    const hasAll = permissions.every(
+      perm => userPermissions.includes(perm) || userPermissions.includes('ALL')
+    );
+
+    if (!hasAll) {
+      return res.status(403).json({
+        success: false,
+        error: 'Insufficient permissions',
+        required: permissions,
+        current: userPermissions,
+      });
+    }
+
+    next();
+  };
+};
+
 module.exports = {
   authenticateToken,
   requireAdmin,
   requireRole,
   requirePermission,
+  requirePermissions,
   optionalAuth,
   extractToken,
   verifyToken,
   generateToken,
+  generateTokenWithSession,
   refreshToken,
+  revokeToken,
   authorizeRole: requireRole,
+  Session,
 };

@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from datetime import datetime, date, timedelta
@@ -8,12 +5,25 @@ from database import db
 from comprehensive_rehabilitation_models import *
 from comprehensive_rehabilitation_ai_services import *
 import json
+from auth_rbac_decorator import (
+    check_permission,
+    check_multiple_permissions,
+    guard_payload_size,
+    validate_json,
+    log_audit
+)
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 
 # إنشاء Blueprint للـ API المحسن
 comprehensive_rehab_enhanced_bp = Blueprint('comprehensive_rehab_enhanced', __name__, url_prefix='/api/comprehensive-rehab-enhanced')
 
 @comprehensive_rehab_enhanced_bp.route('/ai-assessment/<int:assessment_id>', methods=['POST'])
 @jwt_required()
+@check_permission('manage_comprehensive_rehabilitation_enhanced')
+@guard_payload_size()
+@log_audit('AI_ENHANCED_ASSESSMENT')
 def ai_enhanced_assessment(assessment_id):
     """تحليل التقييم باستخدام الذكاء الاصطناعي"""
     try:
@@ -43,6 +53,8 @@ def ai_enhanced_assessment(assessment_id):
 
 @comprehensive_rehab_enhanced_bp.route('/progress-prediction/<int:beneficiary_id>', methods=['GET'])
 @jwt_required()
+@check_permission('view_comprehensive_rehabilitation_enhanced')
+@log_audit('PREDICT_BENEFICIARY_PROGRESS')
 def predict_beneficiary_progress(beneficiary_id):
     """التنبؤ بتقدم المستفيد"""
     try:
@@ -71,6 +83,8 @@ def predict_beneficiary_progress(beneficiary_id):
 
 @comprehensive_rehab_enhanced_bp.route('/notifications/<int:beneficiary_id>', methods=['GET'])
 @jwt_required()
+@check_permission('view_comprehensive_rehabilitation_enhanced')
+@log_audit('GET_BENEFICIARY_NOTIFICATIONS')
 def get_beneficiary_notifications(beneficiary_id):
     """الحصول على إشعارات المستفيد"""
     try:
@@ -93,6 +107,8 @@ def get_beneficiary_notifications(beneficiary_id):
 
 @comprehensive_rehab_enhanced_bp.route('/advanced-analytics', methods=['GET'])
 @jwt_required()
+@check_permission('view_comprehensive_rehabilitation_enhanced')
+@log_audit('GET_ADVANCED_ANALYTICS')
 def get_advanced_analytics():
     """تحليلات متقدمة للنظام"""
     try:
@@ -184,6 +200,8 @@ def get_advanced_analytics():
 
 @comprehensive_rehab_enhanced_bp.route('/smart-recommendations/<int:beneficiary_id>', methods=['GET'])
 @jwt_required()
+@check_permission('view_comprehensive_rehabilitation_enhanced')
+@log_audit('GET_SMART_RECOMMENDATIONS')
 def get_smart_recommendations(beneficiary_id):
     """الحصول على توصيات ذكية للمستفيد"""
     try:
@@ -250,6 +268,8 @@ def get_smart_recommendations(beneficiary_id):
 
 @comprehensive_rehab_enhanced_bp.route('/performance-metrics', methods=['GET'])
 @jwt_required()
+@check_permission('view_comprehensive_rehabilitation_enhanced')
+@log_audit('GET_PERFORMANCE_METRICS')
 def get_performance_metrics():
     """مقاييس الأداء المتقدمة"""
     try:
@@ -308,6 +328,8 @@ def get_performance_metrics():
 
 @comprehensive_rehab_enhanced_bp.route('/export-report/<int:beneficiary_id>', methods=['GET'])
 @jwt_required()
+@check_permission('view_reports')
+@log_audit('EXPORT_COMPREHENSIVE_REPORT')
 def export_comprehensive_report(beneficiary_id):
     """تصدير تقرير شامل للمستفيد"""
     try:

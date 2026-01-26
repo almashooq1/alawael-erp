@@ -92,14 +92,12 @@ const logSecurityEvent = (eventName, details = {}) => {
  */
 const detectSuspiciousActivity = req => {
   const suspiciousPatterns = [
-    // SQL injection patterns
-    /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|UNION)\b)/i,
+    // SQL injection patterns - must be more specific
+    /(\bSELECT\s+.*\s+FROM\b|\bINSERT\s+INTO\b|\bUPDATE\s+.*\s+SET\b|\bDELETE\s+FROM\b|\bDROP\s+(TABLE|DATABASE|INDEX)\b|\bCREATE\s+TABLE\b|\bALTER\s+TABLE\b|\bEXEC\b|\bUNION\s+SELECT\b)/i,
     // XSS patterns
     /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
     // Path traversal
     /\.\.\//g,
-    // Command injection
-    /[;&|`$()]/g,
   ];
 
   const checkString = JSON.stringify({

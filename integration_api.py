@@ -1,3 +1,10 @@
+from auth_rbac_decorator import (
+    check_permission,
+    check_multiple_permissions,
+    guard_payload_size,
+    validate_json,
+    log_audit
+)
 # -*- coding: utf-8 -*-
 """
 API endpoints لنظام التكامل والاتصالات
@@ -23,6 +30,9 @@ def integration_management():
 
 @app.route('/api/communication/send-sms', methods=['POST'])
 @jwt_required()
+@check_permission('send_integration')
+@guard_payload_size()
+@log_audit('SEND_SMS')
 def send_sms():
     """إرسال رسالة SMS"""
     try:
@@ -41,6 +51,9 @@ def send_sms():
 
 @app.route('/api/communication/send-email', methods=['POST'])
 @jwt_required()
+@check_permission('send_integration')
+@guard_payload_size()
+@log_audit('SEND_EMAIL')
 def send_email():
     """إرسال بريد إلكتروني"""
     try:
@@ -60,6 +73,8 @@ def send_email():
 
 @app.route('/api/communication/templates', methods=['GET'])
 @jwt_required()
+@check_permission('view_integration')
+@log_audit('GET_MESSAGE_TEMPLATES')
 def get_message_templates():
     """الحصول على قوالب الرسائل"""
     try:
@@ -99,6 +114,9 @@ def get_message_templates():
 
 @app.route('/api/communication/templates', methods=['POST'])
 @jwt_required()
+@check_permission('manage_integration')
+@guard_payload_size()
+@log_audit('CREATE_MESSAGE_TEMPLATE')
 def create_message_template():
     """إنشاء قالب رسالة جديد"""
     try:
@@ -132,6 +150,8 @@ def create_message_template():
 
 @app.route('/api/communication/messages', methods=['GET'])
 @jwt_required()
+@check_permission('view_integration')
+@log_audit('GET_COMMUNICATION_MESSAGES')
 def get_communication_messages():
     """الحصول على رسائل الاتصال"""
     try:
@@ -180,6 +200,8 @@ def get_communication_messages():
 
 @app.route('/api/integration/external-systems', methods=['GET'])
 @jwt_required()
+@check_permission('view_integration')
+@log_audit('GET_EXTERNAL_SYSTEMS')
 def get_external_systems():
     """الحصول على الأنظمة الخارجية"""
     try:
@@ -203,6 +225,9 @@ def get_external_systems():
 
 @app.route('/api/integration/external-systems', methods=['POST'])
 @jwt_required()
+@check_permission('manage_integration')
+@guard_payload_size()
+@log_audit('CREATE_EXTERNAL_SYSTEM')
 def create_external_system():
     """إنشاء نظام خارجي جديد"""
     try:
@@ -237,6 +262,9 @@ def create_external_system():
 
 @app.route('/api/integration/test-connection/<int:system_id>', methods=['POST'])
 @jwt_required()
+@check_permission('manage_integration')
+@guard_payload_size()
+@log_audit('TEST_SYSTEM_CONNECTION')
 def test_system_connection(system_id):
     """اختبار الاتصال مع النظام الخارجي"""
     try:
@@ -260,6 +288,8 @@ def test_system_connection(system_id):
 
 @app.route('/api/integration/sync-logs', methods=['GET'])
 @jwt_required()
+@check_permission('view_integration')
+@log_audit('GET_SYNC_LOGS')
 def get_sync_logs():
     """الحصول على سجلات المزامنة"""
     try:
@@ -308,6 +338,8 @@ def get_sync_logs():
 
 @app.route('/api/integration/payment-providers', methods=['GET'])
 @jwt_required()
+@check_permission('view_integration')
+@log_audit('GET_PAYMENT_PROVIDERS')
 def get_payment_providers():
     """الحصول على مقدمي خدمات الدفع"""
     try:
@@ -333,6 +365,9 @@ def get_payment_providers():
 
 @app.route('/api/integration/process-payment', methods=['POST'])
 @jwt_required()
+@check_permission('manage_integration')
+@guard_payload_size()
+@log_audit('PROCESS_PAYMENT')
 def process_payment():
     """معالجة دفعة"""
     try:
@@ -375,6 +410,8 @@ def process_payment():
 
 @app.route('/api/integration/insurance-providers', methods=['GET'])
 @jwt_required()
+@check_permission('view_integration')
+@log_audit('GET_INSURANCE_PROVIDERS')
 def get_insurance_providers():
     """الحصول على شركات التأمين"""
     try:
@@ -400,6 +437,9 @@ def get_insurance_providers():
 
 @app.route('/api/integration/submit-insurance-claim', methods=['POST'])
 @jwt_required()
+@check_permission('manage_integration')
+@guard_payload_size()
+@log_audit('SUBMIT_INSURANCE_CLAIM')
 def submit_insurance_claim():
     """تقديم مطالبة تأمين"""
     try:
@@ -414,6 +454,8 @@ def submit_insurance_claim():
 
 @app.route('/api/integration/insurance-claims', methods=['GET'])
 @jwt_required()
+@check_permission('view_integration')
+@log_audit('GET_INSURANCE_CLAIMS')
 def get_insurance_claims():
     """الحصول على مطالبات التأمين"""
     try:
@@ -463,6 +505,9 @@ def get_insurance_claims():
 
 @app.route('/api/communication/send-whatsapp', methods=['POST'])
 @jwt_required()
+@check_permission('send_integration')
+@guard_payload_size()
+@log_audit('SEND_WHATSAPP')
 def send_whatsapp():
     """إرسال رسالة WhatsApp"""
     try:
@@ -481,6 +526,9 @@ def send_whatsapp():
 
 @app.route('/api/communication/send-push', methods=['POST'])
 @jwt_required()
+@check_permission('send_integration')
+@guard_payload_size()
+@log_audit('SEND_PUSH_NOTIFICATION')
 def send_push_notification():
     """إرسال إشعار فوري"""
     try:
@@ -500,6 +548,9 @@ def send_push_notification():
 
 @app.route('/api/communication/send-voice-call', methods=['POST'])
 @jwt_required()
+@check_permission('send_integration')
+@guard_payload_size()
+@log_audit('SEND_VOICE_CALL')
 def send_voice_call():
     """إجراء مكالمة صوتية"""
     try:
@@ -518,6 +569,9 @@ def send_voice_call():
 
 @app.route('/api/communication/retry-message/<int:message_id>', methods=['POST'])
 @jwt_required()
+@check_permission('manage_integration')
+@guard_payload_size()
+@log_audit('RETRY_FAILED_MESSAGE')
 def retry_failed_message(message_id):
     """إعادة محاولة إرسال رسالة فاشلة"""
     try:
@@ -531,6 +585,9 @@ def retry_failed_message(message_id):
 
 @app.route('/api/integration/sync-government/<int:system_id>', methods=['POST'])
 @jwt_required()
+@check_permission('manage_integration')
+@guard_payload_size()
+@log_audit('SYNC_GOVERNMENT_SYSTEM')
 def sync_government_system(system_id):
     """مزامنة مع النظام الحكومي"""
     try:
@@ -543,6 +600,9 @@ def sync_government_system(system_id):
 
 @app.route('/api/integration/sync-laboratory/<int:lab_id>', methods=['POST'])
 @jwt_required()
+@check_permission('manage_integration')
+@guard_payload_size()
+@log_audit('SYNC_LABORATORY_SYSTEM')
 def sync_laboratory_system(lab_id):
     """مزامنة مع نظام المختبر"""
     try:
@@ -555,6 +615,9 @@ def sync_laboratory_system(lab_id):
 
 @app.route('/api/integration/sync-pharmacy/<int:pharmacy_id>', methods=['POST'])
 @jwt_required()
+@check_permission('manage_integration')
+@guard_payload_size()
+@log_audit('SYNC_PHARMACY_SYSTEM')
 def sync_pharmacy_system(pharmacy_id):
     """مزامنة مع نظام الصيدلية"""
     try:
@@ -567,6 +630,9 @@ def sync_pharmacy_system(pharmacy_id):
 
 @app.route('/api/integration/test-connection/<int:system_id>', methods=['POST'])
 @jwt_required()
+@check_permission('manage_integration')
+@guard_payload_size()
+@log_audit('TEST_SYSTEM_CONNECTION_ENHANCED')
 def test_system_connection_enhanced(system_id):
     """اختبار الاتصال مع النظام الخارجي المحسّن"""
     try:
@@ -578,6 +644,8 @@ def test_system_connection_enhanced(system_id):
 
 @app.route('/api/integration/dashboard', methods=['GET'])
 @jwt_required()
+@check_permission('view_dashboard')
+@log_audit('GET_INTEGRATION_DASHBOARD')
 def get_integration_dashboard():
     """لوحة تحكم التكامل والاتصالات"""
     try:

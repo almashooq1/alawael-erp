@@ -1,3 +1,10 @@
+from auth_rbac_decorator import (
+    check_permission,
+    check_multiple_permissions,
+    guard_payload_size,
+    validate_json,
+    log_audit
+)
 """
 API endpoints لنظام الموافقات متعدد المستويات
 Multi-Level Approval System API Endpoints
@@ -21,6 +28,8 @@ approval_bp = Blueprint('approval', __name__, url_prefix='/api/approval')
 
 @approval_bp.route('/workflows', methods=['GET'])
 @jwt_required()
+@check_permission('view_approval')
+@log_audit('GET_WORKFLOWS')
 def get_workflows():
     """الحصول على قائمة سير العمل"""
     try:
@@ -54,6 +63,9 @@ def get_workflows():
 
 @approval_bp.route('/workflows', methods=['POST'])
 @jwt_required()
+@check_permission('manage_approval')
+@guard_payload_size()
+@log_audit('CREATE_WORKFLOW')
 def create_workflow():
     """إنشاء سير عمل جديد"""
     try:
@@ -113,6 +125,8 @@ def create_workflow():
 
 @approval_bp.route('/workflows/<int:workflow_id>', methods=['GET'])
 @jwt_required()
+@check_permission('view_approval')
+@log_audit('GET_WORKFLOW')
 def get_workflow(workflow_id):
     """الحصول على تفاصيل سير العمل"""
     try:
@@ -128,6 +142,9 @@ def get_workflow(workflow_id):
 
 @approval_bp.route('/requests', methods=['POST'])
 @jwt_required()
+@check_permission('manage_approval')
+@guard_payload_size()
+@log_audit('SUBMIT_REQUEST')
 def submit_request():
     """تقديم طلب موافقة"""
     try:
@@ -161,6 +178,8 @@ def submit_request():
 
 @approval_bp.route('/requests', methods=['GET'])
 @jwt_required()
+@check_permission('view_approval')
+@log_audit('GET_REQUESTS')
 def get_requests():
     """الحصول على قائمة الطلبات"""
     try:
@@ -205,6 +224,8 @@ def get_requests():
 
 @approval_bp.route('/requests/<int:request_id>', methods=['GET'])
 @jwt_required()
+@check_permission('view_approval')
+@log_audit('GET_REQUEST')
 def get_request(request_id):
     """الحصول على تفاصيل الطلب"""
     try:
@@ -227,6 +248,9 @@ def get_request(request_id):
 
 @approval_bp.route('/requests/<int:request_id>/approve', methods=['POST'])
 @jwt_required()
+@check_permission('manage_approval')
+@guard_payload_size()
+@log_audit('APPROVE_REQUEST')
 def approve_request(request_id):
     """الموافقة على الطلب"""
     try:
@@ -250,6 +274,9 @@ def approve_request(request_id):
 
 @approval_bp.route('/requests/<int:request_id>/reject', methods=['POST'])
 @jwt_required()
+@check_permission('manage_approval')
+@guard_payload_size()
+@log_audit('REJECT_REQUEST')
 def reject_request(request_id):
     """رفض الطلب"""
     try:
@@ -276,6 +303,9 @@ def reject_request(request_id):
 
 @approval_bp.route('/requests/<int:request_id>/delegate', methods=['POST'])
 @jwt_required()
+@check_permission('manage_approval')
+@guard_payload_size()
+@log_audit('DELEGATE_REQUEST')
 def delegate_request(request_id):
     """تفويض الموافقة"""
     try:
@@ -305,6 +335,8 @@ def delegate_request(request_id):
 
 @approval_bp.route('/delegates', methods=['GET'])
 @jwt_required()
+@check_permission('view_approval')
+@log_audit('GET_DELEGATES')
 def get_delegates():
     """الحصول على قائمة التفويضات"""
     try:
@@ -341,6 +373,9 @@ def get_delegates():
 
 @approval_bp.route('/delegates', methods=['POST'])
 @jwt_required()
+@check_permission('manage_approval')
+@guard_payload_size()
+@log_audit('CREATE_DELEGATE')
 def create_delegate():
     """إنشاء تفويض جديد"""
     try:
@@ -378,6 +413,9 @@ def create_delegate():
 
 @approval_bp.route('/delegates/<int:delegate_id>', methods=['PUT'])
 @jwt_required()
+@check_permission('manage_approval')
+@guard_payload_size()
+@log_audit('UPDATE_DELEGATE')
 def update_delegate(delegate_id):
     """تحديث التفويض"""
     try:
@@ -415,6 +453,8 @@ def update_delegate(delegate_id):
 
 @approval_bp.route('/notifications', methods=['GET'])
 @jwt_required()
+@check_permission('view_approval')
+@log_audit('GET_NOTIFICATIONS')
 def get_notifications():
     """الحصول على الإشعارات"""
     try:
@@ -448,6 +488,9 @@ def get_notifications():
 
 @approval_bp.route('/notifications/<int:notification_id>/read', methods=['PUT'])
 @jwt_required()
+@check_permission('manage_approval')
+@guard_payload_size()
+@log_audit('MARK_NOTIFICATION_READ')
 def mark_notification_read(notification_id):
     """تحديد الإشعار كمقروء"""
     try:
@@ -474,6 +517,8 @@ def mark_notification_read(notification_id):
 
 @approval_bp.route('/dashboard', methods=['GET'])
 @jwt_required()
+@check_permission('view_dashboard')
+@log_audit('GET_DASHBOARD')
 def get_dashboard():
     """لوحة تحكم الموافقات"""
     try:
@@ -532,6 +577,8 @@ def get_dashboard():
 
 @approval_bp.route('/entity-types', methods=['GET'])
 @jwt_required()
+@check_permission('view_approval')
+@log_audit('GET_ENTITY_TYPES')
 def get_entity_types():
     """الحصول على أنواع الكيانات المتاحة"""
     try:

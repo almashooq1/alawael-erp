@@ -1,3 +1,10 @@
+from auth_rbac_decorator import (
+    check_permission,
+    check_multiple_permissions,
+    guard_payload_size,
+    validate_json,
+    log_audit
+)
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
@@ -20,6 +27,8 @@ comprehensive_rehab_bp = Blueprint('comprehensive_rehab', __name__, url_prefix='
 
 @comprehensive_rehab_bp.route('/beneficiaries', methods=['GET'])
 @jwt_required()
+@check_permission('view_comprehensive_rehabilitation')
+@log_audit('GET_BENEFICIARIES')
 def get_beneficiaries():
     """الحصول على قائمة المستفيدين مع الفلترة والبحث"""
     try:
@@ -81,6 +90,9 @@ def get_beneficiaries():
 
 @comprehensive_rehab_bp.route('/beneficiaries', methods=['POST'])
 @jwt_required()
+@check_permission('manage_comprehensive_rehabilitation')
+@guard_payload_size()
+@log_audit('CREATE_BENEFICIARY')
 def create_beneficiary():
     """إضافة مستفيد جديد"""
     try:
@@ -131,6 +143,8 @@ def create_beneficiary():
 
 @comprehensive_rehab_bp.route('/beneficiaries/<int:beneficiary_id>', methods=['GET'])
 @jwt_required()
+@check_permission('view_comprehensive_rehabilitation')
+@log_audit('GET_BENEFICIARY_DETAILS')
 def get_beneficiary_details(beneficiary_id):
     """الحصول على تفاصيل مستفيد محدد"""
     try:
@@ -180,6 +194,9 @@ def get_beneficiary_details(beneficiary_id):
 
 @comprehensive_rehab_bp.route('/assessments', methods=['POST'])
 @jwt_required()
+@check_permission('manage_comprehensive_rehabilitation')
+@guard_payload_size()
+@log_audit('CREATE_ASSESSMENT')
 def create_assessment():
     """إنشاء تقييم شامل جديد"""
     try:
@@ -244,6 +261,9 @@ def create_assessment():
 
 @comprehensive_rehab_bp.route('/rehabilitation-plans', methods=['POST'])
 @jwt_required()
+@check_permission('manage_comprehensive_rehabilitation')
+@guard_payload_size()
+@log_audit('CREATE_REHABILITATION_PLAN')
 def create_rehabilitation_plan():
     """إنشاء خطة تأهيل فردية"""
     try:
@@ -291,6 +311,9 @@ def create_rehabilitation_plan():
 
 @comprehensive_rehab_bp.route('/therapy-sessions', methods=['POST'])
 @jwt_required()
+@check_permission('manage_comprehensive_rehabilitation')
+@guard_payload_size()
+@log_audit('CREATE_THERAPY_SESSION')
 def create_therapy_session():
     """إنشاء جلسة علاجية جديدة"""
     try:
@@ -336,6 +359,8 @@ def create_therapy_session():
 
 @comprehensive_rehab_bp.route('/dashboard', methods=['GET'])
 @jwt_required()
+@check_permission('view_dashboard')
+@log_audit('GET_DASHBOARD_STATS')
 def get_dashboard_stats():
     """الحصول على إحصائيات لوحة التحكم"""
     try:
@@ -415,6 +440,8 @@ def get_dashboard_stats():
 
 @comprehensive_rehab_bp.route('/therapists', methods=['GET'])
 @jwt_required()
+@check_permission('view_comprehensive_rehabilitation')
+@log_audit('GET_THERAPISTS')
 def get_therapists():
     """الحصول على قائمة المعالجين"""
     try:
@@ -441,6 +468,8 @@ def get_therapists():
 
 @comprehensive_rehab_bp.route('/progress-reports/<int:beneficiary_id>', methods=['GET'])
 @jwt_required()
+@check_permission('view_comprehensive_rehabilitation')
+@log_audit('GET_BENEFICIARY_PROGRESS')
 def get_beneficiary_progress(beneficiary_id):
     """الحصول على تقرير تقدم المستفيد"""
     try:

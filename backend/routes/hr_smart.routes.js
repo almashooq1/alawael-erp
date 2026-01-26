@@ -63,3 +63,4 @@ router.put('/payroll/:id/approve', requireRole(['ADMIN']), async (req, res) => {
 });
 
 module.exports = router;
+

@@ -22,3 +22,4 @@ router.get('/:patientId', authorizeRole(['CLINICAL_DIRECTOR', 'ADMIN', 'THERAPIS
 });
 
 module.exports = router;
+

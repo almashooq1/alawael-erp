@@ -34,3 +34,4 @@ router.get('/tip/:id', async (req, res) => {
 });
 
 module.exports = router;
+

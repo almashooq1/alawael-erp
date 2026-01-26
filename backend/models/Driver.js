@@ -197,12 +197,10 @@ const DriverSchema = new Schema(
   },
   {
     timestamps: true,
-  },
+  }
 );
 
-// الفهارس
-DriverSchema.index({ 'personalInfo.nationalId': 1 });
-DriverSchema.index({ 'license.licenseNumber': 1 });
+// الفهارس (nationalId and licenseNumber already have unique:true index)
 DriverSchema.index({ 'license.expiryDate': 1 });
 DriverSchema.index({ 'employment.status': 1 });
 DriverSchema.index({ isActive: 1 });

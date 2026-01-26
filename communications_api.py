@@ -11,6 +11,12 @@ from datetime import datetime, timedelta
 import json
 import requests
 from functools import wraps
+from auth_rbac_decorator import (
+    check_permission,
+    guard_payload_size,
+    validate_json,
+    log_audit
+)
 
 communications_bp = Blueprint('communications', __name__)
 
@@ -18,6 +24,10 @@ communications_bp = Blueprint('communications', __name__)
 
 @communications_bp.route('/api/sms/send', methods=['POST'])
 @jwt_required()
+@check_permission('send_sms')
+@guard_payload_size()
+@validate_json('recipient_phone', 'message')
+@log_audit('SEND_SMS')
 def send_sms():
     """إرسال رسالة نصية"""
     try:
@@ -79,6 +89,8 @@ def send_sms():
 
 @communications_bp.route('/api/sms/messages', methods=['GET'])
 @jwt_required()
+@check_permission('view_communications')
+@log_audit('LIST_SMS_MESSAGES')
 def get_sms_messages():
     """استرجاع رسائل SMS"""
     try:
@@ -127,6 +139,10 @@ def get_sms_messages():
 
 @communications_bp.route('/api/email/send', methods=['POST'])
 @jwt_required()
+@check_permission('send_email')
+@guard_payload_size()
+@validate_json('recipient_email', 'subject', 'content')
+@log_audit('SEND_EMAIL')
 def send_email():
     """إرسال بريد إلكتروني"""
     try:
@@ -193,6 +209,8 @@ def send_email():
 
 @communications_bp.route('/api/notifications/send', methods=['POST'])
 @jwt_required()
+@check_permission('access_communications')
+@log_audit('SEND_PUSH_NOTIFICATION')
 def send_push_notification():
     """إرسال إشعار تفاعلي"""
     try:
@@ -253,6 +271,9 @@ def send_push_notification():
 
 @communications_bp.route('/api/calls/initiate', methods=['POST'])
 @jwt_required()
+@check_permission('manage_communications')
+@guard_payload_size()
+@log_audit('INITIATE_VOICE_CALL')
 def initiate_voice_call():
     """بدء مكالمة صوتية"""
     try:
@@ -300,6 +321,9 @@ def initiate_voice_call():
 
 @communications_bp.route('/api/calls/<call_id>/end', methods=['POST'])
 @jwt_required()
+@check_permission('manage_communications')
+@guard_payload_size()
+@log_audit('END_VOICE_CALL')
 def end_voice_call(call_id):
     """إنهاء مكالمة صوتية"""
     try:
@@ -330,6 +354,9 @@ def end_voice_call(call_id):
 
 @communications_bp.route('/api/conferences/create', methods=['POST'])
 @jwt_required()
+@check_permission('manage_communications')
+@guard_payload_size()
+@log_audit('CREATE_VIDEO_CONFERENCE')
 def create_video_conference():
     """إنشاء مؤتمر فيديو"""
     try:
@@ -400,6 +427,8 @@ def create_video_conference():
 
 @communications_bp.route('/api/templates', methods=['GET'])
 @jwt_required()
+@check_permission('view_communications')
+@log_audit('GET_MESSAGE_TEMPLATES')
 def get_message_templates():
     """استرجاع قوالب الرسائل"""
     try:
@@ -440,6 +469,8 @@ def get_message_templates():
 
 @communications_bp.route('/api/communications/dashboard', methods=['GET'])
 @jwt_required()
+@check_permission('view_dashboard')
+@log_audit('GET_COMMUNICATIONS_DASHBOARD')
 def get_communications_dashboard():
     """استرجاع بيانات لوحة تحكم الاتصالات"""
     try:

@@ -1,3 +1,10 @@
+from auth_rbac_decorator import (
+    check_permission,
+    check_multiple_permissions,
+    guard_payload_size,
+    validate_json,
+    log_audit
+)
 # -*- coding: utf-8 -*-
 """
 واجهة برمجة التطبيقات لتحليل أنماط التعلم والسلوك
@@ -20,6 +27,8 @@ learning_behavior_bp = Blueprint('learning_behavior', __name__, url_prefix='/api
 
 @learning_behavior_bp.route('/analyze-student/<int:student_id>', methods=['GET'])
 @jwt_required()
+@check_permission('view_learning_behavior_analysis')
+@log_audit('ANALYZE_STUDENT_LEARNING_PATTERN')
 def analyze_student_learning_pattern(student_id):
     """تحليل نمط تعلم الطالب"""
     try:
@@ -39,6 +48,8 @@ def analyze_student_learning_pattern(student_id):
 
 @learning_behavior_bp.route('/learning-styles', methods=['GET'])
 @jwt_required()
+@check_permission('view_learning_behavior_analysis')
+@log_audit('GET_LEARNING_STYLES')
 def get_learning_styles():
     """الحصول على أنماط التعلم"""
     try:
@@ -57,6 +68,9 @@ def get_learning_styles():
 
 @learning_behavior_bp.route('/learning-styles', methods=['POST'])
 @jwt_required()
+@check_permission('manage_learning_behavior_analysis')
+@guard_payload_size()
+@log_audit('CREATE_LEARNING_STYLE')
 def create_learning_style():
     """إنشاء نمط تعلم جديد"""
     try:
@@ -91,6 +105,8 @@ def create_learning_style():
 
 @learning_behavior_bp.route('/behavior-patterns', methods=['GET'])
 @jwt_required()
+@check_permission('view_learning_behavior_analysis')
+@log_audit('GET_BEHAVIOR_PATTERNS')
 def get_behavior_patterns():
     """الحصول على أنماط السلوك"""
     try:
@@ -116,6 +132,9 @@ def get_behavior_patterns():
 
 @learning_behavior_bp.route('/behavior-patterns', methods=['POST'])
 @jwt_required()
+@check_permission('manage_learning_behavior_analysis')
+@guard_payload_size()
+@log_audit('CREATE_BEHAVIOR_PATTERN')
 def create_behavior_pattern():
     """إنشاء نمط سلوك جديد"""
     try:
@@ -152,6 +171,8 @@ def create_behavior_pattern():
 
 @learning_behavior_bp.route('/student-profile/<int:student_id>', methods=['GET'])
 @jwt_required()
+@check_permission('view_learning_behavior_analysis')
+@log_audit('GET_STUDENT_LEARNING_PROFILE')
 def get_student_learning_profile(student_id):
     """الحصول على ملف تعريف التعلم للطالب"""
     try:
@@ -176,6 +197,9 @@ def get_student_learning_profile(student_id):
 
 @learning_behavior_bp.route('/student-profile/<int:student_id>', methods=['POST', 'PUT'])
 @jwt_required()
+@check_permission('manage_learning_behavior_analysis')
+@guard_payload_size()
+@log_audit('UPDATE_STUDENT_LEARNING_PROFILE')
 def update_student_learning_profile(student_id):
     """تحديث ملف تعريف التعلم للطالب"""
     try:
@@ -196,6 +220,8 @@ def update_student_learning_profile(student_id):
 
 @learning_behavior_bp.route('/behavior-observations', methods=['GET'])
 @jwt_required()
+@check_permission('view_learning_behavior_analysis')
+@log_audit('GET_BEHAVIOR_OBSERVATIONS')
 def get_behavior_observations():
     """الحصول على ملاحظات السلوك"""
     try:
@@ -241,6 +267,9 @@ def get_behavior_observations():
 
 @learning_behavior_bp.route('/behavior-observations', methods=['POST'])
 @jwt_required()
+@check_permission('manage_learning_behavior_analysis')
+@guard_payload_size()
+@log_audit('CREATE_BEHAVIOR_OBSERVATION')
 def create_behavior_observation():
     """إنشاء ملاحظة سلوك جديدة"""
     try:
@@ -287,6 +316,8 @@ def create_behavior_observation():
 
 @learning_behavior_bp.route('/behavior-interventions', methods=['GET'])
 @jwt_required()
+@check_permission('view_learning_behavior_analysis')
+@log_audit('GET_BEHAVIOR_INTERVENTIONS')
 def get_behavior_interventions():
     """الحصول على التدخلات السلوكية"""
     try:
@@ -326,6 +357,9 @@ def get_behavior_interventions():
 
 @learning_behavior_bp.route('/behavior-interventions', methods=['POST'])
 @jwt_required()
+@check_permission('manage_learning_behavior_analysis')
+@guard_payload_size()
+@log_audit('CREATE_BEHAVIOR_INTERVENTION')
 def create_behavior_intervention():
     """إنشاء تدخل سلوكي جديد"""
     try:
@@ -348,6 +382,9 @@ def create_behavior_intervention():
 
 @learning_behavior_bp.route('/behavior-interventions/<int:intervention_id>', methods=['PUT'])
 @jwt_required()
+@check_permission('manage_learning_behavior_analysis')
+@guard_payload_size()
+@log_audit('UPDATE_BEHAVIOR_INTERVENTION')
 def update_behavior_intervention(intervention_id):
     """تحديث التدخل السلوكي"""
     try:
@@ -393,6 +430,8 @@ def update_behavior_intervention(intervention_id):
 
 @learning_behavior_bp.route('/analytics/dashboard', methods=['GET'])
 @jwt_required()
+@check_permission('view_dashboard')
+@log_audit('GET_ANALYTICS_DASHBOARD')
 def get_analytics_dashboard():
     """لوحة تحكم تحليلات التعلم"""
     try:
@@ -413,6 +452,8 @@ def get_analytics_dashboard():
 
 @learning_behavior_bp.route('/analytics/<int:student_id>/history', methods=['GET'])
 @jwt_required()
+@check_permission('view_learning_behavior_analysis')
+@log_audit('GET_STUDENT_ANALYTICS_HISTORY')
 def get_student_analytics_history(student_id):
     """تاريخ تحليلات الطالب"""
     try:
@@ -442,6 +483,8 @@ def get_student_analytics_history(student_id):
 
 @learning_behavior_bp.route('/environment-factors', methods=['GET'])
 @jwt_required()
+@check_permission('view_learning_behavior_analysis')
+@log_audit('GET_ENVIRONMENT_FACTORS')
 def get_environment_factors():
     """الحصول على عوامل البيئة التعليمية"""
     try:
@@ -467,6 +510,8 @@ def get_environment_factors():
 
 @learning_behavior_bp.route('/environment-assessments', methods=['GET'])
 @jwt_required()
+@check_permission('view_learning_behavior_analysis')
+@log_audit('GET_ENVIRONMENT_ASSESSMENTS')
 def get_environment_assessments():
     """الحصول على تقييمات البيئة"""
     try:
@@ -502,6 +547,9 @@ def get_environment_assessments():
 
 @learning_behavior_bp.route('/environment-assessments', methods=['POST'])
 @jwt_required()
+@check_permission('manage_learning_behavior_analysis')
+@guard_payload_size()
+@log_audit('CREATE_ENVIRONMENT_ASSESSMENT')
 def create_environment_assessment():
     """إنشاء تقييم بيئة جديد"""
     try:
@@ -540,6 +588,8 @@ def create_environment_assessment():
 
 @learning_behavior_bp.route('/reports/student-summary/<int:student_id>', methods=['GET'])
 @jwt_required()
+@check_permission('view_learning_behavior_analysis')
+@log_audit('GET_STUDENT_LEARNING_BEHAVIOR_SUMMARY')
 def get_student_learning_behavior_summary(student_id):
     """تقرير ملخص التعلم والسلوك للطالب"""
     try:

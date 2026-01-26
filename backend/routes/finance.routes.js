@@ -3,8 +3,18 @@ const router = express.Router();
 const { Invoice, Expense, Budget, Payment } = require('../models/Finance.memory');
 const { authenticateToken } = require('../middleware/auth');
 
-// 🔐 يتطلب مصادقة
+const { apiLimiter } = require('../middleware/rateLimiter');
+const {
+  sanitizeInput,
+  commonValidations,
+  handleValidationErrors,
+} = require('../middleware/requestValidation');
+const { body, param } = require('express-validator');
+
+// Apply global protections
 router.use(authenticateToken);
+router.use(apiLimiter);
+router.use(sanitizeInput);
 
 // ==================== INVOICES ====================
 
@@ -12,36 +22,48 @@ router.use(authenticateToken);
  * @route   POST /api/finance/invoices
  * @desc    إنشاء فاتورة جديدة
  */
-router.post('/invoices', (req, res) => {
-  try {
-    const { clientName, clientEmail, amount, items, dueDate } = req.body;
+router.post(
+  '/invoices',
+  [
+    body('clientName')
+      .isString()
+      .isLength({ min: 2, max: 200 })
+      .withMessage('Client name required'),
+    body('amount')
+      .custom(value => {
+        const num = typeof value === 'number' ? value : parseFloat(value);
+        return !isNaN(num) && num >= 0.01 && num <= 1000000;
+      })
+      .withMessage('Invalid amount'),
+    body('clientEmail').optional().isEmail().withMessage('Invalid email'),
+    body('items').optional().isArray({ max: 100 }),
+    body('dueDate').optional().isISO8601(),
+    handleValidationErrors,
+  ],
+  (req, res) => {
+    try {
+      const { clientName, clientEmail, amount, items, dueDate } = req.body;
 
-    if (!clientName || !amount) {
-      return res.status(400).json({
+      const invoice = Invoice.create({
+        clientName,
+        clientEmail,
+        amount,
+        items,
+        dueDate,
+      });
+
+      res.status(201).json({
+        success: true,
+        data: invoice,
+      });
+    } catch (error) {
+      res.status(500).json({
         success: false,
-        message: 'clientName و amount مطلوبة',
+        message: error.message,
       });
     }
-
-    const invoice = Invoice.create({
-      clientName,
-      clientEmail,
-      amount,
-      items,
-      dueDate,
-    });
-
-    res.status(201).json({
-      success: true,
-      data: invoice,
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
   }
-});
+);
 
 /**
  * @route   GET /api/finance/invoices
@@ -66,76 +88,99 @@ router.get('/invoices', (req, res) => {
  * @route   GET /api/finance/invoices/:id
  * @desc    الحصول على فاتورة بمعرفها
  */
-router.get('/invoices/:id', (req, res) => {
-  try {
-    const invoice = Invoice.findById(req.params.id);
-    if (!invoice) {
-      return res.status(404).json({
+router.get(
+  '/invoices/:id',
+  [param('id').isString().isLength({ min: 2 }).withMessage('Invalid ID'), handleValidationErrors],
+  (req, res) => {
+    try {
+      const invoice = Invoice.findById(req.params.id);
+      if (!invoice) {
+        return res.status(404).json({
+          success: false,
+          message: 'الفاتورة غير موجودة',
+        });
+      }
+      res.json({
+        success: true,
+        data: invoice,
+      });
+    } catch (error) {
+      res.status(500).json({
         success: false,
-        message: 'الفاتورة غير موجودة',
+        message: error.message,
       });
     }
-    res.json({
-      success: true,
-      data: invoice,
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
   }
-});
+);
 
 /**
  * @route   PUT /api/finance/invoices/:id
  * @desc    تحديث فاتورة
  */
-router.put('/invoices/:id', (req, res) => {
-  try {
-    const invoice = Invoice.updateById(req.params.id, req.body);
-    if (!invoice) {
-      return res.status(404).json({
+router.put(
+  '/invoices/:id',
+  [
+    param('id').isString().isLength({ min: 2 }).withMessage('Invalid ID'),
+    body('clientName').optional().isString().isLength({ min: 2, max: 200 }),
+    body('amount')
+      .optional()
+      .custom(value => {
+        const num = typeof value === 'number' ? value : parseFloat(value);
+        return !isNaN(num) && num >= 0.01 && num <= 1000000;
+      }),
+    body('clientEmail').optional().isEmail(),
+    handleValidationErrors,
+  ],
+  (req, res) => {
+    try {
+      const invoice = Invoice.updateById(req.params.id, req.body);
+      if (!invoice) {
+        return res.status(404).json({
+          success: false,
+          message: 'الفاتورة غير موجودة',
+        });
+      }
+      res.json({
+        success: true,
+        data: invoice,
+      });
+    } catch (error) {
+      res.status(500).json({
         success: false,
-        message: 'الفاتورة غير موجودة',
+        message: error.message,
       });
     }
-    res.json({
-      success: true,
-      data: invoice,
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
   }
-});
+);
 
 /**
  * @route   DELETE /api/finance/invoices/:id
  * @desc    حذف فاتورة
  */
-router.delete('/invoices/:id', (req, res) => {
-  try {
-    const deleted = Invoice.deleteById(req.params.id);
-    if (!deleted) {
-      return res.status(404).json({
+router.delete(
+  '/invoices/:id',
+  [param('id').isString().isLength({ min: 2 }).withMessage('Invalid ID'), handleValidationErrors],
+  (req, res) => {
+    try {
+      const deleted = Invoice.deleteById(req.params.id);
+      if (!deleted) {
+        return res.status(404).json({
+          success: false,
+          message: 'الفاتورة غير موجودة',
+        });
+      }
+      res.json({
+        success: true,
+        message: 'تم حذف الفاتورة بنجاح',
+      });
+    } catch (error) {
+      res.status(500).json({
         success: false,
-        message: 'الفاتورة غير موجودة',
+        message: error.message,
       });
     }
-    res.json({
-      success: true,
-      message: 'تم حذف الفاتورة بنجاح',
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
   }
-});
+);
 
 // ==================== EXPENSES ====================
 
@@ -143,35 +188,43 @@ router.delete('/invoices/:id', (req, res) => {
  * @route   POST /api/finance/expenses
  * @desc    تسجيل نفقة جديدة
  */
-router.post('/expenses', (req, res) => {
-  try {
-    const { category, description, amount, vendor } = req.body;
+router.post(
+  '/expenses',
+  [
+    body('category').isString().isLength({ min: 2, max: 100 }).withMessage('Category required'),
+    body('amount')
+      .custom(value => {
+        const num = typeof value === 'number' ? value : parseFloat(value);
+        return !isNaN(num) && num >= 0.01 && num <= 1000000;
+      })
+      .withMessage('Invalid amount'),
+    body('description').optional().isString().isLength({ max: 500 }),
+    body('vendor').optional().isString().isLength({ max: 200 }),
+    handleValidationErrors,
+  ],
+  (req, res) => {
+    try {
+      const { category, description, amount, vendor } = req.body;
 
-    if (!category || !amount) {
-      return res.status(400).json({
+      const expense = Expense.create({
+        category,
+        description,
+        amount,
+        vendor,
+      });
+
+      res.status(201).json({
+        success: true,
+        data: expense,
+      });
+    } catch (error) {
+      res.status(500).json({
         success: false,
-        message: 'category و amount مطلوبة',
+        message: error.message,
       });
     }
-
-    const expense = Expense.create({
-      category,
-      description,
-      amount,
-      vendor,
-    });
-
-    res.status(201).json({
-      success: true,
-      data: expense,
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
   }
-});
+);
 
 /**
  * @route   GET /api/finance/expenses
@@ -202,26 +255,30 @@ router.get('/expenses', (req, res) => {
  * @route   PATCH /api/finance/expenses/:id/approve
  * @desc    الموافقة على نفقة
  */
-router.patch('/expenses/:id/approve', (req, res) => {
-  try {
-    const expense = Expense.updateById(req.params.id, { status: 'approved' });
-    if (!expense) {
-      return res.status(404).json({
+router.patch(
+  '/expenses/:id/approve',
+  [param('id').isString().isLength({ min: 2 }).withMessage('Invalid ID'), handleValidationErrors],
+  (req, res) => {
+    try {
+      const expense = Expense.updateById(req.params.id, { status: 'approved' });
+      if (!expense) {
+        return res.status(404).json({
+          success: false,
+          message: 'النفقة غير موجودة',
+        });
+      }
+      res.json({
+        success: true,
+        data: expense,
+      });
+    } catch (error) {
+      res.status(500).json({
         success: false,
-        message: 'النفقة غير موجودة',
+        message: error.message,
       });
     }
-    res.json({
-      success: true,
-      data: expense,
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
   }
-});
+);
 
 // ==================== BUDGETS ====================
 
@@ -229,20 +286,49 @@ router.patch('/expenses/:id/approve', (req, res) => {
  * @route   POST /api/finance/budgets
  * @desc    إنشاء ميزانية جديدة
  */
-router.post('/budgets', (req, res) => {
+router.post(
+  '/budgets',
+  [
+    body('year').isInt({ min: 2020, max: 2100 }).toInt().withMessage('Valid year required'),
+    body('month').optional().isInt({ min: 1, max: 12 }).toInt().withMessage('Month must be 1-12'),
+    body('categories').optional().isObject(),
+    body('notes').optional().isString().isLength({ max: 1000 }),
+    handleValidationErrors,
+  ],
+  (req, res) => {
+    try {
+      const { year, month, categories, notes } = req.body;
+
+      const budget = Budget.create({
+        year,
+        month,
+        categories,
+        notes,
+      });
+
+      res.status(201).json({
+        success: true,
+        data: budget,
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
+);
+
+/**
+ * @route   GET /api/finance/budgets/current
+ * @desc    الحصول على الميزانية الحالية
+ */
+router.get('/budgets', (req, res) => {
   try {
-    const { year, month, categories, notes } = req.body;
-
-    const budget = Budget.create({
-      year,
-      month,
-      categories,
-      notes,
-    });
-
-    res.status(201).json({
+    const budgets = Budget.findAll();
+    res.json({
       success: true,
-      data: budget,
+      data: budgets,
     });
   } catch (error) {
     res.status(500).json({
@@ -356,7 +442,9 @@ router.get('/summary', (req, res) => {
     };
 
     summary.profitMargin =
-      summary.totalRevenue > 0 ? (((summary.totalRevenue - summary.totalExpenses) / summary.totalRevenue) * 100).toFixed(2) : 0;
+      summary.totalRevenue > 0
+        ? (((summary.totalRevenue - summary.totalExpenses) / summary.totalRevenue) * 100).toFixed(2)
+        : 0;
 
     res.json({
       success: true,
@@ -371,3 +459,4 @@ router.get('/summary', (req, res) => {
 });
 
 module.exports = router;
+

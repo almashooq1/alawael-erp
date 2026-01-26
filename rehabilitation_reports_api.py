@@ -1,3 +1,10 @@
+from auth_rbac_decorator import (
+    check_permission,
+    check_multiple_permissions,
+    guard_payload_size,
+    validate_json,
+    log_audit
+)
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
@@ -24,6 +31,8 @@ rehabilitation_reports_bp = Blueprint('rehabilitation_reports', __name__)
 
 @rehabilitation_reports_bp.route('/api/rehabilitation/reports/dashboard', methods=['GET'])
 @jwt_required()
+@check_permission('view_dashboard')
+@log_audit('GET_REPORTS_DASHBOARD')
 def get_reports_dashboard():
     """لوحة تحكم التقارير والتحليلات"""
     try:
@@ -156,6 +165,8 @@ def get_reports_dashboard():
 
 @rehabilitation_reports_bp.route('/api/rehabilitation/reports/beneficiary/<int:beneficiary_id>', methods=['GET'])
 @jwt_required()
+@check_permission('view_reports')
+@log_audit('GET_BENEFICIARY_REPORT')
 def get_beneficiary_report(beneficiary_id):
     """تقرير مفصل عن مستفيد محدد"""
     try:
@@ -261,6 +272,8 @@ def get_beneficiary_report(beneficiary_id):
 
 @rehabilitation_reports_bp.route('/api/rehabilitation/reports/program/<int:program_id>', methods=['GET'])
 @jwt_required()
+@check_permission('view_reports')
+@log_audit('GET_PROGRAM_REPORT')
 def get_program_report(program_id):
     """تقرير مفصل عن برنامج محدد"""
     try:
@@ -353,6 +366,8 @@ def get_program_report(program_id):
 
 @rehabilitation_reports_bp.route('/api/rehabilitation/reports/therapist/<int:therapist_id>', methods=['GET'])
 @jwt_required()
+@check_permission('view_reports')
+@log_audit('GET_THERAPIST_REPORT')
 def get_therapist_report(therapist_id):
     """تقرير أداء أخصائي محدد"""
     try:
@@ -445,6 +460,9 @@ def get_therapist_report(therapist_id):
 
 @rehabilitation_reports_bp.route('/api/rehabilitation/reports/export', methods=['POST'])
 @jwt_required()
+@check_permission('manage_rehabilitation_reports')
+@guard_payload_size()
+@log_audit('EXPORT_REPORT')
 def export_report():
     """تصدير التقارير بصيغ مختلفة"""
     try:
@@ -466,6 +484,9 @@ def export_report():
 
 @rehabilitation_reports_bp.route('/api/rehabilitation/reports/custom', methods=['POST'])
 @jwt_required()
+@check_permission('generate_rehabilitation_reports')
+@guard_payload_size()
+@log_audit('GENERATE_CUSTOM_REPORT')
 def generate_custom_report():
     """إنشاء تقرير مخصص"""
     try:

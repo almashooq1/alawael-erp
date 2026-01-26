@@ -20,3 +20,4 @@ router.post('/simulate', authorizeRole(['ADMIN', 'CEO', 'OPERATIONS_MANAGER']), 
 });
 
 module.exports = router;
+

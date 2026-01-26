@@ -1,0 +1,35 @@
+version: '3.9'
+
+services:
+  # Main backend application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: alawael-backend
+    ports:
+      - "3001:3001"
+    environment:
+      PORT: "3001"
+      NODE_ENV: development
+      USE_MOCK_DB: "true"
+      SKIP_SOCKET_IO: "true"
+      DISABLE_REDIS: "true"
+      SKIP_PHASE17: "true"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3001/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 40s
+    volumes:
+      # Optional: mount source for live development
+      - ./:/app
+      - /app/node_modules  # Prevent overwriting container node_modules
+    networks:
+      - alawael-network
+
+networks:
+  alawael-network:
+    driver: bridge

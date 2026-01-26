@@ -1,3 +1,10 @@
+from auth_rbac_decorator import (
+    check_permission,
+    check_multiple_permissions,
+    guard_payload_size,
+    validate_json,
+    log_audit
+)
 # -*- coding: utf-8 -*-
 """
 API لوحة التحكم التفاعلية المتقدمة
@@ -20,6 +27,8 @@ advanced_dashboard_bp = Blueprint('advanced_dashboard', __name__, url_prefix='/a
 
 @advanced_dashboard_bp.route('/dashboard', methods=['GET'])
 @jwt_required()
+@check_permission('view_dashboard')
+@log_audit('GET_USER_DASHBOARD')
 def get_user_dashboard():
     """الحصول على لوحة تحكم المستخدم"""
     try:
@@ -38,6 +47,8 @@ def get_user_dashboard():
 
 @advanced_dashboard_bp.route('/widgets', methods=['GET'])
 @jwt_required()
+@check_permission('view_advanced_dashboard')
+@log_audit('GET_USER_WIDGETS')
 def get_user_widgets():
     """الحصول على ودجات المستخدم"""
     try:
@@ -76,6 +87,9 @@ def get_user_widgets():
 
 @advanced_dashboard_bp.route('/widgets', methods=['POST'])
 @jwt_required()
+@check_permission('manage_advanced_dashboard')
+@guard_payload_size()
+@log_audit('CREATE_WIDGET')
 def create_widget():
     """إنشاء ودجة جديدة"""
     try:
@@ -109,6 +123,9 @@ def create_widget():
 
 @advanced_dashboard_bp.route('/widgets/<int:widget_id>', methods=['PUT'])
 @jwt_required()
+@check_permission('manage_advanced_dashboard')
+@guard_payload_size()
+@log_audit('UPDATE_WIDGET')
 def update_widget(widget_id):
     """تحديث ودجة"""
     try:
@@ -133,6 +150,8 @@ def update_widget(widget_id):
 
 @advanced_dashboard_bp.route('/widgets/<int:widget_id>', methods=['DELETE'])
 @jwt_required()
+@check_permission('manage_advanced_dashboard')
+@log_audit('DELETE_WIDGET')
 def delete_widget(widget_id):
     """حذف ودجة"""
     try:
@@ -150,6 +169,8 @@ def delete_widget(widget_id):
 
 @advanced_dashboard_bp.route('/widgets/<int:widget_id>/data', methods=['GET'])
 @jwt_required()
+@check_permission('view_advanced_dashboard')
+@log_audit('GET_WIDGET_DATA')
 def get_widget_data(widget_id):
     """الحصول على بيانات ودجة محددة"""
     try:
@@ -168,6 +189,8 @@ def get_widget_data(widget_id):
 
 @advanced_dashboard_bp.route('/layouts', methods=['GET'])
 @jwt_required()
+@check_permission('view_advanced_dashboard')
+@log_audit('GET_USER_LAYOUTS')
 def get_user_layouts():
     """الحصول على تخطيطات المستخدم"""
     try:
@@ -191,6 +214,9 @@ def get_user_layouts():
 
 @advanced_dashboard_bp.route('/layouts', methods=['POST'])
 @jwt_required()
+@check_permission('manage_advanced_dashboard')
+@guard_payload_size()
+@log_audit('SAVE_LAYOUT')
 def save_layout():
     """حفظ تخطيط لوحة التحكم"""
     try:
@@ -222,6 +248,8 @@ def save_layout():
 
 @advanced_dashboard_bp.route('/alerts', methods=['GET'])
 @jwt_required()
+@check_permission('view_advanced_dashboard')
+@log_audit('GET_USER_ALERTS')
 def get_user_alerts():
     """الحصول على تنبيهات المستخدم"""
     try:
@@ -266,6 +294,9 @@ def get_user_alerts():
 
 @advanced_dashboard_bp.route('/alerts', methods=['POST'])
 @jwt_required()
+@check_permission('manage_advanced_dashboard')
+@guard_payload_size()
+@log_audit('CREATE_ALERT')
 def create_alert():
     """إنشاء تنبيه جديد"""
     try:
@@ -299,6 +330,9 @@ def create_alert():
 
 @advanced_dashboard_bp.route('/alerts/<int:alert_id>/read', methods=['PUT'])
 @jwt_required()
+@check_permission('manage_advanced_dashboard')
+@guard_payload_size()
+@log_audit('MARK_ALERT_READ')
 def mark_alert_read(alert_id):
     """تمييز التنبيه كمقروء"""
     try:
@@ -316,6 +350,9 @@ def mark_alert_read(alert_id):
 
 @advanced_dashboard_bp.route('/alerts/<int:alert_id>/dismiss', methods=['PUT'])
 @jwt_required()
+@check_permission('manage_advanced_dashboard')
+@guard_payload_size()
+@log_audit('DISMISS_ALERT')
 def dismiss_alert(alert_id):
     """إخفاء التنبيه"""
     try:
@@ -333,6 +370,8 @@ def dismiss_alert(alert_id):
 
 @advanced_dashboard_bp.route('/notifications', methods=['GET'])
 @jwt_required()
+@check_permission('view_advanced_dashboard')
+@log_audit('GET_USER_NOTIFICATIONS')
 def get_user_notifications():
     """الحصول على إشعارات المستخدم"""
     try:
@@ -385,6 +424,8 @@ def get_dashboard_themes():
 
 @advanced_dashboard_bp.route('/export', methods=['POST'])
 @jwt_required()
+@check_permission('access_advanced_dashboard')
+@log_audit('EXPORT_DASHBOARD')
 def export_dashboard():
     """تصدير لوحة التحكم"""
     try:
@@ -418,6 +459,8 @@ def export_dashboard():
 
 @advanced_dashboard_bp.route('/metrics', methods=['GET'])
 @jwt_required()
+@check_permission('view_dashboard')
+@log_audit('GET_DASHBOARD_METRICS')
 def get_dashboard_metrics():
     """الحصول على مقاييس لوحة التحكم"""
     try:
@@ -453,6 +496,8 @@ def get_dashboard_metrics():
 
 @advanced_dashboard_bp.route('/filters', methods=['GET'])
 @jwt_required()
+@check_permission('view_advanced_dashboard')
+@log_audit('GET_USER_FILTERS')
 def get_user_filters():
     """الحصول على فلاتر المستخدم"""
     try:
@@ -475,6 +520,9 @@ def get_user_filters():
 
 @advanced_dashboard_bp.route('/filters', methods=['POST'])
 @jwt_required()
+@check_permission('manage_advanced_dashboard')
+@guard_payload_size()
+@log_audit('CREATE_FILTER')
 def create_filter():
     """إنشاء فلتر جديد"""
     try:
@@ -524,6 +572,8 @@ def create_filter():
 
 @advanced_dashboard_bp.route('/stats', methods=['GET'])
 @jwt_required()
+@check_permission('view_dashboard')
+@log_audit('GET_DASHBOARD_STATS')
 def get_dashboard_stats():
     """الحصول على إحصائيات لوحة التحكم"""
     try:

@@ -46,3 +46,4 @@ router.post('/tele-robotics/init', requireRole(['DOCTOR', 'ADMIN']), async (req,
 });
 
 module.exports = router;
+

@@ -1,3 +1,10 @@
+from auth_rbac_decorator import (
+    check_permission,
+    check_multiple_permissions,
+    guard_payload_size,
+    validate_json,
+    log_audit
+)
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
@@ -333,6 +340,8 @@ def submit_feedback():
 
 @ai_chatbot_bp.route('/analytics', methods=['GET'])
 @jwt_required()
+@check_permission('access_ai_chatbot')
+@log_audit('GET_CHATBOT_ANALYTICS')
 def get_chatbot_analytics():
     """إحصائيات البوت"""
     try:
@@ -368,6 +377,9 @@ def get_chatbot_analytics():
 
 @ai_chatbot_bp.route('/knowledge-base', methods=['GET', 'POST'])
 @jwt_required()
+@check_permission('view_ai_chatbot')
+@guard_payload_size()
+@log_audit('MANAGE_KNOWLEDGE_BASE')
 def manage_knowledge_base():
     """إدارة قاعدة المعرفة"""
     if request.method == 'GET':

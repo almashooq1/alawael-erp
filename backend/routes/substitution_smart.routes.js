@@ -36,3 +36,4 @@ router.post('/find', authorizeRole(['ADMIN', 'receptionist', 'CARE_MANAGER']), a
 });
 
 module.exports = router;
+

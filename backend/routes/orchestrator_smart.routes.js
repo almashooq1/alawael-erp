@@ -32,3 +32,4 @@ router.post('/trigger/equipment-failure', authorizeRole(['ADMIN', 'FACILITY_MANA
 });
 
 module.exports = router;
+

@@ -1,21 +1,28 @@
 // backend/config/database.js
 const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
 
 let isConnected = false;
+let mongoServer;
 
 const connectDB = async () => {
   // Check if using mock database first
   if (process.env.USE_MOCK_DB === 'true' || process.env.NODE_ENV === 'test') {
     if (isConnected) {
       console.log('✅ Using existing in-memory database');
-      return { connection: { host: 'in-memory' } };
+      return mongoose.connection;
     }
 
     console.log('🎯 Using in-memory database (development mode)');
     console.log('📝 Data will be lost when server restarts');
     console.log('⚙️  To use MongoDB Atlas, set USE_MOCK_DB=false in .env\n');
-    isConnected = true;
-    return { connection: { host: 'in-memory' } };
+
+    // Spin up an ephemeral MongoDB for local/test usage
+    mongoServer = await MongoMemoryServer.create();
+    const uri = mongoServer.getUri();
+    const conn = await mongoose.connect(uri, { dbName: 'alawael-erp-mem' });
+    isConnected = conn.connections[0].readyState === 1;
+    return conn;
   }
 
   if (isConnected) {
@@ -56,11 +63,22 @@ const connectDB = async () => {
     return conn;
   } catch (error) {
     console.error('❌ MongoDB Connection Failed:', error.message);
+    const allowFallback = process.env.DISABLE_MOCK_FALLBACK !== 'true';
 
-    if (process.env.USE_MOCK_DB === 'true') {
-      console.log('⚠️  Fallback: Using in-memory database');
-      isConnected = true;
-      return { connection: { host: 'in-memory' } };
+    if (allowFallback) {
+      try {
+        process.env.USE_MOCK_DB = 'true';
+        console.log('⚠️  Fallback: Using in-memory database');
+        if (!mongoServer) {
+          mongoServer = await MongoMemoryServer.create();
+        }
+        const uri = mongoServer.getUri();
+        const conn = await mongoose.connect(uri, { dbName: 'alawael-erp-mem' });
+        isConnected = conn.connections[0].readyState === 1;
+        return conn;
+      } catch (fallbackErr) {
+        console.error('❌ In-memory MongoDB fallback failed:', fallbackErr.message);
+      }
     }
 
     console.log('⚠️  MongoDB not available');
@@ -75,8 +93,26 @@ const disconnectDB = async () => {
       isConnected = false;
       console.log('✅ MongoDB Disconnected');
     }
+
+    if (mongoServer) {
+      await mongoServer.stop();
+      mongoServer = null;
+      console.log('🧹 In-memory MongoDB stopped');
+    }
   } catch (error) {
     console.error('❌ Error disconnecting MongoDB:', error);
+  }
+};
+
+// Lightweight connection status helper used by health checks
+const checkConnection = () => {
+  try {
+    if (process.env.USE_MOCK_DB === 'true' || process.env.NODE_ENV === 'test') {
+      return true;
+    }
+    return !!mongoose.connection && mongoose.connection.readyState === 1;
+  } catch (e) {
+    return false;
   }
 };
 
@@ -84,4 +120,5 @@ module.exports = {
   connectDB,
   disconnectDB,
   isConnected: () => isConnected,
+  checkConnection,
 };

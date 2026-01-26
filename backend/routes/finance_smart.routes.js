@@ -50,3 +50,4 @@ router.get('/metrics', requireRole(['ADMIN', 'ACCOUNTANT']), async (req, res) =>
 });
 
 module.exports = router;
+

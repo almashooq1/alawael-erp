@@ -1,3 +1,10 @@
+from auth_rbac_decorator import (
+    check_permission,
+    check_multiple_permissions,
+    guard_payload_size,
+    validate_json,
+    log_audit
+)
 # -*- coding: utf-8 -*-
 """
 واجهة برمجة التطبيقات المحسنة لنظام الواقع المعزز والافتراضي
@@ -23,6 +30,8 @@ ar_vr_service = ARVRService()
 
 @ar_vr_enhanced_bp.route('/content', methods=['GET'])
 @jwt_required()
+@check_permission('view_ar_vr_enhanced')
+@log_audit('GET_CONTENT_LIBRARY')
 def get_content_library():
     """الحصول على مكتبة المحتوى"""
     try:
@@ -47,6 +56,9 @@ def get_content_library():
 
 @ar_vr_enhanced_bp.route('/content', methods=['POST'])
 @jwt_required()
+@check_permission('manage_ar_vr_enhanced')
+@guard_payload_size()
+@log_audit('CREATE_CONTENT')
 def create_content():
     """إنشاء محتوى AR/VR جديد"""
     try:
@@ -66,6 +78,8 @@ def create_content():
 
 @ar_vr_enhanced_bp.route('/content/<content_id>', methods=['GET'])
 @jwt_required()
+@check_permission('view_ar_vr_enhanced')
+@log_audit('GET_CONTENT_DETAILS')
 def get_content_details():
     """الحصول على تفاصيل المحتوى"""
     try:
@@ -81,6 +95,9 @@ def get_content_details():
 
 @ar_vr_enhanced_bp.route('/sessions/start', methods=['POST'])
 @jwt_required()
+@check_permission('manage_ar_vr_enhanced')
+@guard_payload_size()
+@log_audit('START_SESSION')
 def start_session():
     """بدء جلسة AR/VR"""
     try:
@@ -100,6 +117,9 @@ def start_session():
 
 @ar_vr_enhanced_bp.route('/sessions/<session_id>/end', methods=['PUT'])
 @jwt_required()
+@check_permission('manage_ar_vr_enhanced')
+@guard_payload_size()
+@log_audit('END_SESSION')
 def end_session():
     """إنهاء جلسة AR/VR"""
     try:
@@ -113,6 +133,9 @@ def end_session():
 
 @ar_vr_enhanced_bp.route('/interactions', methods=['POST'])
 @jwt_required()
+@check_permission('manage_ar_vr_enhanced')
+@guard_payload_size()
+@log_audit('RECORD_INTERACTION')
 def record_interaction():
     """تسجيل تفاعل في الجلسة"""
     try:
@@ -131,6 +154,8 @@ def record_interaction():
 
 @ar_vr_enhanced_bp.route('/student/<int:student_id>/sessions', methods=['GET'])
 @jwt_required()
+@check_permission('view_ar_vr_enhanced')
+@log_audit('GET_STUDENT_SESSIONS')
 def get_student_sessions():
     """الحصول على جلسات الطالب"""
     try:
@@ -154,6 +179,8 @@ def get_student_sessions():
 
 @ar_vr_enhanced_bp.route('/sessions/<session_id>/analytics', methods=['GET'])
 @jwt_required()
+@check_permission('view_ar_vr_enhanced')
+@log_audit('GET_SESSION_ANALYTICS')
 def get_session_analytics():
     """تحليل تفصيلي للجلسة"""
     try:
@@ -165,6 +192,8 @@ def get_session_analytics():
 
 @ar_vr_enhanced_bp.route('/dashboard', methods=['GET'])
 @jwt_required()
+@check_permission('view_dashboard')
+@log_audit('GET_ANALYTICS_DASHBOARD')
 def get_analytics_dashboard():
     """الحصول على بيانات لوحة التحكم"""
     try:
@@ -181,6 +210,8 @@ def get_analytics_dashboard():
 
 @ar_vr_enhanced_bp.route('/therapy-scenarios', methods=['GET'])
 @jwt_required()
+@check_permission('view_ar_vr_enhanced')
+@log_audit('GET_THERAPY_SCENARIOS')
 def get_therapy_scenarios():
     """الحصول على السيناريوهات العلاجية"""
     try:
@@ -200,6 +231,9 @@ def get_therapy_scenarios():
 
 @ar_vr_enhanced_bp.route('/therapy-scenarios', methods=['POST'])
 @jwt_required()
+@check_permission('manage_ar_vr_enhanced')
+@guard_payload_size()
+@log_audit('CREATE_THERAPY_SCENARIO')
 def create_therapy_scenario():
     """إنشاء سيناريو علاجي جديد"""
     try:
@@ -219,6 +253,9 @@ def create_therapy_scenario():
 
 @ar_vr_enhanced_bp.route('/devices/calibrate', methods=['POST'])
 @jwt_required()
+@check_permission('manage_ar_vr_enhanced')
+@guard_payload_size()
+@log_audit('CALIBRATE_DEVICE')
 def calibrate_device():
     """معايرة الجهاز"""
     try:
@@ -238,6 +275,8 @@ def calibrate_device():
 
 @ar_vr_enhanced_bp.route('/devices/<device_id>/calibrations', methods=['GET'])
 @jwt_required()
+@check_permission('view_ar_vr_enhanced')
+@log_audit('GET_DEVICE_CALIBRATIONS')
 def get_device_calibrations():
     """الحصول على معايرات الجهاز"""
     try:
@@ -252,6 +291,8 @@ def get_device_calibrations():
 
 @ar_vr_enhanced_bp.route('/environments', methods=['GET'])
 @jwt_required()
+@check_permission('view_ar_vr_enhanced')
+@log_audit('GET_VIRTUAL_ENVIRONMENTS')
 def get_virtual_environments():
     """الحصول على البيئات الافتراضية"""
     try:
@@ -293,6 +334,8 @@ def get_virtual_environments():
 
 @ar_vr_enhanced_bp.route('/markers', methods=['GET'])
 @jwt_required()
+@check_permission('view_ar_vr_enhanced')
+@log_audit('GET_AR_MARKERS')
 def get_ar_markers():
     """الحصول على علامات الواقع المعزز"""
     try:
@@ -325,6 +368,8 @@ def get_ar_markers():
 
 @ar_vr_enhanced_bp.route('/analytics/content/<content_id>', methods=['GET'])
 @jwt_required()
+@check_permission('view_ar_vr_enhanced')
+@log_audit('GET_CONTENT_ANALYTICS')
 def get_content_analytics():
     """تحليلات محتوى محدد"""
     try:
@@ -366,6 +411,8 @@ def get_content_analytics():
 
 @ar_vr_enhanced_bp.route('/reports/usage', methods=['GET'])
 @jwt_required()
+@check_permission('view_reports')
+@log_audit('GET_USAGE_REPORT')
 def get_usage_report():
     """تقرير الاستخدام"""
     try:
@@ -426,6 +473,8 @@ def get_usage_report():
 
 @ar_vr_enhanced_bp.route('/safety/guidelines', methods=['GET'])
 @jwt_required()
+@check_permission('view_ar_vr_enhanced')
+@log_audit('GET_SAFETY_GUIDELINES')
 def get_safety_guidelines():
     """الحصول على إرشادات الأمان"""
     try:

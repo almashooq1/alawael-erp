@@ -32,3 +32,4 @@ router.post('/run-scan', authorizeRole(['ADMIN', 'CARE_MANAGER', 'CRM_MANAGER'])
 });
 
 module.exports = router;
+

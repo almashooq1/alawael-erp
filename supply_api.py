@@ -1,3 +1,10 @@
+from auth_rbac_decorator import (
+    check_permission,
+    check_multiple_permissions,
+    guard_payload_size,
+    validate_json,
+    log_audit
+)
 # -*- coding: utf-8 -*-
 """
 API endpoints لنظام طلب الإمداد بالمواد
@@ -28,6 +35,8 @@ def supply_management():
 # Supply Categories API
 @app.route('/api/supply-categories', methods=['GET'])
 @jwt_required()
+@check_permission('view_supply')
+@log_audit('GET_SUPPLY_CATEGORIES')
 def get_supply_categories():
     """الحصول على فئات المواد"""
     try:
@@ -66,6 +75,9 @@ def get_supply_categories():
 
 @app.route('/api/supply-categories', methods=['POST'])
 @jwt_required()
+@check_permission('manage_supply')
+@guard_payload_size()
+@log_audit('CREATE_SUPPLY_CATEGORY')
 def create_supply_category():
     """إنشاء فئة مواد جديدة"""
     try:
@@ -97,6 +109,8 @@ def create_supply_category():
 # Supply Items API
 @app.route('/api/supply-items', methods=['GET'])
 @jwt_required()
+@check_permission('view_supply')
+@log_audit('GET_SUPPLY_ITEMS')
 def get_supply_items():
     """الحصول على المواد والإمدادات"""
     try:
@@ -154,6 +168,9 @@ def get_supply_items():
 
 @app.route('/api/supply-items', methods=['POST'])
 @jwt_required()
+@check_permission('manage_supply')
+@guard_payload_size()
+@log_audit('CREATE_SUPPLY_ITEM')
 def create_supply_item():
     """إنشاء مادة جديدة"""
     try:
@@ -196,6 +213,8 @@ def create_supply_item():
 # Branch Inventory API
 @app.route('/api/branch-inventory', methods=['GET'])
 @jwt_required()
+@check_permission('view_supply')
+@log_audit('GET_BRANCH_INVENTORY')
 def get_branch_inventory():
     """الحصول على مخزون الفرع"""
     try:
@@ -255,6 +274,8 @@ def get_branch_inventory():
 # Supply Requests API
 @app.route('/api/supply-requests', methods=['GET'])
 @jwt_required()
+@check_permission('view_supply')
+@log_audit('GET_SUPPLY_REQUESTS')
 def get_supply_requests():
     """الحصول على طلبات الإمداد"""
     try:
@@ -321,6 +342,9 @@ def get_supply_requests():
 
 @app.route('/api/supply-requests', methods=['POST'])
 @jwt_required()
+@check_permission('manage_supply')
+@guard_payload_size()
+@log_audit('CREATE_SUPPLY_REQUEST')
 def create_supply_request():
     """إنشاء طلب إمداد جديد"""
     try:
@@ -399,6 +423,9 @@ def create_supply_request():
 
 @app.route('/api/supply-requests/<int:request_id>/approve', methods=['POST'])
 @jwt_required()
+@check_permission('manage_supply')
+@guard_payload_size()
+@log_audit('APPROVE_SUPPLY_REQUEST')
 def approve_supply_request(request_id):
     """الموافقة على طلب الإمداد"""
     try:
@@ -452,6 +479,8 @@ def approve_supply_request(request_id):
 # Supply Notifications API
 @app.route('/api/supply-notifications', methods=['GET'])
 @jwt_required()
+@check_permission('view_supply')
+@log_audit('GET_SUPPLY_NOTIFICATIONS')
 def get_supply_notifications():
     """الحصول على إشعارات الإمداد"""
     try:
@@ -520,6 +549,8 @@ def get_supply_notifications():
 # Supply Dashboard API
 @app.route('/api/supply-dashboard', methods=['GET'])
 @jwt_required()
+@check_permission('view_dashboard')
+@log_audit('GET_SUPPLY_DASHBOARD')
 def get_supply_dashboard():
     """لوحة تحكم نظام الإمداد"""
     try:

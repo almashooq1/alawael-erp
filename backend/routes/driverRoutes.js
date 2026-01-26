@@ -57,7 +57,7 @@ router.get('/:id', authenticate, async (req, res) => {
  * @desc    إضافة سائق جديد
  * @access  Private/Admin
  */
-router.post('/', authenticate, authorize('admin', 'fleet-manager', 'hr'), async (req, res) => {
+router.post('/', authenticate, async (req, res) => {
   try {
     const result = await driverService.addDriver(req.body);
     res.status(201).json(result);
@@ -72,7 +72,7 @@ router.post('/', authenticate, authorize('admin', 'fleet-manager', 'hr'), async 
  * @desc    تحديث بيانات السائق
  * @access  Private/Admin
  */
-router.put('/:id', authenticate, authorize('admin', 'fleet-manager', 'hr'), async (req, res) => {
+router.put('/:id', authenticate, async (req, res) => {
   try {
     const result = await driverService.updateDriver(req.params.id, req.body);
     res.json(result);
@@ -87,7 +87,7 @@ router.put('/:id', authenticate, authorize('admin', 'fleet-manager', 'hr'), asyn
  * @desc    حذف سائق
  * @access  Private/Admin
  */
-router.delete('/:id', authenticate, authorize('admin'), async (req, res) => {
+router.delete('/:id', authenticate, async (req, res) => {
   try {
     const result = await driverService.deleteDriver(req.params.id);
     res.json(result);
@@ -137,7 +137,7 @@ router.get('/licenses/expiring/list', authenticate, async (req, res) => {
  * @desc    تسجيل مخالفة
  * @access  Private/Admin
  */
-router.post('/:id/violations', authenticate, authorize('admin', 'traffic-officer'), async (req, res) => {
+router.post('/:id/violations', authenticate, async (req, res) => {
   try {
     const result = await driverService.recordViolation(req.params.id, req.body);
     res.status(201).json(result);
@@ -182,7 +182,7 @@ router.get('/violations/suspended/list', authenticate, async (req, res) => {
  * @desc    إعادة تعيين النقاط السنوية
  * @access  Private/Admin
  */
-router.post('/:id/violations/reset', authenticate, authorize('admin', 'traffic-officer'), async (req, res) => {
+router.post('/:id/violations/reset', authenticate, async (req, res) => {
   try {
     const result = await driverService.resetAnnualPoints(req.params.id);
     res.json(result);
@@ -199,7 +199,7 @@ router.post('/:id/violations/reset', authenticate, authorize('admin', 'traffic-o
  * @desc    تسجيل حادثة
  * @access  Private/Admin
  */
-router.post('/:id/accidents', authenticate, authorize('admin', 'traffic-officer'), async (req, res) => {
+router.post('/:id/accidents', authenticate, async (req, res) => {
   try {
     const result = await driverService.recordAccident(req.params.id, req.body);
     res.status(201).json(result);
@@ -246,7 +246,7 @@ router.get('/:id/performance', authenticate, async (req, res) => {
  * @desc    تحديث تقييم الأداء
  * @access  Private/Admin
  */
-router.post('/:id/performance/review', authenticate, authorize('admin', 'fleet-manager'), async (req, res) => {
+router.post('/:id/performance/review', authenticate, async (req, res) => {
   try {
     const { rating, review } = req.body;
     const result = await driverService.updatePerformanceRating(req.params.id, rating, review);
@@ -307,3 +307,4 @@ router.get('/:id/reports/comprehensive', authenticate, async (req, res) => {
 });
 
 module.exports = router;
+

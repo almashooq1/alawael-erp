@@ -32,3 +32,4 @@ router.get('/compliance/:deptId', authorizeRole(['ADMIN', 'Quality Manager']), a
 });
 
 module.exports = router;
+

@@ -26,3 +26,4 @@ router.post('/progress/generate', authorizeRole(['THERAPIST', 'DOCTOR', 'CARE_MA
 });
 
 module.exports = router;
+

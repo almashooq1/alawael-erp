@@ -14,6 +14,7 @@ import pyotp
 import qrcode
 from io import BytesIO
 import base64
+from lib.auth_rbac_decorator import check_permission, require_role, log_audit, guard_payload_size, validate_json
 
 security_bp = Blueprint('security', __name__, url_prefix='/api/security')
 
@@ -21,7 +22,11 @@ security_bp = Blueprint('security', __name__, url_prefix='/api/security')
 # ==================== API KEY MANAGEMENT ====================
 
 @security_bp.route('/api-keys', methods=['POST'])
-@jwt_required()
+
+@check_permission('manage_api_key')
+@guard_payload_size()
+@validate_json()
+@log_audit('POST_CREATE_API_KEY')
 def create_api_key():
     """Create new API key"""
     try:
@@ -65,7 +70,9 @@ def create_api_key():
 
 
 @security_bp.route('/api-keys', methods=['GET'])
-@jwt_required()
+
+@check_permission('view_list_api_keys')
+@log_audit('GET_LIST_API_KEYS')
 def list_api_keys():
     """List user's API keys"""
     try:
@@ -82,7 +89,9 @@ def list_api_keys():
 
 
 @security_bp.route('/api-keys/<api_key_id>', methods=['GET'])
-@jwt_required()
+
+@check_permission('view_api_key')
+@log_audit('GET_GET_API_KEY')
 def get_api_key(api_key_id):
     """Get specific API key details"""
     try:
@@ -106,7 +115,10 @@ def get_api_key(api_key_id):
 
 
 @security_bp.route('/api-keys/<api_key_id>', methods=['PUT'])
-@jwt_required()
+
+@check_permission('manage_api_key')
+@guard_payload_size()
+@log_audit('PUT_UPDATE_API_KEY')
 def update_api_key(api_key_id):
     """Update API key"""
     try:
@@ -149,7 +161,9 @@ def update_api_key(api_key_id):
 
 
 @security_bp.route('/api-keys/<api_key_id>', methods=['DELETE'])
-@jwt_required()
+
+@check_permission('manage_resources')
+@log_audit('DELETE_DELETE_API_KEY')
 def delete_api_key(api_key_id):
     """Delete API key"""
     try:
@@ -178,7 +192,11 @@ def delete_api_key(api_key_id):
 # ==================== 2FA - TWO-FACTOR AUTHENTICATION ====================
 
 @security_bp.route('/2fa/setup', methods=['POST'])
-@jwt_required()
+
+@check_permission('manage_setup2fa')
+@guard_payload_size()
+@validate_json()
+@log_audit('POST_SETUP_2FA')
 def setup_2fa():
     """Setup 2FA for user"""
     try:
@@ -224,7 +242,11 @@ def setup_2fa():
 
 
 @security_bp.route('/2fa/verify', methods=['POST'])
-@jwt_required()
+
+@check_permission('manage_verify2fa')
+@guard_payload_size()
+@validate_json()
+@log_audit('POST_VERIFY_2FA')
 def verify_2fa():
     """Verify 2FA setup with code"""
     try:
@@ -263,7 +285,11 @@ def verify_2fa():
 
 
 @security_bp.route('/2fa/disable', methods=['POST'])
-@jwt_required()
+
+@check_permission('manage_disable2fa')
+@guard_payload_size()
+@validate_json()
+@log_audit('POST_DISABLE_2FA')
 def disable_2fa():
     """Disable 2FA"""
     try:
@@ -299,7 +325,9 @@ def disable_2fa():
 # ==================== AUDIT LOGS ====================
 
 @security_bp.route('/audit-logs', methods=['GET'])
-@jwt_required()
+
+@check_permission('view_audit_logs')
+@log_audit('GET_GET_AUDIT_LOGS')
 def get_audit_logs():
     """Get audit logs for user"""
     try:

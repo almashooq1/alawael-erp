@@ -1,3 +1,10 @@
+from auth_rbac_decorator import (
+    check_permission,
+    check_multiple_permissions,
+    guard_payload_size,
+    validate_json,
+    log_audit
+)
 # -*- coding: utf-8 -*-
 """
 نظام خدمة العملاء والدعم الفني - CRM Customer Support API
@@ -37,6 +44,8 @@ def generate_ticket_number():
 
 @support_bp.route('/tickets', methods=['GET'])
 @jwt_required()
+@check_permission('view_crm_support')
+@log_audit('GET_SUPPORT_TICKETS')
 def get_support_tickets():
     """قائمة تذاكر الدعم مع الفلترة والترقيم"""
     try:
@@ -147,6 +156,9 @@ def get_support_tickets():
 
 @support_bp.route('/tickets', methods=['POST'])
 @jwt_required()
+@check_permission('manage_crm_support')
+@guard_payload_size()
+@log_audit('CREATE_SUPPORT_TICKET')
 def create_support_ticket():
     """إنشاء تذكرة دعم جديدة"""
     try:
@@ -206,6 +218,8 @@ def create_support_ticket():
 
 @support_bp.route('/tickets/<int:ticket_id>', methods=['GET'])
 @jwt_required()
+@check_permission('view_crm_support')
+@log_audit('GET_SUPPORT_TICKET')
 def get_support_ticket(ticket_id):
     """الحصول على تفاصيل تذكرة دعم محددة"""
     try:
@@ -268,6 +282,9 @@ def get_support_ticket(ticket_id):
 
 @support_bp.route('/tickets/<int:ticket_id>', methods=['PUT'])
 @jwt_required()
+@check_permission('manage_crm_support')
+@guard_payload_size()
+@log_audit('UPDATE_SUPPORT_TICKET')
 def update_support_ticket(ticket_id):
     """تحديث تذكرة دعم"""
     try:
@@ -320,6 +337,8 @@ def update_support_ticket(ticket_id):
 
 @support_bp.route('/tickets/<int:ticket_id>/responses', methods=['GET'])
 @jwt_required()
+@check_permission('view_crm_support')
+@log_audit('GET_TICKET_RESPONSES')
 def get_ticket_responses(ticket_id):
     """قائمة ردود تذكرة الدعم"""
     try:
@@ -348,6 +367,9 @@ def get_ticket_responses(ticket_id):
 
 @support_bp.route('/tickets/<int:ticket_id>/responses', methods=['POST'])
 @jwt_required()
+@check_permission('manage_crm_support')
+@guard_payload_size()
+@log_audit('ADD_TICKET_RESPONSE')
 def add_ticket_response(ticket_id):
     """إضافة رد على تذكرة الدعم"""
     try:
@@ -397,6 +419,8 @@ def add_ticket_response(ticket_id):
 
 @support_bp.route('/categories', methods=['GET'])
 @jwt_required()
+@check_permission('view_crm_support')
+@log_audit('GET_SUPPORT_CATEGORIES')
 def get_support_categories():
     """قائمة فئات الدعم"""
     try:
@@ -425,6 +449,9 @@ def get_support_categories():
 
 @support_bp.route('/categories', methods=['POST'])
 @jwt_required()
+@check_permission('manage_crm_support')
+@guard_payload_size()
+@log_audit('CREATE_SUPPORT_CATEGORY')
 def create_support_category():
     """إنشاء فئة دعم جديدة"""
     try:
@@ -467,6 +494,8 @@ def create_support_category():
 
 @support_bp.route('/knowledge-base', methods=['GET'])
 @jwt_required()
+@check_permission('view_crm_support')
+@log_audit('GET_KNOWLEDGE_BASE')
 def get_knowledge_base():
     """قائمة مقالات قاعدة المعرفة"""
     try:
@@ -530,6 +559,8 @@ def get_knowledge_base():
 
 @support_bp.route('/analytics', methods=['GET'])
 @jwt_required()
+@check_permission('view_crm_support')
+@log_audit('GET_SUPPORT_ANALYTICS')
 def get_support_analytics():
     """تحليلات شاملة لنظام الدعم"""
     try:
@@ -629,6 +660,9 @@ def get_support_analytics():
 
 @support_bp.route('/tickets/<int:ticket_id>/escalate', methods=['POST'])
 @jwt_required()
+@check_permission('manage_crm_support')
+@guard_payload_size()
+@log_audit('ESCALATE_TICKET')
 def escalate_ticket(ticket_id):
     """تصعيد تذكرة الدعم"""
     try:

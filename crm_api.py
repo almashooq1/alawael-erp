@@ -15,6 +15,12 @@ import uuid
 
 from app import db
 from crm_models import *
+from auth_rbac_decorator import (
+    check_permission,
+    guard_payload_size,
+    validate_json,
+    log_audit
+)
 
 # إنشاء Blueprint للـ CRM
 crm_bp = Blueprint('crm', __name__, url_prefix='/api/crm')
@@ -46,6 +52,8 @@ def get_current_user_id():
 # Customer Management APIs
 @crm_bp.route('/customers', methods=['GET'])
 @jwt_required()
+@check_permission('view_crm_customers')
+@log_audit('LIST_CRM_CUSTOMERS')
 def get_customers():
     """الحصول على قائمة العملاء"""
     try:
@@ -136,6 +144,10 @@ def get_customers():
 
 @crm_bp.route('/customers', methods=['POST'])
 @jwt_required()
+@check_permission('manage_crm_customers')
+@guard_payload_size()
+@validate_json('customer_type')
+@log_audit('CREATE_CRM_CUSTOMER')
 def create_customer():
     """إنشاء عميل جديد"""
     try:
@@ -194,6 +206,8 @@ def create_customer():
 
 @crm_bp.route('/customers/<int:customer_id>', methods=['GET'])
 @jwt_required()
+@check_permission('access_crm')
+@log_audit('GET_CUSTOMER')
 def get_customer(customer_id):
     """الحصول على تفاصيل عميل"""
     try:
@@ -249,6 +263,9 @@ def get_customer(customer_id):
 
 @crm_bp.route('/customers/<int:customer_id>', methods=['PUT'])
 @jwt_required()
+@check_permission('manage_crm')
+@guard_payload_size()
+@log_audit('UPDATE_CUSTOMER')
 def update_customer(customer_id):
     """تحديث بيانات عميل"""
     try:
@@ -321,6 +338,8 @@ def update_customer(customer_id):
 # Lead Management APIs
 @crm_bp.route('/leads', methods=['GET'])
 @jwt_required()
+@check_permission('view_crm')
+@log_audit('GET_LEADS')
 def get_leads():
     """الحصول على قائمة العملاء المحتملين"""
     try:
@@ -409,6 +428,9 @@ def get_leads():
 
 @crm_bp.route('/leads', methods=['POST'])
 @jwt_required()
+@check_permission('manage_crm')
+@guard_payload_size()
+@log_audit('CREATE_LEAD')
 def create_lead():
     """إنشاء عميل محتمل جديد"""
     try:
@@ -461,6 +483,9 @@ def create_lead():
 
 @crm_bp.route('/leads/<int:lead_id>/convert', methods=['POST'])
 @jwt_required()
+@check_permission('manage_crm')
+@guard_payload_size()
+@log_audit('CONVERT_LEAD_TO_CUSTOMER')
 def convert_lead_to_customer(lead_id):
     """تحويل عميل محتمل إلى عميل"""
     try:
@@ -521,6 +546,8 @@ def convert_lead_to_customer(lead_id):
 # CRM Dashboard API
 @crm_bp.route('/dashboard', methods=['GET'])
 @jwt_required()
+@check_permission('view_dashboard')
+@log_audit('GET_CRM_DASHBOARD')
 def get_crm_dashboard():
     """الحصول على بيانات لوحة تحكم CRM"""
     try:

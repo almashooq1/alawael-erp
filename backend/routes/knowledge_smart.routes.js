@@ -32,3 +32,4 @@ router.post('/index-case', authorizeRole(['ADMIN', 'MEDICAL_DIRECTOR']), async (
 });
 
 module.exports = router;
+

@@ -1,0 +1,642 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Socket.IO Test - اختبار Socket.IO</title>
+    <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 20px;
+        direction: rtl;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+      }
+
+      .header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        text-align: center;
+      }
+
+      .header h1 {
+        font-size: 2.5em;
+        margin-bottom: 10px;
+      }
+
+      .status {
+        display: inline-block;
+        padding: 10px 20px;
+        border-radius: 20px;
+        font-weight: bold;
+        margin-top: 10px;
+      }
+
+      .status.connected {
+        background: #4caf50;
+      }
+
+      .status.disconnected {
+        background: #f44336;
+      }
+
+      .content {
+        padding: 30px;
+      }
+
+      .section {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        border: 2px solid #e9ecef;
+      }
+
+      .section h2 {
+        color: #667eea;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 25px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+        transition:
+          transform 0.2s,
+          box-shadow 0.2s;
+        margin: 5px;
+      }
+
+      .button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+      }
+
+      .button:active {
+        transform: translateY(0);
+      }
+
+      .button.danger {
+        background: linear-gradient(135deg, #f44336 0%, #e91e63 100%);
+      }
+
+      .button.success {
+        background: linear-gradient(135deg, #4caf50 0%, #8bc34a 100%);
+      }
+
+      .log {
+        background: #212529;
+        color: #0f0;
+        padding: 15px;
+        border-radius: 10px;
+        max-height: 400px;
+        overflow-y: auto;
+        font-family: 'Courier New', monospace;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      .log-entry {
+        margin-bottom: 8px;
+        padding: 5px;
+        border-left: 3px solid #667eea;
+        padding-left: 10px;
+      }
+
+      .log-entry.info {
+        border-left-color: #2196f3;
+        color: #4fc3f7;
+      }
+
+      .log-entry.success {
+        border-left-color: #4caf50;
+        color: #81c784;
+      }
+
+      .log-entry.error {
+        border-left-color: #f44336;
+        color: #e57373;
+      }
+
+      .log-entry.warning {
+        border-left-color: #ff9800;
+        color: #ffb74d;
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-top: 15px;
+      }
+
+      .stat-card {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        border: 2px solid #667eea;
+      }
+
+      .stat-card h3 {
+        color: #667eea;
+        font-size: 14px;
+        margin-bottom: 10px;
+      }
+
+      .stat-card .value {
+        font-size: 32px;
+        font-weight: bold;
+        color: #212529;
+      }
+
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+
+      input[type='text'] {
+        flex: 1;
+        min-width: 200px;
+        padding: 12px;
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        font-size: 16px;
+      }
+
+      input[type='text']:focus {
+        outline: none;
+        border-color: #667eea;
+      }
+
+      .notification-demo {
+        background: #fff3cd;
+        border: 2px solid #ffc107;
+        padding: 15px;
+        border-radius: 10px;
+        margin-top: 10px;
+        display: none;
+      }
+
+      .notification-demo.show {
+        display: block;
+        animation: slideIn 0.3s ease;
+      }
+
+      @keyframes slideIn {
+        from {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+
+      .emoji {
+        font-size: 1.5em;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1><span class="emoji">🔌</span> Socket.IO Real-time Test</h1>
+        <h2>اختبار نظام الاتصال الفوري</h2>
+        <div id="status" class="status disconnected">غير متصل</div>
+      </div>
+
+      <div class="content">
+        <!-- Connection Info -->
+        <div class="section">
+          <h2><span class="emoji">📡</span> معلومات الاتصال</h2>
+          <div class="stats">
+            <div class="stat-card">
+              <h3>Socket ID</h3>
+              <div class="value" id="socketId">-</div>
+            </div>
+            <div class="stat-card">
+              <h3>Dashboard Updates</h3>
+              <div class="value" id="dashboardCount">0</div>
+            </div>
+            <div class="stat-card">
+              <h3>Notifications</h3>
+              <div class="value" id="notifCount">0</div>
+            </div>
+            <div class="stat-card">
+              <h3>Module Updates</h3>
+              <div class="value" id="moduleCount">0</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dashboard Test -->
+        <div class="section">
+          <h2><span class="emoji">📊</span> اختبار لوحة القيادة</h2>
+          <div class="controls">
+            <button class="button" onclick="subscribeDashboard()">الاشتراك في Dashboard</button>
+            <button class="button" onclick="unsubscribeDashboard()">إلغاء الاشتراك</button>
+            <button class="button success" onclick="refreshDashboard()">تحديث فوري</button>
+          </div>
+        </div>
+
+        <!-- Module Test -->
+        <div class="section">
+          <h2><span class="emoji">📈</span> اختبار الوحدات (Modules)</h2>
+          <div class="controls">
+            <input
+              type="text"
+              id="moduleKey"
+              placeholder="اسم الوحدة (مثل: finance, hr, reports)"
+              value="finance"
+            />
+            <button class="button" onclick="subscribeModule()">الاشتراك</button>
+            <button class="button" onclick="unsubscribeModule()">إلغاء الاشتراك</button>
+            <button class="button success" onclick="refreshModule()">تحديث</button>
+          </div>
+        </div>
+
+        <!-- Notification Test -->
+        <div class="section">
+          <h2><span class="emoji">🔔</span> اختبار الإشعارات</h2>
+          <div class="controls">
+            <button class="button" onclick="subscribeNotifications()">الاشتراك في الإشعارات</button>
+            <button class="button" onclick="unsubscribeNotifications()">إلغاء الاشتراك</button>
+          </div>
+          <div class="controls">
+            <input type="text" id="notifTitle" placeholder="عنوان الإشعار" value="إشعار تجريبي" />
+            <input
+              type="text"
+              id="notifMessage"
+              placeholder="نص الإشعار"
+              value="هذا إشعار اختباري من Socket.IO"
+            />
+            <button class="button success" onclick="sendNotification()">إرسال إشعار</button>
+          </div>
+          <div id="notificationDemo" class="notification-demo"></div>
+        </div>
+
+        <!-- Chat Test -->
+        <div class="section">
+          <h2><span class="emoji">💬</span> اختبار الدردشة</h2>
+          <div class="controls">
+            <input type="text" id="roomId" placeholder="Room ID" value="test-room-123" />
+            <button class="button" onclick="joinRoom()">الانضمام للغرفة</button>
+            <button class="button danger" onclick="leaveRoom()">المغادرة</button>
+          </div>
+          <div class="controls">
+            <input
+              type="text"
+              id="chatMessage"
+              placeholder="اكتب رسالة..."
+              value="مرحباً من Socket.IO!"
+            />
+            <button class="button success" onclick="sendMessage()">إرسال</button>
+          </div>
+        </div>
+
+        <!-- System Test -->
+        <div class="section">
+          <h2><span class="emoji">⚙️</span> اختبارات النظام</h2>
+          <div class="controls">
+            <button class="button" onclick="testPing()">اختبار Ping/Pong</button>
+            <button class="button danger" onclick="testSystemAlert()">تنبيه النظام</button>
+            <button class="button" onclick="clearLog()">مسح السجل</button>
+          </div>
+        </div>
+
+        <!-- Log -->
+        <div class="section">
+          <h2><span class="emoji">📝</span> سجل الأحداث (Live Log)</h2>
+          <div id="log" class="log"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let socket = null;
+      let dashboardCount = 0;
+      let notifCount = 0;
+      let moduleCount = 0;
+      let currentModule = null;
+
+      // Initialize Socket.IO
+      function initSocket() {
+        socket = io('http://localhost:3001', {
+          query: { userId: 'test-user-' + Date.now() },
+          transports: ['websocket', 'polling'],
+        });
+
+        // Connection events
+        socket.on('connect', () => {
+          updateStatus(true);
+          log('✅ اتصال ناجح بالخادم', 'success');
+        });
+
+        socket.on('connected', data => {
+          document.getElementById('socketId').textContent = data.socketId.substring(0, 8) + '...';
+          log(`📡 ${data.message}`, 'info');
+          log(`🆔 Socket ID: ${data.socketId}`, 'info');
+        });
+
+        socket.on('disconnect', () => {
+          updateStatus(false);
+          log('❌ انقطع الاتصال', 'error');
+        });
+
+        socket.on('error', error => {
+          log(`❌ خطأ: ${error.message || JSON.stringify(error)}`, 'error');
+        });
+
+        // Dashboard events
+        socket.on('dashboard:update', data => {
+          dashboardCount++;
+          document.getElementById('dashboardCount').textContent = dashboardCount;
+          log(`📊 تحديث Dashboard: ${data.summaryCards?.length || 0} بطاقات`, 'info');
+          console.log('Dashboard Data:', data);
+        });
+
+        socket.on('dashboard:unsubscribed', () => {
+          log('📊 تم إلغاء الاشتراك من Dashboard', 'warning');
+        });
+
+        // Module events
+        socket.on('module:unsubscribed', data => {
+          log(`📈 تم إلغاء الاشتراك من ${data.moduleKey}`, 'warning');
+        });
+
+        // Notification events
+        socket.on('notification:new', notif => {
+          notifCount++;
+          document.getElementById('notifCount').textContent = notifCount;
+          log(`🔔 إشعار جديد: ${notif.title}`, 'success');
+          showNotificationDemo(notif);
+          console.log('Notification:', notif);
+        });
+
+        socket.on('notification:update', data => {
+          log(`🔔 تحديث الإشعارات: ${data.unreadCount} غير مقروء`, 'info');
+        });
+
+        socket.on('notification:sent', data => {
+          log(`✅ تم إرسال الإشعار: ${data.notificationId}`, 'success');
+        });
+
+        socket.on('notification:unsubscribed', () => {
+          log('🔔 تم إلغاء الاشتراك من الإشعارات', 'warning');
+        });
+
+        // Chat events
+        socket.on('chat:joined', data => {
+          log(`💬 انضممت للغرفة: ${data.roomId}`, 'success');
+        });
+
+        socket.on('chat:user-joined', data => {
+          log(`👤 انضم مستخدم للغرفة: ${data.userId}`, 'info');
+        });
+
+        socket.on('chat:left', data => {
+          log(`💬 غادرت الغرفة: ${data.roomId}`, 'warning');
+        });
+
+        socket.on('chat:user-left', data => {
+          log(`👤 غادر مستخدم الغرفة: ${data.userId}`, 'info');
+        });
+
+        socket.on('chat:message', msg => {
+          log(`💬 [${msg.userId}]: ${msg.message}`, 'success');
+          console.log('Chat Message:', msg);
+        });
+
+        socket.on('chat:message-sent', data => {
+          log(`✅ تم إرسال الرسالة: ${data.messageId}`, 'success');
+        });
+
+        socket.on('chat:typing', data => {
+          if (data.isTyping) {
+            log(`⌨️ ${data.userId} يكتب...`, 'info');
+          }
+        });
+
+        socket.on('chat:online-users', data => {
+          log(`👥 ${data.count} مستخدم متصل في الغرفة`, 'info');
+        });
+
+        // System events
+        socket.on('pong', data => {
+          const latency = Date.now() - data.timestamp;
+          log(`🏓 Pong received! Latency: ${latency}ms`, 'success');
+        });
+
+        socket.on('system:alert', alert => {
+          log(`⚠️ تنبيه النظام [${alert.severity}]: ${alert.title}`, 'error');
+          console.log('System Alert:', alert);
+        });
+
+        socket.on('announcement', data => {
+          log(`📢 إعلان: ${data.title} - ${data.message}`, 'warning');
+        });
+
+        // Dynamic module event listener
+        setInterval(() => {
+          if (currentModule) {
+            const eventName = `kpi:update:${currentModule}`;
+            socket.off(eventName); // Remove old listener
+            socket.on(eventName, data => {
+              moduleCount++;
+              document.getElementById('moduleCount').textContent = moduleCount;
+              log(
+                `📈 تحديث ${currentModule}: ${JSON.stringify(data.data).substring(0, 50)}...`,
+                'info'
+              );
+              console.log(`${currentModule} KPI:`, data);
+            });
+          }
+        }, 1000);
+      }
+
+      // Dashboard functions
+      function subscribeDashboard() {
+        socket.emit('dashboard:subscribe');
+        log('📊 إرسال طلب الاشتراك في Dashboard...', 'info');
+      }
+
+      function unsubscribeDashboard() {
+        socket.emit('dashboard:unsubscribe');
+        log('📊 إرسال طلب إلغاء الاشتراك من Dashboard...', 'warning');
+      }
+
+      function refreshDashboard() {
+        socket.emit('dashboard:refresh');
+        log('🔄 طلب تحديث فوري للـ Dashboard...', 'info');
+      }
+
+      // Module functions
+      function subscribeModule() {
+        const moduleKey = document.getElementById('moduleKey').value.trim();
+        if (!moduleKey) {
+          log('❌ يجب إدخال اسم الوحدة', 'error');
+          return;
+        }
+        currentModule = moduleKey;
+        socket.emit('module:subscribe', { moduleKey });
+        log(`📈 إرسال طلب الاشتراك في ${moduleKey}...`, 'info');
+      }
+
+      function unsubscribeModule() {
+        const moduleKey = document.getElementById('moduleKey').value.trim();
+        if (!moduleKey) return;
+        socket.emit('module:unsubscribe', { moduleKey });
+        currentModule = null;
+        log(`📈 إرسال طلب إلغاء الاشتراك من ${moduleKey}...`, 'warning');
+      }
+
+      function refreshModule() {
+        const moduleKey = document.getElementById('moduleKey').value.trim();
+        if (!moduleKey) return;
+        socket.emit('module:refresh', { moduleKey });
+        log(`🔄 طلب تحديث فوري لـ ${moduleKey}...`, 'info');
+      }
+
+      // Notification functions
+      function subscribeNotifications() {
+        socket.emit('notification:subscribe', { userId: socket.id });
+        log('🔔 إرسال طلب الاشتراك في الإشعارات...', 'info');
+      }
+
+      function unsubscribeNotifications() {
+        socket.emit('notification:unsubscribe');
+        log('🔔 إرسال طلب إلغاء الاشتراك من الإشعارات...', 'warning');
+      }
+
+      function sendNotification() {
+        const title = document.getElementById('notifTitle').value;
+        const message = document.getElementById('notifMessage').value;
+        socket.emit('notification:send', {
+          type: 'info',
+          title,
+          message,
+          priority: 'normal',
+        });
+        log(`📤 إرسال إشعار: ${title}`, 'info');
+      }
+
+      function showNotificationDemo(notif) {
+        const demo = document.getElementById('notificationDemo');
+        demo.innerHTML = `
+                <strong>${notif.title}</strong><br>
+                ${notif.message}<br>
+                <small>⏰ ${new Date(notif.timestamp).toLocaleString('ar')}</small>
+            `;
+        demo.classList.add('show');
+        setTimeout(() => {
+          demo.classList.remove('show');
+        }, 5000);
+      }
+
+      // Chat functions
+      function joinRoom() {
+        const roomId = document.getElementById('roomId').value.trim();
+        if (!roomId) {
+          log('❌ يجب إدخال Room ID', 'error');
+          return;
+        }
+        socket.emit('chat:join', { roomId, userId: socket.id });
+        log(`💬 محاولة الانضمام للغرفة: ${roomId}...`, 'info');
+      }
+
+      function leaveRoom() {
+        const roomId = document.getElementById('roomId').value.trim();
+        if (!roomId) return;
+        socket.emit('chat:leave', { roomId });
+        log(`💬 محاولة مغادرة الغرفة: ${roomId}...`, 'warning');
+      }
+
+      function sendMessage() {
+        const roomId = document.getElementById('roomId').value.trim();
+        const message = document.getElementById('chatMessage').value.trim();
+        if (!roomId || !message) {
+          log('❌ يجب إدخال Room ID والرسالة', 'error');
+          return;
+        }
+        socket.emit('chat:message', { roomId, message });
+        log(`📤 إرسال رسالة إلى ${roomId}`, 'info');
+      }
+
+      // System functions
+      function testPing() {
+        socket.emit('ping');
+        log('🏓 إرسال Ping...', 'info');
+      }
+
+      function testSystemAlert() {
+        // This would normally be sent from backend
+        log('⚠️ تنبيه: هذا سيتم إرساله عادة من Backend', 'warning');
+      }
+
+      // Utility functions
+      function updateStatus(connected) {
+        const status = document.getElementById('status');
+        if (connected) {
+          status.textContent = 'متصل ✓';
+          status.className = 'status connected';
+        } else {
+          status.textContent = 'غير متصل ✗';
+          status.className = 'status disconnected';
+        }
+      }
+
+      function log(message, type = 'info') {
+        const logDiv = document.getElementById('log');
+        const entry = document.createElement('div');
+        entry.className = `log-entry ${type}`;
+        const timestamp = new Date().toLocaleTimeString('ar');
+        entry.textContent = `[${timestamp}] ${message}`;
+        logDiv.insertBefore(entry, logDiv.firstChild);
+
+        // Keep only last 50 entries
+        while (logDiv.children.length > 50) {
+          logDiv.removeChild(logDiv.lastChild);
+        }
+      }
+
+      function clearLog() {
+        document.getElementById('log').innerHTML = '';
+        log('🧹 تم مسح السجل', 'info');
+      }
+
+      // Initialize on load
+      window.onload = () => {
+        log('🚀 بدء تطبيق Socket.IO Test...', 'info');
+        initSocket();
+      };
+    </script>
+  </body>
+</html>

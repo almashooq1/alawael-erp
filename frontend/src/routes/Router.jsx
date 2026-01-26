@@ -40,6 +40,9 @@ import ProgramForm from '../pages/Programs/ProgramForm';
 import GoalsList from '../pages/Goals/GoalsList';
 import GoalForm from '../pages/Goals/GoalForm';
 
+// Accounting
+import AccountingMain from '../pages/Accounting';
+
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated } = useSelector((state) => state.auth);
@@ -110,6 +113,9 @@ const AppRoutes = () => {
         <Route path="/goals" element={<GoalsList />} />
         <Route path="/goals/new" element={<GoalForm />} />
         <Route path="/goals/:id" element={<GoalForm />} />
+
+        {/* Accounting System */}
+        <Route path="/accounting" element={<AccountingMain />} />
       </Route>
 
       {/* Fallback Routes */}

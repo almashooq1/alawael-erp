@@ -33,3 +33,4 @@ router.post('/optimize-plan', authorizeRole(['DOCTOR', 'THERAPIST']), async (req
 });
 
 module.exports = router;
+

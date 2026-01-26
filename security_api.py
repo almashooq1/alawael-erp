@@ -2,6 +2,13 @@ from flask import Blueprint, request, jsonify, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from models import db, User
 from security_models import (
+from auth_rbac_decorator import (
+    check_permission,
+    check_multiple_permissions,
+    guard_payload_size,
+    validate_json,
+    log_audit
+)
     SecurityConfig, MultiFactorAuth, MFAAttempt, AuditLog, DataEncryption,
     BackupSchedule, BackupHistory, PrivacyConsent, DataRetention,
     SecurityIncident, SecurityAlert, PermissionRole, UserPermission,
@@ -447,6 +454,8 @@ def create_security_incident():
 
 @security_bp.route('/api/security-alerts', methods=['GET'])
 @jwt_required()
+@check_permission('access_security')
+@log_audit('GET_SECURITY_ALERTS')
 def get_security_alerts():
     """استرجاع تنبيهات الأمان"""
     try:

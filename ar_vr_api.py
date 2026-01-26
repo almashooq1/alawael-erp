@@ -1,3 +1,10 @@
+from auth_rbac_decorator import (
+    check_permission,
+    check_multiple_permissions,
+    guard_payload_size,
+    validate_json,
+    log_audit
+)
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
@@ -27,6 +34,8 @@ ar_vr_bp = Blueprint('ar_vr', __name__, url_prefix='/api/ar-vr')
 
 @ar_vr_bp.route('/content', methods=['GET'])
 @jwt_required()
+@check_permission('view_ar_vr')
+@log_audit('GET_AR_VR_CONTENT')
 def get_ar_vr_content():
     """الحصول على محتوى AR/VR"""
     try:
@@ -97,6 +106,9 @@ def get_ar_vr_content():
 
 @ar_vr_bp.route('/content', methods=['POST'])
 @jwt_required()
+@check_permission('manage_ar_vr')
+@guard_payload_size()
+@log_audit('CREATE_AR_VR_CONTENT')
 def create_ar_vr_content():
     """إنشاء محتوى AR/VR جديد"""
     try:
@@ -151,6 +163,9 @@ def create_ar_vr_content():
 
 @ar_vr_bp.route('/sessions', methods=['POST'])
 @jwt_required()
+@check_permission('manage_ar_vr')
+@guard_payload_size()
+@log_audit('START_AR_VR_SESSION')
 def start_ar_vr_session():
     """بدء جلسة AR/VR"""
     try:
@@ -202,6 +217,9 @@ def start_ar_vr_session():
 
 @ar_vr_bp.route('/sessions/<session_id>/end', methods=['PUT'])
 @jwt_required()
+@check_permission('manage_ar_vr')
+@guard_payload_size()
+@log_audit('END_AR_VR_SESSION')
 def end_ar_vr_session(session_id):
     """إنهاء جلسة AR/VR"""
     try:
@@ -242,6 +260,9 @@ def end_ar_vr_session(session_id):
 
 @ar_vr_bp.route('/interactions', methods=['POST'])
 @jwt_required()
+@check_permission('manage_ar_vr')
+@guard_payload_size()
+@log_audit('RECORD_INTERACTION')
 def record_interaction():
     """تسجيل تفاعل في جلسة AR/VR"""
     try:
@@ -293,6 +314,8 @@ def record_interaction():
 
 @ar_vr_bp.route('/environments', methods=['GET'])
 @jwt_required()
+@check_permission('view_ar_vr')
+@log_audit('GET_VIRTUAL_ENVIRONMENTS')
 def get_virtual_environments():
     """الحصول على البيئات الافتراضية"""
     try:
@@ -320,6 +343,8 @@ def get_virtual_environments():
 
 @ar_vr_bp.route('/therapy-scenarios', methods=['GET'])
 @jwt_required()
+@check_permission('view_ar_vr')
+@log_audit('GET_THERAPY_SCENARIOS')
 def get_therapy_scenarios():
     """الحصول على سيناريوهات العلاج"""
     try:
@@ -356,6 +381,9 @@ def get_therapy_scenarios():
 
 @ar_vr_bp.route('/calibration', methods=['POST'])
 @jwt_required()
+@check_permission('manage_ar_vr')
+@guard_payload_size()
+@log_audit('CALIBRATE_DEVICE')
 def calibrate_device():
     """معايرة جهاز AR/VR"""
     try:
@@ -415,6 +443,8 @@ def calibrate_device():
 
 @ar_vr_bp.route('/analytics/dashboard', methods=['GET'])
 @jwt_required()
+@check_permission('view_dashboard')
+@log_audit('GET_AR_VR_DASHBOARD')
 def get_ar_vr_dashboard():
     """لوحة تحكل تحليلات AR/VR"""
     try:
@@ -488,6 +518,8 @@ def get_ar_vr_dashboard():
 
 @ar_vr_bp.route('/sessions/<student_id>/history', methods=['GET'])
 @jwt_required()
+@check_permission('view_ar_vr')
+@log_audit('GET_STUDENT_AR_VR_HISTORY')
 def get_student_ar_vr_history(student_id):
     """تاريخ جلسات AR/VR للطالب"""
     try:

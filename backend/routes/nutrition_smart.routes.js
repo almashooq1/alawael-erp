@@ -33,3 +33,4 @@ router.post('/safe-menu', async (req, res) => {
 });
 
 module.exports = router;
+

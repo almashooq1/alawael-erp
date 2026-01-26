@@ -32,3 +32,4 @@ router.get('/churn-analysis', authorizeRole(['ADMIN', 'MARKETING']), async (req,
 });
 
 module.exports = router;
+

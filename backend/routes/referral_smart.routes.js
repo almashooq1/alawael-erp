@@ -31,3 +31,4 @@ router.post('/analyze', authorizeRole(['ADMIN', 'receptionist']), upload.single(
 });
 
 module.exports = router;
+

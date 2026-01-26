@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">76.55% </span>
+                <span class="strong">76.71% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>111/145</span>
+                <span class='fraction'>112/146</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">79.28% </span>
+                <span class="strong">79.43% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>111/140</span>
+                <span class='fraction'>112/141</span>
             </div>
         
             
@@ -539,7 +539,12 @@
 <a name='L474'></a><a href='#L474'>474</a>
 <a name='L475'></a><a href='#L475'>475</a>
 <a name='L476'></a><a href='#L476'>476</a>
-<a name='L477'></a><a href='#L477'>477</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L477'></a><a href='#L477'>477</a>
+<a name='L478'></a><a href='#L478'>478</a>
+<a name='L479'></a><a href='#L479'>479</a>
+<a name='L480'></a><a href='#L480'>480</a>
+<a name='L481'></a><a href='#L481'>481</a>
+<a name='L482'></a><a href='#L482'>482</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -550,6 +555,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -745,6 +751,7 @@
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2x</span>
@@ -789,6 +796,8 @@
 <span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -984,6 +993,7 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1030,7 +1040,8 @@ const express = require('express');
 const router = express.Router();
 const SaudiComplianceService = require('../services/saudiComplianceService');
 const saudiComplianceService = new SaudiComplianceService();
-const { authenticate, authorize } = require('../middleware/auth');
+const auth = require('../middleware/auth');
+const { authenticateToken, requireAdmin } = auth;
 const logger = require('../utils/logger');
 &nbsp;
 // ====== تسجيل المخالفات المرورية ======
@@ -1039,7 +1050,7 @@ const logger = require('../utils/logger');
  * POST /api/compliance/violations/record
  * تسجيل مخالفة مرورية سعودية
  */
-router.post('/violations/record', authenticate, authorize('admin', 'traffic-officer', 'police'), async (req, res) =&gt; {
+router.post('/violations/record', authenticateToken, requireAdmin, async (req, res) =&gt; {
   try {
     const { vehicleId, violationData } = req.body;
 &nbsp;
@@ -1072,7 +1083,7 @@ router.post('/violations/record', authenticate, authorize('admin', 'traffic-offi
  * GET /api/compliance/violations/codes
  * الحصول على قائمة كود المخالفات السعودية
  */
-router.get('/violations/codes', authenticate, (req, res) =&gt; {
+router.get('/violations/codes', authenticateToken, (req, res) =&gt; {
   try {
     const violations = saudiComplianceService.getSaudiViolationCodes();
 &nbsp;
@@ -1096,7 +1107,7 @@ router.get('/violations/codes', authenticate, (req, res) =&gt; {
  * GET /api/compliance/vehicle/:vehicleId/registration-validity
  * فحص صلاحية تسجيل المركبة
  */
-router.get('/vehicle/:vehicleId/registration-validity', authenticate, async (req, res) =&gt; {
+router.get('/vehicle/:vehicleId/registration-validity', authenticateToken, async (req, res) =&gt; {
   try {
     const Vehicle = require('../models/Vehicle');
     const vehicle = await Vehicle.findById(req.params.vehicleId);
@@ -1132,7 +1143,7 @@ router.get('/vehicle/:vehicleId/registration-validity', authenticate, async (req
  * GET /api/compliance/vehicle/:vehicleId/insurance-validity
  * فحص صلاحية التأمين
  */
-router.get('/vehicle/:vehicleId/insurance-validity', authenticate, async (req, res) =&gt; {
+router.get('/vehicle/:vehicleId/insurance-validity', authenticateToken, async (req, res) =&gt; {
   try {
     const Vehicle = require('../models/Vehicle');
     const vehicle = await Vehicle.findById(req.params.vehicleId);
@@ -1168,7 +1179,7 @@ router.get('/vehicle/:vehicleId/insurance-validity', authenticate, async (req, r
  * GET /api/compliance/vehicle/:vehicleId/inspection-validity
  * فحص استحقاق الفحص الدوري
  */
-router.get('/vehicle/:vehicleId/inspection-validity', authenticate, async (req, res) =&gt; {
+router.get('/vehicle/:vehicleId/inspection-validity', authenticateToken, async (req, res) =&gt; {
   try {
     const Vehicle = require('../models/Vehicle');
     const vehicle = await Vehicle.findById(req.params.vehicleId);
@@ -1205,7 +1216,7 @@ router.get('/vehicle/:vehicleId/inspection-validity', authenticate, async (req, 
  * GET /api/compliance/vehicle/:vehicleId/full-check
  * فحص شامل لجميع الصلاحيات
  */
-router.get('/vehicle/:vehicleId/full-check', authenticate, async (req, res) =&gt; {
+router.get('/vehicle/:vehicleId/full-check', authenticateToken, async (req, res) =&gt; {
   try {
     const Vehicle = require('../models/Vehicle');
     const vehicle = await Vehicle.findById(req.params.vehicleId);
@@ -1221,7 +1232,8 @@ router.get('/vehicle/:vehicleId/full-check', authenticate, async (req, res) =&gt
     const insuranceCheck = saudiComplianceService.checkInsuranceValidity(vehicle);
     const inspectionCheck = saudiComplianceService.checkInspectionValidity(vehicle);
 &nbsp;
-    const allValid = registrationCheck.isValid &amp;&amp; insuranceCheck.isValid &amp;&amp; !inspectionCheck.isOverdue;
+    const allValid =
+      registrationCheck.isValid &amp;&amp; insuranceCheck.isValid &amp;&amp; !inspectionCheck.isOverdue;
 &nbsp;
     res.json({
       success: true,
@@ -1261,9 +1273,11 @@ router.get('/vehicle/:vehicleId/full-check', authenticate, async (req, res) =&gt
  * GET /api/compliance/vehicle/:vehicleId/compliance-report
  * توليد تقرير امتثال شامل للمركبة
  */
-router.get('/vehicle/:vehicleId/compliance-report', authenticate, async (req, res) =&gt; {
+router.get('/vehicle/:vehicleId/compliance-report', authenticateToken, async (req, res) =&gt; {
   try {
-    const report = await saudiComplianceService.generateVehicleComplianceReport(req.params.vehicleId);
+    const report = await saudiComplianceService.generateVehicleComplianceReport(
+      req.params.vehicleId
+    );
 &nbsp;
     res.json({
       success: true,
@@ -1282,7 +1296,7 @@ router.get('/vehicle/:vehicleId/compliance-report', authenticate, async (req, re
  * POST /api/compliance/fleet/compliance-report
  * توليد تقرير امتثال الأسطول
  */
-router.post('/fleet/compliance-report', authenticate, authorize('admin', 'fleet-manager'), async (req, res) =&gt; {
+router.post('/fleet/compliance-report', authenticateToken, async (req, res) =&gt; {
   try {
     const { vehicleIds } = req.body;
 &nbsp;
@@ -1312,7 +1326,7 @@ router.post('/fleet/compliance-report', authenticate, authorize('admin', 'fleet-
  * GET /api/compliance/fleet/critical-issues
  * الحصول على المشاكل الحرجة في الأسطول
  */
-router.get('/fleet/critical-issues', authenticate, authorize('admin', 'fleet-manager'), async (req, res) =&gt; {
+router.get('/fleet/critical-issues', authenticateToken, async (req, res) =&gt; {
   try {
     const Vehicle = require('../models/Vehicle');
     const vehicles = await Vehicle.find({});
@@ -1381,7 +1395,7 @@ router.get('/fleet/critical-issues', authenticate, authorize('admin', 'fleet-man
  * POST /api/compliance/vehicle/validate-data
  * التحقق من اكتمال بيانات المركبة
  */
-router.post('/vehicle/validate-data', authenticate, async (req, res) =&gt; {
+router.post('/vehicle/validate-data', authenticateToken, async (req, res) =&gt; {
   try {
     const vehicleData = req.body;
 &nbsp;
@@ -1404,7 +1418,7 @@ router.post('/vehicle/validate-data', authenticate, async (req, res) =&gt; {
  * GET /api/compliance/inspection-schedule/:vehicleType
  * الحصول على جدول الفحص الدوري حسب نوع المركبة
  */
-router.get('/inspection-schedule/:vehicleType', authenticate, (req, res) =&gt; {
+router.get('/inspection-schedule/:vehicleType', authenticateToken, (req, res) =&gt; {
   try {
     const schedule = saudiComplianceService.getInspectionSchedule(req.params.vehicleType);
 &nbsp;
@@ -1437,7 +1451,7 @@ router.get('/inspection-schedule/:vehicleType', authenticate, (req, res) =&gt; {
  * GET /api/compliance/statistics/vehicles-compliance
  * إحصائيات امتثال المركبات
  */
-router.get('/statistics/vehicles-compliance', authenticate, authorize('admin', 'fleet-manager'), async (req, res) =&gt; {
+router.get('/statistics/vehicles-compliance', authenticateToken, async (req, res) =&gt; {
   try {
     const Vehicle = require('../models/Vehicle');
     const vehicles = await Vehicle.find({});
@@ -1461,7 +1475,8 @@ router.get('/statistics/vehicles-compliance', authenticate, authorize('admin', '
       <span class="missing-if-branch" title="if path not taken" >I</span>if (!insCheck.isValid) <span class="cstat-no" title="statement not covered" >expiredInsurance++;</span>
       <span class="missing-if-branch" title="if path not taken" >I</span>if (inspCheck.isOverdue) <span class="cstat-no" title="statement not covered" >overdueInspection++;</span>
 &nbsp;
-      const unpaidViolationCount = vehicle.violations?.filter(<span class="fstat-no" title="function not covered" >v </span>=&gt; <span class="cstat-no" title="statement not covered" >v.paymentStatus !== 'مسددة كاملاً')</span>.length || 0;
+      const unpaidViolationCount =
+        vehicle.violations?.filter(<span class="fstat-no" title="function not covered" >v </span>=&gt; <span class="cstat-no" title="statement not covered" >v.paymentStatus !== 'مسددة كاملاً')</span>.length || 0;
 &nbsp;
       <span class="missing-if-branch" title="if path not taken" >I</span>if (unpaidViolationCount &gt; 0) <span class="cstat-no" title="statement not covered" >unpaidViolations++;</span>
     }
@@ -1498,7 +1513,7 @@ module.exports = router;
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-01-17T11:40:09.432Z
+                at 2026-01-25T06:52:23.622Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

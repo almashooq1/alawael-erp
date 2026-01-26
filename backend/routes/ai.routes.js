@@ -282,3 +282,4 @@ router.patch('/automations/:id/toggle', (req, res) => {
 });
 
 module.exports = router;
+

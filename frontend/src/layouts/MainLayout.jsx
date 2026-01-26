@@ -31,7 +31,8 @@ import {
   Menu as MenuIcon,
   Close,
   Notifications,
-  TrendingUp
+  TrendingUp,
+  AccountBalance
 } from '@mui/icons-material';
 import { useNavigate, Outlet } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -80,6 +81,11 @@ const MainLayout = () => {
       label: 'البرامج',
       icon: <TrendingUp />,
       path: '/programs'
+    },
+    {
+      label: 'المحاسبة',
+      icon: <AccountBalance />,
+      path: '/accounting'
     }
   ];
 

@@ -63,3 +63,4 @@ router.put('/resolve/:id', authorizeRole(['ADMIN', 'CARE_MANAGER']), async (req,
 });
 
 module.exports = router;
+

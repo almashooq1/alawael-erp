@@ -75,3 +75,4 @@ router.get('/reports/student/:id', mockAuth, async (req, res) => {
 });
 
 module.exports = router;
+

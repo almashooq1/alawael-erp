@@ -1,0 +1,49 @@
+?«Ù≈ Auth routes using In-Memory User model
+node : Redis client not available for monitoring
+At line:1 char:204
++ ... MODE='true'; $env:NODE_ENV='development'; node server.js 2>&1 | Out-S ...
++                                               ~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified:     (Redis client no... for monitoring:Strin    g) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandE    rror
+ 
+Ÿ£‡ Socket.IO initialized for Messaging
+Ÿ??Ì??  Demo/Mock Mode: Redis caching disabled manually.
+System: Smart CRM & Engagement Unit - Initialized
+?«?ª Using in-memory database (development mode)
+?«Ù≈ Data will be lost when server restarts
+Ÿ√¬Ì??  To use MongoDB Atlas, set USE_MOCK_DB=false in .env
+
+(node:28652) [MONGOOSE] Warning: Duplicate schema index on {"code":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index 
+definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:28652) [MONGOOSE] Warning: Duplicate schema index on {"reference":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate 
+index definition.
+(node:28652) [MONGOOSE] Warning: Duplicate schema index on {"reference":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate 
+index definition.
+(node:28652) [MONGOOSE] Warning: Duplicate schema index on {"reference":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate 
+index definition.
+(node:28652) [MONGOOSE] Warning: Duplicate schema index on {"invoiceNumber":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the 
+duplicate index definition.
+(node:28652) [MONGOOSE] Warning: Duplicate schema index on {"registrationNumber":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the 
+duplicate index definition.
+(node:28652) [MONGOOSE] Warning: Duplicate schema index on {"plateNumber":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate 
+index definition.
+(node:28652) [MONGOOSE] Warning: Duplicate schema index on {"assignedDriver":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the 
+duplicate index definition.
+(node:28652) [MONGOOSE] Warning: Duplicate schema index on {"status":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index 
+definition.
+(node:28652) [MONGOOSE] Warning: Duplicate schema index on {"createdAt":-1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate 
+index definition.
+(node:28652) [MONGOOSE] Warning: Duplicate schema index on {"inspection.nextInspectionDate":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please 
+remove the duplicate index definition.
+(node:28652) [MONGOOSE] Warning: Duplicate schema index on {"personalInfo.nationalId":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove 
+the duplicate index definition.
+(node:28652) [MONGOOSE] Warning: Duplicate schema index on {"license.licenseNumber":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the 
+duplicate index definition.
+(node:28652) [MONGOOSE] Warning: Duplicate schema index on {"program_id":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate 
+index definition.
+Server running at http://localhost:3002 (0.0.0.0)
+Ÿ£‡ Graceful shutdown handlers registered
+Ÿ??Ì??  Using in-memory database
+Ÿ£‡ Seeded 3 mock vehicles for demo
+

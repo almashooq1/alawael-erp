@@ -10,7 +10,7 @@ function getNextId() {
     ...users.map(u => {
       const id = parseInt(u._id);
       return isNaN(id) ? 0 : id;
-    }),
+    })
   );
   return maxId + 1;
 }
@@ -130,8 +130,8 @@ InMemoryUser.prototype.select = function (fields) {
 };
 
 // Initialize with admin user (only if no users exist and not in test mode)
-// Completely skip initialization in test mode
-if (process.env.NODE_ENV !== 'test') {
+// AUTO INITIALIZATION DISABLED - Use pre-seeded users from db.json
+if (false && process.env.NODE_ENV !== 'test') {
   (async () => {
     const data = db.read();
     if (!data.users || data.users.length === 0) {

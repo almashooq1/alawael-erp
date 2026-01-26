@@ -1,3 +1,10 @@
+from auth_rbac_decorator import (
+    check_permission,
+    check_multiple_permissions,
+    guard_payload_size,
+    validate_json,
+    log_audit
+)
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
@@ -93,6 +100,8 @@ class DocumentAIService:
 
 @smart_document_bp.route('/documents', methods=['GET'])
 @jwt_required()
+@check_permission('view_smart_document')
+@log_audit('GET_DOCUMENTS')
 def get_documents():
     """Get documents with filtering and pagination"""
     try:
@@ -167,6 +176,9 @@ def get_documents():
 
 @smart_document_bp.route('/documents/upload', methods=['POST'])
 @jwt_required()
+@check_permission('manage_smart_document')
+@guard_payload_size()
+@log_audit('UPLOAD_DOCUMENT')
 def upload_document():
     """Upload new document with AI processing"""
     try:
@@ -305,6 +317,8 @@ def process_document_ai(document_id):
 
 @smart_document_bp.route('/documents/<int:document_id>', methods=['GET'])
 @jwt_required()
+@check_permission('view_smart_document')
+@log_audit('GET_DOCUMENT')
 def get_document(document_id):
     """Get specific document details"""
     try:
@@ -375,6 +389,8 @@ def get_document(document_id):
 
 @smart_document_bp.route('/documents/<int:document_id>/download', methods=['GET'])
 @jwt_required()
+@check_permission('view_smart_document')
+@log_audit('DOWNLOAD_DOCUMENT')
 def download_document(document_id):
     """Download document file"""
     try:
@@ -407,6 +423,9 @@ def download_document(document_id):
 
 @smart_document_bp.route('/documents/<int:document_id>/ai-reprocess', methods=['POST'])
 @jwt_required()
+@check_permission('manage_smart_document')
+@guard_payload_size()
+@log_audit('REPROCESS_DOCUMENT_AI')
 def reprocess_document_ai(document_id):
     """Reprocess document with AI"""
     try:
@@ -422,6 +441,9 @@ def reprocess_document_ai(document_id):
 
 @smart_document_bp.route('/documents/search', methods=['POST'])
 @jwt_required()
+@check_permission('manage_smart_document')
+@guard_payload_size()
+@log_audit('SEARCH_DOCUMENTS')
 def search_documents():
     """Advanced document search with AI"""
     try:
@@ -475,6 +497,8 @@ def search_documents():
 
 @smart_document_bp.route('/documents/analytics', methods=['GET'])
 @jwt_required()
+@check_permission('view_smart_document')
+@log_audit('GET_DOCUMENT_ANALYTICS')
 def get_document_analytics():
     """Get document analytics and statistics"""
     try:
@@ -541,6 +565,8 @@ def get_document_analytics():
 
 @smart_document_bp.route('/documents/categories', methods=['GET'])
 @jwt_required()
+@check_permission('view_smart_document')
+@log_audit('GET_DOCUMENT_CATEGORIES')
 def get_document_categories():
     """Get document categories"""
     try:
@@ -565,6 +591,8 @@ def get_document_categories():
 
 @smart_document_bp.route('/documents/templates', methods=['GET'])
 @jwt_required()
+@check_permission('view_smart_document')
+@log_audit('GET_DOCUMENT_TEMPLATES')
 def get_document_templates():
     """Get document templates"""
     try:

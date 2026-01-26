@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
 from flask import Blueprint, request, jsonify, render_template, send_file
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from datetime import datetime, date
@@ -8,6 +5,16 @@ import json
 import io
 from database import db
 from datetime import timedelta
+from auth_rbac_decorator import (
+    check_permission,
+    check_multiple_permissions,
+    guard_payload_size,
+    validate_json,
+    log_audit
+)
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 
 # إنشاء Blueprint
 reports_viz_bp = Blueprint('reports_visualization', __name__, url_prefix='/api/reports-visualization')
@@ -16,6 +23,8 @@ reports_viz_bp = Blueprint('reports_visualization', __name__, url_prefix='/api/r
 
 @reports_viz_bp.route('/progress-report/<int:beneficiary_id>', methods=['GET'])
 @jwt_required()
+@check_permission('view_reports')
+@log_audit('GENERATE_PROGRESS_REPORT')
 def generate_progress_report(beneficiary_id):
     """إنتاج تقرير التقدم"""
     try:
@@ -52,6 +61,8 @@ def generate_progress_report(beneficiary_id):
 
 @reports_viz_bp.route('/comprehensive-report/<int:beneficiary_id>', methods=['GET'])
 @jwt_required()
+@check_permission('view_reports')
+@log_audit('GENERATE_COMPREHENSIVE_REPORT')
 def generate_comprehensive_report(beneficiary_id):
     """إنتاج التقرير الشامل"""
     try:
@@ -85,6 +96,9 @@ def generate_comprehensive_report(beneficiary_id):
 
 @reports_viz_bp.route('/batch-reports', methods=['POST'])
 @jwt_required()
+@check_permission('generate_reports_visualization')
+@guard_payload_size()
+@log_audit('GENERATE_BATCH_REPORTS')
 def generate_batch_reports():
     """إنتاج تقارير متعددة"""
     try:
@@ -115,6 +129,8 @@ def generate_batch_reports():
 
 @reports_viz_bp.route('/visualization/progress-timeline/<int:beneficiary_id>', methods=['GET'])
 @jwt_required()
+@check_permission('view_reports_visualization')
+@log_audit('GET_PROGRESS_TIMELINE')
 def get_progress_timeline(beneficiary_id):
     """الحصول على خط زمني للتقدم"""
     try:
@@ -134,6 +150,8 @@ def get_progress_timeline(beneficiary_id):
 
 @reports_viz_bp.route('/visualization/skills-radar/<int:beneficiary_id>', methods=['GET'])
 @jwt_required()
+@check_permission('view_reports_visualization')
+@log_audit('GET_SKILLS_RADAR')
 def get_skills_radar(beneficiary_id):
     """الحصول على رسم رادار للمهارات"""
     try:
@@ -153,6 +171,8 @@ def get_skills_radar(beneficiary_id):
 
 @reports_viz_bp.route('/visualization/therapy-effectiveness', methods=['GET'])
 @jwt_required()
+@check_permission('view_reports_visualization')
+@log_audit('GET_THERAPY_EFFECTIVENESS')
 def get_therapy_effectiveness():
     """الحصول على رسم فعالية العلاجات"""
     try:
@@ -164,6 +184,8 @@ def get_therapy_effectiveness():
 
 @reports_viz_bp.route('/visualization/disability-distribution', methods=['GET'])
 @jwt_required()
+@check_permission('view_reports_visualization')
+@log_audit('GET_DISABILITY_DISTRIBUTION')
 def get_disability_distribution():
     """الحصول على توزيع أنواع الإعاقة"""
     try:
@@ -175,6 +197,8 @@ def get_disability_distribution():
 
 @reports_viz_bp.route('/visualization/progress-heatmap', methods=['GET'])
 @jwt_required()
+@check_permission('view_reports_visualization')
+@log_audit('GET_PROGRESS_HEATMAP')
 def get_progress_heatmap():
     """الحصول على خريطة حرارية للتقدم"""
     try:
@@ -187,6 +211,8 @@ def get_progress_heatmap():
 
 @reports_viz_bp.route('/visualization/attendance-calendar/<int:beneficiary_id>', methods=['GET'])
 @jwt_required()
+@check_permission('view_reports_visualization')
+@log_audit('GET_ATTENDANCE_CALENDAR')
 def get_attendance_calendar(beneficiary_id):
     """الحصول على تقويم الحضور"""
     try:
@@ -199,6 +225,8 @@ def get_attendance_calendar(beneficiary_id):
 
 @reports_viz_bp.route('/visualization/dashboard-summary', methods=['GET'])
 @jwt_required()
+@check_permission('view_dashboard')
+@log_audit('GET_DASHBOARD_SUMMARY')
 def get_dashboard_summary():
     """الحصول على ملخص لوحة التحكم"""
     try:
@@ -210,6 +238,9 @@ def get_dashboard_summary():
 
 @reports_viz_bp.route('/schedule-reports', methods=['POST'])
 @jwt_required()
+@check_permission('manage_reports_visualization')
+@guard_payload_size()
+@log_audit('SCHEDULE_AUTOMATED_REPORTS')
 def schedule_automated_reports():
     """جدولة التقارير التلقائية"""
     try:
@@ -230,6 +261,9 @@ def schedule_automated_reports():
 
 @reports_viz_bp.route('/export-report', methods=['POST'])
 @jwt_required()
+@check_permission('manage_reports_visualization')
+@guard_payload_size()
+@log_audit('EXPORT_REPORT')
 def export_report():
     """تصدير التقرير بصيغ مختلفة"""
     try:
@@ -268,6 +302,8 @@ def export_report():
 
 @reports_viz_bp.route('/analytics/summary', methods=['GET'])
 @jwt_required()
+@check_permission('view_reports_visualization')
+@log_audit('GET_ANALYTICS_SUMMARY')
 def get_analytics_summary():
     """الحصول على ملخص التحليلات"""
     try:
@@ -318,6 +354,8 @@ def get_analytics_summary():
 
 @reports_viz_bp.route('/templates', methods=['GET'])
 @jwt_required()
+@check_permission('view_reports')
+@log_audit('GET_REPORT_TEMPLATES')
 def get_report_templates():
     """الحصول على قوالب التقارير المتاحة"""
     try:

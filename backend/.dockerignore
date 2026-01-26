@@ -1,53 +1,99 @@
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-env/
-venv/
-ENV/
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-pip-wheel-metadata/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
+# Node modules and dependencies
+node_modules/
+npm-debug.log
+npm-debug.log*
+yarn-error.log
+yarn-debug.log*
+package-lock.json
 
-# Virtual environments
-.venv
-env/
-venv/
-
-# Testing
+# Testing & Coverage
 .pytest_cache/
 .coverage
 .coverage.*
 htmlcov/
 .tox/
 .hypothesis/
+coverage/
+jest_0/
 
-# IDE
+# IDE & Editor
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
 .DS_Store
+*.sublime-project
+*.sublime-workspace
 
 # Git
+.git/
+.gitignore
+.gitattributes
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.circleci/
+.travis.yml
+
+# Build & Dist
+dist/
+build/
+*.tgz
+
+# Logs
+logs/
+*.log
+server-output.log
+server-error.log
+backend.log
+
+# Environment & Config (except example files)
+.env
+.env.local
+.env.*.local
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+.cache/
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Documentation (optional - keep for reference)
+docs/
+*.md
+
+# Test files & mocks
+__tests__/
+*.test.js
+*.spec.js
+test-*
+*-test.js
+jest.config.js
+
+# Development files
+examples/
+samples/
+sample_*
+
+# Python (if mixed environment)
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Misc
+backups/
+*.bak
+.eslintrc.json
+.prettierrc
+ecosystem.config.js
 .git/
 .gitignore
 .github/
@@ -80,7 +126,6 @@ npm-debug.log
 Thumbs.db
 
 # Project specific
-data/
 backups/
 __pycache__/
 .pytest_cache/

@@ -33,3 +33,4 @@ router.post('/predict-risk', async (req, res) => {
 });
 
 module.exports = router;
+

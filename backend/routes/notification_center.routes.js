@@ -26,3 +26,4 @@ router.post('/send', authorizeRole(['ADMIN', 'RECEPTIONIST']), async (req, res) 
 });
 
 module.exports = router;
+

@@ -1,0 +1,355 @@
+/**
+ * Report Builder Styles
+ * أنماط بناء التقارير
+ */
+
+.report-builder-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px;
+  animation: fadeIn 0.3s ease-in;
+}
+
+/* ==================== Report Table ==================== */
+
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.report-table thead {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.report-table th {
+  padding: 16px;
+  font-weight: 600;
+  text-align: left;
+  color: white !important;
+}
+
+.report-table tbody tr {
+  transition: background-color 0.2s ease;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.report-table tbody tr:hover {
+  background-color: #f5f5f5;
+}
+
+.report-table td {
+  padding: 12px 16px;
+}
+
+/* ==================== Summary Card ==================== */
+
+.summary-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+}
+
+.summary-card .MuiTypography-root {
+  color: white !important;
+}
+
+.summary-card .MuiTypography-body2 {
+  opacity: 0.9;
+  margin-bottom: 4px;
+}
+
+.summary-card .MuiTypography-h6 {
+  font-weight: 600;
+}
+
+/* ==================== Filter Section ==================== */
+
+.filter-section {
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+}
+
+.filter-section .MuiTextField-root,
+.filter-section .MuiFormControl-root {
+  margin-bottom: 16px;
+}
+
+/* ==================== Export Buttons ==================== */
+
+.export-buttons {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.export-buttons .MuiButton-root {
+  text-transform: none;
+}
+
+/* ==================== Status Badges ==================== */
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.status-badge.active {
+  background-color: #4caf50;
+  color: white;
+}
+
+.status-badge.inactive {
+  background-color: #f44336;
+  color: white;
+}
+
+.status-badge.pending {
+  background-color: #ff9800;
+  color: white;
+}
+
+/* ==================== Growth Indicator ==================== */
+
+.growth-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.growth-indicator.positive {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.growth-indicator.negative {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.growth-indicator.neutral {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+/* ==================== Chart Container ==================== */
+
+.chart-container {
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 24px;
+  min-height: 300px;
+}
+
+.chart-container h3 {
+  margin-bottom: 16px;
+  color: #333;
+  font-weight: 600;
+}
+
+/* ==================== Report Actions ==================== */
+
+.report-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.report-actions .MuiIconButton-root {
+  transition: all 0.2s ease;
+}
+
+.report-actions .MuiIconButton-root:hover {
+  background-color: #f5f5f5;
+  transform: scale(1.1);
+}
+
+/* ==================== Empty State ==================== */
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #757575;
+}
+
+.empty-state-icon {
+  font-size: 64px;
+  color: #bdbdbd;
+  margin-bottom: 16px;
+}
+
+.empty-state h3 {
+  margin-bottom: 8px;
+  color: #424242;
+}
+
+.empty-state p {
+  color: #757575;
+  font-size: 14px;
+}
+
+/* ==================== Loading State ==================== */
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 16px;
+}
+
+.loading-container .MuiCircularProgress-root {
+  color: #667eea;
+}
+
+/* ==================== Template Dialog ==================== */
+
+.template-dialog .MuiDialogTitle-root {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.template-dialog .MuiDialogContent-root {
+  padding: 24px;
+  min-width: 400px;
+}
+
+/* ==================== Report Type Chip ==================== */
+
+.report-type-chip {
+  font-size: 11px;
+  height: 24px;
+  font-weight: 500;
+}
+
+/* ==================== Period Badge ==================== */
+
+.period-badge {
+  display: inline-block;
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* ==================== Responsive Design ==================== */
+
+@media (max-width: 768px) {
+  .report-builder-container {
+    padding: 16px;
+  }
+
+  .report-table {
+    font-size: 13px;
+  }
+
+  .report-table th,
+  .report-table td {
+    padding: 8px 12px;
+  }
+
+  .summary-card {
+    margin-bottom: 16px;
+  }
+
+  .export-buttons {
+    flex-direction: column;
+  }
+
+  .export-buttons .MuiButton-root {
+    width: 100%;
+  }
+
+  .chart-container {
+    padding: 16px;
+  }
+}
+
+/* ==================== Print Styles ==================== */
+
+@media print {
+  .report-builder-container {
+    padding: 0;
+  }
+
+  .export-buttons,
+  .report-actions,
+  .MuiTabs-root {
+    display: none !important;
+  }
+
+  .report-table {
+    page-break-inside: avoid;
+  }
+
+  .summary-card {
+    page-break-before: avoid;
+    page-break-after: avoid;
+  }
+}
+
+/* ==================== Animations ==================== */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.loading-pulse {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* ==================== Scrollbar Styling ==================== */
+
+.report-table::-webkit-scrollbar {
+  height: 8px;
+}
+
+.report-table::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.report-table::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.report-table::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}

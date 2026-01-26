@@ -10,7 +10,6 @@ import sys
 import os
 from datetime import datetime, timedelta
 import random
-from decimal import Decimal
 
 # إضافة مسار المشروع
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -18,8 +17,8 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from app import app, db
 from models import User, Student
 from student_comprehensive_models import (
-    ComprehensiveStudentFile, AssessmentTemplate, AssessmentRecord,
-    AIAnalysisResult, FileExportLog, FileImportLog, PrintJob
+    StudentComprehensiveFile, AssessmentTemplate, StudentAssessmentRecord,
+    StudentAIAnalysis, FileExportImportLog, PrintJob
 )
 
 def add_sample_data():
@@ -40,15 +39,15 @@ def add_sample_data():
             # 3. إنشاء سجلات التقييم
             assessments = create_assessment_records(templates, files)
             print(f"✅ تم إنشاء {len(assessments)} سجل تقييم")
-            
+
             # 4. إنشاء نتائج التحليل بالذكاء الاصطناعي
             ai_results = create_ai_analysis_results(assessments)
             print(f"✅ تم إنشاء {len(ai_results)} نتيجة تحليل ذكي")
-            
+
             # 5. إنشاء سجلات التصدير والاستيراد
-            export_logs, import_logs = create_export_import_logs(files)
-            print(f"✅ تم إنشاء {len(export_logs)} سجل تصدير و {len(import_logs)} سجل استيراد")
-            
+            export_logs = create_export_logs(files)
+            print(f"✅ تم إنشاء {len(export_logs)} سجل تصدير")
+
             # 6. إنشاء مهام الطباعة
             print_jobs = create_print_jobs(files)
             print(f"✅ تم إنشاء {len(print_jobs)} مهمة طباعة")
@@ -76,9 +75,8 @@ def create_assessment_templates():
                 'fine_motor': 'المهارات الحركية الدقيقة',
                 'coordination': 'التناسق والتوازن'
             },
-            'scoring_method': 'scale_1_5',
-            'max_score': 100,
-            'passing_score': 70
+            'scoring_method': {'type': 'scale_1_5'},
+            'questions': []
         },
         {
             'name': 'تقييم المهارات المعرفية',
@@ -89,9 +87,8 @@ def create_assessment_templates():
                 'memory': 'الذاكرة',
                 'problem_solving': 'حل المشكلات'
             },
-            'scoring_method': 'percentage',
-            'max_score': 100,
-            'passing_score': 65
+            'scoring_method': {'type': 'percentage'},
+            'questions': []
         },
         {
             'name': 'تقييم المهارات الاجتماعية',
@@ -102,9 +99,8 @@ def create_assessment_templates():
                 'interaction': 'التفاعل الاجتماعي',
                 'behavior': 'السلوك'
             },
-            'scoring_method': 'scale_1_10',
-            'max_score': 100,
-            'passing_score': 60
+            'scoring_method': {'type': 'scale_1_10'},
+            'questions': []
         }
     ]
     
@@ -115,9 +111,8 @@ def create_assessment_templates():
             description=data['description'],
             category=data['category'],
             sections=data['sections'],
+            questions=data['questions'],
             scoring_method=data['scoring_method'],
-            max_score=data['max_score'],
-            passing_score=data['passing_score'],
             is_active=True,
             created_by=1
         )
@@ -167,11 +162,11 @@ def create_comprehensive_files():
             }
         }
         
-        comprehensive_file = ComprehensiveStudentFile(
+        comprehensive_file = StudentComprehensiveFile(
             student_id=file_data['student_id'],
             file_number=file_data['file_number'],
             personal_info=file_data['personal_info'],
-            medical_info=file_data['medical_info'],
+            medical_history=file_data['medical_info'],
             family_info=file_data['family_info'],
             educational_background=file_data['educational_background'],
             status='active',
@@ -210,17 +205,24 @@ def create_assessment_records(templates, files):
                 
                 final_score = total_score / section_count if section_count > 0 else 0
                 
-                assessment = AssessmentRecord(
+                assessment = StudentAssessmentRecord(
                     comprehensive_file_id=file.id,
                     template_id=template.id,
-                    assessment_date=assessment_date,
-                    assessor_name=f'المقيم {random.randint(1, 5)}',
-                    results=results,
-                    total_score=Decimal(str(round(final_score, 2))),
-                    notes=f'ملاحظات عامة على التقييم رقم {j+1}',
+                    assessment_date=assessment_date.date(),
+                    administrator_id=1,
+                    session_number=j + 1,
+                    duration_actual=random.randint(30, 90),
+                    responses=results,
+                    raw_scores={'total': final_score},
+                    standard_scores={},
+                    percentiles={},
+                    interpretation=f'ملاحظات عامة على التقييم رقم {j+1}',
                     recommendations=['توصية عامة 1', 'توصية عامة 2'],
+                    testing_conditions={'room': 'A'},
+                    behavioral_observations='ملاحظات سلوكية تجريبية',
                     status='completed',
-                    created_by=1
+                    is_baseline=(j == 0),
+                    ai_analysis_requested=(j % 2 == 0)
                 )
                 
                 db.session.add(assessment)
@@ -250,14 +252,23 @@ def create_ai_analysis_results(assessments):
             'recommendations': ['توصية ذكية 1', 'توصية ذكية 2']
         }
         
-        ai_result = AIAnalysisResult(
+        ai_result = StudentAIAnalysis(
+            comprehensive_file_id=assessment.comprehensive_file_id,
             assessment_record_id=assessment.id,
             analysis_type=analysis_type,
-            analysis_results=analysis_results,
-            confidence_score=Decimal(str(random.uniform(0.7, 0.95))),
-            insights=['رؤية 1', 'رؤية 2'],
-            recommendations=['توصية AI 1', 'توصية AI 2'],
-            status='completed',
+            analysis_scope='single_assessment',
+            input_data={'assessment': assessment.id},
+            findings=analysis_results,
+            patterns_identified=analysis_results.get('patterns'),
+            risk_factors={},
+            protective_factors={},
+            predictions=analysis_results.get('predictions'),
+            confidence_scores={'overall': round(random.uniform(0.7, 0.95), 2)},
+            recommendations=analysis_results.get('recommendations'),
+            intervention_suggestions=[],
+            ai_model_used='sample-model',
+            model_version='v1',
+            requires_human_review=True,
             created_by=1
         )
         
@@ -267,42 +278,32 @@ def create_ai_analysis_results(assessments):
     db.session.flush()
     return ai_results
 
-def create_export_import_logs(files):
-    """إنشاء سجلات التصدير والاستيراد"""
+def create_export_logs(files):
+    """إنشاء سجلات التصدير"""
     export_logs = []
-    import_logs = []
-    
-    # سجلات التصدير
+
     for i, file in enumerate(files[:5]):
-        export_log = FileExportLog(
+        export_log = FileExportImportLog(
             comprehensive_file_id=file.id,
+            operation_type='export',
             export_format=random.choice(['pdf', 'excel', 'json']),
-            sections_included=['personal_info', 'assessments', 'ai_analysis'],
+            data_included=['personal_info', 'assessments', 'ai_analysis'],
             file_path=f'/exports/student_{file.id}_export_{i+1}.pdf',
             file_size=random.randint(500000, 2000000),
+            access_level='full',
+            encryption_used=False,
+            password_protected=False,
             status='completed',
-            exported_by=1
+            requested_by=1,
+            request_date=datetime.utcnow(),
+            completion_date=datetime.utcnow(),
+            purpose='sample export'
         )
         db.session.add(export_log)
         export_logs.append(export_log)
-    
-    # سجلات الاستيراد
-    for i in range(3):
-        import_log = FileImportLog(
-            source_file_path=f'/imports/import_file_{i+1}.json',
-            import_type=random.choice(['new_file', 'update_existing', 'merge_data']),
-            records_processed=random.randint(5, 20),
-            records_successful=random.randint(4, 18),
-            records_failed=random.randint(0, 2),
-            validation_errors={'errors': ['خطأ تجريبي 1', 'خطأ تجريبي 2']},
-            status='completed',
-            imported_by=1
-        )
-        db.session.add(import_log)
-        import_logs.append(import_log)
-    
+
     db.session.flush()
-    return export_logs, import_logs
+    return export_logs
 
 def create_print_jobs(files):
     """إنشاء مهام الطباعة"""
@@ -311,19 +312,23 @@ def create_print_jobs(files):
     for i, file in enumerate(files[:7]):
         print_job = PrintJob(
             comprehensive_file_id=file.id,
-            print_type=random.choice(['full_file', 'assessments_only', 'summary_report']),
-            sections_to_print=['personal_info', 'assessments'],
+            job_name=f'طباعة ملف {file.file_number}',
+            document_type=random.choice(['full_file', 'assessment_report', 'progress_report']),
+            content_selection=['personal_info', 'assessments'],
+            print_settings={'paper_size': 'A4'},
+            page_range=None,
+            copies=random.randint(1, 3),
+            confidentiality_level='standard',
+            watermark_text=None,
+            requires_authorization=False,
+            status=random.choice(['pending', 'processing', 'completed']),
             printer_name=f'طابعة المكتب {random.randint(1, 3)}',
-            copies_count=random.randint(1, 3),
-            paper_size='A4',
-            is_confidential=random.choice([True, False]),
-            status=random.choice(['pending', 'printing', 'completed']),
-            created_by=1
+            requested_by=1,
+            request_date=datetime.utcnow(),
+            completion_date=datetime.utcnow(),
+            purpose='عينات'
         )
-        
-        if print_job.status == 'completed':
-            print_job.completed_at = datetime.now() - timedelta(hours=random.randint(1, 48))
-        
+
         db.session.add(print_job)
         print_jobs.append(print_job)
     
@@ -334,11 +339,10 @@ def print_statistics():
     """طباعة إحصائيات البيانات المضافة"""
     print("\n📊 إحصائيات البيانات المضافة:")
     print(f"   📋 قوالب التقييم: {AssessmentTemplate.query.count()}")
-    print(f"   📁 الملفات الشاملة: {ComprehensiveStudentFile.query.count()}")
-    print(f"   📝 سجلات التقييم: {AssessmentRecord.query.count()}")
-    print(f"   🤖 نتائج التحليل الذكي: {AIAnalysisResult.query.count()}")
-    print(f"   📤 سجلات التصدير: {FileExportLog.query.count()}")
-    print(f"   📥 سجلات الاستيراد: {FileImportLog.query.count()}")
+    print(f"   📁 الملفات الشاملة: {StudentComprehensiveFile.query.count()}")
+    print(f"   📝 سجلات التقييم: {StudentAssessmentRecord.query.count()}")
+    print(f"   🤖 نتائج التحليل الذكي: {StudentAIAnalysis.query.count()}")
+    print(f"   📤 سجلات التصدير: {FileExportImportLog.query.filter_by(operation_type='export').count()}")
     print(f"   🖨️ مهام الطباعة: {PrintJob.query.count()}")
 
 if __name__ == '__main__':

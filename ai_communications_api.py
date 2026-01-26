@@ -1,3 +1,10 @@
+from auth_rbac_decorator import (
+    check_permission,
+    check_multiple_permissions,
+    guard_payload_size,
+    validate_json,
+    log_audit
+)
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
@@ -26,6 +33,9 @@ analytics_service = AIAnalyticsService()
 
 @ai_comm_bp.route('/chatbot/chat', methods=['POST'])
 @jwt_required()
+@check_permission('manage_ai_communications')
+@guard_payload_size()
+@log_audit('CHAT_WITH_BOT')
 def chat_with_bot():
     """محادثة مع الشات بوت"""
     try:
@@ -107,6 +117,9 @@ def chat_with_bot():
 
 @ai_comm_bp.route('/sentiment/analyze', methods=['POST'])
 @jwt_required()
+@check_permission('manage_ai_communications')
+@guard_payload_size()
+@log_audit('ANALYZE_SENTIMENT')
 def analyze_sentiment():
     """تحليل مشاعر النص"""
     try:
@@ -151,6 +164,9 @@ def analyze_sentiment():
 
 @ai_comm_bp.route('/auto-response/suggest', methods=['POST'])
 @jwt_required()
+@check_permission('manage_ai_communications')
+@guard_payload_size()
+@log_audit('SUGGEST_AUTO_RESPONSES')
 def suggest_auto_responses():
     """اقتراح ردود تلقائية"""
     try:
@@ -180,6 +196,9 @@ def suggest_auto_responses():
 
 @ai_comm_bp.route('/classification/classify', methods=['POST'])
 @jwt_required()
+@check_permission('manage_ai_communications')
+@guard_payload_size()
+@log_audit('CLASSIFY_MESSAGE')
 def classify_message():
     """تصنيف الرسالة تلقائياً"""
     try:
@@ -223,6 +242,8 @@ def classify_message():
 
 @ai_comm_bp.route('/knowledge-base', methods=['GET'])
 @jwt_required()
+@check_permission('view_ai_communications')
+@log_audit('GET_KNOWLEDGE_BASE')
 def get_knowledge_base():
     """الحصول على قاعدة المعرفة"""
     try:
@@ -275,6 +296,9 @@ def get_knowledge_base():
 
 @ai_comm_bp.route('/knowledge-base', methods=['POST'])
 @jwt_required()
+@check_permission('manage_ai_communications')
+@guard_payload_size()
+@log_audit('ADD_KNOWLEDGE_ITEM')
 def add_knowledge_item():
     """إضافة عنصر لقاعدة المعرفة"""
     try:
@@ -314,6 +338,8 @@ def add_knowledge_item():
 
 @ai_comm_bp.route('/analytics/dashboard', methods=['GET'])
 @jwt_required()
+@check_permission('view_dashboard')
+@log_audit('GET_AI_DASHBOARD')
 def get_ai_dashboard():
     """لوحة تحكم الذكاء الاصطناعي"""
     try:
@@ -373,6 +399,9 @@ def get_ai_dashboard():
 
 @ai_comm_bp.route('/analytics/insights', methods=['POST'])
 @jwt_required()
+@check_permission('generate_ai_communications')
+@guard_payload_size()
+@log_audit('GENERATE_INSIGHTS')
 def generate_insights():
     """توليد رؤى تحليلية"""
     try:
@@ -436,6 +465,9 @@ def generate_insights():
 
 @ai_comm_bp.route('/feedback', methods=['POST'])
 @jwt_required()
+@check_permission('manage_ai_communications')
+@guard_payload_size()
+@log_audit('SUBMIT_FEEDBACK')
 def submit_feedback():
     """تقديم تغذية راجعة للتعلم"""
     try:
@@ -472,6 +504,8 @@ def submit_feedback():
 
 @ai_comm_bp.route('/performance/metrics', methods=['GET'])
 @jwt_required()
+@check_permission('view_ai_communications')
+@log_audit('GET_PERFORMANCE_METRICS')
 def get_performance_metrics():
     """الحصول على مقاييس الأداء"""
     try:
@@ -511,6 +545,8 @@ def get_performance_metrics():
 
 @ai_comm_bp.route('/chatbots', methods=['GET'])
 @jwt_required()
+@check_permission('view_ai_communications')
+@log_audit('GET_CHATBOTS')
 def get_chatbots():
     """الحصول على قائمة الشات بوتس"""
     try:
@@ -535,6 +571,8 @@ def get_chatbots():
 
 @ai_comm_bp.route('/conversations/<conversation_id>/history', methods=['GET'])
 @jwt_required()
+@check_permission('view_ai_communications')
+@log_audit('GET_CONVERSATION_HISTORY')
 def get_conversation_history(conversation_id):
     """الحصول على تاريخ المحادثة"""
     try:

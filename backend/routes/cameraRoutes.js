@@ -7,7 +7,7 @@ const router = express.Router();
 const Camera = require('../models/Camera');
 const Branch = require('../models/Branch');
 const hikvisionService = require('../services/hikvisionService');
-const { authenticate, authorize } = require('../middleware/auth');
+const { authenticateToken } = require('../middleware/auth');
 
 /**
  * الحصول على جميع الكاميرات
@@ -63,7 +63,7 @@ router.get('/:id', authenticate, async (req, res) => {
 /**
  * إنشاء كاميرا جديدة
  */
-router.post('/', authenticate, authorize(['admin']), async (req, res) => {
+router.post('/', authenticate, async (req, res) => {
   try {
     const { name, branchId, hikvision, recording, motionDetection, cloudSettings } = req.body;
 
@@ -127,7 +127,7 @@ router.post('/', authenticate, authorize(['admin']), async (req, res) => {
 /**
  * تحديث كاميرا
  */
-router.put('/:id', authenticate, authorize(['admin']), async (req, res) => {
+router.put('/:id', authenticate, async (req, res) => {
   try {
     const { name, location, recording, motionDetection, cloudSettings, status } = req.body;
 
@@ -159,7 +159,7 @@ router.put('/:id', authenticate, authorize(['admin']), async (req, res) => {
 /**
  * حذف كاميرا
  */
-router.delete('/:id', authenticate, authorize(['admin']), async (req, res) => {
+router.delete('/:id', authenticate, async (req, res) => {
   try {
     const camera = await Camera.findById(req.params.id);
     if (!camera || camera.deletedAt) {
@@ -245,7 +245,7 @@ router.get('/:id/stream', authenticate, async (req, res) => {
 /**
  * تفعيل/تعطيل كشف الحركة
  */
-router.put('/:id/motion-detection', authenticate, authorize(['admin']), async (req, res) => {
+router.put('/:id/motion-detection', authenticate, async (req, res) => {
   try {
     const { enabled, sensitivity } = req.body;
     const camera = await Camera.findById(req.params.id);
@@ -310,3 +310,4 @@ router.post('/:id/capture-snapshot', authenticate, async (req, res) => {
 });
 
 module.exports = router;
+

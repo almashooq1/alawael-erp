@@ -50,3 +50,4 @@ router.post('/analyze-vitals', authenticateToken, (req, res) => {
 });
 
 module.exports = router;
+

@@ -9,6 +9,35 @@ const AuditService = require('../services/audit.service');
 
 router.use(authenticateToken);
 
+// ============ HR STATS ============
+router.get('/stats', async (req, res) => {
+  try {
+    const totalEmployees = await Employee.countDocuments();
+    const activeEmployees = await Employee.countDocuments({ status: 'active' });
+    const inactiveEmployees = await Employee.countDocuments({ status: { $ne: 'active' } });
+    const totalShifts = await Shift.countDocuments();
+    const activeShifts = await Shift.countDocuments({ status: 'active' });
+
+    res.json({
+      success: true,
+      data: {
+        employees: {
+          total: totalEmployees,
+          active: activeEmployees,
+          inactive: inactiveEmployees,
+        },
+        shifts: {
+          total: totalShifts,
+          active: activeShifts,
+        },
+        timestamp: new Date().toISOString(),
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 // ============ EMPLOYEES ============
 
 router.get('/employees', async (req, res) => {
@@ -36,7 +65,10 @@ router.post('/employees', async (req, res) => {
     });
 
     await employee.save();
-    await AuditService.log(req, 'HIRE_EMPLOYEE', 'HR', { id: employee.id, name: employee.firstName });
+    await AuditService.log(req, 'HIRE_EMPLOYEE', 'HR', {
+      id: employee.id,
+      name: employee.firstName,
+    });
 
     res.status(201).json({ success: true, data: employee });
   } catch (error) {
@@ -79,7 +111,10 @@ router.get('/employees/:id/performance', async (req, res) => {
 
 router.get('/shifts', async (req, res) => {
   try {
-    const shifts = await Shift.find({ isActive: true }).populate('assignedStaff', 'firstName lastName position');
+    const shifts = await Shift.find({ isActive: true }).populate(
+      'assignedStaff',
+      'firstName lastName position'
+    );
     res.json({ success: true, data: shifts });
   } catch (error) {
     res.status(500).json({ message: error.message });

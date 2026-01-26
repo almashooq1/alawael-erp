@@ -10,10 +10,16 @@ from flask_jwt_extended import (
 from models import db
 from models.user import User
 from datetime import timedelta
+from lib.auth_rbac_decorator import check_permission, require_role, log_audit, guard_payload_size, validate_json
 
 bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 
 @bp.route('/register', methods=['POST'])
+
+@check_permission('manage_register')
+@guard_payload_size()
+@validate_json()
+@log_audit('POST_REGISTER')
 def register():
     """تسجيل مستخدم جديد"""
     try:
@@ -67,6 +73,11 @@ def register():
 
 
 @bp.route('/login', methods=['POST'])
+
+@check_permission('manage_login')
+@guard_payload_size()
+@validate_json()
+@log_audit('POST_LOGIN')
 def login():
     """تسجيل الدخول"""
     try:
@@ -129,7 +140,11 @@ def login():
 
 
 @bp.route('/refresh', methods=['POST'])
-@jwt_required(refresh=True)
+
+@check_permission('manage_refresh')
+@guard_payload_size()
+@validate_json()
+@log_audit('POST_REFRESH')
 def refresh():
     """تحديث التوكن"""
     try:
@@ -162,7 +177,9 @@ def refresh():
 
 
 @bp.route('/profile', methods=['GET'])
-@jwt_required()
+
+@check_permission('view_profile')
+@log_audit('GET_PROFILE')
 def profile():
     """الحصول على ملف المستخدم"""
     try:
@@ -185,7 +202,11 @@ def profile():
 
 
 @bp.route('/logout', methods=['POST'])
-@jwt_required()
+
+@check_permission('manage_logout')
+@guard_payload_size()
+@validate_json()
+@log_audit('POST_LOGOUT')
 def logout():
     """تسجيل الخروج"""
     # في التطبيق الحقيقي، يتم إضافة التوكن للقائمة السوداء
@@ -196,7 +217,9 @@ def logout():
 
 
 @bp.route('/me', methods=['GET'])
-@jwt_required()
+
+@check_permission('view_current_user')
+@log_audit('GET_GET_CURRENT_USER')
 def get_current_user():
     """معلومات المستخدم الحالي"""
     try:
@@ -213,7 +236,10 @@ def get_current_user():
 
 
 @bp.route('/me', methods=['PUT'])
-@jwt_required()
+
+@check_permission('manage_current_user')
+@guard_payload_size()
+@log_audit('PUT_UPDATE_CURRENT_USER')
 def update_current_user():
     """تحديث معلومات المستخدم الحالي"""
     try:
@@ -242,7 +268,11 @@ def update_current_user():
 
 
 @bp.route('/change-password', methods=['POST'])
-@jwt_required()
+
+@check_permission('manage_changepassword')
+@guard_payload_size()
+@validate_json()
+@log_audit('POST_CHANGE_PASSWORD')
 def change_password():
     """تغيير كلمة المرور"""
     try:
@@ -278,7 +308,11 @@ def change_password():
 
 
 @bp.route('/verify-token', methods=['POST'])
-@jwt_required()
+
+@check_permission('manage_verifytoken')
+@guard_payload_size()
+@validate_json()
+@log_audit('POST_VERIFY_TOKEN')
 def verify_token():
     """التحقق من صلاحية التوكن"""
     try:

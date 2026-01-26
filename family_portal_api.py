@@ -15,10 +15,19 @@ from models import db
 from family_portal_models import *
 from rehabilitation_programs_models import RehabilitationBeneficiary, RehabilitationProgram
 from session_scheduling_models import SessionSchedule
+from auth_rbac_decorator import (
+    check_permission,
+    guard_payload_size,
+    validate_json,
+    log_audit
+)
 
 family_portal_bp = Blueprint('family_portal', __name__)
 
 @family_portal_bp.route('/api/family-portal/login', methods=['POST'])
+@guard_payload_size()
+@validate_json('username', 'password')
+@log_audit('FAMILY_PORTAL_LOGIN')
 def family_login():
     """تسجيل دخول أفراد الأسرة"""
     try:
@@ -76,6 +85,8 @@ def family_login():
 
 @family_portal_bp.route('/api/family-portal/dashboard', methods=['GET'])
 @jwt_required()
+@check_permission('view_family_portal')
+@log_audit('VIEW_FAMILY_DASHBOARD')
 def get_family_dashboard():
     """لوحة تحكم الأسرة"""
     try:
@@ -153,6 +164,8 @@ def get_family_dashboard():
 
 @family_portal_bp.route('/api/family-portal/messages', methods=['GET'])
 @jwt_required()
+@check_permission('access_family_portal')
+@log_audit('GET_FAMILY_MESSAGES')
 def get_family_messages():
     """الحصول على رسائل الأسرة"""
     try:
@@ -209,6 +222,9 @@ def get_family_messages():
 
 @family_portal_bp.route('/api/family-portal/messages/<int:message_id>/read', methods=['POST'])
 @jwt_required()
+@check_permission('manage_family_portal')
+@guard_payload_size()
+@log_audit('MARK_MESSAGE_READ')
 def mark_message_read(message_id):
     """تحديد الرسالة كمقروءة"""
     try:
@@ -241,6 +257,8 @@ def mark_message_read(message_id):
 
 @family_portal_bp.route('/api/family-portal/progress-reports', methods=['GET'])
 @jwt_required()
+@check_permission('view_reports')
+@log_audit('GET_PROGRESS_REPORTS')
 def get_progress_reports():
     """الحصول على تقارير التقدم"""
     try:
@@ -282,6 +300,8 @@ def get_progress_reports():
 
 @family_portal_bp.route('/api/family-portal/homework', methods=['GET'])
 @jwt_required()
+@check_permission('view_family_portal')
+@log_audit('GET_HOMEWORK_ASSIGNMENTS')
 def get_homework_assignments():
     """الحصول على الواجبات المنزلية"""
     try:
@@ -339,6 +359,9 @@ def get_homework_assignments():
 
 @family_portal_bp.route('/api/family-portal/homework/<int:assignment_id>/complete', methods=['POST'])
 @jwt_required()
+@check_permission('manage_family_portal')
+@guard_payload_size()
+@log_audit('COMPLETE_HOMEWORK')
 def complete_homework(assignment_id):
     """تحديد الواجب كمكتمل"""
     try:
@@ -375,6 +398,9 @@ def complete_homework(assignment_id):
 
 @family_portal_bp.route('/api/family-portal/feedback', methods=['POST'])
 @jwt_required()
+@check_permission('manage_family_portal')
+@guard_payload_size()
+@log_audit('SUBMIT_FEEDBACK')
 def submit_feedback():
     """تقديم تقييم من الأسرة"""
     try:

@@ -1,0 +1,71 @@
+﻿{
+    "timestamp":  "2026-01-25T01:04:38",
+    "allOk":  true,
+    "passed":  9,
+    "failed":  0,
+    "checks":  [
+                   {
+                       "name":  "Health",
+                       "url":  "http://localhost:3003/health",
+                       "ok":  true,
+                       "status":  200,
+                       "message":  ""
+                   },
+                   {
+                       "name":  "Phase29-33 Base (public)",
+                       "url":  "http://localhost:3003/phases-29-33",
+                       "ok":  true,
+                       "status":  200,
+                       "message":  ""
+                   },
+                   {
+                       "name":  "Phase29-33 Index (public)",
+                       "url":  "http://localhost:3003/phases-29-33/",
+                       "ok":  true,
+                       "status":  200,
+                       "message":  ""
+                   },
+                   {
+                       "name":  "Phase 29 AI (public)",
+                       "url":  "http://localhost:3003/phases-29-33/ai/llm/providers",
+                       "ok":  true,
+                       "status":  200,
+                       "message":  ""
+                   },
+                   {
+                       "name":  "Phase 30 Quantum (public)",
+                       "url":  "http://localhost:3003/phases-29-33/quantum/crypto/key-status/test",
+                       "ok":  true,
+                       "status":  200,
+                       "message":  ""
+                   },
+                   {
+                       "name":  "Phase 31 XR (public)",
+                       "url":  "http://localhost:3003/phases-29-33/xr/hologram/status/test",
+                       "ok":  true,
+                       "status":  200,
+                       "message":  ""
+                   },
+                   {
+                       "name":  "Phase 32 DevOps (public)",
+                       "url":  "http://localhost:3003/phases-29-33/devops/k8s/metrics/test",
+                       "ok":  true,
+                       "status":  200,
+                       "message":  ""
+                   },
+                   {
+                       "name":  "Phase 33 Optimization (public)",
+                       "url":  "http://localhost:3003/phases-29-33/optimization/performance/report/test",
+                       "ok":  true,
+                       "status":  200,
+                       "message":  ""
+                   },
+                   {
+                       "name":  "HTML Docs",
+                       "url":  "http://localhost:3003/phase29-33-docs.html",
+                       "ok":  true,
+                       "status":  200,
+                       "message":  ""
+                   }
+               ]
+}

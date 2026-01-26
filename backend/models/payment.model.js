@@ -59,7 +59,7 @@ if (!useMock) {
     createdAt: { type: Date, default: Date.now },
     completedAt: Date,
   });
-  module.exports = mongoose.model('Payment', PaymentSchema);
+  module.exports = mongoose.models.Payment || mongoose.model('Payment', PaymentSchema);
 } else {
   // Mock Model
   class MockPayment {

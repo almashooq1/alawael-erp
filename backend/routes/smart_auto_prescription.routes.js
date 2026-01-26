@@ -28,3 +28,4 @@ router.post('/generate/:patientId', mockAuth, async (req, res) => {
 });
 
 module.exports = router;
+

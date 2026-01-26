@@ -92,3 +92,4 @@ router.post('/insurance-providers', async (req, res) => {
 });
 
 module.exports = router;
+

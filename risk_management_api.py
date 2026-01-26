@@ -2,6 +2,13 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import db, User
 from risk_management_models import (
+from auth_rbac_decorator import (
+    check_permission,
+    check_multiple_permissions,
+    guard_payload_size,
+    validate_json,
+    log_audit
+)
     RiskCategory, RiskAssessment, EmergencyPlan, IncidentReport,
     SafetyInspection, PreventiveMeasure, RiskMitigation
 )
@@ -15,6 +22,8 @@ risk_management_bp = Blueprint('risk_management', __name__)
 
 @risk_management_bp.route('/api/risk-categories', methods=['GET'])
 @jwt_required()
+@check_permission('view_risk_management')
+@log_audit('GET_RISK_CATEGORIES')
 def get_risk_categories():
     """استرجاع فئات المخاطر"""
     try:
@@ -36,6 +45,9 @@ def get_risk_categories():
 
 @risk_management_bp.route('/api/risk-categories', methods=['POST'])
 @jwt_required()
+@check_permission('manage_risk_management')
+@guard_payload_size()
+@log_audit('CREATE_RISK_CATEGORY')
 def create_risk_category():
     """إنشاء فئة مخاطر جديدة"""
     try:
@@ -64,6 +76,8 @@ def create_risk_category():
 
 @risk_management_bp.route('/api/risk-assessments', methods=['GET'])
 @jwt_required()
+@check_permission('view_risk_management')
+@log_audit('GET_RISK_ASSESSMENTS')
 def get_risk_assessments():
     """استرجاع تقييمات المخاطر"""
     try:
@@ -118,6 +132,9 @@ def get_risk_assessments():
 
 @risk_management_bp.route('/api/risk-assessments', methods=['POST'])
 @jwt_required()
+@check_permission('manage_risk_management')
+@guard_payload_size()
+@log_audit('CREATE_RISK_ASSESSMENT')
 def create_risk_assessment():
     """إنشاء تقييم مخاطر جديد"""
     try:
@@ -182,6 +199,8 @@ def create_risk_assessment():
 
 @risk_management_bp.route('/api/risk-assessments/<int:risk_id>', methods=['GET'])
 @jwt_required()
+@check_permission('view_risk_management')
+@log_audit('GET_RISK_ASSESSMENT')
 def get_risk_assessment(risk_id):
     """استرجاع تقييم مخاطر محدد"""
     try:
@@ -228,6 +247,8 @@ def get_risk_assessment(risk_id):
 
 @risk_management_bp.route('/api/emergency-plans', methods=['GET'])
 @jwt_required()
+@check_permission('view_risk_management')
+@log_audit('GET_EMERGENCY_PLANS')
 def get_emergency_plans():
     """استرجاع خطط الطوارئ"""
     try:
@@ -275,6 +296,9 @@ def get_emergency_plans():
 
 @risk_management_bp.route('/api/emergency-plans', methods=['POST'])
 @jwt_required()
+@check_permission('manage_risk_management')
+@guard_payload_size()
+@log_audit('CREATE_EMERGENCY_PLAN')
 def create_emergency_plan():
     """إنشاء خطة طوارئ جديدة"""
     try:
@@ -324,6 +348,8 @@ def create_emergency_plan():
 
 @risk_management_bp.route('/api/incident-reports', methods=['GET'])
 @jwt_required()
+@check_permission('view_reports')
+@log_audit('GET_INCIDENT_REPORTS')
 def get_incident_reports():
     """استرجاع تقارير الحوادث"""
     try:
@@ -383,6 +409,9 @@ def get_incident_reports():
 
 @risk_management_bp.route('/api/incident-reports', methods=['POST'])
 @jwt_required()
+@check_permission('manage_risk_management')
+@guard_payload_size()
+@log_audit('CREATE_INCIDENT_REPORT')
 def create_incident_report():
     """إنشاء تقرير حادث جديد"""
     try:
@@ -435,6 +464,8 @@ def create_incident_report():
 
 @risk_management_bp.route('/api/safety-inspections', methods=['GET'])
 @jwt_required()
+@check_permission('view_risk_management')
+@log_audit('GET_SAFETY_INSPECTIONS')
 def get_safety_inspections():
     """استرجاع تفتيشات السلامة"""
     try:
@@ -484,6 +515,8 @@ def get_safety_inspections():
 
 @risk_management_bp.route('/api/preventive-measures', methods=['GET'])
 @jwt_required()
+@check_permission('view_risk_management')
+@log_audit('GET_PREVENTIVE_MEASURES')
 def get_preventive_measures():
     """استرجاع التدابير الوقائية"""
     try:
@@ -534,6 +567,8 @@ def get_preventive_measures():
 
 @risk_management_bp.route('/api/risk-management-dashboard', methods=['GET'])
 @jwt_required()
+@check_permission('view_dashboard')
+@log_audit('GET_DASHBOARD_DATA')
 def get_dashboard_data():
     """استرجاع بيانات لوحة التحكم"""
     try:
@@ -631,6 +666,8 @@ def get_dashboard_data():
 
 @risk_management_bp.route('/api/risk-matrix', methods=['GET'])
 @jwt_required()
+@check_permission('view_risk_management')
+@log_audit('GET_RISK_MATRIX')
 def get_risk_matrix():
     """استرجاع مصفوفة المخاطر"""
     try:

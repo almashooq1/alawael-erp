@@ -35,3 +35,4 @@ router.post('/transcribe', authorizeRole(['THERAPIST', 'ADMIN']), upload.single(
 });
 
 module.exports = router;
+

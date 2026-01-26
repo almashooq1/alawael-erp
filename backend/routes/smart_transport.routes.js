@@ -49,3 +49,4 @@ router.post('/trips/:id/status', mockAuth, (req, res) => {
 });
 
 module.exports = router;
+

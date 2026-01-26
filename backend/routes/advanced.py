@@ -12,6 +12,7 @@ from datetime import datetime, timedelta
 import uuid
 from app import db
 from models import User, Beneficiary, Session
+from lib.auth_rbac_decorator import check_permission, require_role, log_audit, guard_payload_size, validate_json
 
 advanced_bp = Blueprint('advanced', __name__, url_prefix='/api/advanced')
 
@@ -19,7 +20,11 @@ advanced_bp = Blueprint('advanced', __name__, url_prefix='/api/advanced')
 # ==================== BATCH OPERATIONS ====================
 
 @advanced_bp.route('/beneficiaries/batch-create', methods=['POST'])
-@jwt_required()
+
+@check_permission('manage_batch_beneficiaries')
+@guard_payload_size()
+@validate_json()
+@log_audit('POST_BATCH_CREATE_BENEFICIARIES')
 def batch_create_beneficiaries():
     """Create multiple beneficiaries at once"""
     try:
@@ -65,7 +70,10 @@ def batch_create_beneficiaries():
 
 
 @advanced_bp.route('/beneficiaries/batch-update', methods=['PUT'])
-@jwt_required()
+
+@check_permission('manage_batch_beneficiaries')
+@guard_payload_size()
+@log_audit('PUT_BATCH_UPDATE_BENEFICIARIES')
 def batch_update_beneficiaries():
     """Update multiple beneficiaries"""
     try:
@@ -118,7 +126,9 @@ def batch_update_beneficiaries():
 
 
 @advanced_bp.route('/beneficiaries/batch-delete', methods=['DELETE'])
-@jwt_required()
+
+@check_permission('manage_resources')
+@log_audit('DELETE_BATCH_DELETE_BENEFICIARIES')
 def batch_delete_beneficiaries():
     """Delete multiple beneficiaries"""
     try:
@@ -166,7 +176,11 @@ def batch_delete_beneficiaries():
 # ==================== ADVANCED SEARCH ====================
 
 @advanced_bp.route('/search', methods=['POST'])
-@jwt_required()
+
+@check_permission('manage_advancedsearch')
+@guard_payload_size()
+@validate_json()
+@log_audit('POST_ADVANCED_SEARCH')
 def advanced_search():
     """Advanced search across beneficiaries and sessions"""
     try:
@@ -271,7 +285,9 @@ def advanced_search():
 # ==================== REPORTING & EXPORT ====================
 
 @advanced_bp.route('/reports/beneficiary/<beneficiary_id>', methods=['GET'])
-@jwt_required()
+
+@check_permission('view_beneficiary_report')
+@log_audit('GET_GET_BENEFICIARY_REPORT')
 def get_beneficiary_report(beneficiary_id):
     """Generate comprehensive beneficiary report"""
     try:
@@ -323,7 +339,11 @@ def get_beneficiary_report(beneficiary_id):
 
 
 @advanced_bp.route('/export/csv', methods=['POST'])
-@jwt_required()
+
+@check_permission('manage_exportcsv')
+@guard_payload_size()
+@validate_json()
+@log_audit('POST_EXPORT_CSV')
 def export_csv():
     """Export data to CSV"""
     try:

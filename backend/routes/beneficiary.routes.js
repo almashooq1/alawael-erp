@@ -99,3 +99,4 @@ router.post('/:id/medical-records', async (req, res) => {
 });
 
 module.exports = router;
+

@@ -326,3 +326,4 @@ router.get('/backup-codes/:userId', authMiddleware, async (req, res) => {
 });
 
 module.exports = router;
+

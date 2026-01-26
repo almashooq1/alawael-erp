@@ -2,6 +2,13 @@ from flask import Blueprint, request, jsonify, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import db, User
 from chat_models import (
+from auth_rbac_decorator import (
+    check_permission,
+    check_multiple_permissions,
+    guard_payload_size,
+    validate_json,
+    log_audit
+)
     ChatRoom, ChatParticipant, ChatMessage, MessageReadReceipt,
     ChatNotification, ChatSession, ChatFile,
     generate_room_id, generate_message_id, generate_file_id,
@@ -19,6 +26,9 @@ chat_bp = Blueprint('chat', __name__)
 
 @chat_bp.route('/api/chat/rooms', methods=['POST'])
 @jwt_required()
+@check_permission('manage_chat')
+@guard_payload_size()
+@log_audit('CREATE_CHAT_ROOM')
 def create_chat_room():
     """إنشاء غرفة دردشة جديدة"""
     try:
@@ -90,6 +100,8 @@ def create_chat_room():
 
 @chat_bp.route('/api/chat/rooms', methods=['GET'])
 @jwt_required()
+@check_permission('view_chat')
+@log_audit('GET_USER_CHAT_ROOMS')
 def get_user_chat_rooms():
     """استرجاع غرف الدردشة للمستخدم"""
     try:
@@ -155,6 +167,9 @@ def get_user_chat_rooms():
 
 @chat_bp.route('/api/chat/rooms/<room_id>/join', methods=['POST'])
 @jwt_required()
+@check_permission('manage_chat')
+@guard_payload_size()
+@log_audit('JOIN_CHAT_ROOM')
 def join_chat_room(room_id):
     """الانضمام لغرفة دردشة"""
     try:
@@ -221,6 +236,9 @@ def join_chat_room(room_id):
 
 @chat_bp.route('/api/chat/rooms/<room_id>/messages', methods=['POST'])
 @jwt_required()
+@check_permission('send_chat')
+@guard_payload_size()
+@log_audit('SEND_MESSAGE')
 def send_message(room_id):
     """إرسال رسالة في غرفة الدردشة"""
     try:
@@ -318,6 +336,8 @@ def send_message(room_id):
 
 @chat_bp.route('/api/chat/rooms/<room_id>/messages', methods=['GET'])
 @jwt_required()
+@check_permission('view_chat')
+@log_audit('GET_ROOM_MESSAGES')
 def get_room_messages(room_id):
     """استرجاع رسائل غرفة الدردشة"""
     try:
@@ -399,6 +419,9 @@ def get_room_messages(room_id):
 
 @chat_bp.route('/api/chat/messages/<message_id>/read', methods=['POST'])
 @jwt_required()
+@check_permission('manage_chat')
+@guard_payload_size()
+@log_audit('MARK_MESSAGE_READ')
 def mark_message_read(message_id):
     """تمييز الرسالة كمقروءة"""
     try:
@@ -452,6 +475,9 @@ def mark_message_read(message_id):
 
 @chat_bp.route('/api/chat/upload', methods=['POST'])
 @jwt_required()
+@check_permission('manage_chat')
+@guard_payload_size()
+@log_audit('UPLOAD_CHAT_FILE')
 def upload_chat_file():
     """رفع ملف للدردشة"""
     try:
@@ -550,6 +576,9 @@ def upload_chat_file():
 
 @chat_bp.route('/api/chat/sessions/connect', methods=['POST'])
 @jwt_required()
+@check_permission('manage_chat')
+@guard_payload_size()
+@log_audit('CONNECT_CHAT_SESSION')
 def connect_chat_session():
     """إنشاء جلسة دردشة نشطة"""
     try:
@@ -609,6 +638,9 @@ def connect_chat_session():
 
 @chat_bp.route('/api/chat/sessions/disconnect', methods=['POST'])
 @jwt_required()
+@check_permission('manage_chat')
+@guard_payload_size()
+@log_audit('DISCONNECT_CHAT_SESSION')
 def disconnect_chat_session():
     """قطع جلسة الدردشة"""
     try:
@@ -644,6 +676,8 @@ def disconnect_chat_session():
 
 @chat_bp.route('/api/chat/dashboard', methods=['GET'])
 @jwt_required()
+@check_permission('view_dashboard')
+@log_audit('GET_CHAT_DASHBOARD')
 def get_chat_dashboard():
     """استرجاع بيانات لوحة تحكم الدردشة"""
     try:

@@ -1,5 +1,29 @@
 {
-  "invoices": [],
+  "invoices": [
+    {
+      "_id": "INV-1768782396747",
+      "invoiceNumber": "INV-1",
+      "clientName": "Test Client",
+      "clientEmail": "client@test.com",
+      "amount": 1500,
+      "items": [
+        {
+          "description": "Service A",
+          "quantity": 2,
+          "price": 500
+        },
+        {
+          "description": "Service B",
+          "quantity": 1,
+          "price": 500
+        }
+      ],
+      "status": "pending",
+      "issueDate": "2026-01-19T00:26:36.747Z",
+      "dueDate": "2026-02-15",
+      "createdAt": "2026-01-19T00:26:36.747Z"
+    }
+  ],
   "expenses": [
     {
       "_id": "EXP-1768263003614",
@@ -19480,8 +19504,3434 @@
       "status": "pending",
       "attachments": [],
       "createdAt": "2026-01-18T12:35:26.783Z"
+    },
+    {
+      "_id": "EXP-1768740133743",
+      "expenseNumber": "EXP-1949",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T12:42:13.743Z"
+    },
+    {
+      "_id": "EXP-1768745065634",
+      "expenseNumber": "EXP-1950",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T14:04:25.634Z"
+    },
+    {
+      "_id": "EXP-1768745350933",
+      "expenseNumber": "EXP-1951",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T14:09:10.933Z"
+    },
+    {
+      "_id": "EXP-1768745435055",
+      "expenseNumber": "EXP-1952",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T14:10:35.055Z"
+    },
+    {
+      "_id": "EXP-1768745872165",
+      "expenseNumber": "EXP-1953",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T14:17:52.165Z"
+    },
+    {
+      "_id": "EXP-1768745999259",
+      "expenseNumber": "EXP-1954",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T14:19:59.259Z"
+    },
+    {
+      "_id": "EXP-1768746210778",
+      "expenseNumber": "EXP-1955",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T14:23:30.778Z"
+    },
+    {
+      "_id": "EXP-1768746315960",
+      "expenseNumber": "EXP-1956",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T14:25:15.960Z"
+    },
+    {
+      "_id": "EXP-1768746678913",
+      "expenseNumber": "EXP-1957",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T14:31:18.913Z"
+    },
+    {
+      "_id": "EXP-1768747767456",
+      "expenseNumber": "EXP-1958",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T14:49:27.456Z"
+    },
+    {
+      "_id": "EXP-1768747965990",
+      "expenseNumber": "EXP-1959",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T14:52:45.990Z"
+    },
+    {
+      "_id": "EXP-1768749493497",
+      "expenseNumber": "EXP-1960",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T15:18:13.497Z"
+    },
+    {
+      "_id": "EXP-1768749663657",
+      "expenseNumber": "EXP-1961",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T15:21:03.657Z"
+    },
+    {
+      "_id": "EXP-1768749794031",
+      "expenseNumber": "EXP-1962",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T15:23:14.031Z"
+    },
+    {
+      "_id": "EXP-1768750025741",
+      "expenseNumber": "EXP-1963",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T15:27:05.741Z"
+    },
+    {
+      "_id": "EXP-1768750365450",
+      "expenseNumber": "EXP-1964",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T15:32:45.450Z"
+    },
+    {
+      "_id": "EXP-1768751288650",
+      "expenseNumber": "EXP-1965",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T15:48:08.650Z"
+    },
+    {
+      "_id": "EXP-1768751551113",
+      "expenseNumber": "EXP-1966",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T15:52:31.113Z"
+    },
+    {
+      "_id": "EXP-1768752030092",
+      "expenseNumber": "EXP-1967",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T16:00:30.092Z"
+    },
+    {
+      "_id": "EXP-1768769558528",
+      "expenseNumber": "EXP-1968",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T20:52:38.528Z"
+    },
+    {
+      "_id": "EXP-1768769652711",
+      "expenseNumber": "EXP-1969",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T20:54:12.711Z"
+    },
+    {
+      "_id": "EXP-1768769808350",
+      "expenseNumber": "EXP-1970",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T20:56:48.350Z"
+    },
+    {
+      "_id": "EXP-1768769850607",
+      "expenseNumber": "EXP-1971",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T20:57:30.607Z"
+    },
+    {
+      "_id": "EXP-1768769895093",
+      "expenseNumber": "EXP-1972",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T20:58:15.093Z"
+    },
+    {
+      "_id": "EXP-1768771054905",
+      "expenseNumber": "EXP-1973",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T21:17:34.905Z"
+    },
+    {
+      "_id": "EXP-1768771083579",
+      "expenseNumber": "EXP-1974",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T21:18:03.579Z"
+    },
+    {
+      "_id": "EXP-1768771405687",
+      "expenseNumber": "EXP-1975",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T21:23:25.687Z"
+    },
+    {
+      "_id": "EXP-1768771805289",
+      "expenseNumber": "EXP-1976",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T21:30:05.289Z"
+    },
+    {
+      "_id": "EXP-1768771842525",
+      "expenseNumber": "EXP-1977",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T21:30:42.525Z"
+    },
+    {
+      "_id": "EXP-1768771911253",
+      "expenseNumber": "EXP-1978",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T21:31:51.254Z"
+    },
+    {
+      "_id": "EXP-1768772545015",
+      "expenseNumber": "EXP-1979",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T21:42:25.015Z"
+    },
+    {
+      "_id": "EXP-1768773245661",
+      "expenseNumber": "EXP-1980",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T21:54:05.661Z"
+    },
+    {
+      "_id": "EXP-1768773272910",
+      "expenseNumber": "EXP-1981",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T21:54:32.910Z"
+    },
+    {
+      "_id": "EXP-1768773308079",
+      "expenseNumber": "EXP-1982",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T21:55:08.079Z"
+    },
+    {
+      "_id": "EXP-1768773383380",
+      "expenseNumber": "EXP-1983",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T21:56:23.380Z"
+    },
+    {
+      "_id": "EXP-1768773765751",
+      "expenseNumber": "EXP-1984",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T22:02:45.751Z"
+    },
+    {
+      "_id": "EXP-1768773795829",
+      "expenseNumber": "EXP-1985",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T22:03:15.829Z"
+    },
+    {
+      "_id": "EXP-1768773823045",
+      "expenseNumber": "EXP-1986",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T22:03:43.045Z"
+    },
+    {
+      "_id": "EXP-1768773851275",
+      "expenseNumber": "EXP-1987",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T22:04:11.275Z"
+    },
+    {
+      "_id": "EXP-1768774055238",
+      "expenseNumber": "EXP-1988",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T22:07:35.238Z"
+    },
+    {
+      "_id": "EXP-1768774475748",
+      "expenseNumber": "EXP-1989",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T22:14:35.748Z"
+    },
+    {
+      "_id": "EXP-1768774569034",
+      "expenseNumber": "EXP-1990",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T22:16:09.034Z"
+    },
+    {
+      "_id": "EXP-1768774841069",
+      "expenseNumber": "EXP-1991",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T22:20:41.069Z"
+    },
+    {
+      "_id": "EXP-1768775049825",
+      "expenseNumber": "EXP-1992",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T22:24:09.825Z"
+    },
+    {
+      "_id": "EXP-1768775107004",
+      "expenseNumber": "EXP-1993",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T22:25:07.004Z"
+    },
+    {
+      "_id": "EXP-1768775138091",
+      "expenseNumber": "EXP-1994",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T22:25:38.091Z"
+    },
+    {
+      "_id": "EXP-1768775182126",
+      "expenseNumber": "EXP-1995",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T22:26:22.126Z"
+    },
+    {
+      "_id": "EXP-1768775207485",
+      "expenseNumber": "EXP-1996",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T22:26:47.485Z"
+    },
+    {
+      "_id": "EXP-1768775234358",
+      "expenseNumber": "EXP-1997",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T22:27:14.358Z"
+    },
+    {
+      "_id": "EXP-1768776329110",
+      "expenseNumber": "EXP-1998",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T22:45:29.110Z"
+    },
+    {
+      "_id": "EXP-1768776735055",
+      "expenseNumber": "EXP-1999",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T22:52:15.055Z"
+    },
+    {
+      "_id": "EXP-1768777047153",
+      "expenseNumber": "EXP-2000",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T22:57:27.153Z"
+    },
+    {
+      "_id": "EXP-1768777983936",
+      "expenseNumber": "EXP-2001",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T23:13:03.936Z"
+    },
+    {
+      "_id": "EXP-1768778123911",
+      "expenseNumber": "EXP-2002",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T23:15:23.911Z"
+    },
+    {
+      "_id": "EXP-1768778236712",
+      "expenseNumber": "EXP-2003",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T23:17:16.712Z"
+    },
+    {
+      "_id": "EXP-1768778530901",
+      "expenseNumber": "EXP-2004",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T23:22:10.902Z"
+    },
+    {
+      "_id": "EXP-1768779107205",
+      "expenseNumber": "EXP-2005",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T23:31:47.205Z"
+    },
+    {
+      "_id": "EXP-1768779624694",
+      "expenseNumber": "EXP-2006",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-18T23:40:24.694Z"
+    },
+    {
+      "_id": "EXP-1768782396747",
+      "expenseNumber": "EXP-2007",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-19T00:26:36.747Z"
+    },
+    {
+      "_id": "EXP-1768782552191",
+      "expenseNumber": "EXP-2008",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-19T00:29:12.191Z",
+      "updatedAt": "2026-01-19T00:29:12.191Z"
+    },
+    {
+      "_id": "EXP-1768782602455",
+      "expenseNumber": "EXP-2009",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-19T00:30:02.455Z",
+      "updatedAt": "2026-01-19T00:30:02.455Z"
+    },
+    {
+      "_id": "EXP-1768782985077",
+      "expenseNumber": "EXP-2010",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-19T00:36:25.077Z",
+      "updatedAt": "2026-01-19T00:36:25.077Z"
+    },
+    {
+      "_id": "EXP-1768783084575",
+      "expenseNumber": "EXP-2011",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-19T00:38:04.575Z",
+      "updatedAt": "2026-01-19T00:38:04.575Z"
+    },
+    {
+      "_id": "EXP-1768783108205",
+      "expenseNumber": "EXP-2012",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-19T00:38:28.205Z",
+      "updatedAt": "2026-01-19T00:38:28.255Z"
+    },
+    {
+      "_id": "EXP-1768783203065",
+      "expenseNumber": "EXP-2013",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-19T00:40:03.065Z"
+    },
+    {
+      "_id": "EXP-1768783627045",
+      "expenseNumber": "EXP-2014",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-19T00:47:07.045Z"
+    },
+    {
+      "_id": "EXP-1768783629146",
+      "expenseNumber": "EXP-2015",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-19T00:47:09.146Z",
+      "updatedAt": "2026-01-19T00:47:09.184Z"
+    },
+    {
+      "_id": "EXP-1768783757458",
+      "expenseNumber": "EXP-2016",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-19T00:49:17.458Z"
+    },
+    {
+      "_id": "EXP-1768783760352",
+      "expenseNumber": "EXP-2017",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-19T00:49:20.352Z",
+      "updatedAt": "2026-01-19T00:49:20.352Z"
+    },
+    {
+      "_id": "EXP-1768784075937",
+      "expenseNumber": "EXP-2018",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-19T00:54:35.937Z",
+      "updatedAt": "2026-01-19T00:54:35.972Z"
+    },
+    {
+      "_id": "EXP-1768784077177",
+      "expenseNumber": "EXP-2019",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-19T00:54:37.177Z"
+    },
+    {
+      "_id": "EXP-1768784413004",
+      "expenseNumber": "EXP-2020",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-19T01:00:13.004Z"
+    },
+    {
+      "_id": "EXP-1768784414392",
+      "expenseNumber": "EXP-2021",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-19T01:00:14.392Z",
+      "updatedAt": "2026-01-19T01:00:14.430Z"
+    },
+    {
+      "_id": "EXP-1768784579393",
+      "expenseNumber": "EXP-2022",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-19T01:02:59.393Z",
+      "updatedAt": "2026-01-19T01:02:59.393Z"
+    },
+    {
+      "_id": "EXP-1768784833331",
+      "expenseNumber": "EXP-2023",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-19T01:07:13.331Z"
+    },
+    {
+      "_id": "EXP-1768784835837",
+      "expenseNumber": "EXP-2024",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-19T01:07:15.837Z",
+      "updatedAt": "2026-01-19T01:07:15.871Z"
+    },
+    {
+      "_id": "EXP-1768785133786",
+      "expenseNumber": "EXP-2025",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-19T01:12:13.786Z",
+      "updatedAt": "2026-01-19T01:12:13.786Z"
+    },
+    {
+      "_id": "EXP-1768785166598",
+      "expenseNumber": "EXP-2026",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-19T01:12:46.598Z",
+      "updatedAt": "2026-01-19T01:12:46.631Z"
+    },
+    {
+      "_id": "EXP-1768785167972",
+      "expenseNumber": "EXP-2027",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-19T01:12:47.972Z"
+    },
+    {
+      "_id": "EXP-1768785236103",
+      "expenseNumber": "EXP-2028",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-19T01:13:56.103Z"
+    },
+    {
+      "_id": "EXP-1768785552899",
+      "expenseNumber": "EXP-2029",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-19T01:19:12.899Z"
+    },
+    {
+      "_id": "EXP-1768785556505",
+      "expenseNumber": "EXP-2030",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-19T01:19:16.505Z",
+      "updatedAt": "2026-01-19T01:19:16.549Z"
+    },
+    {
+      "_id": "EXP-1768786199730",
+      "expenseNumber": "EXP-2031",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-19T01:29:59.730Z",
+      "updatedAt": "2026-01-19T01:29:59.764Z"
+    },
+    {
+      "_id": "EXP-1768786205575",
+      "expenseNumber": "EXP-2032",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-19T01:30:05.575Z"
+    },
+    {
+      "_id": "EXP-1768789928950",
+      "expenseNumber": "EXP-2033",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-19T02:32:08.950Z",
+      "updatedAt": "2026-01-19T02:32:08.950Z"
+    },
+    {
+      "_id": "EXP-1768790134504",
+      "expenseNumber": "EXP-2034",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-19T02:35:34.504Z",
+      "updatedAt": "2026-01-19T02:35:34.549Z"
+    },
+    {
+      "_id": "EXP-1768790138729",
+      "expenseNumber": "EXP-2035",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-19T02:35:38.729Z"
+    },
+    {
+      "_id": "EXP-1768791126104",
+      "expenseNumber": "EXP-2036",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-19T02:52:06.104Z",
+      "updatedAt": "2026-01-19T02:52:06.144Z"
+    },
+    {
+      "_id": "EXP-1768791222292",
+      "expenseNumber": "EXP-2037",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-19T02:53:42.292Z"
+    },
+    {
+      "_id": "EXP-1768791316399",
+      "expenseNumber": "EXP-2038",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-19T02:55:16.399Z",
+      "updatedAt": "2026-01-19T02:55:16.399Z"
+    },
+    {
+      "_id": "EXP-1768791589869",
+      "expenseNumber": "EXP-2039",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-19T02:59:49.869Z"
+    },
+    {
+      "_id": "EXP-1768791593943",
+      "expenseNumber": "EXP-2040",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-19T02:59:53.943Z",
+      "updatedAt": "2026-01-19T02:59:53.980Z"
+    },
+    {
+      "_id": "EXP-1768791994985",
+      "expenseNumber": "EXP-2041",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-19T03:06:34.985Z"
+    },
+    {
+      "_id": "EXP-1768792136263",
+      "expenseNumber": "EXP-2042",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-19T03:08:56.263Z",
+      "updatedAt": "2026-01-19T03:08:56.263Z"
+    },
+    {
+      "_id": "EXP-1768792319500",
+      "expenseNumber": "EXP-2043",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-19T03:11:59.500Z"
+    },
+    {
+      "_id": "EXP-1768792326901",
+      "expenseNumber": "EXP-2044",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-19T03:12:06.901Z",
+      "updatedAt": "2026-01-19T03:12:06.945Z"
+    },
+    {
+      "_id": "EXP-1768796669822",
+      "expenseNumber": "EXP-2045",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-19T04:24:29.822Z"
+    },
+    {
+      "_id": "EXP-1768796670380",
+      "expenseNumber": "EXP-2046",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-19T04:24:30.380Z",
+      "updatedAt": "2026-01-19T04:24:30.380Z"
+    },
+    {
+      "_id": "EXP-1768796894048",
+      "expenseNumber": "EXP-2047",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-19T04:28:14.048Z"
+    },
+    {
+      "_id": "EXP-1768797705175",
+      "expenseNumber": "EXP-2048",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-19T04:41:45.175Z",
+      "updatedAt": "2026-01-19T04:41:45.175Z"
+    },
+    {
+      "_id": "EXP-1768797705886",
+      "expenseNumber": "EXP-2049",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-19T04:41:45.886Z"
+    },
+    {
+      "_id": "EXP-1768836857532",
+      "expenseNumber": "EXP-2050",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-19T15:34:17.532Z"
+    },
+    {
+      "_id": "EXP-1768836858562",
+      "expenseNumber": "EXP-2051",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-19T15:34:18.562Z",
+      "updatedAt": "2026-01-19T15:34:18.562Z"
+    },
+    {
+      "_id": "EXP-1768838421930",
+      "expenseNumber": "EXP-2052",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-19T16:00:21.930Z"
+    },
+    {
+      "_id": "EXP-1768838423130",
+      "expenseNumber": "EXP-2053",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-19T16:00:23.130Z",
+      "updatedAt": "2026-01-19T16:00:23.130Z"
+    },
+    {
+      "_id": "EXP-1768839660222",
+      "expenseNumber": "EXP-2054",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-19T16:21:00.222Z",
+      "updatedAt": "2026-01-19T16:21:00.222Z"
+    },
+    {
+      "_id": "EXP-1768839660775",
+      "expenseNumber": "EXP-2055",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-19T16:21:00.775Z"
+    },
+    {
+      "_id": "EXP-1768839938709",
+      "expenseNumber": "EXP-2056",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-19T16:25:38.709Z",
+      "updatedAt": "2026-01-19T16:25:38.709Z"
+    },
+    {
+      "_id": "EXP-1768839939354",
+      "expenseNumber": "EXP-2057",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-19T16:25:39.354Z"
+    },
+    {
+      "_id": "EXP-1768840754623",
+      "expenseNumber": "EXP-2058",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-19T16:39:14.623Z"
+    },
+    {
+      "_id": "EXP-1768840756951",
+      "expenseNumber": "EXP-2059",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-19T16:39:16.951Z",
+      "updatedAt": "2026-01-19T16:39:16.951Z"
+    },
+    {
+      "_id": "EXP-1768840950658",
+      "expenseNumber": "EXP-2060",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-19T16:42:30.658Z"
+    },
+    {
+      "_id": "EXP-1768840951526",
+      "expenseNumber": "EXP-2061",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-19T16:42:31.526Z",
+      "updatedAt": "2026-01-19T16:42:31.526Z"
+    },
+    {
+      "_id": "EXP-1768841772236",
+      "expenseNumber": "EXP-2062",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-19T16:56:12.236Z"
+    },
+    {
+      "_id": "EXP-1768841773552",
+      "expenseNumber": "EXP-2063",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-19T16:56:13.552Z",
+      "updatedAt": "2026-01-19T16:56:13.552Z"
+    },
+    {
+      "_id": "EXP-1768841978930",
+      "expenseNumber": "EXP-2064",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-19T16:59:38.930Z",
+      "updatedAt": "2026-01-19T16:59:38.930Z"
+    },
+    {
+      "_id": "EXP-1768841990260",
+      "expenseNumber": "EXP-2065",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-19T16:59:50.260Z"
+    },
+    {
+      "_id": "EXP-1768842803417",
+      "expenseNumber": "EXP-2066",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-19T17:13:23.417Z",
+      "updatedAt": "2026-01-19T17:13:23.417Z"
+    },
+    {
+      "_id": "EXP-1768842808669",
+      "expenseNumber": "EXP-2067",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-19T17:13:28.669Z"
+    },
+    {
+      "_id": "EXP-1768907557609",
+      "expenseNumber": "EXP-2068",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-20T11:12:37.609Z"
+    },
+    {
+      "_id": "EXP-1768907726748",
+      "expenseNumber": "EXP-2069",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-20T11:15:26.748Z",
+      "updatedAt": "2026-01-20T11:15:26.748Z"
+    },
+    {
+      "_id": "EXP-1768908547543",
+      "expenseNumber": "EXP-2070",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-20T11:29:07.543Z",
+      "updatedAt": "2026-01-20T11:29:07.543Z"
+    },
+    {
+      "_id": "EXP-1768908606804",
+      "expenseNumber": "EXP-2071",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-20T11:30:06.804Z"
+    },
+    {
+      "_id": "EXP-1768908871188",
+      "expenseNumber": "EXP-2072",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-20T11:34:31.188Z"
+    },
+    {
+      "_id": "EXP-1768909132190",
+      "expenseNumber": "EXP-2073",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-20T11:38:52.190Z",
+      "updatedAt": "2026-01-20T11:38:52.190Z"
+    },
+    {
+      "_id": "EXP-1768910223623",
+      "expenseNumber": "EXP-2074",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-20T11:57:03.623Z"
+    },
+    {
+      "_id": "EXP-1768910489863",
+      "expenseNumber": "EXP-2075",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-20T12:01:29.863Z",
+      "updatedAt": "2026-01-20T12:01:29.863Z"
+    },
+    {
+      "_id": "EXP-1768911025951",
+      "expenseNumber": "EXP-2076",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-20T12:10:25.951Z"
+    },
+    {
+      "_id": "EXP-1768911102411",
+      "expenseNumber": "EXP-2077",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-20T12:11:42.411Z"
+    },
+    {
+      "_id": "EXP-1768911122639",
+      "expenseNumber": "EXP-2078",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-20T12:12:02.639Z"
+    },
+    {
+      "_id": "EXP-1768911125618",
+      "expenseNumber": "EXP-2079",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-20T12:12:05.618Z",
+      "updatedAt": "2026-01-20T12:12:05.718Z"
+    },
+    {
+      "_id": "EXP-1768911196909",
+      "expenseNumber": "EXP-2080",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-20T12:13:16.909Z",
+      "updatedAt": "2026-01-20T12:13:16.948Z"
+    },
+    {
+      "_id": "EXP-1768911217058",
+      "expenseNumber": "EXP-2081",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-20T12:13:37.058Z",
+      "updatedAt": "2026-01-20T12:13:37.312Z"
+    },
+    {
+      "_id": "EXP-1768911399932",
+      "expenseNumber": "EXP-2082",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-20T12:16:39.932Z"
+    },
+    {
+      "_id": "EXP-1768911407820",
+      "expenseNumber": "EXP-2083",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-20T12:16:47.820Z",
+      "updatedAt": "2026-01-20T12:16:47.930Z"
+    },
+    {
+      "_id": "EXP-1768912856981",
+      "expenseNumber": "EXP-2084",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-20T12:40:56.981Z"
+    },
+    {
+      "_id": "EXP-1768912940499",
+      "expenseNumber": "EXP-2085",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-20T12:42:20.499Z",
+      "updatedAt": "2026-01-20T12:42:20.536Z"
+    },
+    {
+      "_id": "EXP-1768913394878",
+      "expenseNumber": "EXP-2086",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-20T12:49:54.878Z"
+    },
+    {
+      "_id": "EXP-1768913397144",
+      "expenseNumber": "EXP-2087",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-20T12:49:57.144Z",
+      "updatedAt": "2026-01-20T12:49:57.191Z"
+    },
+    {
+      "_id": "EXP-1768913626343",
+      "expenseNumber": "EXP-2088",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-20T12:53:46.343Z"
+    },
+    {
+      "_id": "EXP-1768913639202",
+      "expenseNumber": "EXP-2089",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-20T12:53:59.202Z",
+      "updatedAt": "2026-01-20T12:53:59.393Z"
+    },
+    {
+      "_id": "EXP-1768913989923",
+      "expenseNumber": "EXP-2090",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-20T12:59:49.923Z"
+    },
+    {
+      "_id": "EXP-1768913992449",
+      "expenseNumber": "EXP-2091",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-20T12:59:52.449Z",
+      "updatedAt": "2026-01-20T12:59:52.502Z"
+    },
+    {
+      "_id": "EXP-1768914175504",
+      "expenseNumber": "EXP-2092",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-20T13:02:55.504Z"
+    },
+    {
+      "_id": "EXP-1768914184873",
+      "expenseNumber": "EXP-2093",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-20T13:03:04.873Z",
+      "updatedAt": "2026-01-20T13:03:05.044Z"
+    },
+    {
+      "_id": "EXP-1768914866090",
+      "expenseNumber": "EXP-2094",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-20T13:14:26.090Z"
+    },
+    {
+      "_id": "EXP-1768915018087",
+      "expenseNumber": "EXP-2095",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-20T13:16:58.087Z",
+      "updatedAt": "2026-01-20T13:16:58.149Z"
+    },
+    {
+      "_id": "EXP-1768915182411",
+      "expenseNumber": "EXP-2096",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-20T13:19:42.411Z"
+    },
+    {
+      "_id": "EXP-1768915198555",
+      "expenseNumber": "EXP-2097",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-20T13:19:58.555Z",
+      "updatedAt": "2026-01-20T13:19:58.682Z"
+    },
+    {
+      "_id": "EXP-1768915634087",
+      "expenseNumber": "EXP-2098",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-20T13:27:14.087Z"
+    },
+    {
+      "_id": "EXP-1768915643281",
+      "expenseNumber": "EXP-2099",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-20T13:27:23.282Z",
+      "updatedAt": "2026-01-20T13:27:23.570Z"
+    },
+    {
+      "_id": "EXP-1768920274970",
+      "expenseNumber": "EXP-2100",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-20T14:44:34.970Z"
+    },
+    {
+      "_id": "EXP-1768920318769",
+      "expenseNumber": "EXP-2101",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-20T14:45:18.769Z",
+      "updatedAt": "2026-01-20T14:45:18.808Z"
+    },
+    {
+      "_id": "EXP-1768920782137",
+      "expenseNumber": "EXP-2102",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-20T14:53:02.137Z"
+    },
+    {
+      "_id": "EXP-1768920840565",
+      "expenseNumber": "EXP-2103",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-20T14:54:00.565Z",
+      "updatedAt": "2026-01-20T14:54:00.593Z"
+    },
+    {
+      "_id": "EXP-1768921273349",
+      "expenseNumber": "EXP-2104",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-20T15:01:13.349Z"
+    },
+    {
+      "_id": "EXP-1768921335291",
+      "expenseNumber": "EXP-2105",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-20T15:02:15.291Z",
+      "updatedAt": "2026-01-20T15:02:15.318Z"
+    },
+    {
+      "_id": "EXP-1768921776483",
+      "expenseNumber": "EXP-2106",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-20T15:09:36.484Z"
+    },
+    {
+      "_id": "EXP-1768921834633",
+      "expenseNumber": "EXP-2107",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-20T15:10:34.633Z",
+      "updatedAt": "2026-01-20T15:10:34.673Z"
+    },
+    {
+      "_id": "EXP-1768922202872",
+      "expenseNumber": "EXP-2108",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-20T15:16:42.872Z"
+    },
+    {
+      "_id": "EXP-1768922265442",
+      "expenseNumber": "EXP-2109",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-20T15:17:45.442Z",
+      "updatedAt": "2026-01-20T15:17:45.483Z"
+    },
+    {
+      "_id": "EXP-1768922684988",
+      "expenseNumber": "EXP-2110",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-20T15:24:44.988Z"
+    },
+    {
+      "_id": "EXP-1768922744042",
+      "expenseNumber": "EXP-2111",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-20T15:25:44.043Z",
+      "updatedAt": "2026-01-20T15:25:44.077Z"
+    },
+    {
+      "_id": "EXP-1768923545052",
+      "expenseNumber": "EXP-2112",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-20T15:39:05.052Z"
+    },
+    {
+      "_id": "EXP-1768923612039",
+      "expenseNumber": "EXP-2113",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-20T15:40:12.039Z",
+      "updatedAt": "2026-01-20T15:40:12.079Z"
+    },
+    {
+      "_id": "EXP-1768923859375",
+      "expenseNumber": "EXP-2114",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-20T15:44:19.376Z"
+    },
+    {
+      "_id": "EXP-1768923917760",
+      "expenseNumber": "EXP-2115",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-20T15:45:17.760Z",
+      "updatedAt": "2026-01-20T15:45:17.800Z"
+    },
+    {
+      "_id": "EXP-1768924241317",
+      "expenseNumber": "EXP-2116",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-20T15:50:41.317Z"
+    },
+    {
+      "_id": "EXP-1768924303189",
+      "expenseNumber": "EXP-2117",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-20T15:51:43.189Z",
+      "updatedAt": "2026-01-20T15:51:43.235Z"
+    },
+    {
+      "_id": "EXP-1768949755114",
+      "expenseNumber": "EXP-2118",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-20T22:55:55.114Z"
+    },
+    {
+      "_id": "EXP-1768949800353",
+      "expenseNumber": "EXP-2119",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-20T22:56:40.353Z",
+      "updatedAt": "2026-01-20T22:56:40.375Z"
+    },
+    {
+      "_id": "EXP-1768951719581",
+      "expenseNumber": "EXP-2120",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-20T23:28:39.581Z"
+    },
+    {
+      "_id": "EXP-1768951772498",
+      "expenseNumber": "EXP-2121",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-20T23:29:32.498Z",
+      "updatedAt": "2026-01-20T23:29:32.524Z"
+    },
+    {
+      "_id": "EXP-1768953349019",
+      "expenseNumber": "EXP-2122",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-20T23:55:49.019Z"
+    },
+    {
+      "_id": "EXP-1768953401184",
+      "expenseNumber": "EXP-2123",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-20T23:56:41.184Z",
+      "updatedAt": "2026-01-20T23:56:41.206Z"
+    },
+    {
+      "_id": "EXP-1768953849273",
+      "expenseNumber": "EXP-2124",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-21T00:04:09.273Z"
+    },
+    {
+      "_id": "EXP-1768953900830",
+      "expenseNumber": "EXP-2125",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-21T00:05:00.830Z",
+      "updatedAt": "2026-01-21T00:05:00.855Z"
+    },
+    {
+      "_id": "EXP-1769168296189",
+      "expenseNumber": "EXP-2126",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-23T11:38:16.189Z"
+    },
+    {
+      "_id": "EXP-1769168399206",
+      "expenseNumber": "EXP-2127",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-23T11:39:59.206Z",
+      "updatedAt": "2026-01-23T11:39:59.295Z"
+    },
+    {
+      "_id": "EXP-1769168686971",
+      "expenseNumber": "EXP-2128",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-23T11:44:46.971Z"
+    },
+    {
+      "_id": "EXP-1769168744531",
+      "expenseNumber": "EXP-2129",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-23T11:45:44.531Z",
+      "updatedAt": "2026-01-23T11:45:44.570Z"
+    },
+    {
+      "_id": "EXP-1769169686339",
+      "expenseNumber": "EXP-2130",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-23T12:01:26.339Z"
+    },
+    {
+      "_id": "EXP-1769169737532",
+      "expenseNumber": "EXP-2131",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-23T12:02:17.532Z",
+      "updatedAt": "2026-01-23T12:02:17.579Z"
+    },
+    {
+      "_id": "EXP-1769170252464",
+      "expenseNumber": "EXP-2132",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-23T12:10:52.464Z"
+    },
+    {
+      "_id": "EXP-1769170310253",
+      "expenseNumber": "EXP-2133",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-23T12:11:50.253Z",
+      "updatedAt": "2026-01-23T12:11:50.289Z"
+    },
+    {
+      "_id": "EXP-1769172417194",
+      "expenseNumber": "EXP-2134",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-23T12:46:57.194Z"
+    },
+    {
+      "_id": "EXP-1769172477567",
+      "expenseNumber": "EXP-2135",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-23T12:47:57.567Z",
+      "updatedAt": "2026-01-23T12:47:57.603Z"
+    },
+    {
+      "_id": "EXP-1769204954070",
+      "expenseNumber": "EXP-2136",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-23T21:49:14.070Z"
+    },
+    {
+      "_id": "EXP-1769205007850",
+      "expenseNumber": "EXP-2137",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-23T21:50:07.850Z",
+      "updatedAt": "2026-01-23T21:50:07.902Z"
+    },
+    {
+      "_id": "EXP-1769210833579",
+      "expenseNumber": "EXP-2138",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-23T23:27:13.579Z"
+    },
+    {
+      "_id": "EXP-1769210887030",
+      "expenseNumber": "EXP-2139",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-23T23:28:07.030Z",
+      "updatedAt": "2026-01-23T23:28:07.071Z"
+    },
+    {
+      "_id": "EXP-1769232338650",
+      "expenseNumber": "EXP-2140",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-24T05:25:38.650Z"
+    },
+    {
+      "_id": "EXP-1769232395995",
+      "expenseNumber": "EXP-2141",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-24T05:26:35.995Z",
+      "updatedAt": "2026-01-24T05:26:36.041Z"
+    },
+    {
+      "_id": "EXP-1769234962285",
+      "expenseNumber": "EXP-2142",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-24T06:09:22.285Z"
+    },
+    {
+      "_id": "EXP-1769235026729",
+      "expenseNumber": "EXP-2143",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-24T06:10:26.729Z",
+      "updatedAt": "2026-01-24T06:10:26.776Z"
+    },
+    {
+      "_id": "EXP-1769236089334",
+      "expenseNumber": "EXP-2144",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-24T06:28:09.334Z"
+    },
+    {
+      "_id": "EXP-1769236141686",
+      "expenseNumber": "EXP-2145",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-24T06:29:01.686Z",
+      "updatedAt": "2026-01-24T06:29:01.737Z"
+    },
+    {
+      "_id": "EXP-1769320763933",
+      "expenseNumber": "EXP-2146",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-25T05:59:23.933Z"
+    },
+    {
+      "_id": "EXP-1769320830773",
+      "expenseNumber": "EXP-2147",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-25T06:00:30.773Z",
+      "updatedAt": "2026-01-25T06:00:30.809Z"
+    },
+    {
+      "_id": "EXP-1769321632210",
+      "expenseNumber": "EXP-2148",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-25T06:13:52.210Z"
+    },
+    {
+      "_id": "EXP-1769321686881",
+      "expenseNumber": "EXP-2149",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-25T06:14:46.881Z",
+      "updatedAt": "2026-01-25T06:14:46.923Z"
+    },
+    {
+      "_id": "EXP-1769321832605",
+      "expenseNumber": "EXP-2150",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-25T06:17:12.605Z"
+    },
+    {
+      "_id": "EXP-1769321885233",
+      "expenseNumber": "EXP-2151",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-25T06:18:05.233Z",
+      "updatedAt": "2026-01-25T06:18:05.273Z"
+    },
+    {
+      "_id": "EXP-1769322191826",
+      "expenseNumber": "EXP-2152",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-25T06:23:11.826Z"
+    },
+    {
+      "_id": "EXP-1769322247612",
+      "expenseNumber": "EXP-2153",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-25T06:24:07.612Z",
+      "updatedAt": "2026-01-25T06:24:07.650Z"
+    },
+    {
+      "_id": "EXP-1769322571086",
+      "expenseNumber": "EXP-2154",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-25T06:29:31.086Z"
+    },
+    {
+      "_id": "EXP-1769322645254",
+      "expenseNumber": "EXP-2155",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-25T06:30:45.254Z",
+      "updatedAt": "2026-01-25T06:30:45.302Z"
+    },
+    {
+      "_id": "EXP-1769323746989",
+      "expenseNumber": "EXP-2156",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-25T06:49:06.989Z"
+    },
+    {
+      "_id": "EXP-1769323752331",
+      "expenseNumber": "EXP-2157",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-25T06:49:12.331Z",
+      "updatedAt": "2026-01-25T06:49:12.389Z"
+    },
+    {
+      "_id": "EXP-1769323830195",
+      "expenseNumber": "EXP-2158",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-25T06:50:30.195Z"
+    },
+    {
+      "_id": "EXP-1769323899702",
+      "expenseNumber": "EXP-2159",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-25T06:51:39.702Z",
+      "updatedAt": "2026-01-25T06:51:39.754Z"
+    },
+    {
+      "_id": "EXP-1769324145344",
+      "expenseNumber": "EXP-2160",
+      "category": "Office Supplies",
+      "description": "Printer ink",
+      "amount": 100,
+      "status": "pending",
+      "attachments": [],
+      "createdAt": "2026-01-25T06:55:45.344Z"
+    },
+    {
+      "_id": "EXP-1769324206053",
+      "expenseNumber": "EXP-2161",
+      "category": "Office Supplies",
+      "description": "Printer paper and ink",
+      "amount": 250.5,
+      "vendor": "Office Depot",
+      "status": "approved",
+      "attachments": [],
+      "createdAt": "2026-01-25T06:56:46.053Z",
+      "updatedAt": "2026-01-25T06:56:46.097Z"
     }
   ],
-  "budgets": [],
+  "budgets": [
+    {
+      "_id": "BUD-1768782396747",
+      "budgetNumber": "BUD-1",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-19T00:26:36.747Z"
+    },
+    {
+      "_id": "BUD-1768782552191",
+      "budgetNumber": "BUD-2",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-19T00:29:12.191Z"
+    },
+    {
+      "_id": "BUD-1768782602455",
+      "budgetNumber": "BUD-3",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-19T00:30:02.455Z"
+    },
+    {
+      "_id": "BUD-1768782985077",
+      "budgetNumber": "BUD-4",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-19T00:36:25.077Z"
+    },
+    {
+      "_id": "BUD-1768783084575",
+      "budgetNumber": "BUD-5",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-19T00:38:04.575Z"
+    },
+    {
+      "_id": "BUD-1768783108283",
+      "budgetNumber": "BUD-6",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-19T00:38:28.283Z"
+    },
+    {
+      "_id": "BUD-1768783629207",
+      "budgetNumber": "BUD-7",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-19T00:47:09.207Z"
+    },
+    {
+      "_id": "BUD-1768783760352",
+      "budgetNumber": "BUD-8",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-19T00:49:20.352Z"
+    },
+    {
+      "_id": "BUD-1768784075988",
+      "budgetNumber": "BUD-9",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-19T00:54:35.988Z"
+    },
+    {
+      "_id": "BUD-1768784414456",
+      "budgetNumber": "BUD-10",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-19T01:00:14.456Z"
+    },
+    {
+      "_id": "BUD-1768784579393",
+      "budgetNumber": "BUD-11",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-19T01:02:59.393Z"
+    },
+    {
+      "_id": "BUD-1768784835889",
+      "budgetNumber": "BUD-12",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-19T01:07:15.889Z"
+    },
+    {
+      "_id": "BUD-1768785133786",
+      "budgetNumber": "BUD-13",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-19T01:12:13.786Z"
+    },
+    {
+      "_id": "BUD-1768785166653",
+      "budgetNumber": "BUD-14",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-19T01:12:46.653Z"
+    },
+    {
+      "_id": "BUD-1768785556572",
+      "budgetNumber": "BUD-15",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-19T01:19:16.572Z"
+    },
+    {
+      "_id": "BUD-1768786199781",
+      "budgetNumber": "BUD-16",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-19T01:29:59.781Z"
+    },
+    {
+      "_id": "BUD-1768789928950",
+      "budgetNumber": "BUD-17",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-19T02:32:08.950Z"
+    },
+    {
+      "_id": "BUD-1768790134569",
+      "budgetNumber": "BUD-18",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-19T02:35:34.569Z"
+    },
+    {
+      "_id": "BUD-1768791126172",
+      "budgetNumber": "BUD-19",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-19T02:52:06.172Z"
+    },
+    {
+      "_id": "BUD-1768791316399",
+      "budgetNumber": "BUD-20",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-19T02:55:16.399Z"
+    },
+    {
+      "_id": "BUD-1768791593999",
+      "budgetNumber": "BUD-21",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-19T02:59:53.999Z"
+    },
+    {
+      "_id": "BUD-1768792136263",
+      "budgetNumber": "BUD-22",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-19T03:08:56.263Z"
+    },
+    {
+      "_id": "BUD-1768792326971",
+      "budgetNumber": "BUD-23",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-19T03:12:06.971Z"
+    },
+    {
+      "_id": "BUD-1768796670380",
+      "budgetNumber": "BUD-24",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-19T04:24:30.380Z"
+    },
+    {
+      "_id": "BUD-1768797705175",
+      "budgetNumber": "BUD-25",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-19T04:41:45.175Z"
+    },
+    {
+      "_id": "BUD-1768836858562",
+      "budgetNumber": "BUD-26",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-19T15:34:18.562Z"
+    },
+    {
+      "_id": "BUD-1768838423130",
+      "budgetNumber": "BUD-27",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-19T16:00:23.130Z"
+    },
+    {
+      "_id": "BUD-1768839660222",
+      "budgetNumber": "BUD-28",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-19T16:21:00.222Z"
+    },
+    {
+      "_id": "BUD-1768839938709",
+      "budgetNumber": "BUD-29",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-19T16:25:38.709Z"
+    },
+    {
+      "_id": "BUD-1768840756951",
+      "budgetNumber": "BUD-30",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-19T16:39:16.951Z"
+    },
+    {
+      "_id": "BUD-1768840951526",
+      "budgetNumber": "BUD-31",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-19T16:42:31.526Z"
+    },
+    {
+      "_id": "BUD-1768841773552",
+      "budgetNumber": "BUD-32",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-19T16:56:13.552Z"
+    },
+    {
+      "_id": "BUD-1768841978930",
+      "budgetNumber": "BUD-33",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-19T16:59:38.930Z"
+    },
+    {
+      "_id": "BUD-1768842803417",
+      "budgetNumber": "BUD-34",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-19T17:13:23.417Z"
+    },
+    {
+      "_id": "BUD-1768907726748",
+      "budgetNumber": "BUD-35",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-20T11:15:26.748Z"
+    },
+    {
+      "_id": "BUD-1768908547543",
+      "budgetNumber": "BUD-36",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-20T11:29:07.543Z"
+    },
+    {
+      "_id": "BUD-1768909132190",
+      "budgetNumber": "BUD-37",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-20T11:38:52.190Z"
+    },
+    {
+      "_id": "BUD-1768910489863",
+      "budgetNumber": "BUD-38",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-20T12:01:29.863Z"
+    },
+    {
+      "_id": "BUD-1768911125791",
+      "budgetNumber": "BUD-39",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-20T12:12:05.791Z"
+    },
+    {
+      "_id": "BUD-1768911196971",
+      "budgetNumber": "BUD-40",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-20T12:13:16.971Z"
+    },
+    {
+      "_id": "BUD-1768911217379",
+      "budgetNumber": "BUD-41",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-20T12:13:37.379Z"
+    },
+    {
+      "_id": "BUD-1768911407966",
+      "budgetNumber": "BUD-42",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-20T12:16:47.966Z"
+    },
+    {
+      "_id": "BUD-1768912940556",
+      "budgetNumber": "BUD-43",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-20T12:42:20.556Z"
+    },
+    {
+      "_id": "BUD-1768913397229",
+      "budgetNumber": "BUD-44",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-20T12:49:57.229Z"
+    },
+    {
+      "_id": "BUD-1768913639437",
+      "budgetNumber": "BUD-45",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-20T12:53:59.437Z"
+    },
+    {
+      "_id": "BUD-1768913992537",
+      "budgetNumber": "BUD-46",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-20T12:59:52.537Z"
+    },
+    {
+      "_id": "BUD-1768914185092",
+      "budgetNumber": "BUD-47",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-20T13:03:05.092Z"
+    },
+    {
+      "_id": "BUD-1768915018171",
+      "budgetNumber": "BUD-48",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-20T13:16:58.171Z"
+    },
+    {
+      "_id": "BUD-1768915198750",
+      "budgetNumber": "BUD-49",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-20T13:19:58.750Z"
+    },
+    {
+      "_id": "BUD-1768915643610",
+      "budgetNumber": "BUD-50",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-20T13:27:23.610Z"
+    },
+    {
+      "_id": "BUD-1768920318827",
+      "budgetNumber": "BUD-51",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-20T14:45:18.827Z"
+    },
+    {
+      "_id": "BUD-1768920840609",
+      "budgetNumber": "BUD-52",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-20T14:54:00.609Z"
+    },
+    {
+      "_id": "BUD-1768921335330",
+      "budgetNumber": "BUD-53",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-20T15:02:15.330Z"
+    },
+    {
+      "_id": "BUD-1768921834691",
+      "budgetNumber": "BUD-54",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-20T15:10:34.691Z"
+    },
+    {
+      "_id": "BUD-1768922265503",
+      "budgetNumber": "BUD-55",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-20T15:17:45.503Z"
+    },
+    {
+      "_id": "BUD-1768922744096",
+      "budgetNumber": "BUD-56",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-20T15:25:44.096Z"
+    },
+    {
+      "_id": "BUD-1768923612097",
+      "budgetNumber": "BUD-57",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-20T15:40:12.097Z"
+    },
+    {
+      "_id": "BUD-1768923917825",
+      "budgetNumber": "BUD-58",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-20T15:45:17.825Z"
+    },
+    {
+      "_id": "BUD-1768924303250",
+      "budgetNumber": "BUD-59",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-20T15:51:43.250Z"
+    },
+    {
+      "_id": "BUD-1768949800388",
+      "budgetNumber": "BUD-60",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-20T22:56:40.388Z"
+    },
+    {
+      "_id": "BUD-1768951772536",
+      "budgetNumber": "BUD-61",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-20T23:29:32.536Z"
+    },
+    {
+      "_id": "BUD-1768953401217",
+      "budgetNumber": "BUD-62",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-20T23:56:41.217Z"
+    },
+    {
+      "_id": "BUD-1768953900866",
+      "budgetNumber": "BUD-63",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-21T00:05:00.866Z"
+    },
+    {
+      "_id": "BUD-1769168399353",
+      "budgetNumber": "BUD-64",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-23T11:39:59.353Z"
+    },
+    {
+      "_id": "BUD-1769168744592",
+      "budgetNumber": "BUD-65",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-23T11:45:44.592Z"
+    },
+    {
+      "_id": "BUD-1769169737599",
+      "budgetNumber": "BUD-66",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-23T12:02:17.599Z"
+    },
+    {
+      "_id": "BUD-1769170310310",
+      "budgetNumber": "BUD-67",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-23T12:11:50.310Z"
+    },
+    {
+      "_id": "BUD-1769172477621",
+      "budgetNumber": "BUD-68",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-23T12:47:57.621Z"
+    },
+    {
+      "_id": "BUD-1769205007927",
+      "budgetNumber": "BUD-69",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-23T21:50:07.927Z"
+    },
+    {
+      "_id": "BUD-1769210887086",
+      "budgetNumber": "BUD-70",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-23T23:28:07.086Z"
+    },
+    {
+      "_id": "BUD-1769232396059",
+      "budgetNumber": "BUD-71",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-24T05:26:36.059Z"
+    },
+    {
+      "_id": "BUD-1769235026805",
+      "budgetNumber": "BUD-72",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-24T06:10:26.805Z"
+    },
+    {
+      "_id": "BUD-1769236141763",
+      "budgetNumber": "BUD-73",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-24T06:29:01.763Z"
+    },
+    {
+      "_id": "BUD-1769320830826",
+      "budgetNumber": "BUD-74",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-25T06:00:30.826Z"
+    },
+    {
+      "_id": "BUD-1769321686940",
+      "budgetNumber": "BUD-75",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-25T06:14:46.940Z"
+    },
+    {
+      "_id": "BUD-1769321885300",
+      "budgetNumber": "BUD-76",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-25T06:18:05.300Z"
+    },
+    {
+      "_id": "BUD-1769322247663",
+      "budgetNumber": "BUD-77",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-25T06:24:07.663Z"
+    },
+    {
+      "_id": "BUD-1769322645328",
+      "budgetNumber": "BUD-78",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-25T06:30:45.328Z"
+    },
+    {
+      "_id": "BUD-1769323752430",
+      "budgetNumber": "BUD-79",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-25T06:49:12.430Z"
+    },
+    {
+      "_id": "BUD-1769323899786",
+      "budgetNumber": "BUD-80",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-25T06:51:39.786Z"
+    },
+    {
+      "_id": "BUD-1769324206118",
+      "budgetNumber": "BUD-81",
+      "year": 2026,
+      "month": 2,
+      "categories": {
+        "Office Supplies": 5000,
+        "Salaries": 100000,
+        "Marketing": 15000
+      },
+      "notes": "Q1 Budget Plan",
+      "status": "active",
+      "createdAt": "2026-01-25T06:56:46.118Z"
+    }
+  ],
   "payments": []
 }

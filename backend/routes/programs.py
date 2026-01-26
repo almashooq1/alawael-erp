@@ -7,6 +7,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import db
 from models.program import Program, ProgramEnrollment
 from datetime import datetime
+from lib.auth_rbac_decorator import check_permission, require_role, log_audit, guard_payload_size, validate_json
 
 bp = Blueprint('programs', __name__, url_prefix='/api/programs')
 
@@ -48,7 +49,9 @@ def list_programs():
 
 
 @bp.route('/<int:id>', methods=['GET'])
-@jwt_required()
+
+@check_permission('view_program')
+@log_audit('GET_GET_PROGRAM')
 def get_program(id):
     """تفاصيل برنامج"""
     try:
@@ -109,7 +112,11 @@ def create_program():
 
 
 @bp.route('/<int:id>/enroll', methods=['POST'])
-@jwt_required()
+
+@check_permission('manage_enrollbeneficiary')
+@guard_payload_size()
+@validate_json()
+@log_audit('POST_ENROLL_BENEFICIARY')
 def enroll_beneficiary(id):
     """تسجيل مستفيد في برنامج"""
     try:

@@ -191,7 +191,18 @@ const vehicleSchema = new mongoose.Schema(
         street: String,
         city: {
           type: String,
-          enum: ['الرياض', 'جدة', 'الدمام', 'الأحساء', 'مكة', 'المدينة', 'الطائف', 'أبها', 'الخبر', 'أخرى'],
+          enum: [
+            'الرياض',
+            'جدة',
+            'الدمام',
+            'الأحساء',
+            'مكة',
+            'المدينة',
+            'الطائف',
+            'أبها',
+            'الخبر',
+            'أخرى',
+          ],
           required: true,
         },
         postalCode: {
@@ -357,7 +368,14 @@ const vehicleSchema = new mongoose.Schema(
         {
           type: {
             type: String,
-            enum: ['تغيير الزيت', 'تغيير المرشحات', 'فحص الفرامل', 'دوران الإطارات', 'فحص البطارية', 'صيانة دورية'],
+            enum: [
+              'تغيير الزيت',
+              'تغيير المرشحات',
+              'فحص الفرامل',
+              'دوران الإطارات',
+              'فحص البطارية',
+              'صيانة دورية',
+            ],
             required: true,
           },
           interval: {
@@ -686,7 +704,7 @@ const vehicleSchema = new mongoose.Schema(
     timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
-  },
+  }
 );
 
 // ====== الفهارس ======
@@ -727,7 +745,12 @@ vehicleSchema.virtual('daysUntilInsuranceExpiry').get(function () {
 });
 
 vehicleSchema.virtual('isCompliant').get(function () {
-  return !this.isRegistrationExpired && !this.isInsuranceExpired && !this.isInspectionOverdue && this.status === 'نشطة';
+  return (
+    !this.isRegistrationExpired &&
+    !this.isInsuranceExpired &&
+    !this.isInspectionOverdue &&
+    this.status === 'نشطة'
+  );
 });
 
 vehicleSchema.virtual('complianceStatus').get(function () {
@@ -760,7 +783,9 @@ vehicleSchema.pre('save', function (next) {
 });
 
 vehicleSchema.post('save', function (doc) {
-  logger.info(`Vehicle updated: ${doc.registrationNumber} (${doc.basicInfo.make} ${doc.basicInfo.model})`);
+  logger.info(
+    `Vehicle updated: ${doc.registrationNumber} (${doc.basicInfo.make} ${doc.basicInfo.model})`
+  );
 });
 
 // ====== الطرق المخصصة ======
@@ -839,4 +864,4 @@ vehicleSchema.methods.getComplianceReport = function () {
   };
 };
 
-module.exports = mongoose.models.Vehicle || mongoose.model('Vehicle', vehicleSchema);
+module.exports = mongoose.models.VehicleSaudi || mongoose.model('VehicleSaudi', vehicleSchema);

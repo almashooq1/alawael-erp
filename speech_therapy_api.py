@@ -1,3 +1,10 @@
+from auth_rbac_decorator import (
+    check_permission,
+    check_multiple_permissions,
+    guard_payload_size,
+    validate_json,
+    log_audit
+)
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
@@ -45,6 +52,9 @@ def generate_session_number():
 
 @speech_therapy_bp.route('/clients', methods=['POST'])
 @jwt_required()
+@check_permission('manage_speech_therapy')
+@guard_payload_size()
+@log_audit('CREATE_CLIENT')
 def create_client():
     """إنشاء مستفيد جديد"""
     try:
@@ -108,6 +118,8 @@ def create_client():
 
 @speech_therapy_bp.route('/clients', methods=['GET'])
 @jwt_required()
+@check_permission('view_speech_therapy')
+@log_audit('GET_CLIENTS')
 def get_clients():
     """الحصول على قائمة المستفيدين"""
     try:
@@ -167,6 +179,8 @@ def get_clients():
 
 @speech_therapy_bp.route('/clients/<int:client_id>', methods=['GET'])
 @jwt_required()
+@check_permission('view_speech_therapy')
+@log_audit('GET_CLIENT')
 def get_client(client_id):
     """الحصول على تفاصيل مستفيد محدد"""
     try:
@@ -238,6 +252,9 @@ def get_client(client_id):
 
 @speech_therapy_bp.route('/assessments', methods=['POST'])
 @jwt_required()
+@check_permission('manage_speech_therapy')
+@guard_payload_size()
+@log_audit('CREATE_ASSESSMENT')
 def create_assessment():
     """إنشاء تقييم جديد"""
     try:
@@ -302,6 +319,8 @@ def create_assessment():
 
 @speech_therapy_bp.route('/assessments', methods=['GET'])
 @jwt_required()
+@check_permission('view_speech_therapy')
+@log_audit('GET_ASSESSMENTS')
 def get_assessments():
     """الحصول على قائمة التقييمات"""
     try:
@@ -360,6 +379,9 @@ def get_assessments():
 
 @speech_therapy_bp.route('/therapy-plans', methods=['POST'])
 @jwt_required()
+@check_permission('manage_speech_therapy')
+@guard_payload_size()
+@log_audit('CREATE_THERAPY_PLAN')
 def create_therapy_plan():
     """إنشاء خطة علاجية جديدة"""
     try:
@@ -444,6 +466,9 @@ def create_therapy_plan():
 
 @speech_therapy_bp.route('/sessions', methods=['POST'])
 @jwt_required()
+@check_permission('manage_speech_therapy')
+@guard_payload_size()
+@log_audit('CREATE_SESSION')
 def create_session():
     """إنشاء جلسة علاجية جديدة"""
     try:
@@ -507,6 +532,8 @@ def create_session():
 
 @speech_therapy_bp.route('/stats', methods=['GET'])
 @jwt_required()
+@check_permission('view_stats')
+@log_audit('GET_STATS')
 def get_stats():
     """إحصائيات نظام النطق والتخاطب"""
     try:
@@ -559,6 +586,8 @@ def get_stats():
 
 @speech_therapy_bp.route('/search', methods=['GET'])
 @jwt_required()
+@check_permission('view_speech_therapy')
+@log_audit('SEARCH')
 def search():
     """البحث الشامل في النظام"""
     try:

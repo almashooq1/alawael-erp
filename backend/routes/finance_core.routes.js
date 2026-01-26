@@ -34,3 +34,4 @@ router.get('/profitability/:service', authorizeRole(['ADMIN', 'CEO', 'ACCOUNTANT
 });
 
 module.exports = router;
+

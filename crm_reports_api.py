@@ -1,3 +1,10 @@
+from auth_rbac_decorator import (
+    check_permission,
+    check_multiple_permissions,
+    guard_payload_size,
+    validate_json,
+    log_audit
+)
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
@@ -26,6 +33,8 @@ def get_current_user_id():
 # Sales Reports
 @reports_bp.route('/reports/sales-summary', methods=['GET'])
 @jwt_required()
+@check_permission('view_crm_reports')
+@log_audit('GET_SALES_SUMMARY')
 def get_sales_summary():
     """تقرير ملخص المبيعات"""
     try:
@@ -124,6 +133,8 @@ def get_sales_summary():
 
 @reports_bp.route('/reports/sales-pipeline', methods=['GET'])
 @jwt_required()
+@check_permission('view_reports')
+@log_audit('GET_SALES_PIPELINE_REPORT')
 def get_sales_pipeline_report():
     """تقرير خط المبيعات التفصيلي"""
     try:
@@ -185,6 +196,8 @@ def get_sales_pipeline_report():
 # Customer Reports
 @reports_bp.route('/reports/customer-analysis', methods=['GET'])
 @jwt_required()
+@check_permission('view_crm_reports')
+@log_audit('GET_CUSTOMER_ANALYSIS')
 def get_customer_analysis():
     """تقرير تحليل العملاء"""
     try:
@@ -289,6 +302,8 @@ def get_customer_analysis():
 # Activity Reports
 @reports_bp.route('/reports/activity-summary', methods=['GET'])
 @jwt_required()
+@check_permission('view_crm_reports')
+@log_audit('GET_ACTIVITY_SUMMARY')
 def get_activity_summary():
     """تقرير ملخص الأنشطة"""
     try:
@@ -390,6 +405,8 @@ def get_activity_summary():
 # Lead Conversion Reports
 @reports_bp.route('/reports/lead-conversion', methods=['GET'])
 @jwt_required()
+@check_permission('view_reports')
+@log_audit('GET_LEAD_CONVERSION_REPORT')
 def get_lead_conversion_report():
     """تقرير تحويل العملاء المحتملين"""
     try:
@@ -479,6 +496,9 @@ def get_lead_conversion_report():
 # Custom Reports
 @reports_bp.route('/reports/custom', methods=['POST'])
 @jwt_required()
+@check_permission('manage_crm_reports')
+@guard_payload_size()
+@log_audit('CREATE_CUSTOM_REPORT')
 def create_custom_report():
     """إنشاء تقرير مخصص"""
     try:
@@ -514,6 +534,8 @@ def create_custom_report():
 
 @reports_bp.route('/reports/custom', methods=['GET'])
 @jwt_required()
+@check_permission('view_reports')
+@log_audit('GET_CUSTOM_REPORTS')
 def get_custom_reports():
     """الحصول على قائمة التقارير المخصصة"""
     try:
@@ -547,6 +569,8 @@ def get_custom_reports():
 # Export Reports
 @reports_bp.route('/reports/export/<report_type>', methods=['GET'])
 @jwt_required()
+@check_permission('view_reports')
+@log_audit('EXPORT_REPORT')
 def export_report(report_type):
     """تصدير التقارير"""
     try:

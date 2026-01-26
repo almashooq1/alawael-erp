@@ -37,3 +37,4 @@ router.get('/verify-consent/:patientId', authorizeRole(['DOCTOR', 'THERAPIST', '
 });
 
 module.exports = router;
+

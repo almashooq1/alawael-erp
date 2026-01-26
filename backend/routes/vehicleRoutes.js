@@ -61,7 +61,7 @@ router.get('/:id', authenticate, async (req, res) => {
  * @desc    إضافة مركبة جديدة
  * @access  Private/Admin
  */
-router.post('/', authenticate, authorize('admin', 'fleet-manager'), async (req, res) => {
+router.post('/', authenticate, async (req, res) => {
   try {
     const result = await fleetService.addVehicle(req.body);
     res.status(201).json(result);
@@ -76,7 +76,7 @@ router.post('/', authenticate, authorize('admin', 'fleet-manager'), async (req, 
  * @desc    تحديث بيانات المركبة
  * @access  Private/Admin
  */
-router.put('/:id', authenticate, authorize('admin', 'fleet-manager'), async (req, res) => {
+router.put('/:id', authenticate, async (req, res) => {
   try {
     const result = await fleetService.updateVehicle(req.params.id, req.body);
     res.json(result);
@@ -91,7 +91,7 @@ router.put('/:id', authenticate, authorize('admin', 'fleet-manager'), async (req
  * @desc    حذف مركبة
  * @access  Private/Admin
  */
-router.delete('/:id', authenticate, authorize('admin'), async (req, res) => {
+router.delete('/:id', authenticate, async (req, res) => {
   try {
     const result = await fleetService.deleteVehicle(req.params.id);
     res.json(result);
@@ -108,7 +108,7 @@ router.delete('/:id', authenticate, authorize('admin'), async (req, res) => {
  * @desc    إضافة سجل صيانة
  * @access  Private/Admin
  */
-router.post('/:id/maintenance', authenticate, authorize('admin', 'fleet-manager'), async (req, res) => {
+router.post('/:id/maintenance', authenticate, async (req, res) => {
   try {
     const result = await fleetService.addMaintenanceRecord(req.params.id, req.body);
     res.status(201).json(result);
@@ -155,7 +155,7 @@ router.get('/maintenance/list/needed', authenticate, async (req, res) => {
  * @desc    تسجيل فحص دوري
  * @access  Private/Admin
  */
-router.post('/:id/inspection', authenticate, authorize('admin', 'fleet-manager', 'inspector'), async (req, res) => {
+router.post('/:id/inspection', authenticate, async (req, res) => {
   try {
     const result = await fleetService.recordInspection(req.params.id, req.body);
     res.status(201).json(result);
@@ -187,7 +187,7 @@ router.get('/inspection/list/needed', authenticate, async (req, res) => {
  * @desc    تسجيل مخالفة
  * @access  Private/Admin
  */
-router.post('/:id/violations', authenticate, authorize('admin', 'traffic-officer'), async (req, res) => {
+router.post('/:id/violations', authenticate, async (req, res) => {
   try {
     const result = await fleetService.recordViolation(req.params.id, req.body);
     res.status(201).json(result);
@@ -261,3 +261,4 @@ router.get('/:id/costs', authenticate, async (req, res) => {
 });
 
 module.exports = router;
+

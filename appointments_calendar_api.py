@@ -1,3 +1,10 @@
+from auth_rbac_decorator import (
+    check_permission,
+    check_multiple_permissions,
+    guard_payload_size,
+    validate_json,
+    log_audit
+)
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
@@ -67,6 +74,9 @@ def check_appointment_conflicts(start_datetime, end_datetime, participants, appo
 # إنشاء موعد جديد
 @appointments_bp.route('/', methods=['POST'])
 @jwt_required()
+@check_permission('manage_appointments_calendar')
+@guard_payload_size()
+@log_audit('CREATE_APPOINTMENT')
 def create_appointment():
     """إنشاء موعد جديد"""
     try:
@@ -246,6 +256,8 @@ def create_appointment_reminders(appointment_id, reminders_data, user_id):
 # الحصول على المواعيد
 @appointments_bp.route('/', methods=['GET'])
 @jwt_required()
+@check_permission('view_appointments_calendar')
+@log_audit('GET_APPOINTMENTS')
 def get_appointments():
     """الحصول على المواعيد"""
     try:
@@ -338,6 +350,8 @@ def get_appointments():
 # الحصول على موعد محدد
 @appointments_bp.route('/<int:appointment_id>', methods=['GET'])
 @jwt_required()
+@check_permission('view_appointments_calendar')
+@log_audit('GET_APPOINTMENT')
 def get_appointment(appointment_id):
     """الحصول على موعد محدد"""
     try:
@@ -426,6 +440,9 @@ def get_appointment(appointment_id):
 # تحديث موعد
 @appointments_bp.route('/<int:appointment_id>', methods=['PUT'])
 @jwt_required()
+@check_permission('manage_appointments_calendar')
+@guard_payload_size()
+@log_audit('UPDATE_APPOINTMENT')
 def update_appointment(appointment_id):
     """تحديث موعد"""
     try:
@@ -483,6 +500,9 @@ def update_appointment(appointment_id):
 # إلغاء موعد
 @appointments_bp.route('/<int:appointment_id>/cancel', methods=['POST'])
 @jwt_required()
+@check_permission('manage_appointments_calendar')
+@guard_payload_size()
+@log_audit('CANCEL_APPOINTMENT')
 def cancel_appointment(appointment_id):
     """إلغاء موعد"""
     try:
@@ -520,6 +540,8 @@ def cancel_appointment(appointment_id):
 # إحصائيات المواعيد
 @appointments_bp.route('/stats', methods=['GET'])
 @jwt_required()
+@check_permission('view_stats')
+@log_audit('GET_APPOINTMENTS_STATS')
 def get_appointments_stats():
     """إحصائيات المواعيد"""
     try:
@@ -602,6 +624,8 @@ def get_appointments_stats():
 # التحقق من التوفر
 @appointments_bp.route('/availability', methods=['GET'])
 @jwt_required()
+@check_permission('view_appointments_calendar')
+@log_audit('CHECK_AVAILABILITY')
 def check_availability():
     """التحقق من التوفر"""
     try:

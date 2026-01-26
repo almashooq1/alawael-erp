@@ -32,3 +32,4 @@ router.get('/window/:patientId', authorizeRole(['THERAPIST', 'ADMIN']), async (r
 });
 
 module.exports = router;
+

@@ -35,3 +35,4 @@ router.post('/calibrate', authorizeRole(['THERAPIST']), async (req, res) => {
 });
 
 module.exports = router;
+

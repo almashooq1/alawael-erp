@@ -10,6 +10,7 @@ from models.user import User
 from datetime import datetime
 from sqlalchemy import or_
 import secrets
+from lib.auth_rbac_decorator import check_permission, require_role, log_audit, guard_payload_size, validate_json
 
 bp = Blueprint('reports', __name__, url_prefix='/api/reports')
 
@@ -65,7 +66,9 @@ def list_reports():
 
 
 @bp.route('/<int:id>', methods=['GET'])
-@jwt_required()
+
+@check_permission('view_report')
+@log_audit('GET_GET_REPORT')
 def get_report(id):
     """تفاصيل تقرير"""
     try:
@@ -118,7 +121,10 @@ def create_report():
 
 
 @bp.route('/<int:id>', methods=['PUT'])
-@jwt_required()
+
+@check_permission('manage_report')
+@guard_payload_size()
+@log_audit('PUT_UPDATE_REPORT')
 def update_report(id):
     """تحديث تقرير"""
     try:
@@ -157,7 +163,9 @@ def update_report(id):
 
 
 @bp.route('/<int:id>', methods=['DELETE'])
-@jwt_required()
+
+@check_permission('manage_resources')
+@log_audit('DELETE_DELETE_REPORT')
 def delete_report(id):
     """حذف تقرير"""
     try:
@@ -176,7 +184,11 @@ def delete_report(id):
 
 
 @bp.route('/<int:id>/publish', methods=['POST'])
-@jwt_required()
+
+@check_permission('manage_publishreport')
+@guard_payload_size()
+@validate_json()
+@log_audit('POST_PUBLISH_REPORT')
 def publish_report(id):
     """نشر تقرير"""
     try:
@@ -195,7 +207,11 @@ def publish_report(id):
 
 
 @bp.route('/<int:id>/share', methods=['POST'])
-@jwt_required()
+
+@check_permission('manage_sharereport')
+@guard_payload_size()
+@validate_json()
+@log_audit('POST_SHARE_REPORT')
 def share_report(id):
     """مشاركة تقرير"""
     try:
@@ -228,7 +244,9 @@ def share_report(id):
 
 
 @bp.route('/<int:id>/download', methods=['GET'])
-@jwt_required()
+
+@check_permission('view_download_report')
+@log_audit('GET_DOWNLOAD_REPORT')
 def download_report(id):
     """تحميل تقرير بصيغة PDF"""
     try:
@@ -247,7 +265,9 @@ def download_report(id):
 
 
 @bp.route('/<int:id>/comments', methods=['GET'])
-@jwt_required()
+
+@check_permission('view_report_comments')
+@log_audit('GET_GET_REPORT_COMMENTS')
 def get_report_comments(id):
     """جلب تعليقات التقرير"""
     try:
@@ -264,7 +284,11 @@ def get_report_comments(id):
 
 
 @bp.route('/<int:id>/comments', methods=['POST'])
-@jwt_required()
+
+@check_permission('manage_addreportcomment')
+@guard_payload_size()
+@validate_json()
+@log_audit('POST_ADD_REPORT_COMMENT')
 def add_report_comment(id):
     """إضافة تعليق"""
     try:
@@ -294,7 +318,9 @@ def add_report_comment(id):
 
 
 @bp.route('/<int:id>/versions', methods=['GET'])
-@jwt_required()
+
+@check_permission('view_report_versions')
+@log_audit('GET_GET_REPORT_VERSIONS')
 def get_report_versions(id):
     """سجل إصدارات التقرير"""
     try:
@@ -311,7 +337,9 @@ def get_report_versions(id):
 
 
 @bp.route('/types', methods=['GET'])
-@jwt_required()
+
+@check_permission('view_report_types')
+@log_audit('GET_GET_REPORT_TYPES')
 def get_report_types():
     """أنواع التقارير المتاحة"""
     types = [

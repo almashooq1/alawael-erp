@@ -262,7 +262,7 @@ class AuthenticationService {
         {
           expiresIn: '30d',
           algorithm: 'HS256',
-        },
+        }
       );
 
       return token;
@@ -290,20 +290,35 @@ class AuthenticationService {
         throw new Error('البريد الإلكتروني غير صحيح');
       }
 
-      if (email !== DEMO_USER.email) {
-        throw new Error('المستخدم غير موجود');
+      // Read from db.json
+      const fs = require('fs');
+      const path = require('path');
+      const dbPath = path.join(__dirname, '../data/db.json');
+
+      let user = null;
+      if (fs.existsSync(dbPath)) {
+        const dbData = JSON.parse(fs.readFileSync(dbPath, 'utf8'));
+        user = dbData.users.find(u => u.email.toLowerCase() === email.toLowerCase());
       }
 
-      const isValidPassword = await this.comparePassword(password, DEMO_HASHED_PASSWORD);
+      // Fallback to demo user if not found in db
+      if (!user) {
+        if (email !== DEMO_USER.email) {
+          throw new Error('المستخدم غير موجود');
+        }
+        user = { ...DEMO_USER, password: DEMO_HASHED_PASSWORD };
+      }
+
+      const isValidPassword = await this.comparePassword(password, user.password);
 
       if (!isValidPassword) {
         throw new Error('كلمة المرور غير صحيحة');
       }
 
-      const user = { ...DEMO_USER };
-
       const token = this.generateToken({
-        ...user,
+        id: user._id || user.id,
+        email: user.email,
+        role: user.role,
         loginMethod: 'email',
       });
       const refreshToken = this.generateRefreshToken(user);
@@ -312,10 +327,10 @@ class AuthenticationService {
         success: true,
         message: 'تم تسجيل الدخول بنجاح',
         user: {
-          id: user.id,
-          username: user.username,
+          id: user._id || user.id,
+          username: user.username || user.fullName,
           email: user.email,
-          roles: user.roles,
+          roles: user.roles || [user.role],
         },
         token: token.token,
         refreshToken,
@@ -486,7 +501,9 @@ class AuthenticationService {
       } else if (this.isValidUsername(credential)) {
         return await this.loginWithUsername(credential, password);
       } else {
-        throw new Error('البيانات المدخلة غير صحيحة. يرجى إدخال: اسم مستخدم، بريد إلكتروني، رقم جوال، أو رقم بطاقة أحوال');
+        throw new Error(
+          'البيانات المدخلة غير صحيحة. يرجى إدخال: اسم مستخدم، بريد إلكتروني، رقم جوال، أو رقم بطاقة أحوال'
+        );
       }
     } catch (error) {
       throw new Error(`خطأ في تسجيل الدخول: ${error.message}`);
@@ -506,7 +523,8 @@ class AuthenticationService {
    */
   static async registerUser(userData) {
     try {
-      const { username, email, phone, idNumber, password, confirmPassword, firstName, lastName } = userData;
+      const { username, email, phone, idNumber, password, confirmPassword, firstName, lastName } =
+        userData;
 
       // التحقق من المدخلات
       if (!username || !email || !phone || !idNumber || !password) {
@@ -534,7 +552,9 @@ class AuthenticationService {
       }
 
       if (!this.isValidPasswordStrength(password)) {
-        throw new Error('كلمة المرور يجب أن تحتوي على 8 أحرف على الأقل، وتشمل: أحرف كبيرة، أحرف صغيرة، أرقام، ورموز خاصة');
+        throw new Error(
+          'كلمة المرور يجب أن تحتوي على 8 أحرف على الأقل، وتشمل: أحرف كبيرة، أحرف صغيرة، أرقام، ورموز خاصة'
+        );
       }
 
       // تشفير كلمة المرور

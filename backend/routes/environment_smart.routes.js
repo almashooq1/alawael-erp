@@ -45,3 +45,4 @@ router.post('/optimize', authorizeRole(['ADMIN', 'FACILITY_MANAGER']), async (re
 });
 
 module.exports = router;
+

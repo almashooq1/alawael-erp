@@ -1,3 +1,10 @@
+from auth_rbac_decorator import (
+    check_permission,
+    check_multiple_permissions,
+    guard_payload_size,
+    validate_json,
+    log_audit
+)
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
@@ -49,6 +56,8 @@ def log_document_action(document_id, action, description=None, old_values=None, 
 # إدارة فئات الوثائق
 @documents_bp.route('/categories', methods=['GET'])
 @jwt_required()
+@check_permission('view_documents_licenses')
+@log_audit('GET_DOCUMENT_CATEGORIES')
 def get_document_categories():
     """الحصول على قائمة فئات الوثائق"""
     try:
@@ -79,6 +88,9 @@ def get_document_categories():
 
 @documents_bp.route('/categories', methods=['POST'])
 @jwt_required()
+@check_permission('manage_documents_licenses')
+@guard_payload_size()
+@log_audit('CREATE_DOCUMENT_CATEGORY')
 def create_document_category():
     """إنشاء فئة وثائق جديدة"""
     try:
@@ -114,6 +126,8 @@ def create_document_category():
 # إدارة الوثائق الأساسية
 @documents_bp.route('/', methods=['GET'])
 @jwt_required()
+@check_permission('view_documents_licenses')
+@log_audit('GET_DOCUMENTS')
 def get_documents():
     """الحصول على قائمة الوثائق مع الفلترة والبحث"""
     try:
@@ -235,6 +249,9 @@ def get_documents():
 
 @documents_bp.route('/', methods=['POST'])
 @jwt_required()
+@check_permission('manage_documents_licenses')
+@guard_payload_size()
+@log_audit('CREATE_DOCUMENT')
 def create_document():
     """إنشاء وثيقة جديدة"""
     try:
@@ -306,6 +323,8 @@ def create_document():
 
 @documents_bp.route('/<int:document_id>', methods=['GET'])
 @jwt_required()
+@check_permission('view_documents_licenses')
+@log_audit('GET_DOCUMENT_DETAILS')
 def get_document_details(document_id):
     """الحصول على تفاصيل وثيقة محددة"""
     try:
@@ -399,6 +418,8 @@ def get_document_details(document_id):
 # إدارة التذكيرات
 @documents_bp.route('/reminders', methods=['GET'])
 @jwt_required()
+@check_permission('view_documents_licenses')
+@log_audit('GET_DOCUMENT_REMINDERS')
 def get_document_reminders():
     """الحصول على قائمة التذكيرات"""
     try:
@@ -452,6 +473,8 @@ def get_document_reminders():
 # لوحة التحكم والإحصائيات
 @documents_bp.route('/dashboard', methods=['GET'])
 @jwt_required()
+@check_permission('view_dashboard')
+@log_audit('GET_DOCUMENTS_DASHBOARD')
 def get_documents_dashboard():
     """الحصول على إحصائيات لوحة التحكل للوثائق"""
     try:
@@ -547,6 +570,9 @@ def get_documents_dashboard():
 # رفع ملف للوثيقة
 @documents_bp.route('/api/documents/<int:document_id>/upload', methods=['POST'])
 @jwt_required()
+@check_permission('manage_documents_licenses')
+@guard_payload_size()
+@log_audit('UPLOAD_DOCUMENT_FILE')
 def upload_document_file(document_id):
     """رفع ملف للوثيقة"""
     try:
@@ -631,6 +657,8 @@ def upload_document_file(document_id):
 # عرض مرفقات الوثيقة
 @documents_bp.route('/api/documents/<int:document_id>/attachments', methods=['GET'])
 @jwt_required()
+@check_permission('view_documents_licenses')
+@log_audit('GET_DOCUMENT_ATTACHMENTS')
 def get_document_attachments(document_id):
     """عرض مرفقات الوثيقة"""
     try:
@@ -669,6 +697,8 @@ def get_document_attachments(document_id):
 # تحميل ملف الوثيقة
 @documents_bp.route('/api/documents/attachments/<int:attachment_id>/download', methods=['GET'])
 @jwt_required()
+@check_permission('view_documents_licenses')
+@log_audit('DOWNLOAD_DOCUMENT_ATTACHMENT')
 def download_document_attachment(attachment_id):
     """تحميل ملف الوثيقة"""
     try:
@@ -702,6 +732,8 @@ def download_document_attachment(attachment_id):
 # حذف مرفق الوثيقة
 @documents_bp.route('/api/documents/attachments/<int:attachment_id>', methods=['DELETE'])
 @jwt_required()
+@check_permission('manage_documents_licenses')
+@log_audit('DELETE_DOCUMENT_ATTACHMENT')
 def delete_document_attachment(attachment_id):
     """حذف مرفق الوثيقة"""
     try:
@@ -745,6 +777,8 @@ def delete_document_attachment(attachment_id):
 # تقرير الوثائق المنتهية الصلاحية
 @documents_bp.route('/api/documents/reports/expired', methods=['GET'])
 @jwt_required()
+@check_permission('view_reports')
+@log_audit('GET_EXPIRED_DOCUMENTS_REPORT')
 def get_expired_documents_report():
     """تقرير الوثائق المنتهية الصلاحية"""
     try:
@@ -787,6 +821,8 @@ def get_expired_documents_report():
 # تقرير الوثائق التي تنتهي قريباً
 @documents_bp.route('/api/documents/reports/expiring-soon', methods=['GET'])
 @jwt_required()
+@check_permission('view_reports')
+@log_audit('GET_EXPIRING_SOON_DOCUMENTS_REPORT')
 def get_expiring_soon_documents_report():
     """تقرير الوثائق التي تنتهي صلاحيتها قريباً"""
     try:
@@ -837,6 +873,8 @@ def get_expiring_soon_documents_report():
 # تقرير إحصائيات الوثائق حسب النوع
 @documents_bp.route('/api/documents/reports/statistics', methods=['GET'])
 @jwt_required()
+@check_permission('view_stats')
+@log_audit('GET_DOCUMENTS_STATISTICS_REPORT')
 def get_documents_statistics_report():
     """تقرير إحصائيات الوثائق الشامل"""
     try:
@@ -913,6 +951,9 @@ def get_documents_statistics_report():
 # تصدير تقرير إلى Excel
 @documents_bp.route('/api/documents/reports/export', methods=['POST'])
 @jwt_required()
+@check_permission('manage_documents_licenses')
+@guard_payload_size()
+@log_audit('EXPORT_DOCUMENTS_REPORT')
 def export_documents_report():
     """تصدير تقرير الوثائق إلى Excel"""
     try:

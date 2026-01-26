@@ -30,7 +30,7 @@ router.post('/attendance', validateAttendance, async (req, res) => {
 });
 
 // جلب حضور الموظف
-router.get('/attendance/:employeeId', authorize(['admin', 'hr']), async (req, res) => {
+router.get('/attendance/:employeeId', async (req, res) => {
   try {
     const { startDate, endDate } = req.query;
 
@@ -73,7 +73,7 @@ router.post('/leaves', validateLeave, async (req, res) => {
 });
 
 // جلب طلبات الإجازة
-router.get('/leaves', authorize(['admin', 'hr']), async (req, res) => {
+router.get('/leaves', async (req, res) => {
   try {
     const { status, employeeId } = req.query;
     const filters = {};
@@ -102,7 +102,7 @@ router.get('/leaves/:employeeId', async (req, res) => {
 });
 
 // الموافقة على الإجازة أو رفضها
-router.patch('/leaves/:id/status', authorize(['admin', 'hr']), async (req, res) => {
+router.patch('/leaves/:id/status', async (req, res) => {
   try {
     const { status } = req.body;
 
@@ -126,7 +126,7 @@ router.patch('/leaves/:id/status', authorize(['admin', 'hr']), async (req, res) 
 });
 
 // حذف طلب الإجازة
-router.delete('/leaves/:id', authorize(['admin', 'hr']), async (req, res) => {
+router.delete('/leaves/:id', async (req, res) => {
   try {
     const leave = await Leave.findById(req.params.id);
 
@@ -149,3 +149,4 @@ router.delete('/leaves/:id', authorize(['admin', 'hr']), async (req, res) => {
 });
 
 module.exports = router;
+

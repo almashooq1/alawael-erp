@@ -7,6 +7,12 @@ const express = require('express');
 const router = express.Router();
 const paymentService = require('../services/paymentService');
 const authMiddleware = require('../middleware/authMiddleware');
+const AuditLogger = require('../services/audit-logger');
+const Payment = require('../models/payment.model');
+const mongoose = require('mongoose');
+
+// Webhook helpers
+const rawJson = express.raw({ type: 'application/json' });
 
 /**
  * POST /api/payments/initialize-stripe
@@ -310,4 +316,112 @@ router.get('/statistics', authMiddleware, async (req, res) => {
   }
 });
 
+// ============== Health & Monitoring ==============
+router.get('/health', async (req, res) => {
+  try {
+    const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
+    const paymentCount = await Payment.countDocuments();
+    const recentPayments = await Payment.countDocuments({
+      createdAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+    });
+
+    res.json({
+      success: true,
+      status: 'healthy',
+      timestamp: new Date(),
+      database: dbStatus,
+      metrics: {
+        totalPayments: paymentCount,
+        last24Hours: recentPayments,
+      },
+    });
+  } catch (error) {
+    res.status(503).json({
+      success: false,
+      status: 'unhealthy',
+      error: error.message,
+    });
+  }
+});
+
+// Admin: Get audit trail for a payment
+router.get('/audit/:paymentId', authMiddleware, async (req, res) => {
+  try {
+    const { paymentId } = req.params;
+    const payment = await Payment.findOne({ transactionId: paymentId });
+    if (!payment) return res.status(404).json({ success: false, error: 'Payment not found' });
+
+    const logs = await AuditLogger.getResourceLogs('payment', payment._id, 50);
+    res.json({ success: true, payment: payment.transactionId, logs });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+
+// Get payment metrics (admin)
+router.get('/metrics', authMiddleware, async (req, res) => {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const [totalPayments, completedToday, pendingPayments, totalRevenue] = await Promise.all([
+      Payment.countDocuments(),
+      Payment.countDocuments({ status: 'completed', completedAt: { $gte: today } }),
+      Payment.countDocuments({ status: 'pending' }),
+      Payment.aggregate([
+        { $match: { status: 'completed' } },
+        { $group: { _id: null, total: { $sum: '$amount' } } },
+      ]),
+    ]);
+
+    res.json({
+      success: true,
+      metrics: {
+        totalPayments,
+        completedToday,
+        pendingPayments,
+        totalRevenue: totalRevenue[0]?.total || 0,
+      },
+    });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+
 module.exports = router;
+
+// ============== Webhooks ==============
+// Stripe webhook (uses raw body for signature compatibility if middleware order allows)
+router.post('/webhook/stripe', rawJson, async (req, res) => {
+  try {
+    const signature = req.headers['stripe-signature'];
+    const payload = req.body && req.body.length ? JSON.parse(req.body.toString()) : req.body; // fallback if raw buffer
+    const result = await paymentService.handleStripeWebhook(payload, signature);
+    if (!result.success) return res.status(400).json(result);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+
+// PayPal webhook
+router.post('/webhook/paypal', async (req, res) => {
+  try {
+    const result = await paymentService.handlePayPalWebhook(req.body || {});
+    if (!result.success) return res.status(400).json(result);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+
+// KNET webhook (basic placeholder)
+router.post('/webhook/knet', async (req, res) => {
+  try {
+    const result = await paymentService.handleKNETWebhook(req.body || {});
+    if (!result.success) return res.status(400).json(result);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});

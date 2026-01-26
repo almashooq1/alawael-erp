@@ -32,3 +32,4 @@ router.get('/predict', async (req, res) => {
 });
 
 module.exports = router;
+

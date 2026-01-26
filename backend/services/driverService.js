@@ -233,7 +233,9 @@ class DriverService {
    */
   async getViolationHistory(driverId) {
     try {
-      const driver = await Driver.findById(driverId).select('violations violationPoints personalInfo');
+      const driver = await Driver.findById(driverId).select(
+        'violations violationPoints personalInfo'
+      );
 
       if (!driver) {
         throw new Error('السائق غير موجود');
@@ -411,7 +413,9 @@ class DriverService {
       });
 
       // حساب متوسط التقييم
-      const avgRating = driver.performance.reviews.reduce((sum, r) => sum + r.rating, 0) / driver.performance.reviews.length;
+      const avgRating =
+        driver.performance.reviews.reduce((sum, r) => sum + r.rating, 0) /
+        driver.performance.reviews.length;
       driver.performance.customerRating = avgRating.toFixed(2);
 
       await driver.save();
@@ -450,7 +454,9 @@ class DriverService {
             completed: driver.training.defensiveDriving.completed,
             certificateDate: driver.training.defensiveDriving.certificateDate,
             expiryDate: driver.training.defensiveDriving.expiryDate,
-            needsRenewal: driver.training.defensiveDriving.expiryDate && new Date() > driver.training.defensiveDriving.expiryDate,
+            needsRenewal:
+              driver.training.defensiveDriving.expiryDate &&
+              new Date() > driver.training.defensiveDriving.expiryDate,
           },
           safetyTraining: {
             completed: driver.training.safetyTraining.completed,
@@ -460,7 +466,9 @@ class DriverService {
             completed: driver.training.firstAid.completed,
             certificateDate: driver.training.firstAid.certificateDate,
             expiryDate: driver.training.firstAid.expiryDate,
-            needsRenewal: driver.training.firstAid.expiryDate && new Date() > driver.training.firstAid.expiryDate,
+            needsRenewal:
+              driver.training.firstAid.expiryDate &&
+              new Date() > driver.training.firstAid.expiryDate,
           },
           otherCertificates: driver.training.otherCertificates,
         },
@@ -553,4 +561,4 @@ class DriverService {
   }
 }
 
-module.exports = DriverService;
+module.exports = new DriverService();

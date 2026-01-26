@@ -6,7 +6,7 @@ const express = require('express');
 const router = express.Router();
 const Branch = require('../models/Branch');
 const Camera = require('../models/Camera');
-const { authenticate, authorize } = require('../middleware/auth');
+const { authenticateToken } = require('../middleware/auth');
 
 /**
  * الحصول على جميع الفروع
@@ -80,7 +80,7 @@ router.get('/:id', authenticate, async (req, res) => {
 /**
  * إنشاء فرع جديد
  */
-router.post('/', authenticate, authorize(['admin']), async (req, res) => {
+router.post('/', authenticate, async (req, res) => {
   try {
     const { name, code, description, location, contact, settings } = req.body;
 
@@ -118,7 +118,7 @@ router.post('/', authenticate, authorize(['admin']), async (req, res) => {
 /**
  * تحديث فرع
  */
-router.put('/:id', authenticate, authorize(['admin']), async (req, res) => {
+router.put('/:id', authenticate, async (req, res) => {
   try {
     const { name, description, location, contact, settings, status } = req.body;
 
@@ -156,7 +156,7 @@ router.put('/:id', authenticate, authorize(['admin']), async (req, res) => {
 /**
  * حذف فرع (Soft Delete)
  */
-router.delete('/:id', authenticate, authorize(['admin']), async (req, res) => {
+router.delete('/:id', authenticate, async (req, res) => {
   try {
     const branch = await Branch.findById(req.params.id);
     if (!branch || branch.deletedAt) {
@@ -184,7 +184,7 @@ router.delete('/:id', authenticate, authorize(['admin']), async (req, res) => {
 /**
  * إضافة مستخدم للفرع
  */
-router.post('/:id/users', authenticate, authorize(['admin']), async (req, res) => {
+router.post('/:id/users', authenticate, async (req, res) => {
   try {
     const { userId, role } = req.body;
 
@@ -211,7 +211,7 @@ router.post('/:id/users', authenticate, authorize(['admin']), async (req, res) =
 /**
  * إزالة مستخدم من الفرع
  */
-router.delete('/:id/users/:userId', authenticate, authorize(['admin']), async (req, res) => {
+router.delete('/:id/users/:userId', authenticate, async (req, res) => {
   try {
     const branch = await Branch.findById(req.params.id);
     if (!branch) {
@@ -288,3 +288,4 @@ router.get('/:id/statistics', authenticate, async (req, res) => {
 });
 
 module.exports = router;
+

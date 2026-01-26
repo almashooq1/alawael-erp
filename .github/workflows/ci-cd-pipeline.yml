@@ -322,8 +322,8 @@ jobs:
 
             - name: Deploy to staging
               env:
-                  STAGING_HOST: ${{ vars.STAGING_HOST || 'staging.example.com' }}
-                  STAGING_USER: ${{ vars.STAGING_USER || 'deploy' }}
+                  STAGING_HOST: ${{ secrets.STAGING_HOST }}
+                  STAGING_USER: ${{ secrets.STAGING_USER }}
                   STAGING_KEY: ${{ secrets.STAGING_KEY }}
               run: |
                   mkdir -p ~/.ssh
@@ -338,7 +338,7 @@ jobs:
 
             - name: Health check
               run: |
-                  STAGING_URL="${{ vars.STAGING_HOST || 'staging.example.com' }}"
+                  STAGING_URL="${{ secrets.STAGING_HOST }}"
                   for i in {1..30}; do
                     if curl -f "http://${STAGING_URL}/health" || curl -f "https://${STAGING_URL}/health"; then
                       echo "Staging deployment successful"
@@ -358,7 +358,7 @@ jobs:
         runs-on: ubuntu-latest
         name: Deploy to Production
         environment:
-            name: production-env
+            name: production
             url: https://rehabilitation-center.com
 
         steps:
@@ -366,8 +366,8 @@ jobs:
 
             - name: Deploy to production
               env:
-                  PROD_HOST: ${{ vars.PROD_HOST || 'production.example.com' }}
-                  PROD_USER: ${{ vars.PROD_USER || 'deploy' }}
+                  PROD_HOST: ${{ secrets.PROD_HOST }}
+                  PROD_USER: ${{ secrets.PROD_USER }}
                   PROD_KEY: ${{ secrets.PROD_KEY }}
               run: |
                   mkdir -p ~/.ssh
@@ -395,7 +395,7 @@ jobs:
                   exit 1
 
             - name: Notify deployment
-              if: always() && vars.SLACK_NOTIFICATIONS_ENABLED == 'true'
+              if: always()
               uses: slackapi/slack-github-action@v1
               with:
                   payload: |

@@ -32,3 +32,4 @@ router.post('/audio-speech', async (req, res) => {
 });
 
 module.exports = router;
+

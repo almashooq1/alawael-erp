@@ -32,3 +32,4 @@ router.get('/board', authorizeRole(['THERAPIST', 'PARENT']), async (req, res) =>
 });
 
 module.exports = router;
+

@@ -23,10 +23,7 @@ async function testConnection() {
     const safeUri = uri.replace(/:([^@]+)@/, ':****@');
     console.log('📍 URI:', safeUri);
 
-    await mongoose.connect(uri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect(uri);
 
     console.log('\n✅ تم الاتصال بنجاح!');
     console.log('Connected successfully!\n');

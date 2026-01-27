@@ -1,0 +1,7 @@
+{
+    "name": "backend-1",
+    "version": "1.0.0",
+    "description": "Temporary valid package.json to unblock Jest and build tools.",
+    "main": "index.js",
+    "license": "MIT"
+}

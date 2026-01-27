@@ -1,0 +1,1 @@
+{"timestamp":"2026-01-26T07:41:30.866Z","action":"nlp","userId":"1","requestId":"19682b6b-5101-45a4-9cd2-22551726f003","details":{"text":"هذا نص للاختبار","result":{"sentiment":"محايد","keywords":["للاختبار"]}}}

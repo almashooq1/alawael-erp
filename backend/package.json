@@ -18,12 +18,17 @@
         "db:seed": "node scripts/seed-database.js",
         "db:migrate": "node scripts/migrate.js",
         "cache:clear": "node scripts/clear-cache.js",
+        "health:check": "node scripts/health-check.js",
+        "health:check:json": "node scripts/health-check.js --json",
+        "db:pool-config": "node scripts/db-pool-optimizer.js recommend",
+        "db:pool-envvars": "node scripts/db-pool-optimizer.js envvars",
         "monitor:start": "pm2 start server.js --name alawael-backend",
         "monitor:stop": "pm2 stop alawael-backend",
         "monitor:logs": "pm2 logs alawael-backend",
         "docker:build": "docker build -t alawael-backend .",
         "docker:run": "docker-compose up -d",
-        "docker:stop": "docker-compose down"
+        "docker:stop": "docker-compose down",
+        "verify:deploy": "node scripts/verify-deployment.js"
     },
     "dependencies": {
         "@sendgrid/mail": "^8.1.6",

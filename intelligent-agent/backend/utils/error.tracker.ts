@@ -325,14 +325,19 @@ export class ErrorTracker extends EventEmitter {
    */
   private logError(error: TrackedError) {
     const logFn = error.category === ErrorCategory.INTERNAL ? 'error' : 'warn';
-
-    globalLogger[logFn as 'error' | 'warn'](`${error.category}: ${error.message}`, 'ErrorTracker', {
+    const logData: Record<string, any> = {
       errorId: error.id,
       userId: error.userId,
       requestId: error.requestId,
       statusCode: error.statusCode,
       context: error.context,
-    });
+    };
+
+    if (logFn === 'error') {
+      globalLogger.error(`${error.category}: ${error.message}`, undefined, 'ErrorTracker', logData);
+    } else {
+      globalLogger.warn(`${error.category}: ${error.message}`, 'ErrorTracker', logData);
+    }
   }
 
   /**

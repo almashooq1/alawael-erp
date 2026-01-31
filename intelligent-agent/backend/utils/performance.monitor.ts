@@ -203,6 +203,28 @@ export class PerformanceMonitor extends EventEmitter {
   getReport(options: { limit?: number; sortBy?: string } = {}) {
     const { limit = 100, sortBy = 'duration' } = options;
 
+    const aggregatesArray = Array.from(this.aggregates.entries())
+      .map(([name, stats]) => [
+        name,
+        {
+          count: stats.count,
+          avg: stats.avg.toFixed(2),
+          min: stats.min,
+          max: stats.max,
+          p50: stats.p50,
+          p95: stats.p95,
+          p99: stats.p99,
+        },
+      ] as const);
+
+    const sortedAggregates = aggregatesArray.sort((a, b) => {
+      const statA = a[1];
+      const statB = b[1];
+      if (sortBy === 'count') return statB.count - statA.count;
+      if (sortBy === 'avg') return parseFloat(statB.avg) - parseFloat(statA.avg);
+      return 0;
+    });
+
     const report = {
       timestamp: new Date().toISOString(),
       totalMetrics: this.metrics.length,
@@ -211,27 +233,7 @@ export class PerformanceMonitor extends EventEmitter {
         success: this.metrics.filter(m => m.status === 'success').length,
         failure: this.metrics.filter(m => m.status === 'failure').length,
       },
-      aggregates: Object.fromEntries(
-        Array.from(this.aggregates.entries())
-          .map(([name, stats]) => [
-            name,
-            {
-              count: stats.count,
-              avg: stats.avg.toFixed(2),
-              min: stats.min,
-              max: stats.max,
-              p50: stats.p50,
-              p95: stats.p95,
-              p99: stats.p99,
-            },
-          ])
-          .sort((a, b) => {
-            if (sortBy === 'count') return b[1].count - a[1].count;
-            if (sortBy === 'avg') return parseFloat(b[1].avg) - parseFloat(a[1].avg);
-            return 0;
-          })
-          .slice(0, limit)
-      ),
+      aggregates: Object.fromEntries(sortedAggregates.slice(0, limit)),
       slowestOperations: this.metrics
         .sort((a, b) => b.duration - a.duration)
         .slice(0, 10)

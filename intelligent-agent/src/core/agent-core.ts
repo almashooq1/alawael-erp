@@ -68,7 +68,7 @@ export class AgentCore {
     this.api = new APIIntegration();
     this.db = new DBIntegration('mongodb://localhost:27017', 'agentdb');
     this.events = new EventWatcher();
-    this.logger = new Logger();
+    this.logger = Logger.getInstance();
     this.config = Config;
     this.scheduler = new Scheduler();
     this.notifier = new Notifier(this.logger);

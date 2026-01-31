@@ -1,0 +1,606 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🧠 AGI Monitoring Dashboard</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #333;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+
+      header {
+        background: white;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        margin-bottom: 30px;
+        text-align: center;
+      }
+
+      h1 {
+        font-size: 2.5em;
+        color: #667eea;
+        margin-bottom: 10px;
+      }
+
+      .subtitle {
+        color: #666;
+        font-size: 1.1em;
+      }
+
+      .status-bar {
+        background: white;
+        padding: 20px;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .status-item {
+        text-align: center;
+        padding: 15px;
+        min-width: 150px;
+      }
+
+      .status-label {
+        font-size: 0.9em;
+        color: #666;
+        margin-bottom: 5px;
+      }
+
+      .status-value {
+        font-size: 1.8em;
+        font-weight: bold;
+        color: #667eea;
+      }
+
+      .status-indicator {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        margin-right: 10px;
+        animation: pulse 2s infinite;
+      }
+
+      .status-healthy {
+        background: #10b981;
+      }
+
+      .status-degraded {
+        background: #f59e0b;
+      }
+
+      .status-unhealthy {
+        background: #ef4444;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+
+      .dashboard {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 25px;
+        margin-bottom: 30px;
+      }
+
+      .card {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        transition:
+          transform 0.3s ease,
+          box-shadow 0.3s ease;
+      }
+
+      .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      }
+
+      .card-title {
+        font-size: 1.3em;
+        color: #667eea;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .card-icon {
+        font-size: 1.5em;
+      }
+
+      .metric-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid #f0f0f0;
+      }
+
+      .metric-row:last-child {
+        border-bottom: none;
+      }
+
+      .metric-label {
+        color: #666;
+        font-size: 0.95em;
+      }
+
+      .metric-value {
+        font-weight: bold;
+        color: #333;
+        font-size: 1.1em;
+      }
+
+      .progress-bar {
+        width: 100%;
+        height: 8px;
+        background: #f0f0f0;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-top: 8px;
+      }
+
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        border-radius: 10px;
+        transition: width 0.5s ease;
+      }
+
+      .component-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+        margin-top: 15px;
+      }
+
+      .component-item {
+        background: #f9fafb;
+        padding: 15px;
+        border-radius: 10px;
+        border: 2px solid #e5e7eb;
+        transition: all 0.3s ease;
+      }
+
+      .component-item.active {
+        border-color: #10b981;
+        background: #ecfdf5;
+      }
+
+      .component-item.inactive {
+        border-color: #ef4444;
+        background: #fee2e2;
+      }
+
+      .component-name {
+        font-weight: bold;
+        margin-bottom: 8px;
+        color: #333;
+      }
+
+      .component-stats {
+        font-size: 0.85em;
+        color: #666;
+      }
+
+      .chart-container {
+        height: 200px;
+        margin-top: 20px;
+        position: relative;
+      }
+
+      .chart {
+        width: 100%;
+        height: 100%;
+      }
+
+      .refresh-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 25px;
+        font-size: 1em;
+        font-weight: bold;
+        cursor: pointer;
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        transition: all 0.3s ease;
+      }
+
+      .refresh-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+      }
+
+      .refresh-btn:active {
+        transform: translateY(0);
+      }
+
+      footer {
+        text-align: center;
+        color: white;
+        margin-top: 30px;
+        padding: 20px;
+      }
+
+      .loading {
+        text-align: center;
+        padding: 50px;
+        color: white;
+        font-size: 1.5em;
+      }
+
+      .error {
+        background: #fee2e2;
+        color: #dc2626;
+        padding: 20px;
+        border-radius: 10px;
+        margin: 20px 0;
+        border: 2px solid #ef4444;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>🧠 AGI Monitoring Dashboard</h1>
+        <p class="subtitle">Real-time monitoring of Artificial General Intelligence System</p>
+        <p style="margin-top: 10px; color: #999">
+          <span id="lastUpdate">Loading...</span> |
+          <button class="refresh-btn" onclick="loadData()">🔄 Refresh</button>
+        </p>
+      </header>
+
+      <div class="status-bar" id="statusBar">
+        <div class="status-item">
+          <div class="status-label">النظام</div>
+          <div class="status-value">
+            <span class="status-indicator" id="statusIndicator"></span>
+            <span id="statusText">Loading...</span>
+          </div>
+        </div>
+        <div class="status-item">
+          <div class="status-label">وقت التشغيل</div>
+          <div class="status-value" id="uptime">--</div>
+        </div>
+        <div class="status-item">
+          <div class="status-label">إجمالي الطلبات</div>
+          <div class="status-value" id="totalRequests">0</div>
+        </div>
+        <div class="status-item">
+          <div class="status-label">معدل النجاح</div>
+          <div class="status-value" id="successRate">100%</div>
+        </div>
+      </div>
+
+      <div id="errorContainer"></div>
+      <div id="loadingContainer" class="loading">⏳ Loading monitoring data...</div>
+
+      <div class="dashboard" id="dashboard" style="display: none">
+        <!-- Performance Card -->
+        <div class="card">
+          <h2 class="card-title">
+            <span class="card-icon">📈</span>
+            الأداء
+          </h2>
+          <div class="metric-row">
+            <span class="metric-label">متوسط وقت الاستجابة</span>
+            <span class="metric-value" id="avgResponseTime">0ms</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">معدل الخطأ</span>
+            <span class="metric-value" id="errorRate">0%</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">الإنتاجية</span>
+            <span class="metric-value" id="throughput">0 req/s</span>
+          </div>
+        </div>
+
+        <!-- Resources Card -->
+        <div class="card">
+          <h2 class="card-title">
+            <span class="card-icon">💾</span>
+            الموارد
+          </h2>
+          <div class="metric-row">
+            <span class="metric-label">استخدام الذاكرة</span>
+            <span class="metric-value" id="memoryUsage">0 MB</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="memoryProgress" style="width: 0%"></div>
+          </div>
+          <div class="metric-row" style="margin-top: 15px">
+            <span class="metric-label">استخدام المعالج</span>
+            <span class="metric-value" id="cpuUsage">0s</span>
+          </div>
+        </div>
+
+        <!-- Components Card -->
+        <div class="card" style="grid-column: span 2">
+          <h2 class="card-title">
+            <span class="card-icon">🧩</span>
+            المكونات
+          </h2>
+          <div class="component-grid" id="componentsGrid">
+            <!-- Will be populated by JS -->
+          </div>
+        </div>
+
+        <!-- Reasoning Component -->
+        <div class="card">
+          <h2 class="card-title">
+            <span class="card-icon">🤔</span>
+            Reasoning Engine
+          </h2>
+          <div class="metric-row">
+            <span class="metric-label">إجمالي الاستدعاءات</span>
+            <span class="metric-value" id="reasoningCalls">0</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">متوسط الوقت</span>
+            <span class="metric-value" id="reasoningTime">0ms</span>
+          </div>
+        </div>
+
+        <!-- Learning Component -->
+        <div class="card">
+          <h2 class="card-title">
+            <span class="card-icon">📚</span>
+            Learning System
+          </h2>
+          <div class="metric-row">
+            <span class="metric-label">إجمالي الاستدعاءات</span>
+            <span class="metric-value" id="learningCalls">0</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">حجم الذاكرة</span>
+            <span class="metric-value" id="memorySize">0</span>
+          </div>
+        </div>
+
+        <!-- Decision Component -->
+        <div class="card">
+          <h2 class="card-title">
+            <span class="card-icon">⚖️</span>
+            Decision System
+          </h2>
+          <div class="metric-row">
+            <span class="metric-label">إجمالي الاستدعاءات</span>
+            <span class="metric-value" id="decisionCalls">0</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">متوسط الوقت</span>
+            <span class="metric-value" id="decisionTime">0ms</span>
+          </div>
+        </div>
+
+        <!-- Creativity Component -->
+        <div class="card">
+          <h2 class="card-title">
+            <span class="card-icon">🎨</span>
+            Creativity Engine
+          </h2>
+          <div class="metric-row">
+            <span class="metric-label">إجمالي الاستدعاءات</span>
+            <span class="metric-value" id="creativityCalls">0</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">متوسط الوقت</span>
+            <span class="metric-value" id="creativityTime">0ms</span>
+          </div>
+        </div>
+
+        <!-- Planning Component -->
+        <div class="card">
+          <h2 class="card-title">
+            <span class="card-icon">🗺️</span>
+            Planning System
+          </h2>
+          <div class="metric-row">
+            <span class="metric-label">إجمالي الاستدعاءات</span>
+            <span class="metric-value" id="planningCalls">0</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">متوسط الوقت</span>
+            <span class="metric-value" id="planningTime">0ms</span>
+          </div>
+        </div>
+
+        <!-- Context Component -->
+        <div class="card">
+          <h2 class="card-title">
+            <span class="card-icon">🧠</span>
+            Context Understanding
+          </h2>
+          <div class="metric-row">
+            <span class="metric-label">إجمالي الاستدعاءات</span>
+            <span class="metric-value" id="contextCalls">0</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">متوسط الوقت</span>
+            <span class="metric-value" id="contextTime">0ms</span>
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        <p>🤖 AGI Monitoring Dashboard v1.0.0 | Made with ❤️</p>
+        <p style="margin-top: 5px; opacity: 0.8">Auto-refresh every 5 seconds</p>
+      </footer>
+    </div>
+
+    <script>
+      const API_URL = 'http://localhost:5001/api/agi';
+      let autoRefreshInterval;
+
+      // Format uptime
+      function formatUptime(seconds) {
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${hours}h ${minutes}m ${secs}s`;
+      }
+
+      // Format memory
+      function formatMemory(bytes) {
+        return (bytes / 1024 / 1024).toFixed(2) + ' MB';
+      }
+
+      // Load dashboard data
+      async function loadData() {
+        try {
+          const response = await fetch(`${API_URL}/status`);
+
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+
+          const data = await response.json();
+
+          // Update status bar
+          const statusIndicator = document.getElementById('statusIndicator');
+          const statusText = document.getElementById('statusText');
+
+          statusIndicator.className = 'status-indicator status-' + data.health.status;
+          statusText.textContent = data.health.status.toUpperCase();
+
+          document.getElementById('uptime').textContent = formatUptime(data.health.uptime);
+          document.getElementById('totalRequests').textContent = data.performance.requests;
+          document.getElementById('successRate').textContent =
+            data.performance.successRate.toFixed(1) + '%';
+
+          // Update performance card
+          document.getElementById('avgResponseTime').textContent =
+            data.performance.avgResponseTime.toFixed(2) + 'ms';
+          document.getElementById('errorRate').textContent =
+            data.performance.errorRate.toFixed(2) + '%';
+          document.getElementById('throughput').textContent =
+            data.performance.throughput.toFixed(2) + ' req/s';
+
+          // Update resources card
+          document.getElementById('memoryUsage').textContent = formatMemory(
+            data.resources.memoryUsage
+          );
+          document.getElementById('memoryProgress').style.width =
+            data.resources.memoryPercentage + '%';
+          document.getElementById('cpuUsage').textContent =
+            data.resources.cpuUsage.toFixed(2) + 's';
+
+          // Update components grid
+          const componentsGrid = document.getElementById('componentsGrid');
+          componentsGrid.innerHTML = '';
+
+          for (const [name, active] of Object.entries(data.components)) {
+            const div = document.createElement('div');
+            div.className = 'component-item ' + (active ? 'active' : 'inactive');
+            div.innerHTML = `
+            <div class="component-name">${active ? '✅' : '⭕'} ${name.toUpperCase()}</div>
+            <div class="component-stats">${active ? 'Active' : 'Inactive'}</div>
+          `;
+            componentsGrid.appendChild(div);
+          }
+
+          // Update component cards
+          if (data.componentMetrics) {
+            document.getElementById('reasoningCalls').textContent =
+              data.componentMetrics.reasoning.totalCalls;
+            document.getElementById('reasoningTime').textContent =
+              data.componentMetrics.reasoning.avgTime.toFixed(2) + 'ms';
+
+            document.getElementById('learningCalls').textContent =
+              data.componentMetrics.learning.totalCalls;
+            document.getElementById('memorySize').textContent =
+              data.componentMetrics.learning.memorySize;
+
+            document.getElementById('decisionCalls').textContent =
+              data.componentMetrics.decision.totalCalls;
+            document.getElementById('decisionTime').textContent =
+              data.componentMetrics.decision.avgTime.toFixed(2) + 'ms';
+
+            document.getElementById('creativityCalls').textContent =
+              data.componentMetrics.creativity.totalCalls;
+            document.getElementById('creativityTime').textContent =
+              data.componentMetrics.creativity.avgTime.toFixed(2) + 'ms';
+
+            document.getElementById('planningCalls').textContent =
+              data.componentMetrics.planning.totalCalls;
+            document.getElementById('planningTime').textContent =
+              data.componentMetrics.planning.avgTime.toFixed(2) + 'ms';
+
+            document.getElementById('contextCalls').textContent =
+              data.componentMetrics.context.totalCalls;
+            document.getElementById('contextTime').textContent =
+              data.componentMetrics.context.avgTime.toFixed(2) + 'ms';
+          }
+
+          // Update last update time
+          document.getElementById('lastUpdate').textContent =
+            'Last updated: ' + new Date().toLocaleTimeString();
+
+          // Hide loading, show dashboard
+          document.getElementById('loadingContainer').style.display = 'none';
+          document.getElementById('dashboard').style.display = 'grid';
+          document.getElementById('errorContainer').innerHTML = '';
+        } catch (error) {
+          console.error('Failed to load data:', error);
+          document.getElementById('loadingContainer').style.display = 'none';
+          document.getElementById('errorContainer').innerHTML = `
+          <div class="error">
+            <h3>❌ Error Loading Data</h3>
+            <p>${error.message}</p>
+            <p style="margin-top: 10px;">Make sure AGI server is running on <strong>http://localhost:5001</strong></p>
+          </div>
+        `;
+        }
+      }
+
+      // Start auto-refresh
+      function startAutoRefresh() {
+        loadData(); // Initial load
+        autoRefreshInterval = setInterval(loadData, 5000); // Refresh every 5 seconds
+      }
+
+      // Stop auto-refresh
+      function stopAutoRefresh() {
+        if (autoRefreshInterval) {
+          clearInterval(autoRefreshInterval);
+        }
+      }
+
+      // Initialize on page load
+      window.addEventListener('load', startAutoRefresh);
+      window.addEventListener('beforeunload', stopAutoRefresh);
+    </script>
+  </body>
+</html>

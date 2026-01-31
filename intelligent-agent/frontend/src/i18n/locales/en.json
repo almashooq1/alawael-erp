@@ -1,0 +1,36 @@
+{
+    "header": {
+        "title": "AI Intelligence Dashboard",
+        "dashboard": "Dashboard",
+        "recommendations": "Recommendations",
+        "metrics": "Metrics",
+        "reports": "Reports",
+        "advanced": "Advanced",
+        "visualizations": "Visualizations"
+    },
+    "status": {
+        "online": "System Online",
+        "offline": "System Offline",
+        "error": "Error Status",
+        "lastUpdate": "Last Updated"
+    },
+    "sidebar": {
+        "navigation": "Navigation",
+        "features": "Features",
+        "settings": "Settings",
+        "help": "Help"
+    },
+    "charts": {
+        "title": "Performance Metrics",
+        "cpu": "CPU Usage",
+        "memory": "Memory Usage",
+        "network": "Network Traffic",
+        "processing": "Processing Speed"
+    },
+    "buttons": {
+        "refresh": "Refresh",
+        "download": "Download",
+        "export": "Export",
+        "settings": "Settings"
+    }
+}

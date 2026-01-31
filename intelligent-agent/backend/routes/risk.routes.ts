@@ -22,11 +22,11 @@ router.get('/risks/:id', async (req, res) => {
 
 
 // Only admin or risk_manager can create
-router.post('/risks', requireRole(['admin', 'risk_manager']), async (req, res) => {
+router.post('/risks', requireRole(['admin', 'risk_manager']), async (req: any, res) => {
   const risk = new Risk(req.body);
   await risk.save();
   await RiskAuditLog.create({
-    riskId: risk._id,
+    riskId: risk._id.toString(),
     action: 'create',
     user: (req.user && req.user.username) || 'unknown',
     details: req.body,
@@ -41,7 +41,7 @@ router.post('/risks', requireRole(['admin', 'risk_manager']), async (req, res) =
 
 
 // Only admin or risk_manager can update
-router.put('/risks/:id', requireRole(['admin', 'risk_manager']), async (req, res) => {
+router.put('/risks/:id', requireRole(['admin', 'risk_manager']), async (req: any, res) => {
   const risk = await Risk.findByIdAndUpdate(req.params.id, req.body, { new: true });
   if (!risk) return res.status(404).json({ error: 'Not found' });
   await RiskAuditLog.create({
@@ -60,7 +60,7 @@ router.put('/risks/:id', requireRole(['admin', 'risk_manager']), async (req, res
 
 
 // Only admin can delete
-router.delete('/risks/:id', requireRole(['admin']), async (req, res) => {
+router.delete('/risks/:id', requireRole(['admin']), async (req: any, res) => {
   const risk = await Risk.findByIdAndDelete(req.params.id);
   if (!risk) return res.status(404).json({ error: 'Not found' });
   await RiskAuditLog.create({

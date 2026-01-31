@@ -1,0 +1,25 @@
+{"timestamp":"2026-01-30T18:59:02.885Z","level":"INFO","message":"Intelligent Agent started."}
+{"timestamp":"2026-01-30T18:59:02.901Z","level":"INFO","message":"NLP Result","context":[{"sentiment":"إيجابي","keywords":["للاختبار"]}]}
+{"timestamp":"2026-01-30T18:59:45.359Z","level":"INFO","message":"Intelligent Agent started."}
+{"timestamp":"2026-01-30T18:59:45.370Z","level":"INFO","message":"NLP Result","context":[{"sentiment":"إيجابي","keywords":["للاختبار"]}]}
+{"timestamp":"2026-01-30T19:00:14.089Z","level":"INFO","message":"Intelligent Agent started."}
+{"timestamp":"2026-01-30T19:00:14.097Z","level":"INFO","message":"NLP Result","context":[{"sentiment":"إيجابي","keywords":["للاختبار"]}]}
+{"timestamp":"2026-01-30T19:00:54.642Z","level":"INFO","message":"Intelligent Agent started."}
+{"timestamp":"2026-01-30T19:00:54.652Z","level":"INFO","message":"NLP Result","context":[{"sentiment":"إيجابي","keywords":["للاختبار"]}]}
+{"timestamp":"2026-01-30T19:48:15.515Z","level":"INFO","message":"Intelligent Agent started."}
+{"timestamp":"2026-01-30T19:48:15.524Z","level":"INFO","message":"NLP Result","context":[{"sentiment":"إيجابي","keywords":["للاختبار"]}]}
+{"timestamp":"2026-01-31T02:21:18.059Z","level":"INFO","message":"Intelligent Agent started."}
+{"timestamp":"2026-01-31T02:21:18.078Z","level":"INFO","message":"NLP Result","context":[{"sentiment":"إيجابي","keywords":["للاختبار"]}]}
+{"timestamp":"2026-01-31T02:21:18.468Z","level":"INFO","message":"API Result","context":[null]}
+{"timestamp":"2026-01-31T02:21:18.469Z","level":"INFO","message":"[NOTIFY] تم بدء النظام الذكي"}
+{"timestamp":"2026-01-31T02:21:18.469Z","level":"INFO","message":"Auth result","context":[true]}
+{"timestamp":"2026-01-31T02:21:18.469Z","level":"INFO","message":"Start count","context":[1]}
+{"timestamp":"2026-01-31T02:21:18.470Z","level":"INFO","message":"Cache value","context":["value"]}
+{"timestamp":"2026-01-31T02:21:18.470Z","level":"INFO","message":"Queue size","context":[1]}
+{"timestamp":"2026-01-31T02:21:18.473Z","level":"INFO","message":"File content","context":["hello world"]}
+{"timestamp":"2026-01-31T02:21:18.473Z","level":"INFO","message":"Event triggered","context":[{"msg":"مرحباً من الحدث!"}]}
+{"timestamp":"2026-01-31T02:21:18.474Z","level":"INFO","message":"Config AGENT_ENV","context":["default"]}
+{"timestamp":"2026-01-31T02:21:18.475Z","level":"INFO","message":"AI Chat reply","context":["[OpenAI] مرحبا"]}
+{"timestamp":"2026-01-31T02:21:18.476Z","level":"INFO","message":"Report generated","context":["report.json"]}
+{"timestamp":"2026-01-31T02:21:18.477Z","level":"INFO","message":"User profile","context":[{"id":"1","name":"أحمد","email":"ahmed@email.com"}]}
+{"timestamp":"2026-01-31T02:21:18.477Z","level":"INFO","message":"ERP Records","context":[[{"id":"1","type":"customer","data":{"name":"Sample","active":true}}]]}

@@ -1,3 +1,4 @@
+import { touchButtonStyle } from './touchStyles';
 import React, { useState } from 'react';
 
 export default function BoxPanel() {
@@ -29,7 +30,7 @@ export default function BoxPanel() {
       <input placeholder="Access Token" value={accessToken} onChange={e=>setAccessToken(e.target.value)} required />
       <input placeholder="Box Folder ID" value={boxFolderId} onChange={e=>setBoxFolderId(e.target.value)} required />
       <input placeholder="اسم الملف" value={name} onChange={e=>setName(e.target.value)} required />
-      <button type="submit">رفع</button>
+      <button type="submit" style={touchButtonStyle}>رفع</button>
     </form>
     {result && <div>{result}</div>}
   </div>;

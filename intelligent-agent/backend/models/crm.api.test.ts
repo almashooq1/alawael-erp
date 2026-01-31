@@ -1,11 +1,3 @@
-// إعداد متغير البيئة للاتصال بقاعدة بيانات MongoDB السحابية
-// إعداد متغير البيئة للاتصال بقاعدة بيانات MongoDB السحابية بشكل آمن
-require('dotenv').config();
-const username = process.env.MONGO_USER || 'alawael_admin';
-const password = process.env.MONGO_PASSWORD || '';
-const dbName = process.env.MONGO_DB || 'intelligent-agent';
-const cluster = process.env.MONGO_CLUSTER || 'cluster0.5njwaqd';
-process.env.MONGO_URI = `mongodb+srv://${username}:${password}@${cluster}.mongodb.net/${dbName}?retryWrites=true&w=majority`;
 import { describe, it, expect } from 'vitest';
 import request from 'supertest';
 import app from '../app';

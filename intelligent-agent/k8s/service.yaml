@@ -1,0 +1,71 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: intelligent-agent-frontend
+  namespace: production
+  labels:
+    app: intelligent-agent
+    component: frontend
+spec:
+  type: ClusterIP
+  selector:
+    app: intelligent-agent
+    component: frontend
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+    protocol: TCP
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: intelligent-agent-backend
+  namespace: production
+  labels:
+    app: intelligent-agent
+    component: backend
+spec:
+  type: ClusterIP
+  selector:
+    app: intelligent-agent
+    component: backend
+  ports:
+  - name: http
+    port: 5000
+    targetPort: 5000
+    protocol: TCP
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: intelligent-agent-loadbalancer
+  namespace: production
+  labels:
+    app: intelligent-agent
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+    service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
+spec:
+  type: LoadBalancer
+  selector:
+    app: intelligent-agent
+    component: frontend
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+    protocol: TCP
+  - name: https
+    port: 443
+    targetPort: 443
+    protocol: TCP
+  sessionAffinity: ClientIP

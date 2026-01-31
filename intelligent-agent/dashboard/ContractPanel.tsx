@@ -1,3 +1,4 @@
+import { touchButtonStyle, touchTableStyle } from './touchStyles';
 
 
 
@@ -69,7 +70,7 @@ export default function ContractPanel() {
   const [signatures, setSignatures] = useState<{[id:string]:string}>({});
   return <div style={{fontFamily:'Tahoma,Arial',maxWidth:900,margin:'auto'}}>
     <ExportFieldsSelector selected={exportFields} onChange={setExportFields} />
-    <button onClick={handleExport} disabled={exporting || !exportFields.length} style={{marginBottom:16}}>
+    <button onClick={handleExport} disabled={exporting || !exportFields.length} style={{...touchButtonStyle, marginBottom:16}}>
       {exporting ? 'جاري التصدير...' : 'تصدير العقود (حسب الحقول المختارة)'}
     </button>
     <h2>إدارة العقود</h2>
@@ -81,7 +82,7 @@ export default function ContractPanel() {
       <input type="number" placeholder="القيمة" value={form.value} onChange={e=>setForm(f=>({...f,value:e.target.value}))} required />
       <input placeholder="الشروط" value={form.terms} onChange={e=>setForm(f=>({...f,terms:e.target.value}))} required />
       <UserSelect value={form.ownerId} onChange={ownerId=>setForm(f=>({...f,ownerId}))} />
-      <button type="submit">إضافة عقد</button>
+      <button type="submit" style={touchButtonStyle}>إضافة عقد</button>
     </form>
     {/* Smart search/filter bar */}
     <div style={{marginBottom:16,display:'flex',gap:8,flexWrap:'wrap'}}>
@@ -104,9 +105,9 @@ export default function ContractPanel() {
       <input type="number" placeholder="القيمة إلى" value={filters.maxValue} onChange={e=>setFilters(f=>({...f,maxValue:e.target.value}))} style={{width:90}} />
       <input type="date" placeholder="من تاريخ" value={filters.startDate} onChange={e=>setFilters(f=>({...f,startDate:e.target.value}))} />
       <input type="date" placeholder="إلى تاريخ" value={filters.endDate} onChange={e=>setFilters(f=>({...f,endDate:e.target.value}))} />
-      <button type="button" onClick={()=>setFilters({title:'',party:'',status:'',risk:'',minValue:'',maxValue:'',startDate:'',endDate:''})}>مسح</button>
+      <button type="button" onClick={()=>setFilters({title:'',party:'',status:'',risk:'',minValue:'',maxValue:'',startDate:'',endDate:''})} style={touchButtonStyle}>مسح</button>
     </div>
-    <table style={{width:'100%'}}><thead><tr><th>العنوان</th><th>الأطراف</th><th>البداية</th><th>النهاية</th><th>القيمة</th><th>الحالة</th><th>المخاطر</th><th>ملف</th><th>سجل النشاطات</th><th>توقيع إلكتروني</th></tr></thead>
+    <table style={{width:'100%', ...touchTableStyle}}><thead><tr><th>العنوان</th><th>الأطراف</th><th>البداية</th><th>النهاية</th><th>القيمة</th><th>الحالة</th><th>المخاطر</th><th>ملف</th><th>سجل النشاطات</th><th>توقيع إلكتروني</th></tr></thead>
       <tbody>
         {contracts.map(c=><React.Fragment key={c.id}>
           <tr>
@@ -122,11 +123,11 @@ export default function ContractPanel() {
               {c.metadata?.file && <a href={`/dashboard/contract-file/file/${c.id}`} target="_blank" rel="noopener noreferrer">تنزيل</a>}
             </td>
             <td>
-              <button onClick={()=>setShowLog(showLog===c.id?null:c.id)}>{showLog===c.id?'إخفاء':'عرض'}</button>
+              <button onClick={()=>setShowLog(showLog===c.id?null:c.id)} style={touchButtonStyle}>{showLog===c.id?'إخفاء':'عرض'}</button>
             </td>
             <td>
               {c.metadata?.signature ? <img src={c.metadata.signature} alt="توقيع" style={{maxWidth:80,maxHeight:40,border:'1px solid #ccc'}} /> :
-                <button onClick={()=>setSigningId(c.id)}>توقيع</button>}
+                <button onClick={()=>setSigningId(c.id)} style={touchButtonStyle}>توقيع</button>}
             </td>
           </tr>
           {showLog===c.id && <tr><td colSpan={10}><ContractActivityPanel contractId={c.id} /></td></tr>}
@@ -141,7 +142,7 @@ export default function ContractPanel() {
                 body:JSON.stringify({ metadata: { ...c.metadata, signature: dataUrl } })
               }).then(()=>fetchContracts());
             }} />
-            <button onClick={()=>setSigningId(null)}>إلغاء</button>
+            <button onClick={()=>setSigningId(null)} style={touchButtonStyle}>إلغاء</button>
           </td></tr>}
         </React.Fragment>)}
       </tbody>

@@ -1,3 +1,4 @@
+import { touchButtonStyle, touchTableStyle } from './touchStyles';
 import React, { useState } from 'react';
 
 export default function CustomReportsPanel() {
@@ -26,9 +27,9 @@ export default function CustomReportsPanel() {
       <input type="date" value={from} onChange={e=>setFrom(e.target.value)} />
       <input type="date" value={to} onChange={e=>setTo(e.target.value)} />
       <input placeholder="فلتر (JSON)" value={filter} onChange={e=>setFilter(e.target.value)} />
-      <button type="submit">توليد التقرير</button>
+      <button type="submit" style={touchButtonStyle}>توليد التقرير</button>
     </form>
-    <table style={{width:'100%',fontSize:13}}><thead><tr>{fields.split(',').map(f=><th key={f}>{f}</th>)}</tr></thead>
+    <table style={{width:'100%',fontSize:13, ...touchTableStyle}}><thead><tr>{fields.split(',').map(f=><th key={f}>{f}</th>)}</tr></thead>
       <tbody>
         {data.map((row,i)=><tr key={i}>{fields.split(',').map(f=><td key={f}>{row[f]}</td>)}</tr>)}
       </tbody>

@@ -1,10 +1,122 @@
 // process.automation.ts
-// منطق أتمتة العمليات: تنفيذ الخطوات المؤتمتة، إشعارات، انتقالات تلقائية
+// الأتمتة الذكية للعمليات: تحسين الأداء والإنتاجية
 
-import { Process, ProcessStep, Task } from './models/process.model';
+import { Process } from './process.model';
+
+// اقتراح تشغيل تلقائي للعمليات البسيطة
+export function suggestAutomationOpportunities(process: Process): string[] {
+  const opportunities: string[] = [];
+
+  for (const step of process.steps) {
+    // إذا كانت الخطوة يدوية وبسيطة، يمكن أتمتتها
+    if (step.type === 'manual' && step.name.toLowerCase().includes('تحديث')) {
+      opportunities.push(`أتمت: ${step.name}`);
+    }
+
+    // إذا كانت خطوة متكررة
+    if (step.type === 'manual' && step.name.toLowerCase().includes('مراجعة')) {
+      opportunities.push(`أتمت: ${step.name} (متكررة)`);
+    }
+  }
+
+  return opportunities;
+}
+
+// حساب تأثير الأتمتة على الوقت والتكلفة
+export function calculateAutomationBenefit(process: Process): {
+  timeSavedPercentage: number;
+  costSavedPercentage: number;
+  recommendation: string;
+} {
+  const manualSteps = process.steps.filter(s => s.type === 'manual').length;
+  const totalSteps = process.steps.length;
+
+  // افتراض: أتمتة الخطوات اليدوية توفر 50% من الوقت
+  const timeSaved = (manualSteps / totalSteps) * 50;
+
+  return {
+    timeSavedPercentage: Math.round(timeSaved),
+    costSavedPercentage: Math.round(timeSaved * 0.8), // 80% من توفير الوقت = توفير تكاليف
+    recommendation: timeSaved > 30
+      ? 'أتمتة عالية الأولوية'
+      : timeSaved > 10
+      ? 'أتمتة متوسطة الأولوية'
+      : 'أتمتة منخفضة الأولوية'
+  };
+}
+
+// إنشاء قائمة المهام الذكية المقترحة
+export function generateSmartTaskList(process: Process): {
+  task: string;
+  priority: 'عالية' | 'متوسطة' | 'منخفضة';
+  deadline?: string;
+}[] {
+  const tasks: {
+    task: string;
+    priority: 'عالية' | 'متوسطة' | 'منخفضة';
+    deadline?: string;
+  }[] = [];
+
+  // المهام ذات الأولوية العالية (الخطوات المتأخرة)
+  for (const step of process.steps) {
+    if (step.dueDate && new Date().getTime() > new Date(step.dueDate).getTime() && step.status !== 'done') {
+      tasks.push({
+        task: `تسريع: ${step.name}`,
+        priority: 'عالية',
+        deadline: step.dueDate
+      });
+    }
+  }
+
+  // المهام ذات الأولوية المتوسطة (الخطوات الحالية)
+  for (const step of process.steps) {
+    if (step.status === 'in_progress') {
+      tasks.push({
+        task: `متابعة: ${step.name}`,
+        priority: 'متوسطة',
+        deadline: step.dueDate
+      });
+    }
+  }
+
+  // المهام ذات الأولوية المنخفضة (الخطوات المعلقة)
+  for (const step of process.steps) {
+    if (step.status === 'pending' && (!step.dueDate || new Date().getTime() < new Date(step.dueDate).getTime())) {
+      tasks.push({
+        task: `تجهيز: ${step.name}`,
+        priority: 'منخفضة',
+        deadline: step.dueDate
+      });
+    }
+  }
+
+  return tasks.sort((a, b) => {
+    const priorityOrder = { 'عالية': 0, 'متوسطة': 1, 'منخفضة': 2 };
+    return priorityOrder[a.priority] - priorityOrder[b.priority];
+  });
+}
+
+// توليد تقرير الأتمتة الموصى به
+export function generateAutomationReport(process: Process): {
+  currentAutomatedPercentage: number;
+  potentialAutomatedPercentage: number;
+  roi: string;
+} {
+  const automatedSteps = process.steps.filter(s => s.type === 'automated').length;
+  const currentPercentage = (automatedSteps / process.steps.length) * 100;
+
+  // افتراض: يمكن أتمتة 70% من العمليات
+  const potentialPercentage = Math.min(70, currentPercentage + 30);
+
+  return {
+    currentAutomatedPercentage: Math.round(currentPercentage),
+    potentialAutomatedPercentage: Math.round(potentialPercentage),
+    roi: potentialPercentage > 50 ? 'عائد استثمار عالي' : 'عائد استثمار متوسط'
+  };
+}
 
 // تنفيذ خطوة مؤتمتة (مثال: إرسال إشعار، استدعاء API)
-export async function executeAutomatedStep(step: ProcessStep, context: any) {
+export async function executeAutomatedStep(step: any, context: any) {
   switch (step.type) {
     case 'automated':
       // مثال: تنفيذ إجراء حسب نوعه

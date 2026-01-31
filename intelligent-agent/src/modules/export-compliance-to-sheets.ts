@@ -37,6 +37,7 @@ export async function exportComplianceEventsToGoogleSheets({
     requestBody: { values },
   });
   ExportImportLogger.log({
+    timestamp: new Date().toISOString(),
     userId,
     operation: 'export',
     format: 'google-sheets',

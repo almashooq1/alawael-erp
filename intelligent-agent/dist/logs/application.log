@@ -1,0 +1,32 @@
+{"timestamp":"2026-01-30T17:56:02.319Z","level":"INFO","message":"Intelligent Agent started."}
+{"timestamp":"2026-01-30T17:56:02.335Z","level":"INFO","message":"NLP Result","context":[{"sentiment":"إيجابي","keywords":["للاختبار"]}]}
+{"timestamp":"2026-01-30T17:56:02.728Z","level":"INFO","message":"API Result","context":[null]}
+{"timestamp":"2026-01-30T17:56:02.729Z","level":"INFO","message":"[NOTIFY] تم بدء النظام الذكي"}
+{"timestamp":"2026-01-30T17:56:02.730Z","level":"INFO","message":"Auth result","context":[true]}
+{"timestamp":"2026-01-30T17:56:02.730Z","level":"INFO","message":"Start count","context":[1]}
+{"timestamp":"2026-01-30T17:56:02.731Z","level":"INFO","message":"Cache value","context":["value"]}
+{"timestamp":"2026-01-30T17:56:02.731Z","level":"INFO","message":"Queue size","context":[1]}
+{"timestamp":"2026-01-30T17:56:02.735Z","level":"INFO","message":"File content","context":["hello world"]}
+{"timestamp":"2026-01-30T17:56:02.735Z","level":"INFO","message":"Event triggered","context":[{"msg":"مرحباً من الحدث!"}]}
+{"timestamp":"2026-01-30T17:56:02.736Z","level":"INFO","message":"Config AGENT_ENV","context":["default"]}
+{"timestamp":"2026-01-30T17:56:02.739Z","level":"INFO","message":"AI Chat reply","context":["[OpenAI] مرحبا"]}
+{"timestamp":"2026-01-30T17:56:02.742Z","level":"INFO","message":"Report generated","context":["report.json"]}
+{"timestamp":"2026-01-30T17:56:02.743Z","level":"INFO","message":"User profile","context":[{"id":"1","name":"أحمد","email":"ahmed@email.com"}]}
+{"timestamp":"2026-01-30T17:56:02.743Z","level":"INFO","message":"ERP Records","context":[[{"id":"1","type":"customer","data":{"name":"Sample","active":true}}]]}
+{"timestamp":"2026-01-30T17:56:03.730Z","level":"INFO","message":"Scheduled task executed"}
+{"timestamp":"2026-01-30T18:01:40.437Z","level":"INFO","message":"Intelligent Agent started."}
+{"timestamp":"2026-01-30T18:01:40.446Z","level":"INFO","message":"NLP Result","context":[{"sentiment":"إيجابي","keywords":["للاختبار"]}]}
+{"timestamp":"2026-01-30T18:01:40.802Z","level":"INFO","message":"API Result","context":[null]}
+{"timestamp":"2026-01-30T18:01:40.802Z","level":"INFO","message":"[NOTIFY] تم بدء النظام الذكي"}
+{"timestamp":"2026-01-30T18:01:40.802Z","level":"INFO","message":"Auth result","context":[true]}
+{"timestamp":"2026-01-30T18:01:40.803Z","level":"INFO","message":"Start count","context":[1]}
+{"timestamp":"2026-01-30T18:01:40.803Z","level":"INFO","message":"Cache value","context":["value"]}
+{"timestamp":"2026-01-30T18:01:40.804Z","level":"INFO","message":"Queue size","context":[1]}
+{"timestamp":"2026-01-30T18:01:40.806Z","level":"INFO","message":"File content","context":["hello world"]}
+{"timestamp":"2026-01-30T18:01:40.806Z","level":"INFO","message":"Event triggered","context":[{"msg":"مرحباً من الحدث!"}]}
+{"timestamp":"2026-01-30T18:01:40.806Z","level":"INFO","message":"Config AGENT_ENV","context":["default"]}
+{"timestamp":"2026-01-30T18:01:40.807Z","level":"INFO","message":"AI Chat reply","context":["[OpenAI] مرحبا"]}
+{"timestamp":"2026-01-30T18:01:40.808Z","level":"INFO","message":"Report generated","context":["report.json"]}
+{"timestamp":"2026-01-30T18:01:40.808Z","level":"INFO","message":"User profile","context":[{"id":"1","name":"أحمد","email":"ahmed@email.com"}]}
+{"timestamp":"2026-01-30T18:01:40.808Z","level":"INFO","message":"ERP Records","context":[[{"id":"1","type":"customer","data":{"name":"Sample","active":true}}]]}
+{"timestamp":"2026-01-30T18:01:41.814Z","level":"INFO","message":"Scheduled task executed"}

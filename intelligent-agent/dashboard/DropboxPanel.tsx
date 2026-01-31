@@ -1,3 +1,4 @@
+import { touchButtonStyle } from './touchStyles';
 import React, { useState } from 'react';
 
 export default function DropboxPanel() {
@@ -20,7 +21,7 @@ export default function DropboxPanel() {
       <input type="file" onChange={e=>setFile(e.target.files?.[0]||null)} required />
       <input placeholder="Access Token" value={accessToken} onChange={e=>setAccessToken(e.target.value)} required />
       <input placeholder="Dropbox Path (مثال: /folder/file.pdf)" value={dropboxPath} onChange={e=>setDropboxPath(e.target.value)} required />
-      <button type="submit">رفع</button>
+      <button type="submit" style={touchButtonStyle}>رفع</button>
     </form>
     {result && <div>{result}</div>}
   </div>;

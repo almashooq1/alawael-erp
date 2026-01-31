@@ -33,6 +33,7 @@ async function exportComplianceEventsToGoogleSheets({ userId, sheetId, range = '
         requestBody: { values },
     });
     export_import_logger_1.ExportImportLogger.log({
+        timestamp: new Date().toISOString(),
         userId,
         operation: 'export',
         format: 'google-sheets',

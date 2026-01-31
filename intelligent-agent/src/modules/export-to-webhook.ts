@@ -17,6 +17,7 @@ export async function exportDataToWebhook({
 }) {
   const response = await axios.post(webhookUrl, payload, { headers });
   ExportImportLogger.log({
+    timestamp: new Date().toISOString(),
     userId,
     operation: 'export',
     format: 'webhook',

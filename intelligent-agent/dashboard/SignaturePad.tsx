@@ -1,3 +1,4 @@
+import { touchButtonStyle } from './touchStyles';
 import React, { useRef, useState } from 'react';
 
 export default function SignaturePad({ onSave }: { onSave: (dataUrl: string) => void }) {
@@ -27,8 +28,8 @@ export default function SignaturePad({ onSave }: { onSave: (dataUrl: string) => 
     <canvas ref={canvasRef} width={300} height={100} style={{border:'1px solid #888',background:'#fff'}}
       onMouseDown={start} onMouseMove={move} onMouseUp={stop} onMouseLeave={stop} />
     <div style={{marginTop:8}}>
-      <button onClick={clear}>مسح</button>
-      <button onClick={save}>حفظ التوقيع</button>
+      <button onClick={clear} style={touchButtonStyle}>مسح</button>
+      <button onClick={save} style={touchButtonStyle}>حفظ التوقيع</button>
     </div>
   </div>;
 }

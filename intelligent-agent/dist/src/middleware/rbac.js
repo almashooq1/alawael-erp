@@ -1,6 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.rbacObj = void 0;
 exports.requirePermission = requirePermission;
+exports.rbac = rbac;
 const user_profile_1 = require("../modules/user-profile");
 const userProfileManager = new user_profile_1.UserProfileManager();
 function requirePermission(permission) {
@@ -30,3 +32,20 @@ function getPermissionsForRole(role) {
     };
     return rolePermissions[role] || [];
 }
+function rbac(allowedRoles) {
+    return (req, res, next) => {
+        const user = req.user;
+        if (!user || !user.roles) {
+            return res.status(401).json({ error: 'غير مصرح' });
+        }
+        const hasRole = user.roles.some((role) => allowedRoles.includes(role));
+        if (!hasRole) {
+            return res.status(403).json({ error: 'صلاحية غير كافية' });
+        }
+        next();
+    };
+}
+exports.rbacObj = {
+    requirePermission,
+    getPermissionsForRole,
+};

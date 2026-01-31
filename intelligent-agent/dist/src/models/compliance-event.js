@@ -12,6 +12,7 @@ const ComplianceEventSchema = new mongoose_1.default.Schema({
     resource: { type: String, required: true }, // مثال: 'contract', 'meeting', 'user', ...
     resourceId: { type: String, required: false },
     status: { type: String, required: true }, // 'success' | 'fail' | 'warning'
+    resolved: { type: Boolean, default: false }, // تم حل المشكلة أو لا
     details: { type: String },
     policy: { type: String }, // اسم سياسة الامتثال المرتبطة
 });

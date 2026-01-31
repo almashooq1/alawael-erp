@@ -30,3 +30,21 @@ function getPermissionsForRole(role: string): string[] {
   };
   return rolePermissions[role] || [];
 }
+export function rbac(allowedRoles: string[]) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const user = (req as any).user;
+    if (!user || !user.roles) {
+      return res.status(401).json({ error: 'غير مصرح' });
+    }
+    const hasRole = user.roles.some((role: string) => allowedRoles.includes(role));
+    if (!hasRole) {
+      return res.status(403).json({ error: 'صلاحية غير كافية' });
+    }
+    next();
+  };
+}
+
+export const rbacObj = {
+  requirePermission,
+  getPermissionsForRole,
+};

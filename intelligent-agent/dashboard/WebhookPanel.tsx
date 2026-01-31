@@ -1,3 +1,4 @@
+import { touchButtonStyle } from './touchStyles';
 import React, { useState } from 'react';
 
 export default function WebhookPanel() {
@@ -19,7 +20,7 @@ export default function WebhookPanel() {
       <input placeholder="Webhook URL" value={url} onChange={e=>setUrl(e.target.value)} required />
       <input placeholder="اسم الحدث" value={event} onChange={e=>setEvent(e.target.value)} required />
       <input placeholder="بيانات (JSON)" value={data} onChange={e=>setData(e.target.value)} />
-      <button type="submit">إرسال</button>
+      <button type="submit" style={touchButtonStyle}>إرسال</button>
     </form>
     {result && <div>{result}</div>}
   </div>;

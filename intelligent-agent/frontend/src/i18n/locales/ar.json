@@ -1,0 +1,36 @@
+{
+    "header": {
+        "title": "لوحة ذكاء الذكاء الاصطناعي",
+        "dashboard": "لوحة التحكم",
+        "recommendations": "التوصيات",
+        "metrics": "المقاييس",
+        "reports": "التقارير",
+        "advanced": "متقدم",
+        "visualizations": "التصورات"
+    },
+    "status": {
+        "online": "النظام متصل",
+        "offline": "النظام غير متصل",
+        "error": "حالة خطأ",
+        "lastUpdate": "آخر تحديث"
+    },
+    "sidebar": {
+        "navigation": "التنقل",
+        "features": "الميزات",
+        "settings": "الإعدادات",
+        "help": "المساعدة"
+    },
+    "charts": {
+        "title": "مقاييس الأداء",
+        "cpu": "استخدام المعالج",
+        "memory": "استخدام الذاكرة",
+        "network": "حركة الشبكة",
+        "processing": "سرعة المعالجة"
+    },
+    "buttons": {
+        "refresh": "تحديث",
+        "download": "تحميل",
+        "export": "تصدير",
+        "settings": "الإعدادات"
+    }
+}

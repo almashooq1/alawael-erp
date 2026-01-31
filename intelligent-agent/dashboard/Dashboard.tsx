@@ -1,5 +1,6 @@
 
 import ContractDashboardCharts from './ContractDashboardCharts';
+import { touchButtonStyle } from './touchStyles';
 
 export default function Dashboard() {
   const [stats, setStats] = useState<any>(null);
@@ -10,9 +11,9 @@ export default function Dashboard() {
   return (
     <div style={{fontFamily:'Tahoma,Arial',maxWidth:900,margin:'auto'}}>
       <h2>لوحة تحكم الذكاء الذاتي</h2>
-      <div style={{margin:'10px 0'}}>
-        <button onClick={()=>window.open('/dashboard/api/export/pdf','_blank')}>تصدير PDF</button>
-        <button onClick={()=>window.open('/dashboard/api/export/excel','_blank')} style={{marginRight:8}}>تصدير Excel</button>
+      <div style={{margin:'10px 0', display:'flex', gap:12}}>
+        <button onClick={()=>window.open('/dashboard/api/export/pdf','_blank')} style={touchButtonStyle}>تصدير PDF</button>
+        <button onClick={()=>window.open('/dashboard/api/export/excel','_blank')} style={{...touchButtonStyle, marginRight:8}}>تصدير Excel</button>
       </div>
       <div>إجمالي التفاعلات: <b>{stats.total}</b></div>
       <div>تفاعلات هذا الأسبوع: <b>{stats.weekCount}</b></div>

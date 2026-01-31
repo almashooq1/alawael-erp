@@ -1,11 +1,17 @@
+import express from 'express';
 import aiComplianceRiskRouter from './routes/ai-compliance-risk';
 import aiComplianceRootCauseRouter from './routes/ai-compliance-root-cause';
-app.use('/v1/ai', aiComplianceRiskRouter);
-app.use('/v1/ai', aiComplianceRootCauseRouter);
-import express from 'express';
-const v1 = express.Router();
 import { RiskManager } from './modules/risk-manager';
 import { ResourceManager } from './modules/resource-manager';
+import { WebhookManager } from './modules/webhook-manager';
+
+const app = express();
+const v1 = express.Router();
+
+// Router setup
+app.use('/v1/ai', aiComplianceRiskRouter);
+app.use('/v1/ai', aiComplianceRootCauseRouter);
+
 // Duplicate import removed
 const riskManager = new RiskManager();
 const resourceManager = new ResourceManager();
@@ -52,7 +58,6 @@ import { RiskComplianceManager } from './modules/risk-compliance';
 import path from 'path';
 import fs from 'fs';
 import schedule from 'node-schedule';
-const app = express();
 
 
 
@@ -3757,7 +3762,7 @@ v1.post('/recommend', async (req, res) => {
     res.status(500).json({ error: 'Internal error' });
   }
 });
-import { WebhookManager } from './modules/webhook-manager';
+
 // Webhook subscription management endpoints
 app.post('/v1/hooks', (req, res) => {
   const { event, url } = req.body;

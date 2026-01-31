@@ -1,0 +1,8 @@
+# Kubernetes namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: production
+  labels:
+    name: production
+    environment: production

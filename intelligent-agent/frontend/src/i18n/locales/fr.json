@@ -1,0 +1,36 @@
+{
+    "header": {
+        "title": "Tableau de bord de l'intelligence artificielle",
+        "dashboard": "Tableau de bord",
+        "recommendations": "Recommandations",
+        "metrics": "Métriques",
+        "reports": "Rapports",
+        "advanced": "Avancé",
+        "visualizations": "Visualisations"
+    },
+    "status": {
+        "online": "Système en ligne",
+        "offline": "Système hors ligne",
+        "error": "État d'erreur",
+        "lastUpdate": "Dernière mise à jour"
+    },
+    "sidebar": {
+        "navigation": "Navigation",
+        "features": "Caractéristiques",
+        "settings": "Paramètres",
+        "help": "Aide"
+    },
+    "charts": {
+        "title": "Métriques de performance",
+        "cpu": "Utilisation du CPU",
+        "memory": "Utilisation de la mémoire",
+        "network": "Trafic réseau",
+        "processing": "Vitesse de traitement"
+    },
+    "buttons": {
+        "refresh": "Actualiser",
+        "download": "Télécharger",
+        "export": "Exporter",
+        "settings": "Paramètres"
+    }
+}

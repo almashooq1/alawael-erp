@@ -1,0 +1,5 @@
+{
+    "version": "8.0.0",
+    "downloadDir": "./node_modules/.cache/mongodb-memory-server",
+    "checkMD5": false
+}

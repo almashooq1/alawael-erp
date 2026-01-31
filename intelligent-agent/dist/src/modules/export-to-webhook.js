@@ -10,6 +10,7 @@ const export_import_logger_1 = require("./export-import-logger");
 async function exportDataToWebhook({ userId, webhookUrl, payload, headers = {}, eventType = 'generic', }) {
     const response = await axios_1.default.post(webhookUrl, payload, { headers });
     export_import_logger_1.ExportImportLogger.log({
+        timestamp: new Date().toISOString(),
         userId,
         operation: 'export',
         format: 'webhook',

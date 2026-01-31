@@ -19,7 +19,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // رفع مرفق وربطه بمخاطرة
-router.post('/risks/:id/attachments', requireRole(['admin', 'risk_manager']), upload.single('file'), async (req, res) => {
+router.post('/risks/:id/attachments', requireRole(['admin', 'risk_manager']), upload.single('file'), async (req: any, res) => {
   const risk = await Risk.findById(req.params.id);
   if (!risk) return res.status(404).json({ error: 'Risk not found' });
   if (!req.file) return res.status(400).json({ error: 'No file uploaded' });

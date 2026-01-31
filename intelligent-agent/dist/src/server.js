@@ -37,14 +37,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.app = exports.workflowAutomation = exports.notificationCenter = exports.dashboardManager = void 0;
+const express_1 = __importDefault(require("express"));
 const ai_compliance_risk_1 = __importDefault(require("./routes/ai-compliance-risk"));
 const ai_compliance_root_cause_1 = __importDefault(require("./routes/ai-compliance-root-cause"));
-app.use('/v1/ai', ai_compliance_risk_1.default);
-app.use('/v1/ai', ai_compliance_root_cause_1.default);
-const express_1 = __importDefault(require("express"));
-const v1 = express_1.default.Router();
 const risk_manager_1 = require("./modules/risk-manager");
 const resource_manager_1 = require("./modules/resource-manager");
+const webhook_manager_1 = require("./modules/webhook-manager");
+const app = (0, express_1.default)();
+exports.app = app;
+const v1 = express_1.default.Router();
+// Router setup
+app.use('/v1/ai', ai_compliance_risk_1.default);
+app.use('/v1/ai', ai_compliance_root_cause_1.default);
 // Duplicate import removed
 const riskManager = new risk_manager_1.RiskManager();
 const resourceManager = new resource_manager_1.ResourceManager();
@@ -54,8 +58,6 @@ const risk_compliance_1 = require("./modules/risk-compliance");
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
 const node_schedule_1 = __importDefault(require("node-schedule"));
-const app = (0, express_1.default)();
-exports.app = app;
 // --- Advanced Modules Imports ---
 const auto_escalation_1 = require("./modules/auto-escalation");
 const advanced_user_manager_1 = require("./modules/advanced-user-manager");
@@ -4415,7 +4417,6 @@ v1.post('/recommend', async (req, res) => {
         res.status(500).json({ error: 'Internal error' });
     }
 });
-const webhook_manager_1 = require("./modules/webhook-manager");
 // Webhook subscription management endpoints
 app.post('/v1/hooks', (req, res) => {
     const { event, url } = req.body;

@@ -1,0 +1,170 @@
+version: '3.8'
+
+services:
+  # Main AGI Server
+  agi-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rehab-agi-server
+    ports:
+      - "5001:5001"
+    environment:
+      - NODE_ENV=production
+      - AGI_PORT=5001
+      - ERP_API_URL=${ERP_API_URL:-http://erp-mock:3000/api}
+      - ERP_SYNC_ENABLED=true
+      - ERP_AUTO_SYNC=true
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=rehab_agi
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - rehab-network
+    volumes:
+      - ./logs:/app/logs
+      - ./uploads:/app/uploads
+    restart: unless-stopped
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: rehab-postgres
+    environment:
+      - POSTGRES_DB=rehab_agi
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - rehab-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: rehab-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - rehab-network
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Mock ERP Server
+  erp-mock:
+    image: mockserver/mockserver:latest
+    container_name: rehab-erp-mock
+    ports:
+      - "3000:1080"
+    networks:
+      - rehab-network
+    restart: unless-stopped
+
+  # Prometheus Monitoring
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: rehab-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - prometheus-data:/prometheus
+    networks:
+      - rehab-network
+    restart: unless-stopped
+
+  # Grafana Dashboard
+  grafana:
+    image: grafana/grafana:latest
+    container_name: rehab-grafana
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_USER=admin
+    volumes:
+      - grafana-data:/var/lib/grafana
+    networks:
+      - rehab-network
+    restart: unless-stopped
+
+volumes:
+  postgres-data:
+  redis-data:
+  prometheus-data:
+  grafana-data:
+
+networks:
+  rehab-network:
+    driver: bridge
+    restart: unless-stopped
+    networks:
+      - agi-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:5001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Optional: Redis for caching
+  redis:
+    image: redis:7-alpine
+    container_name: agi-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - agi-network
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+
+  # Optional: PostgreSQL for persistence
+  postgres:
+    image: postgres:15-alpine
+    container_name: agi-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=agi_db
+      - POSTGRES_USER=agi_user
+      - POSTGRES_PASSWORD=agi_password
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - agi-network
+    restart: unless-stopped
+
+networks:
+  agi-network:
+    driver: bridge
+
+volumes:
+  redis-data:
+  postgres-data:

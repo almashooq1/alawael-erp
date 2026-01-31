@@ -1,0 +1,78 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: intelligent-agent-config
+  namespace: production
+  labels:
+    app: intelligent-agent
+data:
+  # Application configuration
+  api_url: "https://api.intelligent-agent.com"
+  cors_origin: "https://intelligent-agent.com,https://www.intelligent-agent.com"
+  
+  # Frontend configuration
+  react_app_name: "Intelligent Agent"
+  react_app_version: "1.0.0"
+  react_app_environment: "production"
+  
+  # Backend configuration
+  node_env: "production"
+  port: "5000"
+  
+  # Rate limiting
+  rate_limit_window: "900000"  # 15 minutes in milliseconds
+  rate_limit_max_requests: "100"
+  
+  # Session configuration
+  session_timeout: "3600000"  # 1 hour in milliseconds
+  session_cookie_name: "intelligent-agent-session"
+  
+  # Logging
+  log_level: "info"
+  log_format: "json"
+  
+  # Cache settings
+  cache_ttl: "300"  # 5 minutes in seconds
+  
+  # File upload limits
+  max_file_size: "10485760"  # 10MB in bytes
+  
+  # Pagination defaults
+  default_page_size: "20"
+  max_page_size: "100"
+  
+  # Feature flags
+  enable_analytics: "true"
+  enable_error_tracking: "true"
+  enable_performance_monitoring: "true"
+  
+  # External services
+  cdn_url: "https://cdn.intelligent-agent.com"
+  static_assets_url: "https://static.intelligent-agent.com"
+  
+  # Database pool settings
+  db_pool_min: "2"
+  db_pool_max: "10"
+  db_connection_timeout: "30000"
+  db_idle_timeout: "600000"
+  
+  # Redis settings
+  redis_ttl: "3600"  # 1 hour
+  redis_key_prefix: "intelligent-agent:"
+  
+  # Security settings
+  bcrypt_rounds: "12"
+  jwt_expiration: "86400"  # 24 hours in seconds
+  refresh_token_expiration: "604800"  # 7 days in seconds
+  
+  # CORS settings
+  cors_methods: "GET,POST,PUT,DELETE,OPTIONS,PATCH"
+  cors_allowed_headers: "Content-Type,Authorization,X-Requested-With"
+  cors_max_age: "86400"  # 24 hours
+  
+  # Health check intervals
+  health_check_interval: "30"  # seconds
+  
+  # Monitoring
+  metrics_port: "9090"
+  metrics_path: "/metrics"

@@ -15,7 +15,7 @@ export async function getComplianceRiskScores({ days = 30 } = {}) {
     policy: string;
     riskScore: number;
     violations: number;
-    lastViolation?: string;
+    lastViolation?: Date;
     unresolved: number;
     details: string;
   }> = [];

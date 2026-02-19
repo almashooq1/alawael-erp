@@ -26,8 +26,17 @@ import {
   Tabs,
   Tab,
 } from '@mui/material';
-import { DirectionsBus, LocationOn, MapRounded, EventNote, Assessment, GpsFixed, People as Group, CheckCircle } from '@mui/icons-material';
-import api from '../services/api';
+import {
+  DirectionsBus,
+  LocationOn,
+  MapRounded,
+  EventNote,
+  Assessment,
+  GpsFixed,
+  People as Group,
+  CheckCircle,
+} from '@mui/icons-material';
+import api from '../utils/api';
 
 const DriverTransportPage = () => {
   const [assignedBus, setAssignedBus] = useState(null);
@@ -68,7 +77,10 @@ const DriverTransportPage = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [busRes, routeRes] = await Promise.all([api.get('/transport/buses'), api.get('/transport/routes')]);
+      const [busRes, routeRes] = await Promise.all([
+        api.get('/transport/buses'),
+        api.get('/transport/routes'),
+      ]);
 
       // أفترض أن السائق له حافلة مخصصة
       const bus = busRes.data.data.find(b => b.driver);
@@ -77,7 +89,10 @@ const DriverTransportPage = () => {
       if (bus) {
         // جلب الطلاب في المسار الحالي
         const studentsRes = await api.get(`/transport/routes/${bus.currentRoute}?expand=students`);
-        setStudents(studentsRes.data.data?.stops?.flatMap(s => [...s.pickupStudents, ...s.dropoffStudents]) || []);
+        setStudents(
+          studentsRes.data.data?.stops?.flatMap(s => [...s.pickupStudents, ...s.dropoffStudents]) ||
+            []
+        );
       }
 
       setAssignedRoutes(routeRes.data.data);
@@ -107,7 +122,7 @@ const DriverTransportPage = () => {
           }
         },
         error => console.error('خطأ GPS:', error),
-        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 },
+        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
       );
     }
   };
@@ -187,7 +202,9 @@ const DriverTransportPage = () => {
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={6}>
                   <Typography variant="subtitle2">الحافلة المخصصة</Typography>
-                  <Typography variant="h6">{assignedBus?.busNumber || 'لا توجد حافلة مخصصة'}</Typography>
+                  <Typography variant="h6">
+                    {assignedBus?.busNumber || 'لا توجد حافلة مخصصة'}
+                  </Typography>
                   <Typography variant="body2">السعة: {assignedBus?.capacity || 0} مقعد</Typography>
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -208,7 +225,8 @@ const DriverTransportPage = () => {
                 </Box>
                 {currentLocation && (
                   <Typography variant="caption">
-                    الموقع الحالي: {currentLocation.latitude.toFixed(4)}, {currentLocation.longitude.toFixed(4)}
+                    الموقع الحالي: {currentLocation.latitude.toFixed(4)},{' '}
+                    {currentLocation.longitude.toFixed(4)}
                   </Typography>
                 )}
               </Box>
@@ -220,17 +238,35 @@ const DriverTransportPage = () => {
       {/* الإجراءات السريعة */}
       <Grid container spacing={2} sx={{ mb: 4 }}>
         <Grid item xs={12} sm={6} md={3}>
-          <Button fullWidth variant="contained" color="primary" startIcon={<EventNote />} onClick={handleOpenBusCheck}>
+          <Button
+            fullWidth
+            variant="contained"
+            color="primary"
+            startIcon={<EventNote />}
+            onClick={handleOpenBusCheck}
+          >
             فحص الحافلة
           </Button>
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <Button fullWidth variant="contained" color="success" startIcon={<Group />} onClick={() => handleOpenStudentList(selectedRoute)}>
+          <Button
+            fullWidth
+            variant="contained"
+            color="success"
+            startIcon={<Group />}
+            onClick={() => handleOpenStudentList(selectedRoute)}
+          >
             الطلاب
           </Button>
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <Button fullWidth variant="contained" color="warning" startIcon={<Assessment />} onClick={handleOpenTripReport}>
+          <Button
+            fullWidth
+            variant="contained"
+            color="warning"
+            startIcon={<Assessment />}
+            onClick={handleOpenTripReport}
+          >
             تقرير الرحلة
           </Button>
         </Grid>
@@ -248,7 +284,11 @@ const DriverTransportPage = () => {
           {assignedRoutes.length === 0 ? (
             <Alert severity="info">لا توجد مسارات مخصصة حالياً</Alert>
           ) : (
-            <Tabs value={tabValue} onChange={(e, val) => setTabValue(val)} sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
+            <Tabs
+              value={tabValue}
+              onChange={(e, val) => setTabValue(val)}
+              sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}
+            >
               {assignedRoutes.map((route, idx) => (
                 <Tab key={route._id} label={route.routeName} />
               ))}
@@ -267,7 +307,9 @@ const DriverTransportPage = () => {
                             <Typography variant="subtitle2" color="textSecondary">
                               وقت البدء
                             </Typography>
-                            <Typography variant="h6">{route.morningShift?.startTime || '-'}</Typography>
+                            <Typography variant="h6">
+                              {route.morningShift?.startTime || '-'}
+                            </Typography>
                           </Paper>
                         </Grid>
                         <Grid item xs={12} sm={6} md={3}>
@@ -283,7 +325,9 @@ const DriverTransportPage = () => {
                             <Typography variant="subtitle2" color="textSecondary">
                               الوقت المتوقع
                             </Typography>
-                            <Typography variant="h6">{route.estimatedTravelTime || 0} دقيقة</Typography>
+                            <Typography variant="h6">
+                              {route.estimatedTravelTime || 0} دقيقة
+                            </Typography>
                           </Paper>
                         </Grid>
                         <Grid item xs={12} sm={6} md={3}>
@@ -317,7 +361,7 @@ const DriverTransportPage = () => {
                         ))}
                       </List>
                     </Box>
-                  ),
+                  )
               )}
             </Box>
           )}
@@ -405,7 +449,9 @@ const DriverTransportPage = () => {
             type="number"
             label="عدد الطلاب المقلوعين"
             value={tripReport.studentsBoarded}
-            onChange={e => setTripReport({ ...tripReport, studentsBoarded: parseInt(e.target.value) })}
+            onChange={e =>
+              setTripReport({ ...tripReport, studentsBoarded: parseInt(e.target.value) })
+            }
             margin="normal"
           />
           <TextField
@@ -443,7 +489,12 @@ const DriverTransportPage = () => {
       </Dialog>
 
       {/* قائمة الطلاب */}
-      <Dialog open={openStudentList} onClose={() => setOpenStudentList(false)} maxWidth="sm" fullWidth>
+      <Dialog
+        open={openStudentList}
+        onClose={() => setOpenStudentList(false)}
+        maxWidth="sm"
+        fullWidth
+      >
         <DialogTitle>قائمة الطلاب</DialogTitle>
         <DialogContent sx={{ pt: 2 }}>
           {students.length === 0 ? (
@@ -455,10 +506,18 @@ const DriverTransportPage = () => {
                   <ListItem
                     secondaryAction={
                       <Box>
-                        <Button size="small" color="success" onClick={() => handleRecordAttendance(student._id, 'present')}>
+                        <Button
+                          size="small"
+                          color="success"
+                          onClick={() => handleRecordAttendance(student._id, 'present')}
+                        >
                           موجود
                         </Button>
-                        <Button size="small" color="error" onClick={() => handleRecordAttendance(student._id, 'absent')}>
+                        <Button
+                          size="small"
+                          color="error"
+                          onClick={() => handleRecordAttendance(student._id, 'absent')}
+                        >
                           غائب
                         </Button>
                       </Box>
@@ -467,7 +526,10 @@ const DriverTransportPage = () => {
                     <ListItemIcon>
                       <Avatar>{student.firstName?.charAt(0)}</Avatar>
                     </ListItemIcon>
-                    <ListItemText primary={`${student.firstName} ${student.lastName}`} secondary={student.studentId} />
+                    <ListItemText
+                      primary={`${student.firstName} ${student.lastName}`}
+                      secondary={student.studentId}
+                    />
                   </ListItem>
                   {idx < students.length - 1 && <Divider />}
                 </Box>

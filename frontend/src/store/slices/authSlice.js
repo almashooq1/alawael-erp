@@ -1,7 +1,7 @@
 // Redux Slice للمصادقة - Auth Slice
 
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import api from '../utils/api';
+import api from '../../utils/api';
 
 // تسجيل الدخول
 export const login = createAsyncThunk('auth/login', async (credentials, { rejectWithValue }) => {
@@ -83,6 +83,8 @@ export const changePassword = createAsyncThunk(
 
 const initialState = {
   user: JSON.parse(localStorage.getItem('user')) || null,
+  token: localStorage.getItem('access_token') || null,
+  refreshToken: localStorage.getItem('refresh_token') || null,
   isAuthenticated: !!localStorage.getItem('access_token'),
   loading: false,
   error: null,
@@ -99,6 +101,12 @@ const authSlice = createSlice({
       state.user = action.payload;
       state.isAuthenticated = true;
     },
+    setLoading: (state, action) => {
+      state.loading = action.payload;
+    },
+    setError: (state, action) => {
+      state.error = action.payload;
+    },
   },
   extraReducers: builder => {
     builder
@@ -111,6 +119,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.isAuthenticated = true;
         state.user = action.payload.data?.user || null;
+        state.token = action.payload.data?.accessToken || null;
         state.error = null;
       })
       .addCase(login.rejected, (state, action) => {
@@ -121,7 +130,10 @@ const authSlice = createSlice({
       // Logout
       .addCase(logout.fulfilled, state => {
         state.user = null;
+        state.token = null;
+        state.refreshToken = null;
         state.isAuthenticated = false;
+        state.loading = false;
         state.error = null;
       })
 
@@ -167,5 +179,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { clearError, setUser } = authSlice.actions;
+export const { clearError, setUser, setLoading, setError } = authSlice.actions;
 export default authSlice.reducer;

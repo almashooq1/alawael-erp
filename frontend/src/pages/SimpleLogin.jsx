@@ -16,7 +16,7 @@ const SimpleLogin = () => {
 
     console.log('🔐 Attempting login...');
     console.log('Email:', email);
-    console.log('API URL:', `${api.defaults.baseURL}/auth/login`);
+    console.log('API URL:', '/auth/login');
 
     try {
       const response = await api.post('/auth/login', {
@@ -30,6 +30,7 @@ const SimpleLogin = () => {
       const user = response.data?.data?.user || response.data?.user;
 
       if (token) {
+        localStorage.setItem('token', token);
         localStorage.setItem('access_token', token);
         localStorage.setItem('auth_token', token); // للتح兼 مع أي كود يستخدم الاسم القديم
         localStorage.setItem('user', JSON.stringify(user));

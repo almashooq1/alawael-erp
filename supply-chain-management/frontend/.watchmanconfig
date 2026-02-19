@@ -1,0 +1,20 @@
+{
+  "version": 4,
+  "clockSource": "time",
+  "ignore_dirs": [
+    "node_modules",
+    ".git",
+    ".hg",
+    "build",
+    "dist",
+    "coverage",
+    ".jest-cache",
+    ".next",
+    "__pycache__",
+    ".venv",
+    ".egg-info",
+    ".pytest_cache"
+  ],
+  "ignore_vcs": true,
+  "project_root": "."
+}

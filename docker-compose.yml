@@ -1,202 +1,166 @@
-services:
-  # =============================
-  # 🟠 Node Exporter (Monitoring)
-  # =============================
-  node-exporter:
-    image: prom/node-exporter:latest
-    container_name: node-exporter
-    restart: unless-stopped
-    ports:
-      - "9100:9100"
-    command:
-      - '--path.procfs=/host/proc'
-      - '--path.sysfs=/host/sys'
-    volumes:
-      - /proc:/host/proc:ro
-      - /sys:/host/sys:ro
-    networks:
-      - alaweal-network
-  # ==========================================
-  # 🟢 Frontend (React Client)
-  # ==========================================
-  client:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: alaweal-client
-    ports:
-      - "3000:80"
-    depends_on:
-      api:
-        condition: service_healthy
-    networks:
-      - alaweal-network
-      - staging_erp_network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
-    environment:
-      - REACT_APP_API_URL=http://api:3001
-      - NGINX_CACHE_SIZE=50m
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-    deploy:
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: 512M
-        reservations:
-          cpus: '0.25'
-          memory: 256M
+version: '3.9'
 
-  # ==========================================
-  # 🔵 Backend (Node.js API)
-  # ==========================================
-  api:
+services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:7.0-alpine
+    container_name: erp-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-secure_password}
+      MONGO_INITDB_DATABASE: ${MONGO_DB:-erp_system}
+    volumes:
+      - mongodb_data:/data/db
+      - mongodb_config:/data/configdb
+    networks:
+      - erp-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  # Backend API Service (Port 3001)
+  backend:
     build:
-      context: ./backend
+      context: ./erp_new_system/backend
       dockerfile: Dockerfile
-    container_name: alaweal-api
+    container_name: erp-backend
+    restart: unless-stopped
     ports:
       - "3001:3001"
     environment:
-      - NODE_ENV=production
-      - PORT=3001
-      - MONGODB_URI=mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-password}@mongo:27017/${MONGO_DB_NAME:-alaweal_db}?authSource=admin
-      - REDIS_URL=redis://:${REDIS_PASSWORD:-redis_password}@redis:6379
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - REDIS_PASSWORD=${REDIS_PASSWORD:-redis_password}
-      - JWT_SECRET=${JWT_SECRET:-secure_production_secret}
-      - JWT_EXPIRY=${JWT_EXPIRY:-3600}
-      - ENABLE_MONITORING=${ENABLE_MONITORING:-true}
-      - ENABLE_COMPRESSION=${COMPRESSION_ENABLED:-true}
-      - CACHE_TTL=${CACHE_TTL:-3600}
-      - LOG_LEVEL=${LOG_LEVEL:-info}
-      - ENABLE_AUTO_BACKUP=${ENABLE_AUTO_BACKUP:-true}
-      - BACKUP_RETENTION_DAYS=${BACKUP_RETENTION_DAYS:-7}
-      - BACKUP_TIME=${BACKUP_TIME:-03:00}
-    volumes:
-      - backup_data:/app/backups
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3001
+      MONGODB_URI: mongodb://${MONGO_USERNAME:-admin}:${MONGO_PASSWORD:-secure_password}@mongodb:27017/${MONGO_DB:-erp_system}?authSource=admin
+      MONGODB_USERNAME: ${MONGO_USERNAME:-admin}
+      MONGODB_PASSWORD: ${MONGO_PASSWORD:-secure_password}
+      MONGODB_DB: ${MONGO_DB:-erp_system}
+      JWT_SECRET: ${JWT_SECRET:-your-secret-key-change-in-production}
+      JWT_EXPIRY: ${JWT_EXPIRY:-24h}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
+      CORS_CREDENTIALS: "true"
+      LOG_LEVEL: ${LOG_LEVEL:-info}
     depends_on:
-      mongo:
+      mongodb:
         condition: service_healthy
-      redis:
-        condition: service_healthy
+    volumes:
+      - ./erp_new_system/backend/src:/app/src
+      - ./erp_new_system/backend/logs:/app/logs
     networks:
-      - alaweal-network
-    restart: unless-stopped
+      - erp-network
     healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3001/health', r => process.exit(r.statusCode === 200 ? 0 : 1))"]
+      test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 60s
-    deploy:
-      resources:
-        limits:
-          cpus: '2.0'
-          memory: 1.5G
-        reservations:
-          cpus: '0.5'
-          memory: 512M
+      start_period: 40s
 
-  # ==========================================
-  # 🍃 Database (MongoDB)
-  # ==========================================
-  mongo:
-    image: mongo:6.0
-    container_name: alaweal-mongo
+  # SSO Server (Port 3002)
+  sso-server:
+    build:
+      context: ./erp_new_system/backend
+      dockerfile: Dockerfile
+    container_name: erp-sso-server
+    restart: unless-stopped
+    ports:
+      - "3002:3002"
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=${MONGO_ROOT_USER:-admin}
-      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ROOT_PASSWORD:-password}
-      - MONGO_INITDB_DATABASE=${MONGO_DB_NAME:-alaweal_db}
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3002
+      SERVICE_TYPE: sso
+      MONGODB_URI: mongodb://${MONGO_USERNAME:-admin}:${MONGO_PASSWORD:-secure_password}@mongodb:27017/${MONGO_DB:-erp_system}?authSource=admin
+      JWT_SECRET: ${JWT_SECRET:-your-secret-key-change-in-production}
+      JWT_EXPIRY: ${JWT_EXPIRY:-24h}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    command: node sso-server.js
+    depends_on:
+      mongodb:
+        condition: service_healthy
     volumes:
-      - mongo_data:/data/db
-      - mongo_config:/data/configdb
+      - ./erp_new_system/backend/src:/app/src
+      - ./erp_new_system/backend/logs:/app/logs
     networks:
-      - alaweal-network
-    restart: unless-stopped
+      - erp-network
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')", "--quiet"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 60s
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-    deploy:
-      resources:
-        limits:
-          cpus: '2.0'
-          memory: 1.5G
-        reservations:
-          cpus: '0.5'
-          memory: 512M
-
-  # ==========================================
-  # ⚡ Cache & Queue (Redis)
-  # ==========================================
-  redis:
-    image: redis:7-alpine
-    container_name: alaweal-redis
-    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redis_password}
-    volumes:
-      - redis_data:/data
-    networks:
-      - alaweal-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-redis_password}", "--raw", "incr", "ping"]
+      test: ["CMD", "curl", "-f", "http://localhost:3002/health"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 20s
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 256M
-        reservations:
-          cpus: '0.1'
-          memory: 128M
+      start_period: 40s
 
+  # Frontend Web Application (Port 3000)
+  frontend:
+    build:
+      context: ./erp_new_system/frontend
+      dockerfile: Dockerfile
+      args:
+        REACT_APP_API_URL: http://localhost:3001/api
+        REACT_APP_SSO_URL: http://localhost:3002
+    container_name: erp-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      REACT_APP_API_URL: ${REACT_APP_API_URL:-http://localhost:3001/api}
+      REACT_APP_SSO_URL: ${REACT_APP_SSO_URL:-http://localhost:3002}
+      REACT_APP_PORT: 3000
+    depends_on:
+      - backend
+      - sso-server
+    volumes:
+      - ./erp_new_system/frontend/src:/app/src
+      - ./erp_new_system/frontend/public:/app/public
+    networks:
+      - erp-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
-networks:
-  alaweal-network:
-    driver: bridge
-
-  staging_erp_network:
-    external: true
+  # Nginx Reverse Proxy & Load Balancer (Optional)
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: erp-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+      - nginx_logs:/var/log/nginx
+    depends_on:
+      - backend
+      - frontend
+      - sso-server
+    networks:
+      - erp-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 volumes:
-  mongo_data:
+  mongodb_data:
     driver: local
-  mongo_config:
+  mongodb_config:
     driver: local
-  redis_data:
-    driver: local
-
-  backup_data:
+  nginx_logs:
     driver: local
 
+networks:
+  erp-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.25.0.0/16

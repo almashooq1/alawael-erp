@@ -17,7 +17,6 @@ import {
   Tabs,
   Tab,
   Chip,
-  Divider,
   Alert,
   CircularProgress,
 } from '@mui/material';
@@ -99,7 +98,8 @@ function SmartDocumentsPage() {
       initialData[key] = '';
     });
     // Auto-fill common fields helper
-    if (initialData.hasOwnProperty('DATE')) initialData['DATE'] = new Date().toISOString().split('T')[0];
+    if (initialData.hasOwnProperty('DATE'))
+      initialData['DATE'] = new Date().toISOString().split('T')[0];
 
     setFormData(initialData);
     setSelectedTemplate({ ...template, placeholders });
@@ -136,12 +136,18 @@ function SmartDocumentsPage() {
   return (
     <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
       <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" gutterBottom component="div" sx={{ display: 'flex', alignItems: 'center' }}>
+        <Typography
+          variant="h4"
+          gutterBottom
+          component="div"
+          sx={{ display: 'flex', alignItems: 'center' }}
+        >
           <FormIcon sx={{ mr: 2, fontSize: 40, color: 'primary.main' }} />
           Smart Document Generator (Enterprise)
         </Typography>
         <Typography variant="subtitle1" color="text.secondary">
-          Generate official letters, contracts, and reports using the approved organization templates.
+          Generate official letters, contracts, and reports using the approved organization
+          templates.
         </Typography>
       </Box>
 
@@ -168,11 +174,25 @@ function SmartDocumentsPage() {
                 .filter(t => t.type === categories[selectedCategory])
                 .map(template => (
                   <Grid item xs={12} sm={6} md={4} key={template.id}>
-                    <Card sx={{ height: '100%', transition: '0.3s', '&:hover': { transform: 'translateY(-5px)', boxShadow: 6 } }}>
-                      <CardActionArea onClick={() => handleTemplateClick(template)} sx={{ height: '100%', p: 2 }}>
+                    <Card
+                      sx={{
+                        height: '100%',
+                        transition: '0.3s',
+                        '&:hover': { transform: 'translateY(-5px)', boxShadow: 6 },
+                      }}
+                    >
+                      <CardActionArea
+                        onClick={() => handleTemplateClick(template)}
+                        sx={{ height: '100%', p: 2 }}
+                      >
                         <CardContent>
                           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                            <Chip label={template.type} size="small" color="primary" variant="outlined" />
+                            <Chip
+                              label={template.type}
+                              size="small"
+                              color="primary"
+                              variant="outlined"
+                            />
                             <Typography variant="caption" color="text.secondary">
                               {template.language || 'AR'}
                             </Typography>
@@ -195,7 +215,9 @@ function SmartDocumentsPage() {
 
       {/* Generation Dialog */}
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="md" fullWidth>
-        <DialogTitle>{generatedDoc ? 'Document Ready' : `Customize: ${selectedTemplate?.name}`}</DialogTitle>
+        <DialogTitle>
+          {generatedDoc ? 'Document Ready' : `Customize: ${selectedTemplate?.name}`}
+        </DialogTitle>
         <DialogContent dividers>
           {generatedDoc ? (
             <Box>

@@ -31,22 +31,32 @@ const AIDataVisualizations: React.FC = () => {
           { timestamp: '06:00', value: 72, label: 'الصباح المبكر' },
           { timestamp: '12:00', value: 88, label: 'منتصف النهار' },
           { timestamp: '18:00', value: 82, label: 'المساء' },
-          { timestamp: '23:59', value: 75, label: 'آخر اليوم' }
+          { timestamp: '23:59', value: 75, label: 'آخر اليوم' },
         ];
 
         // بيانات الرسم البياني الدائري
         const pieChartData: Distribution[] = [
           { category: 'مكتملة', percentage: 35, count: 42, color: 'from-green-600 to-green-400' },
-          { category: 'قيد التنفيذ', percentage: 45, count: 54, color: 'from-blue-600 to-blue-400' },
-          { category: 'معرضة للخطر', percentage: 15, count: 18, color: 'from-yellow-600 to-yellow-400' },
-          { category: 'متأخرة', percentage: 5, count: 6, color: 'from-red-600 to-red-400' }
+          {
+            category: 'قيد التنفيذ',
+            percentage: 45,
+            count: 54,
+            color: 'from-blue-600 to-blue-400',
+          },
+          {
+            category: 'معرضة للخطر',
+            percentage: 15,
+            count: 18,
+            color: 'from-yellow-600 to-yellow-400',
+          },
+          { category: 'متأخرة', percentage: 5, count: 6, color: 'from-red-600 to-red-400' },
         ];
 
         setLineData(lineChartData);
         setPieData(pieChartData);
         setRadarData({
           categories: ['الأداء', 'الكفاءة', 'الاستقرار', 'الأمان', 'التوفر'],
-          values: [88, 85, 92, 94, 96]
+          values: [88, 85, 92, 94, 96],
         });
       } catch (error) {
         console.error('Error fetching visualization data:', error);
@@ -96,7 +106,8 @@ const AIDataVisualizations: React.FC = () => {
             </div>
             <div className="mt-6 p-4 bg-slate-900 rounded">
               <p className="text-slate-300 text-sm">
-                <span className="font-semibold">ملخص:</span> الأداء يصل إلى ذروته في منتصف النهار (88%) ويكون منخفضاً في أوقات الليل (65%)
+                <span className="font-semibold">ملخص:</span> الأداء يصل إلى ذروته في منتصف النهار
+                (88%) ويكون منخفضاً في أوقات الليل (65%)
               </p>
             </div>
           </div>
@@ -107,11 +118,13 @@ const AIDataVisualizations: React.FC = () => {
             <div className="flex items-center justify-center h-64">
               <svg viewBox="0 0 200 200" width="200" height="200">
                 {pieData.reduce((paths, item, idx) => {
-                  const startAngle = pieData.slice(0, idx).reduce((sum, d) => sum + (d.percentage * 3.6), 0);
-                  const endAngle = startAngle + (item.percentage * 3.6);
+                  const startAngle = pieData
+                    .slice(0, idx)
+                    .reduce((sum, d) => sum + d.percentage * 3.6, 0);
+                  const endAngle = startAngle + item.percentage * 3.6;
 
-                  const startRad = (startAngle - 90) * Math.PI / 180;
-                  const endRad = (endAngle - 90) * Math.PI / 180;
+                  const startRad = ((startAngle - 90) * Math.PI) / 180;
+                  const endRad = ((endAngle - 90) * Math.PI) / 180;
 
                   const x1 = 100 + 80 * Math.cos(startRad);
                   const y1 = 100 + 80 * Math.sin(startRad);
@@ -125,7 +138,7 @@ const AIDataVisualizations: React.FC = () => {
                     'from-green-600 to-green-400': '#16a34a',
                     'from-blue-600 to-blue-400': '#2563eb',
                     'from-yellow-600 to-yellow-400': '#ca8a04',
-                    'from-red-600 to-red-400': '#dc2626'
+                    'from-red-600 to-red-400': '#dc2626',
                   };
 
                   paths.push(
@@ -138,14 +151,16 @@ const AIDataVisualizations: React.FC = () => {
                   );
 
                   return paths;
-                }, [] as JSX.Element[])}
+                }, [] as React.ReactElement[])}
               </svg>
             </div>
             <div className="grid grid-cols-2 gap-2 mt-4">
               {pieData.map((item, idx) => (
                 <div key={idx} className="flex items-center gap-2 text-sm">
                   <div className={`w-3 h-3 rounded-full bg-gradient-to-r ${item.color}`}></div>
-                  <span className="text-slate-300">{item.category} ({item.percentage}%)</span>
+                  <span className="text-slate-300">
+                    {item.category} ({item.percentage}%)
+                  </span>
                 </div>
               ))}
             </div>
@@ -158,12 +173,12 @@ const AIDataVisualizations: React.FC = () => {
           <div className="flex items-center justify-center h-80">
             <svg viewBox="0 0 300 300" width="300" height="300">
               {/* الشبكات الخلفية */}
-              {[1, 2, 3, 4, 5].map((i) => (
+              {[1, 2, 3, 4, 5].map(i => (
                 <circle
                   key={`grid-${i}`}
                   cx="150"
                   cy="150"
-                  r={(i * 30)}
+                  r={i * 30}
                   fill="none"
                   stroke="#475569"
                   strokeWidth="1"
@@ -172,7 +187,7 @@ const AIDataVisualizations: React.FC = () => {
 
               {/* التسميات */}
               {radarData.categories?.map((cat: string, idx: number) => {
-                const angle = (idx * 360 / radarData.categories.length - 90) * Math.PI / 180;
+                const angle = (((idx * 360) / radarData.categories.length - 90) * Math.PI) / 180;
                 const x = 150 + 130 * Math.cos(angle);
                 const y = 150 + 130 * Math.sin(angle);
                 return (
@@ -191,12 +206,14 @@ const AIDataVisualizations: React.FC = () => {
 
               {/* النقاط والخطوط */}
               <polyline
-                points={radarData.values?.map((v: number, idx: number) => {
-                  const angle = (idx * 360 / radarData.values.length - 90) * Math.PI / 180;
-                  const x = 150 + (v * 1.2) * Math.cos(angle);
-                  const y = 150 + (v * 1.2) * Math.sin(angle);
-                  return `${x},${y}`;
-                }).join(' ')}
+                points={radarData.values
+                  ?.map((v: number, idx: number) => {
+                    const angle = (((idx * 360) / radarData.values.length - 90) * Math.PI) / 180;
+                    const x = 150 + v * 1.2 * Math.cos(angle);
+                    const y = 150 + v * 1.2 * Math.sin(angle);
+                    return `${x},${y}`;
+                  })
+                  .join(' ')}
                 fill="rgba(59, 130, 246, 0.3)"
                 stroke="#3b82f6"
                 strokeWidth="2"
@@ -204,9 +221,9 @@ const AIDataVisualizations: React.FC = () => {
 
               {/* النقاط */}
               {radarData.values?.map((v: number, idx: number) => {
-                const angle = (idx * 360 / radarData.values.length - 90) * Math.PI / 180;
-                const x = 150 + (v * 1.2) * Math.cos(angle);
-                const y = 150 + (v * 1.2) * Math.sin(angle);
+                const angle = (((idx * 360) / radarData.values.length - 90) * Math.PI) / 180;
+                const x = 150 + v * 1.2 * Math.cos(angle);
+                const y = 150 + v * 1.2 * Math.sin(angle);
                 return (
                   <circle
                     key={`point-${idx}`}
@@ -222,7 +239,9 @@ const AIDataVisualizations: React.FC = () => {
             </svg>
           </div>
           <div className="text-center text-slate-300 text-sm mt-4">
-            <p>متوسط الأداء الكلي: <span className="font-bold text-blue-400">91%</span></p>
+            <p>
+              متوسط الأداء الكلي: <span className="font-bold text-blue-400">91%</span>
+            </p>
           </div>
         </div>
 
@@ -245,7 +264,7 @@ const AIDataVisualizations: React.FC = () => {
                   { name: 'الأداء العام', value: '88%', trend: '↑' },
                   { name: 'وقت الاستجابة', value: '2.3h', trend: '↓' },
                   { name: 'معدل الأتمتة', value: '76%', trend: '↑' },
-                  { name: 'درجة المخاطر', value: '12/100', trend: '↓' }
+                  { name: 'درجة المخاطر', value: '12/100', trend: '↓' },
                 ].map((item, idx) => (
                   <tr key={idx} className="border-b border-slate-700">
                     <td className="text-slate-300 py-3">{item.name}</td>
@@ -278,12 +297,14 @@ const AIDataVisualizations: React.FC = () => {
                   { period: 'أمس', performance: '83%', change: '+2%' },
                   { period: 'هذا الأسبوع', performance: '86%', change: '+8%' },
                   { period: 'الأسبوع الماضي', performance: '78%', change: '-3%' },
-                  { period: 'هذا الشهر', performance: '85%', change: '+12%' }
+                  { period: 'هذا الشهر', performance: '85%', change: '+12%' },
                 ].map((item, idx) => (
                   <tr key={idx} className="border-b border-slate-700">
                     <td className="text-slate-300 py-3">{item.period}</td>
                     <td className="text-center text-white font-semibold">{item.performance}</td>
-                    <td className={`text-center font-semibold ${item.change.includes('+') ? 'text-green-400' : 'text-red-400'}`}>
+                    <td
+                      className={`text-center font-semibold ${item.change.includes('+') ? 'text-green-400' : 'text-red-400'}`}
+                    >
                       {item.change}
                     </td>
                   </tr>

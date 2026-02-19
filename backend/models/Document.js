@@ -291,4 +291,73 @@ DocumentSchema.methods.addActivityLog = function (action, performedBy, performed
   });
 };
 
+// Statics - Methods for Document class
+DocumentSchema.statics.searchDocuments = async function(query, filters = {}) {
+  let searchQuery = this.where();
+
+  if (query) {
+    searchQuery = searchQuery.or([
+      { title: { $regex: query, $options: 'i' } },
+      { description: { $regex: query, $options: 'i' } },
+      { tags: { $in: [new RegExp(query, 'i')] } },
+      { extractedText: { $regex: query, $options: 'i' } },
+    ]);
+  }
+
+  if (filters.category) searchQuery = searchQuery.where('category').equals(filters.category);
+  if (filters.uploadedBy) searchQuery = searchQuery.where('uploadedBy').equals(filters.uploadedBy);
+  if (filters.status) searchQuery = searchQuery.where('status').equals(filters.status);
+  if (filters.isArchived !== undefined) searchQuery = searchQuery.where('isArchived').equals(filters.isArchived);
+
+  return searchQuery.sort({ createdAt: -1 });
+};
+
+DocumentSchema.statics.findRecent = function(limit = 10) {
+  return this.find({ isArchived: false })
+    .sort({ createdAt: -1 })
+    .limit(limit)
+    .populate('uploadedBy', 'name email');
+};
+
+DocumentSchema.statics.findByCategory = function(category) {
+  return this.find({ category, isArchived: false }).sort({ createdAt: -1 });
+};
+
+DocumentSchema.statics.findExpiring = function(daysFromNow = 30) {
+  const futureDate = new Date();
+  futureDate.setDate(futureDate.getDate() + daysFromNow);
+  
+  return this.find({
+    expiryDate: { $gte: new Date(), $lte: futureDate },
+    isArchived: false,
+  }).sort({ expiryDate: 1 });
+};
+
+DocumentSchema.statics.getMostDownloaded = function(limit = 10) {
+  return this.find({ isArchived: false })
+    .sort({ downloadCount: -1 })
+    .limit(limit)
+    .populate('uploadedBy', 'name');
+};
+
+// Virtual for file extension
+DocumentSchema.virtual('extension').get(function() {
+  const parts = this.originalFileName.split('.');
+  return parts.length > 1 ? parts[parts.length - 1].toLowerCase() : 'unknown';
+});
+
+// Virtual for age in days
+DocumentSchema.virtual('ageDays').get(function() {
+  const now = new Date();
+  const created = new Date(this.createdAt);
+  return Math.floor((now - created) / (1000 * 60 * 60 * 24));
+});
+
+// Virtual for is expiring soon
+DocumentSchema.virtual('isExpiringSoon').get(function() {
+  if (!this.expiryDate) return false;
+  const daysUntilExpiry = Math.floor((this.expiryDate - new Date()) / (1000 * 60 * 60 * 24));
+  return daysUntilExpiry <= 30 && daysUntilExpiry >= 0;
+});
+
 module.exports = mongoose.model('Document', DocumentSchema);

@@ -26,24 +26,21 @@ const securityHeaders = (req, res, next) => {
    * ├─ Prevents XSS (Cross-Site Scripting) attacks
    * └─ Reports violations to monitoring service
    */
-  const cspDirectives = [
-    "default-src 'self'",
-    "script-src 'self' 'nonce-{RANDOM}' https://trusted-cdn.com",
-    "style-src 'self' 'unsafe-inline' https://trusted-cdn.com https://fonts.googleapis.com",
-    "img-src 'self' data: https:",
-    "font-src 'self' data: https://fonts.googleapis.com https://fonts.gstatic.com",
-    "connect-src 'self' https://api.example.com",
-    "frame-ancestors 'none'",
-    "base-uri 'self'",
-    "form-action 'self'",
-  ];
-  
-  // Add upgrade-insecure-requests only in production
-  if (process.env.NODE_ENV === 'production') {
-    cspDirectives.push('upgrade-insecure-requests');
-  }
-  
-  res.set('Content-Security-Policy', cspDirectives.join('; '));
+  res.set(
+    'Content-Security-Policy',
+    [
+      "default-src 'self'",
+      "script-src 'self' 'nonce-{RANDOM}' https://trusted-cdn.com",
+      "style-src 'self' 'unsafe-inline' https://trusted-cdn.com",
+      "img-src 'self' data: https:",
+      "font-src 'self' data: https://fonts.googleapis.com",
+      "connect-src 'self' https://api.example.com",
+      "frame-ancestors 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+      "upgrade-insecure-requests"
+    ].join('; ')
+  );
 
   /**
    * 3️⃣ X-Content-Type-Options: nosniff
@@ -95,7 +92,7 @@ const securityHeaders = (req, res, next) => {
       'payment=()',
       'usb=()',
       'vr=()',
-      'xr-spatial-tracking=()',
+      'xr-spatial-tracking=()'
     ].join(', ')
   );
 
@@ -105,25 +102,9 @@ const securityHeaders = (req, res, next) => {
    * ├─ Prevents unauthorized cross-origin requests
    * └─ Limits credential exposure
    */
-  const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:3000,http://localhost:5173')
-    .split(',')
-    .map(origin => origin.trim())
-    .filter(Boolean);
-  const requestOrigin = req.headers.origin;
-  
-  if (requestOrigin && allowedOrigins.includes(requestOrigin)) {
-    res.set('Access-Control-Allow-Origin', requestOrigin);
-    res.set('Vary', 'Origin');
-  } else if (process.env.NODE_ENV === 'development' && requestOrigin) {
-    // Allow all origins in development
-    res.set('Access-Control-Allow-Origin', requestOrigin);
-    res.set('Vary', 'Origin');
-  } else if (allowedOrigins.length > 0) {
-    res.set('Access-Control-Allow-Origin', allowedOrigins[0]);
-  }
-  
-  res.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-  res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, X-API-Key');
+  res.set('Access-Control-Allow-Origin', process.env.ALLOWED_ORIGINS || 'https://example.com');
+  res.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
   res.set('Access-Control-Allow-Credentials', 'true');
   res.set('Access-Control-Max-Age', '86400'); // 24 hours
 
@@ -166,7 +147,9 @@ const securityHeaders = (req, res, next) => {
     JSON.stringify({
       group: 'csp-endpoint',
       max_age: 10886400,
-      endpoints: [{ url: 'https://example.com/security/report' }],
+      endpoints: [
+        { url: 'https://example.com/security/report' }
+      ]
     })
   );
 
@@ -228,8 +211,8 @@ function buildCSP(environment, nonce) {
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",
-      'upgrade-insecure-requests',
-      'report-uri https://example.com/csp-report',
+      "upgrade-insecure-requests",
+      "report-uri https://example.com/csp-report"
     ],
     staging: [
       "default-src 'self' https://staging-cdn.example.com",
@@ -237,7 +220,7 @@ function buildCSP(environment, nonce) {
       "style-src 'self' 'unsafe-inline' https://staging-cdn.example.com",
       "img-src 'self' data: https:",
       "frame-ancestors 'none'",
-      'report-uri https://staging.example.com/csp-report',
+      "report-uri https://staging.example.com/csp-report"
     ],
     development: [
       "default-src 'self' http://localhost:*",
@@ -245,8 +228,8 @@ function buildCSP(environment, nonce) {
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: http:",
       "frame-ancestors 'none'",
-      "connect-src 'self' ws://localhost:*",
-    ],
+      "connect-src 'self' ws://localhost:*"
+    ]
   };
 
   return (policies[environment] || policies.production).join('; ');
@@ -259,15 +242,15 @@ function buildCSP(environment, nonce) {
 const secureCookies = (req, res, next) => {
   const setCookie = res.cookie;
 
-  res.cookie = function (name, value, options = {}) {
+  res.cookie = function(name, value, options = {}) {
     // Enforce security options
     const secureOptions = {
       ...options,
-      httpOnly: true, // Prevent JavaScript access
+      httpOnly: true,           // Prevent JavaScript access
       secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-      sameSite: 'strict', // CSRF protection
+      sameSite: 'strict',       // CSRF protection
       path: '/',
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours
     };
 
     return setCookie.call(this, name, value, secureOptions);
@@ -282,7 +265,11 @@ const secureCookies = (req, res, next) => {
 
 const sanitizeRequests = (req, res, next) => {
   // Remove dangerous headers
-  const dangerousHeaders = ['x-forwarded-host', 'x-original-url', 'x-rewrite-url'];
+  const dangerousHeaders = [
+    'x-forwarded-host',
+    'x-original-url',
+    'x-rewrite-url'
+  ];
 
   dangerousHeaders.forEach(header => {
     delete req.headers[header];
@@ -310,7 +297,7 @@ const securityRateLimit = (req, res, next) => {
     '/api/auth/register',
     '/api/auth/verify-2fa',
     '/api/admin/users',
-    '/api/admin/permissions',
+    '/api/admin/permissions'
   ];
 
   if (securePaths.some(path => req.path.startsWith(path))) {
@@ -337,33 +324,33 @@ const securityConfig = {
       connectSrc: ["'self'"],
       frameSrc: ["'none'"],
       baseUri: ["'self'"],
-      formAction: ["'self'"],
+      formAction: ["'self'"]
     },
-    reportUri: 'https://example.com/csp-report',
+    reportUri: 'https://example.com/csp-report'
   },
-
+  
   hsts: {
     maxAge: 31536000, // 1 year
     includeSubDomains: true,
-    preload: true,
+    preload: true
   },
-
+  
   frameguard: {
-    action: 'deny',
+    action: 'deny'
   },
-
+  
   referrerPolicy: {
-    policy: 'strict-origin-when-cross-origin',
+    policy: 'strict-origin-when-cross-origin'
   },
-
+  
   xssFilter: {
     mode: 'block',
-    reportUri: 'https://example.com/xss-report',
+    reportUri: 'https://example.com/xss-report'
   },
-
+  
   noSniff: true,
-
-  noCache: false, // Let Express handle caching
+  
+  noCache: false // Let Express handle caching
 };
 
 /**
@@ -388,5 +375,5 @@ module.exports = {
   sanitizeRequests,
   securityRateLimit,
   securityConfig,
-  setupSecurityHeaders,
+  setupSecurityHeaders
 };

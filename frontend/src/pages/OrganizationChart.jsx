@@ -5,11 +5,8 @@ import {
   TableHead, TableRow, IconButton, Tooltip, CircularProgress, Alert
 } from '@mui/material';
 import {
-  ExpandMore as ExpandMoreIcon,
   Add as AddIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  Download as DownloadIcon
+  Delete as DeleteIcon
 } from '@mui/icons-material';
 import axios from 'axios';
 
@@ -19,7 +16,6 @@ const OrganizationChart = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
-  const [dialogMode, setDialogMode] = useState('add');
   const [selectedPosition, setSelectedPosition] = useState(null);
   const [employeeName, setEmployeeName] = useState('');
   const [employees, setEmployees] = useState({});
@@ -84,7 +80,6 @@ const OrganizationChart = () => {
 
   const openAddEmployeeDialog = (position) => {
     setSelectedPosition(position);
-    setDialogMode('add');
     setEmployeeName('');
     setOpenDialog(true);
   };

@@ -24,7 +24,13 @@ class ProjectManagementService {
 
   // --- Project CRUD ---
   createProject(data) {
-    if (!data) return { error: true, message: 'Invalid project data' };
+    if (!data) {
+      // Return synchronous error object for invalid data in test/mock mode
+      if (useMock) {
+        return { error: true, message: 'Invalid project data' };
+      }
+      return Promise.reject(new Error('Invalid project data'));
+    }
     if (useMock) {
       const id = this.nextProjectId++;
       const project = {
@@ -122,7 +128,9 @@ class ProjectManagementService {
   }
 
   getPhaseProgress(projectId, phaseId) {
-    const phaseTasks = Array.from(this.tasks.values()).filter(t => t.projectId === projectId && t.phaseId === phaseId);
+    const phaseTasks = Array.from(this.tasks.values()).filter(
+      t => t.projectId === projectId && t.phaseId === phaseId
+    );
     if (!phaseTasks.length) return { percentage: 0 };
     const completed = phaseTasks.filter(t => t.status === 'completed').length;
     return { percentage: Math.round((completed / phaseTasks.length) * 100) };
@@ -133,7 +141,14 @@ class ProjectManagementService {
     const project = this.projects.get(projectId);
     if (!project) return { error: true, message: 'Project not found' };
     const id = this.nextTaskId++;
-    const task = { id, _id: 'task_' + id, projectId, status: taskData?.status || 'todo', dependencies: [], ...taskData };
+    const task = {
+      id,
+      _id: 'task_' + id,
+      projectId,
+      status: taskData?.status || 'todo',
+      dependencies: [],
+      ...taskData,
+    };
     this.tasks.set(id, task);
     project.tasks.push(task);
     return task;
@@ -406,7 +421,11 @@ class ProjectManagementService {
       taskData = phaseId;
       phaseId = null;
     }
-    const task = this.addTask(projectId, { ...taskData, phaseId, status: taskData.status || 'todo' });
+    const task = this.addTask(projectId, {
+      ...taskData,
+      phaseId,
+      status: taskData.status || 'todo',
+    });
     return task;
   }
 
@@ -441,6 +460,7 @@ class ProjectManagementService {
   }
 }
 
-// Export both the class and an instance for flexibility
-module.exports = ProjectManagementService;
-module.exports.instance = new ProjectManagementService();
+// Export instance as default, but keep class for tests that need it
+const instance = new ProjectManagementService();
+module.exports = instance;
+module.exports.ProjectManagementService = ProjectManagementService;

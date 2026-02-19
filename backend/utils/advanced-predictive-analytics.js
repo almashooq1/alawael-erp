@@ -7,7 +7,7 @@
 // ============================================================================
 // 1. ADVANCED ANALYTICS ENGINE
 // ============================================================================
-export class AdvancedPredictiveAnalytics {
+class AdvancedPredictiveAnalytics {
   constructor(db) {
     this.db = db;
     this.models = new Map();
@@ -248,7 +248,7 @@ export class AdvancedPredictiveAnalytics {
 // ============================================================================
 // 2. FORECASTING SERVICE
 // ============================================================================
-export class ForecastingService {
+class ForecastingService {
   constructor(db) {
     this.db = db;
     this.analytics = new AdvancedPredictiveAnalytics(db);
@@ -367,7 +367,7 @@ export class ForecastingService {
   }
 }
 
-export default {
+module.exports = {
   AdvancedPredictiveAnalytics,
   ForecastingService,
 };

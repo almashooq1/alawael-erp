@@ -1,5 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Container, Grid, Paper, Typography, Card, CardContent, Chip, LinearProgress, Alert, Divider } from '@mui/material';
+import {
+  Box,
+  Container,
+  Grid,
+  Paper,
+  Typography,
+  Card,
+  CardContent,
+  Chip,
+  LinearProgress,
+  Divider,
+} from '@mui/material';
 import { TrendingUp, People, Dns, Warning, CheckCircle, Speed } from '@mui/icons-material';
 import analyticsService from '../services/analyticsService';
 
@@ -10,7 +21,9 @@ const MetricCard = ({ title, value, subtitle, icon, color = 'primary' }) => (
         <Typography color="textSecondary" variant="subtitle1">
           {title}
         </Typography>
-        <Box sx={{ p: 1, borderRadius: 1, bgcolor: `${color}.light`, color: `${color}.main` }}>{icon}</Box>
+        <Box sx={{ p: 1, borderRadius: 1, bgcolor: `${color}.light`, color: `${color}.main` }}>
+          {icon}
+        </Box>
       </Box>
       <Typography variant="h4" component="div" sx={{ mb: 1 }}>
         {value}
@@ -37,11 +50,24 @@ const InsightRow = ({ insight }) => {
   };
 
   return (
-    <Box sx={{ p: 2, display: 'flex', alignItems: 'flex-start', gap: 2, borderBottom: '1px solid #eee' }}>
+    <Box
+      sx={{
+        p: 2,
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: 2,
+        borderBottom: '1px solid #eee',
+      }}
+    >
       <Warning color={getSeverityColor(insight.severity)} />
       <Box>
         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 0.5 }}>
-          <Chip label={insight.category} size="small" color={getSeverityColor(insight.severity)} variant="outlined" />
+          <Chip
+            label={insight.category}
+            size="small"
+            color={getSeverityColor(insight.severity)}
+            variant="outlined"
+          />
           <Typography variant="subtitle2" component="span" color="textSecondary">
             • Severity: {insight.severity}
           </Typography>
@@ -90,7 +116,9 @@ const ExecutiveDashboard = () => {
         <Typography variant="h4" gutterBottom component="div" sx={{ fontWeight: 'bold' }}>
           Executive AI Dashboard
         </Typography>
-        <Typography color="textSecondary">Real-time overview of organization health, HR metrics, and AI-driven insights.</Typography>
+        <Typography color="textSecondary">
+          Real-time overview of organization health, HR metrics, and AI-driven insights.
+        </Typography>
       </Box>
 
       {/* Top Metrics Row */}

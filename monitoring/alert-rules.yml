@@ -1,0 +1,304 @@
+# ===================================================================
+# Prometheus Alert Rules for AlAwael ERP
+# ===================================================================
+
+groups:
+  - name: system_alerts
+    interval: 30s
+    rules:
+      # ==========================================
+      # CPU & Memory Alerts
+      # ==========================================
+      - alert: HighCPUUsage
+        expr: node_cpu_seconds_total{mode="system"} > 0.8
+        for: 5m
+        labels:
+          severity: 'warning'
+          team: 'devops'
+        annotations:
+          summary: "High CPU usage detected"
+          description: "CPU usage is {{ $value | humanizePercentage }} on {{ $labels.instance }}"
+
+      - alert: CriticalCPUUsage
+        expr: node_cpu_seconds_total{mode="system"} > 0.95
+        for: 2m
+        labels:
+          severity: 'critical'
+          team: 'devops'
+        annotations:
+          summary: "CRITICAL: CPU usage critical"
+          description: "CPU usage is {{ $value | humanizePercentage }} on {{ $labels.instance }}"
+
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) > 0.85
+        for: 5m
+        labels:
+          severity: 'warning'
+          team: 'devops'
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is {{ $value | humanizePercentage }} on {{ $labels.instance }}"
+
+      - alert: CriticalMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) > 0.95
+        for: 2m
+        labels:
+          severity: 'critical'
+          team: 'devops'
+        annotations:
+          summary: "CRITICAL: Memory usage critical"
+          description: "Memory usage is {{ $value | humanizePercentage }} on {{ $labels.instance }}"
+
+      # ==========================================
+      # Disk Space Alerts
+      # ==========================================
+      - alert: LowDiskSpace
+        expr: (node_filesystem_avail_bytes{fstype!="tmpfs"} / node_filesystem_size_bytes) < 0.15
+        for: 10m
+        labels:
+          severity: 'warning'
+          team: 'devops'
+        annotations:
+          summary: "Low disk space"
+          description: "Disk {{ $labels.device }} on {{ $labels.instance }} has {{ $value | humanizePercentage }} free"
+
+      - alert: CriticalDiskSpace
+        expr: (node_filesystem_avail_bytes{fstype!="tmpfs"} / node_filesystem_size_bytes) < 0.05
+        for: 5m
+        labels:
+          severity: 'critical'
+          team: 'devops'
+        annotations:
+          summary: "CRITICAL: Disk space critical"
+          description: "Disk {{ $labels.device }} on {{ $labels.instance }} has {{ $value | humanizePercentage }} free"
+
+  - name: application_alerts
+    interval: 30s
+    rules:
+      # ==========================================
+      # Application Error Rate Alerts
+      # ==========================================
+      - alert: HighErrorRate
+        expr: |
+          rate(http_requests_total{status=~"5.."}[5m]) > 0.01
+        for: 5m
+        labels:
+          severity: 'warning'
+          team: 'backend'
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is {{ $value | humanizePercentage }} on {{ $labels.service }}"
+
+      - alert: CriticalErrorRate
+        expr: |
+          rate(http_requests_total{status=~"5.."}[1m]) > 0.05
+        for: 1m
+        labels:
+          severity: 'critical'
+          team: 'backend'
+          on_call: true
+        annotations:
+          summary: "CRITICAL: Error rate is critical"
+          description: "Error rate is {{ $value | humanizePercentage }} on {{ $labels.service }}"
+
+      # ==========================================
+      # Response Time Alerts
+      # ==========================================
+      - alert: HighResponseTime
+        expr: |
+          histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 1.0
+        for: 5m
+        labels:
+          severity: 'warning'
+          team: 'backend'
+        annotations:
+          summary: "High response time detected"
+          description: "95th percentile response time is {{ $value }}s on {{ $labels.service }}"
+
+      - alert: CriticalResponseTime
+        expr: |
+          histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[1m])) > 5.0
+        for: 2m
+        labels:
+          severity: 'critical'
+          team: 'backend'
+          on_call: true
+        annotations:
+          summary: "CRITICAL: Response time critical"
+          description: "95th percentile response time is {{ $value }}s on {{ $labels.service }}"
+
+      # ==========================================
+      # Application Restart Alerts
+      # ==========================================
+      - alert: HighRestartCount
+        expr: |
+          increase(container_last_seen{name="backend"}[1h]) > 3
+        labels:
+          severity: 'critical'
+          team: 'backend'
+          on_call: true
+        annotations:
+          summary: "High container restart count"
+          description: "Backend container has restarted {{ $value }} times in the last hour"
+
+  - name: database_alerts
+    interval: 30s
+    rules:
+      # ==========================================
+      # MongoDB Alerts
+      # ==========================================
+      - alert: MongoDBDown
+        expr: mongodb_up == 0
+        for: 1m
+        labels:
+          severity: 'critical'
+          team: 'database'
+          on_call: true
+        annotations:
+          summary: "MongoDB is down"
+          description: "MongoDB instance on {{ $labels.instance }} is not responding"
+
+      - alert: MongoDBHighConnections
+        expr: mongodb_connections_current > 80
+        for: 5m
+        labels:
+          severity: 'warning'
+          team: 'database'
+        annotations:
+          summary: "High MongoDB connection count"
+          description: "MongoDB has {{ $value }} active connections on {{ $labels.instance }}"
+
+      - alert: MongoDBSlowQueries
+        expr: |
+          rate(mongodb_op_counters_total{type="query"}[5m]) > 100
+        for: 10m
+        labels:
+          severity: 'warning'
+          team: 'database'
+        annotations:
+          summary: "High MongoDB query rate"
+          description: "MongoDB is processing {{ $value }} queries/sec on {{ $labels.instance }}"
+
+      # ==========================================
+      # Redis Alerts
+      # ==========================================
+      - alert: RedisDown
+        expr: redis_up == 0
+        for: 1m
+        labels:
+          severity: 'critical'
+          team: 'cache'
+          on_call: true
+        annotations:
+          summary: "Redis is down"
+          description: "Redis instance on {{ $labels.instance }} is not responding"
+
+      - alert: RedisHighMemory
+        expr: (redis_memory_used_bytes / redis_memory_max_bytes) > 0.85
+        for: 5m
+        labels:
+          severity: 'warning'
+          team: 'cache'
+        annotations:
+          summary: "High Redis memory usage"
+          description: "Redis memory usage is {{ $value | humanizePercentage }} on {{ $labels.instance }}"
+
+      - alert: RedisHighEvictions
+        expr: rate(redis_evicted_keys_total[5m]) > 0
+        for: 5m
+        labels:
+          severity: 'critical'
+          team: 'cache'
+          on_call: true
+        annotations:
+          summary: "Redis is evicting keys"
+          description: "Redis is evicting {{ $value }} keys/sec on {{ $labels.instance }}"
+
+  - name: infrastructure_alerts
+    interval: 30s
+    rules:
+      # ==========================================
+      # Container Alerts
+      # ==========================================
+      - alert: ContainerHighCPU
+        expr: |
+          (sum(rate(container_cpu_usage_seconds_total{name=~"backend|mongodb|redis|nginx"}[5m])) by (name)) > 0.8
+        for: 5m
+        labels:
+          severity: 'warning'
+          team: 'devops'
+        annotations:
+          summary: "Container high CPU usage"
+          description: "Container {{ $labels.name }} CPU usage is {{ $value | humanizePercentage }}"
+
+      - alert: ContainerHighMemory
+        expr: |
+          (container_memory_usage_bytes{name=~"backend|mongodb|redis|nginx"} / 
+           container_spec_memory_limit_bytes) > 0.85
+        for: 5m
+        labels:
+          severity: 'warning'
+          team: 'devops'
+        annotations:
+          summary: "Container high memory usage"
+          description: "Container {{ $labels.name }} memory usage is {{ $value | humanizePercentage }}"
+
+      # ==========================================
+      # Network Alerts
+      # ==========================================
+      - alert: HighNetworkBandwidth
+        expr: |
+          rate(container_network_transmit_bytes_total[5m]) > 1000000000
+        for: 5m
+        labels:
+          severity: 'warning'
+          team: 'devops'
+        annotations:
+          summary: "High network bandwidth usage"
+          description: "Network bandwidth on {{ $labels.instance }} is {{ $value | humanize }}B/s"
+
+  - name: service_alerts
+    interval: 30s
+    rules:
+      # ==========================================
+      # Service Availability
+      # ==========================================
+      - alert: ServiceDown
+        expr: up{job=~"alawael-api|mongodb|redis"} == 0
+        for: 2m
+        labels:
+          severity: 'critical'
+          team: 'backend'
+          on_call: true
+        annotations:
+          summary: "Service is down"
+          description: "{{ $labels.job }} on {{ $labels.instance }} is not responding"
+
+      # ==========================================
+      # Request Timeout Alerts
+      # ==========================================
+      - alert: HighTimeoutRate
+        expr: |
+          rate(http_requests_total{status="504"}[5m]) > 0.01
+        for: 5m
+        labels:
+          severity: 'warning'
+          team: 'backend'
+        annotations:
+          summary: "High timeout rate"
+          description: "{{ $labels.service }} has {{ $value | humanizePercentage }} timeout rate"
+
+      # ==========================================
+      # Database Connection Alerts
+      # ==========================================
+      - alert: DatabaseConnectionPoolExhausted
+        expr: |
+          (mongodb_connections_current / mongodb_connections_available) > 0.9
+        for: 5m
+        labels:
+          severity: 'critical'
+          team: 'database'
+          on_call: true
+        annotations:
+          summary: "Database connection pool nearly exhausted"
+          description: "{{ $value | humanizePercentage }} of database connections in use"

@@ -1,7 +1,8 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render } from '@testing-library/react';
+import { screen, fireEvent, waitFor } from '@testing-library/dom';
 import '@testing-library/jest-dom';
-import { ThemeProvider } from '../contexts/ThemeContext';
-import { LoadingSkeleton, ErrorState, Toast, ProgressIndicator } from '../components/AdvancedAnimations';
+import { ThemeProvider } from '../../contexts/ThemeContext';
+import { LoadingSkeleton, ErrorState, Toast, ProgressIndicator } from '../AdvancedAnimations';
 
 describe('AdvancedAnimations Components', () => {
   describe('LoadingSkeleton', () => {

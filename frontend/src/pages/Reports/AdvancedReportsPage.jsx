@@ -9,7 +9,7 @@
  * - Custom report generation
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Container,
@@ -32,18 +32,13 @@ import {
   Select,
   MenuItem,
   FormControl,
-  InputLabel,
-  Alert
+  InputLabel
 } from '@mui/material';
 import {
-  GetApp,
   Refresh,
   Share,
-  Edit,
   Delete,
   Download,
-  Mail,
-  MoreVert,
   Assessment,
   TrendingUp,
   FileDownload
@@ -58,7 +53,6 @@ import { motion } from 'framer-motion';
 const AdvancedReportsPage = () => {
   const [tabValue, setTabValue] = useState(0);
   const [reports, setReports] = useState([]);
-  const [selectedReport, setSelectedReport] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [newReport, setNewReport] = useState({ name: '', type: 'comprehensive', format: 'pdf' });
   const [refreshing, setRefreshing] = useState(false);
@@ -121,18 +115,18 @@ const AdvancedReportsPage = () => {
     };
   }, []);
 
-  const loadReports = () => {
+  const loadReports = useCallback(() => {
     setRefreshing(true);
     // محاكاة تحميل التقارير
     setTimeout(() => {
       setReports(sampleReports);
       setRefreshing(false);
     }, 1000);
-  };
+  }, [sampleReports]);
 
   useEffect(() => {
     loadReports();
-  }, []);
+  }, [loadReports]);
 
   const handleCreateReport = async () => {
     try {

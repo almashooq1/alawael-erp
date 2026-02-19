@@ -88,8 +88,8 @@ const UnifiedAccountingAIDashboard: React.FC = () => {
             <button
               className="mt-2 px-4 py-2 text-xs font-semibold"
               style={{
-                backgroundColor: theme.colors.primary.main,
-                color: theme.colors.primary.contrast,
+                backgroundColor: theme.colors.primary[600],
+                color: theme.colors.text.inverse,
                 borderRadius: theme.borderRadius.sm,
               }}
               onClick={fetchInsights}
@@ -110,7 +110,10 @@ const UnifiedAccountingAIDashboard: React.FC = () => {
         {!loading && error && (
           <div
             className="rounded-lg p-6 mb-6"
-            style={{ backgroundColor: theme.colors.error.light, color: theme.colors.error.contrast }}
+            style={{
+              backgroundColor: theme.colors.error.light,
+              color: theme.colors.error.contrast,
+            }}
           >
             {error}
           </div>
@@ -138,9 +141,7 @@ const UnifiedAccountingAIDashboard: React.FC = () => {
                   <p className="text-sm" style={{ color: theme.colors.text.secondary }}>
                     {item.label}
                   </p>
-                  <p className="text-xl font-bold mt-2">
-                    {item.value.toLocaleString('ar-SA')} ر.س
-                  </p>
+                  <p className="text-xl font-bold mt-2">{item.value.toLocaleString('ar-SA')} ر.س</p>
                 </div>
               ))}
             </div>
@@ -183,7 +184,7 @@ const UnifiedAccountingAIDashboard: React.FC = () => {
                     className="text-sm font-semibold px-3 py-1 rounded-full"
                     style={{
                       backgroundColor: riskBadge.color,
-                      color: theme.colors.primary.contrast,
+                      color: theme.colors.text.inverse,
                     }}
                   >
                     {riskBadge.label}

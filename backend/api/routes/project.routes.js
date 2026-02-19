@@ -5,9 +5,7 @@
 
 const express = require('express');
 const router = express.Router();
-const ProjectManagementService = require('../../services/projectManagementService');
-
-const projectService = new ProjectManagementService();
+const projectService = require('../../services/projectManagementService');
 
 // ===== Project CRUD =====
 

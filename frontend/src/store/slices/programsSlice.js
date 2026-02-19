@@ -1,25 +1,31 @@
 // Redux Slice للبرامج والأهداف - programsSlice.js
 
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import api from '../utils/api';
+import api from '../../utils/api';
 
-export const fetchPrograms = createAsyncThunk('programs/fetchPrograms', async (params, { rejectWithValue }) => {
-  try {
-    const response = await api.get('/programs', { params });
-    return response.data;
-  } catch (error) {
-    return rejectWithValue(error.response?.data?.message);
+export const fetchPrograms = createAsyncThunk(
+  'programs/fetchPrograms',
+  async (params, { rejectWithValue }) => {
+    try {
+      const response = await api.get('/programs', { params });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message);
+    }
   }
-});
+);
 
-export const createProgram = createAsyncThunk('programs/createProgram', async (programData, { rejectWithValue }) => {
-  try {
-    const response = await api.post('/programs', programData);
-    return response.data;
-  } catch (error) {
-    return rejectWithValue(error.response?.data?.message);
+export const createProgram = createAsyncThunk(
+  'programs/createProgram',
+  async (programData, { rejectWithValue }) => {
+    try {
+      const response = await api.post('/programs', programData);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message);
+    }
   }
-});
+);
 
 export const enrollBeneficiary = createAsyncThunk(
   'programs/enrollBeneficiary',
@@ -33,7 +39,7 @@ export const enrollBeneficiary = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.response?.data?.message);
     }
-  },
+  }
 );
 
 const initialState = {

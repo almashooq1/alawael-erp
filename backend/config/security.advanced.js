@@ -6,8 +6,22 @@
 const rateLimit = require('express-rate-limit');
 const mongoSanitize = require('express-mongo-sanitize');
 
+// Check if we're in test mode
+const isTestMode = () => {
+  return (
+    process.env.NODE_ENV === 'test' ||
+    process.env.SKIP_RATE_LIMIT === 'true' ||
+    !!process.env.JEST_WORKER_ID
+  );
+};
+
 // Enhanced Rate Limiting
 const createRateLimiter = (options = {}) => {
+  // Return pass-through middleware in test mode
+  if (isTestMode()) {
+    return (req, res, next) => next();
+  }
+
   const {
     windowMs = 15 * 60 * 1000, // 15 minutes
     max = 100, // limit each IP to 100 requests per windowMs

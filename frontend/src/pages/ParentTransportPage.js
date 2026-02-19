@@ -33,8 +33,15 @@ import {
   TextField,
   Rating,
 } from '@mui/material';
-import { DirectionsBus, Timer, CreditCard, Warning, CheckCircle, StarRate } from '@mui/icons-material';
-import api from '../services/api';
+import {
+  DirectionsBus,
+  Timer,
+  CreditCard,
+  Warning,
+  CheckCircle,
+  StarRate,
+} from '@mui/icons-material';
+import api from '../utils/api';
 
 const ParentTransportPage = () => {
   const [registrations, setRegistrations] = useState([]);
@@ -84,7 +91,9 @@ const ParentTransportPage = () => {
 
       const currentDate = new Date();
       const [attRes, payRes] = await Promise.all([
-        api.get(`/transport/attendance/${registration._id}?month=${currentDate.getMonth() + 1}&year=${currentDate.getFullYear()}`),
+        api.get(
+          `/transport/attendance/${registration._id}?month=${currentDate.getMonth() + 1}&year=${currentDate.getFullYear()}`
+        ),
         api.get(`/transport/payments/${registration._id}`),
       ]);
 
@@ -142,7 +151,9 @@ const ParentTransportPage = () => {
   };
 
   const activeRegistrations = registrations.filter(r => r.status === 'active');
-  const pendingPayments = registrations.filter(r => r.paymentStatus === 'unpaid' || r.paymentStatus === 'overdue');
+  const pendingPayments = registrations.filter(
+    r => r.paymentStatus === 'unpaid' || r.paymentStatus === 'overdue'
+  );
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -180,7 +191,9 @@ const ParentTransportPage = () => {
                 <Typography color="inherit" gutterBottom>
                   الحافلات المتاحة
                 </Typography>
-                <Typography variant="h4">{buses.filter(b => b.status === 'active').length}</Typography>
+                <Typography variant="h4">
+                  {buses.filter(b => b.status === 'active').length}
+                </Typography>
               </CardContent>
             </Card>
           </Grid>
@@ -264,7 +277,9 @@ const ParentTransportPage = () => {
                     <TableRow key={reg._id} hover>
                       <TableCell>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <Avatar sx={{ width: 32, height: 32 }}>{reg.studentId?.firstName?.charAt(0)}</Avatar>
+                          <Avatar sx={{ width: 32, height: 32 }}>
+                            {reg.studentId?.firstName?.charAt(0)}
+                          </Avatar>
                           {reg.studentId?.firstName}
                         </Box>
                       </TableCell>
@@ -284,7 +299,11 @@ const ParentTransportPage = () => {
                         />
                       </TableCell>
                       <TableCell>
-                        <Button size="small" variant="outlined" onClick={() => handleViewDetails(reg)}>
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          onClick={() => handleViewDetails(reg)}
+                        >
                           تفاصيل
                         </Button>
                       </TableCell>
@@ -327,7 +346,9 @@ const ParentTransportPage = () => {
                   </Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
                     <DirectionsBus fontSize="small" />
-                    <Typography variant="body2">{driver.assignedBus?.busNumber || 'لا توجد حافلة مخصصة'}</Typography>
+                    <Typography variant="body2">
+                      {driver.assignedBus?.busNumber || 'لا توجد حافلة مخصصة'}
+                    </Typography>
                   </Box>
                 </CardContent>
               </Card>
@@ -340,7 +361,11 @@ const ParentTransportPage = () => {
         <DialogTitle>
           تفاصيل التسجيل
           {selectedRegistration && (
-            <Button sx={{ float: 'left' }} onClick={handleOpenRatingDialog} startIcon={<StarRate />}>
+            <Button
+              sx={{ float: 'left' }}
+              onClick={handleOpenRatingDialog}
+              startIcon={<StarRate />}
+            >
               تقييم الخدمة
             </Button>
           )}
@@ -368,7 +393,9 @@ const ParentTransportPage = () => {
                     </Grid>
                     <Grid item xs={12} sm={6}>
                       <Typography variant="subtitle2">الوردية</Typography>
-                      <Typography>{selectedRegistration.shift === 'morning' ? 'صباح' : 'مساء'}</Typography>
+                      <Typography>
+                        {selectedRegistration.shift === 'morning' ? 'صباح' : 'مساء'}
+                      </Typography>
                     </Grid>
                     <Grid item xs={12} sm={6}>
                       <Typography variant="subtitle2">الرسم الشهري</Typography>
@@ -402,9 +429,15 @@ const ParentTransportPage = () => {
                       <TableBody>
                         {attendance.map((record, idx) => (
                           <TableRow key={idx}>
-                            <TableCell>{new Date(record.date).toLocaleDateString('ar-SA')}</TableCell>
                             <TableCell>
-                              <Chip label={record.status} size="small" color={record.status === 'present' ? 'success' : 'default'} />
+                              {new Date(record.date).toLocaleDateString('ar-SA')}
+                            </TableCell>
+                            <TableCell>
+                              <Chip
+                                label={record.status}
+                                size="small"
+                                color={record.status === 'present' ? 'success' : 'default'}
+                              />
                             </TableCell>
                             <TableCell>{record.remarks || '-'}</TableCell>
                           </TableRow>
@@ -435,11 +468,17 @@ const ParentTransportPage = () => {
                       <TableBody>
                         {payments.map((payment, idx) => (
                           <TableRow key={idx}>
-                            <TableCell>{new Date(payment.paymentDate).toLocaleDateString('ar-SA')}</TableCell>
+                            <TableCell>
+                              {new Date(payment.paymentDate).toLocaleDateString('ar-SA')}
+                            </TableCell>
                             <TableCell>{payment.amount} ريال</TableCell>
                             <TableCell>{payment.paymentMethod}</TableCell>
                             <TableCell>
-                              <Chip label={payment.status} size="small" color={payment.status === 'completed' ? 'success' : 'default'} />
+                              <Chip
+                                label={payment.status}
+                                size="small"
+                                color={payment.status === 'completed' ? 'success' : 'default'}
+                              />
                             </TableCell>
                           </TableRow>
                         ))}
@@ -461,17 +500,29 @@ const ParentTransportPage = () => {
                   </Typography>
                   <Paper sx={{ p: 2, mb: 2, bgcolor: '#f5f5f5' }}>
                     <Typography variant="subtitle2">ولي الأمر</Typography>
-                    <Typography variant="body2">{selectedRegistration.parentContact?.name}</Typography>
-                    <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography variant="body2">
+                      {selectedRegistration.parentContact?.name}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                    >
                       <Timer fontSize="small" />
                       {selectedRegistration.parentContact?.phone}
                     </Typography>
                   </Paper>
                   <Paper sx={{ p: 2, bgcolor: '#f5f5f5' }}>
                     <Typography variant="subtitle2">جهة الطوارئ</Typography>
-                    <Typography variant="body2">{selectedRegistration.emergencyContact?.name}</Typography>
-                    <Typography variant="body2">{selectedRegistration.emergencyContact?.relationship}</Typography>
-                    <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography variant="body2">
+                      {selectedRegistration.emergencyContact?.name}
+                    </Typography>
+                    <Typography variant="body2">
+                      {selectedRegistration.emergencyContact?.relationship}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                    >
                       <Timer fontSize="small" />
                       {selectedRegistration.emergencyContact?.phone}
                     </Typography>

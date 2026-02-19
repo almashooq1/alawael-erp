@@ -33,7 +33,15 @@ import {
   Forward as ForwardIcon,
   AttachFile as AttachIcon,
 } from '@mui/icons-material';
+import { useOrgBranding } from '../OrgBrandingContext';
 
+// Mock function to send security alert email
+export function sendSecurityEmailAlert({ subject, body, to = 'admin@alawael.com' }) {
+  // In real app, integrate with backend email service
+  // For demo, just log
+  console.log('Security Email Sent:', { to, subject, body });
+  return Promise.resolve({ success: true });
+}
 const EmailPanel = () => {
   const [emails, setEmails] = useState([]);
   const [selectedEmail, setSelectedEmail] = useState(null);
@@ -53,6 +61,7 @@ const EmailPanel = () => {
     priority: 'normal',
   });
 
+  const { branding } = useOrgBranding();
   useEffect(() => {
     loadEmails(folder);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -144,11 +153,27 @@ const EmailPanel = () => {
   };
 
   const handleMarkAsRead = emailId => {
+    // تضمين الهوية المؤسسية في تذييل الإيميل تلقائياً
+    const getBrandedBody = body => {
+      let footer = '';
+      if (branding && (branding.name || branding.logo)) {
+        footer = '\n\n---\n';
+        if (branding.logo) {
+          footer += `[شعار المؤسسة]\n`;
+        }
+        if (branding.name) {
+          footer += `${branding.name}\n`;
+        }
+      }
+      return body + footer;
+    };
     setEmails(prev => prev.map(email => (email.id === emailId ? { ...email, read: true } : email)));
   };
 
   const handleToggleStar = emailId => {
-    setEmails(prev => prev.map(email => (email.id === emailId ? { ...email, starred: !email.starred } : email)));
+    setEmails(prev =>
+      prev.map(email => (email.id === emailId ? { ...email, starred: !email.starred } : email))
+    );
   };
 
   const handleDeleteEmail = emailId => {
@@ -189,7 +214,13 @@ const EmailPanel = () => {
       <Grid container sx={{ height: '100%' }}>
         {/* القائمة الجانبية */}
         <Grid item xs={12} md={3} sx={{ borderRight: 1, borderColor: 'divider', p: 2 }}>
-          <Button fullWidth variant="contained" startIcon={<EmailIcon />} onClick={() => setComposeOpen(true)} sx={{ mb: 2 }}>
+          <Button
+            fullWidth
+            variant="contained"
+            startIcon={<EmailIcon />}
+            onClick={() => setComposeOpen(true)}
+            sx={{ mb: 2 }}
+          >
             إنشاء بريد جديد
           </Button>
 
@@ -243,7 +274,11 @@ const EmailPanel = () => {
                   <ListItemText
                     primary={
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Typography variant="subtitle2" sx={{ fontWeight: email.read ? 'normal' : 'bold', flex: 1 }} noWrap>
+                        <Typography
+                          variant="subtitle2"
+                          sx={{ fontWeight: email.read ? 'normal' : 'bold', flex: 1 }}
+                          noWrap
+                        >
                           {email.from}
                         </Typography>
                         {email.priority !== 'normal' && (
@@ -258,7 +293,11 @@ const EmailPanel = () => {
                     }
                     secondary={
                       <>
-                        <Typography variant="body2" sx={{ fontWeight: email.read ? 'normal' : 'bold' }} noWrap>
+                        <Typography
+                          variant="body2"
+                          sx={{ fontWeight: email.read ? 'normal' : 'bold' }}
+                          noWrap
+                        >
                           {email.subject}
                         </Typography>
                         <Typography variant="caption" color="text.secondary" noWrap>
@@ -268,7 +307,14 @@ const EmailPanel = () => {
                     }
                   />
                   <ListItemSecondaryAction>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 1 }}>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'flex-end',
+                        gap: 1,
+                      }}
+                    >
                       <Typography variant="caption" color="text.secondary">
                         {formatTimestamp(email.timestamp)}
                       </Typography>
@@ -309,7 +355,9 @@ const EmailPanel = () => {
                 </Typography>
 
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                  <Avatar sx={{ bgcolor: 'primary.main' }}>{selectedEmail.from.charAt(0).toUpperCase()}</Avatar>
+                  <Avatar sx={{ bgcolor: 'primary.main' }}>
+                    {selectedEmail.from.charAt(0).toUpperCase()}
+                  </Avatar>
                   <Box sx={{ flex: 1 }}>
                     <Typography variant="subtitle2">{selectedEmail.from}</Typography>
                     <Typography variant="caption" color="text.secondary">
@@ -329,7 +377,12 @@ const EmailPanel = () => {
                   <Button size="small" startIcon={<ForwardIcon />}>
                     إعادة توجيه
                   </Button>
-                  <Button size="small" startIcon={<DeleteIcon />} color="error" onClick={() => handleDeleteEmail(selectedEmail.id)}>
+                  <Button
+                    size="small"
+                    startIcon={<DeleteIcon />}
+                    color="error"
+                    onClick={() => handleDeleteEmail(selectedEmail.id)}
+                  >
                     حذف
                   </Button>
                 </Box>
@@ -424,7 +477,12 @@ const EmailPanel = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setComposeOpen(false)}>إلغاء</Button>
-          <Button variant="contained" startIcon={<SendIcon />} onClick={handleSendEmail} disabled={!composeForm.to || !composeForm.subject}>
+          <Button
+            variant="contained"
+            startIcon={<SendIcon />}
+            onClick={handleSendEmail}
+            disabled={!composeForm.to || !composeForm.subject}
+          >
             إرسال
           </Button>
         </DialogActions>

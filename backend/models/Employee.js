@@ -29,7 +29,11 @@ const employeeSchema = new mongoose.Schema(
     // Job Data
     department: { type: String, required: true, index: true }, // HR, Medical, Rehab
     position: { type: String, required: true }, // e.g. Senior Therapist
-    role: { type: String, enum: ['ADMIN', 'DOCTOR', 'THERAPIST', 'NURSE', 'HR', 'ACCOUNTANT'], default: 'THERAPIST' },
+    role: {
+      type: String,
+      enum: ['ADMIN', 'DOCTOR', 'THERAPIST', 'NURSE', 'HR', 'ACCOUNTANT'],
+      default: 'THERAPIST',
+    },
 
     // Schedule
     currentShift: { type: mongoose.Schema.Types.ObjectId, ref: 'Shift' },
@@ -43,7 +47,7 @@ const employeeSchema = new mongoose.Schema(
 
     joinDate: { type: Date, default: Date.now },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 // Virtual for Full Name

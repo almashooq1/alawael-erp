@@ -7,7 +7,7 @@
 // ============================================================================
 // 1. WORKFLOW ENGINE
 // ============================================================================
-export class WorkflowEngine {
+class WorkflowEngine {
   constructor(db) {
     this.db = db;
     this.workflows = new Map();
@@ -383,7 +383,7 @@ export class WorkflowEngine {
 // ============================================================================
 // 2. TEMPLATE LIBRARY
 // ============================================================================
-export class WorkflowTemplates {
+class WorkflowTemplates {
   static templates = {
     // Sales workflow
     sales_order_notification: {
@@ -453,7 +453,7 @@ export class WorkflowTemplates {
   }
 }
 
-export default {
+module.exports = {
   WorkflowEngine,
   WorkflowTemplates,
 };

@@ -1,0 +1,209 @@
+version: '3.8'
+
+# Finance Module Complete Stack
+# Deploys backend REST API, MongoDB, and Redis with monitoring
+
+services:
+  # ═══════════════════════════════════════════════════════════════
+  # Finance Backend API
+  # ═══════════════════════════════════════════════════════════════
+  finance-backend:
+    build:
+      context: .
+      dockerfile: finance-module/Dockerfile.finance
+    container_name: finance-api-prod
+    restart: unless-stopped
+    ports:
+      - "3010:3010"
+    environment:
+      - NODE_ENV=production
+      - PORT=3010
+      - MONGODB_URI=mongodb://mongo:27017/finance_db
+      - REDIS_URL=redis://redis:6379/0
+      - JWT_SECRET=${JWT_SECRET:-your-secret-key-change-in-prod}
+      - JWT_EXPIRE=7d
+      - LOG_LEVEL=info
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./finance-module/backend/src:/app/finance-module/src:ro
+      - ./finance-module/backend/logs:/app/finance-module/logs
+    networks:
+      - finance-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3010/api/finance/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ═══════════════════════════════════════════════════════════════
+  # MongoDB Database
+  # ═══════════════════════════════════════════════════════════════
+  mongo:
+    image: mongo:7.0-alpine
+    container_name: finance-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=finance_db
+      - MONGO_INITDB_ROOT_USERNAME=${DB_USER:-admin}
+      - MONGO_INITDB_ROOT_PASSWORD=${DB_PASSWORD:-changeme}
+    volumes:
+      - mongo-data:/data/db
+      - mongo-config:/data/configdb
+      - ./finance-module/backend/scripts/init-mongo.js:/docker-entrypoint-initdb.d/init.js:ro
+    networks:
+      - finance-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ═══════════════════════════════════════════════════════════════
+  # Redis Cache & Session Store
+  # ═══════════════════════════════════════════════════════════════
+  redis:
+    image: redis:7-alpine
+    container_name: finance-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-changeme}
+    volumes:
+      - redis-data:/data
+    networks:
+      - finance-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ═══════════════════════════════════════════════════════════════
+  # Nginx Reverse Proxy (Optional - for production)
+  # ═══════════════════════════════════════════════════════════════
+  nginx:
+    image: nginx:alpine
+    container_name: finance-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./finance-module/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./finance-module/ssl:/etc/nginx/ssl:ro
+      - ./finance-module/logs:/var/log/nginx
+    depends_on:
+      - finance-backend
+    networks:
+      - finance-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/api/finance/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    profiles:
+      - production
+
+  # ═══════════════════════════════════════════════════════════════
+  # Monitoring: Prometheus (Optional)
+  # ═══════════════════════════════════════════════════════════════
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: finance-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./finance-module/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    networks:
+      - finance-network
+    profiles:
+      - monitoring
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ═══════════════════════════════════════════════════════════════
+  # Monitoring: Grafana (Optional)
+  # ═══════════════════════════════════════════════════════════════
+  grafana:
+    image: grafana/grafana:latest
+    container_name: finance-grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./finance-module/grafana/provisioning:/etc/grafana/provisioning:ro
+    depends_on:
+      - prometheus
+    networks:
+      - finance-network
+    profiles:
+      - monitoring
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+# ═══════════════════════════════════════════════════════════════
+# Volumes
+# ═══════════════════════════════════════════════════════════════
+volumes:
+  mongo-data:
+    driver: local
+  mongo-config:
+    driver: local
+  redis-data:
+    driver: local
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local
+
+# ═══════════════════════════════════════════════════════════════
+# Networks
+# ═══════════════════════════════════════════════════════════════
+networks:
+  finance-network:
+    driver: bridge

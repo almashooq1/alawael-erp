@@ -1,3 +1,7 @@
+// Security Center Components
+import SecurityCenter from '../components/security/SecurityCenter';
+import SecurityDashboard from '../components/security/SecurityDashboard';
+import NotificationSettings from '../components/security/NotificationSettings';
 // Router Configuration - Router.jsx
 
 import React from 'react';
@@ -80,6 +84,11 @@ const AppRoutes = () => {
       >
         {/* Dashboard */}
         <Route path="/dashboard" element={<Dashboard />} />
+
+        {/* Security Center */}
+        <Route path="/security-center" element={<SecurityCenter />} />
+        <Route path="/security-dashboard" element={<SecurityDashboard />} />
+        <Route path="/notification-settings" element={<NotificationSettings />} />
 
         {/* Beneficiaries */}
         <Route path="/beneficiaries" element={<BeneficiariesList />} />

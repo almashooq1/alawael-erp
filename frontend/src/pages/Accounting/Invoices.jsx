@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import exportService, { setBrandingForExport } from '../../utils/exportService';
+import { useOrgBranding } from '../../components/OrgBrandingContext';
 import {
   Box,
   Card,
@@ -43,6 +45,7 @@ import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 
 const Invoices = () => {
+  const { branding } = useOrgBranding();
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
@@ -313,22 +316,16 @@ const Invoices = () => {
     }
   };
 
-  const handleDownloadPDF = async (invoiceId) => {
-    try {
-      const response = await axios.get(
-        `http://localhost:3001/api/accounting/invoices/${invoiceId}/pdf`,
-        { responseType: 'blob' }
-      );
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `invoice-${invoiceId}.pdf`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-    } catch (error) {
-      console.error('Error downloading PDF:', error);
-    }
+  // تصدير الفاتورة PDF مع الهوية المؤسسية
+  const handleDownloadPDF = (invoiceId) => {
+    const invoice = invoices.find(inv => inv._id === invoiceId);
+    if (!invoice) return;
+    setBrandingForExport(branding);
+    // بناء بيانات الفاتورة بشكل مبسط (يمكنك تخصيص الأعمدة)
+    const data = [
+      { 'رقم الفاتورة': invoice.invoiceNumber, 'التاريخ': invoice.invoiceDate, 'العميل': invoice.customerName, 'الإجمالي': invoice.totalAmount }
+    ];
+    exportService.exportToPDF(data, `فاتورة_${invoice.invoiceNumber}`, { branding, title: `فاتورة رقم ${invoice.invoiceNumber}` });
   };
 
   const handleDeleteInvoice = async (invoiceId) => {

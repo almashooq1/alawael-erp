@@ -1,36 +1,37 @@
-// استخدام: const { data, loading, error, fetchData } = useApi('/students')
-
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+// Configure axios base URL
+const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
 
-export const api = axios.create({
-  baseURL: API_BASE_URL,
+// Create axios instance with defaults
+const api = axios.create({
+  baseURL: API_BASE,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// إضافة مقاطع Axios لمعالجة الأخطاء والتوثيق
+// Add request interceptor to include token
 api.interceptors.request.use(
   config => {
-    // إضافة التوكن إلى الطلب إذا كان متاحاً
-    const token = localStorage.getItem('access_token') || localStorage.getItem('auth_token');
+    const token = localStorage.getItem('token');
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      config.headers['Authorization'] = `Bearer ${token}`;
     }
     return config;
   },
-  error => Promise.reject(error)
+  error => {
+    return Promise.reject(error);
+  }
 );
 
+// Add response interceptor for error handling
 api.interceptors.response.use(
   response => response,
   error => {
-    // معالجة الأخطاء الشاملة
     if (error.response?.status === 401) {
-      // توكن منتهي الصلاحية
-      localStorage.removeItem('auth_token');
+      // Unauthorized - clear token and redirect to login
+      localStorage.removeItem('token');
       window.location.href = '/login';
     }
     return Promise.reject(error);

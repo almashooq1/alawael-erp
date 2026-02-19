@@ -1,0 +1,102 @@
+name: Deploy to Kubernetes
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'k8s/**'
+      - 'docker-compose.yml'
+      - '.github/workflows/deploy-k8s.yml'
+  workflow_run:
+    workflows: [ "Test & Build Backend" ]
+    types: [ completed ]
+    branches: [ main ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/backend
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event.workflow_run.conclusion == 'success'
+    
+    permissions:
+      contents: read
+      packages: read
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Configure kubectl
+      run: |
+        mkdir -p $HOME/.kube
+        echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > $HOME/.kube/config
+        chmod 600 $HOME/.kube/config
+    
+    - name: Update image tag
+      working-directory: k8s
+      run: |
+        IMAGE_TAG=${{ github.sha }}
+        sed -i "s|your-docker-registry/erp-backend:latest|${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${IMAGE_TAG}|g" 04-backend-deployment.yaml
+    
+    - name: Apply Kubernetes manifests
+      run: |
+        kubectl apply -f k8s/01-namespace-config.yaml
+        sleep 5
+        kubectl apply -f k8s/02-mongodb-statefulset.yaml
+        sleep 10
+        kubectl apply -f k8s/03-redis-deployment.yaml
+        sleep 10
+        kubectl apply -f k8s/04-backend-deployment.yaml
+        kubectl apply -f k8s/05-ingress-network-policy.yaml
+    
+    - name: Wait for rollout
+      run: |
+        kubectl rollout status deployment/backend -n erp-production --timeout=5m
+    
+    - name: Verify deployment
+      run: |
+        kubectl get pods -n erp-production
+        kubectl get svc -n erp-production
+        kubectl describe deployment backend -n erp-production
+    
+    - name: Health check
+      run: |
+        BACKEND_IP=$(kubectl get svc backend -n erp-production -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+        echo "Waiting for backend health check..."
+        for i in {1..30}; do
+          if curl -f http://$BACKEND_IP:3001/health; then
+            echo "Health check passed!"
+            exit 0
+          fi
+          sleep 10
+        done
+        echo "Health check failed!"
+        exit 1
+      continue-on-error: true
+
+  notify:
+    needs: deploy
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+    - name: Slack notification
+      if: ${{ secrets.SLACK_WEBHOOK_URL }}
+      uses: slackapi/slack-github-action@v1
+      with:
+        webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+        payload: |
+          {
+            "text": "Deployment to Kubernetes: ${{ needs.deploy.result }}",
+            "blocks": [
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "Deployment Status: *${{ needs.deploy.result }}*\ncommit: `${{ github.sha }}`"
+                }
+              }
+            ]
+          }

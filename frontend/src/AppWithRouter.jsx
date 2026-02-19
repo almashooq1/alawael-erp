@@ -7,6 +7,7 @@ import Search from './pages/Search';
 import Validation from './pages/Validation';
 import Admin from './pages/Admin';
 import './App.css';
+import { touchButtonStyle } from './common/touchStyles';
 
 /**
  * Phase 12 Complete Application with Router
@@ -25,7 +26,7 @@ function AppWithRouter() {
         <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
           <div className="sidebar-header">
             <h2>🚀 ERP System</h2>
-            <button className="sidebar-toggle" onClick={closeSidebar} aria-label="Close sidebar">
+            <button className="sidebar-toggle" onClick={closeSidebar} aria-label="Close sidebar" style={touchButtonStyle}>
               <FiX />
             </button>
           </div>
@@ -82,15 +83,16 @@ function AppWithRouter() {
               className="menu-toggle"
               onClick={toggleSidebar}
               aria-label="Toggle menu"
+              style={touchButtonStyle}
             >
               <FiMenu />
             </button>
             <h1>Welcome to ERP System</h1>
             <div className="header-actions">
-              <button className="notification-btn" aria-label="Notifications">
+              <button className="notification-btn" aria-label="Notifications" style={touchButtonStyle}>
                 <FiBell />
               </button>
-              <button className="profile-btn" aria-label="User profile">
+              <button className="profile-btn" aria-label="User profile" style={touchButtonStyle}>
                 <FiUser />
               </button>
             </div>

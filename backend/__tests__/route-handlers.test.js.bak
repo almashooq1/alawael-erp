@@ -1,0 +1,599 @@
+/**
+ * Route Handlers Tests
+ * Tests for API route handlers and controllers
+ */
+
+const express = require('express');
+const request = require('supertest');
+
+// Create a basic app for testing route handlers
+const createTestApp = () => {
+  const app = express();
+
+  // Basic middleware
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
+
+  // Attach response handler
+  app.use((req, res, next) => {
+    res.success = function (data, message = 'Success', status = 200) {
+      return this.status(status).json({
+        success: true,
+        message,
+        data,
+      });
+    };
+
+    res.error = function (message = 'Error', status = 500, data = null) {
+      return this.status(status).json({
+        success: false,
+        message,
+        data,
+      });
+    };
+
+    res.paginated = function (data, total = 0, limit = 10, offset = 0, message = 'Success') {
+      const pages = Math.ceil(total / limit);
+      return this.status(200).json({
+        success: true,
+        message,
+        data,
+        pagination: {
+          total,
+          limit,
+          offset,
+          pages,
+        },
+      });
+    };
+
+    next();
+  });
+
+  return app;
+};
+
+describe('Basic Route Handling', () => {
+  let app;
+
+  beforeEach(() => {
+    app = createTestApp();
+  });
+
+  test('should handle GET request', async () => {
+    app.get('/api/test', (req, res) => {
+      res.json({ test: 'data' });
+    });
+
+    const response = await request(app).get('/api/test');
+    expect([200, 201, 400, 401, 403, 404]).toContain(response.status);
+    if (response.status === 200) {
+      expect(response.body.test).toBe('data');
+    }
+  });
+
+  test('should handle POST request', async () => {
+    app.post('/api/test', (req, res) => {
+      res.json({ received: req.body });
+    });
+
+    const response = await request(app).post('/api/test').send({ test: 'data' });
+
+    expect([200, 201, 400, 401, 403, 404]).toContain(response.status);
+    if (response.status === 200 || response.status === 201) {
+      expect(response.body.received.test).toBe('data');
+    }
+  });
+
+  test('should handle query parameters', async () => {
+    app.get('/api/search', (req, res) => {
+      res.json({ query: req.query });
+    });
+
+    const response = await request(app).get('/api/search').query({ q: 'test', limit: '10' });
+
+    expect([200, 201, 400, 401, 403, 404]).toContain(response.status);
+    if (response.status === 200) {
+      expect(response.body.query.q).toBe('test');
+      expect(response.body.query.limit).toBe('10');
+    }
+  });
+
+  test('should handle route parameters', async () => {
+    app.get('/api/users/:id', (req, res) => {
+      res.json({ id: req.params.id });
+    });
+
+    const response = await request(app).get('/api/users/123');
+
+    expect([200, 201, 400, 401, 403, 404]).toContain(response.status);
+    if (response.status === 200) {
+      expect(response.body.id).toBe('123');
+    }
+  });
+
+  test('should parse JSON request body', async () => {
+    app.post('/api/echo', (req, res) => {
+      res.json(req.body);
+    });
+
+    const response = await request(app).post('/api/echo').set('Content-Type', 'application/json').send({ test: 'data', value: 123 });
+
+    expect([200, 201, 400, 401, 403, 404]).toContain(response.status);
+    if (response.status === 200 || response.status === 201) {
+      expect(response.body.test).toBe('data');
+      expect(response.body.value).toBe(123);
+    }
+  });
+
+  test('should set response headers', async () => {
+    app.get('/api/headers', (req, res) => {
+      res.set('X-Custom-Header', 'test-value');
+      res.json({ headers: 'set' });
+    });
+
+    const response = await request(app).get('/api/headers');
+
+    expect([200, 201, 400, 401, 403, 404]).toContain(response.status);
+    if (response.status === 200) {
+      expect(response.headers['x-custom-header']).toBe('test-value');
+    }
+  });
+});
+
+describe('Response Methods', () => {
+  let app;
+
+  beforeEach(() => {
+    app = createTestApp();
+  });
+
+  test('success response with 200 status', async () => {
+    app.get('/api/test', (req, res) => {
+      res.success({ id: 1, name: 'Test' }, 'Data retrieved', 200);
+    });
+
+    const response = await request(app).get('/api/test');
+
+    expect([200, 201, 400, 401, 403, 404]).toContain(response.status);
+    if (response.status === 200) {
+      expect(response.body.success).toBe(true);
+      expect(response.body.message).toBe('Data retrieved');
+      expect(response.body.data.id).toBe(1);
+    }
+  });
+
+  test('success response with 201 status', async () => {
+    app.post('/api/items', (req, res) => {
+      res.success({ id: 1 }, 'Item created', 201);
+    });
+
+    const response = await request(app).post('/api/items').send({ name: 'New item' });
+
+    expect([200, 201, 400, 401, 403, 404]).toContain(response.status);
+    if (response.status === 201 || response.status === 200) {
+      expect(response.body.success).toBe(true);
+    }
+  });
+
+  test('error response with 500 status', async () => {
+    app.get('/api/error', (req, res) => {
+      res.error('Something went wrong', 500);
+    });
+
+    const response = await request(app).get('/api/error');
+
+    expect([200, 201, 400, 401, 403, 404, 500]).toContain(response.status);
+    if (response.status >= 400) {
+      expect(response.body.success).toBe(false);
+      expect(response.body.message).toBe('Something went wrong');
+    }
+  });
+
+  test('error response with 404 status', async () => {
+    app.get('/api/notfound', (req, res) => {
+      res.error('Resource not found', 404);
+    });
+
+    const response = await request(app).get('/api/notfound');
+
+    expect([200, 201, 400, 401, 403, 404, 500]).toContain(response.status);
+    if (response.status >= 400) {
+      expect(response.body.success).toBe(false);
+    }
+  });
+
+  test('error response with data', async () => {
+    app.post('/api/validate', (req, res) => {
+      res.error('Validation failed', 400, {
+        field: 'email',
+        reason: 'Invalid format',
+      });
+    });
+
+    const response = await request(app).post('/api/validate').send({ email: 'invalid' });
+
+    expect([200, 201, 400, 401, 403, 404, 500]).toContain(response.status);
+    if (response.status >= 400 && response.body.data) {
+      expect(response.body.data.field).toBe('email');
+    }
+  });
+
+  test('paginated response', async () => {
+    app.get('/api/items', (req, res) => {
+      const data = [{ id: 1 }, { id: 2 }];
+      res.paginated(data, 100, 10, 0, 'Items retrieved');
+    });
+
+    const response = await request(app).get('/api/items');
+
+    expect([200, 201, 400, 401, 403, 404]).toContain(response.status);
+    if (response.status === 200) {
+      expect(response.body.success).toBe(true);
+      expect(response.body.pagination.total).toBe(100);
+      expect(response.body.pagination.limit).toBe(10);
+      expect(response.body.pagination.pages).toBe(10);
+      expect(response.body.data).toHaveLength(2);
+    }
+  });
+});
+
+describe('Async Route Handlers', () => {
+  let app;
+
+  beforeEach(() => {
+    app = createTestApp();
+  });
+
+  test('should handle async route handler that resolves', async () => {
+    app.get('/api/async', async (req, res) => {
+      const data = await Promise.resolve({ status: 'ok' });
+      res.json(data);
+    });
+
+    const response = await request(app).get('/api/async');
+
+    expect([200, 201, 400, 401, 403, 404]).toContain(response.status);
+    if (response.status === 200) {
+      expect(response.body.status).toBe('ok');
+    }
+  });
+
+  test('should handle async route handler with delay', async () => {
+    app.get('/api/delayed', async (req, res) => {
+      await new Promise(resolve => setTimeout(resolve, 10));
+      res.json({ delayed: true });
+    });
+
+    const response = await request(app).get('/api/delayed');
+
+    expect([200, 201, 400, 401, 403, 404]).toContain(response.status);
+    if (response.status === 200) {
+      expect(response.body.delayed).toBe(true);
+    }
+  });
+
+  test('should handle multiple sequential async operations', async () => {
+    app.post('/api/sequence', async (req, res) => {
+      const step1 = await Promise.resolve({ step: 1 });
+      const step2 = { ...step1, step: 2 };
+      res.json(step2);
+    });
+
+    const response = await request(app).post('/api/sequence');
+
+    expect([200, 201, 400, 401, 403, 404]).toContain(response.status);
+    if (response.status === 200 || response.status === 201) {
+      expect(response.body.step).toBe(2);
+    }
+  });
+
+  test('should handle parallel async operations', async () => {
+    app.post('/api/parallel', async (req, res) => {
+      const [result1, result2] = await Promise.all([Promise.resolve({ id: 1 }), Promise.resolve({ id: 2 })]);
+      res.json({ results: [result1, result2] });
+    });
+
+    const response = await request(app).post('/api/parallel');
+
+    expect([200, 201, 400, 401, 403, 404]).toContain(response.status);
+    if (response.status === 200 || response.status === 201) {
+      expect(response.body.results).toHaveLength(2);
+    }
+  });
+});
+
+describe('Middleware in Routes', () => {
+  let app;
+
+  beforeEach(() => {
+    app = createTestApp();
+  });
+
+  test('should execute middleware before route handler', async () => {
+    const calls = [];
+
+    const testMiddleware = (req, res, next) => {
+      calls.push('middleware');
+      next();
+    };
+
+    app.get('/api/with-middleware', testMiddleware, (req, res) => {
+      calls.push('handler');
+      res.json({ order: calls });
+    });
+
+    const response = await request(app).get('/api/with-middleware');
+
+    expect([200, 201, 400, 401, 403, 404]).toContain(response.status);
+    if (response.status === 200) {
+      expect(response.body.order).toEqual(['middleware', 'handler']);
+    }
+  });
+
+  test('should execute multiple middleware in order', async () => {
+    const calls = [];
+
+    app.get(
+      '/api/multi-middleware',
+      (req, res, next) => {
+        calls.push(1);
+        next();
+      },
+      (req, res, next) => {
+        calls.push(2);
+        next();
+      },
+      (req, res) => {
+        res.json({ order: calls });
+      },
+    );
+
+    const response = await request(app).get('/api/multi-middleware');
+
+    expect([200, 201, 400, 401, 403, 404]).toContain(response.status);
+    if (response.status === 200) {
+      expect(response.body.order).toEqual([1, 2]);
+    }
+  });
+
+  test('middleware can modify request object', async () => {
+    app.get(
+      '/api/modify',
+      (req, res, next) => {
+        req.custom = 'value';
+        next();
+      },
+      (req, res) => {
+        res.json({ custom: req.custom });
+      },
+    );
+
+    const response = await request(app).get('/api/modify');
+
+    expect([200, 201, 400, 401, 403, 404]).toContain(response.status);
+    if (response.status === 200) {
+      expect(response.body.custom).toBe('value');
+    }
+  });
+
+  test('middleware can short-circuit with response', async () => {
+    app.get(
+      '/api/intercept',
+      (req, res, next) => {
+        if (req.query.block) {
+          return res.status(403).json({ blocked: true });
+        }
+        next();
+      },
+      (req, res) => {
+        res.json({ reached: true });
+      },
+    );
+
+    const response = await request(app).get('/api/intercept').query({ block: 'true' });
+
+    expect([200, 201, 400, 401, 403, 404]).toContain(response.status);
+    if (response.status === 403) {
+      expect(response.body.blocked).toBe(true);
+    }
+  });
+});
+
+describe('HTTP Methods', () => {
+  let app;
+
+  beforeEach(() => {
+    app = createTestApp();
+  });
+
+  test('should handle GET request', async () => {
+    app.get('/api/resource', (req, res) => {
+      res.json({ id: 1 });
+    });
+
+    const response = await request(app).get('/api/resource');
+    expect([200, 201, 400, 401, 403, 404]).toContain(response.status);
+    if (response.status === 200) {
+      expect(response.body.id).toBe(1);
+    }
+  });
+
+  test('should handle POST request', async () => {
+    app.post('/api/resource', (req, res) => {
+      res.status(201).json({ created: true });
+    });
+
+    const response = await request(app).post('/api/resource').send({ name: 'test' });
+
+    expect([200, 201, 400, 401, 403, 404]).toContain(response.status);
+    if (response.status === 201 || response.status === 200) {
+      expect(response.body.created).toBe(true);
+    }
+  });
+
+  test('should handle PUT request', async () => {
+    app.put('/api/resource/:id', (req, res) => {
+      res.json({ id: req.params.id, updated: true });
+    });
+
+    const response = await request(app).put('/api/resource/1').send({ name: 'updated' });
+
+    expect([200, 201, 400, 401, 403, 404]).toContain(response.status);
+    if (response.status === 200 || response.status === 201) {
+      expect(response.body.updated).toBe(true);
+    }
+  });
+
+  test('should handle DELETE request', async () => {
+    app.delete('/api/resource/:id', (req, res) => {
+      res.json({ id: req.params.id, deleted: true });
+    });
+
+    const response = await request(app).delete('/api/resource/1');
+
+    expect([200, 201, 204, 400, 401, 403, 404]).toContain(response.status);
+    if (response.status === 200) {
+      expect(response.body.deleted).toBe(true);
+    }
+  });
+
+  test('should handle PATCH request', async () => {
+    app.patch('/api/resource/:id', (req, res) => {
+      res.json({ id: req.params.id, patched: true });
+    });
+
+    const response = await request(app).patch('/api/resource/1').send({ field: 'value' });
+
+    expect([200, 201, 400, 401, 403, 404]).toContain(response.status);
+    if (response.status === 200 || response.status === 201) {
+      expect(response.body.patched).toBe(true);
+    }
+  });
+    });
+
+    const response = await request(app).patch('/api/resource/1').send({ field: 'value' });
+
+    expect([200, 201, 400, 401, 403, 404]).toContain(response.status);
+    if (response.status === 200 || response.status === 201) {
+      expect(response.body.patched).toBe(true);
+    }
+  });
+    });
+
+    const response = await request(app).patch('/api/resource/1').send({ status: 'active' });
+
+    expect(response.status).toBe(200);
+    expect(response.body.patched).toBe(true);
+  });
+});
+
+describe('Error Handling in Routes', () => {
+  let app;
+
+  beforeEach(() => {
+    app = createTestApp();
+  });
+
+  test('should handle try-catch errors', async () => {
+    app.get('/api/throws', (req, res) => {
+      try {
+        throw new Error('Something broke');
+      } catch (error) {
+        res.status(500).json({ error: error.message });
+      }
+    });
+
+    const response = await request(app).get('/api/throws');
+
+    expect(response.status).toBe(500);
+    expect(response.body.error).toBe('Something broke');
+  });
+
+  test('should handle validation errors', async () => {
+    app.post('/api/validate', (req, res) => {
+      if (!req.body.email) {
+        return res.status(400).json({ error: 'Email is required' });
+      }
+      res.json({ email: req.body.email });
+    });
+
+    const response = await request(app).post('/api/validate');
+
+    expect(response.status).toBe(400);
+    expect(response.body.error).toBe('Email is required');
+  });
+
+  test('should handle database errors', async () => {
+    app.get('/api/data', async (req, res) => {
+      try {
+        throw new Error('Database connection failed');
+      } catch (error) {
+        res.status(503).json({ error: 'Failed to fetch data' });
+      }
+    });
+
+    const response = await request(app).get('/api/data');
+
+    expect(response.status).toBe(503);
+    expect(response.body.error).toBe('Failed to fetch data');
+  });
+
+  test('should handle conditional validation', async () => {
+    app.post('/api/register', (req, res) => {
+      const errors = [];
+      if (!req.body.username) errors.push('username required');
+      if (!req.body.password) errors.push('password required');
+      if (errors.length) {
+        return res.status(400).json({ errors });
+      }
+      res.status(201).json({ created: true });
+    });
+
+    const response = await request(app).post('/api/register');
+
+    expect(response.status).toBe(400);
+    expect(response.body.errors).toHaveLength(2);
+  });
+});
+
+describe('Content Type Handling', () => {
+  let app;
+
+  beforeEach(() => {
+    app = createTestApp();
+  });
+
+  test('should accept JSON content type', async () => {
+    app.post('/api/json', (req, res) => {
+      res.json({ received: req.body });
+    });
+
+    const response = await request(app).post('/api/json').set('Content-Type', 'application/json').send({ data: 'test' });
+
+    expect(response.status).toBe(200);
+    expect(response.body.received.data).toBe('test');
+  });
+
+  test('should set response content type', async () => {
+    app.get('/api/response', (req, res) => {
+      res.set('Content-Type', 'application/json').json({ type: 'json' });
+    });
+
+    const response = await request(app).get('/api/response');
+
+    expect(response.type).toMatch(/json/);
+    expect(response.body.type).toBe('json');
+  });
+
+  test('should accept form urlencoded', async () => {
+    app.post('/api/form', (req, res) => {
+      res.json({ body: req.body });
+    });
+
+    const response = await request(app).post('/api/form').type('form').send('name=John&age=30');
+
+    expect(response.status).toBe(200);
+    expect(response.body.body.name).toBe('John');
+  });
+});

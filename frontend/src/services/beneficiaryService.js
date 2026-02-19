@@ -1,4 +1,4 @@
-import api from './api';
+import api from '../utils/api';
 
 /**
  * خدمة إدارة المستفيدين
@@ -199,7 +199,11 @@ const beneficiaryService = {
    */
   exportBeneficiaries: async (format, filters = {}) => {
     try {
-      const response = await api.post(`/beneficiaries/export/${format}`, { filters }, { responseType: 'blob' });
+      const response = await api.post(
+        `/beneficiaries/export/${format}`,
+        { filters },
+        { responseType: 'blob' }
+      );
       return response.data;
     } catch (error) {
       console.error(`Error exporting beneficiaries to ${format}:`, error);

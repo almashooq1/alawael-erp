@@ -4,15 +4,30 @@
  * ===================================================================
  */
 
-const ExcelJS = require('exceljs');
+let ExcelJS;
+try {
+  ExcelJS = require('exceljs');
+} catch (e) {
+  ExcelJS = null;
+}
 const path = require('path');
 const fs = require('fs');
 
 class ExcelGenerator {
   /**
+   * Check if ExcelJS is available
+   */
+  static _checkExcelJS() {
+    if (!ExcelJS) {
+      throw new Error('ExcelJS module is not available. Excel export functionality is disabled.');
+    }
+  }
+
+  /**
    * تصدير الحسابات إلى Excel
    */
   static async exportAccounts(accounts) {
+    this._checkExcelJS();
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Accounts');
 
@@ -55,6 +70,7 @@ class ExcelGenerator {
    * تصدير قيود اليومية إلى Excel
    */
   static async exportJournalEntries(entries) {
+    this._checkExcelJS();
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Journal Entries');
 
@@ -107,6 +123,7 @@ class ExcelGenerator {
    * تصدير الفواتير إلى Excel
    */
   static async exportInvoices(invoices) {
+    this._checkExcelJS();
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Invoices');
 
@@ -159,6 +176,7 @@ class ExcelGenerator {
    * تصدير تقرير مالي إلى Excel
    */
   static async exportFinancialReport(reportData, reportType) {
+    this._checkExcelJS();
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet(reportType);
 
@@ -301,6 +319,7 @@ class ExcelGenerator {
    * تصدير نموذج استيراد الحسابات
    */
   static async exportAccountsTemplate() {
+    this._checkExcelJS();
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Accounts Template');
 

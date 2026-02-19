@@ -190,7 +190,7 @@ export const AlertPanel: React.FC<AlertPanelProps> = ({
         </button>
       )}
 
-      <style jsx>{`
+      <style>{`
         @keyframes slideIn {
           from {
             opacity: 0;

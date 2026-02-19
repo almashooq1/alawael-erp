@@ -1,9 +1,8 @@
 const mongoose = require('mongoose');
 const MessagingServiceClass = require('../services/messaging.service');
 const messagingService = new MessagingServiceClass();
-const Message = require('../models/message.model');
-const Conversation = require('../models/conversation.model');
 
+// Mock with factory function
 jest.mock('../models/message.model');
 jest.mock('../models/conversation.model');
 jest.mock('../config/socket.config', () => ({
@@ -13,21 +12,26 @@ jest.mock('../config/socket.config', () => ({
   }),
 }));
 
-describe('Messaging Service - Phase 3 Verification', () => {
-  let mockSenderId, mockConversationId;
+const Message = require('../models/message.model');
+const Conversation = require('../models/conversation.model');
 
-  beforeAll(() => {
+describe('Messaging Service - Phase 3 Verification', () => {
+  let mockSenderId, mockConversationId, mockConversation;
+
+  beforeEach(() => {
     mockSenderId = new mongoose.Types.ObjectId();
     mockConversationId = new mongoose.Types.ObjectId();
 
-    Conversation.findById.mockResolvedValue({
+    mockConversation = {
       _id: mockConversationId,
       participants: [{ user: mockSenderId, isActive: true }],
-      // Mock instance method
       updateLastMessage: jest.fn().mockResolvedValue(true),
-    });
+    };
 
-    Message.create.mockResolvedValue({
+    // Set up the mocks for each test
+    Conversation.findById = jest.fn().mockResolvedValue(mockConversation);
+
+    Message.create = jest.fn().mockResolvedValue({
       _id: new mongoose.Types.ObjectId(),
       content: { text: 'Hello Phase 3' },
       sender: mockSenderId,

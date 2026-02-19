@@ -1,0 +1,63 @@
+# Finance Module Docker Configuration
+# Production-ready container setup for finance system
+#
+# Build: docker build -f Dockerfile.finance -t finance-module:1.0.0 .
+# Run: docker run -p 3010:3010 finance-module:1.0.0
+
+# Base image
+FROM node:18-alpine AS builder
+
+# Set working directory
+WORKDIR /app/finance-module
+
+# Copy package files
+COPY finance-module/backend/package.json package.json
+COPY finance-module/backend/package-lock.json package-lock.json
+
+# Install production dependencies
+RUN npm ci --only=production && \
+    npm cache clean --force
+
+# Copy source code
+COPY finance-module/backend/src ./src
+COPY finance-module/backend/.env.example .env.example
+
+# ================================================================
+# Production Stage
+# ================================================================
+FROM node:18-alpine
+
+# Install dumb-init for proper signal handling
+RUN apk add --no-cache dumb-init
+
+WORKDIR /app/finance-module
+
+# Copy from builder
+COPY --from=builder /app/finance-module/node_modules ./node_modules
+COPY --from=builder /app/finance-module/src ./src
+COPY --from=builder /app/finance-module/.env.example .env.example
+
+# Copy environment file (can be overridden at runtime)
+COPY finance-module/.env .env 2>/dev/null || true
+
+# Create app user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001
+
+# Change ownership
+RUN chown -R nodejs:nodejs /app/finance-module
+
+USER nodejs
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD node -e "require('http').get('http://localhost:3010/api/finance/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
+
+# Expose port
+EXPOSE 3010
+
+# Use dumb-init to handle signals properly
+ENTRYPOINT ["dumb-init", "--"]
+
+# Start application
+CMD ["node", "src/server.js"]

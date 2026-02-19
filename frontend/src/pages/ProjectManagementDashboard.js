@@ -1,5 +1,5 @@
 // Phase 4: Project Management Dashboard
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Container,
   Typography,
@@ -20,13 +20,12 @@ import {
   FormControl,
   InputLabel,
 } from '@mui/material';
-import { Add as AddIcon, Assignment as TaskIcon, MoreVert as MoreVertIcon } from '@mui/icons-material';
+import { Add as AddIcon, Assignment as TaskIcon } from '@mui/icons-material';
 import projectManagementService from '../services/projectManagement.service';
 
 const ProjectManagementDashboard = () => {
   const [projects, setProjects] = useState([]);
   const [selectedProject, setSelectedProject] = useState(null);
-  const [loading, setLoading] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
   const [openTaskDialog, setOpenTaskDialog] = useState(false);
   const [tasks, setTasks] = useState({ todo: [], in_progress: [], review: [], done: [] });
@@ -34,15 +33,15 @@ const ProjectManagementDashboard = () => {
   // New Project Form State
   const [newProject, setNewProject] = useState({ name: '', description: '', priority: 'medium' });
   // New Task Form State
-  const [newTask, setNewTask] = useState({ title: '', description: '', priority: 'medium', status: 'todo' });
+  const [newTask, setNewTask] = useState({
+    title: '',
+    description: '',
+    priority: 'medium',
+    status: 'todo',
+  });
 
-  useEffect(() => {
-    loadProjects();
-  }, []);
-
-  const loadProjects = async () => {
+  const loadProjects = useCallback(async () => {
     try {
-      setLoading(true);
       const data = await projectManagementService.getProjects();
       setProjects(data.data);
       if (data.data.length > 0 && !selectedProject) {
@@ -50,10 +49,12 @@ const ProjectManagementDashboard = () => {
       }
     } catch (error) {
       console.error(error);
-    } finally {
-      setLoading(false);
     }
-  };
+  }, [selectedProject]);
+
+  useEffect(() => {
+    loadProjects();
+  }, [loadProjects]);
 
   const selectProject = async project => {
     setSelectedProject(project);
@@ -122,7 +123,11 @@ const ProjectManagementDashboard = () => {
         borderTop: `4px solid ${color}`,
       }}
     >
-      <Typography variant="h6" gutterBottom sx={{ display: 'flex', justifyContent: 'space-between' }}>
+      <Typography
+        variant="h6"
+        gutterBottom
+        sx={{ display: 'flex', justifyContent: 'space-between' }}
+      >
         {title}
         <Chip label={items.length} size="small" />
       </Typography>
@@ -135,7 +140,12 @@ const ProjectManagementDashboard = () => {
                 {task.description}
               </Typography>
               <Box sx={{ mt: 1, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                <Chip label={task.priority} size="small" color={getPrioColor(task.priority)} variant="outlined" />
+                <Chip
+                  label={task.priority}
+                  size="small"
+                  color={getPrioColor(task.priority)}
+                  variant="outlined"
+                />
 
                 {/* Actions Menu or Buttons */}
                 <Box sx={{ flexGrow: 1 }} />
@@ -220,7 +230,11 @@ const ProjectManagementDashboard = () => {
                 <Typography variant="h5" gutterBottom>
                   {selectedProject.name} - Board
                 </Typography>
-                <Button variant="outlined" startIcon={<TaskIcon />} onClick={() => setOpenTaskDialog(true)}>
+                <Button
+                  variant="outlined"
+                  startIcon={<TaskIcon />}
+                  onClick={() => setOpenTaskDialog(true)}
+                >
                   Add Task
                 </Button>
               </Box>
@@ -229,10 +243,20 @@ const ProjectManagementDashboard = () => {
                   <KanbanColumn title="To Do" status="todo" items={tasks.todo} color="#f44336" />
                 </Grid>
                 <Grid item xs={12} md={3}>
-                  <KanbanColumn title="In Progress" status="in_progress" items={tasks.in_progress} color="#ffa726" />
+                  <KanbanColumn
+                    title="In Progress"
+                    status="in_progress"
+                    items={tasks.in_progress}
+                    color="#ffa726"
+                  />
                 </Grid>
                 <Grid item xs={12} md={3}>
-                  <KanbanColumn title="Review" status="review" items={tasks.review} color="#29b6f6" />
+                  <KanbanColumn
+                    title="Review"
+                    status="review"
+                    items={tasks.review}
+                    color="#29b6f6"
+                  />
                 </Grid>
                 <Grid item xs={12} md={3}>
                   <KanbanColumn title="Done" status="done" items={tasks.done} color="#66bb6a" />
@@ -270,7 +294,11 @@ const ProjectManagementDashboard = () => {
           />
           <FormControl fullWidth margin="dense">
             <InputLabel>Priority</InputLabel>
-            <Select value={newProject.priority} label="Priority" onChange={e => setNewProject({ ...newProject, priority: e.target.value })}>
+            <Select
+              value={newProject.priority}
+              label="Priority"
+              onChange={e => setNewProject({ ...newProject, priority: e.target.value })}
+            >
               <MenuItem value="low">Low</MenuItem>
               <MenuItem value="medium">Medium</MenuItem>
               <MenuItem value="high">High</MenuItem>
@@ -308,7 +336,11 @@ const ProjectManagementDashboard = () => {
           />
           <FormControl fullWidth margin="dense">
             <InputLabel>Priority</InputLabel>
-            <Select value={newTask.priority} label="Priority" onChange={e => setNewTask({ ...newTask, priority: e.target.value })}>
+            <Select
+              value={newTask.priority}
+              label="Priority"
+              onChange={e => setNewTask({ ...newTask, priority: e.target.value })}
+            >
               <MenuItem value="low">Low</MenuItem>
               <MenuItem value="medium">Medium</MenuItem>
               <MenuItem value="high">High</MenuItem>

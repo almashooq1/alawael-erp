@@ -1,0 +1,424 @@
+{
+  "documentation": {
+    "title": "نموذج تقرير الاختبارات الشامل - Test Report Schema",
+    "version": "1.0.0",
+    "lastUpdated": "2026-02-18",
+    "description": "هيكل البيانات الكامل للتقرير الناتج من master-report.json"
+  },
+  "exampleReport": {
+    "timestamp": "2026-02-18T10:30:45.000Z",
+    "environment": {
+      "nodeVersion": "v16.13.0",
+      "platform": "linux",
+      "arch": "x64",
+      "cpus": 4,
+      "description": "معلومات بيئة التشغيل"
+    },
+    "testSuites": {
+      "security": {
+        "description": "نتائج اختبارات الأمان - Security Audit",
+        "status": "PASSED",
+        "passed": 10,
+        "failed": 0,
+        "warnings": 0,
+        "details": {
+          "noSQLInjection": "Protected",
+          "xssVulnerability": "Protected",
+          "brokenAuthentication": "Protected",
+          "csrfProtection": "Protected",
+          "rateLimiting": "Configured",
+          "sensitiveDataExposure": "Protected",
+          "securityHeaders": "Present",
+          "accessControl": "Enforced",
+          "encryption": "Enabled",
+          "apiDocumentation": "Available"
+        }
+      },
+      "vulnerability": {
+        "description": "نتائج فحص الثغرات - Vulnerability Scanner",
+        "status": "HAS_ISSUES",
+        "critical": 2,
+        "high": 5,
+        "medium": 8,
+        "low": 3,
+        "info": 10,
+        "recommendations": [
+          "معالجة الثغرات الحرجة فوراً",
+          "تطبيق التحديثات الأمنية",
+          "تفعيل المراقبة المستمرة"
+        ]
+      },
+      "resources": {
+        "description": "نتائج قياس موارد النظام - Resource Profiler",
+        "status": "COMPLETED",
+        "testsRun": 8,
+        "results": [
+          {
+            "test": "String Processing",
+            "duration": "245.50ms",
+            "throughput": "408163 ops/sec",
+            "memoryUsed": "12MB",
+            "status": "PASSED"
+          },
+          {
+            "test": "JSON Processing",
+            "duration": "123.45ms",
+            "throughput": "8101 ops/sec",
+            "memoryUsed": "5MB",
+            "status": "PASSED"
+          },
+          {
+            "test": "Array Processing",
+            "duration": "567.89ms",
+            "throughput": "1762 items/sec",
+            "memoryUsed": "25MB",
+            "status": "PASSED"
+          },
+          {
+            "test": "Date Processing",
+            "duration": "234.56ms",
+            "throughput": "4262 ops/sec",
+            "memoryUsed": "3MB",
+            "status": "PASSED"
+          },
+          {
+            "test": "Math Processing",
+            "duration": "1234.56ms",
+            "throughput": "8103 ops/sec",
+            "memoryUsed": "1MB",
+            "status": "PASSED"
+          },
+          {
+            "test": "Encryption",
+            "duration": "456.78ms",
+            "throughput": "2191 ops/sec",
+            "memoryUsed": "8MB",
+            "status": "PASSED"
+          },
+          {
+            "test": "Regex Processing",
+            "duration": "345.67ms",
+            "throughput": "289444 ops/sec",
+            "memoryUsed": "2MB",
+            "status": "PASSED"
+          },
+          {
+            "test": "Memory Leak Detection",
+            "duration": "123.45ms",
+            "peakMemory": "250MB",
+            "finalMemory": "100MB",
+            "leaked": "5MB",
+            "status": "OK"
+          }
+        ]
+      },
+      "integration": {
+        "description": "نتائج اختبار التكامل - Integration Testing",
+        "status": "PASSED",
+        "passed": 25,
+        "failed": 0,
+        "warnings": 2,
+        "categories": {
+          "browserCompatibility": {
+            "Chrome": "Compatible",
+            "Safari": "Compatible",
+            "Firefox": "Compatible",
+            "iOS": "Compatible",
+            "Android": "Compatible"
+          },
+          "nodeVersions": {
+            "minimum": "v14.0.0",
+            "current": "v16.13.0",
+            "status": "OK"
+          },
+          "frontendBackend": {
+            "apiFormat": "PASSED",
+            "corsHeaders": "PASSED",
+            "contentType": "PASSED",
+            "errorHandling": "PASSED"
+          },
+          "backendDatabase": {
+            "mongoConnection": "Connected",
+            "redisConnection": "Connected",
+            "writeTest": "PASSED",
+            "readTest": "PASSED"
+          },
+          "externalServices": [
+            {
+              "service": "SMS (Twilio)",
+              "status": "Integration working"
+            },
+            {
+              "service": "Email (SendGrid)",
+              "status": "Integration working"
+            },
+            {
+              "service": "Maps (Google Maps)",
+              "status": "Integration working"
+            }
+          ]
+        }
+      },
+      "bigdata": {
+        "description": "نتائج اختبار الأداء مع البيانات الضخمة - Big Data Performance",
+        "status": "COMPLETED",
+        "testsRun": 10,
+        "performanceTargets": {
+          "queryResponse": "1000ms",
+          "bulkOperations": "5000ms",
+          "aggregation": "2000ms",
+          "search": "1500ms"
+        },
+        "results": [
+          {
+            "test": "Bulk Insert Performance",
+            "sizes": [
+              {
+                "size": 100,
+                "duration": "245.12ms",
+                "throughput": "408 items/sec",
+                "passed": true
+              },
+              {
+                "size": 1000,
+                "duration": "2345.67ms",
+                "throughput": "426 items/sec",
+                "passed": true
+              },
+              {
+                "size": 10000,
+                "duration": "21234.56ms",
+                "throughput": "471 items/sec",
+                "passed": true
+              }
+            ]
+          },
+          {
+            "test": "Search Performance",
+            "queries": [
+              {
+                "type": "location",
+                "duration": "342.15ms",
+                "resultsCount": 1250,
+                "passed": true
+              },
+              {
+                "type": "speed",
+                "duration": "567.89ms",
+                "resultsCount": 3450,
+                "passed": true
+              },
+              {
+                "type": "time",
+                "duration": "234.56ms",
+                "resultsCount": 5600,
+                "passed": true
+              }
+            ]
+          },
+          {
+            "test": "Aggregation Performance",
+            "operations": [
+              {
+                "name": "Average Speed by Vehicle",
+                "duration": "876.54ms",
+                "dataPoints": 1502,
+                "passed": true
+              },
+              {
+                "name": "Distance Traveled",
+                "duration": "543.21ms",
+                "dataPoints": 980,
+                "passed": true
+              },
+              {
+                "name": "Fleet Heatmap",
+                "duration": "1234.56ms",
+                "dataPoints": 2340,
+                "passed": true
+              }
+            ]
+          }
+        ]
+      },
+      "e2e": {
+        "description": "نتائج اختبارات النهاية إلى النهاية - End-to-End Testing",
+        "status": "PASSED",
+        "passed": 5,
+        "failed": 0,
+        "totalDuration": 45000,
+        "scenarios": [
+          {
+            "name": "مستخدم جديد ينهي رحلة",
+            "status": "PASSED",
+            "duration": "8234.56ms",
+            "steps": [
+              "✓ التسجيل",
+              "✓ تحديث البيانات الشخصية",
+              "✓ بدء الرحلة",
+              "✓ تحديثات الموقع (5 نقاط)",
+              "✓ إنهاء الرحلة",
+              "✓ عرض الإحصائيات"
+            ]
+          },
+          {
+            "name": "مدير أسطول يراقب المركبات",
+            "status": "PASSED",
+            "duration": "7123.45ms",
+            "steps": [
+              "✓ تسجيل الدخول",
+              "✓ عرض لوحة التحكم",
+              "✓ عرض المركبات النشطة",
+              "✓ عرض الخريطة الحية",
+              "✓ عرض التقارير",
+              "✓ عرض التنبيهات"
+            ]
+          },
+          {
+            "name": "مسؤول يدير النظام",
+            "status": "PASSED",
+            "duration": "6345.67ms",
+            "steps": [
+              "✓ تسجيل دخول المسؤول",
+              "✓ عرض المستخدمين",
+              "✓ إنشاء مستخدم جديد",
+              "✓ عرض السجلات",
+              "✓ تحديث الإعدادات",
+              "✓ فحص صحة النظام"
+            ]
+          },
+          {
+            "name": "التعامل مع حالات الطوارئ",
+            "status": "PASSED",
+            "duration": "5678.90ms",
+            "steps": [
+              "✓ برفع إنذار حادث",
+              "✓ إرسال تنبيه للمدير",
+              "✓ طلب سيارة إسعاف",
+              "✓ تقديم تقرير",
+              "✓ متابعة حالة الحوادث"
+            ]
+          },
+          {
+            "name": "الصيانة الدورية والتنبؤات",
+            "status": "PASSED",
+            "duration": "4567.23ms",
+            "steps": [
+              "✓ جدولة صيانة",
+              "✓ التنبؤ بالصيانة",
+              "✓ حساب التكاليف",
+              "✓ توفر الميكانيكيين",
+              "✓ إنشاء أوامر عمل"
+            ]
+          }
+        ]
+      }
+    },
+    "summary": {
+      "totalTestSuites": 6,
+      "passed": 5,
+      "failed": 0,
+      "hasIssues": 1,
+      "totalDuration": 45000,
+      "overallStatus": "READY_FOR_PRODUCTION",
+      "recommendations": [
+        "معالجة الثغرات المحددة",
+        "تحسين الأداء في بعض المناطق",
+        "تفعيل المراقبة المستمرة",
+        "إجراء اختبارات دورية"
+      ],
+      "nextSteps": [
+        "نشر التحديثات الأمنية",
+        "مراقبة الأداء في الإنتاج",
+        "جدولة الاختبارات المنتظمة",
+        "توثيق النتائج"
+      ]
+    },
+    "additionalMetrics": {
+      "codeQuality": {
+        "coverage": "85%",
+        "status": "Good"
+      },
+      "performance": {
+        "responseTime": "234ms",
+        "throughput": "2500 req/s",
+        "status": "Excellent"
+      },
+      "security": {
+        "criticalVulnerabilities": 0,
+        "highVulnerabilities": 2,
+        "status": "Good"
+      },
+      "reliability": {
+        "uptime": "99.9%",
+        "failureRate": "0.1%",
+        "status": "Excellent"
+      }
+    },
+    "exportFormats": {
+      "json": {
+        "file": "master-report.json",
+        "usage": "للتحليل البرمجي والتكامل",
+        "example": "cat test-reports/master-report.json | jq ."
+      },
+      "html": {
+        "file": "report.html",
+        "usage": "عرض في المتصفح",
+        "example": "open test-reports/report.html"
+      },
+      "markdown": {
+        "file": "report.md",
+        "usage": "للتوثيق والمشاركة",
+        "example": "cat test-reports/report.md"
+      }
+    }
+  },
+  "fieldsExplanation": {
+    "timestamp": "وقت إجراء الاختبارات",
+    "environment.nodeVersion": "إصدار Node.js المستخدم",
+    "environment.platform": "منصة التشغيل (linux, darwin, win32)",
+    "environment.arch": "معمارية المعالج (x64, x32, arm64)",
+    "environment.cpus": "عدد أنوية المعالج",
+    "testSuites": "مجموعات الاختبارات المختلفة",
+    "testSuites.*.status": "حالة الاختبار (PASSED, FAILED, HAS_ISSUES, COMPLETED)",
+    "testSuites.*.passed": "عدد الاختبارات الناجحة",
+    "testSuites.*.failed": "عدد الاختبارات الفاشلة",
+    "testSuites.*.warnings": "عدد التحذيرات",
+    "totalDuration": "إجمالي وقت تشغيل الاختبارات بالميلي ثانية",
+    "summary.overallStatus": "الحالة العامة للنظام",
+    "exportFormats": "صيغ التقارير المتاحة"
+  },
+  "usageExamples": {
+    "readJson": {
+      "command": "cat test-reports/master-report.json | jq .",
+      "description": "عرض التقرير بصيغة منسقة"
+    },
+    "filterResults": {
+      "command": "cat test-reports/master-report.json | jq '.testSuites.security'",
+      "description": "عرض نتائج اختبارات الأمان فقط"
+    },
+    "checkVulnerabilities": {
+      "command": "cat test-reports/master-report.json | jq '.testSuites.vulnerability.critical'",
+      "description": "عدد الثغرات الحرجة"
+    },
+    "exportToCSV": {
+      "command": "node scripts/json-to-csv.js < test-reports/master-report.json",
+      "description": "تصدير النتائج إلى CSV"
+    }
+  },
+  "bestPractices": [
+    "احفظ نسخة من التقرير قبل كل تحديث",
+    "قارن نتائج الاختبارات على الوقت",
+    "شارk النتائج مع الفريق",
+    "تصرف على الفور عند وجود ثغرات حرجة",
+    "وثّق أي مشاكل وحلولها",
+    "جدول الاختبارات بشكل دوري"
+  ],
+  "updateHistory": [
+    {
+      "version": "1.0.0",
+      "date": "2026-02-18",
+      "changes": "الإصدار الأول"
+    }
+  ]
+}

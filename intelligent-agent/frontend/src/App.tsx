@@ -6,6 +6,8 @@ import AIProcessReports from './components/AIProcessReports';
 import AIAdvancedDashboard from './components/AIAdvancedDashboard';
 import AIDataVisualizations from './components/AIDataVisualizations';
 import UnifiedAccountingAIDashboard from './components/UnifiedAccountingAIDashboard';
+import SaudiComplianceDashboard from './components/SaudiComplianceDashboard';
+import EmployeeProfileDashboard from './components/EmployeeProfileDashboard';
 import AIClient from './services/AIClient';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import ThemeToggle from './components/ThemeToggle';
@@ -20,7 +22,9 @@ type PageId =
   | 'reports'
   | 'advanced'
   | 'visualizations'
-  | 'unified';
+  | 'unified'
+  | 'saudi'
+  | 'employee-profile';
 
 interface NavItem {
   id: PageId;
@@ -53,6 +57,8 @@ const AppContent: React.FC = () => {
   const navItems: NavItem[] = [
     { id: 'main', label: 'الرئيسية', icon: '🏠' },
     { id: 'unified', label: 'لوحة موحدة', icon: '🧠' },
+    { id: 'saudi', label: 'لوحة السعودية', icon: '🇸🇦' },
+    { id: 'employee-profile', label: 'ملف الموظف', icon: '🧾' },
     { id: 'recommendations', label: 'التوصيات', icon: '💡' },
     { id: 'metrics', label: 'المقاييس', icon: '📊' },
     { id: 'reports', label: 'التقارير', icon: '📋' },
@@ -66,6 +72,10 @@ const AppContent: React.FC = () => {
         return <AIStreamingDashboard />;
       case 'unified':
         return <UnifiedAccountingAIDashboard />;
+      case 'saudi':
+        return <SaudiComplianceDashboard />;
+      case 'employee-profile':
+        return <EmployeeProfileDashboard />;
       case 'recommendations':
         return <AIRecommendations />;
       case 'metrics':
@@ -125,8 +135,8 @@ const AppContent: React.FC = () => {
                         systemStatus === 'online'
                           ? theme.colors.success.main
                           : systemStatus === 'offline'
-                          ? theme.colors.error.main
-                          : theme.colors.warning.main,
+                            ? theme.colors.error.main
+                            : theme.colors.warning.main,
                     }}
                   ></span>
                   <span
@@ -136,15 +146,15 @@ const AppContent: React.FC = () => {
                         systemStatus === 'online'
                           ? theme.colors.success.main
                           : systemStatus === 'offline'
-                          ? theme.colors.error.main
-                          : theme.colors.warning.main,
+                            ? theme.colors.error.main
+                            : theme.colors.warning.main,
                     }}
                   >
                     {systemStatus === 'online'
                       ? 'النظام نشط'
                       : systemStatus === 'offline'
-                      ? 'غير متصل'
-                      : 'خطأ في الاتصال'}
+                        ? 'غير متصل'
+                        : 'خطأ في الاتصال'}
                   </span>
                 </div>
                 <p className="text-xs mt-1" style={{ color: theme.colors.text.disabled }}>

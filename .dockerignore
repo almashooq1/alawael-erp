@@ -1,9 +1,72 @@
-node_modules
-npm-debug.log
+# Git
 .git
 .gitignore
+.gitattributes
+
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+.npm
+package-lock.json.bak
+
+# Environment
 .env
-build
-dist
-coverage
+.env.local
+.env.development
+.env.production
+.env.test
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+.eclipse
+
+# Build
+dist/
+build/
+.next
+out/
+coverage/
+.cache/
+
+# Testing
 __tests__
+*.test.js
+*.spec.js
+jest.config.js
+cypress/
+.nyc_output/
+
+# Documentation
+docs/
+README.md
+CHANGELOG.md
+*.md
+
+# CI/CD
+.github
+.gitlab-ci.yml
+.travis.yml
+Jenkinsfile
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Development
+logs/
+*.log
+tmp/
+temp/
+
+# OS
+Thumbs.db
+.DS_Store

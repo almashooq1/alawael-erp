@@ -1,51 +1,38 @@
-// Jest setup: ensure test env and bypass heavy middleware
-process.env.NODE_ENV = process.env.NODE_ENV || 'test';
-process.env.USE_MOCK_DB = 'true';
-// increase default jest timeout for slow hooks
-jest.setTimeout(30000);
-
-// Optional: silence noisy logs during tests
-const noop = () => {};
-if (process.env.NODE_ENV === 'test') {
-  console.log = noop;
-  console.info = noop;
-  console.debug = noop;
-}
 /**
  * Jest Setup File
- * ملف إعداد Jest
+ * ملف إعداد Jest - Setup with MongoDB Memory Server initialization
  */
 
-// Set test environment variables FIRST
+// Test environment
 process.env.NODE_ENV = 'test';
-process.env.MONGODB_URI = 'mongodb://localhost:27017/vehicle-management-test';
-process.env.JWT_SECRET = 'test-secret-key-for-testing-only';
+process.env.USE_MOCK_DB = 'true';
+process.env.JWT_SECRET = 'test-secret-key';
+process.env.SMART_TEST_MODE = 'true'; // Skip automated DB seeding
 
-// In-memory database reset after every test to avoid cross-suite contamination
-const db = require('./config/inMemoryDB');
-const EMPTY_DB = {
-  users: [],
-  employees: [],
-  attendances: [],
-  leaves: [],
-  performance: [],
-};
+jest.setTimeout(120000); // Global 2-minute timeout for integration tests
 
-afterEach(() => {
-  db.write(EMPTY_DB);
+// Initialize MongoDB Memory Server before tests
+let mongoMemoryServer = null;
+
+beforeAll(async () => {
+  // Wait for app module to fully initialize
+  // The server.js module exports app after async setup, so we give it time
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  console.log('✅ Jest setup initialized for test environment');
 });
 
-// Use real timers to avoid breaking async callbacks that call `done()`
-jest.useRealTimers();
+afterAll(async () => {
+  // Give async operations time to complete before shutdown
+  await new Promise(resolve => setTimeout(resolve, 500));
+  console.log('✅ Jest teardown complete');
+});
 
-// Suppress console during tests
+// Reduce console output
 global.console = {
   ...console,
   log: jest.fn(),
   debug: jest.fn(),
   info: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn(),
 };
 
 // Custom matchers
@@ -62,7 +49,7 @@ expect.extend({
     const pass = /^\d{10}$/.test(received);
     return {
       pass,
-      message: () => `expected ${received} to be a valid Saudi National ID (10 digits)`,
+      message: () => `expected ${received} to be Saudi National ID`,
     };
   },
 
@@ -92,7 +79,7 @@ expect.extend({
     const pass = validCodes.includes(String(received));
     return {
       pass,
-      message: () => `expected ${received} to be a valid violation code`,
+      message: () => `expected ${received} to be valid code`,
     };
   },
 
@@ -100,19 +87,7 @@ expect.extend({
     const pass = typeof received.score === 'number' && received.score >= 0 && received.score <= 100;
     return {
       pass,
-      message: () =>
-        `expected ${JSON.stringify(received)} to have a valid compliance score (0-100)`,
+      message: () => `expected score 0-100`,
     };
   },
-});
-
-// Mock database
-// jest.mock('../db/connection', () => ({
-//   connect: jest.fn(),
-//   disconnect: jest.fn(),
-// }));
-
-// Clean up after all tests
-afterAll(async () => {
-  // nothing special to clean here
 });

@@ -14,6 +14,12 @@ import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 
+// دعم جلب الهوية المؤسسية من OrgBrandingContext
+let brandingCache = null;
+export function setBrandingForExport(branding) {
+  brandingCache = branding;
+}
+
 // Add Arabic font support for PDF (you'll need to include the font file)
 // For now, we'll use a workaround with Unicode
 
@@ -30,6 +36,7 @@ class ExportService {
         columns = null, // Array of column definitions: [{ key: 'name', label: 'الاسم', width: 20 }]
         sheetName = 'Sheet1',
         formatting = true,
+        branding = brandingCache,
       } = options;
 
       // Prepare data
@@ -46,6 +53,25 @@ class ExportService {
         });
       }
 
+      // إضافة صف رأس الهوية المؤسسية إذا توفرت
+      let headerRows = [];
+      if (branding && (branding.name || branding.logo)) {
+        const logoCell = branding.logo ? '[شعار]' : '';
+        headerRows.push({
+          ...(columns
+            ? Object.fromEntries(
+                columns.map((col, i) => [
+                  col.label || col.key,
+                  i === 0 ? branding.name || '' : i === 1 && branding.logo ? logoCell : '',
+                ])
+              )
+            : { اسم: branding.name || '', شعار: branding.logo ? '[شعار]' : '' }),
+        });
+      }
+      if (headerRows.length > 0) {
+        exportData = [...headerRows, ...exportData];
+      }
+
       // Create worksheet
       const ws = XLSX.utils.json_to_sheet(exportData, {
         header: columns ? columns.map(col => col.label || col.key) : undefined,
@@ -56,17 +82,21 @@ class ExportService {
         ws['!cols'] = columns.map(col => ({ wch: col.width || 15 }));
       }
 
+      // إضافة صورة الشعار إذا توفرت (ملاحظة: XLSX لا يدعم الصور مباشرة، يمكن دعمها لاحقاً عبر مكتبات متقدمة)
+
       // Add styling for headers (if using xlsx-js-style library)
       if (formatting) {
         const range = XLSX.utils.decode_range(ws['!ref']);
         for (let C = range.s.c; C <= range.e.c; ++C) {
           const cellAddress = XLSX.utils.encode_cell({ r: 0, c: C });
           if (!ws[cellAddress]) continue;
-
-          // Style header cells
+          // Style header cells (أول صف = الهوية، ثاني صف = رؤوس الأعمدة)
           ws[cellAddress].s = {
-            font: { bold: true, color: { rgb: 'FFFFFF' } },
-            fill: { fgColor: { rgb: '667EEA' } },
+            font: {
+              bold: true,
+              color: { rgb: C === 0 && headerRows.length > 0 ? '667EEA' : 'FFFFFF' },
+            },
+            fill: { fgColor: { rgb: C === 0 && headerRows.length > 0 ? 'F8F9FF' : '667EEA' } },
             alignment: { horizontal: 'center', vertical: 'center' },
           };
         }
@@ -104,7 +134,8 @@ class ExportService {
       let csvContent = '';
 
       // Prepare columns
-      const cols = columns || (data.length > 0 ? Object.keys(data[0]).map(key => ({ key, label: key })) : []);
+      const cols =
+        columns || (data.length > 0 ? Object.keys(data[0]).map(key => ({ key, label: key })) : []);
 
       // Add headers
       if (includeHeaders) {
@@ -116,7 +147,8 @@ class ExportService {
         const values = cols.map(col => {
           const value = row[col.key];
           // Escape quotes and wrap in quotes
-          const escaped = value !== null && value !== undefined ? String(value).replace(/"/g, '""') : '';
+          const escaped =
+            value !== null && value !== undefined ? String(value).replace(/"/g, '""') : '';
           return `"${escaped}"`;
         });
         csvContent += values.join(delimiter) + '\n';
@@ -151,6 +183,7 @@ class ExportService {
         pageSize = 'a4',
         fontSize = 10,
         includeDate = true,
+        branding = brandingCache,
       } = options;
 
       // Create PDF document
@@ -164,23 +197,44 @@ class ExportService {
       doc.setProperties({
         title: title,
         subject: 'Exported Data',
-        author: 'System',
+        author: branding?.name || 'System',
         creator: 'Export Service',
       });
 
+      // Add org branding (logo + name) at the top
+      let y = 12;
+      if (branding && (branding.logo || branding.name)) {
+        if (branding.logo) {
+          try {
+            // إضافة الشعار (base64 فقط)
+            doc.addImage(branding.logo, 'PNG', 14, y, 18, 18);
+          } catch {}
+        }
+        if (branding.name) {
+          doc.setFontSize(14);
+          doc.setTextColor(102, 126, 234);
+          doc.text(branding.name, branding.logo ? 36 : 14, y + 10);
+        }
+        y += 18;
+      }
+
       // Add title
       doc.setFontSize(16);
-      doc.text(title, 14, 15);
+      doc.setTextColor(0, 0, 0);
+      doc.text(title, 14, y + 6);
+      y += 12;
 
       // Add date if requested
       if (includeDate) {
         doc.setFontSize(10);
         const dateStr = new Date().toLocaleDateString('ar-SA');
-        doc.text(`التاريخ: ${dateStr}`, 14, 22);
+        doc.text(`التاريخ: ${dateStr}`, 14, y + 6);
+        y += 8;
       }
 
       // Prepare columns
-      const cols = columns || (data.length > 0 ? Object.keys(data[0]).map(key => ({ key, label: key })) : []);
+      const cols =
+        columns || (data.length > 0 ? Object.keys(data[0]).map(key => ({ key, label: key })) : []);
 
       // Prepare table data
       const tableColumns = cols.map(col => col.label || col.key);
@@ -190,7 +244,7 @@ class ExportService {
       doc.autoTable({
         head: [tableColumns],
         body: tableRows,
-        startY: includeDate ? 28 : 22,
+        startY: y + 4,
         styles: {
           fontSize: fontSize,
           cellPadding: 3,
@@ -206,7 +260,7 @@ class ExportService {
         alternateRowStyles: {
           fillColor: [248, 249, 255],
         },
-        margin: { top: 30, right: 14, bottom: 14, left: 14 },
+        margin: { top: 14, right: 14, bottom: 14, left: 14 },
         theme: 'grid',
       });
 
@@ -215,9 +269,14 @@ class ExportService {
       for (let i = 1; i <= pageCount; i++) {
         doc.setPage(i);
         doc.setFontSize(8);
-        doc.text(`صفحة ${i} من ${pageCount}`, doc.internal.pageSize.getWidth() / 2, doc.internal.pageSize.getHeight() - 10, {
-          align: 'center',
-        });
+        doc.text(
+          `صفحة ${i} من ${pageCount}`,
+          doc.internal.pageSize.getWidth() / 2,
+          doc.internal.pageSize.getHeight() - 10,
+          {
+            align: 'center',
+          }
+        );
       }
 
       // Save PDF

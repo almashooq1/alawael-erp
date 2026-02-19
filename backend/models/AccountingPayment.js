@@ -121,7 +121,7 @@ accountingPaymentSchema.virtual('invoiceDetails', {
 });
 
 // Pre-save middleware
-accountingPaymentSchema.pre('save', async function (next) {
+accountingPaymentSchema.pre('save', async function () {
   // إذا كانت الدفعة جديدة ومكتملة، تحديث الفاتورة
   if (this.isNew && this.status === 'completed') {
     try {

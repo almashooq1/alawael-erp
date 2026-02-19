@@ -1,0 +1,318 @@
+.employee-policies {
+  background-color: #f5f5f5;
+  min-height: 100vh;
+  padding: 20px 0;
+}
+
+.employee-policies .container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Header */
+.employee-policies .page-header {
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.employee-policies .page-header h1 {
+  font-size: 32px;
+  color: #333;
+  margin: 0 0 10px 0;
+}
+
+.employee-policies .page-header p {
+  font-size: 16px;
+  color: #666;
+  margin: 0;
+}
+
+/* Statistics */
+.employee-policies .stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.employee-policies .stat-card {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.employee-policies .stat-card.alert {
+  background: #fff5f5;
+  border-left: 4px solid #dc3545;
+}
+
+.employee-policies .stat-number {
+  font-size: 32px;
+  font-weight: bold;
+  color: #007bff;
+  margin-bottom: 10px;
+}
+
+.employee-policies .stat-card.alert .stat-number {
+  color: #dc3545;
+}
+
+.employee-policies .stat-label {
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+}
+
+/* Section */
+.employee-policies .section {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 30px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.employee-policies .section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.employee-policies .section h2 {
+  font-size: 20px;
+  color: #333;
+  margin: 0;
+}
+
+/* Policies List */
+.employee-policies .policies-list {
+  display: grid;
+  gap: 15px;
+}
+
+.employee-policies .policies-list.compact {
+  gap: 10px;
+}
+
+/* Policy Card */
+.employee-policies .policy-card {
+  display: flex;
+  gap: 15px;
+  padding: 15px;
+  border: 2px solid #f0f0f0;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.employee-policies .policy-card:hover {
+  border-color: #007bff;
+  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.1);
+}
+
+.employee-policies .policy-card.acknowledged {
+  background-color: #f0fff4;
+  border-color: #28a745;
+}
+
+/* Checkbox */
+.employee-policies .policy-checkbox {
+  display: flex;
+  align-items: flex-start;
+  margin-top: 8px;
+}
+
+.employee-policies .policy-checkbox input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  margin-right: 0;
+}
+
+/* Check Icon */
+.employee-policies .check-icon {
+  font-size: 24px;
+  color: #28a745;
+  font-weight: bold;
+  min-width: 40px;
+  text-align: center;
+}
+
+/* Policy Content */
+.employee-policies .policy-content {
+  flex: 1;
+}
+
+.employee-policies .policy-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  margin-bottom: 10px;
+  gap: 10px;
+}
+
+.employee-policies .policy-title h3 {
+  font-size: 16px;
+  color: #333;
+  margin: 0;
+}
+
+/* Due Badge */
+.employee-policies .due-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  background-color: #d1ecf1;
+  color: #0c5460;
+}
+
+.employee-policies .due-badge.overdue {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.employee-policies .due-badge.warning {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+/* Description */
+.employee-policies .policy-description {
+  font-size: 14px;
+  color: #666;
+  margin: 8px 0;
+  line-height: 1.5;
+}
+
+/* Meta */
+.employee-policies .policy-meta {
+  display: flex;
+  gap: 20px;
+  font-size: 13px;
+  color: #666;
+  flex-wrap: wrap;
+}
+
+.employee-policies .meta-item {
+  display: flex;
+  gap: 5px;
+}
+
+.employee-policies .meta-item strong {
+  color: #333;
+}
+
+/* Acknowledgement Date */
+.employee-policies .acknowledgement-date {
+  font-size: 12px;
+  color: #999;
+  margin-top: 10px;
+}
+
+/* Loading */
+.employee-policies .loading {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+  font-size: 16px;
+}
+
+/* No Data */
+.employee-policies .no-data {
+  text-align: center;
+  padding: 40px;
+  color: #999;
+  font-size: 16px;
+  background-color: #f9f9f9;
+  border-radius: 6px;
+}
+
+/* Buttons */
+.employee-policies .btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.employee-policies .btn-success {
+  background-color: #28a745;
+  color: white;
+}
+
+.employee-policies .btn-success:hover {
+  background-color: #218838;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+}
+
+.employee-policies .btn-secondary {
+  background-color: #6c757d;
+  color: white;
+}
+
+.employee-policies .btn-secondary:hover {
+  background-color: #5a6268;
+}
+
+/* Action Bar */
+.employee-policies .action-bar {
+  display: flex;
+  gap: 10px;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 6px;
+  margin-top: 15px;
+  justify-content: flex-end;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .employee-policies .stats-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .employee-policies .policy-card {
+    flex-direction: column;
+  }
+
+  .employee-policies .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .employee-policies .policy-title {
+    flex-direction: column;
+  }
+
+  .employee-policies .policy-meta {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .employee-policies .action-bar {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .employee-policies .page-header h1 {
+    font-size: 24px;
+  }
+
+  .employee-policies .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}

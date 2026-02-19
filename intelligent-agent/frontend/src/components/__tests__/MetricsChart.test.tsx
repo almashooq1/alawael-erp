@@ -1,7 +1,8 @@
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
+import { screen } from '@testing-library/dom';
 import '@testing-library/jest-dom';
-import { ThemeProvider } from '../contexts/ThemeContext';
-import MetricsChart from '../components/MetricsChart';
+import { ThemeProvider } from '../../contexts/ThemeContext';
+import MetricsChart from '../MetricsChart';
 
 describe('MetricsChart Component', () => {
   const mockData = [
@@ -23,14 +24,10 @@ describe('MetricsChart Component', () => {
   it('renders all chart types', () => {
     const chartTypes = ['area', 'bar', 'line', 'pie'] as const;
 
-    chartTypes.forEach((type) => {
+    chartTypes.forEach(type => {
       const { unmount } = render(
         <ThemeProvider defaultMode="light">
-          <MetricsChart
-            title={`${type} Chart`}
-            data={mockData}
-            type={type}
-          />
+          <MetricsChart title={`${type} Chart`} data={mockData} type={type} />
         </ThemeProvider>
       );
 

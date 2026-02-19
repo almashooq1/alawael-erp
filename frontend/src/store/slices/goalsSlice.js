@@ -1,34 +1,43 @@
 // Redux Slice للأهداف - goalsSlice.js
 
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import api from '../utils/api';
+import api from '../../utils/api';
 
-export const fetchGoals = createAsyncThunk('goals/fetchGoals', async (params, { rejectWithValue }) => {
-  try {
-    const response = await api.get('/goals', { params });
-    return response.data;
-  } catch (error) {
-    return rejectWithValue(error.response?.data?.message);
+export const fetchGoals = createAsyncThunk(
+  'goals/fetchGoals',
+  async (params, { rejectWithValue }) => {
+    try {
+      const response = await api.get('/goals', { params });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message);
+    }
   }
-});
+);
 
-export const fetchGoalById = createAsyncThunk('goals/fetchGoalById', async (id, { rejectWithValue }) => {
-  try {
-    const response = await api.get(`/goals/${id}`);
-    return response.data;
-  } catch (error) {
-    return rejectWithValue(error.response?.data?.message);
+export const fetchGoalById = createAsyncThunk(
+  'goals/fetchGoalById',
+  async (id, { rejectWithValue }) => {
+    try {
+      const response = await api.get(`/goals/${id}`);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message);
+    }
   }
-});
+);
 
-export const createGoal = createAsyncThunk('goals/createGoal', async (goalData, { rejectWithValue }) => {
-  try {
-    const response = await api.post('/goals', goalData);
-    return response.data;
-  } catch (error) {
-    return rejectWithValue(error.response?.data?.message);
+export const createGoal = createAsyncThunk(
+  'goals/createGoal',
+  async (goalData, { rejectWithValue }) => {
+    try {
+      const response = await api.post('/goals', goalData);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message);
+    }
   }
-});
+);
 
 export const updateGoalProgress = createAsyncThunk(
   'goals/updateGoalProgress',
@@ -42,7 +51,7 @@ export const updateGoalProgress = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.response?.data?.message);
     }
-  },
+  }
 );
 
 const initialState = {

@@ -1,55 +1,77 @@
+/**
+ * AuditLog Model
+ * سجل التدقيق الشامل لجميع العمليات والتغييرات
+ */
+
 const mongoose = require('mongoose');
 
-const auditLogSchema = new mongoose.Schema({
-  action: {
-    type: String,
-    required: true,
-    index: true, // e.g., 'CREATE_EMPLOYEE', 'DELETE_INVOICE'
+const auditLogSchema = new mongoose.Schema(
+  {
+    logId: { type: String, required: true, unique: true, index: true },
+    organizationId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'Organization', index: true },
+    
+    user: {
+      userId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User', index: true },
+      username: String,
+      email: String,
+      role: String,
+      ipAddress: String
+    },
+    
+    operation: {
+      type: String,
+      enum: ['create', 'read', 'update', 'delete', 'export', 'import', 'approve', 'reject', 'login', 'logout'],
+      required: true,
+      index: true
+    },
+    
+    entity: {
+      type: String,
+      enum: ['JournalEntry', 'CashFlow', 'RiskAssessment', 'FinancialReport', 'Validation', 'Compliance'],
+      required: true,
+      index: true
+    },
+    
+    entityId: mongoose.Schema.Types.ObjectId,
+    entityName: String,
+    
+    changes: {
+      before: mongoose.Schema.Types.Mixed,
+      after: mongoose.Schema.Types.Mixed,
+      description: String,
+      changedFields: [String]
+    },
+    
+    status: { type: String, enum: ['success', 'failure'], default: 'success', index: true },
+    errorMessage: String,
+    
+    timestamp: { type: Date, default: Date.now, index: true },
+    severity: { type: String, enum: ['low', 'medium', 'high', 'critical'], default: 'medium' },
+    
+    details: { method: String, endpoint: String, duration: Number, affectedRecords: Number },
+    
+    isSensitive: { type: Boolean, default: false },
+    sensitiveFields: [String],
+    
+    complianceRelevant: { type: Boolean, default: false, index: true },
+    complianceType: String
   },
-  module: {
-    type: String,
-    required: true,
-    index: true, // e.g., 'HR', 'FINANCE'
-  },
-  actor: {
-    id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    name: String,
-    email: String,
-    role: String,
-    ip: String,
-  },
-  resource: {
-    id: String,
-    type: String, // e.g., 'Employee', 'Invoice'
-    name: String,
-  },
-  meta: {
-    userAgent: String,
-    method: String,
-    url: String,
-    statusCode: Number,
-  },
-  changes: {
-    before: mongoose.Schema.Types.Mixed,
-    after: mongoose.Schema.Types.Mixed,
-  },
-  status: {
-    type: String,
-    enum: ['SUCCESS', 'FAILURE', 'WARNING'],
-    default: 'SUCCESS',
-  },
-  description: String,
-  timestamp: {
-    type: Date,
-    default: Date.now,
-    expires: 31536000, // Auto-delete after 1 year (TTL)
-  },
-});
+  { timestamps: true, collection: 'audit_logs' }
+);
 
-// Compound index for common queries
-auditLogSchema.index({ module: 1, timestamp: -1 });
-auditLogSchema.index({ 'actor.id': 1, timestamp: -1 });
+auditLogSchema.index({ 'user.userId': 1, timestamp: -1 });
+auditLogSchema.index({ entity: 1, operation: 1 });
 
-const AuditLog = mongoose.model('AuditLog', auditLogSchema);
+auditLogSchema.statics.getUserActions = function(userId, limit = 50) {
+  return this.find({ 'user.userId': userId }).sort({ timestamp: -1 }).limit(limit);
+};
 
-module.exports = AuditLog;
+auditLogSchema.statics.getEntityHistory = function(entityId, entityType) {
+  return this.find({ entityId, entity: entityType }).sort({ timestamp: -1 });
+};
+
+auditLogSchema.statics.getComplianceLog = function(organizationId) {
+  return this.find({ organizationId, complianceRelevant: true }).sort({ timestamp: -1 });
+};
+
+module.exports = mongoose.model('AuditLog', auditLogSchema);

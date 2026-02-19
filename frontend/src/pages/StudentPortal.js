@@ -76,7 +76,9 @@ const StudentPortal = () => {
 
   if (loading || !dashboardData) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+      <Box
+        sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}
+      >
         <LinearProgress sx={{ width: '50%' }} />
       </Box>
     );
@@ -119,9 +121,19 @@ const StudentPortal = () => {
                 مرحباً، {student.name}
               </Typography>
               <Stack direction="row" spacing={2} flexWrap="wrap">
-                <Chip icon={<SchoolIcon />} label={student.grade} sx={{ backgroundColor: 'rgba(255,255,255,0.2)', color: 'white' }} />
-                <Chip label={`القسم: ${student.section}`} sx={{ backgroundColor: 'rgba(255,255,255,0.2)', color: 'white' }} />
-                <Chip label={`الرقم الأكاديمي: ${student.studentId}`} sx={{ backgroundColor: 'rgba(255,255,255,0.2)', color: 'white' }} />
+                <Chip
+                  icon={<SchoolIcon />}
+                  label={student.grade}
+                  sx={{ backgroundColor: 'rgba(255,255,255,0.2)', color: 'white' }}
+                />
+                <Chip
+                  label={`القسم: ${student.section}`}
+                  sx={{ backgroundColor: 'rgba(255,255,255,0.2)', color: 'white' }}
+                />
+                <Chip
+                  label={`الرقم الأكاديمي: ${student.studentId}`}
+                  sx={{ backgroundColor: 'rgba(255,255,255,0.2)', color: 'white' }}
+                />
               </Stack>
             </Grid>
             <Grid item>
@@ -169,7 +181,14 @@ const StudentPortal = () => {
             }}
           >
             <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  mb: 2,
+                }}
+              >
                 <TrophyIcon sx={{ fontSize: 40 }} />
                 <Typography variant="h3" sx={{ fontWeight: 700 }}>
                   {stats.gpa}
@@ -202,7 +221,14 @@ const StudentPortal = () => {
             }}
           >
             <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  mb: 2,
+                }}
+              >
                 <AttendanceIcon sx={{ fontSize: 40 }} />
                 <Typography variant="h3" sx={{ fontWeight: 700 }}>
                   {stats.attendance}%
@@ -235,7 +261,14 @@ const StudentPortal = () => {
             }}
           >
             <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  mb: 2,
+                }}
+              >
                 <AssignmentIcon sx={{ fontSize: 40 }} />
                 <Typography variant="h3" sx={{ fontWeight: 700 }}>
                   {stats.completedAssignments}/{stats.totalAssignments}
@@ -268,7 +301,14 @@ const StudentPortal = () => {
             }}
           >
             <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  mb: 2,
+                }}
+              >
                 <AssessmentIcon sx={{ fontSize: 40 }} />
                 <Typography variant="h3" sx={{ fontWeight: 700 }}>
                   {stats.upcomingExams}
@@ -316,6 +356,7 @@ const StudentPortal = () => {
                   {action.icon === 'grades' && '📊'}
                   {action.icon === 'assignments' && '📝'}
                   {action.icon === 'attendance' && '✅'}
+                  {action.icon === 'reports' && '📈'}
                 </Box>
                 <Typography variant="body2" sx={{ fontWeight: 600 }}>
                   {action.title}
@@ -330,12 +371,21 @@ const StudentPortal = () => {
         {/* Announcements */}
         <Grid item xs={12} md={6}>
           <Paper sx={{ p: 3, borderRadius: 2, height: '100%' }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="h6" sx={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Box
+              sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}
+            >
+              <Typography
+                variant="h6"
+                sx={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}
+              >
                 <AnnouncementIcon color="primary" />
                 الإعلانات الأخيرة
               </Typography>
-              <Button size="small" endIcon={<ArrowForwardIcon />} onClick={() => navigate('/student-portal/announcements')}>
+              <Button
+                size="small"
+                endIcon={<ArrowForwardIcon />}
+                onClick={() => navigate('/student-portal/announcements')}
+              >
                 عرض الكل
               </Button>
             </Box>
@@ -344,7 +394,13 @@ const StudentPortal = () => {
               {announcements.map(announcement => (
                 <Alert
                   key={announcement.id}
-                  severity={announcement.priority === 'عالي' ? 'error' : announcement.priority === 'متوسط' ? 'warning' : 'info'}
+                  severity={
+                    announcement.priority === 'عالي'
+                      ? 'error'
+                      : announcement.priority === 'متوسط'
+                        ? 'warning'
+                        : 'info'
+                  }
                   icon={<span style={{ fontSize: 20 }}>{announcement.icon}</span>}
                   sx={{ borderRadius: 2 }}
                 >
@@ -363,12 +419,21 @@ const StudentPortal = () => {
         {/* Upcoming Assignments */}
         <Grid item xs={12} md={6}>
           <Paper sx={{ p: 3, borderRadius: 2, height: '100%' }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="h6" sx={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Box
+              sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}
+            >
+              <Typography
+                variant="h6"
+                sx={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}
+              >
                 <AssignmentIcon color="primary" />
                 الواجبات القادمة
               </Typography>
-              <Button size="small" endIcon={<ArrowForwardIcon />} onClick={() => navigate('/student-portal/assignments')}>
+              <Button
+                size="small"
+                endIcon={<ArrowForwardIcon />}
+                onClick={() => navigate('/student-portal/assignments')}
+              >
                 عرض الكل
               </Button>
             </Box>
@@ -377,16 +442,38 @@ const StudentPortal = () => {
               {upcomingAssignments.map(assignment => (
                 <Card key={assignment.id} variant="outlined" sx={{ borderRadius: 2 }}>
                   <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1 }}>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'start',
+                        mb: 1,
+                      }}
+                    >
                       <Typography variant="body2" sx={{ fontWeight: 600, flex: 1 }}>
                         {assignment.title}
                       </Typography>
-                      <Chip label={assignment.priority} size="small" color={getPriorityColor(assignment.priority)} sx={{ ml: 1 }} />
+                      <Chip
+                        label={assignment.priority}
+                        size="small"
+                        color={getPriorityColor(assignment.priority)}
+                        sx={{ ml: 1 }}
+                      />
                     </Box>
-                    <Typography variant="caption" color="textSecondary" sx={{ display: 'block', mb: 1 }}>
+                    <Typography
+                      variant="caption"
+                      color="textSecondary"
+                      sx={{ display: 'block', mb: 1 }}
+                    >
                       📚 {assignment.subject}
                     </Typography>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                      }}
+                    >
                       <Typography variant="caption" color="error" sx={{ fontWeight: 600 }}>
                         📅 التسليم: {assignment.dueDate}
                       </Typography>

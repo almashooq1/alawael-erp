@@ -5,33 +5,47 @@
 
 const request = require('supertest');
 const express = require('express');
-const aiRouter = require('../routes/ai.routes');
 
-// Create a mock Express app
-const app = express();
-app.use(express.json());
+// Mock auth middleware FIRST before any route imports
+jest.mock('../middleware/auth', () => ({
+  authenticateToken: (req, res, next) => {
+    req.user = { id: 'test-user', role: 'admin' };
+    next();
+  },
+  requireAdmin: (req, res, next) => {
+    if (req.user && req.user.role === 'admin') {
+      next();
+    } else {
+      res.status(403).json({ success: false, message: 'Admin access required' });
+    }
+  },
+  requireAuth: (req, res, next) => {
+    req.user = { id: 'test-user', role: 'admin' };
+    next();
+  },
+  requireRole:
+    (...roles) =>
+    (req, res, next) => {
+      if (req.user && roles.includes(req.user.role)) {
+        next();
+      } else {
+        res.status(403).json({ success: false, message: 'Forbidden' });
+      }
+    },
+  optionalAuth: (req, res, next) => next(),
+  protect: (req, res, next) => next(),
+  authorize:
+    (...roles) =>
+    (req, res, next) =>
+      next(),
+  authorizeRole:
+    (...roles) =>
+    (req, res, next) =>
+      next(),
+  authenticate: (req, res, next) => next(),
+}));
 
-// Mock middleware
-app.use((req, res, next) => {
-  req.user = { id: 'test-user-1', role: 'admin', email: 'admin@test.com' };
-  next();
-});
-
-// Mock response extensions
-app.use((req, res, next) => {
-  res.success = (data, message = 'Success') => {
-    res.json({ success: true, message, data });
-  };
-  res.error = (message, status = 500) => {
-    res.status(status).json({ success: false, message });
-  };
-  next();
-});
-
-// Add routes
-app.use('/api/ai', aiRouter);
-
-// Mock AI models
+// Mock AI models BEFORE importing routes
 jest.mock('../models/AI.memory', () => ({
   AttendancePrediction: {
     predictAbsence: jest.fn(() => ({
@@ -93,11 +107,17 @@ jest.mock('../models/Employee.memory', () => ({
 
 jest.mock('../models/Attendance.memory', () => ({
   find: jest.fn().mockResolvedValue([{ employeeId: '1', date: '2024-01-01', status: 'present' }]),
-  findByEmployeeId: jest.fn().mockResolvedValue([{ employeeId: '1', date: '2024-01-01', status: 'present' }]),
+  findByEmployeeId: jest
+    .fn()
+    .mockResolvedValue([{ employeeId: '1', date: '2024-01-01', status: 'present' }]),
 }));
 
 jest.mock('../models/Leave.memory', () => ({
-  find: jest.fn().mockResolvedValue([{ employeeId: '1', startDate: '2024-02-01', endDate: '2024-02-05', status: 'approved' }]),
+  find: jest
+    .fn()
+    .mockResolvedValue([
+      { employeeId: '1', startDate: '2024-02-01', endDate: '2024-02-05', status: 'approved' },
+    ]),
 }));
 
 jest.mock('../models/Finance.memory', () => ({
@@ -106,20 +126,113 @@ jest.mock('../models/Finance.memory', () => ({
   },
 }));
 
-// Mock authentication middleware
-jest.mock('../middleware/auth', () => ({
-  authenticateToken: (req, res, next) => {
-    req.user = { id: 'test-user', role: 'admin' };
-    next();
-  },
-}));
+// NOW import routes AFTER all mocks are set up
+const aiRouter = require('../routes/ai.routes');
+
+// Create a mock Express app
+const app = express();
+app.use(express.json());
+
+// Mock middleware
+app.use((req, res, next) => {
+  req.user = { id: 'test-user-1', role: 'admin', email: 'admin@test.com' };
+  next();
+});
+
+// Mock response extensions
+app.use((req, res, next) => {
+  res.success = (data, message = 'Success') => {
+    res.json({ success: true, message, data });
+  };
+  res.error = (message, status = 500) => {
+    res.status(status).json({ success: false, message });
+  };
+  next();
+});
+
+// Add routes
+app.use('/api/ai', aiRouter);
 
 describe('AI Routes', () => {
+  // ==================== SETUP: Re-implement mocks in beforeEach ====================
+  beforeEach(() => {
+    const AI = require('../models/AI.memory');
+    const Employee = require('../models/Employee.memory');
+    const Attendance = require('../models/Attendance.memory');
+    const Leave = require('../models/Leave.memory');
+
+    // Re-implement Employee mocks
+    Employee.find.mockResolvedValue([
+      { _id: '1', name: 'Ahmed', department: 'HR', performanceScore: 85 },
+      { _id: '2', name: 'Fatima', department: 'Finance', performanceScore: 90 },
+    ]);
+    Employee.findById.mockResolvedValue({ _id: '1', name: 'Ahmed' });
+
+    // Re-implement Attendance mocks
+    Attendance.find.mockResolvedValue([{ employeeId: '1', date: '2024-01-01', status: 'present' }]);
+    if (!Attendance.findByEmployeeId) {
+      Attendance.findByEmployeeId = jest.fn();
+    }
+    Attendance.findByEmployeeId.mockResolvedValue([
+      { employeeId: '1', date: '2024-01-01', status: 'present' },
+    ]);
+
+    // Re-implement Leave mocks
+    Leave.find.mockResolvedValue([
+      { employeeId: '1', startDate: '2024-02-01', endDate: '2024-02-05', status: 'approved' },
+    ]);
+
+    AI.AttendancePrediction.predictAbsence.mockImplementation(() => ({
+      employeeId: '1',
+      absentProbability: 0.15,
+      riskLevel: 'low',
+    }));
+    AI.AttendancePrediction.analyzeTrends.mockImplementation(() => ({ trend: 'stable' }));
+
+    AI.SalaryPrediction.predictSalaryNeed.mockImplementation(() => ({
+      prediction: 250000,
+      confidence: 0.92,
+      currency: 'SAR',
+    }));
+
+    AI.LeaveTrendAnalysis.predictLeaveNeeds.mockImplementation(() => ({
+      predictedDays: 45,
+      peak_months: ['February', 'July'],
+      confidence: 0.88,
+    }));
+    AI.LeaveTrendAnalysis.analyzeDepartmentLeavePatterns.mockImplementation(() => ({
+      patterns: {},
+    }));
+
+    AI.AutomationWorkflow.suggestAutomation.mockImplementation(() => ({
+      workflows: [],
+      savingsPotential: '5-10 hours/week',
+    }));
+    AI.AutomationWorkflow.generateWorkflow.mockImplementation(() => ({
+      id: 'wf-001',
+      status: 'created',
+    }));
+
+    AI.PerformanceScore.calculateScore.mockImplementation(() => ({ score: 85, grade: 'A' }));
+    AI.PerformanceScore.predictPerformanceTrend.mockImplementation(() => ({ trend: 'improving' }));
+
+    AI.SmartInsights.analyzeEmployeeBehavior.mockImplementation(() => ({
+      insights: ['High performer', 'Team player'],
+      recommendations: ['Consider for promotion'],
+    }));
+    AI.SmartInsights.generateExecutiveSummary.mockImplementation(() => ({
+      summary: 'Overall status: healthy',
+      alerts: [],
+    }));
+  });
+
   // ==================== ATTENDANCE PREDICTIONS ====================
 
   describe('GET /api/ai/predictions/attendance', () => {
     test('should return attendance prediction for specific employee', async () => {
-      const response = await request(app).get('/api/ai/predictions/attendance?employeeId=1').expect(200);
+      const response = await request(app)
+        .get('/api/ai/predictions/attendance?employeeId=1')
+        .expect(200);
 
       expect(response.body.success).toBe(true);
       expect(response.body.data).toHaveProperty('absentProbability');
@@ -137,20 +250,26 @@ describe('AI Routes', () => {
       const Employee = require('../models/Employee.memory');
       Employee.find.mockResolvedValueOnce([]);
 
-      const response = await request(app).get('/api/ai/predictions/attendance?employeeId=invalid').expect(200);
+      const response = await request(app)
+        .get('/api/ai/predictions/attendance?employeeId=invalid')
+        .expect(200);
 
       expect(response.body.success).toBe(true);
     });
 
     test('should calculate risk levels correctly', async () => {
-      const response = await request(app).get('/api/ai/predictions/attendance?employeeId=1').expect(200);
+      const response = await request(app)
+        .get('/api/ai/predictions/attendance?employeeId=1')
+        .expect(200);
 
       const riskLevel = response.body.data.riskLevel;
       expect(['low', 'medium', 'high']).toContain(riskLevel);
     });
 
     test('should return prediction confidence score', async () => {
-      const response = await request(app).get('/api/ai/predictions/attendance?employeeId=1').expect(200);
+      const response = await request(app)
+        .get('/api/ai/predictions/attendance?employeeId=1')
+        .expect(200);
 
       if (response.body.data.confidence) {
         expect(response.body.data.confidence).toBeGreaterThanOrEqual(0);
@@ -268,12 +387,16 @@ describe('AI Routes', () => {
     });
 
     test('should support time range filtering or 404', async () => {
-      const response = await request(app).get('/api/ai/analytics/trends?type=attendance&from=2024-01-01&to=2024-01-31');
+      const response = await request(app).get(
+        '/api/ai/analytics/trends?type=attendance&from=2024-01-01&to=2024-01-31'
+      );
       expect([200, 404]).toContain(response.status);
     });
 
     test('should filter by department or 404', async () => {
-      const response = await request(app).get('/api/ai/analytics/trends?type=attendance&department=HR');
+      const response = await request(app).get(
+        '/api/ai/analytics/trends?type=attendance&department=HR'
+      );
       expect([200, 404]).toContain(response.status);
     });
   });
@@ -461,7 +584,9 @@ describe('AI Routes', () => {
 
   describe('POST /api/ai/chat', () => {
     test('should respond to user query or 404 if not implemented', async () => {
-      const response = await request(app).post('/api/ai/chat').send({ message: 'How many employees do we have?' });
+      const response = await request(app)
+        .post('/api/ai/chat')
+        .send({ message: 'How many employees do we have?' });
       expect([200, 404]).toContain(response.status);
 
       if (response.status === 200) {
@@ -516,7 +641,9 @@ describe('AI Routes', () => {
 
       if (response.status === 200) {
         expect(response.body.success).toBe(true);
-        expect(Array.isArray(response.body.data) || response.body.data.recommendations).toBeTruthy();
+        expect(
+          Array.isArray(response.body.data) || response.body.data.recommendations
+        ).toBeTruthy();
       }
     });
 
@@ -555,7 +682,9 @@ describe('AI Routes', () => {
     });
 
     test('should support date range filtering or 404', async () => {
-      const response = await request(app).get('/api/ai/analytics/dashboard?from=2024-01-01&to=2024-01-31');
+      const response = await request(app).get(
+        '/api/ai/analytics/dashboard?from=2024-01-01&to=2024-01-31'
+      );
       expect([200, 404]).toContain(response.status);
     });
   });
@@ -584,7 +713,9 @@ describe('AI Routes', () => {
     });
 
     test('should validate query parameters', async () => {
-      const response = await request(app).get('/api/ai/predictions/attendance?employeeId=123&limit=abc').expect(200); // Most likely ignores invalid limit
+      const response = await request(app)
+        .get('/api/ai/predictions/attendance?employeeId=123&limit=abc')
+        .expect(200); // Most likely ignores invalid limit
 
       expect(response.body.success).toBe(true);
     });

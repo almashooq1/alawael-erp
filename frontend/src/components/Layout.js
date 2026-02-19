@@ -1,4 +1,5 @@
 import React from 'react';
+import { OrgBrandingProvider, useOrgBranding } from './OrgBrandingContext';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
   Box,
@@ -40,13 +41,12 @@ import {
   AccessTime as AccessTimeIcon,
   Chat as ChatIcon,
   Archive as ArchiveIcon,
-  School as SchoolIcon,
   HealthAndSafety as HealthIcon,
 } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
 import { useAuth } from '../contexts/AuthContext';
 import QuickSearch from './QuickSearch';
-import NotificationsPopover from './NotificationsPopover';
+// import NotificationsPopover from './NotificationsPopover';
 import SmartNotificationPanel from './SmartNotificationPanel';
 import BreadcrumbsNav from './BreadcrumbsNav';
 
@@ -101,6 +101,7 @@ const navGroups = [
     items: [
       { text: 'الرئيسية', icon: <DashboardIcon />, path: '/home' },
       { text: 'لوحة التشغيل', icon: <DashboardIcon />, path: '/dashboard' },
+      { text: 'مراقبة النظام', icon: <HealthIcon />, path: '/monitoring' },
       { text: 'التقارير والتحليلات', icon: <QueryStatsIcon />, path: '/reports' },
       { text: 'النشاط اللحظي', icon: <ReceiptIcon />, path: '/activity' },
     ],
@@ -149,6 +150,7 @@ const navGroups = [
       { text: 'الجدول الدراسي', icon: <AccessTimeIcon />, path: '/student-portal/schedule' },
       { text: 'الدرجات والتقييمات', icon: <QueryStatsIcon />, path: '/student-portal/grades' },
       { text: 'سجل الحضور', icon: <ReceiptIcon />, path: '/student-portal/attendance' },
+      { text: 'التقارير المتقدمة', icon: <QueryStatsIcon />, path: '/student-portal/reports' },
       { text: 'الواجبات والمشاريع', icon: <ReceiptIcon />, path: '/student-portal/assignments' },
       { text: 'المكتبة الرقمية', icon: <ScienceIcon />, path: '/student-portal/library' },
       { text: 'الإعلانات', icon: <ChatIcon />, path: '/student-portal/announcements' },
@@ -173,7 +175,11 @@ const navGroups = [
     items: [
       { text: 'لوحة المعلومات', icon: <DashboardIcon />, path: '/admin-portal' },
       { text: '🎨 لوحة التحكم المتقدمة', icon: <DashboardIcon />, path: '/admin-portal/enhanced' },
-      { text: '📊 التقارير المتقدمة', icon: <QueryStatsIcon />, path: '/admin-portal/advanced-reports' },
+      {
+        text: '📊 التقارير المتقدمة',
+        icon: <QueryStatsIcon />,
+        path: '/admin-portal/advanced-reports',
+      },
       { text: 'إدارة المستخدمين', icon: <GroupIcon />, path: '/admin-portal/users' },
       { text: 'إعدادات النظام', icon: <EngineeringIcon />, path: '/admin-portal/settings' },
       { text: 'التقارير والتحليلات', icon: <QueryStatsIcon />, path: '/admin-portal/reports' },
@@ -196,10 +202,22 @@ const navGroups = [
       { text: 'لوحة المعلومات', icon: <DashboardIcon />, path: '/parent-portal' },
       { text: 'تتبع التقدم', icon: <QueryStatsIcon />, path: '/parent-portal/children-progress' },
       { text: 'تقارير الحضور', icon: <ReceiptIcon />, path: '/parent-portal/attendance-reports' },
-      { text: 'التواصل مع المعالجين', icon: <ChatIcon />, path: '/parent-portal/therapist-communications' },
+      {
+        text: 'التواصل مع المعالجين',
+        icon: <ChatIcon />,
+        path: '/parent-portal/therapist-communications',
+      },
       { text: 'الدفعات والفواتير', icon: <WalletIcon />, path: '/parent-portal/payments-history' },
-      { text: 'المستندات والتقارير', icon: <ScienceIcon />, path: '/parent-portal/documents-reports' },
-      { text: 'جدولة الجلسات', icon: <AccessTimeIcon />, path: '/parent-portal/appointments-scheduling' },
+      {
+        text: 'المستندات والتقارير',
+        icon: <ScienceIcon />,
+        path: '/parent-portal/documents-reports',
+      },
+      {
+        text: 'جدولة الجلسات',
+        icon: <AccessTimeIcon />,
+        path: '/parent-portal/appointments-scheduling',
+      },
       { text: 'الرسائل والإشعارات', icon: <ChatIcon />, path: '/parent-portal/messages' },
     ],
   },
@@ -251,10 +269,46 @@ const Layout = () => {
     }
   };
 
+  // استخدم الهوية المؤسسية
+  const orgId = window.ORG_ID || localStorage.getItem('orgId') || 'default-org';
+  return (
+    <OrgBrandingProvider orgId={orgId}>
+      <LayoutWithBranding
+        open={open}
+        theme={theme}
+        currentUser={currentUser}
+        isMobile={isMobile}
+        handleDrawerOpen={handleDrawerOpen}
+        handleDrawerClose={handleDrawerClose}
+        handleLogout={handleLogout}
+        handleNavigation={handleNavigation}
+        isActive={isActive}
+        navigate={navigate}
+        location={location}
+      />
+    </OrgBrandingProvider>
+  );
+};
+
+const LayoutWithBranding = ({
+  open,
+  theme,
+  currentUser,
+  isMobile,
+  handleDrawerOpen,
+  handleDrawerClose,
+  handleLogout,
+  handleNavigation,
+  isActive,
+  navigate,
+  location,
+}) => {
+  const { branding } = useOrgBranding();
+  // ...existing code...
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
-      <AppBarStyled position="fixed" open={open}>
+      <AppBarStyled position="fixed" open={open} sx={{ background: branding.color || '#667eea' }}>
         <Toolbar>
           <IconButton
             color="inherit"
@@ -266,24 +320,48 @@ const Layout = () => {
             <MenuIcon />
           </IconButton>
 
-          {/* شعار واسم النظام - Logo and System Name */}
+          {/* شعار واسم المؤسسة واسم النظام */}
           <Box sx={{ display: 'flex', alignItems: 'center', mr: 3 }}>
-            <Box
-              component="img"
-              src="/logo.svg"
-              alt="مركز الأوائل"
-              sx={{
-                width: 40,
-                height: 40,
-                mr: 1.5,
-                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))',
-              }}
-            />
+            {branding.logo ? (
+              <Box
+                component="img"
+                src={branding.logo}
+                alt={branding.name || 'شعار المؤسسة'}
+                sx={{
+                  width: 40,
+                  height: 40,
+                  mr: 1.5,
+                  borderRadius: 2,
+                  background: '#fff',
+                  border: '1px solid #eee',
+                }}
+              />
+            ) : (
+              <Box
+                component="img"
+                src="/logo.svg"
+                alt="مركز الأوائل"
+                sx={{
+                  width: 40,
+                  height: 40,
+                  mr: 1.5,
+                  filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))',
+                }}
+              />
+            )}
             <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
-              <Typography variant="h6" noWrap sx={{ fontWeight: 700, lineHeight: 1.2 }}>
-                مركز الأوائل للتأهيل
+              <Typography
+                variant="h6"
+                noWrap
+                sx={{ fontWeight: 700, lineHeight: 1.2, color: '#fff' }}
+              >
+                {branding.name || 'مركز الأوائل للتأهيل'}
               </Typography>
-              <Typography variant="caption" noWrap sx={{ color: 'rgba(255,255,255,0.8)', display: 'block', lineHeight: 1 }}>
+              <Typography
+                variant="caption"
+                noWrap
+                sx={{ color: 'rgba(255,255,255,0.8)', display: 'block', lineHeight: 1 }}
+              >
                 نظام إدارة التأهيل المتكامل
               </Typography>
             </Box>
@@ -298,7 +376,6 @@ const Layout = () => {
               </IconButton>
             </Tooltip>
             <SmartNotificationPanel userId={currentUser?._id} />
-            <NotificationsPopover />
             <Tooltip title="Profile">
               <IconButton color="inherit" onClick={() => navigate('/profile')}>
                 <ProfileIcon />
@@ -368,9 +445,18 @@ const Layout = () => {
         <Divider />
 
         <DrawerHeader>
-          <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              width: '100%',
+              justifyContent: 'space-between',
+            }}
+          >
             <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-              <Avatar sx={{ bgcolor: theme.palette.primary.main, mr: 1 }}>{currentUser?.name?.charAt(0) || 'U'}</Avatar>
+              <Avatar sx={{ bgcolor: theme.palette.primary.main, mr: 1 }}>
+                {currentUser?.name?.charAt(0) || 'U'}
+              </Avatar>
               <Box sx={{ flexGrow: 1, minWidth: 0 }}>
                 <Typography variant="subtitle2" noWrap>
                   {currentUser?.name || 'User'}
@@ -387,7 +473,11 @@ const Layout = () => {
           <List
             key={group.label}
             subheader={
-              <ListSubheader component="div" disableSticky sx={{ bgcolor: 'transparent', color: 'text.secondary', fontWeight: 600 }}>
+              <ListSubheader
+                component="div"
+                disableSticky
+                sx={{ bgcolor: 'transparent', color: 'text.secondary', fontWeight: 600 }}
+              >
                 {group.label}
               </ListSubheader>
             }
@@ -407,7 +497,11 @@ const Layout = () => {
                   },
                 }}
               >
-                <ListItemIcon sx={{ color: location.pathname === item.path ? 'primary.main' : 'inherit' }}>{item.icon}</ListItemIcon>
+                <ListItemIcon
+                  sx={{ color: location.pathname === item.path ? 'primary.main' : 'inherit' }}
+                >
+                  {item.icon}
+                </ListItemIcon>
                 <ListItemText primary={item.text} />
               </ListItem>
             ))}

@@ -222,7 +222,7 @@ communicationSchema.methods.updateWorkflowStatus = function() {
 };
 
 // Middleware قبل الحفظ
-communicationSchema.pre('save', async function(next) {
+communicationSchema.pre('save', async function() {
   // توليد رقم مرجعي إذا لم يكن موجود
   if (!this.referenceNumber) {
     this.referenceNumber = await this.constructor.generateReferenceNumber();

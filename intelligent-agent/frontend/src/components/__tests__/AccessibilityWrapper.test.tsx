@@ -1,5 +1,6 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render } from '@testing-library/react';
+import { screen, fireEvent } from '@testing-library/dom';
 import '@testing-library/jest-dom';
 import {
   AccessibleButton,
@@ -13,11 +14,7 @@ import {
 describe('AccessibilityWrapper', () => {
   describe('AccessibleButton', () => {
     it('renders button with correct attributes', () => {
-      render(
-        <AccessibleButton ariaLabel="Submit form">
-          Submit
-        </AccessibleButton>
-      );
+      render(<AccessibleButton ariaLabel="Submit form">Submit</AccessibleButton>);
 
       const button = screen.getByRole('button', { name: 'Submit form' });
       expect(button).toBeInTheDocument();
@@ -27,22 +24,14 @@ describe('AccessibilityWrapper', () => {
     it('handles click events', () => {
       const handleClick = jest.fn();
 
-      render(
-        <AccessibleButton onClick={handleClick}>
-          Click Me
-        </AccessibleButton>
-      );
+      render(<AccessibleButton onClick={handleClick}>Click Me</AccessibleButton>);
 
       fireEvent.click(screen.getByRole('button'));
       expect(handleClick).toHaveBeenCalledTimes(1);
     });
 
     it('applies disabled state correctly', () => {
-      render(
-        <AccessibleButton disabled={true}>
-          Disabled
-        </AccessibleButton>
-      );
+      render(<AccessibleButton disabled={true}>Disabled</AccessibleButton>);
 
       const button = screen.getByRole('button');
       expect(button).toBeDisabled();
@@ -52,11 +41,9 @@ describe('AccessibilityWrapper', () => {
     it('applies different variants', () => {
       const variants = ['primary', 'secondary', 'danger'] as const;
 
-      variants.forEach((variant) => {
+      variants.forEach(variant => {
         const { rerender } = render(
-          <AccessibleButton variant={variant}>
-            {variant}
-          </AccessibleButton>
+          <AccessibleButton variant={variant}>{variant}</AccessibleButton>
         );
 
         expect(screen.getByRole('button')).toBeInTheDocument();
@@ -67,13 +54,7 @@ describe('AccessibilityWrapper', () => {
 
   describe('AccessibleInput', () => {
     it('renders input with label', () => {
-      render(
-        <AccessibleInput
-          id="email"
-          name="email"
-          label="Email Address"
-        />
-      );
+      render(<AccessibleInput id="email" name="email" label="Email Address" />);
 
       expect(screen.getByLabelText('Email Address')).toBeInTheDocument();
     });
@@ -161,12 +142,7 @@ describe('AccessibilityWrapper', () => {
     });
 
     it('uses custom label', () => {
-      render(
-        <SkipToContent
-          targetId="content"
-          label="Skip to page content"
-        />
-      );
+      render(<SkipToContent targetId="content" label="Skip to page content" />);
 
       expect(screen.getByText('Skip to page content')).toBeInTheDocument();
     });
@@ -238,10 +214,7 @@ describe('AccessibilityWrapper', () => {
       const handleArrowDown = jest.fn();
 
       render(
-        <KeyboardNavigable
-          onArrowUp={handleArrowUp}
-          onArrowDown={handleArrowDown}
-        >
+        <KeyboardNavigable onArrowUp={handleArrowUp} onArrowDown={handleArrowDown}>
           <div>Arrow Item</div>
         </KeyboardNavigable>
       );
@@ -268,11 +241,7 @@ describe('AccessibilityWrapper', () => {
 
   describe('VisuallyHidden', () => {
     it('renders content visually hidden', () => {
-      render(
-        <VisuallyHidden>
-          Hidden from sight but not screen readers
-        </VisuallyHidden>
-      );
+      render(<VisuallyHidden>Hidden from sight but not screen readers</VisuallyHidden>);
 
       const element = screen.getByText('Hidden from sight but not screen readers');
       expect(element).toBeInTheDocument();

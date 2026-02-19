@@ -15,7 +15,7 @@ api.interceptors.request.use(
     }
     return config;
   },
-  error => Promise.reject(error),
+  error => Promise.reject(error)
 );
 
 class AnalyticsService {
@@ -35,4 +35,6 @@ class AnalyticsService {
   }
 }
 
-export default new AnalyticsService();
+const analyticsService = new AnalyticsService();
+
+export default analyticsService;

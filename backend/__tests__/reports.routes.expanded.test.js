@@ -5,35 +5,11 @@
 
 const request = require('supertest');
 const express = require('express');
-const reportsRouter = require('../routes/reports.routes');
 
-// Create a mock Express app
-const app = express();
-app.use(express.json());
-
-// Mock middleware
-app.use((req, res, next) => {
-  req.user = { id: 'test-user-1', role: 'admin', email: 'admin@test.com' };
-  next();
-});
-
-// Mock response extensions
-app.use((req, res, next) => {
-  res.success = (data, message = 'Success') => {
-    res.json({ success: true, message, data });
-  };
-  res.error = (message, status = 500) => {
-    res.status(status).json({ success: false, message });
-  };
-  next();
-});
-
-// Add routes
-app.use('/api/reports', reportsRouter);
-
-// Mock database module
-jest.mock('../config/inMemoryDB', () => ({
-  read: jest.fn(() => ({
+// Mock BEFORE any imports that depend on them
+// Mock database module FIRST
+jest.mock('../config/inMemoryDB', () => {
+  const mockData = {
     employees: [
       { _id: '1', name: 'Ahmed', department: 'HR', salary: 3500, status: 'active' },
       { _id: '2', name: 'Fatima', department: 'Finance', salary: 5000, status: 'active' },
@@ -45,25 +21,64 @@ jest.mock('../config/inMemoryDB', () => ({
       { _id: 'a3', employeeId: '3', date: '2024-01-02', status: 'present', time: '08:30' },
     ],
     leaves: [
-      { _id: 'l1', employeeId: '1', startDate: '2024-02-01', endDate: '2024-02-05', status: 'approved' },
-      { _id: 'l2', employeeId: '2', startDate: '2024-03-01', endDate: '2024-03-03', status: 'pending' },
+      {
+        _id: 'l1',
+        employeeId: '1',
+        startDate: '2024-02-01',
+        endDate: '2024-02-05',
+        status: 'approved',
+      },
+      {
+        _id: 'l2',
+        employeeId: '2',
+        startDate: '2024-03-01',
+        endDate: '2024-03-03',
+        status: 'pending',
+      },
     ],
-  })),
-  write: jest.fn(),
-}));
+  };
 
-// Mock models
+  return {
+    read: jest.fn().mockReturnValue(mockData),
+    write: jest.fn(),
+  };
+});
+
+// Mock models BEFORE route import
 jest.mock('../models/Employee.memory', () => ({
-  find: jest.fn().mockResolvedValue([{ _id: '1', name: 'Ahmed', department: 'HR', salary: 3500 }]),
+  find: jest.fn().mockResolvedValue([
+    { _id: '1', name: 'Ahmed', department: 'HR', salary: 3500, status: 'active' },
+    { _id: '2', name: 'Fatima', department: 'Finance', salary: 5000, status: 'active' },
+    { _id: '3', name: 'Mohammad', department: 'IT', salary: 8000, status: 'on_leave' },
+  ]),
   findById: jest.fn().mockResolvedValue({ _id: '1', name: 'Ahmed' }),
 }));
 
 jest.mock('../models/Attendance.memory', () => ({
-  find: jest.fn().mockResolvedValue([{ _id: 'a1', employeeId: '1', date: '2024-01-01', status: 'present' }]),
+  find: jest.fn().mockResolvedValue([
+    { _id: 'a1', employeeId: '1', date: '2024-01-01', status: 'present', time: '08:00' },
+    { _id: 'a2', employeeId: '2', date: '2024-01-01', status: 'absent', time: null },
+    { _id: 'a3', employeeId: '3', date: '2024-01-02', status: 'present', time: '08:30' },
+  ]),
 }));
 
 jest.mock('../models/Leave.memory', () => ({
-  find: jest.fn().mockResolvedValue([{ _id: 'l1', employeeId: '1', status: 'approved' }]),
+  find: jest.fn().mockResolvedValue([
+    {
+      _id: 'l1',
+      employeeId: '1',
+      startDate: '2024-02-01',
+      endDate: '2024-02-05',
+      status: 'approved',
+    },
+    {
+      _id: 'l2',
+      employeeId: '2',
+      startDate: '2024-03-01',
+      endDate: '2024-03-03',
+      status: 'pending',
+    },
+  ]),
 }));
 
 // Mock file writers
@@ -103,7 +118,69 @@ jest.mock('../middleware/auth', () => ({
   authorize: () => (req, res, next) => next(),
 }));
 
+// NOW import routes AFTER all mocks are set up
+const reportsRouter = require('../routes/reports.routes');
+
+// Create a mock Express app
+const app = express();
+app.use(express.json());
+
+// Mock middleware
+app.use((req, res, next) => {
+  req.user = { id: 'test-user-1', role: 'admin', email: 'admin@test.com' };
+  next();
+});
+
+// Mock response extensions
+app.use((req, res, next) => {
+  res.success = (data, message = 'Success') => {
+    res.json({ success: true, message, data });
+  };
+  res.error = (message, status = 500) => {
+    res.status(status).json({ success: false, message });
+  };
+  next();
+});
+
+// Add routes
+app.use('/api/reports', reportsRouter);
+
+// ** IMPORTANT: Re-implement mocks in beforeEach to restore after any jest.clearAllMocks()
+const mockData = {
+  employees: [
+    { _id: '1', name: 'Ahmed', department: 'HR', salary: 3500, status: 'active' },
+    { _id: '2', name: 'Fatima', department: 'Finance', salary: 5000, status: 'active' },
+    { _id: '3', name: 'Mohammad', department: 'IT', salary: 8000, status: 'on_leave' },
+  ],
+  attendances: [
+    { _id: 'a1', employeeId: '1', date: '2024-01-01', status: 'present', time: '08:00' },
+    { _id: 'a2', employeeId: '2', date: '2024-01-01', status: 'absent', time: null },
+    { _id: 'a3', employeeId: '3', date: '2024-01-02', status: 'present', time: '08:30' },
+  ],
+  leaves: [
+    {
+      _id: 'l1',
+      employeeId: '1',
+      startDate: '2024-02-01',
+      endDate: '2024-02-05',
+      status: 'approved',
+    },
+    {
+      _id: 'l2',
+      employeeId: '2',
+      startDate: '2024-03-01',
+      endDate: '2024-03-03',
+      status: 'pending',
+    },
+  ],
+};
+
 describe('Reports Routes', () => {
+  beforeEach(() => {
+    const db = require('../config/inMemoryDB');
+    db.read.mockReturnValue(mockData);
+  });
+
   // ==================== EMPLOYEE SUMMARY ====================
 
   describe('GET /api/reports/employee-summary', () => {
@@ -190,13 +267,17 @@ describe('Reports Routes', () => {
     });
 
     test('should filter attendance by date range', async () => {
-      const response = await request(app).get('/api/reports/attendance-stats?startDate=2024-01-01&endDate=2024-01-02').expect([200, 404]);
+      const response = await request(app)
+        .get('/api/reports/attendance-stats?startDate=2024-01-01&endDate=2024-01-02')
+        .expect([200, 404]);
 
       expect(response.body.data).toHaveProperty('total');
     });
 
     test('should filter attendance by department', async () => {
-      const response = await request(app).get('/api/reports/attendance-stats?department=HR').expect([200, 404]);
+      const response = await request(app)
+        .get('/api/reports/attendance-stats?department=HR')
+        .expect([200, 404]);
 
       expect(response.body.success).toBe(true);
     });
@@ -220,7 +301,10 @@ describe('Reports Routes', () => {
       const response = await request(app).get('/api/reports/attendance-stats').expect([200, 404]);
 
       if (response.status === 200 && response.body.data) {
-        expect(typeof response.body.data.averagePerDay === 'number' || typeof response.body.data.averagePerDay === 'string').toBe(true);
+        expect(
+          typeof response.body.data.averagePerDay === 'number' ||
+            typeof response.body.data.averagePerDay === 'string'
+        ).toBe(true);
       }
     });
 
@@ -234,7 +318,9 @@ describe('Reports Routes', () => {
     });
 
     test('should handle invalid date format', async () => {
-      const response = await request(app).get('/api/reports/attendance-stats?startDate=invalid-date').expect([200, 404]);
+      const response = await request(app)
+        .get('/api/reports/attendance-stats?startDate=invalid-date')
+        .expect([200, 404]);
 
       // Should still return data, just may not filter correctly
       expect(response.body.success).toBe(true);
@@ -262,7 +348,9 @@ describe('Reports Routes', () => {
     });
 
     test('should filter leaves by employee', async () => {
-      const response = await request(app).get('/api/reports/leave-summary?employeeId=1').expect([200, 404]);
+      const response = await request(app)
+        .get('/api/reports/leave-summary?employeeId=1')
+        .expect([200, 404]);
 
       if (response.status === 200) {
         expect(response.body.success).toBe(true);
@@ -273,7 +361,10 @@ describe('Reports Routes', () => {
       const response = await request(app).get('/api/reports/leave-summary').expect([200, 404]);
 
       if (response.status === 200 && response.body.data) {
-        expect(typeof response.body.data.totalDays === 'number' || typeof response.body.data.totalDays === 'string').toBe(true);
+        expect(
+          typeof response.body.data.totalDays === 'number' ||
+            typeof response.body.data.totalDays === 'string'
+        ).toBe(true);
       }
     });
   });
@@ -306,7 +397,10 @@ describe('Reports Routes', () => {
 
   describe('POST /api/reports/generate-excel', () => {
     test('should generate Excel report', async () => {
-      const response = await request(app).post('/api/reports/generate-excel').send({ type: 'employee' }).expect([200, 404]);
+      const response = await request(app)
+        .post('/api/reports/generate-excel')
+        .send({ type: 'employee' })
+        .expect([200, 404]);
 
       if (response.status === 200) {
         expect(response.body.success).toBe(true);
@@ -314,13 +408,19 @@ describe('Reports Routes', () => {
     });
 
     test('should handle Excel generation errors', async () => {
-      const response = await request(app).post('/api/reports/generate-excel').send({ type: 'invalid' }).expect([200, 404, 500]); // Implementation dependent
+      const response = await request(app)
+        .post('/api/reports/generate-excel')
+        .send({ type: 'invalid' })
+        .expect([200, 404, 500]); // Implementation dependent
     });
   });
 
   describe('POST /api/reports/generate-pdf', () => {
     test('should generate PDF report', async () => {
-      const response = await request(app).post('/api/reports/generate-pdf').send({ type: 'employee' }).expect([200, 404]);
+      const response = await request(app)
+        .post('/api/reports/generate-pdf')
+        .send({ type: 'employee' })
+        .expect([200, 404]);
 
       expect(response.body.success || response.headers['content-type']).toBeTruthy();
     });
@@ -363,7 +463,10 @@ describe('Reports Routes', () => {
     });
 
     test('should return validation error for missing type', async () => {
-      const response = await request(app).post('/api/reports/custom').send({ filters: {} }).expect([400, 404, 422]);
+      const response = await request(app)
+        .post('/api/reports/custom')
+        .send({ filters: {} })
+        .expect([400, 404, 422]);
 
       if ([400, 422].includes(response.status)) {
         expect(response.body.success).toBe(false);
@@ -436,14 +539,18 @@ describe('Reports Routes', () => {
 
       if (response.status === 200) {
         expect(response.body.success).toBe(true);
-        expect(Array.isArray(response.body.data) || typeof response.body.data === 'object').toBe(true);
+        expect(Array.isArray(response.body.data) || typeof response.body.data === 'object').toBe(
+          true
+        );
       }
     });
   });
 
   describe('GET /api/reports/templates/:templateId', () => {
     test('should get specific report template', async () => {
-      const response = await request(app).get('/api/reports/templates/employee-summary').expect([200, 404]);
+      const response = await request(app)
+        .get('/api/reports/templates/employee-summary')
+        .expect([200, 404]);
 
       if (response.status === 200) {
         expect(response.body.success).toBe(true);
@@ -456,7 +563,9 @@ describe('Reports Routes', () => {
 
   describe('GET /api/reports/export', () => {
     test('should export report in specified format', async () => {
-      const response = await request(app).get('/api/reports/export?format=csv&type=employee').expect([200, 404]);
+      const response = await request(app)
+        .get('/api/reports/export?format=csv&type=employee')
+        .expect([200, 404]);
 
       expect(response.body || response.headers['content-type']).toBeTruthy();
     });
@@ -465,14 +574,18 @@ describe('Reports Routes', () => {
       const formats = ['csv', 'json', 'xml'];
 
       for (const format of formats) {
-        const response = await request(app).get(`/api/reports/export?format=${format}&type=employee`).expect([200, 404]);
+        const response = await request(app)
+          .get(`/api/reports/export?format=${format}&type=employee`)
+          .expect([200, 404]);
 
         expect(response.body || response.headers['content-type']).toBeTruthy();
       }
     });
 
     test('should handle invalid format gracefully', async () => {
-      const response = await request(app).get('/api/reports/export?format=invalid&type=employee').expect([200, 400, 404]);
+      const response = await request(app)
+        .get('/api/reports/export?format=invalid&type=employee')
+        .expect([200, 400, 404]);
 
       // Should either convert to default or return error
       expect(response.body || response.status).toBeTruthy();
@@ -500,7 +613,9 @@ describe('Reports Routes', () => {
     });
 
     test('should validate query parameters', async () => {
-      const response = await request(app).get('/api/reports/attendance-stats?limit=invalid').expect([200, 404]); // Most likely ignores invalid limit
+      const response = await request(app)
+        .get('/api/reports/attendance-stats?limit=invalid')
+        .expect([200, 404]); // Most likely ignores invalid limit
 
       expect(response.body.success).toBe(true);
     });

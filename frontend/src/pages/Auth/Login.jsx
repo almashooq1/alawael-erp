@@ -33,6 +33,7 @@ const Login = () => {
     password: ''
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [localError, setLocalError] = useState('');
 
   const handleChange = (e) => {
     setFormData({
@@ -43,7 +44,16 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+    setLocalError('');
+    // Local validation
+    if (!formData.email || !formData.password) {
+      setLocalError('يرجى إدخال بيانات صحيحة');
+      return;
+    }
+    if (formData.password.length < 6) {
+      setLocalError('كلمة المرور قصيرة جداً');
+      return;
+    }
     try {
       const result = await dispatch(login(formData)).unwrap();
       if (result.success) {
@@ -76,9 +86,9 @@ const Login = () => {
             </Typography>
           </Box>
 
-          {error && (
+          {(localError || error) && (
             <Alert severity="error" sx={{ mb: 2 }}>
-              {error}
+              {localError || error}
             </Alert>
           )}
 

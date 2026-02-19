@@ -1,6 +1,5 @@
 // backend/config/database.js
 const mongoose = require('mongoose');
-const { MongoMemoryServer } = require('mongodb-memory-server');
 
 let isConnected = false;
 let mongoServer;
@@ -8,24 +7,69 @@ let mongoServer;
 const connectDB = async () => {
   // Check if using mock database first
   if (process.env.USE_MOCK_DB === 'true' || process.env.NODE_ENV === 'test') {
-    if (isConnected) {
-      console.log('✅ Using existing in-memory database');
+    if (isConnected && mongoose.connection.readyState === 1) {
+      console.log('✅ Using existing in-memory database connection');
       return mongoose.connection;
     }
 
-    console.log('🎯 Using in-memory database (development mode)');
-    console.log('📝 Data will be lost when server restarts');
-    console.log('⚙️  To use MongoDB Atlas, set USE_MOCK_DB=false in .env\n');
+    console.log('🎯 Starting in-memory database initialization...');
 
-    // Spin up an ephemeral MongoDB for local/test usage
-    mongoServer = await MongoMemoryServer.create();
-    const uri = mongoServer.getUri();
-    const conn = await mongoose.connect(uri, { dbName: 'alawael-erp-mem' });
-    isConnected = conn.connections[0].readyState === 1;
-    return conn;
+    // Try to use MongoMemoryServer with a reasonable timeout
+    try {
+      let { MongoMemoryServer } = require('mongodb-memory-server');
+      // Increase download timeout for slower systems
+      console.log('📦 Starting MongoDB Memory Server...');
+
+      const startTime = Date.now();
+      mongoServer = await Promise.race([
+        MongoMemoryServer.create(),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('MongoMemoryServer startup timeout after 30s')), 30000)
+        ),
+      ]);
+
+      const startupTime = Date.now() - startTime;
+      console.log(`✅ MongoDB Memory Server started in ${startupTime}ms`);
+
+      const uri = mongoServer.getUri();
+      console.log(`🔗 Connecting to: ${uri.substring(0, 50)}...`);
+
+      const conn = await mongoose.connect(uri, {
+        dbName: 'alawael-erp-mem',
+        serverSelectionTimeoutMS: 10000,
+        connectTimeoutMS: 10000,
+      });
+
+      isConnected = conn.connections[0].readyState === 1;
+      console.log(`✅ Mongoose connected, readyState: ${mongoose.connection.readyState}`);
+      return conn;
+    } catch (memoryServerError) {
+      console.error('❌ MongoMemoryServer Error:', memoryServerError.message);
+      console.log('⚠️  Attempting fallback connection...');
+
+      // Fallback: Try to connect to localhost MongoDB if available
+      try {
+        const fallbackUri = 'mongodb://localhost:27017/alawael-erp-test';
+        console.log('🔄 Trying fallback: localhost MongoDB...');
+        const conn = await mongoose.connect(fallbackUri, {
+          serverSelectionTimeoutMS: 5000,
+          connectTimeoutMS: 5000,
+        });
+        isConnected = conn.connections[0].readyState === 1;
+        console.log('✅ Connected to localhost MongoDB');
+        return conn;
+      } catch (fallbackError) {
+        console.error('❌ Fallback also failed:', fallbackError.message);
+        console.error('⚠️  Running in disconnected mock mode - database operations will fail');
+
+        // Last resort: Return mongoose connection even though it's not connected
+        // This may cause tests to fail, but at least it won't timeout
+        return mongoose.connection;
+      }
+    }
   }
 
-  if (isConnected) {
+  if (isConnected && mongoose.connection.readyState === 1) {
     console.log('✅ Using existing MongoDB connection');
     return mongoose.connection;
   }

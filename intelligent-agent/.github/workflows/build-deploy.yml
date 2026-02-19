@@ -20,6 +20,8 @@ env:
   DOCKER_REGISTRY: ghcr.io
   IMAGE_NAME_FRONTEND: ${{ github.repository }}/frontend
   IMAGE_NAME_BACKEND: ${{ github.repository }}/backend
+  KUBECONFIG_STAGING: ''
+  KUBECONFIG_PRODUCTION: ''
 
 jobs:
   # Build Docker Images
@@ -108,9 +110,6 @@ jobs:
     needs: build-images
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/develop' || github.event.inputs.environment == 'staging'
-    environment:
-      name: staging
-      url: https://staging.intelligent-agent.com
 
     steps:
       - name: Checkout code
@@ -124,7 +123,7 @@ jobs:
       - name: Configure kubectl
         run: |
           mkdir -p $HOME/.kube
-          echo "${{ secrets.KUBECONFIG_STAGING }}" | base64 -d > $HOME/.kube/config
+          echo "$KUBECONFIG_STAGING" | base64 -d > $HOME/.kube/config
           chmod 600 $HOME/.kube/config
 
       - name: Deploy to Kubernetes (Staging)
@@ -149,9 +148,6 @@ jobs:
     needs: build-images
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v') || github.event.inputs.environment == 'production'
-    environment:
-      name: production
-      url: https://intelligent-agent.com
 
     steps:
       - name: Checkout code
@@ -165,7 +161,7 @@ jobs:
       - name: Configure kubectl
         run: |
           mkdir -p $HOME/.kube
-          echo "${{ secrets.KUBECONFIG_PRODUCTION }}" | base64 -d > $HOME/.kube/config
+          echo "$KUBECONFIG_PRODUCTION" | base64 -d > $HOME/.kube/config
           chmod 600 $HOME/.kube/config
 
       - name: Create backup
@@ -226,7 +222,7 @@ jobs:
             ## What's Changed
             - Frontend: ${{ needs.build-images.outputs.frontend-tag }}
             - Backend: ${{ needs.build-images.outputs.backend-tag }}
-            
+
             ## Deployment
             - Environment: Production
             - Date: ${{ github.event.head_commit.timestamp }}

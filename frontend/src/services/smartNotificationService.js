@@ -1,13 +1,31 @@
-/**
- * Smart Notification Service
- * خدمة الإشعارات الذكية - للتواصل مع API
- *
- * يوفر دوال للتفاعل مع خدمة النوتيفيكيشنات الذكية في الـ Backend
- */
-
+// إعداد ثابت عنوان الـ API قبل تعريف الكلاس
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 class SmartNotificationService {
+  /**
+   * إرسال إشعار ذكي مخصص (مباشر)
+   * @param {Object} notification - بيانات الإشعار
+   * @returns {Promise<Object>} النتيجة
+   */
+  static async sendSmartNotification(notification) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/notifications/smart/send`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify(notification),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('خطأ في إرسال الإشعار الذكي:', error);
+      throw error;
+    }
+  }
   /**
    * الحصول على الإشعارات الذكية للمستخدم
    * @param {string} userId - معرّف المستخدم

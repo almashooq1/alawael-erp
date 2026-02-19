@@ -1,10 +1,11 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render } from '@testing-library/react';
+import { screen, fireEvent } from '@testing-library/dom';
 import '@testing-library/jest-dom';
-import { ThemeProvider } from '../contexts/ThemeContext';
-import LanguageSwitcher from '../components/LanguageSwitcher';
+import { ThemeProvider } from '../../contexts/ThemeContext';
+import LanguageSwitcher from '../LanguageSwitcher';
 
 // Mock i18n
-jest.mock('i18next-react', () => ({
+jest.mock('react-i18next', () => ({
   useTranslation: () => ({
     i18n: {
       language: 'en',

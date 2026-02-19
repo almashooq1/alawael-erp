@@ -1,751 +1,389 @@
-# دليل النشر الإنتاجي - نظام ERP مراكز الأوائل
+# 🚀 Production Deployment Guide - Advanced Branch Management System
 
-## 🚀 نظرة عامة على النشر
+## نسخة الإنتاج النهائية
 
-هذا الدليل يوضح خطوات نشر نظام ERP مراكز الأوائل في بيئة الإنتاج بشكل آمن وموثوق.
-
-**المصمم والمطور:** عبدالله المعشوق
-
----
-
-## 📋 متطلبات النظام
-
-### متطلبات الخادم الأساسية
-```
-- نظام التشغيل: Ubuntu 20.04 LTS أو CentOS 8+
-- المعالج: 4 cores minimum (8 cores recommended)
-- الذاكرة: 8GB RAM minimum (16GB recommended)
-- التخزين: 100GB SSD minimum (500GB recommended)
-- الشبكة: 100Mbps minimum bandwidth
-```
-
-### البرمجيات المطلوبة
-```
-- Python 3.9+
-- PostgreSQL 13+
-- Redis 6+
-- Nginx 1.18+
-- SSL Certificate (Let's Encrypt or commercial)
-- Docker & Docker Compose (optional but recommended)
-```
+**الإصدار**: 2.0.0  
+**الحالة**: جاهز للإنتاج  
+**آخر تحديث**: 18 فبراير 2026
 
 ---
 
-## 🐳 النشر باستخدام Docker
+## 📋 قائمة التحقق قبل النشر
 
-### 1. إعداد ملفات Docker
+### التحضيرات التقنية
 
-**Dockerfile:**
-```dockerfile
-FROM python:3.9-slim
+- [ ] تثبيت Python 3.8+ على خادم الإنتاج
+- [ ] تثبيت PostgreSQL 12+ وإنشاء قاعدة البيانات
+- [ ] نسخ ملف المتطلبات: `pip install -r requirements_advanced_branch.txt`
+- [ ] إعداد ملف `.env` بالمتغيرات الصحيحة
+- [ ] توليد مفتاح JWT قوي: `python -c "import secrets; print(secrets.token_hex(32))"`
+- [ ] إعداد شهادات SSL/TLS
+- [ ] تكوين WAF (Web Application Firewall)
 
-# Set working directory
-WORKDIR /app
+### قاعدة البيانات
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    gcc \
-    libpq-dev \
-    && rm -rf /var/lib/apt/lists/*
+- [ ] تشغيل هجرات قاعدة البيانات: `flask db upgrade`
+- [ ] التحقق من إنشاء جميع الجداول
+- [ ] إعداد نسخ احتياطية تلقائية
+- [ ] تشغيل tests الأداء الأولية
+- [ ] إعداد مراقبة قاعدة البيانات
 
-# Copy requirements and install Python dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+### الأمان
 
-# Copy application code
-COPY . .
+- [ ] تفعيل HTTPS على جميع الاتصالات
+- [ ] تكوين CORS بشكل صحيح
+- [ ] تفعيل Rate Limiting
+- [ ] إعداد Audit Logging
+- [ ] تثبيت WAF والحماية من DDoS
+- [ ] مراجعة وتصعيد الأذونات (permissions)
 
-# Create non-root user
-RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
-USER appuser
+### المراقبة والتسجيل
 
-# Expose port
-EXPOSE 5000
+- [ ] إعداد ELK Stack أو مشابه (Elasticsearch, Logstash, Kibana)
+- [ ] تكوين alerting rules
+- [ ] إعداد health check endpoints
+- [ ] تثبيت APM (Application Performance Monitoring)
+- [ ] تكوين log aggregation
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:5000/health || exit 1
+### الأداء والتوسع
 
-# Run application
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "4", "--timeout", "120", "app:app"]
-```
-
-**docker-compose.yml:**
-```yaml
-version: '3.8'
-
-services:
-  app:
-    build: .
-    ports:
-      - "5000:5000"
-    environment:
-      - DATABASE_URL=postgresql://alawael_user:${DB_PASSWORD}@db:5432/alawael_db
-      - REDIS_URL=redis://redis:6379/0
-      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
-      - FLASK_ENV=production
-    depends_on:
-      - db
-      - redis
-    volumes:
-      - ./uploads:/app/uploads
-      - ./logs:/app/logs
-    restart: unless-stopped
-    networks:
-      - alawael-network
-
-  db:
-    image: postgres:13
-    environment:
-      - POSTGRES_DB=alawael_db
-      - POSTGRES_USER=alawael_user
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./backups:/backups
-    restart: unless-stopped
-    networks:
-      - alawael-network
-
-  redis:
-    image: redis:6-alpine
-    command: redis-server --appendonly yes
-    volumes:
-      - redis_data:/data
-    restart: unless-stopped
-    networks:
-      - alawael-network
-
-  nginx:
-    image: nginx:alpine
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
-      - ./ssl:/etc/nginx/ssl
-      - ./static:/var/www/static
-    depends_on:
-      - app
-    restart: unless-stopped
-    networks:
-      - alawael-network
-
-volumes:
-  postgres_data:
-  redis_data:
-
-networks:
-  alawael-network:
-    driver: bridge
-```
-
-### 2. إعداد متغيرات البيئة
-
-**ملف .env:**
-```env
-# Database Configuration
-DB_PASSWORD=your_secure_database_password_here
-DATABASE_URL=postgresql://alawael_user:${DB_PASSWORD}@db:5432/alawael_db
-
-# Application Configuration
-JWT_SECRET_KEY=your_very_secure_jwt_secret_key_here
-FLASK_ENV=production
-SECRET_KEY=your_flask_secret_key_here
-
-# Redis Configuration
-REDIS_URL=redis://redis:6379/0
-
-# Email Configuration (for notifications)
-MAIL_SERVER=smtp.gmail.com
-MAIL_PORT=587
-MAIL_USE_TLS=True
-MAIL_USERNAME=your_email@gmail.com
-MAIL_PASSWORD=your_app_password
-
-# External API Keys
-TWILIO_ACCOUNT_SID=your_twilio_sid
-TWILIO_AUTH_TOKEN=your_twilio_token
-FIREBASE_SERVER_KEY=your_firebase_key
-
-# Security Settings
-SESSION_COOKIE_SECURE=True
-SESSION_COOKIE_HTTPONLY=True
-PERMANENT_SESSION_LIFETIME=3600
-
-# File Upload Settings
-MAX_CONTENT_LENGTH=16777216  # 16MB
-UPLOAD_FOLDER=/app/uploads
-```
-
-### 3. إعداد Nginx
-
-**nginx.conf:**
-```nginx
-events {
-    worker_connections 1024;
-}
-
-http {
-    upstream app {
-        server app:5000;
-    }
-
-    # Rate limiting
-    limit_req_zone $binary_remote_addr zone=api:10m rate=10r/s;
-    limit_req_zone $binary_remote_addr zone=login:10m rate=1r/s;
-
-    server {
-        listen 80;
-        server_name your-domain.com www.your-domain.com;
-        return 301 https://$server_name$request_uri;
-    }
-
-    server {
-        listen 443 ssl http2;
-        server_name your-domain.com www.your-domain.com;
-
-        # SSL Configuration
-        ssl_certificate /etc/nginx/ssl/fullchain.pem;
-        ssl_certificate_key /etc/nginx/ssl/privkey.pem;
-        ssl_protocols TLSv1.2 TLSv1.3;
-        ssl_ciphers ECDHE-RSA-AES256-GCM-SHA512:DHE-RSA-AES256-GCM-SHA512;
-        ssl_prefer_server_ciphers off;
-
-        # Security Headers
-        add_header X-Frame-Options DENY;
-        add_header X-Content-Type-Options nosniff;
-        add_header X-XSS-Protection "1; mode=block";
-        add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload";
-
-        # Static files
-        location /static/ {
-            alias /var/www/static/;
-            expires 1y;
-            add_header Cache-Control "public, immutable";
-        }
-
-        # API endpoints with rate limiting
-        location /api/ {
-            limit_req zone=api burst=20 nodelay;
-            proxy_pass http://app;
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-        }
-
-        # Login endpoint with stricter rate limiting
-        location /api/auth/login {
-            limit_req zone=login burst=5 nodelay;
-            proxy_pass http://app;
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-        }
-
-        # Main application
-        location / {
-            proxy_pass http://app;
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-            proxy_read_timeout 300;
-            proxy_connect_timeout 300;
-            proxy_send_timeout 300;
-        }
-    }
-}
-```
+- [ ] إعداد Nginx كـ Reverse Proxy
+- [ ] تكوين Load Balancer
+- [ ] إعداد Redis للـ Caching
+- [ ] تفعيل Database Connection Pooling
+- [ ] اختبار Load Testing
 
 ---
 
-## 🔧 النشر التقليدي (بدون Docker)
+## 🔧 خطوات النشر
 
-### 1. إعداد البيئة
-
-```bash
-# تحديث النظام
-sudo apt update && sudo apt upgrade -y
-
-# تثبيت Python و pip
-sudo apt install python3.9 python3.9-venv python3-pip -y
-
-# تثبيت PostgreSQL
-sudo apt install postgresql postgresql-contrib -y
-
-# تثبيت Redis
-sudo apt install redis-server -y
-
-# تثبيت Nginx
-sudo apt install nginx -y
-
-# تثبيت Git
-sudo apt install git -y
-```
-
-### 2. إعداد قاعدة البيانات
+### المرحلة 1: الإعداد
 
 ```bash
-# الدخول إلى PostgreSQL
-sudo -u postgres psql
+# 1. استنساخ المشروع
+git clone <repository-url>
+cd advanced-branch-system
 
-# إنشاء قاعدة البيانات والمستخدم
-CREATE DATABASE alawael_db;
-CREATE USER alawael_user WITH PASSWORD 'your_secure_password';
-GRANT ALL PRIVILEGES ON DATABASE alawael_db TO alawael_user;
-\q
-```
+# 2. إنشاء بيئة Python
+python -m venv venv
+source venv/bin/activate  # Linux/macOS
+# أو
+venv\Scripts\activate  # Windows
 
-### 3. نشر التطبيق
+# 3. تثبيت المتطلبات
+pip install -r requirements_advanced_branch.txt
 
-```bash
-# إنشاء مستخدم للتطبيق
-sudo useradd -m -s /bin/bash alawael
-sudo su - alawael
-
-# استنساخ المشروع
-git clone https://github.com/your-repo/alawael-erp.git
-cd alawael-erp
-
-# إنشاء البيئة الافتراضية
-python3.9 -m venv venv
-source venv/bin/activate
-
-# تثبيت المتطلبات
-pip install -r requirements.txt
-
-# إعداد متغيرات البيئة
+# 4. إعداد متغيرات البيئة
 cp .env.example .env
-nano .env  # تحرير المتغيرات
+# تحرير .env بالقيم الصحيحة
+nano .env
 
-# تهيئة قاعدة البيانات
-python database_init.py
-
-# إضافة البيانات التجريبية (اختياري)
-python add_sample_data.py
+# 5. جمع المتطلبات الثابتة (Static Files)
+python -c "from flask import Flask; app = Flask(__name__); print('Flask loaded')"
 ```
 
-### 4. إعداد Systemd Service
-
-**ملف /etc/systemd/system/alawael.service:**
-```ini
-[Unit]
-Description=Al-Awael ERP System
-After=network.target postgresql.service redis.service
-
-[Service]
-Type=exec
-User=alawael
-Group=alawael
-WorkingDirectory=/home/alawael/alawael-erp
-Environment=PATH=/home/alawael/alawael-erp/venv/bin
-ExecStart=/home/alawael/alawael-erp/venv/bin/gunicorn --bind 127.0.0.1:5000 --workers 4 app:app
-ExecReload=/bin/kill -s HUP $MAINPID
-Restart=always
-RestartSec=10
-
-[Install]
-WantedBy=multi-user.target
-```
+### المرحلة 2: قاعدة البيانات
 
 ```bash
-# تفعيل وتشغيل الخدمة
-sudo systemctl daemon-reload
-sudo systemctl enable alawael
-sudo systemctl start alawael
-sudo systemctl status alawael
+# 1. إنشاء قاعدة البيانات
+createdb branch_db_prod  # PostgreSQL
+
+# 2. تشغيل الهجرات
+export FLASK_APP=app.py
+export FLASK_ENV=production
+flask db init
+flask db migrate -m "Initial migration"
+flask db upgrade
+
+# 3. التحقق من الجداول
+psql branch_db_prod -c "\dt"  # يجب أن تري 8 جداول
+```
+
+### المرحلة 3: الاختبار
+
+```bash
+# 1. تشغيل اختبارات الوحدة
+python -m pytest test_advanced_branch_comprehensive.py -v
+
+# 2. اختبار الانتصال مع قاعدة البيانات
+python -c "from advanced_branch_management_models import db; print('Database connected')"
+
+# 3. التحقق من الأمان
+python -c "from advanced_branch_rbac import init_rbac; print(init_rbac(None))"
+```
+
+### المرحلة 4: التكوين
+
+```bash
+# 1. إنشاء مستخدم أول (admin)
+python scripts/create_admin_user.py
+
+# 2. تحميل البيانات الأولية (اختياري)
+python scripts/seed_database.py
+
+# 3. التحقق من صحة التكوين
+python scripts/validate_config.py
+```
+
+### المرحلة 5: النشر
+
+```bash
+# 1. تشغيل مع Gunicorn (4 workers)
+gunicorn -w 4 -b 0.0.0.0:5000 wsgi:app
+
+# 2. خلف Nginx (Reverse Proxy)
+# انظر: nginx_config.conf
+
+# 3. مع PM2 (Process Manager)
+pm2 start "gunicorn -w 4 wsgi:app" --name "branch-api"
+pm2 save
+pm2 startup
 ```
 
 ---
 
-## 🔒 إعداد الأمان
+## 🔒 إعدادات الأمان
 
-### 1. إعداد Firewall
+### Nginx Configuration (nginx_config.conf)
 
-```bash
-# تفعيل UFW
-sudo ufw enable
+```nginx
+upstream branch_api {
+    server 127.0.0.1:5000;
+    server 127.0.0.1:5001;
+    server 127.0.0.1:5002;
+    server 127.0.0.1:5003;
+}
 
-# السماح بالاتصالات الأساسية
-sudo ufw allow ssh
-sudo ufw allow 'Nginx Full'
+server {
+    listen 443 ssl http2;
+    server_name api.yourdomain.com;
 
-# منع الاتصالات المباشرة لقاعدة البيانات
-sudo ufw deny 5432
-sudo ufw deny 6379
+    ssl_certificate /etc/ssl/certs/your_cert.crt;
+    ssl_certificate_key /etc/ssl/private/your_key.key;
+    
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers on;
 
-# عرض الحالة
-sudo ufw status
-```
+    # Security Headers
+    add_header Strict-Transport-Security "max-age=31536000" always;
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "no-referrer-when-downgrade" always;
 
-### 2. إعداد SSL Certificate
+    # Rate Limiting
+    limit_req_zone $binary_remote_addr zone=api_limit:10m rate=100r/m;
+    limit_req zone=api_limit burst=200 nodelay;
 
-```bash
-# تثبيت Certbot
-sudo apt install certbot python3-certbot-nginx -y
+    location / {
+        proxy_pass http://branch_api;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        # Timeouts
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+    }
 
-# الحصول على شهادة SSL
-sudo certbot --nginx -d your-domain.com -d www.your-domain.com
+    # Health Check
+    location /health {
+        proxy_pass http://branch_api;
+        access_log off;
+    }
+}
 
-# تجديد تلقائي
-sudo crontab -e
-# إضافة السطر التالي:
-0 12 * * * /usr/bin/certbot renew --quiet
-```
-
-### 3. تقوية الأمان
-
-```bash
-# تعطيل root login عبر SSH
-sudo nano /etc/ssh/sshd_config
-# PermitRootLogin no
-# PasswordAuthentication no (إذا كنت تستخدم SSH keys)
-
-# إعادة تشغيل SSH
-sudo systemctl restart ssh
-
-# تثبيت fail2ban
-sudo apt install fail2ban -y
-sudo systemctl enable fail2ban
-sudo systemctl start fail2ban
-```
-
----
-
-## 📊 المراقبة والسجلات
-
-### 1. إعداد السجلات
-
-**ملف logging.conf:**
-```ini
-[loggers]
-keys=root,alawael
-
-[handlers]
-keys=consoleHandler,fileHandler
-
-[formatters]
-keys=simpleFormatter
-
-[logger_root]
-level=INFO
-handlers=consoleHandler
-
-[logger_alawael]
-level=INFO
-handlers=fileHandler
-qualname=alawael
-propagate=0
-
-[handler_consoleHandler]
-class=StreamHandler
-level=INFO
-formatter=simpleFormatter
-args=(sys.stdout,)
-
-[handler_fileHandler]
-class=handlers.RotatingFileHandler
-level=INFO
-formatter=simpleFormatter
-args=('/var/log/alawael/app.log', 'a', 10485760, 5)
-
-[formatter_simpleFormatter]
-format=%(asctime)s - %(name)s - %(levelname)s - %(message)s
-```
-
-### 2. إعداد مراقبة النظام
-
-```bash
-# إنشاء مجلد السجلات
-sudo mkdir -p /var/log/alawael
-sudo chown alawael:alawael /var/log/alawael
-
-# مراقبة استخدام الموارد
-sudo apt install htop iotop -y
-
-# إعداد logrotate
-sudo nano /etc/logrotate.d/alawael
-```
-
-**ملف logrotate:**
-```
-/var/log/alawael/*.log {
-    daily
-    missingok
-    rotate 30
-    compress
-    delaycompress
-    notifempty
-    create 644 alawael alawael
-    postrotate
-        systemctl reload alawael
-    endscript
+# Redirect HTTP to HTTPS
+server {
+    listen 80;
+    server_name api.yourdomain.com;
+    return 301 https://$server_name$request_uri;
 }
 ```
 
----
-
-## 💾 النسخ الاحتياطي والاستعادة
-
-### 1. نسخ احتياطي لقاعدة البيانات
-
-**سكريبت backup_db.sh:**
-```bash
-#!/bin/bash
-
-# متغيرات
-DB_NAME="alawael_db"
-DB_USER="alawael_user"
-BACKUP_DIR="/backups/database"
-DATE=$(date +%Y%m%d_%H%M%S)
-
-# إنشاء مجلد النسخ الاحتياطي
-mkdir -p $BACKUP_DIR
-
-# إنشاء النسخة الاحتياطية
-pg_dump -U $DB_USER -h localhost $DB_NAME | gzip > $BACKUP_DIR/backup_$DATE.sql.gz
-
-# حذف النسخ القديمة (أكثر من 30 يوم)
-find $BACKUP_DIR -name "backup_*.sql.gz" -mtime +30 -delete
-
-echo "Database backup completed: backup_$DATE.sql.gz"
-```
-
-### 2. نسخ احتياطي للملفات
-
-**سكريبت backup_files.sh:**
-```bash
-#!/bin/bash
-
-# متغيرات
-APP_DIR="/home/alawael/alawael-erp"
-BACKUP_DIR="/backups/files"
-DATE=$(date +%Y%m%d_%H%M%S)
-
-# إنشاء مجلد النسخ الاحتياطي
-mkdir -p $BACKUP_DIR
-
-# نسخ الملفات المهمة
-tar -czf $BACKUP_DIR/files_$DATE.tar.gz \
-    $APP_DIR/uploads \
-    $APP_DIR/.env \
-    $APP_DIR/static \
-    /etc/nginx/sites-available \
-    /etc/systemd/system/alawael.service
-
-# حذف النسخ القديمة
-find $BACKUP_DIR -name "files_*.tar.gz" -mtime +30 -delete
-
-echo "Files backup completed: files_$DATE.tar.gz"
-```
-
-### 3. جدولة النسخ الاحتياطي
-
-```bash
-# إضافة إلى crontab
-sudo crontab -e
-
-# نسخ احتياطي يومي في الساعة 2:00 صباحاً
-0 2 * * * /home/alawael/scripts/backup_db.sh
-30 2 * * * /home/alawael/scripts/backup_files.sh
-
-# نسخ احتياطي أسبوعي كامل
-0 3 * * 0 /home/alawael/scripts/full_backup.sh
-```
-
----
-
-## 🔄 التحديثات والصيانة
-
-### 1. تحديث التطبيق
-
-**سكريبت update_app.sh:**
-```bash
-#!/bin/bash
-
-# الانتقال إلى مجلد التطبيق
-cd /home/alawael/alawael-erp
-
-# إيقاف الخدمة
-sudo systemctl stop alawael
-
-# نسخ احتياطي سريع
-cp -r . ../alawael-erp-backup-$(date +%Y%m%d_%H%M%S)
-
-# تحديث الكود
-git pull origin main
-
-# تفعيل البيئة الافتراضية
-source venv/bin/activate
-
-# تحديث المتطلبات
-pip install -r requirements.txt
-
-# تحديث قاعدة البيانات
-python database_migrate.py
-
-# إعادة تشغيل الخدمة
-sudo systemctl start alawael
-
-# التحقق من الحالة
-sudo systemctl status alawael
-
-echo "Application updated successfully"
-```
-
-### 2. صيانة دورية
-
-```bash
-# تنظيف السجلات القديمة
-sudo logrotate -f /etc/logrotate.d/alawael
-
-# تحديث النظام
-sudo apt update && sudo apt upgrade -y
-
-# تنظيف الذاكرة المؤقتة
-sudo apt autoremove -y
-sudo apt autoclean
-
-# فحص مساحة القرص
-df -h
-
-# فحص استخدام الذاكرة
-free -h
-
-# فحص العمليات
-ps aux | grep alawael
-```
-
----
-
-## 🚨 استكشاف الأخطاء وإصلاحها
-
-### 1. مشاكل شائعة وحلولها
-
-**مشكلة: التطبيق لا يبدأ**
-```bash
-# فحص السجلات
-sudo journalctl -u alawael -f
-
-# فحص حالة قاعدة البيانات
-sudo systemctl status postgresql
-
-# فحص الاتصال بقاعدة البيانات
-sudo -u postgres psql -c "SELECT version();"
-```
-
-**مشكلة: بطء في الاستجابة**
-```bash
-# فحص استخدام الموارد
-htop
-iotop
-
-# فحص اتصالات قاعدة البيانات
-sudo -u postgres psql -c "SELECT * FROM pg_stat_activity;"
-
-# فحص سجلات Nginx
-sudo tail -f /var/log/nginx/access.log
-sudo tail -f /var/log/nginx/error.log
-```
-
-### 2. أوامر مفيدة للصيانة
-
-```bash
-# إعادة تشغيل جميع الخدمات
-sudo systemctl restart alawael nginx postgresql redis
-
-# فحص حالة جميع الخدمات
-sudo systemctl status alawael nginx postgresql redis
-
-# فحص الاتصال بالتطبيق
-curl -I http://localhost:5000/health
-
-# فحص استخدام المنافذ
-sudo netstat -tlnp | grep :5000
-sudo netstat -tlnp | grep :80
-sudo netstat -tlnp | grep :443
-```
-
----
-
-## 📈 تحسين الأداء
-
-### 1. تحسين قاعدة البيانات
+### Database Security
 
 ```sql
--- إنشاء فهارس للاستعلامات الشائعة
-CREATE INDEX idx_students_active ON students(is_active);
-CREATE INDEX idx_sessions_date ON ar_vr_sessions(session_date);
-CREATE INDEX idx_assessments_student ON assessments(student_id);
+-- Create read-only user for analytics
+CREATE USER read_only_user WITH PASSWORD 'strong-password';
+GRANT USAGE ON SCHEMA public TO read_only_user;
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO read_only_user;
 
--- تحليل الجداول
-ANALYZE;
+-- Create designated user for app
+CREATE USER app_user WITH PASSWORD 'strong-password';
+GRANT ALL PRIVILEGES ON DATABASE branch_db_prod TO app_user;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO app_user;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO app_user;
 
--- تحسين إعدادات PostgreSQL
--- في ملف /etc/postgresql/13/main/postgresql.conf
-shared_buffers = 256MB
-effective_cache_size = 1GB
-work_mem = 4MB
-maintenance_work_mem = 64MB
-```
-
-### 2. تحسين التطبيق
-
-```python
-# في app.py - إضافة تخزين مؤقت
-from flask_caching import Cache
-
-cache = Cache(app, config={'CACHE_TYPE': 'redis'})
-
-@app.route('/api/dashboard')
-@cache.cached(timeout=300)  # 5 دقائق
-def dashboard():
-    # كود لوحة التحكم
-    pass
-```
-
-### 3. تحسين Nginx
-
-```nginx
-# في nginx.conf
-worker_processes auto;
-worker_connections 2048;
-
-# تفعيل الضغط
-gzip on;
-gzip_vary on;
-gzip_min_length 1024;
-gzip_types text/plain text/css application/json application/javascript;
-
-# تحسين التخزين المؤقت
-location ~* \.(jpg|jpeg|png|gif|ico|css|js)$ {
-    expires 1y;
-    add_header Cache-Control "public, immutable";
-}
+-- Enable SSL for PostgreSQL connections
+-- In postgresql.conf: ssl = on
+-- Restart PostgreSQL service
 ```
 
 ---
 
-## 📞 الدعم والمساعدة
+## 📊 المراقبة والتسجيل
 
-### معلومات الاتصال
-- **المطور:** عبدالله المعشوق
-- **البريد الإلكتروني:** [البريد الإلكتروني]
-- **الدعم الفني:** 24/7 متاح
+### Health Check Endpoint
 
-### الموارد المفيدة
-- **التوثيق الفني:** `/docs`
-- **API Documentation:** `/api/docs`
-- **دليل المستخدم:** `/user-guide`
-- **الأسئلة الشائعة:** `/faq`
+```bash
+curl -X GET https://api.yourdomain.com/health
+# الرد المتوقع:
+# {
+#   "status": "healthy",
+#   "version": "2.0.0",
+#   "database": "connected",
+#   "timestamp": "2026-02-18T10:00:00Z"
+# }
+```
+
+### Log Files Location
+
+```
+/var/log/branch-api/
+├── error.log
+├── access.log
+├── audit.log
+└── performance.log
+```
+
+### مراقبة الأداء
+
+```bash
+# CPU & Memory
+top -p $(pgrep -f "gunicorn.*wsgi")
+
+# Database Connections
+psql branch_db_prod -c "SELECT datname, count(*) FROM pg_stat_activity GROUP BY datname;"
+
+# Request Rate
+tail -f /var/log/branch-api/access.log | wc -l
+```
 
 ---
 
-**تاريخ آخر تحديث:** 2025-01-06
-**الإصدار:** 1.0.0
-**الحالة:** جاهز للإنتاج
+## 🔄 النسخ الاحتياطية والاسترجاع
 
-**© 2025 مراكز الأوائل - تصميم وتطوير: عبدالله المعشوق**
+### النسخ الاحتياطية التلقائية
+
+```bash
+#!/bin/bash
+# backup_database.sh
+
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+BACKUP_DIR="/backup/branch-db"
+DB_NAME="branch_db_prod"
+
+mkdir -p $BACKUP_DIR
+
+# Full backup
+pg_dump $DB_NAME | gzip > $BACKUP_DIR/backup_$TIMESTAMP.sql.gz
+
+# Keep only last 30 days
+find $BACKUP_DIR -name "backup_*.sql.gz" -mtime +30 -delete
+
+# Upload to cloud storage (optional)
+# aws s3 cp $BACKUP_DIR/backup_$TIMESTAMP.sql.gz s3://backups/
+```
+
+جدولة مع Cron:
+```
+0 2 * * * /home/app/scripts/backup_database.sh
+```
+
+### الاسترجاع من النسخة الاحتياطية
+
+```bash
+# استخدم zcat و psql معاً
+gunzip -c /backup/branch-db/backup_20260218_020000.sql.gz | psql branch_db_prod
+```
+
+---
+
+## 🚨 استجابة الأزمات
+
+### إذا حدث خطأ في الخادم
+
+```bash
+# 1. التحقق من الحالة
+systemctl status branch-api
+
+# 2. عرض السجلات
+journalctl -n 100 -f
+
+# 3. إعادة التشغيل
+systemctl restart branch-api
+
+# 4. إذا لم ينجح، استخدم النسخة السابقة
+git checkout <previous-version>
+systemctl restart branch-api
+```
+
+### إذا حدث خطأ في قاعدة البيانات
+
+```bash
+# 1. التحقق من الاتصال
+psql -h localhost -U app_user -d branch_db_prod -c "SELECT 1;"
+
+# 2. استعادة من النسخة الاحتياطية
+# انظر: الاسترجاع من النسخة الاحتياطية أعلاه
+
+# 3. التحقق من التكامل
+flask db check
+```
+
+---
+
+## 📈 التحسينات المستقبلية
+
+### المرحلة التالية (3-6 أشهر)
+
+- [ ] تطبيق الهاتف الذكي (iOS/Android)
+- [ ] لوحة تحكم ويب متقدمة
+- [ ] تكامل Real-time مع WebSockets
+- [ ] نماذج ML متقدمة
+
+### الأداء
+
+- [ ] تحسين queries قاعدة البيانات
+- [ ] إضافة Caching أكثر ذكاءً
+- [ ] توسع الخوادم الموازية
+
+---
+
+## 📞 الدعم والتواصل
+
+| القناة | التفاصيل |
+|--------|----------|
+| البريد الإلكتروني | support@yourdomain.com |
+| الهاتف | +966-11-XXXX-XXXX |
+| الموقع | https://yourdomain.com/support |
+| الوثائق | https://docs.yourdomain.com |
+
+---
+
+## ✅ قائمة التحقق النهائية
+
+- [ ] جميع الاختبارات تمر بنجاح
+- [ ] قاعدة البيانات تعمل بشكل صحيح
+- [ ] HTTPS مفعّل وآمن
+- [ ] النسخ الاحتياطية تعمل
+- [ ] المراقبة تعمل
+- [ ] Logging مفعّل
+- [ ] Rate Limiting مفعّل
+- [ ] CORS مكون بشكل صحيح
+- [ ] الفريق مدرب على النظام
+- [ ] التوثيق محدثة
+
+---
+
+**النظام جاهز للنشر في الإنتاج!** ✅
+
+---
+
+**أخر تحديث**: 18 فبراير 2026  
+**الإصدار**: 2.0.0  
+**الحالة**: ✅ جاهز للإنتاج

@@ -1,0 +1,32 @@
+{
+    "name": "supply-chain-backend",
+    "version": "1.0.0",
+    "main": "index.js",
+    "scripts": {
+        "start": "node server-clean.js",
+        "test": "jest --testEnvironment=node",
+        "test:watch": "jest --watch --testEnvironment=node",
+        "test:coverage": "jest --coverage --testEnvironment=node",
+        "dev": "nodemon server-clean.js"
+    },
+    "dependencies": {
+        "bcrypt": "^5.0.0",
+        "bwip-js": "^4.8.0",
+        "canvas": "^3.2.1",
+        "cors": "^2.8.5",
+        "dotenv": "^16.0.0",
+        "express": "^4.18.2",
+        "express-rate-limit": "^6.11.2",
+        "express-validator": "^7.0.0",
+        "jsbarcode": "^3.12.3",
+        "jsonwebtoken": "^9.0.0",
+        "mongoose": "^7.0.0",
+        "qrcode": "^1.5.4",
+        "winston": "^3.19.0"
+    },
+    "devDependencies": {
+        "jest": "^29.7.0",
+        "nodemon": "^3.0.2",
+        "supertest": "^6.3.3"
+    }
+}

@@ -28,6 +28,8 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import axios from 'axios';
+import api from '../utils/api';
+import SmartNotificationService from '../services/smartNotificationService';
 
 const DEMO_PREDICTIONS = {
   prediction: { value: 85, confidence: 0.92 },
@@ -66,15 +68,9 @@ const AIAnalyticsDashboard = () => {
 
   useEffect(() => {
     // Get user ID from localStorage
-    const uid = localStorage.getItem('userId');
-    if (uid) {
-      setUserId(uid);
-      loadAnalytics(uid);
-    } else {
-      // If no user ID, try to load demo anyway for preview
-      setUserId('demo-user');
-      loadAnalytics('demo-user');
-    }
+    const uid = localStorage.getItem('userId') || '123';
+    setUserId(uid);
+    loadAnalytics(uid);
   }, []);
 
   const loadAnalytics = async (uid) => {
@@ -83,39 +79,61 @@ const AIAnalyticsDashboard = () => {
       setError(null);
       setUsingDemo(false);
 
-      const token = localStorage.getItem('token');
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      // جلب بيانات توقع الغياب بالذكاء الاصطناعي من backend الجديد
+      const aiRes = await api.post('/ai/predict-absence', {
+        studentId: uid,
+        absencesLast30Days: 2, // يمكن استبدالها بقيم حقيقية
+        attendanceRate: 0.92,
+        behaviorScore: 0.85,
+        performanceScore: 0.8,
+      });
+      const aiData = aiRes.data || {};
 
-      // Attempt to fetch real data
-      const [predRes, recRes] = await Promise.all([
-        axios.get(`/api/ai-predictions/predictions/${uid}`, { headers }),
-        axios.get(`/api/ai-predictions/recommendations/${uid}`, { headers }),
+      // تحويل النتيجة إلى نفس بنية العرض
+      setPredictions({
+        prediction: { value: aiData.attendanceProbability || (aiData.probability ? aiData.probability * 100 : 0), confidence: (aiData.confidence || 0.9) },
+        factors: [
+          { factor: 'نسبة الحضور', weight: aiData.attendanceRate || 0.92 },
+          { factor: 'السلوك', weight: aiData.behaviorScore || 0.85 },
+          { factor: 'الأداء', weight: aiData.performanceScore || 0.8 },
+        ],
+        predictionType: aiData.risk || 'غياب',
+        modelVersion: aiData.algorithm || '1.0.0',
+        accuracy: aiData.confidence || 0.9,
+      });
+      setRecommendations([
+        {
+          title: aiData.risk === 'high' ? 'احتمال غياب مرتفع' : aiData.risk === 'medium' ? 'احتمال غياب متوسط' : 'احتمال غياب منخفض',
+          description: aiData.recommendedAction || 'يرجى متابعة الطالب عن كثب.',
+          priority: aiData.risk === 'high' ? 'critical' : aiData.risk === 'medium' ? 'high' : 'info',
+          expectedImpact: aiData.probability || 0.1,
+        },
       ]);
 
-      const predData = predRes.data?.data || [];
-      const recData = recRes.data?.data || [];
-      
-      if (predData.length > 0) {
-        setPredictions(predData[0]);
-      } else {
-         // Fallback to Demo if API returns empty
-         setUsingDemo(true);
-         setPredictions(DEMO_PREDICTIONS);
+      // إرسال إشعار ذكي تلقائي عند توقع غياب مرتفع
+      if (aiData.risk === 'high') {
+        try {
+          await SmartNotificationService.sendSmartNotification({
+            userId: uid,
+            type: 'ai_absence_alert',
+            title: '🚨 تنبيه ذكاء اصطناعي: احتمال غياب مرتفع',
+            message: `توقع النظام احتمال غياب مرتفع للطالب رقم ${uid} (النسبة: ${(aiData.probability * 100).toFixed(1)}%)`,
+            priority: 5,
+            icon: '🚨',
+            color: '#f44336',
+            tags: ['ai', 'absence', 'alert'],
+            createdAt: new Date(),
+            isRead: false,
+          });
+        } catch (e) {
+          // تجاهل الخطأ في الإشعار الذكي
+        }
       }
-      
-      if (recData.length > 0) {
-         setRecommendations(recData);
-      } else {
-         setRecommendations(DEMO_RECOMMENDATIONS);
-      }
-
     } catch (err) {
       console.warn('Backend connection failed, using demo data.', err);
-      // Fallback to Demo Data on Error
       setUsingDemo(true);
       setPredictions(DEMO_PREDICTIONS);
       setRecommendations(DEMO_RECOMMENDATIONS);
-      // Don't set error here, just show demo mode warning
     } finally {
       setLoading(false);
     }

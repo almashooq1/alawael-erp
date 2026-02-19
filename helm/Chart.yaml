@@ -1,0 +1,476 @@
+# Helm Chart for Therapeutic System
+# نظام إدارة الجلسات العلاجية - مخطط Helm
+
+apiVersion: v2
+name: therapy-system
+description: A Helm chart for the Therapeutic Session Management System
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+
+keywords:
+  - therapy
+  - healthcare
+  - session-management
+
+maintainers:
+  - name: DevOps Team
+    email: devops@therapy.com
+
+home: https://github.com/your-org/therapeutic-system
+sources:
+  - https://github.com/your-org/therapeutic-system
+
+dependencies: []
+
+---
+# values.yaml - Default configuration
+# Override with: helm install therapy . -f custom-values.yaml
+
+global:
+  environment: production
+  region: eastus
+  domain: therapy.yourdomain.com
+
+imagePullSecrets:
+  - name: azure-registry-credentials
+
+image:
+  registry: therapyregistry.azurecr.io
+  tag: "1.0.0"
+  pullPolicy: IfNotPresent
+
+replicaCount: 5
+
+# API Service
+api:
+  name: therapy-api
+  enabled: true
+  image: therapy-api
+  port: 3001
+
+  resources:
+    requests:
+      cpu: 500m
+      memory: 512Mi
+    limits:
+      cpu: 2000m
+      memory: 2Gi
+
+  autoscaling:
+    enabled: true
+    minReplicas: 5
+    maxReplicas: 20
+    targetCPU: 60
+    targetMemory: 75
+
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: 3001
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+  readinessProbe:
+    httpGet:
+      path: /health/ready
+      port: 3001
+    initialDelaySeconds: 10
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 2
+
+  env:
+    - name: NODE_ENV
+      value: "production"
+    - name: LOG_LEVEL
+      value: "info"
+    - name: CORS_ORIGIN
+      value: "https://therapy.yourdomain.com"
+
+# Frontend Service
+frontend:
+  name: therapy-frontend
+  enabled: true
+  image: therapy-frontend
+  port: 80
+  replicas: 2
+
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+
+# MongoDB
+mongodb:
+  enabled: true
+  auth:
+    enabled: true
+    username: therapy-admin
+    # password: set via secrets
+
+  primary:
+    replicas: 3
+    persistence:
+      enabled: true
+      size: 100Gi
+      storageClass: "managed-premium"
+
+  replicaSet:
+    name: therapy-rs
+
+# Redis
+redis:
+  enabled: true
+  auth:
+    enabled: true
+    # password: set via secrets
+
+  replica: 2
+  persistence:
+    enabled: true
+    size: 50Gi
+
+# Ingress
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+
+  hosts:
+    - host: api.therapy.yourdomain.com
+      paths:
+        - path: /
+          pathType: Prefix
+    - host: therapy.yourdomain.com
+      paths:
+        - path: /
+          pathType: Prefix
+
+  tls:
+    - secretName: therapy-tls
+      hosts:
+        - api.therapy.yourdomain.com
+        - therapy.yourdomain.com
+
+# Monitoring
+prometheus:
+  enabled: true
+  retention: "15d"
+
+  scrapeConfigs:
+    - job_name: 'therapy-api'
+      kubernetes_sd_configs:
+        - role: pod
+      relabel_configs:
+        - source_labels: [__meta_kubernetes_pod_label_app]
+          action: keep
+          regex: therapy-api
+
+grafana:
+  enabled: true
+  adminPassword: "SECURE_PASSWORD"
+  dashboards:
+    - name: api-performance
+      path: "/dashboards/api-performance.json"
+    - name: database-metrics
+      path: "/dashboards/database-metrics.json"
+
+# Logging
+logging:
+  enabled: true
+  elasticsearch:
+    host: elasticsearch.logging
+    port: 9200
+
+  kibana:
+    enabled: true
+    replicas: 2
+
+---
+# Chart Templates (in templates/ directory)
+
+# templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "therapy.fullname" . }}-{{ .Values.api.name }}
+  labels:
+    {{- include "therapy.labels" . | nindent 4 }}
+    component: api
+spec:
+  {{- if not .Values.api.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "therapy.selectorLabels" . | nindent 6 }}
+      component: api
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3001"
+        prometheus.io/path: "/metrics"
+      labels:
+        {{- include "therapy.selectorLabels" . | nindent 8 }}
+        component: api
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "therapy.serviceAccountName" . }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+
+      containers:
+      - name: api
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+              - ALL
+        image: "{{ .Values.image.registry }}/{{ .Values.api.image }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - name: http
+          containerPort: {{ .Values.api.port }}
+          protocol: TCP
+
+        livenessProbe:
+          {{- toYaml .Values.api.livenessProbe | nindent 12 }}
+
+        readinessProbe:
+          {{- toYaml .Values.api.readinessProbe | nindent 12 }}
+
+        resources:
+          {{- toYaml .Values.api.resources | nindent 12 }}
+
+        env:
+        {{- toYaml .Values.api.env | nindent 12 }}
+        - name: MONGODB_URI
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "therapy.fullname" . }}-secrets
+              key: mongodb-uri
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "therapy.fullname" . }}-secrets
+              key: redis-url
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "therapy.fullname" . }}-secrets
+              key: jwt-secret
+
+        volumeMounts:
+        - name: empty-dir
+          mountPath: /tmp
+        - name: cache-dir
+          mountPath: /app/cache
+
+      volumes:
+      - name: empty-dir
+        emptyDir: {}
+      - name: cache-dir
+        emptyDir:
+          sizeLimit: 1Gi
+
+---
+# templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "therapy.fullname" . }}-{{ .Values.api.name }}
+  labels:
+    {{- include "therapy.labels" . | nindent 4 }}
+    component: api
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: http
+    protocol: TCP
+    name: http
+  selector:
+    {{- include "therapy.selectorLabels" . | nindent 4 }}
+    component: api
+
+---
+# templates/hpa.yaml
+{{- if .Values.api.autoscaling.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "therapy.fullname" . }}-{{ .Values.api.name }}
+  labels:
+    {{- include "therapy.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "therapy.fullname" . }}-{{ .Values.api.name }}
+  minReplicas: {{ .Values.api.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.api.autoscaling.maxReplicas }}
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: {{ .Values.api.autoscaling.targetCPU }}
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: {{ .Values.api.autoscaling.targetMemory }}
+{{- end }}
+
+---
+# templates/_helpers.tpl
+{{/*
+Expand the name of the chart.
+*/}}
+{{- define "therapy.name" -}}
+{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{/*
+Create a default fully qualified app name.
+*/}}
+{{- define "therapy.fullname" -}}
+{{- if .Values.fullnameOverride }}
+{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
+{{- else }}
+{{- $name := default .Chart.Name .Values.nameOverride }}
+{{- if contains $name .Release.Name }}
+{{- .Release.Name | trunc 63 | trimSuffix "-" }}
+{{- else }}
+{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+{{/*
+Create chart name and version as used by the chart label.
+*/}}
+{{- define "therapy.chart" -}}
+{{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{/*
+Common labels
+*/}}
+{{- define "therapy.labels" -}}
+helm.sh/chart: {{ include "therapy.chart" . }}
+{{ include "therapy.selectorLabels" . }}
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}
+
+{{/*
+Selector labels
+*/}}
+{{- define "therapy.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "therapy.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{/*
+Create the name of the service account to use
+*/}}
+{{- define "therapy.serviceAccountName" -}}
+{{- if .Values.serviceAccount.create }}
+{{- default (include "therapy.fullname" .) .Values.serviceAccount.name }}
+{{- else }}
+{{- default "default" .Values.serviceAccount.name }}
+{{- end }}
+{{- end }}
+
+---
+# Installation Instructions
+
+## Prerequisites
+- Kubernetes 1.24+
+- Helm 3.10+
+- Azure CLI (for secrets management)
+
+## Installation Steps
+
+### 1. Create Namespace
+```bash
+kubectl create namespace therapy-prod
+```
+
+### 2. Create Secrets
+```bash
+# Generate secure passwords
+MONGO_PASS=$(openssl rand -base64 32)
+REDIS_PASS=$(openssl rand -base64 32)
+JWT_SECRET=$(openssl rand -base64 32)
+
+# Create from Azure Key Vault or local
+kubectl create secret generic therapy-secrets \
+  --from-literal=mongodb-uri="mongodb+srv://therapy-admin:$MONGO_PASS@cosmosdb.mongo.cosmos.azure.com:10255/therapy" \
+  --from-literal=redis-url="redis://:$REDIS_PASS@redis-service:6379" \
+  --from-literal=jwt-secret="$JWT_SECRET" \
+  -n therapy-prod
+```
+
+### 3. Add Helm Repositories
+```bash
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+```
+
+### 4. Install Chart
+```bash
+helm install therapy . \
+  -f values.yaml \
+  -n therapy-prod \
+  --create-namespace
+```
+
+### 5. Verify Installation
+```bash
+helm test therapy -n therapy-prod
+kubectl get pods -n therapy-prod
+kubectl get svc -n therapy-prod
+```
+
+### 6. Upgrade (New Version)
+```bash
+helm upgrade therapy . \
+  -f values.yaml \
+  -n therapy-prod
+```
+
+### 7. Rollback (If Needed)
+```bash
+helm rollback therapy 1 -n therapy-prod
+```
+
+## Default Access
+
+- API: `http://api.therapy.yourdomain.com`
+- Frontend: `http://therapy.yourdomain.com`
+- Grafana: `http://grafana.therapy.yourdomain.com`
+  - Username: admin
+  - Password: (set in values.yaml)
+

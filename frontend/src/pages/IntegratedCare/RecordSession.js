@@ -9,9 +9,6 @@ import {
   Grid,
   MenuItem,
   Rating,
-  Slider,
-  CircularProgress,
-  Alert,
 } from '@mui/material';
 import { Save as SaveIcon } from '@mui/icons-material';
 import axios from 'axios';
@@ -21,7 +18,6 @@ function RecordSession() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [students, setStudents] = useState([]);
-  const [activePlan, setActivePlan] = useState(null);
 
   // Flattened list of goals for selection
   const [availableGoals, setAvailableGoals] = useState([]);
@@ -76,7 +72,10 @@ function RecordSession() {
     } else {
       setSessionData(prev => ({
         ...prev,
-        goalsWorkedOn: [...prev.goalsWorkedOn, { goalId: goal.id, goalTitle: goal.title, score: 3, comments: '' }],
+        goalsWorkedOn: [
+          ...prev.goalsWorkedOn,
+          { goalId: goal.id, goalTitle: goal.title, score: 3, comments: '' },
+        ],
       }));
     }
   };
@@ -84,7 +83,9 @@ function RecordSession() {
   const updateGoalData = (goalId, field, value) => {
     setSessionData(prev => ({
       ...prev,
-      goalsWorkedOn: prev.goalsWorkedOn.map(g => (g.goalId === goalId ? { ...g, [field]: value } : g)),
+      goalsWorkedOn: prev.goalsWorkedOn.map(g =>
+        g.goalId === goalId ? { ...g, [field]: value } : g
+      ),
     }));
   };
 
@@ -162,13 +163,21 @@ function RecordSession() {
           <Typography variant="h6" gutterBottom>
             Select Goals Worked On:
           </Typography>
-          {availableGoals.length === 0 && <Typography color="text.secondary">Select a student first to see active goals.</Typography>}
+          {availableGoals.length === 0 && (
+            <Typography color="text.secondary">
+              Select a student first to see active goals.
+            </Typography>
+          )}
 
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 3 }}>
             {availableGoals.map(goal => (
               <Button
                 key={goal.id}
-                variant={sessionData.goalsWorkedOn.find(g => g.goalId === goal.id) ? 'contained' : 'outlined'}
+                variant={
+                  sessionData.goalsWorkedOn.find(g => g.goalId === goal.id)
+                    ? 'contained'
+                    : 'outlined'
+                }
                 onClick={() => handleGoalToggle(goal)}
               >
                 {goal.domain}: {goal.title}
@@ -185,7 +194,10 @@ function RecordSession() {
               <Grid container spacing={2} alignItems="center">
                 <Grid item xs={12} sm={4}>
                   <Typography component="legend">Performance (1-5)</Typography>
-                  <Rating value={g.score} onChange={(e, val) => updateGoalData(g.goalId, 'score', val)} />
+                  <Rating
+                    value={g.score}
+                    onChange={(e, val) => updateGoalData(g.goalId, 'score', val)}
+                  />
                 </Grid>
                 <Grid item xs={12} sm={8}>
                   <TextField

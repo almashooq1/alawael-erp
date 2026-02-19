@@ -1,0 +1,619 @@
+{
+  "info": {
+    "name": "ERP System API Collection",
+    "description": "Complete API collection for SSO and Supply Chain Management",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0",
+    "exporter-id": "12345678"
+  },
+  "item": [
+    {
+      "name": "SSO System",
+      "description": "Single Sign-On API Endpoints",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{sso_base_url}}/health",
+              "host": ["{{sso_base_url}}"],
+              "path": ["api", "sso", "health"]
+            }
+          }
+        },
+        {
+          "name": "Status",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{sso_base_url}}/status",
+              "host": ["{{sso_base_url}}"],
+              "path": ["api", "sso", "status"]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\",\n  \"deviceId\": \"device_uuid\",\n  \"userAgent\": \"Mozilla/5.0\"\n}"
+            },
+            "url": {
+              "raw": "{{sso_base_url}}/login",
+              "host": ["{{sso_base_url}}"],
+              "path": ["api", "sso", "login"]
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{sso_base_url}}/logout",
+              "host": ["{{sso_base_url}}"],
+              "path": ["api", "sso", "logout"]
+            }
+          }
+        },
+        {
+          "name": "Logout All Sessions",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{sso_base_url}}/logout-all",
+              "host": ["{{sso_base_url}}"],
+              "path": ["api", "sso", "logout-all"]
+            }
+          }
+        },
+        {
+          "name": "Verify Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{access_token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{sso_base_url}}/verify-token",
+              "host": ["{{sso_base_url}}"],
+              "path": ["api", "sso", "verify-token"]
+            }
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refresh_token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{sso_base_url}}/refresh-token",
+              "host": ["{{sso_base_url}}"],
+              "path": ["api", "sso", "refresh-token"]
+            }
+          }
+        },
+        {
+          "name": "Introspect Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{access_token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{sso_base_url}}/introspect",
+              "host": ["{{sso_base_url}}"],
+              "path": ["api", "sso", "introspect"]
+            }
+          }
+        },
+        {
+          "name": "List Sessions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{sso_base_url}}/sessions",
+              "host": ["{{sso_base_url}}"],
+              "path": ["api", "sso", "sessions"]
+            }
+          }
+        },
+        {
+          "name": "Get User Info",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{sso_base_url}}/userinfo",
+              "host": ["{{sso_base_url}}"],
+              "path": ["api", "sso", "userinfo"]
+            }
+          }
+        },
+        {
+          "name": "OAuth2 Authorize",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{sso_base_url}}/oauth2/authorize?client_id=sso-client&redirect_uri=http://localhost:3000/callback&response_type=code&scope=openid profile email",
+              "host": ["{{sso_base_url}}"],
+              "path": ["api", "sso", "oauth2", "authorize"],
+              "query": [
+                {
+                  "key": "client_id",
+                  "value": "sso-client"
+                },
+                {
+                  "key": "redirect_uri",
+                  "value": "http://localhost:3000/callback"
+                },
+                {
+                  "key": "response_type",
+                  "value": "code"
+                },
+                {
+                  "key": "scope",
+                  "value": "openid profile email"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "OAuth2 Token Exchange",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"grant_type\": \"authorization_code\",\n  \"code\": \"auth_code_from_authorize\",\n  \"client_id\": \"sso-client\",\n  \"client_secret\": \"secret\",\n  \"redirect_uri\": \"http://localhost:3000/callback\"\n}"
+            },
+            "url": {
+              "raw": "{{sso_base_url}}/oauth2/token",
+              "host": ["{{sso_base_url}}"],
+              "path": ["api", "sso", "oauth2", "token"]
+            }
+          }
+        },
+        {
+          "name": "OAuth2 User Info",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{sso_base_url}}/oauth2/userinfo",
+              "host": ["{{sso_base_url}}"],
+              "path": ["api", "sso", "oauth2", "userinfo"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Supply Chain Management",
+      "description": "Supply Chain API Endpoints",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{main_base_url}}/status",
+              "host": ["{{main_base_url}}"],
+              "path": ["api", "supply-chain", "status"]
+            }
+          }
+        },
+        {
+          "name": "Analytics",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{main_base_url}}/analytics",
+              "host": ["{{main_base_url}}"],
+              "path": ["api", "supply-chain", "analytics"]
+            }
+          }
+        },
+        {
+          "name": "Suppliers",
+          "item": [
+            {
+              "name": "Create Supplier",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Supplier Name\",\n  \"email\": \"contact@supplier.com\",\n  \"phone\": \"+966-500-000-000\",\n  \"address\": \"Address\",\n  \"category\": \"electronics\"\n}"
+                },
+                "url": {
+                  "raw": "{{main_base_url}}/suppliers",
+                  "host": ["{{main_base_url}}"],
+                  "path": ["api", "supply-chain", "suppliers"]
+                }
+              }
+            },
+            {
+              "name": "List Suppliers",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{main_base_url}}/suppliers?category=electronics&status=active&minRating=3&limit=50",
+                  "host": ["{{main_base_url}}"],
+                  "path": ["api", "supply-chain", "suppliers"],
+                  "query": [
+                    {
+                      "key": "category",
+                      "value": "electronics"
+                    },
+                    {
+                      "key": "status",
+                      "value": "active"
+                    },
+                    {
+                      "key": "minRating",
+                      "value": "3"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "50"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Supplier",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{main_base_url}}/suppliers/{{supplier_id}}",
+                  "host": ["{{main_base_url}}"],
+                  "path": ["api", "supply-chain", "suppliers", "{{supplier_id}}"]
+                }
+              }
+            },
+            {
+              "name": "Update Supplier",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"active\",\n  \"rating\": 4.5\n}"
+                },
+                "url": {
+                  "raw": "{{main_base_url}}/suppliers/{{supplier_id}}",
+                  "host": ["{{main_base_url}}"],
+                  "path": ["api", "supply-chain", "suppliers", "{{supplier_id}}"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Inventory",
+          "item": [
+            {
+              "name": "Add Product",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"sku\": \"SKU-001\",\n  \"name\": \"Product Name\",\n  \"category\": \"electronics\",\n  \"quantity\": 100,\n  \"minLevel\": 10,\n  \"price\": 299.99,\n  \"unit\": \"piece\",\n  \"supplierId\": \"supplier_1\"\n}"
+                },
+                "url": {
+                  "raw": "{{main_base_url}}/inventory",
+                  "host": ["{{main_base_url}}"],
+                  "path": ["api", "supply-chain", "inventory"]
+                }
+              }
+            },
+            {
+              "name": "Update Stock",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"quantityChange\": 50,\n  \"reason\": \"Restock\"\n}"
+                },
+                "url": {
+                  "raw": "{{main_base_url}}/inventory/{{product_id}}",
+                  "host": ["{{main_base_url}}"],
+                  "path": ["api", "supply-chain", "inventory", "{{product_id}}"]
+                }
+              }
+            },
+            {
+              "name": "Get Inventory Status",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{main_base_url}}/inventory/status",
+                  "host": ["{{main_base_url}}"],
+                  "path": ["api", "supply-chain", "inventory", "status"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Purchase Orders",
+          "item": [
+            {
+              "name": "Create Order",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"supplierId\": \"supplier_1\",\n  \"items\": [\n    {\n      \"productId\": \"product_1\",\n      \"quantity\": 50,\n      \"unitPrice\": 299.99\n    }\n  ],\n  \"totalAmount\": 14999.50,\n  \"priority\": \"high\",\n  \"dueDate\": \"2026-02-25T00:00:00Z\"\n}"
+                },
+                "url": {
+                  "raw": "{{main_base_url}}/orders",
+                  "host": ["{{main_base_url}}"],
+                  "path": ["api", "supply-chain", "orders"]
+                }
+              }
+            },
+            {
+              "name": "List Orders",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{main_base_url}}/orders?status=confirmed&supplierId=supplier_1&limit=50",
+                  "host": ["{{main_base_url}}"],
+                  "path": ["api", "supply-chain", "orders"],
+                  "query": [
+                    {
+                      "key": "status",
+                      "value": "confirmed"
+                    },
+                    {
+                      "key": "supplierId",
+                      "value": "supplier_1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "50"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Order",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{main_base_url}}/orders/{{order_id}}",
+                  "host": ["{{main_base_url}}"],
+                  "path": ["api", "supply-chain", "orders", "{{order_id}}"]
+                }
+              }
+            },
+            {
+              "name": "Update Order Status",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"delivered\"\n}"
+                },
+                "url": {
+                  "raw": "{{main_base_url}}/orders/{{order_id}}/status",
+                  "host": ["{{main_base_url}}"],
+                  "path": ["api", "supply-chain", "orders", "{{order_id}}", "status"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Shipments",
+          "item": [
+            {
+              "name": "Create Shipment",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"orderId\": \"po_123\",\n  \"carrier\": \"DHL\",\n  \"estimatedDelivery\": \"2026-02-23T00:00:00Z\"\n}"
+                },
+                "url": {
+                  "raw": "{{main_base_url}}/shipments",
+                  "host": ["{{main_base_url}}"],
+                  "path": ["api", "supply-chain", "shipments"]
+                }
+              }
+            },
+            {
+              "name": "Update Shipment Status",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"in-transit\",\n  \"location\": \"Regional Hub\"\n}"
+                },
+                "url": {
+                  "raw": "{{main_base_url}}/shipments/{{shipment_id}}/status",
+                  "host": ["{{main_base_url}}"],
+                  "path": ["api", "supply-chain", "shipments", "{{shipment_id}}", "status"]
+                }
+              }
+            },
+            {
+              "name": "Track Shipment",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{main_base_url}}/shipments/track/{{tracking_number}}",
+                  "host": ["{{main_base_url}}"],
+                  "path": ["api", "supply-chain", "shipments", "track", "{{tracking_number}}"]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "sso_base_url",
+      "value": "http://localhost:3002/api/sso",
+      "type": "string"
+    },
+    {
+      "key": "main_base_url",
+      "value": "http://localhost:3001/api/supply-chain",
+      "type": "string"
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refresh_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "supplier_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "product_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "order_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "shipment_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "tracking_number",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}

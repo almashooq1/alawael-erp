@@ -1,7 +1,8 @@
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
+import { screen } from '@testing-library/dom';
 import '@testing-library/jest-dom';
-import { ThemeProvider } from '../contexts/ThemeContext';
-import AnimatedCard from '../components/AnimatedCard';
+import { ThemeProvider } from '../../contexts/ThemeContext';
+import AnimatedCard from '../AnimatedCard';
 
 describe('AnimatedCard Component', () => {
   it('renders children content', () => {
@@ -19,7 +20,7 @@ describe('AnimatedCard Component', () => {
   it('supports all animation variants', () => {
     const variants = ['fadeIn', 'slideUp', 'scaleIn'] as const;
 
-    variants.forEach((variant) => {
+    variants.forEach(variant => {
       const { unmount } = render(
         <ThemeProvider defaultMode="light">
           <AnimatedCard variant={variant}>

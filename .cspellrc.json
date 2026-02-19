@@ -1,0 +1,32 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "words": [
+    "exceljs",
+    "openxmlformats",
+    "officedocument",
+    "spreadsheetml",
+    "msword",
+    "pdfkit",
+    "nodemon",
+    "multer",
+    "nodemailer",
+    "bcryptjs",
+    "jwt",
+    "qrcode",
+    "cors",
+    "helmet",
+    "mongoose",
+    "dotenv"
+  ],
+  "ignoreRegExpList": [
+    "/[\\u0600-\\u06FF]+/g"
+  ],
+  "ignorePaths": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.git/**",
+    ".cspellrc.json"
+  ]
+}

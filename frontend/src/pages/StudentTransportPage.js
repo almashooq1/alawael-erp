@@ -27,7 +27,7 @@ import {
   Tab,
 } from '@mui/material';
 import { DirectionsBus, LocationOn } from '@mui/icons-material';
-import api from '../services/api';
+import api from '../utils/api';
 
 const StudentTransportPage = () => {
   const [registrations, setRegistrations] = useState([]);
@@ -139,7 +139,7 @@ const StudentTransportPage = () => {
       // جلب سجل الحضور
       const currentDate = new Date();
       const attendanceRes = await api.get(
-        `/transport/attendance/${registration._id}?month=${currentDate.getMonth() + 1}&year=${currentDate.getFullYear()}`,
+        `/transport/attendance/${registration._id}?month=${currentDate.getMonth() + 1}&year=${currentDate.getFullYear()}`
       );
       setAttendance(attendanceRes.data.data);
 
@@ -237,16 +237,34 @@ const StudentTransportPage = () => {
                       {registrations.map(reg => (
                         <TableRow key={reg._id}>
                           <TableCell>
-                            <Chip label={getStatusLabel(reg.status)} color={getStatusColor(reg.status)} size="small" />
+                            <Chip
+                              label={getStatusLabel(reg.status)}
+                              color={getStatusColor(reg.status)}
+                              size="small"
+                            />
                           </TableCell>
                           <TableCell>{reg.currentRoute?.routeName || '-'}</TableCell>
-                          <TableCell>{reg.shift === 'morning' ? 'صباح' : reg.shift === 'evening' ? 'مساء' : 'كلا الوردين'}</TableCell>
+                          <TableCell>
+                            {reg.shift === 'morning'
+                              ? 'صباح'
+                              : reg.shift === 'evening'
+                                ? 'مساء'
+                                : 'كلا الوردين'}
+                          </TableCell>
                           <TableCell>{reg.monthlyFee} ريال</TableCell>
                           <TableCell>
-                            <Chip label={reg.paymentStatus} color={getPaymentStatusColor(reg.paymentStatus)} size="small" />
+                            <Chip
+                              label={reg.paymentStatus}
+                              color={getPaymentStatusColor(reg.paymentStatus)}
+                              size="small"
+                            />
                           </TableCell>
                           <TableCell>
-                            <Button size="small" variant="outlined" onClick={() => handleViewDetails(reg)}>
+                            <Button
+                              size="small"
+                              variant="outlined"
+                              onClick={() => handleViewDetails(reg)}
+                            >
                               تفاصيل
                             </Button>
                           </TableCell>
@@ -447,9 +465,15 @@ const StudentTransportPage = () => {
                       <TableBody>
                         {attendance.map((record, idx) => (
                           <TableRow key={idx}>
-                            <TableCell>{new Date(record.date).toLocaleDateString('ar-SA')}</TableCell>
                             <TableCell>
-                              <Chip label={record.status} color={getAttendanceStatusColor(record.status)} size="small" />
+                              {new Date(record.date).toLocaleDateString('ar-SA')}
+                            </TableCell>
+                            <TableCell>
+                              <Chip
+                                label={record.status}
+                                color={getAttendanceStatusColor(record.status)}
+                                size="small"
+                              />
                             </TableCell>
                             <TableCell>{record.remarks || '-'}</TableCell>
                           </TableRow>
@@ -480,11 +504,17 @@ const StudentTransportPage = () => {
                       <TableBody>
                         {payments.map((payment, idx) => (
                           <TableRow key={idx}>
-                            <TableCell>{new Date(payment.paymentDate).toLocaleDateString('ar-SA')}</TableCell>
+                            <TableCell>
+                              {new Date(payment.paymentDate).toLocaleDateString('ar-SA')}
+                            </TableCell>
                             <TableCell>{payment.amount} ريال</TableCell>
                             <TableCell>{payment.paymentMethod}</TableCell>
                             <TableCell>
-                              <Chip label={payment.status} color={getPaymentStatusColor(payment.status)} size="small" />
+                              <Chip
+                                label={payment.status}
+                                color={getPaymentStatusColor(payment.status)}
+                                size="small"
+                              />
                             </TableCell>
                           </TableRow>
                         ))}

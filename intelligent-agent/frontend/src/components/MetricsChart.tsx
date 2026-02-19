@@ -1,5 +1,21 @@
 import React from 'react';
-import { AreaChart, Area, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import {
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+} from 'recharts';
 import { useTheme } from '../contexts/ThemeContext';
 
 interface MetricsChartProps {
@@ -27,36 +43,24 @@ const MetricsChart: React.FC<MetricsChartProps> = ({
     theme.colors.info.main,
   ];
 
-  const chartConfig = {
-    margin: { top: 10, right: 30, left: 0, bottom: 0 },
-    style: {
-      backgroundColor: theme.colors.surface.primary,
-      borderRadius: '8px',
-      padding: '16px',
-    },
+  const chartMargin = { top: 10, right: 30, left: 0, bottom: 0 };
+  const containerStyle: React.CSSProperties = {
+    backgroundColor: theme.colors.surface.primary,
+    borderRadius: '8px',
+    padding: '16px',
   };
 
   return (
-    <div style={chartConfig}>
-      <h3 style={{ color: theme.colors.text.primary, marginBottom: '16px' }}>
-        {title}
-      </h3>
+    <div style={containerStyle}>
+      <h3 style={{ color: theme.colors.text.primary, marginBottom: '16px' }}>{title}</h3>
 
       <ResponsiveContainer width="100%" height={height}>
         {type === 'area' && (
-          <AreaChart data={data}>
+          <AreaChart data={data} margin={chartMargin}>
             <defs>
               <linearGradient id="colorArea" x1="0" y1="0" x2="0" y2="1">
-                <stop
-                  offset="5%"
-                  stopColor={theme.colors.primary[600]}
-                  stopOpacity={0.8}
-                />
-                <stop
-                  offset="95%"
-                  stopColor={theme.colors.primary[600]}
-                  stopOpacity={0}
-                />
+                <stop offset="5%" stopColor={theme.colors.primary[600]} stopOpacity={0.8} />
+                <stop offset="95%" stopColor={theme.colors.primary[600]} stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke={theme.colors.border.main} />
@@ -80,7 +84,7 @@ const MetricsChart: React.FC<MetricsChartProps> = ({
         )}
 
         {type === 'bar' && (
-          <BarChart data={data}>
+          <BarChart data={data} margin={chartMargin}>
             <CartesianGrid strokeDasharray="3 3" stroke={theme.colors.border.main} />
             <XAxis stroke={theme.colors.text.secondary} />
             <YAxis stroke={theme.colors.text.secondary} />
@@ -97,7 +101,7 @@ const MetricsChart: React.FC<MetricsChartProps> = ({
         )}
 
         {type === 'line' && (
-          <LineChart data={data}>
+          <LineChart data={data} margin={chartMargin}>
             <CartesianGrid strokeDasharray="3 3" stroke={theme.colors.border.main} />
             <XAxis stroke={theme.colors.text.secondary} />
             <YAxis stroke={theme.colors.text.secondary} />

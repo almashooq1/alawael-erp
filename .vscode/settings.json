@@ -1,5 +1,47 @@
 {
     "python-envs.pythonProjects": [],
     "python-envs.defaultEnvManager": "ms-python.python:system",
-    "git.ignoreLimitWarning": true
+    "git.ignoreLimitWarning": true,
+    "cSpell.words": [
+        "المخاطر"
+    ],
+    "cSpell.configFile": "cspell.json",
+    "typescript.tsdk": "intelligent-agent/node_modules/typescript/lib",
+    "typescript.enablePromptUseWorkspaceTsdk": true,
+    "editor.fontSize": 13,
+    "editor.wordWrap": "on",
+    "editor.formatOnSave": true,
+    "files.exclude": {
+        "**/.git": true,
+        "**/__pycache__": true,
+        "**/node_modules": true,
+        "**/.pytest_cache": true,
+        "**/*.log": true,
+        "dist": true,
+        "build": true,
+        "coverage": true
+    },
+    "search.exclude": {
+        "**/node_modules": true,
+        "**/coverage": true,
+        "**/.pytest_cache": true,
+        "dist": true,
+        "build": true
+    },
+    "files.watcherExclude": {
+        "**/.git": true,
+        "**/node_modules": true,
+        "**/dist": true,
+        "**/build": true,
+        "**/.pytest_cache": true
+    },
+    "window.zoomLevel": 0,
+    "telemetry.telemetryLevel": "off",
+    "workbench.startupEditor": "none",
+    "[javascript]": {
+        "editor.formatOnSave": true
+    },
+    "[python]": {
+        "editor.formatOnSave": true
+    }
 }

@@ -11,7 +11,14 @@ jest.mock('../models/User', () => {
 
   return class User {
     constructor(data) {
-      Object.assign(this, data);
+      // Explicitly copy all fields including password
+      this.email = data.email;
+      this.password = data.password;
+      this.fullName = data.fullName;
+      this.phone = data.phone;
+      this.department = data.department;
+      this.role = data.role;
+      this.status = data.status;
       this._id = 'user_' + Date.now() + Math.random();
     }
 
@@ -39,15 +46,18 @@ jest.mock('../models/User', () => {
 
 // Mock bcrypt
 jest.mock('bcryptjs', () => ({
-  hash: jest.fn(async (password, rounds) => `hashed_${password}`),
+  hash: jest.fn((password, rounds) => Promise.resolve(`hashed_${password}`)),
 }));
 
 describe('Seed Database Utility', () => {
   const User = require('../models/User');
+  const bcrypt = require('bcryptjs');
 
   beforeEach(() => {
     User.clearMock();
     jest.clearAllMocks();
+    // Re-setup bcrypt mock after clearing
+    bcrypt.hash.mockImplementation((password, rounds) => Promise.resolve(`hashed_${password}`));
     // Suppress console logs during tests
     jest.spyOn(console, 'log').mockImplementation(() => {});
     jest.spyOn(console, 'error').mockImplementation(() => {});

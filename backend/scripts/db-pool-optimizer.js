@@ -120,11 +120,11 @@ class DBPoolOptimizer {
       maxRetriesPerRequest: config.maxRetriesPerRequest,
       enableReadyCheck: config.enableReadyCheck,
       enableOfflineQueue: config.enableOfflineQueue,
-      retryStrategy: (times) => {
+      retryStrategy: times => {
         const delay = Math.min(times * 50, 2000);
         return delay;
       },
-      reconnectOnError: (err) => {
+      reconnectOnError: err => {
         const targetError = 'READONLY';
         if (err.message.includes(targetError)) {
           return true;

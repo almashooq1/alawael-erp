@@ -8,7 +8,7 @@ import {
   formatRelativeTime,
   pluralize,
   formatWithPlural,
-} from '../i18n/formatting';
+} from '../formatting';
 
 describe('i18n Formatting Utilities', () => {
   describe('formatNumber', () => {
@@ -239,7 +239,7 @@ describe('i18n Formatting Utilities', () => {
       const locales = ['en', 'ar', 'fr'];
       const num = 1000;
 
-      locales.forEach((locale) => {
+      locales.forEach(locale => {
         const result = formatNumber(num, locale);
         expect(result).toBeTruthy();
         expect(result.length).toBeGreaterThan(0);

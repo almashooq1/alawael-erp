@@ -23,7 +23,7 @@ import {
 import { useParams, useNavigate } from 'react-router-dom';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
-import api from '../../services/api';
+import api from '../../utils/api';
 
 const GoalForm = () => {
   const { id } = useParams();

@@ -1,5 +1,0 @@
-{"level":"info","message":"🚀 API Gateway running on port 8080","timestamp":"2026-01-24T10:50:03.644Z"}
-{"level":"info","message":"📊 Health check: http://localhost:8080/health","timestamp":"2026-01-24T10:50:03.648Z"}
-{"level":"info","message":"📚 API docs: http://localhost:8080/api/docs","timestamp":"2026-01-24T10:50:03.649Z"}
-{"level":"info","message":"🔌 Proxying to services:","timestamp":"2026-01-24T10:50:03.650Z"}
-{"level":"info","message":"::1 - - [24/Jan/2026:10:51:36 +0000] \"GET / HTTP/1.1\" 404 82 \"-\" \"Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) WindowsPowerShell/5.1.26100.7462\"","timestamp":"2026-01-24T10:51:36.008Z"}

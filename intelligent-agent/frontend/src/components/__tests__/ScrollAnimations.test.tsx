@@ -1,5 +1,6 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render } from '@testing-library/react';
+import { screen, fireEvent, waitFor } from '@testing-library/dom';
 import '@testing-library/jest-dom';
 import {
   FadeInOnScroll,
@@ -54,7 +55,7 @@ describe('ScrollAnimations', () => {
     it('renders with different effects', () => {
       const effects = ['fade', 'slide', 'zoom', 'flip', 'blur'] as const;
 
-      effects.forEach((effect) => {
+      effects.forEach(effect => {
         const { rerender } = render(
           <RevealOnScroll effect={effect}>
             <div>Effect: {effect}</div>
@@ -89,20 +90,20 @@ describe('ScrollAnimations', () => {
 
     it('displays start value initially', () => {
       render(<CountUpOnScroll start={0} end={100} />);
-      
+
       // Initial render shows 0
       expect(screen.getByText('0')).toBeInTheDocument();
     });
 
     it('adds prefix and suffix', () => {
       render(<CountUpOnScroll start={0} end={100} prefix="$" suffix=" USD" />);
-      
+
       expect(screen.getByText(/\$/)).toBeInTheDocument();
     });
 
     it('respects custom duration', () => {
       render(<CountUpOnScroll start={0} end={100} duration={3} />);
-      
+
       expect(screen.getByText('0')).toBeInTheDocument();
     });
   });
@@ -110,7 +111,7 @@ describe('ScrollAnimations', () => {
   describe('ScrollProgressBar', () => {
     it('renders with default props', () => {
       const { container } = render(<ScrollProgressBar />);
-      
+
       const progressBar = container.firstChild as HTMLElement;
       expect(progressBar).toBeInTheDocument();
       expect(progressBar).toHaveStyle({ position: 'fixed' });
@@ -118,27 +119,23 @@ describe('ScrollAnimations', () => {
 
     it('applies custom height and colors', () => {
       const { container } = render(
-        <ScrollProgressBar
-          height={6}
-          color="#ff0000"
-          backgroundColor="#cccccc"
-        />
+        <ScrollProgressBar height={6} color="#ff0000" backgroundColor="#cccccc" />
       );
-      
+
       const progressBar = container.firstChild as HTMLElement;
       expect(progressBar).toHaveStyle({ height: '6px' });
     });
 
     it('positions at top by default', () => {
       const { container } = render(<ScrollProgressBar position="top" />);
-      
+
       const progressBar = container.firstChild as HTMLElement;
       expect(progressBar).toHaveStyle({ top: 0 });
     });
 
     it('positions at bottom when specified', () => {
       const { container } = render(<ScrollProgressBar position="bottom" />);
-      
+
       const progressBar = container.firstChild as HTMLElement;
       expect(progressBar).toHaveStyle({ bottom: 0 });
     });

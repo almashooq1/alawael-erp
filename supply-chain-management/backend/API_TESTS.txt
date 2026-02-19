@@ -1,0 +1,179 @@
+/**
+ * Postman API Test Examples for Barcode Service
+ * Import this into Postman to test the API
+ */
+
+// Example 1: Generate QR Code
+POST /api/barcode/qr-code
+Authorization: Bearer YOUR_JWT_TOKEN
+Content-Type: application/json
+
+{
+  "data": "https://example.com/product/PROD-001",
+  "errorCorrectionLevel": "H"
+}
+
+// Expected Response (200 OK):
+{
+  "success": true,
+  "type": "QR",
+  "data": "https://example.com/product/PROD-001",
+  "errorCorrection": "H",
+  "code": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAA...",
+  "generatedAt": "2026-02-08T12:34:56.789Z",
+  "userId": "user-id-here"
+}
+
+---
+
+// Example 2: Generate CODE128 Barcode
+POST /api/barcode/barcode
+Authorization: Bearer YOUR_JWT_TOKEN
+Content-Type: application/json
+
+{
+  "data": "PROD-2025-001234",
+  "format": "CODE128"
+}
+
+// Expected Response (200 OK):
+{
+  "success": true,
+  "type": "BARCODE",
+  "data": "PROD-2025-001234",
+  "format": "CODE128",
+  "code": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAA...",
+  "generatedAt": "2026-02-08T12:34:56.789Z",
+  "userId": "user-id-here"
+}
+
+---
+
+// Example 3: Generate Batch of Mixed Codes
+POST /api/barcode/batch
+Authorization: Bearer YOUR_JWT_TOKEN
+Content-Type: application/json
+
+{
+  "items": [
+    {
+      "data": "https://example.com/product/1",
+      "type": "QR",
+      "format": "CODE128"
+    },
+    {
+      "data": "ITEM-2025-001",
+      "type": "BARCODE",
+      "format": "EAN13"
+    },
+    {
+      "data": "https://example.com/product/3",
+      "type": "QR",
+      "format": "CODE128"
+    }
+  ]
+}
+
+// Expected Response (200 OK):
+{
+  "success": true,
+  "type": "BATCH",
+  "totalItems": 3,
+  "successCount": 3,
+  "errorCount": 0,
+  "results": [
+    {
+      "data": "https://example.com/product/1",
+      "type": "QR",
+      "format": "CODE128",
+      "code": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg...",
+      "status": "success",
+      "index": 1
+    },
+    {
+      "data": "ITEM-2025-001",
+      "type": "BARCODE",
+      "format": "EAN13",
+      "code": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg...",
+      "status": "success",
+      "index": 2
+    },
+    {
+      "data": "https://example.com/product/3",
+      "type": "QR",
+      "format": "CODE128",
+      "code": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg...",
+      "status": "success",
+      "index": 3
+    }
+  ],
+  "generatedAt": "2026-02-08T12:34:56.789Z",
+  "userId": "user-id-here"
+}
+
+---
+
+// Example 4: Get Statistics
+GET /api/barcode/statistics
+Authorization: Bearer YOUR_JWT_TOKEN
+
+// Expected Response (200 OK):
+{
+  "success": true,
+  "statistics": [
+    {
+      "_id": "QR",
+      "count": 45,
+      "successCount": 45,
+      "errorCount": 0
+    },
+    {
+      "_id": "BARCODE",
+      "count": 32,
+      "successCount": 31,
+      "errorCount": 1
+    },
+    {
+      "_id": "BATCH",
+      "count": 8,
+      "successCount": 8,
+      "errorCount": 0
+    }
+  ],
+  "retrievedAt": "2026-02-08T12:34:56.789Z"
+}
+
+---
+
+// Example 5: Health Check
+GET /api/barcode/health
+
+// Expected Response (200 OK):
+{
+  "status": "healthy",
+  "timestamp": "2026-02-08T12:34:56.789Z",
+  "service": "barcode-api"
+}
+
+---
+
+// CURL Examples:
+
+// 1. Generate QR Code (Replace TOKEN with actual JWT)
+curl -X POST http://localhost:4000/api/barcode/qr-code \
+  -H "Authorization: Bearer TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"data":"https://example.com/product/1","errorCorrectionLevel":"M"}'
+
+// 2. Generate Barcode
+curl -X POST http://localhost:4000/api/barcode/barcode \
+  -H "Authorization: Bearer TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"data":"PROD-2025-001","format":"CODE128"}'
+
+// 3. Get Statistics
+curl -X GET http://localhost:4000/api/barcode/statistics \
+  -H "Authorization: Bearer TOKEN"
+
+// 4. Health Check
+curl -X GET http://localhost:4000/api/barcode/health

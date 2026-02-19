@@ -61,7 +61,11 @@ export class PerformanceMonitor extends EventEmitter {
   /**
    * End measuring and record metric
    */
-  endMeasure(name: string, status: 'success' | 'failure' = 'success', metadata?: Record<string, any>) {
+  endMeasure(
+    name: string,
+    status: 'success' | 'failure' = 'success',
+    metadata?: Record<string, any>
+  ) {
     const startTime = this.activeTimers.get(name);
 
     if (!startTime) {
@@ -101,11 +105,7 @@ export class PerformanceMonitor extends EventEmitter {
   /**
    * Measure function execution
    */
-  async measure<T>(
-    name: string,
-    fn: () => Promise<T>,
-    metadata?: Record<string, any>
-  ): Promise<T> {
+  async measure<T>(name: string, fn: () => Promise<T>, metadata?: Record<string, any>): Promise<T> {
     this.startMeasure(name);
     try {
       const result = await fn();
@@ -120,11 +120,7 @@ export class PerformanceMonitor extends EventEmitter {
   /**
    * Measure sync function execution
    */
-  measureSync<T>(
-    name: string,
-    fn: () => T,
-    metadata?: Record<string, any>
-  ): T {
+  measureSync<T>(name: string, fn: () => T, metadata?: Record<string, any>): T {
     this.startMeasure(name);
     try {
       const result = fn();
@@ -203,19 +199,21 @@ export class PerformanceMonitor extends EventEmitter {
   getReport(options: { limit?: number; sortBy?: string } = {}) {
     const { limit = 100, sortBy = 'duration' } = options;
 
-    const aggregatesArray = Array.from(this.aggregates.entries())
-      .map(([name, stats]) => [
-        name,
-        {
-          count: stats.count,
-          avg: stats.avg.toFixed(2),
-          min: stats.min,
-          max: stats.max,
-          p50: stats.p50,
-          p95: stats.p95,
-          p99: stats.p99,
-        },
-      ] as const);
+    const aggregatesArray = Array.from(this.aggregates.entries()).map(
+      ([name, stats]) =>
+        [
+          name,
+          {
+            count: stats.count,
+            avg: stats.avg.toFixed(2),
+            min: stats.min,
+            max: stats.max,
+            p50: stats.p50,
+            p95: stats.p95,
+            p99: stats.p99,
+          },
+        ] as const
+    );
 
     const sortedAggregates = aggregatesArray.sort((a, b) => {
       const statA = a[1];
@@ -268,9 +266,7 @@ export class PerformanceMonitor extends EventEmitter {
   exportToCSV() {
     const csv = [
       'name,duration,status,timestamp',
-      ...this.metrics.map(m =>
-        `${m.name},${m.duration},${m.status},${m.timestamp.toISOString()}`
-      ),
+      ...this.metrics.map(m => `${m.name},${m.duration},${m.status},${m.timestamp.toISOString()}`),
     ].join('\n');
 
     return csv;
@@ -286,11 +282,7 @@ export const globalPerformanceMonitor = new PerformanceMonitor();
  * Decorator for measuring function performance
  */
 export function Measure(metricName?: string) {
-  return function (
-    target: any,
-    propertyKey: string,
-    descriptor: PropertyDescriptor
-  ) {
+  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
     const name = metricName || `${target.constructor.name}.${propertyKey}`;
 

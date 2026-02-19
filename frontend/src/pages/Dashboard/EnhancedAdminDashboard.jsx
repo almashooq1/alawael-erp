@@ -22,10 +22,8 @@ import {
   Typography,
   Button,
   Avatar,
-  AvatarGroup,
   IconButton,
   Chip,
-  LinearProgress,
   List,
   ListItem,
   ListItemAvatar,
@@ -33,11 +31,7 @@ import {
   ListItemButton,
   Paper,
   Stack,
-  Divider,
   Badge,
-  Tooltip,
-  Menu,
-  MenuItem,
   Alert
 } from '@mui/material';
 import {
@@ -47,22 +41,16 @@ import {
   EventNote,
   AttachMoney,
   Notifications,
-  MoreVert,
   Schedule,
   CheckCircle,
   Warning,
-  Info,
   CalendarToday,
   Assessment,
   School,
-  LocalHospital,
-  Assignment,
   ArrowForward,
   Refresh
 } from '@mui/icons-material';
 import {
-  LineChart,
-  Line,
   BarChart,
   Bar,
   PieChart,
@@ -87,7 +75,6 @@ import exportService from '../../services/exportService';
 const EnhancedAdminDashboard = () => {
   const navigate = useNavigate();
   const [timeRange, setTimeRange] = useState('week');
-  const [anchorEl, setAnchorEl] = useState(null);
 
   // Sample data
   const statistics = {
@@ -632,7 +619,6 @@ const EnhancedAdminDashboard = () => {
                   size="small" 
                   startIcon={<Assessment />}
                   onClick={() => {
-                    const chartData = { revenueData, weeklyProgress, sessionsByCategory };
                     exportService.toExcel(weeklyProgress, 'analytics-report');
                   }}
                 >

@@ -1,67 +1,85 @@
 // Redux Slice للمستفيدين - Beneficiaries Slice
 
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import api from '../utils/api';
+import api from '../../utils/api';
 
 // جلب قائمة المستفيدين
-export const fetchBeneficiaries = createAsyncThunk('beneficiaries/fetchBeneficiaries', async (params, { rejectWithValue }) => {
-  try {
-    const response = await api.get('/beneficiaries', { params });
-    return response.data;
-  } catch (error) {
-    return rejectWithValue(error.response?.data?.message);
+export const fetchBeneficiaries = createAsyncThunk(
+  'beneficiaries/fetchBeneficiaries',
+  async (params, { rejectWithValue }) => {
+    try {
+      const response = await api.get('/beneficiaries', { params });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message);
+    }
   }
-});
+);
 
 // جلب مستفيد واحد
-export const fetchBeneficiaryById = createAsyncThunk('beneficiaries/fetchBeneficiaryById', async (id, { rejectWithValue }) => {
-  try {
-    const response = await api.get(`/beneficiaries/${id}`);
-    return response.data;
-  } catch (error) {
-    return rejectWithValue(error.response?.data?.message);
+export const fetchBeneficiaryById = createAsyncThunk(
+  'beneficiaries/fetchBeneficiaryById',
+  async (id, { rejectWithValue }) => {
+    try {
+      const response = await api.get(`/beneficiaries/${id}`);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message);
+    }
   }
-});
+);
 
 // إضافة مستفيد جديد
-export const createBeneficiary = createAsyncThunk('beneficiaries/createBeneficiary', async (beneficiaryData, { rejectWithValue }) => {
-  try {
-    const response = await api.post('/beneficiaries', beneficiaryData);
-    return response.data;
-  } catch (error) {
-    return rejectWithValue(error.response?.data?.message);
+export const createBeneficiary = createAsyncThunk(
+  'beneficiaries/createBeneficiary',
+  async (beneficiaryData, { rejectWithValue }) => {
+    try {
+      const response = await api.post('/beneficiaries', beneficiaryData);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message);
+    }
   }
-});
+);
 
 // تحديث مستفيد
-export const updateBeneficiary = createAsyncThunk('beneficiaries/updateBeneficiary', async ({ id, data }, { rejectWithValue }) => {
-  try {
-    const response = await api.put(`/beneficiaries/${id}`, data);
-    return response.data;
-  } catch (error) {
-    return rejectWithValue(error.response?.data?.message);
+export const updateBeneficiary = createAsyncThunk(
+  'beneficiaries/updateBeneficiary',
+  async ({ id, data }, { rejectWithValue }) => {
+    try {
+      const response = await api.put(`/beneficiaries/${id}`, data);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message);
+    }
   }
-});
+);
 
 // حذف مستفيد
-export const deleteBeneficiary = createAsyncThunk('beneficiaries/deleteBeneficiary', async (id, { rejectWithValue }) => {
-  try {
-    await api.delete(`/beneficiaries/${id}`);
-    return id;
-  } catch (error) {
-    return rejectWithValue(error.response?.data?.message);
+export const deleteBeneficiary = createAsyncThunk(
+  'beneficiaries/deleteBeneficiary',
+  async (id, { rejectWithValue }) => {
+    try {
+      await api.delete(`/beneficiaries/${id}`);
+      return id;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message);
+    }
   }
-});
+);
 
 // جلب إحصائيات مستفيد
-export const fetchBeneficiaryStats = createAsyncThunk('beneficiaries/fetchBeneficiaryStats', async (id, { rejectWithValue }) => {
-  try {
-    const response = await api.get(`/beneficiaries/${id}/stats`);
-    return response.data;
-  } catch (error) {
-    return rejectWithValue(error.response?.data?.message);
+export const fetchBeneficiaryStats = createAsyncThunk(
+  'beneficiaries/fetchBeneficiaryStats',
+  async (id, { rejectWithValue }) => {
+    try {
+      const response = await api.get(`/beneficiaries/${id}/stats`);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message);
+    }
   }
-});
+);
 
 const initialState = {
   beneficiaries: [],
@@ -102,7 +120,7 @@ const beneficiariesSlice = createSlice({
       })
       .addCase(fetchBeneficiaries.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = action.error?.message || action.payload || null;
       })
 
       // Fetch Beneficiary By ID
@@ -116,7 +134,7 @@ const beneficiariesSlice = createSlice({
       })
       .addCase(fetchBeneficiaryById.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = action.error?.message || action.payload || null;
       })
 
       // Create Beneficiary
@@ -130,7 +148,7 @@ const beneficiariesSlice = createSlice({
       })
       .addCase(createBeneficiary.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = action.error?.message || action.payload || null;
       })
 
       // Update Beneficiary
@@ -148,7 +166,7 @@ const beneficiariesSlice = createSlice({
       })
       .addCase(updateBeneficiary.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = action.error?.message || action.payload || null;
       })
 
       // Delete Beneficiary

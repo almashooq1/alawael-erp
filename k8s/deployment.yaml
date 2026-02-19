@@ -1,0 +1,340 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: therapy-system
+
+---
+# ============================================
+# MONGODB STATEFULSET
+# ============================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo
+  namespace: therapy-system
+spec:
+  clusterIP: None
+  selector:
+    app: mongo
+  ports:
+    - port: 27017
+      targetPort: 27017
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongo
+  namespace: therapy-system
+spec:
+  serviceName: mongo
+  replicas: 3
+  selector:
+    matchLabels:
+      app: mongo
+  template:
+    metadata:
+      labels:
+        app: mongo
+    spec:
+      containers:
+      - name: mongo
+        image: mongo:6.0
+        ports:
+        - containerPort: 27017
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "2000m"
+        volumeMounts:
+        - name: mongo-data
+          mountPath: /data/db
+        env:
+        - name: MONGO_INITDB_ROOT_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: mongo-credentials
+              key: username
+        - name: MONGO_INITDB_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mongo-credentials
+              key: password
+  volumeClaimTemplates:
+  - metadata:
+      name: mongo-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: "standard"
+      resources:
+        requests:
+          storage: 10Gi
+
+---
+# ============================================
+# REDIS DEPLOYMENT
+# ============================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  namespace: therapy-system
+spec:
+  selector:
+    app: redis
+  ports:
+  - port: 6379
+    targetPort: 6379
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: therapy-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+      - name: redis
+        image: redis:7-alpine
+        ports:
+        - containerPort: 6379
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        volumeMounts:
+        - name: redis-data
+          mountPath: /data
+      volumes:
+      - name: redis-data
+        emptyDir: {}
+
+---
+# ============================================
+# BACKEND API DEPLOYMENT
+# ============================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: therapy-api
+  namespace: therapy-system
+spec:
+  type: LoadBalancer
+  selector:
+    app: therapy-api
+  ports:
+  - port: 80
+    targetPort: 3001
+    protocol: TCP
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: therapy-api
+  namespace: therapy-system
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: therapy-api
+  template:
+    metadata:
+      labels:
+        app: therapy-api
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - therapy-api
+              topologyKey: kubernetes.io/hostname
+      containers:
+      - name: api
+        image: therapy-backend:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3001
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: MONGODB_URI
+          value: "mongodb://admin:password@mongo-0.mongo:27017,mongo-1.mongo:27017,mongo-2.mongo:27017/rehabilitation?replicaSet=rs0"
+        - name: REDIS_HOST
+          value: "redis"
+        - name: REDIS_PORT
+          value: "6379"
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: api-secrets
+              key: jwt-secret
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "2000m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3001
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3001
+          initialDelaySeconds: 10
+          periodSeconds: 5
+
+---
+# ============================================
+# FRONTEND DEPLOYMENT
+# ============================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: therapy-frontend
+  namespace: therapy-system
+spec:
+  type: LoadBalancer
+  selector:
+    app: therapy-frontend
+  ports:
+  - port: 80
+    targetPort: 3000
+    protocol: TCP
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: therapy-frontend
+  namespace: therapy-system
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: therapy-frontend
+  template:
+    metadata:
+      labels:
+        app: therapy-frontend
+    spec:
+      containers:
+      - name: frontend
+        image: therapy-frontend:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+
+---
+# ============================================
+# HORIZONTAL POD AUTOSCALER
+# ============================================
+
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: therapy-api-hpa
+  namespace: therapy-system
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: therapy-api
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+
+---
+# ============================================
+# CONFIGMAP FOR APPLICATION CONFIG
+# ============================================
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: therapy-config
+  namespace: therapy-system
+data:
+  LOG_LEVEL: "info"
+  VIDEO_PROVIDER: "jitsi"
+  ML_MODEL_ENDPOINT: "http://ml-server:8000"
+
+---
+# ============================================
+# SECRETS FOR SENSITIVE DATA
+# ============================================
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mongo-credentials
+  namespace: therapy-system
+type: Opaque
+stringData:
+  username: admin
+  password: changeme123
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: api-secrets
+  namespace: therapy-system
+type: Opaque
+stringData:
+  jwt-secret: "your-super-secret-jwt-key-change-in-production"
+  redis-password: "redis-password-change-in-production"

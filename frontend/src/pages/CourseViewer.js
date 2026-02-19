@@ -1,7 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Container, Typography, Grid, Paper, Box, Button, List, ListItem, ListItemText, ListItemIcon, Divider } from '@mui/material';
-import { PlayCircleFilled, CheckCircle, Add as AddIcon } from '@mui/icons-material';
+import {
+  Container,
+  Typography,
+  Grid,
+  Paper,
+  Box,
+  Button,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemIcon,
+  Divider,
+} from '@mui/material';
+import { PlayCircleFilled, Add as AddIcon } from '@mui/icons-material';
 import axios from 'axios';
 
 const CourseViewer = () => {
@@ -10,11 +22,7 @@ const CourseViewer = () => {
   const [course, setCourse] = useState(null);
   const [selectedLesson, setSelectedLesson] = useState(null);
 
-  useEffect(() => {
-    loadCourse();
-  }, [id]);
-
-  const loadCourse = async () => {
+  const loadCourse = useCallback(async () => {
     try {
       const res = await axios.get(`/api/lms/courses/${id}`);
       setCourse(res.data);
@@ -24,7 +32,11 @@ const CourseViewer = () => {
     } catch (error) {
       console.error('Failed to load course', error);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    loadCourse();
+  }, [loadCourse]);
 
   const handleLessonSelect = lesson => {
     setSelectedLesson(lesson);
@@ -59,7 +71,10 @@ const CourseViewer = () => {
                     <ListItemIcon>
                       <PlayCircleFilled />
                     </ListItemIcon>
-                    <ListItemText primary={`${index + 1}. ${lesson.title}`} secondary={`${lesson.duration} mins`} />
+                    <ListItemText
+                      primary={`${index + 1}. ${lesson.title}`}
+                      secondary={`${lesson.duration} mins`}
+                    />
                   </ListItem>
                   <Divider />
                 </div>
@@ -83,11 +98,24 @@ const CourseViewer = () => {
                   {selectedLesson.title}
                 </Typography>
                 {selectedLesson.videoUrl && (
-                  <Box sx={{ bgcolor: 'black', height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 3 }}>
-                    <Typography color="white">Video Player Placeholder for {selectedLesson.videoUrl}</Typography>
+                  <Box
+                    sx={{
+                      bgcolor: 'black',
+                      height: 400,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      mb: 3,
+                    }}
+                  >
+                    <Typography color="white">
+                      Video Player Placeholder for {selectedLesson.videoUrl}
+                    </Typography>
                   </Box>
                 )}
-                <Typography variant="body1">{selectedLesson.content || 'No text content for this lesson.'}</Typography>
+                <Typography variant="body1">
+                  {selectedLesson.content || 'No text content for this lesson.'}
+                </Typography>
               </>
             ) : (
               <Box display="flex" alignItems="center" justifyContent="center" height="100%">

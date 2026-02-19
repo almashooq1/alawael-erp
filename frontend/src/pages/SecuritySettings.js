@@ -6,8 +6,6 @@ import {
   Paper,
   Box,
   Button,
-  Switch,
-  FormControlLabel,
   List,
   ListItem,
   ListItemText,
@@ -21,7 +19,7 @@ import {
   DialogActions,
   Chip,
 } from '@mui/material';
-import { Shield, Smartphone, History, Lock } from '@mui/icons-material';
+import { Shield, History, Lock } from '@mui/icons-material';
 import axios from 'axios';
 
 const SecuritySettings = () => {
@@ -95,7 +93,8 @@ const SecuritySettings = () => {
               <Box>
                 <Typography variant="subtitle1">Two-Step Verification</Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Add an extra layer of security to your account by requiring a code from your phone.
+                  Add an extra layer of security to your account by requiring a code from your
+                  phone.
                 </Typography>
               </Box>
               <Button
@@ -131,7 +130,13 @@ const SecuritySettings = () => {
                 logs.map(log => (
                   <div key={log._id}>
                     <ListItem>
-                      <ListItemIcon>{log.status === 'FAILURE' ? <Lock color="error" /> : <Shield color="success" />}</ListItemIcon>
+                      <ListItemIcon>
+                        {log.status === 'FAILURE' ? (
+                          <Lock color="error" />
+                        ) : (
+                          <Shield color="success" />
+                        )}
+                      </ListItemIcon>
                       <ListItemText
                         primary={log.action}
                         secondary={`${new Date(log.timestamp).toLocaleString()} - ${log.description || ''}`}
@@ -153,7 +158,16 @@ const SecuritySettings = () => {
           {step === 1 && (
             <Box textAlign="center" py={2}>
               <Typography gutterBottom>1. Scan this QR code with your authenticator app</Typography>
-              <Box sx={{ height: 200, bgcolor: '#eee', display: 'flex', alignItems: 'center', justifyContent: 'center', my: 2 }}>
+              <Box
+                sx={{
+                  height: 200,
+                  bgcolor: '#eee',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  my: 2,
+                }}
+              >
                 {/* Placeholder for QR Code */}
                 <Typography variant="caption">[QR Code for {secretData?.secret}]</Typography>
               </Box>
@@ -165,7 +179,13 @@ const SecuritySettings = () => {
           {step === 2 && (
             <Box py={2}>
               <Typography gutterBottom>2. Enter the 6-digit code from your app</Typography>
-              <TextField fullWidth label="Enter Code" value={token} onChange={e => setToken(e.target.value)} sx={{ mt: 2 }} />
+              <TextField
+                fullWidth
+                label="Enter Code"
+                value={token}
+                onChange={e => setToken(e.target.value)}
+                sx={{ mt: 2 }}
+              />
             </Box>
           )}
           {step === 3 && (
@@ -176,7 +196,9 @@ const SecuritySettings = () => {
               <Typography gutterBottom variant="h6">
                 Backup Codes
               </Typography>
-              <Typography paragraph>Save these codes in a safe place. You can use them if you lose access to your phone.</Typography>
+              <Typography paragraph>
+                Save these codes in a safe place. You can use them if you lose access to your phone.
+              </Typography>
               <Grid container spacing={1}>
                 {backupCodes.map((code, i) => (
                   <Grid item xs={6} key={i}>

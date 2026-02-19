@@ -1,26 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import {
-  Box,
-  Container,
-  Grid,
-  Paper,
-  Typography,
-  Button,
-  Tabs,
-  Tab,
-  Card,
-  CardContent,
-  CardActions,
-  Chip,
-  Avatar,
-  Divider,
-  List,
-  ListItem,
-} from '@mui/material';
+import React, { useState } from 'react';
+import { Box, Container, Paper, Typography, Button, Tabs, Tab } from '@mui/material';
 import {
   School as SchoolIcon,
-  MedicalServices as MedicalIcon,
-  SelfImprovement as LifeSkillsIcon,
   Groups as GroupsIcon,
   Add as AddIcon,
   Assignment as PlanIcon,
@@ -75,7 +56,12 @@ function CarePlansDashboard() {
           >
             Log Session
           </Button>
-          <Button variant="contained" startIcon={<AddIcon />} size="large" onClick={() => navigate('/integrated-care/create')}>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            size="large"
+            onClick={() => navigate('/integrated-care/create')}
+          >
             New Plan / File
           </Button>
         </Box>

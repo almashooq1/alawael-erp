@@ -3,6 +3,7 @@
     "target": "ES2020",
     "module": "commonjs",
     "moduleResolution": "node",
+    "jsx": "react-jsx",
     "allowJs": true,
     "resolveJsonModule": true,
     "outDir": "dist",
@@ -12,6 +13,6 @@
     "esModuleInterop": true,
     "skipLibCheck": true
   },
-  "include": ["backend/**/*", "src/**/*"],
+  "include": ["backend/**/*", "src/**/*", "frontend/src/**/*", "frontend/components/**/*", "global.d.ts"],
   "exclude": ["node_modules", "dist"]
 }

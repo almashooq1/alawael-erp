@@ -1,61 +1,79 @@
 // Redux Slice للجلسات - sessionsSlice.js
 
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import api from '../utils/api';
+import api from '../../utils/api';
 
-export const fetchSessions = createAsyncThunk('sessions/fetchSessions', async (params, { rejectWithValue }) => {
-  try {
-    const response = await api.get('/sessions', { params });
-    return response.data;
-  } catch (error) {
-    return rejectWithValue(error.response?.data?.message);
+export const fetchSessions = createAsyncThunk(
+  'sessions/fetchSessions',
+  async (params, { rejectWithValue }) => {
+    try {
+      const response = await api.get('/sessions', { params });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message);
+    }
   }
-});
+);
 
-export const fetchSessionById = createAsyncThunk('sessions/fetchSessionById', async (id, { rejectWithValue }) => {
-  try {
-    const response = await api.get(`/sessions/${id}`);
-    return response.data;
-  } catch (error) {
-    return rejectWithValue(error.response?.data?.message);
+export const fetchSessionById = createAsyncThunk(
+  'sessions/fetchSessionById',
+  async (id, { rejectWithValue }) => {
+    try {
+      const response = await api.get(`/sessions/${id}`);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message);
+    }
   }
-});
+);
 
-export const createSession = createAsyncThunk('sessions/createSession', async (sessionData, { rejectWithValue }) => {
-  try {
-    const response = await api.post('/sessions', sessionData);
-    return response.data;
-  } catch (error) {
-    return rejectWithValue(error.response?.data?.message);
+export const createSession = createAsyncThunk(
+  'sessions/createSession',
+  async (sessionData, { rejectWithValue }) => {
+    try {
+      const response = await api.post('/sessions', sessionData);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message);
+    }
   }
-});
+);
 
-export const updateSession = createAsyncThunk('sessions/updateSession', async ({ id, data }, { rejectWithValue }) => {
-  try {
-    const response = await api.put(`/sessions/${id}`, data);
-    return response.data;
-  } catch (error) {
-    return rejectWithValue(error.response?.data?.message);
+export const updateSession = createAsyncThunk(
+  'sessions/updateSession',
+  async ({ id, data }, { rejectWithValue }) => {
+    try {
+      const response = await api.put(`/sessions/${id}`, data);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message);
+    }
   }
-});
+);
 
-export const deleteSession = createAsyncThunk('sessions/deleteSession', async (id, { rejectWithValue }) => {
-  try {
-    await api.delete(`/sessions/${id}`);
-    return id;
-  } catch (error) {
-    return rejectWithValue(error.response?.data?.message);
+export const deleteSession = createAsyncThunk(
+  'sessions/deleteSession',
+  async (id, { rejectWithValue }) => {
+    try {
+      await api.delete(`/sessions/${id}`);
+      return id;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message);
+    }
   }
-});
+);
 
-export const completeSession = createAsyncThunk('sessions/completeSession', async (id, { rejectWithValue }) => {
-  try {
-    const response = await api.post(`/sessions/${id}/complete`);
-    return response.data;
-  } catch (error) {
-    return rejectWithValue(error.response?.data?.message);
+export const completeSession = createAsyncThunk(
+  'sessions/completeSession',
+  async (id, { rejectWithValue }) => {
+    try {
+      const response = await api.post(`/sessions/${id}/complete`);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message);
+    }
   }
-});
+);
 
 const initialState = {
   sessions: [],

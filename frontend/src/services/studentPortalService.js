@@ -98,6 +98,29 @@ const studentPortalService = {
     }
   },
 
+  /**
+   * Get student advanced report
+   * الحصول على التقرير المتقدم للطالب
+   */
+  async getStudentAdvancedReport(studentId, filters = {}) {
+    try {
+      const params = new URLSearchParams({
+        student_id: studentId,
+        date_from: filters.dateFrom,
+        date_to: filters.dateTo,
+        report_type: filters.reportType,
+        focus_area: filters.focusArea,
+      });
+
+      const response = await fetch(`${API_BASE_URL}/reports/student-advanced?${params}`);
+      if (!response.ok) throw new Error('فشل في جلب التقرير المتقدم');
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching student advanced report:', error);
+      return this.getMockStudentAdvancedReport(filters);
+    }
+  },
+
   // Mock Data Functions
   getMockDashboardData() {
     return {
@@ -123,6 +146,7 @@ const studentPortalService = {
         { id: 2, title: 'الدرجات', icon: 'grades', path: '/student-portal/grades' },
         { id: 3, title: 'الواجبات', icon: 'assignments', path: '/student-portal/assignments' },
         { id: 4, title: 'الحضور', icon: 'attendance', path: '/student-portal/attendance' },
+        { id: 5, title: 'التقارير المتقدمة', icon: 'reports', path: '/student-portal/reports' },
       ],
     };
   },
@@ -144,7 +168,10 @@ const studentPortalService = {
         { time: '07:30 - 08:15', subject: subjects[dayIndex % 6] },
         { time: '08:15 - 09:00', subject: subjects[(dayIndex + 1) % 6] },
         { time: '09:00 - 09:45', subject: subjects[(dayIndex + 2) % 6] },
-        { time: '09:45 - 10:00', subject: { name: 'استراحة', teacher: '', room: '', color: '#E0E0E0' } },
+        {
+          time: '09:45 - 10:00',
+          subject: { name: 'استراحة', teacher: '', room: '', color: '#E0E0E0' },
+        },
         { time: '10:00 - 10:45', subject: subjects[(dayIndex + 3) % 6] },
         { time: '10:45 - 11:30', subject: subjects[(dayIndex + 4) % 6] },
         { time: '11:30 - 12:15', subject: subjects[(dayIndex + 5) % 6] },
@@ -166,7 +193,13 @@ const studentPortalService = {
             { type: 'اختبار قصير 1', score: 18, total: 20, percentage: 90, date: '2024-09-15' },
             { type: 'واجب', score: 9, total: 10, percentage: 90, date: '2024-09-20' },
             { type: 'اختبار قصير 2', score: 19, total: 20, percentage: 95, date: '2024-10-05' },
-            { type: 'اختبار منتصف الفصل', score: 45, total: 50, percentage: 90, date: '2024-10-20' },
+            {
+              type: 'اختبار منتصف الفصل',
+              score: 45,
+              total: 50,
+              percentage: 90,
+              date: '2024-10-20',
+            },
           ],
           average: 91.25,
           letterGrade: 'A',
@@ -179,7 +212,13 @@ const studentPortalService = {
             { type: 'اختبار قصير 1', score: 17, total: 20, percentage: 85, date: '2024-09-18' },
             { type: 'مشاركة صفية', score: 8, total: 10, percentage: 80, date: '2024-09-25' },
             { type: 'اختبار قصير 2', score: 18, total: 20, percentage: 90, date: '2024-10-10' },
-            { type: 'اختبار منتصف الفصل', score: 43, total: 50, percentage: 86, date: '2024-10-25' },
+            {
+              type: 'اختبار منتصف الفصل',
+              score: 43,
+              total: 50,
+              percentage: 86,
+              date: '2024-10-25',
+            },
           ],
           average: 85.25,
           letterGrade: 'B+',
@@ -192,7 +231,13 @@ const studentPortalService = {
             { type: 'اختبار قصير 1', score: 19, total: 20, percentage: 95, date: '2024-09-16' },
             { type: 'تجربة عملية', score: 10, total: 10, percentage: 100, date: '2024-09-22' },
             { type: 'اختبار قصير 2', score: 18, total: 20, percentage: 90, date: '2024-10-08' },
-            { type: 'اختبار منتصف الفصل', score: 47, total: 50, percentage: 94, date: '2024-10-22' },
+            {
+              type: 'اختبار منتصف الفصل',
+              score: 47,
+              total: 50,
+              percentage: 94,
+              date: '2024-10-22',
+            },
           ],
           average: 94.75,
           letterGrade: 'A',
@@ -205,7 +250,13 @@ const studentPortalService = {
             { type: 'اختبار قصير 1', score: 16, total: 20, percentage: 80, date: '2024-09-19' },
             { type: 'واجب', score: 9, total: 10, percentage: 90, date: '2024-09-26' },
             { type: 'اختبار قصير 2', score: 17, total: 20, percentage: 85, date: '2024-10-12' },
-            { type: 'اختبار منتصف الفصل', score: 40, total: 50, percentage: 80, date: '2024-10-28' },
+            {
+              type: 'اختبار منتصف الفصل',
+              score: 40,
+              total: 50,
+              percentage: 80,
+              date: '2024-10-28',
+            },
           ],
           average: 83.75,
           letterGrade: 'B+',
@@ -214,6 +265,10 @@ const studentPortalService = {
       overallGPA: 88.75,
       overallLetterGrade: 'B+',
     };
+  },
+
+  getMockAnnouncementsData() {
+    return this.getMockOldAnnouncementsData();
   },
 
   getMockOldAnnouncementsData() {
@@ -313,7 +368,8 @@ const studentPortalService = {
       {
         id: 1,
         title: 'اختبارات نهاية الفصل الدراسي الأول',
-        content: 'تبدأ اختبارات نهاية الفصل الدراسي الأول يوم الأحد 15/12/2024. يرجى المراجعة والاستعداد الجيد.',
+        content:
+          'تبدأ اختبارات نهاية الفصل الدراسي الأول يوم الأحد 15/12/2024. يرجى المراجعة والاستعداد الجيد.',
         date: '2024-11-13',
         priority: 'عالي',
         type: 'اختبارات',
@@ -463,7 +519,10 @@ const studentPortalService = {
       },
       monthlyPattern: monthlyPattern,
       records: records,
-      warnings: ['تم تسجيل 7 أيام تأخير هذا الشهر', 'يرجى الالتزام بمواعيد الحضور لتحسين السجل الدراسي'],
+      warnings: [
+        'تم تسجيل 7 أيام تأخير هذا الشهر',
+        'يرجى الالتزام بمواعيد الحضور لتحسين السجل الدراسي',
+      ],
     };
   },
 
@@ -544,6 +603,114 @@ const studentPortalService = {
           attachments: true,
         },
       ],
+    };
+  },
+
+  getMockStudentAdvancedReport(filters = {}) {
+    return {
+      generatedAt: new Date().toLocaleString('ar-SA'),
+      filtersApplied: filters,
+      student: {
+        id: 'STU001',
+        name: 'أحمد محمد علي',
+        grade: 'الصف الخامس',
+        section: 'أ',
+        studentId: '2024001',
+        tags: ['متفوق', 'منضبط', 'موهوب في العلوم'],
+      },
+      summary: {
+        predictedGpa: 4.6,
+        attendanceRate: 96,
+        behaviorScore: 88,
+        riskLevel: 'low',
+        riskLevelLabel: 'منخفض',
+      },
+      trends: {
+        gpaTrend: [
+          { label: 'سبتمبر', value: 4.2 },
+          { label: 'أكتوبر', value: 4.3 },
+          { label: 'نوفمبر', value: 4.4 },
+          { label: 'ديسمبر', value: 4.5 },
+          { label: 'يناير', value: 4.6 },
+        ],
+        attendanceTrend: [
+          { label: 'سبتمبر', value: 93 },
+          { label: 'أكتوبر', value: 94 },
+          { label: 'نوفمبر', value: 95 },
+          { label: 'ديسمبر', value: 96 },
+          { label: 'يناير', value: 96 },
+        ],
+      },
+      subjects: [
+        { subject: 'الرياضيات', average: 92, trend: 'up', trendLabel: 'تحسن مستمر' },
+        { subject: 'العلوم', average: 95, trend: 'up', trendLabel: 'أداء ممتاز' },
+        { subject: 'اللغة العربية', average: 87, trend: 'stable', trendLabel: 'ثابت' },
+        { subject: 'اللغة الإنجليزية', average: 84, trend: 'down', trendLabel: 'يحتاج دعم' },
+      ],
+      skills: [
+        { skill: 'التركيز', value: 86 },
+        { skill: 'التعاون', value: 78 },
+        { skill: 'حل المشكلات', value: 90 },
+        { skill: 'المبادرة', value: 82 },
+        { skill: 'إدارة الوقت', value: 75 },
+      ],
+      insights: [
+        {
+          type: 'success',
+          title: 'تحسن ملحوظ في العلوم والرياضيات',
+          details: 'متوسط الأداء ارتفع بنسبة 6% خلال 8 أسابيع.',
+        },
+        {
+          type: 'warning',
+          title: 'اللغة الإنجليزية تحتاج خطة دعم',
+          details: 'التراجع مرتبط بالاختبارات القصيرة ونسب المشاركة.',
+        },
+        {
+          type: 'info',
+          title: 'الحضور منتظم جدًا مع تأخرات محدودة',
+          details: 'سجل التأخر أقل من 3% خلال الفصل.',
+        },
+      ],
+      riskSignals: [
+        { label: 'مخاطر الحضور', level: 'low', levelLabel: 'منخفض', score: 20 },
+        { label: 'مخاطر الواجبات', level: 'medium', levelLabel: 'متوسط', score: 45 },
+        { label: 'مخاطر السلوك', level: 'low', levelLabel: 'منخفض', score: 18 },
+      ],
+      recommendations: [
+        {
+          title: 'خطة دعم اللغة الإنجليزية',
+          priority: 'عالية',
+          actions: [
+            'جلسات مراجعة أسبوعية مع المعلمة.',
+            'تحديد أهداف قصيرة المدى للقراءة والكتابة.',
+            'تكليف تدريبات إضافية تفاعلية في المنزل.',
+          ],
+        },
+        {
+          title: 'تعزيز مهارات إدارة الوقت',
+          priority: 'متوسطة',
+          actions: [
+            'استخدام مخطط أسبوعي للواجبات.',
+            'تقسيم المهام إلى أجزاء يومية صغيرة.',
+            'متابعة الالتزام عبر تطبيق التذكير.',
+          ],
+        },
+      ],
+      comparison: {
+        current: {
+          label: 'الفصل الحالي',
+          summary: 'معدل 4.6 مع تحسن واضح في العلوم والرياضيات.',
+        },
+        previous: {
+          label: 'الفصل السابق',
+          summary: 'معدل 4.3 مع تذبذب في اللغة الإنجليزية.',
+        },
+        delta: [
+          { label: 'المعدل', value: '+0.3', type: 'positive' },
+          { label: 'الحضور', value: '+2%', type: 'positive' },
+          { label: 'الواجبات المتأخرة', value: '+1', type: 'warning' },
+        ],
+      },
     };
   },
 };

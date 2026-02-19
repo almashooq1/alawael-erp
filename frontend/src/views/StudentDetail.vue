@@ -170,6 +170,7 @@ import { useStudentStore } from '../stores/useStudentStore'
 import { useProgramStore } from '../stores/useProgramStore'
 import FormInput from '../components/Form/FormInput.vue'
 import FormSelect from '../components/Form/FormSelect.vue'
+import { touchButtonStyle } from '../common/touchStyles.js'
 
 export default {
   name: 'StudentDetail',
@@ -179,6 +180,7 @@ export default {
   },
   data() {
     return {
+      touchButtonStyle,
       studentStore: useStudentStore(),
       programStore: useProgramStore(),
       student: null,
@@ -239,30 +241,33 @@ export default {
   mounted() {
     this.loadStudent()
   },
-  watch: {
-    '$route.params.id': function() {
-      this.loadStudent()
-    },
-  },
-}
-</script>
-
-<style scoped>
-.page-container {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-2xl);
-}
-
-.action-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--spacing-lg);
-  flex-wrap: wrap;
-  padding: var(--spacing-lg);
-  background: var(--color-white);
-  border-radius: var(--radius-md);
+        <button
+          v-if="!isEditing"
+          class="btn btn-primary"
+          @click="isEditing = true"
+          :style="touchButtonStyle"
+        >
+          ✏️ تعديل
+        </button>
+        <button
+          v-if="isEditing"
+          class="btn btn-primary"
+          @click="saveStudent"
+          :style="touchButtonStyle"
+        >
+          💾 حفظ
+        </button>
+        <button
+          v-if="isEditing"
+          class="btn btn-secondary"
+          @click="cancelEdit"
+          :style="touchButtonStyle"
+        >
+          ❌ إلغاء
+        </button>
+        <button class="btn btn-danger" @click="deleteStudent" :style="touchButtonStyle">
+          🗑️ حذف
+        </button>
   border: 1px solid var(--color-gray-200);
 }
 

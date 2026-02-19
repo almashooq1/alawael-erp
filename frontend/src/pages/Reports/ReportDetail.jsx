@@ -35,7 +35,7 @@ import {
   MessageSquare
 } from '@mui/icons-material';
 import { useParams, useNavigate } from 'react-router-dom';
-import api from '../../services/api';
+import api from '../../utils/api';
 
 const ReportDetail = () => {
   const { id } = useParams();

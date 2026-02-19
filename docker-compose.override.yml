@@ -1,0 +1,79 @@
+# ====================================
+# Development Overrides for Docker Compose
+# This file is automatically loaded after docker-compose.yml
+# Use for development-specific configuration
+# ====================================
+
+services:
+  mongodb:
+    ports:
+      - "127.0.0.1:27017:27017"
+    environment:
+      NODE_ENV: development
+    volumes:
+      - mongodb_data:/data/db
+      - mongodb_config:/data/configdb
+      # Mount initialization script if needed
+      # - ./scripts/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js
+
+  backend:
+    environment:
+      NODE_ENV: development
+      DEBUG: "erp:*"
+      LOG_LEVEL: debug
+    ports:
+      - "127.0.0.1:3001:3001"
+      - "9229:9229"  # Node debugger port
+    volumes:
+      - ./erp_new_system/backend/src:/app/src
+      - ./erp_new_system/backend/logs:/app/logs
+      - node_modules:/app/node_modules  # Persist node_modules
+    command: >
+      sh -c "npm install && node --inspect=0.0.0.0:9229 server.js"
+    networks:
+      - erp-network
+
+  sso-server:
+    environment:
+      NODE_ENV: development
+      DEBUG: "sso:*"
+      LOG_LEVEL: debug
+    ports:
+      - "127.0.0.1:3002:3002"
+      - "9230:9230"  # Node debugger port for SSO
+    volumes:
+      - ./erp_new_system/backend/src:/app/src
+      - ./erp_new_system/backend/logs:/app/logs
+      - node_modules:/app/node_modules
+    command: >
+      sh -c "npm install && node --inspect=0.0.0.0:9230 sso-server.js"
+    networks:
+      - erp-network
+
+  frontend:
+    environment:
+      NODE_ENV: development
+      REACT_APP_DEBUG: "true"
+      REACT_APP_API_URL: http://localhost:3001/api
+      REACT_APP_SSO_URL: http://localhost:3002
+    ports:
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - ./erp_new_system/frontend/src:/app/src
+      - ./erp_new_system/frontend/public:/app/public
+      - node_modules_frontend:/app/node_modules
+    command: >
+      sh -c "npm install && npm start"
+    networks:
+      - erp-network
+
+  # Comment out nginx for development (access services directly)
+  nginx:
+    profiles:
+      - prod
+
+volumes:
+  node_modules:
+    driver: local
+  node_modules_frontend:
+    driver: local

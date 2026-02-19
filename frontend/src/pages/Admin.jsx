@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { FiUsers, FiSettings, FiAlertTriangle, FiBarChart2, FiTrendingUp, FiDownload } from 'react-icons/fi';
 import './Admin.css';
+import { touchButtonStyle } from '../common/touchStyles';
 
 /**
  * Phase 12 - Admin Panel Component
@@ -75,7 +76,7 @@ const Admin = () => {
           <h1>⚙️ Admin Panel</h1>
           <p>System management and monitoring dashboard</p>
         </div>
-        <button className="btn btn-secondary" onClick={handleExportData}>
+        <button className="btn btn-secondary" onClick={handleExportData} style={touchButtonStyle}>
           <FiDownload /> Export Data
         </button>
       </header>
@@ -85,24 +86,28 @@ const Admin = () => {
         <button
           className={`tab ${activeTab === 'overview' ? 'active' : ''}`}
           onClick={() => setActiveTab('overview')}
+          style={touchButtonStyle}
         >
           <FiBarChart2 /> Overview
         </button>
         <button
           className={`tab ${activeTab === 'users' ? 'active' : ''}`}
           onClick={() => setActiveTab('users')}
+          style={touchButtonStyle}
         >
           <FiUsers /> Users ({users.length})
         </button>
         <button
           className={`tab ${activeTab === 'alerts' ? 'active' : ''}`}
           onClick={() => setActiveTab('alerts')}
+          style={touchButtonStyle}
         >
           <FiAlertTriangle /> Alerts ({alerts.length})
         </button>
         <button
           className={`tab ${activeTab === 'settings' ? 'active' : ''}`}
           onClick={() => setActiveTab('settings')}
+          style={touchButtonStyle}
         >
           <FiSettings /> Settings
         </button>
@@ -211,8 +216,8 @@ const Admin = () => {
                         </td>
                         <td>{new Date(user.createdAt).toLocaleDateString()}</td>
                         <td>
-                          <button className="action-btn edit">Edit</button>
-                          <button className="action-btn delete">Delete</button>
+                          <button className="action-btn edit" style={touchButtonStyle}>Edit</button>
+                          <button className="action-btn delete" style={touchButtonStyle}>Delete</button>
                         </td>
                       </tr>
                     ))
@@ -253,7 +258,7 @@ const Admin = () => {
                         {new Date(alert.timestamp).toLocaleTimeString()}
                       </span>
                     </div>
-                    <button className="alert-dismiss">×</button>
+                    <button className="alert-dismiss" style={touchButtonStyle}>×</button>
                   </div>
                 ))
               ) : (
@@ -314,7 +319,7 @@ const Admin = () => {
                 </label>
               </div>
 
-              <button type="submit" className="btn btn-primary">
+              <button type="submit" className="btn btn-primary" style={touchButtonStyle}>
                 💾 Save Settings
               </button>
             </form>

@@ -19,7 +19,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import api from '../services/api';
+import api from '../utils/api';
 
 const Dashboard = () => {
   const navigate = useNavigate();

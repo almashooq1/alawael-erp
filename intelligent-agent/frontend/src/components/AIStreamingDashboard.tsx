@@ -51,9 +51,24 @@ const AIStreamingDashboard: React.FC = () => {
   if (loading) return <div className="p-4 text-center">جاري التحميل...</div>;
   if (error) return <div className="p-4 text-red-600 text-center">خطأ: {error}</div>;
 
-  const summary = dashboardData.summary || {};
-  const performance = dashboardData.performance || {};
-  const forecast = dashboardData.forecast || {};
+  const summary = dashboardData.summary ?? {
+    totalProcesses: 0,
+    completed: 0,
+    active: 0,
+    successRate: '0%',
+    efficiency: '0%',
+  };
+  const performance = dashboardData.performance ?? {
+    averageCompletionTime: '0 دقيقة',
+    riskScore: '0',
+    bottlenecks: [],
+    trend: 'ثابت',
+  };
+  const forecast = dashboardData.forecast ?? {
+    estimatedCompletions: 0,
+    confidence: '0%',
+    recommendation: 'لا توجد توصيات حالياً',
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 p-6" dir="rtl">
@@ -103,11 +118,15 @@ const AIStreamingDashboard: React.FC = () => {
             <div className="space-y-3">
               <div className="flex justify-between text-slate-300">
                 <span>متوسط وقت الإنجاز</span>
-                <span className="font-mono text-green-400">{performance.averageCompletionTime}</span>
+                <span className="font-mono text-green-400">
+                  {performance.averageCompletionTime}
+                </span>
               </div>
               <div className="flex justify-between text-slate-300">
                 <span>الاتجاه الحالي</span>
-                <span className={`font-bold ${performance.trend === 'تحسن' ? 'text-green-400' : 'text-red-400'}`}>
+                <span
+                  className={`font-bold ${performance.trend === 'تحسن' ? 'text-green-400' : 'text-red-400'}`}
+                >
                   {performance.trend}
                 </span>
               </div>
@@ -131,7 +150,9 @@ const AIStreamingDashboard: React.FC = () => {
             <div className="space-y-3">
               <div className="flex justify-between text-slate-300">
                 <span>العمليات المتوقعة (30 يوم)</span>
-                <span className="font-mono text-blue-400">{forecast.estimatedCompletions || 0}</span>
+                <span className="font-mono text-blue-400">
+                  {forecast.estimatedCompletions || 0}
+                </span>
               </div>
               <div className="flex justify-between text-slate-300">
                 <span>مستوى الثقة</span>
@@ -157,7 +178,9 @@ const AIStreamingDashboard: React.FC = () => {
             </div>
             <div className="p-4 bg-slate-900 rounded">
               <div className="text-sm text-slate-400">آخر تحديث</div>
-              <div className="text-lg font-bold text-blue-400 mt-2">{new Date().toLocaleTimeString('ar-SA')}</div>
+              <div className="text-lg font-bold text-blue-400 mt-2">
+                {new Date().toLocaleTimeString('ar-SA')}
+              </div>
             </div>
             <div className="p-4 bg-slate-900 rounded">
               <div className="text-sm text-slate-400">الإصدار</div>

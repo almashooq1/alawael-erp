@@ -1,4 +1,4 @@
-import api from './api';
+import api from '../utils/api';
 
 /**
  * Messaging Service
@@ -17,7 +17,7 @@ const messagingService = {
    * إنشاء محادثة خاصة جديدة
    * @param {string} userId - معرف المستخدم الآخر
    */
-  createPrivateConversation: async (userId) => {
+  createPrivateConversation: async userId => {
     const response = await api.post('/conversations/private', { userId });
     return response.data;
   },
@@ -36,7 +36,7 @@ const messagingService = {
    * الحصول على تفاصيل محادثة
    * @param {string} conversationId
    */
-  getConversationById: async (conversationId) => {
+  getConversationById: async conversationId => {
     const response = await api.get(`/conversations/${conversationId}`);
     return response.data;
   },
@@ -49,7 +49,7 @@ const messagingService = {
    */
   getMessages: async (conversationId, page = 1, limit = 50) => {
     const response = await api.get(`/messages/conversation/${conversationId}`, {
-      params: { page, limit }
+      params: { page, limit },
     });
     return response.data;
   },
@@ -66,7 +66,7 @@ const messagingService = {
       conversationId,
       content,
       attachments,
-      replyTo
+      replyTo,
     });
     return response.data;
   },
@@ -75,7 +75,7 @@ const messagingService = {
    * تحديد الرسائل كمقروءة
    * @param {string} conversationId
    */
-  markAsRead: async (conversationId) => {
+  markAsRead: async conversationId => {
     const response = await api.post(`/messages/mark-read/${conversationId}`);
     return response.data;
   },
@@ -84,9 +84,9 @@ const messagingService = {
    * البحث في الرسائل
    * @param {string} query
    */
-  searchMessages: async (query) => {
+  searchMessages: async query => {
     const response = await api.get('/messages/search', {
-      params: { q: query }
+      params: { q: query },
     });
     return response.data;
   },
@@ -109,7 +109,7 @@ const messagingService = {
   removeParticipant: async (conversationId, userId) => {
     const response = await api.delete(`/conversations/${conversationId}/participants/${userId}`);
     return response.data;
-  }
+  },
 };
 
 export default messagingService;

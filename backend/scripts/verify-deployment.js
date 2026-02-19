@@ -23,11 +23,11 @@ class DeploymentVerifier {
    * Check HTTP endpoint
    */
   async checkEndpoint(url, expectedStatus = 200) {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const startTime = Date.now();
 
       http
-        .get(url, (res) => {
+        .get(url, res => {
           const duration = Date.now() - startTime;
           const success = res.statusCode === expectedStatus;
 
@@ -41,7 +41,7 @@ class DeploymentVerifier {
               : `Status mismatch: expected ${expectedStatus}, got ${res.statusCode}`,
           });
         })
-        .on('error', (error) => {
+        .on('error', error => {
           const duration = Date.now() - startTime;
           resolve({
             success: false,
@@ -50,7 +50,7 @@ class DeploymentVerifier {
             message: error.message,
           });
         })
-        .setTimeout(5000, function() {
+        .setTimeout(5000, function () {
           this.destroy();
           resolve({
             success: false,
@@ -113,12 +113,7 @@ class DeploymentVerifier {
     // Environment checks
     console.log('🔍 Checking Environment:\n');
 
-    const requiredEnvVars = [
-      'NODE_ENV',
-      'APP_PORT',
-      'MONGODB_URI',
-      'REDIS_URL',
-    ];
+    const requiredEnvVars = ['NODE_ENV', 'APP_PORT', 'MONGODB_URI', 'REDIS_URL'];
 
     let envPassed = 0;
     let envFailed = 0;
@@ -144,12 +139,8 @@ class DeploymentVerifier {
     console.log(`✅ Node.js: ${process.version}`);
     console.log(`✅ Platform: ${process.platform} (${process.arch})`);
     console.log(`✅ Uptime: ${Math.floor(uptime / 3600)}h ${Math.floor((uptime % 3600) / 60)}m`);
-    console.log(
-      `✅ Memory: ${((memUsage.heapUsed / memUsage.heapTotal) * 100).toFixed(2)}% used`
-    );
-    console.log(
-      `✅ System Memory: ${((1 - os.freemem() / os.totalmem()) * 100).toFixed(2)}% used`
-    );
+    console.log(`✅ Memory: ${((memUsage.heapUsed / memUsage.heapTotal) * 100).toFixed(2)}% used`);
+    console.log(`✅ System Memory: ${((1 - os.freemem() / os.totalmem()) * 100).toFixed(2)}% used`);
     console.log('');
 
     // Summary
@@ -179,7 +170,7 @@ const command = args[0];
 const baseUrl = args[1] || process.env.APP_URL || 'http://localhost:3000';
 
 if (command === '--json') {
-  verifier.verify({ baseUrl }).then((result) => {
+  verifier.verify({ baseUrl }).then(result => {
     console.log(JSON.stringify(result, null, 2));
     process.exit(result.ready ? 0 : 1);
   });
@@ -216,7 +207,7 @@ Exit codes:
   process.exit(0);
 } else {
   const url = baseUrl.startsWith('http') ? baseUrl : command;
-  verifier.verify({ baseUrl: url }).then((result) => {
+  verifier.verify({ baseUrl: url }).then(result => {
     process.exit(result.ready ? 0 : 1);
   });
 }

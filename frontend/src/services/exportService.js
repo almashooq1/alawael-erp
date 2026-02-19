@@ -2,6 +2,15 @@ import * as XLSX from 'xlsx';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 
+// إعدادات التخصيص المؤسسي (شعار/ألوان)
+const getBranding = () => {
+  return {
+    logo: localStorage.getItem('orgLogo') || '',
+    color: localStorage.getItem('orgColor') || '#667eea',
+    name: localStorage.getItem('orgName') || '',
+  };
+};
+
 /**
  * خدمة تصدير البيانات
  * Data Export Service
@@ -22,6 +31,7 @@ const exportService = {
    */
   toExcel: (data, fileName = 'export', options = {}) => {
     try {
+      const branding = getBranding();
       const ws = XLSX.utils.json_to_sheet(data);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, options.sheetName || 'Sheet1');
@@ -32,12 +42,14 @@ const exportService = {
       }
 
       // تعيين الألوان للرأس
-      if (options.headerStyle) {
+      if (options.headerStyle || branding.color) {
         const headerRange = XLSX.utils.decode_range(ws['!ref']);
         for (let C = headerRange.s.c; C <= headerRange.e.c; ++C) {
           const address = XLSX.utils.encode_cell({ r: 0, c: C });
           if (!ws[address]) continue;
-          ws[address].s = options.headerStyle;
+          ws[address].s = options.headerStyle || {
+            fill: { fgColor: { rgb: branding.color.replace('#', '') } },
+          };
         }
       }
 
@@ -89,6 +101,7 @@ const exportService = {
    */
   toPDF: async (elementId, fileName = 'export', options = {}) => {
     try {
+      const branding = getBranding();
       const element = document.getElementById(elementId);
       if (!element) {
         throw new Error(`Element with id "${elementId}" not found`);
@@ -108,17 +121,46 @@ const exportService = {
         format: options.format || 'a4',
       });
 
+      // إضافة الشعار المؤسسي أعلى الصفحة
+      if (branding.logo) {
+        const logoImg = new Image();
+        logoImg.src = branding.logo;
+        await new Promise(resolve => {
+          logoImg.onload = resolve;
+        });
+        pdf.addImage(logoImg, 'PNG', 10, 5, 30, 18);
+      }
+      // اسم المؤسسة
+      if (branding.name) {
+        pdf.setFontSize(13);
+        pdf.setTextColor(branding.color);
+        pdf.text(branding.name, 45, 15, { align: 'left' });
+      }
+
       const imgWidth = pdf.internal.pageSize.getWidth() - 20;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       let heightLeft = imgHeight;
-      let position = 10;
+      let position = 30;
 
       pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
       heightLeft -= pdf.internal.pageSize.getHeight();
 
       while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
+        position = heightLeft - imgHeight + 30;
         pdf.addPage();
+        if (branding.logo) {
+          const logoImg = new Image();
+          logoImg.src = branding.logo;
+          await new Promise(resolve => {
+            logoImg.onload = resolve;
+          });
+          pdf.addImage(logoImg, 'PNG', 10, 5, 30, 18);
+        }
+        if (branding.name) {
+          pdf.setFontSize(13);
+          pdf.setTextColor(branding.color);
+          pdf.text(branding.name, 45, 15, { align: 'left' });
+        }
         pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
         heightLeft -= pdf.internal.pageSize.getHeight();
       }
@@ -127,7 +169,7 @@ const exportService = {
       if (options.title) {
         pdf.setProperties({
           title: options.title,
-          author: options.author || 'System',
+          author: options.author || branding.name || 'System',
           subject: options.subject || 'Export',
         });
       }

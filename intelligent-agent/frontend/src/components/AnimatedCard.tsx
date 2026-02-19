@@ -40,7 +40,7 @@ const AnimatedCard: React.FC<AnimatedCardProps> = ({
       initial={variants.initial}
       animate={variants.animate}
       transition={{ duration, delay }}
-      whileHover={{ y: -4, boxShadow: `0 8px 16px ${theme.colors.shadow.main}` }}
+      whileHover={{ y: -4, boxShadow: theme.shadows.md }}
       style={{
         borderRadius: '12px',
         backgroundColor: theme.colors.surface.primary,

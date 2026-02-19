@@ -123,9 +123,7 @@ class HealthChecker {
   async runWithTimeout(promise, timeout) {
     return Promise.race([
       promise,
-      new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Check timeout')), timeout)
-      ),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Check timeout')), timeout)),
     ]);
   }
 }
@@ -148,8 +146,7 @@ checker.register(
     const loadAverage = os.loadavg();
     const loadPercent = ((loadAverage[0] / cpus.length) * 100).toFixed(2);
 
-    const status =
-      memoryPercent < 90 && loadPercent < 90 ? 'UP' : 'DEGRADED';
+    const status = memoryPercent < 90 && loadPercent < 90 ? 'UP' : 'DEGRADED';
 
     return {
       status,

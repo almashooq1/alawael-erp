@@ -30,20 +30,27 @@ const requireAuth = (req, res, next) => {
 };
 
 /**
- * Role-based guard: requires `req.user.role` to match
+ * Role-based guard: requires `req.user.role` to match one of the provided roles
  */
-const requireRole = role => (req, res, next) => {
-  if (!req.user || req.user.role !== role) {
-    return res.status(403).json({ success: false, message: 'Forbidden' });
-  }
-  next();
-};
+const requireRole =
+  (...roles) =>
+  (req, res, next) => {
+    if (!req.user || !roles.includes(req.user.role)) {
+      return res.status(403).json({ success: false, message: 'Forbidden' });
+    }
+    next();
+  };
 
 /**
  * Authenticate JWT token middleware (lenient in tests)
  */
 const authenticateToken = (req, res, next) => {
   try {
+    // If user is already set (from mock or previous middleware), allow it
+    if (req.user) {
+      return next();
+    }
+
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
 
@@ -85,6 +92,11 @@ const requireAdmin = (req, res, next) => {
  */
 const optionalAuth = (req, res, next) => {
   try {
+    // If user is already set, allow it
+    if (req.user) {
+      return next();
+    }
+
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
 

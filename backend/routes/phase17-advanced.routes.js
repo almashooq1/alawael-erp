@@ -6,10 +6,11 @@
 
 const express = require('express');
 const router = express.Router();
+const db = require('../config/inMemoryDB');
 const Chatbot = require('../utils/intelligent-chatbot');
 const Analytics = require('../utils/advanced-predictive-analytics');
 const Workflow = require('../utils/workflow-builder');
-const auth = require('../middleware/auth');
+const auth = require('../middleware/auth').authenticateToken;
 
 // Initialize services
 const chatbot = new Chatbot.IntelligentChatbot(db);

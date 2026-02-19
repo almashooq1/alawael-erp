@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import AIStreamingDashboard from '../components/AIStreamingDashboard';
 import AIRecommendations from '../components/AIRecommendations';
@@ -13,31 +13,31 @@ jest.mock('../services/AIClient', () => ({
     totalProcesses: 127,
     completedProcesses: 82,
     runningProcesses: 35,
-    failedProcesses: 10
+    failedProcesses: 10,
   }),
   suggestNextStep: jest.fn().mockResolvedValue({
-    suggestion: 'الخطوة التالية: مراجعة البيانات'
+    suggestion: 'الخطوة التالية: مراجعة البيانات',
   }),
   predictNextStep: jest.fn().mockResolvedValue({
-    prediction: 'الخطوة المتوقعة: الموافقة'
+    prediction: 'الخطوة المتوقعة: الموافقة',
   }),
   classifyRisk: jest.fn().mockResolvedValue({
-    riskLevel: 'low'
+    riskLevel: 'low',
   }),
   getRecommendation: jest.fn().mockResolvedValue({
-    recommendation: 'يوصى بتطبيق الإجراء الفوري'
+    recommendation: 'يوصى بتطبيق الإجراء الفوري',
   }),
   getProcessScore: jest.fn().mockResolvedValue({
-    score: 95
+    score: 95,
   }),
   automationOpportunities: jest.fn().mockResolvedValue({
-    opportunities: ['أتمتة معالجة البيانات', 'أتمتة التقارير']
+    opportunities: ['أتمتة معالجة البيانات', 'أتمتة التقارير'],
   }),
   smartTasks: jest.fn().mockResolvedValue({
     tasks: [
       { task: 'مراجعة الملفات', priority: 'عالية' },
-      { task: 'تحديث السجلات', priority: 'متوسطة' }
-    ]
+      { task: 'تحديث السجلات', priority: 'متوسطة' },
+    ],
   }),
   getMetrics: jest.fn().mockResolvedValue({
     totalProcesses: 127,
@@ -47,150 +47,130 @@ jest.mock('../services/AIClient', () => ({
     riskScore: 12,
     delayedProcesses: 3,
     avgAlertTime: 15,
-    automationRate: 72
+    automationRate: 72,
   }),
   getTrends: jest.fn().mockResolvedValue({
     data: [
       { name: 'السبت', value: 85 },
-      { name: 'الأحد', value: 88 }
-    ]
+      { name: 'الأحد', value: 88 },
+    ],
   }),
   getHealthReport: jest.fn().mockResolvedValue({
     status: 'healthy',
-    uptime: 99.8
-  })
+    uptime: 99.8,
+  }),
 }));
 
 describe('AI Frontend Components', () => {
   describe('AIStreamingDashboard', () => {
     it('يجب أن يعرض عنوان لوحة التحكم', async () => {
-      render(<AIStreamingDashboard />);
-      await waitFor(() => {
-        expect(screen.getByText(/لوحة التحكم الذكية/)).toBeInTheDocument();
-      });
+      const { findByText } = render(<AIStreamingDashboard />);
+      expect(await findByText(/لوحة التحكم الذكية/)).toBeInTheDocument();
     });
 
     it('يجب أن يعرض البطاقات الرئيسية', async () => {
-      render(<AIStreamingDashboard />);
-      await waitFor(() => {
-        expect(screen.getByText(/إجمالي العمليات/)).toBeInTheDocument();
-      });
+      const { findByText } = render(<AIStreamingDashboard />);
+      expect(await findByText(/إجمالي العمليات/)).toBeInTheDocument();
     });
   });
 
   describe('AIRecommendations', () => {
     it('يجب أن يعرض التوصيات الذكية', async () => {
-      render(<AIRecommendations />);
-      await waitFor(() => {
-        expect(screen.getByText(/التوصيات والاقتراحات الذكية/)).toBeInTheDocument();
-      });
+      const { findByText } = render(<AIRecommendations />);
+      expect(await findByText(/التوصيات والاقتراحات الذكية/)).toBeInTheDocument();
     });
 
     it('يجب أن يعرض التبويبات المختلفة', async () => {
-      render(<AIRecommendations />);
-      await waitFor(() => {
-        expect(screen.getByText(/الاقتراحات/)).toBeInTheDocument();
-        expect(screen.getByText(/التنبؤات/)).toBeInTheDocument();
-      });
+      const { findByText } = render(<AIRecommendations />);
+      expect(await findByText(/الاقتراحات/)).toBeInTheDocument();
+      expect(await findByText(/التنبؤات/)).toBeInTheDocument();
     });
   });
 
   describe('AIMetricsDashboard', () => {
     it('يجب أن يعرض المقاييس الرئيسية', async () => {
-      render(<AIMetricsDashboard />);
-      await waitFor(() => {
-        expect(screen.getByText(/لوحة التحكم - المقاييس والأداء/)).toBeInTheDocument();
-      });
+      const { findByText } = render(<AIMetricsDashboard />);
+      expect(await findByText(/لوحة التحكم - المقاييس والأداء/)).toBeInTheDocument();
     });
 
     it('يجب أن يعرض الرسم البياني للاتجاهات', async () => {
-      render(<AIMetricsDashboard />);
-      await waitFor(() => {
-        expect(screen.getByText(/اتجاهات الأداء/)).toBeInTheDocument();
-      });
+      const { findByText } = render(<AIMetricsDashboard />);
+      expect(await findByText(/اتجاهات الأداء/)).toBeInTheDocument();
     });
   });
 
   describe('AIProcessReports', () => {
     it('يجب أن يعرض تقارير العمليات', async () => {
-      render(<AIProcessReports />);
-      await waitFor(() => {
-        expect(screen.getByText(/تقارير العمليات الذكية/)).toBeInTheDocument();
-      });
+      const { findByText } = render(<AIProcessReports />);
+      expect(await findByText(/تقارير العمليات الذكية/)).toBeInTheDocument();
     });
 
     it('يجب أن يعرض فلاتر التقارير', async () => {
-      render(<AIProcessReports />);
-      await waitFor(() => {
-        expect(screen.getByText(/جميع العمليات/)).toBeInTheDocument();
-      });
+      const { findByText } = render(<AIProcessReports />);
+      expect(await findByText(/جميع العمليات/)).toBeInTheDocument();
     });
   });
 
   describe('AIAdvancedDashboard', () => {
     it('يجب أن يعرض لوحة التحكم المتقدمة', async () => {
-      render(<AIAdvancedDashboard />);
-      await waitFor(() => {
-        expect(screen.getByText(/لوحة التحكم الذكية/)).toBeInTheDocument();
-      });
+      const { findByText } = render(<AIAdvancedDashboard />);
+      expect(await findByText(/لوحة التحكم الذكية/)).toBeInTheDocument();
     });
 
     it('يجب أن يعرض التبويبات المختلفة', async () => {
-      render(<AIAdvancedDashboard />);
-      await waitFor(() => {
-        expect(screen.getByText(/نظرة عامة/)).toBeInTheDocument();
-        expect(screen.getByText(/صحة النظام/)).toBeInTheDocument();
-        expect(screen.getByText(/التنبؤ المستقبلي/)).toBeInTheDocument();
-      });
+      const { findByText } = render(<AIAdvancedDashboard />);
+      expect(await findByText(/نظرة عامة/)).toBeInTheDocument();
+      expect(await findByText(/صحة النظام/)).toBeInTheDocument();
+      expect(await findByText(/التنبؤ المستقبلي/)).toBeInTheDocument();
     });
 
     it('يجب أن يعرض حالة النظام', async () => {
-      render(<AIAdvancedDashboard />);
-      await waitFor(() => {
-        expect(screen.getByText(/النظام نشط/)).toBeInTheDocument();
-      });
+      const { findByText } = render(<AIAdvancedDashboard />);
+      expect(await findByText(/النظام نشط/)).toBeInTheDocument();
     });
   });
 
   describe('Integration Tests', () => {
     it('يجب أن تعمل جميع المكونات بدون أخطاء', async () => {
-      const { container: dashboard } = render(<AIAdvancedDashboard />);
-      const { container: recommendations } = render(<AIRecommendations />);
-      const { container: metrics } = render(<AIMetricsDashboard />);
-      const { container: reports } = render(<AIProcessReports />);
-      const { container: streaming } = render(<AIStreamingDashboard />);
+      const dashboardRender = render(<AIAdvancedDashboard />);
+      const recommendationsRender = render(<AIRecommendations />);
+      const metricsRender = render(<AIMetricsDashboard />);
+      const reportsRender = render(<AIProcessReports />);
+      const streamingRender = render(<AIStreamingDashboard />);
 
-      await waitFor(() => {
-        expect(dashboard).not.toBeEmptyDOMElement();
-        expect(recommendations).not.toBeEmptyDOMElement();
-        expect(metrics).not.toBeEmptyDOMElement();
-        expect(reports).not.toBeEmptyDOMElement();
-        expect(streaming).not.toBeEmptyDOMElement();
-      });
+      await Promise.all([
+        dashboardRender.findByText(/لوحة التحكم الذكية/),
+        recommendationsRender.findByText(/التوصيات والاقتراحات الذكية/),
+        metricsRender.findByText(/لوحة التحكم - المقاييس والأداء/),
+        reportsRender.findByText(/تقارير العمليات الذكية/),
+        streamingRender.findByText(/لوحة التحكم الذكية/),
+      ]);
+
+      expect(dashboardRender.container).not.toBeEmptyDOMElement();
+      expect(recommendationsRender.container).not.toBeEmptyDOMElement();
+      expect(metricsRender.container).not.toBeEmptyDOMElement();
+      expect(reportsRender.container).not.toBeEmptyDOMElement();
+      expect(streamingRender.container).not.toBeEmptyDOMElement();
     });
 
     it('يجب أن تتحدث المكونات مع بعضها البعض', async () => {
       const AIClient = require('../services/AIClient').default;
 
       render(<AIAdvancedDashboard />);
-      await waitFor(() => {
-        expect(AIClient.getDashboard).toHaveBeenCalled();
-      });
+      await new Promise(resolve => setTimeout(resolve, 0));
+      expect(AIClient.getDashboard).toHaveBeenCalled();
 
       render(<AIRecommendations />);
-      await waitFor(() => {
-        expect(AIClient.suggestNextStep).toHaveBeenCalled();
-      });
+      await new Promise(resolve => setTimeout(resolve, 0));
+      expect(AIClient.suggestNextStep).toHaveBeenCalled();
     });
   });
 
   describe('Performance Tests', () => {
     it('يجب أن تحمل لوحة التحكم بسرعة', async () => {
       const start = performance.now();
-      render(<AIAdvancedDashboard />);
-      await waitFor(() => {
-        expect(screen.getByText(/لوحة التحكم الذكية/)).toBeInTheDocument();
-      });
+      const { findByText } = render(<AIAdvancedDashboard />);
+      expect(await findByText(/لوحة التحكم الذكية/)).toBeInTheDocument();
       const end = performance.now();
 
       expect(end - start).toBeLessThan(2000); // أقل من ثانيتين
@@ -198,10 +178,8 @@ describe('AI Frontend Components', () => {
 
     it('يجب أن تحمل التوصيات بسرعة', async () => {
       const start = performance.now();
-      render(<AIRecommendations />);
-      await waitFor(() => {
-        expect(screen.getByText(/التوصيات والاقتراحات الذكية/)).toBeInTheDocument();
-      });
+      const { findByText } = render(<AIRecommendations />);
+      expect(await findByText(/التوصيات والاقتراحات الذكية/)).toBeInTheDocument();
       const end = performance.now();
 
       expect(end - start).toBeLessThan(2000);
@@ -210,17 +188,17 @@ describe('AI Frontend Components', () => {
 
   describe('Accessibility Tests', () => {
     it('يجب أن يكون لديه نصوص بديلة للصور', async () => {
-      render(<AIAdvancedDashboard />);
-      const elements = screen.getAllByRole('img', { hidden: true });
+      const { getAllByRole } = render(<AIAdvancedDashboard />);
+      const elements = getAllByRole('img', { hidden: true });
       elements.forEach(el => {
         expect(el).toHaveAttribute('alt');
       });
     });
 
     it('يجب أن تكون الألوان قابلة للتمييز', async () => {
-      render(<AIAdvancedDashboard />);
+      const { getByText } = render(<AIAdvancedDashboard />);
       // اختبار التباين
-      expect(screen.getByText(/إجمالي العمليات/)).toBeVisible();
+      expect(getByText(/إجمالي العمليات/)).toBeVisible();
     });
 
     it('يجب دعم اتجاه النص من اليمين إلى اليسار', async () => {
@@ -235,17 +213,15 @@ describe('AI Frontend Components', () => {
       const AIClient = require('../services/AIClient').default;
       AIClient.getDashboard.mockRejectedValueOnce(new Error('Network error'));
 
-      render(<AIAdvancedDashboard />);
+      const { queryByText } = render(<AIAdvancedDashboard />);
       // يجب أن يستمر في العمل حتى مع الخطأ
-      expect(screen.queryByText(/خطأ/)).not.toBeInTheDocument();
+      expect(queryByText(/خطأ/)).not.toBeInTheDocument();
     });
 
     it('يجب أن تعرض رسائل خطأ مناسبة', async () => {
-      const { rerender } = render(<AIAdvancedDashboard />);
+      const { findByText } = render(<AIAdvancedDashboard />);
       // تأكد من معالجة الأخطاء
-      await waitFor(() => {
-        expect(screen.getByText(/لوحة التحكم الذكية/)).toBeInTheDocument();
-      });
+      expect(await findByText(/لوحة التحكم الذكية/)).toBeInTheDocument();
     });
   });
 });

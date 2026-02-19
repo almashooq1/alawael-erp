@@ -16,9 +16,8 @@ import {
   MenuItem,
   Card,
   CardContent,
-  IconButton,
 } from '@mui/material';
-import { Save as SaveIcon, Delete as DeleteIcon, Add as AddIcon } from '@mui/icons-material';
+import { Add as AddIcon } from '@mui/icons-material';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
@@ -101,7 +100,10 @@ function CreateCarePlan() {
             ...currentDomains,
             [domain]: {
               ...currentDomainData,
-              goals: [...currentGoals, { title: '', type: domain.toUpperCase(), target: '', status: 'PENDING' }],
+              goals: [
+                ...currentGoals,
+                { title: '', type: domain.toUpperCase(), target: '', status: 'PENDING' },
+              ],
             },
           },
         },
@@ -187,7 +189,11 @@ function CreateCarePlan() {
                   </Box>
                 ))}
 
-                <Button startIcon={<AddIcon />} size="small" onClick={() => addGoal(sectionName, domain)}>
+                <Button
+                  startIcon={<AddIcon />}
+                  size="small"
+                  onClick={() => addGoal(sectionName, domain)}
+                >
                   Add Goal
                 </Button>
               </CardContent>
@@ -198,7 +204,13 @@ function CreateCarePlan() {
     );
   };
 
-  const steps = ['Basic Info', 'Educational Plan', 'Therapeutic Plan', 'Life Skills Plan', 'Review'];
+  const steps = [
+    'Basic Info',
+    'Educational Plan',
+    'Therapeutic Plan',
+    'Life Skills Plan',
+    'Review',
+  ];
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
@@ -249,15 +261,30 @@ function CreateCarePlan() {
                 <Divider sx={{ my: 2 }}>Select Enabled Modules</Divider>
                 <div style={{ display: 'flex', gap: '20px' }}>
                   <FormControlLabel
-                    control={<Switch checked={formData.educational.enabled} onChange={() => handleSectionToggle('educational')} />}
+                    control={
+                      <Switch
+                        checked={formData.educational.enabled}
+                        onChange={() => handleSectionToggle('educational')}
+                      />
+                    }
                     label="Educational Plan"
                   />
                   <FormControlLabel
-                    control={<Switch checked={formData.therapeutic.enabled} onChange={() => handleSectionToggle('therapeutic')} />}
+                    control={
+                      <Switch
+                        checked={formData.therapeutic.enabled}
+                        onChange={() => handleSectionToggle('therapeutic')}
+                      />
+                    }
                     label="Therapeutic Plan"
                   />
                   <FormControlLabel
-                    control={<Switch checked={formData.lifeSkills.enabled} onChange={() => handleSectionToggle('lifeSkills')} />}
+                    control={
+                      <Switch
+                        checked={formData.lifeSkills.enabled}
+                        onChange={() => handleSectionToggle('lifeSkills')}
+                      />
+                    }
                     label="Life Skills Plan"
                   />
                 </div>
@@ -282,7 +309,15 @@ function CreateCarePlan() {
                   formData.lifeSkills.enabled ? ' Life Skills ' : '',
                 ]}
               </Typography>
-              <Button variant="contained" color="success" size="large" fullWidth sx={{ mt: 4 }} onClick={handleSubmit} disabled={loading}>
+              <Button
+                variant="contained"
+                color="success"
+                size="large"
+                fullWidth
+                sx={{ mt: 4 }}
+                onClick={handleSubmit}
+                disabled={loading}
+              >
                 {loading ? 'Creating...' : 'Create Plan'}
               </Button>
             </Box>

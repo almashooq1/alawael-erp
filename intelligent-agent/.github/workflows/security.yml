@@ -10,6 +10,9 @@ on:
     - cron: '0 2 * * *'
   workflow_dispatch:
 
+env:
+  GITLEAKS_LICENSE: ''
+
 jobs:
   # Dependency Vulnerability Scanning
   dependency-scan:
@@ -122,7 +125,6 @@ jobs:
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
 
   # OWASP Dependency Check
   owasp-check:

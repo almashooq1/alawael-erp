@@ -8,7 +8,21 @@ const Invoice = require('../models/invoice.model');
 // Mock specific Mongoose methods used in service
 jest.mock('../models/payment.model');
 jest.mock('../models/subscription.model');
-jest.mock('../models/invoice.model');
+
+jest.mock('../models/invoice.model', () => {
+  // Return a constructor function that jest can spy on
+  const InvoiceMock = jest.fn(function (data) {
+    // Copy all data properties to this instance using Object.assign
+    Object.assign(this, data);
+  });
+
+  // Add prototype method
+  InvoiceMock.prototype.save = jest.fn(async function () {
+    return this;
+  });
+
+  return InvoiceMock;
+});
 
 describe('Payment Gateway Service', () => {
   let mockUserId;
@@ -29,11 +43,14 @@ describe('Payment Gateway Service', () => {
       plan: 'basic',
       status: 'active',
     }));
+  });
 
-    Invoice.mockImplementation(data => ({
-      ...data,
-      save: jest.fn().mockResolvedValue(true),
-    }));
+  beforeEach(() => {
+    // Re-setup Invoice mock implementation in each test since afterEach clears it
+    Invoice.mockImplementation(function (data) {
+      Object.assign(this, data);
+      this.save = jest.fn().mockResolvedValue(this);
+    });
   });
 
   afterEach(() => {

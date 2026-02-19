@@ -7,7 +7,7 @@
 // ============================================================================
 // 1. CHATBOT ENGINE
 // ============================================================================
-export class IntelligentChatbot {
+class IntelligentChatbot {
   constructor(db) {
     this.db = db;
     this.conversationHistory = new Map();
@@ -313,7 +313,7 @@ export class IntelligentChatbot {
 // ============================================================================
 // 2. ENTITY RECOGNIZER
 // ============================================================================
-export class EntityRecognizer {
+class EntityRecognizer {
   /**
    * Recognize entities in text
    */
@@ -388,7 +388,7 @@ export class EntityRecognizer {
 // ============================================================================
 // 3. CONTEXT MANAGER
 // ============================================================================
-export class ContextManager {
+class ContextManager {
   constructor() {
     this.userContexts = new Map();
   }
@@ -433,7 +433,7 @@ export class ContextManager {
 // ============================================================================
 // 4. SENTIMENT ANALYZER
 // ============================================================================
-export class SentimentAnalyzer {
+class SentimentAnalyzer {
   /**
    * Analyze sentiment of text
    */
@@ -470,7 +470,7 @@ export class SentimentAnalyzer {
   }
 }
 
-export default {
+module.exports = {
   IntelligentChatbot,
   EntityRecognizer,
   ContextManager,

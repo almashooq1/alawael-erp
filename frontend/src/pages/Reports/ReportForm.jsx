@@ -26,7 +26,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import api from '../../services/api';
+import api from '../../utils/api';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 

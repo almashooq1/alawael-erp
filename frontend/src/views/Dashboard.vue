@@ -6,6 +6,8 @@
         <h1>لوحة التحكم</h1>
         <p class="header-subtitle">مرحباً {{ userGreeting }}، إليك ملخص الأداء</p>
       </div>
+      <script>
+      import { touchButtonStyle } from '../common/touchStyles.js'
       <div class="header-actions">
         <button
           class="btn btn-secondary"
@@ -37,6 +39,7 @@
           :trend="{ type: 'up', value: 12, period: 'من الشهر الماضي' }"
           description="الطلاب النشطين حالياً"
           @action="navigateTo('/students')"
+          </script>
           :action="{ label: 'عرض الطلاب' }"
         />
 

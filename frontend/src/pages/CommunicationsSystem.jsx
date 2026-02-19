@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Card,
@@ -26,7 +26,6 @@ import {
   ListItemAvatar,
   Badge,
   Tooltip,
-  Paper,
   Divider,
   LinearProgress,
   Alert,
@@ -38,30 +37,18 @@ import {
   Archive as ArchiveIcon,
   Delete as DeleteIcon,
   Reply as ReplyIcon,
-  Forward as ForwardIcon,
-  AttachFile as AttachFileIcon,
   Search as SearchIcon,
   FilterList as FilterIcon,
   Refresh as RefreshIcon,
-  MoreVert as MoreVertIcon,
   Star as StarIcon,
   StarBorder as StarBorderIcon,
-  Label as LabelIcon,
-  Schedule as ScheduleIcon,
   CheckCircle as CheckCircleIcon,
   Error as ErrorIcon,
   Pending as PendingIcon,
   Visibility as VisibilityIcon,
-  Assignment as AssignmentIcon,
-  Group as GroupIcon,
   Business as BusinessIcon,
-  Person as PersonIcon,
-  LocalOffer as TagIcon,
-  TrendingUp as TrendingUpIcon,
   Email as EmailIcon,
   Message as MessageIcon,
-  Phone as PhoneIcon,
-  VideoCall as VideoIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
@@ -106,7 +93,6 @@ const CommunicationsSystem = () => {
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterPriority, setFilterPriority] = useState('all');
   const [showNewDialog, setShowNewDialog] = useState(false);
-  const [showReplyDialog, setShowReplyDialog] = useState(false);
   const [stats, setStats] = useState({
     total: 0,
     unread: 0,
@@ -114,6 +100,10 @@ const CommunicationsSystem = () => {
     today: 0,
   });
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+
+  const showSnackbar = useCallback((message, severity = 'success') => {
+    setSnackbar({ open: true, message, severity });
+  }, []);
 
   // نموذج مراسلة جديدة
   const [newCommunication, setNewCommunication] = useState({
@@ -133,16 +123,7 @@ const CommunicationsSystem = () => {
     dueDate: '',
   });
 
-  useEffect(() => {
-    loadCommunications();
-    loadStats();
-  }, []);
-
-  useEffect(() => {
-    filterCommunications();
-  }, [communications, searchQuery, filterType, filterStatus, filterPriority]);
-
-  const loadCommunications = async () => {
+  const loadCommunications = useCallback(async () => {
     setLoading(true);
     try {
       const response = await axios.get('/api/communications');
@@ -153,18 +134,18 @@ const CommunicationsSystem = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [showSnackbar]);
 
-  const loadStats = async () => {
+  const loadStats = useCallback(async () => {
     try {
       const response = await axios.get('/api/communications/stats');
       setStats(response.data);
     } catch (error) {
       console.error('Error loading stats:', error);
     }
-  };
+  }, []);
 
-  const filterCommunications = () => {
+  const filterCommunications = useCallback(() => {
     let filtered = [...communications];
 
     // تصفية حسب نوع التبويب
@@ -200,7 +181,23 @@ const CommunicationsSystem = () => {
     }
 
     setFilteredCommunications(filtered);
-  };
+  }, [
+    communications,
+    searchQuery,
+    filterType,
+    filterStatus,
+    filterPriority,
+    activeTab,
+  ]);
+
+  useEffect(() => {
+    loadCommunications();
+    loadStats();
+  }, [loadCommunications, loadStats]);
+
+  useEffect(() => {
+    filterCommunications();
+  }, [filterCommunications]);
 
   const handleCreateCommunication = async () => {
     try {
@@ -216,21 +213,6 @@ const CommunicationsSystem = () => {
     }
   };
 
-  const handleReply = async (replyContent) => {
-    try {
-      const response = await axios.post(`/api/communications/${selectedCommunication.id}/reply`, {
-        content: replyContent,
-      });
-      setCommunications(communications.map(c =>
-        c.id === selectedCommunication.id ? response.data : c
-      ));
-      setShowReplyDialog(false);
-      showSnackbar('تم إرسال الرد بنجاح', 'success');
-    } catch (error) {
-      console.error('Error replying:', error);
-      showSnackbar('خطأ في إرسال الرد', 'error');
-    }
-  };
 
   const handleToggleStar = async (id) => {
     try {
@@ -289,9 +271,6 @@ const CommunicationsSystem = () => {
     });
   };
 
-  const showSnackbar = (message, severity = 'success') => {
-    setSnackbar({ open: true, message, severity });
-  };
 
   const formatDate = (date) => {
     return format(new Date(date), 'dd/MM/yyyy HH:mm', { locale: ar });

@@ -39,7 +39,7 @@ import {
 } from '@mui/icons-material';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import api from '../../services/api';
+import api from '../../utils/api';
 
 const BeneficiaryDetail = () => {
   const { id } = useParams();

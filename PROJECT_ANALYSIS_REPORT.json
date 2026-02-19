@@ -1,0 +1,132 @@
+{
+  "timestamp": "2026-02-19T07:07:39.779Z",
+  "projectRoot": "C:\\Users\\x-be\\OneDrive\\المستندات\\04-10-2025\\66666",
+  "sections": {
+    "projectStructure": {
+      "found": [
+        "erp_new_system",
+        "backend",
+        "frontend",
+        "docs",
+        "deployment",
+        "docker"
+      ],
+      "missing": [],
+      "status": "PASS"
+    },
+    "environmentFiles": {
+      "found": [
+        ".env",
+        ".env.example",
+        ".env.docker"
+      ],
+      "missing": [],
+      "status": "PASS"
+    },
+    "dependencies": {
+      "packageJsonFiles": 5,
+      "hasNodeModules": true,
+      "status": "PASS"
+    },
+    "services": {
+      "status": [
+        {
+          "name": "Backend API",
+          "port": 3001,
+          "healthEndpoint": "/api/health",
+          "running": true
+        },
+        {
+          "name": "Frontend",
+          "port": 3000,
+          "running": true
+        },
+        {
+          "name": "Database",
+          "port": 5432,
+          "running": false
+        },
+        {
+          "name": "Redis Cache",
+          "port": 6379,
+          "running": false
+        },
+        {
+          "name": "Elasticsearch",
+          "port": 9200,
+          "running": false
+        }
+      ],
+      "running": 2,
+      "total": 5
+    },
+    "databases": {
+      "status": [
+        {
+          "name": "PostgreSQL",
+          "command": "psql --version",
+          "installed": false
+        },
+        {
+          "name": "MongoDB",
+          "command": "mongo --version",
+          "installed": false
+        },
+        {
+          "name": "MySQL",
+          "command": "mysql --version",
+          "installed": false
+        },
+        {
+          "name": "Redis",
+          "command": "redis-cli --version",
+          "installed": true
+        }
+      ],
+      "installed": 1,
+      "total": 4
+    },
+    "docker": {
+      "files": [
+        "docker-compose.yml",
+        "docker-compose.production.yml",
+        "Dockerfile"
+      ],
+      "dockerInstalled": true,
+      "status": "PASS"
+    },
+    "tests": {
+      "hasTestSetup": true,
+      "filesCount": 367,
+      "status": "PASS"
+    },
+    "security": {
+      "issues": [],
+      "status": "PASS"
+    }
+  },
+  "issues": [
+    {
+      "category": "Security",
+      "severity": "CRITICAL",
+      "message": "ملف .env يحتوي على بيانات حساسة",
+      "solution": "استخدم متغيرات البيئة من نظام التشغيل أو .env.local"
+    },
+    {
+      "category": "Security",
+      "severity": "CRITICAL",
+      "message": "ملف .env.docker يحتوي على بيانات حساسة",
+      "solution": "استخدم متغيرات البيئة من نظام التشغيل أو .env.local"
+    }
+  ],
+  "solutions": [],
+  "summary": {
+    "totalSections": 8,
+    "totalIssues": 2,
+    "totalSolutions": 0,
+    "criticalIssues": 2,
+    "highPriorityIssues": 0,
+    "recommendedActions": 0,
+    "overallStatus": "NEEDS_FIXES"
+  }
+}

@@ -36,7 +36,7 @@ import {
   Cancel
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import api from '../../services/api';
+import api from '../../utils/api';
 
 const SessionsList = () => {
   const navigate = useNavigate();

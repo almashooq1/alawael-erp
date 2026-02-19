@@ -12,6 +12,8 @@ const reportingRoutes = require('./reporting.routes');
 const integrationRoutes = require('./integration.routes');
 const projectRoutes = require('./project.routes');
 const aiRoutes = require('./ai.routes');
+const policyRoutes = require('../../routes/policyRoutes');
+const incidentRoutes = require('../../routes/incidentRoutes');
 
 /**
  * Setup all new routes
@@ -31,6 +33,12 @@ function setupNewRoutes(app) {
 
   // AI routes
   app.use('/api', aiRoutes);
+
+  // Policy Management routes
+  app.use('/api/policies', policyRoutes);
+
+  // Incident Management routes
+  app.use('/api/incidents', incidentRoutes);
 
   console.log('✅ جميع المسارات الجديدة تم تسجيلها بنجاح');
   console.log('✅ All new routes registered successfully');

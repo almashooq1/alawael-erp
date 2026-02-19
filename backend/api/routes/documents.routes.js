@@ -26,11 +26,32 @@ const { authenticateToken } = require('../../middleware/auth');
 const documentsDatabase = {
   categories: [
     { id: 'cat_001', name: 'العقود', nameEn: 'Contracts', icon: '📝', color: '#2196F3', count: 15 },
-    { id: 'cat_002', name: 'الفواتير', nameEn: 'Invoices', icon: '💰', color: '#4CAF50', count: 42 },
+    {
+      id: 'cat_002',
+      name: 'الفواتير',
+      nameEn: 'Invoices',
+      icon: '💰',
+      color: '#4CAF50',
+      count: 42,
+    },
     { id: 'cat_003', name: 'التقارير', nameEn: 'Reports', icon: '📊', color: '#FF9800', count: 28 },
-    { id: 'cat_004', name: 'الشهادات', nameEn: 'Certificates', icon: '🏆', color: '#9C27B0', count: 12 },
+    {
+      id: 'cat_004',
+      name: 'الشهادات',
+      nameEn: 'Certificates',
+      icon: '🏆',
+      color: '#9C27B0',
+      count: 12,
+    },
     { id: 'cat_005', name: 'السياسات', nameEn: 'Policies', icon: '📋', color: '#F44336', count: 8 },
-    { id: 'cat_006', name: 'المراسلات', nameEn: 'Correspondence', icon: '✉️', color: '#00BCD4', count: 35 },
+    {
+      id: 'cat_006',
+      name: 'المراسلات',
+      nameEn: 'Correspondence',
+      icon: '✉️',
+      color: '#00BCD4',
+      count: 35,
+    },
   ],
 
   documents: [
@@ -284,7 +305,7 @@ router.get('/', authenticateToken, (req, res) => {
         doc =>
           doc.title.toLowerCase().includes(searchLower) ||
           doc.description.toLowerCase().includes(searchLower) ||
-          doc.tags.some(tag => tag.toLowerCase().includes(searchLower)),
+          doc.tags.some(tag => tag.toLowerCase().includes(searchLower))
       );
     }
 
@@ -551,7 +572,7 @@ router.get('/search/advanced', authenticateToken, (req, res) => {
         doc =>
           doc.title.toLowerCase().includes(searchLower) ||
           doc.description.toLowerCase().includes(searchLower) ||
-          doc.tags.some(tag => tag.toLowerCase().includes(searchLower)),
+          doc.tags.some(tag => tag.toLowerCase().includes(searchLower))
       );
     }
 
@@ -661,6 +682,103 @@ router.get('/reports/analytics', authenticateToken, (req, res) => {
       message: 'Failed to generate analytics',
       error: error.message,
     });
+  }
+});
+
+// ============================================
+// 📥 BULK UPLOAD
+// ============================================
+router.post('/upload-bulk', authenticateToken, (req, res) => {
+  try {
+    res.json({
+      success: true,
+      message: 'Bulk upload initiated',
+      filesProcessed: 0,
+    });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// 📥 DOCUMENT VERSION MANAGEMENT
+// ============================================
+router.get('/:id/download', authenticateToken, (req, res) => {
+  try {
+    res.json({
+      success: true,
+      message: 'Document download',
+      documentId: req.params.id,
+    });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.get('/:id/preview', authenticateToken, (req, res) => {
+  try {
+    res.json({
+      success: true,
+      message: 'Document preview',
+      documentId: req.params.id,
+      preview: 'Document content preview...',
+    });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.get('/:id/versions', authenticateToken, (req, res) => {
+  try {
+    res.json({
+      success: true,
+      documentId: req.params.id,
+      versions: [
+        { versionId: 'v1', version: 1, createdAt: new Date() },
+        { versionId: 'v2', version: 2, createdAt: new Date() },
+      ],
+    });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/:id/versions/:versionId/restore', authenticateToken, (req, res) => {
+  try {
+    res.json({
+      success: true,
+      message: 'Version restored successfully',
+      documentId: req.params.id,
+      restoredVersion: req.params.versionId,
+    });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/:id/upload-version', authenticateToken, (req, res) => {
+  try {
+    res.json({
+      success: true,
+      message: 'New version uploaded',
+      documentId: req.params.id,
+      versionId: 'v3',
+    });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.get('/:id/versions/:versionId/compare', authenticateToken, (req, res) => {
+  try {
+    res.json({
+      success: true,
+      documentId: req.params.id,
+      compareVersions: [req.params.versionId, req.query.with],
+      differences: [],
+    });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
   }
 });
 

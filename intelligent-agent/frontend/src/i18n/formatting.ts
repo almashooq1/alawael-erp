@@ -1,4 +1,4 @@
-import { useTranslation } from 'i18next-react';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Advanced i18n utilities for formatting dates, numbers, and handling pluralization
@@ -200,10 +200,7 @@ export const formatWithPlural = (
  * Examples:
  *   formatRelativeTime(new Date(Date.now() - 3600000), 'en') → "1 hour ago"
  */
-export const formatRelativeTime = (
-  date: Date,
-  locale: string = 'en'
-): string => {
+export const formatRelativeTime = (date: Date, locale: string = 'en'): string => {
   try {
     const localeCode = locale === 'ar' ? 'ar-SA' : locale === 'fr' ? 'fr-FR' : 'en-US';
     const rtf = new Intl.RelativeTimeFormat(localeCode, { numeric: 'auto' });
@@ -240,8 +237,7 @@ export const useI18nFormat = () => {
   return {
     formatNumber: (value: number, options?: Intl.NumberFormatOptions) =>
       formatNumber(value, locale, options),
-    formatCurrency: (value: number, currency?: string) =>
-      formatCurrency(value, locale, currency),
+    formatCurrency: (value: number, currency?: string) => formatCurrency(value, locale, currency),
     formatPercent: (value: number, maxFractionDigits?: number) =>
       formatPercent(value, locale, maxFractionDigits),
     formatDate: (date: Date, options?: Intl.DateTimeFormatOptions) =>

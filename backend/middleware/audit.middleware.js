@@ -34,4 +34,104 @@ const auditMiddleware = (actionName, moduleName) => {
   };
 };
 
-module.exports = auditMiddleware;
+/**
+ * Audit middleware for authentication events
+ */
+const auditAuthMiddleware = (actionName = 'AUTH_ACTION') => {
+  return (req, res, next) => {
+    const originalSend = res.send;
+
+    res.send = function (body) {
+      const statusCode = res.statusCode;
+      const status = statusCode < 400 ? 'SUCCESS' : 'FAILURE';
+
+      AuditService.log(
+        req,
+        actionName,
+        'AUTHENTICATION',
+        {},
+        null,
+        status,
+        `Authentication action: ${actionName}`,
+      );
+
+      originalSend.call(this, body);
+    };
+
+    next();
+  };
+};
+
+/**
+ * Audit middleware for CRUD operations
+ */
+const auditCrudMiddleware = (entityType) => {
+  return (req, res, next) => {
+    const originalSend = res.send;
+
+    res.send = function (body) {
+      const statusCode = res.statusCode;
+      const status = statusCode < 400 ? 'SUCCESS' : 'FAILURE';
+      const method = req.method;
+      const actionMap = {
+        POST: 'CREATE',
+        PUT: 'UPDATE',
+        PATCH: 'UPDATE',
+        DELETE: 'DELETE',
+        GET: 'READ',
+      };
+      const action = actionMap[method] || 'OPERATION';
+
+      AuditService.log(
+        req,
+        `${action}_${entityType.toUpperCase()}`,
+        entityType,
+        { id: req.params.id, type: entityType },
+        null,
+        status,
+        `${action} operation on ${entityType}`,
+      );
+
+      originalSend.call(this, body);
+    };
+
+    next();
+  };
+};
+
+/**
+ * Audit middleware for brute force detection
+ */
+const auditBruteForceMiddleware = () => {
+  return (req, res, next) => {
+    const originalSend = res.send;
+
+    res.send = function (body) {
+      const statusCode = res.statusCode;
+      if (statusCode === 401 || statusCode === 429) {
+        const status = statusCode === 429 ? 'FAILURE' : 'SUCCESS';
+
+        AuditService.log(
+          req,
+          statusCode === 429 ? 'RATE_LIMIT_EXCEEDED' : 'AUTH_FAILED',
+          'SECURITY',
+          {},
+          null,
+          status,
+          statusCode === 429 ? 'Rate limit exceeded' : 'Authentication failed',
+        );
+      }
+
+      originalSend.call(this, body);
+    };
+
+    next();
+  };
+};
+
+module.exports = {
+  auditMiddleware,
+  auditAuthMiddleware,
+  auditCrudMiddleware,
+  auditBruteForceMiddleware,
+};

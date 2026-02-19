@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { FiSearch, FiFilter, FiDownload } from 'react-icons/fi';
 import './Search.css';
+import { touchButtonStyle } from '../common/touchStyles';
 
 /**
  * Phase 12 - Search Component
@@ -119,7 +120,7 @@ const Search = () => {
               <option value="fuzzy">Fuzzy Match</option>
             </select>
 
-            <button type="submit" className="btn btn-primary" disabled={loading}>
+            <button type="submit" className="btn btn-primary" disabled={loading} style={touchButtonStyle}>
               {loading ? 'Searching...' : 'Search'}
             </button>
           </div>
@@ -140,7 +141,7 @@ const Search = () => {
             {results.length > 0 && <span className="result-count">({results.length})</span>}
           </h2>
           {results.length > 0 && (
-            <button onClick={handleExport} className="btn btn-secondary">
+            <button onClick={handleExport} className="btn btn-secondary" style={touchButtonStyle}>
               <FiDownload /> Export
             </button>
           )}

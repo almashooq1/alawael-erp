@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Container,
   Grid,
-  Paper,
   Typography,
   Card,
   CardContent,
@@ -17,13 +16,7 @@ import {
   Divider,
   LinearProgress,
   Chip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   TextField,
-  Tab,
-  Tabs,
   AppBar,
   Drawer,
   List,
@@ -36,28 +29,18 @@ import {
   Dashboard as DashboardIcon,
   Settings as SettingsIcon,
   Notifications as NotificationsIcon,
-  AccountCircle as AccountIcon,
   Menu as MenuIcon,
   Close as CloseIcon,
   Search as SearchIcon,
   Analytics as AnalyticsIcon,
   Assessment as ReportIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  Download as DownloadIcon,
   Upload as UploadIcon,
   Star as StarIcon,
-  TrendingUp as TrendingUpIcon,
-  EmojiEvents as AchievementIcon,
-  Speed as PerformanceIcon,
-  Security as SecurityIcon,
   Help as HelpIcon,
 } from '@mui/icons-material';
 import {
   LineChart,
   Line,
-  BarChart,
-  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -100,19 +83,7 @@ const dashboardData = {
 
 function AdvancedDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [anchorEl, setAnchorEl] = useState(null);
   const [userMenuAnchor, setUserMenuAnchor] = useState(null);
-  const [selectedTab, setSelectedTab] = useState(0);
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [selectedMetric, setSelectedMetric] = useState(null);
-
-  const handleMenuOpen = event => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
 
   const handleUserMenuOpen = event => {
     setUserMenuAnchor(event.currentTarget);

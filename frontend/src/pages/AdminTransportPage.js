@@ -29,8 +29,17 @@ import {
   FormControl,
   MenuItem,
 } from '@mui/material';
-import { DirectionsBus, Person, LocationOn, Add, Dashboard, Receipt, People, Warning } from '@mui/icons-material';
-import api from '../services/api';
+import {
+  DirectionsBus,
+  Person,
+  LocationOn,
+  Add,
+  Dashboard,
+  Receipt,
+  People,
+  Warning,
+} from '@mui/icons-material';
+import api from '../utils/api';
 
 const AdminTransportPage = () => {
   const [tabValue, setTabValue] = useState(0);
@@ -290,7 +299,11 @@ const AdminTransportPage = () => {
                 إجمالي السائقين
               </Typography>
               <Typography variant="h5">{dashboardStats.totalDrivers || 0}</Typography>
-              <Chip label={`${dashboardStats.activeDrivers || 0} نشطين`} size="small" sx={{ mt: 1 }} />
+              <Chip
+                label={`${dashboardStats.activeDrivers || 0} نشطين`}
+                size="small"
+                sx={{ mt: 1 }}
+              />
             </CardContent>
           </Card>
         </Grid>
@@ -302,7 +315,11 @@ const AdminTransportPage = () => {
                 إجمالي المسارات
               </Typography>
               <Typography variant="h5">{dashboardStats.totalRoutes || 0}</Typography>
-              <Chip label={`${dashboardStats.activeRoutes || 0} نشطة`} size="small" sx={{ mt: 1 }} />
+              <Chip
+                label={`${dashboardStats.activeRoutes || 0} نشطة`}
+                size="small"
+                sx={{ mt: 1 }}
+              />
             </CardContent>
           </Card>
         </Grid>
@@ -388,7 +405,11 @@ const AdminTransportPage = () => {
           <CardHeader
             title="إدارة السائقين"
             action={
-              <Button variant="contained" startIcon={<Add />} onClick={() => handleOpenDriverDialog()}>
+              <Button
+                variant="contained"
+                startIcon={<Add />}
+                onClick={() => handleOpenDriverDialog()}
+              >
                 إضافة سائق
               </Button>
             }
@@ -415,16 +436,26 @@ const AdminTransportPage = () => {
                       </TableCell>
                       <TableCell>{driver.phone}</TableCell>
                       <TableCell>{driver.licenseNumber}</TableCell>
-                      <TableCell>{new Date(driver.licenseExpiry).toLocaleDateString('ar-SA')}</TableCell>
                       <TableCell>
-                        <Chip label={driver.status} color={getStatusColor(driver.status)} size="small" />
+                        {new Date(driver.licenseExpiry).toLocaleDateString('ar-SA')}
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={driver.status}
+                          color={getStatusColor(driver.status)}
+                          size="small"
+                        />
                       </TableCell>
                       <TableCell>⭐ {driver.rating || 5}</TableCell>
                       <TableCell>
                         <Button size="small" onClick={() => handleOpenDriverDialog(driver)}>
                           تعديل
                         </Button>
-                        <Button size="small" color="error" onClick={() => handleDeleteDriver(driver._id)}>
+                        <Button
+                          size="small"
+                          color="error"
+                          onClick={() => handleDeleteDriver(driver._id)}
+                        >
                           حذف
                         </Button>
                       </TableCell>
@@ -443,7 +474,11 @@ const AdminTransportPage = () => {
           <CardHeader
             title="إدارة المسارات"
             action={
-              <Button variant="contained" startIcon={<Add />} onClick={() => handleOpenRouteDialog()}>
+              <Button
+                variant="contained"
+                startIcon={<Add />}
+                onClick={() => handleOpenRouteDialog()}
+              >
                 إضافة مسار
               </Button>
             }
@@ -469,7 +504,11 @@ const AdminTransportPage = () => {
                       <TableCell>{route.totalStudents || 0}</TableCell>
                       <TableCell>{route.scheduleType}</TableCell>
                       <TableCell>
-                        <Chip label={route.status} color={getStatusColor(route.status)} size="small" />
+                        <Chip
+                          label={route.status}
+                          color={getStatusColor(route.status)}
+                          size="small"
+                        />
                       </TableCell>
                       <TableCell>
                         <Button size="small" onClick={() => handleOpenRouteDialog(route)}>
@@ -566,10 +605,18 @@ const AdminTransportPage = () => {
                     <TableRow key={complaint._id} hover>
                       <TableCell>{complaint.complaintType}</TableCell>
                       <TableCell>
-                        <Chip label={complaint.severity} color={complaint.severity === 'critical' ? 'error' : 'warning'} size="small" />
+                        <Chip
+                          label={complaint.severity}
+                          color={complaint.severity === 'critical' ? 'error' : 'warning'}
+                          size="small"
+                        />
                       </TableCell>
                       <TableCell>
-                        <Chip label={complaint.status} color={getComplaintStatusColor(complaint.status)} size="small" />
+                        <Chip
+                          label={complaint.status}
+                          color={getComplaintStatusColor(complaint.status)}
+                          size="small"
+                        />
                       </TableCell>
                       <TableCell>{new Date(complaint.date).toLocaleDateString('ar-SA')}</TableCell>
                       <TableCell>
@@ -608,7 +655,9 @@ const AdminTransportPage = () => {
                     <TableRow key={payment._id} hover>
                       <TableCell>{payment.studentId?.firstName}</TableCell>
                       <TableCell>{payment.currentRoute?.routeName}</TableCell>
-                      <TableCell sx={{ color: 'error.main', fontWeight: 'bold' }}>{payment.balanceDue} ريال</TableCell>
+                      <TableCell sx={{ color: 'error.main', fontWeight: 'bold' }}>
+                        {payment.balanceDue} ريال
+                      </TableCell>
                       <TableCell>
                         <Chip label={payment.paymentStatus} color="error" size="small" />
                       </TableCell>
@@ -687,7 +736,12 @@ const AdminTransportPage = () => {
       </Dialog>
 
       {/* نموذج السائق */}
-      <Dialog open={openDriverDialog} onClose={() => setOpenDriverDialog(false)} maxWidth="sm" fullWidth>
+      <Dialog
+        open={openDriverDialog}
+        onClose={() => setOpenDriverDialog(false)}
+        maxWidth="sm"
+        fullWidth
+      >
         <DialogTitle>{selectedItem ? 'تعديل السائق' : 'إضافة سائق جديد'}</DialogTitle>
         <DialogContent sx={{ pt: 2 }}>
           <TextField
@@ -745,7 +799,12 @@ const AdminTransportPage = () => {
       </Dialog>
 
       {/* نموذج المسار */}
-      <Dialog open={openRouteDialog} onClose={() => setOpenRouteDialog(false)} maxWidth="sm" fullWidth>
+      <Dialog
+        open={openRouteDialog}
+        onClose={() => setOpenRouteDialog(false)}
+        maxWidth="sm"
+        fullWidth
+      >
         <DialogTitle>{selectedItem ? 'تعديل المسار' : 'إضافة مسار جديد'}</DialogTitle>
         <DialogContent sx={{ pt: 2 }}>
           <TextField

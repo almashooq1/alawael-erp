@@ -1,0 +1,624 @@
+name: Production CI/CD Pipeline
+# نظام إدارة الجلسات العلاجية - خط الأنابيب الإنتاجي
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
+      - 'mobile/**'
+      - '.github/workflows/**'
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    - cron: '0 2 * * *'  # Daily security scan at 2 AM UTC
+
+env:
+  REGISTRY: therapyregistry.azurecr.io
+  BACKEND_IMAGE: therapy-api
+  FRONTEND_IMAGE: therapy-frontend
+  MOBILE_IMAGE: therapy-mobile
+  KUBE_NAMESPACE: therapy-prod
+
+concurrency:
+  group: ${{ github.ref }}-${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  # ============================================================================
+  # STAGE 1: Code Quality & Security
+  # ============================================================================
+  code-quality:
+    name: Code Quality & Linting
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    strategy:
+      matrix:
+        service: [backend, frontend]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for SonarQube
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: '${{ matrix.service }}/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: ./${{ matrix.service }}
+        run: npm ci
+
+      - name: Run ESLint
+        working-directory: ./${{ matrix.service }}
+        run: npm run lint -- --format json --output-file lint-report.json || true
+
+      - name: Run prettier check
+        working-directory: ./${{ matrix.service }}
+        run: npm run format:check || npm run format
+
+      - name: SonarQube Scan
+        uses: sonarsource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectKey=therapeuticsystem
+            -Dsonar.organization=therapy
+
+      - name: Upload quality reports
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: quality-reports-${{ matrix.service }}
+          path: |
+            ${{ matrix.service }}/lint-report.json
+            .scannerwork/report-task.txt
+
+  # ============================================================================
+  # STAGE 2: Security Scanning
+  # ============================================================================
+  security-scan:
+    name: Security Scanning
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    strategy:
+      matrix:
+        include:
+          - service: backend
+            dockerfile: Dockerfile.prod
+          - service: frontend
+            dockerfile: Dockerfile.prod
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Dependency scanning (npm audit)
+        working-directory: ./${{ matrix.service }}
+        run: |
+          npm audit --production --json > audit-report.json || true
+          npm audit --production --audit-level=moderate
+
+      - name: SAST scan with Semgrep
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: >
+            p/security-audit
+            p/owasp-top-ten
+          generateSarif: true
+
+      - name: Trivy container image scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: './${{ matrix.service }}'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload SARIF reports
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: trivy-results.sarif
+          category: trivy-${{ matrix.service }}
+
+      - name: Secret scanning
+        run: |
+          pip install detect-secrets
+          detect-secrets scan --baseline .secrets.baseline
+
+      - name: Upload security reports
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: security-reports-${{ matrix.service }}
+          path: |
+            ${{ matrix.service }}/audit-report.json
+            trivy-results.sarif
+
+  # ============================================================================
+  # STAGE 3: Unit & Integration Tests
+  # ============================================================================
+  test:
+    name: Unit & Integration Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    services:
+      mongodb:
+        image: mongo:6
+        options: >-
+          --health-cmd mongosh
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 27017:27017
+
+      redis:
+        image: redis:7
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    strategy:
+      matrix:
+        service: [backend, frontend]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: '${{ matrix.service }}/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: ./${{ matrix.service }}
+        run: npm ci
+
+      - name: Run unit tests
+        working-directory: ./${{ matrix.service }}
+        env:
+          MONGODB_URI: mongodb://localhost:27017/therapy-test
+          REDIS_URL: redis://localhost:6379
+          NODE_ENV: test
+        run: npm run test:unit -- --coverage --coverageReporters=cobertura
+
+      - name: Run integration tests
+        working-directory: ./${{ matrix.service }}
+        env:
+          MONGODB_URI: mongodb://localhost:27017/therapy-test
+          REDIS_URL: redis://localhost:6379
+          NODE_ENV: test
+        run: npm run test:integration || true
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./${{ matrix.service }}/coverage/cobertura-coverage.xml
+          flags: ${{ matrix.service }}
+          fail_ci_if_error: false
+
+  # ============================================================================
+  # STAGE 4: Build & Push Docker Images
+  # ============================================================================
+  build-push:
+    name: Build & Push Docker Images
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    needs: [code-quality, security-scan, test]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+
+    strategy:
+      matrix:
+        include:
+          - service: backend
+            image_name: therapy-api
+          - service: frontend
+            image_name: therapy-frontend
+          - service: mobile
+            image_name: therapy-mobile
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to ACR
+        uses: azure/docker-login@v1
+        with:
+          login-server: ${{ env.REGISTRY }}
+          username: ${{ secrets.AZURE_REGISTRY_USERNAME }}
+          password: ${{ secrets.AZURE_REGISTRY_PASSWORD }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/${{ matrix.image_name }}
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: ./${{ matrix.service }}
+          file: ./${{ matrix.service }}/Dockerfile.prod
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{matrix.image_name}}:buildcache
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{matrix.image_name}}:buildcache,mode=max
+
+      - name: Scan built image with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ env.REGISTRY }}/${{ matrix.image_name }}:${{ steps.meta.outputs.version }}'
+          format: 'sarif'
+          output: 'trivy-docker-${{ matrix.service }}.sarif'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Upload image scan results
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-docker-${{ matrix.service }}.sarif'
+
+  # ============================================================================
+  # STAGE 5: Deploy to Development
+  # ============================================================================
+  deploy-dev:
+    name: Deploy to Development
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: build-push
+    if: github.ref == 'refs/heads/develop'
+
+    environment:
+      name: development
+      url: https://dev-api.therapy.yourdomain.com
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Azure login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Get AKS credentials
+        run: |
+          az aks get-credentials \
+            --resource-group therapy-dev \
+            --name therapy-cluster-dev \
+            --overwrite-existing
+
+      - name: Update image tags
+        run: |
+          BRANCH=$(echo ${GITHUB_REF#refs/heads/} | tr '/' '-')
+          sed -i "s|IMAGE_TAG|${BRANCH}-${{ github.sha }}|g" k8s/deployment.yaml
+          sed -i "s|REGISTRY|${{ env.REGISTRY }}|g" k8s/deployment.yaml
+
+      - name: Deploy with kubectl
+        run: |
+          kubectl apply -f k8s/namespace.yaml
+          kubectl apply -f k8s/configmap.yaml
+          kubectl apply -f k8s/secrets.yaml
+          kubectl apply -f k8s/deployment.yaml
+          kubectl rollout status deployment/therapy-api -n therapy-dev --timeout=5m
+
+      - name: Health check
+        run: |
+          sleep 10
+          kubectl run health-check \
+            --image=curlimages/curl:latest \
+            --rm \
+            -it \
+            --restart=Never \
+            -- curl http://therapy-api-service.therapy-dev:3001/health
+
+  # ============================================================================
+  # STAGE 6: E2E Testing
+  # ============================================================================
+  e2e-test:
+    name: E2E Testing
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: deploy-dev
+    if: github.ref == 'refs/heads/develop'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'e2e/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: ./e2e
+        run: npm ci
+
+      - name: Run Cypress tests
+        working-directory: ./e2e
+        run: npm run test:cypress -- --baseUrl=https://dev-api.therapy.yourdomain.com
+
+      - name: Upload test artifacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: cypress-artifacts
+          path: |
+            e2e/cypress/screenshots
+            e2e/cypress/videos
+
+  # ============================================================================
+  # STAGE 7: Performance Testing
+  # ============================================================================
+  performance-test:
+    name: Performance Testing
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: deploy-dev
+    if: github.ref == 'refs/heads/develop'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup k6
+        run: |
+          sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3232A
+          echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6-stable.list
+          sudo apt-get update && sudo apt-get install k6
+
+      - name: Run k6 load test
+        run: |
+          k6 run k8s/load-test.js \
+            --summary-export=output.json \
+            -e BASE_URL=https://dev-api.therapy.yourdomain.com \
+            -e USERS=100 \
+            -e DURATION=5m
+
+      - name: Upload load test results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: load-test-results
+          path: output.json
+
+  # ============================================================================
+  # STAGE 8: Deploy to Staging
+  # ============================================================================
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [e2e-test, performance-test]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    environment:
+      name: staging
+      url: https://staging-api.therapy.yourdomain.com
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Azure login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Get AKS credentials
+        run: |
+          az aks get-credentials \
+            --resource-group therapy-staging \
+            --name therapy-cluster-staging \
+            --overwrite-existing
+
+      - name: Update image tags
+        run: |
+          VERSION=$(git describe --tags --always)
+          sed -i "s|IMAGE_TAG|${VERSION}|g" k8s/deployment.yaml
+          sed -i "s|REGISTRY|${{ env.REGISTRY }}|g" k8s/deployment.yaml
+
+      - name: Deploy with kubectl
+        run: |
+          kubectl apply -f k8s/namespace.yaml
+          kubectl apply -f k8s/configmap.yaml
+          kubectl apply -f k8s/secrets.yaml
+          kubectl apply -f k8s/deployment.yaml
+          kubectl rollout status deployment/therapy-api -n therapy-staging --timeout=5m
+
+      - name: Create Slack notification
+        uses: slackapi/slack-github-action@v1
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK }}
+          payload: |
+            {
+              "text": "🚀 Deployment to Staging",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "✅ *Staging Deployment Successful*\n*Version:* ${{ github.sha }}\n*URL:* https://staging-api.therapy.yourdomain.com"
+                  }
+                }
+              ]
+            }
+
+  # ============================================================================
+  # STAGE 9: Deploy to Production
+  # ============================================================================
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: deploy-staging
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    environment:
+      name: production
+      url: https://api.therapy.yourdomain.com
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Azure login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Get AKS credentials
+        run: |
+          az aks get-credentials \
+            --resource-group therapy-prod \
+            --name therapy-cluster-prod \
+            --overwrite-existing
+
+      - name: Create database backup
+        run: |
+          kubectl exec -n therapy-prod mongo-0 -- mongodump \
+            --uri="mongodb+srv://admin:${{ secrets.MONGO_PASS }}@cosmosdb.mongo.cosmos.azure.com:10255" \
+            --out=/backups/pre-deployment-$(date +%s)
+
+      - name: Update image tags
+        run: |
+          VERSION=$(git describe --tags --always)
+          sed -i "s|IMAGE_TAG|${VERSION}|g" k8s/deployment.yaml
+          sed -i "s|REGISTRY|${{ env.REGISTRY }}|g" k8s/deployment.yaml
+
+      - name: Deploy with rolling update
+        run: |
+          kubectl apply -f k8s/namespace.yaml
+          kubectl apply -f k8s/configmap.yaml
+          kubectl apply -f k8s/secrets.yaml
+          kubectl apply -f k8s/deployment.yaml --record
+          kubectl rollout status deployment/therapy-api -n therapy-prod --timeout=10m
+
+      - name: Post-deployment validation
+        run: |
+          echo "Running health checks..."
+          for i in {1..10}; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://api.therapy.yourdomain.com/health)
+            if [ $STATUS -eq 200 ]; then
+              echo "✅ Health check passed"
+              exit 0
+            fi
+            echo "Attempt $i failed with status $STATUS, retrying..."
+            sleep 30
+          done
+          echo "❌ Health checks failed"
+          exit 1
+
+      - name: Create GitHub release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ github.run_number }}
+          release_name: Production Release ${{ github.run_number }}
+          body: |
+            Production deployment successful
+            Commit: ${{ github.sha }}
+            Packages: therapy-api, therapy-frontend, therapy-mobile
+
+      - name: Notify Slack - Success
+        uses: slackapi/slack-github-action@v1
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK }}
+          payload: |
+            {
+              "text": "🚀 Production Deployment Successful",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "✅ *Production Deployment Complete*\n*Version:* ${{ github.sha }}\n*Release:* v${{ github.run_number }}\n*URL:* https://api.therapy.yourdomain.com"
+                  }
+                }
+              ]
+            }
+
+  # ============================================================================
+  # STAGE 10: Post-Deployment Monitoring
+  # ============================================================================
+  monitor:
+    name: Post-Deployment Monitoring
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: deploy-production
+    if: always()
+
+    steps:
+      - name: Check metrics in DataDog
+        run: |
+          curl -X GET \
+            "https://api.datadoghq.com/api/v1/monitor" \
+            -H "DD-API-KEY: ${{ secrets.DATADOG_API_KEY }}" \
+            -H "DD-APPLICATION-KEY: ${{ secrets.DATADOG_APP_KEY }}"
+
+      - name: Verify uptime
+        run: |
+          for i in {1..5}; do
+            RESPONSE=$(curl -s -w "\n%{http_code}" https://api.therapy.yourdomain.com/health)
+            HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+            if [ $HTTP_CODE -ne 200 ]; then
+              echo "❌ Health check failed: HTTP $HTTP_CODE"
+              exit 1
+            fi
+            sleep 10
+          done
+          echo "✅ All health checks passed"
+
+      - name: Slack notification
+        if: success()
+        uses: slackapi/slack-github-action@v1
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK }}
+          payload: |
+            {
+              "text": "✅ Post-Deployment Monitoring Complete",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "All health checks passed. System is operational."
+                  }
+                }
+              ]
+            }

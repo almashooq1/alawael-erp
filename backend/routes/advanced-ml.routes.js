@@ -7,7 +7,7 @@
 const express = require('express');
 const router = express.Router();
 const AdvancedMLEngine = require('../utils/advanced-ml-engine');
-const auth = require('../middleware/auth');
+const auth = require('../middleware/auth').authenticateToken;
 
 // Initialize ML engines
 const deepLearningEngine = new AdvancedMLEngine.DeepLearningEngine();

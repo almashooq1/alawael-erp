@@ -6,7 +6,7 @@
         "start": "node server.js",
         "smoke:basic": "node scripts/smoke-basic.js",
         "smoke:health": "node scripts/smoke-health.js",
-        "test": "jest --testPathPattern=\"(__tests__)/(auth|documents-routes\\.phase3|messaging-routes\\.phase2|finance-routes\\.phase2|notifications-routes\\.phase2|reporting-routes\\.phase2)\\.test\\.js\" --coverage",
+        "test": "jest --testPathPattern=\"(__tests__)/(auth|documents-routes\\.phase3|messaging-routes\\.phase2|finance-routes\\.phase2|notifications-routes\\.phase2|reporting-routes\\.phase2|payrollRoutes|users\\.test|integration-routes\\.comprehensive|maintenance\\.comprehensive)\\.test\\.js\" --coverage",
         "test:core": "jest __tests__/auth.test.js __tests__/documents-routes.phase3.test.js --no-coverage --testPathPattern=\"auth|documents-routes\\.phase3\"",
         "test:core:verbose": "jest __tests__/auth.test.js __tests__/documents-routes.phase3.test.js --no-coverage --verbose --testPathPattern=\"auth|documents-routes\\.phase3\"",
         "test:core:watch": "jest __tests__/auth.test.js __tests__/documents-routes.phase3.test.js --watch --no-coverage --testPathPattern=\"auth|documents-routes\\.phase3\"",

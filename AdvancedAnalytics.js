@@ -1,9 +1,8 @@
-# 📊 نظام BI وتحليليات متقدمة - نظام الفوترة الذكية
-
 /**
+ * 📊 نظام BI وتحليليات متقدمة - نظام الفوترة الذكية
  * Advanced Business Intelligence System
  * نظام الذكاء التجاري المتقدم للفوترة الذكية
- * 
+ *
  * الميزات:
  *  - تقارير متقدمة مخصصة
  *  - تحليلات عميقة بالبيانات
@@ -23,7 +22,7 @@ const SmartInvoice = require('./SmartInvoice');
 const analyticsSchema = new mongoose.Schema({
   // معرف فريد
   _id: mongoose.Schema.Types.ObjectId,
-  
+
   // بيانات التحليل
   period: {
     type: String,
@@ -32,7 +31,7 @@ const analyticsSchema = new mongoose.Schema({
   },
   startDate: Date,
   endDate: Date,
-  
+
   // المقاييس الرئيسية
   metrics: {
     // إجمالي الإيرادات
@@ -40,71 +39,71 @@ const analyticsSchema = new mongoose.Schema({
       type: Number,
       default: 0
     },
-    
+
     // الإيرادات المتحققة
     realizedRevenue: {
       type: Number,
       default: 0
     },
-    
+
     // الإيرادات المتوقعة
     projectedRevenue: {
       type: Number,
       default: 0
     },
-    
+
     // معدل النمو
     growthRate: {
       type: Number,
       default: 0
     },
-    
+
     // متوسط حجم الفاتورة
     averageInvoiceAmount: {
       type: Number,
       default: 0
     },
-    
+
     // متوسط فترة الدفع
     averagePaymentDays: {
       type: Number,
       default: 0
     },
-    
+
     // معدل التحصيل
     collectionRate: {
       type: Number,
       default: 0
     },
-    
+
     // معدل الفواتير المتأخرة
     overdueRate: {
       type: Number,
       default: 0
     }
   },
-  
+
   // تحليل العملاء
   customerAnalytics: {
     // إجمالي عدد العملاء
     totalCustomers: Number,
-    
+
     // العملاء النشطين
     activeCustomers: Number,
-    
+
     // عملاء جدد
     newCustomers: Number,
-    
+
     // معدل الاحتفاظ
     retentionRate: Number,
-    
+
     // القيمة العمرية للعميل
     customerLifetimeValue: {
       average: Number,
       min: Number,
       max: Number
     },
-    
+
     // تصنيف العملاء
     customerSegmentation: {
       vip: Number,
@@ -113,7 +112,7 @@ const analyticsSchema = new mongoose.Schema({
       inactive: Number
     }
   },
-  
+
   // تحليل المنتجات/الخدمات
   productAnalytics: {
     // أكثر المنتجات طلباً
@@ -123,7 +122,7 @@ const analyticsSchema = new mongoose.Schema({
       revenue: Number,
       margin: Number
     }],
-    
+
     // أقل المنتجات طلباً
     bottomProducts: [{
       name: String,
@@ -131,7 +130,7 @@ const analyticsSchema = new mongoose.Schema({
       revenue: Number,
       margin: Number
     }],
-    
+
     // معدل المبيعات حسب الفئة
     salesByCategory: [{
       category: String,
@@ -140,7 +139,7 @@ const analyticsSchema = new mongoose.Schema({
       percentage: Number
     }]
   },
-  
+
   // توقعات وتنبؤات
   forecasts: {
     // توقعات الإيرادات
@@ -150,14 +149,14 @@ const analyticsSchema = new mongoose.Schema({
       nextYear: Number,
       accuracy: Number
     },
-    
+
     // توقعات الدفع
     paymentCollection: {
       expectedNextMonth: Number,
       expectedNextQuarter: Number,
       expectedOverdue: Number
     },
-    
+
     // توقعات النمو
     growthForecast: {
       nextMonth: Number,
@@ -165,7 +164,7 @@ const analyticsSchema = new mongoose.Schema({
       trend: String // 'increasing', 'decreasing', 'stable'
     }
   },
-  
+
   // مقارنات زمنية
   comparisons: {
     // مقابل الشهر السابق
@@ -174,7 +173,7 @@ const analyticsSchema = new mongoose.Schema({
       invoiceCountChange: Number,
       collectionRateChange: Number
     },
-    
+
     // مقابل السنة الماضية
     previousYear: {
       revenueChange: Number,
@@ -182,30 +181,30 @@ const analyticsSchema = new mongoose.Schema({
       invoiceCountChange: Number
     }
   },
-  
+
   // تحليل الربحية
   profitabilityAnalysis: {
     // الهامش الإجمالي
     grossMargin: Number,
-    
+
     // الهامش الصافي
     netMargin: Number,
-    
+
     // تكاليف التشغيل
     operatingCosts: Number,
-    
+
     // الربح الإجمالي
     totalProfit: Number,
-    
+
     // نقطة التعادل
     breakEvenPoint: Number
   },
-  
+
   // تحليل المخاطر
   riskAnalysis: {
     // نسبة الديون المتأخرة
     overduePercentage: Number,
-    
+
     // العملاء الخطرين
     riskCustomers: [{
       customerId: String,
@@ -214,11 +213,11 @@ const analyticsSchema = new mongoose.Schema({
       overdueAmount: Number,
       daysOverdue: Number
     }],
-    
+
     // مؤشر الخطر العام
     overallRiskScore: Number // 0-100
   },
-  
+
   // الكفاءات الرئيسية (KPIs)
   kpis: {
     invoiceCreationRate: Number, // فواتير/يوم
@@ -227,13 +226,13 @@ const analyticsSchema = new mongoose.Schema({
     paymentOnTimeRate: Number, // %
     invoiceAccuracyRate: Number // %
   },
-  
+
   // معلومات إضافية
   createdAt: {
     type: Date,
     default: Date.now
   },
-  
+
   updatedAt: {
     type: Date,
     default: Date.now
@@ -294,7 +293,7 @@ class AdvancedAnalyticsService {
       });
 
       const customers = new Map();
-      
+
       // تجميع بيانات العملاء
       invoices.forEach(inv => {
         const customerId = inv.customer._id || inv.customer.email;
@@ -397,7 +396,7 @@ class AdvancedAnalyticsService {
    */
   static calculateGrowthRate(invoices) {
     if (invoices.length < 2) return 0;
-    
+
     const firstHalf = invoices.slice(0, Math.floor(invoices.length / 2));
     const secondHalf = invoices.slice(Math.floor(invoices.length / 2));
 
@@ -460,7 +459,7 @@ class AdvancedAnalyticsService {
         .where('period').equals(period)
         .sort({ startDate: -1 })
         .limit(limit);
-      
+
       return analytics;
     } catch (error) {
       console.error('❌ خطأ جلب التحليليات:', error);

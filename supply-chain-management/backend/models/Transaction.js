@@ -11,8 +11,7 @@ const TransactionSchema = new mongoose.Schema(
     transactionId: {
       type: String,
       unique: true,
-      required: true,
-      index: true,
+      required: true
     },
 
     // Transaction Type
@@ -27,8 +26,7 @@ const TransactionSchema = new mongoose.Schema(
         'reversal', // Transaction reversal
         'settlement', // Settlement
       ],
-      required: true,
-      index: true,
+      required: true
     },
 
     // Transaction Details
@@ -49,21 +47,18 @@ const TransactionSchema = new mongoose.Schema(
     // References
     orderId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Order',
-      index: true,
+      ref: 'Order'
     },
 
     invoiceId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Invoice',
-      index: true,
+      ref: 'Invoice'
     },
 
     customerId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Customer',
-      required: true,
-      index: true,
+      required: true
     },
 
     vendorId: {
@@ -102,15 +97,13 @@ const TransactionSchema = new mongoose.Schema(
         'refunded', // Partially or fully refunded
         'disputed', // Under dispute
       ],
-      default: 'pending',
-      index: true,
+      default: 'pending'
     },
 
     processedAt: Date,
 
     gatewayTransactionId: {
-      type: String,
-      index: true,
+      type: String
     },
 
     gatewayReference: String,
@@ -215,8 +208,7 @@ const TransactionSchema = new mongoose.Schema(
     // Timestamps
     createdAt: {
       type: Date,
-      default: Date.now,
-      index: true,
+      default: Date.now
     },
 
     updatedAt: {

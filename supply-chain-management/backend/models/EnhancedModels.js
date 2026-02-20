@@ -14,7 +14,6 @@ const productSchema = new mongoose.Schema({
     required: [true, 'Product name is required'],
     trim: true,
     minlength: [3, 'Product name must be at least 3 characters'],
-    index: true,
     text: true,
   },
   sku: {
@@ -22,8 +21,7 @@ const productSchema = new mongoose.Schema({
     required: true,
     unique: true,
     trim: true,
-    uppercase: true,
-    index: true,
+    uppercase: true
   },
   description: {
     type: String,
@@ -34,14 +32,12 @@ const productSchema = new mongoose.Schema({
   price: {
     type: Number,
     required: [true, 'Price is required'],
-    min: [0, 'Price cannot be negative'],
-    index: true,
+    min: [0, 'Price cannot be negative']
   },
   category: {
     type: String,
     required: true,
-    trim: true,
-    index: true,
+    trim: true
   },
   stock: {
     type: Number,
@@ -55,8 +51,7 @@ const productSchema = new mongoose.Schema({
   },
   supplier: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Supplier',
-    index: true,
+    ref: 'Supplier'
   },
   reorderLevel: {
     type: Number,
@@ -66,8 +61,7 @@ const productSchema = new mongoose.Schema({
   lastRestocked: Date,
   isActive: {
     type: Boolean,
-    default: true,
-    index: true,
+    default: true
   },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
@@ -75,8 +69,7 @@ const productSchema = new mongoose.Schema({
   },
   createdAt: {
     type: Date,
-    default: Date.now,
-    index: true,
+    default: Date.now
   },
   updatedAt: {
     type: Date,
@@ -102,14 +95,12 @@ const orderSchema = new mongoose.Schema({
   orderNumber: {
     type: String,
     unique: true,
-    trim: true,
-    index: true,
+    trim: true
   },
   supplier: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Supplier',
-    required: true,
-    index: true,
+    required: true
   },
   products: [
     {
@@ -137,8 +128,7 @@ const orderSchema = new mongoose.Schema({
       values: ['pending', 'approved', 'shipped', 'delivered', 'cancelled'],
       message: 'Invalid order status',
     },
-    default: 'pending',
-    index: true,
+    default: 'pending'
   },
   totalAmount: {
     type: Number,
@@ -146,8 +136,7 @@ const orderSchema = new mongoose.Schema({
   },
   orderDate: {
     type: Date,
-    default: Date.now,
-    index: true,
+    default: Date.now
   },
   deliveryDate: Date,
   estimatedDelivery: Date,
@@ -162,8 +151,7 @@ const orderSchema = new mongoose.Schema({
   },
   createdAt: {
     type: Date,
-    default: Date.now,
-    index: true,
+    default: Date.now
   },
   updatedAt: Date,
 });
@@ -191,8 +179,7 @@ const supplierSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Supplier name is required'],
     trim: true,
-    minlength: [2, 'Supplier name must be at least 2 characters'],
-    index: true,
+    minlength: [2, 'Supplier name must be at least 2 characters']
   },
   email: {
     type: String,
@@ -200,8 +187,7 @@ const supplierSchema = new mongoose.Schema({
     unique: true,
     lowercase: true,
     trim: true,
-    match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Invalid email format'],
-    index: true,
+    match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Invalid email format']
   },
   phone: {
     type: String,
@@ -215,8 +201,7 @@ const supplierSchema = new mongoose.Schema({
   city: {
     type: String,
     required: true,
-    trim: true,
-    index: true,
+    trim: true
   },
   country: {
     type: String,
@@ -243,8 +228,7 @@ const supplierSchema = new mongoose.Schema({
   },
   isActive: {
     type: Boolean,
-    default: true,
-    index: true,
+    default: true
   },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
@@ -252,8 +236,7 @@ const supplierSchema = new mongoose.Schema({
   },
   createdAt: {
     type: Date,
-    default: Date.now,
-    index: true,
+    default: Date.now
   },
   updatedAt: Date,
 });
@@ -273,8 +256,7 @@ const inventorySchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Product',
     required: true,
-    unique: true,
-    index: true,
+    unique: true
   },
   quantity: {
     type: Number,
@@ -284,8 +266,7 @@ const inventorySchema = new mongoose.Schema({
   },
   warehouseLocation: {
     type: String,
-    trim: true,
-    index: true,
+    trim: true
   },
   reserved: {
     type: Number,
@@ -304,8 +285,7 @@ const inventorySchema = new mongoose.Schema({
   reorderLevel: Number,
   createdAt: {
     type: Date,
-    default: Date.now,
-    index: true,
+    default: Date.now
   },
   updatedAt: Date,
 });
@@ -323,19 +303,16 @@ const shipmentSchema = new mongoose.Schema({
   order: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Order',
-    required: true,
-    index: true,
+    required: true
   },
   carrier: {
     type: String,
     required: true,
-    trim: true,
-    index: true,
+    trim: true
   },
   trackingNumber: {
     type: String,
-    trim: true,
-    index: true,
+    trim: true
   },
   status: {
     type: String,
@@ -343,8 +320,7 @@ const shipmentSchema = new mongoose.Schema({
       values: ['pending', 'in_transit', 'delivered', 'returned', 'lost'],
       message: 'Invalid shipment status',
     },
-    default: 'pending',
-    index: true,
+    default: 'pending'
   },
   address: {
     type: String,
@@ -367,8 +343,7 @@ const shipmentSchema = new mongoose.Schema({
   },
   createdAt: {
     type: Date,
-    default: Date.now,
-    index: true,
+    default: Date.now
   },
   updatedAt: Date,
 });
@@ -391,8 +366,7 @@ const userSchema = new mongoose.Schema({
     unique: true,
     lowercase: true,
     trim: true,
-    index: true,
-    match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Invalid email format'],
+    match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Invalid email format']\n
   },
   password: {
     type: String,
@@ -408,28 +382,23 @@ const userSchema = new mongoose.Schema({
   role: {
     type: String,
     enum: ['user', 'admin', 'manager', 'viewer'],
-    default: 'user',
-    index: true,
+    default: 'user'
   },
+  phone: String,
+},
   phone: String,
   department: String,
   isActive: {
-    type: Boolean,
-    default: true,
-    index: true,
-  },
-  lastLogin: Date,
-  loginAttempts: {
-    type: Number,
-    default: 0,
-  },
+  type: Boolean,
+  default: true {
+  type: Number,
+  default: 0,
+},
   lockUntil: Date,
   createdAt: {
-    type: Date,
-    default: Date.now,
-    index: true,
-  },
-  updatedAt: Date,
+  type: Date,
+  default: Date.now
+}, e,
 });
 
 userSchema.pre('save', function (next) {

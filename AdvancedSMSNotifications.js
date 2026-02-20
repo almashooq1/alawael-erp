@@ -1,9 +1,8 @@
-# 📱 نظام إشعارات SMS متقدم - نظام الفوترة الذكية
-
 /**
+ * 📱 نظام إشعارات SMS متقدم - نظام الفوترة الذكية
  * Advanced SMS Notification System
  * نظام الإشعارات عبر الرسائل النصية
- * 
+ *
  * الميزات:
  *  - إرسال تذكيرات الدفع التلقائية
  *  - إشعارات الفواتير الجديدة
@@ -24,13 +23,13 @@ const SmartInvoice = require('./SmartInvoice');
 const smsNotificationSchema = new mongoose.Schema({
   // معرف فريد
   _id: mongoose.Schema.Types.ObjectId,
-  
+
   // معرف الفاتورة
   invoiceId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'SmartInvoice'
   },
-  
+
   // بيانات المستقبل
   recipient: {
     customerId: String,
@@ -41,7 +40,7 @@ const smsNotificationSchema = new mongoose.Schema({
     },
     email: String
   },
-  
+
   // نوع الإشعار
   notificationType: {
     type: String,
@@ -57,7 +56,7 @@ const smsNotificationSchema = new mongoose.Schema({
     ],
     required: true
   },
-  
+
   // محتوى الرسالة
   message: {
     template: String, // اسم القالب
@@ -65,14 +64,14 @@ const smsNotificationSchema = new mongoose.Schema({
     body: String,
     variables: mongoose.Schema.Types.Mixed // متغيرات القالب
   },
-  
+
   // حالة الإرسال
   status: {
     type: String,
     enum: ['pending', 'scheduled', 'sent', 'delivered', 'failed'],
     default: 'pending'
   },
-  
+
   // معلومات الإرسال
   sendingInfo: {
     sentAt: Date,
@@ -89,7 +88,7 @@ const smsNotificationSchema = new mongoose.Schema({
       default: 3
     }
   },
-  
+
   // الجدولة
   scheduling: {
     scheduledTime: Date,
@@ -103,14 +102,14 @@ const smsNotificationSchema = new mongoose.Schema({
       endDate: Date
     }
   },
-  
+
   // الأولوية
   priority: {
     type: String,
     enum: ['low', 'normal', 'high', 'urgent'],
     default: 'normal'
   },
-  
+
   // الاستجابة والتتبع
   tracking: {
     opened: Boolean,
@@ -121,20 +120,20 @@ const smsNotificationSchema = new mongoose.Schema({
     repliedAt: Date,
     replyMessage: String
   },
-  
+
   // التحليليات
   analytics: {
     deliveryStatus: String, // 'delivered', 'failed', 'pending'
     costsInCents: Number, // تكلفة الرسالة بالسنتات
     responseRate: Number // معدل الاستجابة %
   },
-  
+
   // بيانات إضافية
   createdAt: {
     type: Date,
     default: Date.now
   },
-  
+
   updatedAt: {
     type: Date,
     default: Date.now
@@ -209,7 +208,7 @@ class AdvancedSMSService {
   static async sendNewInvoiceNotification(invoiceId) {
     try {
       const invoice = await SmartInvoice.findById(invoiceId);
-      
+
       if (!invoice || !invoice.customer.phone) {
         throw new Error('لا توجد فاتورة أو رقم هاتف');
       }
@@ -242,13 +241,13 @@ class AdvancedSMSService {
   static async sendPaymentReminder(invoiceId) {
     try {
       const invoice = await SmartInvoice.findById(invoiceId);
-      
+
       if (!invoice || !invoice.customer.phone) {
         throw new Error('لا توجد فاتورة أو رقم هاتف');
       }
 
       const remainingBalance = invoice.totalAmount - (invoice.paidAmount || 0);
-      
+
       if (remainingBalance <= 0) {
         return; // لا ترسل تذكير للفواتير المدفوعة
       }
@@ -279,7 +278,7 @@ class AdvancedSMSService {
   static async sendOverdueAlert(invoiceId) {
     try {
       const invoice = await SmartInvoice.findById(invoiceId);
-      
+
       if (!invoice || !invoice.customer.phone) {
         throw new Error('لا توجد فاتورة أو رقم هاتف');
       }
@@ -320,7 +319,7 @@ class AdvancedSMSService {
   static async sendPaymentConfirmation(invoiceId, paymentAmount) {
     try {
       const invoice = await SmartInvoice.findById(invoiceId);
-      
+
       if (!invoice || !invoice.customer.phone) {
         throw new Error('لا توجد فاتورة أو رقم هاتف');
       }
@@ -423,7 +422,7 @@ class AdvancedSMSService {
   static async scheduleNotification(invoiceId, notificationType, scheduledTime, recurring = null) {
     try {
       const invoice = await SmartInvoice.findById(invoiceId);
-      
+
       const notification = new SMSNotification({
         invoiceId,
         recipient: {
@@ -457,7 +456,7 @@ class AdvancedSMSService {
   static async processScheduledNotifications() {
     try {
       const now = new Date();
-      
+
       const scheduledNotifications = await SMSNotification.find({
         status: 'scheduled',
         'scheduling.scheduledTime': { $lte: now }
@@ -466,7 +465,7 @@ class AdvancedSMSService {
       for (let notification of scheduledNotifications) {
         // إرسال الإشعار
         const invoice = await SmartInvoice.findById(notification.invoiceId);
-        
+
         const message = this.replaceVariables(notification.message, {
           customerName: notification.recipient.customerName,
           invoiceNumber: invoice.invoiceNumber,
@@ -501,7 +500,7 @@ class AdvancedSMSService {
    */
   static replaceVariables(template, variables) {
     let body = template.body;
-    
+
     for (let [key, value] of Object.entries(variables)) {
       const regex = new RegExp(`{{${key}}}`, 'g');
       body = body.replace(regex, value);
@@ -519,17 +518,17 @@ class AdvancedSMSService {
   static formatPhoneNumber(phoneNumber) {
     // إزالة الأحرف غير الرقمية
     let cleaned = phoneNumber.replace(/\D/g, '');
-    
+
     // إزالة الأصفار الأمامية
     if (cleaned.startsWith('0')) {
       cleaned = cleaned.substring(1);
     }
-    
+
     // إضافة كود الدول (+966 للسعودية)
     if (!cleaned.startsWith('+966')) {
       cleaned = '+966' + cleaned;
     }
-    
+
     return cleaned;
   }
 
@@ -541,7 +540,7 @@ class AdvancedSMSService {
       const notifications = await SMSNotification.find({ invoiceId })
         .sort({ createdAt: -1 })
         .limit(limit);
-      
+
       return notifications;
     } catch (error) {
       console.error('❌ خطأ جلب السجل:', error);

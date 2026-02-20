@@ -1,5 +1,7 @@
-# 🚀 Performance Test Script - k6
-# Load testing for AlAwael ERP System
+/**
+ * 🚀 Performance Test Script - k6
+ * Load testing for AlAwael ERP System
+ */
 
 import http from 'k6/http';
 import { check, sleep } from 'k6';
@@ -32,7 +34,7 @@ export default function () {
   testAPIEndpoint();
   testAuthentication();
   testGraphQL();
-  
+
   sleep(1);
 }
 
@@ -42,7 +44,7 @@ function testHomePage() {
     'homepage status is 200': (r) => r.status === 200,
     'homepage response time < 1s': (r) => r.timings.duration < 1000,
   });
-  
+
   errorRate.add(!success);
 }
 
@@ -52,7 +54,7 @@ function testAPIEndpoint() {
     'API health status is 200': (r) => r.status === 200,
     'API response time < 200ms': (r) => r.timings.duration < 200,
   });
-  
+
   errorRate.add(!success);
 }
 
@@ -61,19 +63,19 @@ function testAuthentication() {
     username: 'testuser',
     password: 'testpass'
   });
-  
+
   const params = {
     headers: {
       'Content-Type': 'application/json',
     },
   };
-  
+
   const res = http.post(`${BASE_URL}/api/auth/login`, payload, params);
   const success = check(res, {
     'login returns token': (r) => r.json('token') !== undefined,
     'login response time < 500ms': (r) => r.timings.duration < 500,
   });
-  
+
   errorRate.add(!success);
 }
 
@@ -91,21 +93,21 @@ function testGraphQL() {
       }
     }
   `;
-  
+
   const payload = JSON.stringify({ query });
-  
+
   const params = {
     headers: {
       'Content-Type': 'application/json',
     },
   };
-  
+
   const res = http.post(`${BASE_URL}/graphql`, payload, params);
   const success = check(res, {
     'GraphQL status is 200': (r) => r.status === 200,
     'GraphQL has data': (r) => r.json('data') !== undefined,
     'GraphQL response time < 300ms': (r) => r.timings.duration < 300,
   });
-  
+
   errorRate.add(!success);
 }

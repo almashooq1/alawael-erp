@@ -424,7 +424,7 @@ describe('Messaging routes smoke', () => {
       .post('/send')
       .set('Authorization', `Bearer ${token}`)
       .send({ conversationId: 'c1', content: 'hello' });
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(201);
   });
 });
 

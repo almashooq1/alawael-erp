@@ -11,16 +11,14 @@ const NotificationSchema = new mongoose.Schema(
     notificationId: {
       type: String,
       unique: true,
-      required: true,
-      index: true,
+      required: true
     },
 
     // Recipients
     recipientId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
-      required: true,
-      index: true,
+      required: true
     },
 
     recipientEmail: String,
@@ -42,8 +40,7 @@ const NotificationSchema = new mongoose.Schema(
         'order_update', // Order status
         'deadline_reminder', // Time-sensitive
       ],
-      required: true,
-      index: true,
+      required: true
     },
 
     // Content
@@ -84,14 +81,12 @@ const NotificationSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: ['scheduled', 'pending', 'sending', 'sent', 'failed', 'bounced', 'unopened'],
-      default: 'pending',
-      index: true,
+      default: 'pending'
     },
 
     // Scheduling
     scheduledFor: {
-      type: Date,
-      index: true,
+      type: Date
     },
 
     sentAt: Date,
@@ -224,8 +219,7 @@ const NotificationSchema = new mongoose.Schema(
     // Timestamps
     createdAt: {
       type: Date,
-      default: Date.now,
-      index: true,
+      default: Date.now
     },
 
     updatedAt: {

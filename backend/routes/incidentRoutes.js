@@ -7,8 +7,8 @@ const router = express.Router();
 const { body, param, query } = require('express-validator');
 const incidentController = require('../controllers/incidentController');
 const auth = require('../middleware/auth');
-const roleAuth = require('../middleware/roleAuth');
-const upload = require('../middleware/upload');
+const { authorize: roleAuth } = require('../middleware/rbac');
+const { upload } = require('../middleware/upload');
 
 // =============== التحقق من البيانات ===============
 
@@ -71,7 +71,7 @@ const closureValidation = [
 
 // 1. إنشاء حادثة جديدة
 router.post('/',
-  auth,
+  auth.authenticate,
   roleAuth(['ADMIN', 'INCIDENT_MANAGER', 'SUPPORT_TEAM']),
   createIncidentValidation,
   incidentController.createIncident
@@ -79,53 +79,53 @@ router.post('/',
 
 // 2. الحصول على جميع الحوادث
 router.get('/',
-  auth,
+  auth.authenticate,
   incidentController.getAllIncidents
 );
 
 // 3. الحصول على الحوادث المعلقة (Dashboard)
 router.get('/pending/list',
-  auth,
+  auth.authenticate,
   incidentController.getPendingIncidents
 );
 
 // 4. الحصول على الحوادث الحرجة
 router.get('/critical/list',
-  auth,
+  auth.authenticate,
   roleAuth(['ADMIN', 'INCIDENT_MANAGER']),
   incidentController.getCriticalIncidents
 );
 
 // 5. البحث المتقدم
 router.get('/search/advanced',
-  auth,
+  auth.authenticate,
   incidentController.searchIncidents
 );
 
 // 6. الحصول على الإحصائيات
 router.get('/reports/statistics',
-  auth,
+  auth.authenticate,
   roleAuth(['ADMIN', 'INCIDENT_MANAGER', 'ANALYST']),
   incidentController.getStatistics
 );
 
 // 7. الحصول على حادثة بواسطة ID
 router.get('/:id',
-  auth,
+  auth.authenticate,
   param('id').isMongoId().withMessage('معرف الحادثة غير صحيح'),
   incidentController.getIncidentById
 );
 
 // 8. الحصول على الحوادث ذات الصلة
 router.get('/:id/related',
-  auth,
+  auth.authenticate,
   param('id').isMongoId().withMessage('معرف الحادثة غير صحيح'),
   incidentController.getRelatedIncidents
 );
 
 // 9. تحديث حادثة
 router.put('/:id',
-  auth,
+  auth.authenticate,
   roleAuth(['ADMIN', 'INCIDENT_MANAGER']),
   param('id').isMongoId().withMessage('معرف الحادثة غير صحيح'),
   createIncidentValidation,
@@ -134,7 +134,7 @@ router.put('/:id',
 
 // 10. تحديث حالة الحادثة
 router.patch('/:id/status',
-  auth,
+  auth.authenticate,
   param('id').isMongoId().withMessage('معرف الحادثة غير صحيح'),
   updateStatusValidation,
   incidentController.updateStatus
@@ -142,7 +142,7 @@ router.patch('/:id/status',
 
 // 11. إسناد الحادثة
 router.post('/:id/assign',
-  auth,
+  auth.authenticate,
   roleAuth(['ADMIN', 'INCIDENT_MANAGER']),
   param('id').isMongoId().withMessage('معرف الحادثة غير صحيح'),
   assignValidation,
@@ -151,7 +151,7 @@ router.post('/:id/assign',
 
 // 12. إضافة مستجيب
 router.post('/:id/responder',
-  auth,
+  auth.authenticate,
   param('id').isMongoId().withMessage('معرف الحادثة غير صحيح'),
   responderValidation,
   incidentController.addResponder
@@ -159,7 +159,7 @@ router.post('/:id/responder',
 
 // 13. تصعيد الحادثة
 router.post('/:id/escalate',
-  auth,
+  auth.authenticate,
   roleAuth(['ADMIN', 'INCIDENT_MANAGER', 'TEAM_LEAD']),
   param('id').isMongoId().withMessage('معرف الحادثة غير صحيح'),
   escalationValidation,
@@ -168,7 +168,7 @@ router.post('/:id/escalate',
 
 // 14. إضافة تعليق
 router.post('/:id/comment',
-  auth,
+  auth.authenticate,
   param('id').isMongoId().withMessage('معرف الحادثة غير صحيح'),
   commentValidation,
   incidentController.addComment
@@ -176,7 +176,7 @@ router.post('/:id/comment',
 
 // 15. إضافة مرفق
 router.post('/:id/attachment',
-  auth,
+  auth.authenticate,
   param('id').isMongoId().withMessage('معرف الحادثة غير صحيح'),
   upload.single('file'),
   incidentController.addAttachment
@@ -184,7 +184,7 @@ router.post('/:id/attachment',
 
 // 16. حل الحادثة
 router.post('/:id/resolve',
-  auth,
+  auth.authenticate,
   roleAuth(['ADMIN', 'INCIDENT_MANAGER', 'TEAM_LEAD']),
   param('id').isMongoId().withMessage('معرف الحادثة غير صحيح'),
   resolutionValidation,
@@ -193,8 +193,7 @@ router.post('/:id/resolve',
 
 // 17. إغلاق الحادثة
 router.post('/:id/close',
-  auth,
-  roleAuth(['ADMIN', 'INCIDENT_MANAGER']),
+  auth.authenticate,  roleAuth(['ADMIN', 'INCIDENT_MANAGER']),
   param('id').isMongoId().withMessage('معرف الحادثة غير صحيح'),
   closureValidation,
   incidentController.closeIncident
@@ -202,7 +201,7 @@ router.post('/:id/close',
 
 // 18. أرشفة الحادثة
 router.post('/:id/archive',
-  auth,
+  auth.authenticate,
   roleAuth(['ADMIN', 'INCIDENT_MANAGER']),
   param('id').isMongoId().withMessage('معرف الحادثة غير صحيح'),
   incidentController.archiveIncident
@@ -210,14 +209,14 @@ router.post('/:id/archive',
 
 // 19. توليد تقرير
 router.get('/:id/report',
-  auth,
+  auth.authenticate,
   param('id').isMongoId().withMessage('معرف الحادثة غير صحيح'),
   incidentController.generateReport
 );
 
 // 20. حذف حادثة
 router.delete('/:id',
-  auth,
+  auth.authenticate,
   roleAuth(['ADMIN']),
   param('id').isMongoId().withMessage('معرف الحادثة غير صحيح'),
   incidentController.deleteIncident

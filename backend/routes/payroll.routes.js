@@ -13,7 +13,7 @@ const {
   BenefitsSummary,
 } = require('../models/compensation.model');
 const PayrollCalculationService = require('../services/payrollCalculationService');
-const { authMiddleware, roleMiddleware } = require('../middleware/authMiddleware');
+const { authenticateToken, requireRole } = require('../middleware/auth.middleware');
 
 // ============= مسارات الرواتب =============
 
@@ -21,7 +21,7 @@ const { authMiddleware, roleMiddleware } = require('../middleware/authMiddleware
  * الحصول على كشف الرواتب الشهري
  * GET /api/payroll/monthly/:month/:year
  */
-router.get('/monthly/:month/:year', authMiddleware, async (req, res) => {
+router.get('/monthly/:month/:year', authenticateToken, async (req, res) => {
   try {
     const { month, year } = req.params;
     const payrolls = await Payroll.getMonthlyPayroll(month, parseInt(year)).select(
@@ -45,7 +45,7 @@ router.get('/monthly/:month/:year', authMiddleware, async (req, res) => {
  * الحصول على تفاصيل راتب الموظف
  * GET /api/payroll/:payrollId
  */
-router.get('/:payrollId', authMiddleware, async (req, res) => {
+router.get('/:payrollId', authenticateToken, async (req, res) => {
   try {
     const payroll = await Payroll.findById(req.params.payrollId);
     if (!payroll) {
@@ -71,7 +71,7 @@ router.get('/:payrollId', authMiddleware, async (req, res) => {
  * الحصول على رواتب الموظف السنوية
  * GET /api/payroll/employee/:employeeId/year/:year
  */
-router.get('/employee/:employeeId/year/:year', authMiddleware, async (req, res) => {
+router.get('/employee/:employeeId/year/:year', authenticateToken, async (req, res) => {
   try {
     const { employeeId, year } = req.params;
     const payrolls = await Payroll.getEmployeePayrolls(employeeId, parseInt(year));
@@ -104,7 +104,7 @@ router.get('/employee/:employeeId/year/:year', authMiddleware, async (req, res) 
  * إنشاء أو تحديث كشف راتب
  * POST /api/payroll/create
  */
-router.post('/create', authMiddleware, roleMiddleware(['hr', 'admin', 'payroll']), async (req, res) => {
+router.post('/create', authenticateToken, requireRole('hr', 'admin', 'payroll'), async (req, res) => {
   try {
     const { employeeId, month, year } = req.body;
 
@@ -149,7 +149,7 @@ router.post('/create', authMiddleware, roleMiddleware(['hr', 'admin', 'payroll']
  * معالجة رواتب الشهر بالكامل
  * POST /api/payroll/process-monthly
  */
-router.post('/process-monthly', authMiddleware, roleMiddleware(['admin', 'payroll']), async (req, res) => {
+router.post('/process-monthly', authenticateToken, requireRole('admin', 'payroll'), async (req, res) => {
   try {
     const { month, year } = req.body;
 
@@ -171,7 +171,7 @@ router.post('/process-monthly', authMiddleware, roleMiddleware(['admin', 'payrol
  * إرسال راتب للموافقة
  * PUT /api/payroll/:payrollId/submit-approval
  */
-router.put('/:payrollId/submit-approval', authMiddleware, roleMiddleware(['hr', 'admin']), async (req, res) => {
+router.put('/:payrollId/submit-approval', authenticateToken, requireRole('hr', 'admin'), async (req, res) => {
   try {
     const payroll = await Payroll.findById(req.params.payrollId);
     if (!payroll) {
@@ -201,7 +201,7 @@ router.put('/:payrollId/submit-approval', authMiddleware, roleMiddleware(['hr', 
  * موافقة على الراتب
  * PUT /api/payroll/:payrollId/approve
  */
-router.put('/:payrollId/approve', authMiddleware, roleMiddleware(['admin', 'director']), async (req, res) => {
+router.put('/:payrollId/approve', authenticateToken, requireRole('admin', 'director'), async (req, res) => {
   try {
     const payroll = await Payroll.findById(req.params.payrollId);
     if (!payroll) {
@@ -231,7 +231,7 @@ router.put('/:payrollId/approve', authMiddleware, roleMiddleware(['admin', 'dire
  * معالجة الراتب للدفع
  * PUT /api/payroll/:payrollId/process
  */
-router.put('/:payrollId/process', authMiddleware, roleMiddleware(['Admin', 'payroll']), async (req, res) => {
+router.put('/:payrollId/process', authenticateToken, requireRole('Admin', 'payroll'), async (req, res) => {
   try {
     const payroll = await Payroll.findById(req.params.payrollId);
     if (!payroll) {
@@ -261,7 +261,7 @@ router.put('/:payrollId/process', authMiddleware, roleMiddleware(['Admin', 'payr
  * تحويل الراتب
  * PUT /api/payroll/:payrollId/transfer
  */
-router.put('/:payrollId/transfer', authMiddleware, roleMiddleware(['admin', 'payroll']), async (req, res) => {
+router.put('/:payrollId/transfer', authenticateToken, requireRole('admin', 'payroll'), async (req, res) => {
   try {
     const { transactionRef, bankName } = req.body;
     const payroll = await Payroll.findById(req.params.payrollId);
@@ -293,7 +293,7 @@ router.put('/:payrollId/transfer', authMiddleware, roleMiddleware(['admin', 'pay
  * تأكيد دفع الراتب
  * PUT /api/payroll/:payrollId/confirm-payment
  */
-router.put('/:payrollId/confirm-payment', authMiddleware, roleMiddleware(['admin', 'payroll']), async (req, res) => {
+router.put('/:payrollId/confirm-payment', authenticateToken, requireRole('admin', 'payroll'), async (req, res) => {
   try {
     const payroll = await Payroll.findById(req.params.payrollId);
     if (!payroll) {
@@ -323,7 +323,7 @@ router.put('/:payrollId/confirm-payment', authMiddleware, roleMiddleware(['admin
  * الحصول على إحصائيات الرواتب
  * GET /api/payroll/stats/:month/:year
  */
-router.get('/stats/:month/:year', authMiddleware, async (req, res) => {
+router.get('/stats/:month/:year', authenticateToken, async (req, res) => {
   try {
     const { month, year } = req.params;
 
@@ -353,7 +353,7 @@ router.get('/stats/:month/:year', authMiddleware, async (req, res) => {
  * الحصول على هياكل الحوافز
  * GET /api/compensation/structures
  */
-router.get('/compensation/structures', authMiddleware, async (req, res) => {
+router.get('/compensation/structures', authenticateToken, async (req, res) => {
   try {
     const structures = await CompensationStructure.find({ isActive: true }).sort({ createdAt: -1 });
 
@@ -376,8 +376,8 @@ router.get('/compensation/structures', authMiddleware, async (req, res) => {
  */
 router.post(
   '/compensation/structures',
-  authMiddleware,
-  roleMiddleware(['admin', 'hr']),
+  authenticateToken,
+  requireRole('admin', 'hr'),
   async (req, res) => {
     try {
       const structure = new CompensationStructure(req.body);
@@ -402,7 +402,7 @@ router.post(
  * الحصول على الحوافز الفردية المعلقة
  * GET /api/compensation/incentives/pending
  */
-router.get('/compensation/incentives/pending', authMiddleware, async (req, res) => {
+router.get('/compensation/incentives/pending', authenticateToken, async (req, res) => {
   try {
     const incentives = await IndividualIncentive.getPendingIncentives();
 
@@ -423,7 +423,7 @@ router.get('/compensation/incentives/pending', authMiddleware, async (req, res) 
  * إنشاء حافز فردي
  * POST /api/compensation/incentives
  */
-router.post('/compensation/incentives', authMiddleware, roleMiddleware(['hr', 'manager', 'admin']), async (req, res) => {
+router.post('/compensation/incentives', authenticateToken, requireRole('hr', 'manager', 'admin'), async (req, res) => {
   try {
     const incentive = new IndividualIncentive(req.body);
     incentive.recommendedBy = {
@@ -452,8 +452,8 @@ router.post('/compensation/incentives', authMiddleware, roleMiddleware(['hr', 'm
  */
 router.put(
   '/compensation/incentives/:incentiveId/approve',
-  authMiddleware,
-  roleMiddleware(['admin', 'hr']),
+  authenticateToken,
+  requireRole('admin', 'hr'),
   async (req, res) => {
     try {
       const incentive = await IndividualIncentive.findById(req.params.incentiveId);
@@ -485,7 +485,7 @@ router.put(
  * تحديد الحافز كمدفوع
  * PUT /api/compensation/incentives/:incentiveId/mark-paid
  */
-router.put('/compensation/incentives/:incentiveId/mark-paid', authMiddleware, roleMiddleware(['admin', 'payroll']), async (req, res) => {
+router.put('/compensation/incentives/:incentiveId/mark-paid', authenticateToken, requireRole('admin', 'payroll'), async (req, res) => {
   try {
     const { transactionRef } = req.body;
     const incentive = await IndividualIncentive.findById(req.params.incentiveId);
@@ -519,7 +519,7 @@ router.put('/compensation/incentives/:incentiveId/mark-paid', authMiddleware, ro
  * إنشاء عقوبة/تنبيه
  * POST /api/compensation/penalties
  */
-router.post('/compensation/penalties', authMiddleware, roleMiddleware(['manager', 'hr', 'admin']), async (req, res) => {
+router.post('/compensation/penalties', authenticateToken, requireRole('manager', 'hr', 'admin'), async (req, res) => {
   try {
     const penalty = new PerformancePenalty(req.body);
     await penalty.save();
@@ -541,7 +541,7 @@ router.post('/compensation/penalties', authMiddleware, roleMiddleware(['manager'
  * موافقة على العقوبة
  * PUT /api/compensation/penalties/:penaltyId/approve
  */
-router.put('/compensation/penalties/:penaltyId/approve', authMiddleware, roleMiddleware(['admin', 'director']), async (req, res) => {
+router.put('/compensation/penalties/:penaltyId/approve', authenticateToken, requireRole('admin', 'director'), async (req, res) => {
   try {
     const penalty = await PerformancePenalty.findById(req.params.penaltyId);
     if (!penalty) {
@@ -571,7 +571,7 @@ router.put('/compensation/penalties/:penaltyId/approve', authMiddleware, roleMid
  * تقديم استئناف على العقوبة
  * POST /api/compensation/penalties/:penaltyId/appeal
  */
-router.post('/compensation/penalties/:penaltyId/appeal', authMiddleware, async (req, res) => {
+router.post('/compensation/penalties/:penaltyId/appeal', authenticateToken, async (req, res) => {
   try {
     const { reason } = req.body;
     const penalty = await PerformancePenalty.findById(req.params.penaltyId);
@@ -605,7 +605,7 @@ router.post('/compensation/penalties/:penaltyId/appeal', authMiddleware, async (
  * إنشاء كشف المزايا السنوي
  * POST /api/compensation/benefits-summary
  */
-router.post('/compensation/benefits-summary', authMiddleware, roleMiddleware(['hr', 'admin']), async (req, res) => {
+router.post('/compensation/benefits-summary', authenticateToken, requireRole(['hr', 'admin']), async (req, res) => {
   try {
     const summary = new BenefitsSummary(req.body);
     await summary.save();
@@ -627,7 +627,7 @@ router.post('/compensation/benefits-summary', authMiddleware, roleMiddleware(['h
  * الحصول على كشف المزايا للموظف
  * GET /api/compensation/benefits-summary/:employeeId/:year
  */
-router.get('/compensation/benefits-summary/:employeeId/:year', authMiddleware, async (req, res) => {
+router.get('/compensation/benefits-summary/:employeeId/:year', authenticateToken, async (req, res) => {
   try {
     const { employeeId, year } = req.params;
     const summary = await BenefitsSummary.findOne({

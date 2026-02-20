@@ -10,15 +10,13 @@ const BudgetSchema = new mongoose.Schema(
     // Budget Identification
     budgetName: {
       type: String,
-      required: true,
-      index: true,
+      required: true
     },
 
     budgetCode: {
       type: String,
       unique: true,
-      required: true,
-      index: true,
+      required: true
     },
 
     // Budget Period
@@ -50,8 +48,7 @@ const BudgetSchema = new mongoose.Schema(
     // Classification
     department: {
       type: String,
-      required: true,
-      index: true,
+      required: true
     },
 
     projectId: {
@@ -114,8 +111,7 @@ const BudgetSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: ['draft', 'approved', 'active', 'closed', 'archived'],
-      default: 'draft',
-      index: true,
+      default: 'draft'
     },
 
     budgetHealthStatus: {
@@ -249,8 +245,7 @@ const BudgetSchema = new mongoose.Schema(
     // Timestamps
     createdAt: {
       type: Date,
-      default: Date.now,
-      index: true,
+      default: Date.now
     },
 
     updatedAt: {

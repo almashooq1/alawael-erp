@@ -16,20 +16,43 @@ if (!global.URL.revokeObjectURL) {
   global.URL.revokeObjectURL = jest.fn();
 }
 
+// Mock IntersectionObserver
+if (!window.IntersectionObserver) {
+  window.IntersectionObserver = class IntersectionObserver {
+    constructor() {}
+    disconnect() {}
+    observe() {}
+    takeRecords() {
+      return [];
+    }
+    unobserve() {}
+  };
+}
+
+// Mock ResizeObserver
+if (!window.ResizeObserver) {
+  window.ResizeObserver = class ResizeObserver {
+    constructor() {}
+    disconnect() {}
+    observe() {}
+    unobserve() {}
+  };
+}
+
 // Mock window.matchMedia for Ant Design responsive observer
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  value: jest.fn().mockImplementation(query => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: jest.fn(),
-    removeListener: jest.fn(),
-    addEventListener: jest.fn(),
-    removeEventListener: jest.fn(),
-    dispatchEvent: jest.fn(),
-  })),
+// This needs to be a proper implementation that returns consistent objects
+const matchMediaMock = (query) => ({
+  matches: false,
+  media: query,
+  onchange: null,
+  addListener: jest.fn(),
+  removeListener: jest.fn(),
+  addEventListener: jest.fn(),
+  removeEventListener: jest.fn(),
+  dispatchEvent: jest.fn(),
 });
+
+window.matchMedia = jest.fn(matchMediaMock);
 
 // Suppress console errors in tests
 const originalError = console.error;
@@ -52,10 +75,13 @@ afterAll(() => {
 
 // Clean up after each test
 afterEach(() => {
-  // Reset mocks (already done by Jest config, but ensure it)
-  jest.resetAllMocks();
-
-  // Clean up DOM
+  // Clear DOM
   document.body.innerHTML = '';
   document.head.innerHTML = '';
+
+  // Clear all timers
+  jest.clearAllTimers();
+
+  // Don't reset mocks because of jest config setting restoreMocks: true
+  // which would break window.matchMedia
 });

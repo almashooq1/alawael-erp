@@ -11,8 +11,7 @@ const DocumentVersionSchema = new mongoose.Schema(
     documentId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Document',
-      required: true,
-      index: true,
+      required: true
     },
 
     // Version Tracking
@@ -178,8 +177,7 @@ const DocumentVersionSchema = new mongoose.Schema(
     // Timestamps
     createdAt: {
       type: Date,
-      default: Date.now,
-      index: true,
+      default: Date.now
     },
 
     updatedAt: {

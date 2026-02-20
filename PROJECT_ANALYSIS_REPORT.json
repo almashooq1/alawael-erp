@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-02-19T07:07:39.779Z",
+  "timestamp": "2026-02-20T10:00:08.685Z",
   "projectRoot": "C:\\Users\\x-be\\OneDrive\\المستندات\\04-10-2025\\66666",
   "sections": {
     "projectStructure": {
@@ -34,30 +34,30 @@
           "name": "Backend API",
           "port": 3001,
           "healthEndpoint": "/api/health",
-          "running": true
+          "running": false
         },
         {
           "name": "Frontend",
           "port": 3000,
-          "running": true
+          "running": false
         },
         {
           "name": "Database",
           "port": 5432,
-          "running": false
+          "running": true
         },
         {
           "name": "Redis Cache",
           "port": 6379,
-          "running": false
+          "running": true
         },
         {
           "name": "Elasticsearch",
           "port": 9200,
-          "running": false
+          "running": true
         }
       ],
-      "running": 2,
+      "running": 3,
       "total": 5
     },
     "databases": {
@@ -97,7 +97,7 @@
     },
     "tests": {
       "hasTestSetup": true,
-      "filesCount": 367,
+      "filesCount": 363,
       "status": "PASS"
     },
     "security": {

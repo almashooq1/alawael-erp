@@ -11,13 +11,11 @@ const InvoiceSchema = new mongoose.Schema(
     invoiceNumber: {
       type: String,
       unique: true,
-      required: true,
-      index: true,
+      required: true
     },
 
     invoiceId: {
-      type: mongoose.Schema.Types.ObjectId,
-      index: true,
+      type: mongoose.Schema.Types.ObjectId
     },
 
     // Date Information
@@ -38,8 +36,7 @@ const InvoiceSchema = new mongoose.Schema(
     customerId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Customer',
-      required: true,
-      index: true,
+      required: true
     },
 
     customerName: String,
@@ -120,8 +117,7 @@ const InvoiceSchema = new mongoose.Schema(
         'cancelled',
         'disputed',
       ],
-      default: 'draft',
-      index: true,
+      default: 'draft'
     },
 
     paymentStatus: {
@@ -254,8 +250,7 @@ const InvoiceSchema = new mongoose.Schema(
     // Timestamps
     createdAt: {
       type: Date,
-      default: Date.now,
-      index: true,
+      default: Date.now
     },
 
     updatedAt: {

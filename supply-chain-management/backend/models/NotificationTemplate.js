@@ -10,8 +10,7 @@ const NotificationTemplateSchema = new mongoose.Schema(
     templateName: {
       type: String,
       required: true,
-      unique: true,
-      index: true,
+      unique: true
     },
 
     templateCode: {
@@ -75,8 +74,7 @@ const NotificationTemplateSchema = new mongoose.Schema(
     // Template Status
     isActive: {
       type: Boolean,
-      default: true,
-      index: true,
+      default: true
     },
 
     isDefault: {
@@ -235,8 +233,7 @@ const NotificationTemplateSchema = new mongoose.Schema(
     // Timestamps
     createdAt: {
       type: Date,
-      default: Date.now,
-      index: true,
+      default: Date.now
     },
 
     updatedAt: {

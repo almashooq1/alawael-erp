@@ -1,6 +1,5 @@
-# 🚀 مسارات API للميزات الجديدة - نظام الفوترة الذكية
-
 /**
+ * 🚀 مسارات API للميزات الجديدة - نظام الفوترة الذكية
  * Advanced Features Routes
  * مسارات API للتحليليات والإشعارات المتقدمة
  */
@@ -26,7 +25,7 @@ const authorize = require('../middleware/authorize');
 router.get('/analytics/metrics', verifyToken, authorize(['admin', 'finance']), async (req, res) => {
   try {
     const { startDate, endDate } = req.query;
-    
+
     if (!startDate || !endDate) {
       return res.status(400).json({
         error: 'يرجى تحديد startDate و endDate'

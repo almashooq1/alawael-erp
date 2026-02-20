@@ -18,8 +18,7 @@ const surveyResponseSchema = new mongoose.Schema(
     },
     surveyId: {
       type: String,
-      required: true,
-      index: true,
+      required: true
     },
     customerId: {
       type: String,

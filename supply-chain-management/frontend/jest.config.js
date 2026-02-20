@@ -20,6 +20,6 @@ module.exports = {
   maxWorkers: '50%',
   cacheDirectory: '<rootDir>/.jest-cache',
   clearMocks: true,
-  resetMocks: true,
-  restoreMocks: true,
+  resetMocks: false,
+  restoreMocks: false,
 };

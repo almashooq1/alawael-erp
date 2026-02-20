@@ -1,0 +1,179 @@
+{
+    // =====================================================
+    // إعدادات GitHub Copilot الموصى بها
+    // =====================================================
+    // تفعيل/تعطيل Copilot حسب نوع الملف
+    "github.copilot.enable": {
+        "*": true,
+        "yaml": false,
+        "plaintext": false,
+        "markdown": false,
+        "json5": true,
+        "dockerfile": true
+    },
+    // تفعيل Copilot Autocomplete
+    "github.copilot.autocomplete.enable": true,
+    // إعدادات الأداء المتقدمة
+    "github.copilot.advanced": {
+        "listDebounceMS": 50,
+        "parsePythonSemantic": false,
+        "skippyEnabled": true,
+        "authProvider": "github"
+    },
+    // =====================================================
+    // إعدادات المحررر
+    // =====================================================
+    // حجم الخط والهامش
+    "editor.fontSize": 14,
+    "editor.fontFamily": "Consolas, 'Courier New', monospace",
+    "editor.lineHeight": 1.6,
+    "editor.wordWrap": "on",
+    "editor.minimap.enabled": true,
+    // تنسيق الكود تلقائياً
+    "editor.formatOnSave": true,
+    "editor.formatOnType": true,
+    "editor.formatOnPaste": true,
+    // IntelliSense
+    "editor.quickSuggestionsDelay": 10,
+    "editor.suggestOnTriggerCharacters": true,
+    // =====================================================
+    // إعدادات اللغات المختلفة
+    // =====================================================
+    "[javascript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.fixAll.eslint": "explicit"
+        }
+    },
+    "[typescript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.fixAll.eslint": "explicit"
+        }
+    },
+    "[json]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true
+    },
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.python",
+        "editor.formatOnSave": true
+    },
+    "[html]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true
+    },
+    "[css]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true
+    },
+    // =====================================================
+    // إعدادات الملفات والبحث
+    // =====================================================
+    // استبعاد الملفات من البحث والمراقبة
+    "files.exclude": {
+        "**/*.log": true,
+        "**/.git": true,
+        "**/node_modules": true,
+        "**/dist": true,
+        "**/build": true,
+        "**/.env.local": true
+    },
+    // حفظ الملفات تلقائياً
+    "files.autoSave": "afterDelay",
+    "files.autoSaveDelay": 1000,
+    // =====================================================
+    // إعدادات الملحقات
+    // =====================================================
+    // ESLint
+    "eslint.validate": [
+        "javascript",
+        "typescript",
+        "javascriptreact",
+        "typescriptreact"
+    ],
+    "eslint.format.enable": true,
+    // Prettier
+    "prettier.semi": true,
+    "prettier.singleQuote": false,
+    "prettier.tabWidth": 2,
+    "prettier.trailingComma": "es5",
+    // Python
+    "python.linting.enabled": true,
+    "python.linting.pylintEnabled": true,
+    // =====================================================
+    // إعدادات الأداء
+    // =====================================================
+    // حد أقصى للملفات المراقبة
+    "files.watcherExclude": {
+        "**/.git/objects/**": true,
+        "**/.git/subtree-cache/**": true,
+        "**/node_modules/*/**": true,
+        "**/.vscode/*/**": true
+    },
+    // تقليل الحمل على البطارية
+    "window.titleBarStyle": "native",
+    // =====================================================
+    // إعدادات الكود والتلميحات
+    // =====================================================
+    "editor.inlayHints.enabled": "on",
+    "editor.bracketPairColorization.enabled": true,
+    "editor.guides.bracketPairs": true,
+    // =====================================================
+    // تصحيح الأخطاء
+    // =====================================================
+    "editor.codeActionsOnSave": {
+        "source.fixAll": "explicit",
+        "source.organizeImports": "explicit"
+    },
+    // =====================================================
+    // إعدادات Git
+    // =====================================================
+    "git.ignoreMissingGitWarning": false,
+    "git.autofetch": true,
+    // =====================================================
+    // إعدادات الوكيل (البروكسي) - إذا لزم الأمر
+    // =====================================================
+    // "http.proxy": "http://proxy.example.com:8080",
+    // "http.proxyStrictSSL": false,
+    // =====================================================
+    // تعطيل الصوت والتنبيهات غير الضرورية
+    // =====================================================
+    "editor.accessibilitySupport": "off",
+    "window.zoomLevel": 0,
+    // =====================================================
+    // إعدادات البحث والاستبدال
+    // =====================================================
+    "search.exclude": {
+        "**/node_modules": true,
+        "**/bower_components": true,
+        "**/.git": true,
+        "**/dist/**": true,
+        "**/build/**": true
+    },
+    // =====================================================
+    // إعدادات الإنتاجية
+    // =====================================================
+    "editor.suggestSelection": "first",
+    "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
+    // تفعيل المراجع التلقائية
+    "editor.hover.enabled": true,
+    "editor.hover.delay": 500,
+    // =====================================================
+    // إعدادات الواجهة (Theme & Icons)
+    // =====================================================
+    // اختر واحد من:
+    "workbench.colorTheme": "One Dark Pro",
+    "workbench.iconTheme": "One Dark Pro Icons",
+    // أو بديل فاتح:
+    // "workbench.colorTheme": "Atom One Light",
+    // =====================================================
+    // ملاحظات مهمة
+    // =====================================================
+    // 1. أغلق وأعد فتح VS Code بعد تطبيق الإعدادات
+    // 2. تأكد من تسجيل الدخول إلى GitHub في VS Code
+    // 3. استخدم Ctrl+Shift+P للوصول إلى الأوامر
+    // 4. بحالة المشاكل، راجع GitHub Copilot Troubleshooting Guide
+}

@@ -56,7 +56,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import dayjs from 'dayjs';
-import { api } from '../services/api';
+import { api } from '../../services/api';
 
 const ValidationDashboard = () => {
   // ===== State Management =====

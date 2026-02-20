@@ -5,8 +5,7 @@ const barcodeLogSchema = new mongoose.Schema(
     type: {
       type: String,
       enum: ['QR', 'BARCODE', 'BATCH'],
-      required: true,
-      index: true,
+      required: true
     },
     data: {
       type: String,
@@ -31,8 +30,7 @@ const barcodeLogSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: ['success', 'error', 'pending', 'completed'],
-      default: 'success',
-      index: true,
+      default: 'success'
     },
     generatedBy: {
       type: String,
@@ -40,8 +38,7 @@ const barcodeLogSchema = new mongoose.Schema(
     },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      index: true,
+      ref: 'User'
     },
     ipAddress: String,
     userAgent: String,

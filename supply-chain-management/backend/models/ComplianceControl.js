@@ -63,8 +63,7 @@ const complianceControlSchema = new mongoose.Schema(
     ],
     createdAt: {
       type: Date,
-      default: Date.now,
-      index: true,
+      default: Date.now
     },
     updatedAt: {
       type: Date,

@@ -1,0 +1,177 @@
+/* Layout Styles - أنماط التخطيط */
+
+.main-layout {
+  transition: all 0.3s ease;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell',
+    'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+}
+
+.layout-sidebar {
+  transition: width 0.3s ease;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.layout-main {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  transition: all 0.3s ease;
+}
+
+.layout-content {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  transition: all 0.3s ease;
+  scrollbar-gutter: stable;
+}
+
+/* Scrollbar Styling */
+.layout-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.layout-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.layout-content::-webkit-scrollbar-thumb {
+  background-color: #bbb;
+  border-radius: 4px;
+}
+
+.layout-content::-webkit-scrollbar-thumb:hover {
+  background-color: #888;
+}
+
+/* RTL Support */
+[dir='rtl'] .layout-sidebar {
+  border-left: 1px solid #e0e0e0;
+  border-right: none;
+}
+
+[dir='ltr'] .layout-sidebar {
+  border-left: none;
+  border-right: 1px solid #e0e0e0;
+}
+
+/* Mobile Responsive */
+@media (max-width: 600px) {
+  .main-layout {
+    flex-direction: column;
+  }
+
+  .layout-sidebar {
+    display: none !important;
+  }
+
+  .layout-main {
+    width: 100%;
+  }
+
+  .layout-content {
+    padding: 8px;
+    scroll-padding-top: 64px;
+  }
+}
+
+@media (max-width: 960px) {
+  .layout-content {
+    padding: 12px;
+  }
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+  .layout-sidebar {
+    background: linear-gradient(135deg, #424242 0%, #212121 100%);
+    border-color: #333;
+  }
+
+  .layout-content {
+    background: linear-gradient(135deg, #424242 0%, #212121 100%);
+  }
+}
+
+/* Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.layout-content {
+  animation: fadeIn 0.3s ease;
+}
+
+/* Container Padding */
+.layout-content .MuiContainer-root {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+/* Overflow Management */
+.layout-main {
+  overflow: hidden;
+}
+
+.layout-content {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Sidebar Collapse Animation */
+@keyframes slideInSidebar {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+[dir='ltr'] .layout-sidebar {
+  animation: slideInSidebar 0.3s ease;
+}
+
+@keyframes slideInSidebarRtl {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+[dir='rtl'] .layout-sidebar {
+  animation: slideInSidebarRtl 0.3s ease;
+}
+
+/* Focus Management */
+.layout-content:focus-visible {
+  outline: 2px solid #667eea;
+  outline-offset: -2px;
+}
+
+/* Loading State */
+.layout-loading {
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+/* Empty State */
+.layout-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  color: #999;
+}

@@ -1,54 +1,55 @@
 const express = require('express');
 const router = express.Router();
 const AIService = require('../services/aiService');
+const { ApiResponse, ApiError } = require('../utils/apiResponse');
 
 // Sales Prediction
-router.post('/sales', async (req, res) => {
+router.post('/sales', async (req, res, next) => {
   try {
     const prediction = await AIService.predictSales(req.body.historicalData);
-    res.json(prediction);
+    return res.json(new ApiResponse(200, prediction, 'Sales prediction generated'));
   } catch (err) {
-    res.status(400).json({ success: false, error: err.message });
+    return next(new ApiError(400, 'Failed to generate sales prediction', [err.message]));
   }
 });
 
 // Performance Prediction
-router.post('/performance', async (req, res) => {
+router.post('/performance', async (req, res, next) => {
   try {
     const prediction = await AIService.predictPerformance(req.body.metrics);
-    res.json(prediction);
+    return res.json(new ApiResponse(200, prediction, 'Performance prediction generated'));
   } catch (err) {
-    res.status(400).json({ success: false, error: err.message });
+    return next(new ApiError(400, 'Failed to generate performance prediction', [err.message]));
   }
 });
 
 // Attendance Prediction
-router.post('/attendance', async (req, res) => {
+router.post('/attendance', async (req, res, next) => {
   try {
     const prediction = await AIService.predictAttendance(req.body.dayData);
-    res.json(prediction);
+    return res.json(new ApiResponse(200, prediction, 'Attendance prediction generated'));
   } catch (err) {
-    res.status(400).json({ success: false, error: err.message });
+    return next(new ApiError(400, 'Failed to generate attendance prediction', [err.message]));
   }
 });
 
 // Churn Prediction
-router.post('/churn', async (req, res) => {
+router.post('/churn', async (req, res, next) => {
   try {
     const prediction = await AIService.predictChurn(req.body.userData);
-    res.json(prediction);
+    return res.json(new ApiResponse(200, prediction, 'Churn prediction generated'));
   } catch (err) {
-    res.status(400).json({ success: false, error: err.message });
+    return next(new ApiError(400, 'Failed to generate churn prediction', [err.message]));
   }
 });
 
 // Inventory Prediction
-router.post('/inventory', async (req, res) => {
+router.post('/inventory', async (req, res, next) => {
   try {
     const prediction = await AIService.predictInventory(req.body.itemData);
-    res.json(prediction);
+    return res.json(new ApiResponse(200, prediction, 'Inventory prediction generated'));
   } catch (err) {
-    res.status(400).json({ success: false, error: err.message });
+    return next(new ApiError(400, 'Failed to generate inventory prediction', [err.message]));
   }
 });
 

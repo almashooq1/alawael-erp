@@ -1,0 +1,362 @@
+/* ============ مكون الجدولة الذكية ============ */
+
+.smart-scheduler {
+  padding: 20px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: 100vh;
+}
+
+.scheduler-header {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #2c3e50;
+}
+
+.scheduler-header h2 {
+  font-size: 32px;
+  margin: 0 0 10px 0;
+  font-weight: 700;
+}
+
+.scheduler-header p {
+  font-size: 16px;
+  color: #7f8c8d;
+  margin: 0;
+}
+
+.scheduler-settings {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 25px;
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.settings-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.settings-group label {
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 8px;
+}
+
+.settings-group select,
+.settings-group input {
+  padding: 10px 15px;
+  border: 2px solid #ecf0f1;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.settings-group select:focus,
+.settings-group input:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 5px rgba(52, 152, 219, 0.2);
+}
+
+.scheduler-status {
+  background: white;
+  padding: 15px 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.scheduler-status p {
+  margin: 0;
+  font-size: 16px;
+  color: #2c3e50;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-left: 10px;
+}
+
+.status-badge.status-draft {
+  background: #ecf0f1;
+  color: #2c3e50;
+}
+
+.status-badge.status-pending-review {
+  background: #f39c12;
+  color: white;
+}
+
+.status-badge.status-approved {
+  background: #3498db;
+  color: white;
+}
+
+.status-badge.status-active {
+  background: #27ae60;
+  color: white;
+}
+
+.scheduler-actions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 25px;
+  flex-wrap: wrap;
+}
+
+.scheduler-actions button {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-generate {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.btn-generate:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-generate:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-approve {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+}
+
+.btn-approve:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
+}
+
+.btn-activate {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+}
+
+.btn-activate:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
+}
+
+.btn-analytics {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  color: white;
+}
+
+.btn-analytics:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(67, 233, 123, 0.4);
+}
+
+.suggestions-section {
+  background: white;
+  padding: 25px;
+  border-radius: 10px;
+  margin-bottom: 25px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.suggestions-section h3 {
+  color: #2c3e50;
+  margin-top: 0;
+  font-size: 20px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #ecf0f1;
+  padding-bottom: 10px;
+}
+
+.suggestions-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.suggestion-card {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 20px;
+  border-radius: 10px;
+  border-left: 4px solid #3498db;
+}
+
+.suggestion-date {
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 15px;
+  font-size: 16px;
+}
+
+.suggestion-details p {
+  margin: 8px 0;
+  font-size: 14px;
+  color: #2c3e50;
+}
+
+.suggestion-details strong {
+  color: #1a252f;
+}
+
+.explanation {
+  background: white;
+  padding: 10px;
+  border-radius: 6px;
+  margin-top: 10px;
+  font-style: italic;
+  color: #7f8c8d;
+}
+
+.alternatives {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #ecf0f1;
+}
+
+.alternatives summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: #3498db;
+  user-select: none;
+}
+
+.alternatives summary:hover {
+  text-decoration: underline;
+}
+
+.alternative {
+  background: white;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.alternative p {
+  margin: 3px 0;
+}
+
+.analytics-section {
+  background: white;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.analytics-section h3 {
+  color: #2c3e50;
+  margin-top: 0;
+  font-size: 20px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #ecf0f1;
+  padding-bottom: 10px;
+}
+
+.analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin-bottom: 25px;
+}
+
+.analytics-card {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 20px;
+  border-radius: 10px;
+  border-left: 4px solid #3498db;
+}
+
+.analytics-card h4 {
+  margin-top: 0;
+  color: #2c3e50;
+  font-size: 16px;
+  margin-bottom: 12px;
+}
+
+.progress-bar {
+  background: #ecf0f1;
+  height: 24px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  background: linear-gradient(90deg, #3498db 0%, #2980b9 100%);
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 12px;
+  transition: width 0.3s ease;
+}
+
+.recommendations {
+  background: #e8f4f8;
+  padding: 20px;
+  border-radius: 10px;
+  border-left: 4px solid #3498db;
+}
+
+.recommendations h4 {
+  margin-top: 0;
+  color: #2c3e50;
+  font-size: 16px;
+}
+
+.recommendations ul {
+  margin: 15px 0 0 0;
+  padding-left: 20px;
+}
+
+.recommendations li {
+  margin: 10px 0;
+  color: #2c3e50;
+  line-height: 1.5;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  background: white;
+  border-radius: 10px;
+  color: #7f8c8d;
+}
+
+@media (max-width: 768px) {
+  .scheduler-settings {
+    grid-template-columns: 1fr;
+  }
+
+  .scheduler-actions {
+    flex-direction: column;
+  }
+
+  .scheduler-actions button {
+    width: 100%;
+  }
+
+  .suggestions-list {
+    grid-template-columns: 1fr;
+  }
+
+  .analytics-grid {
+    grid-template-columns: 1fr;
+  }
+}

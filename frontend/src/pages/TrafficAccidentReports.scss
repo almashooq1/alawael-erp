@@ -1,0 +1,28 @@
+/**
+ * Traffic Accident Reports Page Styles
+ * أنماط صفحة تقارير الحوادث المرورية
+ */
+
+.traffic-accident-reports-page {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #f5f5f5;
+
+  /* Support for RTL */
+  direction: var(--app-direction, ltr);
+
+  /* Ensure content is properly displayed */
+  .traffic-accident-reports {
+    margin: 0;
+    padding: 0;
+
+    /* Responsive spacing for different screen sizes */
+    @media (max-width: 768px) {
+      padding: 8px;
+    }
+
+    @media (max-width: 480px) {
+      padding: 4px;
+    }
+  }
+}

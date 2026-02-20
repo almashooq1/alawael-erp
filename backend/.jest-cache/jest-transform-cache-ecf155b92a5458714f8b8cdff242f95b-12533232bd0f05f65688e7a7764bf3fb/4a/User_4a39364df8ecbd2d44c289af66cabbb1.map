@@ -1,0 +1,1 @@
+{"version":3,"names":["User","require","module","exports"],"sources":["User.js"],"sourcesContent":["/**\r\n * User Model\r\n * نموذج المستخدم\r\n */\r\n\r\nconst { User } = require('./schemas');\r\n\r\nmodule.exports = User;\r\n"],"mappings":"AAAA;AACA;AACA;AACA;;AAEA,MAAM;EAAEA;AAAK,CAAC,GAAGC,OAAO,CAAC,WAAW,CAAC;AAErCC,MAAM,CAACC,OAAO,GAAGH,IAAI","ignoreList":[]}

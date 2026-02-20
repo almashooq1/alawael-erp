@@ -1,0 +1,246 @@
+/* ============ مكون الجلسات المتقدمة ============ */
+
+.advanced-sessions {
+  padding: 20px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: 100vh;
+}
+
+.sessions-header {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #2c3e50;
+}
+
+.sessions-header h2 {
+  font-size: 32px;
+  margin: 0 0 10px 0;
+  font-weight: 700;
+}
+
+.sessions-header p {
+  font-size: 16px;
+  color: #7f8c8d;
+  margin: 0;
+}
+
+.sessions-controls {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 25px;
+  background: white;
+  padding: 15px 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.btn-create-session {
+  margin-left: auto;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-create-session:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
+}
+
+.session-form {
+  background: white;
+  padding: 25px;
+  border-radius: 10px;
+  margin-bottom: 25px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.session-card {
+  background: white;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  border-left: 5px solid #3498db;
+}
+
+.session-card:hover {
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+}
+
+.session-card.status-scheduled {
+  border-left-color: #f39c12;
+}
+
+.session-card.status-in_progress {
+  border-left-color: #3498db;
+}
+
+.session-card.status-completed {
+  border-left-color: #27ae60;
+}
+
+.session-card.status-cancelled {
+  border-left-color: #e74c3c;
+}
+
+.session-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.session-header h3 {
+  margin: 0;
+  font-size: 18px;
+  flex: 1;
+}
+
+.status-badge {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.session-info {
+  padding: 20px;
+  background: #f8f9fa;
+}
+
+.session-info p {
+  margin: 8px 0;
+  color: #2c3e50;
+  display: flex;
+  justify-content: space-between;
+}
+
+.session-info strong {
+  color: #1a252f;
+}
+
+.assessment {
+  background: white;
+  padding: 12px;
+  border-radius: 6px;
+  margin-top: 10px;
+  border-left: 3px solid #3498db;
+}
+
+.assessment p {
+  margin: 5px 0;
+  font-size: 14px;
+}
+
+.session-actions {
+  display: flex;
+  gap: 10px;
+  padding: 15px 20px;
+  flex-wrap: wrap;
+}
+
+.session-actions button {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-start {
+  background: #3498db;
+  color: white;
+  flex: 1;
+  min-width: 100px;
+}
+
+.btn-start:hover {
+  background: #2980b9;
+}
+
+.btn-complete {
+  background: #27ae60;
+  color: white;
+  flex: 1;
+  min-width: 100px;
+}
+
+.btn-complete:hover {
+  background: #229954;
+}
+
+.btn-reschedule {
+  background: #f39c12;
+  color: white;
+  flex: 1;
+  min-width: 100px;
+}
+
+.btn-reschedule:hover {
+  background: #e67e22;
+}
+
+.btn-view-report {
+  background: #9b59b6;
+  color: white;
+  flex: 1;
+  min-width: 100px;
+}
+
+.btn-view-report:hover {
+  background: #8e44ad;
+}
+
+.btn-details {
+  background: #ecf0f1;
+  color: #2c3e50;
+  flex: 1;
+  min-width: 100px;
+}
+
+.btn-details:hover {
+  background: #bdc3c7;
+}
+
+.sessions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+@media (max-width: 768px) {
+  .sessions-controls {
+    flex-direction: column;
+  }
+
+  .btn-create-session {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .session-header {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .session-actions {
+    flex-direction: column;
+  }
+
+  .session-actions button {
+    width: 100%;
+  }
+}

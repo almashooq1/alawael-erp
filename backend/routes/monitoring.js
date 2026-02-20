@@ -1,66 +1,67 @@
 // Monitoring Routes
 const express = require('express');
 const MonitoringService = require('../services/monitoringService');
+const { ApiResponse, ApiError } = require('../utils/apiResponse');
 
 const router = express.Router();
 
 // Get system health
-router.get('/health', (req, res) => {
+router.get('/health', (req, res, next) => {
   try {
     const health = MonitoringService.getSystemHealth();
-    res.json(health);
+    return res.json(new ApiResponse(200, health, 'System health fetched'));
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    return next(new ApiError(500, 'Failed to fetch system health', [error.message]));
   }
 });
 
 // Get performance metrics
-router.get('/metrics', (req, res) => {
+router.get('/metrics', (req, res, next) => {
   try {
     const metrics = MonitoringService.getPerformanceMetrics();
-    res.json(metrics);
+    return res.json(new ApiResponse(200, metrics, 'Performance metrics fetched'));
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    return next(new ApiError(500, 'Failed to fetch performance metrics', [error.message]));
   }
 });
 
 // Monitor endpoints
-router.get('/endpoints', (req, res) => {
+router.get('/endpoints', (req, res, next) => {
   try {
     const endpoints = MonitoringService.monitorEndpoints();
-    res.json(endpoints);
+    return res.json(new ApiResponse(200, endpoints, 'Endpoints monitored'));
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    return next(new ApiError(500, 'Failed to monitor endpoints', [error.message]));
   }
 });
 
 // Get alerts
-router.get('/alerts', (req, res) => {
+router.get('/alerts', (req, res, next) => {
   try {
     const alerts = MonitoringService.getAlerts();
-    res.json(alerts);
+    return res.json(new ApiResponse(200, alerts, 'Alerts fetched'));
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    return next(new ApiError(500, 'Failed to fetch alerts', [error.message]));
   }
 });
 
 // Monitor database
-router.get('/database', (req, res) => {
+router.get('/database', (req, res, next) => {
   try {
     const dbStatus = MonitoringService.monitorDatabase();
-    res.json(dbStatus);
+    return res.json(new ApiResponse(200, dbStatus, 'Database status fetched'));
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    return next(new ApiError(500, 'Failed to fetch database status', [error.message]));
   }
 });
 
 // Get realtime data
-router.get('/realtime', (req, res) => {
+router.get('/realtime', (req, res, next) => {
   try {
     const realtime = MonitoringService.getRealtimeData();
-    res.json(realtime);
+    return res.json(new ApiResponse(200, realtime, 'Realtime data fetched'));
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    return next(new ApiError(500, 'Failed to fetch realtime data', [error.message]));
   }
 });
 

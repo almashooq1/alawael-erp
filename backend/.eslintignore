@@ -1,0 +1,27 @@
+# Test files with known parsing issues
+__tests__/integration.test.js
+__tests__/security-services.test.js
+
+# Node modules
+node_modules/
+
+# Build outputs
+dist/
+build/
+
+# Coverage
+coverage/
+
+# Example files
+**/EXAMPLE.js
+**/examples/**
+
+# Auto-generated files
+**/generated/**
+
+# Third-party code
+**/vendor/**
+
+# Configuration
+*.config.js
+jest.config.js

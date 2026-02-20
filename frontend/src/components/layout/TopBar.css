@@ -1,0 +1,174 @@
+/* TopBar Styles - أنماط TopBar */
+
+.topbar {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.topbar-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 16px;
+  min-height: 64px;
+}
+
+/* Search Box */
+.search-box {
+  flex: 1;
+  max-width: 300px;
+  display: flex;
+  justify-content: center;
+}
+
+.search-box input {
+  color: white;
+}
+
+.search-box input::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Icon Buttons */
+.topbar-icon-button {
+  color: white;
+  transition: all 0.3s ease;
+  border-radius: 8px;
+  padding: 8px;
+}
+
+.topbar-icon-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: scale(1.05);
+}
+
+.topbar-icon-button:active {
+  transform: scale(0.95);
+}
+
+/* Badge */
+.topbar-icon-button .MuiBadge-badge {
+  background-color: #ff5252;
+  color: white;
+  font-weight: bold;
+}
+
+/* Avatar */
+.topbar-icon-button .MuiAvatar-root {
+  border: 2px solid white;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.topbar-icon-button .MuiAvatar-root:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.5);
+}
+
+/* Menu Items */
+.MuiMenu-paper {
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.MuiMenuItem-root {
+  transition: all 0.2s ease;
+}
+
+.MuiMenuItem-root:hover {
+  background-color: #f5f5f5;
+  transform: translateX(4px);
+}
+
+[dir='rtl'] .MuiMenuItem-root:hover {
+  transform: translateX(-4px);
+}
+
+/* Notifications Menu */
+.notifications-menu {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+/* Profile Info in Menu */
+.profile-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+}
+
+/* RTL Support */
+[dir='rtl'] .topbar-toolbar {
+  flex-direction: row-reverse;
+}
+
+[dir='rtl'] .search-box {
+  flex-direction: row-reverse;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .topbar-toolbar {
+    gap: 8px;
+  }
+
+  .search-box {
+    display: none !important;
+  }
+
+  .topbar {
+    min-height: 56px;
+  }
+
+  .topbar-toolbar {
+    min-height: 56px;
+  }
+}
+
+@media (max-width: 480px) {
+  .topbar-toolbar {
+    gap: 4px;
+    padding: 0 8px;
+  }
+
+  .topbar-icon-button {
+    padding: 6px;
+  }
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+  .topbar {
+    background: linear-gradient(135deg, #424242 0%, #212121 100%);
+  }
+
+  .MuiMenuItem-root:hover {
+    background-color: #f5f5f5;
+  }
+}
+
+/* Animations */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.topbar {
+  animation: slideDown 0.3s ease;
+}
+
+/* Loading State */
+.topbar-loading {
+  opacity: 0.7;
+  pointer-events: none;
+}

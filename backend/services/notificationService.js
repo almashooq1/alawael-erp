@@ -1,6 +1,12 @@
 /**
  * Notification Service - Multi-channel Notifications
  */
+
+const { sendEmail } = require('./emailService');
+const { sendSMS } = require('./smsService');
+const { sendPush } = require('./pushService');
+const User = require('../models/User');
+
 class NotificationService {
   static notifications = [];
 
@@ -18,8 +24,41 @@ class NotificationService {
         priority: notificationData.priority || 'normal',
         createdAt: new Date(),
         sent: true,
-        deliveryStatus: this._simulateDelivery(notificationData.channels || ['in-app']),
+        deliveryStatus: {},
       };
+
+      // إرسال عبر القنوات المطلوبة
+
+      // جلب بيانات المستخدم (للحصول على البريد، الجوال، fcmTokens)
+      let user = notificationData.userObj;
+      if (!user) {
+        user = await User.findById(userId).lean();
+      }
+
+      for (const channel of notif.channels) {
+        if (channel === 'email') {
+          const to = notificationData.email || (user && user.email) || 'test@example.com';
+          const subject = notif.title;
+          const text = notif.message;
+          const result = await sendEmail({ to, subject, text });
+          notif.deliveryStatus.email = result.success ? 'sent' : 'failed';
+        } else if (channel === 'sms') {
+          const to = notificationData.phone || (user && user.phone) || '+201234567890';
+          const message = notif.message;
+          const result = await sendSMS({ to, message });
+          notif.deliveryStatus.sms = result.success ? 'sent' : 'failed';
+        } else if (channel === 'push') {
+          const tokens = (user && user.fcmTokens) || [];
+          if (tokens.length > 0) {
+            const result = await sendPush({ tokens, title: notif.title, body: notif.message });
+            notif.deliveryStatus.push = result.success ? 'sent' : 'failed';
+          } else {
+            notif.deliveryStatus.push = 'no-tokens';
+          }
+        } else if (channel === 'in-app') {
+          notif.deliveryStatus.inApp = 'delivered';
+        }
+      }
 
       this.notifications.push(notif);
 

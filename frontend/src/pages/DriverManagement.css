@@ -1,0 +1,304 @@
+/**
+ * Driver Management Styles
+ */
+
+.driver-management-container {
+  padding: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+}
+
+/* Page Header */
+.page-header {
+  background: white;
+  padding: 24px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.page-header h1 {
+  margin: 0;
+  font-size: 28px;
+  color: #1890ff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.page-header p {
+  margin: 8px 0 0 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.header-content {
+  flex: 1;
+}
+
+/* Statistics Row */
+.statistics-row {
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.stat-card .ant-statistic-title {
+  font-size: 12px;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-card .ant-statistic-content {
+  color: #1890ff;
+  font-weight: bold;
+}
+
+/* Filters Card */
+.filters-card {
+  background: white;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Drivers Table Card */
+.drivers-table-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.drivers-table-card .ant-table {
+  margin-bottom: 0;
+}
+
+/* Rating Display */
+.rating-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rating-text {
+  font-weight: bold;
+  color: #1890ff;
+  min-width: 40px;
+}
+
+/* Performance Score */
+.performance-score {
+  text-align: center;
+  padding: 16px;
+  background: #fafafa;
+  border-radius: 8px;
+}
+
+.performance-score .label {
+  display: block;
+  margin-bottom: 12px;
+  font-weight: 500;
+  color: #333;
+}
+
+/* Overall Rating */
+.overall-rating {
+  padding: 16px;
+  background: #f0f2f5;
+  border-left: 4px solid #1890ff;
+  border-radius: 4px;
+}
+
+.overall-rating .label {
+  display: inline-block;
+  font-weight: 500;
+  margin-right: 12px;
+  color: #666;
+}
+
+.overall-rating .value {
+  font-size: 24px;
+  font-weight: bold;
+  color: #1890ff;
+  margin-right: 16px;
+}
+
+/* Violation List */
+.violation-list {
+  padding: 16px 0;
+}
+
+/* Training Recommendations */
+.training-recommendations {
+  padding: 16px 0;
+}
+
+/* Performance Report */
+.performance-report {
+  padding: 16px 0;
+}
+
+.performance-report .ant-card {
+  margin-bottom: 16px;
+}
+
+/* Driver Form */
+.driver-form {
+  padding: 16px 0;
+}
+
+.driver-form .ant-form-item {
+  margin-bottom: 16px;
+}
+
+/* Driver Details Modal */
+.driver-details {
+  padding: 16px 0;
+}
+
+.driver-details .mb-16 {
+  margin-bottom: 16px;
+}
+
+.driver-details .ant-descriptions-item-label {
+  font-weight: 500;
+  color: #666;
+}
+
+/* Analytics Overview */
+.analytics-overview {
+  padding: 16px 0;
+}
+
+/* Tags and Badges */
+.ant-tag {
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+/* Progress Bars */
+.ant-progress-text {
+  font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .page-header h1 {
+    font-size: 20px;
+  }
+
+  .rating-display {
+    flex-direction: column;
+  }
+
+  .performance-score {
+    padding: 12px;
+  }
+
+  .overall-rating {
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+
+  .overall-rating .value {
+    display: block;
+    margin-right: 0;
+    margin-bottom: 8px;
+  }
+}
+
+/* Animation */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ant-modal-content,
+.drivers-table-card {
+  animation: slideIn 0.3s ease;
+}
+
+/* Drawer Styles */
+.ant-drawer-content {
+  padding: 24px;
+}
+
+.ant-drawer-body {
+  padding: 24px;
+}
+
+/* Utility Classes */
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-muted {
+  color: #999;
+}
+
+.text-danger {
+  color: #ff4d4f;
+}
+
+.text-success {
+  color: #52c41a;
+}
+
+.text-warning {
+  color: #faad14;
+}
+
+.badge-success {
+  background: #f6ffed;
+  color: #52c41a;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.badge-danger {
+  background: #fff1f0;
+  color: #ff4d4f;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.badge-warning {
+  background: #fffbe6;
+  color: #faad14;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}

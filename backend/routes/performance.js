@@ -1,66 +1,67 @@
 // Performance Routes
 const express = require('express');
 const PerformanceService = require('../services/performanceService');
+const { ApiResponse, ApiError } = require('../utils/apiResponse');
 
 const router = express.Router();
 
 // Get performance analysis
-router.get('/analysis', (req, res) => {
+router.get('/analysis', (req, res, next) => {
   try {
     const analysis = PerformanceService.getPerformanceAnalysis();
-    res.json(analysis);
+    return res.json(new ApiResponse(200, analysis, 'Performance analysis fetched'));
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    return next(new ApiError(500, 'Failed to fetch performance analysis', [error.message]));
   }
 });
 
 // Get caching recommendations
-router.get('/caching/recommendations', (req, res) => {
+router.get('/caching/recommendations', (req, res, next) => {
   try {
     const recommendations = PerformanceService.getCachingRecommendations();
-    res.json(recommendations);
+    return res.json(new ApiResponse(200, recommendations, 'Caching recommendations fetched'));
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    return next(new ApiError(500, 'Failed to fetch caching recommendations', [error.message]));
   }
 });
 
 // Get database optimization
-router.get('/database/optimization', (req, res) => {
+router.get('/database/optimization', (req, res, next) => {
   try {
     const optimization = PerformanceService.getDatabaseOptimization();
-    res.json(optimization);
+    return res.json(new ApiResponse(200, optimization, 'Database optimization fetched'));
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    return next(new ApiError(500, 'Failed to fetch database optimization', [error.message]));
   }
 });
 
 // Get code optimization
-router.get('/code/optimization', (req, res) => {
+router.get('/code/optimization', (req, res, next) => {
   try {
     const optimization = PerformanceService.getCodeOptimization();
-    res.json(optimization);
+    return res.json(new ApiResponse(200, optimization, 'Code optimization fetched'));
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    return next(new ApiError(500, 'Failed to fetch code optimization', [error.message]));
   }
 });
 
 // Get performance benchmarks
-router.get('/benchmarks', (req, res) => {
+router.get('/benchmarks', (req, res, next) => {
   try {
     const benchmarks = PerformanceService.getPerformanceBenchmarks();
-    res.json(benchmarks);
+    return res.json(new ApiResponse(200, benchmarks, 'Performance benchmarks fetched'));
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    return next(new ApiError(500, 'Failed to fetch performance benchmarks', [error.message]));
   }
 });
 
 // Get optimization history
-router.get('/history', (req, res) => {
+router.get('/history', (req, res, next) => {
   try {
     const history = PerformanceService.getOptimizationHistory();
-    res.json(history);
+    return res.json(new ApiResponse(200, history, 'Optimization history fetched'));
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    return next(new ApiError(500, 'Failed to fetch optimization history', [error.message]));
   }
 });
 

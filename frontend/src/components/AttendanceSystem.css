@@ -1,0 +1,756 @@
+/**
+ * أنماط نظام الحضور والانصراف - CSS
+ */
+
+.attendance-system {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+  font-family: 'Cairo', sans-serif;
+  direction: rtl;
+}
+
+.attendance-system .container {
+  max-width: 1200px;
+  margin: 0 auto;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+/* ============================================================================
+   الرأس
+   ============================================================================ */
+
+.attendance-system .header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 30px;
+  text-align: center;
+}
+
+.attendance-system .header h1 {
+  font-size: 32px;
+  margin: 0 0 10px 0;
+  font-weight: bold;
+}
+
+.attendance-system .header .subtitle {
+  font-size: 16px;
+  margin: 0;
+  opacity: 0.9;
+}
+
+/* ============================================================================
+   التبويبات
+   ============================================================================ */
+
+.attendance-system .tabs {
+  display: flex;
+  background: #f5f5f5;
+  border-bottom: 2px solid #ddd;
+  overflow-x: auto;
+}
+
+.attendance-system .tab {
+  flex: 1;
+  padding: 15px 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  border-bottom: 3px solid transparent;
+}
+
+.attendance-system .tab:hover {
+  background: #e8e8e8;
+  color: #333;
+}
+
+.attendance-system .tab.active {
+  color: #667eea;
+  border-bottom-color: #667eea;
+  background: white;
+}
+
+/* ============================================================================
+   الرسائل
+   ============================================================================ */
+
+.attendance-system .message {
+  padding: 15px 20px;
+  margin: 20px;
+  border-radius: 8px;
+  font-weight: 500;
+  animation: slideIn 0.3s ease;
+}
+
+.attendance-system .message.success {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.attendance-system .message.error {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================================================
+   المحتوى
+   ============================================================================ */
+
+.attendance-system .content {
+  padding: 30px;
+  min-height: 500px;
+}
+
+.attendance-system .tab-content {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ============================================================================
+   بطاقات الحالة
+   ============================================================================ */
+
+.attendance-system .status-card {
+  background: white;
+  border: 2px solid #f0f0f0;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+.attendance-system .status-header {
+  margin-bottom: 30px;
+}
+
+.attendance-system .status-header h2 {
+  margin: 0;
+  color: #333;
+  font-size: 24px;
+}
+
+.attendance-system .status-info {
+  margin-bottom: 30px;
+  padding: 20px;
+  background: #f9f9f9;
+  border-radius: 10px;
+}
+
+.attendance-system .checked-in,
+.attendance-system .checked-out,
+.attendance-system .not-checked-in,
+.attendance-system .not-checked-out {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.attendance-system .status-info .icon {
+  font-size: 48px;
+  min-width: 60px;
+  text-align: center;
+}
+
+.attendance-system .checked-in .icon {
+  color: #28a745;
+}
+
+.attendance-system .checked-out .icon {
+  color: #17a2b8;
+}
+
+.attendance-system .not-checked-in .icon,
+.attendance-system .not-checked-out .icon {
+  color: #ffc107;
+}
+
+.attendance-system .status-info .label {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+  margin: 0 0 5px 0;
+}
+
+.attendance-system .status-info .time {
+  font-size: 20px;
+  color: #667eea;
+  font-weight: bold;
+  margin: 5px 0;
+}
+
+.attendance-system .late-warning {
+  color: #dc3545;
+  font-weight: 500;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+.attendance-system .location-info {
+  margin-bottom: 20px;
+  padding: 15px;
+  background: #f0f7ff;
+  border-radius: 8px;
+  border-right: 4px solid #667eea;
+}
+
+.attendance-system .location-info p {
+  margin: 0 0 5px 0;
+  color: #333;
+}
+
+.attendance-system .coordinates {
+  font-family: 'Courier New', monospace;
+  color: #667eea;
+  font-weight: bold;
+}
+
+.attendance-system .no-location {
+  color: #ffc107;
+  font-style: italic;
+}
+
+/* ============================================================================
+   الأزرار
+   ============================================================================ */
+
+.attendance-system .btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Cairo', sans-serif;
+}
+
+.attendance-system .btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.attendance-system .btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.attendance-system .btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.attendance-system .btn-secondary {
+  background: #e9ecef;
+  color: #333;
+}
+
+.attendance-system .btn-secondary:hover {
+  background: #dee2e6;
+}
+
+.attendance-system .btn-large {
+  width: 100%;
+  padding: 20px;
+  font-size: 18px;
+  margin-top: 20px;
+}
+
+.attendance-system .btn.loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+/* ============================================================================
+   السجلات
+   ============================================================================ */
+
+.attendance-system .filters {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: #f9f9f9;
+  border-radius: 8px;
+}
+
+.attendance-system .filters input {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.attendance-system .records-list {
+  display: grid;
+  gap: 15px;
+}
+
+.attendance-system .record-item {
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 15px;
+  transition: all 0.3s ease;
+}
+
+.attendance-system .record-item:hover {
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.attendance-system .record-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.attendance-system .record-header .date {
+  font-weight: bold;
+  color: #333;
+}
+
+.attendance-system .record-header .status {
+  padding: 5px 15px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.attendance-system .record-header .status.حاضر {
+  background: #d4edda;
+  color: #155724;
+}
+
+.attendance-system .record-header .status.متأخر {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.attendance-system .record-header .status.غياب {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.attendance-system .record-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+}
+
+.attendance-system .detail {
+  padding: 10px;
+  background: #f9f9f9;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.attendance-system .detail .label {
+  display: block;
+  color: #666;
+  font-weight: 500;
+  margin-bottom: 5px;
+}
+
+.attendance-system .detail .value {
+  display: block;
+  color: #333;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.attendance-system .detail.warning .value {
+  color: #dc3545;
+}
+
+.attendance-system .detail.success .value {
+  color: #28a745;
+}
+
+/* ============================================================================
+   الإجازات
+   ============================================================================ */
+
+.attendance-system .leave-balance {
+  margin-bottom: 30px;
+}
+
+.attendance-system .leave-balance h3 {
+  margin-top: 0;
+  color: #333;
+  font-size: 20px;
+}
+
+.attendance-system .balance-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.attendance-system .balance-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.attendance-system .balance-card .leave-type {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.attendance-system .balance-card .balance-info {
+  text-align: center;
+}
+
+.attendance-system .balance-card .remaining {
+  font-size: 32px;
+  font-weight: bold;
+  margin: 0;
+}
+
+.attendance-system .balance-card .used {
+  font-size: 12px;
+  margin: 5px 0 0 0;
+  opacity: 0.8;
+}
+
+.attendance-system .leave-form {
+  background: #f9f9f9;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.attendance-system .leave-form h3 {
+  margin-top: 0;
+  color: #333;
+}
+
+.attendance-system .form-group {
+  margin-bottom: 15px;
+}
+
+.attendance-system .form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #333;
+}
+
+.attendance-system .form-group input,
+.attendance-system .form-group select,
+.attendance-system .form-group textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-family: 'Cairo', sans-serif;
+  font-size: 14px;
+}
+
+.attendance-system .form-group textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.attendance-system .form-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+/* ============================================================================
+   التقارير
+   ============================================================================ */
+
+.attendance-system .report-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.attendance-system .report-header h3 {
+  margin: 0;
+  color: #333;
+  font-size: 22px;
+}
+
+.attendance-system .month-selector {
+  display: flex;
+  gap: 10px;
+}
+
+.attendance-system .month-selector button {
+  padding: 8px 16px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.attendance-system .month-selector button:hover,
+.attendance-system .month-selector button.active {
+  background: #667eea;
+  color: white;
+  border-color: #667eea;
+}
+
+.attendance-system .report-content {
+  display: grid;
+  gap: 30px;
+}
+
+.attendance-system .section {
+  background: #f9f9f9;
+  padding: 20px;
+  border-radius: 12px;
+}
+
+.attendance-system .section h4 {
+  margin-top: 0;
+  color: #333;
+  font-size: 18px;
+  border-bottom: 2px solid #667eea;
+  padding-bottom: 10px;
+}
+
+.attendance-system .stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.attendance-system .stat-item,
+.attendance-system .stat-card {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  border-left: 4px solid #667eea;
+}
+
+.attendance-system .stat-item.success {
+  border-left-color: #28a745;
+}
+
+.attendance-system .stat-item.danger {
+  border-left-color: #dc3545;
+}
+
+.attendance-system .stat-item.warning {
+  border-left-color: #ffc107;
+}
+
+.attendance-system .stat-item.info {
+  border-left-color: #17a2b8;
+}
+
+.attendance-system .stat-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.attendance-system .stat-item .icon {
+  font-size: 32px;
+  min-width: 50px;
+  text-align: center;
+}
+
+.attendance-system .stat-item .info {
+  text-align: right;
+  flex: 1;
+}
+
+.attendance-system .stat-item .label,
+.attendance-system .stat-card .label {
+  margin: 0 0 5px 0;
+  color: #666;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.attendance-system .stat-item .value,
+.attendance-system .stat-card .value {
+  margin: 0;
+  color: #333;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.attendance-system .progress-bars {
+  display: grid;
+  gap: 20px;
+  margin-top: 15px;
+}
+
+.attendance-system .progress-item {
+  background: white;
+  padding: 15px;
+  border-radius: 10px;
+}
+
+.attendance-system .progress-item .label {
+  margin: 0 0 10px 0;
+  font-weight: 600;
+  color: #333;
+}
+
+.attendance-system .progress-bar {
+  width: 100%;
+  height: 30px;
+  background: #e9ecef;
+  border-radius: 15px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.attendance-system .progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  transition: width 0.3s ease;
+}
+
+.attendance-system .progress-item .percentage {
+  margin: 0;
+  text-align: right;
+  color: #667eea;
+  font-weight: bold;
+}
+
+/* ============================================================================
+   الحالات الخاصة
+   ============================================================================ */
+
+.attendance-system .loading {
+  text-align: center;
+  padding: 40px 20px;
+  color: #667eea;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.attendance-system .empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #999;
+  font-size: 16px;
+}
+
+/* ============================================================================
+   responsive
+   ============================================================================ */
+
+@media (max-width: 768px) {
+  .attendance-system .header h1 {
+    font-size: 24px;
+  }
+
+  .attendance-system .tabs {
+    flex-wrap: wrap;
+  }
+
+  .attendance-system .tab {
+    flex: 1;
+    min-width: 100px;
+    padding: 10px;
+    font-size: 12px;
+  }
+
+  .attendance-system .content {
+    padding: 15px;
+  }
+
+  .attendance-system .report-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .attendance-system .month-selector {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .attendance-system .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .attendance-system .balance-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .attendance-system {
+    padding: 10px;
+  }
+
+  .attendance-system .header {
+    padding: 20px;
+  }
+
+  .attendance-system .header h1 {
+    font-size: 20px;
+  }
+
+  .attendance-system .status-card {
+    padding: 15px;
+  }
+
+  .attendance-system .btn-large {
+    padding: 15px;
+    font-size: 16px;
+  }
+
+  .attendance-system .record-details {
+    grid-template-columns: 1fr;
+  }
+
+  .attendance-system .form-buttons {
+    flex-direction: column;
+  }
+
+  .attendance-system .form-buttons .btn {
+    width: 100%;
+  }
+}

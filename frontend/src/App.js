@@ -1,134 +1,130 @@
-import React, { useEffect, useState } from 'react';
-import './App.css';
+import React, { useMemo } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Provider, useSelector } from 'react-redux';
+import { ThemeProvider } from '@mui/material/styles';
+import { CssBaseline } from '@mui/material';
+import rtlPlugin from 'stylis-plugin-rtl';
+import { prefixer } from 'stylis';
+import { CacheProvider } from '@emotion/react';
+import createCache from '@emotion/cache';
+import store from './store';
+import { getTheme } from './theme/theme';
+import './i18n/config'; // Initialize i18n
 
-function App() {
-  const [status, setStatus] = useState('🔄 Loading...');
-  const [predictions, setPredictions] = useState(null);
-  const [report, setReport] = useState(null);
-  const [notification, setNotification] = useState(null);
-  const [loading, setLoading] = useState(false);
+// Layouts
+import MainLayout from './layouts/MainLayout';
 
-  useEffect(() => {
-    checkBackend();
-  }, []);
+// Auth Components
+import Login from './components/auth/Login';
+import Register from './components/auth/Register';
+import ProtectedRoute from './components/common/ProtectedRoute';
 
-  const checkBackend = async () => {
-    try {
-      const res = await fetch('http://localhost:3005/health');
-      const data = await res.json();
-      setStatus(`✅ Connected - ${data.status}`);
-    } catch (err) {
-      setStatus('❌ Backend Not Connected');
-    }
-  };
+// Pages
+import Dashboard from './pages/Dashboard';
+import Settings from './pages/Settings';
+import TrafficAccidentReportsPage from './pages/TrafficAccidentReports';
 
-  const testPrediction = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch('http://localhost:3005/api/predictions/sales', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          historicalData: { jan: 50000, feb: 52000, mar: 54000, apr: 56000 },
-        }),
-      });
-      const data = await res.json();
-      setPredictions(data);
-    } catch (err) {
-      console.error(err);
-      setPredictions({ error: err.message });
-    }
-    setLoading(false);
-  };
+// System Components - All 11 Systems
+import UsersList from './components/users/UsersList';
+import AnalyticsDashboard from './components/analytics/AnalyticsDashboard';
+import ReportsList from './components/reports/ReportsList';
+import NotificationsList from './components/notifications/NotificationsList';
+import RolesList from './components/rbac/RolesList';
+import IntegrationsList from './components/integrations/IntegrationsList';
+import MonitoringDashboard from './components/monitoring/MonitoringDashboard';
+import PerformanceMetrics from './components/performance/PerformanceMetrics';
+import SupportTickets from './components/support/SupportTickets';
+import PredictionsDashboard from './components/predictions/PredictionsDashboard';
+import CMSContent from './components/cms/CMSContent';
 
-  const testReport = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch('http://localhost:3005/api/reports/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: 'Q1 Performance Report',
-          type: 'performance',
-        }),
-      });
-      const data = await res.json();
-      setReport(data);
-    } catch (err) {
-      console.error(err);
-      setReport({ error: err.message });
-    }
-    setLoading(false);
-  };
+// New Notifications System
+import NotificationsPage from './pages/NotificationsPage';
+import { NotificationProvider } from './contexts/NotificationContext';
 
-  const testNotification = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch('http://localhost:3005/api/notifications/send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: 'user_demo',
-          notification: {
-            title: 'Test Notification',
-            message: 'This is a test from the frontend!',
-            channels: ['email', 'in-app', 'push'],
-          },
-        }),
-      });
-      const data = await res.json();
-      setNotification(data);
-    } catch (err) {
-      console.error(err);
-      setNotification({ error: err.message });
-    }
-    setLoading(false);
-  };
+// Create RTL cache
+const cacheRtl = createCache({
+  key: 'muirtl',
+  stylisPlugins: [prefixer, rtlPlugin],
+});
+
+const cacheLtr = createCache({
+  key: 'mui',
+});
+
+function AppContent() {
+  const themeMode = useSelector(state => state.settings.theme);
+  const direction = useSelector(state => state.settings.direction);
+
+  // Memoize theme based on mode and direction
+  const theme = useMemo(() => {
+    const baseTheme = getTheme(themeMode);
+    return {
+      ...baseTheme,
+      direction: direction,
+    };
+  }, [themeMode, direction]);
+
+  // Select cache based on direction
+  const cache = direction === 'rtl' ? cacheRtl : cacheLtr;
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <h1>🚀 ERP System</h1>
-        <p className="status">
-          Backend Status: <strong>{status}</strong>
-        </p>
+    <CacheProvider value={cache}>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <NotificationProvider>
+          <Router>
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
 
-        <div className="button-group">
-          <button onClick={testPrediction} disabled={loading}>
-            🤖 Test AI Prediction
-          </button>
-          <button onClick={testReport} disabled={loading}>
-            📊 Test Report Generation
-          </button>
-          <button onClick={testNotification} disabled={loading}>
-            🔔 Test Notification
-          </button>
-        </div>
+              {/* Protected Routes */}
+              <Route
+                path="/"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout />
+                  </ProtectedRoute>
+                }
+              >
+                <Route index element={<Navigate to="/dashboard" replace />} />
+                <Route path="dashboard" element={<Dashboard />} />
 
-        {loading && <div className="loader">⏳ Loading...</div>}
+                {/* All 11 Systems - Fully Implemented */}
+                <Route path="users" element={<UsersList />} />
+                <Route path="analytics" element={<AnalyticsDashboard />} />
+                <Route path="reports" element={<ReportsList />} />
+                <Route path="notifications" element={<NotificationsPage />} />
+                <Route path="rbac" element={<RolesList />} />
+                <Route path="integrations" element={<IntegrationsList />} />
+                <Route path="monitoring" element={<MonitoringDashboard />} />
+                <Route path="performance" element={<PerformanceMetrics />} />
+                <Route path="support" element={<SupportTickets />} />
+                <Route path="predictions" element={<PredictionsDashboard />} />
+                <Route path="cms" element={<CMSContent />} />
 
-        {predictions && (
-          <div className="result-box">
-            <h3>🤖 AI Prediction Result:</h3>
-            <pre>{JSON.stringify(predictions, null, 2)}</pre>
-          </div>
-        )}
+                {/* Transportation & Traffic Management */}
+                <Route path="traffic-accidents" element={<TrafficAccidentReportsPage />} />
 
-        {report && (
-          <div className="result-box">
-            <h3>📊 Report Result:</h3>
-            <pre>{JSON.stringify(report, null, 2)}</pre>
-          </div>
-        )}
+                {/* Settings */}
+                <Route path="settings" element={<Settings />} />
+              </Route>
 
-        {notification && (
-          <div className="result-box">
-            <h3>🔔 Notification Result:</h3>
-            <pre>{JSON.stringify(notification, null, 2)}</pre>
-          </div>
-        )}
-      </header>
-    </div>
+              {/* 404 */}
+              <Route path="*" element={<Navigate to="/dashboard" replace />} />
+            </Routes>
+          </Router>
+        </NotificationProvider>
+      </ThemeProvider>
+    </CacheProvider>
+  );
+}
+
+function App() {
+  return (
+    <Provider store={store}>
+      <AppContent />
+    </Provider>
   );
 }
 

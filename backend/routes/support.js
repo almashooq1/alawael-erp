@@ -1,86 +1,87 @@
 // Support Routes
 const express = require('express');
 const SupportService = require('../services/supportService');
+const { ApiResponse, ApiError } = require('../utils/apiResponse');
 
 const router = express.Router();
 
 // Create ticket
-router.post('/tickets/create', (req, res) => {
+router.post('/tickets/create', (req, res, next) => {
   try {
     const ticket = SupportService.createTicket(req.body);
-    res.status(201).json(ticket);
+    return res.status(201).json(new ApiResponse(201, ticket, 'Support ticket created'));
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    return next(new ApiError(500, 'Failed to create support ticket', [error.message]));
   }
 });
 
 // Get all tickets
-router.get('/tickets', (req, res) => {
+router.get('/tickets', (req, res, next) => {
   try {
     const tickets = SupportService.getAllTickets(req.query);
-    res.json(tickets);
+    return res.json(new ApiResponse(200, tickets, 'Support tickets fetched'));
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    return next(new ApiError(500, 'Failed to fetch support tickets', [error.message]));
   }
 });
 
 // Update ticket status
-router.put('/tickets/:id/status', (req, res) => {
+router.put('/tickets/:id/status', (req, res, next) => {
   try {
     const result = SupportService.updateTicketStatus(req.params.id, req.body.status);
-    res.json(result);
+    return res.json(new ApiResponse(200, result, 'Ticket status updated'));
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    return next(new ApiError(500, 'Failed to update ticket status', [error.message]));
   }
 });
 
 // Add comment to ticket
-router.post('/tickets/:id/comments', (req, res) => {
+router.post('/tickets/:id/comments', (req, res, next) => {
   try {
     const comment = SupportService.addComment(req.params.id, req.body);
-    res.status(201).json(comment);
+    return res.status(201).json(new ApiResponse(201, comment, 'Comment added'));
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    return next(new ApiError(500, 'Failed to add comment', [error.message]));
   }
 });
 
 // Get ticket statistics
-router.get('/statistics', (req, res) => {
+router.get('/statistics', (req, res, next) => {
   try {
     const stats = SupportService.getTicketStats();
-    res.json(stats);
+    return res.json(new ApiResponse(200, stats, 'Ticket statistics fetched'));
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    return next(new ApiError(500, 'Failed to fetch ticket statistics', [error.message]));
   }
 });
 
 // Get FAQ
-router.get('/faq', (req, res) => {
+router.get('/faq', (req, res, next) => {
   try {
     const faq = SupportService.getFAQ();
-    res.json(faq);
+    return res.json(new ApiResponse(200, faq, 'FAQ fetched'));
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    return next(new ApiError(500, 'Failed to fetch FAQ', [error.message]));
   }
 });
 
 // Get team status
-router.get('/team/status', (req, res) => {
+router.get('/team/status', (req, res, next) => {
   try {
     const teamStatus = SupportService.getTeamStatus();
-    res.json(teamStatus);
+    return res.json(new ApiResponse(200, teamStatus, 'Team status fetched'));
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    return next(new ApiError(500, 'Failed to fetch team status', [error.message]));
   }
 });
 
 // Search knowledge base
-router.get('/kb/search', (req, res) => {
+router.get('/kb/search', (req, res, next) => {
   try {
     const results = SupportService.searchKnowledgeBase(req.query.q || '');
-    res.json(results);
+    return res.json(new ApiResponse(200, results, 'Knowledge base search results'));
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    return next(new ApiError(500, 'Failed to search knowledge base', [error.message]));
   }
 });
 

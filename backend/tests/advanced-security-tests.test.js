@@ -381,7 +381,7 @@ describe('🔐 Advanced Security Testing', () => {
         },
       };
 
-      const vulnerableCode = 'const apiKey = "sk_test_4eC39HqLyjWDarhtT1234567"';
+      const vulnerableCode = 'const apiKey = "sk_test_placeholder"';
       const findings = credentialScanner.scan(vulnerableCode);
       expect(findings.length).toBeGreaterThan(0);
     });

@@ -1,4 +1,5 @@
 # Staging Deployment Guide - Advanced Features
+
 **Date:** February 20, 2026  
 **Status:** ✅ READY FOR DEPLOYMENT  
 **Environment:** Staging (Pre-Production)
@@ -8,6 +9,7 @@
 ## 🎯 Quick Start - Staging Deployment (15 minutes)
 
 ### Step 1: Copy Staging Environment (2 minutes)
+
 ```bash
 # Navigate to backend
 cd erp_new_system/backend
@@ -17,6 +19,7 @@ cp .env.staging .env.staging  # Already copied
 ```
 
 ### Step 2: Install Dependencies (3 minutes)
+
 ```bash
 npm install
 # Dependencies installed for:
@@ -28,6 +31,7 @@ npm install
 ```
 
 ### Step 3: Start Backend on Port 3001 (2 minutes)
+
 ```bash
 # Set environment to staging
 $env:NODE_ENV = "staging"
@@ -46,6 +50,7 @@ npm start
 ```
 
 ### Step 4: Verify Advanced Features (5 minutes)
+
 ```bash
 # Run advanced features integration tests
 npm test -- advanced-features.integration.test.js
@@ -55,6 +60,7 @@ npm test -- advanced-features.integration.test.js
 ```
 
 ### Step 5: Start Frontend on Port 3000 (3 minutes)
+
 ```bash
 # In another terminal
 cd supply-chain-management/frontend
@@ -72,6 +78,7 @@ npm start
 ## 📋 Complete Staging Checklist
 
 ### Backend Setup
+
 - [ ] Copy `.env.staging` configuration
 - [ ] Install npm dependencies: `npm install`
 - [ ] Verify Redis optional (REDIS_ENABLED=true in .env)
@@ -80,6 +87,7 @@ npm start
 - [ ] Verify API health: `GET http://localhost:3001/api/health`
 
 ### Frontend Setup
+
 - [ ] Install frontend dependencies: `npm install`
 - [ ] Start development server: `npm start`
 - [ ] Verify connects to backend
@@ -87,37 +95,35 @@ npm start
 - [ ] Verify no security console errors
 
 ### Advanced Features Activation
+
 - [ ] Cache Layer: Verify Redis connections in logs
   - Test: `curl http://localhost:3001/api/test/cache`
-  
 - [ ] Security Hardening: Verify in request logs
   - Test: Send request with malicious input `<script>alert('xss')</script>`
   - Verify: Input sanitized in logs
-  
 - [ ] Analytics Dashboard: Verify metrics collection
   - Test: Generate API traffic
   - Verify: `GET http://localhost:3001/api/analytics/dashboard`
-  
 - [ ] Notifications: Verify system ready
   - Console: "Notification system initialized"
   - Channels: Email, SMS, Push, In-App ready
-  
 - [ ] Feature Flags: Verify rollout configuration
   - Test: `GET http://localhost:3001/api/features/flags`
   - Check: enable_advanced_analytics=100%, enable_notifications_v2=60%
-  
 - [ ] PWA Service Worker: Verify registration
   - Browser DevTools → Application → Service Workers
   - Status: "Running"
   - Cache: "scm-v1" populated
 
 ### Testing
+
 - [ ] Run backend tests: `npm test` (may have MongoDB timeouts - expected)
 - [ ] Run advanced features tests: `npm test -- advanced-features.integration.test.js`
 - [ ] Performance benchmarks: `npm test -- performance-test.js`
 - [ ] Frontend tests: In SCM frontend directory, `npm test`
 
 ### Integration Verification
+
 - [ ] API endpoint responds with 200: `GET /api/health`
 - [ ] Analytics records API calls: Check `GET /api/analytics/dashboard`
 - [ ] Cache stores responses: Monitor Redis (if enabled)
@@ -131,6 +137,7 @@ npm start
 ## 🔧 Detailed Configuration
 
 ### Redis Caching (Optional but Recommended)
+
 ```bash
 # If Redis not installed, skip this section
 # REDIS_ENABLED=true in .env requires Redis running on port 6379
@@ -143,6 +150,7 @@ docker run -d -p 6379:6379 redis:latest
 ```
 
 ### Email Notifications
+
 ```env
 # In .env.staging, configure Gmail SMTP
 EMAIL_SERVICE=gmail
@@ -158,6 +166,7 @@ EMAIL_PASSWORD=your_app_specific_password  # Not Gmail password!
 ```
 
 ### Feature Flags Configuration
+
 ```env
 # Enable/disable features for staging testing
 ENABLE_ADVANCED_ANALYTICS=100          # 100% = all users
@@ -169,6 +178,7 @@ ENABLE_NOTIFICATIONS_V2=60             # 60% = A/B test cohort
 ```
 
 ### Security Configuration
+
 ```env
 # Rate Limiting
 MAX_LOGIN_ATTEMPTS=5                   # Lock after 5 failed
@@ -186,6 +196,7 @@ ENCRYPTION_ALGORITHM=aes-256-cbc
 ## 📊 Expected Logs Output
 
 ### Startup Logs
+
 ```
 ✅ AlAwael ERP Backend Starting...
 ✅ Environment: staging
@@ -210,6 +221,7 @@ ENCRYPTION_ALGORITHM=aes-256-cbc
 ```
 
 ### Test Execution
+
 ```
 PASS advanced-features.integration.test.js
 ✅ Redis Caching Layer (3 tests)
@@ -268,6 +280,7 @@ Time:        2.345s
 ## 🧪 Manual Testing Workflows
 
 ### Test Cache Layer
+
 ```bash
 # Create cached endpoint call
 curl -X GET http://localhost:3001/api/products \
@@ -282,6 +295,7 @@ curl -X GET http://localhost:3001/api/products \
 ```
 
 ### Test Security Hardening
+
 ```bash
 # Test input sanitization
 curl -X POST http://localhost:3001/api/search \
@@ -301,6 +315,7 @@ curl -X POST http://localhost:3001/api/auth/register \
 ```
 
 ### Test Analytics Dashboard
+
 ```bash
 # Generate some API traffic
 for i in {1..10}; do
@@ -319,6 +334,7 @@ curl -X GET http://localhost:3001/api/analytics/dashboard?timeRange=minute
 ```
 
 ### Test Notifications
+
 ```bash
 # Send test notification
 curl -X POST http://localhost:3001/api/notifications/send \
@@ -341,6 +357,7 @@ curl -X GET http://localhost:3001/api/notifications/history \
 ```
 
 ### Test Feature Flags
+
 ```bash
 # Check if feature enabled for user
 curl -X GET http://localhost:3001/api/features/check?flag=enable_advanced_analytics&userId=user123
@@ -368,6 +385,7 @@ curl -X POST http://localhost:3001/api/features/experiments \
 ## 🚀 Next Steps After Staging Verification
 
 ### Phase 1: Production Readiness (Week 1)
+
 1. ✅ Staging deployment complete
 2. ⏳ Enable Redis in production
 3. ⏳ Configure production database (MongoDB)
@@ -375,6 +393,7 @@ curl -X POST http://localhost:3001/api/features/experiments \
 5. ⏳ Configure email with production domain
 
 ### Phase 2: Gradual Production Rollout (Week 2-3)
+
 ```
 Monday: Deploy to 10% traffic
 ├─ Monitor error rates
@@ -393,6 +412,7 @@ Friday: Full 100% rollout
 ```
 
 ### Phase 3: Optimization (Week 4+)
+
 - Analyze A/B test results
 - Optimize cache invalidation strategies
 - Fine-tune feature flag percentages
@@ -403,10 +423,13 @@ Friday: Full 100% rollout
 ## ⚠️ Troubleshooting
 
 ### Issue: Backend won't start
+
 ```
 Error: EADDRINUSE: address already in use :::3001
 ```
+
 **Solution:**
+
 ```bash
 # Find process using port 3001
 netstat -ano | findstr :3001
@@ -419,29 +442,38 @@ npm start
 ```
 
 ### Issue: Service Worker not registering
+
 ```
 Error: Service Worker registration failed
 ```
+
 **Solution:**
+
 1. Ensure HTTPS or localhost (SW requires secure context)
 2. Check browser console for errors
 3. Verify manifest.json exists in public/
 4. Clear browser cache and reload
 
 ### Issue: Cache layer not working
+
 ```
 Error: Redis connection refused
 ```
+
 **Solution:**
+
 1. Set `REDIS_ENABLED=false` in .env to use in-memory cache
 2. Or install Redis: `docker run -d -p 6379:6379 redis:latest`
 3. Check REDIS_HOST matches running instance
 
 ### Issue: Notifications not sending
+
 ```
 Error: Email service error
 ```
+
 **Solution:**
+
 1. Verify EMAIL_USER and EMAIL_PASSWORD correct
 2. Enable "Less secure apps" for Gmail (if using)
 3. Or use Gmail app-specific password
@@ -452,6 +484,7 @@ Error: Email service error
 ## 📈 Success Criteria
 
 ✅ **Staging Deployment is Successful When:**
+
 - [ ] Backend starts without errors
 - [ ] All 22 API endpoints responding
 - [ ] Advanced features tests: 32/32 passing
@@ -467,21 +500,21 @@ Error: Email service error
 
 ## 📞 Support & Escalation
 
-| Issue | Contact | Urgency |
-|-------|---------|---------|
-| Backend crashes | Engineering | CRITICAL |
-| API responds slowly | DevOps | HIGH |
-| Test failures | QA | HIGH |
-| Notification not sent | Support | MEDIUM |
-| Performance <200ms | Engineering | LOW |
+| Issue                 | Contact     | Urgency  |
+| --------------------- | ----------- | -------- |
+| Backend crashes       | Engineering | CRITICAL |
+| API responds slowly   | DevOps      | HIGH     |
+| Test failures         | QA          | HIGH     |
+| Notification not sent | Support     | MEDIUM   |
+| Performance <200ms    | Engineering | LOW      |
 
 ---
 
 ## 📝 Version History
 
-| Version | Date | Changes |
-|---------|------|---------|
-| 1.0 | Feb 20, 2026 | Initial staging guide with 6 advanced features |
+| Version | Date         | Changes                                        |
+| ------- | ------------ | ---------------------------------------------- |
+| 1.0     | Feb 20, 2026 | Initial staging guide with 6 advanced features |
 
 ---
 
@@ -492,4 +525,3 @@ Error: Email service error
 **Generated:** February 20, 2026  
 **Purpose:** Staging deployment for advanced ERP features  
 **Status:** ✅ PRODUCTION-READY
-

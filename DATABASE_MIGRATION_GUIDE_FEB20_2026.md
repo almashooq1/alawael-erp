@@ -21,6 +21,7 @@
 ## 🏗️ SYSTEM ARCHITECTURE
 
 ### Current Architecture: Mock Database
+
 ```
 Frontend (React 18)
        ↓
@@ -34,6 +35,7 @@ Session Storage
 ```
 
 ### Target Architecture: MongoDB
+
 ```
 Frontend (React 18)
        ↓
@@ -55,6 +57,7 @@ Persistent Document Storage
 ### Current Mock Database Implementation
 
 ✅ **Advantages:**
+
 - Zero dependency management
 - Fast setup and development
 - No external service required
@@ -62,6 +65,7 @@ Persistent Document Storage
 - Memory efficient for small datasets
 
 ❌ **Limitations:**
+
 - Data lost on server restart
 - Single-instance only (no clustering)
 - Not suitable for production workloads
@@ -72,6 +76,7 @@ Persistent Document Storage
 ### Target MongoDB Implementation
 
 ✅ **Advantages:**
+
 - Persistent data storage
 - Scalability (horizontal and vertical)
 - Rich query language
@@ -183,7 +188,7 @@ const mongoose = require('mongoose');
 const connectDB = async () => {
   try {
     const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost/erp-db';
-    
+
     const conn = await mongoose.connect(mongoURI, {
       // Connection options
       maxPoolSize: process.env.DB_POOL_SIZE || 50,
@@ -192,14 +197,14 @@ const connectDB = async () => {
       socketTimeoutMS: 45000,
       family: 4,
       retryWrites: true,
-      w: 'majority'
+      w: 'majority',
     });
 
     console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
-    
+
     // Run migrations
     await runMigrations();
-    
+
     return conn;
   } catch (error) {
     console.error('❌ MongoDB Connection Error:', error);
@@ -218,66 +223,73 @@ module.exports = connectDB;
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
-const userSchema = new mongoose.Schema({
-  username: {
-    type: String,
-    required: true,
-    unique: true,
-    lowercase: true
+const userSchema = new mongoose.Schema(
+  {
+    username: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      validate: {
+        validator: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v),
+        message: 'Invalid email',
+      },
+    },
+    password: {
+      type: String,
+      required: true,
+      minlength: 8,
+    },
+    firstName: String,
+    lastName: String,
+    roles: [
+      {
+        type: String,
+        enum: ['admin', 'manager', 'user', 'viewer'],
+        default: 'user',
+      },
+    ],
+    permissions: [
+      {
+        type: String,
+        enum: ['READ', 'WRITE', 'DELETE', 'APPROVE', 'MANAGE'],
+        default: 'READ',
+      },
+    ],
+    status: {
+      type: String,
+      enum: ['active', 'inactive', 'suspended'],
+      default: 'active',
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now,
+    },
+    updatedAt: {
+      type: Date,
+      default: Date.now,
+    },
   },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    lowercase: true,
-    validate: {
-      validator: (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v),
-      message: 'Invalid email'
-    }
-  },
-  password: {
-    type: String,
-    required: true,
-    minlength: 8
-  },
-  firstName: String,
-  lastName: String,
-  roles: [{
-    type: String,
-    enum: ['admin', 'manager', 'user', 'viewer'],
-    default: 'user'
-  }],
-  permissions: [{
-    type: String,
-    enum: ['READ', 'WRITE', 'DELETE', 'APPROVE', 'MANAGE'],
-    default: 'READ'
-  }],
-  status: {
-    type: String,
-    enum: ['active', 'inactive', 'suspended'],
-    default: 'active'
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now
-  }
-}, { timestamps: true });
+  { timestamps: true },
+);
 
 // Hash password before saving
-userSchema.pre('save', async function(next) {
+userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
-  
+
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
   next();
 });
 
 // Compare password method
-userSchema.methods.comparePassword = async function(password) {
+userSchema.methods.comparePassword = async function (password) {
   return await bcrypt.compare(password, this.password);
 };
 
@@ -303,12 +315,12 @@ const Order = require('../models/Order');
 async function migrateData() {
   try {
     console.log('🔄 Starting data migration to MongoDB...\n');
-    
+
     // Migrate Users
     console.log('📦 Migrating users...');
     const users = mockDB.users || [];
     let migratedUsers = 0;
-    
+
     for (const userData of users) {
       try {
         const user = new User({
@@ -319,9 +331,9 @@ async function migrateData() {
           lastName: userData.lastName,
           roles: userData.roles || ['user'],
           permissions: userData.permissions || ['READ'],
-          status: userData.status || 'active'
+          status: userData.status || 'active',
         });
-        
+
         await user.save();
         migratedUsers++;
       } catch (error) {
@@ -329,12 +341,12 @@ async function migrateData() {
       }
     }
     console.log(`   ✅ Migrated ${migratedUsers} users\n`);
-    
+
     // Migrate Products
     console.log('📦 Migrating products...');
     const products = mockDB.products || [];
     let migratedProducts = 0;
-    
+
     for (const productData of products) {
       try {
         const product = new Product({
@@ -342,9 +354,9 @@ async function migrateData() {
           description: productData.description,
           price: productData.price,
           quantity: productData.quantity,
-          category: productData.category
+          category: productData.category,
         });
-        
+
         await product.save();
         migratedProducts++;
       } catch (error) {
@@ -352,25 +364,25 @@ async function migrateData() {
       }
     }
     console.log(`   ✅ Migrated ${migratedProducts} products\n`);
-    
+
     // Migrate Orders
     console.log('📦 Migrating orders...');
     const orders = mockDB.orders || [];
     let migratedOrders = 0;
-    
+
     for (const orderData of orders) {
       try {
         // Find corresponding user
         const user = await User.findOne({ username: orderData.username });
-        
+
         const order = new Order({
           userId: user._id,
           items: orderData.items,
           totalAmount: orderData.totalAmount,
           status: orderData.status || 'pending',
-          shippingAddress: orderData.shippingAddress
+          shippingAddress: orderData.shippingAddress,
         });
-        
+
         await order.save();
         migratedOrders++;
       } catch (error) {
@@ -378,12 +390,11 @@ async function migrateData() {
       }
     }
     console.log(`   ✅ Migrated ${migratedOrders} orders\n`);
-    
+
     console.log('✨ Migration completed successfully!');
     console.log(`   Total Users: ${migratedUsers}`);
     console.log(`   Total Products: ${migratedProducts}`);
     console.log(`   Total Orders: ${migratedOrders}`);
-    
   } catch (error) {
     console.error('❌ Migration failed:', error);
     throw error;
@@ -393,7 +404,7 @@ async function migrateData() {
 // Run migration
 if (require.main === module) {
   const connectDB = require('../config/database');
-  
+
   connectDB()
     .then(async () => {
       await migrateData();
@@ -424,10 +435,12 @@ const useMongoDB = process.env.USE_MOCK_DB === 'false';
 const app = express();
 
 // Middleware
-app.use(cors({
-  origin: process.env.CORS_ORIGINS?.split(',') || ['http://localhost:3000'],
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGINS?.split(',') || ['http://localhost:3000'],
+    credentials: true,
+  }),
+);
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
@@ -457,9 +470,7 @@ app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(err.status || 500).json({
     success: false,
-    message: process.env.NODE_ENV === 'production' 
-      ? 'Internal server error' 
-      : err.message
+    message: process.env.NODE_ENV === 'production' ? 'Internal server error' : err.message,
   });
 });
 
@@ -517,15 +528,15 @@ npm run test:load
 
 ```javascript
 // Validation queries
-db.users.find().count() === mongoUsers.length
-db.products.find().count() === mongoProducts.length
-db.orders.find().count() === mongoOrders.length
+db.users.find().count() === mongoUsers.length;
+db.products.find().count() === mongoProducts.length;
+db.orders.find().count() === mongoOrders.length;
 
 // Check references
-db.orders.find({ userId: { $exists: false } }).count() === 0
+db.orders.find({ userId: { $exists: false } }).count() === 0;
 
 // Verify no duplicate keys
-db.users.find().count() === db.users.distinct('username').length
+db.users.find().count() === db.users.distinct('username').length;
 ```
 
 ---
@@ -537,6 +548,7 @@ db.users.find().count() === db.users.distinct('username').length
 If critical issues detected:
 
 1. **Immediate Actions:**
+
    ```javascript
    // In environment, switch back
    USE_MOCK_DB=true
@@ -560,16 +572,18 @@ If critical issues detected:
 > **Estimated Recovery Time:** 30 minutes
 
 1. **Backup MongoDB Data:**
+
    ```bash
    mongodump --uri="mongodb+srv://user:pass@cluster.mongodb.net" \
              --out=/backups/mongo-$(date +%Y%m%d)
    ```
 
 2. **Restore Previous State:**
+
    ```bash
    # Update .env file
    echo "USE_MOCK_DB=true" >> .env
-   
+
    # Restart services
    pm2 restart backend
    ```
@@ -655,6 +669,7 @@ PHASE 4: POST-MIGRATION
 ## 🎯 SUCCESS CRITERIA
 
 ✅ **Migration is successful when:**
+
 - All 22 API endpoints responding correctly
 - Data integrity 100% verified
 - Performance metrics: P95 < 200ms, throughput > 1000 req/s
@@ -669,4 +684,3 @@ PHASE 4: POST-MIGRATION
 **Migration Guide Version:** 1.0  
 **Last Updated:** February 20, 2026  
 **Next Review:** March 20, 2026
-

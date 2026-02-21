@@ -281,6 +281,7 @@ class CSVProcessor {
       try {
         const samples = [];
         let count = 0;
+        let resolved = false;
 
         const parser = parse({
           delimiter: this.options.delimiter,
@@ -295,22 +296,35 @@ class CSVProcessor {
             count++;
           }
 
-          if (count >= sampleSize) {
+          if (count >= sampleSize && !resolved) {
+            resolved = true;
             parser.destroy();
+            resolve({
+              success: true,
+              sampleSize: samples.length,
+              samples,
+              filePath,
+            });
           }
         });
 
         parser.on('error', (error) => {
-          reject(new Error(`CSV sampling error: ${error.message}`));
+          if (!resolved) {
+            resolved = true;
+            reject(new Error(`CSV sampling error: ${error.message}`));
+          }
         });
 
         parser.on('end', () => {
-          resolve({
-            success: true,
-            sampleSize: samples.length,
-            samples,
-            filePath,
-          });
+          if (!resolved) {
+            resolved = true;
+            resolve({
+              success: true,
+              sampleSize: samples.length,
+              samples,
+              filePath,
+            });
+          }
         });
 
         const stream = fs.createReadStream(filePath, { encoding: this.options.encoding });

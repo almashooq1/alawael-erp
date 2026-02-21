@@ -58,7 +58,7 @@ class VehicleController {
 
       if (status) query.status = status;
       if (type) query.type = type;
-      
+
       // Search by plate number
       if (search) {
         query.plateNumber = { $regex: search, $options: 'i' };
@@ -567,28 +567,47 @@ class VehicleController {
       const { id } = req.params;
       const { type, description, cost, workshop } = req.body;
 
-      // Use simple update without nested date
-      const updatedVehicle = await Vehicle.findByIdAndUpdate(
-        id,
-        {
-          $push: {
-            maintenanceHistory: {
-              type,
-              description,
-              cost,
-              workshop,
-            },
-          },
-        },
-        { new: true, runValidators: false }
-      );
+      // Validate required fields
+      if (!type || !description) {
+        return res.status(400).json({
+          success: false,
+          message: 'نوع الصيانة والوصف مطلوبان',
+        });
+      }
 
-      if (!updatedVehicle) {
+      // Find the vehicle first
+      const vehicle = await Vehicle.findById(id);
+
+      if (!vehicle) {
         return res.status(404).json({
           success: false,
           message: 'المركبة غير موجودة',
         });
       }
+
+      // Create maintenance record object
+      const maintenanceRecord = {
+        date: new Date(),
+        type,
+        description,
+        cost: cost || 0,
+        workshop: workshop || 'Unknown',
+      };
+
+      // Add to maintenanceHistory array
+      if (!vehicle.maintenanceHistory) {
+        vehicle.maintenanceHistory = [];
+      }
+      vehicle.maintenanceHistory.push(maintenanceRecord);
+
+      // Update maintenance date
+      if (!vehicle.maintenance) {
+        vehicle.maintenance = {};
+      }
+      vehicle.maintenance.lastMaintenanceDate = new Date();
+
+      // Save the vehicle
+      const updatedVehicle = await vehicle.save();
 
       res.status(201).json({
         success: true,
@@ -596,7 +615,7 @@ class VehicleController {
         data: updatedVehicle,
       });
     } catch (error) {
-      console.error('Maintenance error details:', error.message, error.stack);
+      console.error('Maintenance error details:', error.message);
       res.status(400).json({
         success: false,
         message: 'فشل إضافة سجل الصيانة',

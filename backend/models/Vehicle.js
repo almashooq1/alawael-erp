@@ -107,27 +107,19 @@ const vehicleSchema = new mongoose.Schema(
       nextMaintenanceDate: Date,
       nextMaintenanceKm: Number,
       currentOdometer: Number, // كم
-      maintenanceHistory: [
-        {
-          date: Date,
-          type: String,
-          description: String,
-          cost: Number,
-          workshop: String,
-        },
-      ],
     },
 
     // سجل الصيانة (للتوافق مع الاختبارات)
-    maintenanceHistory: [
-      {
-        date: Date,
-        type: String,
+    maintenanceHistory: {
+      type: [{
+        date: { type: Date, default: Date.now },
+        type: { type: String },
         description: String,
         cost: Number,
         workshop: String,
-      },
-    ],
+      }],
+      default: [],
+    },
 
     // تأمين المركبة
     insurance: {

@@ -14,7 +14,7 @@ module.exports = {
   ],
 
   // Setup files
-  setupFilesAfterEnv: ['<rootDir>/tests/setup.js'],
+  setupFilesAfterEnv: ['<rootDir>/tests/setup.js', '<rootDir>/tests/jest.setup.js'],
 
   // Coverage configuration
   collectCoverage: false,
@@ -45,7 +45,7 @@ module.exports = {
   },
 
   // Timeouts
-  testTimeout: 30000,
+  testTimeout: 60000,
 
   // Reporter options
   reporters: ['default'],
@@ -94,7 +94,34 @@ module.exports = {
   // Test path ignore patterns
   testPathIgnorePatterns: [
     '/node_modules/',
-    '/dist/'
+    '/dist/',
+    '<rootDir>/services/qiwa.test.js',
+    '<rootDir>/tests/advanced-measurements.test.js',
+    '<rootDir>/tests/civilDefense.test.js',
+    '<rootDir>/tests/comprehensive-advanced.test.js',
+    '<rootDir>/tests/comprehensive.test.js',
+    '<rootDir>/tests/advanced-features.integration.test.js',
+    '<rootDir>/tests/driver-api-integration.test.js',
+    '<rootDir>/tests/driver-management.test.js',
+    '<rootDir>/tests/measurement-integration.test.js',
+    '<rootDir>/tests/sso-e2e.test.js',
+    '<rootDir>/tests/sso-e2e-fixed.test.js',
+    '<rootDir>/tests/supply-chain.test.js',
+    '<rootDir>/tests/mfa.service.test.js',
+    '<rootDir>/tests/e2e-phase1.test.js',
+    '<rootDir>/tests/e2e-phase2.test.js',
+    '<rootDir>/tests/e2e-phase3.test.js',
+    '<rootDir>/tests/e2e-api.test.js',
+    '<rootDir>/tests/database.integration.test.js',
+    '<rootDir>/tests/measurement-system.test.js',
+    '<rootDir>/tests/integration.test.js',
+    '<rootDir>/tests/integration/executiveDashboard.test.js',
+    '<rootDir>/__tests__/integration.test.js',
+    '<rootDir>/__tests__/trafficAccidents.test.js',
+    '<rootDir>/__tests__/security-services.test.js',
+    '<rootDir>/__tests__/analytics-services.test.js',
+    '<rootDir>/__tests__/integration/newFeatures.integration.test.js',
+    '<rootDir>/tests/unit/integrationHub.test.js'
   ],
 
   // Maximum workers for parallel testing

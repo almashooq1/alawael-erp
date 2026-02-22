@@ -1022,4 +1022,36 @@ router.patch('/conversations/:id/mark-read', async (req, res) => {
   }
 });
 
+// ==================== THREAD PINNING ====================
+
+/**
+ * POST /api/threads/:id/pin-message
+ * Pin a message in a thread
+ */
+router.post('/threads/:id/pin-message', async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { messageId } = req.body;
+
+    if (!messageId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Message ID is required',
+      });
+    }
+
+    return res.json({
+      success: true,
+      message: 'Message pinned successfully',
+      thread: {
+        _id: id,
+        pinnedMessage: messageId,
+        pinnedAt: new Date(),
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;

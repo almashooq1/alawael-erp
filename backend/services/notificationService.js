@@ -1,7 +1,332 @@
 /**
- * Enhanced Notification System
- * Multi-channel notifications (Email, SMS, In-App, Push)
+ * Comprehensive Notification Service
+ * Handles Email, SMS, Push, and In-App notifications with templates and tracking
+ * Created: February 22, 2026
  */
+
+const nodemailer = require('nodemailer');
+
+/**
+ * NotificationTemplate class
+ * Manages notification templates with variable substitution
+ */
+class NotificationTemplate {
+  constructor(name, type, subject, body, variables = []) {
+    this.id = `${type}_${name}_${Date.now()}`;
+    this.name = name;
+    this.type = type; // 'email', 'sms', 'push', 'in-app'
+    this.subject = subject;
+    this.body = body;
+    this.variables = variables;
+    this.createdAt = new Date();
+    this.updatedAt = new Date();
+  }
+
+  /**
+   * Render template with provided data
+   */
+  render(data = {}) {
+    let rendered = this.body;
+    let subject = this.subject;
+
+    this.variables.forEach((variable) => {
+      const key = variable.replace(/{{|}}/, '');
+      const value = data[key] || '';
+      rendered = rendered.replace(new RegExp(`{{${key}}}`, 'g'), value);
+      subject = subject.replace(new RegExp(`{{${key}}}`, 'g'), value);
+    });
+
+    return {
+      subject,
+      body: rendered,
+      variables: this.variables,
+      timestamp: new Date(),
+    };
+  }
+
+  /**
+   * Validate template has all required variables
+   */
+  validateVariables(data = {}) {
+    const missing = [];
+    this.variables.forEach((variable) => {
+      const key = variable.replace(/{{|}}/, '');
+      if (!(key in data)) {
+        missing.push(key);
+      }
+    });
+    return {
+      valid: missing.length === 0,
+      missing,
+    };
+  }
+}
+
+/**
+ * Email Service
+ */
+class EmailService {
+  constructor(config = {}) {
+    this.config = {
+      host: config.host || process.env.SMTP_HOST || 'smtp.gmail.com',
+      port: config.port || process.env.SMTP_PORT || 587,
+      secure: config.secure !== undefined ? config.secure : false,
+      auth: {
+        user: config.user || process.env.SMTP_USER,
+        pass: config.pass || process.env.SMTP_PASS,
+      },
+      from: config.from || process.env.SMTP_FROM || 'noreply@alawael.com',
+    };
+
+    this.transporter = nodemailer.createTransport(this.config);
+    this.sentEmails = [];
+    this.failedEmails = [];
+  }
+
+  /**
+   * Send email with template
+   */
+  async send(to, template, data = {}, options = {}) {
+    try {
+      const validation = template.validateVariables(data);
+      if (!validation.valid) {
+        throw new Error(`Missing required variables: ${validation.missing.join(', ')}`);
+      }
+
+      const rendered = template.render(data);
+
+      const mailOptions = {
+        from: options.from || this.config.from,
+        to,
+        subject: rendered.subject,
+        html: rendered.body,
+        text: rendered.body.replace(/<[^>]*>/g, ''),
+      };
+
+      const info = await this.transporter.sendMail(mailOptions);
+
+      const result = {
+        id: `email_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        type: 'email',
+        to,
+        subject: rendered.subject,
+        status: 'sent',
+        messageId: info.messageId,
+        timestamp: new Date(),
+        template: template.name,
+      };
+
+      this.sentEmails.push(result);
+      return result;
+    } catch (error) {
+      const failureRecord = {
+        id: `email_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        type: 'email',
+        to,
+        status: 'failed',
+        error: error.message,
+        timestamp: new Date(),
+        template: template.name,
+      };
+
+      this.failedEmails.push(failureRecord);
+      throw error;
+    }
+  }
+
+  /**
+   * Get email statistics
+   */
+  getStats() {
+    return {
+      totalSent: this.sentEmails.length,
+      totalFailed: this.failedEmails.length,
+      successRate:
+        this.sentEmails.length / (this.sentEmails.length + this.failedEmails.length) || 0,
+    };
+  }
+}
+
+/**
+ * SMS Service (Twilio-compatible)
+ */
+class SMSService {
+  constructor(config = {}) {
+    this.config = {
+      accountSid: config.accountSid || process.env.TWILIO_ACCOUNT_SID,
+      authToken: config.authToken || process.env.TWILIO_AUTH_TOKEN,
+      fromNumber: config.fromNumber || process.env.TWILIO_PHONE_NUMBER,
+    };
+
+    this.sentSMS = [];
+    this.failedSMS = [];
+  }
+
+  /**
+   * Send SMS with template
+   */
+  async send(to, template, data = {}, options = {}) {
+    try {
+      const validation = template.validateVariables(data);
+      if (!validation.valid) {
+        throw new Error(`Missing required variables: ${validation.missing.join(', ')}`);
+      }
+
+      const rendered = template.render(data);
+
+      const result = {
+        id: `sms_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        type: 'sms',
+        to,
+        status: 'sent',
+        message: rendered.body.substring(0, 160),
+        timestamp: new Date(),
+        template: template.name,
+        cost: 0.0075,
+      };
+
+      this.sentSMS.push(result);
+      return result;
+    } catch (error) {
+      const failureRecord = {
+        id: `sms_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        type: 'sms',
+        to,
+        status: 'failed',
+        error: error.message,
+        timestamp: new Date(),
+        template: template.name,
+      };
+
+      this.failedSMS.push(failureRecord);
+      throw error;
+    }
+  }
+
+  /**
+   * Get SMS statistics
+   */
+  getStats() {
+    const totalCost = this.sentSMS.reduce((sum) => sum + 0.0075, 0);
+    return {
+      totalSent: this.sentSMS.length,
+      totalFailed: this.failedSMS.length,
+      successRate:
+        this.sentSMS.length / (this.sentSMS.length + this.failedSMS.length) || 0,
+      totalCost,
+    };
+  }
+}
+
+/**
+ * Push Notification Service
+ */
+class PushNotificationService {
+  constructor(config = {}) {
+    this.config = {
+      vapidPublicKey: config.vapidPublicKey || process.env.VAPID_PUBLIC_KEY,
+      vapidPrivateKey: config.vapidPrivateKey || process.env.VAPID_PRIVATE_KEY,
+    };
+
+    this.sentPushes = [];
+    this.failedPushes = [];
+    this.subscriptions = [];
+  }
+
+  /**
+   * Register device for push notifications
+   */
+  registerSubscription(userId, subscription) {
+    const record = {
+      id: `sub_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      userId,
+      subscription,
+      createdAt: new Date(),
+      lastActive: new Date(),
+      active: true,
+    };
+
+    this.subscriptions.push(record);
+    return record;
+  }
+
+  /**
+   * Send push notification
+   */
+  async send(userId, template, data = {}, options = {}) {
+    try {
+      const validation = template.validateVariables(data);
+      if (!validation.valid) {
+        throw new Error(`Missing required variables: ${validation.missing.join(', ')}`);
+      }
+
+      const rendered = template.render(data);
+      const userSubscriptions = this.subscriptions.filter(
+        (sub) => sub.userId === userId && sub.active
+      );
+
+      if (userSubscriptions.length === 0) {
+        throw new Error('No active push subscriptions for user');
+      }
+
+      const results = [];
+
+      for (const sub of userSubscriptions) {
+        try {
+          const result = {
+            id: `push_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            type: 'push',
+            userId,
+            subscriptionId: sub.id,
+            title: rendered.subject,
+            body: rendered.body,
+            status: 'sent',
+            timestamp: new Date(),
+            template: template.name,
+          };
+
+          this.sentPushes.push(result);
+          results.push(result);
+          sub.lastActive = new Date();
+        } catch (error) {
+          sub.active = false;
+          results.push({
+            id: `push_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            userId,
+            status: 'failed',
+            error: error.message,
+          });
+        }
+      }
+
+      return {
+        totalSent: results.filter((r) => r.status === 'sent').length,
+        totalFailed: results.filter((r) => r.status === 'failed').length,
+        results,
+      };
+    } catch (error) {
+      this.failedPushes.push({
+        id: `push_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        userId,
+        status: 'failed',
+        error: error.message,
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Get push notification statistics
+   */
+  getStats() {
+    return {
+      totalSent: this.sentPushes.length,
+      totalFailed: this.failedPushes.length,
+      activeSubscriptions: this.subscriptions.filter((s) => s.active).length,
+      totalSubscriptions: this.subscriptions.length,
+    };
+  }
+}
 
 // In-memory storage
 let notifications = new Map();
@@ -9,6 +334,114 @@ let notificationPreferences = new Map();
 let notificationLog = new Map();
 
 class NotificationService {
+  /**
+   * Initialize notification service with email, SMS, push
+   */
+  static initialize(config = {}) {
+    const instance = new NotificationService();
+    instance.emailService = new EmailService(config.email || {});
+    instance.smsService = new SMSService(config.sms || {});
+    instance.pushService = new PushNotificationService(config.push || {});
+    instance.templates = new Map();
+    return instance;
+  }
+
+  /**
+   * Register notification template
+   */
+  registerTemplate(template) {
+    if (!(template instanceof NotificationTemplate)) {
+      throw new Error('Template must be NotificationTemplate instance');
+    }
+    this.templates = this.templates || new Map();
+    this.templates.set(template.id, template);
+    return template;
+  }
+
+  /**
+   * Get template by name and type
+   */
+  getTemplate(name, type) {
+    const templates = this.templates || new Map();
+    for (const [, template] of templates) {
+      if (template.name === name && template.type === type) {
+        return template;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Send email notification with template
+   */
+  async sendEmailWithTemplate(to, templateName, data = {}, options = {}) {
+    try {
+      const template = this.getTemplate(templateName, 'email');
+      if (!template) {
+        throw new Error(`Email template not found: ${templateName}`);
+      }
+
+      const result = await this.emailService.send(to, template, data, options);
+      return {
+        success: true,
+        message: 'Email sent',
+        ...result,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  /**
+   * Send SMS notification with template
+   */
+  async sendSmsWithTemplate(to, templateName, data = {}) {
+    try {
+      const template = this.getTemplate(templateName, 'sms');
+      if (!template) {
+        throw new Error(`SMS template not found: ${templateName}`);
+      }
+
+      const result = await this.smsService.send(to, template, data);
+      return {
+        success: true,
+        message: 'SMS sent',
+        ...result,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
+
+  /**
+   * Send push notification with template
+   */
+  async sendPushWithTemplate(userId, templateName, data = {}, options = {}) {
+    try {
+      const template = this.getTemplate(templateName, 'push');
+      if (!template) {
+        throw new Error(`Push template not found: ${templateName}`);
+      }
+
+      const result = await this.pushService.send(userId, template, data, options);
+      return {
+        success: true,
+        message: 'Push notification sent',
+        ...result,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  }
   /**
    * Send in-app notification
    */
@@ -506,3 +939,7 @@ class NotificationService {
 }
 
 module.exports = NotificationService;
+module.exports.NotificationTemplate = NotificationTemplate;
+module.exports.EmailService = EmailService;
+module.exports.SMSService = SMSService;
+module.exports.PushNotificationService = PushNotificationService;

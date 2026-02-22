@@ -11,7 +11,8 @@
     import React from 'https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js';
     import ReactDOM from 'https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js';
     import ContractPanel from './ContractPanel.tsx';
-    ReactDOM.render(React.createElement(ContractPanel), document.getElementById('root'));
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(React.createElement(ContractPanel));
   </script>
 </body>
 </html>

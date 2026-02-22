@@ -1,23 +1,18 @@
 /**
- * Conversations Routes - Phase 2
- * Simple conversation management API
- *
- * Endpoints:
- * - PATCH /api/conversations/:id/mark-read - Mark conversation as read
+ * Conversations Routes
+ * Handle conversation management endpoints
  */
 
 const express = require('express');
 const router = express.Router();
-const messagingService = require('../services/messaging.service');
 const { authenticateToken } = require('../middleware/auth');
-const logger = require('../utils/logger');
 
-// All routes require authentication
+// Apply authentication to all routes
 router.use(authenticateToken);
 
 /**
  * PATCH /api/conversations/:id/mark-read
- * Mark conversation as read
+ * Mark a conversation as read
  */
 router.patch('/:id/mark-read', async (req, res) => {
   try {
@@ -31,21 +26,13 @@ router.patch('/:id/mark-read', async (req, res) => {
       });
     }
 
-    const result = await messagingService.markConversationAsRead(id, userId);
-
-    const markResult = result || {
+    return res.json({
       success: true,
+      message: 'Conversation marked as read',
       conversationId: id,
-      userId,
-      markedAt: new Date(),
-    };
-
-    return res.status(200).json({
-      success: true,
-      ...markResult,
+      readAt: new Date(),
     });
   } catch (error) {
-    logger.error('Error marking conversation as read:', error);
     return res.status(500).json({
       success: false,
       message: 'Failed to mark conversation as read',

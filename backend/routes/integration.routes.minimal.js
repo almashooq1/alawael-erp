@@ -1,144 +1,132 @@
-/**
- * Minimal Integration Routes (Test Version)
- * Used for testing route loading and basic health checks
+﻿/**
+ * Integration Routes - Minimal
+ * مسارات التكاملات - الحد الأدنى
  */
 
 const express = require('express');
 const router = express.Router();
+const integrationService = require('../services/externalIntegrationService');
 
-// Try to load the integration service, provide stubs if unavailable
-let integrationService;
-try {
-  integrationService = require('../services/externalIntegrationService');
-} catch (error) {
-  // Create stub service for testing
-  integrationService = {
-    configureSlack: () => ({ success: true, message: 'Slack configured' }),
-    sendSlackMessage: () => ({ success: true, messageId: 'msg123' }),
-    configureEmail: () => ({ success: true, message: 'Email configured' }),
-    sendEmail: () => ({ success: true, messageId: 'email123' }),
-    sendBulkEmail: () => ({ success: true, sent: 0 }),
-  };
-}
+// ============================================
+// Slack Integration
+// ============================================
 
-// Root endpoint for integrations hub
-router.get('/', (req, res) => {
+router.post('/slack/configure', async (req, res, next) => {
+  try {
+    const { webhookUrl, channels } = req.body;
+    const result = await integrationService.configureSlack(webhookUrl, channels);
+    res.json(result);
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+router.post('/slack/send', async (req, res, next) => {
+  try {
+    const { channel, message, options } = req.body;
+    const result = await integrationService.sendSlackMessage(channel, message, options);
+    res.json(result);
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ============================================
+// Email Integration
+// ============================================
+
+router.post('/email/configure', async (req, res, next) => {
+  try {
+    const config = req.body;
+    if (!config.smtpHost || !config.smtpPort) {
+      return res.status(400).json({ success: false, error: 'SMTP Host and Port are required' });
+    }
+    const result = await integrationService.configureEmail(config);
+    res.json(result);
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+router.post('/email/send', async (req, res, next) => {
+  try {
+    const { to, subject, body, options } = req.body;
+    const result = await integrationService.sendEmail(to, subject, body, options);
+    res.json(result);
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+router.post('/email/bulk', async (req, res, next) => {
+  try {
+    const { recipients, subject, template, data } = req.body;
+    const result = await integrationService.sendBulkEmail(recipients, subject, template, data);
+    res.json(result);
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ============================================
+// Webhook Integration
+// ============================================
+
+router.post('/webhooks/register', (req, res, next) => {
+  try {
+    const { event, url, options } = req.body;
+    const result = integrationService.registerWebhook(event, url, options);
+    res.status(201).json(result);
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+router.post('/webhooks/:id/trigger', async (req, res, next) => {
+  try {
+    const { data } = req.body;
+    const webhook = integrationService.webhooks ? integrationService.webhooks.get(req.params.id) : null;
+
+    if (!webhook) {
+      return res.status(404).json({ success: false, error: 'Webhook غير موجود' });
+    }
+
+    const result = await integrationService.executeWebhook(webhook, data);
+    res.json(result);
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+router.delete('/webhooks/:id', (req, res, next) => {
+  try {
+    const result = integrationService.deleteWebhook(req.params.id);
+    res.json(result);
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ============================================
+// Additional Endpoints
+// ============================================
+
+router.get('/available', (req, res) => {
   res.json({
     success: true,
-    message: 'Integrations hub is reachable',
-    endpoints: [
-      '/api/integrations/health',
-      '/api/integrations/metrics',
-      '/api/integrations/reset-metrics',
+    integrations: [
+      { id: 1, name: 'Slack', status: 'active' },
+      { id: 2, name: 'Email', status: 'active' },
+      { id: 3, name: 'Webhooks', status: 'active' },
     ],
   });
 });
 
-// Simple health check
-router.get('/health', (req, res) => {
+router.get('/webhooks', (req, res) => {
   res.json({
     success: true,
-    timestamp: new Date().toISOString(),
-    health: {
-      government: { status: 'ok' },
-      insurance: { status: 'ok' },
-      lab: { status: 'ok' },
-    },
+    webhooks: []
   });
-});
-
-// Simple metrics
-router.get('/metrics', (req, res) => {
-  res.json({
-    success: true,
-    timestamp: new Date().toISOString(),
-    metrics: {
-      requestCount: 0,
-      errorCount: 0,
-      avgResponseTime: 0,
-    },
-  });
-});
-
-// Reset metrics
-router.post('/reset-metrics', (req, res) => {
-  res.json({
-    success: true,
-    message: 'Metrics reset successfully',
-  });
-});
-
-// ===== Slack Integration Endpoints =====
-router.post('/slack/configure', async (req, res) => {
-  try {
-    const { webhookUrl, channels = [] } = req.body;
-    const result = await integrationService.configureSlack(webhookUrl, channels);
-    res.json({
-      success: result?.success !== false ? true : false,
-      message: result?.message || 'Slack configured successfully',
-      ...result,
-    });
-  } catch (error) {
-    res.status(400).json({ success: false, error: error.message || 'Failed to configure Slack' });
-  }
-});
-
-router.post('/slack/send', async (req, res) => {
-  try {
-    const { message, channel } = req.body;
-    const result = await integrationService.sendSlackMessage({ message, channel });
-    res.json({
-      success: result?.success !== false ? true : false,
-      messageId: result?.messageId || 'msg123',
-      ...result,
-    });
-  } catch (error) {
-    res
-      .status(400)
-      .json({ success: false, error: error.message || 'Failed to send Slack message' });
-  }
-});
-
-// ===== Email Integration Endpoints =====
-router.post('/email/configure', async (req, res) => {
-  try {
-    const result = await integrationService.configureEmail(req.body);
-    res.json({
-      success: result?.success !== false ? true : false,
-      message: result?.message || 'Email configured successfully',
-      ...result,
-    });
-  } catch (error) {
-    res.status(400).json({ success: false, error: error.message || 'Failed to configure email' });
-  }
-});
-
-router.post('/email/send', async (req, res) => {
-  try {
-    const { to, subject, body } = req.body;
-    const result = await integrationService.sendEmail(to, subject, body);
-    res.json({
-      success: result?.success !== false ? true : false,
-      messageId: result?.messageId || 'email123',
-      ...result,
-    });
-  } catch (error) {
-    res.status(400).json({ success: false, error: error.message || 'Failed to send email' });
-  }
-});
-
-router.post('/email/bulk', async (req, res) => {
-  try {
-    const { recipients, subject, body } = req.body;
-    const result = await integrationService.sendBulkEmail(recipients);
-    res.json({
-      success: result?.success !== false ? true : false,
-      sent: result?.sent || recipients?.length || 0,
-      ...result,
-    });
-  } catch (error) {
-    res.status(400).json({ success: false, error: error.message || 'Failed to send bulk emails' });
-  }
 });
 
 module.exports = router;

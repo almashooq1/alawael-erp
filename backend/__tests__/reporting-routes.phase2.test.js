@@ -10,15 +10,20 @@ const app = require('../server');
 // Mock reporting service
 jest.mock('../services/advancedReportingService', () => {
   return {
-    generateReport: jest.fn().mockResolvedValue({
-      _id: 'report123',
-      name: 'Monthly Report',
-      type: 'summary',
-      data: { totalTransactions: 150, totalAmount: 50000 },
-      generatedAt: new Date(),
-      status: 'completed',
+    generateReport: jest.fn((type, options) => {
+      return {
+        _id: `report_${Date.now()}`,
+        type: type || 'summary',
+        name: `${type || 'Report'} Report`,
+        data: { totalTransactions: 150, totalAmount: 50000, ...((options && options.data) || {}) },
+        generatedAt: new Date(),
+        status: 'completed',
+        charts: (options && options.chartTypes) ? { types: options.chartTypes } : undefined,
+        comparison: (options && options.compareWith) ? { compareWith: options.compareWith } : undefined,
+        ...options,
+      };
     }),
-    getReports: jest.fn().mockResolvedValue([
+    getReports: jest.fn(() => [
       {
         _id: 'report1',
         name: 'January Report',
@@ -26,24 +31,34 @@ jest.mock('../services/advancedReportingService', () => {
         status: 'completed',
       },
     ]),
-    scheduleReport: jest.fn().mockResolvedValue({
-      _id: 'sched123',
-      reportId: 'report123',
-      frequency: 'monthly',
+    scheduleReport: jest.fn((templateId, frequency, recipients) => ({
+      _id: `sched_${Date.now()}`,
+      templateId,
+      reportId: `report_${Date.now()}`,
+      frequency,
+      recipients: recipients || [],
       nextRun: new Date(),
-    }),
-    exportReport: jest.fn().mockResolvedValue({
+    })),
+    exportReport: jest.fn((reportId, format) => ({
       success: true,
-      format: 'pdf',
+      format: format || 'pdf',
       fileSize: 2048000,
-    }),
-    getReportMetrics: jest.fn().mockResolvedValue({
+      contentType: {
+        pdf: 'application/pdf',
+        excel: 'application/vnd.ms-excel',
+        csv: 'text/csv',
+        json: 'application/json',
+      }[format || 'pdf'],
+    })),
+    getReportMetrics: jest.fn(() => ({
       totalReports: 50,
+      totalGenerated: 500,
       avgGenerationTime: 250,
       mostUsedMetric: 'revenue',
-    }),
+    })),
   };
 });
+
 
 // Mock auth middleware
 jest.mock('../middleware/auth', () => ({
@@ -187,7 +202,9 @@ describe('Reporting Routes - Phase 2 Coverage', () => {
 
     it('should handle report generation errors', async () => {
       const reportService = require('../services/advancedReportingService');
-      reportService.generateReport.mockRejectedValueOnce(new Error('Generation failed'));
+      reportService.generateReport.mockImplementationOnce(() => {
+        throw new Error('Generation failed');
+      });
 
       const res = await request(app)
         .post('/api/reports/generate')
@@ -607,7 +624,9 @@ describe('Reporting Routes - Phase 2 Coverage', () => {
 
     it('should handle database errors', async () => {
       const reportService = require('../services/advancedReportingService');
-      reportService.getReports.mockRejectedValueOnce(new Error('DB Error'));
+      reportService.getReports.mockImplementationOnce(() => {
+        throw new Error('DB Error');
+      });
 
       const res = await request(app).get('/api/reports').expect(500);
 

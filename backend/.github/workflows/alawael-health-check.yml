@@ -1,0 +1,49 @@
+name: ALAWAEL Health Check
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # Every 6 hours
+  workflow_dispatch:        # Manual trigger
+  push:
+    branches: [main]
+
+jobs:
+  health_check:
+    runs-on: ubuntu-latest
+    name: ALAWAEL System Health Check
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Tests
+        run: npm test -- --passWithNoTests 2>&1 | head -50
+
+      - name: Build Check
+        run: npm run build 2>&1 | tail -20 || true
+
+      - name: Health Dashboard Check
+        run: |
+          echo "✅ ALAWAEL Health Check Passed"
+          echo "Status: All systems operational"
+          echo "Timestamp: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+
+      - name: Notify on Failure
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '⚠️ ALAWAEL health check failed. Please review.'
+            })

@@ -1,0 +1,743 @@
+/**
+ * Rehabilitation Center Comprehensive Routes
+ * مسارات نظام مراكز التأهيل الشامل
+ * @version 2.0.0
+ */
+
+const express = require('express');
+const router = express.Router();
+const authMiddleware = require('../middleware/advancedAuth');
+
+const {
+  AssessmentTool,
+  BeneficiaryAssessment,
+  IndividualizedPlan,
+  GroupSession,
+  SatisfactionSurvey,
+  SurveyResponse,
+  Referral,
+  Schedule,
+  AssistiveEquipment,
+  FamilyCommunication,
+  Waitlist,
+  ReportTemplate,
+  GeneratedReport
+} = require('../models/rehabilitation-center.model');
+
+// ============================================
+// 1. أدوات التقييم - Assessment Tools
+// ============================================
+
+router.get('/assessment-tools', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const { category, isActive, page = 1, limit = 20 } = req.query;
+    const filter = {};
+    if (isActive !== undefined) filter.is_active = isActive === 'true';
+    if (category) filter.category = category;
+
+    const tools = await AssessmentTool.find(filter)
+      .populate('created_by', 'name email')
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit));
+
+    const total = await AssessmentTool.countDocuments(filter);
+    res.json({ success: true, data: tools, pagination: { total, page: parseInt(page), pages: Math.ceil(total / limit) } });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/assessment-tools', authMiddleware.authenticate, authMiddleware.requireRole(['admin', 'supervisor']), async (req, res) => {
+  try {
+    const tool = new AssessmentTool({ ...req.body, created_by: req.user._id });
+    await tool.save();
+    res.status(201).json({ success: true, data: tool, message: 'تم إنشاء أداة التقييم بنجاح' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.get('/assessment-tools/:id', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const tool = await AssessmentTool.findById(req.params.id).populate('created_by', 'name email');
+    if (!tool) return res.status(404).json({ success: false, message: 'أداة التقييم غير موجودة' });
+    res.json({ success: true, data: tool });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.put('/assessment-tools/:id', authMiddleware.authenticate, authMiddleware.requireRole(['admin', 'supervisor']), async (req, res) => {
+  try {
+    const tool = await AssessmentTool.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    if (!tool) return res.status(404).json({ success: false, message: 'أداة التقييم غير موجودة' });
+    res.json({ success: true, data: tool, message: 'تم تحديث أداة التقييم بنجاح' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// 2. تقييمات المستفيدين - Beneficiary Assessments
+// ============================================
+
+router.get('/assessments', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const { beneficiary_id, type, status, page = 1, limit = 20 } = req.query;
+    const filter = {};
+    if (beneficiary_id) filter.beneficiary_id = beneficiary_id;
+    if (type) filter.assessment_type = type;
+    if (status) filter.status = status;
+
+    const assessments = await BeneficiaryAssessment.find(filter)
+      .populate('beneficiary_id', 'name national_id')
+      .populate('assessment_team.evaluator_id', 'name specialization')
+      .sort({ assessment_date: -1 })
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit));
+
+    const total = await BeneficiaryAssessment.countDocuments(filter);
+    res.json({ success: true, data: assessments, pagination: { total, page: parseInt(page), pages: Math.ceil(total / limit) } });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/assessments', authMiddleware.authenticate, authMiddleware.requireRole(['therapist', 'supervisor', 'psychologist']), async (req, res) => {
+  try {
+    const assessment = new BeneficiaryAssessment({ ...req.body, created_by: req.user._id });
+    await assessment.save();
+    res.status(201).json({ success: true, data: assessment, message: 'تم إنشاء التقييم بنجاح' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.get('/assessments/:id', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const assessment = await BeneficiaryAssessment.findById(req.params.id)
+      .populate('beneficiary_id')
+      .populate('assessment_team.evaluator_id', 'name specialization')
+      .populate('assessment_tool.tool_id');
+    if (!assessment) return res.status(404).json({ success: false, message: 'التقييم غير موجود' });
+    res.json({ success: true, data: assessment });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.put('/assessments/:id', authMiddleware.authenticate, authMiddleware.requireRole(['therapist', 'supervisor']), async (req, res) => {
+  try {
+    const assessment = await BeneficiaryAssessment.findByIdAndUpdate(
+      req.params.id,
+      { ...req.body, updated_by: req.user._id },
+      { new: true, runValidators: true }
+    );
+    if (!assessment) return res.status(404).json({ success: false, message: 'التقييم غير موجود' });
+    res.json({ success: true, data: assessment, message: 'تم تحديث التقييم بنجاح' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/assessments/:id/approve', authMiddleware.authenticate, authMiddleware.requireRole(['supervisor']), async (req, res) => {
+  try {
+    const assessment = await BeneficiaryAssessment.findById(req.params.id);
+    if (!assessment) return res.status(404).json({ success: false, message: 'التقييم غير موجود' });
+
+    assessment.approvals.supervisor_approval = {
+      approved: true,
+      approval_date: new Date(),
+      supervisor_id: req.user._id,
+      comments: req.body.comments
+    };
+    assessment.status = 'approved';
+    await assessment.save();
+    res.json({ success: true, data: assessment, message: 'تمت الموافقة على التقييم' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// 3. الخطط العلاجية الفردية - Individualized Plans
+// ============================================
+
+router.get('/plans', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const { beneficiary_id, status, type, page = 1, limit = 20 } = req.query;
+    const filter = {};
+    if (beneficiary_id) filter.beneficiary_id = beneficiary_id;
+    if (status) filter.status = status;
+    if (type) filter.plan_type = type;
+
+    const plans = await IndividualizedPlan.find(filter)
+      .populate('beneficiary_id', 'name national_id')
+      .populate('team_members.member_id', 'name specialization')
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit));
+
+    const total = await IndividualizedPlan.countDocuments(filter);
+    res.json({ success: true, data: plans, pagination: { total, page: parseInt(page), pages: Math.ceil(total / limit) } });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/plans', authMiddleware.authenticate, authMiddleware.requireRole(['therapist', 'supervisor', 'case_manager']), async (req, res) => {
+  try {
+    const plan = new IndividualizedPlan({ ...req.body, created_by: req.user._id });
+    await plan.save();
+    res.status(201).json({ success: true, data: plan, message: 'تم إنشاء الخطة العلاجية بنجاح' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.get('/plans/:id', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const plan = await IndividualizedPlan.findById(req.params.id)
+      .populate('beneficiary_id')
+      .populate('team_members.member_id', 'name specialization email')
+      .populate('support_services.provider.provider_id', 'name');
+    if (!plan) return res.status(404).json({ success: false, message: 'الخطة العلاجية غير موجودة' });
+    res.json({ success: true, data: plan });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.put('/plans/:id', authMiddleware.authenticate, authMiddleware.requireRole(['therapist', 'supervisor']), async (req, res) => {
+  try {
+    const plan = await IndividualizedPlan.findByIdAndUpdate(
+      req.params.id,
+      { ...req.body, updated_by: req.user._id },
+      { new: true, runValidators: true }
+    );
+    if (!plan) return res.status(404).json({ success: false, message: 'الخطة العلاجية غير موجودة' });
+    res.json({ success: true, data: plan, message: 'تم تحديث الخطة العلاجية بنجاح' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/plans/:id/goals/short-term', authMiddleware.authenticate, authMiddleware.requireRole(['therapist', 'supervisor']), async (req, res) => {
+  try {
+    const plan = await IndividualizedPlan.findById(req.params.id);
+    if (!plan) return res.status(404).json({ success: false, message: 'الخطة العلاجية غير موجودة' });
+    plan.short_term_goals.push(req.body);
+    await plan.save();
+    res.json({ success: true, data: plan, message: 'تم إضافة الهدف بنجاح' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.put('/plans/:id/goals/:goalId/progress', authMiddleware.authenticate, authMiddleware.requireRole(['therapist', 'supervisor']), async (req, res) => {
+  try {
+    const plan = await IndividualizedPlan.findById(req.params.id);
+    if (!plan) return res.status(404).json({ success: false, message: 'الخطة العلاجية غير موجودة' });
+
+    const goal = plan.short_term_goals.id(req.params.goalId);
+    if (!goal) return res.status(404).json({ success: false, message: 'الهدف غير موجود' });
+
+    goal.progress_updates.push({ ...req.body, date: new Date(), data_collector: req.user._id });
+    if (req.body.progress_percentage >= 100) goal.status = 'mastered';
+    else if (req.body.progress_percentage > 0) goal.status = 'in_progress';
+
+    await plan.save();
+    res.json({ success: true, data: plan, message: 'تم تحديث تقدم الهدف بنجاح' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// 4. الجلسات الجماعية - Group Sessions
+// ============================================
+
+router.get('/groups', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const { type, status, page = 1, limit = 20 } = req.query;
+    const filter = {};
+    if (type) filter.group_type = type;
+    if (status) filter.status = status;
+
+    const groups = await GroupSession.find(filter)
+      .populate('facilitators.facilitator_id', 'name specialization')
+      .populate('participants.beneficiary_id', 'name')
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit));
+
+    const total = await GroupSession.countDocuments(filter);
+    res.json({ success: true, data: groups, pagination: { total, page: parseInt(page), pages: Math.ceil(total / limit) } });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/groups', authMiddleware.authenticate, authMiddleware.requireRole(['supervisor', 'therapist']), async (req, res) => {
+  try {
+    const group = new GroupSession({ ...req.body, created_by: req.user._id });
+    await group.save();
+    res.status(201).json({ success: true, data: group, message: 'تم إنشاء المجموعة بنجاح' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.get('/groups/:id', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const group = await GroupSession.findById(req.params.id)
+      .populate('facilitators.facilitator_id', 'name specialization')
+      .populate('participants.beneficiary_id', 'name national_id');
+    if (!group) return res.status(404).json({ success: false, message: 'المجموعة غير موجودة' });
+    res.json({ success: true, data: group });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/groups/:id/participants', authMiddleware.authenticate, authMiddleware.requireRole(['therapist', 'supervisor']), async (req, res) => {
+  try {
+    const group = await GroupSession.findById(req.params.id);
+    if (!group) return res.status(404).json({ success: false, message: 'المجموعة غير موجودة' });
+    if (group.capacity.current_enrollment >= group.capacity.max_participants) {
+      return res.status(400).json({ success: false, message: 'المجموعة مكتملة' });
+    }
+    group.participants.push({ ...req.body, enrollment_date: new Date(), status: 'active' });
+    group.capacity.current_enrollment = group.participants.filter(p => p.status === 'active').length;
+    await group.save();
+    res.json({ success: true, data: group, message: 'تم إضافة المشارك بنجاح' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/groups/:id/sessions', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const group = await GroupSession.findById(req.params.id);
+    if (!group) return res.status(404).json({ success: false, message: 'المجموعة غير موجودة' });
+    group.sessions.push({ ...req.body, session_date: new Date(), session_number: group.sessions.length + 1 });
+    await group.save();
+    res.json({ success: true, data: group, message: 'تم إضافة الجلسة بنجاح' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// 5. التحويلات - Referrals
+// ============================================
+
+router.get('/referrals', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const { status, priority, page = 1, limit = 20 } = req.query;
+    const filter = {};
+    if (status) filter['acceptance.status'] = status;
+    if (priority) filter['referral_details.priority'] = priority;
+
+    const referrals = await Referral.find(filter)
+      .populate('beneficiary.beneficiary_id', 'name national_id')
+      .populate('acceptance.assigned_case_manager', 'name')
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit));
+
+    const total = await Referral.countDocuments(filter);
+    res.json({ success: true, data: referrals, pagination: { total, page: parseInt(page), pages: Math.ceil(total / limit) } });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/referrals', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const referral = new Referral({ ...req.body, created_by: req.user._id });
+    await referral.save();
+    res.status(201).json({ success: true, data: referral, message: 'تم إنشاء التحويل بنجاح' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.put('/referrals/:id/accept', authMiddleware.authenticate, authMiddleware.requireRole(['supervisor', 'admin']), async (req, res) => {
+  try {
+    const referral = await Referral.findById(req.params.id);
+    if (!referral) return res.status(404).json({ success: false, message: 'التحويل غير موجود' });
+
+    referral.acceptance = { ...req.body, decision_date: new Date(), decision_maker: req.user._id };
+    await referral.save();
+    res.json({ success: true, data: referral, message: 'تم تحديث حالة التحويل بنجاح' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// 6. الجدولة - Scheduling
+// ============================================
+
+router.get('/schedules', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const { provider_id, beneficiary_id, date, status, page = 1, limit = 50 } = req.query;
+    const filter = {};
+    if (provider_id) filter['provider.provider_id'] = provider_id;
+    if (beneficiary_id) filter['beneficiary.beneficiary_id'] = beneficiary_id;
+    if (date) filter['appointment.date'] = { $gte: new Date(date), $lt: new Date(date + 'T23:59:59') };
+    if (status) filter.status = status;
+
+    const schedules = await Schedule.find(filter)
+      .populate('provider.provider_id', 'name specialization')
+      .populate('beneficiary.beneficiary_id', 'name')
+      .sort({ 'appointment.date': 1, 'appointment.start_time': 1 })
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit));
+
+    const total = await Schedule.countDocuments(filter);
+    res.json({ success: true, data: schedules, pagination: { total, page: parseInt(page), pages: Math.ceil(total / limit) } });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/schedules', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const existingSchedule = await Schedule.findOne({
+      'provider.provider_id': req.body.provider.provider_id,
+      'appointment.date': new Date(req.body.appointment.date),
+      'appointment.start_time': req.body.appointment.start_time,
+      status: { $nin: ['cancelled', 'no_show'] }
+    });
+
+    if (existingSchedule) {
+      return res.status(400).json({ success: false, message: 'يوجد تعارض في الجدول الزمني' });
+    }
+
+    const schedule = new Schedule({ ...req.body, created_by: req.user._id });
+    await schedule.save();
+    res.status(201).json({ success: true, data: schedule, message: 'تم إنشاء الموعد بنجاح' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.put('/schedules/:id/status', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const schedule = await Schedule.findById(req.params.id);
+    if (!schedule) return res.status(404).json({ success: false, message: 'الموعد غير موجود' });
+
+    schedule.status = req.body.status;
+    if (req.body.notes) schedule.notes = req.body.notes;
+    await schedule.save();
+    res.json({ success: true, data: schedule, message: 'تم تحديث حالة الموعد بنجاح' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/schedules/:id/check-in', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const schedule = await Schedule.findById(req.params.id);
+    if (!schedule) return res.status(404).json({ success: false, message: 'الموعد غير موجود' });
+
+    schedule.attendance.checked_in = true;
+    schedule.attendance.check_in_time = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+    schedule.status = 'in_progress';
+    await schedule.save();
+    res.json({ success: true, data: schedule, message: 'تم تسجيل الحضور بنجاح' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/schedules/:id/check-out', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const schedule = await Schedule.findById(req.params.id);
+    if (!schedule) return res.status(404).json({ success: false, message: 'الموعد غير موجود' });
+
+    schedule.attendance.checked_out = true;
+    schedule.attendance.check_out_time = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+    schedule.status = 'completed';
+    if (req.body.notes) schedule.attendance.attendance_notes = req.body.notes;
+    await schedule.save();
+    res.json({ success: true, data: schedule, message: 'تم تسجيل الانصراف بنجاح' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// 7. المعدات المساعدة - Assistive Equipment
+// ============================================
+
+router.get('/equipment', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const { category, available, page = 1, limit = 20 } = req.query;
+    const filter = { is_active: true };
+    if (category) filter.category = category;
+    if (available !== undefined) filter['availability.is_available'] = available === 'true';
+
+    const equipment = await AssistiveEquipment.find(filter)
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit));
+
+    const total = await AssistiveEquipment.countDocuments(filter);
+    res.json({ success: true, data: equipment, pagination: { total, page: parseInt(page), pages: Math.ceil(total / limit) } });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/equipment', authMiddleware.authenticate, authMiddleware.requireRole(['admin', 'supervisor']), async (req, res) => {
+  try {
+    const equipment = new AssistiveEquipment({ ...req.body, created_by: req.user._id });
+    await equipment.save();
+    res.status(201).json({ success: true, data: equipment, message: 'تم إضافة المعدة بنجاح' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.put('/equipment/:id/assign', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const equipment = await AssistiveEquipment.findById(req.params.id);
+    if (!equipment) return res.status(404).json({ success: false, message: 'المعدة غير موجودة' });
+
+    equipment.assignment = { ...req.body, is_assigned: true, assignment_date: new Date() };
+    equipment.availability.is_available = false;
+    await equipment.save();
+    res.json({ success: true, data: equipment, message: 'تم إسناد المعدة بنجاح' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// 8. التواصل مع الأسرة - Family Communication
+// ============================================
+
+router.get('/communications', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const { beneficiary_id, type, page = 1, limit = 20 } = req.query;
+    const filter = { is_archived: false };
+    if (beneficiary_id) filter.beneficiary_id = beneficiary_id;
+    if (type) filter.communication_type = type;
+
+    const communications = await FamilyCommunication.find(filter)
+      .populate('sender.sender_id', 'name role')
+      .populate('recipients.recipient_id', 'name relationship')
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit));
+
+    const total = await FamilyCommunication.countDocuments(filter);
+    res.json({ success: true, data: communications, pagination: { total, page: parseInt(page), pages: Math.ceil(total / limit) } });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/communications', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const communication = new FamilyCommunication({
+      ...req.body,
+      sender: { sender_id: req.user._id, name: req.user.name, role: req.user.role }
+    });
+    await communication.save();
+    res.status(201).json({ success: true, data: communication, message: 'تم إرسال الرسالة بنجاح' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// 9. قائمة الانتظار - Waitlist
+// ============================================
+
+router.get('/waitlist', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const { status, service, page = 1, limit = 20 } = req.query;
+    const filter = {};
+    if (status) filter.status = status;
+    if (service) filter['requested_service.service_type'] = service;
+
+    const waitlist = await Waitlist.find(filter)
+      .populate('beneficiary_id', 'name national_id')
+      .populate('assigned_to', 'name')
+      .sort({ 'waitlist_info.priority_score': -1, 'waitlist_info.registration_date': 1 })
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit));
+
+    const total = await Waitlist.countDocuments(filter);
+    res.json({ success: true, data: waitlist, pagination: { total, page: parseInt(page), pages: Math.ceil(total / limit) } });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/waitlist', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const waitlistEntry = new Waitlist({ ...req.body, 'waitlist_info.registration_date': new Date() });
+    await waitlistEntry.save();
+    res.status(201).json({ success: true, data: waitlistEntry, message: 'تم الإضافة لقائمة الانتظار بنجاح' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.put('/waitlist/:id/offer', authMiddleware.authenticate, authMiddleware.requireRole(['supervisor', 'admin']), async (req, res) => {
+  try {
+    const waitlistEntry = await Waitlist.findById(req.params.id);
+    if (!waitlistEntry) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
+
+    waitlistEntry.service_offers.push({ ...req.body, offer_date: new Date(), response: 'pending' });
+    waitlistEntry.status = 'offer_made';
+    await waitlistEntry.save();
+    res.json({ success: true, data: waitlistEntry, message: 'تم إرسال العرض بنجاح' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// 10. التقارير - Reports
+// ============================================
+
+router.get('/reports/templates', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const templates = await ReportTemplate.find({ is_active: true })
+      .populate('created_by', 'name')
+      .sort({ createdAt: -1 });
+    res.json({ success: true, data: templates });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/reports/templates', authMiddleware.authenticate, authMiddleware.requireRole(['admin', 'supervisor']), async (req, res) => {
+  try {
+    const template = new ReportTemplate({ ...req.body, created_by: req.user._id });
+    await template.save();
+    res.status(201).json({ success: true, data: template, message: 'تم إنشاء القالب بنجاح' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/reports/generate', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const report = new GeneratedReport({
+      ...req.body,
+      status: 'generating',
+      generated_by: req.user._id,
+      generated_at: new Date()
+    });
+    await report.save();
+
+    // هنا يمكن إضافة منطق توليد التقرير الفعلي
+
+    report.status = 'completed';
+    await report.save();
+
+    res.json({ success: true, data: report, message: 'تم توليد التقرير بنجاح' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.get('/reports', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const { type, page = 1, limit = 20 } = req.query;
+    const filter = {};
+    if (type) filter.report_type = type;
+
+    const reports = await GeneratedReport.find(filter)
+      .populate('template_id', 'template_name')
+      .populate('generated_by', 'name')
+      .sort({ generated_at: -1 })
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit));
+
+    const total = await GeneratedReport.countDocuments(filter);
+    res.json({ success: true, data: reports, pagination: { total, page: parseInt(page), pages: Math.ceil(total / limit) } });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// 11. استطلاعات الرضا - Satisfaction Surveys
+// ============================================
+
+router.get('/surveys', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const surveys = await SatisfactionSurvey.find({ is_active: true })
+      .populate('created_by', 'name')
+      .sort({ createdAt: -1 });
+    res.json({ success: true, data: surveys });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/surveys', authMiddleware.authenticate, authMiddleware.requireRole(['admin', 'supervisor']), async (req, res) => {
+  try {
+    const survey = new SatisfactionSurvey({ ...req.body, created_by: req.user._id });
+    await survey.save();
+    res.status(201).json({ success: true, data: survey, message: 'تم إنشاء الاستطلاع بنجاح' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/surveys/:id/respond', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const response = new SurveyResponse({
+      survey_id: req.params.id,
+      ...req.body,
+      response_date: new Date()
+    });
+    await response.save();
+    res.status(201).json({ success: true, data: response, message: 'تم إرسال الرد بنجاح' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// 12. الإحصائيات والتقارير العامة - Statistics
+// ============================================
+
+router.get('/statistics/overview', authMiddleware.authenticate, authMiddleware.requireRole(['admin', 'supervisor']), async (req, res) => {
+  try {
+    const totalAssessments = await BeneficiaryAssessment.countDocuments();
+    const activePlans = await IndividualizedPlan.countDocuments({ status: 'active' });
+    const activeGroups = await GroupSession.countDocuments({ status: 'active' });
+    const pendingReferrals = await Referral.countDocuments({ 'acceptance.status': 'pending' });
+    const waitlistCount = await Waitlist.countDocuments({ status: 'waiting' });
+    const todaySchedules = await Schedule.countDocuments({
+      'appointment.date': { $gte: new Date(new Date().toDateString()), $lt: new Date(new Date().toDateString() + 'T23:59:59') }
+    });
+
+    res.json({
+      success: true,
+      data: {
+        totalAssessments,
+        activePlans,
+        activeGroups,
+        pendingReferrals,
+        waitlistCount,
+        todaySchedules
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+module.exports = router;

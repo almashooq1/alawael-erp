@@ -1,0 +1,62 @@
+{
+  "startTime": 1771715450769,
+  "endTime": 1771715451125,
+  "tests": [
+    {
+      "endpoint": "Health Check",
+      "path": "/health",
+      "requests": 50,
+      "successful": 50,
+      "failed": 0,
+      "min": 1,
+      "max": 28,
+      "avg": 5,
+      "median": 4,
+      "p95": 20,
+      "p99": 28,
+      "cacheHitRate": 0
+    },
+    {
+      "endpoint": "Get Users",
+      "path": "/api/v1/users?limit=10",
+      "requests": 50,
+      "successful": 50,
+      "failed": 0,
+      "min": 1,
+      "max": 10,
+      "avg": 4,
+      "median": 4,
+      "p95": 8,
+      "p99": 10,
+      "cacheHitRate": 0
+    },
+    {
+      "endpoint": "Get Departments",
+      "path": "/api/v1/departments",
+      "requests": 50,
+      "successful": 50,
+      "failed": 0,
+      "min": 2,
+      "max": 15,
+      "avg": 5,
+      "median": 4,
+      "p95": 13,
+      "p99": 15,
+      "cacheHitRate": 0
+    },
+    {
+      "endpoint": "Get Reports",
+      "path": "/api/v1/reports?limit=20",
+      "requests": 50,
+      "successful": 50,
+      "failed": 0,
+      "min": 2,
+      "max": 14,
+      "avg": 6,
+      "median": 5,
+      "p95": 11,
+      "p99": 14,
+      "cacheHitRate": 0
+    }
+  ]
+}

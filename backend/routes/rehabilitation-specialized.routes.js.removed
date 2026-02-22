@@ -1,0 +1,601 @@
+/**
+ * Specialized Rehabilitation Center Routes
+ * مسارات الأنظمة المتخصصة لمراكز التأهيل
+ * @version 4.0.0
+ */
+
+const express = require('express');
+const router = express.Router();
+const authMiddleware = require('../middleware/advancedAuth');
+
+const {
+  Transportation,
+  InsuranceClaim,
+  BillingRecord,
+  Volunteer,
+  Donation,
+  ResidentialUnit,
+  Activity,
+  Document,
+  Event,
+  ClinicalNote
+} = require('../models/rehabilitation-specialized.model');
+
+// ============================================
+// 1. إدارة النقل والمواصلات
+// ============================================
+
+router.get('/transportation/vehicles', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const { status, type } = req.query;
+    const filter = { is_active: true };
+    if (status) filter['availability.status'] = status;
+    if (type) filter['vehicle_info.vehicle_type'] = type;
+
+    const vehicles = await Transportation.find(filter)
+      .populate('driver.driver_id', 'name phone')
+      .sort({ 'vehicle_info.plate_number': 1 });
+    res.json({ success: true, data: vehicles });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/transportation/vehicles', authMiddleware.authenticate, authMiddleware.requireRole(['admin', 'logistics']), async (req, res) => {
+  try {
+    const vehicle = new Transportation(req.body);
+    await vehicle.save();
+    res.status(201).json({ success: true, data: vehicle, message: 'تم إضافة المركبة' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/transportation/vehicles/:id/trip', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const vehicle = await Transportation.findById(req.params.id);
+    if (!vehicle) return res.status(404).json({ success: false, message: 'المركبة غير موجودة' });
+
+    vehicle.trip_logs.push({ ...req.body, trip_date: new Date() });
+    await vehicle.save();
+    res.json({ success: true, data: vehicle, message: 'تم تسجيل الرحلة' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// 2. التأمين والفوترة
+// ============================================
+
+router.get('/insurance/claims', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const { beneficiary_id, status } = req.query;
+    const filter = {};
+    if (beneficiary_id) filter.beneficiary_id = beneficiary_id;
+    if (status) filter['status.current_status'] = status;
+
+    const claims = await InsuranceClaim.find(filter)
+      .populate('beneficiary_id', 'name national_id')
+      .sort({ createdAt: -1 });
+    res.json({ success: true, data: claims });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/insurance/claims', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const claim = new InsuranceClaim({ ...req.body, submitted_by: req.user._id });
+    await claim.save();
+    res.status(201).json({ success: true, data: claim, message: 'تم إنشاء مطالبة التأمين' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.put('/insurance/claims/:id/status', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const claim = await InsuranceClaim.findById(req.params.id);
+    if (!claim) return res.status(404).json({ success: false, message: 'المطالبة غير موجودة' });
+
+    claim.status.current_status = req.body.status;
+    claim.status.status_history.push({
+      status: req.body.status,
+      notes: req.body.notes,
+      updated_by: req.user._id
+    });
+    await claim.save();
+    res.json({ success: true, data: claim, message: 'تم تحديث حالة المطالبة' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.get('/billing/invoices', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const { beneficiary_id, status } = req.query;
+    const filter = {};
+    if (beneficiary_id) filter.beneficiary_id = beneficiary_id;
+    if (status) filter.status = status;
+
+    const invoices = await BillingRecord.find(filter)
+      .populate('beneficiary_id', 'name national_id')
+      .sort({ createdAt: -1 });
+    res.json({ success: true, data: invoices });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/billing/invoices', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const invoice = new BillingRecord({ ...req.body, created_by: req.user._id });
+    await invoice.save();
+    res.status(201).json({ success: true, data: invoice, message: 'تم إنشاء الفاتورة' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/billing/invoices/:id/payment', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const invoice = await BillingRecord.findById(req.params.id);
+    if (!invoice) return res.status(404).json({ success: false, message: 'الفاتورة غير موجودة' });
+
+    invoice.payments.push({ ...req.body, received_by: req.user._id });
+    invoice.summary.amount_paid = (invoice.summary.amount_paid || 0) + req.body.amount;
+    invoice.summary.balance_due = invoice.summary.total_amount - invoice.summary.amount_paid;
+
+    if (invoice.summary.balance_due <= 0) {
+      invoice.status = 'paid';
+    } else if (invoice.summary.amount_paid > 0) {
+      invoice.status = 'partial';
+    }
+
+    await invoice.save();
+    res.json({ success: true, data: invoice, message: 'تم تسجيل الدفعة' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// 3. إدارة المتطوعين
+// ============================================
+
+router.get('/volunteers', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const { status, department } = req.query;
+    const filter = {};
+    if (status) filter.status = status;
+
+    const volunteers = await Volunteer.find(filter)
+      .populate('assignments.supervisor', 'name')
+      .sort({ 'personal_info.full_name': 1 });
+    res.json({ success: true, data: volunteers });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/volunteers', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const volunteer = new Volunteer(req.body);
+    await volunteer.save();
+    res.status(201).json({ success: true, data: volunteer, message: 'تم تسجيل المتطوع' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/volunteers/:id/hours', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const volunteer = await Volunteer.findById(req.params.id);
+    if (!volunteer) return res.status(404).json({ success: false, message: 'المتطوع غير موجود' });
+
+    volunteer.hours_log.push({ ...req.body, date: new Date() });
+    await volunteer.save();
+    res.json({ success: true, data: volunteer, message: 'تم تسجيل ساعات التطوع' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.put('/volunteers/:id/status', authMiddleware.authenticate, authMiddleware.requireRole(['admin', 'hr']), async (req, res) => {
+  try {
+    const volunteer = await Volunteer.findById(req.params.id);
+    if (!volunteer) return res.status(404).json({ success: false, message: 'المتطوع غير موجود' });
+
+    volunteer.status = req.body.status;
+    await volunteer.save();
+    res.json({ success: true, data: volunteer, message: 'تم تحديث حالة المتطوع' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// 4. التبرعات والكفالات
+// ============================================
+
+router.get('/donations', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const { status, type, page = 1, limit = 20 } = req.query;
+    const filter = {};
+    if (status) filter.status = status;
+    if (type) filter['donation_details.donation_type'] = type;
+
+    const donations = await Donation.find(filter)
+      .sort({ 'donation_details.donation_date': -1 })
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit));
+
+    const total = await Donation.countDocuments(filter);
+    res.json({ success: true, data: donations, pagination: { total, page: parseInt(page), pages: Math.ceil(total / limit) } });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/donations', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const donation = new Donation({ ...req.body, received_by: req.user._id });
+    await donation.save();
+    res.status(201).json({ success: true, data: donation, message: 'تم تسجيل التبرع' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.get('/donations/statistics', authMiddleware.authenticate, authMiddleware.requireRole(['admin', 'finance']), async (req, res) => {
+  try {
+    const totalDonations = await Donation.aggregate([
+      { $match: { status: 'received' } },
+      { $group: { _id: null, total: { $sum: '$donation_details.amount' }, count: { $sum: 1 } } }
+    ]);
+
+    const monthlyDonations = await Donation.aggregate([
+      { $match: { status: 'received' } },
+      {
+        $group: {
+          _id: { year: { $year: '$donation_details.donation_date' }, month: { $month: '$donation_details.donation_date' } },
+          total: { $sum: '$donation_details.amount' },
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { '_id.year': -1, '_id.month': -1 } },
+      { $limit: 12 }
+    ]);
+
+    res.json({ success: true, data: { total: totalDonations[0] || { total: 0, count: 0 }, monthly: monthlyDonations } });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// 5. الإقامة الداخلية
+// ============================================
+
+router.get('/residential/units', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const { type, gender } = req.query;
+    const filter = { is_active: true };
+    if (type) filter['unit_info.unit_type'] = type;
+    if (gender) filter['unit_info.gender'] = gender;
+
+    const units = await ResidentialUnit.find(filter)
+      .populate('residents.beneficiary_id', 'name')
+      .populate('care_team.staff_id', 'name')
+      .sort({ 'unit_info.unit_name': 1 });
+    res.json({ success: true, data: units });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/residential/units', authMiddleware.authenticate, authMiddleware.requireRole(['admin', 'residential']), async (req, res) => {
+  try {
+    const unit = new ResidentialUnit(req.body);
+    await unit.save();
+    res.status(201).json({ success: true, data: unit, message: 'تم إضافة وحدة الإقامة' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/residential/units/:id/admit', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const unit = await ResidentialUnit.findById(req.params.id);
+    if (!unit) return res.status(404).json({ success: false, message: 'الوحدة غير موجودة' });
+
+    if (unit.unit_info.current_occupancy >= unit.unit_info.capacity) {
+      return res.status(400).json({ success: false, message: 'الوحدة مكتملة' });
+    }
+
+    unit.residents.push({ ...req.body, admission_date: new Date() });
+    unit.unit_info.current_occupancy += 1;
+    await unit.save();
+    res.json({ success: true, data: unit, message: 'تم إسكان المقيم' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// 6. الأنشطة الترفيهية والتربوية
+// ============================================
+
+router.get('/activities', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const { status, category } = req.query;
+    const filter = {};
+    if (status) filter.status = status;
+    if (category) filter['activity_info.category'] = category;
+
+    const activities = await Activity.find(filter)
+      .populate('participants.enrolled_beneficiaries', 'name')
+      .sort({ 'schedule.start_date': 1 });
+    res.json({ success: true, data: activities });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/activities', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const activity = new Activity({ ...req.body, created_by: req.user._id });
+    await activity.save();
+    res.status(201).json({ success: true, data: activity, message: 'تم إنشاء النشاط' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/activities/:id/enroll', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const activity = await Activity.findById(req.params.id);
+    if (!activity) return res.status(404).json({ success: false, message: 'النشاط غير موجود' });
+
+    if (activity.participants.current_participants >= activity.participants.max_participants) {
+      activity.participants.waiting_list.push(req.body.beneficiary_id);
+      await activity.save();
+      return res.json({ success: true, data: activity, message: 'تم الإضافة لقائمة الانتظار' });
+    }
+
+    activity.participants.enrolled_beneficiaries.push(req.body.beneficiary_id);
+    activity.participants.current_participants += 1;
+    await activity.save();
+    res.json({ success: true, data: activity, message: 'تم التسجيل في النشاط' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/activities/:id/session', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const activity = await Activity.findById(req.params.id);
+    if (!activity) return res.status(404).json({ success: false, message: 'النشاط غير موجود' });
+
+    activity.sessions_log.push({ ...req.body, session_date: new Date() });
+    await activity.save();
+    res.json({ success: true, data: activity, message: 'تم تسجيل الجلسة' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// 7. التوثيق والأرشفة
+// ============================================
+
+router.get('/documents', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const { type, entity_type, entity_id } = req.query;
+    const filter = {};
+    if (type) filter['document_info.document_type'] = type;
+    if (entity_type) filter['related_to.entity_type'] = entity_type;
+    if (entity_id) filter['related_to.entity_id'] = entity_id;
+
+    const documents = await Document.find(filter)
+      .populate('uploaded_by', 'name')
+      .sort({ createdAt: -1 });
+    res.json({ success: true, data: documents });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/documents', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const document = new Document({ ...req.body, uploaded_by: req.user._id });
+    await document.save();
+    res.status(201).json({ success: true, data: document, message: 'تم رفع المستند' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/documents/:id/access', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const document = await Document.findById(req.params.id);
+    if (!document) return res.status(404).json({ success: false, message: 'المستند غير موجود' });
+
+    document.access_log.push({
+      user_id: req.user._id,
+      access_type: req.body.access_type,
+      ip_address: req.ip
+    });
+    await document.save();
+    res.json({ success: true, data: document });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// 8. التقويم والأحداث
+// ============================================
+
+router.get('/events', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const { status, type, start, end } = req.query;
+    const filter = {};
+    if (status) filter.status = status;
+    if (type) filter['event_info.event_type'] = type;
+    if (start && end) {
+      filter['timing.start_datetime'] = { $gte: new Date(start), $lte: new Date(end) };
+    }
+
+    const events = await Event.find(filter)
+      .populate('participants.organizers', 'name')
+      .sort({ 'timing.start_datetime': 1 });
+    res.json({ success: true, data: events });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/events', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const event = new Event({ ...req.body, created_by: req.user._id });
+    await event.save();
+    res.status(201).json({ success: true, data: event, message: 'تم إنشاء الحدث' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/events/:id/respond', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const event = await Event.findById(req.params.id);
+    if (!event) return res.status(404).json({ success: false, message: 'الحدث غير موجود' });
+
+    const attendeeIndex = event.participants.attendees.findIndex(a => a.entity_id.toString() === req.user._id.toString());
+    if (attendeeIndex >= 0) {
+      event.participants.attendees[attendeeIndex].response_status = req.body.response;
+    } else {
+      event.participants.attendees.push({
+        entity_type: 'staff',
+        entity_id: req.user._id,
+        name: req.user.name,
+        response_status: req.body.response
+      });
+    }
+    await event.save();
+    res.json({ success: true, data: event, message: 'تم تسجيل الرد' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// 9. الملاحظات السريرية
+// ============================================
+
+router.get('/clinical-notes', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const { beneficiary_id, type, page = 1, limit = 20 } = req.query;
+    const filter = {};
+    if (beneficiary_id) filter.beneficiary_id = beneficiary_id;
+    if (type) filter['note_info.note_type'] = type;
+
+    const notes = await ClinicalNote.find(filter)
+      .populate('beneficiary_id', 'name national_id')
+      .populate('signatures.therapist.user_id', 'name')
+      .sort({ 'note_info.session_date': -1 })
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit));
+
+    const total = await ClinicalNote.countDocuments(filter);
+    res.json({ success: true, data: notes, pagination: { total, page: parseInt(page), pages: Math.ceil(total / limit) } });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/clinical-notes', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const note = new ClinicalNote({
+      ...req.body,
+      'signatures.therapist': {
+        user_id: req.user._id,
+        name: req.user.name,
+        signature_date: new Date()
+      }
+    });
+    await note.save();
+    res.status(201).json({ success: true, data: note, message: 'تم إنشاء الملاحظة السريرية' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.put('/clinical-notes/:id/review', authMiddleware.authenticate, authMiddleware.requireRole(['supervisor', 'senior_therapist']), async (req, res) => {
+  try {
+    const note = await ClinicalNote.findById(req.params.id);
+    if (!note) return res.status(404).json({ success: false, message: 'الملاحظة غير موجودة' });
+
+    note.signatures.supervisor = {
+      user_id: req.user._id,
+      name: req.user.name,
+      review_date: new Date(),
+      comments: req.body.comments
+    };
+    note.status = 'approved';
+    await note.save();
+    res.json({ success: true, data: note, message: 'تم مراجعة الملاحظة' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// 10. لوحة التحكم الشاملة
+// ============================================
+
+router.get('/dashboard/stats', authMiddleware.authenticate, authMiddleware.requireRole(['admin', 'supervisor']), async (req, res) => {
+  try {
+    const [
+      totalVehicles,
+      pendingClaims,
+      totalRevenue,
+      activeVolunteers,
+      totalDonations,
+      occupiedUnits,
+      activeActivities,
+      upcomingEvents,
+      pendingNotes
+    ] = await Promise.all([
+      Transportation.countDocuments({ is_active: true }),
+      InsuranceClaim.countDocuments({ 'status.current_status': { $in: ['draft', 'submitted', 'under_review'] } }),
+      BillingRecord.aggregate([{ $group: { _id: null, total: { $sum: '$summary.total_amount' } } }]),
+      Volunteer.countDocuments({ status: 'active' }),
+      Donation.aggregate([{ $match: { status: 'received' } }, { $group: { _id: null, total: { $sum: '$donation_details.amount' } } }]),
+      ResidentialUnit.aggregate([{ $group: { _id: null, total: { $sum: '$unit_info.current_occupancy' }, capacity: { $sum: '$unit_info.capacity' } } }]),
+      Activity.countDocuments({ status: 'active' }),
+      Event.countDocuments({ status: 'scheduled', 'timing.start_datetime': { $gte: new Date() } }),
+      ClinicalNote.countDocuments({ status: 'pending_review' })
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        transportation: { totalVehicles },
+        insurance: { pendingClaims },
+        billing: { totalRevenue: totalRevenue[0]?.total || 0 },
+        volunteers: { activeVolunteers },
+        donations: { totalDonations: totalDonations[0]?.total || 0 },
+        residential: { occupied: occupiedUnits[0]?.total || 0, capacity: occupiedUnits[0]?.capacity || 0 },
+        activities: { activeActivities },
+        events: { upcomingEvents },
+        clinical: { pendingNotes }
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+module.exports = router;

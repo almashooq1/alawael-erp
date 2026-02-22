@@ -1,0 +1,171 @@
+name: Deploy to Staging
+
+on:
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'erp_new_system/backend/**'
+      - 'docker-compose.unified.yml'
+      - '.github/workflows/deploy-staging.yml'
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/66666-api
+
+jobs:
+  deploy-staging:
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: https://api-staging.alawael.com
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Wait for Docker build
+      run: sleep 30
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+        aws-region: us-east-1
+      if: ${{ secrets.AWS_ROLE_TO_ASSUME != '' }}
+
+    - name: Setup SSH key
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.STAGING_SSH_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H ${{ secrets.STAGING_HOST }} >> ~/.ssh/known_hosts
+
+    - name: Deploy to Staging Server
+      env:
+        STAGING_USER: ${{ secrets.STAGING_USER }}
+        STAGING_HOST: ${{ secrets.STAGING_HOST }}
+        STAGING_PATH: ${{ secrets.STAGING_PATH }}
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        ssh $STAGING_USER@$STAGING_HOST << 'EOF'
+        set -e
+        echo "Deploying to Staging..."
+        
+        cd ${{ env.STAGING_PATH }}
+        
+        # Pull latest Docker images
+        docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+        
+        # Stop existing containers
+        docker-compose -f docker-compose.unified.yml down || true
+        
+        # Update environment variables
+        cat > .env.staging << 'ENVEOF'
+        MONGODB_URI=${{ secrets.STAGING_MONGODB_URI }}
+        REDIS_URL=${{ secrets.STAGING_REDIS_URL }}
+        JWT_SECRET=${{ secrets.JWT_SECRET }}
+        NODE_ENV=staging
+        CORS_ORIGIN=${{ secrets.STAGING_CORS_ORIGIN }}
+        ENCRYPTION_KEY=${{ secrets.ENCRYPTION_KEY }}
+        ENVEOF
+        
+        # Start new containers
+        docker-compose -f docker-compose.unified.yml up -d
+        
+        # Wait for services to be healthy
+        sleep 10
+        
+        # Health check
+        for i in {1..30}; do
+          if curl -f http://localhost:3000/api/v1/health 2>/dev/null; then
+            echo "✅ API is healthy"
+            exit 0
+          fi
+          echo "Waiting for API... ($i/30)"
+          sleep 2
+        done
+        
+        echo "❌ API health check failed"
+        exit 1
+        EOF
+        ssh $STAGING_USER@$STAGING_HOST "bash -s" < deploy-staging.sh
+
+    - name: Run Smoke Tests
+      env:
+        STAGING_API_URL: https://api-staging.alawael.com
+      run: |
+        npm install -g artillery
+        
+        cat > smoke-test.yml << 'EOF'
+        config:
+          target: "${{ env.STAGING_API_URL }}"
+          phases:
+            - duration: 60
+              arrivalRate: 1
+        scenarios:
+          - name: "Smoke Tests"
+            flow:
+              - get:
+                  url: "/api/v1/health"
+                  expect:
+                    - statusCode: 200
+              - get:
+                  url: "/api/v1/users"
+                  expect:
+                    - statusCode: 200
+              - get:
+                  url: "/api/v1/departments"
+                  expect:
+                    - statusCode: 200
+        EOF
+        
+        artillery run smoke-test.yml --target ${{ env.STAGING_API_URL }}
+
+    - name: Notify Slack - Deployment Success
+      if: success()
+      uses: slackapi/slack-github-action@v1
+      with:
+        payload: |
+          {
+            "text": "✅ Staging Deployment Successful",
+            "blocks": [
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "*Staging Deployment Successful*\n*Commit:* ${{ github.sha }}\n*Author:* ${{ github.actor }}\n*Branch:* ${{ github.ref_name }}"
+                }
+              }
+            ]
+          }
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      if: ${{ secrets.SLACK_WEBHOOK_URL != '' }}
+
+    - name: Notify Slack - Deployment Failed
+      if: failure()
+      uses: slackapi/slack-github-action@v1
+      with:
+        payload: |
+          {
+            "text": "❌ Staging Deployment Failed",
+            "blocks": [
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "*Staging Deployment Failed*\n*Commit:* ${{ github.sha }}\n*Author:* ${{ github.actor }}\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Logs>"
+                }
+              }
+            ]
+          }
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      if: ${{ secrets.SLACK_WEBHOOK_URL != '' }}
+
+    - name: Deployment Status
+      run: |
+        echo "✅ Staging Deployment Completed"
+        echo "Environment: staging"
+        echo "API URL: https://api-staging.alawael.com"

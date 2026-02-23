@@ -11,4 +11,7 @@ module.exports = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   clearMocks: true,
   verbose: false,
+  moduleNameMapper: {
+    '^(\\.{1,2}/.*)/[Nn]otification[Ss]ervice(\\.js)?$': '$1/notificationService.js',
+  },
 };

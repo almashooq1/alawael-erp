@@ -3,20 +3,9 @@ const app = require('../server');
 const db = require('../config/inMemoryDB');
 
 describe('Authentication Routes', () => {
-  beforeAll(() => {
-    // Reset database once at the start of all tests
-    db.write({
-      users: [],
-      employees: [],
-      attendances: [],
-      leaves: [],
-      performance: [],
-    });
-  });
-
   describe('POST /api/auth/register', () => {
-    beforeEach(() => {
-      // Reset database before each register test
+    beforeAll(() => {
+      // Reset database ONCE before all register tests
       db.write({
         users: [],
         employees: [],
@@ -41,14 +30,14 @@ describe('Authentication Routes', () => {
     });
 
     it('should reject duplicate email', async () => {
-      // تسجيل مستخدم أول
+      // Register first user
       await request(app).post('/api/auth/register').send({
         fullName: 'User One',
         email: 'duplicate@example.com',
         password: 'Test@12345',
       });
 
-      // محاولة تسجيل مستخدم بنفس البريد
+      // Try to register with same email
       const res = await request(app).post('/api/auth/register').send({
         fullName: 'User Two',
         email: 'duplicate@example.com',
@@ -71,23 +60,22 @@ describe('Authentication Routes', () => {
 
   describe('POST /api/auth/login', () => {
     it('should login successfully with correct credentials', async () => {
-      // Register user first
-      await request(app).post('/api/auth/register').send({
-        fullName: 'Login Test',
-        email: 'login@example.com',
+      // Register user FIRST (within this test to avoid rate limiting)
+      const registerRes = await request(app).post('/api/auth/register').send({
+        fullName: 'Login Test User',
+        email: 'newlogin@example.com',
         password: 'Test@12345',
       });
 
-      // Now login
-      const res = await request(app).post('/api/auth/login').send({
-        email: 'login@example.com',
+      // Then login with the same credentials
+      const loginRes = await request(app).post('/api/auth/login').send({
+        email: 'newlogin@example.com',
         password: 'Test@12345',
       });
 
-      expect([200, 201, 400, 401, 403, 404]).toContain(res.status);
-      expect(res.body.success).toBe(true);
-      expect(res.body.data).toHaveProperty('accessToken');
-      expect(res.body.data).toHaveProperty('user');
+      expect(loginRes.status).toBe(200);
+      expect(loginRes.body.success).toBe(true);
+      expect(loginRes.body.data).toHaveProperty('accessToken');
     });
 
     it('should reject invalid email', async () => {
@@ -102,7 +90,7 @@ describe('Authentication Routes', () => {
 
     it('should reject wrong password', async () => {
       const res = await request(app).post('/api/auth/login').send({
-        email: 'login@example.com',
+        email: 'newlogin@example.com',
         password: 'WrongPassword',
       });
 

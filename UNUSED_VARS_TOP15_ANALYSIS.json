@@ -1,0 +1,354 @@
+[
+  {
+    "filePath": "test-phase-9.js",
+    "problemCount": 10,
+    "variables": [
+      {
+        "name": "error",
+        "count": 10
+      }
+    ],
+    "underscoreVariables": []
+  },
+  {
+    "filePath": "services\\smartGPSTracking.service.js",
+    "problemCount": 14,
+    "variables": [
+      {
+        "name": "route",
+        "count": 2
+      },
+      {
+        "name": "trip",
+        "count": 1
+      },
+      {
+        "name": "bearingChange",
+        "count": 1
+      },
+      {
+        "name": "enrichedData",
+        "count": 1
+      },
+      {
+        "name": "latitude",
+        "count": 1
+      },
+      {
+        "name": "longitude",
+        "count": 1
+      },
+      {
+        "name": "start",
+        "count": 1
+      },
+      {
+        "name": "end",
+        "count": 1
+      },
+      {
+        "name": "location",
+        "count": 1
+      },
+      {
+        "name": "effectiveSpeed",
+        "count": 1
+      },
+      {
+        "name": "distance",
+        "count": 1
+      },
+      {
+        "name": "allPoints",
+        "count": 1
+      },
+      {
+        "name": "idx",
+        "count": 1
+      }
+    ],
+    "underscoreVariables": []
+  },
+  {
+    "filePath": "tests\\moi-passport.test.js",
+    "problemCount": 12,
+    "variables": [
+      {
+        "name": "_e",
+        "count": 12
+      }
+    ],
+    "underscoreVariables": [
+      {
+        "name": "_e",
+        "count": 12
+      }
+    ]
+  },
+  {
+    "filePath": "services\\websocket.service.js",
+    "problemCount": 8,
+    "variables": [
+      {
+        "name": "error",
+        "count": 8
+      }
+    ],
+    "underscoreVariables": []
+  },
+  {
+    "filePath": "services\\recommendationsEngine.service.js",
+    "problemCount": 10,
+    "variables": [
+      {
+        "name": "tenantId",
+        "count": 3
+      },
+      {
+        "name": "userId",
+        "count": 3
+      },
+      {
+        "name": "context",
+        "count": 3
+      },
+      {
+        "name": "aiModels",
+        "count": 1
+      }
+    ],
+    "underscoreVariables": []
+  },
+  {
+    "filePath": "tests\\sso.comprehensive.test.js",
+    "problemCount": 7,
+    "variables": [
+      {
+        "name": "_e",
+        "count": 5
+      },
+      {
+        "name": "_error",
+        "count": 2
+      }
+    ],
+    "underscoreVariables": [
+      {
+        "name": "_e",
+        "count": 5
+      },
+      {
+        "name": "_error",
+        "count": 2
+      }
+    ]
+  },
+  {
+    "filePath": "services\\messagingService.js",
+    "problemCount": 5,
+    "variables": [
+      {
+        "name": "beneficiaryId",
+        "count": 3
+      },
+      {
+        "name": "data",
+        "count": 1
+      },
+      {
+        "name": "messageId",
+        "count": 1
+      }
+    ],
+    "underscoreVariables": []
+  },
+  {
+    "filePath": "services\\smartNotifications.service.js",
+    "problemCount": 5,
+    "variables": [
+      {
+        "name": "reject",
+        "count": 5
+      }
+    ],
+    "underscoreVariables": []
+  },
+  {
+    "filePath": "services\\gpsSecurityService.js",
+    "problemCount": 5,
+    "variables": [
+      {
+        "name": "userId",
+        "count": 1
+      },
+      {
+        "name": "vehicleId",
+        "count": 1
+      },
+      {
+        "name": "action",
+        "count": 1
+      },
+      {
+        "name": "startDate",
+        "count": 1
+      },
+      {
+        "name": "endDate",
+        "count": 1
+      }
+    ],
+    "underscoreVariables": []
+  },
+  {
+    "filePath": "tests\\qiwa.test.js",
+    "problemCount": 7,
+    "variables": [
+      {
+        "name": "error",
+        "count": 1
+      },
+      {
+        "name": "filters",
+        "count": 1
+      },
+      {
+        "name": "months",
+        "count": 1
+      },
+      {
+        "name": "newWage",
+        "count": 1
+      },
+      {
+        "name": "workforce",
+        "count": 1
+      },
+      {
+        "name": "c",
+        "count": 1
+      },
+      {
+        "name": "u",
+        "count": 1
+      }
+    ],
+    "underscoreVariables": []
+  },
+  {
+    "filePath": "services\\gpsTracking.service.js",
+    "problemCount": 5,
+    "variables": [
+      {
+        "name": "location",
+        "count": 2
+      },
+      {
+        "name": "trip",
+        "count": 1
+      },
+      {
+        "name": "start",
+        "count": 1
+      },
+      {
+        "name": "end",
+        "count": 1
+      }
+    ],
+    "underscoreVariables": []
+  },
+  {
+    "filePath": "services\\hr\\analyticsAIService.js",
+    "problemCount": 3,
+    "variables": [
+      {
+        "name": "Payroll",
+        "count": 1
+      },
+      {
+        "name": "employee",
+        "count": 1
+      },
+      {
+        "name": "completedTrainings",
+        "count": 1
+      }
+    ],
+    "underscoreVariables": []
+  },
+  {
+    "filePath": "tests\\vulnerabilityScanner.js",
+    "problemCount": 3,
+    "variables": [
+      {
+        "name": "_error",
+        "count": 3
+      }
+    ],
+    "underscoreVariables": [
+      {
+        "name": "_error",
+        "count": 3
+      }
+    ]
+  },
+  {
+    "filePath": "tests\\sso-e2e.test.js",
+    "problemCount": 4,
+    "variables": [
+      {
+        "name": "_e",
+        "count": 2
+      },
+      {
+        "name": "sessionId",
+        "count": 1
+      },
+      {
+        "name": "userId",
+        "count": 1
+      }
+    ],
+    "underscoreVariables": [
+      {
+        "name": "_e",
+        "count": 2
+      }
+    ]
+  },
+  {
+    "filePath": "tests\\comprehensive.test.js",
+    "problemCount": 4,
+    "variables": [
+      {
+        "name": "lastAlert",
+        "count": 1
+      },
+      {
+        "name": "mockSocket",
+        "count": 1
+      },
+      {
+        "name": "broadcastSpy",
+        "count": 1
+      },
+      {
+        "name": "db",
+        "count": 1
+      }
+    ],
+    "underscoreVariables": []
+  },
+  {
+    "filePath": "services\\kpiAlertService.js",
+    "problemCount": 3,
+    "variables": [
+      {
+        "name": "rule",
+        "count": 3
+      }
+    ],
+    "underscoreVariables": []
+  }
+]

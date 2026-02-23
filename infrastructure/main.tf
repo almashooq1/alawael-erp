@@ -1,43 +1,62 @@
-# Terraform - Azure Infrastructure as Code
-# نظام إدارة الجلسات العلاجية - البنية التحتية على أكسيوم
+/**
+ * Terraform Configuration for Alawael ERP
+ * Azure Infrastructure as Code
+ */
+
+# ==================== Provider Configuration ====================
 
 terraform {
-  required_version = ">= 1.0"
-
+  required_version = ">= 1.0.0"
+  
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
       version = "~> 3.0"
     }
-    kubernetes = {
-      source  = "hashicorp/kubernetes"
-      version = "~> 2.0"
-    }
-    helm = {
-      source  = "hashicorp/helm"
+    azuread = {
+      source  = "hashicorp/azuread"
       version = "~> 2.0"
     }
   }
-
+  
   backend "azurerm" {
-    resource_group_name  = "therapy-terraform"
-    storage_account_name = "therapytfstate"
+    resource_group_name  = "alawael-terraform-state"
+    storage_account_name = "alawaeltfstate"
     container_name       = "tfstate"
-    key                  = "prod.tfstate"
+    key                  = "alawael-erp.tfstate"
   }
 }
 
 provider "azurerm" {
   features {
     key_vault {
-      purge_soft_delete_on_destroy = false
+      purge_soft_delete_on_destroy    = false
+      recover_soft_deleted_key_vaults = true
+    }
+    resource_group {
+      prevent_deletion_if_contains_resources = true
     }
   }
+  
+  subscription_id = var.subscription_id
+  tenant_id       = var.tenant_id
 }
 
-# ============================================================================
-# VARIABLES
-# ============================================================================
+provider "azuread" {
+  tenant_id = var.tenant_id
+}
+
+# ==================== Variables ====================
+
+variable "subscription_id" {
+  description = "Azure Subscription ID"
+  type        = string
+}
+
+variable "tenant_id" {
+  description = "Azure Tenant ID"
+  type        = string
+}
 
 variable "environment" {
   description = "Environment name"
@@ -45,469 +64,313 @@ variable "environment" {
   default     = "production"
 }
 
-variable "region" {
+variable "location" {
   description = "Azure region"
   type        = string
-  default     = "eastus"
+  default     = "Saudi Arabia Central"
 }
 
-variable "project_name" {
-  description = "Project name"
+variable "resource_group_name" {
+  description = "Resource group name"
   type        = string
-  default     = "therapy"
+  default     = "alawael-erp-rg"
 }
 
-variable "kubernetes_version" {
-  description = "Kubernetes version"
-  type        = string
-  default     = "1.27.0"
+variable "tags" {
+  description = "Common tags for all resources"
+  type        = map(string)
+  default = {
+    Project     = "Alawael-ERP"
+    ManagedBy   = "Terraform"
+    Environment = "production"
+  }
 }
 
-variable "node_count" {
-  description = "Number of AKS nodes"
-  type        = number
-  default     = 3
-}
-
-variable "vm_size" {
-  description = "VM size for AKS nodes"
-  type        = string
-  default     = "Standard_D4s_v3"  # 4 CPU, 16GB RAM
-}
-
-# ============================================================================
-# RESOURCE GROUP
-# ============================================================================
+# ==================== Resource Group ====================
 
 resource "azurerm_resource_group" "main" {
-  name     = "${var.project_name}-${var.environment}"
-  location = var.region
+  name     = var.resource_group_name
+  location = var.location
+  tags     = var.tags
+}
 
-  tags = {
-    Environment = var.environment
-    ManagedBy   = "Terraform"
-    Project     = var.project_name
+# ==================== Virtual Network ====================
+
+resource "azurerm_virtual_network" "main" {
+  name                = "alawael-vnet"
+  address_space       = ["10.0.0.0/16"]
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+  tags                = var.tags
+}
+
+resource "azurerm_subnet" "app" {
+  name                 = "app-subnet"
+  resource_group_name  = azurerm_resource_group.main.name
+  virtual_network_name = azurerm_virtual_network.main.name
+  address_prefixes     = ["10.0.1.0/24"]
+  
+  delegation {
+    name = "app-service-delegation"
+    service_delegation {
+      name    = "Microsoft.Web/serverFarms"
+      actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
+    }
   }
 }
 
-# ============================================================================
-# CONTAINER REGISTRY
-# ============================================================================
+resource "azurerm_subnet" "database" {
+  name                 = "database-subnet"
+  resource_group_name  = azurerm_resource_group.main.name
+  virtual_network_name = azurerm_virtual_network.main.name
+  address_prefixes     = ["10.0.2.0/24"]
+  
+  delegation {
+    name = "database-delegation"
+    service_delegation {
+      name    = "Microsoft.DBforPostgreSQL/flexibleServers"
+      actions = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
+    }
+  }
+}
+
+resource "azurerm_subnet" "redis" {
+  name                 = "redis-subnet"
+  resource_group_name  = azurerm_resource_group.main.name
+  virtual_network_name = azurerm_virtual_network.main.name
+  address_prefixes     = ["10.0.3.0/24"]
+  
+  delegation {
+    name = "redis-delegation"
+    service_delegation {
+      name    = "Microsoft.Cache/redis"
+      actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
+    }
+  }
+}
+
+# ==================== Azure Container Registry ====================
 
 resource "azurerm_container_registry" "main" {
-  name                = "${var.project_name}registry${var.environment}"
+  name                = "alawaelacr"
   resource_group_name = azurerm_resource_group.main.name
   location            = azurerm_resource_group.main.location
+  sku                 = "Premium"
   admin_enabled       = true
-  sku                 = "Standard"
-
-  tags = {
-    Environment = var.environment
-  }
+  tags                = var.tags
 }
 
-# ============================================================================
-# KUBERNETES CLUSTER
-# ============================================================================
+# ==================== Azure Kubernetes Service ====================
 
 resource "azurerm_kubernetes_cluster" "main" {
-  name                = "${var.project_name}-cluster-${var.environment}"
+  name                = "alawael-aks"
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
-  dns_prefix          = "${var.project_name}-${var.environment}"
-  kubernetes_version  = var.kubernetes_version
-
-  # Default node pool
+  dns_prefix          = "alawael"
+  kubernetes_version  = "1.27"
+  
   default_node_pool {
-    name       = "default"
-    node_count = var.node_count
-    vm_size    = var.vm_size
-
-    health_probe_type            = "VHD"
-    enable_host_encryption       = true
-    enable_node_public_ip        = false
-    only_critical_addons_enabled = false
-
-    upgrade_settings {
-      drain_timeout_in_minutes      = 30
-      max_surge                     = "33%"
-      node_soak_duration_in_minutes = 0
-    }
-
-    zones = ["1", "2", "3"]  # Multi-AZ deployment
+    name                = "default"
+    node_count          = 3
+    vm_size             = "Standard_D4s_v3"
+    vnet_subnet_id      = azurerm_subnet.app.id
+    enable_auto_scaling = true
+    min_count           = 2
+    max_count           = 10
   }
-
-  # Managed identity
+  
   identity {
     type = "SystemAssigned"
   }
-
-  # Network
+  
   network_profile {
-    network_plugin    = "azure"
-    network_policy    = "azure"
-    service_cidr      = "10.0.0.0/16"
-    dns_service_ip    = "10.0.0.10"
-    docker_bridge_cidr = "172.17.0.1/16"
-    load_balancer_sku = "standard"
+    network_plugin     = "azure"
+    network_policy     = "calico"
+    dns_service_ip     = "10.0.100.10"
+    service_cidr       = "10.0.100.0/24"
+    load_balancer_sku  = "standard"
+    outbound_type      = "loadBalancer"
   }
-
-  # RBAC
-  role_based_access_control_enabled = true
+  
+  oms_agent {
+    log_analytics_workspace_id = azurerm_log_analytics_workspace.main.id
+  }
+  
   azure_active_directory_role_based_access_control {
     managed                = true
-    admin_group_object_ids = []  # Set via terraform.tfvars
+    azure_rbac_enabled     = true
   }
-
-  # Monitoring
-  monitor_metrics {
-    annotations_allowed = "app.terraform.io/*"
-    labels_allowed      = "app.terraform.io/*"
-  }
-
-  # Add-ons
-  addon_profile {
-    aci_connector_linux {
-      enabled = false
-    }
-    azure_policy {
-      enabled = true
-    }
-    http_application_routing {
-      enabled = false
-    }
-    ingress_application_gateway {
-      enabled = false
-    }
-    kube_dashboard {
-      enabled = false
-    }
-    oms_agent {
-      enabled                    = true
-      log_analytics_workspace_id = azurerm_log_analytics_workspace.main.id
-    }
-  }
-
-  tags = {
-    Environment = var.environment
-  }
-
-  depends_on = [
-    azurerm_resource_group.main
-  ]
+  
+  tags = var.tags
 }
 
-# Autoscaler
-resource "azurerm_kubernetes_cluster_node_pool" "compute" {
-  name                  = "compute"
-  kubernetes_cluster_id = azurerm_kubernetes_cluster.main.id
-  vm_size               = var.vm_size
-  node_count            = 2
+# ==================== Azure PostgreSQL ====================
 
-  enable_auto_scaling = true
-  min_count           = 2
-  max_count           = 20
-
-  enable_node_public_ip = false
-  zones                 = ["1", "2", "3"]
-
-  labels = {
-    workload = "compute"
+resource "azurerm_postgresql_flexible_server" "main" {
+  name                   = "alawael-pgsql"
+  resource_group_name    = azurerm_resource_group.main.name
+  location               = azurerm_resource_group.main.location
+  version                = "14"
+  administrator_login    = "pgadmin"
+  administrator_password = var.db_password
+  sku_name               = "GP_Standard_D4s_v3"
+  storage_mb             = 131072
+  backup_retention_days  = 30
+  geo_redundant_backup_enabled = true
+  
+  high_aviability {
+    mode = "ZoneRedundant"
   }
-
-  tags = {
-    Environment = var.environment
+  
+  maintenance_window {
+    day_of_week  = 0
+    start_hour   = 3
+    start_minute = 0
   }
+  
+  tags = var.tags
 }
 
-# ============================================================================
-# MONGODB (COSMOSDB)
-# ============================================================================
-
-resource "azurerm_cosmosdb_account" "mongodb" {
-  name                = "${var.project_name}-mongodb-${var.environment}"
-  location            = azurerm_resource_group.main.location
-  resource_group_name = azurerm_resource_group.main.name
-  offer_type          = "Standard"
-  kind                = "MongoDB"
-
-  consistency_policy {
-    consistency_level       = "Session"
-    max_interval_in_seconds = 5
-    max_staleness_prefix    = 100
-  }
-
-  geo_location {
-    location          = azurerm_resource_group.main.location
-    failover_priority = 0
-  }
-
-  # Backup
-  backup {
-    type                = "Continuous"
-    interval_in_minutes = 60
-    retention_in_hours  = 2160  # 90 days
-  }
-
-  # Security
-  public_network_access_enabled = false
-  ip_range_filter              = ""  # Private endpoint only
-
-  tags = {
-    Environment = var.environment
-  }
+resource "azurerm_postgresql_flexible_server_database" "erp" {
+  name      = "alawael_erp"
+  server_id = azurerm_postgresql_flexible_server.main.id
+  collation = "en_US.utf8"
+  charset   = "UTF8"
 }
 
-resource "azurerm_cosmosdb_mongo_database" "therapy" {
-  name                = "therapy"
-  resource_group_name = azurerm_resource_group.main.name
-  account_name        = azurerm_cosmosdb_account.mongodb.name
-  throughput          = 400  # RU/s
-}
-
-# Collections
-resource "azurerm_cosmosdb_mongo_collection" "sessions" {
-  name                = "therapeutic_sessions"
-  resource_group_name = azurerm_resource_group.main.name
-  account_name        = azurerm_cosmosdb_account.mongodb.name
-  database_name       = azurerm_cosmosdb_mongo_database.therapy.name
-
-  index {
-    keys   = ["_id"]
-    unique = true
-  }
-
-  index {
-    keys = ["therapist_id", "date"]
-  }
-
-  index {
-    keys = ["patient_id", "status"]
-  }
-}
-
-# ============================================================================
-# REDIS CACHE
-# ============================================================================
+# ==================== Azure Redis Cache ====================
 
 resource "azurerm_redis_cache" "main" {
-  name                = "${var.project_name}-redis-${var.environment}"
-  location            = azurerm_resource_group.main.location
-  resource_group_name = azurerm_resource_group.main.name
-  capacity            = 2
-  family              = "P"  # Premium for cluster support
-  sku_name            = "Premium"
-
-  minimum_tls_version = "1.2"
-  enable_non_ssl_port = false
+  name                          = "alawael-redis"
+  location                      = azurerm_resource_group.main.location
+  resource_group_name           = azurerm_resource_group.main.name
+  capacity                      = 2
+  family                        = "C"
+  sku_name                      = "Standard"
+  enable_non_ssl_port           = false
+  minimum_tls_version           = "1.2"
   public_network_access_enabled = false
-
+  
   redis_configuration {
-    enable_authentication = true
-    maxmemory_policy      = "allkeys-lru"
+    maxmemory_policy = "volatile-lru"
   }
-
-  tags = {
-    Environment = var.environment
-  }
+  
+  tags = var.tags
 }
 
-# ============================================================================
-# STORAGE ACCOUNT (BACKUPS)
-# ============================================================================
-
-resource "azurerm_storage_account" "backups" {
-  name                     = "${var.project_name}backups${var.environment}"
-  resource_group_name      = azurerm_resource_group.main.name
-  location                 = azurerm_resource_group.main.location
-  account_tier             = "Standard"
-  account_replication_type = "GRS"  # Geo-redundant
-
-  https_traffic_only_enabled       = true
-  min_tls_version                  = "TLS1_2"
-  public_network_access_enabled    = false
-  shared_access_key_enabled        = true
-
-  tags = {
-    Environment = var.environment
-  }
-}
-
-resource "azurerm_storage_container" "backups" {
-  name                  = "database-backups"
-  storage_account_name  = azurerm_storage_account.backups.name
-  container_access_type = "private"
-}
-
-# ============================================================================
-# KEY VAULT
-# ============================================================================
-
-resource "azurerm_key_vault" "main" {
-  name                        = "${var.project_name}-kv-${var.environment}"
-  location                    = azurerm_resource_group.main.location
-  resource_group_name         = azurerm_resource_group.main.name
-  tenant_id                   = data.azurerm_client_config.current.tenant_id
-  sku_name                    = "standard"
-  enabled_for_disk_encryption = true
-  enable_rbac_authorization   = true
-  purge_protection_enabled    = true
-
-  network_acls {
-    bypass           = "AzureServices"
-    default_action   = "Deny"
-  }
-
-  tags = {
-    Environment = var.environment
-  }
-}
-
-# DB Credentials
-resource "azurerm_key_vault_secret" "mongodb_uri" {
-  name         = "mongodb-uri"
-  value        = "mongodb+srv://${azurerm_cosmosdb_account.mongodb.name}:${random_password.mongodb.result}@${azurerm_cosmosdb_account.mongodb.endpoint}"
-  key_vault_id = azurerm_key_vault.main.id
-}
-
-resource "azurerm_key_vault_secret" "redis_auth" {
-  name         = "redis-auth"
-  value        = azurerm_redis_cache.main.primary_access_key
-  key_vault_id = azurerm_key_vault.main.id
-}
-
-# ============================================================================
-# LOG ANALYTICS
-# ============================================================================
-
-resource "azurerm_log_analytics_workspace" "main" {
-  name                = "${var.project_name}-logs-${var.environment}"
-  location            = azurerm_resource_group.main.location
-  resource_group_name = azurerm_resource_group.main.name
-  sku                 = "PerGB2018"
-  retention_in_days   = 30
-
-  tags = {
-    Environment = var.environment
-  }
-}
-
-# ============================================================================
-# APPLICATION INSIGHTS
-# ============================================================================
-
-resource "azurerm_application_insights" "main" {
-  name                = "${var.project_name}-appi-${var.environment}"
-  location            = azurerm_resource_group.main.location
-  resource_group_name = azurerm_resource_group.main.name
-  application_type    = "web"
-  workspace_id        = azurerm_log_analytics_workspace.main.id
-
-  tags = {
-    Environment = var.environment
-  }
-}
-
-# ============================================================================
-# VIRTUAL NETWORK & SECURITY
-# ============================================================================
-
-resource "azurerm_virtual_network" "main" {
-  name                = "${var.project_name}-vnet-${var.environment}"
-  address_space       = ["10.1.0.0/16"]
-  location            = azurerm_resource_group.main.location
-  resource_group_name = azurerm_resource_group.main.name
-
-  tags = {
-    Environment = var.environment
-  }
-}
-
-resource "azurerm_subnet" "aks" {
-  name                 = "aks-subnet"
-  resource_group_name  = azurerm_resource_group.main.name
-  virtual_network_name = azurerm_virtual_network.main.name
-  address_prefixes     = ["10.1.0.0/22"]
-}
-
-resource "azurerm_network_security_group" "aks" {
-  name                = "${var.project_name}-nsg-${var.environment}"
-  location            = azurerm_resource_group.main.location
-  resource_group_name = azurerm_resource_group.main.name
-
-  security_rule {
-    name                       = "AllowHTTPS"
-    priority                   = 100
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "443"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
-  }
-
-  tags = {
-    Environment = var.environment
-  }
-}
-
-# ============================================================================
-# DATA SOURCES
-# ============================================================================
+# ==================== Azure Key Vault ====================
 
 data "azurerm_client_config" "current" {}
 
-# ============================================================================
-# RANDOM PASSWORDS
-# ============================================================================
-
-resource "random_password" "mongodb" {
-  length  = 32
-  special = true
+resource "azurerm_key_vault" "main" {
+  name                        = "alawael-kv"
+  location                    = azurerm_resource_group.main.location
+  resource_group_name         = azurerm_resource_group.main.name
+  tenant_id                   = data.azurerm_client_config.current.tenant_id
+  soft_delete_retention_days  = 90
+  purge_protection_enabled    = true
+  sku_name                    = "premium"
+  
+  access_policy {
+    tenant_id = data.azurerm_client_config.current.tenant_id
+    object_id = data.azurerm_client_config.current.object_id
+    
+    secret_permissions = [
+      "Get", "List", "Set", "Delete", "Recover", "Backup", "Restore"
+    ]
+    
+    key_permissions = [
+      "Get", "List", "Create", "Delete", "Update", "Recover", "Backup", "Restore"
+    ]
+    
+    certificate_permissions = [
+      "Get", "List", "Create", "Delete", "Update", "Recover", "Backup", "Restore"
+    ]
+  }
+  
+  tags = var.tags
 }
 
-# ============================================================================
-# OUTPUTS
-# ============================================================================
+# ==================== Storage Account ====================
 
-output "k8s_cluster_name" {
-  value       = azurerm_kubernetes_cluster.main.name
-  description = "Kubernetes cluster name"
+resource "azurerm_storage_account" "main" {
+  name                      = "alawaelstorage"
+  resource_group_name       = azurerm_resource_group.main.name
+  location                  = azurerm_resource_group.main.location
+  account_tier              = "Standard"
+  account_replication_type  = "GRS"
+  account_kind              = "StorageV2"
+  access_tier               = "Hot"
+  enable_https_traffic_only = true
+  min_tls_version           = "TLS1_2"
+  
+  identity {
+    type = "SystemAssigned"
+  }
+  
+  blob_properties {
+    versioning_enabled = true
+    delete_retention_policy {
+      days = 30
+    }
+  }
+  
+  tags = var.tags
 }
 
-output "k8s_cluster_id" {
-  value       = azurerm_kubernetes_cluster.main.id
-  description = "Kubernetes cluster ID"
+# ==================== Log Analytics ====================
+
+resource "azurerm_log_analytics_workspace" "main" {
+  name                = "alawael-logs"
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+  sku                 = "PerGB2018"
+  retention_in_days   = 90
+  tags                = var.tags
 }
 
-output "container_registry_url" {
-  value       = azurerm_container_registry.main.login_server
-  description = "Container registry URL"
+# ==================== Application Insights ====================
+
+resource "azurerm_application_insights" "main" {
+  name                = "alawael-insights"
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+  workspace_id        = azurerm_log_analytics_workspace.main.id
+  application_type    = "web"
+  tags                = var.tags
 }
 
-output "cosmosdb_endpoint" {
-  value       = azurerm_cosmosdb_account.mongodb.endpoint
-  sensitive   = true
-  description = "CosmosDB endpoint"
+# ==================== Outputs ====================
+
+output "aks_cluster_name" {
+  value = azurerm_kubernetes_cluster.main.name
+}
+
+output "aks_cluster_fqdn" {
+  value = azurerm_kubernetes_cluster.main.fqdn
+}
+
+output "postgres_server_fqdn" {
+  value = azurerm_postgresql_flexible_server.main.fqdn
 }
 
 output "redis_hostname" {
-  value       = azurerm_redis_cache.main.hostname
-  description = "Redis cache hostname"
+  value = azurerm_redis_cache.main.hostname
 }
 
 output "storage_account_name" {
-  value       = azurerm_storage_account.backups.name
-  description = "Backup storage account name"
+  value = azurerm_storage_account.main.name
 }
 
-output "key_vault_id" {
-  value       = azurerm_key_vault.main.id
-  description = "Key Vault ID"
+output "key_vault_uri" {
+  value = azurerm_key_vault.main.vault_uri
 }
 
-output "resource_group_name" {
-  value       = azurerm_resource_group.main.name
-  description = "Resource group name"
+output "application_insights_instrumentation_key" {
+  value     = azurerm_application_insights.main.instrumentation_key
+  sensitive = true
+}
+
+output "container_registry_login_server" {
+  value = azurerm_container_registry.main.login_server
 }

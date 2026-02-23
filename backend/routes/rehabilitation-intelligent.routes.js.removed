@@ -1,0 +1,478 @@
+/**
+ * Intelligent Rehabilitation Center Routes
+ * مسارات الأنظمة الذكية لمراكز التأهيل
+ * @version 3.0.0
+ */
+
+const express = require('express');
+const router = express.Router();
+const authMiddleware = require('../middleware/advancedAuth');
+
+const {
+  AIRecommendation,
+  PredictiveModel,
+  PredictionResult,
+  RiskAssessment,
+  QualityIndicator,
+  AccreditationStandard,
+  ResearchProject,
+  TrainingProgram,
+  CompetencyAssessment,
+  EmergencyProtocol,
+  EmergencyIncident,
+  GovernmentIntegration
+} = require('../models/rehabilitation-intelligent.model');
+
+// ============================================
+// 1. الذكاء الاصطناعي والتوصيات
+// ============================================
+
+router.get('/ai/recommendations', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const { beneficiary_id, type, status } = req.query;
+    const filter = {};
+    if (beneficiary_id) filter.beneficiary_id = beneficiary_id;
+    if (type) filter.recommendation_type = type;
+    if (status) filter['implementation_status.status'] = status;
+
+    const recommendations = await AIRecommendation.find(filter)
+      .populate('beneficiary_id', 'name national_id')
+      .sort({ createdAt: -1 });
+    res.json({ success: true, data: recommendations });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/ai/recommendations', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const recommendation = new AIRecommendation({ ...req.body, created_by: req.user._id });
+    await recommendation.save();
+    res.status(201).json({ success: true, data: recommendation, message: 'تم إنشاء التوصية' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.put('/ai/recommendations/:id/approve', authMiddleware.authenticate, authMiddleware.requireRole(['supervisor', 'admin']), async (req, res) => {
+  try {
+    const recommendation = await AIRecommendation.findById(req.params.id);
+    if (!recommendation) return res.status(404).json({ success: false, message: 'التوصية غير موجودة' });
+
+    recommendation.implementation_status = {
+      status: 'approved',
+      approved_by: req.user._id,
+      approved_date: new Date()
+    };
+    await recommendation.save();
+    res.json({ success: true, data: recommendation, message: 'تمت الموافقة على التوصية' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// 2. التحليلات التنبؤية
+// ============================================
+
+router.get('/predictive/models', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const { type, status } = req.query;
+    const filter = { is_active: true };
+    if (type) filter.model_type = type;
+    if (status) filter.status = status;
+
+    const models = await PredictiveModel.find(filter).sort({ createdAt: -1 });
+    res.json({ success: true, data: models });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/predictive/models', authMiddleware.authenticate, authMiddleware.requireRole(['admin', 'data_scientist']), async (req, res) => {
+  try {
+    const model = new PredictiveModel({ ...req.body, created_by: req.user._id });
+    await model.save();
+    res.status(201).json({ success: true, data: model, message: 'تم إنشاء النموذج التنبؤي' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.get('/predictive/predictions', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const { beneficiary_id, model_id } = req.query;
+    const filter = {};
+    if (beneficiary_id) filter.beneficiary_id = beneficiary_id;
+    if (model_id) filter.model_id = model_id;
+
+    const predictions = await PredictionResult.find(filter)
+      .populate('beneficiary_id', 'name national_id')
+      .populate('model_id', 'model_name model_type')
+      .sort({ generated_at: -1 });
+    res.json({ success: true, data: predictions });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/predictive/generate/:beneficiaryId', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const { model_id } = req.body;
+    const model = await PredictiveModel.findById(model_id);
+    if (!model || model.status !== 'production') {
+      return res.status(400).json({ success: false, message: 'النموذج غير متاح' });
+    }
+
+    const prediction = new PredictionResult({
+      beneficiary_id: req.params.beneficiaryId,
+      model_id,
+      input_features: req.body.features,
+      prediction_result: req.body.prediction,
+      contributing_factors: req.body.factors
+    });
+    await prediction.save();
+
+    model.usage_stats.total_predictions += 1;
+    model.usage_stats.last_used = new Date();
+    await model.save();
+
+    res.status(201).json({ success: true, data: prediction, message: 'تم توليد التنبؤ' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// 3. إدارة المخاطر
+// ============================================
+
+router.get('/risk/assessments', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const { beneficiary_id, level } = req.query;
+    const filter = {};
+    if (beneficiary_id) filter.beneficiary_id = beneficiary_id;
+    if (level) filter.overall_risk_level = level;
+
+    const assessments = await RiskAssessment.find(filter)
+      .populate('beneficiary_id', 'name national_id')
+      .sort({ createdAt: -1 });
+    res.json({ success: true, data: assessments });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/risk/assessments', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const assessment = new RiskAssessment({ ...req.body, assessor: req.user._id });
+    await assessment.save();
+    res.status(201).json({ success: true, data: assessment, message: 'تم إنشاء تقييم المخاطر' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// 4. الجودة والاعتماد
+// ============================================
+
+router.get('/quality/indicators', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const { category } = req.query;
+    const filter = { is_active: true };
+    if (category) filter.category = category;
+
+    const indicators = await QualityIndicator.find(filter).sort({ indicator_name: 1 });
+    res.json({ success: true, data: indicators });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/quality/indicators', authMiddleware.authenticate, authMiddleware.requireRole(['admin', 'quality']), async (req, res) => {
+  try {
+    const indicator = new QualityIndicator(req.body);
+    await indicator.save();
+    res.status(201).json({ success: true, data: indicator, message: 'تم إنشاء مؤشر الجودة' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/quality/indicators/:id/measure', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const indicator = await QualityIndicator.findById(req.params.id);
+    if (!indicator) return res.status(404).json({ success: false, message: 'المؤشر غير موجود' });
+
+    indicator.measurements.push({ ...req.body, collected_by: req.user._id });
+    await indicator.save();
+    res.json({ success: true, data: indicator, message: 'تم تسجيل القياس' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.get('/accreditation/standards', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const standards = await AccreditationStandard.find({ is_active: true })
+      .sort({ 'standard_info.name': 1 });
+    res.json({ success: true, data: standards });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/accreditation/standards', authMiddleware.authenticate, authMiddleware.requireRole(['admin', 'quality']), async (req, res) => {
+  try {
+    const standard = new AccreditationStandard(req.body);
+    await standard.save();
+    res.status(201).json({ success: true, data: standard, message: 'تم إضافة معيار الاعتماد' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// 5. الأبحاث والدراسات
+// ============================================
+
+router.get('/research/projects', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const { status } = req.query;
+    const filter = {};
+    if (status) filter.status = status;
+
+    const projects = await ResearchProject.find(filter)
+      .populate('research_team.principal_investigator', 'name')
+      .sort({ createdAt: -1 });
+    res.json({ success: true, data: projects });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/research/projects', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const project = new ResearchProject(req.body);
+    await project.save();
+    res.status(201).json({ success: true, data: project, message: 'تم إنشاء مشروع البحث' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// 6. التطوير المهني
+// ============================================
+
+router.get('/training/programs', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const { type } = req.query;
+    const filter = { is_active: true };
+    if (type) filter.program_type = type;
+
+    const programs = await TrainingProgram.find(filter)
+      .populate('instructors.instructor_id', 'name')
+      .sort({ program_name: 1 });
+    res.json({ success: true, data: programs });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/training/programs', authMiddleware.authenticate, authMiddleware.requireRole(['admin', 'hr']), async (req, res) => {
+  try {
+    const program = new TrainingProgram({ ...req.body, created_by: req.user._id });
+    await program.save();
+    res.status(201).json({ success: true, data: program, message: 'تم إنشاء برنامج التدريب' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/training/programs/:id/enroll', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const program = await TrainingProgram.findById(req.params.id);
+    if (!program) return res.status(404).json({ success: false, message: 'البرنامج غير موجود' });
+
+    program.enrollments.push({ staff_id: req.body.staff_id || req.user._id });
+    await program.save();
+    res.json({ success: true, data: program, message: 'تم التسجيل في البرنامج' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.get('/competency/assessments', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const { staff_id } = req.query;
+    const filter = {};
+    if (staff_id) filter.staff_id = staff_id;
+
+    const assessments = await CompetencyAssessment.find(filter)
+      .populate('staff_id', 'name email')
+      .populate('assessor', 'name')
+      .sort({ assessment_date: -1 });
+    res.json({ success: true, data: assessments });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/competency/assessments', authMiddleware.authenticate, authMiddleware.requireRole(['supervisor', 'hr']), async (req, res) => {
+  try {
+    const assessment = new CompetencyAssessment({ ...req.body, assessor: req.user._id });
+    await assessment.save();
+    res.status(201).json({ success: true, data: assessment, message: 'تم إنشاء تقييم الكفاءة' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// 7. إدارة الطوارئ
+// ============================================
+
+router.get('/emergency/protocols', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const { type } = req.query;
+    const filter = { is_active: true };
+    if (type) filter.emergency_type = type;
+
+    const protocols = await EmergencyProtocol.find(filter).sort({ protocol_name: 1 });
+    res.json({ success: true, data: protocols });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/emergency/protocols', authMiddleware.authenticate, authMiddleware.requireRole(['admin', 'safety']), async (req, res) => {
+  try {
+    const protocol = new EmergencyProtocol(req.body);
+    await protocol.save();
+    res.status(201).json({ success: true, data: protocol, message: 'تم إنشاء بروتوكول الطوارئ' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.get('/emergency/incidents', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const { status, page = 1, limit = 20 } = req.query;
+    const filter = {};
+    if (status) filter.status = status;
+
+    const incidents = await EmergencyIncident.find(filter)
+      .populate('incident_info.reported_by', 'name')
+      .sort({ 'incident_info.date': -1 })
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit));
+
+    const total = await EmergencyIncident.countDocuments(filter);
+    res.json({ success: true, data: incidents, pagination: { total, page: parseInt(page), pages: Math.ceil(total / limit) } });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/emergency/incidents', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const incident = new EmergencyIncident({
+      ...req.body,
+      'incident_info.reported_by': req.user._id
+    });
+    await incident.save();
+    res.status(201).json({ success: true, data: incident, message: 'تم تسجيل حالة الطوارئ' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// 8. التكامل الحكومي
+// ============================================
+
+router.get('/government/integrations', authMiddleware.authenticate, authMiddleware.requireRole(['admin']), async (req, res) => {
+  try {
+    const integrations = await GovernmentIntegration.find({ is_active: true });
+    res.json({ success: true, data: integrations });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/government/integrations', authMiddleware.authenticate, authMiddleware.requireRole(['admin']), async (req, res) => {
+  try {
+    const integration = new GovernmentIntegration(req.body);
+    await integration.save();
+    res.status(201).json({ success: true, data: integration, message: 'تم إضافة التكامل' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/government/integrations/:id/sync', authMiddleware.authenticate, authMiddleware.requireRole(['admin']), async (req, res) => {
+  try {
+    const integration = await GovernmentIntegration.findById(req.params.id);
+    if (!integration) return res.status(404).json({ success: false, message: 'التكامل غير موجود' });
+
+    integration.sync_log.push({
+      sync_type: req.body.sync_type,
+      records_processed: req.body.records_processed,
+      records_successful: req.body.records_successful,
+      records_failed: req.body.records_failed,
+      errors: req.body.errors,
+      duration_ms: req.body.duration_ms
+    });
+    await integration.save();
+    res.json({ success: true, data: integration, message: 'تم تسجيل عملية المزامنة' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// 9. لوحة التحكم الذكية
+// ============================================
+
+router.get('/dashboard/overview', authMiddleware.authenticate, authMiddleware.requireRole(['admin', 'supervisor']), async (req, res) => {
+  try {
+    const [
+      totalRecommendations,
+      pendingRecommendations,
+      activePredictions,
+      riskAssessments,
+      qualityIndicators,
+      activeResearchProjects,
+      activeTrainingPrograms,
+      emergencyIncidents
+    ] = await Promise.all([
+      AIRecommendation.countDocuments(),
+      AIRecommendation.countDocuments({ 'implementation_status.status': 'pending' }),
+      PredictionResult.countDocuments({ 'validation.validated': false }),
+      RiskAssessment.countDocuments({ overall_risk_level: { $in: ['high', 'critical'] } }),
+      QualityIndicator.countDocuments({ is_active: true }),
+      ResearchProject.countDocuments({ status: { $in: ['data_collection', 'analysis'] } }),
+      TrainingProgram.countDocuments({ is_active: true }),
+      EmergencyIncident.countDocuments({ status: 'active' })
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        ai: { total: totalRecommendations, pending: pendingRecommendations },
+        predictions: { active: activePredictions },
+        risk: { highRiskCases: riskAssessments },
+        quality: { indicators: qualityIndicators },
+        research: { activeProjects: activeResearchProjects },
+        training: { activePrograms: activeTrainingPrograms },
+        emergency: { activeIncidents: emergencyIncidents }
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+module.exports = router;

@@ -1,7 +1,9 @@
 const request = require('supertest');
 const app = require('../server');
-const db = require('../config/inMemoryDB');
 const jwt = require('jsonwebtoken');
+
+// Get DB reference from app if available, otherwise require it fresh
+let db;
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this-in-production';
 
@@ -11,47 +13,81 @@ describe('User Management Routes', () => {
   let adminUser;
   let testUser;
 
-  beforeAll(() => {
-    // Clear database at start of test suite to handle contamination from other suites
-    db.write({
-      users: [],
-      employees: [],
-      attendances: [],
-      leaves: [],
-      performance: [],
-    });
+  beforeAll(async () => {
+    // Wait a tick to ensure other test suites have finished loading
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    try {
+      // Try to get DB from app globals or require fresh
+      if (!db) {
+        db = require('../config/inMemoryDB');
+      }
+      
+      if (db && typeof db.write === 'function') {
+        db.write({
+          users: [],
+          employees: [],
+          attendances: [],
+          leaves: [],
+          performance: [],
+          messages: [],
+          threads: [],
+          conversations: [],
+          reports: [],
+          schedules: [],
+        });
+      }
+    } catch (e) {
+      console.error('[users.test.js] Failed to initialize DB in beforeAll:', e.message);
+    }
   });
 
-  beforeEach(() => {
-    // Reset database
-    db.write({
-      users: [
-        {
-          _id: 'admin-1',
-          email: 'admin@example.com',
-          password: '$2a$10$mock',
-          fullName: 'Admin User',
-          role: 'admin',
-          lastLogin: null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-        {
-          _id: 'user-1',
-          email: 'user@example.com',
-          password: '$2a$10$mock',
-          fullName: 'Regular User',
-          role: 'user',
-          lastLogin: null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      ],
-      employees: [],
-      attendances: [],
-      leaves: [],
-      performance: [],
-    });
+  beforeEach(async () => {
+    try {
+      // Ensure db reference is available
+      if (!db) {
+        db = require('../config/inMemoryDB');
+      }
+      
+      // Double-check db is working before resetting
+      if (db && typeof db.write === 'function') {
+        db.write({
+          users: [
+            {
+              _id: 'admin-1',
+              email: 'admin@example.com',
+              password: '$2a$10$mock',
+              fullName: 'Admin User',
+              role: 'admin',
+              lastLogin: null,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            },
+            {
+              _id: 'user-1',
+              email: 'user@example.com',
+              password: '$2a$10$mock',
+              fullName: 'Regular User',
+              role: 'user',
+              lastLogin: null,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            },
+          ],
+          employees: [],
+          attendances: [],
+          leaves: [],
+          performance: [],
+          messages: [],
+          threads: [],
+          conversations: [],
+          reports: [],
+          schedules: [],
+        });
+      }
+    } catch (e) {
+      console.error('[users.test.js] Failed to reset DB in beforeEach:', e.message);
+    }
 
     // Generate tokens
     adminToken = jwt.sign(
@@ -66,8 +102,38 @@ describe('User Management Routes', () => {
       { expiresIn: '24h' }
     );
 
-    adminUser = db.read().users[0];
-    testUser = db.read().users[1];
+    try {
+      if (!db) {
+        db = require('../config/inMemoryDB');
+      }
+      adminUser = db.read().users[0];
+      testUser = db.read().users[1];
+    } catch (e) {
+      adminUser = { _id: 'admin-1', email: 'admin@example.com', role: 'admin' };
+      testUser = { _id: 'user-1', email: 'user@example.com', role: 'user' };
+    }
+  });
+
+  afterAll(() => {
+    try {
+      // Restore DB to clean state for other tests
+      if (db && typeof db.write === 'function') {
+        db.write({
+          users: [],
+          employees: [],
+          attendances: [],
+          leaves: [],
+          performance: [],
+          messages: [],
+          threads: [],
+          conversations: [],
+          reports: [],
+          schedules: [],
+        });
+      }
+    } catch (e) {
+      console.warn('[users.test.js] Failed to cleanup DB in afterAll:', e.message);
+    }
   });
 
   describe('GET /api/users', () => {

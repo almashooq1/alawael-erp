@@ -4,6 +4,7 @@
  */
 
 const request = require('supertest');
+const jwt = require('jsonwebtoken');
 
 // Force test-friendly settings before loading the app
 process.env.SMART_TEST_MODE = process.env.SMART_TEST_MODE || 'true';
@@ -11,6 +12,13 @@ process.env.USE_MOCK_DB = process.env.USE_MOCK_DB || 'true';
 
 const app = require('../server');
 const DisabilityRehabilitation = require('../models/disability-rehabilitation.model');
+
+// Generate a valid test JWT token
+const mockToken = `Bearer ${jwt.sign({
+  id: 'test-user-123',
+  email: 'test@test.com',
+  role: 'admin'
+}, process.env.JWT_SECRET || 'test-secret-key', { expiresIn: '1h' })}`;
 
 // Test data
 const validProgramData = {
@@ -48,8 +56,6 @@ const validProgramData = {
     },
   ],
 };
-
-const mockToken = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';
 
 describe('Disability Rehabilitation API Integration Tests', () => {
   let createdProgramId;

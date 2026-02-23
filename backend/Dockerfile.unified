@@ -1,0 +1,34 @@
+# 🐳 AlAwael ERP - Dockerfile
+# النظام الموحد
+
+FROM node:18-alpine
+
+# تعيين مجلد العمل
+WORKDIR /app
+
+# نسخ ملف الحزم
+COPY package.unified.json ./package.json
+
+# تثبيت الحزم
+RUN npm install --production
+
+# نسخ الملفات الموحدة
+COPY middleware/ ./middleware/
+COPY routes/ ./routes/
+COPY models/ ./models/
+COPY services/ ./services/
+COPY utils/ ./utils/
+COPY config/ ./config/
+COPY server.unified.js ./
+COPY app.unified.js ./
+COPY index.unified.js ./
+
+# متغيرات البيئة
+ENV NODE_ENV=production
+ENV PORT=3000
+
+# المنفذ
+EXPOSE 3000
+
+# بدء التشغيل
+CMD ["node", "index.unified.js"]

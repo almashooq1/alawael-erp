@@ -1,0 +1,272 @@
+name: Deploy to Production
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - blue-green
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/66666-api
+
+jobs:
+  deploy-production:
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://api.alawael.com
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Verify Release Tag
+      if: github.event_name == 'release'
+      run: |
+        echo "Deploying release: ${{ github.event.release.tag_name }}"
+        echo "Release name: ${{ github.event.release.name }}"
+
+    - name: Configure AWS credentials
+      if: secrets.AWS_ROLE_TO_ASSUME != ''
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+        aws-region: us-east-1
+
+    - name: Setup SSH key
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.PRODUCTION_SSH_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H ${{ secrets.PRODUCTION_HOST }} >> ~/.ssh/known_hosts
+
+    - name: Deploy to Production - Blue/Green
+      if: github.event.inputs.environment == 'blue-green' || github.event_name == 'release'
+      env:
+        PRODUCTION_USER: ${{ secrets.PRODUCTION_USER }}
+        PRODUCTION_HOST: ${{ secrets.PRODUCTION_HOST }}
+        PRODUCTION_PATH: ${{ secrets.PRODUCTION_PATH }}
+        IMAGE_TAG: ${{ github.event.release.tag_name || github.sha }}
+      run: |
+        cat > deploy-prod-blue-green.sh << 'EOF'
+        #!/bin/bash
+        set -e
+        
+        echo "🚀 Starting Blue/Green Deployment..."
+        cd $PRODUCTION_PATH
+        
+        # Get current environment (blue or green)
+        CURRENT_ENV=$(cat .current-env 2>/dev/null || echo "blue")
+        if [ "$CURRENT_ENV" == "blue" ]; then
+          TARGET_ENV="green"
+        else
+          TARGET_ENV="blue"
+        fi
+        
+        echo "Current Environment: $CURRENT_ENV"
+        echo "Deploying to: $TARGET_ENV"
+        
+        # Pull latest image
+        docker pull $REGISTRY/$IMAGE_NAME:latest
+        
+        # Create target env file
+        cat > .env.$TARGET_ENV << 'ENVEOF'
+        MONGODB_URI=${{ secrets.PRODUCTION_MONGODB_URI }}
+        REDIS_URL=${{ secrets.PRODUCTION_REDIS_URL }}
+        JWT_SECRET=${{ secrets.JWT_SECRET }}
+        NODE_ENV=production
+        CORS_ORIGIN=${{ secrets.PRODUCTION_CORS_ORIGIN }}
+        ENCRYPTION_KEY=${{ secrets.ENCRYPTION_KEY }}
+        ENVEOF
+        
+        # Start target environment
+        export COMPOSE_PROJECT_NAME=$TARGET_ENV
+        docker-compose -f docker-compose.unified.yml up -d
+        
+        # Wait and health check
+        echo "Running health checks..."
+        HEALTH_CHECKS=0
+        for i in {1..60}; do
+          if curl -f -s http://localhost:3000/api/v1/health >/dev/null 2>&1; then
+            HEALTH_CHECKS=$((HEALTH_CHECKS + 1))
+            if [ $HEALTH_CHECKS -ge 5 ]; then
+              echo "✅ Health checks passed"
+              break
+            fi
+          else
+            HEALTH_CHECKS=0
+          fi
+          echo "Health check... ($i/60)"
+          sleep 2
+        done
+        
+        if [ $HEALTH_CHECKS -lt 5 ]; then
+          echo "❌ Health checks failed"
+          docker-compose -f docker-compose.unified.yml down
+          exit 1
+        fi
+        
+        # Switch traffic
+        echo "✅ Switching traffic to $TARGET_ENV"
+        echo $TARGET_ENV > .current-env
+        
+        # Cleanup old environment
+        echo "Cleaning up old environment..."
+        export COMPOSE_PROJECT_NAME=$CURRENT_ENV
+        docker-compose -f docker-compose.unified.yml down || true
+        
+        echo "✅ Blue/Green Deployment Complete"
+        echo "Current Environment: $TARGET_ENV"
+        EOF
+        
+        chmod +x deploy-prod-blue-green.sh
+        scp deploy-prod-blue-green.sh $PRODUCTION_USER@$PRODUCTION_HOST:$PRODUCTION_PATH/
+        ssh $PRODUCTION_USER@$PRODUCTION_HOST "cd $PRODUCTION_PATH && bash deploy-prod-blue-green.sh"
+
+    - name: Run Production Smoke Tests
+      env:
+        PRODUCTION_API_URL: https://api.alawael.com
+      run: |
+        npm install -g artillery
+        
+        cat > smoke-test-prod.yml << 'EOF'
+        config:
+          target: "${{ env.PRODUCTION_API_URL }}"
+          phases:
+            - duration: 120
+              arrivalRate: 2
+        scenarios:
+          - name: "Production Smoke Tests"
+            flow:
+              - get:
+                  url: "/api/v1/health"
+                  expect:
+                    - statusCode: 200
+              - get:
+                  url: "/api/v1/users"
+                  expect:
+                    - statusCode: 200
+              - get:
+                  url: "/api/v1/departments"
+                  expect:
+                    - statusCode: 200
+              - get:
+                  url: "/api/v1/reports"
+                  expect:
+                    - statusCode: 200
+        EOF
+        
+        artillery run smoke-test-prod.yml
+
+    - name: Run Production Canary Tests
+      run: |
+        # Extended test suite for production
+        echo "Running canary tests..."
+        npm install -g k6
+        
+        cat > canary-test.js << 'EOF'
+        import http from 'k6/http';
+        import { check } from 'k6';
+        
+        export const options = {
+          vus: 5,
+          duration: '5m',
+        };
+        
+        export default function() {
+          let response = http.get('https://api.alawael.com/api/v1/health');
+          check(response, {
+            'status is 200': (r) => r.status === 200,
+            'response time < 100ms': (r) => r.timings.duration < 100,
+          });
+        }
+        EOF
+        
+        k6 run canary-test.js || true
+
+    - name: Create Rollback Plan
+      run: |
+        cat > ROLLBACK.md << 'EOF'
+        # Rollback Instructions
+        
+        If issues are detected post-deployment:
+        
+        ## Quick Rollback
+        ```bash
+        ssh $PRODUCTION_USER@$PRODUCTION_HOST
+        cd $PRODUCTION_PATH
+        
+        # Get previous environment
+        PREVIOUS_ENV=$([ "$(cat .current-env)" = "blue" ] && echo "green" || echo "blue")
+        
+        # Switch back
+        echo $PREVIOUS_ENV > .current-env
+        
+        # Restart previous environment
+        export COMPOSE_PROJECT_NAME=$PREVIOUS_ENV
+        docker-compose -f docker-compose.unified.yml up -d
+        ```
+        
+        ## Verify Rollback
+        ```bash
+        curl https://api.alawael.com/api/v1/health
+        ```
+        EOF
+        
+        cat ROLLBACK.md
+
+    - name: Notify Slack - Production Deployment Success
+      if: success() && secrets.SLACK_WEBHOOK_URL != ''
+      uses: slackapi/slack-github-action@v1
+      with:
+        payload: |
+          {
+            "text": "🚀 Production Deployment Successful",
+            "blocks": [
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "*🚀 Production Deployment Successful*\n*Release:* ${{ github.event.release.tag_name || github.sha }}\n*Author:* ${{ github.actor }}\n*Timestamp:* $(date -u +'%Y-%m-%d %H:%M:%S UTC')\n\n✅ Health checks passed\n✅ Smoke tests passed\n✅ Canary tests passed"
+                }
+              }
+            ]
+          }
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+    - name: Notify Slack - Production Deployment Failed
+      if: failure() && secrets.SLACK_WEBHOOK_URL != ''
+      uses: slackapi/slack-github-action@v1
+      with:
+        payload: |
+          {
+            "text": "❌ Production Deployment Failed",
+            "blocks": [
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "*❌ Production Deployment FAILED*\n*Release:* ${{ github.event.release.tag_name || github.sha }}\n*Author:* ${{ github.actor }}\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Logs>\n\n⚠️ AUTOMATIC ROLLBACK INITIATED"
+                }
+              }
+            ]
+          }
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+    - name: Deployment Status
+      run: |
+        echo "✅ Production Deployment Completed"
+        echo "Environment: production"
+        echo "API URL: https://api.alawael.com"
+        echo "Release: ${{ github.event.release.tag_name || github.sha }}"

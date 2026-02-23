@@ -16,7 +16,7 @@ const TestDBHelper = require('../utils/test-db-helper');
 // Extended timeout for integration tests with TestDBHelper
 jest.setTimeout(120000);
 
-describe.skip('Advanced Integration Workflows - Phase 5.1', () => {
+describe('Advanced Integration Workflows - Phase 5.1', () => {
   let authToken;
   let adminToken;
   let employees = [];

@@ -1,0 +1,491 @@
+/**
+ * Advanced Rehabilitation Center Routes
+ * مسارات الأنظمة المتقدمة لمراكز التأهيل
+ * @version 2.0.0
+ */
+
+const express = require('express');
+const router = express.Router();
+const authMiddleware = require('../middleware/advancedAuth');
+
+const {
+  BehaviorIncident,
+  BehaviorPlan,
+  VocationalProfile,
+  JobCoachLog,
+  HomeProgram,
+  MedicationRecord,
+  AutismProfile,
+  TherapySession,
+  NutritionPlan,
+  ResourceRoom,
+  StaffCertification,
+  DischargePlan
+} = require('../models/rehabilitation-advanced.model');
+
+// ============================================
+// 1. إدارة السلوك - Behavior Management
+// ============================================
+
+router.get('/behavior/incidents', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const { beneficiary_id, intensity, page = 1, limit = 20 } = req.query;
+    const filter = {};
+    if (beneficiary_id) filter.beneficiary_id = beneficiary_id;
+    if (intensity) filter['incident_info.intensity'] = intensity;
+
+    const incidents = await BehaviorIncident.find(filter)
+      .populate('beneficiary_id', 'name national_id')
+      .populate('reported_by', 'name')
+      .sort({ 'incident_info.date': -1 })
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit));
+
+    const total = await BehaviorIncident.countDocuments(filter);
+    res.json({ success: true, data: incidents, pagination: { total, page: parseInt(page), pages: Math.ceil(total / limit) } });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/behavior/incidents', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const incident = new BehaviorIncident({ ...req.body, reported_by: req.user._id });
+    await incident.save();
+    res.status(201).json({ success: true, data: incident, message: 'تم تسجيل الحادثة السلوكية' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.get('/behavior/plans', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const { beneficiary_id, status } = req.query;
+    const filter = {};
+    if (beneficiary_id) filter.beneficiary_id = beneficiary_id;
+    if (status) filter.status = status;
+
+    const plans = await BehaviorPlan.find(filter)
+      .populate('beneficiary_id', 'name national_id')
+      .sort({ createdAt: -1 });
+    res.json({ success: true, data: plans });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/behavior/plans', authMiddleware.authenticate, authMiddleware.requireRole(['bcba', 'supervisor']), async (req, res) => {
+  try {
+    const plan = new BehaviorPlan({ ...req.body, created_by: req.user._id });
+    await plan.save();
+    res.status(201).json({ success: true, data: plan, message: 'تم إنشاء خطة التدخل السلوكي' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// 2. التدريب المهني - Vocational Training
+// ============================================
+
+router.get('/vocational/profiles', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const profiles = await VocationalProfile.find()
+      .populate('beneficiary_id', 'name national_id')
+      .sort({ createdAt: -1 });
+    res.json({ success: true, data: profiles });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/vocational/profiles', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const profile = new VocationalProfile({ ...req.body, created_by: req.user._id });
+    await profile.save();
+    res.status(201).json({ success: true, data: profile, message: 'تم إنشاء الملف المهني' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.get('/vocational/job-coach-logs', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const { beneficiary_id, page = 1, limit = 20 } = req.query;
+    const filter = {};
+    if (beneficiary_id) filter.beneficiary_id = beneficiary_id;
+
+    const logs = await JobCoachLog.find(filter)
+      .populate('beneficiary_id', 'name')
+      .populate('job_coach_id', 'name')
+      .sort({ session_date: -1 })
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit));
+
+    const total = await JobCoachLog.countDocuments(filter);
+    res.json({ success: true, data: logs, pagination: { total, page: parseInt(page), pages: Math.ceil(total / limit) } });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/vocational/job-coach-logs', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const log = new JobCoachLog({ ...req.body, job_coach_id: req.user._id });
+    await log.save();
+    res.status(201).json({ success: true, data: log, message: 'تم تسجيل سجل مدرب العمل' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// 3. المتابعة المنزلية - Home Follow-up
+// ============================================
+
+router.get('/home-programs', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const { beneficiary_id, status } = req.query;
+    const filter = {};
+    if (beneficiary_id) filter.beneficiary_id = beneficiary_id;
+    if (status) filter.status = status;
+
+    const programs = await HomeProgram.find(filter)
+      .populate('beneficiary_id', 'name national_id')
+      .sort({ createdAt: -1 });
+    res.json({ success: true, data: programs });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/home-programs', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const program = new HomeProgram({ ...req.body, created_by: req.user._id });
+    await program.save();
+    res.status(201).json({ success: true, data: program, message: 'تم إنشاء البرنامج المنزلي' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/home-programs/:id/execution', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const program = await HomeProgram.findById(req.params.id);
+    if (!program) return res.status(404).json({ success: false, message: 'البرنامج غير موجود' });
+
+    program.execution_log.push({ ...req.body, date: new Date() });
+    await program.save();
+    res.json({ success: true, data: program, message: 'تم تسجيل التنفيذ' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// 4. إدارة الأدوية - Medication Management
+// ============================================
+
+router.get('/medications', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const { beneficiary_id, status } = req.query;
+    const filter = {};
+    if (beneficiary_id) filter.beneficiary_id = beneficiary_id;
+    if (status) filter.status = status;
+
+    const medications = await MedicationRecord.find(filter)
+      .populate('beneficiary_id', 'name national_id')
+      .sort({ createdAt: -1 });
+    res.json({ success: true, data: medications });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/medications', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const medication = new MedicationRecord({ ...req.body, created_by: req.user._id });
+    await medication.save();
+    res.status(201).json({ success: true, data: medication, message: 'تم إضافة الدواء' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/medications/:id/administer', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const medication = await MedicationRecord.findById(req.params.id);
+    if (!medication) return res.status(404).json({ success: false, message: 'الدواء غير موجود' });
+
+    medication.administration_log.push({ ...req.body, date: new Date(), administered_by: req.user._id });
+    await medication.save();
+    res.json({ success: true, data: medication, message: 'تم تسجيل إعطاء الدواء' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// 5. ملف التوحد - Autism Profile
+// ============================================
+
+router.get('/autism/profiles', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const profiles = await AutismProfile.find()
+      .populate('beneficiary_id', 'name national_id date_of_birth')
+      .sort({ createdAt: -1 });
+    res.json({ success: true, data: profiles });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/autism/profiles', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const profile = new AutismProfile({ ...req.body, created_by: req.user._id });
+    await profile.save();
+    res.status(201).json({ success: true, data: profile, message: 'تم إنشاء ملف التوحد' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.get('/autism/profiles/:beneficiaryId', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const profile = await AutismProfile.findOne({ beneficiary_id: req.params.beneficiaryId })
+      .populate('beneficiary_id');
+    if (!profile) return res.status(404).json({ success: false, message: 'الملف غير موجود' });
+    res.json({ success: true, data: profile });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// 6. جلسات العلاج - Therapy Sessions
+// ============================================
+
+router.get('/therapy/sessions', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const { beneficiary_id, therapy_type, page = 1, limit = 20 } = req.query;
+    const filter = {};
+    if (beneficiary_id) filter.beneficiary_id = beneficiary_id;
+    if (therapy_type) filter.therapy_type = therapy_type;
+
+    const sessions = await TherapySession.find(filter)
+      .populate('beneficiary_id', 'name national_id')
+      .populate('session_info.therapist', 'name specialization')
+      .sort({ 'session_info.date': -1 })
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit));
+
+    const total = await TherapySession.countDocuments(filter);
+    res.json({ success: true, data: sessions, pagination: { total, page: parseInt(page), pages: Math.ceil(total / limit) } });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/therapy/sessions', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const session = new TherapySession(req.body);
+    await session.save();
+    res.status(201).json({ success: true, data: session, message: 'تم تسجيل جلسة العلاج' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// 7. خطط التغذية - Nutrition Plans
+// ============================================
+
+router.get('/nutrition/plans', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const { beneficiary_id } = req.query;
+    const filter = {};
+    if (beneficiary_id) filter.beneficiary_id = beneficiary_id;
+
+    const plans = await NutritionPlan.find(filter)
+      .populate('beneficiary_id', 'name national_id')
+      .populate('dietitian', 'name')
+      .sort({ effective_date: -1 });
+    res.json({ success: true, data: plans });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/nutrition/plans', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const plan = new NutritionPlan({ ...req.body, created_by: req.user._id });
+    await plan.save();
+    res.status(201).json({ success: true, data: plan, message: 'تم إنشاء خطة التغذية' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// 8. غرف الموارد - Resource Rooms
+// ============================================
+
+router.get('/rooms', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const { type, available } = req.query;
+    const filter = {};
+    if (type) filter['room_info.room_type'] = type;
+    if (available !== undefined) filter.is_available = available === 'true';
+
+    const rooms = await ResourceRoom.find(filter).sort({ 'room_info.name': 1 });
+    res.json({ success: true, data: rooms });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/rooms', authMiddleware.authenticate, authMiddleware.requireRole(['admin', 'supervisor']), async (req, res) => {
+  try {
+    const room = new ResourceRoom(req.body);
+    await room.save();
+    res.status(201).json({ success: true, data: room, message: 'تم إضافة الغرفة' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/rooms/:id/book', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const room = await ResourceRoom.findById(req.params.id);
+    if (!room) return res.status(404).json({ success: false, message: 'الغرفة غير موجودة' });
+
+    room.bookings.push({ ...req.body, booked_by: req.user._id, booking_id: `BK-${Date.now()}`, status: 'booked' });
+    await room.save();
+    res.json({ success: true, data: room, message: 'تم حجز الغرفة' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// 9. شهادات الموظفين - Staff Certifications
+// ============================================
+
+router.get('/certifications', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const { staff_id, status } = req.query;
+    const filter = {};
+    if (staff_id) filter.staff_id = staff_id;
+    if (status) filter.status = status;
+
+    const certifications = await StaffCertification.find(filter)
+      .populate('staff_id', 'name email')
+      .sort({ 'dates.expiry_date': 1 });
+    res.json({ success: true, data: certifications });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/certifications', authMiddleware.authenticate, authMiddleware.requireRole(['admin', 'hr']), async (req, res) => {
+  try {
+    const certification = new StaffCertification({ ...req.body, created_by: req.user._id });
+    await certification.save();
+    res.status(201).json({ success: true, data: certification, message: 'تم إضافة الشهادة' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// 10. خطط الخروج - Discharge Plans
+// ============================================
+
+router.get('/discharge-plans', authMiddleware.authenticate, async (req, res) => {
+  try {
+    const { beneficiary_id, status } = req.query;
+    const filter = {};
+    if (beneficiary_id) filter.beneficiary_id = beneficiary_id;
+    if (status) filter.status = status;
+
+    const plans = await DischargePlan.find(filter)
+      .populate('beneficiary_id', 'name national_id')
+      .sort({ createdAt: -1 });
+    res.json({ success: true, data: plans });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+router.post('/discharge-plans', authMiddleware.authenticate, authMiddleware.requireRole(['supervisor', 'case_manager']), async (req, res) => {
+  try {
+    const plan = new DischargePlan({ ...req.body, created_by: req.user._id });
+    await plan.save();
+    res.status(201).json({ success: true, data: plan, message: 'تم إنشاء خطة الخروج' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.put('/discharge-plans/:id/approve', authMiddleware.authenticate, authMiddleware.requireRole(['supervisor', 'admin']), async (req, res) => {
+  try {
+    const plan = await DischargePlan.findById(req.params.id);
+    if (!plan) return res.status(404).json({ success: false, message: 'الخطة غير موجودة' });
+
+    plan.approvals.case_manager_approval = {
+      approved: true,
+      approver_id: req.user._id,
+      approval_date: new Date(),
+      comments: req.body.comments
+    };
+    plan.status = 'completed';
+    await plan.save();
+    res.json({ success: true, data: plan, message: 'تمت الموافقة على خطة الخروج' });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+// ============================================
+// 11. إحصائيات متقدمة - Advanced Statistics
+// ============================================
+
+router.get('/advanced-statistics/overview', authMiddleware.authenticate, authMiddleware.requireRole(['admin', 'supervisor']), async (req, res) => {
+  try {
+    const behaviorIncidents = await BehaviorIncident.countDocuments();
+    const activeBehaviorPlans = await BehaviorPlan.countDocuments({ status: 'active' });
+    const vocationalProfiles = await VocationalProfile.countDocuments();
+    const activeHomePrograms = await HomeProgram.countDocuments({ status: 'active' });
+    const activeMedications = await MedicationRecord.countDocuments({ status: 'active' });
+    const autismProfiles = await AutismProfile.countDocuments();
+    const therapySessionsToday = await TherapySession.countDocuments({
+      'session_info.date': { $gte: new Date(new Date().toDateString()), $lt: new Date(new Date().toDateString() + 'T23:59:59') }
+    });
+    const activeNutritionPlans = await NutritionPlan.countDocuments({ end_date: { $gte: new Date() } });
+    const pendingDischarges = await DischargePlan.countDocuments({ status: 'planning' });
+    const expiringCertifications = await StaffCertification.countDocuments({
+      status: 'active',
+      'dates.expiry_date': { $lte: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000) }
+    });
+
+    res.json({
+      success: true,
+      data: {
+        behaviorIncidents,
+        activeBehaviorPlans,
+        vocationalProfiles,
+        activeHomePrograms,
+        activeMedications,
+        autismProfiles,
+        therapySessionsToday,
+        activeNutritionPlans,
+        pendingDischarges,
+        expiringCertifications
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+module.exports = router;

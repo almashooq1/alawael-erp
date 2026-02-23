@@ -26,7 +26,7 @@ const invalidCredentials = {
 
 test.describe('🔐 Authentication E2E Tests', () => {
   // Skip auth tests if API not available
-  test.skip(({ browserName }) => browserName === 'webkit' && !process.env.CI);
+  // test.skip(({ browserName }) => browserName === 'webkit' && !process.env.CI);
 
   test.describe('Login Flow', () => {
     test('should complete successful login with valid credentials', async ({ page }) => {

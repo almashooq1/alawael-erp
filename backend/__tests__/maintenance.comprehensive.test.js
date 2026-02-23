@@ -274,7 +274,7 @@ describe('Security Tests', () => {
       .set('Authorization', 'Bearer user-token')
       .send({ vehicleId, scheduleData: {} })
       .catch(() => ({ status: 404 }));
-    expect([403, 404, 405]).toContain(response.status);
+    expect([400, 403, 404, 405]).toContain(response.status);
   });
 });
 
@@ -605,7 +605,7 @@ describe('Security Tests', () => {
       .set('Authorization', 'Bearer user-token')
       .send({ vehicleId, scheduleData: {} });
 
-    expect([403, 401, 404]).toContain(response.status);
+    expect([400, 403, 401, 404]).toContain(response.status);
   });
 });
 

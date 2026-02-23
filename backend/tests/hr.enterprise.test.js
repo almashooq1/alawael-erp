@@ -36,9 +36,7 @@ beforeAll(async () => {
     email: 'test.employee@test.com',
     position: 'Therapist',
     department: 'Rehabilitation',
-    hireDate: new Date('2025-01-01'),
-    salary: { base: 5000 },
-    role: 'therapist',
+    role: 'THERAPIST',
   });
   testEmployeeId = testEmployee._id;
 

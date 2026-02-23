@@ -4,13 +4,13 @@
  * Created: February 22, 2026
  */
 
+const NotificationService = require('../services/notificationService');
 const {
-  NotificationService,
   NotificationTemplate,
   EmailService,
   SMSService,
   PushNotificationService,
-} = require('../services/NotificationService');
+} = NotificationService;
 const { initializeTemplates } = require('../config/notificationTemplates');
 
 describe('Notification System', () => {

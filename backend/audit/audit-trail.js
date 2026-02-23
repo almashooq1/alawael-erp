@@ -272,3 +272,297 @@ class AuditManager {
     
     try {
       await this.AuditLog.insertMany(toInsert, { ordered: false });
+    } catch (error) {
+      console.error('Audit flush error:', error);
+      // Re-add failed items to buffer
+      this.buffer = [...toInsert, ...this.buffer];
+    }
+  }
+  
+  /**
+   * Generate audit ID
+   */
+  generateAuditId() {
+    const crypto = require('crypto');
+    return `aud_${Date.now()}_${crypto.randomBytes(6).toString('hex')}`;
+  }
+  
+  /**
+   * Get category from action
+   */
+  getCategory(action) {
+    const prefix = action.split('.')[0];
+    return AuditCategories[prefix.toUpperCase()] || 'system';
+  }
+  
+  /**
+   * Calculate diff between before and after
+   */
+  calculateDiff(before, after) {
+    if (!before || !after) return null;
+    
+    const diff = {};
+    const allKeys = new Set([...Object.keys(before), ...Object.keys(after)]);
+    
+    for (const key of allKeys) {
+      if (JSON.stringify(before[key]) !== JSON.stringify(after[key])) {
+        diff[key] = {
+          from: before[key],
+          to: after[key],
+        };
+      }
+    }
+    
+    return Object.keys(diff).length > 0 ? diff : null;
+  }
+  
+  /**
+   * Query audit logs
+   */
+  async query(options = {}) {
+    const {
+      userId,
+      action,
+      resourceType,
+      resourceId,
+      tenantId,
+      status,
+      startDate,
+      endDate,
+      limit = 100,
+      skip = 0,
+      sort = { timestamp: -1 },
+    } = options;
+    
+    const query = {};
+    
+    if (userId) query['actor.userId'] = userId;
+    if (action) query['action.type'] = action;
+    if (resourceType) query['resource.type'] = resourceType;
+    if (resourceId) query['resource.id'] = resourceId;
+    if (tenantId) query['context.tenantId'] = tenantId;
+    if (status) query['action.status'] = status;
+    
+    if (startDate || endDate) {
+      query.timestamp = {};
+      if (startDate) query.timestamp.$gte = new Date(startDate);
+      if (endDate) query.timestamp.$lte = new Date(endDate);
+    }
+    
+    return this.AuditLog.find(query)
+      .sort(sort)
+      .skip(skip)
+      .limit(limit);
+  }
+  
+  /**
+   * Get audit log by ID
+   */
+  async getById(auditId) {
+    return this.AuditLog.findOne({ auditId });
+  }
+  
+  /**
+   * Get user activity
+   */
+  async getUserActivity(userId, options = {}) {
+    const { limit = 50, startDate, endDate } = options;
+    
+    return this.query({
+      userId,
+      startDate,
+      endDate,
+      limit,
+      sort: { timestamp: -1 },
+    });
+  }
+  
+  /**
+   * Get resource history
+   */
+  async getResourceHistory(resourceType, resourceId, options = {}) {
+    const { limit = 100 } = options;
+    
+    return this.query({
+      resourceType,
+      resourceId,
+      limit,
+      sort: { timestamp: -1 },
+    });
+  }
+  
+  /**
+   * Get audit statistics
+   */
+  async getStats(options = {}) {
+    const { tenantId, startDate, endDate } = options;
+    
+    const match = {};
+    if (tenantId) match['context.tenantId'] = tenantId;
+    if (startDate || endDate) {
+      match.timestamp = {};
+      if (startDate) match.timestamp.$gte = new Date(startDate);
+      if (endDate) match.timestamp.$lte = new Date(endDate);
+    }
+    
+    const [byAction, byStatus, byUser, total] = await Promise.all([
+      this.AuditLog.aggregate([
+        { $match: match },
+        { $group: { _id: '$action.type', count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+        { $limit: 10 },
+      ]),
+      this.AuditLog.aggregate([
+        { $match: match },
+        { $group: { _id: '$action.status', count: { $sum: 1 } } },
+      ]),
+      this.AuditLog.aggregate([
+        { $match: match },
+        { $group: { _id: '$actor.userId', count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+        { $limit: 10 },
+      ]),
+      this.AuditLog.countDocuments(match),
+    ]);
+    
+    return {
+      total,
+      byAction,
+      byStatus,
+      byUser,
+    };
+  }
+  
+  /**
+   * Export audit logs
+   */
+  async export(options = {}) {
+    const logs = await this.query({ ...options, limit: 10000 });
+    
+    return logs.map(log => ({
+      AuditID: log.auditId,
+      Timestamp: log.timestamp.toISOString(),
+      User: log.actor.email || log.actor.userId,
+      Action: log.action.type,
+      Resource: `${log.resource.type}:${log.resource.id}`,
+      Status: log.action.status,
+      Description: log.action.description,
+      Changes: log.changes.diff ? JSON.stringify(log.changes.diff) : '',
+      IP: log.actor.ip,
+    }));
+  }
+  
+  /**
+   * Close audit manager
+   */
+  async close() {
+    if (this.flushInterval) {
+      clearInterval(this.flushInterval);
+    }
+    await this.flush();
+  }
+}
+
+// Singleton instance
+const auditManager = new AuditManager();
+
+/**
+ * Audit Middleware for Express
+ */
+const auditMiddleware = (options = {}) => {
+  const {
+    excludePaths = ['/health', '/metrics', '/favicon.ico'],
+    includeBody = false,
+    includeResponse = false,
+  } = options;
+  
+  return async (req, res, next) => {
+    // Skip excluded paths
+    if (excludePaths.some(path => req.path.startsWith(path))) {
+      return next();
+    }
+    
+    const startTime = Date.now();
+    
+    // Store original end
+    const originalEnd = res.end;
+    const chunks = [];
+    
+    // Override res.end to capture response
+    res.end = function(chunk, encoding) {
+      if (chunk && includeResponse) {
+        chunks.push(Buffer.from(chunk));
+      }
+      
+      const duration = Date.now() - startTime;
+      
+      // Log audit event
+      auditManager.log({
+        userId: req.user?.id,
+        userEmail: req.user?.email,
+        userName: req.user?.name,
+        userRole: req.user?.role,
+        ip: req.ip,
+        userAgent: req.get('user-agent'),
+        action: `${req.method.toLowerCase()}.${req.path.split('/')[1] || 'unknown'}`,
+        category: 'system',
+        description: `${req.method} ${req.path}`,
+        status: res.statusCode < 400 ? 'success' : 'failure',
+        resourceType: 'api',
+        resourceId: req.params?.id || 'unknown',
+        tenantId: req.tenant?.tenantId,
+        route: req.path,
+        method: req.method,
+        duration,
+        metadata: includeBody ? { body: req.body } : undefined,
+      }).catch(console.error);
+      
+      originalEnd.apply(res, arguments);
+    };
+    
+    next();
+  };
+};
+
+/**
+ * Audit Decorator for Functions
+ */
+const audit = (action, options = {}) => {
+  return function(target, propertyKey, descriptor) {
+    const originalMethod = descriptor.value;
+    
+    descriptor.value = async function(...args) {
+      const startTime = Date.now();
+      let result;
+      let error;
+      
+      try {
+        result = await originalMethod.apply(this, args);
+        return result;
+      } catch (e) {
+        error = e;
+        throw e;
+      } finally {
+        await auditManager.log({
+          ...options,
+          action,
+          status: error ? 'failure' : 'success',
+          duration: Date.now() - startTime,
+          errorMessage: error?.message,
+        }).catch(console.error);
+      }
+    };
+    
+    return descriptor;
+  };
+};
+
+module.exports = {
+  AuditManager,
+  auditManager,
+  AuditLogSchema,
+  AuditActionTypes,
+  AuditCategories,
+  auditMiddleware,
+  audit,
+};

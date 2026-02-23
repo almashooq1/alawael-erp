@@ -5,7 +5,7 @@
 
 const AdvancedArchivingSystem = require('../services/advancedArchivingSystem');
 
-describe.skip('🗂️ نظام الأرشفة الإلكترونية الذكي', () => {
+describe('🗂️ نظام الأرشفة الإلكترونية الذكي', () => {
   let archivingSystem;
 
   beforeEach(() => {

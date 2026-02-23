@@ -36,11 +36,11 @@ jobs:
         echo "Release name: ${{ github.event.release.name }}"
 
     - name: Configure AWS credentials
+      if: secrets.AWS_ROLE_TO_ASSUME != ''
       uses: aws-actions/configure-aws-credentials@v2
       with:
         role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
         aws-region: us-east-1
-      if: ${{ secrets.AWS_ROLE_TO_ASSUME != '' }}
 
     - name: Setup SSH key
       run: |
@@ -225,7 +225,7 @@ jobs:
         cat ROLLBACK.md
 
     - name: Notify Slack - Production Deployment Success
-      if: success()
+      if: success() && secrets.SLACK_WEBHOOK_URL != ''
       uses: slackapi/slack-github-action@v1
       with:
         payload: |
@@ -243,10 +243,9 @@ jobs:
           }
       env:
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-      if: ${{ secrets.SLACK_WEBHOOK_URL != '' }}
 
     - name: Notify Slack - Production Deployment Failed
-      if: failure()
+      if: failure() && secrets.SLACK_WEBHOOK_URL != ''
       uses: slackapi/slack-github-action@v1
       with:
         payload: |
@@ -264,7 +263,6 @@ jobs:
           }
       env:
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-      if: ${{ secrets.SLACK_WEBHOOK_URL != '' }}
 
     - name: Deployment Status
       run: |

@@ -1,352 +1,420 @@
+const Maintenance = require('../models/Maintenance');
+const MaintenancePrediction = require('../models/MaintenancePrediction');
+const logger = require('../utils/logger');
+
 /**
- * =====================================================
- * MAINTENANCE SERVICE - خدمة إدارة الصيانة
- * =====================================================
- * إدارة صيانة المركبات والجدولة والتكاليف
+ * MaintenanceService
+ * Manages asset maintenance schedules, records, and predictions
  */
-
-const mockDB = {
-  maintenanceRecords: [],
-  maintenanceSchedules: [],
-  maintenanceTypes: [
-    { id: 'oil-change', name: 'تغيير الزيت', intervalKm: 5000 },
-    { id: 'tire-rotation', name: 'تبديل الإطارات', intervalKm: 10000 },
-    { id: 'brake-check', name: 'فحص الفرامل', intervalKm: 15000 },
-    { id: 'full-service', name: 'صيانة شاملة', intervalKm: 20000 },
-    { id: 'ac-service', name: 'صيانة المكيف', intervalMonths: 12 },
-    { id: 'battery-check', name: 'فحص البطارية', intervalMonths: 6 },
-  ],
-};
-
 class MaintenanceService {
-  /**
-   * إنشاء سجل صيانة جديد
-   */
-  async createMaintenanceRecord(data) {
-    const record = {
-      id: `MAINT-${Date.now()}`,
-      vehicleId: data.vehicleId,
-      type: data.type,
-      date: data.date || new Date().toISOString(),
-      mileage: data.mileage,
-      description: data.description,
-      cost: data.cost || 0,
-      parts: data.parts || [],
-      labor: data.labor || 0,
-      mechanic: data.mechanic || 'غير محدد',
-      status: data.status || 'completed',
-      notes: data.notes || '',
-      nextServiceDue: this.calculateNextService(data),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
 
-    mockDB.maintenanceRecords.push(record);
-    return { success: true, data: record };
-  }
+  // ============ SCHEDULE MANAGEMENT ============
 
   /**
-   * حساب موعد الصيانة التالية
+   * Get all maintenance schedules
    */
-  calculateNextService(data) {
-    const maintenanceType = mockDB.maintenanceTypes.find(t => t.id === data.type);
-    if (!maintenanceType) return null;
+  async getAllSchedules(query = {}) {
+    try {
+      let mongoQuery = {};
 
-    const nextService = {
-      type: data.type,
-      dueDate: null,
-      dueMileage: null,
-    };
-
-    if (maintenanceType.intervalKm) {
-      nextService.dueMileage = (data.mileage || 0) + maintenanceType.intervalKm;
-    }
-
-    if (maintenanceType.intervalMonths) {
-      const dueDate = new Date(data.date || Date.now());
-      dueDate.setMonth(dueDate.getMonth() + maintenanceType.intervalMonths);
-      nextService.dueDate = dueDate.toISOString();
-    }
-
-    return nextService;
-  }
-
-  /**
-   * الحصول على سجلات الصيانة لمركبة
-   */
-  async getMaintenanceHistory(vehicleId, options = {}) {
-    let records = mockDB.maintenanceRecords.filter(r => r.vehicleId === vehicleId);
-
-    // تطبيق الفلاتر
-    if (options.type) {
-      records = records.filter(r => r.type === options.type);
-    }
-
-    if (options.startDate) {
-      records = records.filter(r => new Date(r.date) >= new Date(options.startDate));
-    }
-
-    if (options.endDate) {
-      records = records.filter(r => new Date(r.date) <= new Date(options.endDate));
-    }
-
-    // الترتيب
-    records.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-    // Pagination
-    const page = options.page || 1;
-    const limit = options.limit || 20;
-    const startIndex = (page - 1) * limit;
-    const endIndex = startIndex + limit;
-    const paginatedRecords = records.slice(startIndex, endIndex);
-
-    return {
-      success: true,
-      data: {
-        records: paginatedRecords,
-        total: records.length,
-        page,
-        totalPages: Math.ceil(records.length / limit),
-        summary: this.calculateMaintenanceSummary(records),
-      },
-    };
-  }
-
-  /**
-   * حساب ملخص الصيانة
-   */
-  calculateMaintenanceSummary(records) {
-    return {
-      totalRecords: records.length,
-      totalCost: records.reduce((sum, r) => sum + (r.cost || 0), 0),
-      totalLabor: records.reduce((sum, r) => sum + (r.labor || 0), 0),
-      averageCost:
-        records.length > 0
-          ? records.reduce((sum, r) => sum + (r.cost || 0), 0) / records.length
-          : 0,
-      lastMaintenance:
-        records.length > 0 ? records.sort((a, b) => new Date(b.date) - new Date(a.date))[0] : null,
-    };
-  }
-
-  /**
-   * جدولة صيانة قادمة
-   */
-  async scheduleMaintenanceService(data) {
-    const schedule = {
-      id: `SCHED-${Date.now()}`,
-      vehicleId: data.vehicleId,
-      type: data.type,
-      scheduledDate: data.scheduledDate,
-      estimatedCost: data.estimatedCost || 0,
-      priority: data.priority || 'normal',
-      status: 'scheduled',
-      notes: data.notes || '',
-      createdAt: new Date().toISOString(),
-    };
-
-    mockDB.maintenanceSchedules.push(schedule);
-    return { success: true, data: schedule };
-  }
-
-  /**
-   * الحصول على الصيانات المجدولة
-   */
-  async getScheduledMaintenance(vehicleId = null) {
-    let schedules = mockDB.maintenanceSchedules;
-
-    if (vehicleId) {
-      schedules = schedules.filter(s => s.vehicleId === vehicleId);
-    }
-
-    schedules = schedules.filter(s => s.status === 'scheduled');
-    schedules.sort((a, b) => new Date(a.scheduledDate) - new Date(b.scheduledDate));
-
-    return {
-      success: true,
-      data: {
-        schedules,
-        total: schedules.length,
-        upcoming: schedules.filter(
-          s => new Date(s.scheduledDate) <= new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-        ),
-        overdue: schedules.filter(s => new Date(s.scheduledDate) < new Date()),
-      },
-    };
-  }
-
-  /**
-   * الحصول على توصيات الصيانة
-   */
-  async getMaintenanceRecommendations(vehicleId, currentMileage) {
-    const recommendations = [];
-    const history = await this.getMaintenanceHistory(vehicleId);
-
-    for (const type of mockDB.maintenanceTypes) {
-      const lastService = history.data.records.find(r => r.type === type.id);
-
-      if (!lastService) {
-        recommendations.push({
-          type: type.id,
-          name: type.name,
-          priority: 'high',
-          reason: 'لم يتم إجراء هذه الصيانة مسبقاً',
-          recommended: true,
-        });
-        continue;
+      if (query.assetId) {
+        mongoQuery.assetId = query.assetId;
+      }
+      if (query.status) {
+        mongoQuery.status = query.status;
+      }
+      if (query.type) {
+        mongoQuery.type = query.type;
       }
 
-      if (type.intervalKm && currentMileage) {
-        const kmSinceLastService = currentMileage - lastService.mileage;
-        if (kmSinceLastService >= type.intervalKm) {
-          recommendations.push({
-            type: type.id,
-            name: type.name,
-            priority: 'high',
-            reason: `مضى ${kmSinceLastService} كم منذ آخر صيانة`,
-            recommended: true,
-            overdue: kmSinceLastService > type.intervalKm * 1.2,
-          });
-        } else if (kmSinceLastService >= type.intervalKm * 0.8) {
-          recommendations.push({
-            type: type.id,
-            name: type.name,
-            priority: 'medium',
-            reason: `قريب من موعد الصيانة (${kmSinceLastService}/${type.intervalKm} كم)`,
-            recommended: true,
-          });
+      const schedules = await Maintenance.find(mongoQuery)
+        .populate('assignedTo', 'firstName lastName email')
+        .populate('createdBy', 'firstName lastName email')
+        .populate('assetId', 'name location')
+        .sort({ scheduledDate: 1 });
+
+      return schedules;
+    } catch (error) {
+      logger.error('Error getting schedules:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Create maintenance schedule
+   */
+  async createSchedule(data) {
+    try {
+      const maintenance = new Maintenance({
+        title: data.title,
+        description: data.description,
+        assetId: data.assetId,
+        type: data.type,
+        category: data.category,
+        scheduledDate: data.scheduledDate,
+        estimatedDuration: data.estimatedDuration,
+        assignedTo: data.assignedTo,
+        createdBy: data.createdBy,
+        priority: data.priority || 'medium',
+        status: 'scheduled'
+      });
+
+      const saved = await maintenance.save();
+      logger.info(`Schedule created: ${saved._id}`);
+      return saved;
+    } catch (error) {
+      logger.error('Error creating schedule:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get specific schedule by ID
+   */
+  async getScheduleById(scheduleId) {
+    try {
+      const schedule = await Maintenance.findById(scheduleId)
+        .populate('assignedTo', 'firstName lastName email')
+        .populate('createdBy', 'firstName lastName email')
+        .populate('assetId', 'name location');
+      return schedule || null;
+    } catch (error) {
+      logger.error('Error getting schedule:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Update maintenance schedule
+   */
+  async updateSchedule(scheduleId, data) {
+    try {
+      const schedule = await Maintenance.findByIdAndUpdate(
+        scheduleId,
+        { ...data, updatedAt: new Date() },
+        { new: true, runValidators: true }
+      ).populate('assignedTo', 'firstName lastName email')
+       .populate('createdBy', 'firstName lastName email')
+       .populate('assetId', 'name location');
+
+      if (!schedule) return null;
+
+      logger.info(`Schedule updated: ${scheduleId}`);
+      return schedule;
+    } catch (error) {
+      logger.error('Error updating schedule:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Delete maintenance schedule
+   */
+  async deleteSchedule(scheduleId) {
+    try {
+      const deleted = await Maintenance.findByIdAndDelete(scheduleId);
+
+      if (!deleted) return null;
+
+      logger.info(`Schedule deleted: ${scheduleId}`);
+      return { success: true };
+    } catch (error) {
+      logger.error('Error deleting schedule:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Complete maintenance record
+   */
+  async completeSchedule(scheduleId, data) {
+    try {
+      const maintenance = await Maintenance.findByIdAndUpdate(
+        scheduleId,
+        {
+          status: 'completed',
+          completionDate: new Date(),
+          workCompleted: data.workCompleted,
+          actualDuration: data.actualDuration,
+          actualCost: data.actualCost,
+          partsReplaced: data.partsReplaced || [],
+          updatedAt: new Date()
+        },
+        { new: true, runValidators: true }
+      );
+
+      if (!maintenance) return null;
+
+      logger.info(`Schedule completed: ${scheduleId}`);
+      return maintenance;
+    } catch (error) {
+      logger.error('Error completing schedule:', error);
+      throw error;
+    }
+  }
+
+  // ============ PREDICTION & ANALYTICS ============
+
+  /**
+   * Predict next maintenance needs for asset
+   */
+  async predictMaintenanceNeeds(assetId) {
+    try {
+      // Validate assetId is not empty
+      if (!assetId) {
+        return {
+          assetId: null,
+          prediction: 'invalid-id',
+          message: 'Asset ID is required'
+        };
+      }
+
+      // Get recent maintenance history
+      let maintenance = [];
+      try {
+        maintenance = await Maintenance.find({ assetId, status: 'completed' })
+          .sort({ completionDate: -1 })
+          .limit(10);
+      } catch (dbError) {
+        // If assetId is not a valid ObjectId format, return graceful response
+        if (dbError.name === 'CastError') {
+          // Return a prediction response indicating no data available
+          return {
+            assetId,
+            prediction: 'insufficient-data',
+            message: 'Asset not found or invalid asset ID format',
+            confidence: 0,
+            daysUntilMaintenance: null,
+            recommendedMaintenanceTypes: []
+          };
+        } else {
+          throw dbError;
         }
       }
 
-      if (type.intervalMonths) {
-        const monthsSinceLastService = Math.floor(
-          (Date.now() - new Date(lastService.date)) / (30 * 24 * 60 * 60 * 1000)
-        );
+      if (maintenance.length < 1) {
+        return {
+          assetId,
+          prediction: 'insufficient-data',
+          message: 'Not enough maintenance history to predict'
+        };
+      }
 
-        if (monthsSinceLastService >= type.intervalMonths) {
-          recommendations.push({
-            type: type.id,
-            name: type.name,
-            priority: 'high',
-            reason: `مضى ${monthsSinceLastService} شهر منذ آخر صيانة`,
-            recommended: true,
-            overdue: monthsSinceLastService > type.intervalMonths * 1.2,
-          });
+      // Calculate maintenance cycle
+      const cycle = this._calculateMaintenanceCycle(maintenance);
+      const lastMaintenance = maintenance[0].completionDate || new Date();
+
+      // Predict next maintenance date
+      const nextDate = new Date(lastMaintenance);
+      nextDate.setDate(nextDate.getDate() + (cycle || 90));
+
+      const daysUntil = Math.floor((nextDate - new Date()) / (1000 * 60 * 60 * 24));
+
+      const prediction = new MaintenancePrediction({
+        assetId,
+        predictionType: daysUntil <= 0 ? 'maintenance-needed' : 'failure',
+        predictedDate: nextDate,
+        confidence: Math.min(85 + Math.floor(maintenance.length * 2), 98),
+        riskLevel: daysUntil <= 7 ? 'critical' : daysUntil <= 30 ? 'high' : 'medium',
+        reason: `Next maintenance predicted based on ${maintenance.length} historical records`,
+        indicators: this._generateIndicators(maintenance),
+        historicalData: {
+          failureCount: maintenance.length,
+          averageInterval: `${cycle || 90} days`,
+          lastMaintenanceDate: lastMaintenance,
+          usageHours: Math.random() * 10000
+        },
+        recommendedAction: daysUntil <= 7 ? 'Schedule immediately' : 'Schedule within next week',
+        estimatedCost: this._estimateMaintenanceCost(maintenance),
+        urgency: daysUntil <= 7 ? 'immediate' : daysUntil <= 30 ? 'high' : 'medium',
+        status: 'open'
+      });
+
+      const saved = await prediction.save();
+      return {
+        assetId,
+        lastMaintenance,
+        maintenanceCycleDays: cycle || 90,
+        predictedNextMaintenanceDate: nextDate,
+        daysUntilMaintenance: daysUntil,
+        urgency: daysUntil <= 7 ? 'critical' : daysUntil <= 30 ? 'high' : 'normal',
+        recommendedMaintenanceTypes: this._getRecommendedTypes(maintenance),
+        estimatedCost: this._estimateMaintenanceCost(maintenance),
+        confidence: saved.confidence,
+        predictionId: saved._id
+      };
+    } catch (error) {
+      logger.error('Error predicting maintenance:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get asset maintenance history
+   */
+  async getAssetMaintenanceHistory(assetId) {
+    try {
+      // Validate assetId is not empty
+      if (!assetId) {
+        return {
+          success: false,
+          message: 'Asset ID is required',
+          records: []
+        };
+      }
+
+      let records = [];
+      try {
+        records = await Maintenance.find({ assetId })
+          .populate('assignedTo', 'firstName lastName email')
+          .sort({ completionDate: -1 });
+      } catch (dbError) {
+        // If assetId is not a valid ObjectId format, return graceful response
+        if (dbError.name === 'CastError') {
+          // Return an empty history for invalid asset IDs
+          return {
+            success: false,
+            message: 'Asset not found or invalid asset ID format',
+            records: []
+          };
+        } else {
+          throw dbError;
         }
       }
+
+      if (records.length === 0) return null;
+
+      const totalCost = records.reduce((sum, r) => sum + (r.actualCost || 0), 0);
+      const completedRecords = records.filter(r => r.status === 'completed');
+
+      return {
+        assetId,
+        totalRecords: records.length,
+        completedRecords: completedRecords.length,
+        totalCost: Math.round(totalCost),
+        lastMaintenance: records[0]?.completionDate || records[0]?.scheduledDate,
+        upcomingSchedules: records.filter(r => r.status === 'scheduled'),
+        recentRecords: completedRecords.slice(0, 10),
+        avgMaintenanceCycle: this._calculateMaintenanceCycle(completedRecords),
+        avgCost: Math.round(completedRecords.length > 0 ? totalCost / completedRecords.length : 0)
+      };
+    } catch (error) {
+      logger.error('Error getting history:', error);
+      throw error;
+    }
+  }
+
+  // ============ UTILITY METHODS ============
+
+  /**
+   * Calculate average maintenance cycle in days
+   */
+  _calculateMaintenanceCycle(records) {
+    if (records.length < 2) return null;
+
+    const cycles = [];
+    for (let i = 0; i < records.length - 1; i++) {
+      const date1 = new Date(records[i].completionDate);
+      const date2 = new Date(records[i + 1].completionDate);
+      const diff = (date1 - date2) / (1000 * 60 * 60 * 24);
+      if (diff > 0) cycles.push(diff);
     }
 
-    return {
-      success: true,
-      data: {
-        vehicleId,
-        currentMileage,
-        recommendations,
-        totalRecommendations: recommendations.length,
-        highPriority: recommendations.filter(r => r.priority === 'high').length,
-        overdue: recommendations.filter(r => r.overdue).length,
+    if (cycles.length === 0) return null;
+    const average = cycles.reduce((a, b) => a + b, 0) / cycles.length;
+    return Math.round(average);
+  }
+
+  /**
+   * Get recommended maintenance types based on history
+   */
+  _getRecommendedTypes(records) {
+    const types = {};
+    records.forEach(r => {
+      if (!types[r.type]) {
+        types[r.type] = 0;
+      }
+      types[r.type]++;
+    });
+
+    return Object.entries(types)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([type, count]) => ({ type, frequency: count }));
+  }
+
+  /**
+   * Estimate maintenance cost
+   */
+  _estimateMaintenanceCost(records) {
+    const completed = records.filter(r => r.actualCost);
+    if (completed.length === 0) return 0;
+
+    const cost = completed.reduce((sum, r) => sum + r.actualCost, 0) / completed.length;
+    return Math.round(cost);
+  }
+
+  /**
+   * Generate indicators for prediction
+   */
+  _generateIndicators(records) {
+    return [
+      {
+        name: 'Maintenance Frequency',
+        value: `${records.length} times`,
+        threshold: '10 times',
+        status: records.length > 5 ? 'warning' : 'normal'
       },
-    };
-  }
-
-  /**
-   * تحديث سجل صيانة
-   */
-  async updateMaintenanceRecord(recordId, updates) {
-    const index = mockDB.maintenanceRecords.findIndex(r => r.id === recordId);
-    if (index === -1) {
-      return { success: false, error: 'سجل الصيانة غير موجود' };
-    }
-
-    mockDB.maintenanceRecords[index] = {
-      ...mockDB.maintenanceRecords[index],
-      ...updates,
-      updatedAt: new Date().toISOString(),
-    };
-
-    return { success: true, data: mockDB.maintenanceRecords[index] };
-  }
-
-  /**
-   * حذف سجل صيانة
-   */
-  async deleteMaintenanceRecord(recordId) {
-    const index = mockDB.maintenanceRecords.findIndex(r => r.id === recordId);
-    if (index === -1) {
-      return { success: false, error: 'سجل الصيانة غير موجود' };
-    }
-
-    const deleted = mockDB.maintenanceRecords.splice(index, 1)[0];
-    return { success: true, data: deleted };
-  }
-
-  /**
-   * إحصائيات الصيانة
-   */
-  async getMaintenanceStatistics(options = {}) {
-    let records = mockDB.maintenanceRecords;
-
-    if (options.startDate) {
-      records = records.filter(r => new Date(r.date) >= new Date(options.startDate));
-    }
-
-    if (options.endDate) {
-      records = records.filter(r => new Date(r.date) <= new Date(options.endDate));
-    }
-
-    const stats = {
-      totalRecords: records.length,
-      totalCost: records.reduce((sum, r) => sum + (r.cost || 0), 0),
-      averageCost: 0,
-      byType: {},
-      byMonth: {},
-      mostExpensive: null,
-      mostFrequent: null,
-    };
-
-    if (records.length > 0) {
-      stats.averageCost = stats.totalCost / records.length;
-      stats.mostExpensive = records.sort((a, b) => (b.cost || 0) - (a.cost || 0))[0];
-    }
-
-    // تجميع حسب النوع
-    records.forEach(r => {
-      if (!stats.byType[r.type]) {
-        stats.byType[r.type] = { count: 0, totalCost: 0 };
+      {
+        name: 'Average Cost',
+        value: `$${this._estimateMaintenanceCost(records)}`,
+        threshold: '$500',
+        status: this._estimateMaintenanceCost(records) > 500 ? 'warning' : 'normal'
+      },
+      {
+        name: 'Time Since Maintenance',
+        value: records[0]?.completionDate ?
+          `${Math.floor((new Date() - new Date(records[0].completionDate)) / (1000 * 60 * 60 * 24))} days` :
+          'unknown',
+        threshold: '30 days',
+        status: 'normal'
       }
-      stats.byType[r.type].count++;
-      stats.byType[r.type].totalCost += r.cost || 0;
-    });
-
-    // تجميع حسب الشهر
-    records.forEach(r => {
-      const month = new Date(r.date).toISOString().slice(0, 7);
-      if (!stats.byMonth[month]) {
-        stats.byMonth[month] = { count: 0, totalCost: 0 };
-      }
-      stats.byMonth[month].count++;
-      stats.byMonth[month].totalCost += r.cost || 0;
-    });
-
-    // الأكثر تكراراً
-    const typeCounts = Object.entries(stats.byType).map(([type, data]) => ({
-      type,
-      count: data.count,
-    }));
-    stats.mostFrequent = typeCounts.sort((a, b) => b.count - a.count)[0];
-
-    return { success: true, data: stats };
+    ];
   }
 
   /**
-   * الحصول على أنواع الصيانة المتاحة
+   * Get service health status
    */
-  getMaintenanceTypes() {
-    return {
-      success: true,
-      data: mockDB.maintenanceTypes,
-    };
+  async getHealthStatus() {
+    try {
+      const [schedulesCount, recordsCount, predictionsCount] = await Promise.all([
+        Maintenance.countDocuments({ status: 'scheduled' }),
+        Maintenance.countDocuments({ status: 'completed' }),
+        MaintenancePrediction.countDocuments()
+      ]);
+
+      return {
+        service: 'MaintenanceService',
+        status: 'operational',
+        schedulesCount,
+        recordsCount,
+        predictionsCount
+      };
+    } catch (error) {
+      logger.error('Error getting health status:', error);
+      return {
+        service: 'MaintenanceService',
+        status: 'error',
+        error: error.message
+      };
+    }
   }
 }
 
-module.exports = new MaintenanceService();
+// Export service and singleton instance
+const maintenanceService = new MaintenanceService();
+
+module.exports = {
+  MaintenanceService,
+  maintenanceService
+};

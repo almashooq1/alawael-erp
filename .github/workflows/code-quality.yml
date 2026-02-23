@@ -148,17 +148,17 @@ jobs:
       uses: actions/github-script@v6
       with:
         script: |
-          const comment = `## 📊 Code Quality Report
-
-### Checks Performed
-✅ ESLint
-✅ Code Formatting (Prettier)
-✅ Complexity Analysis
-✅ Documentation (JSDoc)
-
-### Quality Grade: **A**
-
-All code quality checks passed! Your code follows best practices.`;
+          const comment = `## Code Quality Report
+          
+          ### Checks Performed
+          - ESLint (PASSED)
+          - Code Formatting with Prettier (PASSED)
+          - Complexity Analysis (PASSED)
+          - Documentation with JSDoc (PASSED)
+          
+          ### Quality Grade: A
+          
+          All code quality checks passed! Your code follows best practices.`;
           
           github.rest.issues.createComment({
             issue_number: context.issue.number,

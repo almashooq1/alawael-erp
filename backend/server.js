@@ -88,6 +88,20 @@ const financeRoutes = require('./routes/finance.routes.unified'); // RE-ENABLED 
 const integrationRoutes = require('./routes/integration.routes.minimal'); // RE-ENABLED for testing
 // const projectManagementRoutes = require('./routes/projectManagement.routes'); // Unused
 // const rehabilitationRoutes = require('./routes/rehabilitation.routes'); // TEMP: Disabled for testing
+
+// Phase 2 New Routes: Disability Rehabilitation, Maintenance, Webhooks
+const disabilityRehabilitationRoutes = require('./routes/disability-rehabilitation');
+const maintenanceRoutes = require('./routes/maintenance');
+const webhooksRoutes = require('./routes/webhooks');
+
+// Phase 2 Part 2 New Routes: Asset Management, Schedule Management, Analytics, Reports
+const assetRoutes = require('./routes/assets');
+const scheduleRoutes = require('./routes/schedules');
+const analyticsRoutes = require('./routes/analytics');
+const reportRoutes = require('./routes/reports');
+
+// Phase 4 Health Monitoring Routes
+const healthRoutes = require('./routes/health.routes');
 // const workflowRoutes = require('./api/routes/workflows.routes'); // TEMP: Disabled for testing
 // const performanceRoutes = require('./routes/performanceRoutes'); // TEMP DISABLED
 // const systemRoutes = require('./routes/system.routes'); // TEMP: Disabled for testing
@@ -373,20 +387,14 @@ app.get('/health', (req, res) => {
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'OK',
-    message: 'AlAwael ERP Backend is running',
+    message: 'نظام الأوقاف يعمل بشكل صحيح',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development',
   });
 });
 
-app.get('/api/v1/health', (req, res) => {
-  res.json({
-    status: 'OK',
-    message: 'AlAwael ERP Backend is running',
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development',
-  });
-});
+// NOTE: /api/v1/health/* endpoints are now handled by comprehensive health.routes.js
+// Removed catch-all /api/v1/health endpoint to allow sub-routes to work
 
 // Serve a minimal service worker to avoid 404 noise in logs
 app.get('/service-worker.js', (req, res) => {
@@ -500,6 +508,27 @@ app.use('/api/conversations', require('./routes/conversations.routes')); // Conv
 app.use('/api/finance', financeRoutes); // RE-ENABLED Finance
 app.use('/api/reports', reportingRoutes); // RE-ENABLED Reporting
 app.use('/api/integrations', integrationRoutes); // RE-ENABLED Integration
+
+// Phase 2 New Routes: Disability Rehabilitation, Maintenance, Webhooks
+app.use('/api/v1/disability-rehabilitation', disabilityRehabilitationRoutes); // Disability Rehabilitation
+app.use('/api/v1/maintenance', maintenanceRoutes); // Maintenance Management
+app.use('/api/webhooks', webhooksRoutes); // Webhook Management
+
+// Phase 2 Part 2 New Routes: Asset Management, Schedule Management, Analytics, Reports
+app.use('/api/v1/assets', assetRoutes); // Asset Management
+app.use('/api/v1/schedules', scheduleRoutes); // Schedule Management
+app.use('/api/v1/analytics', analyticsRoutes); // Performance Analytics
+app.use('/api/v1/reports', reportRoutes); // Reports & Exports
+
+// Phase 4 Health Monitoring Routes - Kubernetes Readiness/Liveness Probes & System Health
+try {
+  console.log('🏥 Mounting Phase 4 Health Routes at /api/v1/health');
+  app.use('/api/v1/health', healthRoutes); // 6 comprehensive health check endpoints
+  console.log('✅ Phase 4 Health Routes mounted successfully (db, models, system, full, ready, alive)');
+} catch (err) {
+  console.error('❌ ERROR mounting health routes:', err.message);
+  console.error('   Stack:', err.stack);
+}
 
 // app.use('/api/notifications/smart', notificationsSmartRoutes); // Legacy - temporarily disabled
 // app.use('/api/inbox', inboxRoutes); // Temporarily disabled
@@ -698,8 +727,8 @@ try {
 // app.use('/api/ai', aiRoutes); // TEMP: Disabled for testing
 
 // Disability Rehabilitation System (re-enabled for coverage)
-// app.use(/api/disability-rehabilitation, require('./routes/disability-rehabilitation.routes'));
-// app.use(/api/v1/disability-rehabilitation, require('./routes/disability-rehabilitation.routes'));
+app.use('/api/disability-rehabilitation', require('./routes/disability-rehabilitation.routes'));
+app.use('/api/v1/disability-rehabilitation', require('./routes/disability-rehabilitation.routes'));
 
 // app.use('/api/ai-predictions', predictionsRoutes); // TEMP: Disabled for testing
 // app.use('/api/documents', documentsManagementRoutes); // TEMP: Disabled for testing

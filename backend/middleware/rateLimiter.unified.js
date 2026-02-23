@@ -5,8 +5,33 @@
  */
 
 const rateLimit = require('express-rate-limit');
-const RedisStore = require('rate-limit-redis');
-const redis = require('redis');
+
+// Optional dependencies - safely loaded
+let RedisStore = null;
+let redisModule = null;
+let redisAvailable = false;
+let redisClient = null;
+
+// Try to load optional Redis dependencies - safely with individual try-catch blocks
+try {
+  redisModule = require('redis');
+} catch (e) {
+  console.warn('⚠️  Redis module not available');
+  redisModule = null;
+}
+
+try {
+  RedisStore = require('rate-limit-redis');
+  if (redisModule && RedisStore) {
+    redisAvailable = true;
+    console.log('✅ Redis rate limiter modules loaded');
+  }
+} catch (e) {
+  // rate-limit-redis not available
+  console.warn('⚠️  rate-limit-redis not available, using in-memory store');
+  RedisStore = null;
+  redisAvailable = false;
+}
 
 // ============================================
 // 1. الإعدادات الأساسية
@@ -18,17 +43,20 @@ const DEFAULT_AUTH_MAX = 5;
 const DEFAULT_API_MAX = 300;
 
 // إعداد Redis (اختياري)
-let redisClient = null;
 const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';
 
 const initRedis = async () => {
+  if (!redisModule || !RedisStore) {
+    console.warn('⚠️ Redis module not available, using memory store');
+    return false;
+  }
   try {
-    redisClient = redis.createClient({ url: REDIS_URL });
+    redisClient = redisModule.createClient({ url: REDIS_URL });
     await redisClient.connect();
     console.log('✅ Redis connected for rate limiting');
     return true;
   } catch (error) {
-    console.warn('⚠️ Redis not available, using memory store');
+    console.warn('⚠️ Redis not available, using memory store:', error.message);
     return false;
   }
 };
@@ -67,7 +95,7 @@ const createRateLimiter = (options = {}) => {
   };
 
   // استخدام Redis إذا كان متاحاً
-  if (redisClient && redisClient.isOpen) {
+  if (redisClient && redisClient.isOpen && RedisStore) {
     limiterOptions.store = new RedisStore({
       sendCommand: (...args) => redisClient.sendCommand(args),
     });

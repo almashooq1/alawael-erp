@@ -1,0 +1,13 @@
+﻿
+> 66666@1.0.0 lint
+> cd erp_new_system/backend && npm run lint 2>/dev/null || echo 'No lint script in backend'
+
+node.exe : The system cannot find the path specified.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Users\x-be\AppData\Roaming\n ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (The system cann...path specified. 
+   :String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+'No lint script in backend'

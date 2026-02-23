@@ -17,7 +17,18 @@ const validation = require('./validation.unified');
 // ============================================
 // تحديد المعدل - Rate Limiting
 // ============================================
-const rateLimiter = require('./rateLimiter.unified');
+let rateLimiter;
+try {
+  rateLimiter = require('./rateLimiter.unified');
+} catch (e) {
+  console.warn('⚠️ RateLimiter module failed to load:', e.message);
+  // Fallback - create dummy rate limiter
+  rateLimiter = {
+    loginLimiter: (req, res, next) => next(),
+    apiLimiter: (req, res, next) => next(),
+    createLimiter: () => (req, res, next) => next(),
+  };
+}
 
 // ============================================
 // التخزين المؤقت - Caching

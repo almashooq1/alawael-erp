@@ -3,7 +3,8 @@
  * Created: February 22, 2026
  */
 
-const { NotificationTemplate } = require('../services/NotificationService');
+const NotificationService = require('../services/notificationService');
+const { NotificationTemplate } = NotificationService;
 
 // Email Templates
 const emailTemplates = {

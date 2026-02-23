@@ -63,15 +63,15 @@ jobs:
       run: npm install -g snyk
 
     - name: Authenticate Snyk
+      if: secrets.SNYK_TOKEN != ''
       run: snyk auth ${{ secrets.SNYK_TOKEN }}
-      if: ${{ secrets.SNYK_TOKEN != '' }}
 
     - name: Run Snyk test
+      if: secrets.SNYK_TOKEN != ''
       working-directory: erp_new_system/backend
       continue-on-error: true
       run: |
         snyk test --severity-threshold=high || true
-      if: ${{ secrets.SNYK_TOKEN != '' }}
 
   code-scanning:
     runs-on: ubuntu-latest

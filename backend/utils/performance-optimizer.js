@@ -169,9 +169,6 @@ const compressionMiddleware = () => {
  * Cache control headers middleware
  */
 const cacheControlMiddleware = (req, res, next) => {
-  const originalJson = res.json.bind(res);
-  const originalSend = res.send.bind(res);
-
   // Determine cache duration based on route
   let cacheDuration = 0;
   for (const [pattern, duration] of Object.entries(CACHE_CONFIG.durations)) {
@@ -191,21 +188,28 @@ const cacheControlMiddleware = (req, res, next) => {
     res.set('Expires', '0');
   }
 
-  // Add response size header
-  res.json = function(data) {
-    const size = JSON.stringify(data).length;
-    res.set('X-Response-Size', `${size}B`);
-    res.set('X-Cache-Duration', `${cacheDuration}s`);
-    return originalJson(data);
-  };
-
-  res.send = function(data) {
-    if (typeof data === 'object') {
+  // Wrap res.json if it exists
+  if (res.json) {
+    const originalJson = res.json.bind(res);
+    res.json = function(data) {
       const size = JSON.stringify(data).length;
       res.set('X-Response-Size', `${size}B`);
-    }
-    return originalSend(data);
-  };
+      res.set('X-Cache-Duration', `${cacheDuration}s`);
+      return originalJson(data);
+    };
+  }
+
+  // Wrap res.send if it exists
+  if (res.send) {
+    const originalSend = res.send.bind(res);
+    res.send = function(data) {
+      if (typeof data === 'object') {
+        const size = JSON.stringify(data).length;
+        res.set('X-Response-Size', `${size}B`);
+      }
+      return originalSend(data);
+    };
+  }
 
   next();
 };
@@ -318,13 +322,13 @@ function initializePerformanceOptimizations(app) {
   app.use(compressionMiddleware());
 
   // Add cache control headers
-  app.use(cacheControlMiddleware());
+  app.use(cacheControlMiddleware);
 
   // Add response caching
-  app.use(responseCachingMiddleware());
+  app.use(responseCachingMiddleware);
 
   // Add performance monitoring
-  app.use(performanceMonitoringMiddleware());
+  app.use(performanceMonitoringMiddleware);
 
   // Add cache statistics endpoint
   app.get('/api/cache-stats', (req, res) => {

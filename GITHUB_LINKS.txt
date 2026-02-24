@@ -1,0 +1,137 @@
+═══════════════════════════════════════════════════════════════════
+🔗 روابط GitHub - جاهزة للنسخ واللصق
+═══════════════════════════════════════════════════════════════════
+
+## 🎯 المستودعات الرئيسية:
+
+### Backend (الخادم الأساسي)
+رابط الإصدارات:
+https://github.com/almashooq1/alawael-backend/releases
+
+رابط المستودع:
+https://github.com/almashooq1/alawael-backend
+
+───────────────────────────────────────────────────────────────────
+
+### ERP (نظام إدارة الموارد)
+رابط الإصدارات:
+https://github.com/almashooq1/alawael-erp/releases
+
+رابط المستودع:
+https://github.com/almashooq1/alawael-erp
+
+═══════════════════════════════════════════════════════════════════
+
+## 💻 الخوادم المحلية:
+
+### Backend Server
+http://localhost:3000
+
+Health Check:
+http://localhost:3000/api/health
+
+───────────────────────────────────────────────────────────────────
+
+### Frontend Server
+http://localhost:3001
+
+Dashboard:
+http://localhost:3001/dashboard
+
+───────────────────────────────────────────────────────────────────
+
+### MongoDB (إذا كان متاحاً)
+mongodb://localhost:27017
+
+═══════════════════════════════════════════════════════════════════
+
+## 📊 صفحات GitHub المهمة:
+
+### Issues & Pull Requests
+Backend Issues:
+https://github.com/almashooq1/alawael-backend/issues
+
+Backend PRs:
+https://github.com/almashooq1/alawael-backend/pulls
+
+ERP Issues:
+https://github.com/almashooq1/alawael-erp/issues
+
+ERP PRs:
+https://github.com/almashooq1/alawael-erp/pulls
+
+───────────────────────────────────────────────────────────────────
+
+### Wiki & Documentation
+Backend Wiki:
+https://github.com/almashooq1/alawael-backend/wiki
+
+ERP Wiki:
+https://github.com/almashooq1/alawael-erp/wiki
+
+───────────────────────────────────────────────────────────────────
+
+### Actions / CI-CD
+Backend Actions:
+https://github.com/almashooq1/alawael-backend/actions
+
+ERP Actions:
+https://github.com/almashooq1/alawael-erp/actions
+
+═══════════════════════════════════════════════════════════════════
+
+## 📱 النسخ السابقة:
+
+### جميع الإصدارات (Backend):
+https://github.com/almashooq1/alawael-backend/releases
+
+### جميع الإصدارات (ERP):
+https://github.com/almashooq1/alawael-erp/releases
+
+═══════════════════════════════════════════════════════════════════
+
+## ⚙️ الإعدادات والإدارة:
+
+### GitHub Profile
+https://github.com/almashooq1
+
+### Settings (Backend)
+https://github.com/almashooq1/alawael-backend/settings
+
+### Settings (ERP)
+https://github.com/almashooq1/alawael-erp/settings
+
+═══════════════════════════════════════════════════════════════════
+
+## 🔐 الأقسام الحساسة:
+
+### Security (Backend)
+https://github.com/almashooq1/alawael-backend/security
+
+### Security (ERP)
+https://github.com/almashooq1/alawael-erp/security
+
+───────────────────────────────────────────────────────────────────
+
+### Dependabot (Backend)
+https://github.com/almashooq1/alawael-backend/security/dependabot
+
+### Dependabot (ERP)
+https://github.com/almashooq1/alawael-erp/security/dependabot
+
+═══════════════════════════════════════════════════════════════════
+
+## 📋 روابط الخطوات:
+
+الخطوة 1 - GitHub Releases:
+https://github.com/almashooq1/alawael-backend/releases
+https://github.com/almashooq1/alawael-erp/releases
+
+الخطوة 2 - اختبار محلي:
+http://localhost:3000
+http://localhost:3001
+
+الخطوة 3 - النشر الفعلي:
+(سيتم من خلال CI-CD في GitHub Actions)
+
+═══════════════════════════════════════════════════════════════════

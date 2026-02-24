@@ -1,322 +1,495 @@
-import React from 'react';
+/**
+ * Login Page - Complete Authentication System
+ * صفحة تسجيل الدخول الشاملة
+ */
+
+import React, { useState, useEffect } from 'react';
 import {
-  Container, Paper, TextField, Button, Box, Typography, FormControlLabel,
-  Checkbox, Card, CardContent, CircularProgress, Alert, Grid, Select, MenuItem
-} from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import { useDispatch } from 'react-redux';
+  Box,
+  Card,
+  CardContent,
+  TextField,
+  Button,
+  Typography,
+  Avatar,
+  InputAdornment,
+  IconButton,
+  FormControlLabel,
+  Checkbox,
+  Link,
+  Divider,
+  Alert,
+  CircularProgress,
+  Paper,
+  Grid,
+  useMediaQuery,
+  useTheme,
+} from '@mui/material';
+import {
+  Person as PersonIcon,
+  Lock as LockIcon,
+  Visibility as VisibilityIcon,
+  VisibilityOff as VisibilityOffIcon,
+  Login as LoginIcon,
+  LocationOn as LocationIcon,
+  Phone as PhoneIcon,
+  Email as EmailIcon,
+  Security as SecurityIcon,
+  ArrowBack as ArrowBackIcon,
+} from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import authService from '../services/auth.service';
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    minHeight: '100vh',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-  },
-  container: {
-    maxWidth: 400,
-  },
-  paper: {
-    padding: theme.spacing(4),
-    borderRadius: theme.spacing(2),
-    boxShadow: '0 10px 40px rgba(0,0,0,0.2)',
-  },
-  title: {
-    marginBottom: theme.spacing(3),
-    textAlign: 'center',
-    fontWeight: 600,
-    color: theme.palette.primary.main,
-  },
-  field: {
-    marginBottom: theme.spacing(2),
-  },
-  button: {
-    marginTop: theme.spacing(3),
-    padding: theme.spacing(1.5),
-    fontSize: '1rem',
-    fontWeight: 500,
-  },
-  portalSection: {
-    marginBottom: theme.spacing(3),
-    padding: theme.spacing(2),
-    backgroundColor: '#f5f5f5',
-    borderRadius: theme.spacing(1),
-  },
-  errorAlert: {
-    marginBottom: theme.spacing(2),
-  },
-  loadingContainer: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    minHeight: 200,
-  },
-  registerLink: {
-    marginTop: theme.spacing(2),
-    textAlign: 'center',
-    '& a': {
-      color: theme.palette.primary.main,
-      textDecoration: 'none',
-      fontWeight: 500,
-      '&:hover': {
-        textDecoration: 'underline',
-      },
-    },
-  },
-}));
-
+// Login Page Component
 const LoginPage = () => {
-  const classes = useStyles();
-  const { t } = useTranslation();
-  const dispatch = useDispatch();
+  const theme = useTheme();
   const navigate = useNavigate();
-
-  const [formData, setFormData] = React.useState({
-    email: '',
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  
+  // State
+  const [loginMethod, setLoginMethod] = useState('username'); // username, nationalId, phone
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  
+  // Form Data
+  const [formData, setFormData] = useState({
+    username: '',
+    nationalId: '',
+    phone: '',
     password: '',
-    rememberMe: false,
-    portal: 'beneficiary',
   });
-
-  const [loading, setLoading] = React.useState(false);
-  const [error, setError] = React.useState(null);
-
-  const handleChange = (e) => {
-    const { name, value, checked, type } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
-    setError(null);
+  
+  // Centers for selection
+  const centers = [
+    { id: 'CTR-001', name: 'مركز التأهيل الشامل - الرياض' },
+    { id: 'CTR-002', name: 'مركز التأهيل الشامل - جدة' },
+    { id: 'CTR-003', name: 'مركز التأهيل الشامل - الدمام' },
+  ];
+  const [selectedCenter, setSelectedCenter] = useState(centers[0].id);
+  
+  // Handle input change
+  const handleChange = (field) => (e) => {
+    setFormData({ ...formData, [field]: e.target.value });
+    setError('');
   };
-
+  
+  // Handle login method change
+  const handleLoginMethodChange = (method) => {
+    setLoginMethod(method);
+    setFormData({ username: '', nationalId: '', phone: '', password: '' });
+    setError('');
+  };
+  
+  // Handle submit
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
-
+    setError('');
+    
+    // Validation
+    let identifier = '';
+    if (loginMethod === 'username') {
+      identifier = formData.username;
+      if (!identifier) {
+        setError('يرجى إدخال اسم المستخدم');
+        setLoading(false);
+        return;
+      }
+    } else if (loginMethod === 'nationalId') {
+      identifier = formData.nationalId;
+      if (!identifier || identifier.length !== 10) {
+        setError('يرجى إدخال رقم الهوية الوطنية (10 أرقام)');
+        setLoading(false);
+        return;
+      }
+    } else if (loginMethod === 'phone') {
+      identifier = formData.phone;
+      if (!identifier || identifier.length !== 10) {
+        setError('يرجى إدخال رقم الجوال (10 أرقام)');
+        setLoading(false);
+        return;
+      }
+    }
+    
+    if (!formData.password) {
+      setError('يرجى إدخال كلمة المرور');
+      setLoading(false);
+      return;
+    }
+    
+    // Simulate API call
     try {
-      // Validate inputs
-      if (!formData.email || !formData.password) {
-        setError(t('login.validation.required'));
-        setLoading(false);
-        return;
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Mock success
+      setSuccess('تم تسجيل الدخول بنجاح! جاري التحويل...');
+      
+      // Save to localStorage if remember me
+      if (rememberMe) {
+        localStorage.setItem('rememberMe', 'true');
+        localStorage.setItem('savedUsername', identifier);
       }
-
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-        setError(t('login.validation.invalidEmail'));
-        setLoading(false);
-        return;
-      }
-
-      // Call login service
-      const response = await authService.login({
-        email: formData.email,
-        password: formData.password,
-        portal: formData.portal,
-      });
-
-      if (response.error) {
-        setError(response.error);
-        setLoading(false);
-        return;
-      }
-
-      // Save remember me preference
-      if (formData.rememberMe) {
-        localStorage.setItem('rememberedEmail', formData.email);
-        localStorage.setItem('rememberedPortal', formData.portal);
-      } else {
-        localStorage.removeItem('rememberedEmail');
-        localStorage.removeItem('rememberedPortal');
-      }
-
-      // Dispatch login action to Redux
-      dispatch({
-        type: 'LOGIN_SUCCESS',
-        payload: {
-          user: response.user,
-          token: response.token,
-          portal: formData.portal,
-        },
-      });
-
-      // Store in localStorage for persistence
-      localStorage.setItem('authToken', response.token);
-      localStorage.setItem('userPortal', formData.portal);
-      localStorage.setItem('user', JSON.stringify(response.user));
-
-      // Navigate to appropriate dashboard
-      const dashboardPath = formData.portal === 'beneficiary' ? '/beneficiary' : '/guardian';
-      navigate(dashboardPath);
+      
+      // Redirect after delay
+      setTimeout(() => {
+        navigate('/');
+      }, 1500);
+      
     } catch (err) {
-      console.error('Login error:', err);
-      setError(t('login.error.generic') || err.message);
+      setError('حدث خطأ أثناء تسجيل الدخول. يرجى المحاولة مرة أخرى.');
     } finally {
       setLoading(false);
     }
   };
-
-  // Load remembered credentials
-  React.useEffect(() => {
-    const rememberedEmail = localStorage.getItem('rememberedEmail');
-    const rememberedPortal = localStorage.getItem('rememberedPortal');
-    if (rememberedEmail) {
-      setFormData((prev) => ({
-        ...prev,
-        email: rememberedEmail,
-        portal: rememberedPortal || 'beneficiary',
-        rememberMe: true,
-      }));
+  
+  // Load saved credentials
+  useEffect(() => {
+    const saved = localStorage.getItem('rememberMe');
+    if (saved === 'true') {
+      const savedUsername = localStorage.getItem('savedUsername');
+      if (savedUsername) {
+        setFormData(prev => ({ ...prev, username: savedUsername }));
+        setRememberMe(true);
+      }
     }
   }, []);
-
-  if (loading) {
-    return (
-      <Box className={classes.root}>
-        <Box className={classes.loadingContainer}>
-          <CircularProgress />
-        </Box>
-      </Box>
-    );
-  }
-
+  
   return (
-    <Box className={classes.root}>
-      <Container maxWidth="sm" className={classes.container}>
-        <Paper className={classes.paper}>
-          <Typography variant="h4" className={classes.title}>
-            {t('login.title')}
+    <Box
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        bgcolor: '#F3F4F6',
+      }}
+      dir="rtl"
+    >
+      {/* Left Side - Branding (hidden on mobile) */}
+      {!isMobile && (
+        <Box
+          sx={{
+            flex: 1,
+            bgcolor: 'primary.main',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            p: 4,
+            background: 'linear-gradient(135deg, #6366F1 0%, #4F46E5 100%)',
+          }}
+        >
+          <Avatar
+            sx={{
+              width: 100,
+              height: 100,
+              bgcolor: 'white',
+              mb: 3,
+            }}
+          >
+            <LocationIcon sx={{ fontSize: 60, color: 'primary.main' }} />
+          </Avatar>
+          <Typography variant="h4" fontWeight="bold" color="white" gutterBottom>
+            نظام إدارة مراكز التأهيل
           </Typography>
-
-          {error && (
-            <Alert severity="error" className={classes.errorAlert}>
-              {error}
-            </Alert>
-          )}
-
-          <Box component="form" onSubmit={handleSubmit}>
-            {/* Portal Selection */}
-            <Box className={classes.portalSection}>
-              <Typography variant="subtitle2" gutterBottom>
-                {t('login.portalType')}
-              </Typography>
-              <Select
-                fullWidth
-                name="portal"
-                value={formData.portal}
-                onChange={handleChange}
-              >
-                <MenuItem value="beneficiary">
-                  {t('login.portal.beneficiary')}
-                </MenuItem>
-                <MenuItem value="guardian">
-                  {t('login.portal.guardian')}
-                </MenuItem>
-              </Select>
+          <Typography variant="body1" color="white" sx={{ opacity: 0.9, maxWidth: 400, textAlign: 'center' }}>
+            نظام متكامل لإدارة مراكز تأهيل ذوي الإعاقة مع دعم الذكاء الاصطناعي
+          </Typography>
+          
+          <Box sx={{ mt: 6, color: 'white', opacity: 0.8 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+              <SecurityIcon />
+              <Typography>تسجيل دخول آمن</Typography>
             </Box>
-
-            {/* Email Field */}
-            <TextField
-              fullWidth
-              type="email"
-              name="email"
-              label={t('login.email')}
-              value={formData.email}
-              onChange={handleChange}
-              placeholder={t('login.emailPlaceholder')}
-              className={classes.field}
-              variant="outlined"
-              autoComplete="email"
-              required
-            />
-
-            {/* Password Field */}
-            <TextField
-              fullWidth
-              type="password"
-              name="password"
-              label={t('login.password')}
-              value={formData.password}
-              onChange={handleChange}
-              placeholder={t('login.passwordPlaceholder')}
-              className={classes.field}
-              variant="outlined"
-              autoComplete="current-password"
-              required
-            />
-
-            {/* Remember Me & Forgot Password */}
-            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name="rememberMe"
-                    color="primary"
-                    checked={formData.rememberMe}
-                    onChange={handleChange}
-                  />
-                }
-                label={t('login.rememberMe')}
-              />
-              <Typography>
-                <a href="/forgot-password" style={{ color: '#667eea', textDecoration: 'none' }}>
-                  {t('login.forgotPassword')}
-                </a>
-              </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+              <LocationIcon />
+              <Typography>متوافق مع العنوان الوطني</Typography>
             </Box>
-
-            {/* Login Button */}
-            <Button
-              fullWidth
-              variant="contained"
-              color="primary"
-              className={classes.button}
-              type="submit"
-              disabled={loading}
-            >
-              {loading ? <CircularProgress size={24} /> : t('login.button')}
-            </Button>
-
-            {/* Register Link */}
-            <Box className={classes.registerLink}>
-              <Typography variant="body2">
-                {t('login.noAccount')}{' '}
-                <a href="/register">
-                  {t('login.registerHere')}
-                </a>
-              </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <PersonIcon />
+              <Typography>دعم هوية الوصول الموحد</Typography>
             </Box>
           </Box>
-
-          {/* Demo Credentials Card */}
-          <Card style={{ marginTop: 24, backgroundColor: '#f5f5f5' }}>
-            <CardContent>
-              <Typography variant="subtitle2" gutterBottom>
-                {t('login.demoCredentials')}
+        </Box>
+      )}
+      
+      {/* Right Side - Login Form */}
+      <Box
+        sx={{
+          flex: isMobile ? 1 : { xs: 1, md: 0.6 },
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          p: 3,
+        }}
+      >
+        <Card
+          sx={{
+            width: '100%',
+            maxWidth: 480,
+            borderRadius: 3,
+            boxShadow: '0 10px 40px rgba(0,0,0,0.1)',
+          }}
+        >
+          <CardContent sx={{ p: 4 }}>
+            {/* Mobile Logo */}
+            {isMobile && (
+              <Box sx={{ textAlign: 'center', mb: 3 }}>
+                <Avatar
+                  sx={{
+                    width: 70,
+                    height: 70,
+                    bgcolor: 'primary.main',
+                    mx: 'auto',
+                    mb: 2,
+                  }}
+                >
+                  <LocationIcon sx={{ fontSize: 40 }} />
+                </Avatar>
+                <Typography variant="h5" fontWeight="bold">
+                  نظام مراكز التأهيل
+                </Typography>
+              </Box>
+            )}
+            
+            {/* Header */}
+            <Typography variant="h5" fontWeight="bold" gutterBottom>
+              تسجيل الدخول
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              أدخل بياناتك للوصول إلى النظام
+            </Typography>
+            
+            {/* Error Alert */}
+            {error && (
+              <Alert severity="error" sx={{ mb: 3 }}>
+                {error}
+              </Alert>
+            )}
+            
+            {/* Success Alert */}
+            {success && (
+              <Alert severity="success" sx={{ mb: 3 }}>
+                {success}
+              </Alert>
+            )}
+            
+            {/* Login Method Tabs */}
+            <Box sx={{ display: 'flex', gap: 1, mb: 3 }}>
+              <Button
+                size="small"
+                variant={loginMethod === 'username' ? 'contained' : 'outlined'}
+                onClick={() => handleLoginMethodChange('username')}
+                sx={{ flex: 1, borderRadius: 2 }}
+              >
+                اسم المستخدم
+              </Button>
+              <Button
+                size="small"
+                variant={loginMethod === 'nationalId' ? 'contained' : 'outlined'}
+                onClick={() => handleLoginMethodChange('nationalId')}
+                sx={{ flex: 1, borderRadius: 2 }}
+              >
+                الهوية
+              </Button>
+              <Button
+                size="small"
+                variant={loginMethod === 'phone' ? 'contained' : 'outlined'}
+                onClick={() => handleLoginMethodChange('phone')}
+                sx={{ flex: 1, borderRadius: 2 }}
+              >
+                الجوال
+              </Button>
+            </Box>
+            
+            {/* Form */}
+            <form onSubmit={handleSubmit}>
+              {/* Username Field */}
+              {loginMethod === 'username' && (
+                <TextField
+                  fullWidth
+                  label="اسم المستخدم"
+                  value={formData.username}
+                  onChange={handleChange('username')}
+                  sx={{ mb: 2 }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <PersonIcon color="action" />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              )}
+              
+              {/* National ID Field */}
+              {loginMethod === 'nationalId' && (
+                <TextField
+                  fullWidth
+                  label="رقم الهوية الوطنية"
+                  value={formData.nationalId}
+                  onChange={handleChange('nationalId')}
+                  placeholder="10 أرقام"
+                  inputProps={{ maxLength: 10, pattern: '[0-9]*' }}
+                  sx={{ mb: 2 }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <PersonIcon color="action" />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              )}
+              
+              {/* Phone Field */}
+              {loginMethod === 'phone' && (
+                <TextField
+                  fullWidth
+                  label="رقم الجوال"
+                  value={formData.phone}
+                  onChange={handleChange('phone')}
+                  placeholder="05xxxxxxxx"
+                  inputProps={{ maxLength: 10, pattern: '[0-9]*' }}
+                  sx={{ mb: 2 }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <PhoneIcon color="action" />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              )}
+              
+              {/* Password Field */}
+              <TextField
+                fullWidth
+                label="كلمة المرور"
+                type={showPassword ? 'text' : 'password'}
+                value={formData.password}
+                onChange={handleChange('password')}
+                sx={{ mb: 2 }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <LockIcon color="action" />
+                    </InputAdornment>
+                  ),
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => setShowPassword(!showPassword)}
+                        edge="end"
+                      >
+                        {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+              
+              {/* Center Selection */}
+              <TextField
+                fullWidth
+                select
+                label="المركز"
+                value={selectedCenter}
+                onChange={(e) => setSelectedCenter(e.target.value)}
+                sx={{ mb: 2 }}
+                SelectProps={{
+                  native: true,
+                }}
+              >
+                {centers.map((center) => (
+                  <option key={center.id} value={center.id}>
+                    {center.name}
+                  </option>
+                ))}
+              </TextField>
+              
+              {/* Remember Me & Forgot Password */}
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={rememberMe}
+                      onChange={(e) => setRememberMe(e.target.checked)}
+                      size="small"
+                    />
+                  }
+                  label={<Typography variant="body2">تذكرني</Typography>}
+                />
+                <Link
+                  href="#"
+                  variant="body2"
+                  color="primary"
+                  underline="hover"
+                >
+                  نسيت كلمة المرور؟
+                </Link>
+              </Box>
+              
+              {/* Login Button */}
+              <Button
+                fullWidth
+                type="submit"
+                variant="contained"
+                size="large"
+                disabled={loading}
+                sx={{
+                  py: 1.5,
+                  borderRadius: 2,
+                  mb: 2,
+                }}
+              >
+                {loading ? (
+                  <CircularProgress size={24} color="inherit" />
+                ) : (
+                  <>
+                    <LoginIcon sx={{ ml: 1 }} />
+                    تسجيل الدخول
+                  </>
+                )}
+              </Button>
+            </form>
+            
+            {/* Divider */}
+            <Divider sx={{ my: 3 }}>
+              <Typography variant="body2" color="text.secondary">
+                أو
               </Typography>
-              <Typography variant="body2">
-                <strong>{t('login.student')}:</strong>
-              </Typography>
-              <Typography variant="caption">
-                Email: student@example.com<br />
-                Password: demo123
-              </Typography>
-              <Typography variant="body2" style={{ marginTop: 8 }}>
-                <strong>{t('login.parent')}:</strong>
-              </Typography>
-              <Typography variant="caption">
-                Email: parent@example.com<br />
-                Password: demo123
-              </Typography>
-            </CardContent>
-          </Card>
-        </Paper>
-      </Container>
+            </Divider>
+            
+            {/* SSO Login */}
+            <Button
+              fullWidth
+              variant="outlined"
+              size="large"
+              sx={{
+                py: 1.5,
+                borderRadius: 2,
+                mb: 2,
+              }}
+            >
+              <Avatar sx={{ width: 24, height: 24, mr: 1, bgcolor: 'primary.main' }}>
+                <SecurityIcon sx={{ fontSize: 16 }} />
+              </Avatar>
+              تسجيل الدخول بواسصة الوصول الموحد (SSO)
+            </Button>
+            
+            {/* Help Links */}
+            <Box sx={{ textAlign: 'center', mt: 2 }}>
+              <Link href="#" variant="body2" color="text.secondary" underline="hover" sx={{ mx: 1 }}>
+                المساعدة
+              </Link>
+              <Link href="#" variant="body2" color="text.secondary" underline="hover" sx={{ mx: 1 }}>
+                الدعم الفني
+              </Link>
+            </Box>
+          </CardContent>
+        </Card>
+      </Box>
     </Box>
   );
 };

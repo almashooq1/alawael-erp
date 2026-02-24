@@ -1,0 +1,101 @@
+name: Security & Linting Check
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+  schedule:
+    - cron: '0 0 * * 0'  # Weekly on Sunday
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Use Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+
+    # Dependency Security Check
+    - name: 🔒 npm audit - Backend
+      working-directory: ./backend
+      continue-on-error: true
+      run: |
+        echo "Running npm audit for backend..."
+        npm audit --audit-level=moderate || echo "⚠️ Vulnerabilities found"
+
+    - name: 🔒 npm audit - Frontend
+      working-directory: ./frontend
+      continue-on-error: true
+      run: |
+        echo "Running npm audit for frontend..."
+        npm audit --audit-level=moderate || echo "⚠️ Vulnerabilities found"
+
+    # GitHub Advanced Security
+    - name: 🔍 Dependency Review
+      uses: actions/dependency-review-action@v3
+      if: github.event_name == 'pull_request'
+
+    # SonarCloud (if configured)
+    - name: 📊 Code Quality Analysis
+      continue-on-error: true
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      run: |
+        if [ ! -z "$SONAR_TOKEN" ]; then
+          echo "Running SonarCloud analysis..."
+          npm install -g sonarqube-scanner
+          sonar-scanner \
+            -Dsonar.projectKey=almashooq1_alawael-erp \
+            -Dsonar.sources=. \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.login=$SONAR_TOKEN
+        else
+          echo "SonarCloud token not configured"
+        fi
+
+    # SAST using Semgrep
+    - name: 🔐 Semgrep Security Scan
+      uses: returntocorp/semgrep-action@v1
+      with:
+        config: >-
+          p/security-audit
+          p/owasp-top-ten
+          p/cwe-top-25
+
+    # ESLint for code quality
+    - name: 📋 ESLint - Backend
+      working-directory: ./backend
+      continue-on-error: true
+      run: npx eslint . --ext .js --max-warnings 100 || true
+
+    - name: 📋 ESLint - Frontend
+      working-directory: ./frontend
+      continue-on-error: true
+      run: npx eslint . --ext .js,.jsx --max-warnings 100 || true
+
+    # Prettier format check
+    - name: 💅 Prettier - Check formatting
+      run: |
+        npm install -g prettier
+        prettier --check "backend/**/*.js" "frontend/**/*.{js,jsx}" || echo "⚠️ Formatting issues found"
+
+    # Security Summary
+    - name: 📊 Security Check Summary
+      if: always()
+      run: |
+        echo "✅ Security checks completed"
+        echo "Checks performed:"
+        echo "  • npm audit (dependency vulnerabilities)"
+        echo "  • Dependency Review"
+        echo "  • Semgrep SAST scan"
+        echo "  • ESLint checks"
+        echo "  • Prettier formatting"

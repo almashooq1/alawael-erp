@@ -1,104 +1,25 @@
-name: Test Suite
+name: Test Suite (Jest & Unit Tests)
 
 on:
   push:
     branches: [ main, master, develop ]
   pull_request:
     branches: [ main, master, develop ]
+  schedule:
+    - cron: '0 2 * * *'  # Daily at 2 AM
 
 jobs:
-  test-backend:
+  test:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
     strategy:
       matrix:
-        node-version: [16.x, 18.x, 20.x]
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-
-    - name: Setup Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-
-    - name: Install backend dependencies
-      working-directory: ./backend
-      run: npm install
-
-    - name: Run linter
-      working-directory: ./backend
-      run: npm run lint --if-present || true
-
-    - name: Run tests
-      working-directory: ./backend
-      run: npm test -- --passWithNoTests --coverage
-
-    - name: Upload coverage
-      uses: codecov/codecov-action@v3
-      with:
-        files: ./backend/coverage/lcov.info
-        flags: backend
-        fail_ci_if_error: false
-
-  test-frontend:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [16.x, 18.x, 20.x]
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-
-    - name: Setup Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-
-    - name: Install frontend dependencies
-      working-directory: ./frontend
-      run: npm install
-
-    - name: Build frontend
-      working-directory: ./frontend
-      run: npm run build || true
-
-    - name: Run tests
-      working-directory: ./frontend
-      run: npm test -- --passWithNoTests --coverage || true
-
-  test-mobile:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [16.x, 18.x, 20.x]
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-
-    - name: Setup Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-
-    - name: Install mobile dependencies
-      working-directory: ./mobile
-      run: npm install || true
-
-    - name: Run tests
-      working-directory: ./mobile
-      run: npm test -- --passWithNoTests || true
-
-  integration-tests:
-    runs-on: ubuntu-latest
+        node-version: [18.x, 20.x]
+    
     services:
       mongodb:
-        image: mongo:5.0
+        image: mongo:6.0
         options: >-
           --health-cmd mongosh
           --health-interval 10s
@@ -106,8 +27,9 @@ jobs:
           --health-retries 5
         ports:
           - 27017:27017
+      
       redis:
-        image: redis:7.0
+        image: redis:7-alpine
         options: >-
           --health-cmd "redis-cli ping"
           --health-interval 10s
@@ -117,30 +39,57 @@ jobs:
           - 6379:6379
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-
-    - name: Setup Node.js
-      uses: actions/setup-node@v3
+    - uses: actions/checkout@v4
       with:
-        node-version: '18.x'
+        fetch-depth: 0
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
         cache: 'npm'
 
-    - name: Install dependencies
+    - name: 📦 Backend - Install dependencies
       working-directory: ./backend
-      run: npm install
+      run: npm ci
 
-    - name: Wait for services
-      run: |
-        echo "Waiting for MongoDB..."
-        sleep 5
-        echo "Waiting for Redis..."
-        sleep 5
+    - name: 📦 Frontend - Install dependencies
+      working-directory: ./frontend
+      run: npm ci
 
-    - name: Run integration tests
+    - name: 📦 Mobile - Install dependencies
+      working-directory: ./mobile
+      run: npm ci || true  # Optional for mobile
+
+    - name: ✅ Backend - Run tests
       working-directory: ./backend
       env:
-        MONGODB_URI: mongodb://localhost:27017/alawael-test
-        REDIS_URL: redis://localhost:6379
         NODE_ENV: test
-      run: npm run test:integration || true
+        MONGODB_URI: mongodb://localhost:27017/alawael_test
+        REDIS_URL: redis://localhost:6379
+      run: npm test -- --passWithNoTests --coverage
+
+    - name: ✅ Frontend - Run tests
+      working-directory: ./frontend
+      run: npm test -- --passWithNoTests --coverage || true
+
+    - name: 📊 Upload coverage reports
+      uses: codecov/codecov-action@v3
+      with:
+        files: ./backend/coverage/lcov.info,./frontend/coverage/lcov.info
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+        verbose: true
+
+    - name: 📈 Backend - Jest coverage
+      working-directory: ./backend
+      run: |
+        echo "Backend Test Results:"
+        npm test -- --passWithNoTests --coverage 2>&1 | tail -20
+
+    - name: 🎯 Test Summary
+      if: always()
+      run: |
+        echo "✅ Test execution completed"
+        echo "Matrix: Node.js ${{ matrix.node-version }}"

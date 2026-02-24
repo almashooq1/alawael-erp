@@ -33,7 +33,9 @@ export const AuthProvider = ({ children }) => {
         }
       } catch (err) {
         console.error('Auth check failed:', err);
-        logout();
+        // Clear auth on error
+        setToken(null);
+        setUser(null);
       } finally {
         setLoading(false);
       }
@@ -49,7 +51,7 @@ export const AuthProvider = ({ children }) => {
     
     try {
       // Simulate API call - replace with actual API call
-      const response = await fetch(`${API_BASE}/auth/login`, {
+      await fetch(`${API_BASE}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(credentials),

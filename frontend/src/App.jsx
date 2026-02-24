@@ -26,8 +26,6 @@ import {
   Badge,
   useMediaQuery,
   Tooltip,
-  Snackbar,
-  Alert,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -43,7 +41,6 @@ import {
   LocationOn as LocationIcon,
   Psychology as AIIcon,
   Search as SearchIcon,
-  ChevronLeft as ChevronLeftIcon,
 } from '@mui/icons-material';
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 
@@ -346,17 +343,6 @@ const MainLayout = ({ children }) => {
 };
 
 // Placeholder Pages
-const StaffPage = () => (
-  <Box sx={{ p: 3 }} dir="rtl">
-    <Typography variant="h4" fontWeight="bold" gutterBottom>
-      إدارة الموظفين
-    </Typography>
-    <Typography color="text.secondary">
-      صفحة إدارة الموظفين - قيد التطوير
-    </Typography>
-  </Box>
-);
-
 const AIPage = () => (
   <Box sx={{ p: 3 }} dir="rtl">
     <Typography variant="h4" fontWeight="bold" gutterBottom>

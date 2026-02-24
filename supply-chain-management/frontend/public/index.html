@@ -4,6 +4,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Supply Chain Management</title>
+
+    <!-- 🔍 DYNATRACE REAL USER MONITORING (RUM) -->
+    <!-- هذا الـ Script يجب أن يكون أول Script في الـ Head -->
+    <script>
+      if (window.location.hostname !== 'localhost') {
+        var dtrum=window.dtrum||{};dtrum.loader||(dtrum.config={'gcpCredentialsToken':''},window.addEventListener('load',function(){var script=document.createElement('script');script.type='text/javascript';script.async=true;script.src='https://code.dynatrace.com/latest/dt.js';document.head.appendChild(script)}))
+      }
+    </script>
+    <!-- END DYNATRACE RUM -->
+
   </head>
   <body>
     <div id="root"></div>

@@ -3,7 +3,7 @@
  * صفحة الموارد البشرية الشاملة
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Grid,
@@ -34,34 +34,18 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  LinearProgress,
-  Tooltip,
-  Menu,
-  ListItemIcon,
-  ListItemText,
 } from '@mui/material';
 import {
   People as PeopleIcon,
   PersonAdd as PersonAddIcon,
   Search as SearchIcon,
-  FilterList as FilterIcon,
   MoreVert as MoreIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  Visibility as ViewIcon,
-  Work as WorkIcon,
   Event as LeaveIcon,
   AccessTime as AttendanceIcon,
   AttachMoney as PayrollIcon,
   TrendingUp as TrendingUpIcon,
-  Business as DepartmentIcon,
-  Badge as BadgeIcon,
-  Email as EmailIcon,
-  Phone as PhoneIcon,
-  LocationOn as LocationIcon,
   CheckCircle as CheckCircleIcon,
   Warning as WarningIcon,
-  Error as ErrorIcon,
 } from '@mui/icons-material';
 import {
   Chart as ChartJS,
@@ -99,7 +83,6 @@ const HRPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
 
   // Mock Data
   const [employees] = useState([
@@ -373,7 +356,7 @@ const HRPage = () => {
                         />
                       </TableCell>
                       <TableCell>
-                        <IconButton size="small" onClick={(e) => setAnchorEl(e.currentTarget)}>
+                        <IconButton size="small">
                           <MoreIcon />
                         </IconButton>
                       </TableCell>

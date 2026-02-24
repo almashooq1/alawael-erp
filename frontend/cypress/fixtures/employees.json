@@ -1,0 +1,62 @@
+[
+    {
+        "id": "emp-001",
+        "name": "Ahmed Hassan",
+        "email": "ahmed@example.com",
+        "phone": "+966501234567",
+        "position": "Software Engineer",
+        "department": "IT",
+        "salary": 8000,
+        "joinDate": "2023-01-15",
+        "status": "active",
+        "manager": "manager-001"
+    },
+    {
+        "id": "emp-002",
+        "name": "Fatima Al-Rashid",
+        "email": "fatima@example.com",
+        "phone": "+966502345678",
+        "position": "HR Specialist",
+        "department": "Human Resources",
+        "salary": 6500,
+        "joinDate": "2023-03-20",
+        "status": "active",
+        "manager": "manager-001"
+    },
+    {
+        "id": "emp-003",
+        "name": "Mohammed Al-Otaibi",
+        "email": "mohammed@example.com",
+        "phone": "+966503456789",
+        "position": "Financial Analyst",
+        "department": "Finance",
+        "salary": 7500,
+        "joinDate": "2023-05-10",
+        "status": "active",
+        "manager": "manager-002"
+    },
+    {
+        "id": "emp-004",
+        "name": "Sarah Al-Doqeish",
+        "email": "sarah@example.com",
+        "phone": "+966504567890",
+        "position": "Project Manager",
+        "department": "Operations",
+        "salary": 9000,
+        "joinDate": "2022-11-05",
+        "status": "active",
+        "manager": "manager-001"
+    },
+    {
+        "id": "emp-005",
+        "name": "Ibrahim Khan",
+        "email": "ibrahim@example.com",
+        "phone": "+966505678901",
+        "position": "Data Analyst",
+        "department": "IT",
+        "salary": 7000,
+        "joinDate": "2024-01-10",
+        "status": "active",
+        "manager": "manager-001"
+    }
+]

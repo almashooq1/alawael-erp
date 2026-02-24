@@ -1,0 +1,369 @@
+/**
+ * Disability Rehabilitation Module Styles
+ * أنماط وحدة تأهيل ذوي الإعاقة
+ */
+
+.disability-rehabilitation-module {
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+/* Navigation Bar */
+.navbar-custom {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 1rem 0;
+}
+
+.navbar-custom .navbar-brand {
+  font-size: 18px;
+  font-weight: 700;
+  transition: all 0.3s ease;
+}
+
+.navbar-custom .navbar-brand:hover {
+  transform: scale(1.05);
+}
+
+.navbar-custom .nav-link {
+  color: rgba(255, 255, 255, 0.8) !important;
+  padding: 0.5rem 1rem !important;
+  margin: 0 0.25rem !important;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  font-weight: 600;
+}
+
+.navbar-custom .nav-link:hover {
+  color: white !important;
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.navbar-custom .nav-link.active {
+  color: white !important;
+  background-color: rgba(255, 255, 255, 0.3);
+  border-bottom: 3px solid white;
+}
+
+/* Module Content */
+.module-content {
+  padding: 2rem 0;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* API Documentation */
+.api-documentation {
+  background: white;
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.api-documentation h2 {
+  color: #007bff;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  border-bottom: 3px solid #007bff;
+  padding-bottom: 1rem;
+}
+
+.api-documentation h5 {
+  color: #333;
+  font-weight: 600;
+  margin-top: 1.5rem;
+}
+
+/* API Intro */
+.api-intro {
+  background-color: #f8f9fa;
+  border-left: 4px solid #007bff;
+  padding: 1.5rem;
+  border-radius: 4px;
+}
+
+.api-intro ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.api-intro li {
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.api-intro code {
+  background-color: #e9ecef;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 13px;
+  color: #d63384;
+}
+
+/* Endpoints */
+.endpoint-card {
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.endpoint-card:hover {
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  border-color: #007bff;
+}
+
+.endpoint-header {
+  background-color: #f8f9fa;
+  padding: 1rem;
+  border-bottom: 2px solid #dee2e6;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.endpoint-header .method {
+  min-width: 70px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 12px;
+  padding: 6px 12px !important;
+}
+
+.endpoint-header .method.bg-info {
+  background-color: #17a2b8 !important;
+}
+
+.endpoint-header .method.bg-success {
+  background-color: #28a745 !important;
+}
+
+.endpoint-header .method.bg-warning {
+  background-color: #ffc107 !important;
+  color: #212529;
+}
+
+.endpoint-header .method.bg-danger {
+  background-color: #dc3545 !important;
+}
+
+.endpoint-path {
+  background-color: white;
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: 1px solid #dee2e6;
+  color: #007bff;
+  font-weight: 600;
+  font-size: 13px;
+  font-family: 'Courier New', monospace;
+}
+
+.endpoint-access {
+  font-size: 12px;
+}
+
+.endpoint-body {
+  padding: 1rem;
+}
+
+.endpoint-description {
+  color: #333;
+  margin-bottom: 1rem;
+  font-size: 14px;
+}
+
+.endpoint-params {
+  background-color: #f8f9fa;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-top: 1rem;
+}
+
+.endpoint-params strong {
+  color: #333;
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
+.endpoint-params ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.endpoint-params li {
+  margin-bottom: 0.5rem;
+  color: #555;
+  font-size: 13px;
+}
+
+.endpoint-params code {
+  background-color: #e9ecef;
+  padding: 2px 6px;
+  border-radius: 3px;
+  color: #e83e8c;
+  font-size: 12px;
+}
+
+.endpoint-params small {
+  color: #999;
+  font-weight: normal;
+}
+
+/* Usage Examples */
+.usage-examples {
+  background: white;
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.usage-examples h5 {
+  color: #007bff;
+  font-weight: 700;
+  border-bottom: 3px solid #007bff;
+  padding-bottom: 1rem;
+}
+
+.example-card {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  padding: 1.5rem;
+  overflow-x: auto;
+}
+
+.example-card h6 {
+  color: #333;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #007bff;
+  padding-bottom: 0.5rem;
+}
+
+.example-code {
+  background-color: #2d2d2d;
+  color: #f8f8f2;
+  padding: 1rem;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  margin: 0;
+  overflow-x: auto;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.example-code {
+  scrollbar-width: thin;
+  scrollbar-color: #888 #f8f8f2;
+}
+
+.example-code::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+.example-code::-webkit-scrollbar-track {
+  background: #f8f8f2;
+  border-radius: 4px;
+}
+
+.example-code::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.example-code::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .navbar-custom .navbar-brand {
+    font-size: 16px;
+  }
+
+  .navbar-custom .nav-link {
+    padding: 0.5rem 0.75rem !important;
+    font-size: 13px;
+  }
+
+  .api-documentation {
+    padding: 1.5rem;
+  }
+
+  .endpoint-header {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .endpoint-header .endpoint-access {
+    flex-basis: 100%;
+    margin-top: 0.5rem;
+  }
+
+  .module-content {
+    padding: 1rem 0;
+  }
+}
+
+@media (max-width: 576px) {
+  .navbar-custom .navbar-brand {
+    font-size: 14px;
+  }
+
+  .navbar-custom .nav-link {
+    padding: 0.25rem 0.5rem !important;
+    font-size: 12px;
+  }
+
+  .api-documentation,
+  .usage-examples {
+    padding: 1rem;
+  }
+
+  .endpoint-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .endpoint-path {
+    font-size: 12px;
+    width: 100%;
+    word-break: break-all;
+  }
+
+  .example-code {
+    font-size: 11px;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .navbar-custom {
+    display: none;
+  }
+
+  .endpoint-card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .example-code {
+    background-color: white;
+    color: black;
+    border: 1px solid #000;
+  }
+}

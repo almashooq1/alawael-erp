@@ -16,7 +16,7 @@ class IntegratedCareService {
   }
 
   async updatePlan(id, updateData) {
-    return await CarePlan.findByIdAndUpdate(id, updateData, { new: true });
+    return await CarePlan.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
   }
 
   // --- GROUPS ---
@@ -26,7 +26,7 @@ class IntegratedCareService {
   }
 
   async addStudentToGroup(groupId, studentId) {
-    return await GroupProgram.findByIdAndUpdate(groupId, { $addToSet: { students: studentId } }, { new: true });
+    return await GroupProgram.findByIdAndUpdate(groupId, { $addToSet: { students: studentId } }, { new: true, runValidators: true });
   }
 
   async logGroupSession(groupId, sessionData) {

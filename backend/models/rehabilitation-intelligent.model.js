@@ -973,7 +973,7 @@ const governmentIntegrationSchema = new Schema({
     records_processed: Number,
     records_successful: Number,
     records_failed: Number,
-    errors: [String],
+    error_items: [String],
     duration_ms: Number
   }],
 

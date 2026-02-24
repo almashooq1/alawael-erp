@@ -14,7 +14,7 @@ const AuditLogSchema = new mongoose.Schema({
   
   // Who performed the action
   actor: {
-    userId: { type: String, index: true },
+      userId: { type: String },
     email: String,
     name: String,
     role: String,

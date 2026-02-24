@@ -23,7 +23,7 @@ export interface ITransaction extends Document {
 
 const transactionSchema = new Schema<ITransaction>(
   {
-    userId: { type: String, required: true, index: true },
+    userId: { type: String, required: true },
     type: { type: String, enum: ['transfer', 'income', 'expense', 'investment', 'loan'], required: true },
     amount: { type: Number, required: true, index: true },
     currency: { type: String, default: 'SAR' },
@@ -72,8 +72,8 @@ export interface IAccount extends Document {
 
 const accountSchema = new Schema<IAccount>(
   {
-    userId: { type: String, required: true, unique: true, index: true },
-    iban: { type: String, required: true, unique: true, index: true },
+    userId: { type: String, required: true, unique: true },
+    iban: { type: String, required: true, unique: true },
     accountType: { type: String, enum: ['savings', 'checking', 'investment', 'loan'], default: 'checking' },
     balance: { type: Number, required: true, default: 0 },
     currency: { type: String, default: 'SAR' },
@@ -147,7 +147,7 @@ export interface IFinancialProfile extends Document {
 
 const financialProfileSchema = new Schema<IFinancialProfile>(
   {
-    userId: { type: String, required: true, unique: true, index: true },
+    userId: { type: String, required: true, unique: true },
     assets: { type: Number, default: 0 },
     debts: { type: Number, default: 0 },
     monthlyIncome: { type: Number, default: 0 },
@@ -183,7 +183,7 @@ export interface IFraudAlert extends Document {
 
 const fraudAlertSchema = new Schema<IFraudAlert>(
   {
-    userId: { type: String, required: true, index: true },
+    userId: { type: String, required: true },
     transactionId: String,
     type: { type: String, required: true },
     severity: { type: String, enum: ['low', 'medium', 'high', 'critical'], default: 'medium' },

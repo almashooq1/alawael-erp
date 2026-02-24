@@ -533,7 +533,7 @@ const QiwaWPSSubmissionSchema = new mongoose.Schema(
       message: String,
       confirmationNumber: String,
       processedAt: Date,
-      errors: [String],
+      error_items: [String],
     },
 
     // System Fields

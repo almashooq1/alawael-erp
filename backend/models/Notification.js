@@ -5,13 +5,11 @@ const notificationSchema = new mongoose.Schema({
   recipient: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    index: true,
   },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true,
-    index: true,
   },
 
   // Core notification fields
@@ -61,12 +59,10 @@ const notificationSchema = new mongoose.Schema({
   read: {
     type: Boolean,
     default: false,
-    index: true,
   },
   isRead: {
     type: Boolean,
     default: false,
-    index: true,
   },
   readAt: {
     type: Date,
@@ -77,7 +73,6 @@ const notificationSchema = new mongoose.Schema({
   archived: {
     type: Boolean,
     default: false,
-    index: true,
   },
   archivedAt: {
     type: Date,

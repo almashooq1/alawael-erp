@@ -515,7 +515,7 @@ class ArchiveService {
     filteredUpdates['audit.updatedBy'] = options.userId;
     filteredUpdates['audit.updatedAt'] = new Date();
     
-    return this.Document.findByIdAndUpdate(id, filteredUpdates, { new: true });
+    return this.Document.findByIdAndUpdate(id, filteredUpdates, { new: true, runValidators: true });
   }
   
   /**

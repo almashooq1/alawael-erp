@@ -68,7 +68,7 @@ class ProjectManagementService {
       this.projects.set(id, updated);
       return updated;
     }
-    return Project.findByIdAndUpdate(id, data, { new: true });
+    return Project.findByIdAndUpdate(id, data, { new: true, runValidators: true });
   }
 
   listProjects() {

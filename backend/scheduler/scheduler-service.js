@@ -406,7 +406,7 @@ class SchedulerService {
    * Resume a job
    */
   async resumeJob(jobId) {
-    const job = await this.Job.findByIdAndUpdate(jobId, { status: 'active' }, { new: true });
+    const job = await this.Job.findByIdAndUpdate(jobId, { status: 'active' }, { new: true, runValidators: true });
     await this.scheduleJob(job);
   }
   

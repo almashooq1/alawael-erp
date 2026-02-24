@@ -229,7 +229,6 @@ const QiwaEmployeeSchema = new mongoose.Schema(
       type: String,
       unique: true,
       required: true,
-      index: true,
     },
     nationalId: {
       type: String,

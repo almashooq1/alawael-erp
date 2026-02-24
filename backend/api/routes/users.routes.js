@@ -2,11 +2,32 @@ const express = require('express');
 const router = express.Router();
 let User;
 
-// Use in-memory model when in mock mode
+/**
+ * ==================== USER MODEL INITIALIZATION ====================
+ * Dynamically loads User model based on database mode (mock vs. real)
+ * 
+ * This is intentional and REQUIRED for development flexibility:
+ * - Mock Mode (USE_MOCK_DB=true): Uses in-memory User.memory model
+ *   - Fast development/testing without database
+ *   - No persistence across restarts
+ *   - Use for: Unit tests, development, CI/CD pipelines
+ * 
+ * - Database Mode (USE_MOCK_DB=false or unset): Uses persistent User model
+ *   - Connect to MongoDB
+ *   - Data persists across restarts
+ *   - Use for: Production, development with real data
+ * 
+ * IMPORTANT: Both models must have compatible interfaces for routes to work.
+ * Always test route changes with BOTH models to ensure compatibility.
+ */
 if (process.env.USE_MOCK_DB === 'true') {
+  // ✅ MOCK MODE: Use in-memory implementation for fast dev/testing
   User = require('../../models/User.memory');
+  console.log('[Users Route] Using in-memory User.memory model (Mock Mode)');
 } else {
+  // ✅ PRODUCTION MODE: Use persistent MongoDB implementation
   User = require('../../models/User');
+  console.log('[Users Route] Using persistent User database model (Production Mode)');
 }
 let { authenticateToken, requireAdmin } = require('../../middleware/auth');
 const { validateProfileUpdate } = require('../../middleware/validation');

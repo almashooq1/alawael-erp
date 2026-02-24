@@ -8,6 +8,7 @@ const { EventEmitter } = require('events');
 const Analytics = require('../models/Analytics');
 const Prediction = require('../models/Prediction');
 const Insight = require('../models/Insight');
+const moment = require('moment');
 
 class MLService extends EventEmitter {
   constructor() {
@@ -31,8 +32,7 @@ class MLService extends EventEmitter {
    */
   async generateAnalytics(analyticsType, filters = {}) {
     try {
-      const Analytics_Model = require('../models/Analytics');
-
+      // Use module-level Analytics constant (not dynamic require)
       const analyticsData = {
         analyticsId: `analytics_${Date.now()}`,
         analyticsType,
@@ -49,7 +49,7 @@ class MLService extends EventEmitter {
         status: 'draft',
       };
 
-      const analytics = new Analytics_Model(analyticsData);
+      const analytics = new Analytics(analyticsData);
       await analytics.save();
 
       this.emit('analytics-generated', {
@@ -262,9 +262,8 @@ class MLService extends EventEmitter {
    */
   async createPredictionModel(modelData) {
     try {
-      const Prediction_Model = require('../models/Prediction');
 
-      const predictionModel = new Prediction_Model({
+      const predictionModel = new Prediction({
         predictionId: `pred_${Date.now()}`,
         modelName: modelData.name,
         modelType: modelData.type,
@@ -307,8 +306,7 @@ class MLService extends EventEmitter {
    */
   async makePrediction(modelId, features) {
     try {
-      const Prediction_Model = require('../models/Prediction');
-      const model = await Prediction_Model.findOne({ predictionId: modelId });
+      const model = await Prediction.findOne({ predictionId: modelId });
 
       if (!model) {
         throw new Error('Model not found');
@@ -389,7 +387,6 @@ class MLService extends EventEmitter {
    */
   async generateInsights(analyticsType, filters = {}) {
     try {
-      const Insight_Model = require('../models/Insight');
 
       const insights = [
         {
@@ -434,7 +431,7 @@ class MLService extends EventEmitter {
 
       // Save insights
       for (const insightData of insights) {
-        const insight = new Insight_Model(insightData);
+        const insight = new Insight(insightData);
         insight.createdBy = filters.userId;
         insight.status = 'draft';
         await insight.save();
@@ -456,8 +453,7 @@ class MLService extends EventEmitter {
    * Get high impact insights
    */
   async getHighImpactInsights(limit = 10) {
-    const Insight_Model = require('../models/Insight');
-    return Insight_Model.getHighImpactInsights(limit);
+    return Insight.getHighImpactInsights(limit);
   }
 
   // ==================== DATA QUALITY ====================
@@ -481,8 +477,7 @@ class MLService extends EventEmitter {
    * Get active models
    */
   async getActiveModels() {
-    const Prediction_Model = require('../models/Prediction');
-    return Prediction_Model.getActiveModels();
+    return Prediction.getActiveModels();
   }
 
   /**
@@ -490,8 +485,7 @@ class MLService extends EventEmitter {
    */
   async deployModel(modelId) {
     try {
-      const Prediction_Model = require('../models/Prediction');
-      const model = await Prediction_Model.findOne({ predictionId: modelId });
+      const model = await Prediction.findOne({ predictionId: modelId });
 
       if (!model) {
         throw new Error('Model not found');
@@ -515,8 +509,7 @@ class MLService extends EventEmitter {
    * Monitor model performance
    */
   async monitorModelPerformance(modelId) {
-    const Prediction_Model = require('../models/Prediction');
-    const model = await Prediction_Model.findOne({ predictionId: modelId });
+    const model = await Prediction.findOne({ predictionId: modelId });
 
     if (!model) {
       throw new Error('Model not found');
@@ -540,8 +533,7 @@ class MLService extends EventEmitter {
    */
   async checkAndRetrain() {
     try {
-      const Prediction_Model = require('../models/Prediction');
-      const modelsToRetrain = await Prediction_Model.getModelsNeedingRetraining();
+      const modelsToRetrain = await Prediction.getModelsNeedingRetraining();
 
       for (const model of modelsToRetrain) {
         // Simulate retraining
@@ -570,11 +562,8 @@ class MLService extends EventEmitter {
    * Get system health status
    */
   async getSystemHealth() {
-    const Prediction_Model = require('../models/Prediction');
-    const Analytics_Model = require('../models/Analytics');
-
-    const models = await Prediction_Model.find({ status: 'production' });
-    const analytics = await Analytics_Model.find({ status: 'published' });
+    const models = await Prediction.find({ status: 'production' });
+    const analytics = await Analytics.find({ status: 'published' });
 
     const healthyModels = models.filter(m => m.health.status === 'healthy').length;
     const potentialIssues = models.filter(m => m.health.status !== 'healthy').length;
@@ -593,14 +582,10 @@ class MLService extends EventEmitter {
    * Get ML service statistics
    */
   async getStatistics() {
-    const Prediction_Model = require('../models/Prediction');
-    const Analytics_Model = require('../models/Analytics');
-    const Insight_Model = require('../models/Insight');
-
     const stats = await Promise.all([
-      Prediction_Model.countDocuments({ status: 'production' }),
-      Analytics_Model.countDocuments({ status: 'published' }),
-      Insight_Model.countDocuments({ status: 'published' }),
+      Prediction.countDocuments({ status: 'production' }),
+      Analytics.countDocuments({ status: 'published' }),
+      Insight.countDocuments({ status: 'published' }),
     ]);
 
     return {

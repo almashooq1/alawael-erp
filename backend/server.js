@@ -137,6 +137,9 @@ const {
   cacheMiddleware,
 } = require('./config/performance');
 
+// Performance Optimizer (NEW)
+const { initializePerformanceOptimizations } = require('./utils/performance-optimizer');
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 
@@ -323,6 +326,9 @@ app.use(cacheMiddleware(300, 'api')); // 5 minutes cache for API routes
 if (!isTestEnv) {
   initializeRedis();
 }
+
+// Initialize additional performance optimizations
+initializePerformanceOptimizations(app);
 
 // Response helper middleware
 app.use(responseHandler);

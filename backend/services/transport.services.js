@@ -57,7 +57,7 @@ class BusService {
   // تحديث بيانات الحافلة
   async updateBus(busId, updateData) {
     try {
-      return await Bus.findByIdAndUpdate(busId, updateData, { new: true });
+      return await Bus.findByIdAndUpdate(busId, updateData, { new: true, runValidators: true });
     } catch (error) {
       throw new Error(`خطأ في تحديث الحافلة: ${error.message}`);
     }
@@ -94,7 +94,7 @@ class BusService {
   // إضافة جدول صيانة
   async addMaintenanceSchedule(busId, maintenanceData) {
     try {
-      return await Bus.findByIdAndUpdate(busId, { $push: { maintenanceSchedule: maintenanceData } }, { new: true });
+      return await Bus.findByIdAndUpdate(busId, { $push: { maintenanceSchedule: maintenanceData } }, { new: true, runValidators: true });
     } catch (error) {
       throw new Error(`خطأ في إضافة جدول الصيانة: ${error.message}`);
     }
@@ -138,7 +138,7 @@ class DriverService {
   // تحديث بيانات السائق
   async updateDriver(driverId, updateData) {
     try {
-      return await Driver.findByIdAndUpdate(driverId, updateData, { new: true });
+      return await Driver.findByIdAndUpdate(driverId, updateData, { new: true, runValidators: true });
     } catch (error) {
       throw new Error(`خطأ في تحديث السائق: ${error.message}`);
     }
@@ -156,7 +156,7 @@ class DriverService {
   // تسجيل الحضور والغياب
   async recordAttendance(driverId, attendanceData) {
     try {
-      return await Driver.findByIdAndUpdate(driverId, { $push: { attendance: attendanceData } }, { new: true });
+      return await Driver.findByIdAndUpdate(driverId, { $push: { attendance: attendanceData } }, { new: true, runValidators: true });
     } catch (error) {
       throw new Error(`خطأ في تسجيل الحضور: ${error.message}`);
     }
@@ -165,7 +165,7 @@ class DriverService {
   // تسجيل الانتهاكات
   async recordViolation(driverId, violationData) {
     try {
-      return await Driver.findByIdAndUpdate(driverId, { $push: { violations: violationData } }, { new: true });
+      return await Driver.findByIdAndUpdate(driverId, { $push: { violations: violationData } }, { new: true, runValidators: true });
     } catch (error) {
       throw new Error(`خطأ في تسجيل الانتهاك: ${error.message}`);
     }
@@ -235,7 +235,7 @@ class RouteService {
   // تحديث مسار
   async updateRoute(routeId, updateData) {
     try {
-      return await Route.findByIdAndUpdate(routeId, updateData, { new: true });
+      return await Route.findByIdAndUpdate(routeId, updateData, { new: true, runValidators: true });
     } catch (error) {
       throw new Error(`خطأ في تحديث المسار: ${error.message}`);
     }

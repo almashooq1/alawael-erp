@@ -1,0 +1,189 @@
+93b6915bc3348a53a7d96bc6b6a55e68
+/**
+ * Integration Hub Routes
+ * Routes for managing integrations, workflows, webhooks, and marketplace
+ */
+
+const express = require('express');
+const router = express.Router();
+const IntegrationHubController = require('../controllers/integrationHub.controller');
+const {
+  requireAuth,
+  requireTenant
+} = require('../middleware/auth');
+
+/**
+ * ========== CONNECTORS ROUTES ==========
+ */
+
+/**
+ * @route   POST /api/integrations/connectors/register
+ * @desc    Register a new integration connector
+ * @access  Private (Tenant Admin)
+ * @param   {string} connectorId - Unique connector identifier
+ * @param   {string} name - Connector display name
+ * @param   {string} provider - Provider name (zapier, slack, etc.)
+ * @param   {string} [baseUrl] - API base URL
+ * @param   {object} [config] - Connector configuration
+ * @return  {object} Connector object
+ */
+router.post('/connectors/register', requireAuth, requireTenant, IntegrationHubController.registerConnector);
+
+/**
+ * @route   POST /api/integrations/connectors/:connectorId/authenticate
+ * @desc    Authenticate connector with credentials
+ * @access  Private (Tenant Admin)
+ * @param   {string} connectorId - Connector ID to authenticate
+ * @body    {string} [apiKey] - API key credential
+ * @body    {string} [apiSecret] - API secret
+ * @body    {string} [accessToken] - OAuth access token
+ * @body    {string} [refreshToken] - OAuth refresh token
+ * @return  {object} Credential information
+ */
+router.post('/connectors/:connectorId/authenticate', requireAuth, requireTenant, IntegrationHubController.authenticateConnector);
+
+/**
+ * @route   GET /api/integrations/connectors
+ * @desc    Get all available connectors
+ * @access  Private
+ * @return  {array} Array of connector objects
+ */
+router.get('/connectors', requireAuth, IntegrationHubController.getConnectors);
+
+/**
+ * @route   GET /api/integrations/connectors/:connectorId
+ * @desc    Get specific connector details
+ * @access  Private
+ * @param   {string} connectorId - Connector ID
+ * @return  {object} Connector details
+ */
+router.get('/connectors/:connectorId', requireAuth, IntegrationHubController.getConnector);
+
+/**
+ * ========== WORKFLOWS ROUTES ==========
+ */
+
+/**
+ * @route   POST /api/integrations/workflows
+ * @desc    Create a new workflow
+ * @access  Private (Tenant User)
+ * @param   {string} name - Workflow name
+ * @param   {object} trigger - Trigger configuration
+ * @param   {array} [actions] - Array of actions to execute
+ * @param   {array} [conditions] - Conditional logic
+ * @return  {object} Created workflow
+ * @example
+ * {
+ *   "name": "Slack Alert on New Order",
+ *   "trigger": {
+ *     "connectorId": "shopify",
+ *     "event": "order.created"
+ *   },
+ *   "actions": [
+ *     {
+ *       "connectorId": "slack",
+ *       "type": "send_message",
+ *       "data": { "channel": "#orders", "text": "New order created" }
+ *     }
+ *   ]
+ * }
+ */
+router.post('/workflows', requireAuth, requireTenant, IntegrationHubController.createWorkflow);
+
+/**
+ * @route   POST /api/integrations/workflows/:workflowId/execute
+ * @desc    Execute a workflow
+ * @access  Private (Tenant User)
+ * @param   {string} workflowId - Workflow ID
+ * @body    {object} triggerData - Data to pass to workflow
+ * @return  {object} Execution result
+ */
+router.post('/workflows/:workflowId/execute', requireAuth, requireTenant, IntegrationHubController.executeWorkflow);
+
+/**
+ * ========== WEBHOOKS ROUTES ==========
+ */
+
+/**
+ * @route   POST /api/integrations/webhooks/register
+ * @desc    Register a webhook endpoint
+ * @access  Private (Tenant Admin)
+ * @param   {string} connectorId - Connector ID
+ * @param   {string} webhookUrl - URL to receive webhook events
+ * @param   {array} [events] - Array of events to subscribe to
+ * @return  {object} Webhook registration details
+ */
+router.post('/webhooks/register', requireAuth, requireTenant, IntegrationHubController.registerWebhook);
+
+/**
+ * @route   POST /api/integrations/webhooks/:webhookId/trigger
+ * @desc    Trigger a webhook (for testing)
+ * @access  Private
+ * @param   {string} webhookId - Webhook ID
+ * @body    {object} - Webhook payload data
+ * @return  {object} Trigger result
+ */
+router.post('/webhooks/:webhookId/trigger', requireAuth, IntegrationHubController.triggerWebhook);
+
+/**
+ * ========== MARKETPLACE ROUTES ==========
+ */
+
+/**
+ * @route   POST /api/integrations/marketplace/apps
+ * @desc    Publish a new app to marketplace
+ * @access  Private (Developer/Admin)
+ * @param   {string} name - App name
+ * @param   {string} author - App author email
+ * @param   {string} category - App category (productivity, communication, ecommerce, etc.)
+ * @param   {string} [description] - App description
+ * @param   {string} [version] - Semantic version
+ * @param   {object} [pricing] - Pricing information
+ * @param   {array} [features] - App features list
+ * @return  {object} Published app details
+ */
+router.post('/marketplace/apps', requireAuth, IntegrationHubController.publishApp);
+
+/**
+ * @route   GET /api/integrations/marketplace/apps
+ * @desc    Get marketplace apps with filtering
+ * @access  Public
+ * @query   {string} [category] - Filter by category
+ * @query   {string} [pricing] - Filter by pricing (free, premium, enterprise)
+ * @query   {string} [search] - Search by name or description
+ * @query   {number} [limit] - Limit number of results
+ * @return  {array} Array of apps matching criteria
+ */
+router.get('/marketplace/apps', IntegrationHubController.getMarketplaceApps);
+
+/**
+ * @route   POST /api/integrations/marketplace/subscribe
+ * @desc    Subscribe to a marketplace app
+ * @access  Private (Tenant User)
+ * @param   {string} appId - App ID to subscribe to
+ * @param   {string} [plan] - Subscription plan (free, premium, enterprise)
+ * @return  {object} Subscription details with API key
+ */
+router.post('/marketplace/subscribe', requireAuth, requireTenant, IntegrationHubController.subscribeToApp);
+
+/**
+ * ========== STATISTICS ROUTES ==========
+ */
+
+/**
+ * @route   GET /api/integrations/statistics
+ * @desc    Get integration hub statistics
+ * @access  Private (Tenant Admin)
+ * @return  {object} Statistics object containing:
+ *          - totalConnectors: number
+ *          - connectorsByStatus: object
+ *          - totalWorkflows: number
+ *          - activeWorkflows: number
+ *          - totalExecutions: number
+ *          - webhooksRegistered: number
+ *          - marketplaceApps: number
+ *          - totalSubscriptions: number
+ */
+router.get('/statistics', requireAuth, requireTenant, IntegrationHubController.getStatistics);
+module.exports = router;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJleHByZXNzIiwicmVxdWlyZSIsInJvdXRlciIsIlJvdXRlciIsIkludGVncmF0aW9uSHViQ29udHJvbGxlciIsInJlcXVpcmVBdXRoIiwicmVxdWlyZVRlbmFudCIsInBvc3QiLCJyZWdpc3RlckNvbm5lY3RvciIsImF1dGhlbnRpY2F0ZUNvbm5lY3RvciIsImdldCIsImdldENvbm5lY3RvcnMiLCJnZXRDb25uZWN0b3IiLCJjcmVhdGVXb3JrZmxvdyIsImV4ZWN1dGVXb3JrZmxvdyIsInJlZ2lzdGVyV2ViaG9vayIsInRyaWdnZXJXZWJob29rIiwicHVibGlzaEFwcCIsImdldE1hcmtldHBsYWNlQXBwcyIsInN1YnNjcmliZVRvQXBwIiwiZ2V0U3RhdGlzdGljcyIsIm1vZHVsZSIsImV4cG9ydHMiXSwic291cmNlcyI6WyJpbnRlZ3JhdGlvbkh1Yi5yb3V0ZXMuanMiXSwic291cmNlc0NvbnRlbnQiOlsiLyoqXG4gKiBJbnRlZ3JhdGlvbiBIdWIgUm91dGVzXG4gKiBSb3V0ZXMgZm9yIG1hbmFnaW5nIGludGVncmF0aW9ucywgd29ya2Zsb3dzLCB3ZWJob29rcywgYW5kIG1hcmtldHBsYWNlXG4gKi9cblxuY29uc3QgZXhwcmVzcyA9IHJlcXVpcmUoJ2V4cHJlc3MnKTtcbmNvbnN0IHJvdXRlciA9IGV4cHJlc3MuUm91dGVyKCk7XG5jb25zdCBJbnRlZ3JhdGlvbkh1YkNvbnRyb2xsZXIgPSByZXF1aXJlKCcuLi9jb250cm9sbGVycy9pbnRlZ3JhdGlvbkh1Yi5jb250cm9sbGVyJyk7XG5jb25zdCB7IHJlcXVpcmVBdXRoLCByZXF1aXJlVGVuYW50IH0gPSByZXF1aXJlKCcuLi9taWRkbGV3YXJlL2F1dGgnKTtcblxuLyoqXG4gKiA9PT09PT09PT09IENPTk5FQ1RPUlMgUk9VVEVTID09PT09PT09PT1cbiAqL1xuXG4vKipcbiAqIEByb3V0ZSAgIFBPU1QgL2FwaS9pbnRlZ3JhdGlvbnMvY29ubmVjdG9ycy9yZWdpc3RlclxuICogQGRlc2MgICAgUmVnaXN0ZXIgYSBuZXcgaW50ZWdyYXRpb24gY29ubmVjdG9yXG4gKiBAYWNjZXNzICBQcml2YXRlIChUZW5hbnQgQWRtaW4pXG4gKiBAcGFyYW0gICB7c3RyaW5nfSBjb25uZWN0b3JJZCAtIFVuaXF1ZSBjb25uZWN0b3IgaWRlbnRpZmllclxuICogQHBhcmFtICAge3N0cmluZ30gbmFtZSAtIENvbm5lY3RvciBkaXNwbGF5IG5hbWVcbiAqIEBwYXJhbSAgIHtzdHJpbmd9IHByb3ZpZGVyIC0gUHJvdmlkZXIgbmFtZSAoemFwaWVyLCBzbGFjaywgZXRjLilcbiAqIEBwYXJhbSAgIHtzdHJpbmd9IFtiYXNlVXJsXSAtIEFQSSBiYXNlIFVSTFxuICogQHBhcmFtICAge29iamVjdH0gW2NvbmZpZ10gLSBDb25uZWN0b3IgY29uZmlndXJhdGlvblxuICogQHJldHVybiAge29iamVjdH0gQ29ubmVjdG9yIG9iamVjdFxuICovXG5yb3V0ZXIucG9zdChcbiAgJy9jb25uZWN0b3JzL3JlZ2lzdGVyJyxcbiAgcmVxdWlyZUF1dGgsXG4gIHJlcXVpcmVUZW5hbnQsXG4gIEludGVncmF0aW9uSHViQ29udHJvbGxlci5yZWdpc3RlckNvbm5lY3RvclxuKTtcblxuLyoqXG4gKiBAcm91dGUgICBQT1NUIC9hcGkvaW50ZWdyYXRpb25zL2Nvbm5lY3RvcnMvOmNvbm5lY3RvcklkL2F1dGhlbnRpY2F0ZVxuICogQGRlc2MgICAgQXV0aGVudGljYXRlIGNvbm5lY3RvciB3aXRoIGNyZWRlbnRpYWxzXG4gKiBAYWNjZXNzICBQcml2YXRlIChUZW5hbnQgQWRtaW4pXG4gKiBAcGFyYW0gICB7c3RyaW5nfSBjb25uZWN0b3JJZCAtIENvbm5lY3RvciBJRCB0byBhdXRoZW50aWNhdGVcbiAqIEBib2R5ICAgIHtzdHJpbmd9IFthcGlLZXldIC0gQVBJIGtleSBjcmVkZW50aWFsXG4gKiBAYm9keSAgICB7c3RyaW5nfSBbYXBpU2VjcmV0XSAtIEFQSSBzZWNyZXRcbiAqIEBib2R5ICAgIHtzdHJpbmd9IFthY2Nlc3NUb2tlbl0gLSBPQXV0aCBhY2Nlc3MgdG9rZW5cbiAqIEBib2R5ICAgIHtzdHJpbmd9IFtyZWZyZXNoVG9rZW5dIC0gT0F1dGggcmVmcmVzaCB0b2tlblxuICogQHJldHVybiAge29iamVjdH0gQ3JlZGVudGlhbCBpbmZvcm1hdGlvblxuICovXG5yb3V0ZXIucG9zdChcbiAgJy9jb25uZWN0b3JzLzpjb25uZWN0b3JJZC9hdXRoZW50aWNhdGUnLFxuICByZXF1aXJlQXV0aCxcbiAgcmVxdWlyZVRlbmFudCxcbiAgSW50ZWdyYXRpb25IdWJDb250cm9sbGVyLmF1dGhlbnRpY2F0ZUNvbm5lY3RvclxuKTtcblxuLyoqXG4gKiBAcm91dGUgICBHRVQgL2FwaS9pbnRlZ3JhdGlvbnMvY29ubmVjdG9yc1xuICogQGRlc2MgICAgR2V0IGFsbCBhdmFpbGFibGUgY29ubmVjdG9yc1xuICogQGFjY2VzcyAgUHJpdmF0ZVxuICogQHJldHVybiAge2FycmF5fSBBcnJheSBvZiBjb25uZWN0b3Igb2JqZWN0c1xuICovXG5yb3V0ZXIuZ2V0KCcvY29ubmVjdG9ycycsIHJlcXVpcmVBdXRoLCBJbnRlZ3JhdGlvbkh1YkNvbnRyb2xsZXIuZ2V0Q29ubmVjdG9ycyk7XG5cbi8qKlxuICogQHJvdXRlICAgR0VUIC9hcGkvaW50ZWdyYXRpb25zL2Nvbm5lY3RvcnMvOmNvbm5lY3RvcklkXG4gKiBAZGVzYyAgICBHZXQgc3BlY2lmaWMgY29ubmVjdG9yIGRldGFpbHNcbiAqIEBhY2Nlc3MgIFByaXZhdGVcbiAqIEBwYXJhbSAgIHtzdHJpbmd9IGNvbm5lY3RvcklkIC0gQ29ubmVjdG9yIElEXG4gKiBAcmV0dXJuICB7b2JqZWN0fSBDb25uZWN0b3IgZGV0YWlsc1xuICovXG5yb3V0ZXIuZ2V0KCcvY29ubmVjdG9ycy86Y29ubmVjdG9ySWQnLCByZXF1aXJlQXV0aCwgSW50ZWdyYXRpb25IdWJDb250cm9sbGVyLmdldENvbm5lY3Rvcik7XG5cbi8qKlxuICogPT09PT09PT09PSBXT1JLRkxPV1MgUk9VVEVTID09PT09PT09PT1cbiAqL1xuXG4vKipcbiAqIEByb3V0ZSAgIFBPU1QgL2FwaS9pbnRlZ3JhdGlvbnMvd29ya2Zsb3dzXG4gKiBAZGVzYyAgICBDcmVhdGUgYSBuZXcgd29ya2Zsb3dcbiAqIEBhY2Nlc3MgIFByaXZhdGUgKFRlbmFudCBVc2VyKVxuICogQHBhcmFtICAge3N0cmluZ30gbmFtZSAtIFdvcmtmbG93IG5hbWVcbiAqIEBwYXJhbSAgIHtvYmplY3R9IHRyaWdnZXIgLSBUcmlnZ2VyIGNvbmZpZ3VyYXRpb25cbiAqIEBwYXJhbSAgIHthcnJheX0gW2FjdGlvbnNdIC0gQXJyYXkgb2YgYWN0aW9ucyB0byBleGVjdXRlXG4gKiBAcGFyYW0gICB7YXJyYXl9IFtjb25kaXRpb25zXSAtIENvbmRpdGlvbmFsIGxvZ2ljXG4gKiBAcmV0dXJuICB7b2JqZWN0fSBDcmVhdGVkIHdvcmtmbG93XG4gKiBAZXhhbXBsZVxuICoge1xuICogICBcIm5hbWVcIjogXCJTbGFjayBBbGVydCBvbiBOZXcgT3JkZXJcIixcbiAqICAgXCJ0cmlnZ2VyXCI6IHtcbiAqICAgICBcImNvbm5lY3RvcklkXCI6IFwic2hvcGlmeVwiLFxuICogICAgIFwiZXZlbnRcIjogXCJvcmRlci5jcmVhdGVkXCJcbiAqICAgfSxcbiAqICAgXCJhY3Rpb25zXCI6IFtcbiAqICAgICB7XG4gKiAgICAgICBcImNvbm5lY3RvcklkXCI6IFwic2xhY2tcIixcbiAqICAgICAgIFwidHlwZVwiOiBcInNlbmRfbWVzc2FnZVwiLFxuICogICAgICAgXCJkYXRhXCI6IHsgXCJjaGFubmVsXCI6IFwiI29yZGVyc1wiLCBcInRleHRcIjogXCJOZXcgb3JkZXIgY3JlYXRlZFwiIH1cbiAqICAgICB9XG4gKiAgIF1cbiAqIH1cbiAqL1xucm91dGVyLnBvc3QoXG4gICcvd29ya2Zsb3dzJyxcbiAgcmVxdWlyZUF1dGgsXG4gIHJlcXVpcmVUZW5hbnQsXG4gIEludGVncmF0aW9uSHViQ29udHJvbGxlci5jcmVhdGVXb3JrZmxvd1xuKTtcblxuLyoqXG4gKiBAcm91dGUgICBQT1NUIC9hcGkvaW50ZWdyYXRpb25zL3dvcmtmbG93cy86d29ya2Zsb3dJZC9leGVjdXRlXG4gKiBAZGVzYyAgICBFeGVjdXRlIGEgd29ya2Zsb3dcbiAqIEBhY2Nlc3MgIFByaXZhdGUgKFRlbmFudCBVc2VyKVxuICogQHBhcmFtICAge3N0cmluZ30gd29ya2Zsb3dJZCAtIFdvcmtmbG93IElEXG4gKiBAYm9keSAgICB7b2JqZWN0fSB0cmlnZ2VyRGF0YSAtIERhdGEgdG8gcGFzcyB0byB3b3JrZmxvd1xuICogQHJldHVybiAge29iamVjdH0gRXhlY3V0aW9uIHJlc3VsdFxuICovXG5yb3V0ZXIucG9zdChcbiAgJy93b3JrZmxvd3MvOndvcmtmbG93SWQvZXhlY3V0ZScsXG4gIHJlcXVpcmVBdXRoLFxuICByZXF1aXJlVGVuYW50LFxuICBJbnRlZ3JhdGlvbkh1YkNvbnRyb2xsZXIuZXhlY3V0ZVdvcmtmbG93XG4pO1xuXG4vKipcbiAqID09PT09PT09PT0gV0VCSE9PS1MgUk9VVEVTID09PT09PT09PT1cbiAqL1xuXG4vKipcbiAqIEByb3V0ZSAgIFBPU1QgL2FwaS9pbnRlZ3JhdGlvbnMvd2ViaG9va3MvcmVnaXN0ZXJcbiAqIEBkZXNjICAgIFJlZ2lzdGVyIGEgd2ViaG9vayBlbmRwb2ludFxuICogQGFjY2VzcyAgUHJpdmF0ZSAoVGVuYW50IEFkbWluKVxuICogQHBhcmFtICAge3N0cmluZ30gY29ubmVjdG9ySWQgLSBDb25uZWN0b3IgSURcbiAqIEBwYXJhbSAgIHtzdHJpbmd9IHdlYmhvb2tVcmwgLSBVUkwgdG8gcmVjZWl2ZSB3ZWJob29rIGV2ZW50c1xuICogQHBhcmFtICAge2FycmF5fSBbZXZlbnRzXSAtIEFycmF5IG9mIGV2ZW50cyB0byBzdWJzY3JpYmUgdG9cbiAqIEByZXR1cm4gIHtvYmplY3R9IFdlYmhvb2sgcmVnaXN0cmF0aW9uIGRldGFpbHNcbiAqL1xucm91dGVyLnBvc3QoXG4gICcvd2ViaG9va3MvcmVnaXN0ZXInLFxuICByZXF1aXJlQXV0aCxcbiAgcmVxdWlyZVRlbmFudCxcbiAgSW50ZWdyYXRpb25IdWJDb250cm9sbGVyLnJlZ2lzdGVyV2ViaG9va1xuKTtcblxuLyoqXG4gKiBAcm91dGUgICBQT1NUIC9hcGkvaW50ZWdyYXRpb25zL3dlYmhvb2tzLzp3ZWJob29rSWQvdHJpZ2dlclxuICogQGRlc2MgICAgVHJpZ2dlciBhIHdlYmhvb2sgKGZvciB0ZXN0aW5nKVxuICogQGFjY2VzcyAgUHJpdmF0ZVxuICogQHBhcmFtICAge3N0cmluZ30gd2ViaG9va0lkIC0gV2ViaG9vayBJRFxuICogQGJvZHkgICAge29iamVjdH0gLSBXZWJob29rIHBheWxvYWQgZGF0YVxuICogQHJldHVybiAge29iamVjdH0gVHJpZ2dlciByZXN1bHRcbiAqL1xucm91dGVyLnBvc3QoXG4gICcvd2ViaG9va3MvOndlYmhvb2tJZC90cmlnZ2VyJyxcbiAgcmVxdWlyZUF1dGgsXG4gIEludGVncmF0aW9uSHViQ29udHJvbGxlci50cmlnZ2VyV2ViaG9va1xuKTtcblxuLyoqXG4gKiA9PT09PT09PT09IE1BUktFVFBMQUNFIFJPVVRFUyA9PT09PT09PT09XG4gKi9cblxuLyoqXG4gKiBAcm91dGUgICBQT1NUIC9hcGkvaW50ZWdyYXRpb25zL21hcmtldHBsYWNlL2FwcHNcbiAqIEBkZXNjICAgIFB1Ymxpc2ggYSBuZXcgYXBwIHRvIG1hcmtldHBsYWNlXG4gKiBAYWNjZXNzICBQcml2YXRlIChEZXZlbG9wZXIvQWRtaW4pXG4gKiBAcGFyYW0gICB7c3RyaW5nfSBuYW1lIC0gQXBwIG5hbWVcbiAqIEBwYXJhbSAgIHtzdHJpbmd9IGF1dGhvciAtIEFwcCBhdXRob3IgZW1haWxcbiAqIEBwYXJhbSAgIHtzdHJpbmd9IGNhdGVnb3J5IC0gQXBwIGNhdGVnb3J5IChwcm9kdWN0aXZpdHksIGNvbW11bmljYXRpb24sIGVjb21tZXJjZSwgZXRjLilcbiAqIEBwYXJhbSAgIHtzdHJpbmd9IFtkZXNjcmlwdGlvbl0gLSBBcHAgZGVzY3JpcHRpb25cbiAqIEBwYXJhbSAgIHtzdHJpbmd9IFt2ZXJzaW9uXSAtIFNlbWFudGljIHZlcnNpb25cbiAqIEBwYXJhbSAgIHtvYmplY3R9IFtwcmljaW5nXSAtIFByaWNpbmcgaW5mb3JtYXRpb25cbiAqIEBwYXJhbSAgIHthcnJheX0gW2ZlYXR1cmVzXSAtIEFwcCBmZWF0dXJlcyBsaXN0XG4gKiBAcmV0dXJuICB7b2JqZWN0fSBQdWJsaXNoZWQgYXBwIGRldGFpbHNcbiAqL1xucm91dGVyLnBvc3QoXG4gICcvbWFya2V0cGxhY2UvYXBwcycsXG4gIHJlcXVpcmVBdXRoLFxuICBJbnRlZ3JhdGlvbkh1YkNvbnRyb2xsZXIucHVibGlzaEFwcFxuKTtcblxuLyoqXG4gKiBAcm91dGUgICBHRVQgL2FwaS9pbnRlZ3JhdGlvbnMvbWFya2V0cGxhY2UvYXBwc1xuICogQGRlc2MgICAgR2V0IG1hcmtldHBsYWNlIGFwcHMgd2l0aCBmaWx0ZXJpbmdcbiAqIEBhY2Nlc3MgIFB1YmxpY1xuICogQHF1ZXJ5ICAge3N0cmluZ30gW2NhdGVnb3J5XSAtIEZpbHRlciBieSBjYXRlZ29yeVxuICogQHF1ZXJ5ICAge3N0cmluZ30gW3ByaWNpbmddIC0gRmlsdGVyIGJ5IHByaWNpbmcgKGZyZWUsIHByZW1pdW0sIGVudGVycHJpc2UpXG4gKiBAcXVlcnkgICB7c3RyaW5nfSBbc2VhcmNoXSAtIFNlYXJjaCBieSBuYW1lIG9yIGRlc2NyaXB0aW9uXG4gKiBAcXVlcnkgICB7bnVtYmVyfSBbbGltaXRdIC0gTGltaXQgbnVtYmVyIG9mIHJlc3VsdHNcbiAqIEByZXR1cm4gIHthcnJheX0gQXJyYXkgb2YgYXBwcyBtYXRjaGluZyBjcml0ZXJpYVxuICovXG5yb3V0ZXIuZ2V0KCcvbWFya2V0cGxhY2UvYXBwcycsIEludGVncmF0aW9uSHViQ29udHJvbGxlci5nZXRNYXJrZXRwbGFjZUFwcHMpO1xuXG4vKipcbiAqIEByb3V0ZSAgIFBPU1QgL2FwaS9pbnRlZ3JhdGlvbnMvbWFya2V0cGxhY2Uvc3Vic2NyaWJlXG4gKiBAZGVzYyAgICBTdWJzY3JpYmUgdG8gYSBtYXJrZXRwbGFjZSBhcHBcbiAqIEBhY2Nlc3MgIFByaXZhdGUgKFRlbmFudCBVc2VyKVxuICogQHBhcmFtICAge3N0cmluZ30gYXBwSWQgLSBBcHAgSUQgdG8gc3Vic2NyaWJlIHRvXG4gKiBAcGFyYW0gICB7c3RyaW5nfSBbcGxhbl0gLSBTdWJzY3JpcHRpb24gcGxhbiAoZnJlZSwgcHJlbWl1bSwgZW50ZXJwcmlzZSlcbiAqIEByZXR1cm4gIHtvYmplY3R9IFN1YnNjcmlwdGlvbiBkZXRhaWxzIHdpdGggQVBJIGtleVxuICovXG5yb3V0ZXIucG9zdChcbiAgJy9tYXJrZXRwbGFjZS9zdWJzY3JpYmUnLFxuICByZXF1aXJlQXV0aCxcbiAgcmVxdWlyZVRlbmFudCxcbiAgSW50ZWdyYXRpb25IdWJDb250cm9sbGVyLnN1YnNjcmliZVRvQXBwXG4pO1xuXG4vKipcbiAqID09PT09PT09PT0gU1RBVElTVElDUyBST1VURVMgPT09PT09PT09PVxuICovXG5cbi8qKlxuICogQHJvdXRlICAgR0VUIC9hcGkvaW50ZWdyYXRpb25zL3N0YXRpc3RpY3NcbiAqIEBkZXNjICAgIEdldCBpbnRlZ3JhdGlvbiBodWIgc3RhdGlzdGljc1xuICogQGFjY2VzcyAgUHJpdmF0ZSAoVGVuYW50IEFkbWluKVxuICogQHJldHVybiAge29iamVjdH0gU3RhdGlzdGljcyBvYmplY3QgY29udGFpbmluZzpcbiAqICAgICAgICAgIC0gdG90YWxDb25uZWN0b3JzOiBudW1iZXJcbiAqICAgICAgICAgIC0gY29ubmVjdG9yc0J5U3RhdHVzOiBvYmplY3RcbiAqICAgICAgICAgIC0gdG90YWxXb3JrZmxvd3M6IG51bWJlclxuICogICAgICAgICAgLSBhY3RpdmVXb3JrZmxvd3M6IG51bWJlclxuICogICAgICAgICAgLSB0b3RhbEV4ZWN1dGlvbnM6IG51bWJlclxuICogICAgICAgICAgLSB3ZWJob29rc1JlZ2lzdGVyZWQ6IG51bWJlclxuICogICAgICAgICAgLSBtYXJrZXRwbGFjZUFwcHM6IG51bWJlclxuICogICAgICAgICAgLSB0b3RhbFN1YnNjcmlwdGlvbnM6IG51bWJlclxuICovXG5yb3V0ZXIuZ2V0KFxuICAnL3N0YXRpc3RpY3MnLFxuICByZXF1aXJlQXV0aCxcbiAgcmVxdWlyZVRlbmFudCxcbiAgSW50ZWdyYXRpb25IdWJDb250cm9sbGVyLmdldFN0YXRpc3RpY3Ncbik7XG5cbm1vZHVsZS5leHBvcnRzID0gcm91dGVyO1xuIl0sIm1hcHBpbmdzIjoiQUFBQTtBQUNBO0FBQ0E7QUFDQTs7QUFFQSxNQUFNQSxPQUFPLEdBQUdDLE9BQU8sQ0FBQyxTQUFTLENBQUM7QUFDbEMsTUFBTUMsTUFBTSxHQUFHRixPQUFPLENBQUNHLE1BQU0sQ0FBQyxDQUFDO0FBQy9CLE1BQU1DLHdCQUF3QixHQUFHSCxPQUFPLENBQUMsMENBQTBDLENBQUM7QUFDcEYsTUFBTTtFQUFFSSxXQUFXO0VBQUVDO0FBQWMsQ0FBQyxHQUFHTCxPQUFPLENBQUMsb0JBQW9CLENBQUM7O0FBRXBFO0FBQ0E7QUFDQTs7QUFFQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0FDLE1BQU0sQ0FBQ0ssSUFBSSxDQUNULHNCQUFzQixFQUN0QkYsV0FBVyxFQUNYQyxhQUFhLEVBQ2JGLHdCQUF3QixDQUFDSSxpQkFDM0IsQ0FBQzs7QUFFRDtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0FOLE1BQU0sQ0FBQ0ssSUFBSSxDQUNULHVDQUF1QyxFQUN2Q0YsV0FBVyxFQUNYQyxhQUFhLEVBQ2JGLHdCQUF3QixDQUFDSyxxQkFDM0IsQ0FBQzs7QUFFRDtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQVAsTUFBTSxDQUFDUSxHQUFHLENBQUMsYUFBYSxFQUFFTCxXQUFXLEVBQUVELHdCQUF3QixDQUFDTyxhQUFhLENBQUM7O0FBRTlFO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0FULE1BQU0sQ0FBQ1EsR0FBRyxDQUFDLDBCQUEwQixFQUFFTCxXQUFXLEVBQUVELHdCQUF3QixDQUFDUSxZQUFZLENBQUM7O0FBRTFGO0FBQ0E7QUFDQTs7QUFFQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBVixNQUFNLENBQUNLLElBQUksQ0FDVCxZQUFZLEVBQ1pGLFdBQVcsRUFDWEMsYUFBYSxFQUNiRix3QkFBd0IsQ0FBQ1MsY0FDM0IsQ0FBQzs7QUFFRDtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0FYLE1BQU0sQ0FBQ0ssSUFBSSxDQUNULGdDQUFnQyxFQUNoQ0YsV0FBVyxFQUNYQyxhQUFhLEVBQ2JGLHdCQUF3QixDQUFDVSxlQUMzQixDQUFDOztBQUVEO0FBQ0E7QUFDQTs7QUFFQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQVosTUFBTSxDQUFDSyxJQUFJLENBQ1Qsb0JBQW9CLEVBQ3BCRixXQUFXLEVBQ1hDLGFBQWEsRUFDYkYsd0JBQXdCLENBQUNXLGVBQzNCLENBQUM7O0FBRUQ7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBYixNQUFNLENBQUNLLElBQUksQ0FDVCw4QkFBOEIsRUFDOUJGLFdBQVcsRUFDWEQsd0JBQXdCLENBQUNZLGNBQzNCLENBQUM7O0FBRUQ7QUFDQTtBQUNBOztBQUVBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0FkLE1BQU0sQ0FBQ0ssSUFBSSxDQUNULG1CQUFtQixFQUNuQkYsV0FBVyxFQUNYRCx3QkFBd0IsQ0FBQ2EsVUFDM0IsQ0FBQzs7QUFFRDtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBZixNQUFNLENBQUNRLEdBQUcsQ0FBQyxtQkFBbUIsRUFBRU4sd0JBQXdCLENBQUNjLGtCQUFrQixDQUFDOztBQUU1RTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0FoQixNQUFNLENBQUNLLElBQUksQ0FDVCx3QkFBd0IsRUFDeEJGLFdBQVcsRUFDWEMsYUFBYSxFQUNiRix3QkFBd0IsQ0FBQ2UsY0FDM0IsQ0FBQzs7QUFFRDtBQUNBO0FBQ0E7O0FBRUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBakIsTUFBTSxDQUFDUSxHQUFHLENBQ1IsYUFBYSxFQUNiTCxXQUFXLEVBQ1hDLGFBQWEsRUFDYkYsd0JBQXdCLENBQUNnQixhQUMzQixDQUFDO0FBRURDLE1BQU0sQ0FBQ0MsT0FBTyxHQUFHcEIsTUFBTSIsImlnbm9yZUxpc3QiOltdfQ==

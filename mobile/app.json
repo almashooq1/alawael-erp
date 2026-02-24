@@ -1,0 +1,76 @@
+{
+  "expo": {
+    "name": "AlAwael ERP",
+    "slug": "alawael-erp",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1673e6"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTabletMode": true,
+      "bundleIdentifier": "com.alawael.erp",
+      "buildNumber": "1.0.0",
+      "infoPlist": {
+        "UIRequiredDeviceCapabilities": [
+          "armv7"
+        ],
+        "NSCameraUsageDescription": "Allow camera access for receipts",
+        "NSPhotoLibraryUsageDescription": "Allow photo access for receipts",
+        "NSLocationWhenInUseUsageDescription": "Allow location for delivery tracking"
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#1673e6"
+      },
+      "package": "com.alawael.erp",
+      "permissions": [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "INTERNET"
+      ],
+      "versionCode": 1
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "newArchEnabled": false
+          },
+          "android": {
+            "newArchEnabled": false
+          }
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#1673e6"
+        }
+      ]
+    ],
+    "extra": {
+      "apiUrl": "https://api.alawael.com/api/v1",
+      "wsUrl": "wss://api.alawael.com",
+      "appName": "AlAwael ERP",
+      "version": "1.0.0"
+    }
+  }
+}

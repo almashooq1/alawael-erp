@@ -1,0 +1,116 @@
+cc10327598bdedc1d5a44cb20e0ef7a4
+/**
+ * مسارات التحليلات والتقارير المتقدم
+ * Advanced Analytics Routes
+ */
+
+const express = require('express');
+const router = express.Router();
+const AdvancedAnalyticsController = require('../controllers/advancedAnalytics.controller');
+const {
+  protect,
+  _authorize
+} = require('../middleware/auth');
+
+// جميع المسارات تتطلب المصادقة
+router.use(protect);
+
+// ========== تسجيل الأحداث والمقاييس ==========
+
+/**
+ * @route   POST /api/analytics/events
+ * @desc    تسجيل حدث تحليلي
+ * @access  Private
+ */
+router.post('/events', AdvancedAnalyticsController.logEvent);
+
+/**
+ * @route   POST /api/analytics/metrics
+ * @desc    تتبع مقياس
+ * @access  Private
+ */
+router.post('/metrics', AdvancedAnalyticsController.trackMetric);
+
+/**
+ * @route   GET /api/analytics/events
+ * @desc    جلب الأحداث
+ * @access  Private
+ */
+router.get('/events', AdvancedAnalyticsController.getEvents);
+
+// ========== التقارير ==========
+
+/**
+ * @route   POST /api/analytics/reports
+ * @desc    إنشاء تقرير مخصص
+ * @access  Private
+ */
+router.post('/reports', AdvancedAnalyticsController.generateReport);
+
+/**
+ * @route   GET /api/analytics/reports/:reportId/export
+ * @desc    تصدير التقرير
+ * @access  Private
+ */
+router.get('/reports/:reportId/export', AdvancedAnalyticsController.exportReport);
+
+// ========== التنبؤ ==========
+
+/**
+ * @route   POST /api/analytics/predict
+ * @desc    التنبؤ بالقيم المستقبلية
+ * @access  Private
+ */
+router.post('/predict', AdvancedAnalyticsController.predictValues);
+
+// ========== الشذوذ ==========
+
+/**
+ * @route   GET /api/analytics/anomalies
+ * @desc    جلب الشذوذ المكتشفة
+ * @access  Private
+ */
+router.get('/anomalies', AdvancedAnalyticsController.getAnomalies);
+
+// ========== لوحات المعلومات ==========
+
+/**
+ * @route   POST /api/analytics/dashboards
+ * @desc    إنشاء لوحة معلومات
+ * @access  Private
+ */
+router.post('/dashboards', AdvancedAnalyticsController.createDashboard);
+
+/**
+ * @route   GET /api/analytics/dashboards/:dashboardId
+ * @desc    جلب بيانات لوحة المعلومات
+ * @access  Private
+ */
+router.get('/dashboards/:dashboardId', AdvancedAnalyticsController.getDashboard);
+
+/**
+ * @route   POST /api/analytics/dashboards/:dashboardId/widgets
+ * @desc    إضافة widget إلى لوحة المعلومات
+ * @access  Private
+ */
+router.post('/dashboards/:dashboardId/widgets', AdvancedAnalyticsController.addWidget);
+
+// ========== التحليل المقارن ==========
+
+/**
+ * @route   POST /api/analytics/compare
+ * @desc    جلب التحليل المقارن للمقاييس
+ * @access  Private
+ */
+router.post('/compare', AdvancedAnalyticsController.getComparativeAnalysis);
+
+// ========== الإحصائيات ==========
+
+/**
+ * @route   GET /api/analytics/stats
+ * @desc    جلب الإحصائيات العامة
+ * @access  Private
+ */
+router.get('/stats', AdvancedAnalyticsController.getStatistics);
+module.exports = router;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJleHByZXNzIiwicmVxdWlyZSIsInJvdXRlciIsIlJvdXRlciIsIkFkdmFuY2VkQW5hbHl0aWNzQ29udHJvbGxlciIsInByb3RlY3QiLCJfYXV0aG9yaXplIiwidXNlIiwicG9zdCIsImxvZ0V2ZW50IiwidHJhY2tNZXRyaWMiLCJnZXQiLCJnZXRFdmVudHMiLCJnZW5lcmF0ZVJlcG9ydCIsImV4cG9ydFJlcG9ydCIsInByZWRpY3RWYWx1ZXMiLCJnZXRBbm9tYWxpZXMiLCJjcmVhdGVEYXNoYm9hcmQiLCJnZXREYXNoYm9hcmQiLCJhZGRXaWRnZXQiLCJnZXRDb21wYXJhdGl2ZUFuYWx5c2lzIiwiZ2V0U3RhdGlzdGljcyIsIm1vZHVsZSIsImV4cG9ydHMiXSwic291cmNlcyI6WyJhZHZhbmNlZEFuYWx5dGljcy5yb3V0ZXMuanMiXSwic291cmNlc0NvbnRlbnQiOlsiLyoqXHJcbiAqINmF2LPYp9ix2KfYqiDYp9mE2KrYrdmE2YrZhNin2Kog2YjYp9mE2KrZgtin2LHZitixINin2YTZhdiq2YLYr9mFXHJcbiAqIEFkdmFuY2VkIEFuYWx5dGljcyBSb3V0ZXNcclxuICovXHJcblxyXG5jb25zdCBleHByZXNzID0gcmVxdWlyZSgnZXhwcmVzcycpO1xyXG5jb25zdCByb3V0ZXIgPSBleHByZXNzLlJvdXRlcigpO1xyXG5jb25zdCBBZHZhbmNlZEFuYWx5dGljc0NvbnRyb2xsZXIgPSByZXF1aXJlKCcuLi9jb250cm9sbGVycy9hZHZhbmNlZEFuYWx5dGljcy5jb250cm9sbGVyJyk7XHJcbmNvbnN0IHsgcHJvdGVjdCwgX2F1dGhvcml6ZSB9ID0gcmVxdWlyZSgnLi4vbWlkZGxld2FyZS9hdXRoJyk7XHJcblxyXG4vLyDYrNmF2YrYuSDYp9mE2YXYs9in2LHYp9iqINiq2KrYt9mE2Kgg2KfZhNmF2LXYp9iv2YLYqVxyXG5yb3V0ZXIudXNlKHByb3RlY3QpO1xyXG5cclxuLy8gPT09PT09PT09PSDYqtiz2KzZitmEINin2YTYo9it2K/Yp9irINmI2KfZhNmF2YLYp9mK2YrYsyA9PT09PT09PT09XHJcblxyXG4vKipcclxuICogQHJvdXRlICAgUE9TVCAvYXBpL2FuYWx5dGljcy9ldmVudHNcclxuICogQGRlc2MgICAg2KrYs9is2YrZhCDYrdiv2Ksg2KrYrdmE2YrZhNmKXHJcbiAqIEBhY2Nlc3MgIFByaXZhdGVcclxuICovXHJcbnJvdXRlci5wb3N0KCcvZXZlbnRzJywgQWR2YW5jZWRBbmFseXRpY3NDb250cm9sbGVyLmxvZ0V2ZW50KTtcclxuXHJcbi8qKlxyXG4gKiBAcm91dGUgICBQT1NUIC9hcGkvYW5hbHl0aWNzL21ldHJpY3NcclxuICogQGRlc2MgICAg2KrYqtio2Lkg2YXZgtmK2KfYs1xyXG4gKiBAYWNjZXNzICBQcml2YXRlXHJcbiAqL1xyXG5yb3V0ZXIucG9zdCgnL21ldHJpY3MnLCBBZHZhbmNlZEFuYWx5dGljc0NvbnRyb2xsZXIudHJhY2tNZXRyaWMpO1xyXG5cclxuLyoqXHJcbiAqIEByb3V0ZSAgIEdFVCAvYXBpL2FuYWx5dGljcy9ldmVudHNcclxuICogQGRlc2MgICAg2KzZhNioINin2YTYo9it2K/Yp9irXHJcbiAqIEBhY2Nlc3MgIFByaXZhdGVcclxuICovXHJcbnJvdXRlci5nZXQoJy9ldmVudHMnLCBBZHZhbmNlZEFuYWx5dGljc0NvbnRyb2xsZXIuZ2V0RXZlbnRzKTtcclxuXHJcbi8vID09PT09PT09PT0g2KfZhNiq2YLYp9ix2YrYsSA9PT09PT09PT09XHJcblxyXG4vKipcclxuICogQHJvdXRlICAgUE9TVCAvYXBpL2FuYWx5dGljcy9yZXBvcnRzXHJcbiAqIEBkZXNjICAgINil2YbYtNin2KEg2KrZgtix2YrYsSDZhdiu2LXYtVxyXG4gKiBAYWNjZXNzICBQcml2YXRlXHJcbiAqL1xyXG5yb3V0ZXIucG9zdCgnL3JlcG9ydHMnLCBBZHZhbmNlZEFuYWx5dGljc0NvbnRyb2xsZXIuZ2VuZXJhdGVSZXBvcnQpO1xyXG5cclxuLyoqXHJcbiAqIEByb3V0ZSAgIEdFVCAvYXBpL2FuYWx5dGljcy9yZXBvcnRzLzpyZXBvcnRJZC9leHBvcnRcclxuICogQGRlc2MgICAg2KrYtdiv2YrYsSDYp9mE2KrZgtix2YrYsVxyXG4gKiBAYWNjZXNzICBQcml2YXRlXHJcbiAqL1xyXG5yb3V0ZXIuZ2V0KCcvcmVwb3J0cy86cmVwb3J0SWQvZXhwb3J0JywgQWR2YW5jZWRBbmFseXRpY3NDb250cm9sbGVyLmV4cG9ydFJlcG9ydCk7XHJcblxyXG4vLyA9PT09PT09PT09INin2YTYqtmG2KjYpCA9PT09PT09PT09XHJcblxyXG4vKipcclxuICogQHJvdXRlICAgUE9TVCAvYXBpL2FuYWx5dGljcy9wcmVkaWN0XHJcbiAqIEBkZXNjICAgINin2YTYqtmG2KjYpCDYqNin2YTZgtmK2YUg2KfZhNmF2LPYqtmC2KjZhNmK2KlcclxuICogQGFjY2VzcyAgUHJpdmF0ZVxyXG4gKi9cclxucm91dGVyLnBvc3QoJy9wcmVkaWN0JywgQWR2YW5jZWRBbmFseXRpY3NDb250cm9sbGVyLnByZWRpY3RWYWx1ZXMpO1xyXG5cclxuLy8gPT09PT09PT09PSDYp9mE2LTYsNmI2LAgPT09PT09PT09PVxyXG5cclxuLyoqXHJcbiAqIEByb3V0ZSAgIEdFVCAvYXBpL2FuYWx5dGljcy9hbm9tYWxpZXNcclxuICogQGRlc2MgICAg2KzZhNioINin2YTYtNiw2YjYsCDYp9mE2YXZg9iq2LTZgdipXHJcbiAqIEBhY2Nlc3MgIFByaXZhdGVcclxuICovXHJcbnJvdXRlci5nZXQoJy9hbm9tYWxpZXMnLCBBZHZhbmNlZEFuYWx5dGljc0NvbnRyb2xsZXIuZ2V0QW5vbWFsaWVzKTtcclxuXHJcbi8vID09PT09PT09PT0g2YTZiNit2KfYqiDYp9mE2YXYudmE2YjZhdin2KogPT09PT09PT09PVxyXG5cclxuLyoqXHJcbiAqIEByb3V0ZSAgIFBPU1QgL2FwaS9hbmFseXRpY3MvZGFzaGJvYXJkc1xyXG4gKiBAZGVzYyAgICDYpdmG2LTYp9ihINmE2YjYrdipINmF2LnZhNmI2YXYp9iqXHJcbiAqIEBhY2Nlc3MgIFByaXZhdGVcclxuICovXHJcbnJvdXRlci5wb3N0KCcvZGFzaGJvYXJkcycsIEFkdmFuY2VkQW5hbHl0aWNzQ29udHJvbGxlci5jcmVhdGVEYXNoYm9hcmQpO1xyXG5cclxuLyoqXHJcbiAqIEByb3V0ZSAgIEdFVCAvYXBpL2FuYWx5dGljcy9kYXNoYm9hcmRzLzpkYXNoYm9hcmRJZFxyXG4gKiBAZGVzYyAgICDYrNmE2Kgg2KjZitin2YbYp9iqINmE2YjYrdipINin2YTZhdi52YTZiNmF2KfYqlxyXG4gKiBAYWNjZXNzICBQcml2YXRlXHJcbiAqL1xyXG5yb3V0ZXIuZ2V0KCcvZGFzaGJvYXJkcy86ZGFzaGJvYXJkSWQnLCBBZHZhbmNlZEFuYWx5dGljc0NvbnRyb2xsZXIuZ2V0RGFzaGJvYXJkKTtcclxuXHJcbi8qKlxyXG4gKiBAcm91dGUgICBQT1NUIC9hcGkvYW5hbHl0aWNzL2Rhc2hib2FyZHMvOmRhc2hib2FyZElkL3dpZGdldHNcclxuICogQGRlc2MgICAg2KXYttin2YHYqSB3aWRnZXQg2KXZhNmJINmE2YjYrdipINin2YTZhdi52YTZiNmF2KfYqlxyXG4gKiBAYWNjZXNzICBQcml2YXRlXHJcbiAqL1xyXG5yb3V0ZXIucG9zdCgnL2Rhc2hib2FyZHMvOmRhc2hib2FyZElkL3dpZGdldHMnLCBBZHZhbmNlZEFuYWx5dGljc0NvbnRyb2xsZXIuYWRkV2lkZ2V0KTtcclxuXHJcbi8vID09PT09PT09PT0g2KfZhNiq2K3ZhNmK2YQg2KfZhNmF2YLYp9ix2YYgPT09PT09PT09PVxyXG5cclxuLyoqXHJcbiAqIEByb3V0ZSAgIFBPU1QgL2FwaS9hbmFseXRpY3MvY29tcGFyZVxyXG4gKiBAZGVzYyAgICDYrNmE2Kgg2KfZhNiq2K3ZhNmK2YQg2KfZhNmF2YLYp9ix2YYg2YTZhNmF2YLYp9mK2YrYs1xyXG4gKiBAYWNjZXNzICBQcml2YXRlXHJcbiAqL1xyXG5yb3V0ZXIucG9zdCgnL2NvbXBhcmUnLCBBZHZhbmNlZEFuYWx5dGljc0NvbnRyb2xsZXIuZ2V0Q29tcGFyYXRpdmVBbmFseXNpcyk7XHJcblxyXG4vLyA9PT09PT09PT09INin2YTYpdit2LXYp9im2YrYp9iqID09PT09PT09PT1cclxuXHJcbi8qKlxyXG4gKiBAcm91dGUgICBHRVQgL2FwaS9hbmFseXRpY3Mvc3RhdHNcclxuICogQGRlc2MgICAg2KzZhNioINin2YTYpdit2LXYp9im2YrYp9iqINin2YTYudin2YXYqVxyXG4gKiBAYWNjZXNzICBQcml2YXRlXHJcbiAqL1xyXG5yb3V0ZXIuZ2V0KCcvc3RhdHMnLCBBZHZhbmNlZEFuYWx5dGljc0NvbnRyb2xsZXIuZ2V0U3RhdGlzdGljcyk7XHJcblxyXG5tb2R1bGUuZXhwb3J0cyA9IHJvdXRlcjtcclxuIl0sIm1hcHBpbmdzIjoiQUFBQTtBQUNBO0FBQ0E7QUFDQTs7QUFFQSxNQUFNQSxPQUFPLEdBQUdDLE9BQU8sQ0FBQyxTQUFTLENBQUM7QUFDbEMsTUFBTUMsTUFBTSxHQUFHRixPQUFPLENBQUNHLE1BQU0sQ0FBQyxDQUFDO0FBQy9CLE1BQU1DLDJCQUEyQixHQUFHSCxPQUFPLENBQUMsNkNBQTZDLENBQUM7QUFDMUYsTUFBTTtFQUFFSSxPQUFPO0VBQUVDO0FBQVcsQ0FBQyxHQUFHTCxPQUFPLENBQUMsb0JBQW9CLENBQUM7O0FBRTdEO0FBQ0FDLE1BQU0sQ0FBQ0ssR0FBRyxDQUFDRixPQUFPLENBQUM7O0FBRW5COztBQUVBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQUgsTUFBTSxDQUFDTSxJQUFJLENBQUMsU0FBUyxFQUFFSiwyQkFBMkIsQ0FBQ0ssUUFBUSxDQUFDOztBQUU1RDtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0FQLE1BQU0sQ0FBQ00sSUFBSSxDQUFDLFVBQVUsRUFBRUosMkJBQTJCLENBQUNNLFdBQVcsQ0FBQzs7QUFFaEU7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBUixNQUFNLENBQUNTLEdBQUcsQ0FBQyxTQUFTLEVBQUVQLDJCQUEyQixDQUFDUSxTQUFTLENBQUM7O0FBRTVEOztBQUVBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQVYsTUFBTSxDQUFDTSxJQUFJLENBQUMsVUFBVSxFQUFFSiwyQkFBMkIsQ0FBQ1MsY0FBYyxDQUFDOztBQUVuRTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0FYLE1BQU0sQ0FBQ1MsR0FBRyxDQUFDLDJCQUEyQixFQUFFUCwyQkFBMkIsQ0FBQ1UsWUFBWSxDQUFDOztBQUVqRjs7QUFFQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0FaLE1BQU0sQ0FBQ00sSUFBSSxDQUFDLFVBQVUsRUFBRUosMkJBQTJCLENBQUNXLGFBQWEsQ0FBQzs7QUFFbEU7O0FBRUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBYixNQUFNLENBQUNTLEdBQUcsQ0FBQyxZQUFZLEVBQUVQLDJCQUEyQixDQUFDWSxZQUFZLENBQUM7O0FBRWxFOztBQUVBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQWQsTUFBTSxDQUFDTSxJQUFJLENBQUMsYUFBYSxFQUFFSiwyQkFBMkIsQ0FBQ2EsZUFBZSxDQUFDOztBQUV2RTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0FmLE1BQU0sQ0FBQ1MsR0FBRyxDQUFDLDBCQUEwQixFQUFFUCwyQkFBMkIsQ0FBQ2MsWUFBWSxDQUFDOztBQUVoRjtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0FoQixNQUFNLENBQUNNLElBQUksQ0FBQyxrQ0FBa0MsRUFBRUosMkJBQTJCLENBQUNlLFNBQVMsQ0FBQzs7QUFFdEY7O0FBRUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBakIsTUFBTSxDQUFDTSxJQUFJLENBQUMsVUFBVSxFQUFFSiwyQkFBMkIsQ0FBQ2dCLHNCQUFzQixDQUFDOztBQUUzRTs7QUFFQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0FsQixNQUFNLENBQUNTLEdBQUcsQ0FBQyxRQUFRLEVBQUVQLDJCQUEyQixDQUFDaUIsYUFBYSxDQUFDO0FBRS9EQyxNQUFNLENBQUNDLE9BQU8sR0FBR3JCLE1BQU0iLCJpZ25vcmVMaXN0IjpbXX0=

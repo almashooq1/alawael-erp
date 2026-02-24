@@ -1,0 +1,121 @@
+{
+  "login": {
+    "title": "Login",
+    "email": "Email",
+    "emailPlaceholder": "Enter your email",
+    "password": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "rememberMe": "Remember me",
+    "forgotPassword": "Forgot password?",
+    "button": "Sign In",
+    "noAccount": "Don't have an account?",
+    "registerHere": "Register here",
+    "demoCredentials": "Demo Credentials",
+    "student": "Student",
+    "parent": "Parent",
+    "portalType": "Portal Type",
+    "portal": {
+      "beneficiary": "Student Portal",
+      "guardian": "Parent Portal"
+    },
+    "validation": {
+      "required": "All fields are required",
+      "invalidEmail": "Invalid email address"
+    },
+    "error": {
+      "generic": "Login failed. Please try again"
+    }
+  },
+  "header": {
+    "notifications": "Notifications",
+    "messages": "Messages",
+    "language": "Language",
+    "profile": "Profile",
+    "settings": "Settings",
+    "logout": "Logout"
+  },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "academic": "Academic",
+    "progress": "Progress",
+    "grades": "Grades",
+    "attendance": "Attendance",
+    "programs": "Programs",
+    "communication": "Communication",
+    "messages": "Messages",
+    "notifications": "Notifications",
+    "documents": "Documents",
+    "profile": "Profile",
+    "settings": "Settings",
+    "beneficiaries": "Beneficiaries",
+    "monitoring": "Monitoring",
+    "behavior": "Behavior",
+    "financial": "Financial",
+    "payments": "Payments",
+    "invoices": "Invoices",
+    "installments": "Installments",
+    "summary": "Summary",
+    "reports": "Reports",
+    "analytics": "Analytics"
+  },
+  "dashboard": {
+    "welcome": "Welcome",
+    "academicScore": "Academic Score",
+    "attendance": "Attendance",
+    "unreadMessages": "Unread Messages",
+    "pendingTasks": "Pending Tasks",
+    "progressTrend": "Progress Trend",
+    "gradeDistribution": "Grade Distribution",
+    "recentActivities": "Recent Activities",
+    "upcomingEvents": "Upcoming Events",
+    "viewFullReport": "View Full Report",
+    "contactGuardian": "Contact Guardian",
+    "children": "Children Count",
+    "averageScore": "Average Score",
+    "totalDue": "Total Due",
+    "pendingPayments": "Pending Payments"
+  },
+  "progress": {
+    "title": "Progress Monitoring",
+    "subtitle": "View academic progress details"
+  },
+  "financial": {
+    "title": "Financial Management",
+    "subtitle": "Manage payments and invoices"
+  },
+  "payments": {
+    "title": "Payment Processor",
+    "subtitle": "Process payments",
+    "compose": "Write your message...",
+    "send": "Send"
+  },
+  "reports": {
+    "title": "Report Viewer",
+    "subtitle": "View detailed reports"
+  },
+  "analytics": {
+    "title": "Analytics Dashboard",
+    "subtitle": "View analytics and statistics"
+  },
+  "messages": {
+    "title": "Message Center",
+    "subtitle": "Manage messages",
+    "compose": "Write your message...",
+    "send": "Send"
+  },
+  "notifications": {
+    "title": "Notification Hub",
+    "subtitle": "View notifications"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "retry": "Retry"
+  }
+}

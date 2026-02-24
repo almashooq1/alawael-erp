@@ -1,0 +1,121 @@
+{
+  "login": {
+    "title": "تسجيل الدخول",
+    "email": "البريد الإلكتروني",
+    "emailPlaceholder": "أدخل بريدك الإلكتروني",
+    "password": "كلمة المرور",
+    "passwordPlaceholder": "أدخل كلمة المرور",
+    "rememberMe": "تذكرني",
+    "forgotPassword": "هل نسيت كلمة المرور؟",
+    "button": "دخول",
+    "noAccount": "ليس لديك حساب؟",
+    "registerHere": "سجل هنا",
+    "demoCredentials": "بيانات تجريبية",
+    "student": "الطالب",
+    "parent": "الولي",
+    "portalType": "نوع البوابة",
+    "portal": {
+      "beneficiary": "بوابة الطالب",
+      "guardian": "بوابة الولي"
+    },
+    "validation": {
+      "required": "جميع الحقول مطلوبة",
+      "invalidEmail": "البريد الإلكتروني غير صحيح"
+    },
+    "error": {
+      "generic": "خطأ في تسجيل الدخول. يرجى المحاولة مرة أخرى"
+    }
+  },
+  "header": {
+    "notifications": "الإشعارات",
+    "messages": "الرسائل",
+    "language": "اللغة",
+    "profile": "الملف الشخصي",
+    "settings": "الإعدادات",
+    "logout": "تسجيل الخروج"
+  },
+  "sidebar": {
+    "dashboard": "لوحة التحكم",
+    "academic": "الأكاديمي",
+    "progress": "التقدم",
+    "grades": "الدرجات",
+    "attendance": "الحضور",
+    "programs": "البرامج",
+    "communication": "التواصل",
+    "messages": "الرسائل",
+    "notifications": "الإشعارات",
+    "documents": "المستندات",
+    "profile": "الملف الشخصي",
+    "settings": "الإعدادات",
+    "beneficiaries": "الطلاب",
+    "monitoring": "المراقبة",
+    "behavior": "السلوك",
+    "financial": "المالي",
+    "payments": "الدفعات",
+    "invoices": "الفواتير",
+    "installments": "الأقساط",
+    "summary": "ملخص",
+    "reports": "التقارير",
+    "analytics": "التحليلات"
+  },
+  "dashboard": {
+    "welcome": "مرحبا",
+    "academicScore": "الدرجة الأكاديمية",
+    "attendance": "الحضور",
+    "unreadMessages": "الرسائل غير المقروءة",
+    "pendingTasks": "المهام المعلقة",
+    "progressTrend": "اتجاه التقدم",
+    "gradeDistribution": "توزيع الدرجات",
+    "recentActivities": "الأنشطة الأخيرة",
+    "upcomingEvents": "الأحداث القادمة",
+    "viewFullReport": "عرض التقرير الكامل",
+    "contactGuardian": "التواصل مع الولي",
+    "children": "عدد الأطفال",
+    "averageScore": "متوسط الدرجات",
+    "totalDue": "الإجمالي المستحق",
+    "pendingPayments": "الدفعات المعلقة"
+  },
+  "progress": {
+    "title": "مراقبة التقدم",
+    "subtitle": "عرض تفاصيل التقدم الأكاديمي"
+  },
+  "financial": {
+    "title": "الإدارة المالية",
+    "subtitle": "إدارة المدفوعات والفواتير"
+  },
+  "payments": {
+    "title": "معالج الدفع",
+    "subtitle": "قم بمعالجة الدفعات",
+    "compose": "اكتب رسالتك...",
+    "send": "إرسال"
+  },
+  "reports": {
+    "title": "عرض التقارير",
+    "subtitle": "عرض التقارير التفصيلية"
+  },
+  "analytics": {
+    "title": "لوحة التحليلات",
+    "subtitle": "عرض التحليلات والإحصائيات"
+  },
+  "messages": {
+    "title": "مركز الرسائل",
+    "subtitle": "إدارة الرسائل",
+    "compose": "اكتب رسالتك...",
+    "send": "إرسال"
+  },
+  "notifications": {
+    "title": "مركز الإشعارات",
+    "subtitle": "عرض الإشعارات"
+  },
+  "common": {
+    "loading": "جاري التحميل...",
+    "error": "حدث خطأ",
+    "success": "تم بنجاح",
+    "cancel": "إلغاء",
+    "save": "حفظ",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "close": "إغلاق",
+    "retry": "إعادة المحاولة"
+  }
+}

@@ -1,0 +1,17 @@
+{
+    "short_name": "الأوائل للتأهيل",
+    "name": "مركز الأوائل للتأهيل - نظام إدارة التأهيل المتكامل",
+    "description": "Al-Awael Rehabilitation Center - Integrated Rehabilitation Management System",
+    "icons": [
+        {
+            "src": "logo.svg",
+            "sizes": "any",
+            "type": "image/svg+xml"
+        }
+    ],
+    "start_url": ".",
+    "display": "standalone",
+    "theme_color": "#667eea",
+    "background_color": "#ffffff",
+    "orientation": "portrait-primary"
+}

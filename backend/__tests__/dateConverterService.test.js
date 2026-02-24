@@ -339,7 +339,7 @@ describe('Integration Tests', () => {
    */
 
   // Round-trip conversion test - allows for rounding differences in Hijri conversion
-  test.skip('التحويل من ميلادي إلى هجري ثم العودة يجب أن يعطي نفس التاريخ تقريباً', () => {
+  test('التحويل من ميلادي إلى هجري ثم العودة يجب أن يعطي نفس التاريخ تقريباً', () => {
     // TODO: Fix Hijri conversion algorithm - round-trip conversion has 384-day precision error
     // This test is skipped until the core conversion algorithm is fixed.
     const original = '2025-01-16';

@@ -1,0 +1,39 @@
+{
+    "users": {
+        "admin": {
+            "id": "admin-001",
+            "name": "Admin User",
+            "email": "admin@example.com",
+            "password": "Admin@12345",
+            "role": "admin",
+            "phone": "+966501234567",
+            "department": "Management",
+            "status": "active"
+        },
+        "manager": {
+            "id": "manager-001",
+            "name": "Manager User",
+            "email": "manager@example.com",
+            "password": "Manager@12345",
+            "role": "manager",
+            "phone": "+966502345678",
+            "department": "HR",
+            "status": "active"
+        },
+        "employee": {
+            "id": "emp-001",
+            "name": "Employee User",
+            "email": "employee@example.com",
+            "password": "Employee@12345",
+            "role": "employee",
+            "phone": "+966503456789",
+            "department": "Operations",
+            "status": "active"
+        }
+    },
+    "tokens": {
+        "admin": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFkbWluLTAwMSIsInJvbGUiOiJhZG1pbiJ9.test",
+        "manager": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Im1hbmFnZXItMDAxIiwicm9sZSI6Im1hbmFnZXIifQ.test",
+        "employee": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImVtcC0wMDEiLCJyb2xlIjoiZW1wbG95ZWUifQ.test"
+    }
+}

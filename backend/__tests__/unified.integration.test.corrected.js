@@ -439,7 +439,7 @@ describe('Permissions & Ownership', () => {
     const perm = getPermissionService();
     const hasDelete = perm.checkPermission(req.user, 'delete');
     expect(hasDelete).toBe(false);
-  };
+  });
 });
 
 /**

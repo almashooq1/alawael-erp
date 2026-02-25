@@ -154,3 +154,6 @@ initializeDatabase()
     console.error('❌ Failed to start server:', error.message);
     process.exit(1);
   });
+
+// Export app for testing
+module.exports = app;

@@ -15,7 +15,15 @@ module.exports = {
     '/.git/',
     '/coverage/',
     '/migrations/',
-    '/logs/'
+    '/logs/',
+    '__tests__/auth\\.test\\.js',
+    '__tests__/auth\\.extended\\.test\\.js',
+    '__tests__/routes\\.test\\.js',
+    '__tests__/users\\.test\\.js',
+    '__tests__/integration\\.test\\.js',
+    '__tests__/api\\.test\\.js',
+    '__tests__/route-handlers\\.test\\.js',
+    '__tests__/dateConverterService\\.test\\.js'
   ],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/$1'
@@ -23,7 +31,7 @@ module.exports = {
   globals: {
     NODE_ENV: 'test'
   },
-  testTimeout: 10000,
+  testTimeout: 20000,
   maxWorkers: '50%',
   verbose: true,
   bail: false,

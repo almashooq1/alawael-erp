@@ -28,7 +28,7 @@ const branchIntegrationRoutes = safeRequire('./routes/branch-integration.routes'
 const notificationRoutes = safeRequire('./routes/notificationRoutes'); // 🎯 Advanced Notification System
 
 // Custom middleware
-const errorHandler = require('./middleware/errorHandler');
+const { errorHandler } = require('./middleware/errorHandler');
 const { cache } = require('./config/redis');
 const { limiters } = require('./middleware/rateLimit');
 const analytics = require('./middleware/analytics');

@@ -50,7 +50,7 @@ jest.mock('../middleware/auth.middleware', () => ({
       next(),
 }));
 
-const driverRoutes = require('../routes/driverRoutes');
+const driverRoutes = require('../routes/drivers');
 
 describe('Driver Routes Comprehensive Tests', () => {
   let app;

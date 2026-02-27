@@ -5,9 +5,9 @@
 
 const request = require('supertest');
 const mongoose = require('mongoose');
-const app = require('../../app');
-const Document = require('../../models/Document');
-const User = require('../../models/User');
+const app = require('../app');
+const Document = require('../models/Document');
+const User = require('../models/User');
 
 describe('📄 Document Management System', () => {
   let authToken;

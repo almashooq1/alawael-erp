@@ -452,7 +452,6 @@ export class ReportGenerator {
 }
 
 // ============================================================================
-// 5. EXPORT ANALYTICS UTILITIES
+// 5. ANALYTICS UTILITIES EXPORTED ABOVE AS `export class`
 // ============================================================================
-
-export { DataAggregator, InsightsGenerator, BusinessMetricsTracker, ReportGenerator };
+// Classes are already exported at their declaration points

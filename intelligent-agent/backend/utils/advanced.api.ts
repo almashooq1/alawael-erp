@@ -573,7 +573,6 @@ export class RequestValidator {
 }
 
 // ============================================================================
-// 6. EXPORT API UTILITIES
+// 6. API UTILITIES EXPORTED ABOVE AS `export class`
 // ============================================================================
-
-export { ResponseBuilder, CacheManager, ApiVersionManager, RateLimiter, RequestValidator };
+// Classes are already exported at their declaration points

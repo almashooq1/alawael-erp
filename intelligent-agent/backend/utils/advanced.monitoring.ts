@@ -460,7 +460,6 @@ export class AlertManager {
 }
 
 // ============================================================================
-// 5. EXPORT MONITORING UTILITIES
+// 5. MONITORING UTILITIES EXPORTED ABOVE AS `export class`
 // ============================================================================
-
-export { MetricsCollector, AdvancedPerformanceMonitor, HealthCheckManager, AlertManager };
+// Classes are already exported at their declaration points

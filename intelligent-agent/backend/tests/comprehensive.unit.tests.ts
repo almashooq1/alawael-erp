@@ -442,15 +442,18 @@ describe('AlertManager', () => {
     expect(active[0].severity).toBe('Warning');
   });
 
-  test('should subscribe to alerts', done => {
-    let alertReceived = false;
+  test('should subscribe to alerts', () => {
+    return new Promise<void>((resolve) => {
+      let alertReceived = false;
 
-    alertManager.onAlert(() => {
-      alertReceived = true;
-      done();
+      alertManager.onAlert(() => {
+        alertReceived = true;
+        expect(alertReceived).toBe(true);
+        resolve();
+      });
+
+      alertManager.createAlert('Info', 'Test');
     });
-
-    alertManager.createAlert('Info', 'Test');
   });
 
   test('should unsubscribe from alerts', () => {

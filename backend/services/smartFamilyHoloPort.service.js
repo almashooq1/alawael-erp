@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * PHASE 106: Smart Family Holo-Port
  * "The Living Room" - A shared Virtual Reality space where patients and families
@@ -6,10 +7,11 @@
  */
 
 const SmartVRService = require('./smartVR.service');
+const logger = require('../utils/logger');
 
 class SmartFamilyHoloPortService {
   constructor() {
-    console.log('System: Smart Family Holo-Port - Initialized');
+    logger.info('System: Smart Family Holo-Port - Initialized');
     this.activeRooms = new Map(); // roomId -> { participants: [], activity: null }
   }
 

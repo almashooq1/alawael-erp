@@ -3,6 +3,8 @@
  * معالج الأخطاء المحسّن
  */
 
+const logger = require('../utils/logger');
+
 /**
  * Custom Application Error
  * خطأ مخصص للتطبيق
@@ -72,17 +74,23 @@ const handleJWTExpiredError = () => {
  * Send error response in development
  */
 const sendErrorDev = (err, req, res) => {
-  console.error('ERROR 💥', err);
+  logger.error('DEV ERROR', {
+    message: err.message,
+    stack: err.stack,
+    path: req.path,
+    requestId: req.id,
+  });
 
   res.status(err.statusCode || 500).json({
     success: false,
     statusCode: err.statusCode || 500,
     code: err.code || 'INTERNAL_ERROR',
-    message: err.message,
+    message: 'حدث خطأ داخلي',
     error: err,
     stack: err.stack,
     path: req.path,
     method: req.method,
+    requestId: req.id || undefined,
     timestamp: new Date().toISOString(),
   });
 };
@@ -92,24 +100,31 @@ const sendErrorDev = (err, req, res) => {
  */
 const sendErrorProd = (err, req, res) => {
   // Operational, trusted error: send message to client
-  if (err.isOperational) {
+  if (err.isOperational || (err.statusCode && err.statusCode < 500)) {
     res.status(err.statusCode).json({
       success: false,
       statusCode: err.statusCode,
-      code: err.code,
+      code: err.code || err.name || 'APP_ERROR',
       message: err.message,
+      requestId: req.id || undefined,
       timestamp: new Date().toISOString(),
     });
   }
   // Programming or other unknown error: don't leak error details
   else {
-    console.error('ERROR 💥', err);
+    logger.error('PROD ERROR (non-operational)', {
+      message: 'حدث خطأ داخلي',
+      stack: err.stack,
+      path: req.path,
+      requestId: req.id,
+    });
 
     res.status(500).json({
       success: false,
       statusCode: 500,
       code: 'INTERNAL_ERROR',
       message: 'Something went wrong',
+      requestId: req.id || undefined,
       timestamp: new Date().toISOString(),
     });
   }
@@ -169,6 +184,7 @@ const notFoundHandler = (req, res) => {
     code: 'NOT_FOUND',
     message: `Cannot ${req.method} ${req.url}`,
     path: req.path,
+    requestId: req.id || undefined,
     timestamp: new Date().toISOString(),
   });
 };
@@ -178,9 +194,11 @@ const notFoundHandler = (req, res) => {
  */
 const unhandledRejectionHandler = () => {
   process.on('unhandledRejection', err => {
-    console.error('UNHANDLED REJECTION! 💥 Shutting down...');
-    console.error(err.name, err.message);
-    console.error(err.stack);
+    logger.error('UNHANDLED REJECTION — shutting down', {
+      name: err.name,
+      message: 'حدث خطأ داخلي',
+      stack: err.stack,
+    });
 
     // Give time for logs to flush
     setTimeout(() => {
@@ -194,9 +212,11 @@ const unhandledRejectionHandler = () => {
  */
 const uncaughtExceptionHandler = () => {
   process.on('uncaughtException', err => {
-    console.error('UNCAUGHT EXCEPTION! 💥 Shutting down...');
-    console.error(err.name, err.message);
-    console.error(err.stack);
+    logger.error('UNCAUGHT EXCEPTION — shutting down', {
+      name: err.name,
+      message: 'حدث خطأ داخلي',
+      stack: err.stack,
+    });
 
     process.exit(1);
   });

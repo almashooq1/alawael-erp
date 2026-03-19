@@ -1,3 +1,4 @@
+﻿/* eslint-disable no-unused-vars */
 const express = require('express');
 const router = express.Router();
 const asyncHandler = require('express-async-handler');
@@ -9,11 +10,11 @@ const logger = require('../utils/logger');
 const assetService = new AssetManagementService();
 
 // Middleware to verify service is ready
-router.use((req, res, next) => {
+router.use((_req, res, next) => {
   if (!assetService) {
-    return res.status(503).json({ 
+    return res.status(503).json({
       error: 'Service unavailable',
-      message: 'Asset management service not initialized'
+      message: 'Asset management service not initialized',
     });
   }
   next();
@@ -24,7 +25,8 @@ router.use((req, res, next) => {
  * @desc    Get all assets
  * @access  Private
  */
-router.get('/',
+router.get(
+  '/',
   authenticate,
   asyncHandler(async (req, res) => {
     try {
@@ -32,13 +34,13 @@ router.get('/',
       res.status(200).json({
         success: true,
         count: assets.length,
-        data: assets
+        data: assets,
       });
     } catch (error) {
       logger.error('Error fetching assets:', error);
       res.status(500).json({
         success: false,
-        error: error.message || 'Failed to fetch assets'
+        error: 'حدث خطأ في الخادم' || 'Failed to fetch assets',
       });
     }
   })
@@ -49,7 +51,8 @@ router.get('/',
  * @desc    Create new asset
  * @access  Private/Manager
  */
-router.post('/',
+router.post(
+  '/',
   authenticate,
   authorize(['manager', 'admin']),
   asyncHandler(async (req, res) => {
@@ -59,7 +62,7 @@ router.post('/',
       if (!name || !category) {
         return res.status(400).json({
           success: false,
-          error: 'Asset name and category are required'
+          error: 'Asset name and category are required',
         });
       }
 
@@ -70,119 +73,18 @@ router.post('/',
         value: value || 0,
         location,
         status: status || 'active',
-        createdBy: req.user.id
+        createdBy: req.user.id,
       });
 
       res.status(201).json({
         success: true,
-        data: asset
+        data: asset,
       });
     } catch (error) {
       logger.error('Error creating asset:', error);
       res.status(500).json({
         success: false,
-        error: error.message || 'Failed to create asset'
-      });
-    }
-  })
-);
-
-/**
- * @route   GET /api/v1/assets/:assetId
- * @desc    Get specific asset
- * @access  Private
- */
-router.get('/:assetId',
-  authenticate,
-  asyncHandler(async (req, res) => {
-    try {
-      const asset = await assetService.getAssetById(req.params.assetId);
-      
-      if (!asset) {
-        return res.status(404).json({
-          success: false,
-          error: 'Asset not found'
-        });
-      }
-
-      res.status(200).json({
-        success: true,
-        data: asset
-      });
-    } catch (error) {
-      logger.error('Error fetching asset:', error);
-      res.status(500).json({
-        success: false,
-        error: error.message || 'Failed to fetch asset'
-      });
-    }
-  })
-);
-
-/**
- * @route   PUT /api/v1/assets/:assetId
- * @desc    Update asset
- * @access  Private/Manager
- */
-router.put('/:assetId',
-  authenticate,
-  authorize(['manager', 'admin']),
-  asyncHandler(async (req, res) => {
-    try {
-      const asset = await assetService.updateAsset(
-        req.params.assetId,
-        req.body
-      );
-
-      if (!asset) {
-        return res.status(404).json({
-          success: false,
-          error: 'Asset not found'
-        });
-      }
-
-      res.status(200).json({
-        success: true,
-        data: asset
-      });
-    } catch (error) {
-      logger.error('Error updating asset:', error);
-      res.status(500).json({
-        success: false,
-        error: error.message || 'Failed to update asset'
-      });
-    }
-  })
-);
-
-/**
- * @route   DELETE /api/v1/assets/:assetId
- * @desc    Delete asset
- * @access  Private/Admin
- */
-router.delete('/:assetId',
-  authenticate,
-  authorize(['admin']),
-  asyncHandler(async (req, res) => {
-    try {
-      const result = await assetService.deleteAsset(req.params.assetId);
-
-      if (!result) {
-        return res.status(404).json({
-          success: false,
-          error: 'Asset not found'
-        });
-      }
-
-      res.status(200).json({
-        success: true,
-        message: 'Asset deleted successfully'
-      });
-    } catch (error) {
-      logger.error('Error deleting asset:', error);
-      res.status(500).json({
-        success: false,
-        error: error.message || 'Failed to delete asset'
+        error: 'حدث خطأ في الخادم' || 'Failed to create asset',
       });
     }
   })
@@ -193,22 +95,23 @@ router.delete('/:assetId',
  * @desc    Get assets by category
  * @access  Private
  */
-router.get('/category/:category',
+router.get(
+  '/category/:category',
   authenticate,
   asyncHandler(async (req, res) => {
     try {
       const assets = await assetService.getAssetsByCategory(req.params.category);
-      
+
       res.status(200).json({
         success: true,
         count: assets.length,
-        data: assets
+        data: assets,
       });
     } catch (error) {
       logger.error('Error fetching assets by category:', error);
       res.status(500).json({
         success: false,
-        error: error.message || 'Failed to fetch assets'
+        error: 'حدث خطأ في الخادم' || 'Failed to fetch assets',
       });
     }
   })
@@ -219,33 +122,135 @@ router.get('/category/:category',
  * @desc    Get asset depreciation report
  * @access  Private
  */
-router.get('/depreciation/report',
+router.get(
+  '/depreciation/report',
   authenticate,
   asyncHandler(async (req, res) => {
     try {
       const report = await assetService.getDepreciationReport();
-      
+
       res.status(200).json({
         success: true,
-        data: report
+        data: report,
       });
     } catch (error) {
       logger.error('Error generating depreciation report:', error);
       res.status(500).json({
         success: false,
-        error: error.message || 'Failed to generate report'
+        error: 'حدث خطأ في الخادم' || 'Failed to generate report',
+      });
+    }
+  })
+);
+
+/**
+ * @route   GET /api/v1/assets/:assetId
+ * @desc    Get specific asset
+ * @access  Private
+ */
+router.get(
+  '/:assetId',
+  authenticate,
+  asyncHandler(async (req, res) => {
+    try {
+      const asset = await assetService.getAssetById(req.params.assetId);
+
+      if (!asset) {
+        return res.status(404).json({
+          success: false,
+          error: 'Asset not found',
+        });
+      }
+
+      res.status(200).json({
+        success: true,
+        data: asset,
+      });
+    } catch (error) {
+      logger.error('Error fetching asset:', error);
+      res.status(500).json({
+        success: false,
+        error: 'حدث خطأ في الخادم' || 'Failed to fetch asset',
+      });
+    }
+  })
+);
+
+/**
+ * @route   PUT /api/v1/assets/:assetId
+ * @desc    Update asset
+ * @access  Private/Manager
+ */
+router.put(
+  '/:assetId',
+  authenticate,
+  authorize(['manager', 'admin']),
+  asyncHandler(async (req, res) => {
+    try {
+      const asset = await assetService.updateAsset(req.params.assetId, req.body);
+
+      if (!asset) {
+        return res.status(404).json({
+          success: false,
+          error: 'Asset not found',
+        });
+      }
+
+      res.status(200).json({
+        success: true,
+        data: asset,
+      });
+    } catch (error) {
+      logger.error('Error updating asset:', error);
+      res.status(500).json({
+        success: false,
+        error: 'حدث خطأ في الخادم' || 'Failed to update asset',
+      });
+    }
+  })
+);
+
+/**
+ * @route   DELETE /api/v1/assets/:assetId
+ * @desc    Delete asset
+ * @access  Private/Admin
+ */
+router.delete(
+  '/:assetId',
+  authenticate,
+  authorize(['admin']),
+  asyncHandler(async (req, res) => {
+    try {
+      const result = await assetService.deleteAsset(req.params.assetId);
+
+      if (!result) {
+        return res.status(404).json({
+          success: false,
+          error: 'Asset not found',
+        });
+      }
+
+      res.status(200).json({
+        success: true,
+        message: 'Asset deleted successfully',
+      });
+    } catch (error) {
+      logger.error('Error deleting asset:', error);
+      res.status(500).json({
+        success: false,
+        error: 'حدث خطأ في الخادم' || 'Failed to delete asset',
       });
     }
   })
 );
 
 // Error handling middleware
-router.use((err, req, res, next) => {
+router.use((err, _req, res, _next) => {
   logger.error('Router error:', err);
   res.status(500).json({
     success: false,
     error: 'An unexpected error occurred',
-    message: err.message
+    message: 'حدث خطأ في الخادم',
   });
 });
 

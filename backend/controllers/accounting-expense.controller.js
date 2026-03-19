@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * ===================================================================
  * ACCOUNTING EXPENSE CONTROLLER - متحكم المصروفات المحاسبية
@@ -5,6 +6,8 @@
  */
 
 const AccountingExpense = require('../models/AccountingExpense');
+const logger = require('../utils/logger');
+const { escapeRegex } = require('../utils/sanitize');
 
 // @desc    Get all expenses
 // @route   GET /api/accounting/expenses
@@ -25,9 +28,9 @@ exports.getAllExpenses = async (req, res) => {
 
     if (search) {
       query.$or = [
-        { description: { $regex: search, $options: 'i' } },
-        { vendor: { $regex: search, $options: 'i' } },
-        { reference: { $regex: search, $options: 'i' } },
+        { description: { $regex: escapeRegex(search), $options: 'i' } },
+        { vendor: { $regex: escapeRegex(search), $options: 'i' } },
+        { reference: { $regex: escapeRegex(search), $options: 'i' } },
       ];
     }
 
@@ -53,11 +56,11 @@ exports.getAllExpenses = async (req, res) => {
       data: expenses,
     });
   } catch (error) {
-    console.error('Error fetching expenses:', error);
+    logger.error('Error fetching expenses:', error);
     res.status(500).json({
       success: false,
       message: 'حدث خطأ أثناء جلب المصروفات',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 };
@@ -128,11 +131,11 @@ exports.getExpenseStats = async (req, res) => {
       data: stats,
     });
   } catch (error) {
-    console.error('Error fetching expense stats:', error);
+    logger.error('Error fetching expense stats:', error);
     res.status(500).json({
       success: false,
       message: 'حدث خطأ أثناء جلب الإحصائيات',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 };
@@ -159,11 +162,11 @@ exports.getExpenseById = async (req, res) => {
       data: expense,
     });
   } catch (error) {
-    console.error('Error fetching expense:', error);
+    logger.error('Error fetching expense:', error);
     res.status(500).json({
       success: false,
       message: 'حدث خطأ أثناء جلب المصروف',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 };
@@ -188,11 +191,11 @@ exports.createExpense = async (req, res) => {
       message: 'تم إنشاء المصروف بنجاح',
     });
   } catch (error) {
-    console.error('Error creating expense:', error);
+    logger.error('Error creating expense:', error);
     res.status(400).json({
       success: false,
       message: 'حدث خطأ أثناء إنشاء المصروف',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 };
@@ -231,11 +234,11 @@ exports.updateExpense = async (req, res) => {
       message: 'تم تحديث المصروف بنجاح',
     });
   } catch (error) {
-    console.error('Error updating expense:', error);
+    logger.error('Error updating expense:', error);
     res.status(400).json({
       success: false,
       message: 'حدث خطأ أثناء تحديث المصروف',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 };
@@ -269,11 +272,11 @@ exports.deleteExpense = async (req, res) => {
       message: 'تم حذف المصروف بنجاح',
     });
   } catch (error) {
-    console.error('Error deleting expense:', error);
+    logger.error('Error deleting expense:', error);
     res.status(500).json({
       success: false,
       message: 'حدث خطأ أثناء حذف المصروف',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 };
@@ -302,7 +305,7 @@ exports.approveExpense = async (req, res) => {
     await expense.approve(req.user?._id);
     await expense.populate('approvedBy', 'name email');
 
-    // TODO: إنشاء قيد محاسبي تلقائياً
+    // @todo [P1] Auto-create journal entry on expense approval (accounting double-entry)
 
     res.json({
       success: true,
@@ -310,11 +313,11 @@ exports.approveExpense = async (req, res) => {
       message: 'تم الموافقة على المصروف بنجاح',
     });
   } catch (error) {
-    console.error('Error approving expense:', error);
+    logger.error('Error approving expense:', error);
     res.status(500).json({
       success: false,
       message: 'حدث خطأ أثناء الموافقة على المصروف',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 };
@@ -358,11 +361,11 @@ exports.rejectExpense = async (req, res) => {
       message: 'تم رفض المصروف',
     });
   } catch (error) {
-    console.error('Error rejecting expense:', error);
+    logger.error('Error rejecting expense:', error);
     res.status(500).json({
       success: false,
       message: 'حدث خطأ أثناء رفض المصروف',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 };

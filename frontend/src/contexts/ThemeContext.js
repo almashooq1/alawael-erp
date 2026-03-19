@@ -1,11 +1,12 @@
 /**
  * Theme Context - Dark/Light Mode Support
  * سياق الثيم - دعم الوضع الليلي/النهاري
+ * Upgraded to Professional Theme System
  */
 
-import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
-import { createTheme } from '@mui/material/styles';
-import educationTheme from '../theme/educationTheme';
+import { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import { createAppTheme } from '../theme/professionalTheme';
+import { getThemeMode, setThemeMode } from 'utils/storageService';
 
 const ThemeContext = createContext();
 
@@ -19,40 +20,27 @@ export const useThemeMode = () => {
 
 export const ThemeModeProvider = ({ children }) => {
   const [mode, setMode] = useState(() => {
-    const saved = localStorage.getItem('themeMode');
-    return saved || 'light';
+    return getThemeMode() || 'light';
   });
 
   useEffect(() => {
-    localStorage.setItem('themeMode', mode);
+    setThemeMode(mode);
+    // Update document class for CSS-level dark-mode hooks
+    document.documentElement.setAttribute('data-theme', mode);
   }, [mode]);
 
   const toggleTheme = () => {
     setMode(prevMode => (prevMode === 'light' ? 'dark' : 'light'));
   };
 
-  const theme = useMemo(() => {
-    if (mode === 'dark') {
-      return createTheme({
-        ...educationTheme,
-        palette: {
-          ...educationTheme.palette,
-          mode: 'dark',
-          background: {
-            default: '#0a1929',
-            paper: '#132f4c',
-          },
-          text: {
-            primary: '#ffffff',
-            secondary: '#b2bac2',
-          },
-        },
-      });
-    }
-    return educationTheme;
-  }, [mode]);
+  // Alias for ProHeader compatibility
+  const toggleMode = toggleTheme;
+
+  const theme = useMemo(() => createAppTheme(mode), [mode]);
 
   return (
-    <ThemeContext.Provider value={{ mode, toggleTheme, theme }}>{children}</ThemeContext.Provider>
+    <ThemeContext.Provider value={{ mode, toggleTheme, toggleMode, theme }}>
+      {children}
+    </ThemeContext.Provider>
   );
 };

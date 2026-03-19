@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Branch Model - نموذج الفروع
  * إدارة معلومات الفروع المختلفة

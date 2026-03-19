@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * CDN Integration & Static Asset Optimization
  * تكامل CDN وتحسين الملفات الثابتة
@@ -12,6 +13,7 @@
 const path = require('path');
 const crypto = require('crypto');
 const fs = require('fs').promises;
+const logger = require('../utils/logger');
 
 // ============================================================================
 // CDN CONFIGURATION
@@ -92,7 +94,7 @@ class CDNManager {
 
       return fullURL.toString();
     } catch (error) {
-      console.error('Error generating CDN URL:', error.message);
+      logger.error('Error generating CDN URL:', { error: error.message });
       return assetPath;
     }
   }
@@ -247,7 +249,7 @@ class CDNManager {
   // PURGE CACHE
   // ============================================================================
   async purgeCache(paths = []) {
-    console.log(`🗑️ Purging CDN cache for ${paths.length} paths...`);
+    logger.info(`Purging CDN cache for ${paths.length} paths...`);
 
     try {
       switch (this.provider) {
@@ -258,11 +260,11 @@ class CDNManager {
           return await this.purgeCloudFront(paths);
 
         default:
-          console.log('Local CDN - no purge needed');
+          logger.info('Local CDN - no purge needed');
           return { success: true, provider: 'local' };
       }
     } catch (error) {
-      console.error('CDN purge error:', error.message);
+      logger.error('CDN purge error:', { error: error.message });
       throw error;
     }
   }
@@ -275,7 +277,7 @@ class CDNManager {
     const apiKey = process.env.CLOUDFLARE_API_KEY;
 
     if (!zoneId || !apiKey) {
-      console.warn('Cloudflare credentials not configured');
+      logger.warn('Cloudflare credentials not configured');
       return { success: false, error: 'Missing credentials' };
     }
 
@@ -301,7 +303,7 @@ class CDNManager {
   // PURGE CLOUDFRONT
   // ============================================================================
   async purgeCloudFront(paths) {
-    console.log('CloudFront purge - would require AWS SDK');
+    logger.info('CloudFront purge - would require AWS SDK');
     // This would use AWS SDK to create an invalidation
     return {
       success: true,

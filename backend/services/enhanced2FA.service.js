@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Enhanced 2FA/MFA Service
  * خدمة المصادقة الثنائية المحسّنة
@@ -17,6 +18,7 @@ const User = require('../models/User');
 const AuditLogger = require('./audit-logger');
 const emailService = require('./emailService');
 const smsService = require('./smsService');
+const logger = require('../utils/logger');
 
 class Enhanced2FAService {
   /**
@@ -57,7 +59,7 @@ class Enhanced2FAService {
         otpauthUrl: secret.otpauth_url,
       };
     } catch (error) {
-      console.error('Error generating TOTP secret:', error);
+      logger.error('Error generating TOTP secret:', error);
       throw error;
     }
   }
@@ -111,7 +113,7 @@ class Enhanced2FAService {
       try {
         await emailService.send2FAEnabledEmail(user.email, user.username);
       } catch (emailError) {
-        console.warn('Failed to send 2FA enabled email:', emailError);
+        logger.warn('Failed to send 2FA enabled email:', emailError);
       }
 
       return {
@@ -119,7 +121,7 @@ class Enhanced2FAService {
         backupCodes, // Return plain codes (only time they're shown)
       };
     } catch (error) {
-      console.error('Error enabling 2FA:', error);
+      logger.error('Error enabling 2FA:', error);
       throw error;
     }
   }
@@ -158,12 +160,12 @@ class Enhanced2FAService {
       try {
         await emailService.send2FADisabledEmail(user.email, user.username);
       } catch (emailError) {
-        console.warn('Failed to send 2FA disabled email:', emailError);
+        logger.warn('Failed to send 2FA disabled email:', emailError);
       }
 
       return { success: true };
     } catch (error) {
-      console.error('Error disabling 2FA:', error);
+      logger.error('Error disabling 2FA:', error);
       throw error;
     }
   }
@@ -204,7 +206,7 @@ class Enhanced2FAService {
 
       return isValid;
     } catch (error) {
-      console.error('Error verifying 2FA:', error);
+      logger.error('Error verifying 2FA:', error);
       return false;
     }
   }
@@ -250,7 +252,7 @@ class Enhanced2FAService {
 
       return false;
     } catch (error) {
-      console.error('Error verifying backup code:', error);
+      logger.error('Error verifying backup code:', error);
       return false;
     }
   }
@@ -289,7 +291,7 @@ class Enhanced2FAService {
         backupCodes,
       };
     } catch (error) {
-      console.error('Error regenerating backup codes:', error);
+      logger.error('Error regenerating backup codes:', error);
       throw error;
     }
   }
@@ -324,7 +326,7 @@ class Enhanced2FAService {
 
       return { success: true };
     } catch (error) {
-      console.error('Error sending SMS 2FA:', error);
+      logger.error('Error sending SMS 2FA:', error);
       throw error;
     }
   }
@@ -363,7 +365,7 @@ class Enhanced2FAService {
 
       return false;
     } catch (error) {
-      console.error('Error verifying SMS 2FA:', error);
+      logger.error('Error verifying SMS 2FA:', error);
       return false;
     }
   }
@@ -400,7 +402,7 @@ class Enhanced2FAService {
 
       return { deviceToken };
     } catch (error) {
-      console.error('Error remembering device:', error);
+      logger.error('Error remembering device:', error);
       throw error;
     }
   }
@@ -424,7 +426,7 @@ class Enhanced2FAService {
 
       return !!device;
     } catch (error) {
-      console.error('Error checking trusted device:', error);
+      logger.error('Error checking trusted device:', error);
       return false;
     }
   }
@@ -447,7 +449,7 @@ class Enhanced2FAService {
         enabledAt: user.mfa?.enabledAt || null,
       };
     } catch (error) {
-      console.error('Error getting 2FA status:', error);
+      logger.error('Error getting 2FA status:', error);
       throw error;
     }
   }

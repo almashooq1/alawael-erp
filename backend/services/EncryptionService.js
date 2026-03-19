@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * ============================================
  * DATA ENCRYPTION & DECRYPTION SERVICE

@@ -1,3 +1,4 @@
+/* eslint-disable no-undef, no-unused-vars */
 /**
  * Cross-Phase Integration Tests
  * Tests complete workflows across multiple phases of the system
@@ -5,10 +6,10 @@
  * Framework v21.0+ with 23 phases
  */
 
-const request = require('supertest');
+const _request = require('supertest');
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
-const AuditLogService = require('../../services/auditLog.service');
+const _AuditLogService = require('../../services/auditLog.service');
 const RealtimeMonitoringService = require('../../services/realtimeMonitoring.service');
 const CachingService = require('../../services/advancedCaching.service');
 const MLModelService = require('../../services/mlIntegration.service');
@@ -276,7 +277,7 @@ describe('Cross-Phase Integration Workflows', () => {
 
       // Time audit operation
       const t1 = Date.now();
-      const auditLog = await auditService.createAuditLog({
+      const _auditLog = await auditService.createAuditLog({
         action: 'PERFORMANCE_TEST',
       });
       timing.audit = Date.now() - t1;
@@ -355,7 +356,7 @@ describe('Cross-Phase Integration Workflows', () => {
 
       // Initialize
       state.initialized = true;
-      const initLog = await auditService.createAuditLog({
+      const _initLog = await auditService.createAuditLog({
         action: 'WORKFLOW_INITIALIZED',
         workflowId,
         state,
@@ -374,7 +375,7 @@ describe('Cross-Phase Integration Workflows', () => {
       // Complete
       state.processing = false;
       state.completed = true;
-      const completeLog = await auditService.createAuditLog({
+      const _completeLog = await auditService.createAuditLog({
         action: 'WORKFLOW_COMPLETED',
         workflowId,
         state,

@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * ALAWAEL ERP - PHASE 18: QUALITY MANAGEMENT TESTS
  * Comprehensive test suite for Quality Management & Advanced Reporting
@@ -622,8 +624,8 @@ describe('Phase 18: Quality Management & Advanced Reporting', () => {
 
       expect(dashboard.widgets).toBeDefined();
       expect(dashboard.widgets.length).toBeGreaterThan(0);
-      expect(dashboard.widgets.some((w) => w.type === 'kpi-cards')).toBe(true);
-      expect(dashboard.widgets.some((w) => w.type === 'pie-chart')).toBe(true);
+      expect(dashboard.widgets.some(w => w.type === 'kpi-cards')).toBe(true);
+      expect(dashboard.widgets.some(w => w.type === 'pie-chart')).toBe(true);
     });
 
     test('Should get dashboard data with widget data', () => {

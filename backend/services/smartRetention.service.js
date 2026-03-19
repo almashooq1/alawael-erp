@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const TherapySession = require('../models/TherapySession');
 const Feedback = require('../models/Feedback');
 const TherapeuticPlan = require('../models/TherapeuticPlan');
@@ -38,7 +39,9 @@ class SmartRetentionService {
       }
     } else {
       // Calculate Cancellation Rate
-      const badSessions = sessions.filter(s => ['CANCELLED_BY_PATIENT', 'NO_SHOW'].includes(s.status)).length;
+      const badSessions = sessions.filter(s =>
+        ['CANCELLED_BY_PATIENT', 'NO_SHOW'].includes(s.status)
+      ).length;
       const rate = badSessions / sessions.length;
 
       if (rate > 0.5) {
@@ -48,7 +51,9 @@ class SmartRetentionService {
     }
 
     // 2. Satisfaction Analysis (NPS)
-    const lastFeedback = await Feedback.findOne({ beneficiary: beneficiaryId }).sort({ createdAt: -1 });
+    const lastFeedback = await Feedback.findOne({ beneficiary: beneficiaryId }).sort({
+      createdAt: -1,
+    });
     if (lastFeedback) {
       if (lastFeedback.npsScore <= 6) {
         riskScore += 25;
@@ -58,7 +63,10 @@ class SmartRetentionService {
 
     // 3. Clinical Stagnation
     // If goals show no progress updates in 45 days
-    const activePlan = await TherapeuticPlan.findOne({ beneficiary: beneficiaryId, status: 'ACTIVE' });
+    const activePlan = await TherapeuticPlan.findOne({
+      beneficiary: beneficiaryId,
+      status: 'ACTIVE',
+    });
     if (activePlan) {
       // Check if updatedAt is old
       const planIdleDays = Math.ceil((new Date() - activePlan.updatedAt) / (1000 * 60 * 60 * 24));
@@ -84,7 +92,10 @@ class SmartRetentionService {
    */
   static async identifyAtRiskPatients(adminUserId) {
     // Find beneficiaries with Active Plans
-    const plans = await TherapeuticPlan.find({ status: 'ACTIVE' }).populate('beneficiary', 'firstName lastName fileNumber phone');
+    const plans = await TherapeuticPlan.find({ status: 'ACTIVE' }).populate(
+      'beneficiary',
+      'firstName lastName fileNumber phone'
+    );
 
     const atRiskList = [];
 
@@ -110,11 +121,14 @@ class SmartRetentionService {
         'Retention Alert',
         `Identified ${criticalCount} patients at CRITICAL risk of leaving. Action required.`,
         'CRITICAL',
-        '/crm/retention',
+        '/crm/retention'
       );
     }
 
-    return { count: atRiskList.length, data: atRiskList.sort((a, b) => b.risk.score - a.risk.score) };
+    return {
+      count: atRiskList.length,
+      data: atRiskList.sort((a, b) => b.risk.score - a.risk.score),
+    };
   }
 }
 

@@ -1,9 +1,11 @@
+/* eslint-disable no-unused-vars */
 /**
  * 🚀 Cache Configuration - تكوين التخزين المؤقت المحسن
  * نظام ERP الألوائل - إصدار احترافي
  */
 
-const redis = require('redis');
+const Redis = require('ioredis');
+const logger = require('../utils/logger');
 
 // إعدادات Redis المتقدمة
 const cacheConfig = {
@@ -18,38 +20,41 @@ const cacheConfig = {
     socket: {
       connectTimeout: 10000,
       keepAlive: 5000,
-      reconnectStrategy: (retries) => {
+      reconnectStrategy: retries => {
         if (retries > 10) {
-          console.error('❌ Redis: فشل إعادة الاتصال بعد 10 محاولات');
+          logger.error('Redis: فشل إعادة الاتصال بعد 10 محاولات');
           return new Error('فشل الاتصال بـ Redis');
         }
         return Math.min(retries * 100, 3000);
-      }
+      },
     },
 
     // إعدادات Cluster (للإنتاج)
-    cluster: process.env.NODE_ENV === 'production' ? {
-      nodes: [
-        { host: process.env.REDIS_NODE_1 || 'redis-1', port: 6379 },
-        { host: process.env.REDIS_NODE_2 || 'redis-2', port: 6379 },
-        { host: process.env.REDIS_NODE_3 || 'redis-3', port: 6379 }
-      ],
-      options: {
-        scaleReads: 'slave',
-        maxRedirections: 16
-      }
-    } : null
+    cluster:
+      process.env.NODE_ENV === 'production'
+        ? {
+            nodes: [
+              { host: process.env.REDIS_NODE_1 || 'redis-1', port: 6379 },
+              { host: process.env.REDIS_NODE_2 || 'redis-2', port: 6379 },
+              { host: process.env.REDIS_NODE_3 || 'redis-3', port: 6379 },
+            ],
+            options: {
+              scaleReads: 'slave',
+              maxRedirections: 16,
+            },
+          }
+        : null,
   },
 
   // إعدادات التخزين المؤقت
   cache: {
     // الأوقات الافتراضية (بالثواني)
     ttl: {
-      short: 60,           // دقيقة واحدة - للبيانات المتغيرة
-      medium: 300,         // 5 دقائق - للبيانات شبه ثابتة
-      long: 3600,          // ساعة واحدة - للبيانات الثابتة
-      veryLong: 86400,     // يوم واحد - للبيانات النادرة التغيير
-      session: 7200        // ساعتين - لجلسات المستخدم
+      short: 60, // دقيقة واحدة - للبيانات المتغيرة
+      medium: 300, // 5 دقائق - للبيانات شبه ثابتة
+      long: 3600, // ساعة واحدة - للبيانات الثابتة
+      veryLong: 86400, // يوم واحد - للبيانات النادرة التغيير
+      session: 7200, // ساعتين - لجلسات المستخدم
     },
 
     // مفاتيح التخزين المؤقت
@@ -62,7 +67,7 @@ const cacheConfig = {
       analytics: 'analytics:',
       dashboard: 'dashboard:',
       branch: 'branch:',
-      employee: 'employee:'
+      employee: 'employee:',
     },
 
     // بادئات المفاتيح
@@ -70,8 +75,8 @@ const cacheConfig = {
       app: 'alawael:',
       cache: 'cache:',
       session: 'session:',
-      rateLimit: 'ratelimit:'
-    }
+      rateLimit: 'ratelimit:',
+    },
   },
 
   // استراتيجيات التخزين المؤقت
@@ -85,9 +90,9 @@ const cacheConfig = {
       write: async (key, data, ttl = 300) => {
         // سيتم تنفيذها في الخدمة
       },
-      invalidate: async (key) => {
+      invalidate: async key => {
         // سيتم تنفيذها في الخدمة
-      }
+      },
     },
 
     // Write-Through Pattern
@@ -95,22 +100,22 @@ const cacheConfig = {
       enabled: true,
       write: async (key, data, ttl = 300) => {
         // كتابة في Cache و Database معاً
-      }
+      },
     },
 
     // Write-Behind Pattern
     writeBehind: {
       enabled: false, // للإنتاج فقط
       queueSize: 1000,
-      flushInterval: 5000
-    }
+      flushInterval: 5000,
+    },
   },
 
   // إعدادات الضغط
   compression: {
     enabled: true,
     threshold: 1024, // ضغط البيانات أكبر من 1KB
-    algorithm: 'gzip'
+    algorithm: 'gzip',
   },
 
   // إعدادات المراقبة
@@ -118,8 +123,8 @@ const cacheConfig = {
     enabled: true,
     logSlowQueries: true,
     slowQueryThreshold: 100, // ms
-    statsInterval: 60000 // كل دقيقة
-  }
+    statsInterval: 60000, // كل دقيقة
+  },
 };
 
 // إنشاء عميل Redis
@@ -127,33 +132,34 @@ const createRedisClient = async () => {
   let client;
 
   if (cacheConfig.redis.cluster && process.env.NODE_ENV === 'production') {
-    // Cluster Mode
-    client = redis.createCluster(
-      cacheConfig.redis.cluster.nodes,
-      cacheConfig.redis.cluster.options
-    );
+    // Cluster Mode (ioredis)
+    client = new Redis.Cluster(cacheConfig.redis.cluster.nodes, cacheConfig.redis.cluster.options);
   } else {
-    // Standalone Mode
-    client = redis.createClient({
-      socket: cacheConfig.redis.socket,
+    // Standalone Mode (ioredis)
+    client = new Redis({
+      host: cacheConfig.redis.host,
+      port: cacheConfig.redis.port,
       password: cacheConfig.redis.password,
-      database: cacheConfig.redis.db
+      db: cacheConfig.redis.db,
+      connectTimeout: cacheConfig.redis.socket.connectTimeout,
+      keepAlive: cacheConfig.redis.socket.keepAlive,
+      retryStrategy: cacheConfig.redis.socket.reconnectStrategy,
     });
   }
 
   client.on('connect', () => {
-    console.log('✅ Redis: متصل بنجاح');
+    // console.log('✅ Redis: متصل بنجاح');
   });
 
-  client.on('error', (err) => {
-    console.error('❌ Redis Error:', err.message);
+  client.on('error', err => {
+    logger.error('Redis Error:', { error: err.message });
   });
 
   client.on('ready', () => {
-    console.log('🚀 Redis: جاهز للاستخدام');
+    // console.log('🚀 Redis: جاهز للاستخدام');
   });
 
-  await client.connect();
+  // ioredis auto-connects
 
   return client;
 };
@@ -178,7 +184,7 @@ class CacheService {
       // فك الضغط إذا كان ضرورياً
       return JSON.parse(data);
     } catch (error) {
-      console.error('Cache Get Error:', error.message);
+      logger.error('Cache Get Error:', { error: error.message });
       return null;
     }
   }
@@ -191,10 +197,10 @@ class CacheService {
       const fullKey = this.config.cache.prefix.app + this.config.cache.prefix.cache + key;
       const data = JSON.stringify(value);
 
-      await this.client.setEx(fullKey, ttl, data);
+      await this.client.setex(fullKey, ttl, data);
       return true;
     } catch (error) {
-      console.error('Cache Set Error:', error.message);
+      logger.error('Cache Set Error:', { error: error.message });
       return false;
     }
   }
@@ -208,7 +214,7 @@ class CacheService {
       await this.client.del(fullKey);
       return true;
     } catch (error) {
-      console.error('Cache Del Error:', error.message);
+      logger.error('Cache Del Error:', { error: error.message });
       return false;
     }
   }
@@ -227,7 +233,7 @@ class CacheService {
 
       return keys.length;
     } catch (error) {
-      console.error('Cache DelPattern Error:', error.message);
+      logger.error('Cache DelPattern Error:', { error: error.message });
       return 0;
     }
   }
@@ -292,12 +298,12 @@ class CacheService {
       return {
         connected: true,
         stats: this.parseRedisInfo(info),
-        memory: this.parseRedisInfo(memory)
+        memory: this.parseRedisInfo(memory),
       };
     } catch (error) {
       return {
         connected: false,
-        error: error.message
+        error: error.message,
       };
     }
   }
@@ -322,7 +328,7 @@ class CacheService {
   async disconnect() {
     if (this.client) {
       await this.client.quit();
-      console.log('👋 Redis: تم إغلاق الاتصال');
+      // console.log('👋 Redis: تم إغلاق الاتصال');
     }
   }
 }
@@ -330,5 +336,5 @@ class CacheService {
 module.exports = {
   cacheConfig,
   createRedisClient,
-  CacheService
+  CacheService,
 };

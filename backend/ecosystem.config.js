@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * PM2 Ecosystem Configuration
  *

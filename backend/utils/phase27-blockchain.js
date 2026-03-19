@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // Phase 27: Blockchain & Web3
 // Smart Contracts, NFT Support, Crypto Payments, DID
 
@@ -33,7 +34,7 @@ class SmartContractIntegration {
     return { success: true, contractId, address: contract.address };
   }
 
-  callSmartContract(contractId, method, params) {
+  callSmartContract(contractId, method, _params) {
     const contract = this.contracts.get(contractId);
     if (!contract) throw new Error('Contract not found');
 

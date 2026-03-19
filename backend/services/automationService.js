@@ -1,13 +1,14 @@
+/* eslint-disable no-unused-vars */
 /**
  * Automation Engine Service
  * Workflow automation, task scheduling, and event-based actions
  */
 
 // In-memory storage
-let automations = new Map();
-let workflows = new Map();
-let triggers = new Map();
-let scheduledTasks = new Map();
+const automations = new Map();
+const workflows = new Map();
+const triggers = new Map();
+const scheduledTasks = new Map();
 
 class AutomationService {
   constructor() {
@@ -46,7 +47,11 @@ class AutomationService {
     workflows.set('course-completion', {
       name: 'Course Completion Workflow',
       trigger: 'course-completed',
-      steps: [{ action: 'issue-certificate' }, { action: 'update-profile' }, { action: 'send-congratulations-email' }],
+      steps: [
+        { action: 'issue-certificate' },
+        { action: 'update-profile' },
+        { action: 'send-congratulations-email' },
+      ],
       enabled: true,
     });
 
@@ -54,7 +59,11 @@ class AutomationService {
     workflows.set('document-approval', {
       name: 'Document Approval Workflow',
       trigger: 'document-submitted',
-      steps: [{ action: 'notify-approver' }, { action: 'create-approval-task' }, { action: 'set-deadline', days: 3 }],
+      steps: [
+        { action: 'notify-approver' },
+        { action: 'create-approval-task' },
+        { action: 'set-deadline', days: 3 },
+      ],
       enabled: true,
     });
   }
@@ -88,7 +97,7 @@ class AutomationService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -142,7 +151,7 @@ class AutomationService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -223,7 +232,7 @@ class AutomationService {
       return {
         action: action.action,
         status: 'failed',
-        error: error.message,
+        error: 'حدث خطأ داخلي',
         timestamp: new Date(),
       };
     }
@@ -275,7 +284,7 @@ class AutomationService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -301,7 +310,7 @@ class AutomationService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -323,7 +332,7 @@ class AutomationService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -352,7 +361,7 @@ class AutomationService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -371,7 +380,7 @@ class AutomationService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -393,7 +402,7 @@ class AutomationService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -427,7 +436,7 @@ class AutomationService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -440,7 +449,10 @@ class AutomationService {
       const stats = {
         totalAutomations: automations.size,
         enabledAutomations: Array.from(automations.values()).filter(a => a.enabled).length,
-        totalExecutions: Array.from(automations.values()).reduce((sum, a) => sum + a.executionCount, 0),
+        totalExecutions: Array.from(automations.values()).reduce(
+          (sum, a) => sum + a.executionCount,
+          0
+        ),
         totalWorkflows: workflows.size,
         scheduledTasks: scheduledTasks.size,
       };
@@ -452,7 +464,7 @@ class AutomationService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -474,7 +486,7 @@ class AutomationService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -510,7 +522,7 @@ class AutomationService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }

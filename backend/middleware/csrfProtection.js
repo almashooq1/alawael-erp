@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const crypto = require('crypto');
 
 const CSRF_COOKIE = 'csrf_token';

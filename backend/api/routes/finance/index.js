@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Finance Routes - نظام المسارات المالية الشاملة
  * Professional Financial System API Routes v3.0
@@ -46,7 +47,7 @@ router.get('/health', (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'خطأ في فحص صحة النظام',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -96,7 +97,7 @@ router.get('/statistics', (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'خطأ في جلب الإحصائيات',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -134,7 +135,7 @@ router.get('/summary', (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'خطأ في جلب الملخص',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -184,7 +185,7 @@ router.get('/compliance-check', (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'خطأ في فحص الامتثال',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -217,7 +218,7 @@ router.get('/reports/:type', (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'خطأ في جلب التقرير',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });

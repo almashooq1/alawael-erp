@@ -1,12 +1,13 @@
+/* eslint-disable no-unused-vars */
 /**
  * AI Chatbot Service
  * Natural Language Processing, Intent Recognition, and Conversational AI
  */
 
 // In-memory storage
-let conversations = new Map();
-let chatbotKB = new Map(); // Knowledge Base
-let userSessions = new Map();
+const conversations = new Map();
+const chatbotKB = new Map(); // Knowledge Base
+const userSessions = new Map();
 
 class ChatbotService {
   constructor() {
@@ -20,54 +21,62 @@ class ChatbotService {
     // HR Module Q&A
     chatbotKB.set('hr-salary', {
       keywords: ['salary', 'pay', 'wages', 'compensation'],
-      response: 'Your salary is available in the HR module. You can view detailed breakdown including base, allowances, and deductions.',
+      response:
+        'Your salary is available in the HR module. You can view detailed breakdown including base, allowances, and deductions.',
       actions: ['navigate_hr'],
     });
 
     chatbotKB.set('hr-leave', {
       keywords: ['leave', 'vacation', 'absent', 'time-off'],
-      response: 'You can manage leave through the HR module. Request leave, view balance, and track approvals.',
+      response:
+        'You can manage leave through the HR module. Request leave, view balance, and track approvals.',
       actions: ['navigate_hr'],
     });
 
     // CRM Module Q&A
     chatbotKB.set('crm-clients', {
       keywords: ['client', 'customer', 'contact', 'lead'],
-      response: 'Manage your clients in the CRM module. View details, track interactions, and manage relationships.',
+      response:
+        'Manage your clients in the CRM module. View details, track interactions, and manage relationships.',
       actions: ['navigate_crm'],
     });
 
     chatbotKB.set('crm-opportunities', {
       keywords: ['opportunity', 'deal', 'opportunity', 'sales'],
-      response: 'Track sales opportunities in the CRM module. Monitor deals, manage pipelines, and forecast revenue.',
+      response:
+        'Track sales opportunities in the CRM module. Monitor deals, manage pipelines, and forecast revenue.',
       actions: ['navigate_crm'],
     });
 
     // E-Learning Module Q&A
     chatbotKB.set('elearning-courses', {
       keywords: ['course', 'training', 'learning', 'learn'],
-      response: 'Browse and enroll in courses through the E-Learning module. Track your progress and earn certificates.',
+      response:
+        'Browse and enroll in courses through the E-Learning module. Track your progress and earn certificates.',
       actions: ['navigate_elearning'],
     });
 
     // Documents Module Q&A
     chatbotKB.set('documents-files', {
       keywords: ['document', 'file', 'folder', 'upload'],
-      response: 'Manage documents in the Documents module. Upload, organize, and share files securely.',
+      response:
+        'Manage documents in the Documents module. Upload, organize, and share files securely.',
       actions: ['navigate_documents'],
     });
 
     // Reports Module Q&A
     chatbotKB.set('reports-analytics', {
       keywords: ['report', 'analytics', 'dashboard', 'statistics'],
-      response: 'View comprehensive reports and analytics in the Reports module. Analyze performance and trends.',
+      response:
+        'View comprehensive reports and analytics in the Reports module. Analyze performance and trends.',
       actions: ['navigate_reports'],
     });
 
     // General Q&A
     chatbotKB.set('help-general', {
       keywords: ['help', 'support', 'how', 'guide'],
-      response: 'How can I assist you? You can ask me about HR, CRM, E-Learning, Documents, or Reports.',
+      response:
+        'How can I assist you? You can ask me about HR, CRM, E-Learning, Documents, or Reports.',
       actions: [],
     });
 
@@ -145,7 +154,7 @@ class ChatbotService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -209,7 +218,9 @@ class ChatbotService {
     const messageWords = message.toLowerCase().split(' ');
     const keywordWords = keyword.toLowerCase().split(' ');
 
-    const matches = messageWords.filter(word => keywordWords.some(kw => kw.includes(word) || word.includes(kw))).length;
+    const matches = messageWords.filter(word =>
+      keywordWords.some(kw => kw.includes(word) || word.includes(kw))
+    ).length;
 
     return matches / keywordWords.length;
   }
@@ -235,7 +246,7 @@ class ChatbotService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -265,7 +276,7 @@ class ChatbotService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -284,7 +295,7 @@ class ChatbotService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -309,7 +320,7 @@ class ChatbotService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -333,7 +344,7 @@ class ChatbotService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -345,7 +356,10 @@ class ChatbotService {
     try {
       const stats = {
         totalConversations: conversations.size,
-        totalMessages: Array.from(conversations.values()).reduce((sum, c) => sum + c.messages.length, 0),
+        totalMessages: Array.from(conversations.values()).reduce(
+          (sum, c) => sum + c.messages.length,
+          0
+        ),
         knowledgeBaseSize: chatbotKB.size,
         averageMessagesPerConversation: 0,
       };
@@ -361,7 +375,7 @@ class ChatbotService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -421,7 +435,7 @@ class ChatbotService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }

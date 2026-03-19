@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * Unit Tests for Auth Middleware
  * Testing all authentication and authorization functions
@@ -11,6 +13,12 @@
  */
 
 const jwt = require('jsonwebtoken');
+
+// Mock token blacklist so tests don't need Redis
+jest.mock('../utils/tokenBlacklist', () => ({
+  isBlacklisted: jest.fn().mockResolvedValue(false),
+  add: jest.fn().mockResolvedValue(undefined),
+}));
 
 // Test JWT secret (matches the test environment secret)
 const JWT_SECRET = 'test-secret-key-for-testing-only';
@@ -389,7 +397,7 @@ describe('Auth Middleware Unit Tests', () => {
   });
 
   describe('requireAuth', () => {
-    test('should authenticate with valid Bearer token', () => {
+    test('should authenticate with valid Bearer token', async () => {
       const token = generateToken({ userId: '123', role: 'user' });
       const req = createMockReq({
         authorization: `Bearer ${token}`,
@@ -397,33 +405,33 @@ describe('Auth Middleware Unit Tests', () => {
       const res = createMockRes();
       const next = createMockNext();
 
-      auth.requireAuth(req, res, next);
+      await auth.requireAuth(req, res, next);
 
       expect(next).toHaveBeenCalled();
       expect(req.user).toBeDefined();
       expect(req.user.userId).toBe('123');
     });
 
-    test('should reject request without token', () => {
+    test('should reject request without token', async () => {
       const req = createMockReq();
       const res = createMockRes();
       const next = createMockNext();
 
-      auth.requireAuth(req, res, next);
+      await auth.requireAuth(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(401);
       expect(res.jsonData).toHaveProperty('message', 'Unauthorized');
       expect(next).not.toHaveBeenCalled();
     });
 
-    test('should reject invalid token', () => {
+    test('should reject invalid token', async () => {
       const req = createMockReq({
         authorization: 'Bearer invalid-token',
       });
       const res = createMockRes();
       const next = createMockNext();
 
-      auth.requireAuth(req, res, next);
+      await auth.requireAuth(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(401);
       expect(next).not.toHaveBeenCalled();

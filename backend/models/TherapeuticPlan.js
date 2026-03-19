@@ -1,9 +1,14 @@
+/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 const goalSchema = new mongoose.Schema({
   description: { type: String, required: true },
   targetDate: Date,
-  status: { type: String, enum: ['PENDING', 'IN_PROGRESS', 'ACHIEVED', 'CANCELLED'], default: 'PENDING' },
+  status: {
+    type: String,
+    enum: ['PENDING', 'IN_PROGRESS', 'ACHIEVED', 'CANCELLED'],
+    default: 'PENDING',
+  },
   progress: { type: Number, default: 0 }, // 0-100%
 });
 
@@ -19,7 +24,11 @@ const therapeuticPlanSchema = new mongoose.Schema(
     startDate: { type: Date, default: Date.now },
     endDate: { type: Date },
 
-    status: { type: String, enum: ['ACTIVE', 'COMPLETED', 'ON_HOLD', 'CANCELLED'], default: 'ACTIVE' },
+    status: {
+      type: String,
+      enum: ['ACTIVE', 'COMPLETED', 'ON_HOLD', 'CANCELLED'],
+      default: 'ACTIVE',
+    },
 
     // Goals (Individualized Education Plan - IEP)
     goals: [goalSchema],
@@ -27,10 +36,14 @@ const therapeuticPlanSchema = new mongoose.Schema(
     initialAssessment: { type: String }, // Summary or Link to assessment ID
 
     // Financial
-    paymentMethod: { type: String, enum: ['SELF_PAY', 'INSURANCE', 'SPONSORED'], default: 'SELF_PAY' },
+    paymentMethod: {
+      type: String,
+      enum: ['SELF_PAY', 'INSURANCE', 'SPONSORED'],
+      default: 'SELF_PAY',
+    },
     insuranceApprovalCode: String,
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 module.exports = mongoose.model('TherapeuticPlan', therapeuticPlanSchema);

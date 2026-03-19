@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Socket Emitter Utility
  * أداة إرسال الأحداث عبر Socket.IO
@@ -5,6 +6,8 @@
  * This utility provides a centralized way to emit events to Socket.IO clients
  * from anywhere in the backend (controllers, services, etc.)
  */
+
+const logger = require('./logger');
 
 let ioInstance = null;
 
@@ -17,7 +20,7 @@ function initializeSocketEmitter(io) {
     throw new Error('Socket.IO instance is required');
   }
   ioInstance = io;
-  console.log('[SocketEmitter] Initialized successfully');
+  logger.info('[SocketEmitter] Initialized successfully');
 }
 
 /**
@@ -26,7 +29,7 @@ function initializeSocketEmitter(io) {
  */
 function getIO() {
   if (!ioInstance) {
-    console.warn('[SocketEmitter] Socket.IO not initialized yet');
+    logger.warn('[SocketEmitter] Socket.IO not initialized yet');
     return null;
   }
   return ioInstance;
@@ -46,10 +49,10 @@ function emitModuleKPIUpdate(moduleKey, data) {
       data,
       timestamp: new Date().toISOString(),
     });
-    console.log(`[SocketEmitter] KPI update sent to module:${moduleKey}`);
+    logger.info(`[SocketEmitter] KPI update sent to module:${moduleKey}`);
     return true;
   } catch (error) {
-    console.error(`[SocketEmitter] Failed to emit KPI update for ${moduleKey}:`, error);
+    logger.error(`[SocketEmitter] Failed to emit KPI update for ${moduleKey}:`, error);
     return false;
   }
 }
@@ -67,10 +70,10 @@ function emitDashboardUpdate(data) {
       ...data,
       timestamp: new Date().toISOString(),
     });
-    console.log('[SocketEmitter] Dashboard update sent');
+    logger.info('[SocketEmitter] Dashboard update sent');
     return true;
   } catch (error) {
-    console.error('[SocketEmitter] Failed to emit dashboard update:', error);
+    logger.error('[SocketEmitter] Failed to emit dashboard update:', error);
     return false;
   }
 }
@@ -98,17 +101,17 @@ function emitNotification({ userId, type, title, message, priority, metadata }) 
     if (userId) {
       // Send to specific user
       io.to(`notifications:${userId}`).emit('notification:new', notification);
-      console.log(`[SocketEmitter] Notification sent to user ${userId}`);
+      logger.info(`[SocketEmitter] Notification sent to user ${userId}`);
     } else {
       // Broadcast to all
       io.to('notifications').emit('notification:new', notification);
-      console.log('[SocketEmitter] Notification broadcast to all');
+      logger.info('[SocketEmitter] Notification broadcast to all');
     }
 
     return { success: true, notificationId: notification.id };
   } catch (error) {
-    console.error('[SocketEmitter] Failed to emit notification:', error);
-    return { success: false, error: error.message };
+    logger.error('[SocketEmitter] Failed to emit notification:', error);
+    return { success: false, error: 'حدث خطأ داخلي' };
   }
 }
 
@@ -131,11 +134,11 @@ function emitChatMessage({ roomId, userId, message, metadata }) {
     };
 
     io.to(`chat:${roomId}`).emit('chat:message', messageData);
-    console.log(`[SocketEmitter] Chat message sent to room ${roomId}`);
+    logger.info(`[SocketEmitter] Chat message sent to room ${roomId}`);
     return { success: true, messageId: messageData.id };
   } catch (error) {
-    console.error('[SocketEmitter] Failed to emit chat message:', error);
-    return { success: false, error: error.message };
+    logger.error('[SocketEmitter] Failed to emit chat message:', error);
+    return { success: false, error: 'حدث خطأ داخلي' };
   }
 }
 
@@ -160,11 +163,11 @@ function emitSystemAlert({ title, message, severity, metadata }) {
 
     // Broadcast to all connected clients
     io.emit('system:alert', alert);
-    console.log('[SocketEmitter] System alert broadcast:', severity);
+    logger.info('[SocketEmitter] System alert broadcast:', severity);
     return { success: true, alertId: alert.id };
   } catch (error) {
-    console.error('[SocketEmitter] Failed to emit system alert:', error);
-    return { success: false, error: error.message };
+    logger.error('[SocketEmitter] Failed to emit system alert:', error);
+    return { success: false, error: 'حدث خطأ داخلي' };
   }
 }
 
@@ -187,10 +190,10 @@ function emitDataChange({ entity, action, data, userId }) {
 
     // Emit to entity-specific room
     io.to(`entity:${entity}`).emit('data:change', changeEvent);
-    console.log(`[SocketEmitter] Data change event: ${entity}.${action}`);
+    logger.info(`[SocketEmitter] Data change event: ${entity}.${action}`);
     return true;
   } catch (error) {
-    console.error('[SocketEmitter] Failed to emit data change:', error);
+    logger.error('[SocketEmitter] Failed to emit data change:', error);
     return false;
   }
 }
@@ -206,7 +209,7 @@ function getConnectedClientsCount() {
   try {
     return io.engine.clientsCount;
   } catch (error) {
-    console.error('[SocketEmitter] Failed to get clients count:', error);
+    logger.error('[SocketEmitter] Failed to get clients count:', error);
     return 0;
   }
 }
@@ -223,7 +226,7 @@ async function getClientsInRoom(roomName) {
     const socketsInRoom = await io.in(roomName).allSockets();
     return Array.from(socketsInRoom);
   } catch (error) {
-    console.error(`[SocketEmitter] Failed to get clients in room ${roomName}:`, error);
+    logger.error(`[SocketEmitter] Failed to get clients in room ${roomName}:`, error);
     return [];
   }
 }
@@ -241,10 +244,10 @@ function broadcast(event, data) {
       ...data,
       timestamp: new Date().toISOString(),
     });
-    console.log(`[SocketEmitter] Broadcast event: ${event}`);
+    logger.info(`[SocketEmitter] Broadcast event: ${event}`);
     return true;
   } catch (error) {
-    console.error(`[SocketEmitter] Failed to broadcast ${event}:`, error);
+    logger.error(`[SocketEmitter] Failed to broadcast ${event}:`, error);
     return false;
   }
 }

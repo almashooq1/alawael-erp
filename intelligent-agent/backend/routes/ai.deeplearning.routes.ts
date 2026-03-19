@@ -38,7 +38,7 @@ router.post('/init', async (req: express.Request, res: express.Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -81,7 +81,7 @@ router.post('/train', async (req: express.Request, res: express.Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -120,7 +120,7 @@ router.post('/predict', async (req: express.Request, res: express.Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -156,7 +156,7 @@ router.post('/analyze-patterns', async (req: express.Request, res: express.Respo
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -189,7 +189,7 @@ router.post('/optimize', async (req: express.Request, res: express.Response) => 
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -216,7 +216,7 @@ router.get('/summary', (req: express.Request, res: express.Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -257,7 +257,7 @@ router.post('/batch-predict', async (req: express.Request, res: express.Response
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });

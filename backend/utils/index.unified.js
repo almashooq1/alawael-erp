@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * 🛠️ Unified Utils - الأدوات المساعدة الموحدة
  * @version 2.0.0
@@ -9,8 +10,9 @@
 
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
+const winstonLogger = require('./logger');
 
-const hashPassword = async (password) => {
+const hashPassword = async password => {
   const salt = await bcrypt.genSalt(10);
   return bcrypt.hash(password, salt);
 };
@@ -32,15 +34,16 @@ const hashString = (str, algorithm = 'sha256') => {
 // ============================================
 
 const jwt = require('jsonwebtoken');
+const { jwtSecret } = require('../config/secrets');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+const JWT_SECRET = jwtSecret;
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
 
 const signToken = (payload, expiresIn = JWT_EXPIRES_IN) => {
   return jwt.sign(payload, JWT_SECRET, { expiresIn });
 };
 
-const verifyToken = (token) => {
+const verifyToken = token => {
   try {
     return jwt.verify(token, JWT_SECRET);
   } catch (error) {
@@ -48,7 +51,7 @@ const verifyToken = (token) => {
   }
 };
 
-const decodeToken = (token) => {
+const decodeToken = token => {
   return jwt.decode(token);
 };
 
@@ -56,23 +59,23 @@ const decodeToken = (token) => {
 // التحقق - Validation
 // ============================================
 
-const isValidEmail = (email) => {
+const isValidEmail = email => {
   const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return regex.test(email);
 };
 
-const isValidPhone = (phone) => {
+const isValidPhone = phone => {
   const regex = /^(\+966|0)?5\d{8}$/;
   return regex.test(phone.replace(/\s/g, ''));
 };
 
-const isValidPassword = (password) => {
+const isValidPassword = password => {
   // على الأقل 8 أحرف، حرف كبير، حرف صغير، رقم
   const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{8,}$/;
   return regex.test(password);
 };
 
-const sanitizeInput = (input) => {
+const sanitizeInput = input => {
   if (typeof input !== 'string') return input;
   return input
     .replace(/</g, '<')
@@ -112,7 +115,7 @@ const getDaysDifference = (date1, date2) => {
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 };
 
-const isWeekend = (date) => {
+const isWeekend = date => {
   const d = new Date(date);
   const day = d.getDay();
   // في السعودية: الجمعة (5) والسبت (6)
@@ -128,7 +131,7 @@ const successResponse = (res, data, message = 'تم بنجاح', statusCode = 20
     success: true,
     message,
     data,
-    timestamp: new Date()
+    timestamp: new Date(),
   });
 };
 
@@ -137,7 +140,7 @@ const errorResponse = (res, message = 'حدث خطأ', statusCode = 500, errors 
     success: false,
     message,
     ...(errors && { errors }),
-    timestamp: new Date()
+    timestamp: new Date(),
   });
 };
 
@@ -149,8 +152,8 @@ const paginatedResponse = (res, data, page, limit, total) => {
       page: parseInt(page),
       limit: parseInt(limit),
       total,
-      pages: Math.ceil(total / limit)
-    }
+      pages: Math.ceil(total / limit),
+    },
   });
 };
 
@@ -158,7 +161,7 @@ const paginatedResponse = (res, data, page, limit, total) => {
 // الترقيم - Pagination
 // ============================================
 
-const getPaginationParams = (req) => {
+const getPaginationParams = req => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 20;
   const skip = (page - 1) * limit;
@@ -201,20 +204,20 @@ const buildSort = (query, defaultSort = '-createdAt') => {
 // ============================================
 
 const logger = {
-  info: (message, data = {}) => {
-    console.log(`[INFO] ${new Date().toISOString()} - ${message}`, data);
+  info: (message, _data = {}) => {
+    // console.log(`[INFO] ${new Date().toISOString()} - ${message}`, data);
   },
   error: (message, error = {}) => {
-    console.error(`[ERROR] ${new Date().toISOString()} - ${message}`, error);
+    winstonLogger.error(`[ERROR] ${new Date().toISOString()} - ${message}`, error);
   },
   warn: (message, data = {}) => {
-    console.warn(`[WARN] ${new Date().toISOString()} - ${message}`, data);
+    winstonLogger.warn(`[WARN] ${new Date().toISOString()} - ${message}`, data);
   },
-  debug: (message, data = {}) => {
+  debug: (message, _data = {}) => {
     if (process.env.NODE_ENV === 'development') {
-      console.log(`[DEBUG] ${new Date().toISOString()} - ${message}`, data);
+      // console.log(`[DEBUG] ${new Date().toISOString()} - ${message}`, data);
     }
-  }
+  },
 };
 
 // ============================================
@@ -238,15 +241,15 @@ const calculateTrend = (current, previous) => {
 const formatCurrency = (amount, currency = 'SAR') => {
   return new Intl.NumberFormat('ar-SA', {
     style: 'currency',
-    currency
+    currency,
   }).format(amount);
 };
 
-const formatNumber = (num) => {
+const formatNumber = num => {
   return new Intl.NumberFormat('ar-SA').format(num);
 };
 
-const formatPercentage = (value) => {
+const formatPercentage = value => {
   return `${value}%`;
 };
 
@@ -298,5 +301,5 @@ module.exports = {
   // التنسيق
   formatCurrency,
   formatNumber,
-  formatPercentage
+  formatPercentage,
 };

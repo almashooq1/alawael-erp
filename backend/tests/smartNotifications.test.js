@@ -1,3 +1,4 @@
+/* eslint-disable no-undef, no-unused-vars */
 /**
  * اختبارات النوتيفيكيشنات الذكية
  * Smart Notification System Tests
@@ -26,7 +27,11 @@ describe('SmartNotificationService Tests', () => {
       status: 'pending',
     };
 
-    const notification = notificationService.createSmartNotification(workflow, 'urgent', 'user_123');
+    const notification = notificationService.createSmartNotification(
+      workflow,
+      'urgent',
+      'user_123'
+    );
 
     expect(notification).toBeDefined();
     expect(notification.id).toBeDefined();
@@ -73,7 +78,7 @@ describe('SmartNotificationService Tests', () => {
     const notificationId = notification.id;
 
     notificationService.markAsRead(notificationId, 'user_123');
-    const unreadNotifications = notificationService.getUnreadNotifications('user_123');
+    const _unreadNotifications = notificationService.getUnreadNotifications('user_123');
 
     const marked = notificationService.notifications.get(notificationId);
     expect(marked.isRead).toBe(true);
@@ -157,14 +162,18 @@ describe('SmartNotificationService Tests', () => {
 
     const scheduledTime = new Date(Date.now() + 1000); // بعد ثانية واحدة
 
-    const result = notificationService.scheduleNotification(notification, scheduledTime, 'user_123');
+    const result = notificationService.scheduleNotification(
+      notification,
+      scheduledTime,
+      'user_123'
+    );
 
     expect(result.success).toBe(true);
     expect(result.scheduleId).toBeDefined();
 
     // اختبار بعد انقضاء الوقت
     setTimeout(() => {
-      const allNotifications = notificationService.getAllNotifications('user_123');
+      const _allNotifications = notificationService.getAllNotifications('user_123');
       // يجب أن يكون الإشعار قد تم إرساله الآن
       done();
     }, 1500);
@@ -189,7 +198,10 @@ describe('AdvancedMessagingAlertSystem Tests', () => {
 
   // اختبار 2: إرسال رسالة
   test('should send message using template', async () => {
-    const result = await messagingService.sendMessage('user_123', 'workflow_created', { workflowName: 'طلب إجازة', status: 'pending' });
+    const result = await messagingService.sendMessage('user_123', 'workflow_created', {
+      workflowName: 'طلب إجازة',
+      status: 'pending',
+    });
 
     expect(result.success).toBe(true);
     expect(result.messageId).toBeDefined();
@@ -201,7 +213,7 @@ describe('AdvancedMessagingAlertSystem Tests', () => {
     const alert = messagingService.createAlert(
       'SLA Breach Alert',
       { type: 'sla_breach', threshold: 3, window: 3600 },
-      { type: 'notify', recipients: ['manager@example.com'] },
+      { type: 'notify', recipients: ['manager@example.com'] }
     );
 
     expect(alert.id).toBeDefined();
@@ -213,10 +225,10 @@ describe('AdvancedMessagingAlertSystem Tests', () => {
   // اختبار 4: التحقق من قواعس الإنذارات
   test('should check and trigger alerts', async () => {
     // First create an alert rule
-    const alert = messagingService.createAlert(
+    const _alert = messagingService.createAlert(
       'Performance Drop Alert',
       { type: 'performance_drop', threshold: 70, window: 3600 },
-      { type: 'notify', recipients: ['manager@example.com'] },
+      { type: 'notify', recipients: ['manager@example.com'] }
     );
 
     const workflows = [
@@ -233,12 +245,22 @@ describe('AdvancedMessagingAlertSystem Tests', () => {
 
   // اختبار 5: أنواع الإنذارات المختلفة
   test('should support multiple alert types', () => {
-    const types = ['sla_breach', 'performance_drop', 'volume_spike', 'high_rejection_rate', 'stuck_workflow'];
+    const types = [
+      'sla_breach',
+      'performance_drop',
+      'volume_spike',
+      'high_rejection_rate',
+      'stuck_workflow',
+    ];
 
     types.forEach(type => {
-      const alert = messagingService.createAlert(`Test ${type}`, { type, threshold: 5, window: 3600 }, { type: 'notify', recipients: [] });
+      const _alert = messagingService.createAlert(
+        `Test ${type}`,
+        { type, threshold: 5, window: 3600 },
+        { type: 'notify', recipients: [] }
+      );
 
-      expect(alert.rule.type).toBe(type);
+      expect(_alert.rule.type).toBe(type);
     });
   });
 
@@ -254,8 +276,16 @@ describe('AdvancedMessagingAlertSystem Tests', () => {
 
   // اختبار 7: إحصائيات الإنذارات
   test('should get alert statistics', () => {
-    messagingService.createAlert('Alert 1', { type: 'sla_breach', threshold: 5 }, { type: 'notify', recipients: [] });
-    messagingService.createAlert('Alert 2', { type: 'performance_drop', threshold: 70 }, { type: 'notify', recipients: [] });
+    messagingService.createAlert(
+      'Alert 1',
+      { type: 'sla_breach', threshold: 5 },
+      { type: 'notify', recipients: [] }
+    );
+    messagingService.createAlert(
+      'Alert 2',
+      { type: 'performance_drop', threshold: 70 },
+      { type: 'notify', recipients: [] }
+    );
 
     const stats = messagingService.getAlertStats();
 
@@ -286,7 +316,11 @@ describe('Integration Tests', () => {
     };
 
     // 2. إنشاء إشعار
-    const notification = notificationService.createSmartNotification(workflow, 'approval', 'user_123');
+    const notification = notificationService.createSmartNotification(
+      workflow,
+      'approval',
+      'user_123'
+    );
 
     // 3. إرسال الإشعار
     const sendResult = notificationService.sendNotification('user_123', notification);
@@ -307,14 +341,16 @@ describe('Integration Tests', () => {
   // اختبار 2: رسالة + إنذار
   test('send message and trigger alert', async () => {
     // 1. إرسال رسالة
-    const messageResult = await messagingService.sendMessage('user_123', 'approval_needed', { workflowName: 'طلب إجازة' });
+    const messageResult = await messagingService.sendMessage('user_123', 'approval_needed', {
+      workflowName: 'طلب إجازة',
+    });
     expect(messageResult.success).toBe(true);
 
     // 2. إنشاء إنذار
     const alert = messagingService.createAlert(
       'High Volume Alert',
       { type: 'volume_spike', threshold: 10, window: 3600 },
-      { type: 'notify', recipients: ['manager@example.com'] },
+      { type: 'notify', recipients: ['manager@example.com'] }
     );
     expect(alert.id).toBeDefined();
 
@@ -332,7 +368,11 @@ describe('Integration Tests', () => {
     ];
 
     workflows.forEach(workflow => {
-      const notification = notificationService.createSmartNotification(workflow, 'info', 'user_123');
+      const notification = notificationService.createSmartNotification(
+        workflow,
+        'info',
+        'user_123'
+      );
 
       const scheduledTime = new Date(Date.now() + 2000);
       notificationService.scheduleNotification(notification, scheduledTime, 'user_123');
@@ -361,7 +401,11 @@ describe('Performance Tests', () => {
     const startTime = Date.now();
 
     for (let i = 0; i < 1000; i++) {
-      const notification = notificationService.createSmartNotification(workflow, 'info', `user_${i % 100}`);
+      const notification = notificationService.createSmartNotification(
+        workflow,
+        'info',
+        `user_${i % 100}`
+      );
       notificationService.sendNotification(`user_${i % 100}`, notification);
     }
 
@@ -377,12 +421,16 @@ describe('Performance Tests', () => {
     const workflow = { id: 'wf_001' };
 
     for (let i = 0; i < 100; i++) {
-      const notification = notificationService.createSmartNotification(workflow, 'info', 'user_123');
+      const notification = notificationService.createSmartNotification(
+        workflow,
+        'info',
+        'user_123'
+      );
       notificationService.sendNotification('user_123', notification);
     }
 
     const startTime = Date.now();
-    const notifications = notificationService.getAllNotifications('user_123');
+    const _notifications = notificationService.getAllNotifications('user_123');
     const endTime = Date.now();
 
     console.log(`✅ Retrieved 100 notifications in ${endTime - startTime}ms`);
@@ -407,7 +455,11 @@ describe('Edge Cases', () => {
 
   // اختبار 2: حذف نفس الإشعار مرتين
   test('should handle deleting same notification twice', () => {
-    const notification = notificationService.createSmartNotification({ id: 'wf_001' }, 'info', 'user_123');
+    const notification = notificationService.createSmartNotification(
+      { id: 'wf_001' },
+      'info',
+      'user_123'
+    );
     notificationService.sendNotification('user_123', notification);
 
     notificationService.deleteNotification(notification.id, 'user_123');

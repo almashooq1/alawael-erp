@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Advanced Reporting System
  * نظام التقارير المتقدم
@@ -10,6 +11,7 @@ const PDFDocument = require('pdfkit');
 const ExcelJS = require('exceljs');
 const fs = require('fs');
 const path = require('path');
+const logger = require('./logger');
 
 /**
  * Report Generator - مولد التقارير
@@ -37,7 +39,7 @@ class ReportGenerator {
     const {
       title = 'تقرير متقدم',
       author = 'النظام',
-      includeCharts = true,
+      includeCharts: _includeCharts = true,
       includeAnalytics = true,
     } = options;
 
@@ -123,7 +125,11 @@ class ReportGenerator {
    * إنشاء تقرير Excel
    */
   async generateExcelReport(data, options = {}) {
-    const { title = 'تقرير Excel', sheetName = 'البيانات', includeCharts = true } = options;
+    const {
+      title: _title = 'تقرير Excel',
+      sheetName = 'البيانات',
+      includeCharts: _includeCharts = true,
+    } = options;
 
     const workbook = new ExcelJS.Workbook();
     workbook.creator = 'النظام';
@@ -358,9 +364,9 @@ class ReportScheduler {
     const intervalId = setInterval(async () => {
       try {
         await generator();
-        console.log(`✅ تم إنشاء التقرير المجدول: ${name}`);
+        // console.log(`✅ تم إنشاء التقرير المجدول: ${name}`);
       } catch (error) {
-        console.error(`❌ خطأ في التقرير المجدول ${name}:`, error);
+        logger.error(`❌ خطأ في التقرير المجدول ${name}:`, error);
       }
     }, interval);
 
@@ -424,7 +430,7 @@ class ReportExporter {
             break;
         }
       } catch (error) {
-        results[format] = { success: false, error: error.message };
+        results[format] = { success: false, error: 'حدث خطأ داخلي' };
       }
     }
 

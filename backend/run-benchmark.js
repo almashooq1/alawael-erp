@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable no-unused-vars, no-undef, no-empty, prefer-const, no-constant-condition, no-unused-expressions */
 
 // Simple benchmark runner
 const axios = require('axios');
@@ -44,7 +45,9 @@ async function runBenchmark() {
       const avg = Math.round(times.reduce((a, b) => a + b, 0) / times.length);
       const min = Math.min(...times);
       const max = Math.max(...times);
-      console.log(`\n  Success: ${success}/${REQUESTS} | Avg: ${avg}ms | Min: ${min}ms | Max: ${max}ms\n`);
+      console.log(
+        `\n  Success: ${success}/${REQUESTS} | Avg: ${avg}ms | Min: ${min}ms | Max: ${max}ms\n`
+      );
     } else {
       console.log(`\n  Failed: 0/${REQUESTS}\n`);
     }

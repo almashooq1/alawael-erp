@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * Config Module Tests
  * Tests for configuration files and database setup
@@ -136,7 +138,15 @@ describe('Configuration Modules', () => {
 
     test('should maintain data types on read/write', () => {
       const testData = {
-        users: [{ id: 1, active: true, score: 95.5, tags: ['admin', 'manager'], meta: { created: new Date().toISOString() } }],
+        users: [
+          {
+            id: 1,
+            active: true,
+            score: 95.5,
+            tags: ['admin', 'manager'],
+            meta: { created: new Date().toISOString() },
+          },
+        ],
       };
       inMemoryDB.write(testData);
       const data = inMemoryDB.read();

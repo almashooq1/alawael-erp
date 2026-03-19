@@ -16,15 +16,15 @@ const AuditManager = () => {
     scope: '',
     objectives: '',
     auditedBy: '',
-    scheduledDate: ''
+    scheduledDate: '',
   });
   const [executionForm, setExecutionForm] = useState({
     notes: '',
-    findings: ''
+    findings: '',
   });
   const [resultForm, setResultForm] = useState({
     rating: 'compliant',
-    recommendations: ''
+    recommendations: '',
   });
 
   const auditTypes = [
@@ -33,7 +33,7 @@ const AuditManager = () => {
     'Compliance Audit',
     'Financial Audit',
     'Operational Audit',
-    'IT Security Audit'
+    'IT Security Audit',
   ];
 
   const auditStatuses = ['planned', 'scheduled', 'in-progress', 'completed', 'reported'];
@@ -48,7 +48,7 @@ const AuditManager = () => {
       const response = await fetch('/api/v1/risk-management/audits', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newAudit)
+        body: JSON.stringify(newAudit),
       });
 
       if (response.ok) {
@@ -59,7 +59,7 @@ const AuditManager = () => {
           scope: '',
           objectives: '',
           auditedBy: '',
-          scheduledDate: ''
+          scheduledDate: '',
         });
         setShowForm(false);
         alert('Audit plan created!');
@@ -69,18 +69,16 @@ const AuditManager = () => {
     }
   };
 
-  const handleExecuteAudit = async (auditId) => {
+  const handleExecuteAudit = async auditId => {
     try {
       const response = await fetch(`/api/v1/risk-management/audits/${auditId}/execute`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(executionForm)
+        body: JSON.stringify(executionForm),
       });
 
       if (response.ok) {
-        const updated = audits.map(a =>
-          a.id === auditId ? {...a, status: 'in-progress'} : a
-        );
+        const updated = audits.map(a => (a.id === auditId ? { ...a, status: 'in-progress' } : a));
         setAudits(updated);
         setSelectedAudit(null);
         setExecutionForm({ notes: '', findings: '' });
@@ -91,17 +89,17 @@ const AuditManager = () => {
     }
   };
 
-  const handleDocumentResult = async (auditId) => {
+  const handleDocumentResult = async auditId => {
     try {
       const response = await fetch(`/api/v1/risk-management/audits/${auditId}/result`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(resultForm)
+        body: JSON.stringify(resultForm),
       });
 
       if (response.ok) {
         const updated = audits.map(a =>
-          a.id === auditId ? {...a, status: 'completed', rating: resultForm.rating} : a
+          a.id === auditId ? { ...a, status: 'completed', rating: resultForm.rating } : a
         );
         setAudits(updated);
         setSelectedAudit(null);
@@ -113,32 +111,32 @@ const AuditManager = () => {
     }
   };
 
-  const getStatusColor = (status) => {
+  const getStatusColor = status => {
     const colors = {
       planned: '#94a3b8',
       scheduled: '#3b82f6',
       'in-progress': '#f59e0b',
       completed: '#10b981',
-      reported: '#6b7280'
+      reported: '#6b7280',
     };
     return colors[status] || '#9ca3af';
   };
 
-  const getRatingColor = (rating) => {
+  const getRatingColor = rating => {
     const colors = {
       compliant: '#10b981',
       partial: '#f59e0b',
-      'non-compliant': '#ef4444'
+      'non-compliant': '#ef4444',
     };
     return colors[rating] || '#9ca3af';
   };
 
   const filteredAudits = audits.filter(a => {
     const statusMap = {
-      'planned': ['planned'],
-      'scheduled': ['scheduled'],
+      planned: ['planned'],
+      scheduled: ['scheduled'],
       'in-progress': ['in-progress'],
-      'completed': ['completed', 'reported']
+      completed: ['completed', 'reported'],
     };
     const statuses = statusMap[activeTab] || ['planned'];
     return statuses.includes(a.status);
@@ -148,10 +146,7 @@ const AuditManager = () => {
     <div className="audit-manager">
       <div className="header">
         <h1>🔍 Audit Management</h1>
-        <button 
-          className="btn-primary"
-          onClick={() => setShowForm(!showForm)}
-        >
+        <button className="btn-primary" onClick={() => setShowForm(!showForm)}>
           {showForm ? '✕ Cancel' : '+ Plan Audit'}
         </button>
       </div>
@@ -165,7 +160,7 @@ const AuditManager = () => {
               type="text"
               placeholder="e.g., Q1 Financial Audit"
               value={newAudit.name}
-              onChange={(e) => setNewAudit({...newAudit, name: e.target.value})}
+              onChange={e => setNewAudit({ ...newAudit, name: e.target.value })}
             />
           </div>
 
@@ -184,7 +179,7 @@ const AuditManager = () => {
               <input
                 type="date"
                 value={newAudit.scheduledDate}
-                onChange={(e) => setNewAudit({...newAudit, scheduledDate: e.target.value})}
+                onChange={e => setNewAudit({ ...newAudit, scheduledDate: e.target.value })}
               />
             </div>
           </div>
@@ -195,7 +190,7 @@ const AuditManager = () => {
               placeholder="What areas will be audited?"
               rows="3"
               value={newAudit.scope}
-              onChange={(e) => setNewAudit({...newAudit, scope: e.target.value})}
+              onChange={e => setNewAudit({ ...newAudit, scope: e.target.value })}
             />
           </div>
 
@@ -205,7 +200,7 @@ const AuditManager = () => {
               placeholder="What are the main audit objectives?"
               rows="3"
               value={newAudit.objectives}
-              onChange={(e) => setNewAudit({...newAudit, objectives: e.target.value})}
+              onChange={e => setNewAudit({ ...newAudit, objectives: e.target.value })}
             />
           </div>
 
@@ -215,7 +210,7 @@ const AuditManager = () => {
               type="text"
               placeholder="Who will conduct the audit?"
               value={newAudit.auditedBy}
-              onChange={(e) => setNewAudit({...newAudit, auditedBy: e.target.value})}
+              onChange={e => setNewAudit({ ...newAudit, auditedBy: e.target.value })}
             />
           </div>
 
@@ -247,14 +242,14 @@ const AuditManager = () => {
         {filteredAudits.length === 0 ? (
           <p className="empty-state">No audits in this category</p>
         ) : (
-          filteredAudits.map((audit) => (
+          filteredAudits.map(audit => (
             <div key={audit.id} className="audit-card">
               <div className="audit-header">
                 <div>
                   <h3>{audit.name}</h3>
                   <p className="objectives">{audit.objectives}</p>
                 </div>
-                <div 
+                <div
                   className="status-badge"
                   style={{ backgroundColor: getStatusColor(audit.status) }}
                 >
@@ -284,7 +279,7 @@ const AuditManager = () => {
 
                 {audit.rating && (
                   <div className="detail-item">
-                    <div 
+                    <div
                       className="rating-badge"
                       style={{ backgroundColor: getRatingColor(audit.rating) }}
                     >
@@ -296,10 +291,10 @@ const AuditManager = () => {
 
               <div className="audit-actions">
                 {audit.status === 'planned' && (
-                  <button 
+                  <button
                     className="btn-secondary"
                     onClick={() => {
-                      setSelectedAudit({...audit, action: 'execute'});
+                      setSelectedAudit({ ...audit, action: 'execute' });
                     }}
                   >
                     ▶️ Execute
@@ -307,10 +302,10 @@ const AuditManager = () => {
                 )}
 
                 {audit.status === 'in-progress' && (
-                  <button 
+                  <button
                     className="btn-secondary"
                     onClick={() => {
-                      setSelectedAudit({...audit, action: 'result'});
+                      setSelectedAudit({ ...audit, action: 'result' });
                     }}
                   >
                     ✓ Document Result
@@ -318,9 +313,7 @@ const AuditManager = () => {
                 )}
 
                 {audit.status === 'completed' && (
-                  <button className="btn-secondary">
-                    📄 View Report
-                  </button>
+                  <button className="btn-secondary">📄 View Report</button>
                 )}
 
                 <button className="btn-secondary">📋 View Details</button>
@@ -332,7 +325,7 @@ const AuditManager = () => {
 
       {selectedAudit && selectedAudit.action === 'execute' && (
         <div className="modal-overlay" onClick={() => setSelectedAudit(null)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
             <h3>Execute Audit: {selectedAudit.name}</h3>
 
             <div className="form-group">
@@ -341,7 +334,7 @@ const AuditManager = () => {
                 placeholder="Notes from the audit execution"
                 rows="4"
                 value={executionForm.notes}
-                onChange={(e) => setExecutionForm({...executionForm, notes: e.target.value})}
+                onChange={e => setExecutionForm({ ...executionForm, notes: e.target.value })}
               />
             </div>
 
@@ -351,15 +344,12 @@ const AuditManager = () => {
                 placeholder="Findings and observations"
                 rows="4"
                 value={executionForm.findings}
-                onChange={(e) => setExecutionForm({...executionForm, findings: e.target.value})}
+                onChange={e => setExecutionForm({ ...executionForm, findings: e.target.value })}
               />
             </div>
 
             <div className="modal-actions">
-              <button 
-                className="btn-primary"
-                onClick={() => handleExecuteAudit(selectedAudit.id)}
-              >
+              <button className="btn-primary" onClick={() => handleExecuteAudit(selectedAudit.id)}>
                 ✓ Execute
               </button>
               <button className="btn-secondary" onClick={() => setSelectedAudit(null)}>
@@ -372,14 +362,14 @@ const AuditManager = () => {
 
       {selectedAudit && selectedAudit.action === 'result' && (
         <div className="modal-overlay" onClick={() => setSelectedAudit(null)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
             <h3>Document Result: {selectedAudit.name}</h3>
 
             <div className="form-group">
               <label>Audit Rating *</label>
               <select
                 value={resultForm.rating}
-                onChange={(e) => setResultForm({...resultForm, rating: e.target.value})}
+                onChange={e => setResultForm({ ...resultForm, rating: e.target.value })}
               >
                 <option value="compliant">✅ Compliant</option>
                 <option value="partial">⚠️ Partial</option>
@@ -393,12 +383,12 @@ const AuditManager = () => {
                 placeholder="Recommendations for improvement"
                 rows="4"
                 value={resultForm.recommendations}
-                onChange={(e) => setResultForm({...resultForm, recommendations: e.target.value})}
+                onChange={e => setResultForm({ ...resultForm, recommendations: e.target.value })}
               />
             </div>
 
             <div className="modal-actions">
-              <button 
+              <button
                 className="btn-primary"
                 onClick={() => handleDocumentResult(selectedAudit.id)}
               >

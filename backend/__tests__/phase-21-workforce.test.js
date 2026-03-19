@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * ALAWAEL ERP - PHASE 21: WORKFORCE ANALYTICS & PLANNING TEST SUITE
  * Comprehensive testing of HR planning, forecasting, succession planning, compensation analysis

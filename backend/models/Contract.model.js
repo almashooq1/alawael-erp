@@ -1,277 +1,292 @@
+/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 /**
  * Contract Schema - نموذج العقود والاتفاقيات مع الموردين
  */
-const ContractSchema = new mongoose.Schema({
-  // ===== معلومات العقد الأساسية =====
-  contractNumber: {
-    type: String,
-    required: true,
-    unique: true,
-    uppercase: true,
-  }, // CT-2026-001
-  
-  contractTitle: {
-    type: String,
-    required: true,
-  },
-  
-  contractType: {
-    type: String,
-    enum: [
-      'SUPPLY_AGREEMENT', // اتفاقية توريد
-      'FRAMEWORK_AGREEMENT', // اتفاقية إطار
-      'ONE_TIME_PURCHASE', // شراء لمرة واحدة
-      'MAINTENANCE_AGREEMENT', // اتفاقية الصيانة
-      'SERVICE_AGREEMENT', // اتفاقية الخدمات
-      'DISTRIBUTION_AGREEMENT', // اتفاقية التوزيع
-    ],
-    required: true,
-  },
-  
-  status: {
-    type: String,
-    enum: ['DRAFT', 'ACTIVE', 'EXPIRED', 'TERMINATED', 'SUSPENDED'],
-    default: 'DRAFT',
-  },
-  
-  // ===== الأطراف =====
-  supplier: {
-    supplierId: mongoose.Schema.Types.ObjectId,
-    supplierCode: String,
-    supplierName: String,
-    supplierAddress: String,
-    signatory: String,
-  },
-  
-  organization: {
-    organizationName: String,
-    address: String,
-    signatory: String,
-    signatoryTitle: String,
-  },
-  
-  // ===== تواريخ العقد =====
-  startDate: {
-    type: Date,
-    required: true,
-  },
-  
-  endDate: {
-    type: Date,
-    required: true,
-  },
-  
-  executionDate: Date, // تاريخ التوقيع
-  
-  renewalTerms: {
-    isAutoRenewal: Boolean,
-    renewalPeriod: String, // '1 year', '6 months'
-    renewalNoticeRequired: Number, // أيام قبل الانتهاء
-  },
-  
-  // ===== الشروط المالية =====
-  financialTerms: {
-    paymentTerms: String,
-    creditDays: Number,
-    discountStructure: [{
-      volumeFrom: Number,
-      volumeTo: Number,
-      discountPercentage: Number,
-    }],
-    priceAdjustmentClause: String,
-    paymentMethod: String,
-    currency: { type: String, default: 'SAR' },
-  },
-  
-  // ===== الشروط التسليم =====
-  deliveryTerms: {
-    deliveryMethod: String,
-    leadTime: Number,
-    incoterms: String, // FOB, CIF, etc.
-    deliveryLocation: String,
-    handlingCharges: String,
-  },
-  
-  // ===== الالتزامات والحقوق =====
-  obligations: {
-    supplier: [String], // التزامات المورد
-    buyer: [String], // التزامات المشتري
-  },
-  
-  terms: {
-    qualityStandards: String,
-    warrantyPeriod: Number, // أيام
-    returnPolicy: String,
-    inspectionRights: String,
-  },
-  
-  // ===== الخصوصيات والسرية =====
-  confidentiality: {
-    isConfidential: Boolean,
-    confidentialityDuration: Number, // سنوات
-    disclosureRestrictions: String,
-  },
-  
-  // ===== المنتجات المغطاة =====
-  products: [{
-    productCode: String,
-    productName: String,
-    supplierId: mongoose.Schema.Types.ObjectId,
-    minPrice: Number,
-    maxPrice: Number,
-    estimatedVolume: Number,
-    leadTime: Number,
-  }],
-  
-  // ===== الشروط العامة =====
-  generalterms: {
-    minimumOrder: Number,
-    maximumOrder: Number,
-    exclusivity: Boolean,
-    nonCompete: Boolean,
-    intellectualPropertyRights: String,
-  },
-  
-  // ===== المسؤوليات والتأمين =====
-  liabilityInsurance: {
-    required: Boolean,
-    amount: Number,
-    type: String,
-  },
-  
-  indemnification: String,
-  forceMAjeure: String,
-  
-  // ===== الإنهاء والتجديد =====
-  termination: {
-    terminationClause: String,
-    terminationNotice: Number, // أيام
-    terminationForCause: String,
-    terminationFees: String,
-  },
-  
-  // ===== المراجعة والتحديثات =====
-  amendments: [{
-    amendmentNumber: String,
-    amendmentDate: Date,
-    description: String,
-    changedClauses: String,
-    documentUrl: String,
-  }],
-  
-  // ===== المراقبة والأداء =====
-  performanceMetrics: {
-    qualityMetric: String,
-    deliveryMetric: String,
-    responseTimeMetric: String,
-    penaltyClause: String,
-    incentiveClause: String,
-  },
-  
-  // ===== المنازعات =====
-  disputes: {
-    governingLaw: String,
-    jurisdiction: String,
-    arbitration: String,
-    escalationProcess: String,
-  },
-  
-  // ===== المراجع والمراجعة =====
-  contractValue: {
-    minValue: Number,
-    maxValue: Number,
-    estimatedAnnualValue: Number,
-    currency: { type: String, default: 'SAR' },
-  },
-  
-  reviewSchedule: {
-    annualReview: Boolean,
-    nextReviewDate: Date,
-    lastReviewDate: Date,
-    reviewComments: String,
-  },
-  
-  // ===== الملفات والوثائق =====
-  documents: [{
-    documentType: String,
-    fileName: String,
-    fileUrl: String,
-    uploadDate: Date,
-    version: Number,
-  }],
-  
-  contractDocument: {
-    fileName: String,
-    fileUrl: String,
-    uploadDate: Date,
-  },
-  
-  // ===== الموافقات =====
-  approvals: [{
-    approverId: mongoose.Schema.Types.ObjectId,
-    approverName: String,
-    approverRole: String,
+const ContractSchema = new mongoose.Schema(
+  {
+    // ===== معلومات العقد الأساسية =====
+    contractNumber: {
+      type: String,
+      required: true,
+      unique: true,
+      uppercase: true,
+    }, // CT-2026-001
+
+    contractTitle: {
+      type: String,
+      required: true,
+    },
+
+    contractType: {
+      type: String,
+      enum: [
+        'SUPPLY_AGREEMENT', // اتفاقية توريد
+        'FRAMEWORK_AGREEMENT', // اتفاقية إطار
+        'ONE_TIME_PURCHASE', // شراء لمرة واحدة
+        'MAINTENANCE_AGREEMENT', // اتفاقية الصيانة
+        'SERVICE_AGREEMENT', // اتفاقية الخدمات
+        'DISTRIBUTION_AGREEMENT', // اتفاقية التوزيع
+      ],
+      required: true,
+    },
+
     status: {
       type: String,
-      enum: ['PENDING', 'APPROVED', 'REJECTED'],
-      default: 'PENDING',
+      enum: ['DRAFT', 'ACTIVE', 'EXPIRED', 'TERMINATED', 'SUSPENDED'],
+      default: 'DRAFT',
     },
-    approvalDate: Date,
-    comments: String,
-  }],
-  
-  // ===== البيانات الوصفية =====
-  notes: String,
-  internalNotes: String,
-  tags: [String],
-  
-  createdBy: mongoose.Schema.Types.ObjectId,
-  createdAt: { type: Date, default: Date.now },
-  updatedBy: mongoose.Schema.Types.ObjectId,
-  updatedAt: { type: Date, default: Date.now },
-  
-  // ===== التنبيهات =====
-  alerts: [{
-    alertType: String,
-    message: String,
-    alertDate: { type: Date, default: Date.now },
-    acknowledged: { type: Boolean, default: false },
-  }],
-}, {
-  timestamps: true,
-  collection: 'contracts',
-});
 
-// Indexes
-ContractSchema.index({ contractNumber: 1 });
+    // ===== الأطراف =====
+    supplier: {
+      supplierId: mongoose.Schema.Types.ObjectId,
+      supplierCode: String,
+      supplierName: String,
+      supplierAddress: String,
+      signatory: String,
+    },
+
+    organization: {
+      organizationName: String,
+      address: String,
+      signatory: String,
+      signatoryTitle: String,
+    },
+
+    // ===== تواريخ العقد =====
+    startDate: {
+      type: Date,
+      required: true,
+    },
+
+    endDate: {
+      type: Date,
+      required: true,
+    },
+
+    executionDate: Date, // تاريخ التوقيع
+
+    renewalTerms: {
+      isAutoRenewal: Boolean,
+      renewalPeriod: String, // '1 year', '6 months'
+      renewalNoticeRequired: Number, // أيام قبل الانتهاء
+    },
+
+    // ===== الشروط المالية =====
+    financialTerms: {
+      paymentTerms: String,
+      creditDays: Number,
+      discountStructure: [
+        {
+          volumeFrom: Number,
+          volumeTo: Number,
+          discountPercentage: Number,
+        },
+      ],
+      priceAdjustmentClause: String,
+      paymentMethod: String,
+      currency: { type: String, default: 'SAR' },
+    },
+
+    // ===== الشروط التسليم =====
+    deliveryTerms: {
+      deliveryMethod: String,
+      leadTime: Number,
+      incoterms: String, // FOB, CIF, etc.
+      deliveryLocation: String,
+      handlingCharges: String,
+    },
+
+    // ===== الالتزامات والحقوق =====
+    obligations: {
+      supplier: [String], // التزامات المورد
+      buyer: [String], // التزامات المشتري
+    },
+
+    terms: {
+      qualityStandards: String,
+      warrantyPeriod: Number, // أيام
+      returnPolicy: String,
+      inspectionRights: String,
+    },
+
+    // ===== الخصوصيات والسرية =====
+    confidentiality: {
+      isConfidential: Boolean,
+      confidentialityDuration: Number, // سنوات
+      disclosureRestrictions: String,
+    },
+
+    // ===== المنتجات المغطاة =====
+    products: [
+      {
+        productCode: String,
+        productName: String,
+        supplierId: mongoose.Schema.Types.ObjectId,
+        minPrice: Number,
+        maxPrice: Number,
+        estimatedVolume: Number,
+        leadTime: Number,
+      },
+    ],
+
+    // ===== الشروط العامة =====
+    generalterms: {
+      minimumOrder: Number,
+      maximumOrder: Number,
+      exclusivity: Boolean,
+      nonCompete: Boolean,
+      intellectualPropertyRights: String,
+    },
+
+    // ===== المسؤوليات والتأمين =====
+    liabilityInsurance: {
+      required: Boolean,
+      amount: Number,
+      type: String,
+    },
+
+    indemnification: String,
+    forceMAjeure: String,
+
+    // ===== الإنهاء والتجديد =====
+    termination: {
+      terminationClause: String,
+      terminationNotice: Number, // أيام
+      terminationForCause: String,
+      terminationFees: String,
+    },
+
+    // ===== المراجعة والتحديثات =====
+    amendments: [
+      {
+        amendmentNumber: String,
+        amendmentDate: Date,
+        description: String,
+        changedClauses: String,
+        documentUrl: String,
+      },
+    ],
+
+    // ===== المراقبة والأداء =====
+    performanceMetrics: {
+      qualityMetric: String,
+      deliveryMetric: String,
+      responseTimeMetric: String,
+      penaltyClause: String,
+      incentiveClause: String,
+    },
+
+    // ===== المنازعات =====
+    disputes: {
+      governingLaw: String,
+      jurisdiction: String,
+      arbitration: String,
+      escalationProcess: String,
+    },
+
+    // ===== المراجع والمراجعة =====
+    contractValue: {
+      minValue: Number,
+      maxValue: Number,
+      estimatedAnnualValue: Number,
+      currency: { type: String, default: 'SAR' },
+    },
+
+    reviewSchedule: {
+      annualReview: Boolean,
+      nextReviewDate: Date,
+      lastReviewDate: Date,
+      reviewComments: String,
+    },
+
+    // ===== الملفات والوثائق =====
+    documents: [
+      {
+        documentType: String,
+        fileName: String,
+        fileUrl: String,
+        uploadDate: Date,
+        version: Number,
+      },
+    ],
+
+    contractDocument: {
+      fileName: String,
+      fileUrl: String,
+      uploadDate: Date,
+    },
+
+    // ===== الموافقات =====
+    approvals: [
+      {
+        approverId: mongoose.Schema.Types.ObjectId,
+        approverName: String,
+        approverRole: String,
+        status: {
+          type: String,
+          enum: ['PENDING', 'APPROVED', 'REJECTED'],
+          default: 'PENDING',
+        },
+        approvalDate: Date,
+        comments: String,
+      },
+    ],
+
+    // ===== البيانات الوصفية =====
+    notes: String,
+    internalNotes: String,
+    tags: [String],
+
+    createdBy: mongoose.Schema.Types.ObjectId,
+    createdAt: { type: Date, default: Date.now },
+    updatedBy: mongoose.Schema.Types.ObjectId,
+    updatedAt: { type: Date, default: Date.now },
+
+    // ===== التنبيهات =====
+    alerts: [
+      {
+        alertType: String,
+        message: String,
+        alertDate: { type: Date, default: Date.now },
+        acknowledged: { type: Boolean, default: false },
+      },
+    ],
+  },
+  {
+    timestamps: true,
+    collection: 'contracts',
+  }
+);
+
+// Indexes (contractNumber already has unique:true in schema — no separate index needed)
 ContractSchema.index({ 'supplier.supplierId': 1 });
 ContractSchema.index({ status: 1 });
 ContractSchema.index({ startDate: 1, endDate: 1 });
 ContractSchema.index({ contractType: 1 });
 
 // Virtuals
-ContractSchema.virtual('isActive').get(function() {
+ContractSchema.virtual('isActive').get(function () {
   const now = new Date();
   return this.status === 'ACTIVE' && this.startDate <= now && this.endDate > now;
 });
 
-ContractSchema.virtual('isExpired').get(function() {
+ContractSchema.virtual('isExpired').get(function () {
   return new Date() > this.endDate;
 });
 
-ContractSchema.virtual('daysUntilExpiry').get(function() {
+ContractSchema.virtual('daysUntilExpiry').get(function () {
   const days = Math.ceil((this.endDate - new Date()) / (1000 * 60 * 60 * 24));
   return Math.max(days, 0);
 });
 
-ContractSchema.virtual('expiresWithinMonths').get(function() {
+ContractSchema.virtual('expiresWithinMonths').get(function () {
   const daysToExpiry = this.daysUntilExpiry;
   return daysToExpiry <= 30;
 });
 
-ContractSchema.virtual('duration').get(function() {
+ContractSchema.virtual('duration').get(function () {
   const milliseconds = this.endDate - this.startDate;
   const days = milliseconds / (1000 * 60 * 60 * 24);
   const months = days / 30;
@@ -372,7 +387,7 @@ ContractSchema.methods = {
   getDiscountForVolume(volume) {
     if (!this.financialTerms?.discountStructure) return 0;
 
-    for (let discount of this.financialTerms.discountStructure) {
+    for (const discount of this.financialTerms.discountStructure) {
       if (volume >= discount.volumeFrom && volume <= discount.volumeTo) {
         return discount.discountPercentage;
       }

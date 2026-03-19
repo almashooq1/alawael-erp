@@ -1,7 +1,7 @@
 /**
  * ValidationDashboard Component
  * لوحة تحقق القواعد المالية والامتثال
- * 
+ *
  * Features:
  * - عرض الانتهاكات والأخطاء
  * - تصفية حسب الخطورة والنوع
@@ -34,7 +34,21 @@ import {
   FilePdfOutlined,
   FileExcelOutlined,
 } from '@ant-design/icons';
-import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import {
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from 'recharts';
 import dayjs from 'dayjs';
 
 const ValidationDashboard = () => {
@@ -71,12 +85,9 @@ const ValidationDashboard = () => {
         to: filter.dateRange?.[1]?.format('YYYY-MM-DD') || '',
       });
 
-      const response = await fetch(
-        `/api/finance/validation/violations-report?${params}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const response = await fetch(`/api/finance/validation/violations-report?${params}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       if (!response.ok) throw new Error('Failed to fetch violations');
 
@@ -91,7 +102,7 @@ const ValidationDashboard = () => {
     }
   }, [filter]);
 
-  const calculateStats = (data) => {
+  const calculateStats = data => {
     const stats = {
       total: data.length,
       critical: data.filter(v => v.severity === 'critical').length,
@@ -100,18 +111,24 @@ const ValidationDashboard = () => {
       low: data.filter(v => v.severity === 'low').length,
       resolved: data.filter(v => v.status === 'resolved').length,
       pending: data.filter(v => v.status === 'pending').length,
-      complianceRate: data.length > 0 ? ((data.length - data.filter(v => v.severity === 'critical').length) / data.length * 100).toFixed(2) : 100,
+      complianceRate:
+        data.length > 0
+          ? (
+              ((data.length - data.filter(v => v.severity === 'critical').length) / data.length) *
+              100
+            ).toFixed(2)
+          : 100,
     };
     setStats(stats);
   };
 
-  const resolveViolation = async (violationId) => {
+  const resolveViolation = async violationId => {
     try {
       const token = localStorage.getItem('authToken');
       const response = await fetch(`/api/finance/validation/${violationId}/resolve`, {
         method: 'PATCH',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ status: 'resolved' }),
@@ -128,15 +145,12 @@ const ValidationDashboard = () => {
     }
   };
 
-  const exportReport = async (format) => {
+  const exportReport = async format => {
     try {
       const token = localStorage.getItem('authToken');
-      const response = await fetch(
-        `/api/finance/validation/export?format=${format}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const response = await fetch(`/api/finance/validation/export?format=${format}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       if (!response.ok) throw new Error('Export failed');
 
@@ -199,13 +213,13 @@ const ValidationDashboard = () => {
       title: 'النوع',
       dataIndex: 'type',
       key: 'type',
-      render: (text) => <span>{text}</span>,
+      render: text => <span>{text}</span>,
     },
     {
       title: 'الخطورة',
       dataIndex: 'severity',
       key: 'severity',
-      render: (severity) => {
+      render: severity => {
         let color = 'default';
         let icon = null;
         if (severity === 'critical') {
@@ -228,13 +242,13 @@ const ValidationDashboard = () => {
       title: 'التاريخ',
       dataIndex: 'createdAt',
       key: 'createdAt',
-      render: (date) => dayjs(date).format('DD/MM/YYYY'),
+      render: date => dayjs(date).format('DD/MM/YYYY'),
     },
     {
       title: 'الحالة',
       dataIndex: 'status',
       key: 'status',
-      render: (status) => (
+      render: status => (
         <Badge
           status={status === 'resolved' ? 'success' : 'processing'}
           text={status === 'resolved' ? 'مَحلول' : 'معلق'}
@@ -327,9 +341,7 @@ const ValidationDashboard = () => {
           <Col xs={24} sm={12} md={6}>
             <Select
               value={filter.severity}
-              onChange={(value) =>
-                setFilter({ ...filter, severity: value })
-              }
+              onChange={value => setFilter({ ...filter, severity: value })}
               style={{ width: '100%' }}
               placeholder="اختر درجة الخطورة"
               options={[
@@ -344,9 +356,7 @@ const ValidationDashboard = () => {
           <Col xs={24} sm={12} md={6}>
             <Select
               value={filter.type}
-              onChange={(value) =>
-                setFilter({ ...filter, type: value })
-              }
+              onChange={value => setFilter({ ...filter, type: value })}
               style={{ width: '100%' }}
               placeholder="اختر نوع الانتهاك"
               options={[
@@ -360,9 +370,7 @@ const ValidationDashboard = () => {
           <Col xs={24} sm={12} md={6}>
             <DatePicker.RangePicker
               value={filter.dateRange}
-              onChange={(dates) =>
-                setFilter({ ...filter, dateRange: dates })
-              }
+              onChange={dates => setFilter({ ...filter, dateRange: dates })}
               style={{ width: '100%' }}
             />
           </Col>
@@ -426,10 +434,7 @@ const ValidationDashboard = () => {
             >
               PDF
             </Button>
-            <Button
-              icon={<FileExcelOutlined />}
-              onClick={() => exportReport('excel')}
-            >
+            <Button icon={<FileExcelOutlined />} onClick={() => exportReport('excel')}>
               Excel
             </Button>
           </div>
@@ -446,7 +451,7 @@ const ValidationDashboard = () => {
             pagination={{
               pageSize: 10,
               showSizeChanger: true,
-              showTotal: (total) => `إجمالي: ${total} انتهاك`,
+              showTotal: total => `إجمالي: ${total} انتهاك`,
             }}
           />
         )}

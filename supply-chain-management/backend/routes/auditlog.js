@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const express = require('express');
 const router = express.Router();
 const AuditLog = require('../models/AuditLog');
@@ -15,7 +16,7 @@ router.get('/', authMiddleware, async (req, res) => {
       .sort({ timestamp: -1 })
       .limit(100);
     res.json(logs);
-  } catch (err) {
+  } catch (_err) {
     res.status(500).json({ message: 'خطأ في جلب السجل' });
   }
 });

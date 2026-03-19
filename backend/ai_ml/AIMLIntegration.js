@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * AI/ML Integration Module - Phase 9
  * Predictive analytics, intelligent automation, and NLP features
@@ -7,7 +8,7 @@ class AIMLIntegration {
   /**
    * Predictive Analytics Engine
    */
-  static class PredictiveAnalytics {
+  static PredictiveAnalytics = class {
     /**
      * Predict employee turnover probability
      * Uses simple ML model pattern
@@ -16,9 +17,7 @@ class AIMLIntegration {
       let turnoverProbability = 0;
 
       // Factor 1: Tenure (0-30 points)
-      const tenure =
-        (Date.now() - new Date(employeeData.joinDate)) /
-        (1000 * 60 * 60 * 24 * 365);
+      const tenure = (Date.now() - new Date(employeeData.joinDate)) / (1000 * 60 * 60 * 24 * 365);
       if (tenure < 1) turnoverProbability += 30;
       else if (tenure < 2) turnoverProbability += 20;
       else if (tenure < 3) turnoverProbability += 10;
@@ -26,8 +25,7 @@ class AIMLIntegration {
       // Factor 2: Recent promotion (0-20 points)
       if (employeeData.lastPromotion) {
         const monthsSincePromotion =
-          (Date.now() - new Date(employeeData.lastPromotion)) /
-          (1000 * 60 * 60 * 24 * 30);
+          (Date.now() - new Date(employeeData.lastPromotion)) / (1000 * 60 * 60 * 24 * 30);
         if (monthsSincePromotion > 36) turnoverProbability += 20;
         else if (monthsSincePromotion > 24) turnoverProbability += 10;
       } else {
@@ -39,10 +37,9 @@ class AIMLIntegration {
         'Below Average': 25,
         Average: 15,
         'Above Average': 5,
-        Excellent: 0
+        Excellent: 0,
       };
-      turnoverProbability +=
-        performanceScores[employeeData.lastPerformanceRating] || 10;
+      turnoverProbability += performanceScores[employeeData.lastPerformanceRating] || 10;
 
       // Factor 4: Salary competitiveness (0-25 points)
       if (employeeData.salary < 30000) turnoverProbability += 25;
@@ -57,14 +54,11 @@ class AIMLIntegration {
           turnoverProbability > 75
             ? 'CRITICAL'
             : turnoverProbability > 50
-            ? 'HIGH'
-            : turnoverProbability > 25
-            ? 'MEDIUM'
-            : 'LOW',
-        recommendations: this.generateTurnoverRecommendations(
-          employeeData,
-          turnoverProbability
-        )
+              ? 'HIGH'
+              : turnoverProbability > 25
+                ? 'MEDIUM'
+                : 'LOW',
+        recommendations: this.generateTurnoverRecommendations(employeeData, turnoverProbability),
       };
     }
 
@@ -78,9 +72,7 @@ class AIMLIntegration {
         recommendations.push('Consider promotion opportunity');
       }
 
-      const tenure =
-        (Date.now() - new Date(employeeData.joinDate)) /
-        (1000 * 60 * 60 * 24 * 365);
+      const tenure = (Date.now() - new Date(employeeData.joinDate)) / (1000 * 60 * 60 * 24 * 365);
       if (tenure < 2) {
         recommendations.push('Increase onboarding support');
         recommendations.push('Schedule regular check-ins');
@@ -112,34 +104,23 @@ class AIMLIntegration {
         'Below Average': 0,
         Average: 1,
         'Above Average': 3,
-        Excellent: 5
+        Excellent: 5,
       };
-      increasePercent +=
-        performanceBonus[employeeData.lastPerformanceRating] || 1;
+      increasePercent += performanceBonus[employeeData.lastPerformanceRating] || 1;
 
       // Inflation adjustment (simplified)
       const inflation = marketData.inflationRate || 2;
       increasePercent += inflation;
 
       // Market comparison
-      if (
-        employeeData.salary <
-        marketData.marketAverage * 0.8
-      ) {
+      if (employeeData.salary < marketData.marketAverage * 0.8) {
         increasePercent += 2; // Adjust to market
       }
 
       return {
         recommendedIncrease: increasePercent.toFixed(2) + '%',
-        newSalary: (
-          employeeData.salary *
-          (1 + increasePercent / 100)
-        ).toFixed(2),
-        factors: [
-          'performance',
-          'inflation',
-          'market_competitiveness'
-        ]
+        newSalary: (employeeData.salary * (1 + increasePercent / 100)).toFixed(2),
+        factors: ['performance', 'inflation', 'market_competitiveness'],
       };
     }
 
@@ -150,14 +131,11 @@ class AIMLIntegration {
       const predictions = [];
 
       // Based on turnover trends
-      const expectedTurnover =
-        historicalData.avgTurnoverRate * departmentMetrics.employeeCount;
+      const expectedTurnover = historicalData.avgTurnoverRate * departmentMetrics.employeeCount;
 
       // Based on growth trends
       const growthFactor = historicalData.growthRate || 0.05;
-      const growthHires = Math.ceil(
-        departmentMetrics.employeeCount * growthFactor
-      );
+      const growthHires = Math.ceil(departmentMetrics.employeeCount * growthFactor);
 
       const totalNeeded = Math.ceil(expectedTurnover + growthHires);
 
@@ -167,10 +145,7 @@ class AIMLIntegration {
         expectedTurnover: Math.floor(expectedTurnover),
         growthHires: growthHires,
         totalHiringNeed: totalNeeded,
-        recommendedTimeline: this.calculateHiringTimeline(
-          totalNeeded,
-          departmentMetrics
-        )
+        recommendedTimeline: this.calculateHiringTimeline(totalNeeded, departmentMetrics),
       };
     }
 
@@ -186,15 +161,15 @@ class AIMLIntegration {
         immediateNeeds: Math.ceil(hiringNeed * 0.4),
         shortTermNeeds: Math.ceil(hiringNeed * 0.6),
         estimatedDuration: totalWeeks + ' weeks',
-        startRecruitmentBy: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+        startRecruitmentBy: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       };
     }
-  }
+  };
 
   /**
    * NLP & Sentiment Analysis
    */
-  static class NLPService {
+  static NLPService = class {
     /**
      * Analyze sentiment in employee feedback
      */
@@ -210,7 +185,7 @@ class AIMLIntegration {
         'satisfied',
         'appreciate',
         'enjoy',
-        'love'
+        'love',
       ];
       const negativeKeywords = [
         'bad',
@@ -220,35 +195,28 @@ class AIMLIntegration {
         'frustrated',
         'disappointed',
         'hate',
-        'difficult'
+        'difficult',
       ];
 
       const lowerText = feedbackText.toLowerCase();
-      const positiveCount = positiveKeywords.filter(kw =>
-        lowerText.includes(kw)
-      ).length;
-      const negativeCount = negativeKeywords.filter(kw =>
-        lowerText.includes(kw)
-      ).length;
+      const positiveCount = positiveKeywords.filter(kw => lowerText.includes(kw)).length;
+      const negativeCount = negativeKeywords.filter(kw => lowerText.includes(kw)).length;
 
       const sentiment =
         positiveCount > negativeCount
           ? 'positive'
           : negativeCount > positiveCount
-          ? 'negative'
-          : 'neutral';
+            ? 'negative'
+            : 'neutral';
 
       return {
         sentiment,
         score:
-          (
-            (positiveCount - negativeCount) /
-            (positiveCount + negativeCount || 1)
-          ).toFixed(2) || 0,
+          ((positiveCount - negativeCount) / (positiveCount + negativeCount || 1)).toFixed(2) || 0,
         keywords: {
           positive: positiveKeywords.filter(kw => lowerText.includes(kw)),
-          negative: negativeKeywords.filter(kw => lowerText.includes(kw))
-        }
+          negative: negativeKeywords.filter(kw => lowerText.includes(kw)),
+        },
       };
     }
 
@@ -274,12 +242,10 @@ class AIMLIntegration {
         'for',
         'of',
         'is',
-        'was'
+        'was',
       ];
 
-      const filtered = words.filter(
-        w => w.length > 3 && !commonStopwords.includes(w)
-      );
+      const filtered = words.filter(w => w.length > 3 && !commonStopwords.includes(w));
 
       // Count word frequency
       const frequency = {};
@@ -293,7 +259,7 @@ class AIMLIntegration {
         .slice(0, maxTopics)
         .map(([word, count]) => ({
           word,
-          frequency: count
+          frequency: count,
         }));
 
       return topics;
@@ -304,69 +270,37 @@ class AIMLIntegration {
      */
     static categorizeComment(comment) {
       const categories = {
-        compensation: [
-          'salary',
-          'pay',
-          'bonus',
-          'benefits',
-          'raise'
-        ],
-        management: [
-          'manager',
-          'boss',
-          'leadership',
-          'direction',
-          'support'
-        ],
-        culture: [
-          'culture',
-          'team',
-          'environment',
-          'values',
-          'community'
-        ],
-        career: [
-          'growth',
-          'development',
-          'career',
-          'opportunity',
-          'learn'
-        ],
-        worklife: [
-          'balance',
-          'flexibility',
-          'hours',
-          'remote',
-          'schedule'
-        ]
+        compensation: ['salary', 'pay', 'bonus', 'benefits', 'raise'],
+        management: ['manager', 'boss', 'leadership', 'direction', 'support'],
+        culture: ['culture', 'team', 'environment', 'values', 'community'],
+        career: ['growth', 'development', 'career', 'opportunity', 'learn'],
+        worklife: ['balance', 'flexibility', 'hours', 'remote', 'schedule'],
       };
 
       const lowerComment = comment.toLowerCase();
       const matched = [];
 
       Object.entries(categories).forEach(([category, keywords]) => {
-        const matches = keywords.filter(kw =>
-          lowerComment.includes(kw)
-        ).length;
+        const matches = keywords.filter(kw => lowerComment.includes(kw)).length;
         if (matches > 0) {
           matched.push({
             category,
-            confidence: (matches / keywords.length * 100).toFixed(0) + '%'
+            confidence: ((matches / keywords.length) * 100).toFixed(0) + '%',
           });
         }
       });
 
       return {
         categories: matched,
-        primaryCategory: matched.length > 0 ? matched[0].category : 'other'
+        primaryCategory: matched.length > 0 ? matched[0].category : 'other',
       };
     }
-  }
+  };
 
   /**
    * Intelligent Automation
    */
-  static class IntelligentAutomation {
+  static IntelligentAutomation = class {
     /**
      * Auto-approve low-risk leave requests
      */
@@ -401,10 +335,7 @@ class AIMLIntegration {
       return {
         shouldAutoApprove: approvalScore >= 75,
         score: approvalScore,
-        reason:
-          approvalScore >= 75
-            ? 'Low-risk leave request'
-            : 'Requires manual review'
+        reason: approvalScore >= 75 ? 'Low-risk leave request' : 'Requires manual review',
       };
     }
 
@@ -429,9 +360,7 @@ class AIMLIntegration {
      */
     static detectAttendanceAnomalies(employeeAttendance) {
       const recentDays = employeeAttendance.last30Days;
-      const avgAbsentDays = (
-        recentDays.filter(d => d.status === 'absent').length / 30
-      ).toFixed(2);
+      const avgAbsentDays = (recentDays.filter(d => d.status === 'absent').length / 30).toFixed(2);
 
       const anomalies = [];
 
@@ -439,7 +368,7 @@ class AIMLIntegration {
         anomalies.push({
           type: 'UNUSUAL_ABSENCE_RATE',
           severity: 'medium',
-          description: `High absence rate: ${avgAbsentDays * 100}% of days`
+          description: `High absence rate: ${avgAbsentDays * 100}% of days`,
         });
       }
 
@@ -452,7 +381,7 @@ class AIMLIntegration {
             anomalies.push({
               type: 'CONSECUTIVE_ABSENCES',
               severity: 'high',
-              description: `${consecutiveDays} consecutive days absent`
+              description: `${consecutiveDays} consecutive days absent`,
             });
             break;
           }
@@ -463,12 +392,12 @@ class AIMLIntegration {
 
       return anomalies;
     }
-  }
+  };
 
   /**
    * Recommendation Engine
    */
-  static class RecommendationEngine {
+  static RecommendationEngine = class RecommendationEngine {
     /**
      * Recommend training courses for employees
      */
@@ -477,28 +406,19 @@ class AIMLIntegration {
 
       // Recommend based on role
       const roleBasedCourses = {
-        'Software Engineer': [
-          'Advanced JavaScript',
-          'System Design',
-          'Database Optimization'
-        ],
-        'Product Manager': [
-          'Product Strategy',
-          'Data Analysis for PMs',
-          'User Research'
-        ],
-        'Sales': ['Sales Techniques', 'Negotiation', 'CRM Mastery'],
-        Manager: ['Team Management', 'Leadership', 'Conflict Resolution']
+        'Software Engineer': ['Advanced JavaScript', 'System Design', 'Database Optimization'],
+        'Product Manager': ['Product Strategy', 'Data Analysis for PMs', 'User Research'],
+        Sales: ['Sales Techniques', 'Negotiation', 'CRM Mastery'],
+        Manager: ['Team Management', 'Leadership', 'Conflict Resolution'],
       };
 
-      const suggested =
-        roleBasedCourses[employeeData.position] || [];
+      const suggested = roleBasedCourses[employeeData.position] || [];
       for (const course of suggested) {
         if (!completedTrainings.includes(course)) {
           recommendations.push({
             course,
             type: 'role-based',
-            priority: 'high'
+            priority: 'high',
           });
         }
       }
@@ -508,7 +428,7 @@ class AIMLIntegration {
         recommendations.push({
           course: 'Performance Improvement Program',
           type: 'remedial',
-          priority: 'critical'
+          priority: 'critical',
         });
       }
 
@@ -548,16 +468,14 @@ class AIMLIntegration {
           recommendations.push({
             mentorId: mentor._id,
             name: mentor.name,
-            matchScore: score
+            matchScore: score,
           });
         }
       }
 
-      return recommendations
-        .sort((a, b) => b.matchScore - a.matchScore)
-        .slice(0, 3);
+      return recommendations.sort((a, b) => b.matchScore - a.matchScore).slice(0, 3);
     }
-  }
+  };
 }
 
 module.exports = AIMLIntegration;

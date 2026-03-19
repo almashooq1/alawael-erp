@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // Mock Audio Processing
 const User = require('../models/User');
 

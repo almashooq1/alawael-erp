@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // utils/pagination-helper.js
 // Pagination & Data Formatting Utilities
 
@@ -63,7 +64,7 @@ class PaginationHelper {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }

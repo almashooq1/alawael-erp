@@ -1,37 +1,38 @@
+/* eslint-disable no-unused-vars */
 /**
  * Performance Optimization Service
  * Caching, compression, and optimization strategies
  */
 
-const Redis = require('redis');
+const Redis = require('ioredis');
 const zlib = require('zlib');
-const { promisify } = require('util');
+const logger = require('../utils/logger');
 
 class PerformanceOptimizer {
   constructor() {
     // Initialize Redis client if available
     try {
-      this.redisClient = Redis.createClient({
+      this.redisClient = new Redis({
         host: process.env.REDIS_HOST || 'localhost',
-        port: process.env.REDIS_PORT || 6379,
+        port: parseInt(process.env.REDIS_PORT) || 6379,
       });
 
       this.redisClient.on('error', err => {
-        console.warn('Redis client error:', err);
+        logger.warn('Redis client error:', err);
         this.cacheEnabled = false;
       });
 
       this.cacheEnabled = true;
     } catch (error) {
-      console.warn('Redis unavailable, using in-memory cache:', error.message);
+      logger.warn('Redis unavailable, using in-memory cache:', error.message);
       this.inMemoryCache = new Map();
       this.cacheEnabled = true;
     }
 
-    // Promisify Redis commands
+    // ioredis natively supports promises
     if (this.redisClient) {
-      this.getAsync = promisify(this.redisClient.get).bind(this.redisClient);
-      this.setAsync = promisify(this.redisClient.setex).bind(this.redisClient);
+      this.getAsync = this.redisClient.get.bind(this.redisClient);
+      this.setAsync = this.redisClient.setex.bind(this.redisClient);
     }
   }
 
@@ -89,7 +90,7 @@ class PerformanceOptimizer {
 
       return null;
     } catch (error) {
-      console.warn('Cache retrieval error:', error);
+      logger.warn('Cache retrieval error:', error);
       return null;
     }
   }
@@ -113,7 +114,7 @@ class PerformanceOptimizer {
         return true;
       }
     } catch (error) {
-      console.warn('Cache set error:', error);
+      logger.warn('Cache set error:', error);
     }
     return false;
   }
@@ -124,9 +125,9 @@ class PerformanceOptimizer {
   async clearCache(pattern = '*') {
     try {
       if (this.cacheEnabled && this.redisClient) {
-        const keys = await promisify(this.redisClient.keys).bind(this.redisClient)(pattern);
+        const keys = await this.redisClient.keys(pattern);
         if (keys.length > 0) {
-          await promisify(this.redisClient.del).bind(this.redisClient)(keys);
+          await this.redisClient.del(...keys);
         }
       }
 
@@ -135,7 +136,7 @@ class PerformanceOptimizer {
         this.inMemoryCache.clear();
       }
     } catch (error) {
-      console.warn('Cache clear error:', error);
+      logger.warn('Cache clear error:', error);
     }
   }
 
@@ -254,7 +255,7 @@ class PerformanceOptimizer {
   async calculateCacheHitRate() {
     try {
       if (this.redisClient) {
-        const info = await promisify(this.redisClient.info).bind(this.redisClient)('stats');
+        const info = await this.redisClient.info('stats');
         const lines = info.split('\r\n');
         let hits = 0;
         let misses = 0;
@@ -272,7 +273,7 @@ class PerformanceOptimizer {
         return total > 0 ? ((hits / total) * 100).toFixed(2) + '%' : 'N/A';
       }
     } catch (error) {
-      console.warn('Cache hit rate calculation error:', error);
+      logger.warn('Cache hit rate calculation error:', error);
     }
     return 'N/A';
   }
@@ -338,7 +339,7 @@ class PerformanceOptimizer {
     const isSlowQuery = duration > 1000;
 
     if (isSlowQuery) {
-      console.warn(`Slow query detected: ${duration}ms for ${query}`);
+      logger.warn(`Slow query detected: ${duration}ms for ${query}`);
     }
 
     return {

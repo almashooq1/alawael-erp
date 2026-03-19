@@ -1,3 +1,6 @@
+/* eslint-disable no-unused-vars */
+const logger = require('../utils/logger');
+
 class SmartIoTService {
   /**
    * Process Incoming Vitals Data from Wearables
@@ -6,12 +9,16 @@ class SmartIoTService {
   static async processVitalData(deviceId, payload) {
     // Mock payload: { heartRate: 85, steps: 500, timestamp: ... }
 
-    console.log(`[IoT] Received data from Device ${deviceId}`);
+    logger.info(`[IoT] Received data from Device ${deviceId}`);
 
     // 1. Threshold Alerting
     const alerts = [];
     if (payload.heartRate > 120) {
-      alerts.push({ type: 'HIGH_HEART_RATE', value: payload.heartRate, msg: 'Patient seems stressed.' });
+      alerts.push({
+        type: 'HIGH_HEART_RATE',
+        value: payload.heartRate,
+        msg: 'Patient seems stressed.',
+      });
     }
     if (payload.oxygenSaturation && payload.oxygenSaturation < 95) {
       alerts.push({ type: 'LOW_O2', value: payload.oxygenSaturation, msg: 'Check breathing.' });

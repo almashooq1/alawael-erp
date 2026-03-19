@@ -39,11 +39,7 @@ npm install --save-dev @testing-library/react @testing-library/jest-dom @testing
     "testEnvironment": "node",
     "coveragePathIgnorePatterns": ["/node_modules/"],
     "testMatch": ["**/tests/**/*.test.js"],
-    "collectCoverageFrom": [
-      "models/**/*.js",
-      "services/**/*.js",
-      "controllers/**/*.js"
-    ]
+    "collectCoverageFrom": ["models/**/*.js", "services/**/*.js", "controllers/**/*.js"]
   }
 }
 ```

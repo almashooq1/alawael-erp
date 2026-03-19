@@ -1,9 +1,10 @@
+/* eslint-disable no-undef, no-unused-vars */
 /**
  * 🚀 Phase 21: Real-Time Monitoring & Analytics System
  * Advanced Real-Time Dashboard, Metrics, and Monitoring
  */
 
-const mongoose = require('mongoose');
+const _mongoose = require('mongoose');
 
 // Mock Real-Time Monitoring Service
 class RealtimeMonitoringService {
@@ -220,9 +221,9 @@ describe('🚀 Phase 21: Real-Time Monitoring System', () => {
 
   describe('Real-Time Subscriptions', () => {
     test('should notify subscribers of metric updates', done => {
-      let notified = false;
+      let _notified = false;
       service.subscribe(data => {
-        notified = true;
+        _notified = true;
         expect(data.category).toBe('cpuUsage');
         expect(data.value).toBe(75);
         done();

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Routes Registration
  * تسجيل جميع المسارات الجديدة
@@ -14,6 +15,7 @@ const projectRoutes = require('./project.routes');
 const aiRoutes = require('./ai.routes');
 const policyRoutes = require('../../routes/policyRoutes');
 const incidentRoutes = require('../../routes/incidentRoutes');
+const logger = require('../../utils/logger');
 
 /**
  * Setup all new routes
@@ -40,8 +42,7 @@ function setupNewRoutes(app) {
   // Incident Management routes
   app.use('/api/incidents', incidentRoutes);
 
-  console.log('✅ جميع المسارات الجديدة تم تسجيلها بنجاح');
-  console.log('✅ All new routes registered successfully');
+  logger.info('All new routes registered successfully');
 
   // Print available routes
   const routes = [
@@ -99,7 +100,7 @@ function setupNewRoutes(app) {
     '   GET /api/ai/models/:id/info',
   ];
 
-  console.log('\n' + routes.join('\n'));
+  logger.debug('Registered routes:\n' + routes.join('\n'));
 }
 
 module.exports = setupNewRoutes;

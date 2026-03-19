@@ -1,0 +1,43 @@
+
+Path                                                                 SizeMB
+----                                                                 ------
+.\intelligent-agent\node_modules\alaweal-center-management-system   2504.78
+.\intelligent-agent                                                 1327.98
+.\intelligent-agent\node_modules                                    1317.30
+.\intelligent-agent\node_modules\@tensorflow                         714.20
+.\intelligent-agent\node_modules\@tensorflow\tfjs-node               449.50
+.\backend                                                            430.25
+.\supply-chain-management                                            304.60
+.\backend\node_modules                                               258.08
+.\intelligent-agent\node_modules\@tensorflow\tfjs-node\deps          241.52
+.\intelligent-agent\node_modules\@tensorflow\tfjs-node\deps\lib      240.99
+.\supply-chain-management\frontend                                   209.59
+.\intelligent-agent\node_modules\@tensorflow\tfjs-node\lib           197.12
+.\intelligent-agent\node_modules\@tensorflow\tfjs-node\lib\napi-v10  196.96
+.\supply-chain-management\frontend\node_modules                      195.34
+.\frontend                                                           192.08
+
+
+File
+----                                                                            
+.\intelligent-agent\node_modules\@tensorflow\tfjs-node\deps\lib\tensorflow.dll  
+.\intelligent-agent\node_modules\@tensorflow\tfjs-node\lib\napi-v10\tensorflow.…
+.\intelligent-agent\node_modules\.cache\mongodb-memory-server\mongod-x64-win32-…
+.\intelligent-agent\node_modules\@tensorflow\tfjs-node\deps\lib\tensorflow.lib  
+.\github.copilot-1.388.0-web.vsix                                               
+.\supply-chain-management\backend\node_modules\canvas\build\Release\librsvg-2-2…
+.\intelligent-agent\node_modules\@esbuild\win32-x64\esbuild.exe                 
+.\supply-chain-management\frontend\test-output.txt                              
+.\intelligent-agent\node_modules\googleapis\build\src\apis\compute\alpha.d.ts   
+.\backend\test_phase5_continuation.txt                                          
+.\intelligent-agent\node_modules\googleapis\build\src\apis\compute\beta.d.ts    
+.\backend\test-results-phase6-pass3.txt                                         
+.\backend\test_phase6_pass1.txt                                                 
+.\backend\test-results-phase6-pass2-full.txt                                    
+.\backend\test_after_model_sync.txt                                             
+.\backend\test_after_fullname_fix.txt                                           
+.\backend\test_phase5_after_fixes.txt                                           
+.\node_modules\typescript\lib\typescript.js                                     
+.\supply-chain-management\frontend\node_modules\typescript\lib\typescript.js    
+.\intelligent-agent\node_modules\typescript\lib\typescript.js                   
+

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * 📈 Auto-Scaling Configuration
  *
@@ -7,6 +8,8 @@
  * - Lambda scaling
  * - Custom metrics scaling
  */
+
+const logger = require('../utils/logger');
 
 class AutoScalingManager {
   constructor(options = {}) {
@@ -306,13 +309,13 @@ class AutoScalingManager {
 
       if (recommendation === 'scale_up' && this.currentReplicas < this.maxReplicas) {
         this.currentReplicas++;
-        console.log(`[AutoScaling] Scaled up to ${this.currentReplicas} replicas`);
+        logger.info(`[AutoScaling] Scaled up to ${this.currentReplicas} replicas`);
       } else if (recommendation === 'scale_down' && this.currentReplicas > this.minReplicas) {
         this.currentReplicas--;
-        console.log(`[AutoScaling] Scaled down to ${this.currentReplicas} replicas`);
+        logger.info(`[AutoScaling] Scaled down to ${this.currentReplicas} replicas`);
       }
     } catch (error) {
-      console.error('[AutoScaling] Evaluation error:', error.message);
+      logger.error('[AutoScaling] Evaluation error:', error.message);
     }
   }
 }

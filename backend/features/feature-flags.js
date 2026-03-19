@@ -1,9 +1,11 @@
+/* eslint-disable no-unused-vars */
 /**
  * Feature Flags System - نظام إدارة الميزات
  * Professional Feature Management for Alawael ERP
  */
 
 const EventEmitter = require('events');
+const logger = require('../utils/logger');
 
 /**
  * Feature Flag Configuration
@@ -11,10 +13,10 @@ const EventEmitter = require('events');
 const featureConfig = {
   // Refresh interval for feature flags (ms)
   refreshInterval: 60000, // 1 minute
-  
+
   // Default state for undefined flags
   defaultState: false,
-  
+
   // Enable logging
   logging: true,
 };
@@ -29,7 +31,7 @@ class FeatureFlagStore extends EventEmitter {
     this.userOverrides = new Map();
     this.percentageCache = new Map();
   }
-  
+
   /**
    * Set a feature flag
    */
@@ -47,20 +49,20 @@ class FeatureFlagStore extends EventEmitter {
       createdAt: new Date(),
       updatedAt: new Date(),
     };
-    
+
     this.flags.set(name, flag);
     this.emit('flag:updated', { name, flag });
-    
+
     return flag;
   }
-  
+
   /**
    * Get a feature flag
    */
   getFlag(name) {
     return this.flags.get(name);
   }
-  
+
   /**
    * Delete a feature flag
    */
@@ -71,7 +73,7 @@ class FeatureFlagStore extends EventEmitter {
     }
     return deleted;
   }
-  
+
   /**
    * Get all flags
    */
@@ -82,7 +84,7 @@ class FeatureFlagStore extends EventEmitter {
     }
     return result;
   }
-  
+
   /**
    * Set user-specific override
    */
@@ -91,7 +93,7 @@ class FeatureFlagStore extends EventEmitter {
     this.userOverrides.set(key, enabled);
     this.emit('override:updated', { userId, flagName, enabled });
   }
-  
+
   /**
    * Get user-specific override
    */
@@ -99,7 +101,7 @@ class FeatureFlagStore extends EventEmitter {
     const key = `${userId}:${flagName}`;
     return this.userOverrides.get(key);
   }
-  
+
   /**
    * Clear user-specific override
    */
@@ -125,7 +127,7 @@ class FeatureFlagsManager {
     this.store = store;
     this.refreshTimer = null;
   }
-  
+
   /**
    * Initialize feature flags from configuration
    */
@@ -133,26 +135,26 @@ class FeatureFlagsManager {
     for (const [name, config] of Object.entries(flags)) {
       this.store.setFlag(name, config);
     }
-    
+
     if (this.config.logging) {
-      console.log(`✅ Feature flags initialized: ${this.store.flags.size} flags loaded`);
+      logger.info(`✅ Feature flags initialized: ${this.store.flags.size} flags loaded`);
     }
-    
+
     // Start refresh timer if needed
     this.startRefreshTimer();
   }
-  
+
   /**
    * Check if a feature is enabled
    */
   isEnabled(flagName, context = {}) {
     const flag = this.store.getFlag(flagName);
-    
+
     // If flag doesn't exist, return default
     if (!flag) {
       return this.config.defaultState;
     }
-    
+
     // Check user-specific override first
     if (context.userId) {
       const override = this.store.getUserOverride(context.userId, flagName);
@@ -160,7 +162,7 @@ class FeatureFlagsManager {
         return override;
       }
     }
-    
+
     // Check time-based rules
     const now = new Date();
     if (flag.startTime && now < flag.startTime) {
@@ -169,7 +171,7 @@ class FeatureFlagsManager {
     if (flag.endTime && now > flag.endTime) {
       return false;
     }
-    
+
     // Check custom rules
     if (flag.rules && flag.rules.length > 0) {
       for (const rule of flag.rules) {
@@ -179,7 +181,7 @@ class FeatureFlagsManager {
         }
       }
     }
-    
+
     // Check percentage rollout
     if (flag.percentage < 100 && context.userId) {
       const userPercentage = this.getUserPercentage(context.userId, flagName);
@@ -187,29 +189,29 @@ class FeatureFlagsManager {
         return false;
       }
     }
-    
+
     return flag.enabled;
   }
-  
+
   /**
    * Get feature variant for a user
    */
   getVariant(flagName, context = {}) {
     const flag = this.store.getFlag(flagName);
-    
+
     if (!flag || !flag.variants || Object.keys(flag.variants).length === 0) {
       return null;
     }
-    
+
     // Check if user is eligible for the flag
     if (!this.isEnabled(flagName, context)) {
       return null;
     }
-    
+
     // Calculate variant based on user ID
     const hash = this.hashString(`${flagName}:${context.userId || 'anonymous'}`);
     const percentage = (hash % 100) + 1;
-    
+
     let cumulative = 0;
     for (const [variantName, variantConfig] of Object.entries(flag.variants)) {
       cumulative += variantConfig.percentage || 0;
@@ -220,14 +222,14 @@ class FeatureFlagsManager {
         };
       }
     }
-    
+
     // Return default variant
     return {
       name: 'default',
       value: null,
     };
   }
-  
+
   /**
    * Evaluate a rule
    */
@@ -238,19 +240,19 @@ class FeatureFlagsManager {
           return rule.enabled;
         }
         break;
-        
+
       case 'role':
         if (context.role && rule.roles.includes(context.role)) {
           return rule.enabled;
         }
         break;
-        
+
       case 'organization':
         if (context.organizationId && rule.organizationIds.includes(context.organizationId)) {
           return rule.enabled;
         }
         break;
-        
+
       case 'percentage':
         if (context.userId) {
           const userPercentage = this.getUserPercentage(context.userId, rule.flagName || 'default');
@@ -259,41 +261,41 @@ class FeatureFlagsManager {
           }
         }
         break;
-        
+
       case 'environment':
         if (rule.environments.includes(process.env.NODE_ENV)) {
           return rule.enabled;
         }
         break;
-        
+
       case 'custom':
         if (rule.evaluator && typeof rule.evaluator === 'function') {
           return rule.evaluator(context);
         }
         break;
     }
-    
+
     return null;
   }
-  
+
   /**
    * Get percentage value for a user
    */
   getUserPercentage(userId, flagName) {
     const cacheKey = `${flagName}:${userId}`;
-    
+
     if (this.store.percentageCache.has(cacheKey)) {
       return this.store.percentageCache.get(cacheKey);
     }
-    
+
     const hash = this.hashString(cacheKey);
     const percentage = (hash % 100) + 1;
-    
+
     this.store.percentageCache.set(cacheKey, percentage);
-    
+
     return percentage;
   }
-  
+
   /**
    * Simple string hash
    */
@@ -301,12 +303,12 @@ class FeatureFlagsManager {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32bit integer
     }
     return Math.abs(hash);
   }
-  
+
   /**
    * Enable a feature flag
    */
@@ -318,7 +320,7 @@ class FeatureFlagsManager {
       this.store.emit('flag:enabled', { name: flagName });
     }
   }
-  
+
   /**
    * Disable a feature flag
    */
@@ -330,7 +332,7 @@ class FeatureFlagsManager {
       this.store.emit('flag:disabled', { name: flagName });
     }
   }
-  
+
   /**
    * Toggle a feature flag
    */
@@ -344,7 +346,7 @@ class FeatureFlagsManager {
     }
     return false;
   }
-  
+
   /**
    * Set percentage rollout
    */
@@ -356,7 +358,7 @@ class FeatureFlagsManager {
       this.store.emit('flag:percentage_updated', { name: flagName, percentage });
     }
   }
-  
+
   /**
    * Start refresh timer
    */
@@ -364,12 +366,12 @@ class FeatureFlagsManager {
     if (this.refreshTimer) {
       clearInterval(this.refreshTimer);
     }
-    
+
     this.refreshTimer = setInterval(() => {
       this.refresh();
     }, this.config.refreshInterval);
   }
-  
+
   /**
    * Stop refresh timer
    */
@@ -379,7 +381,7 @@ class FeatureFlagsManager {
       this.refreshTimer = null;
     }
   }
-  
+
   /**
    * Refresh flags (override to implement remote fetching)
    */
@@ -388,7 +390,7 @@ class FeatureFlagsManager {
     // e.g., LaunchDarkly, Unleash, etc.
     this.store.emit('flags:refreshed');
   }
-  
+
   /**
    * Get all flags status
    */
@@ -410,12 +412,8 @@ class FeatureFlagsManager {
  */
 const featureFlagMiddleware = (flagName, options = {}) => {
   const manager = new FeatureFlagsManager();
-  const {
-    statusCode = 404,
-    message = 'Feature not available',
-    redirect = null,
-  } = options;
-  
+  const { statusCode = 404, message = 'Feature not available', redirect = null } = options;
+
   return (req, res, next) => {
     const context = {
       userId: req.user?._id || req.user?.id,
@@ -424,12 +422,12 @@ const featureFlagMiddleware = (flagName, options = {}) => {
       ip: req.ip,
       userAgent: req.get('user-agent'),
     };
-    
+
     if (!manager.isEnabled(flagName, context)) {
       if (redirect) {
         return res.redirect(redirect);
       }
-      
+
       return res.status(statusCode).json({
         success: false,
         code: 'FEATURE_DISABLED',
@@ -437,10 +435,10 @@ const featureFlagMiddleware = (flagName, options = {}) => {
         feature: flagName,
       });
     }
-    
+
     // Attach variant to request
     req.featureVariant = manager.getVariant(flagName, context);
-    
+
     next();
   };
 };
@@ -448,12 +446,12 @@ const featureFlagMiddleware = (flagName, options = {}) => {
 /**
  * Feature Flag Checker for Routes
  */
-const requireFeature = (flagName, contextExtractor = (req) => ({ userId: req.user?.id })) => {
+const requireFeature = (flagName, contextExtractor = req => ({ userId: req.user?.id })) => {
   const manager = new FeatureFlagsManager();
-  
+
   return (req, res, next) => {
     const context = contextExtractor(req);
-    
+
     if (!manager.isEnabled(flagName, context)) {
       return res.status(403).json({
         success: false,
@@ -461,7 +459,7 @@ const requireFeature = (flagName, contextExtractor = (req) => ({ userId: req.use
         message: `Feature '${flagName}' is not enabled`,
       });
     }
-    
+
     next();
   };
 };
@@ -473,28 +471,28 @@ class ABTest {
   constructor(manager) {
     this.manager = manager;
   }
-  
+
   /**
    * Get test variant for user
    */
   getVariant(testName, context) {
     return this.manager.getVariant(testName, context);
   }
-  
+
   /**
    * Track conversion
    */
   trackConversion(testName, variant, userId, metadata = {}) {
     // In production, send to analytics service
-    console.log(`A/B Conversion: ${testName} - ${variant} - ${userId}`, metadata);
+    logger.info(`A/B Conversion: ${testName} - ${variant} - ${userId}`, metadata);
   }
-  
+
   /**
    * Track impression
    */
   trackImpression(testName, variant, userId) {
     // In production, send to analytics service
-    console.log(`A/B Impression: ${testName} - ${variant} - ${userId}`);
+    logger.info(`A/B Impression: ${testName} - ${variant} - ${userId}`);
   }
 }
 
@@ -504,78 +502,78 @@ const defaultManager = new FeatureFlagsManager();
 // Pre-defined feature flags for Alawael ERP
 const defaultFlags = {
   // Core Features
-  'new_dashboard': {
+  new_dashboard: {
     enabled: true,
     description: 'New dashboard design',
     percentage: 100,
   },
-  
-  'advanced_analytics': {
+
+  advanced_analytics: {
     enabled: true,
     description: 'Advanced analytics and reporting',
     percentage: 100,
   },
-  
-  'mobile_app_v2': {
+
+  mobile_app_v2: {
     enabled: false,
     description: 'Mobile app version 2',
     percentage: 10,
   },
-  
+
   // HR Features
-  'hr_ai_recruitment': {
+  hr_ai_recruitment: {
     enabled: true,
     description: 'AI-powered recruitment',
     percentage: 50,
   },
-  
-  'hr_performance_v2': {
+
+  hr_performance_v2: {
     enabled: true,
     description: 'New performance management system',
     percentage: 100,
   },
-  
+
   // Finance Features
-  'finance_multi_currency': {
+  finance_multi_currency: {
     enabled: true,
     description: 'Multi-currency support',
     percentage: 100,
   },
-  
-  'finance_automated_reports': {
+
+  finance_automated_reports: {
     enabled: true,
     description: 'Automated financial reports',
     percentage: 75,
   },
-  
+
   // Inventory Features
-  'inventory_ai_forecast': {
+  inventory_ai_forecast: {
     enabled: true,
     description: 'AI inventory forecasting',
     percentage: 50,
   },
-  
+
   // Integrations
-  'qiwa_integration': {
+  qiwa_integration: {
     enabled: true,
     description: 'Qiwa integration',
     percentage: 100,
   },
-  
-  'zatca_e_invoicing': {
+
+  zatca_e_invoicing: {
     enabled: true,
     description: 'ZATCA e-invoicing',
     percentage: 100,
   },
-  
+
   // Experimental
-  'dark_mode': {
+  dark_mode: {
     enabled: false,
     description: 'Dark mode theme',
     percentage: 0,
   },
-  
-  'realtime_notifications': {
+
+  realtime_notifications: {
     enabled: true,
     description: 'Real-time WebSocket notifications',
     percentage: 100,

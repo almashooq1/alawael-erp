@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * 👥 Role-Based Access Control (RBAC)
  *

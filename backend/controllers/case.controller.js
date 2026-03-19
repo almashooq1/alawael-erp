@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Case Management Controller
  * متحكم إدارة الحالات
@@ -8,6 +9,7 @@
  */
 
 const caseService = require('../services/caseManagementService');
+const logger = require('../utils/logger');
 
 class CaseController {
   /**
@@ -27,11 +29,11 @@ class CaseController {
         data: newCase,
       });
     } catch (error) {
-      console.error('Error creating case:', error);
+      logger.error('Error creating case:', error);
       res.status(400).json({
         success: false,
-        message: error.message || 'فشل في إنشاء الحالة',
-        error: error.message,
+        message: 'فشل في إنشاء الحالة',
+        error: 'حدث خطأ داخلي',
       });
     }
   }
@@ -74,11 +76,11 @@ class CaseController {
         pagination: result.pagination,
       });
     } catch (error) {
-      console.error('Error getting cases:', error);
+      logger.error('Error getting cases:', error);
       res.status(500).json({
         success: false,
         message: 'فشل في الحصول على الحالات',
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       });
     }
   }
@@ -97,11 +99,11 @@ class CaseController {
         data: caseData,
       });
     } catch (error) {
-      console.error('Error getting case:', error);
+      logger.error('Error getting case:', error);
       res.status(404).json({
         success: false,
-        message: error.message || 'الحالة غير موجودة',
-        error: error.message,
+        message: 'الحالة غير موجودة',
+        error: 'حدث خطأ داخلي',
       });
     }
   }
@@ -124,11 +126,11 @@ class CaseController {
         data: updatedCase,
       });
     } catch (error) {
-      console.error('Error updating case:', error);
+      logger.error('Error updating case:', error);
       res.status(400).json({
         success: false,
-        message: error.message || 'فشل في تحديث الحالة',
-        error: error.message,
+        message: 'فشل في تحديث الحالة',
+        error: 'حدث خطأ داخلي',
       });
     }
   }
@@ -158,11 +160,11 @@ class CaseController {
         data: updatedCase,
       });
     } catch (error) {
-      console.error('Error changing status:', error);
+      logger.error('Error changing status:', error);
       res.status(400).json({
         success: false,
-        message: error.message || 'فشل في تغيير الحالة',
-        error: error.message,
+        message: 'فشل في تغيير الحالة',
+        error: 'حدث خطأ داخلي',
       });
     }
   }
@@ -192,11 +194,11 @@ class CaseController {
         data: updatedCase,
       });
     } catch (error) {
-      console.error('Error assigning team:', error);
+      logger.error('Error assigning team:', error);
       res.status(400).json({
         success: false,
-        message: error.message || 'فشل في تعيين الفريق',
-        error: error.message,
+        message: 'فشل في تعيين الفريق',
+        error: 'حدث خطأ داخلي',
       });
     }
   }
@@ -219,11 +221,11 @@ class CaseController {
         data: updatedCase,
       });
     } catch (error) {
-      console.error('Error removing team member:', error);
+      logger.error('Error removing team member:', error);
       res.status(400).json({
         success: false,
-        message: error.message || 'فشل في إزالة عضو الفريق',
-        error: error.message,
+        message: 'فشل في إزالة عضو الفريق',
+        error: 'حدث خطأ داخلي',
       });
     }
   }
@@ -246,11 +248,11 @@ class CaseController {
         data: iep,
       });
     } catch (error) {
-      console.error('Error creating/updating IEP:', error);
+      logger.error('Error creating/updating IEP:', error);
       res.status(400).json({
         success: false,
-        message: error.message || 'فشل في حفظ الخطة التربوية الفردية',
-        error: error.message,
+        message: 'فشل في حفظ الخطة التربوية الفردية',
+        error: 'حدث خطأ داخلي',
       });
     }
   }
@@ -272,11 +274,11 @@ class CaseController {
         data: iep,
       });
     } catch (error) {
-      console.error('Error approving IEP:', error);
+      logger.error('Error approving IEP:', error);
       res.status(400).json({
         success: false,
-        message: error.message || 'فشل في اعتماد الخطة التربوية الفردية',
-        error: error.message,
+        message: 'فشل في اعتماد الخطة التربوية الفردية',
+        error: 'حدث خطأ داخلي',
       });
     }
   }
@@ -299,11 +301,11 @@ class CaseController {
         data: note,
       });
     } catch (error) {
-      console.error('Error adding note:', error);
+      logger.error('Error adding note:', error);
       res.status(400).json({
         success: false,
-        message: error.message || 'فشل في إضافة الملاحظة',
-        error: error.message,
+        message: 'فشل في إضافة الملاحظة',
+        error: 'حدث خطأ داخلي',
       });
     }
   }
@@ -322,11 +324,11 @@ class CaseController {
         data: history,
       });
     } catch (error) {
-      console.error('Error getting case history:', error);
+      logger.error('Error getting case history:', error);
       res.status(404).json({
         success: false,
-        message: error.message || 'فشل في الحصول على التاريخ',
-        error: error.message,
+        message: 'فشل في الحصول على التاريخ',
+        error: 'حدث خطأ داخلي',
       });
     }
   }
@@ -355,11 +357,11 @@ class CaseController {
         data: statistics,
       });
     } catch (error) {
-      console.error('Error getting statistics:', error);
+      logger.error('Error getting statistics:', error);
       res.status(500).json({
         success: false,
         message: 'فشل في الحصول على الإحصائيات',
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       });
     }
   }
@@ -378,11 +380,11 @@ class CaseController {
         data: cases,
       });
     } catch (error) {
-      console.error('Error in advanced search:', error);
+      logger.error('Error in advanced search:', error);
       res.status(500).json({
         success: false,
         message: 'فشل في البحث',
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       });
     }
   }
@@ -401,11 +403,11 @@ class CaseController {
         count: cases.length,
       });
     } catch (error) {
-      console.error('Error getting critical cases:', error);
+      logger.error('Error getting critical cases:', error);
       res.status(500).json({
         success: false,
         message: 'فشل في الحصول على الحالات الحرجة',
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       });
     }
   }
@@ -424,11 +426,11 @@ class CaseController {
         count: cases.length,
       });
     } catch (error) {
-      console.error('Error getting pending cases:', error);
+      logger.error('Error getting pending cases:', error);
       res.status(500).json({
         success: false,
         message: 'فشل في الحصول على الحالات المعلقة',
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       });
     }
   }
@@ -447,11 +449,11 @@ class CaseController {
         data: report,
       });
     } catch (error) {
-      console.error('Error getting progress report:', error);
+      logger.error('Error getting progress report:', error);
       res.status(404).json({
         success: false,
-        message: error.message || 'فشل في الحصول على تقرير التقدم',
-        error: error.message,
+        message: 'فشل في الحصول على تقرير التقدم',
+        error: 'حدث خطأ داخلي',
       });
     }
   }
@@ -474,11 +476,11 @@ class CaseController {
         data: archivedCase,
       });
     } catch (error) {
-      console.error('Error archiving case:', error);
+      logger.error('Error archiving case:', error);
       res.status(400).json({
         success: false,
-        message: error.message || 'فشل في أرشفة الحالة',
-        error: error.message,
+        message: 'فشل في أرشفة الحالة',
+        error: 'حدث خطأ داخلي',
       });
     }
   }
@@ -498,11 +500,11 @@ class CaseController {
         data: unarchivedCase,
       });
     } catch (error) {
-      console.error('Error unarchiving case:', error);
+      logger.error('Error unarchiving case:', error);
       res.status(400).json({
         success: false,
-        message: error.message || 'فشل في استعادة الحالة',
-        error: error.message,
+        message: 'فشل في استعادة الحالة',
+        error: 'حدث خطأ داخلي',
       });
     }
   }
@@ -531,11 +533,11 @@ class CaseController {
         message: 'تم حذف الحالة بنجاح (أرشفة)',
       });
     } catch (error) {
-      console.error('Error deleting case:', error);
+      logger.error('Error deleting case:', error);
       res.status(400).json({
         success: false,
-        message: error.message || 'فشل في حذف الحالة',
-        error: error.message,
+        message: 'فشل في حذف الحالة',
+        error: 'حدث خطأ داخلي',
       });
     }
   }

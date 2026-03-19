@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Unified Notification Service
  * خدمة الإشعارات الموحدة
@@ -16,6 +17,7 @@ const emailService = require('./emailService');
 const smsService = require('./smsService');
 const Notification = require('../models/Notification');
 const AuditLogger = require('./audit-logger');
+const logger = require('../utils/logger');
 
 class UnifiedNotificationService {
   constructor() {
@@ -41,7 +43,7 @@ class UnifiedNotificationService {
       );
 
       if (!allowed) {
-        console.log(
+        logger.info(
           `Notification blocked by user preferences: ${notification.userId} - ${notification.channel}`
         );
         return { success: false, reason: 'blocked_by_preferences' };
@@ -73,7 +75,7 @@ class UnifiedNotificationService {
         notificationId: notificationRecord._id,
       };
     } catch (error) {
-      console.error('Error sending notification:', error);
+      logger.error('Error sending notification:', error);
       throw error;
     }
   }
@@ -88,7 +90,7 @@ class UnifiedNotificationService {
         const result = await this.send(notification);
         results.push(result);
       } catch (error) {
-        results.push({ success: false, error: error.message });
+        results.push({ success: false, error: 'حدث خطأ داخلي' });
       }
     }
     return results;
@@ -116,7 +118,7 @@ class UnifiedNotificationService {
       try {
         await this.deliverNotification(notification);
       } catch (error) {
-        console.error('Error delivering notification:', error);
+        logger.error('Error delivering notification:', error);
         await this.handleDeliveryFailure(notification, error);
       }
     }
@@ -226,7 +228,7 @@ class UnifiedNotificationService {
     // WhatsApp integration (placeholder)
     // await whatsappService.sendMessage(user.phone, notification.message);
 
-    console.log(`[WhatsApp] Would send to ${user.phone}: ${notification.message}`);
+    logger.info(`[WhatsApp] Would send to ${user.phone}: ${notification.message}`);
 
     return { success: true, phone: user.phone, method: 'whatsapp' };
   }
@@ -242,7 +244,7 @@ class UnifiedNotificationService {
     //   data: notification.data
     // });
 
-    console.log(`[Push] Would send to ${notification.userId}: ${notification.title}`);
+    logger.info(`[Push] Would send to ${notification.userId}: ${notification.title}`);
 
     return { success: true, userId: notification.userId, method: 'push' };
   }
@@ -266,7 +268,7 @@ class UnifiedNotificationService {
         });
       }
     } catch (error) {
-      console.warn('Socket.IO not available for in-app notification');
+      logger.warn('Socket.IO not available for in-app notification');
     }
 
     return { success: true, userId: notification.userId, method: 'in-app' };
@@ -281,13 +283,13 @@ class UnifiedNotificationService {
     // Update notification with failure
     await Notification.findByIdAndUpdate(notification.id, {
       status: 'failed',
-      failureReason: error.message,
+      failureReason: 'حدث خطأ داخلي',
       attempts: attempt,
     });
 
     // Retry if under max attempts
     if (attempt < this.RETRY_ATTEMPTS) {
-      console.log(`Retrying notification ${notification.id} (attempt ${attempt + 1})`);
+      logger.info(`Retrying notification ${notification.id} (attempt ${attempt + 1})`);
 
       // Add back to queue with delay
       setTimeout(() => {
@@ -297,7 +299,7 @@ class UnifiedNotificationService {
         });
       }, this.RETRY_DELAY * attempt); // Exponential backoff
     } else {
-      console.error(`Notification ${notification.id} failed after ${attempt} attempts`);
+      logger.error(`Notification ${notification.id} failed after ${attempt} attempts`);
 
       await AuditLogger.log({
         action: 'notification.failed',
@@ -306,7 +308,7 @@ class UnifiedNotificationService {
           notificationId: notification.id,
           channel: notification.channel,
           attempts: attempt,
-          error: error.message,
+          error: 'حدث خطأ داخلي',
         },
       });
     }
@@ -346,7 +348,7 @@ class UnifiedNotificationService {
   /**
    * Check user notification preferences
    */
-  async checkUserPreferences(userId, type, channel) {
+  async checkUserPreferences(userId, type, channel, priority = 'normal') {
     try {
       const User = require('../models/User');
       const user = await User.findById(userId).select('notificationPreferences');
@@ -375,13 +377,13 @@ class UnifiedNotificationService {
 
         if (currentHour >= start && currentHour < end) {
           // During quiet hours, only allow urgent notifications
-          return notification.priority === 'urgent';
+          return priority === 'urgent';
         }
       }
 
       return true;
     } catch (error) {
-      console.error('Error checking user preferences:', error);
+      logger.error('Error checking user preferences:', error);
       return true; // Allow on error (fail open)
     }
   }
@@ -394,7 +396,7 @@ class UnifiedNotificationService {
       const User = require('../models/User');
       return await User.findById(userId).select('email phone username fullName');
     } catch (error) {
-      console.error('Error getting user info:', error);
+      logger.error('Error getting user info:', error);
       return null;
     }
   }
@@ -427,7 +429,7 @@ class UnifiedNotificationService {
         totalPages: Math.ceil(total / limit),
       };
     } catch (error) {
-      console.error('Error getting notification history:', error);
+      logger.error('Error getting notification history:', error);
       throw error;
     }
   }
@@ -445,7 +447,7 @@ class UnifiedNotificationService {
 
       return notification;
     } catch (error) {
-      console.error('Error marking notification as read:', error);
+      logger.error('Error marking notification as read:', error);
       throw error;
     }
   }
@@ -462,7 +464,7 @@ class UnifiedNotificationService {
 
       return { modifiedCount: result.modifiedCount };
     } catch (error) {
-      console.error('Error marking all notifications as read:', error);
+      logger.error('Error marking all notifications as read:', error);
       throw error;
     }
   }
@@ -479,7 +481,7 @@ class UnifiedNotificationService {
 
       return count;
     } catch (error) {
-      console.error('Error getting unread count:', error);
+      logger.error('Error getting unread count:', error);
       return 0;
     }
   }
@@ -496,7 +498,7 @@ class UnifiedNotificationService {
 
       return { success: true };
     } catch (error) {
-      console.error('Error deleting notification:', error);
+      logger.error('Error deleting notification:', error);
       throw error;
     }
   }

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const Training = require('../models/training.model');
 const Employee = require('../models/Employee');
 const SmartNotificationService = require('./smartNotificationService');
@@ -48,7 +49,7 @@ class SmartTrainingService {
         'AI Training Manager',
         `Assigned remedial training to ${assignments.length} staff members based on performance gaps.`,
         'INFO',
-        '/hr/training',
+        '/hr/training'
       );
     }
 
@@ -82,7 +83,9 @@ class SmartTrainingService {
     }
 
     // Check if already registered
-    const alreadyIn = course.participants.some(p => p.employeeId.toString() === employee._id.toString());
+    const alreadyIn = course.participants.some(
+      p => p.employeeId.toString() === employee._id.toString()
+    );
     if (!alreadyIn) {
       course.participants.push({
         employeeId: employee._id,
@@ -96,7 +99,7 @@ class SmartTrainingService {
         'New Training Assigned',
         `You have been enrolled in "${courseTitle}" to support your professional growth.`,
         'WARNING',
-        `/hr/training/${course._id}`,
+        `/hr/training/${course._id}`
       );
     }
   }
@@ -123,7 +126,11 @@ class SmartTrainingService {
       // High stagnation rate found.
       const emp = await Employee.findById(therapistId);
       if (emp) {
-        return this.assignRemedialTraining(emp, 'Clinical Efficacy & Goal Setting Workshop', 'clinical');
+        return this.assignRemedialTraining(
+          emp,
+          'Clinical Efficacy & Goal Setting Workshop',
+          'clinical'
+        );
       }
     }
     return null;

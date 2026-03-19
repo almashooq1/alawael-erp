@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Database Index Creation Script
  * نص لإنشاء Indexes في قاعدة البيانات
@@ -148,7 +149,12 @@ module.exports = {
   // Indexes documentation
   indexDocumentation: {
     description: 'Database indexes for performance optimization',
-    benefits: ['⚡ 10-50x faster queries', '📉 Reduced memory usage', '🚀 Better scalability', '💾 Efficient storage'],
+    benefits: [
+      '⚡ 10-50x faster queries',
+      '📉 Reduced memory usage',
+      '🚀 Better scalability',
+      '💾 Efficient storage',
+    ],
     expectedImprovements: {
       vehicleLookups: '80% faster',
       complianceReports: '60% faster',

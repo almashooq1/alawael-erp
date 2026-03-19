@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Saudi Compliance Service
  * خدمة الامتثال للمعايير السعودية
@@ -176,7 +177,14 @@ class SaudiComplianceService {
         daysRemaining: daysRemaining,
         status: daysRemaining > 30 ? 'صحيح' : daysRemaining > 0 ? 'قريب الانتهاء' : 'منتهي',
         requiresRenewal: daysRemaining <= 30,
-        renewalAlertLevel: daysRemaining > 30 ? 'green' : daysRemaining > 15 ? 'yellow' : daysRemaining > 0 ? 'orange' : 'red',
+        renewalAlertLevel:
+          daysRemaining > 30
+            ? 'green'
+            : daysRemaining > 15
+              ? 'yellow'
+              : daysRemaining > 0
+                ? 'orange'
+                : 'red',
       };
     } catch (error) {
       return {
@@ -208,7 +216,14 @@ class SaudiComplianceService {
       status: daysRemaining > 30 ? 'صحيح' : daysRemaining > 0 ? 'قريب الانتهاء' : 'منتهي',
       isMandatory: true,
       requiresRenewal: daysRemaining <= 30,
-      renewalAlertLevel: daysRemaining > 30 ? 'green' : daysRemaining > 15 ? 'yellow' : daysRemaining > 0 ? 'orange' : 'red',
+      renewalAlertLevel:
+        daysRemaining > 30
+          ? 'green'
+          : daysRemaining > 15
+            ? 'yellow'
+            : daysRemaining > 0
+              ? 'orange'
+              : 'red',
     };
   }
 
@@ -302,7 +317,12 @@ class SaudiComplianceService {
         },
         generatedAt: new Date(),
         overallComplianceScore: Math.max(0, complianceScore),
-        overallStatus: complianceScore >= 80 ? 'متوافق' : complianceScore >= 50 ? 'متوافق مع تحفظات' : 'غير متوافق',
+        overallStatus:
+          complianceScore >= 80
+            ? 'متوافق'
+            : complianceScore >= 50
+              ? 'متوافق مع تحفظات'
+              : 'غير متوافق',
 
         registration: registrationCheck,
         insurance: insuranceCheck,
@@ -324,7 +344,8 @@ class SaudiComplianceService {
 
         legalStatus: {
           canBeDriven: registrationCheck.isValid && insuranceCheck.isValid,
-          canBeTransferred: registrationCheck.isValid && inspectionCheck.isValid && unpaidFines.length === 0,
+          canBeTransferred:
+            registrationCheck.isValid && inspectionCheck.isValid && unpaidFines.length === 0,
           canBeSold: vehicle.owner.ownershipType === 'فردي' && unpaidFines.length === 0,
         },
       };
@@ -409,7 +430,9 @@ class SaudiComplianceService {
     try {
       const vehicles = await Vehicle.find({ _id: { $in: vehicleIds } });
 
-      const reports = await Promise.all(vehicles.map(vehicle => this.generateVehicleComplianceReport(vehicle._id)));
+      const reports = await Promise.all(
+        vehicles.map(vehicle => this.generateVehicleComplianceReport(vehicle._id))
+      );
 
       const compliant = reports.filter(r => r.overallStatus === 'متوافق').length;
       const partiallyCompliant = reports.filter(r => r.overallStatus === 'متوافق مع تحفظات').length;
@@ -436,7 +459,9 @@ class SaudiComplianceService {
           totalOutstandingFines: totalFines,
         },
         vehicleDetails: reports,
-        averageComplianceScore: (reports.reduce((sum, r) => sum + r.overallComplianceScore, 0) / reports.length).toFixed(2),
+        averageComplianceScore: (
+          reports.reduce((sum, r) => sum + r.overallComplianceScore, 0) / reports.length
+        ).toFixed(2),
       };
     } catch (error) {
       logger.error(`خطأ في توليد تقرير الأسطول: ${error.message}`);
@@ -510,7 +535,10 @@ class SaudiComplianceService {
       isValid: missingFields.length === 0 && invalidFields.length === 0,
       missingFields: missingFields,
       invalidFields: invalidFields,
-      dataCompletionPercentage: (((requiredFields.length - missingFields.length) / requiredFields.length) * 100).toFixed(2) + '%',
+      dataCompletionPercentage:
+        (((requiredFields.length - missingFields.length) / requiredFields.length) * 100).toFixed(
+          2
+        ) + '%',
     };
   }
 }

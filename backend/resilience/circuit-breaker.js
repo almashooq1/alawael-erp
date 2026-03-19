@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Circuit Breaker Pattern - نمط قاطع الدائرة
  * Professional Resilience Patterns for Alawael ERP
@@ -7,31 +8,31 @@ const EventEmitter = require('events');
 
 // Circuit States
 const CircuitState = {
-  CLOSED: 'CLOSED',       // Normal operation
-  OPEN: 'OPEN',           // Failing, rejecting requests
+  CLOSED: 'CLOSED', // Normal operation
+  OPEN: 'OPEN', // Failing, rejecting requests
   HALF_OPEN: 'HALF_OPEN', // Testing if service recovered
 };
 
 // Default Configuration
 const defaultConfig = {
   // Failure threshold
-  failureThreshold: 5,           // Number of failures before opening
-  failureThresholdPercent: 50,   // Percentage of failures before opening
-  volumeThreshold: 10,           // Minimum requests before calculating percentage
-  
+  failureThreshold: 5, // Number of failures before opening
+  failureThresholdPercent: 50, // Percentage of failures before opening
+  volumeThreshold: 10, // Minimum requests before calculating percentage
+
   // Success threshold (for half-open state)
-  successThreshold: 3,           // Successful requests to close circuit
-  
+  successThreshold: 3, // Successful requests to close circuit
+
   // Timeout
-  timeout: 30000,                // Time in ms before attempting retry (open state)
-  responseTimeout: 10000,        // Timeout for individual requests
-  
+  timeout: 30000, // Time in ms before attempting retry (open state)
+  responseTimeout: 10000, // Timeout for individual requests
+
   // Reset
-  resetTimeout: 60000,           // Time to reset failure counts
-  
+  resetTimeout: 60000, // Time to reset failure counts
+
   // Monitoring
   enabled: true,
-  rollingCountTimeout: 10000,    // Rolling window for stats
+  rollingCountTimeout: 10000, // Rolling window for stats
 };
 
 /**
@@ -40,11 +41,11 @@ const defaultConfig = {
 class CircuitBreaker extends EventEmitter {
   constructor(name, options = {}) {
     super();
-    
+
     this.name = name;
     this.config = { ...defaultConfig, ...options };
     this.state = CircuitState.CLOSED;
-    
+
     // Statistics
     this.stats = {
       failures: 0,
@@ -54,25 +55,25 @@ class CircuitBreaker extends EventEmitter {
       fires: 0,
       fallbacks: 0,
     };
-    
+
     // Rolling window for stats
     this.rollingWindow = [];
-    
+
     // Half-open state tracking
     this.halfOpenSuccesses = 0;
     this.halfOpenFailures = 0;
-    
+
     // Timers
     this.openTimer = null;
     this.resetTimer = null;
-    
+
     // Fallback function
     this.fallbackFn = null;
-    
+
     // Enabled state
     this.enabled = this.config.enabled;
   }
-  
+
   /**
    * Execute a function with circuit breaker protection
    */
@@ -80,25 +81,22 @@ class CircuitBreaker extends EventEmitter {
     if (!this.enabled) {
       return fn(...args);
     }
-    
+
     this.stats.fires++;
-    
+
     // Check circuit state
     if (this.state === CircuitState.OPEN) {
       this.stats.rejects++;
       this.emit('reject', { name: this.name });
-      
+
       if (this.fallbackFn) {
         this.stats.fallbacks++;
         return this.fallbackFn(...args);
       }
-      
-      throw new CircuitBreakerError(
-        `Circuit breaker '${this.name}' is OPEN`,
-        'CIRCUIT_OPEN'
-      );
+
+      throw new CircuitBreakerError(`Circuit breaker '${this.name}' is OPEN`, 'CIRCUIT_OPEN');
     }
-    
+
     // Execute with timeout
     try {
       const result = await this._executeWithTimeout(fn, args);
@@ -109,24 +107,26 @@ class CircuitBreaker extends EventEmitter {
       throw error;
     }
   }
-  
+
   /**
    * Execute function with timeout
    */
   async _executeWithTimeout(fn, args) {
     return new Promise((resolve, reject) => {
       let timeoutId;
-      
+
       const timeoutPromise = new Promise((_, rejectTimeout) => {
         timeoutId = setTimeout(() => {
           this.stats.timeouts++;
-          rejectTimeout(new CircuitBreakerError(
-            `Circuit breaker '${this.name}' timed out after ${this.config.responseTimeout}ms`,
-            'TIMEOUT'
-          ));
+          rejectTimeout(
+            new CircuitBreakerError(
+              `Circuit breaker '${this.name}' timed out after ${this.config.responseTimeout}ms`,
+              'TIMEOUT'
+            )
+          );
         }, this.config.responseTimeout);
       });
-      
+
       Promise.resolve(fn(...args))
         .then(result => {
           clearTimeout(timeoutId);
@@ -136,7 +136,7 @@ class CircuitBreaker extends EventEmitter {
           clearTimeout(timeoutId);
           reject(error);
         });
-      
+
       // Race between execution and timeout
       Promise.race([Promise.resolve(fn(...args)), timeoutPromise])
         .then(resolve)
@@ -144,103 +144,103 @@ class CircuitBreaker extends EventEmitter {
         .finally(() => clearTimeout(timeoutId));
     });
   }
-  
+
   /**
    * Handle successful execution
    */
   _onSuccess() {
     this.stats.successes++;
     this._addToRollingWindow(true);
-    
+
     if (this.state === CircuitState.HALF_OPEN) {
       this.halfOpenSuccesses++;
       this.emit('halfOpenSuccess', { name: this.name, count: this.halfOpenSuccesses });
-      
+
       if (this.halfOpenSuccesses >= this.config.successThreshold) {
         this._close();
       }
     }
   }
-  
+
   /**
    * Handle failed execution
    */
   _onFailure(error) {
     this.stats.failures++;
     this._addToRollingWindow(false);
-    
+
     if (this.state === CircuitState.HALF_OPEN) {
       this.halfOpenFailures++;
       this.emit('halfOpenFailure', { name: this.name, count: this.halfOpenFailures });
       this._open();
       return;
     }
-    
+
     // Check if should open circuit
     if (this._shouldOpen()) {
       this._open();
     }
   }
-  
+
   /**
    * Add result to rolling window
    */
   _addToRollingWindow(success) {
     const now = Date.now();
     this.rollingWindow.push({ success, timestamp: now });
-    
+
     // Clean old entries
     const cutoff = now - this.config.rollingCountTimeout;
     this.rollingWindow = this.rollingWindow.filter(entry => entry.timestamp > cutoff);
   }
-  
+
   /**
    * Check if circuit should open
    */
   _shouldOpen() {
     const windowSize = this.rollingWindow.length;
-    
+
     // Need minimum volume
     if (windowSize < this.config.volumeThreshold) {
       return false;
     }
-    
+
     // Count failures in window
     const failures = this.rollingWindow.filter(e => !e.success).length;
-    
+
     // Check absolute threshold
     if (failures >= this.config.failureThreshold) {
       return true;
     }
-    
+
     // Check percentage threshold
     const failurePercent = (failures / windowSize) * 100;
     if (failurePercent >= this.config.failureThresholdPercent) {
       return true;
     }
-    
+
     return false;
   }
-  
+
   /**
    * Open the circuit
    */
   _open() {
     const previousState = this.state;
     this.state = CircuitState.OPEN;
-    
-    this.emit('open', { 
-      name: this.name, 
+
+    this.emit('open', {
+      name: this.name,
       previousState,
       stats: this.getStats(),
     });
-    
+
     // Set timer to attempt half-open
     this.openTimer = setTimeout(() => {
       this._halfOpen();
     }, this.config.timeout);
   }
-  
+
   /**
    * Move to half-open state
    */
@@ -249,13 +249,13 @@ class CircuitBreaker extends EventEmitter {
     this.state = CircuitState.HALF_OPEN;
     this.halfOpenSuccesses = 0;
     this.halfOpenFailures = 0;
-    
-    this.emit('halfOpen', { 
-      name: this.name, 
+
+    this.emit('halfOpen', {
+      name: this.name,
       previousState,
     });
   }
-  
+
   /**
    * Close the circuit
    */
@@ -264,23 +264,23 @@ class CircuitBreaker extends EventEmitter {
     this.state = CircuitState.CLOSED;
     this.halfOpenSuccesses = 0;
     this.halfOpenFailures = 0;
-    
+
     // Clear timers
     if (this.openTimer) {
       clearTimeout(this.openTimer);
       this.openTimer = null;
     }
-    
-    this.emit('close', { 
-      name: this.name, 
+
+    this.emit('close', {
+      name: this.name,
       previousState,
       stats: this.getStats(),
     });
-    
+
     // Schedule stats reset
     this._scheduleReset();
   }
-  
+
   /**
    * Schedule stats reset
    */
@@ -288,12 +288,12 @@ class CircuitBreaker extends EventEmitter {
     if (this.resetTimer) {
       clearTimeout(this.resetTimer);
     }
-    
+
     this.resetTimer = setTimeout(() => {
       this.rollingWindow = [];
     }, this.config.resetTimeout);
   }
-  
+
   /**
    * Set fallback function
    */
@@ -301,35 +301,35 @@ class CircuitBreaker extends EventEmitter {
     this.fallbackFn = fn;
     return this;
   }
-  
+
   /**
    * Get current state
    */
   getState() {
     return this.state;
   }
-  
+
   /**
    * Check if circuit is open
    */
   isOpen() {
     return this.state === CircuitState.OPEN;
   }
-  
+
   /**
    * Check if circuit is closed
    */
   isClosed() {
     return this.state === CircuitState.CLOSED;
   }
-  
+
   /**
    * Check if circuit is half-open
    */
   isHalfOpen() {
     return this.state === CircuitState.HALF_OPEN;
   }
-  
+
   /**
    * Get statistics
    */
@@ -337,15 +337,15 @@ class CircuitBreaker extends EventEmitter {
     const windowFailures = this.rollingWindow.filter(e => !e.success).length;
     const windowSuccesses = this.rollingWindow.filter(e => e.success).length;
     const windowTotal = this.rollingWindow.length;
-    
+
     return {
       name: this.name,
       state: this.state,
       enabled: this.enabled,
-      
+
       // Overall stats
       ...this.stats,
-      
+
       // Rolling window stats
       window: {
         failures: windowFailures,
@@ -353,7 +353,7 @@ class CircuitBreaker extends EventEmitter {
         total: windowTotal,
         failureRate: windowTotal > 0 ? (windowFailures / windowTotal) * 100 : 0,
       },
-      
+
       // Half-open state
       halfOpen: {
         successes: this.halfOpenSuccesses,
@@ -361,7 +361,7 @@ class CircuitBreaker extends EventEmitter {
       },
     };
   }
-  
+
   /**
    * Enable circuit breaker
    */
@@ -369,7 +369,7 @@ class CircuitBreaker extends EventEmitter {
     this.enabled = true;
     this.emit('enable', { name: this.name });
   }
-  
+
   /**
    * Disable circuit breaker
    */
@@ -377,7 +377,7 @@ class CircuitBreaker extends EventEmitter {
     this.enabled = false;
     this.emit('disable', { name: this.name });
   }
-  
+
   /**
    * Reset circuit breaker
    */
@@ -394,7 +394,7 @@ class CircuitBreaker extends EventEmitter {
     this.rollingWindow = [];
     this.halfOpenSuccesses = 0;
     this.halfOpenFailures = 0;
-    
+
     if (this.openTimer) {
       clearTimeout(this.openTimer);
       this.openTimer = null;
@@ -403,10 +403,10 @@ class CircuitBreaker extends EventEmitter {
       clearTimeout(this.resetTimer);
       this.resetTimer = null;
     }
-    
+
     this.emit('reset', { name: this.name });
   }
-  
+
   /**
    * Shutdown circuit breaker
    */
@@ -440,44 +440,44 @@ class RetryPolicy {
     this.jitter = options.jitter || true;
     this.retryableErrors = options.retryableErrors || [];
   }
-  
+
   /**
    * Execute function with retry
    */
   async execute(fn, ...args) {
     let lastError;
     let delay = this.initialDelay;
-    
+
     for (let attempt = 0; attempt <= this.maxRetries; attempt++) {
       try {
         return await fn(...args);
       } catch (error) {
         lastError = error;
-        
+
         // Check if error is retryable
         if (!this._isRetryable(error)) {
           throw error;
         }
-        
+
         // Last attempt, throw error
         if (attempt === this.maxRetries) {
           break;
         }
-        
+
         // Calculate delay with exponential backoff
         const actualDelay = this._calculateDelay(delay);
-        
+
         // Wait before retry
         await this._sleep(actualDelay);
-        
+
         // Increase delay for next attempt
         delay = Math.min(delay * this.multiplier, this.maxDelay);
       }
     }
-    
+
     throw lastError;
   }
-  
+
   /**
    * Check if error is retryable
    */
@@ -491,18 +491,21 @@ class RetryPolicy {
         'ENOTFOUND',
         'EAI_AGAIN',
       ];
-      return defaultRetryable.includes(error.code) || 
-             error.code === 'TIMEOUT' ||
-             error.isCircuitBreakerError;
+      return (
+        defaultRetryable.includes(error.code) ||
+        error.code === 'TIMEOUT' ||
+        error.isCircuitBreakerError
+      );
     }
-    
-    return this.retryableErrors.some(retryable => 
-      error.code === retryable || 
-      error.name === retryable ||
-      error.message.includes(retryable)
+
+    return this.retryableErrors.some(
+      retryable =>
+        error.code === retryable ||
+        error.name === retryable ||
+        (error.message || '').includes(retryable)
     );
   }
-  
+
   /**
    * Calculate delay with optional jitter
    */
@@ -514,7 +517,7 @@ class RetryPolicy {
     }
     return baseDelay;
   }
-  
+
   /**
    * Sleep helper
    */
@@ -531,12 +534,12 @@ class Bulkhead {
     this.name = name;
     this.maxConcurrent = options.maxConcurrent || 10;
     this.maxQueueSize = options.maxQueueSize || 0;
-    
+
     this.running = 0;
     this.queue = [];
     this.rejected = 0;
   }
-  
+
   /**
    * Execute function with bulkhead protection
    */
@@ -549,15 +552,15 @@ class Bulkhead {
           'BULKHEAD_FULL'
         );
       }
-      
+
       // Queue the request
       return new Promise((resolve, reject) => {
         this.queue.push({ fn, args, resolve, reject });
       });
     }
-    
+
     this.running++;
-    
+
     try {
       const result = await fn(...args);
       return result;
@@ -566,17 +569,19 @@ class Bulkhead {
       this._processQueue();
     }
   }
-  
+
   /**
    * Process queued requests
    */
   _processQueue() {
     if (this.queue.length > 0 && this.running < this.maxConcurrent) {
       const { fn, args, resolve, reject } = this.queue.shift();
-      this.execute(fn, ...args).then(resolve).catch(reject);
+      this.execute(fn, ...args)
+        .then(resolve)
+        .catch(reject);
     }
   }
-  
+
   /**
    * Get statistics
    */
@@ -612,7 +617,7 @@ class CircuitBreakerFactory {
     this.breakers = new Map();
     this.defaultOptions = { ...defaultConfig };
   }
-  
+
   /**
    * Create or get circuit breaker
    */
@@ -626,21 +631,21 @@ class CircuitBreakerFactory {
     }
     return this.breakers.get(name);
   }
-  
+
   /**
    * Set default options
    */
   setDefaults(options) {
     this.defaultOptions = { ...this.defaultOptions, ...options };
   }
-  
+
   /**
    * Get all breakers
    */
   getAll() {
     return Array.from(this.breakers.values());
   }
-  
+
   /**
    * Get all stats
    */
@@ -651,7 +656,7 @@ class CircuitBreakerFactory {
     }
     return stats;
   }
-  
+
   /**
    * Reset all breakers
    */
@@ -660,7 +665,7 @@ class CircuitBreakerFactory {
       breaker.reset();
     }
   }
-  
+
   /**
    * Shutdown all breakers
    */
@@ -680,14 +685,14 @@ const factory = new CircuitBreakerFactory();
  */
 const withCircuitBreaker = (name, options = {}) => {
   const breaker = factory.get(name, options);
-  
+
   return (target, propertyKey, descriptor) => {
     const originalMethod = descriptor.value;
-    
+
     descriptor.value = async function (...args) {
       return breaker.fire(originalMethod.bind(this), ...args);
     };
-    
+
     return descriptor;
   };
 };

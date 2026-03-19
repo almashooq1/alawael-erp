@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * 🚨 Anomaly Detection System
  *
@@ -6,6 +7,8 @@
  * - Potential attacks (brute force, SQL injection, etc.)
  * - Performance anomalies
  */
+
+const logger = require('./logger');
 
 class AnomalyDetector {
   constructor(options = {}) {
@@ -173,7 +176,7 @@ class AnomalyDetector {
           }
         }
       } catch (error) {
-        console.error(`[AnomalyDetector] Rule ${rule.name} failed:`, error.message);
+        logger.error(`[AnomalyDetector] Rule ${rule.name} failed:`, error.message);
       }
     });
 

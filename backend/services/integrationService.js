@@ -1,5 +1,7 @@
+/* eslint-disable no-unused-vars */
 const Integration = require('../models/Integration');
 const crypto = require('crypto');
+const logger = require('../utils/logger');
 
 class IntegrationService {
   /**
@@ -36,7 +38,10 @@ class IntegrationService {
 
     try {
       // Simulation of an external HTTP request
-      console.log(`[IntegrationService] Sending webhook to ${integration.config.webhookUrl}`, payload);
+      logger.info(
+        `[IntegrationService] Sending webhook to ${integration.config.webhookUrl}`,
+        payload
+      );
 
       const logEntry = {
         action: 'WEBHOOK_DISPATCH',
@@ -53,7 +58,7 @@ class IntegrationService {
       integration.logs.push({
         action: 'WEBHOOK_DISPATCH',
         status: 'FAILED',
-        message: error.message,
+        message: 'حدث خطأ داخلي',
       });
       await integration.save();
       throw error;

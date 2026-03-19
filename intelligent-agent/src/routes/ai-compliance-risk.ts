@@ -12,7 +12,7 @@ router.get('/compliance-risk-scores', rbac(['admin', 'compliance-manager']), asy
     const scores = await getComplianceRiskScores({ days });
     res.json(scores);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'حدث خطأ في الخادم' });
   }
 });
 

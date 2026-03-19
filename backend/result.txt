@@ -1,0 +1,2 @@
+[SECURITY] Running with dev-only secret fallbacks. Set NODE_ENV=production or ALLOW_DEV_SECRETS=1 to suppress.
+ALL_MODULES_OK

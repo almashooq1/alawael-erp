@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 // ============================================
@@ -93,7 +94,7 @@ const OrganizationSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  },
+  }
 );
 
 // ============================================
@@ -221,7 +222,7 @@ const EmployeeSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  },
+  }
 );
 
 // ============================================
@@ -256,7 +257,7 @@ const AIPredictionSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  },
+  }
 );
 
 // ============================================
@@ -295,7 +296,7 @@ const SystemLogSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  },
+  }
 );
 
 // Indexes for performance
@@ -339,7 +340,7 @@ const BackupSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  },
+  }
 );
 
 // ============================================

@@ -13,7 +13,7 @@ const NPSTracker = () => {
     promoters: 0,
     passives: 0,
     detractors: 0,
-    trend: 'stable'
+    trend: 'stable',
   });
   const [selectedScore, setSelectedScore] = useState(null);
   const [feedback, setFeedback] = useState('');
@@ -49,8 +49,8 @@ const NPSTracker = () => {
         body: JSON.stringify({
           customerId,
           score: selectedScore,
-          feedback
-        })
+          feedback,
+        }),
       });
 
       if (response.ok) {
@@ -68,13 +68,13 @@ const NPSTracker = () => {
     }
   };
 
-  const getNpsCategory = (score) => {
+  const getNpsCategory = score => {
     if (score >= 9) return { label: 'PROMOTER', color: '#10b981', icon: '😍' };
     if (score >= 7) return { label: 'PASSIVE', color: '#f59e0b', icon: '😐' };
     return { label: 'DETRACTOR', color: '#ef4444', icon: '😞' };
   };
 
-  const getCategoryPercentage = (value) => {
+  const getCategoryPercentage = value => {
     if (npsData.totalResponses === 0) return 0;
     return ((value / npsData.totalResponses) * 100).toFixed(1);
   };
@@ -83,7 +83,9 @@ const NPSTracker = () => {
     <div className="nps-tracker">
       <div className="header">
         <h1>⭐ Net Promoter Score (NPS)</h1>
-        <button className="btn-refresh" onClick={fetchNPSData}>🔄 Refresh</button>
+        <button className="btn-refresh" onClick={fetchNPSData}>
+          🔄 Refresh
+        </button>
       </div>
 
       <div className="nps-input-section">
@@ -93,12 +95,12 @@ const NPSTracker = () => {
             type="text"
             placeholder="Customer ID"
             value={customerId}
-            onChange={(e) => setCustomerId(e.target.value)}
+            onChange={e => setCustomerId(e.target.value)}
           />
           <textarea
             placeholder="Additional feedback (optional)"
             value={feedback}
-            onChange={(e) => setFeedback(e.target.value)}
+            onChange={e => setFeedback(e.target.value)}
             rows="3"
           />
         </div>
@@ -106,14 +108,14 @@ const NPSTracker = () => {
         <div className="score-selector">
           <p>How likely are you to recommend us? (0-10)</p>
           <div className="score-buttons">
-            {Array.from({length: 11}, (_, i) => (
+            {Array.from({ length: 11 }, (_, i) => (
               <button
                 key={i}
                 className={`score-btn ${selectedScore === i ? 'selected' : ''}`}
                 onClick={() => setSelectedScore(i)}
                 style={{
                   backgroundColor: selectedScore === i ? getNpsCategory(i).color : '#f3f4f6',
-                  color: selectedScore === i ? 'white' : '#374151'
+                  color: selectedScore === i ? 'white' : '#374151',
                 }}
               >
                 {i}
@@ -131,18 +133,14 @@ const NPSTracker = () => {
           ✓ Submit NPS Score
         </button>
 
-        {submitted && (
-          <div className="success-message">✅ NPS score recorded successfully!</div>
-        )}
+        {submitted && <div className="success-message">✅ NPS score recorded successfully!</div>}
       </div>
 
       <div className="nps-dashboard">
         <div className="nps-score-card">
           <div className="score-display">
             <h3>NPS Score</h3>
-            <div className="score-value">
-              {parseFloat(npsData.npsScore).toFixed(2)}
-            </div>
+            <div className="score-value">{parseFloat(npsData.npsScore).toFixed(2)}</div>
             <div className={`trend ${npsData.trend}`}>
               {npsData.trend === 'improving' && '📈 Improving'}
               {npsData.trend === 'declining' && '📉 Declining'}
@@ -196,7 +194,16 @@ const NPSTracker = () => {
           </div>
           <div className="stat">
             <label>Response Rate</label>
-            <value>{npsData.totalResponses > 0 ? ((npsData.promoters + npsData.passives + npsData.detractors) / npsData.totalResponses * 100).toFixed(1) : 0}%</value>
+            <value>
+              {npsData.totalResponses > 0
+                ? (
+                    ((npsData.promoters + npsData.passives + npsData.detractors) /
+                      npsData.totalResponses) *
+                    100
+                  ).toFixed(1)
+                : 0}
+              %
+            </value>
           </div>
         </div>
       </div>

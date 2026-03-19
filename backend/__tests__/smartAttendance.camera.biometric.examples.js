@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * SMART ATTENDANCE - CAMERA & BIOMETRIC EXAMPLES
  * أمثلة عملية لاستخدام الكاميرات والبصمة
@@ -15,20 +16,20 @@ describe('Smart Attendance Camera & Biometric System', () => {
   let cameraManager;
 
   beforeEach(() => {
-    // Reset mocks  
+    // Reset mocks
     jest.clearAllMocks();
-    
+
     // Create mock instances with required methods
     biometricProcessor = {
       enrollBiometricData: jest.fn(),
       getBiometricStatus: jest.fn(),
     };
-    
+
     cameraManager = {
       connectCamera: jest.fn(),
       startVideoStream: jest.fn(),
     };
-    
+
     // Mock the constructors
     SmartBiometricProcessor.mockImplementation(() => biometricProcessor);
     SmartCameraManager.mockImplementation(() => cameraManager);

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * PHASE 17: ADVANCED PREDICTIVE ANALYTICS
  * Machine Learning Models with Time Series & Seasonality
@@ -276,7 +277,7 @@ class ForecastingService {
         avgHistorical: this.analytics.calculateMean(timeSeries),
       };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -310,7 +311,7 @@ class ForecastingService {
         threshold: threshold,
       };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -344,7 +345,7 @@ class ForecastingService {
         relationship: correlation > 0.7 ? 'strong' : correlation > 0.3 ? 'moderate' : 'weak',
       };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 

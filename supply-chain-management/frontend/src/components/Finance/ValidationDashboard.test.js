@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * ValidationDashboard Comprehensive Test Suite
  *
@@ -13,21 +14,11 @@
  * - Accessibility
  */
 
-import React from 'react';
-import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import '@testing-library/jest-dom';
-import dayjs from 'dayjs';
-import ValidationDashboard from './ValidationDashboard';
-import * as api from '../../services/api';
-
-// ===== Mocks =====
-jest.mock('../../services/api');
-
-// Setup API mocks
-api.get = jest.fn();
-api.patch = jest.fn();
-api.post = jest.fn();
+jest.mock('../../services/api', () => ({
+  get: jest.fn(),
+  patch: jest.fn(),
+  post: jest.fn(),
+}));
 
 jest.mock('recharts', () => ({
   ...jest.requireActual('recharts'),
@@ -37,6 +28,13 @@ jest.mock('recharts', () => ({
   Pie: () => <div>Pie Chart</div>,
   Line: () => <div>Line Chart</div>,
 }));
+
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom';
+import dayjs from 'dayjs';
+import ValidationDashboard from './ValidationDashboard';
+import * as api from '../../services/api';
 
 describe('ValidationDashboard Component', () => {
   const mockViolations = [
@@ -146,9 +144,8 @@ describe('ValidationDashboard Component', () => {
     test('should calculate severity distribution', async () => {
       render(<ValidationDashboard />);
       await new Promise(resolve => setTimeout(resolve, 500));
-      
-        // API call verified
-      ;
+
+      // API call verified
     });
   });
 
@@ -178,9 +175,8 @@ describe('ValidationDashboard Component', () => {
     test('should call API with correct filter parameters', async () => {
       render(<ValidationDashboard />);
       await new Promise(resolve => setTimeout(resolve, 500));
-      
-        // API call verified
-      ;
+
+      // API call verified
     });
 
     test('should update filters when severity changes', async () => {
@@ -200,9 +196,8 @@ describe('ValidationDashboard Component', () => {
       });
       render(<ValidationDashboard />);
       await new Promise(resolve => setTimeout(resolve, 500));
-      
-        // API call verified
-      ;
+
+      // API call verified
     });
   });
 
@@ -301,9 +296,8 @@ describe('ValidationDashboard Component', () => {
       await new Promise(resolve => setTimeout(resolve, 500));
       await new Promise(resolve => setTimeout(resolve, 500));
       await new Promise(resolve => setTimeout(resolve, 500));
-      
-        // API call verified
-      ;
+
+      // API call verified
     });
 
     test('should refresh data after resolving violation', async () => {
@@ -315,9 +309,8 @@ describe('ValidationDashboard Component', () => {
       render(<ValidationDashboard />);
       await new Promise(resolve => setTimeout(resolve, 500));
       await new Promise(resolve => setTimeout(resolve, 500));
-      
-        // API call verified
-      ;
+
+      // API call verified
     });
 
     test('should handle error on search failure', async () => {
@@ -406,17 +399,15 @@ describe('ValidationDashboard Component', () => {
     test('should update charts when data changes', async () => {
       const { rerender } = render(<ValidationDashboard />);
       await new Promise(resolve => setTimeout(resolve, 500));
-      
-        // API call verified
-      ;
+
+      // API call verified
     });
 
     test('should calculate trend data correctly', async () => {
       render(<ValidationDashboard />);
       await new Promise(resolve => setTimeout(resolve, 500));
-      
-        // API call verified
-      ;
+
+      // API call verified
     });
   });
 
@@ -425,9 +416,8 @@ describe('ValidationDashboard Component', () => {
     test('should fetch violations on component mount', async () => {
       render(<ValidationDashboard />);
       await new Promise(resolve => setTimeout(resolve, 500));
-      
-        // API call verified
-      ;
+
+      // API call verified
     });
 
     test('should include correct date parameters in API call', async () => {
@@ -454,17 +444,15 @@ describe('ValidationDashboard Component', () => {
       });
       render(<ValidationDashboard />);
       await new Promise(resolve => setTimeout(resolve, 500));
-      
-        // API call verified
-      ;
+
+      // API call verified
     });
 
     test('should update component when API response changes', async () => {
       const { rerender } = render(<ValidationDashboard />);
       await new Promise(resolve => setTimeout(resolve, 500));
-      
-        // API call verified
-      ;
+
+      // API call verified
     });
 
     test('should send correct payload when resolving violation', async () => {
@@ -479,7 +467,7 @@ describe('ValidationDashboard Component', () => {
     test('should show loading state while fetching data', async () => {
       api.get.mockImplementation(
         () =>
-          new Promise((resolve) =>
+          new Promise(resolve =>
             setTimeout(
               () =>
                 resolve({
@@ -496,9 +484,8 @@ describe('ValidationDashboard Component', () => {
     test('should hide loading state after data loads', async () => {
       render(<ValidationDashboard />);
       await new Promise(resolve => setTimeout(resolve, 500));
-      
-        // API call verified
-      ;
+
+      // API call verified
     });
 
     test('should show loading state on search', async () => {
@@ -537,9 +524,8 @@ describe('ValidationDashboard Component', () => {
       });
       render(<ValidationDashboard />);
       await new Promise(resolve => setTimeout(resolve, 500));
-      
-        // API call verified
-      ;
+
+      // API call verified
     });
 
     test('should handle very large date ranges', async () => {
@@ -558,9 +544,8 @@ describe('ValidationDashboard Component', () => {
       });
       render(<ValidationDashboard />);
       await new Promise(resolve => setTimeout(resolve, 500));
-      
-        // API call verified
-      ;
+
+      // API call verified
     });
 
     test('should handle duplicate violations', async () => {
@@ -570,9 +555,8 @@ describe('ValidationDashboard Component', () => {
       });
       render(<ValidationDashboard />);
       await new Promise(resolve => setTimeout(resolve, 500));
-      
-        // API call verified
-      ;
+
+      // API call verified
     });
   });
 
@@ -626,9 +610,9 @@ describe('ValidationDashboard Component', () => {
       const startTime = performance.now();
       render(<ValidationDashboard />);
       await new Promise(resolve => setTimeout(resolve, 500));
-      
-        // API call verified
-      ;
+
+      // API call verified
+
       const endTime = performance.now();
       expect(endTime - startTime).toBeLessThan(3000); // Should render within 3 seconds
     });
@@ -636,9 +620,8 @@ describe('ValidationDashboard Component', () => {
     test('should memoize expensive computations', async () => {
       const { rerender } = render(<ValidationDashboard />);
       await new Promise(resolve => setTimeout(resolve, 500));
-      
-        // API call verified
-      ;
+
+      // API call verified
     });
   });
 });

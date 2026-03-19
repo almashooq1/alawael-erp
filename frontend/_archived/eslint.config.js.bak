@@ -1,0 +1,135 @@
+const js = require('@eslint/js');
+const globals = require('globals');
+
+module.exports = [
+  // Global ignores
+  {
+    ignores: [
+      'node_modules/**',
+      'dist/**',
+      'build/**',
+      'coverage/**',
+      '.git/**',
+      '*.log',
+      'package-lock.json',
+      'yarn.lock',
+      '.next/**',
+      'out/**',
+      // Generated files
+      '**/*.min.js',
+      '**/*.bundle.js',
+      // Legacy files with encoding issues
+      'erp_new_system/**',
+    ],
+  },
+  // Base JavaScript configuration
+  {
+    files: ['**/*.js'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'module',
+      globals: {
+        ...globals.node,
+        process: 'readonly',
+        __dirname: 'readonly',
+        __filename: 'readonly',
+        module: 'readonly',
+        require: 'readonly',
+        exports: 'writable',
+        console: 'readonly',
+        Buffer: 'readonly',
+        setTimeout: 'readonly',
+        clearTimeout: 'readonly',
+        setInterval: 'readonly',
+        clearInterval: 'readonly',
+        setImmediate: 'readonly',
+        clearImmediate: 'readonly',
+        fetch: 'readonly',
+        URL: 'readonly',
+        URLSearchParams: 'readonly',
+      },
+    },
+    rules: {
+      ...js.configs.recommended.rules,
+      'no-unused-vars': ['warn', { 
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+        caughtErrors: 'none',
+      }],
+      'no-console': 'off',
+      'no-undef': 'warn',
+      'no-empty': 'warn',
+      'no-useless-catch': 'off',
+      'no-constant-condition': 'warn',
+      'no-unused-expressions': 'warn',
+      'prefer-const': 'warn',
+      'no-var': 'warn',
+    },
+  },
+  // Frontend/React configuration
+  {
+    files: ['**/*.jsx', 'frontend/**/*.js', 'alawael-erp/frontend/**/*.js'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'module',
+      parserOptions: {
+        ecmaFeatures: {
+          jsx: true,
+        },
+      },
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+        React: 'readonly',
+        JSX: 'readonly',
+      },
+    },
+    rules: {
+      'no-console': 'warn',
+    },
+  },
+  // Test files configuration
+  {
+    files: ['**/*.test.js', '**/*.spec.js', 'tests/**/*.js', '__tests__/**/*.js'],
+    languageOptions: {
+      globals: {
+        describe: 'readonly',
+        it: 'readonly',
+        test: 'readonly',
+        expect: 'readonly',
+        beforeAll: 'readonly',
+        afterAll: 'readonly',
+        beforeEach: 'readonly',
+        afterEach: 'readonly',
+        jest: 'readonly',
+      },
+    },
+    rules: {
+      'no-unused-vars': ['warn', { 
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+        caughtErrors: 'none',
+      }],
+    },
+  },
+  // Routes files configuration
+  {
+    files: ['**/routes/**/*.js'],
+    languageOptions: {
+      globals: {
+        router: 'readonly',
+        authenticateToken: 'readonly',
+        authenticate: 'readonly',
+        authMiddleware: 'readonly',
+        verifyToken: 'readonly',
+      },
+    },
+  },
+  // Configuration files
+  {
+    files: ['*.config.js', '.*.js'],
+    languageOptions: {
+      sourceType: 'commonjs',
+    },
+  },
+];

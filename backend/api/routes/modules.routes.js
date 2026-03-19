@@ -1,6 +1,23 @@
+/* eslint-disable no-unused-vars */
 const express = require('express');
 const router = express.Router();
 const { authenticateToken } = require('../../middleware/auth');
+
+const logger = require('../../utils/logger');
+
+// RBAC Integration (Role-Based Access Control)
+let createRBACMiddleware;
+try {
+  const rbacModule = require('../../rbac');
+  createRBACMiddleware = rbacModule.createRBACMiddleware;
+  logger.info('[Modules Routes] RBAC middleware loaded successfully');
+} catch (err) {
+  logger.warn('[Modules Routes] RBAC module not available, using fallback');
+  createRBACMiddleware = permissions => (req, res, next) => {
+    logger.debug(`[RBAC Fallback] Checking permissions: ${permissions.join(', ')}`);
+    next();
+  };
+}
 
 // Mock data for modules
 const modulesMockData = {
@@ -225,8 +242,9 @@ const modulesMockData = {
  * @route   GET /api/modules/:moduleKey
  * @desc    Get module data
  * @access  Private
+ * @requires Permission: modules:read
  */
-router.get('/:moduleKey', authenticateToken, (req, res) => {
+router.get('/:moduleKey', authenticateToken, createRBACMiddleware(['modules:read']), (req, res) => {
   try {
     const { moduleKey } = req.params;
 
@@ -247,11 +265,11 @@ router.get('/:moduleKey', authenticateToken, (req, res) => {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('Error fetching module data:', error);
+    logger.error('Error fetching module data:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch module data',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -260,8 +278,9 @@ router.get('/:moduleKey', authenticateToken, (req, res) => {
  * @route   GET /api/modules
  * @desc    Get all available modules
  * @access  Private
+ * @requires Permission: modules:read
  */
-router.get('/', authenticateToken, (req, res) => {
+router.get('/', authenticateToken, createRBACMiddleware(['modules:read']), (req, res) => {
   try {
     const modules = Object.keys(modulesMockData);
 
@@ -274,11 +293,11 @@ router.get('/', authenticateToken, (req, res) => {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('Error fetching modules list:', error);
+    logger.error('Error fetching modules list:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch modules list',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -302,11 +321,11 @@ router.get('/elearning/courses', authenticateToken, (req, res) => {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('Error fetching courses:', error);
+    logger.error('Error fetching courses:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch courses',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });

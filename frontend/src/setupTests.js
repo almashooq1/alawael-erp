@@ -32,7 +32,6 @@ if (!global.navigator.clipboard) {
 // Mock IntersectionObserver
 if (!window.IntersectionObserver) {
   window.IntersectionObserver = class IntersectionObserver {
-    constructor() {}
     disconnect() {}
     observe() {}
     takeRecords() {
@@ -45,7 +44,6 @@ if (!window.IntersectionObserver) {
 // Mock ResizeObserver
 if (!window.ResizeObserver) {
   window.ResizeObserver = class ResizeObserver {
-    constructor() {}
     disconnect() {}
     observe() {}
     unobserve() {}
@@ -53,7 +51,7 @@ if (!window.ResizeObserver) {
 }
 
 // Mock window.matchMedia for Ant Design responsive observer
-const matchMediaMock = (query) => ({
+const matchMediaMock = query => ({
   matches: false,
   media: query,
   onchange: null,
@@ -70,7 +68,7 @@ if (!window.matchMedia) {
 
 // Mock fetch for all tests to avoid network errors and CORS issues
 beforeAll(() => {
-  global.fetch = jest.fn((url, options) => {
+  global.fetch = jest.fn((_url, _options) => {
     // You can customize mock responses based on URL or method
     return Promise.resolve({
       ok: true,

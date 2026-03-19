@@ -1,9 +1,10 @@
+/* eslint-disable no-unused-vars */
 /**
  * ═══════════════════════════════════════════════════════════════════════
  * PERFORMANCE OPTIMIZATION ENGINE
  * محرك تحسين الأداء الديناميكي
  * ═══════════════════════════════════════════════════════════════════════
- * 
+ *
  * Features:
  * ✅ Dynamic Resource Allocation
  * ✅ Performance Tuning
@@ -18,6 +19,7 @@ const EventEmitter = require('events');
 const os = require('os');
 const fs = require('fs').promises;
 const path = require('path');
+const logger = require('../utils/logger');
 
 class PerformanceOptimization extends EventEmitter {
   constructor(options = {}) {
@@ -46,10 +48,10 @@ class PerformanceOptimization extends EventEmitter {
   async initializeOptimization() {
     try {
       await fs.mkdir(this.dataPath, { recursive: true });
-      console.log('✅ Performance optimization system initialized');
+      // console.log('✅ Performance optimization system initialized');
       this.startContinuousMonitoring();
     } catch (error) {
-      console.error('❌ Optimization initialization failed:', error.message);
+      logger.error('❌ Optimization initialization failed:', error.message);
     }
   }
 
@@ -89,7 +91,7 @@ class PerformanceOptimization extends EventEmitter {
       this.emit('performance:metrics-updated', metrics);
       return metrics;
     } catch (error) {
-      console.error('❌ Performance monitoring failed:', error.message);
+      logger.error('❌ Performance monitoring failed:', error.message);
       return null;
     }
   }
@@ -175,7 +177,10 @@ class PerformanceOptimization extends EventEmitter {
 
       // Memory optimization
       if (metrics.memory.usagePercent > this.optimizationThreshold * 100) {
-        const newBufferSize = Math.max(256, Math.floor(this.resourceAllocation.memory.allocated * 0.8));
+        const newBufferSize = Math.max(
+          256,
+          Math.floor(this.resourceAllocation.memory.allocated * 0.8)
+        );
         optimization.actions.push({
           type: 'MEMORY_OPTIMIZATION',
           action: 'Reduce buffer sizes and cache',
@@ -211,11 +216,11 @@ class PerformanceOptimization extends EventEmitter {
 
       this.optimizationHistory.push(optimization);
       this.emit('performance:optimization-applied', optimization);
-      console.log(`🔧 Performance optimization applied: ${optimization.actions.length} actions`);
+      // console.log(`🔧 Performance optimization applied: ${optimization.actions.length} actions`);
 
       return optimization;
     } catch (error) {
-      console.error('❌ Auto-optimization failed:', error.message);
+      logger.error('❌ Auto-optimization failed:', error.message);
       throw error;
     }
   }
@@ -262,7 +267,7 @@ class PerformanceOptimization extends EventEmitter {
 
       return report;
     } catch (error) {
-      console.error('❌ Report generation failed:', error.message);
+      logger.error('❌ Report generation failed:', error.message);
       throw error;
     }
   }
@@ -340,8 +345,8 @@ class PerformanceOptimization extends EventEmitter {
         healthStatus: this.calculateHealthStatus(latest),
       };
     } catch (error) {
-      console.error('❌ Failed to get utilization:', error.message);
-      return { error: error.message };
+      logger.error('❌ Failed to get utilization:', error.message);
+      return { error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -433,9 +438,18 @@ class PerformanceOptimization extends EventEmitter {
     let status = 'HEALTHY';
     let score = 100;
 
-    if (metrics.cpu.usage > 80) { score -= 20; status = 'WARNING'; }
-    if (metrics.memory.usagePercent > 85) { score -= 20; status = 'WARNING'; }
-    if (metrics.disk.usagePercent > 90) { score -= 30; status = 'CRITICAL'; }
+    if (metrics.cpu.usage > 80) {
+      score -= 20;
+      status = 'WARNING';
+    }
+    if (metrics.memory.usagePercent > 85) {
+      score -= 20;
+      status = 'WARNING';
+    }
+    if (metrics.disk.usagePercent > 90) {
+      score -= 30;
+      status = 'CRITICAL';
+    }
 
     return {
       status: score >= 70 ? 'HEALTHY' : score >= 50 ? 'WARNING' : 'CRITICAL',

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Rehabilitation Program Model
  * نموذج البرامج التأهيلية - Comprehensive Rehabilitation Management
@@ -48,7 +49,10 @@ const therapySessionSchema = new Schema(
       cooperation_level: Number, // 1-10
       fatigue_level: Number, // 1-10
       pain_level: Number, // 0-10
-      mood: { type: String, enum: ['very_positive', 'positive', 'neutral', 'negative', 'very_negative'] },
+      mood: {
+        type: String,
+        enum: ['very_positive', 'positive', 'neutral', 'negative', 'very_negative'],
+      },
       comments: String,
     },
 
@@ -68,12 +72,16 @@ const therapySessionSchema = new Schema(
       },
     ],
 
-    session_status: { type: String, enum: ['completed', 'cancelled', 'rescheduled'], default: 'completed' },
+    session_status: {
+      type: String,
+      enum: ['completed', 'cancelled', 'rescheduled'],
+      default: 'completed',
+    },
     cancellation_reason: String,
 
     therapist_notes: String,
   },
-  { _id: false },
+  { _id: false }
 );
 
 // Goal Sub-schema
@@ -83,7 +91,15 @@ const goalSchema = new Schema(
     goal_statement: { type: String, required: true },
     domain: {
       type: String,
-      enum: ['mobility', 'self_care', 'communication', 'cognitive', 'social', 'vocational', 'community'],
+      enum: [
+        'mobility',
+        'self_care',
+        'communication',
+        'cognitive',
+        'social',
+        'vocational',
+        'community',
+      ],
       required: true,
     },
 
@@ -119,7 +135,7 @@ const goalSchema = new Schema(
     last_reviewed: Date,
     next_review_date: Date,
   },
-  { _id: false },
+  { _id: false }
 );
 
 // Team Member Sub-schema
@@ -161,7 +177,7 @@ const teamMemberSchema = new Schema(
     end_date: Date,
     status: { type: String, enum: ['active', 'inactive'], default: 'active' },
   },
-  { _id: false },
+  { _id: false }
 );
 
 // Outcome Measure Sub-schema
@@ -181,7 +197,7 @@ const outcomeSchema = new Schema(
     interpretation: String,
     therapist_id: String,
   },
-  { _id: false },
+  { _id: false }
 );
 
 // Main Schema
@@ -212,7 +228,10 @@ const rehabilitationProgramSchema = new Schema(
 
     program_setting: {
       facility_name: String,
-      facility_type: { type: String, enum: ['rehabilitation_center', 'hospital', 'clinic', 'community_center', 'home'] },
+      facility_type: {
+        type: String,
+        enum: ['rehabilitation_center', 'hospital', 'clinic', 'community_center', 'home'],
+      },
       location: String,
       accessibility_features: [String],
     },
@@ -274,7 +293,11 @@ const rehabilitationProgramSchema = new Schema(
     },
 
     progress_summary: {
-      overall_progress: { type: String, enum: ['excellent', 'good', 'fair', 'poor'], default: 'fair' },
+      overall_progress: {
+        type: String,
+        enum: ['excellent', 'good', 'fair', 'poor'],
+        default: 'fair',
+      },
       progress_trajectory: { type: String, enum: ['improving', 'stable', 'declining', 'variable'] },
       compliance_rate: { type: Number, min: 0, max: 100 },
       attendance_rate: { type: Number, min: 0, max: 100 },
@@ -336,7 +359,14 @@ const rehabilitationProgramSchema = new Schema(
 
     discharge_reason: {
       type: String,
-      enum: ['goal_achieved', 'plateau', 'client_choice', 'medical_reasons', 'non_compliance', 'transferred'],
+      enum: [
+        'goal_achieved',
+        'plateau',
+        'client_choice',
+        'medical_reasons',
+        'non_compliance',
+        'transferred',
+      ],
     },
 
     outcomes_achieved: [
@@ -387,7 +417,7 @@ const rehabilitationProgramSchema = new Schema(
   {
     timestamps: true,
     collection: 'rehabilitation_programs',
-  },
+  }
 );
 
 // Indexes
@@ -401,7 +431,9 @@ rehabilitationProgramSchema.index({ 'program_duration.actual_discharge_date': -1
 // Methods
 rehabilitationProgramSchema.methods.addTherapySession = function (sessionData) {
   this.therapy_sessions.push(sessionData);
-  this.total_sessions_completed = this.therapy_sessions.filter(s => s.session_status === 'completed').length;
+  this.total_sessions_completed = this.therapy_sessions.filter(
+    s => s.session_status === 'completed'
+  ).length;
   return this.save();
 };
 
@@ -440,7 +472,9 @@ rehabilitationProgramSchema.methods.generateProgressReport = function () {
     },
     program_status: this.program_status,
     enrollment_date: this.program_duration.enrollment_date,
-    duration_weeks: Math.ceil((new Date() - this.program_duration.enrollment_date) / (1000 * 60 * 60 * 24 * 7)),
+    duration_weeks: Math.ceil(
+      (new Date() - this.program_duration.enrollment_date) / (1000 * 60 * 60 * 24 * 7)
+    ),
     goal_progress: this.getGoalProgress(),
     compliance_rate: this.calculateComplianceRate(),
     attendance_rate: this.progress_summary.attendance_rate,
@@ -477,7 +511,9 @@ rehabilitationProgramSchema.statics.getProgramsReadyForDischarge = async functio
   const programs = await this.find({ program_status: 'active' });
   return programs.filter(p => {
     const progress = p.getGoalProgress();
-    return progress.overall_progress >= 80 && p.progress_summary.progress_trajectory === 'improving';
+    return (
+      progress.overall_progress >= 80 && p.progress_summary.progress_trajectory === 'improving'
+    );
   });
 };
 

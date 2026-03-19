@@ -1,7 +1,9 @@
+/* eslint-disable no-unused-vars */
 const Policy = require('../models/Policy');
 const PolicyAcknowledgement = require('../models/PolicyAcknowledgement');
 const { v4: uuidv4 } = require('uuid');
 const logger = require('../utils/logger');
+const { escapeRegex } = require('../utils/sanitize');
 
 class PolicyService {
   // ==================== السياسات ====================
@@ -12,10 +14,10 @@ class PolicyService {
   async createPolicy(policyData) {
     try {
       const policyId = `POL-${Date.now()}-${uuidv4().substring(0, 8)}`;
-      
+
       const policy = new Policy({
         policyId,
-        ...policyData
+        ...policyData,
       });
 
       await policy.save();
@@ -23,7 +25,7 @@ class PolicyService {
       return { success: true, policy, message: 'تم إنشاء السياسة بنجاح' };
     } catch (error) {
       logger.error(`Error creating policy: ${error.message}`);
-      throw new Error(`فشل في إنشاء السياسة: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -44,14 +46,14 @@ class PolicyService {
           content: policy.content,
           contentAr: policy.contentAr,
           effectiveDate: policy.effectiveDate,
-          createdBy: policy.updatedBy || policy.createdBy
+          createdBy: policy.updatedBy || policy.createdBy,
         });
         policy.version += 1;
       }
 
       Object.assign(policy, {
         ...updateData,
-        updatedBy: updateData.updatedBy
+        updatedBy: updateData.updatedBy,
       });
 
       await policy.save();
@@ -72,11 +74,11 @@ class PolicyService {
       if (!policy) {
         throw new Error('السياسة غير موجودة');
       }
-      
+
       // زيادة عدد المشاهدات
       policy.stats.viewCount += 1;
       await policy.save();
-      
+
       return policy;
     } catch (error) {
       logger.error(`Error fetching policy: ${error.message}`);
@@ -89,16 +91,16 @@ class PolicyService {
    */
   async getPolicies(filters = {}) {
     try {
-      let query = {};
+      const query = {};
 
       if (filters.policyType) query.policyType = filters.policyType;
       if (filters.status) query.status = filters.status;
       if (filters.department) query.applicableDepartments = filters.department;
       if (filters.searchTerm) {
         query.$or = [
-          { policyName: { $regex: filters.searchTerm, $options: 'i' } },
-          { description: { $regex: filters.searchTerm, $options: 'i' } },
-          { keywords: { $in: [new RegExp(filters.searchTerm, 'i')] } }
+          { policyName: { $regex: escapeRegex(filters.searchTerm), $options: 'i' } },
+          { description: { $regex: escapeRegex(filters.searchTerm), $options: 'i' } },
+          { keywords: { $in: [new RegExp(escapeRegex(filters.searchTerm), 'i')] } },
         ];
       }
 
@@ -106,10 +108,7 @@ class PolicyService {
       const limit = filters.limit || 10;
       const skip = (page - 1) * limit;
 
-      const policies = await Policy.find(query)
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit);
+      const policies = await Policy.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit);
 
       const total = await Policy.countDocuments(query);
 
@@ -119,8 +118,8 @@ class PolicyService {
         pagination: {
           total,
           page,
-          pages: Math.ceil(total / limit)
-        }
+          pages: Math.ceil(total / limit),
+        },
       };
     } catch (error) {
       logger.error(`Error fetching policies: ${error.message}`);
@@ -133,8 +132,10 @@ class PolicyService {
    */
   async getActivePolicies() {
     try {
-      const policies = await Policy.find({ status: 'ACTIVE' })
-        .sort({ policyType: 1, createdAt: -1 });
+      const policies = await Policy.find({ status: 'ACTIVE' }).sort({
+        policyType: 1,
+        createdAt: -1,
+      });
 
       return policies.filter(p => p.isActive());
     } catch (error) {
@@ -154,8 +155,7 @@ class PolicyService {
       }
 
       // التحقق من وجود اعترافات
-      const acknowledgements = await PolicyAcknowledgement
-        .countDocuments({ policyId: policy._id });
+      const acknowledgements = await PolicyAcknowledgement.countDocuments({ policyId: policy._id });
 
       if (acknowledgements > 0) {
         throw new Error('لا يمكن حذف السياسة - يوجد اعترافات مرتبطة بها');
@@ -186,7 +186,7 @@ class PolicyService {
       // إنشاء سجلات الموافقة
       policy.approvals = requiredApprovers.map(role => ({
         approverRole: role,
-        status: 'PENDING'
+        status: 'PENDING',
       }));
 
       await policy.save();
@@ -274,7 +274,7 @@ class PolicyService {
 
       for (const emp of employees) {
         const ackId = `ACK-${Date.now()}-${uuidv4().substring(0, 8)}`;
-        
+
         const acknowledgement = new PolicyAcknowledgement({
           acknowledgementId: ackId,
           policyId: policy._id,
@@ -283,7 +283,7 @@ class PolicyService {
           employeeName: emp.employeeName,
           department: emp.department,
           email: emp.email,
-          dueDate: emp.dueDate || new Date(Date.now() + 14 * 24 * 60 * 60 * 1000) // 14 أيام
+          dueDate: emp.dueDate || new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 أيام
         });
 
         await acknowledgement.save();
@@ -312,7 +312,7 @@ class PolicyService {
       for (const policyId of policyIds) {
         const acknowledgement = await PolicyAcknowledgement.findOne({
           policyId,
-          employeeId
+          employeeId,
         });
 
         if (!acknowledgement) {
@@ -328,12 +328,15 @@ class PolicyService {
         // تحديث إحصائيات السياسة
         const policy = await Policy.findById(policyId);
         if (policy) {
-          policy.stats.pendingAcknowledgements = Math.max(0, policy.stats.pendingAcknowledgements - 1);
+          policy.stats.pendingAcknowledgements = Math.max(
+            0,
+            policy.stats.pendingAcknowledgements - 1
+          );
           policy.acknowledgedBy.push({
             employeeId,
             employeeName: acknowledgement.employeeName,
             acknowledgedDate: new Date(),
-            ipAddress
+            ipAddress,
           });
           await policy.save();
         }
@@ -354,7 +357,7 @@ class PolicyService {
    */
   async getPendingAcknowledgements(filters = {}) {
     try {
-      let query = { status: 'PENDING' };
+      const query = { status: 'PENDING' };
 
       if (filters.employeeId) query.employeeId = filters.employeeId;
       if (filters.policyId) {
@@ -384,8 +387,8 @@ class PolicyService {
         pagination: {
           total,
           page,
-          pages: Math.ceil(total / limit)
-        }
+          pages: Math.ceil(total / limit),
+        },
       };
     } catch (error) {
       logger.error(`Error fetching pending acknowledgements: ${error.message}`);
@@ -402,7 +405,7 @@ class PolicyService {
       if (!policy) throw new Error('السياسة غير موجودة');
 
       const acknowledgements = await PolicyAcknowledgement.find({
-        policyId: policy._id
+        policyId: policy._id,
       });
 
       const report = {
@@ -413,14 +416,17 @@ class PolicyService {
         pending: acknowledgements.filter(a => a.status === 'PENDING').length,
         rejected: acknowledgements.filter(a => a.status === 'REJECTED').length,
         expired: acknowledgements.filter(a => a.status === 'EXPIRED').length,
-        
-        acknowledgementRate: (
-          (acknowledgements.filter(a => a.status === 'ACKNOWLEDGED').length / policy.stats.totalAcknowledgements) * 100
-        ).toFixed(2) + '%',
-        
+
+        acknowledgementRate:
+          (
+            (acknowledgements.filter(a => a.status === 'ACKNOWLEDGED').length /
+              policy.stats.totalAcknowledgements) *
+            100
+          ).toFixed(2) + '%',
+
         bytDepartment: this._groupByDepartment(acknowledgements),
         byStatus: this._groupByStatus(acknowledgements),
-        details: acknowledgements
+        details: acknowledgements,
       };
 
       return { success: true, report };

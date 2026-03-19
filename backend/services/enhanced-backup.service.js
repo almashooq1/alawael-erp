@@ -1,9 +1,10 @@
+/* eslint-disable no-unused-vars */
 /**
  * ═══════════════════════════════════════════════════════════════════════
  * ENHANCED BACKUP MANAGEMENT SERVICE
  * خدمة إدارة النسخ الاحتياطية المحسّنة - النسخة 2.0
  * ═══════════════════════════════════════════════════════════════════════
- * 
+ *
  * Features:
  * ✅ Automated & Manual Backups
  * ✅ Multi-location Backup Support
@@ -16,16 +17,13 @@
  * ═══════════════════════════════════════════════════════════════════════
  */
 
-const mongoose = require('mongoose');
 const fs = require('fs').promises;
 const crypto = require('crypto');
 const path = require('path');
 const zlib = require('zlib');
 const { exec } = require('child_process');
-const { promisify } = require('util');
 const EventEmitter = require('events');
-
-const execPromise = promisify(exec);
+const logger = require('../utils/logger');
 
 class EnhancedBackupService extends EventEmitter {
   constructor() {
@@ -50,7 +48,7 @@ class EnhancedBackupService extends EventEmitter {
       await fs.mkdir(this.backupDir, { recursive: true });
 
       const metadataPath = path.join(this.backupDir, 'metadata.json');
-      if (!await this.fileExists(metadataPath)) {
+      if (!(await this.fileExists(metadataPath))) {
         const metadata = {
           version: '2.0',
           createdAt: new Date(),
@@ -61,9 +59,9 @@ class EnhancedBackupService extends EventEmitter {
         await fs.writeFile(metadataPath, JSON.stringify(metadata, null, 2));
       }
 
-      console.log('✅ Backup directory initialized:', this.backupDir);
+      logger.info('✅ Backup directory initialized:', this.backupDir);
     } catch (error) {
-      console.error('❌ Failed to initialize backup directory:', error.message);
+      logger.error('❌ Failed to initialize backup directory:', error.message);
     }
   }
 
@@ -114,7 +112,7 @@ class EnhancedBackupService extends EventEmitter {
       this.activeBackups.set(backupId, backupMetadata);
       this.emit('backup:started', backupMetadata);
 
-      console.log(`🔄 Starting backup [${backupId}]...`);
+      logger.info(`🔄 Starting backup [${backupId}]...`);
 
       // Create backup file
       const backupPath = path.join(this.backupDir, `${backupId}.gz`);
@@ -151,7 +149,8 @@ class EnhancedBackupService extends EventEmitter {
       // Update metadata
       backupMetadata.status = 'COMPLETED';
       backupMetadata.endTime = new Date().toISOString();
-      backupMetadata.duration = new Date(backupMetadata.endTime) - new Date(backupMetadata.startTime);
+      backupMetadata.duration =
+        new Date(backupMetadata.endTime) - new Date(backupMetadata.startTime);
       backupMetadata.progress = 100;
 
       // Save metadata
@@ -163,24 +162,24 @@ class EnhancedBackupService extends EventEmitter {
       this.activeBackups.delete(backupId);
       this.emit('backup:completed', backupMetadata);
 
-      console.log(`✅ Backup completed [${backupId}]`);
-      console.log(`   Size: ${this.formatFileSize(backupMetadata.size)}`);
-      console.log(`   Duration: ${Math.floor(backupMetadata.duration / 1000)}s`);
+      logger.info(`✅ Backup completed [${backupId}]`);
+      logger.info(`   Size: ${this.formatFileSize(backupMetadata.size)}`);
+      logger.info(`   Duration: ${Math.floor(backupMetadata.duration / 1000)}s`);
 
       return backupMetadata;
     } catch (error) {
-      console.error(`❌ Backup failed [${backupId}]:`, error.message);
+      logger.error(`❌ Backup failed [${backupId}]:`, error.message);
 
       const backupMetadata = this.activeBackups.get(backupId);
       if (backupMetadata) {
         backupMetadata.status = 'FAILED';
-        backupMetadata.error = error.message;
+        backupMetadata.error = 'حدث خطأ داخلي';
         backupMetadata.endTime = new Date().toISOString();
         await this.saveBackupMetadata(backupMetadata);
       }
 
       this.activeBackups.delete(backupId);
-      this.emit('backup:failed', { backupId, error: error.message });
+      this.emit('backup:failed', { backupId, error: 'حدث خطأ داخلي' });
 
       throw error;
     }
@@ -197,16 +196,15 @@ class EnhancedBackupService extends EventEmitter {
       const command = `mongodump --uri="${mongoUri}" --archive="${backupPath}" --gzip`;
 
       return new Promise((resolve, reject) => {
-        const child = exec(command, (error, stdout, stderr) => {
+        const child = exec(command, (error, _stdout, _stderr) => {
           if (error) {
-            reject(new Error(`Backup command failed: ${error.message}`));
+            reject(new Error('حدث خطأ داخلي'));
           } else {
             resolve();
           }
         });
 
         // Monitor progress
-        let lastUpdate = Date.now();
         const progressInterval = setInterval(async () => {
           try {
             const stats = await fs.stat(backupPath);
@@ -231,7 +229,7 @@ class EnhancedBackupService extends EventEmitter {
         });
       });
     } catch (error) {
-      throw new Error(`Database backup failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -247,21 +245,25 @@ class EnhancedBackupService extends EventEmitter {
 
       const fileContent = await fs.readFile(backupPath);
       const iv = crypto.randomBytes(16);
-      const cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(this.encryptionKey, 'hex'), iv);
+      const cipher = crypto.createCipheriv(
+        'aes-256-cbc',
+        Buffer.from(this.encryptionKey, 'hex'),
+        iv
+      );
 
       let encrypted = cipher.update(fileContent);
       encrypted = Buffer.concat([encrypted, cipher.final()]);
 
-      const encryptedData = IV.toString('hex') + ':' + encrypted.toString('hex');
+      const encryptedData = iv.toString('hex') + ':' + encrypted.toString('hex');
       await fs.writeFile(backupPath + '.enc', encryptedData);
 
       // Delete original unencrypted backup
       await fs.unlink(backupPath);
 
       metadata.encrypted = true;
-      console.log(`✅ Backup encrypted: ${path.basename(backupPath)}`);
+      logger.info(`✅ Backup encrypted: ${path.basename(backupPath)}`);
     } catch (error) {
-      throw new Error(`Encryption failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -280,13 +282,13 @@ class EnhancedBackupService extends EventEmitter {
 
       // Try to decompress to verify integrity
       if (metadata.compressed) {
-        return new Promise((resolve) => {
-          zlib.gunzip(fileContent, (error) => {
+        return new Promise(resolve => {
+          zlib.gunzip(fileContent, error => {
             if (error) {
-              console.warn(`⚠️  Backup verification warning: ${error.message}`);
+              logger.warn(`⚠️  Backup verification warning: ${error.message}`);
               resolve(false);
             } else {
-              console.log(`✅ Backup verified successfully`);
+              logger.info(`✅ Backup verified successfully`);
               resolve(true);
             }
           });
@@ -295,7 +297,7 @@ class EnhancedBackupService extends EventEmitter {
 
       return true;
     } catch (error) {
-      console.error(`❌ Verification failed: ${error.message}`);
+      logger.error(`❌ Verification failed: ${error.message}`);
       return false;
     }
   }
@@ -311,7 +313,7 @@ class EnhancedBackupService extends EventEmitter {
       hash.update(fileContent);
       return hash.digest('hex');
     } catch (error) {
-      console.warn(`⚠️  Failed to calculate checksum: ${error.message}`);
+      logger.warn(`⚠️  Failed to calculate checksum: ${error.message}`);
       return null;
     }
   }
@@ -324,7 +326,7 @@ class EnhancedBackupService extends EventEmitter {
     const { force = false, verify = true } = options;
 
     try {
-      console.log(`🔄 Starting restore from backup [${backupId}]...`);
+      logger.info(`🔄 Starting restore from backup [${backupId}]...`);
 
       const metadata = await this.getBackupMetadata(backupId);
       if (!metadata) {
@@ -355,9 +357,9 @@ class EnhancedBackupService extends EventEmitter {
       return new Promise((resolve, reject) => {
         exec(command, (error, stdout, stderr) => {
           if (error) {
-            reject(new Error(`Restore command failed: ${error.message}`));
+            reject(new Error('حدث خطأ داخلي'));
           } else {
-            console.log(`✅ Backup restored successfully [${backupId}]`);
+            logger.info(`✅ Backup restored successfully [${backupId}]`);
             resolve({
               success: true,
               backupId,
@@ -367,8 +369,8 @@ class EnhancedBackupService extends EventEmitter {
         });
       });
     } catch (error) {
-      console.error(`❌ Restore failed:`, error.message);
-      this.emit('restore:failed', { backupId, error: error.message });
+      logger.error(`❌ Restore failed:`, error.message);
+      this.emit('restore:failed', { backupId, error: 'حدث خطأ داخلي' });
       throw error;
     }
   }
@@ -389,7 +391,11 @@ class EnhancedBackupService extends EventEmitter {
       const iv = Buffer.from(ivHex, 'hex');
       const encrypted = Buffer.from(encryptedHex, 'hex');
 
-      const decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(this.encryptionKey, 'hex'), iv);
+      const decipher = crypto.createDecipheriv(
+        'aes-256-cbc',
+        Buffer.from(this.encryptionKey, 'hex'),
+        iv
+      );
 
       let decrypted = decipher.update(encrypted);
       decrypted = Buffer.concat([decrypted, decipher.final()]);
@@ -399,7 +405,7 @@ class EnhancedBackupService extends EventEmitter {
 
       return decryptedPath;
     } catch (error) {
-      throw new Error(`Decryption failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -428,7 +434,7 @@ class EnhancedBackupService extends EventEmitter {
 
       return backups.sort((a, b) => new Date(b.startTime) - new Date(a.startTime));
     } catch (error) {
-      console.error('❌ Failed to list backups:', error.message);
+      logger.error('❌ Failed to list backups:', error.message);
       return [];
     }
   }
@@ -456,7 +462,7 @@ class EnhancedBackupService extends EventEmitter {
 
       return backup;
     } catch (error) {
-      console.error('❌ Failed to get backup details:', error.message);
+      logger.error('❌ Failed to get backup details:', error.message);
       throw error;
     }
   }
@@ -486,12 +492,12 @@ class EnhancedBackupService extends EventEmitter {
         JSON.stringify(metadata, null, 2)
       );
 
-      console.log(`✅ Backup deleted: ${backupId}`);
+      logger.info(`✅ Backup deleted: ${backupId}`);
       this.emit('backup:deleted', { backupId });
 
       return true;
     } catch (error) {
-      console.error('❌ Failed to delete backup:', error.message);
+      logger.error('❌ Failed to delete backup:', error.message);
       throw error;
     }
   }
@@ -502,10 +508,10 @@ class EnhancedBackupService extends EventEmitter {
    */
   scheduleBackups(cronExpression = '0 2 * * *') {
     // Schedule daily backup at 2:00 AM
-    console.log(`📅 Scheduling backups with cron: ${cronExpression}`);
+    logger.info(`📅 Scheduling backups with cron: ${cronExpression}`);
 
     if (!this.enableAutoBackup) {
-      console.warn('⚠️  Auto-backup is disabled');
+      logger.warn('⚠️  Auto-backup is disabled');
       return;
     }
 
@@ -520,7 +526,7 @@ class EnhancedBackupService extends EventEmitter {
           triggeredBy: 'SCHEDULER',
         });
       } catch (error) {
-        console.error('❌ Scheduled backup failed:', error.message);
+        logger.error('❌ Scheduled backup failed:', error.message);
       }
     }, INTERVAL);
 
@@ -545,10 +551,10 @@ class EnhancedBackupService extends EventEmitter {
           await this.deleteBackup(backup.id);
         }
 
-        console.log(`🗑️  Cleaned up ${toDelete.length} old backup(s)`);
+        logger.info(`🗑️  Cleaned up ${toDelete.length} old backup(s)`);
       }
     } catch (error) {
-      console.warn('⚠️  Cleanup failed:', error.message);
+      logger.warn('⚠️  Cleanup failed:', error.message);
     }
   }
 
@@ -578,7 +584,7 @@ class EnhancedBackupService extends EventEmitter {
 
       return stats;
     } catch (error) {
-      console.error('❌ Failed to get backup stats:', error.message);
+      logger.error('❌ Failed to get backup stats:', error.message);
       return null;
     }
   }
@@ -605,7 +611,7 @@ class EnhancedBackupService extends EventEmitter {
         JSON.stringify(metadata, null, 2)
       );
     } catch (error) {
-      console.error('❌ Failed to save metadata:', error.message);
+      logger.error('❌ Failed to save metadata:', error.message);
     }
   }
 

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Smart Alumni & Success Tracking Service (Phase 85)
  *
@@ -9,7 +10,12 @@ class SmartAlumniService {
   constructor() {
     this.alumniDb = new Map();
     // Mock data
-    this.alumniDb.set('AL-001', { id: 'AL-001', name: 'Omar', gradDate: '2024-01-01', status: 'EMPLOYED' });
+    this.alumniDb.set('AL-001', {
+      id: 'AL-001',
+      name: 'Omar',
+      gradDate: '2024-01-01',
+      status: 'EMPLOYED',
+    });
   }
 
   /**
@@ -18,7 +24,10 @@ class SmartAlumniService {
    */
   async conduclFollowUp(alumniId) {
     // AI Logic: Select relevant questions based on their diagnosis/treatment history
-    const dynamicQuestions = ['Are you still employed at the same location?', 'Have you faced any new sensory challenges?'];
+    const dynamicQuestions = [
+      'Are you still employed at the same location?',
+      'Have you faced any new sensory challenges?',
+    ];
 
     return {
       surveyId: 'SUR-' + Date.now(),

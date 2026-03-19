@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Advanced Search & Filtering Service
  * خدمة البحث والتصفية المتقدمة
@@ -65,10 +66,16 @@ class AdvancedSearchService {
    * بحث ذكي متقدم
    */
   advancedSearchRanked(data, query, options = {}) {
-    const { fields = [], fuzzyMatch = true, caseSensitive = false, limit = 50, offset = 0 } = options;
+    const {
+      fields = [],
+      fuzzyMatch = true,
+      caseSensitive = false,
+      limit = 50,
+      offset = 0,
+    } = options;
 
     const searchQuery = caseSensitive ? query : query.toLowerCase();
-    let results = [];
+    const results = [];
 
     // البحث المباشر
     data.forEach((item, idx) => {
@@ -144,7 +151,11 @@ class AdvancedSearchService {
         if (b.charAt(i - 1) === a.charAt(j - 1)) {
           matrix[i][j] = matrix[i - 1][j - 1];
         } else {
-          matrix[i][j] = Math.min(matrix[i - 1][j - 1] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j] + 1);
+          matrix[i][j] = Math.min(
+            matrix[i - 1][j - 1] + 1,
+            matrix[i][j - 1] + 1,
+            matrix[i - 1][j] + 1
+          );
         }
       }
     }
@@ -254,7 +265,8 @@ class AdvancedSearchService {
     };
 
     if (this.searchHistory.length > 0) {
-      stats.averageResults = this.searchHistory.reduce((sum, s) => sum + s.resultsCount, 0) / this.searchHistory.length;
+      stats.averageResults =
+        this.searchHistory.reduce((sum, s) => sum + s.resultsCount, 0) / this.searchHistory.length;
 
       // أكثر عمليات بحث
       const searchCount = new Map();
@@ -298,7 +310,7 @@ class AdvancedSearchService {
             const value = row[header];
             return typeof value === 'string' && value.includes(',') ? `"${value}"` : value;
           })
-          .join(','),
+          .join(',')
       ),
     ];
 
@@ -377,7 +389,7 @@ class AdvancedSearchService {
         return Object.values(item).some(val =>
           String(val || '')
             .toLowerCase()
-            .includes(String(query).toLowerCase()),
+            .includes(String(query).toLowerCase())
         );
       });
     }
@@ -592,11 +604,12 @@ class AdvancedSearchService {
     if (query) {
       const q = String(query).toLowerCase();
       results = results.filter(item => {
-        const sourceFields = Array.isArray(fields) && fields.length > 0 ? fields : Object.keys(item);
+        const sourceFields =
+          Array.isArray(fields) && fields.length > 0 ? fields : Object.keys(item);
         return sourceFields.some(field =>
           String(item[field] || '')
             .toLowerCase()
-            .includes(q),
+            .includes(q)
         );
       });
     }

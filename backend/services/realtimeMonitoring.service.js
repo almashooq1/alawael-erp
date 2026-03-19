@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Real-time Monitoring Service
  * خدمة المراقبة الفورية

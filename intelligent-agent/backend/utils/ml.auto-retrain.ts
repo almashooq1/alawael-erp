@@ -216,9 +216,9 @@ export async function executeRetraining(
     // إنشاء تنبيه بالفشل
     await MLAlert.create({
       severity: 'high',
-      message: `Model retraining failed: ${error.message}`,
+      message: 'حدث خطأ داخلي',
       source: 'auto-retrain',
-      details: { error: error.message, triggeredBy },
+      details: { error: 'حدث خطأ داخلي', triggeredBy },
     });
 
     throw error;

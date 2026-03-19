@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Event Sourcing System - نظام تتبع الأحداث
  * Professional Event Store for Alawael ERP
@@ -5,42 +6,46 @@
 
 const EventEmitter = require('events');
 const mongoose = require('mongoose');
+const logger = require('../utils/logger');
 
 /**
  * Event Schema
  */
-const EventSchema = new mongoose.Schema({
-  // Event Identity
-  eventId: { type: String, required: true, unique: true },
-  eventType: { type: String, required: true, index: true },
-  aggregateType: { type: String, required: true, index: true },
-  aggregateId: { type: String, required: true, index: true },
-  
-  // Event Data
-  payload: { type: mongoose.Schema.Types.Mixed, required: true },
-  metadata: {
-    userId: { type: String, index: true },
-    correlationId: { type: String },
-    causationId: { type: String },
-    ip: String,
-    userAgent: String,
-    source: String,
+const EventSchema = new mongoose.Schema(
+  {
+    // Event Identity
+    eventId: { type: String, required: true, unique: true },
+    eventType: { type: String, required: true, index: true },
+    aggregateType: { type: String, required: true, index: true },
+    aggregateId: { type: String, required: true, index: true },
+
+    // Event Data
+    payload: { type: mongoose.Schema.Types.Mixed, required: true },
+    metadata: {
+      userId: { type: String, index: true },
+      correlationId: { type: String },
+      causationId: { type: String },
+      ip: String,
+      userAgent: String,
+      source: String,
+    },
+
+    // Versioning
+    version: { type: Number, required: true },
+
+    // Timestamps
+    timestamp: { type: Date, default: Date.now, index: true },
+
+    // Processing Status
+    processed: { type: Boolean, default: false },
+    processedAt: Date,
+    processingError: String,
   },
-  
-  // Versioning
-  version: { type: Number, required: true },
-  
-  // Timestamps
-  timestamp: { type: Date, default: Date.now, index: true },
-  
-  // Processing Status
-  processed: { type: Boolean, default: false },
-  processedAt: Date,
-  processingError: String,
-}, {
-  collection: 'events',
-  timestamps: false,
-});
+  {
+    collection: 'events',
+    timestamps: false,
+  }
+);
 
 // Compound indexes for efficient queries
 EventSchema.index({ aggregateType: 1, aggregateId: 1, version: 1 });
@@ -58,25 +63,19 @@ class EventStore extends EventEmitter {
     this.projections = new Map();
     this.isProcessing = false;
   }
-  
+
   /**
    * Append event to store
    */
   async append(event) {
-    const {
-      eventType,
-      aggregateType,
-      aggregateId,
-      payload,
-      metadata = {},
-    } = event;
-    
+    const { eventType, aggregateType, aggregateId, payload, metadata = {} } = event;
+
     // Get next version number
     const version = await this.getNextVersion(aggregateType, aggregateId);
-    
+
     // Generate event ID
     const eventId = this.generateEventId();
-    
+
     // Create event document
     const eventDoc = new this.Event({
       eventId,
@@ -90,36 +89,36 @@ class EventStore extends EventEmitter {
       },
       version,
     });
-    
+
     // Save event
     await eventDoc.save();
-    
+
     // Emit event for subscribers
     this.emit('event:appended', eventDoc);
-    
+
     // Notify subscribers
     await this.notifySubscribers(eventDoc);
-    
+
     return eventDoc;
   }
-  
+
   /**
    * Append multiple events atomically
    */
   async appendMany(events) {
     const session = await this.connection.startSession();
     session.startTransaction();
-    
+
     try {
       const savedEvents = [];
-      
+
       for (const event of events) {
         const savedEvent = await this.append(event);
         savedEvents.push(savedEvent);
       }
-      
+
       await session.commitTransaction();
-      
+
       return savedEvents;
     } catch (error) {
       await session.abortTransaction();
@@ -128,7 +127,7 @@ class EventStore extends EventEmitter {
       session.endSession();
     }
   }
-  
+
   /**
    * Get next version for aggregate
    */
@@ -137,10 +136,10 @@ class EventStore extends EventEmitter {
       aggregateType,
       aggregateId,
     }).sort({ version: -1 });
-    
+
     return lastEvent ? lastEvent.version + 1 : 1;
   }
-  
+
   /**
    * Get events for aggregate
    */
@@ -151,24 +150,21 @@ class EventStore extends EventEmitter {
       version: { $gt: fromVersion },
     }).sort({ version: 1 });
   }
-  
+
   /**
    * Get all events of a type
    */
   async getEventsByType(eventType, options = {}) {
     const { limit = 100, skip = 0, fromTimestamp } = options;
-    
+
     const query = { eventType };
     if (fromTimestamp) {
       query.timestamp = { $gte: fromTimestamp };
     }
-    
-    return this.Event.find(query)
-      .sort({ timestamp: 1 })
-      .skip(skip)
-      .limit(limit);
+
+    return this.Event.find(query).sort({ timestamp: 1 }).skip(skip).limit(limit);
   }
-  
+
   /**
    * Subscribe to events
    */
@@ -176,31 +172,31 @@ class EventStore extends EventEmitter {
     if (!this.subscribers.has(eventType)) {
       this.subscribers.set(eventType, new Set());
     }
-    
+
     this.subscribers.get(eventType).add(handler);
-    
+
     // Return unsubscribe function
     return () => {
       this.subscribers.get(eventType)?.delete(handler);
     };
   }
-  
+
   /**
    * Notify all subscribers
    */
   async notifySubscribers(event) {
     const handlers = this.subscribers.get(event.eventType);
-    
+
     if (handlers) {
       for (const handler of handlers) {
         try {
           await handler(event);
         } catch (error) {
-          console.error(`Subscriber error for ${event.eventType}:`, error);
+          logger.error(`Subscriber error for ${event.eventType}:`, error);
         }
       }
     }
-    
+
     // Also notify wildcard subscribers
     const wildcardHandlers = this.subscribers.get('*');
     if (wildcardHandlers) {
@@ -208,54 +204,52 @@ class EventStore extends EventEmitter {
         try {
           await handler(event);
         } catch (error) {
-          console.error('Wildcard subscriber error:', error);
+          logger.error('Wildcard subscriber error:', error);
         }
       }
     }
   }
-  
+
   /**
    * Register projection
    */
   registerProjection(name, projection) {
     this.projections.set(name, projection);
-    console.log(`✅ Projection registered: ${name}`);
+    logger.info(`✅ Projection registered: ${name}`);
   }
-  
+
   /**
    * Rebuild projection
    */
   async rebuildProjection(name, fromTimestamp = null) {
     const projection = this.projections.get(name);
-    
+
     if (!projection) {
       throw new Error(`Projection '${name}' not found`);
     }
-    
+
     const query = {};
     if (fromTimestamp) {
       query.timestamp = { $gte: fromTimestamp };
     }
-    
+
     // Get all events
-    const events = await this.Event.find(query)
-      .sort({ timestamp: 1 })
-      .stream();
-    
+    const events = await this.Event.find(query).sort({ timestamp: 1 }).stream();
+
     let processed = 0;
-    
+
     for await (const event of events) {
       if (projection.handles.includes(event.eventType)) {
         await projection.apply(event);
         processed++;
       }
     }
-    
-    console.log(`✅ Projection '${name}' rebuilt: ${processed} events processed`);
-    
+
+    logger.info(`✅ Projection '${name}' rebuilt: ${processed} events processed`);
+
     return { processed };
   }
-  
+
   /**
    * Generate unique event ID
    */
@@ -263,7 +257,7 @@ class EventStore extends EventEmitter {
     const crypto = require('crypto');
     return `evt_${Date.now()}_${crypto.randomBytes(8).toString('hex')}`;
   }
-  
+
   /**
    * Get event statistics
    */
@@ -274,7 +268,7 @@ class EventStore extends EventEmitter {
       { $sort: { count: -1 } },
       { $limit: 10 },
     ]);
-    
+
     return {
       total,
       byType,
@@ -293,21 +287,21 @@ class Aggregate {
     this.version = 0;
     this.changes = [];
   }
-  
+
   /**
    * Apply event to aggregate
    */
   apply(event, isNew = true) {
     // Apply event to aggregate state
     this.handle(event);
-    
+
     if (isNew) {
       this.changes.push(event);
     }
-    
+
     this.version++;
   }
-  
+
   /**
    * Load from history
    */
@@ -316,21 +310,21 @@ class Aggregate {
       this.apply(event, false);
     }
   }
-  
+
   /**
    * Get uncommitted changes
    */
   getUncommittedChanges() {
     return [...this.changes];
   }
-  
+
   /**
    * Mark changes as committed
    */
   markChangesAsCommitted() {
     this.changes = [];
   }
-  
+
   /**
    * Handle event (to be overridden)
    */
@@ -349,33 +343,33 @@ const EventTypes = {
   USER_DELETED: 'user.deleted',
   USER_PASSWORD_CHANGED: 'user.password_changed',
   USER_ROLE_ASSIGNED: 'user.role_assigned',
-  
+
   // Employee Events
   EMPLOYEE_HIRED: 'employee.hired',
   EMPLOYEE_TERMINATED: 'employee.terminated',
   EMPLOYEE_PROMOTED: 'employee.promoted',
   EMPLOYEE_DEPARTMENT_CHANGED: 'employee.department_changed',
-  
+
   // Attendance Events
   ATTENDANCE_CHECKED_IN: 'attendance.checked_in',
   ATTENDANCE_CHECKED_OUT: 'attendance.checked_out',
   ATTENDANCE_LEAVE_REQUESTED: 'attendance.leave_requested',
   ATTENDANCE_LEAVE_APPROVED: 'attendance.leave_approved',
-  
+
   // Finance Events
   INVOICE_CREATED: 'invoice.created',
   INVOICE_PAID: 'invoice.paid',
   INVOICE_CANCELLED: 'invoice.cancelled',
   PAYMENT_RECEIVED: 'payment.received',
   BUDGET_ALLOCATED: 'budget.allocated',
-  
+
   // Inventory Events
   STOCK_ADDED: 'stock.added',
   STOCK_REMOVED: 'stock.removed',
   STOCK_RESERVED: 'stock.reserved',
   STOCK_TRANSFERRED: 'stock.transferred',
   PURCHASE_ORDER_CREATED: 'purchase_order.created',
-  
+
   // Project Events
   PROJECT_CREATED: 'project.created',
   PROJECT_UPDATED: 'project.updated',
@@ -387,7 +381,7 @@ const EventTypes = {
 /**
  * Create Event Store
  */
-const createEventStore = (connection) => {
+const createEventStore = connection => {
   return new EventStore(connection);
 };
 

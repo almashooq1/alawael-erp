@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Rehabilitation Services - Advanced Implementation
  * خدمات التأهيل المتقدمة
@@ -8,6 +9,7 @@
 
 const DisabilityAssessment = require('../models/disability-assessment.model');
 const RehabilitationProgram = require('../models/rehabilitation-program.model');
+const { escapeRegex } = require('../utils/sanitize');
 
 class RehabilitationService {
   // ==================== ASSESSMENT SERVICES ====================
@@ -26,7 +28,7 @@ class RehabilitationService {
         data: assessment,
       };
     } catch (error) {
-      throw new Error(`خطأ في إنشاء التقييم: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -41,7 +43,7 @@ class RehabilitationService {
       }
       return assessment;
     } catch (error) {
-      throw new Error(`خطأ في استرجاع التقييم: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -50,7 +52,10 @@ class RehabilitationService {
    */
   async updateAssessment(assessmentId, updateData) {
     try {
-      const assessment = await DisabilityAssessment.findByIdAndUpdate(assessmentId, updateData, { new: true, runValidators: true });
+      const assessment = await DisabilityAssessment.findByIdAndUpdate(assessmentId, updateData, {
+        new: true,
+        runValidators: true,
+      });
       if (!assessment) {
         throw new Error('التقييم غير موجود');
       }
@@ -60,7 +65,7 @@ class RehabilitationService {
         data: assessment,
       };
     } catch (error) {
-      throw new Error(`خطأ في تحديث التقييم: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -76,7 +81,7 @@ class RehabilitationService {
         data: assessments,
       };
     } catch (error) {
-      throw new Error(`خطأ في استرجاع التقييمات: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -91,7 +96,7 @@ class RehabilitationService {
         data: stats,
       };
     } catch (error) {
-      throw new Error(`خطأ في الحصول على الإحصائيات: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -107,7 +112,7 @@ class RehabilitationService {
         data: report,
       };
     } catch (error) {
-      throw new Error(`خطأ في إنشاء التقرير: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -134,7 +139,7 @@ class RehabilitationService {
         },
       };
     } catch (error) {
-      throw new Error(`خطأ في التحقق من الجاهزية: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -163,7 +168,7 @@ class RehabilitationService {
         data: program,
       };
     } catch (error) {
-      throw new Error(`خطأ في إنشاء البرنامج: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -178,7 +183,7 @@ class RehabilitationService {
       }
       return program;
     } catch (error) {
-      throw new Error(`خطأ في استرجاع البرنامج: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -204,7 +209,7 @@ class RehabilitationService {
         data: program,
       };
     } catch (error) {
-      throw new Error(`خطأ في إضافة الجلسة: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -226,7 +231,7 @@ class RehabilitationService {
         data: program.getGoalProgress(),
       };
     } catch (error) {
-      throw new Error(`خطأ في تحديث تقدم الهدف: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -243,7 +248,7 @@ class RehabilitationService {
         data: report,
       };
     } catch (error) {
-      throw new Error(`خطأ في إنشاء تقرير التقدم: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -259,7 +264,7 @@ class RehabilitationService {
         data: outcomes,
       };
     } catch (error) {
-      throw new Error(`خطأ في استرجاع النتائج: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -279,7 +284,8 @@ class RehabilitationService {
       // Calculate FIM gain if available
       if (dischargeData.discharge_fim) {
         program.functional_independence_gain.discharge_fim = dischargeData.discharge_fim;
-        program.functional_independence_gain.fim_gain = dischargeData.discharge_fim - program.functional_independence_gain.baseline_fim;
+        program.functional_independence_gain.fim_gain =
+          dischargeData.discharge_fim - program.functional_independence_gain.baseline_fim;
       }
 
       await program.save();
@@ -291,7 +297,7 @@ class RehabilitationService {
         data: program,
       };
     } catch (error) {
-      throw new Error(`خطأ في إنهاء البرنامج: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -308,7 +314,7 @@ class RehabilitationService {
         data: programs,
       };
     } catch (error) {
-      throw new Error(`خطأ في استرجاع البرامج: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -328,7 +334,7 @@ class RehabilitationService {
         data: programs,
       };
     } catch (error) {
-      throw new Error(`خطأ في استرجاع البرامج: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -340,8 +346,12 @@ class RehabilitationService {
   async getRehabilitationStatistics() {
     try {
       const activeCount = await RehabilitationProgram.countDocuments({ program_status: 'active' });
-      const dischargedCount = await RehabilitationProgram.countDocuments({ program_status: 'discharged' });
-      const completedCount = await RehabilitationProgram.countDocuments({ program_status: 'completed' });
+      const dischargedCount = await RehabilitationProgram.countDocuments({
+        program_status: 'discharged',
+      });
+      const completedCount = await RehabilitationProgram.countDocuments({
+        program_status: 'completed',
+      });
 
       const disabilityStats = await RehabilitationProgram.getDisabilityTypeStatistics();
 
@@ -359,7 +369,7 @@ class RehabilitationService {
         },
       };
     } catch (error) {
-      throw new Error(`خطأ في الحصول على الإحصائيات: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -383,11 +393,13 @@ class RehabilitationService {
           compliance_rate: complianceRate,
           client_satisfaction: program.client_satisfaction?.satisfaction_score,
           adverse_events: program.quality_indicators?.adverse_events_count || 0,
-          duration_weeks: Math.ceil((new Date() - program.program_duration.enrollment_date) / (1000 * 60 * 60 * 24 * 7)),
+          duration_weeks: Math.ceil(
+            (new Date() - program.program_duration.enrollment_date) / (1000 * 60 * 60 * 24 * 7)
+          ),
         },
       };
     } catch (error) {
-      throw new Error(`خطأ في حساب المقاييس: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -408,7 +420,7 @@ class RehabilitationService {
         data: session,
       };
     } catch (error) {
-      throw new Error(`خطأ في استرجاع تفاصيل الجلسة: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -436,7 +448,10 @@ class RehabilitationService {
               baseline_score: baseline?.current_score,
               discharge_score: discharge.current_score,
               improvement: discharge.current_score - baseline?.current_score,
-              improvement_percentage: (((discharge.current_score - baseline?.current_score) / baseline?.current_score) * 100).toFixed(2),
+              improvement_percentage: (
+                ((discharge.current_score - baseline?.current_score) / baseline?.current_score) *
+                100
+              ).toFixed(2),
               clinically_significant: discharge.minimal_clinically_important_difference,
             };
           }),
@@ -445,7 +460,7 @@ class RehabilitationService {
 
       return comparison;
     } catch (error) {
-      throw new Error(`خطأ في المقارنة: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -470,7 +485,7 @@ class RehabilitationService {
         })),
       };
     } catch (error) {
-      throw new Error(`خطأ في استرجاع حالات المعالج: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -481,12 +496,12 @@ class RehabilitationService {
     try {
       const { keyword, disability_type, program_status, date_from, date_to } = searchParams;
 
-      let assessmentFilter = {};
-      let programFilter = {};
+      const assessmentFilter = {};
+      const programFilter = {};
 
       if (keyword) {
-        assessmentFilter.beneficiary_name = { $regex: keyword, $options: 'i' };
-        programFilter.beneficiary_name = { $regex: keyword, $options: 'i' };
+        assessmentFilter.beneficiary_name = { $regex: escapeRegex(keyword), $options: 'i' };
+        programFilter.beneficiary_name = { $regex: escapeRegex(keyword), $options: 'i' };
       }
 
       if (disability_type) {
@@ -518,7 +533,7 @@ class RehabilitationService {
         programs,
       };
     } catch (error) {
-      throw new Error(`خطأ في البحث: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 }

@@ -1,3 +1,4 @@
+/* eslint-disable no-undef, no-unused-vars */
 /**
  * 🎭 End-to-End & Visual Testing Suite
  * مجموعة اختبارات E2E والاختبارات البصرية
@@ -41,7 +42,7 @@ describe('🎭 End-to-End User Journeys', () => {
 
     test('should handle multi-factor authentication (MFA) flow', async () => {
       // Step 1: User logs in with credentials
-      const credentials = {
+      const _credentials = {
         email: 'test@example.com',
         password: 'password123',
       };
@@ -497,7 +498,7 @@ describe('👁️ Visual & UI Testing', () => {
     });
 
     test('should maintain responsive layout across breakpoints', async () => {
-      const breakpoints = {
+      const _breakpoints = {
         mobile: { width: 375, height: 667 },
         tablet: { width: 768, height: 1024 },
         desktop: { width: 1920, height: 1080 },
@@ -509,7 +510,7 @@ describe('👁️ Visual & UI Testing', () => {
         desktop: { columns: 3, spacing: '24px' },
       };
 
-      for (const [device, layout] of Object.entries(layouts)) {
+      for (const [_device, layout] of Object.entries(layouts)) {
         expect(layout.columns).toBeGreaterThan(0);
         expect(layout.spacing).toBeDefined();
       }
@@ -523,7 +524,7 @@ describe('👁️ Visual & UI Testing', () => {
         disabled: { bgColor: '#6c757d', textColor: '#fff', cursor: 'not-allowed' },
       };
 
-      for (const [state, style] of Object.entries(buttonStates)) {
+      for (const [_state, style] of Object.entries(buttonStates)) {
         expect(style.bgColor).toMatch(/^#[0-9a-f]{3}([0-9a-f]{3})?$/i);
         expect(style.textColor).toMatch(/^(#[0-9a-f]{3}([0-9a-f]{3})?|white|black)$/i);
       }

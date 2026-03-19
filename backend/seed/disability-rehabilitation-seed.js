@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Seed Script for Disability Rehabilitation Programs
  * This script creates sample data for testing the rehabilitation system

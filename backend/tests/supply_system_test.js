@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Supply & Support System - Comprehensive Test Suite
  * نظام الإمداد والمساندة - مجموعة الاختبارات الشاملة

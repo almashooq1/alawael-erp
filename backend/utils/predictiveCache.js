@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * 🤖 Predictive Caching with Machine Learning
  *
@@ -8,8 +9,9 @@
  * - Machine learning models
  */
 
-const fs = require('fs');
-const path = require('path');
+const _fs = require('fs');
+const _path = require('path');
+const logger = require('./logger');
 
 class PredictiveCacheManager {
   constructor(options = {}) {
@@ -219,7 +221,7 @@ class PredictiveCacheManager {
         await cacheManager.set(`predict:${userId}:${resource}`, {}, data, 600);
         this.stats.warmedItems++;
       } catch (error) {
-        console.error(`[PredictiveCache] Failed to warm ${resource}:`, error.message);
+        logger.error(`[PredictiveCache] Failed to warm ${resource}:`, error.message);
       }
     }
 

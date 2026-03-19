@@ -10,6 +10,7 @@
 
 const Redis = require('ioredis');
 const compression = require('compression');
+const logger = require('../utils/logger');
 
 // Redis Connection
 let redis = null;
@@ -17,7 +18,7 @@ let redis = null;
 const initializeRedis = () => {
   // Graceful fallback for demo mode - prevent infinite strict retries
   if (process.env.USE_MOCK_DB === 'true' || process.env.DISABLE_REDIS === 'true') {
-    console.log('ℹ️  Demo/Mock Mode: Redis caching disabled manually.');
+    logger.info('ℹ️  Demo/Mock Mode: Redis caching disabled manually.');
     return null;
   }
 
@@ -36,17 +37,17 @@ const initializeRedis = () => {
     });
 
     redis.on('connect', () => {
-      console.log('✅ Redis Connected for Caching');
+      logger.info('✅ Redis Connected for Caching');
     });
 
     redis.on('error', err => {
-      console.warn('⚠️  Redis Connection Error:', err.message);
-      console.log('📝 Caching disabled, using in-memory fallback');
+      logger.warn('⚠️  Redis Connection Error:', err.message);
+      logger.info('📝 Caching disabled, using in-memory fallback');
     });
 
     return redis;
   } catch (error) {
-    console.warn('⚠️  Redis initialization failed:', error.message);
+    logger.warn('⚠️  Redis initialization failed:', error.message);
     return null;
   }
 };
@@ -68,7 +69,7 @@ const cacheMiddleware = (ttl = 300, prefix = 'cache:') => {
       const cachedData = await redis.get(cacheKey);
 
       if (cachedData) {
-        console.log(`📦 Cache HIT: ${cacheKey}`);
+        logger.info(`📦 Cache HIT: ${cacheKey}`);
         if (!res.headersSent) {
           res.set('X-Cache', 'HIT');
         }
@@ -82,7 +83,7 @@ const cacheMiddleware = (ttl = 300, prefix = 'cache:') => {
       res.json = data => {
         if (res.statusCode === 200) {
           redis.setex(cacheKey, ttl, JSON.stringify(data)).catch(err => {
-            console.warn(`⚠️  Cache SET error for ${cacheKey}:`, err.message);
+            logger.warn(`⚠️  Cache SET error for ${cacheKey}:`, err.message);
           });
         }
         if (!res.headersSent) {
@@ -93,27 +94,39 @@ const cacheMiddleware = (ttl = 300, prefix = 'cache:') => {
 
       next();
     } catch (error) {
-      console.warn('⚠️  Cache middleware error:', error.message);
+      logger.warn('⚠️  Cache middleware error:', error.message);
       next();
     }
   };
 };
 
 /**
- * Clear specific cache pattern
+ * Clear specific cache pattern.
+ * Uses SCAN instead of KEYS to avoid blocking Redis in production.
  */
 const clearCache = async (pattern = '*') => {
   if (!redis) return false;
 
   try {
-    const keys = await redis.keys(pattern);
-    if (keys.length === 0) return true;
+    let cursor = '0';
+    let totalDeleted = 0;
 
-    await redis.del(...keys);
-    console.log(`🗑️  Cleared ${keys.length} cache entries with pattern: ${pattern}`);
+    do {
+      const [nextCursor, keys] = await redis.scan(cursor, 'MATCH', pattern, 'COUNT', 100);
+      cursor = nextCursor;
+
+      if (keys.length > 0) {
+        await redis.del(...keys);
+        totalDeleted += keys.length;
+      }
+    } while (cursor !== '0');
+
+    if (totalDeleted > 0) {
+      logger.info(`🗑️  Cleared ${totalDeleted} cache entries with pattern: ${pattern}`);
+    }
     return true;
   } catch (error) {
-    console.warn('⚠️  Clear cache error:', error.message);
+    logger.warn('⚠️  Clear cache error:', error.message);
     return false;
   }
 };
@@ -177,7 +190,7 @@ const requestTimerMiddleware = (req, res, next) => {
 
     // Log slow requests (> 1000ms)
     if (duration > 1000) {
-      console.warn(`⏱️  SLOW REQUEST: ${req.method} ${route} - ${duration}ms`);
+      logger.warn(`⏱️  SLOW REQUEST: ${req.method} ${route} - ${duration}ms`);
     }
   });
 
@@ -244,12 +257,17 @@ const performanceMonitor = {
   getStats: () => {
     const avgDuration =
       performanceMonitor.metrics.totalRequests > 0
-        ? (performanceMonitor.metrics.totalDuration / performanceMonitor.metrics.totalRequests).toFixed(2)
+        ? (
+            performanceMonitor.metrics.totalDuration / performanceMonitor.metrics.totalRequests
+          ).toFixed(2)
         : 0;
 
     const cacheHitRate =
       performanceMonitor.metrics.totalRequests > 0
-        ? ((performanceMonitor.metrics.cacheHits / performanceMonitor.metrics.totalRequests) * 100).toFixed(2)
+        ? (
+            (performanceMonitor.metrics.cacheHits / performanceMonitor.metrics.totalRequests) *
+            100
+          ).toFixed(2)
         : 0;
 
     return {
@@ -282,4 +300,9 @@ module.exports = {
   requestTimerMiddleware,
   queryOptimizationHints,
   performanceMonitor,
+  /** Returns Redis status string: 'connected' | 'disconnected' | 'disabled' */
+  getRedisStatus: () => {
+    if (!redis) return 'disabled';
+    return redis.status === 'ready' ? 'connected' : redis.status || 'disconnected';
+  },
 };

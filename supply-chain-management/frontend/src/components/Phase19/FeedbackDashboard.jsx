@@ -18,7 +18,7 @@ const FeedbackDashboard = () => {
     customerId: '',
     content: '',
     category: 'general',
-    rating: 5
+    rating: 5,
   });
 
   useEffect(() => {
@@ -46,7 +46,7 @@ const FeedbackDashboard = () => {
     try {
       const startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
       const endDate = new Date().toISOString();
-      
+
       const response = await fetch(
         `/api/v1/customer-experience/feedback/analytics?startDate=${startDate}&endDate=${endDate}`
       );
@@ -69,7 +69,7 @@ const FeedbackDashboard = () => {
       const response = await fetch('/api/v1/customer-experience/feedback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newFeedback)
+        body: JSON.stringify(newFeedback),
       });
 
       if (response.ok) {
@@ -77,7 +77,7 @@ const FeedbackDashboard = () => {
           customerId: '',
           content: '',
           category: 'general',
-          rating: 5
+          rating: 5,
         });
         setShowSubmitForm(false);
         fetchFeedback();
@@ -102,8 +102,8 @@ const FeedbackDashboard = () => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             message: responseText,
-            status: 'acknowledged'
-          })
+            status: 'acknowledged',
+          }),
         }
       );
 
@@ -118,22 +118,22 @@ const FeedbackDashboard = () => {
     }
   };
 
-  const getSentimentColor = (sentiment) => {
+  const getSentimentColor = sentiment => {
     const colors = {
       positive: '#10b981',
       neutral: '#8b5cf6',
-      negative: '#ef4444'
+      negative: '#ef4444',
     };
     return colors[sentiment] || '#6b7280';
   };
 
-  const getStatusBadge = (status) => {
+  const getStatusBadge = status => {
     const statuses = {
       new: { label: 'New', color: '#3b82f6' },
       acknowledged: { label: 'Acknowledged', color: '#f59e0b' },
       in_progress: { label: 'In Progress', color: '#8b5cf6' },
       resolved: { label: 'Resolved', color: '#10b981' },
-      closed: { label: 'Closed', color: '#6b7280' }
+      closed: { label: 'Closed', color: '#6b7280' },
     };
     return statuses[status] || statuses.new;
   };
@@ -142,10 +142,7 @@ const FeedbackDashboard = () => {
     <div className="feedback-dashboard">
       <div className="header">
         <h1>💬 Feedback Management</h1>
-        <button 
-          className="btn-primary"
-          onClick={() => setShowSubmitForm(!showSubmitForm)}
-        >
+        <button className="btn-primary" onClick={() => setShowSubmitForm(!showSubmitForm)}>
           {showSubmitForm ? '✕ Cancel' : '+ New Feedback'}
         </button>
       </div>
@@ -159,7 +156,7 @@ const FeedbackDashboard = () => {
               type="text"
               placeholder="Customer ID"
               value={newFeedback.customerId}
-              onChange={(e) => setNewFeedback({...newFeedback, customerId: e.target.value})}
+              onChange={e => setNewFeedback({ ...newFeedback, customerId: e.target.value })}
             />
           </div>
 
@@ -169,7 +166,7 @@ const FeedbackDashboard = () => {
               placeholder="What is your feedback?"
               rows="4"
               value={newFeedback.content}
-              onChange={(e) => setNewFeedback({...newFeedback, content: e.target.value})}
+              onChange={e => setNewFeedback({ ...newFeedback, content: e.target.value })}
             />
           </div>
 
@@ -178,7 +175,7 @@ const FeedbackDashboard = () => {
               <label>Category</label>
               <select
                 value={newFeedback.category}
-                onChange={(e) => setNewFeedback({...newFeedback, category: e.target.value})}
+                onChange={e => setNewFeedback({ ...newFeedback, category: e.target.value })}
               >
                 <option value="general">General</option>
                 <option value="product">Product</option>
@@ -195,7 +192,7 @@ const FeedbackDashboard = () => {
               <label>Rating (1-5)</label>
               <select
                 value={newFeedback.rating}
-                onChange={(e) => setNewFeedback({...newFeedback, rating: parseInt(e.target.value)})}
+                onChange={e => setNewFeedback({ ...newFeedback, rating: parseInt(e.target.value) })}
               >
                 <option value="1">⭐ 1 - Poor</option>
                 <option value="2">⭐⭐ 2 - Fair</option>
@@ -263,10 +260,7 @@ const FeedbackDashboard = () => {
       )}
 
       <div className="filters">
-        <select
-          value={filterStatus}
-          onChange={(e) => setFilterStatus(e.target.value)}
-        >
+        <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
           <option value="all">All Status</option>
           <option value="new">New</option>
           <option value="acknowledged">Acknowledged</option>
@@ -275,10 +269,7 @@ const FeedbackDashboard = () => {
           <option value="closed">Closed</option>
         </select>
 
-        <select
-          value={filterCategory}
-          onChange={(e) => setFilterCategory(e.target.value)}
-        >
+        <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)}>
           <option value="all">All Categories</option>
           <option value="general">General</option>
           <option value="product">Product</option>
@@ -296,7 +287,7 @@ const FeedbackDashboard = () => {
         {feedbackList.length === 0 ? (
           <p className="empty-state">No feedback found</p>
         ) : (
-          feedbackList.map((feedback) => (
+          feedbackList.map(feedback => (
             <div key={feedback.id} className="feedback-card">
               <div className="feedback-header">
                 <div>
@@ -304,13 +295,13 @@ const FeedbackDashboard = () => {
                   <p className="feedback-text">{feedback.content}</p>
                 </div>
                 <div className="badges">
-                  <span 
+                  <span
                     className="badge sentiment"
                     style={{ backgroundColor: getSentimentColor(feedback.sentiment) }}
                   >
                     {feedback.sentiment}
                   </span>
-                  <span 
+                  <span
                     className="badge status"
                     style={{ backgroundColor: getStatusBadge(feedback.status).color }}
                   >
@@ -325,10 +316,7 @@ const FeedbackDashboard = () => {
                 <span>📅 {new Date(feedback.submittedAt).toLocaleDateString()}</span>
               </div>
 
-              <button
-                className="btn-secondary"
-                onClick={() => setSelectedFeedback(feedback)}
-              >
+              <button className="btn-secondary" onClick={() => setSelectedFeedback(feedback)}>
                 💬 Respond
               </button>
             </div>
@@ -338,14 +326,14 @@ const FeedbackDashboard = () => {
 
       {selectedFeedback && (
         <div className="modal-overlay" onClick={() => setSelectedFeedback(null)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
             <h3>Respond to Feedback</h3>
             <p className="original-feedback">{selectedFeedback.content}</p>
             <textarea
               placeholder="Your response..."
               rows="5"
               value={responseText}
-              onChange={(e) => setResponseText(e.target.value)}
+              onChange={e => setResponseText(e.target.value)}
             />
             <div className="modal-actions">
               <button className="btn-primary" onClick={handleRespondToFeedback}>

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Compensation & Incentives Model
  * نموذج الحوافز والمزايا الشاملة
@@ -485,8 +486,8 @@ individualIncentiveSchema.index({ employeeId: 1, month: 1, year: 1 });
 individualIncentiveSchema.index({ month: 1, year: 1, status: 1 });
 individualIncentiveSchema.index({ departmentId: 1, month: 1 });
 
-performancePenaltySchema.index({ employeeId: 1, 'reportDate': -1 });
-performancePenaltySchema.index({ 'status': 1, 'reportDate': -1 });
+performancePenaltySchema.index({ employeeId: 1, reportDate: -1 });
+performancePenaltySchema.index({ status: 1, reportDate: -1 });
 
 benefitsSummarySchema.index({ employeeId: 1, year: 1 }, { unique: true });
 benefitsSummarySchema.index({ year: 1, departmentId: 1 });

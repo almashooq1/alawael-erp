@@ -1,3 +1,4 @@
+/* eslint-disable no-undef, no-unused-vars */
 const AdvancedReportingServiceClass = require('../services/advancedReportingService');
 const AnalyticsServiceClass = require('../services/analyticsService');
 const AnalyticsCache = require('../models/AnalyticsCache');
@@ -26,14 +27,14 @@ describe('Phase 10: Reporting & BI', () => {
     });
 
     test('generateReport should filter data correctly', () => {
-      const template = { format: 'html', fields: ['category', 'amount'] };
-      const data = [
+      const _template = { format: 'html', fields: ['category', 'amount'] };
+      const _data = [
         { category: 'A', amount: 100 },
         { category: 'B', amount: 200 },
         { category: 'A', amount: 300 },
       ];
 
-      const options = {
+      const _options = {
         filters: [{ field: 'category', operator: 'equals', value: 'A' }],
       };
 

@@ -1,3 +1,4 @@
+/* eslint-disable no-undef, no-unused-vars */
 const request = require('supertest');
 const app = require('../../server');
 
@@ -12,7 +13,7 @@ describe('Auth integration', () => {
       if (app && app.close) {
         await new Promise(resolve => app.close(resolve));
       }
-    } catch (err) {
+    } catch (_err) {
       // Ignore cleanup errors
     }
   });

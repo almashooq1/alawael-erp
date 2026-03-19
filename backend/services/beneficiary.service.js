@@ -1,6 +1,7 @@
+/* eslint-disable no-unused-vars */
 /**
  * Beneficiary Portal Service
- * 
+ *
  * Business logic for beneficiary portal operations
  * - Progress calculations
  * - Performance analysis
@@ -43,7 +44,7 @@ class BeneficiaryService {
 
     const records = await BeneficiaryProgress.find({
       beneficiaryId,
-      createdAt: { $gte: sixMonthsAgo }
+      createdAt: { $gte: sixMonthsAgo },
     })
       .sort({ month: 1 })
       .select('academicScore month')
@@ -62,7 +63,7 @@ class BeneficiaryService {
       improvement,
       firstScore,
       lastScore,
-      months: records.length
+      months: records.length,
     };
   }
 
@@ -74,9 +75,9 @@ class BeneficiaryService {
   static async generateMonthlyReport(beneficiaryId, month = null) {
     const currentMonth = month || new Date().toISOString().slice(0, 7);
 
-    let progress = await BeneficiaryProgress.findOne({
+    const progress = await BeneficiaryProgress.findOne({
       beneficiaryId,
-      month: currentMonth
+      month: currentMonth,
     });
 
     if (!progress) {
@@ -105,7 +106,7 @@ class BeneficiaryService {
         message_ar: `تقرير أداء الطالب للشهر ${currentMonth}`,
         message_en: `Student performance report for ${currentMonth}`,
         relatedType: 'progress_report',
-        relatedId: progress._id
+        relatedId: progress._id,
       });
     }
 
@@ -135,7 +136,7 @@ class BeneficiaryService {
         severity: 'high',
         message: `Attendance below 80%: ${progress.attendanceRate}%`,
         absenceDays: progress.absenceDays,
-        lateDays: progress.lateDays
+        lateDays: progress.lateDays,
       });
     }
 
@@ -144,7 +145,7 @@ class BeneficiaryService {
         type: 'excessive_absences',
         severity: 'critical',
         message: `Excessive absences: ${progress.absenceDays} days`,
-        absenceDays: progress.absenceDays
+        absenceDays: progress.absenceDays,
       });
     }
 
@@ -169,7 +170,7 @@ class BeneficiaryService {
         type: 'low_grades',
         severity: 'critical',
         message: `Academic score below 60: ${progress.academicScore}`,
-        score: progress.academicScore
+        score: progress.academicScore,
       });
     }
 
@@ -178,7 +179,7 @@ class BeneficiaryService {
         type: 'declining_performance',
         severity: 'high',
         message: `Grade declined by ${Math.abs(progress.scoreImprovement)} points`,
-        declined: Math.abs(progress.scoreImprovement)
+        declined: Math.abs(progress.scoreImprovement),
       });
     }
 
@@ -187,7 +188,7 @@ class BeneficiaryService {
         type: 'low_activity_completion',
         severity: 'medium',
         message: `Activity completion below 70%: ${progress.activityCompletionRate}%`,
-        rate: progress.activityCompletionRate
+        rate: progress.activityCompletionRate,
       });
     }
 
@@ -212,7 +213,7 @@ class BeneficiaryService {
         type: 'poor_behavior',
         severity: 'high',
         message: `Behavior rating needs improvement: ${progress.behaviorRating}/10`,
-        rating: progress.behaviorRating
+        rating: progress.behaviorRating,
       });
     }
 
@@ -227,14 +228,14 @@ class BeneficiaryService {
     const [attendanceAlerts, academicAlerts, behaviorAlerts] = await Promise.all([
       this.getAttendanceAlerts(beneficiaryId),
       this.getAcademicAlerts(beneficiaryId),
-      this.getBehaviorAlerts(beneficiaryId)
+      this.getBehaviorAlerts(beneficiaryId),
     ]);
 
     return {
       attendance: attendanceAlerts,
       academic: academicAlerts,
       behavior: behaviorAlerts,
-      total: attendanceAlerts.length + academicAlerts.length + behaviorAlerts.length
+      total: attendanceAlerts.length + academicAlerts.length + behaviorAlerts.length,
     };
   }
 
@@ -262,7 +263,7 @@ class BeneficiaryService {
           message_ar: `الطالب يحتاج إلى دعم أكاديمي`,
           message_en: 'Student needs academic support',
           relatedType: 'beneficiary',
-          relatedId: beneficiaryId
+          relatedId: beneficiaryId,
         });
       }
 
@@ -275,7 +276,7 @@ class BeneficiaryService {
           title_ar: 'تنبيه الحضور',
           title_en: 'Attendance Alert',
           message_ar: `الحضور منخفض جداً`,
-          message_en: 'Attendance is critically low'
+          message_en: 'Attendance is critically low',
         });
       }
     }
@@ -296,7 +297,7 @@ class BeneficiaryService {
         good: 0,
         satisfactory: 0,
         needsImprovement: 0,
-        total: 0
+        total: 0,
       };
     }
 
@@ -305,7 +306,7 @@ class BeneficiaryService {
       good: records.filter(r => r.academicScore >= 70 && r.academicScore < 80).length,
       satisfactory: records.filter(r => r.academicScore >= 60 && r.academicScore < 70).length,
       needsImprovement: records.filter(r => r.academicScore < 60).length,
-      total: records.length
+      total: records.length,
     };
 
     return distribution;
@@ -325,14 +326,14 @@ class BeneficiaryService {
 
     // Get class average (if available)
     const classAverage = await BeneficiaryProgress.aggregate([
-      { $group: { _id: null, avgScore: { $avg: '$academicScore' } } }
+      { $group: { _id: null, avgScore: { $avg: '$academicScore' } } },
     ]);
 
     return {
       beneficiaryScore: currentProgress.academicScore,
       classAverage: classAverage[0]?.avgScore || 0,
       aboveAverage: currentProgress.academicScore > (classAverage[0]?.avgScore || 0),
-      percentile: Math.round((currentProgress.academicScore / 100) * 100) // Simplified
+      percentile: Math.round((currentProgress.academicScore / 100) * 100), // Simplified
     };
   }
 
@@ -351,15 +352,15 @@ class BeneficiaryService {
       beneficiary: {
         name: beneficiary.firstName_ar + ' ' + beneficiary.lastName_ar,
         enrollmentDate: beneficiary.enrollmentDate,
-        level: beneficiary.currentLevel
+        level: beneficiary.currentLevel,
       },
       progressData: progress.map(p => ({
         month: p.month,
         academicScore: p.academicScore,
         attendance: p.attendanceRate,
         behavior: p.behaviorRating,
-        completion: p.activityCompletionRate
-      }))
+        completion: p.activityCompletionRate,
+      })),
     };
 
     return data;
@@ -373,7 +374,7 @@ class BeneficiaryService {
   static async getYearSummary(beneficiaryId, year) {
     const records = await BeneficiaryProgress.find({
       beneficiaryId,
-      month: { $regex: year.toString() }
+      month: { $regex: year.toString() },
     }).lean();
 
     if (records.length === 0) return null;
@@ -381,11 +382,15 @@ class BeneficiaryService {
     return {
       year,
       totalMonths: records.length,
-      averageScore: (records.reduce((sum, r) => sum + r.academicScore, 0) / records.length).toFixed(2),
-      averageAttendance: (records.reduce((sum, r) => sum + r.attendanceRate, 0) / records.length).toFixed(2),
+      averageScore: (records.reduce((sum, r) => sum + r.academicScore, 0) / records.length).toFixed(
+        2
+      ),
+      averageAttendance: (
+        records.reduce((sum, r) => sum + r.attendanceRate, 0) / records.length
+      ).toFixed(2),
       highestScore: Math.max(...records.map(r => r.academicScore)),
       lowestScore: Math.min(...records.map(r => r.academicScore)),
-      totalAbsences: records.reduce((sum, r) => sum + r.absenceDays, 0)
+      totalAbsences: records.reduce((sum, r) => sum + r.absenceDays, 0),
     };
   }
 
@@ -400,7 +405,7 @@ class BeneficiaryService {
       lowGrades: alerts.academic.some(a => a.type === 'low_grades'),
       lowAttendance: alerts.attendance.some(a => a.severity === 'critical'),
       poorBehavior: alerts.behavior.some(a => a.severity === 'high'),
-      decliningPerformance: alerts.academic.some(a => a.type === 'declining_performance')
+      decliningPerformance: alerts.academic.some(a => a.type === 'declining_performance'),
     };
 
     const riskScore = Object.values(riskFactors).filter(Boolean).length;
@@ -409,7 +414,7 @@ class BeneficiaryService {
       atRisk: riskScore >= 2,
       riskScore,
       factors: riskFactors,
-      recommendation: riskScore >= 2 ? 'Immediate intervention required' : 'Monitor closely'
+      recommendation: riskScore >= 2 ? 'Immediate intervention required' : 'Monitor closely',
     };
   }
 }

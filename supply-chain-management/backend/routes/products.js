@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import ChangeLog from '../models/ChangeLog.js';
 import express from 'express';
 import Product from '../models/Product.js';
@@ -21,8 +22,12 @@ const router = express.Router();
 
 // Get all products
 router.get('/', authMiddleware, async (req, res) => {
-  const products = await Product.find().populate('supplier');
-  res.json(products);
+  try {
+    const products = await Product.find().populate('supplier');
+    res.json(products);
+  } catch (_err) {
+    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+  }
 });
 
 // Create product (with image upload)
@@ -42,55 +47,68 @@ router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
       details: { data },
     });
     res.status(201).json(product);
-  } catch (err) {
+  } catch (_err) {
     res.status(500).json({ error: 'فشل رفع المنتج' });
   }
 });
 
 // Update product
 router.put('/:id', authMiddleware, async (req, res) => {
-  const before = await Product.findById(req.params.id);
-  const product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
-  await logAction({
-    user: req.user,
-    action: 'update',
-    entity: 'Product',
-    entityId: product._id,
-    details: { before, after: product },
-  });
-  // سجل التعديلات
-  await ChangeLog.create({
-    entity: 'Product',
-    entityId: product._id,
-    action: 'update',
-    user: req.user._id,
-    before,
-    after: product,
-  });
-  res.json(product);
+  try {
+    const before = await Product.findById(req.params.id);
+    const { name, description, sku, category, price, supplier, status, imagePath } = req.body;
+    const product = await Product.findByIdAndUpdate(
+      req.params.id,
+      { name, description, sku, category, price, supplier, status, imagePath },
+      { new: true },
+    );
+    await logAction({
+      user: req.user,
+      action: 'update',
+      entity: 'Product',
+      entityId: product._id,
+      details: { before, after: product },
+    });
+    // سجل التعديلات
+    await ChangeLog.create({
+      entity: 'Product',
+      entityId: product._id,
+      action: 'update',
+      user: req.user._id,
+      before,
+      after: product,
+    });
+    res.json(product);
+  } catch (_err) {
+    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+  }
 });
 
 // Delete product
 router.delete('/:id', authMiddleware, async (req, res) => {
-  const before = await Product.findById(req.params.id);
-  await Product.findByIdAndDelete(req.params.id);
-  await logAction({
-    user: req.user,
-    action: 'delete',
-    entity: 'Product',
-    entityId: req.params.id,
-    details: { before },
-  });
-  // سجل التعديلات
-  await ChangeLog.create({
-    entity: 'Product',
-    entityId: req.params.id,
-    action: 'delete',
-    user: req.user._id,
-    before,
-    after: null,
-  });
-  res.status(204).end();
+  try {
+    const before = await Product.findById(req.params.id);
+    await Product.findByIdAndDelete(req.params.id);
+    await logAction({
+      user: req.user,
+      action: 'delete',
+      entity: 'Product',
+      entityId: req.params.id,
+      details: { before },
+    });
+    // سجل التعديلات
+    await ChangeLog.create({
+      entity: 'Product',
+      entityId: req.params.id,
+      action: 'delete',
+      user: req.user._id,
+      before,
+      after: null,
+    });
+    res.status(204).end();
+  } catch (_err) {
+    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+  }
 });
 
 export default router;

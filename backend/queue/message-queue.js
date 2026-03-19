@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Message Queue System - نظام قوائم الرسائل
  * Professional Job Queue for Alawael ERP
@@ -20,7 +21,7 @@ const queueConfig = {
     removeOnFail: 500,
     timeout: 30000,
   },
-  
+
   // Queue settings
   maxJobs: 10000,
   concurrency: 5,
@@ -43,7 +44,7 @@ class InMemoryQueue extends EventEmitter {
     this.isPaused = false;
     this.jobIdCounter = 0;
   }
-  
+
   /**
    * Add job to queue
    */
@@ -62,9 +63,9 @@ class InMemoryQueue extends EventEmitter {
       finishedOn: null,
       delay: options.delay || 0,
     };
-    
+
     this.jobs.set(job.id, job);
-    
+
     if (job.delay > 0) {
       setTimeout(() => {
         if (job.state === 'waiting') {
@@ -76,12 +77,12 @@ class InMemoryQueue extends EventEmitter {
       this.pending.push(job);
       this.processNext();
     }
-    
+
     this.emit('job:added', job);
-    
+
     return job;
   }
-  
+
   /**
    * Add bulk jobs
    */
@@ -93,7 +94,7 @@ class InMemoryQueue extends EventEmitter {
     }
     return addedJobs;
   }
-  
+
   /**
    * Process jobs
    */
@@ -101,7 +102,7 @@ class InMemoryQueue extends EventEmitter {
     this.workers.push(processor);
     this.processNext();
   }
-  
+
   /**
    * Process next job
    */
@@ -109,16 +110,16 @@ class InMemoryQueue extends EventEmitter {
     if (this.isPaused) return;
     if (this.pending.length === 0) return;
     if (this.processing.size >= this.options.concurrency) return;
-    
+
     const job = this.pending.shift();
     if (!job) return;
-    
+
     job.state = 'active';
     job.processedOn = Date.now();
     this.processing.set(job.id, job);
-    
+
     this.emit('job:active', job);
-    
+
     try {
       // Find available worker
       const processor = this.workers[0];
@@ -126,35 +127,36 @@ class InMemoryQueue extends EventEmitter {
         this.pending.unshift(job);
         return;
       }
-      
+
       const result = await processor(job);
-      
+
       // Job completed successfully
       job.state = 'completed';
       job.finishedOn = Date.now();
       job.returnvalue = result;
-      
+
       this.processing.delete(job.id);
       this.completed.push(job);
-      
+
       // Trim completed jobs
       if (this.completed.length > this.options.defaultJobOptions.removeOnComplete) {
         const removed = this.completed.shift();
         this.jobs.delete(removed.id);
       }
-      
+
       this.emit('job:completed', job, result);
     } catch (error) {
       job.attempts++;
       job.failedReason = error.message;
-      
+
       if (job.attempts < job.maxAttempts) {
         // Retry with backoff
         const backoff = this.options.defaultJobOptions.backoff;
-        const delay = backoff.type === 'exponential'
-          ? backoff.delay * Math.pow(2, job.attempts - 1)
-          : backoff.delay;
-        
+        const delay =
+          backoff.type === 'exponential'
+            ? backoff.delay * Math.pow(2, job.attempts - 1)
+            : backoff.delay;
+
         setTimeout(() => {
           job.state = 'waiting';
           this.pending.push(job);
@@ -166,31 +168,31 @@ class InMemoryQueue extends EventEmitter {
         // Job failed permanently
         job.state = 'failed';
         job.finishedOn = Date.now();
-        
+
         this.processing.delete(job.id);
         this.failed.push(job);
-        
+
         // Trim failed jobs
         if (this.failed.length > this.options.defaultJobOptions.removeOnFail) {
           const removed = this.failed.shift();
           this.jobs.delete(removed.id);
         }
-        
+
         this.emit('job:failed', job, error);
       }
     }
-    
+
     // Process next job
     setImmediate(() => this.processNext());
   }
-  
+
   /**
    * Get job by ID
    */
   getJob(jobId) {
     return this.jobs.get(jobId);
   }
-  
+
   /**
    * Get queue stats
    */
@@ -205,7 +207,7 @@ class InMemoryQueue extends EventEmitter {
       isPaused: this.isPaused,
     };
   }
-  
+
   /**
    * Pause queue
    */
@@ -213,7 +215,7 @@ class InMemoryQueue extends EventEmitter {
     this.isPaused = true;
     this.emit('queue:paused');
   }
-  
+
   /**
    * Resume queue
    */
@@ -222,7 +224,7 @@ class InMemoryQueue extends EventEmitter {
     this.emit('queue:resumed');
     this.processNext();
   }
-  
+
   /**
    * Clear queue
    */
@@ -232,7 +234,7 @@ class InMemoryQueue extends EventEmitter {
     this.jobs.clear();
     this.emit('queue:emptied');
   }
-  
+
   /**
    * Close queue
    */
@@ -250,7 +252,7 @@ class QueueManager {
     this.queues = new Map();
     this.schedulers = new Map();
   }
-  
+
   /**
    * Create or get queue
    */
@@ -261,13 +263,13 @@ class QueueManager {
     }
     return this.queues.get(name);
   }
-  
+
   /**
    * Create scheduled job
    */
   schedule(name, cron, data, options = {}) {
     const cronstrue = require('cronstrue');
-    
+
     // Parse cron (simplified - use node-cron in production)
     const schedule = {
       name,
@@ -278,7 +280,7 @@ class QueueManager {
       nextRun: this.getNextCronTime(cron),
       isRunning: false,
     };
-    
+
     // Start scheduler
     schedule.timer = setInterval(() => {
       const now = new Date();
@@ -289,12 +291,12 @@ class QueueManager {
         schedule.nextRun = this.getNextCronTime(cron);
       }
     }, 60000); // Check every minute
-    
+
     this.schedulers.set(name, schedule);
-    
+
     return schedule;
   }
-  
+
   /**
    * Get next cron time (simplified)
    */
@@ -303,7 +305,7 @@ class QueueManager {
     const now = new Date();
     return new Date(now.getTime() + 60000);
   }
-  
+
   /**
    * Check if cron should run (simplified)
    */
@@ -311,7 +313,7 @@ class QueueManager {
     // Simplified - use proper cron library in production
     return date.getSeconds() === 0;
   }
-  
+
   /**
    * Cancel scheduled job
    */
@@ -322,7 +324,7 @@ class QueueManager {
     }
     this.schedulers.delete(name);
   }
-  
+
   /**
    * Get all queue stats
    */
@@ -333,7 +335,7 @@ class QueueManager {
     }
     return stats;
   }
-  
+
   /**
    * Close all queues
    */
@@ -360,34 +362,34 @@ const JobTypes = {
   EMAIL_SEND: 'email:send',
   EMAIL_BULK: 'email:bulk',
   EMAIL_NEWSLETTER: 'email:newsletter',
-  
+
   // Report Jobs
   REPORT_GENERATE: 'report:generate',
   REPORT_EXPORT: 'report:export',
   REPORT_SCHEDULED: 'report:scheduled',
-  
+
   // Notification Jobs
   NOTIFICATION_PUSH: 'notification:push',
   NOTIFICATION_SMS: 'notification:sms',
   NOTIFICATION_BULK: 'notification:bulk',
-  
+
   // Data Processing Jobs
   DATA_IMPORT: 'data:import',
   DATA_EXPORT: 'data:export',
   DATA_SYNC: 'data:sync',
   DATA_BACKUP: 'data:backup',
-  
+
   // Integration Jobs
   INTEGRATION_SYNC: 'integration:sync',
   INTEGRATION_WEBHOOK: 'integration:webhook',
   ZATCA_INVOICE: 'zatca:invoice',
   QIWA_SYNC: 'qiwa:sync',
-  
+
   // Maintenance Jobs
   CLEANUP_TEMP: 'cleanup:temp',
   CLEANUP_LOGS: 'cleanup:logs',
   HEALTH_CHECK: 'health:check',
-  
+
   // Analytics Jobs
   ANALYTICS_AGGREGATE: 'analytics:aggregate',
   ANALYTICS_REPORT: 'analytics:report',

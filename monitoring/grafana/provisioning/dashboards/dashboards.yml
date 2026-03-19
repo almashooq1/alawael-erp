@@ -1,0 +1,17 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# Grafana Provisioning — Dashboard Provider
+# ═══════════════════════════════════════════════════════════════════════════
+
+apiVersion: 1
+
+providers:
+  - name: "AlAwael ERP"
+    orgId: 1
+    folder: "AlAwael ERP"
+    type: file
+    disableDeletion: false
+    editable: true
+    updateIntervalSeconds: 30
+    options:
+      path: /var/lib/grafana/dashboards
+      foldersFromFilesStructure: false

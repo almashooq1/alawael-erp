@@ -1,0 +1,196 @@
+{
+  "monitoring": {
+    "name": "ALAWAEL ERP Monitoring Configuration",
+    "date": "2026-02-28",
+    "environment": "production",
+    "alerting": {
+      "enabled": true,
+      "channels": {
+        "email": {
+          "enabled": true,
+          "recipients": ["admin@alawael-erp.com"],
+          "alerts": [
+            "high_cpu_usage",
+            "high_memory_usage",
+            "process_crash",
+            "response_time_high",
+            "database_connection_lost",
+            "backup_failed"
+          ]
+        },
+        "slack": {
+          "enabled": false,
+          "webhook_url": "CONFIGURE_AT_DEPLOYMENT",
+          "alerts": ["critical_errors", "deployment_status", "performance_degradation"]
+        },
+        "pagerduty": {
+          "enabled": false,
+          "api_key": "CONFIGURE_AT_DEPLOYMENT",
+          "alerts": ["critical_system_down", "data_loss_risk"]
+        }
+      },
+      "thresholds": {
+        "cpu_warning_percent": 70,
+        "cpu_critical_percent": 85,
+        "memory_warning_percent": 75,
+        "memory_critical_percent": 90,
+        "response_time_warning_ms": 100,
+        "response_time_critical_ms": 500,
+        "error_rate_warning_percent": 5,
+        "error_rate_critical_percent": 10
+      }
+    },
+    "metrics_to_monitor": [
+      {
+        "metric": "cpu_usage_per_instance",
+        "interval_seconds": 60,
+        "aggregation": "average",
+        "alert_threshold": 85
+      },
+      {
+        "metric": "memory_usage_per_instance",
+        "interval_seconds": 60,
+        "aggregation": "max",
+        "alert_threshold": 500
+      },
+      {
+        "metric": "api_response_time_p95",
+        "interval_seconds": 300,
+        "aggregation": "p95",
+        "alert_threshold": 500
+      },
+      {
+        "metric": "http_status_5xx_rate",
+        "interval_seconds": 300,
+        "aggregation": "sum",
+        "alert_threshold": 10
+      },
+      {
+        "metric": "database_connection_count",
+        "interval_seconds": 300,
+        "aggregation": "current",
+        "alert_threshold": 100
+      },
+      {
+        "metric": "request_queue_length",
+        "interval_seconds": 300,
+        "aggregation": "max",
+        "alert_threshold": 50
+      },
+      {
+        "metric": "uptime_hours",
+        "interval_seconds": 3600,
+        "aggregation": "current",
+        "alert_threshold": 0
+      }
+    ],
+    "pm2_config": {
+      "max_memory_restart": "500M",
+      "max_restarts": 10,
+      "min_uptime": "30s",
+      "autorestart": true,
+      "watch": false,
+      "ignore_watch": ["node_modules", "logs", ".git"],
+      "error_file": "./logs/error.log",
+      "out_file": "./logs/out.log",
+      "log_date_format": "YYYY-MM-DD HH:mm:ss Z",
+      "merge_logs": false,
+      "env": {
+        "NODE_ENV": "production",
+        "LOG_LEVEL": "info"
+      }
+    },
+    "log_rotation": {
+      "enabled": true,
+      "max_size": "100M",
+      "max_files": 14,
+      "compress": true,
+      "archive_path": "./logs/archive",
+      "retention_days": 90
+    },
+    "backup_policy": {
+      "type": "automated_daily",
+      "schedule": "02:00 AM UTC",
+      "retention_days": 30,
+      "storage_location": "C:\\mongodb-backups",
+      "verification": {
+        "enabled": true,
+        "check_interval_hours": 24
+      }
+    },
+    "health_checks": {
+      "interval_seconds": 30,
+      "endpoints": [
+        {
+          "path": "/api/v1/health/alive",
+          "method": "GET",
+          "expected_status": 200,
+          "timeout_ms": 5000,
+          "critical": true
+        },
+        {
+          "path": "/api/v1/health/db",
+          "method": "GET",
+          "expected_status": 200,
+          "timeout_ms": 5000,
+          "critical": true
+        },
+        {
+          "path": "/api/v1/health/ready",
+          "method": "GET",
+          "expected_status": 200,
+          "timeout_ms": 5000,
+          "critical": false
+        }
+      ]
+    },
+    "dashboards": {
+      "requested": [
+        {
+          "name": "Real-time Operations",
+          "metrics": ["cpu", "memory", "request_count", "response_time"],
+          "refresh_interval": "5s"
+        },
+        {
+          "name": "SLA Tracking",
+          "metrics": ["uptime_hours", "error_rate", "throughput", "p95_latency"],
+          "refresh_interval": "60s"
+        },
+        {
+          "name": "Business Metrics",
+          "metrics": ["active_users", "transaction_count", "revenue", "api_calls"],
+          "refresh_interval": "300s"
+        }
+      ],
+      "recommended_tools": [
+        {
+          "name": "Prometheus",
+          "purpose": "Time-series metrics collection",
+          "estimated_setup_hours": 4
+        },
+        {
+          "name": "Grafana",
+          "purpose": "Visualization and alerting",
+          "estimated_setup_hours": 2
+        },
+        {
+          "name": "ELK Stack (Elasticsearch/Logstash/Kibana)",
+          "purpose": "Log aggregation and analysis",
+          "estimated_setup_hours": 6
+        },
+        {
+          "name": "DataDog",
+          "purpose": "All-in-one monitoring (cloud-based)",
+          "estimated_setup_hours": 1,
+          "cost_monthly": "$0.10-0.30 per host"
+        },
+        {
+          "name": "New Relic",
+          "purpose": "APM and monitoring (cloud-based)",
+          "estimated_setup_hours": 1,
+          "cost_monthly": "$50-200 per month"
+        }
+      ]
+    }
+  }
+}

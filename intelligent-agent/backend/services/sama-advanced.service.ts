@@ -228,7 +228,7 @@ export class AdvancedSAMAService extends EventEmitter {
       return validation;
     } catch (error: any) {
       this.logger.error('IBAN validation failed', error);
-      throw new Error(`IBAN validation failed: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 

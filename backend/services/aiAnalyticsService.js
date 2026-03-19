@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * AI Analytics Service
  * خدمة تحليلات الذكاء الاصطناعي المتقدمة
@@ -100,7 +101,7 @@ class AIAnalyticsService {
       this.predictions.set(prediction.id, prediction);
       return { success: true, prediction };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -125,7 +126,8 @@ class AIAnalyticsService {
       return { nextScore: 0, confidence: 0, factors: [] };
     }
 
-    const avgScore = data.reduce((sum, d) => sum + (d.score || d.performance || 0), 0) / data.length;
+    const avgScore =
+      data.reduce((sum, d) => sum + (d.score || d.performance || 0), 0) / data.length;
     const nextScore = Math.round(Math.max(0, Math.min(100, avgScore + (Math.random() * 10 - 5))));
     const confidence = Math.round(Math.max(50, Math.min(100, 75 + Math.random() * 25)));
 
@@ -197,7 +199,7 @@ class AIAnalyticsService {
       this.predictions.set(performancePrediction.id, performancePrediction);
       return { success: true, prediction: performancePrediction };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -228,7 +230,10 @@ class AIAnalyticsService {
 
       // البحث عن الشذوذ
       data.forEach((item, index) => {
-        const value = typeof item === 'number' ? item : item.score || item.performance || item.value || item.attendance || 0;
+        const value =
+          typeof item === 'number'
+            ? item
+            : item.score || item.performance || item.value || item.attendance || 0;
         const zScore = Math.abs((value - mean) / stdDev);
 
         if (zScore > threshold) {
@@ -322,7 +327,7 @@ class AIAnalyticsService {
       this.recommendations.set(recommendations.id, recommendations);
       return { success: true, recommendations };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -388,7 +393,7 @@ class AIAnalyticsService {
       // Return in legacy format for backward compatibility
       return { success: true, trends };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -415,8 +420,10 @@ class AIAnalyticsService {
     const movingAverage = this.calculateMovingAverage(values);
 
     // Determine direction
-    const recentAvg = movingAverage.slice(-3).reduce((a, b) => a + b, 0) / Math.min(3, movingAverage.length);
-    const olderAvg = movingAverage.slice(-6, -3).reduce((a, b) => a + b, 0) / Math.min(3, movingAverage.length);
+    const recentAvg =
+      movingAverage.slice(-3).reduce((a, b) => a + b, 0) / Math.min(3, movingAverage.length);
+    const olderAvg =
+      movingAverage.slice(-6, -3).reduce((a, b) => a + b, 0) / Math.min(3, movingAverage.length);
     const direction = recentAvg > olderAvg ? 'up' : recentAvg < olderAvg ? 'down' : 'stable';
 
     // Calculate slope
@@ -459,7 +466,9 @@ class AIAnalyticsService {
   analyzeDayPattern(historyData) {
     const pattern = {};
     ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'].forEach(day => {
-      const dayAbsences = historyData.filter(h => h.dayOfWeek === day && h.status === 'absent').length;
+      const dayAbsences = historyData.filter(
+        h => h.dayOfWeek === day && h.status === 'absent'
+      ).length;
       pattern[day] = dayAbsences;
     });
     return pattern;
@@ -533,7 +542,9 @@ class AIAnalyticsService {
   }
 
   identifySkillGaps(userProfile) {
-    return userProfile.requiredSkills ? userProfile.requiredSkills.filter(skill => !userProfile.currentSkills.includes(skill)) : [];
+    return userProfile.requiredSkills
+      ? userProfile.requiredSkills.filter(skill => !userProfile.currentSkills.includes(skill))
+      : [];
   }
 
   analyzeDevelopmentNeeds(userProfile) {
@@ -565,7 +576,9 @@ class AIAnalyticsService {
 
     // Handle both array of objects and array of numbers
     const values = data.map(d => (typeof d === 'object' ? d.value || d.score || 0 : d));
-    const movingAverage = this.calculateMovingAverage(values.map((v, i) => ({ value: v, index: i })));
+    const movingAverage = this.calculateMovingAverage(
+      values.map((v, i) => ({ value: v, index: i }))
+    );
 
     const recent = movingAverage.slice(-3);
     const slope = (recent[2] - recent[0]) / 2;
@@ -631,13 +644,18 @@ class AIAnalyticsService {
 
   predictAttendance(data, options = {}) {
     if (!data || !Array.isArray(data)) return { nextPeriod: 0, confidence: 0 };
-    const avgAttendance = data.reduce((sum, item) => sum + (item.attendance || 0), 0) / (data.length || 1);
+    const avgAttendance =
+      data.reduce((sum, item) => sum + (item.attendance || 0), 0) / (data.length || 1);
     const nextPeriodPrediction = Math.round(avgAttendance * 100);
 
     let trend = 'stable';
     if (options.considerTrend) {
-      const recentAvg = data.slice(-5).reduce((sum, item) => sum + (item.attendance || 0), 0) / Math.min(5, data.length);
-      const olderAvg = data.slice(-10, -5).reduce((sum, item) => sum + (item.attendance || 0), 0) / Math.min(5, data.length);
+      const recentAvg =
+        data.slice(-5).reduce((sum, item) => sum + (item.attendance || 0), 0) /
+        Math.min(5, data.length);
+      const olderAvg =
+        data.slice(-10, -5).reduce((sum, item) => sum + (item.attendance || 0), 0) /
+        Math.min(5, data.length);
       trend = recentAvg > olderAvg ? 'increasing' : recentAvg < olderAvg ? 'decreasing' : 'stable';
     }
 
@@ -649,7 +667,8 @@ class AIAnalyticsService {
     return {
       nextPeriod: Math.max(0, Math.min(100, nextPeriodPrediction)),
       confidence,
-      confidenceReason: confidence > 75 ? 'High data quality and consistent patterns' : 'Limited historical data',
+      confidenceReason:
+        confidence > 75 ? 'High data quality and consistent patterns' : 'Limited historical data',
       trend: trend,
       seasonalPattern,
       periods: Array.from({ length: 3 }, (_, i) => nextPeriodPrediction + Math.random() * 5 - 2.5),
@@ -785,7 +804,9 @@ class AIAnalyticsService {
     const field = options.field || 'value';
     const values = data.map(item => item[field] || 0);
     const mean = values.reduce((a, b) => a + b, 0) / values.length;
-    const std = Math.sqrt(values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length);
+    const std = Math.sqrt(
+      values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length
+    );
 
     const outliers = [];
     values.forEach((val, idx) => {
@@ -895,7 +916,8 @@ class AIAnalyticsService {
 
   comparePerformance(data, options = {}) {
     const baseline = options.baseline || 85;
-    const avgScore = data.reduce((sum, d) => sum + (d.score || d.performance || 0), 0) / data.length;
+    const avgScore =
+      data.reduce((sum, d) => sum + (d.score || d.performance || 0), 0) / data.length;
     return {
       aboveBaseline: avgScore > baseline,
       variance: Math.abs(avgScore - baseline),
@@ -904,7 +926,8 @@ class AIAnalyticsService {
   }
 
   predictImprovement(data) {
-    const currentAvg = data.reduce((sum, d) => sum + (d.score || d.performance || 0), 0) / data.length;
+    const currentAvg =
+      data.reduce((sum, d) => sum + (d.score || d.performance || 0), 0) / data.length;
     return {
       projectedImprovement: (Math.random() * 15).toFixed(2),
       timeToTarget: Math.ceil(Math.random() * 12) + ' months',
@@ -929,7 +952,9 @@ class AIAnalyticsService {
 
   // Recommendations wrapper
   generateRecommendations(data, options = {}) {
-    const avgScore = data.reduce((sum, d) => sum + (d.score || d.performance || d.attendance || 0), 0) / data.length;
+    const avgScore =
+      data.reduce((sum, d) => sum + (d.score || d.performance || d.attendance || 0), 0) /
+      data.length;
     const recommendations = [
       {
         action: 'Improve attendance tracking',

@@ -1,9 +1,11 @@
+/* eslint-disable no-unused-vars */
 /**
  * 🔐 Advanced Authentication Middleware - المصادقة المتقدمة
  * نظام ERP الألوائل - إصدار احترافي
  */
 
 const jwt = require('jsonwebtoken');
+const logger = require('../utils/logger');
 const { securityConfig, SecurityService } = require('../config/security.config');
 
 const securityService = new SecurityService();
@@ -19,7 +21,7 @@ const authenticate = async (req, res, next) => {
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return res.status(401).json({
         success: false,
-        message: 'الوصول مرفوض. يرجى تسجيل الدخول'
+        message: 'الوصول مرفوض. يرجى تسجيل الدخول',
       });
     }
 
@@ -28,7 +30,7 @@ const authenticate = async (req, res, next) => {
     // التحقق من صحة التوكن
     const decoded = jwt.verify(token, securityConfig.jwt.secret, {
       issuer: securityConfig.jwt.issuer,
-      audience: securityConfig.jwt.audience
+      audience: securityConfig.jwt.audience,
     });
 
     // إضافة معلومات المستخدم للطلب
@@ -41,7 +43,7 @@ const authenticate = async (req, res, next) => {
       return res.status(401).json({
         success: false,
         message: 'انتهت صلاحية الجلسة. يرجى تسجيل الدخول مجدداً',
-        code: 'TOKEN_EXPIRED'
+        code: 'TOKEN_EXPIRED',
       });
     }
 
@@ -49,13 +51,13 @@ const authenticate = async (req, res, next) => {
       return res.status(401).json({
         success: false,
         message: 'توكن غير صالح',
-        code: 'INVALID_TOKEN'
+        code: 'INVALID_TOKEN',
       });
     }
 
     return res.status(500).json({
       success: false,
-      message: 'خطأ في المصادقة'
+      message: 'خطأ في المصادقة',
     });
   }
 };
@@ -73,13 +75,13 @@ const optionalAuth = async (req, res, next) => {
       try {
         const decoded = jwt.verify(token, securityConfig.jwt.secret, {
           issuer: securityConfig.jwt.issuer,
-          audience: securityConfig.jwt.audience
+          audience: securityConfig.jwt.audience,
         });
 
         req.user = decoded;
         req.token = token;
       } catch (error) {
-        // تجاهل الأخطاء في المصادقة الاختيارية
+        logger.debug('Optional auth token invalid:', error.message);
       }
     }
 
@@ -97,14 +99,14 @@ const authorize = (...roles) => {
     if (!req.user) {
       return res.status(401).json({
         success: false,
-        message: 'الوصول مرفوض. يرجى تسجيل الدخول'
+        message: 'الوصول مرفوض. يرجى تسجيل الدخول',
       });
     }
 
     if (!roles.includes(req.user.role)) {
       return res.status(403).json({
         success: false,
-        message: 'ليس لديك صلاحية للوصول إلى هذا المورد'
+        message: 'ليس لديك صلاحية للوصول إلى هذا المورد',
       });
     }
 
@@ -120,7 +122,7 @@ const checkPermission = (resource, action) => {
     if (!req.user) {
       return res.status(401).json({
         success: false,
-        message: 'الوصول مرفوض. يرجى تسجيل الدخول'
+        message: 'الوصول مرفوض. يرجى تسجيل الدخول',
       });
     }
 
@@ -135,7 +137,7 @@ const checkPermission = (resource, action) => {
     if (!hasPermission) {
       return res.status(403).json({
         success: false,
-        message: `ليس لديك صلاحية ${action} على ${resource}`
+        message: `ليس لديك صلاحية ${action} على ${resource}`,
       });
     }
 
@@ -150,7 +152,7 @@ const requireMFA = (req, res, next) => {
   if (!req.user) {
     return res.status(401).json({
       success: false,
-      message: 'الوصول مرفوض'
+      message: 'الوصول مرفوض',
     });
   }
 
@@ -159,7 +161,7 @@ const requireMFA = (req, res, next) => {
     return res.status(403).json({
       success: false,
       message: 'يرجى التحقق من هويتك باستخدام المصادقة الثنائية',
-      code: 'MFA_REQUIRED'
+      code: 'MFA_REQUIRED',
     });
   }
 
@@ -169,12 +171,12 @@ const requireMFA = (req, res, next) => {
 /**
  * middleware للتحقق من ملكية المورد
  */
-const checkOwnership = (getResourceUserId) => {
+const checkOwnership = getResourceUserId => {
   return async (req, res, next) => {
     if (!req.user) {
       return res.status(401).json({
         success: false,
-        message: 'الوصول مرفوض'
+        message: 'الوصول مرفوض',
       });
     }
 
@@ -189,7 +191,7 @@ const checkOwnership = (getResourceUserId) => {
       if (req.user.id !== resourceUserId.toString()) {
         return res.status(403).json({
           success: false,
-          message: 'ليس لديك صلاحية للوصول إلى هذا المورد'
+          message: 'ليس لديك صلاحية للوصول إلى هذا المورد',
         });
       }
 
@@ -197,7 +199,7 @@ const checkOwnership = (getResourceUserId) => {
     } catch (error) {
       return res.status(500).json({
         success: false,
-        message: 'خطأ في التحقق من الملكية'
+        message: 'خطأ في التحقق من الملكية',
       });
     }
   };
@@ -210,7 +212,7 @@ const checkBranch = (req, res, next) => {
   if (!req.user) {
     return res.status(401).json({
       success: false,
-      message: 'الوصول مرفوض'
+      message: 'الوصول مرفوض',
     });
   }
 
@@ -224,7 +226,7 @@ const checkBranch = (req, res, next) => {
   if (requestedBranch && req.user.branch !== requestedBranch) {
     return res.status(403).json({
       success: false,
-      message: 'ليس لديك صلاحية للوصول إلى هذا الفرع'
+      message: 'ليس لديك صلاحية للوصول إلى هذا الفرع',
     });
   }
 
@@ -241,14 +243,14 @@ const refreshToken = async (req, res, next) => {
     if (!refreshToken) {
       return res.status(400).json({
         success: false,
-        message: 'Refresh token مطلوب'
+        message: 'Refresh token مطلوب',
       });
     }
 
     // التحقق من صحة التوكن
     const decoded = jwt.verify(refreshToken, securityConfig.jwt.refreshSecret, {
       issuer: securityConfig.jwt.issuer,
-      audience: securityConfig.jwt.audience
+      audience: securityConfig.jwt.audience,
     });
 
     // إنشاء توكن جديد
@@ -258,7 +260,7 @@ const refreshToken = async (req, res, next) => {
       {
         expiresIn: securityConfig.jwt.accessTokenExpiry,
         issuer: securityConfig.jwt.issuer,
-        audience: securityConfig.jwt.audience
+        audience: securityConfig.jwt.audience,
       }
     );
 
@@ -269,7 +271,7 @@ const refreshToken = async (req, res, next) => {
   } catch (error) {
     return res.status(401).json({
       success: false,
-      message: 'Refresh token غير صالح أو منتهي الصلاحية'
+      message: 'Refresh token غير صالح أو منتهي الصلاحية',
     });
   }
 };
@@ -284,16 +286,18 @@ const validateAPIKey = async (req, res, next) => {
     if (!apiKey) {
       return res.status(401).json({
         success: false,
-        message: 'API Key مطلوب'
+        message: 'API Key مطلوب',
       });
     }
 
     // التحقق من صحة API Key
-    if (!apiKey.startsWith(securityConfig.apiKeys.prefix) &&
-        !apiKey.startsWith(securityConfig.apiKeys.testPrefix)) {
+    if (
+      !apiKey.startsWith(securityConfig.apiKeys.prefix) &&
+      !apiKey.startsWith(securityConfig.apiKeys.testPrefix)
+    ) {
       return res.status(401).json({
         success: false,
-        message: 'API Key غير صالح'
+        message: 'API Key غير صالح',
       });
     }
 
@@ -305,7 +309,7 @@ const validateAPIKey = async (req, res, next) => {
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: 'خطأ في التحقق من API Key'
+      message: 'خطأ في التحقق من API Key',
     });
   }
 };
@@ -313,12 +317,12 @@ const validateAPIKey = async (req, res, next) => {
 /**
  * middleware لتسجيل النشاط
  */
-const logActivity = (action) => {
+const logActivity = action => {
   return async (req, res, next) => {
     // حفظ الـ res.json الأصلي
     const originalJson = res.json.bind(res);
 
-    res.json = async function(data) {
+    res.json = async function (data) {
       // تسجيل النشاط فقط إذا كان الطلب ناجحاً
       if (data.success !== false) {
         try {
@@ -333,14 +337,14 @@ const logActivity = (action) => {
               path: req.path,
               body: securityService.sanitizeForLogging(req.body),
               params: req.params,
-              query: req.query
-            }
+              query: req.query,
+            },
           };
 
           // يمكن حفظ النشاط في قاعدة البيانات هنا
-          console.log('📋 Activity Log:', JSON.stringify(activity));
+          // console.log('📋 Activity Log:', JSON.stringify(activity));
         } catch (error) {
-          console.error('Error logging activity:', error);
+          logger.error('Error logging activity:', error);
         }
       }
 
@@ -358,7 +362,7 @@ const requirePasswordChange = (req, res, next) => {
   if (!req.user) {
     return res.status(401).json({
       success: false,
-      message: 'الوصول مرفوض'
+      message: 'الوصول مرفوض',
     });
   }
 
@@ -366,7 +370,7 @@ const requirePasswordChange = (req, res, next) => {
     return res.status(403).json({
       success: false,
       message: 'يرجى تغيير كلمة المرور الخاصة بك',
-      code: 'PASSWORD_CHANGE_REQUIRED'
+      code: 'PASSWORD_CHANGE_REQUIRED',
     });
   }
 
@@ -380,7 +384,7 @@ const requireVerified = (req, res, next) => {
   if (!req.user) {
     return res.status(401).json({
       success: false,
-      message: 'الوصول مرفوض'
+      message: 'الوصول مرفوض',
     });
   }
 
@@ -388,7 +392,7 @@ const requireVerified = (req, res, next) => {
     return res.status(403).json({
       success: false,
       message: 'يرجى تأكيد حسابك أولاً',
-      code: 'ACCOUNT_NOT_VERIFIED'
+      code: 'ACCOUNT_NOT_VERIFIED',
     });
   }
 
@@ -402,7 +406,7 @@ const checkActiveUser = (req, res, next) => {
   if (!req.user) {
     return res.status(401).json({
       success: false,
-      message: 'الوصول مرفوض'
+      message: 'الوصول مرفوض',
     });
   }
 
@@ -410,7 +414,7 @@ const checkActiveUser = (req, res, next) => {
     return res.status(403).json({
       success: false,
       message: 'هذا الحساب محذوف',
-      code: 'ACCOUNT_DELETED'
+      code: 'ACCOUNT_DELETED',
     });
   }
 
@@ -418,7 +422,7 @@ const checkActiveUser = (req, res, next) => {
     return res.status(403).json({
       success: false,
       message: 'هذا الحساب معلق',
-      code: 'ACCOUNT_SUSPENDED'
+      code: 'ACCOUNT_SUSPENDED',
     });
   }
 
@@ -436,7 +440,7 @@ const detectNewDevice = async (req, res, next) => {
   const deviceFingerprint = {
     userAgent: req.headers['user-agent'],
     ip: req.ip || req.connection.remoteAddress,
-    userId: req.user.id
+    userId: req.user.id,
   };
 
   // يمكن التحقق من الجهاز من قاعدة البيانات هنا
@@ -464,5 +468,5 @@ module.exports = {
   requirePasswordChange,
   requireVerified,
   checkActiveUser,
-  detectNewDevice
+  detectNewDevice,
 };

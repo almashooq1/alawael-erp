@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const TherapySession = require('../models/TherapySession');
 const Invoice = require('../models/Invoice');
 const Employee = require('../models/Employee');
@@ -14,25 +15,26 @@ class SmartDashboardService {
     const endOfDay = new Date(today.setHours(23, 59, 59, 999));
 
     // Parallel Execution for Speed
-    const [todaysSessions, activePatients, activeStaff, todaysRevenue, pendingInvoices] = await Promise.all([
-      // 1. Ops: Sessions Today
-      TherapySession.countDocuments({ date: { $gte: startOfDay, $lte: endOfDay } }),
+    const [todaysSessions, activePatients, activeStaff, todaysRevenue, pendingInvoices] =
+      await Promise.all([
+        // 1. Ops: Sessions Today
+        TherapySession.countDocuments({ date: { $gte: startOfDay, $lte: endOfDay } }),
 
-      // 2. Growth: Active Patients
-      BeneficiaryFile.countDocuments({}), // Add { status: 'ACTIVE' } if field exists
+        // 2. Growth: Active Patients
+        BeneficiaryFile.countDocuments({}), // Add { status: 'ACTIVE' } if field exists
 
-      // 3. HR: Active Staff
-      Employee.countDocuments({ status: 'ACTIVE' }),
+        // 3. HR: Active Staff
+        Employee.countDocuments({ status: 'ACTIVE' }),
 
-      // 4. Finance: Revenue generated today (Invoices created today)
-      Invoice.aggregate([
-        { $match: { createdAt: { $gte: startOfDay, $lte: endOfDay } } },
-        { $group: { _id: null, total: { $sum: '$totalAmount' } } },
-      ]),
+        // 4. Finance: Revenue generated today (Invoices created today)
+        Invoice.aggregate([
+          { $match: { createdAt: { $gte: startOfDay, $lte: endOfDay } } },
+          { $group: { _id: null, total: { $sum: '$totalAmount' } } },
+        ]),
 
-      // 5. Cash Flow: Pending Invoices
-      Invoice.countDocuments({ status: 'UNPAID' }),
-    ]);
+        // 5. Cash Flow: Pending Invoices
+        Invoice.countDocuments({ status: 'UNPAID' }),
+      ]);
 
     return {
       operations: {

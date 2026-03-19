@@ -1,10 +1,11 @@
+/* eslint-disable no-undef, no-unused-vars */
 /**
  * ⚡ Part 3 Improvements - Simple Verification Test
  * اختبار بسيط للتحقق من جميع تحسينات الجزء 3
  */
 
 // This is an integration test file, not a Jest unit test
-describe.skip('Part 3 Simple Integration Tests', () => {
+describe('Part 3 Simple Integration Tests', () => {
   test('placeholder', () => {
     expect(true).toBe(true);
   });

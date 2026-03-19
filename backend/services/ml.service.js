@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * ALAWAEL ERP - ADVANCED ML SERVICE
  * Machine Learning & Predictive Analytics Engine
@@ -68,7 +69,7 @@ class MLService {
 
       return model;
     } catch (error) {
-      throw new Error(`Demand forecast training failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -96,7 +97,7 @@ class MLService {
         validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
       };
     } catch (error) {
-      throw new Error(`Failed to get demand forecast: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -151,7 +152,7 @@ class MLService {
       this.predictions.push(trendAnalysis);
       return trendAnalysis;
     } catch (error) {
-      throw new Error(`Trend prediction failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -188,7 +189,7 @@ class MLService {
         })),
       };
     } catch (error) {
-      throw new Error(`Failed to get trending metrics: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -242,7 +243,7 @@ class MLService {
         expireAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
       };
     } catch (error) {
-      throw new Error(`Recommendation generation failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -264,7 +265,7 @@ class MLService {
         generatedAt: new Date(),
       };
     } catch (error) {
-      throw new Error(`Batch recommendations failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -311,7 +312,7 @@ class MLService {
         analyzedAt: new Date(),
       };
     } catch (error) {
-      throw new Error(`Anomaly detection failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -350,7 +351,7 @@ class MLService {
 
       return prediction;
     } catch (error) {
-      throw new Error(`Churn prediction failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -386,7 +387,7 @@ class MLService {
         analyzedAt: new Date(),
       };
     } catch (error) {
-      throw new Error(`At-risk customer retrieval failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -457,7 +458,7 @@ class MLService {
 
       return priceOptimization;
     } catch (error) {
-      throw new Error(`Price optimization failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -524,7 +525,7 @@ class MLService {
 
       return inventory;
     } catch (error) {
-      throw new Error(`Inventory optimization failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 

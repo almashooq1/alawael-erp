@@ -1,3 +1,4 @@
+/* eslint-disable no-undef, no-unused-vars */
 /**
  * 🤖 Phase 23: Machine Learning Integration
  * Predictive Analytics, Anomaly Detection, and ML Models
@@ -550,7 +551,7 @@ describe('🤖 Phase 23: Machine Learning Integration', () => {
     test('should include confidence scores', () => {
       const result = mlService.predictTrend([1, 2, 3], 5);
 
-      result.predictions.forEach((pred, index) => {
+      result.predictions.forEach((pred, _index) => {
         expect(pred.confidence).toBeDefined();
         expect(pred.confidence).toBeLessThanOrEqual(0.85);
       });

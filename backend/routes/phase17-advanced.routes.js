@@ -1,45 +1,50 @@
+/* eslint-disable no-unused-vars */
 /**
  * Phase 17: Advanced AI & Automation
  * الذكاء الاصطناعي والأتمتة المتقدمة
  */
 
 const express = require('express');
+const { authenticate, authorize } = require('../middleware/auth');
 const router = express.Router();
 
+// Apply authentication to all routes in this file
+router.use(authenticate);
+
 // AI Chatbot Endpoints
-router.post('/chatbot/message', (req, res) => {
+router.post('/chatbot/message', authorize(['admin', 'system_admin']), (_req, res) => {
   res.json({ success: true, phase: 17, feature: 'AI Chatbot' });
 });
 
-router.get('/chatbot/history/:userId', (req, res) => {
+router.get('/chatbot/history/:userId', (_req, res) => {
   res.json({ success: true, phase: 17, feature: 'Chatbot History' });
 });
 
 // Advanced Analytics
-router.get('/analytics/predictions', (req, res) => {
+router.get('/analytics/predictions', (_req, res) => {
   res.json({ success: true, phase: 17, feature: 'AI Predictions' });
 });
 
-router.post('/analytics/train-model', (req, res) => {
+router.post('/analytics/train-model', authorize(['admin', 'system_admin']), (_req, res) => {
   res.json({ success: true, phase: 17, feature: 'Model Training' });
 });
 
 // Workflow Automation
-router.post('/automation/workflow', (req, res) => {
+router.post('/automation/workflow', authorize(['admin', 'system_admin']), (_req, res) => {
   res.json({ success: true, phase: 17, feature: 'Workflow' });
 });
 
-router.get('/automation/status/:workflowId', (req, res) => {
+router.get('/automation/status/:workflowId', (_req, res) => {
   res.json({ success: true, phase: 17, feature: 'Workflow Status' });
 });
 
 // NLP Processing
-router.post('/nlp/process', (req, res) => {
+router.post('/nlp/process', authorize(['admin', 'system_admin']), (_req, res) => {
   res.json({ success: true, phase: 17, feature: 'NLP Processing' });
 });
 
 // Recommendations
-router.get('/recommendations/:userId', (req, res) => {
+router.get('/recommendations/:userId', (_req, res) => {
   res.json({ success: true, phase: 17, feature: 'Recommendations' });
 });
 

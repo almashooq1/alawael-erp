@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+const logger = require('../utils/logger');
 /**
  * PHASE 102: Predictive Recovery AI Engine
  * Uses historical data (Cognitive, Physical, Physiological) to forecast rehabilitation outcomes.
@@ -6,7 +8,7 @@
 
 class SmartPredictiveAIService {
   constructor() {
-    console.log('System: Smart Predictive AI Engine - Initialized');
+    logger.info('System: Smart Predictive AI Engine - Initialized');
   }
 
   /**

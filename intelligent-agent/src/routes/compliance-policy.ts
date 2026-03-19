@@ -13,14 +13,15 @@ router.get('/', requirePermission('view-policies'), sanitizeInput, async (req, r
 });
 
 // إضافة سياسة
-router.post('/',
+router.post(
+  '/',
   requirePermission('manage-policies'),
   sanitizeInput,
   [
     commonValidations.requiredString('name', 2, 100),
     commonValidations.optionalString('description', 500),
     commonValidations.boolean('enabled'),
-    handleValidationErrors
+    handleValidationErrors,
   ],
   async (req, res) => {
     try {
@@ -28,13 +29,14 @@ router.post('/',
       res.status(201).json(p);
     } catch (e) {
       const err = e as Error;
-      res.status(400).json({ error: err.message });
+      res.status(400).json({ error: 'حدث خطأ في الخادم' });
     }
-  }
+  },
 );
 
 // تعديل سياسة
-router.put('/:id',
+router.put(
+  '/:id',
   requirePermission('manage-policies'),
   sanitizeInput,
   [
@@ -42,22 +44,28 @@ router.put('/:id',
     commonValidations.optionalString('name', 100),
     commonValidations.optionalString('description', 500),
     commonValidations.boolean('enabled'),
-    handleValidationErrors
+    handleValidationErrors,
   ],
   async (req, res) => {
     try {
-      const p = await CompliancePolicy.findByIdAndUpdate(req.params.id, req.body, { new: true });
+      const { title, description, category, status, effectiveDate, reviewDate, content, tags, owner } = req.body;
+      const p = await CompliancePolicy.findByIdAndUpdate(
+        req.params.id,
+        { title, description, category, status, effectiveDate, reviewDate, content, tags, owner },
+        { new: true },
+      );
       if (!p) return res.status(404).json({ error: 'Not found' });
       res.json(p);
     } catch (e) {
       const err = e as Error;
-      res.status(400).json({ error: err.message });
+      res.status(400).json({ error: 'حدث خطأ في الخادم' });
     }
-  }
+  },
 );
 
 // حذف سياسة
-router.delete('/:id',
+router.delete(
+  '/:id',
   requirePermission('manage-policies'),
   sanitizeInput,
   [commonValidations.mongoId('id'), handleValidationErrors],
@@ -68,9 +76,9 @@ router.delete('/:id',
       res.json({ ok: true });
     } catch (e) {
       const err = e as Error;
-      res.status(400).json({ error: err.message });
+      res.status(400).json({ error: 'حدث خطأ في الخادم' });
     }
-  }
+  },
 );
 
 export default router;

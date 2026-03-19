@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Query Optimization Guide & Implementation
  * تحسين استعلامات قاعدة البيانات

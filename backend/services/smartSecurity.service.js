@@ -1,4 +1,6 @@
+/* eslint-disable no-unused-vars */
 const User = require('../models/User');
+const logger = require('../utils/logger');
 
 class SmartSecurityService {
   /**
@@ -33,7 +35,7 @@ class SmartSecurityService {
   }
 
   static async logSecurityEvent(userId, alerts) {
-    console.warn(`[SECURITY ALERT] User ${userId}:`, alerts);
+    logger.warn(`[SECURITY ALERT] User ${userId}:`, alerts);
     // Save to specialized AuditLog model
   }
 }

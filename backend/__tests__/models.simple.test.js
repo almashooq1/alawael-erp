@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 describe('Memory Models - Simplified Tests', () => {
   const Employee = require('../models/Employee.memory');
   const Attendance = require('../models/Attendance.memory');

@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * 🔒 Security Utils Tests
  * Comprehensive test suite for security utility functions
@@ -13,7 +15,7 @@ const validatePassword =
     if (!pwd || pwd.length < 8) return false;
     if (!/[A-Z]/.test(pwd)) return false;
     if (!/[0-9]/.test(pwd)) return false;
-    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>?]/.test(pwd)) return false;
+    if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>?]/.test(pwd)) return false;
     return true;
   });
 const sanitizeInput =

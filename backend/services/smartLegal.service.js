@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // Mock Models
 const User = require('../models/User');
 
@@ -24,7 +25,11 @@ class SmartLegalService {
 
     // Rule 2: Role Scope Violation
     if (user.role === 'ACCOUNTANT' && resourceAccessed.includes('CLINICAL_NOTES')) {
-      alerts.push({ type: 'SCOPE_VIOLATION', risk: 'HIGH', details: 'Accountant accessing medical EMR.' });
+      alerts.push({
+        type: 'SCOPE_VIOLATION',
+        risk: 'HIGH',
+        details: 'Accountant accessing medical EMR.',
+      });
     }
 
     if (alerts.length > 0) {
@@ -44,7 +49,9 @@ class SmartLegalService {
       { patientId: 'P001', procedure: 'PHOTOGRAPHY', expires: '2025-01-01' }, // Expired
     ];
 
-    const consent = activeConsents.find(c => c.patientId === patientId && c.procedure === procedureCode);
+    const consent = activeConsents.find(
+      c => c.patientId === patientId && c.procedure === procedureCode
+    );
 
     if (!consent) {
       return { valid: false, reason: 'NO_CONSENT_ON_FILE' };
@@ -65,7 +72,7 @@ class SmartLegalService {
     const sanitized = JSON.parse(JSON.stringify(jsonData));
 
     const masker = obj => {
-      for (let k in obj) {
+      for (const k in obj) {
         if (typeof obj[k] === 'object') masker(obj[k]);
         else {
           if (['name', 'phone', 'ssn', 'iqama'].includes(k.toLowerCase())) obj[k] = 'REDACTED';

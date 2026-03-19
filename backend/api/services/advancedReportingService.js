@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Advanced Reporting Service
  */
@@ -11,18 +12,18 @@ module.exports = {
       data: { totalTransactions: 150, totalAmount: 50000 },
       generatedAt: new Date(),
       status: 'completed',
-      ...options
+      ...options,
     };
   },
-  
+
   parseReports(reports) {
     return reports.map(r => ({ ...r, parsed: true }));
   },
-  
+
   aggregateData(data) {
     return {
       total: data.length,
-      summary: 'Aggregated data'
+      summary: 'Aggregated data',
     };
-  }
+  },
 };

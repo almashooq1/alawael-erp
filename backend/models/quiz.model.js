@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 const questionSchema = new mongoose.Schema({
@@ -36,7 +37,7 @@ const quizSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  },
+  }
 );
 
 module.exports = mongoose.model('Quiz', quizSchema);

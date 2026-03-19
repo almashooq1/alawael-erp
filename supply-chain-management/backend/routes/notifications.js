@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const express = require('express');
 const router = express.Router();
 const smartNotificationService = require('../services/smartNotificationService');
@@ -27,19 +28,17 @@ router.post(
       });
     }
 
-    const notification = await smartNotificationService.sendNotification(
-      templateCode,
-      recipientId,
-      variables || {},
-      { channels, priority }
-    );
+    const notification = await smartNotificationService.sendNotification(templateCode, recipientId, variables || {}, {
+      channels,
+      priority,
+    });
 
     res.status(201).json({
       success: true,
       data: notification,
       message: 'Notification sent successfully',
     });
-  })
+  }),
 );
 
 /**
@@ -58,11 +57,7 @@ router.post(
       });
     }
 
-    const notifications = await smartNotificationService.batchSend(
-      recipientIds,
-      templateCode,
-      variables || {}
-    );
+    const notifications = await smartNotificationService.batchSend(recipientIds, templateCode, variables || {});
 
     res.status(201).json({
       success: true,
@@ -72,7 +67,7 @@ router.post(
       },
       message: `${notifications.length} notifications sent successfully`,
     });
-  })
+  }),
 );
 
 /**
@@ -91,12 +86,7 @@ router.post(
       });
     }
 
-    const notifications = await smartNotificationService.scheduleBulk(
-      recipients,
-      templateCode,
-      new Date(scheduledFor),
-      variables || {}
-    );
+    const notifications = await smartNotificationService.scheduleBulk(recipients, templateCode, new Date(scheduledFor), variables || {});
 
     res.status(201).json({
       success: true,
@@ -106,7 +96,7 @@ router.post(
       },
       message: `${notifications.length} notifications scheduled successfully`,
     });
-  })
+  }),
 );
 
 /**
@@ -119,17 +109,14 @@ router.get(
     const { recipientId } = req.params;
     const { limit = 10 } = req.query;
 
-    const notifications = await smartNotificationService.getUnreadNotifications(
-      recipientId,
-      parseInt(limit)
-    );
+    const notifications = await smartNotificationService.getUnreadNotifications(recipientId, parseInt(limit));
 
     res.status(200).json({
       success: true,
       data: notifications,
       count: notifications.length,
     });
-  })
+  }),
 );
 
 /**
@@ -154,7 +141,7 @@ router.get(
       success: true,
       data: notification,
     });
-  })
+  }),
 );
 
 /**
@@ -173,7 +160,7 @@ router.post(
       data: notification,
       message: 'Notification marked as read',
     });
-  })
+  }),
 );
 
 /**
@@ -192,7 +179,7 @@ router.post(
       data: notification,
       message: 'Notification click recorded',
     });
-  })
+  }),
 );
 
 /**
@@ -211,7 +198,7 @@ router.post(
       data: notification,
       message: 'Unsubscribed from notification',
     });
-  })
+  }),
 );
 
 /**
@@ -230,7 +217,7 @@ router.get(
       data: notifications,
       count: notifications.length,
     });
-  })
+  }),
 );
 
 // ======================= TEMPLATE ENDPOINTS =======================
@@ -242,17 +229,7 @@ router.get(
 router.post(
   '/templates',
   asyncHandler(async (req, res) => {
-    const {
-      name,
-      code,
-      description,
-      emailBody,
-      emailSubject,
-      smsBody,
-      pushMessage,
-      variables,
-      defaultChannels,
-    } = req.body;
+    const { name, code, description, emailBody, emailSubject, smsBody, pushMessage, variables, defaultChannels } = req.body;
 
     if (!name || !code || !emailBody) {
       return res.status(400).json({
@@ -278,7 +255,7 @@ router.post(
       data: template,
       message: 'Template created successfully',
     });
-  })
+  }),
 );
 
 /**
@@ -303,7 +280,7 @@ router.get(
       success: true,
       data: template,
     });
-  })
+  }),
 );
 
 /**
@@ -322,7 +299,7 @@ router.get(
       data: templates,
       count: templates.length,
     });
-  })
+  }),
 );
 
 /**
@@ -340,7 +317,7 @@ router.get(
       success: true,
       data: performance,
     });
-  })
+  }),
 );
 
 /**
@@ -374,7 +351,7 @@ router.put(
       data: template,
       message: 'Template updated successfully',
     });
-  })
+  }),
 );
 
 // ======================= ANALYTICS ENDPOINTS =======================
@@ -394,7 +371,7 @@ router.get(
       success: true,
       data: stats,
     });
-  })
+  }),
 );
 
 /**
@@ -414,7 +391,7 @@ router.post(
       },
       message: `${processed.length} pending notifications processed`,
     });
-  })
+  }),
 );
 
 /**
@@ -434,15 +411,15 @@ router.post(
       },
       message: `${retried.length} failed notifications retried`,
     });
-  })
+  }),
 );
 
 // Error handling middleware
-router.use((error, req, res, next) => {
+router.use((error, _req, res, _next) => {
   console.error('[Notification Routes Error]', error.message);
   res.status(500).json({
     success: false,
-    error: error.message || 'Internal server error',
+    error: 'حدث خطأ في الخادم',
   });
 });
 

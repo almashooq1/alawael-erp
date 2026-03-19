@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const Patient = require('../models/Beneficiary');
 const SmartRoboticsService = require('./smartRobotics.service');
 
@@ -42,9 +43,27 @@ class SmartGlobalExpertService {
   static async matchSpecialist(diagnosis, budget) {
     // Mock Partner DB
     const partners = [
-      { name: 'Dr. Emily Chen', hospital: 'Boston Childrens', specialty: 'Pediatric Neurology', cost: 500, roboticsCapable: true },
-      { name: 'Dr. Hans Muller', hospital: 'Charité Berlin', specialty: 'Rare Genetic Disorders', cost: 450, roboticsCapable: false },
-      { name: 'Dr. Sarah Smith', hospital: 'Mayo Clinic', specialty: 'Orthopedics', cost: 600, roboticsCapable: true },
+      {
+        name: 'Dr. Emily Chen',
+        hospital: 'Boston Childrens',
+        specialty: 'Pediatric Neurology',
+        cost: 500,
+        roboticsCapable: true,
+      },
+      {
+        name: 'Dr. Hans Muller',
+        hospital: 'Charité Berlin',
+        specialty: 'Rare Genetic Disorders',
+        cost: 450,
+        roboticsCapable: false,
+      },
+      {
+        name: 'Dr. Sarah Smith',
+        hospital: 'Mayo Clinic',
+        specialty: 'Orthopedics',
+        cost: 600,
+        roboticsCapable: true,
+      },
     ];
 
     // Filter Mock

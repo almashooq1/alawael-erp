@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const SmartPatientService = require('./smartPatient.service');
 const TherapySession = require('../models/TherapySession');
 
@@ -38,7 +39,10 @@ class SmartReportService {
     // Concatenate the "Plan/Assessment" notes from the last 3 sessions to give recent context
     const recentNotes = sessions
       .slice(-3)
-      .map(s => `[${s.date.toISOString().split('T')[0]}]: ${s.notes?.assessment || 'No assessment recorded.'}`)
+      .map(
+        s =>
+          `[${s.date.toISOString().split('T')[0]}]: ${s.notes?.assessment || 'No assessment recorded.'}`
+      )
       .join('\n');
 
     // D. Recommendations

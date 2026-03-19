@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 // Snapshot of goal progress at a point in time
@@ -14,7 +15,7 @@ const goalProgressHistorySchema = new mongoose.Schema(
     sessionRef: { type: mongoose.Schema.Types.ObjectId, ref: 'TherapySession' }, // Optional link to session
     note: String,
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 module.exports = mongoose.model('GoalProgressHistory', goalProgressHistorySchema);

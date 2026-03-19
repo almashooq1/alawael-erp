@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * 🔬 Performance Profiling System
  *
@@ -9,6 +10,7 @@
  */
 
 const v8 = require('v8');
+const logger = require('../utils/logger');
 
 class PerformanceProfiler {
   constructor(options = {}) {
@@ -42,7 +44,7 @@ class PerformanceProfiler {
         this._setupGCTracking();
       }
     } catch (e) {
-      console.log('[Profiler] GC tracking not available');
+      logger.info('[Profiler] GC tracking not available');
     }
   }
 
@@ -120,7 +122,7 @@ class PerformanceProfiler {
       self._recordFunctionMetric(name, {
         duration,
         memoryDelta: memDelta,
-        error: error ? error.message : null,
+        error: error ? 'حدث خطأ داخلي' : null,
       });
 
       if (error) throw error;
@@ -156,7 +158,7 @@ class PerformanceProfiler {
       self._recordFunctionMetric(name, {
         duration,
         memoryDelta: memDelta,
-        error: error ? error.message : null,
+        error: error ? 'حدث خطأ داخلي' : null,
       });
 
       if (error) throw error;

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Integration Manager
  * مدير التكامل الموحد - نقطة مركزية لجميع الموصلات الخارجية
@@ -104,21 +105,21 @@ class IntegrationManager extends EventEmitter {
     try {
       results.government = await this.gov.healthCheck();
     } catch (error) {
-      results.government = { healthy: false, error: error.message };
+      results.government = { healthy: false, error: 'حدث خطأ داخلي' };
       results.overallStatus = 'degraded';
     }
 
     try {
       results.insurance = await this.insurance.healthCheck();
     } catch (error) {
-      results.insurance = { healthy: false, error: error.message };
+      results.insurance = { healthy: false, error: 'حدث خطأ داخلي' };
       results.overallStatus = 'degraded';
     }
 
     try {
       results.laboratory = await this.lab.healthCheck();
     } catch (error) {
-      results.laboratory = { healthy: false, error: error.message };
+      results.laboratory = { healthy: false, error: 'حدث خطأ داخلي' };
       results.overallStatus = 'degraded';
     }
 

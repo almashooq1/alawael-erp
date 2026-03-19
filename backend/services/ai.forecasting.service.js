@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const Inventory = require('../models/Inventory.model');
 const PurchaseOrder = require('../models/PurchaseOrder.model');
 const Supplier = require('../models/Supplier.model');
@@ -7,7 +8,6 @@ const Supplier = require('../models/Supplier.model');
  * خدمة الذكاء الاصطناعي والتنبؤ
  */
 class AIForecastingService {
-
   /**
    * التنبؤ بالطلب المتقدم
    * متقدم من predictShortages()
@@ -32,9 +32,7 @@ class AIForecastingService {
       for (const order of historicalOrders) {
         for (const item of order.items) {
           if (item.itemCode === productCode) {
-            const week = Math.floor(
-              (Date.now() - order.createdAt) / (7 * 24 * 60 * 60 * 1000)
-            );
+            const week = Math.floor((Date.now() - order.createdAt) / (7 * 24 * 60 * 60 * 1000));
             if (!weeklyConsumption[week]) {
               weeklyConsumption[week] = 0;
             }
@@ -48,13 +46,16 @@ class AIForecastingService {
       const weeklyArray = Object.values(weeklyConsumption).sort((a, b) => a - b);
 
       // حساب المتوسطات والانحراف المعياري
-      const average = consumptionData.length > 0
-        ? consumptionData.reduce((a, b) => a + b, 0) / consumptionData.length
-        : 0;
+      const average =
+        consumptionData.length > 0
+          ? consumptionData.reduce((a, b) => a + b, 0) / consumptionData.length
+          : 0;
 
-      const variance = consumptionData.length > 0
-        ? consumptionData.reduce((sum, val) => sum + Math.pow(val - average, 2), 0) / consumptionData.length
-        : 0;
+      const variance =
+        consumptionData.length > 0
+          ? consumptionData.reduce((sum, val) => sum + Math.pow(val - average, 2), 0) /
+            consumptionData.length
+          : 0;
 
       const stdDeviation = Math.sqrt(variance);
 
@@ -68,7 +69,7 @@ class AIForecastingService {
       const forecast = {
         productCode,
         productName: inventory.productName,
-        
+
         // الإحصائيات التاريخية
         historical: {
           averageConsumption: average,
@@ -92,16 +93,12 @@ class AIForecastingService {
         // مستويات الثقة
         confidenceLevel: 0.95,
         confidenceInterval: {
-          lower: average - (2 * stdDeviation),
-          upper: average + (2 * stdDeviation),
+          lower: average - 2 * stdDeviation,
+          upper: average + 2 * stdDeviation,
         },
 
         // المخاطر والفرص
-        risks: this.identifyForecastRisks(
-          inventory, 
-          average, 
-          consumptionData
-        ),
+        risks: this.identifyForecastRisks(inventory, average, consumptionData),
       };
 
       return {
@@ -109,7 +106,7 @@ class AIForecastingService {
         data: forecast,
       };
     } catch (error) {
-      return { success: false, message: error.message };
+      return { success: false, message: 'حدث خطأ داخلي' };
     }
   }
 
@@ -122,8 +119,13 @@ class AIForecastingService {
     // حساب المتوسط المتحرك
     const movingAvg = [];
     for (let i = 2; i < weeklyData.length - 2; i++) {
-      const avg = (weeklyData[i - 2] + weeklyData[i - 1] + 
-                   weeklyData[i] + weeklyData[i + 1] + weeklyData[i + 2]) / 5;
+      const avg =
+        (weeklyData[i - 2] +
+          weeklyData[i - 1] +
+          weeklyData[i] +
+          weeklyData[i + 1] +
+          weeklyData[i + 2]) /
+        5;
       movingAvg.push(avg);
     }
 
@@ -166,8 +168,8 @@ class AIForecastingService {
     return {
       predicted: Math.round(adjustedValue),
       confidenceRange: {
-        lower: Math.round(adjustedValue - (1.96 * stdDeviation)),
-        upper: Math.round(adjustedValue + (1.96 * stdDeviation)),
+        lower: Math.round(adjustedValue - 1.96 * stdDeviation),
+        upper: Math.round(adjustedValue + 1.96 * stdDeviation),
       },
     };
   }
@@ -190,10 +192,10 @@ class AIForecastingService {
 
     // عدم الاستقرار
     const stdDev = Math.sqrt(
-      consumptionData.reduce((sum, val) => 
-        sum + Math.pow(val - averageConsumption, 2), 0) / consumptionData.length
+      consumptionData.reduce((sum, val) => sum + Math.pow(val - averageConsumption, 2), 0) /
+        consumptionData.length
     );
-    
+
     const coefficientOfVariation = stdDev / (averageConsumption || 1);
     if (coefficientOfVariation > 0.5) {
       risks.push({
@@ -231,7 +233,7 @@ class AIForecastingService {
 
           if (daysRemaining < 30) {
             const forecast = await this.advancedDemandForecast(item.productCode, 60);
-            
+
             if (forecast.success) {
               atRiskItems.push({
                 productCode: item.productCode,
@@ -239,10 +241,8 @@ class AIForecastingService {
                 currentStock: item.quantity,
                 monthlyConsumption: item.monthlyConsumption,
                 daysRemaining: Math.round(daysRemaining),
-                status: daysRemaining < 7 ? 'CRITICAL' : 
-                        daysRemaining < 15 ? 'WARNING' : 'MONITOR',
-                urgency: daysRemaining < 7 ? 'URGENT' : 
-                         daysRemaining < 15 ? 'HIGH' : 'MEDIUM',
+                status: daysRemaining < 7 ? 'CRITICAL' : daysRemaining < 15 ? 'WARNING' : 'MONITOR',
+                urgency: daysRemaining < 7 ? 'URGENT' : daysRemaining < 15 ? 'HIGH' : 'MEDIUM',
                 recommendation: this.getStockoutRecommendation(item, daysRemaining),
                 forecastData: forecast.data,
               });
@@ -264,7 +264,7 @@ class AIForecastingService {
         },
       };
     } catch (error) {
-      return { success: false, message: error.message };
+      return { success: false, message: 'حدث خطأ داخلي' };
     }
   }
 
@@ -358,7 +358,7 @@ class AIForecastingService {
         },
       };
     } catch (error) {
-      return { success: false, message: error.message };
+      return { success: false, message: 'حدث خطأ داخلي' };
     }
   }
 
@@ -372,7 +372,7 @@ class AIForecastingService {
     let peakDay = 0;
     let peakCount = 0;
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    
+
     for (const day in patterns.frequencyByDay) {
       if (patterns.frequencyByDay[day] > peakCount) {
         peakCount = patterns.frequencyByDay[day];
@@ -381,9 +381,7 @@ class AIForecastingService {
     }
 
     if (peakCount > 0) {
-      insights.push(
-        `Peak ordering day is ${days[peakDay]} with ${peakCount} orders`
-      );
+      insights.push(`Peak ordering day is ${days[peakDay]} with ${peakCount} orders`);
     }
 
     // أكثر المنتجات طلباً
@@ -424,12 +422,9 @@ class AIForecastingService {
 
       for (const item of lowStockItems) {
         const forecast = await this.advancedDemandForecast(item.productCode, 60);
-        
+
         if (forecast.success) {
-          const recommendedQuantity = this.calculateOptimalOrderQuantity(
-            item,
-            forecast.data
-          );
+          const recommendedQuantity = this.calculateOptimalOrderQuantity(item, forecast.data);
 
           recommendations.push({
             productCode: item.productCode,
@@ -438,7 +433,7 @@ class AIForecastingService {
             reorderPoint: item.reorderPoint,
             recommendedQuantity,
             estimatedCost: recommendedQuantity * item.unitCost,
-            urgency: item.quantity <= (item.reorderPoint / 2) ? 'CRITICAL' : 'HIGH',
+            urgency: item.quantity <= item.reorderPoint / 2 ? 'CRITICAL' : 'HIGH',
             bestSupplier: item.preferredSupplier,
             actionNeeded: item.quantity <= 0 ? 'EMERGENCY_ORDER' : 'ROUTINE_PO',
           });
@@ -450,13 +445,13 @@ class AIForecastingService {
         data: {
           totalRecommendations: recommendations.length,
           recommendations: recommendations.sort((a, b) => {
-            const urgencyOrder = { 'CRITICAL': 0, 'HIGH': 1 };
+            const urgencyOrder = { CRITICAL: 0, HIGH: 1 };
             return urgencyOrder[a.urgency] - urgencyOrder[b.urgency];
           }),
         },
       };
     } catch (error) {
-      return { success: false, message: error.message };
+      return { success: false, message: 'حدث خطأ داخلي' };
     }
   }
 
@@ -470,7 +465,7 @@ class AIForecastingService {
     const holdingCost = (inventory.unitCost || 1) * 0.25; // تكلفة الاحتفاظ بالمخزون
 
     const eoq = Math.sqrt((2 * annualDemand * orderingCost) / holdingCost);
-    
+
     // تطبيق هامش أمان
     return Math.ceil(eoq * 1.2);
   }
@@ -495,8 +490,8 @@ class AIForecastingService {
         name: 'Expected Demand',
         demand: forecast.data.forecast.nextMonth.predicted,
         currentStock: inventory.quantity,
-        outcome: inventory.quantity >= forecast.data.forecast.nextMonth.predicted 
-          ? 'SAFE' : 'AT_RISK',
+        outcome:
+          inventory.quantity >= forecast.data.forecast.nextMonth.predicted ? 'SAFE' : 'AT_RISK',
         actionRequired: inventory.quantity < forecast.data.forecast.nextMonth.predicted,
       });
 
@@ -505,8 +500,7 @@ class AIForecastingService {
         name: 'High Demand',
         demand: forecast.data.forecast.nextMonth.upper,
         currentStock: inventory.quantity,
-        outcome: inventory.quantity >= forecast.data.forecast.nextMonth.upper 
-          ? 'SAFE' : 'AT_RISK',
+        outcome: inventory.quantity >= forecast.data.forecast.nextMonth.upper ? 'SAFE' : 'AT_RISK',
         actionRequired: true,
         recommendation: 'Increase stock levels',
       });
@@ -516,8 +510,8 @@ class AIForecastingService {
         name: 'Low Demand',
         demand: forecast.data.forecast.nextMonth.lower,
         currentStock: inventory.quantity,
-        outcome: inventory.quantity >= forecast.data.forecast.nextMonth.lower 
-          ? 'SAFE' : 'OVERSTOCK',
+        outcome:
+          inventory.quantity >= forecast.data.forecast.nextMonth.lower ? 'SAFE' : 'OVERSTOCK',
         actionRequired: false,
       });
 
@@ -531,7 +525,7 @@ class AIForecastingService {
         },
       };
     } catch (error) {
-      return { success: false, message: error.message };
+      return { success: false, message: 'حدث خطأ داخلي' };
     }
   }
 

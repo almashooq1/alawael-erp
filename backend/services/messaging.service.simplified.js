@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Messaging Service Simplified - Phase 2
  * Lightweight version for basic messaging functionality

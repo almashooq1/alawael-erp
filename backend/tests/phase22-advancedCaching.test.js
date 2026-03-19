@@ -1,9 +1,10 @@
+/* eslint-disable no-undef, no-unused-vars */
 /**
  * 🔥 Phase 22: Advanced Caching Layer
  * Multi-Level Caching with Redis, In-Memory, and Distributed Cache
  */
 
-const perfDescribe = process.env.RUN_PERF_TESTS === 'true' ? describe : describe.skip;
+const perfDescribe = describe;
 
 // Advanced Caching Service
 class AdvancedCachingService {
@@ -22,16 +23,24 @@ class AdvancedCachingService {
 
   // 💾 Basic Cache Operations
   set(key, value, ttl = 3600) {
-    if (this.memoryCache.size >= this.maxSize) {
+    // Evict until we have space (handles maxSize correctly)
+    while (this.memoryCache.size >= this.maxSize && !this.memoryCache.has(key)) {
       this.evictLRU();
     }
 
     this.memoryCache.set(key, value);
     this.cacheStats.writes++;
 
-    if (ttl) {
-      this.ttlMap.set(key, Date.now() + ttl * 1000);
-      setTimeout(() => this.delete(key), ttl * 1000);
+    if (ttl != null && ttl >= 0) {
+      if (ttl === 0) {
+        // Zero TTL = expire immediately
+        this.ttlMap.set(key, 0);
+      } else {
+        this.ttlMap.set(key, Date.now() + ttl * 1000);
+      }
+    } else if (ttl != null && ttl < 0) {
+      // Negative TTL = expire immediately
+      this.ttlMap.set(key, 0);
     }
 
     this.logAccess('write', key);
@@ -68,7 +77,8 @@ class AdvancedCachingService {
   // ⏰ TTL Management
   isExpired(key) {
     const expiry = this.ttlMap.get(key);
-    if (!expiry) return false;
+    if (expiry === undefined) return false;
+    if (expiry === 0) return true; // zero TTL = always expired
     return Date.now() > expiry;
   }
 
@@ -89,11 +99,21 @@ class AdvancedCachingService {
 
   // 🔄 Cache Eviction Strategy (LRU)
   evictLRU() {
-    if (this.accessLog.length === 0) return;
-
-    const lruKey = this.accessLog[0].key;
-    this.delete(lruKey);
-    this.cacheStats.evictions++;
+    // Walk access log from oldest and find a key that still exists in cache
+    for (let i = 0; i < this.accessLog.length; i++) {
+      const candidate = this.accessLog[i].key;
+      if (this.memoryCache.has(candidate)) {
+        this.delete(candidate);
+        this.cacheStats.evictions++;
+        return;
+      }
+    }
+    // Fallback: evict the first key in the Map iterator
+    const firstKey = this.memoryCache.keys().next().value;
+    if (firstKey !== undefined) {
+      this.delete(firstKey);
+      this.cacheStats.evictions++;
+    }
   }
 
   // 📝 Access Logging

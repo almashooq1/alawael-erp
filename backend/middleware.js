@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Core Middleware for Supply Chain Management System
  * - Authentication
@@ -30,15 +31,16 @@ const authMiddleware = (req, res, next) => {
       return next();
     }
 
-    // In production, verify JWT
-    // For now, accept any token and extract user ID
+    // Verify JWT token
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'dev-secret-key');
-      req.userId = decoded.userId || decoded.sub || 'user-123';
+      const { jwtSecret } = require('./config/secrets');
+      const decoded = jwt.verify(token, jwtSecret);
+      req.userId = decoded.userId || decoded.sub || decoded.id || null;
       req.user = decoded;
     } catch (err) {
-      // Invalid token, continue without auth
-      req.userId = req.body.userId || 'user-123';
+      // Invalid token — mark as unauthenticated (never trust req.body for identity)
+      req.userId = null;
+      req.user = null;
     }
 
     next();
@@ -51,7 +53,7 @@ const authMiddleware = (req, res, next) => {
  * Error Handler Middleware
  * Centralized error handling
  */
-const errorHandler = (err, req, res, next) => {
+const errorHandler = (err, _req, res, _next) => {
   console.error('Error:', err);
 
   // Mongoose validation error
@@ -83,11 +85,12 @@ const errorHandler = (err, req, res, next) => {
     });
   }
 
-  // Default error response
+  // Default error response — hide internal details in production
+  const isProduction = process.env.NODE_ENV === 'production';
   res.status(err.status || 500).json({
     success: false,
     error: err.name || 'Server Error',
-    message: err.message || 'Internal server error',
+    message: isProduction ? 'Internal server error' : err.message || 'Internal server error',
   });
 };
 
@@ -151,8 +154,23 @@ const validateRequest = schema => (req, res, next) => {
 const rateLimit = (windowMs = 60000, maxRequests = 100) => {
   const requests = new Map();
 
+  // Evict stale IPs every 5 minutes to prevent memory leak
+  const cleanupInterval = setInterval(
+    () => {
+      const now = Date.now();
+      const windowStart = now - windowMs;
+      for (const [key, times] of requests.entries()) {
+        const recent = times.filter(t => t > windowStart);
+        if (recent.length === 0) requests.delete(key);
+        else requests.set(key, recent);
+      }
+    },
+    5 * 60 * 1000
+  );
+  if (cleanupInterval.unref) cleanupInterval.unref();
+
   return (req, res, next) => {
-    const key = req.ip || req.connection.remoteAddress;
+    const key = req.ip || req.socket?.remoteAddress || 'unknown';
     const now = Date.now();
     const windowStart = now - windowMs;
 

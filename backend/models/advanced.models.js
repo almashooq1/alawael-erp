@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Financial Management Models
  * نظام إدارة الشؤون المالية

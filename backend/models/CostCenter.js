@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * ===================================================================
  * COST CENTER MODEL - نموذج مراكز التكلفة
@@ -86,7 +87,6 @@ const costCenterSchema = new mongoose.Schema(
     manager: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Employee',
-      required: [true, 'مدير المركز مطلوب'],
     },
     accountant: {
       type: mongoose.Schema.Types.ObjectId,
@@ -402,7 +402,6 @@ const costCenterSchema = new mongoose.Schema(
 // INDEXES
 // ===================================================================
 
-costCenterSchema.index({ code: 1 });
 costCenterSchema.index({ type: 1, status: 1 });
 costCenterSchema.index({ department: 1 });
 costCenterSchema.index({ branch: 1 });
@@ -674,7 +673,7 @@ costCenterSchema.statics.getNeedingReview = function () {
 // ===================================================================
 
 // قبل الحفظ
-costCenterSchema.pre('save', function (next) {
+costCenterSchema.pre('save', function () {
   // حساب الميزانية المتبقية
   this.budget.remainingBudget = this.budget.totalBudget - this.budget.spentBudget;
 
@@ -690,8 +689,6 @@ costCenterSchema.pre('save', function (next) {
 
   this.costBreakdown.fixedCosts = indirectTotal;
   this.costBreakdown.variableCosts = directTotal;
-
-  next();
 });
 
 // بعد الحفظ - تحديث المراكز الفرعية

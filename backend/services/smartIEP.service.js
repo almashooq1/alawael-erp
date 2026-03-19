@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+const logger = require('../utils/logger');
 /**
  * Smart IEP & Meeting Orchestrator Service (Phase 80)
  *
@@ -44,8 +46,16 @@ class SmartIEPService {
   async draftIEPGoals(meetingId, rawNotes) {
     // GenAI simulation
     const suggestedGoals = [
-      { domain: 'COMMUNICATION', target: 'Student will use 3-word sentences', reviewDate: '3 months' },
-      { domain: 'MOTOR', target: 'Student will hold pencil with tripod grasp', reviewDate: '6 months' },
+      {
+        domain: 'COMMUNICATION',
+        target: 'Student will use 3-word sentences',
+        reviewDate: '3 months',
+      },
+      {
+        domain: 'MOTOR',
+        target: 'Student will hold pencil with tripod grasp',
+        reviewDate: '6 months',
+      },
     ];
 
     return {
@@ -62,7 +72,7 @@ class SmartIEPService {
    */
   async signOffPlan(meetingId, signerId, signatureHash) {
     // Verify hash
-    console.log(`[IEP] Plan ${meetingId} signed by ${signerId}`);
+    logger.info(`[IEP] Plan ${meetingId} signed by ${signerId}`);
 
     return {
       signerId,

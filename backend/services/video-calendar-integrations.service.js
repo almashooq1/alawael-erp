@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Video & Calendar Integration Service
  * Zoom and Google Calendar Integration

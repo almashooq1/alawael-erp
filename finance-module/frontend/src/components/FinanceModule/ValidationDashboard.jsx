@@ -456,6 +456,7 @@ const ValidationDashboard = () => {
                         size="small"
                         onClick={() => handleOpenDetail(violation)}
                         title="View Details"
+                        aria-label="عرض التفاصيل"
                       >
                         <InfoIcon />
                       </IconButton>
@@ -465,6 +466,7 @@ const ValidationDashboard = () => {
                           onClick={() => handleOpenResolve(violation)}
                           title="Resolve"
                           color="primary"
+                          aria-label="حل"
                         >
                           <CheckCircleIcon />
                         </IconButton>
@@ -483,7 +485,7 @@ const ValidationDashboard = () => {
         <Box sx={{ p: 3 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
             <Typography variant="h6">Violation Details</Typography>
-            <IconButton onClick={() => setShowDetailDialog(false)} size="small">
+            <IconButton onClick={() => setShowDetailDialog(false)} size="small" aria-label="إغلاق">
               <CloseIcon />
             </IconButton>
           </Box>
@@ -516,7 +518,7 @@ const ValidationDashboard = () => {
         <Box sx={{ p: 3 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
             <Typography variant="h6">Resolve Violation</Typography>
-            <IconButton onClick={() => setShowResolveDialog(false)} size="small">
+            <IconButton onClick={() => setShowResolveDialog(false)} size="small" aria-label="إغلاق">
               <CloseIcon />
             </IconButton>
           </Box>
@@ -552,7 +554,7 @@ const ValidationDashboard = () => {
         <Box sx={{ p: 3 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
             <Typography variant="h6">Generate Report</Typography>
-            <IconButton onClick={() => setShowReportDialog(false)} size="small">
+            <IconButton onClick={() => setShowReportDialog(false)} size="small" aria-label="إغلاق">
               <CloseIcon />
             </IconButton>
           </Box>

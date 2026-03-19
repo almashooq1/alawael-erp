@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * AI Analytics Service Tests
  * اختبارات خدمة تحليلات الذكاء الاصطناعي
@@ -105,7 +107,10 @@ describe('AIAnalyticsService Tests', () => {
     });
 
     test('should detect performance anomalies', () => {
-      const dataWithAnomaly = [...trainingData, { date: '2024-01-06', attendance: 50, performance: 20, score: 30 }];
+      const dataWithAnomaly = [
+        ...trainingData,
+        { date: '2024-01-06', attendance: 50, performance: 20, score: 30 },
+      ];
 
       const anomalies = aiService.detectPerformanceAnomalies(dataWithAnomaly);
       assert(anomalies.length > 0, 'Should detect anomalies');
@@ -131,7 +136,10 @@ describe('AIAnalyticsService Tests', () => {
   // ============================================
   describe('Anomaly Detection', () => {
     test('should detect unusual patterns', () => {
-      const dataWithAnomaly = [...trainingData, { date: '2024-01-06', attendance: 10, performance: 5, score: 8 }];
+      const dataWithAnomaly = [
+        ...trainingData,
+        { date: '2024-01-06', attendance: 10, performance: 5, score: 8 },
+      ];
 
       const anomalies = aiService.detectAnomalies(dataWithAnomaly);
       assert(Array.isArray(anomalies), 'Should return array of anomalies');
@@ -139,7 +147,10 @@ describe('AIAnalyticsService Tests', () => {
     });
 
     test('should classify anomaly severity', () => {
-      const dataWithAnomaly = [...trainingData, { date: '2024-01-06', attendance: 5, performance: 2, score: 3 }];
+      const dataWithAnomaly = [
+        ...trainingData,
+        { date: '2024-01-06', attendance: 5, performance: 2, score: 3 },
+      ];
 
       const anomalies = aiService.detectAnomalies(dataWithAnomaly);
       anomalies.forEach(a => {
@@ -148,7 +159,10 @@ describe('AIAnalyticsService Tests', () => {
     });
 
     test('should explain anomalies', () => {
-      const dataWithAnomaly = [...trainingData, { date: '2024-01-06', attendance: 20, performance: 15, score: 18 }];
+      const dataWithAnomaly = [
+        ...trainingData,
+        { date: '2024-01-06', attendance: 20, performance: 15, score: 18 },
+      ];
 
       const anomalies = aiService.detectAnomalies(dataWithAnomaly);
       anomalies.forEach(a => {
@@ -271,7 +285,10 @@ describe('AIAnalyticsService Tests', () => {
     });
 
     test('should compare trends over periods', () => {
-      const comparison = aiService.compareTrends(trainingData.slice(0, 3), trainingData.slice(2, 5));
+      const comparison = aiService.compareTrends(
+        trainingData.slice(0, 3),
+        trainingData.slice(2, 5)
+      );
       assert(comparison.trend1Direction, 'Should analyze first trend');
       assert(comparison.trend2Direction, 'Should analyze second trend');
     });
@@ -368,14 +385,20 @@ describe('AIAnalyticsService Tests', () => {
     });
 
     test('should detect missing values', () => {
-      const incompleteData = [...trainingData, { date: '2024-01-06', attendance: null, performance: 85 }];
+      const incompleteData = [
+        ...trainingData,
+        { date: '2024-01-06', attendance: null, performance: 85 },
+      ];
 
       const quality = aiService.checkDataQuality(incompleteData);
       assert(quality.missingValueCount >= 0);
     });
 
     test('should identify outliers', () => {
-      const dataWithOutliers = [...trainingData, { date: '2024-01-06', attendance: 200, performance: 250, score: 300 }];
+      const dataWithOutliers = [
+        ...trainingData,
+        { date: '2024-01-06', attendance: 200, performance: 250, score: 300 },
+      ];
 
       const quality = aiService.checkDataQuality(dataWithOutliers);
       assert(quality.outlierCount >= 0);

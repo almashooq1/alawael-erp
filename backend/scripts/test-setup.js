@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable no-unused-vars */
 
 /**
  * 🧪 MongoDB Atlas Setup Test
@@ -86,7 +87,10 @@ class MongoDBSetupTest {
 
     for (const variable of required) {
       if (process.env[variable]) {
-        const value = variable === 'MONGODB_URI' ? process.env[variable].substring(0, 40) + '...' : process.env[variable];
+        const value =
+          variable === 'MONGODB_URI'
+            ? process.env[variable].substring(0, 40) + '...'
+            : process.env[variable];
         this.log(`${variable}: ${value}`, 'success');
         this.passed++;
       } else {
@@ -253,11 +257,15 @@ class MongoDBSetupTest {
 
   printSummary() {
     console.log(`\n${'═'.repeat(50)}`);
-    console.log(`${colors.green}✅ PASSED: ${this.passed}${colors.reset}  |  ${colors.red}❌ FAILED: ${this.failed}${colors.reset}`);
+    console.log(
+      `${colors.green}✅ PASSED: ${this.passed}${colors.reset}  |  ${colors.red}❌ FAILED: ${this.failed}${colors.reset}`
+    );
     console.log(`${'═'.repeat(50)}\n`);
 
     if (this.failed === 0) {
-      console.log(`${colors.green}${colors.bright}🎉 All tests passed! Ready to go!${colors.reset}\n`);
+      console.log(
+        `${colors.green}${colors.bright}🎉 All tests passed! Ready to go!${colors.reset}\n`
+      );
       console.log('Next steps:');
       console.log('  1. npm start (Backend)');
       console.log('  2. cd frontend && npm start (Frontend)');

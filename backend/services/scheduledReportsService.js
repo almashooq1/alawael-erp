@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * خدمة جدولة التقارير الدورية
  * Scheduled Reports Service
@@ -7,7 +8,7 @@
  */
 
 const schedule = require('node-schedule');
-const logger = require('../../utils/logger');
+const logger = require('../utils/logger');
 
 class ScheduledReportsService {
   constructor() {
@@ -34,7 +35,7 @@ class ScheduledReportsService {
     } = config;
 
     try {
-      let cronExpression = this.getCronExpression(frequency, time);
+      const cronExpression = this.getCronExpression(frequency, time);
 
       const job = schedule.scheduleJob(cronExpression, () => {
         this.executeScheduledReport({

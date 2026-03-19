@@ -1,6 +1,8 @@
+/* eslint-disable no-unused-vars */
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
+import helmet from 'helmet';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -14,13 +16,19 @@ const PORT = process.env.PORT || 4000;
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/supply_chain_db';
 
 // Middleware
-app.use(cors());
+app.use(helmet());
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : ['http://localhost:3000', 'http://localhost:5173'],
+    credentials: true,
+  }),
+);
 app.use(express.json());
 
 // MongoDB Connection
 mongoose
   .connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('✅ MongoDB connected'))
+  .then(() => console.error('✅ MongoDB connected'))
   .catch(err => console.error('❌ MongoDB connection error:', err));
 
 // Root health check
@@ -38,12 +46,12 @@ app.use('/api/barcode', barcodeRouter);
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`\n✨ Barcode API Server running on http://localhost:${PORT}`);
-  console.log(`📍 Health Check: http://localhost:${PORT}/api/barcode/health`);
-  console.log(`\n🔌 Available Endpoints:`);
-  console.log(`   POST   /api/barcode/qr-code      - Generate QR Code`);
-  console.log(`   POST   /api/barcode/barcode      - Generate Barcode`);
-  console.log(`   POST   /api/barcode/batch        - Batch Generation`);
-  console.log(`   GET    /api/barcode/statistics   - Get Statistics`);
-  console.log(`   GET    /api/barcode/health       - Health Check (Public)\n`);
+  // console.log(`\n✨ Barcode API Server running on http://localhost:${PORT}`);
+  // console.log(`📍 Health Check: http://localhost:${PORT}/api/barcode/health`);
+  // console.log(`\n🔌 Available Endpoints:`);
+  // console.log(`   POST   /api/barcode/qr-code      - Generate QR Code`);
+  // console.log(`   POST   /api/barcode/barcode      - Generate Barcode`);
+  // console.log(`   POST   /api/barcode/batch        - Batch Generation`);
+  // console.log(`   GET    /api/barcode/statistics   - Get Statistics`);
+  // console.log(`   GET    /api/barcode/health       - Health Check (Public)\n`);
 });

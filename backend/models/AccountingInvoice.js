@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * ===================================================================
  * ACCOUNTING INVOICE MODEL - نموذج الفاتورة المحاسبية
@@ -226,7 +227,7 @@ accountingInvoiceSchema.methods.recordPayment = function (amount, paymentId) {
 };
 
 // Pre-save middleware للتحقق من البيانات
-accountingInvoiceSchema.pre('save', function (next) {
+accountingInvoiceSchema.pre('save', function () {
   // التأكد من أن remainingAmount صحيح
   if (this.isNew || this.isModified('totalAmount') || this.isModified('paidAmount')) {
     this.remainingAmount = this.totalAmount - this.paidAmount;
@@ -234,10 +235,8 @@ accountingInvoiceSchema.pre('save', function (next) {
 
   // التحقق من أن dueDate بعد invoiceDate
   if (this.dueDate < this.invoiceDate) {
-    return next(new Error('تاريخ الاستحقاق يجب أن يكون بعد تاريخ الفاتورة'));
+    throw new Error('تاريخ الاستحقاق يجب أن يكون بعد تاريخ الفاتورة');
   }
-
-  next();
 });
 
 // Static method لإنشاء رقم فاتورة تلقائي

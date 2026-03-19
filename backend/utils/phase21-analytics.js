@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // Phase 21: Advanced Analytics v2
 // ML-Powered Insights, Anomaly Detection, Predictive Models
 
@@ -185,7 +186,7 @@ class CustomDashboardBuilder {
     return { success: true, widgetId, widget };
   }
 
-  getVisualizations(tenantId, options = {}) {
+  getVisualizations(_tenantId, _options = {}) {
     return {
       chartTypes: ['line', 'bar', 'pie', 'area', 'scatter', '3d-bar', '3d-scatter'],
       mapTypes: ['heatmap', 'geographic', 'network'],

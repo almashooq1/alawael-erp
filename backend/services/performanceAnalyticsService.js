@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const Analytics = require('../models/Analytics');
 const logger = require('../utils/logger');
 
@@ -12,45 +13,42 @@ class PerformanceAnalyticsService {
         {
           $match: {
             timestamp: {
-              $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
-            }
-          }
+              $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+            },
+          },
         },
         {
           $group: {
             _id: '$module',
             totalRequests: { $sum: 1 },
             successCount: {
-              $sum: { $cond: [{ $eq: ['$status', 'success'] }, 1, 0] }
+              $sum: { $cond: [{ $eq: ['$status', 'success'] }, 1, 0] },
             },
             errorCount: {
-              $sum: { $cond: [{ $eq: ['$status', 'failed'] }, 1, 0] }
+              $sum: { $cond: [{ $eq: ['$status', 'failed'] }, 1, 0] },
             },
-            avgDuration: { $avg: '$duration' }
-          }
+            avgDuration: { $avg: '$duration' },
+          },
         },
         {
           $project: {
             module: '$_id',
             totalRequests: 1,
             successRate: {
-              $round: [
-                { $multiply: [{ $divide: ['$successCount', '$totalRequests'] }, 100] },
-                2
-              ]
+              $round: [{ $multiply: [{ $divide: ['$successCount', '$totalRequests'] }, 100] }, 2],
             },
             averageResponseTime: { $round: ['$avgDuration', 2] },
             errorCount: 1,
-            _id: 0
-          }
-        }
+            _id: 0,
+          },
+        },
       ]);
 
       const overview = {
         generatedAt: new Date(),
         period: query.period || 'month',
         metrics,
-        summary: this._calculateMetricsSummary(metrics)
+        summary: this._calculateMetricsSummary(metrics),
       };
 
       return overview;
@@ -69,7 +67,7 @@ class PerformanceAnalyticsService {
         totalRequests: 0,
         averageSuccessRate: 0,
         averageResponseTime: 0,
-        totalErrors: 0
+        totalErrors: 0,
       };
     }
 
@@ -86,7 +84,7 @@ class PerformanceAnalyticsService {
       totalRequests,
       averageSuccessRate: parseFloat(avgSuccessRate),
       averageResponseTime: parseFloat(avgResponseTime),
-      totalErrors
+      totalErrors,
     };
   }
 
@@ -96,18 +94,15 @@ class PerformanceAnalyticsService {
   async getDashboard(query = {}) {
     try {
       const overview = await this.getOverview(query);
-      const recentEvents = await Analytics.find()
-        .sort({ timestamp: -1 })
-        .limit(10)
-        .lean();
+      const recentEvents = await Analytics.find().sort({ timestamp: -1 }).limit(10).lean();
 
       const dashboard = {
         generatedAt: new Date(),
         widgets: {
           overview,
           recentEvents,
-          alerts: this._generateAlerts(overview.metrics)
-        }
+          alerts: this._generateAlerts(overview.metrics),
+        },
       };
 
       return dashboard;
@@ -128,7 +123,7 @@ class PerformanceAnalyticsService {
         alerts.push({
           severity: 'warning',
           module: metric.module,
-          message: `Low success rate: ${metric.successRate}%`
+          message: `Low success rate: ${metric.successRate}%`,
         });
       }
 
@@ -136,7 +131,7 @@ class PerformanceAnalyticsService {
         alerts.push({
           severity: 'info',
           module: metric.module,
-          message: `High response time: ${metric.averageResponseTime}ms`
+          message: `High response time: ${metric.averageResponseTime}ms`,
         });
       }
     });
@@ -151,21 +146,21 @@ class PerformanceAnalyticsService {
     try {
       const metrics = await Analytics.aggregate([
         {
-          $match: { module: moduleName }
+          $match: { module: moduleName },
         },
         {
           $group: {
             _id: '$action',
             count: { $sum: 1 },
-            avgDuration: { $avg: '$duration' }
-          }
-        }
+            avgDuration: { $avg: '$duration' },
+          },
+        },
       ]);
 
       return {
         module: moduleName,
         generatedAt: new Date(),
-        actionBreakdown: metrics
+        actionBreakdown: metrics,
       };
     } catch (error) {
       logger.error('Error in getModuleAnalytics:', error);
@@ -187,9 +182,9 @@ class PerformanceAnalyticsService {
             lastActive: { $max: '$timestamp' },
             modules: { $push: '$module' },
             successRate: {
-              $avg: { $cond: [{ $eq: ['$status', 'success'] }, 1, 0] }
-            }
-          }
+              $avg: { $cond: [{ $eq: ['$status', 'success'] }, 1, 0] },
+            },
+          },
         },
         {
           $project: {
@@ -197,9 +192,9 @@ class PerformanceAnalyticsService {
             lastActive: 1,
             modules: 1,
             successRate: { $multiply: ['$successRate', 100] },
-            _id: 0
-          }
-        }
+            _id: 0,
+          },
+        },
       ]);
 
       if (userEvents.length === 0) {
@@ -212,8 +207,8 @@ class PerformanceAnalyticsService {
         metrics: {
           requestsInitiated: userEvents[0].activityCount,
           operationsCompleted: Math.floor(userEvents[0].activityCount * 0.85),
-          errorRate: (100 - userEvents[0].successRate).toFixed(2)
-        }
+          errorRate: (100 - userEvents[0].successRate).toFixed(2),
+        },
       };
     } catch (error) {
       logger.error('Error in getUserAnalytics:', error);
@@ -233,30 +228,30 @@ class PerformanceAnalyticsService {
         {
           $match: {
             timestamp: {
-              $gte: new Date(Date.now() - daysBack * 24 * 60 * 60 * 1000)
-            }
-          }
+              $gte: new Date(Date.now() - daysBack * 24 * 60 * 60 * 1000),
+            },
+          },
         },
         {
           $group: {
             _id: {
-              $dateToString: { format: '%Y-%m-%d', date: '$timestamp' }
+              $dateToString: { format: '%Y-%m-%d', date: '$timestamp' },
             },
             requestCount: { $sum: 1 },
             avgResponse: { $avg: '$duration' },
             successRate: {
-              $avg: { $cond: [{ $eq: ['$status', 'success'] }, 1, 0] }
-            }
-          }
+              $avg: { $cond: [{ $eq: ['$status', 'success'] }, 1, 0] },
+            },
+          },
         },
-        { $sort: { _id: 1 } }
+        { $sort: { _id: 1 } },
       ]);
 
       return {
         period,
         generatedAt: new Date(),
         data: trends,
-        trend: this._calculateTrend(trends)
+        trend: this._calculateTrend(trends),
       };
     } catch (error) {
       logger.error('Error in getPerformanceTrends:', error);
@@ -298,18 +293,18 @@ class PerformanceAnalyticsService {
               _id: null,
               totalRequests: { $sum: 1 },
               totalErrors: { $sum: { $cond: [{ $eq: ['$status', 'failed'] }, 1, 0] } },
-              avgResponse: { $avg: '$duration' }
-            }
-          }
+              avgResponse: { $avg: '$duration' },
+            },
+          },
         ]),
         Analytics.distinct('module'),
-        Analytics.distinct('userId')
+        Analytics.distinct('userId'),
       ]);
 
       const stats = totalStats[0] || {
         totalRequests: 0,
         totalErrors: 0,
-        avgResponse: 0
+        avgResponse: 0,
       };
 
       return {
@@ -321,13 +316,13 @@ class PerformanceAnalyticsService {
           totalProcessed: stats.totalRequests,
           totalErrors: stats.totalErrors,
           modules: moduleCount.length,
-          users: userCount.length
+          users: userCount.length,
         },
         targets: {
           responseTime: '< 100ms',
           successRate: '> 99%',
-          uptime: '> 99.9%'
-        }
+          uptime: '> 99.9%',
+        },
       };
     } catch (error) {
       logger.error('Error in getKPIs:', error);
@@ -359,7 +354,7 @@ class PerformanceAnalyticsService {
       const [totalEvents, moduleCount, userCount] = await Promise.all([
         Analytics.countDocuments(),
         Analytics.distinct('module'),
-        Analytics.distinct('userId')
+        Analytics.distinct('userId'),
       ]);
 
       return {
@@ -368,13 +363,13 @@ class PerformanceAnalyticsService {
         modulesTracked: moduleCount.length,
         usersTracked: userCount.length,
         uptime: '99.9%',
-        lastChecked: new Date()
+        lastChecked: new Date(),
       };
     } catch (error) {
       logger.error('Error in getHealthStatus:', error);
       return {
         status: 'error',
-        error: error.message
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -386,5 +381,5 @@ const performanceAnalyticsService = new PerformanceAnalyticsService();
 module.exports = {
   PerformanceAnalyticsService,
   performanceAnalyticsService,
-  analyticsService: performanceAnalyticsService
+  analyticsService: performanceAnalyticsService,
 };

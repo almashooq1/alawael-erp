@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Search Routes
  * مسارات البحث المتقدم
@@ -5,10 +6,14 @@
 
 const express = require('express');
 const router = express.Router();
+const { authenticateToken } = require('../../middleware/auth');
 const AdvancedSearchService = require('../../services/advancedSearchService');
 
 // Initialize service
 const searchService = new AdvancedSearchService();
+
+// Require authentication for all search routes
+router.use(authenticateToken);
 
 /**
  * POST /api/search

@@ -1,8 +1,10 @@
+/* eslint-disable no-unused-vars */
 const ComplianceLog = require('../models/ComplianceLog');
 const Employee = require('../models/Employee');
 const TherapySession = require('../models/TherapySession');
 const Vehicle = require('../models/Vehicle'); // تغيير إلى Vehicle.js الأساسي
 const SmartNotificationService = require('./smartNotificationService');
+const logger = require('../utils/logger');
 
 class SmartQualityService {
   /**
@@ -100,7 +102,7 @@ class SmartQualityService {
       }
     } catch (e) {
       // Vehicle model might be complex or named differently, fail gracefully
-      console.log('Fleet scan skipped or failed:', e.message);
+      logger.info('Fleet scan skipped or failed:', e.message);
     }
     return count;
   }

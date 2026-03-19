@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Helper utilities for handling ObjectId conversions safely
  * Especially useful for test mode where userId might be 'mock_tester'
@@ -23,7 +24,7 @@ function toObjectIdSafe(value) {
     if (typeof value === 'string' && value.length === 24) {
       try {
         return new mongoose.Types.ObjectId(value);
-      } catch (e) {
+      } catch (_e) {
         return null;
       }
     }

@@ -1,3 +1,4 @@
+﻿/* eslint-disable no-unused-vars */
 const express = require('express');
 const router = express.Router();
 const asyncHandler = require('express-async-handler');
@@ -9,11 +10,11 @@ const logger = require('../utils/logger');
 const webhookService = new WebhookService();
 
 // Middleware to verify service is ready
-router.use((req, res, next) => {
+router.use((_req, res, next) => {
   if (!webhookService) {
-    return res.status(503).json({ 
+    return res.status(503).json({
       error: 'Service unavailable',
-      message: 'Webhook service not initialized'
+      message: 'Webhook service not initialized',
     });
   }
   next();
@@ -24,7 +25,8 @@ router.use((req, res, next) => {
  * @desc    Get all webhooks
  * @access  Private/Admin
  */
-router.get('/',
+router.get(
+  '/',
   authenticate,
   authorize(['admin', 'manager']),
   asyncHandler(async (req, res) => {
@@ -33,13 +35,13 @@ router.get('/',
       res.status(200).json({
         success: true,
         count: webhooks.length,
-        data: webhooks
+        data: webhooks,
       });
     } catch (error) {
       logger.error('Error fetching webhooks:', error);
       res.status(500).json({
         success: false,
-        error: error.message || 'Failed to fetch webhooks'
+        error: 'حدث خطأ في الخادم' || 'Failed to fetch webhooks',
       });
     }
   })
@@ -50,7 +52,8 @@ router.get('/',
  * @desc    Register new webhook
  * @access  Private/Admin
  */
-router.post('/register',
+router.post(
+  '/register',
   authenticate,
   authorize(['admin', 'manager']),
   asyncHandler(async (req, res) => {
@@ -60,14 +63,14 @@ router.post('/register',
       if (!url) {
         return res.status(400).json({
           success: false,
-          error: 'Webhook URL is required'
+          error: 'Webhook URL is required',
         });
       }
 
       if (!events || !Array.isArray(events) || events.length === 0) {
         return res.status(400).json({
           success: false,
-          error: 'At least one event must be specified'
+          error: 'At least one event must be specified',
         });
       }
 
@@ -76,18 +79,18 @@ router.post('/register',
         events,
         secret,
         description,
-        createdBy: req.user.id
+        createdBy: req.user.id,
       });
 
       res.status(201).json({
         success: true,
-        data: webhook
+        data: webhook,
       });
     } catch (error) {
       logger.error('Error registering webhook:', error);
       res.status(500).json({
         success: false,
-        error: error.message || 'Failed to register webhook'
+        error: 'حدث خطأ في الخادم' || 'Failed to register webhook',
       });
     }
   })
@@ -98,29 +101,30 @@ router.post('/register',
  * @desc    Get specific webhook
  * @access  Private/Admin
  */
-router.get('/:webhookId',
+router.get(
+  '/:webhookId',
   authenticate,
   authorize(['admin', 'manager']),
   asyncHandler(async (req, res) => {
     try {
       const webhook = await webhookService.getWebhookById(req.params.webhookId);
-      
+
       if (!webhook) {
         return res.status(404).json({
           success: false,
-          error: 'Webhook not found'
+          error: 'Webhook not found',
         });
       }
 
       res.status(200).json({
         success: true,
-        data: webhook
+        data: webhook,
       });
     } catch (error) {
       logger.error('Error fetching webhook:', error);
       res.status(500).json({
         success: false,
-        error: error.message || 'Failed to fetch webhook'
+        error: 'حدث خطأ في الخادم' || 'Failed to fetch webhook',
       });
     }
   })
@@ -131,32 +135,30 @@ router.get('/:webhookId',
  * @desc    Update webhook
  * @access  Private/Admin
  */
-router.put('/:webhookId',
+router.put(
+  '/:webhookId',
   authenticate,
   authorize(['admin', 'manager']),
   asyncHandler(async (req, res) => {
     try {
-      const webhook = await webhookService.updateWebhook(
-        req.params.webhookId,
-        req.body
-      );
+      const webhook = await webhookService.updateWebhook(req.params.webhookId, req.body);
 
       if (!webhook) {
         return res.status(404).json({
           success: false,
-          error: 'Webhook not found'
+          error: 'Webhook not found',
         });
       }
 
       res.status(200).json({
         success: true,
-        data: webhook
+        data: webhook,
       });
     } catch (error) {
       logger.error('Error updating webhook:', error);
       res.status(500).json({
         success: false,
-        error: error.message || 'Failed to update webhook'
+        error: 'حدث خطأ في الخادم' || 'Failed to update webhook',
       });
     }
   })
@@ -167,7 +169,8 @@ router.put('/:webhookId',
  * @desc    Delete webhook
  * @access  Private/Admin
  */
-router.delete('/:webhookId',
+router.delete(
+  '/:webhookId',
   authenticate,
   authorize(['admin']),
   asyncHandler(async (req, res) => {
@@ -177,19 +180,19 @@ router.delete('/:webhookId',
       if (!result) {
         return res.status(404).json({
           success: false,
-          error: 'Webhook not found'
+          error: 'Webhook not found',
         });
       }
 
       res.status(200).json({
         success: true,
-        message: 'Webhook deleted successfully'
+        message: 'Webhook deleted successfully',
       });
     } catch (error) {
       logger.error('Error deleting webhook:', error);
       res.status(500).json({
         success: false,
-        error: error.message || 'Failed to delete webhook'
+        error: 'حدث خطأ في الخادم' || 'Failed to delete webhook',
       });
     }
   })
@@ -200,17 +203,18 @@ router.delete('/:webhookId',
  * @desc    Manually trigger webhook
  * @access  Private/Admin
  */
-router.post('/:webhookId/trigger',
+router.post(
+  '/:webhookId/trigger',
   authenticate,
   authorize(['admin', 'manager']),
   asyncHandler(async (req, res) => {
     try {
       const webhook = await webhookService.getWebhookById(req.params.webhookId);
-      
+
       if (!webhook) {
         return res.status(404).json({
           success: false,
-          error: 'Webhook not found'
+          error: 'Webhook not found',
         });
       }
 
@@ -222,13 +226,13 @@ router.post('/:webhookId/trigger',
 
       res.status(200).json({
         success: true,
-        data: result
+        data: result,
       });
     } catch (error) {
       logger.error('Error triggering webhook:', error);
       res.status(500).json({
         success: false,
-        error: error.message || 'Failed to trigger webhook'
+        error: 'حدث خطأ في الخادم' || 'Failed to trigger webhook',
       });
     }
   })
@@ -239,17 +243,18 @@ router.post('/:webhookId/trigger',
  * @desc    Test webhook with sample payload
  * @access  Private/Admin
  */
-router.post('/:webhookId/test',
+router.post(
+  '/:webhookId/test',
   authenticate,
   authorize(['admin', 'manager']),
   asyncHandler(async (req, res) => {
     try {
       const webhook = await webhookService.getWebhookById(req.params.webhookId);
-      
+
       if (!webhook) {
         return res.status(404).json({
           success: false,
-          error: 'Webhook not found'
+          error: 'Webhook not found',
         });
       }
 
@@ -257,13 +262,13 @@ router.post('/:webhookId/test',
 
       res.status(200).json({
         success: true,
-        data: result
+        data: result,
       });
     } catch (error) {
       logger.error('Error testing webhook:', error);
       res.status(500).json({
         success: false,
-        error: error.message || 'Failed to test webhook'
+        error: 'حدث خطأ في الخادم' || 'Failed to test webhook',
       });
     }
   })
@@ -274,45 +279,43 @@ router.post('/:webhookId/test',
  * @desc    Get webhook delivery history
  * @access  Private/Admin
  */
-router.get('/:webhookId/deliveries',
+router.get(
+  '/:webhookId/deliveries',
   authenticate,
   authorize(['admin', 'manager']),
   asyncHandler(async (req, res) => {
     try {
-      const deliveries = await webhookService.getDeliveryHistory(
-        req.params.webhookId,
-        req.query
-      );
-      
+      const deliveries = await webhookService.getDeliveryHistory(req.params.webhookId, req.query);
+
       if (!deliveries) {
         return res.status(404).json({
           success: false,
-          error: 'Webhook not found'
+          error: 'Webhook not found',
         });
       }
 
       res.status(200).json({
         success: true,
         count: deliveries.length,
-        data: deliveries
+        data: deliveries,
       });
     } catch (error) {
       logger.error('Error fetching deliveries:', error);
       res.status(500).json({
         success: false,
-        error: error.message || 'Failed to fetch deliveries'
+        error: 'حدث خطأ في الخادم' || 'Failed to fetch deliveries',
       });
     }
   })
 );
 
 // Error handling middleware
-router.use((err, req, res, next) => {
+router.use((err, _req, res, _next) => {
   logger.error('Router error:', err);
   res.status(500).json({
     success: false,
     error: 'An unexpected error occurred',
-    message: err.message
+    message: 'حدث خطأ في الخادم',
   });
 });
 

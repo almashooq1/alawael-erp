@@ -1,5 +1,7 @@
+/* eslint-disable no-unused-vars */
 const fs = require('fs');
 const path = require('path');
+const logger = require('../utils/logger');
 
 // قاعدة بيانات الاشعارات
 const notificationsPath = path.join(__dirname, '../data/notifications.json');
@@ -13,7 +15,7 @@ function readNotifications() {
     }
     return JSON.parse(fs.readFileSync(notificationsPath, 'utf8'));
   } catch (error) {
-    console.error('Error reading notifications:', error);
+    logger.error('Error reading notifications:', error);
     return { notifications: [] };
   }
 }
@@ -23,7 +25,7 @@ function writeNotifications(data) {
     fs.writeFileSync(notificationsPath, JSON.stringify(data, null, 2));
     return true;
   } catch (error) {
-    console.error('Error writing notifications:', error);
+    logger.error('Error writing notifications:', error);
     return false;
   }
 }
@@ -105,7 +107,9 @@ class EmailService {
 
   static async sendLeaveApproval(employee, leave) {
     const message =
-      leave.status === 'approved' ? `تم الموافقة على طلب إجازتك من ${leave.fromDate} إلى ${leave.toDate}` : `تم رفض طلب إجازتك`;
+      leave.status === 'approved'
+        ? `تم الموافقة على طلب إجازتك من ${leave.fromDate} إلى ${leave.toDate}`
+        : `تم رفض طلب إجازتك`;
 
     const notification = Notification.create({
       userId: employee._id,
@@ -136,7 +140,7 @@ class EmailService {
 class SMSService {
   static async sendOTP(phone, otp) {
     // محاكاة إرسال رمز التحقق
-    console.log(`📱 OTP للرقم ${phone}: ${otp}`);
+    logger.info(`📱 OTP للرقم ${phone}: ${otp}`);
     return {
       success: true,
       message: `تم إرسال الرمز إلى ${phone}`,
@@ -156,7 +160,7 @@ class SMSService {
 
   static async sendAttendanceAlert(phone, employeeName) {
     const message = `${employeeName}، لم تسجل حضورك اليوم. يرجى التسجيل فوراً.`;
-    console.log(`📱 SMS إلى ${phone}: ${message}`);
+    logger.info(`📱 SMS إلى ${phone}: ${message}`);
     return { success: true };
   }
 }
@@ -178,7 +182,9 @@ class PushNotificationService {
   }
 
   static async sendToMultiple(userIds, title, body, data = {}) {
-    const notifications = userIds.map(userId => this.sendPushNotification(userId, title, body, data));
+    const notifications = userIds.map(userId =>
+      this.sendPushNotification(userId, title, body, data)
+    );
     return notifications;
   }
 }

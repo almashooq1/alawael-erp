@@ -1,12 +1,15 @@
+/* eslint-disable no-unused-vars */
 /**
  * PHASE 101: Smart Clinical Command Center
  * "The Bridge" - Aggregates real-time feeds from Wearables, Robotics, and Cognitive Units.
  * Operates independently of the legacy MongoDB to ensure speed and fault tolerance.
  */
 
+const logger = require('../utils/logger');
+
 class SmartClinicalCommandService {
   constructor() {
-    console.log('System: Smart Clinical Command Center - Initialized');
+    logger.info('System: Smart Clinical Command Center - Initialized');
   }
 
   /**
@@ -92,8 +95,10 @@ class SmartClinicalCommandService {
 
   _generateAlerts(physio, robotics) {
     const alerts = [];
-    if (physio.stressIndex > 50) alerts.push({ level: 'WARN', msg: 'Elevated Stress - Monitor Patient' });
-    if (robotics.calibrationStatus !== 'OPTIMAL') alerts.push({ level: 'CRITICAL', msg: 'Robot Calibration Required' });
+    if (physio.stressIndex > 50)
+      alerts.push({ level: 'WARN', msg: 'Elevated Stress - Monitor Patient' });
+    if (robotics.calibrationStatus !== 'OPTIMAL')
+      alerts.push({ level: 'CRITICAL', msg: 'Robot Calibration Required' });
     return alerts;
   }
 

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Auth Service - Token Management and Authentication
  * Handles JWT token generation, validation, and storage for frontend
@@ -11,14 +12,14 @@ export const generateTestToken = () => {
     email: 'test@example.com',
     name: 'Test User',
     permissions: ['read', 'write', 'delete'],
-    exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60) // 24 hours
+    exp: Math.floor(Date.now() / 1000) + 24 * 60 * 60, // 24 hours
   };
-  
+
   return Buffer.from(JSON.stringify(tokenData)).toString('base64');
 };
 
 // Store token in localStorage
-export const setToken = (token) => {
+export const setToken = token => {
   if (token) {
     localStorage.setItem('token', token);
     localStorage.setItem('tokenExpiry', new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString());
@@ -45,7 +46,7 @@ export const isTokenExpired = () => {
 };
 
 // Decode token (base64)
-export const decodeToken = (token) => {
+export const decodeToken = token => {
   try {
     return JSON.parse(Buffer.from(token, 'base64').toString());
   } catch (error) {
@@ -58,7 +59,7 @@ export const decodeToken = (token) => {
 export const getCurrentUser = () => {
   const token = getToken();
   if (!token) return null;
-  
+
   try {
     const decoded = decodeToken(token);
     if (decoded && !isTokenExpired()) {
@@ -67,18 +68,18 @@ export const getCurrentUser = () => {
   } catch (error) {
     console.error('Error getting current user:', error);
   }
-  
+
   return null;
 };
 
 // Check if user has permission
-export const hasPermission = (permission) => {
+export const hasPermission = permission => {
   const user = getCurrentUser();
   return user && user.permissions && user.permissions.includes(permission);
 };
 
 // Check if user has role
-export const hasRole = (role) => {
+export const hasRole = role => {
   const user = getCurrentUser();
   return user && user.role === role;
 };

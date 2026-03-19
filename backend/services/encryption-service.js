@@ -1,14 +1,16 @@
+/* eslint-disable no-unused-vars */
 /**
  * Encryption Service - Data Protection
  * Handles encryption/decryption for sensitive data
  */
 
 const crypto = require('crypto');
+const { encryptionKey: envEncryptionKey, hmacKey: envHmacKey } = require('../config/secrets');
 
 class EncryptionService {
   constructor() {
     this.algorithm = 'aes-256-gcm';
-    this.key = crypto.scryptSync(process.env.ENCRYPTION_KEY || 'secure-key-2025', 'salt', 32);
+    this.key = crypto.scryptSync(envEncryptionKey, 'salt', 32);
   }
 
   /**
@@ -30,7 +32,7 @@ class EncryptionService {
         authTag: authTag.toString('hex'),
       };
     } catch (error) {
-      throw new Error(`Encryption failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -50,7 +52,7 @@ class EncryptionService {
 
       return JSON.parse(decrypted);
     } catch (error) {
-      throw new Error(`Decryption failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -115,7 +117,7 @@ class EncryptionService {
    * Create HMAC for data integrity verification
    */
   createHMAC(data) {
-    const hmacKey = crypto.scryptSync(process.env.HMAC_KEY || 'hmac-key-2025', 'salt', 32);
+    const hmacKey = crypto.scryptSync(envHmacKey, 'salt', 32);
     return crypto.createHmac('sha256', hmacKey).update(JSON.stringify(data)).digest('hex');
   }
 

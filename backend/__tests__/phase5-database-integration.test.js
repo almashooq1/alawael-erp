@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * Phase 5: Database Integration & Advanced Testing
  * Extends Phase 4 with direct database operations, transaction handling,
@@ -181,7 +183,7 @@ describe('Phase 5: Database Integration & Advanced Workflows', () => {
       });
 
       expect(customer._id).toBeDefined();
-      let custCount = await dbHelpers.countRecords('customers');
+      const custCount = await dbHelpers.countRecords('customers');
       expect(custCount).toBe(1);
 
       // Step 2: Create invoice for customer
@@ -196,7 +198,7 @@ describe('Phase 5: Database Integration & Advanced Workflows', () => {
 
       expect(invoice.customerId).toBe(customer._id);
       expect(invoice.amount).toBe(2000);
-      let invCount = await dbHelpers.countRecords('invoices');
+      const invCount = await dbHelpers.countRecords('invoices');
       expect(invCount).toBe(1);
 
       // Step 3: Update customer balance after payment

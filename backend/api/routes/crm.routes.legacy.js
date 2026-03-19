@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * 🏢 CRM Advanced API Routes
  * Professional Customer Relationship Management System
@@ -299,7 +300,9 @@ router.get('/dashboard', authenticateToken, (req, res) => {
   try {
     const kpis = calculateKPIs();
     const recentDeals = crmDatabase.deals.slice(0, 3);
-    const topCustomers = crmDatabase.customers.sort((a, b) => b.totalValue - a.totalValue).slice(0, 5);
+    const topCustomers = crmDatabase.customers
+      .sort((a, b) => b.totalValue - a.totalValue)
+      .slice(0, 5);
 
     res.json({
       success: true,
@@ -320,7 +323,7 @@ router.get('/dashboard', authenticateToken, (req, res) => {
     res.status(500).json({
       success: false,
       message: 'خطأ في جلب بيانات لوحة التحكم',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -342,7 +345,9 @@ router.get('/customers', authenticateToken, (req, res) => {
       customers = customers.filter(c => c.tier === tier);
     }
     if (search) {
-      customers = customers.filter(c => c.name.includes(search) || c.email.includes(search) || c.phone.includes(search));
+      customers = customers.filter(
+        c => c.name.includes(search) || c.email.includes(search) || c.phone.includes(search)
+      );
     }
 
     // Pagination
@@ -365,7 +370,7 @@ router.get('/customers', authenticateToken, (req, res) => {
     res.status(500).json({
       success: false,
       message: 'خطأ في جلب قائمة العملاء',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -407,7 +412,7 @@ router.get('/customers/:customerId', authenticateToken, (req, res) => {
     res.status(500).json({
       success: false,
       message: 'خطأ في جلب تفاصيل العميل',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -449,7 +454,8 @@ router.get('/deals', authenticateToken, (req, res) => {
         },
         statistics: {
           totalValue: deals.reduce((sum, d) => sum + d.value, 0),
-          averageValue: deals.length > 0 ? deals.reduce((sum, d) => sum + d.value, 0) / deals.length : 0,
+          averageValue:
+            deals.length > 0 ? deals.reduce((sum, d) => sum + d.value, 0) / deals.length : 0,
           count: deals.length,
         },
       },
@@ -458,7 +464,7 @@ router.get('/deals', authenticateToken, (req, res) => {
     res.status(500).json({
       success: false,
       message: 'خطأ في جلب قائمة الفرص',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -495,7 +501,7 @@ router.get('/deals/:dealId', authenticateToken, (req, res) => {
     res.status(500).json({
       success: false,
       message: 'خطأ في جلب تفاصيل الفرصة',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -533,7 +539,7 @@ router.get('/pipeline', authenticateToken, (req, res) => {
     res.status(500).json({
       success: false,
       message: 'خطأ في جلب بيانات خط الأنابيب',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -575,7 +581,7 @@ router.get('/activities', authenticateToken, (req, res) => {
     res.status(500).json({
       success: false,
       message: 'خطأ في جلب سجل الأنشطة',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -639,7 +645,7 @@ router.get('/analytics', authenticateToken, (req, res) => {
     res.status(500).json({
       success: false,
       message: 'خطأ في جلب التحليلات',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -657,7 +663,10 @@ function calculateDealTimeline(deal) {
     createdDate: deal.createdDate,
     daysActive,
     expectedCloseDate: deal.expectedCloseDate,
-    daysUntilClose: Math.max(0, Math.floor((new Date(deal.expectedCloseDate) - today) / (1000 * 60 * 60 * 24))),
+    daysUntilClose: Math.max(
+      0,
+      Math.floor((new Date(deal.expectedCloseDate) - today) / (1000 * 60 * 60 * 24))
+    ),
   };
 }
 

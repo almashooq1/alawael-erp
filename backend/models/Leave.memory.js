@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const db = require('../config/inMemoryDB');
 
 class Leave {

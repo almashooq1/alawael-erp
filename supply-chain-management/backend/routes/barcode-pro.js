@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const express = require('express');
 const BarcodeService = require('../services/BarcodeService');
 const { barcodeAuth, barcodeRateLimit } = require('../middleware/barcodeAuth');
@@ -9,7 +10,7 @@ const router = express.Router();
  * GET /api/barcode/health
  * Health check endpoint - PUBLIC, no auth required
  */
-router.get('/health', (req, res) => {
+router.get('/health', (_req, res) => {
   res.json({
     status: 'healthy',
     timestamp: new Date(),
@@ -50,7 +51,7 @@ router.post('/qr-code', async (req, res) => {
   } catch (error) {
     logger.error(`QR Code generation error: ${error.message}`);
     res.status(500).json({
-      message: error.message,
+      message: 'حدث خطأ في الخادم',
       code: 'GENERATION_ERROR',
       type: 'QR',
     });
@@ -86,7 +87,7 @@ router.post('/barcode', async (req, res) => {
   } catch (error) {
     logger.error(`Barcode generation error: ${error.message}`);
     res.status(500).json({
-      message: error.message,
+      message: 'حدث خطأ في الخادم',
       code: 'GENERATION_ERROR',
       type: 'BARCODE',
     });
@@ -126,7 +127,7 @@ router.post('/batch', async (req, res) => {
   } catch (error) {
     logger.error(`Batch generation error: ${error.message}`);
     res.status(500).json({
-      message: error.message,
+      message: 'حدث خطأ في الخادم',
       code: 'BATCH_ERROR',
     });
   }
@@ -148,7 +149,7 @@ router.get('/statistics', async (req, res) => {
   } catch (error) {
     logger.error(`Statistics retrieval error: ${error.message}`);
     res.status(500).json({
-      message: error.message,
+      message: 'حدث خطأ في الخادم',
       code: 'STATS_ERROR',
     });
   }

@@ -302,7 +302,7 @@ export class HealthCheckManager {
           status: 'Unhealthy',
           responseTime: -1,
           timestamp: new Date(),
-          details: error instanceof Error ? error.message : String(error),
+          details: error instanceof Error ? 'An internal error occurred' : String(error),
         });
       }
     }

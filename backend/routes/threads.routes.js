@@ -1,3 +1,4 @@
+﻿/* eslint-disable no-unused-vars */
 /**
  * Threads Routes - Separate routing for /api/threads
  * To avoid conflicts with messaging.routes.js
@@ -5,6 +6,10 @@
 
 const express = require('express');
 const router = express.Router();
+const { authenticate, authorize } = require('../middleware/auth');
+
+// Authentication required for all thread routes
+router.use(authenticate);
 
 // Mock messaging service
 const messagingService = {
@@ -17,26 +22,26 @@ const messagingService = {
       lastMessage: 'Last message',
       unreadCount: 0,
       createdAt: new Date(),
-    }
+    },
   ],
-  getThread: async (id) => ({
+  getThread: async id => ({
     _id: id,
     title: 'Thread ' + id,
     description: '',
     participants: ['user123'],
     messages: [
-      { _id: 'msg1', content: 'Sample message', author: 'user123', createdAt: new Date() }
+      { _id: 'msg1', content: 'Sample message', author: 'user123', createdAt: new Date() },
     ],
     createdAt: new Date(),
     updatedAt: new Date(),
-  })
+  }),
 };
 
 /**
  * POST /api/threads
  * Create a new thread
  */
-router.post('/', async (req, res) => {
+router.post('/', authorize(['admin', 'manager']), async (req, res) => {
   try {
     const { title, description, participants, subject } = req.body;
     const userId = req.user?.id || req.user?.userId;
@@ -68,7 +73,7 @@ router.post('/', async (req, res) => {
     return res.status(500).json({
       success: false,
       message: 'Failed to create thread',
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -82,7 +87,7 @@ router.get('/', async (req, res) => {
     const userId = req.user?.id || req.user?.userId;
     const { page = 1, limit = 20 } = req.query;
 
-    const threads = await messagingService.getThreads() || [];
+    const threads = (await messagingService.getThreads()) || [];
 
     return res.status(200).json({
       success: true,
@@ -97,7 +102,7 @@ router.get('/', async (req, res) => {
     return res.status(500).json({
       success: false,
       message: 'Failed to retrieve threads',
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -118,7 +123,7 @@ router.get('/:id', async (req, res) => {
       });
     }
 
-    const thread = await messagingService.getThread(id) || {
+    const thread = (await messagingService.getThread(id)) || {
       _id: id,
       title: 'Unknown Thread',
       messages: [],
@@ -129,14 +134,14 @@ router.get('/:id', async (req, res) => {
       success: true,
       thread: {
         ...thread,
-        messages: thread.messages || []
+        messages: thread.messages || [],
       },
     });
   } catch (error) {
     return res.status(500).json({
       success: false,
       message: 'Failed to retrieve thread',
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -145,7 +150,7 @@ router.get('/:id', async (req, res) => {
  * POST /api/threads/:id/messages
  * Add message to thread
  */
-router.post('/:id/messages', async (req, res) => {
+router.post('/:id/messages', authorize(['admin', 'manager']), async (req, res) => {
   const { id } = req.params;
   const { content, attachments } = req.body;
   const userId = req.user?.id || req.user?.userId;
@@ -185,7 +190,7 @@ router.post('/:id/messages', async (req, res) => {
  * PATCH /api/threads/:id/archive
  * Archive thread
  */
-router.patch('/:id/archive', (req, res) => {
+router.patch('/:id/archive', authorize(['admin', 'manager']), (req, res) => {
   res.json({
     success: true,
     message: 'Thread archived successfully',
@@ -207,7 +212,7 @@ router.post('/:id/leave', (req, res) => {
  * POST /api/threads/:id/pin-message
  * Pin a message in a thread
  */
-router.post('/:id/pin-message', (req, res) => {
+router.post('/:id/pin-message', authorize(['admin', 'manager']), (req, res) => {
   try {
     const { id } = req.params;
     const { messageId } = req.body;
@@ -232,7 +237,7 @@ router.post('/:id/pin-message', (req, res) => {
     return res.status(500).json({
       success: false,
       message: 'Failed to pin message',
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });

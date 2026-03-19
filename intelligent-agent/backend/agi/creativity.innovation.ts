@@ -132,7 +132,7 @@ export class AGICreativityInnovation extends EventEmitter {
         (b.novelty * b.value * b.feasibility) - (a.novelty * a.value * a.feasibility)
       );
     } catch (error: any) {
-      this.emit('creativity:error', { challenge, error: error.message });
+      this.emit('creativity:error', { challenge, error: 'حدث خطأ داخلي' });
       throw error;
     }
   }

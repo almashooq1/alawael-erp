@@ -1,26 +1,31 @@
 # ALAWAEL Integration - Backend Repository
 
 ## Overview
+
 This repository includes **ALAWAEL v1.0.0** (Advanced Enterprise Automation for Logistics & Operations), a comprehensive enterprise automation platform with 48 production-ready tools, complete CI/CD workflows, and operational procedures.
 
 ## 🚀 Quick Start
 
 ### View Tools
+
 ```bash
 ls -la .alawael/tools/
 ```
 
 ### Run Health Check
+
 ```bash
 npm run alawael:health
 ```
 
 ### Deploy to Staging
+
 ```bash
 bash alawael-deployment.sh canary staging
 ```
 
 ### Deploy to Production
+
 ```bash
 bash alawael-deployment.sh blue-green production
 ```
@@ -51,6 +56,7 @@ bash alawael-deployment.sh blue-green production
 ## 🎯 ALAWAEL Capabilities
 
 ### Automation (48 Tools)
+
 - Database management
 - API testing & validation
 - Performance testing
@@ -63,6 +69,7 @@ bash alawael-deployment.sh blue-green production
 - And 39 more...
 
 ### Operational Procedures
+
 - Daily operations
 - Weekly maintenance
 - Monthly reviews
@@ -93,6 +100,7 @@ npm run alawael:incident
 ## 📖 Documentation
 
 **Complete Documentation Available:**
+
 - ALAWAEL_GOLIVE_ACTIVATION_GUIDE.md - Deployment procedures
 - ALAWAEL_OPERATIONS_MANUAL.md - Daily operations
 - ALAWAEL_INCIDENT_RESPONSE.md - Emergency procedures
@@ -104,16 +112,19 @@ npm run alawael:incident
 ### If Something Goes Wrong
 
 **Instant Rollback** (< 3 minutes)
+
 ```bash
 bash alawael-deployment.sh rollback production
 ```
 
 **Create Incident Record**
+
 ```bash
 bash .alawael/incident-response.sh
 ```
 
 **Escalation Path**
+
 1. On-call Engineer (Slack #alawael-alerts)
 2. DevOps Lead (PagerDuty alawael-oncall)
 3. CTO (Email + Phone)
@@ -139,13 +150,13 @@ bash .alawael/incident-response.sh
 
 ## 📈 Performance Targets
 
-| Metric | Target | Status |
-|--------|--------|--------|
-| Uptime | 99.95% | ✅ |
-| API Response P99 | <500ms | ✅ |
-| Error Rate | <0.05% | ✅ |
-| RTO | <5 min | ✅ |
-| Code Coverage | >85% | ✅ 89% |
+| Metric           | Target | Status |
+| ---------------- | ------ | ------ |
+| Uptime           | 99.95% | ✅     |
+| API Response P99 | <500ms | ✅     |
+| Error Rate       | <0.05% | ✅     |
+| RTO              | <5 min | ✅     |
+| Code Coverage    | >85%   | ✅ 89% |
 
 ## 🔐 Security & Compliance
 
@@ -181,6 +192,7 @@ bash .alawael/incident-response.sh
 ## 🤝 Contributing
 
 All changes to ALAWAEL require:
+
 1. Code review (2+ approvals)
 2. All tests passing
 3. Security scan clean
@@ -194,6 +206,7 @@ ALAWAEL v1.0.0 - Standard AWS License
 ---
 
 **Need Help?**
+
 - Read documentation in repository root
 - Check #alawael Slack channel
 - Email alawael-team@company.com

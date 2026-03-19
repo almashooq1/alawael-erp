@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Trip Management Service - خدمة إدارة الرحلات
  *

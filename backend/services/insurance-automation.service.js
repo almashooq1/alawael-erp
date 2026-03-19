@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Insurance Automation Service
  * خدمة أتمتة التأمين
@@ -7,6 +8,7 @@
 
 const axios = require('axios');
 const EventEmitter = require('events');
+const logger = require('../utils/logger');
 
 class InsuranceAutomationService extends EventEmitter {
   constructor() {
@@ -27,23 +29,23 @@ class InsuranceAutomationService extends EventEmitter {
         {
           name: 'aetna',
           endpoint: process.env.AETNA_API_ENDPOINT,
-          key: process.env.AETNA_API_KEY
+          key: process.env.AETNA_API_KEY,
         },
         {
           name: 'bcbs',
           endpoint: process.env.BCBS_API_ENDPOINT,
-          key: process.env.BCBS_API_KEY
+          key: process.env.BCBS_API_KEY,
         },
         {
           name: 'united',
           endpoint: process.env.UNITED_API_ENDPOINT,
-          key: process.env.UNITED_API_KEY
+          key: process.env.UNITED_API_KEY,
         },
         {
           name: 'cigna',
           endpoint: process.env.CIGNA_API_ENDPOINT,
-          key: process.env.CIGNA_API_KEY
-        }
+          key: process.env.CIGNA_API_KEY,
+        },
       ];
 
       providers.forEach(provider => {
@@ -51,14 +53,16 @@ class InsuranceAutomationService extends EventEmitter {
           this.insuranceProviders.set(provider.name, {
             endpoint: provider.endpoint,
             key: provider.key,
-            status: 'active'
+            status: 'active',
           });
         }
       });
 
-      console.log(`✅ Insurance Automation initialized with ${this.insuranceProviders.size} providers`);
+      logger.info(
+        `✅ Insurance Automation initialized with ${this.insuranceProviders.size} providers`
+      );
     } catch (error) {
-      console.error('Insurance initialization error:', error);
+      logger.error('Insurance initialization error:', error);
     }
   }
 
@@ -77,14 +81,15 @@ class InsuranceAutomationService extends EventEmitter {
         expectedSessions,
         therapyType,
         diagnosisCode,
-        therapistNPI
+        therapistNPI,
       } = authData;
 
       // Check cache first
       const cacheKey = `${memberId}-${serviceName}`;
       if (this.preAuthCache.has(cacheKey)) {
         const cached = this.preAuthCache.get(cacheKey);
-        if (new Date() - cached.timestamp < 86400000) { // 24 hours
+        if (new Date() - cached.timestamp < 86400000) {
+          // 24 hours
           return { success: true, cached: true, ...cached };
         }
       }
@@ -99,7 +104,7 @@ class InsuranceAutomationService extends EventEmitter {
         requestType: 'preAuthorizationRequest',
         member: {
           id: memberId,
-          name: memberName
+          name: memberName,
         },
         service: {
           type: therapyType,
@@ -107,30 +112,26 @@ class InsuranceAutomationService extends EventEmitter {
           diagnosisCode,
           expectedDuration,
           expectedSessions,
-          therapistNPI
+          therapistNPI,
         },
         requestDate: new Date(),
-        priority: 'standard'
+        priority: 'standard',
       };
 
       // Submit to insurance provider
-      const response = await this.submitToProvider(
-        provider,
-        '/pre-authorization',
-        preAuthRequest
-      );
+      const response = await this.submitToProvider(provider, '/pre-authorization', preAuthRequest);
 
       if (response.status === 'approved') {
         // Cache approved pre-auth
         this.preAuthCache.set(cacheKey, {
           ...response,
-          timestamp: new Date()
+          timestamp: new Date(),
         });
 
         this.emit('insurance:auth-approved', {
           memberId,
           authNumber: response.authorizationNumber,
-          approvedSessions: response.approvedSessions
+          approvedSessions: response.approvedSessions,
         });
 
         return {
@@ -140,30 +141,30 @@ class InsuranceAutomationService extends EventEmitter {
           validUntil: response.validUntil,
           copay: response.copay,
           coinsurance: response.coinsurance,
-          deductible: response.deductible
+          deductible: response.deductible,
         };
       } else if (response.status === 'pending') {
         return {
           success: false,
           status: 'pending',
           message: 'Pre-authorization pending review',
-          referenceNumber: response.referenceNumber
+          referenceNumber: response.referenceNumber,
         };
       } else {
         this.emit('insurance:auth-denied', {
           memberId,
-          reason: response.denialReason
+          reason: response.denialReason,
         });
 
         return {
           success: false,
           status: 'denied',
-          reason: response.denialReason
+          reason: response.denialReason,
         };
       }
     } catch (error) {
-      console.error('Pre-authorization request error:', error);
-      return { success: false, error: error.message };
+      logger.error('Pre-authorization request error:', error);
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -183,7 +184,7 @@ class InsuranceAutomationService extends EventEmitter {
         therapistNPI,
         facilityCode,
         diagnosisCode,
-        authorizationNumber
+        authorizationNumber,
       } = claimData;
 
       const provider = this.insuranceProviders.get(insuranceProviderId);
@@ -196,11 +197,11 @@ class InsuranceAutomationService extends EventEmitter {
         claimType: '837P', // Professional claim
         member: {
           id: memberId,
-          subscriptionId: claimData.subscriptionId
+          subscriptionId: claimData.subscriptionId,
         },
         provider: {
           npi: therapistNPI,
-          facilityCode
+          facilityCode,
         },
         claim: {
           claimNumber: invoiceId,
@@ -214,19 +215,15 @@ class InsuranceAutomationService extends EventEmitter {
             units: service.units || 1,
             unitPrice: service.unitPrice,
             modifiers: service.modifiers || [],
-            total: (service.units || 1) * service.unitPrice
-          }))
+            total: (service.units || 1) * service.unitPrice,
+          })),
         },
         submissionDate: new Date(),
-        submissionMethod: 'electronic'
+        submissionMethod: 'electronic',
       };
 
       // Submit claim to insurance
-      const response = await this.submitToProvider(
-        provider,
-        '/claims',
-        claimRequest
-      );
+      const response = await this.submitToProvider(provider, '/claims', claimRequest);
 
       const submission = {
         submissionId: response.submissionId,
@@ -237,7 +234,7 @@ class InsuranceAutomationService extends EventEmitter {
         status: 'submitted',
         submittedDate: new Date(),
         eob: null,
-        paymentStatus: 'pending'
+        paymentStatus: 'pending',
       };
 
       this.eobSubmissions.set(response.submissionId, submission);
@@ -245,18 +242,18 @@ class InsuranceAutomationService extends EventEmitter {
       this.emit('insurance:claim-submitted', {
         submissionId: response.submissionId,
         claimId: invoiceId,
-        amount: claimAmount
+        amount: claimAmount,
       });
 
       return {
         success: true,
         submissionId: response.submissionId,
         status: 'submitted',
-        expectedResponseDate: response.expectedResponseDate
+        expectedResponseDate: response.expectedResponseDate,
       };
     } catch (error) {
-      console.error('Claim submission error:', error);
-      return { success: false, error: error.message };
+      logger.error('Claim submission error:', error);
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -271,11 +268,7 @@ class InsuranceAutomationService extends EventEmitter {
         throw new Error('Insurance provider not found');
       }
 
-      const response = await this.submitToProvider(
-        provider,
-        `/claims/${submissionId}/status`,
-        {}
-      );
+      const response = await this.submitToProvider(provider, `/claims/${submissionId}/status`, {});
 
       const submission = this.eobSubmissions.get(submissionId);
       if (submission) {
@@ -286,7 +279,7 @@ class InsuranceAutomationService extends EventEmitter {
 
       this.emit('insurance:status-checked', {
         submissionId,
-        status: response.status
+        status: response.status,
       });
 
       return {
@@ -300,12 +293,12 @@ class InsuranceAutomationService extends EventEmitter {
           copayApplied: response.copayApplied,
           insurancePayment: response.insurancePayment,
           patientResponsibility: response.patientResponsibility,
-          expectedPaymentDate: response.expectedPaymentDate
-        }
+          expectedPaymentDate: response.expectedPaymentDate,
+        },
       };
     } catch (error) {
-      console.error('Claim status check error:', error);
-      return { success: false, error: error.message };
+      logger.error('Claim status check error:', error);
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -320,15 +313,11 @@ class InsuranceAutomationService extends EventEmitter {
         throw new Error('Insurance provider not found');
       }
 
-      const response = await this.submitToProvider(
-        provider,
-        '/coverage/verify',
-        {
-          memberId,
-          serviceName,
-          queryDate: new Date()
-        }
-      );
+      const response = await this.submitToProvider(provider, '/coverage/verify', {
+        memberId,
+        serviceName,
+        queryDate: new Date(),
+      });
 
       return {
         success: true,
@@ -340,25 +329,25 @@ class InsuranceAutomationService extends EventEmitter {
             individual: response.deductibleIndividual,
             family: response.deductibleFamily,
             metIndividual: response.metDeductibleIndividual,
-            metFamily: response.metDeductibleFamily
+            metFamily: response.metDeductibleFamily,
           },
           outOfPocket: {
             individual: response.outOfPocketIndividual,
-            family: response.outOfPocketFamily
+            family: response.outOfPocketFamily,
           },
           benefits: {
             therapyVisits: response.therapyVisits,
             copay: response.copay,
             coinsurance: response.coinsurance,
-            requiresPreAuth: response.requiresPreAuth
+            requiresPreAuth: response.requiresPreAuth,
           },
           restrictions: response.restrictions || [],
-          exclusions: response.exclusions || []
-        }
+          exclusions: response.exclusions || [],
+        },
       };
     } catch (error) {
-      console.error('Coverage verification error:', error);
-      return { success: false, error: error.message };
+      logger.error('Coverage verification error:', error);
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -368,14 +357,8 @@ class InsuranceAutomationService extends EventEmitter {
    */
   async postInsurancePayment(paymentData) {
     try {
-      const {
-        submissionId,
-        claimId,
-        memberId,
-        insurancePayment,
-        patientResponsibility,
-        eobDate
-      } = paymentData;
+      const { submissionId, claimId, memberId, insurancePayment, patientResponsibility, eobDate } =
+        paymentData;
 
       const submission = this.eobSubmissions.get(submissionId);
       if (!submission) {
@@ -391,18 +374,18 @@ class InsuranceAutomationService extends EventEmitter {
         submissionId,
         claimId,
         amount: insurancePayment,
-        date: eobDate
+        date: eobDate,
       });
 
       return {
         success: true,
         submissionId,
         paymentApplied: insurancePayment,
-        balance: patientResponsibility
+        balance: patientResponsibility,
       };
     } catch (error) {
-      console.error('Payment posting error:', error);
-      return { success: false, error: error.message };
+      logger.error('Payment posting error:', error);
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -417,7 +400,7 @@ class InsuranceAutomationService extends EventEmitter {
         denialReason,
         insuranceProviderId,
         appealReason,
-        supportingDocumentation
+        supportingDocumentation,
       } = appealData;
 
       const provider = this.insuranceProviders.get(insuranceProviderId);
@@ -431,29 +414,25 @@ class InsuranceAutomationService extends EventEmitter {
         appealReason,
         supportingDocumentation,
         appealDate: new Date(),
-        level: 1 // First level appeal
+        level: 1, // First level appeal
       };
 
-      const response = await this.submitToProvider(
-        provider,
-        '/claims/appeal',
-        appealRequest
-      );
+      const response = await this.submitToProvider(provider, '/claims/appeal', appealRequest);
 
       this.emit('insurance:appeal-submitted', {
         submissionId,
-        appealId: response.appealId
+        appealId: response.appealId,
       });
 
       return {
         success: true,
         appealId: response.appealId,
         status: 'submitted',
-        expectedDecisionDate: response.expectedDecisionDate
+        expectedDecisionDate: response.expectedDecisionDate,
       };
     } catch (error) {
-      console.error('Appeal submission error:', error);
-      return { success: false, error: error.message };
+      logger.error('Appeal submission error:', error);
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -474,7 +453,7 @@ class InsuranceAutomationService extends EventEmitter {
           processed: submissions.filter(s => s.status === 'processed').length,
           paid: submissions.filter(s => s.status === 'paid').length,
           denied: submissions.filter(s => s.status === 'denied').length,
-          appealed: submissions.filter(s => s.status === 'appealed').length
+          appealed: submissions.filter(s => s.status === 'appealed').length,
         },
         totalInsurancePayments: submissions
           .filter(s => s.paymentStatus === 'received')
@@ -483,24 +462,36 @@ class InsuranceAutomationService extends EventEmitter {
           .filter(s => s.paymentStatus === 'received')
           .reduce((sum, s) => sum + (s.patientResponsibility || 0), 0),
         averageProcessingTime: Math.round(
-          submissions.filter(s => s.eobDate).reduce((sum, s) => {
-            return sum + (new Date(s.eobDate) - new Date(s.submittedDate));
-          }, 0) / submissions.filter(s => s.eobDate).length / 86400000
+          submissions
+            .filter(s => s.eobDate)
+            .reduce((sum, s) => {
+              return sum + (new Date(s.eobDate) - new Date(s.submittedDate));
+            }, 0) /
+            submissions.filter(s => s.eobDate).length /
+            86400000
         ),
-        denialRate: (submissions.filter(s => s.status === 'denied').length / submissions.length * 100).toFixed(2) + '%',
-        collectionsRate: (submissions
-          .filter(s => s.paymentStatus === 'received')
-          .reduce((sum, s) => sum + s.insurancePayment, 0) /
-          submissions.reduce((sum, s) => sum + s.amount, 0) * 100).toFixed(2) + '%'
+        denialRate:
+          (
+            (submissions.filter(s => s.status === 'denied').length / submissions.length) *
+            100
+          ).toFixed(2) + '%',
+        collectionsRate:
+          (
+            (submissions
+              .filter(s => s.paymentStatus === 'received')
+              .reduce((sum, s) => sum + s.insurancePayment, 0) /
+              submissions.reduce((sum, s) => sum + s.amount, 0)) *
+            100
+          ).toFixed(2) + '%',
       };
 
       return {
         success: true,
-        report
+        report,
       };
     } catch (error) {
-      console.error('Report generation error:', error);
-      return { success: false, error: error.message };
+      logger.error('Report generation error:', error);
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -509,16 +500,12 @@ class InsuranceAutomationService extends EventEmitter {
    */
   async submitToProvider(provider, endpoint, data) {
     try {
-      const response = await axios.post(
-        `${provider.endpoint}${endpoint}`,
-        data,
-        {
-          headers: {
-            'Authorization': `Bearer ${provider.key}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
+      const response = await axios.post(`${provider.endpoint}${endpoint}`, data, {
+        headers: {
+          Authorization: `Bearer ${provider.key}`,
+          'Content-Type': 'application/json',
+        },
+      });
 
       return response.data;
     } catch (error) {
@@ -534,7 +521,7 @@ class InsuranceAutomationService extends EventEmitter {
     return {
       status: 'pending',
       message: 'Provider temporarily unavailable',
-      referenceNumber: `REF-${Date.now()}`
+      referenceNumber: `REF-${Date.now()}`,
     };
   }
 }

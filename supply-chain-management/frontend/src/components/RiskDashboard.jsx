@@ -1,7 +1,7 @@
 /**
  * RiskDashboard Component
  * لوحة إدارة المخاطر المالية
- * 
+ *
  * Features:
  * - تقييم المخاطر
  * - مصفوفة المخاطر
@@ -96,7 +96,7 @@ const RiskDashboard = () => {
     }
   }, []);
 
-  const calculateStats = (data) => {
+  const calculateStats = data => {
     const stats = {
       critical: data.filter(r => r.severity === 'critical').length,
       high: data.filter(r => r.severity === 'high').length,
@@ -108,7 +108,7 @@ const RiskDashboard = () => {
     setStats(stats);
   };
 
-  const calculateRiskScore = (data) => {
+  const calculateRiskScore = data => {
     let score = 0;
     data.forEach(risk => {
       const probability = risk.probability || 0;
@@ -119,7 +119,7 @@ const RiskDashboard = () => {
     return Math.min(100, score / Math.max(1, data.length));
   };
 
-  const determineHealth = (score) => {
+  const determineHealth = score => {
     if (score >= 75) return 'Critical';
     if (score >= 50) return 'Poor';
     if (score >= 25) return 'Fair';
@@ -132,7 +132,7 @@ const RiskDashboard = () => {
       const response = await fetch(`/api/finance/risk/${riskId}/mitigate`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ action }),
@@ -149,15 +149,12 @@ const RiskDashboard = () => {
     }
   };
 
-  const exportData = async (format) => {
+  const exportData = async format => {
     try {
       const token = localStorage.getItem('authToken');
-      const response = await fetch(
-        `/api/finance/risk/export?format=${format}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const response = await fetch(`/api/finance/risk/export?format=${format}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       if (!response.ok) throw new Error('Export failed');
 
@@ -201,9 +198,7 @@ const RiskDashboard = () => {
       id: r.id,
     }));
 
-  const filteredRisks = riskFilter === 'all' 
-    ? risks 
-    : risks.filter(r => r.severity === riskFilter);
+  const filteredRisks = riskFilter === 'all' ? risks : risks.filter(r => r.severity === riskFilter);
 
   // ===== Table Columns =====
   const columns = [
@@ -217,13 +212,13 @@ const RiskDashboard = () => {
       title: 'الفئة',
       dataIndex: 'category',
       key: 'category',
-      render: (category) => <Tag>{category}</Tag>,
+      render: category => <Tag>{category}</Tag>,
     },
     {
       title: 'الاحتمالية',
       dataIndex: 'probability',
       key: 'probability',
-      render: (prob) => (
+      render: prob => (
         <Tooltip title={`${prob}%`}>
           <Progress type="circle" percent={prob} width={50} />
         </Tooltip>
@@ -233,7 +228,7 @@ const RiskDashboard = () => {
       title: 'التأثير',
       dataIndex: 'impact',
       key: 'impact',
-      render: (impact) => (
+      render: impact => (
         <Tooltip title={`${impact}%`}>
           <Progress type="circle" percent={impact} width={50} />
         </Tooltip>
@@ -243,7 +238,7 @@ const RiskDashboard = () => {
       title: 'الخطورة',
       dataIndex: 'severity',
       key: 'severity',
-      render: (severity) => {
+      render: severity => {
         let color = 'default';
         let icon = null;
         if (severity === 'critical') {
@@ -266,7 +261,7 @@ const RiskDashboard = () => {
       title: 'الحالة',
       dataIndex: 'status',
       key: 'status',
-      render: (status) => {
+      render: status => {
         const statusConfig = {
           identified: { text: 'معروفة', color: 'blue' },
           assessed: { text: 'مقيمة', color: 'orange' },
@@ -326,10 +321,10 @@ const RiskDashboard = () => {
                   stats.overallHealth === 'Good'
                     ? '#52c41a'
                     : stats.overallHealth === 'Fair'
-                    ? '#faad14'
-                    : stats.overallHealth === 'Poor'
-                    ? '#fa8c16'
-                    : '#ff4d4f',
+                      ? '#faad14'
+                      : stats.overallHealth === 'Poor'
+                        ? '#fa8c16'
+                        : '#ff4d4f',
               }}
             />
           </Col>
@@ -340,8 +335,8 @@ const RiskDashboard = () => {
                 stats.overallHealth === 'Good'
                   ? 'success'
                   : stats.overallHealth === 'Fair'
-                  ? 'normal'
-                  : 'exception'
+                    ? 'normal'
+                    : 'exception'
               }
               format={() => `درجة المخاطر: ${stats.riskScore.toFixed(1)}/100`}
               strokeColor={{
@@ -429,7 +424,7 @@ const RiskDashboard = () => {
                   name="المخاطر"
                   data={risks}
                   fill="#1890ff"
-                  onClick={(data) => {
+                  onClick={data => {
                     setSelectedRisk(data.payload);
                     setModalVisible(true);
                   }}
@@ -459,27 +454,16 @@ const RiskDashboard = () => {
             />
           </Col>
           <Col xs={24} sm={12} md={8}>
-            <Button
-              type="primary"
-              block
-              onClick={fetchRisks}
-              loading={loading}
-            >
+            <Button type="primary" block onClick={fetchRisks} loading={loading}>
               تحديث البيانات
             </Button>
           </Col>
           <Col xs={24} sm={12} md={8}>
             <Button.Group>
-              <Button
-                icon={<FileExcelOutlined />}
-                onClick={() => exportData('excel')}
-              >
+              <Button icon={<FileExcelOutlined />} onClick={() => exportData('excel')}>
                 Excel
               </Button>
-              <Button
-                icon={<FilePdfOutlined />}
-                onClick={() => exportData('pdf')}
-              >
+              <Button icon={<FilePdfOutlined />} onClick={() => exportData('pdf')}>
                 PDF
               </Button>
             </Button.Group>
@@ -500,7 +484,7 @@ const RiskDashboard = () => {
             pagination={{
               pageSize: 10,
               showSizeChanger: true,
-              showTotal: (total) => `إجمالي: ${total} مخاطرة`,
+              showTotal: total => `إجمالي: ${total} مخاطرة`,
             }}
           />
         )}
@@ -556,7 +540,7 @@ const RiskDashboard = () => {
             <h4>الإجراءات المقترحة</h4>
             <List
               dataSource={selectedRisk.mitigationActions || []}
-              renderItem={(action) => (
+              renderItem={action => (
                 <List.Item>
                   <List.Item.Meta title={action.name} description={action.description} />
                 </List.Item>

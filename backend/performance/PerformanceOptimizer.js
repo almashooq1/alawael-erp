@@ -1,22 +1,24 @@
+/* eslint-disable no-unused-vars */
 /**
  * Performance Optimization Module - Phase 9
  * Advanced caching, query optimization, and performance enhancement
  */
 
-const redis = require('redis');
+const Redis = require('ioredis');
+const logger = require('../utils/logger');
 
 class PerformanceOptimizer {
   /**
    * Advanced Caching Strategy
    */
-  static class CacheManager {
+  static CacheManager = class CacheManager {
     constructor(redisClient) {
       this.redis = redisClient;
       this.cacheStrategies = new Map();
       this.metrics = {
         hits: 0,
         misses: 0,
-        evictions: 0
+        evictions: 0,
       };
     }
 
@@ -49,7 +51,7 @@ class PerformanceOptimizer {
 
         return value;
       } catch (error) {
-        console.error(`Cache error for ${key}:`, error);
+        logger.error(`Cache error for ${key}:`, error);
         return await computeFn();
       }
     }
@@ -58,15 +60,11 @@ class PerformanceOptimizer {
      * Cache warming - pre-load frequent data
      */
     async warmCache(patterns) {
-      console.log('Warming up cache with patterns:', patterns);
+      logger.info('Warming up cache with patterns:', patterns);
 
       for (const pattern of patterns) {
         const data = await pattern.getValue();
-        await this.redis.setex(
-          pattern.key,
-          pattern.ttl || 3600,
-          JSON.stringify(data)
-        );
+        await this.redis.setex(pattern.key, pattern.ttl || 3600, JSON.stringify(data));
       }
     }
 
@@ -108,8 +106,8 @@ class PerformanceOptimizer {
       return {
         hits: this.metrics.hits,
         misses: this.metrics.misses,
-        hitRate: total > 0 ? (this.metrics.hits / total * 100).toFixed(2) + '%' : 'N/A',
-        evictions: this.metrics.evictions
+        hitRate: total > 0 ? ((this.metrics.hits / total) * 100).toFixed(2) + '%' : 'N/A',
+        evictions: this.metrics.evictions,
       };
     }
 
@@ -119,12 +117,12 @@ class PerformanceOptimizer {
     resetMetrics() {
       this.metrics = { hits: 0, misses: 0, evictions: 0 };
     }
-  }
+  };
 
   /**
    * Database Query Optimizer
    */
-  static class QueryOptimizer {
+  static QueryOptimizer = class QueryOptimizer {
     /**
      * Generate optimized MongoDB query with indexes
      */
@@ -156,7 +154,7 @@ class PerformanceOptimizer {
       return {
         query,
         indexes,
-        estimatedExecutionTime: this.estimateExecutionTime(filters)
+        estimatedExecutionTime: this.estimateExecutionTime(filters),
       };
     }
 
@@ -171,7 +169,7 @@ class PerformanceOptimizer {
         indexes.push({
           field,
           type: 'standard',
-          priority: 'high'
+          priority: 'high',
         });
       });
 
@@ -181,7 +179,7 @@ class PerformanceOptimizer {
           indexes.push({
             fields: [Object.keys(filters)[0], field],
             type: 'compound',
-            priority: 'medium'
+            priority: 'medium',
           });
         });
       }
@@ -207,7 +205,7 @@ class PerformanceOptimizer {
       const slowQueries = await db
         .collection('system.profile')
         .find({
-          millis: { $gt: threshold }
+          millis: { $gt: threshold },
         })
         .sort({ millis: -1 })
         .limit(20)
@@ -218,15 +216,15 @@ class PerformanceOptimizer {
         namespace: q.ns,
         duration: q.millis,
         timestamp: q.ts,
-        indexes: q.planSummary
+        indexes: q.planSummary,
       }));
     }
-  }
+  };
 
   /**
    * API Response Optimization
    */
-  static class ResponseOptimizer {
+  static ResponseOptimizer = class ResponseOptimizer {
     /**
      * Compress response
      */
@@ -235,10 +233,7 @@ class PerformanceOptimizer {
       return {
         original: JSON.stringify(data).length,
         compressed,
-        ratio: (
-          (1 - compressed / JSON.stringify(data).length) *
-          100
-        ).toFixed(2) + '%'
+        ratio: ((1 - compressed / JSON.stringify(data).length) * 100).toFixed(2) + '%',
       };
     }
 
@@ -265,8 +260,8 @@ class PerformanceOptimizer {
           totalRecords: total,
           totalPages: Math.ceil(total / pageSize),
           hasNextPage: end < total,
-          hasPreviousPage: page > 1
-        }
+          hasPreviousPage: page > 1,
+        },
       };
     }
 
@@ -293,12 +288,12 @@ class PerformanceOptimizer {
       });
       return filtered;
     }
-  }
+  };
 
   /**
    * Request Debouncing & Throttling
    */
-  static class RateLimiter {
+  static RateLimiter = class RateLimiter {
     constructor(maxRequests = 100, windowMs = 60000) {
       this.maxRequests = maxRequests;
       this.windowMs = windowMs;
@@ -320,13 +315,13 @@ class PerformanceOptimizer {
         this.requests.set(key, validRequests);
         return {
           allowed: true,
-          remaining: this.maxRequests - validRequests.length
+          remaining: this.maxRequests - validRequests.length,
         };
       }
 
       return {
         allowed: false,
-        retryAfter: Math.ceil((validRequests[0] + this.windowMs - now) / 1000)
+        retryAfter: Math.ceil((validRequests[0] + this.windowMs - now) / 1000),
       };
     }
 
@@ -342,17 +337,15 @@ class PerformanceOptimizer {
         current: validRequests.length,
         limit: this.maxRequests,
         remaining: this.maxRequests - validRequests.length,
-        resetAt: validRequests.length > 0
-          ? new Date(validRequests[0] + this.windowMs)
-          : new Date()
+        resetAt: validRequests.length > 0 ? new Date(validRequests[0] + this.windowMs) : new Date(),
       };
     }
-  }
+  };
 
   /**
    * Performance Monitoring
    */
-  static class PerformanceMonitor {
+  static PerformanceMonitor = class PerformanceMonitor {
     constructor() {
       this.metrics = [];
     }
@@ -365,7 +358,7 @@ class PerformanceOptimizer {
         endpoint,
         duration,
         statusCode,
-        timestamp
+        timestamp,
       });
 
       // Keep only last 1000 metrics
@@ -378,9 +371,7 @@ class PerformanceOptimizer {
      * Get endpoint performance summary
      */
     getEndpointMetrics(endpoint) {
-      const endpointMetrics = this.metrics.filter(
-        m => m.endpoint === endpoint
-      );
+      const endpointMetrics = this.metrics.filter(m => m.endpoint === endpoint);
 
       if (endpointMetrics.length === 0) {
         return null;
@@ -392,18 +383,16 @@ class PerformanceOptimizer {
       return {
         endpoint,
         calls: endpointMetrics.length,
-        avgDuration: (
-          durations.reduce((a, b) => a + b, 0) / durations.length
-        ).toFixed(2),
+        avgDuration: (durations.reduce((a, b) => a + b, 0) / durations.length).toFixed(2),
         minDuration: Math.min(...durations),
         maxDuration: Math.max(...durations),
         p95Duration: sorted[Math.floor(sorted.length * 0.95)],
         p99Duration: sorted[Math.floor(sorted.length * 0.99)],
-        errorRate: (
-          (endpointMetrics.filter(m => m.statusCode >= 400).length /
-            endpointMetrics.length) *
-          100
-        ).toFixed(2) + '%'
+        errorRate:
+          (
+            (endpointMetrics.filter(m => m.statusCode >= 400).length / endpointMetrics.length) *
+            100
+          ).toFixed(2) + '%',
       };
     }
 
@@ -420,21 +409,19 @@ class PerformanceOptimizer {
 
       return {
         totalRequests: this.metrics.length,
-        avgDuration: (
-          durations.reduce((a, b) => a + b, 0) / durations.length
-        ).toFixed(2),
+        avgDuration: (durations.reduce((a, b) => a + b, 0) / durations.length).toFixed(2),
         minDuration: Math.min(...durations),
         maxDuration: Math.max(...durations),
         p95Duration: sorted[Math.floor(sorted.length * 0.95)],
         p99Duration: sorted[Math.floor(sorted.length * 0.99)],
-        errorRate: (
-          (this.metrics.filter(m => m.statusCode >= 400).length /
-            this.metrics.length) *
-          100
-        ).toFixed(2) + '%'
+        errorRate:
+          (
+            (this.metrics.filter(m => m.statusCode >= 400).length / this.metrics.length) *
+            100
+          ).toFixed(2) + '%',
       };
     }
-  }
+  };
 }
 
 module.exports = PerformanceOptimizer;

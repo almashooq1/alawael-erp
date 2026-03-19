@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const BeneficiaryFile = require('../models/BeneficiaryFile');
 const Employee = require('../models/Employee');
 const Invoice = require('../models/Invoice');
@@ -59,7 +60,12 @@ class GlobalSearchService {
 
         // Search Employees
         Employee.find({
-          $or: [{ firstName: regex }, { lastName: regex }, { position: regex }, { department: regex }],
+          $or: [
+            { firstName: regex },
+            { lastName: regex },
+            { position: regex },
+            { department: regex },
+          ],
         })
           .select('firstName lastName employeeId position department')
           .limit(5),
@@ -86,7 +92,8 @@ class GlobalSearchService {
     }
 
     // Calculate Totals
-    results.totalHits = results.beneficiaries.length + results.employees.length + results.invoices.length;
+    results.totalHits =
+      results.beneficiaries.length + results.employees.length + results.invoices.length;
 
     return results;
   }

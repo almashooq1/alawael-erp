@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Smart Philanthropy & Grants Service (Phase 69)
  *
@@ -15,7 +16,12 @@ class SmartPhilanthropyService {
     // Mock DB query for candidates
     const candidates = [
       { id: 'BEN-101', diagnosis: 'Autism', financialStatus: 'LOW_INCOME', fundingNeeded: 12000 },
-      { id: 'BEN-102', diagnosis: 'Cerebral Palsy', financialStatus: 'ORPHAN', fundingNeeded: 8500 },
+      {
+        id: 'BEN-102',
+        diagnosis: 'Cerebral Palsy',
+        financialStatus: 'ORPHAN',
+        fundingNeeded: 8500,
+      },
     ];
 
     // Simple scoring logic
@@ -47,7 +53,9 @@ class SmartPhilanthropyService {
         { category: 'Therapy Sessions', amount: 10000, count: 50 },
         { category: 'Assistive Devices', amount: 5000, item: 'Custom Wheelchair' },
       ],
-      beneficiaryUpdates: [{ beneficiaryId: 'BEN-102', progress: 'Improved mobility by 15% this quarter' }],
+      beneficiaryUpdates: [
+        { beneficiaryId: 'BEN-102', progress: 'Improved mobility by 15% this quarter' },
+      ],
       generatedAt: new Date(),
     };
   }

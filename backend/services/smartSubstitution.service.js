@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const User = require('../models/User');
 const TherapySession = require('../models/TherapySession');
 

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * PHASES 29-33: Advanced Features Routes (Minimal/Working Version)
  * - Phase 29: Advanced AI Integration
@@ -8,7 +9,11 @@
  */
 
 const express = require('express');
+const { authenticate, authorize } = require('../middleware/auth');
 const router = express.Router();
+
+// Apply authentication to all routes in this file
+router.use(authenticate);
 
 // ═══════════════════════════════════════════════════════════════════════════
 // PHASE 29: ADVANCED AI INTEGRATION
@@ -18,7 +23,7 @@ const router = express.Router();
  * GET /api/phases-29-33
  * Root endpoint - API Information
  */
-router.get('/', (req, res) => {
+router.get('/', (_req, res) => {
   res.json({
     success: true,
     message: 'Phases 29-33 API - Advanced Features',
@@ -28,24 +33,24 @@ router.get('/', (req, res) => {
       30: 'Quantum Computing',
       31: 'Extended Reality (XR)',
       32: 'DevOps & Cloud Automation',
-      33: 'Optimization & Performance'
-    }
+      33: 'Optimization & Performance',
+    },
   });
 });
 
 // Phase 29: AI endpoints
-router.post('/ai/llm/query', (req, res) => {
+router.post('/ai/llm/query', authorize(['admin', 'system_admin']), (_req, res) => {
   res.json({ success: true, message: 'AI query processed', data: {} });
 });
 
-router.get('/ai/llm/providers', (req, res) => {
+router.get('/ai/llm/providers', (_req, res) => {
   res.json({
     success: true,
-    providers: ['openai', 'anthropic', 'azure', 'local']
+    providers: ['openai', 'anthropic', 'azure', 'local'],
   });
 });
 
-router.get('/ai/workflow/status', (req, res) => {
+router.get('/ai/workflow/status', (_req, res) => {
   res.json({ success: true, status: 'operational' });
 });
 
@@ -53,15 +58,15 @@ router.get('/ai/workflow/status', (req, res) => {
 // PHASE 30: QUANTUM COMPUTING (Placeholder/Mock)
 // ═══════════════════════════════════════════════════════════════════════════
 
-router.get('/quantum/status', (req, res) => {
-  res.json({ 
-    success: true, 
+router.get('/quantum/status', (_req, res) => {
+  res.json({
+    success: true,
     quantum_ready: false,
-    message: 'Quantum computing not yet enabled'
+    message: 'Quantum computing not yet enabled',
   });
 });
 
-router.post('/quantum/circuit', (req, res) => {
+router.post('/quantum/circuit', authorize(['admin', 'system_admin']), (_req, res) => {
   res.json({ success: true, circuit_id: 'qc-' + Date.now() });
 });
 
@@ -69,21 +74,21 @@ router.post('/quantum/circuit', (req, res) => {
 // PHASE 31: EXTENDED REALITY (XR)
 // ═══════════════════════════════════════════════════════════════════════════
 
-router.get('/xr/environments', (req, res) => {
+router.get('/xr/environments', (_req, res) => {
   res.json({
     success: true,
     environments: [
       { id: 'vr-therapy-1', name: 'VR Therapy Room', type: 'vr' },
-      { id: 'ar-training-1', name: 'AR Training Lab', type: 'ar' }
-    ]
+      { id: 'ar-training-1', name: 'AR Training Lab', type: 'ar' },
+    ],
   });
 });
 
-router.post('/xr/session/start', (req, res) => {
-  res.json({ 
-    success: true, 
+router.post('/xr/session/start', authorize(['admin', 'system_admin']), (_req, res) => {
+  res.json({
+    success: true,
     session_id: 'xr-' + Date.now(),
-    start_time: new Date().toISOString()
+    start_time: new Date().toISOString(),
   });
 });
 
@@ -91,31 +96,29 @@ router.post('/xr/session/start', (req, res) => {
 // PHASE 32: DEVOPS & CLOUD AUTOMATION
 // ═══════════════════════════════════════════════════════════════════════════
 
-router.get('/devops/deployments', (req, res) => {
+router.get('/devops/deployments', (_req, res) => {
   res.json({
     success: true,
-    deployments: [
-      { id: 'deploy-1', status: 'success', timestamp: new Date().toISOString() }
-    ]
+    deployments: [{ id: 'deploy-1', status: 'success', timestamp: new Date().toISOString() }],
   });
 });
 
-router.post('/devops/deploy', (req, res) => {
+router.post('/devops/deploy', authorize(['admin', 'system_admin']), (_req, res) => {
   res.json({
     success: true,
     deployment_id: 'deploy-' + Date.now(),
-    status: 'in_progress'
+    status: 'in_progress',
   });
 });
 
-router.get('/devops/health', (req, res) => {
+router.get('/devops/health', (_req, res) => {
   res.json({
     success: true,
     services: {
       api: 'healthy',
       database: 'healthy',
-      cache: 'healthy'
-    }
+      cache: 'healthy',
+    },
   });
 });
 
@@ -123,37 +126,37 @@ router.get('/devops/health', (req, res) => {
 // PHASE 33: OPTIMIZATION & PERFORMANCE
 // ═══════════════════════════════════════════════════════════════════════════
 
-router.get('/optimization/metrics', (req, res) => {
+router.get('/optimization/metrics', (_req, res) => {
   res.json({
     success: true,
     metrics: {
       response_time: { avg: '145ms', p95: '250ms', p99: '500ms' },
       throughput: { requests_per_second: 5000 },
-      error_rate: '0.01%'
-    }
+      error_rate: '0.01%',
+    },
   });
 });
 
-router.post('/optimization/analyze', (req, res) => {
+router.post('/optimization/analyze', authorize(['admin', 'system_admin']), (_req, res) => {
   res.json({
     success: true,
     analysis_id: 'opt-' + Date.now(),
     recommendations: [
       'Cache static assets',
       'Implement rate limiting',
-      'Optimize database queries'
-    ]
+      'Optimize database queries',
+    ],
   });
 });
 
-router.get('/optimization/cache/status', (req, res) => {
+router.get('/optimization/cache/status', (_req, res) => {
   res.json({
     success: true,
     cache: {
       hit_rate: '87%',
       size: '512MB',
-      items: 10000
-    }
+      items: 10000,
+    },
   });
 });
 
@@ -161,11 +164,11 @@ router.get('/optimization/cache/status', (req, res) => {
 // Health Check
 // ═══════════════════════════════════════════════════════════════════════════
 
-router.get('/health', (req, res) => {
+router.get('/health', (_req, res) => {
   res.json({
     success: true,
     status: 'operational',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 });
 

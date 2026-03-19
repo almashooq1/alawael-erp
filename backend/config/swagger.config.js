@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Swagger/OpenAPI Configuration
  * إعدادات توثيق API
@@ -5,6 +6,7 @@
 
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
+const logger = require('../utils/logger');
 
 const options = {
   definition: {
@@ -138,7 +140,7 @@ const options = {
       },
 
       responses: {
-        '400': {
+        400: {
           description: 'Bad Request',
           content: {
             'application/json': {
@@ -146,7 +148,7 @@ const options = {
             },
           },
         },
-        '401': {
+        401: {
           description: 'Unauthorized',
           content: {
             'application/json': {
@@ -154,7 +156,7 @@ const options = {
             },
           },
         },
-        '403': {
+        403: {
           description: 'Forbidden',
           content: {
             'application/json': {
@@ -162,7 +164,7 @@ const options = {
             },
           },
         },
-        '404': {
+        404: {
           description: 'Not Found',
           content: {
             'application/json': {
@@ -170,7 +172,7 @@ const options = {
             },
           },
         },
-        '500': {
+        500: {
           description: 'Internal Server Error',
           content: {
             'application/json': {
@@ -184,18 +186,32 @@ const options = {
     security: [{ bearerAuth: [] }, { apiKey: [] }],
   },
 
-  apis: ['./backend/routes/**/*.js', './backend/api/**/*.js'],
+  apis: ['./routes/**/*.js', './api/**/*.js'],
 };
 
 const swaggerSpec = swaggerJsdoc(options);
 
 /**
- * Setup Swagger UI
+ * Setup Swagger UI — single consolidated mount point
+ * Mounts at /api-docs (primary) and /api/docs (alias)
  */
 const setupSwagger = app => {
-  app.use('/api/docs', swaggerUi.serve);
+  const PORT = process.env.PORT || 3001;
 
-  app.get('/api/docs', swaggerUi.setup(swaggerSpec, {
+  // Dynamic server URL (overrides static config when env var is set)
+  if (process.env.API_BASE_URL) {
+    swaggerSpec.servers = [
+      { url: process.env.API_BASE_URL, description: 'Current server' },
+      ...swaggerSpec.servers,
+    ];
+  } else {
+    swaggerSpec.servers.unshift({
+      url: `http://localhost:${PORT}`,
+      description: 'Local Development',
+    });
+  }
+
+  const swaggerUiOptions = {
     swaggerOptions: {
       persistAuthorization: true,
       displayOperationId: true,
@@ -204,7 +220,14 @@ const setupSwagger = app => {
     },
     customCss: '.swagger-ui .topbar { display: none }',
     customSiteTitle: 'Alawael ERP API Documentation',
-  }));
+  };
+
+  // Primary path (was the inline route in app.js)
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));
+
+  // Alias path (from original swagger.config.js)
+  app.use('/api/docs', swaggerUi.serve);
+  app.get('/api/docs', swaggerUi.setup(swaggerSpec, swaggerUiOptions));
 
   // JSON spec endpoint
   app.get('/api/docs/openapi.json', (req, res) => {
@@ -212,7 +235,7 @@ const setupSwagger = app => {
     res.send(swaggerSpec);
   });
 
-  console.log('✅ Swagger API Documentation: http://localhost:3001/api/docs');
+  logger.info(`📖 Swagger API Docs: http://localhost:${PORT}/api-docs`);
 };
 
 module.exports = {

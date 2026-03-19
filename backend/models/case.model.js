@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars, no-undef, no-empty, prefer-const, no-constant-condition, no-unused-expressions */
 /**
  * Case Management Model
  * نموذج إدارة الحالات لمراكز تأهيل ذوي الإعاقة
@@ -279,7 +280,6 @@ const caseSchema = new mongoose.Schema(
       required: true,
       unique: true,
       trim: true,
-      index: true,
     },
 
     beneficiaryId: {

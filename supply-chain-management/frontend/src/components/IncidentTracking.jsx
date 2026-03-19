@@ -6,6 +6,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './IncidentTracking.css';
 
+const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+
 const IncidentTracking = () => {
   const [incidents, setIncidents] = useState([]);
   const [selectedIncident, setSelectedIncident] = useState(null);
@@ -17,10 +19,10 @@ const IncidentTracking = () => {
   const fetchIncidents = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:5000/api/incidents?limit=50', {
+      const response = await axios.get(`${API_BASE}/incidents?limit=50`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
       });
       setIncidents(response.data.data);
       console.log('✅ Incidents loaded for tracking');
@@ -42,7 +44,7 @@ const IncidentTracking = () => {
   });
 
   // الحصول على معلومات الحالة
-  const getStatusInfo = (incident) => {
+  const getStatusInfo = incident => {
     const statusMap = {
       REPORTED: { label: 'تم الإبلاغ', icon: '📢', color: '#17a2b8' },
       ACKNOWLEDGED: { label: 'تم التأكيد', icon: '✓', color: '#0066cc' },
@@ -51,13 +53,13 @@ const IncidentTracking = () => {
       IN_RESOLUTION: { label: 'قيد الحل', icon: '🔧', color: '#fd7e14' },
       RESOLVED: { label: 'تم الحل', icon: '✅', color: '#28a745' },
       CLOSED: { label: 'مغلقة', icon: '🔐', color: '#6c757d' },
-      REOPENED: { label: 'أعيد فتحها', icon: '⚠️', color: '#dc3545' }
+      REOPENED: { label: 'أعيد فتحها', icon: '⚠️', color: '#dc3545' },
     };
     return statusMap[incident.status] || { label: incident.status, icon: '❓', color: '#999' };
   };
 
   // القيمة المئوية للتقدم
-  const getProgressPercentage = (status) => {
+  const getProgressPercentage = status => {
     const progress = {
       REPORTED: 12,
       ACKNOWLEDGED: 25,
@@ -65,13 +67,13 @@ const IncidentTracking = () => {
       IDENTIFIED: 55,
       IN_RESOLUTION: 70,
       RESOLVED: 85,
-      CLOSED: 100
+      CLOSED: 100,
     };
     return progress[status] || 0;
   };
 
   // وقت مضى
-  const getElapsedTime = (startDate) => {
+  const getElapsedTime = startDate => {
     const now = new Date();
     const start = new Date(startDate);
     const diff = now - start;
@@ -95,7 +97,11 @@ const IncidentTracking = () => {
           <div className="stat">
             <span className="label">قيد المعالجة:</span>
             <span className="value" style={{ color: '#fd7e14' }}>
-              {incidents.filter(i => ['REPORTED', 'ACKNOWLEDGED', 'INVESTIGATING'].includes(i.status)).length}
+              {
+                incidents.filter(i =>
+                  ['REPORTED', 'ACKNOWLEDGED', 'INVESTIGATING'].includes(i.status)
+                ).length
+              }
             </span>
           </div>
           <div className="stat">
@@ -109,10 +115,7 @@ const IncidentTracking = () => {
 
       {/* فلتر الحالة */}
       <div className="tracking-filters">
-        <button
-          className={`filter-btn ${!filter ? 'active' : ''}`}
-          onClick={() => setFilter('')}
-        >
+        <button className={`filter-btn ${!filter ? 'active' : ''}`} onClick={() => setFilter('')}>
           جميع الحالات ({incidents.length})
         </button>
         <button
@@ -163,7 +166,7 @@ const IncidentTracking = () => {
                 >
                   <div className="card-header">
                     <div className="incident-info">
-                      <h3className="incident-id">{incident.incidentNumber}</h3>
+                      <h3 className="incident-id">{incident.incidentNumber}</h3>
                       <p className="incident-title">{incident.title}</p>
                       <p className="incident-category">
                         {incident.category} • منذ {elapsedTime}
@@ -181,7 +184,7 @@ const IncidentTracking = () => {
                         className="progress-fill"
                         style={{
                           width: `${progress}%`,
-                          backgroundColor: statusInfo.color
+                          backgroundColor: statusInfo.color,
                         }}
                       />
                     </div>
@@ -212,7 +215,9 @@ const IncidentTracking = () => {
         <div className="timeline-section">
           <div className="timeline-header">
             <h2>📅 الجدول الزمني: {selectedIncident.incidentNumber}</h2>
-            <button className="btn-close" onClick={() => setShowTimeline(false)}>✕</button>
+            <button className="btn-close" onClick={() => setShowTimeline(false)}>
+              ✕
+            </button>
           </div>
 
           <div className="timeline">
@@ -245,7 +250,9 @@ const IncidentTracking = () => {
         <div className="details-section">
           <div className="details-header">
             <h2>📋 تفاصيل الحادثة</h2>
-            <button className="btn-close" onClick={() => setSelectedIncident(null)}>✕</button>
+            <button className="btn-close" onClick={() => setSelectedIncident(null)}>
+              ✕
+            </button>
           </div>
 
           <div className="details-grid">
@@ -266,7 +273,7 @@ const IncidentTracking = () => {
               <value
                 style={{
                   color: getSeverityColor(selectedIncident.severity),
-                  fontWeight: 'bold'
+                  fontWeight: 'bold',
                 }}
               >
                 {selectedIncident.severity}
@@ -325,7 +332,7 @@ function getSeverityColor(severity) {
     CRITICAL: '#dc3545',
     HIGH: '#fd7e14',
     MEDIUM: '#ffc107',
-    LOW: '#28a745'
+    LOW: '#28a745',
   };
   return colors[severity] || '#6c757d';
 }

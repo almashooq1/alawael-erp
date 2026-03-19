@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Case Management Service
  * خدمات إدارة الحالات لمراكز تأهيل ذوي الإعاقة

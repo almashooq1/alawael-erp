@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * FinancialTransaction.js - MongoDB Model for Financial Transactions
  * Records all financial transactions including debits and credits
@@ -11,56 +12,56 @@ const FinancialTransactionSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Organization',
       required: true,
-      index: true
+      index: true,
     },
     transactionId: {
       type: String,
       required: true,
-      unique: true
+      unique: true,
     },
     transactionDate: {
       type: Date,
       required: true,
-      index: true
+      index: true,
     },
     description: {
       type: String,
-      required: true
+      required: true,
     },
     journalEntryId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'JournalEntry',
-      required: true
+      required: true,
     },
     // Debit Account
     debitAccount: {
       accountId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Account',
-        required: true
+        required: true,
       },
       accountCode: String,
       accountName: String,
       amount: {
         type: Number,
         required: true,
-        min: 0
-      }
+        min: 0,
+      },
     },
     // Credit Account
     creditAccount: {
       accountId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Account',
-        required: true
+        required: true,
       },
       accountCode: String,
       accountName: String,
       amount: {
         type: Number,
         required: true,
-        min: 0
-      }
+        min: 0,
+      },
     },
     // Transaction Classification
     transactionType: {
@@ -75,48 +76,48 @@ const FinancialTransactionSchema = new mongoose.Schema(
         'adjustment',
         'depreciation',
         'accrual',
-        'provision'
+        'provision',
       ],
-      required: true
+      required: true,
     },
     flowType: {
       type: String,
       enum: ['revenue', 'expense', 'investment', 'financing'],
-      required: true
+      required: true,
     },
     activityType: {
       type: String,
       enum: ['operating', 'investing', 'financing'],
-      required: true
+      required: true,
     },
     // Related Document
     relatedDocument: {
       documentType: String, // invoice, purchase order, receipt
       documentId: mongoose.Schema.Types.ObjectId,
       documentNumber: String,
-      documentDate: Date
+      documentDate: Date,
     },
     // Parties Involved
     customer: {
       customerId: mongoose.Schema.Types.ObjectId,
       name: String,
-      email: String
+      email: String,
     },
     vendor: {
       vendorId: mongoose.Schema.Types.ObjectId,
       name: String,
-      email: String
+      email: String,
     },
     employee: {
       employeeId: mongoose.Schema.Types.ObjectId,
       name: String,
-      email: String
+      email: String,
     },
     // Payment Details
     paymentMethod: {
       type: String,
       enum: ['cash', 'check', 'credit-card', 'bank-transfer', 'online'],
-      default: 'bank-transfer'
+      default: 'bank-transfer',
     },
     referenceNumber: String,
     checkNumber: String,
@@ -126,66 +127,68 @@ const FinancialTransactionSchema = new mongoose.Schema(
       taxType: String,
       taxRate: Number,
       taxAmount: Number,
-      taxAccount: mongoose.Schema.Types.ObjectId
+      taxAccount: mongoose.Schema.Types.ObjectId,
     },
 
     // Cost Center/Department
     costCenter: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'CostCenter'
+      ref: 'CostCenter',
     },
     department: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Department'
+      ref: 'Department',
     },
     project: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Project'
+      ref: 'Project',
     },
 
     // Status and Approval
     status: {
       type: String,
       enum: ['draft', 'posted', 'reconciled', 'voided'],
-      default: 'draft'
+      default: 'draft',
     },
     isPosted: {
       type: Boolean,
-      default: false
+      default: false,
     },
     postedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
+      ref: 'User',
     },
     postedDate: Date,
 
     approvalStatus: {
       type: String,
       enum: ['pending', 'approved', 'rejected'],
-      default: 'pending'
+      default: 'pending',
     },
     approvedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
+      ref: 'User',
     },
     approvalNotes: String,
 
     // Attachments
-    attachments: [{
-      filename: String,
-      fileUrl: String,
-      uploadedAt: Date
-    }],
+    attachments: [
+      {
+        filename: String,
+        fileUrl: String,
+        uploadedAt: Date,
+      },
+    ],
 
     // Reconciliation
     isReconciled: {
       type: Boolean,
-      default: false
+      default: false,
     },
     reconciliationDate: Date,
     reconciledBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
+      ref: 'User',
     },
 
     // Notes and Tags
@@ -193,29 +196,31 @@ const FinancialTransactionSchema = new mongoose.Schema(
     tags: [String],
 
     // Audit Trail
-    auditTrail: [{
-      action: String,
-      performedBy: mongoose.Schema.Types.ObjectId,
-      timestamp: {
-        type: Date,
-        default: Date.now
+    auditTrail: [
+      {
+        action: String,
+        performedBy: mongoose.Schema.Types.ObjectId,
+        timestamp: {
+          type: Date,
+          default: Date.now,
+        },
+        details: String,
       },
-      details: String
-    }],
+    ],
 
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
-      required: true
+      required: true,
     },
     createdAt: {
       type: Date,
-      default: Date.now
+      default: Date.now,
     },
     updatedAt: {
       type: Date,
-      default: Date.now
-    }
+      default: Date.now,
+    },
   },
   { timestamps: true }
 );
@@ -229,7 +234,7 @@ FinancialTransactionSchema.index({ status: 1, transactionDate: -1 });
 FinancialTransactionSchema.index({ transactionType: 1, transactionDate: -1 });
 
 // Validation: Ensure debit and credit amounts are equal
-FinancialTransactionSchema.pre('save', function(next) {
+FinancialTransactionSchema.pre('save', function (next) {
   if (this.debitAccount.amount !== this.creditAccount.amount) {
     return next(new Error('Debit and credit amounts must be equal'));
   }
@@ -237,7 +242,7 @@ FinancialTransactionSchema.pre('save', function(next) {
 });
 
 // Method to post transaction
-FinancialTransactionSchema.methods.post = function(userId) {
+FinancialTransactionSchema.methods.post = function (userId) {
   this.status = 'posted';
   this.isPosted = true;
   this.postedBy = userId;
@@ -246,28 +251,28 @@ FinancialTransactionSchema.methods.post = function(userId) {
   this.auditTrail.push({
     action: 'posted',
     performedBy: userId,
-    timestamp: new Date()
+    timestamp: new Date(),
   });
 
   return this.save();
 };
 
 // Method to void transaction
-FinancialTransactionSchema.methods.void = function(userId, reason = '') {
+FinancialTransactionSchema.methods.void = function (userId, reason = '') {
   this.status = 'voided';
 
   this.auditTrail.push({
     action: 'voided',
     performedBy: userId,
     timestamp: new Date(),
-    details: reason
+    details: reason,
   });
 
   return this.save();
 };
 
 // Method to reconcile transaction
-FinancialTransactionSchema.methods.reconcile = function(userId) {
+FinancialTransactionSchema.methods.reconcile = function (userId) {
   this.isReconciled = true;
   this.reconciliationDate = new Date();
   this.reconciledBy = userId;
@@ -275,24 +280,24 @@ FinancialTransactionSchema.methods.reconcile = function(userId) {
   this.auditTrail.push({
     action: 'reconciled',
     performedBy: userId,
-    timestamp: new Date()
+    timestamp: new Date(),
   });
 
   return this.save();
 };
 
 // Method to add attachment
-FinancialTransactionSchema.methods.addAttachment = function(filename, fileUrl) {
+FinancialTransactionSchema.methods.addAttachment = function (filename, fileUrl) {
   this.attachments.push({
     filename,
     fileUrl,
-    uploadedAt: new Date()
+    uploadedAt: new Date(),
   });
   return this.save();
 };
 
 // Static method to create journal entry transactions
-FinancialTransactionSchema.statics.createFromJournalEntry = function(journalEntry) {
+FinancialTransactionSchema.statics.createFromJournalEntry = function (journalEntry) {
   const transactions = [];
 
   journalEntry.entries.forEach(entry => {
@@ -308,7 +313,7 @@ FinancialTransactionSchema.statics.createFromJournalEntry = function(journalEntr
       flowType: journalEntry.flowType,
       activityType: journalEntry.activityType,
       status: 'draft',
-      createdBy: journalEntry.createdBy
+      createdBy: journalEntry.createdBy,
     });
   });
 
@@ -316,15 +321,17 @@ FinancialTransactionSchema.statics.createFromJournalEntry = function(journalEntr
 };
 
 // Static method to get account transactions
-FinancialTransactionSchema.statics.getAccountTransactions = function(organizationId, accountId, from, to) {
+FinancialTransactionSchema.statics.getAccountTransactions = function (
+  organizationId,
+  accountId,
+  from,
+  to
+) {
   return this.find({
     organizationId,
-    $or: [
-      { 'debitAccount.accountId': accountId },
-      { 'creditAccount.accountId': accountId }
-    ],
+    $or: [{ 'debitAccount.accountId': accountId }, { 'creditAccount.accountId': accountId }],
     transactionDate: { $gte: from, $lte: to },
-    isPosted: true
+    isPosted: true,
   }).sort({ transactionDate: 1 });
 };
 

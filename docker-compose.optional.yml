@@ -10,7 +10,7 @@ services:
       - "5432:5432"
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres_password}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
       POSTGRES_DB: ${POSTGRES_DB:-erp_system}
       POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
     volumes:
@@ -59,7 +59,7 @@ services:
     networks:
       - erp-network
     healthcheck:
-      test: ["CMD-SHELL", "curl -s http://localhost:9200 /_cluster/health | grep -q '\"status\":\"[gy].*\"'"]
+      test: ["CMD-SHELL", "curl -sf http://localhost:9200/_cluster/health | grep -q '\"status\":\"[gy]'"]
       interval: 30s
       timeout: 10s
       retries: 5

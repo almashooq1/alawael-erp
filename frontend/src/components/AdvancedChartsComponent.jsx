@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   Box,
   Card,
@@ -11,7 +11,6 @@ import {
   MenuItem,
   Button,
   CircularProgress,
-  Alert,
   Chip,
 } from '@mui/material';
 import {
@@ -40,12 +39,32 @@ import {
   Scatter,
 } from 'recharts';
 import { Download as DownloadIcon, Refresh as RefreshIcon } from '@mui/icons-material';
-import exportService from '../services/exportService';
+import exportService from 'services/exportService';
+import logger from 'utils/logger';
+import { gradients, brandColors, surfaceColors } from 'theme/palette';
+
+/** Shared Recharts tooltip styles (DRY — used across all chart types) */
+const TOOLTIP_STYLES = {
+  contentStyle: { backgroundColor: surfaceColors.background, border: 'none', borderRadius: '8px' },
+  labelStyle: { color: brandColors.primaryStart },
+};
+
+/** Custom chart color palette derived from brand */
+const COLORS = [
+  brandColors.primaryStart,
+  brandColors.primaryEnd,
+  brandColors.accentPink,
+  brandColors.accentCoral,
+  brandColors.accentSky,
+  brandColors.accentCyan,
+  brandColors.accentGreen,
+  brandColors.accentRose,
+];
 
 /**
  * مكون الرسوم البيانية المتقدمة
  * Advanced Charts Component
- * 
+ *
  * يوفر رسوم بيانية متقدمة وتفاعلية
  * Provides advanced and interactive charts
  */
@@ -55,18 +74,6 @@ const AdvancedChartsComponent = ({ data = [], title = 'التحليلات الم
   const [loading, setLoading] = useState(false);
   const [dataRange, setDataRange] = useState('monthly');
   const [selectedMetrics, setSelectedMetrics] = useState(['value']);
-
-  // ألوان مخصصة
-  const COLORS = [
-    '#667eea',
-    '#764ba2',
-    '#f093fb',
-    '#f5576c',
-    '#4facfe',
-    '#00f2fe',
-    '#43e97b',
-    '#fa709a',
-  ];
 
   // بيانات نموذجية
   const sampleData = data.length > 0 ? data : [
@@ -84,7 +91,7 @@ const AdvancedChartsComponent = ({ data = [], title = 'التحليلات الم
       const fileName = `${title}-${new Date().toLocaleDateString('ar-SA')}`;
       await exportService.toExcel(sampleData, fileName);
     } catch (error) {
-      console.error('Error exporting:', error);
+      logger.error('Error exporting:', error);
     } finally {
       setLoading(false);
     }
@@ -100,19 +107,16 @@ const AdvancedChartsComponent = ({ data = [], title = 'التحليلات الم
     <ResponsiveContainer width="100%" height={400}>
       <LineChart data={sampleData}>
         <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="name" stroke="#667eea" />
-        <YAxis stroke="#667eea" />
-        <Tooltip
-          contentStyle={{ backgroundColor: '#f3f4f6', border: 'none', borderRadius: '8px' }}
-          labelStyle={{ color: '#667eea' }}
-        />
+        <XAxis dataKey="name" stroke={brandColors.primaryStart} />
+        <YAxis stroke={brandColors.primaryStart} />
+        <Tooltip {...TOOLTIP_STYLES} />
         <Legend />
-        <Line type="monotone" dataKey="value" stroke="#667eea" strokeWidth={2} dot={{ fill: '#667eea', r: 5 }} />
+        <Line type="monotone" dataKey="value" stroke={brandColors.primaryStart} strokeWidth={2} dot={{ fill: brandColors.primaryStart, r: 5 }} />
         {selectedMetrics.includes('actual') && (
-          <Line type="monotone" dataKey="actual" stroke="#764ba2" strokeWidth={2} dot={{ fill: '#764ba2', r: 5 }} />
+          <Line type="monotone" dataKey="actual" stroke={brandColors.primaryEnd} strokeWidth={2} dot={{ fill: brandColors.primaryEnd, r: 5 }} />
         )}
         {selectedMetrics.includes('forecast') && (
-          <Line type="monotone" dataKey="forecast" stroke="#f093fb" strokeWidth={2} strokeDasharray="5 5" />
+          <Line type="monotone" dataKey="forecast" stroke={brandColors.accentPink} strokeWidth={2} strokeDasharray="5 5" />
         )}
       </LineChart>
     </ResponsiveContainer>
@@ -123,15 +127,12 @@ const AdvancedChartsComponent = ({ data = [], title = 'التحليلات الم
     <ResponsiveContainer width="100%" height={400}>
       <BarChart data={sampleData}>
         <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="name" stroke="#667eea" />
-        <YAxis stroke="#667eea" />
-        <Tooltip
-          contentStyle={{ backgroundColor: '#f3f4f6', border: 'none', borderRadius: '8px' }}
-          labelStyle={{ color: '#667eea' }}
-        />
+        <XAxis dataKey="name" stroke={brandColors.primaryStart} />
+        <YAxis stroke={brandColors.primaryStart} />
+        <Tooltip {...TOOLTIP_STYLES} />
         <Legend />
-        <Bar dataKey="value" fill="#667eea" radius={[8, 8, 0, 0]} />
-        {selectedMetrics.includes('actual') && <Bar dataKey="actual" fill="#764ba2" radius={[8, 8, 0, 0]} />}
+        <Bar dataKey="value" fill={brandColors.primaryStart} radius={[8, 8, 0, 0]} />
+        {selectedMetrics.includes('actual') && <Bar dataKey="actual" fill={brandColors.primaryEnd} radius={[8, 8, 0, 0]} />}
       </BarChart>
     </ResponsiveContainer>
   );
@@ -142,21 +143,18 @@ const AdvancedChartsComponent = ({ data = [], title = 'التحليلات الم
       <AreaChart data={sampleData}>
         <defs>
           <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#667eea" stopOpacity={0.8} />
-            <stop offset="95%" stopColor="#667eea" stopOpacity={0.1} />
+            <stop offset="5%" stopColor={brandColors.primaryStart} stopOpacity={0.8} />
+            <stop offset="95%" stopColor={brandColors.primaryStart} stopOpacity={0.1} />
           </linearGradient>
         </defs>
         <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="name" stroke="#667eea" />
-        <YAxis stroke="#667eea" />
-        <Tooltip
-          contentStyle={{ backgroundColor: '#f3f4f6', border: 'none', borderRadius: '8px' }}
-          labelStyle={{ color: '#667eea' }}
-        />
+        <XAxis dataKey="name" stroke={brandColors.primaryStart} />
+        <YAxis stroke={brandColors.primaryStart} />
+        <Tooltip {...TOOLTIP_STYLES} />
         <Legend />
-        <Area type="monotone" dataKey="value" stroke="#667eea" fillOpacity={1} fill="url(#colorValue)" />
+        <Area type="monotone" dataKey="value" stroke={brandColors.primaryStart} fillOpacity={1} fill="url(#colorValue)" />
         {selectedMetrics.includes('actual') && (
-          <Area type="monotone" dataKey="actual" stroke="#764ba2" fillOpacity={0.3} fill="#764ba2" />
+          <Area type="monotone" dataKey="actual" stroke={brandColors.primaryEnd} fillOpacity={0.3} fill={brandColors.primaryEnd} />
         )}
       </AreaChart>
     </ResponsiveContainer>
@@ -171,10 +169,7 @@ const AdvancedChartsComponent = ({ data = [], title = 'التحليلات الم
             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
           ))}
         </Pie>
-        <Tooltip
-          contentStyle={{ backgroundColor: '#f3f4f6', border: 'none', borderRadius: '8px' }}
-          labelStyle={{ color: '#667eea' }}
-        />
+        <Tooltip {...TOOLTIP_STYLES} />
         <Legend />
       </PieChart>
     </ResponsiveContainer>
@@ -187,15 +182,12 @@ const AdvancedChartsComponent = ({ data = [], title = 'التحليلات الم
         <PolarGrid />
         <PolarAngleAxis dataKey="name" />
         <PolarRadiusAxis />
-        <Radar name="القيمة" dataKey="value" stroke="#667eea" fill="#667eea" fillOpacity={0.6} />
+        <Radar name="القيمة" dataKey="value" stroke={brandColors.primaryStart} fill={brandColors.primaryStart} fillOpacity={0.6} />
         {selectedMetrics.includes('actual') && (
-          <Radar name="الفعلي" dataKey="actual" stroke="#764ba2" fill="#764ba2" fillOpacity={0.3} />
+          <Radar name="الفعلي" dataKey="actual" stroke={brandColors.primaryEnd} fill={brandColors.primaryEnd} fillOpacity={0.3} />
         )}
         <Legend />
-        <Tooltip
-          contentStyle={{ backgroundColor: '#f3f4f6', border: 'none', borderRadius: '8px' }}
-          labelStyle={{ color: '#667eea' }}
-        />
+        <Tooltip {...TOOLTIP_STYLES} />
       </RadarChart>
     </ResponsiveContainer>
   );
@@ -205,17 +197,14 @@ const AdvancedChartsComponent = ({ data = [], title = 'التحليلات الم
     <ResponsiveContainer width="100%" height={400}>
       <ComposedChart data={sampleData}>
         <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="name" stroke="#667eea" />
-        <YAxis stroke="#667eea" />
-        <Tooltip
-          contentStyle={{ backgroundColor: '#f3f4f6', border: 'none', borderRadius: '8px' }}
-          labelStyle={{ color: '#667eea' }}
-        />
+        <XAxis dataKey="name" stroke={brandColors.primaryStart} />
+        <YAxis stroke={brandColors.primaryStart} />
+        <Tooltip {...TOOLTIP_STYLES} />
         <Legend />
-        <Bar dataKey="value" fill="#667eea" radius={[8, 8, 0, 0]} />
-        <Line type="monotone" dataKey="target" stroke="#f093fb" strokeWidth={2} />
+        <Bar dataKey="value" fill={brandColors.primaryStart} radius={[8, 8, 0, 0]} />
+        <Line type="monotone" dataKey="target" stroke={brandColors.accentPink} strokeWidth={2} />
         {selectedMetrics.includes('forecast') && (
-          <Line type="monotone" dataKey="forecast" stroke="#43e97b" strokeWidth={2} strokeDasharray="5 5" />
+          <Line type="monotone" dataKey="forecast" stroke={brandColors.accentGreen} strokeWidth={2} strokeDasharray="5 5" />
         )}
       </ComposedChart>
     </ResponsiveContainer>
@@ -226,13 +215,10 @@ const AdvancedChartsComponent = ({ data = [], title = 'التحليلات الم
     <ResponsiveContainer width="100%" height={400}>
       <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
         <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="value" name="المحور الأفقي" stroke="#667eea" />
-        <YAxis dataKey="target" name="المحور العمودي" stroke="#667eea" />
-        <Tooltip
-          contentStyle={{ backgroundColor: '#f3f4f6', border: 'none', borderRadius: '8px' }}
-          labelStyle={{ color: '#667eea' }}
-        />
-        <Scatter name="البيانات" data={sampleData} fill="#667eea" />
+        <XAxis dataKey="value" name="المحور الأفقي" stroke={brandColors.primaryStart} />
+        <YAxis dataKey="target" name="المحور العمودي" stroke={brandColors.primaryStart} />
+        <Tooltip {...TOOLTIP_STYLES} />
+        <Scatter name="البيانات" data={sampleData} fill={brandColors.primaryStart} />
       </ScatterChart>
     </ResponsiveContainer>
   );
@@ -271,7 +257,7 @@ const AdvancedChartsComponent = ({ data = [], title = 'التحليلات الم
                 size="small"
                 disabled={loading}
                 sx={{
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  background: gradients.primary,
                 }}
               >
                 تصدير
@@ -279,14 +265,14 @@ const AdvancedChartsComponent = ({ data = [], title = 'التحليلات الم
             </Box>
           }
           sx={{
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            background: gradients.primary,
             color: 'white',
           }}
         />
         <CardContent sx={{ p: 3 }}>
           {loading && (
             <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
-              <CircularProgress size={40} sx={{ color: '#667eea' }} />
+              <CircularProgress size={40} sx={{ color: brandColors.primaryStart }} />
             </Box>
           )}
 
@@ -350,7 +336,7 @@ const AdvancedChartsComponent = ({ data = [], title = 'التحليلات الم
               <Paper
                 sx={{
                   p: 2,
-                  background: '#f9fafb',
+                  background: surfaceColors.backgroundLighter,
                   borderRadius: '8px',
                   mb: 2,
                 }}
@@ -361,8 +347,8 @@ const AdvancedChartsComponent = ({ data = [], title = 'التحليلات الم
               {/* Statistics */}
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={6} md={3}>
-                  <Paper sx={{ p: 2, textAlign: 'center', borderRadius: '8px', background: '#f0f4ff' }}>
-                    <Typography variant="h6" sx={{ color: '#667eea', fontWeight: 'bold' }}>
+                  <Paper sx={{ p: 2, textAlign: 'center', borderRadius: '8px', background: surfaceColors.brandTintLight }}>
+                    <Typography variant="h6" sx={{ color: brandColors.primaryStart, fontWeight: 'bold' }}>
                       {sampleData.reduce((sum, item) => sum + item.value, 0)}
                     </Typography>
                     <Typography variant="caption" color="textSecondary">
@@ -372,8 +358,8 @@ const AdvancedChartsComponent = ({ data = [], title = 'التحليلات الم
                 </Grid>
 
                 <Grid item xs={12} sm={6} md={3}>
-                  <Paper sx={{ p: 2, textAlign: 'center', borderRadius: '8px', background: '#f5f0ff' }}>
-                    <Typography variant="h6" sx={{ color: '#764ba2', fontWeight: 'bold' }}>
+                  <Paper sx={{ p: 2, textAlign: 'center', borderRadius: '8px', background: surfaceColors.purpleTint }}>
+                    <Typography variant="h6" sx={{ color: brandColors.primaryEnd, fontWeight: 'bold' }}>
                       {(sampleData.reduce((sum, item) => sum + item.value, 0) / sampleData.length).toFixed(0)}
                     </Typography>
                     <Typography variant="caption" color="textSecondary">
@@ -383,8 +369,8 @@ const AdvancedChartsComponent = ({ data = [], title = 'التحليلات الم
                 </Grid>
 
                 <Grid item xs={12} sm={6} md={3}>
-                  <Paper sx={{ p: 2, textAlign: 'center', borderRadius: '8px', background: '#fff0f5' }}>
-                    <Typography variant="h6" sx={{ color: '#f5576c', fontWeight: 'bold' }}>
+                  <Paper sx={{ p: 2, textAlign: 'center', borderRadius: '8px', background: surfaceColors.roseTint }}>
+                    <Typography variant="h6" sx={{ color: brandColors.accentCoral, fontWeight: 'bold' }}>
                       {Math.max(...sampleData.map((d) => d.value))}
                     </Typography>
                     <Typography variant="caption" color="textSecondary">
@@ -394,8 +380,8 @@ const AdvancedChartsComponent = ({ data = [], title = 'التحليلات الم
                 </Grid>
 
                 <Grid item xs={12} sm={6} md={3}>
-                  <Paper sx={{ p: 2, textAlign: 'center', borderRadius: '8px', background: '#f0fff5' }}>
-                    <Typography variant="h6" sx={{ color: '#43e97b', fontWeight: 'bold' }}>
+                  <Paper sx={{ p: 2, textAlign: 'center', borderRadius: '8px', background: surfaceColors.greenTint }}>
+                    <Typography variant="h6" sx={{ color: brandColors.accentGreen, fontWeight: 'bold' }}>
                       {Math.min(...sampleData.map((d) => d.value))}
                     </Typography>
                     <Typography variant="caption" color="textSecondary">

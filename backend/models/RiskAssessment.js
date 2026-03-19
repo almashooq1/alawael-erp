@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * RiskAssessment Model
  * تقييم وإدارة المخاطر المالية والتشغيلية
@@ -12,33 +13,42 @@ const riskAssessmentSchema = new mongoose.Schema(
       type: String,
       required: true,
       unique: true,
-      index: true
+      index: true,
     },
-    
+
     organizationId: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
       ref: 'Organization',
-      index: true
+      index: true,
     },
-    
+
     // تفاصيل المخاطرة
     riskName: {
       type: String,
       required: true,
     },
-    
+
     riskType: {
       type: String,
-      enum: ['operational', 'financial', 'credit', 'market', 'liquidity', 'regulatory', 'fraud', 'reputational'],
+      enum: [
+        'operational',
+        'financial',
+        'credit',
+        'market',
+        'liquidity',
+        'regulatory',
+        'fraud',
+        'reputational',
+      ],
       required: true,
     },
-    
+
     riskDescription: {
       type: String,
       required: true,
     },
-    
+
     // تقييم المخاطرة
     assessment: {
       probability: {
@@ -59,23 +69,25 @@ const riskAssessmentSchema = new mongoose.Schema(
       },
       exposureAmount: {
         type: Number,
-      }
+      },
     },
-    
+
     // المعايير الحضر
     indicators: {
-      type: [{
-        name: String,
-        value: Number,
-        threshold: Number,
-        status: {
-          type: String,
-          enum: ['normal', 'warning', 'critical'],
-        }
-      }],
+      type: [
+        {
+          name: String,
+          value: Number,
+          threshold: Number,
+          status: {
+            type: String,
+            enum: ['normal', 'warning', 'critical'],
+          },
+        },
+      ],
       default: [],
     },
-    
+
     // التخفيف والتحكم
     mitigation: {
       strategy: String,
@@ -97,25 +109,27 @@ const riskAssessmentSchema = new mongoose.Schema(
         type: Number,
         min: 0,
         max: 100,
-      }
+      },
     },
-    
+
     // الاتجاهات التاريخية
     trends: {
-      type: [{
-        period: {
-          month: Number,
-          year: Number
+      type: [
+        {
+          period: {
+            month: Number,
+            year: Number,
+          },
+          probability: Number,
+          impact: Number,
+          severity: String,
+          exposureAmount: Number,
+          note: String,
         },
-        probability: Number,
-        impact: Number,
-        severity: String,
-        exposureAmount: Number,
-        note: String
-      }],
+      ],
       default: [],
     },
-    
+
     // الحالة والتتبع
     status: {
       type: String,
@@ -123,48 +137,50 @@ const riskAssessmentSchema = new mongoose.Schema(
       default: 'identified',
       index: true,
     },
-    
+
     // المراجع والوثائق
     attachments: {
       type: [mongoose.Schema.Types.ObjectId],
       ref: 'Attachment',
       default: [],
     },
-    
+
     // معلومات الإنشاء والتعديل
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
       ref: 'User',
     },
-    
+
     assignedTo: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
     },
-    
+
     lastReviewedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
     },
-    
+
     lastReviewDate: {
       type: Date,
     },
-    
+
     // التعليقات والتحديثات
-    updates: [{
-      date: { type: Date, default: Date.now },
-      user: mongoose.Schema.Types.ObjectId,
-      message: String,
-      attachment: mongoose.Schema.Types.ObjectId
-    }]
+    updates: [
+      {
+        date: { type: Date, default: Date.now },
+        user: mongoose.Schema.Types.ObjectId,
+        message: String,
+        attachment: mongoose.Schema.Types.ObjectId,
+      },
+    ],
   },
   {
     timestamps: true,
     collection: 'risk_assessments',
     toJSON: { virtuals: true },
-    toObject: { virtuals: true }
+    toObject: { virtuals: true },
   }
 );
 
@@ -175,21 +191,21 @@ riskAssessmentSchema.index({ 'assessment.severity': 1 });
 riskAssessmentSchema.index({ assignedTo: 1 });
 
 // ===== VIRTUALS =====
-riskAssessmentSchema.virtual('riskScore').get(function() {
+riskAssessmentSchema.virtual('riskScore').get(function () {
   const score = this.assessment.probability * this.assessment.impact * 100;
   return Math.round(score * 100) / 100;
 });
 
-riskAssessmentSchema.virtual('riskLevel').get(function() {
+riskAssessmentSchema.virtual('riskLevel').get(function () {
   const score = this.riskScore;
   if (score >= 0.75) return 'critical';
-  if (score >= 0.50) return 'high';
+  if (score >= 0.5) return 'high';
   if (score >= 0.25) return 'medium';
   return 'low';
 });
 
 // ===== HOOKS =====
-riskAssessmentSchema.pre('save', function(next) {
+riskAssessmentSchema.pre('save', function (next) {
   // تحديد درجة الخطورة بناءً على الاحتمالية والتأثير
   const severity = this.riskScore;
   if (severity >= 0.75) {
@@ -201,72 +217,72 @@ riskAssessmentSchema.pre('save', function(next) {
   } else {
     this.assessment.severity = 'low';
   }
-  
+
   next();
 });
 
 // ===== METHODS =====
-riskAssessmentSchema.methods.updateAssessment = function(probability, impact, exposureAmount) {
+riskAssessmentSchema.methods.updateAssessment = function (probability, impact, exposureAmount) {
   this.assessment.probability = probability;
   this.assessment.impact = impact;
   this.assessment.exposureAmount = exposureAmount;
   return this.save();
 };
 
-riskAssessmentSchema.methods.addTrendPoint = function(month, year) {
+riskAssessmentSchema.methods.addTrendPoint = function (month, year) {
   this.trends.push({
     period: { month, year },
     probability: this.assessment.probability,
     impact: this.assessment.impact,
     severity: this.assessment.severity,
     exposureAmount: this.assessment.exposureAmount,
-    note: `تحديث دوري - ${new Date().toLocaleDateString('ar-SA')}`
+    note: `تحديث دوري - ${new Date().toLocaleDateString('ar-SA')}`,
   });
   return this.save();
 };
 
-riskAssessmentSchema.methods.addUpdate = function(userId, message) {
+riskAssessmentSchema.methods.addUpdate = function (userId, message) {
   this.updates.push({
     date: new Date(),
     user: userId,
-    message
+    message,
   });
   this.lastReviewDate = new Date();
   this.lastReviewedBy = userId;
   return this.save();
 };
 
-riskAssessmentSchema.methods.close = function(userId) {
+riskAssessmentSchema.methods.close = function (userId) {
   this.status = 'closed';
   this.updates.push({
     date: new Date(),
     user: userId,
-    message: 'تم إغلاق المخاطرة'
+    message: 'تم إغلاق المخاطرة',
   });
   return this.save();
 };
 
 // ===== STATICS =====
-riskAssessmentSchema.statics.getCriticalRisks = function(organizationId) {
+riskAssessmentSchema.statics.getCriticalRisks = function (organizationId) {
   return this.find({
     organizationId,
     'assessment.severity': 'critical',
-    status: { $ne: 'closed' }
+    status: { $ne: 'closed' },
   }).sort({ createdAt: -1 });
 };
 
-riskAssessmentSchema.statics.getRisksByType = function(organizationId, riskType) {
+riskAssessmentSchema.statics.getRisksByType = function (organizationId, riskType) {
   return this.find({
     organizationId,
     riskType,
-    status: { $ne: 'closed' }
+    status: { $ne: 'closed' },
   }).sort({ 'assessment.severity': -1 });
 };
 
-riskAssessmentSchema.statics.getTotalExposure = async function(organizationId) {
+riskAssessmentSchema.statics.getTotalExposure = async function (organizationId) {
   const result = await this.aggregate([
     { $match: { organizationId, status: { $ne: 'closed' } } },
-    { $group: { _id: null, total: { $sum: '$assessment.exposureAmount' } } }
+    { $group: { _id: null, total: { $sum: '$assessment.exposureAmount' } } },
   ]);
   return result[0]?.total || 0;
 };

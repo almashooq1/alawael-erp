@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // Lightweight smoke test for backend /health endpoint
 const http = require('http');
 

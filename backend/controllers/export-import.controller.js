@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Export/Import Controller
  * Handles HTTP requests for export and import operations
@@ -6,6 +7,7 @@
 const exportImportService = require('../services/export-import.service');
 const path = require('path');
 const fs = require('fs');
+const logger = require('../utils/logger');
 
 class ExportImportController {
   /**
@@ -50,7 +52,7 @@ class ExportImportController {
       // Send file
       res.download(filePath, filename, err => {
         if (err) {
-          console.error('Error sending file:', err);
+          logger.error('Error sending file:', err);
         }
         // Delete file after sending
         setTimeout(() => {
@@ -60,11 +62,11 @@ class ExportImportController {
         }, 5000);
       });
     } catch (error) {
-      console.error('Error exporting to Excel:', error);
+      logger.error('Error exporting to Excel:', error);
       res.status(500).json({
         success: false,
         message: 'Error exporting to Excel',
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       });
     }
   }
@@ -94,7 +96,7 @@ class ExportImportController {
       // Send file
       res.download(filePath, filename, err => {
         if (err) {
-          console.error('Error sending file:', err);
+          logger.error('Error sending file:', err);
         }
         // Delete file after sending
         setTimeout(() => {
@@ -104,11 +106,11 @@ class ExportImportController {
         }, 5000);
       });
     } catch (error) {
-      console.error('Error exporting to PDF:', error);
+      logger.error('Error exporting to PDF:', error);
       res.status(500).json({
         success: false,
         message: 'Error exporting to PDF',
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       });
     }
   }
@@ -152,11 +154,11 @@ class ExportImportController {
         message: `Successfully imported ${result.imported} of ${result.total} programs`,
       });
     } catch (error) {
-      console.error('Error importing from Excel:', error);
+      logger.error('Error importing from Excel:', error);
       res.status(500).json({
         success: false,
         message: 'Error importing from Excel',
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       });
     }
   }
@@ -183,7 +185,7 @@ class ExportImportController {
       // Send file
       res.download(filePath, 'template_import_programs.xlsx', err => {
         if (err) {
-          console.error('Error sending template:', err);
+          logger.error('Error sending template:', err);
         }
         // Delete file after sending
         setTimeout(() => {
@@ -193,11 +195,11 @@ class ExportImportController {
         }, 5000);
       });
     } catch (error) {
-      console.error('Error generating template:', error);
+      logger.error('Error generating template:', error);
       res.status(500).json({
         success: false,
         message: 'Error generating import template',
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       });
     }
   }

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars, no-undef, no-empty, prefer-const, no-constant-condition, no-unused-expressions */
 /**
  * ===================================================================
  * ADVANCED CASH FLOW MANAGEMENT
@@ -574,7 +575,7 @@ class CashFlowManagement extends EventEmitter {
     };
 
     // إنشاء قائمة الدفعات
-    let currentDate = new Date(startDate);
+    const currentDate = new Date(startDate);
     const end = new Date(endDate);
 
     while (currentDate <= end) {

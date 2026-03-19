@@ -31,7 +31,7 @@ router.post('/init', (req: express.Request, res: express.Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -68,7 +68,7 @@ router.post('/fit', (req: express.Request, res: express.Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -109,7 +109,7 @@ router.post('/detect', (req: express.Request, res: express.Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -147,7 +147,7 @@ router.post('/detect-realtime', (req: express.Request, res: express.Response) =>
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -183,7 +183,7 @@ router.post('/seasonal', (req: express.Request, res: express.Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -210,7 +210,7 @@ router.get('/stats', (req: express.Request, res: express.Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });

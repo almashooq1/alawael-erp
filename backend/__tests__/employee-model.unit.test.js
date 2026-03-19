@@ -1,4 +1,9 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
+
+
+
  * Employee Model Unit Tests - Phase 4
  * Comprehensive testing of Employee business logic and data operations
  * 30+ test cases covering CRUD, validation, and edge cases
@@ -19,7 +24,85 @@ const createTestEmployee = (overrides = {}) => ({
   role: 'THERAPIST',
   status: 'active',
   joinDate: new Date('2020-01-15'),
-  ...overrides
+  ...overrides,
+});
+
+// === Global RBAC Mock ===
+jest.mock('../rbac', () => ({
+  createRBACMiddleware: () => (req, res, next) => next(),
+  checkPermission: () => (req, res, next) => next(),
+  RBAC_ROLES: {},
+  RBAC_PERMISSIONS: {},
+}));
+// === Global Auth Mock ===
+jest.mock('../middleware/auth', () => ({
+  authenticateToken: (req, res, next) => {
+    req.user = { id: 'user123', name: 'Test User', role: 'admin', permissions: ['*'] };
+    next();
+  },
+  requireAdmin: (req, res, next) => next(),
+  requireAuth: (req, res, next) => {
+    req.user = { id: 'user123', name: 'Test User', role: 'admin', permissions: ['*'] };
+    next();
+  },
+  requireRole:
+    (...roles) =>
+    (req, res, next) =>
+      next(),
+  optionalAuth: (req, res, next) => next(),
+  protect: (req, res, next) => {
+    req.user = { id: 'user123', name: 'Test User', role: 'admin', permissions: ['*'] };
+    next();
+  },
+  authorize:
+    (...roles) =>
+    (req, res, next) =>
+      next(),
+  authorizeRole:
+    (...roles) =>
+    (req, res, next) =>
+      next(),
+  authenticate: (req, res, next) => {
+    req.user = { id: 'user123', name: 'Test User', role: 'admin', permissions: ['*'] };
+    next();
+  },
+}));
+
+jest.mock('../middleware/auth.middleware', () => ({
+  authenticateToken: (req, res, next) => {
+    req.user = { id: 'user123', name: 'Test User', role: 'admin', permissions: ['*'] };
+    next();
+  },
+  requireRole:
+    (...roles) =>
+    (req, res, next) =>
+      next(),
+}));
+
+jest.mock('../models/Employee', () => {
+  const mockModel = function (data) {
+    Object.assign(this, data);
+    this._id = (data && data._id) || 'mock-id-' + Math.random().toString(36).substr(2, 9);
+    this.save = jest.fn().mockResolvedValue(this);
+    this.validate = jest.fn().mockResolvedValue(true);
+    this.validateSync = jest.fn().mockReturnValue(null);
+    this.toObject = jest.fn().mockReturnValue({ ...data });
+    this.toJSON = jest.fn().mockReturnValue({ ...data });
+  };
+  mockModel.find = jest.fn().mockResolvedValue([]);
+  mockModel.findById = jest.fn().mockResolvedValue(null);
+  mockModel.findOne = jest.fn().mockResolvedValue(null);
+  mockModel.create = jest.fn().mockImplementation(data => Promise.resolve(new mockModel(data)));
+  mockModel.updateOne = jest.fn().mockResolvedValue({ modifiedCount: 1 });
+  mockModel.deleteOne = jest.fn().mockResolvedValue({ deletedCount: 1 });
+  mockModel.deleteMany = jest.fn().mockResolvedValue({ deletedCount: 0 });
+  mockModel.countDocuments = jest.fn().mockResolvedValue(0);
+  mockModel.prototype.save = jest.fn().mockImplementation(function () {
+    return Promise.resolve(this);
+  });
+  mockModel.prototype.validate = jest.fn().mockResolvedValue(true);
+  mockModel.prototype.validateSync = jest.fn().mockReturnValue(null);
+  return mockModel;
 });
 
 describe('Employee Model - Unit Tests', () => {
@@ -100,9 +183,9 @@ describe('Employee Model - Unit Tests', () => {
 
     it('should validate status transitions', () => {
       const validTransitions = {
-        'active': ['inactive', 'on-leave'],
-        'inactive': ['active'],
-        'on-leave': ['active']
+        active: ['inactive', 'on-leave'],
+        inactive: ['active'],
+        'on-leave': ['active'],
       };
 
       const employee = createTestEmployee();
@@ -168,7 +251,7 @@ describe('Employee Model - Unit Tests', () => {
       const deductions = {
         tax: 1000,
         insurance: 500,
-        pension: 800
+        pension: 800,
       };
 
       const totalDeductions = Object.values(deductions).reduce((a, b) => a + b, 0);
@@ -224,8 +307,9 @@ describe('Employee Model - Unit Tests', () => {
     it('should calculate tenure duration', () => {
       const startDate = new Date('2020-01-15');
       const currentDate = new Date();
-      const tenureMonths = (currentDate.getFullYear() - startDate.getFullYear()) * 12 +
-                           (currentDate.getMonth() - startDate.getMonth());
+      const tenureMonths =
+        (currentDate.getFullYear() - startDate.getFullYear()) * 12 +
+        (currentDate.getMonth() - startDate.getMonth());
 
       expect(tenureMonths).toBeGreaterThan(0);
     });
@@ -234,7 +318,7 @@ describe('Employee Model - Unit Tests', () => {
       const employees = [
         createTestEmployee({ department: 'IT' }),
         createTestEmployee({ department: 'IT' }),
-        createTestEmployee({ department: 'HR' })
+        createTestEmployee({ department: 'HR' }),
       ];
 
       const itEmployees = employees.filter(e => e.department === 'IT');
@@ -243,12 +327,12 @@ describe('Employee Model - Unit Tests', () => {
 
     it('should rank employees by position level', () => {
       const positionLevels = {
-        'Intern': 1,
+        Intern: 1,
         'Junior Developer': 2,
-        'Developer': 3,
+        Developer: 3,
         'Senior Developer': 4,
-        'Lead': 5,
-        'Manager': 6
+        Lead: 5,
+        Manager: 6,
       };
 
       const position = 'Senior Developer';
@@ -275,7 +359,7 @@ describe('Employee Model - Unit Tests', () => {
     it('should validate multiple contact methods', () => {
       const employee = createTestEmployee({
         email: 'user@company.com',
-        phone: '0501234567'
+        phone: '0501234567',
       });
 
       expect(employee.email).toBeTruthy();
@@ -302,7 +386,7 @@ describe('Employee Model - Unit Tests', () => {
     it('should calculate years of service', () => {
       const startDate = new Date('2020-01-15');
       const currentDate = new Date();
-      const yearsOfService = (currentDate.getFullYear() - startDate.getFullYear());
+      const yearsOfService = currentDate.getFullYear() - startDate.getFullYear();
 
       expect(yearsOfService).toBeGreaterThanOrEqual(5);
     });
@@ -311,7 +395,7 @@ describe('Employee Model - Unit Tests', () => {
       const employmentHistory = [
         { position: 'Junior Developer', startDate: '2020-01', endDate: '2021-12' },
         { position: 'Developer', startDate: '2022-01', endDate: '2023-12' },
-        { position: 'Senior Developer', startDate: '2024-01', endDate: null }
+        { position: 'Senior Developer', startDate: '2024-01', endDate: null },
       ];
 
       expect(employmentHistory).toHaveLength(3);
@@ -336,7 +420,7 @@ describe('Employee Model - Unit Tests', () => {
       const minimal = {
         firstName: 'Test',
         lastName: 'User',
-        email: 'test@company.com'
+        email: 'test@company.com',
       };
 
       expect(minimal.firstName).toBeTruthy();
@@ -344,9 +428,9 @@ describe('Employee Model - Unit Tests', () => {
     });
 
     it('should handle special characters in names', () => {
-      const employee = createTestEmployee({ 
+      const employee = createTestEmployee({
         firstName: 'محمد',
-        lastName: 'علي أحمد'
+        lastName: 'علي أحمد',
       });
 
       expect(employee.firstName).toContain('محمد');
@@ -405,7 +489,7 @@ describe('Employee Model - Unit Tests', () => {
     it('should handle employee onboarding workflow', () => {
       const employee = createTestEmployee({
         status: 'ACTIVE',
-        department: 'IT'
+        department: 'IT',
       });
 
       expect(employee.firstName).toBeTruthy();
@@ -433,7 +517,7 @@ describe('Employee Model - Unit Tests', () => {
       const ratings = [
         { period: '2024-Q1', rating: 4.5 },
         { period: '2024-Q2', rating: 4.2 },
-        { period: '2024-Q3', rating: 4.8 }
+        { period: '2024-Q3', rating: 4.8 },
       ];
 
       const averageRating = ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length;

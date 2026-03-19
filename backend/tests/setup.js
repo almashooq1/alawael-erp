@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * إعداد Jest للاختبارات
  * Jest Setup Configuration

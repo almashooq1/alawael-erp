@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import express from 'express';
+import helmet from 'helmet';
 import { app as webhookApp } from './webhook';
 import health from './health';
 import { startQueueConsumer } from './queue';
@@ -9,9 +10,14 @@ const app = express();
 const port = Number(process.env.PORT || 3000);
 
 // Middleware
-app.use(express.json({ verify: (req, res, buf) => {
-  (req as any).rawBody = buf;
-} }));
+app.use(helmet());
+app.use(
+  express.json({
+    verify: (req, res, buf) => {
+      (req as any).rawBody = buf;
+    },
+  }),
+);
 
 // Health check endpoints
 app.use('/', health);

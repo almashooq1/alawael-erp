@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * 🔧 Unified Integration Config - تكامل الملفات الموحدة
  * هذا الملف يوضح كيفية استبدال الاستيرادات القديمة بالجديدة
@@ -11,6 +12,7 @@
 // ✅ الطريقة الجديدة (موحدة)
 const unifiedMiddleware = require('../middleware/index.unified');
 const unifiedRoutes = require('../routes/index.unified');
+const logger = require('../utils/logger');
 
 // فك الاستيراد
 const {
@@ -36,7 +38,7 @@ const {
 
   // أخرى
   sanitizeInput,
-  requestLogger
+  requestLogger,
 } = unifiedMiddleware;
 
 // ============================================
@@ -50,10 +52,10 @@ const loginRouteExample = {
   method: 'POST',
   path: '/api/auth/login',
   middleware: [
-    loginLimiter,           // تحديد معدل المحاولات
+    loginLimiter, // تحديد معدل المحاولات
     validate(loginRules()), // التحقق من البيانات
-    authenticate            // المصادقة
-  ]
+    authenticate, // المصادقة
+  ],
 };
 
 /**
@@ -63,10 +65,10 @@ const adminRouteExample = {
   method: 'DELETE',
   path: '/api/users/:id',
   middleware: [
-    authenticate,           // يجب تسجيل الدخول
-    authorize('admin'),     // يجب أن يكون مسؤولاً
-    strictLimiter          // تحديد صارم
-  ]
+    authenticate, // يجب تسجيل الدخول
+    authorize('admin'), // يجب أن يكون مسؤولاً
+    strictLimiter, // تحديد صارم
+  ],
 };
 
 /**
@@ -76,12 +78,13 @@ const publicRouteExample = {
   method: 'GET',
   path: '/api/search',
   middleware: [
-    optionalAuth,           // المصادقة اختيارية
-    validate([              // التحقق من المعاملات
+    optionalAuth, // المصادقة اختيارية
+    validate([
+      // التحقق من المعاملات
       query('q').optional().trim(),
-      query('page').optional().isInt({ min: 1 })
-    ])
-  ]
+      query('page').optional().isInt({ min: 1 }),
+    ]),
+  ],
 };
 
 // ============================================
@@ -130,7 +133,7 @@ const publicRouteExample = {
  * @param {Express} app - تطبيق Express
  */
 function integrateUnifiedModules(app) {
-  console.log('🔧 Integrating unified modules...');
+  logger.info('Integrating unified modules...');
 
   // 1. إضافة Middleware الموحد
   app.use(sanitizeInput);
@@ -139,7 +142,7 @@ function integrateUnifiedModules(app) {
   // 2. إضافة المسارات الموحدة (اختياري)
   // app.use('/api/v2', unifiedRoutes);
 
-  console.log('✅ Unified modules integrated successfully');
+  logger.info('Unified modules integrated successfully');
 
   return {
     middleware: {
@@ -149,9 +152,9 @@ function integrateUnifiedModules(app) {
       validate,
       loginLimiter,
       apiLimiter,
-      strictLimiter
+      strictLimiter,
     },
-    routes: unifiedRoutes
+    routes: unifiedRoutes,
   };
 }
 
@@ -182,5 +185,5 @@ module.exports = {
   unifiedRoutes,
 
   // Integration function
-  integrateUnifiedModules
+  integrateUnifiedModules,
 };

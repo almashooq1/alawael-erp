@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Advanced Health Check System
  * نظام فحص صحة شامل
@@ -36,7 +37,7 @@ const checkMongoHealth = async () => {
   } catch (error) {
     return {
       status: 'unhealthy',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     };
   }
 };
@@ -79,7 +80,7 @@ const checkRedisHealth = async () => {
   } catch (error) {
     return {
       status: 'unhealthy',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     };
   }
 };
@@ -87,21 +88,14 @@ const checkRedisHealth = async () => {
 /**
  * Check Disk Space
  */
-const checkDiskSpace = () => {
+const _checkDiskSpace = () => {
   // Simple check - in production use proper disk monitoring
-  try {
-    return {
-      status: 'healthy',
-      details: {
-        message: 'Disk space monitoring requires OS-specific implementation',
-      },
-    };
-  } catch (error) {
-    return {
-      status: 'unknown',
-      error: error.message,
-    };
-  }
+  return {
+    status: 'healthy',
+    details: {
+      message: 'Disk space monitoring requires OS-specific implementation',
+    },
+  };
 };
 
 /**
@@ -197,7 +191,7 @@ const performHealthCheck = async () => {
     return {
       status: 'unhealthy',
       timestamp: new Date().toISOString(),
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     };
   }
 };
@@ -226,7 +220,7 @@ const checkReadiness = async () => {
     return {
       ready: false,
       timestamp: new Date().toISOString(),
-      reason: error.message,
+      reason: 'حدث خطأ داخلي',
     };
   }
 };

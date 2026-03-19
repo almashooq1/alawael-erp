@@ -3,14 +3,19 @@
  * إدارة اختيار وتحديد المستندات
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 
 export const useDocumentSelection = () => {
   const [selected, setSelected] = useState([]);
   const [selectionMenuAnchor, setSelectionMenuAnchor] = useState(null);
 
+  // O(1) lookup Set
+  const selectedSet = useMemo(() => new Set(selected), [selected]);
+
   const selectOne = useCallback(docId => {
-    setSelected(prev => (prev.includes(docId) ? prev.filter(id => id !== docId) : [...prev, docId]));
+    setSelected(prev =>
+      prev.includes(docId) ? prev.filter(id => id !== docId) : [...prev, docId]
+    );
   }, []);
 
   const selectMultiple = useCallback(docIds => {
@@ -29,10 +34,10 @@ export const useDocumentSelection = () => {
         setSelected(docIds);
       }
     },
-    [selected.length],
+    [selected.length]
   );
 
-  const isSelected = useCallback(docId => selected.includes(docId), [selected]);
+  const isSelected = useCallback(docId => selectedSet.has(docId), [selectedSet]);
 
   const openSelectionMenu = useCallback(event => {
     setSelectionMenuAnchor(event.currentTarget);

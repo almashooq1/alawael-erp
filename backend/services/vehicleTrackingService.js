@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Vehicle Tracking Service - خدمة تتبع المركبات
  *
@@ -84,7 +85,9 @@ class VehicleTrackingService {
       if (!vehicle) throw new Error('المركبة غير موجودة');
 
       const startTime = new Date(Date.now() - hours * 60 * 60 * 1000);
-      const history = vehicle.tracking.locationHistory.filter(loc => new Date(loc.timestamp) >= startTime);
+      const history = vehicle.tracking.locationHistory.filter(
+        loc => new Date(loc.timestamp) >= startTime
+      );
 
       return {
         success: true,
@@ -112,7 +115,9 @@ class VehicleTrackingService {
       if (filters.status) query.status = filters.status;
       if (filters.assignedDriver) query.assignedDriver = filters.assignedDriver;
 
-      const vehicles = await Vehicle.find(query).select('registrationNumber plateNumber basicInfo tracking assignedDriver status');
+      const vehicles = await Vehicle.find(query).select(
+        'registrationNumber plateNumber basicInfo tracking assignedDriver status'
+      );
 
       const vehiclesOnMap = vehicles.map(vehicle => ({
         _id: vehicle._id,
@@ -203,7 +208,7 @@ class VehicleTrackingService {
           trip.startLocation.latitude,
           trip.startLocation.longitude,
           trip.endLocation.latitude,
-          trip.endLocation.longitude,
+          trip.endLocation.longitude
         );
         trip.distance = distance;
 
@@ -238,7 +243,9 @@ class VehicleTrackingService {
    */
   async getTripDetails(tripId) {
     try {
-      const trip = await Trip.findOne({ tripId }).populate('vehicle', 'registrationNumber plateNumber').populate('driver', 'personalInfo');
+      const trip = await Trip.findOne({ tripId })
+        .populate('vehicle', 'registrationNumber plateNumber')
+        .populate('driver', 'personalInfo');
 
       if (!trip) throw new Error('الرحلة غير موجودة');
 
@@ -410,7 +417,10 @@ class VehicleTrackingService {
     const dLon = (lon2 - lon1) * (Math.PI / 180);
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      Math.cos(lat1 * (Math.PI / 180)) *
+        Math.cos(lat2 * (Math.PI / 180)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   }
@@ -428,9 +438,15 @@ class VehicleTrackingService {
 
       const totalDistance = trips.reduce((sum, trip) => sum + (trip.distance || 0), 0);
       const totalTime = trips.reduce((sum, trip) => sum + (trip.duration || 0), 0); // بالدقائق
-      const averageSpeed = totalDistance > 0 && totalTime > 0 ? (totalDistance / (totalTime / 60)).toFixed(2) : 0;
+      const averageSpeed =
+        totalDistance > 0 && totalTime > 0 ? (totalDistance / (totalTime / 60)).toFixed(2) : 0;
       const averageSafetyScore =
-        trips.length > 0 ? (trips.reduce((sum, trip) => sum + (trip.drivingQuality.safetyScore || 0), 0) / trips.length).toFixed(2) : 0;
+        trips.length > 0
+          ? (
+              trips.reduce((sum, trip) => sum + (trip.drivingQuality.safetyScore || 0), 0) /
+              trips.length
+            ).toFixed(2)
+          : 0;
 
       return {
         success: true,

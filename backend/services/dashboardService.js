@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * =====================================================
  * ADVANCED DASHBOARD SERVICE - خدمة لوحة التحكم المتقدمة
@@ -13,6 +14,12 @@ const bookingService = require('./bookingService');
 const driverRatingService = require('./driverRatingService');
 const alertService = require('./alertNotificationService');
 const costBudgetService = require('./costBudgetService');
+const logger = require('../utils/logger');
+// tripService not available yet - using mock
+const tripService = {
+  getVehicleStats: async () => ({ data: { total: 0, totalDistance: 0, totalFuel: 0 } }),
+  getDriverStats: async () => ({ data: { total: 0, totalDistance: 0 } }),
+};
 
 class DashboardService {
   /**
@@ -54,7 +61,7 @@ class DashboardService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -206,7 +213,7 @@ class DashboardService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -236,7 +243,7 @@ class DashboardService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -311,7 +318,7 @@ class DashboardService {
         alerts.push(...fuelAlerts.data.alerts);
       }
     } catch (error) {
-      console.error('Error getting vehicle alerts:', error);
+      logger.error('Error getting vehicle alerts:', error);
     }
 
     return alerts;
@@ -345,7 +352,7 @@ class DashboardService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }

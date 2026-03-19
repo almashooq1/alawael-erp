@@ -1,0 +1,623 @@
+/* ILMSComponents CSS - نمط مكونات نظام إدارة التعلم الذكي */
+
+.ilms-dashboard {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: 100vh;
+  padding: 20px 0;
+}
+
+/* ========= نمط الشريط العلوي ========= */
+
+.ilms-dashboard .navbar {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  margin: 0 20px;
+}
+
+.ilms-dashboard .navbar-brand {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+/* ========= نمط البطاقات ========= */
+
+.course-card {
+  transition: all 0.3s ease;
+  border: none;
+  border-left: 4px solid #0d6efd;
+  height: 100%;
+}
+
+.course-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 20px rgba(13, 110, 253, 0.15);
+  border-left-color: #0dcaf0;
+}
+
+.course-card .card-header {
+  border-radius: 0;
+  padding: 15px;
+}
+
+.course-card h5 {
+  margin: 0;
+  font-weight: 600;
+}
+
+.course-stats {
+  background: #f8f9fa;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.course-stats div {
+  margin: 5px 0;
+  color: #495057;
+}
+
+/* ========= بطاقات التسجيل ========= */
+
+.enrollment-card {
+  transition: all 0.3s ease;
+  border: 1px solid #dee2e6;
+}
+
+.enrollment-card:hover {
+  border-color: #0d6efd;
+  box-shadow: 0 8px 16px rgba(13, 110, 253, 0.1);
+}
+
+.enrollment-card .card-header {
+  padding: 12px 15px;
+}
+
+.enrollment-card h6 {
+  margin: 0;
+  font-weight: 600;
+}
+
+.enrollment-stats {
+  background: #f8f9fa;
+  padding: 12px;
+  border-radius: 5px;
+  border-left: 3px solid #0dcaf0;
+}
+
+.enrollment-stats div {
+  padding: 3px 0;
+  color: #495057;
+}
+
+/* ========= شريط التقدم ========= */
+
+.progress {
+  background-color: #e9ecef;
+  border-radius: 8px;
+  height: 25px;
+}
+
+.progress-bar {
+  background: linear-gradient(90deg, #0d6efd 0%, #0dcaf0 100%);
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ========= البطاقات الإحصائية ========= */
+
+.stat-card {
+  border: 1px solid #dee2e6;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+}
+
+.stat-card .card-body {
+  padding: 20px 10px;
+}
+
+.stat-card h5 {
+  font-size: 2.5rem;
+  margin: 10px 0;
+}
+
+.stat-card h6 {
+  color: #6c757d;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.stat-card h4 {
+  color: #0d6efd;
+  font-size: 1.8rem;
+  margin-top: 10px;
+}
+
+/* ========= بطاقات التوصيات ========= */
+
+.recommendation-card {
+  border: none;
+  border-left: 4px solid #ffc107;
+  transition: all 0.3s ease;
+}
+
+.recommendation-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(255, 193, 7, 0.15);
+}
+
+.recommendation-card .card-header {
+  background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%) !important;
+  border-radius: 0;
+}
+
+.recommendation-card h6 {
+  margin: 0;
+  font-weight: 600;
+}
+
+.recommendation-card ul {
+  padding-left: 20px;
+  margin: 10px 0;
+}
+
+.recommendation-card li {
+  margin: 5px 0;
+  color: #495057;
+}
+
+/* ========= المرافق والأسلوب ========= */
+
+.lesson-content {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.lesson-resources {
+  margin-top: 20px;
+}
+
+.lesson-resources h6 {
+  font-weight: 600;
+  color: #0d6efd;
+  margin-bottom: 10px;
+}
+
+/* ========= الأكورديون ========= */
+
+.accordion-button {
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.accordion-button:not(.collapsed) {
+  background-color: #e7f1ff;
+  color: #0d6efd;
+}
+
+.accordion-button:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.accordion-button:hover {
+  background-color: #f0f6ff;
+}
+
+.accordion-button.collapsed:hover {
+  background-color: #f8f9fa;
+}
+
+/* ========= الشارات والعلامات ========= */
+
+.badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+/* ========= الأزرار ========= */
+
+.btn {
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #0d6efd 0%, #0dcaf0 100%);
+  border: none;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(13, 110, 253, 0.3);
+  background: linear-gradient(135deg, #0a58ca 0%, #08bfda 100%);
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #198754 0%, #20c997 100%);
+  border: none;
+}
+
+.btn-success:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(25, 135, 84, 0.3);
+  background: linear-gradient(135deg, #146c43 0%, #1aa179 100%);
+}
+
+.btn-info {
+  background: linear-gradient(135deg, #0dcaf0 0%, #00bcd4 100%);
+  border: none;
+}
+
+.btn-info:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(13, 202, 240, 0.3);
+  background: linear-gradient(135deg, #0aa2c1 0%, #0081a1 100%);
+}
+
+/* ========= قائمة المجموعات ========= */
+
+.list-group-item {
+  border: 1px solid #dee2e6;
+  transition: all 0.3s ease;
+  background: #f8f9fa;
+}
+
+.list-group-item:hover {
+  background: #e7f1ff;
+  border-color: #0d6efd;
+  padding-left: 1.5rem;
+}
+
+.list-group-item a {
+  color: #0d6efd;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.list-group-item a:hover {
+  color: #0a58ca;
+  text-decoration: underline;
+}
+
+/* ========= التنبيهات ========= */
+
+.alert {
+  border-radius: 8px;
+  border: none;
+}
+
+.alert-danger {
+  background: linear-gradient(135deg, #f8d7da 0%, #f5c2c7 100%);
+  color: #842029;
+}
+
+.alert-success {
+  background: linear-gradient(135deg, #d1e7dd 0%, #badbcc 100%);
+  color: #0f5132;
+}
+
+.alert-info {
+  background: linear-gradient(135deg, #cfe2ff 0%, #b6d4fe 100%);
+  color: #084298;
+}
+
+.alert-warning {
+  background: linear-gradient(135deg, #fff3cd 0%, #ffecb5 100%);
+  color: #664d03;
+}
+
+/* ========= الجداول ========= */
+
+.table {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.table thead {
+  background: linear-gradient(135deg, #0d6efd 0%, #0dcaf0 100%);
+  color: white;
+  font-weight: 600;
+}
+
+.table tbody tr {
+  transition: all 0.2s ease;
+}
+
+.table tbody tr:hover {
+  background: #f8f9fa;
+  transform: scale(1.01);
+}
+
+.table td {
+  vertical-align: middle;
+  padding: 12px;
+}
+
+/* ========= الأشكال والنماذج ========= */
+
+.form-control,
+.form-select {
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+  background-color: #f8f9fa;
+}
+
+.form-label {
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 8px;
+}
+
+/* ========= الرسوم البيانية ========= */
+
+.recharts-surface {
+  border-radius: 8px;
+}
+
+.recharts-tooltip-wrapper {
+  outline: none;
+}
+
+.recharts-default-tooltip {
+  border-radius: 6px;
+}
+
+/* ========= الحالات الخاصة ========= */
+
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+}
+
+.error-message {
+  background: #f8d7da;
+  color: #842029;
+  padding: 15px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  border-left: 4px solid #dc3545;
+}
+
+.success-message {
+  background: #d1e7dd;
+  color: #0f5132;
+  padding: 15px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  border-left: 4px solid #198754;
+}
+
+/* ========= التجاوب ========= */
+
+@media (max-width: 768px) {
+  .course-card,
+  .enrollment-card,
+  .stat-card,
+  .recommendation-card {
+    margin-bottom: 15px;
+  }
+
+  .ilms-dashboard .navbar {
+    margin: 0 10px;
+  }
+
+  .course-card h5,
+  .enrollment-card h6,
+  .stat-card h6 {
+    font-size: 1rem;
+  }
+
+  .stat-card h4 {
+    font-size: 1.5rem;
+  }
+
+  .progress {
+    height: 20px;
+  }
+
+  .btn {
+    font-size: 0.9rem;
+    padding: 8px 12px;
+  }
+
+  .accordion-button {
+    padding: 10px 15px;
+    font-size: 0.95rem;
+  }
+
+  .modal-body {
+    padding: 15px;
+  }
+}
+
+@media (max-width: 576px) {
+  .course-card,
+  .enrollment-card {
+    width: 100%;
+  }
+
+  .stat-card .card-body {
+    padding: 15px 5px;
+  }
+
+  .stat-card h5 {
+    font-size: 2rem;
+  }
+
+  .stat-card h4 {
+    font-size: 1.3rem;
+  }
+
+  .ilms-dashboard .navbar-brand {
+    font-size: 1.2rem;
+  }
+
+  .badge {
+    padding: 4px 8px;
+    font-size: 0.8rem;
+  }
+}
+
+/* ========= الحالات المتقدمة ========= */
+
+.course-card.featured {
+  border-left: 4px solid #ffc107;
+  background: linear-gradient(135deg, #f8f9fa 0%, #fff9e6 100%);
+}
+
+.course-card.featured:hover {
+  box-shadow: 0 12px 20px rgba(255, 193, 7, 0.2);
+}
+
+.enrollment-card.completed {
+  border-left-color: #198754;
+}
+
+.enrollment-card.in-progress {
+  border-left-color: #0dcaf0;
+}
+
+.enrollment-card.not-started {
+  border-left-color: #6c757d;
+  opacity: 0.8;
+}
+
+/* ========= الحركات والانتقالات ========= */
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.course-card,
+.enrollment-card,
+.stat-card {
+  animation: slideInUp 0.5s ease-out forwards;
+}
+
+.alert {
+  animation: slideInUp 0.4s ease-out;
+}
+
+.spinner-border {
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ========= CSS Grid للتخطيط ========= */
+
+.courses-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.enrollments-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+@media (max-width: 768px) {
+  .courses-grid,
+  .enrollments-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+}
+
+/* ========= نمط الوضع المظلم (اختياري) ========= */
+
+@media (prefers-color-scheme: dark) {
+  .ilms-dashboard {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  }
+
+  .course-card,
+  .enrollment-card,
+  .stat-card {
+    background: #2d2d2d;
+    color: #e0e0e0;
+  }
+
+  .form-control,
+  .form-select {
+    background: #404040;
+    color: #e0e0e0;
+    border-color: #505050;
+  }
+
+  .form-control:focus,
+  .form-select:focus {
+    background: #505050;
+    color: #e0e0e0;
+    border-color: #0d6efd;
+  }
+
+  .table {
+    background: #2d2d2d;
+    color: #e0e0e0;
+  }
+
+  .table thead {
+    background: linear-gradient(135deg, #0d6efd 0%, #0dcaf0 100%);
+  }
+
+  .table tbody tr:hover {
+    background: #404040;
+  }
+}

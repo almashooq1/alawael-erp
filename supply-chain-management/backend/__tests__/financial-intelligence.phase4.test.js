@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 const request = require('supertest');
 const mongoose = require('mongoose');
 const moment = require('moment');

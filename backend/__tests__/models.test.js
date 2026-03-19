@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 describe('Memory Models - Employee, Attendance, Leave, Finance', () => {
   const Employee = require('../models/Employee.memory');
   const Attendance = require('../models/Attendance.memory');
@@ -269,7 +271,7 @@ describe('Memory Models - Employee, Attendance, Leave, Finance', () => {
           Employee.create({
             name: `Employee ${i}`,
             department: 'IT',
-          }),
+          })
         );
       }
 
@@ -311,7 +313,7 @@ describe('Memory Models - Employee, Attendance, Leave, Finance', () => {
           Employee.create({
             name: `Employee ${i}`,
             department: 'IT',
-          }),
+          })
         );
       }
 

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // Phase 22: Mobile App Enhancements
 // AR/VR, Voice Commands, Gesture Recognition, Advanced Offline
 
@@ -200,7 +201,7 @@ class MobilePaymentIntegration {
   }
 
   initializePaymentGateway(config) {
-    const { provider = 'stripe', publicKey, environment = 'sandbox' } = config;
+    const { provider = 'stripe', publicKey: _publicKey, environment = 'sandbox' } = config;
     return {
       success: true,
       gateway: provider,

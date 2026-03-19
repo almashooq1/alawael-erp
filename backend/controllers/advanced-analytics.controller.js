@@ -1,9 +1,11 @@
+/* eslint-disable no-unused-vars */
 /**
  * Advanced Analytics Controller
  * Handles HTTP requests for advanced analytics endpoints
  */
 
 const advancedAnalyticsService = require('../services/advanced-analytics.service');
+const logger = require('../utils/logger');
 
 class AdvancedAnalyticsController {
   /**
@@ -26,11 +28,11 @@ class AdvancedAnalyticsController {
         message: 'Dashboard analytics retrieved successfully',
       });
     } catch (error) {
-      console.error('Error fetching dashboard analytics:', error);
+      logger.error('Error fetching dashboard analytics:', error);
       res.status(500).json({
         success: false,
         message: 'Error fetching dashboard analytics',
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       });
     }
   }
@@ -50,11 +52,11 @@ class AdvancedAnalyticsController {
         message: 'Program performance metrics retrieved successfully',
       });
     } catch (error) {
-      console.error('Error fetching program performance:', error);
+      logger.error('Error fetching program performance:', error);
       res.status(500).json({
         success: false,
         message: 'Error fetching program performance metrics',
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       });
     }
   }
@@ -82,11 +84,11 @@ class AdvancedAnalyticsController {
         message: 'Comparative analysis completed successfully',
       });
     } catch (error) {
-      console.error('Error performing comparative analysis:', error);
+      logger.error('Error performing comparative analysis:', error);
       res.status(500).json({
         success: false,
         message: 'Error performing comparative analysis',
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       });
     }
   }
@@ -106,11 +108,11 @@ class AdvancedAnalyticsController {
         message: 'Predictive insights generated successfully',
       });
     } catch (error) {
-      console.error('Error generating predictive insights:', error);
+      logger.error('Error generating predictive insights:', error);
       res.status(500).json({
         success: false,
         message: 'Error generating predictive insights',
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       });
     }
   }
@@ -130,11 +132,11 @@ class AdvancedAnalyticsController {
         message: 'Beneficiary journey analytics retrieved successfully',
       });
     } catch (error) {
-      console.error('Error fetching beneficiary journey:', error);
+      logger.error('Error fetching beneficiary journey:', error);
       res.status(500).json({
         success: false,
         message: 'Error fetching beneficiary journey analytics',
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       });
     }
   }
@@ -164,11 +166,11 @@ class AdvancedAnalyticsController {
         message: 'Monthly trends retrieved successfully',
       });
     } catch (error) {
-      console.error('Error fetching monthly trends:', error);
+      logger.error('Error fetching monthly trends:', error);
       res.status(500).json({
         success: false,
         message: 'Error fetching monthly trends',
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       });
     }
   }
@@ -213,11 +215,11 @@ class AdvancedAnalyticsController {
         });
       }
     } catch (error) {
-      console.error('Error exporting analytics report:', error);
+      logger.error('Error exporting analytics report:', error);
       res.status(500).json({
         success: false,
         message: 'Error exporting analytics report',
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       });
     }
   }

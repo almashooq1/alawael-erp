@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+const logger = require('../utils/logger');
 /**
  * PHASE 111: Smart Document Generation & e-Signature Unit
  * Automates the creation of official letters using templates, variable data injection,
@@ -6,7 +8,7 @@
 
 class SmartDocumentService {
   constructor() {
-    console.log('System: Smart Document & e-Signature Unit - Initialized');
+    logger.info('System: Smart Document & e-Signature Unit - Initialized');
 
     // In-memory storage for this phase
     this.templates = new Map();
@@ -56,7 +58,11 @@ class SmartDocumentService {
     if (!personData) throw new Error('Person not found');
 
     // Merge Data: Combine DB data with any manual modifiers
-    const mergeContext = { ...personData, ...modifierData, DATE: new Date().toLocaleDateString('ar-SA') };
+    const mergeContext = {
+      ...personData,
+      ...modifierData,
+      DATE: new Date().toLocaleDateString('ar-SA'),
+    };
 
     // Replace Placeholders
     let content = template.body;
@@ -148,9 +154,12 @@ class SmartDocumentService {
    * PHASE 113: Public Verification
    */
   verifyDocument(referenceNumber) {
-    const doc = Array.from(this.documents.values()).find(d => d.referenceNumber === referenceNumber);
+    const doc = Array.from(this.documents.values()).find(
+      d => d.referenceNumber === referenceNumber
+    );
     if (!doc) return { valid: false, message: 'Document not found' };
-    if (doc.status !== 'SEALED') return { valid: false, message: 'Document exists but is not sealed/official.' };
+    if (doc.status !== 'SEALED')
+      return { valid: false, message: 'Document exists but is not sealed/official.' };
 
     return {
       valid: true,
@@ -191,13 +200,29 @@ class SmartDocumentService {
         },
       },
       STUDENT: {
-        STU500: { NAME: 'Omar Khalid', ID_NUM: '5005', PROGRAM: 'Clinical Psychology', UNIVERSITY: 'KSU', START_DATE: '2025-09-01' },
+        STU500: {
+          NAME: 'Omar Khalid',
+          ID_NUM: '5005',
+          PROGRAM: 'Clinical Psychology',
+          UNIVERSITY: 'KSU',
+          START_DATE: '2025-09-01',
+        },
       },
       TRAINEE: {
-        TRN900: { NAME: 'Mona Zaki', ID_NUM: '9009', SPECIALTY: 'Occupational Therapy', DURATION: '6 Months' },
+        TRN900: {
+          NAME: 'Mona Zaki',
+          ID_NUM: '9009',
+          SPECIALTY: 'Occupational Therapy',
+          DURATION: '6 Months',
+        },
       },
       PARENT: {
-        PAR100: { NAME: 'Khalid Abdullah', CHILD_NAME: 'Omar Khalid', RELATION: 'Father', CONTACT: '0555555555' },
+        PAR100: {
+          NAME: 'Khalid Abdullah',
+          CHILD_NAME: 'Omar Khalid',
+          RELATION: 'Father',
+          CONTACT: '0555555555',
+        },
       },
       GOV: {
         GOV_MOH: { NAME: 'Ministry of Health', DEPT: 'Licensing', REGION: 'Riyadh' },
@@ -227,9 +252,9 @@ class SmartDocumentService {
                 </div>
 
                 <h1 style="text-align: center; color: #2c3e50; margin-bottom: 40px; text-decoration: underline;">شهادة تعريف بالراتب</h1>
-                
+
                 <p style="font-size: 16px; line-height: 1.8;">تشهد إدارة الموارد البشرية في <strong>ScaleHealth</strong> بأن الموظف الموضح بياناته أدناه يعمل لدينا ولا يزال على رأس العمل:</p>
-                
+
                 <table style="width: 100%; border-collapse: collapse; margin: 30px 0; font-size: 16px;">
                     <tr>
                         <td style="padding: 12px; border: 1px solid #bdc3c7; background: #ecf0f1; font-weight: bold; width: 30%;">الاسم الرباعي</td>
@@ -258,7 +283,7 @@ class SmartDocumentService {
                 </table>
 
                 <p style="font-size: 16px; line-height: 1.8;">وقد أعطي هذا التعريف بناءً على طلبه لتقديمه لمن يهمه الأمر، دون أدنى مسؤولية مالية أو قانونية على المركز.</p>
-                
+
                 <div style="margin-top: 60px; display: flex; justify-content: space-between;">
                     <div style="text-align: center;">
                         <p><strong>مدير الموارد البشرية</strong></p>
@@ -279,11 +304,11 @@ class SmartDocumentService {
       body: `
             <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: right; direction: rtl; border: 2px solid #e74c3c; padding: 40px; max-width: 800px; margin: 0 auto; background: #fff;">
                 <h2 style="color: #c0392b; border-bottom: 2px solid #c0392b; padding-bottom: 10px;">نموذج مخالصة نهائية وتسوية مستحقات</h2>
-                
+
                 <p><strong>التاريخ:</strong> {{DATE}}</p>
-                
+
                 <p>أقر أنا الموقع أدناه، <strong>{{NAME}}</strong>، هوية رقم ({{ID_NUM}})، بأنني استلمت كامل مستحقاتي النظامية من شركة ScaleHealth عن فترة عملي التي انتهت في <strong>{{END_DATE}}</strong>.</p>
-                
+
                 <table style="width: 100%; border: 1px solid #ddd; margin: 20px 0;">
                     <tr style="background: #f9f9f9;">
                         <th style="padding: 10px; border: 1px solid #ddd;">البند</th>
@@ -304,7 +329,7 @@ class SmartDocumentService {
                 </table>
 
                 <p>وبهذا أقر بأنه لا يحق لي المطالبة بأي حقوق مالية أو عمالية مستقبلاً.</p>
-                
+
                 <div style="margin-top: 40px; display: flex; justify-content: space-between;">
                     <div>
                         <p><strong>الموظف:</strong> {{NAME}}</p>
@@ -322,18 +347,18 @@ class SmartDocumentService {
             <div style="font-family: 'Times New Roman', serif; text-align: center; direction: rtl; border: 5px double #27ae60; padding: 50px; max-width: 800px; margin: 0 auto; background: #fffdf9;">
                 <h1 style="color: #27ae60; font-size: 36px; margin-bottom: 10px;">تهنئة وقرار ترقية</h1>
                 <hr style="width: 50%; border: 1px solid #27ae60;">
-                
+
                 <p style="font-size: 18px; margin-top: 40px;">يسر إدارة الموارد البشرية أن تعلن عن ترقية الزميل/ة:</p>
-                
+
                 <h2 style="font-size: 28px; color: #34495e; margin: 10px 0;">{{NAME}}</h2>
-                
+
                 <p>إلى وظيفة:</p>
                 <h2 style="font-size: 24px; color: #2980b9;">{{NEW_TITLE}}</h2>
-                
+
                 <p style="text-align: justify; margin: 30px 10%; line-height: 1.8;">
                     وذلك تقديراً لجهودكم المتميزة وكفاءتكم العالية خلال الفترة الماضية. يسري هذا القرار اعتباراً من {{EFFECTIVE_DATE}}، مع تمنياتنا لكم بدوام التوفيق والنجاح في مهامكم الجديدة.
                 </p>
-                
+
                 <div style="margin-top: 60px;">
                     <p><strong>المدير التنفيذي</strong></p>
                     <p>___________________</p>
@@ -355,7 +380,7 @@ class SmartDocumentService {
                 </table>
                 <h2 style="background: #eee; padding: 10px; text-align: center; border: 1px solid #999;">قرار إداري رقم ({{REF}})</h2>
                 <p>إشارة إلى طلب الإجازة المقدم من الموظف: <strong>{{NAME}}</strong> ({{ID_NUM}})</p>
-                
+
                 <p>فقد تقرر الموافقة على منح إجازة وفق التفاصيل التالية:</p>
                 <ul>
                     <li><strong>نوع الإجازة:</strong> سنوية</li>
@@ -364,9 +389,9 @@ class SmartDocumentService {
                     <li><strong>تنتهي في:</strong> {{END_DATE}}</li>
                     <li><strong>تاريخ المباشرة:</strong> {{RETURN_DATE}}</li>
                 </ul>
-                
+
                 <p>الرصيد المتبقي بعد هذه الإجازة: <strong>{{BALANCE}}</strong> يوم.</p>
-                
+
                 <p style="margin-top: 30px;"><strong>مدير الموارد البشرية</strong></p>
             </div>`,
     });
@@ -396,12 +421,12 @@ class SmartDocumentService {
                 <h2 style="color: red; text-align: center;">إنذار إداري / Warning Letter</h2>
                 <p><strong>إلى الموظف:</strong> {{NAME}}</p>
                 <p><strong>الرقم الوظيفي:</strong> {{EMP_ID}}</p>
-                
+
                 <p>نظراً لما لوحظ عليكم من مخالفة للأنظمة واللوائح والمتمثلة في:</p>
                 <div style="background: #fff; border: 1px solid red; padding: 15px; margin: 10px 0;">
                     <strong>{{VIOLATION}}</strong> بتاريخ {{VIOLATION_DATE}}
                 </div>
-                
+
                 <p>فقد تقرر توجيه هذا الإنذار لكم، ونلفت نظركم إلى ضرورة الالتزام وعدم تكرار ذلك مستقبلاً لكي لا نضطر لاتخاذ إجراءات أشد وفقاً للائحة الجزاءات.</p>
                 <p><strong>إدارة الموارد البشرية</strong></p>
             </div>`,
@@ -498,15 +523,15 @@ class SmartDocumentService {
             <div style="text-align: center; direction: ltr; font-family: 'Georgia', serif; border: 10px solid #ddd; padding: 50px;">
                 <h1 style="color: #2c3e50; font-size: 48px; margin-bottom: 10px;">Certificate of Completion</h1>
                 <p style="font-size: 18px; color: #7f8c8d;">This is to certify that</p>
-                
+
                 <h2 style="font-size: 36px; color: #2980b9; margin: 20px 0;">{{NAME}}</h2>
-                
+
                 <p style="font-size: 18px;">Has successfully completed the Internship Program at ScaleHealth in</p>
                 <h3 style="font-size: 24px; color: #2c3e50;">{{SPECIALTY}}</h3>
-                
+
                 <p style="margin-top: 30px;"><strong>Duration:</strong> {{DURATION}}</p>
                 <p>We wish them success in their future endeavors.</p>
-                
+
                 <div style="margin-top: 60px; display: flex; justify-content: space-around;">
                     <div>
                         <hr style="width: 200px;">
@@ -714,7 +739,7 @@ class SmartDocumentService {
                 <hr>
                 <p><strong>العميل:</strong> {{CUSTOMER_NAME}}</p>
                 <p><strong>الرقم الضريبي:</strong> {{TAX_NO}}</p>
-                
+
                 <table style="width: 100%; border-collapse: collapse; margin-top: 20px; text-align: center;">
                     <tr style="background: #eee;">
                         <th style="border: 1px solid #999; padding: 8px;">الوصف</th>
@@ -1104,7 +1129,7 @@ class SmartDocumentService {
                 <p><strong>القسم المعني:</strong> {{DEPT}}</p>
                 <p><strong>تاريخ الاكتشاف:</strong> {{DETECT_DATE}}</p>
                 <p><strong>المعيار المرجعي (Standard Ref):</strong> {{STANDARD_REF}}</p>
-                
+
                 <h4 style="background: #eee; padding: 5px;">وصف حالة عدم المطابقة (Description):</h4>
                 <p style="border: 1px solid #ccc; padding: 10px; min-height: 80px;">{{DESCRIPTION}}</p>
 

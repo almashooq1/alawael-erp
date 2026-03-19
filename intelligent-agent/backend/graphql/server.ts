@@ -41,7 +41,7 @@ export async function createGraphQLServer(app: express.Application) {
     formatError: (error) => {
       console.error('GraphQL Error:', error);
       return {
-        message: error.message,
+        message: 'حدث خطأ داخلي',
         locations: error.locations,
         path: error.path,
         extensions: {

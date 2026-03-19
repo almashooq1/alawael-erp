@@ -1,54 +1,45 @@
-import axios from 'axios';
+import apiClient from './api.client';
 
-const API_BASE = '/api/lms';
+const LMS_PREFIX = '/lms';
 
 const eLearningService = {
   // Courses
   getAllCourses: async params => {
-    const response = await axios.get(`${API_BASE}/courses`, { params });
-    return response.data;
+    return apiClient.get(`${LMS_PREFIX}/courses`, { params });
   },
 
   getCourseById: async id => {
-    const response = await axios.get(`${API_BASE}/courses/${id}`);
-    return response.data;
+    return apiClient.get(`${LMS_PREFIX}/courses/${id}`);
   },
 
   createCourse: async data => {
-    const response = await axios.post(`${API_BASE}/courses`, data);
-    return response.data;
+    return apiClient.post(`${LMS_PREFIX}/courses`, data);
   },
 
   updateCourse: async (id, data) => {
-    const response = await axios.put(`${API_BASE}/courses/${id}`, data);
-    return response.data;
+    return apiClient.put(`${LMS_PREFIX}/courses/${id}`, data);
   },
 
   deleteCourse: async id => {
-    const response = await axios.delete(`${API_BASE}/courses/${id}`);
-    return response.data;
+    return apiClient.delete(`${LMS_PREFIX}/courses/${id}`);
   },
 
   // Lessons
   addLesson: async (courseId, data) => {
-    const response = await axios.post(`${API_BASE}/courses/${courseId}/lessons`, data);
-    return response.data;
+    return apiClient.post(`${LMS_PREFIX}/courses/${courseId}/lessons`, data);
   },
 
   completeLesson: async (courseId, lessonId) => {
-    const response = await axios.post(`${API_BASE}/courses/${courseId}/lessons/${lessonId}/complete`);
-    return response.data;
+    return apiClient.post(`${LMS_PREFIX}/courses/${courseId}/lessons/${lessonId}/complete`);
   },
 
   // Enrollment
   enrollInCourse: async courseId => {
-    const response = await axios.post(`${API_BASE}/courses/${courseId}/enroll`);
-    return response.data;
+    return apiClient.post(`${LMS_PREFIX}/enroll/${courseId}`);
   },
 
   getMyCourses: async () => {
-    const response = await axios.get(`${API_BASE}/my-courses`);
-    return response.data;
+    return apiClient.get(`${LMS_PREFIX}/my-courses`);
   },
 };
 

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * E-Learning System Test Suite
  * اختبارات شاملة لنظام التعلم عن بعد

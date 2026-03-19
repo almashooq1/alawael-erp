@@ -1,9 +1,11 @@
+/* eslint-disable no-unused-vars */
 /**
  * Notification Center - مركز الإشعارات
  * Enterprise Notification Management for Alawael ERP
  */
 
 const mongoose = require('mongoose');
+const logger = require('../utils/logger');
 
 /**
  * Notification Configuration
@@ -11,16 +13,16 @@ const mongoose = require('mongoose');
 const notificationConfig = {
   // Channels
   channels: ['in_app', 'email', 'sms', 'push', 'slack', 'webhook'],
-  
+
   // Priorities
   priorities: ['low', 'normal', 'high', 'urgent'],
-  
+
   // Retention
   retention: {
     read: 30, // days
     unread: 90, // days
   },
-  
+
   // Rate limits
   rateLimits: {
     perUser: 100, // per hour
@@ -31,122 +33,136 @@ const notificationConfig = {
 /**
  * Notification Template Schema
  */
-const NotificationTemplateSchema = new mongoose.Schema({
-  name: { type: String, required: true, unique: true },
-  category: String,
-  
-  // Content
-  title: { type: String, required: true },
-  body: { type: String, required: true },
-  
-  // Variables
-  variables: [{
-    name: String,
-    description: String,
-    defaultValue: mongoose.Schema.Types.Mixed,
-  }],
-  
-  // Channels
-  channels: [{
-    channel: { type: String, enum: notificationConfig.channels },
-    enabled: { type: Boolean, default: true },
-    template: String, // Override template for specific channel
-  }],
-  
-  // Default settings
-  defaults: {
-    priority: { type: String, enum: notificationConfig.priorities, default: 'normal' },
-    icon: String,
-    color: String,
-    actionUrl: String,
+const NotificationTemplateSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true, unique: true },
+    category: String,
+
+    // Content
+    title: { type: String, required: true },
+    body: { type: String, required: true },
+
+    // Variables
+    variables: [
+      {
+        name: String,
+        description: String,
+        defaultValue: mongoose.Schema.Types.Mixed,
+      },
+    ],
+
+    // Channels
+    channels: [
+      {
+        channel: { type: String, enum: notificationConfig.channels },
+        enabled: { type: Boolean, default: true },
+        template: String, // Override template for specific channel
+      },
+    ],
+
+    // Default settings
+    defaults: {
+      priority: { type: String, enum: notificationConfig.priorities, default: 'normal' },
+      icon: String,
+      color: String,
+      actionUrl: String,
+    },
+
+    // Localization
+    translations: {
+      ar: { title: String, body: String },
+      en: { title: String, body: String },
+    },
+
+    // Metadata
+    isActive: { type: Boolean, default: true },
+    tenantId: String,
+
+    // Timestamps
+    createdAt: { type: Date, default: Date.now },
   },
-  
-  // Localization
-  translations: {
-    ar: { title: String, body: String },
-    en: { title: String, body: String },
-  },
-  
-  // Metadata
-  isActive: { type: Boolean, default: true },
-  tenantId: String,
-  
-  // Timestamps
-  createdAt: { type: Date, default: Date.now },
-}, {
-  collection: 'notification_templates',
-});
+  {
+    collection: 'notification_templates',
+  }
+);
 
 /**
  * Notification Schema
  */
-const NotificationSchema = new mongoose.Schema({
-  // Template reference
-  templateId: { type: mongoose.Schema.Types.ObjectId, ref: 'NotificationTemplate' },
-  templateName: String,
-  
-  // Content
-  title: { type: String, required: true },
-  body: { type: String, required: true },
-  data: mongoose.Schema.Types.Mixed,
-  
-  // Recipient
-  recipient: {
-    userId: { type: String, required: true },
-    email: String,
-    phone: String,
-    deviceTokens: [String],
+const NotificationSchema = new mongoose.Schema(
+  {
+    // Template reference
+    templateId: { type: mongoose.Schema.Types.ObjectId, ref: 'NotificationTemplate' },
+    templateName: String,
+
+    // Content
+    title: { type: String, required: true },
+    body: { type: String, required: true },
+    data: mongoose.Schema.Types.Mixed,
+
+    // Recipient
+    recipient: {
+      userId: { type: String, required: true },
+      email: String,
+      phone: String,
+      deviceTokens: [String],
+    },
+
+    // Channel
+    channel: { type: String, enum: notificationConfig.channels, default: 'in_app' },
+
+    // Priority
+    priority: { type: String, enum: notificationConfig.priorities, default: 'normal' },
+
+    // Status
+    status: {
+      type: String,
+      enum: ['pending', 'sent', 'delivered', 'read', 'failed'],
+      default: 'pending',
+    },
+
+    // Read status
+    isRead: { type: Boolean, default: false },
+    readAt: Date,
+
+    // Delivery
+    sentAt: Date,
+    deliveredAt: Date,
+
+    // Retry
+    retryCount: { type: Number, default: 0 },
+    lastError: String,
+
+    // Scheduling
+    scheduledAt: Date,
+
+    // Expiry
+    expiresAt: Date,
+
+    // Action
+    actionUrl: String,
+    actionText: String,
+
+    // Metadata
+    icon: String,
+    color: String,
+    image: String,
+    sound: String,
+
+    // Reference
+    referenceType: String, // e.g., 'order', 'invoice', 'user'
+    referenceId: String,
+
+    // Tenant
+    tenantId: String,
+
+    // Timestamps
+    createdAt: { type: Date, default: Date.now, expires: '90d' },
   },
-  
-  // Channel
-  channel: { type: String, enum: notificationConfig.channels, default: 'in_app' },
-  
-  // Priority
-  priority: { type: String, enum: notificationConfig.priorities, default: 'normal' },
-  
-  // Status
-  status: { type: String, enum: ['pending', 'sent', 'delivered', 'read', 'failed'], default: 'pending' },
-  
-  // Read status
-  isRead: { type: Boolean, default: false },
-  readAt: Date,
-  
-  // Delivery
-  sentAt: Date,
-  deliveredAt: Date,
-  
-  // Retry
-  retryCount: { type: Number, default: 0 },
-  lastError: String,
-  
-  // Scheduling
-  scheduledAt: Date,
-  
-  // Expiry
-  expiresAt: Date,
-  
-  // Action
-  actionUrl: String,
-  actionText: String,
-  
-  // Metadata
-  icon: String,
-  color: String,
-  image: String,
-  sound: String,
-  
-  // Reference
-  referenceType: String, // e.g., 'order', 'invoice', 'user'
-  referenceId: String,
-  
-  // Tenant
-  tenantId: String,
-  
-  // Timestamps
-  createdAt: { type: Date, default: Date.now, expires: '90d' },
-}, {
-  collection: 'notifications',
-});
+  {
+    collection: 'notifications',
+  }
+);
 
 // Indexes
 NotificationSchema.index({ 'recipient.userId': 1, createdAt: -1 });
@@ -156,49 +172,54 @@ NotificationSchema.index({ tenantId: 1 });
 /**
  * Notification Preferences Schema
  */
-const NotificationPreferencesSchema = new mongoose.Schema({
-  userId: { type: String, required: true },
-  tenantId: String,
-  
-  // Global preferences
-  enabled: { type: Boolean, default: true },
-  
-  // Channel preferences
-  channels: {
-    in_app: { type: Boolean, default: true },
-    email: { type: Boolean, default: true },
-    sms: { type: Boolean, default: false },
-    push: { type: Boolean, default: true },
-  },
-  
-  // Category preferences
-  categories: [{
-    category: String,
+const NotificationPreferencesSchema = new mongoose.Schema(
+  {
+    userId: { type: String, required: true },
+    tenantId: String,
+
+    // Global preferences
     enabled: { type: Boolean, default: true },
-    channels: mongoose.Schema.Types.Mixed,
-  }],
-  
-  // Quiet hours
-  quietHours: {
-    enabled: { type: Boolean, default: false },
-    start: String, // "22:00"
-    end: String, // "08:00"
-    timezone: { type: String, default: 'Asia/Riyadh' },
+
+    // Channel preferences
+    channels: {
+      in_app: { type: Boolean, default: true },
+      email: { type: Boolean, default: true },
+      sms: { type: Boolean, default: false },
+      push: { type: Boolean, default: true },
+    },
+
+    // Category preferences
+    categories: [
+      {
+        category: String,
+        enabled: { type: Boolean, default: true },
+        channels: mongoose.Schema.Types.Mixed,
+      },
+    ],
+
+    // Quiet hours
+    quietHours: {
+      enabled: { type: Boolean, default: false },
+      start: String, // "22:00"
+      end: String, // "08:00"
+      timezone: { type: String, default: 'Asia/Riyadh' },
+    },
+
+    // Digest settings
+    digest: {
+      enabled: { type: Boolean, default: false },
+      frequency: { type: String, enum: ['hourly', 'daily', 'weekly'], default: 'daily' },
+      lastSent: Date,
+    },
+
+    // Timestamps
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: Date,
   },
-  
-  // Digest settings
-  digest: {
-    enabled: { type: Boolean, default: false },
-    frequency: { type: String, enum: ['hourly', 'daily', 'weekly'], default: 'daily' },
-    lastSent: Date,
-  },
-  
-  // Timestamps
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: Date,
-}, {
-  collection: 'notification_preferences',
-});
+  {
+    collection: 'notification_preferences',
+  }
+);
 
 // Unique index
 NotificationPreferencesSchema.index({ userId: 1, tenantId: 1 }, { unique: true });
@@ -213,55 +234,61 @@ class NotificationCenter {
     this.NotificationPreferences = null;
     this.channelProviders = new Map();
   }
-  
+
   /**
    * Initialize
    */
   async initialize(connection) {
     this.Notification = connection.model('Notification', NotificationSchema);
-    this.NotificationTemplate = connection.model('NotificationTemplate', NotificationTemplateSchema);
-    this.NotificationPreferences = connection.model('NotificationPreferences', NotificationPreferencesSchema);
-    
+    this.NotificationTemplate = connection.model(
+      'NotificationTemplate',
+      NotificationTemplateSchema
+    );
+    this.NotificationPreferences = connection.model(
+      'NotificationPreferences',
+      NotificationPreferencesSchema
+    );
+
     // Register default providers
     this.registerDefaultProviders();
-    
+
     // Create default templates
     await this.createDefaultTemplates();
-    
-    console.log('✅ Notification Center initialized');
+
+    logger.info('✅ Notification Center initialized');
   }
-  
+
   /**
    * Register default providers
    */
   registerDefaultProviders() {
     // In-app provider
-    this.registerProvider('in_app', async (notification) => {
+    this.registerProvider('in_app', async notification => {
       // Store in database (already done)
       return { delivered: true, channel: 'in_app' };
     });
-    
+
     // Email provider placeholder
-    this.registerProvider('email', async (notification) => {
+    this.registerProvider('email', async notification => {
       // Would use email service
-      console.log(`Sending email to ${notification.recipient.email}`);
+      logger.info(`Sending email to ${notification.recipient.email}`);
       return { delivered: true, channel: 'email' };
     });
-    
+
     // SMS provider placeholder
-    this.registerProvider('sms', async (notification) => {
-      console.log(`Sending SMS to ${notification.recipient.phone}`);
+    this.registerProvider('sms', async notification => {
+      logger.info(`Sending SMS to ${notification.recipient.phone}`);
       return { delivered: true, channel: 'sms' };
     });
-    
+
     // Push provider placeholder
-    this.registerProvider('push', async (notification) => {
-      console.log(`Sending push to ${notification.recipient.userId}`);
+    this.registerProvider('push', async notification => {
+      logger.info(`Sending push to ${notification.recipient.userId}`);
       return { delivered: true, channel: 'push' };
     });
-    
+
     // Webhook provider
-    this.registerProvider('webhook', async (notification) => {
+    this.registerProvider('webhook', async notification => {
       if (notification.data?.webhookUrl) {
         const axios = require('axios');
         await axios.post(notification.data.webhookUrl, notification);
@@ -269,14 +296,14 @@ class NotificationCenter {
       return { delivered: true, channel: 'webhook' };
     });
   }
-  
+
   /**
    * Register provider
    */
   registerProvider(channel, handler) {
     this.channelProviders.set(channel, handler);
   }
-  
+
   /**
    * Create default templates
    */
@@ -311,9 +338,7 @@ class NotificationCenter {
         category: 'orders',
         title: 'طلب جديد',
         body: 'تم إنشاء طلب جديد رقم {{orderNumber}}',
-        variables: [
-          { name: 'orderNumber', description: 'رقم الطلب' },
-        ],
+        variables: [{ name: 'orderNumber', description: 'رقم الطلب' }],
         channels: [
           { channel: 'in_app', enabled: true },
           { channel: 'email', enabled: true },
@@ -360,7 +385,7 @@ class NotificationCenter {
         defaults: { priority: 'normal', icon: 'task', color: '#9C27B0' },
       },
     ];
-    
+
     for (const template of templates) {
       const existing = await this.NotificationTemplate.findOne({ name: template.name });
       if (!existing) {
@@ -368,7 +393,7 @@ class NotificationCenter {
       }
     }
   }
-  
+
   /**
    * Send notification
    */
@@ -384,13 +409,13 @@ class NotificationCenter {
       referenceId,
       tenantId,
     } = options;
-    
+
     // Get template if specified
     let template = null;
     if (templateName) {
       template = await this.NotificationTemplate.findOne({ name: templateName, isActive: true });
     }
-    
+
     // Build notification content
     const notification = {
       templateId: template?._id,
@@ -408,20 +433,22 @@ class NotificationCenter {
       referenceId,
       tenantId,
       scheduledAt,
-      expiresAt: scheduledAt ? new Date(scheduledAt.getTime() + 7 * 24 * 60 * 60 * 1000) : undefined,
+      expiresAt: scheduledAt
+        ? new Date(scheduledAt.getTime() + 7 * 24 * 60 * 60 * 1000)
+        : undefined,
     };
-    
+
     // Create notification
     const notificationDoc = await this.Notification.create(notification);
-    
+
     // Send through channels
     if (!scheduledAt || scheduledAt <= new Date()) {
       await this.deliver(notificationDoc, channels);
     }
-    
+
     return notificationDoc;
   }
-  
+
   /**
    * Deliver notification
    */
@@ -432,11 +459,10 @@ class NotificationCenter {
         try {
           notification.channel = channel;
           const result = await provider(notification);
-          
+
           notification.status = 'sent';
           notification.sentAt = new Date();
           await notification.save();
-          
         } catch (error) {
           notification.status = 'failed';
           notification.lastError = error.message;
@@ -446,7 +472,7 @@ class NotificationCenter {
       }
     }
   }
-  
+
   /**
    * Interpolate variables
    */
@@ -456,7 +482,7 @@ class NotificationCenter {
       return data[key] !== undefined ? data[key] : match;
     });
   }
-  
+
   /**
    * Get user notifications
    */
@@ -464,12 +490,12 @@ class NotificationCenter {
     const filter = { 'recipient.userId': userId };
     if (options.unreadOnly) filter.isRead = false;
     if (options.status) filter.status = options.status;
-    
+
     return this.Notification.find(filter)
       .sort({ createdAt: -1 })
       .limit(options.limit || 50);
   }
-  
+
   /**
    * Mark as read
    */
@@ -480,7 +506,7 @@ class NotificationCenter {
       { new: true }
     );
   }
-  
+
   /**
    * Mark all as read
    */
@@ -490,7 +516,7 @@ class NotificationCenter {
       { isRead: true, readAt: new Date(), status: 'read' }
     );
   }
-  
+
   /**
    * Get unread count
    */
@@ -500,14 +526,14 @@ class NotificationCenter {
       isRead: false,
     });
   }
-  
+
   /**
    * Delete notification
    */
   async deleteNotification(notificationId) {
     return this.Notification.findByIdAndDelete(notificationId);
   }
-  
+
   /**
    * Get user preferences
    */
@@ -518,7 +544,7 @@ class NotificationCenter {
     }
     return preferences;
   }
-  
+
   /**
    * Update preferences
    */
@@ -529,14 +555,14 @@ class NotificationCenter {
       { upsert: true, new: true }
     );
   }
-  
+
   /**
    * Create template
    */
   async createTemplate(template) {
     return this.NotificationTemplate.create(template);
   }
-  
+
   /**
    * List templates
    */
@@ -545,7 +571,7 @@ class NotificationCenter {
     if (category) filter.category = category;
     return this.NotificationTemplate.find(filter);
   }
-  
+
   /**
    * Process scheduled notifications
    */
@@ -554,35 +580,39 @@ class NotificationCenter {
       status: 'pending',
       scheduledAt: { $lte: new Date() },
     });
-    
+
     for (const notification of notifications) {
       await this.deliver(notification, [notification.channel]);
     }
-    
+
     return { processed: notifications.length };
   }
-  
+
   /**
    * Send bulk notifications
    */
   async sendBulk(recipients, options) {
     const results = [];
-    
+
     for (const recipient of recipients) {
       try {
         const notification = await this.send({
           ...options,
           recipient,
         });
-        results.push({ recipient: recipient.userId, success: true, notificationId: notification._id });
+        results.push({
+          recipient: recipient.userId,
+          success: true,
+          notificationId: notification._id,
+        });
       } catch (error) {
-        results.push({ recipient: recipient.userId, success: false, error: error.message });
+        results.push({ recipient: recipient.userId, success: false, error: 'حدث خطأ داخلي' });
       }
     }
-    
+
     return results;
   }
-  
+
   /**
    * Get notification statistics
    */
@@ -604,7 +634,7 @@ class NotificationCenter {
         },
       },
     ]);
-    
+
     return stats;
   }
 }

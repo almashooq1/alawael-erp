@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+const logger = require('../utils/logger');
 /**
  * Smart Adaptive Sports & Recreation Service (Phase 88)
  *
@@ -19,7 +21,7 @@ class SmartSportsService {
    */
   async logMatchPerformance(athleteId, matchId, metrics) {
     // metrics: { goals: 1, assists: 2, sportsmanship: 'High' }
-    console.log(`Logging stats for Athlete ${athleteId} in Match ${matchId}`);
+    logger.info(`Logging stats for Athlete ${athleteId} in Match ${matchId}`);
 
     return {
       logId: 'STAT-' + Date.now(),

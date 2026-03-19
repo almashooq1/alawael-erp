@@ -1,10 +1,11 @@
+/* eslint-disable no-unused-vars */
 /**
  * ALAWAEL ERP - AI/ML Engine
  * Phase 13: Advanced Intelligence & Predictive Analytics
  * Provides ML models, predictions, and intelligent recommendations
  */
 
-const math = require('mathjs');
+const _math = require('mathjs');
 
 // ============================================================================
 // 1. PREDICTIVE ANALYTICS ENGINE
@@ -56,7 +57,7 @@ class PredictiveAnalyticsEngine {
 
       return { success: true, model, accuracy: r2, message: 'Sales model trained' };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -83,7 +84,7 @@ class PredictiveAnalyticsEngine {
 
       return { success: true, forecasts, model: 'sales-forecast' };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -128,7 +129,7 @@ class PredictiveAnalyticsEngine {
 
       return { success: true, model, accuracy: 0.85, message: 'Demand model trained' };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -169,7 +170,7 @@ class PredictiveAnalyticsEngine {
         recommendations: this.getChurnRecommendations(riskLevel, customerData),
       };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -254,7 +255,7 @@ class RecommendationEngine {
 
       return { success: true, recommendations: topRecommendations };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -287,7 +288,7 @@ class RecommendationEngine {
 
       return { success: true, similar: similarities.map(s => s.item) };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -318,7 +319,7 @@ class RecommendationEngine {
    * Update user profile based on interaction
    */
   updateProfile(userId, item, interactionType = 'view') {
-    let profile = this.userProfiles.get(userId) || { preferences: {}, history: [] };
+    const profile = this.userProfiles.get(userId) || { preferences: {}, history: [] };
 
     // Update category preference
     const weight = interactionType === 'purchase' ? 0.3 : interactionType === 'view' ? 0.1 : 0.05;
@@ -412,7 +413,7 @@ class AnomalyDetectionEngine {
         reasons,
       };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -466,7 +467,7 @@ class AnomalyDetectionEngine {
         reasons,
       };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 }
@@ -540,7 +541,7 @@ class NLPEngine {
         wordsMatched,
       };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -583,7 +584,7 @@ class NLPEngine {
 
       return { success: true, keywords };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -620,7 +621,7 @@ class NLPEngine {
         scores,
       };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 }
@@ -668,7 +669,7 @@ class OptimizationEngine {
               : 'MAINTAIN',
       };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -695,7 +696,7 @@ class OptimizationEngine {
         optimalMaxStock: Math.round(reorderPoint + eoq),
       };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 }

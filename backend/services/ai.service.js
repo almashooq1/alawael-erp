@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // Mock AI Service until real model integration
 class AIService {
   static async summarizeNotes(text) {

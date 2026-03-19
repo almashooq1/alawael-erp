@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Billing Integration Service
  * خدمة تكامل الفواتير
@@ -6,6 +7,7 @@
  */
 
 const mongoose = require('mongoose');
+const logger = require('../utils/logger');
 
 /**
  * Therapy Session Billing Service
@@ -23,19 +25,18 @@ class BillingService {
       const billingRate = await BillingRate.findOne({
         therapist: session.therapist,
         plan: session.plan,
-        active: true
+        active: true,
       });
 
       if (!billingRate) {
-        console.warn(`No billing rate found for therapist ${session.therapist} and plan ${session.plan}`);
+        logger.warn(
+          `No billing rate found for therapist ${session.therapist} and plan ${session.plan}`
+        );
         return null;
       }
 
       // Calculate billing amount based on session duration
-      const sessionMinutes = this.calculateSessionDuration(
-        session.startTime,
-        session.endTime
-      );
+      const sessionMinutes = this.calculateSessionDuration(session.startTime, session.endTime);
       const amount = (sessionMinutes / 60) * billingRate.hourlyRate;
 
       // Create invoice
@@ -55,9 +56,9 @@ class BillingService {
             description: `Therapy Session - ${this.formatTime(session.startTime)} to ${this.formatTime(session.endTime)}`,
             duration: sessionMinutes,
             rate: billingRate.hourlyRate,
-            amount: amount
-          }
-        ]
+            amount: amount,
+          },
+        ],
       });
 
       // Check if insurance needs to be billed
@@ -67,7 +68,7 @@ class BillingService {
 
       return invoice;
     } catch (error) {
-      console.error('Failed to create session invoice:', error);
+      logger.error('Failed to create session invoice:', error);
       throw error;
     }
   }
@@ -88,15 +89,15 @@ class BillingService {
         status: 'submitted',
         submittedDate: new Date(),
         serviceDate: session.date,
-        providerCode: session.plan.insuranceCode
+        providerCode: session.plan.insuranceCode,
       });
 
       // Emit event for claim submission
-      console.log(`Insurance claim created: ${claim._id}`);
+      // console.log(`Insurance claim created: ${claim._id}`);
 
       return claim;
     } catch (error) {
-      console.error('Failed to create insurance claim:', error);
+      logger.error('Failed to create insurance claim:', error);
       // Don't throw - insurance billing is optional
     }
   }
@@ -115,8 +116,8 @@ class BillingService {
         status: 'COMPLETED',
         completedAt: {
           $gte: new Date(startDate),
-          $lte: new Date(endDate)
-        }
+          $lte: new Date(endDate),
+        },
       });
 
       // Get invoices
@@ -124,8 +125,8 @@ class BillingService {
         therapist: therapistId,
         issuedDate: {
           $gte: new Date(startDate),
-          $lte: new Date(endDate)
-        }
+          $lte: new Date(endDate),
+        },
       });
 
       // Calculate totals
@@ -144,13 +145,13 @@ class BillingService {
           totalAmount,
           paidAmount,
           pendingAmount,
-          averageSessionAmount: totalSessions > 0 ? totalAmount / totalSessions : 0
+          averageSessionAmount: totalSessions > 0 ? totalAmount / totalSessions : 0,
         },
         invoices: this.groupInvoicesByStatus(invoices),
-        breakdown: this.breakdownByPlan(sessions, invoices)
+        breakdown: this.breakdownByPlan(sessions, invoices),
       };
     } catch (error) {
-      console.error('Failed to generate billing report:', error);
+      logger.error('Failed to generate billing report:', error);
       throw error;
     }
   }
@@ -167,15 +168,15 @@ class BillingService {
         status: 'COMPLETED',
         completedAt: {
           $gte: new Date(startDate),
-          $lte: new Date(endDate)
-        }
+          $lte: new Date(endDate),
+        },
       });
 
       const invoices = await Invoice.find({
         issuedDate: {
           $gte: new Date(startDate),
-          $lte: new Date(endDate)
-        }
+          $lte: new Date(endDate),
+        },
       });
 
       const totalAmount = invoices.reduce((sum, inv) => sum + inv.amount, 0);
@@ -190,14 +191,14 @@ class BillingService {
           totalAmount,
           paidAmount,
           pendingAmount: totalAmount - paidAmount,
-          collectionRate: totalAmount > 0 ? (paidAmount / totalAmount) * 100 : 0
+          collectionRate: totalAmount > 0 ? (paidAmount / totalAmount) * 100 : 0,
         },
         byTherapist: await this.aggregateByTherapist(invoices),
         byPlan: await this.aggregateByPlan(invoices),
-        byStatus: this.groupInvoicesByStatus(invoices)
+        byStatus: this.groupInvoicesByStatus(invoices),
       };
     } catch (error) {
-      console.error('Failed to generate clinic billing report:', error);
+      logger.error('Failed to generate clinic billing report:', error);
       throw error;
     }
   }
@@ -220,17 +221,17 @@ class BillingService {
         amount: amount || invoice.amount,
         paymentMethod,
         paidDate: new Date(),
-        status: 'completed'
+        status: 'completed',
       });
 
       // Update invoice status
       const newStatus = amount >= invoice.amount ? 'paid' : 'partially_paid';
       await Invoice.findByIdAndUpdate(invoiceId, { status: newStatus });
 
-      console.log(`Payment processed: ${payment._id}`);
+      // console.log(`Payment processed: ${payment._id}`);
       return payment;
     } catch (error) {
-      console.error('Failed to process payment:', error);
+      logger.error('Failed to process payment:', error);
       throw error;
     }
   }
@@ -248,7 +249,7 @@ class BillingService {
         .populate('therapist');
 
       if (!invoice.beneficiary.email) {
-        console.warn('No email for beneficiary');
+        logger.warn('No email for beneficiary');
         return;
       }
 
@@ -264,13 +265,13 @@ class BillingService {
           dueDate: invoice.dueDate,
           amount: invoice.amount,
           items: invoice.items,
-          therapist: invoice.therapist.name
-        }
+          therapist: invoice.therapist.name,
+        },
       });
 
-      console.log(`Invoice sent to ${invoice.beneficiary.email}`);
+      // console.log(`Invoice sent to ${invoice.beneficiary.email}`);
     } catch (error) {
-      console.error('Failed to send invoice:', error);
+      logger.error('Failed to send invoice:', error);
     }
   }
 
@@ -303,7 +304,7 @@ class BillingService {
       pending: invoices.filter(inv => inv.status === 'pending').length,
       paid: invoices.filter(inv => inv.status === 'paid').length,
       overdue: invoices.filter(inv => inv.status === 'overdue').length,
-      cancelled: invoices.filter(inv => inv.status === 'cancelled').length
+      cancelled: invoices.filter(inv => inv.status === 'cancelled').length,
     };
   }
 
@@ -318,7 +319,7 @@ class BillingService {
       if (!breakdown[planId]) {
         breakdown[planId] = {
           count: 0,
-          amount: 0
+          amount: 0,
         };
       }
       breakdown[planId].count++;
@@ -345,7 +346,7 @@ class BillingService {
       if (!byTherapist[therapistId]) {
         byTherapist[therapistId] = {
           total: 0,
-          count: 0
+          count: 0,
         };
       }
       byTherapist[therapistId].total += invoice.amount;
@@ -366,7 +367,7 @@ class BillingService {
       if (!byPlan[planId]) {
         byPlan[planId] = {
           total: 0,
-          count: 0
+          count: 0,
         };
       }
       byPlan[planId].total += invoice.amount;

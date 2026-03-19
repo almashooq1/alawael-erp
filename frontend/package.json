@@ -1,31 +1,62 @@
 {
   "name": "rehabilitation-frontend",
   "version": "1.0.0",
-  "description": "واجهة مستخدم نظام إدارة مراكز التأهيل",
+  "description": "واجهة مستخدم نظام مراكز الأوائل للرعاية النهارية",
   "private": true,
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "lint": "eslint src/ --ext .js,.jsx",
+    "lint:fix": "eslint src/ --ext .js,.jsx --fix",
+    "format": "prettier --write \"src/**/*.{js,jsx,json,css}\"",
+    "format:check": "prettier --check \"src/**/*.{js,jsx,json,css}\"",
+    "quality:guard": "react-scripts test --passWithNoTests",
+    "quality:fast": "npm run quality:guard -- --coverage --passWithNoTests",
+    "quality:ci": "npm run quality:guard -- --coverage --passWithNoTests --watchAll=false",
+    "quality": "npm run quality:ci"
   },
   "dependencies": {
+    "@emotion/cache": "^11.11.0",
     "@emotion/react": "^11.11.0",
     "@emotion/styled": "^11.11.0",
     "@fontsource/cairo": "^5.0.0",
-    "@fontsource/tajawal": "^5.0.0",
     "@mui/icons-material": "^5.15.0",
     "@mui/material": "^5.15.0",
+    "axios": "^1.13.6",
     "chart.js": "^4.4.0",
+    "date-fns": "^4.1.0",
+    "dompurify": "^3.3.2",
+    "formik": "^2.4.9",
+    "framer-motion": "^12.35.0",
+    "html2canvas": "^1.4.1",
+    "i18next": "^23.11.0",
+    "jspdf": "^4.2.0",
+    "notistack": "^3.0.2",
+    "qrcode.react": "^4.2.0",
     "react": "^18.2.0",
     "react-chartjs-2": "^5.2.0",
     "react-dom": "^18.2.0",
+    "react-i18next": "^14.1.0",
     "react-router-dom": "^6.20.0",
-    "react-scripts": "5.0.1"
+    "react-scripts": "5.0.1",
+    "recharts": "^3.7.0",
+    "socket.io-client": "^4.8.3",
+    "stylis": "^4.3.6",
+    "stylis-plugin-rtl": "^2.1.1",
+    "web-vitals": "^5.1.0",
+    "xlsx": "^0.18.5",
+    "yup": "^1.7.1"
   },
   "devDependencies": {
-    "@types/react": "^18.2.0",
-    "@types/react-dom": "^18.2.0"
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "axe-core": "^4.11.1",
+    "cypress": "^15.12.0",
+    "cypress-axe": "^1.7.0",
+    "eslint-plugin-unused-imports": "^4.4.1"
   },
   "browserslist": {
     "production": [
@@ -38,5 +69,18 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "jest": {
+    "transformIgnorePatterns": [
+      "node_modules/(?!(axios|socket\\.io-client|engine\\.io-client|socket\\.io-parser|lucide-react|recharts)/)"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 60,
+        "functions": 65,
+        "lines": 70,
+        "statements": 70
+      }
+    }
   }
 }

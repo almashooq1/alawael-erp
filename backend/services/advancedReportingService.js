@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Advanced Reporting Service
  * خدمة التقارير المتقدمة
@@ -254,7 +255,8 @@ class AdvancedReportingService {
           totalExpense: data.reduce((sum, d) => sum + (d.expense || 0), 0),
           balance: 0,
         };
-        summary.keyMetrics.balance = summary.keyMetrics.totalIncome - summary.keyMetrics.totalExpense;
+        summary.keyMetrics.balance =
+          summary.keyMetrics.totalIncome - summary.keyMetrics.totalExpense;
         break;
 
       case 'hr-analytics':
@@ -349,11 +351,14 @@ class AdvancedReportingService {
     const sorted = [...data].sort((a, b) => (a.value || 0) - (b.value || 0));
     stats.median =
       sorted.length % 2 === 0
-        ? (Number(sorted[sorted.length / 2 - 1].value) + Number(sorted[sorted.length / 2].value)) / 2
+        ? (Number(sorted[sorted.length / 2 - 1].value) + Number(sorted[sorted.length / 2].value)) /
+          2
         : Number(sorted[Math.floor(sorted.length / 2)].value);
 
     // حساب الانحراف المعياري
-    const variance = data.reduce((sum, d) => sum + Math.pow((Number(d.value) || 0) - stats.average, 2), 0) / data.length;
+    const variance =
+      data.reduce((sum, d) => sum + Math.pow((Number(d.value) || 0) - stats.average, 2), 0) /
+      data.length;
     stats.standardDeviation = Math.sqrt(variance);
 
     // حساب الحد الأدنى والأقصى
@@ -569,7 +574,7 @@ class AdvancedReportingService {
             <h3>${section.title}</h3>
             <pre>${JSON.stringify(section.content, null, 2)}</pre>
           </div>
-        `,
+        `
           )
           .join('')}
       </body>
@@ -601,7 +606,7 @@ class AdvancedReportingService {
    * تصدير إلى CSV
    */
   exportToCSV(report, filename, options = {}) {
-    let rows = [];
+    const rows = [];
 
     // Include metadata if requested
     if (options.includeMetadata) {

@@ -1,14 +1,45 @@
+/* eslint-disable no-undef, no-unused-vars */
 const HRServiceClass = require('../services/hrPhase6Service');
 const Employee = require('../models/employee.model');
 const Payroll = require('../models/payroll.model');
 const Attendance = require('../models/attendance.model');
 
 // Mock Mongoose Models
-jest.mock('../models/employee.model');
-jest.mock('../models/payroll.model');
-jest.mock('../models/attendance.model');
-jest.mock('../models/leave.model');
-jest.mock('../models/performance.model');
+jest.mock('../models/employee.model', () => {
+  const mock = jest.fn();
+  mock.find = jest.fn();
+  mock.findOne = jest.fn();
+  mock.findById = jest.fn();
+  return mock;
+});
+jest.mock('../models/payroll.model', () => {
+  const mock = jest.fn();
+  mock.find = jest.fn();
+  mock.findOne = jest.fn();
+  mock.findById = jest.fn();
+  return mock;
+});
+jest.mock('../models/attendance.model', () => {
+  const mock = jest.fn();
+  mock.find = jest.fn();
+  mock.findOne = jest.fn();
+  mock.findById = jest.fn();
+  return mock;
+});
+jest.mock('../models/leave.model', () => {
+  const mock = jest.fn();
+  mock.find = jest.fn();
+  mock.findOne = jest.fn();
+  mock.findById = jest.fn();
+  return mock;
+});
+jest.mock('../models/performance.model', () => {
+  const mock = jest.fn();
+  mock.find = jest.fn();
+  mock.findOne = jest.fn();
+  mock.findById = jest.fn();
+  return mock;
+});
 
 // Create instance
 const hrService = new HRServiceClass();
@@ -54,7 +85,7 @@ describe('HR Phase 6 Service', () => {
       // Mock findOne to return existing record
       Attendance.findOne.mockResolvedValue(mockRecord);
 
-      const result = await hrService.checkOut(mockEmployeeId);
+      const _result = await hrService.checkOut(mockEmployeeId);
 
       expect(Attendance.findOne).toHaveBeenCalled();
       expect(mockRecord.save).toHaveBeenCalled();

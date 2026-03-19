@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars, no-undef, no-empty, prefer-const, no-constant-condition, no-unused-expressions */
 /**
  * 🔒 Data Encryption & Protection System
  *
@@ -9,6 +10,7 @@
  */
 
 const crypto = require('crypto');
+const logger = require('../utils/logger');
 
 class EncryptionManager {
   constructor(options = {}) {
@@ -160,7 +162,7 @@ class EncryptionManager {
           try {
             decrypted[field] = this.decrypt(decrypted[field]);
           } catch (error) {
-            console.error(`Failed to decrypt field ${field}:`, error.message);
+            logger.error(`Failed to decrypt field ${field}:`, error.message);
           }
         }
       }
@@ -175,7 +177,7 @@ class EncryptionManager {
   secureDelete(data) {
     if (typeof data === 'string') {
       // Overwrite multiple times
-      let buffer = Buffer.alloc(data.length);
+      const buffer = Buffer.alloc(data.length);
       for (let i = 0; i < 3; i++) {
         crypto.randomFillSync(buffer);
       }

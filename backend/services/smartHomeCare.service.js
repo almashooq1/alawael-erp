@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const HomeAssignment = require('../models/HomeAssignment');
 const SmartNotificationService = require('./smartNotificationService');
 
@@ -69,7 +70,7 @@ class SmartHomeCareService {
           'Home Care Alert: Family Inactive',
           `Family of ${assign.beneficiary.firstName} hasn't logged home exercises in ${diffDays} days. Please follow up.`,
           'WARNING',
-          `/rehab/home-care/${assign._id}`,
+          `/rehab/home-care/${assign._id}`
         );
 
         atRisk.push({

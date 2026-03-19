@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * Payment Model Unit Tests - Phase 4
  * Comprehensive testing of payment processing, transactions, and financial operations
@@ -20,7 +22,7 @@ const createTestPayment = (overrides = {}) => ({
   paymentMethod: 'bank-transfer',
   reference: 'REF-2024-001',
   description: 'Monthly Salary',
-  ...overrides
+  ...overrides,
 });
 
 describe('Payment Model - Unit Tests', () => {
@@ -113,7 +115,7 @@ describe('Payment Model - Unit Tests', () => {
       const statusHistory = [
         { status: 'pending', timestamp: new Date('2024-01-01') },
         { status: 'processing', timestamp: new Date('2024-01-02') },
-        { status: 'completed', timestamp: new Date('2024-01-03') }
+        { status: 'completed', timestamp: new Date('2024-01-03') },
       ];
 
       expect(statusHistory).toHaveLength(3);
@@ -122,10 +124,10 @@ describe('Payment Model - Unit Tests', () => {
 
     it('should validate status transitions', () => {
       const validTransitions = {
-        'pending': ['processing', 'cancelled'],
-        'processing': ['completed', 'failed'],
-        'failed': ['pending'],
-        'cancelled': []
+        pending: ['processing', 'cancelled'],
+        processing: ['completed', 'failed'],
+        failed: ['pending'],
+        cancelled: [],
       };
 
       const currentStatus = 'pending';
@@ -137,7 +139,7 @@ describe('Payment Model - Unit Tests', () => {
         fromStatus: 'pending',
         toStatus: 'completed',
         timestamp: new Date(),
-        changedBy: 'system'
+        changedBy: 'system',
       };
 
       expect(statusChange.timestamp instanceof Date).toBe(true);
@@ -146,7 +148,7 @@ describe('Payment Model - Unit Tests', () => {
     it('should allow status updates with reason', () => {
       const statusUpdate = {
         newStatus: 'failed',
-        reason: 'Insufficient funds in account'
+        reason: 'Insufficient funds in account',
       };
 
       expect(statusUpdate.reason).toBeTruthy();
@@ -188,7 +190,7 @@ describe('Payment Model - Unit Tests', () => {
       const bankDetails = {
         bankName: 'Saudi National Bank',
         accountNumber: '1234567890',
-        IBAN: 'SA1234567890'
+        IBAN: 'SA1234567890',
       };
 
       expect(bankDetails.bankName).toBeTruthy();
@@ -201,7 +203,7 @@ describe('Payment Model - Unit Tests', () => {
         paymentId: payment.paymentId,
         reconciledDate: new Date(),
         reconciledAmount: payment.amount,
-        status: 'reconciled'
+        status: 'reconciled',
       };
 
       expect(reconciled.reconciledAmount).toBe(payment.amount);
@@ -235,7 +237,7 @@ describe('Payment Model - Unit Tests', () => {
     });
 
     it('should handle decimal precision in calculations', () => {
-      const amount = 1000.50;
+      const amount = 1000.5;
       const tax = amount * 0.15;
       const total = amount + tax;
 
@@ -269,7 +271,7 @@ describe('Payment Model - Unit Tests', () => {
       const payments = [
         { amount: 1000, date: new Date('2024-01-01') },
         { amount: 2000, date: new Date('2024-01-15') },
-        { amount: 2000, date: new Date('2024-02-01') }
+        { amount: 2000, date: new Date('2024-02-01') },
       ];
 
       const totalPaid = payments.reduce((sum, p) => sum + p.amount, 0);
@@ -307,7 +309,7 @@ describe('Payment Model - Unit Tests', () => {
         receiptNumber: 'REC-2024-001',
         amount: 5000,
         date: new Date(),
-        recipient: 'Ahmed Mohammed'
+        recipient: 'Ahmed Mohammed',
       };
 
       expect(receipt.receiptNumber).toBeTruthy();
@@ -318,7 +320,7 @@ describe('Payment Model - Unit Tests', () => {
       const authorization = {
         authorizedBy: 'Manager Name',
         authorizedDate: new Date(),
-        approvalCode: 'APR-2024-001'
+        approvalCode: 'APR-2024-001',
       };
 
       expect(authorization.authorizedBy).toBeTruthy();
@@ -328,7 +330,7 @@ describe('Payment Model - Unit Tests', () => {
     it('should track attachment documents', () => {
       const attachments = [
         { type: 'invoice', filename: 'invoice-2024-001.pdf' },
-        { type: 'receipt', filename: 'receipt-2024-001.pdf' }
+        { type: 'receipt', filename: 'receipt-2024-001.pdf' },
       ];
 
       expect(attachments).toHaveLength(2);
@@ -338,7 +340,7 @@ describe('Payment Model - Unit Tests', () => {
       const auditLog = [
         { action: 'created', timestamp: new Date(), user: 'system' },
         { action: 'approved', timestamp: new Date(), user: 'manager' },
-        { action: 'processed', timestamp: new Date(), user: 'finance' }
+        { action: 'processed', timestamp: new Date(), user: 'finance' },
       ];
 
       expect(auditLog).toHaveLength(3);
@@ -351,7 +353,7 @@ describe('Payment Model - Unit Tests', () => {
       const payments = [
         createTestPayment({ amount: 5000, status: 'completed' }),
         createTestPayment({ amount: 3000, status: 'completed' }),
-        createTestPayment({ amount: 2000, status: 'pending' })
+        createTestPayment({ amount: 2000, status: 'pending' }),
       ];
 
       const totalCompleted = payments
@@ -365,7 +367,7 @@ describe('Payment Model - Unit Tests', () => {
       const payments = [
         { amount: 1000, date: new Date('2024-01-15') },
         { amount: 2000, date: new Date('2024-01-20') },
-        { amount: 1500, date: new Date('2024-02-10') }
+        { amount: 1500, date: new Date('2024-02-10') },
       ];
 
       const byMonth = {};
@@ -379,11 +381,7 @@ describe('Payment Model - Unit Tests', () => {
     });
 
     it('should calculate payment statistics', () => {
-      const payments = [
-        { amount: 5000 },
-        { amount: 3000 },
-        { amount: 4000 }
-      ];
+      const payments = [{ amount: 5000 }, { amount: 3000 }, { amount: 4000 }];
 
       const totalAmount = payments.reduce((sum, p) => sum + p.amount, 0);
       const averageAmount = totalAmount / payments.length;
@@ -415,10 +413,10 @@ describe('Payment Model - Unit Tests', () => {
 
     it('should handle payment reversal', () => {
       const original = createTestPayment({ amount: 5000, status: 'completed' });
-      const reversal = createTestPayment({ 
-        amount: -5000, 
+      const reversal = createTestPayment({
+        amount: -5000,
         paymentType: 'reversal',
-        reference: 'REVERSAL-' + original.paymentId 
+        reference: 'REVERSAL-' + original.paymentId,
       });
 
       expect(reversal.amount).toBe(-5000);
@@ -455,7 +453,7 @@ describe('Payment Model - Unit Tests', () => {
       const expenses = [
         { description: 'Flight', amount: 500 },
         { description: 'Hotel', amount: 300 },
-        { description: 'Meals', amount: 150 }
+        { description: 'Meals', amount: 150 },
       ];
 
       const totalReimbursement = expenses.reduce((sum, e) => sum + e.amount, 0);
@@ -477,7 +475,7 @@ describe('Payment Model - Unit Tests', () => {
         numberOfPayments: 50,
         averagePayment: 5000,
         paymentsMade: 45,
-        paymentsPending: 5
+        paymentsPending: 5,
       };
 
       expect(report.numberOfPayments).toBe(50);

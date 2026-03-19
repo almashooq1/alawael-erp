@@ -1,46 +1,38 @@
-import api from '../utils/api';
+import api from './api.client';
 
 const projectManagementService = {
   // Projects
   getProjects: async () => {
-    const response = await api.get('/pm/projects');
-    return response.data;
+    return api.get('/pm/projects');
   },
 
   createProject: async data => {
-    const response = await api.post('/pm/projects', data);
-    return response.data;
+    return api.post('/pm/projects', data);
   },
 
   getProjectById: async id => {
-    const response = await api.get(`/pm/projects/${id}`);
-    return response.data;
+    return api.get(`/pm/projects/${id}`);
   },
 
   updateProject: async (id, data) => {
-    const response = await api.put(`/pm/projects/${id}`, data);
-    return response.data;
+    return api.put(`/pm/projects/${id}`, data);
   },
 
   // Tasks
   getTasks: async projectId => {
-    const response = await api.get(`/pm/projects/${projectId}/tasks`);
-    return response.data;
+    return api.get(`/pm/projects/${projectId}/tasks`);
   },
 
   createTask: async data => {
-    const response = await api.post('/pm/tasks', data);
-    return response.data;
+    return api.post('/pm/tasks', data);
   },
 
   updateTask: async (id, data) => {
-    const response = await api.patch(`/pm/tasks/${id}`, data);
-    return response.data;
+    return api.patch(`/pm/tasks/${id}`, data);
   },
 
   deleteTask: async id => {
-    const response = await api.delete(`/pm/tasks/${id}`);
-    return response.data;
+    return api.delete(`/pm/tasks/${id}`);
   },
 };
 

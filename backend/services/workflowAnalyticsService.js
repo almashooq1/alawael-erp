@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Workflow Analytics Service
  * خدمة تحليلات متقدمة لسير العمل
@@ -107,9 +108,11 @@ class WorkflowAnalyticsService {
     const breachedWorkflows = workflows.filter(w => w.sla && w.sla.breached);
 
     const metrics = {
-      completionRate: workflows.length > 0 ? (completedWorkflows.length / workflows.length) * 100 : 0,
+      completionRate:
+        workflows.length > 0 ? (completedWorkflows.length / workflows.length) * 100 : 0,
       rejectionRate: workflows.length > 0 ? (rejectedWorkflows.length / workflows.length) * 100 : 0,
-      slaComplianceRate: workflows.length > 0 ? 100 - (breachedWorkflows.length / workflows.length) * 100 : 100,
+      slaComplianceRate:
+        workflows.length > 0 ? 100 - (breachedWorkflows.length / workflows.length) * 100 : 100,
       averageCompletionTime: 0,
       averageApprovedTime: 0,
       throughput: 0,
@@ -171,7 +174,8 @@ class WorkflowAnalyticsService {
       trends.byStatus[w.status] = (trends.byStatus[w.status] || 0) + 1;
 
       // بالأولوية
-      trends.byPriority[w.priority || 'unknown'] = (trends.byPriority[w.priority || 'unknown'] || 0) + 1;
+      trends.byPriority[w.priority || 'unknown'] =
+        (trends.byPriority[w.priority || 'unknown'] || 0) + 1;
     });
 
     return trends;
@@ -256,7 +260,11 @@ class WorkflowAnalyticsService {
       recommendations.push({
         priority: 'high',
         title: 'تسريع عملية الموافقة',
-        actions: ['تقليل عدد المراحل غير الضرورية', 'تفويض الصلاحيات لتسريع الموافقة', 'تحديد مهل زمنية محددة لكل مرحلة'],
+        actions: [
+          'تقليل عدد المراحل غير الضرورية',
+          'تفويض الصلاحيات لتسريع الموافقة',
+          'تحديد مهل زمنية محددة لكل مرحلة',
+        ],
         expectedImpact: 'زيادة معدل الإنجاز بنسبة 20-30%',
       });
     }
@@ -266,7 +274,11 @@ class WorkflowAnalyticsService {
       recommendations.push({
         priority: 'high',
         title: 'تحسين جودة الطلبات',
-        actions: ['توفير قوالب موحدة للطلبات', 'تدريب المستخدمين على المتطلبات', 'إضافة التحقق المسبق من البيانات'],
+        actions: [
+          'توفير قوالب موحدة للطلبات',
+          'تدريب المستخدمين على المتطلبات',
+          'إضافة التحقق المسبق من البيانات',
+        ],
         expectedImpact: 'تقليل معدل الرفض بنسبة 50%',
       });
     }
@@ -276,7 +288,11 @@ class WorkflowAnalyticsService {
       recommendations.push({
         priority: 'critical',
         title: 'تحسين امتثال SLA',
-        actions: ['مراجعة مهل SLA الحالية', 'إضافة تنبيهات تلقائية قبل الانتهاء', 'تحديد نقاط الاختناق وحلها'],
+        actions: [
+          'مراجعة مهل SLA الحالية',
+          'إضافة تنبيهات تلقائية قبل الانتهاء',
+          'تحديد نقاط الاختناق وحلها',
+        ],
         expectedImpact: 'زيادة امتثال SLA إلى 95%',
       });
     }
@@ -287,7 +303,11 @@ class WorkflowAnalyticsService {
       recommendations.push({
         priority: 'medium',
         title: 'إعادة تقييم معايير الأولوية',
-        actions: ['مراجعة معايير تصنيف الأولوية', 'تقليل عدد الطلبات ذات الأولوية العالية', 'تحديد معايير واضحة للأولوية'],
+        actions: [
+          'مراجعة معايير تصنيف الأولوية',
+          'تقليل عدد الطلبات ذات الأولوية العالية',
+          'تحديد معايير واضحة للأولوية',
+        ],
         expectedImpact: 'توازن أفضل في توزيع الموارد',
       });
     }
@@ -358,7 +378,8 @@ class WorkflowAnalyticsService {
       const rejectedRecent = recentWorkflows.filter(w => w.status === 'rejected').length;
       const breachedRecent = recentWorkflows.filter(w => w.sla && w.sla.breached).length;
 
-      forecast.expectedCompletionRate = ((recentWorkflows.length - rejectedRecent) / recentWorkflows.length) * 100;
+      forecast.expectedCompletionRate =
+        ((recentWorkflows.length - rejectedRecent) / recentWorkflows.length) * 100;
       forecast.estimatedRejectionRate = (rejectedRecent / recentWorkflows.length) * 100;
       forecast.projectedSLACompliance = 100 - (breachedRecent / recentWorkflows.length) * 100;
       forecast.confidence = recentWorkflows.length >= 10 ? 'high' : 'medium';

@@ -11,7 +11,7 @@
         margin-bottom: 2rem;
         border-radius: 15px;
     }
-    
+
     .stats-card {
         background: white;
         border-radius: 15px;
@@ -20,27 +20,31 @@
         transition: transform 0.3s ease;
         border-right: 4px solid;
     }
-    
+
     .stats-card:hover {
         transform: translateY(-5px);
     }
-    
+
     .stats-card.beneficiaries { border-right-color: #28a745; }
     .stats-card.programs { border-right-color: #007bff; }
     .stats-card.plans { border-right-color: #ffc107; }
     .stats-card.assessments { border-right-color: #dc3545; }
-    
+    .stats-card.waiting { border-right-color: #6f42c1; }
+    .stats-card.risk { border-right-color: #e83e8c; }
+    .stats-card.medications { border-right-color: #20c997; }
+    .stats-card.qol { border-right-color: #17a2b8; }
+
     .stats-number {
         font-size: 2.5rem;
         font-weight: bold;
         margin-bottom: 0.5rem;
     }
-    
+
     .stats-label {
         color: #6c757d;
         font-size: 0.9rem;
     }
-    
+
     .action-card {
         background: white;
         border-radius: 15px;
@@ -51,18 +55,18 @@
         cursor: pointer;
         border: 2px solid transparent;
     }
-    
+
     .action-card:hover {
         transform: translateY(-3px);
         border-color: #667eea;
     }
-    
+
     .action-icon {
         font-size: 3rem;
         margin-bottom: 1rem;
         color: #667eea;
     }
-    
+
     .section-title {
         color: #495057;
         font-weight: 600;
@@ -70,7 +74,7 @@
         border-bottom: 2px solid #e9ecef;
         padding-bottom: 0.5rem;
     }
-    
+
     .quick-access-btn {
         background: linear-gradient(45deg, #667eea, #764ba2);
         border: none;
@@ -80,12 +84,12 @@
         font-weight: 500;
         transition: all 0.3s ease;
     }
-    
+
     .quick-access-btn:hover {
         transform: scale(1.05);
         box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
     }
-    
+
     .disability-type-badge {
         display: inline-block;
         padding: 0.5rem 1rem;
@@ -95,26 +99,185 @@
         border-radius: 20px;
         font-size: 0.85rem;
     }
-    
+
     .recent-activity {
         background: white;
         border-radius: 15px;
         padding: 1.5rem;
         box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     }
-    
+
     .activity-item {
         padding: 0.75rem 0;
         border-bottom: 1px solid #e9ecef;
     }
-    
+
     .activity-item:last-child {
         border-bottom: none;
     }
-    
+
     .activity-time {
         color: #6c757d;
         font-size: 0.8rem;
+    }
+
+    .risk-badge {
+        display: inline-block;
+        padding: 0.35rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+    .risk-badge.low { background: #d4edda; color: #155724; }
+    .risk-badge.medium { background: #fff3cd; color: #856404; }
+    .risk-badge.high { background: #f8d7da; color: #721c24; }
+    .risk-badge.critical { background: #721c24; color: #fff; }
+
+    .medication-item {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        border-right: 3px solid #20c997;
+    }
+
+    .vital-card {
+        background: white;
+        border-radius: 10px;
+        padding: 1rem;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .vital-card .vital-value {
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: #495057;
+    }
+    .vital-card .vital-label {
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+
+    .team-message {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        border-right: 3px solid #667eea;
+    }
+    .team-message.urgent { border-right-color: #dc3545; }
+    .team-message.normal { border-right-color: #28a745; }
+
+    .waiting-list-status {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+    }
+    .waiting-list-status.pending { background: #fff3cd; color: #856404; }
+    .waiting-list-status.approved { background: #d4edda; color: #155724; }
+    .waiting-list-status.admitted { background: #cce5ff; color: #004085; }
+
+    .qol-score-bar {
+        height: 8px;
+        border-radius: 4px;
+        background: #e9ecef;
+        overflow: hidden;
+    }
+    .qol-score-bar .bar-fill {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 0.5s ease;
+    }
+
+    /* Phase 3 Styles */
+    .stats-card.appointments { border-right-color: #fd7e14; }
+    .stats-card.incidents { border-right-color: #dc3545; }
+    .stats-card.documents { border-right-color: #6610f2; }
+    .stats-card.alerts { border-right-color: #ffc107; }
+
+    .incident-card {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+    }
+    .incident-card.minor { border-right: 3px solid #28a745; }
+    .incident-card.moderate { border-right: 3px solid #ffc107; }
+    .incident-card.major { border-right: 3px solid #fd7e14; }
+    .incident-card.critical { border-right: 3px solid #dc3545; }
+
+    .appointment-card {
+        background: white;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        border-right: 3px solid #fd7e14;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .appointment-card.completed { border-right-color: #28a745; opacity: 0.7; }
+    .appointment-card.cancelled { border-right-color: #dc3545; opacity: 0.6; }
+
+    .document-card {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        border-right: 3px solid #6610f2;
+        transition: all 0.2s;
+    }
+    .document-card:hover { background: #e9ecef; }
+
+    .alert-card {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+    }
+    .alert-card.urgent { border-right: 3px solid #dc3545; background: #fff5f5; }
+    .alert-card.high { border-right: 3px solid #fd7e14; background: #fff8f0; }
+    .alert-card.medium { border-right: 3px solid #ffc107; }
+    .alert-card.low { border-right: 3px solid #28a745; }
+
+    .bip-card {
+        background: white;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        border-right: 3px solid #17a2b8;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .group-activity-card {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        border-right: 3px solid #28a745;
+    }
+
+    .analytics-chart-container {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        margin-bottom: 1.5rem;
+    }
+
+    .search-box {
+        position: relative;
+    }
+    .search-box .form-control {
+        padding-right: 2.5rem;
+        border-radius: 20px;
+        border: 1px solid #dee2e6;
+    }
+    .search-box .search-icon {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
     }
 </style>
 {% endblock %}
@@ -151,6 +314,90 @@
             <div class="stats-card assessments">
                 <div class="stats-number text-danger" id="assessmentsCount">0</div>
                 <div class="stats-label">التقييمات المنجزة</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Extended Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="stats-card waiting">
+                <div class="stats-number" style="color: #6f42c1;" id="waitingListCount">0</div>
+                <div class="stats-label">قائمة الانتظار</div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stats-card risk">
+                <div class="stats-number" style="color: #e83e8c;" id="highRiskCount">0</div>
+                <div class="stats-label">حالات عالية المخاطر</div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stats-card medications">
+                <div class="stats-number" style="color: #20c997;" id="activeMedications">0</div>
+                <div class="stats-label">الأدوية النشطة</div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stats-card qol">
+                <div class="stats-number" style="color: #17a2b8;" id="avgQolScore">0</div>
+                <div class="stats-label">متوسط جودة الحياة</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Phase 3 Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="stats-card appointments">
+                <div class="stats-number" style="color: #fd7e14;" id="appointmentsCount">0</div>
+                <div class="stats-label">المواعيد القادمة</div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stats-card incidents">
+                <div class="stats-number text-danger" id="incidentsCount">0</div>
+                <div class="stats-label">الحوادث المسجلة</div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stats-card alerts">
+                <div class="stats-number" style="color: #ffc107;" id="activeAlertsCount">0</div>
+                <div class="stats-label">التنبيهات النشطة</div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stats-card documents">
+                <div class="stats-number" style="color: #6610f2;" id="documentsCount">0</div>
+                <div class="stats-label">المستندات</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Phase 4 Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="stats-card telehealth">
+                <div class="stats-number" style="color: #0dcaf0;" id="telehealthSessionsCount">0</div>
+                <div class="stats-label">جلسات عن بعد</div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stats-card financial">
+                <div class="stats-number" style="color: #198754;" id="totalFinancialBalance">0</div>
+                <div class="stats-label">الرصيد المالي (ر.س)</div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stats-card notes">
+                <div class="stats-number" style="color: #6f42c1;" id="notesCount">0</div>
+                <div class="stats-label">الملاحظات</div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="stats-card referrals">
+                <div class="stats-number" style="color: #d63384;" id="referralsCount">0</div>
+                <div class="stats-label">الإحالات النشطة</div>
             </div>
         </div>
     </div>
@@ -198,6 +445,86 @@
         </div>
     </div>
 
+    <!-- Extended Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="action-card" onclick="openRiskAssessmentModal()">
+                <div class="action-icon">
+                    <i class="fas fa-shield-alt" style="color: #e83e8c;"></i>
+                </div>
+                <h5>تقييم المخاطر</h5>
+                <p class="text-muted">تقييم مخاطر المستفيد</p>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="action-card" onclick="openMedicationModal()">
+                <div class="action-icon">
+                    <i class="fas fa-pills" style="color: #20c997;"></i>
+                </div>
+                <h5>إضافة دواء</h5>
+                <p class="text-muted">تسجيل أدوية المستفيد</p>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="action-card" onclick="openVitalsModal()">
+                <div class="action-icon">
+                    <i class="fas fa-heartbeat" style="color: #dc3545;"></i>
+                </div>
+                <h5>تسجيل العلامات الحيوية</h5>
+                <p class="text-muted">قياسات العلامات الحيوية</p>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="action-card" onclick="openTeamMessageModal()">
+                <div class="action-icon">
+                    <i class="fas fa-comments" style="color: #6f42c1;"></i>
+                </div>
+                <h5>رسالة للفريق</h5>
+                <p class="text-muted">تواصل مع فريق التأهيل</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Phase 3 Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="action-card" onclick="openAppointmentModal()">
+                <div class="action-icon">
+                    <i class="fas fa-calendar-check" style="color: #fd7e14;"></i>
+                </div>
+                <h5>إضافة موعد</h5>
+                <p class="text-muted">جدولة موعد جديد</p>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="action-card" onclick="openIncidentModal()">
+                <div class="action-icon">
+                    <i class="fas fa-exclamation-triangle" style="color: #dc3545;"></i>
+                </div>
+                <h5>تسجيل حادثة</h5>
+                <p class="text-muted">الإبلاغ عن حادثة جديدة</p>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="action-card" onclick="openBehavioralPlanModal()">
+                <div class="action-icon">
+                    <i class="fas fa-brain" style="color: #17a2b8;"></i>
+                </div>
+                <h5>خطة سلوكية</h5>
+                <p class="text-muted">إنشاء خطة تدخل سلوكي</p>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="action-card" onclick="openDocumentModal()">
+                <div class="action-icon">
+                    <i class="fas fa-file-upload" style="color: #6610f2;"></i>
+                </div>
+                <h5>رفع مستند</h5>
+                <p class="text-muted">إضافة مستند جديد</p>
+            </div>
+        </div>
+    </div>
+
     <!-- Main Content Tabs -->
     <div class="row">
         <div class="col-12">
@@ -227,8 +554,94 @@
                         <i class="fas fa-chart-bar me-2"></i>سجلات التقدم
                     </button>
                 </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="riskAssessment-tab" data-bs-toggle="tab" data-bs-target="#riskAssessment" type="button" role="tab">
+                        <i class="fas fa-shield-alt me-2"></i>تقييم المخاطر
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="medications-tab" data-bs-toggle="tab" data-bs-target="#medications" type="button" role="tab">
+                        <i class="fas fa-pills me-2"></i>الأدوية
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="vitals-tab" data-bs-toggle="tab" data-bs-target="#vitals" type="button" role="tab">
+                        <i class="fas fa-heartbeat me-2"></i>العلامات الحيوية
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="teamComm-tab" data-bs-toggle="tab" data-bs-target="#teamComm" type="button" role="tab">
+                        <i class="fas fa-comments me-2"></i>تواصل الفريق
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="waitingList-tab" data-bs-toggle="tab" data-bs-target="#waitingList" type="button" role="tab">
+                        <i class="fas fa-clock me-2"></i>قائمة الانتظار
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="appointments-tab" data-bs-toggle="tab" data-bs-target="#appointments" type="button" role="tab">
+                        <i class="fas fa-calendar-check me-2"></i>المواعيد
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="incidents-tab" data-bs-toggle="tab" data-bs-target="#incidents" type="button" role="tab">
+                        <i class="fas fa-exclamation-triangle me-2"></i>الحوادث
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="behavioralPlans-tab" data-bs-toggle="tab" data-bs-target="#behavioralPlans" type="button" role="tab">
+                        <i class="fas fa-brain me-2"></i>الخطط السلوكية
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="documents-tab" data-bs-toggle="tab" data-bs-target="#documents" type="button" role="tab">
+                        <i class="fas fa-folder-open me-2"></i>المستندات
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="groupActivities-tab" data-bs-toggle="tab" data-bs-target="#groupActivities" type="button" role="tab">
+                        <i class="fas fa-users-cog me-2"></i>الأنشطة الجماعية
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="analytics-tab" data-bs-toggle="tab" data-bs-target="#analytics" type="button" role="tab">
+                        <i class="fas fa-chart-pie me-2"></i>التحليلات
+                    </button>
+                </li>
+                <!-- ═══════ Phase 4 Tabs ═══════ -->
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="telehealth-tab" data-bs-toggle="tab" data-bs-target="#telehealth" type="button" role="tab">
+                        <i class="fas fa-video me-2"></i>الرعاية عن بعد
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="financial-tab" data-bs-toggle="tab" data-bs-target="#financial" type="button" role="tab">
+                        <i class="fas fa-money-bill-wave me-2"></i>المالية والتأمين
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="notes-tab" data-bs-toggle="tab" data-bs-target="#notes" type="button" role="tab">
+                        <i class="fas fa-sticky-note me-2"></i>الملاحظات
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="referrals-tab" data-bs-toggle="tab" data-bs-target="#referrals" type="button" role="tab">
+                        <i class="fas fa-share-square me-2"></i>الإحالات
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="transportation-tab" data-bs-toggle="tab" data-bs-target="#transportation" type="button" role="tab">
+                        <i class="fas fa-bus me-2"></i>النقل والمواصلات
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="alerts-tab" data-bs-toggle="tab" data-bs-target="#alerts" type="button" role="tab">
+                        <i class="fas fa-bell me-2"></i>الإنذارات
+                    </button>
+                </li>
             </ul>
-            
+
             <div class="tab-content mt-3" id="rehabilitationTabsContent">
                 <!-- Beneficiaries Tab -->
                 <div class="tab-pane fade show active" id="beneficiaries" role="tabpanel">
@@ -360,6 +773,890 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Risk Assessment Tab -->
+                <div class="tab-pane fade" id="riskAssessment" role="tabpanel">
+                    <div class="recent-activity">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5><i class="fas fa-shield-alt me-2 text-danger"></i>تقييمات المخاطر</h5>
+                            <button class="btn quick-access-btn" onclick="openRiskAssessmentModal()">
+                                <i class="fas fa-plus me-2"></i>تقييم جديد
+                            </button>
+                        </div>
+                        <!-- Risk Summary Cards -->
+                        <div class="row mb-3">
+                            <div class="col-md-3">
+                                <div class="vital-card">
+                                    <div class="vital-value text-success" id="lowRiskCount">0</div>
+                                    <div class="vital-label">مخاطر منخفضة</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="vital-card">
+                                    <div class="vital-value text-warning" id="mediumRiskCount">0</div>
+                                    <div class="vital-label">مخاطر متوسطة</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="vital-card">
+                                    <div class="vital-value text-danger" id="highRiskCountDetail">0</div>
+                                    <div class="vital-label">مخاطر عالية</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="vital-card">
+                                    <div class="vital-value" style="color: #721c24;" id="criticalRiskCount">0</div>
+                                    <div class="vital-label">مخاطر حرجة</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>المستفيد</th>
+                                        <th>مستوى المخاطر</th>
+                                        <th>نوع المخاطر</th>
+                                        <th>التاريخ</th>
+                                        <th>المقيّم</th>
+                                        <th>الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="riskAssessmentTableBody">
+                                    <!-- Data will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Medications Tab -->
+                <div class="tab-pane fade" id="medications" role="tabpanel">
+                    <div class="recent-activity">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5><i class="fas fa-pills me-2" style="color: #20c997;"></i>إدارة الأدوية</h5>
+                            <div>
+                                <select class="form-select form-select-sm d-inline-block w-auto me-2" id="medicationStatusFilter" onchange="filterMedications()">
+                                    <option value="">جميع الحالات</option>
+                                    <option value="active">نشط</option>
+                                    <option value="paused">متوقف مؤقتاً</option>
+                                    <option value="completed">مكتمل</option>
+                                    <option value="cancelled">ملغي</option>
+                                </select>
+                                <button class="btn quick-access-btn" onclick="openMedicationModal()">
+                                    <i class="fas fa-plus me-2"></i>إضافة دواء
+                                </button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>المستفيد</th>
+                                        <th>اسم الدواء</th>
+                                        <th>الجرعة</th>
+                                        <th>التكرار</th>
+                                        <th>الحالة</th>
+                                        <th>تاريخ البدء</th>
+                                        <th>الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="medicationsTableBody">
+                                    <!-- Data will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vitals Tab -->
+                <div class="tab-pane fade" id="vitals" role="tabpanel">
+                    <div class="recent-activity">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5><i class="fas fa-heartbeat me-2 text-danger"></i>العلامات الحيوية</h5>
+                            <button class="btn quick-access-btn" onclick="openVitalsModal()">
+                                <i class="fas fa-plus me-2"></i>تسجيل قياسات
+                            </button>
+                        </div>
+                        <!-- Vitals Summary Cards -->
+                        <div class="row mb-3">
+                            <div class="col-md-2">
+                                <div class="vital-card">
+                                    <div class="vital-value" id="lastBP">--</div>
+                                    <div class="vital-label">ضغط الدم</div>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="vital-card">
+                                    <div class="vital-value" id="lastHR">--</div>
+                                    <div class="vital-label">نبض القلب</div>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="vital-card">
+                                    <div class="vital-value" id="lastTemp">--</div>
+                                    <div class="vital-label">الحرارة</div>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="vital-card">
+                                    <div class="vital-value" id="lastO2">--</div>
+                                    <div class="vital-label">تشبع الأكسجين</div>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="vital-card">
+                                    <div class="vital-value" id="lastWeight">--</div>
+                                    <div class="vital-label">الوزن (كغ)</div>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="vital-card">
+                                    <div class="vital-value" id="lastHeight">--</div>
+                                    <div class="vital-label">الطول (سم)</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>المستفيد</th>
+                                        <th>التاريخ</th>
+                                        <th>ضغط الدم</th>
+                                        <th>النبض</th>
+                                        <th>الحرارة</th>
+                                        <th>الأكسجين</th>
+                                        <th>الوزن</th>
+                                        <th>الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="vitalsTableBody">
+                                    <!-- Data will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Team Communications Tab -->
+                <div class="tab-pane fade" id="teamComm" role="tabpanel">
+                    <div class="recent-activity">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5><i class="fas fa-comments me-2" style="color: #6f42c1;"></i>تواصل فريق التأهيل</h5>
+                            <div>
+                                <select class="form-select form-select-sm d-inline-block w-auto me-2" id="messageTypeFilter" onchange="filterTeamMessages()">
+                                    <option value="">جميع الأنواع</option>
+                                    <option value="update">تحديث</option>
+                                    <option value="alert">تنبيه</option>
+                                    <option value="request">طلب</option>
+                                    <option value="note">ملاحظة</option>
+                                </select>
+                                <button class="btn quick-access-btn" onclick="openTeamMessageModal()">
+                                    <i class="fas fa-plus me-2"></i>رسالة جديدة
+                                </button>
+                            </div>
+                        </div>
+                        <div id="teamMessagesContainer">
+                            <!-- Messages will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Waiting List Tab -->
+                <div class="tab-pane fade" id="waitingList" role="tabpanel">
+                    <div class="recent-activity">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5><i class="fas fa-clock me-2" style="color: #6f42c1;"></i>قائمة الانتظار</h5>
+                            <div>
+                                <select class="form-select form-select-sm d-inline-block w-auto me-2" id="waitingStatusFilter" onchange="filterWaitingList()">
+                                    <option value="">جميع الحالات</option>
+                                    <option value="pending">قيد الانتظار</option>
+                                    <option value="approved">معتمد</option>
+                                    <option value="admitted">تم القبول</option>
+                                </select>
+                                <button class="btn btn-outline-primary btn-sm" onclick="refreshWaitingList()">
+                                    <i class="fas fa-sync-alt me-1"></i>تحديث
+                                </button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>المستفيد</th>
+                                        <th>نوع الإعاقة</th>
+                                        <th>البرنامج المطلوب</th>
+                                        <th>الأولوية</th>
+                                        <th>تاريخ التسجيل</th>
+                                        <th>الحالة</th>
+                                        <th>الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="waitingListTableBody">
+                                    <!-- Data will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Appointments Tab -->
+                <div class="tab-pane fade" id="appointments" role="tabpanel">
+                    <div class="recent-activity">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5><i class="fas fa-calendar-check me-2" style="color: #fd7e14;"></i>إدارة المواعيد</h5>
+                            <div>
+                                <div class="search-box d-inline-block me-2">
+                                    <input type="text" class="form-control form-control-sm" placeholder="بحث..." id="appointmentSearch" oninput="filterAppointments()">
+                                    <i class="fas fa-search search-icon"></i>
+                                </div>
+                                <select class="form-select form-select-sm d-inline-block w-auto me-2" id="appointmentStatusFilter" onchange="filterAppointments()">
+                                    <option value="">جميع الحالات</option>
+                                    <option value="scheduled">مجدول</option>
+                                    <option value="confirmed">مؤكد</option>
+                                    <option value="completed">مكتمل</option>
+                                    <option value="cancelled">ملغي</option>
+                                    <option value="no_show">لم يحضر</option>
+                                    <option value="rescheduled">معاد جدولة</option>
+                                </select>
+                                <button class="btn quick-access-btn" onclick="openAppointmentModal()">
+                                    <i class="fas fa-plus me-2"></i>موعد جديد
+                                </button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>المستفيد</th>
+                                        <th>نوع الموعد</th>
+                                        <th>التاريخ</th>
+                                        <th>الوقت</th>
+                                        <th>مقدم الخدمة</th>
+                                        <th>الموقع</th>
+                                        <th>الحالة</th>
+                                        <th>الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="appointmentsTableBody">
+                                    <!-- Data will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Incidents Tab -->
+                <div class="tab-pane fade" id="incidents" role="tabpanel">
+                    <div class="recent-activity">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5><i class="fas fa-exclamation-triangle me-2" style="color: #dc3545;"></i>سجل الحوادث</h5>
+                            <div>
+                                <select class="form-select form-select-sm d-inline-block w-auto me-2" id="incidentSeverityFilter" onchange="filterIncidents()">
+                                    <option value="">جميع المستويات</option>
+                                    <option value="minor">بسيط</option>
+                                    <option value="moderate">متوسط</option>
+                                    <option value="major">كبير</option>
+                                    <option value="critical">حرج</option>
+                                </select>
+                                <select class="form-select form-select-sm d-inline-block w-auto me-2" id="incidentTypeFilter" onchange="filterIncidents()">
+                                    <option value="">جميع الأنواع</option>
+                                    <option value="fall">سقوط</option>
+                                    <option value="injury">إصابة</option>
+                                    <option value="behavioral">سلوكي</option>
+                                    <option value="medication_error">خطأ دوائي</option>
+                                    <option value="elopement">هروب</option>
+                                    <option value="property_damage">تلف ممتلكات</option>
+                                    <option value="verbal_aggression">عدوان لفظي</option>
+                                    <option value="physical_aggression">عدوان جسدي</option>
+                                    <option value="self_harm">إيذاء ذاتي</option>
+                                    <option value="seizure">نوبة صرع</option>
+                                    <option value="allergic_reaction">ردة فعل تحسسية</option>
+                                    <option value="equipment_malfunction">عطل أجهزة</option>
+                                    <option value="environmental">بيئي</option>
+                                    <option value="other">أخرى</option>
+                                </select>
+                                <button class="btn quick-access-btn" onclick="openIncidentModal()">
+                                    <i class="fas fa-plus me-2"></i>تسجيل حادثة
+                                </button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>المستفيد</th>
+                                        <th>نوع الحادثة</th>
+                                        <th>الخطورة</th>
+                                        <th>التاريخ</th>
+                                        <th>الموقع</th>
+                                        <th>الحالة</th>
+                                        <th>الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="incidentsTableBody">
+                                    <!-- Data will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Behavioral Plans Tab -->
+                <div class="tab-pane fade" id="behavioralPlans" role="tabpanel">
+                    <div class="recent-activity">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5><i class="fas fa-brain me-2" style="color: #17a2b8;"></i>خطط التدخل السلوكي</h5>
+                            <div>
+                                <select class="form-select form-select-sm d-inline-block w-auto me-2" id="bipStatusFilter" onchange="filterBehavioralPlans()">
+                                    <option value="">جميع الحالات</option>
+                                    <option value="draft">مسودة</option>
+                                    <option value="active">نشط</option>
+                                    <option value="under_review">قيد المراجعة</option>
+                                    <option value="completed">مكتمل</option>
+                                    <option value="discontinued">متوقف</option>
+                                </select>
+                                <button class="btn quick-access-btn" onclick="openBehavioralPlanModal()">
+                                    <i class="fas fa-plus me-2"></i>خطة جديدة
+                                </button>
+                            </div>
+                        </div>
+                        <div class="row" id="behavioralPlansGrid">
+                            <!-- Behavioral plans will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Documents Tab -->
+                <div class="tab-pane fade" id="documents" role="tabpanel">
+                    <div class="recent-activity">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5><i class="fas fa-folder-open me-2" style="color: #6610f2;"></i>إدارة المستندات</h5>
+                            <div>
+                                <div class="search-box d-inline-block me-2">
+                                    <input type="text" class="form-control form-control-sm" placeholder="بحث في المستندات..." id="documentSearch" oninput="filterDocuments()">
+                                    <i class="fas fa-search search-icon"></i>
+                                </div>
+                                <select class="form-select form-select-sm d-inline-block w-auto me-2" id="documentTypeFilter" onchange="filterDocuments()">
+                                    <option value="">جميع الأنواع</option>
+                                    <option value="medical_report">تقرير طبي</option>
+                                    <option value="assessment_report">تقرير تقييم</option>
+                                    <option value="iep_document">وثيقة IEP</option>
+                                    <option value="therapy_note">ملاحظة علاجية</option>
+                                    <option value="consent_form">نموذج موافقة</option>
+                                    <option value="insurance_document">مستند تأمين</option>
+                                    <option value="prescription">وصفة طبية</option>
+                                    <option value="lab_result">نتيجة مختبر</option>
+                                    <option value="imaging">تصوير طبي</option>
+                                    <option value="referral_letter">خطاب إحالة</option>
+                                    <option value="discharge_summary">ملخص خروج</option>
+                                    <option value="progress_report">تقرير تقدم</option>
+                                    <option value="legal_document">مستند قانوني</option>
+                                    <option value="identification">هوية</option>
+                                    <option value="other">أخرى</option>
+                                </select>
+                                <button class="btn quick-access-btn" onclick="openDocumentModal()">
+                                    <i class="fas fa-upload me-2"></i>رفع مستند
+                                </button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>العنوان</th>
+                                        <th>النوع</th>
+                                        <th>المستفيد</th>
+                                        <th>تاريخ الرفع</th>
+                                        <th>الحجم</th>
+                                        <th>سري</th>
+                                        <th>الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="documentsTableBody">
+                                    <!-- Data will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Group Activities Tab -->
+                <div class="tab-pane fade" id="groupActivities" role="tabpanel">
+                    <div class="recent-activity">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5><i class="fas fa-users-cog me-2" style="color: #28a745;"></i>الأنشطة الجماعية</h5>
+                            <div>
+                                <select class="form-select form-select-sm d-inline-block w-auto me-2" id="activityTypeFilter" onchange="filterGroupActivities()">
+                                    <option value="">جميع الأنشطة</option>
+                                    <option value="social_skills">مهارات اجتماعية</option>
+                                    <option value="art_therapy">علاج بالفن</option>
+                                    <option value="music_therapy">علاج بالموسيقى</option>
+                                    <option value="physical_exercise">تمارين بدنية</option>
+                                    <option value="cognitive_training">تدريب ذهني</option>
+                                    <option value="life_skills">مهارات حياتية</option>
+                                    <option value="recreational">ترفيهي</option>
+                                    <option value="educational">تعليمي</option>
+                                    <option value="vocational">مهني</option>
+                                    <option value="support_group">مجموعة دعم</option>
+                                </select>
+                                <button class="btn quick-access-btn" onclick="openGroupActivityModal()">
+                                    <i class="fas fa-plus me-2"></i>نشاط جديد
+                                </button>
+                            </div>
+                        </div>
+                        <div class="row" id="groupActivitiesGrid">
+                            <!-- Group activities will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analytics Tab -->
+                <div class="tab-pane fade" id="analytics" role="tabpanel">
+                    <div class="recent-activity">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5><i class="fas fa-chart-pie me-2" style="color: #6f42c1;"></i>التحليلات والإحصائيات</h5>
+                            <div>
+                                <select class="form-select form-select-sm d-inline-block w-auto me-2" id="analyticsPeriod" onchange="loadAnalytics()">
+                                    <option value="week">آخر أسبوع</option>
+                                    <option value="month" selected>آخر شهر</option>
+                                    <option value="quarter">آخر 3 أشهر</option>
+                                    <option value="year">آخر سنة</option>
+                                </select>
+                                <button class="btn btn-outline-primary btn-sm" onclick="exportAnalyticsReport()">
+                                    <i class="fas fa-download me-1"></i>تصدير التقرير
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Analytics Summary Cards -->
+                        <div class="row mb-4">
+                            <div class="col-md-3 mb-3">
+                                <div class="analytics-chart-container text-center">
+                                    <h6 class="text-muted">معدل تحقيق الأهداف</h6>
+                                    <div class="stats-number text-success" id="goalAchievementRate">0%</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="analytics-chart-container text-center">
+                                    <h6 class="text-muted">معدل الحضور</h6>
+                                    <div class="stats-number text-primary" id="overallAttendanceRate">0%</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="analytics-chart-container text-center">
+                                    <h6 class="text-muted">متوسط الرضا</h6>
+                                    <div class="stats-number" style="color: #fd7e14;" id="avgSatisfaction">0</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="analytics-chart-container text-center">
+                                    <h6 class="text-muted">إجمالي الحوادث</h6>
+                                    <div class="stats-number text-danger" id="totalIncidents">0</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Charts Row 1 -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="analytics-chart-container">
+                                    <h6>توزيع أنواع الإعاقة</h6>
+                                    <canvas id="disabilityDistributionChart" height="250"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="analytics-chart-container">
+                                    <h6>حالة الأهداف التأهيلية</h6>
+                                    <canvas id="goalsStatusChart" height="250"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Charts Row 2 -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="analytics-chart-container">
+                                    <h6>توزيع الخدمات المقدمة</h6>
+                                    <canvas id="serviceDistributionChart" height="250"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="analytics-chart-container">
+                                    <h6>اتجاه الحضور الشهري</h6>
+                                    <canvas id="attendanceTrendChart" height="250"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Charts Row 3 -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="analytics-chart-container">
+                                    <h6>اتجاه الرضا</h6>
+                                    <canvas id="satisfactionTrendChart" height="250"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="analytics-chart-container">
+                                    <h6>إحصائيات الحوادث الشهرية</h6>
+                                    <canvas id="incidentsTrendChart" height="250"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══════════════════════════════════════════════════ -->
+                <!-- ═══════         Phase 4 Tab Panes          ═══════ -->
+                <!-- ═══════════════════════════════════════════════════ -->
+
+                <!-- Telehealth Tab -->
+                <div class="tab-pane fade" id="telehealth" role="tabpanel">
+                    <div class="recent-activity">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5>الرعاية الصحية عن بعد</h5>
+                            <button class="btn quick-access-btn" onclick="openTelehealthModal()">
+                                <i class="fas fa-cog me-2"></i>إعدادات الرعاية عن بعد
+                            </button>
+                        </div>
+                        <!-- Telehealth Status Cards -->
+                        <div class="row mb-4">
+                            <div class="col-md-3">
+                                <div class="card border-0 shadow-sm text-center p-3">
+                                    <i class="fas fa-laptop-medical fa-2x text-primary mb-2"></i>
+                                    <h6>المنصة المفضلة</h6>
+                                    <span id="telehealthPlatform" class="fw-bold">-</span>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card border-0 shadow-sm text-center p-3">
+                                    <i class="fas fa-wifi fa-2x text-success mb-2"></i>
+                                    <h6>جودة الاتصال</h6>
+                                    <span id="telehealthConnection" class="fw-bold">-</span>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card border-0 shadow-sm text-center p-3">
+                                    <i class="fas fa-star fa-2x text-warning mb-2"></i>
+                                    <h6>مدى الفعالية</h6>
+                                    <span id="telehealthEffectiveness" class="fw-bold">-</span>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card border-0 shadow-sm text-center p-3">
+                                    <i class="fas fa-exclamation-triangle fa-2x text-danger mb-2"></i>
+                                    <h6>مشاكل الاتصال</h6>
+                                    <span id="telehealthIssuesCount" class="fw-bold">0</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Connectivity Issues Table -->
+                        <h6 class="mb-3">سجل مشاكل الاتصال</h6>
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="connectivityIssuesTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>التاريخ</th>
+                                        <th>نوع المشكلة</th>
+                                        <th>الوصف</th>
+                                        <th>الحل</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="connectivityIssuesTableBody">
+                                    <!-- Data will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Financial & Insurance Tab -->
+                <div class="tab-pane fade" id="financial" role="tabpanel">
+                    <div class="recent-activity">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5>المعلومات المالية والتأمين</h5>
+                            <div>
+                                <button class="btn quick-access-btn me-2" onclick="openFinancialModal()">
+                                    <i class="fas fa-money-bill me-2"></i>تحديث المالية
+                                </button>
+                                <button class="btn quick-access-btn me-2" onclick="openInsuranceModal()">
+                                    <i class="fas fa-shield-alt me-2"></i>تحديث التأمين
+                                </button>
+                                <button class="btn quick-access-btn" onclick="openInvoiceModal()">
+                                    <i class="fas fa-file-invoice me-2"></i>فاتورة جديدة
+                                </button>
+                            </div>
+                        </div>
+                        <!-- Financial Summary Cards -->
+                        <div class="row mb-4">
+                            <div class="col-md-3">
+                                <div class="card border-0 shadow-sm text-center p-3">
+                                    <i class="fas fa-coins fa-2x text-primary mb-2"></i>
+                                    <h6>التكلفة الإجمالية</h6>
+                                    <span id="financialTotalCost" class="fw-bold text-primary">0 ر.س</span>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card border-0 shadow-sm text-center p-3">
+                                    <i class="fas fa-hand-holding-usd fa-2x text-success mb-2"></i>
+                                    <h6>المبلغ المدفوع</h6>
+                                    <span id="financialAmountPaid" class="fw-bold text-success">0 ر.س</span>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card border-0 shadow-sm text-center p-3">
+                                    <i class="fas fa-balance-scale fa-2x text-warning mb-2"></i>
+                                    <h6>المبلغ المتبقي</h6>
+                                    <span id="financialOutstanding" class="fw-bold text-warning">0 ر.س</span>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card border-0 shadow-sm text-center p-3">
+                                    <i class="fas fa-file-invoice-dollar fa-2x text-info mb-2"></i>
+                                    <h6>عدد الفواتير</h6>
+                                    <span id="financialInvoicesCount" class="fw-bold text-info">0</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Insurance Info Card -->
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0"><i class="fas fa-shield-alt me-2"></i>معلومات التأمين</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row" id="insuranceInfoDisplay">
+                                    <div class="col-md-3"><strong>مقدم التأمين:</strong> <span id="insuranceProvider">-</span></div>
+                                    <div class="col-md-3"><strong>رقم الوثيقة:</strong> <span id="insurancePolicyNumber">-</span></div>
+                                    <div class="col-md-3"><strong>نوع التغطية:</strong> <span id="insuranceCoverageType">-</span></div>
+                                    <div class="col-md-3"><strong>الرصيد المتبقي:</strong> <span id="insuranceRemaining">-</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Invoices Table -->
+                        <h6 class="mb-3">الفواتير</h6>
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="invoicesTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>رقم الفاتورة</th>
+                                        <th>المبلغ</th>
+                                        <th>مصدر التمويل</th>
+                                        <th>حالة الدفع</th>
+                                        <th>تاريخ الاستحقاق</th>
+                                        <th>الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="invoicesTableBody">
+                                    <!-- Data will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notes Tab -->
+                <div class="tab-pane fade" id="notes" role="tabpanel">
+                    <div class="recent-activity">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5>الملاحظات</h5>
+                            <button class="btn quick-access-btn" onclick="openNoteModal()">
+                                <i class="fas fa-plus me-2"></i>إضافة ملاحظة
+                            </button>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <select class="form-select form-select-sm" id="notesTypeFilter" onchange="filterNotes()">
+                                    <option value="">جميع الأنواع</option>
+                                    <option value="progress">تقدم</option>
+                                    <option value="clinical">سريرية</option>
+                                    <option value="behavioral">سلوكية</option>
+                                    <option value="family">عائلية</option>
+                                    <option value="administrative">إدارية</option>
+                                    <option value="therapy">علاجية</option>
+                                    <option value="medical">طبية</option>
+                                    <option value="educational">تعليمية</option>
+                                    <option value="social">اجتماعية</option>
+                                    <option value="follow_up">متابعة</option>
+                                    <option value="general">عامة</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <select class="form-select form-select-sm" id="notesPriorityFilter" onchange="filterNotes()">
+                                    <option value="">جميع الأولويات</option>
+                                    <option value="high">عالية</option>
+                                    <option value="medium">متوسطة</option>
+                                    <option value="low">منخفضة</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="notesTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>التاريخ</th>
+                                        <th>النوع</th>
+                                        <th>الأولوية</th>
+                                        <th>العنوان</th>
+                                        <th>الكاتب</th>
+                                        <th>الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="notesTableBody">
+                                    <!-- Data will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Referrals Tab -->
+                <div class="tab-pane fade" id="referrals" role="tabpanel">
+                    <div class="recent-activity">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5>الإحالات</h5>
+                            <button class="btn quick-access-btn" onclick="openReferralModal()">
+                                <i class="fas fa-plus me-2"></i>إحالة جديدة
+                            </button>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <select class="form-select form-select-sm" id="referralsStatusFilter" onchange="filterReferrals()">
+                                    <option value="">جميع الحالات</option>
+                                    <option value="pending">قيد الانتظار</option>
+                                    <option value="accepted">مقبولة</option>
+                                    <option value="rejected">مرفوضة</option>
+                                    <option value="completed">مكتملة</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="referralsTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>التاريخ</th>
+                                        <th>المحال إليه</th>
+                                        <th>سبب الإحالة</th>
+                                        <th>الأولوية</th>
+                                        <th>الحالة</th>
+                                        <th>الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="referralsTableBody">
+                                    <!-- Data will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Transportation Tab -->
+                <div class="tab-pane fade" id="transportation" role="tabpanel">
+                    <div class="recent-activity">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5>النقل والمواصلات</h5>
+                            <button class="btn quick-access-btn" onclick="openTransportationModal()">
+                                <i class="fas fa-cog me-2"></i>تحديث بيانات النقل
+                            </button>
+                        </div>
+                        <!-- Transportation Info Cards -->
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <div class="card border-0 shadow-sm text-center p-3">
+                                    <i class="fas fa-bus fa-2x text-primary mb-2"></i>
+                                    <h6>نوع النقل</h6>
+                                    <span id="transportationType" class="fw-bold">-</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card border-0 shadow-sm text-center p-3">
+                                    <i class="fas fa-wheelchair fa-2x text-info mb-2"></i>
+                                    <h6>إمكانية الوصول</h6>
+                                    <span id="transportationAccessibility" class="fw-bold">-</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card border-0 shadow-sm text-center p-3">
+                                    <i class="fas fa-road fa-2x text-success mb-2"></i>
+                                    <h6>المسافة</h6>
+                                    <span id="transportationDistance" class="fw-bold">-</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>تفاصيل النقل</h6>
+                            </div>
+                            <div class="card-body" id="transportationDetails">
+                                <div class="row">
+                                    <div class="col-md-6"><strong>مقدم الخدمة:</strong> <span id="transportationProvider">-</span></div>
+                                    <div class="col-md-6"><strong>احتياجات خاصة:</strong> <span id="transportationSpecialNeeds">-</span></div>
+                                    <div class="col-md-6 mt-2"><strong>الجهة المسؤولة عن التكلفة:</strong> <span id="transportationCostCoveredBy">-</span></div>
+                                    <div class="col-md-6 mt-2"><strong>ملاحظات:</strong> <span id="transportationNotes">-</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alerts Full Tab -->
+                <div class="tab-pane fade" id="alerts" role="tabpanel">
+                    <div class="recent-activity">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5>الإنذارات والتنبيهات</h5>
+                            <div>
+                                <button class="btn btn-sm btn-outline-success me-2" onclick="markAllAlertsRead()">
+                                    <i class="fas fa-check-double me-2"></i>تعليم الكل كمقروء
+                                </button>
+                                <button class="btn quick-access-btn" onclick="openAlertModal()">
+                                    <i class="fas fa-plus me-2"></i>تنبيه جديد
+                                </button>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <select class="form-select form-select-sm" id="alertsTypeFilter" onchange="filterAlerts()">
+                                    <option value="">جميع الأنواع</option>
+                                    <option value="medication">دواء</option>
+                                    <option value="appointment">موعد</option>
+                                    <option value="assessment">تقييم</option>
+                                    <option value="goal">هدف</option>
+                                    <option value="risk">خطر</option>
+                                    <option value="general">عام</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <select class="form-select form-select-sm" id="alertsPriorityFilter" onchange="filterAlerts()">
+                                    <option value="">جميع الأولويات</option>
+                                    <option value="critical">حرج</option>
+                                    <option value="high">عالي</option>
+                                    <option value="medium">متوسط</option>
+                                    <option value="low">منخفض</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="alertsFullTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>التاريخ</th>
+                                        <th>النوع</th>
+                                        <th>الأولوية</th>
+                                        <th>العنوان</th>
+                                        <th>الحالة</th>
+                                        <th>الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="alertsFullTableBody">
+                                    <!-- Data will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>

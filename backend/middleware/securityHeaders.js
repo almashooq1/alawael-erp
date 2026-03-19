@@ -4,7 +4,7 @@ const helmet = require('helmet');
  * Security headers configuration using Helmet
  * Protects against common web vulnerabilities
  */
-const securityHeaders = helmet({
+const helmetMiddleware = helmet({
   // Content Security Policy
   contentSecurityPolicy: {
     directives: {
@@ -20,15 +20,15 @@ const securityHeaders = helmet({
     },
   },
 
+  // Cross-Origin Resource Policy — allow cross-origin API calls from frontend
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+
+  // Cross-Origin Opener Policy — allow popups from same origin
+  crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
+
   // DNS Prefetch Control
   dnsPrefetchControl: {
     allow: false,
-  },
-
-  // Expect-CT
-  expectCt: {
-    maxAge: 86400,
-    enforce: true,
   },
 
   // Frame Guard (X-Frame-Options)
@@ -65,5 +65,22 @@ const securityHeaders = helmet({
   // XSS Filter
   xssFilter: true,
 });
+
+// Compose Helmet with additional security headers
+const securityHeaders = (req, res, next) => {
+  // Permissions-Policy (not natively covered by Helmet)
+  res.setHeader(
+    'Permissions-Policy',
+    'geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=()'
+  );
+
+  // Prevent caching of sensitive API responses
+  if (req.path.startsWith('/api/auth') || req.path.startsWith('/api/v1/auth')) {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.setHeader('Pragma', 'no-cache');
+  }
+
+  helmetMiddleware(req, res, next);
+};
 
 module.exports = securityHeaders;

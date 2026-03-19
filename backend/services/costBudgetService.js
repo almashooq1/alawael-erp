@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * 💰 نظام إدارة التكاليف والميزانيات
  * Cost & Budget Management Service

@@ -1,3 +1,4 @@
+﻿/* eslint-disable no-unused-vars */
 /**
  * 📦 نظام المخزون الموحد - Inventory System
  * AlAwael ERP - Unified Inventory Routes
@@ -7,6 +8,12 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
+const { escapeRegex } = require('../utils/sanitize');
+const { paginate } = require('../utils/paginate');
+const { authenticate, authorize } = require('../middleware/auth');
+const { validate } = require('../middleware/validate');
+const invV = require('../middleware/validators/inventory.validators');
+const validateObjectId = require('../middleware/validateObjectId');
 
 // ============================================
 // نماذج المخزون
@@ -44,7 +51,7 @@ const ProductSchema = new mongoose.Schema({
   organization: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization' },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
+  updatedAt: { type: Date, default: Date.now },
 });
 
 // الفئات
@@ -57,7 +64,7 @@ const CategorySchema = new mongoose.Schema({
   image: String,
   isActive: { type: Boolean, default: true },
   organization: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization' },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
 });
 
 // المستودعات
@@ -70,7 +77,7 @@ const WarehouseSchema = new mongoose.Schema({
     city: String,
     region: String,
     country: String,
-    postalCode: String
+    postalCode: String,
   },
   phone: String,
   email: String,
@@ -78,7 +85,7 @@ const WarehouseSchema = new mongoose.Schema({
   capacity: { type: Number, default: 0 },
   isActive: { type: Boolean, default: true },
   organization: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization' },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
 });
 
 // حركة المخزون
@@ -87,7 +94,7 @@ const StockMovementSchema = new mongoose.Schema({
   type: {
     type: String,
     enum: ['in', 'out', 'transfer', 'adjustment', 'return', 'damage'],
-    required: true
+    required: true,
   },
   product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
   warehouse: { type: mongoose.Schema.Types.ObjectId, ref: 'Warehouse' },
@@ -104,7 +111,7 @@ const StockMovementSchema = new mongoose.Schema({
   notes: String,
   organization: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization' },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
 });
 
 // الجرد
@@ -112,14 +119,20 @@ const StockTakeSchema = new mongoose.Schema({
   stockTakeNumber: { type: String, required: true, unique: true },
   warehouse: { type: mongoose.Schema.Types.ObjectId, ref: 'Warehouse' },
   date: { type: Date, required: true },
-  status: { type: String, enum: ['draft', 'in_progress', 'completed', 'cancelled'], default: 'draft' },
-  items: [{
-    product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
-    systemQuantity: { type: Number, default: 0 },
-    countedQuantity: { type: Number, default: 0 },
-    variance: { type: Number, default: 0 },
-    notes: String
-  }],
+  status: {
+    type: String,
+    enum: ['draft', 'in_progress', 'completed', 'cancelled'],
+    default: 'draft',
+  },
+  items: [
+    {
+      product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+      systemQuantity: { type: Number, default: 0 },
+      countedQuantity: { type: Number, default: 0 },
+      variance: { type: Number, default: 0 },
+      notes: String,
+    },
+  ],
   totalItems: { type: Number, default: 0 },
   totalVariance: { type: Number, default: 0 },
   startedAt: Date,
@@ -128,7 +141,7 @@ const StockTakeSchema = new mongoose.Schema({
   completedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   organization: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization' },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
 });
 
 // التحويلات
@@ -137,14 +150,20 @@ const StockTransferSchema = new mongoose.Schema({
   fromWarehouse: { type: mongoose.Schema.Types.ObjectId, ref: 'Warehouse', required: true },
   toWarehouse: { type: mongoose.Schema.Types.ObjectId, ref: 'Warehouse', required: true },
   date: { type: Date, required: true },
-  status: { type: String, enum: ['draft', 'pending', 'shipped', 'received', 'cancelled'], default: 'draft' },
-  items: [{
-    product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
-    requestedQuantity: { type: Number, required: true },
-    shippedQuantity: { type: Number, default: 0 },
-    receivedQuantity: { type: Number, default: 0 },
-    notes: String
-  }],
+  status: {
+    type: String,
+    enum: ['draft', 'pending', 'shipped', 'received', 'cancelled'],
+    default: 'draft',
+  },
+  items: [
+    {
+      product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+      requestedQuantity: { type: Number, required: true },
+      shippedQuantity: { type: Number, default: 0 },
+      receivedQuantity: { type: Number, default: 0 },
+      notes: String,
+    },
+  ],
   notes: String,
   shippedAt: Date,
   receivedAt: Date,
@@ -152,16 +171,21 @@ const StockTransferSchema = new mongoose.Schema({
   receivedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   organization: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization' },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
 });
 
 // إنشاء النماذج
-const Product = mongoose.model('Product', ProductSchema);
-const Category = mongoose.model('Category', CategorySchema);
-const Warehouse = mongoose.model('Warehouse', WarehouseSchema);
-const StockMovement = mongoose.model('StockMovement', StockMovementSchema);
-const StockTake = mongoose.model('StockTake', StockTakeSchema);
-const StockTransfer = mongoose.model('StockTransfer', StockTransferSchema);
+const Product = mongoose.models.Product || mongoose.model('Product', ProductSchema);
+const Category = mongoose.models.Category || mongoose.model('Category', CategorySchema);
+const Warehouse = mongoose.models.Warehouse || mongoose.model('Warehouse', WarehouseSchema);
+const StockMovement =
+  mongoose.models.StockMovement || mongoose.model('StockMovement', StockMovementSchema);
+const StockTake = mongoose.models.StockTake || mongoose.model('StockTake', StockTakeSchema);
+const StockTransfer =
+  mongoose.models.StockTransfer || mongoose.model('StockTransfer', StockTransferSchema);
+
+// Authentication required for all inventory routes
+router.use(authenticate);
 
 // ============================================
 // API: الأصناف
@@ -179,20 +203,21 @@ router.get('/products', async (req, res) => {
     if (lowStock === 'true') filter.currentStock = { $lte: '$minStock' };
     if (search) {
       filter.$or = [
-        { sku: { $regex: search, $options: 'i' } },
-        { name: { $regex: search, $options: 'i' } },
-        { barcode: { $regex: search, $options: 'i' } }
+        { sku: { $regex: escapeRegex(search), $options: 'i' } },
+        { name: { $regex: escapeRegex(search), $options: 'i' } },
+        { barcode: { $regex: escapeRegex(search), $options: 'i' } },
       ];
     }
 
-    const products = await Product.find(filter)
+    const query = Product.find(filter)
       .populate('category', 'name')
       .populate('warehouse', 'name')
       .sort({ name: 1 });
+    const { data, meta } = await paginate(query, req.query);
 
-    res.json({ success: true, data: products, count: products.length });
+    res.json({ success: true, data, ...meta });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
   }
 });
 
@@ -201,7 +226,7 @@ router.get('/products/barcode/:barcode', async (req, res) => {
   try {
     const product = await Product.findOne({
       barcode: req.params.barcode,
-      organization: req.user.organization
+      organization: req.user.organization,
     }).populate('category warehouse');
 
     if (!product) {
@@ -210,72 +235,83 @@ router.get('/products/barcode/:barcode', async (req, res) => {
 
     res.json({ success: true, data: product });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
   }
 });
 
 // إنشاء صنف
-router.post('/products', async (req, res) => {
-  try {
-    const lastProduct = await Product.findOne({
-      organization: req.user.organization
-    }).sort({ createdAt: -1 });
+router.post(
+  '/products',
+  authorize(['admin', 'manager']),
+  validate(invV.createProduct),
+  async (req, res) => {
+    try {
+      const lastProduct = await Product.findOne({
+        organization: req.user.organization,
+      }).sort({ createdAt: -1 });
 
-    const sku = lastProduct
-      ? `PRD-${String(parseInt(lastProduct.sku.split('-')[1]) + 1).padStart(6, '0')}`
-      : 'PRD-000001';
+      const sku = lastProduct
+        ? `PRD-${String(parseInt(lastProduct.sku.split('-')[1]) + 1).padStart(6, '0')}`
+        : 'PRD-000001';
 
-    const product = new Product({
-      ...req.body,
-      sku,
-      availableStock: req.body.currentStock || 0,
-      organization: req.user.organization,
-      createdBy: req.user._id
-    });
+      const product = new Product({
+        ...req.body,
+        sku,
+        availableStock: req.body.currentStock || 0,
+        organization: req.user.organization,
+        createdBy: req.user._id,
+      });
 
-    await product.save();
+      await product.save();
 
-    res.status(201).json({
-      success: true,
-      data: product,
-      message: 'تم إنشاء الصنف بنجاح'
-    });
-  } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+      res.status(201).json({
+        success: true,
+        data: product,
+        message: 'تم إنشاء الصنف بنجاح',
+      });
+    } catch (error) {
+      res.status(400).json({ success: false, message: 'خطأ في البيانات المدخلة' });
+    }
   }
-});
+);
 
 // تحديث صنف
-router.put('/products/:id', async (req, res) => {
-  try {
-    const product = await Product.findOneAndUpdate(
-      { _id: req.params.id, organization: req.user.organization },
-      { ...req.body, updatedAt: Date.now() },
-      { new: true }
-    );
+router.put(
+  '/products/:id',
+  authorize(['admin', 'manager']),
+  validate(invV.updateProduct),
+  async (req, res) => {
+    try {
+      const product = await Product.findOneAndUpdate(
+        { _id: req.params.id, organization: req.user.organization },
+        { ...req.body, updatedAt: Date.now() },
+        { new: true }
+      );
 
-    if (!product) {
-      return res.status(404).json({ success: false, message: 'الصنف غير موجود' });
+      if (!product) {
+        return res.status(404).json({ success: false, message: 'الصنف غير موجود' });
+      }
+
+      res.json({ success: true, data: product, message: 'تم تحديث الصنف بنجاح' });
+    } catch (error) {
+      res.status(400).json({ success: false, message: 'خطأ في البيانات المدخلة' });
     }
-
-    res.json({ success: true, data: product, message: 'تم تحديث الصنف بنجاح' });
-  } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
   }
-});
+);
 
 // الأصناف منخفضة المخزون
 router.get('/products/low-stock', async (req, res) => {
   try {
-    const products = await Product.find({
+    const query = Product.find({
       organization: req.user.organization,
       isActive: true,
-      $expr: { $lte: ['$currentStock', '$minStock'] }
+      $expr: { $lte: ['$currentStock', '$minStock'] },
     }).populate('category warehouse');
+    const { data, meta } = await paginate(query, req.query);
 
-    res.json({ success: true, data: products, count: products.length });
+    res.json({ success: true, data, ...meta });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
   }
 });
 
@@ -285,29 +321,37 @@ router.get('/products/low-stock', async (req, res) => {
 
 router.get('/categories', async (req, res) => {
   try {
-    const categories = await Category.find({
+    const query = Category.find({
       organization: req.user.organization,
-      isActive: true
-    }).populate('parent').sort({ name: 1 });
+      isActive: true,
+    })
+      .populate('parent')
+      .sort({ name: 1 });
+    const { data, meta } = await paginate(query, req.query);
 
-    res.json({ success: true, data: categories });
+    res.json({ success: true, data, ...meta });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
   }
 });
 
-router.post('/categories', async (req, res) => {
-  try {
-    const category = new Category({
-      ...req.body,
-      organization: req.user.organization
-    });
-    await category.save();
-    res.status(201).json({ success: true, data: category });
-  } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+router.post(
+  '/categories',
+  authorize(['admin', 'manager']),
+  validate(invV.createCategory),
+  async (req, res) => {
+    try {
+      const category = new Category({
+        ...req.body,
+        organization: req.user.organization,
+      });
+      await category.save();
+      res.status(201).json({ success: true, data: category });
+    } catch (error) {
+      res.status(400).json({ success: false, message: 'خطأ في البيانات المدخلة' });
+    }
   }
-});
+);
 
 // ============================================
 // API: المستودعات
@@ -315,52 +359,60 @@ router.post('/categories', async (req, res) => {
 
 router.get('/warehouses', async (req, res) => {
   try {
-    const warehouses = await Warehouse.find({
+    const query = Warehouse.find({
       organization: req.user.organization,
-      isActive: true
+      isActive: true,
     }).populate('manager', 'name');
+    const { data, meta } = await paginate(query, req.query);
 
-    res.json({ success: true, data: warehouses });
+    res.json({ success: true, data, ...meta });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
   }
 });
 
-router.post('/warehouses', async (req, res) => {
-  try {
-    const warehouse = new Warehouse({
-      ...req.body,
-      organization: req.user.organization
-    });
-    await warehouse.save();
-    res.status(201).json({ success: true, data: warehouse });
-  } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+router.post(
+  '/warehouses',
+  authorize(['admin', 'manager']),
+  validate(invV.createWarehouse),
+  async (req, res) => {
+    try {
+      const warehouse = new Warehouse({
+        ...req.body,
+        organization: req.user.organization,
+      });
+      await warehouse.save();
+      res.status(201).json({ success: true, data: warehouse });
+    } catch (error) {
+      res.status(400).json({ success: false, message: 'خطأ في البيانات المدخلة' });
+    }
   }
-});
+);
 
 // مخزون المستودع
-router.get('/warehouses/:id/stock', async (req, res) => {
+router.get('/warehouses/:id/stock', validateObjectId('id'), async (req, res) => {
   try {
-    const products = await Product.find({
+    const query = Product.find({
       warehouse: req.params.id,
       organization: req.user.organization,
-      currentStock: { $gt: 0 }
+      currentStock: { $gt: 0 },
     }).populate('category');
+    const { data: products, meta } = await paginate(query, req.query);
 
-    const totalValue = products.reduce((sum, p) => sum + (p.currentStock * p.costPrice), 0);
+    const totalValue = products.reduce((sum, p) => sum + p.currentStock * p.costPrice, 0);
 
     res.json({
       success: true,
       data: {
         products,
-        totalItems: products.length,
+        totalItems: meta.total,
         totalQuantity: products.reduce((sum, p) => sum + p.currentStock, 0),
-        totalValue
-      }
+        totalValue,
+      },
+      ...meta,
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
   }
 });
 
@@ -380,183 +432,200 @@ router.get('/movements', async (req, res) => {
       filter.createdAt = { $gte: new Date(startDate), $lte: new Date(endDate) };
     }
 
-    const movements = await StockMovement.find(filter)
+    const query = StockMovement.find(filter)
       .populate('product', 'sku name')
       .populate('warehouse toWarehouse', 'name')
       .sort({ createdAt: -1 });
+    const { data, meta } = await paginate(query, req.query);
 
-    res.json({ success: true, data: movements, count: movements.length });
+    res.json({ success: true, data, ...meta });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
   }
 });
 
 // إضافة للمخزون
-router.post('/movements/in', async (req, res) => {
-  try {
-    const { productId, warehouseId, quantity, unitCost, reference, batchNumber, expiryDate } = req.body;
+router.post(
+  '/movements/in',
+  authorize(['admin', 'manager']),
+  validate(invV.movementIn),
+  async (req, res) => {
+    try {
+      const { productId, warehouseId, quantity, unitCost, reference, batchNumber, expiryDate } =
+        req.body;
 
-    const product = await Product.findOne({
-      _id: productId,
-      organization: req.user.organization
-    });
+      const product = await Product.findOne({
+        _id: productId,
+        organization: req.user.organization,
+      });
 
-    if (!product) {
-      return res.status(404).json({ success: false, message: 'الصنف غير موجود' });
+      if (!product) {
+        return res.status(404).json({ success: false, message: 'الصنف غير موجود' });
+      }
+
+      // إنشاء رقم الحركة
+      const lastMovement = await StockMovement.findOne({
+        organization: req.user.organization,
+      }).sort({ createdAt: -1 });
+      const movementNumber = lastMovement
+        ? `MOV-${String(parseInt(lastMovement.movementNumber.split('-')[1]) + 1).padStart(8, '0')}`
+        : 'MOV-00000001';
+
+      const movement = new StockMovement({
+        movementNumber,
+        type: 'in',
+        product: productId,
+        warehouse: warehouseId,
+        quantity,
+        unitCost: unitCost || product.costPrice,
+        totalCost: quantity * (unitCost || product.costPrice),
+        reference,
+        batchNumber,
+        expiryDate,
+        organization: req.user.organization,
+        createdBy: req.user._id,
+      });
+
+      await movement.save();
+
+      // تحديث المخزون
+      product.currentStock += quantity;
+      product.availableStock = product.currentStock - product.reservedStock;
+      product.costPrice = unitCost || product.costPrice;
+      await product.save();
+
+      res.status(201).json({
+        success: true,
+        data: { movement, product },
+        message: 'تم إضافة المخزون بنجاح',
+      });
+    } catch (error) {
+      res.status(400).json({ success: false, message: 'خطأ في البيانات المدخلة' });
     }
-
-    // إنشاء رقم الحركة
-    const lastMovement = await StockMovement.findOne({
-      organization: req.user.organization
-    }).sort({ createdAt: -1 });
-    const movementNumber = lastMovement
-      ? `MOV-${String(parseInt(lastMovement.movementNumber.split('-')[1]) + 1).padStart(8, '0')}`
-      : 'MOV-00000001';
-
-    const movement = new StockMovement({
-      movementNumber,
-      type: 'in',
-      product: productId,
-      warehouse: warehouseId,
-      quantity,
-      unitCost: unitCost || product.costPrice,
-      totalCost: quantity * (unitCost || product.costPrice),
-      reference,
-      batchNumber,
-      expiryDate,
-      organization: req.user.organization,
-      createdBy: req.user._id
-    });
-
-    await movement.save();
-
-    // تحديث المخزون
-    product.currentStock += quantity;
-    product.availableStock = product.currentStock - product.reservedStock;
-    product.costPrice = unitCost || product.costPrice;
-    await product.save();
-
-    res.status(201).json({
-      success: true,
-      data: { movement, product },
-      message: 'تم إضافة المخزون بنجاح'
-    });
-  } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
   }
-});
+);
 
 // صرف من المخزون
-router.post('/movements/out', async (req, res) => {
-  try {
-    const { productId, warehouseId, quantity, reference, notes } = req.body;
+router.post(
+  '/movements/out',
+  authorize(['admin', 'manager']),
+  validate(invV.movementOut),
+  async (req, res) => {
+    try {
+      const { productId, warehouseId, quantity, reference, notes } = req.body;
 
-    const product = await Product.findOne({
-      _id: productId,
-      organization: req.user.organization
-    });
-
-    if (!product) {
-      return res.status(404).json({ success: false, message: 'الصنف غير موجود' });
-    }
-
-    if (product.availableStock < quantity) {
-      return res.status(400).json({
-        success: false,
-        message: `الكمية المتاحة (${product.availableStock}) أقل من المطلوب (${quantity})`
+      const product = await Product.findOne({
+        _id: productId,
+        organization: req.user.organization,
       });
+
+      if (!product) {
+        return res.status(404).json({ success: false, message: 'الصنف غير موجود' });
+      }
+
+      if (product.availableStock < quantity) {
+        return res.status(400).json({
+          success: false,
+          message: `الكمية المتاحة (${product.availableStock}) أقل من المطلوب (${quantity})`,
+        });
+      }
+
+      const lastMovement = await StockMovement.findOne({
+        organization: req.user.organization,
+      }).sort({ createdAt: -1 });
+      const movementNumber = lastMovement
+        ? `MOV-${String(parseInt(lastMovement.movementNumber.split('-')[1]) + 1).padStart(8, '0')}`
+        : 'MOV-00000001';
+
+      const movement = new StockMovement({
+        movementNumber,
+        type: 'out',
+        product: productId,
+        warehouse: warehouseId,
+        quantity,
+        unitCost: product.costPrice,
+        totalCost: quantity * product.costPrice,
+        reference,
+        notes,
+        organization: req.user.organization,
+        createdBy: req.user._id,
+      });
+
+      await movement.save();
+
+      // تحديث المخزون
+      product.currentStock -= quantity;
+      product.availableStock = product.currentStock - product.reservedStock;
+      await product.save();
+
+      res.status(201).json({
+        success: true,
+        data: { movement, product },
+        message: 'تم صرف المخزون بنجاح',
+      });
+    } catch (error) {
+      res.status(400).json({ success: false, message: 'خطأ في البيانات المدخلة' });
     }
-
-    const lastMovement = await StockMovement.findOne({
-      organization: req.user.organization
-    }).sort({ createdAt: -1 });
-    const movementNumber = lastMovement
-      ? `MOV-${String(parseInt(lastMovement.movementNumber.split('-')[1]) + 1).padStart(8, '0')}`
-      : 'MOV-00000001';
-
-    const movement = new StockMovement({
-      movementNumber,
-      type: 'out',
-      product: productId,
-      warehouse: warehouseId,
-      quantity,
-      unitCost: product.costPrice,
-      totalCost: quantity * product.costPrice,
-      reference,
-      notes,
-      organization: req.user.organization,
-      createdBy: req.user._id
-    });
-
-    await movement.save();
-
-    // تحديث المخزون
-    product.currentStock -= quantity;
-    product.availableStock = product.currentStock - product.reservedStock;
-    await product.save();
-
-    res.status(201).json({
-      success: true,
-      data: { movement, product },
-      message: 'تم صرف المخزون بنجاح'
-    });
-  } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
   }
-});
+);
 
 // تسوية المخزون
-router.post('/movements/adjustment', async (req, res) => {
-  try {
-    const { productId, warehouseId, newQuantity, notes } = req.body;
+router.post(
+  '/movements/adjustment',
+  authorize(['admin', 'manager']),
+  validate(invV.movementAdjustment),
+  async (req, res) => {
+    try {
+      const { productId, warehouseId, newQuantity, notes } = req.body;
 
-    const product = await Product.findOne({
-      _id: productId,
-      organization: req.user.organization
-    });
+      const product = await Product.findOne({
+        _id: productId,
+        organization: req.user.organization,
+      });
 
-    if (!product) {
-      return res.status(404).json({ success: false, message: 'الصنف غير موجود' });
+      if (!product) {
+        return res.status(404).json({ success: false, message: 'الصنف غير موجود' });
+      }
+
+      const variance = newQuantity - product.currentStock;
+
+      const lastMovement = await StockMovement.findOne({
+        organization: req.user.organization,
+      }).sort({ createdAt: -1 });
+      const movementNumber = lastMovement
+        ? `MOV-${String(parseInt(lastMovement.movementNumber.split('-')[1]) + 1).padStart(8, '0')}`
+        : 'MOV-00000001';
+
+      const movement = new StockMovement({
+        movementNumber,
+        type: 'adjustment',
+        product: productId,
+        warehouse: warehouseId,
+        quantity: Math.abs(variance),
+        unitCost: product.costPrice,
+        totalCost: Math.abs(variance) * product.costPrice,
+        notes: `تسوية من ${product.currentStock} إلى ${newQuantity}. ${notes || ''}`,
+        organization: req.user.organization,
+        createdBy: req.user._id,
+      });
+
+      await movement.save();
+
+      // تحديث المخزون
+      product.currentStock = newQuantity;
+      product.availableStock = product.currentStock - product.reservedStock;
+      await product.save();
+
+      res.status(201).json({
+        success: true,
+        data: { movement, product },
+        message: 'تم تسوية المخزون بنجاح',
+      });
+    } catch (error) {
+      res.status(400).json({ success: false, message: 'خطأ في البيانات المدخلة' });
     }
-
-    const variance = newQuantity - product.currentStock;
-
-    const lastMovement = await StockMovement.findOne({
-      organization: req.user.organization
-    }).sort({ createdAt: -1 });
-    const movementNumber = lastMovement
-      ? `MOV-${String(parseInt(lastMovement.movementNumber.split('-')[1]) + 1).padStart(8, '0')}`
-      : 'MOV-00000001';
-
-    const movement = new StockMovement({
-      movementNumber,
-      type: 'adjustment',
-      product: productId,
-      warehouse: warehouseId,
-      quantity: Math.abs(variance),
-      unitCost: product.costPrice,
-      totalCost: Math.abs(variance) * product.costPrice,
-      notes: `تسوية من ${product.currentStock} إلى ${newQuantity}. ${notes || ''}`,
-      organization: req.user.organization,
-      createdBy: req.user._id
-    });
-
-    await movement.save();
-
-    // تحديث المخزون
-    product.currentStock = newQuantity;
-    product.availableStock = product.currentStock - product.reservedStock;
-    await product.save();
-
-    res.status(201).json({
-      success: true,
-      data: { movement, product },
-      message: 'تم تسوية المخزون بنجاح'
-    });
-  } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
   }
-});
+);
 
 // ============================================
 // API: الجرد
@@ -564,132 +633,148 @@ router.post('/movements/adjustment', async (req, res) => {
 
 router.get('/stock-takes', async (req, res) => {
   try {
-    const stockTakes = await StockTake.find({
-      organization: req.user.organization
+    const query = StockTake.find({
+      organization: req.user.organization,
     })
       .populate('warehouse', 'name')
       .sort({ date: -1 });
+    const { data, meta } = await paginate(query, req.query);
 
-    res.json({ success: true, data: stockTakes });
+    res.json({ success: true, data, ...meta });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
   }
 });
 
-router.post('/stock-takes', async (req, res) => {
-  try {
-    const { warehouseId } = req.body;
+router.post(
+  '/stock-takes',
+  authorize(['admin', 'manager']),
+  validate(invV.createStockTake),
+  async (req, res) => {
+    try {
+      const { warehouseId } = req.body;
 
-    const products = await Product.find({
-      warehouse: warehouseId,
-      organization: req.user.organization,
-      isActive: true
-    });
+      const products = await Product.find({
+        warehouse: warehouseId,
+        organization: req.user.organization,
+        isActive: true,
+      });
 
-    const lastStockTake = await StockTake.findOne({
-      organization: req.user.organization
-    }).sort({ createdAt: -1 });
-    const stockTakeNumber = lastStockTake
-      ? `STK-${String(parseInt(lastStockTake.stockTakeNumber.split('-')[1]) + 1).padStart(6, '0')}`
-      : 'STK-000001';
+      const lastStockTake = await StockTake.findOne({
+        organization: req.user.organization,
+      }).sort({ createdAt: -1 });
+      const stockTakeNumber = lastStockTake
+        ? `STK-${String(parseInt(lastStockTake.stockTakeNumber.split('-')[1]) + 1).padStart(6, '0')}`
+        : 'STK-000001';
 
-    const items = products.map(p => ({
-      product: p._id,
-      systemQuantity: p.currentStock,
-      countedQuantity: 0,
-      variance: -p.currentStock
-    }));
+      const items = products.map(p => ({
+        product: p._id,
+        systemQuantity: p.currentStock,
+        countedQuantity: 0,
+        variance: -p.currentStock,
+      }));
 
-    const stockTake = new StockTake({
-      stockTakeNumber,
-      warehouse: warehouseId,
-      date: new Date(),
-      items,
-      totalItems: products.length,
-      organization: req.user.organization,
-      createdBy: req.user._id
-    });
+      const stockTake = new StockTake({
+        stockTakeNumber,
+        warehouse: warehouseId,
+        date: new Date(),
+        items,
+        totalItems: products.length,
+        organization: req.user.organization,
+        createdBy: req.user._id,
+      });
 
-    await stockTake.save();
+      await stockTake.save();
 
-    res.status(201).json({
-      success: true,
-      data: stockTake,
-      message: 'تم إنشاء الجرد بنجاح'
-    });
-  } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+      res.status(201).json({
+        success: true,
+        data: stockTake,
+        message: 'تم إنشاء الجرد بنجاح',
+      });
+    } catch (error) {
+      res.status(400).json({ success: false, message: 'خطأ في البيانات المدخلة' });
+    }
   }
-});
+);
 
 // تسجيل العدد
-router.put('/stock-takes/:id/count', async (req, res) => {
-  try {
-    const { productId, countedQuantity, notes } = req.body;
+router.put(
+  '/stock-takes/:id/count',
+  authorize(['admin', 'manager']),
+  validate(invV.countStockTake),
+  async (req, res) => {
+    try {
+      const { productId, countedQuantity, notes } = req.body;
 
-    const stockTake = await StockTake.findOne({
-      _id: req.params.id,
-      organization: req.user.organization
-    });
+      const stockTake = await StockTake.findOne({
+        _id: req.params.id,
+        organization: req.user.organization,
+      });
 
-    if (!stockTake) {
-      return res.status(404).json({ success: false, message: 'الجرد غير موجود' });
+      if (!stockTake) {
+        return res.status(404).json({ success: false, message: 'الجرد غير موجود' });
+      }
+
+      const item = stockTake.items.find(i => String(i.product) === String(productId));
+      if (!item) {
+        return res.status(404).json({ success: false, message: 'الصنف غير موجود في الجرد' });
+      }
+
+      item.countedQuantity = countedQuantity;
+      item.variance = countedQuantity - item.systemQuantity;
+      if (notes) item.notes = notes;
+
+      stockTake.totalVariance = stockTake.items.reduce((sum, i) => sum + i.variance, 0);
+      await stockTake.save();
+
+      res.json({ success: true, data: stockTake });
+    } catch (error) {
+      res.status(400).json({ success: false, message: 'خطأ في البيانات المدخلة' });
     }
-
-    const item = stockTake.items.find(i => String(i.product) === String(productId));
-    if (!item) {
-      return res.status(404).json({ success: false, message: 'الصنف غير موجود في الجرد' });
-    }
-
-    item.countedQuantity = countedQuantity;
-    item.variance = countedQuantity - item.systemQuantity;
-    if (notes) item.notes = notes;
-
-    stockTake.totalVariance = stockTake.items.reduce((sum, i) => sum + i.variance, 0);
-    await stockTake.save();
-
-    res.json({ success: true, data: stockTake });
-  } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
   }
-});
+);
 
 // إتمام الجرد
-router.post('/stock-takes/:id/complete', async (req, res) => {
-  try {
-    const stockTake = await StockTake.findOne({
-      _id: req.params.id,
-      organization: req.user.organization
-    }).populate('items.product');
+router.post(
+  '/stock-takes/:id/complete',
+  validateObjectId('id'),
+  authorize(['admin', 'manager']),
+  async (req, res) => {
+    try {
+      const stockTake = await StockTake.findOne({
+        _id: req.params.id,
+        organization: req.user.organization,
+      }).populate('items.product');
 
-    if (!stockTake) {
-      return res.status(404).json({ success: false, message: 'الجرد غير موجود' });
-    }
-
-    // تحديث المخزون لكل صنف
-    for (const item of stockTake.items) {
-      if (item.variance !== 0) {
-        const product = await Product.findById(item.product._id);
-        product.currentStock = item.countedQuantity;
-        product.availableStock = product.currentStock - product.reservedStock;
-        await product.save();
+      if (!stockTake) {
+        return res.status(404).json({ success: false, message: 'الجرد غير موجود' });
       }
+
+      // تحديث المخزون لكل صنف
+      for (const item of stockTake.items) {
+        if (item.variance !== 0) {
+          const product = await Product.findById(item.product._id);
+          product.currentStock = item.countedQuantity;
+          product.availableStock = product.currentStock - product.reservedStock;
+          await product.save();
+        }
+      }
+
+      stockTake.status = 'completed';
+      stockTake.completedAt = new Date();
+      stockTake.completedBy = req.user._id;
+      await stockTake.save();
+
+      res.json({
+        success: true,
+        data: stockTake,
+        message: 'تم إتمام الجرد وتحديث المخزون',
+      });
+    } catch (error) {
+      res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
     }
-
-    stockTake.status = 'completed';
-    stockTake.completedAt = new Date();
-    stockTake.completedBy = req.user._id;
-    await stockTake.save();
-
-    res.json({
-      success: true,
-      data: stockTake,
-      message: 'تم إتمام الجرد وتحديث المخزون'
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
   }
-});
+);
 
 // ============================================
 // API: التحويلات
@@ -697,131 +782,147 @@ router.post('/stock-takes/:id/complete', async (req, res) => {
 
 router.get('/transfers', async (req, res) => {
   try {
-    const transfers = await StockTransfer.find({
-      organization: req.user.organization
+    const query = StockTransfer.find({
+      organization: req.user.organization,
     })
       .populate('fromWarehouse toWarehouse', 'name')
       .sort({ date: -1 });
+    const { data, meta } = await paginate(query, req.query);
 
-    res.json({ success: true, data: transfers });
+    res.json({ success: true, data, ...meta });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
   }
 });
 
-router.post('/transfers', async (req, res) => {
-  try {
-    const { fromWarehouseId, toWarehouseId, items, notes } = req.body;
+router.post(
+  '/transfers',
+  authorize(['admin', 'manager']),
+  validate(invV.createTransfer),
+  async (req, res) => {
+    try {
+      const { fromWarehouseId, toWarehouseId, items, notes } = req.body;
 
-    const lastTransfer = await StockTransfer.findOne({
-      organization: req.user.organization
-    }).sort({ createdAt: -1 });
-    const transferNumber = lastTransfer
-      ? `TRF-${String(parseInt(lastTransfer.transferNumber.split('-')[1]) + 1).padStart(6, '0')}`
-      : 'TRF-000001';
+      const lastTransfer = await StockTransfer.findOne({
+        organization: req.user.organization,
+      }).sort({ createdAt: -1 });
+      const transferNumber = lastTransfer
+        ? `TRF-${String(parseInt(lastTransfer.transferNumber.split('-')[1]) + 1).padStart(6, '0')}`
+        : 'TRF-000001';
 
-    const transfer = new StockTransfer({
-      transferNumber,
-      fromWarehouse: fromWarehouseId,
-      toWarehouse: toWarehouseId,
-      date: new Date(),
-      items: items.map(i => ({
-        product: i.productId,
-        requestedQuantity: i.quantity,
-        shippedQuantity: 0,
-        receivedQuantity: 0
-      })),
-      notes,
-      organization: req.user.organization,
-      createdBy: req.user._id
-    });
+      const transfer = new StockTransfer({
+        transferNumber,
+        fromWarehouse: fromWarehouseId,
+        toWarehouse: toWarehouseId,
+        date: new Date(),
+        items: items.map(i => ({
+          product: i.productId,
+          requestedQuantity: i.quantity,
+          shippedQuantity: 0,
+          receivedQuantity: 0,
+        })),
+        notes,
+        organization: req.user.organization,
+        createdBy: req.user._id,
+      });
 
-    await transfer.save();
+      await transfer.save();
 
-    res.status(201).json({
-      success: true,
-      data: transfer,
-      message: 'تم إنشاء التحويل بنجاح'
-    });
-  } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+      res.status(201).json({
+        success: true,
+        data: transfer,
+        message: 'تم إنشاء التحويل بنجاح',
+      });
+    } catch (error) {
+      res.status(400).json({ success: false, message: 'خطأ في البيانات المدخلة' });
+    }
   }
-});
+);
 
 // شحن التحويل
-router.post('/transfers/:id/ship', async (req, res) => {
-  try {
-    const transfer = await StockTransfer.findOne({
-      _id: req.params.id,
-      organization: req.user.organization
-    }).populate('items.product');
+router.post(
+  '/transfers/:id/ship',
+  validateObjectId('id'),
+  authorize(['admin', 'manager']),
+  async (req, res) => {
+    try {
+      const transfer = await StockTransfer.findOne({
+        _id: req.params.id,
+        organization: req.user.organization,
+      }).populate('items.product');
 
-    if (!transfer) {
-      return res.status(404).json({ success: false, message: 'التحويل غير موجود' });
-    }
-
-    // خصم من المخزون المصدر
-    for (const item of transfer.items) {
-      const product = await Product.findById(item.product._id);
-      if (product.availableStock < item.requestedQuantity) {
-        return res.status(400).json({
-          success: false,
-          message: `الكمية المتاحة من ${product.name} غير كافية`
-        });
+      if (!transfer) {
+        return res.status(404).json({ success: false, message: 'التحويل غير موجود' });
       }
-      product.currentStock -= item.requestedQuantity;
-      product.availableStock -= item.requestedQuantity;
-      await product.save();
-      item.shippedQuantity = item.requestedQuantity;
+
+      // خصم من المخزون المصدر
+      for (const item of transfer.items) {
+        const product = await Product.findById(item.product._id);
+        if (product.availableStock < item.requestedQuantity) {
+          return res.status(400).json({
+            success: false,
+            message: `الكمية المتاحة من ${product.name} غير كافية`,
+          });
+        }
+        product.currentStock -= item.requestedQuantity;
+        product.availableStock -= item.requestedQuantity;
+        await product.save();
+        item.shippedQuantity = item.requestedQuantity;
+      }
+
+      transfer.status = 'shipped';
+      transfer.shippedAt = new Date();
+      transfer.shippedBy = req.user._id;
+      await transfer.save();
+
+      res.json({ success: true, data: transfer, message: 'تم شحن التحويل' });
+    } catch (error) {
+      res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
     }
-
-    transfer.status = 'shipped';
-    transfer.shippedAt = new Date();
-    transfer.shippedBy = req.user._id;
-    await transfer.save();
-
-    res.json({ success: true, data: transfer, message: 'تم شحن التحويل' });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
   }
-});
+);
 
 // استلام التحويل
-router.post('/transfers/:id/receive', async (req, res) => {
-  try {
-    const { items } = req.body; // [{ productId, receivedQuantity }]
+router.post(
+  '/transfers/:id/receive',
+  authorize(['admin', 'manager']),
+  validate(invV.receiveTransfer),
+  async (req, res) => {
+    try {
+      const { items } = req.body; // [{ productId, receivedQuantity }]
 
-    const transfer = await StockTransfer.findOne({
-      _id: req.params.id,
-      organization: req.user.organization
-    }).populate('items.product');
+      const transfer = await StockTransfer.findOne({
+        _id: req.params.id,
+        organization: req.user.organization,
+      }).populate('items.product');
 
-    if (!transfer) {
-      return res.status(404).json({ success: false, message: 'التحويل غير موجود' });
-    }
-
-    // إضافة للمخزون المستهدف
-    for (const receivedItem of items) {
-      const item = transfer.items.find(i => String(i.product._id) === receivedItem.productId);
-      if (item) {
-        item.receivedQuantity = receivedItem.receivedQuantity;
-        const product = await Product.findById(item.product._id);
-        product.currentStock += receivedItem.receivedQuantity;
-        product.availableStock += receivedItem.receivedQuantity;
-        await product.save();
+      if (!transfer) {
+        return res.status(404).json({ success: false, message: 'التحويل غير موجود' });
       }
+
+      // إضافة للمخزون المستهدف
+      for (const receivedItem of items) {
+        const item = transfer.items.find(i => String(i.product._id) === receivedItem.productId);
+        if (item) {
+          item.receivedQuantity = receivedItem.receivedQuantity;
+          const product = await Product.findById(item.product._id);
+          product.currentStock += receivedItem.receivedQuantity;
+          product.availableStock += receivedItem.receivedQuantity;
+          await product.save();
+        }
+      }
+
+      transfer.status = 'received';
+      transfer.receivedAt = new Date();
+      transfer.receivedBy = req.user._id;
+      await transfer.save();
+
+      res.json({ success: true, data: transfer, message: 'تم استلام التحويل' });
+    } catch (error) {
+      res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
     }
-
-    transfer.status = 'received';
-    transfer.receivedAt = new Date();
-    transfer.receivedBy = req.user._id;
-    await transfer.save();
-
-    res.json({ success: true, data: transfer, message: 'تم استلام التحويل' });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
   }
-});
+);
 
 // ============================================
 // لوحة تحكم المخزون
@@ -830,13 +931,18 @@ router.post('/transfers/:id/receive', async (req, res) => {
 router.get('/dashboard', async (req, res) => {
   try {
     const products = await Product.find({ organization: req.user.organization });
-    const warehouses = await Warehouse.find({ organization: req.user.organization, isActive: true });
+    const warehouses = await Warehouse.find({
+      organization: req.user.organization,
+      isActive: true,
+    });
 
     const totalProducts = products.length;
     const activeProducts = products.filter(p => p.isActive).length;
     const totalStock = products.reduce((sum, p) => sum + p.currentStock, 0);
-    const totalValue = products.reduce((sum, p) => sum + (p.currentStock * p.costPrice), 0);
-    const lowStockProducts = products.filter(p => p.currentStock <= p.minStock && p.isActive).length;
+    const totalValue = products.reduce((sum, p) => sum + p.currentStock * p.costPrice, 0);
+    const lowStockProducts = products.filter(
+      p => p.currentStock <= p.minStock && p.isActive
+    ).length;
     const outOfStockProducts = products.filter(p => p.currentStock === 0 && p.isActive).length;
 
     // الحركات الأخيرة
@@ -847,7 +953,7 @@ router.get('/dashboard', async (req, res) => {
 
     // أعلى الأصناف قيمة
     const topValueProducts = [...products]
-      .sort((a, b) => (b.currentStock * b.costPrice) - (a.currentStock * a.costPrice))
+      .sort((a, b) => b.currentStock * b.costPrice - a.currentStock * a.costPrice)
       .slice(0, 5);
 
     res.json({
@@ -860,15 +966,15 @@ router.get('/dashboard', async (req, res) => {
           totalValue,
           lowStockProducts,
           outOfStockProducts,
-          totalWarehouses: warehouses.length
+          totalWarehouses: warehouses.length,
         },
         lowStock: products.filter(p => p.currentStock <= p.minStock && p.isActive).slice(0, 10),
         recentMovements,
-        topValueProducts
-      }
+        topValueProducts,
+      },
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
   }
 });
 
@@ -883,5 +989,5 @@ module.exports = {
   Warehouse,
   StockMovement,
   StockTake,
-  StockTransfer
+  StockTransfer,
 };

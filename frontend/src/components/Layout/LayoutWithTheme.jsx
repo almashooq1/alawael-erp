@@ -3,11 +3,10 @@
  * مكون التخطيط مع زر تبديل الثيم
  */
 
-import React from 'react';
+import { useState } from 'react';
 import {
   AppBar,
   Box,
-  Container,
   IconButton,
   Toolbar,
   Typography,
@@ -25,22 +24,26 @@ import {
   School as SchoolIcon,
   Assessment as AssessmentIcon,
   Settings as SettingsIcon,
+  AccessibilityNew as AccessibilityIcon,
+  Quiz as QuizIcon,
 } from '@mui/icons-material';
 import { Link, useLocation } from 'react-router-dom';
-import ThemeToggle from '../ui/ThemeToggle';
-import { SkipLink } from '../ui/AccessibleComponents';
+import ThemeToggle from 'components/ui/ThemeToggle';
+import { SkipLink } from 'components/ui/AccessibleComponents';
 
 const menuItems = [
   { text: 'لوحة التحكم', icon: <DashboardIcon />, path: '/dashboard' },
   { text: 'التقارير', icon: <AssessmentIcon />, path: '/student-portal/reports' },
   { text: 'الطلاب', icon: <SchoolIcon />, path: '/students' },
+  { text: 'مقاييس التقييم', icon: <AccessibilityIcon />, path: '/assessment-scales' },
+  { text: 'اختبارات التقييم', icon: <QuizIcon />, path: '/assessment-tests' },
   { text: 'الإعدادات', icon: <SettingsIcon />, path: '/settings' },
 ];
 
 const LayoutWithTheme = ({ children }) => {
   const theme = useTheme();
   const location = useLocation();
-  const [drawerOpen, setDrawerOpen] = React.useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const toggleDrawer = (open) => (event) => {
     if (
@@ -55,24 +58,24 @@ const LayoutWithTheme = ({ children }) => {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <SkipLink targetId="main-content" />
-      
+
       {/* Header */}
       <AppBar position="sticky" elevation={2}>
         <Toolbar>
           <IconButton
             edge="start"
             color="inherit"
-            aria-label="menu"
+            aria-label="القائمة"
             onClick={toggleDrawer(true)}
             sx={{ mr: 2 }}
           >
             <MenuIcon />
           </IconButton>
-          
+
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             نظام إدارة المدارس
           </Typography>
-          
+
           <ThemeToggle sx={{ color: 'white' }} />
         </Toolbar>
       </AppBar>

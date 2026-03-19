@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 const sectionSchema = new mongoose.Schema({
@@ -24,7 +25,7 @@ const standardizedAssessmentSchema = new mongoose.Schema(
     attachments: [String], // Scan of the paper form
     recommendations: String,
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 module.exports = mongoose.model('StandardizedAssessment', standardizedAssessmentSchema);

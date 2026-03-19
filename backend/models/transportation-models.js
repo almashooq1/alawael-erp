@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * ===================================================================
  * STUDENT TRANSPORTATION SYSTEM - Models
@@ -119,9 +120,6 @@ const studentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-studentSchema.index({ email: 1 });
-studentSchema.index({ studentID: 1 });
-
 // ===================================================================
 // 2. BUS ROUTE MODEL - نموذج مسار الحافلة
 // ===================================================================
@@ -208,7 +206,6 @@ const busRouteSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-busRouteSchema.index({ routeNumber: 1 });
 busRouteSchema.index({ status: 1 });
 
 // ===================================================================
@@ -318,7 +315,6 @@ const driverSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-driverSchema.index({ email: 1 });
 driverSchema.index({ status: 1 });
 
 // ===================================================================
@@ -551,7 +547,6 @@ const incidentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-incidentSchema.index({ incidentNumber: 1 });
 incidentSchema.index({ status: 1 });
 
 // ===================================================================

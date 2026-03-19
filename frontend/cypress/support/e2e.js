@@ -1,5 +1,6 @@
 // Cypress support file - Global setup and custom commands
 import './commands';
+import 'cypress-axe';
 
 // Suppress console errors during tests
 const app = window.top;

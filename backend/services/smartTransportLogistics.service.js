@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+const logger = require('../utils/logger');
 /**
  * Smart Transportation Logistics Service (Phase 81)
  *
@@ -16,7 +18,7 @@ class SmartTransportLogisticsService {
    */
   async optimizeDailyRoute(busId, registeredStudents) {
     // registeredStudents = [{id: 1, lat: 24.0, long: 45.0, wheelchair: true}]
-    console.log(`Optimizing route for Bus ${busId} with ${registeredStudents.length} stops`);
+    logger.info(`Optimizing route for Bus ${busId} with ${registeredStudents.length} stops`);
 
     // Mock optimization algorithm
     return {
@@ -59,7 +61,7 @@ class SmartTransportLogisticsService {
   async logTelematics(busId, eventData) {
     // eventData = { type: 'HARSH_BRAKING', speed: 80, limit: 60 }
     if (eventData.type === 'HARSH_BRAKING') {
-      console.warn(`[SAFETY] Bus ${busId} harsh braking detected`);
+      logger.warn(`[SAFETY] Bus ${busId} harsh braking detected`);
     }
 
     return {

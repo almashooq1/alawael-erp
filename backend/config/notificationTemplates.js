@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Notification Templates - Pre-built Email, SMS, Push templates
  * Created: February 22, 2026
@@ -40,7 +41,14 @@ const emailTemplates = {
      <p>Track your order using the link below:</p>
      <p><a href="{{trackingUrl}}" style="color: #3498db;">Track Order</a></p>
      <p>Thank you for your business!</p>`,
-    ['{{customerName}}', '{{orderId}}', '{{total}}', '{{currency}}', '{{deliveryDate}}', '{{trackingUrl}}']
+    [
+      '{{customerName}}',
+      '{{orderId}}',
+      '{{total}}',
+      '{{currency}}',
+      '{{deliveryDate}}',
+      '{{trackingUrl}}',
+    ]
   ),
 
   passwordReset: new NotificationTemplate(
@@ -155,13 +163,9 @@ const pushTemplates = {
     ['{{discount}}', '{{productName}}']
   ),
 
-  systemAlert: new NotificationTemplate(
-    'systemAlert',
-    'push',
-    'System Alert',
-    `{{message}}`,
-    ['{{message}}']
-  ),
+  systemAlert: new NotificationTemplate('systemAlert', 'push', 'System Alert', `{{message}}`, [
+    '{{message}}',
+  ]),
 
   accountActivity: new NotificationTemplate(
     'accountActivity',
@@ -185,17 +189,17 @@ const pushTemplates = {
  */
 function initializeTemplates(notificationService) {
   // Register email templates
-  Object.values(emailTemplates).forEach((template) => {
+  Object.values(emailTemplates).forEach(template => {
     notificationService.registerTemplate(template);
   });
 
   // Register SMS templates
-  Object.values(smsTemplates).forEach((template) => {
+  Object.values(smsTemplates).forEach(template => {
     notificationService.registerTemplate(template);
   });
 
   // Register push templates
-  Object.values(pushTemplates).forEach((template) => {
+  Object.values(pushTemplates).forEach(template => {
     notificationService.registerTemplate(template);
   });
 

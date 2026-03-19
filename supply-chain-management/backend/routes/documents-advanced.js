@@ -1,5 +1,7 @@
+/* eslint-disable no-unused-vars */
 const express = require('express');
 const router = express.Router({ mergeParams: true });
+const jwt = require('jsonwebtoken');
 const DocumentCollaborationService = require('../services/documentCollaborationService');
 
 /**
@@ -15,9 +17,17 @@ const authMiddleware = (req, res, next) => {
   if (!token) {
     return res.status(401).json({ success: false, error: 'No token provided' });
   }
-  // Simplified auth - in production use JWT verification
-  req.userId = req.body.userId || 'user-123';
-  next();
+  if (!process.env.JWT_SECRET) {
+    return res.status(500).json({ success: false, error: 'Server configuration error' });
+  }
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.userId = decoded.userId || decoded.sub || decoded.id;
+    req.user = decoded;
+    next();
+  } catch (err) {
+    return res.status(401).json({ success: false, error: 'Invalid or expired token' });
+  }
 };
 
 router.use(authMiddleware);
@@ -45,7 +55,7 @@ router.post(
         changeDescription: changeDescription || '',
         tags: tags || [],
         category: category || '',
-      }
+      },
     );
 
     res.status(201).json({
@@ -53,7 +63,7 @@ router.post(
       data: newVersion,
       message: `Version ${newVersion.versionNumber} created successfully`,
     });
-  })
+  }),
 );
 
 /**
@@ -76,7 +86,7 @@ router.get(
       success: true,
       data: history,
     });
-  })
+  }),
 );
 
 /**
@@ -88,16 +98,13 @@ router.get(
   asyncHandler(async (req, res) => {
     const { documentId, versionNumber } = req.params;
 
-    const version = await DocumentCollaborationService.getVersion(
-      documentId,
-      parseInt(versionNumber)
-    );
+    const version = await DocumentCollaborationService.getVersion(documentId, parseInt(versionNumber));
 
     res.status(200).json({
       success: true,
       data: version,
     });
-  })
+  }),
 );
 
 /**
@@ -114,7 +121,7 @@ router.post(
       documentId,
       parseInt(versionNumber),
       req.userId,
-      restoreDescription
+      restoreDescription,
     );
 
     res.status(201).json({
@@ -122,7 +129,7 @@ router.post(
       data: restoredVersion,
       message: `Version ${versionNumber} restored as version ${restoredVersion.versionNumber}`,
     });
-  })
+  }),
 );
 
 /**
@@ -139,19 +146,14 @@ router.patch(
       return res.status(400).json({ success: false, error: 'Status is required' });
     }
 
-    const updatedVersion = await DocumentCollaborationService.updateWorkflowStatus(
-      documentId,
-      parseInt(versionNumber),
-      status,
-      req.userId
-    );
+    const updatedVersion = await DocumentCollaborationService.updateWorkflowStatus(documentId, parseInt(versionNumber), status, req.userId);
 
     res.status(200).json({
       success: true,
       data: updatedVersion,
       message: `Version status updated to ${status}`,
     });
-  })
+  }),
 );
 
 /**
@@ -163,17 +165,13 @@ router.get(
   asyncHandler(async (req, res) => {
     const { documentId, version1, version2 } = req.params;
 
-    const comparison = await DocumentCollaborationService.compareVersions(
-      documentId,
-      parseInt(version1),
-      parseInt(version2)
-    );
+    const comparison = await DocumentCollaborationService.compareVersions(documentId, parseInt(version1), parseInt(version2));
 
     res.status(200).json({
       success: true,
       data: comparison,
     });
-  })
+  }),
 );
 
 /**
@@ -195,7 +193,7 @@ router.post(
       parseInt(versionNumber),
       userId,
       permission,
-      req.userId
+      req.userId,
     );
 
     res.status(200).json({
@@ -203,7 +201,7 @@ router.post(
       data: sharedVersion,
       message: `Version shared with permission: ${permission}`,
     });
-  })
+  }),
 );
 
 /**
@@ -225,7 +223,7 @@ router.post(
       parseInt(versionNumber),
       req.userId,
       comment,
-      position
+      position,
     );
 
     res.status(201).json({
@@ -233,7 +231,7 @@ router.post(
       data: versionWithComment,
       message: 'Comment added successfully',
     });
-  })
+  }),
 );
 
 /**
@@ -245,18 +243,14 @@ router.post(
   asyncHandler(async (req, res) => {
     const { documentId, versionNumber } = req.params;
 
-    const version = await DocumentCollaborationService.startEditSession(
-      documentId,
-      parseInt(versionNumber),
-      req.userId
-    );
+    const version = await DocumentCollaborationService.startEditSession(documentId, parseInt(versionNumber), req.userId);
 
     res.status(200).json({
       success: true,
       data: version,
       message: 'Edit session started',
     });
-  })
+  }),
 );
 
 /**
@@ -268,18 +262,14 @@ router.post(
   asyncHandler(async (req, res) => {
     const { documentId, versionNumber } = req.params;
 
-    const version = await DocumentCollaborationService.endEditSession(
-      documentId,
-      parseInt(versionNumber),
-      req.userId
-    );
+    const version = await DocumentCollaborationService.endEditSession(documentId, parseInt(versionNumber), req.userId);
 
     res.status(200).json({
       success: true,
       data: version,
       message: 'Edit session ended',
     });
-  })
+  }),
 );
 
 /**
@@ -291,16 +281,13 @@ router.get(
   asyncHandler(async (req, res) => {
     const { documentId, versionNumber } = req.params;
 
-    const collaborators = await DocumentCollaborationService.getCollaborators(
-      documentId,
-      parseInt(versionNumber)
-    );
+    const collaborators = await DocumentCollaborationService.getCollaborators(documentId, parseInt(versionNumber));
 
     res.status(200).json({
       success: true,
       data: collaborators,
     });
-  })
+  }),
 );
 
 /**
@@ -320,16 +307,16 @@ router.post(
       data: result,
       message: `Archived ${result.archived} versions, keeping ${result.kept} active`,
     });
-  })
+  }),
 );
 
 // Error handling middleware
-router.use((error, req, res, next) => {
+router.use((error, _req, res, _next) => {
   console.error('Phase 3 Route Error:', error);
 
   res.status(error.status || 500).json({
     success: false,
-    error: error.message || 'Internal Server Error',
+    error: 'حدث خطأ في الخادم',
     timestamp: new Date().toISOString(),
   });
 });

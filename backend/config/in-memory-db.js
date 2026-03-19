@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // backend/config/in-memory-db.js
 // محاكاة قاعدة بيانات في الذاكرة للتطوير السريع
 

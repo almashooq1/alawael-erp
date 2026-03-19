@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Advanced Performance Monitoring & Logging
  * نظام مراقبة الأداء المتقدمة
@@ -106,7 +107,10 @@ class PerformanceMetrics {
   }
 
   getReport() {
-    const slowQueryPercentage = ((this.metrics.slowQueries / this.metrics.totalRequests) * 100).toFixed(1);
+    const slowQueryPercentage = (
+      (this.metrics.slowQueries / this.metrics.totalRequests) *
+      100
+    ).toFixed(1);
 
     return {
       summary: {

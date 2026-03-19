@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * 🏗️ Infrastructure as Code (Terraform)
  *

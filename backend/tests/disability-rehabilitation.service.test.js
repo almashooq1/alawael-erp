@@ -1,3 +1,4 @@
+/* eslint-disable no-undef, no-unused-vars */
 /**
  * Unit Tests for Disability Rehabilitation Service
  * Jest Test Suite

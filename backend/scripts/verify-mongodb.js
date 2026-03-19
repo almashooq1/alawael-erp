@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable no-unused-vars */
 
 /**
  * 🔍 MongoDB Connection Verification Script
@@ -82,7 +83,9 @@ mongoose
         console.log(`   ${colors.yellow}⚠️  No organizations found${colors.reset}`);
       }
     } catch (err) {
-      console.log(`   ${colors.yellow}⚠️  Could not query organizations: ${err.message}${colors.reset}`);
+      console.log(
+        `   ${colors.yellow}⚠️  Could not query organizations: ${err.message}${colors.reset}`
+      );
     }
 
     console.log();
@@ -100,11 +103,15 @@ mongoose
     console.log(`${colors.red}Error:${colors.reset} ${err.message}\n`);
 
     if (err.message.includes('authentication failed')) {
-      console.log(`${colors.yellow}💡 Tip: Check username and password in MONGODB_URI${colors.reset}\n`);
+      console.log(
+        `${colors.yellow}💡 Tip: Check username and password in MONGODB_URI${colors.reset}\n`
+      );
     }
 
     if (err.message.includes('MongooseServerSelectionError')) {
-      console.log(`${colors.yellow}💡 Tip: Check if IP address (0.0.0.0/0) is added in MongoDB Atlas${colors.reset}\n`);
+      console.log(
+        `${colors.yellow}💡 Tip: Check if IP address (0.0.0.0/0) is added in MongoDB Atlas${colors.reset}\n`
+      );
     }
 
     if (err.message.includes('ENOTFOUND')) {

@@ -1,9 +1,11 @@
+/* eslint-disable no-unused-vars */
 /**
  * Database Optimization & Indexes
  * تحسين قاعدة البيانات والفهارس
  */
 
 const mongoose = require('mongoose');
+const logger = require('../utils/logger');
 
 /**
  * Create MongoDB indexes for better performance
@@ -11,7 +13,7 @@ const mongoose = require('mongoose');
  */
 const createIndexes = async () => {
   try {
-    console.log('🔍 Creating MongoDB indexes...');
+    // console.log('🔍 Creating MongoDB indexes...');
 
     // User indexes
     const User = mongoose.model('User');
@@ -20,7 +22,7 @@ const createIndexes = async () => {
       await User.collection.createIndex({ role: 1 }, { background: true });
       await User.collection.createIndex({ isActive: 1 }, { background: true });
       await User.collection.createIndex({ createdAt: -1 }, { background: true });
-      console.log('✅ User indexes created');
+      // console.log('✅ User indexes created');
     }
 
     // Add more model indexes as needed
@@ -34,9 +36,9 @@ const createIndexes = async () => {
     }
     */
 
-    console.log('✅ All indexes created successfully');
+    // console.log('✅ All indexes created successfully');
   } catch (error) {
-    console.error('❌ Error creating indexes:', error.message);
+    logger.error('❌ Error creating indexes:', error.message);
     // Don't throw - let the app continue even if indexes fail
   }
 };
@@ -68,7 +70,7 @@ const mongooseOptions = {
  */
 const monitorDBPerformance = () => {
   mongoose.connection.on('connected', () => {
-    console.log('📊 MongoDB Performance Monitoring Active');
+    // console.log('📊 MongoDB Performance Monitoring Active');
 
     // Log slow queries (> 100ms)
     mongoose.set('debug', (collectionName, method, _query, _doc, _options) => {
@@ -78,7 +80,7 @@ const monitorDBPerformance = () => {
       setTimeout(() => {
         const duration = Date.now() - startTime;
         if (duration > 100) {
-          console.warn(`⚠️  Slow query detected: ${collectionName}.${method} took ${duration}ms`);
+          logger.warn(`⚠️  Slow query detected: ${collectionName}.${method} took ${duration}ms`);
         }
       }, 0);
     });
@@ -113,14 +115,14 @@ const checkDatabaseHealth = async () => {
  */
 const cleanupConnections = async () => {
   try {
-    console.log('🧹 Cleaning up database connections...');
+    // console.log('🧹 Cleaning up database connections...');
 
     // Close all connections
     await mongoose.connection.close();
 
-    console.log('✅ Database connections cleaned up');
+    // console.log('✅ Database connections cleaned up');
   } catch (error) {
-    console.error('❌ Error cleaning up connections:', error.message);
+    logger.error('❌ Error cleaning up connections:', error.message);
   }
 };
 

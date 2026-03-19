@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Maintenance Schedule Model - نموذج جدول الصيانة
  *

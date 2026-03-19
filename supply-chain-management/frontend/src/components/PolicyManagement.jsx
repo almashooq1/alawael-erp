@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './PolicyManagement.css';
 
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
 
 const PolicyManagement = () => {
   const [policies, setPolicies] = useState([]);
@@ -13,7 +13,7 @@ const PolicyManagement = () => {
   const [filter, setFilter] = useState({
     type: 'ALL',
     status: 'ALL',
-    searchTerm: ''
+    searchTerm: '',
   });
 
   const [formData, setFormData] = useState({
@@ -27,8 +27,8 @@ const PolicyManagement = () => {
     applicableDepartments: [],
     content: {
       ar: '',
-      en: ''
-    }
+      en: '',
+    },
   });
 
   // Fetch policies
@@ -70,9 +70,8 @@ const PolicyManagement = () => {
     // Search filter
     if (filter.searchTerm) {
       const term = filter.searchTerm.toLowerCase();
-      filtered = filtered.filter(p =>
-        p.policyName.toLowerCase().includes(term) ||
-        p.policyNameAr.includes(term)
+      filtered = filtered.filter(
+        p => p.policyName.toLowerCase().includes(term) || p.policyNameAr.includes(term)
       );
     }
 
@@ -94,7 +93,7 @@ const PolicyManagement = () => {
         effectiveDate: '',
         dueDate: '',
         applicableDepartments: [],
-        content: { ar: '', en: '' }
+        content: { ar: '', en: '' },
       });
     }
     setShowModal(true);
@@ -105,11 +104,11 @@ const PolicyManagement = () => {
     setEditingPolicy(null);
   };
 
-  const handleFormChange = (e) => {
+  const handleFormChange = e => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -130,7 +129,7 @@ const PolicyManagement = () => {
     }
   };
 
-  const handleDeletePolicy = async (policyId) => {
+  const handleDeletePolicy = async policyId => {
     if (window.confirm('هل أنت متأكد من حذف هذه السياسة؟')) {
       try {
         await axios.delete(`${API_BASE}/policies/${policyId}`);
@@ -151,7 +150,7 @@ const PolicyManagement = () => {
     'RETIREMENT_BENEFITS',
     'TRAINING_DEVELOPMENT',
     'CODE_OF_CONDUCT',
-    'ATTENDANCE_DISCIPLINE'
+    'ATTENDANCE_DISCIPLINE',
   ];
 
   const policyStatuses = ['DRAFT', 'PENDING_APPROVAL', 'APPROVED', 'ACTIVE', 'ARCHIVED'];
@@ -175,7 +174,7 @@ const PolicyManagement = () => {
               type="text"
               placeholder="ابحث عن سياسة..."
               value={filter.searchTerm}
-              onChange={(e) => setFilter({ ...filter, searchTerm: e.target.value })}
+              onChange={e => setFilter({ ...filter, searchTerm: e.target.value })}
               className="form-control"
             />
           </div>
@@ -184,12 +183,14 @@ const PolicyManagement = () => {
             <label>نوع السياسة:</label>
             <select
               value={filter.type}
-              onChange={(e) => setFilter({ ...filter, type: e.target.value })}
+              onChange={e => setFilter({ ...filter, type: e.target.value })}
               className="form-control"
             >
               <option value="ALL">جميع الأنواع</option>
               {policyTypes.map(type => (
-                <option key={type} value={type}>{type}</option>
+                <option key={type} value={type}>
+                  {type}
+                </option>
               ))}
             </select>
           </div>
@@ -198,12 +199,14 @@ const PolicyManagement = () => {
             <label>الحالة:</label>
             <select
               value={filter.status}
-              onChange={(e) => setFilter({ ...filter, status: e.target.value })}
+              onChange={e => setFilter({ ...filter, status: e.target.value })}
               className="form-control"
             >
               <option value="ALL">جميع الحالات</option>
               {policyStatuses.map(status => (
-                <option key={status} value={status}>{status}</option>
+                <option key={status} value={status}>
+                  {status}
+                </option>
               ))}
             </select>
           </div>
@@ -264,7 +267,9 @@ const PolicyManagement = () => {
             <div className="modal-content">
               <div className="modal-header">
                 <h2>{editingPolicy ? 'تعديل السياسة' : 'إضافة سياسة جديدة'}</h2>
-                <button className="close-btn" onClick={handleModalClose}>×</button>
+                <button className="close-btn" onClick={handleModalClose}>
+                  ×
+                </button>
               </div>
 
               <div className="modal-body">
@@ -299,7 +304,9 @@ const PolicyManagement = () => {
                     className="form-control"
                   >
                     {policyTypes.map(type => (
-                      <option key={type} value={type}>{type}</option>
+                      <option key={type} value={type}>
+                        {type}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -350,8 +357,12 @@ const PolicyManagement = () => {
               </div>
 
               <div className="modal-footer">
-                <button className="btn btn-secondary" onClick={handleModalClose}>إلغاء</button>
-                <button className="btn btn-primary" onClick={handleSavePolicy}>حفظ</button>
+                <button className="btn btn-secondary" onClick={handleModalClose}>
+                  إلغاء
+                </button>
+                <button className="btn btn-primary" onClick={handleSavePolicy}>
+                  حفظ
+                </button>
               </div>
             </div>
           </div>

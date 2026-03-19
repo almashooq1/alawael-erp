@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const SmartNotificationService = require('./smartNotificationService');
 const User = require('../models/User');
 
@@ -36,7 +37,8 @@ class SmartCommunityService {
     const flags = [];
 
     // 1. PII Check
-    const phoneRegex = /(\d{3}[-.\s]??\d{3}[-.\s]??\d{4}|\(\d{3}\)\s*\d{3}[-.\s]??\d{4}|\d{3}[-.\s]??\d{4})/;
+    const phoneRegex =
+      /(\d{3}[-.\s]??\d{3}[-.\s]??\d{4}|\(\d{3}\)\s*\d{3}[-.\s]??\d{4}|\d{3}[-.\s]??\d{4})/;
     if (phoneRegex.test(postText)) {
       flags.push('PII_DETECTED_PHONE');
     }

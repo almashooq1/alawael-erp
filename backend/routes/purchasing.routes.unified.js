@@ -1,3 +1,4 @@
+﻿/* eslint-disable no-unused-vars */
 /**
  * 🛒 نظام المشتريات الموحد - Purchasing System
  * AlAwael ERP - Unified Purchasing Routes
@@ -7,6 +8,12 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
+const { escapeRegex } = require('../utils/sanitize');
+const { paginate } = require('../utils/paginate');
+const { authenticateToken } = require('../middleware/auth');
+const { validate } = require('../middleware/validate');
+const purV = require('../middleware/validators/purchasing.validators');
+const validateObjectId = require('../middleware/validateObjectId');
 
 // ============================================
 // نماذج المشتريات
@@ -29,17 +36,17 @@ const VendorSchema = new mongoose.Schema({
     city: String,
     region: String,
     country: { type: String, default: 'السعودية' },
-    postalCode: String
+    postalCode: String,
   },
   contactPerson: {
     name: String,
     phone: String,
-    email: String
+    email: String,
   },
   bankInfo: {
     bankName: String,
     accountNumber: String,
-    iban: String
+    iban: String,
   },
   paymentTerms: { type: String, default: 'net30' },
   creditLimit: { type: Number, default: 0 },
@@ -50,7 +57,7 @@ const VendorSchema = new mongoose.Schema({
   organization: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization' },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
+  updatedAt: { type: Date, default: Date.now },
 });
 
 // طلبات الشراء
@@ -60,19 +67,21 @@ const PurchaseRequestSchema = new mongoose.Schema({
   requiredDate: Date,
   department: String,
   requestedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  items: [{
-    product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
-    description: String,
-    quantity: { type: Number, required: true },
-    unit: String,
-    estimatedPrice: { type: Number, default: 0 },
-    notes: String
-  }],
+  items: [
+    {
+      product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+      description: String,
+      quantity: { type: Number, required: true },
+      unit: String,
+      estimatedPrice: { type: Number, default: 0 },
+      notes: String,
+    },
+  ],
   totalEstimated: { type: Number, default: 0 },
   status: {
     type: String,
     enum: ['draft', 'submitted', 'approved', 'rejected', 'ordered'],
-    default: 'draft'
+    default: 'draft',
   },
   priority: { type: String, enum: ['low', 'medium', 'high', 'urgent'], default: 'medium' },
   approvedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
@@ -81,7 +90,7 @@ const PurchaseRequestSchema = new mongoose.Schema({
   notes: String,
   organization: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization' },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
 });
 
 // أوامر الشراء
@@ -92,19 +101,21 @@ const PurchaseOrderSchema = new mongoose.Schema({
   vendor: { type: mongoose.Schema.Types.ObjectId, ref: 'Vendor', required: true },
   quotationNumber: String,
   quotationDate: Date,
-  items: [{
-    product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
-    description: String,
-    quantity: { type: Number, required: true },
-    unit: String,
-    unitPrice: { type: Number, required: true },
-    discount: { type: Number, default: 0 },
-    taxRate: { type: Number, default: 15 },
-    taxAmount: { type: Number, default: 0 },
-    total: { type: Number, default: 0 },
-    receivedQuantity: { type: Number, default: 0 },
-    notes: String
-  }],
+  items: [
+    {
+      product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+      description: String,
+      quantity: { type: Number, required: true },
+      unit: String,
+      unitPrice: { type: Number, required: true },
+      discount: { type: Number, default: 0 },
+      taxRate: { type: Number, default: 15 },
+      taxAmount: { type: Number, default: 0 },
+      total: { type: Number, default: 0 },
+      receivedQuantity: { type: Number, default: 0 },
+      notes: String,
+    },
+  ],
   subtotal: { type: Number, default: 0 },
   discount: { type: Number, default: 0 },
   taxAmount: { type: Number, default: 0 },
@@ -113,19 +124,19 @@ const PurchaseOrderSchema = new mongoose.Schema({
   status: {
     type: String,
     enum: ['draft', 'sent', 'confirmed', 'partial', 'received', 'cancelled'],
-    default: 'draft'
+    default: 'draft',
   },
   paymentStatus: {
     type: String,
     enum: ['unpaid', 'partial', 'paid'],
-    default: 'unpaid'
+    default: 'unpaid',
   },
   paymentTerms: String,
   terms: String,
   notes: String,
   organization: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization' },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
 });
 
 // استلام المشتريات
@@ -135,27 +146,29 @@ const PurchaseReceiptSchema = new mongoose.Schema({
   purchaseOrder: { type: mongoose.Schema.Types.ObjectId, ref: 'PurchaseOrder', required: true },
   vendor: { type: mongoose.Schema.Types.ObjectId, ref: 'Vendor' },
   warehouse: { type: mongoose.Schema.Types.ObjectId, ref: 'Warehouse' },
-  items: [{
-    product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
-    orderedQuantity: { type: Number, required: true },
-    receivedQuantity: { type: Number, required: true },
-    rejectedQuantity: { type: Number, default: 0 },
-    unitCost: { type: Number, required: true },
-    batchNumber: String,
-    expiryDate: Date,
-    notes: String
-  }],
+  items: [
+    {
+      product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+      orderedQuantity: { type: Number, required: true },
+      receivedQuantity: { type: Number, required: true },
+      rejectedQuantity: { type: Number, default: 0 },
+      unitCost: { type: Number, required: true },
+      batchNumber: String,
+      expiryDate: Date,
+      notes: String,
+    },
+  ],
   totalReceived: { type: Number, default: 0 },
   totalRejected: { type: Number, default: 0 },
   status: {
     type: String,
     enum: ['draft', 'received', 'partial', 'cancelled'],
-    default: 'draft'
+    default: 'draft',
   },
   notes: String,
   organization: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization' },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
 });
 
 // فواتير الموردين
@@ -167,13 +180,15 @@ const VendorInvoiceSchema = new mongoose.Schema({
   vendor: { type: mongoose.Schema.Types.ObjectId, ref: 'Vendor', required: true },
   purchaseOrder: { type: mongoose.Schema.Types.ObjectId, ref: 'PurchaseOrder' },
   purchaseReceipt: { type: mongoose.Schema.Types.ObjectId, ref: 'PurchaseReceipt' },
-  items: [{
-    description: String,
-    quantity: { type: Number, default: 1 },
-    unitPrice: { type: Number, default: 0 },
-    taxRate: { type: Number, default: 15 },
-    total: { type: Number, default: 0 }
-  }],
+  items: [
+    {
+      description: String,
+      quantity: { type: Number, default: 1 },
+      unitPrice: { type: Number, default: 0 },
+      taxRate: { type: Number, default: 15 },
+      total: { type: Number, default: 0 },
+    },
+  ],
   subtotal: { type: Number, default: 0 },
   taxAmount: { type: Number, default: 0 },
   total: { type: Number, default: 0 },
@@ -182,11 +197,11 @@ const VendorInvoiceSchema = new mongoose.Schema({
   status: {
     type: String,
     enum: ['draft', 'verified', 'approved', 'paid', 'cancelled'],
-    default: 'draft'
+    default: 'draft',
   },
   organization: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization' },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
 });
 
 // عقود الموردين
@@ -204,13 +219,13 @@ const VendorContractSchema = new mongoose.Schema({
   status: {
     type: String,
     enum: ['draft', 'active', 'expired', 'cancelled'],
-    default: 'draft'
+    default: 'draft',
   },
   renewalReminder: { type: Boolean, default: true },
   reminderDays: { type: Number, default: 30 },
   organization: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization' },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
 });
 
 // إنشاء النماذج
@@ -220,6 +235,11 @@ const PurchaseOrder = mongoose.model('PurchaseOrder', PurchaseOrderSchema);
 const PurchaseReceipt = mongoose.model('PurchaseReceipt', PurchaseReceiptSchema);
 const VendorInvoice = mongoose.model('VendorInvoice', VendorInvoiceSchema);
 const VendorContract = mongoose.model('VendorContract', VendorContractSchema);
+
+// ============================================
+// 🔐 Authentication — all purchasing endpoints require a valid token
+// ============================================
+router.use(authenticateToken);
 
 // ============================================
 // API: الموردين
@@ -234,23 +254,24 @@ router.get('/vendors', async (req, res) => {
     if (rating) filter.rating = { $gte: parseInt(rating) };
     if (search) {
       filter.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { vendorNumber: { $regex: search, $options: 'i' } },
-        { taxNumber: { $regex: search, $options: 'i' } }
+        { name: { $regex: escapeRegex(search), $options: 'i' } },
+        { vendorNumber: { $regex: escapeRegex(search), $options: 'i' } },
+        { taxNumber: { $regex: escapeRegex(search), $options: 'i' } },
       ];
     }
 
-    const vendors = await Vendor.find(filter).sort({ name: 1 });
-    res.json({ success: true, data: vendors, count: vendors.length });
+    const query = Vendor.find(filter).sort({ name: 1 });
+    const { data, meta } = await paginate(query, req.query);
+    res.json({ success: true, data, ...meta });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
   }
 });
 
-router.post('/vendors', async (req, res) => {
+router.post('/vendors', validate(purV.createVendor), async (req, res) => {
   try {
     const lastVendor = await Vendor.findOne({
-      organization: req.user.organization
+      organization: req.user.organization,
     }).sort({ createdAt: -1 });
     const vendorNumber = lastVendor
       ? `VND-${String(parseInt(lastVendor.vendorNumber.split('-')[1]) + 1).padStart(6, '0')}`
@@ -260,60 +281,70 @@ router.post('/vendors', async (req, res) => {
       ...req.body,
       vendorNumber,
       organization: req.user.organization,
-      createdBy: req.user._id
+      createdBy: req.user._id,
     });
     await vendor.save();
 
     res.status(201).json({
       success: true,
       data: vendor,
-      message: 'تم إنشاء المورد بنجاح'
+      message: 'تم إنشاء المورد بنجاح',
     });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    res.status(400).json({ success: false, message: 'خطأ في البيانات المدخلة' });
   }
 });
 
-router.put('/vendors/:id', async (req, res) => {
-  try {
-    const vendor = await Vendor.findOneAndUpdate(
-      { _id: req.params.id, organization: req.user.organization },
-      { ...req.body, updatedAt: Date.now() },
-      { new: true }
-    );
+router.put(
+  '/vendors/:id',
+  validateObjectId('id'),
+  validate(purV.updateVendor),
+  async (req, res) => {
+    try {
+      const vendor = await Vendor.findOneAndUpdate(
+        { _id: req.params.id, organization: req.user.organization },
+        { ...req.body, updatedAt: Date.now() },
+        { new: true }
+      );
 
-    if (!vendor) {
-      return res.status(404).json({ success: false, message: 'المورد غير موجود' });
+      if (!vendor) {
+        return res.status(404).json({ success: false, message: 'المورد غير موجود' });
+      }
+
+      res.json({ success: true, data: vendor, message: 'تم تحديث المورد' });
+    } catch (error) {
+      res.status(400).json({ success: false, message: 'خطأ في البيانات المدخلة' });
     }
-
-    res.json({ success: true, data: vendor, message: 'تم تحديث المورد' });
-  } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
   }
-});
+);
 
 // تقييم المورد
-router.post('/vendors/:id/rate', async (req, res) => {
-  try {
-    const { rating, notes } = req.body;
-    const vendor = await Vendor.findOne({
-      _id: req.params.id,
-      organization: req.user.organization
-    });
+router.post(
+  '/vendors/:id/rate',
+  validateObjectId('id'),
+  validate(purV.rateVendor),
+  async (req, res) => {
+    try {
+      const { rating, notes } = req.body;
+      const vendor = await Vendor.findOne({
+        _id: req.params.id,
+        organization: req.user.organization,
+      });
 
-    if (!vendor) {
-      return res.status(404).json({ success: false, message: 'المورد غير موجود' });
+      if (!vendor) {
+        return res.status(404).json({ success: false, message: 'المورد غير موجود' });
+      }
+
+      vendor.rating = rating;
+      if (notes) vendor.notes = notes;
+      await vendor.save();
+
+      res.json({ success: true, data: vendor, message: 'تم تحديث تقييم المورد' });
+    } catch (error) {
+      res.status(400).json({ success: false, message: 'خطأ في البيانات المدخلة' });
     }
-
-    vendor.rating = rating;
-    if (notes) vendor.notes = notes;
-    await vendor.save();
-
-    res.json({ success: true, data: vendor, message: 'تم تحديث تقييم المورد' });
-  } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
   }
-});
+);
 
 // ============================================
 // API: طلبات الشراء
@@ -330,24 +361,25 @@ router.get('/requests', async (req, res) => {
       filter.date = { $gte: new Date(startDate), $lte: new Date(endDate) };
     }
 
-    const requests = await PurchaseRequest.find(filter)
+    const query = PurchaseRequest.find(filter)
       .populate('requestedBy', 'name')
       .populate('approvedBy', 'name')
       .sort({ date: -1 });
 
-    res.json({ success: true, data: requests, count: requests.length });
+    const { data, meta } = await paginate(query, req.query);
+    res.json({ success: true, data, ...meta });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
   }
 });
 
-router.post('/requests', async (req, res) => {
+router.post('/requests', validate(purV.createPurchaseRequest), async (req, res) => {
   try {
     const { items, ...rest } = req.body;
-    const totalEstimated = items.reduce((sum, i) => sum + (i.quantity * (i.estimatedPrice || 0)), 0);
+    const totalEstimated = items.reduce((sum, i) => sum + i.quantity * (i.estimatedPrice || 0), 0);
 
     const lastRequest = await PurchaseRequest.findOne({
-      organization: req.user.organization
+      organization: req.user.organization,
     }).sort({ createdAt: -1 });
     const requestNumber = lastRequest
       ? `PR-${String(parseInt(lastRequest.requestNumber.split('-')[1]) + 1).padStart(6, '0')}`
@@ -359,7 +391,7 @@ router.post('/requests', async (req, res) => {
       items,
       totalEstimated,
       organization: req.user.organization,
-      createdBy: req.user._id
+      createdBy: req.user._id,
     });
 
     await request.save();
@@ -367,19 +399,19 @@ router.post('/requests', async (req, res) => {
     res.status(201).json({
       success: true,
       data: request,
-      message: 'تم إنشاء طلب الشراء بنجاح'
+      message: 'تم إنشاء طلب الشراء بنجاح',
     });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    res.status(400).json({ success: false, message: 'خطأ في البيانات المدخلة' });
   }
 });
 
 // اعتماد طلب الشراء
-router.post('/requests/:id/approve', async (req, res) => {
+router.post('/requests/:id/approve', validateObjectId('id'), async (req, res) => {
   try {
     const request = await PurchaseRequest.findOne({
       _id: req.params.id,
-      organization: req.user.organization
+      organization: req.user.organization,
     });
 
     if (!request) {
@@ -397,16 +429,16 @@ router.post('/requests/:id/approve', async (req, res) => {
 
     res.json({ success: true, data: request, message: 'تم اعتماد طلب الشراء' });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
   }
 });
 
 // تقديم طلب الشراء
-router.post('/requests/:id/submit', async (req, res) => {
+router.post('/requests/:id/submit', validateObjectId('id'), async (req, res) => {
   try {
     const request = await PurchaseRequest.findOne({
       _id: req.params.id,
-      organization: req.user.organization
+      organization: req.user.organization,
     });
 
     if (!request) {
@@ -418,7 +450,7 @@ router.post('/requests/:id/submit', async (req, res) => {
 
     res.json({ success: true, data: request, message: 'تم تقديم طلب الشراء للموافقة' });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
   }
 });
 
@@ -437,17 +469,16 @@ router.get('/orders', async (req, res) => {
       filter.date = { $gte: new Date(startDate), $lte: new Date(endDate) };
     }
 
-    const orders = await PurchaseOrder.find(filter)
-      .populate('vendor', 'name')
-      .sort({ date: -1 });
+    const query = PurchaseOrder.find(filter).populate('vendor', 'name').sort({ date: -1 });
 
-    res.json({ success: true, data: orders, count: orders.length });
+    const { data, meta } = await paginate(query, req.query);
+    res.json({ success: true, data, ...meta });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
   }
 });
 
-router.post('/orders', async (req, res) => {
+router.post('/orders', validate(purV.createPurchaseOrder), async (req, res) => {
   try {
     const { items, ...rest } = req.body;
 
@@ -456,21 +487,21 @@ router.post('/orders', async (req, res) => {
     let totalTax = 0;
 
     const calculatedItems = items.map(item => {
-      const itemTotal = (item.quantity * item.unitPrice) - (item.discount || 0);
+      const itemTotal = item.quantity * item.unitPrice - (item.discount || 0);
       const itemTax = itemTotal * ((item.taxRate || 15) / 100);
       subtotal += itemTotal;
       totalTax += itemTax;
       return {
         ...item,
         taxAmount: itemTax,
-        total: itemTotal + itemTax
+        total: itemTotal + itemTax,
       };
     });
 
     const total = subtotal + totalTax + (rest.shippingCost || 0);
 
     const lastOrder = await PurchaseOrder.findOne({
-      organization: req.user.organization
+      organization: req.user.organization,
     }).sort({ createdAt: -1 });
     const orderNumber = lastOrder
       ? `PO-${String(parseInt(lastOrder.orderNumber.split('-')[1]) + 1).padStart(6, '0')}`
@@ -484,7 +515,7 @@ router.post('/orders', async (req, res) => {
       taxAmount: totalTax,
       total,
       organization: req.user.organization,
-      createdBy: req.user._id
+      createdBy: req.user._id,
     });
 
     await order.save();
@@ -493,26 +524,26 @@ router.post('/orders', async (req, res) => {
     if (rest.purchaseRequest) {
       await PurchaseRequest.findByIdAndUpdate(rest.purchaseRequest, {
         status: 'ordered',
-        purchaseOrder: order._id
+        purchaseOrder: order._id,
       });
     }
 
     res.status(201).json({
       success: true,
       data: order,
-      message: 'تم إنشاء أمر الشراء بنجاح'
+      message: 'تم إنشاء أمر الشراء بنجاح',
     });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    res.status(400).json({ success: false, message: 'خطأ في البيانات المدخلة' });
   }
 });
 
 // إرسال أمر الشراء للمورد
-router.post('/orders/:id/send', async (req, res) => {
+router.post('/orders/:id/send', validateObjectId('id'), async (req, res) => {
   try {
     const order = await PurchaseOrder.findOne({
       _id: req.params.id,
-      organization: req.user.organization
+      organization: req.user.organization,
     });
 
     if (!order) {
@@ -524,16 +555,16 @@ router.post('/orders/:id/send', async (req, res) => {
 
     res.json({ success: true, data: order, message: 'تم إرسال أمر الشراء للمورد' });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
   }
 });
 
 // تأكيد أمر الشراء
-router.post('/orders/:id/confirm', async (req, res) => {
+router.post('/orders/:id/confirm', validateObjectId('id'), async (req, res) => {
   try {
     const order = await PurchaseOrder.findOne({
       _id: req.params.id,
-      organization: req.user.organization
+      organization: req.user.organization,
     });
 
     if (!order) {
@@ -545,7 +576,7 @@ router.post('/orders/:id/confirm', async (req, res) => {
 
     res.json({ success: true, data: order, message: 'تم تأكيد أمر الشراء' });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
   }
 });
 
@@ -564,25 +595,26 @@ router.get('/receipts', async (req, res) => {
       filter.date = { $gte: new Date(startDate), $lte: new Date(endDate) };
     }
 
-    const receipts = await PurchaseReceipt.find(filter)
+    const query = PurchaseReceipt.find(filter)
       .populate('purchaseOrder', 'orderNumber')
       .populate('vendor', 'name')
       .populate('warehouse', 'name')
       .sort({ date: -1 });
 
-    res.json({ success: true, data: receipts, count: receipts.length });
+    const { data, meta } = await paginate(query, req.query);
+    res.json({ success: true, data, ...meta });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
   }
 });
 
-router.post('/receipts', async (req, res) => {
+router.post('/receipts', validate(purV.createPurchaseReceipt), async (req, res) => {
   try {
     const { purchaseOrderId, warehouseId, items } = req.body;
 
     const order = await PurchaseOrder.findOne({
       _id: purchaseOrderId,
-      organization: req.user.organization
+      organization: req.user.organization,
     }).populate('vendor');
 
     if (!order) {
@@ -590,7 +622,7 @@ router.post('/receipts', async (req, res) => {
     }
 
     const lastReceipt = await PurchaseReceipt.findOne({
-      organization: req.user.organization
+      organization: req.user.organization,
     }).sort({ createdAt: -1 });
     const receiptNumber = lastReceipt
       ? `RCPT-${String(parseInt(lastReceipt.receiptNumber.split('-')[1]) + 1).padStart(6, '0')}`
@@ -606,7 +638,7 @@ router.post('/receipts', async (req, res) => {
         unitCost: orderItem ? orderItem.unitPrice : 0,
         batchNumber: item.batchNumber,
         expiryDate: item.expiryDate,
-        notes: item.notes
+        notes: item.notes,
       };
     });
 
@@ -620,7 +652,7 @@ router.post('/receipts', async (req, res) => {
       totalReceived: receiptItems.reduce((sum, i) => sum + i.receivedQuantity, 0),
       totalRejected: receiptItems.reduce((sum, i) => sum + i.rejectedQuantity, 0),
       organization: req.user.organization,
-      createdBy: req.user._id
+      createdBy: req.user._id,
     });
 
     await receipt.save();
@@ -636,16 +668,16 @@ router.post('/receipts', async (req, res) => {
     // تحديث حالة أمر الشراء
     const allReceived = order.items.every(i => i.receivedQuantity >= i.quantity);
     const someReceived = order.items.some(i => i.receivedQuantity > 0);
-    order.status = allReceived ? 'received' : (someReceived ? 'partial' : order.status);
+    order.status = allReceived ? 'received' : someReceived ? 'partial' : order.status;
     await order.save();
 
     res.status(201).json({
       success: true,
       data: receipt,
-      message: 'تم تسجيل الاستلام بنجاح'
+      message: 'تم تسجيل الاستلام بنجاح',
     });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    res.status(400).json({ success: false, message: 'خطأ في البيانات المدخلة' });
   }
 });
 
@@ -664,18 +696,19 @@ router.get('/vendor-invoices', async (req, res) => {
       filter.date = { $gte: new Date(startDate), $lte: new Date(endDate) };
     }
 
-    const invoices = await VendorInvoice.find(filter)
+    const query = VendorInvoice.find(filter)
       .populate('vendor', 'name')
       .populate('purchaseOrder', 'orderNumber')
       .sort({ date: -1 });
 
-    res.json({ success: true, data: invoices, count: invoices.length });
+    const { data, meta } = await paginate(query, req.query);
+    res.json({ success: true, data, ...meta });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
   }
 });
 
-router.post('/vendor-invoices', async (req, res) => {
+router.post('/vendor-invoices', validate(purV.createVendorInvoice), async (req, res) => {
   try {
     const { items, ...rest } = req.body;
 
@@ -693,7 +726,7 @@ router.post('/vendor-invoices', async (req, res) => {
     const total = subtotal + taxAmount;
 
     const lastInvoice = await VendorInvoice.findOne({
-      organization: req.user.organization
+      organization: req.user.organization,
     }).sort({ createdAt: -1 });
     const invoiceNumber = lastInvoice
       ? `VI-${String(parseInt(lastInvoice.invoiceNumber.split('-')[1]) + 1).padStart(6, '0')}`
@@ -708,7 +741,7 @@ router.post('/vendor-invoices', async (req, res) => {
       total,
       balance: total,
       organization: req.user.organization,
-      createdBy: req.user._id
+      createdBy: req.user._id,
     });
 
     await invoice.save();
@@ -716,19 +749,19 @@ router.post('/vendor-invoices', async (req, res) => {
     res.status(201).json({
       success: true,
       data: invoice,
-      message: 'تم إنشاء فاتورة المورد بنجاح'
+      message: 'تم إنشاء فاتورة المورد بنجاح',
     });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    res.status(400).json({ success: false, message: 'خطأ في البيانات المدخلة' });
   }
 });
 
 // اعتماد فاتورة المورد
-router.post('/vendor-invoices/:id/approve', async (req, res) => {
+router.post('/vendor-invoices/:id/approve', validateObjectId('id'), async (req, res) => {
   try {
     const invoice = await VendorInvoice.findOne({
       _id: req.params.id,
-      organization: req.user.organization
+      organization: req.user.organization,
     });
 
     if (!invoice) {
@@ -740,7 +773,7 @@ router.post('/vendor-invoices/:id/approve', async (req, res) => {
 
     res.json({ success: true, data: invoice, message: 'تم اعتماد الفاتورة' });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
   }
 });
 
@@ -756,20 +789,19 @@ router.get('/contracts', async (req, res) => {
     if (status) filter.status = status;
     if (vendor) filter.vendor = vendor;
 
-    const contracts = await VendorContract.find(filter)
-      .populate('vendor', 'name')
-      .sort({ endDate: 1 });
+    const query = VendorContract.find(filter).populate('vendor', 'name').sort({ endDate: 1 });
 
-    res.json({ success: true, data: contracts, count: contracts.length });
+    const { data, meta } = await paginate(query, req.query);
+    res.json({ success: true, data, ...meta });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
   }
 });
 
-router.post('/contracts', async (req, res) => {
+router.post('/contracts', validate(purV.createVendorContract), async (req, res) => {
   try {
     const lastContract = await VendorContract.findOne({
-      organization: req.user.organization
+      organization: req.user.organization,
     }).sort({ createdAt: -1 });
     const contractNumber = lastContract
       ? `CTR-${String(parseInt(lastContract.contractNumber.split('-')[1]) + 1).padStart(6, '0')}`
@@ -779,7 +811,7 @@ router.post('/contracts', async (req, res) => {
       ...req.body,
       contractNumber,
       organization: req.user.organization,
-      createdBy: req.user._id
+      createdBy: req.user._id,
     });
 
     await contract.save();
@@ -787,10 +819,10 @@ router.post('/contracts', async (req, res) => {
     res.status(201).json({
       success: true,
       data: contract,
-      message: 'تم إنشاء العقد بنجاح'
+      message: 'تم إنشاء العقد بنجاح',
     });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    res.status(400).json({ success: false, message: 'خطأ في البيانات المدخلة' });
   }
 });
 
@@ -801,15 +833,16 @@ router.get('/contracts/expiring', async (req, res) => {
     const targetDate = new Date();
     targetDate.setDate(targetDate.getDate() + days);
 
-    const contracts = await VendorContract.find({
+    const query = VendorContract.find({
       organization: req.user.organization,
       status: 'active',
-      endDate: { $lte: targetDate, $gt: new Date() }
+      endDate: { $lte: targetDate, $gt: new Date() },
     }).populate('vendor', 'name');
 
-    res.json({ success: true, data: contracts, count: contracts.length });
+    const { data, meta } = await paginate(query, req.query);
+    res.json({ success: true, data, ...meta });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
   }
 });
 
@@ -838,7 +871,9 @@ router.get('/dashboard', async (req, res) => {
     // إحصائيط الفواتير
     const invoices = await VendorInvoice.find({ organization: req.user.organization });
     const unpaidInvoices = invoices.filter(i => i.status !== 'paid').length;
-    const totalPayable = invoices.filter(i => i.status !== 'paid').reduce((sum, i) => sum + i.balance, 0);
+    const totalPayable = invoices
+      .filter(i => i.status !== 'paid')
+      .reduce((sum, i) => sum + i.balance, 0);
 
     // أوامر الشراء الأخيرة
     const recentOrders = await PurchaseOrder.find({ organization: req.user.organization })
@@ -850,7 +885,7 @@ router.get('/dashboard', async (req, res) => {
     const expiringContracts = await VendorContract.find({
       organization: req.user.organization,
       status: 'active',
-      endDate: { $lte: new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000) }
+      endDate: { $lte: new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000) },
     }).populate('vendor', 'name');
 
     res.json({
@@ -864,18 +899,18 @@ router.get('/dashboard', async (req, res) => {
           totalPurchases,
           unpaidInvoices,
           totalPayable,
-          expiringContracts: expiringContracts.length
+          expiringContracts: expiringContracts.length,
         },
         recentOrders,
         expiringContracts,
         monthlyPurchases: await PurchaseOrder.aggregate([
           { $match: { organization: req.user.organization, date: { $gte: startOfMonth } } },
-          { $group: { _id: null, total: { $sum: '$total' }, count: { $sum: 1 } } }
-        ]).then(r => r[0] || { total: 0, count: 0 })
-      }
+          { $group: { _id: null, total: { $sum: '$total' }, count: { $sum: 1 } } },
+        ]).then(r => r[0] || { total: 0, count: 0 }),
+      },
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
   }
 });
 
@@ -890,5 +925,5 @@ module.exports = {
   PurchaseOrder,
   PurchaseReceipt,
   VendorInvoice,
-  VendorContract
+  VendorContract,
 };

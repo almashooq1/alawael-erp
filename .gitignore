@@ -1,6 +1,5 @@
 # Dependencies
 node_modules/
-package-lock.json
 yarn.lock
 
 # Logs
@@ -45,7 +44,11 @@ ssl/
 *.crt
 
 # IDE
-.vscode/
+.vscode/launch.json
+.vscode/tasks.json
+.vscode/extensions.json
+# Keep settings.json for consistent configuration
+!.vscode/settings.json
 .idea/
 *.swp
 *.swo
@@ -64,8 +67,138 @@ coverage/
 dist/
 out/
 
+# Large binary files that cause issues
+*.exe
+*.dll
+tensorflow.dll
+tensorflow.lib
+tensorflow/
+esbuild.exe
+mongod-*.exe
+*.o
+*.so
+*.dylib
+
+# Large source maps (causing VS Code slowdown)
+*.js.map
+*.ts.map
+*.css.map
+
+# ML/AI models and large data files
+intelligent-agent/node_modules/
+intelligent-agent/dist/
+intelligent-agent/.next/
+*.pb
+*.ckpt
+*.pth
+*.h5
+*.model
+models/
+data/large/
+
 # Misc
 uploads/
 .pytest_cache/
 __pycache__/
+*.pyc
+.db
+*.db-journal
+
+# Chrome extensions and large plugin files
+**/chrome/*
+**/plugins/*
+**/extensions/*
+
+# ═══════════════════════════════════════════════════════════════
+# Added by cleanup script - VS Code Performance
+# ═══════════════════════════════════════════════════════════════
+
+# Source maps
+*.map
+
+# Log files
+*.log
+logs/
+*.log.*
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+coverage/
+
+# VS Code
+.vscode/settings.json.backup
+.vscode/*.log
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Node
+.npm
+.node_repl_history
+
+# Testing
+.nyc_output/
+test-results/
+playwright-report/
+
+# Security-sensitive files (must never be committed)
+**/find-password*
+**/generate-hash*
+**/register.json
+**/login.json
+_archived/security-debris/
+intelligent-agent/backend/.env
+
+# ═══════════════════════════════════════════════════════════════
+# Temporary / Debug / Audit files (prevent accumulation)
+# ═══════════════════════════════════════════════════════════════
+
+# Underscore-prefixed temp scripts & outputs
+_*.txt
+_*.ps1
+_*.json
+__*.txt
+
+# Jest & test output files (root & backend)
+jest-*.txt
+jest_*.txt
+jest-output.json
+jest-*.json
+test_*.txt
+test-results*.txt
+
+# Audit/session reports
+AUDIT_REPORT.md
+AUDIT_SESSION_*.md
+CODE_QUALITY_AUDIT_*.md
+E2E_TESTING_*.md
+FRONTEND_BUG_REPORT.md
+TASK*_PHASES_*.md
+BACKEND_AUDIT_REPORT.md
+
+# ESLint & performance outputs
+eslint-results.json
+performance-test-*.json
+port*-process.json
+
+# Analysis outputs
+dead-analysis.txt
+dead-files-report.txt
+build_output.txt
+
+# Python cache
+__pycache__/
+.pytest_cache/
 *.pyc

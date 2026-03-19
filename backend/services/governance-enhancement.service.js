@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * AL-AWAEL ERP - GOVERNANCE ENHANCEMENT SERVICE
  * Phase 24 - Enhanced Governance, Risk & Compliance System
@@ -85,7 +86,7 @@ class GovernanceEnhancementService {
 
       return policy;
     } catch (error) {
-      throw new Error(`Failed to create policy: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -110,7 +111,7 @@ class GovernanceEnhancementService {
       Object.assign(policy, updates, { version: newVersion, lastUpdated: new Date() });
       return policy;
     } catch (error) {
-      throw new Error(`Failed to update policy: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -135,7 +136,7 @@ class GovernanceEnhancementService {
       this._enforceMaxSize(this.policyAcknowledgements, this.maxAcknowledgements);
       return acknowledgement;
     } catch (error) {
-      throw new Error(`Failed to acknowledge policy: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -150,7 +151,7 @@ class GovernanceEnhancementService {
         acknowledgedBy: acknowledgements.map(a => a.employeeId),
       };
     } catch (error) {
-      throw new Error(`Failed to get acknowledgement status: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -167,7 +168,7 @@ class GovernanceEnhancementService {
       const pagination = this._normalizePagination(limit, skip);
       return policies.slice(pagination.skip, pagination.skip + pagination.limit);
     } catch (error) {
-      throw new Error(`Failed to list policies: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -204,7 +205,7 @@ class GovernanceEnhancementService {
       this._enforceMaxSize(this.complianceCalendar, this.maxComplianceCalendar);
       return complianceRecord;
     } catch (error) {
-      throw new Error(`Failed to track compliance activity: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -254,7 +255,7 @@ class GovernanceEnhancementService {
 
       return report;
     } catch (error) {
-      throw new Error(`Failed to generate compliance report: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -278,7 +279,7 @@ class GovernanceEnhancementService {
 
       return violations;
     } catch (error) {
-      throw new Error(`Failed to identify violations: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -306,7 +307,7 @@ class GovernanceEnhancementService {
       this._enforceMaxSize(this.incidentLog, this.maxIncidents);
       return violation;
     } catch (error) {
-      throw new Error(`Failed to report violation: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -334,7 +335,7 @@ class GovernanceEnhancementService {
       this._enforceMaxSize(this.dataRetentionPolicies, this.maxDataRetentionPolicies);
       return policy;
     } catch (error) {
-      throw new Error(`Failed to track data retention: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -376,7 +377,7 @@ class GovernanceEnhancementService {
       this._enforceMaxSize(this.riskRegister, this.maxRisks);
       return risk;
     } catch (error) {
-      throw new Error(`Failed to identify risk: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -394,7 +395,7 @@ class GovernanceEnhancementService {
 
       return risk;
     } catch (error) {
-      throw new Error(`Failed to score risk: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -423,7 +424,7 @@ class GovernanceEnhancementService {
 
       return plan;
     } catch (error) {
-      throw new Error(`Failed to create mitigation plan: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -446,7 +447,7 @@ class GovernanceEnhancementService {
 
       return plan;
     } catch (error) {
-      throw new Error(`Failed to track mitigation: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -470,7 +471,7 @@ class GovernanceEnhancementService {
 
       return escalation;
     } catch (error) {
-      throw new Error(`Failed to escalate risk: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -516,7 +517,7 @@ class GovernanceEnhancementService {
       this._enforceMaxSize(this.internalControls, this.maxInternalControls);
       return control;
     } catch (error) {
-      throw new Error(`Failed to define control: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -537,7 +538,7 @@ class GovernanceEnhancementService {
 
       return segregation;
     } catch (error) {
-      throw new Error(`Failed to segregate duties: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -573,7 +574,7 @@ class GovernanceEnhancementService {
       this._enforceMaxSize(this.authorityMatrix, this.maxAuthorityMatrix);
       return matrix;
     } catch (error) {
-      throw new Error(`Failed to create authorization matrix: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -592,7 +593,7 @@ class GovernanceEnhancementService {
 
       return enforcement_record;
     } catch (error) {
-      throw new Error(`Failed to enforce controls: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -619,7 +620,7 @@ class GovernanceEnhancementService {
       this._enforceMaxSize(this.controlTests, this.maxControlTests);
       return auditResult;
     } catch (error) {
-      throw new Error(`Failed to audit controls: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -695,7 +696,7 @@ class GovernanceEnhancementService {
 
       return report;
     } catch (error) {
-      throw new Error(`Failed to generate governance report: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 }

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars, no-undef, no-empty, prefer-const, no-constant-condition, no-unused-expressions */
 /**
  * ============================================
  * HEALTH CHECK SERVICE
@@ -6,9 +7,10 @@
  */
 
 const mongoose = require('mongoose');
-const redis = require('redis');
+const Redis = require('ioredis');
 const os = require('os');
 const http = require('http');
+const logger = require('../utils/logger');
 
 class HealthCheckService {
   constructor() {
@@ -63,7 +65,7 @@ class HealthCheckService {
     } catch (error) {
       return {
         status: 'unhealthy',
-        error: error.message,
+        error: 'حدث خطأ داخلي',
         timestamp: new Date(),
       };
     }
@@ -75,21 +77,18 @@ class HealthCheckService {
 
   async checkRedisHealth() {
     try {
-      const redisClient = redis.createClient({
+      const redisClient = new Redis({
         host: process.env.REDIS_HOST || 'localhost',
-        port: process.env.REDIS_PORT || 6379,
+        port: parseInt(process.env.REDIS_PORT) || 6379,
         password: process.env.REDIS_PASSWORD,
+        lazyConnect: true,
       });
 
       const startTime = Date.now();
+      await redisClient.connect();
 
       // Test ping
-      const result = await new Promise((resolve, reject) => {
-        redisClient.ping((err, reply) => {
-          if (err) reject(err);
-          else resolve(reply);
-        });
-      });
+      const result = await redisClient.ping();
 
       const latency = Date.now() - startTime;
 
@@ -105,7 +104,7 @@ class HealthCheckService {
     } catch (error) {
       return {
         status: 'unhealthy',
-        error: `Redis unavailable: ${error.message}`,
+        error: 'حدث خطأ داخلي',
         timestamp: new Date(),
       };
     }
@@ -188,7 +187,7 @@ class HealthCheckService {
       } catch (error) {
         results[endpoint.name] = {
           status: 'unhealthy',
-          error: error.message,
+          error: 'حدث خطأ داخلي',
         };
       }
     }
@@ -221,7 +220,7 @@ class HealthCheckService {
 
       return results;
     } catch (error) {
-      return { error: error.message };
+      return { error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -273,7 +272,7 @@ class HealthCheckService {
       return {
         timestamp: new Date(),
         overallStatus: 'error',
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -369,19 +368,19 @@ class HealthCheckService {
           this.healthStatus = report;
 
           if (report.overallStatus !== 'healthy') {
-            console.warn(`⚠️  Health check warning: ${report.overallStatus}`);
+            logger.warn(`⚠️  Health check warning: ${report.overallStatus}`);
             // Send alert/notification
           } else {
-            console.log(`✅ Health check passed: ${new Date().toISOString()}`);
+            logger.info(`✅ Health check passed: ${new Date().toISOString()}`);
           }
         } catch (error) {
-          console.error(`❌ Health check failed: ${error.message}`);
+          logger.error(`❌ Health check failed: ${error.message}`);
         }
       },
       intervalMinutes * 60 * 1000
     );
 
-    console.log(`✅ Auto health check configured (every ${intervalMinutes} minutes)`);
+    logger.info(`✅ Auto health check configured (every ${intervalMinutes} minutes)`);
   }
 
   /**

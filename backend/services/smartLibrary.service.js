@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Smart Library & Toy Lending Service (Phase 86)
  *
@@ -8,8 +9,20 @@
 class SmartLibraryService {
   constructor() {
     this.inventory = [
-      { id: 'TOY-101', name: 'Weighted Blanket (5kg)', category: 'Sensory', status: 'AVAILABLE', sanitized: true },
-      { id: 'BK-55', name: 'Sign Language Basics', category: 'Book', status: 'LOANED', sanitized: false },
+      {
+        id: 'TOY-101',
+        name: 'Weighted Blanket (5kg)',
+        category: 'Sensory',
+        status: 'AVAILABLE',
+        sanitized: true,
+      },
+      {
+        id: 'BK-55',
+        name: 'Sign Language Basics',
+        category: 'Book',
+        status: 'LOANED',
+        sanitized: false,
+      },
     ];
   }
 

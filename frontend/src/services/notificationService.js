@@ -6,6 +6,8 @@
  * Provides real-time notification system using WebSocket
  */
 
+import logger from 'utils/logger';
+
 class NotificationService {
   constructor() {
     this.socket = null;
@@ -25,12 +27,12 @@ class NotificationService {
    * @param {Object} options - خيارات الاتصال
    * @returns {Promise}
    */
-  connect(url, options = {}) {
+  connect(url, _options = {}) {
     return new Promise((resolve, reject) => {
       try {
         // استخدام اتصال عادي إذا لم يتوفر WebSocket
         if (typeof WebSocket === 'undefined') {
-          console.warn('WebSocket not available, using polling instead');
+          logger.warn('WebSocket not available, using polling instead');
           this.setupPolling();
           resolve();
           return;
@@ -39,7 +41,6 @@ class NotificationService {
         this.socket = new WebSocket(url);
 
         this.socket.onopen = () => {
-          console.log('Connected to notification server');
           this.reconnectAttempts = 0;
           this.emit('connected');
           resolve();
@@ -50,23 +51,23 @@ class NotificationService {
             const message = JSON.parse(event.data);
             this.handleMessage(message);
           } catch (error) {
-            console.error('Error parsing message:', error);
+            logger.error('Error parsing message:', error);
           }
         };
 
-        this.socket.onerror = error => {
-          console.error('WebSocket error:', error);
-          this.emit('error', error);
-          reject(error);
+        this.socket.onerror = _event => {
+          const wsError = new Error('WebSocket connection failed');
+          logger.error('WebSocket error:', wsError.message);
+          this.emit('error', wsError);
+          reject(wsError);
         };
 
         this.socket.onclose = () => {
-          console.log('Disconnected from notification server');
           this.emit('disconnected');
           this.attemptReconnect(url);
         };
       } catch (error) {
-        console.error('Error connecting to WebSocket:', error);
+        logger.error('Error connecting to WebSocket:', error);
         reject(error);
       }
     });
@@ -80,17 +81,19 @@ class NotificationService {
    * @private
    */
   attemptReconnect(url) {
+    if (this._reconnecting) return; // Prevent parallel reconnection chains
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
+      this._reconnecting = true;
       this.reconnectAttempts++;
-      console.log(`Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts})...`);
 
       setTimeout(() => {
+        this._reconnecting = false;
         this.connect(url).catch(() => {
           // المحاولة التالية ستتم من onclose
         });
       }, this.reconnectDelay);
     } else {
-      console.error('Max reconnection attempts reached');
+      logger.error('Max reconnection attempts reached');
       this.setupPolling();
     }
   }
@@ -103,7 +106,6 @@ class NotificationService {
    */
   setupPolling() {
     // يمكن إضافة polling للتحقق من الإشعارات الجديدة
-    console.log('Using polling for notifications');
     // هنا يمكن إضافة كود polling
   }
 
@@ -201,7 +203,7 @@ class NotificationService {
         try {
           callback(data);
         } catch (error) {
-          console.error(`Error in listener for event "${event}":`, error);
+          logger.error(`Error in listener for event "${event}":`, error);
         }
       });
     }
@@ -220,11 +222,11 @@ class NotificationService {
         this.socket.send(JSON.stringify(message));
         return true;
       } catch (error) {
-        console.error('Error sending message:', error);
+        logger.error('Error sending message:', error);
         return false;
       }
     } else {
-      console.warn('WebSocket not connected');
+      logger.warn('WebSocket not connected');
       return false;
     }
   }

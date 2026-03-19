@@ -1,5 +1,7 @@
+/* eslint-disable no-unused-vars */
 const fs = require('fs');
 const path = require('path');
+const logger = require('../utils/logger');
 
 const aiPath = path.join(__dirname, '../data/ai.json');
 
@@ -25,7 +27,7 @@ function writeAI(data) {
     fs.writeFileSync(aiPath, JSON.stringify(data, null, 2));
     return true;
   } catch (error) {
-    console.error('Error writing AI data:', error);
+    logger.error('Error writing AI data:', error);
     return false;
   }
 }
@@ -46,7 +48,8 @@ class AttendancePrediction {
       reliability: 'medium',
     };
 
-    stats.punctualityRate = stats.totalDays > 0 ? ((stats.presentDays / stats.totalDays) * 100).toFixed(2) : 0;
+    stats.punctualityRate =
+      stats.totalDays > 0 ? ((stats.presentDays / stats.totalDays) * 100).toFixed(2) : 0;
 
     // تحديد مستوى الموثوقية
     if (stats.punctualityRate >= 95) stats.reliability = 'excellent';
@@ -137,10 +140,16 @@ class LeaveTrendAnalysis {
 
     // تحديد الأنماط
     const monthKeys = Object.keys(patterns.byMonth);
-    patterns.peakMonth = monthKeys.length > 0 ? monthKeys.reduce((a, b) => (patterns.byMonth[a] > patterns.byMonth[b] ? a : b)) : null;
+    patterns.peakMonth =
+      monthKeys.length > 0
+        ? monthKeys.reduce((a, b) => (patterns.byMonth[a] > patterns.byMonth[b] ? a : b))
+        : null;
 
     const typeKeys = Object.keys(patterns.byType);
-    patterns.mostCommonType = typeKeys.length > 0 ? typeKeys.reduce((a, b) => (patterns.byType[a] > patterns.byType[b] ? a : b)) : null;
+    patterns.mostCommonType =
+      typeKeys.length > 0
+        ? typeKeys.reduce((a, b) => (patterns.byType[a] > patterns.byType[b] ? a : b))
+        : null;
 
     return patterns;
   }
@@ -207,7 +216,10 @@ class PerformanceScore {
     let score = 100;
 
     // عامل الحضور (40%)
-    const attendanceRate = attendance.length > 0 ? (attendance.filter(a => a.status === 'present').length / attendance.length) * 100 : 100;
+    const attendanceRate =
+      attendance.length > 0
+        ? (attendance.filter(a => a.status === 'present').length / attendance.length) * 100
+        : 100;
     score -= (100 - attendanceRate) * 0.4;
 
     // عامل الإجازات (20%)

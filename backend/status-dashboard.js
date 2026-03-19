@@ -5,9 +5,6 @@
  * نظام معلومات حالة نظام الأوائل
  */
 
-const fs = require('fs');
-const path = require('path');
-
 const colors = {
   reset: '\x1b[0m',
   bright: '\x1b[1m',
@@ -23,7 +20,7 @@ function log(msg, color = 'reset') {
   console.log(`${colors[color]}${msg}${colors.reset}`);
 }
 
-function header(title) {
+function header(_title) {
   console.clear();
   log(`\n${'═'.repeat(70)}`, 'blue');
   log(`  AlAwael ERP - System Status Dashboard`, 'cyan');

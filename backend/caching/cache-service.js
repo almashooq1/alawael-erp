@@ -1,9 +1,11 @@
+/* eslint-disable no-unused-vars */
 /**
  * Cache Service - خدمة التخزين المؤقت
  * Enterprise Caching for Alawael ERP
  */
 
 const EventEmitter = require('events');
+const logger = require('../utils/logger');
 
 /**
  * Cache Configuration
@@ -11,10 +13,10 @@ const EventEmitter = require('events');
 const cacheConfig = {
   // Default TTL in seconds
   defaultTTL: 3600, // 1 hour
-  
+
   // Maximum keys
   maxKeys: 10000,
-  
+
   // Redis configuration
   redis: {
     host: process.env.REDIS_HOST || 'localhost',
@@ -23,7 +25,7 @@ const cacheConfig = {
     db: process.env.REDIS_DB || 0,
     keyPrefix: 'alawael:',
   },
-  
+
   // Cache strategies
   strategies: {
     'user:session': { ttl: 86400, maxKeys: 50000 }, // 24 hours
@@ -52,75 +54,78 @@ class MemoryCacheProvider extends EventEmitter {
       deletes: 0,
     };
   }
-  
+
   async get(key) {
     const item = this.cache.get(key);
-    
+
     if (item && (!item.expires || item.expires > Date.now())) {
       this.stats.hits++;
       return item.value;
     }
-    
+
     this.stats.misses++;
-    
+
     if (item) {
       this.cache.delete(key);
     }
-    
+
     return null;
   }
-  
+
   async set(key, value, ttl = cacheConfig.defaultTTL) {
     // Enforce max keys
     if (this.cache.size >= this.maxKeys && !this.cache.has(key)) {
       this.evictOldest();
     }
-    
+
     // Clear existing timer
     if (this.timers.has(key)) {
       clearTimeout(this.timers.get(key));
     }
-    
+
     const expires = ttl ? Date.now() + ttl * 1000 : null;
-    
+
     this.cache.set(key, {
       value,
       expires,
       createdAt: Date.now(),
     });
-    
+
     // Set expiration timer
     if (ttl) {
-      this.timers.set(key, setTimeout(() => {
-        this.delete(key);
-      }, ttl * 1000));
+      this.timers.set(
+        key,
+        setTimeout(() => {
+          this.delete(key);
+        }, ttl * 1000)
+      );
     }
-    
+
     this.stats.sets++;
-    
+
     return true;
   }
-  
+
   async delete(key) {
     if (this.timers.has(key)) {
       clearTimeout(this.timers.get(key));
       this.timers.delete(key);
     }
-    
+
     const result = this.cache.delete(key);
-    
+
     if (result) {
       this.stats.deletes++;
     }
-    
+
     return result;
   }
-  
+
   async has(key) {
     const item = this.cache.get(key);
     return item && (!item.expires || item.expires > Date.now());
   }
-  
+
   async clear() {
     for (const timer of this.timers.values()) {
       clearTimeout(timer);
@@ -129,33 +134,33 @@ class MemoryCacheProvider extends EventEmitter {
     this.cache.clear();
     return true;
   }
-  
+
   async keys(pattern = '*') {
     const regex = new RegExp('^' + pattern.replace(/\*/g, '.*') + '$');
     return Array.from(this.cache.keys()).filter(key => regex.test(key));
   }
-  
+
   async size() {
     return this.cache.size;
   }
-  
+
   evictOldest() {
     let oldest = null;
     let oldestKey = null;
-    
+
     for (const [key, item] of this.cache) {
       if (!oldest || item.createdAt < oldest.createdAt) {
         oldest = item;
         oldestKey = key;
       }
     }
-    
+
     if (oldestKey) {
       this.delete(oldestKey);
       this.emit('eviction', oldestKey);
     }
   }
-  
+
   getStats() {
     return {
       ...this.stats,
@@ -182,92 +187,90 @@ class RedisCacheProvider extends EventEmitter {
       deletes: 0,
     };
   }
-  
+
   async connect() {
-    const redis = require('redis');
-    
-    this.client = redis.createClient({
-      socket: {
-        host: this.config.host,
-        port: this.config.port,
-      },
+    const Redis = require('ioredis');
+
+    this.client = new Redis({
+      host: this.config.host,
+      port: this.config.port,
       password: this.config.password,
-      database: this.config.db,
+      db: this.config.db,
     });
-    
+
     this.client.on('connect', () => {
       this.isConnected = true;
-      console.log('✅ Redis cache connected');
+      logger.info('✅ Redis cache connected');
     });
-    
-    this.client.on('disconnect', () => {
+
+    this.client.on('close', () => {
       this.isConnected = false;
-      console.log('⚠️ Redis cache disconnected');
+      logger.info('⚠️ Redis cache disconnected');
     });
-    
-    this.client.on('error', (error) => {
-      console.error('Redis error:', error);
+
+    this.client.on('error', error => {
+      logger.error('Redis error:', error);
     });
-    
-    await this.client.connect();
+
+    // ioredis auto-connects
   }
-  
+
   prefixKey(key) {
     return `${this.config.keyPrefix}${key}`;
   }
-  
+
   async get(key) {
     try {
       const value = await this.client.get(this.prefixKey(key));
-      
+
       if (value) {
         this.stats.hits++;
         return JSON.parse(value);
       }
-      
+
       this.stats.misses++;
       return null;
     } catch (error) {
-      console.error('Cache get error:', error);
+      logger.error('Cache get error:', error);
       return null;
     }
   }
-  
+
   async set(key, value, ttl = cacheConfig.defaultTTL) {
     try {
       const prefixedKey = this.prefixKey(key);
       const serialized = JSON.stringify(value);
-      
+
       if (ttl) {
-        await this.client.setEx(prefixedKey, ttl, serialized);
+        await this.client.setex(prefixedKey, ttl, serialized);
       } else {
         await this.client.set(prefixedKey, serialized);
       }
-      
+
       this.stats.sets++;
       return true;
     } catch (error) {
-      console.error('Cache set error:', error);
+      logger.error('Cache set error:', error);
       return false;
     }
   }
-  
+
   async delete(key) {
     try {
       const result = await this.client.del(this.prefixKey(key));
-      
+
       if (result > 0) {
         this.stats.deletes++;
         return true;
       }
-      
+
       return false;
     } catch (error) {
-      console.error('Cache delete error:', error);
+      logger.error('Cache delete error:', error);
       return false;
     }
   }
-  
+
   async has(key) {
     try {
       const exists = await this.client.exists(this.prefixKey(key));
@@ -276,33 +279,33 @@ class RedisCacheProvider extends EventEmitter {
       return false;
     }
   }
-  
+
   async clear() {
     try {
       const keys = await this.client.keys(`${this.config.keyPrefix}*`);
-      
+
       if (keys.length > 0) {
         await this.client.del(keys);
       }
-      
+
       return true;
     } catch (error) {
-      console.error('Cache clear error:', error);
+      logger.error('Cache clear error:', error);
       return false;
     }
   }
-  
+
   async keys(pattern = '*') {
     try {
       const fullPattern = this.prefixKey(pattern);
       const keys = await this.client.keys(fullPattern);
-      
+
       return keys.map(key => key.replace(this.config.keyPrefix, ''));
     } catch (error) {
       return [];
     }
   }
-  
+
   async size() {
     try {
       const keys = await this.client.keys(`${this.config.keyPrefix}*`);
@@ -311,14 +314,14 @@ class RedisCacheProvider extends EventEmitter {
       return 0;
     }
   }
-  
+
   async disconnect() {
     if (this.client) {
       await this.client.quit();
       this.isConnected = false;
     }
   }
-  
+
   getStats() {
     return {
       ...this.stats,
@@ -336,7 +339,7 @@ class CacheManager {
     this.provider = null;
     this.strategies = cacheConfig.strategies;
   }
-  
+
   /**
    * Initialize cache manager
    */
@@ -347,17 +350,17 @@ class CacheManager {
     } else {
       this.provider = new MemoryCacheProvider();
     }
-    
-    console.log(`✅ Cache manager initialized (${providerType})`);
+
+    logger.info(`✅ Cache manager initialized (${providerType})`);
   }
-  
+
   /**
    * Get from cache
    */
   async get(key) {
     return this.provider.get(key);
   }
-  
+
   /**
    * Set in cache
    */
@@ -365,72 +368,68 @@ class CacheManager {
     // Check for strategy
     const strategy = this.getStrategy(key);
     const effectiveTTL = ttl || strategy?.ttl || cacheConfig.defaultTTL;
-    
+
     return this.provider.set(key, value, effectiveTTL);
   }
-  
+
   /**
    * Get or set (cache-aside pattern)
    */
   async getOrSet(key, factory, ttl) {
     const cached = await this.get(key);
-    
+
     if (cached !== null) {
       return cached;
     }
-    
+
     const value = await factory();
     await this.set(key, value, ttl);
-    
+
     return value;
   }
-  
+
   /**
    * Delete from cache
    */
   async delete(key) {
     return this.provider.delete(key);
   }
-  
+
   /**
    * Delete by pattern
    */
   async deletePattern(pattern) {
     const keys = await this.provider.keys(pattern);
-    
+
     for (const key of keys) {
       await this.provider.delete(key);
     }
-    
+
     return keys.length;
   }
-  
+
   /**
    * Invalidate cache for entity
    */
   async invalidateEntity(entity, id) {
-    const patterns = [
-      `${entity}:${id}`,
-      `${entity}:${id}:*`,
-      `*:${entity}:${id}`,
-    ];
-    
+    const patterns = [`${entity}:${id}`, `${entity}:${id}:*`, `*:${entity}:${id}`];
+
     let deleted = 0;
-    
+
     for (const pattern of patterns) {
       deleted += await this.deletePattern(pattern);
     }
-    
+
     return deleted;
   }
-  
+
   /**
    * Clear all cache
    */
   async clear() {
     return this.provider.clear();
   }
-  
+
   /**
    * Get strategy for key
    */
@@ -442,21 +441,21 @@ class CacheManager {
     }
     return null;
   }
-  
+
   /**
    * Get cache statistics
    */
   getStats() {
     return this.provider.getStats();
   }
-  
+
   /**
    * Create cache key
    */
   static createKey(...parts) {
     return parts.filter(Boolean).join(':');
   }
-  
+
   /**
    * Disconnect
    */
@@ -476,39 +475,39 @@ const cacheManager = new CacheManager();
 const cacheMiddleware = (options = {}) => {
   const {
     ttl = 300,
-    keyGenerator = (req) => `${req.method}:${req.originalUrl}`,
-    shouldCache = (req) => req.method === 'GET',
+    keyGenerator = req => `${req.method}:${req.originalUrl}`,
+    shouldCache = req => req.method === 'GET',
   } = options;
-  
+
   return async (req, res, next) => {
     if (!shouldCache(req)) {
       return next();
     }
-    
+
     const key = keyGenerator(req);
-    
+
     try {
       const cached = await cacheManager.get(key);
-      
+
       if (cached) {
         return res.json({
           ...cached,
           _cached: true,
         });
       }
-      
+
       // Store original json
       const originalJson = res.json.bind(res);
-      
-      res.json = (data) => {
+
+      res.json = data => {
         // Cache successful responses
         if (res.statusCode >= 200 && res.statusCode < 300) {
           cacheManager.set(key, data, ttl).catch(console.error);
         }
-        
+
         return originalJson(data);
       };
-      
+
       next();
     } catch (error) {
       next();
@@ -522,15 +521,13 @@ const cacheMiddleware = (options = {}) => {
 const cached = (keyTemplate, ttl) => {
   return (target, propertyKey, descriptor) => {
     const originalMethod = descriptor.value;
-    
-    descriptor.value = async function(...args) {
-      const key = typeof keyTemplate === 'function'
-        ? keyTemplate(...args)
-        : keyTemplate;
-      
+
+    descriptor.value = async function (...args) {
+      const key = typeof keyTemplate === 'function' ? keyTemplate(...args) : keyTemplate;
+
       return cacheManager.getOrSet(key, () => originalMethod.apply(this, args), ttl);
     };
-    
+
     return descriptor;
   };
 };
@@ -540,29 +537,29 @@ const cached = (keyTemplate, ttl) => {
  */
 const CacheKeys = {
   // User
-  USER_SESSION: (userId) => `user:session:${userId}`,
-  USER_PROFILE: (userId) => `user:profile:${userId}`,
-  USER_PERMISSIONS: (userId) => `user:permissions:${userId}`,
-  
+  USER_SESSION: userId => `user:session:${userId}`,
+  USER_PROFILE: userId => `user:profile:${userId}`,
+  USER_PERMISSIONS: userId => `user:permissions:${userId}`,
+
   // Employee
-  EMPLOYEE_DATA: (empId) => `employee:data:${empId}`,
-  EMPLOYEE_LIST: (deptId) => `employee:list:${deptId}`,
-  
+  EMPLOYEE_DATA: empId => `employee:data:${empId}`,
+  EMPLOYEE_LIST: deptId => `employee:list:${deptId}`,
+
   // Finance
   EXCHANGE_RATE: (from, to) => `finance:rate:${from}:${to}`,
-  INVOICE: (invId) => `finance:invoice:${invId}`,
-  
+  INVOICE: invId => `finance:invoice:${invId}`,
+
   // Inventory
-  STOCK_LEVEL: (itemId) => `inventory:stock:${itemId}`,
-  PRODUCT: (prodId) => `inventory:product:${prodId}`,
-  
+  STOCK_LEVEL: itemId => `inventory:stock:${itemId}`,
+  PRODUCT: prodId => `inventory:product:${prodId}`,
+
   // Settings
   GLOBAL_SETTINGS: 'settings:global',
-  TENANT_SETTINGS: (tenantId) => `settings:tenant:${tenantId}`,
-  
+  TENANT_SETTINGS: tenantId => `settings:tenant:${tenantId}`,
+
   // Reports
-  DAILY_REPORT: (date) => `reports:daily:${date}`,
-  MONTHLY_REPORT: (month) => `reports:monthly:${month}`,
+  DAILY_REPORT: date => `reports:daily:${date}`,
+  MONTHLY_REPORT: month => `reports:monthly:${month}`,
 };
 
 module.exports = {

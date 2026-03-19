@@ -1,7 +1,8 @@
+/* eslint-disable no-unused-vars */
 /**
  * نظام الرواتب والحوافز - بيانات أولية (Seed Data)
  * Payroll & Incentives System - Sample Data
- * 
+ *
  * هذا الملف ينشئ بيانات تجريبية شاملة لاختبار نظام الرواتب
  * لتشغيل: node backend/seed/payroll-seed-data.js
  */
@@ -20,10 +21,20 @@ const getLastDayOfMonth = (month, year) => {
   return new Date(year, month, 0).getDate();
 };
 
-const getMonthName = (month) => {
+const getMonthName = month => {
   const months = [
-    'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
-    'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'
+    'يناير',
+    'فبراير',
+    'مارس',
+    'أبريل',
+    'مايو',
+    'يونيو',
+    'يوليو',
+    'أغسطس',
+    'سبتمبر',
+    'أكتوبر',
+    'نوفمبر',
+    'ديسمبر',
   ];
   return months[month - 1];
 };
@@ -41,21 +52,21 @@ const createCompensationStructures = async () => {
       effectiveDate: new Date('2025-01-01'),
       isActive: true,
       applicableTo: {
-        scope: 'all'
+        scope: 'all',
       },
       fixedAllowances: [
         { name: 'السكن', amount: 600, period: 'monthly' },
         { name: 'النقل', amount: 200, period: 'monthly' },
         { name: 'الوجبات', amount: 150, period: 'monthly' },
-        { name: 'الهاتف', amount: 100, period: 'monthly' }
+        { name: 'الهاتف', amount: 100, period: 'monthly' },
       ],
       variableAllowances: [
         {
           name: 'العمل الإضافي',
           basedOn: 'other',
           percentage: 0,
-          conditions: { basedOnOvertime: true }
-        }
+          conditions: { basedOnOvertime: true },
+        },
       ],
       incentiveStructure: {
         performance: { percentage: 10, minScore: 80 },
@@ -63,26 +74,26 @@ const createCompensationStructures = async () => {
         safety: { amount: 75, conditions: {} },
         loyalty: { percentage: 5, yearsRequired: 5 },
         project: { amount: 100, conditions: { projectCompletion: 100 } },
-        seasonal: { amount: 200, months: [12] }
+        seasonal: { amount: 200, months: [12] },
       },
       mandatoryDeductions: {
         incomeTax: {
           brackets: [
             { amount: 1000, rate: 0 },
             { amount: 2000, rate: 0.05 },
-            { amount: 3000, rate: 0.10 },
+            { amount: 3000, rate: 0.1 },
             { amount: 6000, rate: 0.15 },
-            { amount: Infinity, rate: 0.20 }
-          ]
+            { amount: Infinity, rate: 0.2 },
+          ],
         },
         socialSecurity: { percentage: 6, maxAmount: 1000 },
         healthInsurance: { percentage: 2, amount: 50 },
-        GOSI: { percentage: 3, maxAmount: 2000, minAmount: 100 }
+        GOSI: { percentage: 3, maxAmount: 2000, minAmount: 100 },
       },
       paidLeave: {
         annualDays: 30,
-        accruedPerMonth: 2.5
-      }
+        accruedPerMonth: 2.5,
+      },
     },
     {
       name: 'هيكل الإدارة العليا',
@@ -91,17 +102,17 @@ const createCompensationStructures = async () => {
       isActive: true,
       applicableTo: {
         scope: 'custom',
-        roles: ['manager', 'director', 'supervisor']
+        roles: ['manager', 'director', 'supervisor'],
       },
       fixedAllowances: [
         { name: 'السكن', amount: 1000, period: 'monthly' },
         { name: 'النقل', amount: 400, period: 'monthly' },
         { name: 'الوجبات', amount: 300, period: 'monthly' },
         { name: 'الهاتف', amount: 200, period: 'monthly' },
-        { name: 'مكتبية', amount: 150, period: 'monthly' }
+        { name: 'مكتبية', amount: 150, period: 'monthly' },
       ],
       variableAllowances: [
-        { name: 'بدل المسؤولية', basedOn: 'salary', percentage: 15, conditions: {} }
+        { name: 'بدل المسؤولية', basedOn: 'salary', percentage: 15, conditions: {} },
       ],
       incentiveStructure: {
         performance: { percentage: 20, minScore: 85 },
@@ -109,27 +120,27 @@ const createCompensationStructures = async () => {
         safety: { amount: 150, conditions: {} },
         loyalty: { percentage: 10, yearsRequired: 3 },
         project: { amount: 500, conditions: {} },
-        seasonal: { amount: 500, months: [12] }
+        seasonal: { amount: 500, months: [12] },
       },
       mandatoryDeductions: {
         incomeTax: {
           brackets: [
             { amount: 2000, rate: 0 },
             { amount: 4000, rate: 0.05 },
-            { amount: 8000, rate: 0.10 },
+            { amount: 8000, rate: 0.1 },
             { amount: 15000, rate: 0.15 },
-            { amount: Infinity, rate: 0.20 }
-          ]
+            { amount: Infinity, rate: 0.2 },
+          ],
         },
         socialSecurity: { percentage: 6, maxAmount: 1500 },
         healthInsurance: { percentage: 2.5, amount: 100 },
-        GOSI: { percentage: 3, maxAmount: 2500, minAmount: 200 }
+        GOSI: { percentage: 3, maxAmount: 2500, minAmount: 200 },
       },
       paidLeave: {
         annualDays: 35,
-        accruedPerMonth: 3
-      }
-    }
+        accruedPerMonth: 3,
+      },
+    },
   ];
 
   const created = await CompensationStructure.insertMany(structures);
@@ -167,7 +178,7 @@ const createPayrollRecords = async (employees, structures) => {
         name: a.name,
         type: a.name === 'السكن' ? 'housing' : 'other',
         amount: a.amount,
-        isCalculated: false
+        isCalculated: false,
       }));
 
       // حساب العمل الإضافي عشوائي
@@ -186,7 +197,7 @@ const createPayrollRecords = async (employees, structures) => {
         loyalty: 0,
         project: Math.random() > 0.4 ? 100 : 0,
         seasonal: month === 12 ? 200 : 0,
-        other: 0
+        other: 0,
       };
 
       const totalIncentives = Object.values(incentives).reduce((sum, val) => sum + val, 0);
@@ -196,7 +207,7 @@ const createPayrollRecords = async (employees, structures) => {
         disciplinary: Math.random() > 0.7 ? 50 : 0,
         attendance: 0,
         misconduct: 0,
-        other: 0
+        other: 0,
       };
 
       const totalPenalties = Object.values(penalties).reduce((sum, val) => sum + val, 0);
@@ -215,10 +226,7 @@ const createPayrollRecords = async (employees, structures) => {
 
       const socialSecurity = Math.min((totalGross * 6) / 100, 1000);
       const healthInsurance = (totalGross * 2) / 100;
-      const GOSI = Math.max(
-        Math.min((totalGross * 3) / 100, 2000),
-        100
-      );
+      const GOSI = Math.max(Math.min((totalGross * 3) / 100, 2000), 100);
 
       const totalDeductions = incomeTax + socialSecurity + healthInsurance + GOSI + totalPenalties;
       const netSalary = totalGross + totalIncentives - totalDeductions;
@@ -240,8 +248,8 @@ const createPayrollRecords = async (employees, structures) => {
           overtime: {
             regular: Math.floor(Math.random() * 10),
             weekend: Math.floor(Math.random() * 5),
-            holiday: Math.floor(Math.random() * 3)
-          }
+            holiday: Math.floor(Math.random() * 3),
+          },
         },
         incentives,
         penalties,
@@ -253,18 +261,23 @@ const createPayrollRecords = async (employees, structures) => {
           totalDeductions,
           totalNet: netSalary,
           netPayable: netSalary,
-          lastCalculatedAt: new Date()
+          lastCalculatedAt: new Date(),
         },
         taxes: {
-          incomeTax: { amount: incomeTax, percentage: (incomeTax / taxableIncome) * 100 || 0, taxableIncome },
+          incomeTax: {
+            amount: incomeTax,
+            percentage: (incomeTax / taxableIncome) * 100 || 0,
+            taxableIncome,
+          },
           socialSecurity: { amount: socialSecurity, percentage: 6 },
           healthInsurance: { amount: healthInsurance, percentage: 2 },
-          GOSI: { amount: GOSI, percentage: 3 }
+          GOSI: { amount: GOSI, percentage: 3 },
         },
-        status: monthOffset > 0 ? 'paid' : (Math.random() > 0.5 ? 'approved' : 'pending-approval'),
+        status: monthOffset > 0 ? 'paid' : Math.random() > 0.5 ? 'approved' : 'pending-approval',
         paymentMethod: 'bank_transfer',
         bankAccount: `SA${Math.random().toString().slice(2, 22)}`,
-        transactionReference: monthOffset > 0 ? `TXN${Date.now()}${Math.random().toString().slice(2, 6)}` : null,
+        transactionReference:
+          monthOffset > 0 ? `TXN${Date.now()}${Math.random().toString().slice(2, 6)}` : null,
         paymentDate: monthOffset > 0 ? new Date(year, month, 25) : null,
         createdBy: employee.createdBy,
         modifiedBy: employee.modifiedBy,
@@ -272,21 +285,28 @@ const createPayrollRecords = async (employees, structures) => {
         isLocked: monthOffset > 0,
         approvals: {
           preparedBy: { userId: 'user123', name: 'محضر الرواتب', date: new Date() },
-          reviewedBy: monthOffset <= 1 ? { userId: 'user456', name: 'مراجع HR', date: new Date() } : null,
-          approvedBy: monthOffset <= 0 ? { userId: 'user789', name: 'مدير HR', date: new Date() } : null,
-          finalizedBy: monthOffset > 0 ? { userId: 'user999', name: 'مسؤول الدفع', date: new Date() } : null
-        }
+          reviewedBy:
+            monthOffset <= 1 ? { userId: 'user456', name: 'مراجع HR', date: new Date() } : null,
+          approvedBy:
+            monthOffset <= 0 ? { userId: 'user789', name: 'مدير HR', date: new Date() } : null,
+          finalizedBy:
+            monthOffset > 0 ? { userId: 'user999', name: 'مسؤول الدفع', date: new Date() } : null,
+        },
       });
     }
   }
 
   const created = await Payroll.insertMany(payrolls, { ordered: false }).catch(err => {
     console.log('⚠️  بعض السجلات موجودة بالفعل:', err.writeErrors?.length || 0);
-    return payrolls.filter(p => !err.writeErrors?.some(e => 
-      e.err.op.employeeId === p.employeeId && 
-      e.err.op.month === p.month && 
-      e.err.op.year === p.year
-    ));
+    return payrolls.filter(
+      p =>
+        !err.writeErrors?.some(
+          e =>
+            e.err.op.employeeId === p.employeeId &&
+            e.err.op.month === p.month &&
+            e.err.op.year === p.year
+        )
+    );
   });
 
   console.log(`✅ تم إنشاء ${created.length || payrolls.length} سجل راتب`);
@@ -296,12 +316,18 @@ const createPayrollRecords = async (employees, structures) => {
 /**
  * إنشاء سجلات الحوافز الفردية
  */
-const createIncentives = async (employees) => {
+const createIncentives = async employees => {
   console.log('🎁 إنشاء سجلات الحوافز...');
 
   const incentiveTypes = [
-    'performance', 'attendance', 'safety', 'loyalty',
-    'project', 'seasonal', 'referral', 'achievement'
+    'performance',
+    'attendance',
+    'safety',
+    'loyalty',
+    'project',
+    'seasonal',
+    'referral',
+    'achievement',
   ];
 
   const currentDate = new Date();
@@ -325,22 +351,24 @@ const createIncentives = async (employees) => {
         approvals: {
           recommendedBy: {
             userId: 'manager1',
-            date: new Date()
+            date: new Date(),
           },
-          approvedBy: Math.random() > 0.3 ? { userId: 'hr1', date: new Date() } : null
+          approvedBy: Math.random() > 0.3 ? { userId: 'hr1', date: new Date() } : null,
         },
         payment: {
           paidDate: Math.random() > 0.5 ? new Date() : null,
-          transactionReference: Math.random() > 0.5 ? `INC${Date.now()}` : null
-        }
+          transactionReference: Math.random() > 0.5 ? `INC${Date.now()}` : null,
+        },
       });
     }
   }
 
-  const created = await IndividualIncentive.insertMany(incentives, { ordered: false }).catch(err => {
-    console.log('⚠️  بعض الحوافز موجودة بالفعل:', err.writeErrors?.length || 0);
-    return incentives;
-  });
+  const created = await IndividualIncentive.insertMany(incentives, { ordered: false }).catch(
+    err => {
+      console.log('⚠️  بعض الحوافز موجودة بالفعل:', err.writeErrors?.length || 0);
+      return incentives;
+    }
+  );
 
   console.log(`✅ تم إنشاء ${created.length || incentives.length} حافزة`);
   return incentives;
@@ -349,7 +377,7 @@ const createIncentives = async (employees) => {
 /**
  * إنشاء سجلات العقوبات
  */
-const createPenalties = async (employees) => {
+const createPenalties = async employees => {
   console.log('⚠️  إنشاء سجلات العقوبات...');
 
   const penaltyTypes = ['disciplinary', 'attendance', 'misconduct'];
@@ -372,13 +400,13 @@ const createPenalties = async (employees) => {
       status: Math.random() > 0.4 ? 'approved' : 'pending-approval',
       approvals: {
         submittedBy: { userId: 'manager1', date: new Date() },
-        approvedBy: Math.random() > 0.4 ? { userId: 'director1', date: new Date() } : null
+        approvedBy: Math.random() > 0.4 ? { userId: 'director1', date: new Date() } : null,
       },
       appeal: {
         appealedDate: Math.random() > 0.8 ? new Date() : null,
         appealReason: Math.random() > 0.8 ? 'I disagree with this penalty' : null,
-        appealOutcome: null
-      }
+        appealOutcome: null,
+      },
     });
   }
 
@@ -402,16 +430,24 @@ const seedPayrollData = async () => {
     const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/alawael_erp';
     await mongoose.connect(mongoUri, {
       useNewUrlParser: true,
-      useUnifiedTopology: true
+      useUnifiedTopology: true,
     });
     console.log('✅ اتصل بـ MongoDB بنجاح\n');
 
     // استيراد النماذج
     Payroll = require('../models/payroll.model')?.Payroll || require('../models/payroll.model');
-    CompensationStructure = require('../models/compensation.model')?.CompensationStructure || require('../models/compensation.model').CompensationStructure;
-    IndividualIncentive = require('../models/compensation.model')?.IndividualIncentive || require('../models/compensation.model').IndividualIncentive;
-    PerformancePenalty = require('../models/compensation.model')?.PerformancePenalty || require('../models/compensation.model').PerformancePenalty;
-    BenefitsSummary = require('../models/compensation.model')?.BenefitsSummary || require('../models/compensation.model').BenefitsSummary;
+    CompensationStructure =
+      require('../models/compensation.model')?.CompensationStructure ||
+      require('../models/compensation.model').CompensationStructure;
+    IndividualIncentive =
+      require('../models/compensation.model')?.IndividualIncentive ||
+      require('../models/compensation.model').IndividualIncentive;
+    PerformancePenalty =
+      require('../models/compensation.model')?.PerformancePenalty ||
+      require('../models/compensation.model').PerformancePenalty;
+    BenefitsSummary =
+      require('../models/compensation.model')?.BenefitsSummary ||
+      require('../models/compensation.model').BenefitsSummary;
 
     // الحصول على نماذج الموظفين
     const Employee = mongoose.model('Employee') || require('../models/employee.model');
@@ -427,36 +463,36 @@ const seedPayrollData = async () => {
           email: 'ahmed@alawael.com',
           salary: 3000,
           department: new mongoose.Types.ObjectId(),
-          position: 'مهندس'
+          position: 'مهندس',
         },
         {
           name: 'فاطمة عبدالله حسن',
           email: 'fatima@alawael.com',
           salary: 2800,
           department: new mongoose.Types.ObjectId(),
-          position: 'محاسبة'
+          position: 'محاسبة',
         },
         {
           name: 'محمد سالم خالد',
           email: 'mohammed@alawael.com',
           salary: 2500,
           department: new mongoose.Types.ObjectId(),
-          position: 'موظف'
+          position: 'موظف',
         },
         {
           name: 'نور حميد ياسين',
           email: 'noor@alawael.com',
           salary: 2600,
           department: new mongoose.Types.ObjectId(),
-          position: 'تطوير'
+          position: 'تطوير',
         },
         {
           name: 'علي رضا محمود',
           email: 'ali@alawael.com',
           salary: 3200,
           department: new mongoose.Types.ObjectId(),
-          position: 'مدير'
-        }
+          position: 'مدير',
+        },
       ];
       employees = await Employee.insertMany(sampleEmployees);
     }
@@ -478,7 +514,6 @@ const seedPayrollData = async () => {
 
     await mongoose.connection.close();
     process.exit(0);
-
   } catch (error) {
     console.error('❌ خطأ في عملية البذر:', error.message);
     console.error(error);

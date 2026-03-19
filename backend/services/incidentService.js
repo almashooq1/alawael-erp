@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // backend/services/incidentService.js
 // خدمة إدارة الحوادث الشاملة
 // Comprehensive Incident Management Service
@@ -15,7 +16,7 @@ class IncidentService {
         ...incidentData,
         'discoveryInfo.discoveredBy': userId,
         'auditInfo.createdBy': userId,
-        'auditInfo.ipAddress': incidentData.ipAddress
+        'auditInfo.ipAddress': incidentData.ipAddress,
       });
 
       incident.generateIncidentNumber();
@@ -23,7 +24,7 @@ class IncidentService {
 
       logger.info('Incident created successfully', {
         incidentNumber: incident.incidentNumber,
-        userId
+        userId,
       });
 
       return incident;
@@ -64,7 +65,7 @@ class IncidentService {
         total,
         page,
         limit,
-        filters
+        filters,
       });
 
       return {
@@ -73,8 +74,8 @@ class IncidentService {
           page,
           limit,
           total,
-          pages: Math.ceil(total / limit)
-        }
+          pages: Math.ceil(total / limit),
+        },
       };
     } catch (error) {
       logger.error('Error fetching incidents', { error: error.message });
@@ -102,7 +103,7 @@ class IncidentService {
       }
 
       logger.info('Fetched incident details', {
-        incidentNumber: incident.incidentNumber
+        incidentNumber: incident.incidentNumber,
       });
 
       return incident;
@@ -131,7 +132,7 @@ class IncidentService {
 
       logger.info('Incident updated successfully', {
         incidentNumber: incident.incidentNumber,
-        userId
+        userId,
       });
 
       return incident;
@@ -153,7 +154,7 @@ class IncidentService {
 
       logger.info('Incident deleted successfully', {
         incidentNumber: incident.incidentNumber,
-        userId
+        userId,
       });
 
       return { message: 'تم حذف الحادثة بنجاح' };
@@ -169,7 +170,7 @@ class IncidentService {
       logger.info('Updating incident status', {
         incidentId,
         newStatus,
-        userId
+        userId,
       });
 
       const incident = await Incident.findById(incidentId);
@@ -185,7 +186,7 @@ class IncidentService {
           timestamp: new Date(),
           eventType: 'STATUS_CHANGE',
           description: notes,
-          performedBy: userId
+          performedBy: userId,
         });
       }
 
@@ -193,7 +194,7 @@ class IncidentService {
 
       logger.info('Incident status updated', {
         incidentNumber: incident.incidentNumber,
-        newStatus
+        newStatus,
       });
 
       return incident;
@@ -209,7 +210,7 @@ class IncidentService {
       logger.info('Assigning incident', {
         incidentId,
         assignedToIds,
-        userId
+        userId,
       });
 
       const incident = await Incident.findById(incidentId);
@@ -225,13 +226,13 @@ class IncidentService {
         eventType: 'ASSIGNED',
         description: `تم إسناد الحادثة إلى فريق من ${assignedToIds.length} أشخاص`,
         performedBy: userId,
-        details: { assignedToIds, teamLeadId }
+        details: { assignedToIds, teamLeadId },
       });
 
       await incident.save();
 
       logger.info('Incident assigned', {
-        incidentNumber: incident.incidentNumber
+        incidentNumber: incident.incidentNumber,
       });
 
       return incident;
@@ -246,7 +247,7 @@ class IncidentService {
     try {
       logger.info('Adding responder to incident', {
         incidentId,
-        userId
+        userId,
       });
 
       const incident = await Incident.findById(incidentId);
@@ -257,20 +258,20 @@ class IncidentService {
       incident.addResponder({
         ...responderData,
         assignedBy: userId,
-        assignedAt: new Date()
+        assignedAt: new Date(),
       });
 
       incident.timeline.push({
         timestamp: new Date(),
         eventType: 'RESPONDER_ADDED',
         description: `تم إضافة مستجيب: ${responderData.name} بدور ${responderData.role}`,
-        performedBy: userId
+        performedBy: userId,
       });
 
       await incident.save();
 
       logger.info('Responder added', {
-        incidentNumber: incident.incidentNumber
+        incidentNumber: incident.incidentNumber,
       });
 
       return incident;
@@ -285,7 +286,7 @@ class IncidentService {
     try {
       logger.info('Escalating incident', {
         incidentId,
-        userId
+        userId,
       });
 
       const incident = await Incident.findById(incidentId);
@@ -302,7 +303,7 @@ class IncidentService {
         escalatedBy: userId,
         escalationReason: escalationData.reason,
         escalationNotes: escalationData.notes,
-        status: 'PENDING'
+        status: 'PENDING',
       });
 
       incident.timeline.push({
@@ -310,14 +311,14 @@ class IncidentService {
         eventType: 'ESCALATED',
         description: `تم تصعيد الحادثة إلى المستوى ${incident.currentEscalationLevel}`,
         performedBy: userId,
-        details: escalationData
+        details: escalationData,
       });
 
       await incident.save();
 
       logger.info('Incident escalated', {
         incidentNumber: incident.incidentNumber,
-        escalationLevel: incident.currentEscalationLevel
+        escalationLevel: incident.currentEscalationLevel,
       });
 
       return incident;
@@ -332,7 +333,7 @@ class IncidentService {
     try {
       logger.info('Adding comment to incident', {
         incidentId,
-        userId
+        userId,
       });
 
       const incident = await Incident.findById(incidentId);
@@ -343,20 +344,20 @@ class IncidentService {
       incident.addComment({
         userId,
         ...commentData,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       incident.timeline.push({
         timestamp: new Date(),
         eventType: 'COMMENT_ADDED',
         description: `تم إضافة تعليق: ${commentData.comment.substring(0, 50)}...`,
-        performedBy: userId
+        performedBy: userId,
       });
 
       await incident.save();
 
       logger.info('Comment added', {
-        incidentNumber: incident.incidentNumber
+        incidentNumber: incident.incidentNumber,
       });
 
       return incident;
@@ -371,7 +372,7 @@ class IncidentService {
     try {
       logger.info('Adding attachment to incident', {
         incidentId,
-        userId
+        userId,
       });
 
       const incident = await Incident.findById(incidentId);
@@ -382,20 +383,20 @@ class IncidentService {
       incident.addAttachment({
         ...attachmentData,
         uploadedBy: userId,
-        uploadedAt: new Date()
+        uploadedAt: new Date(),
       });
 
       incident.timeline.push({
         timestamp: new Date(),
         eventType: 'ATTACHMENT_ADDED',
         description: `تم إضافة مرفق: ${attachmentData.fileName}`,
-        performedBy: userId
+        performedBy: userId,
       });
 
       await incident.save();
 
       logger.info('Attachment added', {
-        incidentNumber: incident.incidentNumber
+        incidentNumber: incident.incidentNumber,
       });
 
       return incident;
@@ -410,7 +411,7 @@ class IncidentService {
     try {
       logger.info('Resolving incident', {
         incidentId,
-        userId
+        userId,
       });
 
       const incident = await Incident.findById(incidentId);
@@ -421,7 +422,7 @@ class IncidentService {
       incident.resolution = {
         ...resolutionData,
         resolvedBy: userId,
-        resolvedAt: new Date()
+        resolvedAt: new Date(),
       };
 
       incident.updateStatus('RESOLVED', userId);
@@ -430,7 +431,7 @@ class IncidentService {
         timestamp: new Date(),
         eventType: 'RESOLVED',
         description: `تم حل الحادثة: ${resolutionData.solution}`,
-        performedBy: userId
+        performedBy: userId,
       });
 
       incident.calculateMetrics();
@@ -440,7 +441,7 @@ class IncidentService {
 
       logger.info('Incident resolved', {
         incidentNumber: incident.incidentNumber,
-        resolutionTime: incident.metrics.timeToResolve
+        resolutionTime: incident.metrics.timeToResolve,
       });
 
       return incident;
@@ -455,7 +456,7 @@ class IncidentService {
     try {
       logger.info('Closing incident', {
         incidentId,
-        userId
+        userId,
       });
 
       const incident = await Incident.findById(incidentId);
@@ -466,7 +467,7 @@ class IncidentService {
       incident.closure = {
         ...closureData,
         closedBy: userId,
-        closedAt: new Date()
+        closedAt: new Date(),
       };
 
       incident.updateStatus('CLOSED', userId);
@@ -475,13 +476,13 @@ class IncidentService {
         timestamp: new Date(),
         eventType: 'CLOSED',
         description: `تم إغلاق الحادثة - السبب: ${closureData.closureReason}`,
-        performedBy: userId
+        performedBy: userId,
       });
 
       await incident.save();
 
       logger.info('Incident closed', {
-        incidentNumber: incident.incidentNumber
+        incidentNumber: incident.incidentNumber,
       });
 
       return incident;
@@ -514,14 +515,14 @@ class IncidentService {
         responders: incident.responders.map(r => ({
           name: r.name,
           role: r.role,
-          timeSpent: r.timeSpent
+          timeSpent: r.timeSpent,
         })),
         comments: incident.comments.length,
-        attachments: incident.attachments.length
+        attachments: incident.attachments.length,
       };
 
       logger.info('Incident report generated', {
-        incidentNumber: incident.incidentNumber
+        incidentNumber: incident.incidentNumber,
       });
 
       return report;
@@ -543,35 +544,32 @@ class IncidentService {
       if (filters.dateRange) {
         query['discoveryInfo.discoveredAt'] = {
           $gte: filters.dateRange.start,
-          $lte: filters.dateRange.end
+          $lte: filters.dateRange.end,
         };
       }
 
-      const [
-        total,
-        bySeverity,
-        byCategory,
-        byStatus,
-        avgResolutionTime,
-        slaBreaches
-      ] = await Promise.all([
-        Incident.countDocuments(query),
-        Incident.countDocuments({ ...query, severity: { $in: ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'] } }),
-        Incident.aggregate([
-          { $match: query },
-          { $group: { _id: '$category', count: { $sum: 1 } } },
-          { $sort: { count: -1 } }
-        ]),
-        Incident.aggregate([
-          { $match: query },
-          { $group: { _id: '$status', count: { $sum: 1 } } }
-        ]),
-        Incident.aggregate([
-          { $match: { ...query, 'resolution.resolvedAt': { $exists: true } } },
-          { $group: { _id: null, avgTime: { $avg: '$metrics.timeToResolve' } } }
-        ]),
-        Incident.countDocuments({ ...query, 'sla.slaStatus': 'BREACHED' })
-      ]);
+      const [total, bySeverity, byCategory, byStatus, avgResolutionTime, slaBreaches] =
+        await Promise.all([
+          Incident.countDocuments(query),
+          Incident.countDocuments({
+            ...query,
+            severity: { $in: ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'] },
+          }),
+          Incident.aggregate([
+            { $match: query },
+            { $group: { _id: '$category', count: { $sum: 1 } } },
+            { $sort: { count: -1 } },
+          ]),
+          Incident.aggregate([
+            { $match: query },
+            { $group: { _id: '$status', count: { $sum: 1 } } },
+          ]),
+          Incident.aggregate([
+            { $match: { ...query, 'resolution.resolvedAt': { $exists: true } } },
+            { $group: { _id: null, avgTime: { $avg: '$metrics.timeToResolve' } } },
+          ]),
+          Incident.countDocuments({ ...query, 'sla.slaStatus': 'BREACHED' }),
+        ]);
 
       const statistics = {
         total,
@@ -580,7 +578,7 @@ class IncidentService {
         byStatus,
         avgResolutionTime: avgResolutionTime[0]?.avgTime || 0,
         slaBreaches,
-        slaBreachRate: ((slaBreaches / total) * 100).toFixed(2) + '%'
+        slaBreachRate: ((slaBreaches / total) * 100).toFixed(2) + '%',
       };
 
       logger.info('Statistics fetched', { statistics });
@@ -598,7 +596,7 @@ class IncidentService {
       logger.info('Searching incidents', { searchTerm, filters });
 
       const query = {
-        $text: { $search: searchTerm }
+        $text: { $search: searchTerm },
       };
 
       if (filters.severity) query.severity = filters.severity;
@@ -621,8 +619,8 @@ class IncidentService {
           page,
           limit,
           total,
-          pages: Math.ceil(total / limit)
-        }
+          pages: Math.ceil(total / limit),
+        },
       };
     } catch (error) {
       logger.error('Error searching incidents', { error: error.message });
@@ -647,7 +645,7 @@ class IncidentService {
       await incident.save();
 
       logger.info('Incident archived', {
-        incidentNumber: incident.incidentNumber
+        incidentNumber: incident.incidentNumber,
       });
 
       return incident;
@@ -666,7 +664,7 @@ class IncidentService {
       }
 
       const related = await Incident.find({
-        _id: { $in: incident.relatedIncidents }
+        _id: { $in: incident.relatedIncidents },
       }).limit(limit);
 
       return related;

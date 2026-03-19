@@ -1,15 +1,32 @@
-const mongoose = require('mongoose');
+/* eslint-disable no-undef, no-unused-vars */
+const _mongoose = require('mongoose');
 
 // Force mock mode for this test
 process.env.USE_MOCK_DB = 'true';
 
-const ProjectManagementServiceClass = require('../services/projectManagementService');
+const {
+  ProjectManagementService: ProjectManagementServiceClass,
+} = require('../services/projectManagementService');
 const Project = require('../models/project.model');
 const Task = require('../models/task.model');
 
 // Mock Mongoose Models
-jest.mock('../models/project.model');
-jest.mock('../models/task.model');
+jest.mock('../models/project.model', () => {
+  const mock = jest.fn();
+  mock.find = jest.fn();
+  mock.findOne = jest.fn();
+  mock.findById = jest.fn();
+  mock.findByIdAndUpdate = jest.fn();
+  return mock;
+});
+jest.mock('../models/task.model', () => {
+  const mock = jest.fn();
+  mock.find = jest.fn();
+  mock.findOne = jest.fn();
+  mock.findById = jest.fn();
+  mock.findByIdAndUpdate = jest.fn();
+  return mock;
+});
 
 describe('Project Management Service', () => {
   let projectManagementService;
@@ -56,7 +73,7 @@ describe('Project Management Service', () => {
 
   describe('createTask', () => {
     it('should create a task successfully', async () => {
-      const projectId = 'proj1';
+      const _projectId = 'proj1';
       const project = projectManagementService.createProject({ name: 'Test' });
       const data = { title: 'New Task' };
       const result = await projectManagementService.createTask(project.id, data);
@@ -67,7 +84,7 @@ describe('Project Management Service', () => {
 
   describe('updateTaskStatus', () => {
     it('should update task status', async () => {
-      const projectId = 'proj1';
+      const _projectId = 'proj1';
       const project = projectManagementService.createProject({ name: 'Test' });
       const task = projectManagementService.addTask(project.id, { title: 'Task' });
       const newStatus = 'completed';

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * 🔄 CI/CD Pipeline Configuration
  *
@@ -22,7 +23,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+
     services:
       mongodb:
         image: mongo:6.0-alpine
@@ -36,7 +37,7 @@ jobs:
           --health-retries 5
         ports:
           - 27017:27017
-      
+
       redis:
         image: redis:7-alpine
         options: >-
@@ -49,25 +50,25 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: Use Node.js
       uses: actions/setup-node@v3
       with:
         node-version: '18'
         cache: 'npm'
-    
+
     - name: Install dependencies
       run: npm ci
-    
+
     - name: Run linter
       run: npm run lint
-    
+
     - name: Run tests
       run: npm test
       env:
-        MONGO_URI: mongodb://admin:password@localhost:27017/test
+        MONGODB_URI: mongodb://localhost:27017/alawael-test
         REDIS_URL: redis://localhost:6379
-    
+
     - name: Upload coverage
       uses: codecov/codecov-action@v3
       with:
@@ -86,23 +87,23 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     permissions:
       contents: read
       packages: write
-    
+
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
-    
+
     - name: Login to Docker Hub
       uses: docker/login-action@v2
       with:
         username: \${{ secrets.DOCKER_USERNAME }}
         password: \${{ secrets.DOCKER_PASSWORD }}
-    
+
     - name: Extract metadata
       id: meta
       uses: docker/metadata-action@v4
@@ -113,7 +114,7 @@ jobs:
           type=semver,pattern={{version}}
           type=semver,pattern={{major}}.{{minor}}
           type=sha
-    
+
     - name: Build and push Docker image
       uses: docker/build-push-action@v4
       with:
@@ -137,26 +138,26 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: build
-    
+
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: Configure kubectl
       run: |
-        mkdir -p \$HOME/.kube
-        echo "\${{ secrets.KUBE_CONFIG }}" | base64 -d > \$HOME/.kube/config
-        chmod 600 \$HOME/.kube/config
-    
+        mkdir -p $HOME/.kube
+        echo "\${{ secrets.KUBE_CONFIG }}" | base64 -d > $HOME/.kube/config
+        chmod 600 $HOME/.kube/config
+
     - name: Deploy to Kubernetes
       run: |
         kubectl apply -f k8s/
         kubectl rollout status deployment/alawael-app -n alawael --timeout=5m
-    
+
     - name: Verify deployment
       run: |
         kubectl get all -n alawael
         kubectl logs -l app=alawael -n alawael --tail=100
-    
+
     - name: Slack notification
       if: always()
       uses: 8398a7/action-slack@v3
@@ -174,7 +175,7 @@ stages:
   - deploy
 
 variables:
-  DOCKER_IMAGE: \$CI_REGISTRY_IMAGE
+  DOCKER_IMAGE: $CI_REGISTRY_IMAGE
 
 test:
   stage: test
@@ -199,17 +200,17 @@ build:
   services:
     - docker:dind
   script:
-    - docker login -u \$CI_REGISTRY_USER -p \$CI_REGISTRY_PASSWORD \$CI_REGISTRY
-    - docker build -t \$DOCKER_IMAGE:\$CI_COMMIT_SHA -t \$DOCKER_IMAGE:latest .
-    - docker push \$DOCKER_IMAGE:\$CI_COMMIT_SHA
-    - docker push \$DOCKER_IMAGE:latest
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker build -t $DOCKER_IMAGE:$CI_COMMIT_SHA -t $DOCKER_IMAGE:latest .
+    - docker push $DOCKER_IMAGE:$CI_COMMIT_SHA
+    - docker push $DOCKER_IMAGE:latest
 
 deploy:
   stage: deploy
   image: bitnami/kubectl:latest
   script:
-    - kubectl config use-context \$KUBE_CONTEXT
-    - kubectl set image deployment/alawael-app alawael=\$DOCKER_IMAGE:\$CI_COMMIT_SHA -n alawael
+    - kubectl config use-context $KUBE_CONTEXT
+    - kubectl set image deployment/alawael-app alawael=$DOCKER_IMAGE:$CI_COMMIT_SHA -n alawael
     - kubectl rollout status deployment/alawael-app -n alawael
   only:
     - main

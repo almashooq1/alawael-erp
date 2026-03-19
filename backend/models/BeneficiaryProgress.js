@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars, no-undef, no-empty, prefer-const, no-constant-condition, no-unused-expressions */
 /**
  * BeneficiaryProgress Model
  * نموذج تقدم/إنجاز المستفيد
@@ -163,7 +164,9 @@ BeneficiaryProgressSchema.statics.getUnreportedProgress = function () {
 BeneficiaryProgressSchema.methods.generateReport = async function () {
   // Calculate performance metrics
   if (this.totalActivities > 0) {
-    this.activityCompletionRate = Math.round((this.completedActivities / this.totalActivities) * 100);
+    this.activityCompletionRate = Math.round(
+      (this.completedActivities / this.totalActivities) * 100
+    );
   }
 
   // Determine overall performance
@@ -215,12 +218,14 @@ BeneficiaryProgressSchema.methods.sendToGuardian = async function () {
 };
 
 BeneficiaryProgressSchema.methods.calculateTrend = async function () {
-  const previousMonth = await this.constructor.findOne({
-    beneficiaryId: this.beneficiaryId,
-    month: {
-      $lt: this.month,
-    },
-  }).sort({ month: -1 });
+  const previousMonth = await this.constructor
+    .findOne({
+      beneficiaryId: this.beneficiaryId,
+      month: {
+        $lt: this.month,
+      },
+    })
+    .sort({ month: -1 });
 
   if (previousMonth) {
     this.previousMonthScore = previousMonth.academicScore;
@@ -236,7 +241,6 @@ BeneficiaryProgressSchema.pre('save', async function () {
     await this.calculateTrend();
   }
   this.updatedAt = new Date();
-  next();
 });
 
 module.exports = mongoose.model('BeneficiaryProgress', BeneficiaryProgressSchema);

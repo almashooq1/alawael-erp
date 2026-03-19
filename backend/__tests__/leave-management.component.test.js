@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * Leave Management Component Tests - Phase 5.2
  * Tests leave request, approval, and balance calculations
@@ -105,7 +107,7 @@ describe('Leave Management Component Tests - Phase 5.2', () => {
 
   afterEach(async () => {
     // Cleanup
-    for (let leave of createdLeaves) {
+    for (const leave of createdLeaves) {
       try {
         await Leave.findByIdAndDelete(leave._id);
       } catch (e) {
@@ -188,7 +190,7 @@ describe('Leave Management Component Tests - Phase 5.2', () => {
       const endDate = new Date(startDate);
       endDate.setDate(endDate.getDate() + 2);
 
-      for (let type of leaveTypes) {
+      for (const type of leaveTypes) {
         const leave = await Leave.create({
           employeeId: testEmployee._id,
           leaveType: type,
@@ -405,7 +407,7 @@ describe('Leave Management Component Tests - Phase 5.2', () => {
       };
 
       const balances = {};
-      for (let type in leaveTypes) {
+      for (const type in leaveTypes) {
         balances[type] = leaveTypes[type];
       }
 

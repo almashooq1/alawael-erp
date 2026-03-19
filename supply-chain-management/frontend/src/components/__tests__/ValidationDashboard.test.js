@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * ValidationDashboard.test.js
  * اختبارات وحدة شاملة لـ ValidationDashboard
@@ -15,12 +16,14 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ValidationDashboard from '../ValidationDashboard';
-import * as API from '../../services/api';
+jest.mock('../../services/api', () => ({
+  getViolations: jest.fn(),
+  exportViolations: jest.fn(),
+  updateViolation: jest.fn(),
+  exportReport: jest.fn(),
+  resolveViolation: jest.fn(),
+}));
 
-// Mock API calls
-jest.mock('../../services/api');
-
-// Mock Ant Design message
 jest.mock('antd', () => ({
   ...jest.requireActual('antd'),
   message: {
@@ -29,12 +32,7 @@ jest.mock('antd', () => ({
   },
 }));
 
-// Setup API mocks
-API.getViolations = jest.fn();
-API.exportViolations = jest.fn();
-API.updateViolation = jest.fn();
-API.exportReport = jest.fn();
-API.resolveViolation = jest.fn();
+import * as API from '../../services/api';
 
 describe('ValidationDashboard', () => {
   const mockViolations = [
@@ -72,8 +70,8 @@ describe('ValidationDashboard', () => {
     });
 
     test('يجب أن يعرض رسالة تحميل في البداية', async () => {
-      API.getViolations.mockImplementation(() =>
-        new Promise(resolve => setTimeout(() => resolve({ data: [] }), 100))
+      API.getViolations.mockImplementation(
+        () => new Promise(resolve => setTimeout(() => resolve({ data: [] }), 100))
       );
 
       render(<ValidationDashboard />);
@@ -119,7 +117,7 @@ describe('ValidationDashboard', () => {
       render(<ValidationDashboard />);
 
       await new Promise(resolve => setTimeout(resolve, 500));
-      
+
       expect(screen.getByText(/لوحة تحقق/i)).toBeInTheDocument();
     });
 
@@ -141,7 +139,7 @@ describe('ValidationDashboard', () => {
       render(<ValidationDashboard />);
 
       await new Promise(resolve => setTimeout(resolve, 500));
-      
+
       expect(screen.getByText(/لوحة تحقق/i)).toBeInTheDocument();
     });
 
@@ -151,7 +149,7 @@ describe('ValidationDashboard', () => {
       render(<ValidationDashboard />);
 
       await new Promise(resolve => setTimeout(resolve, 500));
-      
+
       expect(screen.getByText(/لوحة تحقق/i)).toBeInTheDocument();
     });
 
@@ -161,7 +159,7 @@ describe('ValidationDashboard', () => {
       render(<ValidationDashboard />);
 
       await new Promise(resolve => setTimeout(resolve, 500));
-      
+
       expect(screen.getByText(/لوحة تحقق/i)).toBeInTheDocument();
     });
   });
@@ -205,7 +203,7 @@ describe('ValidationDashboard', () => {
       fireEvent.click(resolveButton);
 
       await new Promise(resolve => setTimeout(resolve, 500));
-      
+
       expect(screen.getByText(/لوحة تحقق/i)).toBeInTheDocument();
     });
   });
@@ -253,7 +251,7 @@ describe('ValidationDashboard', () => {
       await new Promise(resolve => setTimeout(resolve, 500));
 
       await new Promise(resolve => setTimeout(resolve, 500));
-      
+
       expect(screen.getByText(/لوحة تحقق/i)).toBeInTheDocument();
     });
 
@@ -268,7 +266,7 @@ describe('ValidationDashboard', () => {
       await new Promise(resolve => setTimeout(resolve, 500));
 
       await new Promise(resolve => setTimeout(resolve, 500));
-      
+
       expect(screen.getByText(/لوحة تحقق/i)).toBeInTheDocument();
     });
 
@@ -283,7 +281,7 @@ describe('ValidationDashboard', () => {
       await new Promise(resolve => setTimeout(resolve, 500));
 
       await new Promise(resolve => setTimeout(resolve, 500));
-      
+
       // Component should handle export error gracefully
       expect(screen.getByText(/لوحة تحقق/i)).toBeInTheDocument();
     });

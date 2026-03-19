@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * PHASE 107: Smart Metabolic & Nutrition Unit (Advanced)
  * "The Fuel System" - Manages the biochemical inputs required for recovery.
@@ -7,10 +8,11 @@
  */
 
 const SmartClinicalCommandService = require('./smartClinicalCommand.service');
+const logger = require('../utils/logger');
 
 class SmartNutritionService {
   constructor() {
-    console.log('System: Smart Metabolic & Nutrition Unit - Initialized');
+    logger.info('System: Smart Metabolic & Nutrition Unit - Initialized');
     this.dailyLogs = new Map(); // patientId -> { date, meals: [], waterML: 0 }
   }
 

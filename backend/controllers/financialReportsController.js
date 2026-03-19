@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * financialReportsController.js - Financial Reports Business Logic
  * Handles generation and management of financial statements
@@ -22,7 +23,7 @@ class FinancialReportsController {
       // Get all transactions within the date range
       const transactions = await Transaction.find({
         organizationId,
-        date: { $lte: new Date(dateRange.to) }
+        date: { $lte: new Date(dateRange.to) },
       });
 
       // Calculate account balances
@@ -41,23 +42,23 @@ class FinancialReportsController {
           currentTotal: this._sumAmount(assets.current),
           fixed: assets.fixed || [],
           fixedTotal: this._sumAmount(assets.fixed),
-          total: this._sumAmount(assets.all)
+          total: this._sumAmount(assets.all),
         },
         liabilities: {
           current: liabilities.current || [],
           currentTotal: this._sumAmount(liabilities.current),
           longTerm: liabilities.longTerm || [],
           longTermTotal: this._sumAmount(liabilities.longTerm),
-          total: this._sumAmount(liabilities.all)
+          total: this._sumAmount(liabilities.all),
         },
         equity: {
           capital: equity.capital?.[0]?.balance || 0,
           retainedEarnings: equity.retained?.[0]?.balance || 0,
-          total: this._sumAmount(equity.all)
-        }
+          total: this._sumAmount(equity.all),
+        },
       };
     } catch (error) {
-      throw new Error(`Balance Sheet retrieval failed: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -72,8 +73,8 @@ class FinancialReportsController {
         organizationId,
         date: {
           $gte: new Date(dateRange.from),
-          $lte: new Date(dateRange.to)
-        }
+          $lte: new Date(dateRange.to),
+        },
       });
 
       // Categorize revenues and expenses
@@ -100,22 +101,22 @@ class FinancialReportsController {
           operatingTotal: operatingRevenue,
           other: revenues.other || [],
           otherTotal: otherRevenue,
-          total: totalRevenue
+          total: totalRevenue,
         },
         expenses: {
           operating: expenses.operating || [],
           operatingTotal: operatingExpense,
           nonOperating: expenses.nonOperating || [],
           nonOperatingTotal: nonOperatingExpense,
-          total: totalExpense
+          total: totalExpense,
         },
         operatingIncome,
         incomeBeforeTaxes,
         taxes,
-        netIncome
+        netIncome,
       };
     } catch (error) {
-      throw new Error(`Income Statement retrieval failed: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -130,25 +131,31 @@ class FinancialReportsController {
         organizationId,
         date: {
           $gte: new Date(dateRange.from),
-          $lte: new Date(dateRange.to)
-        }
+          $lte: new Date(dateRange.to),
+        },
       });
 
       // Categorize cash flows
-      const operating = transactions.filter(t => t.activityType === 'operating').map(t => ({
-        name: t.description,
-        amount: t.amount
-      }));
+      const operating = transactions
+        .filter(t => t.activityType === 'operating')
+        .map(t => ({
+          name: t.description,
+          amount: t.amount,
+        }));
 
-      const investing = transactions.filter(t => t.activityType === 'investing').map(t => ({
-        name: t.description,
-        amount: t.amount
-      }));
+      const investing = transactions
+        .filter(t => t.activityType === 'investing')
+        .map(t => ({
+          name: t.description,
+          amount: t.amount,
+        }));
 
-      const financing = transactions.filter(t => t.activityType === 'financing').map(t => ({
-        name: t.description,
-        amount: t.amount
-      }));
+      const financing = transactions
+        .filter(t => t.activityType === 'financing')
+        .map(t => ({
+          name: t.description,
+          amount: t.amount,
+        }));
 
       const operatingTotal = operating.reduce((sum, i) => sum + i.amount, 0);
       const investingTotal = investing.reduce((sum, i) => sum + i.amount, 0);
@@ -168,10 +175,10 @@ class FinancialReportsController {
         financingTotal,
         netChange,
         beginningBalance,
-        endingBalance
+        endingBalance,
       };
     } catch (error) {
-      throw new Error(`Cash Flow Statement retrieval failed: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -195,54 +202,75 @@ class FinancialReportsController {
             name: 'Net Profit Margin',
             value: `${((netIncome / revenue) * 100).toFixed(2)}%`,
             interpretation: 'Healthy' + (netIncome / revenue > 0.15 ? ' ✓' : ''),
-            status: netIncome / revenue > 0.15 ? 'good' : 'warning'
+            status: netIncome / revenue > 0.15 ? 'good' : 'warning',
           },
           {
             name: 'Return on Assets (ROA)',
             value: `${((netIncome / assets) * 100).toFixed(2)}%`,
             interpretation: 'Strong' + (netIncome / assets > 0.15 ? ' ✓' : ''),
-            status: netIncome / assets > 0.15 ? 'good' : 'warning'
+            status: netIncome / assets > 0.15 ? 'good' : 'warning',
           },
           {
             name: 'Return on Equity (ROE)',
             value: `${((netIncome / equity) * 100).toFixed(2)}%`,
-            interpretation: 'Excellent' + (netIncome / equity > 0.20 ? ' ✓' : ''),
-            status: netIncome / equity > 0.20 ? 'good' : 'warning'
-          }
+            interpretation: 'Excellent' + (netIncome / equity > 0.2 ? ' ✓' : ''),
+            status: netIncome / equity > 0.2 ? 'good' : 'warning',
+          },
         ],
         liquidity: [
           {
             name: 'Current Ratio',
-            value: (balanceSheet.assets.currentTotal / balanceSheet.liabilities.currentTotal).toFixed(2),
-            interpretation: 'Adequate' + (balanceSheet.assets.currentTotal / balanceSheet.liabilities.currentTotal > 1.5 ? ' ✓' : ''),
-            status: balanceSheet.assets.currentTotal / balanceSheet.liabilities.currentTotal > 1.5 ? 'good' : 'warning'
+            value: (
+              balanceSheet.assets.currentTotal / balanceSheet.liabilities.currentTotal
+            ).toFixed(2),
+            interpretation:
+              'Adequate' +
+              (balanceSheet.assets.currentTotal / balanceSheet.liabilities.currentTotal > 1.5
+                ? ' ✓'
+                : ''),
+            status:
+              balanceSheet.assets.currentTotal / balanceSheet.liabilities.currentTotal > 1.5
+                ? 'good'
+                : 'warning',
           },
           {
             name: 'Quick Ratio',
-            value: ((balanceSheet.assets.currentTotal - 10000) / balanceSheet.liabilities.currentTotal).toFixed(2),
-            interpretation: 'Good' + ((balanceSheet.assets.currentTotal - 10000) / balanceSheet.liabilities.currentTotal > 1.0 ? ' ✓' : ''),
-            status: (balanceSheet.assets.currentTotal - 10000) / balanceSheet.liabilities.currentTotal > 1.0 ? 'good' : 'warning'
-          }
+            value: (
+              (balanceSheet.assets.currentTotal - 10000) /
+              balanceSheet.liabilities.currentTotal
+            ).toFixed(2),
+            interpretation:
+              'Good' +
+              ((balanceSheet.assets.currentTotal - 10000) / balanceSheet.liabilities.currentTotal >
+              1.0
+                ? ' ✓'
+                : ''),
+            status:
+              (balanceSheet.assets.currentTotal - 10000) / balanceSheet.liabilities.currentTotal >
+              1.0
+                ? 'good'
+                : 'warning',
+          },
         ],
         efficiency: [
           {
             name: 'Asset Turnover',
             value: (revenue / assets).toFixed(2),
             interpretation: 'Efficient' + (revenue / assets > 1.5 ? ' ✓' : ''),
-            status: revenue / assets > 1.5 ? 'good' : 'warning'
-          }
+            status: revenue / assets > 1.5 ? 'good' : 'warning',
+          },
         ],
         leverage: [
           {
             name: 'Debt-to-Equity',
             value: (liabilities / equity).toFixed(2),
             interpretation: 'Conservative' + (liabilities / equity < 1.0 ? ' ✓' : ''),
-            status: liabilities / equity < 1.0 ? 'good' : 'warning'
-          }
-        ]
+            status: liabilities / equity < 1.0 ? 'good' : 'warning',
+          },
+        ],
       };
     } catch (error) {
-      throw new Error(`Financial Ratios calculation failed: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -261,10 +289,10 @@ class FinancialReportsController {
         totalRevenues: incomeStatement.revenues.total,
         netIncome: incomeStatement.netIncome,
         totalEquity: balanceSheet.equity.total,
-        branches: branches
+        branches: branches,
       };
     } catch (error) {
-      throw new Error(`Consolidated Report failed: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -284,7 +312,7 @@ class FinancialReportsController {
         throw new Error(`Unsupported export format: ${format}`);
       }
     } catch (error) {
-      throw new Error(`Report export failed: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -300,8 +328,14 @@ class FinancialReportsController {
       doc.pipe(stream);
 
       // Header
-      doc.fontSize(20).font('Helvetica-Bold').text(`${reportType.toUpperCase()} REPORT`, { align: 'center' });
-      doc.fontSize(10).font('Helvetica').text(`Generated: ${new Date().toLocaleDateString()}`, { align: 'center' });
+      doc
+        .fontSize(20)
+        .font('Helvetica-Bold')
+        .text(`${reportType.toUpperCase()} REPORT`, { align: 'center' });
+      doc
+        .fontSize(10)
+        .font('Helvetica')
+        .text(`Generated: ${new Date().toLocaleDateString()}`, { align: 'center' });
       doc.moveDown(1);
 
       // Content based on report type
@@ -316,7 +350,7 @@ class FinancialReportsController {
         stream.on('error', reject);
       });
     } catch (error) {
-      throw new Error(`PDF export failed: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -336,7 +370,7 @@ class FinancialReportsController {
 
       return { path: filepath, filename: `${filename}.xlsx` };
     } catch (error) {
-      throw new Error(`Excel export failed: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -346,22 +380,32 @@ class FinancialReportsController {
   _addPDFContent(doc, reportType, reportData) {
     if (reportType === 'balance-sheet') {
       doc.fontSize(12).font('Helvetica-Bold').text('ASSETS', { underline: true });
-      doc.fontSize(10).font('Helvetica').text(`Current Assets: $${reportData.assets?.currentTotal.toLocaleString()}`);
+      doc
+        .fontSize(10)
+        .font('Helvetica')
+        .text(`Current Assets: $${reportData.assets?.currentTotal.toLocaleString()}`);
       doc.text(`Fixed Assets: $${reportData.assets?.fixedTotal.toLocaleString()}`);
       doc.moveDown();
 
       doc.fontSize(12).font('Helvetica-Bold').text('LIABILITIES & EQUITY', { underline: true });
-      doc.fontSize(10).font('Helvetica')
+      doc
+        .fontSize(10)
+        .font('Helvetica')
         .text(`Current Liabilities: $${reportData.liabilities?.currentTotal.toLocaleString()}`)
         .text(`Long-term Liabilities: $${reportData.liabilities?.longTermTotal.toLocaleString()}`)
         .text(`Total Equity: $${reportData.equity?.total.toLocaleString()}`);
     } else if (reportType === 'income-statement') {
       doc.fontSize(12).font('Helvetica-Bold').text('REVENUES', { underline: true });
-      doc.fontSize(10).font('Helvetica').text(`Total Revenues: $${reportData.revenues?.total.toLocaleString()}`);
+      doc
+        .fontSize(10)
+        .font('Helvetica')
+        .text(`Total Revenues: $${reportData.revenues?.total.toLocaleString()}`);
       doc.moveDown();
 
       doc.fontSize(12).font('Helvetica-Bold').text('EXPENSES', { underline: true });
-      doc.fontSize(10).font('Helvetica')
+      doc
+        .fontSize(10)
+        .font('Helvetica')
         .text(`Total Expenses: $${reportData.expenses?.total.toLocaleString()}`)
         .text(`Net Income: $${reportData.netIncome.toLocaleString()}`);
     }
@@ -374,7 +418,7 @@ class FinancialReportsController {
     if (reportType === 'balance-sheet') {
       worksheet.columns = [
         { header: 'Account', key: 'account', width: 30 },
-        { header: 'Amount', key: 'amount', width: 15 }
+        { header: 'Amount', key: 'amount', width: 15 },
       ];
 
       worksheet.addRow({ account: 'ASSETS', amount: '' });
@@ -392,7 +436,7 @@ class FinancialReportsController {
 
     return {
       from: from.toISOString(),
-      to: to.toISOString()
+      to: to.toISOString(),
     };
   }
 
@@ -403,7 +447,10 @@ class FinancialReportsController {
     return accounts.map(account => {
       const balance = transactions
         .filter(t => t.accountId === account._id)
-        .reduce((sum, t) => sum + (t.type === 'debit' ? t.amount : -t.amount), account.openingBalance || 0);
+        .reduce(
+          (sum, t) => sum + (t.type === 'debit' ? t.amount : -t.amount),
+          account.openingBalance || 0
+        );
 
       return { ...account, balance };
     });
@@ -419,7 +466,7 @@ class FinancialReportsController {
       longTerm: items.filter(i => i.accountType === `${category}-longterm`),
       capital: items.filter(i => i.accountType === 'equity-capital'),
       retained: items.filter(i => i.accountType === 'equity-retained'),
-      all: items.filter(i => i.accountType?.startsWith(category))
+      all: items.filter(i => i.accountType?.startsWith(category)),
     };
   }
 
@@ -439,7 +486,7 @@ class FinancialReportsController {
     return {
       operating: filtered.filter(t => t.flowCategory === 'operating'),
       other: filtered.filter(t => t.flowCategory === 'other'),
-      nonOperating: filtered.filter(t => t.flowCategory === 'non-operating')
+      nonOperating: filtered.filter(t => t.flowCategory === 'non-operating'),
     };
   }
 
@@ -454,7 +501,7 @@ class FinancialReportsController {
       assets: Math.random() * 1000000,
       revenues: Math.random() * 500000,
       netIncome: Math.random() * 100000,
-      margin: Math.random() * 30
+      margin: Math.random() * 30,
     }));
   }
 
@@ -462,18 +509,20 @@ class FinancialReportsController {
    * Generate comparison between two periods
    */
   async generateComparison(organizationId, reportType, period1, period2) {
-    const report1 = reportType === 'balance-sheet'
-      ? await this.getBalanceSheet(organizationId, period1.from, period1.to)
-      : await this.getIncomeStatement(organizationId, period1.from, period1.to);
+    const report1 =
+      reportType === 'balance-sheet'
+        ? await this.getBalanceSheet(organizationId, period1.from, period1.to)
+        : await this.getIncomeStatement(organizationId, period1.from, period1.to);
 
-    const report2 = reportType === 'balance-sheet'
-      ? await this.getBalanceSheet(organizationId, period2.from, period2.to)
-      : await this.getIncomeStatement(organizationId, period2.from, period2.to);
+    const report2 =
+      reportType === 'balance-sheet'
+        ? await this.getBalanceSheet(organizationId, period2.from, period2.to)
+        : await this.getIncomeStatement(organizationId, period2.from, period2.to);
 
     return {
       period1: report1,
       period2: report2,
-      variance: this._calculateVariance(report1, report2)
+      variance: this._calculateVariance(report1, report2),
     };
   }
 
@@ -489,7 +538,7 @@ class FinancialReportsController {
       netIncome: incomeStatement.netIncome,
       totalAssets: balanceSheet.assets.total,
       totalLiabilities: balanceSheet.liabilities.total,
-      totalEquity: balanceSheet.equity.total
+      totalEquity: balanceSheet.equity.total,
     };
   }
 
@@ -504,7 +553,7 @@ class FinancialReportsController {
       status: 'completed',
       findings: [],
       recommendations: [],
-      includeDetails
+      includeDetails,
     };
   }
 
@@ -521,13 +570,17 @@ class FinancialReportsController {
       const from = new Date(to);
       from.setMonth(from.getMonth() - 1);
 
-      const report = await this.getIncomeStatement(organizationId, from.toISOString(), to.toISOString());
+      const report = await this.getIncomeStatement(
+        organizationId,
+        from.toISOString(),
+        to.toISOString()
+      );
 
       trends.push({
         month: to.toLocaleString('default', { month: 'short', year: 'numeric' }),
         revenue: report.revenues.total,
         expenses: report.expenses.total,
-        netIncome: report.netIncome
+        netIncome: report.netIncome,
       });
     }
 

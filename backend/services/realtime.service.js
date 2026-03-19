@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * WebSocket Real-time Updates Service
  * خدمة تحديثات الوقت الفعلي
@@ -7,6 +8,7 @@
 
 const socketIO = require('socket.io');
 const jwt = require('jsonwebtoken');
+const logger = require('../utils/logger');
 
 /**
  * WebSocket Service for Real-time Updates
@@ -16,8 +18,8 @@ class RealTimeService {
     this.io = socketIO(server, {
       cors: {
         origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-        methods: ['GET', 'POST']
-      }
+        methods: ['GET', 'POST'],
+      },
     });
 
     this.userConnections = new Map(); // userId -> [socketId]
@@ -51,8 +53,8 @@ class RealTimeService {
    * Setup event handlers
    */
   setupEventHandlers() {
-    this.io.on('connection', (socket) => {
-      console.log(`[SOCKET] User ${socket.userId} connected: ${socket.id}`);
+    this.io.on('connection', socket => {
+      logger.info(`[SOCKET] User ${socket.userId} connected: ${socket.id}`);
 
       // Track user connection
       if (!this.userConnections.has(socket.userId)) {
@@ -68,7 +70,7 @@ class RealTimeService {
 
       // Handle disconnection
       socket.on('disconnect', () => {
-        console.log(`[SOCKET] User ${socket.userId} disconnected: ${socket.id}`);
+        logger.info(`[SOCKET] User ${socket.userId} disconnected: ${socket.id}`);
         const connections = this.userConnections.get(socket.userId);
         if (connections) {
           const index = connections.indexOf(socket.id);
@@ -79,8 +81,8 @@ class RealTimeService {
       });
 
       // Handle errors
-      socket.on('error', (error) => {
-        console.error(`[SOCKET ERROR] ${socket.userId}:`, error);
+      socket.on('error', error => {
+        logger.error(`[SOCKET ERROR] ${socket.userId}:`, error);
       });
     });
   }
@@ -98,9 +100,9 @@ class RealTimeService {
         endTime: session.endTime,
         beneficiary: session.beneficiary.name,
         therapist: session.therapist.name,
-        room: session.room
+        room: session.room,
       },
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     // Send to therapist
@@ -129,9 +131,9 @@ class RealTimeService {
         _id: session._id,
         date: session.date,
         startTime: session.startTime,
-        therapist: session.therapist.name
+        therapist: session.therapist.name,
       },
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     this.emitToUser(session.beneficiary._id, 'session:reminder', event);
@@ -148,9 +150,9 @@ class RealTimeService {
         _id: session._id,
         oldStatus,
         newStatus,
-        date: session.date
+        date: session.date,
       },
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     this.emitToUser(session.beneficiary._id, 'session:status-updated', event);
@@ -169,9 +171,9 @@ class RealTimeService {
         session: documentation.session._id,
         beneficiary: documentation.beneficiary.name,
         therapist: documentation.therapist.name,
-        status: 'submitted'
+        status: 'submitted',
       },
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     this.emitToRole('supervisor', 'documentation:submitted', event);
@@ -187,13 +189,13 @@ class RealTimeService {
       documentation: {
         _id: documentation._id,
         status: feedback.status,
-        score: feedback.qualityScore
+        score: feedback.qualityScore,
       },
       feedback: {
         issues: feedback.issues,
-        suggestions: feedback.suggestions
+        suggestions: feedback.suggestions,
       },
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     this.emitToUser(documentation.therapist._id, 'documentation:reviewed', event);
@@ -207,7 +209,7 @@ class RealTimeService {
       type: 'availability:updated',
       therapist: therapistId,
       availability,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     this.emitToRole('admin', 'availability:updated', event);
@@ -222,7 +224,7 @@ class RealTimeService {
       type: 'session:attendance',
       session: session._id,
       status: attendanceStatus, // 'attended', 'no-show', 'late'
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     this.emitToUser(session.therapist._id, 'session:attendance', event);
@@ -239,9 +241,9 @@ class RealTimeService {
       metrics: {
         completionRate: metrics.completionRate,
         averageRating: metrics.averageRating,
-        noShowRate: metrics.noShowRate
+        noShowRate: metrics.noShowRate,
       },
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     this.emitToUser(therapistId, 'metrics:updated', event);
@@ -257,7 +259,7 @@ class RealTimeService {
       sessionId,
       from,
       message,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     this.io.to(`session:${sessionId}`).emit('session:message', event);
@@ -271,7 +273,7 @@ class RealTimeService {
       type: 'session:live-update',
       sessionId,
       progress,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     this.io.to(`session:${sessionId}`).emit('session:live-update', event);

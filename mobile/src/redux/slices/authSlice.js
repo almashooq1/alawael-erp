@@ -24,7 +24,7 @@ export const loginUser = createAsyncThunk('auth/loginUser', async ({ email, pass
 
     return response;
   } catch (error) {
-    return rejectWithValue(error.response?.data || error.message);
+    return rejectWithValue(error.response?.data || 'An internal error occurred');
   }
 });
 
@@ -33,7 +33,7 @@ export const registerUser = createAsyncThunk('auth/registerUser', async (userDat
     const response = await mobileApiService.post('/auth/register', userData);
     return response;
   } catch (error) {
-    return rejectWithValue(error.response?.data || error.message);
+    return rejectWithValue(error.response?.data || 'An internal error occurred');
   }
 });
 
@@ -48,7 +48,7 @@ export const loginWithNafath = createAsyncThunk('auth/loginWithNafath', async (n
 
     return response;
   } catch (error) {
-    return rejectWithValue(error.response?.data || error.message);
+    return rejectWithValue(error.response?.data || 'An internal error occurred');
   }
 });
 
@@ -64,7 +64,7 @@ export const refreshToken = createAsyncThunk('auth/refreshToken', async (_, { re
 
     return response;
   } catch (error) {
-    return rejectWithValue(error.response?.data || error.message);
+    return rejectWithValue(error.response?.data || 'An internal error occurred');
   }
 });
 
@@ -75,7 +75,7 @@ export const logoutUser = createAsyncThunk('auth/logoutUser', async (_, { reject
     await storageService.removeSecureItem('refreshToken');
     return null;
   } catch (error) {
-    return rejectWithValue(error.response?.data || error.message);
+    return rejectWithValue(error.response?.data || 'An internal error occurred');
   }
 });
 

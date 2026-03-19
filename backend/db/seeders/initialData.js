@@ -1,6 +1,5 @@
 // backend/db/seeders/initialData.js
 const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
 
 const seedDatabase = async () => {
   try {
@@ -21,13 +20,20 @@ const seedDatabase = async () => {
       return;
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash('Admin@123456', 10);
+    // Use environment variables; fall back to dev defaults only outside prod
+    const adminEmail = process.env.SEED_ADMIN_EMAIL || 'admin@alawael.com';
+    let adminPassword = process.env.SEED_ADMIN_PASSWORD;
+    if (!adminPassword) {
+      if (process.env.NODE_ENV === 'production') {
+        throw new Error('SEED_ADMIN_PASSWORD must be set in production');
+      }
+      adminPassword = 'Admin@123456'; // dev-only default
+    }
 
-    // Create admin user directly without middleware
+    // Create admin user — let Mongoose pre('save') hook handle hashing
     const admin = new User({
-      email: 'admin@alawael.com',
-      password: hashedPassword,
+      email: adminEmail,
+      password: adminPassword,
       fullName: 'مسؤول النظام',
       role: 'admin',
       lastLogin: new Date(),
@@ -36,8 +42,8 @@ const seedDatabase = async () => {
     await admin.save();
 
     console.log('✅ Database seeded successfully');
-    console.log('📧 Admin Email: admin@alawael.com');
-    console.log('🔐 Admin Password: Admin@123456');
+    console.log('📧 Admin Email:', adminEmail);
+    // NEVER log passwords — even in development
 
     return admin;
   } catch (error) {

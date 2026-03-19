@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Email Service - خدمة البريد الإلكتروني
  * Enterprise Email for Alawael ERP
@@ -6,6 +7,7 @@
 const nodemailer = require('nodemailer');
 const path = require('path');
 const fs = require('fs').promises;
+const logger = require('../utils/logger');
 
 /**
  * Email Configuration
@@ -13,7 +15,7 @@ const fs = require('fs').promises;
 const emailConfig = {
   // Provider
   provider: process.env.EMAIL_PROVIDER || 'smtp', // smtp, sendgrid, mailgun
-  
+
   // SMTP Configuration
   smtp: {
     host: process.env.SMTP_HOST || 'smtp.gmail.com',
@@ -24,20 +26,20 @@ const emailConfig = {
       pass: process.env.SMTP_PASSWORD,
     },
   },
-  
+
   // SendGrid Configuration
   sendgrid: {
     apiKey: process.env.SENDGRID_API_KEY,
     fromEmail: process.env.SENDGRID_FROM_EMAIL || 'noreply@alawael-erp.com',
   },
-  
+
   // Mailgun Configuration
   mailgun: {
     apiKey: process.env.MAILGUN_API_KEY,
     domain: process.env.MAILGUN_DOMAIN,
     fromEmail: process.env.MAILGUN_FROM_EMAIL || 'noreply@alawael-erp.com',
   },
-  
+
   // Default settings
   defaults: {
     from: {
@@ -46,10 +48,10 @@ const emailConfig = {
     },
     replyTo: process.env.EMAIL_REPLY_TO,
   },
-  
+
   // Template directory
   templatesDir: process.env.EMAIL_TEMPLATES_DIR || './templates/emails',
-  
+
   // Rate limiting
   rateLimit: {
     maxPerMinute: 100,
@@ -117,7 +119,7 @@ class EmailService {
     this.EmailLog = null;
     this.provider = emailConfig.provider;
   }
-  
+
   /**
    * Initialize email service
    */
@@ -133,19 +135,19 @@ class EmailService {
       default:
         this.transporter = this.createSMTPTransporter();
     }
-    
+
     // Initialize Email Log model
     if (connection) {
       const mongoose = require('mongoose');
       this.EmailLog = connection.model('EmailLog', new mongoose.Schema(EmailLogSchema));
     }
-    
+
     // Load templates
     await this.loadTemplates();
-    
-    console.log(`✅ Email service initialized (${this.provider})`);
+
+    logger.info(`✅ Email service initialized (${this.provider})`);
   }
-  
+
   /**
    * Create SMTP transporter
    */
@@ -160,26 +162,26 @@ class EmailService {
       rateLimit: emailConfig.rateLimit.maxPerMinute,
     });
   }
-  
+
   /**
    * Create SendGrid transporter
    */
   createSendGridTransporter() {
     const sgTransport = require('nodemailer-sendgrid');
-    
+
     return nodemailer.createTransport(
       sgTransport({
         apiKey: emailConfig.sendgrid.apiKey,
       })
     );
   }
-  
+
   /**
    * Create Mailgun transporter
    */
   createMailgunTransporter() {
     const mailgunTransport = require('nodemailer-mailgun-transport');
-    
+
     return nodemailer.createTransport(
       mailgunTransport({
         auth: {
@@ -189,7 +191,7 @@ class EmailService {
       })
     );
   }
-  
+
   /**
    * Load email templates
    */
@@ -197,25 +199,25 @@ class EmailService {
     try {
       const templatesPath = path.resolve(emailConfig.templatesDir);
       const files = await fs.readdir(templatesPath).catch(() => []);
-      
+
       for (const file of files) {
         if (file.endsWith('.html')) {
           const templateName = file.replace('.html', '');
           const content = await fs.readFile(path.join(templatesPath, file), 'utf-8');
-          
+
           this.templates.set(templateName, {
             name: templateName,
             html: content,
           });
         }
       }
-      
-      console.log(`✅ Loaded ${this.templates.size} email templates`);
+
+      logger.info(`✅ Loaded ${this.templates.size} email templates`);
     } catch (error) {
-      console.warn('⚠️ No email templates directory found');
+      logger.warn('⚠️ No email templates directory found');
     }
   }
-  
+
   /**
    * Send email
    */
@@ -232,10 +234,10 @@ class EmailService {
       variables,
       metadata = {},
     } = options;
-    
+
     // Generate email ID
     const emailId = this.generateEmailId();
-    
+
     // Build email data
     const mailOptions = {
       from: emailConfig.defaults.from,
@@ -248,7 +250,7 @@ class EmailService {
       attachments,
       replyTo: emailConfig.defaults.replyTo,
     };
-    
+
     // Apply template if specified
     if (template) {
       const rendered = await this.renderTemplate(template, variables || {});
@@ -256,7 +258,7 @@ class EmailService {
       mailOptions.html = rendered.html;
       mailOptions.text = rendered.text;
     }
-    
+
     // Log email
     if (this.EmailLog) {
       await this.EmailLog.create({
@@ -272,10 +274,10 @@ class EmailService {
         timestamps: { queuedAt: new Date() },
       });
     }
-    
+
     try {
       const result = await this.transporter.sendMail(mailOptions);
-      
+
       // Update log
       if (this.EmailLog) {
         await this.EmailLog.updateOne(
@@ -287,7 +289,7 @@ class EmailService {
           }
         );
       }
-      
+
       return {
         success: true,
         emailId,
@@ -300,22 +302,22 @@ class EmailService {
           { emailId },
           {
             status: 'failed',
-            error: error.message,
+            error: 'فشل إرسال البريد',
             'timestamps.failedAt': new Date(),
           }
         );
       }
-      
+
       throw error;
     }
   }
-  
+
   /**
    * Send bulk emails
    */
   async sendBulk(recipients, options) {
     const results = [];
-    
+
     for (const recipient of recipients) {
       try {
         const result = await this.send({
@@ -323,54 +325,55 @@ class EmailService {
           to: recipient.email,
           variables: { ...options.variables, ...recipient.variables },
         });
-        
+
         results.push({ email: recipient.email, ...result });
       } catch (error) {
+        logger.error('Bulk email send failed for recipient:', error.message);
         results.push({
           email: recipient.email,
           success: false,
-          error: error.message,
+          error: 'فشل إرسال البريد',
         });
       }
     }
-    
+
     return results;
   }
-  
+
   /**
    * Render email template
    */
   async renderTemplate(templateName, variables) {
     // Check in-memory templates first
     let template = this.templates.get(templateName);
-    
+
     // If not found, try to load from database
     if (!template) {
       // Load from database if available
       template = await this.loadTemplateFromDB(templateName);
     }
-    
+
     if (!template) {
       throw new Error(`Email template '${templateName}' not found`);
     }
-    
+
     // Render variables
     let html = template.html;
     let subject = template.subject || '';
-    
+
     for (const [key, value] of Object.entries(variables)) {
       const regex = new RegExp(`{{${key}}}`, 'g');
       html = html.replace(regex, value);
       subject = subject.replace(regex, value);
     }
-    
+
     return {
       html,
       subject,
       text: template.text,
     };
   }
-  
+
   /**
    * Load template from database
    */
@@ -379,7 +382,7 @@ class EmailService {
     // For now, return null
     return null;
   }
-  
+
   /**
    * Generate email ID
    */
@@ -387,7 +390,7 @@ class EmailService {
     const crypto = require('crypto');
     return `eml_${Date.now()}_${crypto.randomBytes(6).toString('hex')}`;
   }
-  
+
   /**
    * Verify transporter connection
    */
@@ -396,18 +399,19 @@ class EmailService {
       await this.transporter.verify();
       return { success: true, message: 'Email service is ready' };
     } catch (error) {
-      return { success: false, error: error.message };
+      logger.error('Email service verification failed:', error.message);
+      return { success: false, error: 'فشل التحقق من خدمة البريد' };
     }
   }
-  
+
   /**
    * Get email statistics
    */
   async getStats(options = {}) {
     if (!this.EmailLog) return null;
-    
+
     const { startDate, endDate, tenantId } = options;
-    
+
     const match = {};
     if (tenantId) match['metadata.tenantId'] = tenantId;
     if (startDate || endDate) {
@@ -415,17 +419,19 @@ class EmailService {
       if (startDate) match.createdAt.$gte = new Date(startDate);
       if (endDate) match.createdAt.$lte = new Date(endDate);
     }
-    
+
     const stats = await this.EmailLog.aggregate([
       { $match: match },
-      { $group: {
-        _id: '$status',
-        count: { $sum: 1 },
-      }},
+      {
+        $group: {
+          _id: '$status',
+          count: { $sum: 1 },
+        },
+      },
     ]);
-    
+
     const total = await this.EmailLog.countDocuments(match);
-    
+
     return {
       total,
       byStatus: stats.reduce((acc, s) => {
@@ -434,7 +440,7 @@ class EmailService {
       }, {}),
     };
   }
-  
+
   /**
    * Close connections
    */
@@ -468,7 +474,7 @@ const EmailTemplates = {
       </div>
     `,
   },
-  
+
   // Password reset
   PASSWORD_RESET: {
     name: 'password-reset',
@@ -484,7 +490,7 @@ const EmailTemplates = {
       </div>
     `,
   },
-  
+
   // Invoice email
   INVOICE: {
     name: 'invoice',
@@ -500,7 +506,7 @@ const EmailTemplates = {
       </div>
     `,
   },
-  
+
   // Leave request
   LEAVE_REQUEST: {
     name: 'leave-request',
@@ -517,7 +523,7 @@ const EmailTemplates = {
       </div>
     `,
   },
-  
+
   // Notification
   NOTIFICATION: {
     name: 'notification',
@@ -532,7 +538,7 @@ const EmailTemplates = {
       </div>
     `,
   },
-  
+
   // Report
   REPORT: {
     name: 'report',
@@ -550,7 +556,7 @@ const EmailTemplates = {
 /**
  * Email Helper Functions
  */
-const sendWelcomeEmail = async (user) => {
+const sendWelcomeEmail = async user => {
   return emailService.send({
     to: user.email,
     template: 'welcome',
@@ -585,10 +591,14 @@ const sendInvoiceEmail = async (invoice, customer) => {
       totalAmount: invoice.total,
       dueDate: invoice.dueDate,
     },
-    attachments: invoice.pdf ? [{
-      filename: `invoice-${invoice.number}.pdf`,
-      content: invoice.pdf,
-    }] : undefined,
+    attachments: invoice.pdf
+      ? [
+          {
+            filename: `invoice-${invoice.number}.pdf`,
+            content: invoice.pdf,
+          },
+        ]
+      : undefined,
     metadata: { tenantId: invoice.tenantId },
   });
 };
@@ -608,13 +618,38 @@ const sendNotificationEmail = async (to, title, message, options = {}) => {
   });
 };
 
+/**
+ * Send OTP Email
+ */
+const sendOTPEmail = async (to, otp, expiry = 5) => {
+  try {
+    const { emailIntegration } = require('../services/email-integration.service');
+    return await emailIntegration.sendOTPEmail({ email: to }, otp, expiry);
+  } catch (error) {
+    return emailService.send({
+      to,
+      subject: `رمز التحقق: ${otp}`,
+      html: `<div dir="rtl" style="font-family: Arial, sans-serif;"><h2>رمز التحقق</h2><p>رمزك هو: <strong>${otp}</strong></p><p>صالح لمدة ${expiry} دقائق.</p></div>`,
+    });
+  }
+};
+
+/**
+ * Send Email (generic wrapper)
+ */
+const sendEmail = async (to, subject, html, options = {}) => {
+  return emailService.send({ to, subject, html, ...options });
+};
+
 module.exports = {
   EmailService,
   emailService,
   EmailTemplates,
   emailConfig,
+  sendEmail,
   sendWelcomeEmail,
   sendPasswordResetEmail,
   sendInvoiceEmail,
   sendNotificationEmail,
+  sendOTPEmail,
 };

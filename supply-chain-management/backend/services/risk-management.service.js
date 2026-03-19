@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Risk Management & Compliance Service
  * Phase 20: Risk Identification, Assessment, Compliance Tracking, Audit Management

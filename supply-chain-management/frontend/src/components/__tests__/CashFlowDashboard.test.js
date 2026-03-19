@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * CashFlowDashboard.test.js
  * اختبارات وحدة شاملة لـ CashFlowDashboard
@@ -16,7 +17,12 @@ import userEvent from '@testing-library/user-event';
 import CashFlowDashboard from '../CashFlowDashboard';
 import * as API from '../../services/api';
 
-jest.mock('../../services/api');
+jest.mock('../../services/api', () => ({
+  getCashFlowData: jest.fn(),
+  getForecasts: jest.fn(),
+  exportCashFlow: jest.fn().mockResolvedValue(new Blob()),
+}));
+
 jest.mock('antd', () => ({
   ...jest.requireActual('antd'),
   message: {
@@ -24,11 +30,6 @@ jest.mock('antd', () => ({
     success: jest.fn(),
   },
 }));
-
-// Setup API mocks
-API.getCashFlowData = jest.fn();
-API.getForecasts = jest.fn();
-API.exportCashFlow = jest.fn();
 
 describe('CashFlowDashboard', () => {
   const mockCashFlowData = [
@@ -61,7 +62,7 @@ describe('CashFlowDashboard', () => {
     {
       date: new Date('2025-03-16'),
       forecasted_balance: 155000,
-      confidence_level: 0.80,
+      confidence_level: 0.8,
     },
   ];
 
@@ -109,7 +110,7 @@ describe('CashFlowDashboard', () => {
       render(<CashFlowDashboard />);
 
       await new Promise(resolve => setTimeout(resolve, 500));
-      
+
       expect(screen.getByText(/لوحة/i)).toBeInTheDocument();
     });
 
@@ -120,7 +121,7 @@ describe('CashFlowDashboard', () => {
       render(<CashFlowDashboard />);
 
       await new Promise(resolve => setTimeout(resolve, 500));
-      
+
       expect(screen.getByText(/لوحة/i)).toBeInTheDocument();
     });
 
@@ -132,7 +133,7 @@ describe('CashFlowDashboard', () => {
       render(<CashFlowDashboard />);
 
       await new Promise(resolve => setTimeout(resolve, 500));
-      
+
       expect(message.error).toHaveBeenCalled();
     });
   });
@@ -201,46 +202,53 @@ describe('CashFlowDashboard', () => {
     test('يجب تصدير البيانات بصيغة Excel', async () => {
       API.getCashFlowData.mockResolvedValue({ data: { dailyFlows: mockCashFlowData } });
       API.getForecasts.mockResolvedValue({ data: { forecasts: mockForecasts } });
-      API.exportCashFlow = jest.fn().mockResolvedValue(new Blob());
 
       render(<CashFlowDashboard />);
 
-      await waitFor(() => {
-        const excelButton = screen.queryByText(/Excel/i);
-        if (excelButton) {
-          fireEvent.click(excelButton);
-        }
-      }, { timeout: 3000 });
+      await waitFor(
+        () => {
+          const excelButton = screen.queryByText(/Excel/i);
+          if (excelButton) {
+            fireEvent.click(excelButton);
+          }
+        },
+        { timeout: 3000 }
+      );
     });
 
     test('يجب تصدير البيانات بصيغة PDF', async () => {
       API.getCashFlowData.mockResolvedValue({ data: { dailyFlows: mockCashFlowData } });
       API.getForecasts.mockResolvedValue({ data: { forecasts: mockForecasts } });
-      API.exportCashFlow = jest.fn().mockResolvedValue(new Blob());
 
       render(<CashFlowDashboard />);
 
-      await waitFor(() => {
-        const pdfButton = screen.queryByText(/PDF/i);
-        if (pdfButton) {
-          fireEvent.click(pdfButton);
-        }
-      }, { timeout: 3000 });
+      await waitFor(
+        () => {
+          const pdfButton = screen.queryByText(/PDF/i);
+          if (pdfButton) {
+            fireEvent.click(pdfButton);
+          }
+        },
+        { timeout: 3000 }
+      );
     });
 
     test('يجب معالجة أخطاء التصدير', async () => {
       API.getCashFlowData.mockResolvedValue({ data: { dailyFlows: mockCashFlowData } });
       API.getForecasts.mockResolvedValue({ data: { forecasts: mockForecasts } });
-      API.exportCashFlow = jest.fn().mockRejectedValue(new Error('Export Error'));
+      API.exportCashFlow.mockRejectedValue(new Error('Export Error'));
 
       render(<CashFlowDashboard />);
 
-      await waitFor(() => {
-        const excelButton = screen.queryByText(/Excel/i);
-        if (excelButton) {
-          fireEvent.click(excelButton);
-        }
-      }, { timeout: 3000 });
+      await waitFor(
+        () => {
+          const excelButton = screen.queryByText(/Excel/i);
+          if (excelButton) {
+            fireEvent.click(excelButton);
+          }
+        },
+        { timeout: 3000 }
+      );
     });
   });
 
@@ -253,7 +261,9 @@ describe('CashFlowDashboard', () => {
 
       await waitFor(() => {
         // التحقق من وجود رسم بياني
-        expect(container.querySelectorAll('.recharts-responsive-container').length).toBeGreaterThan(0);
+        expect(container.querySelectorAll('.recharts-responsive-container').length).toBeGreaterThan(
+          0
+        );
       });
     });
 
@@ -279,7 +289,9 @@ describe('CashFlowDashboard', () => {
 
       await waitFor(() => {
         // يجب أن يكون هناك تبويب للرسوم البيانية
-        expect(screen.getByText(/📈 الرسوم البيانية/i) || screen.getByText(/الرسوم البيانية/i)).toBeTruthy();
+        expect(
+          screen.getByText(/📈 الرسوم البيانية/i) || screen.getByText(/الرسوم البيانية/i)
+        ).toBeTruthy();
       });
     });
 

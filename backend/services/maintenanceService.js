@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const Maintenance = require('../models/Maintenance');
 const MaintenancePrediction = require('../models/MaintenancePrediction');
 const logger = require('../utils/logger');
@@ -7,7 +8,6 @@ const logger = require('../utils/logger');
  * Manages asset maintenance schedules, records, and predictions
  */
 class MaintenanceService {
-
   // ============ SCHEDULE MANAGEMENT ============
 
   /**
@@ -15,7 +15,7 @@ class MaintenanceService {
    */
   async getAllSchedules(query = {}) {
     try {
-      let mongoQuery = {};
+      const mongoQuery = {};
 
       if (query.assetId) {
         mongoQuery.assetId = query.assetId;
@@ -56,7 +56,7 @@ class MaintenanceService {
         assignedTo: data.assignedTo,
         createdBy: data.createdBy,
         priority: data.priority || 'medium',
-        status: 'scheduled'
+        status: 'scheduled',
       });
 
       const saved = await maintenance.save();
@@ -93,9 +93,10 @@ class MaintenanceService {
         scheduleId,
         { ...data, updatedAt: new Date() },
         { new: true, runValidators: true }
-      ).populate('assignedTo', 'firstName lastName email')
-       .populate('createdBy', 'firstName lastName email')
-       .populate('assetId', 'name location');
+      )
+        .populate('assignedTo', 'firstName lastName email')
+        .populate('createdBy', 'firstName lastName email')
+        .populate('assetId', 'name location');
 
       if (!schedule) return null;
 
@@ -138,7 +139,7 @@ class MaintenanceService {
           actualDuration: data.actualDuration,
           actualCost: data.actualCost,
           partsReplaced: data.partsReplaced || [],
-          updatedAt: new Date()
+          updatedAt: new Date(),
         },
         { new: true, runValidators: true }
       );
@@ -165,7 +166,7 @@ class MaintenanceService {
         return {
           assetId: null,
           prediction: 'invalid-id',
-          message: 'Asset ID is required'
+          message: 'Asset ID is required',
         };
       }
 
@@ -185,7 +186,7 @@ class MaintenanceService {
             message: 'Asset not found or invalid asset ID format',
             confidence: 0,
             daysUntilMaintenance: null,
-            recommendedMaintenanceTypes: []
+            recommendedMaintenanceTypes: [],
           };
         } else {
           throw dbError;
@@ -196,7 +197,7 @@ class MaintenanceService {
         return {
           assetId,
           prediction: 'insufficient-data',
-          message: 'Not enough maintenance history to predict'
+          message: 'Not enough maintenance history to predict',
         };
       }
 
@@ -222,12 +223,12 @@ class MaintenanceService {
           failureCount: maintenance.length,
           averageInterval: `${cycle || 90} days`,
           lastMaintenanceDate: lastMaintenance,
-          usageHours: Math.random() * 10000
+          usageHours: Math.random() * 10000,
         },
         recommendedAction: daysUntil <= 7 ? 'Schedule immediately' : 'Schedule within next week',
         estimatedCost: this._estimateMaintenanceCost(maintenance),
         urgency: daysUntil <= 7 ? 'immediate' : daysUntil <= 30 ? 'high' : 'medium',
-        status: 'open'
+        status: 'open',
       });
 
       const saved = await prediction.save();
@@ -241,7 +242,7 @@ class MaintenanceService {
         recommendedMaintenanceTypes: this._getRecommendedTypes(maintenance),
         estimatedCost: this._estimateMaintenanceCost(maintenance),
         confidence: saved.confidence,
-        predictionId: saved._id
+        predictionId: saved._id,
       };
     } catch (error) {
       logger.error('Error predicting maintenance:', error);
@@ -259,7 +260,7 @@ class MaintenanceService {
         return {
           success: false,
           message: 'Asset ID is required',
-          records: []
+          records: [],
         };
       }
 
@@ -275,7 +276,7 @@ class MaintenanceService {
           return {
             success: false,
             message: 'Asset not found or invalid asset ID format',
-            records: []
+            records: [],
           };
         } else {
           throw dbError;
@@ -296,7 +297,7 @@ class MaintenanceService {
         upcomingSchedules: records.filter(r => r.status === 'scheduled'),
         recentRecords: completedRecords.slice(0, 10),
         avgMaintenanceCycle: this._calculateMaintenanceCycle(completedRecords),
-        avgCost: Math.round(completedRecords.length > 0 ? totalCost / completedRecords.length : 0)
+        avgCost: Math.round(completedRecords.length > 0 ? totalCost / completedRecords.length : 0),
       };
     } catch (error) {
       logger.error('Error getting history:', error);
@@ -363,22 +364,22 @@ class MaintenanceService {
         name: 'Maintenance Frequency',
         value: `${records.length} times`,
         threshold: '10 times',
-        status: records.length > 5 ? 'warning' : 'normal'
+        status: records.length > 5 ? 'warning' : 'normal',
       },
       {
         name: 'Average Cost',
         value: `$${this._estimateMaintenanceCost(records)}`,
         threshold: '$500',
-        status: this._estimateMaintenanceCost(records) > 500 ? 'warning' : 'normal'
+        status: this._estimateMaintenanceCost(records) > 500 ? 'warning' : 'normal',
       },
       {
         name: 'Time Since Maintenance',
-        value: records[0]?.completionDate ?
-          `${Math.floor((new Date() - new Date(records[0].completionDate)) / (1000 * 60 * 60 * 24))} days` :
-          'unknown',
+        value: records[0]?.completionDate
+          ? `${Math.floor((new Date() - new Date(records[0].completionDate)) / (1000 * 60 * 60 * 24))} days`
+          : 'unknown',
         threshold: '30 days',
-        status: 'normal'
-      }
+        status: 'normal',
+      },
     ];
   }
 
@@ -390,7 +391,7 @@ class MaintenanceService {
       const [schedulesCount, recordsCount, predictionsCount] = await Promise.all([
         Maintenance.countDocuments({ status: 'scheduled' }),
         Maintenance.countDocuments({ status: 'completed' }),
-        MaintenancePrediction.countDocuments()
+        MaintenancePrediction.countDocuments(),
       ]);
 
       return {
@@ -398,14 +399,14 @@ class MaintenanceService {
         status: 'operational',
         schedulesCount,
         recordsCount,
-        predictionsCount
+        predictionsCount,
       };
     } catch (error) {
       logger.error('Error getting health status:', error);
       return {
         service: 'MaintenanceService',
         status: 'error',
-        error: error.message
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -416,5 +417,5 @@ const maintenanceService = new MaintenanceService();
 
 module.exports = {
   MaintenanceService,
-  maintenanceService
+  maintenanceService,
 };

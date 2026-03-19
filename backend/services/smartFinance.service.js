@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const Invoice = require('../models/Invoice');
 const TherapySession = require('../models/TherapySession');
 const BeneficiaryFile = require('../models/BeneficiaryFile');
@@ -87,7 +88,10 @@ class SmartFinanceService {
 
       // Update Sessions
       const sessionIds = sessions.map(s => s._id);
-      await TherapySession.updateMany({ _id: { $in: sessionIds } }, { $set: { isBilled: true, invoiceId: savedInvoice._id } });
+      await TherapySession.updateMany(
+        { _id: { $in: sessionIds } },
+        { $set: { isBilled: true, invoiceId: savedInvoice._id } }
+      );
 
       stats.generated++;
       stats.totalAmount += total;
@@ -99,7 +103,7 @@ class SmartFinanceService {
         'Smart Billing Complete',
         `Generated ${stats.generated} invoices totaling ${stats.totalAmount} SAR.`,
         'SUCCESS',
-        '/finance/invoices',
+        '/finance/invoices'
       );
     }
 

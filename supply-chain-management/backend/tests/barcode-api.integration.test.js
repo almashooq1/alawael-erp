@@ -1,3 +1,4 @@
+/* eslint-disable no-undef, no-unused-vars */
 /**
  * Barcode API Integration Tests
  * Tests the complete API endpoints with authentication

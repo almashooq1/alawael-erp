@@ -1,3 +1,4 @@
+/* eslint-disable no-undef, no-unused-vars */
 const SmartCRMServiceClass = require('../services/smartCRM.service');
 const SmartMarketingServiceClass = require('../services/smartMarketing.service');
 
@@ -25,7 +26,11 @@ describe('Phase 11: Smart CRM & Marketing Automation', () => {
       const initialScore = p.engagementScore || 0;
       const points = 50;
 
-      const updatedProfile = SmartCRMService.updateEngagementScore(p.id, points, 'Attended Workshop');
+      const updatedProfile = SmartCRMService.updateEngagementScore(
+        p.id,
+        points,
+        'Attended Workshop'
+      );
 
       expect(updatedProfile.engagementScore).toBe(initialScore + points);
       expect(updatedProfile.history.length).toBeGreaterThan(0);

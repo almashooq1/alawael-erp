@@ -1,20 +1,24 @@
 const jwt = require('jsonwebtoken');
+const logger = require('../utils/logger');
+const { jwtSecret } = require('../config/secrets');
+const tokenBlacklist = require('../utils/tokenBlacklist');
 
-// Use test-friendly secret in tests; require explicit secret otherwise
-const JWT_SECRET =
-  process.env.JWT_SECRET ||
-  (process.env.NODE_ENV === 'test'
-    ? 'test-secret-key-for-testing-only'
-    : 'your-super-secret-jwt-key-change-this-in-production');
+// Use centralized secret management (no hardcoded fallbacks)
+const JWT_SECRET = jwtSecret;
 
 /**
  * Strict authentication: requires a valid Bearer token
  */
-const requireAuth = (req, res, next) => {
+const requireAuth = async (req, res, next) => {
   try {
     const header = req.headers.authorization || '';
     const token = header.startsWith('Bearer ') ? header.slice(7) : null;
     if (!token) return res.status(401).json({ success: false, message: 'Unauthorized' });
+
+    // Check token blacklist (logout invalidation)
+    if (await tokenBlacklist.isBlacklisted(token)) {
+      return res.status(401).json({ success: false, message: 'Token has been revoked' });
+    }
 
     const decoded = jwt.verify(token, JWT_SECRET);
     req.user = decoded;
@@ -46,8 +50,8 @@ const requireRole =
  */
 const authenticateToken = (req, res, next) => {
   try {
-    // If user is already set (from mock or previous middleware), allow it
-    if (req.user) {
+    // Only allow pre-set req.user in test environment (for test mocks)
+    if (req.user && process.env.NODE_ENV === 'test') {
       return next();
     }
 
@@ -58,7 +62,7 @@ const authenticateToken = (req, res, next) => {
       return res.status(401).json({ success: false, message: 'Access token is required' });
     }
 
-    jwt.verify(token, JWT_SECRET, (err, decoded) => {
+    jwt.verify(token, JWT_SECRET, async (err, decoded) => {
       if (err) {
         if (err.name === 'TokenExpiredError') {
           return res
@@ -67,11 +71,17 @@ const authenticateToken = (req, res, next) => {
         }
         return res.status(403).json({ success: false, message: 'Invalid access token' });
       }
+
+      // Check token blacklist (logout invalidation)
+      if (await tokenBlacklist.isBlacklisted(token)) {
+        return res.status(401).json({ success: false, message: 'Token has been revoked' });
+      }
+
       req.user = decoded;
       next();
     });
   } catch (error) {
-    console.error('Auth middleware error:', error);
+    logger.error('Auth middleware error:', { error: error.message, stack: error.stack });
     res.status(500).json({ success: false, message: 'Authentication failed' });
   }
 };
@@ -118,26 +128,23 @@ const optionalAuth = (req, res, next) => {
 /**
  * Authorization middleware: checks role-based permissions
  */
-const authorize = (roles = []) => (req, res, next) => {
-  if (!req.user) {
-    return res.status(401).json({ success: false, message: 'Authentication required' });
-  }
-  if (roles && roles.length > 0 && !roles.includes(req.user.role)) {
-    return res.status(403).json({ success: false, message: 'Insufficient permissions' });
-  }
-  next();
-};
+const authorize =
+  (roles = []) =>
+  (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({ success: false, message: 'Authentication required' });
+    }
+    if (roles && roles.length > 0 && !roles.includes(req.user.role)) {
+      return res.status(403).json({ success: false, message: 'Insufficient permissions' });
+    }
+    next();
+  };
 
 /**
- * Alternative authorization middleware
+ * Alias for authorize — kept for backward compatibility.
+ * Both functions are identical; prefer `authorize` in new code.
  */
-const authorizeRole = (roles = []) => (req, res, next) => {
-  if (!req.user)
-    return res.status(401).json({ success: false, message: 'Authentication required' });
-  if (roles && roles.length > 0 && !roles.includes(req.user.role))
-    return res.status(403).json({ success: false, message: 'Insufficient permissions' });
-  next();
-};
+const authorizeRole = authorize;
 
 module.exports = {
   // Primary exports used by routes

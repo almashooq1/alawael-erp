@@ -1,9 +1,12 @@
 /**
  * Document Service
  * خدمة التعامل مع API المستندات
+ * يستخدم apiClient المركزي لضمان إرسال Token وتحديثه تلقائياً
  */
 
-const API_BASE = 'http://localhost:3001/api';
+import apiClient from './api.client';
+import logger from 'utils/logger';
+import { triggerBlobDownload } from 'utils/downloadHelper';
 
 const documentService = {
   // 📤 تحميل مستند
@@ -12,26 +15,17 @@ const documentService = {
       const formData = new FormData();
       formData.append('file', file);
       formData.append('title', title);
-      formData.append('description', description);
-      formData.append('category', category);
-      formData.append('tags', tags);
+      formData.append('description', description || '');
+      formData.append('category', category || 'أخرى');
+      if (tags) formData.append('tags', tags);
 
-      const response = await fetch(`${API_BASE}/documents/upload`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('authToken')}`,
-        },
-        body: formData,
+      // IMPORTANT: Do NOT set Content-Type manually for FormData.
+      // The browser must auto-set it with the multipart boundary parameter.
+      return await apiClient.post('/documents/upload', formData, {
+        headers: { 'Content-Type': undefined },
       });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'خطأ في تحميل المستند');
-      }
-
-      return await response.json();
     } catch (error) {
-      console.error('خطأ في تحميل المستند:', error);
+      logger.error('خطأ في تحميل المستند:', error);
       throw error;
     }
   },
@@ -39,66 +33,28 @@ const documentService = {
   // 📋 الحصول على جميع المستندات
   getAllDocuments: async (filters = {}) => {
     try {
-      const params = new URLSearchParams();
+      const params = {};
+      if (filters.category) params.category = filters.category;
+      if (filters.search) params.search = filters.search;
+      if (filters.folder) params.folder = filters.folder;
+      if (filters.sortBy) params.sortBy = filters.sortBy;
+      if (filters.status) params.status = filters.status;
+      if (filters.page) params.page = filters.page;
+      if (filters.limit) params.limit = filters.limit;
 
-      if (filters.category) params.append('category', filters.category);
-      if (filters.search) params.append('search', filters.search);
-      if (filters.folder) params.append('folder', filters.folder);
-      if (filters.sortBy) params.append('sortBy', filters.sortBy);
-
-      const response = await fetch(`${API_BASE}/documents?${params}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('authToken')}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('خطأ في جلب المستندات');
-      }
-
-      return await response.json();
+      return await apiClient.get('/documents', { params });
     } catch (error) {
-      console.error('خطأ في جلب المستندات:', error);
-      // إرجاع بيانات وهمية كبديل
-      return {
-        documents: [
-          {
-            _id: '1',
-            title: 'مثال على مستند 1',
-            category: 'تقارير',
-            fileSize: 1024000,
-            uploadedAt: new Date().toISOString(),
-            uploadedByName: 'المستخدم',
-          },
-          {
-            _id: '2',
-            title: 'مثال على مستند 2',
-            category: 'عقود',
-            fileSize: 2048000,
-            uploadedAt: new Date().toISOString(),
-            uploadedByName: 'المستخدم',
-          },
-        ],
-      };
+      logger.error('خطأ في جلب المستندات:', error);
+      return { documents: [] };
     }
   },
 
   // 📄 الحصول على مستند واحد
   getDocument: async id => {
     try {
-      const response = await fetch(`${API_BASE}/documents/${id}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('authToken')}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('خطأ في جلب المستند');
-      }
-
-      return await response.json();
+      return await apiClient.get(`/documents/${id}`);
     } catch (error) {
-      console.error('خطأ في جلب المستند:', error);
+      logger.error('خطأ في جلب المستند:', error);
       throw error;
     }
   },
@@ -106,51 +62,22 @@ const documentService = {
   // ✏️ تحديث المستند
   updateDocument: async (id, updates) => {
     try {
-      const response = await fetch(`${API_BASE}/documents/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('authToken')}`,
-        },
-        body: JSON.stringify(updates),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'خطأ في تحديث المستند');
-      }
-
-      return await response.json();
+      return await apiClient.put(`/documents/${id}`, updates);
     } catch (error) {
-      console.error('خطأ في تحديث المستند:', error);
+      logger.error('خطأ في تحديث المستند:', error);
       throw error;
     }
   },
 
-  // 📥 تنزيل المستند
+  // 📥 تنزيل المستند — يستخدم apiClient لضمان الـ interceptors
   downloadDocument: async (id, fileName) => {
     try {
-      const response = await fetch(`${API_BASE}/documents/${id}/download`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('authToken')}`,
-        },
+      const data = await apiClient.get(`/documents/${id}/download`, {
+        responseType: 'blob',
       });
-
-      if (!response.ok) {
-        throw new Error('خطأ في تنزيل المستند');
-      }
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = fileName;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+      triggerBlobDownload(data, fileName);
     } catch (error) {
-      console.error('خطأ في تنزيل المستند:', error);
+      logger.error('خطأ في تنزيل المستند:', error);
       throw error;
     }
   },
@@ -158,23 +85,9 @@ const documentService = {
   // 🔗 مشاركة المستند
   shareDocument: async (id, email, permission) => {
     try {
-      const response = await fetch(`${API_BASE}/documents/${id}/share`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('authToken')}`,
-        },
-        body: JSON.stringify({ email, permission }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'خطأ في مشاركة المستند');
-      }
-
-      return await response.json();
+      return await apiClient.post(`/documents/${id}/share`, { email, permission });
     } catch (error) {
-      console.error('خطأ في مشاركة المستند:', error);
+      logger.error('خطأ في مشاركة المستند:', error);
       throw error;
     }
   },
@@ -182,20 +95,9 @@ const documentService = {
   // 🚫 إزالة الوصول
   revokeAccess: async (id, shareId) => {
     try {
-      const response = await fetch(`${API_BASE}/documents/${id}/share/${shareId}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('authToken')}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('خطأ في إزالة الوصول');
-      }
-
-      return await response.json();
+      return await apiClient.delete(`/documents/${id}/share/${shareId}`);
     } catch (error) {
-      console.error('خطأ في إزالة الوصول:', error);
+      logger.error('خطأ في إزالة الوصول:', error);
       throw error;
     }
   },
@@ -203,21 +105,9 @@ const documentService = {
   // 🗑️ حذف المستند
   deleteDocument: async id => {
     try {
-      const response = await fetch(`${API_BASE}/documents/${id}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('authToken')}`,
-        },
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'خطأ في حذف المستند');
-      }
-
-      return await response.json();
+      return await apiClient.delete(`/documents/${id}`);
     } catch (error) {
-      console.error('خطأ في حذف المستند:', error);
+      logger.error('خطأ في حذف المستند:', error);
       throw error;
     }
   },
@@ -225,20 +115,9 @@ const documentService = {
   // ♻️ استرجاع المستند
   restoreDocument: async id => {
     try {
-      const response = await fetch(`${API_BASE}/documents/${id}/restore`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('authToken')}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('خطأ في استرجاع المستند');
-      }
-
-      return await response.json();
+      return await apiClient.post(`/documents/${id}/restore`);
     } catch (error) {
-      console.error('خطأ في استرجاع المستند:', error);
+      logger.error('خطأ في استرجاع المستند:', error);
       throw error;
     }
   },
@@ -246,50 +125,24 @@ const documentService = {
   // 📊 الحصول على الإحصائيات
   getStats: async () => {
     try {
-      const response = await fetch(`${API_BASE}/documents/stats`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('authToken')}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('خطأ في جلب الإحصائيات');
-      }
-
-      return await response.json();
+      return await apiClient.get('/documents/stats');
     } catch (error) {
-      console.error('خطأ في جلب الإحصائيات:', error);
-      return {
-        totalDocuments: 0,
-        totalSize: 0,
-        byCategory: [],
-      };
+      logger.error('خطأ في جلب الإحصائيات:', error);
+      return { totalDocuments: 0, totalSize: 0, byCategory: [] };
     }
   },
 
   // 🔍 البحث المتقدم
   searchDocuments: async (query, filters = {}) => {
     try {
-      const params = new URLSearchParams();
-      params.append('q', query);
+      const params = { q: query };
+      if (filters.category) params.category = filters.category;
+      if (filters.dateFrom) params.dateFrom = filters.dateFrom;
+      if (filters.dateTo) params.dateTo = filters.dateTo;
 
-      if (filters.category) params.append('category', filters.category);
-      if (filters.dateFrom) params.append('dateFrom', filters.dateFrom);
-      if (filters.dateTo) params.append('dateTo', filters.dateTo);
-
-      const response = await fetch(`${API_BASE}/documents/search?${params}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('authToken')}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('خطأ في البحث');
-      }
-
-      return await response.json();
+      return await apiClient.get('/documents/search', { params });
     } catch (error) {
-      console.error('خطأ في البحث:', error);
+      logger.error('خطأ في البحث:', error);
       throw error;
     }
   },
@@ -297,20 +150,30 @@ const documentService = {
   // 📁 الحصول على المجلدات
   getFolders: async () => {
     try {
-      const response = await fetch(`${API_BASE}/documents/folders`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('authToken')}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('خطأ في جلب المجلدات');
-      }
-
-      return await response.json();
+      return await apiClient.get('/documents/folders');
     } catch (error) {
-      console.error('خطأ في جلب المجلدات:', error);
+      logger.error('خطأ في جلب المجلدات:', error);
       return [];
+    }
+  },
+
+  // 📊 لوحة المعلومات
+  getDashboard: async () => {
+    try {
+      return await apiClient.get('/documents/dashboard');
+    } catch (error) {
+      logger.error('خطأ في جلب لوحة المعلومات:', error);
+      return { data: { stats: {}, categories: [] } };
+    }
+  },
+
+  // 📈 التحليلات
+  getAnalytics: async () => {
+    try {
+      return await apiClient.get('/documents/reports/analytics');
+    } catch (error) {
+      logger.error('خطأ في جلب التحليلات:', error);
+      return { data: {} };
     }
   },
 
@@ -323,21 +186,111 @@ const documentService = {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   },
 
-  // تحديد أيقونة الملف
+  // تحديد أيقونة الملف — يشمل جميع التنسيقات المدعومة
   getFileIcon: fileType => {
     const icons = {
+      // PDF
       pdf: '📄',
+      // Word
+      doc: '📝',
       docx: '📝',
+      docm: '📝',
+      odt: '📝',
+      rtf: '📝',
+      // Excel
+      xls: '📊',
       xlsx: '📊',
-      jpg: '🖼️',
-      png: '🖼️',
-      txt: '📃',
+      xlsm: '📊',
+      ods: '📊',
+      csv: '📊',
+      // PowerPoint
+      ppt: '🎥',
       pptx: '🎥',
+      pptm: '🎥',
+      odp: '🎥',
+      // Text & Code
+      txt: '📃',
+      json: '📃',
+      xml: '📃',
+      html: '📃',
+      htm: '📃',
+      // Images
+      jpg: '🖼️',
+      jpeg: '🖼️',
+      png: '🖼️',
+      gif: '🖼️',
+      bmp: '🖼️',
+      webp: '🖼️',
+      tiff: '🖼️',
+      tif: '🖼️',
+      svg: '🖼️',
+      ico: '🖼️',
+      // Audio
+      mp3: '🎵',
+      wav: '🎵',
+      ogg: '🎵',
+      m4a: '🎵',
+      flac: '🎵',
+      aac: '🎵',
+      // Video
+      mp4: '🎬',
+      webm: '🎬',
+      ogv: '🎬',
+      avi: '🎬',
+      mkv: '🎬',
+      mov: '🎬',
+      // Archives
       zip: '🗜️',
+      rar: '🗜️',
+      '7z': '🗜️',
+      gz: '🗜️',
+      tar: '🗜️',
+      // Other
       other: '📦',
     };
-    return icons[fileType] || icons.other;
+    return icons[fileType?.toLowerCase()] || icons.other;
   },
+
+  // 📜 الحصول على إصدارات المستند
+  getVersions: async id => {
+    try {
+      return await apiClient.get(`/documents/${id}/versions`);
+    } catch (error) {
+      logger.error('خطأ في جلب الإصدارات:', error);
+      return { versions: [] };
+    }
+  },
+
+  // ⬆️ تحميل إصدار جديد
+  uploadVersion: async (id, file, changes) => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      if (changes) formData.append('changes', changes);
+
+      // IMPORTANT: Do NOT set Content-Type manually for FormData.
+      // The browser must auto-set it with the multipart boundary parameter.
+      return await apiClient.post(`/documents/${id}/upload-version`, formData, {
+        headers: { 'Content-Type': undefined },
+      });
+    } catch (error) {
+      logger.error('خطأ في تحميل الإصدار:', error);
+      throw error;
+    }
+  },
+
+  // ↩️ استرجاع إصدار سابق
+  restoreVersion: async (id, versionId) => {
+    try {
+      return await apiClient.post(`/documents/${id}/versions/${versionId}/restore`);
+    } catch (error) {
+      logger.error('خطأ في استرجاع الإصدار:', error);
+      throw error;
+    }
+  },
+
+  // 🔎 معاينة المستند
+  getPreviewUrl: id => `/api/documents/${id}/preview`,
 };
 
 export default documentService;

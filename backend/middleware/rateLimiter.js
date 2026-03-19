@@ -1,364 +1,308 @@
 /**
  * 🚦 Rate Limiter Middleware - تحديد معدل الطلبات
  * نظام ERP الألوائل - إصدار احترافي
+ *
+ * Redis-backed (via express-rate-limit + rate-limit-redis) for K8s HPA multi-pod.
+ * Falls back to in-memory store when Redis is unavailable or in test/dev.
  */
 
+const rateLimit = require('express-rate-limit');
 const { securityConfig, RateLimiter } = require('../config/security.config');
+const logger = require('../utils/logger');
 
-// إنشاء محددات المعدل
-const limiters = {
-  general: new RateLimiter(securityConfig.rateLimit.general),
-  login: new RateLimiter(securityConfig.rateLimit.login),
-  register: new RateLimiter(securityConfig.rateLimit.register),
-  api: new RateLimiter(securityConfig.rateLimit.api),
-  export: new RateLimiter(securityConfig.rateLimit.export)
-};
+// ─── Redis Store Factory ────────────────────────────────────────────────────
+let _redisStoreAvailable = null; // null = not checked yet
 
 /**
- * الحصول على معرف العميل
+ * Try to create a RedisStore for express-rate-limit.
+ * Returns undefined when Redis is not available → express-rate-limit uses built-in MemoryStore.
  */
-const getClientIdentifier = (req) => {
-  // استخدام IP + User ID إذا كان متوفراً
-  const ip = req.ip || req.connection.remoteAddress || req.headers['x-forwarded-for'];
-  const userId = req.user?.id || '';
+const getRedisStore = (prefix = 'rl:') => {
+  // Skip Redis in test mode or when explicitly disabled
+  if (
+    process.env.NODE_ENV === 'test' ||
+    process.env.USE_MOCK_DB === 'true' ||
+    process.env.DISABLE_REDIS === 'true'
+  ) {
+    return undefined;
+  }
 
+  try {
+    if (_redisStoreAvailable === false) return undefined;
+
+    const { RedisStore } = require('rate-limit-redis');
+    const { getRedisClient } = require('../config/redis.config');
+    const client = getRedisClient();
+
+    if (!client || client.status === 'end') {
+      _redisStoreAvailable = false;
+      return undefined;
+    }
+
+    _redisStoreAvailable = true;
+    return new RedisStore({
+      // ioredis-compatible call function
+      sendCommand: (...args) => client.call(...args),
+      prefix,
+    });
+  } catch (err) {
+    if (_redisStoreAvailable === null) {
+      logger.warn(`Rate limiter Redis store unavailable, using memory: ${err.message}`);
+      _redisStoreAvailable = false;
+    }
+    return undefined;
+  }
+};
+
+// ─── Client Identifier ──────────────────────────────────────────────────────
+/**
+ * الحصول على معرف العميل (IP + optional User ID)
+ */
+const getClientIdentifier = req => {
+  const ip = req.ip || req.connection?.remoteAddress || req.headers['x-forwarded-for'] || '0.0.0.0';
+  const userId = req.user?.id || '';
   return userId ? `${ip}:${userId}` : ip;
 };
 
-/**
- * middleware عام لتحديد المعدل
- */
-const generalLimiter = (req, res, next) => {
-  // تخطي rate limiting في بيئة الاختبار
-  if (process.env.NODE_ENV === 'test') {
-    return next();
-  }
-  
-  const identifier = getClientIdentifier(req);
-  const result = limiters.general.check(identifier);
-
-  // إضافة headers للحد
-  res.setHeader('X-RateLimit-Limit', securityConfig.rateLimit.general.max);
-  res.setHeader('X-RateLimit-Remaining', result.remaining);
-  res.setHeader('X-RateLimit-Reset', new Date(result.resetAt).toISOString());
-
-  if (!result.allowed) {
-    return res.status(429).json({
-      success: false,
-      message: securityConfig.rateLimit.general.message.error,
-      retryAfter: Math.ceil((result.resetAt - Date.now()) / 1000)
-    });
-  }
-
-  next();
+// ─── Shared Handler ─────────────────────────────────────────────────────────
+const rateLimitHandler = message => (_req, res) => {
+  res.status(429).json({
+    success: false,
+    message,
+    retryAfter: Math.ceil(res.getHeader('Retry-After') || 60),
+  });
 };
 
-/**
- * middleware لتحديد معدل تسجيل الدخول
- */
-const loginLimiter = (req, res, next) => {
-  // تخطي rate limiting في بيئة الاختبار
-  if (process.env.NODE_ENV === 'test') {
-    return next();
-  }
-  
-  const identifier = req.ip || req.connection.remoteAddress;
-  const result = limiters.login.check(identifier);
-
-  res.setHeader('X-RateLimit-Limit', securityConfig.rateLimit.login.max);
-  res.setHeader('X-RateLimit-Remaining', result.remaining);
-
-  if (!result.allowed) {
-    // تسجيل محاولة مشبوهة
-    console.warn(`🚨 Login rate limit exceeded for IP: ${identifier}`);
-
-    return res.status(429).json({
-      success: false,
-      message: securityConfig.rateLimit.login.message.error,
-      retryAfter: Math.ceil((result.resetAt - Date.now()) / 1000)
-    });
-  }
-
-  next();
-};
+// ─── Standard rate-limit factories ──────────────────────────────────────────
 
 /**
- * middleware لتحديد معدل إنشاء الحسابات
+ * Build an express-rate-limit middleware from config.
+ * @param {object} cfg - { windowMs, max, message }
+ * @param {object} [opts] - additional options
  */
-const registerLimiter = (req, res, next) => {
-  // تخطي rate limiting في بيئة الاختبار
-  if (process.env.NODE_ENV === 'test') {
-    return next();
-  }
-  
-  const identifier = req.ip || req.connection.remoteAddress;
-  const result = limiters.register.check(identifier);
-
-  if (!result.allowed) {
-    return res.status(429).json({
-      success: false,
-      message: securityConfig.rateLimit.register.message.error,
-      retryAfter: Math.ceil((result.resetAt - Date.now()) / 1000)
-    });
-  }
-
-  next();
+const buildLimiter = (cfg, opts = {}) => {
+  const skip = opts.skipEnvs || ['test'];
+  return rateLimit({
+    windowMs: cfg.windowMs,
+    max: cfg.max,
+    standardHeaders: true, // RateLimit-* headers (draft-6)
+    legacyHeaders: true, // X-RateLimit-* headers
+    store: getRedisStore(opts.prefix),
+    keyGenerator: opts.keyGenerator || getClientIdentifier,
+    skip: _req => skip.includes(process.env.NODE_ENV),
+    handler: rateLimitHandler(cfg.message?.error || 'تجاوزت الحد المسموح من الطلبات'),
+    validate: { keyGeneratorIpFallback: false }, // We handle IP extraction ourselves
+    ...opts.extra,
+  });
 };
 
-/**
- * middleware لتحديد معدل API
- */
-const apiLimiter = (req, res, next) => {
-  // تخطي rate limiting في بيئة الاختبار
-  if (process.env.NODE_ENV === 'test') {
-    return next();
-  }
-  
-  const identifier = getClientIdentifier(req);
-  const result = limiters.api.check(identifier);
+// ─── Pre-built Limiters ─────────────────────────────────────────────────────
 
-  res.setHeader('X-RateLimit-Limit', securityConfig.rateLimit.api.max);
-  res.setHeader('X-RateLimit-Remaining', result.remaining);
+/** middleware عام لتحديد المعدل — 100 req / 15 min */
+const generalLimiter = buildLimiter(securityConfig.rateLimit.general, {
+  prefix: 'rl:general:',
+});
 
-  if (!result.allowed) {
-    return res.status(429).json({
-      success: false,
-      message: securityConfig.rateLimit.api.message.error,
-      retryAfter: Math.ceil((result.resetAt - Date.now()) / 1000)
-    });
-  }
+/** middleware لتحديد معدل تسجيل الدخول — 5 req / 15 min */
+const loginLimiter = buildLimiter(securityConfig.rateLimit.login, {
+  prefix: 'rl:login:',
+  skipEnvs: ['test', 'development'],
+  keyGenerator: req => req.ip || req.connection?.remoteAddress || '0.0.0.0',
+});
 
-  next();
-};
+/** middleware لتحديد معدل إنشاء الحسابات — 3 req / 1h */
+const registerLimiter = buildLimiter(securityConfig.rateLimit.register, {
+  prefix: 'rl:register:',
+  keyGenerator: req => req.ip || req.connection?.remoteAddress || '0.0.0.0',
+});
 
-/**
- * middleware لتحديد معدل التصدير
- */
-const exportLimiter = (req, res, next) => {
-  const identifier = getClientIdentifier(req);
-  const result = limiters.export.check(identifier);
+/** middleware لتحديد معدل API — 60 req / 1 min */
+const apiLimiter = buildLimiter(securityConfig.rateLimit.api, {
+  prefix: 'rl:api:',
+});
 
-  if (!result.allowed) {
-    return res.status(429).json({
-      success: false,
-      message: securityConfig.rateLimit.export.message.error,
-      retryAfter: Math.ceil((result.resetAt - Date.now()) / 1000)
-    });
-  }
+/** middleware لتحديد معدل التصدير — 10 req / 1h */
+const exportLimiter = buildLimiter(securityConfig.rateLimit.export, {
+  prefix: 'rl:export:',
+  skipEnvs: [], // enforce always
+});
 
-  next();
-};
+// ─── Dynamic / Parameterized Limiters ───────────────────────────────────────
 
 /**
  * middleware لتحديد معدل مخصص
  */
 const createCustomLimiter = (options = {}) => {
-  const limiter = new RateLimiter({
-    windowMs: options.windowMs || 60000,
-    max: options.max || 100,
-    message: options.message || { error: 'تجاوزت الحد المسموح من الطلبات' }
-  });
-
-  return (req, res, next) => {
-    const identifier = options.keyGenerator
-      ? options.keyGenerator(req)
-      : getClientIdentifier(req);
-
-    const result = limiter.check(identifier);
-
-    res.setHeader('X-RateLimit-Limit', options.max || 100);
-    res.setHeader('X-RateLimit-Remaining', result.remaining);
-
-    if (!result.allowed) {
-      return res.status(429).json({
-        success: false,
-        message: options.message?.error || 'تجاوزت الحد المسموح من الطلبات',
-        retryAfter: Math.ceil((result.resetAt - Date.now()) / 1000)
-      });
+  return buildLimiter(
+    {
+      windowMs: options.windowMs || 60000,
+      max: options.max || 100,
+      message: options.message || { error: 'تجاوزت الحد المسموح من الطلبات' },
+    },
+    {
+      prefix: options.prefix || 'rl:custom:',
+      keyGenerator: options.keyGenerator || getClientIdentifier,
+      skipEnvs: options.skipEnvs || ['test'],
     }
-
-    next();
-  };
+  );
 };
 
 /**
  * middleware لتحديد معدل بناء على المستخدم
  */
 const userBasedLimiter = (maxRequests = 100, windowMs = 60000) => {
-  const limiter = new RateLimiter({ windowMs, max: maxRequests });
-
-  return (req, res, next) => {
-    if (!req.user) {
-      return next();
+  return buildLimiter(
+    {
+      windowMs,
+      max: maxRequests,
+      message: { error: 'تجاوزت الحد المسموح من الطلبات لهذا الحساب' },
+    },
+    {
+      prefix: 'rl:user:',
+      keyGenerator: req => (req.user ? `user:${req.user.id}` : getClientIdentifier(req)),
+      extra: {
+        skip: req => !req.user || process.env.NODE_ENV === 'test',
+      },
     }
-
-    const identifier = `user:${req.user.id}`;
-    const result = limiter.check(identifier);
-
-    if (!result.allowed) {
-      return res.status(429).json({
-        success: false,
-        message: 'تجاوزت الحد المسموح من الطلبات لهذا الحساب',
-        retryAfter: Math.ceil((result.resetAt - Date.now()) / 1000)
-      });
-    }
-
-    next();
-  };
+  );
 };
 
 /**
  * middleware لتحديد معدل بناء على الدور
+ * @param {Object} limits - { admin: {max, windowMs}, user: {max, windowMs}, ... }
  */
 const roleBasedLimiter = (limits = {}) => {
+  // Pre-build one limiter per role
   const limitersByRole = {};
-
-  // إنشاء محدد لكل دور
-  for (const [role, config] of Object.entries(limits)) {
-    limitersByRole[role] = new RateLimiter({
-      windowMs: config.windowMs || 60000,
-      max: config.max || 100
-    });
+  for (const [role, cfg] of Object.entries(limits)) {
+    limitersByRole[role] = buildLimiter(
+      {
+        windowMs: cfg.windowMs || 60000,
+        max: cfg.max || 100,
+        message: { error: `تجاوزت الحد المسموح لدور ${role}` },
+      },
+      {
+        prefix: `rl:role:${role}:`,
+        keyGenerator: req => `role:${role}:${req.user?.id || 'anon'}`,
+      }
+    );
   }
 
   return (req, res, next) => {
-    if (!req.user || !req.user.role) {
+    if (!req.user?.role || !limitersByRole[req.user.role]) {
       return next();
     }
-
-    const role = req.user.role;
-    const config = limits[role];
-
-    if (!config) {
-      return next();
-    }
-
-    const limiter = limitersByRole[role];
-    const identifier = `role:${role}:${req.user.id}`;
-    const result = limiter.check(identifier);
-
-    if (!result.allowed) {
-      return res.status(429).json({
-        success: false,
-        message: `تجاوزت الحد المسموح لدور ${role}`,
-        retryAfter: Math.ceil((result.resetAt - Date.now()) / 1000)
-      });
-    }
-
-    next();
+    return limitersByRole[req.user.role](req, res, next);
   };
 };
 
 /**
- * middleware لتحديد معدل للعمليات الحساسة
+ * middleware لتحديد معدل للعمليات الحساسة — 5 req / 1h (singleton, NOT per-request)
  */
-const sensitiveOperationLimiter = (req, res, next) => {
-  const identifier = getClientIdentifier(req);
-  const limiter = new RateLimiter({
-    windowMs: 60 * 60 * 1000, // ساعة
-    max: 5 // 5 عمليات فقط
-  });
-
-  const result = limiter.check(identifier);
-
-  if (!result.allowed) {
-    return res.status(429).json({
-      success: false,
-      message: 'تجاوزت الحد المسموح من العمليات الحساسة. يرجى المحاولة لاحقاً',
-      retryAfter: Math.ceil((result.resetAt - Date.now()) / 1000)
-    });
+const sensitiveOperationLimiter = buildLimiter(
+  {
+    windowMs: 60 * 60 * 1000,
+    max: 5,
+    message: { error: 'تجاوزت الحد المسموح من العمليات الحساسة. يرجى المحاولة لاحقاً' },
+  },
+  {
+    prefix: 'rl:sensitive:',
+    skipEnvs: [], // enforce always
   }
+);
 
-  next();
+// ─── Utility Functions ──────────────────────────────────────────────────────
+
+// In-memory RateLimiter instances for resetLimiter/checkLimit backward compat
+const _legacyLimiters = {
+  general: new RateLimiter(securityConfig.rateLimit.general),
+  login: new RateLimiter(securityConfig.rateLimit.login),
+  register: new RateLimiter(securityConfig.rateLimit.register),
+  api: new RateLimiter(securityConfig.rateLimit.api),
+  export: new RateLimiter(securityConfig.rateLimit.export),
 };
 
 /**
- * middleware لإعادة تعيين الحد
+ * إعادة تعيين الحد for a specific identifier (best-effort)
  */
 const resetLimiter = (type, identifier) => {
-  if (limiters[type]) {
-    limiters[type].reset(identifier);
+  if (_legacyLimiters[type]) {
+    _legacyLimiters[type].reset(identifier);
   }
 };
 
 /**
- * middleware لفحص الحد دون منع
+ * فحص الحد دون منع (read-only check)
  */
 const checkLimit = (type, identifier) => {
-  if (limiters[type]) {
-    const result = limiters[type].check(identifier);
+  if (_legacyLimiters[type]) {
+    const result = _legacyLimiters[type].check(identifier);
     return {
       allowed: result.allowed,
       remaining: result.remaining,
-      resetAt: result.resetAt
+      resetAt: result.resetAt,
     };
   }
   return { allowed: true, remaining: Infinity, resetAt: null };
 };
 
 /**
- * middleware للحد التكيفي (يتكيف مع الحمل)
+ * middleware للحد التكيفي (يتكيف مع حمل الخادم)
+ * Dynamically adjusts max based on heap usage every 60s.
  */
 const adaptiveLimiter = (baseMax = 100, windowMs = 60000) => {
   let currentMax = baseMax;
   let lastAdjustment = Date.now();
 
-  const limiter = new RateLimiter({ windowMs, max: currentMax });
+  // Create an express-rate-limit instance; max is mutated on the returned middleware
+  const limiter = rateLimit({
+    windowMs,
+    max: () => currentMax, // dynamic getter — express-rate-limit v7+ supports function
+    standardHeaders: true,
+    legacyHeaders: true,
+    store: getRedisStore('rl:adaptive:'),
+    keyGenerator: getClientIdentifier,
+    skip: () => process.env.NODE_ENV === 'test',
+    handler: rateLimitHandler('الخادم مشغول، يرجى المحاولة لاحقاً'),
+    validate: { keyGeneratorIpFallback: false },
+  });
 
-  // تعديل الحد بناء على حمل الخادم
+  // Adjust limit based on server load
   const adjustLimit = () => {
     const now = Date.now();
-    if (now - lastAdjustment < 60000) return; // تعديل كل دقيقة
+    if (now - lastAdjustment < 60000) return;
 
-    const memoryUsage = process.memoryUsage();
-    const heapUsedRatio = memoryUsage.heapUsed / memoryUsage.heapTotal;
+    const mem = process.memoryUsage();
+    const ratio = mem.heapUsed / mem.heapTotal;
 
-    if (heapUsedRatio > 0.8) {
-      // ضغط عالي - تقليل الحد
+    if (ratio > 0.8) {
       currentMax = Math.max(Math.floor(baseMax * 0.5), 10);
-    } else if (heapUsedRatio > 0.6) {
-      // ضغط متوسط
+    } else if (ratio > 0.6) {
       currentMax = Math.floor(baseMax * 0.75);
     } else {
-      // ضغط منخفض - الحد الطبيعي
       currentMax = baseMax;
     }
-
     lastAdjustment = now;
   };
 
   return (req, res, next) => {
     adjustLimit();
-
-    const identifier = getClientIdentifier(req);
-    const result = limiter.check(identifier);
-
-    res.setHeader('X-RateLimit-Limit', currentMax);
-    res.setHeader('X-RateLimit-Remaining', result.remaining);
-
-    if (!result.allowed) {
-      return res.status(429).json({
-        success: false,
-        message: 'الخادم مشغول، يرجى المحاولة لاحقاً',
-        retryAfter: Math.ceil((result.resetAt - Date.now()) / 1000)
-      });
-    }
-
-    next();
+    return limiter(req, res, next);
   };
 };
 
-// Aliases for backward compatibility
+// ─── Backward Compatibility Aliases ─────────────────────────────────────────
 const authLimiter = loginLimiter;
 const passwordLimiter = createCustomLimiter({
   windowMs: 60 * 60 * 1000,
   max: 5,
-  message: { error: 'تجاوزت الحد المسموح من محاولات تغيير كلمة المرور' }
+  prefix: 'rl:password:',
+  message: { error: 'تجاوزت الحد المسموح من محاولات تغيير كلمة المرور' },
 });
 const createAccountLimiter = registerLimiter;
 
 module.exports = {
-  // New exports
+  // Primary exports
   generalLimiter,
   loginLimiter,
   registerLimiter,
@@ -374,5 +318,5 @@ module.exports = {
   // Backward compatibility exports
   authLimiter,
   passwordLimiter,
-  createAccountLimiter
+  createAccountLimiter,
 };

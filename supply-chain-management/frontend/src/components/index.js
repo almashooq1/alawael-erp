@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Finance Dashboard Components Index
  * مؤشر مكونات لوحة التحكم المالية

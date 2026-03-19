@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * Enhanced Middleware Unit Tests
  * Testing error handling, edge cases, and advanced scenarios
@@ -6,6 +8,13 @@
  */
 
 const jwt = require('jsonwebtoken');
+
+// Mock token blacklist so tests don't need Redis
+jest.mock('../utils/tokenBlacklist', () => ({
+  isBlacklisted: jest.fn().mockResolvedValue(false),
+  add: jest.fn().mockResolvedValue(undefined),
+}));
+
 const auth = require('../middleware/auth');
 
 const JWT_SECRET = 'test-secret-key-for-testing-only';
@@ -80,20 +89,20 @@ describe('Enhanced Auth Middleware Tests', () => {
       expect(next).not.toHaveBeenCalled();
     });
 
-    test('should reject request with malformed Bearer token', () => {
+    test('should reject request with malformed Bearer token', async () => {
       const req = createMockReq({
         authorization: 'Bearer invalid.token.format',
       });
       const res = createMockRes();
       const next = createMockNext();
 
-      auth.requireAuth(req, res, next);
+      await auth.requireAuth(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(401);
       expect(next).not.toHaveBeenCalled();
     });
 
-    test('should reject request with expired token', () => {
+    test('should reject request with expired token', async () => {
       const token = jwt.sign({ userId: '123' }, JWT_SECRET, { expiresIn: '-1h' });
       const req = createMockReq({
         authorization: `Bearer ${token}`,
@@ -101,13 +110,7 @@ describe('Enhanced Auth Middleware Tests', () => {
       const res = createMockRes();
       const next = createMockNext();
 
-      try {
-        auth.requireAuth(req, res, next);
-      } catch (e) {
-        // Expected for expired token
-        res.status(401);
-        res.json({ expired: true });
-      }
+      await auth.requireAuth(req, res, next);
 
       // Verify error response was set
       expect(res.statusCode === 401 || res.jsonData?.expired).toBeTruthy();
@@ -284,7 +287,7 @@ describe('Enhanced Auth Middleware Tests', () => {
       expect(res.status).toBeDefined();
     });
 
-    test('should handle token with extra Bearer prefix', () => {
+    test('should handle token with extra Bearer prefix', async () => {
       const token = generateToken({ userId: '123' });
       const req = createMockReq({
         authorization: `Bearer Bearer ${token}`,
@@ -292,7 +295,7 @@ describe('Enhanced Auth Middleware Tests', () => {
       const res = createMockRes();
       const next = createMockNext();
 
-      auth.requireAuth(req, res, next);
+      await auth.requireAuth(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(401);
     });

@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+const logger = require('../utils/logger');
 /**
  * Smart Research & Clinical Trials Service (Phase 70)
  *
@@ -12,7 +14,7 @@ class SmartResearchService {
    * @param {object} criteria { ageRange: [5,10], diagnosis: 'ADHD', medication: false }
    */
   async identifyCohort(criteria) {
-    console.log(`Searching for cohort: ${JSON.stringify(criteria)}`);
+    logger.info(`Searching for cohort: ${JSON.stringify(criteria)}`);
 
     // Mock result
     const eligibleCount = 42;

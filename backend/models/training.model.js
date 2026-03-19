@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Training & Development Model
  * نموذج التدريب والتطوير
@@ -76,7 +77,7 @@ const trainingSchema = new mongoose.Schema(
   {
     timestamps: true,
     collection: 'trainings',
-  },
+  }
 );
 
 trainingSchema.index({ startDate: 1, status: 1 });

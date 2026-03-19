@@ -1,79 +1,84 @@
+/* eslint-disable no-unused-vars */
 /**
  * Audit Trail System - نظام تتبع التدقيق
  * Comprehensive Audit Logging for Alawael ERP
  */
 
 const mongoose = require('mongoose');
+const logger = require('../utils/logger');
 
 /**
  * Audit Log Schema
  */
-const AuditLogSchema = new mongoose.Schema({
-  // Event Identity
-  auditId: { type: String, required: true, unique: true },
-  
-  // Who performed the action
-  actor: {
+const AuditLogSchema = new mongoose.Schema(
+  {
+    // Event Identity
+    auditId: { type: String, required: true, unique: true },
+
+    // Who performed the action
+    actor: {
       userId: { type: String },
-    email: String,
-    name: String,
-    role: String,
-    ip: String,
-    userAgent: String,
+      email: String,
+      name: String,
+      role: String,
+      ip: String,
+      userAgent: String,
+    },
+
+    // What action was performed
+    action: {
+      type: { type: String, required: true, index: true },
+      category: { type: String, index: true },
+      description: String,
+      status: { type: String, enum: ['success', 'failure', 'pending'], default: 'success' },
+    },
+
+    // What was affected
+    resource: {
+      type: { type: String, required: true, index: true },
+      id: { type: String, required: true, index: true },
+      name: String,
+    },
+
+    // Where it happened
+    context: {
+      tenantId: { type: String, index: true },
+      organizationId: String,
+      departmentId: String,
+      module: String,
+      route: String,
+      method: String,
+    },
+
+    // Changes made
+    changes: {
+      before: mongoose.Schema.Types.Mixed,
+      after: mongoose.Schema.Types.Mixed,
+      diff: mongoose.Schema.Types.Mixed,
+    },
+
+    // When it happened
+    timestamp: { type: Date, default: Date.now, index: true },
+
+    // Additional metadata
+    metadata: {
+      correlationId: String,
+      requestId: String,
+      sessionId: String,
+      duration: Number,
+      errorMessage: String,
+      additionalData: mongoose.Schema.Types.Mixed,
+    },
+
+    // Retention
+    retentionPeriod: { type: Number, default: 2555 }, // 7 years in days
+    expiresAt: { type: Date, index: { expires: '0s' } },
   },
-  
-  // What action was performed
-  action: {
-    type: { type: String, required: true, index: true },
-    category: { type: String, index: true },
-    description: String,
-    status: { type: String, enum: ['success', 'failure', 'pending'], default: 'success' },
-  },
-  
-  // What was affected
-  resource: {
-    type: { type: String, required: true, index: true },
-    id: { type: String, required: true, index: true },
-    name: String,
-  },
-  
-  // Where it happened
-  context: {
-    tenantId: { type: String, index: true },
-    organizationId: String,
-    departmentId: String,
-    module: String,
-    route: String,
-    method: String,
-  },
-  
-  // Changes made
-  changes: {
-    before: mongoose.Schema.Types.Mixed,
-    after: mongoose.Schema.Types.Mixed,
-    diff: mongoose.Schema.Types.Mixed,
-  },
-  
-  // When it happened
-  timestamp: { type: Date, default: Date.now, index: true },
-  
-  // Additional metadata
-  metadata: {
-    correlationId: String,
-    requestId: String,
-    sessionId: String,
-    duration: Number,
-    errorMessage: String,
-    additionalData: mongoose.Schema.Types.Mixed,
-  },
-  
-  // Retention
-  retentionPeriod: { type: Number, default: 2555 }, // 7 years in days
-  expiresAt: { type: Date, index: { expires: '0s' } },
-}, {
-  collection: 'audit_logs',
-  timestamps: false,
-});
+  {
+    collection: 'audit_logs',
+    timestamps: false,
+  }
+);
 
 // Compound indexes
 AuditLogSchema.index({ 'actor.userId': 1, timestamp: -1 });
@@ -82,7 +87,7 @@ AuditLogSchema.index({ 'action.type': 1, timestamp: -1 });
 AuditLogSchema.index({ 'context.tenantId': 1, timestamp: -1 });
 
 // Set expiration
-AuditLogSchema.pre('save', function(next) {
+AuditLogSchema.pre('save', function (next) {
   if (!this.expiresAt) {
     this.expiresAt = new Date(Date.now() + this.retentionPeriod * 24 * 60 * 60 * 1000);
   }
@@ -100,20 +105,20 @@ const AuditActionTypes = {
   AUTH_PASSWORD_RESET: 'auth.password_reset',
   AUTH_MFA_ENABLE: 'auth.mfa_enable',
   AUTH_MFA_DISABLE: 'auth.mfa_disable',
-  
+
   // User Management
   USER_CREATE: 'user.create',
   USER_UPDATE: 'user.update',
   USER_DELETE: 'user.delete',
   USER_ROLE_CHANGE: 'user.role_change',
   USER_PERMISSION_CHANGE: 'user.permission_change',
-  
+
   // Employee Management
   EMPLOYEE_HIRE: 'employee.hire',
   EMPLOYEE_TERMINATE: 'employee.terminate',
   EMPLOYEE_PROMOTE: 'employee.promote',
   EMPLOYEE_TRANSFER: 'employee.transfer',
-  
+
   // Financial
   INVOICE_CREATE: 'invoice.create',
   INVOICE_UPDATE: 'invoice.update',
@@ -122,20 +127,20 @@ const AuditActionTypes = {
   PAYMENT_CREATE: 'payment.create',
   PAYMENT_APPROVE: 'payment.approve',
   BUDGET_ALLOCATE: 'budget.allocate',
-  
+
   // Inventory
   STOCK_ADD: 'stock.add',
   STOCK_REMOVE: 'stock.remove',
   STOCK_TRANSFER: 'stock.transfer',
   INVENTORY_ADJUST: 'inventory.adjust',
-  
+
   // System
   SETTINGS_CHANGE: 'settings.change',
   BACKUP_CREATE: 'backup.create',
   BACKUP_RESTORE: 'backup.restore',
   EXPORT_DATA: 'export.data',
   IMPORT_DATA: 'import.data',
-  
+
   // Security
   SECURITY_ALERT: 'security.alert',
   ACCESS_DENIED: 'access.denied',
@@ -167,25 +172,25 @@ class AuditManager {
     this.bufferSize = 100;
     this.bufferTimeout = 5000; // 5 seconds
   }
-  
+
   /**
    * Initialize Audit Manager
    */
   initialize(connection) {
     this.AuditLog = connection.model('AuditLog', AuditLogSchema);
-    
+
     // Start buffer flush interval
     this.startBufferFlush();
-    
-    console.log('✅ Audit Manager initialized');
+
+    logger.info('✅ Audit Manager initialized');
   }
-  
+
   /**
    * Log audit event
    */
   async log(event) {
     const auditId = this.generateAuditId();
-    
+
     const auditLog = {
       auditId,
       actor: {
@@ -231,18 +236,18 @@ class AuditManager {
       },
       retentionPeriod: event.retentionPeriod || 2555,
     };
-    
+
     // Add to buffer
     this.buffer.push(auditLog);
-    
+
     // Flush if buffer is full
     if (this.buffer.length >= this.bufferSize) {
       await this.flush();
     }
-    
+
     return auditId;
   }
-  
+
   /**
    * Log with immediate save
    */
@@ -251,7 +256,7 @@ class AuditManager {
     await this.flush();
     return auditId;
   }
-  
+
   /**
    * Start buffer flush interval
    */
@@ -260,25 +265,25 @@ class AuditManager {
       this.flush();
     }, this.bufferTimeout);
   }
-  
+
   /**
    * Flush buffer to database
    */
   async flush() {
     if (this.buffer.length === 0) return;
-    
+
     const toInsert = [...this.buffer];
     this.buffer = [];
-    
+
     try {
       await this.AuditLog.insertMany(toInsert, { ordered: false });
     } catch (error) {
-      console.error('Audit flush error:', error);
+      logger.error('Audit flush error:', error);
       // Re-add failed items to buffer
       this.buffer = [...toInsert, ...this.buffer];
     }
   }
-  
+
   /**
    * Generate audit ID
    */
@@ -286,7 +291,7 @@ class AuditManager {
     const crypto = require('crypto');
     return `aud_${Date.now()}_${crypto.randomBytes(6).toString('hex')}`;
   }
-  
+
   /**
    * Get category from action
    */
@@ -294,16 +299,16 @@ class AuditManager {
     const prefix = action.split('.')[0];
     return AuditCategories[prefix.toUpperCase()] || 'system';
   }
-  
+
   /**
    * Calculate diff between before and after
    */
   calculateDiff(before, after) {
     if (!before || !after) return null;
-    
+
     const diff = {};
     const allKeys = new Set([...Object.keys(before), ...Object.keys(after)]);
-    
+
     for (const key of allKeys) {
       if (JSON.stringify(before[key]) !== JSON.stringify(after[key])) {
         diff[key] = {
@@ -312,10 +317,10 @@ class AuditManager {
         };
       }
     }
-    
+
     return Object.keys(diff).length > 0 ? diff : null;
   }
-  
+
   /**
    * Query audit logs
    */
@@ -333,41 +338,38 @@ class AuditManager {
       skip = 0,
       sort = { timestamp: -1 },
     } = options;
-    
+
     const query = {};
-    
+
     if (userId) query['actor.userId'] = userId;
     if (action) query['action.type'] = action;
     if (resourceType) query['resource.type'] = resourceType;
     if (resourceId) query['resource.id'] = resourceId;
     if (tenantId) query['context.tenantId'] = tenantId;
     if (status) query['action.status'] = status;
-    
+
     if (startDate || endDate) {
       query.timestamp = {};
       if (startDate) query.timestamp.$gte = new Date(startDate);
       if (endDate) query.timestamp.$lte = new Date(endDate);
     }
-    
-    return this.AuditLog.find(query)
-      .sort(sort)
-      .skip(skip)
-      .limit(limit);
+
+    return this.AuditLog.find(query).sort(sort).skip(skip).limit(limit);
   }
-  
+
   /**
    * Get audit log by ID
    */
   async getById(auditId) {
     return this.AuditLog.findOne({ auditId });
   }
-  
+
   /**
    * Get user activity
    */
   async getUserActivity(userId, options = {}) {
     const { limit = 50, startDate, endDate } = options;
-    
+
     return this.query({
       userId,
       startDate,
@@ -376,13 +378,13 @@ class AuditManager {
       sort: { timestamp: -1 },
     });
   }
-  
+
   /**
    * Get resource history
    */
   async getResourceHistory(resourceType, resourceId, options = {}) {
     const { limit = 100 } = options;
-    
+
     return this.query({
       resourceType,
       resourceId,
@@ -390,13 +392,13 @@ class AuditManager {
       sort: { timestamp: -1 },
     });
   }
-  
+
   /**
    * Get audit statistics
    */
   async getStats(options = {}) {
     const { tenantId, startDate, endDate } = options;
-    
+
     const match = {};
     if (tenantId) match['context.tenantId'] = tenantId;
     if (startDate || endDate) {
@@ -404,7 +406,7 @@ class AuditManager {
       if (startDate) match.timestamp.$gte = new Date(startDate);
       if (endDate) match.timestamp.$lte = new Date(endDate);
     }
-    
+
     const [byAction, byStatus, byUser, total] = await Promise.all([
       this.AuditLog.aggregate([
         { $match: match },
@@ -424,7 +426,7 @@ class AuditManager {
       ]),
       this.AuditLog.countDocuments(match),
     ]);
-    
+
     return {
       total,
       byAction,
@@ -432,13 +434,13 @@ class AuditManager {
       byUser,
     };
   }
-  
+
   /**
    * Export audit logs
    */
   async export(options = {}) {
     const logs = await this.query({ ...options, limit: 10000 });
-    
+
     return logs.map(log => ({
       AuditID: log.auditId,
       Timestamp: log.timestamp.toISOString(),
@@ -451,7 +453,7 @@ class AuditManager {
       IP: log.actor.ip,
     }));
   }
-  
+
   /**
    * Close audit manager
    */
@@ -475,51 +477,53 @@ const auditMiddleware = (options = {}) => {
     includeBody = false,
     includeResponse = false,
   } = options;
-  
+
   return async (req, res, next) => {
     // Skip excluded paths
     if (excludePaths.some(path => req.path.startsWith(path))) {
       return next();
     }
-    
+
     const startTime = Date.now();
-    
+
     // Store original end
     const originalEnd = res.end;
     const chunks = [];
-    
+
     // Override res.end to capture response
-    res.end = function(chunk, encoding) {
+    res.end = function (chunk, encoding) {
       if (chunk && includeResponse) {
         chunks.push(Buffer.from(chunk));
       }
-      
+
       const duration = Date.now() - startTime;
-      
+
       // Log audit event
-      auditManager.log({
-        userId: req.user?.id,
-        userEmail: req.user?.email,
-        userName: req.user?.name,
-        userRole: req.user?.role,
-        ip: req.ip,
-        userAgent: req.get('user-agent'),
-        action: `${req.method.toLowerCase()}.${req.path.split('/')[1] || 'unknown'}`,
-        category: 'system',
-        description: `${req.method} ${req.path}`,
-        status: res.statusCode < 400 ? 'success' : 'failure',
-        resourceType: 'api',
-        resourceId: req.params?.id || 'unknown',
-        tenantId: req.tenant?.tenantId,
-        route: req.path,
-        method: req.method,
-        duration,
-        metadata: includeBody ? { body: req.body } : undefined,
-      }).catch(console.error);
-      
+      auditManager
+        .log({
+          userId: req.user?.id,
+          userEmail: req.user?.email,
+          userName: req.user?.name,
+          userRole: req.user?.role,
+          ip: req.ip,
+          userAgent: req.get('user-agent'),
+          action: `${req.method.toLowerCase()}.${req.path.split('/')[1] || 'unknown'}`,
+          category: 'system',
+          description: `${req.method} ${req.path}`,
+          status: res.statusCode < 400 ? 'success' : 'failure',
+          resourceType: 'api',
+          resourceId: req.params?.id || 'unknown',
+          tenantId: req.tenant?.tenantId,
+          route: req.path,
+          method: req.method,
+          duration,
+          metadata: includeBody ? { body: req.body } : undefined,
+        })
+        .catch(err => logger.error('Audit middleware log error:', err));
+
       originalEnd.apply(res, arguments);
     };
-    
+
     next();
   };
 };
@@ -528,14 +532,14 @@ const auditMiddleware = (options = {}) => {
  * Audit Decorator for Functions
  */
 const audit = (action, options = {}) => {
-  return function(target, propertyKey, descriptor) {
+  return function (target, propertyKey, descriptor) {
     const originalMethod = descriptor.value;
-    
-    descriptor.value = async function(...args) {
+
+    descriptor.value = async function (...args) {
       const startTime = Date.now();
       let result;
       let error;
-      
+
       try {
         result = await originalMethod.apply(this, args);
         return result;
@@ -543,16 +547,18 @@ const audit = (action, options = {}) => {
         error = e;
         throw e;
       } finally {
-        await auditManager.log({
-          ...options,
-          action,
-          status: error ? 'failure' : 'success',
-          duration: Date.now() - startTime,
-          errorMessage: error?.message,
-        }).catch(console.error);
+        await auditManager
+          .log({
+            ...options,
+            action,
+            status: error ? 'failure' : 'success',
+            duration: Date.now() - startTime,
+            errorMessage: error?.message,
+          })
+          .catch(err => logger.error('Audit decorator log error:', err));
       }
     };
-    
+
     return descriptor;
   };
 };

@@ -1,14 +1,27 @@
+/* eslint-disable no-undef, no-unused-vars */
 /**
  * Finance Routes Comprehensive Test Suite - Phase 2
  * Tests for financial transactions, budgets, and accounting
  * Target: Improve from 25.26% to 50%+ coverage
  */
 
+// Mock RBAC module to bypass role-based permission checks in tests
+jest.mock('../rbac', () => ({
+  createRBACMiddleware: () => (req, res, next) => next(),
+  checkPermission: () => (req, res, next) => next(),
+  RBAC_ROLES: {},
+  RBAC_PERMISSIONS: {},
+}));
+
+// Mock validateObjectId to allow test-friendly IDs like 'trans123'
+jest.mock('../middleware/validateObjectId', () => () => (req, res, next) => next());
+
 // Mock logger first
 jest.mock('../utils/logger', () => ({
   info: jest.fn(),
   error: jest.fn(),
   warn: jest.fn(),
+  debug: jest.fn(),
 }));
 
 // Mock models BEFORE finance service

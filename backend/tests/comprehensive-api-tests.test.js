@@ -1,10 +1,12 @@
+/* eslint-disable no-undef, no-unused-vars */
 /**
  * 🧪 Comprehensive API Testing Suite - REST, GraphQL, WebSocket
  * مجموعة اختبارات API شاملة - REST, GraphQL, WebSocket
  */
 
+/* eslint-disable no-undef */
 const request = require('supertest');
-const { Server } = require('http');
+const { Server: _Server } = require('http');
 
 // ============================================
 // 1️⃣ REST API Tests

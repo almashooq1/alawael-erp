@@ -15,7 +15,7 @@
  * ✅ Beautiful animations
  */
 
-import React, { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import {
   Box,
   Paper,
@@ -44,6 +44,7 @@ import {
   VideoLibrary as VideoIcon,
   AudioFile as AudioIcon,
 } from '@mui/icons-material';
+import { gradients } from 'theme/palette';
 
 const DragDropUpload = ({
   onUpload,
@@ -71,68 +72,79 @@ const DragDropUpload = ({
     return <FileIcon />;
   };
 
-  const validateFile = file => {
-    const errors = [];
+  const validateFile = useCallback(
+    file => {
+      const errors = [];
 
-    // Check file size
-    if (file.size > maxFileSize) {
-      errors.push(`الملف ${file.name} أكبر من الحد المسموح (${(maxFileSize / 1024 / 1024).toFixed(2)} MB)`);
-    }
-
-    // Check file type if specified
-    if (acceptedTypes.length > 0 && !acceptedTypes.includes('*/*')) {
-      const fileType = file.type;
-      const fileExtension = `.${file.name.split('.').pop()}`;
-      const isAccepted = acceptedTypes.some(
-        type => type === fileType || type === fileExtension || (type.endsWith('/*') && fileType.startsWith(type.replace('/*', '/'))),
-      );
-
-      if (!isAccepted) {
-        errors.push(`نوع الملف ${file.name} غير مدعوم`);
+      // Check file size
+      if (file.size > maxFileSize) {
+        errors.push(
+          `الملف ${file.name} أكبر من الحد المسموح (${(maxFileSize / 1024 / 1024).toFixed(2)} MB)`
+        );
       }
-    }
 
-    return errors;
-  };
+      // Check file type if specified
+      if (acceptedTypes.length > 0 && !acceptedTypes.includes('*/*')) {
+        const fileType = file.type;
+        const fileExtension = `.${file.name.split('.').pop()}`;
+        const isAccepted = acceptedTypes.some(
+          type =>
+            type === fileType ||
+            type === fileExtension ||
+            (type.endsWith('/*') && fileType.startsWith(type.replace('/*', '/')))
+        );
 
-  const handleFiles = newFiles => {
-    const fileArray = Array.from(newFiles);
-    const validationErrors = [];
-
-    // Check max files limit
-    if (files.length + fileArray.length > maxFiles) {
-      validationErrors.push(`لا يمكن رفع أكثر من ${maxFiles} ملف`);
-      setErrors(validationErrors);
-      return;
-    }
-
-    // Validate each file
-    fileArray.forEach(file => {
-      const fileErrors = validateFile(file);
-      if (fileErrors.length > 0) {
-        validationErrors.push(...fileErrors);
+        if (!isAccepted) {
+          errors.push(`نوع الملف ${file.name} غير مدعوم`);
+        }
       }
-    });
 
-    if (validationErrors.length > 0) {
-      setErrors(validationErrors);
-      return;
-    }
+      return errors;
+    },
+    [maxFileSize, acceptedTypes]
+  );
 
-    // Add files with preview URLs
-    const filesWithPreviews = fileArray.map(file => ({
-      file,
-      id: `${file.name}-${Date.now()}-${Math.random()}`,
-      name: file.name,
-      size: file.size,
-      type: file.type,
-      preview: file.type.startsWith('image/') ? URL.createObjectURL(file) : null,
-      status: 'pending', // pending, uploading, success, error
-    }));
+  const handleFiles = useCallback(
+    newFiles => {
+      const fileArray = Array.from(newFiles);
+      const validationErrors = [];
 
-    setFiles(prev => [...prev, ...filesWithPreviews]);
-    setErrors([]);
-  };
+      // Check max files limit
+      if (files.length + fileArray.length > maxFiles) {
+        validationErrors.push(`لا يمكن رفع أكثر من ${maxFiles} ملف`);
+        setErrors(validationErrors);
+        return;
+      }
+
+      // Validate each file
+      fileArray.forEach(file => {
+        const fileErrors = validateFile(file);
+        if (fileErrors.length > 0) {
+          validationErrors.push(...fileErrors);
+        }
+      });
+
+      if (validationErrors.length > 0) {
+        setErrors(validationErrors);
+        return;
+      }
+
+      // Add files with preview URLs
+      const filesWithPreviews = fileArray.map(file => ({
+        file,
+        id: `${file.name}-${Date.now()}-${Math.random()}`,
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        preview: file.type.startsWith('image/') ? URL.createObjectURL(file) : null,
+        status: 'pending', // pending, uploading, success, error
+      }));
+
+      setFiles(prev => [...prev, ...filesWithPreviews]);
+      setErrors([]);
+    },
+    [files, maxFiles, validateFile]
+  );
 
   const handleDrag = useCallback(e => {
     e.preventDefault();
@@ -154,8 +166,7 @@ const DragDropUpload = ({
         handleFiles(e.dataTransfer.files);
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [files],
+    [handleFiles]
   );
 
   const handleChange = e => {
@@ -313,7 +324,9 @@ const DragDropUpload = ({
       {/* File List */}
       {files.length > 0 && (
         <Box sx={{ mt: 3 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Box
+            sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}
+          >
             <Typography variant="h6">الملفات المحددة ({files.length})</Typography>
             <Stack direction="row" spacing={1}>
               <Button variant="outlined" size="small" onClick={handleClearAll} disabled={uploading}>
@@ -325,7 +338,7 @@ const DragDropUpload = ({
                 onClick={handleUpload}
                 disabled={uploading || pendingFiles === 0}
                 startIcon={<CloudUploadIcon />}
-                sx={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}
+                sx={{ background: gradients.primary }}
               >
                 رفع {pendingFiles > 0 ? `(${pendingFiles})` : ''}
               </Button>
@@ -334,9 +347,23 @@ const DragDropUpload = ({
 
           {/* Statistics */}
           <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
-            <Chip label={`قيد الانتظار: ${pendingFiles}`} size="small" color="default" variant="outlined" />
-            {successFiles > 0 && <Chip label={`نجح: ${successFiles}`} size="small" color="success" variant="outlined" />}
-            {errorFiles > 0 && <Chip label={`فشل: ${errorFiles}`} size="small" color="error" variant="outlined" />}
+            <Chip
+              label={`قيد الانتظار: ${pendingFiles}`}
+              size="small"
+              color="default"
+              variant="outlined"
+            />
+            {successFiles > 0 && (
+              <Chip
+                label={`نجح: ${successFiles}`}
+                size="small"
+                color="success"
+                variant="outlined"
+              />
+            )}
+            {errorFiles > 0 && (
+              <Chip label={`فشل: ${errorFiles}`} size="small" color="error" variant="outlined" />
+            )}
           </Stack>
 
           {/* Files Grid */}
@@ -356,7 +383,9 @@ const DragDropUpload = ({
                 >
                   <CardContent sx={{ flex: 1, pb: 1 }}>
                     <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 1 }}>
-                      <Box sx={{ color: 'primary.main', fontSize: 40 }}>{getFileIcon(fileItem.file)}</Box>
+                      <Box sx={{ color: 'primary.main', fontSize: 40 }}>
+                        {getFileIcon(fileItem.file)}
+                      </Box>
                       <Box sx={{ flex: 1, minWidth: 0 }}>
                         <Tooltip title={fileItem.name}>
                           <Typography variant="body2" noWrap sx={{ fontWeight: 600 }}>
@@ -368,8 +397,12 @@ const DragDropUpload = ({
                         </Typography>
                       </Box>
                       <Box>
-                        {fileItem.status === 'success' && <CheckCircleIcon color="success" fontSize="small" />}
-                        {fileItem.status === 'error' && <ErrorIcon color="error" fontSize="small" />}
+                        {fileItem.status === 'success' && (
+                          <CheckCircleIcon color="success" fontSize="small" />
+                        )}
+                        {fileItem.status === 'error' && (
+                          <ErrorIcon color="error" fontSize="small" />
+                        )}
                       </Box>
                     </Box>
 
@@ -390,14 +423,19 @@ const DragDropUpload = ({
                     )}
 
                     {/* Upload Progress */}
-                    {fileItem.status === 'uploading' && uploadProgress[fileItem.id] !== undefined && (
-                      <Box sx={{ mt: 1 }}>
-                        <LinearProgress variant="determinate" value={uploadProgress[fileItem.id]} sx={{ mb: 0.5 }} />
-                        <Typography variant="caption" color="textSecondary">
-                          {uploadProgress[fileItem.id]}%
-                        </Typography>
-                      </Box>
-                    )}
+                    {fileItem.status === 'uploading' &&
+                      uploadProgress[fileItem.id] !== undefined && (
+                        <Box sx={{ mt: 1 }}>
+                          <LinearProgress
+                            variant="determinate"
+                            value={uploadProgress[fileItem.id]}
+                            sx={{ mb: 0.5 }}
+                          />
+                          <Typography variant="caption" color="textSecondary">
+                            {uploadProgress[fileItem.id]}%
+                          </Typography>
+                        </Box>
+                      )}
 
                     {/* Error Message */}
                     {fileItem.status === 'error' && fileItem.error && (
@@ -414,6 +452,7 @@ const DragDropUpload = ({
                         onClick={() => handleRemoveFile(fileItem.id)}
                         disabled={uploading && fileItem.status === 'uploading'}
                         color="error"
+                        aria-label="إزالة الملف"
                       >
                         <DeleteIcon fontSize="small" />
                       </IconButton>

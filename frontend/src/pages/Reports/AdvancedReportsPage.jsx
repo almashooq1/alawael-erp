@@ -1,7 +1,7 @@
 /**
  * صفحة التقارير المتقدمة
  * Advanced Reports Page
- * 
+ *
  * Features:
  * - Smart Reports Dashboard
  * - Advanced data export
@@ -9,7 +9,7 @@
  * - Custom report generation
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Box,
   Container,
@@ -43,22 +43,20 @@ import {
   TrendingUp,
   FileDownload
 } from '@mui/icons-material';
-import SmartReportsDashboard from '../../components/SmartReportsDashboard';
-import AdvancedChartsComponent from '../../components/AdvancedChartsComponent';
-import exportService from '../../services/exportService';
-import smartReportsService from '../../services/smartReportsService';
-import notificationService from '../../services/notificationService';
+import SmartReportsDashboard from 'components/SmartReportsDashboard';
+import AdvancedChartsComponent from 'components/AdvancedChartsComponent';
+import exportService from 'services/exportService';
+import smartReportsService from 'services/smartReportsService';
+import notificationService from 'services/notificationService';
+import { WS_URL } from 'config/apiConfig';
 import { motion } from 'framer-motion';
+import logger from 'utils/logger';
+import { gradients } from '../../theme/palette';
+import ConfirmDialog, { useConfirmDialog } from '../../components/common/ConfirmDialog';
+import { useSnackbar } from '../../contexts/SnackbarContext';
 
-const AdvancedReportsPage = () => {
-  const [tabValue, setTabValue] = useState(0);
-  const [reports, setReports] = useState([]);
-  const [openDialog, setOpenDialog] = useState(false);
-  const [newReport, setNewReport] = useState({ name: '', type: 'comprehensive', format: 'pdf' });
-  const [refreshing, setRefreshing] = useState(false);
-
-  // Sample reports data
-  const sampleReports = [
+// Static sample reports data
+const SAMPLE_REPORTS = [
     {
       id: 1,
       name: 'تقرير الأداء الشهري',
@@ -91,38 +89,47 @@ const AdvancedReportsPage = () => {
     }
   ];
 
+const AdvancedReportsPage = () => {
+  const showSnackbar = useSnackbar();
+  const [confirmState, showConfirm] = useConfirmDialog();
+  const [tabValue, setTabValue] = useState(0);
+  const [reports, setReports] = useState([]);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [newReport, setNewReport] = useState({ name: '', type: 'comprehensive', format: 'pdf' });
+  const [refreshing, setRefreshing] = useState(false);
+
+  const loadReports = useCallback(() => {
+    setRefreshing(true);
+    // محاكاة تحميل التقارير
+    setTimeout(() => {
+      setReports(SAMPLE_REPORTS);
+      setRefreshing(false);
+    }, 1000);
+  }, []);
+
+  // Keep a stable ref so event handlers always call the latest loadReports
+  const loadReportsRef = useRef(loadReports);
+  useEffect(() => { loadReportsRef.current = loadReports; }, [loadReports]);
+
   // Initialize notifications
   useEffect(() => {
-    try {
-      notificationService.connect('ws://localhost:5000/notifications');
-      
-      notificationService.on('report-generated', (data) => {
-        console.log('Report generated:', data);
-        loadReports();
-      });
+    notificationService.connect(`${WS_URL}/notifications`).catch(error => {
+      logger.warn('Notification service error:', error);
+    });
 
-      notificationService.on('export-completed', (data) => {
-        console.log('Export completed:', data);
-      });
-    } catch (error) {
-      console.warn('Notification service error:', error);
-    }
+    notificationService.on('report-generated', () => {
+      loadReportsRef.current();
+    });
+
+    notificationService.on('export-completed', (_data) => {
+    });
 
     return () => {
       if (notificationService.isConnected()) {
         notificationService.disconnect?.();
       }
     };
-  }, []);
-
-  const loadReports = useCallback(() => {
-    setRefreshing(true);
-    // محاكاة تحميل التقارير
-    setTimeout(() => {
-      setReports(sampleReports);
-      setRefreshing(false);
-    }, 1000);
-  }, [sampleReports]);
+  }, [showSnackbar]);
 
   useEffect(() => {
     loadReports();
@@ -130,7 +137,7 @@ const AdvancedReportsPage = () => {
 
   const handleCreateReport = async () => {
     try {
-      const reportData = {
+      const _reportData = {
         name: newReport.name,
         type: newReport.type,
         timestamp: new Date().toISOString()
@@ -145,7 +152,7 @@ const AdvancedReportsPage = () => {
 
       // تصدير التقرير
       if (newReport.format === 'excel') {
-        exportService.toExcel(sampleReports, `${newReport.name}`);
+        exportService.toExcel(reports, `${newReport.name}`);
       } else if (newReport.format === 'pdf') {
         // PDF export
         await exportService.toPDF('reports-table', `${newReport.name}`);
@@ -156,17 +163,19 @@ const AdvancedReportsPage = () => {
         title: 'تم إنشاء التقرير',
         message: `تم إنشاء تقرير "${newReport.name}" بنجاح`
       });
+      showSnackbar('تم إنشاء التقرير بنجاح', 'success');
 
       setOpenDialog(false);
       setNewReport({ name: '', type: 'comprehensive', format: 'pdf' });
       loadReports();
     } catch (error) {
-      console.error('Error creating report:', error);
+      logger.error('Error creating report:', error);
       notificationService.addNotification({
         type: 'error',
         title: 'خطأ',
         message: 'حدث خطأ في إنشاء التقرير'
       });
+      showSnackbar('حدث خطأ في إنشاء التقرير', 'error');
     }
   };
 
@@ -185,17 +194,27 @@ const AdvancedReportsPage = () => {
         title: 'تم التصدير',
         message: `تم تصدير التقرير بصيغة ${format.toUpperCase()}`
       });
+      showSnackbar('تم تصدير التقرير بنجاح', 'success');
     } catch (error) {
-      console.error('Export error:', error);
+      logger.error('Export error:', error);
+      showSnackbar('فشل تصدير التقرير', 'error');
     }
   };
 
   const handleDeleteReport = (reportId) => {
-    setReports(reports.filter(r => r.id !== reportId));
-    notificationService.addNotification({
-      type: 'info',
-      title: 'تم الحذف',
-      message: 'تم حذف التقرير بنجاح'
+    showConfirm({
+      title: 'تأكيد الحذف',
+      message: 'هل أنت متأكد من حذف هذا التقرير؟ لا يمكن التراجع عن هذا الإجراء.',
+      confirmText: 'حذف',
+      confirmColor: 'error',
+      onConfirm: async () => {
+        setReports(reports.filter(r => r.id !== reportId));
+        notificationService.addNotification({
+          type: 'info',
+          title: 'تم الحذف',
+          message: 'تم حذف التقرير بنجاح'
+        });
+      },
     });
   };
 
@@ -215,6 +234,16 @@ const AdvancedReportsPage = () => {
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       {/* Header */}
+      <Box sx={{ background: gradients.info, borderRadius: 2, p: 3, mb: 4, color: 'white' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Assessment sx={{ fontSize: 40 }} />
+          <Box>
+            <Typography variant="h4" sx={{ fontWeight: 'bold' }}>التقارير المتقدمة</Typography>
+            <Typography variant="body2">تحليلات وتقارير شاملة</Typography>
+          </Box>
+        </Box>
+      </Box>
+
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
         <Box mb={4}>
           <Typography variant="h4" fontWeight="bold" gutterBottom>
@@ -308,6 +337,7 @@ const AdvancedReportsPage = () => {
                           <IconButton
                             size="small"
                             color="primary"
+                            aria-label="تنزيل Excel"
                             onClick={() => handleExportReport(report, 'excel')}
                           >
                             <Download />
@@ -317,13 +347,14 @@ const AdvancedReportsPage = () => {
                           <IconButton
                             size="small"
                             color="primary"
+                            aria-label="تنزيل PDF"
                             onClick={() => handleExportReport(report, 'pdf')}
                           >
                             <FileDownload />
                           </IconButton>
                         </Tooltip>
                         <Tooltip title="مشاركة">
-                          <IconButton size="small" color="primary">
+                          <IconButton size="small" color="primary" aria-label="مشاركة">
                             <Share />
                           </IconButton>
                         </Tooltip>
@@ -331,6 +362,7 @@ const AdvancedReportsPage = () => {
                           <IconButton
                             size="small"
                             color="error"
+                            aria-label="حذف"
                             onClick={() => handleDeleteReport(report.id)}
                           >
                             <Delete />
@@ -349,7 +381,7 @@ const AdvancedReportsPage = () => {
         {tabValue === 2 && (
           <Card>
             <CardContent>
-              <AdvancedChartsComponent data={sampleReports.map((r, i) => ({
+              <AdvancedChartsComponent data={reports.map((r, _i) => ({
                 name: r.name,
                 value: Math.random() * 100,
                 date: r.date
@@ -404,6 +436,7 @@ const AdvancedReportsPage = () => {
           </Button>
         </DialogActions>
       </Dialog>
+      <ConfirmDialog {...confirmState} />
     </Container>
   );
 };

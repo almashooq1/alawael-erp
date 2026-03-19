@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * SMART ATTENDANCE SYSTEM CONFIGURATION
  * إعدادات نظام الحضور والانصراف الذكي

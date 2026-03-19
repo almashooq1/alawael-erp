@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Notifications Service - Phase 2
  * Comprehensive notification management system
@@ -5,6 +6,7 @@
 
 const Notification = require('../models/Notification');
 const logger = require('../utils/logger');
+const { escapeRegex } = require('../utils/sanitize');
 
 class NotificationsService {
   /**
@@ -78,8 +80,8 @@ class NotificationsService {
       // Search in title or message
       if (search) {
         query.$or = [
-          { title: { $regex: search, $options: 'i' } },
-          { message: { $regex: search, $options: 'i' } },
+          { title: { $regex: escapeRegex(search), $options: 'i' } },
+          { message: { $regex: escapeRegex(search), $options: 'i' } },
         ];
       }
 

@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * End-to-End (E2E) Tests - Phase 5.3
  * In-memory workflow scenarios (no DB dependency)

@@ -4,6 +4,7 @@
  */
 
 import { createTheme } from '@mui/material/styles';
+import { gradients } from 'theme/palette';
 
 // ألوان مخصصة للمجال التعليمي
 const educationColors = {
@@ -55,14 +56,14 @@ const educationColors = {
 
   // تدرجات لونية
   gradients: {
-    primary: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    success: 'linear-gradient(135deg, #43cea2 0%, #185a9d 100%)',
-    warning: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-    info: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-    purple: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    blue: 'linear-gradient(135deg, #43cea2 0%, #185a9d 100%)',
-    pink: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-    orange: 'linear-gradient(135deg, #ffb347 0%, #ffcc33 100%)',
+    primary: gradients.primary,
+    success: gradients.ocean,
+    warning: gradients.warning,
+    info: gradients.info,
+    purple: gradients.primary,
+    blue: gradients.ocean,
+    pink: gradients.warning,
+    orange: gradients.orange,
   },
 };
 

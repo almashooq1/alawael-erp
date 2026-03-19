@@ -1,3 +1,4 @@
+﻿/* eslint-disable no-unused-vars */
 /**
  * Payroll & Compensation API Routes
  * مسارات API الرواتب والحوافز
@@ -13,7 +14,8 @@ const {
   BenefitsSummary,
 } = require('../models/compensation.model');
 const PayrollCalculationService = require('../services/payrollCalculationService');
-const { authenticateToken, requireRole } = require('../middleware/auth.middleware');
+const PayrollReportService = require('../services/payrollReportService');
+const { authenticateToken, requireRole } = require('../middleware/auth');
 
 // ============= مسارات الرواتب =============
 
@@ -36,7 +38,7 @@ router.get('/monthly/:month/:year', authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(400).json({
       success: false,
-      error: error.message,
+      error: 'خطأ في البيانات المدخلة',
     });
   }
 });
@@ -62,7 +64,7 @@ router.get('/:payrollId', authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(400).json({
       success: false,
-      error: error.message,
+      error: 'خطأ في البيانات المدخلة',
     });
   }
 });
@@ -83,8 +85,14 @@ router.get('/employee/:employeeId/year/:year', authenticateToken, async (req, re
       totals: {
         totalGross: payrolls.reduce((sum, p) => sum + (p.calculations?.totalGross || 0), 0),
         totalNet: payrolls.reduce((sum, p) => sum + (p.calculations?.totalNet || 0), 0),
-        totalDeductions: payrolls.reduce((sum, p) => sum + (p.calculations?.totalDeductions || 0), 0),
-        totalIncentives: payrolls.reduce((sum, p) => sum + (p.calculations?.totalIncentives || 0), 0),
+        totalDeductions: payrolls.reduce(
+          (sum, p) => sum + (p.calculations?.totalDeductions || 0),
+          0
+        ),
+        totalIncentives: payrolls.reduce(
+          (sum, p) => sum + (p.calculations?.totalIncentives || 0),
+          0
+        ),
       },
     };
 
@@ -95,7 +103,7 @@ router.get('/employee/:employeeId/year/:year', authenticateToken, async (req, re
   } catch (error) {
     res.status(400).json({
       success: false,
-      error: error.message,
+      error: 'خطأ في البيانات المدخلة',
     });
   }
 });
@@ -104,220 +112,259 @@ router.get('/employee/:employeeId/year/:year', authenticateToken, async (req, re
  * إنشاء أو تحديث كشف راتب
  * POST /api/payroll/create
  */
-router.post('/create', authenticateToken, requireRole('hr', 'admin', 'payroll'), async (req, res) => {
-  try {
-    const { employeeId, month, year } = req.body;
+router.post(
+  '/create',
+  authenticateToken,
+  requireRole('hr', 'admin', 'payroll'),
+  async (req, res) => {
+    try {
+      const { employeeId, month, year } = req.body;
 
-    // حساب الراتب
-    const payroll = await PayrollCalculationService.calculateMonthlyPayroll(employeeId, month, year);
+      // حساب الراتب
+      const payroll = await PayrollCalculationService.calculateMonthlyPayroll(
+        employeeId,
+        month,
+        year
+      );
 
-    // تحديث إذا كان موجوداً
-    let existingPayroll = await Payroll.findOne({
-      employeeId,
-      month,
-      year,
-    });
+      // تحديث إذا كان موجوداً
+      const existingPayroll = await Payroll.findOne({
+        employeeId,
+        month,
+        year,
+      });
 
-    if (existingPayroll) {
-      // تحديث البيانات
-      Object.assign(existingPayroll, payroll.toObject());
-      await existingPayroll.save();
-      return res.json({
+      if (existingPayroll) {
+        // تحديث البيانات
+        Object.assign(existingPayroll, payroll.toObject());
+        await existingPayroll.save();
+        return res.json({
+          success: true,
+          data: existingPayroll,
+          message: 'تم تحديث الراتب بنجاح',
+        });
+      }
+
+      // حفظ راتب جديد
+      const savedPayroll = await payroll.save();
+
+      res.json({
         success: true,
-        data: existingPayroll,
-        message: 'تم تحديث الراتب بنجاح',
+        data: savedPayroll,
+        message: 'تم إنشاء الراتب بنجاح',
+      });
+    } catch (error) {
+      res.status(400).json({
+        success: false,
+        error: 'خطأ في البيانات المدخلة',
       });
     }
-
-    // حفظ راتب جديد
-    const savedPayroll = await payroll.save();
-
-    res.json({
-      success: true,
-      data: savedPayroll,
-      message: 'تم إنشاء الراتب بنجاح',
-    });
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      error: error.message,
-    });
   }
-});
+);
 
 /**
  * معالجة رواتب الشهر بالكامل
  * POST /api/payroll/process-monthly
  */
-router.post('/process-monthly', authenticateToken, requireRole('admin', 'payroll'), async (req, res) => {
-  try {
-    const { month, year } = req.body;
+router.post(
+  '/process-monthly',
+  authenticateToken,
+  requireRole('admin', 'payroll'),
+  async (req, res) => {
+    try {
+      const { month, year } = req.body;
 
-    const results = await PayrollCalculationService.processMonthlyPayrollBatch(month, year);
+      const results = await PayrollCalculationService.processMonthlyPayrollBatch(month, year);
 
-    res.json({
-      success: true,
-      data: results,
-    });
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      error: error.message,
-    });
+      res.json({
+        success: true,
+        data: results,
+      });
+    } catch (error) {
+      res.status(400).json({
+        success: false,
+        error: 'خطأ في البيانات المدخلة',
+      });
+    }
   }
-});
+);
 
 /**
  * إرسال راتب للموافقة
  * PUT /api/payroll/:payrollId/submit-approval
  */
-router.put('/:payrollId/submit-approval', authenticateToken, requireRole('hr', 'admin'), async (req, res) => {
-  try {
-    const payroll = await Payroll.findById(req.params.payrollId);
-    if (!payroll) {
-      return res.status(404).json({
+router.put(
+  '/:payrollId/submit-approval',
+  authenticateToken,
+  requireRole('hr', 'admin'),
+  async (req, res) => {
+    try {
+      const payroll = await Payroll.findById(req.params.payrollId);
+      if (!payroll) {
+        return res.status(404).json({
+          success: false,
+          error: 'الراتب غير موجود',
+        });
+      }
+
+      payroll.submitForApproval(req.user._id, req.user.name);
+      await payroll.save();
+
+      res.json({
+        success: true,
+        data: payroll,
+        message: 'تم إرسال الراتب للموافقة',
+      });
+    } catch (error) {
+      res.status(400).json({
         success: false,
-        error: 'الراتب غير موجود',
+        error: 'خطأ في البيانات المدخلة',
       });
     }
-
-    payroll.submitForApproval(req.user._id, req.user.name);
-    await payroll.save();
-
-    res.json({
-      success: true,
-      data: payroll,
-      message: 'تم إرسال الراتب للموافقة',
-    });
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      error: error.message,
-    });
   }
-});
+);
 
 /**
  * موافقة على الراتب
  * PUT /api/payroll/:payrollId/approve
  */
-router.put('/:payrollId/approve', authenticateToken, requireRole('admin', 'director'), async (req, res) => {
-  try {
-    const payroll = await Payroll.findById(req.params.payrollId);
-    if (!payroll) {
-      return res.status(404).json({
+router.put(
+  '/:payrollId/approve',
+  authenticateToken,
+  requireRole('admin', 'director'),
+  async (req, res) => {
+    try {
+      const payroll = await Payroll.findById(req.params.payrollId);
+      if (!payroll) {
+        return res.status(404).json({
+          success: false,
+          error: 'الراتب غير موجود',
+        });
+      }
+
+      payroll.approve(req.user._id, req.user.name);
+      await payroll.save();
+
+      res.json({
+        success: true,
+        data: payroll,
+        message: 'تم الموافقة على الراتب',
+      });
+    } catch (error) {
+      res.status(400).json({
         success: false,
-        error: 'الراتب غير موجود',
+        error: 'خطأ في البيانات المدخلة',
       });
     }
-
-    payroll.approve(req.user._id, req.user.name);
-    await payroll.save();
-
-    res.json({
-      success: true,
-      data: payroll,
-      message: 'تم الموافقة على الراتب',
-    });
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      error: error.message,
-    });
   }
-});
+);
 
 /**
  * معالجة الراتب للدفع
  * PUT /api/payroll/:payrollId/process
  */
-router.put('/:payrollId/process', authenticateToken, requireRole('Admin', 'payroll'), async (req, res) => {
-  try {
-    const payroll = await Payroll.findById(req.params.payrollId);
-    if (!payroll) {
-      return res.status(404).json({
+router.put(
+  '/:payrollId/process',
+  authenticateToken,
+  requireRole('Admin', 'payroll'),
+  async (req, res) => {
+    try {
+      const payroll = await Payroll.findById(req.params.payrollId);
+      if (!payroll) {
+        return res.status(404).json({
+          success: false,
+          error: 'الراتب غير موجود',
+        });
+      }
+
+      payroll.process(req.user._id, req.user.name);
+      await payroll.save();
+
+      res.json({
+        success: true,
+        data: payroll,
+        message: 'تم معالجة الراتب بنجاح',
+      });
+    } catch (error) {
+      res.status(400).json({
         success: false,
-        error: 'الراتب غير موجود',
+        error: 'خطأ في البيانات المدخلة',
       });
     }
-
-    payroll.process(req.user._id, req.user.name);
-    await payroll.save();
-
-    res.json({
-      success: true,
-      data: payroll,
-      message: 'تم معالجة الراتب بنجاح',
-    });
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      error: error.message,
-    });
   }
-});
+);
 
 /**
  * تحويل الراتب
  * PUT /api/payroll/:payrollId/transfer
  */
-router.put('/:payrollId/transfer', authenticateToken, requireRole('admin', 'payroll'), async (req, res) => {
-  try {
-    const { transactionRef, bankName } = req.body;
-    const payroll = await Payroll.findById(req.params.payrollId);
+router.put(
+  '/:payrollId/transfer',
+  authenticateToken,
+  requireRole('admin', 'payroll'),
+  async (req, res) => {
+    try {
+      const { transactionRef, bankName } = req.body;
+      const payroll = await Payroll.findById(req.params.payrollId);
 
-    if (!payroll) {
-      return res.status(404).json({
+      if (!payroll) {
+        return res.status(404).json({
+          success: false,
+          error: 'الراتب غير موجود',
+        });
+      }
+
+      payroll.transfer(transactionRef, bankName);
+      await payroll.save();
+
+      res.json({
+        success: true,
+        data: payroll,
+        message: 'تم تحويل الراتب بنجاح',
+      });
+    } catch (error) {
+      res.status(400).json({
         success: false,
-        error: 'الراتب غير موجود',
+        error: 'خطأ في البيانات المدخلة',
       });
     }
-
-    payroll.transfer(transactionRef, bankName);
-    await payroll.save();
-
-    res.json({
-      success: true,
-      data: payroll,
-      message: 'تم تحويل الراتب بنجاح',
-    });
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      error: error.message,
-    });
   }
-});
+);
 
 /**
  * تأكيد دفع الراتب
  * PUT /api/payroll/:payrollId/confirm-payment
  */
-router.put('/:payrollId/confirm-payment', authenticateToken, requireRole('admin', 'payroll'), async (req, res) => {
-  try {
-    const payroll = await Payroll.findById(req.params.payrollId);
-    if (!payroll) {
-      return res.status(404).json({
+router.put(
+  '/:payrollId/confirm-payment',
+  authenticateToken,
+  requireRole('admin', 'payroll'),
+  async (req, res) => {
+    try {
+      const payroll = await Payroll.findById(req.params.payrollId);
+      if (!payroll) {
+        return res.status(404).json({
+          success: false,
+          error: 'الراتب غير موجود',
+        });
+      }
+
+      payroll.confirmPayment();
+      await payroll.save();
+
+      res.json({
+        success: true,
+        data: payroll,
+        message: 'تم تأكيد دفع الراتب',
+      });
+    } catch (error) {
+      res.status(400).json({
         success: false,
-        error: 'الراتب غير موجود',
+        error: 'خطأ في البيانات المدخلة',
       });
     }
-
-    payroll.confirmPayment();
-    await payroll.save();
-
-    res.json({
-      success: true,
-      data: payroll,
-      message: 'تم تأكيد دفع الراتب',
-    });
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      error: error.message,
-    });
   }
-});
+);
 
 /**
  * الحصول على إحصائيات الرواتب
@@ -342,7 +389,7 @@ router.get('/stats/:month/:year', authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(400).json({
       success: false,
-      error: error.message,
+      error: 'خطأ في البيانات المدخلة',
     });
   }
 });
@@ -365,7 +412,7 @@ router.get('/compensation/structures', authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(400).json({
       success: false,
-      error: error.message,
+      error: 'خطأ في البيانات المدخلة',
     });
   }
 });
@@ -392,7 +439,7 @@ router.post(
     } catch (error) {
       res.status(400).json({
         success: false,
-        error: error.message,
+        error: 'خطأ في البيانات المدخلة',
       });
     }
   }
@@ -414,7 +461,7 @@ router.get('/compensation/incentives/pending', authenticateToken, async (req, re
   } catch (error) {
     res.status(400).json({
       success: false,
-      error: error.message,
+      error: 'خطأ في البيانات المدخلة',
     });
   }
 });
@@ -423,28 +470,33 @@ router.get('/compensation/incentives/pending', authenticateToken, async (req, re
  * إنشاء حافز فردي
  * POST /api/compensation/incentives
  */
-router.post('/compensation/incentives', authenticateToken, requireRole('hr', 'manager', 'admin'), async (req, res) => {
-  try {
-    const incentive = new IndividualIncentive(req.body);
-    incentive.recommendedBy = {
-      userId: req.user._id,
-      name: req.user.name,
-      date: new Date(),
-    };
-    await incentive.save();
+router.post(
+  '/compensation/incentives',
+  authenticateToken,
+  requireRole('hr', 'manager', 'admin'),
+  async (req, res) => {
+    try {
+      const incentive = new IndividualIncentive(req.body);
+      incentive.recommendedBy = {
+        userId: req.user._id,
+        name: req.user.name,
+        date: new Date(),
+      };
+      await incentive.save();
 
-    res.json({
-      success: true,
-      data: incentive,
-      message: 'تم إنشاء الحافز بنجاح',
-    });
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      error: error.message,
-    });
+      res.json({
+        success: true,
+        data: incentive,
+        message: 'تم إنشاء الحافز بنجاح',
+      });
+    } catch (error) {
+      res.status(400).json({
+        success: false,
+        error: 'خطأ في البيانات المدخلة',
+      });
+    }
   }
-});
+);
 
 /**
  * موافقة على الحافز
@@ -475,7 +527,7 @@ router.put(
     } catch (error) {
       res.status(400).json({
         success: false,
-        error: error.message,
+        error: 'خطأ في البيانات المدخلة',
       });
     }
   }
@@ -485,33 +537,38 @@ router.put(
  * تحديد الحافز كمدفوع
  * PUT /api/compensation/incentives/:incentiveId/mark-paid
  */
-router.put('/compensation/incentives/:incentiveId/mark-paid', authenticateToken, requireRole('admin', 'payroll'), async (req, res) => {
-  try {
-    const { transactionRef } = req.body;
-    const incentive = await IndividualIncentive.findById(req.params.incentiveId);
+router.put(
+  '/compensation/incentives/:incentiveId/mark-paid',
+  authenticateToken,
+  requireRole('admin', 'payroll'),
+  async (req, res) => {
+    try {
+      const { transactionRef } = req.body;
+      const incentive = await IndividualIncentive.findById(req.params.incentiveId);
 
-    if (!incentive) {
-      return res.status(404).json({
+      if (!incentive) {
+        return res.status(404).json({
+          success: false,
+          error: 'الحافز غير موجود',
+        });
+      }
+
+      incentive.markAsPaid(transactionRef);
+      await incentive.save();
+
+      res.json({
+        success: true,
+        data: incentive,
+        message: 'تم تحديد الحافز كمدفوع',
+      });
+    } catch (error) {
+      res.status(400).json({
         success: false,
-        error: 'الحافز غير موجود',
+        error: 'خطأ في البيانات المدخلة',
       });
     }
-
-    incentive.markAsPaid(transactionRef);
-    await incentive.save();
-
-    res.json({
-      success: true,
-      data: incentive,
-      message: 'تم تحديد الحافز كمدفوع',
-    });
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      error: error.message,
-    });
   }
-});
+);
 
 // ============= مسارات العقوبات =============
 
@@ -519,53 +576,63 @@ router.put('/compensation/incentives/:incentiveId/mark-paid', authenticateToken,
  * إنشاء عقوبة/تنبيه
  * POST /api/compensation/penalties
  */
-router.post('/compensation/penalties', authenticateToken, requireRole('manager', 'hr', 'admin'), async (req, res) => {
-  try {
-    const penalty = new PerformancePenalty(req.body);
-    await penalty.save();
+router.post(
+  '/compensation/penalties',
+  authenticateToken,
+  requireRole('manager', 'hr', 'admin'),
+  async (req, res) => {
+    try {
+      const penalty = new PerformancePenalty(req.body);
+      await penalty.save();
 
-    res.json({
-      success: true,
-      data: penalty,
-      message: 'تم تسجيل العقوبة بنجاح',
-    });
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      error: error.message,
-    });
+      res.json({
+        success: true,
+        data: penalty,
+        message: 'تم تسجيل العقوبة بنجاح',
+      });
+    } catch (error) {
+      res.status(400).json({
+        success: false,
+        error: 'خطأ في البيانات المدخلة',
+      });
+    }
   }
-});
+);
 
 /**
  * موافقة على العقوبة
  * PUT /api/compensation/penalties/:penaltyId/approve
  */
-router.put('/compensation/penalties/:penaltyId/approve', authenticateToken, requireRole('admin', 'director'), async (req, res) => {
-  try {
-    const penalty = await PerformancePenalty.findById(req.params.penaltyId);
-    if (!penalty) {
-      return res.status(404).json({
+router.put(
+  '/compensation/penalties/:penaltyId/approve',
+  authenticateToken,
+  requireRole('admin', 'director'),
+  async (req, res) => {
+    try {
+      const penalty = await PerformancePenalty.findById(req.params.penaltyId);
+      if (!penalty) {
+        return res.status(404).json({
+          success: false,
+          error: 'العقوبة غير موجودة',
+        });
+      }
+
+      penalty.approve(req.user._id, req.user.name);
+      await penalty.save();
+
+      res.json({
+        success: true,
+        data: penalty,
+        message: 'تم الموافقة على العقوبة',
+      });
+    } catch (error) {
+      res.status(400).json({
         success: false,
-        error: 'العقوبة غير موجودة',
+        error: 'خطأ في البيانات المدخلة',
       });
     }
-
-    penalty.approve(req.user._id, req.user.name);
-    await penalty.save();
-
-    res.json({
-      success: true,
-      data: penalty,
-      message: 'تم الموافقة على العقوبة',
-    });
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      error: error.message,
-    });
   }
-});
+);
 
 /**
  * تقديم استئناف على العقوبة
@@ -594,7 +661,7 @@ router.post('/compensation/penalties/:penaltyId/appeal', authenticateToken, asyn
   } catch (error) {
     res.status(400).json({
       success: false,
-      error: error.message,
+      error: 'خطأ في البيانات المدخلة',
     });
   }
 });
@@ -605,51 +672,230 @@ router.post('/compensation/penalties/:penaltyId/appeal', authenticateToken, asyn
  * إنشاء كشف المزايا السنوي
  * POST /api/compensation/benefits-summary
  */
-router.post('/compensation/benefits-summary', authenticateToken, requireRole(['hr', 'admin']), async (req, res) => {
-  try {
-    const summary = new BenefitsSummary(req.body);
-    await summary.save();
+router.post(
+  '/compensation/benefits-summary',
+  authenticateToken,
+  requireRole(['hr', 'admin']),
+  async (req, res) => {
+    try {
+      const summary = new BenefitsSummary(req.body);
+      await summary.save();
 
-    res.json({
-      success: true,
-      data: summary,
-      message: 'تم إنشاء كشف المزايا بنجاح',
-    });
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      error: error.message,
-    });
+      res.json({
+        success: true,
+        data: summary,
+        message: 'تم إنشاء كشف المزايا بنجاح',
+      });
+    } catch (error) {
+      res.status(400).json({
+        success: false,
+        error: 'خطأ في البيانات المدخلة',
+      });
+    }
   }
-});
+);
 
 /**
  * الحصول على كشف المزايا للموظف
  * GET /api/compensation/benefits-summary/:employeeId/:year
  */
-router.get('/compensation/benefits-summary/:employeeId/:year', authenticateToken, async (req, res) => {
-  try {
-    const { employeeId, year } = req.params;
-    const summary = await BenefitsSummary.findOne({
-      employeeId,
-      year,
-    });
+router.get(
+  '/compensation/benefits-summary/:employeeId/:year',
+  authenticateToken,
+  async (req, res) => {
+    try {
+      const { employeeId, year } = req.params;
+      const summary = await BenefitsSummary.findOne({
+        employeeId,
+        year,
+      });
 
-    if (!summary) {
-      return res.status(404).json({
+      if (!summary) {
+        return res.status(404).json({
+          success: false,
+          error: 'كشف المزايا غير موجود',
+        });
+      }
+
+      res.json({
+        success: true,
+        data: summary,
+      });
+    } catch (error) {
+      res.status(400).json({
         success: false,
-        error: 'كشف المزايا غير موجود',
+        error: 'خطأ في البيانات المدخلة',
       });
     }
+  }
+);
+
+// ============= مسارات التقارير المتقدمة =============
+
+/**
+ * تقرير حماية الأجور (WPS)
+ * GET /api/payroll/reports/wps/:month/:year
+ */
+router.get('/reports/wps/:month/:year', authenticateToken, async (req, res) => {
+  try {
+    const { month, year } = req.params;
+    const report = await PayrollReportService.generateWPSReport(month, year);
 
     res.json({
       success: true,
-      data: summary,
+      data: report,
     });
   } catch (error) {
-    res.status(400).json({
+    res.status(500).json({
       success: false,
-      error: error.message,
+      error: error.message || 'خطأ في توليد تقرير WPS',
+    });
+  }
+});
+
+/**
+ * تقرير التأمينات الاجتماعية (GOSI)
+ * GET /api/payroll/reports/gosi/:month/:year
+ */
+router.get('/reports/gosi/:month/:year', authenticateToken, async (req, res) => {
+  try {
+    const { month, year } = req.params;
+    const report = await PayrollReportService.generateGOSIReport(month, year);
+
+    res.json({
+      success: true,
+      data: report,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message || 'خطأ في توليد تقرير GOSI',
+    });
+  }
+});
+
+/**
+ * ملف التحويل البنكي
+ * GET /api/payroll/reports/bank-transfer/:month/:year
+ */
+router.get('/reports/bank-transfer/:month/:year', authenticateToken, async (req, res) => {
+  try {
+    const { month, year } = req.params;
+    const report = await PayrollReportService.generateBankTransferReport(month, year);
+
+    res.json({
+      success: true,
+      data: report,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message || 'خطأ في توليد ملف التحويل البنكي',
+    });
+  }
+});
+
+/**
+ * تقرير مقارنة الأقسام
+ * GET /api/payroll/reports/department-comparison/:month/:year
+ */
+router.get('/reports/department-comparison/:month/:year', authenticateToken, async (req, res) => {
+  try {
+    const { month, year } = req.params;
+    const report = await PayrollReportService.generateDepartmentComparisonReport(month, year);
+
+    res.json({
+      success: true,
+      data: report,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message || 'خطأ في توليد تقرير مقارنة الأقسام',
+    });
+  }
+});
+
+/**
+ * التقرير السنوي للرواتب
+ * GET /api/payroll/reports/annual-summary/:year
+ */
+router.get('/reports/annual-summary/:year', authenticateToken, async (req, res) => {
+  try {
+    const { year } = req.params;
+    const report = await PayrollReportService.generateAnnualSummaryReport(year);
+
+    res.json({
+      success: true,
+      data: report,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message || 'خطأ في توليد التقرير السنوي',
+    });
+  }
+});
+
+/**
+ * تقرير الفروقات الشهرية
+ * GET /api/payroll/reports/variance/:month/:year
+ */
+router.get('/reports/variance/:month/:year', authenticateToken, async (req, res) => {
+  try {
+    const { month, year } = req.params;
+    const report = await PayrollReportService.generateVarianceReport(month, year);
+
+    res.json({
+      success: true,
+      data: report,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message || 'خطأ في توليد تقرير الفروقات',
+    });
+  }
+});
+
+/**
+ * تقرير تكلفة الموظف
+ * GET /api/payroll/reports/employee-cost/:employeeId/:year
+ */
+router.get('/reports/employee-cost/:employeeId/:year', authenticateToken, async (req, res) => {
+  try {
+    const { employeeId, year } = req.params;
+    const report = await PayrollReportService.generateEmployeeCostReport(employeeId, year);
+
+    res.json({
+      success: true,
+      data: report,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message || 'خطأ في توليد تقرير تكلفة الموظف',
+    });
+  }
+});
+
+/**
+ * تقرير الخصومات التفصيلي
+ * GET /api/payroll/reports/deductions/:month/:year
+ */
+router.get('/reports/deductions/:month/:year', authenticateToken, async (req, res) => {
+  try {
+    const { month, year } = req.params;
+    const report = await PayrollReportService.generateDeductionsReport(month, year);
+
+    res.json({
+      success: true,
+      data: report,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message || 'خطأ في توليد تقرير الخصومات',
     });
   }
 });

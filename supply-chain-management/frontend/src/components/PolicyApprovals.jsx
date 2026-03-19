@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './PolicyApprovals.css';
 
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
 
 const PolicyApprovals = () => {
   const [policies, setPolicies] = useState([]);
@@ -17,7 +17,7 @@ const PolicyApprovals = () => {
   const [stats, setStats] = useState({
     pending: 0,
     approved: 0,
-    rejected: 0
+    rejected: 0,
   });
 
   useEffect(() => {
@@ -35,8 +35,8 @@ const PolicyApprovals = () => {
       const allPolicies = response.data.data || response.data;
 
       // Filter policies that need approval
-      const approvalPolicies = allPolicies.filter(p =>
-        p.status === 'PENDING_APPROVAL' || p.approvals?.some(a => a.status === 'PENDING')
+      const approvalPolicies = allPolicies.filter(
+        p => p.status === 'PENDING_APPROVAL' || p.approvals?.some(a => a.status === 'PENDING')
       );
 
       setPolicies(approvalPolicies);
@@ -44,7 +44,7 @@ const PolicyApprovals = () => {
       // Calculate stats
       const pending = approvalPolicies.filter(p => p.status === 'PENDING_APPROVAL').length;
       const approved = approvalPolicies.filter(p => p.status === 'APPROVED').length;
-      const rejected = approvalPolicies.filter(p => 
+      const rejected = approvalPolicies.filter(p =>
         p.approvals?.some(a => a.status === 'REJECTED')
       ).length;
 
@@ -71,13 +71,14 @@ const PolicyApprovals = () => {
 
     try {
       setLoading(true);
-      const endpoint = approvalAction === 'approve'
-        ? `${API_BASE}/policies/${selectedPolicy.policyId}/approve`
-        : `${API_BASE}/policies/${selectedPolicy.policyId}/reject`;
+      const endpoint =
+        approvalAction === 'approve'
+          ? `${API_BASE}/policies/${selectedPolicy.policyId}/approve`
+          : `${API_BASE}/policies/${selectedPolicy.policyId}/reject`;
 
       await axios.post(endpoint, {
         approverRole: 'HR_DIRECTOR', // Should come from auth
-        comments: comments.trim()
+        comments: comments.trim(),
       });
 
       alert(`تم ${approvalAction === 'approve' ? 'الموافقة' : 'الرفض'} على السياسة بنجاح`);
@@ -92,7 +93,7 @@ const PolicyApprovals = () => {
     }
   };
 
-  const getApprovalStatus = (approvals) => {
+  const getApprovalStatus = approvals => {
     if (!approvals || approvals.length === 0) return 'pending';
 
     const allApproved = approvals.every(a => a.status === 'APPROVED');
@@ -103,23 +104,23 @@ const PolicyApprovals = () => {
     return 'in-progress';
   };
 
-  const getApprovalStatusLabel = (approvals) => {
+  const getApprovalStatusLabel = approvals => {
     const status = getApprovalStatus(approvals);
     const labels = {
       pending: 'قيد الانتظار',
       'in-progress': 'قيد المراجعة',
       approved: 'موافق عليه',
-      rejected: 'مرفوض'
+      rejected: 'مرفوض',
     };
     return labels[status] || 'غير محدد';
   };
 
-  const getApproversForRole = (approvals) => {
+  const getApproversForRole = approvals => {
     const roleApprovers = {
-      'POLICY_MANAGER': [],
-      'HR_DIRECTOR': [],
-      'COMPLIANCE_OFFICER': [],
-      'CFO': []
+      POLICY_MANAGER: [],
+      HR_DIRECTOR: [],
+      COMPLIANCE_OFFICER: [],
+      CFO: [],
     };
 
     if (approvals) {
@@ -187,9 +188,7 @@ const PolicyApprovals = () => {
                           </span>
                         </div>
                       </div>
-                      <div className="expand-icon">
-                        {isExpanded ? '▼' : '▶'}
-                      </div>
+                      <div className="expand-icon">{isExpanded ? '▼' : '▶'}</div>
                     </div>
 
                     {/* Expanded Details */}
@@ -198,9 +197,17 @@ const PolicyApprovals = () => {
                         {/* Policy Details */}
                         <div className="details-section">
                           <h4>تفاصيل السياسة</h4>
-                          <p><strong>الوصف:</strong> {policy.description}</p>
-                          <p><strong>تاريخ البدء:</strong> {new Date(policy.effectiveDate).toLocaleDateString('ar')}</p>
-                          <p><strong>الأقسام المعنية:</strong> {policy.applicableDepartments?.join(', ') || 'جميع الأقسام'}</p>
+                          <p>
+                            <strong>الوصف:</strong> {policy.description}
+                          </p>
+                          <p>
+                            <strong>تاريخ البدء:</strong>{' '}
+                            {new Date(policy.effectiveDate).toLocaleDateString('ar')}
+                          </p>
+                          <p>
+                            <strong>الأقسام المعنية:</strong>{' '}
+                            {policy.applicableDepartments?.join(', ') || 'جميع الأقسام'}
+                          </p>
                         </div>
 
                         {/* Approval Matrix */}
@@ -213,9 +220,14 @@ const PolicyApprovals = () => {
                                 <div className="approvers-list">
                                   {approvers.length > 0 ? (
                                     approvers.map((app, idx) => (
-                                      <div key={idx} className={`approver-item status-${app.status?.toLowerCase()}`}>
+                                      <div
+                                        key={idx}
+                                        className={`approver-item status-${app.status?.toLowerCase()}`}
+                                      >
                                         <span className="approval-badge">{app.status}</span>
-                                        <span className="approver-name">{app.approverName || 'غير محدد'}</span>
+                                        <span className="approver-name">
+                                          {app.approverName || 'غير محدد'}
+                                        </span>
                                         {app.approvalDate && (
                                           <span className="approval-date">
                                             {new Date(app.approvalDate).toLocaleDateString('ar')}
@@ -270,13 +282,8 @@ const PolicyApprovals = () => {
           <div className="modal-overlay">
             <div className="modal-content">
               <div className="modal-header">
-                <h2>
-                  {approvalAction === 'approve' ? 'الموافقة على السياسة' : 'رفض السياسة'}
-                </h2>
-                <button
-                  className="close-btn"
-                  onClick={() => setShowCommentModal(false)}
-                >
+                <h2>{approvalAction === 'approve' ? 'الموافقة على السياسة' : 'رفض السياسة'}</h2>
+                <button className="close-btn" onClick={() => setShowCommentModal(false)}>
                   ×
                 </button>
               </div>
@@ -290,7 +297,7 @@ const PolicyApprovals = () => {
                   <label>الملاحظات والتعليقات:</label>
                   <textarea
                     value={comments}
-                    onChange={(e) => setComments(e.target.value)}
+                    onChange={e => setComments(e.target.value)}
                     placeholder="أضف ملاحظاتك هنا..."
                     className="form-control"
                     rows="6"
@@ -299,10 +306,7 @@ const PolicyApprovals = () => {
               </div>
 
               <div className="modal-footer">
-                <button
-                  className="btn btn-secondary"
-                  onClick={() => setShowCommentModal(false)}
-                >
+                <button className="btn btn-secondary" onClick={() => setShowCommentModal(false)}>
                   إلغاء
                 </button>
                 <button
@@ -310,7 +314,11 @@ const PolicyApprovals = () => {
                   onClick={handleSubmitApproval}
                   disabled={loading}
                 >
-                  {loading ? 'جاري...' : approvalAction === 'approve' ? 'تأكيد الموافقة' : 'تأكيد الرفض'}
+                  {loading
+                    ? 'جاري...'
+                    : approvalAction === 'approve'
+                      ? 'تأكيد الموافقة'
+                      : 'تأكيد الرفض'}
                 </button>
               </div>
             </div>

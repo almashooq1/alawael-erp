@@ -1,9 +1,10 @@
+/* eslint-disable no-unused-vars */
 /**
  * ═══════════════════════════════════════════════════════════════════════
  * ADVANCED SECURITY & COMPLIANCE SYSTEM
  * نظام الأمان المتقدم والامتثال
  * ═══════════════════════════════════════════════════════════════════════
- * 
+ *
  * Features:
  * ✅ Advanced Encryption
  * ✅ Access Control & RBAC
@@ -18,6 +19,7 @@ const EventEmitter = require('events');
 const crypto = require('crypto');
 const fs = require('fs').promises;
 const path = require('path');
+const logger = require('../utils/logger');
 
 class AdvancedSecurity extends EventEmitter {
   constructor(options = {}) {
@@ -45,10 +47,10 @@ class AdvancedSecurity extends EventEmitter {
       await fs.mkdir(this.keyPath, { recursive: true });
       await this.loadEncryptionKeys();
       await this.loadAccessControl();
-      console.log('✅ Advanced security system initialized');
+      // console.log('✅ Advanced security system initialized');
       this.startSecurityMonitoring();
     } catch (error) {
-      console.error('❌ Security initialization failed:', error.message);
+      logger.error('❌ Security initialization failed:', error.message);
     }
   }
 
@@ -86,7 +88,7 @@ class AdvancedSecurity extends EventEmitter {
         timestamp: new Date(),
       };
     } catch (error) {
-      console.error('❌ Encryption failed:', error.message);
+      logger.error('❌ Encryption failed:', error.message);
       throw error;
     }
   }
@@ -114,7 +116,7 @@ class AdvancedSecurity extends EventEmitter {
 
       return JSON.parse(decrypted);
     } catch (error) {
-      console.error('❌ Decryption failed:', error.message);
+      logger.error('❌ Decryption failed:', error.message);
       throw error;
     }
   }
@@ -147,7 +149,7 @@ class AdvancedSecurity extends EventEmitter {
 
       return accessPolicy;
     } catch (error) {
-      console.error('❌ Access control definition failed:', error.message);
+      logger.error('❌ Access control definition failed:', error.message);
       throw error;
     }
   }
@@ -164,7 +166,7 @@ class AdvancedSecurity extends EventEmitter {
           type: 'ACCESS_DENIED',
           user,
           reason: 'No access policy found',
-      });
+        });
         return false;
       }
 
@@ -181,7 +183,7 @@ class AdvancedSecurity extends EventEmitter {
 
       return hasPermission;
     } catch (error) {
-      console.error('❌ Access verification failed:', error.message);
+      logger.error('❌ Access verification failed:', error.message);
       return false;
     }
   }
@@ -218,7 +220,7 @@ class AdvancedSecurity extends EventEmitter {
 
       return auditEntry;
     } catch (error) {
-      console.error('❌ Audit logging failed:', error.message);
+      logger.error('❌ Audit logging failed:', error.message);
     }
   }
 
@@ -234,9 +236,7 @@ class AdvancedSecurity extends EventEmitter {
       );
 
       // Pattern 1: Multiple failed access attempts
-      const failedAttempts = recentEvents.filter(
-        e => e.type === 'UNAUTHORIZED_ACCESS_ATTEMPT'
-      );
+      const failedAttempts = recentEvents.filter(e => e.type === 'UNAUTHORIZED_ACCESS_ATTEMPT');
       const failuresByUser = {};
       failedAttempts.forEach(e => {
         failuresByUser[e.user] = (failuresByUser[e.user] || 0) + 1;
@@ -255,9 +255,7 @@ class AdvancedSecurity extends EventEmitter {
       });
 
       // Pattern 2: Unusual data access
-      const dataAccessEvents = recentEvents.filter(
-        e => e.type === 'DATA_ACCESS'
-      );
+      const dataAccessEvents = recentEvents.filter(e => e.type === 'DATA_ACCESS');
       if (dataAccessEvents.length > 100) {
         suspiciousPatterns.push({
           type: 'UNUSUAL_DATA_ACCESS_VOLUME',
@@ -268,9 +266,7 @@ class AdvancedSecurity extends EventEmitter {
       }
 
       // Pattern 3: Mass export attempts
-      const exportAttempts = recentEvents.filter(
-        e => e.type === 'EXPORT_INITIATED'
-      );
+      const exportAttempts = recentEvents.filter(e => e.type === 'EXPORT_INITIATED');
       if (exportAttempts.length >= 3) {
         suspiciousPatterns.push({
           type: 'MASS_EXPORT_ATTEMPT',
@@ -286,7 +282,7 @@ class AdvancedSecurity extends EventEmitter {
 
       return suspiciousPatterns;
     } catch (error) {
-      console.error('❌ Suspicious activity detection failed:', error.message);
+      logger.error('❌ Suspicious activity detection failed:', error.message);
       return [];
     }
   }
@@ -338,7 +334,7 @@ class AdvancedSecurity extends EventEmitter {
 
       return complianceStatus;
     } catch (error) {
-      console.error('❌ Compliance check failed:', error.message);
+      logger.error('❌ Compliance check failed:', error.message);
       throw error;
     }
   }
@@ -367,7 +363,7 @@ class AdvancedSecurity extends EventEmitter {
 
       return analytics;
     } catch (error) {
-      console.error('❌ Analytics generation failed:', error.message);
+      logger.error('❌ Analytics generation failed:', error.message);
       throw error;
     }
   }
@@ -385,14 +381,8 @@ class AdvancedSecurity extends EventEmitter {
         'security:manage',
         'users:manage',
       ],
-      USER: [
-        'backup:create',
-        'backup:restore',
-        'backup:view',
-      ],
-      VIEWER: [
-        'backup:view',
-      ],
+      USER: ['backup:create', 'backup:restore', 'backup:view'],
+      VIEWER: ['backup:view'],
       SUPER_ADMIN: [
         '*', // All permissions
       ],
@@ -417,14 +407,11 @@ class AdvancedSecurity extends EventEmitter {
       this.encryptionKeys.set(key.id, key);
 
       // Save key to file
-      await fs.writeFile(
-        path.join(this.keyPath, `${key.id}.json`),
-        JSON.stringify(key)
-      );
+      await fs.writeFile(path.join(this.keyPath, `${key.id}.json`), JSON.stringify(key));
 
       return key;
     } catch (error) {
-      console.error('❌ Key generation failed:', error.message);
+      logger.error('❌ Key generation failed:', error.message);
       throw error;
     }
   }
@@ -447,12 +434,12 @@ class AdvancedSecurity extends EventEmitter {
    */
   determineSeverity(eventType) {
     const severityMap = {
-      'UNAUTHORIZED_ACCESS_ATTEMPT': 'HIGH',
-      'ACCESS_DENIED': 'MEDIUM',
-      'ENCRYPTION_FAILED': 'CRITICAL',
-      'KEY_ROTATION': 'INFO',
-      'BACKUP_DELETED': 'MEDIUM',
-      'COMPLIANCE_VIOLATION': 'CRITICAL',
+      UNAUTHORIZED_ACCESS_ATTEMPT: 'HIGH',
+      ACCESS_DENIED: 'MEDIUM',
+      ENCRYPTION_FAILED: 'CRITICAL',
+      KEY_ROTATION: 'INFO',
+      BACKUP_DELETED: 'MEDIUM',
+      COMPLIANCE_VIOLATION: 'CRITICAL',
     };
 
     return severityMap[eventType] || 'INFO';
@@ -558,7 +545,7 @@ class AdvancedSecurity extends EventEmitter {
 
       await fs.appendFile(logFile, JSON.stringify(entry) + '\n');
     } catch (error) {
-      console.warn('⚠️  Failed to write audit log:', error.message);
+      logger.warn('⚠️  Failed to write audit log:', error.message);
     }
   }
 
@@ -583,7 +570,7 @@ class AdvancedSecurity extends EventEmitter {
         }
       }
     } catch (error) {
-      console.log('ℹ️  No existing encryption keys found');
+      // console.log('ℹ️  No existing encryption keys found');
     }
   }
 
@@ -598,9 +585,12 @@ class AdvancedSecurity extends EventEmitter {
    * Helper: Start security monitoring
    */
   startSecurityMonitoring() {
-    setInterval(() => {
-      this.detectSuspiciousActivity();
-    }, 5 * 60 * 1000); // Every 5 minutes
+    setInterval(
+      () => {
+        this.detectSuspiciousActivity();
+      },
+      5 * 60 * 1000
+    ); // Every 5 minutes
   }
 }
 

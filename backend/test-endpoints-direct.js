@@ -6,16 +6,16 @@
 const http = require('http');
 
 async function testEndpoint(path) {
-  return new Promise((resolve) => {
-    const req = http.request(`http://localhost:3000${path}`, { method: 'GET' }, (res) => {
+  return new Promise(resolve => {
+    const req = http.request(`http://localhost:3000${path}`, { method: 'GET' }, res => {
       let data = '';
-      res.on('data', chunk => data += chunk);
+      res.on('data', chunk => (data += chunk));
       res.on('end', () => {
         resolve({
           path,
           status: res.statusCode,
           headers: res.headers,
-          body: data.length > 0 ? JSON.parse(data) : null
+          body: data.length > 0 ? JSON.parse(data) : null,
         });
       });
     });
@@ -67,4 +67,10 @@ async function main() {
 }
 
 setTimeout(() => main(), 1000);
-process.on('exit', () => { try { process.kill(process.pid); } catch(e) {} });
+process.on('exit', () => {
+  try {
+    process.kill(process.pid);
+  } catch (_e) {
+    // intentional no-op during shutdown
+  }
+});

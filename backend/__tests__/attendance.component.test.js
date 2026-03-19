@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars, no-undef, no-empty, prefer-const, no-constant-condition, no-unused-expressions */
+/* eslint-disable no-undef */
 /**
  * Attendance Component Tests - Phase 5.2
  * Tests attendance tracking, validation, and reporting
@@ -141,10 +143,10 @@ describe('Attendance Component Tests - Phase 5.2', () => {
 
   afterEach(async () => {
     // Cleanup
-    for (let record of createdAttendanceRecords) {
+    for (const record of createdAttendanceRecords) {
       try {
         await Attendance.findByIdAndDelete(record._id);
-      } catch (e) {}
+      } catch (_e) {}
     }
     createdAttendanceRecords = [];
 

@@ -1,6 +1,8 @@
+/* eslint-disable no-unused-vars */
 const CarePlan = require('../models/CarePlan');
 const GroupProgram = require('../models/GroupProgram');
 const DailySession = require('../models/DailySession');
+const logger = require('../utils/logger');
 
 class IntegratedCareService {
   // --- PLANS ---
@@ -26,7 +28,11 @@ class IntegratedCareService {
   }
 
   async addStudentToGroup(groupId, studentId) {
-    return await GroupProgram.findByIdAndUpdate(groupId, { $addToSet: { students: studentId } }, { new: true, runValidators: true });
+    return await GroupProgram.findByIdAndUpdate(
+      groupId,
+      { $addToSet: { students: studentId } },
+      { new: true, runValidators: true }
+    );
   }
 
   async logGroupSession(groupId, sessionData) {
@@ -93,7 +99,7 @@ class IntegratedCareService {
         await plan.save();
       }
     } catch (err) {
-      console.error('Error updating goal progress:', err);
+      logger.error('Error updating goal progress:', err);
     }
   }
 
@@ -129,7 +135,8 @@ class IntegratedCareService {
             domainProgress[domain] = {
               total: data.goals.length,
               achieved: data.goals.filter(g => g.status === 'ACHIEVED').length,
-              avgProgress: data.goals.reduce((acc, curr) => acc + curr.progress, 0) / (data.goals.length || 1),
+              avgProgress:
+                data.goals.reduce((acc, curr) => acc + curr.progress, 0) / (data.goals.length || 1),
             };
           }
         });

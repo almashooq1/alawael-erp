@@ -123,7 +123,7 @@ const ValidationDashboard = () => {
     }
   }, [filter]);
 
-  const calculateStats = (data) => {
+  const calculateStats = data => {
     const newStats = {
       total: data.length,
       critical: data.filter(v => v.severity === 'critical').length,
@@ -136,15 +136,18 @@ const ValidationDashboard = () => {
 
     // حساب متوسط وقت الحل
     const resolved = data.filter(v => v.status === 'resolved' && v.resolvedAt);
-    const avgTime = resolved.length > 0
-      ? resolved.reduce((sum, v) => sum + (new Date(v.resolvedAt) - new Date(v.createdAt)), 0) / resolved.length / (1000 * 60 * 60)
-      : 0;
+    const avgTime =
+      resolved.length > 0
+        ? resolved.reduce((sum, v) => sum + (new Date(v.resolvedAt) - new Date(v.createdAt)), 0) /
+          resolved.length /
+          (1000 * 60 * 60)
+        : 0;
     newStats.averageResolutionTime = Math.round(avgTime);
 
     setStats(newStats);
   };
 
-  const generateCharts = (data) => {
+  const generateCharts = data => {
     // توزيع الانتهاكات حسب الخطورة
     const byType = data.reduce((acc, v) => {
       const existing = acc.find(item => item.name === v.type);
@@ -218,7 +221,7 @@ const ValidationDashboard = () => {
     }
   };
 
-  const handleResolveViolation = async (violationId) => {
+  const handleResolveViolation = async violationId => {
     try {
       await api.patch(`/finance/validation/violations/${violationId}`, {
         status: 'resolved',
@@ -248,31 +251,21 @@ const ValidationDashboard = () => {
       dataIndex: 'type',
       key: 'type',
       width: 120,
-      render: (text) => <span>{text}</span>,
+      render: text => <span>{text}</span>,
     },
     {
       title: 'الخطورة',
       dataIndex: 'severity',
       key: 'severity',
       width: 100,
-      render: (severity) => (
-        <Badge
-          color={severityColors[severity]}
-          text={severity}
-        />
-      ),
+      render: severity => <Badge color={severityColors[severity]} text={severity} />,
     },
     {
       title: 'الحالة',
       dataIndex: 'status',
       key: 'status',
       width: 100,
-      render: (status) => (
-        <Badge
-          color={statusColors[status]}
-          text={status}
-        />
-      ),
+      render: status => <Badge color={statusColors[status]} text={status} />,
     },
     {
       title: 'الوصف',
@@ -286,7 +279,7 @@ const ValidationDashboard = () => {
       dataIndex: 'createdAt',
       key: 'createdAt',
       width: 150,
-      render: (date) => dayjs(date).format('YYYY-MM-DD HH:mm'),
+      render: date => dayjs(date).format('YYYY-MM-DD HH:mm'),
     },
     {
       title: 'الإجراء',
@@ -305,11 +298,7 @@ const ValidationDashboard = () => {
             عرض
           </Button>
           {record.status === 'pending' && (
-            <Button
-              type="success"
-              size="small"
-              onClick={() => handleResolveViolation(record.id)}
-            >
+            <Button type="success" size="small" onClick={() => handleResolveViolation(record.id)}>
               حل
             </Button>
           )}
@@ -321,9 +310,7 @@ const ValidationDashboard = () => {
   return (
     <div style={{ padding: '24px' }}>
       {/* ===== Page Title ===== */}
-      <h1 style={{ marginBottom: '24px', color: '#1890ff' }}>
-        لوحة التحقق من الامتثال المالي
-      </h1>
+      <h1 style={{ marginBottom: '24px', color: '#1890ff' }}>لوحة التحقق من الامتثال المالي</h1>
 
       {/* ===== Statistics Cards ===== */}
       <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
@@ -376,7 +363,7 @@ const ValidationDashboard = () => {
             <Select
               placeholder="اختر مستوى الخطورة"
               value={filter.severity}
-              onChange={(value) => setFilter({ ...filter, severity: value })}
+              onChange={value => setFilter({ ...filter, severity: value })}
               style={{ width: '100%' }}
               options={[
                 { label: 'الكل', value: 'all' },
@@ -391,7 +378,7 @@ const ValidationDashboard = () => {
             <Select
               placeholder="اختر النوع"
               value={filter.type}
-              onChange={(value) => setFilter({ ...filter, type: value })}
+              onChange={value => setFilter({ ...filter, type: value })}
               style={{ width: '100%' }}
               options={[
                 { label: 'الكل', value: 'all' },
@@ -405,7 +392,7 @@ const ValidationDashboard = () => {
           <Col xs={24} sm={12} md={6}>
             <DatePicker.RangePicker
               value={filter.dateRange}
-              onChange={(dates) => setFilter({ ...filter, dateRange: dates })}
+              onChange={dates => setFilter({ ...filter, dateRange: dates })}
               style={{ width: '100%' }}
               format="YYYY-MM-DD"
             />
@@ -490,22 +477,12 @@ const ValidationDashboard = () => {
       <Card style={{ marginBottom: '24px' }}>
         <Row gutter={16}>
           <Col xs={24} sm={12} md={6}>
-            <Button
-              type="primary"
-              icon={<FilePdfOutlined />}
-              block
-              onClick={handleExportPDF}
-            >
+            <Button type="primary" icon={<FilePdfOutlined />} block onClick={handleExportPDF}>
               تصدير PDF
             </Button>
           </Col>
           <Col xs={24} sm={12} md={6}>
-            <Button
-              type="primary"
-              icon={<FileExcelOutlined />}
-              block
-              onClick={handleExportExcel}
-            >
+            <Button type="primary" icon={<FileExcelOutlined />} block onClick={handleExportExcel}>
               تصدير Excel
             </Button>
           </Col>
@@ -513,15 +490,12 @@ const ValidationDashboard = () => {
       </Card>
 
       {/* ===== Violations Table ===== */}
-      <Card
-        title="جدول الانتهاكات"
-        loading={loading}
-      >
+      <Card title="جدول الانتهاكات" loading={loading}>
         {violations.length > 0 ? (
           <Table
             columns={columns}
             dataSource={violations.map((v, index) => ({ ...v, key: index }))}
-            pagination={{ pageSize: 10, showTotal: (total) => `إجمالي: ${total}` }}
+            pagination={{ pageSize: 10, showTotal: total => `إجمالي: ${total}` }}
             scroll={{ x: 1200 }}
           />
         ) : (
@@ -554,8 +528,12 @@ const ValidationDashboard = () => {
       >
         {selectedViolation && (
           <div>
-            <p><strong>ID:</strong> {selectedViolation.id}</p>
-            <p><strong>النوع:</strong> {selectedViolation.type}</p>
+            <p>
+              <strong>ID:</strong> {selectedViolation.id}
+            </p>
+            <p>
+              <strong>النوع:</strong> {selectedViolation.type}
+            </p>
             <p>
               <strong>الخطورة:</strong>{' '}
               <Badge
@@ -570,10 +548,18 @@ const ValidationDashboard = () => {
                 text={selectedViolation.status}
               />
             </p>
-            <p><strong>الوصف:</strong> {selectedViolation.description}</p>
-            <p><strong>التاريخ:</strong> {dayjs(selectedViolation.createdAt).format('YYYY-MM-DD HH:mm')}</p>
+            <p>
+              <strong>الوصف:</strong> {selectedViolation.description}
+            </p>
+            <p>
+              <strong>التاريخ:</strong>{' '}
+              {dayjs(selectedViolation.createdAt).format('YYYY-MM-DD HH:mm')}
+            </p>
             {selectedViolation.resolvedAt && (
-              <p><strong>تاريخ الحل:</strong> {dayjs(selectedViolation.resolvedAt).format('YYYY-MM-DD HH:mm')}</p>
+              <p>
+                <strong>تاريخ الحل:</strong>{' '}
+                {dayjs(selectedViolation.resolvedAt).format('YYYY-MM-DD HH:mm')}
+              </p>
             )}
           </div>
         )}

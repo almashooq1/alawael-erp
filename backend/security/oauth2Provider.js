@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * 🔐 OAuth 2.0 & OpenID Connect Integration
  *

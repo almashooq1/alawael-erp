@@ -3,43 +3,25 @@
  * أداة مراقبة الأداء
  */
 
-/**
- * Measure component render time
- */
-export const measureRenderTime = componentName => {
-  if (typeof window === 'undefined' || !window.performance) return;
-
-  const startMark = `${componentName}-render-start`;
-  const endMark = `${componentName}-render-end`;
-  const measureName = `${componentName}-render-time`;
-
-  performance.mark(startMark);
-
-  return () => {
-    performance.mark(endMark);
-    performance.measure(measureName, startMark, endMark);
-
-    const measure = performance.getEntriesByName(measureName)[0];
-    console.log(`${componentName} render time: ${measure.duration.toFixed(2)}ms`);
-
-    // Clean up marks
-    performance.clearMarks(startMark);
-    performance.clearMarks(endMark);
-    performance.clearMeasures(measureName);
-  };
-};
+import logger from 'utils/logger';
 
 /**
  * Report Web Vitals
  */
 export const reportWebVitals = onPerfEntry => {
   if (onPerfEntry && onPerfEntry instanceof Function) {
-    import('web-vitals').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
-      getCLS(onPerfEntry);
-      getFID(onPerfEntry);
-      getFCP(onPerfEntry);
-      getLCP(onPerfEntry);
-      getTTFB(onPerfEntry);
+    import('web-vitals').then(mod => {
+      // web-vitals v4+ uses onXXX naming; v3 used getXXX
+      const cls = mod.onCLS || mod.getCLS;
+      const inp = mod.onINP || mod.getFID; // INP replaced FID in v4
+      const fcp = mod.onFCP || mod.getFCP;
+      const lcp = mod.onLCP || mod.getLCP;
+      const ttfb = mod.onTTFB || mod.getTTFB;
+      if (cls) cls(onPerfEntry);
+      if (inp) inp(onPerfEntry);
+      if (fcp) fcp(onPerfEntry);
+      if (lcp) lcp(onPerfEntry);
+      if (ttfb) ttfb(onPerfEntry);
     });
   }
 };
@@ -55,65 +37,7 @@ export const logPerformanceMetrics = () => {
   const connectTime = perfData.responseEnd - perfData.requestStart;
   const renderTime = perfData.domComplete - perfData.domLoading;
 
-  console.group('⚡ Performance Metrics');
-  console.log(`Page Load Time: ${pageLoadTime}ms`);
-  console.log(`Connect Time: ${connectTime}ms`);
-  console.log(`Render Time: ${renderTime}ms`);
-  console.groupEnd();
+  logger.log(
+    `⚡ Performance — Page Load: ${pageLoadTime}ms | Server Response: ${connectTime}ms | DOM Render: ${renderTime}ms`
+  );
 };
-
-/**
- * Debounce function for performance
- */
-export const debounce = (func, wait = 300) => {
-  let timeout;
-  return function executedFunction(...args) {
-    const later = () => {
-      clearTimeout(timeout);
-      func(...args);
-    };
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
-  };
-};
-
-/**
- * Throttle function for performance
- */
-export const throttle = (func, limit = 300) => {
-  let inThrottle;
-  return function executedFunction(...args) {
-    if (!inThrottle) {
-      func(...args);
-      inThrottle = true;
-      setTimeout(() => (inThrottle = false), limit);
-    }
-  };
-};
-
-/**
- * Memoize expensive calculations
- */
-export const memoize = fn => {
-  const cache = new Map();
-  return (...args) => {
-    const key = JSON.stringify(args);
-    if (cache.has(key)) {
-      return cache.get(key);
-    }
-    const result = fn(...args);
-    cache.set(key, result);
-    return result;
-  };
-};
-
-const performanceMonitor = {
-  measureRenderTime,
-  reportWebVitals,
-  logPerformanceMetrics,
-  debounce,
-  throttle,
-  memoize,
-};
-
-export default performanceMonitor;

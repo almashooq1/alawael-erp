@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Smart Notification Service
  * خدمة النوتيفيكيشنات الذكية المتقدمة
@@ -225,7 +226,18 @@ class SmartNotificationService {
    */
   getDefaultPreferences() {
     return {
-      enabledTypes: ['urgent', 'sla_breach', 'approval', 'warning', 'rejected', 'completed', 'info', 'success', 'delayed', 'revised'],
+      enabledTypes: [
+        'urgent',
+        'sla_breach',
+        'approval',
+        'warning',
+        'rejected',
+        'completed',
+        'info',
+        'success',
+        'delayed',
+        'revised',
+      ],
       channels: {
         email: { enabled: true, maxPerDay: 50 },
         sms: { enabled: false, maxPerDay: 10 },

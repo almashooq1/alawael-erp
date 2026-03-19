@@ -32,8 +32,8 @@ interface AttentionState {
 interface EmotionalState {
   primary: string;
   intensity: number;
-  valence: number;      // -1 (negative) to 1 (positive)
-  arousal: number;      // 0 (calm) to 1 (excited)
+  valence: number; // -1 (negative) to 1 (positive)
+  arousal: number; // 0 (calm) to 1 (excited)
 }
 
 /**
@@ -145,7 +145,7 @@ export class AGICoreSystem extends EventEmitter {
 
       return result;
     } catch (error: any) {
-      this.emit('process:error', { input, error: error.message });
+      this.emit('process:error', { input, error: 'حدث خطأ داخلي' });
       throw error;
     }
   }
@@ -193,7 +193,7 @@ export class AGICoreSystem extends EventEmitter {
 
       return result;
     } catch (error: any) {
-      this.emit('task:error', { task, error: error.message });
+      this.emit('task:error', { task, error: 'حدث خطأ داخلي' });
       this.activeTask = null;
       throw error;
     }
@@ -223,7 +223,7 @@ export class AGICoreSystem extends EventEmitter {
 
         this.emit('cognitive:cycle', this.cognitiveState);
       } catch (error: any) {
-        this.emit('cognitive:error', error.message);
+        this.emit('cognitive:error', 'حدث خطأ داخلي');
       }
     }, 1000); // Every second
   }
@@ -244,9 +244,7 @@ export class AGICoreSystem extends EventEmitter {
 
   private async handleLearningTask(task: AGITask): Promise<any> {
     const { mode, data } = task.context;
-    const resolvedMode = Object.values(LearningMode).includes(mode)
-      ? mode
-      : LearningMode.SELF_SUPERVISED;
+    const resolvedMode = Object.values(LearningMode).includes(mode) ? mode : LearningMode.SELF_SUPERVISED;
 
     return await this.learning.learn({
       task: task.description,
@@ -284,9 +282,7 @@ export class AGICoreSystem extends EventEmitter {
   }
 
   private async handlePlanningTask(task: AGITask): Promise<any> {
-    const goalType = Object.values(GoalType).includes(task.context.goalType)
-      ? task.context.goalType
-      : GoalType.ACHIEVEMENT;
+    const goalType = Object.values(GoalType).includes(task.context.goalType) ? task.context.goalType : GoalType.ACHIEVEMENT;
     const goal = {
       id: task.id,
       type: goalType,
@@ -302,10 +298,7 @@ export class AGICoreSystem extends EventEmitter {
       resources: task.context.resources || [],
     };
 
-    return await this.planning.createPlan(
-      goal,
-      task.context.horizon || this.determineHorizon(goal)
-    );
+    return await this.planning.createPlan(goal, task.context.horizon || this.determineHorizon(goal));
   }
 
   private async handleGeneralTask(task: AGITask): Promise<any> {
@@ -315,7 +308,7 @@ export class AGICoreSystem extends EventEmitter {
     const reasoning = await this.reasoning.reason(
       `Understand: ${task.description}`,
       { taskId: task.id },
-      { preferredTypes: [ReasoningType.METACOGNITIVE] }
+      { preferredTypes: [ReasoningType.METACOGNITIVE] },
     );
 
     // 2. التخطيط للحل
@@ -338,18 +331,16 @@ export class AGICoreSystem extends EventEmitter {
     // 3. اتخاذ القرارات لتنفيذ الخطة
     const decisions = [];
     for (const step of plan.steps) {
-      const decision = await this.decision.makeDecision(
-        {
-          situation: step.action,
-          goals: [],
-          constraints: [],
-          resources: [],
-          stakeholders: [],
-          timeHorizon: 'short',
-          uncertainty: 0.5,
-          criticality: 0.5,
-        }
-      );
+      const decision = await this.decision.makeDecision({
+        situation: step.action,
+        goals: [],
+        constraints: [],
+        resources: [],
+        stakeholders: [],
+        timeHorizon: 'short',
+        uncertainty: 0.5,
+        criticality: 0.5,
+      });
       decisions.push(decision);
     }
 
@@ -420,11 +411,7 @@ export class AGICoreSystem extends EventEmitter {
     };
 
     // استخدام metacognitive reasoning للتأمل
-    await this.reasoning.reason(
-      'Reflect on recent performance',
-      { reflection },
-      { preferredTypes: [ReasoningType.METACOGNITIVE] }
-    );
+    await this.reasoning.reason('Reflect on recent performance', { reflection }, { preferredTypes: [ReasoningType.METACOGNITIVE] });
 
     this.emit('reflect', reflection);
   }
@@ -456,7 +443,7 @@ export class AGICoreSystem extends EventEmitter {
 
   private setupComponentIntegration(): void {
     // Reasoning -> Learning
-    this.reasoning.on('reasoning:complete', (result) => {
+    this.reasoning.on('reasoning:complete', result => {
       this.learning.learn({
         task: 'reasoning',
         input: result,
@@ -466,16 +453,12 @@ export class AGICoreSystem extends EventEmitter {
     });
 
     // Learning -> Reasoning
-    this.learning.on('learning:insight', (insight) => {
-      this.reasoning.reason(
-        `New insight: ${insight}`,
-        { insight },
-        { preferredTypes: [ReasoningType.INDUCTIVE] }
-      );
+    this.learning.on('learning:insight', insight => {
+      this.reasoning.reason(`New insight: ${insight}`, { insight }, { preferredTypes: [ReasoningType.INDUCTIVE] });
     });
 
     // Decision -> Learning
-    this.decision.on('decision:executed', (result) => {
+    this.decision.on('decision:executed', result => {
       this.learning.learn({
         task: 'decision',
         input: result,
@@ -485,7 +468,7 @@ export class AGICoreSystem extends EventEmitter {
     });
 
     // Creativity -> Learning
-    this.creativity.on('creativity:complete', (outputs) => {
+    this.creativity.on('creativity:complete', outputs => {
       this.learning.learn({
         task: 'creativity',
         input: outputs,
@@ -495,27 +478,25 @@ export class AGICoreSystem extends EventEmitter {
     });
 
     // Planning -> Decision
-    this.planning.on('plan:ready', async (plan) => {
+    this.planning.on('plan:ready', async plan => {
       // لكل خطوة، اتخذ قراراً بالتنفيذ
       for (const step of plan.steps) {
-        await this.decision.makeDecision(
-          {
-            situation: step.action,
-            goals: [],
-            constraints: [],
-            resources: [],
-            stakeholders: [],
-            timeHorizon: 'short',
-            uncertainty: 0.5,
-            criticality: 0.5,
-          }
-        );
+        await this.decision.makeDecision({
+          situation: step.action,
+          goals: [],
+          constraints: [],
+          resources: [],
+          stakeholders: [],
+          timeHorizon: 'short',
+          uncertainty: 0.5,
+          criticality: 0.5,
+        });
       }
     });
 
     // All components -> Performance tracking
     [this.reasoning, this.learning, this.decision, this.creativity, this.planning].forEach(component => {
-      component.on('error', (error) => {
+      component.on('error', error => {
         this.emit('component:error', { component: component.constructor.name, error });
       });
     });
@@ -607,8 +588,7 @@ export class AGICoreSystem extends EventEmitter {
     // تحديث مقاييس الأداء
     // في نظام حقيقي، سيكون هذا أكثر تفصيلاً
 
-    this.performanceMetrics.reliability =
-      (this.performanceMetrics.reliability * 0.9) + (result ? 0.1 : 0);
+    this.performanceMetrics.reliability = this.performanceMetrics.reliability * 0.9 + (result ? 0.1 : 0);
   }
 
   private initializeCognitiveState(): CognitiveState {
@@ -673,9 +653,15 @@ export class AGICoreSystem extends EventEmitter {
   }
 
   // Placeholder methods
-  private async extractIntent(input: string): Promise<string> { return 'general'; }
-  private async extractEntities(input: string): Promise<any[]> { return []; }
-  private async analyzeSentiment(input: string): Promise<string> { return 'neutral'; }
+  private async extractIntent(input: string): Promise<string> {
+    return 'general';
+  }
+  private async extractEntities(input: string): Promise<any[]> {
+    return [];
+  }
+  private async analyzeSentiment(input: string): Promise<string> {
+    return 'neutral';
+  }
 }
 
 interface AGIConfig {

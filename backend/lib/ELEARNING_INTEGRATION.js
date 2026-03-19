@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * E-Learning Integration Helper
  * Script to integrate E-Learning System with main backend

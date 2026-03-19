@@ -1,3 +1,4 @@
+/* eslint-disable no-undef, no-unused-vars */
 const request = require('supertest');
 const { app } = require('../server');
 const AIPredictionsServiceClass = require('../services/ai-predictions.service');
@@ -92,7 +93,9 @@ describe('AI Predictions Service', () => {
     });
 
     test('GET /api/ai-predictions/predict-churn/:userId مع userId صحيح', async () => {
-      const res = await request(app).get('/api/ai-predictions/predict-churn/user123').set('Authorization', mockToken);
+      const res = await request(app)
+        .get('/api/ai-predictions/predict-churn/user123')
+        .set('Authorization', mockToken);
 
       if (res.status === 200 || res.status === 401) {
         expect(res.body).toBeDefined();
@@ -100,7 +103,9 @@ describe('AI Predictions Service', () => {
     });
 
     test('GET /api/ai-predictions/predict-behavior/:userId مع userId صحيح', async () => {
-      const res = await request(app).get('/api/ai-predictions/predict-behavior/user123').set('Authorization', mockToken);
+      const res = await request(app)
+        .get('/api/ai-predictions/predict-behavior/user123')
+        .set('Authorization', mockToken);
 
       if (res.status === 200 || res.status === 401) {
         expect(res.body).toBeDefined();
@@ -119,7 +124,9 @@ describe('AI Predictions Service', () => {
     });
 
     test('GET /api/ai-predictions/predictions/:userId يعيد قائمة التنبؤات', async () => {
-      const res = await request(app).get('/api/ai-predictions/predictions/user123').set('Authorization', mockToken);
+      const res = await request(app)
+        .get('/api/ai-predictions/predictions/user123')
+        .set('Authorization', mockToken);
 
       if (res.status === 200 || res.status === 401) {
         expect(res.body).toBeDefined();
@@ -127,7 +134,9 @@ describe('AI Predictions Service', () => {
     });
 
     test('GET /api/ai-predictions/recommendations/:userId يعيد التوصيات', async () => {
-      const res = await request(app).get('/api/ai-predictions/recommendations/user123').set('Authorization', mockToken);
+      const res = await request(app)
+        .get('/api/ai-predictions/recommendations/user123')
+        .set('Authorization', mockToken);
 
       if (res.status === 200 || res.status === 401) {
         expect(res.body).toBeDefined();

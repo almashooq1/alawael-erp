@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * Notification System Tests
  * Tests for Email, SMS, Push, and In-App notifications
@@ -5,12 +7,8 @@
  */
 
 const NotificationService = require('../services/notificationService');
-const {
-  NotificationTemplate,
-  EmailService,
-  SMSService,
-  PushNotificationService,
-} = NotificationService;
+const { NotificationTemplate, EmailService, SMSService, PushNotificationService } =
+  NotificationService;
 const { initializeTemplates } = require('../config/notificationTemplates');
 
 describe('Notification System', () => {
@@ -45,13 +43,9 @@ describe('Notification System', () => {
 
   describe('NotificationTemplate', () => {
     it('should create a template with correct properties', () => {
-      const template = new NotificationTemplate(
-        'test',
-        'email',
-        'Test Subject',
-        'Test {{name}}',
-        ['{{name}}']
-      );
+      const template = new NotificationTemplate('test', 'email', 'Test Subject', 'Test {{name}}', [
+        '{{name}}',
+      ]);
 
       expect(template.name).toBe('test');
       expect(template.type).toBe('email');
@@ -319,13 +313,9 @@ describe('Notification System', () => {
     });
 
     it('should send SMS with template', async () => {
-      const result = await notificationService.sendSmsWithTemplate(
-        '+966501234567',
-        'otp',
-        {
-          code: '123456',
-        }
-      );
+      const result = await notificationService.sendSmsWithTemplate('+966501234567', 'otp', {
+        code: '123456',
+      });
 
       expect(result.success).toBe(true);
     });
@@ -337,14 +327,10 @@ describe('Notification System', () => {
         keys: { p256dh: 'key', auth: 'auth' },
       });
 
-      const result = await notificationService.sendPushWithTemplate(
-        'user123',
-        'orderUpdate',
-        {
-          orderId: '12345',
-          status: 'Shipped',
-        }
-      );
+      const result = await notificationService.sendPushWithTemplate('user123', 'orderUpdate', {
+        orderId: '12345',
+        status: 'Shipped',
+      });
 
       expect(result.success).toBe(true);
     });
@@ -401,23 +387,23 @@ describe('Notification System', () => {
       expect(emailResult.success).toBe(true);
 
       // Send via SMS
-      const smsResult = await notificationService.sendSmsWithTemplate('+966501234567', 'orderStatus', {
-        orderId: 'ORD-123',
-        status: 'Confirmed',
-        message: 'Your order has been confirmed',
-      });
+      const smsResult = await notificationService.sendSmsWithTemplate(
+        '+966501234567',
+        'orderStatus',
+        {
+          orderId: 'ORD-123',
+          status: 'Confirmed',
+          message: 'Your order has been confirmed',
+        }
+      );
 
       expect(smsResult.success).toBe(true);
 
       // Send via push
-      const pushResult = await notificationService.sendPushWithTemplate(
-        'user789',
-        'orderUpdate',
-        {
-          orderId: 'ORD-123',
-          status: 'Confirmed',
-        }
-      );
+      const pushResult = await notificationService.sendPushWithTemplate('user789', 'orderUpdate', {
+        orderId: 'ORD-123',
+        status: 'Confirmed',
+      });
 
       expect(pushResult.success).toBe(true);
     });

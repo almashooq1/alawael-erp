@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 const policyAcknowledgementSchema = new mongoose.Schema(
@@ -6,19 +7,18 @@ const policyAcknowledgementSchema = new mongoose.Schema(
       type: String,
       unique: true,
       required: true,
-      index: true
+      index: true,
     },
     policyId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Policy',
       required: true,
-      index: true
+      index: true,
     },
     policyName: String,
     employeeId: {
       type: String,
       required: true,
-      index: true
     },
     employeeName: String,
     department: String,
@@ -28,13 +28,13 @@ const policyAcknowledgementSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: ['PENDING', 'ACKNOWLEDGED', 'REJECTED', 'EXPIRED'],
-      default: 'PENDING'
+      default: 'PENDING',
     },
 
     // التواريخ
     sentDate: {
       type: Date,
-      default: Date.now
+      default: Date.now,
     },
     dueDate: Date,
     acknowledgedDate: Date,
@@ -53,27 +53,27 @@ const policyAcknowledgementSchema = new mongoose.Schema(
     // المتابعة
     remindersSent: {
       type: Number,
-      default: 0
+      default: 0,
     },
     lastReminderDate: Date,
     isOverdue: {
       type: Boolean,
-      default: false
+      default: false,
     },
 
     // التدريب
     trainingCompleted: {
       type: Boolean,
-      default: false
+      default: false,
     },
     trainingDate: Date,
     trainingCertificate: String,
     assessmentScore: Number,
-    assessmentPassed: Boolean
+    assessmentPassed: Boolean,
   },
   {
     timestamps: true,
-    collection: 'policyAcknowledgements'
+    collection: 'policyAcknowledgements',
   }
 );
 

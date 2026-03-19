@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import '@testing-library/jest-dom';
 
 // Polyfill setImmediate for tests that rely on it
@@ -41,7 +42,7 @@ if (!window.ResizeObserver) {
 
 // Mock window.matchMedia for Ant Design responsive observer
 // This needs to be a proper implementation that returns consistent objects
-const matchMediaMock = (query) => ({
+const matchMediaMock = query => ({
   matches: false,
   media: query,
   onchange: null,
@@ -60,8 +61,7 @@ beforeAll(() => {
   console.error = (...args) => {
     if (
       typeof args[0] === 'string' &&
-      (args[0].includes('Warning: ReactDOM.render') ||
-        args[0].includes('Element with id'))
+      (args[0].includes('Warning: ReactDOM.render') || args[0].includes('Element with id'))
     ) {
       return;
     }

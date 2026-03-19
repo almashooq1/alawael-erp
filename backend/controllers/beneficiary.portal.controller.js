@@ -1,6 +1,7 @@
+/* eslint-disable no-unused-vars, no-undef, no-empty, prefer-const, no-constant-condition, no-unused-expressions */
 /**
  * Beneficiary Portal Controller
- * 
+ *
  * Handles all operations for student/trainee portal
  * - Dashboard, Profile, Progress, Grades, Attendance
  * - Programs, Messaging, Documents, Notifications
@@ -27,13 +28,15 @@ exports.getDashboard = catchAsync(async (req, res) => {
   const beneficiaryId = req.user._id;
 
   const beneficiary = await Beneficiary.findById(beneficiaryId)
-    .select('firstName_ar firstName_en lastName_ar lastName_en academicScore attendanceRate behaviorRating currentLevel')
+    .select(
+      'firstName_ar firstName_en lastName_ar lastName_en academicScore attendanceRate behaviorRating currentLevel'
+    )
     .lean();
 
   if (!beneficiary) {
     return res.status(404).json({
       success: false,
-      message: 'Beneficiary record not found'
+      message: 'Beneficiary record not found',
     });
   }
 
@@ -44,12 +47,12 @@ exports.getDashboard = catchAsync(async (req, res) => {
   const unreadMessages = await PortalMessage.countDocuments({
     toId: beneficiaryId,
     toModel: 'Beneficiary',
-    isRead: false
+    isRead: false,
   });
 
   const unreadNotifications = await PortalNotification.countDocuments({
     beneficiaryId,
-    isRead: false
+    isRead: false,
   });
 
   const guardians = await Guardian.find({ beneficiaries: beneficiaryId })
@@ -63,30 +66,30 @@ exports.getDashboard = catchAsync(async (req, res) => {
       recentScore: beneficiary.academicScore,
       attendance: beneficiary.attendanceRate,
       behavior: beneficiary.behaviorRating,
-      level: beneficiary.currentLevel
+      level: beneficiary.currentLevel,
     },
     progress: {
       currentMonth: recentProgress?.month || new Date().toISOString().slice(0, 7),
       score: recentProgress?.academicScore || 0,
       completionRate: recentProgress?.activityCompletionRate || 0,
-      performanceStatus: recentProgress?.performanceStatus || 'pending'
+      performanceStatus: recentProgress?.performanceStatus || 'pending',
     },
     notifications: {
       unreadCount: unreadNotifications,
-      unreadMessages: unreadMessages
+      unreadMessages: unreadMessages,
     },
     guardians: guardians.map(g => ({
       id: g._id,
       name: `${g.firstName_ar} ${g.lastName_ar}`,
       email: g.email,
       phone: g.phone,
-      photo: g.profilePhoto
-    }))
+      photo: g.profilePhoto,
+    })),
   };
 
   res.status(200).json({
     success: true,
-    data: dashboard
+    data: dashboard,
   });
 });
 
@@ -103,7 +106,7 @@ exports.getDashboardStats = catchAsync(async (req, res) => {
 
   const progressTrend = await BeneficiaryProgress.find({
     beneficiaryId,
-    createdAt: { $gte: sixMonthsAgo }
+    createdAt: { $gte: sixMonthsAgo },
   })
     .sort({ month: -1 })
     .select('month academicScore attendanceRate behaviorRating activityCompletionRate')
@@ -115,37 +118,40 @@ exports.getDashboardStats = catchAsync(async (req, res) => {
       currentScore: progressTrend[0]?.academicScore || 0,
       previousScore: progressTrend[1]?.academicScore || 0,
       trend: (progressTrend[0]?.academicScore || 0) - (progressTrend[1]?.academicScore || 0),
-      average: (progressTrend.reduce((sum, p) => sum + p.academicScore, 0) / progressTrend.length) || 0
+      average:
+        progressTrend.reduce((sum, p) => sum + p.academicScore, 0) / progressTrend.length || 0,
     },
     attendance: {
       currentRate: progressTrend[0]?.attendanceRate || 0,
       previousRate: progressTrend[1]?.attendanceRate || 0,
       trend: (progressTrend[0]?.attendanceRate || 0) - (progressTrend[1]?.attendanceRate || 0),
-      average: (progressTrend.reduce((sum, p) => sum + p.attendanceRate, 0) / progressTrend.length) || 0
+      average:
+        progressTrend.reduce((sum, p) => sum + p.attendanceRate, 0) / progressTrend.length || 0,
     },
     behavior: {
       currentRating: progressTrend[0]?.behaviorRating || 0,
       previousRating: progressTrend[1]?.behaviorRating || 0,
       trend: (progressTrend[0]?.behaviorRating || 0) - (progressTrend[1]?.behaviorRating || 0),
-      average: (progressTrend.reduce((sum, p) => sum + p.behaviorRating, 0) / progressTrend.length) || 0
+      average:
+        progressTrend.reduce((sum, p) => sum + p.behaviorRating, 0) / progressTrend.length || 0,
     },
     activity: {
       completionRate: progressTrend[0]?.activityCompletionRate || 0,
       activitiesCompleted: progressTrend[0]?.completedActivities || 0,
-      totalActivities: progressTrend[0]?.totalActivities || 0
+      totalActivities: progressTrend[0]?.totalActivities || 0,
     },
     historicalData: progressTrend.map(p => ({
       month: p.month,
       score: p.academicScore,
       attendance: p.attendanceRate,
       behavior: p.behaviorRating,
-      completion: p.activityCompletionRate
-    }))
+      completion: p.activityCompletionRate,
+    })),
   };
 
   res.status(200).json({
     success: true,
-    data: stats
+    data: stats,
   });
 });
 
@@ -165,13 +171,13 @@ exports.getProfile = catchAsync(async (req, res) => {
   if (!beneficiary) {
     return res.status(404).json({
       success: false,
-      message: 'Profile not found'
+      message: 'Profile not found',
     });
   }
 
   res.status(200).json({
     success: true,
-    data: beneficiary
+    data: beneficiary,
   });
 });
 
@@ -182,8 +188,12 @@ exports.getProfile = catchAsync(async (req, res) => {
 exports.updateProfile = catchAsync(async (req, res) => {
   const beneficiaryId = req.user._id;
   const allowedFields = [
-    'email', 'phone', 'dateOfBirth', 'gender',
-    'language', 'notificationPreference'
+    'email',
+    'phone',
+    'dateOfBirth',
+    'gender',
+    'language',
+    'notificationPreference',
   ];
 
   const updateData = {};
@@ -193,16 +203,15 @@ exports.updateProfile = catchAsync(async (req, res) => {
     }
   });
 
-  const beneficiary = await Beneficiary.findByIdAndUpdate(
-    beneficiaryId,
-    updateData,
-    { new: true, runValidators: true }
-  );
+  const beneficiary = await Beneficiary.findByIdAndUpdate(beneficiaryId, updateData, {
+    new: true,
+    runValidators: true,
+  });
 
   res.status(200).json({
     success: true,
     message: 'Profile updated successfully',
-    data: beneficiary
+    data: beneficiary,
   });
 });
 
@@ -216,7 +225,7 @@ exports.updateProfilePhoto = catchAsync(async (req, res) => {
   if (!req.file) {
     return res.status(400).json({
       success: false,
-      message: 'No file uploaded'
+      message: 'No file uploaded',
     });
   }
 
@@ -231,7 +240,7 @@ exports.updateProfilePhoto = catchAsync(async (req, res) => {
   res.status(200).json({
     success: true,
     message: 'Profile photo updated successfully',
-    data: { photoUrl: beneficiary.profilePhoto }
+    data: { photoUrl: beneficiary.profilePhoto },
   });
 });
 
@@ -247,19 +256,19 @@ exports.downloadProfileData = catchAsync(async (req, res) => {
   const messages = await PortalMessage.find({
     $or: [
       { toId: beneficiaryId, toModel: 'Beneficiary' },
-      { fromId: beneficiaryId, fromModel: 'Beneficiary' }
-    ]
+      { fromId: beneficiaryId, fromModel: 'Beneficiary' },
+    ],
   }).limit(100);
 
   const profileData = {
     beneficiary: beneficiary.toObject(),
     progressHistory: progress,
-    recentMessages: messages
+    recentMessages: messages,
   };
 
   res.status(200).json({
     success: true,
-    data: profileData
+    data: profileData,
   });
 });
 
@@ -275,19 +284,19 @@ exports.getProgress = catchAsync(async (req, res) => {
 
   const progress = await BeneficiaryProgress.findOne({
     beneficiaryId,
-    month: currentMonth
+    month: currentMonth,
   });
 
   if (!progress) {
     return res.status(404).json({
       success: false,
-      message: 'No progress record found for current month'
+      message: 'No progress record found for current month',
     });
   }
 
   res.status(200).json({
     success: true,
-    data: progress
+    data: progress,
   });
 });
 
@@ -301,19 +310,19 @@ exports.getProgressByMonth = catchAsync(async (req, res) => {
 
   const progress = await BeneficiaryProgress.findOne({
     beneficiaryId,
-    month: monthId
+    month: monthId,
   });
 
   if (!progress) {
     return res.status(404).json({
       success: false,
-      message: `No progress record found for ${monthId}`
+      message: `No progress record found for ${monthId}`,
     });
   }
 
   res.status(200).json({
     success: true,
-    data: progress
+    data: progress,
   });
 });
 
@@ -329,10 +338,12 @@ exports.getProgressTrend = catchAsync(async (req, res) => {
 
   const trend = await BeneficiaryProgress.find({
     beneficiaryId,
-    createdAt: { $gte: sixMonthsAgo }
+    createdAt: { $gte: sixMonthsAgo },
   })
     .sort({ month: 1 })
-    .select('month academicScore attendanceRate behaviorRating activityCompletionRate scoreImprovement performanceStatus');
+    .select(
+      'month academicScore attendanceRate behaviorRating activityCompletionRate scoreImprovement performanceStatus'
+    );
 
   res.status(200).json({
     success: true,
@@ -342,9 +353,9 @@ exports.getProgressTrend = catchAsync(async (req, res) => {
         totalMonths: trend.length,
         averageScore: trend.reduce((sum, p) => sum + p.academicScore, 0) / trend.length || 0,
         averageAttendance: trend.reduce((sum, p) => sum + p.attendanceRate, 0) / trend.length || 0,
-        overallImprovement: trend[trend.length - 1]?.scoreImprovement || 0
-      }
-    }
+        overallImprovement: trend[trend.length - 1]?.scoreImprovement || 0,
+      },
+    },
   });
 });
 
@@ -357,7 +368,7 @@ exports.getProgressReports = catchAsync(async (req, res) => {
 
   const reports = await BeneficiaryProgress.find({
     beneficiaryId,
-    reportGenerated: true
+    reportGenerated: true,
   })
     .sort({ reportGeneratedAt: -1 })
     .select('month reportGeneratedAt reportSentToGuardian reportSentAt overallPerformance');
@@ -371,9 +382,9 @@ exports.getProgressReports = catchAsync(async (req, res) => {
         generatedAt: r.reportGeneratedAt,
         sentAt: r.reportSentAt,
         sentStatus: r.reportSentToGuardian,
-        performance: r.overallPerformance
-      }))
-    }
+        performance: r.overallPerformance,
+      })),
+    },
   });
 });
 
@@ -395,12 +406,13 @@ exports.getGrades = catchAsync(async (req, res) => {
     score: g.academicScore,
     previousScore: g.previousMonthScore,
     improvement: g.scoreImprovement,
-    status: g.academicScore >= 80 ? 'excellent' : g.academicScore >= 70 ? 'good' : 'needs_improvement'
+    status:
+      g.academicScore >= 80 ? 'excellent' : g.academicScore >= 70 ? 'good' : 'needs_improvement',
   }));
 
   res.status(200).json({
     success: true,
-    data: formattedGrades
+    data: formattedGrades,
   });
 });
 
@@ -411,9 +423,7 @@ exports.getGrades = catchAsync(async (req, res) => {
 exports.getGradesSummary = catchAsync(async (req, res) => {
   const beneficiaryId = req.user._id;
 
-  const grades = await BeneficiaryProgress.find({ beneficiaryId })
-    .select('academicScore')
-    .lean();
+  const grades = await BeneficiaryProgress.find({ beneficiaryId }).select('academicScore').lean();
 
   const scores = grades.map(g => g.academicScore);
   const average = scores.reduce((a, b) => a + b, 0) / scores.length || 0;
@@ -426,8 +436,8 @@ exports.getGradesSummary = catchAsync(async (req, res) => {
       average: average.toFixed(2),
       highest,
       lowest,
-      totalGrades: scores.length
-    }
+      totalGrades: scores.length,
+    },
   });
 });
 
@@ -446,7 +456,7 @@ exports.getGradesTrend = catchAsync(async (req, res) => {
   const trendData = trend.map(t => ({
     month: t.month,
     score: t.academicScore,
-    improvement: t.scoreImprovement
+    improvement: t.scoreImprovement,
   }));
 
   const improvingMonths = trendData.filter(t => t.improvement > 0).length;
@@ -457,8 +467,8 @@ exports.getGradesTrend = catchAsync(async (req, res) => {
       trend: trendData,
       improvingMonths,
       decliningMonths: trendData.length - improvingMonths,
-      overallDirection: improvingMonths > trendData.length / 2 ? 'improving' : 'declining'
-    }
+      overallDirection: improvingMonths > trendData.length / 2 ? 'improving' : 'declining',
+    },
   });
 });
 
@@ -477,7 +487,7 @@ exports.getAttendance = catchAsync(async (req, res) => {
 
   res.status(200).json({
     success: true,
-    data: attendance
+    data: attendance,
   });
 });
 
@@ -488,12 +498,15 @@ exports.getAttendance = catchAsync(async (req, res) => {
 exports.getAttendanceSummary = catchAsync(async (req, res) => {
   const beneficiaryId = req.user._id;
 
-  const records = await BeneficiaryProgress.find({ beneficiaryId }).select('attendanceRate absenceDays lateDays').lean();
+  const records = await BeneficiaryProgress.find({ beneficiaryId })
+    .select('attendanceRate absenceDays lateDays')
+    .lean();
 
   const totalDays = records.length * 20; // Assume 20 school days per month
   const totalAbsences = records.reduce((sum, r) => sum + r.absenceDays, 0);
   const totalLateArrivals = records.reduce((sum, r) => sum + r.lateDays, 0);
-  const averageAttendance = records.reduce((sum, r) => sum + r.attendanceRate, 0) / records.length || 0;
+  const averageAttendance =
+    records.reduce((sum, r) => sum + r.attendanceRate, 0) / records.length || 0;
 
   res.status(200).json({
     success: true,
@@ -501,8 +514,13 @@ exports.getAttendanceSummary = catchAsync(async (req, res) => {
       averageAttendanceRate: averageAttendance.toFixed(2),
       totalAbsences,
       totalLateArrivals,
-      attendanceStatus: averageAttendance >= 90 ? 'excellent' : averageAttendance >= 80 ? 'good' : 'needs_improvement'
-    }
+      attendanceStatus:
+        averageAttendance >= 90
+          ? 'excellent'
+          : averageAttendance >= 80
+            ? 'good'
+            : 'needs_improvement',
+    },
   });
 });
 
@@ -523,8 +541,8 @@ exports.getAttendanceReport = catchAsync(async (req, res) => {
     data: {
       lastSixMonths: report,
       totalAbsences: report.reduce((sum, r) => sum + r.absenceDays, 0),
-      totalLateArrivals: report.reduce((sum, r) => sum + r.lateDays, 0)
-    }
+      totalLateArrivals: report.reduce((sum, r) => sum + r.lateDays, 0),
+    },
   });
 });
 
@@ -543,7 +561,7 @@ exports.getPrograms = catchAsync(async (req, res) => {
 
   res.status(200).json({
     success: true,
-    data: beneficiary.programs
+    data: beneficiary.programs,
   });
 });
 
@@ -560,13 +578,13 @@ exports.getProgramDetails = catchAsync(async (req, res) => {
   if (!program) {
     return res.status(404).json({
       success: false,
-      message: 'Program not found'
+      message: 'Program not found',
     });
   }
 
   res.status(200).json({
     success: true,
-    data: program
+    data: program,
   });
 });
 
@@ -582,7 +600,7 @@ exports.getProgramActivities = catchAsync(async (req, res) => {
 
   res.status(200).json({
     success: true,
-    data: activities
+    data: activities,
   });
 });
 
@@ -595,11 +613,11 @@ exports.enrollProgram = catchAsync(async (req, res) => {
   const { programId } = req.params;
 
   const beneficiary = await Beneficiary.findById(beneficiaryId);
-  
+
   if (beneficiary.programs.includes(programId)) {
     return res.status(400).json({
       success: false,
-      message: 'Already enrolled in this program'
+      message: 'Already enrolled in this program',
     });
   }
 
@@ -613,12 +631,12 @@ exports.enrollProgram = catchAsync(async (req, res) => {
     title_ar: 'التحاق جديد ببرنامج',
     title_en: 'New Program Enrollment',
     message_ar: `تم التحاق الطالب ببرنامج جديد`,
-    message_en: 'Student enrolled in new program'
+    message_en: 'Student enrolled in new program',
   });
 
   res.status(201).json({
     success: true,
-    message: 'Successfully enrolled in program'
+    message: 'Successfully enrolled in program',
   });
 });
 
@@ -636,7 +654,7 @@ exports.unenrollProgram = catchAsync(async (req, res) => {
 
   res.status(200).json({
     success: true,
-    message: 'Successfully unenrolled from program'
+    message: 'Successfully unenrolled from program',
   });
 });
 
@@ -654,7 +672,7 @@ exports.getMessages = catchAsync(async (req, res) => {
 
   const messages = await PortalMessage.find({
     toId: beneficiaryId,
-    toModel: 'Beneficiary'
+    toModel: 'Beneficiary',
   })
     .sort({ createdAt: -1 })
     .skip(skip)
@@ -663,13 +681,13 @@ exports.getMessages = catchAsync(async (req, res) => {
 
   const total = await PortalMessage.countDocuments({
     toId: beneficiaryId,
-    toModel: 'Beneficiary'
+    toModel: 'Beneficiary',
   });
 
   res.status(200).json({
     success: true,
     data: messages,
-    pagination: { page, limit, total, pages: Math.ceil(total / limit) }
+    pagination: { page, limit, total, pages: Math.ceil(total / limit) },
   });
 });
 
@@ -685,7 +703,7 @@ exports.getSentMessages = catchAsync(async (req, res) => {
 
   const messages = await PortalMessage.find({
     fromId: beneficiaryId,
-    fromModel: 'Beneficiary'
+    fromModel: 'Beneficiary',
   })
     .sort({ createdAt: -1 })
     .skip(skip)
@@ -693,13 +711,13 @@ exports.getSentMessages = catchAsync(async (req, res) => {
 
   const total = await PortalMessage.countDocuments({
     fromId: beneficiaryId,
-    fromModel: 'Beneficiary'
+    fromModel: 'Beneficiary',
   });
 
   res.status(200).json({
     success: true,
     data: messages,
-    pagination: { page, limit, total, pages: Math.ceil(total / limit) }
+    pagination: { page, limit, total, pages: Math.ceil(total / limit) },
   });
 });
 
@@ -711,20 +729,25 @@ exports.getMessageDetail = catchAsync(async (req, res) => {
   const { messageId } = req.params;
   const beneficiaryId = req.user._id;
 
-  const message = await PortalMessage.findById(messageId)
-    .populate('fromId', 'firstName_ar firstName_en lastName_ar lastName_en profilePhoto');
+  const message = await PortalMessage.findById(messageId).populate(
+    'fromId',
+    'firstName_ar firstName_en lastName_ar lastName_en profilePhoto'
+  );
 
   if (!message) {
     return res.status(404).json({
       success: false,
-      message: 'Message not found'
+      message: 'Message not found',
     });
   }
 
-  if (message.toId.toString() !== beneficiaryId.toString() && message.fromId.toString() !== beneficiaryId.toString()) {
+  if (
+    message.toId.toString() !== beneficiaryId.toString() &&
+    message.fromId.toString() !== beneficiaryId.toString()
+  ) {
     return res.status(403).json({
       success: false,
-      message: 'Unauthorized to view this message'
+      message: 'Unauthorized to view this message',
     });
   }
 
@@ -736,7 +759,7 @@ exports.getMessageDetail = catchAsync(async (req, res) => {
 
   res.status(200).json({
     success: true,
-    data: message
+    data: message,
   });
 });
 
@@ -751,7 +774,7 @@ exports.sendMessage = catchAsync(async (req, res) => {
   if (!toId || !toModel || !message) {
     return res.status(400).json({
       success: false,
-      message: 'Missing required fields'
+      message: 'Missing required fields',
     });
   }
 
@@ -763,13 +786,13 @@ exports.sendMessage = catchAsync(async (req, res) => {
     subject: subject || 'No Subject',
     message,
     messageType: messageType || 'general',
-    priority: priority || 'normal'
+    priority: priority || 'normal',
   });
 
   res.status(201).json({
     success: true,
     message: 'Message sent successfully',
-    data: newMessage
+    data: newMessage,
   });
 });
 
@@ -785,7 +808,7 @@ exports.replyMessage = catchAsync(async (req, res) => {
   if (!message) {
     return res.status(400).json({
       success: false,
-      message: 'Message content required'
+      message: 'Message content required',
     });
   }
 
@@ -794,7 +817,7 @@ exports.replyMessage = catchAsync(async (req, res) => {
   if (!originalMessage) {
     return res.status(404).json({
       success: false,
-      message: 'Original message not found'
+      message: 'Original message not found',
     });
   }
 
@@ -807,7 +830,7 @@ exports.replyMessage = catchAsync(async (req, res) => {
     message,
     isReply: true,
     repliedToId: messageId,
-    messageType: originalMessage.messageType
+    messageType: originalMessage.messageType,
   });
 
   originalMessage.replies = originalMessage.replies || [];
@@ -817,7 +840,7 @@ exports.replyMessage = catchAsync(async (req, res) => {
   res.status(201).json({
     success: true,
     message: 'Reply sent successfully',
-    data: reply
+    data: reply,
   });
 });
 
@@ -837,7 +860,7 @@ exports.markMessageRead = catchAsync(async (req, res) => {
   res.status(200).json({
     success: true,
     message: 'Message marked as read',
-    data: message
+    data: message,
   });
 });
 
@@ -857,7 +880,7 @@ exports.archiveMessage = catchAsync(async (req, res) => {
   res.status(200).json({
     success: true,
     message: 'Message archived',
-    data: message
+    data: message,
   });
 });
 
@@ -870,13 +893,11 @@ exports.archiveMessage = catchAsync(async (req, res) => {
 exports.getDocuments = catchAsync(async (req, res) => {
   const beneficiaryId = req.user._id;
 
-  const beneficiary = await Beneficiary.findById(beneficiaryId)
-    .select('documents')
-    .lean();
+  const beneficiary = await Beneficiary.findById(beneficiaryId).select('documents').lean();
 
   res.status(200).json({
     success: true,
-    data: beneficiary.documents
+    data: beneficiary.documents,
   });
 });
 
@@ -892,13 +913,13 @@ exports.getDocumentDetail = catchAsync(async (req, res) => {
   if (!document) {
     return res.status(404).json({
       success: false,
-      message: 'Document not found'
+      message: 'Document not found',
     });
   }
 
   res.status(200).json({
     success: true,
-    data: document
+    data: document,
   });
 });
 
@@ -914,7 +935,7 @@ exports.downloadDocument = catchAsync(async (req, res) => {
   if (!document) {
     return res.status(404).json({
       success: false,
-      message: 'Document not found'
+      message: 'Document not found',
     });
   }
 
@@ -931,7 +952,7 @@ exports.uploadDocument = catchAsync(async (req, res) => {
   if (!req.file) {
     return res.status(400).json({
       success: false,
-      message: 'No file uploaded'
+      message: 'No file uploaded',
     });
   }
 
@@ -941,19 +962,16 @@ exports.uploadDocument = catchAsync(async (req, res) => {
     filePath: req.file.path,
     fileSize: req.file.size,
     mimeType: req.file.mimetype,
-    uploadedAt: new Date()
+    uploadedAt: new Date(),
   });
 
   // Add to beneficiary's documents
-  await Beneficiary.findByIdAndUpdate(
-    beneficiaryId,
-    { $push: { documents: document._id } }
-  );
+  await Beneficiary.findByIdAndUpdate(beneficiaryId, { $push: { documents: document._id } });
 
   res.status(201).json({
     success: true,
     message: 'Document uploaded successfully',
-    data: document
+    data: document,
   });
 });
 
@@ -968,7 +986,7 @@ exports.deleteDocument = catchAsync(async (req, res) => {
 
   res.status(200).json({
     success: true,
-    message: 'Document deleted successfully'
+    message: 'Document deleted successfully',
   });
 });
 
@@ -994,7 +1012,7 @@ exports.getNotifications = catchAsync(async (req, res) => {
   res.status(200).json({
     success: true,
     data: notifications,
-    pagination: { page, limit, total, pages: Math.ceil(total / limit) }
+    pagination: { page, limit, total, pages: Math.ceil(total / limit) },
   });
 });
 
@@ -1013,7 +1031,7 @@ exports.markNotificationRead = catchAsync(async (req, res) => {
 
   res.status(200).json({
     success: true,
-    data: notification
+    data: notification,
   });
 });
 
@@ -1031,7 +1049,7 @@ exports.markAllNotificationsRead = catchAsync(async (req, res) => {
 
   res.status(200).json({
     success: true,
-    message: 'All notifications marked as read'
+    message: 'All notifications marked as read',
   });
 });
 
@@ -1050,7 +1068,7 @@ exports.archiveNotification = catchAsync(async (req, res) => {
 
   res.status(200).json({
     success: true,
-    data: notification
+    data: notification,
   });
 });
 
@@ -1061,15 +1079,16 @@ exports.archiveNotification = catchAsync(async (req, res) => {
 exports.getNotificationPreferences = catchAsync(async (req, res) => {
   const beneficiaryId = req.user._id;
 
-  const beneficiary = await Beneficiary.findById(beneficiaryId)
-    .select('notificationPreference language');
+  const beneficiary = await Beneficiary.findById(beneficiaryId).select(
+    'notificationPreference language'
+  );
 
   res.status(200).json({
     success: true,
     data: {
       preference: beneficiary.notificationPreference,
-      language: beneficiary.language
-    }
+      language: beneficiary.language,
+    },
   });
 });
 
@@ -1085,7 +1104,7 @@ exports.updateNotificationPreferences = catchAsync(async (req, res) => {
     beneficiaryId,
     {
       notificationPreference: notificationPreference || 'email',
-      language: language || 'ar'
+      language: language || 'ar',
     },
     { new: true }
   );
@@ -1093,7 +1112,7 @@ exports.updateNotificationPreferences = catchAsync(async (req, res) => {
   res.status(200).json({
     success: true,
     message: 'Preferences updated successfully',
-    data: { preference: beneficiary.notificationPreference, language: beneficiary.language }
+    data: { preference: beneficiary.notificationPreference, language: beneficiary.language },
   });
 });
 
@@ -1106,12 +1125,13 @@ exports.updateNotificationPreferences = catchAsync(async (req, res) => {
 exports.getSettings = catchAsync(async (req, res) => {
   const beneficiaryId = req.user._id;
 
-  const beneficiary = await Beneficiary.findById(beneficiaryId)
-    .select('email phone language notificationPreference accountStatus accountVerified');
+  const beneficiary = await Beneficiary.findById(beneficiaryId).select(
+    'email phone language notificationPreference accountStatus accountVerified'
+  );
 
   res.status(200).json({
     success: true,
-    data: beneficiary
+    data: beneficiary,
   });
 });
 
@@ -1132,7 +1152,7 @@ exports.updateSettings = catchAsync(async (req, res) => {
   res.status(200).json({
     success: true,
     message: 'Settings updated successfully',
-    data: beneficiary
+    data: beneficiary,
   });
 });
 
@@ -1147,7 +1167,7 @@ exports.changePassword = catchAsync(async (req, res) => {
   if (newPassword !== confirmPassword) {
     return res.status(400).json({
       success: false,
-      message: 'Passwords do not match'
+      message: 'Passwords do not match',
     });
   }
 
@@ -1157,7 +1177,7 @@ exports.changePassword = catchAsync(async (req, res) => {
   if (!isPasswordCorrect) {
     return res.status(401).json({
       success: false,
-      message: 'Current password is incorrect'
+      message: 'Current password is incorrect',
     });
   }
 
@@ -1166,7 +1186,7 @@ exports.changePassword = catchAsync(async (req, res) => {
 
   res.status(200).json({
     success: true,
-    message: 'Password changed successfully'
+    message: 'Password changed successfully',
   });
 });
 
@@ -1181,7 +1201,7 @@ exports.changeLanguage = catchAsync(async (req, res) => {
   if (!['ar', 'en'].includes(language)) {
     return res.status(400).json({
       success: false,
-      message: 'Invalid language. Supported: ar, en'
+      message: 'Invalid language. Supported: ar, en',
     });
   }
 
@@ -1194,7 +1214,7 @@ exports.changeLanguage = catchAsync(async (req, res) => {
   res.status(200).json({
     success: true,
     message: 'Language updated successfully',
-    data: { language: beneficiary.language }
+    data: { language: beneficiary.language },
   });
 });
 
@@ -1212,7 +1232,7 @@ exports.exportProfileData = catchAsync(async (req, res) => {
 
   const data = {
     profile: beneficiary.toObject(),
-    progressHistory: progress.map(p => p.toObject())
+    progressHistory: progress.map(p => p.toObject()),
   };
 
   res.setHeader('Content-Type', 'application/json');
@@ -1228,8 +1248,9 @@ exports.exportGrades = catchAsync(async (req, res) => {
   const beneficiaryId = req.user._id;
   const { format } = req.params;
 
-  const grades = await BeneficiaryProgress.find({ beneficiaryId })
-    .select('month academicScore attendanceRate behaviorRating activityCompletionRate');
+  const grades = await BeneficiaryProgress.find({ beneficiaryId }).select(
+    'month academicScore attendanceRate behaviorRating activityCompletionRate'
+  );
 
   if (format === 'csv') {
     let csv = 'Month,Score,Attendance,Behavior,Completion\n';
@@ -1254,8 +1275,9 @@ exports.exportAttendance = catchAsync(async (req, res) => {
   const beneficiaryId = req.user._id;
   const { format } = req.params;
 
-  const records = await BeneficiaryProgress.find({ beneficiaryId })
-    .select('month attendanceRate absenceDays lateDays');
+  const records = await BeneficiaryProgress.find({ beneficiaryId }).select(
+    'month attendanceRate absenceDays lateDays'
+  );
 
   if (format === 'csv') {
     let csv = 'Month,AttendanceRate,Absences,LateArrivals\n';
@@ -1280,8 +1302,7 @@ exports.exportProgress = catchAsync(async (req, res) => {
   const beneficiaryId = req.user._id;
   const { format } = req.params;
 
-  const progress = await BeneficiaryProgress.find({ beneficiaryId })
-    .sort({ month: -1 });
+  const progress = await BeneficiaryProgress.find({ beneficiaryId }).sort({ month: -1 });
 
   res.setHeader('Content-Type', format === 'csv' ? 'text/csv' : 'application/json');
   res.setHeader('Content-Disposition', `attachment; filename=progress.${format}`);
@@ -1309,19 +1330,19 @@ exports.getFAQ = catchAsync(async (req, res) => {
       question_ar: 'كيف أعرض درجاتي؟',
       question_en: 'How do I view my grades?',
       answer_ar: 'يمكنك عرض درجاتك من خلال الذهاب إلى قسم الدرجات في البوابة',
-      answer_en: 'You can view your grades by going to the Grades section'
+      answer_en: 'You can view your grades by going to the Grades section',
     },
     {
       question_ar: 'كيف أتواصل مع ولي الأمر؟',
       question_en: 'How do I contact my guardian?',
       answer_ar: 'استخدم قسم الرسائل للتواصل مع ولي الأمر',
-      answer_en: 'Use the Messages section to contact your guardian'
-    }
+      answer_en: 'Use the Messages section to contact your guardian',
+    },
   ];
 
   res.status(200).json({
     success: true,
-    data: faqs
+    data: faqs,
   });
 });
 
@@ -1340,7 +1361,7 @@ exports.contactSupport = catchAsync(async (req, res) => {
     message,
     category: category || 'general',
     status: 'open',
-    createdAt: new Date()
+    createdAt: new Date(),
   };
 
   // Save to database (assuming SupportTicket model exists)
@@ -1348,7 +1369,7 @@ exports.contactSupport = catchAsync(async (req, res) => {
 
   res.status(201).json({
     success: true,
-    message: 'Support request submitted successfully'
+    message: 'Support request submitted successfully',
   });
 });
 
@@ -1364,7 +1385,7 @@ exports.getSupportTickets = catchAsync(async (req, res) => {
 
   res.status(200).json({
     success: true,
-    data: tickets
+    data: tickets,
   });
 });
 

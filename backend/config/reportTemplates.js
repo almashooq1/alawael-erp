@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Pre-built Report Templates
  * Sales, Inventory, Financial, User reports

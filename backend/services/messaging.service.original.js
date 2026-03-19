@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Messaging Service - Phase 3
  * خدمة الرسائل للدردشة الفورية
@@ -12,6 +13,7 @@
 const Message = require('../models/message.model');
 const Conversation = require('../models/conversation.model');
 const socketManager = require('../config/socket.config');
+const { escapeRegex } = require('../utils/sanitize');
 
 class MessagingService {
   /**
@@ -27,7 +29,9 @@ class MessagingService {
         throw new Error('المحادثة غير موجودة');
       }
 
-      const isParticipant = conversation.participants.some(p => p.user.toString() === senderId.toString() && p.isActive);
+      const isParticipant = conversation.participants.some(
+        p => p.user.toString() === senderId.toString() && p.isActive
+      );
 
       if (!isParticipant) {
         throw new Error('ليس لديك صلاحية للإرسال في هذه المحادثة');
@@ -56,7 +60,9 @@ class MessagingService {
       await conversation.updateLastMessage(message);
 
       // إرسال الإشعارات
-      const participants = conversation.participants.filter(p => p.user.toString() !== senderId.toString() && p.isActive);
+      const participants = conversation.participants.filter(
+        p => p.user.toString() !== senderId.toString() && p.isActive
+      );
 
       participants.forEach(participant => {
         if (participant.notifications.enabled && !participant.notifications.muted) {
@@ -93,14 +99,19 @@ class MessagingService {
         throw new Error('المحادثة غير موجودة');
       }
 
-      const isParticipant = conversation.participants.some(p => p.user.toString() === userId.toString() && p.isActive);
+      const isParticipant = conversation.participants.some(
+        p => p.user.toString() === userId.toString() && p.isActive
+      );
 
       if (!isParticipant) {
         throw new Error('ليس لديك صلاحية لعرض هذه المحادثة');
       }
 
       // الحصول على الرسائل
-      const messages = await Message.getConversationMessages(conversationId, userId, { page, limit });
+      const messages = await Message.getConversationMessages(conversationId, userId, {
+        page,
+        limit,
+      });
 
       // الحصول على العدد الكلي
       const total = await Message.countDocuments({
@@ -140,7 +151,7 @@ class MessagingService {
             ...conv.toObject(),
             unreadCount,
           };
-        }),
+        })
       );
 
       return {
@@ -180,7 +191,12 @@ class MessagingService {
         throw new Error('اسم المجموعة مطلوب');
       }
 
-      const conversation = await Conversation.createGroupConversation(creatorId, name, description, participantIds);
+      const conversation = await Conversation.createGroupConversation(
+        creatorId,
+        name,
+        description,
+        participantIds
+      );
 
       return {
         success: true,
@@ -203,7 +219,9 @@ class MessagingService {
       }
 
       // التحقق من أن المستخدم مشرف في المجموعة
-      const userParticipant = conversation.participants.find(p => p.user.toString() === userId.toString());
+      const userParticipant = conversation.participants.find(
+        p => p.user.toString() === userId.toString()
+      );
 
       if (!userParticipant || userParticipant.role !== 'admin') {
         throw new Error('ليس لديك صلاحية لإضافة مشاركين');
@@ -232,9 +250,14 @@ class MessagingService {
       }
 
       // التحقق من الصلاحيات
-      const userParticipant = conversation.participants.find(p => p.user.toString() === userId.toString());
+      const userParticipant = conversation.participants.find(
+        p => p.user.toString() === userId.toString()
+      );
 
-      if (!userParticipant || (userParticipant.role !== 'admin' && userId.toString() !== participantId.toString())) {
+      if (
+        !userParticipant ||
+        (userParticipant.role !== 'admin' && userId.toString() !== participantId.toString())
+      ) {
         throw new Error('ليس لديك صلاحية لإزالة مشاركين');
       }
 
@@ -319,7 +342,7 @@ class MessagingService {
       const { conversationId, page = 1, limit = 20 } = options;
 
       const query = {
-        'content.text': { $regex: searchTerm, $options: 'i' },
+        'content.text': { $regex: escapeRegex(searchTerm), $options: 'i' },
         deletedFor: { $ne: userId },
         isDeleted: false,
       };

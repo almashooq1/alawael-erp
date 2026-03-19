@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * PHASE 14: ADVANCED MACHINE LEARNING
  * Deep Learning, GPU Acceleration, Real-time Model Retraining
@@ -5,6 +6,7 @@
  */
 
 const tf = require('@tensorflow/tfjs-node-gpu');
+const logger = require('./logger');
 
 // ============================================================================
 // 1. DEEP LEARNING ENGINE (Neural Networks)
@@ -79,7 +81,7 @@ class DeepLearningEngine {
       this.models.set('demand-nn', model);
       return { success: true, model: 'demand-nn', layers: 5 };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -131,7 +133,7 @@ class DeepLearningEngine {
       this.models.set('lstm-forecast', model);
       return { success: true, model: 'lstm-forecast', type: 'LSTM' };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -189,7 +191,7 @@ class DeepLearningEngine {
       this.models.set('cnn-classifier', model);
       return { success: true, model: 'cnn-classifier', type: 'CNN' };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -215,7 +217,7 @@ class DeepLearningEngine {
         callbacks: {
           onEpochEnd: (epoch, logs) => {
             if (epoch % 10 === 0) {
-              console.log(`Epoch ${epoch}: loss = ${logs.loss.toFixed(4)}`);
+              logger.info(`Epoch ${epoch}: loss = ${logs.loss.toFixed(4)}`);
             }
           },
         },
@@ -240,7 +242,7 @@ class DeepLearningEngine {
         accuracy: history.history.acc?.[history.history.acc.length - 1] || null,
       };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -265,7 +267,7 @@ class DeepLearningEngine {
         prediction: Array.from(result),
       };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 }
@@ -301,7 +303,7 @@ class EnsembleEngine {
         method: 'weighted-averaging',
       };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -330,7 +332,7 @@ class EnsembleEngine {
         method: 'weighted-ensemble',
       };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -352,7 +354,7 @@ class EnsembleEngine {
         confidence: this.calculateConfidence(predictions),
       };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -415,7 +417,7 @@ class TransferLearningEngine {
 
       return { success: true, message: 'Fine-tuning complete' };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -440,7 +442,7 @@ class TransferLearningEngine {
 
       return { success: true, features: Array.from(result) };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 }
@@ -486,14 +488,14 @@ class HyperparameterOptimizer {
         trials: this.trials.length,
       };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
   /**
    * Evaluate hyperparameters (mock evaluation)
    */
-  evaluateParams(params) {
+  evaluateParams(_params) {
     // Mock: return score based on parameters
     // In real scenario, would train model and evaluate
     return Math.random() * 0.9 + 0.1;
@@ -525,7 +527,7 @@ class HyperparameterOptimizer {
         iterations: numTrials,
       };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 

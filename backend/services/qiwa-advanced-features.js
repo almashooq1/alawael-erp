@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * 🇸🇦 Qiwa Advanced Features
  * Professional Enterprise Features for Qiwa Integration
@@ -18,6 +19,7 @@
  */
 
 const EventEmitter = require('events');
+const logger = require('../utils/logger');
 
 // =====================================================
 // ADVANCED CACHE MANAGER
@@ -36,7 +38,7 @@ class AdvancedCacheManager extends EventEmitter {
     };
     this.maxMemoryCacheSize = options.maxSize || 1000;
     this.defaultTTL = options.defaultTTL || 3600; // 1 hour
-    
+
     // Optional Redis client
     this.redisClient = options.redisClient || null;
     this.enableRedis = options.enableRedis || false;
@@ -77,17 +79,13 @@ class AdvancedCacheManager extends EventEmitter {
    */
   async set(key, value, ttl = null) {
     const cacheTTL = ttl || this.defaultTTL;
-    
+
     this._setInMemory(key, value, cacheTTL);
     this.cacheStats.sets++;
 
     if (this.enableRedis && this.redisClient) {
       try {
-        await this.redisClient.setex(
-          key,
-          cacheTTL,
-          JSON.stringify(value)
-        );
+        await this.redisClient.setex(key, cacheTTL, JSON.stringify(value));
         this.emit('cache:redis:set', { key, ttl: cacheTTL });
       } catch (error) {
         this.emit('redis:error', { error, key });
@@ -133,9 +131,13 @@ class AdvancedCacheManager extends EventEmitter {
   getStats() {
     return {
       ...this.cacheStats,
-      hitRate: this.cacheStats.hits + this.cacheStats.misses > 0
-        ? ((this.cacheStats.hits / (this.cacheStats.hits + this.cacheStats.misses)) * 100).toFixed(2) + '%'
-        : 'N/A',
+      hitRate:
+        this.cacheStats.hits + this.cacheStats.misses > 0
+          ? (
+              (this.cacheStats.hits / (this.cacheStats.hits + this.cacheStats.misses)) *
+              100
+            ).toFixed(2) + '%'
+          : 'N/A',
       memorySize: this.memoryCache.size,
       maxSize: this.maxMemoryCacheSize,
     };
@@ -215,7 +217,7 @@ class CircuitBreaker extends EventEmitter {
         this.state = 'open';
         this.emit('circuitBreaker:open', {
           failureCount: this.failureCount,
-          error: error.message,
+          error: 'حدث خطأ داخلي',
         });
       }
 
@@ -257,9 +259,7 @@ class RateLimiter extends EventEmitter {
     const requests = this.requestCounts.get(key) || [];
 
     // Remove old requests outside window
-    const validRequests = requests.filter(
-      (timestamp) => now - timestamp < this.windowSize
-    );
+    const validRequests = requests.filter(timestamp => now - timestamp < this.windowSize);
 
     if (validRequests.length >= this.maxRequests) {
       this.emit('rateLimiter:exceeded', {
@@ -281,9 +281,7 @@ class RateLimiter extends EventEmitter {
   getRemaining(key) {
     const now = Date.now();
     const requests = this.requestCounts.get(key) || [];
-    const validRequests = requests.filter(
-      (timestamp) => now - timestamp < this.windowSize
-    );
+    const validRequests = requests.filter(timestamp => now - timestamp < this.windowSize);
     return Math.max(0, this.maxRequests - validRequests.length);
   }
 
@@ -368,7 +366,7 @@ class RequestQueue extends EventEmitter {
           results.push({ success: true, data: result });
           item.resolve(result);
         } catch (error) {
-          results.push({ success: false, error: error.message });
+          results.push({ success: false, error: 'حدث خطأ داخلي' });
           item.reject(error);
         }
       }
@@ -436,7 +434,7 @@ class WebhookManager extends EventEmitter {
    */
   async triggerWebhooks(event, data) {
     const matchingWebhooks = Array.from(this.webhooks.values()).filter(
-      (webhook) => webhook.active && webhook.events.includes(event)
+      webhook => webhook.active && webhook.events.includes(event)
     );
 
     const results = [];
@@ -451,7 +449,7 @@ class WebhookManager extends EventEmitter {
         results.push({
           webhookId: webhook.id,
           success: false,
-          error: error.message,
+          error: 'حدث خطأ داخلي',
         });
       }
     }
@@ -470,7 +468,7 @@ class WebhookManager extends EventEmitter {
     };
 
     // Implementation would use axios or fetch
-    console.log(`[WebhookManager] Sending to ${webhook.url}`, payload);
+    logger.info(`[WebhookManager] Sending to ${webhook.url}`, payload);
   }
 
   /**

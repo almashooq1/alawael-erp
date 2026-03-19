@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Container,
@@ -48,8 +48,11 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
+import apiClient from 'services/api.client';
+import { gradients, statusColors, surfaceColors, neutralColors } from '../../theme/palette';
+import { useSnackbar } from '../../contexts/SnackbarContext';
 
-// Sample data
+// Sample data (fallback)
 const dashboardData = {
   summary: {
     totalPrograms: 156,
@@ -82,8 +85,38 @@ const dashboardData = {
 };
 
 function AdvancedDashboard() {
+  const showSnackbar = useSnackbar();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [userMenuAnchor, setUserMenuAnchor] = useState(null);
+  const [data, setData] = useState(dashboardData);
+
+  useEffect(() => {
+    const loadDashboard = async () => {
+      try {
+        const res = await apiClient.get('/admin/overview');
+        const d = res?.data || res;
+        if (d && typeof d === 'object') {
+          setData(prev => ({
+            summary: {
+              totalPrograms: d.totalUsers || d.totalPrograms || prev.summary.totalPrograms,
+              activePrograms: d.activeUsers || d.activePrograms || prev.summary.activePrograms,
+              completedPrograms: d.completedPrograms || prev.summary.completedPrograms,
+              successRate: d.successRate || prev.summary.successRate,
+            },
+            recentActivity: d.recentActivity || prev.recentActivity,
+            performanceMetrics: d.performanceMetrics || prev.performanceMetrics,
+            topPrograms: d.topPrograms || prev.topPrograms,
+            notifications: d.notifications || prev.notifications,
+          }));
+        }
+      } catch {
+        // Keep static fallback
+        showSnackbar('تعذر تحميل بيانات لوحة التحكم، يتم استخدام البيانات الافتراضية', 'warning');
+      }
+    };
+    loadDashboard();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleUserMenuOpen = event => {
     setUserMenuAnchor(event.currentTarget);
@@ -105,26 +138,28 @@ function AdvancedDashboard() {
   const getNotificationColor = type => {
     switch (type) {
       case 'warning':
-        return '#ff9800';
+        return statusColors.warning;
       case 'success':
-        return '#4caf50';
+        return statusColors.success;
       case 'error':
-        return '#f44336';
+        return statusColors.error;
       default:
-        return '#2196f3';
+        return statusColors.info;
     }
   };
 
   return (
-    <Box sx={{ display: 'flex', backgroundColor: '#f5f7fa', minHeight: '100vh' }}>
+    <Box
+      sx={{ display: 'flex', backgroundColor: surfaceColors.pageBackground, minHeight: '100vh' }}
+    >
       <CssBaseline />
 
       {/* Top AppBar */}
       <AppBar
         position="fixed"
         sx={{
-          backgroundColor: '#ffffff',
-          color: '#333',
+          backgroundColor: 'white',
+          color: neutralColors.textDark,
           boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
           zIndex: 1201,
         }}
@@ -139,12 +174,16 @@ function AdvancedDashboard() {
         >
           {/* Left: Menu + Logo */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <IconButton onClick={() => setSidebarOpen(!sidebarOpen)} sx={{ color: '#333' }}>
+            <IconButton
+              aria-label="القائمة"
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              sx={{ color: neutralColors.textDark }}
+            >
               {sidebarOpen ? <CloseIcon /> : <MenuIcon />}
             </IconButton>
             <Typography
               variant="h6"
-              sx={{ fontWeight: 'bold', color: '#1976d2', fontSize: '20px' }}
+              sx={{ fontWeight: 'bold', color: statusColors.primaryBlue, fontSize: '20px' }}
             >
               🏥 نظام إعادة التأهيل
             </Typography>
@@ -155,13 +194,13 @@ function AdvancedDashboard() {
             sx={{
               display: 'flex',
               alignItems: 'center',
-              backgroundColor: '#f5f5f5',
+              backgroundColor: surfaceColors.lightGray,
               borderRadius: '20px',
               padding: '8px 16px',
               width: '300px',
             }}
           >
-            <SearchIcon sx={{ color: '#999', marginRight: 1 }} />
+            <SearchIcon sx={{ color: neutralColors.textMuted, marginRight: 1 }} />
             <TextField
               placeholder="بحث سريع..."
               variant="standard"
@@ -173,7 +212,7 @@ function AdvancedDashboard() {
           {/* Right: Notifications + User */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Tooltip title="الإشعارات">
-              <IconButton sx={{ color: '#333' }}>
+              <IconButton aria-label="إجراء" sx={{ color: neutralColors.textDark }}>
                 <Badge badgeContent={3} color="error">
                   <NotificationsIcon />
                 </Badge>
@@ -183,14 +222,18 @@ function AdvancedDashboard() {
             <Divider orientation="vertical" sx={{ height: 30, margin: '0 8px' }} />
 
             <Tooltip title="حسابي">
-              <IconButton onClick={handleUserMenuOpen} sx={{ color: '#333' }}>
+              <IconButton
+                aria-label="إجراء"
+                onClick={handleUserMenuOpen}
+                sx={{ color: neutralColors.textDark }}
+              >
                 <Badge
                   overlap="circular"
                   anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                   variant="dot"
                   sx={{
                     '& .MuiBadge-badge': {
-                      backgroundColor: '#4caf50',
+                      backgroundColor: statusColors.success,
                       boxShadow: '0 0 0 2px white',
                     },
                   }}
@@ -199,7 +242,7 @@ function AdvancedDashboard() {
                     sx={{
                       width: 36,
                       height: 36,
-                      backgroundColor: '#1976d2',
+                      backgroundColor: statusColors.primaryBlue,
                       cursor: 'pointer',
                     }}
                   >
@@ -234,7 +277,7 @@ function AdvancedDashboard() {
           '& .MuiDrawer-paper': {
             width: sidebarOpen ? 280 : 0,
             marginTop: '64px',
-            backgroundColor: '#2c3e50',
+            backgroundColor: neutralColors.navyDark,
             color: 'white',
             transition: 'width 0.3s',
             overflowX: 'hidden',
@@ -253,7 +296,9 @@ function AdvancedDashboard() {
                 },
               }}
             >
-              <ListItemIcon sx={{ color: '#64b5f6', minWidth: 40 }}>{item.icon}</ListItemIcon>
+              <ListItemIcon sx={{ color: statusColors.blueLight, minWidth: 40 }}>
+                {item.icon}
+              </ListItemIcon>
               {sidebarOpen && <ListItemText primary={item.text} />}
             </ListItem>
           ))}
@@ -270,6 +315,18 @@ function AdvancedDashboard() {
       >
         <Container maxWidth="xl">
           {/* Header */}
+          <Box sx={{ background: gradients.primary, borderRadius: 2, p: 3, mb: 4, color: 'white' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <DashboardIcon sx={{ fontSize: 40 }} />
+              <Box>
+                <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                  لوحة التحكم المتقدمة
+                </Typography>
+                <Typography variant="body2">تحليلات ومؤشرات أداء النظام</Typography>
+              </Box>
+            </Box>
+          </Box>
+
           <Box sx={{ marginBottom: '30px' }}>
             <Typography variant="h4" sx={{ fontWeight: 'bold', marginBottom: '10px' }}>
               مرحباً بعودتك، أحمد 👋
@@ -284,33 +341,33 @@ function AdvancedDashboard() {
             {[
               {
                 title: 'إجمالي البرامج',
-                value: dashboardData.summary.totalPrograms,
+                value: data.summary.totalPrograms,
                 icon: '📊',
-                color: '#2196f3',
+                color: statusColors.info,
               },
               {
                 title: 'برامج نشطة',
-                value: dashboardData.summary.activePrograms,
+                value: data.summary.activePrograms,
                 icon: '⚡',
-                color: '#4caf50',
+                color: statusColors.success,
               },
               {
                 title: 'برامج مكتملة',
-                value: dashboardData.summary.completedPrograms,
+                value: data.summary.completedPrograms,
                 icon: '✅',
-                color: '#ff9800',
+                color: statusColors.warning,
               },
               {
                 title: 'معدل النجاح',
-                value: `${dashboardData.summary.successRate}%`,
+                value: `${data.summary.successRate}%`,
                 icon: '🎯',
-                color: '#9c27b0',
+                color: statusColors.purple,
               },
             ].map((card, index) => (
               <Grid item xs={12} sm={6} md={3} key={index}>
                 <Card
                   sx={{
-                    backgroundColor: '#ffffff',
+                    backgroundColor: 'white',
                     borderRadius: '12px',
                     boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
                     transition: 'all 0.3s',
@@ -357,7 +414,7 @@ function AdvancedDashboard() {
                     📈 أداء البرامج
                   </Typography>
                   <ResponsiveContainer width="100%" height={300}>
-                    <LineChart data={dashboardData.performanceMetrics}>
+                    <LineChart data={data.performanceMetrics}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="month" />
                       <YAxis />
@@ -366,13 +423,13 @@ function AdvancedDashboard() {
                       <Line
                         type="monotone"
                         dataKey="performance"
-                        stroke="#2196f3"
+                        stroke={statusColors.info}
                         name="الأداء الفعلي"
                       />
                       <Line
                         type="monotone"
                         dataKey="target"
-                        stroke="#ff9800"
+                        stroke={statusColors.warning}
                         name="الهدف"
                         strokeDasharray="5 5"
                       />
@@ -390,7 +447,7 @@ function AdvancedDashboard() {
                     🏆 أفضل البرامج
                   </Typography>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    {dashboardData.topPrograms.map((program, index) => (
+                    {data.topPrograms.map((program, index) => (
                       <Box key={index}>
                         <Box
                           sx={{
@@ -452,14 +509,14 @@ function AdvancedDashboard() {
                     </Button>
                   </Box>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    {dashboardData.recentActivity.map(activity => (
+                    {data.recentActivity.map(activity => (
                       <Box
                         key={activity.id}
                         sx={{
                           padding: '12px',
-                          backgroundColor: '#f5f5f5',
+                          backgroundColor: surfaceColors.lightGray,
                           borderRadius: '8px',
-                          borderRight: '3px solid #2196f3',
+                          borderRight: `3px solid ${statusColors.info}`,
                         }}
                       >
                         <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -500,7 +557,7 @@ function AdvancedDashboard() {
                     </Button>
                   </Box>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    {dashboardData.notifications.map(notification => (
+                    {data.notifications.map(notification => (
                       <Box
                         key={notification.id}
                         sx={{
@@ -514,7 +571,7 @@ function AdvancedDashboard() {
                         }}
                       >
                         <Typography variant="body2">{notification.message}</Typography>
-                        <IconButton size="small">
+                        <IconButton aria-label="إغلاق" size="small">
                           <CloseIcon sx={{ fontSize: '18px' }} />
                         </IconButton>
                       </Box>

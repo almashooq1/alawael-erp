@@ -34,6 +34,9 @@ const ai_analytics_routes_1 = __importDefault(require("./routes/ai.analytics.rou
 const notifications_routes_1 = __importDefault(require("./routes/notifications.routes"));
 const ai_accounting_routes_1 = __importDefault(require("./routes/ai.accounting.routes"));
 const gateway_routes_1 = __importDefault(require("./routes/gateway.routes"));
+const saudi_integration_routes_1 = __importDefault(require("./routes/saudi-integration.routes"));
+const saudi_dashboard_routes_1 = __importDefault(require("./routes/saudi-dashboard.routes"));
+const saudi_compliance_monitoring_service_1 = __importDefault(require("./services/saudi-compliance-monitoring.service"));
 // Phase 8: Enhanced ML System
 const ml_routes_1 = __importDefault(require("./routes/ml.routes"));
 const ml_updates_1 = require("./websocket/ml-updates");
@@ -49,7 +52,11 @@ try {
     ({ queueService } = require('./services/queue'));
     ({ cacheService } = require('./services/cache'));
     ({ versionMiddleware, setupVersioningRoutes } = require('./middleware/versioning'));
-    ({ globalRateLimiter, userRateLimiter, concurrentRequestsLimiter } = require('./middleware/rate-limiting'));
+    ({
+        globalRateLimiter,
+        userRateLimiter,
+        concurrentRequestsLimiter,
+    } = require('./middleware/rate-limiting'));
     ({ tenantMiddleware } = require('./middleware/multi-tenant'));
     analyticsRoutes = require('./routes/analytics').default;
     // Start job processors if available
@@ -70,12 +77,12 @@ const httpServer = http_1.default.createServer(app);
 // Security
 app.use((0, helmet_1.default)({
     contentSecurityPolicy: NODE_ENV === 'production' ? undefined : false,
-    crossOriginEmbedderPolicy: false
+    crossOriginEmbedderPolicy: false,
 }));
 // CORS
 app.use((0, cors_1.default)({
     origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-    credentials: true
+    credentials: true,
 }));
 // Body parsers
 app.use(express_1.default.json({ limit: '10mb' }));
@@ -87,10 +94,12 @@ if (NODE_ENV === 'development') {
     app.use((0, morgan_1.default)('dev'));
 }
 // Mock user middleware for testing
-app.use((req, res, next) => {
-    req.user = { role: 'admin', username: 'test-admin', id: 'user_123' };
-    next();
-});
+if (NODE_ENV !== 'production') {
+    app.use((req, res, next) => {
+        req.user = { role: 'admin', username: 'test-admin', id: 'user_123' };
+        next();
+    });
+}
 // ==================== ADVANCED FEATURES (if available) ====================
 // Rate limiting
 if (globalRateLimiter) {
@@ -142,6 +151,9 @@ app.use('/api/ml', ml_routes_1.default);
 console.log('✅ Enhanced ML routes loaded');
 // Notifications API
 app.use('/api/notifications', notifications_routes_1.default);
+// Saudi Integration APIs
+app.use('/api/saudi-integration', saudi_integration_routes_1.default);
+app.use('/api/saudi-dashboard', saudi_dashboard_routes_1.default);
 // ==================== ADVANCED ROUTES (if available) ====================
 // Analytics routes
 if (analyticsRoutes) {
@@ -160,8 +172,8 @@ app.get('/health', (req, res) => {
         services: {
             mongodb: mongoose_1.default.connection.readyState === 1 ? 'connected' : 'disconnected',
             cache: cacheService ? 'available' : 'not-available',
-            queue: queueService ? 'available' : 'not-available'
-        }
+            queue: queueService ? 'available' : 'not-available',
+        },
     });
 });
 // ==================== ERROR HANDLING ====================
@@ -170,7 +182,7 @@ app.use((req, res) => {
     res.status(404).json({
         error: 'Not Found',
         message: `Route ${req.method} ${req.path} not found`,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
     });
 });
 // Global error handler
@@ -181,7 +193,7 @@ app.use((err, req, res, next) => {
         error: err.name || 'Error',
         message: err.message || 'Internal Server Error',
         ...(NODE_ENV === 'development' && { stack: err.stack }),
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
     });
 });
 // ==================== SERVER STARTUP ====================
@@ -204,6 +216,11 @@ async function startServer() {
             console.log('✅ WebSocket service ready');
             console.log('✅ ML WebSocket ready at /ml namespace');
         }
+        // Start Saudi compliance monitoring (skip in tests)
+        if (process.env.NODE_ENV !== 'test' && !process.env.VITEST_WORKER_ID) {
+            saudi_compliance_monitoring_service_1.default.initializeMonitoring();
+            console.log('✅ Saudi compliance monitoring enabled');
+        }
         // Start server
         httpServer.listen(PORT, () => {
             console.log('\n' + '='.repeat(60));
@@ -223,6 +240,8 @@ async function startServer() {
             if (analyticsRoutes) {
                 console.log(`📈 Analytics API:      http://localhost:${PORT}/api/analytics`);
             }
+            console.log(`🇸🇦 Saudi Integration: http://localhost:${PORT}/api/saudi-integration`);
+            console.log(`📊 Saudi Dashboard:   http://localhost:${PORT}/api/saudi-dashboard`);
             console.log('\n' + '='.repeat(60));
             console.log('\n✨ Features available:');
             console.log('   ✅ Risk Management APIs');
@@ -245,6 +264,7 @@ async function startServer() {
                 console.log('   ✅ Advanced Analytics Dashboard');
             if (tenantMiddleware)
                 console.log('   ✅ Multi-tenant Support');
+            console.log('   ✅ Saudi Integration & Compliance');
             console.log('\n' + '='.repeat(60) + '\n');
         });
         // Graceful shutdown

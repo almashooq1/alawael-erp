@@ -1,9 +1,12 @@
+/* eslint-disable no-unused-vars */
 /**
  * Smart Crisis Management & Incident Service (Phase 71)
  *
  * Automates the response to medical or behavioral emergencies.
  * Broadcasts alerts, guides staff through protocols, and auto-logs for audits.
  */
+
+const logger = require('../utils/logger');
 
 class SmartCrisisService {
   constructor() {
@@ -17,7 +20,7 @@ class SmartCrisisService {
    * @param {string} reporterId
    */
   async triggerCode(codeType, location, reporterId) {
-    console.log(`[CRISIS] ${codeType} triggered at ${location} by ${reporterId}`);
+    logger.info(`[CRISIS] ${codeType} triggered at ${location} by ${reporterId}`);
 
     const incidentId = `INC-${Date.now()}`;
     const incident = {

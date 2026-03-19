@@ -1,7 +1,10 @@
+/* eslint-disable no-unused-vars */
 /**
  * Notification Handler
  * معالج الإشعارات الفورية
  */
+
+const logger = require('../../utils/logger');
 
 /**
  * Handle notification events
@@ -20,7 +23,7 @@ function notificationHandler(socket, io, activeSubscriptions) {
       subscribedAt: new Date(),
     });
 
-    console.log(`[Notification] ${socket.id} subscribed to ${room}`);
+    logger.info(`[Notification] ${socket.id} subscribed to ${room}`);
 
     // Send initial notification state
     socket.emit('notification:update', {
@@ -39,7 +42,7 @@ function notificationHandler(socket, io, activeSubscriptions) {
       activeSubscriptions.delete(socket.id);
     }
 
-    console.log(`[Notification] ${socket.id} unsubscribed`);
+    logger.info(`[Notification] ${socket.id} unsubscribed`);
     socket.emit('notification:unsubscribed');
   });
 
@@ -61,11 +64,11 @@ function notificationHandler(socket, io, activeSubscriptions) {
     if (userId) {
       // Send to specific user
       io.to(`notifications:${userId}`).emit('notification:new', notification);
-      console.log(`[Notification] Sent to user ${userId}`);
+      logger.info(`[Notification] Sent to user ${userId}`);
     } else {
       // Broadcast to all subscribed clients
       io.to('notifications').emit('notification:new', notification);
-      console.log('[Notification] Broadcast to all clients');
+      logger.info('[Notification] Broadcast to all clients');
     }
 
     // Confirm to sender
@@ -79,7 +82,7 @@ function notificationHandler(socket, io, activeSubscriptions) {
   socket.on('notification:mark-read', ({ notificationId }) => {
     if (!notificationId) return;
 
-    console.log(`[Notification] Marked as read: ${notificationId}`);
+    logger.info(`[Notification] Marked as read: ${notificationId}`);
 
     socket.emit('notification:read-confirmed', {
       notificationId,
@@ -91,7 +94,7 @@ function notificationHandler(socket, io, activeSubscriptions) {
   socket.on('notification:mark-all-read', ({ userId }) => {
     const targetRoom = userId ? `notifications:${userId}` : socket.id;
 
-    console.log(`[Notification] Marked all as read for: ${targetRoom}`);
+    logger.info(`[Notification] Marked all as read for: ${targetRoom}`);
 
     socket.emit('notification:all-read-confirmed', {
       timestamp: new Date().toISOString(),

@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * Advanced Workflow System Tests
  * اختبارات نظام سير العمل والمصادقات المتقدم

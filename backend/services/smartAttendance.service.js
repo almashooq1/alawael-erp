@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * SMART ATTENDANCE & PUNCTUALITY SYSTEM
  * نظام الحضور والانصراف الذكي والمتكامل للطلاب
@@ -16,6 +17,7 @@
 
 const mongoose = require('mongoose');
 const EventEmitter = require('events');
+const logger = require('../utils/logger');
 
 class SmartAttendanceService extends EventEmitter {
   constructor() {
@@ -96,7 +98,7 @@ class SmartAttendanceService extends EventEmitter {
 
       return record;
     } catch (error) {
-      throw new Error(`Attendance Recording Error: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -177,7 +179,7 @@ class SmartAttendanceService extends EventEmitter {
 
       return analysis;
     } catch (error) {
-      throw new Error(`Pattern Analysis Error: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -321,7 +323,7 @@ class SmartAttendanceService extends EventEmitter {
         });
       }
     } catch (error) {
-      console.error('Notification Error:', error.message);
+      logger.error('Notification Error:', error.message);
     }
   }
 
@@ -492,7 +494,7 @@ class SmartAttendanceService extends EventEmitter {
 
       return report;
     } catch (error) {
-      throw new Error(`Report Generation Error: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -565,7 +567,7 @@ class SmartAttendanceService extends EventEmitter {
         timestamp: new Date(),
       };
     } catch (error) {
-      throw new Error(`Biometric Validation Error: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -631,7 +633,7 @@ class SmartAttendanceService extends EventEmitter {
 
       return appeal;
     } catch (error) {
-      throw new Error(`Appeal Submission Error: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -659,7 +661,7 @@ class SmartAttendanceService extends EventEmitter {
 
       return syncData;
     } catch (error) {
-      throw new Error(`Sync Error: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -696,7 +698,7 @@ class SmartAttendanceService extends EventEmitter {
 
       return stats;
     } catch (error) {
-      throw new Error(`Class Statistics Error: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 

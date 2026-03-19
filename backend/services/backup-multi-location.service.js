@@ -1,9 +1,10 @@
+/* eslint-disable no-unused-vars */
 /**
  * ═══════════════════════════════════════════════════════════════════════
  * MULTI-LOCATION BACKUP STORAGE SERVICE
  * خدمة التخزين متعدد المواقع للنسخ الاحتياطية
  * ═══════════════════════════════════════════════════════════════════════
- * 
+ *
  * Supported Locations:
  * ✅ Local Storage
  * ✅ AWS S3
@@ -16,6 +17,7 @@
 const AWS = require('aws-sdk');
 const fs = require('fs').promises;
 const path = require('path');
+const logger = require('../utils/logger');
 
 class MultiLocationBackupStorage {
   constructor() {
@@ -78,7 +80,10 @@ class MultiLocationBackupStorage {
       });
     }
 
-    console.log('✅ Storage locations initialized:', Array.from(this.storageLocations.keys()).join(', '));
+    // console.log(
+    //   '✅ Storage locations initialized:',
+    //   Array.from(this.storageLocations.keys()).join(', ')
+    // );
   }
 
   /**
@@ -113,7 +118,7 @@ class MultiLocationBackupStorage {
         const operation = this.storeToLocation(backupFile, backupMetadata, location);
         operations.push(operation);
       } catch (error) {
-        console.error(`❌ Failed to store in ${location.name}:`, error.message);
+        logger.error(`❌ Failed to store in ${location.name}:`, error.message);
       }
     }
 
@@ -130,7 +135,7 @@ class MultiLocationBackupStorage {
           data: result.value,
         });
 
-        console.log(`✅ Backup stored in ${location.name}`);
+        // console.log(`✅ Backup stored in ${location.name}`);
       } else {
         results.push({
           location: location.name,
@@ -139,14 +144,14 @@ class MultiLocationBackupStorage {
         });
 
         location.failureCount++;
-        console.error(`❌ Backup failed in ${location.name}:`, result.reason?.message);
+        logger.error(`❌ Backup failed in ${location.name}:`, result.reason?.message);
       }
     }
 
     // Check if minimum replication met
     const successCount = results.filter(r => r.status === 'SUCCESS').length;
     if (successCount < 2) {
-      console.warn('⚠️  Warning: Backup not replicated to minimum locations');
+      logger.warn('⚠️  Warning: Backup not replicated to minimum locations');
     }
 
     return {
@@ -199,7 +204,7 @@ class MultiLocationBackupStorage {
         timestamp: new Date(),
       };
     } catch (error) {
-      throw new Error(`Local storage failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -242,7 +247,7 @@ class MultiLocationBackupStorage {
         timestamp: new Date(),
       };
     } catch (error) {
-      throw new Error(`S3 storage failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -254,7 +259,7 @@ class MultiLocationBackupStorage {
     try {
       // GCS integration would go here
       // Requires @google-cloud/storage package
-      console.warn('GCS storage not yet fully implemented');
+      logger.warn('GCS storage not yet fully implemented');
 
       return {
         bucket: location.bucket,
@@ -262,7 +267,7 @@ class MultiLocationBackupStorage {
         timestamp: new Date(),
       };
     } catch (error) {
-      throw new Error(`GCS storage failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -274,7 +279,7 @@ class MultiLocationBackupStorage {
     try {
       // Azure integration would go here
       // Requires @azure/storage-blob package
-      console.warn('Azure storage not yet fully implemented');
+      logger.warn('Azure storage not yet fully implemented');
 
       return {
         container: location.containerName,
@@ -282,7 +287,7 @@ class MultiLocationBackupStorage {
         timestamp: new Date(),
       };
     } catch (error) {
-      throw new Error(`Azure storage failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -301,7 +306,7 @@ class MultiLocationBackupStorage {
           return await this.retrieveFromLocation(backupId, location);
         } catch (error) {
           if (!fallback) throw error;
-          console.warn(`⚠️  Failed to retrieve from ${preferredLocation}, trying fallback`);
+          logger.warn(`⚠️  Failed to retrieve from ${preferredLocation}, trying fallback`);
         }
       }
     }
@@ -315,7 +320,7 @@ class MultiLocationBackupStorage {
       try {
         return await this.retrieveFromLocation(backupId, location);
       } catch (error) {
-        console.warn(`⚠️  Failed to retrieve from ${location.name}:`, error.message);
+        logger.warn(`⚠️  Failed to retrieve from ${location.name}:`, error.message);
       }
     }
 
@@ -360,7 +365,7 @@ class MultiLocationBackupStorage {
         path: filePath,
       };
     } catch (error) {
-      throw new Error(`Local retrieval failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -396,7 +401,7 @@ class MultiLocationBackupStorage {
         key: objectKey,
       };
     } catch (error) {
-      throw new Error(`S3 retrieval failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -415,14 +420,14 @@ class MultiLocationBackupStorage {
           location: location.name,
           status: 'DELETED',
         });
-        console.log(`✅ Deleted from ${location.name}`);
+        // console.log(`✅ Deleted from ${location.name}`);
       } catch (error) {
         results.push({
           location: location.name,
           status: 'FAILED',
-          error: error.message,
+          error: 'حدث خطأ داخلي',
         });
-        console.warn(`⚠️  Failed to delete from ${location.name}`);
+        logger.warn(`⚠️  Failed to delete from ${location.name}`);
       }
     }
 
@@ -461,7 +466,7 @@ class MultiLocationBackupStorage {
 
       return true;
     } catch (error) {
-      throw new Error(`Local deletion failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -496,7 +501,7 @@ class MultiLocationBackupStorage {
       await s3.deleteObjects(deleteParams).promise();
       return true;
     } catch (error) {
-      throw new Error(`S3 deletion failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -535,7 +540,7 @@ class MultiLocationBackupStorage {
         stats.locations[name] = {
           type: location.type,
           status: 'ERROR',
-          error: error.message,
+          error: 'حدث خطأ داخلي',
         };
       }
     }
@@ -548,7 +553,7 @@ class MultiLocationBackupStorage {
    * نسخ النسخة الاحتياطية إلى جميع المواقع
    */
   async replicateBackup(backupId, sourceLocation = null) {
-    console.log(`🔄 Replicating backup [${backupId}]...`);
+    // console.log(`🔄 Replicating backup [${backupId}]...`);
 
     try {
       // Retrieve from source
@@ -572,15 +577,15 @@ class MultiLocationBackupStorage {
           results.push({
             location: name,
             status: 'FAILED',
-            error: error.message,
+            error: 'حدث خطأ داخلي',
           });
         }
       }
 
-      console.log(`✅ Replication completed`);
+      // console.log(`✅ Replication completed`);
       return results;
     } catch (error) {
-      console.error(`❌ Replication failed:`, error.message);
+      logger.error(`❌ Replication failed:`, error.message);
       throw error;
     }
   }

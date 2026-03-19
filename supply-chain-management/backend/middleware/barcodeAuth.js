@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import jwt from 'jsonwebtoken';
 import logger from '../config/logger.js';
 
@@ -16,7 +17,15 @@ export const barcodeAuth = (req, res, next) => {
       });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+    if (!process.env.JWT_SECRET) {
+      logger.error('CRITICAL: JWT_SECRET environment variable is not set for barcode auth!');
+      return res.status(500).json({
+        message: 'Server configuration error',
+        code: 'CONFIG_ERROR',
+      });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     // Check if user has required role
     const allowedRoles = ['admin', 'warehouse_manager', 'logistics'];

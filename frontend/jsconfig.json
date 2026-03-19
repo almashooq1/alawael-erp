@@ -1,19 +1,11 @@
 {
   "compilerOptions": {
+    "baseUrl": "src",
     "module": "esnext",
-    "moduleResolution": "bundler",
+    "moduleResolution": "node",
+    "target": "es2020",
     "resolveJsonModule": true,
-    "paths": {
-      "@services/*": ["./src/services/*"],
-      "@hooks/*": ["./src/hooks/*"],
-      "@components/*": ["./src/components/*"],
-      "@pages/*": ["./src/pages/*"],
-      "@utils/*": ["./src/utils/*"],
-      "@config/*": ["./src/config/*"],
-      "@store/*": ["./src/store/*"],
-      "@contexts/*": ["./src/contexts/*"]
-    },
-    "jsx": "react"
+    "jsx": "react-jsx"
   },
   "include": ["src"],
   "exclude": ["node_modules"]

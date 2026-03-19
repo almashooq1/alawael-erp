@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Financial Reporting Routes - مسارات التقارير المالية
  * Comprehensive Financial Reporting API Routes
@@ -24,48 +25,48 @@ router.get('/balance-sheet', (req, res) => {
           accountsReceivable: 150000,
           inventory: 80000,
           prepaidExpenses: 20000,
-          totalCurrent: 350000
+          totalCurrent: 350000,
         },
         fixed: {
           propertyPlantEquipment: 200000,
           accumulatedDepreciation: -50000,
           netPPE: 150000,
-          totalFixed: 150000
+          totalFixed: 150000,
         },
         other: {
           intangibleAssets: 30000,
           goodwill: 20000,
-          totalOther: 50000
+          totalOther: 50000,
         },
-        totalAssets: 550000
+        totalAssets: 550000,
       },
       liabilities: {
         current: {
           accountsPayable: 50000,
           shortTermDebt: 30000,
           accruals: 20000,
-          totalCurrent: 100000
+          totalCurrent: 100000,
         },
         longTerm: {
           longTermDebt: 100000,
-          totalLongTerm: 100000
+          totalLongTerm: 100000,
         },
         other: {
           deferredTaxLiabilities: 0,
-          totalOther: 0
+          totalOther: 0,
         },
-        totalLiabilities: 200000
+        totalLiabilities: 200000,
       },
       equity: {
         shareCapital: 250000,
         retainedEarnings: 100000,
         reserves: 0,
-        totalEquity: 350000
+        totalEquity: 350000,
       },
       verification: {
-        assetsEqualLiabilitiesPlus Equity: true,
-        isBalanced: true
-      }
+        assetsEqualLiabilitiesPlusEquity: true,
+        isBalanced: true,
+      },
     };
 
     res.status(200).json(balanceSheet);
@@ -73,7 +74,7 @@ router.get('/balance-sheet', (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'خطأ في جلب الميزانية العمومية',
-      error: error.message
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -90,24 +91,24 @@ router.get('/income-statement', (req, res) => {
       type: 'INCOME_STATEMENT',
       period: {
         start: startDate || '2026-01-01',
-        end: endDate || '2026-01-31'
+        end: endDate || '2026-01-31',
       },
       timestamp: new Date().toISOString(),
       revenues: {
         salesRevenue: 500000,
         serviceRevenue: 150000,
         otherRevenue: 50000,
-        totalRevenues: 700000
+        totalRevenues: 700000,
       },
       costOfRevenue: {
         costOfGoodsSold: 300000,
         directLabor: 100000,
         costOfServices: 50000,
-        totalCostOfRevenue: 450000
+        totalCostOfRevenue: 450000,
       },
       calculations: {
         grossProfit: 250000,
-        grossProfitMargin: 35.7
+        grossProfitMargin: 35.7,
       },
       operatingExpenses: {
         salaries: 80000,
@@ -116,14 +117,14 @@ router.get('/income-statement', (req, res) => {
         marketing: 30000,
         depreciation: 10000,
         other: 20000,
-        totalOperatingExpenses: 168000
+        totalOperatingExpenses: 168000,
       },
       operatingProfit: 82000,
       otherIncomeExpense: {
         interestIncome: 5000,
         interestExpense: -10000,
         other: 0,
-        totalOtherExpense: -5000
+        totalOtherExpense: -5000,
       },
       incomeBeforeTax: 77000,
       taxProvision: -11550,
@@ -131,8 +132,8 @@ router.get('/income-statement', (req, res) => {
       metrics: {
         netProfitMargin: 9.35,
         operatingMargin: 11.71,
-        grossMargin: 35.71
-      }
+        grossMargin: 35.71,
+      },
     };
 
     res.status(200).json(incomeStatement);
@@ -140,7 +141,7 @@ router.get('/income-statement', (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'خطأ في جلب قائمة الدخل',
-      error: error.message
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -157,7 +158,7 @@ router.get('/cash-flow-statement', (req, res) => {
       type: 'CASH_FLOW_STATEMENT',
       period: {
         start: startDate || '2026-01-01',
-        end: endDate || '2026-01-31'
+        end: endDate || '2026-01-31',
       },
       timestamp: new Date().toISOString(),
       operatingActivities: {
@@ -167,27 +168,27 @@ router.get('/cash-flow-statement', (req, res) => {
           changeInAccountsReceivable: -20000,
           changeInInventory: -15000,
           changeInAccountsPayable: 10000,
-          other: 5000
+          other: 5000,
         },
-        netOperatingCashFlow: 55450
+        netOperatingCashFlow: 55450,
       },
       investingActivities: {
         capitalExpenditures: -30000,
         assetSales: 5000,
         investmentPurchases: -10000,
-        netInvestingCashFlow: -35000
+        netInvestingCashFlow: -35000,
       },
       financingActivities: {
         debtProceeds: 20000,
         debtRepayment: -15000,
         dividendsPaid: -10000,
-        netFinancingCashFlow: -5000
+        netFinancingCashFlow: -5000,
       },
       summary: {
         netChangeInCash: 15450,
         beginningCashBalance: 100000,
-        endingCashBalance: 115450
-      }
+        endingCashBalance: 115450,
+      },
     };
 
     res.status(200).json(cashFlowStatement);
@@ -195,7 +196,7 @@ router.get('/cash-flow-statement', (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'خطأ في جلب قائمة التدفقات النقدية',
-      error: error.message
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -215,33 +216,33 @@ router.get('/financial-ratios', (req, res) => {
         ROA: 11.9,
         ROE: 18.7,
         netProfitMargin: 9.35,
-        grossProfitMargin: 35.7
+        grossProfitMargin: 35.7,
       },
       liquidity: {
         currentRatio: 3.5,
         quickRatio: 3.0,
-        cashRatio: 1.0
+        cashRatio: 1.0,
       },
       efficiency: {
         assetTurnover: 1.27,
         receivablesTurnover: 4.67,
-        inventoryTurnover: 6.25
+        inventoryTurnover: 6.25,
       },
       leverage: {
         debtRatio: 0.36,
         debtToEquity: 0.57,
-        equityMultiplier: 1.57
+        equityMultiplier: 1.57,
       },
       marketMetrics: {
         EPS: 130.9,
-        priceToEarnings: 0
+        priceToEarnings: 0,
       },
       analysis: {
         profitabilityStatus: 'Strong',
         liquidityStatus: 'Excellent',
         efficiencyStatus: 'Good',
-        leverageStatus: 'Healthy'
-      }
+        leverageStatus: 'Healthy',
+      },
     };
 
     res.status(200).json(ratios);
@@ -249,7 +250,7 @@ router.get('/financial-ratios', (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'خطأ في حساب النسب المالية',
-      error: error.message
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -270,19 +271,19 @@ router.post('/subsidiary', (req, res) => {
       ownershipPercentage,
       acquisitionDate,
       consolidationMethod: ownershipPercentage >= 50 ? 'full' : 'equity',
-      status: 'registered'
+      status: 'registered',
     };
 
     res.status(201).json({
       status: 'success',
       message: 'تم تسجيل الشركة التابعة بنجاح',
-      data: subsidiary
+      data: subsidiary,
     });
   } catch (error) {
     res.status(500).json({
       status: 'error',
       message: 'خطأ في تسجيل الشركة التابعة',
-      error: error.message
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -305,34 +306,34 @@ router.post('/consolidation', (req, res) => {
         assets: {
           totalAssets: 1200000,
           eliminations: -150000,
-          consolidatedAssets: 1050000
+          consolidatedAssets: 1050000,
         },
         liabilities: {
           totalLiabilities: 500000,
           eliminations: -50000,
-          consolidatedLiabilities: 450000
+          consolidatedLiabilities: 450000,
         },
         equity: {
           parentEquity: 350000,
           subsidiaryEquity: 250000,
           NCI: 80000,
           eliminations: -150000,
-          consolidatedEquity: 530000
-        }
+          consolidatedEquity: 530000,
+        },
       },
-      status: 'completed'
+      status: 'completed',
     };
 
     res.status(201).json({
       status: 'success',
       message: 'تم التوحيد بنجاح',
-      data: consolidation
+      data: consolidation,
     });
   } catch (error) {
     res.status(500).json({
       status: 'error',
       message: 'خطأ في توحيد البيانات',
-      error: error.message
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -354,52 +355,48 @@ router.get('/full-package', (req, res) => {
       reportingPeriod: {
         start,
         end,
-        asOfDate: reportingDate
+        asOfDate: reportingDate,
       },
       includedStatements: [
         'balance-sheet',
         'income-statement',
         'cash-flow-statement',
-        'equity-changes'
+        'equity-changes',
       ],
       balanceSheet: {
         totalAssets: 550000,
         totalLiabilities: 200000,
-        totalEquity: 350000
+        totalEquity: 350000,
       },
       incomeStatement: {
         totalRevenues: 700000,
         totalExpenses: 635450,
         netIncome: 65450,
-        netProfitMargin: 9.35
+        netProfitMargin: 9.35,
       },
       cashFlowStatement: {
         operatingCashFlow: 55450,
         investingCashFlow: -35000,
         financingCashFlow: -5000,
-        netCashFlow: 15450
+        netCashFlow: 15450,
       },
       financialRatios: {
         currentRatio: 3.5,
         ROA: 11.9,
         ROE: 18.7,
-        debtRatio: 0.36
+        debtRatio: 0.36,
       },
       managementNotes: [
         'الأداء المالية قوية مع نمو مستقر',
         'نسب السيولة ممتازة',
-        'معايير الربحية جيدة'
+        'معايير الربحية جيدة',
       ],
       auditStatement: {
         status: 'unqualified',
         auditFirm: '',
-        auditDate: ''
+        auditDate: '',
       },
-      complianceNotes: [
-        'جميع المعايير المحاسبية مطبقة',
-        'الإفصاحات كاملة',
-        'التوثيق شامل'
-      ]
+      complianceNotes: ['جميع المعايير المحاسبية مطبقة', 'الإفصاحات كاملة', 'التوثيق شامل'],
     };
 
     res.status(200).json(fullPackage);
@@ -407,7 +404,7 @@ router.get('/full-package', (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'خطأ في جلب حزمة التقرير الشاملة',
-      error: error.message
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -449,7 +446,7 @@ router.get('/export-html/:reportId', (req, res) => {
                     تم إنشاؤه في: ${new Date().toLocaleDateString('ar-SA')}
                 </p>
             </div>
-            
+
             <h2 style="color: #1a5490; margin: 30px 0 15px 0;">الميزانية العمومية</h2>
             <table>
                 <thead>
@@ -495,7 +492,7 @@ router.get('/export-html/:reportId', (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'خطأ في تصدير التقرير',
-      error: error.message
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -512,7 +509,7 @@ router.post('/custom-report', (req, res) => {
     if (format && !supportedFormats.includes(format)) {
       return res.status(400).json({
         status: 'error',
-        message: `صيغة غير مدعومة. الصيغ المدعومة: ${supportedFormats.join(', ')}`
+        message: `صيغة غير مدعومة. الصيغ المدعومة: ${supportedFormats.join(', ')}`,
       });
     }
 
@@ -524,19 +521,19 @@ router.post('/custom-report', (req, res) => {
       filters,
       format: format || 'json',
       status: 'generated',
-      data: {}
+      data: {},
     };
 
     res.status(201).json({
       status: 'success',
       message: 'تم إنشاء التقرير المخصص بنجاح',
-      data: customReport
+      data: customReport,
     });
   } catch (error) {
     res.status(500).json({
       status: 'error',
       message: 'خطأ في إنشاء التقرير المخصص',
-      error: error.message
+      error: 'حدث خطأ داخلي',
     });
   }
 });

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Assessment Management Service
  *
@@ -8,6 +9,7 @@
 const Assessment = require('../models/assessment.model');
 const Case = require('../models/case.model');
 const Beneficiary = require('../models/beneficiary.model');
+const { escapeRegex } = require('../utils/sanitize');
 
 class AssessmentService {
   /**
@@ -244,10 +246,10 @@ class AssessmentService {
 
       if (searchParams.text) {
         query.$or = [
-          { title: { $regex: searchParams.text, $options: 'i' } },
-          { description: { $regex: searchParams.text, $options: 'i' } },
-          { 'observations.strengths': { $regex: searchParams.text, $options: 'i' } },
-          { 'observations.challenges': { $regex: searchParams.text, $options: 'i' } },
+          { title: { $regex: escapeRegex(searchParams.text), $options: 'i' } },
+          { description: { $regex: escapeRegex(searchParams.text), $options: 'i' } },
+          { 'observations.strengths': { $regex: escapeRegex(searchParams.text), $options: 'i' } },
+          { 'observations.challenges': { $regex: escapeRegex(searchParams.text), $options: 'i' } },
         ];
       }
 

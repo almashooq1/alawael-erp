@@ -13,7 +13,7 @@ router.post('/compliance-to-sheets', rbac(['admin', 'compliance-manager']), asyn
     const count = await exportComplianceEventsToGoogleSheets({ userId, sheetId, range });
     res.json({ success: true, exported: count });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'حدث خطأ في الخادم' });
   }
 });
 

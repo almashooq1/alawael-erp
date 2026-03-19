@@ -1,7 +1,8 @@
+/* eslint-disable no-unused-vars */
 /**
  * Performance Optimizer Utility
  * Implements caching, compression, and response optimization strategies
- * 
+ *
  * Features:
  * - Gzip response compression
  * - Cache-Control headers optimization
@@ -11,6 +12,7 @@
  */
 
 const compression = require('compression');
+const logger = require('./logger');
 
 // ==================== CONFIGURATION ====================
 const CACHE_CONFIG = {
@@ -24,13 +26,13 @@ const CACHE_CONFIG = {
     '/api/notifications': 0, // No cache - real-time data
     '/api/users': 0, // No cache - user-specific data
   },
-  
+
   // Maximum cache size in MB
   maxSize: 50,
-  
+
   // Enable/disable compression
   compression: true,
-  
+
   // Compression options
   compressionOptions: {
     level: 6, // 0-9, default 6
@@ -67,7 +69,7 @@ class ResponseCache {
     }
 
     const entry = this.cache.get(key);
-    
+
     // Check if expired
     if (entry.expiresAt && Date.now() > entry.expiresAt) {
       this.cache.delete(key);
@@ -96,7 +98,7 @@ class ResponseCache {
       data: data,
       size: size,
       createdAt: Date.now(),
-      expiresAt: durationSeconds > 0 ? Date.now() + (durationSeconds * 1000) : null,
+      expiresAt: durationSeconds > 0 ? Date.now() + durationSeconds * 1000 : null,
     };
 
     this.cache.set(key, entry);
@@ -108,20 +110,21 @@ class ResponseCache {
    */
   evict() {
     const entriesToRemove = Math.ceil(this.cache.size * 0.2); // Remove 20% of old entries
-    let removed = 0;
+    let _removed = 0;
 
     // Sort by creation time (oldest first)
-    const sorted = Array.from(this.cache.entries())
-      .sort((a, b) => a[1].createdAt - b[1].createdAt);
+    const sorted = Array.from(this.cache.entries()).sort((a, b) => a[1].createdAt - b[1].createdAt);
 
     for (let i = 0; i < entriesToRemove && i < sorted.length; i++) {
       const [key, entry] = sorted[i];
       this.cache.delete(key);
       this.currentSize -= entry.size;
-      removed++;
+      _removed++;
     }
 
-    console.log(`📦 Cache evicted ${removed} old entries (freed ${Math.round(removed * 1024 / 1024)}MB)`);
+    // console.log(
+    //   `📦 Cache evicted ${removed} old entries (freed ${Math.round((removed * 1024) / 1024)}MB)`
+    // );
   }
 
   /**
@@ -137,7 +140,7 @@ class ResponseCache {
    */
   getStats() {
     const hitRate = (this.hits / (this.hits + this.misses)) * 100 || 0;
-    
+
     return {
       entries: this.cache.size,
       size: `${(this.currentSize / 1024 / 1024).toFixed(2)} MB`,
@@ -191,7 +194,7 @@ const cacheControlMiddleware = (req, res, next) => {
   // Wrap res.json if it exists
   if (res.json) {
     const originalJson = res.json.bind(res);
-    res.json = function(data) {
+    res.json = function (data) {
       const size = JSON.stringify(data).length;
       res.set('X-Response-Size', `${size}B`);
       res.set('X-Cache-Duration', `${cacheDuration}s`);
@@ -202,7 +205,7 @@ const cacheControlMiddleware = (req, res, next) => {
   // Wrap res.send if it exists
   if (res.send) {
     const originalSend = res.send.bind(res);
-    res.send = function(data) {
+    res.send = function (data) {
       if (typeof data === 'object') {
         const size = JSON.stringify(data).length;
         res.set('X-Response-Size', `${size}B`);
@@ -224,7 +227,7 @@ const responseCachingMiddleware = (req, res, next) => {
   }
 
   const cacheKey = cache.generateKey(req);
-  
+
   // Check if response is cached
   const cachedResponse = cache.get(cacheKey);
   if (cachedResponse) {
@@ -234,8 +237,8 @@ const responseCachingMiddleware = (req, res, next) => {
 
   // Intercept res.json to cache response
   const originalJson = res.json.bind(res);
-  
-  res.json = function(data) {
+
+  res.json = function (data) {
     // Determine cache duration
     let cacheDuration = 0;
     for (const [pattern, duration] of Object.entries(CACHE_CONFIG.durations)) {
@@ -265,15 +268,15 @@ const performanceMonitoringMiddleware = (req, res, next) => {
   const startTime = Date.now();
   const originalJson = res.json.bind(res);
 
-  res.json = function(data) {
+  res.json = function (data) {
     const duration = Date.now() - startTime;
-    
+
     // Add performance headers
     res.set('X-Response-Time', `${duration}ms`);
-    
+
     // Log slow requests
     if (duration > 1000) {
-      console.warn(`⚠️  Slow request: ${req.method} ${req.path} took ${duration}ms`);
+      logger.warn(`⚠️  Slow request: ${req.method} ${req.path} took ${duration}ms`);
     }
 
     return originalJson(data);
@@ -290,21 +293,21 @@ const performanceMonitoringMiddleware = (req, res, next) => {
 const clearCache = (path = null) => {
   if (!path) {
     cache.clear();
-    console.log('🧹 Cache cleared completely');
+    // console.log('🧹 Cache cleared completely');
     return;
   }
 
   // Clear cache entries matching path
-  let cleared = 0;
+  let _cleared = 0;
   for (const [key, entry] of cache.cache.entries()) {
     if (key.includes(path)) {
       cache.cache.delete(key);
       cache.currentSize -= entry.size;
-      cleared++;
+      _cleared++;
     }
   }
 
-  console.log(`🧹 Cleared ${cleared} cache entries for path: ${path}`);
+  // console.log(`🧹 Cleared ${cleared} cache entries for path: ${path}`);
 };
 
 /**
@@ -343,7 +346,7 @@ function initializePerformanceOptimizations(app) {
   app.post('/api/cache/clear', (req, res) => {
     const path = req.body?.path || null;
     clearCache(path);
-    
+
     res.json({
       success: true,
       message: path ? `Cache cleared for ${path}` : 'All cache cleared',
@@ -351,11 +354,11 @@ function initializePerformanceOptimizations(app) {
     });
   });
 
-  console.log('✅ Performance optimizations initialized');
-  console.log('   - Compression: Enabled');
-  console.log('   - Response caching: Enabled');
-  console.log('   - Cache-Control headers: Enabled');
-  console.log('   - Performance monitoring: Enabled');
+  // console.log('✅ Performance optimizations initialized');
+  // console.log('   - Compression: Enabled');
+  // console.log('   - Response caching: Enabled');
+  // console.log('   - Cache-Control headers: Enabled');
+  // console.log('   - Performance monitoring: Enabled');
 }
 
 // ==================== EXPORTS ====================

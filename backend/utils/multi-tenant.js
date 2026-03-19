@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // Phase 18: Multi-Tenant Enterprise System
 // Advanced SaaS Architecture with Tenant Isolation
 
@@ -703,7 +704,7 @@ class TenantMiddleware {
       } catch (error) {
         return res.status(404).json({
           error: 'Tenant not found',
-          message: error.message,
+          message: 'حدث خطأ داخلي',
         });
       }
     };

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const Beneficiary = require('../models/Beneficiary');
 const TherapeuticPlan = require('../models/TherapeuticPlan');
 
@@ -55,7 +56,8 @@ class SmartParentCoachService {
 
     return {
       type: 'HOME_ACTIVITY',
-      message: "No therapy today? Try the 'Animal Walk' game in the living room needed for Gross Motor skills.",
+      message:
+        "No therapy today? Try the 'Animal Walk' game in the living room needed for Gross Motor skills.",
       videoLink: 'https://rehab-videos.com/animal-walk',
     };
   }

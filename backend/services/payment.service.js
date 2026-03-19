@@ -1,6 +1,7 @@
+/* eslint-disable no-unused-vars */
 /**
  * Portal Payment Service
- * 
+ *
  * Handles payment operations and processing
  * - Payment processing
  * - Invoice generation
@@ -27,7 +28,7 @@ class PaymentService {
         return { success: false, message: 'Payment not found' };
       }
 
-      if (amount <= 0 || amount > (payment.amount - payment.amountPaid)) {
+      if (amount <= 0 || amount > payment.amount - payment.amountPaid) {
         return { success: false, message: 'Invalid payment amount' };
       }
 
@@ -52,10 +53,10 @@ class PaymentService {
       return {
         success: true,
         message: 'Payment processed successfully',
-        payment: payment.toObject()
+        payment: payment.toObject(),
       };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -80,7 +81,7 @@ class PaymentService {
         amount: payment.amount,
         guardian: payment.guardianId,
         beneficiary: payment.beneficiaryId,
-        description: payment.description
+        description: payment.description,
       };
 
       // You would integrate with a PDF library here
@@ -91,10 +92,10 @@ class PaymentService {
 
       return {
         success: true,
-        invoice
+        invoice,
       };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -120,14 +121,14 @@ class PaymentService {
 
       for (let i = 1; i <= numInstallments; i++) {
         const installmentDueDate = new Date(payment.dueDate);
-        installmentDueDate.setDate(installmentDueDate.getDate() + (daysPerMonth * (i - 1)));
+        installmentDueDate.setDate(installmentDueDate.getDate() + daysPerMonth * (i - 1));
 
         payment.installmentPlan.push({
           number: i,
           amount: installmentAmount,
           dueDate: installmentDueDate,
           status: 'pending',
-          amountPaid: 0
+          amountPaid: 0,
         });
       }
 
@@ -136,10 +137,10 @@ class PaymentService {
       return {
         success: true,
         message: 'Installment plan created',
-        plan: payment.installmentPlan
+        plan: payment.installmentPlan,
       };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -157,15 +158,13 @@ class PaymentService {
         return { success: false, message: 'Invalid payment or not an installment' };
       }
 
-      const installment = payment.installmentPlan.find(
-        ip => ip.number === installmentNumber
-      );
+      const installment = payment.installmentPlan.find(ip => ip.number === installmentNumber);
 
       if (!installment) {
         return { success: false, message: 'Installment not found' };
       }
 
-      if (amount <= 0 || amount > (installment.amount - installment.amountPaid)) {
+      if (amount <= 0 || amount > installment.amount - installment.amountPaid) {
         return { success: false, message: 'Invalid amount' };
       }
 
@@ -187,10 +186,10 @@ class PaymentService {
       return {
         success: true,
         message: 'Installment paid',
-        payment: payment.toObject()
+        payment: payment.toObject(),
       };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -221,10 +220,10 @@ class PaymentService {
         success: true,
         message: 'Discount applied',
         discountAmount,
-        finalAmount: payment.finalAmount
+        finalAmount: payment.finalAmount,
       };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -249,10 +248,10 @@ class PaymentService {
       return {
         success: true,
         message: 'Penalty applied',
-        penaltyCharge: penaltyAmount
+        penaltyCharge: penaltyAmount,
       };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -281,7 +280,7 @@ class PaymentService {
         message_ar: `يستحق الدفع: ${payment.amount} في ${payment.dueDate.toLocaleDateString('ar-SA')}`,
         message_en: `Payment due: ${payment.amount} on ${payment.dueDate.toLocaleDateString()}`,
         relatedType: 'payment',
-        relatedId: paymentId
+        relatedId: paymentId,
       });
 
       payment.reminderSentAt = new Date();
@@ -290,10 +289,10 @@ class PaymentService {
 
       return {
         success: true,
-        message: 'Reminder sent'
+        message: 'Reminder sent',
       };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -306,7 +305,7 @@ class PaymentService {
 
       const overduePayments = await PortalPayment.find({
         dueDate: { $lt: now },
-        status: { $in: ['pending', 'partially_paid'] }
+        status: { $in: ['pending', 'partially_paid'] },
       });
 
       for (const payment of overduePayments) {
@@ -315,7 +314,7 @@ class PaymentService {
 
         // Auto-apply late fee after 30 days
         if (payment.daysOverdue > 30) {
-          const lateFee = (payment.amount * 0.05); // 5% late fee
+          const lateFee = payment.amount * 0.05; // 5% late fee
           payment.penaltyCharge = lateFee;
         }
 
@@ -329,16 +328,16 @@ class PaymentService {
           title_ar: 'دفع متأخر',
           title_en: 'Overdue Payment',
           message_ar: 'لديك دفع متأخر يتطلب اهتمامك الفوري',
-          message_en: 'You have an overdue payment requiring immediate attention'
+          message_en: 'You have an overdue payment requiring immediate attention',
         });
       }
 
       return {
         success: true,
-        processed: overduePayments.length
+        processed: overduePayments.length,
       };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -367,10 +366,10 @@ class PaymentService {
 
       return {
         success: true,
-        message: 'Refund request submitted'
+        message: 'Refund request submitted',
       };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -398,16 +397,16 @@ class PaymentService {
         title_ar: 'تم معالجة الاسترداد',
         title_en: 'Refund Processed',
         message_ar: `تم استرجاع المبلغ: ${payment.refundAmount}`,
-        message_en: `Refund processed: ${payment.refundAmount}`
+        message_en: `Refund processed: ${payment.refundAmount}`,
       });
 
       return {
         success: true,
         message: 'Refund processed',
-        refundAmount: payment.refundAmount
+        refundAmount: payment.refundAmount,
       };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -422,18 +421,22 @@ class PaymentService {
       const stats = {
         totalPayments: payments.length,
         totalAmount: payments.reduce((sum, p) => sum + p.amount, 0),
-        totalPaid: payments.filter(p => p.status === 'paid').reduce((sum, p) => sum + p.amountPaid, 0),
+        totalPaid: payments
+          .filter(p => p.status === 'paid')
+          .reduce((sum, p) => sum + p.amountPaid, 0),
         totalDue: payments
           .filter(p => ['pending', 'partially_paid', 'overdue'].includes(p.status))
           .reduce((sum, p) => sum + (p.amount - p.amountPaid), 0),
         overdue: payments.filter(p => p.status === 'overdue').length,
         pending: payments.filter(p => p.status === 'pending').length,
-        paidPercentage: ((payments.filter(p => p.status === 'paid').length / payments.length) * 100).toFixed(2) + '%'
+        paidPercentage:
+          ((payments.filter(p => p.status === 'paid').length / payments.length) * 100).toFixed(2) +
+          '%',
       };
 
       return stats;
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -444,14 +447,12 @@ class PaymentService {
    */
   static async generatePaymentSchedule(guardianId, months = 12) {
     try {
-      const payments = await PortalPayment.find({ guardianId })
-        .sort({ dueDate: 1 })
-        .lean();
+      const payments = await PortalPayment.find({ guardianId }).sort({ dueDate: 1 }).lean();
 
       const schedule = {
         total: 0,
         expectedMonthly: [],
-        paymentsByMonth: {}
+        paymentsByMonth: {},
       };
 
       for (let i = 0; i < months; i++) {
@@ -469,7 +470,7 @@ class PaymentService {
           schedule.expectedMonthly.push({
             month: monthKey,
             amount: monthTotal,
-            count: monthPayments.length
+            count: monthPayments.length,
           });
           schedule.total += monthTotal;
         }
@@ -477,7 +478,7 @@ class PaymentService {
 
       return schedule;
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 }

@@ -1,19 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap');
-
+/* RTL direction + code font — all other body styles are in App.css */
 body {
-  margin: 0;
-  font-family: 'Manrope', 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
   direction: rtl;
-  background: #f7f7f9;
-  color: #0f172a;
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
-}
-
-* {
-  box-sizing: border-box;
 }

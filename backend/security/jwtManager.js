@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * 🎫 Advanced JWT Security System
  *
@@ -229,7 +230,7 @@ class JWTManager {
    * Verify with key rotation support
    */
   verifyTokenWithRotation(token) {
-    let verification = this.verifyToken(token);
+    const verification = this.verifyToken(token);
 
     // If verification fails and we have old key, try with old key
     if (!verification.valid && this.oldPublicKey) {

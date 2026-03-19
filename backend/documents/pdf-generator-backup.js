@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * PDF Generator Service - خدمة توليد PDF
  * Enterprise PDF Generation for Alawael ERP
@@ -5,6 +6,7 @@
 
 const fs = require('fs').promises;
 const path = require('path');
+const logger = require('../utils/logger');
 
 /**
  * PDF Configuration
@@ -47,7 +49,7 @@ class PDFGenerator {
       const html = this.getInvoiceTemplate(data);
       return await this.generateFromHTML(html);
     } catch (error) {
-      console.error('Error generating invoice PDF:', error);
+      logger.error('Error generating invoice PDF:', error);
       throw error;
     }
   }
@@ -100,14 +102,21 @@ class PDFGenerator {
         </tr>
       </thead>
       <tbody>
-        ${Array.isArray(data.items) ? data.items.map(item => \`
+        ${
+          Array.isArray(data.items)
+            ? data.items
+                .map(
+                  item => `
           <tr>
-            <td>\${item.description || ''}</td>
-            <td>\${item.quantity || 0}</td>
-            <td>\${item.unitPrice || 0}</td>
-            <td>\${item.total || 0}</td>
-          </tr>\`
-        ).join('') : '<tr><td colspan="4">لا توجد عناصر</td></tr>'}
+            <td>${item.description || ''}</td>
+            <td>${item.quantity || 0}</td>
+            <td>${item.unitPrice || 0}</td>
+            <td>${item.total || 0}</td>
+          </tr>`
+                )
+                .join('')
+            : '<tr><td colspan="4">لا توجد عناصر</td></tr>'
+        }
       </tbody>
     </table>
     <div class="totals">
@@ -132,7 +141,7 @@ class PDFGenerator {
       // Placeholder for actual PDF generation
       return html;
     } catch (error) {
-      console.error('Error generating PDF from HTML:', error);
+      logger.error('Error generating PDF from HTML:', error);
       throw error;
     }
   }

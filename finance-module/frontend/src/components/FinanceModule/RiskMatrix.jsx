@@ -315,7 +315,7 @@ const RiskMatrix = () => {
         // Risk Matrix Grid
         <Paper sx={{ p: 2, overflowX: 'auto', mb: 4 }}>
           <Typography variant="h6" sx={{ mb: 2 }}>Risk Matrix (10x10 Grid)</Typography>
-          
+
           <Box sx={{ minWidth: 800, minHeight: 800, display: 'grid', gridTemplateColumns: 'repeat(11, 1fr)', gap: 0.5, backgroundColor: '#f5f5f5', p: 1, borderRadius: 1 }}>
             {/* Header row */}
             <Box sx={{ gridColumn: 1 }} />
@@ -476,6 +476,7 @@ const RiskMatrix = () => {
                           setSelectedRisk(risk);
                           setShowDetailDialog(true);
                         }}
+                        aria-label="عرض المخاطرة"
                       >
                         <EditIcon fontSize="small" />
                       </IconButton>
@@ -531,7 +532,7 @@ const RiskMatrix = () => {
         <Box sx={{ p: 3 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
             <Typography variant="h6">Create Risk Item</Typography>
-            <IconButton onClick={() => setShowCreateRiskDialog(false)} size="small">
+            <IconButton onClick={() => setShowCreateRiskDialog(false)} size="small" aria-label="إغلاق">
               <CloseIcon />
             </IconButton>
           </Box>
@@ -601,7 +602,7 @@ const RiskMatrix = () => {
           <Box sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
               <Typography variant="h6">{selectedRisk.title}</Typography>
-              <IconButton onClick={() => setShowDetailDialog(false)} size="small">
+              <IconButton onClick={() => setShowDetailDialog(false)} size="small" aria-label="إغلاق">
                 <CloseIcon />
               </IconButton>
             </Box>

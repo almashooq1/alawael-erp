@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * JWT Token Generator for Testing
  * الاستخدام: node generate-jwt.js
@@ -55,26 +56,26 @@ function verifyToken(token) {
     const decoded = jwt.verify(token, JWT_SECRET);
     return { valid: true, decoded };
   } catch (error) {
-    return { valid: false, error: error.message };
+    return { valid: false, error: 'An internal error occurred' };
   }
 }
 
 // Generate and display tokens
-console.log('🔑 JWT Token Generator\n');
-console.log('='.repeat(60));
+// console.log('🔑 JWT Token Generator\n');
+// console.log('='.repeat(60));
 
 Object.entries(testUsers).forEach(([role, user]) => {
   const token = generateToken(user.id, role);
-  console.log(`\n👤 ${role.toUpperCase()}`);
-  console.log(`User: ${user.username} (${user.email})`);
-  console.log(`Role: ${user.role}`);
-  console.log('\n📝 Token:');
-  console.log(token);
-  console.log('\n🔗 Authorization Header:');
-  console.log(`Authorization: Bearer ${token}`);
-  console.log('-'.repeat(60));
+  // console.log(`\n👨 ${role.toUpperCase()}`);
+  // console.log(`User: ${user.username} (${user.email})`);
+  // console.log(`Role: ${user.role}`);
+  // console.log('\n📏 Token:');
+  // console.log(token);
+  // console.log('\n🔗 Authorization Header:');
+  // console.log(`Authorization: Bearer ${token}`);
+  // console.log('-'.repeat(60));
 });
 
-console.log('\n✅ Tokensjenerado successfully!');
-console.log('\n💡 Tip: Copy the tokens above and use them in Postman headers');
-console.log('   as "Authorization: Bearer <token>"');
+// console.log('\n✅ Tokensjenerado successfully!');
+// console.log('\n💡 Tip: Copy the tokens above and use them in Postman headers');
+// console.log('   as "Authorization: Bearer <token>"');

@@ -1,4 +1,3 @@
-import React from 'react';
 import { Box, Grid, Card, CardContent, Typography, LinearProgress } from '@mui/material';
 import {
   TrendingUp as TrendingUpIcon,
@@ -23,6 +22,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
+import { brandColors } from 'theme/palette';
 
 const AnalyticsDashboard = ({ stats }) => {
   // بيانات الرسوم البيانية
@@ -46,10 +46,10 @@ const AnalyticsDashboard = ({ stats }) => {
   ];
 
   const channelDistribution = [
-    { name: 'الرسائل المباشرة', value: 45, color: '#667eea' },
-    { name: 'البريد الداخلي', value: 30, color: '#f093fb' },
-    { name: 'المساعد الذكي', value: 15, color: '#4facfe' },
-    { name: 'أخرى', value: 10, color: '#43e97b' },
+    { name: 'الرسائل المباشرة', value: 45, color: brandColors.primaryStart },
+    { name: 'البريد الداخلي', value: 30, color: brandColors.accentPink },
+    { name: 'المساعد الذكي', value: 15, color: brandColors.accentSky },
+    { name: 'أخرى', value: 10, color: brandColors.accentGreen },
   ];
 
   const satisfactionData = [
@@ -135,7 +135,10 @@ const AnalyticsDashboard = ({ stats }) => {
                   ) : (
                     <TrendingDownIcon sx={{ color: getChangeColor(metric.trend), fontSize: 16 }} />
                   )}
-                  <Typography variant="caption" sx={{ color: getChangeColor(metric.trend), fontWeight: 'bold' }}>
+                  <Typography
+                    variant="caption"
+                    sx={{ color: getChangeColor(metric.trend), fontWeight: 'bold' }}
+                  >
                     {metric.change}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
@@ -161,16 +164,16 @@ const AnalyticsDashboard = ({ stats }) => {
                 <AreaChart data={messagesTrendData}>
                   <defs>
                     <linearGradient id="colorMessages" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#667eea" stopOpacity={0.8} />
-                      <stop offset="95%" stopColor="#667eea" stopOpacity={0} />
+                      <stop offset="5%" stopColor={brandColors.primaryStart} stopOpacity={0.8} />
+                      <stop offset="95%" stopColor={brandColors.primaryStart} stopOpacity={0} />
                     </linearGradient>
                     <linearGradient id="colorEmails" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#f093fb" stopOpacity={0.8} />
-                      <stop offset="95%" stopColor="#f093fb" stopOpacity={0} />
+                      <stop offset="5%" stopColor={brandColors.accentPink} stopOpacity={0.8} />
+                      <stop offset="95%" stopColor={brandColors.accentPink} stopOpacity={0} />
                     </linearGradient>
                     <linearGradient id="colorBot" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#4facfe" stopOpacity={0.8} />
-                      <stop offset="95%" stopColor="#4facfe" stopOpacity={0} />
+                      <stop offset="5%" stopColor={brandColors.accentSky} stopOpacity={0.8} />
+                      <stop offset="95%" stopColor={brandColors.accentSky} stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" />
@@ -182,12 +185,26 @@ const AnalyticsDashboard = ({ stats }) => {
                     type="monotone"
                     dataKey="messages"
                     name="الرسائل المباشرة"
-                    stroke="#667eea"
+                    stroke={brandColors.primaryStart}
                     fillOpacity={1}
                     fill="url(#colorMessages)"
                   />
-                  <Area type="monotone" dataKey="emails" name="البريد الداخلي" stroke="#f093fb" fillOpacity={1} fill="url(#colorEmails)" />
-                  <Area type="monotone" dataKey="bot" name="المساعد الذكي" stroke="#4facfe" fillOpacity={1} fill="url(#colorBot)" />
+                  <Area
+                    type="monotone"
+                    dataKey="emails"
+                    name="البريد الداخلي"
+                    stroke={brandColors.accentPink}
+                    fillOpacity={1}
+                    fill="url(#colorEmails)"
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="bot"
+                    name="المساعد الذكي"
+                    stroke={brandColors.accentSky}
+                    fillOpacity={1}
+                    fill="url(#colorBot)"
+                  />
                 </AreaChart>
               </ResponsiveContainer>
             </CardContent>
@@ -237,7 +254,7 @@ const AnalyticsDashboard = ({ stats }) => {
                   <XAxis dataKey="day" />
                   <YAxis />
                   <Tooltip />
-                  <Bar dataKey="avgTime" name="متوسط الوقت" fill="#4facfe" />
+                  <Bar dataKey="avgTime" name="متوسط الوقت" fill={brandColors.accentSky} />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
@@ -267,7 +284,14 @@ const AnalyticsDashboard = ({ stats }) => {
                       borderRadius: 4,
                       bgcolor: 'grey.200',
                       '& .MuiLinearProgress-bar': {
-                        bgcolor: index === 0 ? 'success.main' : index === 1 ? 'info.main' : index === 2 ? 'warning.main' : 'error.main',
+                        bgcolor:
+                          index === 0
+                            ? 'success.main'
+                            : index === 1
+                              ? 'info.main'
+                              : index === 2
+                                ? 'warning.main'
+                                : 'error.main',
                       },
                     }}
                   />

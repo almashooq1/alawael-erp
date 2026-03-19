@@ -6,9 +6,9 @@
  */
 
 import { Employee, IEmployee } from '../models/employee.model';
-import { globalLogger } from '../utils/advanced.logger';
-import { globalErrorTracker, ErrorCategory } from '../utils/error.tracker';
-import { performanceMonitor } from '../utils/performance.monitor';
+import { globalLogger, Logger } from '../utils/advanced.logger';
+import { globalErrorTracker, ErrorCategory, ErrorTracker } from '../utils/error.tracker';
+import { globalPerformanceMonitor, PerformanceMonitor } from '../utils/performance.monitor';
 
 /**
  * Employee Statistics Interface
@@ -26,13 +26,35 @@ export interface EmployeeStats {
 
 /**
  * Employee Service
+ * ✅ REFACTORED FOR DEPENDENCY INJECTION
  */
 export class EmployeeService {
+  private logger: any;
+  private errorTracker: any;
+  private performanceMonitor: any;
+
+  /**
+   * Constructor with Dependency Injection
+   * Supports both real and mock dependencies for testing
+   * 
+   * Usage:
+   * - Production: new EmployeeService() - uses global instances
+   * - Testing: new EmployeeService(mockLogger, mockErrorTracker, mockMonitor)
+   */
+  constructor(
+    logger?: any,
+    errorTracker?: any,
+    performanceMonitor?: any
+  ) {
+    this.logger = logger || globalLogger;
+    this.errorTracker = errorTracker || globalErrorTracker;
+    this.performanceMonitor = performanceMonitor || globalPerformanceMonitor;
+  }
   /**
    * Create new employee
    */
   async createEmployee(data: Partial<IEmployee>, createdBy: string): Promise<IEmployee> {
-    return performanceMonitor.measure('createEmployee', async () => {
+    return this.performanceMonitor.measure('createEmployee', async () => {
       try {
         const employee = new Employee({
           ...data,
@@ -42,14 +64,14 @@ export class EmployeeService {
 
         await employee.save();
 
-        globalLogger.info('Employee created', 'EmployeeService', {
+        this.logger.info('Employee created', 'EmployeeService', {
           employeeId: employee.employeeId,
           name: employee.fullName,
         });
 
         return employee;
       } catch (error) {
-        globalErrorTracker.trackError(error as Error, {
+        this.errorTracker.trackError(error as Error, {
           category: ErrorCategory.DATABASE,
           context: { operation: 'createEmployee', data },
         });
@@ -66,7 +88,7 @@ export class EmployeeService {
     updateData: Partial<IEmployee>,
     modifiedBy: string
   ): Promise<IEmployee | null> {
-    return performanceMonitor.measure('updateEmployee', async () => {
+    return this.performanceMonitor.measure('updateEmployee', async () => {
       try {
         const employee = await Employee.findOneAndUpdate(
           { employeeId },
@@ -81,7 +103,7 @@ export class EmployeeService {
           throw new Error(`Employee not found: ${employeeId}`);
         }
 
-        globalLogger.info('Employee updated', 'EmployeeService', {
+        this.logger.info('Employee updated', 'EmployeeService', {
           employeeId,
           changes: Object.keys(updateData),
         });

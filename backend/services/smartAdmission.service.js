@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 class SmartAdmissionService {
   /**
    * Simulate Impact of New Admissions
@@ -26,7 +27,9 @@ class SmartAdmissionService {
 
     // 3. Result
     const canAccommodate = availableCapacity >= totalSessionsNeeded;
-    const hiringNeeds = canAccommodate ? 0 : Math.ceil((totalSessionsNeeded - availableCapacity) / avgSlotsPerTherapist);
+    const hiringNeeds = canAccommodate
+      ? 0
+      : Math.ceil((totalSessionsNeeded - availableCapacity) / avgSlotsPerTherapist);
 
     return {
       scenario: `Admitting ${count} patients for ${discipline}`,
@@ -42,7 +45,9 @@ class SmartAdmissionService {
       recommendation: canAccommodate
         ? 'Proceed. Sufficient capacity available.'
         : `STOP. Need to hire ${hiringNeeds} more ${discipline} therapist(s) first.`,
-      waitlistPrediction: canAccommodate ? 'No impact on waitlist.' : 'Waitlist will increase by approx 14 days.',
+      waitlistPrediction: canAccommodate
+        ? 'No impact on waitlist.'
+        : 'Waitlist will increase by approx 14 days.',
     };
   }
 }

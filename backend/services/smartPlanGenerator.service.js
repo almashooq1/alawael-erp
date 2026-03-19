@@ -1,6 +1,8 @@
+/* eslint-disable no-unused-vars */
 const GoalBank = require('../models/GoalBank');
 const Beneficiary = require('../models/Beneficiary'); // Assuming
 const SmartClinicalService = require('./smartClinical.service');
+const logger = require('../utils/logger');
 
 class SmartPlanGeneratorService {
   /**
@@ -16,7 +18,7 @@ class SmartPlanGeneratorService {
     const diagnosis = patient.diagnosis || 'Autism Spectrum Disorder';
     const age = patient.age || 4;
 
-    console.log(`[SmartPlan] Generating plan for ${patient.firstName} (${diagnosis}, Age ${age})`);
+    logger.info(`[SmartPlan] Generating plan for ${patient.firstName} (${diagnosis}, Age ${age})`);
 
     // 2. Determine Recommended Disciplines based on Diagnosis
     const recommendedDisciplines = this.getDisciplinesForDiagnosis(diagnosis);
@@ -84,7 +86,10 @@ class SmartPlanGeneratorService {
       stGoals = [`Will use 3-word sentences to request needs`, `Will follow 2-step commands`];
     } else if (domain === 'OT') {
       ltGoals = [`Improve sensory processing modulation for attention`];
-      stGoals = [`Will maintain seated attention for 10 minutes`, `Will tolerate different textures`];
+      stGoals = [
+        `Will maintain seated attention for 10 minutes`,
+        `Will tolerate different textures`,
+      ];
     } else if (domain === 'PT') {
       ltGoals = [`Improve gross motor skills for independent mobility`];
       stGoals = [`Will stand on one foot for 5 seconds`, `Will jump with two feet together`];
@@ -98,7 +103,8 @@ class SmartPlanGeneratorService {
 
   static getHomeTips(domain, diagnosis) {
     if (domain === 'SPEECH') return 'Daily reading time: 15 mins. Narration of daily activities.';
-    if (domain === 'OT') return 'Deep pressure massage before sleep. Heavy work activities (carrying groceries).';
+    if (domain === 'OT')
+      return 'Deep pressure massage before sleep. Heavy work activities (carrying groceries).';
     return 'General active play.';
   }
 }

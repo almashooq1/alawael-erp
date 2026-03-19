@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Sentry Error Tracking Integration - نظام تتبع الأخطاء
  * Professional Error Management for Alawael ERP
@@ -6,21 +7,23 @@
 const Sentry = require('@sentry/node');
 const { ProfilingIntegration } = require('@sentry/profiling-node');
 const Tracing = require('@sentry/tracing');
+const logger = require('../utils/logger');
 
 // Configuration
 const config = {
   dsn: process.env.SENTRY_DSN || '',
   environment: process.env.NODE_ENV || 'development',
-  release: process.env.SENTRY_RELEASE || `alawael-erp@${process.env.npm_package_version || '1.0.0'}`,
-  
+  release:
+    process.env.SENTRY_RELEASE || `alawael-erp@${process.env.npm_package_version || '1.0.0'}`,
+
   // Sampling rates
   tracesSampleRate: parseFloat(process.env.SENTRY_TRACES_SAMPLE_RATE || '0.2'),
   profilesSampleRate: parseFloat(process.env.SENTRY_PROFILES_SAMPLE_RATE || '0.1'),
-  
+
   // Performance monitoring
   enableTracing: process.env.SENTRY_ENABLE_TRACING !== 'false',
   enableProfiling: process.env.SENTRY_ENABLE_PROFILING === 'true',
-  
+
   // Session replay (frontend)
   replaysSessionSampleRate: parseFloat(process.env.SENTRY_REPLAYS_SESSION_SAMPLE_RATE || '0.1'),
   replaysOnErrorSampleRate: parseFloat(process.env.SENTRY_REPLAYS_ON_ERROR_SAMPLE_RATE || '1.0'),
@@ -34,10 +37,10 @@ let currentUser = null;
  */
 const initializeSentry = () => {
   if (!config.dsn) {
-    console.warn('⚠️ Sentry DSN not configured. Error tracking disabled.');
+    logger.warn('⚠️ Sentry DSN not configured. Error tracking disabled.');
     return false;
   }
-  
+
   try {
     const integrations = [
       // Enable HTTP integration
@@ -51,38 +54,38 @@ const initializeSentry = () => {
       // Enable Mongoose integration
       new Tracing.Integrations.Mongoose(),
     ];
-    
+
     // Add profiling if enabled
     if (config.enableProfiling) {
       integrations.push(new ProfilingIntegration());
     }
-    
+
     Sentry.init({
       dsn: config.dsn,
       environment: config.environment,
       release: config.release,
       integrations,
-      
+
       // Performance Monitoring
       tracesSampleRate: config.tracesSampleRate,
-      
+
       // Profiling
       profilesSampleRate: config.profilesSampleRate,
-      
+
       // Set transaction name to route
       normalizeDepth: 10,
-      
+
       // Additional options
       attachStacktrace: true,
       sendDefaultPii: false,
-      
+
       // Before send hook - filter sensitive data
       beforeSend(event, hint) {
         // Don't send events in development unless explicitly enabled
         if (config.environment === 'development' && process.env.SENTRY_SEND_IN_DEV !== 'true') {
           return null;
         }
-        
+
         // Filter out sensitive headers
         if (event.request?.headers) {
           const sensitiveHeaders = ['authorization', 'cookie', 'set-cookie', 'x-api-key'];
@@ -92,30 +95,31 @@ const initializeSentry = () => {
             }
           });
         }
-        
+
         // Filter out sensitive body fields
         if (event.request?.data) {
           try {
-            const data = typeof event.request.data === 'string' 
-              ? JSON.parse(event.request.data) 
-              : event.request.data;
-            
+            const data =
+              typeof event.request.data === 'string'
+                ? JSON.parse(event.request.data)
+                : event.request.data;
+
             const sensitiveFields = ['password', 'passwordConfirm', 'token', 'secret', 'apiKey'];
             sensitiveFields.forEach(field => {
               if (data[field]) {
                 data[field] = '[Filtered]';
               }
             });
-            
+
             event.request.data = JSON.stringify(data);
-          } catch (e) {
+          } catch (_e) {
             // Keep original data if parsing fails
           }
         }
-        
+
         return event;
       },
-      
+
       // Before breadcrumb hook
       beforeBreadcrumb(breadcrumb, hint) {
         // Filter out health check requests
@@ -127,7 +131,7 @@ const initializeSentry = () => {
         }
         return breadcrumb;
       },
-      
+
       // Ignore specific errors
       ignoreErrors: [
         // Common browser errors
@@ -138,33 +142,29 @@ const initializeSentry = () => {
         'NetworkError',
         'cancelled',
         'canceled',
-        
+
         // Common Node.js errors
         'ECONNREFUSED',
         'ECONNRESET',
         'ETIMEDOUT',
         'ENOTFOUND',
-        
+
         // Custom errors to ignore
         'ValidationError',
         'UnauthorizedError',
       ],
-      
+
       // Ignore transactions
-      ignoreTransactions: [
-        'GET /health',
-        'GET /metrics',
-        'GET /favicon.ico',
-      ],
+      ignoreTransactions: ['GET /health', 'GET /metrics', 'GET /favicon.ico'],
     });
-    
-    console.log('✅ Sentry initialized successfully');
-    console.log(`📊 Environment: ${config.environment}`);
-    console.log(`🏷️ Release: ${config.release}`);
-    
+
+    logger.info('✅ Sentry initialized successfully');
+    logger.info(`📊 Environment: ${config.environment}`);
+    logger.info(`🏷️ Release: ${config.release}`);
+
     return true;
   } catch (error) {
-    console.error('❌ Failed to initialize Sentry:', error);
+    logger.error('❌ Failed to initialize Sentry:', error);
     return false;
   }
 };
@@ -172,9 +172,9 @@ const initializeSentry = () => {
 /**
  * Set user context
  */
-const setUser = (user) => {
+const setUser = user => {
   currentUser = user;
-  
+
   if (user) {
     Sentry.setUser({
       id: user._id || user.id,
@@ -199,26 +199,26 @@ const getUser = () => currentUser;
 const captureException = (error, context = {}) => {
   // Add custom context
   if (Object.keys(context).length > 0) {
-    Sentry.withScope((scope) => {
+    Sentry.withScope(scope => {
       // Add tags
       if (context.tags) {
         Object.entries(context.tags).forEach(([key, value]) => {
           scope.setTag(key, value);
         });
       }
-      
+
       // Add extra context
       if (context.extra) {
         Object.entries(context.extra).forEach(([key, value]) => {
           scope.setExtra(key, value);
         });
       }
-      
+
       // Add request context
       if (context.request) {
         scope.setRequestData(context.request);
       }
-      
+
       // Add user context
       if (context.user) {
         scope.setUser({
@@ -227,17 +227,17 @@ const captureException = (error, context = {}) => {
           username: context.user.username,
         });
       }
-      
+
       // Set fingerprint for grouping
       if (context.fingerprint) {
         scope.setFingerprint(context.fingerprint);
       }
-      
+
       // Set level
       if (context.level) {
         scope.setLevel(context.level);
       }
-      
+
       Sentry.captureException(error);
     });
   } else {
@@ -249,21 +249,21 @@ const captureException = (error, context = {}) => {
  * Capture message
  */
 const captureMessage = (message, level = 'info', context = {}) => {
-  Sentry.withScope((scope) => {
+  Sentry.withScope(scope => {
     // Add tags
     if (context.tags) {
       Object.entries(context.tags).forEach(([key, value]) => {
         scope.setTag(key, value);
       });
     }
-    
+
     // Add extra context
     if (context.extra) {
       Object.entries(context.extra).forEach(([key, value]) => {
         scope.setExtra(key, value);
       });
     }
-    
+
     scope.setLevel(level);
     Sentry.captureMessage(message);
   });
@@ -272,7 +272,7 @@ const captureMessage = (message, level = 'info', context = {}) => {
 /**
  * Add breadcrumb
  */
-const addBreadcrumb = (breadcrumb) => {
+const addBreadcrumb = breadcrumb => {
   Sentry.addBreadcrumb({
     timestamp: Date.now() / 1000,
     ...breadcrumb,
@@ -327,14 +327,14 @@ const tracingMiddleware = () => {
 const createSpan = (name, op, parentSpan) => {
   const scope = Sentry.getCurrentScope();
   const parent = parentSpan || scope.getSpan();
-  
+
   if (parent) {
     return parent.startChild({
       op,
       description: name,
     });
   }
-  
+
   return Sentry.startTransaction({
     name,
     op,
@@ -344,9 +344,9 @@ const createSpan = (name, op, parentSpan) => {
 /**
  * Wrap async function with error capture
  */
-const wrapAsync = (fn) => {
+const wrapAsync = fn => {
   return (req, res, next) => {
-    Promise.resolve(fn(req, res, next)).catch((error) => {
+    Promise.resolve(fn(req, res, next)).catch(error => {
       captureException(error, {
         tags: {
           route: req.route?.path || req.path,
@@ -372,7 +372,7 @@ class AppError extends Error {
     this.statusCode = statusCode;
     this.code = code;
     this.isOperational = true;
-    
+
     Error.captureStackTrace(this, this.constructor);
   }
 }
@@ -417,11 +417,11 @@ class RateLimitError extends AppError {
 /**
  * Error serializer for logging
  */
-const serializeError = (error) => {
+const serializeError = error => {
   if (error instanceof Error) {
     return {
       name: error.name,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
       stack: error.stack,
       code: error.code,
       statusCode: error.statusCode,
@@ -437,9 +437,9 @@ const serializeError = (error) => {
 const closeSentry = async () => {
   try {
     await Sentry.close(2000);
-    console.log('✅ Sentry closed successfully');
+    logger.info('✅ Sentry closed successfully');
   } catch (error) {
-    console.error('❌ Error closing Sentry:', error);
+    logger.error('❌ Error closing Sentry:', error);
   }
 };
 
@@ -447,26 +447,26 @@ module.exports = {
   // Initialization
   initializeSentry,
   closeSentry,
-  
+
   // User context
   setUser,
   getUser,
-  
+
   // Error capture
   captureException,
   captureMessage,
   addBreadcrumb,
-  
+
   // Performance
   startTransaction,
   createSpan,
-  
+
   // Middleware
   requestHandler,
   errorHandler,
   tracingMiddleware,
   wrapAsync,
-  
+
   // Error classes
   AppError,
   ValidationError,
@@ -475,7 +475,7 @@ module.exports = {
   NotFoundError,
   ConflictError,
   RateLimitError,
-  
+
   // Utilities
   serializeError,
   config,

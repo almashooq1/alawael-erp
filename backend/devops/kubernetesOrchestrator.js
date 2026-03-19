@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * ☸️ Kubernetes Orchestration
  *
@@ -46,10 +47,10 @@ metadata:
   namespace: alawael
 type: Opaque
 stringData:
-  MONGO_URI: "mongodb+srv://user:password@cluster.mongodb.net/alawael"
-  REDIS_URL: "redis://:password@redis-host:6379"
-  JWT_SECRET: "your-secret-key-here"
-  API_KEY: "your-api-key-here"
+  MONGODB_URI: "<REPLACE_WITH_ACTUAL_MONGODB_URI>"
+  REDIS_URL: "<REPLACE_WITH_ACTUAL_REDIS_URL>"
+  JWT_SECRET: "<REPLACE_WITH_ACTUAL_JWT_SECRET>"
+  API_KEY: "<REPLACE_WITH_ACTUAL_API_KEY>"
   `,
 
   // Deployment manifest
@@ -97,11 +98,11 @@ spec:
             configMapKeyRef:
               name: alawael-config
               key: NODE_ENV
-        - name: MONGO_URI
+        - name: MONGODB_URI
           valueFrom:
             secretKeyRef:
               name: alawael-secrets
-              key: MONGO_URI
+              key: MONGODB_URI
         - name: REDIS_URL
           valueFrom:
             secretKeyRef:
@@ -375,7 +376,7 @@ env:
   CACHE_TTL: 3600
 
 secrets:
-  MONGO_URI: ""
+  MONGODB_URI: ""
   REDIS_URL: ""
   JWT_SECRET: ""
     `;

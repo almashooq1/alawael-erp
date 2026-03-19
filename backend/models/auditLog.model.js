@@ -1,9 +1,11 @@
+/* eslint-disable no-unused-vars */
 /**
  * نموذج سجل التدقيق الشامل (Audit Log Model)
  * نظام تدقيق ذكي متقدم لتتبع جميع العمليات في النظام
  */
 
 const mongoose = require('mongoose');
+const logger = require('../utils/logger');
 
 // تعريف أنواع الأحداث
 const AuditEventTypes = {
@@ -358,7 +360,7 @@ auditLogSchema.statics = {
       await log.save();
       return log;
     } catch (error) {
-      console.error('Error creating audit log:', error);
+      logger.error('Error creating audit log:', error);
       throw error;
     }
   },

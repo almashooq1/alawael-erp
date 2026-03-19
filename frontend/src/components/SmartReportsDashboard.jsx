@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Card,
@@ -19,28 +19,25 @@ import {
   TableCell,
   TableHead,
   TableRow,
-  Paper,
   CircularProgress,
-  Alert,
   Tab,
   Tabs,
   LinearProgress,
 } from '@mui/material';
 import {
   Download as DownloadIcon,
-  Print as PrintIcon,
-  Share as ShareIcon,
   Add as AddIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
 } from '@mui/icons-material';
-import smartReportsService from '../services/smartReportsService';
-import exportService from '../services/exportService';
+import exportService from 'services/exportService';
+import logger from 'utils/logger';
+import { gradients, surfaceColors, neutralColors, brandColors } from 'theme/palette';
 
 /**
  * مكون لوحة التقارير الذكية
  * Smart Reports Dashboard Component
- * 
+ *
  * يوفر نظام تقارير متقدم مع التحليلات الذكية
  * Provides advanced reporting system with intelligent analytics
  */
@@ -49,7 +46,7 @@ const SmartReportsDashboard = () => {
   const [tabValue, setTabValue] = useState(0);
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [selectedReport, setSelectedReport] = useState(null);
+  const [_selectedReport, _setSelectedReport] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [newReport, setNewReport] = useState({
     name: '',
@@ -72,7 +69,7 @@ const SmartReportsDashboard = () => {
       setLoading(true);
       // محاكاة تحميل البيانات
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      
+
       // بيانات نموذجية
       setReports([
         {
@@ -107,7 +104,7 @@ const SmartReportsDashboard = () => {
         byType: { performance: 5, trends: 4, executive: 3 },
       });
     } catch (error) {
-      console.error('Error loading data:', error);
+      logger.error('Error loading data:', error);
     } finally {
       setLoading(false);
     }
@@ -118,7 +115,7 @@ const SmartReportsDashboard = () => {
       setLoading(true);
       // محاكاة حفظ التقرير
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      
+
       const newReportData = {
         id: reports.length + 1,
         ...newReport,
@@ -134,7 +131,7 @@ const SmartReportsDashboard = () => {
         filters: {},
       });
     } catch (error) {
-      console.error('Error creating report:', error);
+      logger.error('Error creating report:', error);
     } finally {
       setLoading(false);
     }
@@ -158,13 +155,13 @@ const SmartReportsDashboard = () => {
         fileName
       );
     } catch (error) {
-      console.error('Error exporting report:', error);
+      logger.error('Error exporting report:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handlePrintReport = (report) => {
+  const _handlePrintReport = (report) => {
     exportService.print('report-content', {
       title: report.name,
     });
@@ -174,7 +171,7 @@ const SmartReportsDashboard = () => {
   const renderOverview = () => (
     <Grid container spacing={3}>
       <Grid item xs={12} sm={6} md={3}>
-        <Card sx={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white' }}>
+        <Card sx={{ background: gradients.primary, color: 'white' }}>
           <CardContent sx={{ textAlign: 'center' }}>
             <Box sx={{ fontSize: 32, fontWeight: 'bold', mb: 1 }}>{kpis.total}</Box>
             <Box sx={{ fontSize: 14 }}>إجمالي التقارير</Box>
@@ -183,7 +180,7 @@ const SmartReportsDashboard = () => {
       </Grid>
 
       <Grid item xs={12} sm={6} md={3}>
-        <Card sx={{ background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)', color: 'white' }}>
+        <Card sx={{ background: gradients.warning, color: 'white' }}>
           <CardContent sx={{ textAlign: 'center' }}>
             <Box sx={{ fontSize: 32, fontWeight: 'bold', mb: 1 }}>{kpis.unread}</Box>
             <Box sx={{ fontSize: 14 }}>تقارير جديدة</Box>
@@ -192,7 +189,7 @@ const SmartReportsDashboard = () => {
       </Grid>
 
       <Grid item xs={12} sm={6} md={3}>
-        <Card sx={{ background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)', color: 'white' }}>
+        <Card sx={{ background: gradients.success, color: 'white' }}>
           <CardContent sx={{ textAlign: 'center' }}>
             <Box sx={{ fontSize: 32, fontWeight: 'bold', mb: 1 }}>
               {reports.filter((r) => r.status === 'completed').length}
@@ -203,7 +200,7 @@ const SmartReportsDashboard = () => {
       </Grid>
 
       <Grid item xs={12} sm={6} md={3}>
-        <Card sx={{ background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)', color: 'white' }}>
+        <Card sx={{ background: gradients.accent, color: 'white' }}>
           <CardContent sx={{ textAlign: 'center' }}>
             <Box sx={{ fontSize: 32, fontWeight: 'bold', mb: 1 }}>
               {reports.filter((r) => r.status === 'processing').length}
@@ -220,7 +217,7 @@ const SmartReportsDashboard = () => {
           <CardContent>
             <Table>
               <TableHead>
-                <TableRow sx={{ background: '#f3f4f6' }}>
+                <TableRow sx={{ background: surfaceColors.background }}>
                   <TableCell align="right">اسم التقرير</TableCell>
                   <TableCell align="right">النوع</TableCell>
                   <TableCell align="right">الحالة</TableCell>
@@ -312,8 +309,8 @@ const SmartReportsDashboard = () => {
                 <Box sx={{ display: 'flex', gap: 3 }}>
                   {Object.entries(report.metrics).map(([key, value]) => (
                     <Box key={key}>
-                      <Box sx={{ fontSize: 12, color: '#666' }}>{key}</Box>
-                      <Box sx={{ fontSize: 24, fontWeight: 'bold', color: '#667eea' }}>{value}</Box>
+                      <Box sx={{ fontSize: 12, color: neutralColors.textSecondary }}>{key}</Box>
+                      <Box sx={{ fontSize: 24, fontWeight: 'bold', color: brandColors.primaryStart }}>{value}</Box>
                     </Box>
                   ))}
                 </Box>
@@ -336,14 +333,14 @@ const SmartReportsDashboard = () => {
               <Box variant="h5" sx={{ fontSize: 24, fontWeight: 'bold', mb: 1 }}>
                 📊 لوحة التقارير الذكية
               </Box>
-              <Box sx={{ fontSize: 14, color: '#666' }}>نظام متقدم للتحليلات والتقارير</Box>
+              <Box sx={{ fontSize: 14, color: neutralColors.textSecondary }}>نظام متقدم للتحليلات والتقارير</Box>
             </Box>
             <Button
               variant="contained"
               startIcon={<AddIcon />}
               onClick={() => setOpenDialog(true)}
               sx={{
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                background: gradients.primary,
               }}
             >
               إنشاء تقرير جديد
@@ -356,7 +353,7 @@ const SmartReportsDashboard = () => {
               value={tabValue}
               onChange={(e, newValue) => setTabValue(newValue)}
               sx={{
-                borderBottom: '1px solid #e0e0e0',
+                borderBottom: `1px solid ${surfaceColors.divider}`,
                 '& .MuiTab-root': {
                   textTransform: 'none',
                   fontSize: 14,

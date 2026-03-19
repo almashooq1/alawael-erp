@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 const waitlistSchema = new mongoose.Schema(
@@ -20,7 +21,7 @@ const waitlistSchema = new mongoose.Schema(
     status: { type: String, enum: ['WAITING', 'OFFERED', 'BOOKED', 'EXPIRED'], default: 'WAITING' },
     expertiryDate: { type: Date },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 module.exports = mongoose.model('Waitlist', waitlistSchema);

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // backend/utils/seedDatabase.js
 const bcrypt = require('bcryptjs');
 const User = require('../models/User');

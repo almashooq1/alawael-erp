@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // const openai = require('openai'); // In production, use Whisper API
 const fs = require('fs');
 

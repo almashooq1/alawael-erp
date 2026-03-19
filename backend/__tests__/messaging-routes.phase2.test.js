@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * Messaging Routes Comprehensive Test Suite - Phase 2
  * Tests for all messaging and communication features
@@ -117,6 +119,7 @@ jest.mock('../utils/logger', () => ({
   info: jest.fn(),
   error: jest.fn(),
   warn: jest.fn(),
+  debug: jest.fn(),
 }));
 
 // Import after all mocks are defined

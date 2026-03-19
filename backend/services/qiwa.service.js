@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * 🇸🇦 Qiwa Integration Service
  * Ministry of Labor (MOL) - Professional Integration
@@ -22,6 +23,7 @@
 const axios = require('axios');
 const crypto = require('crypto');
 const EventEmitter = require('events');
+const logger = require('../utils/logger');
 
 class QiwaService extends EventEmitter {
   constructor(config = {}) {
@@ -77,31 +79,29 @@ class QiwaService extends EventEmitter {
       timeout: 30000,
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
+        Accept: 'application/json',
       },
     });
 
     // Request interceptor for signing requests
     this.client.interceptors.request.use(
-      (config) => {
+      config => {
         config.headers['X-API-Key'] = this.apiKey;
         config.headers['X-Request-ID'] = crypto.randomUUID();
         config.headers['X-Timestamp'] = new Date().toISOString();
 
         // Sign request
-        config.headers['X-Signature'] = this._generateSignature(
-          config.data || {}
-        );
+        config.headers['X-Signature'] = this._generateSignature(config.data || {});
 
         return config;
       },
-      (error) => Promise.reject(error)
+      error => Promise.reject(error)
     );
 
     // Response interceptor
     this.client.interceptors.response.use(
-      (response) => response,
-      async (error) => {
+      response => response,
+      async error => {
         const config = error.config;
 
         // Retry logic
@@ -109,16 +109,13 @@ class QiwaService extends EventEmitter {
           config.retryCount = 0;
         }
 
-        if (
-          config.retryCount < this.retryConfig.maxRetries &&
-          this._isRetryableError(error)
-        ) {
+        if (config.retryCount < this.retryConfig.maxRetries && this._isRetryableError(error)) {
           config.retryCount++;
           const delay =
             this.retryConfig.retryDelay *
             Math.pow(this.retryConfig.backoffMultiplier, config.retryCount - 1);
 
-          await new Promise((resolve) => setTimeout(resolve, delay));
+          await new Promise(resolve => setTimeout(resolve, delay));
           return this.client(config);
         }
 
@@ -133,10 +130,7 @@ class QiwaService extends EventEmitter {
   _generateSignature(data) {
     const timestamp = new Date().toISOString();
     const payload = JSON.stringify({ ...data, timestamp, key: this.apiSecret });
-    return crypto
-      .createHash('sha256')
-      .update(payload)
-      .digest('hex');
+    return crypto.createHash('sha256').update(payload).digest('hex');
   }
 
   /**
@@ -222,7 +216,7 @@ class QiwaService extends EventEmitter {
 
       // Log error
       this._log('error', `${method} ${endpoint} - Failed (${responseTime}ms)`, {
-        error: error.message,
+        error: 'حدث خطأ داخلي',
         statusCode: error.response?.status,
         responseData: error.response?.data,
       });
@@ -261,14 +255,10 @@ class QiwaService extends EventEmitter {
     this._validate('nationalId', nationalId, 'Invalid National ID');
 
     try {
-      const response = await this._makeRequest(
-        'GET',
-        '/employees/verify/national-id',
-        {
-          nationalId,
-          establishmentId: this.establishmentId,
-        }
-      );
+      const response = await this._makeRequest('GET', '/employees/verify/national-id', {
+        nationalId,
+        establishmentId: this.establishmentId,
+      });
 
       return this._transformResponse(response, 'verification');
     } catch (error) {
@@ -311,16 +301,12 @@ class QiwaService extends EventEmitter {
     try {
       const normalizedData = this._normalizeContractData(contractData);
 
-      const response = await this._makeRequest(
-        'POST',
-        '/contracts/register',
-        {
-          ...normalizedData,
-          establishmentId: this.establishmentId,
-          laborOfficeId: this.laborOfficeId,
-          timestamp: new Date().toISOString(),
-        }
-      );
+      const response = await this._makeRequest('POST', '/contracts/register', {
+        ...normalizedData,
+        establishmentId: this.establishmentId,
+        laborOfficeId: this.laborOfficeId,
+        timestamp: new Date().toISOString(),
+      });
 
       const result = this._transformResponse(response, 'contractRegistration');
 
@@ -347,14 +333,10 @@ class QiwaService extends EventEmitter {
     try {
       const normalizedData = this._normalizeContractData(updates);
 
-      const response = await this._makeRequest(
-        'PUT',
-        `/contracts/${contractId}`,
-        {
-          ...normalizedData,
-          updatedAt: new Date().toISOString(),
-        }
-      );
+      const response = await this._makeRequest('PUT', `/contracts/${contractId}`, {
+        ...normalizedData,
+        updatedAt: new Date().toISOString(),
+      });
 
       const result = this._transformResponse(response, 'contractUpdate');
 
@@ -382,16 +364,12 @@ class QiwaService extends EventEmitter {
     }
 
     try {
-      const response = await this._makeRequest(
-        'POST',
-        `/contracts/${contractId}/terminate`,
-        {
-          reason,
-          terminationDate: terminationDate || new Date(),
-          establishmentId: this.establishmentId,
-          terminatedAt: new Date().toISOString(),
-        }
-      );
+      const response = await this._makeRequest('POST', `/contracts/${contractId}/terminate`, {
+        reason,
+        terminationDate: terminationDate || new Date(),
+        establishmentId: this.establishmentId,
+        terminatedAt: new Date().toISOString(),
+      });
 
       const result = this._transformResponse(response, 'contractTermination');
 
@@ -416,12 +394,9 @@ class QiwaService extends EventEmitter {
     this._validate('contractId', contractId, 'Invalid Contract ID');
 
     try {
-      const response = await this._makeRequest(
-        'GET',
-        `/contracts/${contractId}`,
-        null,
-        { cacheDuration: 7200 }
-      );
+      const response = await this._makeRequest('GET', `/contracts/${contractId}`, null, {
+        cacheDuration: 7200,
+      });
 
       return this._transformResponse(response, 'contractDetails');
     } catch (error) {
@@ -466,15 +441,11 @@ class QiwaService extends EventEmitter {
     try {
       const normalizedWage = this._normalizeWageData(wageData);
 
-      const response = await this._makeRequest(
-        'PUT',
-        `/employees/${iqamaNumber}/wage`,
-        {
-          ...normalizedWage,
-          updatedAt: new Date().toISOString(),
-          updatedBy: 'system-integration',
-        }
-      );
+      const response = await this._makeRequest('PUT', `/employees/${iqamaNumber}/wage`, {
+        ...normalizedWage,
+        updatedAt: new Date().toISOString(),
+        updatedBy: 'system-integration',
+      });
 
       const result = this._transformResponse(response, 'wageUpdate');
 
@@ -649,14 +620,10 @@ class QiwaService extends EventEmitter {
    */
   async calculateNitaqatPoints(workforce) {
     try {
-      const response = await this._makeRequest(
-        'POST',
-        '/nitaqat/calculate-points',
-        {
-          establishmentId: this.establishmentId,
-          workforce,
-        }
-      );
+      const response = await this._makeRequest('POST', '/nitaqat/calculate-points', {
+        establishmentId: this.establishmentId,
+        workforce,
+      });
 
       return this._transformResponse(response, 'nitaqatPoints');
     } catch (error) {
@@ -684,15 +651,15 @@ class QiwaService extends EventEmitter {
         } catch (error) {
           errors.push({
             iqama: contract.employeeIqama,
-            error: error.message,
+            error: 'حدث خطأ داخلي',
           });
-          results.push({ success: false, error: error.message });
+          results.push({ success: false, error: 'حدث خطأ داخلي' });
         }
       }
 
       this.emit('batchOperation:completed', {
         total: contractsList.length,
-        successful: results.filter((r) => r.success).length,
+        successful: results.filter(r => r.success).length,
         failed: errors.length,
       });
 
@@ -700,7 +667,7 @@ class QiwaService extends EventEmitter {
         results,
         summary: {
           total: contractsList.length,
-          successful: results.filter((r) => r.success).length,
+          successful: results.filter(r => r.success).length,
           failed: errors.length,
           errors,
         },
@@ -721,23 +688,20 @@ class QiwaService extends EventEmitter {
 
       for (const update of wageUpdatesList) {
         try {
-          const result = await this.updateEmployeeWage(
-            update.iqamaNumber,
-            update.wageData
-          );
+          const result = await this.updateEmployeeWage(update.iqamaNumber, update.wageData);
           results.push({ success: true, data: result });
         } catch (error) {
           errors.push({
             iqama: update.iqamaNumber,
-            error: error.message,
+            error: 'حدث خطأ داخلي',
           });
-          results.push({ success: false, error: error.message });
+          results.push({ success: false, error: 'حدث خطأ داخلي' });
         }
       }
 
       this.emit('batchWageUpdate:completed', {
         total: wageUpdatesList.length,
-        successful: results.filter((r) => r.success).length,
+        successful: results.filter(r => r.success).length,
         failed: errors.length,
       });
 
@@ -745,7 +709,7 @@ class QiwaService extends EventEmitter {
         results,
         summary: {
           total: wageUpdatesList.length,
-          successful: results.filter((r) => r.success).length,
+          successful: results.filter(r => r.success).length,
           failed: errors.length,
           errors,
         },
@@ -774,13 +738,7 @@ class QiwaService extends EventEmitter {
    * Validate contract data structure
    */
   _validateContract(contractData) {
-    const required = [
-      'employeeIqama',
-      'contractType',
-      'jobTitle',
-      'basicSalary',
-      'startDate',
-    ];
+    const required = ['employeeIqama', 'contractType', 'jobTitle', 'basicSalary', 'startDate'];
 
     for (const field of required) {
       if (!contractData[field]) {
@@ -794,10 +752,7 @@ class QiwaService extends EventEmitter {
       throw new Error('Salary cannot be negative');
     }
 
-    if (
-      contractData.contractType !== 'limited' &&
-      contractData.contractType !== 'unlimited'
-    ) {
+    if (contractData.contractType !== 'limited' && contractData.contractType !== 'unlimited') {
       throw new Error('Invalid contract type');
     }
   }
@@ -816,17 +771,9 @@ class QiwaService extends EventEmitter {
       transportAllowance: data.transportAllowance || 0,
       otherAllowances: data.otherAllowances || 0,
       startDate: new Date(data.startDate).toISOString().split('T')[0],
-      endDate: data.endDate
-        ? new Date(data.endDate).toISOString().split('T')[0]
-        : null,
+      endDate: data.endDate ? new Date(data.endDate).toISOString().split('T')[0] : null,
       workingHours: data.workingHours || 8,
-      workingDays: data.workingDays || [
-        'sun',
-        'mon',
-        'tue',
-        'wed',
-        'thu',
-      ],
+      workingDays: data.workingDays || ['sun', 'mon', 'tue', 'wed', 'thu'],
     };
   }
 
@@ -847,9 +794,7 @@ class QiwaService extends EventEmitter {
             (data.otherAllowances || 0)) *
             100
         ) / 100,
-      effectiveDate: new Date(data.effectiveDate || new Date())
-        .toISOString()
-        .split('T')[0],
+      effectiveDate: new Date(data.effectiveDate || new Date()).toISOString().split('T')[0],
     };
   }
 
@@ -860,7 +805,7 @@ class QiwaService extends EventEmitter {
     return {
       period: data.period,
       submissionType: data.submissionType || 'regular',
-      employees: (data.employees || []).map((emp) => ({
+      employees: (data.employees || []).map(emp => ({
         iqamaNumber: emp.iqamaNumber,
         basicSalary: Math.round(emp.basicSalary * 100) / 100,
         allowances: emp.allowances || {},
@@ -893,7 +838,7 @@ class QiwaService extends EventEmitter {
    */
   _formatError(error) {
     const formattedError = new Error(
-      error.response?.data?.message || error.message || 'Unknown error'
+      error.response?.data?.message || 'حدث خطأ داخلي' || 'Unknown error'
     );
 
     formattedError.statusCode = error.response?.status || 500;
@@ -964,8 +909,7 @@ class QiwaService extends EventEmitter {
     }
 
     const totalTime = this.metrics.requestTimes.reduce((a, b) => a + b, 0);
-    this.metrics.averageResponseTime =
-      Math.round(totalTime / this.metrics.requestTimes.length);
+    this.metrics.averageResponseTime = Math.round(totalTime / this.metrics.requestTimes.length);
   }
 
   /**
@@ -976,16 +920,11 @@ class QiwaService extends EventEmitter {
       ...this.metrics,
       successRate:
         this.metrics.totalRequests > 0
-          ? Math.round(
-              (this.metrics.successfulRequests / this.metrics.totalRequests) *
-                100
-            )
+          ? Math.round((this.metrics.successfulRequests / this.metrics.totalRequests) * 100)
           : 0,
       cacheHitRate:
         this.metrics.totalRequests > 0
-          ? Math.round(
-              (this.metrics.cachedResponses / this.metrics.totalRequests) * 100
-            )
+          ? Math.round((this.metrics.cachedResponses / this.metrics.totalRequests) * 100)
           : 0,
       recentRequests: this.requestHistory.slice(-100),
     };
@@ -1008,7 +947,7 @@ class QiwaService extends EventEmitter {
       return {
         status: 'unhealthy',
         timestamp: new Date(),
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -1034,9 +973,9 @@ class QiwaService extends EventEmitter {
     }
 
     if (level === 'error') {
-      console.error(`[Qiwa Service] ${message}`, metadata);
+      logger.error(`[Qiwa Service] ${message}`, metadata);
     } else {
-      console.log(`[Qiwa Service] ${message}`, metadata);
+      logger.info(`[Qiwa Service] ${message}`, metadata);
     }
   }
 
@@ -1047,7 +986,7 @@ class QiwaService extends EventEmitter {
     let history = this.requestHistory;
 
     if (filter.level) {
-      history = history.filter((h) => h.level === filter.level);
+      history = history.filter(h => h.level === filter.level);
     }
 
     if (filter.limit) {

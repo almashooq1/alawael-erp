@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const Transaction = require('../models/Transaction');
 const Invoice = require('../models/Invoice');
 const Budget = require('../models/Budget');
@@ -13,7 +14,7 @@ class FinancialIntelligenceService extends EventEmitter {
   constructor() {
     super();
     this.name = 'FinancialIntelligenceService';
-    console.log(`[${this.name}] Initialized`);
+    // console.log(`[${this.name}] Initialized`);
   }
 
   // ==================== TRANSACTION METHODS ====================
@@ -67,7 +68,7 @@ class FinancialIntelligenceService extends EventEmitter {
 
       return transaction;
     } catch (error) {
-      this.emit('payment-error', { error: error.message });
+      this.emit('payment-error', { error: 'An internal error occurred' });
       throw error;
     }
   }
@@ -98,7 +99,7 @@ class FinancialIntelligenceService extends EventEmitter {
       this.emit('payment-completed', { transactionId, amount: transaction.amount });
       return transaction;
     } catch (error) {
-      this.emit('payment-completion-error', { error: error.message });
+      this.emit('payment-completion-error', { error: 'An internal error occurred' });
       throw error;
     }
   }

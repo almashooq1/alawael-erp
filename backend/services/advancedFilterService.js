@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * خدمة التصفية المتقدمة والذكية
  * Advanced Data Filtering Service
@@ -118,7 +119,9 @@ class AdvancedFilterService {
     let result = data;
 
     Object.keys(fieldFilters).forEach(field => {
-      const values = Array.isArray(fieldFilters[field]) ? fieldFilters[field] : [fieldFilters[field]];
+      const values = Array.isArray(fieldFilters[field])
+        ? fieldFilters[field]
+        : [fieldFilters[field]];
 
       result = result.filter(item => values.includes(item[field]));
     });

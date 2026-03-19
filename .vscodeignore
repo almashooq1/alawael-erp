@@ -1,0 +1,37 @@
+# VS Code Ignore - Performance Optimization
+# استبعادات VS Code - تحسين الأداء
+
+# Node modules
+**/node_modules/**
+node_modules/
+
+# Build outputs
+**/dist/**
+**/build/**
+**/.next/**
+**/out/**
+**/coverage/**
+
+# Source maps
+**/*.map
+
+# Logs
+**/*.log
+logs/
+
+# Git
+.git/
+
+# Cache
+**/.cache/**
+**/.npm/**
+**/.yarn/**
+
+# Temporary
+**/*.tmp
+**/*.temp
+**/.temp/
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable no-unused-vars */
 
 /**
  * استيراد البيانات الأولية لنظام ERP
@@ -40,8 +41,18 @@ const organizationData = {
           id: 'SEC001',
           name: 'مكتب المدير العام',
           positions: [
-            { id: 'POS001', title: 'مدير عام المنظمة', level: 'executive', salary: { min: 30000, max: 40000 } },
-            { id: 'POS002', title: 'مساعد المدير العام', level: 'senior', salary: { min: 20000, max: 25000 } },
+            {
+              id: 'POS001',
+              title: 'مدير عام المنظمة',
+              level: 'executive',
+              salary: { min: 30000, max: 40000 },
+            },
+            {
+              id: 'POS002',
+              title: 'مساعد المدير العام',
+              level: 'senior',
+              salary: { min: 20000, max: 25000 },
+            },
           ],
         },
       ],
@@ -55,14 +66,31 @@ const organizationData = {
           id: 'SEC002',
           name: 'التأهيل الطبي',
           positions: [
-            { id: 'POS003', title: 'أخصائي تأهيل طبي', level: 'specialist', salary: { min: 12000, max: 18000 } },
-            { id: 'POS004', title: 'أخصائي علاج طبيعي', level: 'specialist', salary: { min: 11000, max: 16000 } },
+            {
+              id: 'POS003',
+              title: 'أخصائي تأهيل طبي',
+              level: 'specialist',
+              salary: { min: 12000, max: 18000 },
+            },
+            {
+              id: 'POS004',
+              title: 'أخصائي علاج طبيعي',
+              level: 'specialist',
+              salary: { min: 11000, max: 16000 },
+            },
           ],
         },
         {
           id: 'SEC003',
           name: 'التأهيل النفسي',
-          positions: [{ id: 'POS005', title: 'أخصائي نفسي', level: 'specialist', salary: { min: 12000, max: 17000 } }],
+          positions: [
+            {
+              id: 'POS005',
+              title: 'أخصائي نفسي',
+              level: 'specialist',
+              salary: { min: 12000, max: 17000 },
+            },
+          ],
         },
       ],
     },
@@ -75,8 +103,18 @@ const organizationData = {
           id: 'SEC004',
           name: 'الشؤون الإدارية',
           positions: [
-            { id: 'POS006', title: 'مدير موارد بشرية', level: 'management', salary: { min: 18000, max: 25000 } },
-            { id: 'POS007', title: 'أخصائي موارد بشرية', level: 'specialist', salary: { min: 10000, max: 14000 } },
+            {
+              id: 'POS006',
+              title: 'مدير موارد بشرية',
+              level: 'management',
+              salary: { min: 18000, max: 25000 },
+            },
+            {
+              id: 'POS007',
+              title: 'أخصائي موارد بشرية',
+              level: 'specialist',
+              salary: { min: 10000, max: 14000 },
+            },
           ],
         },
       ],
@@ -90,8 +128,18 @@ const organizationData = {
           id: 'SEC005',
           name: 'المحاسبة',
           positions: [
-            { id: 'POS008', title: 'مدير مالي', level: 'management', salary: { min: 20000, max: 28000 } },
-            { id: 'POS009', title: 'محاسب', level: 'specialist', salary: { min: 9000, max: 13000 } },
+            {
+              id: 'POS008',
+              title: 'مدير مالي',
+              level: 'management',
+              salary: { min: 20000, max: 28000 },
+            },
+            {
+              id: 'POS009',
+              title: 'محاسب',
+              level: 'specialist',
+              salary: { min: 9000, max: 13000 },
+            },
           ],
         },
       ],
@@ -121,7 +169,9 @@ const organizationData = {
       { id: 'KPI002', name: 'عدد المستفيدين', target: 500, current: 420, unit: 'person' },
     ],
     departments: {
-      DEPT002: [{ id: 'KPI003', name: 'نسبة إكمال برامج التأهيل', target: 85, current: 78, unit: '%' }],
+      DEPT002: [
+        { id: 'KPI003', name: 'نسبة إكمال برامج التأهيل', target: 85, current: 78, unit: '%' },
+      ],
     },
   },
 
@@ -453,7 +503,9 @@ async function seed() {
     console.log('👥 Inserting employee data...');
     for (const employeeData of employeesData) {
       const employee = await Employee.create(employeeData);
-      console.log(`   ✅ ${employee.personalInfo.firstName} ${employee.personalInfo.lastName} (${employee.employment.positionTitle})`);
+      console.log(
+        `   ✅ ${employee.personalInfo.firstName} ${employee.personalInfo.lastName} (${employee.employment.positionTitle})`
+      );
     }
     console.log('');
 

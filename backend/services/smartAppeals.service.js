@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // Mock Models
 const Invoice = require('../models/Invoice');
 const Patient = require('../models/Beneficiary');
@@ -14,7 +15,11 @@ class SmartAppealsService {
    */
   static async generateAppealLetter(invoiceId, rejectionCode) {
     // Mock Data
-    const invoice = { id: invoiceId, service: 'Speech Therapy 92507', diagnosis: 'F80.2 (Receptive Language Disorder)' };
+    const invoice = {
+      id: invoiceId,
+      service: 'Speech Therapy 92507',
+      diagnosis: 'F80.2 (Receptive Language Disorder)',
+    };
 
     let appealStrategy = '';
     let template = '';

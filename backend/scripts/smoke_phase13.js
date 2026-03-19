@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // Simple smoke test for Phase 13 routes with JWT auth
 // Uses built-in http to avoid extra dependencies
 

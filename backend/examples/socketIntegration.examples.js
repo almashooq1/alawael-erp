@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Socket.IO Integration Examples
  * أمثلة على استخدام Socket.IO في Controllers
@@ -30,7 +31,7 @@ async function createUserWithNotification(req, res) {
 
     res.status(201).json({ success: true, user: newUser });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'حدث خطأ داخلي' });
   }
 }
 
@@ -64,7 +65,7 @@ async function createReportWithDashboardUpdate(req, res) {
 
     res.status(201).json({ success: true, report: newReport });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'حدث خطأ داخلي' });
   }
 }
 
@@ -86,7 +87,7 @@ async function emitMaintenanceAlert(req, res) {
 
     res.json({ success: true, message: 'Alert sent to all clients' });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'حدث خطأ داخلي' });
   }
 }
 
@@ -117,7 +118,7 @@ async function updateTaskWithDataSync(req, res) {
 
     res.json({ success: true, task: updatedTask });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'حدث خطأ داخلي' });
   }
 }
 
@@ -141,7 +142,7 @@ async function sendUserNotification(req, res) {
 
     res.json(result);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'حدث خطأ داخلي' });
   }
 }
 
@@ -162,7 +163,7 @@ async function getSocketStats(req, res) {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'حدث خطأ داخلي' });
   }
 }
 
@@ -183,7 +184,7 @@ async function broadcastAnnouncement(req, res) {
 
     res.json({ success: true, message: 'Announcement broadcast to all clients' });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'حدث خطأ داخلي' });
   }
 }
 

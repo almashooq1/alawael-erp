@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Database Indexing Optimizer - محسّن فهرسة قاعدة البيانات
  *
@@ -9,6 +10,7 @@
  */
 
 const mongoose = require('mongoose');
+const logger = require('../utils/logger');
 
 // ============================================================================
 // INDEX STRATEGIES
@@ -95,7 +97,7 @@ class IndexOptimizer {
       const indexes = INDEX_STRATEGIES[strategy] || INDEX_STRATEGIES.common;
       const results = [];
 
-      console.log(`📊 Creating indexes for collection: ${collectionName}`);
+      // console.log(`📊 Creating indexes for collection: ${collectionName}`);
 
       for (const index of indexes) {
         try {
@@ -105,7 +107,7 @@ class IndexOptimizer {
             result,
             status: 'created',
           });
-          console.log(`  ✅ Index created:`, index.fields);
+          // console.log(`  ✅ Index created:`, index.fields);
         } catch (error) {
           if (error.code === 85) {
             // Index already exists
@@ -115,7 +117,7 @@ class IndexOptimizer {
               status: 'exists',
             });
           } else {
-            console.error(`  ❌ Failed to create index:`, index.fields, error.message);
+            logger.error(`Failed to create index:`, index.fields, error.message);
             results.push({
               index: index.fields,
               error: error.message,
@@ -127,7 +129,7 @@ class IndexOptimizer {
 
       return results;
     } catch (error) {
-      console.error(`Failed to create indexes for ${collectionName}:`, error.message);
+      logger.error(`Failed to create indexes for ${collectionName}:`, error.message);
       throw error;
     }
   }
@@ -176,7 +178,7 @@ class IndexOptimizer {
       this.indexStats[collectionName] = analysis;
       return analysis;
     } catch (error) {
-      console.error(`Failed to analyze indexes for ${collectionName}:`, error.message);
+      logger.error(`Failed to analyze indexes for ${collectionName}:`, error.message);
       return [];
     }
   }
@@ -249,7 +251,7 @@ class IndexOptimizer {
 
       return recommendations;
     } catch (error) {
-      console.error(`Failed to get recommendations for ${collectionName}:`, error.message);
+      logger.error(`Failed to get recommendations for ${collectionName}:`, error.message);
       return [];
     }
   }
@@ -270,8 +272,8 @@ class IndexOptimizer {
       );
 
       if (dryRun) {
-        console.log(`🔍 Dry run - would drop ${toDrop.length} indexes:`);
-        toDrop.forEach(idx => console.log(`  - ${idx.name} (used ${idx.usageCount} times)`));
+        // console.log(`🔍 Dry run - would drop ${toDrop.length} indexes:`);
+        // toDrop.forEach(idx => console.log(`  - ${idx.name} (used ${idx.usageCount} times)`));
         return { dryRun: true, wouldDrop: toDrop.length, indexes: toDrop.map(i => i.name) };
       }
 
@@ -280,15 +282,15 @@ class IndexOptimizer {
         try {
           await collection.dropIndex(idx.name);
           dropped.push(idx.name);
-          console.log(`  ✅ Dropped index: ${idx.name}`);
+          // console.log(`  ✅ Dropped index: ${idx.name}`);
         } catch (error) {
-          console.error(`  ❌ Failed to drop index ${idx.name}:`, error.message);
+          logger.error(`Failed to drop index ${idx.name}:`, error.message);
         }
       }
 
       return { dropped: dropped.length, indexes: dropped };
     } catch (error) {
-      console.error(`Failed to drop unused indexes for ${collectionName}:`, error.message);
+      logger.error(`Failed to drop unused indexes for ${collectionName}:`, error.message);
       throw error;
     }
   }
@@ -315,7 +317,7 @@ class IndexOptimizer {
 
       return analysis;
     } catch (error) {
-      console.error(`Failed to explain query for ${collectionName}:`, error.message);
+      logger.error(`Failed to explain query for ${collectionName}:`, error.message);
       throw error;
     }
   }

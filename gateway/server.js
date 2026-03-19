@@ -14,6 +14,12 @@ const { createProxyMiddleware } = require('http-proxy-middleware');
 const CircuitBreaker = require('opossum');
 const winston = require('winston');
 
+// Professional modules
+const { ServiceRegistry } = require('./service-registry');
+const { tracingMiddleware, propagateTraceHeaders } = require('./tracing');
+const { mountHealthRoutes } = require('./health-aggregator');
+const gatewayLogger = require('./logger');
+
 // Configuration
 const config = {
   port: process.env.GATEWAY_PORT || 8080,
@@ -55,14 +61,17 @@ const app = express();
 app.use(helmet()); // Security headers
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN || '*',
+    origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : ['http://localhost:3000', 'http://localhost:5173'],
     credentials: true,
-  })
+  }),
 );
 app.use(compression()); // Compress responses
 app.use(morgan('combined', { stream: { write: message => logger.info(message.trim()) } }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Distributed tracing
+app.use(tracingMiddleware);
 
 // Rate limiting
 const limiter = rateLimit({
@@ -82,6 +91,9 @@ const limiter = rateLimit({
 });
 
 app.use('/api/', limiter);
+
+// Health aggregator routes (/health/status, /health/services, /health/ready, /health/live)
+mountHealthRoutes(app);
 
 // Health check
 app.get('/health', (req, res) => {
@@ -121,7 +133,7 @@ const createCircuitBreaker = (serviceName, serviceUrl) => {
       timeout: config.circuitBreaker.timeout,
       errorThresholdPercentage: config.circuitBreaker.errorThresholdPercentage,
       resetTimeout: config.circuitBreaker.resetTimeout,
-    }
+    },
   );
 
   breaker.on('open', () => {
@@ -160,7 +172,7 @@ Object.entries(config.services).forEach(([serviceName, serviceUrl]) => {
       res.status(503).json({
         error: 'Service error',
         service: serviceName,
-        message: error.message,
+        message: 'حدث خطأ داخلي',
       });
     }
   });
@@ -189,7 +201,7 @@ Object.entries(config.services).forEach(([serviceName, serviceUrl]) => {
           message: 'Service is currently unavailable',
         });
       },
-    })
+    }),
   );
 });
 
@@ -221,7 +233,7 @@ const server = app.listen(config.port, () => {
     '🔌 Proxying to services:',
     Object.entries(config.services)
       .map(([name, url]) => `\n  - ${name}: ${url}`)
-      .join('')
+      .join(''),
   );
 });
 

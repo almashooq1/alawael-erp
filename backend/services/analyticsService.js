@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const AnalyticsCache = require('../models/AnalyticsCache');
 const Employee = require('../models/Employee');
 const Integration = require('../models/Integration');
@@ -19,7 +20,11 @@ class AnalyticsService {
     const expiresAt = new Date();
     expiresAt.setMinutes(expiresAt.getMinutes() + ttlMinutes);
 
-    await AnalyticsCache.findOneAndUpdate({ key }, { key, data, type, expiresAt }, { upsert: true, new: true });
+    await AnalyticsCache.findOneAndUpdate(
+      { key },
+      { key, data, type, expiresAt },
+      { upsert: true, new: true }
+    );
 
     return data;
   }
@@ -48,7 +53,7 @@ class AnalyticsService {
           },
         };
       },
-      'HR_METRICS',
+      'HR_METRICS'
     );
   }
 
@@ -74,7 +79,7 @@ class AnalyticsService {
         };
       },
       'SYSTEM_HEALTH',
-      5,
+      5
     ); // 5 min cache
   }
 
@@ -111,13 +116,14 @@ class AnalyticsService {
         insights.push({
           severity: 'LOW',
           category: 'PERFORMANCE',
-          message: 'System performance is optimal. Predictive analysis suggests stable load for next 7 days.',
+          message:
+            'System performance is optimal. Predictive analysis suggests stable load for next 7 days.',
         });
 
         return insights;
       },
       'AI_INSIGHTS',
-      120,
+      120
     );
   }
 }

@@ -180,7 +180,7 @@ export class AGIReasoningEngine extends EventEmitter {
 
       return chain;
     } catch (error: any) {
-      this.emit('reasoning:error', { goal, error: error.message });
+      this.emit('reasoning:error', { goal, error: 'حدث خطأ داخلي' });
       throw error;
     }
   }

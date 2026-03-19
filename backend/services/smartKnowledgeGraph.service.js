@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+const logger = require('../utils/logger');
 /**
  * Smart Knowledge Graph Service (Phase 84)
  *
@@ -11,7 +13,7 @@ class SmartKnowledgeGraphService {
    * Build a visual graph for an Entity (Patient, Staff, or Condition)
    */
   async buildEntityGraph(entityId, type) {
-    console.log(`Building knowledge graph for ${type}: ${entityId}`);
+    logger.info(`Building knowledge graph for ${type}: ${entityId}`);
 
     // Mock Graph Data (Nodes and Edges)
     return {
@@ -28,7 +30,8 @@ class SmartKnowledgeGraphService {
         { source: 'S-101', target: 'I-HYDRO', label: 'specializes_in' },
         { source: 'I-HYDRO', target: 'C-CP', label: 'effective_for' },
       ],
-      insight: "Dr. Sarah specializes in Hydrotherapy which is highly effective for this patient's condition.",
+      insight:
+        "Dr. Sarah specializes in Hydrotherapy which is highly effective for this patient's condition.",
     };
   }
 

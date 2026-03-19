@@ -1,27 +1,35 @@
-const securityService = require('../services/securityService');
-const saudiComplianceService = require('../services/saudiComplianceService');
-
-// Just instantiate classes if they are exported as classes, or use direct object if exported as new instance
-// securityService export style: "new SecurityService()" or "class SecurityService"
-// saudiComplianceService export style: "class SaudiComplianceService"
-// Based on file reads:
-// securityService.js: class SecurityService { ... } module.exports = new SecurityService(); (Inferred from usage usually, but let's check file)
-// saudiComplianceService.js: class SaudiComplianceService { ... } module.exports = SaudiComplianceService; (Inferred from routes usage "new SaudiComplianceService()")
-
-// Let's re-verify exports if verification fails, but for now assuming typical patterns seen in routes.
+/* eslint-disable no-undef, no-unused-vars */
+const { securityService } = require('../services/securityService');
+const _saudiComplianceService = require('../services/saudiComplianceService');
 
 // Mocks
-jest.mock('../models/User');
+jest.mock('../models/User', () => {
+  const mock = jest.fn();
+  mock.find = jest.fn();
+  mock.findOne = jest.fn();
+  mock.findById = jest.fn().mockReturnValue({
+    select: jest.fn(),
+  });
+  mock.findByIdAndUpdate = jest.fn().mockResolvedValue({});
+  return mock;
+});
+jest.mock('../models/securityLog.model', () => ({
+  create: jest.fn().mockResolvedValue({}),
+}));
+jest.mock('../models/Session', () => ({
+  find: jest.fn(),
+  findById: jest.fn(),
+}));
 jest.mock('../models/AuditLog');
 jest.mock('../models/Vehicle');
 jest.mock('../models/Driver');
 
 const User = require('../models/User');
 const Vehicle = require('../models/Vehicle');
-const AuditLog = require('../models/AuditLog');
+const _AuditLog = require('../models/AuditLog');
 
-// Initialize services (adjust based on export type)
-const security = securityService; // Assuming instance exported
+// Initialize services
+const security = securityService;
 const compliance = new (require('../services/saudiComplianceService'))();
 
 describe('Phase 7: Security & Compliance', () => {
@@ -30,16 +38,17 @@ describe('Phase 7: Security & Compliance', () => {
   });
 
   describe('Biometric & MFA Security', () => {
-    test('generateMfaSecret should return secret and otpauth_url', async () => {
+    test('generateMfaSecret should return secret and otpauthUrl', async () => {
       const mockUser = { _id: 'user123', email: 'test@alaweal.com' };
       User.findById.mockResolvedValue(mockUser);
+      User.findByIdAndUpdate.mockResolvedValue({});
 
       const result = await security.generateMfaSecret('user123');
 
       expect(User.findById).toHaveBeenCalledWith('user123');
       expect(result).toHaveProperty('secret');
-      expect(result).toHaveProperty('otpauth_url');
-      expect(result.otpauth_url).toContain('test@alaweal.com');
+      expect(result).toHaveProperty('otpauthUrl');
+      expect(result.otpauthUrl).toContain('test@alaweal.com');
     });
 
     test('verifyMfaToken should validate master code for testing', async () => {
@@ -49,7 +58,7 @@ describe('Phase 7: Security & Compliance', () => {
 
     test('verifyMfaToken should reject invalid code in production mode (mock)', async () => {
       const isValid = await security.verifyMfaToken('user123', '999999', 'anySecret');
-      expect(isValid).toBe(false); // As per current implementation for testing
+      expect(isValid).toBe(false);
     });
   });
 
@@ -65,7 +74,7 @@ describe('Phase 7: Security & Compliance', () => {
       };
       Vehicle.findById.mockResolvedValue(mockVehicle);
       // Mock driver if service accesses it for points
-      const mockDriver = { _id: 'd123', trafficPoints: 0, save: jest.fn() };
+      const _mockDriver = { _id: 'd123', trafficPoints: 0, save: jest.fn() };
       // Ensure Driver.findOne or Driver.findById is mocked if used.
       // Reading service code implies checking assignedDriver. Let's start with just vehicle fix.
 
@@ -92,7 +101,9 @@ describe('Phase 7: Security & Compliance', () => {
     test('recordSaudiViolation should throw error for invalid code', async () => {
       Vehicle.findById.mockResolvedValue({ _id: 'v123' });
 
-      await expect(compliance.recordSaudiViolation('v123', { violationCode: '999' })).rejects.toThrow('كود المخالفة غير صحيح');
+      await expect(
+        compliance.recordSaudiViolation('v123', { violationCode: '999' })
+      ).rejects.toThrow('كود المخالفة غير صحيح');
     });
   });
 });

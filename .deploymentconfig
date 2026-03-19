@@ -1,0 +1,54 @@
+# ALAWAEL ERP System - Deployment Configuration
+# Version: 1.0.0
+# Date: March 3, 2026
+
+[PRODUCTION]
+ENVIRONMENT=production
+DEBUG=false
+PORT=3000
+LOG_LEVEL=info
+NODE_ENV=production
+
+[DATABASE]
+MONGODB_URI=mongodb://production-server:27017/alawael
+POSTGRESQL_URI=postgresql://user:pass@production-server:5432/alawael
+REDIS_URI=redis://production-server:6379/0
+
+[SECURITY]
+JWT_SECRET=your-secret-key-here-change-this
+JWT_EXPIRE=7d
+BCRYPT_ROUNDS=12
+HTTPS=true
+CORS_ORIGIN=https://yourdomain.com
+
+[FEATURES]
+ENABLE_BACKUPS=true
+ENABLE_MONITORING=true
+ENABLE_ANALYTICS=true
+ENABLE_CACHE=true
+
+[LIMITS]
+MAX_FILE_SIZE=50mb
+MAX_REQUEST_TIMEOUT=30s
+MAX_CONNECTIONS=100
+RATE_LIMIT=100/15min
+
+[NOTIFICATIONS]
+EMAIL_ENABLED=true
+SMS_ENABLED=true
+WEBHOOK_ENABLED=true
+
+[MONITORING]
+SENTRY_DSN=your-sentry-dsn
+APM_ENABLED=true
+LOG_RETENTION_DAYS=30
+
+[BACKUP]
+SCHEDULE=0 2 * * *
+RETENTION_DAYS=30
+DESTINATION=/backups
+
+[CACHE]
+TTL=3600
+MAX_SIZE=1000
+STRATEGY=LRU

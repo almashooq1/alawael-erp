@@ -142,7 +142,7 @@ export class EmailService extends events.EventEmitter {
     } catch (error: any) {
       const result: EmailResult = {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
 
       this.emit('email-failed', result);

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 const crypto = require('crypto');
 
@@ -34,7 +35,7 @@ const apiKeySchema = new mongoose.Schema(
       default: true,
     },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 // Generate a secure random key before saving

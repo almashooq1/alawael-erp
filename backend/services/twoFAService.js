@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Two-Factor Authentication (2FA) Service
  * Supports SMS OTP, Email OTP, Google Authenticator
@@ -8,9 +9,9 @@ const emailService = require('./emailService');
 const smsService = require('./smsService');
 
 // In-memory storage (replace with MongoDB)
-let otpStore = new Map();
-let twoFASettings = new Map();
-let backupCodes = new Map();
+const otpStore = new Map();
+const twoFASettings = new Map();
+const backupCodes = new Map();
 
 class TwoFAService {
   /**
@@ -54,7 +55,7 @@ class TwoFAService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -89,7 +90,7 @@ class TwoFAService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -145,7 +146,7 @@ class TwoFAService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -201,7 +202,7 @@ class TwoFAService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -249,7 +250,7 @@ class TwoFAService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -272,7 +273,7 @@ class TwoFAService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -294,7 +295,7 @@ class TwoFAService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -337,7 +338,7 @@ class TwoFAService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -358,7 +359,7 @@ class TwoFAService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }

@@ -15,7 +15,15 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
+    "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,json,css,md}\"",
+    "format:check": "prettier --check \"src/**/*.{js,jsx,ts,tsx,json,css,md}\"",
+    "quality:guard": "npm run lint",
+    "quality:fast": "npm run quality:guard && npm test -- --watchAll=false --coverage",
+    "quality:ci": "npm run quality:guard && npm test -- --watchAll=false --ci --coverage",
+    "quality": "npm run quality:ci"
   },
   "devDependencies": {
     "@babel/core": "^7.22.0",
@@ -25,10 +33,15 @@
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^14.6.1",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
     "babel-jest": "^29.5.0",
+    "eslint": "^8.0.0",
+    "eslint-plugin-react-hooks": "^7.0.1",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^29.5.0",
     "jest-environment-jsdom": "^29.5.0",
+    "prettier": "^3.0.0",
     "react-scripts": "^5.0.1"
   },
   "browserslist": {

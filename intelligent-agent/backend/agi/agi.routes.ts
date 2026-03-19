@@ -80,7 +80,7 @@ router.post('/process', async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error('AGI process error:', error);
     res.status(500).json({
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -113,7 +113,7 @@ router.post('/reason', async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error('AGI reasoning error:', error);
     res.status(500).json({
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -146,7 +146,7 @@ router.post('/learn', async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error('AGI learning error:', error);
     res.status(500).json({
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -180,7 +180,7 @@ router.post('/decide', async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error('AGI decision error:', error);
     res.status(500).json({
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -215,7 +215,7 @@ router.post('/create', async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error('AGI creativity error:', error);
     res.status(500).json({
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -253,7 +253,7 @@ router.post('/plan', async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error('AGI planning error:', error);
     res.status(500).json({
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -285,7 +285,7 @@ router.get('/status', (req: Request, res: Response) => {
   } catch (error: any) {
     console.error('AGI status error:', error);
     res.status(500).json({
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -302,7 +302,7 @@ router.get('/metrics', (req: Request, res: Response) => {
   } catch (error: any) {
     console.error('AGI metrics error:', error);
     res.status(500).json({
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -327,7 +327,7 @@ router.get('/health', (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(503).json({
       status: 'unhealthy',
-      error: error.message
+      error: 'حدث خطأ داخلي'
     });
   }
 });
@@ -344,7 +344,7 @@ router.get('/report', (req: Request, res: Response) => {
   } catch (error: any) {
     console.error('AGI report error:', error);
     res.status(500).json({
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -368,7 +368,7 @@ router.post('/reset', (req: Request, res: Response) => {
   } catch (error: any) {
     console.error('AGI reset error:', error);
     res.status(500).json({
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -412,7 +412,7 @@ router.get('/capabilities', (req: Request, res: Response) => {
   } catch (error: any) {
     console.error('AGI capabilities error:', error);
     res.status(500).json({
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });

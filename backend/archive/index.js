@@ -1,31 +1,28 @@
+/* eslint-disable no-unused-vars */
 /**
  * Archive Module Index - ملف فهرس الأرشفة
  * Electronic Archive System for Alawael ERP
  */
 
 const mongoose = require('mongoose');
+const logger = require('../utils/logger');
 
 // Services
-const { 
-  ArchiveService, 
-  archiveService, 
-  archiveConfig, 
-  archiveCategories 
+const {
+  ArchiveService,
+  archiveService,
+  archiveConfig,
+  archiveCategories,
 } = require('./archive-service');
 
-const { 
-  OCRService, 
-  ocrService, 
-  ocrConfig, 
-  ocrMiddleware 
-} = require('./ocr-service');
+const { OCRService, ocrService, ocrConfig, ocrMiddleware } = require('./ocr-service');
 
-const { 
-  DocumentWorkflowService, 
-  documentWorkflowService, 
-  workflowConfig, 
-  workflowStages, 
-  workflowActions 
+const {
+  DocumentWorkflowService,
+  documentWorkflowService,
+  workflowConfig,
+  workflowStages,
+  workflowActions,
 } = require('./document-workflow');
 
 // Routes
@@ -39,7 +36,7 @@ const archiveModuleConfig = {
   name: 'archive',
   version: '1.0.0',
   description: 'نظام الأرشفة الإلكتروني',
-  
+
   // Features
   features: {
     documentManagement: true,
@@ -50,7 +47,7 @@ const archiveModuleConfig = {
     search: true,
     versioning: true,
   },
-  
+
   // Integration points
   integrations: {
     notifications: true,
@@ -64,15 +61,15 @@ const archiveModuleConfig = {
  * Initialize Archive Module
  */
 async function initializeArchiveModule(connection, options = {}) {
-  console.log('📁 Initializing Archive Module...');
-  
+  logger.info('📁 Initializing Archive Module...');
+
   // Initialize services
   await archiveService.initialize(connection);
   await ocrService.initialize();
   await documentWorkflowService.initialize(connection);
-  
-  console.log('✅ Archive Module initialized successfully');
-  
+
+  logger.info('✅ Archive Module initialized successfully');
+
   return {
     archiveService,
     ocrService,
@@ -87,7 +84,7 @@ async function getArchiveModuleStatus() {
   const archiveStats = await archiveService.getStatistics();
   const ocrStats = ocrService.getStatistics();
   const workflowStats = await documentWorkflowService.getStatistics();
-  
+
   return {
     archive: archiveStats,
     ocr: ocrStats,
@@ -126,7 +123,7 @@ module.exports = {
   ocrService,
   DocumentWorkflowService,
   documentWorkflowService,
-  
+
   // Configurations
   archiveConfig,
   archiveCategories,
@@ -135,15 +132,15 @@ module.exports = {
   workflowStages,
   workflowActions,
   archiveModuleConfig,
-  
+
   // Middleware
   ocrMiddleware,
   archiveMiddleware,
-  
+
   // Routes
   archiveRoutes,
   setupArchiveRoutes,
-  
+
   // Initialization
   initializeArchiveModule,
   getArchiveModuleStatus,

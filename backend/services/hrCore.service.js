@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // Mock models for demo
 const User = require('../models/User');
 
@@ -12,8 +13,16 @@ class HRCoreService {
 
     // Mock query: User.find({ 'contract.endDate': { $lte: thresholdDate } })
     const expiringEmployees = [
-      { name: 'Ahmed Ali', role: 'Therapist', endDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000) }, // 15 days left
-      { name: 'Sara Noor', role: 'Receptionist', endDate: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000) }, // 45 days left
+      {
+        name: 'Ahmed Ali',
+        role: 'Therapist',
+        endDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
+      }, // 15 days left
+      {
+        name: 'Sara Noor',
+        role: 'Receptionist',
+        endDate: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000),
+      }, // 45 days left
     ];
 
     return expiringEmployees.map(emp => ({

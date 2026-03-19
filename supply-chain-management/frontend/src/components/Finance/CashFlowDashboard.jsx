@@ -1,7 +1,7 @@
 /**
  * CashFlowDashboard Component
  * لوحة التدفق النقدي والسيولة المتقدمة
- * 
+ *
  * Features:
  * - عرض موضع النقد الفعلي والمتوقع
  * - رسوم بيانية متعددة (منطقة، أعمدة، شلال)
@@ -68,10 +68,7 @@ const CashFlowDashboard = () => {
   const [cashData, setCashData] = useState([]);
   const [forecasts, setForecasts] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [dateRange, setDateRange] = useState([
-    dayjs().subtract(6, 'months'),
-    dayjs(),
-  ]);
+  const [dateRange, setDateRange] = useState([dayjs().subtract(6, 'months'), dayjs()]);
   const [selectedAccount, setSelectedAccount] = useState('all');
   const [stats, setStats] = useState({
     totalInflow: 0,
@@ -101,17 +98,17 @@ const CashFlowDashboard = () => {
     const wsUrl = `${protocol}//${window.location.host}/ws/cash-flow`;
     const ws = new WebSocket(wsUrl);
 
-    ws.onmessage = (event) => {
+    ws.onmessage = event => {
       try {
         const data = JSON.parse(event.data);
         // تحديث البيانات الفعلية الجديدة
-        setCashData((prev) => [...prev.slice(-89), data]); // احتفظ بآخر 90 يوم
+        setCashData(prev => [...prev.slice(-89), data]); // احتفظ بآخر 90 يوم
       } catch (error) {
         console.error('WebSocket parse error:', error);
       }
     };
 
-    ws.onerror = (error) => {
+    ws.onerror = error => {
       console.error('WebSocket error:', error);
       message.error('فقدان الاتصال بالبيانات الفعلية');
     };
@@ -146,14 +143,14 @@ const CashFlowDashboard = () => {
     }
   }, [dateRange, selectedAccount]);
 
-  const calculateStats = (data) => {
+  const calculateStats = data => {
     if (!data || data.length === 0) return;
 
     const totalInflow = data.reduce((sum, d) => sum + (d.inflows || 0), 0);
     const totalOutflow = data.reduce((sum, d) => sum + (d.outflows || 0), 0);
     const netCashFlow = totalInflow - totalOutflow;
-    const endingBalance = (data[data.length - 1]?.balance || 0);
-    const beginningBalance = (data[0]?.balance || 0);
+    const endingBalance = data[data.length - 1]?.balance || 0;
+    const beginningBalance = data[0]?.balance || 0;
     const averageDailyFlow = netCashFlow / data.length;
 
     // الحد الأدنى للرصيد
@@ -171,7 +168,7 @@ const CashFlowDashboard = () => {
     });
   };
 
-  const performAnalysis = (data) => {
+  const performAnalysis = data => {
     if (!data || data.length === 0) return;
 
     // تحليل الأنماط
@@ -196,12 +193,12 @@ const CashFlowDashboard = () => {
     });
   };
 
-  const detectPatterns = (data) => {
+  const detectPatterns = data => {
     // اكتشاف الأنماط الدورية والموسمية
     const patterns = [];
     const weeklyAvg = {};
 
-    data.forEach((d) => {
+    data.forEach(d => {
       const dayOfWeek = dayjs(d.date).day();
       if (!weeklyAvg[dayOfWeek]) {
         weeklyAvg[dayOfWeek] = { count: 0, total: 0 };
@@ -221,7 +218,7 @@ const CashFlowDashboard = () => {
     return patterns;
   };
 
-  const detectAnomalies = (data) => {
+  const detectAnomalies = data => {
     // اكتشاف القيم الشاذة باستخدام الانحراف المعياري
     const flows = data.map(d => d.netFlow || 0);
     const mean = flows.reduce((a, b) => a + b, 0) / flows.length;
@@ -237,9 +234,9 @@ const CashFlowDashboard = () => {
       }));
   };
 
-  const analyzeInflowSources = (data) => {
+  const analyzeInflowSources = data => {
     const sources = {};
-    data.forEach((d) => {
+    data.forEach(d => {
       if (d.inflowSources) {
         Object.entries(d.inflowSources).forEach(([source, amount]) => {
           sources[source] = (sources[source] || 0) + amount;
@@ -249,9 +246,9 @@ const CashFlowDashboard = () => {
     return Object.entries(sources).map(([name, value]) => ({ name, value }));
   };
 
-  const analyzeOutflowPurposes = (data) => {
+  const analyzeOutflowPurposes = data => {
     const purposes = {};
-    data.forEach((d) => {
+    data.forEach(d => {
       if (d.outflowPurposes) {
         Object.entries(d.outflowPurposes).forEach(([purpose, amount]) => {
           purposes[purpose] = (purposes[purpose] || 0) + amount;
@@ -261,7 +258,7 @@ const CashFlowDashboard = () => {
     return Object.entries(purposes).map(([name, value]) => ({ name, value }));
   };
 
-  const analyzeTrends = (data) => {
+  const analyzeTrends = data => {
     // تحليل الاتجاهات باستخدام المتوسط المتحرك
     const trends = [];
     const window = 7; // نافذة 7 أيام
@@ -279,7 +276,7 @@ const CashFlowDashboard = () => {
     return trends;
   };
 
-  const handleSimulateWhatIf = async (scenario) => {
+  const handleSimulateWhatIf = async scenario => {
     try {
       const response = await api.post('/finance/cash-flow/simulate', {
         scenario,
@@ -294,7 +291,7 @@ const CashFlowDashboard = () => {
     }
   };
 
-  const handleDrillDown = (dataPoint) => {
+  const handleDrillDown = dataPoint => {
     // فتح تفاصيل نقطة البيانات
     console.log('Drill down:', dataPoint);
   };
@@ -360,12 +357,7 @@ const CashFlowDashboard = () => {
                     <YAxis />
                     <RechartsTooltip />
                     <Legend />
-                    <Line
-                      type="monotone"
-                      dataKey="balance"
-                      stroke="#1890ff"
-                      strokeWidth={2}
-                    />
+                    <Line type="monotone" dataKey="balance" stroke="#1890ff" strokeWidth={2} />
                   </LineChart>
                 </ResponsiveContainer>
               ) : (
@@ -489,19 +481,15 @@ const CashFlowDashboard = () => {
             {reserves.map((reserve, index) => (
               <Col xs={24} sm={12} md={6} key={index}>
                 <Card>
-                  <p><strong>{reserve.name}</strong></p>
-                  <Statistic
-                    value={reserve.amount}
-                    prefix="$"
-                    valueStyle={{ color: '#1890ff' }}
-                  />
+                  <p>
+                    <strong>{reserve.name}</strong>
+                  </p>
+                  <Statistic value={reserve.amount} prefix="$" valueStyle={{ color: '#1890ff' }} />
                   <Progress
                     percent={Math.min(100, (reserve.amount / reserve.target) * 100)}
                     status={reserve.amount >= reserve.target ? 'success' : 'active'}
                   />
-                  <p style={{ marginTop: '8px', fontSize: '12px' }}>
-                    الهدف: ${reserve.target}
-                  </p>
+                  <p style={{ marginTop: '8px', fontSize: '12px' }}>الهدف: ${reserve.target}</p>
                 </Card>
               </Col>
             ))}
@@ -514,9 +502,7 @@ const CashFlowDashboard = () => {
   return (
     <div style={{ padding: '24px' }}>
       {/* ===== Page Title ===== */}
-      <h1 style={{ marginBottom: '24px', color: '#1890ff' }}>
-        لوحة التدفق النقدي والسيولة
-      </h1>
+      <h1 style={{ marginBottom: '24px', color: '#1890ff' }}>لوحة التدفق النقدي والسيولة</h1>
 
       {/* ===== Statistics Cards ===== */}
       <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
@@ -582,7 +568,7 @@ const CashFlowDashboard = () => {
           <Col xs={24} sm={12} md={6}>
             <DatePicker.RangePicker
               value={dateRange}
-              onChange={(dates) => setDateRange(dates)}
+              onChange={dates => setDateRange(dates)}
               style={{ width: '100%' }}
             />
           </Col>
@@ -598,11 +584,7 @@ const CashFlowDashboard = () => {
             </Button>
           </Col>
           <Col xs={24} sm={12} md={6}>
-            <Button
-              icon={<ReloadOutlined />}
-              onClick={fetchCashFlowData}
-              block
-            >
+            <Button icon={<ReloadOutlined />} onClick={fetchCashFlowData} block>
               تحديث
             </Button>
           </Col>
@@ -611,11 +593,7 @@ const CashFlowDashboard = () => {
 
       {/* ===== Tabs ===== */}
       <Card loading={loading}>
-        <Tabs
-          activeKey={activeTab}
-          onChange={setActiveTab}
-          items={tabItems}
-        />
+        <Tabs activeKey={activeTab} onChange={setActiveTab} items={tabItems} />
       </Card>
     </div>
   );

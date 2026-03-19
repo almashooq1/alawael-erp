@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * ============================================
  * PRODUCTION DATABASE CONFIGURATION
@@ -7,6 +8,7 @@
 
 const mongoose = require('mongoose');
 const path = require('path');
+const logger = require('../utils/logger');
 
 class ProductionDatabase {
   constructor() {
@@ -73,11 +75,11 @@ class ProductionDatabase {
     try {
       const uri = this.mongodbAtlasUri || this.mongoUri;
 
-      console.log('🔗 Connecting to MongoDB Atlas...');
+      logger.info('🔗 Connecting to MongoDB Atlas...');
 
       const connection = await mongoose.connect(uri, this.getConnectionOptions());
 
-      console.log(`✅ Connected to MongoDB: ${connection.connection.host}`);
+      logger.info(`✅ Connected to MongoDB: ${connection.connection.host}`);
 
       // Setup event listeners
       this.setupEventListeners();
@@ -90,7 +92,7 @@ class ProductionDatabase {
 
       return connection;
     } catch (error) {
-      console.error(`❌ Database connection failed: ${error.message}`);
+      logger.error(`❌ Database connection failed: ${error.message}`);
       throw error;
     }
   }
@@ -101,23 +103,23 @@ class ProductionDatabase {
 
   setupEventListeners() {
     mongoose.connection.on('connected', () => {
-      console.log('✅ MongoDB connected');
+      logger.info('✅ MongoDB connected');
     });
 
     mongoose.connection.on('disconnected', () => {
-      console.warn('⚠️  MongoDB disconnected');
+      logger.warn('⚠️  MongoDB disconnected');
     });
 
     mongoose.connection.on('reconnected', () => {
-      console.log('🔄 MongoDB reconnected');
+      logger.info('🔄 MongoDB reconnected');
     });
 
     mongoose.connection.on('error', error => {
-      console.error(`❌ MongoDB error: ${error.message}`);
+      logger.error(`❌ MongoDB error: ${error.message}`);
     });
 
     mongoose.connection.on('close', () => {
-      console.log('🔌 MongoDB connection closed');
+      logger.info('🔌 MongoDB connection closed');
     });
   }
 
@@ -176,9 +178,9 @@ class ProductionDatabase {
         }
       }
 
-      console.log('✅ Database indexes created');
+      logger.info('✅ Database indexes created');
     } catch (error) {
-      console.error(`⚠️  Index creation warning: ${error.message}`);
+      logger.error(`⚠️  Index creation warning: ${error.message}`);
     }
   }
 
@@ -195,10 +197,10 @@ class ProductionDatabase {
 
           // Check if healthy
           if (status.ok === 1) {
-            console.log(`✅ Database healthy - Connections: ${status.connections.current}`);
+            logger.info(`✅ Database healthy - Connections: ${status.connections.current}`);
           }
         } catch (error) {
-          console.error(`⚠️  Database monitoring error: ${error.message}`);
+          logger.error(`⚠️  Database monitoring error: ${error.message}`);
         }
       },
       5 * 60 * 1000
@@ -283,9 +285,9 @@ class ProductionDatabase {
   async disconnect() {
     try {
       await mongoose.disconnect();
-      console.log('✅ MongoDB disconnected');
+      logger.info('✅ MongoDB disconnected');
     } catch (error) {
-      console.error(`❌ Disconnect error: ${error.message}`);
+      logger.error(`❌ Disconnect error: ${error.message}`);
       throw error;
     }
   }
@@ -301,13 +303,13 @@ class ProductionDatabase {
 
       const replicaSetStatus = await admin.replSetGetStatus();
 
-      console.log('✅ Replica set configured');
-      console.log(`   Primary: ${replicaSetStatus.members[0].name}`);
-      console.log(`   Members: ${replicaSetStatus.members.length}`);
+      logger.info('✅ Replica set configured');
+      logger.info(`   Primary: ${replicaSetStatus.members[0].name}`);
+      logger.info(`   Members: ${replicaSetStatus.members.length}`);
 
       return replicaSetStatus;
     } catch (error) {
-      console.error(`⚠️  Replica set configuration warning: ${error.message}`);
+      logger.error(`⚠️  Replica set configuration warning: ${error.message}`);
     }
   }
 
@@ -327,15 +329,15 @@ class ProductionDatabase {
 
         // Get index information
         const indexes = await col.getIndexes();
-        console.log(`📊 Collection: ${collection.name}`);
-        console.log(`   Indexes: ${Object.keys(indexes).length}`);
+        logger.info(`📊 Collection: ${collection.name}`);
+        logger.info(`   Indexes: ${Object.keys(indexes).length}`);
 
         // Check for unused indexes
         const stats = await col.aggregate([{ $indexStats: {} }]).toArray();
 
         for (const stat of stats) {
           if (stat.accesses.ops === 0) {
-            console.log(`   ⚠️  Unused index: ${stat.name}`);
+            logger.info(`   ⚠️  Unused index: ${stat.name}`);
           }
         }
       }
@@ -345,7 +347,7 @@ class ProductionDatabase {
         timestamp: new Date(),
       };
     } catch (error) {
-      console.error(`⚠️  Performance optimization warning: ${error.message}`);
+      logger.error(`⚠️  Performance optimization warning: ${error.message}`);
     }
   }
 

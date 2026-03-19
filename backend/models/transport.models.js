@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * نظام النقل والمواصلات - نماذج قاعدة البيانات
  * Transport and Shuttle Management System - Database Models

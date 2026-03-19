@@ -1,3 +1,4 @@
+/* eslint-disable no-undef, no-unused-vars */
 /**
  * Backend Integration Tests - Simplified
  * اختبارات التكامل المبسطة للـ Backend

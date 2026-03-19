@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const SmartNotificationService = require('./smartNotificationService');
 const SmartSubstitutionService = require('./smartSubstitution.service');
 const SmartLogisticsService = require('./smartLogistics.service');
@@ -32,7 +33,7 @@ class SmartWorkflowOrchestrator {
       await SmartNotificationService.broadcastToRole(
         'RECEPTION',
         `Solved Absence: ${bestSub.name} is covering for ${therapistId}. No cancellations needed.`,
-        'info',
+        'info'
       );
       return { status: 'RESOLVED', method: 'SUBSTITUTION', log: executionLog };
     } else {
@@ -71,7 +72,9 @@ class SmartWorkflowOrchestrator {
     executionLog.push(`Step 2: Marking Asset as 'UNAVAILABLE' in calendar.`);
 
     // Step 3: Rescheduling
-    executionLog.push(`Step 3: Found 3 affected sessions. Moved 2 to 'Room B'. 1 Cancelled due to capacity.`);
+    executionLog.push(
+      `Step 3: Found 3 affected sessions. Moved 2 to 'Room B'. 1 Cancelled due to capacity.`
+    );
 
     return { status: 'PARTIALLY_RESOLVED', log: executionLog };
   }

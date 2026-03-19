@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // Mock Models
 const Employee = require('../models/Employee'); // For Interns
 const TherapySession = require('../models/TherapySession');
@@ -19,7 +20,10 @@ class SmartAcademicService {
       university: 'King Saud University',
     };
 
-    const completedSessions = await TherapySession.countDocuments({ therapist: internId, status: 'COMPLETED' });
+    const completedSessions = await TherapySession.countDocuments({
+      therapist: internId,
+      status: 'COMPLETED',
+    });
     const directHours = completedSessions * 0.75; // 45 min sessions
 
     const progress = (directHours / supervisorConfig.requiredDirectHours) * 100;

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * ╔════════════════════════════════════════════════════════════════════════════╗
  * ║        PHASE 30: QUANTUM-READY COMPUTING (2,200+ LOC)                     ║
@@ -67,7 +68,7 @@ class PostQuantumCryptography {
         timestamp: new Date(),
       };
     } catch (error) {
-      throw new Error('Decryption failed: ' + error.message);
+      throw new Error(error.message);
     }
   }
 
@@ -186,7 +187,7 @@ class QuantumKeyDistribution {
   calculateQBER(session) {
     // Quantum Bit Error Rate calculation
     const errors = session.siftedKey.filter(
-      (bit, i) => bit !== (Math.random() > 0.5 ? 1 : 0)
+      (bit, _i) => bit !== (Math.random() > 0.5 ? 1 : 0)
     ).length;
     return errors / (session.siftedKey.length || 1);
   }

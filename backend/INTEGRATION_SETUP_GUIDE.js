@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * INTEGRATION SETUP & CONFIGURATION GUIDE
  *

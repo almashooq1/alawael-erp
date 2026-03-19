@@ -1,7 +1,8 @@
+/* eslint-disable no-unused-vars */
 /**
  * Professional System Integration - تكامل النظام الاحترافي
  * Main Entry Point for All Professional Components
- * 
+ *
  * This module provides a unified interface to all professional
  * system components for the Alawael ERP system.
  */
@@ -74,11 +75,12 @@ const {
 const {
   Logger,
   createLogger,
-  logger,
+  logger: _advancedLogger,
   requestLoggingMiddleware,
   errorLoggingMiddleware,
   flushLogs,
 } = require('../utils/advanced-logger');
+const logger = require('../utils/logger');
 
 // ==================== Health Checks ====================
 const {
@@ -101,7 +103,7 @@ const professionalConfig = {
     serviceName: process.env.OTEL_SERVICE_NAME || 'alawael-erp-backend',
     prometheusPort: parseInt(process.env.PROMETHEUS_PORT || '9464'),
   },
-  
+
   // Error Tracking
   errorTracking: {
     enabled: !!process.env.SENTRY_DSN,
@@ -109,7 +111,7 @@ const professionalConfig = {
     environment: process.env.NODE_ENV || 'development',
     tracesSampleRate: parseFloat(process.env.SENTRY_TRACES_SAMPLE_RATE || '0.2'),
   },
-  
+
   // Resilience
   resilience: {
     circuitBreaker: {
@@ -122,21 +124,21 @@ const professionalConfig = {
       maxRetries: parseInt(process.env.RETRY_MAX_RETRIES || '3'),
     },
   },
-  
+
   // Security
   security: {
     headersEnabled: process.env.SECURITY_HEADERS_ENABLED !== 'false',
     sanitizeInput: process.env.SANITIZE_INPUT !== 'false',
     corsOrigins: process.env.ALLOWED_ORIGINS || 'http://localhost:3000',
   },
-  
+
   // Logging
   logging: {
     level: process.env.LOG_LEVEL || 'info',
     prettyPrint: process.env.LOG_PRETTY === 'true',
     fileLogging: process.env.LOG_FILE === 'true',
   },
-  
+
   // Health Checks
   healthChecks: {
     enabled: process.env.HEALTH_CHECKS_ENABLED !== 'false',
@@ -155,68 +157,68 @@ let initialized = false;
  */
 const initializeProfessionalSystem = async (app, options = {}) => {
   if (initialized) {
-    console.log('⚠️ Professional system already initialized');
+    logger.info('⚠️ Professional system already initialized');
     return;
   }
-  
-  console.log('🚀 Initializing Professional System Components...');
-  
+
+  logger.info('🚀 Initializing Professional System Components...');
+
   try {
     // 1. Initialize OpenTelemetry (must be first)
     if (professionalConfig.observability.enabled) {
       try {
         await initializeOpenTelemetry();
-        console.log('✅ OpenTelemetry initialized');
+        logger.info('✅ OpenTelemetry initialized');
       } catch (error) {
-        console.warn('⚠️ OpenTelemetry initialization skipped:', error.message);
+        logger.warn('⚠️ OpenTelemetry initialization skipped:', error.message);
       }
     }
-    
+
     // 2. Initialize Sentry Error Tracking
     if (professionalConfig.errorTracking.enabled) {
       try {
         initializeSentry();
-        console.log('✅ Sentry initialized');
+        logger.info('✅ Sentry initialized');
       } catch (error) {
-        console.warn('⚠️ Sentry initialization skipped:', error.message);
+        logger.warn('⚠️ Sentry initialization skipped:', error.message);
       }
     }
-    
+
     // 3. Setup Security Middleware
     if (professionalConfig.security.headersEnabled && app) {
       app.use(securityHeaders);
-      console.log('✅ Security headers configured');
+      logger.info('✅ Security headers configured');
     }
-    
+
     // 4. Setup Request Logging
     if (app) {
       app.use(requestLoggingMiddleware);
-      console.log('✅ Request logging configured');
+      logger.info('✅ Request logging configured');
     }
-    
+
     // 5. Setup Sentry Request Handler
     if (professionalConfig.errorTracking.enabled && app) {
       app.use(sentryRequestHandler());
       app.use(sentryTracingMiddleware());
-      console.log('✅ Sentry request handlers configured');
+      logger.info('✅ Sentry request handlers configured');
     }
-    
+
     // 6. Setup Input Sanitization
     if (professionalConfig.security.sanitizeInput && app) {
       app.use(sanitizationMiddleware);
       app.use(noSqlInjectionProtection);
-      console.log('✅ Input sanitization configured');
+      logger.info('✅ Input sanitization configured');
     }
-    
+
     // 7. Setup Health Check Routes
     if (professionalConfig.healthChecks.enabled && app) {
       healthManager.setupRoutes(app);
-      console.log('✅ Health check routes configured');
+      logger.info('✅ Health check routes configured');
     }
-    
+
     initialized = true;
-    console.log('🎉 Professional System initialized successfully');
-    
+    logger.info('🎉 Professional System initialized successfully');
+
     return {
       success: true,
       components: {
@@ -228,7 +230,7 @@ const initializeProfessionalSystem = async (app, options = {}) => {
       },
     };
   } catch (error) {
-    console.error('❌ Failed to initialize professional system:', error);
+    logger.error('❌ Failed to initialize professional system:', error);
     throw error;
   }
 };
@@ -236,22 +238,22 @@ const initializeProfessionalSystem = async (app, options = {}) => {
 /**
  * Setup Error Handlers (must be called after all routes)
  */
-const setupErrorHandlers = (app) => {
+const setupErrorHandlers = app => {
   if (!app) return;
-  
+
   // Sentry Error Handler
   if (professionalConfig.errorTracking.enabled) {
     app.use(sentryErrorHandler());
   }
-  
+
   // Logging Error Handler
   app.use(errorLoggingMiddleware);
-  
+
   // Generic Error Handler
-  app.use((err, req, res, next) => {
+  app.use((err, req, res, _next) => {
     const statusCode = err.statusCode || 500;
     const code = err.code || 'INTERNAL_ERROR';
-    
+
     res.status(statusCode).json({
       success: false,
       code,
@@ -261,36 +263,36 @@ const setupErrorHandlers = (app) => {
       timestamp: new Date().toISOString(),
     });
   });
-  
-  console.log('✅ Error handlers configured');
+
+  logger.info('✅ Error handlers configured');
 };
 
 /**
  * Graceful Shutdown
  */
 const shutdownProfessionalSystem = async () => {
-  console.log('🔄 Shutting down professional system...');
-  
+  logger.info('🔄 Shutting down professional system...');
+
   try {
     // Flush logs
     await flushLogs();
-    console.log('✅ Logs flushed');
-    
+    logger.info('✅ Logs flushed');
+
     // Close Sentry
     await closeSentry();
-    console.log('✅ Sentry closed');
-    
+    logger.info('✅ Sentry closed');
+
     // Shutdown OpenTelemetry
     await shutdownOpenTelemetry();
-    console.log('✅ OpenTelemetry shutdown');
-    
+    logger.info('✅ OpenTelemetry shutdown');
+
     // Shutdown all circuit breakers
     circuitBreakerFactory.shutdownAll();
-    console.log('✅ Circuit breakers shutdown');
-    
-    console.log('👋 Professional system shutdown complete');
+    logger.info('✅ Circuit breakers shutdown');
+
+    logger.info('👋 Professional system shutdown complete');
   } catch (error) {
-    console.error('❌ Error during shutdown:', error);
+    logger.error('❌ Error during shutdown:', error);
   }
 };
 
@@ -303,11 +305,11 @@ const resilient = (serviceName, options = {}) => {
   return (target, propertyKey, descriptor) => {
     const originalMethod = descriptor.value;
     const breaker = circuitBreakerFactory.get(`${serviceName}.${propertyKey}`, options);
-    
+
     descriptor.value = async function (...args) {
       return breaker.fire(originalMethod.bind(this), ...args);
     };
-    
+
     return descriptor;
   };
 };
@@ -318,9 +320,9 @@ const resilient = (serviceName, options = {}) => {
 const createResilientService = (name, service, options = {}) => {
   const breaker = circuitBreakerFactory.get(name, options);
   const retry = new RetryPolicy(options.retry || {});
-  
+
   const wrappedService = {};
-  
+
   for (const [key, fn] of Object.entries(service)) {
     if (typeof fn === 'function') {
       wrappedService[key] = async (...args) => {
@@ -330,7 +332,7 @@ const createResilientService = (name, service, options = {}) => {
       wrappedService[key] = fn;
     }
   }
-  
+
   return wrappedService;
 };
 
@@ -341,14 +343,14 @@ const createMonitoredService = (name, service) => {
   const tracer = getTracer(name);
   const meter = getMeter(name);
   const log = createLogger({ service: name });
-  
+
   const wrappedService = {};
-  
+
   for (const [key, fn] of Object.entries(service)) {
     if (typeof fn === 'function') {
       wrappedService[key] = async (...args) => {
         const span = tracer.startSpan(`${name}.${key}`);
-        
+
         try {
           const result = await fn(...args);
           span.setStatus({ code: 1 });
@@ -358,12 +360,12 @@ const createMonitoredService = (name, service) => {
           span.recordException(error);
           span.setStatus({ code: 2, message: error.message });
           span.end();
-          
+
           log.error(`Service error: ${name}.${key}`, error);
           captureException(error, {
             tags: { service: name, method: key },
           });
-          
+
           throw error;
         }
       };
@@ -371,7 +373,7 @@ const createMonitoredService = (name, service) => {
       wrappedService[key] = fn;
     }
   }
-  
+
   return wrappedService;
 };
 
@@ -383,10 +385,10 @@ const createMonitoredService = (name, service) => {
 const integrateWithExpress = (app, options = {}) => {
   // Initialize system
   const initPromise = initializeProfessionalSystem(app, options);
-  
+
   // Setup error handlers (should be called after routes are defined)
   const setupErrors = () => setupErrorHandlers(app);
-  
+
   return {
     initialized: initPromise,
     setupErrorHandlers: setupErrors,
@@ -402,10 +404,10 @@ module.exports = {
   setupErrorHandlers,
   shutdownProfessionalSystem,
   integrateWithExpress,
-  
+
   // Configuration
   professionalConfig,
-  
+
   // Observability
   initializeOpenTelemetry,
   shutdownOpenTelemetry,
@@ -413,7 +415,7 @@ module.exports = {
   getMeter,
   createCustomMetrics,
   otelTracingMiddleware,
-  
+
   // Error Tracking
   initializeSentry,
   closeSentry,
@@ -427,7 +429,7 @@ module.exports = {
   sentryErrorHandler,
   sentryTracingMiddleware,
   wrapAsync,
-  
+
   // Error Classes
   AppError,
   ValidationError,
@@ -436,7 +438,7 @@ module.exports = {
   NotFoundError,
   ConflictError,
   RateLimitError,
-  
+
   // Resilience
   CircuitBreaker,
   CircuitBreakerError,
@@ -449,7 +451,7 @@ module.exports = {
   wrapWithCircuitBreaker,
   resilient,
   createResilientService,
-  
+
   // Security
   accessControlMiddleware,
   createRBAC,
@@ -465,7 +467,7 @@ module.exports = {
   securityLogger,
   ssrfProtection,
   ssrfMiddleware,
-  
+
   // Logging
   Logger,
   createLogger,
@@ -473,7 +475,7 @@ module.exports = {
   requestLoggingMiddleware,
   errorLoggingMiddleware,
   flushLogs,
-  
+
   // Health Checks
   HealthCheckManager,
   healthManager,
@@ -484,7 +486,7 @@ module.exports = {
   CpuHealthCheck,
   DiskHealthCheck,
   ExternalServicesHealthCheck,
-  
+
   // Utilities
   createMonitoredService,
 };

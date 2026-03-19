@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * attendance.routes.js - Attendance Management API Routes
  * Handles all attendance-related endpoints
@@ -10,8 +11,8 @@ const router = express.Router();
 const AttendanceService = require('../../../services/BeneficiaryManagement/AttendanceService');
 
 // Middleware
-const authenticate = (req, res, next) => {
-  // TODO: Implement JWT authentication
+const authenticate = (_req, _res, next) => {
+  // @todo [P1] Replace with real JWT auth middleware from middleware/auth.middleware.js
   next();
 };
 
@@ -43,7 +44,7 @@ router.post('/record', authenticate, async (req, res) => {
         status: 'error',
         message: 'beneficiaryId is required',
         data: null,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
     }
 
@@ -51,13 +52,12 @@ router.post('/record', authenticate, async (req, res) => {
 
     const statusCode = result.status === 'success' ? 201 : 400;
     return res.status(statusCode).json(result);
-
   } catch (error) {
     return res.status(500).json({
       status: 'error',
-      message: error.message,
+      message: 'حدث خطأ داخلي',
       data: null,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 });
@@ -77,19 +77,18 @@ router.get('/:beneficiaryId/report', authenticate, async (req, res) => {
     const options = {
       startDate: req.query.startDate,
       endDate: req.query.endDate,
-      courseId: req.query.courseId
+      courseId: req.query.courseId,
     };
 
     const result = await attendanceService.getAttendanceReport(beneficiaryId, options);
     const statusCode = result.status === 'success' ? 200 : 404;
     return res.status(statusCode).json(result);
-
   } catch (error) {
     return res.status(500).json({
       status: 'error',
-      message: error.message,
+      message: 'حدث خطأ داخلي',
       data: null,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 });
@@ -105,19 +104,18 @@ router.get('/:beneficiaryId/threshold-check', authenticate, async (req, res) => 
   try {
     const { beneficiaryId } = req.params;
     const options = {
-      period: req.query.period || 'semester'
+      period: req.query.period || 'semester',
     };
 
     const result = await attendanceService.checkAttendanceThreshold(beneficiaryId, options);
     const statusCode = result.status === 'success' ? 200 : 404;
     return res.status(statusCode).json(result);
-
   } catch (error) {
     return res.status(500).json({
       status: 'error',
-      message: error.message,
+      message: 'حدث خطأ داخلي',
       data: null,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 });
@@ -137,20 +135,19 @@ router.post('/bulk-upload', authenticate, async (req, res) => {
         status: 'error',
         message: 'records must be an array',
         data: null,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
     }
 
     const result = await attendanceService.bulkUploadAttendance(records);
     const statusCode = result.status === 'success' ? 201 : 400;
     return res.status(statusCode).json(result);
-
   } catch (error) {
     return res.status(500).json({
       status: 'error',
-      message: error.message,
+      message: 'حدث خطأ داخلي',
       data: null,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 });
@@ -168,7 +165,7 @@ router.get('/:beneficiaryId/export', authenticate, async (req, res) => {
     const { beneficiaryId } = req.params;
     const options = {
       startDate: req.query.startDate,
-      endDate: req.query.endDate
+      endDate: req.query.endDate,
     };
 
     const result = await attendanceService.exportAttendanceData(beneficiaryId, options);
@@ -176,18 +173,20 @@ router.get('/:beneficiaryId/export', authenticate, async (req, res) => {
     if (result.status === 'success') {
       // Send CSV file
       res.setHeader('Content-Type', 'text/csv');
-      res.setHeader('Content-Disposition', `attachment; filename="attendance-${beneficiaryId}.csv"`);
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="attendance-${beneficiaryId}.csv"`
+      );
       return res.send(result.data.csv);
     }
 
     return res.status(404).json(result);
-
   } catch (error) {
     return res.status(500).json({
       status: 'error',
-      message: error.message,
+      message: 'حدث خطأ داخلي',
       data: null,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 });
@@ -202,7 +201,7 @@ router.get('/health', (req, res) => {
     status: 'success',
     message: 'Attendance service is healthy',
     service: 'AttendanceService',
-    timestamp: new Date()
+    timestamp: new Date(),
   });
 });
 

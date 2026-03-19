@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Performance Management Model
  * نموذج إدارة الأداء
@@ -106,7 +107,7 @@ const performanceSchema = new mongoose.Schema(
   {
     timestamps: true,
     collection: 'performance_reviews',
-  },
+  }
 );
 
 performanceSchema.index({ employeeId: 1, 'period.startDate': 1 });

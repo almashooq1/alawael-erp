@@ -1,0 +1,43 @@
+{
+  "name": "backend-1",
+  "version": "1.0.0",
+  "description": "Backend Service 1 - Extended Quality Pattern",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest --passWithNoTests",
+    "test:watch": "jest --watch",
+    "lint": "eslint . --ext .js,.ts 2>/dev/null || true",
+    "quality:guard": "echo 'backend-1 guard check'",
+    "quality:fast": "npm run quality:guard && npm test",
+    "quality:ci": "npm run quality:guard && npm test -- --coverage",
+    "quality": "npm run quality:ci"
+  },
+  "keywords": [
+    "alawael",
+    "erp",
+    "backend"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "@types/accepts": "^1.3.7",
+    "@types/bunyan": "^1.8.11",
+    "@types/chai": "^5.2.3",
+    "@types/cors": "^2.8.19",
+    "@types/debug": "^4.1.12",
+    "@types/deep-eql": "^4.0.2",
+    "@types/jsdom": "^28.0.0",
+    "@types/long": "^4.0.2",
+    "@types/ms": "^2.1.0",
+    "@types/mysql": "^2.15.27",
+    "@types/node": "^25.3.3",
+    "@types/pako": "^2.0.4",
+    "@types/pg": "^8.18.0",
+    "@types/pg-pool": "^2.0.7",
+    "@types/quill": "^2.0.14",
+    "@types/raf": "^3.4.3",
+    "@types/shimmer": "^1.2.0",
+    "@types/triple-beam": "^1.3.5",
+    "@types/webidl-conversions": "^7.0.3",
+    "@types/whatwg-url": "^13.0.0"
+  }
+}

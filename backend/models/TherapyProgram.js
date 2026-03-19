@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 const therapyProgramSchema = new mongoose.Schema(
@@ -18,7 +19,7 @@ const therapyProgramSchema = new mongoose.Schema(
 
     isActive: { type: Boolean, default: true },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 module.exports = mongoose.model('TherapyProgram', therapyProgramSchema);

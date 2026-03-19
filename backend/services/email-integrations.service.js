@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Email Integration Service
  * SendGrid, SMTP, and Email Management
@@ -186,7 +187,7 @@ class EmailIntegrationService {
       }
     } catch (error) {
       this.logger.log('error', 'Failed to send email', {
-        error: error.message,
+        error: 'حدث خطأ داخلي',
         to: emailData.to,
       });
       throw error;
@@ -264,7 +265,7 @@ class EmailIntegrationService {
   async sendInvoiceEmail(to, invoiceData, options = {}) {
     const { invoiceNumber, amount, dueDate, items = [] } = invoiceData;
 
-    let itemsHtml = items
+    const itemsHtml = items
       .map(
         item =>
           `<tr><td>${item.description}</td><td>${item.quantity}</td><td>$${item.price}</td></tr>`
@@ -350,7 +351,7 @@ class EmailIntegrationService {
           });
           results.push({ email: recipient.email, success: true, ...result });
         } catch (error) {
-          results.push({ email: recipient.email, success: false, error: error.message });
+          results.push({ email: recipient.email, success: false, error: 'حدث خطأ داخلي' });
         }
       }
 

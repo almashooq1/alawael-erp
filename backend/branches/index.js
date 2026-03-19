@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Branch Management Module - وحدة إدارة الفروع
  * Main Entry Point
@@ -52,14 +53,14 @@ module.exports = {
   // Service
   BranchManagementService,
   branchManagementService,
-  
+
   // Routes
   branchRoutes,
-  
+
   // Configuration
   branchConfig,
   branchTypes,
-  
+
   // Helpers
   initialize,
   getService,

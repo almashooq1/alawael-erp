@@ -61,14 +61,14 @@ const AdvancedDashboardFilters = ({
 
   // Handle search query
   const handleSearchChange = useCallback(
-    (e) => {
+    e => {
       const value = e.target.value;
       setSearchQuery(value);
 
       if (value.length >= 2) {
         // Generate suggestions
         const matchedKPIs = kpis.filter(
-          (kpi) =>
+          kpi =>
             kpi.name.toLowerCase().includes(value.toLowerCase()) ||
             kpi.category.toLowerCase().includes(value.toLowerCase())
         );
@@ -87,7 +87,7 @@ const AdvancedDashboardFilters = ({
   // Handle filter changes
   const handleFilterChange = useCallback(
     (filterType, value) => {
-      setActiveFilters((prev) => {
+      setActiveFilters(prev => {
         const updated = { ...prev };
 
         if (filterType.includes('Min') || filterType.includes('Max')) {
@@ -96,7 +96,7 @@ const AdvancedDashboardFilters = ({
         } else {
           // Multi-select filters
           if (updated[filterType].includes(value)) {
-            updated[filterType] = updated[filterType].filter((v) => v !== value);
+            updated[filterType] = updated[filterType].filter(v => v !== value);
           } else {
             updated[filterType] = [...updated[filterType], value];
           }
@@ -145,8 +145,8 @@ const AdvancedDashboardFilters = ({
 
   // Load saved filter
   const handleLoadSavedFilter = useCallback(
-    (filterId) => {
-      const saved = savedFilters.find((f) => f.id === filterId);
+    filterId => {
+      const saved = savedFilters.find(f => f.id === filterId);
       if (saved) {
         setActiveFilters(saved.filters);
         onFiltersChange(saved.filters);
@@ -156,8 +156,8 @@ const AdvancedDashboardFilters = ({
   );
 
   // Delete saved filter
-  const handleDeleteSavedFilter = useCallback((filterId) => {
-    setSavedFilters((prev) => prev.filter((f) => f.id !== filterId));
+  const handleDeleteSavedFilter = useCallback(filterId => {
+    setSavedFilters(prev => prev.filter(f => f.id !== filterId));
   }, []);
 
   // Count active filters
@@ -169,10 +169,7 @@ const AdvancedDashboardFilters = ({
     if (activeFilters.trends.length > 0) count++;
     if (activeFilters.owners.length > 0) count++;
     if (activeFilters.frequencies.length > 0) count++;
-    if (
-      activeFilters.performanceMin > 0 ||
-      activeFilters.performanceMax < 100
-    ) {
+    if (activeFilters.performanceMin > 0 || activeFilters.performanceMax < 100) {
       count++;
     }
     return count;
@@ -202,7 +199,7 @@ const AdvancedDashboardFilters = ({
               {suggestions.length} suggestions found
             </Typography>
             <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 1 }}>
-              {suggestions.map((kpi) => (
+              {suggestions.map(kpi => (
                 <Chip
                   key={kpi.id}
                   label={kpi.name}
@@ -224,10 +221,7 @@ const AdvancedDashboardFilters = ({
         <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
           <FormControlLabel
             control={
-              <Checkbox
-                checked={advancedMode}
-                onChange={(e) => setAdvancedMode(e.target.checked)}
-              />
+              <Checkbox checked={advancedMode} onChange={e => setAdvancedMode(e.target.checked)} />
             }
             label="Advanced Mode"
           />
@@ -238,11 +232,7 @@ const AdvancedDashboardFilters = ({
           >
             Filters {activeFilterCount > 0 && `(${activeFilterCount})`}
           </Button>
-          <Button
-            startIcon={<SaveAsIcon />}
-            size="small"
-            onClick={() => setOpenSaveDialog(true)}
-          >
+          <Button startIcon={<SaveAsIcon />} size="small" onClick={() => setOpenSaveDialog(true)}>
             Save Filter
           </Button>
           <Button
@@ -271,7 +261,7 @@ const AdvancedDashboardFilters = ({
                 />
               )}
 
-              {activeFilters.categories.map((cat) => (
+              {activeFilters.categories.map(cat => (
                 <Chip
                   key={`cat_${cat}`}
                   label={`Category: ${cat}`}
@@ -281,7 +271,7 @@ const AdvancedDashboardFilters = ({
                 />
               ))}
 
-              {activeFilters.statuses.map((status) => (
+              {activeFilters.statuses.map(status => (
                 <Chip
                   key={`status_${status}`}
                   label={`Status: ${status}`}
@@ -291,7 +281,7 @@ const AdvancedDashboardFilters = ({
                 />
               ))}
 
-              {activeFilters.trends.map((trend) => (
+              {activeFilters.trends.map(trend => (
                 <Chip
                   key={`trend_${trend}`}
                   label={`Trend: ${trend}`}
@@ -301,7 +291,7 @@ const AdvancedDashboardFilters = ({
                 />
               ))}
 
-              {activeFilters.owners.map((owner) => (
+              {activeFilters.owners.map(owner => (
                 <Chip
                   key={`owner_${owner}`}
                   label={`Owner: ${owner}`}
@@ -324,19 +314,19 @@ const AdvancedDashboardFilters = ({
                 fullWidth
                 size="small"
                 value={activeFilters.categories}
-                onChange={(e) => {
+                onChange={e => {
                   const value = e.target.value;
-                  setActiveFilters((prev) => ({
+                  setActiveFilters(prev => ({
                     ...prev,
                     categories: typeof value === 'string' ? value.split(',') : value,
                   }));
                 }}
                 displayEmpty
-                renderValue={(selected) =>
+                renderValue={selected =>
                   selected.length === 0 ? 'Select Categories' : `${selected.length} selected`
                 }
               >
-                {availableFilters.categories?.map((cat) => (
+                {availableFilters.categories?.map(cat => (
                   <MenuItem key={cat} value={cat}>
                     {cat}
                   </MenuItem>
@@ -351,19 +341,19 @@ const AdvancedDashboardFilters = ({
                 fullWidth
                 size="small"
                 value={activeFilters.statuses}
-                onChange={(e) => {
+                onChange={e => {
                   const value = e.target.value;
-                  setActiveFilters((prev) => ({
+                  setActiveFilters(prev => ({
                     ...prev,
                     statuses: typeof value === 'string' ? value.split(',') : value,
                   }));
                 }}
                 displayEmpty
-                renderValue={(selected) =>
+                renderValue={selected =>
                   selected.length === 0 ? 'Select Status' : `${selected.length} selected`
                 }
               >
-                {availableFilters.statuses?.map((status) => (
+                {availableFilters.statuses?.map(status => (
                   <MenuItem key={status} value={status}>
                     {status}
                   </MenuItem>
@@ -378,19 +368,19 @@ const AdvancedDashboardFilters = ({
                 fullWidth
                 size="small"
                 value={activeFilters.trends}
-                onChange={(e) => {
+                onChange={e => {
                   const value = e.target.value;
-                  setActiveFilters((prev) => ({
+                  setActiveFilters(prev => ({
                     ...prev,
                     trends: typeof value === 'string' ? value.split(',') : value,
                   }));
                 }}
                 displayEmpty
-                renderValue={(selected) =>
+                renderValue={selected =>
                   selected.length === 0 ? 'Select Trend' : `${selected.length} selected`
                 }
               >
-                {availableFilters.trends?.map((trend) => (
+                {availableFilters.trends?.map(trend => (
                   <MenuItem key={trend} value={trend}>
                     {trend}
                   </MenuItem>
@@ -406,9 +396,7 @@ const AdvancedDashboardFilters = ({
                 size="small"
                 label="Min Performance %"
                 value={activeFilters.performanceMin}
-                onChange={(e) =>
-                  handleFilterChange('performanceMin', parseInt(e.target.value))
-                }
+                onChange={e => handleFilterChange('performanceMin', parseInt(e.target.value))}
                 InputProps={{ inputProps: { min: 0, max: 100 } }}
               />
             </Grid>
@@ -423,7 +411,7 @@ const AdvancedDashboardFilters = ({
             Saved Filters
           </Typography>
           <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}>
-            {savedFilters.map((filter) => (
+            {savedFilters.map(filter => (
               <Tooltip key={filter.id} title={`Created: ${filter.createdAt.toLocaleDateString()}`}>
                 <Chip
                   label={filter.name}
@@ -446,7 +434,7 @@ const AdvancedDashboardFilters = ({
             fullWidth
             label="Filter Name"
             value={filterName}
-            onChange={(e) => setFilterName(e.target.value)}
+            onChange={e => setFilterName(e.target.value)}
             placeholder="e.g., Critical Revenue KPIs"
             sx={{ mt: 2 }}
             autoFocus
@@ -454,11 +442,7 @@ const AdvancedDashboardFilters = ({
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenSaveDialog(false)}>Cancel</Button>
-          <Button
-            onClick={handleSaveFilter}
-            variant="contained"
-            disabled={!filterName.trim()}
-          >
+          <Button onClick={handleSaveFilter} variant="contained" disabled={!filterName.trim()}>
             Save
           </Button>
         </DialogActions>

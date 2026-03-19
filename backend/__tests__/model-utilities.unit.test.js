@@ -1,7 +1,9 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * Unit Tests for Model and Utility Functions
  * Testing CRUD operations, data transformations, and helper functions
- * 
+ *
  * Coverage focus: Models and utility function coverage improvement
  */
 
@@ -11,7 +13,7 @@ describe('Model and Utility Functions Unit Tests', () => {
     // In production, these would be imported from actual utility modules
 
     test('should transform user data correctly with defined function', () => {
-      const transformUserData = (user) => {
+      const transformUserData = user => {
         if (!user) return null;
         return {
           id: user._id,
@@ -39,7 +41,7 @@ describe('Model and Utility Functions Unit Tests', () => {
     });
 
     test('should use fullName when available', () => {
-      const transformUserData = (user) => {
+      const transformUserData = user => {
         if (!user) return null;
         return {
           id: user._id,
@@ -59,7 +61,7 @@ describe('Model and Utility Functions Unit Tests', () => {
     });
 
     test('should handle null user', () => {
-      const transformUserData = (user) => {
+      const transformUserData = user => {
         if (!user) return null;
         return { id: user._id };
       };
@@ -133,13 +135,13 @@ describe('Model and Utility Functions Unit Tests', () => {
       const year = d.getFullYear();
       const month = String(d.getMonth() + 1).padStart(2, '0');
       const day = String(d.getDate()).padStart(2, '0');
-      
+
       if (format === 'YYYY-MM-DD') return `${year}-${month}-${day}`;
       if (format === 'DD/MM/YYYY') return `${day}/${month}/${year}`;
       return date.toString();
     };
 
-    const isBusinessDay = (date) => {
+    const isBusinessDay = date => {
       const d = new Date(date);
       const day = d.getDay();
       return day !== 5 && day !== 6; // Friday and Saturday are weekends in Saudi Arabia
@@ -178,9 +180,9 @@ describe('Model and Utility Functions Unit Tests', () => {
   describe('Array and Object Utilities', () => {
     const flattenObject = (obj, parent_key = '', sep = '_') => {
       let items = [];
-      for (let k in obj) {
-        let v = obj[k];
-        let new_key = parent_key ? parent_key + sep + k : k;
+      for (const k in obj) {
+        const v = obj[k];
+        const new_key = parent_key ? parent_key + sep + k : k;
         if (typeof v === 'object' && v !== null && !Array.isArray(v)) {
           items = items.concat(flattenObject(v, new_key, sep));
         } else {
@@ -303,15 +305,15 @@ describe('Model and Utility Functions Unit Tests', () => {
   });
 
   describe('String Transformation Utilities', () => {
-    const camelCaseToKebab = (str) => {
+    const camelCaseToKebab = str => {
       return str.replace(/([a-z0-9]|(?=[A-Z]))([A-Z])/g, '$1-$2').toLowerCase();
     };
 
-    const kebabToCamelCase = (str) => {
-      return str.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
+    const kebabToCamelCase = str => {
+      return str.replace(/-([a-z])/g, g => g[1].toUpperCase());
     };
 
-    const capitalize = (str) => {
+    const capitalize = str => {
       return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
     };
 
@@ -350,8 +352,8 @@ describe('Model and Utility Functions Unit Tests', () => {
   });
 
   describe('Status and State Utilities', () => {
-    const isActive = (status) => status === 'ACTIVE' || status === 'active';
-    
+    const isActive = status => status === 'ACTIVE' || status === 'active';
+
     const canTransition = (currentStatus, targetStatus) => {
       const transitions = {
         ACTIVE: ['ON_LEAVE', 'TERMINATED'],
@@ -361,7 +363,7 @@ describe('Model and Utility Functions Unit Tests', () => {
       return transitions[currentStatus]?.includes(targetStatus) ?? false;
     };
 
-    const getStatusColor = (status) => {
+    const getStatusColor = status => {
       const colors = {
         ACTIVE: 'green',
         ON_LEAVE: 'yellow',
@@ -398,7 +400,7 @@ describe('Model and Utility Functions Unit Tests', () => {
       return { valid: true };
     };
 
-    const validateEmail = (email) => {
+    const validateEmail = email => {
       const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!regex.test(email)) {
         return { valid: false, message: 'Invalid email format' };

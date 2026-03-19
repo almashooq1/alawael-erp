@@ -1,0 +1,14 @@
+PASS src/pages/__tests__/StudentReports.test.js
+PASS src/__tests__/advancedFeatures.test.js
+PASS src/__tests__/beneficiaries.test.js
+PASS src/__tests__/integration.test.js
+PASS src/__tests__/Phase12Integration.test.js
+PASS src/__tests__/Login.test.js
+PASS src/__tests__/authSlice.test.js
+A worker process has failed to exit gracefully and has been force exited. This is likely caused by tests leaking due to improper teardown. Try running with --detectOpenHandles to find leaks. Active timers can also cause this, ensure that .unref() was called on them.
+
+Test Suites: 7 passed, 7 total
+Tests:       58 passed, 58 total
+Snapshots:   0 total
+Time:        18.52 s
+Ran all test suites.

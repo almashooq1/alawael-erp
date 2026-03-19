@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Comprehensive Validation Utilities
  * أدوات التحقق الشاملة

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Seed Data for Policy Management System
  * إنشاء بيانات تجريبية لنظام إدارة السياسات
@@ -36,8 +37,8 @@ const samplePolicies = [
     priority: 'HIGH',
     content: {
       ar: 'تحدد هذه السياسة آليات الرواتب والحوافز...',
-      en: 'This policy defines salary and incentive mechanisms...'
-    }
+      en: 'This policy defines salary and incentive mechanisms...',
+    },
   },
   {
     policyId: uuidv4(),
@@ -63,8 +64,8 @@ const samplePolicies = [
     priority: 'HIGH',
     content: {
       ar: 'سياسة الإجازات تحدد حقوق الموظفين...',
-      en: 'Leave policy defines employee rights...'
-    }
+      en: 'Leave policy defines employee rights...',
+    },
   },
   {
     policyId: uuidv4(),
@@ -93,18 +94,18 @@ const samplePolicies = [
         approverRole: 'POLICY_MANAGER',
         approverName: 'Muhammad Al-Dosari',
         status: 'APPROVED',
-        approvalDate: new Date()
+        approvalDate: new Date(),
       },
       {
         approverRole: 'HR_DIRECTOR',
         approverName: 'Sarah Freeman',
-        status: 'PENDING'
-      }
+        status: 'PENDING',
+      },
     ],
     content: {
       ar: 'هذه السياسة توضح متطلبات السلوك...',
-      en: 'This policy outlines conduct requirements...'
-    }
+      en: 'This policy outlines conduct requirements...',
+    },
   },
   {
     policyId: uuidv4(),
@@ -130,8 +131,8 @@ const samplePolicies = [
     priority: 'CRITICAL',
     content: {
       ar: 'ضمان سلامة جميع الموظفين في مكان العمل...',
-      en: 'Ensuring safety of all employees at work...'
-    }
+      en: 'Ensuring safety of all employees at work...',
+    },
   },
   {
     policyId: uuidv4(),
@@ -157,9 +158,9 @@ const samplePolicies = [
     priority: 'CRITICAL',
     content: {
       ar: 'حماية البيانات السرية للشركة...',
-      en: 'Protection of company confidential data...'
-    }
-  }
+      en: 'Protection of company confidential data...',
+    },
+  },
 ];
 
 /**
@@ -170,10 +171,13 @@ async function seedDatabase() {
     console.log('🌱 Starting database seeding...');
 
     // Connect to MongoDB
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/policy_management', {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    });
+    await mongoose.connect(
+      process.env.MONGODB_URI || 'mongodb://localhost:27017/policy_management',
+      {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+      }
+    );
 
     console.log('✓ Connected to MongoDB');
 
@@ -199,7 +203,7 @@ async function seedDatabase() {
           acknowledgedDate: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000),
           ipAddress: `192.168.1.${100 + i}`,
           trainingCompletedDate: policy.requiresTraining ? new Date() : null,
-          trainingScore: policy.requiresTraining ? Math.floor(Math.random() * 40) + 60 : null
+          trainingScore: policy.requiresTraining ? Math.floor(Math.random() * 40) + 60 : null,
         });
       }
     }

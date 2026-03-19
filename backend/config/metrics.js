@@ -1,9 +1,11 @@
+/* eslint-disable no-unused-vars */
 /**
  * Prometheus Metrics Collection
  * تجميع مقاييس Prometheus
  */
 
 const promClient = require('prom-client');
+const logger = require('../utils/logger');
 
 // Default metrics
 promClient.collectDefaultMetrics();
@@ -236,7 +238,7 @@ const initMetricsServer = (app, port = 9091) => {
   // Update memory metrics every 5 seconds
   setInterval(updateMemoryMetrics, 5000);
 
-  console.log(`✅ Metrics server running on port ${port}`);
+  logger.info(`✅ Metrics server running on port ${port}`);
   return port;
 };
 

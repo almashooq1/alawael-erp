@@ -1,3 +1,4 @@
+/* eslint-disable no-undef, no-unused-vars */
 /**
  * 🔐 Phase 14: Advanced Audit & Compliance System Tests
  * نظام التدقيق والامتثال المتقدم

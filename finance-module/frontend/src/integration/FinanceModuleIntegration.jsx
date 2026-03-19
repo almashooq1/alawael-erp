@@ -45,7 +45,7 @@ const FinanceModuleLoader = () => (
 const FinanceModuleErrorFallback = ({ error, resetErrorBoundary }) => (
   <Box p={3}>
     <Alert severity="error">
-      <strong>Finance Module Error:</strong> {error.message}
+      <strong>Finance Module Error:</strong> {'An internal error occurred'}
       <Box mt={2}>
         <button onClick={resetErrorBoundary} style={{
           padding: '8px 16px',

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * 🇸🇦 Qiwa Data Models
  * MongoDB Schemas for Qiwa Integration
@@ -569,7 +570,6 @@ const QiwaNitaqatSchema = new mongoose.Schema(
       type: String,
       unique: true,
       required: true,
-      index: true,
     },
 
     // Nitaqat Status
@@ -757,14 +757,7 @@ const QiwaAuditLogSchema = new mongoose.Schema(
     // Entity Information
     entityType: {
       type: String,
-      enum: [
-        'contract',
-        'employee',
-        'wage',
-        'wps',
-        'nitaqat',
-        'labor_record',
-      ],
+      enum: ['contract', 'employee', 'wage', 'wps', 'nitaqat', 'labor_record'],
       required: true,
     },
     entityId: {
@@ -823,10 +816,7 @@ module.exports = {
   QiwaContract: mongoose.model('QiwaContract', QiwaContractSchema),
   QiwaEmployee: mongoose.model('QiwaEmployee', QiwaEmployeeSchema),
   QiwaWage: mongoose.model('QiwaWage', QiwaWageSchema),
-  QiwaWPSSubmission: mongoose.model(
-    'QiwaWPSSubmission',
-    QiwaWPSSubmissionSchema
-  ),
+  QiwaWPSSubmission: mongoose.model('QiwaWPSSubmission', QiwaWPSSubmissionSchema),
   QiwaNitaqat: mongoose.model('QiwaNitaqat', QiwaNitaqatSchema),
   QiwaLaborRecord: mongoose.model('QiwaLaborRecord', QiwaLaborRecordSchema),
   QiwaAuditLog: mongoose.model('QiwaAuditLog', QiwaAuditLogSchema),

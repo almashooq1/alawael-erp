@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 class SmartVoiceAssistantService {
   constructor() {
     this.commandRegistry = [
@@ -28,7 +29,9 @@ class SmartVoiceAssistantService {
     const normalizedText = rawText.toLowerCase();
 
     // 1. Intent Recognition (Simple Keyword Matching for Demo)
-    const matchedIntent = this.commandRegistry.find(cmd => cmd.keywords.some(k => normalizedText.includes(k)));
+    const matchedIntent = this.commandRegistry.find(cmd =>
+      cmd.keywords.some(k => normalizedText.includes(k))
+    );
 
     if (!matchedIntent) {
       return {
@@ -55,7 +58,8 @@ class SmartVoiceAssistantService {
 
       case 'GET_PREDICTION':
         executionResult = { type: 'SIMULATION_RUN', predictedScore: 85 };
-        verbalResponse = 'Based on the digital twin, this intervention has an 85% success probability.';
+        verbalResponse =
+          'Based on the digital twin, this intervention has an 85% success probability.';
         break;
     }
 

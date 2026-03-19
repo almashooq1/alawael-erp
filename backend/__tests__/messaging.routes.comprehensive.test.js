@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 const express = require('express');
 const request = require('supertest');
 
@@ -24,6 +26,8 @@ jest.mock('../middleware/auth', () => ({
     req.user = { id: 'user-123', _id: 'user-123', role: 'user', name: 'Test User' };
     next();
   },
+  authorize: () => (req, res, next) => next(),
+  authorizeRole: () => (req, res, next) => next(),
 }));
 
 // Route file
@@ -39,7 +43,7 @@ describe('Messaging Routes Comprehensive Tests', () => {
     app.use('/api/messages', messagingRoutes);
 
     // Middleware error handler mock
-    app.use((err, req, res, next) => {
+    app.use((err, _req, res, _next) => {
       res.status(500).json({ success: false, message: err.message });
     });
   });

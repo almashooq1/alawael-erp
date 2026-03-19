@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+const logger = require('../utils/logger');
 /**
  * Smart Staff Roster & Shift Optimization Service (Phase 75)
  *
@@ -20,7 +22,7 @@ class SmartRosterService {
    * Generate AI Optimized Schedule for a Department
    */
   async generateSchedule(department, weekStartDate) {
-    console.log(`Generating schedule for ${department} week of ${weekStartDate}`);
+    logger.info(`Generating schedule for ${department} week of ${weekStartDate}`);
 
     // Mock optimization logic
     return {
@@ -58,7 +60,9 @@ class SmartRosterService {
   async analyzeFatigueRisk() {
     // Find staff with back-to-back doubles or 6-day weeks
     return {
-      highRiskStaff: [{ id: 'ST-02', riskFactor: 'HIGH', reason: 'Consecutive 10h shifts without 12h rest' }],
+      highRiskStaff: [
+        { id: 'ST-02', riskFactor: 'HIGH', reason: 'Consecutive 10h shifts without 12h rest' },
+      ],
       recommendation: 'Swap ST-02 Tuesday shift with ST-05',
     };
   }

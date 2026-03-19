@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Vehicle Fleet Service - خدمة إدارة الأسطول
  *

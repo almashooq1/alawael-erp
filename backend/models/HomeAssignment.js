@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 const submissionSchema = new mongoose.Schema({
@@ -26,7 +27,7 @@ const homeAssignmentSchema = new mongoose.Schema(
 
     status: { type: String, enum: ['ACTIVE', 'COMPLETED', 'ARCHIVED'], default: 'ACTIVE' },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 module.exports = mongoose.model('HomeAssignment', homeAssignmentSchema);

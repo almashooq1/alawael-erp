@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // Phase 24: Advanced Security & Governance
 // Zero-Trust, Encryption, Threat Detection, Compliance Automation
 
@@ -39,7 +40,7 @@ class ZeroTrustArchitecture {
     return { deviceId, trustScore: score, trustLevel };
   }
 
-  requireMFA(userId, accessRequest) {
+  requireMFA(_userId, _accessRequest) {
     return {
       required: true,
       method: 'totp',
@@ -107,7 +108,7 @@ class AdvancedEncryption {
     return { success: true, dataId };
   }
 
-  decryptData(dataId, keyId) {
+  decryptData(dataId, _keyId) {
     const encrypted = this.encryptedData.get(dataId);
     if (!encrypted) throw new Error('Encrypted data not found');
 

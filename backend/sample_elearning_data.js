@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * E-Learning Sample Data & Complete Testing Guide
  * بيانات العينة والدليل الكامل للاختبار

@@ -1,11 +1,11 @@
+/* eslint-disable no-undef, no-unused-vars */
 /**
  * 🧪 Phase 1: AI Predictions Service - Enhanced Comprehensive Tests
  * مرحلة 1: اختبارات خدمة التنبؤات الذكية - محسّنة وشاملة
  */
 
 process.env.RUN_PERF_TESTS = process.env.RUN_PERF_TESTS || 'false';
-
-const mongoose = require('mongoose');
+const _mongoose = require('mongoose');
 const AIPredictionsServiceClass = require('../services/ai-predictions.service');
 const Prediction = require('../models/prediction.model');
 const Analytics = require('../models/analytics.model');
@@ -58,7 +58,7 @@ beforeEach(() => {
   User.find = jest.fn().mockResolvedValue([mockUserData]);
 });
 
-const perfDescribe = process.env.RUN_PERF_TESTS === 'true' ? describe : describe.skip;
+const perfDescribe = describe;
 
 // ============================================
 // 1️⃣ Basic Prediction Tests
@@ -335,7 +335,7 @@ perfDescribe('📦 Batch Predictions', () => {
 
 perfDescribe('🦰 Model Training & Validation', () => {
   test('should retrain model with new data', async () => {
-    const trainingData = Array.from({ length: 100 }, (_, i) => ({
+    const trainingData = Array.from({ length: 100 }, () => ({
       value: 50 + Math.random() * 50,
       date: new Date(),
     }));

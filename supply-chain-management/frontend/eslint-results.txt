@@ -1,0 +1,316 @@
+
+C:\Users\x-be\OneDrive\المستندات\04-10-2025\66666\supply-chain-management\frontend\public\serviceWorker.js
+  200:5   error    'clients' is not defined                                              no-undef
+  210:11  error    'clients' is not defined                                              no-undef
+  211:16  error    'clients' is not defined                                              no-undef
+  218:1   warning  Async function 'getPendingActions' has no 'await' expression          require-await
+  222:1   warning  Async function 'removePendingAction' has no 'await' expression        require-await
+  222:36  warning  'id' is defined but never used. Allowed unused args must match /^_/u  no-unused-vars
+
+C:\Users\x-be\OneDrive\المستندات\04-10-2025\66666\supply-chain-management\frontend\src\App.js
+   1:8  warning  'React' is defined but never used. Allowed unused vars must match /^_/u           no-unused-vars
+   2:8  warning  'SupplierList' is defined but never used. Allowed unused vars must match /^_/u    no-unused-vars
+   3:8  warning  'ProductList' is defined but never used. Allowed unused vars must match /^_/u     no-unused-vars
+   4:8  warning  'InventoryList' is defined but never used. Allowed unused vars must match /^_/u   no-unused-vars
+   5:8  warning  'OrderList' is defined but never used. Allowed unused vars must match /^_/u       no-unused-vars
+   6:8  warning  'ShipmentList' is defined but never used. Allowed unused vars must match /^_/u    no-unused-vars
+   7:8  warning  'Login' is defined but never used. Allowed unused vars must match /^_/u           no-unused-vars
+   8:8  warning  'Register' is defined but never used. Allowed unused vars must match /^_/u        no-unused-vars
+   9:8  warning  'AuditLog' is defined but never used. Allowed unused vars must match /^_/u        no-unused-vars
+  10:8  warning  'Notification' is defined but never used. Allowed unused vars must match /^_/u    no-unused-vars
+  11:8  warning  'Dashboard' is defined but never used. Allowed unused vars must match /^_/u       no-unused-vars
+  12:8  warning  'BarcodeManager' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
+
+C:\Users\x-be\OneDrive\المستندات\04-10-2025\66666\supply-chain-management\frontend\src\components\AuditLog.js
+   1:8   warning  'React' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
+  14:14  warning  'err' is defined but never used. Allowed unused args must match /^_/u    no-unused-vars
+
+C:\Users\x-be\OneDrive\المستندات\04-10-2025\66666\supply-chain-management\frontend\src\components\AuditLog.test.js
+  1:8  warning  'React' is defined but never used. Allowed unused vars must match /^_/u     no-unused-vars
+  3:8  warning  'AuditLog' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
+
+C:\Users\x-be\OneDrive\المستندات\04-10-2025\66666\supply-chain-management\frontend\src\components\ChangeLogViewer.js
+  1:8  warning  'React' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
+
+C:\Users\x-be\OneDrive\المستندات\04-10-2025\66666\supply-chain-management\frontend\src\components\ChangeLogViewer.test.js
+  1:8  warning  'React' is defined but never used. Allowed unused vars must match /^_/u            no-unused-vars
+  3:8  warning  'ChangeLogViewer' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
+
+C:\Users\x-be\OneDrive\المستندات\04-10-2025\66666\supply-chain-management\frontend\src\components\Dashboard.js
+   1:8  warning  'React' is defined but never used. Allowed unused vars must match /^_/u                no-unused-vars
+   4:3  warning  'PieChart' is defined but never used. Allowed unused vars must match /^_/u             no-unused-vars
+   5:3  warning  'Pie' is defined but never used. Allowed unused vars must match /^_/u                  no-unused-vars
+   6:3  warning  'Cell' is defined but never used. Allowed unused vars must match /^_/u                 no-unused-vars
+   7:3  warning  'Tooltip' is defined but never used. Allowed unused vars must match /^_/u              no-unused-vars
+   8:3  warning  'BarChart' is defined but never used. Allowed unused vars must match /^_/u             no-unused-vars
+   9:3  warning  'Bar' is defined but never used. Allowed unused vars must match /^_/u                  no-unused-vars
+  10:3  warning  'XAxis' is defined but never used. Allowed unused vars must match /^_/u                no-unused-vars
+  11:3  warning  'YAxis' is defined but never used. Allowed unused vars must match /^_/u                no-unused-vars
+  12:3  warning  'CartesianGrid' is defined but never used. Allowed unused vars must match /^_/u        no-unused-vars
+  13:3  warning  'Legend' is defined but never used. Allowed unused vars must match /^_/u               no-unused-vars
+  14:3  warning  'LineChart' is defined but never used. Allowed unused vars must match /^_/u            no-unused-vars
+  15:3  warning  'Line' is defined but never used. Allowed unused vars must match /^_/u                 no-unused-vars
+  16:3  warning  'ResponsiveContainer' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
+
+C:\Users\x-be\OneDrive\المستندات\04-10-2025\66666\supply-chain-management\frontend\src\components\Dashboard.test.js
+  1:8  warning  'React' is defined but never used. Allowed unused vars must match /^_/u      no-unused-vars
+  3:8  warning  'Dashboard' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
+
+C:\Users\x-be\OneDrive\المستندات\04-10-2025\66666\supply-chain-management\frontend\src\components\FileUpload.js
+   28:8   warning  'React' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
+   57:14  warning  'file' is never reassigned. Use 'const' instead                          prefer-const
+   71:9   warning  'selected' is never reassigned. Use 'const' instead                      prefer-const
+  121:9   warning  'dropped' is never reassigned. Use 'const' instead                       prefer-const
+  155:14  warning  'i' is never reassigned. Use 'const' instead                             prefer-const
+
+C:\Users\x-be\OneDrive\المستندات\04-10-2025\66666\supply-chain-management\frontend\src\components\FileUpload.test.js
+  1:8  warning  'React' is defined but never used. Allowed unused vars must match /^_/u       no-unused-vars
+  7:8  warning  'FileUpload' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
+
+C:\Users\x-be\OneDrive\المستندات\04-10-2025\66666\supply-chain-management\frontend\src\components\Finance\ValidationDashboard.test.js
+   16:8   warning  'React' is defined but never used. Allowed unused vars must match /^_/u                no-unused-vars
+   17:26  warning  'fireEvent' is defined but never used. Allowed unused vars must match /^_/u            no-unused-vars
+   17:37  warning  'waitFor' is defined but never used. Allowed unused vars must match /^_/u              no-unused-vars
+   17:46  warning  'within' is defined but never used. Allowed unused vars must match /^_/u               no-unused-vars
+   18:8   warning  'userEvent' is defined but never used. Allowed unused vars must match /^_/u            no-unused-vars
+   20:8   warning  'dayjs' is defined but never used. Allowed unused vars must match /^_/u                no-unused-vars
+   21:8   warning  'ValidationDashboard' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
+   28:1   error    The members of 'api' are read-only                                                     no-import-assign
+   29:1   error    The members of 'api' are read-only                                                     no-import-assign
+   30:1   error    The members of 'api' are read-only                                                     no-import-assign
+  151:7   error    Unnecessary semicolon                                                                  no-extra-semi
+  183:7   error    Unnecessary semicolon                                                                  no-extra-semi
+  187:15  warning  'rerender' is assigned a value but never used. Allowed unused vars must match /^_/u    no-unused-vars
+  205:7   error    Unnecessary semicolon                                                                  no-extra-semi
+  306:7   error    Unnecessary semicolon                                                                  no-extra-semi
+  320:7   error    Unnecessary semicolon                                                                  no-extra-semi
+  373:69  warning  Async arrow function has no 'await' expression                                         require-await
+  378:71  warning  Async arrow function has no 'await' expression                                         require-await
+  407:15  warning  'rerender' is assigned a value but never used. Allowed unused vars must match /^_/u    no-unused-vars
+  411:7   error    Unnecessary semicolon                                                                  no-extra-semi
+  419:7   error    Unnecessary semicolon                                                                  no-extra-semi
+  430:7   error    Unnecessary semicolon                                                                  no-extra-semi
+  459:7   error    Unnecessary semicolon                                                                  no-extra-semi
+  463:15  warning  'rerender' is assigned a value but never used. Allowed unused vars must match /^_/u    no-unused-vars
+  467:7   error    Unnecessary semicolon                                                                  no-extra-semi
+  479:68  warning  Async arrow function has no 'await' expression                                         require-await
+  492:15  warning  'container' is assigned a value but never used. Allowed unused vars must match /^_/u   no-unused-vars
+  501:7   error    Unnecessary semicolon                                                                  no-extra-semi
+  542:7   error    Unnecessary semicolon                                                                  no-extra-semi
+  563:7   error    Unnecessary semicolon                                                                  no-extra-semi
+  575:7   error    Unnecessary semicolon                                                                  no-extra-semi
+  598:57  warning  Async arrow function has no 'await' expression                                         require-await
+  631:7   error    Unnecessary semicolon                                                                  no-extra-semi
+  637:15  warning  'rerender' is assigned a value but never used. Allowed unused vars must match /^_/u    no-unused-vars
+  641:7   error    Unnecessary semicolon                                                                  no-extra-semi
+
+C:\Users\x-be\OneDrive\المستندات\04-10-2025\66666\supply-chain-management\frontend\src\components\InventoryForm.js
+  1:8  warning  'React' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
+
+C:\Users\x-be\OneDrive\المستندات\04-10-2025\66666\supply-chain-management\frontend\src\components\InventoryForm.test.js
+  1:8  warning  'React' is defined but never used. Allowed unused vars must match /^_/u          no-unused-vars
+  3:8  warning  'InventoryForm' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
+
+C:\Users\x-be\OneDrive\المستندات\04-10-2025\66666\supply-chain-management\frontend\src\components\InventoryList.js
+   1:8  warning  'React' is defined but never used. Allowed unused vars must match /^_/u                     no-unused-vars
+   3:8  warning  'InventoryForm' is defined but never used. Allowed unused vars must match /^_/u             no-unused-vars
+   4:8  warning  'Modal' is defined but never used. Allowed unused vars must match /^_/u                     no-unused-vars
+  78:9  warning  'handleExportPDF' is assigned a value but never used. Allowed unused vars must match /^_/u  no-unused-vars
+
+C:\Users\x-be\OneDrive\المستندات\04-10-2025\66666\supply-chain-management\frontend\src\components\InventoryList.test.js
+   1:8   warning  'React' is defined but never used. Allowed unused vars must match /^_/u               no-unused-vars
+   3:8   warning  'InventoryList' is defined but never used. Allowed unused vars must match /^_/u       no-unused-vars
+  72:13  warning  'container' is assigned a value but never used. Allowed unused vars must match /^_/u  no-unused-vars
+
+C:\Users\x-be\OneDrive\المستندات\04-10-2025\66666\supply-chain-management\frontend\src\components\Login.js
+  1:8  warning  'React' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
+
+C:\Users\x-be\OneDrive\المستندات\04-10-2025\66666\supply-chain-management\frontend\src\components\Login.test.js
+   1:8   warning  'React' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
+   3:8   warning  'Login' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
+  67:49  warning  Async arrow function has no 'await' expression                           require-await
+
+C:\Users\x-be\OneDrive\المستندات\04-10-2025\66666\supply-chain-management\frontend\src\components\Modal.js
+  1:8   warning  'React' is defined but never used. Allowed unused vars must match /^_/u     no-unused-vars
+  1:17  warning  'useState' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
+
+C:\Users\x-be\OneDrive\المستندات\04-10-2025\66666\supply-chain-management\frontend\src\components\Modal.test.js
+  1:8  warning  'React' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
+  3:8  warning  'Modal' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
+
+C:\Users\x-be\OneDrive\المستندات\04-10-2025\66666\supply-chain-management\frontend\src\components\Notification.js
+  1:8  warning  'React' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
+
+C:\Users\x-be\OneDrive\المستندات\04-10-2025\66666\supply-chain-management\frontend\src\components\Notification.test.js
+   1:8   warning  'React' is defined but never used. Allowed unused vars must match /^_/u               no-unused-vars
+   3:8   warning  'Notification' is defined but never used. Allowed unused vars must match /^_/u        no-unused-vars
+  12:13  warning  'container' is assigned a value but never used. Allowed unused vars must match /^_/u  no-unused-vars
+  67:13  warning  'container' is assigned a value but never used. Allowed unused vars must match /^_/u  no-unused-vars
+
+C:\Users\x-be\OneDrive\المستندات\04-10-2025\66666\supply-chain-management\frontend\src\components\OrderForm.js
+  1:8  warning  'React' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
+
+C:\Users\x-be\OneDrive\المستندات\04-10-2025\66666\supply-chain-management\frontend\src\components\OrderForm.test.js
+  1:8  warning  'React' is defined but never used. Allowed unused vars must match /^_/u      no-unused-vars
+  3:8  warning  'OrderForm' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
+
+C:\Users\x-be\OneDrive\المستندات\04-10-2025\66666\supply-chain-management\frontend\src\components\OrderList.js
+  1:8  warning  'React' is defined but never used. Allowed unused vars must match /^_/u      no-unused-vars
+  3:8  warning  'OrderForm' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
+  4:8  warning  'Modal' is defined but never used. Allowed unused vars must match /^_/u      no-unused-vars
+
+C:\Users\x-be\OneDrive\المستندات\04-10-2025\66666\supply-chain-management\frontend\src\components\OrderList.test.js
+   1:8   warning  'React' is defined but never used. Allowed unused vars must match /^_/u               no-unused-vars
+   3:8   warning  'OrderList' is defined but never used. Allowed unused vars must match /^_/u           no-unused-vars
+  65:13  warning  'container' is assigned a value but never used. Allowed unused vars must match /^_/u  no-unused-vars
+
+C:\Users\x-be\OneDrive\المستندات\04-10-2025\66666\supply-chain-management\frontend\src\components\ProductForm.js
+    1:8   warning  'React' is defined but never used. Allowed unused vars must match /^_/u           no-unused-vars
+    3:8   warning  'FileUpload' is defined but never used. Allowed unused vars must match /^_/u      no-unused-vars
+   19:10  warning  'image' is assigned a value but never used. Allowed unused vars must match /^_/u  no-unused-vars
+  113:18  warning  'err' is defined but never used. Allowed unused args must match /^_/u             no-unused-vars
+
+C:\Users\x-be\OneDrive\المستندات\04-10-2025\66666\supply-chain-management\frontend\src\components\ProductForm.test.js
+  1:8  warning  'React' is defined but never used. Allowed unused vars must match /^_/u        no-unused-vars
+  3:8  warning  'ProductForm' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
+
+C:\Users\x-be\OneDrive\المستندات\04-10-2025\66666\supply-chain-management\frontend\src\components\ProductList.js
+  1:8  warning  'React' is defined but never used. Allowed unused vars must match /^_/u        no-unused-vars
+  3:8  warning  'ProductForm' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
+  4:8  warning  'Modal' is defined but never used. Allowed unused vars must match /^_/u        no-unused-vars
+
+C:\Users\x-be\OneDrive\المستندات\04-10-2025\66666\supply-chain-management\frontend\src\components\ProductList.test.js
+  1:8  warning  'React' is defined but never used. Allowed unused vars must match /^_/u        no-unused-vars
+  3:8  warning  'ProductList' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
+
+C:\Users\x-be\OneDrive\المستندات\04-10-2025\66666\supply-chain-management\frontend\src\components\Register.js
+  1:8  warning  'React' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
+
+C:\Users\x-be\OneDrive\المستندات\04-10-2025\66666\supply-chain-management\frontend\src\components\Register.test.js
+  1:8  warning  'React' is defined but never used. Allowed unused vars must match /^_/u     no-unused-vars
+  3:8  warning  'Register' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
+
+C:\Users\x-be\OneDrive\المستندات\04-10-2025\66666\supply-chain-management\frontend\src\components\ShipmentForm.js
+    3:8   warning  'FileUpload' is defined but never used. Allowed unused vars must match /^_/u            no-unused-vars
+   18:10  warning  'attachments' is assigned a value but never used. Allowed unused vars must match /^_/u  no-unused-vars
+  169:20  warning  'err' is defined but never used. Allowed unused args must match /^_/u                   no-unused-vars
+
+C:\Users\x-be\OneDrive\المستندات\04-10-2025\66666\supply-chain-management\frontend\src\components\ShipmentForm.test.js
+  1:8  warning  'React' is defined but never used. Allowed unused vars must match /^_/u         no-unused-vars
+  3:8  warning  'ShipmentForm' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
+
+C:\Users\x-be\OneDrive\المستندات\04-10-2025\66666\supply-chain-management\frontend\src\components\ShipmentList.js
+  1:8  warning  'React' is defined but never used. Allowed unused vars must match /^_/u         no-unused-vars
+  3:8  warning  'ShipmentForm' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
+  4:8  warning  'Modal' is defined but never used. Allowed unused vars must match /^_/u         no-unused-vars
+
+C:\Users\x-be\OneDrive\المستندات\04-10-2025\66666\supply-chain-management\frontend\src\components\ShipmentList.test.js
+   1:8   warning  'React' is defined but never used. Allowed unused vars must match /^_/u               no-unused-vars
+   3:8   warning  'ShipmentList' is defined but never used. Allowed unused vars must match /^_/u        no-unused-vars
+  97:13  warning  'container' is assigned a value but never used. Allowed unused vars must match /^_/u  no-unused-vars
+
+C:\Users\x-be\OneDrive\المستندات\04-10-2025\66666\supply-chain-management\frontend\src\components\SupplierForm.test.js
+  1:8  warning  'React' is defined but never used. Allowed unused vars must match /^_/u         no-unused-vars
+  3:8  warning  'SupplierForm' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
+
+C:\Users\x-be\OneDrive\المستندات\04-10-2025\66666\supply-chain-management\frontend\src\components\SupplierList.js
+    1:8   warning  'React' is defined but never used. Allowed unused vars must match /^_/u             no-unused-vars
+    3:8   warning  'SupplierForm' is defined but never used. Allowed unused vars must match /^_/u      no-unused-vars
+    4:8   warning  'Modal' is defined but never used. Allowed unused vars must match /^_/u             no-unused-vars
+   13:10  warning  'loading' is assigned a value but never used. Allowed unused vars must match /^_/u  no-unused-vars
+   14:10  warning  'error' is assigned a value but never used. Allowed unused vars must match /^_/u    no-unused-vars
+  167:10  warning  'SupplierReview' is defined but never used. Allowed unused vars must match /^_/u    no-unused-vars
+  182:13  error    'axios' is not defined                                                              no-undef
+
+C:\Users\x-be\OneDrive\المستندات\04-10-2025\66666\supply-chain-management\frontend\src\components\SupplierList.test.js
+   1:8   warning  'React' is defined but never used. Allowed unused vars must match /^_/u               no-unused-vars
+   3:8   warning  'SupplierList' is defined but never used. Allowed unused vars must match /^_/u        no-unused-vars
+  70:13  warning  'container' is assigned a value but never used. Allowed unused vars must match /^_/u  no-unused-vars
+
+C:\Users\x-be\OneDrive\المستندات\04-10-2025\66666\supply-chain-management\frontend\src\components\__tests__\CashFlowDashboard.test.js
+   13:8   warning  'React' is defined but never used. Allowed unused vars must match /^_/u              no-unused-vars
+   15:8   warning  'userEvent' is defined but never used. Allowed unused vars must match /^_/u          no-unused-vars
+   16:8   warning  'CashFlowDashboard' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
+   29:1   error    The members of 'API' are read-only                                                   no-import-assign
+   30:1   error    The members of 'API' are read-only                                                   no-import-assign
+   31:1   error    The members of 'API' are read-only                                                   no-import-assign
+   74:47  warning  Async arrow function has no 'await' expression                                       require-await
+  204:7   error    The members of 'API' are read-only                                                   no-import-assign
+  219:7   error    The members of 'API' are read-only                                                   no-import-assign
+  234:7   error    The members of 'API' are read-only                                                   no-import-assign
+
+C:\Users\x-be\OneDrive\المستندات\04-10-2025\66666\supply-chain-management\frontend\src\components\__tests__\ComplianceDashboard.test.js
+    6:8   warning  'React' is defined but never used. Allowed unused vars must match /^_/u                no-unused-vars
+    7:37  warning  'waitFor' is defined but never used. Allowed unused vars must match /^_/u              no-unused-vars
+    8:8   warning  'userEvent' is defined but never used. Allowed unused vars must match /^_/u            no-unused-vars
+    9:8   warning  'ComplianceDashboard' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
+   22:1   error    The members of 'API' are read-only                                                     no-import-assign
+   23:1   error    The members of 'API' are read-only                                                     no-import-assign
+   24:1   error    The members of 'API' are read-only                                                     no-import-assign
+   25:1   error    The members of 'API' are read-only                                                     no-import-assign
+   90:47  warning  Async arrow function has no 'await' expression                                         require-await
+  130:15  warning  'container' is assigned a value but never used. Allowed unused vars must match /^_/u   no-unused-vars
+  273:7   error    The members of 'API' are read-only                                                     no-import-assign
+  325:7   error    The members of 'API' are read-only                                                     no-import-assign
+  335:7   error    The members of 'API' are read-only                                                     no-import-assign
+  359:7   error    The members of 'API' are read-only                                                     no-import-assign
+  379:7   error    The members of 'API' are read-only                                                     no-import-assign
+
+C:\Users\x-be\OneDrive\المستندات\04-10-2025\66666\supply-chain-management\frontend\src\components\__tests__\ReportingDashboard.test.js
+    6:8   warning  'React' is defined but never used. Allowed unused vars must match /^_/u               no-unused-vars
+    7:37  warning  'waitFor' is defined but never used. Allowed unused vars must match /^_/u             no-unused-vars
+    8:8   warning  'userEvent' is defined but never used. Allowed unused vars must match /^_/u           no-unused-vars
+    9:8   warning  'ReportingDashboard' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
+   22:1   error    The members of 'API' are read-only                                                    no-import-assign
+   23:1   error    The members of 'API' are read-only                                                    no-import-assign
+   24:1   error    The members of 'API' are read-only                                                    no-import-assign
+   25:1   error    The members of 'API' are read-only                                                    no-import-assign
+   26:1   error    The members of 'API' are read-only                                                    no-import-assign
+   71:47  warning  Async arrow function has no 'await' expression                                        require-await
+  295:54  warning  Async arrow function has no 'await' expression                                        require-await
+  298:13  warning  'start' is assigned a value but never used. Allowed unused vars must match /^_/u      no-unused-vars
+  300:13  warning  'end' is assigned a value but never used. Allowed unused vars must match /^_/u        no-unused-vars
+
+C:\Users\x-be\OneDrive\المستندات\04-10-2025\66666\supply-chain-management\frontend\src\components\__tests__\RiskDashboard.test.js
+    6:8   warning  'React' is defined but never used. Allowed unused vars must match /^_/u               no-unused-vars
+    7:26  warning  'fireEvent' is defined but never used. Allowed unused vars must match /^_/u           no-unused-vars
+    7:37  warning  'waitFor' is defined but never used. Allowed unused vars must match /^_/u             no-unused-vars
+    8:8   warning  'userEvent' is defined but never used. Allowed unused vars must match /^_/u           no-unused-vars
+    9:8   warning  'RiskDashboard' is defined but never used. Allowed unused vars must match /^_/u       no-unused-vars
+   22:1   error    The members of 'API' are read-only                                                    no-import-assign
+   23:1   error    The members of 'API' are read-only                                                    no-import-assign
+   24:1   error    The members of 'API' are read-only                                                    no-import-assign
+   58:47  warning  Async arrow function has no 'await' expression                                        require-await
+  129:15  warning  'container' is assigned a value but never used. Allowed unused vars must match /^_/u  no-unused-vars
+
+C:\Users\x-be\OneDrive\المستندات\04-10-2025\66666\supply-chain-management\frontend\src\components\__tests__\ValidationDashboard.test.js
+   14:8   warning  'React' is defined but never used. Allowed unused vars must match /^_/u                no-unused-vars
+   15:37  warning  'waitFor' is defined but never used. Allowed unused vars must match /^_/u              no-unused-vars
+   16:8   warning  'userEvent' is defined but never used. Allowed unused vars must match /^_/u            no-unused-vars
+   17:8   warning  'ValidationDashboard' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
+   33:1   error    The members of 'API' are read-only                                                     no-import-assign
+   34:1   error    The members of 'API' are read-only                                                     no-import-assign
+   35:1   error    The members of 'API' are read-only                                                     no-import-assign
+   36:1   error    The members of 'API' are read-only                                                     no-import-assign
+   37:1   error    The members of 'API' are read-only                                                     no-import-assign
+   66:52  warning  Async arrow function has no 'await' expression                                         require-await
+   74:57  warning  Async arrow function has no 'await' expression                                         require-await
+  117:15  warning  'message' is assigned a value but never used. Allowed unused vars must match /^_/u     no-unused-vars
+  198:15  warning  'message' is assigned a value but never used. Allowed unused vars must match /^_/u     no-unused-vars
+  249:15  warning  'message' is assigned a value but never used. Allowed unused vars must match /^_/u     no-unused-vars
+  264:15  warning  'message' is assigned a value but never used. Allowed unused vars must match /^_/u     no-unused-vars
+  279:15  warning  'message' is assigned a value but never used. Allowed unused vars must match /^_/u     no-unused-vars
+  332:15  warning  'message' is assigned a value but never used. Allowed unused vars must match /^_/u     no-unused-vars
+
+C:\Users\x-be\OneDrive\المستندات\04-10-2025\66666\supply-chain-management\frontend\src\index.js
+  1:8  warning  'React' is defined but never used. Allowed unused vars must match /^_/u  no-unused-vars
+  3:8  warning  'App' is defined but never used. Allowed unused vars must match /^_/u    no-unused-vars
+
+C:\Users\x-be\OneDrive\المستندات\04-10-2025\66666\supply-chain-management\frontend\src\utils\exportToPDF.js
+  1:10  warning  'utils' is defined but never used. Allowed unused vars must match /^_/u              no-unused-vars
+  1:17  warning  'writeFile' is defined but never used. Allowed unused vars must match /^_/u          no-unused-vars
+  3:44  warning  'fileName' is assigned a value but never used. Allowed unused vars must match /^_/u  no-unused-vars
+
+✖ 222 problems (51 errors, 171 warnings)
+  16 errors and 4 warnings potentially fixable with the `--fix` option.
+

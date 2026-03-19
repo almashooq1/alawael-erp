@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const SmartNotificationService = require('./smartNotificationService');
 const Beneficiary = require('../models/Beneficiary'); // Patient
 const TherapeuticPlan = require('../models/TherapeuticPlan');
@@ -33,12 +34,20 @@ class SmartCDSSService {
         risk: 'CRITICAL',
         msg: 'High bleeding risk on impact. Ensure extra safety harness.',
       },
-      { med: 'Muscle Relaxants', activity: 'Balance Training', risk: 'MODERATE', msg: 'Drowsiness/Instability risk. monitor closely.' },
+      {
+        med: 'Muscle Relaxants',
+        activity: 'Balance Training',
+        risk: 'MODERATE',
+        msg: 'Drowsiness/Instability risk. monitor closely.',
+      },
     ];
 
     medications.forEach(med => {
       rules.forEach(rule => {
-        if (med.toLowerCase().includes(rule.med.toLowerCase()) && activityType.toLowerCase().includes(rule.activity.toLowerCase())) {
+        if (
+          med.toLowerCase().includes(rule.med.toLowerCase()) &&
+          activityType.toLowerCase().includes(rule.activity.toLowerCase())
+        ) {
           alerts.push({
             type: 'DRUG_THERAPY_INTERACTION',
             severity: rule.risk,
@@ -76,7 +85,8 @@ class SmartCDSSService {
       newAlerts.push({
         targetDiscipline: 'Occupational Therapy',
         source: 'Speech Therapy',
-        alert: 'Possible Dysphagia / Choking Risk detected in SLP session. Please evaluate feeding safety.',
+        alert:
+          'Possible Dysphagia / Choking Risk detected in SLP session. Please evaluate feeding safety.',
       });
     }
 
@@ -92,7 +102,11 @@ class SmartCDSSService {
 
     if (newAlerts.length > 0) {
       // Notify relevant departments
-      await SmartNotificationService.broadcastToRole('CLINICAL_MANAGER', 'CDSS Alert: Cross-Discipline Risk Detected', 'WARNING');
+      await SmartNotificationService.broadcastToRole(
+        'CLINICAL_MANAGER',
+        'CDSS Alert: Cross-Discipline Risk Detected',
+        'WARNING'
+      );
     }
 
     return newAlerts;

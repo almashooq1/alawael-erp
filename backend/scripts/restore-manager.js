@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable no-unused-vars */
 
 /**
  * 🔄 Intelligent Restore System
@@ -220,7 +221,8 @@ class RestoreManager {
       if (backupPath.endsWith('.enc')) {
         log.info('🔓 جاري فك التشفير...');
 
-        const password = process.env.BACKUP_ENCRYPTION_PASSWORD || 'secure-backup-key';
+        const { backupEncryptionPassword } = require('../config/secrets');
+        const password = backupEncryptionPassword;
         const decryptedFile = backupPath.replace('.enc', '.dec');
 
         const decryptCommand = `openssl enc -aes-256-cbc -d -in "${backupPath}" -out "${decryptedFile}" -k "${password}"`;

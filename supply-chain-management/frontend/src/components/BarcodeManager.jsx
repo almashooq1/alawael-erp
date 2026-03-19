@@ -23,7 +23,7 @@ const BarcodeManager = () => {
   const [batchItems, setBatchItems] = useState([{ data: '', type: 'QR', format: 'CODE128' }]);
 
   // QR Code Handler
-  const handleGenerateQR = async (e) => {
+  const handleGenerateQR = async e => {
     e.preventDefault();
     if (!qrData.trim()) {
       alert('Please enter data for QR code');
@@ -33,7 +33,7 @@ const BarcodeManager = () => {
   };
 
   // Barcode Handler
-  const handleGenerateBarcode = async (e) => {
+  const handleGenerateBarcode = async e => {
     e.preventDefault();
     if (!barcodeData.trim()) {
       alert('Please enter data for barcode');
@@ -43,7 +43,7 @@ const BarcodeManager = () => {
   };
 
   // Batch Handler
-  const handleGenerateBatch = async (e) => {
+  const handleGenerateBatch = async e => {
     e.preventDefault();
     const validItems = batchItems.filter(item => item.data.trim());
     if (validItems.length === 0) {
@@ -57,7 +57,7 @@ const BarcodeManager = () => {
     setBatchItems([...batchItems, { data: '', type: 'QR', format: 'CODE128' }]);
   };
 
-  const removeBatchItem = (index) => {
+  const removeBatchItem = index => {
     setBatchItems(batchItems.filter((_, i) => i !== index));
   };
 
@@ -122,7 +122,7 @@ const BarcodeManager = () => {
               <input
                 type="text"
                 value={qrData}
-                onChange={(e) => setQrData(e.target.value)}
+                onChange={e => setQrData(e.target.value)}
                 placeholder="Enter text, URL, or product ID"
                 className="input-field"
               />
@@ -132,7 +132,7 @@ const BarcodeManager = () => {
               <label>Error Correction Level:</label>
               <select
                 value={qrErrorLevel}
-                onChange={(e) => setQrErrorLevel(e.target.value)}
+                onChange={e => setQrErrorLevel(e.target.value)}
                 className="input-field"
               >
                 <option value="L">L (7% recovery)</option>
@@ -142,11 +142,7 @@ const BarcodeManager = () => {
               </select>
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn btn-primary"
-            >
+            <button type="submit" disabled={loading} className="btn btn-primary">
               {loading ? '⏳ Generating...' : '✨ Generate QR Code'}
             </button>
           </form>
@@ -162,7 +158,7 @@ const BarcodeManager = () => {
               <input
                 type="text"
                 value={barcodeData}
-                onChange={(e) => setBarcodeData(e.target.value)}
+                onChange={e => setBarcodeData(e.target.value)}
                 placeholder="Enter product code, SKU, or ID"
                 className="input-field"
               />
@@ -172,7 +168,7 @@ const BarcodeManager = () => {
               <label>Barcode Format:</label>
               <select
                 value={barcodeFormat}
-                onChange={(e) => setBarcodeFormat(e.target.value)}
+                onChange={e => setBarcodeFormat(e.target.value)}
                 className="input-field"
               >
                 <option value="CODE128">CODE128</option>
@@ -182,11 +178,7 @@ const BarcodeManager = () => {
               </select>
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn btn-primary"
-            >
+            <button type="submit" disabled={loading} className="btn btn-primary">
               {loading ? '⏳ Generating...' : '✨ Generate Barcode'}
             </button>
           </form>
@@ -203,13 +195,13 @@ const BarcodeManager = () => {
                   <input
                     type="text"
                     value={item.data}
-                    onChange={(e) => updateBatchItem(index, 'data', e.target.value)}
+                    onChange={e => updateBatchItem(index, 'data', e.target.value)}
                     placeholder="Enter data"
                     className="input-field"
                   />
                   <select
                     value={item.type}
-                    onChange={(e) => updateBatchItem(index, 'type', e.target.value)}
+                    onChange={e => updateBatchItem(index, 'type', e.target.value)}
                     className="input-field"
                   >
                     <option value="QR">QR</option>
@@ -217,7 +209,7 @@ const BarcodeManager = () => {
                   </select>
                   <select
                     value={item.format}
-                    onChange={(e) => updateBatchItem(index, 'format', e.target.value)}
+                    onChange={e => updateBatchItem(index, 'format', e.target.value)}
                     className="input-field"
                     disabled={item.type === 'QR'}
                   >
@@ -237,19 +229,11 @@ const BarcodeManager = () => {
               ))}
             </div>
 
-            <button
-              type="button"
-              onClick={addBatchItem}
-              className="btn btn-secondary"
-            >
+            <button type="button" onClick={addBatchItem} className="btn btn-secondary">
               ➕ Add Item
             </button>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn btn-primary"
-            >
+            <button type="submit" disabled={loading} className="btn btn-primary">
               {loading ? `⏳ Progress ${batchProgress}%` : '✨ Generate Batch'}
             </button>
           </form>
@@ -262,17 +246,17 @@ const BarcodeManager = () => {
           <h3>✅ Generated Successfully!</h3>
           {generatedCode.type === 'BATCH' ? (
             <div className="batch-result">
-              <p>Total: {generatedCode.totalItems} | Success: {generatedCode.successCount} | Errors: {generatedCode.errorCount}</p>
+              <p>
+                Total: {generatedCode.totalItems} | Success: {generatedCode.successCount} | Errors:{' '}
+                {generatedCode.errorCount}
+              </p>
               <div className="batch-codes">
                 {generatedCode.results.map((result, idx) => (
-                  <div
-                    key={idx}
-                    className={`batch-code ${result.status}`}
-                  >
-                    <p>Item {result.index}: {result.data}</p>
-                    {result.status === 'success' && (
-                      <img src={result.code} alt={`Code ${idx}`} />
-                    )}
+                  <div key={idx} className={`batch-code ${result.status}`}>
+                    <p>
+                      Item {result.index}: {result.data}
+                    </p>
+                    {result.status === 'success' && <img src={result.code} alt={`Code ${idx}`} />}
                   </div>
                 ))}
               </div>

@@ -1,8 +1,15 @@
+/* eslint-disable no-undef, no-unused-vars */
 const IntegrationServiceClass = require('../services/integrationService');
 const Integration = require('../models/Integration');
 
 // Mock Mongoose Model
-jest.mock('../models/Integration');
+jest.mock('../models/Integration', () => {
+  const mock = jest.fn();
+  mock.find = jest.fn();
+  mock.findOne = jest.fn();
+  mock.findById = jest.fn();
+  return mock;
+});
 
 // Create instance
 const service = new IntegrationServiceClass();

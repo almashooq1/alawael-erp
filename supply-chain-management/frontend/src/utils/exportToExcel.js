@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { utils, writeFile } from 'xlsx';
 
 export function exportToExcel(data, columns, fileName = 'data.xlsx') {

@@ -1,5 +1,7 @@
+/* eslint-disable no-unused-vars */
 const Queue = require('bull');
-const { createClient } = require('redis');
+const Redis = require('ioredis');
+const logger = require('../utils/logger');
 
 // Redis Configuration (from Docker environment)
 const redisConfig = {
@@ -16,17 +18,17 @@ const aiPredictionsQueue = new Queue('ai-predictions-queue', { redis: redisConfi
 // 2. Process Jobs (Workers)
 // In a real microservices architecture, these would be in a separate "worker" process
 emailQueue.process(async job => {
-  console.log(`📧 Processing email job ${job.id} for ${job.data.to}`);
+  logger.info(`📧 Processing email job ${job.id} for ${job.data.to}`);
   // Simulate email sending
   await new Promise(resolve => setTimeout(resolve, 1000));
-  console.log(`✅ Email sent to ${job.data.to}`);
+  logger.info(`✅ Email sent to ${job.data.to}`);
 });
 
 reportsQueue.process(async job => {
-  console.log(`📊 Generating report ${job.data.reportId} (${job.data.type})`);
+  logger.info(`📊 Generating report ${job.data.reportId} (${job.data.type})`);
   // Simulate heavy calculation
   await new Promise(resolve => setTimeout(resolve, 5000));
-  console.log(`✅ Report ${job.data.reportId} generated`);
+  logger.info(`✅ Report ${job.data.reportId} generated`);
 });
 
 // 3. Public API to Add Jobs
@@ -56,10 +58,10 @@ const addToQueue = async (queueName, data, options = {}) => {
     };
 
     const job = await queue.add(data, jobOptions);
-    console.log(`📥 Job added to ${queueName} queue: ${job.id}`);
+    logger.info(`📥 Job added to ${queueName} queue: ${job.id}`);
     return job;
   } catch (error) {
-    console.error('Queue Error:', error);
+    logger.error('Queue Error:', error);
     // Fallback: execute synchronously if queue fails (optional)
     return null;
   }

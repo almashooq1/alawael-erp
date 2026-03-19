@@ -1,3 +1,4 @@
+﻿/* eslint-disable no-unused-vars */
 /**
  * Conversations Routes
  * Handle conversation management endpoints
@@ -36,7 +37,7 @@ router.patch('/:id/mark-read', async (req, res) => {
     return res.status(500).json({
       success: false,
       message: 'Failed to mark conversation as read',
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const EventEmitter = require('events');
 const Report = require('../models/Report');
 const Dashboard = require('../models/Dashboard');
@@ -55,7 +56,7 @@ class ReportingService extends EventEmitter {
 
       return report;
     } catch (error) {
-      this.emit('report-generation-failed', { error: error.message });
+      this.emit('report-generation-failed', { error: 'An internal error occurred' });
       throw error;
     }
   }
@@ -127,7 +128,7 @@ class ReportingService extends EventEmitter {
       this.emit('report-refreshed', { reportId });
       return report;
     } catch (error) {
-      this.emit('report-refresh-failed', { error: error.message });
+      this.emit('report-refresh-failed', { error: 'An internal error occurred' });
       throw error;
     }
   }
@@ -494,7 +495,7 @@ class ReportingService extends EventEmitter {
       this.emit('scheduled-reports-processed', { count: scheduledReports.length });
       return scheduledReports.length;
     } catch (error) {
-      this.emit('scheduled-reports-processing-failed', { error: error.message });
+      this.emit('scheduled-reports-processing-failed', { error: 'An internal error occurred' });
       throw error;
     }
   }

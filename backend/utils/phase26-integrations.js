@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // Phase 26: Advanced Integrations
 // Zapier, Workflow Automation, API Marketplace, Custom Connectors
 
@@ -34,7 +35,7 @@ class IntegrationConnector {
     return { success: true, credentialId: connectorId };
   }
 
-  executeConnectorAction(connectorId, action, params) {
+  executeConnectorAction(connectorId, action, _params) {
     const connector = this.connectors.get(connectorId);
     if (!connector) throw new Error('Connector not found');
 
@@ -191,7 +192,7 @@ class WorkflowAutomationEngine {
   }
 
   getWorkflowMetrics(workflowId) {
-    const workflow = this.workflows.get(workflowId);
+    const _workflow = this.workflows.get(workflowId);
     const workflowExecutions = this.executions.filter(e => e.workflowId === workflowId);
 
     return {

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 const useMock = process.env.USE_MOCK_DB === 'true' || process.env.NODE_ENV === 'test';

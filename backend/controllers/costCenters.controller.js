@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * ===================================================================
  * COST CENTER CONTROLLER - متحكم مراكز التكلفة
@@ -6,6 +7,7 @@
 
 const CostCenter = require('../models/CostCenter');
 const asyncHandler = require('express-async-handler');
+const { escapeRegex } = require('../utils/sanitize');
 
 // الحصول على جميع مراكز التكلفة
 exports.getAllCostCenters = asyncHandler(async (req, res) => {
@@ -18,8 +20,8 @@ exports.getAllCostCenters = asyncHandler(async (req, res) => {
   if (department) filter.department = department;
   if (search) {
     filter.$or = [
-      { name: { $regex: search, $options: 'i' } },
-      { code: { $regex: search, $options: 'i' } },
+      { name: { $regex: escapeRegex(search), $options: 'i' } },
+      { code: { $regex: escapeRegex(search), $options: 'i' } },
     ];
   }
 

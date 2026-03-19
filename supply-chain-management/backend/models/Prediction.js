@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Prediction Model - Phase 7
  * Machine Learning predictions and forecasting

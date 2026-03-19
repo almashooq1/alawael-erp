@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const Feedback = require('../models/Feedback');
 const Employee = require('../models/Employee');
 const SmartNotificationService = require('./smartNotificationService');

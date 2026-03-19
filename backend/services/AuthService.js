@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Authentication Service
  * JWT token generation, verification, and password management
@@ -15,7 +16,7 @@ class AuthService {
    * @returns {string} JWT token
    */
   static generateToken(userId, email, role) {
-    const jwtSecret = process.env.JWT_SECRET || 'dev-secret-key-change-in-production';
+    const { jwtSecret } = require('../config/secrets');
     const expiresIn = process.env.JWT_EXPIRES_IN || '24h';
 
     const payload = {
@@ -33,7 +34,7 @@ class AuthService {
       });
       return { success: true, token, expiresIn };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -43,7 +44,7 @@ class AuthService {
    * @returns {string} Refresh token
    */
   static generateRefreshToken(userId) {
-    const jwtSecret = process.env.JWT_SECRET || 'dev-secret-key-change-in-production';
+    const { jwtSecret } = require('../config/secrets');
     const expiresIn = process.env.REFRESH_TOKEN_EXPIRES_IN || '7d';
 
     const payload = {
@@ -59,7 +60,7 @@ class AuthService {
       });
       return { success: true, token, expiresIn };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -69,7 +70,7 @@ class AuthService {
    * @returns {object} Verification result with decoded payload
    */
   static verifyToken(token) {
-    const jwtSecret = process.env.JWT_SECRET || 'dev-secret-key-change-in-production';
+    const { jwtSecret } = require('../config/secrets');
 
     try {
       // Remove "Bearer " prefix if present
@@ -88,7 +89,7 @@ class AuthService {
       return {
         valid: false,
         decoded: null,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
         code: error.code || 'INVALID_TOKEN',
       };
     }
@@ -105,7 +106,7 @@ class AuthService {
       const hash = await bcrypt.hash(password, saltRounds);
       return { success: true, hash };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -120,7 +121,7 @@ class AuthService {
       const match = await bcrypt.compare(password, hash);
       return { success: true, match };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -135,7 +136,7 @@ class AuthService {
       const decoded = jwt.decode(cleanToken);
       return { success: true, decoded };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 

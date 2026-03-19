@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Finance Module Main Router
  * Integrates all finance endpoints
@@ -17,10 +18,10 @@ router.use('/cashflow', cashFlowRoutes);
 router.use('/risk', riskRoutes);
 
 // Catch-all for missing routes
-router.use((req, res) => {
+router.use((_req, res) => {
   res.status(404).json({
     success: false,
-    message: 'Finance API endpoint not found'
+    message: 'Finance API endpoint not found',
   });
 });
 

@@ -1,11 +1,14 @@
+/* eslint-disable no-unused-vars */
 /**
  * PHASE 115: Smart CRM & Patient Engagement Unit
  * Manages patient relationships, engagement scores, and automated communication campaigns.
  */
 
+const logger = require('../utils/logger');
+
 class SmartCRMService {
   constructor() {
-    console.log('System: Smart CRM & Engagement Unit - Initialized');
+    logger.info('System: Smart CRM & Engagement Unit - Initialized');
     this.patients = new Map();
     this.interactions = new Map();
     this.campaigns = new Map();
@@ -85,7 +88,9 @@ class SmartCRMService {
     if (!campaign) throw new Error('Campaign not found');
 
     // Find targets
-    const targets = Array.from(this.patients.values()).filter(p => p.segment === campaign.targetSegment);
+    const targets = Array.from(this.patients.values()).filter(
+      p => p.segment === campaign.targetSegment
+    );
 
     // Simulate Sending
     targets.forEach(p => {

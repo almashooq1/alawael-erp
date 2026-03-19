@@ -49,11 +49,13 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
     CMD node -e "require('http').get('http://localhost:' + (process.env.PORT || 3001) + '/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)});"
 
 # Environment variables (can be overridden at runtime)
+# NOTE: USE_MOCK_DB, DISABLE_REDIS, SKIP_SOCKET_IO default to false
+# so the production image connects to real services by default.
 ENV PORT=3001 \
     NODE_ENV=production \
-    USE_MOCK_DB=true \
-    SKIP_SOCKET_IO=true \
-    DISABLE_REDIS=true \
+    USE_MOCK_DB=false \
+    SKIP_SOCKET_IO=false \
+    DISABLE_REDIS=false \
     SKIP_PHASE17=true
 
 # Use dumb-init to handle signals properly (optional)

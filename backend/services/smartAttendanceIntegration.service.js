@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * SMART ATTENDANCE INTEGRATION MODULE
  * تكامل نظام الحضور مع الأنظمة الأخرى
@@ -11,6 +12,7 @@
  */
 
 const EventEmitter = require('events');
+const logger = require('../utils/logger');
 
 class SmartAttendanceIntegration extends EventEmitter {
   constructor() {
@@ -44,7 +46,7 @@ class SmartAttendanceIntegration extends EventEmitter {
 
       return academicUpdate;
     } catch (error) {
-      console.error('Academic Integration Error:', error);
+      logger.error('Academic Integration Error:', error);
       throw error;
     }
   }
@@ -129,7 +131,7 @@ class SmartAttendanceIntegration extends EventEmitter {
 
       return notification;
     } catch (error) {
-      console.error('Notification Integration Error:', error);
+      logger.error('Notification Integration Error:', error);
       throw error;
     }
   }
@@ -139,7 +141,7 @@ class SmartAttendanceIntegration extends EventEmitter {
     // fetch parent email → send via SMTP
     return new Promise(resolve => {
       setTimeout(() => {
-        console.log(`[EMAIL] Notification sent to parent of ${studentId}`);
+        logger.info(`[EMAIL] Notification sent to parent of ${studentId}`);
         resolve({ status: 'SENT' });
       }, 100);
     });
@@ -149,7 +151,7 @@ class SmartAttendanceIntegration extends EventEmitter {
     // Integration with SMS service (Twilio, AWS SNS, etc.)
     return new Promise(resolve => {
       setTimeout(() => {
-        console.log(`[SMS] Notification sent to ${studentId}`);
+        logger.info(`[SMS] Notification sent to ${studentId}`);
         resolve({ status: 'SENT' });
       }, 100);
     });
@@ -159,7 +161,7 @@ class SmartAttendanceIntegration extends EventEmitter {
     // Integration with WhatsApp Business API
     return new Promise(resolve => {
       setTimeout(() => {
-        console.log(`[WHATSAPP] Notification sent to ${studentId}`);
+        logger.info(`[WHATSAPP] Notification sent to ${studentId}`);
         resolve({ status: 'SENT' });
       }, 100);
     });
@@ -169,7 +171,7 @@ class SmartAttendanceIntegration extends EventEmitter {
     // Integration with Firebase Cloud Messaging / OneSignal
     return new Promise(resolve => {
       setTimeout(() => {
-        console.log(`[PUSH] Notification sent to ${studentId}`);
+        logger.info(`[PUSH] Notification sent to ${studentId}`);
         resolve({ status: 'SENT' });
       }, 100);
     });
@@ -179,7 +181,7 @@ class SmartAttendanceIntegration extends EventEmitter {
     // Create in-app notification
     return new Promise(resolve => {
       setTimeout(() => {
-        console.log(`[IN-APP] Notification created for ${studentId}`);
+        logger.info(`[IN-APP] Notification created for ${studentId}`);
         resolve({ status: 'CREATED' });
       }, 100);
     });
@@ -208,7 +210,7 @@ class SmartAttendanceIntegration extends EventEmitter {
 
       return securityReport;
     } catch (error) {
-      console.error('Security Integration Error:', error);
+      logger.error('Security Integration Error:', error);
       throw error;
     }
   }
@@ -240,7 +242,7 @@ class SmartAttendanceIntegration extends EventEmitter {
 
       return { synced: true, timestamp: new Date() };
     } catch (error) {
-      console.error('Analytics Integration Error:', error);
+      logger.error('Analytics Integration Error:', error);
       throw error;
     }
   }
@@ -264,7 +266,7 @@ class SmartAttendanceIntegration extends EventEmitter {
 
       return staffSync;
     } catch (error) {
-      console.error('HR Integration Error:', error);
+      logger.error('HR Integration Error:', error);
       throw error;
     }
   }
@@ -278,7 +280,7 @@ class SmartAttendanceIntegration extends EventEmitter {
       name: 'daily-absence-report',
       schedule: '16:30', // 4:30 PM
       task: async () => {
-        console.log('Running daily absence report...');
+        logger.info('Running daily absence report...');
         this.emit('generate-daily-absence-report');
       },
     });
@@ -288,7 +290,7 @@ class SmartAttendanceIntegration extends EventEmitter {
       name: 'weekly-attendance-summary',
       schedule: '17:00 Friday', // 5 PM Friday
       task: async () => {
-        console.log('Running weekly attendance summary...');
+        logger.info('Running weekly attendance summary...');
         this.emit('generate-weekly-summary');
       },
     });
@@ -298,7 +300,7 @@ class SmartAttendanceIntegration extends EventEmitter {
       name: 'monthly-parent-notification',
       schedule: '1st day at 09:00', // 1st day of month at 9 AM
       task: async () => {
-        console.log('Sending monthly parent notifications...');
+        logger.info('Sending monthly parent notifications...');
         this.emit('send-monthly-notifications');
       },
     });
@@ -308,7 +310,7 @@ class SmartAttendanceIntegration extends EventEmitter {
       name: 'risk-assessment',
       schedule: 'Every Tuesday at 08:00',
       task: async () => {
-        console.log('Running risk assessment analysis...');
+        logger.info('Running risk assessment analysis...');
         this.emit('run-risk-assessment');
       },
     });
@@ -342,7 +344,7 @@ class SmartAttendanceIntegration extends EventEmitter {
   async triggerWebhook(webhook, data) {
     try {
       // Mock webhook trigger
-      console.log(`[WEBHOOK] Triggering ${webhook.event} to ${webhook.url}`);
+      logger.info(`[WEBHOOK] Triggering ${webhook.event} to ${webhook.url}`);
 
       // In real implementation:
       // const response = await fetch(webhook.url, {
@@ -353,7 +355,7 @@ class SmartAttendanceIntegration extends EventEmitter {
 
       return { success: true, webhookId: webhook.id };
     } catch (error) {
-      console.error(`Webhook trigger failed: ${error.message}`);
+      logger.error(`Webhook trigger failed: ${error.message}`);
       webhook.retryAttempts++;
 
       if (webhook.retryAttempts < webhook.maxRetries) {
@@ -387,7 +389,7 @@ class SmartAttendanceIntegration extends EventEmitter {
 
       return exportData;
     } catch (error) {
-      console.error('Export Error:', error);
+      logger.error('Export Error:', error);
       throw error;
     }
   }
@@ -423,7 +425,7 @@ class SmartAttendanceIntegration extends EventEmitter {
 
       return { cached: true, key: cacheKey, expiresIn: cacheDuration };
     } catch (error) {
-      console.error('Cache Integration Error:', error);
+      logger.error('Cache Integration Error:', error);
       throw error;
     }
   }
@@ -449,7 +451,7 @@ class SmartAttendanceIntegration extends EventEmitter {
 
       return auditLog;
     } catch (error) {
-      console.error('Audit Log Error:', error);
+      logger.error('Audit Log Error:', error);
       throw error;
     }
   }
@@ -475,7 +477,7 @@ class SmartAttendanceIntegration extends EventEmitter {
           results.failed++;
           results.errors.push({
             recordId: record.studentId,
-            error: error.message,
+            error: 'حدث خطأ داخلي',
           });
         }
       }
@@ -484,7 +486,7 @@ class SmartAttendanceIntegration extends EventEmitter {
 
       return results;
     } catch (error) {
-      console.error('Bulk Processing Error:', error);
+      logger.error('Bulk Processing Error:', error);
       throw error;
     }
   }

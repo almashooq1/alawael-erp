@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Seed Data Script - إنشاء بيانات تجريبية
  * Creates demo/test data for the system

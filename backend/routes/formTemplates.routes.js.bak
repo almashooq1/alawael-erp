@@ -1,0 +1,3374 @@
+/* eslint-disable no-unused-vars */
+/**
+ * Form Templates Routes — مسارات النماذج الجاهزة
+ * Ready-made form templates for beneficiaries, administration & HR
+ *
+ * @created 2026-03-13
+ */
+
+const express = require('express');
+const router = express.Router();
+const mongoose = require('mongoose');
+const logger = require('../utils/logger');
+
+// ─── Schema ────────────────────────────────────────────────────────────────
+
+const FormFieldSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true },
+    label: { type: String, required: true },
+    labelEn: { type: String },
+    type: {
+      type: String,
+      required: true,
+      enum: [
+        'text',
+        'textarea',
+        'number',
+        'email',
+        'tel',
+        'date',
+        'select',
+        'radio',
+        'checkbox',
+        'file',
+        'signature',
+        'header',
+        'divider',
+      ],
+    },
+    placeholder: String,
+    required: { type: Boolean, default: false },
+    options: [{ label: String, value: String }],
+    defaultValue: mongoose.Schema.Types.Mixed,
+    validation: {
+      min: Number,
+      max: Number,
+      minLength: Number,
+      maxLength: Number,
+      pattern: String,
+    },
+    gridSize: { type: Number, default: 12 }, // 1-12 for MUI grid
+    order: { type: Number, default: 0 },
+  },
+  { _id: false }
+);
+
+const FormTemplateSchema = new mongoose.Schema(
+  {
+    templateId: { type: String, required: true, unique: true, index: true },
+    name: { type: String, required: true },
+    nameEn: { type: String },
+    description: { type: String },
+    category: {
+      type: String,
+      required: true,
+      enum: ['beneficiary', 'hr', 'administration', 'finance', 'general'],
+      index: true,
+    },
+    icon: { type: String, default: '📄' },
+    color: { type: String, default: '#1976d2' },
+    fields: [FormFieldSchema],
+    isActive: { type: Boolean, default: true },
+    isBuiltIn: { type: Boolean, default: true },
+    requiresApproval: { type: Boolean, default: true },
+    approvalSteps: [
+      {
+        role: String,
+        label: String,
+        order: Number,
+      },
+    ],
+    outputFormat: {
+      type: String,
+      enum: ['pdf', 'docx', 'html'],
+      default: 'pdf',
+    },
+    usageCount: { type: Number, default: 0 },
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    tenantId: String,
+  },
+  { timestamps: true }
+);
+
+const FormSubmissionSchema = new mongoose.Schema(
+  {
+    templateId: { type: String, required: true, index: true },
+    templateName: { type: String },
+    submittedBy: {
+      userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+      name: String,
+      email: String,
+      department: String,
+    },
+    data: { type: mongoose.Schema.Types.Mixed, required: true },
+    status: {
+      type: String,
+      enum: ['draft', 'submitted', 'under_review', 'approved', 'rejected', 'cancelled'],
+      default: 'submitted',
+      index: true,
+    },
+    approvals: [
+      {
+        role: String,
+        approvedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        approverName: String,
+        status: { type: String, enum: ['pending', 'approved', 'rejected'] },
+        comment: String,
+        date: { type: Date },
+      },
+    ],
+    submissionNumber: { type: String, unique: true },
+    notes: String,
+    attachments: [
+      {
+        filename: String,
+        path: String,
+        size: Number,
+        mimeType: String,
+      },
+    ],
+    tenantId: String,
+  },
+  { timestamps: true }
+);
+
+// Auto-generate submission number
+FormSubmissionSchema.pre('save', function (next) {
+  if (!this.submissionNumber) {
+    const year = new Date().getFullYear();
+    const rand = Math.floor(10000 + Math.random() * 90000);
+    this.submissionNumber = `SUB-${year}-${rand}`;
+  }
+  next();
+});
+
+let FormTemplate, FormSubmission;
+try {
+  FormTemplate = mongoose.model('FormTemplate');
+} catch {
+  FormTemplate = mongoose.model('FormTemplate', FormTemplateSchema);
+}
+try {
+  FormSubmission = mongoose.model('FormSubmission');
+} catch {
+  FormSubmission = mongoose.model('FormSubmission', FormSubmissionSchema);
+}
+
+// ─── Built-in Templates (النماذج المدمجة) ──────────────────────────────────
+
+const BUILT_IN_TEMPLATES = [
+  // ══════ شؤون المستفيدين ══════
+  {
+    templateId: 'beneficiary-identification',
+    name: 'طلب تعريف بالمستفيد',
+    nameEn: 'Beneficiary Identification Request',
+    description: 'نموذج لاستخراج خطاب تعريف بالمستفيد يتضمن بياناته الأساسية وحالة التسجيل',
+    category: 'beneficiary',
+    icon: '🪪',
+    color: '#1565C0',
+    requiresApproval: true,
+    approvalSteps: [
+      { role: 'department_head', label: 'رئيس القسم', order: 1 },
+      { role: 'admin', label: 'الإدارة', order: 2 },
+    ],
+    fields: [
+      {
+        name: 'beneficiaryName',
+        label: 'اسم المستفيد الرباعي',
+        type: 'text',
+        required: true,
+        gridSize: 6,
+      },
+      {
+        name: 'nationalId',
+        label: 'رقم الهوية الوطنية',
+        type: 'text',
+        required: true,
+        gridSize: 6,
+        validation: { minLength: 10, maxLength: 10 },
+      },
+      {
+        name: 'beneficiaryId',
+        label: 'رقم ملف المستفيد',
+        type: 'text',
+        required: true,
+        gridSize: 6,
+      },
+      { name: 'dateOfBirth', label: 'تاريخ الميلاد', type: 'date', required: true, gridSize: 6 },
+      {
+        name: 'program',
+        label: 'البرنامج المسجل به',
+        type: 'select',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'برنامج التأهيل الشامل', value: 'comprehensive_rehab' },
+          { label: 'برنامج الرعاية النهارية', value: 'day_care' },
+          { label: 'برنامج التدريب المهني', value: 'vocational_training' },
+          { label: 'برنامج التعليم الخاص', value: 'special_education' },
+          { label: 'برنامج الدعم النفسي', value: 'psychological_support' },
+        ],
+      },
+      {
+        name: 'registrationDate',
+        label: 'تاريخ التسجيل',
+        type: 'date',
+        required: true,
+        gridSize: 6,
+      },
+      {
+        name: 'purpose',
+        label: 'الغرض من التعريف',
+        type: 'select',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'جهة حكومية', value: 'government' },
+          { label: 'جهة طبية', value: 'medical' },
+          { label: 'جهة تعليمية', value: 'educational' },
+          { label: 'جهة خاصة', value: 'private' },
+          { label: 'أخرى', value: 'other' },
+        ],
+      },
+      {
+        name: 'entityName',
+        label: 'اسم الجهة المقدم لها',
+        type: 'text',
+        required: true,
+        gridSize: 6,
+      },
+      {
+        name: 'additionalNotes',
+        label: 'ملاحظات إضافية',
+        type: 'textarea',
+        required: false,
+        gridSize: 12,
+      },
+    ],
+  },
+  {
+    templateId: 'beneficiary-transfer',
+    name: 'طلب نقل مستفيد',
+    nameEn: 'Beneficiary Transfer Request',
+    description: 'نموذج لطلب نقل مستفيد من برنامج أو قسم إلى آخر',
+    category: 'beneficiary',
+    icon: '🔄',
+    color: '#00897B',
+    requiresApproval: true,
+    approvalSteps: [
+      { role: 'department_head', label: 'رئيس القسم الحالي', order: 1 },
+      { role: 'receiving_dept', label: 'رئيس القسم المستقبل', order: 2 },
+      { role: 'admin', label: 'الإدارة', order: 3 },
+    ],
+    fields: [
+      { name: 'beneficiaryName', label: 'اسم المستفيد', type: 'text', required: true, gridSize: 6 },
+      { name: 'beneficiaryId', label: 'رقم الملف', type: 'text', required: true, gridSize: 6 },
+      {
+        name: 'currentProgram',
+        label: 'البرنامج الحالي',
+        type: 'text',
+        required: true,
+        gridSize: 6,
+      },
+      {
+        name: 'currentDepartment',
+        label: 'القسم الحالي',
+        type: 'text',
+        required: true,
+        gridSize: 6,
+      },
+      {
+        name: 'targetProgram',
+        label: 'البرنامج المطلوب النقل إليه',
+        type: 'text',
+        required: true,
+        gridSize: 6,
+      },
+      {
+        name: 'targetDepartment',
+        label: 'القسم المطلوب النقل إليه',
+        type: 'text',
+        required: true,
+        gridSize: 6,
+      },
+      {
+        name: 'transferDate',
+        label: 'التاريخ المطلوب للنقل',
+        type: 'date',
+        required: true,
+        gridSize: 6,
+      },
+      { name: 'reason', label: 'سبب النقل', type: 'textarea', required: true, gridSize: 12 },
+      {
+        name: 'medicalReport',
+        label: 'هل يوجد تقرير طبي مرفق؟',
+        type: 'radio',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'نعم', value: 'yes' },
+          { label: 'لا', value: 'no' },
+        ],
+      },
+    ],
+  },
+  {
+    templateId: 'beneficiary-absence',
+    name: 'نموذج غياب مستفيد',
+    nameEn: 'Beneficiary Absence Form',
+    description: 'نموذج لتقديم عذر غياب مستفيد عن البرنامج',
+    category: 'beneficiary',
+    icon: '📅',
+    color: '#F57C00',
+    requiresApproval: true,
+    approvalSteps: [{ role: 'supervisor', label: 'المشرف', order: 1 }],
+    fields: [
+      { name: 'beneficiaryName', label: 'اسم المستفيد', type: 'text', required: true, gridSize: 6 },
+      { name: 'beneficiaryId', label: 'رقم الملف', type: 'text', required: true, gridSize: 6 },
+      {
+        name: 'absenceFrom',
+        label: 'تاريخ بداية الغياب',
+        type: 'date',
+        required: true,
+        gridSize: 6,
+      },
+      { name: 'absenceTo', label: 'تاريخ نهاية الغياب', type: 'date', required: true, gridSize: 6 },
+      {
+        name: 'absenceType',
+        label: 'نوع الغياب',
+        type: 'select',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'مرضي', value: 'medical' },
+          { label: 'عائلي', value: 'family' },
+          { label: 'شخصي', value: 'personal' },
+          { label: 'طارئ', value: 'emergency' },
+          { label: 'أخرى', value: 'other' },
+        ],
+      },
+      { name: 'reason', label: 'سبب الغياب', type: 'textarea', required: true, gridSize: 12 },
+      {
+        name: 'hasAttachment',
+        label: 'مرفقات (تقرير طبي أو إثبات)',
+        type: 'file',
+        required: false,
+        gridSize: 12,
+      },
+    ],
+  },
+  {
+    templateId: 'beneficiary-complaint',
+    name: 'نموذج شكوى مستفيد',
+    nameEn: 'Beneficiary Complaint Form',
+    description: 'نموذج لتقديم شكوى أو ملاحظة من المستفيد أو ولي الأمر',
+    category: 'beneficiary',
+    icon: '📢',
+    color: '#C62828',
+    requiresApproval: true,
+    approvalSteps: [
+      { role: 'department_head', label: 'رئيس القسم', order: 1 },
+      { role: 'quality', label: 'إدارة الجودة', order: 2 },
+    ],
+    fields: [
+      {
+        name: 'complainantName',
+        label: 'اسم مقدم الشكوى',
+        type: 'text',
+        required: true,
+        gridSize: 6,
+      },
+      { name: 'complainantPhone', label: 'رقم الجوال', type: 'tel', required: true, gridSize: 6 },
+      {
+        name: 'relationship',
+        label: 'صفة مقدم الشكوى',
+        type: 'select',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'المستفيد نفسه', value: 'self' },
+          { label: 'ولي الأمر', value: 'guardian' },
+          { label: 'أخ/أخت', value: 'sibling' },
+          { label: 'أخرى', value: 'other' },
+        ],
+      },
+      { name: 'beneficiaryName', label: 'اسم المستفيد', type: 'text', required: true, gridSize: 6 },
+      {
+        name: 'complaintType',
+        label: 'نوع الشكوى',
+        type: 'select',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'خدمات مقدمة', value: 'services' },
+          { label: 'سلوك موظف', value: 'staff_behavior' },
+          { label: 'بيئة المركز', value: 'environment' },
+          { label: 'إجراءات إدارية', value: 'administrative' },
+          { label: 'أخرى', value: 'other' },
+        ],
+      },
+      { name: 'department', label: 'القسم المعني', type: 'text', required: false, gridSize: 6 },
+      {
+        name: 'complaintDetails',
+        label: 'تفاصيل الشكوى',
+        type: 'textarea',
+        required: true,
+        gridSize: 12,
+      },
+      {
+        name: 'suggestedSolution',
+        label: 'الحل المقترح (اختياري)',
+        type: 'textarea',
+        required: false,
+        gridSize: 12,
+      },
+    ],
+  },
+  {
+    templateId: 'beneficiary-service-request',
+    name: 'طلب خدمة للمستفيد',
+    nameEn: 'Beneficiary Service Request',
+    description: 'نموذج لطلب خدمة إضافية للمستفيد مثل أجهزة مساعدة أو علاج طبيعي',
+    category: 'beneficiary',
+    icon: '🏥',
+    color: '#2E7D32',
+    requiresApproval: true,
+    approvalSteps: [
+      { role: 'specialist', label: 'الأخصائي', order: 1 },
+      { role: 'department_head', label: 'رئيس القسم', order: 2 },
+    ],
+    fields: [
+      { name: 'beneficiaryName', label: 'اسم المستفيد', type: 'text', required: true, gridSize: 6 },
+      { name: 'beneficiaryId', label: 'رقم الملف', type: 'text', required: true, gridSize: 6 },
+      {
+        name: 'serviceType',
+        label: 'نوع الخدمة المطلوبة',
+        type: 'select',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'جهاز مساعد', value: 'assistive_device' },
+          { label: 'علاج طبيعي', value: 'physical_therapy' },
+          { label: 'علاج وظيفي', value: 'occupational_therapy' },
+          { label: 'علاج نطق ولغة', value: 'speech_therapy' },
+          { label: 'دعم نفسي', value: 'psychological_support' },
+          { label: 'نقل متخصص', value: 'specialized_transport' },
+          { label: 'أخرى', value: 'other' },
+        ],
+      },
+      {
+        name: 'urgency',
+        label: 'الأولوية',
+        type: 'radio',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'عاجل', value: 'urgent' },
+          { label: 'عالي', value: 'high' },
+          { label: 'متوسط', value: 'medium' },
+          { label: 'منخفض', value: 'low' },
+        ],
+      },
+      {
+        name: 'description',
+        label: 'وصف تفصيلي للخدمة المطلوبة',
+        type: 'textarea',
+        required: true,
+        gridSize: 12,
+      },
+      {
+        name: 'medicalJustification',
+        label: 'المبرر الطبي',
+        type: 'textarea',
+        required: false,
+        gridSize: 12,
+      },
+    ],
+  },
+
+  // ══════ شؤون الموظفين (HR) ══════
+  {
+    templateId: 'hr-resignation',
+    name: 'طلب استقالة',
+    nameEn: 'Resignation Request',
+    description: 'نموذج تقديم طلب استقالة من العمل',
+    category: 'hr',
+    icon: '📝',
+    color: '#D32F2F',
+    requiresApproval: true,
+    approvalSteps: [
+      { role: 'direct_manager', label: 'المدير المباشر', order: 1 },
+      { role: 'hr_manager', label: 'مدير الموارد البشرية', order: 2 },
+      { role: 'general_manager', label: 'المدير العام', order: 3 },
+    ],
+    fields: [
+      {
+        name: 'employeeName',
+        label: 'اسم الموظف الرباعي',
+        type: 'text',
+        required: true,
+        gridSize: 6,
+      },
+      { name: 'employeeId', label: 'الرقم الوظيفي', type: 'text', required: true, gridSize: 6 },
+      { name: 'department', label: 'القسم/الإدارة', type: 'text', required: true, gridSize: 6 },
+      { name: 'jobTitle', label: 'المسمى الوظيفي', type: 'text', required: true, gridSize: 6 },
+      { name: 'hireDate', label: 'تاريخ التعيين', type: 'date', required: true, gridSize: 6 },
+      {
+        name: 'lastWorkingDay',
+        label: 'آخر يوم عمل مقترح',
+        type: 'date',
+        required: true,
+        gridSize: 6,
+      },
+      {
+        name: 'reason',
+        label: 'سبب الاستقالة',
+        type: 'select',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'فرصة عمل أفضل', value: 'better_opportunity' },
+          { label: 'ظروف شخصية', value: 'personal' },
+          { label: 'الانتقال لمدينة أخرى', value: 'relocation' },
+          { label: 'إكمال الدراسة', value: 'education' },
+          { label: 'التقاعد المبكر', value: 'early_retirement' },
+          { label: 'أسباب صحية', value: 'health' },
+          { label: 'أخرى', value: 'other' },
+        ],
+      },
+      {
+        name: 'noticePeriod',
+        label: 'هل ستلتزم بفترة الإشعار؟',
+        type: 'radio',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'نعم', value: 'yes' },
+          { label: 'لا (يرجى التوضيح)', value: 'no' },
+        ],
+      },
+      {
+        name: 'detailedReason',
+        label: 'تفاصيل إضافية',
+        type: 'textarea',
+        required: false,
+        gridSize: 12,
+      },
+      {
+        name: 'handoverPlan',
+        label: 'خطة تسليم المهام',
+        type: 'textarea',
+        required: false,
+        gridSize: 12,
+      },
+    ],
+  },
+  {
+    templateId: 'hr-leave-request',
+    name: 'طلب إجازة',
+    nameEn: 'Leave Request',
+    description: 'نموذج لتقديم طلب إجازة بأنواعها المختلفة',
+    category: 'hr',
+    icon: '🏖️',
+    color: '#0097A7',
+    requiresApproval: true,
+    approvalSteps: [
+      { role: 'direct_manager', label: 'المدير المباشر', order: 1 },
+      { role: 'hr', label: 'الموارد البشرية', order: 2 },
+    ],
+    fields: [
+      { name: 'employeeName', label: 'اسم الموظف', type: 'text', required: true, gridSize: 6 },
+      { name: 'employeeId', label: 'الرقم الوظيفي', type: 'text', required: true, gridSize: 6 },
+      { name: 'department', label: 'القسم', type: 'text', required: true, gridSize: 6 },
+      {
+        name: 'leaveType',
+        label: 'نوع الإجازة',
+        type: 'select',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'إجازة سنوية', value: 'annual' },
+          { label: 'إجازة مرضية', value: 'sick' },
+          { label: 'إجازة اضطرارية', value: 'emergency' },
+          { label: 'إجازة بدون راتب', value: 'unpaid' },
+          { label: 'إجازة أمومة', value: 'maternity' },
+          { label: 'إجازة أبوة', value: 'paternity' },
+          { label: 'إجازة وفاة', value: 'bereavement' },
+          { label: 'إجازة زواج', value: 'marriage' },
+          { label: 'إجازة حج', value: 'hajj' },
+        ],
+      },
+      {
+        name: 'startDate',
+        label: 'تاريخ بداية الإجازة',
+        type: 'date',
+        required: true,
+        gridSize: 6,
+      },
+      { name: 'endDate', label: 'تاريخ نهاية الإجازة', type: 'date', required: true, gridSize: 6 },
+      { name: 'totalDays', label: 'عدد الأيام', type: 'number', required: true, gridSize: 4 },
+      {
+        name: 'contactDuringLeave',
+        label: 'رقم الجوال أثناء الإجازة',
+        type: 'tel',
+        required: true,
+        gridSize: 4,
+      },
+      { name: 'delegate', label: 'البديل أثناء الغياب', type: 'text', required: true, gridSize: 4 },
+      { name: 'reason', label: 'سبب الإجازة', type: 'textarea', required: false, gridSize: 12 },
+    ],
+  },
+  {
+    templateId: 'hr-employment-certificate',
+    name: 'طلب شهادة تعريف بالعمل',
+    nameEn: 'Employment Certificate Request',
+    description: 'نموذج لطلب إصدار شهادة تعريف بالعمل موجهة لجهة خارجية',
+    category: 'hr',
+    icon: '📜',
+    color: '#5E35B1',
+    requiresApproval: true,
+    approvalSteps: [{ role: 'hr', label: 'الموارد البشرية', order: 1 }],
+    fields: [
+      {
+        name: 'employeeName',
+        label: 'اسم الموظف الرباعي',
+        type: 'text',
+        required: true,
+        gridSize: 6,
+      },
+      { name: 'employeeId', label: 'الرقم الوظيفي', type: 'text', required: true, gridSize: 6 },
+      {
+        name: 'nationalId',
+        label: 'رقم الهوية الوطنية',
+        type: 'text',
+        required: true,
+        gridSize: 6,
+      },
+      { name: 'jobTitle', label: 'المسمى الوظيفي', type: 'text', required: true, gridSize: 6 },
+      { name: 'hireDate', label: 'تاريخ التعيين', type: 'date', required: true, gridSize: 6 },
+      {
+        name: 'salary',
+        label: 'هل يتضمن الراتب؟',
+        type: 'radio',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'نعم', value: 'yes' },
+          { label: 'لا', value: 'no' },
+        ],
+      },
+      {
+        name: 'purpose',
+        label: 'الغرض من الشهادة',
+        type: 'select',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'بنك / تمويل', value: 'bank' },
+          { label: 'سفارة / تأشيرة', value: 'embassy' },
+          { label: 'جهة حكومية', value: 'government' },
+          { label: 'إيجار سكن', value: 'rental' },
+          { label: 'أخرى', value: 'other' },
+        ],
+      },
+      {
+        name: 'entityName',
+        label: 'اسم الجهة المقدم لها',
+        type: 'text',
+        required: true,
+        gridSize: 6,
+      },
+      {
+        name: 'language',
+        label: 'لغة الشهادة',
+        type: 'radio',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'عربي', value: 'ar' },
+          { label: 'إنجليزي', value: 'en' },
+          { label: 'عربي وإنجليزي', value: 'both' },
+        ],
+      },
+      {
+        name: 'copies',
+        label: 'عدد النسخ',
+        type: 'number',
+        required: true,
+        gridSize: 6,
+        defaultValue: 1,
+        validation: { min: 1, max: 10 },
+      },
+    ],
+  },
+  {
+    templateId: 'hr-salary-certificate',
+    name: 'طلب تعريف بالراتب',
+    nameEn: 'Salary Certificate Request',
+    description: 'نموذج لطلب إصدار شهادة تعريف بالراتب',
+    category: 'hr',
+    icon: '💰',
+    color: '#388E3C',
+    requiresApproval: true,
+    approvalSteps: [
+      { role: 'hr', label: 'الموارد البشرية', order: 1 },
+      { role: 'finance', label: 'المالية', order: 2 },
+    ],
+    fields: [
+      { name: 'employeeName', label: 'اسم الموظف', type: 'text', required: true, gridSize: 6 },
+      { name: 'employeeId', label: 'الرقم الوظيفي', type: 'text', required: true, gridSize: 6 },
+      { name: 'nationalId', label: 'رقم الهوية', type: 'text', required: true, gridSize: 6 },
+      {
+        name: 'purpose',
+        label: 'الغرض',
+        type: 'select',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'بنك / تمويل', value: 'bank' },
+          { label: 'سفارة', value: 'embassy' },
+          { label: 'جهة حكومية', value: 'government' },
+          { label: 'أخرى', value: 'other' },
+        ],
+      },
+      { name: 'entityName', label: 'اسم الجهة', type: 'text', required: true, gridSize: 6 },
+      {
+        name: 'includeAllowances',
+        label: 'تضمين البدلات؟',
+        type: 'radio',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'نعم', value: 'yes' },
+          { label: 'لا', value: 'no' },
+        ],
+      },
+      {
+        name: 'copies',
+        label: 'عدد النسخ',
+        type: 'number',
+        required: true,
+        gridSize: 6,
+        defaultValue: 1,
+      },
+    ],
+  },
+  {
+    templateId: 'hr-training-request',
+    name: 'طلب تدريب',
+    nameEn: 'Training Request',
+    description: 'نموذج لطلب حضور دورة تدريبية أو ورشة عمل',
+    category: 'hr',
+    icon: '🎓',
+    color: '#F9A825',
+    requiresApproval: true,
+    approvalSteps: [
+      { role: 'direct_manager', label: 'المدير المباشر', order: 1 },
+      { role: 'hr', label: 'الموارد البشرية', order: 2 },
+    ],
+    fields: [
+      { name: 'employeeName', label: 'اسم الموظف', type: 'text', required: true, gridSize: 6 },
+      { name: 'employeeId', label: 'الرقم الوظيفي', type: 'text', required: true, gridSize: 6 },
+      { name: 'department', label: 'القسم', type: 'text', required: true, gridSize: 6 },
+      {
+        name: 'trainingName',
+        label: 'اسم الدورة/الورشة',
+        type: 'text',
+        required: true,
+        gridSize: 6,
+      },
+      { name: 'provider', label: 'الجهة المقدمة', type: 'text', required: true, gridSize: 6 },
+      {
+        name: 'trainingType',
+        label: 'نوع التدريب',
+        type: 'select',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'حضوري', value: 'in_person' },
+          { label: 'عن بعد', value: 'remote' },
+          { label: 'مدمج', value: 'hybrid' },
+        ],
+      },
+      { name: 'startDate', label: 'تاريخ البداية', type: 'date', required: true, gridSize: 6 },
+      { name: 'endDate', label: 'تاريخ النهاية', type: 'date', required: true, gridSize: 6 },
+      { name: 'cost', label: 'التكلفة (ريال)', type: 'number', required: false, gridSize: 6 },
+      {
+        name: 'justification',
+        label: 'مبررات الطلب',
+        type: 'textarea',
+        required: true,
+        gridSize: 12,
+      },
+    ],
+  },
+  {
+    templateId: 'hr-overtime',
+    name: 'طلب عمل إضافي',
+    nameEn: 'Overtime Request',
+    description: 'نموذج لطلب الموافقة على ساعات العمل الإضافية',
+    category: 'hr',
+    icon: '⏰',
+    color: '#E65100',
+    requiresApproval: true,
+    approvalSteps: [
+      { role: 'direct_manager', label: 'المدير المباشر', order: 1 },
+      { role: 'hr', label: 'الموارد البشرية', order: 2 },
+    ],
+    fields: [
+      { name: 'employeeName', label: 'اسم الموظف', type: 'text', required: true, gridSize: 6 },
+      { name: 'employeeId', label: 'الرقم الوظيفي', type: 'text', required: true, gridSize: 6 },
+      { name: 'department', label: 'القسم', type: 'text', required: true, gridSize: 6 },
+      {
+        name: 'overtimeDate',
+        label: 'تاريخ العمل الإضافي',
+        type: 'date',
+        required: true,
+        gridSize: 6,
+      },
+      {
+        name: 'startTime',
+        label: 'من الساعة',
+        type: 'text',
+        required: true,
+        gridSize: 6,
+        placeholder: 'مثال: 17:00',
+      },
+      {
+        name: 'endTime',
+        label: 'إلى الساعة',
+        type: 'text',
+        required: true,
+        gridSize: 6,
+        placeholder: 'مثال: 21:00',
+      },
+      { name: 'totalHours', label: 'إجمالي الساعات', type: 'number', required: true, gridSize: 6 },
+      {
+        name: 'reason',
+        label: 'سبب العمل الإضافي',
+        type: 'textarea',
+        required: true,
+        gridSize: 12,
+      },
+    ],
+  },
+
+  // ══════ الإدارة (Administration) ══════
+  {
+    templateId: 'admin-purchase-request',
+    name: 'طلب شراء',
+    nameEn: 'Purchase Request',
+    description: 'نموذج لطلب شراء مواد أو معدات أو خدمات',
+    category: 'administration',
+    icon: '🛒',
+    color: '#1565C0',
+    requiresApproval: true,
+    approvalSteps: [
+      { role: 'department_head', label: 'رئيس القسم', order: 1 },
+      { role: 'finance', label: 'المالية', order: 2 },
+      { role: 'general_manager', label: 'المدير العام', order: 3 },
+    ],
+    fields: [
+      { name: 'requesterName', label: 'اسم الطالب', type: 'text', required: true, gridSize: 6 },
+      { name: 'department', label: 'القسم', type: 'text', required: true, gridSize: 6 },
+      {
+        name: 'itemDescription',
+        label: 'وصف المواد/الخدمة المطلوبة',
+        type: 'textarea',
+        required: true,
+        gridSize: 12,
+      },
+      { name: 'quantity', label: 'الكمية', type: 'number', required: true, gridSize: 4 },
+      {
+        name: 'estimatedCost',
+        label: 'التكلفة التقديرية (ريال)',
+        type: 'number',
+        required: true,
+        gridSize: 4,
+      },
+      {
+        name: 'priority',
+        label: 'الأولوية',
+        type: 'select',
+        required: true,
+        gridSize: 4,
+        options: [
+          { label: 'عاجل', value: 'urgent' },
+          { label: 'عالي', value: 'high' },
+          { label: 'متوسط', value: 'medium' },
+          { label: 'منخفض', value: 'low' },
+        ],
+      },
+      {
+        name: 'justification',
+        label: 'مبرر الشراء',
+        type: 'textarea',
+        required: true,
+        gridSize: 12,
+      },
+      {
+        name: 'suggestedVendor',
+        label: 'المورد المقترح (اختياري)',
+        type: 'text',
+        required: false,
+        gridSize: 6,
+      },
+      { name: 'neededBy', label: 'التاريخ المطلوب', type: 'date', required: true, gridSize: 6 },
+    ],
+  },
+  {
+    templateId: 'admin-maintenance-request',
+    name: 'طلب صيانة',
+    nameEn: 'Maintenance Request',
+    description: 'نموذج لطلب صيانة مبنى أو معدات أو أنظمة',
+    category: 'administration',
+    icon: '🔧',
+    color: '#6D4C41',
+    requiresApproval: true,
+    approvalSteps: [{ role: 'maintenance_supervisor', label: 'مشرف الصيانة', order: 1 }],
+    fields: [
+      { name: 'requesterName', label: 'اسم الطالب', type: 'text', required: true, gridSize: 6 },
+      { name: 'department', label: 'القسم', type: 'text', required: true, gridSize: 6 },
+      {
+        name: 'maintenanceType',
+        label: 'نوع الصيانة',
+        type: 'select',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'كهرباء', value: 'electrical' },
+          { label: 'سباكة', value: 'plumbing' },
+          { label: 'تكييف', value: 'hvac' },
+          { label: 'نجارة', value: 'carpentry' },
+          { label: 'تقنية معلومات', value: 'it' },
+          { label: 'نظافة', value: 'cleaning' },
+          { label: 'أخرى', value: 'other' },
+        ],
+      },
+      {
+        name: 'location',
+        label: 'الموقع / المبنى / الغرفة',
+        type: 'text',
+        required: true,
+        gridSize: 6,
+      },
+      {
+        name: 'priority',
+        label: 'الأولوية',
+        type: 'radio',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'طارئ', value: 'emergency' },
+          { label: 'عاجل', value: 'urgent' },
+          { label: 'عادي', value: 'normal' },
+        ],
+      },
+      { name: 'description', label: 'وصف المشكلة', type: 'textarea', required: true, gridSize: 12 },
+    ],
+  },
+  {
+    templateId: 'admin-room-booking',
+    name: 'طلب حجز قاعة',
+    nameEn: 'Room Booking Request',
+    description: 'نموذج لحجز قاعة اجتماعات أو تدريب',
+    category: 'administration',
+    icon: '🏢',
+    color: '#00838F',
+    requiresApproval: false,
+    fields: [
+      { name: 'requesterName', label: 'اسم الطالب', type: 'text', required: true, gridSize: 6 },
+      { name: 'department', label: 'القسم', type: 'text', required: true, gridSize: 6 },
+      {
+        name: 'roomType',
+        label: 'نوع القاعة',
+        type: 'select',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'قاعة اجتماعات صغيرة', value: 'small_meeting' },
+          { label: 'قاعة اجتماعات كبيرة', value: 'large_meeting' },
+          { label: 'قاعة تدريب', value: 'training' },
+          { label: 'قاعة مؤتمرات', value: 'conference' },
+        ],
+      },
+      { name: 'date', label: 'التاريخ', type: 'date', required: true, gridSize: 6 },
+      {
+        name: 'startTime',
+        label: 'من الساعة',
+        type: 'text',
+        required: true,
+        gridSize: 6,
+        placeholder: 'مثال: 09:00',
+      },
+      {
+        name: 'endTime',
+        label: 'إلى الساعة',
+        type: 'text',
+        required: true,
+        gridSize: 6,
+        placeholder: 'مثال: 11:00',
+      },
+      {
+        name: 'attendees',
+        label: 'عدد الحضور المتوقع',
+        type: 'number',
+        required: true,
+        gridSize: 6,
+      },
+      { name: 'purpose', label: 'الغرض', type: 'text', required: true, gridSize: 6 },
+      {
+        name: 'equipment',
+        label: 'المعدات المطلوبة',
+        type: 'checkbox',
+        required: false,
+        gridSize: 12,
+        options: [
+          { label: 'بروجكتر', value: 'projector' },
+          { label: 'لوح ذكي', value: 'smartboard' },
+          { label: 'مكبر صوت', value: 'speaker' },
+          { label: 'فيديو كونفرنس', value: 'video_conf' },
+        ],
+      },
+    ],
+  },
+  {
+    templateId: 'admin-vehicle-request',
+    name: 'طلب سيارة نقل',
+    nameEn: 'Vehicle Request',
+    description: 'نموذج لطلب سيارة لنقل مستفيدين أو مهمة خارجية',
+    category: 'administration',
+    icon: '🚐',
+    color: '#37474F',
+    requiresApproval: true,
+    approvalSteps: [{ role: 'transport_supervisor', label: 'مشرف النقل', order: 1 }],
+    fields: [
+      { name: 'requesterName', label: 'اسم الطالب', type: 'text', required: true, gridSize: 6 },
+      { name: 'department', label: 'القسم', type: 'text', required: true, gridSize: 6 },
+      {
+        name: 'tripType',
+        label: 'نوع الرحلة',
+        type: 'select',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'نقل مستفيدين', value: 'beneficiary_transport' },
+          { label: 'مهمة عمل', value: 'business' },
+          { label: 'رحلة ترفيهية', value: 'recreational' },
+          { label: 'زيارة ميدانية', value: 'field_visit' },
+        ],
+      },
+      { name: 'passengers', label: 'عدد الركاب', type: 'number', required: true, gridSize: 6 },
+      { name: 'date', label: 'التاريخ', type: 'date', required: true, gridSize: 6 },
+      {
+        name: 'departureTime',
+        label: 'وقت الانطلاق',
+        type: 'text',
+        required: true,
+        gridSize: 6,
+        placeholder: 'مثال: 08:00',
+      },
+      { name: 'destination', label: 'الوجهة', type: 'text', required: true, gridSize: 6 },
+      {
+        name: 'returnTime',
+        label: 'وقت العودة المتوقع',
+        type: 'text',
+        required: true,
+        gridSize: 6,
+        placeholder: 'مثال: 14:00',
+      },
+      {
+        name: 'specialNeeds',
+        label: 'احتياجات خاصة (كرسي متحرك، إلخ)',
+        type: 'textarea',
+        required: false,
+        gridSize: 12,
+      },
+    ],
+  },
+  {
+    templateId: 'admin-it-support',
+    name: 'طلب دعم تقني',
+    nameEn: 'IT Support Request',
+    description: 'نموذج لطلب دعم فني أو تقني من قسم تقنية المعلومات',
+    category: 'administration',
+    icon: '💻',
+    color: '#283593',
+    requiresApproval: false,
+    fields: [
+      { name: 'requesterName', label: 'اسم الطالب', type: 'text', required: true, gridSize: 6 },
+      { name: 'department', label: 'القسم', type: 'text', required: true, gridSize: 6 },
+      {
+        name: 'issueType',
+        label: 'نوع المشكلة',
+        type: 'select',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'عطل جهاز كمبيوتر', value: 'computer' },
+          { label: 'مشكلة شبكة/إنترنت', value: 'network' },
+          { label: 'مشكلة طابعة', value: 'printer' },
+          { label: 'مشكلة برنامج/نظام', value: 'software' },
+          { label: 'طلب حساب جديد', value: 'new_account' },
+          { label: 'إعادة تعيين كلمة مرور', value: 'password_reset' },
+          { label: 'أخرى', value: 'other' },
+        ],
+      },
+      {
+        name: 'priority',
+        label: 'الأولوية',
+        type: 'radio',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'عاجل', value: 'urgent' },
+          { label: 'عالي', value: 'high' },
+          { label: 'متوسط', value: 'medium' },
+          { label: 'منخفض', value: 'low' },
+        ],
+      },
+      { name: 'description', label: 'وصف المشكلة', type: 'textarea', required: true, gridSize: 12 },
+    ],
+  },
+
+  // ══════ المالية (Finance) ══════
+  {
+    templateId: 'finance-expense-claim',
+    name: 'طلب صرف مصروفات',
+    nameEn: 'Expense Claim',
+    description: 'نموذج لتقديم طلب صرف أو استرداد مصروفات',
+    category: 'finance',
+    icon: '💳',
+    color: '#2E7D32',
+    requiresApproval: true,
+    approvalSteps: [
+      { role: 'direct_manager', label: 'المدير المباشر', order: 1 },
+      { role: 'finance', label: 'المالية', order: 2 },
+    ],
+    fields: [
+      { name: 'employeeName', label: 'اسم الموظف', type: 'text', required: true, gridSize: 6 },
+      { name: 'employeeId', label: 'الرقم الوظيفي', type: 'text', required: true, gridSize: 6 },
+      { name: 'department', label: 'القسم', type: 'text', required: true, gridSize: 6 },
+      {
+        name: 'expenseType',
+        label: 'نوع المصروف',
+        type: 'select',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'سفر وتنقل', value: 'travel' },
+          { label: 'ضيافة', value: 'hospitality' },
+          { label: 'لوازم مكتبية', value: 'office_supplies' },
+          { label: 'اتصالات', value: 'communications' },
+          { label: 'أخرى', value: 'other' },
+        ],
+      },
+      { name: 'amount', label: 'المبلغ (ريال)', type: 'number', required: true, gridSize: 6 },
+      { name: 'expenseDate', label: 'تاريخ الصرف', type: 'date', required: true, gridSize: 6 },
+      {
+        name: 'description',
+        label: 'تفاصيل المصروف',
+        type: 'textarea',
+        required: true,
+        gridSize: 12,
+      },
+      { name: 'receipt', label: 'إرفاق الإيصال', type: 'file', required: true, gridSize: 12 },
+    ],
+  },
+  {
+    templateId: 'finance-advance',
+    name: 'طلب سلفة',
+    nameEn: 'Advance Payment Request',
+    description: 'نموذج لطلب سلفة مالية على الراتب',
+    category: 'finance',
+    icon: '🏦',
+    color: '#4527A0',
+    requiresApproval: true,
+    approvalSteps: [
+      { role: 'direct_manager', label: 'المدير المباشر', order: 1 },
+      { role: 'hr', label: 'الموارد البشرية', order: 2 },
+      { role: 'finance', label: 'المالية', order: 3 },
+    ],
+    fields: [
+      { name: 'employeeName', label: 'اسم الموظف', type: 'text', required: true, gridSize: 6 },
+      { name: 'employeeId', label: 'الرقم الوظيفي', type: 'text', required: true, gridSize: 6 },
+      { name: 'department', label: 'القسم', type: 'text', required: true, gridSize: 6 },
+      {
+        name: 'amount',
+        label: 'المبلغ المطلوب (ريال)',
+        type: 'number',
+        required: true,
+        gridSize: 6,
+      },
+      {
+        name: 'installments',
+        label: 'عدد أقساط السداد',
+        type: 'select',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'قسط واحد', value: '1' },
+          { label: '2 أقساط', value: '2' },
+          { label: '3 أقساط', value: '3' },
+          { label: '4 أقساط', value: '4' },
+          { label: '6 أقساط', value: '6' },
+        ],
+      },
+      { name: 'reason', label: 'السبب', type: 'textarea', required: true, gridSize: 12 },
+    ],
+  },
+
+  // ══════ نماذج إضافية — شؤون المستفيدين ══════
+  {
+    templateId: 'beneficiary-evaluation',
+    name: 'نموذج تقييم مستفيد',
+    nameEn: 'Beneficiary Evaluation Form',
+    description: 'نموذج لتقييم حالة المستفيد الصحية والاجتماعية والتعليمية',
+    category: 'beneficiary',
+    icon: '📊',
+    color: '#7B1FA2',
+    requiresApproval: true,
+    approvalSteps: [
+      { role: 'specialist', label: 'الأخصائي', order: 1 },
+      { role: 'department_head', label: 'رئيس القسم', order: 2 },
+    ],
+    fields: [
+      { name: 'beneficiaryName', label: 'اسم المستفيد', type: 'text', required: true, gridSize: 6 },
+      { name: 'beneficiaryId', label: 'رقم الملف', type: 'text', required: true, gridSize: 6 },
+      {
+        name: 'evaluationType',
+        label: 'نوع التقييم',
+        type: 'select',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'تقييم أولي', value: 'initial' },
+          { label: 'تقييم دوري', value: 'periodic' },
+          { label: 'تقييم نهائي', value: 'final' },
+          { label: 'إعادة تقييم', value: 're_evaluation' },
+        ],
+      },
+      { name: 'evaluationDate', label: 'تاريخ التقييم', type: 'date', required: true, gridSize: 6 },
+      {
+        name: 'healthStatus',
+        label: 'الحالة الصحية',
+        type: 'select',
+        required: true,
+        gridSize: 4,
+        options: [
+          { label: 'ممتاز', value: 'excellent' },
+          { label: 'جيد', value: 'good' },
+          { label: 'متوسط', value: 'average' },
+          { label: 'يحتاج متابعة', value: 'needs_followup' },
+        ],
+      },
+      {
+        name: 'socialStatus',
+        label: 'الحالة الاجتماعية',
+        type: 'select',
+        required: true,
+        gridSize: 4,
+        options: [
+          { label: 'مستقر', value: 'stable' },
+          { label: 'متوسط', value: 'moderate' },
+          { label: 'يحتاج دعم', value: 'needs_support' },
+        ],
+      },
+      {
+        name: 'educationalStatus',
+        label: 'الحالة التعليمية',
+        type: 'select',
+        required: true,
+        gridSize: 4,
+        options: [
+          { label: 'متقدم', value: 'advanced' },
+          { label: 'ملائم', value: 'appropriate' },
+          { label: 'متأخر', value: 'delayed' },
+        ],
+      },
+      { name: 'strengths', label: 'نقاط القوة', type: 'textarea', required: true, gridSize: 12 },
+      { name: 'weaknesses', label: 'نقاط الضعف', type: 'textarea', required: true, gridSize: 12 },
+      {
+        name: 'recommendations',
+        label: 'التوصيات',
+        type: 'textarea',
+        required: true,
+        gridSize: 12,
+      },
+    ],
+  },
+  {
+    templateId: 'beneficiary-discharge',
+    name: 'نموذج إخلاء طرف مستفيد',
+    nameEn: 'Beneficiary Discharge Form',
+    description: 'نموذج لإخلاء طرف المستفيد عند انتهاء البرنامج أو الانسحاب',
+    category: 'beneficiary',
+    icon: '🚪',
+    color: '#455A64',
+    requiresApproval: true,
+    approvalSteps: [
+      { role: 'department_head', label: 'رئيس القسم', order: 1 },
+      { role: 'finance', label: 'المالية', order: 2 },
+      { role: 'admin', label: 'الإدارة', order: 3 },
+    ],
+    fields: [
+      { name: 'beneficiaryName', label: 'اسم المستفيد', type: 'text', required: true, gridSize: 6 },
+      { name: 'beneficiaryId', label: 'رقم الملف', type: 'text', required: true, gridSize: 6 },
+      { name: 'program', label: 'البرنامج', type: 'text', required: true, gridSize: 6 },
+      { name: 'dischargeDate', label: 'تاريخ الإخلاء', type: 'date', required: true, gridSize: 6 },
+      {
+        name: 'dischargeReason',
+        label: 'سبب الإخلاء',
+        type: 'select',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'انتهاء البرنامج', value: 'program_end' },
+          { label: 'انسحاب', value: 'withdrawal' },
+          { label: 'نقل لجهة أخرى', value: 'transfer' },
+          { label: 'تحسن الحالة', value: 'improvement' },
+          { label: 'أسباب أخرى', value: 'other' },
+        ],
+      },
+      {
+        name: 'personalBelongings',
+        label: 'تم تسليم المتعلقات الشخصية',
+        type: 'radio',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'نعم', value: 'yes' },
+          { label: 'لا ينطبق', value: 'na' },
+        ],
+      },
+      {
+        name: 'financialClearance',
+        label: 'إخلاء مالي',
+        type: 'radio',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'لا توجد مستحقات', value: 'clear' },
+          { label: 'توجد مستحقات', value: 'pending' },
+        ],
+      },
+      {
+        name: 'finalReport',
+        label: 'التقرير النهائي',
+        type: 'textarea',
+        required: true,
+        gridSize: 12,
+      },
+    ],
+  },
+  {
+    templateId: 'beneficiary-guardian-authorization',
+    name: 'تفويض ولي أمر مستفيد',
+    nameEn: 'Guardian Authorization Form',
+    description: 'نموذج تفويض شخص آخر لاستلام المستفيد أو التوقيع نيابة عن ولي الأمر',
+    category: 'beneficiary',
+    icon: '✍️',
+    color: '#00695C',
+    requiresApproval: true,
+    approvalSteps: [{ role: 'admin', label: 'الإدارة', order: 1 }],
+    fields: [
+      { name: 'guardianName', label: 'اسم ولي الأمر', type: 'text', required: true, gridSize: 6 },
+      {
+        name: 'guardianId',
+        label: 'رقم هوية ولي الأمر',
+        type: 'text',
+        required: true,
+        gridSize: 6,
+      },
+      { name: 'guardianPhone', label: 'جوال ولي الأمر', type: 'tel', required: true, gridSize: 6 },
+      { name: 'beneficiaryName', label: 'اسم المستفيد', type: 'text', required: true, gridSize: 6 },
+      {
+        name: 'authorizedPerson',
+        label: 'اسم الشخص المفوّض',
+        type: 'text',
+        required: true,
+        gridSize: 6,
+      },
+      {
+        name: 'authorizedId',
+        label: 'رقم هوية المفوّض',
+        type: 'text',
+        required: true,
+        gridSize: 6,
+      },
+      { name: 'authorizedPhone', label: 'جوال المفوّض', type: 'tel', required: true, gridSize: 6 },
+      { name: 'relationship', label: 'صلة القرابة', type: 'text', required: true, gridSize: 6 },
+      {
+        name: 'authorizationType',
+        label: 'نوع التفويض',
+        type: 'select',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'استلام المستفيد', value: 'pickup' },
+          { label: 'توقيع مستندات', value: 'sign' },
+          { label: 'حضور اجتماعات', value: 'meetings' },
+          { label: 'تفويض شامل', value: 'full' },
+        ],
+      },
+      { name: 'validFrom', label: 'صالح من', type: 'date', required: true, gridSize: 6 },
+      { name: 'validTo', label: 'صالح إلى', type: 'date', required: true, gridSize: 6 },
+    ],
+  },
+
+  // ══════ نماذج إضافية — شؤون الموظفين ══════
+  {
+    templateId: 'hr-clearance',
+    name: 'نموذج إخلاء طرف موظف',
+    nameEn: 'Employee Clearance Form',
+    description: 'نموذج إخلاء طرف الموظف عند إنهاء الخدمة',
+    category: 'hr',
+    icon: '📋',
+    color: '#795548',
+    requiresApproval: true,
+    approvalSteps: [
+      { role: 'direct_manager', label: 'المدير المباشر', order: 1 },
+      { role: 'it', label: 'تقنية المعلومات', order: 2 },
+      { role: 'finance', label: 'المالية', order: 3 },
+      { role: 'hr', label: 'الموارد البشرية', order: 4 },
+    ],
+    fields: [
+      { name: 'employeeName', label: 'اسم الموظف', type: 'text', required: true, gridSize: 6 },
+      { name: 'employeeId', label: 'الرقم الوظيفي', type: 'text', required: true, gridSize: 6 },
+      { name: 'department', label: 'القسم', type: 'text', required: true, gridSize: 6 },
+      { name: 'lastDay', label: 'آخر يوم عمل', type: 'date', required: true, gridSize: 6 },
+      {
+        name: 'reason',
+        label: 'سبب ترك العمل',
+        type: 'select',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'استقالة', value: 'resignation' },
+          { label: 'انتهاء العقد', value: 'contract_end' },
+          { label: 'تقاعد', value: 'retirement' },
+          { label: 'إنهاء خدمات', value: 'termination' },
+        ],
+      },
+      {
+        name: 'returnedLaptop',
+        label: 'تسليم الحاسب المحمول',
+        type: 'radio',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'تم التسليم', value: 'yes' },
+          { label: 'لا ينطبق', value: 'na' },
+        ],
+      },
+      {
+        name: 'returnedKeys',
+        label: 'تسليم المفاتيح والبطاقات',
+        type: 'radio',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'تم التسليم', value: 'yes' },
+          { label: 'لا ينطبق', value: 'na' },
+        ],
+      },
+      {
+        name: 'returnedDocuments',
+        label: 'تسليم الملفات والوثائق',
+        type: 'radio',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'تم التسليم', value: 'yes' },
+          { label: 'لا ينطبق', value: 'na' },
+        ],
+      },
+      {
+        name: 'financialDues',
+        label: 'المستحقات المالية',
+        type: 'textarea',
+        required: false,
+        gridSize: 12,
+      },
+      { name: 'notes', label: 'ملاحظات', type: 'textarea', required: false, gridSize: 12 },
+    ],
+  },
+  {
+    templateId: 'hr-promotion-request',
+    name: 'طلب ترقية موظف',
+    nameEn: 'Promotion Request',
+    description: 'نموذج لطلب ترقية موظف بناءً على التقييم والأداء',
+    category: 'hr',
+    icon: '⭐',
+    color: '#FF6F00',
+    requiresApproval: true,
+    approvalSteps: [
+      { role: 'direct_manager', label: 'المدير المباشر', order: 1 },
+      { role: 'hr_manager', label: 'مدير الموارد البشرية', order: 2 },
+      { role: 'general_manager', label: 'المدير العام', order: 3 },
+    ],
+    fields: [
+      { name: 'employeeName', label: 'اسم الموظف', type: 'text', required: true, gridSize: 6 },
+      { name: 'employeeId', label: 'الرقم الوظيفي', type: 'text', required: true, gridSize: 6 },
+      {
+        name: 'currentTitle',
+        label: 'المسمى الوظيفي الحالي',
+        type: 'text',
+        required: true,
+        gridSize: 6,
+      },
+      { name: 'proposedTitle', label: 'المسمى المقترح', type: 'text', required: true, gridSize: 6 },
+      { name: 'currentGrade', label: 'الدرجة الحالية', type: 'text', required: true, gridSize: 6 },
+      {
+        name: 'proposedGrade',
+        label: 'الدرجة المقترحة',
+        type: 'text',
+        required: true,
+        gridSize: 6,
+      },
+      {
+        name: 'yearsInPosition',
+        label: 'سنوات في المنصب الحالي',
+        type: 'number',
+        required: true,
+        gridSize: 6,
+      },
+      {
+        name: 'lastEvaluation',
+        label: 'تقييم الأداء الأخير',
+        type: 'select',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'ممتاز', value: 'excellent' },
+          { label: 'جيد جداً', value: 'very_good' },
+          { label: 'جيد', value: 'good' },
+        ],
+      },
+      {
+        name: 'justification',
+        label: 'مبررات الترقية',
+        type: 'textarea',
+        required: true,
+        gridSize: 12,
+      },
+      {
+        name: 'achievements',
+        label: 'أبرز الإنجازات',
+        type: 'textarea',
+        required: true,
+        gridSize: 12,
+      },
+    ],
+  },
+  {
+    templateId: 'hr-business-trip',
+    name: 'طلب مهمة عمل / انتداب',
+    nameEn: 'Business Trip Request',
+    description: 'نموذج لطلب مهمة عمل أو انتداب خارجي',
+    category: 'hr',
+    icon: '✈️',
+    color: '#0277BD',
+    requiresApproval: true,
+    approvalSteps: [
+      { role: 'direct_manager', label: 'المدير المباشر', order: 1 },
+      { role: 'hr', label: 'الموارد البشرية', order: 2 },
+      { role: 'finance', label: 'المالية', order: 3 },
+    ],
+    fields: [
+      { name: 'employeeName', label: 'اسم الموظف', type: 'text', required: true, gridSize: 6 },
+      { name: 'employeeId', label: 'الرقم الوظيفي', type: 'text', required: true, gridSize: 6 },
+      { name: 'department', label: 'القسم', type: 'text', required: true, gridSize: 6 },
+      {
+        name: 'destination',
+        label: 'جهة الانتداب / المدينة',
+        type: 'text',
+        required: true,
+        gridSize: 6,
+      },
+      { name: 'purpose', label: 'الغرض من المهمة', type: 'textarea', required: true, gridSize: 12 },
+      { name: 'startDate', label: 'تاريخ البداية', type: 'date', required: true, gridSize: 6 },
+      { name: 'endDate', label: 'تاريخ النهاية', type: 'date', required: true, gridSize: 6 },
+      {
+        name: 'transportationType',
+        label: 'وسيلة النقل',
+        type: 'select',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'طيران', value: 'flight' },
+          { label: 'سيارة الجهة', value: 'company_car' },
+          { label: 'سيارة خاصة', value: 'personal_car' },
+          { label: 'أخرى', value: 'other' },
+        ],
+      },
+      {
+        name: 'accommodationNeeded',
+        label: 'يحتاج سكن؟',
+        type: 'radio',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'نعم', value: 'yes' },
+          { label: 'لا', value: 'no' },
+        ],
+      },
+      {
+        name: 'estimatedCost',
+        label: 'التكلفة التقديرية (ريال)',
+        type: 'number',
+        required: false,
+        gridSize: 6,
+      },
+      { name: 'delegate', label: 'البديل أثناء الغياب', type: 'text', required: true, gridSize: 6 },
+    ],
+  },
+  {
+    templateId: 'hr-work-from-home',
+    name: 'طلب عمل عن بعد',
+    nameEn: 'Work From Home Request',
+    description: 'نموذج لطلب العمل عن بعد لفترة محددة',
+    category: 'hr',
+    icon: '🏠',
+    color: '#558B2F',
+    requiresApproval: true,
+    approvalSteps: [
+      { role: 'direct_manager', label: 'المدير المباشر', order: 1 },
+      { role: 'hr', label: 'الموارد البشرية', order: 2 },
+    ],
+    fields: [
+      { name: 'employeeName', label: 'اسم الموظف', type: 'text', required: true, gridSize: 6 },
+      { name: 'employeeId', label: 'الرقم الوظيفي', type: 'text', required: true, gridSize: 6 },
+      { name: 'department', label: 'القسم', type: 'text', required: true, gridSize: 6 },
+      { name: 'startDate', label: 'تاريخ البداية', type: 'date', required: true, gridSize: 6 },
+      { name: 'endDate', label: 'تاريخ النهاية', type: 'date', required: true, gridSize: 6 },
+      {
+        name: 'workDays',
+        label: 'أيام العمل عن بعد',
+        type: 'select',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'يوم واحد', value: '1' },
+          { label: 'يومان', value: '2' },
+          { label: '3 أيام', value: '3' },
+          { label: 'أسبوع كامل', value: '5' },
+        ],
+      },
+      { name: 'reason', label: 'السبب', type: 'textarea', required: true, gridSize: 12 },
+      {
+        name: 'availableOnline',
+        label: 'متاح عبر الإنترنت؟',
+        type: 'radio',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'نعم طوال الوقت', value: 'always' },
+          { label: 'خلال ساعات العمل', value: 'working_hours' },
+        ],
+      },
+      {
+        name: 'tasksToComplete',
+        label: 'المهام المطلوب إنجازها',
+        type: 'textarea',
+        required: true,
+        gridSize: 12,
+      },
+    ],
+  },
+  {
+    templateId: 'hr-permission-request',
+    name: 'طلب استئذان',
+    nameEn: 'Permission / Early Leave Request',
+    description: 'نموذج لطلب استئذان أو خروج مبكر من العمل',
+    category: 'hr',
+    icon: '🕐',
+    color: '#AD1457',
+    requiresApproval: true,
+    approvalSteps: [{ role: 'direct_manager', label: 'المدير المباشر', order: 1 }],
+    fields: [
+      { name: 'employeeName', label: 'اسم الموظف', type: 'text', required: true, gridSize: 6 },
+      { name: 'employeeId', label: 'الرقم الوظيفي', type: 'text', required: true, gridSize: 6 },
+      { name: 'permissionDate', label: 'التاريخ', type: 'date', required: true, gridSize: 6 },
+      {
+        name: 'permissionType',
+        label: 'نوع الاستئذان',
+        type: 'select',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'خروج مبكر', value: 'early_leave' },
+          { label: 'حضور متأخر', value: 'late_arrival' },
+          { label: 'خروج وعودة', value: 'out_and_back' },
+        ],
+      },
+      {
+        name: 'fromTime',
+        label: 'من الساعة',
+        type: 'text',
+        required: true,
+        gridSize: 6,
+        placeholder: 'مثال: 11:00',
+      },
+      {
+        name: 'toTime',
+        label: 'إلى الساعة',
+        type: 'text',
+        required: true,
+        gridSize: 6,
+        placeholder: 'مثال: 13:00',
+      },
+      { name: 'reason', label: 'السبب', type: 'textarea', required: true, gridSize: 12 },
+    ],
+  },
+  {
+    templateId: 'hr-loan-letter',
+    name: 'طلب خطاب تعاون بنكي',
+    nameEn: 'Bank Cooperation Letter Request',
+    description: 'نموذج لطلب خطاب موجه لجهة تمويلية أو بنك',
+    category: 'hr',
+    icon: '🏛️',
+    color: '#1B5E20',
+    requiresApproval: true,
+    approvalSteps: [{ role: 'hr', label: 'الموارد البشرية', order: 1 }],
+    fields: [
+      { name: 'employeeName', label: 'اسم الموظف', type: 'text', required: true, gridSize: 6 },
+      { name: 'employeeId', label: 'الرقم الوظيفي', type: 'text', required: true, gridSize: 6 },
+      { name: 'nationalId', label: 'رقم الهوية', type: 'text', required: true, gridSize: 6 },
+      {
+        name: 'bankName',
+        label: 'اسم البنك / جهة التمويل',
+        type: 'text',
+        required: true,
+        gridSize: 6,
+      },
+      {
+        name: 'loanType',
+        label: 'نوع التمويل',
+        type: 'select',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'تمويل شخصي', value: 'personal' },
+          { label: 'تمويل عقاري', value: 'mortgage' },
+          { label: 'تمويل سيارة', value: 'auto' },
+          { label: 'بطاقة ائتمان', value: 'credit_card' },
+          { label: 'أخرى', value: 'other' },
+        ],
+      },
+      {
+        name: 'letterLanguage',
+        label: 'لغة الخطاب',
+        type: 'radio',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'عربي', value: 'ar' },
+          { label: 'إنجليزي', value: 'en' },
+          { label: 'كلاهما', value: 'both' },
+        ],
+      },
+      {
+        name: 'copies',
+        label: 'عدد النسخ',
+        type: 'number',
+        required: true,
+        gridSize: 6,
+        validation: { min: 1, max: 5 },
+      },
+    ],
+  },
+
+  // ══════ نماذج إضافية — الإدارة ══════
+  {
+    templateId: 'admin-exit-permit',
+    name: 'طلب تصريح خروج (أصول)',
+    nameEn: 'Asset Exit Permit',
+    description: 'نموذج لتصريح إخراج أصول أو أجهزة من مقر المنشأة',
+    category: 'administration',
+    icon: '🔑',
+    color: '#E65100',
+    requiresApproval: true,
+    approvalSteps: [
+      { role: 'department_head', label: 'رئيس القسم', order: 1 },
+      { role: 'security', label: 'الأمن', order: 2 },
+    ],
+    fields: [
+      { name: 'requesterName', label: 'اسم الطالب', type: 'text', required: true, gridSize: 6 },
+      { name: 'department', label: 'القسم', type: 'text', required: true, gridSize: 6 },
+      {
+        name: 'itemDescription',
+        label: 'وصف الأصل / الجهاز',
+        type: 'textarea',
+        required: true,
+        gridSize: 12,
+      },
+      { name: 'assetTag', label: 'رقم الأصل (إن وجد)', type: 'text', required: false, gridSize: 6 },
+      { name: 'serialNumber', label: 'الرقم التسلسلي', type: 'text', required: false, gridSize: 6 },
+      { name: 'exitDate', label: 'تاريخ الإخراج', type: 'date', required: true, gridSize: 6 },
+      {
+        name: 'returnDate',
+        label: 'تاريخ الإعادة المتوقع',
+        type: 'date',
+        required: false,
+        gridSize: 6,
+      },
+      { name: 'reason', label: 'سبب الإخراج', type: 'textarea', required: true, gridSize: 12 },
+      {
+        name: 'permanent',
+        label: 'هل الإخراج نهائي؟',
+        type: 'radio',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'مؤقت', value: 'temporary' },
+          { label: 'نهائي', value: 'permanent' },
+        ],
+      },
+    ],
+  },
+  {
+    templateId: 'admin-stationery-request',
+    name: 'طلب قرطاسية ومستلزمات',
+    nameEn: 'Stationery & Supplies Request',
+    description: 'نموذج لطلب قرطاسية ومستلزمات مكتبية',
+    category: 'administration',
+    icon: '🗃️',
+    color: '#4E342E',
+    requiresApproval: false,
+    fields: [
+      { name: 'requesterName', label: 'اسم الطالب', type: 'text', required: true, gridSize: 6 },
+      { name: 'department', label: 'القسم', type: 'text', required: true, gridSize: 6 },
+      {
+        name: 'items',
+        label: 'المواد المطلوبة (اذكر كل صنف وكميته)',
+        type: 'textarea',
+        required: true,
+        gridSize: 12,
+      },
+      {
+        name: 'urgency',
+        label: 'الأولوية',
+        type: 'radio',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'عاجل', value: 'urgent' },
+          { label: 'عادي', value: 'normal' },
+        ],
+      },
+      {
+        name: 'deliveryLocation',
+        label: 'مكان التسليم',
+        type: 'text',
+        required: true,
+        gridSize: 6,
+      },
+    ],
+  },
+  {
+    templateId: 'admin-visitor-request',
+    name: 'طلب تصريح زائر',
+    nameEn: 'Visitor Pass Request',
+    description: 'نموذج لطلب تصريح دخول زائر للمنشأة',
+    category: 'administration',
+    icon: '🪪',
+    color: '#006064',
+    requiresApproval: true,
+    approvalSteps: [{ role: 'security', label: 'الأمن', order: 1 }],
+    fields: [
+      { name: 'hostName', label: 'اسم المضيف (الموظف)', type: 'text', required: true, gridSize: 6 },
+      { name: 'hostDepartment', label: 'قسم المضيف', type: 'text', required: true, gridSize: 6 },
+      { name: 'visitorName', label: 'اسم الزائر', type: 'text', required: true, gridSize: 6 },
+      { name: 'visitorId', label: 'رقم هوية الزائر', type: 'text', required: true, gridSize: 6 },
+      { name: 'visitorCompany', label: 'جهة الزائر', type: 'text', required: false, gridSize: 6 },
+      { name: 'visitDate', label: 'تاريخ الزيارة', type: 'date', required: true, gridSize: 6 },
+      {
+        name: 'visitTime',
+        label: 'وقت الزيارة',
+        type: 'text',
+        required: true,
+        gridSize: 6,
+        placeholder: 'مثال: 10:00',
+      },
+      { name: 'purpose', label: 'الغرض من الزيارة', type: 'text', required: true, gridSize: 6 },
+      {
+        name: 'areas',
+        label: 'المناطق المسموح بالدخول إليها',
+        type: 'text',
+        required: true,
+        gridSize: 12,
+      },
+    ],
+  },
+  {
+    templateId: 'admin-key-request',
+    name: 'طلب استلام مفاتيح / بطاقة دخول',
+    nameEn: 'Key / Access Card Request',
+    description: 'نموذج لطلب استلام مفاتيح مكتب أو بطاقة دخول',
+    category: 'administration',
+    icon: '🔐',
+    color: '#BF360C',
+    requiresApproval: true,
+    approvalSteps: [
+      { role: 'admin', label: 'الخدمات الإدارية', order: 1 },
+      { role: 'security', label: 'الأمن', order: 2 },
+    ],
+    fields: [
+      { name: 'employeeName', label: 'اسم الموظف', type: 'text', required: true, gridSize: 6 },
+      { name: 'employeeId', label: 'الرقم الوظيفي', type: 'text', required: true, gridSize: 6 },
+      { name: 'department', label: 'القسم', type: 'text', required: true, gridSize: 6 },
+      {
+        name: 'requestType',
+        label: 'نوع الطلب',
+        type: 'select',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'مفتاح مكتب', value: 'office_key' },
+          { label: 'بطاقة دخول', value: 'access_card' },
+          { label: 'مفتاح مخزن', value: 'storage_key' },
+          { label: 'مفتاح سيارة', value: 'vehicle_key' },
+          { label: 'بدل فاقد', value: 'replacement' },
+        ],
+      },
+      { name: 'location', label: 'الموقع / رقم المكتب', type: 'text', required: true, gridSize: 6 },
+      { name: 'reason', label: 'السبب', type: 'textarea', required: true, gridSize: 12 },
+    ],
+  },
+
+  // ══════ نماذج إضافية — المالية ══════
+  {
+    templateId: 'finance-petty-cash',
+    name: 'طلب صرف من العهدة / الصندوق',
+    nameEn: 'Petty Cash Request',
+    description: 'نموذج لطلب صرف نقدي من صندوق المصروفات النثرية',
+    category: 'finance',
+    icon: '💵',
+    color: '#33691E',
+    requiresApproval: true,
+    approvalSteps: [
+      { role: 'department_head', label: 'رئيس القسم', order: 1 },
+      { role: 'finance', label: 'المالية', order: 2 },
+    ],
+    fields: [
+      { name: 'requesterName', label: 'اسم الطالب', type: 'text', required: true, gridSize: 6 },
+      { name: 'department', label: 'القسم', type: 'text', required: true, gridSize: 6 },
+      {
+        name: 'amount',
+        label: 'المبلغ المطلوب (ريال)',
+        type: 'number',
+        required: true,
+        gridSize: 6,
+      },
+      { name: 'purpose', label: 'الغرض من الصرف', type: 'textarea', required: true, gridSize: 12 },
+      {
+        name: 'paymentMethod',
+        label: 'طريقة الصرف',
+        type: 'radio',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'نقداً', value: 'cash' },
+          { label: 'تحويل بنكي', value: 'transfer' },
+        ],
+      },
+      { name: 'neededBy', label: 'مطلوب بتاريخ', type: 'date', required: true, gridSize: 6 },
+    ],
+  },
+  {
+    templateId: 'finance-refund',
+    name: 'طلب استرداد مبلغ',
+    nameEn: 'Refund Request',
+    description: 'نموذج لطلب استرداد مبلغ مالي مدفوع',
+    category: 'finance',
+    icon: '🔁',
+    color: '#00838F',
+    requiresApproval: true,
+    approvalSteps: [
+      { role: 'finance', label: 'المالية', order: 1 },
+      { role: 'admin', label: 'الإدارة', order: 2 },
+    ],
+    fields: [
+      { name: 'requesterName', label: 'اسم مقدم الطلب', type: 'text', required: true, gridSize: 6 },
+      { name: 'requesterPhone', label: 'رقم الجوال', type: 'tel', required: true, gridSize: 6 },
+      {
+        name: 'originalPaymentDate',
+        label: 'تاريخ الدفع الأصلي',
+        type: 'date',
+        required: true,
+        gridSize: 6,
+      },
+      {
+        name: 'originalAmount',
+        label: 'المبلغ المدفوع (ريال)',
+        type: 'number',
+        required: true,
+        gridSize: 6,
+      },
+      {
+        name: 'refundAmount',
+        label: 'المبلغ المطلوب استرداده',
+        type: 'number',
+        required: true,
+        gridSize: 6,
+      },
+      {
+        name: 'refundReason',
+        label: 'سبب الاسترداد',
+        type: 'select',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'دفع مكرر', value: 'duplicate' },
+          { label: 'خدمة لم تقدم', value: 'no_service' },
+          { label: 'خطأ في المبلغ', value: 'amount_error' },
+          { label: 'إلغاء خدمة', value: 'cancellation' },
+          { label: 'أخرى', value: 'other' },
+        ],
+      },
+      { name: 'bankIban', label: 'رقم الآيبان للتحويل', type: 'text', required: true, gridSize: 6 },
+      {
+        name: 'receipt',
+        label: 'إرفاق إيصال الدفع الأصلي',
+        type: 'file',
+        required: true,
+        gridSize: 12,
+      },
+      { name: 'details', label: 'تفاصيل إضافية', type: 'textarea', required: false, gridSize: 12 },
+    ],
+  },
+  {
+    templateId: 'finance-budget-transfer',
+    name: 'طلب نقل اعتماد مالي',
+    nameEn: 'Budget Transfer Request',
+    description: 'نموذج لطلب نقل مبلغ من بند مالي إلى آخر',
+    category: 'finance',
+    icon: '📊',
+    color: '#1A237E',
+    requiresApproval: true,
+    approvalSteps: [
+      { role: 'department_head', label: 'رئيس القسم', order: 1 },
+      { role: 'finance_manager', label: 'مدير المالية', order: 2 },
+      { role: 'general_manager', label: 'المدير العام', order: 3 },
+    ],
+    fields: [
+      { name: 'requesterName', label: 'اسم الطالب', type: 'text', required: true, gridSize: 6 },
+      { name: 'department', label: 'القسم', type: 'text', required: true, gridSize: 6 },
+      {
+        name: 'fromBudgetItem',
+        label: 'البند المنقول منه',
+        type: 'text',
+        required: true,
+        gridSize: 6,
+      },
+      {
+        name: 'fromBudgetBalance',
+        label: 'الرصيد المتاح في البند',
+        type: 'number',
+        required: true,
+        gridSize: 6,
+      },
+      {
+        name: 'toBudgetItem',
+        label: 'البند المنقول إليه',
+        type: 'text',
+        required: true,
+        gridSize: 6,
+      },
+      {
+        name: 'transferAmount',
+        label: 'المبلغ المطلوب نقله (ريال)',
+        type: 'number',
+        required: true,
+        gridSize: 6,
+      },
+      {
+        name: 'justification',
+        label: 'مبرر النقل',
+        type: 'textarea',
+        required: true,
+        gridSize: 12,
+      },
+    ],
+  },
+
+  // ══════ نماذج عامة ══════
+  {
+    templateId: 'general-suggestion',
+    name: 'نموذج اقتراح أو فكرة',
+    nameEn: 'Suggestion / Idea Form',
+    description: 'نموذج لتقديم اقتراح أو فكرة لتطوير العمل',
+    category: 'general',
+    icon: '💡',
+    color: '#FFA000',
+    requiresApproval: false,
+    fields: [
+      {
+        name: 'submitterName',
+        label: 'اسم مقدم الاقتراح',
+        type: 'text',
+        required: true,
+        gridSize: 6,
+      },
+      { name: 'department', label: 'القسم', type: 'text', required: true, gridSize: 6 },
+      {
+        name: 'suggestionTitle',
+        label: 'عنوان الاقتراح',
+        type: 'text',
+        required: true,
+        gridSize: 12,
+      },
+      {
+        name: 'category',
+        label: 'مجال الاقتراح',
+        type: 'select',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'تطوير خدمات', value: 'services' },
+          { label: 'تحسين بيئة العمل', value: 'workplace' },
+          { label: 'تقنية ورقمنة', value: 'technology' },
+          { label: 'توفير تكاليف', value: 'cost_saving' },
+          { label: 'سلامة وأمان', value: 'safety' },
+          { label: 'أخرى', value: 'other' },
+        ],
+      },
+      {
+        name: 'currentSituation',
+        label: 'الوضع الحالي',
+        type: 'textarea',
+        required: true,
+        gridSize: 12,
+      },
+      {
+        name: 'proposedSolution',
+        label: 'الاقتراح المقدم',
+        type: 'textarea',
+        required: true,
+        gridSize: 12,
+      },
+      {
+        name: 'expectedBenefit',
+        label: 'الفائدة المتوقعة',
+        type: 'textarea',
+        required: true,
+        gridSize: 12,
+      },
+    ],
+  },
+  {
+    templateId: 'general-incident-report',
+    name: 'نموذج بلاغ حادثة / طارئ',
+    nameEn: 'Incident Report Form',
+    description: 'نموذج للإبلاغ عن حادثة أو حالة طوارئ في المنشأة',
+    category: 'general',
+    icon: '🚨',
+    color: '#B71C1C',
+    requiresApproval: false,
+    fields: [
+      { name: 'reporterName', label: 'اسم المبلّغ', type: 'text', required: true, gridSize: 6 },
+      { name: 'reporterPhone', label: 'رقم الجوال', type: 'tel', required: true, gridSize: 6 },
+      { name: 'incidentDate', label: 'تاريخ الحادثة', type: 'date', required: true, gridSize: 6 },
+      {
+        name: 'incidentTime',
+        label: 'وقت الحادثة',
+        type: 'text',
+        required: true,
+        gridSize: 6,
+        placeholder: 'مثال: 14:30',
+      },
+      { name: 'location', label: 'مكان الحادثة', type: 'text', required: true, gridSize: 6 },
+      {
+        name: 'incidentType',
+        label: 'نوع الحادثة',
+        type: 'select',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'إصابة عمل', value: 'work_injury' },
+          { label: 'حريق', value: 'fire' },
+          { label: 'تسرب مواد', value: 'leak' },
+          { label: 'سقوط', value: 'fall' },
+          { label: 'عطل كهربائي', value: 'electrical' },
+          { label: 'أمن وسلامة', value: 'security' },
+          { label: 'أخرى', value: 'other' },
+        ],
+      },
+      {
+        name: 'severity',
+        label: 'مستوى الخطورة',
+        type: 'radio',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'بسيط', value: 'minor' },
+          { label: 'متوسط', value: 'moderate' },
+          { label: 'خطير', value: 'serious' },
+          { label: 'حرج', value: 'critical' },
+        ],
+      },
+      {
+        name: 'involvedPersons',
+        label: 'الأشخاص المتضررون (إن وجد)',
+        type: 'textarea',
+        required: false,
+        gridSize: 12,
+      },
+      {
+        name: 'description',
+        label: 'وصف تفصيلي للحادثة',
+        type: 'textarea',
+        required: true,
+        gridSize: 12,
+      },
+      {
+        name: 'actionsTaken',
+        label: 'الإجراءات المتخذة فوراً',
+        type: 'textarea',
+        required: false,
+        gridSize: 12,
+      },
+    ],
+  },
+  {
+    templateId: 'general-feedback',
+    name: 'نموذج تقييم خدمة / رضا',
+    nameEn: 'Service Feedback / Satisfaction Form',
+    description: 'نموذج لقياس رضا المستفيدين أو الموظفين عن خدمة معينة',
+    category: 'general',
+    icon: '⭐',
+    color: '#F57F17',
+    requiresApproval: false,
+    fields: [
+      {
+        name: 'respondentName',
+        label: 'الاسم (اختياري)',
+        type: 'text',
+        required: false,
+        gridSize: 6,
+      },
+      {
+        name: 'respondentType',
+        label: 'الفئة',
+        type: 'select',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'مستفيد', value: 'beneficiary' },
+          { label: 'ولي أمر', value: 'guardian' },
+          { label: 'موظف', value: 'employee' },
+          { label: 'زائر', value: 'visitor' },
+        ],
+      },
+      {
+        name: 'serviceName',
+        label: 'اسم الخدمة / القسم',
+        type: 'text',
+        required: true,
+        gridSize: 6,
+      },
+      {
+        name: 'serviceDate',
+        label: 'تاريخ الحصول على الخدمة',
+        type: 'date',
+        required: true,
+        gridSize: 6,
+      },
+      {
+        name: 'overallRating',
+        label: 'التقييم العام',
+        type: 'radio',
+        required: true,
+        gridSize: 12,
+        options: [
+          { label: 'ممتاز ⭐⭐⭐⭐⭐', value: '5' },
+          { label: 'جيد جداً ⭐⭐⭐⭐', value: '4' },
+          { label: 'جيد ⭐⭐⭐', value: '3' },
+          { label: 'مقبول ⭐⭐', value: '2' },
+          { label: 'ضعيف ⭐', value: '1' },
+        ],
+      },
+      {
+        name: 'staffRating',
+        label: 'تقييم الكادر',
+        type: 'radio',
+        required: true,
+        gridSize: 12,
+        options: [
+          { label: 'ممتاز', value: '5' },
+          { label: 'جيد جداً', value: '4' },
+          { label: 'جيد', value: '3' },
+          { label: 'مقبول', value: '2' },
+          { label: 'ضعيف', value: '1' },
+        ],
+      },
+      { name: 'positives', label: 'ما أعجبك', type: 'textarea', required: false, gridSize: 12 },
+      {
+        name: 'improvements',
+        label: 'ما يمكن تحسينه',
+        type: 'textarea',
+        required: false,
+        gridSize: 12,
+      },
+    ],
+  },
+  {
+    templateId: 'general-information-request',
+    name: 'طلب معلومات رسمي',
+    nameEn: 'Official Information Request',
+    description: 'نموذج لطلب معلومات أو بيانات رسمية من إدارة معينة',
+    category: 'general',
+    icon: 'ℹ️',
+    color: '#0288D1',
+    requiresApproval: false,
+    fields: [
+      { name: 'requesterName', label: 'اسم الطالب', type: 'text', required: true, gridSize: 6 },
+      { name: 'requesterDepartment', label: 'القسم', type: 'text', required: true, gridSize: 6 },
+      { name: 'requesterPhone', label: 'رقم الجوال', type: 'tel', required: true, gridSize: 6 },
+      {
+        name: 'requesterEmail',
+        label: 'البريد الإلكتروني',
+        type: 'email',
+        required: true,
+        gridSize: 6,
+      },
+      {
+        name: 'targetDepartment',
+        label: 'الإدارة المطلوب منها المعلومات',
+        type: 'text',
+        required: true,
+        gridSize: 6,
+      },
+      { name: 'neededBy', label: 'مطلوب بتاريخ', type: 'date', required: true, gridSize: 6 },
+      {
+        name: 'informationDetails',
+        label: 'وصف المعلومات المطلوبة',
+        type: 'textarea',
+        required: true,
+        gridSize: 12,
+      },
+      { name: 'purpose', label: 'الغرض من الطلب', type: 'textarea', required: true, gridSize: 12 },
+    ],
+  },
+
+  // ══════ نماذج إضافية — الدفعة الثانية ══════
+
+  // ── مستفيدين ──
+  {
+    templateId: 'beneficiary-home-visit',
+    name: 'طلب زيارة منزلية',
+    nameEn: 'Home Visit Request',
+    description: 'نموذج لطلب إجراء زيارة منزلية للمستفيد',
+    category: 'beneficiary',
+    icon: '🏡',
+    color: '#2E7D32',
+    requiresApproval: true,
+    approvalSteps: [
+      { role: 'specialist', label: 'الأخصائي', order: 1 },
+      { role: 'department_head', label: 'رئيس القسم', order: 2 },
+    ],
+    fields: [
+      { name: 'beneficiaryName', label: 'اسم المستفيد', type: 'text', required: true, gridSize: 6 },
+      { name: 'fileNumber', label: 'رقم الملف', type: 'text', required: true, gridSize: 6 },
+      {
+        name: 'visitPurpose',
+        label: 'الغرض من الزيارة',
+        type: 'select',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'تقييم أولي', value: 'initial_assessment' },
+          { label: 'متابعة دورية', value: 'periodic_followup' },
+          { label: 'تقييم بيئة المنزل', value: 'home_assessment' },
+          { label: 'تسليم مستلزمات', value: 'delivery' },
+          { label: 'طارئة', value: 'emergency' },
+        ],
+      },
+      { name: 'preferredDate', label: 'التاريخ المفضل', type: 'date', required: true, gridSize: 6 },
+      { name: 'address', label: 'العنوان', type: 'textarea', required: true, gridSize: 12 },
+      { name: 'guardianPhone', label: 'جوال ولي الأمر', type: 'tel', required: true, gridSize: 6 },
+      {
+        name: 'specialNeeds',
+        label: 'احتياجات خاصة للزيارة',
+        type: 'textarea',
+        required: false,
+        gridSize: 12,
+      },
+    ],
+  },
+  {
+    templateId: 'beneficiary-fee-exemption',
+    name: 'طلب إعفاء من الرسوم',
+    nameEn: 'Fee Exemption Request',
+    description: 'نموذج لطلب إعفاء كلي أو جزئي من رسوم الخدمات',
+    category: 'beneficiary',
+    icon: '🎫',
+    color: '#00695C',
+    requiresApproval: true,
+    approvalSteps: [
+      { role: 'department_head', label: 'رئيس القسم', order: 1 },
+      { role: 'finance', label: 'المالية', order: 2 },
+      { role: 'general_manager', label: 'المدير العام', order: 3 },
+    ],
+    fields: [
+      { name: 'beneficiaryName', label: 'اسم المستفيد', type: 'text', required: true, gridSize: 6 },
+      { name: 'fileNumber', label: 'رقم الملف', type: 'text', required: true, gridSize: 6 },
+      { name: 'serviceName', label: 'اسم الخدمة', type: 'text', required: true, gridSize: 6 },
+      {
+        name: 'originalFee',
+        label: 'الرسوم الأصلية (ريال)',
+        type: 'number',
+        required: true,
+        gridSize: 6,
+      },
+      {
+        name: 'exemptionType',
+        label: 'نوع الإعفاء',
+        type: 'radio',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'إعفاء كلي', value: 'full' },
+          { label: 'إعفاء جزئي', value: 'partial' },
+        ],
+      },
+      {
+        name: 'exemptionAmount',
+        label: 'المبلغ المطلوب إعفاؤه',
+        type: 'number',
+        required: false,
+        gridSize: 6,
+      },
+      { name: 'reason', label: 'مبرر الإعفاء', type: 'textarea', required: true, gridSize: 12 },
+      {
+        name: 'socialReport',
+        label: 'إرفاق تقرير اجتماعي',
+        type: 'file',
+        required: false,
+        gridSize: 12,
+      },
+    ],
+  },
+
+  // ── موظفين ──
+  {
+    templateId: 'hr-data-update',
+    name: 'طلب تعديل بيانات موظف',
+    nameEn: 'Employee Data Update Request',
+    description: 'نموذج لطلب تعديل بيانات الموظف الشخصية أو الوظيفية',
+    category: 'hr',
+    icon: '✏️',
+    color: '#37474F',
+    requiresApproval: true,
+    approvalSteps: [{ role: 'hr', label: 'الموارد البشرية', order: 1 }],
+    fields: [
+      { name: 'employeeName', label: 'اسم الموظف', type: 'text', required: true, gridSize: 6 },
+      { name: 'employeeId', label: 'الرقم الوظيفي', type: 'text', required: true, gridSize: 6 },
+      {
+        name: 'fieldToUpdate',
+        label: 'البيان المطلوب تعديله',
+        type: 'select',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'رقم الجوال', value: 'phone' },
+          { label: 'العنوان', value: 'address' },
+          { label: 'الحالة الاجتماعية', value: 'marital_status' },
+          { label: 'بيانات بنكية (IBAN)', value: 'bank' },
+          { label: 'جهة اتصال الطوارئ', value: 'emergency_contact' },
+          { label: 'المؤهل العلمي', value: 'education' },
+        ],
+      },
+      { name: 'currentValue', label: 'القيمة الحالية', type: 'text', required: true, gridSize: 6 },
+      { name: 'newValue', label: 'القيمة الجديدة', type: 'text', required: true, gridSize: 12 },
+      {
+        name: 'supportingDoc',
+        label: 'المستند الداعم (إن وجد)',
+        type: 'file',
+        required: false,
+        gridSize: 12,
+      },
+    ],
+  },
+  {
+    templateId: 'hr-housing-allowance',
+    name: 'طلب بدل سكن',
+    nameEn: 'Housing Allowance Request',
+    description: 'نموذج لطلب صرف بدل سكن أو تعديل مبلغه',
+    category: 'hr',
+    icon: '🏘️',
+    color: '#4A148C',
+    requiresApproval: true,
+    approvalSteps: [
+      { role: 'hr', label: 'الموارد البشرية', order: 1 },
+      { role: 'finance', label: 'المالية', order: 2 },
+      { role: 'general_manager', label: 'المدير العام', order: 3 },
+    ],
+    fields: [
+      { name: 'employeeName', label: 'اسم الموظف', type: 'text', required: true, gridSize: 6 },
+      { name: 'employeeId', label: 'الرقم الوظيفي', type: 'text', required: true, gridSize: 6 },
+      {
+        name: 'requestType',
+        label: 'نوع الطلب',
+        type: 'radio',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'صرف بدل جديد', value: 'new' },
+          { label: 'تعديل المبلغ', value: 'adjustment' },
+        ],
+      },
+      {
+        name: 'currentAllowance',
+        label: 'البدل الحالي (ريال)',
+        type: 'number',
+        required: false,
+        gridSize: 6,
+      },
+      {
+        name: 'requestedAmount',
+        label: 'المبلغ المطلوب (ريال)',
+        type: 'number',
+        required: true,
+        gridSize: 6,
+      },
+      {
+        name: 'maritalStatus',
+        label: 'الحالة الاجتماعية',
+        type: 'select',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'أعزب', value: 'single' },
+          { label: 'متزوج', value: 'married' },
+          { label: 'متزوج ويعول', value: 'married_with_dependents' },
+        ],
+      },
+      {
+        name: 'leaseContract',
+        label: 'إرفاق عقد الإيجار',
+        type: 'file',
+        required: true,
+        gridSize: 12,
+      },
+      { name: 'justification', label: 'المبرر', type: 'textarea', required: true, gridSize: 12 },
+    ],
+  },
+
+  // ── إدارة ──
+  {
+    templateId: 'admin-printing-request',
+    name: 'طلب تصوير / طباعة',
+    nameEn: 'Printing / Photocopying Request',
+    description: 'نموذج لطلب طباعة أو تصوير مستندات من قسم الخدمات',
+    category: 'administration',
+    icon: '🖨️',
+    color: '#546E7A',
+    requiresApproval: false,
+    fields: [
+      { name: 'requesterName', label: 'اسم الطالب', type: 'text', required: true, gridSize: 6 },
+      { name: 'department', label: 'القسم', type: 'text', required: true, gridSize: 6 },
+      {
+        name: 'serviceType',
+        label: 'نوع الخدمة',
+        type: 'select',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'طباعة', value: 'print' },
+          { label: 'تصوير', value: 'photocopy' },
+          { label: 'مسح ضوئي (سكانر)', value: 'scan' },
+          { label: 'تغليف وتجليد', value: 'binding' },
+        ],
+      },
+      {
+        name: 'copies',
+        label: 'عدد النسخ',
+        type: 'number',
+        required: true,
+        gridSize: 6,
+        validation: { min: 1 },
+      },
+      {
+        name: 'colorType',
+        label: 'نوع الطباعة',
+        type: 'radio',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'أبيض وأسود', value: 'bw' },
+          { label: 'ألوان', value: 'color' },
+        ],
+      },
+      {
+        name: 'paperSize',
+        label: 'حجم الورق',
+        type: 'select',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'A4', value: 'a4' },
+          { label: 'A3', value: 'a3' },
+          { label: 'Legal', value: 'legal' },
+        ],
+      },
+      { name: 'neededBy', label: 'مطلوب بتاريخ', type: 'date', required: true, gridSize: 6 },
+      { name: 'description', label: 'وصف المواد', type: 'textarea', required: true, gridSize: 12 },
+    ],
+  },
+  {
+    templateId: 'admin-event-request',
+    name: 'طلب تنظيم فعالية / مناسبة',
+    nameEn: 'Event Organization Request',
+    description: 'نموذج لطلب تنظيم فعالية أو مناسبة داخل المنشأة',
+    category: 'administration',
+    icon: '🎉',
+    color: '#880E4F',
+    requiresApproval: true,
+    approvalSteps: [
+      { role: 'department_head', label: 'رئيس القسم', order: 1 },
+      { role: 'admin', label: 'الخدمات الإدارية', order: 2 },
+      { role: 'finance', label: 'المالية', order: 3 },
+    ],
+    fields: [
+      { name: 'eventName', label: 'اسم الفعالية', type: 'text', required: true, gridSize: 6 },
+      {
+        name: 'organizer',
+        label: 'الجهة المنظمة / القسم',
+        type: 'text',
+        required: true,
+        gridSize: 6,
+      },
+      { name: 'eventDate', label: 'التاريخ', type: 'date', required: true, gridSize: 6 },
+      {
+        name: 'eventTime',
+        label: 'الوقت',
+        type: 'text',
+        required: true,
+        gridSize: 6,
+        placeholder: 'مثال: 09:00 - 12:00',
+      },
+      { name: 'location', label: 'المكان', type: 'text', required: true, gridSize: 6 },
+      {
+        name: 'expectedAttendees',
+        label: 'عدد الحضور المتوقع',
+        type: 'number',
+        required: true,
+        gridSize: 6,
+      },
+      {
+        name: 'requirements',
+        label: 'المتطلبات (صوتيات، شاشات، ضيافة...)',
+        type: 'textarea',
+        required: true,
+        gridSize: 12,
+      },
+      {
+        name: 'estimatedBudget',
+        label: 'الميزانية التقديرية (ريال)',
+        type: 'number',
+        required: false,
+        gridSize: 6,
+      },
+      {
+        name: 'description',
+        label: 'وصف الفعالية',
+        type: 'textarea',
+        required: true,
+        gridSize: 12,
+      },
+    ],
+  },
+
+  // ── مالية ──
+  {
+    templateId: 'finance-custody-settlement',
+    name: 'طلب تسوية عهدة',
+    nameEn: 'Custody Settlement Form',
+    description: 'نموذج لتسوية عهدة مالية صُرفت مسبقاً',
+    category: 'finance',
+    icon: '📒',
+    color: '#3E2723',
+    requiresApproval: true,
+    approvalSteps: [
+      { role: 'department_head', label: 'رئيس القسم', order: 1 },
+      { role: 'finance', label: 'المالية', order: 2 },
+    ],
+    fields: [
+      {
+        name: 'custodianName',
+        label: 'اسم حامل العهدة',
+        type: 'text',
+        required: true,
+        gridSize: 6,
+      },
+      { name: 'employeeId', label: 'الرقم الوظيفي', type: 'text', required: true, gridSize: 6 },
+      {
+        name: 'custodyNumber',
+        label: 'رقم العهدة / السند',
+        type: 'text',
+        required: true,
+        gridSize: 6,
+      },
+      {
+        name: 'custodyAmount',
+        label: 'مبلغ العهدة (ريال)',
+        type: 'number',
+        required: true,
+        gridSize: 6,
+      },
+      {
+        name: 'spentAmount',
+        label: 'المبلغ المصروف (ريال)',
+        type: 'number',
+        required: true,
+        gridSize: 6,
+      },
+      {
+        name: 'remainingAmount',
+        label: 'المبلغ المتبقي (ريال)',
+        type: 'number',
+        required: true,
+        gridSize: 6,
+      },
+      {
+        name: 'expenseDetails',
+        label: 'تفاصيل المصروفات',
+        type: 'textarea',
+        required: true,
+        gridSize: 12,
+      },
+      {
+        name: 'receipts',
+        label: 'إرفاق الفواتير / الإيصالات',
+        type: 'file',
+        required: true,
+        gridSize: 12,
+      },
+    ],
+  },
+  {
+    templateId: 'finance-bank-update',
+    name: 'طلب تعديل حساب بنكي',
+    nameEn: 'Bank Account Update Request',
+    description: 'نموذج لطلب تحديث بيانات الحساب البنكي لصرف الراتب',
+    category: 'finance',
+    icon: '🏦',
+    color: '#004D40',
+    requiresApproval: true,
+    approvalSteps: [
+      { role: 'hr', label: 'الموارد البشرية', order: 1 },
+      { role: 'finance', label: 'المالية', order: 2 },
+    ],
+    fields: [
+      { name: 'employeeName', label: 'اسم الموظف', type: 'text', required: true, gridSize: 6 },
+      { name: 'employeeId', label: 'الرقم الوظيفي', type: 'text', required: true, gridSize: 6 },
+      { name: 'currentBank', label: 'البنك الحالي', type: 'text', required: true, gridSize: 6 },
+      { name: 'newBank', label: 'البنك الجديد', type: 'text', required: true, gridSize: 6 },
+      {
+        name: 'newIban',
+        label: 'رقم الآيبان الجديد',
+        type: 'text',
+        required: true,
+        gridSize: 12,
+        placeholder: 'SA...',
+      },
+      {
+        name: 'bankCertificate',
+        label: 'إرفاق شهادة الآيبان',
+        type: 'file',
+        required: true,
+        gridSize: 12,
+      },
+    ],
+  },
+
+  // ── عامة ──
+  {
+    templateId: 'general-experience-certificate',
+    name: 'طلب شهادة خبرة',
+    nameEn: 'Experience Certificate Request',
+    description: 'نموذج لطلب إصدار شهادة خبرة للموظف الحالي أو السابق',
+    category: 'general',
+    icon: '🏅',
+    color: '#5D4037',
+    requiresApproval: true,
+    approvalSteps: [{ role: 'hr', label: 'الموارد البشرية', order: 1 }],
+    fields: [
+      { name: 'employeeName', label: 'اسم الموظف', type: 'text', required: true, gridSize: 6 },
+      { name: 'employeeId', label: 'الرقم الوظيفي', type: 'text', required: true, gridSize: 6 },
+      { name: 'department', label: 'القسم', type: 'text', required: true, gridSize: 6 },
+      { name: 'jobTitle', label: 'المسمى الوظيفي', type: 'text', required: true, gridSize: 6 },
+      { name: 'startDate', label: 'تاريخ بداية العمل', type: 'date', required: true, gridSize: 6 },
+      {
+        name: 'endDate',
+        label: 'تاريخ نهاية العمل (إن لم يزل يعمل اتركه فارغاً)',
+        type: 'date',
+        required: false,
+        gridSize: 6,
+      },
+      {
+        name: 'language',
+        label: 'لغة الشهادة',
+        type: 'radio',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'عربي', value: 'ar' },
+          { label: 'إنجليزي', value: 'en' },
+          { label: 'كلاهما', value: 'both' },
+        ],
+      },
+      { name: 'purpose', label: 'الغرض', type: 'text', required: true, gridSize: 6 },
+    ],
+  },
+  {
+    templateId: 'general-pledge',
+    name: 'نموذج إقرار وتعهد',
+    nameEn: 'Pledge / Acknowledgment Form',
+    description: 'نموذج لتوقيع إقرار أو تعهد رسمي',
+    category: 'general',
+    icon: '📜',
+    color: '#263238',
+    requiresApproval: false,
+    fields: [
+      { name: 'fullName', label: 'الاسم الكامل', type: 'text', required: true, gridSize: 6 },
+      { name: 'nationalId', label: 'رقم الهوية', type: 'text', required: true, gridSize: 6 },
+      {
+        name: 'role',
+        label: 'الصفة',
+        type: 'select',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'موظف', value: 'employee' },
+          { label: 'مستفيد', value: 'beneficiary' },
+          { label: 'ولي أمر', value: 'guardian' },
+          { label: 'مورد / مقاول', value: 'vendor' },
+        ],
+      },
+      {
+        name: 'pledgeType',
+        label: 'نوع التعهد',
+        type: 'select',
+        required: true,
+        gridSize: 6,
+        options: [
+          { label: 'السرية وعدم الإفصاح', value: 'nda' },
+          { label: 'الالتزام بالأنظمة', value: 'compliance' },
+          { label: 'استلام عهدة', value: 'custody' },
+          { label: 'مسؤولية شخصية', value: 'personal_liability' },
+          { label: 'أخرى', value: 'other' },
+        ],
+      },
+      {
+        name: 'pledgeText',
+        label: 'نص الإقرار / التعهد',
+        type: 'textarea',
+        required: true,
+        gridSize: 12,
+      },
+      { name: 'agreementDate', label: 'تاريخ التوقيع', type: 'date', required: true, gridSize: 6 },
+    ],
+  },
+];
+
+// ─── Seed built-in templates ───────────────────────────────────────────────
+
+async function seedBuiltInTemplates() {
+  try {
+    for (const tpl of BUILT_IN_TEMPLATES) {
+      await FormTemplate.findOneAndUpdate(
+        { templateId: tpl.templateId },
+        { $setOnInsert: { ...tpl, isBuiltIn: true, isActive: true } },
+        { upsert: true, new: true }
+      );
+    }
+    logger.info(`[FormTemplates] Seeded ${BUILT_IN_TEMPLATES.length} built-in templates`);
+  } catch (err) {
+    logger.warn(`[FormTemplates] Seed skipped (DB may not be connected): ${err.message}`);
+  }
+}
+
+// Seed on first load if DB is connected
+if (mongoose.connection.readyState === 1) {
+  seedBuiltInTemplates();
+} else {
+  mongoose.connection.once('connected', seedBuiltInTemplates);
+}
+
+// ─── Routes ────────────────────────────────────────────────────────────────
+
+/**
+ * GET /api/form-templates
+ * List all templates, optionally filtered by category
+ */
+router.get('/', async (req, res) => {
+  try {
+    const { category, search, page = 1, limit = 50 } = req.query;
+    const filter = { isActive: true };
+
+    if (category && category !== 'all') filter.category = category;
+    if (search) {
+      filter.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } },
+        { nameEn: { $regex: search, $options: 'i' } },
+      ];
+    }
+
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const [templates, total] = await Promise.all([
+      FormTemplate.find(filter)
+        .sort({ category: 1, name: 1 })
+        .skip(skip)
+        .limit(parseInt(limit))
+        .lean(),
+      FormTemplate.countDocuments(filter),
+    ]);
+
+    res.json({
+      success: true,
+      templates,
+      pagination: { page: +page, limit: +limit, total, pages: Math.ceil(total / limit) },
+    });
+  } catch (error) {
+    logger.error('Error fetching form templates:', error);
+    // Fallback to built-in templates if DB is unavailable
+    const { category } = req.query;
+    let templates = BUILT_IN_TEMPLATES;
+    if (category && category !== 'all') {
+      templates = templates.filter(t => t.category === category);
+    }
+    res.json({
+      success: true,
+      templates,
+      pagination: { page: 1, limit: 50, total: templates.length },
+    });
+  }
+});
+
+/**
+ * GET /api/form-templates/categories
+ * Get template categories with counts
+ */
+router.get('/categories', async (req, res) => {
+  try {
+    const categories = [
+      { id: 'all', label: 'جميع النماذج', labelEn: 'All Forms', icon: '📋', color: '#455A64' },
+      {
+        id: 'beneficiary',
+        label: 'شؤون المستفيدين',
+        labelEn: 'Beneficiary Affairs',
+        icon: '🧑‍🦽',
+        color: '#1565C0',
+      },
+      {
+        id: 'hr',
+        label: 'شؤون الموظفين',
+        labelEn: 'Human Resources',
+        icon: '👥',
+        color: '#D32F2F',
+      },
+      {
+        id: 'administration',
+        label: 'الشؤون الإدارية',
+        labelEn: 'Administration',
+        icon: '🏛️',
+        color: '#6D4C41',
+      },
+      { id: 'finance', label: 'الشؤون المالية', labelEn: 'Finance', icon: '💰', color: '#2E7D32' },
+      { id: 'general', label: 'عامة', labelEn: 'General', icon: '📁', color: '#757575' },
+    ];
+
+    // Get counts from DB
+    try {
+      const counts = await FormTemplate.aggregate([
+        { $match: { isActive: true } },
+        { $group: { _id: '$category', count: { $sum: 1 } } },
+      ]);
+      const countMap = {};
+      let totalCount = 0;
+      counts.forEach(c => {
+        countMap[c._id] = c.count;
+        totalCount += c.count;
+      });
+      categories.forEach(cat => {
+        cat.count = cat.id === 'all' ? totalCount : countMap[cat.id] || 0;
+      });
+    } catch {
+      // Fallback counts from built-in
+      categories.forEach(cat => {
+        cat.count =
+          cat.id === 'all'
+            ? BUILT_IN_TEMPLATES.length
+            : BUILT_IN_TEMPLATES.filter(t => t.category === cat.id).length;
+      });
+    }
+
+    res.json({ success: true, categories });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'خطأ في جلب التصنيفات' });
+  }
+});
+
+/**
+ * GET /api/form-templates/stats
+ * Get submission statistics
+ */
+router.get('/stats', async (req, res) => {
+  try {
+    const [totalTemplates, totalSubmissions, pendingSubmissions, approvedSubmissions] =
+      await Promise.all([
+        FormTemplate.countDocuments({ isActive: true }).catch(() => BUILT_IN_TEMPLATES.length),
+        FormSubmission.countDocuments().catch(() => 0),
+        FormSubmission.countDocuments({ status: { $in: ['submitted', 'under_review'] } }).catch(
+          () => 0
+        ),
+        FormSubmission.countDocuments({ status: 'approved' }).catch(() => 0),
+      ]);
+
+    // Recent submissions
+    const recentSubmissions = await FormSubmission.find()
+      .sort({ createdAt: -1 })
+      .limit(10)
+      .lean()
+      .catch(() => []);
+
+    res.json({
+      success: true,
+      stats: {
+        totalTemplates,
+        totalSubmissions,
+        pendingSubmissions,
+        approvedSubmissions,
+        rejectedSubmissions: totalSubmissions - pendingSubmissions - approvedSubmissions,
+      },
+      recentSubmissions,
+    });
+  } catch (error) {
+    res.json({
+      success: true,
+      stats: {
+        totalTemplates: BUILT_IN_TEMPLATES.length,
+        totalSubmissions: 0,
+        pendingSubmissions: 0,
+        approvedSubmissions: 0,
+        rejectedSubmissions: 0,
+      },
+      recentSubmissions: [],
+    });
+  }
+});
+
+/**
+ * GET /api/form-templates/:id
+ * Get a single template by templateId or _id
+ */
+router.get('/:id', async (req, res) => {
+  try {
+    let template = await FormTemplate.findOne({
+      $or: [
+        { templateId: req.params.id },
+        { _id: mongoose.isValidObjectId(req.params.id) ? req.params.id : undefined },
+      ],
+    }).lean();
+
+    if (!template) {
+      // Try built-in
+      template = BUILT_IN_TEMPLATES.find(t => t.templateId === req.params.id);
+    }
+
+    if (!template) {
+      return res.status(404).json({ success: false, message: 'النموذج غير موجود' });
+    }
+
+    // Increment usage count
+    if (template._id) {
+      FormTemplate.updateOne({ _id: template._id }, { $inc: { usageCount: 1 } }).catch(() => {});
+    }
+
+    res.json({ success: true, template });
+  } catch (error) {
+    // Try built-in fallback
+    const template = BUILT_IN_TEMPLATES.find(t => t.templateId === req.params.id);
+    if (template) return res.json({ success: true, template });
+    res.status(404).json({ success: false, message: 'النموذج غير موجود' });
+  }
+});
+
+/**
+ * POST /api/form-templates
+ * Create a new custom template (admin only)
+ */
+router.post('/', async (req, res) => {
+  try {
+    const {
+      name,
+      nameEn,
+      description,
+      category,
+      icon,
+      color,
+      fields,
+      requiresApproval,
+      approvalSteps,
+    } = req.body;
+    if (!name || !category) {
+      return res.status(400).json({ success: false, message: 'اسم النموذج والتصنيف مطلوبان' });
+    }
+
+    const templateId = `custom-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
+    const template = await FormTemplate.create({
+      templateId,
+      name,
+      nameEn,
+      description,
+      category,
+      icon: icon || '📄',
+      color: color || '#1976d2',
+      fields: fields || [],
+      isBuiltIn: false,
+      requiresApproval: requiresApproval ?? true,
+      approvalSteps: approvalSteps || [],
+      createdBy: req.user?.id,
+      tenantId: req.tenantId,
+    });
+
+    res.status(201).json({ success: true, template, message: 'تم إنشاء النموذج بنجاح' });
+  } catch (error) {
+    logger.error('Error creating form template:', error);
+    res.status(500).json({ success: false, message: 'خطأ في إنشاء النموذج' });
+  }
+});
+
+/**
+ * PUT /api/form-templates/:id
+ * Update a template
+ */
+router.put('/:id', async (req, res) => {
+  try {
+    const template = await FormTemplate.findOneAndUpdate(
+      {
+        $or: [
+          { templateId: req.params.id },
+          { _id: mongoose.isValidObjectId(req.params.id) ? req.params.id : undefined },
+        ],
+      },
+      { $set: { ...req.body, updatedAt: new Date() } },
+      { new: true }
+    );
+    if (!template) return res.status(404).json({ success: false, message: 'النموذج غير موجود' });
+    res.json({ success: true, template, message: 'تم تحديث النموذج بنجاح' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'خطأ في تحديث النموذج' });
+  }
+});
+
+/**
+ * DELETE /api/form-templates/:id
+ * Soft delete a template
+ */
+router.delete('/:id', async (req, res) => {
+  try {
+    const template = await FormTemplate.findOneAndUpdate(
+      {
+        $or: [
+          { templateId: req.params.id },
+          { _id: mongoose.isValidObjectId(req.params.id) ? req.params.id : undefined },
+        ],
+      },
+      { $set: { isActive: false } },
+      { new: true }
+    );
+    if (!template) return res.status(404).json({ success: false, message: 'النموذج غير موجود' });
+    res.json({ success: true, message: 'تم حذف النموذج بنجاح' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'خطأ في حذف النموذج' });
+  }
+});
+
+// ─── Submissions ───────────────────────────────────────────────────────────
+
+/**
+ * POST /api/form-templates/:id/submit
+ * Submit a filled form
+ */
+router.post('/:id/submit', async (req, res) => {
+  try {
+    const { data, notes } = req.body;
+
+    // Find the template
+    let template = await FormTemplate.findOne({
+      $or: [
+        { templateId: req.params.id },
+        { _id: mongoose.isValidObjectId(req.params.id) ? req.params.id : undefined },
+      ],
+    })
+      .lean()
+      .catch(() => null);
+
+    if (!template) {
+      template = BUILT_IN_TEMPLATES.find(t => t.templateId === req.params.id);
+    }
+
+    if (!template) {
+      return res.status(404).json({ success: false, message: 'النموذج غير موجود' });
+    }
+
+    // Build approval chain
+    const approvals = (template.approvalSteps || []).map(step => ({
+      role: step.role,
+      status: 'pending',
+    }));
+
+    const submission = await FormSubmission.create({
+      templateId: template.templateId,
+      templateName: template.name,
+      submittedBy: {
+        userId: req.user?.id,
+        name: req.user?.name || req.body.submitterName || 'مستخدم',
+        email: req.user?.email || '',
+        department: req.body.department || '',
+      },
+      data,
+      notes,
+      status: template.requiresApproval ? 'submitted' : 'approved',
+      approvals,
+      tenantId: req.tenantId,
+    });
+
+    // Increment template usage
+    if (template._id) {
+      FormTemplate.updateOne({ _id: template._id }, { $inc: { usageCount: 1 } }).catch(() => {});
+    }
+
+    res.status(201).json({
+      success: true,
+      submission: {
+        id: submission._id,
+        submissionNumber: submission.submissionNumber,
+        status: submission.status,
+        templateName: submission.templateName,
+      },
+      message:
+        submission.status === 'approved'
+          ? 'تم إرسال النموذج والموافقة عليه تلقائياً'
+          : 'تم إرسال النموذج بنجاح وهو بانتظار المراجعة',
+    });
+  } catch (error) {
+    logger.error('Error submitting form:', error);
+    res.status(500).json({ success: false, message: 'خطأ في إرسال النموذج' });
+  }
+});
+
+/**
+ * GET /api/form-templates/submissions/my
+ * Get current user submissions
+ */
+router.get('/submissions/my', async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    const { status, page = 1, limit = 20 } = req.query;
+    const filter = {};
+    if (userId) filter['submittedBy.userId'] = userId;
+    if (status) filter.status = status;
+
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const [submissions, total] = await Promise.all([
+      FormSubmission.find(filter).sort({ createdAt: -1 }).skip(skip).limit(parseInt(limit)).lean(),
+      FormSubmission.countDocuments(filter),
+    ]);
+
+    res.json({ success: true, submissions, pagination: { page: +page, limit: +limit, total } });
+  } catch (error) {
+    res.json({ success: true, submissions: [], pagination: { page: 1, limit: 20, total: 0 } });
+  }
+});
+
+/**
+ * GET /api/form-templates/submissions/pending
+ * Get pending submissions for approval
+ */
+router.get('/submissions/pending', async (req, res) => {
+  try {
+    const submissions = await FormSubmission.find({
+      status: { $in: ['submitted', 'under_review'] },
+    })
+      .sort({ createdAt: -1 })
+      .limit(50)
+      .lean();
+
+    res.json({ success: true, submissions });
+  } catch (error) {
+    res.json({ success: true, submissions: [] });
+  }
+});
+
+/**
+ * PUT /api/form-templates/submissions/:submissionId/approve
+ * Approve a submission
+ */
+router.put('/submissions/:submissionId/approve', async (req, res) => {
+  try {
+    const { comment } = req.body;
+    const submission = await FormSubmission.findById(req.params.submissionId);
+    if (!submission) return res.status(404).json({ success: false, message: 'الطلب غير موجود' });
+
+    // Find first pending approval and approve it
+    const pendingApproval = submission.approvals.find(a => a.status === 'pending');
+    if (pendingApproval) {
+      pendingApproval.status = 'approved';
+      pendingApproval.approvedBy = req.user?.id;
+      pendingApproval.approverName = req.user?.name || 'مسؤول';
+      pendingApproval.comment = comment;
+      pendingApproval.date = new Date();
+    }
+
+    // Check if all approvals are done
+    const allApproved = submission.approvals.every(a => a.status === 'approved');
+    if (allApproved) {
+      submission.status = 'approved';
+    } else {
+      submission.status = 'under_review';
+    }
+
+    await submission.save();
+    res.json({ success: true, submission, message: 'تم اعتماد الطلب بنجاح' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'خطأ في اعتماد الطلب' });
+  }
+});
+
+/**
+ * PUT /api/form-templates/submissions/:submissionId/reject
+ * Reject a submission
+ */
+router.put('/submissions/:submissionId/reject', async (req, res) => {
+  try {
+    const { comment } = req.body;
+    const submission = await FormSubmission.findByIdAndUpdate(
+      req.params.submissionId,
+      {
+        $set: {
+          status: 'rejected',
+          'approvals.$[pending].status': 'rejected',
+          'approvals.$[pending].comment': comment || 'مرفوض',
+          'approvals.$[pending].approvedBy': req.user?.id,
+          'approvals.$[pending].approverName': req.user?.name || 'مسؤول',
+          'approvals.$[pending].date': new Date(),
+        },
+      },
+      { new: true, arrayFilters: [{ 'pending.status': 'pending' }] }
+    );
+
+    if (!submission) return res.status(404).json({ success: false, message: 'الطلب غير موجود' });
+    res.json({ success: true, submission, message: 'تم رفض الطلب' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'خطأ في رفض الطلب' });
+  }
+});
+
+module.exports = router;

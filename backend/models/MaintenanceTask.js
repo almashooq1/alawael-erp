@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Maintenance Task Model - نموذج مهام الصيانة
  *
@@ -40,16 +41,7 @@ const MaintenanceTaskSchema = new Schema(
     description: String,
     category: {
       type: String,
-      enum: [
-        'روتينية',
-        'وقائية',
-        'تصحيحية',
-        'طوارئ',
-        'فحص',
-        'تنظيف',
-        'معايرة',
-        'استبدال',
-      ],
+      enum: ['روتينية', 'وقائية', 'تصحيحية', 'طوارئ', 'فحص', 'تنظيف', 'معايرة', 'استبدال'],
       required: true,
     },
     type: {

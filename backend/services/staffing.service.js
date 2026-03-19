@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const Employee = require('../models/Employee');
 // const Shift = require('../models/Shift');
 
@@ -16,7 +17,9 @@ class StaffingService {
     // In a real app, we'd check time overlaps.
     // Here we check if 'currentShift' is set (assuming 1 shift at a time for simplicity)
 
-    const available = candidates.filter(emp => !emp.currentShift || emp.currentShift.toString() !== shiftId);
+    const available = candidates.filter(
+      emp => !emp.currentShift || emp.currentShift.toString() !== shiftId
+    );
 
     // 3. Sort by "Workload" (Mock: random sort or alphabetical to simulate balancing)
     // Advanced: We would count their assigned sessions here.

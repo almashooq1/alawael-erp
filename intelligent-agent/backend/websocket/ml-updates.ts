@@ -54,7 +54,7 @@ export class MLWebSocketService {
           });
         } catch (error: any) {
           socket.emit('ml:error', {
-            error: error.message,
+            error: 'حدث خطأ داخلي',
             timestamp: new Date().toISOString(),
           });
         }
@@ -73,7 +73,7 @@ export class MLWebSocketService {
           });
         } catch (error: any) {
           socket.emit('ml:error', {
-            error: error.message,
+            error: 'حدث خطأ داخلي',
             timestamp: new Date().toISOString(),
           });
         }

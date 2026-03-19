@@ -1,7 +1,10 @@
+/* eslint-disable no-unused-vars */
 /**
  * Center Administration Module
  * وحدة إدارة مراكز التأهيل
  */
+
+const logger = require('../utils/logger');
 
 const {
   CenterAdministrationService,
@@ -16,7 +19,7 @@ const centerRoutes = require('./center-routes');
  */
 async function initialize(connection) {
   await centerAdministrationService.initialize(connection);
-  console.log('✅ Center Administration Module initialized');
+  logger.info('✅ Center Administration Module initialized');
   return { centerAdministrationService };
 }
 
@@ -45,13 +48,13 @@ module.exports = {
   // Service
   CenterAdministrationService,
   centerAdministrationService,
-  
+
   // Configuration
   centerConfig,
-  
+
   // Routes
   centerRoutes,
-  
+
   // Helpers
   initialize,
   getServices,

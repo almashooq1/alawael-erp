@@ -1,8 +1,11 @@
+/* eslint-disable no-unused-vars */
 /**
  * 🔧 Unified Services Index - فهرس الخدمات الموحد
  * نقطة تجميع واحدة لجميع الخدمات
  * @version 2.0.0
  */
+
+const logger = require('../utils/logger');
 
 // ============================================
 // الخدمات الأساسية
@@ -13,19 +16,27 @@ let notificationService, authService, userService, analyticsService;
 
 try {
   notificationService = require('./notification.service');
-} catch (e) { notificationService = null; }
+} catch (e) {
+  notificationService = null;
+}
 
 try {
   authService = require('./auth.service');
-} catch (e) { authService = null; }
+} catch (e) {
+  authService = null;
+}
 
 try {
   userService = require('./user.service');
-} catch (e) { userService = null; }
+} catch (e) {
+  userService = null;
+}
 
 try {
   analyticsService = require('./analytics.service');
-} catch (e) { analyticsService = null; }
+} catch (e) {
+  analyticsService = null;
+}
 
 // ============================================
 // خدمة الإشعارات الموحدة
@@ -41,7 +52,7 @@ class UnifiedNotificationService {
    * إرسال إشعار
    */
   async send(userId, notification) {
-    console.log(`[NotificationService] Sending to ${userId}:`, notification.title);
+    logger.info(`[NotificationService] Sending to ${userId}:`, notification.title);
     return { success: true, sentAt: new Date() };
   }
 
@@ -49,7 +60,7 @@ class UnifiedNotificationService {
    * إرسال إشعار للجميع
    */
   async broadcast(notification) {
-    console.log('[NotificationService] Broadcasting:', notification.title);
+    logger.info('[NotificationService] Broadcasting:', notification.title);
     return { success: true, recipients: 0 };
   }
 
@@ -60,7 +71,7 @@ class UnifiedNotificationService {
     return {
       notifications: [],
       total: 0,
-      unread: 0
+      unread: 0,
     };
   }
 
@@ -92,11 +103,11 @@ class UnifiedAuthService {
    * تسجيل الدخول
    */
   async login(email, password) {
-    console.log(`[AuthService] Login attempt: ${email}`);
+    logger.info(`[AuthService] Login attempt: ${email}`);
     return {
       success: true,
       user: { id: '1', email, name: 'User' },
-      token: 'jwt-token-placeholder'
+      token: 'jwt-token-placeholder',
     };
   }
 
@@ -124,7 +135,7 @@ class UnifiedAuthService {
   async refreshToken(token) {
     return {
       success: true,
-      newToken: 'new-jwt-token-placeholder'
+      newToken: 'new-jwt-token-placeholder',
     };
   }
 
@@ -132,7 +143,7 @@ class UnifiedAuthService {
    * تغيير كلمة المرور
    */
   async changePassword(userId, oldPassword, newPassword) {
-    console.log(`[AuthService] Password change for ${userId}`);
+    logger.info(`[AuthService] Password change for ${userId}`);
     return { success: true };
   }
 
@@ -140,7 +151,7 @@ class UnifiedAuthService {
    * نسيت كلمة المرور
    */
   async forgotPassword(email) {
-    console.log(`[AuthService] Password reset for ${email}`);
+    logger.info(`[AuthService] Password reset for ${email}`);
     return { success: true, resetToken: 'reset-token-placeholder' };
   }
 }
@@ -158,7 +169,7 @@ class UnifiedUserService {
       users: [],
       total: 0,
       page: options.page || 1,
-      limit: options.limit || 20
+      limit: options.limit || 20,
     };
   }
 
@@ -171,7 +182,7 @@ class UnifiedUserService {
       name: 'User',
       email: 'user@example.com',
       role: 'user',
-      createdAt: new Date()
+      createdAt: new Date(),
     };
   }
 
@@ -179,10 +190,10 @@ class UnifiedUserService {
    * إنشاء مستخدم
    */
   async create(userData) {
-    console.log('[UserService] Creating user:', userData.email);
+    logger.info('[UserService] Creating user:', userData.email);
     return {
       success: true,
-      user: { id: '1', ...userData }
+      user: { id: '1', ...userData },
     };
   }
 
@@ -190,7 +201,7 @@ class UnifiedUserService {
    * تحديث مستخدم
    */
   async update(userId, updateData) {
-    console.log(`[UserService] Updating user ${userId}`);
+    logger.info(`[UserService] Updating user ${userId}`);
     return { success: true };
   }
 
@@ -198,7 +209,7 @@ class UnifiedUserService {
    * حذف مستخدم
    */
   async delete(userId) {
-    console.log(`[UserService] Deleting user ${userId}`);
+    logger.info(`[UserService] Deleting user ${userId}`);
     return { success: true };
   }
 }
@@ -215,7 +226,7 @@ class UnifiedAnalyticsService {
     return {
       users: { total: 0, active: 0, new: 0 },
       revenue: { total: 0, monthly: [] },
-      performance: { average: 0, trend: 0 }
+      performance: { average: 0, trend: 0 },
     };
   }
 
@@ -227,7 +238,7 @@ class UnifiedAnalyticsService {
       registrations: [],
       activeUsers: [],
       byCountry: [],
-      byDevice: []
+      byDevice: [],
     };
   }
 
@@ -235,7 +246,7 @@ class UnifiedAnalyticsService {
    * تتبع حدث
    */
   async trackEvent(eventName, data) {
-    console.log(`[AnalyticsService] Event: ${eventName}`, data);
+    logger.info(`[AnalyticsService] Event: ${eventName}`, data);
     return { success: true };
   }
 
@@ -246,7 +257,7 @@ class UnifiedAnalyticsService {
     return {
       data: [],
       summary: {},
-      generatedAt: new Date()
+      generatedAt: new Date(),
     };
   }
 }
@@ -281,5 +292,5 @@ module.exports = {
   createNotificationService: () => new UnifiedNotificationService(),
   createAuthService: () => new UnifiedAuthService(),
   createUserService: () => new UnifiedUserService(),
-  createAnalyticsService: () => new UnifiedAnalyticsService()
+  createAnalyticsService: () => new UnifiedAnalyticsService(),
 };

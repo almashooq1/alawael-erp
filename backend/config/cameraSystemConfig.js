@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Camera System Configuration
  * إعدادات نظام كاميرات المراقبة

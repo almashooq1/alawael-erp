@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * 🎨 Smart UI Engine
  * Intelligent user interface and experience optimization

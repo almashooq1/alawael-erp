@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+const logger = require('../utils/logger');
 /**
  * PHASE 105: Smart Psychotherapy Integration Unit
  * Provides Digital CBT Flows, Mood Tracking, and Automated Assessments.
@@ -6,7 +8,7 @@
 
 class SmartPsychotherapyService {
   constructor() {
-    console.log('System: Smart Psychotherapy Unit - Initialized');
+    logger.info('System: Smart Psychotherapy Unit - Initialized');
     this.patientRecords = new Map(); // Mock DB: patientId -> { moods: [], thoughts: [], assessments: [] }
   }
 
@@ -21,8 +23,16 @@ class SmartPsychotherapyService {
         steps: [
           { id: 1, type: 'CHECK_IN', prompt: 'Current Anxiety Level (0-10)?' },
           { id: 2, type: 'TRIGGER_ID', prompt: 'What situation triggered this feeling?' },
-          { id: 3, type: 'THOUGHT_CATCHING', prompt: 'What is the worst-case scenario you are imagining?' },
-          { id: 4, type: 'COGNITIVE_RESTRUCTURING', prompt: 'What is the evidence AGAINST this thought?' },
+          {
+            id: 3,
+            type: 'THOUGHT_CATCHING',
+            prompt: 'What is the worst-case scenario you are imagining?',
+          },
+          {
+            id: 4,
+            type: 'COGNITIVE_RESTRUCTURING',
+            prompt: 'What is the evidence AGAINST this thought?',
+          },
           { id: 5, type: 'HOMEWORK', task: 'Practice Deep Breathing for 5 mins' },
         ],
       },

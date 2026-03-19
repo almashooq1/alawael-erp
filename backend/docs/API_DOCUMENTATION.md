@@ -74,7 +74,6 @@ http://localhost:3001/api/docs
   - الإعدادات
 
   ### مراقبة النظام (Monitoring)
-
   - `GET /api/monitoring/health`
   - `GET /api/monitoring/health/dashboard`
   - `GET /api/monitoring/dashboard`

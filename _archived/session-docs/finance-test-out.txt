@@ -1,0 +1,30 @@
+jest-haste-map: duplicate manual mock found: api
+  The following files share their name; please delete one of them:
+    * <rootDir>\src\utils\__mocks__\api.js
+    * <rootDir>\frontend\src\utils\__mocks__\api.js
+
+jest-haste-map: duplicate manual mock found: api
+  The following files share their name; please delete one of them:
+    * <rootDir>\frontend\src\utils\__mocks__\api.js
+    * <rootDir>\backups\structure-cleanup-backup-20260227_123336\frontend-src-src-backup\utils\__mocks__\api.js
+
+jest-haste-map: Haste module naming collision: backend-1
+  The following files share their name; please adjust your hasteImpl:
+    * <rootDir>\archive\backend-1\package.json
+    * <rootDir>\archive\legacy-services-2026-03-03\backend-1\package.json
+
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+PASS backend/__tests__/finance.routes.comprehensive.test.js
+  Finance Routes Comprehensive Tests
+    POST /api/finance/invoices
+      √ should create an invoice (89 ms)
+      √ should fail if missing required fields (10 ms)
+    GET /api/finance/invoices
+      √ should get all invoices (5 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       3 passed, 3 total
+Snapshots:   0 total
+Time:        1.387 s
+Ran all test suites matching __tests__/finance.routes.comprehensive.test.js.
+Force exiting Jest: Have you considered using `--detectOpenHandles` to detect async operations that kept running after all tests finished?

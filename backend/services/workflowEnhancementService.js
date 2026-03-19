@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Workflow Enhancement Service
  * خدمات تحسين نظام سير العمل
@@ -134,7 +135,9 @@ class WorkflowEnhancementService {
     // إضافة نقاط للموافقات السريعة
     const completedWorkflows = workflows.filter(w => w.completedAt);
     if (completedWorkflows.length > 0) {
-      const avgTime = completedWorkflows.reduce((sum, w) => sum + (w.completedAt - w.createdAt), 0) / completedWorkflows.length;
+      const avgTime =
+        completedWorkflows.reduce((sum, w) => sum + (w.completedAt - w.createdAt), 0) /
+        completedWorkflows.length;
 
       // إذا كان متوسط الوقت أقل من 24 ساعة
       if (avgTime < 24 * 60 * 60 * 1000) {
@@ -255,7 +258,9 @@ class WorkflowEnhancementService {
     }
 
     // عامل 2: عدد مرات المراجعة
-    const revisionCount = workflow.history ? workflow.history.filter(h => h.action === 'revision_required').length : 0;
+    const revisionCount = workflow.history
+      ? workflow.history.filter(h => h.action === 'revision_required').length
+      : 0;
 
     if (revisionCount > 2) {
       riskScore += 20;
@@ -283,7 +288,9 @@ class WorkflowEnhancementService {
     }
 
     // عامل 4: عدد المعتمدين المطلوبين
-    const approverCount = workflow.stages ? workflow.stages.filter(s => s.assignees && s.assignees.length > 0).length : 0;
+    const approverCount = workflow.stages
+      ? workflow.stages.filter(s => s.assignees && s.assignees.length > 0).length
+      : 0;
 
     if (approverCount > 4) {
       riskScore += 15;
@@ -418,7 +425,10 @@ class WorkflowEnhancementService {
     // مقاييس الأداء
     const completedWorkflows = workflows.filter(w => w.completedAt);
     if (completedWorkflows.length > 0) {
-      const totalTime = completedWorkflows.reduce((sum, w) => sum + (w.completedAt - w.createdAt), 0);
+      const totalTime = completedWorkflows.reduce(
+        (sum, w) => sum + (w.completedAt - w.createdAt),
+        0
+      );
       const avgTime = totalTime / completedWorkflows.length;
 
       report.performance = {
@@ -436,7 +446,8 @@ class WorkflowEnhancementService {
       high: riskAssessments.filter(r => r.riskLevel === 'high').length,
       medium: riskAssessments.filter(r => r.riskLevel === 'medium').length,
       low: riskAssessments.filter(r => r.riskLevel === 'low').length,
-      averageRiskScore: riskAssessments.reduce((sum, r) => sum + r.riskScore, 0) / riskAssessments.length,
+      averageRiskScore:
+        riskAssessments.reduce((sum, r) => sum + r.riskScore, 0) / riskAssessments.length,
     };
 
     // التوصيات الشاملة

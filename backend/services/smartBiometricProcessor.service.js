@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * SMART BIOMETRIC PROCESSOR SERVICE
  * خدمة معالجة البصمات والبيومترية الذكية
@@ -117,7 +118,7 @@ class SmartBiometricProcessor extends EventEmitter {
         timestamp: new Date(),
       };
     } catch (error) {
-      throw new Error(`Camera Feed Processing Error: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -153,7 +154,7 @@ class SmartBiometricProcessor extends EventEmitter {
       // Filter by quality
       return detections.filter(d => d.quality > 0.75);
     } catch (error) {
-      throw new Error(`Face Detection Error: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -172,7 +173,7 @@ class SmartBiometricProcessor extends EventEmitter {
 
       return embedding;
     } catch (error) {
-      throw new Error(`Embedding Generation Error: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -209,7 +210,7 @@ class SmartBiometricProcessor extends EventEmitter {
         };
       }
     } catch (error) {
-      throw new Error(`Template Matching Error: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -280,7 +281,7 @@ class SmartBiometricProcessor extends EventEmitter {
         };
       }
     } catch (error) {
-      throw new Error(`Fingerprint Processing Error: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -303,7 +304,7 @@ class SmartBiometricProcessor extends EventEmitter {
 
       return template;
     } catch (error) {
-      throw new Error(`Template Extraction Error: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -340,7 +341,7 @@ class SmartBiometricProcessor extends EventEmitter {
         };
       }
     } catch (error) {
-      throw new Error(`Fingerprint Matching Error: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -445,7 +446,7 @@ class SmartBiometricProcessor extends EventEmitter {
 
       return enrollment;
     } catch (error) {
-      throw new Error(`Biometric Enrollment Error: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -515,7 +516,7 @@ class SmartBiometricProcessor extends EventEmitter {
 
       return results;
     } catch (error) {
-      throw new Error(`Multi-Modal Authentication Error: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -580,7 +581,7 @@ class SmartBiometricProcessor extends EventEmitter {
 
       return anomalies;
     } catch (error) {
-      throw new Error(`Anomaly Detection Error: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -610,7 +611,7 @@ class SmartBiometricProcessor extends EventEmitter {
         ready: this.faceTemplates.has(studentId) && this.fingerprintTemplates.has(studentId),
       };
     } catch (error) {
-      throw new Error(`Status Retrieval Error: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -649,7 +650,7 @@ class SmartBiometricProcessor extends EventEmitter {
         message: `تم تحديث قالب ${method} بنجاح`,
       };
     } catch (error) {
-      throw new Error(`Template Update Error: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -677,7 +678,7 @@ class SmartBiometricProcessor extends EventEmitter {
         message: `تم حذف بيانات ${method} للطالب`,
       };
     } catch (error) {
-      throw new Error(`Data Deletion Error: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -738,7 +739,7 @@ class SmartBiometricProcessor extends EventEmitter {
         message: 'تم التحقق من البطاقة بنجاح',
       };
     } catch (error) {
-      throw new Error(`RFID Processing Error: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -767,7 +768,7 @@ class SmartBiometricProcessor extends EventEmitter {
         cardId,
       };
     } catch (error) {
-      throw new Error(`RFID Enrollment Error: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -828,7 +829,7 @@ class SmartBiometricProcessor extends EventEmitter {
 
       return assessment;
     } catch (error) {
-      throw new Error(`Quality Assessment Error: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -883,7 +884,7 @@ class SmartBiometricProcessor extends EventEmitter {
 
       return stats;
     } catch (error) {
-      throw new Error(`Statistics Error: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 

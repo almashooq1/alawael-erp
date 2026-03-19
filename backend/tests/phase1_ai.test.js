@@ -1,3 +1,4 @@
+/* eslint-disable no-undef, no-unused-vars */
 const AIPredictionsServiceClass = require('../services/ai-predictions.service');
 const Prediction = require('../models/prediction.model');
 const Analytics = require('../models/analytics.model');
@@ -21,7 +22,9 @@ describe('Phase 1: AI Predictions Service', () => {
     ]);
 
     // Mock Prediction creation
-    Prediction.create.mockImplementation(data => Promise.resolve({ ...data, _id: 'mock-prediction-id' }));
+    Prediction.create.mockImplementation(data =>
+      Promise.resolve({ ...data, _id: 'mock-prediction-id' })
+    );
 
     const result = await service.predictPerformance('user-123', { specificFactor: '10' });
 

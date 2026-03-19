@@ -4,7 +4,7 @@ import Ticket from '../models/crm.ticket.model';
 const router = express.Router();
 
 // Get all tickets
-router.get('/', async (req, res) => {
+router.get('/', async (_req, res) => {
   try {
     const tickets = await Ticket.find().populate('customer');
     res.json(tickets);
@@ -38,7 +38,12 @@ router.post('/', async (req, res) => {
 // Update ticket
 router.put('/:id', async (req, res) => {
   try {
-    const ticket = await Ticket.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const { subject, description, customer, status, priority, assignee, category } = req.body;
+    const ticket = await Ticket.findByIdAndUpdate(
+      req.params.id,
+      { subject, description, customer, status, priority, assignee, category },
+      { new: true },
+    );
     if (!ticket) return res.status(404).json({ error: 'Ticket not found' });
     res.json(ticket);
   } catch (err) {

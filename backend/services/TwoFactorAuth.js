@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * ============================================
  * TWO-FACTOR AUTHENTICATION SERVICE (2FA)
@@ -18,14 +19,11 @@ class TwoFactorAuthService {
       port: process.env.SMTP_PORT,
       auth: {
         user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASSWORD
-      }
+        pass: process.env.SMTP_PASSWORD,
+      },
     });
 
-    this.twilioClient = twilio(
-      process.env.TWILIO_ACCOUNT_SID,
-      process.env.TWILIO_AUTH_TOKEN
-    );
+    this.twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
   }
 
   /**
@@ -37,12 +35,12 @@ class TwoFactorAuthService {
     const secret = speakeasy.generateSecret({
       name: `ERP System (${userEmail})`,
       issuer: 'ERP System',
-      length: 32
+      length: 32,
     });
 
     return {
       secret: secret.base32,
-      qrCode: secret.otpauth_url
+      qrCode: secret.otpauth_url,
     };
   }
 
@@ -63,7 +61,7 @@ class TwoFactorAuthService {
         secret: secret,
         encoding: 'base32',
         token: token,
-        window: 2
+        window: 2,
       });
       return isValid;
     } catch (error) {
@@ -79,11 +77,11 @@ class TwoFactorAuthService {
   generateSmsOTP() {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
-    
+
     return {
       code: otp,
       expiresAt: expiresAt,
-      hash: this.hashOTP(otp)
+      hash: this.hashOTP(otp),
     };
   }
 
@@ -93,12 +91,12 @@ class TwoFactorAuthService {
       const message = await this.twilioClient.messages.create({
         body: `Your ERP System verification code is: ${otp}. Valid for 5 minutes.`,
         from: process.env.TWILIO_PHONE_NUMBER,
-        to: phoneNumber
+        to: phoneNumber,
       });
 
       return {
         success: true,
-        messageId: message.sid
+        messageId: message.sid,
       };
     } catch (error) {
       throw new Error(`Failed to send SMS: ${error.message}`);
@@ -111,7 +109,7 @@ class TwoFactorAuthService {
     if (new Date() > new Date(expiresAt)) {
       return {
         valid: false,
-        reason: 'OTP expired'
+        reason: 'OTP expired',
       };
     }
 
@@ -120,12 +118,12 @@ class TwoFactorAuthService {
     if (providedHash !== storedHash) {
       return {
         valid: false,
-        reason: 'Invalid OTP'
+        reason: 'Invalid OTP',
       };
     }
 
     return {
-      valid: true
+      valid: true,
     };
   }
 
@@ -137,11 +135,11 @@ class TwoFactorAuthService {
   generateEmailOTP() {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
-    
+
     return {
       code: otp,
       expiresAt: expiresAt,
-      hash: this.hashOTP(otp)
+      hash: this.hashOTP(otp),
     };
   }
 
@@ -175,12 +173,12 @@ class TwoFactorAuthService {
         from: process.env.SMTP_FROM,
         to: email,
         subject: 'رمز التحقق - ERP System | Verification Code',
-        html: htmlContent
+        html: htmlContent,
       });
 
       return {
         success: true,
-        message: 'OTP sent to email'
+        message: 'OTP sent to email',
       };
     } catch (error) {
       throw new Error(`Failed to send email OTP: ${error.message}`);
@@ -193,7 +191,7 @@ class TwoFactorAuthService {
     if (new Date() > new Date(expiresAt)) {
       return {
         valid: false,
-        reason: 'OTP expired'
+        reason: 'OTP expired',
       };
     }
 
@@ -202,12 +200,12 @@ class TwoFactorAuthService {
     if (providedHash !== storedHash) {
       return {
         valid: false,
-        reason: 'Invalid OTP'
+        reason: 'Invalid OTP',
       };
     }
 
     return {
-      valid: true
+      valid: true,
     };
   }
 
@@ -223,7 +221,7 @@ class TwoFactorAuthService {
       backupCodes.push({
         code: code,
         used: false,
-        usedAt: null
+        usedAt: null,
       });
     }
     return backupCodes;
@@ -231,20 +229,18 @@ class TwoFactorAuthService {
 
   // Verify and Use Backup Code
   verifyBackupCode(backupCodes, providedCode) {
-    const codeEntry = backupCodes.find(
-      b => b.code === providedCode && !b.used
-    );
+    const codeEntry = backupCodes.find(b => b.code === providedCode && !b.used);
 
     if (!codeEntry) {
       return {
         valid: false,
-        reason: 'Invalid or already used backup code'
+        reason: 'Invalid or already used backup code',
       };
     }
 
     return {
       valid: true,
-      codeEntry: codeEntry
+      codeEntry: codeEntry,
     };
   }
 
@@ -265,19 +261,19 @@ class TwoFactorAuthService {
     if (method === 'google') {
       const { secret, qrCode } = this.generateGoogleAuthSecret(userEmail);
       const qrCodeImage = await this.generateQRCodeImage(qrCode);
-      
+
       return {
         method: 'google',
         secret: secret,
         qrCodeUrl: qrCodeImage,
-        backupCodes: this.generateBackupCodes()
+        backupCodes: this.generateBackupCodes(),
       };
     }
-    
+
     if (method === 'sms' || method === 'email') {
       return {
         method: method,
-        backupCodes: this.generateBackupCodes()
+        backupCodes: this.generateBackupCodes(),
       };
     }
   }
@@ -288,7 +284,7 @@ class TwoFactorAuthService {
       enabled: user.twoFactorEnabled || false,
       method: user.twoFactorMethod || null,
       backupCodesRemaining: user.backupCodes?.filter(b => !b.used).length || 0,
-      lastVerified: user.lastTwoFactorVerified || null
+      lastVerified: user.lastTwoFactorVerified || null,
     };
   }
 }

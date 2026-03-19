@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * File Upload Middleware
  * معالج تحميل الملفات مع التحقق من الأمان والنوع والحجم
@@ -29,27 +30,115 @@ const storage = multer.diskStorage({
 // التحقق من نوع الملف
 const fileFilter = (req, file, cb) => {
   const allowedMimes = [
-    'application/pdf', // PDF
+    // PDF
+    'application/pdf',
+    // Microsoft Office (modern)
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // DOCX
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // XLSX
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation', // PPTX
+    // Microsoft Office (legacy)
+    'application/msword', // DOC
+    'application/vnd.ms-excel', // XLS
+    'application/vnd.ms-powerpoint', // PPT
+    // Microsoft Office (macro-enabled)
     'application/vnd.ms-word.document.macroEnabled.12', // DOCM
     'application/vnd.ms-excel.sheet.macroEnabled.12', // XLSM
-    'image/jpeg', // JPEG
-    'image/png', // PNG
-    'image/jpg', // JPG
+    'application/vnd.ms-powerpoint.presentation.macroEnabled.12', // PPTM
+    // OpenDocument
+    'application/vnd.oasis.opendocument.text', // ODT
+    'application/vnd.oasis.opendocument.spreadsheet', // ODS
+    'application/vnd.oasis.opendocument.presentation', // ODP
+    // Images
+    'image/jpeg',
+    'image/png',
+    'image/jpg',
+    'image/gif',
+    'image/bmp',
+    'image/webp',
+    'image/tiff',
+    'image/svg+xml',
+    // Text & Data
     'text/plain', // TXT
-    'application/vnd.openxmlformats-officedocument.presentationml.presentation', // PPTX
-    'application/zip', // ZIP
-    'application/x-zip-compressed', // ZIP
+    'text/csv', // CSV
+    'text/html', // HTML
+    'text/xml', // XML
+    'application/xml', // XML
+    'application/json', // JSON
+    'application/rtf', // RTF
+    'text/rtf', // RTF
+    // Archives
+    'application/zip',
+    'application/x-zip-compressed',
+    'application/x-rar-compressed',
+    'application/vnd.rar',
+    'application/x-7z-compressed',
+    'application/gzip',
+    'application/x-tar',
+    // Audio
+    'audio/mpeg', // MP3
+    'audio/wav',
+    'audio/ogg',
+    // Video
+    'video/mp4',
+    'video/webm',
+    'video/ogg',
   ];
 
   const ext = path.extname(file.originalname).toLowerCase();
-  const validExts = ['.pdf', '.docx', '.xlsx', '.jpg', '.jpeg', '.png', '.txt', '.pptx', '.zip', '.docm', '.xlsm'];
+  const validExts = [
+    // Documents
+    '.pdf',
+    '.doc',
+    '.docx',
+    '.docm',
+    '.xls',
+    '.xlsx',
+    '.xlsm',
+    '.ppt',
+    '.pptx',
+    '.pptm',
+    '.odt',
+    '.ods',
+    '.odp',
+    '.txt',
+    '.csv',
+    '.rtf',
+    '.html',
+    '.htm',
+    '.xml',
+    '.json',
+    // Images
+    '.jpg',
+    '.jpeg',
+    '.png',
+    '.gif',
+    '.bmp',
+    '.webp',
+    '.tiff',
+    '.tif',
+    '.svg',
+    // Archives
+    '.zip',
+    '.rar',
+    '.7z',
+    '.gz',
+    '.tar',
+    // Audio
+    '.mp3',
+    '.wav',
+    '.ogg',
+    // Video
+    '.mp4',
+    '.webm',
+    '.ogv',
+  ];
 
-  if (allowedMimes.includes(file.mimetype) && validExts.includes(ext)) {
+  if (allowedMimes.includes(file.mimetype) || validExts.includes(ext)) {
     cb(null, true);
   } else {
-    cb(new Error(`نوع الملف غير مدعوم. الأنواع المقبولة: ${validExts.join(', ')}`));
+    cb(
+      new Error(`نوع الملف غير مدعوم (${ext}). الأنواع المقبولة: مستندات، صور، أرشيف، صوت، فيديو`)
+    );
   }
 };
 
@@ -63,14 +152,14 @@ const upload = multer({
 });
 
 // معالج الأخطاء
-const handleUploadError = (err, req, res, next) => {
+const handleUploadError = (err, _req, res, next) => {
   if (err instanceof multer.MulterError) {
-    if (err.code === 'FILE_TOO_LARGE') {
+    if (err.code === 'LIMIT_FILE_SIZE') {
       return res.status(400).json({ message: 'حجم الملف كبير جداً. الحد الأقصى 50 MB' });
     }
     return res.status(400).json({ message: `خطأ في تحميل الملف: ${err.message}` });
   } else if (err) {
-    return res.status(400).json({ message: err.message });
+    return res.status(400).json({ message: err.message || 'حدث خطأ أثناء تحميل الملف' });
   }
   next();
 };
@@ -78,4 +167,5 @@ const handleUploadError = (err, req, res, next) => {
 module.exports = {
   upload: upload.single('file'),
   handleUploadError,
+  fileFilter,
 };

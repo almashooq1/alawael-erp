@@ -1,3 +1,4 @@
+/* eslint-disable no-undef, no-unused-vars */
 /**
  * 🌐 API & Interface Comprehensive Test Suite
  * جناح اختبارات واجهات برمجية شاملة
@@ -227,7 +228,7 @@ describe('🌐 API & Interface Testing', () => {
         },
       };
 
-      const chunkCount = await streamHandler.processStream('chunk1');
+      const _chunkCount = await streamHandler.processStream('chunk1');
       await streamHandler.processStream('chunk2');
       await streamHandler.processStream('chunk3');
 

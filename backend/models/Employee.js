@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 const contractSchema = new mongoose.Schema({
@@ -54,5 +55,14 @@ const employeeSchema = new mongoose.Schema(
 employeeSchema.virtual('fullName').get(function () {
   return `${this.firstName} ${this.lastName}`;
 });
+
+// ─── Indexes ─────────────────────────────────────────────────────────────────
+// employeeId + email already have { unique: true } → implicit unique index
+// department already has { index: true }
+employeeSchema.index({ status: 1 }); // Filter active/terminated employees
+employeeSchema.index({ role: 1 }); // Role-based queries (doctors, therapists)
+employeeSchema.index({ department: 1, status: 1 }); // Department + status filters
+employeeSchema.index({ userId: 1 }); // Lookup employee by auth user
+employeeSchema.index({ joinDate: -1 }); // Sorted hiring reports
 
 module.exports = mongoose.models.Employee || mongoose.model('Employee', employeeSchema);

@@ -1,9 +1,10 @@
+/* eslint-disable no-unused-vars */
 /**
  * ═══════════════════════════════════════════════════════════════════════
  * ADVANCED BACKUP QUEUE SYSTEM
  * نظام قوائم الانتظار المتقدم للنسخ الاحتياطية
  * ═══════════════════════════════════════════════════════════════════════
- * 
+ *
  * Features:
  * ✅ Job Queue Management
  * ✅ Priority Scheduling
@@ -17,6 +18,7 @@
 const EventEmitter = require('events');
 const path = require('path');
 const fs = require('fs').promises;
+const logger = require('../utils/logger');
 
 class BackupQueueSystem extends EventEmitter {
   constructor(options = {}) {
@@ -41,9 +43,9 @@ class BackupQueueSystem extends EventEmitter {
     try {
       await fs.mkdir(this.queuePath, { recursive: true });
       await this.loadPersistedQueue();
-      console.log('✅ Queue system initialized');
+      // console.log('✅ Queue system initialized');
     } catch (error) {
-      console.error('❌ Queue initialization failed:', error.message);
+      logger.error('❌ Queue initialization failed:', error.message);
     }
   }
 
@@ -54,7 +56,7 @@ class BackupQueueSystem extends EventEmitter {
   async addJob(job) {
     try {
       const jobId = this.generateJobId();
-      
+
       const queueJob = {
         id: jobId,
         type: job.type || 'FULL_BACKUP',
@@ -82,7 +84,7 @@ class BackupQueueSystem extends EventEmitter {
 
       return queueJob;
     } catch (error) {
-      console.error('❌ Failed to add job:', error.message);
+      logger.error('❌ Failed to add job:', error.message);
       throw error;
     }
   }
@@ -105,7 +107,7 @@ class BackupQueueSystem extends EventEmitter {
         await this.executeJob(job);
       }
     } catch (error) {
-      console.error('❌ Queue processing error:', error.message);
+      logger.error('❌ Queue processing error:', error.message);
     }
   }
 
@@ -118,7 +120,7 @@ class BackupQueueSystem extends EventEmitter {
       job.startedAt = new Date();
 
       this.emit('job:started', job);
-      console.log(`🔄 Processing job [${job.id}] - Type: ${job.type}`);
+      // console.log(`🔄 Processing job [${job.id}] - Type: ${job.type}`);
 
       const timeoutPromise = new Promise((_, reject) =>
         setTimeout(() => reject(new Error('Job timeout')), job.timeout)
@@ -136,7 +138,7 @@ class BackupQueueSystem extends EventEmitter {
       this.processing.delete(job.id);
 
       this.emit('job:completed', job);
-      console.log(`✅ Job completed [${job.id}]`);
+      // console.log(`✅ Job completed [${job.id}]`);
 
       await this.persistQueue();
       this.processQueue();
@@ -151,20 +153,23 @@ class BackupQueueSystem extends EventEmitter {
   async runJobLogic(job) {
     // This would be implemented with actual backup logic
     // For now, simulate the job
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const steps = 10;
       let currentStep = 0;
 
-      const interval = setInterval(() => {
-        currentStep++;
-        job.progress = (currentStep / steps) * 100;
-        this.emit('job:progress', job);
+      const interval = setInterval(
+        () => {
+          currentStep++;
+          job.progress = (currentStep / steps) * 100;
+          this.emit('job:progress', job);
 
-        if (currentStep >= steps) {
-          clearInterval(interval);
-          resolve({ success: true, jobId: job.id });
-        }
-      }, (job.timeout / steps) / 10);
+          if (currentStep >= steps) {
+            clearInterval(interval);
+            resolve({ success: true, jobId: job.id });
+          }
+        },
+        job.timeout / steps / 10
+      );
     });
   }
 
@@ -172,11 +177,11 @@ class BackupQueueSystem extends EventEmitter {
    * Handle job error with retry
    */
   async handleJobError(job, error) {
-    job.error = error.message;
+    job.error = 'حدث خطأ داخلي';
     job.retries++;
 
     if (job.retries < job.maxRetries) {
-      console.warn(`⚠️  Job failed, retrying [${job.id}] - Attempt ${job.retries + 1}`);
+      logger.warn(`⚠️  Job failed, retrying [${job.id}] - Attempt ${job.retries + 1}`);
       job.status = 'PENDING';
       job.startedAt = null;
       this.queue.push(job);
@@ -184,7 +189,7 @@ class BackupQueueSystem extends EventEmitter {
 
       this.emit('job:retrying', job);
     } else {
-      console.error(`❌ Job failed permanently [${job.id}]`);
+      logger.error(`❌ Job failed permanently [${job.id}]`);
       job.status = 'FAILED';
       job.completedAt = new Date();
       this.deadLetterQueue.push(job);
@@ -206,7 +211,11 @@ class BackupQueueSystem extends EventEmitter {
       processing: this.processing.size,
       completed: this.completed.length,
       failed: this.deadLetterQueue.length,
-      total: this.queue.length + this.processing.size + this.completed.length + this.deadLetterQueue.length,
+      total:
+        this.queue.length +
+        this.processing.size +
+        this.completed.length +
+        this.deadLetterQueue.length,
       averageTime: this.calculateAverageJobTime(),
       successRate: this.calculateSuccessRate(),
     };
@@ -294,7 +303,7 @@ class BackupQueueSystem extends EventEmitter {
         JSON.stringify(queueState, null, 2)
       );
     } catch (error) {
-      console.warn('⚠️  Failed to persist queue:', error.message);
+      logger.warn('⚠️  Failed to persist queue:', error.message);
     }
   }
 
@@ -311,7 +320,7 @@ class BackupQueueSystem extends EventEmitter {
       this.completed = state.completed || [];
       this.deadLetterQueue = state.deadLetterQueue || [];
     } catch (error) {
-      console.log('ℹ️  No persisted queue found, starting fresh');
+      // console.log('ℹ️  No persisted queue found, starting fresh');
     }
   }
 }

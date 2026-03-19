@@ -1,5 +1,7 @@
+﻿/* eslint-disable no-unused-vars */
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
 const dotenv = require('dotenv');
 const path = require('path');
 const bcrypt = require('bcryptjs');
@@ -25,10 +27,20 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+if (!process.env.JWT_SECRET) {
+  console.error('CRITICAL: JWT_SECRET environment variable is not set!');
+  process.exit(1);
+}
+const JWT_SECRET = process.env.JWT_SECRET;
 
 // Middleware
-app.use(cors());
+app.use(helmet());
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : ['http://localhost:3000', 'http://localhost:5173'],
+    credentials: true,
+  }),
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -38,7 +50,12 @@ const users = [
     _id: '1',
     username: 'admin',
     email: 'admin@alawael.com',
-    password: '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcg7b3XeKeUxWdeS86E36P4/LiyFW8', // hashed 'Admin@123456'
+    password:
+      process.env.SCM_ADMIN_HASH ||
+      (() => {
+        console.error('WARNING: SCM_ADMIN_HASH not set, admin login disabled');
+        return '';
+      })(),
     role: 'admin',
   },
 ];
@@ -169,7 +186,7 @@ let auditLogs = [
 ];
 
 // Health check
-app.get('/health', (req, res) => {
+app.get('/health', (_req, res) => {
   res.json({ status: 'ok', message: 'Server is running' });
 });
 
@@ -189,8 +206,8 @@ app.post('/api/auth/login', async (req, res) => {
       });
     }
 
-    // For demo: accept any password that matches or just any password
-    const passwordMatch = password === 'Admin@123456' || password === 'admin@123456';
+    // Compare password with stored bcrypt hash
+    const passwordMatch = await bcrypt.compare(password, user.password);
 
     if (!passwordMatch) {
       return res.status(401).json({
@@ -220,7 +237,7 @@ app.post('/api/auth/login', async (req, res) => {
     return res.status(500).json({
       success: false,
       error: 'Server error',
-      message: err.message,
+      message: 'حدث خطأ أثناء تسجيل الدخول',
     });
   }
 });
@@ -275,7 +292,7 @@ app.post('/api/auth/register', async (req, res) => {
     return res.status(500).json({
       success: false,
       error: 'Server error',
-      message: err.message,
+      message: 'حدث خطأ أثناء إنشاء الحساب',
     });
   }
 });
@@ -343,7 +360,7 @@ app.post('/api/barcode/qr-code', async (req, res) => {
     });
   } catch (err) {
     console.error('QR Code error:', err);
-    res.status(500).json({ error: 'Failed to generate QR code', message: err.message });
+    res.status(500).json({ error: 'Failed to generate QR code' });
   }
 });
 
@@ -386,7 +403,7 @@ app.post('/api/barcode/barcode', async (req, res) => {
     });
   } catch (err) {
     console.error('Barcode error:', err);
-    res.status(500).json({ error: 'Failed to generate barcode', message: err.message });
+    res.status(500).json({ error: 'Failed to generate barcode' });
   }
 });
 
@@ -442,7 +459,7 @@ app.post('/api/barcode/batch', async (req, res) => {
           data: item.data,
           type: item.type,
           status: 'error',
-          error: itemErr.message,
+          error: 'Barcode generation failed',
         });
         errorCount++;
       }
@@ -458,7 +475,7 @@ app.post('/api/barcode/batch', async (req, res) => {
     });
   } catch (err) {
     console.error('Batch generation error:', err);
-    res.status(500).json({ error: 'Failed to generate batch', message: err.message });
+    res.status(500).json({ error: 'Failed to generate batch' });
   }
 });
 
@@ -544,7 +561,7 @@ app.post('/api/suppliers', (req, res) => {
     suppliers.push(supplier);
     res.status(201).json({ success: true, data: supplier });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'حدث خطأ في الخادم' });
   }
 });
 
@@ -558,7 +575,7 @@ app.put('/api/suppliers/:id', (req, res) => {
     suppliers[index] = { ...suppliers[index], ...req.body, _id: id };
     res.json({ success: true, data: suppliers[index] });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'حدث خطأ في الخادم' });
   }
 });
 
@@ -568,7 +585,7 @@ app.delete('/api/suppliers/:id', (req, res) => {
     suppliers = suppliers.filter(s => s._id !== id);
     res.json({ success: true, message: 'Supplier deleted' });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'حدث خطأ في الخادم' });
   }
 });
 
@@ -594,7 +611,7 @@ app.post('/api/products', (req, res) => {
     products.push(product);
     res.status(201).json({ success: true, data: product });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'حدث خطأ في الخادم' });
   }
 });
 
@@ -608,7 +625,7 @@ app.put('/api/products/:id', (req, res) => {
     products[index] = { ...products[index], ...req.body, _id: id };
     res.json({ success: true, data: products[index] });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'حدث خطأ في الخادم' });
   }
 });
 
@@ -618,7 +635,7 @@ app.delete('/api/products/:id', (req, res) => {
     products = products.filter(p => p._id !== id);
     res.json({ success: true, message: 'Product deleted' });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'حدث خطأ في الخادم' });
   }
 });
 
@@ -643,7 +660,7 @@ app.post('/api/inventory', (req, res) => {
     inventory.push(inv);
     res.status(201).json({ success: true, data: inv });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'حدث خطأ في الخادم' });
   }
 });
 
@@ -662,7 +679,7 @@ app.put('/api/inventory/:id', (req, res) => {
     };
     res.json({ success: true, data: inventory[index] });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'حدث خطأ في الخادم' });
   }
 });
 
@@ -688,7 +705,7 @@ app.post('/api/orders', (req, res) => {
     orders.push(order);
     res.status(201).json({ success: true, data: order });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'حدث خطأ في الخادم' });
   }
 });
 
@@ -702,7 +719,7 @@ app.put('/api/orders/:id', (req, res) => {
     orders[index] = { ...orders[index], ...req.body, _id: id };
     res.json({ success: true, data: orders[index] });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'حدث خطأ في الخادم' });
   }
 });
 
@@ -712,7 +729,7 @@ app.delete('/api/orders/:id', (req, res) => {
     orders = orders.filter(o => o._id !== id);
     res.json({ success: true, message: 'Order deleted' });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'حدث خطأ في الخادم' });
   }
 });
 
@@ -737,7 +754,7 @@ app.post('/api/shipments', (req, res) => {
     shipments.push(shipment);
     res.status(201).json({ success: true, data: shipment });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'حدث خطأ في الخادم' });
   }
 });
 
@@ -751,7 +768,7 @@ app.put('/api/shipments/:id', (req, res) => {
     shipments[index] = { ...shipments[index], ...req.body, _id: id };
     res.json({ success: true, data: shipments[index] });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'حدث خطأ في الخادم' });
   }
 });
 
@@ -761,7 +778,7 @@ app.delete('/api/shipments/:id', (req, res) => {
     shipments = shipments.filter(s => s._id !== id);
     res.json({ success: true, message: 'Shipment deleted' });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'حدث خطأ في الخادم' });
   }
 });
 
@@ -795,6 +812,6 @@ app.get('*', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`\n✅ Supply Chain Backend Server running on http://localhost:${PORT}`);
-  console.log(`\n📝 Demo Credentials:\n   Username: admin\n   Password: Admin@123456\n`);
+  // console.log(`\n✅ Supply Chain Backend Server running on http://localhost:${PORT}`);
+  // console.log(`\n📏 Demo Credentials:\n   Username: admin\n   Password: Admin@123456\n`);
 });

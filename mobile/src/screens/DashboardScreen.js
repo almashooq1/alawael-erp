@@ -45,7 +45,7 @@ export class MobileAPIClient {
 
       return { success: true, monitoring: true };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'An internal error occurred' };
     }
   }
 
@@ -111,7 +111,7 @@ export class MobileAPIClient {
       }
       return { success: false, error: 'No cached data' };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'An internal error occurred' };
     }
   }
 
@@ -126,7 +126,7 @@ export class MobileAPIClient {
       this.pendingRequests = [];
       return { success: true, synced: this.pendingRequests.length };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'An internal error occurred' };
     }
   }
 
@@ -147,7 +147,7 @@ export class MobileAPIClient {
       await AsyncStorage.multiRemove(cacheKeys);
       return { success: true };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'An internal error occurred' };
     }
   }
 }

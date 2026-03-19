@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * ╔════════════════════════════════════════════════════════════════════════════╗
  * ║           PHASE 31: EXTENDED REALITY (XR) (2,400+ LOC)                    ║
@@ -172,7 +173,7 @@ class HolographicDataVisualization {
           })),
         edges: Array(30)
           .fill(0)
-          .map((_, i) => ({
+          .map((_, _i) => ({
             source: Math.floor(Math.random() * 20),
             target: Math.floor(Math.random() * 20),
           })),
@@ -313,7 +314,7 @@ class BrainComputerInterfaceReady {
       samplingRate: device.samplingRate,
       samples: Array(device.channels)
         .fill(0)
-        .map((_, ch) =>
+        .map((_, _ch) =>
           Array(device.samplingRate * duration)
             .fill(0)
             .map(() => Math.random() * 100 - 50)
@@ -324,7 +325,7 @@ class BrainComputerInterfaceReady {
     return signals;
   }
 
-  decodeBCICommand(signals) {
+  decodeBCICommand(_signals) {
     const decoder = {
       algorithm: 'neural_network',
       modelVersion: '2.1',

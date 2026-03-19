@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const AuditService = require('../services/audit.service');
 
 /**
@@ -14,7 +15,7 @@ const auditMiddleware = (actionName, moduleName) => {
       const status = statusCode >= 400 ? 'FAILURE' : 'SUCCESS';
 
       // Try to parse partial changes if possible (advanced usage)
-      let resourceDetails = {};
+      const resourceDetails = {};
       if (req.params.id) resourceDetails.id = req.params.id;
 
       AuditService.log(
@@ -24,7 +25,7 @@ const auditMiddleware = (actionName, moduleName) => {
         resourceDetails,
         null, // changes tracking requires more complex logic
         status,
-        `Request to ${req.originalUrl} finished with ${statusCode}`,
+        `Request to ${req.originalUrl} finished with ${statusCode}`
       );
 
       originalSend.call(this, body);
@@ -52,7 +53,7 @@ const auditAuthMiddleware = (actionName = 'AUTH_ACTION') => {
         {},
         null,
         status,
-        `Authentication action: ${actionName}`,
+        `Authentication action: ${actionName}`
       );
 
       originalSend.call(this, body);
@@ -65,7 +66,7 @@ const auditAuthMiddleware = (actionName = 'AUTH_ACTION') => {
 /**
  * Audit middleware for CRUD operations
  */
-const auditCrudMiddleware = (entityType) => {
+const auditCrudMiddleware = entityType => {
   return (req, res, next) => {
     const originalSend = res.send;
 
@@ -89,7 +90,7 @@ const auditCrudMiddleware = (entityType) => {
         { id: req.params.id, type: entityType },
         null,
         status,
-        `${action} operation on ${entityType}`,
+        `${action} operation on ${entityType}`
       );
 
       originalSend.call(this, body);
@@ -118,7 +119,7 @@ const auditBruteForceMiddleware = () => {
           {},
           null,
           status,
-          statusCode === 429 ? 'Rate limit exceeded' : 'Authentication failed',
+          statusCode === 429 ? 'Rate limit exceeded' : 'Authentication failed'
         );
       }
 

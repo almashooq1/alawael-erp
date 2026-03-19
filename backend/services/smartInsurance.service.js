@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const Invoice = require('../models/Invoice');
 const Beneficiary = require('../models/Beneficiary'); // Assuming policy details here
 
@@ -33,7 +34,9 @@ class SmartInsuranceService {
     const currentUsage = 18; // Mock
     const limit = policy.sessionLimit || 20;
     if (currentUsage + invoice.items.length > limit) {
-      warnings.push(`LIMIT ALERT: Patient is at ${currentUsage + invoice.items.length}/${limit} sessions.`);
+      warnings.push(
+        `LIMIT ALERT: Patient is at ${currentUsage + invoice.items.length}/${limit} sessions.`
+      );
     }
 
     // Rule 4: Waiting Period
@@ -47,7 +50,8 @@ class SmartInsuranceService {
         errors,
         warnings,
       },
-      recommendation: errors.length > 0 ? 'Do not submit. Fix errors.' : 'Ready for electronic submission.',
+      recommendation:
+        errors.length > 0 ? 'Do not submit. Fix errors.' : 'Ready for electronic submission.',
     };
   }
 
@@ -59,7 +63,12 @@ class SmartInsuranceService {
     // Mock Parsing of standard CSV/835 Format
     // payment_ref, amount, claim_id, status
 
-    const mockRow = { claimId: 'INV-1001', paidAmount: 150, billedAmount: 200, status: 'PARTIAL_PAYMENT' };
+    const mockRow = {
+      claimId: 'INV-1001',
+      paidAmount: 150,
+      billedAmount: 200,
+      status: 'PARTIAL_PAYMENT',
+    };
 
     // Logic:
     // 1. Find Invoice

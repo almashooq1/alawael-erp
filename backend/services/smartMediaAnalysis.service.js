@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // Mock Models
 const TherapySession = require('../models/TherapySession');
 
@@ -26,7 +27,9 @@ class SmartMediaAnalysisService {
       behaviorEvents: events,
       totalStimulationTimeSeconds: totalStimTime,
       clinicalInsight:
-        totalStimTime > 60 ? 'High frequency of stimming detected. Consider sensory regulation break.' : 'Behavior is regulated.',
+        totalStimTime > 60
+          ? 'High frequency of stimming detected. Consider sensory regulation break.'
+          : 'Behavior is regulated.',
     };
   }
 

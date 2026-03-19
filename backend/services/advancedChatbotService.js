@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * ADVANCED INTELLIGENT CHATBOT SERVICE
  * متقدم - معالجة لغة طبيعية، تعلم ذاتي، توقعات ذكية
@@ -6,6 +7,7 @@
 
 const EventEmitter = require('events');
 const { v4: uuidv4 } = require('uuid');
+const logger = require('../utils/logger');
 
 class AdvancedChatbotService extends EventEmitter {
   constructor(config = {}) {
@@ -88,10 +90,7 @@ class AdvancedChatbotService extends EventEmitter {
       },
       'crm.opportunities': {
         patterns: ['opportunity', 'deal', 'sales', 'revenue', 'فرصة'],
-        responses: [
-          'تتبع فرص المبيعات والعقود',
-          'Track sales opportunities and deals',
-        ],
+        responses: ['تتبع فرص المبيعات والعقود', 'Track sales opportunities and deals'],
         priority: 1,
         category: 'crm',
       },
@@ -117,34 +116,25 @@ class AdvancedChatbotService extends EventEmitter {
       // General Intent
       'general.greeting': {
         patterns: ['hello', 'hi', 'hey', 'greetings', 'مرحبا', 'السلام عليكم'],
-        responses: [
-          'مرحبا! كيف يمكنني مساعدتك؟',
-          'Hello! How can I assist you today?',
-        ],
+        responses: ['مرحبا! كيف يمكنني مساعدتك؟', 'Hello! How can I assist you today?'],
         priority: 0,
         category: 'general',
       },
       'general.help': {
         patterns: ['help', 'support', 'assist', 'guide', 'help me', 'ساعدني'],
-        responses: [
-          'أنا هنا لمساعدتك. ما الذي تحتاج إليه؟',
-          "I'm here to help. What do you need?",
-        ],
+        responses: ['أنا هنا لمساعدتك. ما الذي تحتاج إليه؟', "I'm here to help. What do you need?"],
         priority: 1,
         category: 'general',
       },
       'general.faq': {
         patterns: ['faq', 'frequently asked', 'common questions', 'الأسئلة الشائعة'],
-        responses: [
-          'إليك الأسئلة الشائعة والإجابات عليها',
-          'Here are frequently asked questions',
-        ],
+        responses: ['إليك الأسئلة الشائعة والإجابات عليها', 'Here are frequently asked questions'],
         priority: 0,
         category: 'general',
       },
     };
 
-    intents.forEach((intent, key) => {
+    Object.entries(intents).forEach(([key, intent]) => {
       this.intents.set(key, intent);
     });
   }
@@ -248,7 +238,7 @@ class AdvancedChatbotService extends EventEmitter {
     this.entities.set('module', {
       patterns: ['hr', 'crm', 'finance', 'elearning', 'documents', 'reports'],
       type: 'module',
-      extractor: (text) => {
+      extractor: text => {
         const modules = ['hr', 'crm', 'finance', 'elearning', 'documents', 'reports'];
         return modules.find(m => text.toLowerCase().includes(m));
       },
@@ -257,7 +247,7 @@ class AdvancedChatbotService extends EventEmitter {
     this.entities.set('date', {
       patterns: [/(today|tomorrow|yesterday|this week|next week|next month)/i],
       type: 'date',
-      extractor: (text) => {
+      extractor: text => {
         const dateMatch = text.match(/(today|tomorrow|yesterday|this week|next week)/i);
         return dateMatch ? dateMatch[1] : null;
       },
@@ -266,7 +256,7 @@ class AdvancedChatbotService extends EventEmitter {
     this.entities.set('action', {
       patterns: ['create', 'update', 'delete', 'view', 'search', 'export', 'import'],
       type: 'action',
-      extractor: (text) => {
+      extractor: text => {
         const actions = ['create', 'update', 'delete', 'view', 'search', 'export', 'import'];
         return actions.find(a => text.toLowerCase().includes(a));
       },
@@ -284,7 +274,7 @@ class AdvancedChatbotService extends EventEmitter {
       if (!conversationId) {
         conversationId = this.createConversation(userId);
       }
-      
+
       const conversation = this.conversations.get(conversationId);
       if (!conversation) {
         throw new Error('Conversation not found');
@@ -356,11 +346,11 @@ class AdvancedChatbotService extends EventEmitter {
         },
       };
     } catch (error) {
-      console.error('Error processing message:', error);
+      logger.error('Error processing message:', error);
       return {
         success: false,
         conversationId,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
         fallbackResponse: 'عذراً، حدث خطأ في معالجة طلبك. سيتم تحويله لفريق الدعم.',
       };
     }
@@ -406,7 +396,7 @@ class AdvancedChatbotService extends EventEmitter {
   detectLanguage(message) {
     const arabicRegex = /[\u0600-\u06FF]/g;
     const englishRegex = /[a-zA-Z]/g;
-    
+
     const arabicMatches = message.match(arabicRegex) || [];
     const englishMatches = message.match(englishRegex) || [];
 
@@ -517,8 +507,8 @@ class AdvancedChatbotService extends EventEmitter {
       };
 
       // Get suggestions from knowledge base
-      const kbEntry = Array.from(this.knowledgeBase.values()).find(
-        kb => kb.keywords.some(kw => message.toLowerCase().includes(kw))
+      const kbEntry = Array.from(this.knowledgeBase.values()).find(kb =>
+        kb.keywords.some(kw => message.toLowerCase().includes(kw))
       );
 
       if (kbEntry) {
@@ -584,8 +574,7 @@ class AdvancedChatbotService extends EventEmitter {
   updateMetrics(startTime, success) {
     this.metrics.totalMessages++;
     const responseTime = Date.now() - startTime;
-    this.metrics.averageResponseTime =
-      (this.metrics.averageResponseTime + responseTime) / 2;
+    this.metrics.averageResponseTime = (this.metrics.averageResponseTime + responseTime) / 2;
 
     if (success) {
       this.metrics.successRate = (this.metrics.totalMessages - 1) / this.metrics.totalMessages;
@@ -658,10 +647,11 @@ class AdvancedChatbotService extends EventEmitter {
    * Get Chatbot Statistics
    */
   getStatistics() {
-    const avgSatisfaction = this.metrics.userSatisfaction.length > 0
-      ? (this.metrics.userSatisfaction.reduce((a, b) => a + b, 0) /
-        this.metrics.userSatisfaction.length)
-      : 0;
+    const avgSatisfaction =
+      this.metrics.userSatisfaction.length > 0
+        ? this.metrics.userSatisfaction.reduce((a, b) => a + b, 0) /
+          this.metrics.userSatisfaction.length
+        : 0;
 
     return {
       totalMessages: this.metrics.totalMessages,

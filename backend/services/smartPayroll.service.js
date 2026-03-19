@@ -1,7 +1,9 @@
+/* eslint-disable no-unused-vars */
 const Payroll = require('../models/payroll.model');
 const Employee = require('../models/Employee');
 const TherapySession = require('../models/TherapySession');
 const SmartNotificationService = require('./smartNotificationService');
+const logger = require('../utils/logger');
 
 class SmartPayrollService {
   /**
@@ -13,7 +15,7 @@ class SmartPayrollService {
     const endDate = new Date(year, month, 0, 23, 59, 59);
     const monthStr = `${year}-${String(month).padStart(2, '0')}`;
 
-    console.log(`Generating payroll for ${monthStr}...`);
+    logger.info(`Generating payroll for ${monthStr}...`);
 
     const employees = await Employee.find({ status: 'ACTIVE' });
     const results = [];
@@ -67,7 +69,8 @@ class SmartPayrollService {
         // High Performance Bonus (Rating > 4.8)
         const ratedSessions = sessions.filter(s => s.rating);
         if (ratedSessions.length > 5) {
-          const avgRating = ratedSessions.reduce((sum, s) => sum + s.rating, 0) / ratedSessions.length;
+          const avgRating =
+            ratedSessions.reduce((sum, s) => sum + s.rating, 0) / ratedSessions.length;
           if (avgRating >= 4.8) {
             allowances.push({
               name: 'Star Therapist Bonus (High Ratings)',
@@ -115,7 +118,7 @@ class SmartPayrollService {
       'Payroll Generated',
       `Payroll for ${monthStr} generated for ${results.length} employees.`,
       'INFO',
-      `/hr/payroll?month=${monthStr}`,
+      `/hr/payroll?month=${monthStr}`
     );
 
     return { success: true, count: results.length, details: results };

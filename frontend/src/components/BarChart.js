@@ -1,4 +1,3 @@
-import React from 'react';
 import { Box, Typography, useTheme } from '@mui/material';
 
 const BarChart = ({ data = [], labels = [], height = 200, color = '#0f766e' }) => {

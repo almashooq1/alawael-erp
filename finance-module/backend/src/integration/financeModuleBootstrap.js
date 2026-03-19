@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Finance Module Bootstrap Integration
  * Mounts all finance module routes to main Express server

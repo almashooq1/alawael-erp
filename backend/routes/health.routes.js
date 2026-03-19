@@ -1,3 +1,4 @@
+﻿/* eslint-disable no-unused-vars */
 /**
  * Health & Monitoring Routes - Phase 4
  * Comprehensive health checks and system monitoring endpoints
@@ -18,14 +19,13 @@ router.get('/db', async (req, res) => {
     const dbStatus = {
       connected: mongoose.connection.readyState === 1,
       readyState: mongoose.connection.readyState,
-      host: mongoose.connection.host,
-      port: mongoose.connection.port,
-      dbName: mongoose.connection.name,
-      collections: mongoose.connection.collections ? Object.keys(mongoose.connection.collections).length : 0,
+      collections: mongoose.connection.collections
+        ? Object.keys(mongoose.connection.collections).length
+        : 0,
     };
 
     // Check database responsiveness with a simple query
-    const dbHealth = await Promise.race([
+    const _dbHealth = await Promise.race([
       Asset.countDocuments().lean(),
       new Promise((_, reject) =>
         setTimeout(() => reject(new Error('Database query timeout')), 5000)
@@ -50,7 +50,7 @@ router.get('/db', async (req, res) => {
   } catch (error) {
     res.status(503).json({
       status: 'unhealthy',
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
       database: {
         connected: false,
         healthCheck: 'failed',
@@ -97,7 +97,7 @@ router.get('/models', async (req, res) => {
   } catch (error) {
     res.status(503).json({
       status: 'unhealthy',
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
       timestamp: new Date().toISOString(),
     });
   }
@@ -143,8 +143,6 @@ router.get('/system', async (req, res) => {
       },
       database: {
         connected: mongoConnected,
-        host: mongoose.connection.host || 'unknown',
-        port: mongoose.connection.port || 27017,
         records: {
           assets: assetCount,
           analytics: analyticsCount,
@@ -161,7 +159,7 @@ router.get('/system', async (req, res) => {
   } catch (error) {
     res.status(503).json({
       status: 'unhealthy',
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
       timestamp: new Date().toISOString(),
     });
   }
@@ -231,7 +229,7 @@ router.get('/full', async (req, res) => {
   } catch (error) {
     res.status(503).json({
       status: 'unhealthy',
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
       timestamp: new Date().toISOString(),
     });
   }
@@ -262,7 +260,7 @@ router.get('/ready', async (req, res) => {
   } catch (error) {
     res.status(503).json({
       ready: false,
-      reason: error.message,
+      reason: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -271,7 +269,7 @@ router.get('/ready', async (req, res) => {
  * GET /api/v1/health/alive
  * Kubernetes-style liveness probe
  */
-router.get('/alive', (req, res) => {
+router.get('/alive', (_req, res) => {
   res.json({
     alive: true,
     pid: process.pid,

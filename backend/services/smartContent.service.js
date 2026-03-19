@@ -1,9 +1,12 @@
+/* eslint-disable no-unused-vars */
 /**
  * Smart Therapy Content Generator Service (Phase 72)
  *
  * Uses Generative AI to create personalized educational and therapeutic materials
  * on the fly (Worksheets, Social Stories, Visual Schedules).
  */
+
+const logger = require('../utils/logger');
 
 class SmartContentService {
   /**
@@ -15,7 +18,7 @@ class SmartContentService {
    */
   async generateSocialStory(beneficiaryName, scenario, comprehensionLevel) {
     // Mock GenAI Output
-    console.log(`Generating story for ${beneficiaryName} about ${scenario}`);
+    logger.info(`Generating story for ${beneficiaryName} about ${scenario}`);
 
     const simpleText = `
         Page 1: My name is ${beneficiaryName}.

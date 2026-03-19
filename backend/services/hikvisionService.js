@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Hikvision Integration Service
  * التكامل مع كاميرات Hikvision
@@ -5,6 +6,7 @@
 
 const axios = require('axios');
 const crypto = require('crypto');
+const logger = require('../utils/logger');
 
 class HikvisionService {
   constructor(config = {}) {
@@ -46,10 +48,10 @@ class HikvisionService {
         message: 'تم الاتصال بنجاح',
       };
     } catch (error) {
-      console.error('❌ خطأ الاتصال بـ Hikvision:', error.message);
+      logger.error('❌ خطأ الاتصال بـ Hikvision:', error.message);
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
         message: 'فشل الاتصال بالكاميرا',
       };
     }
@@ -82,7 +84,7 @@ class HikvisionService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -103,7 +105,7 @@ class HikvisionService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -130,7 +132,7 @@ class HikvisionService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
         channels: [],
       };
     }
@@ -159,7 +161,7 @@ class HikvisionService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -182,7 +184,7 @@ class HikvisionService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -214,7 +216,7 @@ class HikvisionService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -236,7 +238,7 @@ class HikvisionService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -257,7 +259,7 @@ class HikvisionService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -299,7 +301,7 @@ class HikvisionService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
         logs: [],
       };
     }
@@ -312,7 +314,9 @@ class HikvisionService {
     try {
       const client = this.createClient(ipAddress, port, username, password);
 
-      const response = await client.get(`/ISAPI/Streaming/channels/${channelId}/picture`, { responseType: 'arraybuffer' });
+      const response = await client.get(`/ISAPI/Streaming/channels/${channelId}/picture`, {
+        responseType: 'arraybuffer',
+      });
 
       return {
         success: true,
@@ -322,7 +326,7 @@ class HikvisionService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -351,7 +355,7 @@ class HikvisionService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -371,7 +375,10 @@ class HikvisionService {
           totalCapacity: device.totalCapacity,
           freeSpace: device.freeSpace,
           usedSpace: device.totalCapacity - device.freeSpace,
-          usagePercentage: (((device.totalCapacity - device.freeSpace) / device.totalCapacity) * 100).toFixed(2),
+          usagePercentage: (
+            ((device.totalCapacity - device.freeSpace) / device.totalCapacity) *
+            100
+          ).toFixed(2),
         })) || [];
 
       return {
@@ -381,7 +388,7 @@ class HikvisionService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -406,7 +413,7 @@ class HikvisionService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }

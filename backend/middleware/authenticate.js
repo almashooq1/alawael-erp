@@ -1,10 +1,13 @@
+/* eslint-disable no-unused-vars */
 const jwt = require('jsonwebtoken');
+const logger = require('../utils/logger');
 
-const JWT_SECRET =
-  process.env.JWT_SECRET ||
-  (process.env.NODE_ENV === 'test'
-    ? 'test-secret-key-for-testing-only'
-    : 'your-super-secret-jwt-key-change-this-in-production');
+const JWT_SECRET = (() => {
+  if (process.env.JWT_SECRET) return process.env.JWT_SECRET;
+  if (process.env.NODE_ENV === 'test') return 'test-secret-key-for-testing-only';
+  logger.error('CRITICAL: JWT_SECRET environment variable is not set!');
+  throw new Error('JWT_SECRET must be configured via environment variable');
+})();
 
 /**
  * Authentication middleware for integration routes
@@ -21,7 +24,7 @@ const authenticate = (req, res, next) => {
 
     jwt.verify(token, JWT_SECRET, (err, decoded) => {
       if (err) {
-        console.error('Token verification error:', err.message);
+        logger.error('Token verification error:', { error: err.message });
         if (err.name === 'TokenExpiredError') {
           return res.status(401).json({
             success: false,
@@ -35,7 +38,7 @@ const authenticate = (req, res, next) => {
       next();
     });
   } catch (error) {
-    console.error('Auth middleware error:', error);
+    logger.error('Auth middleware error:', { error: error.message, stack: error.stack });
     res.status(500).json({ success: false, message: 'Authentication failed' });
   }
 };

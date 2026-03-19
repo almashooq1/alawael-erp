@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * ╔═══════════════════════════════════════════════════════════════════════════════╗
  * ║                    🎯 ZAKAT CONTROLLER - API HANDLERS                         ║
@@ -10,11 +11,12 @@ const {
   ZakatPayment,
   ZakatReminder,
   ZakatReport,
-  ZAKAT_CONFIG
+  ZAKAT_CONFIG,
 } = require('../models/Zakat.model');
 
 const { ZakatCalculationEngine, ZakatValidation } = require('../services/ZakatCalculationEngine');
 const { sendNotification } = require('../services/notificationService');
+const logger = require('../utils/logger');
 
 // ============================================================================
 // 📊 ZAKAT CONTROLLER
@@ -35,7 +37,7 @@ class ZakatController {
       if (!assets || !Array.isArray(assets) || assets.length === 0) {
         return res.status(400).json({
           success: false,
-          message: 'يجب إضافة أصل واحد على الأقل'
+          message: 'يجب إضافة أصل واحد على الأقل',
         });
       }
 
@@ -46,7 +48,7 @@ class ZakatController {
           return res.status(400).json({
             success: false,
             message: 'البيانات المدخلة غير صحيحة',
-            errors: validation.errors
+            errors: validation.errors,
           });
         }
       }
@@ -68,17 +70,17 @@ class ZakatController {
           livestock: zakatCalculation.livestock,
           crops: zakatCalculation.crops,
           businessInventory: zakatCalculation.businessInventory,
-          financialAssets: zakatCalculation.financialAssets
+          financialAssets: zakatCalculation.financialAssets,
         },
         summary: {
           totalAssetsValue: assets.reduce((sum, a) => sum + (a.amount || a.currentPrice || 0), 0),
           totalZakatDue: zakatCalculation.totalZakat,
           totalZakatPaid: 0,
           zakatBalance: zakatCalculation.totalZakat,
-          percentage: 0
+          percentage: 0,
         },
         status: 'PENDING',
-        notes: notes
+        notes: notes,
       });
 
       await calculation.save();
@@ -91,7 +93,7 @@ class ZakatController {
         type: 'ZAKAT_CALCULATED',
         title: 'تم حساب الزكاة بنجاح',
         message: `الزكاة المستحقة: ${zakatCalculation.totalZakat} SAR`,
-        data: { calculationId: calculation._id }
+        data: { calculationId: calculation._id },
       });
 
       return res.status(201).json({
@@ -101,15 +103,15 @@ class ZakatController {
           calculation: calculation._id,
           zakatAmount: zakatCalculation.totalZakat,
           details: zakatCalculation,
-          recommendations: zakatCalculation.recommendations
-        }
+          recommendations: zakatCalculation.recommendations,
+        },
       });
     } catch (error) {
-      console.error('Error calculating zakat:', error);
+      logger.error('Error calculating zakat:', error);
       res.status(500).json({
         success: false,
         message: 'حدث خطأ في حساب الزكاة',
-        error: error.message
+        error: 'حدث خطأ داخلي',
       });
     }
   }
@@ -127,9 +129,7 @@ class ZakatController {
       if (status) query.status = status;
       if (year) query.gregorianYear = parseInt(year);
 
-      const calculations = await ZakatCalculation.find(query)
-        .sort({ createdAt: -1 })
-        .limit(50);
+      const calculations = await ZakatCalculation.find(query).sort({ createdAt: -1 }).limit(50);
 
       const formattedData = calculations.map(calc => ({
         id: calc._id,
@@ -139,19 +139,19 @@ class ZakatController {
         zakatBalance: calc.summary.zakatBalance,
         status: calc.status,
         percentage: calc.summary.percentage,
-        assetCount: calc.assets.length
+        assetCount: calc.assets.length,
       }));
 
       res.json({
         success: true,
         data: formattedData,
-        count: calculations.length
+        count: calculations.length,
       });
     } catch (error) {
       res.status(500).json({
         success: false,
         message: 'خطأ في جلب الحسابات',
-        error: error.message
+        error: 'حدث خطأ داخلي',
       });
     }
   }
@@ -162,33 +162,38 @@ class ZakatController {
    */
   static async getCalculationDetails(req, res) {
     try {
-      const calculation = await ZakatCalculation.findById(req.params.id)
-        .populate('user_id', 'name email');
+      const calculation = await ZakatCalculation.findById(req.params.id).populate(
+        'user_id',
+        'name email'
+      );
 
       if (!calculation) {
         return res.status(404).json({
           success: false,
-          message: 'لم يتم العثور على الحساب'
+          message: 'لم يتم العثور على الحساب',
         });
       }
 
       // التحقق من الصلاحيات
-      if (calculation.user_id._id.toString() !== req.user._id.toString() && req.user.role !== 'ADMIN') {
+      if (
+        calculation.user_id._id.toString() !== req.user._id.toString() &&
+        req.user.role !== 'ADMIN'
+      ) {
         return res.status(403).json({
           success: false,
-          message: 'ليس لديك صلاحية للوصول إلى هذا الحساب'
+          message: 'ليس لديك صلاحية للوصول إلى هذا الحساب',
         });
       }
 
       res.json({
         success: true,
-        data: calculation
+        data: calculation,
       });
     } catch (error) {
       res.status(500).json({
         success: false,
         message: 'خطأ في جلب التفاصيل',
-        error: error.message
+        error: 'حدث خطأ داخلي',
       });
     }
   }
@@ -206,7 +211,7 @@ class ZakatController {
         recipientType,
         recipientName,
         recipientContact,
-        notes
+        notes,
       } = req.body;
 
       const userId = req.user._id;
@@ -216,7 +221,7 @@ class ZakatController {
       if (!calculation) {
         return res.status(404).json({
           success: false,
-          message: 'لم يتم العثور على حساب الزكاة'
+          message: 'لم يتم العثور على حساب الزكاة',
         });
       }
 
@@ -224,14 +229,14 @@ class ZakatController {
       if (amount <= 0) {
         return res.status(400).json({
           success: false,
-          message: 'المبلغ يجب أن يكون أكبر من صفر'
+          message: 'المبلغ يجب أن يكون أكبر من صفر',
         });
       }
 
       if (amount > calculation.summary.zakatBalance) {
         return res.status(400).json({
           success: false,
-          message: `المبلغ المدفوع يتجاوز الزكاة المستحقة (${calculation.summary.zakatBalance})`
+          message: `المبلغ المدفوع يتجاوز الزكاة المستحقة (${calculation.summary.zakatBalance})`,
         });
       }
 
@@ -245,16 +250,18 @@ class ZakatController {
         recipientType: recipientType,
         recipientName: recipientName,
         recipientContact: recipientContact,
-        notes: notes
+        notes: notes,
       });
 
       await payment.save();
 
       // تحديث حساب الزكاة
       calculation.summary.totalZakatPaid += amount;
-      calculation.summary.zakatBalance = calculation.summary.totalZakatDue - calculation.summary.totalZakatPaid;
-      calculation.summary.percentage = (calculation.summary.totalZakatPaid / calculation.summary.totalZakatDue) * 100;
-      
+      calculation.summary.zakatBalance =
+        calculation.summary.totalZakatDue - calculation.summary.totalZakatPaid;
+      calculation.summary.percentage =
+        (calculation.summary.totalZakatPaid / calculation.summary.totalZakatDue) * 100;
+
       // تحديث الحالة
       if (calculation.summary.zakatBalance <= 0) {
         calculation.status = 'FULLY_PAID';
@@ -269,7 +276,7 @@ class ZakatController {
         type: 'ZAKAT_PAID',
         title: 'تم تسجيل دفعة الزكاة',
         message: `تم تسجيل دفعة بقيمة ${amount} SAR`,
-        data: { paymentId: payment._id }
+        data: { paymentId: payment._id },
       });
 
       res.status(201).json({
@@ -279,14 +286,14 @@ class ZakatController {
           paymentId: payment._id,
           totalPaid: calculation.summary.totalZakatPaid,
           remaining: calculation.summary.zakatBalance,
-          status: calculation.status
-        }
+          status: calculation.status,
+        },
       });
     } catch (error) {
       res.status(500).json({
         success: false,
         message: 'خطأ في تسجيل الدفعة',
-        error: error.message
+        error: 'حدث خطأ داخلي',
       });
     }
   }
@@ -298,19 +305,19 @@ class ZakatController {
   static async getPayments(req, res) {
     try {
       const payments = await ZakatPayment.find({
-        calculation_id: req.params.calculationId
+        calculation_id: req.params.calculationId,
       }).sort({ paymentDate: -1 });
 
       res.json({
         success: true,
         data: payments,
-        count: payments.length
+        count: payments.length,
       });
     } catch (error) {
       res.status(500).json({
         success: false,
         message: 'خطأ في جلب الدفعات',
-        error: error.message
+        error: 'حدث خطأ داخلي',
       });
     }
   }
@@ -328,7 +335,7 @@ class ZakatController {
       // جلب بيانات السنة الحالية
       const calculations = await ZakatCalculation.find({
         user_id: userId,
-        gregorianYear: currentYear
+        gregorianYear: currentYear,
       });
 
       // حساب الإحصائيات
@@ -341,19 +348,21 @@ class ZakatController {
         PENDING: calculations.filter(c => c.status === 'PENDING').length,
         PARTIALLY_PAID: calculations.filter(c => c.status === 'PARTIALLY_PAID').length,
         FULLY_PAID: calculations.filter(c => c.status === 'FULLY_PAID').length,
-        OVERDUE: calculations.filter(c => c.status === 'OVERDUE').length
+        OVERDUE: calculations.filter(c => c.status === 'OVERDUE').length,
       };
 
       // جلب التذكيرات
       const reminders = await ZakatReminder.find({
         user_id: userId,
-        isRead: false
+        isRead: false,
       }).limit(5);
 
       // جلب آخر الدفعات
       const recentPayments = await ZakatPayment.find({
-        user_id: userId
-      }).sort({ paymentDate: -1 }).limit(10);
+        user_id: userId,
+      })
+        .sort({ paymentDate: -1 })
+        .limit(10);
 
       res.json({
         success: true,
@@ -363,20 +372,21 @@ class ZakatController {
             totalZakatPaid: totalZakatPaid,
             zakatBalance: totalZakatDue - totalZakatPaid,
             totalAssetsValue: totalAssetsValue,
-            compliancePercentage: totalZakatDue > 0 ? (totalZakatPaid / totalZakatDue * 100).toFixed(2) : 0
+            compliancePercentage:
+              totalZakatDue > 0 ? ((totalZakatPaid / totalZakatDue) * 100).toFixed(2) : 0,
           },
           statusBreakdown: statusCount,
           recentReminders: reminders.length,
           reminders: reminders,
           recentPayments: recentPayments,
-          year: currentYear
-        }
+          year: currentYear,
+        },
       });
     } catch (error) {
       res.status(500).json({
         success: false,
         message: 'خطأ في تحميل لوحة التحكم',
-        error: error.message
+        error: 'حدث خطأ داخلي',
       });
     }
   }
@@ -395,20 +405,18 @@ class ZakatController {
         query.isRead = isRead === 'true';
       }
 
-      const reminders = await ZakatReminder.find(query)
-        .sort({ sentDate: -1 })
-        .limit(100);
+      const reminders = await ZakatReminder.find(query).sort({ sentDate: -1 }).limit(100);
 
       res.json({
         success: true,
         data: reminders,
-        count: reminders.length
+        count: reminders.length,
       });
     } catch (error) {
       res.status(500).json({
         success: false,
         message: 'خطأ في جلب التذكيرات',
-        error: error.message
+        error: 'حدث خطأ داخلي',
       });
     }
   }
@@ -427,13 +435,13 @@ class ZakatController {
 
       res.json({
         success: true,
-        data: reminder
+        data: reminder,
       });
     } catch (error) {
       res.status(500).json({
         success: false,
         message: 'خطأ في تحديث التذكير',
-        error: error.message
+        error: 'حدث خطأ داخلي',
       });
     }
   }
@@ -448,7 +456,7 @@ class ZakatController {
       const { fromYear, toYear, reportType = 'ANNUAL' } = req.body;
 
       const query = {
-        user_id: userId
+        user_id: userId,
       };
 
       if (fromYear) {
@@ -464,13 +472,17 @@ class ZakatController {
       const statistics = {
         totalZakatDue: calculations.reduce((sum, c) => sum + c.summary.totalZakatDue, 0),
         totalZakatPaid: calculations.reduce((sum, c) => sum + c.summary.totalZakatPaid, 0),
-        totalDeductions: calculations.reduce((sum, c) => sum + (c.deductions.debts + c.deductions.mortgages), 0),
-        assetsValue: calculations.reduce((sum, c) => sum + c.summary.totalAssetsValue, 0)
+        totalDeductions: calculations.reduce(
+          (sum, c) => sum + (c.deductions.debts + c.deductions.mortgages),
+          0
+        ),
+        assetsValue: calculations.reduce((sum, c) => sum + c.summary.totalAssetsValue, 0),
       };
 
-      statistics.compliancePercentage = statistics.totalZakatDue > 0 
-        ? Math.round((statistics.totalZakatPaid / statistics.totalZakatDue) * 100)
-        : 0;
+      statistics.compliancePercentage =
+        statistics.totalZakatDue > 0
+          ? Math.round((statistics.totalZakatPaid / statistics.totalZakatDue) * 100)
+          : 0;
 
       const report = new ZakatReport({
         user_id: userId,
@@ -478,7 +490,7 @@ class ZakatController {
         toYear: toYear,
         reportType: reportType,
         statistics: statistics,
-        generatedAt: new Date()
+        generatedAt: new Date(),
       });
 
       await report.save();
@@ -488,14 +500,14 @@ class ZakatController {
         message: 'تم إنشاء التقرير بنجاح',
         data: {
           reportId: report._id,
-          ...statistics
-        }
+          ...statistics,
+        },
       });
     } catch (error) {
       res.status(500).json({
         success: false,
         message: 'خطأ في إنشاء التقرير',
-        error: error.message
+        error: 'حدث خطأ داخلي',
       });
     }
   }
@@ -516,27 +528,31 @@ class ZakatController {
     const reminders = [];
 
     // تذكير عند وصول النصاب
-    reminders.push(new ZakatReminder({
-      user_id: userId,
-      calculation_id: calculationId,
-      reminderType: 'NISAB_REACHED',
-      title: 'تم الوصول إلى النصاب',
-      message: `لقد وصلت أموالك إلى نصاب الزكاة. الزكاة المستحقة: ${zakatAmount} SAR`,
-      zakatAmount: zakatAmount,
-      sentVia: ['IN_APP', 'EMAIL']
-    }));
+    reminders.push(
+      new ZakatReminder({
+        user_id: userId,
+        calculation_id: calculationId,
+        reminderType: 'NISAB_REACHED',
+        title: 'تم الوصول إلى النصاب',
+        message: `لقد وصلت أموالك إلى نصاب الزكاة. الزكاة المستحقة: ${zakatAmount} SAR`,
+        zakatAmount: zakatAmount,
+        sentVia: ['IN_APP', 'EMAIL'],
+      })
+    );
 
     // تذكير قبل نهاية السنة بـ 30 يوم
-    reminders.push(new ZakatReminder({
-      user_id: userId,
-      calculation_id: calculationId,
-      reminderType: 'YEAR_APPROACHING',
-      title: 'اقترب موعد استحقاق الزكاة',
-      message: 'تبقى 30 يوماً على استحقاق الزكاة. يرجى التجهيز للدفع',
-      zakatAmount: zakatAmount,
-      daysUntilDue: 30,
-      sentVia: ['IN_APP', 'EMAIL', 'SMS']
-    }));
+    reminders.push(
+      new ZakatReminder({
+        user_id: userId,
+        calculation_id: calculationId,
+        reminderType: 'YEAR_APPROACHING',
+        title: 'اقترب موعد استحقاق الزكاة',
+        message: 'تبقى 30 يوماً على استحقاق الزكاة. يرجى التجهيز للدفع',
+        zakatAmount: zakatAmount,
+        daysUntilDue: 30,
+        sentVia: ['IN_APP', 'EMAIL', 'SMS'],
+      })
+    );
 
     await ZakatReminder.insertMany(reminders);
   }

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * PHASE 110: Smart Device Gateway (External API Integration)
  * "The Universal Translator" - Standardizes data from external health platforms.
@@ -7,10 +8,11 @@
  * - Apple HealthKit (JSON export format)
  * - Google Fit (REST API Mock)
  */
+const logger = require('../utils/logger');
 
 class SmartDeviceGatewayService {
   constructor() {
-    console.log('System: Smart Device Gateway - Initialized');
+    logger.info('System: Smart Device Gateway - Initialized');
     this.deviceDataStore = new Map(); // patientId -> standardizedData
   }
 
@@ -21,7 +23,7 @@ class SmartDeviceGatewayService {
    */
   async processFitbitWebHook(patientId, rawData) {
     // Fitbit Format: { activities: [{ heartRate: [ { value: 72 } ], steps: 1200 }] }
-    console.log(`[Gateway] Processing Fitbit data for ${patientId}...`);
+    logger.info(`[Gateway] Processing Fitbit data for ${patientId}...`);
 
     // Normalize
     const standardized = {
@@ -43,7 +45,7 @@ class SmartDeviceGatewayService {
    */
   async processAppleHealthUpload(patientId, rawData) {
     // Apple Format: { metrics: { bpm: 74, stepCount: 1500, flightsClimbed: 2 } }
-    console.log(`[Gateway] Processing Apple Health data for ${patientId}...`);
+    logger.info(`[Gateway] Processing Apple Health data for ${patientId}...`);
 
     const standardized = {
       source: 'APPLE_HEALTH',
@@ -63,7 +65,7 @@ class SmartDeviceGatewayService {
     this.deviceDataStore.set(patientId, data);
 
     // Notify Command Center (console log for simulation)
-    console.log(`[Gateway] -> [Command Center]: New Vitals Pushed for ${patientId}`);
+    logger.info(`[Gateway] -> [Command Center]: New Vitals Pushed for ${patientId}`);
   }
 
   // Exposed for Phase 101 to read if needed, though usually Phase 101 pulls.

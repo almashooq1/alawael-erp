@@ -127,7 +127,7 @@
   margin-top: 8px;
 }
 
-.employee-policies .policy-checkbox input[type="checkbox"] {
+.employee-policies .policy-checkbox input[type='checkbox'] {
   width: 20px;
   height: 20px;
   cursor: pointer;

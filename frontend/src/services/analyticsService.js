@@ -1,37 +1,50 @@
-import axios from 'axios';
+import apiClient from './api.client';
+import logger from '../utils/logger';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+const MOCK_HR_METRICS = {
+  totalEmployees: 0,
+  activeEmployees: 0,
+  departments: [],
+  performanceAverage: 0,
+};
 
-// Create axios instance with auth interceptor
-const api = axios.create({
-  baseURL: API_URL,
-});
+const MOCK_SYSTEM_HEALTH = {
+  status: 'unknown',
+  uptime: 0,
+  services: [],
+};
 
-api.interceptors.request.use(
-  config => {
-    const user = JSON.parse(localStorage.getItem('user'));
-    if (user && user.token) {
-      config.headers.Authorization = `Bearer ${user.token}`;
-    }
-    return config;
-  },
-  error => Promise.reject(error)
-);
+const MOCK_AI_INSIGHTS = {
+  predictions: [],
+  recommendations: [],
+};
 
 class AnalyticsService {
   async getHRMetrics() {
-    const response = await api.get('/analytics/hr');
-    return response.data;
+    try {
+      return await apiClient.get('/analytics/hr');
+    } catch (error) {
+      logger.warn('Analytics HR metrics unavailable, using defaults:', error.message);
+      return MOCK_HR_METRICS;
+    }
   }
 
   async getSystemHealth() {
-    const response = await api.get('/analytics/system');
-    return response.data;
+    try {
+      return await apiClient.get('/analytics/system');
+    } catch (error) {
+      logger.warn('Analytics system health unavailable, using defaults:', error.message);
+      return MOCK_SYSTEM_HEALTH;
+    }
   }
 
   async getAIInsights() {
-    const response = await api.get('/analytics/insights');
-    return response.data;
+    try {
+      return await apiClient.get('/analytics/insights');
+    } catch (error) {
+      logger.warn('Analytics AI insights unavailable, using defaults:', error.message);
+      return MOCK_AI_INSIGHTS;
+    }
   }
 }
 

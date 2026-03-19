@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * ALAWAEL ERP - PHASE 21: WORKFORCE ANALYTICS & PLANNING SYSTEM
  * HR metrics, forecasting, succession planning, talent analytics, compensation analysis

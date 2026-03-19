@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 const Employee = require('../models/Employee.memory');
 const db = require('../config/inMemoryDB');
 

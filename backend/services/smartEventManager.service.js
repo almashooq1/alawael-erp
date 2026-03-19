@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Smart Event & Workshop Manager Service (Phase 82)
  *

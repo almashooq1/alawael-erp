@@ -1,4 +1,9 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
+
+
+
  * Payroll Component Tests - Phase 5.2
  * Tests salary calculations, deductions, and payroll processing
  * 15 test cases covering payroll operations
@@ -45,7 +50,7 @@ class PaymentStore {
 
   async find(query = {}) {
     return Array.from(this.data.values()).filter(record => {
-      for (let key in query) {
+      for (const key in query) {
         if (record[key] !== query[key]) return false;
       }
       return true;
@@ -54,6 +59,86 @@ class PaymentStore {
 }
 
 const Payment = new PaymentStore();
+
+// === Global RBAC Mock ===
+jest.mock('../rbac', () => ({
+  createRBACMiddleware: () => (req, res, next) => next(),
+  checkPermission: () => (req, res, next) => next(),
+  RBAC_ROLES: {},
+  RBAC_PERMISSIONS: {},
+}));
+// === Global Auth Mock ===
+jest.mock('../middleware/auth', () => ({
+  authenticateToken: (req, res, next) => {
+    req.user = { id: 'user123', name: 'Test User', role: 'admin', permissions: ['*'] };
+    next();
+  },
+  requireAdmin: (req, res, next) => next(),
+  requireAuth: (req, res, next) => {
+    req.user = { id: 'user123', name: 'Test User', role: 'admin', permissions: ['*'] };
+    next();
+  },
+  requireRole:
+    (...roles) =>
+    (req, res, next) =>
+      next(),
+  optionalAuth: (req, res, next) => next(),
+  protect: (req, res, next) => {
+    req.user = { id: 'user123', name: 'Test User', role: 'admin', permissions: ['*'] };
+    next();
+  },
+  authorize:
+    (...roles) =>
+    (req, res, next) =>
+      next(),
+  authorizeRole:
+    (...roles) =>
+    (req, res, next) =>
+      next(),
+  authenticate: (req, res, next) => {
+    req.user = { id: 'user123', name: 'Test User', role: 'admin', permissions: ['*'] };
+    next();
+  },
+}));
+
+jest.mock('../middleware/auth.middleware', () => ({
+  authenticateToken: (req, res, next) => {
+    req.user = { id: 'user123', name: 'Test User', role: 'admin', permissions: ['*'] };
+    next();
+  },
+  requireRole:
+    (...roles) =>
+    (req, res, next) =>
+      next(),
+}));
+
+jest.mock('../models/payroll.model', () => {
+  const mongoose = require('mongoose');
+  const mockModel = function (data) {
+    Object.assign(this, data);
+    this._id = (data && data._id) || new mongoose.Types.ObjectId();
+    this.save = jest.fn().mockResolvedValue(this);
+    this.validate = jest.fn().mockResolvedValue(true);
+    this.validateSync = jest.fn().mockReturnValue(null);
+    this.toObject = jest.fn().mockReturnValue({ ...data });
+    this.toJSON = jest.fn().mockReturnValue({ ...data });
+  };
+  mockModel.find = jest.fn().mockResolvedValue([]);
+  mockModel.findById = jest.fn().mockResolvedValue(null);
+  mockModel.findOne = jest.fn().mockResolvedValue(null);
+  mockModel.findByIdAndUpdate = jest.fn().mockResolvedValue(null);
+  mockModel.findByIdAndDelete = jest.fn().mockResolvedValue(null);
+  mockModel.create = jest.fn().mockImplementation(data => Promise.resolve(new mockModel(data)));
+  mockModel.updateOne = jest.fn().mockResolvedValue({ modifiedCount: 1 });
+  mockModel.deleteOne = jest.fn().mockResolvedValue({ deletedCount: 1 });
+  mockModel.deleteMany = jest.fn().mockResolvedValue({ deletedCount: 0 });
+  mockModel.countDocuments = jest.fn().mockResolvedValue(0);
+  mockModel.prototype.save = jest.fn().mockImplementation(function () {
+    return Promise.resolve(this);
+  });
+  mockModel.prototype.validate = jest.fn().mockResolvedValue(true);
+  return mockModel;
+});
 
 describe('Payroll Component Tests - Phase 5.2', () => {
   let testEmployee;

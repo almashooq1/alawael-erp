@@ -54,7 +54,7 @@ router.post('/iban/validate', async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -90,7 +90,7 @@ router.post('/account/verify', async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -112,7 +112,7 @@ router.get('/account/:iban/balance', async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -170,7 +170,7 @@ router.post(
     } catch (error: any) {
       res.status(400).json({
         success: false,
-        message: error.message,
+        message: 'حدث خطأ داخلي',
       });
     }
   }
@@ -185,13 +185,7 @@ router.post(
   authorizeRole(['USER', 'ADMIN']),
   async (req: Request, res: Response) => {
     try {
-      const {
-        sourceIban,
-        destinationIban,
-        amount,
-        frequency,
-        description,
-      } = req.body;
+      const { sourceIban, destinationIban, amount, frequency, description } = req.body;
 
       // Validate inputs
       if (!sourceIban || !destinationIban || !amount || !frequency) {
@@ -216,7 +210,7 @@ router.post(
     } catch (error: any) {
       res.status(400).json({
         success: false,
-        message: error.message,
+        message: 'حدث خطأ داخلي',
       });
     }
   }
@@ -244,7 +238,7 @@ router.get('/account/:iban/analysis', async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -255,12 +249,7 @@ router.get('/account/:iban/analysis', async (req: Request, res: Response) => {
  */
 router.post('/analytics/forecast', async (req: Request, res: Response) => {
   try {
-    const {
-      currentBalance,
-      monthlyIncome,
-      monthlyExpenses,
-      forecastDays = 90,
-    } = req.body;
+    const { currentBalance, monthlyIncome, monthlyExpenses, forecastDays = 90 } = req.body;
 
     const forecast = await FinancialIntelligenceService.generateCashFlowForecast(
       currentBalance,
@@ -276,7 +265,7 @@ router.post('/analytics/forecast', async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -298,7 +287,7 @@ router.post('/analytics/financial-score', async (req: Request, res: Response) =>
   } catch (error: any) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -330,7 +319,7 @@ router.post('/analytics/spending-patterns', async (req: Request, res: Response) 
   } catch (error: any) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -362,7 +351,7 @@ router.post('/analytics/budget-recommendations', async (req: Request, res: Respo
   } catch (error: any) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -384,7 +373,7 @@ router.post('/analytics/investment-suggestions', async (req: Request, res: Respo
   } catch (error: any) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -417,7 +406,7 @@ router.post('/analytics/monthly-report', async (req: Request, res: Response) => 
   } catch (error: any) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -458,7 +447,7 @@ router.get(
     } catch (error: any) {
       res.status(400).json({
         success: false,
-        message: error.message,
+        message: 'حدث خطأ داخلي',
       });
     }
   }
@@ -492,7 +481,7 @@ router.post('/fraud/detect', async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -512,10 +501,7 @@ router.post('/fraud/profile/build', async (req: Request, res: Response) => {
       });
     }
 
-    const profile = await FraudDetectionService.buildBehavioralProfile(
-      accountId,
-      transactions
-    );
+    const profile = await FraudDetectionService.buildBehavioralProfile(accountId, transactions);
 
     res.json({
       success: true,
@@ -524,7 +510,7 @@ router.post('/fraud/profile/build', async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -561,7 +547,7 @@ router.post(
     } catch (error: any) {
       res.status(400).json({
         success: false,
-        message: error.message,
+        message: 'حدث خطأ داخلي',
       });
     }
   }
@@ -601,7 +587,7 @@ router.post(
     } catch (error: any) {
       res.status(400).json({
         success: false,
-        message: error.message,
+        message: 'حدث خطأ داخلي',
       });
     }
   }
@@ -634,7 +620,7 @@ router.post(
     } catch (error: any) {
       res.status(400).json({
         success: false,
-        message: error.message,
+        message: 'حدث خطأ داخلي',
       });
     }
   }
@@ -667,7 +653,7 @@ router.post(
     } catch (error: any) {
       res.status(400).json({
         success: false,
-        message: error.message,
+        message: 'حدث خطأ داخلي',
       });
     }
   }
@@ -697,7 +683,7 @@ router.get('/status', async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -706,7 +692,7 @@ router.get('/status', async (req: Request, res: Response) => {
 // Error Handling
 // ============================================
 
-router.use((err: any, req: Request, res: Response, next: NextFunction) => {
+router.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   console.error('SAMA API Error:', err);
   res.status(500).json({
     success: false,

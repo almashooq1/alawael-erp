@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const Project = require('../models/project.model');
 const Task = require('../models/task.model');
 const User = require('../models/User');

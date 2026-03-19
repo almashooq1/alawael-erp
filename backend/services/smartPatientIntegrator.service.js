@@ -1,18 +1,24 @@
+/* eslint-disable no-unused-vars */
 const SmartClinicalCommandService = require('./smartClinicalCommand.service');
 const SmartPredictiveService = require('./smartPredictiveAI.service');
 const SmartPsychotherapyService = require('./smartPsychotherapy.service');
 const SmartNutritionService = require('./smartNutrition.service');
+const logger = require('../utils/logger');
 
 class SmartPatientIntegratorService {
   // THE DIGITAL TWIN AGGREGATOR
   static async getPatientDigitalTwin(patientId) {
-    console.log(`[Integrator] Building Digital Twin for ${patientId}...`);
+    logger.info(`[Integrator] Building Digital Twin for ${patientId}...`);
 
     try {
       // 1. Fetch from Command Center (The Physical Body)
       // Use the comprehensive snapshot method which simulates fetching relevant modules
       const snapshot = await SmartClinicalCommandService.getPatientCommandSnapshot(patientId);
-      const vitals = snapshot.modules.wearable || { liveHeartRate: 75, liveSpO2: 98, stressIndex: 10 };
+      const vitals = snapshot.modules.wearable || {
+        liveHeartRate: 75,
+        liveSpO2: 98,
+        stressIndex: 10,
+      };
 
       // 2. Fetch AI Prediction (The Future)
       // Passes the current snapshot to the AI engine
@@ -21,7 +27,9 @@ class SmartPatientIntegratorService {
       // 3. Fetch Psych State (The Mind)
       // Access internal store of the Psych service instance
       let psychScore = 5; // Default low anxiety
-      const psychData = SmartPsychotherapyService.patientRecords ? SmartPsychotherapyService.patientRecords.get(patientId) : null;
+      const psychData = SmartPsychotherapyService.patientRecords
+        ? SmartPsychotherapyService.patientRecords.get(patientId)
+        : null;
       if (psychData && psychData.assessments && psychData.assessments.length > 0) {
         // Get latest assessment
         const lastAsmt = psychData.assessments[psychData.assessments.length - 1];
@@ -67,7 +75,9 @@ class SmartPatientIntegratorService {
           },
           future_outlook: {
             source: 'Phase 102',
-            recoveryProbability: prediction.forecast ? prediction.forecast.confidenceScore / 100 : 0,
+            recoveryProbability: prediction.forecast
+              ? prediction.forecast.confidenceScore / 100
+              : 0,
           },
           metabolic: {
             source: 'Phase 107',
@@ -77,15 +87,17 @@ class SmartPatientIntegratorService {
         recommendation: this.generateHolisticRecommendation(status, scores),
       };
     } catch (error) {
-      console.error('Integrator Error:', error);
-      throw { message: 'Failed to build Digital Twin', error: error.message };
+      logger.error('Integrator Error:', error);
+      throw { message: 'Failed to build Digital Twin', error: 'حدث خطأ داخلي' };
     }
   }
 
   static generateHolisticRecommendation(status, scores) {
-    if (status === 'CRITICAL') return 'IMMEDIATE INTERVENTION: Multi-disciplinary team review required.';
+    if (status === 'CRITICAL')
+      return 'IMMEDIATE INTERVENTION: Multi-disciplinary team review required.';
 
-    if (scores.mental < 70) return 'Suggest increasing Meditation VR sessions (Phase 104) and CBT flow (Phase 105).';
+    if (scores.mental < 70)
+      return 'Suggest increasing Meditation VR sessions (Phase 104) and CBT flow (Phase 105).';
     if (scores.physical < 80) return 'Review Clinical Vitals and adjust Medication (Phase 103).';
 
     return 'Maintain current integral therapy plan.';

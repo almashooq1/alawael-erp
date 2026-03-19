@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Advanced HR Models
  * نماذج الموارد البشرية المتقدمة
@@ -286,7 +287,6 @@ const employeeBenefitsSchema = new Schema({
     ref: 'Employee',
     required: true,
     unique: true,
-    index: true,
   },
 
   healthInsurance: {

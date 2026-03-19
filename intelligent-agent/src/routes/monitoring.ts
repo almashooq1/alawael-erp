@@ -18,8 +18,8 @@ const logger = Logger.getInstance();
  *       200:
  *         description: System metrics
  */
-router.get('/system', (req, res) => {
-  const cpuUsage = os.loadavg()[0] / os.cpus().length * 100;
+router.get('/system', (_req, res) => {
+  const cpuUsage = (os.loadavg()[0] / os.cpus().length) * 100;
   const totalMem = os.totalmem();
   const freeMem = os.freemem();
   const memUsage = ((totalMem - freeMem) / totalMem) * 100;
@@ -47,7 +47,7 @@ router.get('/system', (req, res) => {
  *       200:
  *         description: Request statistics
  */
-router.get('/requests', (req, res) => {
+router.get('/requests', (_req, res) => {
   const stats = performanceMonitor.getStats();
 
   const statsData: any = stats;
@@ -71,7 +71,7 @@ router.get('/requests', (req, res) => {
  *       200:
  *         description: Endpoint statistics
  */
-router.get('/endpoints', (req, res) => {
+router.get('/endpoints', (_req, res) => {
   const stats = performanceMonitor.getStats();
 
   // Convert map to array and sort by count
@@ -99,17 +99,17 @@ router.get('/endpoints', (req, res) => {
  *       200:
  *         description: Time series data
  */
-router.get('/timeseries', (req, res) => {
+router.get('/timeseries', (_req, res) => {
   // Mock data - في production يجب حفظ هذه البيانات في قاعدة بيانات
   const now = Date.now();
   const data = [];
 
   for (let i = 60; i >= 0; i--) {
-    const timestamp = now - (i * 60 * 1000); // كل دقيقة
+    const timestamp = now - i * 60 * 1000; // كل دقيقة
     data.push({
       time: new Date(timestamp).toLocaleTimeString('en-US', {
         hour: '2-digit',
-        minute: '2-digit'
+        minute: '2-digit',
       }),
       responseTime: Math.floor(Math.random() * 200) + 50,
       requests: Math.floor(Math.random() * 50) + 10,
@@ -180,12 +180,12 @@ router.get('/errors', async (req, res) => {
  *       200:
  *         description: Active alerts
  */
-router.get('/alerts', (req, res) => {
+router.get('/alerts', (_req, res) => {
   const alerts = [];
   const stats = performanceMonitor.getStats();
 
   // CPU Alert
-  const cpuUsage = os.loadavg()[0] / os.cpus().length * 100;
+  const cpuUsage = (os.loadavg()[0] / os.cpus().length) * 100;
   if (cpuUsage > 80) {
     alerts.push({
       type: 'warning',
@@ -210,7 +210,7 @@ router.get('/alerts', (req, res) => {
   if ((stats as any).avgResponseTime && (stats as any).avgResponseTime > 500) {
     alerts.push({
       type: 'warning',
-      message: `Slow response time: ${((stats as any).avgResponseTime).toFixed(0)}ms`,
+      message: `Slow response time: ${(stats as any).avgResponseTime.toFixed(0)}ms`,
       timestamp: new Date().toISOString(),
     });
   }
@@ -221,7 +221,7 @@ router.get('/alerts', (req, res) => {
 /**
  * Health check endpoint
  */
-router.get('/health', (req, res) => {
+router.get('/health', (_req, res) => {
   res.json({
     status: 'ok',
     timestamp: new Date().toISOString(),

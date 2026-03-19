@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * ============================================
  * BACKUP & RESTORE SERVICE
@@ -12,6 +13,7 @@ const zlib = require('zlib');
 const { exec } = require('child_process');
 const { promisify } = require('util');
 const AWS = require('aws-sdk');
+const logger = require('../utils/logger');
 
 const execPromise = promisify(exec);
 
@@ -65,7 +67,7 @@ class BackupRestoreService {
         location: 'LOCAL',
       };
     } catch (error) {
-      throw new Error(`Local backup failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -88,7 +90,7 @@ class BackupRestoreService {
 
       return compressedPath;
     } catch (error) {
-      throw new Error(`Backup compression failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -130,7 +132,7 @@ class BackupRestoreService {
         source: backupFileName,
       };
     } catch (error) {
-      throw new Error(`Restore failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -164,7 +166,7 @@ class BackupRestoreService {
         timestamp: new Date(),
       };
     } catch (error) {
-      throw new Error(`S3 upload failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -193,7 +195,7 @@ class BackupRestoreService {
         timestamp: new Date(),
       };
     } catch (error) {
-      throw new Error(`S3 download failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -218,7 +220,7 @@ class BackupRestoreService {
         total: result.Contents?.length || 0,
       };
     } catch (error) {
-      throw new Error(`Failed to list S3 backups: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -233,24 +235,24 @@ class BackupRestoreService {
     // Daily backup at 2 AM
     schedule.scheduleJob('0 2 * * *', async () => {
       try {
-        console.log('📦 Starting daily automatic backup...');
+        // console.log('📦 Starting daily automatic backup...');
 
         // Create backup
         const backup = await this.createLocalBackup();
-        console.log(`✅ Local backup created: ${backup.fileName}`);
+        // console.log(`✅ Local backup created: ${backup.fileName}`);
 
         // Compress backup
         const compressedPath = await this.compressBackup(backup.backupPath);
-        console.log(`✅ Backup compressed: ${compressedPath}`);
+        // console.log(`✅ Backup compressed: ${compressedPath}`);
 
         // Upload to S3
         const s3Result = await this.uploadBackupToS3(compressedPath, path.basename(compressedPath));
-        console.log(`✅ Backup uploaded to S3: ${s3Result.s3Url}`);
+        // console.log(`✅ Backup uploaded to S3: ${s3Result.s3Url}`);
 
         // Cleanup old local backups (keep last 7 days)
         await this.cleanupOldBackups(7);
       } catch (error) {
-        console.error(`❌ Auto backup failed: ${error.message}`);
+        logger.error(`❌ Auto backup failed: ${error.message}`);
         // Send alert/notification
       }
     });
@@ -258,14 +260,14 @@ class BackupRestoreService {
     // Weekly full backup at Sunday 1 AM
     schedule.scheduleJob('0 1 * * 0', async () => {
       try {
-        console.log('📦 Starting weekly full backup...');
+        // console.log('📦 Starting weekly full backup...');
         // Similar process with full backup flag
       } catch (error) {
-        console.error(`❌ Weekly backup failed: ${error.message}`);
+        logger.error(`❌ Weekly backup failed: ${error.message}`);
       }
     });
 
-    console.log('✅ Backup schedules configured');
+    // console.log('✅ Backup schedules configured');
   }
 
   /**
@@ -292,7 +294,7 @@ class BackupRestoreService {
 
       return backups.sort((a, b) => b.created - a.created);
     } catch (error) {
-      throw new Error(`Failed to list backups: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -308,7 +310,7 @@ class BackupRestoreService {
 
         if (stats.mtime.getTime() < cutoffDate) {
           await fs.unlink(filePath);
-          console.log(`🗑️  Deleted old backup: ${file}`);
+          // console.log(`🗑️  Deleted old backup: ${file}`);
         }
       }
 
@@ -317,7 +319,7 @@ class BackupRestoreService {
         message: `Backups older than ${daysToKeep} days deleted`,
       };
     } catch (error) {
-      throw new Error(`Cleanup failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -345,7 +347,7 @@ class BackupRestoreService {
       return {
         success: false,
         message: 'Backup integrity check failed',
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -381,7 +383,7 @@ class BackupRestoreService {
         },
       };
     } catch (error) {
-      throw new Error(`Report generation failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 }

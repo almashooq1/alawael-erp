@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Standardized Response Formatter
  * تنسيق موحّد للاستجابات

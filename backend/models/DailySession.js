@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 const goalProgressSchema = new mongoose.Schema({
@@ -26,7 +27,7 @@ const dailySessionSchema = new mongoose.Schema(
     // Attachments (Photos/Videos of session)
     media: [String],
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 module.exports = mongoose.model('DailySession', dailySessionSchema);

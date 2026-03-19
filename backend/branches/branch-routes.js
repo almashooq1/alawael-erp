@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Branch Routes - مسارات الفروع
  * API Endpoints for Branch Management
@@ -23,9 +24,9 @@ router.get('/', async (req, res) => {
       limit: parseInt(req.query.limit) || 100,
       sort: req.query.sort || { code: 1 },
     };
-    
+
     const branches = await branchManagementService.getBranches(options);
-    
+
     res.json({
       success: true,
       data: branches,
@@ -34,7 +35,7 @@ router.get('/', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -47,7 +48,7 @@ router.get('/', async (req, res) => {
 router.get('/hierarchy', async (req, res) => {
   try {
     const hierarchy = await branchManagementService.getBranchHierarchy();
-    
+
     res.json({
       success: true,
       data: hierarchy,
@@ -55,7 +56,7 @@ router.get('/hierarchy', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -69,7 +70,7 @@ router.get('/statistics', async (req, res) => {
   try {
     const tenantId = req.user?.tenantId;
     const stats = await branchManagementService.getStatistics(tenantId);
-    
+
     res.json({
       success: true,
       data: stats,
@@ -77,7 +78,7 @@ router.get('/statistics', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -90,7 +91,7 @@ router.get('/statistics', async (req, res) => {
 router.get('/open', async (req, res) => {
   try {
     const branches = await branchManagementService.getOpenBranches(req.query.region);
-    
+
     res.json({
       success: true,
       data: branches,
@@ -99,7 +100,7 @@ router.get('/open', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -112,19 +113,19 @@ router.get('/open', async (req, res) => {
 router.get('/search', async (req, res) => {
   try {
     const { q } = req.query;
-    
+
     if (!q) {
       return res.status(400).json({
         success: false,
         error: 'Search query is required',
       });
     }
-    
+
     const branches = await branchManagementService.searchBranches(q, {
       status: req.query.status,
       limit: parseInt(req.query.limit) || 20,
     });
-    
+
     res.json({
       success: true,
       data: branches,
@@ -133,7 +134,7 @@ router.get('/search', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -146,7 +147,7 @@ router.get('/search', async (req, res) => {
 router.get('/region/:region', async (req, res) => {
   try {
     const branches = await branchManagementService.getBranchesByRegion(req.params.region);
-    
+
     res.json({
       success: true,
       data: branches,
@@ -155,7 +156,7 @@ router.get('/region/:region', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -168,20 +169,20 @@ router.get('/region/:region', async (req, res) => {
 router.get('/nearby', async (req, res) => {
   try {
     const { lat, lng, distance } = req.query;
-    
+
     if (!lat || !lng) {
       return res.status(400).json({
         success: false,
         error: 'Latitude and longitude are required',
       });
     }
-    
+
     const branches = await branchManagementService.getNearbyBranches(
       parseFloat(lat),
       parseFloat(lng),
       parseFloat(distance) || 50
     );
-    
+
     res.json({
       success: true,
       data: branches,
@@ -190,7 +191,7 @@ router.get('/nearby', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -203,14 +204,14 @@ router.get('/nearby', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const branch = await branchManagementService.getBranch(req.params.id);
-    
+
     if (!branch) {
       return res.status(404).json({
         success: false,
         error: 'Branch not found',
       });
     }
-    
+
     res.json({
       success: true,
       data: branch,
@@ -218,7 +219,7 @@ router.get('/:id', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -231,14 +232,14 @@ router.get('/:id', async (req, res) => {
 router.get('/code/:code', async (req, res) => {
   try {
     const branch = await branchManagementService.getBranchByCode(req.params.code);
-    
+
     if (!branch) {
       return res.status(404).json({
         success: false,
         error: 'Branch not found',
       });
     }
-    
+
     res.json({
       success: true,
       data: branch,
@@ -246,7 +247,7 @@ router.get('/code/:code', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -259,7 +260,7 @@ router.get('/code/:code', async (req, res) => {
 router.get('/:id/open', async (req, res) => {
   try {
     const isOpen = await branchManagementService.isBranchOpen(req.params.id);
-    
+
     res.json({
       success: true,
       isOpen,
@@ -268,7 +269,7 @@ router.get('/:id/open', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -285,9 +286,9 @@ router.post('/', async (req, res) => {
       createdBy: req.user?.id,
       tenantId: req.user?.tenantId,
     };
-    
+
     const branch = await branchManagementService.createBranch(branchData);
-    
+
     res.status(201).json({
       success: true,
       data: branch,
@@ -296,7 +297,7 @@ router.post('/', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -313,14 +314,14 @@ router.put('/:id', async (req, res) => {
       req.body,
       req.user?.id
     );
-    
+
     if (!branch) {
       return res.status(404).json({
         success: false,
         error: 'Branch not found',
       });
     }
-    
+
     res.json({
       success: true,
       data: branch,
@@ -329,7 +330,7 @@ router.put('/:id', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -342,28 +343,28 @@ router.put('/:id', async (req, res) => {
 router.put('/:id/status', async (req, res) => {
   try {
     const { status, reason } = req.body;
-    
+
     if (!status) {
       return res.status(400).json({
         success: false,
         error: 'Status is required',
       });
     }
-    
+
     const branch = await branchManagementService.updateStatus(
       req.params.id,
       status,
       req.user?.id,
       reason
     );
-    
+
     if (!branch) {
       return res.status(404).json({
         success: false,
         error: 'Branch not found',
       });
     }
-    
+
     res.json({
       success: true,
       data: branch,
@@ -372,7 +373,7 @@ router.put('/:id/status', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -384,18 +385,15 @@ router.put('/:id/status', async (req, res) => {
  */
 router.put('/:id/manager', async (req, res) => {
   try {
-    const branch = await branchManagementService.assignManager(
-      req.params.id,
-      req.body
-    );
-    
+    const branch = await branchManagementService.assignManager(req.params.id, req.body);
+
     if (!branch) {
       return res.status(404).json({
         success: false,
         error: 'Branch not found',
       });
     }
-    
+
     res.json({
       success: true,
       data: branch,
@@ -404,7 +402,7 @@ router.put('/:id/manager', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -422,14 +420,14 @@ router.delete('/:id', async (req, res) => {
       req.user?.id,
       req.body.reason || 'Closed via API'
     );
-    
+
     if (!branch) {
       return res.status(404).json({
         success: false,
         error: 'Branch not found',
       });
     }
-    
+
     res.json({
       success: true,
       message: 'تم إغلاق الفرع',
@@ -437,7 +435,7 @@ router.delete('/:id', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -451,15 +449,12 @@ router.delete('/:id', async (req, res) => {
  */
 router.get('/:branchId/transfers', async (req, res) => {
   try {
-    const transfers = await branchManagementService.getTransfers(
-      req.params.branchId,
-      {
-        status: req.query.status,
-        type: req.query.type,
-        limit: parseInt(req.query.limit) || 50,
-      }
-    );
-    
+    const transfers = await branchManagementService.getTransfers(req.params.branchId, {
+      status: req.query.status,
+      type: req.query.type,
+      limit: parseInt(req.query.limit) || 50,
+    });
+
     res.json({
       success: true,
       data: transfers,
@@ -468,7 +463,7 @@ router.get('/:branchId/transfers', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -485,9 +480,9 @@ router.post('/transfers', async (req, res) => {
       createdBy: req.user?.id,
       tenantId: req.user?.tenantId,
     };
-    
+
     const transfer = await branchManagementService.createTransfer(transferData);
-    
+
     res.status(201).json({
       success: true,
       data: transfer,
@@ -496,7 +491,7 @@ router.post('/transfers', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -509,14 +504,14 @@ router.post('/transfers', async (req, res) => {
 router.put('/transfers/:transferId/approve', async (req, res) => {
   try {
     const { branchType } = req.body; // 'from' or 'to'
-    
+
     const transfer = await branchManagementService.approveTransfer(
       req.params.transferId,
       branchType,
       req.user?.id,
       req.user?.name
     );
-    
+
     res.json({
       success: true,
       data: transfer,
@@ -525,7 +520,7 @@ router.put('/transfers/:transferId/approve', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -537,11 +532,8 @@ router.put('/transfers/:transferId/approve', async (req, res) => {
  */
 router.put('/transfers/:transferId/ship', async (req, res) => {
   try {
-    const transfer = await branchManagementService.shipTransfer(
-      req.params.transferId,
-      req.body
-    );
-    
+    const transfer = await branchManagementService.shipTransfer(req.params.transferId, req.body);
+
     res.json({
       success: true,
       data: transfer,
@@ -550,7 +542,7 @@ router.put('/transfers/:transferId/ship', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -567,7 +559,7 @@ router.put('/transfers/:transferId/receive', async (req, res) => {
       req.user?.id,
       req.user?.name
     );
-    
+
     res.json({
       success: true,
       data: transfer,
@@ -576,7 +568,7 @@ router.put('/transfers/:transferId/receive', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -591,20 +583,20 @@ router.put('/transfers/:transferId/receive', async (req, res) => {
 router.get('/:branchId/performance', async (req, res) => {
   try {
     const { startDate, endDate } = req.query;
-    
+
     if (!startDate || !endDate) {
       return res.status(400).json({
         success: false,
         error: 'Start date and end date are required',
       });
     }
-    
+
     const report = await branchManagementService.getPerformanceReport(
       req.params.branchId,
       new Date(startDate),
       new Date(endDate)
     );
-    
+
     res.json({
       success: true,
       data: report,
@@ -612,7 +604,7 @@ router.get('/:branchId/performance', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -625,13 +617,13 @@ router.get('/:branchId/performance', async (req, res) => {
 router.post('/:branchId/performance', async (req, res) => {
   try {
     const { date, metrics } = req.body;
-    
+
     const log = await branchManagementService.logPerformance(
       req.params.branchId,
       new Date(date),
       metrics
     );
-    
+
     res.status(201).json({
       success: true,
       data: log,
@@ -639,7 +631,7 @@ router.post('/:branchId/performance', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });

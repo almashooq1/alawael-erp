@@ -129,7 +129,7 @@ class DeploymentWizard {
         }
       } catch (error: any) {
         spinner.fail(`${check.name}: Failed`);
-        results.push({ name: check.name, status: 'fail', message: error.message });
+        results.push({ name: check.name, status: 'fail', message: 'An internal error occurred' });
       }
 
       await this.sleep(300);
@@ -255,7 +255,7 @@ class DeploymentWizard {
         
         spinner.succeed(task.name);
       } catch (error: any) {
-        spinner.fail(`${task.name}: ${error.message}`);
+        spinner.fail(`${task.name}: ${'An internal error occurred'}`);
         throw error;
       }
     }

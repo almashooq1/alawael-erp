@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * ===================================================================
  * ACCOUNTING PAYMENT CONTROLLER - متحكم المدفوعات المحاسبية
@@ -5,6 +6,8 @@
  */
 
 const AccountingPayment = require('../models/AccountingPayment');
+const logger = require('../utils/logger');
+const { escapeRegex } = require('../utils/sanitize');
 
 // @desc    Get all payments
 // @route   GET /api/accounting/payments
@@ -24,7 +27,7 @@ exports.getAllPayments = async (req, res) => {
     }
 
     if (search) {
-      query.$or = [{ reference: { $regex: search, $options: 'i' } }];
+      query.$or = [{ reference: { $regex: escapeRegex(search), $options: 'i' } }];
     }
 
     const payments = await AccountingPayment.find(query)
@@ -36,11 +39,11 @@ exports.getAllPayments = async (req, res) => {
       data: payments,
     });
   } catch (error) {
-    console.error('Error fetching payments:', error);
+    logger.error('Error fetching payments:', error);
     res.status(500).json({
       success: false,
       message: 'حدث خطأ أثناء جلب المدفوعات',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 };
@@ -110,11 +113,11 @@ exports.getPaymentStats = async (req, res) => {
       data: stats,
     });
   } catch (error) {
-    console.error('Error fetching payment stats:', error);
+    logger.error('Error fetching payment stats:', error);
     res.status(500).json({
       success: false,
       message: 'حدث خطأ أثناء جلب الإحصائيات',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 };
@@ -140,11 +143,11 @@ exports.getPaymentById = async (req, res) => {
       data: payment,
     });
   } catch (error) {
-    console.error('Error fetching payment:', error);
+    logger.error('Error fetching payment:', error);
     res.status(500).json({
       success: false,
       message: 'حدث خطأ أثناء جلب الدفعة',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 };
@@ -170,11 +173,11 @@ exports.createPayment = async (req, res) => {
       message: 'تم إنشاء الدفعة بنجاح',
     });
   } catch (error) {
-    console.error('Error creating payment:', error);
+    logger.error('Error creating payment:', error);
     res.status(400).json({
       success: false,
       message: 'حدث خطأ أثناء إنشاء الدفعة',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 };
@@ -213,11 +216,11 @@ exports.updatePayment = async (req, res) => {
       message: 'تم تحديث الدفعة بنجاح',
     });
   } catch (error) {
-    console.error('Error updating payment:', error);
+    logger.error('Error updating payment:', error);
     res.status(400).json({
       success: false,
       message: 'حدث خطأ أثناء تحديث الدفعة',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 };
@@ -251,11 +254,11 @@ exports.deletePayment = async (req, res) => {
       message: 'تم حذف الدفعة بنجاح',
     });
   } catch (error) {
-    console.error('Error deleting payment:', error);
+    logger.error('Error deleting payment:', error);
     res.status(500).json({
       success: false,
       message: 'حدث خطأ أثناء حذف الدفعة',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 };
@@ -276,7 +279,8 @@ exports.downloadReceipt = async (req, res) => {
 
     const receiptData = await payment.generateReceipt();
 
-    // TODO: إضافة منطق إنشاء PDF للإيصال هنا
+    // @todo [P2] Integrate PDF generation library (e.g. pdfkit) to produce downloadable receipt
+    logger.warn('Receipt PDF generation not yet implemented — returning raw data');
 
     res.json({
       success: true,
@@ -284,11 +288,11 @@ exports.downloadReceipt = async (req, res) => {
       data: receiptData,
     });
   } catch (error) {
-    console.error('Error generating receipt:', error);
+    logger.error('Error generating receipt:', error);
     res.status(500).json({
       success: false,
       message: 'حدث خطأ أثناء إنشاء الإيصال',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 };

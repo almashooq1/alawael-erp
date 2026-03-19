@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * External Integration Service Tests
  * اختبارات خدمة التكامل الخارجي
@@ -111,7 +113,11 @@ describe('ExternalIntegrationService Tests', () => {
         host: 'smtp.gmail.com',
       });
 
-      const result = await integrationService.sendEmail('recipient@example.com', 'Test', 'Test email');
+      const result = await integrationService.sendEmail(
+        'recipient@example.com',
+        'Test',
+        'Test email'
+      );
 
       assert(result.success === true, 'Should send successfully');
       assert(result.email || result.email, 'Should return email info');
@@ -125,7 +131,11 @@ describe('ExternalIntegrationService Tests', () => {
 
       const recipients = ['user1@example.com', 'user2@example.com', 'user3@example.com'];
 
-      const result = await integrationService.sendBulkEmail(recipients, 'Bulk Message', 'Test template');
+      const result = await integrationService.sendBulkEmail(
+        recipients,
+        'Bulk Message',
+        'Test template'
+      );
 
       assert(result.success === true, 'Should send successfully');
       assert(result.totalSent >= 0, 'Should send to recipients');
@@ -137,9 +147,14 @@ describe('ExternalIntegrationService Tests', () => {
         host: 'smtp.gmail.com',
       });
 
-      const result = await integrationService.sendEmail('test@example.com', 'With Attachment', 'See attachment', {
-        attachments: [{ filename: 'test.txt', content: 'data' }],
-      });
+      const result = await integrationService.sendEmail(
+        'test@example.com',
+        'With Attachment',
+        'See attachment',
+        {
+          attachments: [{ filename: 'test.txt', content: 'data' }],
+        }
+      );
 
       assert(result.success === true || result.success === false, 'Should handle attachments');
     });
@@ -150,10 +165,15 @@ describe('ExternalIntegrationService Tests', () => {
         host: 'smtp.gmail.com',
       });
 
-      const result = await integrationService.sendEmail('test@example.com', 'Welcome', 'Template content', {
-        templateId: 'welcome',
-        data: { name: 'John' },
-      });
+      const result = await integrationService.sendEmail(
+        'test@example.com',
+        'Welcome',
+        'Template content',
+        {
+          templateId: 'welcome',
+          data: { name: 'John' },
+        }
+      );
 
       assert(result.success === true || result.success === false, 'Should support templates');
     });
@@ -174,7 +194,11 @@ describe('ExternalIntegrationService Tests', () => {
         host: 'smtp.gmail.com',
       });
 
-      const result = await integrationService.sendEmail('test@example.com', 'Test with Unicode: 你好', 'الرسالة التجريبية');
+      const result = await integrationService.sendEmail(
+        'test@example.com',
+        'Test with Unicode: 你好',
+        'الرسالة التجريبية'
+      );
 
       assert(result.success === true, 'Should handle unicode');
     });
@@ -185,7 +209,9 @@ describe('ExternalIntegrationService Tests', () => {
         host: 'smtp.gmail.com',
       });
 
-      const result = await integrationService.sendEmail('test@example.com', 'Test', 'Test', { trackDelivery: true });
+      const result = await integrationService.sendEmail('test@example.com', 'Test', 'Test', {
+        trackDelivery: true,
+      });
 
       assert(result.success === true || result.success === false, 'Should track or handle');
     });
@@ -232,7 +258,10 @@ describe('ExternalIntegrationService Tests', () => {
     });
 
     test('should delete webhook', () => {
-      const registered = integrationService.registerWebhook('delete', 'https://example.com/webhook');
+      const registered = integrationService.registerWebhook(
+        'delete',
+        'https://example.com/webhook'
+      );
       const webhookId = registered.webhook.id;
 
       const deleted = integrationService.deleteWebhook(webhookId);
@@ -344,7 +373,11 @@ describe('ExternalIntegrationService Tests', () => {
 
     test('should export logs', () => {
       integrationService.eventQueue = [];
-      integrationService.eventQueue.push({ type: 'test', data: { msg: 'test' }, timestamp: new Date() });
+      integrationService.eventQueue.push({
+        type: 'test',
+        data: { msg: 'test' },
+        timestamp: new Date(),
+      });
       const exported = JSON.stringify(integrationService.eventQueue);
       assert(exported, 'Should export logs');
     });
@@ -364,7 +397,10 @@ describe('ExternalIntegrationService Tests', () => {
     });
 
     test('should handle connection timeouts', async () => {
-      const result = await integrationService.configureSlack('https://invalid-domain-12345.com', []);
+      const result = await integrationService.configureSlack(
+        'https://invalid-domain-12345.com',
+        []
+      );
       assert(!result.success || result.error, 'Should handle timeout errors');
     });
 

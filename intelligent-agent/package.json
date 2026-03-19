@@ -14,7 +14,11 @@
     "test:coverage": "vitest run --coverage",
     "ms:nlp": "ts-node services/nlp-service.ts",
     "ms:user": "ts-node services/user-service.ts",
-    "ms:report": "ts-node services/report-service.ts"
+    "ms:report": "ts-node services/report-service.ts",
+    "quality:guard": "npm run build && tsc --noEmit",
+    "quality:fast": "npm run quality:guard && npm test -- --no-coverage",
+    "quality:ci": "npm run quality:guard && npm test -- --coverage",
+    "quality": "npm run quality:ci"
   },
   "author": "",
   "license": "MIT",

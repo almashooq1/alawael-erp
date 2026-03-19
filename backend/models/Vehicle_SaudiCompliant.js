@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Vehicle Model - السعودي المحدّث
  * نموذج بيانات المركبة مع معايير التوافق السعودية
@@ -769,7 +770,7 @@ vehicleSchema.virtual('complianceStatus').get(function () {
 });
 
 // ====== الوسائط ======
-vehicleSchema.pre('save', function (next) {
+vehicleSchema.pre('save', async function () {
   this.metadata.updatedAt = new Date();
 
   // حساب إجمالي تكاليف الصيانة
@@ -778,8 +779,6 @@ vehicleSchema.pre('save', function (next) {
       return total + (record.cost || 0);
     }, 0);
   }
-
-  next();
 });
 
 vehicleSchema.post('save', function (doc) {

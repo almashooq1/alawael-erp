@@ -28,7 +28,7 @@
 
 .btn-add {
   padding: 12px 24px;
-  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
   color: white;
   border: none;
   border-radius: 8px;
@@ -70,7 +70,7 @@
 .search-input:focus,
 .filter-select:focus {
   outline: none;
-  border-color: #4CAF50;
+  border-color: #4caf50;
   box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
 }
 
@@ -177,12 +177,12 @@
 }
 
 .btn-edit {
-  background: #2196F3;
+  background: #2196f3;
   color: white;
 }
 
 .btn-edit:hover {
-  background: #1976D2;
+  background: #1976d2;
   transform: scale(1.05);
 }
 
@@ -197,12 +197,12 @@
 }
 
 .btn-view {
-  background: #FF9800;
+  background: #ff9800;
   color: white;
 }
 
 .btn-view:hover {
-  background: #F57C00;
+  background: #f57c00;
   transform: scale(1.05);
 }
 
@@ -307,7 +307,7 @@
 
 .form-input:focus {
   outline: none;
-  border-color: #4CAF50;
+  border-color: #4caf50;
   box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
 }
 
@@ -347,7 +347,7 @@
 }
 
 .btn-save {
-  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
   color: white;
 }
 

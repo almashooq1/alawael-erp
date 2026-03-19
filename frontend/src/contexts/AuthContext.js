@@ -1,8 +1,5 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
-import api from '../utils/api';
-
-// Use a configurable API base (falls back to port 3001)
-const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+import React, { createContext, useState, useEffect, useContext, useCallback, useMemo } from 'react';
+import api from '../services/api';
 
 const AuthContext = createContext();
 
@@ -15,27 +12,29 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const fetchUser = async () => {
+  const fetchUser = useCallback(async () => {
     try {
       const response = await api.get('/auth/me');
-      const user = response.data?.user || response.data?.data?.user;
-      setCurrentUser(user || null);
+      // Backend returns { success, data: { id, email, name, role, permissions, ... } }
+      // api.client.js response interceptor returns response.data, so response = { success, data }
+      const userData = response?.data || response;
+      if (userData) {
+        setCurrentUser(userData);
+      } else {
+        setCurrentUser(null);
+      }
     } catch (err) {
       console.error('Error fetching user:', err);
       logout();
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  // Set up axios defaults
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('authToken');
     if (token) {
-      if (api?.defaults?.headers?.common) {
-        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      }
-      // Fetch user data if token exists
+      // api.client.js request interceptor already reads authToken from localStorage
       fetchUser();
     } else {
       setLoading(false);
@@ -46,42 +45,43 @@ export function AuthProvider({ children }) {
   const login = async (email, password) => {
     try {
       setError('');
-      console.log('🔐 Login attempt:', { email, url: `${API_BASE}/auth/login` });
 
-      const response = await api.post('/auth/login', {
-        email,
-        password,
-      });
+      const response = await api.post('/auth/login', { email, password });
 
-      console.log('📥 Login response:', response.data);
+      // api.client.js interceptor returns response.data
+      // so response = { success, data: { token, refreshToken, user } }
+      const data = response?.data || response;
 
-      // Support both original and simple backend response shapes
-      const accessToken =
-        response.data?.accessToken ||
-        response.data?.token ||
-        response.data?.data?.accessToken ||
-        response.data?.data?.token;
-
-      const user = response.data?.user || response.data?.data?.user;
+      const accessToken = data?.accessToken || data?.token;
+      const refreshToken = data?.refreshToken;
+      const user = data?.user;
 
       if (!accessToken) {
         throw new Error('Missing access token from login response');
       }
 
-      localStorage.setItem('token', accessToken);
-      if (api?.defaults?.headers?.common) {
-        api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+      // Store token with the key that api.client.js reads
+      localStorage.setItem('authToken', accessToken);
+      if (refreshToken) {
+        localStorage.setItem('refreshToken', refreshToken);
       }
+
       setCurrentUser(user || null);
 
-      console.log('✅ Login successful:', { user: user.email, role: user.role });
       return { success: true };
     } catch (err) {
-      console.error('❌ Login error:', err);
-      console.error('Response data:', err.response?.data);
-      console.error('Response status:', err.response?.status);
+      console.error('Login error:', err);
+      let errorMessage;
 
-      const errorMessage = err.response?.data?.message || 'Login failed. Please try again.';
+      if (!err?.status && (err?.message === 'Network Error' || err?.code === 'ERR_NETWORK')) {
+        errorMessage = 'لا يمكن الاتصال بالخادم. تأكد من تشغيل الخادم وحاول مرة أخرى.';
+      } else {
+        // err.data may be an object { message: '...' } or a plain string
+        const dataMsg = typeof err?.data === 'object' ? err?.data?.message : err?.data;
+        errorMessage =
+          dataMsg || err?.response?.data?.message || 'فشل تسجيل الدخول. حاول مرة أخرى.';
+      }
+
       setError(errorMessage);
       return { success: false, error: errorMessage };
     }
@@ -90,34 +90,60 @@ export function AuthProvider({ children }) {
   const register = async (name, email, password) => {
     try {
       setError('');
-      await api.post('/auth/register', {
-        fullName: name,
-        email,
-        password,
-      });
+      await api.post('/auth/register', { fullName: name, email, password });
       return { success: true };
     } catch (err) {
-      const errorMessage = err.response?.data?.message || 'Registration failed. Please try again.';
+      const errorMessage =
+        err?.data?.message || err?.response?.data?.message || 'فشل التسجيل. حاول مرة أخرى.';
       setError(errorMessage);
       return { success: false, error: errorMessage };
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    if (api?.defaults?.headers?.common) {
-      delete api.defaults.headers.common['Authorization'];
-    }
+  const logout = useCallback(() => {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('refreshToken');
     setCurrentUser(null);
-  };
+  }, []);
 
-  const value = {
-    currentUser,
-    error,
-    login,
-    register,
-    logout,
-  };
+  /**
+   * Check if the current user has a specific permission.
+   * @param {string} resource
+   * @param {string} action
+   * @returns {boolean}
+   */
+  const hasPermission = useCallback(
+    (resource, action) => {
+      if (!currentUser) return false;
+      if (currentUser.role === 'super_admin') return true;
+      const perms = currentUser.permissions || [];
+      return (
+        perms.includes(`${resource}:${action}`) ||
+        perms.includes(`${resource}:*`) ||
+        perms.includes('*:*')
+      );
+    },
+    [currentUser]
+  );
+
+  /**
+   * Shorthand: can('finance', 'read')
+   */
+  const can = hasPermission;
+
+  const value = useMemo(
+    () => ({
+      currentUser,
+      error,
+      login,
+      register,
+      logout,
+      hasPermission,
+      can,
+      fetchUser,
+    }),
+    [currentUser, error, logout, hasPermission, can, fetchUser]
+  );
 
   return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>;
 }

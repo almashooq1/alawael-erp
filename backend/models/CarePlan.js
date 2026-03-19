@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 // --- SHARED SCHEMAS ---
@@ -7,7 +8,16 @@ const goalSchema = new mongoose.Schema({
   description: String,
   type: {
     type: String,
-    enum: ['ACADEMIC', 'BEHAVIORAL', 'COMMUNICATION', 'MOTOR', 'SPEECH', 'SOCIAL', 'LIFE_SKILL', 'OTHER'],
+    enum: [
+      'ACADEMIC',
+      'BEHAVIORAL',
+      'COMMUNICATION',
+      'MOTOR',
+      'SPEECH',
+      'SOCIAL',
+      'LIFE_SKILL',
+      'OTHER',
+    ],
     required: true,
   },
   baseline: String, // Description of current level
@@ -15,7 +25,11 @@ const goalSchema = new mongoose.Schema({
   criteria: String, // e.g. "80% accuracy"
   startDate: Date,
   targetDate: Date,
-  status: { type: String, enum: ['PENDING', 'IN_PROGRESS', 'ACHIEVED', 'DISCONTINUED'], default: 'PENDING' },
+  status: {
+    type: String,
+    enum: ['PENDING', 'IN_PROGRESS', 'ACHIEVED', 'DISCONTINUED'],
+    default: 'PENDING',
+  },
   progress: { type: Number, default: 0 }, // Percentage
 });
 
@@ -73,7 +87,7 @@ const carePlanSchema = new mongoose.Schema(
       },
     },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 module.exports = mongoose.model('CarePlan', carePlanSchema);

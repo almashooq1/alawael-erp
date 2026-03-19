@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const DocumentVersion = require('../models/DocumentVersion');
 
 /**
@@ -50,7 +51,7 @@ class DocumentCollaborationService {
       await newVersion.save();
       return newVersion;
     } catch (error) {
-      throw new Error(`Failed to create version: ${error.message}`);
+      throw new Error('Operation failed');
     }
   }
 
@@ -61,7 +62,7 @@ class DocumentCollaborationService {
     try {
       return await DocumentVersion.getVersionHistory(documentId, options);
     } catch (error) {
-      throw new Error(`Failed to get version history: ${error.message}`);
+      throw new Error('Operation failed');
     }
   }
 
@@ -76,7 +77,7 @@ class DocumentCollaborationService {
       }
       return version;
     } catch (error) {
-      throw new Error(`Failed to get version: ${error.message}`);
+      throw new Error('Operation failed');
     }
   }
 
@@ -105,7 +106,7 @@ class DocumentCollaborationService {
 
       return newVersion;
     } catch (error) {
-      throw new Error(`Failed to restore version: ${error.message}`);
+      throw new Error('Operation failed');
     }
   }
 
@@ -132,7 +133,7 @@ class DocumentCollaborationService {
         totalChanges: differences.length,
       };
     } catch (error) {
-      throw new Error(`Failed to compare versions: ${error.message}`);
+      throw new Error('Operation failed');
     }
   }
 
@@ -159,7 +160,7 @@ class DocumentCollaborationService {
       await version.save();
       return version;
     } catch (error) {
-      throw new Error(`Failed to update workflow status: ${error.message}`);
+      throw new Error('Operation failed');
     }
   }
 
@@ -178,7 +179,7 @@ class DocumentCollaborationService {
       await version.shareWith(userId, permission, sharedBy);
       return version;
     } catch (error) {
-      throw new Error(`Failed to share version: ${error.message}`);
+      throw new Error('Operation failed');
     }
   }
 
@@ -191,7 +192,7 @@ class DocumentCollaborationService {
       await version.revokeAccess(userId);
       return version;
     } catch (error) {
-      throw new Error(`Failed to revoke access: ${error.message}`);
+      throw new Error('Operation failed');
     }
   }
 
@@ -204,7 +205,7 @@ class DocumentCollaborationService {
       await version.addComment(userId, comment, position);
       return version;
     } catch (error) {
-      throw new Error(`Failed to add comment: ${error.message}`);
+      throw new Error('Operation failed');
     }
   }
 
@@ -217,7 +218,7 @@ class DocumentCollaborationService {
       await version.resolveComment(commentId);
       return version;
     } catch (error) {
-      throw new Error(`Failed to resolve comment: ${error.message}`);
+      throw new Error('Operation failed');
     }
   }
 
@@ -235,7 +236,7 @@ class DocumentCollaborationService {
       await version.startEditSession(userId);
       return version;
     } catch (error) {
-      throw new Error(`Failed to start edit session: ${error.message}`);
+      throw new Error('Operation failed');
     }
   }
 
@@ -248,7 +249,7 @@ class DocumentCollaborationService {
       await version.endEditSession(userId);
       return version;
     } catch (error) {
-      throw new Error(`Failed to end edit session: ${error.message}`);
+      throw new Error('Operation failed');
     }
   }
 
@@ -266,7 +267,7 @@ class DocumentCollaborationService {
         collaborators: activeSessions,
       };
     } catch (error) {
-      throw new Error(`Failed to get collaborators: ${error.message}`);
+      throw new Error('Operation failed');
     }
   }
 
@@ -296,7 +297,7 @@ class DocumentCollaborationService {
         kept: Math.min(keepVersions, allVersions.length),
       };
     } catch (error) {
-      throw new Error(`Failed to archive old versions: ${error.message}`);
+      throw new Error('Operation failed');
     }
   }
 

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Therapeutic Session Management Service
  * خدمة إدارة الجلسات العلاجية
@@ -34,7 +35,7 @@ class TherapeuticSessionService {
         data.therapist,
         data.date,
         data.startTime,
-        data.endTime,
+        data.endTime
       );
       if (!availabilityConflict.available) {
         throw new Error(`Therapist not available: ${availabilityConflict.reason}`);
@@ -45,7 +46,7 @@ class TherapeuticSessionService {
         data.therapist,
         data.date,
         data.startTime,
-        data.endTime,
+        data.endTime
       );
       if (sessionConflict) {
         throw new Error('Time slot conflicts with existing session');
@@ -74,7 +75,7 @@ class TherapeuticSessionService {
     } catch (error) {
       return {
         success: false,
-        message: error.message,
+        message: 'حدث خطأ داخلي',
         error: error,
       };
     }
@@ -92,7 +93,7 @@ class TherapeuticSessionService {
 
       const dayOfWeek = this.getDayOfWeek(date);
       const slot = availability.recurringSchedule.find(
-        (s) => s.dayOfWeek === dayOfWeek && s.isActive,
+        s => s.dayOfWeek === dayOfWeek && s.isActive
       );
 
       if (!slot) {
@@ -204,11 +205,7 @@ class TherapeuticSessionService {
         throw new Error(`Invalid status: ${status}`);
       }
 
-      const session = await TherapySession.findByIdAndUpdate(
-        sessionId,
-        { status },
-        { new: true },
-      );
+      const session = await TherapySession.findByIdAndUpdate(sessionId, { status }, { new: true });
 
       if (!session) {
         throw new Error('Session not found');
@@ -222,7 +219,7 @@ class TherapeuticSessionService {
     } catch (error) {
       return {
         success: false,
-        message: error.message,
+        message: 'حدث خطأ داخلي',
       };
     }
   }
@@ -292,7 +289,7 @@ class TherapeuticSessionService {
     } catch (error) {
       return {
         success: false,
-        message: error.message,
+        message: 'حدث خطأ داخلي',
       };
     }
   }
@@ -319,14 +316,14 @@ class TherapeuticSessionService {
 
       // Get documentation status
       const sessionsWithDocs = await Promise.all(
-        sessions.map(async (session) => {
+        sessions.map(async session => {
           const doc = await SessionDocumentation.findOne({ session: session._id });
           return {
             ...session.toObject(),
             documented: !!doc,
             documentedAt: doc?.documentedAt,
           };
-        }),
+        })
       );
 
       return {
@@ -337,7 +334,7 @@ class TherapeuticSessionService {
     } catch (error) {
       return {
         success: false,
-        message: error.message,
+        message: 'حدث خطأ داخلي',
       };
     }
   }
@@ -365,7 +362,7 @@ class TherapeuticSessionService {
     } catch (error) {
       return {
         success: false,
-        message: error.message,
+        message: 'حدث خطأ داخلي',
       };
     }
   }
@@ -389,7 +386,7 @@ class TherapeuticSessionService {
         session.therapist,
         newDate,
         newStartTime,
-        newEndTime,
+        newEndTime
       );
       if (!availability.available) {
         throw new Error(`New time not available: ${availability.reason}`);
@@ -400,7 +397,7 @@ class TherapeuticSessionService {
         session.therapist,
         newDate,
         newStartTime,
-        newEndTime,
+        newEndTime
       );
       if (conflict) {
         throw new Error('New time slot conflicts with existing session');
@@ -421,7 +418,7 @@ class TherapeuticSessionService {
     } catch (error) {
       return {
         success: false,
-        message: error.message,
+        message: 'حدث خطأ داخلي',
       };
     }
   }
@@ -491,7 +488,7 @@ class TherapeuticSessionService {
     } catch (error) {
       return {
         success: false,
-        message: error.message,
+        message: 'حدث خطأ داخلي',
       };
     }
   }
@@ -539,7 +536,7 @@ class TherapeuticSessionService {
     } catch (error) {
       return {
         success: false,
-        message: error.message,
+        message: 'حدث خطأ داخلي',
       };
     }
   }
@@ -570,7 +567,7 @@ class TherapeuticSessionService {
     } catch (error) {
       return {
         success: false,
-        message: error.message,
+        message: 'حدث خطأ داخلي',
       };
     }
   }
@@ -582,7 +579,7 @@ class TherapeuticSessionService {
     try {
       const availability = await TherapistAvailability.findOne({ therapist: therapistId }).populate(
         'therapist',
-        'firstName lastName specialization',
+        'firstName lastName specialization'
       );
 
       if (!availability) {
@@ -599,7 +596,7 @@ class TherapeuticSessionService {
     } catch (error) {
       return {
         success: false,
-        message: error.message,
+        message: 'حدث خطأ داخلي',
       };
     }
   }

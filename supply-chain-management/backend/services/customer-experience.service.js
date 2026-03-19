@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Customer Experience & Satisfaction Management Service
  * Phase 19: Survey Management, NPS Tracking, Sentiment Analysis
@@ -268,7 +269,7 @@ class CustomerExperienceService {
     feedbacks.forEach(f => {
       byCategory[f.category] = (byCategory[f.category] || 0) + 1;
       byStatus[f.status] = (byStatus[f.status] || 0) + 1;
-      if (bySentiment.hasOwnProperty(f.sentiment)) {
+      if (Object.prototype.hasOwnProperty.call(bySentiment, f.sentiment)) {
         bySentiment[f.sentiment]++;
       }
     });

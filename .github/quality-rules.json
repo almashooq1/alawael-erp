@@ -1,0 +1,133 @@
+{
+  "version": "1.0.0",
+  "description": "Quality gates and rules for ALAWAEL ERP System",
+  "lastUpdated": "2026-03-02",
+
+  "qualityGates": {
+    "minTestCoverage": 70,
+    "minSuccessRate": 80,
+    "allowedFailures": 2,
+    "minTestsPerService": 10
+  },
+
+  "criticalServices": ["backend", "graphql", "supply-chain", "frontend"],
+
+  "serviceRequirements": {
+    "backend": {
+      "minCoverage": 80,
+      "minTests": 50,
+      "requiredFiles": ["src/", "test/", "package.json"]
+    },
+    "graphql": {
+      "minCoverage": 75,
+      "minTests": 30,
+      "requiredFiles": ["src/", "test/", "package.json"]
+    },
+    "supply-chain": {
+      "minCoverage": 70,
+      "minTests": 20,
+      "requiredFiles": ["src/", "test/", "package.json"]
+    },
+    "finance": {
+      "minCoverage": 70,
+      "minTests": 20,
+      "requiredFiles": ["src/", "test/", "package.json"]
+    },
+    "frontend": {
+      "minCoverage": 65,
+      "minTests": 15,
+      "requiredFiles": ["src/", "package.json"]
+    }
+  },
+
+  "codeQualityRules": {
+    "maxComplexity": 15,
+    "maxFileLength": 500,
+    "maxFunctionLength": 100,
+    "enforceTypeScript": false,
+    "requireJSDoc": true
+  },
+
+  "testingStandards": {
+    "framework": "jest",
+    "testFilePattern": "**/*.test.js",
+    "coverageThresholds": {
+      "statements": 70,
+      "branches": 65,
+      "functions": 70,
+      "lines": 70
+    },
+    "testTimeout": 30000,
+    "collectCoverageFrom": ["src/**/*.js", "!src/**/*.test.js", "!src/**/index.js"]
+  },
+
+  "securityRules": {
+    "allowedLicenses": ["MIT", "Apache-2.0", "ISC", "BSD-3-Clause"],
+    "vulnerabilitySeverity": "moderate",
+    "dependencyAudit": true,
+    "blockHighVulnerabilities": true
+  },
+
+  "performanceThresholds": {
+    "maxBuildTime": 600,
+    "maxTestTime": 300,
+    "maxBundleSize": 5242880
+  },
+
+  "notifications": {
+    "onFailure": ["slack", "email"],
+    "onSuccess": ["slack"],
+    "emailRecipients": ["team@alawael.com"],
+    "slackChannel": "#quality-alerts"
+  },
+
+  "branches": {
+    "main": {
+      "requireApproval": true,
+      "minApprovers": 2,
+      "requireQualityGate": true,
+      "allowDirectPush": false
+    },
+    "develop": {
+      "requireApproval": true,
+      "minApprovers": 1,
+      "requireQualityGate": true,
+      "allowDirectPush": false
+    },
+    "feature/*": {
+      "requireApproval": false,
+      "minApprovers": 0,
+      "requireQualityGate": true,
+      "allowDirectPush": true
+    }
+  },
+
+  "deployment": {
+    "production": {
+      "requireAllTestsPass": true,
+      "requireManualApproval": true,
+      "minCoverage": 80,
+      "allowedFailures": 0
+    },
+    "staging": {
+      "requireAllTestsPass": true,
+      "requireManualApproval": false,
+      "minCoverage": 70,
+      "allowedFailures": 1
+    },
+    "development": {
+      "requireAllTestsPass": false,
+      "requireManualApproval": false,
+      "minCoverage": 60,
+      "allowedFailures": 3
+    }
+  },
+
+  "customRules": {
+    "enforceCommitMessage": true,
+    "commitMessagePattern": "^(feat|fix|docs|style|refactor|test|chore)(\\(.+\\))?: .{10,}",
+    "requireLinkedIssue": false,
+    "blockTodoComments": false,
+    "enforceCodeReview": true
+  }
+}

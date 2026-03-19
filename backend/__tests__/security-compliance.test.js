@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * Security & Compliance Tests
  * اختبارات الأمان والامتثال
@@ -77,7 +79,11 @@ describe('Security & Compliance Tests', () => {
     test('should validate JWT tokens', () => {
       // Generate a valid JWT with 3 parts: header.payload.signature
       const jwt = require('jsonwebtoken');
-      const token = jwt.sign({ sub: '1234567890', name: 'John Doe', iat: 1516239022 }, 'test-secret-key', { expiresIn: '1h' });
+      const token = jwt.sign(
+        { sub: '1234567890', name: 'John Doe', iat: 1516239022 },
+        'test-secret-key',
+        { expiresIn: '1h' }
+      );
       expect(token).toBeDefined();
       expect(token.split('.')).toHaveLength(3);
     });

@@ -1,3 +1,4 @@
+/* eslint-disable no-undef, no-unused-vars */
 const AnalyticsServiceClass = require('../services/analyticsService');
 const analyticsService = new AnalyticsServiceClass();
 const AnalyticsCache = require('../models/AnalyticsCache');

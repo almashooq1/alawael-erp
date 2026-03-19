@@ -234,7 +234,7 @@ export class AGIAutonomousDecision extends EventEmitter {
 
       return result;
     } catch (error: any) {
-      this.emit('decision:error', { context, error: error.message });
+      this.emit('decision:error', { context, error: 'حدث خطأ داخلي' });
       throw error;
     }
   }
@@ -410,7 +410,7 @@ export class AGIAutonomousDecision extends EventEmitter {
 
       this.emit('execution:complete', result);
     } catch (error: any) {
-      this.emit('execution:error', { result, error: error.message });
+      this.emit('execution:error', { result, error: 'حدث خطأ داخلي' });
 
       // تفعيل خطة الطوارئ
       await this.activateContingency(result, error);

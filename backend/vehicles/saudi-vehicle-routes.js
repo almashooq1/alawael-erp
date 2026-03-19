@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Saudi Vehicle Routes - مسارات المركبات السعودية
  * API Endpoints for Saudi Vehicle Management
@@ -38,7 +39,7 @@ router.get('/', async (req, res) => {
     });
     res.json({ success: true, data: vehicles, count: vehicles.length });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
   }
 });
 
@@ -47,7 +48,7 @@ router.get('/statistics', async (req, res) => {
     const stats = await saudiVehicleService.getFleetStatistics(req.user?.tenantId);
     res.json({ success: true, data: stats });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
   }
 });
 
@@ -57,7 +58,7 @@ router.get('/expiring-documents', async (req, res) => {
     const expiring = await saudiVehicleService.getExpiringDocuments(days);
     res.json({ success: true, data: expiring });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
   }
 });
 
@@ -68,7 +69,7 @@ router.get('/plate/:number/:letters/:region', async (req, res) => {
     if (!vehicle) return res.status(404).json({ success: false, error: 'Vehicle not found' });
     res.json({ success: true, data: vehicle });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
   }
 });
 
@@ -78,7 +79,7 @@ router.get('/:id', async (req, res) => {
     if (!vehicle) return res.status(404).json({ success: false, error: 'Vehicle not found' });
     res.json({ success: true, data: vehicle });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
   }
 });
 
@@ -90,7 +91,7 @@ router.post('/', async (req, res) => {
     });
     res.status(201).json({ success: true, data: vehicle, message: 'تم إضافة المركبة' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
   }
 });
 
@@ -100,7 +101,7 @@ router.put('/:id', async (req, res) => {
     if (!vehicle) return res.status(404).json({ success: false, error: 'Vehicle not found' });
     res.json({ success: true, data: vehicle, message: 'تم تحديث المركبة' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
   }
 });
 
@@ -112,7 +113,7 @@ router.get('/:id/violations', async (req, res) => {
     if (!vehicle) return res.status(404).json({ success: false, error: 'Vehicle not found' });
     res.json({ success: true, data: vehicle.violations });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
   }
 });
 
@@ -121,16 +122,20 @@ router.post('/:id/violations', async (req, res) => {
     const vehicle = await saudiVehicleService.addViolation(req.params.id, req.body);
     res.status(201).json({ success: true, data: vehicle, message: 'تم إضافة المخالفة' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
   }
 });
 
 router.put('/:id/violations/:violationId/pay', async (req, res) => {
   try {
-    const vehicle = await saudiVehicleService.payViolation(req.params.id, req.params.violationId, req.body);
+    const vehicle = await saudiVehicleService.payViolation(
+      req.params.id,
+      req.params.violationId,
+      req.body
+    );
     res.json({ success: true, data: vehicle, message: 'تم سداد المخالفة' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
   }
 });
 
@@ -145,7 +150,7 @@ router.get('/:id/trips', async (req, res) => {
     });
     res.json({ success: true, data: trips });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
   }
 });
 
@@ -157,7 +162,7 @@ router.post('/trips', async (req, res) => {
     });
     res.status(201).json({ success: true, data: trip, message: 'تم إنشاء الرحلة' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
   }
 });
 
@@ -166,7 +171,7 @@ router.put('/trips/:tripId/start', async (req, res) => {
     const trip = await saudiVehicleService.startTrip(req.params.tripId, req.body);
     res.json({ success: true, data: trip, message: 'تم بدء الرحلة' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
   }
 });
 
@@ -175,7 +180,7 @@ router.put('/trips/:tripId/complete', async (req, res) => {
     const trip = await saudiVehicleService.completeTrip(req.params.tripId, req.body);
     res.json({ success: true, data: trip, message: 'تم إكمال الرحلة' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
   }
 });
 
@@ -187,7 +192,7 @@ router.get('/:id/fuel', async (req, res) => {
     if (!vehicle) return res.status(404).json({ success: false, error: 'Vehicle not found' });
     res.json({ success: true, data: vehicle.fuelLog });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
   }
 });
 
@@ -196,7 +201,7 @@ router.get('/:id/fuel/statistics', async (req, res) => {
     const stats = await saudiVehicleService.getFuelStatistics(req.params.id, req.query.period);
     res.json({ success: true, data: stats });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
   }
 });
 
@@ -208,7 +213,7 @@ router.post('/:id/fuel', async (req, res) => {
     });
     res.status(201).json({ success: true, data: vehicle, message: 'تم تسجيل التعبئة' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
   }
 });
 

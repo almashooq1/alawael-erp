@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Employee Model - Enhanced HR System
  * نموذج الموظف - نظام الموارد البشرية المحسّن
@@ -40,7 +41,81 @@ const employeeSchema = new mongoose.Schema(
     },
     phone: String,
     dateOfBirth: Date,
-    nationalId: String,
+    nationalId: {
+      type: String,
+      trim: true,
+      index: true,
+    },
+    nationality: {
+      type: String,
+      default: 'سعودي',
+    },
+    gender: {
+      type: String,
+      enum: ['male', 'female', 'ذكر', 'أنثى'],
+    },
+    iqamaNumber: {
+      type: String,
+      trim: true,
+      index: true,
+    },
+
+    // التأمينات الاجتماعية — GOSI
+    gosi: {
+      subscriptionNumber: String,
+      registrationDate: Date,
+      status: {
+        type: String,
+        enum: ['active', 'inactive', 'pending', 'cancelled', 'مسجل', 'غير مسجل', 'معلق'],
+        default: 'pending',
+      },
+      wage: Number,
+      employeeShare: Number,
+      employerShare: Number,
+      lastContributionDate: Date,
+      totalContributionMonths: { type: Number, default: 0 },
+      annuities: { type: Boolean, default: false },
+      occupationalHazards: { type: Boolean, default: true },
+    },
+
+    // وزارة العمل — Ministry of Labor
+    mol: {
+      workPermitNumber: String,
+      workPermitExpiry: Date,
+      occupationCode: String,
+      occupationNameAr: String,
+      occupationNameEn: String,
+      visaNumber: String,
+      borderNumber: String,
+    },
+
+    // قوى — Qiwa
+    qiwa: {
+      contractId: String,
+      contractStatus: {
+        type: String,
+        enum: ['active', 'pending', 'expired', 'terminated', 'نشط', 'منتهي', 'معلق'],
+      },
+      contractAuthDate: Date,
+      wageProtectionStatus: {
+        type: String,
+        enum: ['compliant', 'non-compliant', 'pending', 'ملتزم', 'غير ملتزم'],
+        default: 'pending',
+      },
+      lastWageSubmission: Date,
+      nitaqatCategory: String,
+      saudizationPoints: Number,
+    },
+
+    // الكفيل / التأشيرة
+    sponsorship: {
+      sponsorName: String,
+      sponsorId: String,
+      visaType: String,
+      visaExpiry: Date,
+      passportNumber: String,
+      passportExpiry: Date,
+    },
 
     // معلومات الوظيفة
     position: {
@@ -96,8 +171,24 @@ const employeeSchema = new mongoose.Schema(
     contract: {
       startDate: Date,
       endDate: Date,
-      contractType: String,
+      contractType: {
+        type: String,
+        enum: [
+          'unlimited',
+          'limited',
+          'part-time',
+          'seasonal',
+          'temporary',
+          'غير محدد المدة',
+          'محدد المدة',
+          'دوام جزئي',
+          'موسمي',
+        ],
+      },
       renewalDate: Date,
+      probationEndDate: Date,
+      noticePeriodDays: { type: Number, default: 60 },
+      qiwaContractId: String,
     },
 
     // معلومات الاتصال الشخصية
@@ -230,7 +321,7 @@ const employeeSchema = new mongoose.Schema(
     documents: [
       {
         name: String,
-        type: String,
+        type: { type: String },
         url: String,
         uploadDate: Date,
       },
@@ -246,13 +337,16 @@ const employeeSchema = new mongoose.Schema(
   {
     timestamps: true,
     collection: 'employees',
-  },
+  }
 );
 
 // Indexes for better performance
 employeeSchema.index({ department: 1, status: 1 });
 employeeSchema.index({ hireDate: 1 });
 employeeSchema.index({ manager: 1 });
+employeeSchema.index({ 'gosi.subscriptionNumber': 1 }, { sparse: true });
+employeeSchema.index({ 'qiwa.contractId': 1 }, { sparse: true });
+employeeSchema.index({ nationality: 1, status: 1 });
 // email already has unique: true which creates an index automatically
 
 // Virtual: Full Name
@@ -443,7 +537,12 @@ employeeSchema.statics.getHRAnalytics = async function () {
 employeeSchema.statics.searchEmployees = function (searchTerm) {
   const searchRegex = new RegExp(searchTerm, 'i');
   return this.find({
-    $or: [{ firstName: searchRegex }, { lastName: searchRegex }, { email: searchRegex }, { employeeId: searchRegex }],
+    $or: [
+      { firstName: searchRegex },
+      { lastName: searchRegex },
+      { email: searchRegex },
+      { employeeId: searchRegex },
+    ],
   });
 };
 

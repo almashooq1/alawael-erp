@@ -5,25 +5,20 @@
  */
 
 import { EventEmitter } from 'events';
-import DisabilityRehabAGI, {
-  Beneficiary,
-  RehabProgram,
-  Payment,
-  Assessment
-} from './disability-rehab-agi';
+import DisabilityRehabAGI, { Beneficiary, RehabProgram, Payment, Assessment } from './disability-rehab-agi';
 
 /**
  * ERP Modules
  */
 export enum ERPModule {
-  HR = 'hr',                           // الموارد البشرية
-  FINANCE = 'finance',                 // المالية
-  INVENTORY = 'inventory',             // المخزون
-  BENEFICIARY = 'beneficiary',         // شؤون المستفيدين
-  MEDICAL = 'medical',                 // الطبي
-  EDUCATION = 'education',             // التعليمي
-  REPORTS = 'reports',                 // التقارير
-  CRM = 'crm'                         // علاقات العملاء
+  HR = 'hr', // الموارد البشرية
+  FINANCE = 'finance', // المالية
+  INVENTORY = 'inventory', // المخزون
+  BENEFICIARY = 'beneficiary', // شؤون المستفيدين
+  MEDICAL = 'medical', // الطبي
+  EDUCATION = 'education', // التعليمي
+  REPORTS = 'reports', // التقارير
+  CRM = 'crm', // علاقات العملاء
 }
 
 /**
@@ -34,7 +29,7 @@ export enum OperationType {
   READ = 'read',
   UPDATE = 'update',
   DELETE = 'delete',
-  SYNC = 'sync'
+  SYNC = 'sync',
 }
 
 /**
@@ -62,11 +57,7 @@ export class ERPIntegration extends EventEmitter {
   private apiKey: string;
   private operationQueue: ERPOperation[];
 
-  constructor(config: {
-    apiBaseUrl: string;
-    apiKey: string;
-    agi: DisabilityRehabAGI;
-  }) {
+  constructor(config: { apiBaseUrl: string; apiKey: string; agi: DisabilityRehabAGI }) {
     super();
     this.apiBaseUrl = config.apiBaseUrl;
     this.apiKey = config.apiKey;
@@ -111,9 +102,8 @@ export class ERPIntegration extends EventEmitter {
       return {
         success: true,
         syncedModules,
-        errors
+        errors,
       };
-
     } catch (error: any) {
       errors.push(error);
       this.emit('sync:error', { beneficiaryId: beneficiary.id, error });
@@ -121,7 +111,7 @@ export class ERPIntegration extends EventEmitter {
       return {
         success: false,
         syncedModules,
-        errors
+        errors,
       };
     }
   }
@@ -154,7 +144,7 @@ export class ERPIntegration extends EventEmitter {
       data,
       timestamp: new Date(),
       userId: 'system',
-      status: 'pending'
+      status: 'pending',
     };
 
     try {
@@ -166,12 +156,11 @@ export class ERPIntegration extends EventEmitter {
       return {
         invoiceId: response.id,
         invoiceNumber: response.invoiceNumber,
-        status: 'created'
+        status: 'created',
       };
-
     } catch (error: any) {
       operation.status = 'failed';
-      operation.error = error.message;
+      operation.error = 'حدث خطأ داخلي';
       throw error;
     } finally {
       this.operationQueue.push(operation);
@@ -181,7 +170,10 @@ export class ERPIntegration extends EventEmitter {
   /**
    * تسجيل دفعة في النظام المالي
    */
-  async recordPayment(payment: Payment, beneficiaryId: string): Promise<{
+  async recordPayment(
+    payment: Payment,
+    beneficiaryId: string,
+  ): Promise<{
     receiptId: string;
     receiptNumber: string;
     balance: number;
@@ -195,13 +187,13 @@ export class ERPIntegration extends EventEmitter {
       data: payment,
       timestamp: new Date(),
       userId: 'system',
-      status: 'pending'
+      status: 'pending',
     };
 
     try {
       const response = await this.makeERPRequest('/finance/payments', 'POST', {
         beneficiaryId,
-        ...payment
+        ...payment,
       });
 
       operation.status = 'success';
@@ -210,12 +202,11 @@ export class ERPIntegration extends EventEmitter {
       return {
         receiptId: response.id,
         receiptNumber: response.receiptNumber,
-        balance: response.remainingBalance
+        balance: response.remainingBalance,
       };
-
     } catch (error: any) {
       operation.status = 'failed';
-      operation.error = error.message;
+      operation.error = 'حدث خطأ داخلي';
       throw error;
     } finally {
       this.operationQueue.push(operation);
@@ -246,9 +237,8 @@ export class ERPIntegration extends EventEmitter {
       return {
         bookingId: response.id,
         confirmed: response.status === 'confirmed',
-        conflictingBookings: response.conflicts || []
+        conflictingBookings: response.conflicts || [],
       };
-
     } catch (error: any) {
       this.emit('resource:booking_failed', { data, error });
       throw error;
@@ -258,7 +248,10 @@ export class ERPIntegration extends EventEmitter {
   /**
    * توليد تقرير من ERP
    */
-  async generateERPReport(reportType: string, parameters: any): Promise<{
+  async generateERPReport(
+    reportType: string,
+    parameters: any,
+  ): Promise<{
     reportId: string;
     reportUrl: string;
     format: string;
@@ -267,15 +260,14 @@ export class ERPIntegration extends EventEmitter {
       const response = await this.makeERPRequest('/reports/generate', 'POST', {
         reportType,
         parameters,
-        format: 'pdf'
+        format: 'pdf',
       });
 
       return {
         reportId: response.id,
         reportUrl: response.downloadUrl,
-        format: response.format
+        format: response.format,
       };
-
     } catch (error: any) {
       throw error;
     }
@@ -293,13 +285,9 @@ export class ERPIntegration extends EventEmitter {
     paymentHistory: any[];
   }> {
     try {
-      const response = await this.makeERPRequest(
-        `/finance/beneficiaries/${beneficiaryId}/summary`,
-        'GET'
-      );
+      const response = await this.makeERPRequest(`/finance/beneficiaries/${beneficiaryId}/summary`, 'GET');
 
       return response;
-
     } catch (error: any) {
       throw error;
     }
@@ -308,11 +296,14 @@ export class ERPIntegration extends EventEmitter {
   /**
    * الحصول على جدول المواعيد
    */
-  async getSchedule(date: Date, filters?: {
-    therapistId?: string;
-    programType?: string;
-    location?: string;
-  }): Promise<{
+  async getSchedule(
+    date: Date,
+    filters?: {
+      therapistId?: string;
+      programType?: string;
+      location?: string;
+    },
+  ): Promise<{
     appointments: Array<{
       id: string;
       beneficiaryId: string;
@@ -335,11 +326,10 @@ export class ERPIntegration extends EventEmitter {
     try {
       const response = await this.makeERPRequest('/schedule/appointments', 'GET', {
         date: date.toISOString(),
-        ...filters
+        ...filters,
       });
 
       return response;
-
     } catch (error: any) {
       throw error;
     }
@@ -348,29 +338,27 @@ export class ERPIntegration extends EventEmitter {
   /**
    * تحديث حالة الجلسة
    */
-  async updateSessionStatus(sessionId: string, status: {
-    attended: boolean;
-    notes?: string;
-    rating?: number;
-    nextSessionNotes?: string;
-  }): Promise<{
+  async updateSessionStatus(
+    sessionId: string,
+    status: {
+      attended: boolean;
+      notes?: string;
+      rating?: number;
+      nextSessionNotes?: string;
+    },
+  ): Promise<{
     success: boolean;
     updatedSession: any;
   }> {
     try {
-      const response = await this.makeERPRequest(
-        `/sessions/${sessionId}/status`,
-        'PUT',
-        status
-      );
+      const response = await this.makeERPRequest(`/sessions/${sessionId}/status`, 'PUT', status);
 
       this.emit('session:updated', response);
 
       return {
         success: true,
-        updatedSession: response
+        updatedSession: response,
       };
-
     } catch (error: any) {
       throw error;
     }
@@ -396,9 +384,8 @@ export class ERPIntegration extends EventEmitter {
 
       return {
         notificationId: response.id,
-        status: response.status
+        status: response.status,
       };
-
     } catch (error: any) {
       throw error;
     }
@@ -459,9 +446,8 @@ export class ERPIntegration extends EventEmitter {
         recommendations,
         trends: erpData.trends || [],
         predictions: erpData.predictions || [],
-        charts: erpData.charts || {}
+        charts: erpData.charts || {},
       };
-
     } catch (error: any) {
       throw error;
     }
@@ -487,7 +473,7 @@ export class ERPIntegration extends EventEmitter {
     try {
       // مزامنة جميع البيانات
       const syncResults = await this.makeERPRequest('/sync/full', 'POST', {
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       const duration = Date.now() - startTime;
@@ -498,9 +484,8 @@ export class ERPIntegration extends EventEmitter {
         success: true,
         syncedEntities: syncResults.entities,
         duration,
-        errors
+        errors,
       };
-
     } catch (error: any) {
       errors.push(error);
       const duration = Date.now() - startTime;
@@ -509,7 +494,7 @@ export class ERPIntegration extends EventEmitter {
         success: false,
         syncedEntities: { beneficiaries: 0, programs: 0, payments: 0, assessments: 0 },
         duration,
-        errors
+        errors,
       };
     }
   }
@@ -524,18 +509,18 @@ export class ERPIntegration extends EventEmitter {
           name: beneficiary.name,
           nationalId: beneficiary.nationalId,
           dateOfBirth: beneficiary.dateOfBirth,
-          gender: beneficiary.gender
+          gender: beneficiary.gender,
         },
         disabilityInfo: {
           types: beneficiary.disabilityType,
-          severity: beneficiary.disabilitySeverity
+          severity: beneficiary.disabilitySeverity,
         },
         contactInfo: {
           address: beneficiary.address,
           phone: beneficiary.phone,
-          email: beneficiary.email
-        }
-      }
+          email: beneficiary.email,
+        },
+      },
     });
   }
 
@@ -543,7 +528,7 @@ export class ERPIntegration extends EventEmitter {
     await this.makeERPRequest('/finance/sync', 'POST', {
       beneficiaryId: beneficiary.id,
       financialStatus: beneficiary.financialStatus,
-      paymentHistory: beneficiary.paymentHistory
+      paymentHistory: beneficiary.paymentHistory,
     });
   }
 
@@ -551,14 +536,14 @@ export class ERPIntegration extends EventEmitter {
     await this.makeERPRequest('/medical/sync', 'POST', {
       beneficiaryId: beneficiary.id,
       medicalReports: beneficiary.medicalReports,
-      assessments: beneficiary.assessments
+      assessments: beneficiary.assessments,
     });
   }
 
   private async syncToReportsModule(beneficiary: Beneficiary): Promise<void> {
     await this.makeERPRequest('/reports/sync', 'POST', {
       beneficiaryId: beneficiary.id,
-      progressReports: beneficiary.progressReports
+      progressReports: beneficiary.progressReports,
     });
   }
 
@@ -569,12 +554,12 @@ export class ERPIntegration extends EventEmitter {
     console.log(`ERP Request: ${method} ${endpoint}`, data);
 
     // Simulate API response
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       setTimeout(() => {
         resolve({
           success: true,
           data: {},
-          timestamp: new Date()
+          timestamp: new Date(),
         });
       }, 100);
     });

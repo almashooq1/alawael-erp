@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * ML & Advanced Analytics Routes - Phase 7
  * RESTful API endpoints for ML models, analytics, and insights
@@ -41,7 +42,7 @@ router.post(
       data: analytics,
       message: 'Analytics generated successfully',
     });
-  })
+  }),
 );
 
 /**
@@ -64,7 +65,7 @@ router.get(
       success: true,
       data: analytics,
     });
-  })
+  }),
 );
 
 /**
@@ -79,10 +80,7 @@ router.get(
     const filter = { status: status || 'published' };
     if (analyticsType) filter.analyticsType = analyticsType;
 
-    const analytics = await Analytics.find(filter)
-      .limit(parseInt(limit))
-      .skip(parseInt(skip))
-      .sort({ createdAt: -1 });
+    const analytics = await Analytics.find(filter).limit(parseInt(limit)).skip(parseInt(skip)).sort({ createdAt: -1 });
 
     const total = await Analytics.countDocuments(filter);
 
@@ -91,7 +89,7 @@ router.get(
       data: analytics,
       pagination: { total, limit: parseInt(limit), skip: parseInt(skip) },
     });
-  })
+  }),
 );
 
 /**
@@ -117,7 +115,7 @@ router.put(
       data: analytics,
       message: 'Analytics published successfully',
     });
-  })
+  }),
 );
 
 // ==================== PREDICTION ENDPOINTS ====================
@@ -153,7 +151,7 @@ router.post(
       data: model,
       message: 'Prediction model created successfully',
     });
-  })
+  }),
 );
 
 /**
@@ -169,10 +167,7 @@ router.get(
     if (status) filter.status = status;
     if (modelType) filter.modelType = modelType;
 
-    const models = await Prediction.find(filter)
-      .limit(parseInt(limit))
-      .skip(parseInt(skip))
-      .sort({ 'performance.f1Score': -1 });
+    const models = await Prediction.find(filter).limit(parseInt(limit)).skip(parseInt(skip)).sort({ 'performance.f1Score': -1 });
 
     const total = await Prediction.countDocuments(filter);
 
@@ -181,7 +176,7 @@ router.get(
       data: models,
       pagination: { total, limit: parseInt(limit), skip: parseInt(skip) },
     });
-  })
+  }),
 );
 
 /**
@@ -207,7 +202,7 @@ router.post(
       data: prediction,
       message: 'Prediction generated successfully',
     });
-  })
+  }),
 );
 
 /**
@@ -224,7 +219,7 @@ router.put(
       data: model,
       message: 'Model deployed to production successfully',
     });
-  })
+  }),
 );
 
 /**
@@ -240,7 +235,7 @@ router.get(
       success: true,
       data: health,
     });
-  })
+  }),
 );
 
 /**
@@ -257,7 +252,7 @@ router.post(
       data: { retrainedCount },
       message: `${retrainedCount} model(s) retrained successfully`,
     });
-  })
+  }),
 );
 
 // ==================== INSIGHTS ENDPOINTS ====================
@@ -269,14 +264,7 @@ router.post(
 router.get(
   '/insights',
   asyncHandler(async (req, res) => {
-    const {
-      insightType,
-      category,
-      status = 'published',
-      priority,
-      limit = 10,
-      skip = 0,
-    } = req.query;
+    const { insightType, category, status = 'published', priority, limit = 10, skip = 0 } = req.query;
 
     const filter = { status };
     if (insightType) filter.insightType = insightType;
@@ -286,10 +274,7 @@ router.get(
       filter.$or.push({ 'actionItems.priority': priority });
     }
 
-    const insights = await Insight.find(filter)
-      .limit(parseInt(limit))
-      .skip(parseInt(skip))
-      .sort({ confidence: -1, createdAt: -1 });
+    const insights = await Insight.find(filter).limit(parseInt(limit)).skip(parseInt(skip)).sort({ confidence: -1, createdAt: -1 });
 
     const total = await Insight.countDocuments(filter);
 
@@ -298,7 +283,7 @@ router.get(
       data: insights,
       pagination: { total, limit: parseInt(limit), skip: parseInt(skip) },
     });
-  })
+  }),
 );
 
 /**
@@ -316,7 +301,7 @@ router.get(
       data: insights,
       message: `Retrieved ${insights.length} high-impact insights`,
     });
-  })
+  }),
 );
 
 /**
@@ -339,7 +324,7 @@ router.get(
       success: true,
       data: insight,
     });
-  })
+  }),
 );
 
 /**
@@ -366,7 +351,7 @@ router.post(
       data: insight,
       message: 'Insight approved successfully',
     });
-  })
+  }),
 );
 
 /**
@@ -392,7 +377,7 @@ router.post(
       data: insight,
       message: 'Insight published successfully',
     });
-  })
+  }),
 );
 
 /**
@@ -419,7 +404,7 @@ router.post(
       data: insight,
       message: 'Implementation started successfully',
     });
-  })
+  }),
 );
 
 // ==================== ANOMALY DETECTION ====================
@@ -445,7 +430,7 @@ router.get(
       data: anomalies,
       filter: { severity },
     });
-  })
+  }),
 );
 
 // ==================== SYSTEM HEALTH ====================
@@ -467,7 +452,7 @@ router.get(
         ...stats,
       },
     });
-  })
+  }),
 );
 
 /**
@@ -483,16 +468,16 @@ router.get(
       success: true,
       data: stats,
     });
-  })
+  }),
 );
 
 // Error Handling Middleware
-router.use((err, req, res, next) => {
+router.use((err, _req, res, _next) => {
   console.error('ML Route Error:', err);
 
   res.status(err.status || 500).json({
     success: false,
-    message: err.message || 'Internal server error',
+    message: 'حدث خطأ في الخادم',
     error: process.env.NODE_ENV === 'development' ? err : undefined,
   });
 });

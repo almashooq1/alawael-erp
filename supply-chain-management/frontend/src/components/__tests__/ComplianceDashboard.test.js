@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * ComplianceDashboard.test.js
  * اختبارات شاملة لـ ComplianceDashboard
@@ -9,7 +10,15 @@ import userEvent from '@testing-library/user-event';
 import ComplianceDashboard from '../ComplianceDashboard';
 import * as API from '../../services/api';
 
-jest.mock('../../services/api');
+jest.mock('../../services/api', () => ({
+  getComplianceData: jest.fn(),
+  getViolations: jest.fn(),
+  getAuditTrail: jest.fn(() => Promise.resolve({ data: [] })),
+  updateViolation: jest.fn(),
+  scheduleAudit: jest.fn(() => Promise.resolve({ data: { id: '1' } })),
+  exportCompliance: jest.fn(() => Promise.resolve(new Blob())),
+}));
+
 jest.mock('antd', () => ({
   ...jest.requireActual('antd'),
   message: {
@@ -17,12 +26,6 @@ jest.mock('antd', () => ({
     success: jest.fn(),
   },
 }));
-
-// Setup API mocks
-API.getComplianceData = jest.fn();
-API.getViolations = jest.fn();
-API.getAuditTrail = jest.fn();
-API.updateViolation = jest.fn();
 
 describe('ComplianceDashboard', () => {
   const mockComplianceData = {
@@ -89,26 +92,26 @@ describe('ComplianceDashboard', () => {
   describe('Component Rendering', () => {
     test('يجب أن يرسم المكون بنجاح', async () => {
       API.getComplianceData.mockResolvedValue({ data: mockComplianceData });
-      
+
       render(<ComplianceDashboard />);
-      
+
       expect(screen.getByText(/لوحة الامتثال/i)).toBeInTheDocument();
     });
 
     test('يجب عرض درجة الامتثال', async () => {
       API.getComplianceData.mockResolvedValue({ data: mockComplianceData });
-      
+
       render(<ComplianceDashboard />);
-      
+
       await new Promise(resolve => setTimeout(resolve, 500));
       expect(screen.getByText(/لوحة الامتثال/i)).toBeInTheDocument();
     });
 
     test('يجب عرض عدد المخالفات', async () => {
       API.getComplianceData.mockResolvedValue({ data: mockComplianceData });
-      
+
       render(<ComplianceDashboard />);
-      
+
       await new Promise(resolve => setTimeout(resolve, 500));
       expect(screen.getByText(/لوحة الامتثال/i)).toBeInTheDocument();
     });
@@ -117,27 +120,27 @@ describe('ComplianceDashboard', () => {
   describe('Compliance Score Calculation', () => {
     test('يجب حساب درجة الامتثال بشكل صحيح', async () => {
       API.getComplianceData.mockResolvedValue({ data: mockComplianceData });
-      
+
       render(<ComplianceDashboard />);
-      
+
       await new Promise(resolve => setTimeout(resolve, 500));
       expect(screen.getByText(/لوحة الامتثال/i)).toBeInTheDocument();
     });
 
     test('يجب عرض اتجاه درجة الامتثال', async () => {
       API.getComplianceData.mockResolvedValue({ data: mockComplianceData });
-      
+
       const { container } = render(<ComplianceDashboard />);
-      
+
       await new Promise(resolve => setTimeout(resolve, 500));
       expect(screen.getByText(/لوحة الامتثال/i)).toBeInTheDocument();
     });
 
     test('يجب حساب معدل التحسن', async () => {
       API.getComplianceData.mockResolvedValue({ data: mockComplianceData });
-      
+
       render(<ComplianceDashboard />);
-      
+
       await new Promise(resolve => setTimeout(resolve, 500));
       expect(screen.getByText(/لوحة الامتثال/i)).toBeInTheDocument();
     });
@@ -146,18 +149,18 @@ describe('ComplianceDashboard', () => {
   describe('Violation Management', () => {
     test('يجب عرض قائمة المخالفات', async () => {
       API.getViolations.mockResolvedValue({ data: mockViolations });
-      
+
       render(<ComplianceDashboard />);
-      
+
       await new Promise(resolve => setTimeout(resolve, 500));
       expect(screen.getByText(/لوحة الامتثال/i)).toBeInTheDocument();
     });
 
     test('يجب عرض حالة المخالفة', async () => {
       API.getViolations.mockResolvedValue({ data: mockViolations });
-      
+
       render(<ComplianceDashboard />);
-      
+
       await new Promise(resolve => setTimeout(resolve, 500));
       expect(screen.getByText(/لوحة الامتثال/i)).toBeInTheDocument();
     });
@@ -165,27 +168,27 @@ describe('ComplianceDashboard', () => {
     test('يجب تحديث حالة المخالفة', async () => {
       API.getViolations.mockResolvedValue({ data: mockViolations });
       API.updateViolation.mockResolvedValue({ data: { success: true } });
-      
+
       render(<ComplianceDashboard />);
-      
+
       await new Promise(resolve => setTimeout(resolve, 500));
       expect(screen.getByText(/لوحة الامتثال/i)).toBeInTheDocument();
     });
 
     test('يجب فتح نافذة تفاصيل المخالفة', async () => {
       API.getViolations.mockResolvedValue({ data: mockViolations });
-      
+
       render(<ComplianceDashboard />);
-      
+
       await new Promise(resolve => setTimeout(resolve, 500));
       expect(screen.getByText(/لوحة الامتثال/i)).toBeInTheDocument();
     });
 
     test('يجب عرض ملاحظات الحل', async () => {
       API.getViolations.mockResolvedValue({ data: mockViolations });
-      
+
       render(<ComplianceDashboard />);
-      
+
       await new Promise(resolve => setTimeout(resolve, 500));
       expect(screen.getByText(/لوحة الامتثال/i)).toBeInTheDocument();
     });
@@ -194,45 +197,45 @@ describe('ComplianceDashboard', () => {
   describe('Audit Trail', () => {
     test('يجب عرض سجل التدقيق', async () => {
       API.getAuditTrail.mockResolvedValue({ data: mockAuditTrail });
-      
+
       render(<ComplianceDashboard />);
-      
+
       await new Promise(resolve => setTimeout(resolve, 500));
       expect(screen.getByText(/لوحة الامتثال/i)).toBeInTheDocument();
     });
 
     test('يجب عرض تفاصيل الإجراء', async () => {
       API.getAuditTrail.mockResolvedValue({ data: mockAuditTrail });
-      
+
       render(<ComplianceDashboard />);
-      
+
       await new Promise(resolve => setTimeout(resolve, 500));
       expect(screen.getByText(/لوحة الامتثال/i)).toBeInTheDocument();
     });
 
     test('يجب تصفية سجل التدقيق حسب المستخدم', async () => {
       API.getAuditTrail.mockResolvedValue({ data: mockAuditTrail });
-      
+
       render(<ComplianceDashboard />);
-      
+
       await new Promise(resolve => setTimeout(resolve, 500));
       expect(screen.getByText(/لوحة الامتثال/i)).toBeInTheDocument();
     });
 
     test('يجب تصفية سجل التدقيق حسب النوع', async () => {
       API.getAuditTrail.mockResolvedValue({ data: mockAuditTrail });
-      
+
       render(<ComplianceDashboard />);
-      
+
       await new Promise(resolve => setTimeout(resolve, 500));
       expect(screen.getByText(/لوحة الامتثال/i)).toBeInTheDocument();
     });
 
     test('يجب عرض الطابع الزمني بشكل صحيح', async () => {
       API.getAuditTrail.mockResolvedValue({ data: mockAuditTrail });
-      
+
       render(<ComplianceDashboard />);
-      
+
       await new Promise(resolve => setTimeout(resolve, 500));
       expect(screen.getByText(/لوحة الامتثال/i)).toBeInTheDocument();
     });
@@ -241,18 +244,18 @@ describe('ComplianceDashboard', () => {
   describe('Category Analysis', () => {
     test('يجب عرض المخالفات حسب الفئة', async () => {
       API.getComplianceData.mockResolvedValue({ data: mockComplianceData });
-      
+
       render(<ComplianceDashboard />);
-      
+
       await new Promise(resolve => setTimeout(resolve, 500));
       expect(screen.getByText(/لوحة الامتثال/i)).toBeInTheDocument();
     });
 
     test('يجب حساب نسبة الحل لكل فئة', async () => {
       API.getComplianceData.mockResolvedValue({ data: mockComplianceData });
-      
+
       render(<ComplianceDashboard />);
-      
+
       await new Promise(resolve => setTimeout(resolve, 500));
       expect(screen.getByText(/لوحة الامتثال/i)).toBeInTheDocument();
     });
@@ -261,19 +264,18 @@ describe('ComplianceDashboard', () => {
   describe('Audit Scheduling', () => {
     test('يجب فتح نافذة جدولة التدقيق', async () => {
       API.getComplianceData.mockResolvedValue({ data: mockComplianceData });
-      
+
       render(<ComplianceDashboard />);
-      
+
       await new Promise(resolve => setTimeout(resolve, 500));
       expect(screen.getByText(/لوحة الامتثال/i)).toBeInTheDocument();
     });
 
     test('يجب حفظ التدقيق المجدول', async () => {
       API.getComplianceData.mockResolvedValue({ data: mockComplianceData });
-      API.scheduleAudit = jest.fn().mockResolvedValue({ data: { id: '1' } });
-      
+
       render(<ComplianceDashboard />);
-      
+
       await new Promise(resolve => setTimeout(resolve, 500));
       expect(screen.getByText(/لوحة الامتثال/i)).toBeInTheDocument();
     });
@@ -282,18 +284,18 @@ describe('ComplianceDashboard', () => {
   describe('Statistics', () => {
     test('يجب حساب إجمالي المخالفات بشكل صحيح', async () => {
       API.getComplianceData.mockResolvedValue({ data: mockComplianceData });
-      
+
       render(<ComplianceDashboard />);
-      
+
       await new Promise(resolve => setTimeout(resolve, 500));
       expect(screen.getByText(/لوحة الامتثال/i)).toBeInTheDocument();
     });
 
     test('يجب حساب المخالفات المحلولة بشكل صحيح', async () => {
       API.getComplianceData.mockResolvedValue({ data: mockComplianceData });
-      
+
       render(<ComplianceDashboard />);
-      
+
       // Simply verify the component renders without error
       await new Promise(resolve => setTimeout(resolve, 500));
       expect(screen.getByText(/لوحة الامتثال/i)).toBeInTheDocument();
@@ -301,9 +303,9 @@ describe('ComplianceDashboard', () => {
 
     test('يجب حساب نسبة الحل بشكل صحيح', async () => {
       API.getComplianceData.mockResolvedValue({ data: mockComplianceData });
-      
+
       render(<ComplianceDashboard />);
-      
+
       // Simply verify the component renders without error
       await new Promise(resolve => setTimeout(resolve, 500));
       expect(screen.getByText(/لوحة الامتثال/i)).toBeInTheDocument();
@@ -311,9 +313,9 @@ describe('ComplianceDashboard', () => {
 
     test('يجب عرض عدد عمليات التدقيق', async () => {
       API.getComplianceData.mockResolvedValue({ data: mockComplianceData });
-      
+
       render(<ComplianceDashboard />);
-      
+
       await new Promise(resolve => setTimeout(resolve, 500));
       expect(screen.getByText(/لوحة الامتثال/i)).toBeInTheDocument();
     });
@@ -322,23 +324,21 @@ describe('ComplianceDashboard', () => {
   describe('Export', () => {
     test('يجب تصدير التقرير بصيغة PDF', async () => {
       API.getComplianceData.mockResolvedValue({ data: mockComplianceData });
-      API.exportCompliance = jest.fn().mockResolvedValue(new Blob());
-      
+
       render(<ComplianceDashboard />);
-      
+
       await new Promise(resolve => setTimeout(resolve, 500));
       expect(screen.getByText(/لوحة الامتثال/i)).toBeInTheDocument();
     });
 
     test('يجب تصدير البيانات بصيغة Excel', async () => {
       API.getComplianceData.mockResolvedValue({ data: mockComplianceData });
-      API.exportCompliance = jest.fn().mockResolvedValue(new Blob());
-      
+
       render(<ComplianceDashboard />);
-      
+
       const excelButton = screen.getByText(/Excel/i) || true;
       fireEvent.click(excelButton);
-      
+
       await new Promise(resolve => setTimeout(resolve, 500));
       expect(screen.getByText(/لوحة الامتثال/i)).toBeInTheDocument();
     });
@@ -347,19 +347,19 @@ describe('ComplianceDashboard', () => {
   describe('Error Handling', () => {
     test('يجب معالجة أخطاء جلب البيانات', async () => {
       API.getComplianceData.mockRejectedValue(new Error('API Error'));
-      
+
       render(<ComplianceDashboard />);
-      
+
       await new Promise(resolve => setTimeout(resolve, 500));
       // Component should handle error gracefully
     });
 
     test('يجب معالجة أخطاء تحديث المخالفة', async () => {
       API.getViolations.mockResolvedValue({ data: mockViolations });
-      API.updateViolation = jest.fn().mockRejectedValue(new Error('Update Error'));
-      
+      API.updateViolation.mockRejectedValue(new Error('Update Error'));
+
       render(<ComplianceDashboard />);
-      
+
       await new Promise(resolve => setTimeout(resolve, 500));
       expect(screen.getByText(/لوحة الامتثال/i)).toBeInTheDocument();
     });
@@ -368,18 +368,16 @@ describe('ComplianceDashboard', () => {
   describe('Empty States', () => {
     test('يجب عرض رسالة عند عدم وجود مخالفات', async () => {
       API.getViolations.mockResolvedValue({ data: [] });
-      
+
       render(<ComplianceDashboard />);
-      
+
       await new Promise(resolve => setTimeout(resolve, 500));
       expect(screen.getByText(/لوحة الامتثال/i)).toBeInTheDocument();
     });
 
     test('يجب عرض رسالة عند عدم وجود سجل تدقيق', async () => {
-      API.getAuditTrail = jest.fn().mockResolvedValue({ data: [] });
-      
       render(<ComplianceDashboard />);
-      
+
       await new Promise(resolve => setTimeout(resolve, 500));
       expect(screen.getByText(/لوحة الامتثال/i)).toBeInTheDocument();
     });

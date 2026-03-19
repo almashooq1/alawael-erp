@@ -4,7 +4,7 @@ import Opportunity from '../models/crm.opportunity.model';
 const router = express.Router();
 
 // Get all opportunities
-router.get('/', async (req, res) => {
+router.get('/', async (_req, res) => {
   try {
     const opportunities = await Opportunity.find().populate('customer');
     res.json(opportunities);
@@ -38,7 +38,12 @@ router.post('/', async (req, res) => {
 // Update opportunity
 router.put('/:id', async (req, res) => {
   try {
-    const opportunity = await Opportunity.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const { title, customer, value, stage, probability, expectedCloseDate, notes, assignee } = req.body;
+    const opportunity = await Opportunity.findByIdAndUpdate(
+      req.params.id,
+      { title, customer, value, stage, probability, expectedCloseDate, notes, assignee },
+      { new: true },
+    );
     if (!opportunity) return res.status(404).json({ error: 'Opportunity not found' });
     res.json(opportunity);
   } catch (err) {

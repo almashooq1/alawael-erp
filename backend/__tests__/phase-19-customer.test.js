@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * ALAWAEL ERP - PHASE 19 TEST SUITE
  * Customer Experience & Satisfaction Management

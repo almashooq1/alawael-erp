@@ -1,0 +1,238 @@
+.PHONY: help install clean test build lint format dev start
+.DEFAULT_GOAL := help
+
+# 🎨 الألوان للإخراج
+BLUE = \033[0;34m
+GREEN = \033[0;32m
+YELLOW = \033[1;33m
+RED = \033[0;31m
+NC = \033[0m
+
+# 📁 المسارات
+ROOT_DIR := $(shell pwd)
+SCM_FRONTEND := $(ROOT_DIR)/supply-chain-management/frontend
+BACKEND := $(ROOT_DIR)/backend
+NODE_MODULES := node_modules
+
+# 🔧 الإصدارات
+NODE_VERSION := $(shell node --version)
+NPM_VERSION := $(shell npm --version)
+TIMESTAMP := $(shell date +"%Y-%m-%d %H:%M:%S")
+
+# ====================================
+# 📖 المساعدة
+# ====================================
+help: ## عرض هذا الملف النصي
+	@echo "$(BLUE)========================================$(NC)"
+	@echo "$(BLUE)🚀 سكريبت تحسين المشروع$(NC)"
+	@echo "$(BLUE)========================================$(NC)"
+	@echo ""
+	@echo "$(GREEN)الأوامر المتاحة:$(NC)"
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  $(YELLOW)%-15s$(NC) %s\n", $$1, $$2}'
+	@echo ""
+	@echo "$(GREEN)مثال:$(NC)"
+	@echo "  make install    # تثبيت جميع المكتبات"
+	@echo "  make test       # تشغيل جميع الاختبارات"
+	@echo "  make build      # بناء جميع المشاريع"
+	@echo ""
+
+# ====================================
+# 🔧 تثبيت وتنظيف
+# ====================================
+install: ## تثبيت جميع مكتبات المشروع
+	@echo "$(BLUE)🔧 تثبيت المكتبات...$(NC)"
+	@$(MAKE) clean
+	npm install --legacy-peer-deps
+	@if [ -d "$(SCM_FRONTEND)" ]; then \
+		cd $(SCM_FRONTEND) && npm install --legacy-peer-deps; \
+	fi
+	@if [ -d "$(BACKEND)" ]; then \
+		cd $(BACKEND) && npm install --legacy-peer-deps; \
+	fi
+	@echo "$(GREEN)✅ تم التثبيت بنجاح$(NC)"
+
+clean: ## تنظيف البيئة (حذف node_modules و package-lock.json)
+	@echo "$(YELLOW)🧹 تنظيف البيئة...$(NC)"
+	@find . -name "node_modules" -type d -prune -exec rm -rf {} + 2>/dev/null || true
+	@find . -name "package-lock.json" -type f -delete 2>/dev/null || true
+	@npm cache clean --force
+	@echo "$(GREEN)✅ تم التنظيف$(NC)"
+
+cache-clean: ## تنظيف npm cache
+	@echo "$(YELLOW)🧹 تنظيف npm cache...$(NC)"
+	npm cache clean --force
+	@echo "$(GREEN)✅ تم تنظيف cache$(NC)"
+
+reinstall: clean install ## إعادة تثبيت المكتبات (clean + install)
+
+# ====================================
+# 🧪 الاختبارات
+# ====================================
+test: ## تشغيل جميع الاختبارات
+	@echo "$(BLUE)🧪 تشغيل الاختبارات...$(NC)"
+	npm test -- --passWithNoTests || true
+	@if [ -d "$(SCM_FRONTEND)" ]; then \
+		echo "$(BLUE)تشغيل اختبارات SCM Frontend...$(NC)"; \
+		cd $(SCM_FRONTEND) && npm test -- --passWithNoTests || true; \
+	fi
+
+test-coverage: ## تشغيل الاختبارات مع تقرير التغطية
+	@echo "$(BLUE)📊 تشغيل الاختبارات مع التغطية...$(NC)"
+	npm test -- --coverage --passWithNoTests || true
+	@if [ -d "$(SCM_FRONTEND)" ]; then \
+		cd $(SCM_FRONTEND) && npm test -- --coverage --passWithNoTests || true; \
+	fi
+
+test-watch: ## تشغيل الاختبارات في وضع المراقبة
+	@echo "$(BLUE)👁️ تشغيل الاختبارات (مراقبة)...$(NC)"
+	npm test -- --watch || true
+
+test-frontend: ## تشغيل اختبارات SCM Frontend فقط
+	@echo "$(BLUE)🧪 تشغيل اختبارات SCM Frontend...$(NC)"
+	@if [ -d "$(SCM_FRONTEND)" ]; then \
+		cd $(SCM_FRONTEND) && npm test -- --passWithNoTests --coverage; \
+	else \
+		echo "$(RED)❌ لم يتم العثور على SCM Frontend$(NC)"; \
+	fi
+
+test-backend: ## تشغيل اختبارات Backend فقط
+	@echo "$(BLUE)🧪 تشغيل اختبارات Backend...$(NC)"
+	@if [ -d "$(BACKEND)" ]; then \
+		cd $(BACKEND) && npm test; \
+	else \
+		echo "$(RED)❌ لم يتم العثور على Backend$(NC)"; \
+	fi
+
+# ====================================
+# 🏗️ البناء
+# ====================================
+build: ## بناء جميع المشاريع
+	@echo "$(BLUE)🏗️ بناء المشاريع...$(NC)"
+	npm run build || true
+	@if [ -d "$(SCM_FRONTEND)" ]; then \
+		echo "$(BLUE)بناء SCM Frontend...$(NC)"; \
+		cd $(SCM_FRONTEND) && npm run build || true; \
+	fi
+	@echo "$(GREEN)✅ تم البناء$(NC)"
+
+build-prod: ## بناء للإنتاج مع التحسينات
+	@echo "$(BLUE)🏗️ بناء الإنتاج...$(NC)"
+	NODE_ENV=production npm run build
+	@if [ -d "$(SCM_FRONTEND)" ]; then \
+		cd $(SCM_FRONTEND) && NODE_ENV=production npm run build; \
+	fi
+	@echo "$(GREEN)✅ تم بناء الإنتاج$(NC)"
+
+# ====================================
+# 📝 الكود
+# ====================================
+lint: ## فحص جودة الكود
+	@echo "$(BLUE)🔍 فحص جودة الكود...$(NC)"
+	npm run lint || true
+	@if [ -d "$(SCM_FRONTEND)" ]; then \
+		cd $(SCM_FRONTEND) && npm run lint || true; \
+	fi
+	@echo "$(GREEN)✅ تم الفحص$(NC)"
+
+format: ## تنسيق الكود تلقائياً
+	@echo "$(BLUE)🎨 تنسيق الكود...$(NC)"
+	npm run format || true
+	@if [ -d "$(SCM_FRONTEND)" ]; then \
+		cd $(SCM_FRONTEND) && npm run format || true; \
+	fi
+	@echo "$(GREEN)✅ تم التنسيق$(NC)"
+
+lint-fix: ## إصلاح مشاكل الكود تلقائياً
+	@echo "$(BLUE)🔧 إصلاح مشاكل الكود...$(NC)"
+	npm run lint -- --fix || true
+	npm run format || true
+	@if [ -d "$(SCM_FRONTEND)" ]; then \
+		cd $(SCM_FRONTEND) && npm run lint -- --fix || true; \
+		cd $(SCM_FRONTEND) && npm run format || true; \
+	fi
+	@echo "$(GREEN)✅ تم الإصلاح$(NC)"
+
+# ====================================
+# 🔒 الأمان
+# ====================================
+audit: ## فحص الأمان
+	@echo "$(BLUE)🔒 فحص الأمان...$(NC)"
+	npm audit --legacy-peer-deps || true
+	@echo "$(GREEN)✅ تم الفحص$(NC)"
+
+audit-fix: ## إصلاح مشاكل الأمان
+	@echo "$(BLUE)🔧 إصلاح مشاكل الأمان...$(NC)"
+	npm audit fix --legacy-peer-deps || true
+	@echo "$(GREEN)✅ تم الإصلاح$(NC)"
+
+# ====================================
+# 🚀 التطوير والتشغيل
+# ====================================
+dev: ## تشغيل المشروع في وضع التطوير
+	@echo "$(BLUE)🚀 تشغيل وضع التطوير...$(NC)"
+	npm run dev || npm start
+
+start: ## بدء التطبيق
+	@echo "$(BLUE)▶️ بدء التطبيق...$(NC)"
+	npm start
+
+start-frontend: ## تشغيل SCM Frontend
+	@echo "$(BLUE)▶️ تشغيل SCM Frontend...$(NC)"
+	@if [ -d "$(SCM_FRONTEND)" ]; then \
+		cd $(SCM_FRONTEND) && npm start; \
+	else \
+		echo "$(RED)❌ لم يتم العثور على SCM Frontend$(NC)"; \
+	fi
+
+start-backend: ## تشغيل Backend
+	@echo "$(BLUE)▶️ تشغيل Backend...$(NC)"
+	@if [ -d "$(BACKEND)" ]; then \
+		cd $(BACKEND) && npm start; \
+	else \
+		echo "$(RED)❌ لم يتم العثور على Backend$(NC)"; \
+	fi
+
+# ====================================
+# 📊 التقارير والمعلومات
+# ====================================
+status: ## عرض حالة المشروع
+	@echo "$(BLUE)========================================$(NC)"
+	@echo "$(BLUE)📊 حالة المشروع$(NC)"
+	@echo "$(BLUE)========================================$(NC)"
+	@echo "$(GREEN)Node Version:$(NC) $(NODE_VERSION)"
+	@echo "$(GREEN)NPM Version:$(NC) $(NPM_VERSION)"
+	@echo "$(GREEN)Working Directory:$(NC) $(ROOT_DIR)"
+	@echo "$(GREEN)Timestamp:$(NC) $(TIMESTAMP)"
+	@echo ""
+	@echo "$(YELLOW)المشاريع الموجودة:$(NC)"
+	@[ -d "$(SCM_FRONTEND)" ] && echo "  ✅ Supply Chain Frontend" || echo "  ❌ Supply Chain Frontend"
+	@[ -d "$(BACKEND)" ] && echo "  ✅ Backend" || echo "  ❌ Backend"
+
+info: ## عرض معلومات التبعيات
+	@echo "$(BLUE)ℹ️ معلومات التبعيات$(NC)"
+	@npm list --depth=0 || true
+
+# ====================================
+# 🎯 المهام المركبة
+# ====================================
+setup: install lint build ## إعداد كامل (install + lint + build)
+	@echo "$(GREEN)✅ تم الإعداد الكامل$(NC)"
+
+full-check: lint test build ## فحص شامل (lint + test + build)
+	@echo "$(GREEN)✅ تم الفحص الشامل$(NC)"
+
+prepare-commit: lint-fix test ## تحضير commit (lint-fix + test)
+	@echo "$(GREEN)✅ جاهز للـ commit$(NC)"
+
+all: clean install lint test build ## تشغيل جميع الأوامر
+	@echo "$(GREEN)🎉 تم إكمال جميع الأوامر$(NC)"
+
+# ====================================
+# 🧪 أوامر إضافية
+# ====================================
+version: ## عرض الإصدار
+	@echo "Project Version: $$(cat package.json | grep '\"version\"' | head -1 | awk -F: '{ print $$2 }' | sed 's/[\",]//g' | xargs)"
+	@echo "Node Version: $(NODE_VERSION)"
+	@echo "NPM Version: $(NPM_VERSION)"
+
+.PHONY: all

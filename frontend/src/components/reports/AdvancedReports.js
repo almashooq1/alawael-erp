@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { triggerBlobDownload } from 'utils/downloadHelper';
 import {
   Container,
   Grid,
@@ -22,7 +23,7 @@ import {
   TableRow,
   Paper,
 } from '@mui/material';
-import { TrendingUp, Compare, Timeline, Download, Insights } from '@mui/icons-material';
+import { Compare, Timeline, Download, Insights } from '@mui/icons-material';
 import {
   LineChart,
   Line,
@@ -40,6 +41,9 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
+import { getToken } from 'utils/tokenStorage';
+import logger from 'utils/logger';
+import { statusColors, neutralColors, chartColors } from '../../theme/palette';
 
 const AdvancedReports = () => {
   const [loading, setLoading] = useState(false);
@@ -57,13 +61,13 @@ const AdvancedReports = () => {
     try {
       const response = await fetch('/api/rehabilitation-programs', {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${getToken()}`,
         },
       });
       const data = await response.json();
       setPrograms(data);
     } catch (error) {
-      console.error('Error fetching programs:', error);
+      logger.error('Error fetching programs:', error);
     }
   };
 
@@ -97,7 +101,7 @@ const AdvancedReports = () => {
 
       setReportData(data);
     } catch (error) {
-      console.error('Error generating report:', error);
+      logger.error('Error generating report:', error);
     } finally {
       setLoading(false);
     }
@@ -106,7 +110,7 @@ const AdvancedReports = () => {
   const fetchPerformanceMetrics = async programId => {
     const response = await fetch(`/api/analytics/program/${programId}/performance`, {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
+        Authorization: `Bearer ${getToken()}`,
       },
     });
     return await response.json();
@@ -116,7 +120,7 @@ const AdvancedReports = () => {
     const response = await fetch('/api/analytics/compare', {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
+        Authorization: `Bearer ${getToken()}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ programIds }),
@@ -127,7 +131,7 @@ const AdvancedReports = () => {
   const fetchPredictiveInsights = async disabilityType => {
     const response = await fetch(`/api/analytics/predictive/${disabilityType}`, {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
+        Authorization: `Bearer ${getToken()}`,
       },
     });
     return await response.json();
@@ -138,12 +142,7 @@ const AdvancedReports = () => {
 
     const dataStr = JSON.stringify(reportData, null, 2);
     const blob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `report-${reportType}-${new Date().toISOString()}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+    triggerBlobDownload(blob, `report-${reportType}-${new Date().toISOString()}.json`);
   };
 
   return (
@@ -355,9 +354,9 @@ const AdvancedReports = () => {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="achieved" fill="#4caf50" name="محققة" />
-                    <Bar dataKey="inProgress" fill="#ff9800" name="قيد التنفيذ" />
-                    <Bar dataKey="notStarted" fill="#9e9e9e" name="لم تبدأ" />
+                    <Bar dataKey="achieved" fill={statusColors.success} name="محققة" />
+                    <Bar dataKey="inProgress" fill={statusColors.warning} name="قيد التنفيذ" />
+                    <Bar dataKey="notStarted" fill={neutralColors.inactive} name="لم تبدأ" />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -378,8 +377,18 @@ const AdvancedReports = () => {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Line type="monotone" dataKey="sessions" stroke="#8884d8" name="الجلسات" />
-                    <Line type="monotone" dataKey="attendance" stroke="#82ca9d" name="الحضور" />
+                    <Line
+                      type="monotone"
+                      dataKey="sessions"
+                      stroke={chartColors.purple}
+                      name="الجلسات"
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="attendance"
+                      stroke={chartColors.green}
+                      name="الحضور"
+                    />
                   </LineChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -448,15 +457,15 @@ const AdvancedReports = () => {
                     <Radar
                       name="البرنامج 1"
                       dataKey="program1"
-                      stroke="#8884d8"
-                      fill="#8884d8"
+                      stroke={chartColors.purple}
+                      fill={chartColors.purple}
                       fillOpacity={0.6}
                     />
                     <Radar
                       name="البرنامج 2"
                       dataKey="program2"
-                      stroke="#82ca9d"
-                      fill="#82ca9d"
+                      stroke={chartColors.green}
+                      fill={chartColors.green}
                       fillOpacity={0.6}
                     />
                     <Legend />

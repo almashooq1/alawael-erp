@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * ALAWAEL ERP - PHASE 20: RISK MANAGEMENT & COMPLIANCE SYSTEM
  * Enterprise risk assessment, compliance tracking, audit management, mitigation strategies

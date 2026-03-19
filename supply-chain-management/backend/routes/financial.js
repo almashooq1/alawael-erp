@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const express = require('express');
 const router = express.Router();
 const financialIntelligenceService = require('../services/financialIntelligenceService');
@@ -42,7 +43,7 @@ router.post(
       data: transaction,
       message: 'Payment created successfully',
     });
-  })
+  }),
 );
 
 /**
@@ -62,18 +63,14 @@ router.post(
       });
     }
 
-    const transaction = await financialIntelligenceService.completePayment(
-      transactionId,
-      gatewayTransactionId,
-      reference
-    );
+    const transaction = await financialIntelligenceService.completePayment(transactionId, gatewayTransactionId, reference);
 
     res.status(200).json({
       success: true,
       data: transaction,
       message: 'Payment completed successfully',
     });
-  })
+  }),
 );
 
 /**
@@ -100,7 +97,7 @@ router.post(
       data: refund,
       message: 'Refund processed successfully',
     });
-  })
+  }),
 );
 
 /**
@@ -131,7 +128,7 @@ router.get(
         skip: result.skip,
       },
     });
-  })
+  }),
 );
 
 /**
@@ -155,7 +152,7 @@ router.get(
       success: true,
       data: transaction,
     });
-  })
+  }),
 );
 
 /**
@@ -183,7 +180,7 @@ router.post(
       data: result,
       message: `Reconciliation complete: ${result.matched} matched, ${result.unmatched.length} unmatched`,
     });
-  })
+  }),
 );
 
 // ==================== INVOICE ENDPOINTS ====================
@@ -217,7 +214,7 @@ router.post(
       data: invoice,
       message: 'Invoice created successfully',
     });
-  })
+  }),
 );
 
 /**
@@ -244,7 +241,7 @@ router.post(
       data: invoice,
       message: 'Invoice sent successfully',
     });
-  })
+  }),
 );
 
 /**
@@ -264,7 +261,7 @@ router.get(
         summary: result.summary,
       },
     });
-  })
+  }),
 );
 
 /**
@@ -277,16 +274,13 @@ router.get(
     const { status } = req.params;
     const { customerId } = req.query;
 
-    const invoices = await financialIntelligenceService.getInvoicesByStatus(
-      status,
-      customerId || null
-    );
+    const invoices = await financialIntelligenceService.getInvoicesByStatus(status, customerId || null);
 
     res.status(200).json({
       success: true,
       data: invoices,
     });
-  })
+  }),
 );
 
 /**
@@ -310,7 +304,7 @@ router.get(
       success: true,
       data: invoice,
     });
-  })
+  }),
 );
 
 /**
@@ -345,7 +339,7 @@ router.post(
       data: invoice,
       message: 'Payment recorded successfully',
     });
-  })
+  }),
 );
 
 /**
@@ -364,7 +358,7 @@ router.post(
       data: invoice,
       message: 'Invoice reminder sent successfully',
     });
-  })
+  }),
 );
 
 // ==================== BUDGET ENDPOINTS ====================
@@ -399,7 +393,7 @@ router.post(
       data: budget,
       message: 'Budget created successfully',
     });
-  })
+  }),
 );
 
 /**
@@ -426,7 +420,7 @@ router.post(
       data: budget,
       message: 'Expense recorded successfully',
     });
-  })
+  }),
 );
 
 /**
@@ -453,7 +447,7 @@ router.post(
       data: budget,
       message: 'Budget approved successfully',
     });
-  })
+  }),
 );
 
 /**
@@ -472,7 +466,7 @@ router.post(
       data: budget,
       message: 'Budget activated successfully',
     });
-  })
+  }),
 );
 
 /**
@@ -490,7 +484,7 @@ router.get(
       success: true,
       data: status,
     });
-  })
+  }),
 );
 
 /**
@@ -502,16 +496,13 @@ router.get(
   asyncHandler(async (req, res) => {
     const { department, fiscalYear } = req.params;
 
-    const budgets = await financialIntelligenceService.getDepartmentBudgets(
-      department,
-      parseInt(fiscalYear)
-    );
+    const budgets = await financialIntelligenceService.getDepartmentBudgets(department, parseInt(fiscalYear));
 
     res.status(200).json({
       success: true,
       data: budgets,
     });
-  })
+  }),
 );
 
 // ==================== ANALYTICS ENDPOINTS ====================
@@ -532,17 +523,13 @@ router.get(
       });
     }
 
-    const summary = await financialIntelligenceService.getFinancialSummary(
-      startDate,
-      endDate,
-      customerId || null
-    );
+    const summary = await financialIntelligenceService.getFinancialSummary(startDate, endDate, customerId || null);
 
     res.status(200).json({
       success: true,
       data: summary,
     });
-  })
+  }),
 );
 
 /**
@@ -560,7 +547,7 @@ router.get(
       success: true,
       data: forecast,
     });
-  })
+  }),
 );
 
 /**
@@ -578,7 +565,7 @@ router.get(
       success: true,
       data: analytics,
     });
-  })
+  }),
 );
 
 /**
@@ -596,15 +583,15 @@ router.get(
       success: true,
       data: variance,
     });
-  })
+  }),
 );
 
 // Error handling middleware
-router.use((error, req, res, next) => {
+router.use((error, _req, res, _next) => {
   console.error('[Financial Routes Error]', error.message);
   res.status(500).json({
     success: false,
-    error: error.message || 'Internal server error',
+    error: 'حدث خطأ في الخادم',
   });
 });
 

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Swagger UI Setup
  * Mount Swagger documentation on the Express server
@@ -5,6 +6,7 @@
 
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpecs = require('./swagger');
+const logger = require('../utils/logger');
 
 const setupSwaggerUI = app => {
   app.use('/api/docs', swaggerUi.serve);
@@ -31,7 +33,7 @@ const setupSwaggerUI = app => {
     res.json(swaggerSpecs);
   });
 
-  console.log('✅ Swagger UI متاح على: http://localhost:3001/api/docs');
+  logger.info('Swagger UI available at: http://localhost:3001/api/docs');
 };
 
 module.exports = setupSwaggerUI;

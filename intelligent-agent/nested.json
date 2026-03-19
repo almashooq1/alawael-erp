@@ -1,0 +1,15 @@
+{
+  "metadata": {
+    "generated": "2026-02-28T16:40:48.321Z",
+    "format": "json"
+  },
+  "data": {
+    "level1": {
+      "level2": {
+        "level3": {
+          "value": "deep"
+        }
+      }
+    }
+  }
+}

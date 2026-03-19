@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Recording Model - نموذج التسجيلات
  * إدارة ملفات الفيديو المسجلة
@@ -188,7 +189,7 @@ const recordingSchema = new mongoose.Schema(
   {
     timestamps: true,
     collection: 'recordings',
-  },
+  }
 );
 
 // الفهارس

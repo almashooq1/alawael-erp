@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Message Model - Phase 3
  * نموذج الرسائل للدردشة الفورية
@@ -131,7 +132,7 @@ const messageSchema = new mongoose.Schema(
     timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
-  },
+  }
 );
 
 // Indexes for performance
@@ -177,7 +178,11 @@ messageSchema.methods.deleteForUser = async function (userId) {
 };
 
 // Static: احصل على رسائل محادثة
-messageSchema.statics.getConversationMessages = async function (conversationId, userId, options = {}) {
+messageSchema.statics.getConversationMessages = async function (
+  conversationId,
+  userId,
+  options = {}
+) {
   const { page = 1, limit = 50 } = options;
 
   const query = {
@@ -218,14 +223,12 @@ messageSchema.statics.markAllAsRead = async function (conversationId, userId) {
 };
 
 // Hook: قبل الحفظ
-messageSchema.pre('save', function (next) {
+messageSchema.pre('save', function () {
   // تحديث وقت التعديل
   if (this.isModified('content.text')) {
     this.isEdited = true;
     this.editedAt = new Date();
   }
-
-  next();
 });
 
 // Hook: بعد الحفظ - إرسال إشعار

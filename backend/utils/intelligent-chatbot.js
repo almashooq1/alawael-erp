@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * PHASE 17: INTELLIGENT CHATBOT ENGINE
  * Advanced NLP & Conversational AI
@@ -103,7 +104,7 @@ class IntelligentChatbot {
         suggestions: response.suggestions,
       };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -181,8 +182,8 @@ class IntelligentChatbot {
    * Handle sales queries
    */
   async handleSalesQuery(message, entities) {
-    const amount = entities.find(e => e.type === 'amount');
-    const date = entities.find(e => e.type === 'date');
+    const _amount = entities.find(e => e.type === 'amount');
+    const _date = entities.find(e => e.type === 'date');
 
     if (message.includes('forecast') || message.includes('predict')) {
       return 'I can forecast sales based on historical data. Would you like a 30-day, 90-day, or annual forecast?';
@@ -199,7 +200,7 @@ class IntelligentChatbot {
    * Handle inventory queries
    */
   async handleInventoryQuery(message, entities) {
-    const product = entities.find(e => e.type === 'product');
+    const _product = entities.find(e => e.type === 'product');
 
     if (message.includes('low stock') || message.includes('out of stock')) {
       return '5 items are currently low in stock. Would you like me to suggest reordering?';
@@ -215,8 +216,8 @@ class IntelligentChatbot {
   /**
    * Handle customer queries
    */
-  async handleCustomerQuery(message, entities, context) {
-    const customerId = entities.find(e => e.type === 'customer_id');
+  async handleCustomerQuery(message, entities, _context) {
+    const _customerId = entities.find(e => e.type === 'customer_id');
 
     if (message.includes('profile') || message.includes('details')) {
       return 'I can retrieve customer profiles. Which customer would you like information about?';
@@ -237,7 +238,7 @@ class IntelligentChatbot {
    * Handle analytics queries
    */
   async handleAnalyticsQuery(message, entities) {
-    const metric = entities.find(e => e.type === 'metric');
+    const _metric = entities.find(e => e.type === 'metric');
 
     if (message.includes('dashboard')) {
       return 'Your dashboard is ready. Key metrics: Revenue +12%, Active Users +8%, Inventory 92%.';
@@ -257,7 +258,7 @@ class IntelligentChatbot {
   /**
    * Handle support queries
    */
-  async handleSupportQuery(message, context) {
+  async handleSupportQuery(message, _context) {
     if (message.includes('error') || message.includes('bug')) {
       return "I'm sorry you're experiencing an issue. Can you describe what happened?";
     }
@@ -305,7 +306,7 @@ class IntelligentChatbot {
 
       return { success: true };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 }

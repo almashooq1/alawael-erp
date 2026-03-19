@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * خدمات نظام النقل والمواصلات
  * Transport Services
@@ -28,7 +29,7 @@ class BusService {
       });
       return await bus.save();
     } catch (error) {
-      throw new Error(`خطأ في إضافة الحافلة: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -41,16 +42,19 @@ class BusService {
         .populate('assistant', 'firstName lastName phone')
         .populate('currentRoute', 'routeName routeCode');
     } catch (error) {
-      throw new Error(`خطأ في جلب الحافلات: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
   // الحصول على حافلة واحدة
   async getBusById(busId) {
     try {
-      return await Bus.findById(busId).populate('driver').populate('assistant').populate('currentRoute');
+      return await Bus.findById(busId)
+        .populate('driver')
+        .populate('assistant')
+        .populate('currentRoute');
     } catch (error) {
-      throw new Error(`خطأ في جلب الحافلة: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -59,7 +63,7 @@ class BusService {
     try {
       return await Bus.findByIdAndUpdate(busId, updateData, { new: true, runValidators: true });
     } catch (error) {
-      throw new Error(`خطأ في تحديث الحافلة: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -68,7 +72,7 @@ class BusService {
     try {
       return await Bus.findByIdAndDelete(busId);
     } catch (error) {
-      throw new Error(`خطأ في حذف الحافلة: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -84,19 +88,23 @@ class BusService {
             timestamp: new Date(),
           },
         },
-        { new: true },
+        { new: true }
       );
     } catch (error) {
-      throw new Error(`خطأ في تحديث الموقع: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
   // إضافة جدول صيانة
   async addMaintenanceSchedule(busId, maintenanceData) {
     try {
-      return await Bus.findByIdAndUpdate(busId, { $push: { maintenanceSchedule: maintenanceData } }, { new: true, runValidators: true });
+      return await Bus.findByIdAndUpdate(
+        busId,
+        { $push: { maintenanceSchedule: maintenanceData } },
+        { new: true, runValidators: true }
+      );
     } catch (error) {
-      throw new Error(`خطأ في إضافة جدول الصيانة: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 }
@@ -112,7 +120,7 @@ class DriverService {
       });
       return await driver.save();
     } catch (error) {
-      throw new Error(`خطأ في إضافة السائق: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -120,9 +128,11 @@ class DriverService {
   async getAllDrivers(filters = {}) {
     try {
       const query = { ...filters };
-      return await Driver.find(query).populate('assignedBus', 'busNumber licensePlate').populate('routes', 'routeName routeCode');
+      return await Driver.find(query)
+        .populate('assignedBus', 'busNumber licensePlate')
+        .populate('routes', 'routeName routeCode');
     } catch (error) {
-      throw new Error(`خطأ في جلب السائقين: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -131,16 +141,19 @@ class DriverService {
     try {
       return await Driver.findById(driverId).populate('assignedBus').populate('routes');
     } catch (error) {
-      throw new Error(`خطأ في جلب السائق: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
   // تحديث بيانات السائق
   async updateDriver(driverId, updateData) {
     try {
-      return await Driver.findByIdAndUpdate(driverId, updateData, { new: true, runValidators: true });
+      return await Driver.findByIdAndUpdate(driverId, updateData, {
+        new: true,
+        runValidators: true,
+      });
     } catch (error) {
-      throw new Error(`خطأ في تحديث السائق: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -149,25 +162,33 @@ class DriverService {
     try {
       return await Driver.findByIdAndDelete(driverId);
     } catch (error) {
-      throw new Error(`خطأ في حذف السائق: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
   // تسجيل الحضور والغياب
   async recordAttendance(driverId, attendanceData) {
     try {
-      return await Driver.findByIdAndUpdate(driverId, { $push: { attendance: attendanceData } }, { new: true, runValidators: true });
+      return await Driver.findByIdAndUpdate(
+        driverId,
+        { $push: { attendance: attendanceData } },
+        { new: true, runValidators: true }
+      );
     } catch (error) {
-      throw new Error(`خطأ في تسجيل الحضور: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
   // تسجيل الانتهاكات
   async recordViolation(driverId, violationData) {
     try {
-      return await Driver.findByIdAndUpdate(driverId, { $push: { violations: violationData } }, { new: true, runValidators: true });
+      return await Driver.findByIdAndUpdate(
+        driverId,
+        { $push: { violations: violationData } },
+        { new: true, runValidators: true }
+      );
     } catch (error) {
-      throw new Error(`خطأ في تسجيل الانتهاك: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -181,10 +202,12 @@ class DriverService {
       return {
         isValid,
         expiryDate: driver.licenseExpiry,
-        daysRemaining: Math.floor((new Date(driver.licenseExpiry) - new Date()) / (1000 * 60 * 60 * 24)),
+        daysRemaining: Math.floor(
+          (new Date(driver.licenseExpiry) - new Date()) / (1000 * 60 * 60 * 24)
+        ),
       };
     } catch (error) {
-      throw new Error(`خطأ في التحقق من الرخصة: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 }
@@ -200,7 +223,7 @@ class RouteService {
       });
       return await route.save();
     } catch (error) {
-      throw new Error(`خطأ في إضافة المسار: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -213,7 +236,7 @@ class RouteService {
         .populate('eveningShift.assignedBus', 'busNumber')
         .populate('eveningShift.assignedDriver', 'firstName lastName');
     } catch (error) {
-      throw new Error(`خطأ في جلب المسارات: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -228,7 +251,7 @@ class RouteService {
         .populate('stops.pickupStudents', 'firstName lastName')
         .populate('stops.dropoffStudents', 'firstName lastName');
     } catch (error) {
-      throw new Error(`خطأ في جلب المسار: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -237,7 +260,7 @@ class RouteService {
     try {
       return await Route.findByIdAndUpdate(routeId, updateData, { new: true, runValidators: true });
     } catch (error) {
-      throw new Error(`خطأ في تحديث المسار: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -248,7 +271,7 @@ class RouteService {
       const perKmRate = 10; // رسم لكل كيلومتر
       return baseRate + routeDistance * perKmRate;
     } catch (error) {
-      throw new Error(`خطأ في حساب الرسوم: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -258,7 +281,7 @@ class RouteService {
       const route = await Route.findById(routeId);
       return route?.stops || [];
     } catch (error) {
-      throw new Error(`خطأ في جلب المحطات: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 }
@@ -275,7 +298,7 @@ class StudentTransportService {
       });
       return await registration.save();
     } catch (error) {
-      throw new Error(`خطأ في تسجيل الطالب: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -287,7 +310,7 @@ class StudentTransportService {
         .populate('currentRoute', 'routeName routeCode')
         .sort({ createdAt: -1 });
     } catch (error) {
-      throw new Error(`خطأ في جلب التسجيلات: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -301,10 +324,10 @@ class StudentTransportService {
           approalDate: new Date(),
           approvedBy: adminId,
         },
-        { new: true },
+        { new: true }
       );
     } catch (error) {
-      throw new Error(`خطأ في الموافقة: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -317,19 +340,23 @@ class StudentTransportService {
           status: 'inactive',
           notes: reason,
         },
-        { new: true },
+        { new: true }
       );
     } catch (error) {
-      throw new Error(`خطأ في إلغاء التسجيل: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
   // تحديث رسوم الطالب
   async updateStudentFee(registrationId, monthlyFee) {
     try {
-      return await StudentTransport.findByIdAndUpdate(registrationId, { monthlyFee }, { new: true, runValidators: true });
+      return await StudentTransport.findByIdAndUpdate(
+        registrationId,
+        { monthlyFee },
+        { new: true, runValidators: true }
+      );
     } catch (error) {
-      throw new Error(`خطأ في تحديث الرسوم: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -341,7 +368,7 @@ class StudentTransportService {
         status: 'active',
       }).populate('studentId');
     } catch (error) {
-      throw new Error(`خطأ في جلب الطلاب: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 }
@@ -360,12 +387,12 @@ class AttendanceService {
       await StudentTransport.findByIdAndUpdate(
         attendanceData.studentTransportId,
         { $push: { attendanceRecords: attendanceData } },
-        { new: true },
+        { new: true }
       );
 
       return attendance;
     } catch (error) {
-      throw new Error(`خطأ في تسجيل الحضور: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -383,7 +410,7 @@ class AttendanceService {
         },
       });
     } catch (error) {
-      throw new Error(`خطأ في جلب السجل: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -402,7 +429,7 @@ class AttendanceService {
         attendanceRate: rate + '%',
       };
     } catch (error) {
-      throw new Error(`خطأ في حساب معدل الحضور: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 }
@@ -430,7 +457,7 @@ class PaymentService {
 
       return payment;
     } catch (error) {
-      throw new Error(`خطأ في تسجيل الدفعة: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -439,7 +466,7 @@ class PaymentService {
     try {
       return await TransportPayment.find({ studentTransportId }).sort({ paymentDate: -1 });
     } catch (error) {
-      throw new Error(`خطأ في جلب سجل الدفعات: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -451,7 +478,7 @@ class PaymentService {
         paymentStatus: { $in: ['partial', 'unpaid', 'overdue'] },
       }).populate('studentId');
     } catch (error) {
-      throw new Error(`خطأ في جلب الحسابات المتأخرة: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -481,7 +508,7 @@ class PaymentService {
         payments,
       };
     } catch (error) {
-      throw new Error(`خطأ في تقرير الإيرادات: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 }
@@ -498,7 +525,7 @@ class ComplaintService {
       });
       return await complaint.save();
     } catch (error) {
-      throw new Error(`خطأ في إضافة الشكوى: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -513,7 +540,7 @@ class ComplaintService {
         .populate('assignedTo')
         .sort({ createdAt: -1 });
     } catch (error) {
-      throw new Error(`خطأ في جلب الشكاوى: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -527,10 +554,10 @@ class ComplaintService {
           resolution,
           resolutionDate: status === 'resolved' ? new Date() : null,
         },
-        { new: true },
+        { new: true }
       );
     } catch (error) {
-      throw new Error(`خطأ في تحديث الشكوى: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -559,7 +586,7 @@ class ComplaintService {
         byType,
       };
     } catch (error) {
-      throw new Error(`خطأ في إحصائيات الشكاوى: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 }
@@ -576,7 +603,7 @@ class NotificationService {
       });
       return await notification.save();
     } catch (error) {
-      throw new Error(`خطأ في إرسال التنبيه: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -587,7 +614,7 @@ class NotificationService {
         $or: [{ recipient: recipientId }, { recipientType: 'all' }],
       }).sort({ sendDate: -1 });
     } catch (error) {
-      throw new Error(`خطأ في جلب التنبيهات: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -600,10 +627,10 @@ class NotificationService {
           isRead: true,
           readDate: new Date(),
         },
-        { new: true },
+        { new: true }
       );
     } catch (error) {
-      throw new Error(`خطأ في تحديث التنبيه: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -631,7 +658,7 @@ class NotificationService {
 
       return true;
     } catch (error) {
-      throw new Error(`خطأ في إرسال تنبيه التأخير: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 }

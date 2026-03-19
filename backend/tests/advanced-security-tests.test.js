@@ -1,3 +1,4 @@
+/* eslint-disable no-undef, no-unused-vars */
 /**
  * 🔐 Advanced Security Testing Suite
  * جناح اختبارات الأمان المتقدمة

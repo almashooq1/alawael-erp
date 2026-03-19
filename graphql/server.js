@@ -13,6 +13,7 @@ const { useServer } = require('graphql-ws/lib/use/ws');
 const express = require('express');
 const http = require('http');
 const cors = require('cors');
+const helmet = require('helmet');
 const bodyParser = require('body-parser');
 const DataLoader = require('dataloader');
 
@@ -182,23 +183,23 @@ const typeDefs = `
     users(filter: UserFilter, pagination: Pagination): UserConnection!
     user(id: ID!): User
     me: User
-    
+
     # Beneficiaries
     beneficiaries(filter: UserFilter, pagination: Pagination): [Beneficiary!]!
     beneficiary(id: ID!): Beneficiary
-    
+
     # Programs
     programs(filter: UserFilter): [Program!]!
     program(id: ID!): Program
-    
+
     # Sessions
     sessions(filter: UserFilter, pagination: Pagination): [Session!]!
     session(id: ID!): Session
-    
+
     # Reports
     reports(type: String, pagination: Pagination): [Report!]!
     report(id: ID!): Report
-    
+
     # Analytics
     analytics(startDate: DateTime, endDate: DateTime): Analytics!
   }
@@ -209,22 +210,22 @@ const typeDefs = `
     login(username: String!, password: String!): AuthPayload!
     logout: Boolean!
     refreshToken(token: String!): AuthPayload!
-    
+
     # Users
     createUser(input: CreateUserInput!): User!
     updateUser(id: ID!, input: UpdateUserInput!): User!
     deleteUser(id: ID!): Boolean!
-    
+
     # Beneficiaries
     createBeneficiary(input: CreateBeneficiaryInput!): Beneficiary!
     updateBeneficiary(id: ID!, input: CreateBeneficiaryInput!): Beneficiary!
     deleteBeneficiary(id: ID!): Boolean!
-    
+
     # Programs
     createProgram(name: String!, description: String): Program!
     updateProgram(id: ID!, name: String, description: String): Program!
     deleteProgram(id: ID!): Boolean!
-    
+
     # Sessions
     createSession(programId: ID!, beneficiaryId: ID!, scheduledAt: DateTime!): Session!
     updateSession(id: ID!, status: String, notes: String): Session!
@@ -271,27 +272,27 @@ const resolvers = {
     users: async (_, { filter, pagination }, { dataSources, user }) => {
       // Check authentication
       if (!user) throw new Error('Not authenticated');
-      
+
       // Fetch users with pagination
       const users = await dataSources.userAPI.getUsers(filter, pagination);
       return users;
     },
-    
+
     user: async (_, { id }, { dataSources, user }) => {
       if (!user) throw new Error('Not authenticated');
       return await dataSources.userAPI.getUserById(id);
     },
-    
+
     me: async (_, __, { dataSources, user }) => {
       if (!user) throw new Error('Not authenticated');
       return await dataSources.userAPI.getUserById(user.id);
     },
-    
+
     beneficiaries: async (_, { filter, pagination }, { dataSources, user }) => {
       if (!user) throw new Error('Not authenticated');
       return await dataSources.beneficiaryAPI.getBeneficiaries(filter, pagination);
     },
-    
+
     analytics: async (_, { startDate, endDate }, { dataSources, user }) => {
       if (!user) throw new Error('Not authenticated');
       return await dataSources.analyticsAPI.getAnalytics(startDate, endDate);
@@ -302,21 +303,21 @@ const resolvers = {
     login: async (_, { username, password }, { dataSources }) => {
       return await dataSources.authAPI.login(username, password);
     },
-    
+
     createUser: async (_, { input }, { dataSources, user }) => {
       if (!user || user.role !== 'ADMIN') {
         throw new Error('Not authorized');
       }
       return await dataSources.userAPI.createUser(input);
     },
-    
+
     updateUser: async (_, { id, input }, { dataSources, user }) => {
       if (!user || (user.role !== 'ADMIN' && user.id !== id)) {
         throw new Error('Not authorized');
       }
       return await dataSources.userAPI.updateUser(id, input);
     },
-    
+
     createBeneficiary: async (_, { input }, { dataSources, user }) => {
       if (!user) throw new Error('Not authenticated');
       return await dataSources.beneficiaryAPI.createBeneficiary(input);
@@ -327,11 +328,11 @@ const resolvers = {
     userCreated: {
       subscribe: (_, __, { pubsub }) => pubsub.asyncIterator(['USER_CREATED']),
     },
-    
+
     sessionScheduled: {
       subscribe: (_, __, { pubsub }) => pubsub.asyncIterator(['SESSION_SCHEDULED']),
     },
-    
+
     notificationReceived: {
       subscribe: (_, __, { pubsub, user }) => {
         if (!user) throw new Error('Not authenticated');
@@ -342,7 +343,7 @@ const resolvers = {
 
   // Field resolvers
   User: {
-    fullName: (user) => `${user.firstName || ''} ${user.lastName || ''}`.trim(),
+    fullName: user => `${user.firstName || ''} ${user.lastName || ''}`.trim(),
     department: async (user, _, { dataSources, departmentLoader }) => {
       if (!user.departmentId) return null;
       return await departmentLoader.load(user.departmentId);
@@ -360,7 +361,7 @@ const resolvers = {
   },
 
   Beneficiary: {
-    age: (beneficiary) => {
+    age: beneficiary => {
       if (!beneficiary.dateOfBirth) return null;
       const today = new Date();
       const birthDate = new Date(beneficiary.dateOfBirth);
@@ -378,13 +379,13 @@ const resolvers = {
 };
 
 // DataLoader setup (prevents N+1 queries)
-const createLoaders = (dataSources) => ({
-  userLoader: new DataLoader(async (ids) => {
+const createLoaders = dataSources => ({
+  userLoader: new DataLoader(async ids => {
     const users = await dataSources.userAPI.getUsersByIds(ids);
     return ids.map(id => users.find(user => user.id === id));
   }),
-  
-  departmentLoader: new DataLoader(async (ids) => {
+
+  departmentLoader: new DataLoader(async ids => {
     const departments = await dataSources.departmentAPI.getDepartmentsByIds(ids);
     return ids.map(id => departments.find(dept => dept.id === id));
   }),
@@ -426,9 +427,14 @@ const server = new ApolloServer({
 async function startServer() {
   await server.start();
 
+  app.use(helmet({ contentSecurityPolicy: false }));
+
   app.use(
     '/graphql',
-    cors(),
+    cors({
+      origin: process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : ['http://localhost:3000', 'http://localhost:5173'],
+      credentials: true,
+    }),
     bodyParser.json(),
     expressMiddleware(server, {
       context: async ({ req }) => {
@@ -442,7 +448,7 @@ async function startServer() {
           ...createLoaders(createDataSources()),
         };
       },
-    })
+    }),
   );
 
   const PORT = process.env.GRAPHQL_PORT || 4000;

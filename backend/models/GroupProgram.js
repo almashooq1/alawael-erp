@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 const groupSessionLogSchema = new mongoose.Schema({
@@ -17,7 +18,11 @@ const groupSessionLogSchema = new mongoose.Schema({
 const groupProgramSchema = new mongoose.Schema(
   {
     name: { type: String, required: true }, // e.g. "Social Skills Group A"
-    type: { type: String, enum: ['SOCIAL', 'VOCATIONAL', 'BEHAVIORAL', 'RECREATIONAL'], required: true },
+    type: {
+      type: String,
+      enum: ['SOCIAL', 'VOCATIONAL', 'BEHAVIORAL', 'RECREATIONAL'],
+      required: true,
+    },
 
     supervisor: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 
@@ -36,7 +41,7 @@ const groupProgramSchema = new mongoose.Schema(
 
     status: { type: String, enum: ['ACTIVE', 'COMPLETED', 'PLANNED'], default: 'ACTIVE' },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 module.exports = mongoose.model('GroupProgram', groupProgramSchema);

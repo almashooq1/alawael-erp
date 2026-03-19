@@ -1,3 +1,8 @@
+/* eslint-disable no-unused-vars */
+const logger = require('../utils/logger');
+const { whatsappIntegration } = require('./whatsapp-integration.service');
+const { emailIntegration } = require('./email-integration.service');
+
 class NotificationCenterService {
   /**
    * Omni-Channel Dispatcher
@@ -8,9 +13,9 @@ class NotificationCenterService {
 
     const results = [];
 
-    // 1. WhatsApp (Priority for Appts)
+    // 1. WhatsApp (Priority for Appts & Urgent)
     if (preferences.whatsapp && (type === 'APPOINTMENT' || type === 'URGENT')) {
-      const status = await this.sendWhatsApp(recipient.phone, message);
+      const status = await this.sendWhatsApp(recipient.phone, message, { type });
       results.push({ channel: 'WhatsApp', status });
     }
 
@@ -29,20 +34,64 @@ class NotificationCenterService {
     return results;
   }
 
-  static async sendWhatsApp(phone, msg) {
-    console.log(`[WhatsApp] Sending to ${phone}: ${msg}`);
-    // Integration with Twilio/Meta API
-    return 'SENT';
+  /**
+   * Send WhatsApp message via integration service
+   * Connected to real WhatsApp Business API
+   */
+  static async sendWhatsApp(phone, msg, options = {}) {
+    if (!phone) {
+      logger.warn('[NotificationCenter] No phone number provided for WhatsApp');
+      return 'FAILED';
+    }
+
+    try {
+      const result = await whatsappIntegration.sendNotification(phone, msg, {
+        sourceSystem: 'notification-center',
+        title: options.title,
+        type: options.type,
+      });
+
+      if (result.success) {
+        logger.info(`[WhatsApp] Sent to ${phone}`);
+        return 'SENT';
+      }
+
+      logger.warn(`[WhatsApp] Failed to send to ${phone}: ${result.error}`);
+      return 'FAILED';
+    } catch (error) {
+      logger.error(`[WhatsApp] Error sending to ${phone}: ${error.message}`);
+      return 'FAILED';
+    }
   }
 
   static async sendSMS(phone, msg) {
-    console.log(`[SMS] Sending to ${phone}: ${msg}`);
+    logger.info(`[SMS] Sending to ${phone}: ${msg}`);
     return 'SENT';
   }
 
   static async sendEmail(email, subject, body) {
-    console.log(`[Email] Sending to ${email}: ${subject}`);
-    return 'QUEUED';
+    if (!email) {
+      logger.warn('[NotificationCenter] No email address provided for Email');
+      return 'FAILED';
+    }
+
+    try {
+      const result = await emailIntegration.sendNotification(email, {
+        title: subject,
+        message: body,
+      });
+
+      if (result.success) {
+        logger.info(`[Email] Sent to ${email}: ${subject}`);
+        return 'SENT';
+      }
+
+      logger.warn(`[Email] Failed to send to ${email}: ${result.error}`);
+      return 'FAILED';
+    } catch (error) {
+      logger.error(`[Email] Error sending to ${email}: ${error.message}`);
+      return 'FAILED';
+    }
   }
 }
 

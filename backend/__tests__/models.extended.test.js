@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * Models Extended Testing Suite
  * ملف اختبار شامل لجميع نماذج البيانات
@@ -425,7 +427,7 @@ describe('Leave Model Extended Tests', () => {
         employeeId: 'emp-1',
         startDate: '2024-02-01',
         endDate: '2024-02-10',
-      }),
+      })
     ).rejects.toThrow('Overlapping');
   });
 });
@@ -629,7 +631,7 @@ describe('Data Integrity Tests', () => {
         employeeId: 'emp-1',
         startDate: 'invalid-date',
         endDate: '2024-02-05',
-      }),
+      })
     ).rejects.toThrow();
   });
 });

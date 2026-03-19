@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * 🚨 Alert System
  *
@@ -5,6 +6,7 @@
  */
 
 const EventEmitter = require('events');
+const logger = require('../utils/logger');
 
 class AlertSystem extends EventEmitter {
   constructor(options = {}) {
@@ -37,7 +39,7 @@ class AlertSystem extends EventEmitter {
       try {
         shouldTrigger = rule.condition(context);
       } catch (error) {
-        console.error('[AlertSystem] Rule evaluation error:', rule.id, error.message);
+        logger.error('[AlertSystem] Rule evaluation error:', rule.id, error.message);
       }
 
       if (shouldTrigger) {
@@ -81,7 +83,7 @@ class AlertSystem extends EventEmitter {
       try {
         await notifier(alert);
       } catch (error) {
-        console.error('[AlertSystem] Notifier error:', error.message);
+        logger.error('[AlertSystem] Notifier error:', error.message);
       }
     });
 
@@ -114,7 +116,7 @@ class AlertSystem extends EventEmitter {
       try {
         await notifier(payload);
       } catch (error) {
-        console.error('[AlertSystem] Notifier error:', error.message);
+        logger.error('[AlertSystem] Notifier error:', error.message);
       }
     });
 

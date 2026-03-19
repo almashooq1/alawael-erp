@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * ===================================================================
  * EXPENSE MODEL - نموذج المصروف
@@ -8,11 +9,11 @@ const mongoose = require('mongoose');
 
 const expenseSchema = new mongoose.Schema(
   {
-    // الرقم المرجعي
+    // الرقم المرجعي (مولّد تلقائياً)
     reference: {
       type: String,
-      required: true,
       unique: true,
+      sparse: true,
     },
 
     // التاريخ
@@ -25,19 +26,6 @@ const expenseSchema = new mongoose.Schema(
     category: {
       type: String,
       required: true,
-      enum: [
-        'salary',
-        'rent',
-        'utilities',
-        'supplies',
-        'maintenance',
-        'marketing',
-        'travel',
-        'insurance',
-        'professional_fees',
-        'taxes',
-        'other',
-      ],
     },
 
     // الوصف
@@ -63,21 +51,23 @@ const expenseSchema = new mongoose.Schema(
     accountId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Account',
-      required: true,
     },
-
-    // المورد
-    vendorId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Vendor',
+    // اسم الحساب (نصي)
+    account: {
+      type: String,
+      trim: true,
     },
-    vendorName: String,
+    // اسم المورد (نصي)
+    vendor: {
+      type: String,
+      trim: true,
+    },
 
     // طريقة الدفع
     paymentMethod: {
       type: String,
       enum: ['cash', 'bank_transfer', 'check', 'credit_card', 'debit_card'],
-      required: true,
+      default: 'bank_transfer',
     },
 
     // المشروع أو مركز التكلفة
@@ -136,7 +126,6 @@ const expenseSchema = new mongoose.Schema(
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
-      required: true,
     },
     updatedBy: {
       type: mongoose.Schema.Types.ObjectId,
@@ -147,6 +136,14 @@ const expenseSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+// Auto-generate reference before save
+expenseSchema.pre('save', async function () {
+  if (!this.reference) {
+    const count = await this.constructor.countDocuments();
+    this.reference = `EXP-${String(count + 1).padStart(4, '0')}`;
+  }
+});
 
 // فهرسة
 // Note: reference field doesn't need explicit index (not unique, optional field)

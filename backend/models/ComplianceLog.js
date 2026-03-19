@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 const complianceLogSchema = new mongoose.Schema(
@@ -19,7 +20,7 @@ const complianceLogSchema = new mongoose.Schema(
     resolvedAt: { type: Date },
     resolvedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 module.exports = mongoose.model('ComplianceLog', complianceLogSchema);

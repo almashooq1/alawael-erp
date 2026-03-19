@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 const lessonSchema = new mongoose.Schema(
@@ -39,7 +40,7 @@ const lessonSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  },
+  }
 );
 
 module.exports = mongoose.model('Lesson', lessonSchema);

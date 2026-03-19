@@ -1,0 +1,56 @@
+{
+  "root": true,
+  "env": {
+    "node": true,
+    "es2022": true,
+    "browser": true,
+    "jest": true
+  },
+  "extends": ["eslint:recommended"],
+  "plugins": [],
+  "parserOptions": {
+    "ecmaVersion": 2022,
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true
+    }
+  },
+  "rules": {
+    "no-unused-vars": ["warn", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
+    "no-console": ["warn", { "allow": ["warn", "error", "info", "log"] }],
+    "no-undef": "error",
+    "no-empty": ["error", { "allowEmptyCatch": true }],
+    "no-useless-catch": "error",
+    "no-unreachable": "error",
+    "no-constant-condition": ["warn", { "checkLoops": true }],
+    "prefer-const": "warn",
+    "no-var": "error",
+    "no-eval": "error",
+    "no-implied-eval": "error",
+    "no-dupe-keys": "error",
+    "no-fallthrough": "error",
+    "semi": ["warn", "always"],
+    "quotes": "off",
+    "comma-dangle": ["warn", "only-multiline"],
+    "require-await": "warn",
+    "require-yield": "error",
+    "arrow-spacing": "warn",
+    "no-debugger": "warn",
+    "no-prototype-builtins": "warn",
+    "no-unsafe-finally": "warn"
+  },
+  "ignorePatterns": [
+    "node_modules/**",
+    "dist/**",
+    "build/**",
+    "coverage/**",
+    "*.min.js",
+    "mobile/**",
+    "scripts/**",
+    "deploy/**",
+    "devops/**",
+    "docker/**",
+    "archive/**",
+    "backups/**"
+  ]
+}

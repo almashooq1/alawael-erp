@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+const logger = require('../utils/logger');
 /**
  * PHASE 99: Smart Robotics & Tele-Rehabilitation Service
  * Manages physical rehabilitation robots, exoskeletons, and haptic devices.
@@ -59,7 +61,7 @@ class SmartRoboticsService {
     // Safety Layer (Asimov's Laws style checks)
     const safetyCheck = this.safetyProtocol(device, command);
     if (!safetyCheck.safe) {
-      console.warn(`SAFETY STOP: ${deviceId} - ${safetyCheck.reason}`);
+      logger.warn(`SAFETY STOP: ${deviceId} - ${safetyCheck.reason}`);
       return { executed: false, error: 'SAFETY_VIOLATION', reason: safetyCheck.reason };
     }
 
@@ -73,7 +75,8 @@ class SmartRoboticsService {
   }
 
   safetyProtocol(device, command) {
-    if (command.torque > device.specs.maxForce) return { safe: false, reason: 'Force exceeds limit' };
+    if (command.torque > device.specs.maxForce)
+      return { safe: false, reason: 'Force exceeds limit' };
     if (command.velocity > 50) return { safe: false, reason: 'Velocity too high' };
     return { safe: true };
   }

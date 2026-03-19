@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable no-unused-vars */
 
 /**
  * النسخ الاحتياطي التلقائي لقاعدة البيانات
@@ -170,7 +171,9 @@ async function performManualBackup(backupId, dbName) {
       totalDocs += documents.length;
       totalSize += fileStats.size;
 
-      console.log(`  ✓ ${collectionName}: ${documents.length} documents (${formatBytes(fileStats.size)})`);
+      console.log(
+        `  ✓ ${collectionName}: ${documents.length} documents (${formatBytes(fileStats.size)})`
+      );
     }
 
     await mongoose.disconnect();

@@ -1,8 +1,9 @@
+/* eslint-disable no-unused-vars */
 /**
  * ===================================================================
  * SMART INVOICE MODEL - نموذج الفاتورة الذكية والمتقدمة
  * ===================================================================
- * 
+ *
  * نموذج محسّن للفاتورة يشمل:
  * - إدارة شاملة للعملاء والمنتجات
  * - دعم الضرائب والخصومات والرسوم
@@ -48,7 +49,7 @@ const invoiceItemSchema = new Schema(
       ref: 'Product',
     },
     category: String,
-    
+
     // الضرائب
     taxRate: {
       type: Number,
@@ -56,7 +57,7 @@ const invoiceItemSchema = new Schema(
       min: 0,
       max: 100,
     },
-    
+
     // الخصومات
     discountType: {
       type: String,
@@ -67,7 +68,7 @@ const invoiceItemSchema = new Schema(
       type: Number,
       default: 0,
     },
-    
+
     // الحقول المحسوبة
     subtotal: {
       type: Number,
@@ -78,7 +79,7 @@ const invoiceItemSchema = new Schema(
       type: Number,
       required: true,
     },
-    
+
     // للتتبع
     notes: String,
     createdAt: {
@@ -115,7 +116,7 @@ const customerSchema = new Schema(
     zipCode: String,
     taxId: String, // للشركات والعاملين بحسابات شاملة
     website: String,
-    
+
     // معلومات التصنيف
     customerType: {
       type: String,
@@ -233,25 +234,24 @@ const smartInvoiceSchema = new Schema(
       required: true,
       unique: true,
       trim: true,
-      index: true,
     },
-    
+
     referenceNumber: String, // للمراجع الخارجية
-    
+
     invoiceDate: {
       type: Date,
       default: Date.now,
       required: true,
     },
-    
+
     dueDate: {
       type: Date,
       required: true,
     },
-    
+
     // تاريخ الخدمة/التسليم
     serviceDate: Date,
-    
+
     // ============ معلومات الشركة المصدرة ============
     company: {
       name: {
@@ -265,13 +265,13 @@ const smartInvoiceSchema = new Schema(
       email: String,
       website: String,
     },
-    
+
     // ============ معلومات العميل ============
     customer: {
       type: customerSchema,
       required: true,
     },
-    
+
     // ============ بنود الفاتورة ============
     items: {
       type: [invoiceItemSchema],
@@ -283,14 +283,14 @@ const smartInvoiceSchema = new Schema(
         message: 'يجب أن تحتوي الفاتورة على بند واحد على الأقل',
       },
     },
-    
+
     // ============ الحقول المالية ============
     subtotal: {
       type: Number,
       required: true,
       default: 0,
     },
-    
+
     // الخصومات
     discounts: {
       itemDiscounts: {
@@ -314,7 +314,7 @@ const smartInvoiceSchema = new Schema(
         default: 0,
       },
     },
-    
+
     // الضرائب والرسوم
     taxes: {
       vat: {
@@ -330,7 +330,7 @@ const smartInvoiceSchema = new Schema(
         default: 0,
       },
     },
-    
+
     // الرسوم الإضافية
     fees: {
       shippingFee: {
@@ -350,13 +350,13 @@ const smartInvoiceSchema = new Schema(
         default: 0,
       },
     },
-    
+
     // الإجمالي
     totalAmount: {
       type: Number,
       required: true,
     },
-    
+
     // ============ معلومات الدفع ============
     paymentTerms: {
       type: paymentTermsSchema,
@@ -365,36 +365,46 @@ const smartInvoiceSchema = new Schema(
         netDays: 30,
       }),
     },
-    
+
     paymentMethod: {
       type: String,
       enum: ['cash', 'check', 'transfer', 'card', 'crypto', 'installment'],
       default: 'transfer',
     },
-    
+
     payments: {
       type: [paymentRecordSchema],
       default: [],
     },
-    
+
     paidAmount: {
       type: Number,
       default: 0,
     },
-    
+
     remainingAmount: {
       type: Number,
       required: true,
     },
-    
+
     // ============ حالة الفاتورة ============
     status: {
       type: String,
-      enum: ['draft', 'sent', 'viewed', 'accepted', 'rejected', 'paid', 'partial', 'overdue', 'cancelled', 'disputed'],
+      enum: [
+        'draft',
+        'sent',
+        'viewed',
+        'accepted',
+        'rejected',
+        'paid',
+        'partial',
+        'overdue',
+        'cancelled',
+        'disputed',
+      ],
       default: 'draft',
-      index: true,
     },
-    
+
     statusHistory: [
       {
         status: String,
@@ -406,7 +416,7 @@ const smartInvoiceSchema = new Schema(
         reason: String,
       },
     ],
-    
+
     // ============ البيانات الذكية والتنبيهات ============
     smartData: {
       // توقع الدفع
@@ -415,26 +425,26 @@ const smartInvoiceSchema = new Schema(
         confidence: Number,
         riskScore: Number,
       },
-      
+
       // تصنيف التأخير
       delayRisk: {
         type: String,
         enum: ['low', 'medium', 'high'],
         default: 'low',
       },
-      
+
       // الأتمتة
       isAutomated: {
         type: Boolean,
         default: false,
       },
       automationRules: [String],
-      
+
       // الملاحظات الذكية
       aiNotes: String,
       aiRecommendations: [String],
     },
-    
+
     // ============ التنبيهات ============
     alerts: {
       overdue: {
@@ -446,16 +456,18 @@ const smartInvoiceSchema = new Schema(
         default: false,
       },
       daysUntilOverdue: Number,
-      customAlerts: [{
-        type: String,
-        message: String,
-        severity: {
+      customAlerts: [
+        {
           type: String,
-          enum: ['info', 'warning', 'critical'],
+          message: String,
+          severity: {
+            type: String,
+            enum: ['info', 'warning', 'critical'],
+          },
         },
-      }],
+      ],
     },
-    
+
     // ============ معلومات إضافية ============
     notes: String,
     internalNotes: String,
@@ -463,33 +475,35 @@ const smartInvoiceSchema = new Schema(
       type: String,
       default: 'الدفع خلال 30 يوم من تاريخ الفاتورة',
     },
-    
+
     // المرفقات
-    attachments: [{
-      name: String,
-      url: String,
-      type: String,
-      size: Number,
-      uploadedAt: Date,
-    }],
-    
+    attachments: [
+      {
+        name: String,
+        url: String,
+        type: String,
+        size: Number,
+        uploadedAt: Date,
+      },
+    ],
+
     // ============ المراجع والتكاملات ============
     purchaseOrder: {
       type: Schema.Types.ObjectId,
       ref: 'PurchaseOrder',
     },
-    
+
     contract: {
       type: Schema.Types.ObjectId,
       ref: 'Contract',
     },
-    
+
     // ربط مع نظام الحسابات
     journalEntry: {
       type: Schema.Types.ObjectId,
       ref: 'JournalEntry',
     },
-    
+
     // إرسال الفاتورة
     sentTo: {
       email: String,
@@ -502,50 +516,52 @@ const smartInvoiceSchema = new Schema(
         default: 'not_sent',
       },
     },
-    
+
     // ============ معلومات النظام ============
     createdBy: {
       type: Schema.Types.ObjectId,
       ref: 'User',
       required: true,
     },
-    
+
     updatedBy: {
       type: Schema.Types.ObjectId,
       ref: 'User',
     },
-    
+
     approvedBy: {
       type: Schema.Types.ObjectId,
       ref: 'User',
     },
-    
+
     approvalDate: Date,
-    
+
     // التتبع والتدقيق
-    auditTrail: [{
-      action: String,
-      performedBy: Schema.Types.ObjectId,
-      timestamp: {
-        type: Date,
-        default: Date.now,
+    auditTrail: [
+      {
+        action: String,
+        performedBy: Schema.Types.ObjectId,
+        timestamp: {
+          type: Date,
+          default: Date.now,
+        },
+        details: mongoose.Schema.Types.Mixed,
       },
-      details: mongoose.Schema.Types.Mixed,
-    }],
-    
+    ],
+
     // النسخ والنسخ المرجعية
     version: {
       type: Number,
       default: 1,
     },
-    
+
     remindersSent: {
       type: Number,
       default: 0,
     },
-    
+
     lastReminderDate: Date,
-    
+
     // بيانات التحليل
     analytics: {
       viewCount: {
@@ -576,7 +592,6 @@ const smartInvoiceSchema = new Schema(
 // ============================================================================
 // INDEXES
 // ============================================================================
-smartInvoiceSchema.index({ invoiceNumber: 1 });
 smartInvoiceSchema.index({ 'customer.customerId': 1 });
 smartInvoiceSchema.index({ status: 1 });
 smartInvoiceSchema.index({ invoiceDate: -1 });
@@ -718,16 +733,11 @@ smartInvoiceSchema.methods.calculateTotals = function () {
 
   // حساب الرسوم
   this.fees.totalFees =
-    (this.fees.shippingFee || 0) +
-    (this.fees.serviceFee || 0) +
-    (this.fees.processingFee || 0);
+    (this.fees.shippingFee || 0) + (this.fees.serviceFee || 0) + (this.fees.processingFee || 0);
 
   // حساب الإجمالي
   this.totalAmount =
-    subtotal -
-    this.discounts.totalDiscount +
-    this.taxes.totalTax +
-    this.fees.totalFees;
+    subtotal - this.discounts.totalDiscount + this.taxes.totalTax + this.fees.totalFees;
 
   this.remainingAmount = this.totalAmount - this.paidAmount;
 
@@ -765,9 +775,7 @@ smartInvoiceSchema.methods.exportToPDF = async function () {
 smartInvoiceSchema.pre('save', function (next) {
   // التأكد من أن dueDate بعد invoiceDate
   if (this.dueDate < this.invoiceDate) {
-    return next(
-      new Error('تاريخ الاستحقاق يجب أن يكون بعد تاريخ الفاتورة')
-    );
+    return next(new Error('تاريخ الاستحقاق يجب أن يكون بعد تاريخ الفاتورة'));
   }
 
   // حساب remainingAmount

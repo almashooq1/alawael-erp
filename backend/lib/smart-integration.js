@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * 🔄 Smart System Integration
  * Unified intelligent system orchestration
@@ -194,7 +195,7 @@ class SmartSystemIntegration {
           data: dashboard,
         });
       } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+        res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
       }
     });
 
@@ -207,7 +208,7 @@ class SmartSystemIntegration {
           data: status,
         });
       } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+        res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
       }
     });
 
@@ -221,7 +222,7 @@ class SmartSystemIntegration {
           data: results,
         });
       } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+        res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
       }
     });
 
@@ -234,7 +235,7 @@ class SmartSystemIntegration {
           data: insights,
         });
       } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+        res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
       }
     });
 
@@ -248,7 +249,7 @@ class SmartSystemIntegration {
           data: prediction,
         });
       } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+        res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
       }
     });
 
@@ -263,7 +264,7 @@ class SmartSystemIntegration {
           data: report,
         });
       } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+        res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
       }
     });
 
@@ -276,7 +277,7 @@ class SmartSystemIntegration {
           data: workflows,
         });
       } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+        res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
       }
     });
 
@@ -290,7 +291,7 @@ class SmartSystemIntegration {
           data: result,
         });
       } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+        res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
       }
     });
 
@@ -303,7 +304,7 @@ class SmartSystemIntegration {
           data: personalization,
         });
       } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+        res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
       }
     });
 
@@ -317,7 +318,7 @@ class SmartSystemIntegration {
           data: config,
         });
       } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+        res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
       }
     });
   }

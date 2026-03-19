@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // MongoDB connectivity check using current .env
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');

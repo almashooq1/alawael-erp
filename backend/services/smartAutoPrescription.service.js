@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * PHASE 103: Smart Auto-Prescription Engine
  * "The Architect" - automatically constructs detailed therapeutic plans based on AI predictions.
@@ -6,10 +7,11 @@
 
 const SmartPredictiveAIService = require('./smartPredictiveAI.service');
 const SmartClinicalCommandService = require('./smartClinicalCommand.service');
+const logger = require('../utils/logger');
 
 class SmartAutoPrescriptionService {
   constructor() {
-    console.log('System: Smart Auto-Prescription Engine - Initialized');
+    logger.info('System: Smart Auto-Prescription Engine - Initialized');
   }
 
   /**
@@ -23,7 +25,8 @@ class SmartAutoPrescriptionService {
 
     // 2. Select Optimal Protocol
     // Logic: If recovery > 12 weeks, choose 'INTENSIVE'. Else 'STANDARD'.
-    const optimalScenario = forecast.scenarios.find(s => s.name.includes('Intensive')) || forecast.scenarios[0];
+    const optimalScenario =
+      forecast.scenarios.find(s => s.name.includes('Intensive')) || forecast.scenarios[0];
     const isIntensive = optimalScenario.name.includes('Intensive');
 
     // 3. Construct the Plan

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Finance Service - Phase 2
  * Comprehensive financial management system
@@ -7,6 +8,7 @@
 const Transaction = require('../models/Transaction');
 const Budget = require('../models/Budget');
 const logger = require('../utils/logger');
+const { escapeRegex } = require('../utils/sanitize');
 
 class FinanceService {
   /**
@@ -85,8 +87,8 @@ class FinanceService {
 
       if (search) {
         query.$or = [
-          { description: { $regex: search, $options: 'i' } },
-          { notes: { $regex: search, $options: 'i' } },
+          { description: { $regex: escapeRegex(search), $options: 'i' } },
+          { notes: { $regex: escapeRegex(search), $options: 'i' } },
         ];
       }
 

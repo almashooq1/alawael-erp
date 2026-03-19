@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Advanced Analytics System
  * نظام التحليلات المتقدم
@@ -87,10 +88,11 @@ class AnalyticsEngine {
         case 'day':
           bucket = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
           break;
-        case 'week':
+        case 'week': {
           const week = Math.ceil(date.getDate() / 7);
           bucket = `${date.getFullYear()}-W${week}`;
           break;
+        }
         default:
           bucket = date.toISOString();
       }
@@ -290,7 +292,7 @@ class RealTimeAnalytics {
   /**
    * تسجيل مستخدم نشط
    */
-  trackActiveUser(userId, metadata = {}) {
+  trackActiveUser(userId, _metadata = {}) {
     this.activeUsers.add(userId);
     this.metrics.uniqueVisitors = this.activeUsers.size;
 
@@ -394,7 +396,7 @@ class PredictiveAnalytics {
   /**
    * حساب الثقة
    */
-  static calculateConfidence(data, slope) {
+  static calculateConfidence(data, _slope) {
     // Simplified confidence calculation
     const variance = this.calculateVariance(data);
     const baseConfidence = 0.85;

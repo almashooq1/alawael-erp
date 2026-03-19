@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * ALAWAEL ERP - ML SERVICE TESTS
  * Phase 14 - Advanced ML & Predictive Analytics

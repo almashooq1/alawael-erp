@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const BeneficiaryFile = require('../models/BeneficiaryFile');
 const TherapySession = require('../models/TherapySession');
 const Invoice = require('../models/Invoice');
@@ -9,7 +10,9 @@ class PortalService {
    * Get all children linked to this parent user
    */
   static async getChildren(userId) {
-    return await BeneficiaryFile.find({ user: userId }).select('firstName lastName fileNumber status dob gender');
+    return await BeneficiaryFile.find({ user: userId }).select(
+      'firstName lastName fileNumber status dob gender'
+    );
   }
 
   /**

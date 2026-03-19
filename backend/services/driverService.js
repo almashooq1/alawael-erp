@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Driver Management Service - خدمة إدارة السائقين
  *

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * 🗄️ Database Performance Optimization Utilities
  * Phase 3: Database Query Optimization
@@ -5,6 +6,7 @@
  */
 
 const mongoose = require('mongoose');
+const logger = require('./logger');
 
 /**
  * Performance Optimization Utilities
@@ -77,9 +79,9 @@ const DatabaseOptimization = {
   ensureIndexes: async Model => {
     try {
       await Model.collection.createIndexes();
-      console.log(`✅ Indexes created for ${Model.collection.name}`);
+      // console.log(`✅ Indexes created for ${Model.collection.name}`);
     } catch (error) {
-      console.error(`❌ Index creation failed: ${error.message}`);
+      logger.error(`❌ Index creation failed: ${error.message}`);
     }
   },
 
@@ -212,7 +214,7 @@ const DatabaseOptimization = {
     try {
       return await Model.collection.bulkWrite(operations);
     } catch (error) {
-      console.error('Bulk write error:', error);
+      logger.error('Bulk write error:', error);
       throw error;
     }
   },
@@ -239,7 +241,7 @@ const DatabaseOptimization = {
   /**
    * ✅ Analyze Query Performance
    */
-  analyzeQueryPerformance: async (Model, query = {}, options = {}) => {
+  analyzeQueryPerformance: async (Model, query = {}, _options = {}) => {
     const explain = await Model.find(query).explain('executionStats');
 
     return {
@@ -348,12 +350,12 @@ const PerformanceBenchmark = {
   /**
    * Measure query execution time
    */
-  measureQueryTime: async (queryFn, label = 'Query') => {
+  measureQueryTime: async (queryFn, _label = 'Query') => {
     const start = Date.now();
     const result = await queryFn();
     const duration = Date.now() - start;
 
-    console.log(`⏱️  ${label}: ${duration}ms`);
+    // console.log(`⏱️  ${label}: ${duration}ms`);
 
     return { result, duration };
   },

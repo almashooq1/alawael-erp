@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * 🔗 GraphQL Integration
  *
@@ -6,6 +7,8 @@
  * - Efficient data fetching
  * - Real-time subscriptions support
  */
+
+const { escapeRegex } = require('../utils/sanitize');
 
 const typeDefs = `
   type Query {
@@ -291,7 +294,7 @@ const resolvers = {
       try {
         return await db.collection('users').findOne({ _id: id });
       } catch (error) {
-        throw new Error(`Failed to fetch user: ${error.message}`);
+        throw new Error('حدث خطأ داخلي');
       }
     },
 
@@ -299,7 +302,7 @@ const resolvers = {
       try {
         return await db.collection('users').find({}).limit(limit).skip(offset).toArray();
       } catch (error) {
-        throw new Error(`Failed to fetch users: ${error.message}`);
+        throw new Error('حدث خطأ داخلي');
       }
     },
 
@@ -309,7 +312,7 @@ const resolvers = {
         const filter = category ? { category } : {};
         return await db.collection('products').find(filter).limit(limit).skip(offset).toArray();
       } catch (error) {
-        throw new Error(`Failed to fetch products: ${error.message}`);
+        throw new Error('حدث خطأ داخلي');
       }
     },
 
@@ -319,14 +322,14 @@ const resolvers = {
           .collection('products')
           .find({
             $or: [
-              { name: { $regex: query, $options: 'i' } },
-              { description: { $regex: query, $options: 'i' } },
+              { name: { $regex: escapeRegex(query), $options: 'i' } },
+              { description: { $regex: escapeRegex(query), $options: 'i' } },
             ],
           })
           .limit(limit)
           .toArray();
       } catch (error) {
-        throw new Error(`Search failed: ${error.message}`);
+        throw new Error('حدث خطأ داخلي');
       }
     },
 
@@ -347,7 +350,7 @@ const resolvers = {
         const result = await db.collection('orders').aggregate(aggregation).toArray();
         return result[0] || { totalRevenue: 0, totalOrders: 0, averageOrderValue: 0 };
       } catch (error) {
-        throw new Error(`Analytics query failed: ${error.message}`);
+        throw new Error('حدث خطأ داخلي');
       }
     },
   },
@@ -370,7 +373,7 @@ const resolvers = {
       } catch (error) {
         return {
           success: false,
-          message: `Failed to create user: ${error.message}`,
+          message: 'حدث خطأ داخلي',
         };
       }
     },
@@ -397,7 +400,7 @@ const resolvers = {
       } catch (error) {
         return {
           success: false,
-          message: `Failed to update user: ${error.message}`,
+          message: 'حدث خطأ داخلي',
         };
       }
     },
@@ -423,7 +426,7 @@ const resolvers = {
       } catch (error) {
         return {
           success: false,
-          message: `Failed to create order: ${error.message}`,
+          message: 'حدث خطأ داخلي',
         };
       }
     },
@@ -452,7 +455,7 @@ const resolvers = {
       } catch (error) {
         return {
           success: false,
-          message: `Login failed: ${error.message}`,
+          message: 'حدث خطأ داخلي',
         };
       }
     },

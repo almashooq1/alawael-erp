@@ -1,15 +1,18 @@
+/* eslint-disable no-unused-vars */
 // backend/utils/errorHandler.js
+const logger = require('./logger');
 
 class AppError extends Error {
   constructor(message, statusCode, code = null) {
     super(message);
     this.statusCode = statusCode;
     this.code = code;
+    this.isOperational = true;
     this.timestamp = new Date().toISOString();
   }
 }
 
-const errorHandler = (err, req, res, next) => {
+const errorHandler = (err, _req, res, _next) => {
   // Default error
   let error = {
     success: false,
@@ -73,7 +76,7 @@ const errorHandler = (err, req, res, next) => {
 
   // Log error in development
   if (process.env.NODE_ENV === 'development') {
-    console.error('❌ Error:', {
+    logger.error('❌ Error:', {
       message: err.message,
       code: error.code,
       statusCode: error.statusCode,
@@ -92,4 +95,5 @@ module.exports = {
   AppError,
   errorHandler,
   asyncHandler,
+  catchAsync: asyncHandler,
 };

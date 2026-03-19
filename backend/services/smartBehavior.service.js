@@ -1,9 +1,12 @@
+/* eslint-disable no-unused-vars */
 /**
  * Smart Behavior Analysis Service (Phase 91)
  *
  * Implements the ABC Model (Antecedent - Behavior - Consequence).
  * Uses AI to identify hidden triggers for challenging behaviors.
  */
+
+const logger = require('../utils/logger');
 
 class SmartBehaviorService {
   constructor() {
@@ -29,7 +32,9 @@ class SmartBehaviorService {
     return {
       logId: log.id,
       status: 'RECORDED',
-      immediateInsight: analysis.topTrigger ? `Warning: ${analysis.topTrigger} is a recurring trigger.` : null,
+      immediateInsight: analysis.topTrigger
+        ? `Warning: ${analysis.topTrigger} is a recurring trigger.`
+        : null,
     };
   }
 
@@ -37,7 +42,7 @@ class SmartBehaviorService {
    * Analyze ABC Patterns (The "Why")
    */
   async analyzePatterns(patientId) {
-    console.log(`Analyzing behavioral patterns for ${patientId}...`);
+    logger.info(`Analyzing behavioral patterns for ${patientId}...`);
 
     // Mock Pattern Recognition Logic
     return {

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 // Badge Definition (Admin Configured)
@@ -7,7 +8,10 @@ const badgeSchema = new mongoose.Schema({
   icon: { type: String }, // URL or icon key
 
   // Automatic Awarding Rules
-  actionType: { type: String, enum: ['SESSION_ATTENDANCE', 'HOMEWORK_SUBMISSION', 'EARLY_ARRIVAL'] },
+  actionType: {
+    type: String,
+    enum: ['SESSION_ATTENDANCE', 'HOMEWORK_SUBMISSION', 'EARLY_ARRIVAL'],
+  },
   threshold: { type: Number, default: 1 }, // e.g., 5 sessions
   pointsValue: { type: Number, default: 50 }, // Points given when earned
 });
@@ -15,7 +19,12 @@ const badgeSchema = new mongoose.Schema({
 // Patient Reward Wallet
 const beneficiaryWalletSchema = new mongoose.Schema(
   {
-    beneficiary: { type: mongoose.Schema.Types.ObjectId, ref: 'BeneficiaryFile', required: true, unique: true },
+    beneficiary: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'BeneficiaryFile',
+      required: true,
+      unique: true,
+    },
 
     totalPoints: { type: Number, default: 0 },
     currentLevel: { type: Number, default: 1 }, // Level 1, 2, 3...
@@ -35,7 +44,7 @@ const beneficiaryWalletSchema = new mongoose.Schema(
       },
     ],
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 module.exports = {

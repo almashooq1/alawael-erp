@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Risk Controller
  * Manages financial risk assessment
@@ -20,7 +21,7 @@ exports.getRiskMatrix = async (req, res) => {
 
     res.json({ success: true, data: matrix });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
   }
 };
 
@@ -41,7 +42,7 @@ exports.getRiskItems = async (req, res) => {
 
     res.json({ success: true, data: risks });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
   }
 };
 
@@ -61,7 +62,7 @@ exports.getRiskItem = async (req, res) => {
 
     res.json({ success: true, data: risk });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
   }
 };
 
@@ -102,7 +103,7 @@ exports.createRiskItem = async (req, res) => {
     await risk.save();
     res.json({ success: true, data: risk });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
   }
 };
 
@@ -147,7 +148,7 @@ exports.updateRiskItem = async (req, res) => {
     await risk.save();
     res.json({ success: true, data: risk });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
   }
 };
 
@@ -214,7 +215,7 @@ exports.createRiskMatrix = async (req, res) => {
     await matrix.save();
     res.json({ success: true, data: matrix });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
   }
 };
 
@@ -262,7 +263,7 @@ exports.getHeatmapData = async (req, res) => {
 
     res.json({ success: true, data: grid });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
   }
 };
 
@@ -275,7 +276,7 @@ exports.getRiskTrends = async (req, res) => {
 
     res.json({ success: true, data: trends });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
   }
 };
 
@@ -304,6 +305,6 @@ exports.addMitigationStrategy = async (req, res) => {
 
     res.json({ success: true, data: risk });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
   }
 };

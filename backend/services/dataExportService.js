@@ -1,7 +1,8 @@
+/* eslint-disable no-unused-vars */
 /**
  * خدمة تصدير البيانات - Excel/CSV
  * Data Export Service - Excel & CSV
- * 
+ *
  * يوفر قدرات التصدير المتقدمة لبيانات الرواتب
  * npm install xlsx exceljs
  */
@@ -40,8 +41,18 @@ class DataExportService {
    */
   static stylizeSummarySheet(sheet, payrolls, month, year) {
     const monthNames = [
-      'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
-      'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'
+      'يناير',
+      'فبراير',
+      'مارس',
+      'أبريل',
+      'مايو',
+      'يونيو',
+      'يوليو',
+      'أغسطس',
+      'سبتمبر',
+      'أكتوبر',
+      'نوفمبر',
+      'ديسمبر',
     ];
 
     // العنوان
@@ -57,9 +68,15 @@ class DataExportService {
 
     // إحصائيات الملخص
     const totalGross = payrolls.reduce((sum, p) => sum + (p.calculations?.totalGross || 0), 0);
-    const totalDeductions = payrolls.reduce((sum, p) => sum + (p.calculations?.totalDeductions || 0), 0);
+    const totalDeductions = payrolls.reduce(
+      (sum, p) => sum + (p.calculations?.totalDeductions || 0),
+      0
+    );
     const totalNet = payrolls.reduce((sum, p) => sum + (p.calculations?.totalNet || 0), 0);
-    const totalIncentives = payrolls.reduce((sum, p) => sum + (p.calculations?.totalIncentives || 0), 0);
+    const totalIncentives = payrolls.reduce(
+      (sum, p) => sum + (p.calculations?.totalIncentives || 0),
+      0
+    );
 
     const statsData = [
       ['البيان | Description', 'المبلغ | Amount'],
@@ -68,7 +85,7 @@ class DataExportService {
       ['إجمالي الحوافز | Total Incentives', totalIncentives.toFixed(2)],
       ['إجمالي الخصومات | Total Deductions', totalDeductions.toFixed(2)],
       ['إجمالي الرواتب الصافية | Total Net Salary', totalNet.toFixed(2)],
-      ['متوسط الراتب | Average Salary', (totalNet / payrolls.length).toFixed(2)]
+      ['متوسط الراتب | Average Salary', (totalNet / payrolls.length).toFixed(2)],
     ];
 
     let row = 3;
@@ -93,10 +110,7 @@ class DataExportService {
       row++;
     });
 
-    sheet.columns = [
-      { width: 30 },
-      { width: 20 }
-    ];
+    sheet.columns = [{ width: 30 }, { width: 20 }];
   }
 
   /**
@@ -114,7 +128,7 @@ class DataExportService {
       'الإجمالي الإجمالي | Gross',
       'الخصومات | Deductions',
       'الراتب الصافي | Net',
-      'الحالة | Status'
+      'الحالة | Status',
     ];
 
     const headerRow = sheet.addRow(headers);
@@ -134,7 +148,7 @@ class DataExportService {
         payroll.calculations?.totalGross || 0,
         payroll.calculations?.totalDeductions || 0,
         payroll.calculations?.totalNet || 0,
-        payroll.status
+        payroll.status,
       ]);
     });
 
@@ -149,17 +163,17 @@ class DataExportService {
       { width: 15, numFmt: '#,##0.00' },
       { width: 15, numFmt: '#,##0.00' },
       { width: 15, numFmt: '#,##0.00' },
-      { width: 15 }
+      { width: 15 },
     ];
 
     // تطبيق الحدود على جميع الخلايا
     sheet.eachRow((row, rowNumber) => {
-      row.eachCell((cell) => {
+      row.eachCell(cell => {
         cell.border = {
           top: { style: 'thin' },
           left: { style: 'thin' },
           bottom: { style: 'thin' },
-          right: { style: 'thin' }
+          right: { style: 'thin' },
         };
       });
     });
@@ -193,7 +207,7 @@ class DataExportService {
         departmentStats[dept] = {
           count: 0,
           totalGross: 0,
-          totalNet: 0
+          totalNet: 0,
         };
       }
       departmentStats[dept].count++;
@@ -225,7 +239,12 @@ class DataExportService {
     sheet.getCell(`A${row}`).font = { bold: true };
     row++;
 
-    const deptHeaders = ['القسم | Department', 'العدد | Count', 'إجمالي الإجمالي | Total Gross', 'متوسط | Average'];
+    const deptHeaders = [
+      'القسم | Department',
+      'العدد | Count',
+      'إجمالي الإجمالي | Total Gross',
+      'متوسط | Average',
+    ];
     const deptHeaderRow = sheet.getRow(row);
     deptHeaderRow.values = deptHeaders;
     deptHeaderRow.font = { bold: true };
@@ -236,17 +255,12 @@ class DataExportService {
         dept,
         stats.count,
         stats.totalGross.toFixed(2),
-        (stats.totalGross / stats.count).toFixed(2)
+        (stats.totalGross / stats.count).toFixed(2),
       ];
       row++;
     });
 
-    sheet.columns = [
-      { width: 25 },
-      { width: 15 },
-      { width: 20 },
-      { width: 15 }
-    ];
+    sheet.columns = [{ width: 25 }, { width: 15 }, { width: 20 }, { width: 15 }];
   }
 
   /**
@@ -263,7 +277,7 @@ class DataExportService {
       { label: 'totalGross', value: payroll => payroll.calculations?.totalGross || 0 },
       { label: 'totalDeductions', value: payroll => payroll.calculations?.totalDeductions || 0 },
       { label: 'totalNet', value: payroll => payroll.calculations?.totalNet || 0 },
-      'status'
+      'status',
     ];
 
     try {
@@ -273,7 +287,7 @@ class DataExportService {
       fs.writeFileSync(outputPath, csv, 'utf8');
       return outputPath;
     } catch (error) {
-      throw new Error(`خطأ في تصدير CSV: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -293,7 +307,7 @@ class DataExportService {
       'السبب | Reason',
       'الحالة | Status',
       'تاريخ الموافقة | Approval Date',
-      'تاريخ الدفع | Payment Date'
+      'تاريخ الدفع | Payment Date',
     ];
 
     const headerRow = sheet.addRow(headers);
@@ -310,7 +324,7 @@ class DataExportService {
         incentive.reason,
         incentive.status,
         incentive.approvals?.approvedBy?.date || '',
-        incentive.payment?.paidDate || ''
+        incentive.payment?.paidDate || '',
       ]);
     });
 
@@ -323,7 +337,7 @@ class DataExportService {
       { width: 30 },
       { width: 15 },
       { width: 15 },
-      { width: 15 }
+      { width: 15 },
     ];
 
     await workbook.xlsx.writeFile(outputPath);
@@ -346,7 +360,7 @@ class DataExportService {
       'تاريخ الحادثة | Incident Date',
       'الحالة | Status',
       'تاريخ الاستئناف | Appeal Date',
-      'نتيجة الاستئناف | Appeal Outcome'
+      'نتيجة الاستئناف | Appeal Outcome',
     ];
 
     const headerRow = sheet.addRow(headers);
@@ -363,7 +377,7 @@ class DataExportService {
         penalty.incidentDate,
         penalty.status,
         penalty.appeal?.appealedDate || '',
-        penalty.appeal?.appealOutcome || ''
+        penalty.appeal?.appealOutcome || '',
       ]);
     });
 
@@ -376,7 +390,7 @@ class DataExportService {
       { width: 15 },
       { width: 15 },
       { width: 15 },
-      { width: 15 }
+      { width: 15 },
     ];
 
     await workbook.xlsx.writeFile(outputPath);
@@ -409,7 +423,7 @@ class DataExportService {
       fileName,
       filePath,
       url: `/uploads/exports/${fileName}`,
-      size: fs.statSync(filePath).size
+      size: fs.statSync(filePath).size,
     };
   }
 }

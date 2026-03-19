@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * ========================================
  * نظام المصادقة المتقدم
@@ -29,21 +30,29 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const logger = require('../utils/logger');
+const { jwtSecret } = require('../config/secrets');
 
-// في الإنتاج، يجب استخدام environment variables
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+const JWT_SECRET = jwtSecret;
 const JWT_EXPIRE = process.env.JWT_EXPIRE || '7d';
 const BCRYPT_ROUNDS = 10;
-const DEMO_PASSWORD = 'TestPassword123!';
-const DEMO_USER = {
-  id: 'user-123',
-  username: 'testuser',
-  email: 'test@example.com',
-  phone: '0501234567',
-  idNumber: '1234567890',
-  roles: ['user'],
-};
-const DEMO_HASHED_PASSWORD = bcrypt.hashSync(DEMO_PASSWORD, BCRYPT_ROUNDS);
+
+// Demo credentials - ONLY available in non-production environments
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+const DEMO_PASSWORD = IS_PRODUCTION ? null : 'TestPassword123!';
+const DEMO_USER = IS_PRODUCTION
+  ? null
+  : {
+      id: 'user-123',
+      username: 'testuser',
+      email: 'test@example.com',
+      phone: '0501234567',
+      idNumber: '1234567890',
+      roles: ['user'],
+    };
+const DEMO_HASHED_PASSWORD = IS_PRODUCTION
+  ? null
+  : bcrypt.hashSync(DEMO_PASSWORD || 'disabled', BCRYPT_ROUNDS);
 
 class AuthenticationService {
   /**
@@ -176,7 +185,7 @@ class AuthenticationService {
       const hashedPassword = await bcrypt.hash(password, BCRYPT_ROUNDS);
       return hashedPassword;
     } catch (error) {
-      throw new Error(`خطأ في تشفير كلمة المرور: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -188,7 +197,7 @@ class AuthenticationService {
     try {
       return await bcrypt.compare(password, hashedPassword);
     } catch (error) {
-      throw new Error(`خطأ في التحقق من كلمة المرور: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -227,7 +236,7 @@ class AuthenticationService {
         createdAt: new Date(),
       };
     } catch (error) {
-      throw new Error(`خطأ في إنشاء الـ Token: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -243,7 +252,7 @@ class AuthenticationService {
       if (error.name === 'TokenExpiredError') {
         throw new Error('انتهت صلاحية الـ Token');
       }
-      throw new Error(`Token غير صحيح: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -267,7 +276,7 @@ class AuthenticationService {
 
       return token;
     } catch (error) {
-      throw new Error(`خطأ في إنشاء Refresh Token: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -301,9 +310,9 @@ class AuthenticationService {
         user = dbData.users.find(u => u.email.toLowerCase() === email.toLowerCase());
       }
 
-      // Fallback to demo user if not found in db
+      // Fallback to demo user if not found in db (non-production only)
       if (!user) {
-        if (email !== DEMO_USER.email) {
+        if (IS_PRODUCTION || !DEMO_USER || email !== DEMO_USER.email) {
           throw new Error('المستخدم غير موجود');
         }
         user = { ...DEMO_USER, password: DEMO_HASHED_PASSWORD };
@@ -337,7 +346,7 @@ class AuthenticationService {
         expiresIn: token.expiresIn,
       };
     } catch (error) {
-      throw new Error(`خطأ في تسجيل الدخول: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -353,7 +362,7 @@ class AuthenticationService {
         throw new Error('رقم الجوال غير صحيح');
       }
 
-      if (phone !== DEMO_USER.phone) {
+      if (IS_PRODUCTION || !DEMO_USER || phone !== DEMO_USER.phone) {
         throw new Error('المستخدم غير موجود');
       }
 
@@ -385,7 +394,7 @@ class AuthenticationService {
         expiresIn: token.expiresIn,
       };
     } catch (error) {
-      throw new Error(`خطأ في تسجيل الدخول: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -401,7 +410,7 @@ class AuthenticationService {
         throw new Error('رقم بطاقة الأحوال غير صحيح');
       }
 
-      if (idNumber !== DEMO_USER.idNumber) {
+      if (IS_PRODUCTION || !DEMO_USER || idNumber !== DEMO_USER.idNumber) {
         throw new Error('المستخدم غير موجود');
       }
 
@@ -433,7 +442,7 @@ class AuthenticationService {
         expiresIn: token.expiresIn,
       };
     } catch (error) {
-      throw new Error(`خطأ في تسجيل الدخول: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -449,7 +458,7 @@ class AuthenticationService {
         throw new Error('اسم المستخدم غير صحيح');
       }
 
-      if (username !== DEMO_USER.username) {
+      if (IS_PRODUCTION || !DEMO_USER || username !== DEMO_USER.username) {
         throw new Error('المستخدم غير موجود');
       }
 
@@ -480,7 +489,7 @@ class AuthenticationService {
         expiresIn: token.expiresIn,
       };
     } catch (error) {
-      throw new Error(`خطأ في تسجيل الدخول: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -506,7 +515,7 @@ class AuthenticationService {
         );
       }
     } catch (error) {
-      throw new Error(`خطأ في تسجيل الدخول: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -588,7 +597,7 @@ class AuthenticationService {
         },
       };
     } catch (error) {
-      throw new Error(`خطأ في التسجيل: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -641,7 +650,7 @@ class AuthenticationService {
         expiresIn: newToken.expiresIn,
       };
     } catch (error) {
-      throw new Error(`خطأ في تحديث الـ Token: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -676,7 +685,7 @@ class AuthenticationService {
         resetToken, // في الإنتاج، لا نرسل هذا للعميل
       };
     } catch (error) {
-      throw new Error(`خطأ في طلب إعادة تعيين كلمة المرور: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -704,7 +713,7 @@ class AuthenticationService {
         message: 'تم تعيين كلمة المرور الجديدة بنجاح',
       };
     } catch (error) {
-      throw new Error(`خطأ في إعادة تعيين كلمة المرور: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -735,7 +744,7 @@ class AuthenticationService {
         message: 'تم تغيير كلمة المرور بنجاح',
       };
     } catch (error) {
-      throw new Error(`خطأ في تغيير كلمة المرور: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -762,7 +771,7 @@ class AuthenticationService {
         qrCode: `otpauth://totp/EnterpriseSys:${userId}?secret=${secret}`,
       };
     } catch (error) {
-      throw new Error(`خطأ في تفعيل المصادقة الثنائية: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -783,7 +792,7 @@ class AuthenticationService {
         message: 'تم التحقق من المصادقة الثنائية بنجاح',
       };
     } catch (error) {
-      throw new Error(`خطأ في التحقق من المصادقة الثنائية: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -806,7 +815,7 @@ class AuthenticationService {
 
       return activity;
     } catch (error) {
-      console.error('خطأ في تسجيل نشاط الدخول:', error);
+      logger.error('خطأ في تسجيل نشاط الدخول:', error);
     }
   }
 }

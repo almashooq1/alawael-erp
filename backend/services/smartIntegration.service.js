@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+const logger = require('../utils/logger');
 /**
  * Smart Interoperability & Integration Service (Phase 68)
  *
@@ -51,7 +53,7 @@ class SmartIntegrationService {
     // Simulate external API call latency
     await new Promise(resolve => setTimeout(resolve, 800));
 
-    console.log(`[INTEGRATION] Sending ${payloadType} to MoH Gateway...`);
+    logger.info(`[INTEGRATION] Sending ${payloadType} to MoH Gateway...`);
 
     // Validate mandatory fields
     if (!data.nationalId) {

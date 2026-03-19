@@ -1,9 +1,10 @@
+/* eslint-disable no-unused-vars */
 /**
  * ╔═══════════════════════════════════════════════════════════════════════════════╗
  * ║                      🧮 ADVANCED ZAKAT CALCULATION ENGINE                      ║
  * ║                    محرك حساب الزكاة الذكي والمتقدم                          ║
  * ╚═══════════════════════════════════════════════════════════════════════════════╝
- * 
+ *
  * محرك متقدم لحساب جميع أنواع الزكاة وفق الشريعة الإسلامية
  * يتضمن معادلات شرعية دقيقة وحسابات ذكية
  */
@@ -21,7 +22,7 @@ class ZakatCalculationEngine {
    */
   static calculateCashZakat(amount, nisab = ZAKAT_CONFIG.THRESHOLDS.CASH_NISAB) {
     const isAboveNisab = amount >= nisab;
-    
+
     if (!isAboveNisab) {
       return {
         totalAmount: amount,
@@ -29,7 +30,7 @@ class ZakatCalculationEngine {
         isAboveNisab: false,
         zakatAmount: 0,
         rate: ZAKAT_CONFIG.RATES.CASH,
-        message: `المبلغ أقل من النصاب. النصاب الحالي: ${nisab} SAR`
+        message: `المبلغ أقل من النصاب. النصاب الحالي: ${nisab} SAR`,
       };
     }
 
@@ -41,7 +42,7 @@ class ZakatCalculationEngine {
       isAboveNisab: true,
       zakatAmount: Math.round(zakatAmount * 100) / 100,
       rate: ZAKAT_CONFIG.RATES.CASH,
-      message: `المبلغ فوق النصاب. الزكاة المستحقة: ${zakatAmount.toFixed(2)} SAR`
+      message: `المبلغ فوق النصاب. الزكاة المستحقة: ${zakatAmount.toFixed(2)} SAR`,
     };
   }
 
@@ -64,7 +65,7 @@ class ZakatCalculationEngine {
         zakatAmount: 0,
         zakatGrams: 0,
         rate: ZAKAT_CONFIG.RATES.GOLD,
-        message: `وزن الذهب أقل من النصاب (85 جرام). الوزن الحالي: ${grams} جرام`
+        message: `وزن الذهب أقل من النصاب (85 جرام). الوزن الحالي: ${grams} جرام`,
       };
     }
 
@@ -80,7 +81,7 @@ class ZakatCalculationEngine {
       zakatAmount: Math.round(zakatAmount * 100) / 100,
       zakatGrams: Math.round(zakatGrams * 100) / 100,
       rate: ZAKAT_CONFIG.RATES.GOLD,
-      message: `الذهب فوق النصاب. الزكاة المستحقة: ${zakatAmount.toFixed(2)} SAR أو ${zakatGrams.toFixed(2)} جرام`
+      message: `الذهب فوق النصاب. الزكاة المستحقة: ${zakatAmount.toFixed(2)} SAR أو ${zakatGrams.toFixed(2)} جرام`,
     };
   }
 
@@ -103,7 +104,7 @@ class ZakatCalculationEngine {
         zakatAmount: 0,
         zakatGrams: 0,
         rate: ZAKAT_CONFIG.RATES.SILVER,
-        message: `وزن الفضة أقل من النصاب (595 جرام). الوزن الحالي: ${grams} جرام`
+        message: `وزن الفضة أقل من النصاب (595 جرام). الوزن الحالي: ${grams} جرام`,
       };
     }
 
@@ -119,14 +120,14 @@ class ZakatCalculationEngine {
       zakatAmount: Math.round(zakatAmount * 100) / 100,
       zakatGrams: Math.round(zakatGrams * 100) / 100,
       rate: ZAKAT_CONFIG.RATES.SILVER,
-      message: `الفضة فوق النصاب. الزكاة المستحقة: ${zakatAmount.toFixed(2)} SAR أو ${zakatGrams.toFixed(2)} جرام`
+      message: `الفضة فوق النصاب. الزكاة المستحقة: ${zakatAmount.toFixed(2)} SAR أو ${zakatGrams.toFixed(2)} جرام`,
     };
   }
 
   /**
    * حساب زكاة الماشية (الإبل)
    * Calculate Zakat on Camels
-   * 
+   *
    * الحساب الشرعي:
    * 5 إبل: شاة واحدة
    * 10 إبل: شاتان
@@ -145,7 +146,7 @@ class ZakatCalculationEngine {
         count: count,
         zakatAmount: 0,
         zakatType: 'NONE',
-        message: 'عدد الإبل أقل من النصاب (5 إبل)'
+        message: 'عدد الإبل أقل من النصاب (5 إبل)',
       };
     }
 
@@ -197,14 +198,14 @@ class ZakatCalculationEngine {
       zakatCount: zakatCount,
       zakatType: zakatType,
       zakatDescription: this.getZakatTypeDescription(zakatType),
-      message: `الزكاة المستحقة: ${zakatCount} من ${zakatType}`
+      message: `الزكاة المستحقة: ${zakatCount} من ${zakatType}`,
     };
   }
 
   /**
    * حساب زكاة الماشية (الأبقار والجاموس)
    * Calculate Zakat on Cattle and Buffalo
-   * 
+   *
    * 30 بقرة: عجل أو تيس (سنة)
    * 40 بقرة: بقرة أو تيس (سنتان)
    * 60 بقرة: عجلان
@@ -216,7 +217,7 @@ class ZakatCalculationEngine {
         count: count,
         zakatAmount: 0,
         zakatType: 'NONE',
-        message: 'عدد البقر أقل من النصاب (30 بقرة)'
+        message: 'عدد البقر أقل من النصاب (30 بقرة)',
       };
     }
 
@@ -243,14 +244,14 @@ class ZakatCalculationEngine {
       zakatCount: zakatCount,
       zakatType: zakatType,
       zakatDescription: this.getZakatTypeDescription(zakatType),
-      message: `الزكاة المستحقة: ${zakatCount} من ${zakatType}`
+      message: `الزكاة المستحقة: ${zakatCount} من ${zakatType}`,
     };
   }
 
   /**
    * حساب زكاة الماشية (الغنم والماعز)
    * Calculate Zakat on Sheep and Goats
-   * 
+   *
    * 40 إلى 120: شاة واحدة
    * 121 إلى 200: شاتان
    * 201 إلى 300: ثلاث شاات
@@ -262,7 +263,7 @@ class ZakatCalculationEngine {
         count: count,
         zakatAmount: 0,
         zakatType: 'NONE',
-        message: 'عدد الغنم أقل من النصاب (40 رأس)'
+        message: 'عدد الغنم أقل من النصاب (40 رأس)',
       };
     }
 
@@ -282,7 +283,7 @@ class ZakatCalculationEngine {
       count: count,
       zakatCount: zakatCount,
       zakatType: 'SHEEP',
-      message: `الزكاة المستحقة: ${zakatCount} من الغنم`
+      message: `الزكاة المستحقة: ${zakatCount} من الغنم`,
     };
   }
 
@@ -292,19 +293,20 @@ class ZakatCalculationEngine {
    */
   static calculateCropsZakat(tons, irrigationType = 'irrigated') {
     const wasq = ZAKAT_CONFIG.THRESHOLDS.CROPS.wasq / 1000; // تحويل من كغ إلى أطنان
-    
+
     if (tons < wasq) {
       return {
         tons: tons,
         nisab: wasq,
         zakatAmount: 0,
-        message: `المحصول أقل من النصاب (${wasq} طن)`
+        message: `المحصول أقل من النصاب (${wasq} طن)`,
       };
     }
 
-    const rate = irrigationType === 'irrigated' 
-      ? ZAKAT_CONFIG.RATES.CROPS_IRRIGATED 
-      : ZAKAT_CONFIG.RATES.CROPS_RAINFALL;
+    const rate =
+      irrigationType === 'irrigated'
+        ? ZAKAT_CONFIG.RATES.CROPS_IRRIGATED
+        : ZAKAT_CONFIG.RATES.CROPS_RAINFALL;
 
     const zakatTons = tons * rate;
 
@@ -314,7 +316,7 @@ class ZakatCalculationEngine {
       irrigationType: irrigationType,
       rate: rate,
       zakatTons: Math.round(zakatTons * 100) / 100,
-      message: `الزكاة المستحقة: ${zakatTons.toFixed(2)} طن (${(rate * 100)}%)`
+      message: `الزكاة المستحقة: ${zakatTons.toFixed(2)} طن (${rate * 100}%)`,
     };
   }
 
@@ -331,7 +333,7 @@ class ZakatCalculationEngine {
         nisab: nisab,
         isAboveNisab: false,
         zakatAmount: 0,
-        message: `قيمة المخزون أقل من النصاب (${nisab} SAR)`
+        message: `قيمة المخزون أقل من النصاب (${nisab} SAR)`,
       };
     }
 
@@ -343,7 +345,7 @@ class ZakatCalculationEngine {
       isAboveNisab: true,
       zakatAmount: Math.round(zakatAmount * 100) / 100,
       rate: ZAKAT_CONFIG.RATES.BUSINESS_INVENTORY,
-      message: `الزكاة المستحقة: ${zakatAmount.toFixed(2)} SAR`
+      message: `الزكاة المستحقة: ${zakatAmount.toFixed(2)} SAR`,
     };
   }
 
@@ -352,13 +354,13 @@ class ZakatCalculationEngine {
    */
   static getZakatTypeDescription(type) {
     const descriptions = {
-      'SHEEP': 'شاة',
-      'DAUGHTER_OF_ONE_YEAR': 'بنت مخاض (سنة ونصف)',
-      'DAUGHTER_OF_TWO_YEARS': 'بنت لبون (سنتان)',
-      'THREE_YEAR_OLD': 'حقة (ثلاث سنوات)',
-      'FOUR_YEAR_OLD': 'جذعة (أربع سنوات)',
-      'YOUNG_CALF_ONE_YEAR': 'عجل (سنة واحدة)',
-      'FEMALE_CATTLE_TWO_YEARS': 'بقرة أنثى (سنتان)'
+      SHEEP: 'شاة',
+      DAUGHTER_OF_ONE_YEAR: 'بنت مخاض (سنة ونصف)',
+      DAUGHTER_OF_TWO_YEARS: 'بنت لبون (سنتان)',
+      THREE_YEAR_OLD: 'حقة (ثلاث سنوات)',
+      FOUR_YEAR_OLD: 'جذعة (أربع سنوات)',
+      YOUNG_CALF_ONE_YEAR: 'عجل (سنة واحدة)',
+      FEMALE_CATTLE_TWO_YEARS: 'بقرة أنثى (سنتان)',
     };
     return descriptions[type] || type;
   }
@@ -379,7 +381,7 @@ class ZakatCalculationEngine {
       totalZakat: 0,
       assetDetails: [],
       warnings: [],
-      recommendations: []
+      recommendations: [],
     };
 
     // معالجة كل نوع من الأصول
@@ -391,12 +393,18 @@ class ZakatCalculationEngine {
           break;
 
         case 'GOLD':
-          results.gold = this.calculateGoldZakat(asset.quantity, asset.currentPrice / asset.quantity);
+          results.gold = this.calculateGoldZakat(
+            asset.quantity,
+            asset.currentPrice / asset.quantity
+          );
           results.totalZakat += results.gold.zakatAmount;
           break;
 
         case 'SILVER':
-          results.silver = this.calculateSilverZakat(asset.quantity, asset.currentPrice / asset.quantity);
+          results.silver = this.calculateSilverZakat(
+            asset.quantity,
+            asset.currentPrice / asset.quantity
+          );
           results.totalZakat += results.silver.zakatAmount;
           break;
 
@@ -434,7 +442,7 @@ class ZakatCalculationEngine {
       results.assetDetails.push({
         name: asset.name,
         type: asset.type,
-        value: asset.amount || asset.currentPrice || 0
+        value: asset.amount || asset.currentPrice || 0,
       });
     });
 
@@ -443,7 +451,7 @@ class ZakatCalculationEngine {
 
     return {
       ...results,
-      totalZakat: Math.round(results.totalZakat * 100) / 100
+      totalZakat: Math.round(results.totalZakat * 100) / 100,
     };
   }
 
@@ -493,7 +501,7 @@ class ZakatValidation {
 
     return {
       isValid: errors.length === 0,
-      errors: errors
+      errors: errors,
     };
   }
 
@@ -503,9 +511,10 @@ class ZakatValidation {
   static validateZakatDue(totalAssetsValue, nisab) {
     return {
       isAboveNisab: totalAssetsValue >= nisab,
-      message: totalAssetsValue >= nisab
-        ? ✅ المبلغ فوق النصاب - الزكاة مستحقة'
-        : '⛔ المبلغ أقل من النصاب - الزكاة غير مستحقة'
+      message:
+        totalAssetsValue >= nisab
+          ? '✅ المبلغ فوق النصاب - الزكاة مستحقة'
+          : '⛔ المبلغ أقل من النصاب - الزكاة غير مستحقة',
     };
   }
 }
@@ -517,5 +526,5 @@ class ZakatValidation {
 module.exports = {
   ZakatCalculationEngine,
   ZakatValidation,
-  ZAKAT_CONFIG
+  ZAKAT_CONFIG,
 };

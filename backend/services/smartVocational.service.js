@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+const logger = require('../utils/logger');
 /**
  * Smart Vocational Rehabilitation Service
  *
@@ -13,7 +15,7 @@ class SmartVocationalService {
    */
   async enrollBeneficiary(programId, beneficiaryId) {
     // Mock DB operation
-    console.log(`Enrolling ${beneficiaryId} into program ${programId}`);
+    logger.info(`Enrolling ${beneficiaryId} into program ${programId}`);
     return {
       enrollmentId: 'ENR-' + Math.floor(Math.random() * 10000),
       status: 'ACTIVE',

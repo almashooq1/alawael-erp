@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * @file loadTester.js
  * @description Load Testing Framework for Phase 11 System Integration
@@ -65,14 +66,14 @@ class LoadTester extends EventEmitter {
       this.metrics.failedRequests++;
       this.metrics.errors.push({
         endpoint,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
         timestamp: new Date(),
       });
 
       return {
         success: false,
         status: error.response?.status || 0,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     } finally {
       this.metrics.totalRequests++;

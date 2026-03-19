@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { triggerBlobDownload } from 'utils/downloadHelper';
 import {
   Container,
   Grid,
@@ -25,13 +26,13 @@ import {
   FileDownload,
   FileUpload,
   Description,
-  PictureAsPdf,
   TableChart,
   CheckCircle,
   Error,
   Info,
   Close,
 } from '@mui/icons-material';
+import { getToken } from 'utils/tokenStorage';
 
 const ExportImportManager = () => {
   const [loading, setLoading] = useState(false);
@@ -66,7 +67,7 @@ const ExportImportManager = () => {
 
       const response = await fetch(`/api/export-import/export/excel?${params.toString()}`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${getToken()}`,
         },
       });
 
@@ -76,14 +77,10 @@ const ExportImportManager = () => {
 
       // Download file
       const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `rehabilitation-programs-${new Date().toISOString().split('T')[0]}.xlsx`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
+      triggerBlobDownload(
+        blob,
+        `rehabilitation-programs-${new Date().toISOString().split('T')[0]}.xlsx`
+      );
 
       setMessage({
         type: 'success',
@@ -92,7 +89,7 @@ const ExportImportManager = () => {
     } catch (error) {
       setMessage({
         type: 'error',
-        text: `❌ خطأ في التصدير: ${error.message}`,
+        text: `❌ خطأ في التصدير: ${'حدث خطأ، يرجى المحاولة لاحقاً'}`,
       });
     } finally {
       setLoading(false);
@@ -100,14 +97,14 @@ const ExportImportManager = () => {
   };
 
   // Handle export program to PDF
-  const handleExportPDF = async programId => {
+  const _handleExportPDF = async programId => {
     try {
       setLoading(true);
       setMessage(null);
 
       const response = await fetch(`/api/export-import/export/pdf/${programId}`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${getToken()}`,
         },
       });
 
@@ -117,14 +114,10 @@ const ExportImportManager = () => {
 
       // Download file
       const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `program-${programId}-${new Date().toISOString().split('T')[0]}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
+      triggerBlobDownload(
+        blob,
+        `program-${programId}-${new Date().toISOString().split('T')[0]}.pdf`
+      );
 
       setMessage({
         type: 'success',
@@ -133,7 +126,7 @@ const ExportImportManager = () => {
     } catch (error) {
       setMessage({
         type: 'error',
-        text: `❌ خطأ في التصدير: ${error.message}`,
+        text: `❌ خطأ في التصدير: ${'حدث خطأ، يرجى المحاولة لاحقاً'}`,
       });
     } finally {
       setLoading(false);
@@ -148,7 +141,7 @@ const ExportImportManager = () => {
 
       const response = await fetch('/api/export-import/import/template', {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${getToken()}`,
         },
       });
 
@@ -158,14 +151,7 @@ const ExportImportManager = () => {
 
       // Download file
       const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'import-template.xlsx';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
+      triggerBlobDownload(blob, 'import-template.xlsx');
 
       setMessage({
         type: 'success',
@@ -174,7 +160,7 @@ const ExportImportManager = () => {
     } catch (error) {
       setMessage({
         type: 'error',
-        text: `❌ خطأ في التحميل: ${error.message}`,
+        text: `❌ خطأ في التحميل: ${'حدث خطأ، يرجى المحاولة لاحقاً'}`,
       });
     } finally {
       setLoading(false);
@@ -219,7 +205,7 @@ const ExportImportManager = () => {
       const response = await fetch('/api/export-import/import/excel', {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${getToken()}`,
         },
         body: formData,
       });
@@ -239,7 +225,7 @@ const ExportImportManager = () => {
     } catch (error) {
       setMessage({
         type: 'error',
-        text: `❌ خطأ في الاستيراد: ${error.message}`,
+        text: `❌ خطأ في الاستيراد: ${'حدث خطأ، يرجى المحاولة لاحقاً'}`,
       });
     } finally {
       setUploadLoading(false);
@@ -259,7 +245,7 @@ const ExportImportManager = () => {
           sx={{ mb: 3 }}
           action={
             <IconButton
-              aria-label="close"
+              aria-label="إغلاق"
               color="inherit"
               size="small"
               onClick={() => setMessage(null)}

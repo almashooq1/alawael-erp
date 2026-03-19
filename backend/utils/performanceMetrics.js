@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Performance Metrics System
  * نظام قياس الأداء المتقدم

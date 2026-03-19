@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * ===================================================================
  * ADVANCED FINANCIAL REPORTS SERVICE - خدمة التقارير المالية المتقدمة

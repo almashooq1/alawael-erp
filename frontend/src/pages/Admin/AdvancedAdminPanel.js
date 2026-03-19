@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Container,
@@ -41,78 +41,43 @@ import {
   Block as BlockIcon,
   CheckCircle as ActiveIcon,
   Warning as WarningIcon,
-  Visibility as VisibilityIcon,
-  VisibilityOff as VisibilityOffIcon,
+  AdminPanelSettings as AdminPanelIcon,
 } from '@mui/icons-material';
+import { useSnackbar } from 'contexts/SnackbarContext';
+import { adminService } from 'services/adminService';
+import { gradients, surfaceColors } from '../../theme/palette';
+import ConfirmDialog, { useConfirmDialog } from '../../components/common/ConfirmDialog';
 
 const AdminPanel = () => {
+  const showSnackbar = useSnackbar();
+  const [confirmState, showConfirm] = useConfirmDialog();
   const [activeTab, setActiveTab] = useState(0);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [settingsChanged, setSettingsChanged] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [users, setUsers] = useState([]);
+  const [systemSettings, setSystemSettings] = useState(null);
 
-  // Sample data
-  const users = [
-    {
-      id: 1,
-      name: 'أحمد محمد',
-      email: 'ahmed@example.com',
-      role: 'admin',
-      status: 'active',
-      lastLogin: '2026-01-19 10:30',
-    },
-    {
-      id: 2,
-      name: 'فاطمة علي',
-      email: 'fatima@example.com',
-      role: 'manager',
-      status: 'active',
-      lastLogin: '2026-01-19 09:15',
-    },
-    {
-      id: 3,
-      name: 'محمد علي',
-      email: 'muhammed@example.com',
-      role: 'therapist',
-      status: 'inactive',
-      lastLogin: '2026-01-18 14:45',
-    },
-    {
-      id: 4,
-      name: 'سارة حسن',
-      email: 'sarah@example.com',
-      role: 'case_manager',
-      status: 'active',
-      lastLogin: '2026-01-19 08:20',
-    },
-  ];
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [usersRes, settingsRes] = await Promise.all([
+        adminService.getAdminUsers(),
+        adminService.getAdminSettings(),
+      ]);
+      setUsers(usersRes?.data || usersRes?.users || usersRes || []);
+      setSystemSettings(settingsRes?.data || settingsRes?.settings || settingsRes || {});
+    } catch {
+      showSnackbar('خطأ في تحميل البيانات', 'error');
+    } finally {
+      setLoading(false);
+    }
+  }, [showSnackbar]);
 
-  const systemSettings = {
-    security: {
-      twoFactorAuth: true,
-      sessionTimeout: 30,
-      passwordExpiry: 90,
-      enforceStrongPassword: true,
-    },
-    notifications: {
-      emailNotifications: true,
-      smsNotifications: false,
-      pushNotifications: true,
-      dailyReport: true,
-    },
-    performance: {
-      cachingEnabled: true,
-      compressionEnabled: true,
-      apiRateLimit: 1000,
-      databaseOptimization: true,
-    },
-    backup: {
-      autoBackup: true,
-      backupFrequency: 'daily',
-      retentionDays: 30,
-      encryptBackup: true,
-    },
-  };
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
@@ -124,16 +89,47 @@ const AdminPanel = () => {
   };
 
   const handleDeleteUser = userId => {
-    alert(`حذف المستخدم ${userId}`);
+    showConfirm({
+      title: 'تأكيد الحذف',
+      message: 'هل أنت متأكد من حذف هذا المستخدم؟ لا يمكن التراجع عن هذا الإجراء.',
+      confirmText: 'حذف',
+      confirmColor: 'error',
+      onConfirm: async () => {
+        try {
+          await adminService.deleteUser?.(userId);
+          setUsers(prev => prev.filter(u => (u.id || u._id) !== userId));
+          showSnackbar('تم حذف المستخدم بنجاح', 'success');
+        } catch {
+          showSnackbar('خطأ في حذف المستخدم', 'error');
+        }
+      },
+    });
   };
 
-  const handleBlockUser = userId => {
-    alert(`حظر المستخدم ${userId}`);
+  const handleBlockUser = async userId => {
+    try {
+      await adminService.blockUser?.(userId);
+      setUsers(prev =>
+        prev.map(u =>
+          (u.id || u._id) === userId
+            ? { ...u, status: u.status === 'active' ? 'blocked' : 'active' }
+            : u
+        )
+      );
+      showSnackbar('تم تحديث حالة المستخدم', 'success');
+    } catch {
+      showSnackbar('خطأ في تحديث حالة المستخدم', 'error');
+    }
   };
 
-  const handleSaveSettings = () => {
-    alert('تم حفظ الإعدادات بنجاح');
-    setSettingsChanged(false);
+  const handleSaveSettings = async () => {
+    try {
+      await adminService.updateSettings?.(systemSettings);
+      showSnackbar('تم حفظ الإعدادات بنجاح', 'success');
+      setSettingsChanged(false);
+    } catch {
+      showSnackbar('خطأ في حفظ الإعدادات', 'error');
+    }
   };
 
   const getRoleColor = role => {
@@ -158,6 +154,20 @@ const AdminPanel = () => {
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+      {/* Header */}
+      <Box sx={{ background: gradients.primary, borderRadius: 2, p: 3, mb: 4, color: 'white' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <AdminPanelIcon sx={{ fontSize: 40 }} />
+          <Box>
+            <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+              لوحة الإدارة المتقدمة
+            </Typography>
+            <Typography variant="body2">إعدادات النظام وأدوات الإدارة المتقدمة</Typography>
+          </Box>
+        </Box>
+      </Box>
+
+      {loading && <LinearProgress sx={{ mb: 2 }} />}
       <Typography variant="h4" sx={{ mb: 3, fontWeight: 'bold' }}>
         ⚙️ لوحة التحكم الإدارية
       </Typography>
@@ -165,7 +175,7 @@ const AdminPanel = () => {
       <Tabs
         value={activeTab}
         onChange={handleTabChange}
-        sx={{ mb: 3, borderBottom: '1px solid #e0e0e0' }}
+        sx={{ mb: 3, borderBottom: `1px solid ${surfaceColors.divider}` }}
       >
         <Tab label="إدارة المستخدمين" />
         <Tab label="الأمان" />
@@ -186,7 +196,7 @@ const AdminPanel = () => {
 
           <TableContainer component={Paper}>
             <Table>
-              <TableHead sx={{ backgroundColor: '#f5f5f5' }}>
+              <TableHead sx={{ backgroundColor: surfaceColors.lightGray }}>
                 <TableRow>
                   <TableCell>
                     <strong>الاسم</strong>
@@ -231,6 +241,7 @@ const AdminPanel = () => {
                     <TableCell>{user.lastLogin}</TableCell>
                     <TableCell>
                       <IconButton
+                        aria-label="إجراء"
                         size="small"
                         onClick={() => handleEditUser(user)}
                         color="primary"
@@ -239,6 +250,7 @@ const AdminPanel = () => {
                         <EditIcon fontSize="small" />
                       </IconButton>
                       <IconButton
+                        aria-label="إجراء"
                         size="small"
                         onClick={() => handleBlockUser(user.id)}
                         color="warning"
@@ -247,6 +259,7 @@ const AdminPanel = () => {
                         <BlockIcon fontSize="small" />
                       </IconButton>
                       <IconButton
+                        aria-label="إجراء"
                         size="small"
                         onClick={() => handleDeleteUser(user.id)}
                         color="error"
@@ -378,7 +391,7 @@ const AdminPanel = () => {
                         justifyContent: 'space-between',
                         alignItems: 'center',
                         padding: '12px',
-                        backgroundColor: '#f5f5f5',
+                        backgroundColor: surfaceColors.lightGray,
                         borderRadius: '8px',
                       }}
                     >
@@ -431,13 +444,15 @@ const AdminPanel = () => {
                     { label: 'ضغط البيانات', icon: '📦', enabled: true },
                     { label: 'تحسين قاعدة البيانات', icon: '🗄️', enabled: true },
                     { label: 'CDN مفعل', icon: '🌐', enabled: false },
-                  ].map((item, index) => (
-                    <Grid item xs={12} sm={6} md={3} key={index}>
+                  ].map(item => (
+                    <Grid item xs={12} sm={6} md={3} key={item.label}>
                       <Paper
                         sx={{
                           padding: '16px',
                           textAlign: 'center',
-                          backgroundColor: item.enabled ? '#e8f5e9' : '#f5f5f5',
+                          backgroundColor: item.enabled
+                            ? surfaceColors.successLight
+                            : surfaceColors.lightGray,
                           cursor: 'pointer',
                           '&:hover': {
                             boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
@@ -545,7 +560,7 @@ const AdminPanel = () => {
                       justifyContent: 'space-between',
                       alignItems: 'center',
                       padding: '12px',
-                      borderBottom: '1px solid #e0e0e0',
+                      borderBottom: `1px solid ${surfaceColors.divider}`,
                       '&:last-child': { borderBottom: 'none' },
                     }}
                   >
@@ -617,6 +632,7 @@ const AdminPanel = () => {
           </Button>
         </DialogActions>
       </Dialog>
+      <ConfirmDialog {...confirmState} />
     </Container>
   );
 };

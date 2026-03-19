@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const express = require('express');
 const router = express.Router();
 const MessagingService = require('../services/messagingService');
@@ -39,7 +40,7 @@ router.post(
       data: result,
       message: 'Message sent',
     });
-  })
+  }),
 );
 
 /**
@@ -71,7 +72,7 @@ router.post(
       data: result,
       message: 'Group message sent',
     });
-  })
+  }),
 );
 
 /**
@@ -96,7 +97,7 @@ router.post(
       success: true,
       message: `Typing indicator ${isTyping ? 'sent' : 'removed'}`,
     });
-  })
+  }),
 );
 
 /**
@@ -121,7 +122,7 @@ router.post(
       success: true,
       message: 'Read receipt sent',
     });
-  })
+  }),
 );
 
 /**
@@ -153,7 +154,7 @@ router.post(
       data: group,
       message: 'Group chat created',
     });
-  })
+  }),
 );
 
 /**
@@ -187,7 +188,7 @@ router.post(
       data: result,
       message: 'Participant added to group',
     });
-  })
+  }),
 );
 
 /**
@@ -221,7 +222,7 @@ router.post(
       data: result,
       message: 'Participant removed from group',
     });
-  })
+  }),
 );
 
 /**
@@ -239,7 +240,7 @@ router.get(
       success: true,
       data: status,
     });
-  })
+  }),
 );
 
 /**
@@ -258,7 +259,7 @@ router.get(
         users,
       },
     });
-  })
+  }),
 );
 
 /**
@@ -284,7 +285,7 @@ router.get(
       success: true,
       data: history,
     });
-  })
+  }),
 );
 
 /**
@@ -300,16 +301,16 @@ router.get(
       success: true,
       data: stats,
     });
-  })
+  }),
 );
 
 // Error handling
-router.use((error, req, res, next) => {
+router.use((error, _req, res, _next) => {
   console.error('Messaging Route Error:', error);
 
   res.status(error.status || 500).json({
     success: false,
-    error: error.message || 'Internal Server Error',
+    error: 'حدث خطأ في الخادم',
     timestamp: new Date().toISOString(),
   });
 });

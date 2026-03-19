@@ -4,6 +4,7 @@
  */
 
 import { lazy } from 'react';
+import logger from 'utils/logger';
 
 /**
  * Lazy load component with retry logic
@@ -18,12 +19,27 @@ export const lazyWithRetry = (importFunc, retries = 3) => {
         importFunc()
           .then(resolve)
           .catch(error => {
+            const isChunkError =
+              error && (error.name === 'ChunkLoadError' || /loading chunk/i.test(error.message));
+
             if (n === 1) {
+              // All retries exhausted
+              if (isChunkError) {
+                // Chunk hash mismatch — force full page reload (once)
+                const reloadKey = 'chunk_reload_' + Date.now();
+                if (!sessionStorage.getItem('chunk_force_reload')) {
+                  sessionStorage.setItem('chunk_force_reload', reloadKey);
+                  logger.warn('ChunkLoadError after all retries — forcing page reload');
+                  window.location.reload();
+                  return;
+                }
+                sessionStorage.removeItem('chunk_force_reload');
+              }
               reject(error);
               return;
             }
 
-            console.warn(`Import failed. Retrying... (${retries - n + 1}/${retries})`);
+            logger.warn(`Import failed. Retrying... (${retries - n + 1}/${retries})`);
 
             // Wait before retry (exponential backoff)
             setTimeout(
@@ -38,28 +54,6 @@ export const lazyWithRetry = (importFunc, retries = 3) => {
       attempt(retries);
     });
   });
-};
-
-/**
- * Preload component
- * @param {Function} importFunc - Dynamic import function
- */
-export const preloadComponent = importFunc => {
-  importFunc().catch(error => {
-    console.error('Preload failed:', error);
-  });
-};
-
-/**
- * Code splitting by route
- */
-export const routes = {
-  // Lazy load pages
-  Dashboard: lazyWithRetry(() => import('../components/dashboard/AdvancedDashboard')),
-  StudentReports: lazyWithRetry(() => import('../pages/StudentReports')),
-  StudentPortal: lazyWithRetry(() => import('../pages/StudentPortal')),
-  AdminDashboard: lazyWithRetry(() => import('../pages/AdminDashboard')),
-  // Add more routes as needed
 };
 
 export default lazyWithRetry;

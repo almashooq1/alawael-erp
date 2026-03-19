@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars, no-undef, no-empty, prefer-const, no-constant-condition, no-unused-expressions */
 /**
  * PortalPayment Model
  * نموذج الدفعات في بوابة المستفيد/ولي الأمر
@@ -199,7 +200,6 @@ const PortalPaymentSchema = new Schema(
 PortalPaymentSchema.index({ guardianId: 1, createdAt: -1 });
 PortalPaymentSchema.index({ beneficiaryId: 1, status: 1 });
 PortalPaymentSchema.index({ status: 1, dueDate: 1 });
-PortalPaymentSchema.index({ invoiceNumber: 1 });
 
 // Virtual: Days Until Due
 PortalPaymentSchema.virtual('daysUntilDue').get(function () {
@@ -282,7 +282,11 @@ PortalPaymentSchema.statics.getPaymentStats = function (guardianId) {
 };
 
 // Instance Methods
-PortalPaymentSchema.methods.markAsPaid = async function (paidAmount, paymentMethod, transactionRef) {
+PortalPaymentSchema.methods.markAsPaid = async function (
+  paidAmount,
+  paymentMethod,
+  transactionRef
+) {
   this.amountPaid = (this.amountPaid || 0) + paidAmount;
   this.paidDate = new Date();
   this.paymentMethod = paymentMethod;
@@ -309,7 +313,7 @@ PortalPaymentSchema.methods.markAsOverdue = async function () {
   return this.save();
 };
 
-PortalMessageSchema.methods.sendReminder = async function () {
+PortalPaymentSchema.methods.sendReminder = async function () {
   const Notification = mongoose.model('PortalNotification');
 
   await Notification.create({
@@ -346,7 +350,7 @@ PortalPaymentSchema.methods.requestRefund = async function (reason) {
 };
 
 // Middleware
-PortalPaymentSchema.pre('save', function (next) {
+PortalPaymentSchema.pre('save', function () {
   // Calculate final amount
   this.finalAmount = this.amount + this.penaltyCharge - this.discountApplied;
   if (!this.amountRemaining) {
@@ -360,7 +364,6 @@ PortalPaymentSchema.pre('save', function (next) {
   }
 
   this.updatedAt = new Date();
-  next();
 });
 
 module.exports = mongoose.model('PortalPayment', PortalPaymentSchema);

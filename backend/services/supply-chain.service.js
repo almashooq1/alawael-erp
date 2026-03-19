@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * ALAWAEL ERP - SUPPLY CHAIN & LOGISTICS MANAGEMENT SERVICE
  * Supplier Management, Inventory Tracking, Order Fulfillment, Logistics

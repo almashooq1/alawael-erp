@@ -598,7 +598,7 @@ const CashFlowDashboard = () => {
         <Box sx={{ p: 3 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
             <Typography variant="h6">Add Cash Flow Entry</Typography>
-            <IconButton onClick={() => setShowCreateDialog(false)} size="small">
+            <IconButton onClick={() => setShowCreateDialog(false)} size="small" aria-label="إغلاق">
               <CloseIcon />
             </IconButton>
           </Box>
@@ -641,7 +641,7 @@ const CashFlowDashboard = () => {
         <Box sx={{ p: 3 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
             <Typography variant="h6">Generate Forecast</Typography>
-            <IconButton onClick={() => setShowForecastDialog(false)} size="small">
+            <IconButton onClick={() => setShowForecastDialog(false)} size="small" aria-label="إغلاق">
               <CloseIcon />
             </IconButton>
           </Box>
@@ -677,7 +677,7 @@ const CashFlowDashboard = () => {
         <Box sx={{ p: 3 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
             <Typography variant="h6">Record Reserve Transaction</Typography>
-            <IconButton onClick={() => setShowReserveDialog(false)} size="small">
+            <IconButton onClick={() => setShowReserveDialog(false)} size="small" aria-label="إغلاق">
               <CloseIcon />
             </IconButton>
           </Box>

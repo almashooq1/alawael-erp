@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const Supplier = require('../models/Supplier.model');
 const PurchaseOrder = require('../models/PurchaseOrder.model');
 const Contract = require('../models/Contract.model');
@@ -7,7 +8,6 @@ const Contract = require('../models/Contract.model');
  * خدمة إدارة الموردين المتقدمة
  */
 class AdvancedSupplierManagementService {
-
   /**
    * تقييم قدرات المورد
    * Supplier Capability Assessment
@@ -74,10 +74,9 @@ class AdvancedSupplierManagementService {
       const scores = Object.values(assessment.capabilities)
         .filter(c => typeof c.score === 'number')
         .map(c => c.score);
-      
-      assessment.overallCapabilityScore = scores.length > 0
-        ? (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1)
-        : 0;
+
+      assessment.overallCapabilityScore =
+        scores.length > 0 ? (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1) : 0;
 
       // توصيات الاستخدام
       assessment.recommendedUseCase = this.getRecommendedUseCase(assessment);
@@ -87,7 +86,7 @@ class AdvancedSupplierManagementService {
         data: assessment,
       };
     } catch (error) {
-      return { success: false, message: error.message };
+      return { success: false, message: 'حدث خطأ داخلي' };
     }
   }
 
@@ -96,7 +95,7 @@ class AdvancedSupplierManagementService {
    */
   assessProductRange(supplier) {
     const productCount = supplier.products?.length || 0;
-    
+
     if (productCount > 50) return 10;
     if (productCount > 30) return 9;
     if (productCount > 15) return 8;
@@ -125,8 +124,8 @@ class AdvancedSupplierManagementService {
   assessInnovation(supplier) {
     // التحقق من تحديثات الشهادات والتحسينات
     const hasCertifications = supplier.certifications?.length > 0;
-    const hasRecentUpdates = supplier.updatedAt && 
-      (Date.now() - supplier.updatedAt) < (90 * 24 * 60 * 60 * 1000);
+    const hasRecentUpdates =
+      supplier.updatedAt && Date.now() - supplier.updatedAt < 90 * 24 * 60 * 60 * 1000;
 
     let score = 5;
     if (hasCertifications) score += 3;
@@ -142,9 +141,11 @@ class AdvancedSupplierManagementService {
     let score = 5;
 
     // التحقق من شهادات الاستدامة
-    if (supplier.certifications?.some(c => 
-      ['ISO 14001', 'Green Cert', 'Sustainability'].includes(c.name)
-    )) {
+    if (
+      supplier.certifications?.some(c =>
+        ['ISO 14001', 'Green Cert', 'Sustainability'].includes(c.name)
+      )
+    ) {
       score += 3;
     }
 
@@ -223,7 +224,7 @@ class AdvancedSupplierManagementService {
 
       for (const supplier of suppliers) {
         const products = supplier.products?.filter(p => p.category === category) || [];
-        
+
         if (products.length > 0) {
           const avgPrice = products.reduce((sum, p) => sum + (p.price || 0), 0) / products.length;
 
@@ -248,17 +249,15 @@ class AdvancedSupplierManagementService {
       }
 
       pool.poolStatistics.totalSuppliers = pool.suppliers.length;
-      pool.poolStatistics.averageRating = pool.suppliers.length > 0
-        ? (totalRating / pool.suppliers.length).toFixed(2)
-        : 0;
-      pool.poolStatistics.averagePrice = priceCount > 0 ? 
-        (totalPrice / priceCount).toFixed(2) : 0;
+      pool.poolStatistics.averageRating =
+        pool.suppliers.length > 0 ? (totalRating / pool.suppliers.length).toFixed(2) : 0;
+      pool.poolStatistics.averagePrice = priceCount > 0 ? (totalPrice / priceCount).toFixed(2) : 0;
 
       // حساب أوزان التخصيص
       if (pool.suppliers.length > 0) {
         const ratingSum = pool.suppliers.reduce((sum, s) => sum + s.rating, 0);
         for (const supplier of pool.suppliers) {
-          supplier.allocationWeight = (supplier.rating / ratingSum * 100).toFixed(1);
+          supplier.allocationWeight = ((supplier.rating / ratingSum) * 100).toFixed(1);
         }
       }
 
@@ -282,7 +281,7 @@ class AdvancedSupplierManagementService {
         data: pool,
       };
     } catch (error) {
-      return { success: false, message: error.message };
+      return { success: false, message: 'حدث خطأ داخلي' };
     }
   }
 
@@ -340,9 +339,8 @@ class AdvancedSupplierManagementService {
           ...allocation.allocations.map(a => parseFloat(a.allocationPercentage))
         );
         allocation.riskMitigation.concentrationRatio = topSupplierPercentage.toFixed(1);
-        allocation.riskMitigation.redundancyLevel = 
-          pool.suppliers.length >= 3 ? 'HIGH' : 
-          pool.suppliers.length === 2 ? 'MEDIUM' : 'LOW';
+        allocation.riskMitigation.redundancyLevel =
+          pool.suppliers.length >= 3 ? 'HIGH' : pool.suppliers.length === 2 ? 'MEDIUM' : 'LOW';
       }
 
       return {
@@ -350,7 +348,7 @@ class AdvancedSupplierManagementService {
         data: allocation,
       };
     } catch (error) {
-      return { success: false, message: error.message };
+      return { success: false, message: 'حدث خطأ داخلي' };
     }
   }
 
@@ -377,26 +375,31 @@ class AdvancedSupplierManagementService {
         supplierId,
         supplierName: supplier.name,
         relationshipLevel: this.determineRelationshipLevel(supplier, orders, contracts),
-        
+
         engagement: {
           totalOrders: orders.length,
           activeContracts: contracts.filter(c => c.status === 'ACTIVE').length,
-          averageOrderValue: orders.length > 0 
-            ? (orders.reduce((sum, o) => sum + (o.summary.grandTotal || 0), 0) / orders.length).toFixed(2)
-            : 0,
+          averageOrderValue:
+            orders.length > 0
+              ? (
+                  orders.reduce((sum, o) => sum + (o.summary.grandTotal || 0), 0) / orders.length
+                ).toFixed(2)
+              : 0,
           yearsOfBusiness: this.calculateYearsOfBusiness(orders),
         },
 
         communication: {
           recommendedFrequency: this.getRecommendedContactFrequency(supplier),
-          keyContacts: supplier.contactPerson ? [
-            {
-              name: supplier.contactPerson.name,
-              title: supplier.contactPerson.title,
-              email: supplier.contactPerson.email,
-              phone: supplier.contactPerson.phone,
-            }
-          ] : [],
+          keyContacts: supplier.contactPerson
+            ? [
+                {
+                  name: supplier.contactPerson.name,
+                  title: supplier.contactPerson.title,
+                  email: supplier.contactPerson.email,
+                  phone: supplier.contactPerson.phone,
+                },
+              ]
+            : [],
           lastInteraction: this.getLastInteractionDate(orders, contracts),
         },
 
@@ -414,7 +417,7 @@ class AdvancedSupplierManagementService {
         data: relationshipProfile,
       };
     } catch (error) {
-      return { success: false, message: error.message };
+      return { success: false, message: 'حدث خطأ داخلي' };
     }
   }
 
@@ -469,10 +472,7 @@ class AdvancedSupplierManagementService {
    * الحصول على تاريخ آخر تفاعل
    */
   getLastInteractionDate(orders, contracts) {
-    const dates = [
-      ...orders.map(o => o.createdAt),
-      ...contracts.map(c => c.createdAt),
-    ];
+    const dates = [...orders.map(o => o.createdAt), ...contracts.map(c => c.createdAt)];
 
     return dates.length > 0 ? new Date(Math.max(...dates)) : null;
   }

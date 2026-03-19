@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Advanced HR Services
  * خدمات الموارد البشرية المتقدمة
@@ -65,7 +66,7 @@ class PerformanceManagementService {
 
       return review;
     } catch (error) {
-      throw new Error(`Failed to create performance review: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -104,7 +105,7 @@ class PerformanceManagementService {
         strengths: reviews[0]?.strengths,
       };
     } catch (error) {
-      throw new Error(`Failed to get performance history: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -163,7 +164,7 @@ class PerformanceManagementService {
 
       return report;
     } catch (error) {
-      throw new Error(`Failed to generate performance report: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 }
@@ -198,7 +199,7 @@ class LeaveManagementService {
 
       return leaveRequest;
     } catch (error) {
-      throw new Error(`Failed to submit leave request: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -247,7 +248,7 @@ class LeaveManagementService {
 
       return leaveRequest;
     } catch (error) {
-      throw new Error(`Failed to process leave request: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -264,7 +265,7 @@ class LeaveManagementService {
 
       return benefits.paidTimeOff;
     } catch (error) {
-      throw new Error(`Failed to get leave balance: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -307,7 +308,7 @@ class AttendanceService {
 
       return attendance;
     } catch (error) {
-      throw new Error(`Failed to record check-in: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -344,7 +345,7 @@ class AttendanceService {
 
       return attendance;
     } catch (error) {
-      throw new Error(`Failed to record check-out: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -385,7 +386,7 @@ class AttendanceService {
         records: attendance,
       };
     } catch (error) {
-      throw new Error(`Failed to get attendance report: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 }
@@ -491,7 +492,7 @@ class PayrollService {
 
       return payroll;
     } catch (error) {
-      throw new Error(`Failed to calculate payroll: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -516,7 +517,7 @@ class PayrollService {
 
       return payroll;
     } catch (error) {
-      throw new Error(`Failed to process payment: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -541,7 +542,7 @@ class PayrollService {
         generatedDate: new Date(),
       };
     } catch (error) {
-      throw new Error(`Failed to generate payslip: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 }
@@ -563,7 +564,7 @@ class TrainingService {
 
       return training;
     } catch (error) {
-      throw new Error(`Failed to create training: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -587,7 +588,7 @@ class TrainingService {
 
       return training;
     } catch (error) {
-      throw new Error(`Failed to register employee: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -609,7 +610,7 @@ class TrainingService {
 
       return training;
     } catch (error) {
-      throw new Error(`Failed to mark attendance: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 

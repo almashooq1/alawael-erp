@@ -5,6 +5,7 @@
 
 const rateLimit = require('express-rate-limit');
 const mongoSanitize = require('express-mongo-sanitize');
+const logger = require('../utils/logger');
 
 // Check if we're in test mode
 const isTestMode = () => {
@@ -48,7 +49,7 @@ const createRateLimiter = (options = {}) => {
 // Strict rate limiter for auth endpoints
 const authRateLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // 5 requests per window
+  max: process.env.NODE_ENV === 'production' ? 5 : 50, // relaxed in dev
   message: 'Too many login attempts, please try again after 15 minutes.',
   skipSuccessfulRequests: true,
 });
@@ -64,7 +65,7 @@ const apiRateLimiter = createRateLimiter({
 const mongoSanitizeMiddleware = mongoSanitize({
   replaceWith: '_',
   onSanitize: ({ req, key }) => {
-    console.warn(`⚠️  Potential NoSQL injection detected: ${key} from ${req.ip}`);
+    logger.warn(`Potential NoSQL injection detected: ${key} from ${req.ip}`);
   },
 });
 
@@ -81,7 +82,7 @@ const ipWhitelist = (whitelist = []) => {
       return next();
     }
 
-    console.warn(`⚠️  Blocked IP: ${clientIp}`);
+    logger.warn(`Blocked IP: ${clientIp}`);
     return res.status(403).json({
       success: false,
       message: 'Access denied',
@@ -124,7 +125,7 @@ const requestLogger = (req, res, next) => {
     const logLevel = res.statusCode >= 400 ? 'WARN' : 'INFO';
 
     if (process.env.LOG_LEVEL === 'debug' || logLevel === 'WARN') {
-      console.log(
+      logger.info(
         `[${logLevel}] ${req.method} ${req.path} ${res.statusCode} ${duration}ms - ${req.ip}`
       );
     }

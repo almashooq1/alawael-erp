@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Swagger/OpenAPI Configuration for Disability Rehabilitation System
  * Generate comprehensive API documentation

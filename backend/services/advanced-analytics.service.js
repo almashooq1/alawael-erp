@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Advanced Analytics Service
  * Comprehensive data analytics and insights for disability rehabilitation system

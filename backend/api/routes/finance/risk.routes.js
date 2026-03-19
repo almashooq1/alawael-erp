@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Risk Analysis Routes - مسارات تحليل المخاطر المالية
  * Risk Management & Analysis API Routes
@@ -64,7 +65,7 @@ router.post('/profiles', (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'خطأ في إنشاء ملف المخاطر',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -98,7 +99,7 @@ router.post('/credit-assessment', (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'خطأ في تقييم مخاطر الائتمان',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -133,7 +134,7 @@ router.get('/liquidity-assessment', (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'خطأ في تقييم مخاطر السيولة',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -178,7 +179,7 @@ router.get('/operational-assessment', (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'خطأ في تقييم المخاطر العملياتية',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -208,7 +209,7 @@ router.get('/fraud-assessment', (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'خطأ في تقييم مخاطر الغش',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -243,7 +244,7 @@ router.post('/mitigation-strategy', (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'خطأ في إنشاء استراتيجية التخفيف',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -275,7 +276,7 @@ router.put('/mitigation-strategy/:strategyId', (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'خطأ في تحديث الاستراتيجية',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -328,7 +329,7 @@ router.get('/indicators', (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'خطأ في جلب مؤشرات المخاطر',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -393,7 +394,7 @@ router.get('/report', (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'خطأ في جلب تقرير المخاطر',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -438,7 +439,7 @@ router.get('/alerts', (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'خطأ في جلب التنبيهات',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, Fragment } from 'react';
 import {
   Box,
   Grid,
@@ -33,16 +33,18 @@ import {
   Forward as ForwardIcon,
   AttachFile as AttachIcon,
 } from '@mui/icons-material';
-import { useOrgBranding } from '../OrgBrandingContext';
+import { useOrgBranding } from 'components/OrgBrandingContext';
+import logger from 'utils/logger';
+import { useSnackbar } from 'contexts/SnackbarContext';
 
 // Mock function to send security alert email
-export function sendSecurityEmailAlert({ subject, body, to = 'admin@alawael.com' }) {
+export function sendSecurityEmailAlert({ _subject, _body, _to = 'admin@alawael.com' }) {
   // In real app, integrate with backend email service
   // For demo, just log
-  console.log('Security Email Sent:', { to, subject, body });
   return Promise.resolve({ success: true });
 }
 const EmailPanel = () => {
+  const showSnackbar = useSnackbar();
   const [emails, setEmails] = useState([]);
   const [selectedEmail, setSelectedEmail] = useState(null);
   const [composeOpen, setComposeOpen] = useState(false);
@@ -62,12 +64,8 @@ const EmailPanel = () => {
   });
 
   const { branding } = useOrgBranding();
-  useEffect(() => {
-    loadEmails(folder);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [folder]);
 
-  const loadEmails = async folderType => {
+  const loadEmails = useCallback(async folderType => {
     try {
       const response = await fetch(`/api/ai-communications/emails?folder=${folderType}`);
       const data = await response.json();
@@ -79,12 +77,16 @@ const EmailPanel = () => {
         loadMockEmails(folderType);
       }
     } catch (error) {
-      console.error('Error loading emails:', error);
+      logger.error('Error loading emails:', error);
       loadMockEmails(folderType);
     }
-  };
+  }, []);
 
-  const loadMockEmails = folderType => {
+  useEffect(() => {
+    loadEmails(folder);
+  }, [folder, loadEmails]);
+
+  const loadMockEmails = _folderType => {
     const mockEmails = [
       {
         id: 1,
@@ -148,13 +150,13 @@ const EmailPanel = () => {
         // إظهار رسالة نجاح
       }
     } catch (error) {
-      console.error('Error sending email:', error);
+      logger.error('Error sending email:', error);
     }
   };
 
   const handleMarkAsRead = emailId => {
     // تضمين الهوية المؤسسية في تذييل الإيميل تلقائياً
-    const getBrandedBody = body => {
+    const _getBrandedBody = body => {
       let footer = '';
       if (branding && (branding.name || branding.logo)) {
         footer = '\n\n---\n';
@@ -256,7 +258,7 @@ const EmailPanel = () => {
         <Grid item xs={12} md={4} sx={{ borderRight: 1, borderColor: 'divider' }}>
           <List sx={{ overflowY: 'auto', height: '100%', p: 0 }}>
             {emails.map(email => (
-              <React.Fragment key={email.id}>
+              <Fragment key={email.id}>
                 <ListItem
                   button
                   selected={selectedEmail?.id === email.id}
@@ -325,6 +327,7 @@ const EmailPanel = () => {
                           e.stopPropagation();
                           handleToggleStar(email.id);
                         }}
+                        aria-label="تبديل المفضلة"
                       >
                         <StarIcon fontSize="small" color={email.starred ? 'warning' : 'disabled'} />
                       </IconButton>
@@ -332,7 +335,7 @@ const EmailPanel = () => {
                   </ListItemSecondaryAction>
                 </ListItem>
                 <Divider />
-              </React.Fragment>
+              </Fragment>
             ))}
 
             {emails.length === 0 && (
@@ -406,7 +409,7 @@ const EmailPanel = () => {
                       key={index}
                       icon={<AttachIcon />}
                       label={attachment}
-                      onClick={() => console.log('Download', attachment)}
+                      onClick={() => showSnackbar(`تحميل ${attachment} - قيد التطوير`, 'info')}
                       sx={{ mr: 1 }}
                     />
                   ))}

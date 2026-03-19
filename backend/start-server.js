@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * AlAwael ERP Backend Server Launcher
  * مشغل خادم الباك اند مع حماية من التوقف غير المتوقع

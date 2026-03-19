@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // Phase 23: Industry-Specific Solutions
 // Healthcare, Finance, Retail, Manufacturing, Logistics, Education, Oil & Gas
 
@@ -308,7 +309,7 @@ class EducationLMSSystem {
     return { success: true, enrollmentId: enrollment.id };
   }
 
-  submitAssignment(enrollmentId, assignmentData) {
+  submitAssignment(_enrollmentId, _assignmentData) {
     return {
       success: true,
       submissionId: `sub_${Date.now()}`,

@@ -1,4 +1,5 @@
-const DocumentCollaborationService = require('../services/documentCollaborationService');
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */\nconst DocumentCollaborationService = require('../services/documentCollaborationService');
 const DocumentVersion = require('../models/DocumentVersion');
 const { generateObjectId } = require('./testUtils');
 

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * ╔════════════════════════════════════════════════════════════════════════════╗
  * ║         PHASE 32: ADVANCED DEVOPS & MLOPS (2,100+ LOC)                    ║
@@ -69,7 +70,7 @@ class AdvancedCICDPipeline {
     return build;
   }
 
-  executePipelineStages(buildId, build, pipeline) {
+  executePipelineStages(buildId, build, _pipeline) {
     let currentStageIndex = 0;
 
     const executeNextStage = () => {
@@ -194,7 +195,6 @@ class KubernetesOrchestration {
           memory: deploymentConfig.memoryLimit || '512Mi',
         },
       },
-      replicas: deploymentConfig.replicas || 3,
       status: 'deploying',
       createdAt: new Date(),
       deployedAt: null,

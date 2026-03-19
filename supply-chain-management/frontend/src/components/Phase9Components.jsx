@@ -17,16 +17,9 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-  ResponsiveContainer
+  ResponsiveContainer,
 } from 'recharts';
-import {
-  AlertCircle,
-  Shield,
-  Workflow,
-  TrendingUp,
-  Lock,
-  Zap
-} from 'lucide-react';
+import { AlertCircle, Shield, Workflow, TrendingUp, Lock, Zap } from 'lucide-react';
 
 // ==================== SECURITY COMPONENTS ====================
 
@@ -47,12 +40,12 @@ export const MFASetupComponent = () => {
     }
   };
 
-  const verifyMFA = async (token) => {
+  const verifyMFA = async token => {
     try {
       const response = await fetch('/api/security/mfa/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, secret: 'temp-secret' })
+        body: JSON.stringify({ token, secret: 'temp-secret' }),
       });
 
       if (response.ok) {
@@ -89,20 +82,14 @@ export const MFASetupComponent = () => {
       {step === 'verify' && qrCode && (
         <div>
           <div className="mb-4">
-            <p className="text-sm text-gray-600 mb-2">
-              Scan with Authenticator App:
-            </p>
-            <img
-              src={qrCode}
-              alt="MFA QR Code"
-              className="w-64 h-64"
-            />
+            <p className="text-sm text-gray-600 mb-2">Scan with Authenticator App:</p>
+            <img src={qrCode} alt="MFA QR Code" className="w-64 h-64" />
           </div>
 
           <input
             type="text"
             placeholder="Enter 6-digit code"
-            onKeyPress={(e) => {
+            onKeyPress={e => {
               if (e.key === 'Enter' && e.target.value.length === 6) {
                 verifyMFA(e.target.value);
               }
@@ -114,9 +101,7 @@ export const MFASetupComponent = () => {
 
       {step === 'success' && (
         <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-          <p className="text-green-700 font-semibold mb-2">
-            ✓ MFA Enabled Successfully
-          </p>
+          <p className="text-green-700 font-semibold mb-2">✓ MFA Enabled Successfully</p>
           <p className="text-sm text-gray-600 mb-4">
             Save these backup codes in a secure location:
           </p>
@@ -167,7 +152,7 @@ export const WorkflowDashboard = ({ userId }) => {
       await fetch(`/api/workflows/${workflowId}/tasks/${taskId}/complete`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ approval })
+        body: JSON.stringify({ approval }),
       });
       fetchTasks();
     } catch (err) {
@@ -190,22 +175,15 @@ export const WorkflowDashboard = ({ userId }) => {
       </div>
 
       {tasks.length === 0 ? (
-        <div className="text-center py-8 text-gray-500">
-          No pending tasks
-        </div>
+        <div className="text-center py-8 text-gray-500">No pending tasks</div>
       ) : (
         <div className="space-y-4">
-          {tasks.map((task) => (
-            <div
-              key={task.id}
-              className="border rounded-lg p-4 hover:shadow-md transition"
-            >
+          {tasks.map(task => (
+            <div key={task.id} className="border rounded-lg p-4 hover:shadow-md transition">
               <div className="flex items-start justify-between mb-3">
                 <div>
                   <h3 className="font-semibold text-lg">{task.name}</h3>
-                  <p className="text-sm text-gray-600">
-                    {task.description}
-                  </p>
+                  <p className="text-sm text-gray-600">{task.description}</p>
                 </div>
                 <span
                   className={`px-3 py-1 rounded-full text-xs font-semibold ${
@@ -220,22 +198,17 @@ export const WorkflowDashboard = ({ userId }) => {
 
               <div className="flex items-center justify-between pt-3 border-t">
                 <div className="text-sm text-gray-600">
-                  Due:{' '}
-                  {new Date(task.dueDate).toLocaleDateString()}
+                  Due: {new Date(task.dueDate).toLocaleDateString()}
                 </div>
                 <div className="flex gap-2">
                   <button
-                    onClick={() =>
-                      completeTask(task.workflowId, task.id, true)
-                    }
+                    onClick={() => completeTask(task.workflowId, task.id, true)}
                     className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
                   >
                     Approve
                   </button>
                   <button
-                    onClick={() =>
-                      completeTask(task.workflowId, task.id, false)
-                    }
+                    onClick={() => completeTask(task.workflowId, task.id, false)}
                     className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 transition"
                   >
                     Reject
@@ -267,7 +240,7 @@ export const AnalyticsDashboard = () => {
       const [kpiRes, turnoverRes, perfRes] = await Promise.all([
         fetch('/api/analytics/kpis'),
         fetch('/api/analytics/turnover-risk'),
-        fetch('/api/analytics/performance')
+        fetch('/api/analytics/performance'),
       ]);
 
       const kpiData = await kpiRes.json();
@@ -275,9 +248,7 @@ export const AnalyticsDashboard = () => {
       const perfMetrics = await perfRes.json();
 
       setKpis(kpiData.data);
-      setTurnoverData(
-        turnoverRiskData.data.highRiskEmployees || []
-      );
+      setTurnoverData(turnoverRiskData.data.highRiskEmployees || []);
       setPerfData(perfMetrics.data || []);
     } catch (err) {
       console.error('Failed to fetch analytics:', err);
@@ -296,9 +267,7 @@ export const AnalyticsDashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-white rounded-lg shadow p-6">
           <p className="text-gray-600 text-sm">Total Employees</p>
-          <p className="text-3xl font-bold mt-2">
-            {kpis?.summary?.totalEmployees || 0}
-          </p>
+          <p className="text-3xl font-bold mt-2">{kpis?.summary?.totalEmployees || 0}</p>
         </div>
 
         <div className="bg-white rounded-lg shadow p-6">
@@ -310,16 +279,12 @@ export const AnalyticsDashboard = () => {
 
         <div className="bg-white rounded-lg shadow p-6">
           <p className="text-gray-600 text-sm">Avg Salary</p>
-          <p className="text-3xl font-bold mt-2">
-            ${(kpis?.hr?.averageSalary || 0).toFixed(0)}
-          </p>
+          <p className="text-3xl font-bold mt-2">${(kpis?.hr?.averageSalary || 0).toFixed(0)}</p>
         </div>
 
         <div className="bg-white rounded-lg shadow p-6">
           <p className="text-gray-600 text-sm">Turnover Risk</p>
-          <p className="text-3xl font-bold mt-2 text-red-600">
-            {turnoverData.length}
-          </p>
+          <p className="text-3xl font-bold mt-2 text-red-600">{turnoverData.length}</p>
         </div>
       </div>
 
@@ -329,12 +294,10 @@ export const AnalyticsDashboard = () => {
           <div className="flex items-start gap-3">
             <AlertCircle className="w-6 h-6 text-red-600 flex-shrink-0 mt-1" />
             <div>
-              <h3 className="font-semibold text-red-900">
-                High Turnover Risk Detected
-              </h3>
+              <h3 className="font-semibold text-red-900">High Turnover Risk Detected</h3>
               <p className="text-red-800 text-sm mt-1">
-                {turnoverData.length} employees have high turnover risk and
-                require management attention
+                {turnoverData.length} employees have high turnover risk and require management
+                attention
               </p>
             </div>
           </div>
@@ -344,9 +307,7 @@ export const AnalyticsDashboard = () => {
       {/* Performance Distribution Chart */}
       {perfData && (
         <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="font-semibold text-lg mb-4">
-            Performance Distribution
-          </h3>
+          <h3 className="font-semibold text-lg mb-4">Performance Distribution</h3>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={perfData}>
               <CartesianGrid strokeDasharray="3 3" />
@@ -374,9 +335,7 @@ export const AIRecommendations = ({ employeeId }) => {
 
   const fetchRecommendations = async () => {
     try {
-      const response = await fetch(
-        `/api/ai/recommend-training/${employeeId}`
-      );
+      const response = await fetch(`/api/ai/recommend-training/${employeeId}`);
       const data = await response.json();
       setRecommendations(data.data);
     } catch (err) {
@@ -398,22 +357,13 @@ export const AIRecommendations = ({ employeeId }) => {
       </div>
 
       {!recommendations || recommendations.length === 0 ? (
-        <p className="text-gray-600">
-          No recommendations at this time
-        </p>
+        <p className="text-gray-600">No recommendations at this time</p>
       ) : (
         <div className="space-y-3">
           {recommendations.map((rec, idx) => (
-            <div
-              key={idx}
-              className="border-l-4 border-yellow-500 bg-yellow-50 p-4 rounded"
-            >
-              <p className="font-semibold text-gray-900">
-                {rec.course}
-              </p>
-              <p className="text-sm text-gray-600 mt-1">
-                Type: {rec.type}
-              </p>
+            <div key={idx} className="border-l-4 border-yellow-500 bg-yellow-50 p-4 rounded">
+              <p className="font-semibold text-gray-900">{rec.course}</p>
+              <p className="text-sm text-gray-600 mt-1">Type: {rec.type}</p>
               <span
                 className={`inline-block mt-2 px-2 py-1 rounded text-xs font-semibold ${
                   rec.priority === 'critical'
@@ -443,9 +393,7 @@ export const TurnoverRiskAnalysis = () => {
 
   const fetchRiskData = async () => {
     try {
-      const response = await fetch(
-        '/api/analytics/turnover-risk'
-      );
+      const response = await fetch('/api/analytics/turnover-risk');
       const data = await response.json();
       setRiskData(data.data);
     } catch (err) {
@@ -484,30 +432,24 @@ export const TurnoverRiskAnalysis = () => {
             </div>
           </div>
 
-          {riskData.highRiskEmployees &&
-            riskData.highRiskEmployees.length > 0 && (
-              <div>
-                <h3 className="font-semibold mb-3">At-Risk Employees</h3>
-                <div className="space-y-2">
-                  {riskData.highRiskEmployees.slice(0, 5).map((emp) => (
-                    <div
-                      key={emp.employeeId}
-                      className="border rounded p-3 hover:bg-gray-50"
-                    >
-                      <div className="flex justify-between items-center">
-                        <p className="font-semibold">{emp.name}</p>
-                        <span className="bg-red-100 text-red-700 px-2 py-1 rounded text-xs">
-                          {emp.probability}% risk
-                        </span>
-                      </div>
-                      <p className="text-sm text-gray-600 mt-2">
-                        {emp.recommendations[0]}
-                      </p>
+          {riskData.highRiskEmployees && riskData.highRiskEmployees.length > 0 && (
+            <div>
+              <h3 className="font-semibold mb-3">At-Risk Employees</h3>
+              <div className="space-y-2">
+                {riskData.highRiskEmployees.slice(0, 5).map(emp => (
+                  <div key={emp.employeeId} className="border rounded p-3 hover:bg-gray-50">
+                    <div className="flex justify-between items-center">
+                      <p className="font-semibold">{emp.name}</p>
+                      <span className="bg-red-100 text-red-700 px-2 py-1 rounded text-xs">
+                        {emp.probability}% risk
+                      </span>
                     </div>
-                  ))}
-                </div>
+                    <p className="text-sm text-gray-600 mt-2">{emp.recommendations[0]}</p>
+                  </div>
+                ))}
               </div>
-            )}
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -519,5 +461,5 @@ export default {
   WorkflowDashboard,
   AnalyticsDashboard,
   AIRecommendations,
-  TurnoverRiskAnalysis
+  TurnoverRiskAnalysis,
 };

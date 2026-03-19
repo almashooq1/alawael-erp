@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const TherapySession = require('../models/TherapySession');
 const TherapeuticPlan = require('../models/TherapeuticPlan');
 const TherapyRoom = require('../models/TherapyRoom');

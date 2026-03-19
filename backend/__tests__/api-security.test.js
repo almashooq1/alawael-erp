@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * 🔒 Phase 10: Advanced API Security & Rate Limiting Tests
  * اختبارات أمان API متقدمة ومراقبة معدل الطلبات

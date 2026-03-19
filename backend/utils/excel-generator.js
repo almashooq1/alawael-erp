@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * ===================================================================
  * EXCEL GENERATOR - مولد ملفات Excel
@@ -7,7 +8,7 @@
 let ExcelJS;
 try {
   ExcelJS = require('exceljs');
-} catch (e) {
+} catch (_e) {
   ExcelJS = null;
 }
 const path = require('path');

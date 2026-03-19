@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * APIs نظام النقل والمواصلات
  * Transport System APIs
@@ -15,7 +16,7 @@ const {
   PaymentService,
   ComplaintService,
   NotificationService,
-} = require('../services/transport.services');
+} = require('../../services/transport.services');
 
 // ==================== APIs إدارة الحافلات ====================
 
@@ -31,7 +32,7 @@ router.post('/buses', authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -51,7 +52,7 @@ router.get('/buses', authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -73,7 +74,7 @@ router.get('/buses/:busId', authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -90,7 +91,7 @@ router.put('/buses/:busId', authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -106,7 +107,7 @@ router.delete('/buses/:busId', authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -124,7 +125,7 @@ router.post('/buses/:busId/location', authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -143,7 +144,7 @@ router.post('/drivers', authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -163,7 +164,7 @@ router.get('/drivers', authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -185,7 +186,7 @@ router.get('/drivers/:driverId', authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -202,7 +203,7 @@ router.put('/drivers/:driverId', authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -218,7 +219,7 @@ router.delete('/drivers/:driverId', authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -234,7 +235,7 @@ router.get('/drivers/:driverId/verify-license', authenticateToken, async (req, r
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -253,7 +254,7 @@ router.post('/routes', authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -270,7 +271,7 @@ router.get('/routes', authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -292,7 +293,7 @@ router.get('/routes/:routeId', authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -309,7 +310,7 @@ router.put('/routes/:routeId', authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -328,7 +329,7 @@ router.post('/student-registration', authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -349,32 +350,42 @@ router.get('/student-registration', authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
 
 // الموافقة على التسجيل
-router.post('/student-registration/:registrationId/approve', authenticateToken, async (req, res) => {
-  try {
-    const registration = await StudentTransportService.approveRegistration(req.params.registrationId, req.user.id);
-    res.json({
-      success: true,
-      message: 'تمت الموافقة على التسجيل',
-      data: registration,
-    });
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: error.message,
-    });
+router.post(
+  '/student-registration/:registrationId/approve',
+  authenticateToken,
+  async (req, res) => {
+    try {
+      const registration = await StudentTransportService.approveRegistration(
+        req.params.registrationId,
+        req.user.id
+      );
+      res.json({
+        success: true,
+        message: 'تمت الموافقة على التسجيل',
+        data: registration,
+      });
+    } catch (error) {
+      res.status(400).json({
+        success: false,
+        message: 'حدث خطأ داخلي',
+      });
+    }
   }
-});
+);
 
 // إلغاء التسجيل
 router.post('/student-registration/:registrationId/cancel', authenticateToken, async (req, res) => {
   try {
-    const registration = await StudentTransportService.cancelRegistration(req.params.registrationId, req.body.reason);
+    const registration = await StudentTransportService.cancelRegistration(
+      req.params.registrationId,
+      req.body.reason
+    );
     res.json({
       success: true,
       message: 'تم إلغاء التسجيل',
@@ -383,7 +394,7 @@ router.post('/student-registration/:registrationId/cancel', authenticateToken, a
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -402,7 +413,7 @@ router.post('/attendance', authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -411,7 +422,11 @@ router.post('/attendance', authenticateToken, async (req, res) => {
 router.get('/attendance/:studentTransportId', authenticateToken, async (req, res) => {
   try {
     const { month, year } = req.query;
-    const records = await AttendanceService.getAttendanceRecords(req.params.studentTransportId, month, year);
+    const records = await AttendanceService.getAttendanceRecords(
+      req.params.studentTransportId,
+      month,
+      year
+    );
     res.json({
       success: true,
       data: records,
@@ -420,7 +435,7 @@ router.get('/attendance/:studentTransportId', authenticateToken, async (req, res
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -429,7 +444,11 @@ router.get('/attendance/:studentTransportId', authenticateToken, async (req, res
 router.get('/attendance/:studentTransportId/rate', authenticateToken, async (req, res) => {
   try {
     const { month, year } = req.query;
-    const rate = await AttendanceService.calculateAttendanceRate(req.params.studentTransportId, month, year);
+    const rate = await AttendanceService.calculateAttendanceRate(
+      req.params.studentTransportId,
+      month,
+      year
+    );
     res.json({
       success: true,
       data: rate,
@@ -437,7 +456,7 @@ router.get('/attendance/:studentTransportId/rate', authenticateToken, async (req
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -456,7 +475,7 @@ router.post('/payments', authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -473,7 +492,7 @@ router.get('/payments/:studentTransportId', authenticateToken, async (req, res) 
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -490,7 +509,7 @@ router.get('/payments/overdue/all', authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -506,7 +525,7 @@ router.get('/payments/report/:month/:year', authenticateToken, async (req, res) 
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -525,7 +544,7 @@ router.post('/complaints', authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -546,7 +565,7 @@ router.get('/complaints', authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -554,7 +573,11 @@ router.get('/complaints', authenticateToken, async (req, res) => {
 // تحديث الشكوى
 router.put('/complaints/:complaintId', authenticateToken, async (req, res) => {
   try {
-    const complaint = await ComplaintService.updateComplaintStatus(req.params.complaintId, req.body.status, req.body.resolution);
+    const complaint = await ComplaintService.updateComplaintStatus(
+      req.params.complaintId,
+      req.body.status,
+      req.body.resolution
+    );
     res.json({
       success: true,
       message: 'تم تحديث الشكوى',
@@ -563,7 +586,7 @@ router.put('/complaints/:complaintId', authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -579,7 +602,7 @@ router.get('/complaints/stats', authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -598,7 +621,7 @@ router.get('/notifications', authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -615,7 +638,7 @@ router.post('/notifications/:notificationId/read', authenticateToken, async (req
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -645,7 +668,7 @@ router.get('/dashboard', authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });

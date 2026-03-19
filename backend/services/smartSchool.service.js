@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // Mock Models
 const Beneficiary = require('../models/Beneficiary');
 const TherapeuticPlan = require('../models/TherapeuticPlan');
@@ -38,8 +39,10 @@ class SmartSchoolService {
     // Mock Translation Logic
     const educationalTranslation = clinicalPlan.goals.map(goal => {
       let schoolGoal = '';
-      if (goal.domain === 'OT') schoolGoal = 'Student will remain seated for 15 minutes during class.';
-      if (goal.domain === 'Speech') schoolGoal = 'Student will follow instructions like "Open book and take out pencil".';
+      if (goal.domain === 'OT')
+        schoolGoal = 'Student will remain seated for 15 minutes during class.';
+      if (goal.domain === 'Speech')
+        schoolGoal = 'Student will follow instructions like "Open book and take out pencil".';
 
       return {
         clinicalId: goal.id,

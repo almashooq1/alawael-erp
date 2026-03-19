@@ -6,7 +6,7 @@
 import axios from 'axios';
 
 // تكوين قاعدة الـ API
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -21,7 +21,7 @@ const apiClient = axios.create({
  * إضافة Token و معالجة قبل الإرسال
  */
 apiClient.interceptors.request.use(
-  (config) => {
+  config => {
     // إضافة Token من LocalStorage
     const token = localStorage.getItem('authToken');
     if (token) {
@@ -34,7 +34,7 @@ apiClient.interceptors.request.use(
 
     return config;
   },
-  (error) => {
+  error => {
     console.error('Request Config Error:', error);
     return Promise.reject(error);
   }
@@ -45,20 +45,30 @@ apiClient.interceptors.request.use(
  * معالجة الاستجابات و الأخطاء
  */
 apiClient.interceptors.response.use(
-  (response) => {
+  response => {
     // إذا كانت الاستجابة ناجحة
     console.log('API Response Success:', response.config.url);
     return response.data;
   },
-  (error) => {
+  error => {
     // معالجة الأخطاء
     const errorData = error.response?.data || error.message;
 
     if (error.response?.status === 401) {
-      // عدم استطاعة الوصول - قد انتهت جلسة العمل
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
+      // Skip redirect for auth endpoints (login, register, refresh)
+      const requestUrl = error.config?.url || '';
+      const isAuthRequest = /\/auth\/(login|register|refresh)/.test(requestUrl);
+
+      if (!isAuthRequest) {
+        // انتهت جلسة العمل - حذف التوكن وإعادة التوجيه
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('user');
+
+        // Use React-safe redirect (avoid full page reload loop)
+        if (window.location.pathname !== '/login') {
+          window.location.replace('/login');
+        }
+      }
     }
 
     if (error.response?.status === 403) {

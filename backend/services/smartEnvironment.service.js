@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+const logger = require('../utils/logger');
 /**
  * Smart Environment & IoT Control Service (Phase 77)
  *
@@ -10,7 +12,12 @@ class SmartEnvironmentService {
   constructor() {
     // Mock State of Rooms
     this.roomStates = new Map();
-    this.roomStates.set('SENSORY-01', { light: 'BLUE', intensity: 50, sound: 'OCEAN', status: 'ACTIVE' });
+    this.roomStates.set('SENSORY-01', {
+      light: 'BLUE',
+      intensity: 50,
+      sound: 'OCEAN',
+      status: 'ACTIVE',
+    });
   }
 
   /**
@@ -18,7 +25,7 @@ class SmartEnvironmentService {
    * e.g., "Calm Down" mode for an agitated child
    */
   async setRoomProfile(roomId, profileType) {
-    console.log(`Setting room ${roomId} to profile ${profileType}`);
+    logger.info(`Setting room ${roomId} to profile ${profileType}`);
 
     const profiles = {
       CALM: { light: 'SOFT_BLUE', sound: 'WHITE_NOISE', projection: 'STARS' },
@@ -64,7 +71,12 @@ class SmartEnvironmentService {
       timestamp: new Date(),
       actionsTaken: [
         { room: 'ROOM-104', action: 'AC_OFF', reason: 'Empty for > 30mins', savings: '2.5 kWh' },
-        { room: 'HALLWAY-B', action: 'DIM_LIGHTS', reason: 'No motion detected', savings: '0.8 kWh' },
+        {
+          room: 'HALLWAY-B',
+          action: 'DIM_LIGHTS',
+          reason: 'No motion detected',
+          savings: '0.8 kWh',
+        },
       ],
       totalSavingsEst: '3.3 kWh',
     };

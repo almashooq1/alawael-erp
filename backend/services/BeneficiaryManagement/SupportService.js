@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * SupportService.js - Beneficiary Support & Counseling Service
  * Handles support plans, counseling sessions, and psychosocial support
@@ -7,6 +8,7 @@
  */
 
 const EventEmitter = require('events');
+const logger = require('../../utils/logger');
 
 class SupportService extends EventEmitter {
   /**
@@ -56,11 +58,13 @@ class SupportService extends EventEmitter {
         nextReviewDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
         createdAt: new Date(),
         updatedAt: new Date(),
-        auditLog: [{
-          action: 'PLAN_CREATED',
-          user: planData.coordinator || 'system',
-          timestamp: new Date()
-        }]
+        auditLog: [
+          {
+            action: 'PLAN_CREATED',
+            user: planData.coordinator || 'system',
+            timestamp: new Date(),
+          },
+        ],
       };
 
       const saved = await this.db.collection(this.supportPlanCollection).insertOne(supportPlan);
@@ -68,7 +72,7 @@ class SupportService extends EventEmitter {
       this.emit('support:plan-created', {
         beneficiaryId,
         planId: saved.insertedId,
-        type: planData.type
+        type: planData.type,
       });
 
       return {
@@ -79,17 +83,16 @@ class SupportService extends EventEmitter {
           type: planData.type,
           status: supportPlan.status,
           nextReview: supportPlan.nextReviewDate,
-          goals: supportPlan.goals.length
+          goals: supportPlan.goals.length,
         },
-        timestamp: new Date()
+        timestamp: new Date(),
       };
-
     } catch (error) {
       return {
         status: 'error',
-        message: error.message,
+        message: 'حدث خطأ داخلي',
         data: null,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     }
   }
@@ -112,12 +115,11 @@ class SupportService extends EventEmitter {
       }
 
       // Check availability
-      const conflict = await this.db.collection(this.counselingCollection)
-        .findOne({
-          counselorId: sessionData.counselorId,
-          scheduledDate: new Date(sessionData.scheduledDate),
-          status: { $ne: 'CANCELLED' }
-        });
+      const conflict = await this.db.collection(this.counselingCollection).findOne({
+        counselorId: sessionData.counselorId,
+        scheduledDate: new Date(sessionData.scheduledDate),
+        status: { $ne: 'CANCELLED' },
+      });
 
       if (conflict) {
         throw new Error('Counselor not available at this time');
@@ -135,11 +137,13 @@ class SupportService extends EventEmitter {
         outcome: null,
         createdAt: new Date(),
         updatedAt: new Date(),
-        auditLog: [{
-          action: 'SESSION_SCHEDULED',
-          user: sessionData.counselorId,
-          timestamp: new Date()
-        }]
+        auditLog: [
+          {
+            action: 'SESSION_SCHEDULED',
+            user: sessionData.counselorId,
+            timestamp: new Date(),
+          },
+        ],
       };
 
       const saved = await this.db.collection(this.counselingCollection).insertOne(session);
@@ -149,7 +153,7 @@ class SupportService extends EventEmitter {
         beneficiaryId,
         sessionId: saved.insertedId,
         scheduledDate: sessionData.scheduledDate,
-        counselorId: sessionData.counselorId
+        counselorId: sessionData.counselorId,
       });
 
       return {
@@ -159,17 +163,16 @@ class SupportService extends EventEmitter {
           sessionId: saved.insertedId,
           scheduledDate: sessionData.scheduledDate,
           counselorId: sessionData.counselorId,
-          type: sessionData.type
+          type: sessionData.type,
         },
-        timestamp: new Date()
+        timestamp: new Date(),
       };
-
     } catch (error) {
       return {
         status: 'error',
-        message: error.message,
+        message: 'حدث خطأ داخلي',
         data: null,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     }
   }
@@ -193,7 +196,9 @@ class SupportService extends EventEmitter {
       // Validate eligibility
       const eligible = await this.validateFinancialEligibility(beneficiaryId);
       if (!eligible) {
-        throw new Error('Beneficiary is not eligible for additional financial support at this time');
+        throw new Error(
+          'Beneficiary is not eligible for additional financial support at this time'
+        );
       }
 
       // Create support request
@@ -208,7 +213,7 @@ class SupportService extends EventEmitter {
         processedDate: null,
         approvedBy: null,
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
 
       const saved = await this.db.collection('financialSupport').insertOne(request);
@@ -217,7 +222,7 @@ class SupportService extends EventEmitter {
         beneficiaryId,
         supportId: saved.insertedId,
         type: supportData.type,
-        amount: supportData.amount
+        amount: supportData.amount,
       });
 
       return {
@@ -228,17 +233,16 @@ class SupportService extends EventEmitter {
           type: supportData.type,
           amount: supportData.amount,
           status: 'PENDING',
-          message: 'Your request will be reviewed within 3 business days'
+          message: 'Your request will be reviewed within 3 business days',
         },
-        timestamp: new Date()
+        timestamp: new Date(),
       };
-
     } catch (error) {
       return {
         status: 'error',
-        message: error.message,
+        message: 'حدث خطأ داخلي',
         data: null,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     }
   }
@@ -260,20 +264,23 @@ class SupportService extends EventEmitter {
       // Get support resources
       const query = options.concern ? { category: options.concern } : {};
 
-      const resources = await this.db.collection(this.supportResourceCollection)
+      const resources = await this.db
+        .collection(this.supportResourceCollection)
         .find(query)
         .toArray();
 
       // Get active sessions
-      const sessions = await this.db.collection(this.counselingCollection)
+      const sessions = await this.db
+        .collection(this.counselingCollection)
         .find({
           beneficiaryId,
-          status: { $in: ['SCHEDULED', 'IN_PROGRESS'] }
+          status: { $in: ['SCHEDULED', 'IN_PROGRESS'] },
         })
         .toArray();
 
       // Get support plan
-      const supportPlan = await this.db.collection(this.supportPlanCollection)
+      const supportPlan = await this.db
+        .collection(this.supportPlanCollection)
         .findOne({ beneficiaryId, status: 'ACTIVE' });
 
       const response = {
@@ -285,45 +292,46 @@ class SupportService extends EventEmitter {
             description: r.description,
             category: r.category,
             contact: r.contact,
-            availability: r.availability
+            availability: r.availability,
           })),
-          count: resources.length
+          count: resources.length,
         },
         activeSessions: sessions.length,
         upcomingSessions: sessions.slice(0, 3),
-        supportPlan: supportPlan ? {
-          id: supportPlan._id,
-          type: supportPlan.type,
-          status: supportPlan.status,
-          nextReview: supportPlan.nextReviewDate
-        } : null,
+        supportPlan: supportPlan
+          ? {
+              id: supportPlan._id,
+              type: supportPlan.type,
+              status: supportPlan.status,
+              nextReview: supportPlan.nextReviewDate,
+            }
+          : null,
         emergencyContacts: [
           {
             name: 'Crisis Hotline',
             number: '1-800-XXX-XXXX',
-            available: '24/7'
+            available: '24/7',
           },
           {
             name: 'Mental Health Support',
             number: '1-800-YYY-YYYY',
-            available: 'Mon-Fri 9AM-5PM'
-          }
-        ]
+            available: 'Mon-Fri 9AM-5PM',
+          },
+        ],
       };
 
       return {
         status: 'success',
         message: 'Psychosocial support resources retrieved',
         data: response,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
-
     } catch (error) {
       return {
         status: 'error',
-        message: error.message,
+        message: 'حدث خطأ داخلي',
         data: null,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     }
   }
@@ -341,7 +349,8 @@ class SupportService extends EventEmitter {
       const { ObjectId } = require('mongodb');
 
       // Get beneficiary data
-      const beneficiary = await this.db.collection('beneficiaries')
+      const beneficiary = await this.db
+        .collection('beneficiaries')
         .findOne({ _id: new ObjectId(beneficiaryId) });
 
       const assessment = {
@@ -352,16 +361,16 @@ class SupportService extends EventEmitter {
           behavioral: 'UNDER_ASSESSMENT',
           emotional: 'UNDER_ASSESSMENT',
           financial: 'UNDER_ASSESSMENT',
-          social: 'UNDER_ASSESSMENT'
+          social: 'UNDER_ASSESSMENT',
         },
         riskFactors: planData.concerns || [],
         strengths: [],
-        recommendations: []
+        recommendations: [],
       };
 
       return assessment;
     } catch (error) {
-      console.error('Assessment error:', error);
+      logger.error('Assessment error:', error);
       return {};
     }
   }
@@ -375,23 +384,23 @@ class SupportService extends EventEmitter {
    */
   createGoals(planType, concerns) {
     const baseGoals = {
-      'academic': [
+      academic: [
         { goal: 'Improve GPA', timeline: '6 months', priority: 'HIGH' },
         { goal: 'Complete all assignments', timeline: '3 months', priority: 'HIGH' },
-        { goal: 'Regular class attendance', timeline: 'ongoing', priority: 'HIGH' }
+        { goal: 'Regular class attendance', timeline: 'ongoing', priority: 'HIGH' },
       ],
-      'behavioral': [
+      behavioral: [
         { goal: 'Reduce behavioral incidents', timeline: '3 months', priority: 'HIGH' },
-        { goal: 'Develop anger management skills', timeline: '6 months', priority: 'MEDIUM' }
+        { goal: 'Develop anger management skills', timeline: '6 months', priority: 'MEDIUM' },
       ],
-      'financial': [
+      financial: [
         { goal: 'Secure financial aid', timeline: '1 month', priority: 'HIGH' },
-        { goal: 'Develop financial literacy', timeline: '3 months', priority: 'MEDIUM' }
+        { goal: 'Develop financial literacy', timeline: '3 months', priority: 'MEDIUM' },
       ],
-      'comprehensive': [
+      comprehensive: [
         { goal: 'Improve overall wellbeing', timeline: '6 months', priority: 'HIGH' },
-        { goal: 'Establish support network', timeline: '3 months', priority: 'HIGH' }
-      ]
+        { goal: 'Establish support network', timeline: '3 months', priority: 'HIGH' },
+      ],
     };
 
     return baseGoals[planType] || baseGoals['comprehensive'];
@@ -410,7 +419,7 @@ class SupportService extends EventEmitter {
       { type: 'academic_tutoring', frequency: 'weekly', duration: '6 months' },
       { type: 'resource_referral', frequency: 'as_needed', duration: 'ongoing' },
       { type: 'family_support', frequency: 'monthly', duration: '6 months' },
-      { type: 'peer_mentoring', frequency: 'weekly', duration: '6 months' }
+      { type: 'peer_mentoring', frequency: 'weekly', duration: '6 months' },
     ];
 
     return interventions;
@@ -426,11 +435,10 @@ class SupportService extends EventEmitter {
   async validateFinancialEligibility(beneficiaryId) {
     try {
       // Check recent support
-      const recent = await this.db.collection('financialSupport')
-        .countDocuments({
-          beneficiaryId,
-          requestDate: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) }
-        },);
+      const recent = await this.db.collection('financialSupport').countDocuments({
+        beneficiaryId,
+        requestDate: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
+      });
 
       return recent < 2; // Allow max 2 requests per month
     } catch (error) {
@@ -446,16 +454,19 @@ class SupportService extends EventEmitter {
    */
   async getSupportSummary(beneficiaryId) {
     try {
-      const activePlan = await this.db.collection(this.supportPlanCollection)
+      const activePlan = await this.db
+        .collection(this.supportPlanCollection)
         .findOne({ beneficiaryId, status: 'ACTIVE' });
 
-      const sessions = await this.db.collection(this.counselingCollection)
+      const sessions = await this.db
+        .collection(this.counselingCollection)
         .find({ beneficiaryId })
         .sort({ scheduledDate: -1 })
         .limit(10)
         .toArray();
 
-      const financialSupport = await this.db.collection('financialSupport')
+      const financialSupport = await this.db
+        .collection('financialSupport')
         .find({ beneficiaryId })
         .toArray();
 
@@ -464,33 +475,34 @@ class SupportService extends EventEmitter {
         message: 'Support summary retrieved',
         data: {
           beneficiaryId,
-          activePlan: activePlan ? {
-            id: activePlan._id,
-            type: activePlan.type,
-            nextReview: activePlan.nextReviewDate
-          } : null,
+          activePlan: activePlan
+            ? {
+                id: activePlan._id,
+                type: activePlan.type,
+                nextReview: activePlan.nextReviewDate,
+              }
+            : null,
           sessions: {
             total: sessions.length,
             completed: sessions.filter(s => s.status === 'COMPLETED').length,
-            upcoming: sessions.filter(s => s.status === 'SCHEDULED').length
+            upcoming: sessions.filter(s => s.status === 'SCHEDULED').length,
           },
           financialSupport: {
             total: financialSupport.length,
             approved: financialSupport.filter(s => s.status === 'APPROVED').length,
             totalAmountApproved: financialSupport
               .filter(s => s.status === 'APPROVED')
-              .reduce((sum, s) => sum + (s.approvedAmount || 0), 0)
-          }
+              .reduce((sum, s) => sum + (s.approvedAmount || 0), 0),
+          },
         },
-        timestamp: new Date()
+        timestamp: new Date(),
       };
-
     } catch (error) {
       return {
         status: 'error',
-        message: error.message,
+        message: 'حدث خطأ داخلي',
         data: null,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     }
   }

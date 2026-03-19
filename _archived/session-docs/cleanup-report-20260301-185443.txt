@@ -1,0 +1,65 @@
+Starting cleanup at 03/01/2026 18:54:43
+Project Root: C:\Users\x-be\OneDrive\المستندات\04-10-2025\66666
+
+📍 STEP 1: Removing source maps (*.map files)...
+Found: 13466 map files (410.98 MB)
+✓ Removed 13466 map files (410.98 MB freed)
+📍 STEP 2: Removing log files (*.log)...
+Found: 1 log files (0.37 MB)
+✓ Removed 1 log files (0.37 MB freed)
+📍 STEP 3: Removing build outputs...
+  Removing coverage folders...
+    ✓ .\backend\coverage [6.67 MB]
+    ✓ .\backend\hr-service\coverage [0.18 MB]
+    ✓ .\backend\shared\coverage [0.04 MB]
+    ✓ .\backend\test-utils\coverage [0.06 MB]
+    ✓ .\graphql\coverage [0.04 MB]
+    ✓ .\intelligent-agent\coverage [0.47 MB]
+✓ Build outputs removed
+📍 STEP 4: Analyzing node_modules folders...
+Found 8 top-level node_modules folders:
+  - .\node_modules [173.09 MB]
+  - .\backend\node_modules [189.3 MB]
+  - .\frontend\node_modules [159.71 MB]
+  - .\frontend\admin-dashboard\node_modules [1.18 MB]
+  - .\intelligent-agent\node_modules [1017.65 MB]
+  - .\intelligent-agent\backend\node_modules [0 MB]
+  - .\supply-chain-management\backend\node_modules [85.39 MB]
+  - .\supply-chain-management\frontend\node_modules [184 MB]
+
+⚠️ INFO: node_modules NOT deleted (required for projects)
+   If you want to clean and reinstall:
+   1. Delete specific node_modules folders manually
+   2. Run: npm install
+📍 STEP 5: Cleaning VS Code cache...
+  ⚠️ Failed to clear: C:\Users\x-be\AppData\Roaming\Code\Cache
+  ✓ Cleared: C:\Users\x-be\AppData\Roaming\Code\GPUCache [5.57 MB]
+  ✓ Cleared: C:\Users\x-be\AppData\Roaming\Code\CachedData [12.13 MB]
+  ✓ Cleared old workspace storage (.Count folders)
+✓ VS Code cache cleaned
+📍 STEP 6: Updating .gitignore...
+  ✓ .gitignore updated with new exclusions
+═══════════════════════════════════════════════════════
+    ✅ CLEANUP COMPLETE - النظافة مكتملة
+═══════════════════════════════════════════════════════
+📊 SUMMARY:
+  • Files deleted: 13467
+  • Directories deleted: 6
+  • Total space freed: 436.5 MB
+💡 NEXT STEPS - الخطوات التالية:
+
+1. Apply optimized settings:
+   Copy: .vscode/settings.optimized.json
+   To:   .vscode/settings.json
+
+2. Restart VS Code completely
+   انسخ الملف: .vscode/settings.optimized.json
+   إلى: .vscode/settings.json
+   ثم أعد تشغيل VS Code
+
+3. Monitor performance:
+   - Check for Extension host crashes (should be gone)
+   - Git errors should disappear
+   - Terraform won't scan node_modules
+
+📄 Full report saved to: C:\Users\x-be\OneDrive\المستندات\04-10-2025\66666\cleanup-report-20260301-185443.txt

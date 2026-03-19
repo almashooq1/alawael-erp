@@ -1,5 +1,16 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Box, Paper, Typography, TextField, IconButton, Avatar, Chip, CircularProgress, Fade, Tooltip } from '@mui/material';
+import { useState, useEffect, useRef } from 'react';
+import {
+  Box,
+  Paper,
+  Typography,
+  TextField,
+  IconButton,
+  Avatar,
+  Chip,
+  CircularProgress,
+  Fade,
+  Tooltip,
+} from '@mui/material';
 import {
   Send as SendIcon,
   SmartToy as BotIcon,
@@ -10,6 +21,9 @@ import {
   TipsAndUpdates as TipIcon,
   QuestionAnswer as QuestionIcon,
 } from '@mui/icons-material';
+import { getToken } from 'utils/tokenStorage';
+import logger from 'utils/logger';
+import { gradients } from 'theme/palette';
 
 const ChatbotPanel = () => {
   const [messages, setMessages] = useState([]);
@@ -66,7 +80,7 @@ const ChatbotPanel = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${getToken()}`,
         },
         body: JSON.stringify({
           message: inputMessage,
@@ -106,7 +120,7 @@ const ChatbotPanel = () => {
         setIsTyping(false);
       }, 1000);
     } catch (error) {
-      console.error('Error communicating with chatbot:', error);
+      logger.error('Error communicating with chatbot:', error);
 
       const errorMessage = {
         id: Date.now() + 1,
@@ -155,8 +169,7 @@ const ChatbotPanel = () => {
     }
   };
 
-  const handleFeedback = (messageId, isPositive) => {
-    console.log(`Feedback for message ${messageId}: ${isPositive ? 'positive' : 'negative'}`);
+  const handleFeedback = (_messageId, _isPositive) => {
     // يمكن إرسال التقييم للـ Backend لتحسين الذكاء الاصطناعي
   };
 
@@ -191,6 +204,7 @@ const ChatbotPanel = () => {
         </Box>
         <Tooltip title="بدء محادثة جديدة">
           <IconButton
+            aria-label="تبديل الدردشة"
             sx={{ color: 'white' }}
             onClick={() => {
               setMessages([
@@ -217,7 +231,7 @@ const ChatbotPanel = () => {
           overflowY: 'auto',
           p: 2,
           bgcolor: '#f5f5f5',
-          backgroundImage: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+          backgroundImage: gradients.subtle,
         }}
       >
         {messages.map((message, index) => (
@@ -249,7 +263,8 @@ const ChatbotPanel = () => {
                     p: 2,
                     bgcolor: message.sender === 'user' ? 'primary.main' : 'white',
                     color: message.sender === 'user' ? 'white' : 'text.primary',
-                    borderRadius: message.sender === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
+                    borderRadius:
+                      message.sender === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
                   }}
                 >
                   <Typography
@@ -262,7 +277,9 @@ const ChatbotPanel = () => {
                     {message.text}
                   </Typography>
 
-                  {message.intent && message.sender === 'bot' && <Chip label={message.intent} size="small" sx={{ mt: 1, opacity: 0.7 }} />}
+                  {message.intent && message.sender === 'bot' && (
+                    <Chip label={message.intent} size="small" sx={{ mt: 1, opacity: 0.7 }} />
+                  )}
 
                   {message.confidence && (
                     <Typography variant="caption" sx={{ display: 'block', mt: 1, opacity: 0.7 }}>
@@ -278,10 +295,20 @@ const ChatbotPanel = () => {
 
                   {message.sender === 'bot' && index > 0 && (
                     <>
-                      <IconButton size="small" onClick={() => handleFeedback(message.id, true)} sx={{ p: 0.5 }}>
+                      <IconButton
+                        size="small"
+                        aria-label="إعجاب"
+                        onClick={() => handleFeedback(message.id, true)}
+                        sx={{ p: 0.5 }}
+                      >
                         <LikeIcon sx={{ fontSize: 14 }} />
                       </IconButton>
-                      <IconButton size="small" onClick={() => handleFeedback(message.id, false)} sx={{ p: 0.5 }}>
+                      <IconButton
+                        size="small"
+                        aria-label="عدم إعجاب"
+                        onClick={() => handleFeedback(message.id, false)}
+                        sx={{ p: 0.5 }}
+                      >
                         <DislikeIcon sx={{ fontSize: 14 }} />
                       </IconButton>
                     </>
@@ -352,6 +379,7 @@ const ChatbotPanel = () => {
           />
           <IconButton
             color="primary"
+            aria-label="إرسال"
             onClick={handleSendMessage}
             disabled={!inputMessage.trim() || isTyping}
             sx={{

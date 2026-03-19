@@ -1,8 +1,9 @@
+/* eslint-disable no-undef, no-unused-vars */
 const { ELearningService: ELearningServiceClass } = require('../services/eLearningService');
 const eLearningService = new ELearningServiceClass();
-const Course = require('../models/course.model');
-const Lesson = require('../models/lesson.model');
-const Quiz = require('../models/quiz.model');
+const _Course = require('../models/course.model');
+const _Lesson = require('../models/lesson.model');
+const _Quiz = require('../models/quiz.model');
 
 jest.mock('../models/course.model');
 jest.mock('../models/lesson.model');

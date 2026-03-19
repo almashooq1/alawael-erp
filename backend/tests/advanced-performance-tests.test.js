@@ -1,3 +1,4 @@
+/* eslint-disable no-undef, no-unused-vars */
 /**
  * ⚡ Advanced Performance Testing Suite
  * جناح اختبارات الأداء المتقدمة

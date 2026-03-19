@@ -35,7 +35,7 @@ router.all(/^\/([^/]+)\/?(.*)/, async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(502).json({
       success: false,
-      message: error.message || 'Gateway proxy error',
+      message: 'Gateway proxy error',
       service,
     });
   }

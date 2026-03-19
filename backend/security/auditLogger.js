@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+const logger = require('../utils/logger');
 /**
  * 📋 Comprehensive Audit Logging System
  *
@@ -373,7 +375,7 @@ class AuditLogger {
         });
 
         if (this.logs.length < initialLength) {
-          console.log(`[AuditLogger] Removed ${initialLength - this.logs.length} old logs`);
+          logger.info(`[AuditLogger] Removed ${initialLength - this.logs.length} old logs`);
         }
       },
       60 * 60 * 1000

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 const leadSchema = new mongoose.Schema(
@@ -15,7 +16,11 @@ const leadSchema = new mongoose.Schema(
     },
 
     // Referral Source (Where did they come from?)
-    source: { type: String, enum: ['WEBSITE', 'REFERRAL', 'WALK_IN', 'SOCIAL_MEDIA'], default: 'WALK_IN' },
+    source: {
+      type: String,
+      enum: ['WEBSITE', 'REFERRAL', 'WALK_IN', 'SOCIAL_MEDIA'],
+      default: 'WALK_IN',
+    },
 
     // What are they interested in?
     interest: [{ type: String }], // 'Speech Therapy', 'Autism Program'
@@ -31,7 +36,7 @@ const leadSchema = new mongoose.Schema(
 
     notes: [{ body: String, date: Date, by: String }],
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 module.exports = mongoose.model('Lead', leadSchema);

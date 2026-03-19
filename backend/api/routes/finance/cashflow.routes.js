@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Cash Flow Routes - مسارات إدارة التدفقات النقدية
  * Cash Flow Management API Routes
@@ -55,7 +56,7 @@ router.post('/incoming', (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'خطأ في تسجيل التدفق الوارد',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -109,7 +110,7 @@ router.post('/outgoing', (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'خطأ في تسجيل التدفق الصادر',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -142,7 +143,7 @@ router.post('/approve/:outflowId', (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'خطأ في المصادقة على التدفق',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -174,7 +175,7 @@ router.post('/reject/:outflowId', (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'خطأ في رفض التدفق',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -236,7 +237,7 @@ router.get('/analysis', (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'خطأ في تحليل التدفقات النقدية',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -297,7 +298,7 @@ router.post('/forecast', (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'خطأ في إنشاء التنبؤ',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -337,7 +338,7 @@ router.post('/liquidity-reserve', (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'خطأ في إنشاء احتياطي النقد',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -375,7 +376,7 @@ router.post('/deposit/:reserveId', (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'خطأ في الإيداع في الاحتياطي',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -413,7 +414,7 @@ router.post('/withdraw/:reserveId', (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'خطأ في السحب من الاحتياطي',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -456,7 +457,7 @@ router.post('/payment-schedule', (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'خطأ في إنشاء جدول السداد',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -488,7 +489,7 @@ router.get('/available-cash', (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'خطأ في جلب معلومات النقد',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -533,7 +534,7 @@ router.get('/summary', (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'خطأ في جلب ملخص التدفقات',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -579,7 +580,7 @@ router.get('/statement', (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'خطأ في جلب قائمة التدفقات',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });

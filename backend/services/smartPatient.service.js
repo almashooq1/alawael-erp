@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const BeneficiaryFile = require('../models/BeneficiaryFile');
 const TherapeuticPlan = require('../models/TherapeuticPlan');
 const TherapySession = require('../models/TherapySession');
@@ -26,7 +27,9 @@ class SmartPatientService {
     }).populate('assignedTherapists', 'firstName lastName position');
 
     // 3. Documented History (Last 5 Assessments)
-    const assessments = await StandardizedAssessment.find({ beneficiary: beneficiaryId }).sort({ date: -1 }).limit(5);
+    const assessments = await StandardizedAssessment.find({ beneficiary: beneficiaryId })
+      .sort({ date: -1 })
+      .limit(5);
 
     // 4. Operational (Upcoming Sessions)
     const upcoming = await TherapySession.find({
@@ -54,7 +57,10 @@ class SmartPatientService {
       },
       history: {
         assessments,
-        totalSessionsCompleted: await TherapySession.countDocuments({ beneficiary: beneficiaryId, status: 'COMPLETED' }),
+        totalSessionsCompleted: await TherapySession.countDocuments({
+          beneficiary: beneficiaryId,
+          status: 'COMPLETED',
+        }),
       },
       schedule: upcoming,
       engagement: {
@@ -103,7 +109,9 @@ class SmartPatientService {
    * Get Progress Chart Data for a Goal
    */
   static async getGoalTrend(goalId) {
-    return await GoalProgressHistory.find({ goalId }).sort({ recordedDate: 1 }).select('percentage recordedDate note');
+    return await GoalProgressHistory.find({ goalId })
+      .sort({ recordedDate: 1 })
+      .select('percentage recordedDate note');
   }
 }
 

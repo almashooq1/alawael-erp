@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Payment Gateway Integration Service (DB-backed)
  * Supports Stripe, PayPal, and KNET (Saudi)
@@ -8,6 +9,7 @@ const Payment = require('../models/payment.model');
 const Invoice = require('../models/invoice.model');
 const AuditLogger = require('./audit-logger');
 const NotificationService = require('./notification.service');
+const logger = require('../utils/logger');
 
 const PaymentMethodSchema = new mongoose.Schema(
   {
@@ -69,9 +71,9 @@ class PaymentService {
         undefined,
         'CREATE',
         'failure',
-        error.message
+        'حدث خطأ داخلي'
       );
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -105,7 +107,7 @@ class PaymentService {
         currency: payment.currency,
       };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -142,9 +144,9 @@ class PaymentService {
         undefined,
         'CREATE',
         'failure',
-        error.message
+        'حدث خطأ داخلي'
       );
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -182,9 +184,9 @@ class PaymentService {
         undefined,
         'CREATE',
         'failure',
-        error.message
+        'حدث خطأ داخلي'
       );
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -207,7 +209,7 @@ class PaymentService {
         },
       };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -258,9 +260,9 @@ class PaymentService {
         undefined,
         'CREATE',
         'failure',
-        error.message
+        'حدث خطأ داخلي'
       );
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -288,7 +290,7 @@ class PaymentService {
         sentTo: recipientEmail,
       };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -311,7 +313,7 @@ class PaymentService {
 
       return { success: true, message: 'Payment method saved', methodId: method._id };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -320,7 +322,7 @@ class PaymentService {
       const methods = await PaymentMethod.find({ userId }).sort({ createdAt: -1 }).lean();
       return { success: true, methods, count: methods.length };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -329,7 +331,7 @@ class PaymentService {
       await PaymentMethod.deleteOne({ _id: methodId });
       return { success: true, message: 'Payment method deleted' };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -354,7 +356,7 @@ class PaymentService {
         amount: payment.amount,
       };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -363,7 +365,7 @@ class PaymentService {
       const payments = await Payment.find({ userId }).sort({ createdAt: -1 }).limit(limit).lean();
       return { success: true, payments, count: payments.length };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -390,7 +392,7 @@ class PaymentService {
         },
       };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -461,9 +463,9 @@ class PaymentService {
         undefined,
         'UPDATE',
         'failure',
-        error.message
+        'حدث خطأ داخلي'
       );
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -485,7 +487,7 @@ class PaymentService {
       if (!recipientId) return;
       await NotificationService.send(null, recipientId, data);
     } catch (error) {
-      // Notification failures should not break the flow
+      logger.warn('Notification send failed:', error.message);
     }
   }
 }

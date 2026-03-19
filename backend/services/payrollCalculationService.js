@@ -1,13 +1,20 @@
+/* eslint-disable no-unused-vars */
 /**
  * Payroll Calculation Service
  * خدمة حساب الرواتب المتقدمة
  */
 
+const mongoose = require('mongoose');
 const Payroll = require('../models/payroll.model');
 const Employee = require('../models/Employee');
 const Attendance = require('../models/attendance.model');
 const Leave = require('../models/leave.model');
-const { CompensationStructure, IndividualIncentive, PerformancePenalty } = require('../models/compensation.model');
+const logger = require('../utils/logger');
+const {
+  CompensationStructure,
+  IndividualIncentive,
+  PerformancePenalty,
+} = require('../models/compensation.model');
 
 class PayrollCalculationService {
   /**
@@ -51,7 +58,7 @@ class PayrollCalculationService {
       });
 
       // إنشاء سجل الراتب
-      let payroll = new Payroll({
+      const payroll = new Payroll({
         employeeId,
         employeeName: employee.fullName,
         employeeEmail: employee.email,
@@ -84,7 +91,7 @@ class PayrollCalculationService {
 
       return payroll;
     } catch (error) {
-      throw new Error(`خطأ في حساب الراتب: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -95,7 +102,7 @@ class PayrollCalculationService {
     const allowances = [];
 
     if (!compensationStructure || !compensationStructure.fixedAllowances) {
-      return;
+      return { totalAllowances: 0, allowances: [] };
     }
 
     compensationStructure.fixedAllowances.forEach(allowance => {
@@ -141,6 +148,8 @@ class PayrollCalculationService {
     }
 
     payroll.allowances = allowances;
+    const totalAllowances = allowances.reduce((sum, a) => sum + a.amount, 0);
+    return { totalAllowances, allowances };
   }
 
   /**
@@ -172,7 +181,7 @@ class PayrollCalculationService {
         overtime: attendance.overtime || 0,
       };
     } catch (error) {
-      console.error('خطأ في جلب بيانات الحضور:', error);
+      logger.error('خطأ في جلب بيانات الحضور:', error);
       return {};
     }
   }
@@ -186,7 +195,9 @@ class PayrollCalculationService {
         employeeId,
         startDate: {
           $gte: new Date(`${year}-${month}-01`),
-          $lt: new Date(`${year}-${parseInt(month) === 12 ? parseInt(month) : parseInt(month) + 1}-01`),
+          $lt: new Date(
+            `${year}-${parseInt(month) === 12 ? parseInt(month) : parseInt(month) + 1}-01`
+          ),
         },
         status: 'approved',
       });
@@ -206,7 +217,7 @@ class PayrollCalculationService {
 
       return leaveDays;
     } catch (error) {
-      console.error('خطأ في جلب بيانات الإجازات:', error);
+      logger.error('خطأ في جلب بيانات الإجازات:', error);
       return { paid: 0, unpaid: 0 };
     }
   }
@@ -321,7 +332,8 @@ class PayrollCalculationService {
     // حساب الضمان الاجتماعي
     const deductionConfig = compensationStructure?.mandatoryDeductions;
     if (deductionConfig?.socialSecurity?.enabled) {
-      let socialSecurity = (taxableIncome * (deductionConfig.socialSecurity.employeePercentage || 0)) / 100;
+      let socialSecurity =
+        (taxableIncome * (deductionConfig.socialSecurity.employeePercentage || 0)) / 100;
       if (deductionConfig.socialSecurity.maxCap) {
         socialSecurity = Math.min(socialSecurity, deductionConfig.socialSecurity.maxCap);
       }
@@ -331,7 +343,8 @@ class PayrollCalculationService {
 
     // حساب التأمين الصحي
     if (deductionConfig?.healthInsurance?.enabled) {
-      const healthInsurance = (taxableIncome * (deductionConfig.healthInsurance.employeePercentage || 0)) / 100;
+      const healthInsurance =
+        (taxableIncome * (deductionConfig.healthInsurance.employeePercentage || 0)) / 100;
       payroll.taxes.healthInsurance = healthInsurance;
       payroll.taxes.healthInsurancePercentage = deductionConfig.healthInsurance.employeePercentage;
     }
@@ -363,14 +376,14 @@ class PayrollCalculationService {
           results.errors.push({
             employeeId: employee._id,
             employeeName: employee.fullName,
-            error: error.message,
+            error: 'حدث خطأ داخلي',
           });
         }
       }
 
       return results;
     } catch (error) {
-      throw new Error(`خطأ في معالجة الرواتب: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -394,7 +407,7 @@ class PayrollCalculationService {
       // إذا لم يجد هيكل خاص، استخدم الهيكل العام
       return structures.find(s => s.applicableTo === 'all') || null;
     } catch (error) {
-      console.error('خطأ في جلب هيكل الحوافز:', error);
+      logger.error('خطأ في جلب هيكل الحوافز:', error);
       return null;
     }
   }
@@ -458,31 +471,67 @@ class PayrollCalculationService {
 
   /**
    * التحقق من اكتمال راتب الموظف
+   * يقبل إما معرف الراتب (string) للبحث في قاعدة البيانات أو كائن راتب مباشر
    */
-  static async validatePayroll(payrollId) {
+  static validatePayroll(payrollInput) {
     try {
-      const payroll = await Payroll.findById(payrollId);
-      if (!payroll) {
-        throw new Error('الراتب غير موجود');
+      // إذا كان المدخل كائن مباشر (وليس معرف)
+      if (typeof payrollInput === 'object' && payrollInput !== null) {
+        const payroll = payrollInput;
+        const errors = [];
+
+        if (!payroll.baseSalary || payroll.baseSalary <= 0) {
+          errors.push('يجب أن يكون الراتب الأساسي أكبر من الصفر');
+        }
+
+        if (payroll.calculations) {
+          if (
+            payroll.calculations.totalGross === undefined ||
+            payroll.calculations.totalGross === null
+          ) {
+            errors.push('يجب إكمال حساب إجمالي الراتب');
+          }
+          if (
+            payroll.calculations.totalNet === undefined ||
+            payroll.calculations.totalNet === null
+          ) {
+            errors.push('يجب إكمال حساب صافي الراتب');
+          }
+        } else {
+          errors.push('يجب إكمال جميع الحسابات');
+        }
+
+        return {
+          isValid: errors.length === 0,
+          errors,
+        };
       }
 
-      const validations = {
-        hasBaseSalary: payroll.baseSalary > 0,
-        hasTotalGross: payroll.calculations.totalGross > 0,
-        hasTotalNet: payroll.calculations.totalNet > 0,
-        isCalculated: payroll.calculations.lastCalculatedAt != null,
-        taxesCalculated: payroll.taxes.incomeTax >= 0,
-      };
+      // إذا كان معرف - بحث في قاعدة البيانات (async)
+      return (async () => {
+        const payroll = await Payroll.findById(payrollInput);
+        if (!payroll) {
+          throw new Error('الراتب غير موجود');
+        }
 
-      const isValid = Object.values(validations).every(v => v === true);
+        const validations = {
+          hasBaseSalary: payroll.baseSalary > 0,
+          hasTotalGross: payroll.calculations.totalGross > 0,
+          hasTotalNet: payroll.calculations.totalNet > 0,
+          isCalculated: payroll.calculations.lastCalculatedAt != null,
+          taxesCalculated: payroll.taxes.incomeTax >= 0,
+        };
 
-      return {
-        isValid,
-        validations,
-        errors: Object.keys(validations).filter(key => validations[key] === false),
-      };
+        const isValid = Object.values(validations).every(v => v === true);
+
+        return {
+          isValid,
+          validations,
+          errors: Object.keys(validations).filter(key => validations[key] === false),
+        };
+      })();
     } catch (error) {
-      throw new Error(`خطأ في التحقق: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 }

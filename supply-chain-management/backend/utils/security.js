@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Security & Utility Functions
  * Password hashing, email validation, JWT handling, etc.
@@ -7,7 +8,10 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+if (!process.env.JWT_SECRET) {
+  console.error('CRITICAL: JWT_SECRET environment variable is not set!');
+}
+const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
 
 /**
@@ -23,7 +27,7 @@ export const passwordUtils = {
       const hashedPassword = await bcrypt.hash(password, saltRounds);
       return hashedPassword;
     } catch (error) {
-      throw new Error(`Password hashing failed: ${error.message}`);
+      throw new Error('Operation failed');
     }
   },
 
@@ -35,7 +39,7 @@ export const passwordUtils = {
       const isMatch = await bcrypt.compare(password, hash);
       return isMatch;
     } catch (error) {
-      throw new Error(`Password comparison failed: ${error.message}`);
+      throw new Error('Operation failed');
     }
   },
 
@@ -50,24 +54,13 @@ export const passwordUtils = {
     const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
 
     return {
-      isStrong:
-        password.length >= minLength &&
-        hasUppercase &&
-        hasLowercase &&
-        hasNumbers &&
-        hasSpecialChar,
+      isStrong: password.length >= minLength && hasUppercase && hasLowercase && hasNumbers && hasSpecialChar,
       minLength: password.length >= minLength,
       hasUppercase,
       hasLowercase,
       hasNumbers,
       hasSpecialChar,
-      score: [
-        password.length >= minLength,
-        hasUppercase,
-        hasLowercase,
-        hasNumbers,
-        hasSpecialChar,
-      ].filter(Boolean).length,
+      score: [password.length >= minLength, hasUppercase, hasLowercase, hasNumbers, hasSpecialChar].filter(Boolean).length,
     };
   },
 
@@ -100,7 +93,7 @@ export const tokenUtils = {
       });
       return token;
     } catch (error) {
-      throw new Error(`Token generation failed: ${error.message}`);
+      throw new Error('Operation failed');
     }
   },
 
@@ -120,7 +113,7 @@ export const tokenUtils = {
       if (error instanceof jwt.JsonWebTokenError) {
         throw new Error('Invalid token');
       }
-      throw new Error(`Token verification failed: ${error.message}`);
+      throw new Error('Operation failed');
     }
   },
 
@@ -131,7 +124,7 @@ export const tokenUtils = {
     try {
       return jwt.decode(token);
     } catch (error) {
-      throw new Error(`Token decoding failed: ${error.message}`);
+      throw new Error('Operation failed');
     }
   },
 
@@ -147,7 +140,7 @@ export const tokenUtils = {
         role: decoded.role,
       });
     } catch (error) {
-      throw new Error(`Token refresh failed: ${error.message}`);
+      throw new Error('Operation failed');
     }
   },
 };
@@ -183,12 +176,7 @@ export const emailUtils = {
    * Check if email is from disposable domain
    */
   isDisposable(email) {
-    const disposableDomains = [
-      'tempmail.com',
-      'guerrillamail.com',
-      '10minutemail.com',
-      'mailinator.com',
-    ];
+    const disposableDomains = ['tempmail.com', 'guerrillamail.com', '10minutemail.com', 'mailinator.com'];
     const domain = this.getDomain(email);
     return disposableDomains.includes(domain?.toLowerCase());
   },

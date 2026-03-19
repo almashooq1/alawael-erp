@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // Mock Models
 const TherapeuticPlan = require('../models/TherapeuticPlan');
 
@@ -15,11 +16,19 @@ class SmartImmersiveService {
     const scenarioMap = {
       FINE_MOTOR: { scene: 'Virtual Kitchen', task: 'Chop Vegetables', difficulty: 'Adaptive' },
       GROSS_MOTOR: { scene: 'Space Station', task: 'Reach for Stars', difficulty: 'Hard' },
-      SOCIAL_ANXIETY: { scene: 'Busy School Hallway', task: 'Find Locker', difficulty: 'Graduated Exposure' },
+      SOCIAL_ANXIETY: {
+        scene: 'Busy School Hallway',
+        task: 'Find Locker',
+        difficulty: 'Graduated Exposure',
+      },
       COGNITIVE_ATTENTION: { scene: 'Traffic Control', task: 'Monitor Cars', difficulty: 'Medium' },
     };
 
-    const prescription = scenarioMap[clinicalGoal] || { scene: 'Relaxation Garden', task: 'Breathe', difficulty: 'Easy' };
+    const prescription = scenarioMap[clinicalGoal] || {
+      scene: 'Relaxation Garden',
+      task: 'Breathe',
+      difficulty: 'Easy',
+    };
 
     return {
       patientId,
@@ -39,7 +48,8 @@ class SmartImmersiveService {
   static async analyzeVRTelemetry(sessionId, telemetryData) {
     // telemetryData: { gazePoints: [...], reactionTimes: [0.5s, 0.4s], errors: 2 }
 
-    const avgReaction = telemetryData.reactionTimes.reduce((a, b) => a + b, 0) / telemetryData.reactionTimes.length;
+    const avgReaction =
+      telemetryData.reactionTimes.reduce((a, b) => a + b, 0) / telemetryData.reactionTimes.length;
 
     let status = 'IMPROVING';
     if (avgReaction > 1.5) status = 'STAGNANT'; // Too slow
@@ -50,7 +60,10 @@ class SmartImmersiveService {
       result: `${avgReaction.toFixed(2)}s`,
       clinicalAssessment: status,
       heatmapURL: `https://storage.rehab.com/heatmaps/${sessionId}.png`, // Mock URL
-      aiFeedback: status === 'STAGNANT' ? 'Recommend lowering difficulty speed by 10%.' : 'Ready for next level.',
+      aiFeedback:
+        status === 'STAGNANT'
+          ? 'Recommend lowering difficulty speed by 10%.'
+          : 'Ready for next level.',
     };
   }
 }

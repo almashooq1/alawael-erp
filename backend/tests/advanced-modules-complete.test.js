@@ -1,3 +1,4 @@
+/* eslint-disable no-undef, no-unused-vars */
 /**
  * 🧪 Advanced Module Tests - E-Learning, Finance, HR, Payment Systems
  * اختبارات محسّنة للمكتبات المتقدمة
@@ -7,9 +8,9 @@
 // 📚 PHASE 2+: E-LEARNING ADVANCED TESTS
 // ============================================
 
-const ELearning = jest.mock('../models/elearning.model');
-const Quiz = jest.mock('../models/quiz.model');
-const Student = jest.mock('../models/student.model');
+jest.mock('../models/elearning.model');
+jest.mock('../models/quiz.model');
+jest.mock('../models/student.model');
 
 describe('📚 E-Learning System - Advanced', () => {
   describe('Adaptive Learning', () => {
@@ -147,9 +148,9 @@ describe('📚 E-Learning System - Advanced', () => {
 // 💰 PHASE 5+: ADVANCED FINANCE TESTS
 // ============================================
 
-const Finance = jest.mock('../models/finance.model');
-const Budget = jest.mock('../models/budget.model');
-const Invoice = jest.mock('../models/invoice.model');
+jest.mock('../models/finance.model');
+jest.mock('../models/budget.model');
+jest.mock('../models/invoice.model');
 
 describe('💰 Finance System - Advanced', () => {
   describe('Advanced Financial Management', () => {
@@ -293,9 +294,9 @@ describe('💰 Finance System - Advanced', () => {
 // 👥 PHASE 6+: ADVANCED HR TESTS
 // ============================================
 
-const HR = jest.mock('../models/hr.model');
-const Payroll = jest.mock('../models/payroll.model');
-const Recruitment = jest.mock('../models/recruitment.model');
+jest.mock('../models/hr.model');
+jest.mock('../models/payroll.model');
+jest.mock('../models/recruitment.model');
 
 describe('👥 HR System - Advanced', () => {
   describe('Talent Management', () => {
@@ -453,8 +454,8 @@ describe('👥 HR System - Advanced', () => {
 // 💳 PAYMENT GATEWAY ADVANCED TESTS
 // ============================================
 
-const Payment = jest.mock('../models/payment.model');
-const Transaction = jest.mock('../models/transaction.model');
+jest.mock('../models/payment.model');
+jest.mock('../models/transaction.model');
 
 describe('💳 Payment Gateway - Advanced', () => {
   describe('Payment Processing', () => {

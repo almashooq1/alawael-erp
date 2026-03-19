@@ -1,0 +1,112 @@
+name: Supply Chain Quality Gate
+
+on:
+  pull_request:
+    branches: [main, master, develop]
+    paths:
+      - 'supply-chain-management/**'
+      - '.github/workflows/supply-chain-quality-gate.yml'
+  push:
+    branches: [main, master]
+    paths:
+      - 'supply-chain-management/**'
+  workflow_dispatch:
+
+concurrency:
+  group: supply-chain-quality-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  supply-chain-backend-quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    services:
+      mongodb:
+        image: mongo:7.0
+        options: >-
+          --health-cmd "mongosh --eval 'db.adminCommand(\"ping\")'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 27017:27017
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: supply-chain-management/backend/package-lock.json
+
+      - name: Install backend dependencies
+        run: cd supply-chain-management/backend && npm ci
+
+      - name: Run Supply Chain Backend Quality Gate
+        env:
+          NODE_ENV: test
+          MONGODB_URI: mongodb://localhost:27017/supply_chain_test
+        run: cd supply-chain-management/backend && npm run quality
+
+      - name: Upload backend coverage (optional)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: supply-chain-backend-coverage
+          path: supply-chain-management/backend/coverage
+          retention-days: 7
+          if-no-files-found: ignore
+
+  supply-chain-frontend-quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: supply-chain-management/frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        run: cd supply-chain-management/frontend && npm ci
+
+      - name: Run Supply Chain Frontend Quality Gate
+        run: cd supply-chain-management/frontend && npm test -- --coverage --passWithNoTests --watchAll=false
+
+      - name: Upload frontend coverage (optional)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: supply-chain-frontend-coverage
+          path: supply-chain-management/frontend/coverage
+          retention-days: 7
+          if-no-files-found: ignore
+
+  supply-chain-summary:
+    runs-on: ubuntu-latest
+    needs: [supply-chain-backend-quality, supply-chain-frontend-quality]
+    if: always()
+    permissions:
+      contents: read
+    steps:
+      - name: Report Status
+        run: |
+          echo "## 📊 Supply Chain Module Quality Gate"
+          echo ""
+          echo "| Component | Status |"
+          echo "|-----------|--------|"
+          echo "| Backend | ${{ needs.supply-chain-backend-quality.result }} |"
+          echo "| Frontend | ${{ needs.supply-chain-frontend-quality.result }} |"
+          echo ""
+          if [ "${{ needs.supply-chain-backend-quality.result }}" != "success" ] || \
+             [ "${{ needs.supply-chain-frontend-quality.result }}" != "success" ]; then
+            echo "❌ Supply Chain quality gate FAILED"
+            exit 1
+          fi
+          echo "✅ Supply Chain quality gate PASSED"

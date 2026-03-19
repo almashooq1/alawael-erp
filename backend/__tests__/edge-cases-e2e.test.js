@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * Edge Cases & Error Scenarios E2E Tests - Phase 5.3
  * Boundary conditions and error handling flows
@@ -105,7 +107,7 @@ class LeaveStore {
 
   async find(query = {}) {
     return Array.from(this.data.values()).filter(record => {
-      for (let key in query) {
+      for (const key in query) {
         if (record[key] !== query[key]) return false;
       }
       return true;
@@ -148,7 +150,7 @@ const Leave = new LeaveStore();
 const Payment = new PaymentStore();
 
 describe('Edge Cases & Error Scenarios E2E - Phase 5.3', () => {
-  let cleanup = async () => {
+  const cleanup = async () => {
     // Cleanup logic will be per test
   };
 
@@ -359,7 +361,7 @@ describe('Edge Cases & Error Scenarios E2E - Phase 5.3', () => {
       }
 
       // Cleanup
-      for (let leave of leaves) {
+      for (const leave of leaves) {
         await Leave.findByIdAndDelete(leave._id);
       }
       await Employee.findByIdAndDelete(emp._id);
@@ -480,7 +482,7 @@ describe('Edge Cases & Error Scenarios E2E - Phase 5.3', () => {
 
       // Process all salaries at once
       const payments = [];
-      for (let emp of employees) {
+      for (const emp of employees) {
         const payment = await Payment.create({
           employeeId: emp._id,
           amount: emp.baseSalary,
@@ -497,10 +499,10 @@ describe('Edge Cases & Error Scenarios E2E - Phase 5.3', () => {
       expect(totalPayroll).toBeGreaterThan(0);
 
       // Cleanup
-      for (let payment of payments) {
+      for (const payment of payments) {
         await Payment.findByIdAndDelete(payment._id);
       }
-      for (let emp of employees) {
+      for (const emp of employees) {
         await Employee.findByIdAndDelete(emp._id);
       }
     });
@@ -536,7 +538,7 @@ describe('Edge Cases & Error Scenarios E2E - Phase 5.3', () => {
       // All team members request leave
       const allLeaves = [];
       for (let teamIdx = 0; teamIdx < teams.length; teamIdx++) {
-        for (let emp of teams[teamIdx]) {
+        for (const emp of teams[teamIdx]) {
           const leave = await Leave.create({
             employeeId: emp._id,
             leaveType: 'ANNUAL',
@@ -552,7 +554,7 @@ describe('Edge Cases & Error Scenarios E2E - Phase 5.3', () => {
 
       // All managers approve batch
       let approvedCount = 0;
-      for (let leave of allLeaves) {
+      for (const leave of allLeaves) {
         const approved = await Leave.findByIdAndUpdate(
           leave._id,
           { managerStatus: 'APPROVED', managerApprovedAt: new Date() },
@@ -564,15 +566,15 @@ describe('Edge Cases & Error Scenarios E2E - Phase 5.3', () => {
       expect(approvedCount).toBe(15);
 
       // Cleanup
-      for (let leave of allLeaves) {
+      for (const leave of allLeaves) {
         await Leave.findByIdAndDelete(leave._id);
       }
-      for (let team of teams) {
-        for (let emp of team) {
+      for (const team of teams) {
+        for (const emp of team) {
           await Employee.findByIdAndDelete(emp._id);
         }
       }
-      for (let manager of managers) {
+      for (const manager of managers) {
         await User.findByIdAndDelete(manager._id);
       }
     });

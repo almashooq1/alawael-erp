@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * AI Analytics Routes
  * مسارات تحليلات الذكاء الاصطناعي
@@ -5,9 +6,13 @@
 
 const express = require('express');
 const router = express.Router();
+const { authenticateToken } = require('../../middleware/auth');
 const AIAnalyticsService = require('../../services/aiAnalyticsService');
 
 const aiService = new AIAnalyticsService();
+
+// Require authentication for all AI routes
+router.use(authenticateToken);
 
 /**
  * POST /api/ai/predict/attendance

@@ -1,12 +1,13 @@
+/* eslint-disable no-unused-vars */
 /**
  * AI Predictions and Analytics Service
  * Machine Learning for Sales Forecasting, Student Performance, Attendance Prediction
  */
 
 // In-memory storage
-let predictions = new Map();
-let models = new Map();
-let trainingData = new Map();
+const predictions = new Map();
+const models = new Map();
+const trainingData = new Map();
 
 class AIService {
   constructor() {
@@ -97,7 +98,7 @@ class AIService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -144,7 +145,7 @@ class AIService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -207,7 +208,7 @@ class AIService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -232,7 +233,12 @@ class AIService {
         type: 'attendance-prediction',
         userId,
         attendanceProbability: Math.round(attendanceProbability * 100),
-        prediction: attendanceProbability > 0.7 ? 'likely' : attendanceProbability > 0.4 ? 'uncertain' : 'unlikely',
+        prediction:
+          attendanceProbability > 0.7
+            ? 'likely'
+            : attendanceProbability > 0.4
+              ? 'uncertain'
+              : 'unlikely',
         confidence: model.accuracy,
         factors: {
           dayOfWeek: dayData.dayOfWeek,
@@ -251,7 +257,7 @@ class AIService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -274,7 +280,7 @@ class AIService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -301,13 +307,16 @@ class AIService {
           ...model,
           predictionsCount: relatedPredictions.length,
           averageConfidence:
-            relatedPredictions.length > 0 ? relatedPredictions.reduce((sum, p) => sum + p.confidence, 0) / relatedPredictions.length : 0,
+            relatedPredictions.length > 0
+              ? relatedPredictions.reduce((sum, p) => sum + p.confidence, 0) /
+                relatedPredictions.length
+              : 0,
         },
       };
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -342,7 +351,7 @@ class AIService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -365,7 +374,7 @@ class AIService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }

@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * Advanced Reporting Service Tests
  * اختبارات الخدمة المتقدمة للتقارير
@@ -100,8 +102,14 @@ describe('AdvancedReportingService Tests', () => {
     });
 
     test('should generate report in different formats', () => {
-      const htmlReport = reportingService.generateReport({ ...reportTemplate, format: 'html' }, sampleData);
-      const csvReport = reportingService.generateReport({ ...reportTemplate, format: 'csv' }, sampleData);
+      const htmlReport = reportingService.generateReport(
+        { ...reportTemplate, format: 'html' },
+        sampleData
+      );
+      const csvReport = reportingService.generateReport(
+        { ...reportTemplate, format: 'csv' },
+        sampleData
+      );
       assert(htmlReport.content, 'HTML report should be generated');
       assert(csvReport.content, 'CSV report should be generated');
     });
@@ -120,7 +128,10 @@ describe('AdvancedReportingService Tests', () => {
     test('should include section headers in report', () => {
       const report = reportingService.generateReport(reportTemplate, sampleData);
       const content = report.content.toLowerCase();
-      assert(content.includes('monthly') || content.includes('sales'), 'Report should contain template sections');
+      assert(
+        content.includes('monthly') || content.includes('sales'),
+        'Report should contain template sections'
+      );
     });
 
     test('should handle empty data in report', () => {

@@ -75,9 +75,9 @@ const KPIAlertManager = ({ kpiId, alerts = [], onCreateRule, onDeleteRule }) => 
   }, [kpiId]);
 
   // Handle form input change
-  const handleInputChange = useCallback((e) => {
+  const handleInputChange = useCallback(e => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
       [name]: value,
     }));
@@ -86,11 +86,9 @@ const KPIAlertManager = ({ kpiId, alerts = [], onCreateRule, onDeleteRule }) => 
   // Handle checkbox changes
   const handleCheckboxChange = useCallback((e, fieldName) => {
     const { checked, value } = e.target;
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
-      [fieldName]: checked
-        ? [...prev[fieldName], value]
-        : prev[fieldName].filter((v) => v !== value),
+      [fieldName]: checked ? [...prev[fieldName], value] : prev[fieldName].filter(v => v !== value),
     }));
   }, []);
 
@@ -130,9 +128,7 @@ const KPIAlertManager = ({ kpiId, alerts = [], onCreateRule, onDeleteRule }) => 
 
     if (editingRule) {
       // Update existing rule
-      setRules((prev) =>
-        prev.map((r) => (r.id === editingRule.id ? { ...r, ...formData } : r))
-      );
+      setRules(prev => prev.map(r => (r.id === editingRule.id ? { ...r, ...formData } : r)));
     } else {
       // Create new rule
       const newRule = {
@@ -140,7 +136,7 @@ const KPIAlertManager = ({ kpiId, alerts = [], onCreateRule, onDeleteRule }) => 
         ...formData,
         createdAt: new Date(),
       };
-      setRules((prev) => [...prev, newRule]);
+      setRules(prev => [...prev, newRule]);
       onCreateRule(newRule);
     }
 
@@ -148,15 +144,18 @@ const KPIAlertManager = ({ kpiId, alerts = [], onCreateRule, onDeleteRule }) => 
   }, [formData, editingRule, onCreateRule]);
 
   // Delete rule
-  const handleDeleteRule = useCallback((ruleId) => {
-    if (window.confirm('Are you sure you want to delete this rule?')) {
-      setRules((prev) => prev.filter((r) => r.id !== ruleId));
-      onDeleteRule(ruleId);
-    }
-  }, [onDeleteRule]);
+  const handleDeleteRule = useCallback(
+    ruleId => {
+      if (window.confirm('Are you sure you want to delete this rule?')) {
+        setRules(prev => prev.filter(r => r.id !== ruleId));
+        onDeleteRule(ruleId);
+      }
+    },
+    [onDeleteRule]
+  );
 
   // Get severity icon
-  const getSeverityIcon = (severity) => {
+  const getSeverityIcon = severity => {
     switch (severity) {
       case 'critical':
         return <ErrorIcon sx={{ color: 'error.main' }} />;
@@ -170,7 +169,7 @@ const KPIAlertManager = ({ kpiId, alerts = [], onCreateRule, onDeleteRule }) => 
   };
 
   // Get severity color
-  const getSeverityColor = (severity) => {
+  const getSeverityColor = severity => {
     switch (severity) {
       case 'critical':
         return 'error';
@@ -197,7 +196,7 @@ const KPIAlertManager = ({ kpiId, alerts = [], onCreateRule, onDeleteRule }) => 
                 Active Alerts
               </Typography>
               <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
-                {activeAlerts.slice(0, 3).map((alert) => (
+                {activeAlerts.slice(0, 3).map(alert => (
                   <Chip
                     key={alert.id}
                     icon={getSeverityIcon(alert.severity)}
@@ -224,11 +223,7 @@ const KPIAlertManager = ({ kpiId, alerts = [], onCreateRule, onDeleteRule }) => 
           title="Alert Rules"
           subheader={`${rules.length} rules configured`}
           action={
-            <Button
-              variant="contained"
-              size="small"
-              onClick={() => handleOpenDialog()}
-            >
+            <Button variant="contained" size="small" onClick={() => handleOpenDialog()}>
               Create Rule
             </Button>
           }
@@ -252,7 +247,7 @@ const KPIAlertManager = ({ kpiId, alerts = [], onCreateRule, onDeleteRule }) => 
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {rules.map((rule) => (
+                  {rules.map(rule => (
                     <TableRow key={rule.id}>
                       <TableCell>{rule.name}</TableCell>
                       <TableCell>
@@ -260,10 +255,10 @@ const KPIAlertManager = ({ kpiId, alerts = [], onCreateRule, onDeleteRule }) => 
                           {rule.condition === 'below'
                             ? `Below ${rule.threshold}`
                             : rule.condition === 'above'
-                            ? `Above ${rule.threshold}`
-                            : rule.condition === 'range'
-                            ? `Outside ${rule.thresholdMin}-${rule.thresholdMax}`
-                            : `${rule.threshold}% of target`}
+                              ? `Above ${rule.threshold}`
+                              : rule.condition === 'range'
+                                ? `Outside ${rule.thresholdMin}-${rule.thresholdMax}`
+                                : `${rule.threshold}% of target`}
                         </Typography>
                       </TableCell>
                       <TableCell>
@@ -276,30 +271,19 @@ const KPIAlertManager = ({ kpiId, alerts = [], onCreateRule, onDeleteRule }) => 
                       </TableCell>
                       <TableCell>
                         <Stack direction="row" spacing={0.5}>
-                          {rule.notifyChannels?.map((channel) => (
-                            <Chip
-                              key={channel}
-                              label={channel}
-                              size="small"
-                              variant="outlined"
-                            />
+                          {rule.notifyChannels?.map(channel => (
+                            <Chip key={channel} label={channel} size="small" variant="outlined" />
                           ))}
                         </Stack>
                       </TableCell>
                       <TableCell align="right">
                         <Tooltip title="Edit">
-                          <IconButton
-                            size="small"
-                            onClick={() => handleOpenDialog(rule)}
-                          >
+                          <IconButton size="small" aria-label="تحرير القاعدة" onClick={() => handleOpenDialog(rule)}>
                             <EditIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>
                         <Tooltip title="Delete">
-                          <IconButton
-                            size="small"
-                            onClick={() => handleDeleteRule(rule.id)}
-                          >
+                          <IconButton size="small" aria-label="حذف القاعدة" onClick={() => handleDeleteRule(rule.id)}>
                             <DeleteIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>
@@ -315,9 +299,7 @@ const KPIAlertManager = ({ kpiId, alerts = [], onCreateRule, onDeleteRule }) => 
 
       {/* Create/Edit Rule Dialog */}
       <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>
-          {editingRule ? 'Edit Alert Rule' : 'Create Alert Rule'}
-        </DialogTitle>
+        <DialogTitle>{editingRule ? 'Edit Alert Rule' : 'Create Alert Rule'}</DialogTitle>
         <DialogContent sx={{ pt: 2 }}>
           <Stack spacing={2}>
             {/* Rule Name */}
@@ -411,15 +393,13 @@ const KPIAlertManager = ({ kpiId, alerts = [], onCreateRule, onDeleteRule }) => 
                 Notify Via
               </Typography>
               <Stack direction="row" spacing={1}>
-                {['in-app', 'email', 'slack', 'sms'].map((channel) => (
+                {['in-app', 'email', 'slack', 'sms'].map(channel => (
                   <FormControlLabel
                     key={channel}
                     control={
                       <Checkbox
                         checked={formData.notifyChannels.includes(channel)}
-                        onChange={(e) =>
-                          handleCheckboxChange(e, 'notifyChannels')
-                        }
+                        onChange={e => handleCheckboxChange(e, 'notifyChannels')}
                         value={channel}
                       />
                     }

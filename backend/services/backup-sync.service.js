@@ -1,9 +1,10 @@
+/* eslint-disable no-unused-vars */
 /**
  * ═══════════════════════════════════════════════════════════════════════
  * ADVANCED BACKUP SYNC SYSTEM
  * نظام المزامنة المتقدم للنسخ الاحتياطية
  * ═══════════════════════════════════════════════════════════════════════
- * 
+ *
  * Features:
  * ✅ Real-Time Sync
  * ✅ Incremental Sync
@@ -18,6 +19,7 @@ const EventEmitter = require('events');
 const fs = require('fs').promises;
 const path = require('path');
 const crypto = require('crypto');
+const logger = require('../utils/logger');
 
 class BackupSyncSystem extends EventEmitter {
   constructor(options = {}) {
@@ -43,10 +45,10 @@ class BackupSyncSystem extends EventEmitter {
     try {
       await fs.mkdir(this.syncPath, { recursive: true });
       await this.loadSyncMetadata();
-      console.log('✅ Sync system initialized');
+      // console.log('✅ Sync system initialized');
       this.startAutomaticSync();
     } catch (error) {
-      console.error('❌ Sync initialization failed:', error.message);
+      logger.error('❌ Sync initialization failed:', error.message);
     }
   }
 
@@ -87,7 +89,7 @@ class BackupSyncSystem extends EventEmitter {
 
       return changes;
     } catch (error) {
-      console.error('❌ Change detection failed:', error.message);
+      logger.error('❌ Change detection failed:', error.message);
       return { added: [], modified: [], deleted: [] };
     }
   }
@@ -115,7 +117,7 @@ class BackupSyncSystem extends EventEmitter {
 
       this.activeSyncs.set(syncId, syncSession);
       this.emit('sync:started', syncSession);
-      console.log(`🔄 Starting incremental sync [${syncId}]`);
+      // console.log(`🔄 Starting incremental sync [${syncId}]`);
 
       // Detect changes
       const changes = await this.detectChanges(source);
@@ -132,7 +134,7 @@ class BackupSyncSystem extends EventEmitter {
             await this.syncFile(file, destination, syncSession);
           }
         } catch (error) {
-          syncSession.errors.push({ file, error: error.message });
+          syncSession.errors.push({ file, error: 'حدث خطأ داخلي' });
         }
       }
 
@@ -141,9 +143,9 @@ class BackupSyncSystem extends EventEmitter {
         const destFile = file.replace(source, destination);
         try {
           await fs.unlink(destFile);
-          console.log(`🗑️  Deleted from destination: ${destFile}`);
+          // console.log(`🗑️  Deleted from destination: ${destFile}`);
         } catch (error) {
-          console.warn(`⚠️  Failed to delete ${destFile}: ${error.message}`);
+          logger.warn(`⚠️  Failed to delete ${destFile}: ${error.message}`);
         }
       }
 
@@ -153,11 +155,11 @@ class BackupSyncSystem extends EventEmitter {
       this.activeSyncs.delete(syncId);
 
       this.emit('sync:completed', syncSession);
-      console.log(`✅ Incremental sync completed [${syncId}]`);
+      // console.log(`✅ Incremental sync completed [${syncId}]`);
 
       return syncSession;
     } catch (error) {
-      console.error('❌ Incremental sync failed:', error.message);
+      logger.error('❌ Incremental sync failed:', error.message);
       throw error;
     }
   }
@@ -176,10 +178,12 @@ class BackupSyncSystem extends EventEmitter {
       let transferred = 0;
       let chunkIndex = 0;
 
-      const readStream = require('fs').createReadStream(sourcePath, { highWaterMark: this.chunkSize });
+      const readStream = require('fs').createReadStream(sourcePath, {
+        highWaterMark: this.chunkSize,
+      });
 
       await new Promise((resolve, reject) => {
-        readStream.on('data', (chunk) => {
+        readStream.on('data', chunk => {
           transferred += chunk.length;
           syncSession.transferred += chunk.length;
           syncSession.progress = (syncSession.transferred / syncSession.totalSize) * 100;
@@ -202,9 +206,9 @@ class BackupSyncSystem extends EventEmitter {
         readStream.pipe(require('fs').createWriteStream(destFile));
       });
 
-      console.log(`✅ Synced: ${sourcePath}`);
+      // console.log(`✅ Synced: ${sourcePath}`);
     } catch (error) {
-      console.error(`❌ Failed to sync file: ${error.message}`);
+      logger.error(`❌ Failed to sync file: ${error.message}`);
       throw error;
     }
   }
@@ -219,7 +223,10 @@ class BackupSyncSystem extends EventEmitter {
 
       switch (strategy) {
         case 'NEWER':
-          winner = new Date(localVersion.modifiedAt) > new Date(remoteVersion.modifiedAt) ? 'local' : 'remote';
+          winner =
+            new Date(localVersion.modifiedAt) > new Date(remoteVersion.modifiedAt)
+              ? 'local'
+              : 'remote';
           break;
 
         case 'LARGER':
@@ -248,11 +255,11 @@ class BackupSyncSystem extends EventEmitter {
       };
 
       this.emit('sync:conflict-resolved', resolution);
-      console.log(`🔧 Conflict resolved for ${file}: ${winner} version kept`);
+      // console.log(`🔧 Conflict resolved for ${file}: ${winner} version kept`);
 
       return resolution;
     } catch (error) {
-      console.error('❌ Conflict resolution failed:', error.message);
+      logger.error('❌ Conflict resolution failed:', error.message);
       throw error;
     }
   }
@@ -281,7 +288,7 @@ class BackupSyncSystem extends EventEmitter {
   startAutomaticSync() {
     setInterval(() => {
       this.emit('sync:auto-check');
-      console.log('🔄 Automatic sync check triggered');
+      // console.log('🔄 Automatic sync check triggered');
     }, this.syncInterval);
   }
 
@@ -317,7 +324,7 @@ class BackupSyncSystem extends EventEmitter {
       const content = await fs.readFile(filePath);
       return crypto.createHash('sha256').update(content).digest('hex');
     } catch (error) {
-      console.warn(`⚠️  Failed to hash file: ${error.message}`);
+      logger.warn(`⚠️  Failed to hash file: ${error.message}`);
       return null;
     }
   }
@@ -358,7 +365,7 @@ class BackupSyncSystem extends EventEmitter {
       this.fileHashes = new Map(metadata.fileHashes || []);
       this.syncHistory = metadata.syncHistory || [];
     } catch (error) {
-      console.log('ℹ️  No sync metadata found, starting fresh');
+      // console.log('ℹ️  No sync metadata found, starting fresh');
     }
   }
 
@@ -378,7 +385,7 @@ class BackupSyncSystem extends EventEmitter {
         JSON.stringify(metadata, null, 2)
       );
     } catch (error) {
-      console.warn('⚠️  Failed to save sync metadata:', error.message);
+      logger.warn('⚠️  Failed to save sync metadata:', error.message);
     }
   }
 }

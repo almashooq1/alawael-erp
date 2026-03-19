@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * 🤖 Phase 13: Advanced Machine Learning & Analytics Integration Tests
  * اختبارات شاملة لتكامل تعلم الآلة والتحليلات المتقدمة

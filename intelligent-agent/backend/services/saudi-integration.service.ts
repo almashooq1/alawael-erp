@@ -234,7 +234,7 @@ export class SaudiIntegrationService {
       return response.data;
     } catch (error: any) {
       this.logger.error('Failed to verify National ID', error);
-      throw new Error(`National ID verification failed: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -273,7 +273,7 @@ export class SaudiIntegrationService {
       return response.data;
     } catch (error: any) {
       this.logger.error('Failed to verify Iqama', error);
-      throw new Error(`Iqama verification failed: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -343,7 +343,7 @@ export class SaudiIntegrationService {
       return response.data;
     } catch (error: any) {
       this.logger.error('Failed to register contract with MOL', error);
-      throw new Error(`MOL contract registration failed: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 

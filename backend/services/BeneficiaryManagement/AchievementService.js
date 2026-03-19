@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * AchievementService.js - Beneficiary Achievement & Recognition Service
  * Handles achievement recognition, certifications, and skill development tracking
@@ -7,6 +8,7 @@
  */
 
 const EventEmitter = require('events');
+const logger = require('../../utils/logger');
 
 class AchievementService extends EventEmitter {
   /**
@@ -59,11 +61,13 @@ class AchievementService extends EventEmitter {
         recordedBy: achievementData.recordedBy || 'system',
         createdAt: new Date(),
         updatedAt: new Date(),
-        auditLog: [{
-          action: 'ACHIEVEMENT_RECORDED',
-          user: achievementData.recordedBy || 'system',
-          timestamp: new Date()
-        }]
+        auditLog: [
+          {
+            action: 'ACHIEVEMENT_RECORDED',
+            user: achievementData.recordedBy || 'system',
+            timestamp: new Date(),
+          },
+        ],
       };
 
       // Save
@@ -76,7 +80,7 @@ class AchievementService extends EventEmitter {
         beneficiaryId,
         title: achievementData.title,
         type: achievementData.type,
-        points: achievement.points
+        points: achievement.points,
       });
 
       return {
@@ -86,17 +90,16 @@ class AchievementService extends EventEmitter {
           achievementId: saved.insertedId,
           title: achievementData.title,
           points: achievement.points,
-          type: achievementData.type
+          type: achievementData.type,
         },
-        timestamp: new Date()
+        timestamp: new Date(),
       };
-
     } catch (error) {
       return {
         status: 'error',
-        message: error.message,
+        message: 'حدث خطأ داخلي',
         data: null,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     }
   }
@@ -123,11 +126,10 @@ class AchievementService extends EventEmitter {
       }
 
       // Check existing skill
-      const existing = await this.db.collection(this.skillsCollection)
-        .findOne({
-          beneficiaryId,
-          skillName: skillData.skillName
-        });
+      const existing = await this.db.collection(this.skillsCollection).findOne({
+        beneficiaryId,
+        skillName: skillData.skillName,
+      });
 
       if (existing) {
         // Update existing skill
@@ -138,15 +140,15 @@ class AchievementService extends EventEmitter {
           {
             $set: {
               level: newLevel,
-              updatedAt: new Date()
+              updatedAt: new Date(),
             },
             $push: {
               levelHistory: {
                 level: skillData.level,
                 date: new Date(),
-                evidence: skillData.evidence
-              }
-            }
+                evidence: skillData.evidence,
+              },
+            },
           }
         );
 
@@ -155,9 +157,9 @@ class AchievementService extends EventEmitter {
           message: 'Skill updated successfully',
           data: {
             skillName: skillData.skillName,
-            newLevel
+            newLevel,
           },
-          timestamp: new Date()
+          timestamp: new Date(),
         };
       }
 
@@ -168,13 +170,15 @@ class AchievementService extends EventEmitter {
         level: skillData.level,
         category: skillData.category,
         evidence: skillData.evidence,
-        levelHistory: [{
-          level: skillData.level,
-          date: new Date(),
-          evidence: skillData.evidence
-        }],
+        levelHistory: [
+          {
+            level: skillData.level,
+            date: new Date(),
+            evidence: skillData.evidence,
+          },
+        ],
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
 
       const saved = await this.db.collection(this.skillsCollection).insertOne(skill);
@@ -182,7 +186,7 @@ class AchievementService extends EventEmitter {
       this.emit('skill:tracked', {
         beneficiaryId,
         skillName: skillData.skillName,
-        level: skillData.level
+        level: skillData.level,
       });
 
       return {
@@ -192,17 +196,16 @@ class AchievementService extends EventEmitter {
           skillId: saved.insertedId,
           skillName: skillData.skillName,
           level: skillData.level,
-          category: skillData.category
+          category: skillData.category,
         },
-        timestamp: new Date()
+        timestamp: new Date(),
       };
-
     } catch (error) {
       return {
         status: 'error',
-        message: error.message,
+        message: 'حدث خطأ داخلي',
         data: null,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     }
   }
@@ -235,7 +238,7 @@ class AchievementService extends EventEmitter {
         status: activityData.endDate ? 'COMPLETED' : 'ACTIVE',
         points: this.calculateActivityPoints(activityData.role),
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
 
       const saved = await this.db.collection(this.activitiesCollection).insertOne(activity);
@@ -247,7 +250,7 @@ class AchievementService extends EventEmitter {
         beneficiaryId,
         activityName: activityData.activityName,
         role: activityData.role,
-        points: activity.points
+        points: activity.points,
       });
 
       return {
@@ -257,17 +260,16 @@ class AchievementService extends EventEmitter {
           activityId: saved.insertedId,
           activityName: activityData.activityName,
           role: activityData.role,
-          status: activity.status
+          status: activity.status,
         },
-        timestamp: new Date()
+        timestamp: new Date(),
       };
-
     } catch (error) {
       return {
         status: 'error',
-        message: error.message,
+        message: 'حدث خطأ داخلي',
         data: null,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     }
   }
@@ -286,12 +288,14 @@ class AchievementService extends EventEmitter {
       }
 
       // Get all achievements
-      const achievements = await this.db.collection(this.achievementCollection)
+      const achievements = await this.db
+        .collection(this.achievementCollection)
         .find({ beneficiaryId })
         .toArray();
 
       // Get all activities
-      const activities = await this.db.collection(this.activitiesCollection)
+      const activities = await this.db
+        .collection(this.activitiesCollection)
         .find({ beneficiaryId })
         .toArray();
 
@@ -322,27 +326,30 @@ class AchievementService extends EventEmitter {
           pointsToNextLevel: Math.max(0, pointsToNextLevel),
           achievements: {
             count: achievements.length,
-            byType: this.groupByType(achievements)
+            byType: this.groupByType(achievements),
           },
           activities: {
             count: activities.length,
-            active: activities.filter(a => a.status === 'ACTIVE').length
+            active: activities.filter(a => a.status === 'ACTIVE').length,
           },
           progress: {
             currentLevelPoints: currentLevelPoints,
             nextLevelPoints: nextLevelPoints,
-            percentage: ((totalPoints - currentLevelPoints) / (nextLevelPoints - currentLevelPoints) * 100).toFixed(2) + '%'
-          }
+            percentage:
+              (
+                ((totalPoints - currentLevelPoints) / (nextLevelPoints - currentLevelPoints)) *
+                100
+              ).toFixed(2) + '%',
+          },
         },
-        timestamp: new Date()
+        timestamp: new Date(),
       };
-
     } catch (error) {
       return {
         status: 'error',
-        message: error.message,
+        message: 'حدث خطأ داخلي',
         data: null,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     }
   }
@@ -355,10 +362,10 @@ class AchievementService extends EventEmitter {
    */
   calculateAchievementPoints(type) {
     const points = {
-      'academic': 50,
-      'certification': 100,
-      'award': 75,
-      'special': 150
+      academic: 50,
+      certification: 100,
+      award: 75,
+      special: 150,
     };
     return points[type] || 50;
   }
@@ -371,12 +378,12 @@ class AchievementService extends EventEmitter {
    */
   calculateActivityPoints(role) {
     const rolePoints = {
-      'leader': 100,
-      'president': 150,
-      'vice_president': 120,
-      'treasurer': 100,
-      'member': 50,
-      'volunteer': 75
+      leader: 100,
+      president: 150,
+      vice_president: 120,
+      treasurer: 100,
+      member: 50,
+      volunteer: 75,
     };
     return rolePoints[role.toLowerCase()] || 50;
   }
@@ -409,7 +416,7 @@ class AchievementService extends EventEmitter {
       3: 'Contributor',
       4: 'Leader',
       5: 'Achiever',
-      6: 'Champion'
+      6: 'Champion',
     };
     return badges[level] || 'Beginner';
   }
@@ -427,7 +434,7 @@ class AchievementService extends EventEmitter {
       3: 300,
       4: 600,
       5: 1000,
-      6: 1500
+      6: 1500,
     };
     return levelPoints[level] || 0;
   }
@@ -462,12 +469,12 @@ class AchievementService extends EventEmitter {
         { _id: new ObjectId(beneficiaryId) },
         {
           $inc: { totalPoints: increment },
-          $set: { updatedAt: new Date() }
+          $set: { updatedAt: new Date() },
         }
       );
     } catch (error) {
       // Log error but don't throw
-      console.error('Error updating beneficiary points:', error);
+      logger.error('Error updating beneficiary points:', error);
     }
   }
 
@@ -479,15 +486,18 @@ class AchievementService extends EventEmitter {
    */
   async getBeneficiaryAchievementSummary(beneficiaryId) {
     try {
-      const achievements = await this.db.collection(this.achievementCollection)
+      const achievements = await this.db
+        .collection(this.achievementCollection)
         .find({ beneficiaryId })
         .toArray();
 
-      const skills = await this.db.collection(this.skillsCollection)
+      const skills = await this.db
+        .collection(this.skillsCollection)
         .find({ beneficiaryId })
         .toArray();
 
-      const activities = await this.db.collection(this.activitiesCollection)
+      const activities = await this.db
+        .collection(this.activitiesCollection)
         .find({ beneficiaryId })
         .toArray();
 
@@ -499,7 +509,7 @@ class AchievementService extends EventEmitter {
           achievements: {
             total: achievements.length,
             byType: this.groupByType(achievements),
-            recent: achievements.slice(-5)
+            recent: achievements.slice(-5),
           },
           skills: {
             total: skills.length,
@@ -507,23 +517,22 @@ class AchievementService extends EventEmitter {
               acc[s.level] = (acc[s.level] || 0) + 1;
               return acc;
             }, {}),
-            topSkills: skills.sort((a, b) => b.level - a.level).slice(0, 5)
+            topSkills: skills.sort((a, b) => b.level - a.level).slice(0, 5),
           },
           activities: {
             total: activities.length,
             active: activities.filter(a => a.status === 'ACTIVE').length,
-            completed: activities.filter(a => a.status === 'COMPLETED').length
-          }
+            completed: activities.filter(a => a.status === 'COMPLETED').length,
+          },
         },
-        timestamp: new Date()
+        timestamp: new Date(),
       };
-
     } catch (error) {
       return {
         status: 'error',
-        message: error.message,
+        message: 'حدث خطأ داخلي',
         data: null,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     }
   }

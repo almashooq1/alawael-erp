@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Archive Routes - مسارات الأرشفة
  * API Endpoints for Electronic Archive System
@@ -16,7 +17,7 @@ const storage = multer.diskStorage({
     cb(null, archiveConfig.storage.tempPath);
   },
   filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
     cb(null, uniqueSuffix + path.extname(file.originalname));
   },
 });
@@ -93,7 +94,7 @@ router.post('/upload', upload.single('file'), async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'حدث خطأ داخلي' });
   }
 });
 
@@ -113,7 +114,7 @@ router.get('/documents', async (req, res) => {
       ...result,
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'حدث خطأ داخلي' });
   }
 });
 
@@ -133,7 +134,7 @@ router.get('/documents/:id', async (req, res) => {
       document,
     });
   } catch (error) {
-    res.status(404).json({ error: error.message });
+    res.status(404).json({ error: 'حدث خطأ داخلي' });
   }
 });
 
@@ -155,7 +156,7 @@ router.get('/documents/number/:documentNumber', async (req, res) => {
       document,
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'حدث خطأ داخلي' });
   }
 });
 
@@ -171,10 +172,13 @@ router.get('/documents/:id/download', async (req, res) => {
     });
 
     res.setHeader('Content-Type', result.mimeType);
-    res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(result.filename)}"`);
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="${encodeURIComponent(result.filename)}"`
+    );
     res.send(result.buffer);
   } catch (error) {
-    res.status(404).json({ error: error.message });
+    res.status(404).json({ error: 'حدث خطأ داخلي' });
   }
 });
 
@@ -194,7 +198,7 @@ router.put('/documents/:id', async (req, res) => {
       document,
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'حدث خطأ داخلي' });
   }
 });
 
@@ -230,7 +234,7 @@ router.post('/documents/:id/version', upload.single('file'), async (req, res) =>
       document,
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'حدث خطأ داخلي' });
   }
 });
 
@@ -250,7 +254,7 @@ router.post('/documents/:id/archive', async (req, res) => {
       document,
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'حدث خطأ داخلي' });
   }
 });
 
@@ -270,7 +274,7 @@ router.delete('/documents/:id', async (req, res) => {
       document,
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'حدث خطأ داخلي' });
   }
 });
 
@@ -290,7 +294,7 @@ router.get('/search', async (req, res) => {
       ...result,
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'حدث خطأ داخلي' });
   }
 });
 
@@ -308,7 +312,167 @@ router.get('/statistics', async (req, res) => {
       statistics: stats,
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'حدث خطأ داخلي' });
+  }
+});
+
+/**
+ * @route   GET /api/archive/stats
+ * @desc    Get archive storage stats (alias for frontend compatibility)
+ * @access  Private
+ */
+router.get('/stats', async (req, res) => {
+  try {
+    const stats = await archiveService.getStatistics(req.tenantId);
+
+    // Count documents by status
+    const Document = archiveService.Document;
+    const [totalDocs, archivedDocs, pendingDocs] = await Promise.all([
+      Document ? Document.countDocuments({ tenantId: req.tenantId }).catch(() => 0) : 0,
+      Document
+        ? Document.countDocuments({ tenantId: req.tenantId, status: 'archived' }).catch(() => 0)
+        : 0,
+      Document
+        ? Document.countDocuments({ tenantId: req.tenantId, status: 'pending' }).catch(() => 0)
+        : 0,
+    ]);
+
+    // Category counts
+    const categoryAgg = Document
+      ? await Document.aggregate([
+          { $match: req.tenantId ? { tenantId: req.tenantId } : {} },
+          {
+            $group: {
+              _id: '$category.main',
+              count: { $sum: 1 },
+              totalSize: { $sum: '$file.size' },
+            },
+          },
+        ]).catch(() => [])
+      : [];
+
+    const categoryCounts = {};
+    for (const cat of categoryAgg) {
+      if (cat._id) {
+        const catDef = archiveCategories.find(c => c.id === cat._id);
+        categoryCounts[cat._id] = {
+          count: cat.count,
+          size: cat.totalSize || 0,
+          label: catDef?.label || cat._id,
+          icon: catDef?.icon || '📁',
+          color: catDef?.color || '#757575',
+        };
+      }
+    }
+
+    res.json({
+      success: true,
+      totalStorage: 50 * 1024 * 1024 * 1024,
+      usedStorage: stats?.totalSize || 0,
+      documentsCount: totalDocs,
+      archivedCount: archivedDocs,
+      pendingCount: pendingDocs,
+      categoryCounts,
+      monthlyUploads: stats?.monthlyUploads || [],
+      fileTypeDistribution: stats?.fileTypeDistribution || [],
+      classificationDistribution: stats?.classificationDistribution || [],
+      recentSearches: [],
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'حدث خطأ داخلي' });
+  }
+});
+
+/**
+ * @route   GET /api/archive/activity
+ * @desc    Get recent activity log
+ * @access  Private
+ */
+router.get('/activity', async (req, res) => {
+  try {
+    const Document = archiveService.Document;
+    const limit = parseInt(req.query.limit) || 25;
+
+    // Fetch recently modified documents as activity
+    const recentDocs = Document
+      ? await Document.find(req.tenantId ? { tenantId: req.tenantId } : {})
+          .sort({ 'audit.updatedAt': -1, 'audit.createdAt': -1 })
+          .limit(limit)
+          .select('documentNumber title status audit category')
+          .lean()
+          .catch(() => [])
+      : [];
+
+    const activities = recentDocs.map((doc, i) => ({
+      _id: `act-${doc._id || i}`,
+      action:
+        doc.status === 'archived' ? 'أرشفة' : doc.status === 'deleted' ? 'حذف' : 'تحديث بيانات',
+      user: doc.audit?.createdBy || 'النظام',
+      document: doc.title || 'مستند',
+      documentNumber: doc.documentNumber || '',
+      timestamp: doc.audit?.updatedAt || doc.audit?.createdAt || new Date().toISOString(),
+      ip: '—',
+    }));
+
+    res.json({
+      success: true,
+      activities,
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'حدث خطأ داخلي' });
+  }
+});
+
+/**
+ * @route   GET /api/archive/retention-report
+ * @desc    Get retention policy report
+ * @access  Private
+ */
+router.get('/retention-report', async (req, res) => {
+  try {
+    const Document = archiveService.Document;
+    const now = new Date();
+    const thirtyDaysLater = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+    let expiringSoon = [];
+    let expired = [];
+    let totalRetained = 0;
+
+    if (Document) {
+      // Documents expiring within 30 days
+      expiringSoon = await Document.find({
+        'retention.expiresAt': { $gt: now, $lte: thirtyDaysLater },
+        ...(req.tenantId ? { tenantId: req.tenantId } : {}),
+      })
+        .lean()
+        .catch(() => []);
+
+      expiringSoon = expiringSoon.map(d => ({
+        ...d,
+        daysLeft: Math.ceil((new Date(d.retention?.expiresAt) - now) / (1000 * 60 * 60 * 24)),
+      }));
+
+      // Already expired documents
+      expired = await Document.find({
+        'retention.expiresAt': { $lte: now },
+        ...(req.tenantId ? { tenantId: req.tenantId } : {}),
+      })
+        .lean()
+        .catch(() => []);
+
+      totalRetained = await Document.countDocuments(
+        req.tenantId ? { tenantId: req.tenantId } : {}
+      ).catch(() => 0);
+    }
+
+    res.json({
+      success: true,
+      expiringSoon,
+      expired,
+      totalRetained,
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'حدث خطأ داخلي' });
   }
 });
 
@@ -338,7 +502,7 @@ router.get('/expired', async (req, res) => {
       documents,
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'حدث خطأ داخلي' });
   }
 });
 
@@ -356,7 +520,7 @@ router.post('/retention/process', async (req, res) => {
       ...result,
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'حدث خطأ داخلي' });
   }
 });
 
@@ -376,7 +540,7 @@ router.post('/folders', async (req, res) => {
       folder,
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'حدث خطأ داخلي' });
   }
 });
 
@@ -396,7 +560,7 @@ router.get('/folders/:id/contents', async (req, res) => {
       ...contents,
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'حدث خطأ داخلي' });
   }
 });
 
@@ -414,7 +578,7 @@ router.post('/documents/:id/ocr', async (req, res) => {
       message: 'OCR processing started',
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'حدث خطأ داخلي' });
   }
 });
 
@@ -445,7 +609,7 @@ router.post('/documents/:id/related', async (req, res) => {
       document,
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'حدث خطأ داخلي' });
   }
 });
 
@@ -456,15 +620,16 @@ router.post('/documents/:id/related', async (req, res) => {
  */
 router.get('/documents/:id/related', async (req, res) => {
   try {
-    const document = await archiveService.Document.findById(req.params.id)
-      .populate('relatedDocuments.document');
+    const document = await archiveService.Document.findById(req.params.id).populate(
+      'relatedDocuments.document'
+    );
 
     res.json({
       success: true,
       relatedDocuments: document.relatedDocuments,
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'حدث خطأ داخلي' });
   }
 });
 
@@ -490,7 +655,7 @@ router.get('/documents/:id/history', async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'حدث خطأ داخلي' });
   }
 });
 
@@ -503,21 +668,26 @@ router.get('/export', async (req, res) => {
   try {
     const { format = 'json', ...query } = req.query;
 
-    const result = await archiveService.searchDocuments({
-      ...query,
-      limit: 1000,
-    }, {
-      tenantId: req.tenantId,
-    });
+    const result = await archiveService.searchDocuments(
+      {
+        ...query,
+        limit: 1000,
+      },
+      {
+        tenantId: req.tenantId,
+      }
+    );
 
     if (format === 'csv') {
       const fields = ['documentNumber', 'title', 'category.main', 'status', 'audit.createdAt'];
       const header = fields.join(',');
       const rows = result.documents.map(doc =>
-        fields.map(f => {
-          const value = f.split('.').reduce((obj, key) => obj?.[key], doc);
-          return typeof value === 'string' && value.includes(',') ? `"${value}"` : value;
-        }).join(',')
+        fields
+          .map(f => {
+            const value = f.split('.').reduce((obj, key) => obj?.[key], doc);
+            return typeof value === 'string' && value.includes(',') ? `"${value}"` : value;
+          })
+          .join(',')
       );
 
       res.setHeader('Content-Type', 'text/csv; charset=utf-8');
@@ -531,7 +701,7 @@ router.get('/export', async (req, res) => {
       });
     }
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'حدث خطأ داخلي' });
   }
 });
 

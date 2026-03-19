@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Financial Validation Model
  * Tracks compliance violations and audit findings

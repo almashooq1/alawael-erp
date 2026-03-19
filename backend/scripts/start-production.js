@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable no-unused-vars */
 
 /**
  * Production Server Launcher
@@ -55,7 +56,7 @@ const main = async () => {
   // Check critical env vars
   process.stdout.write('  ⏳ Checking environment variables... ');
   const required = ['DATABASE_URI', 'JWT_SECRET', 'PORT'];
-  let missing = [];
+  const missing = [];
   required.forEach(key => {
     if (!process.env[key]) missing.push(key);
   });

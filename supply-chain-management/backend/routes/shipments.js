@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import ChangeLog from '../models/ChangeLog.js';
 import { sendMail } from '../utils/mailer.js';
 import express from 'express';
@@ -22,8 +23,12 @@ const router = express.Router();
 
 // Get all shipments
 router.get('/', authMiddleware, async (req, res) => {
-  const shipments = await Shipment.find().populate('order');
-  res.json(shipments);
+  try {
+    const shipments = await Shipment.find().populate('order');
+    res.json(shipments);
+  } catch (_err) {
+    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+  }
 });
 
 // Create shipment (with attachments upload)
@@ -49,57 +54,70 @@ router.post('/', authMiddleware, upload.array('attachments', 5), async (req, res
         subject: `شحنة جديدة #${shipment._id}`,
         text: `تم إضافة شحنة جديدة برقم ${shipment._id}\nمن المستخدم: ${req.user.email || req.user._id}`,
       });
-    } catch (e) {
+    } catch (_e) {
       /* تجاهل فشل البريد */
     }
     res.status(201).json(shipment);
-  } catch (err) {
+  } catch (_err) {
     res.status(500).json({ error: 'فشل رفع الشحنة' });
   }
 });
 
 // Update shipment
 router.put('/:id', authMiddleware, async (req, res) => {
-  const before = await Shipment.findById(req.params.id);
-  const shipment = await Shipment.findByIdAndUpdate(req.params.id, req.body, { new: true });
-  await logAction({
-    user: req.user,
-    action: 'update',
-    entity: 'Shipment',
-    entityId: shipment._id,
-    details: { before, after: shipment },
-  });
-  await ChangeLog.create({
-    entity: 'Shipment',
-    entityId: shipment._id,
-    action: 'update',
-    user: req.user._id,
-    before,
-    after: shipment,
-  });
-  res.json(shipment);
+  try {
+    const before = await Shipment.findById(req.params.id);
+    const { order, carrier, trackingNumber, status, estimatedDelivery, actualDelivery, notes } = req.body;
+    const shipment = await Shipment.findByIdAndUpdate(
+      req.params.id,
+      { order, carrier, trackingNumber, status, estimatedDelivery, actualDelivery, notes },
+      { new: true },
+    );
+    await logAction({
+      user: req.user,
+      action: 'update',
+      entity: 'Shipment',
+      entityId: shipment._id,
+      details: { before, after: shipment },
+    });
+    await ChangeLog.create({
+      entity: 'Shipment',
+      entityId: shipment._id,
+      action: 'update',
+      user: req.user._id,
+      before,
+      after: shipment,
+    });
+    res.json(shipment);
+  } catch (_err) {
+    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+  }
 });
 
 // Delete shipment
 router.delete('/:id', authMiddleware, async (req, res) => {
-  const before = await Shipment.findById(req.params.id);
-  await Shipment.findByIdAndDelete(req.params.id);
-  await logAction({
-    user: req.user,
-    action: 'delete',
-    entity: 'Shipment',
-    entityId: req.params.id,
-    details: { before },
-  });
-  await ChangeLog.create({
-    entity: 'Shipment',
-    entityId: req.params.id,
-    action: 'delete',
-    user: req.user._id,
-    before,
-    after: null,
-  });
-  res.status(204).end();
+  try {
+    const before = await Shipment.findById(req.params.id);
+    await Shipment.findByIdAndDelete(req.params.id);
+    await logAction({
+      user: req.user,
+      action: 'delete',
+      entity: 'Shipment',
+      entityId: req.params.id,
+      details: { before },
+    });
+    await ChangeLog.create({
+      entity: 'Shipment',
+      entityId: req.params.id,
+      action: 'delete',
+      user: req.user._id,
+      before,
+      after: null,
+    });
+    res.status(204).end();
+  } catch (_err) {
+    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+  }
 });
 
 export default router;

@@ -31,14 +31,7 @@ router.post('/create', (req: express.Request, res: express.Response) => {
       });
     }
 
-    const notification = notificationService.createNotification(
-      userId,
-      type,
-      title,
-      message,
-      priority,
-      recipients
-    );
+    const notification = notificationService.createNotification(userId, type, title, message, priority, recipients);
 
     res.json({
       success: true,
@@ -47,7 +40,7 @@ router.post('/create', (req: express.Request, res: express.Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -67,13 +60,7 @@ router.post('/from-template', (req: express.Request, res: express.Response) => {
       });
     }
 
-    const notification = notificationService.createFromTemplate(
-      userId,
-      type,
-      templateName,
-      variables,
-      recipients
-    );
+    const notification = notificationService.createFromTemplate(userId, type, templateName, variables, recipients);
 
     if (!notification) {
       return res.status(404).json({
@@ -89,7 +76,7 @@ router.post('/from-template', (req: express.Request, res: express.Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -119,7 +106,7 @@ router.post('/send-email', async (req: express.Request, res: express.Response) =
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -143,7 +130,7 @@ router.get('/:userId', (req: express.Request, res: express.Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -166,7 +153,7 @@ router.get('/:userId/unread', (req: express.Request, res: express.Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -195,7 +182,7 @@ router.put('/:notificationId/read', (req: express.Request, res: express.Response
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -224,7 +211,7 @@ router.delete('/:notificationId', (req: express.Request, res: express.Response) 
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -248,7 +235,7 @@ router.delete('/:userId/clear', (req: express.Request, res: express.Response) =>
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -272,7 +259,7 @@ router.post('/:userId/preferences', (req: express.Request, res: express.Response
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -294,7 +281,7 @@ router.get('/:userId/preferences', (req: express.Request, res: express.Response)
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -324,7 +311,7 @@ router.post('/bulk/create', (req: express.Request, res: express.Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -344,7 +331,7 @@ router.get('/stats', (req: express.Request, res: express.Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -378,7 +365,7 @@ router.post('/templates/add', (req: express.Request, res: express.Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });

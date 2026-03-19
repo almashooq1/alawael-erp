@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * AI Session Analysis Service
  * خدمة تحليل الجلسات بالذكاء الاصطناعي
@@ -7,6 +8,7 @@
 
 const axios = require('axios');
 const EventEmitter = require('events');
+const logger = require('../utils/logger');
 
 class AISessionService extends EventEmitter {
   constructor() {
@@ -24,11 +26,11 @@ class AISessionService extends EventEmitter {
       const response = await axios.get(`${this.modelEndpoint}/health`);
       if (response.status === 200) {
         this.initialized = true;
-        console.log('✅ AI Service initialized successfully');
+        // console.log('✅ AI Service initialized successfully');
         this.emit('ai:ready');
       }
     } catch (error) {
-      console.log('⚠️ AI Service unavailable - continuing with fallback mode');
+      // console.log('⚠️ AI Service unavailable - continuing with fallback mode');
       this.initialized = false;
     }
   }
@@ -43,16 +45,13 @@ class AISessionService extends EventEmitter {
         return this.fallbackDocumentationAnalysis(documentation);
       }
 
-      const response = await axios.post(
-        `${this.modelEndpoint}/analyze/documentation`,
-        {
-          content: documentation.content,
-          soap: documentation.soap,
-          therapistId,
-          patientId: documentation.beneficiaryId,
-          sessionDate: documentation.createdAt
-        }
-      );
+      const response = await axios.post(`${this.modelEndpoint}/analyze/documentation`, {
+        content: documentation.content,
+        soap: documentation.soap,
+        therapistId,
+        patientId: documentation.beneficiaryId,
+        sessionDate: documentation.createdAt,
+      });
 
       return {
         qualityScore: response.data.qualityScore,
@@ -61,10 +60,10 @@ class AISessionService extends EventEmitter {
         suggestedImprovements: response.data.suggestedImprovements,
         redFlags: response.data.redFlags,
         recommendedInterventions: response.data.recommendedInterventions,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     } catch (error) {
-      console.error('Documentation analysis error:', error);
+      logger.error('Documentation analysis error:', error);
       return this.fallbackDocumentationAnalysis(documentation);
     }
   }
@@ -79,24 +78,21 @@ class AISessionService extends EventEmitter {
         return this.fallbackProgressAnalysis(sessions, goals);
       }
 
-      const response = await axios.post(
-        `${this.modelEndpoint}/analyze/progress`,
-        {
-          patientId,
-          sessions: sessions.map(s => ({
-            date: s.completedAt,
-            duration: s.duration,
-            therapist: s.therapistId,
-            documentation: s.documentation?.soap
-          })),
-          goals: goals.map(g => ({
-            id: g._id,
-            name: g.name,
-            targetDate: g.targetDate,
-            metrics: g.metrics
-          }))
-        }
-      );
+      const response = await axios.post(`${this.modelEndpoint}/analyze/progress`, {
+        patientId,
+        sessions: sessions.map(s => ({
+          date: s.completedAt,
+          duration: s.duration,
+          therapist: s.therapistId,
+          documentation: s.documentation?.soap,
+        })),
+        goals: goals.map(g => ({
+          id: g._id,
+          name: g.name,
+          targetDate: g.targetDate,
+          metrics: g.metrics,
+        })),
+      });
 
       return {
         overallProgress: response.data.overallProgress,
@@ -106,10 +102,10 @@ class AISessionService extends EventEmitter {
         complianceScore: response.data.complianceScore,
         recommendations: response.data.recommendations,
         riskFactors: response.data.riskFactors,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     } catch (error) {
-      console.error('Progress analysis error:', error);
+      logger.error('Progress analysis error:', error);
       return this.fallbackProgressAnalysis(sessions, goals);
     }
   }
@@ -124,17 +120,14 @@ class AISessionService extends EventEmitter {
         return this.fallbackPredictiveAlerts(therapistData);
       }
 
-      const response = await axios.post(
-        `${this.modelEndpoint}/predict/alerts`,
-        {
-          patientId,
-          recentSessions: therapistData.recentSessions,
-          noShowHistory: therapistData.noShowCount,
-          satisfactionTrend: therapistData.satisfactionTrend,
-          engagementPattern: therapistData.engagementPattern,
-          clinicalHistory: clinicalHistory
-        }
-      );
+      const response = await axios.post(`${this.modelEndpoint}/predict/alerts`, {
+        patientId,
+        recentSessions: therapistData.recentSessions,
+        noShowHistory: therapistData.noShowCount,
+        satisfactionTrend: therapistData.satisfactionTrend,
+        engagementPattern: therapistData.engagementPattern,
+        clinicalHistory: clinicalHistory,
+      });
 
       return {
         alerts: response.data.alerts.map(alert => ({
@@ -143,14 +136,14 @@ class AISessionService extends EventEmitter {
           probability: alert.probability,
           description: alert.description,
           recommendedAction: alert.recommendedAction,
-          referralSuggestion: alert.referralSuggestion
+          referralSuggestion: alert.referralSuggestion,
         })),
         riskScore: response.data.riskScore,
         interventionSuggestions: response.data.interventionSuggestions,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     } catch (error) {
-      console.error('Predictive alerts error:', error);
+      logger.error('Predictive alerts error:', error);
       return this.fallbackPredictiveAlerts(therapistData);
     }
   }
@@ -165,27 +158,24 @@ class AISessionService extends EventEmitter {
         return this.fallbackTherapistRecommendation(availableTherapists);
       }
 
-      const response = await axios.post(
-        `${this.modelEndpoint}/recommend/therapist`,
-        {
-          patient: {
-            age: patientProfile.age,
-            condition: patientProfile.diagnosis,
-            language: patientProfile.language,
-            preferences: patientProfile.preferences,
-            previousTherapists: patientProfile.previousTherapistIds
-          },
-          therapists: availableTherapists.map(t => ({
-            id: t._id,
-            specializations: t.specializations,
-            experience: t.yearsExperience,
-            successRate: t.successRate,
-            patientSatisfaction: t.avgRating,
-            caseload: t.activePatients.length,
-            previousPatients: t.previousPatientCount
-          }))
-        }
-      );
+      const response = await axios.post(`${this.modelEndpoint}/recommend/therapist`, {
+        patient: {
+          age: patientProfile.age,
+          condition: patientProfile.diagnosis,
+          language: patientProfile.language,
+          preferences: patientProfile.preferences,
+          previousTherapists: patientProfile.previousTherapistIds,
+        },
+        therapists: availableTherapists.map(t => ({
+          id: t._id,
+          specializations: t.specializations,
+          experience: t.yearsExperience,
+          successRate: t.successRate,
+          patientSatisfaction: t.avgRating,
+          caseload: t.activePatients.length,
+          previousPatients: t.previousPatientCount,
+        })),
+      });
 
       return {
         recommendations: response.data.recommendations.map(rec => ({
@@ -193,13 +183,13 @@ class AISessionService extends EventEmitter {
           compatibilityScore: rec.compatibilityScore,
           reasoning: rec.reasoning,
           expectedOutcomes: rec.expectedOutcomes,
-          riskFactors: rec.riskFactors
+          riskFactors: rec.riskFactors,
         })),
         alternativeMatches: response.data.alternativeMatches,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     } catch (error) {
-      console.error('Therapist recommendation error:', error);
+      logger.error('Therapist recommendation error:', error);
       return this.fallbackTherapistRecommendation(availableTherapists);
     }
   }
@@ -214,13 +204,10 @@ class AISessionService extends EventEmitter {
         return this.fallbackTherapyAnalysis();
       }
 
-      const response = await axios.post(
-        `${this.modelEndpoint}/analyze/effectiveness`,
-        {
-          therapistId,
-          timeframe
-        }
-      );
+      const response = await axios.post(`${this.modelEndpoint}/analyze/effectiveness`, {
+        therapistId,
+        timeframe,
+      });
 
       return {
         effectivenessScore: response.data.effectivenessScore,
@@ -233,10 +220,10 @@ class AISessionService extends EventEmitter {
         areasForImprovement: response.data.areasForImprovement,
         benchmarkComparison: response.data.benchmarkComparison,
         recommendations: response.data.recommendations,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     } catch (error) {
-      console.error('Effectiveness analysis error:', error);
+      logger.error('Effectiveness analysis error:', error);
       return this.fallbackTherapyAnalysis();
     }
   }
@@ -251,16 +238,13 @@ class AISessionService extends EventEmitter {
         return { anomalies: [], normalPatterns: [] };
       }
 
-      const response = await axios.post(
-        `${this.modelEndpoint}/detect/anomalies`,
-        {
-          noShowPatterns: clinicData.noShowPatterns,
-          documentationQuality: clinicData.documentationQuality,
-          patientSatisfaction: clinicData.patientSatisfaction,
-          therapistPerformance: clinicData.therapistPerformance,
-          revenueTrends: clinicData.revenueTrends
-        }
-      );
+      const response = await axios.post(`${this.modelEndpoint}/detect/anomalies`, {
+        noShowPatterns: clinicData.noShowPatterns,
+        documentationQuality: clinicData.documentationQuality,
+        patientSatisfaction: clinicData.patientSatisfaction,
+        therapistPerformance: clinicData.therapistPerformance,
+        revenueTrends: clinicData.revenueTrends,
+      });
 
       return {
         anomalies: response.data.anomalies.map(a => ({
@@ -268,13 +252,13 @@ class AISessionService extends EventEmitter {
           severity: a.severity,
           affectedMetric: a.affectedMetric,
           description: a.description,
-          recommendation: a.recommendation
+          recommendation: a.recommendation,
         })),
         normalPatterns: response.data.normalPatterns,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     } catch (error) {
-      console.error('Anomaly detection error:', error);
+      logger.error('Anomaly detection error:', error);
       return { anomalies: [], normalPatterns: [] };
     }
   }
@@ -289,15 +273,12 @@ class AISessionService extends EventEmitter {
         return this.fallbackRecommendations();
       }
 
-      const response = await axios.post(
-        `${this.modelEndpoint}/generate/recommendations`,
-        {
-          patientId,
-          condition,
-          progress: currentProgress,
-          baselineMetrics: currentProgress.baseline
-        }
-      );
+      const response = await axios.post(`${this.modelEndpoint}/generate/recommendations`, {
+        patientId,
+        condition,
+        progress: currentProgress,
+        baselineMetrics: currentProgress.baseline,
+      });
 
       return {
         recommendedTechniques: response.data.recommendedTechniques,
@@ -306,10 +287,10 @@ class AISessionService extends EventEmitter {
         milestones: response.data.milestones,
         alternatives: response.data.alternatives,
         contraindications: response.data.contraindications,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     } catch (error) {
-      console.error('Recommendation generation error:', error);
+      logger.error('Recommendation generation error:', error);
       return this.fallbackRecommendations();
     }
   }
@@ -327,10 +308,13 @@ class AISessionService extends EventEmitter {
       qualityScore: lengthScore,
       completeness: documentation.soap?.subjective && documentation.soap?.objective ? 80 : 50,
       clinicalInsights: [],
-      suggestedImprovements: ['Add more specific patient observations', 'Include measurable outcomes'],
+      suggestedImprovements: [
+        'Add more specific patient observations',
+        'Include measurable outcomes',
+      ],
       redFlags: [],
       recommendedInterventions: [],
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 
@@ -342,14 +326,14 @@ class AISessionService extends EventEmitter {
       goalPredictions: goals.map(g => ({
         goalId: g._id,
         achievementProbability: 0.65 + Math.random() * 0.3,
-        estimatedDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
+        estimatedDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
       })),
       progressTrendline: [],
       motivationLevel: 'medium',
       complianceScore: 75,
       recommendations: ['Continue current therapy plan'],
       riskFactors: [],
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 
@@ -358,14 +342,12 @@ class AISessionService extends EventEmitter {
       alerts: [],
       riskScore: therapistData.noShowCount > 2 ? 'medium' : 'low',
       interventionSuggestions: [],
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 
   fallbackTherapistRecommendation(availableTherapists) {
-    const sorted = availableTherapists.sort(
-      (a, b) => (b.avgRating || 0) - (a.avgRating || 0)
-    );
+    const sorted = availableTherapists.sort((a, b) => (b.avgRating || 0) - (a.avgRating || 0));
 
     return {
       recommendations: sorted.slice(0, 3).map(t => ({
@@ -373,10 +355,10 @@ class AISessionService extends EventEmitter {
         compatibilityScore: 0.7 + Math.random() * 0.2,
         reasoning: 'Top rated therapist',
         expectedOutcomes: [],
-        riskFactors: []
+        riskFactors: [],
       })),
       alternativeMatches: sorted.slice(3, 6),
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 
@@ -392,7 +374,7 @@ class AISessionService extends EventEmitter {
       areasForImprovement: ['Session efficiency'],
       benchmarkComparison: 'above average',
       recommendations: [],
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 
@@ -404,7 +386,7 @@ class AISessionService extends EventEmitter {
       milestones: [],
       alternatives: [],
       contraindications: [],
-      timestamp: new Date()
+      timestamp: new Date(),
     };
   }
 }

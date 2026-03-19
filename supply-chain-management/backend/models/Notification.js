@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * DEPRECATED: This file now acts as a pass-through to the unified Notification model
  * All Notification operations should use the unified model

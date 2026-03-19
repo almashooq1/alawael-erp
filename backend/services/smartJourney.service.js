@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Smart Patient Journey & Experience Analytics (Phase 76)
  *
@@ -35,7 +36,10 @@ class SmartJourneyService {
         { stage: 'WAITING_LIST', dropOffRate: '15%', reason: 'Competitor availability' },
         { stage: 'INSURANCE_APPROVAL', dropOffRate: '8%', reason: 'High copay' },
       ],
-      recommendations: ['Implement "Fast-Track" assessment for high-acuity cases.', 'Offer payment plans during insurance negotiation.'],
+      recommendations: [
+        'Implement "Fast-Track" assessment for high-acuity cases.',
+        'Offer payment plans during insurance negotiation.',
+      ],
     };
   }
 

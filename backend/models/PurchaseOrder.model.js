@@ -1,269 +1,292 @@
+/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 /**
  * Purchase Order Schema - نموذج أوامر الشراء
  * الوثيقة الرسمية للشراء من الموردين
  */
-const PurchaseOrderSchema = new mongoose.Schema({
-  // ===== معلومات الأمر الأساسية =====
-  orderNumber: {
-    type: String,
-    required: true,
-    unique: true,
-    uppercase: true,
-  }, // PO-2026-0001
-  
-  orderDate: {
-    type: Date,
-    default: Date.now,
-  },
-  
-  requiredDeliveryDate: {
-    type: Date,
-    required: true,
-  },
-  
-  status: {
-    type: String,
-    enum: [
-      'DRAFT', // مسودة
-      'ISSUED', // صادر
-      'SENT_TO_SUPPLIER', // مرسل للمورد
-      'ACKNOWLEDGED', // تم التأكيد من المورد
-      'IN_PRODUCTION', // قيد الإنتاج
-      'READY_FOR_DISPATCH', // جاهز للشحن
-      'PARTIALLY_RECEIVED', // استقبال جزئي
-      'FULLY_RECEIVED', // استقبال كامل
-      'INVOICE_RECEIVED', // فاتورة مستلمة
-      'PAID', // تم الدفع
-      'CLOSED', // مغلق
-      'CANCELLED', // ملغى
-    ],
-    default: 'DRAFT',
-  },
-  
-  // ===== بيانات المورد =====
-  supplier: {
-    supplierId: mongoose.Schema.Types.ObjectId,
-    supplierCode: String,
-    supplierName: String,
-    supplierEmail: String,
-    supplierPhone: String,
-    supplierAddress: String,
-  },
-  
-  // ===== الطلب الأصلي =====
-  relatedPurchaseRequest: {
-    prId: mongoose.Schema.Types.ObjectId,
-    prNumber: String,
-  },
-  
-  // ===== تفاصيل البضاعة والأسعار =====
-  items: [{
-    itemCode: String,
-    itemName: String,
-    quantity: Number,
-    unit: String,
-    unitPrice: {
-      type: Number,
+const PurchaseOrderSchema = new mongoose.Schema(
+  {
+    // ===== معلومات الأمر الأساسية =====
+    orderNumber: {
+      type: String,
+      required: true,
+      unique: true,
+      uppercase: true,
+    }, // PO-2026-0001
+
+    orderDate: {
+      type: Date,
+      default: Date.now,
+    },
+
+    requiredDeliveryDate: {
+      type: Date,
       required: true,
     },
-    totalPrice: Number,
-    discount: {
-      type: Number,
-      default: 0,
-    }, // مبلغ الخصم
-    discountPercentage: { type: Number, default: 0 },
-    discountedPrice: Number,
-    tax: Number,
-    taxPercentage: { type: Number, default: 15 },
-    finalPrice: Number,
-    description: String,
-    specifications: String,
-    deliverySchedule: [{
-      deliveryDate: Date,
-      quantity: Number,
-    }],
-    receivedQuantity: { type: Number, default: 0 },
+
     status: {
       type: String,
-      enum: ['PENDING', 'PARTIALLY_RECEIVED', 'FULLY_RECEIVED'],
-      default: 'PENDING',
+      enum: [
+        'DRAFT', // مسودة
+        'ISSUED', // صادر
+        'SENT_TO_SUPPLIER', // مرسل للمورد
+        'ACKNOWLEDGED', // تم التأكيد من المورد
+        'IN_PRODUCTION', // قيد الإنتاج
+        'READY_FOR_DISPATCH', // جاهز للشحن
+        'PARTIALLY_RECEIVED', // استقبال جزئي
+        'FULLY_RECEIVED', // استقبال كامل
+        'INVOICE_RECEIVED', // فاتورة مستلمة
+        'PAID', // تم الدفع
+        'CLOSED', // مغلق
+        'CANCELLED', // ملغى
+      ],
+      default: 'DRAFT',
     },
-  }],
-  
-  // ===== ملخص الأسعار =====
-  summary: {
-    totalItems: Number,
-    totalQuantity: Number,
-    subtotal: {
-      type: Number,
-      default: 0,
+
+    // ===== بيانات المورد =====
+    supplier: {
+      supplierId: mongoose.Schema.Types.ObjectId,
+      supplierCode: String,
+      supplierName: String,
+      supplierEmail: String,
+      supplierPhone: String,
+      supplierAddress: String,
     },
-    totalDiscount: { type: Number, default: 0 },
-    discountPercentage: { type: Number, default: 0 },
-    subtotalAfterDiscount: { type: Number, default: 0 },
-    totalTax: { type: Number, default: 0 },
-    shippingCost: { type: Number, default: 0 },
-    insuranceCost: { type: Number, default: 0 },
-    otherCharges: { type: Number, default: 0 },
-    grandTotal: {
-      type: Number,
-      default: 0,
+
+    // ===== الطلب الأصلي =====
+    relatedPurchaseRequest: {
+      prId: mongoose.Schema.Types.ObjectId,
+      prNumber: String,
     },
-    currency: { type: String, default: 'SAR' },
-  },
-  
-  // ===== شروط التسليم والدفع =====
-  deliveryTerms: {
-    deliveryMethod: {
-      type: String,
-      enum: ['PICKUP', 'DELIVERY', 'DHL', 'ARAMEX', 'SMSA', 'OTHER'],
-      default: 'DELIVERY',
+
+    // ===== تفاصيل البضاعة والأسعار =====
+    items: [
+      {
+        itemCode: String,
+        itemName: String,
+        quantity: Number,
+        unit: String,
+        unitPrice: {
+          type: Number,
+          required: true,
+        },
+        totalPrice: Number,
+        discount: {
+          type: Number,
+          default: 0,
+        }, // مبلغ الخصم
+        discountPercentage: { type: Number, default: 0 },
+        discountedPrice: Number,
+        tax: Number,
+        taxPercentage: { type: Number, default: 15 },
+        finalPrice: Number,
+        description: String,
+        specifications: String,
+        deliverySchedule: [
+          {
+            deliveryDate: Date,
+            quantity: Number,
+          },
+        ],
+        receivedQuantity: { type: Number, default: 0 },
+        status: {
+          type: String,
+          enum: ['PENDING', 'PARTIALLY_RECEIVED', 'FULLY_RECEIVED'],
+          default: 'PENDING',
+        },
+      },
+    ],
+
+    // ===== ملخص الأسعار =====
+    summary: {
+      totalItems: Number,
+      totalQuantity: Number,
+      subtotal: {
+        type: Number,
+        default: 0,
+      },
+      totalDiscount: { type: Number, default: 0 },
+      discountPercentage: { type: Number, default: 0 },
+      subtotalAfterDiscount: { type: Number, default: 0 },
+      totalTax: { type: Number, default: 0 },
+      shippingCost: { type: Number, default: 0 },
+      insuranceCost: { type: Number, default: 0 },
+      otherCharges: { type: Number, default: 0 },
+      grandTotal: {
+        type: Number,
+        default: 0,
+      },
+      currency: { type: String, default: 'SAR' },
     },
-    deliveryAddress: String,
-    expectedDeliveryDate: Date,
-    actualDeliveryDate: Date,
-    trackingNumber: String,
-  },
-  
-  paymentTerms: {
-    paymentMethod: {
-      type: String,
-      enum: ['CASH', 'BANK_TRANSFER', 'CHEQUE', 'CREDIT_CARD', 'LETTER_OF_CREDIT'],
+
+    // ===== شروط التسليم والدفع =====
+    deliveryTerms: {
+      deliveryMethod: {
+        type: String,
+        enum: ['PICKUP', 'DELIVERY', 'DHL', 'ARAMEX', 'SMSA', 'OTHER'],
+        default: 'DELIVERY',
+      },
+      deliveryAddress: String,
+      expectedDeliveryDate: Date,
+      actualDeliveryDate: Date,
+      trackingNumber: String,
     },
-    creditDays: Number,
-    depositRequired: {
-      type: Number,
-      default: 0,
+
+    paymentTerms: {
+      paymentMethod: {
+        type: String,
+        enum: ['CASH', 'BANK_TRANSFER', 'CHEQUE', 'CREDIT_CARD', 'LETTER_OF_CREDIT'],
+      },
+      creditDays: Number,
+      depositRequired: {
+        type: Number,
+        default: 0,
+      },
+      depositPaid: { type: Boolean, default: false },
+      depositPaidDate: Date,
     },
-    depositPaid: { type: Boolean, default: false },
-    depositPaidDate: Date,
-  },
-  
-  // ===== الفاتورة والدفع =====
-  invoicing: {
-    invoiceNumber: String,
-    invoiceDate: Date,
-    invoiceAmount: Number,
-    invoiceUrl: String,
-    paymentDueDate: Date,
-    amountPaid: { type: Number, default: 0 },
-    amountDue: { type: Number, default: 0 },
-    paymentStatus: {
-      type: String,
-      enum: ['NOT_INVOICED', 'INVOICED', 'PARTIALLY_PAID', 'FULLY_PAID'],
-      default: 'NOT_INVOICED',
+
+    // ===== الفاتورة والدفع =====
+    invoicing: {
+      invoiceNumber: String,
+      invoiceDate: Date,
+      invoiceAmount: Number,
+      invoiceUrl: String,
+      paymentDueDate: Date,
+      amountPaid: { type: Number, default: 0 },
+      amountDue: { type: Number, default: 0 },
+      paymentStatus: {
+        type: String,
+        enum: ['NOT_INVOICED', 'INVOICED', 'PARTIALLY_PAID', 'FULLY_PAID'],
+        default: 'NOT_INVOICED',
+      },
+      paymentHistory: [
+        {
+          paymentDate: Date,
+          amountPaid: Number,
+          paymentMethod: String,
+          referenceNumber: String,
+          notes: String,
+        },
+      ],
     },
-    paymentHistory: [{
-      paymentDate: Date,
-      amountPaid: Number,
-      paymentMethod: String,
-      referenceNumber: String,
-      notes: String,
-    }],
-  },
-  
-  // ===== الاستقبال والتفتيش =====
-  reception: {
-    expectedReceiptDate: Date,
-    actualReceiptDate: Date,
-    receivedBy: mongoose.Schema.Types.ObjectId,
-    inspectedBy: mongoose.Schema.Types.ObjectId,
-    inspectionDate: Date,
-    qualityIssues: [{
-      itemCode: String,
-      issue: String,
-      severity: { type: String, enum: ['MINOR', 'MAJOR', 'CRITICAL'] },
-      actionTaken: String,
-    }],
-    damagedItems: Number,
-    shortageItems: [{
-      itemCode: String,
-      expectedQuantity: Number,
-      receivedQuantity: Number,
-    }],
-    overageItems: [{
-      itemCode: String,
-      expectedQuantity: Number,
-      receivedQuantity: Number,
-    }],
-    receivingNotes: String,
-  },
-  
-  // ===== الملاحظات والمراجع =====
-  notes: String,
-  internalNotes: String,
-  termsAndConditions: String,
-  
-  references: {
-    jobNumber: String,
-    projectCode: String,
-    contractNumber: String,
-    costCenter: String,
-  },
-  
-  approvalChain: [{
-    approverId: mongoose.Schema.Types.ObjectId,
-    approverName: String,
-    role: String,
-    status: {
-      type: String,
-      enum: ['PENDING', 'APPROVED', 'REJECTED'],
-      default: 'PENDING',
+
+    // ===== الاستقبال والتفتيش =====
+    reception: {
+      expectedReceiptDate: Date,
+      actualReceiptDate: Date,
+      receivedBy: mongoose.Schema.Types.ObjectId,
+      inspectedBy: mongoose.Schema.Types.ObjectId,
+      inspectionDate: Date,
+      qualityIssues: [
+        {
+          itemCode: String,
+          issue: String,
+          severity: { type: String, enum: ['MINOR', 'MAJOR', 'CRITICAL'] },
+          actionTaken: String,
+        },
+      ],
+      damagedItems: Number,
+      shortageItems: [
+        {
+          itemCode: String,
+          expectedQuantity: Number,
+          receivedQuantity: Number,
+        },
+      ],
+      overageItems: [
+        {
+          itemCode: String,
+          expectedQuantity: Number,
+          receivedQuantity: Number,
+        },
+      ],
+      receivingNotes: String,
     },
-    approvalDate: Date,
-    comments: String,
-  }],
-  
-  // ===== المرفقات والوثائق =====
-  attachments: [{
-    documentType: String,
-    fileName: String,
-    fileUrl: String,
-    uploadDate: Date,
-    uploadedBy: mongoose.Schema.Types.ObjectId,
-  }],
-  
-  // ===== التتبع والتاريخ =====
-  history: [{
-    event: String,
-    changedBy: mongoose.Schema.Types.ObjectId,
-    timestamp: { type: Date, default: Date.now },
-    details: String,
-    previousStatus: String,
-    newStatus: String,
-  }],
-  
-  // ===== الإخطارات والتنبيهات =====
-  alerts: [{
-    alertType: String,
-    message: String,
-    severity: { type: String, enum: ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'] },
+
+    // ===== الملاحظات والمراجع =====
+    notes: String,
+    internalNotes: String,
+    termsAndConditions: String,
+
+    references: {
+      jobNumber: String,
+      projectCode: String,
+      contractNumber: String,
+      costCenter: String,
+    },
+
+    approvalChain: [
+      {
+        approverId: mongoose.Schema.Types.ObjectId,
+        approverName: String,
+        role: String,
+        status: {
+          type: String,
+          enum: ['PENDING', 'APPROVED', 'REJECTED'],
+          default: 'PENDING',
+        },
+        approvalDate: Date,
+        comments: String,
+      },
+    ],
+
+    // ===== المرفقات والوثائق =====
+    attachments: [
+      {
+        documentType: String,
+        fileName: String,
+        fileUrl: String,
+        uploadDate: Date,
+        uploadedBy: mongoose.Schema.Types.ObjectId,
+      },
+    ],
+
+    // ===== التتبع والتاريخ =====
+    history: [
+      {
+        event: String,
+        changedBy: mongoose.Schema.Types.ObjectId,
+        timestamp: { type: Date, default: Date.now },
+        details: String,
+        previousStatus: String,
+        newStatus: String,
+      },
+    ],
+
+    // ===== الإخطارات والتنبيهات =====
+    alerts: [
+      {
+        alertType: String,
+        message: String,
+        severity: { type: String, enum: ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'] },
+        createdAt: { type: Date, default: Date.now },
+        acknowledged: { type: Boolean, default: false },
+      },
+    ],
+
+    // ===== البيانات الوصفية =====
+    createdBy: mongoose.Schema.Types.ObjectId,
     createdAt: { type: Date, default: Date.now },
-    acknowledged: { type: Boolean, default: false },
-  }],
-  
-  // ===== البيانات الوصفية =====
-  createdBy: mongoose.Schema.Types.ObjectId,
-  createdAt: { type: Date, default: Date.now },
-  updatedBy: mongoose.Schema.Types.ObjectId,
-  updatedAt: { type: Date, default: Date.now },
-  cancelledBy: mongoose.Schema.Types.ObjectId,
-  cancelledAt: Date,
-  cancellationReason: String,
-  
-  tags: [String],
-  isArmendment: { type: Boolean, default: false },
-  originalPONumber: String,
-  amendments: [mongoose.Schema.Types.ObjectId],
-}, {
-  timestamps: true,
-  collection: 'purchase_orders',
-});
+    updatedBy: mongoose.Schema.Types.ObjectId,
+    updatedAt: { type: Date, default: Date.now },
+    cancelledBy: mongoose.Schema.Types.ObjectId,
+    cancelledAt: Date,
+    cancellationReason: String,
+
+    tags: [String],
+    isArmendment: { type: Boolean, default: false },
+    originalPONumber: String,
+    amendments: [mongoose.Schema.Types.ObjectId],
+  },
+  {
+    timestamps: true,
+    collection: 'purchase_orders',
+  }
+);
 
 // Indexes
-PurchaseOrderSchema.index({ orderNumber: 1 });
 PurchaseOrderSchema.index({ status: 1 });
 PurchaseOrderSchema.index({ 'supplier.supplierId': 1 });
 PurchaseOrderSchema.index({ requiredDeliveryDate: 1 });
@@ -272,17 +295,19 @@ PurchaseOrderSchema.index({ 'summary.grandTotal': -1 });
 PurchaseOrderSchema.index({ relatedPurchaseRequest: 1 });
 
 // Virtuals
-PurchaseOrderSchema.virtual('daysUntilDelivery').get(function() {
+PurchaseOrderSchema.virtual('daysUntilDelivery').get(function () {
   const days = Math.ceil((this.requiredDeliveryDate - new Date()) / (1000 * 60 * 60 * 24));
   return Math.max(days, 0);
 });
 
-PurchaseOrderSchema.virtual('isOverdue').get(function() {
-  return this.requiredDeliveryDate < new Date() && 
-         !['FULLY_RECEIVED', 'CLOSED', 'CANCELLED'].includes(this.status);
+PurchaseOrderSchema.virtual('isOverdue').get(function () {
+  return (
+    this.requiredDeliveryDate < new Date() &&
+    !['FULLY_RECEIVED', 'CLOSED', 'CANCELLED'].includes(this.status)
+  );
 });
 
-PurchaseOrderSchema.virtual('deliveryProgress').get(function() {
+PurchaseOrderSchema.virtual('deliveryProgress').get(function () {
   const totalQty = this.items.reduce((sum, item) => sum + item.quantity, 0);
   const receivedQty = this.items.reduce((sum, item) => sum + item.receivedQuantity, 0);
   return totalQty > 0 ? (receivedQty / totalQty) * 100 : 0;
@@ -318,11 +343,11 @@ PurchaseOrderSchema.methods = {
     this.summary.totalDiscount = totalDiscount;
     this.summary.subtotalAfterDiscount = subtotal - totalDiscount;
     this.summary.totalTax = totalTax;
-    this.summary.grandTotal = 
-      this.summary.subtotalAfterDiscount + 
-      totalTax + 
-      (this.summary.shippingCost || 0) + 
-      (this.summary.insuranceCost || 0) + 
+    this.summary.grandTotal =
+      this.summary.subtotalAfterDiscount +
+      totalTax +
+      (this.summary.shippingCost || 0) +
+      (this.summary.insuranceCost || 0) +
       (this.summary.otherCharges || 0);
 
     return this.summary;

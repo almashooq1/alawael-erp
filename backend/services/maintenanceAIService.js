@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Maintenance AI Service - خدمة الذكاء الاصطناعي للصيانة
  *
@@ -107,7 +108,10 @@ class MaintenanceAIService {
   predictOilChange(patterns, performance) {
     const standardInterval = 5000; // كم معياري
     const nextDue = new Date();
-    const daysEstimate = Math.round(standardInterval / (patterns.averageIntervalKm / patterns.averageIntervalDays || 20) / 100) * 100;
+    const daysEstimate =
+      Math.round(
+        standardInterval / (patterns.averageIntervalKm / patterns.averageIntervalDays || 20) / 100
+      ) * 100;
     nextDue.setDate(nextDue.getDate() + daysEstimate);
 
     return {
@@ -127,7 +131,10 @@ class MaintenanceAIService {
   predictFilterChange(patterns, performance) {
     const standardInterval = 10000;
     const nextDue = new Date();
-    const daysEstimate = Math.round(standardInterval / (patterns.averageIntervalKm / patterns.averageIntervalDays || 40) / 100) * 100;
+    const daysEstimate =
+      Math.round(
+        standardInterval / (patterns.averageIntervalKm / patterns.averageIntervalDays || 40) / 100
+      ) * 100;
     nextDue.setDate(nextDue.getDate() + daysEstimate);
 
     return {
@@ -147,7 +154,10 @@ class MaintenanceAIService {
   predictTireChange(patterns, performance) {
     const standardInterval = 20000;
     const nextDue = new Date();
-    const daysEstimate = Math.round(standardInterval / (patterns.averageIntervalKm / patterns.averageIntervalDays || 80) / 100) * 100;
+    const daysEstimate =
+      Math.round(
+        standardInterval / (patterns.averageIntervalKm / patterns.averageIntervalDays || 80) / 100
+      ) * 100;
     nextDue.setDate(nextDue.getDate() + daysEstimate);
 
     return {
@@ -167,7 +177,10 @@ class MaintenanceAIService {
   predictBrakeChange(patterns, performance) {
     const standardInterval = 40000;
     const nextDue = new Date();
-    const daysEstimate = Math.round(standardInterval / (patterns.averageIntervalKm / patterns.averageIntervalDays || 160) / 100) * 100;
+    const daysEstimate =
+      Math.round(
+        standardInterval / (patterns.averageIntervalKm / patterns.averageIntervalDays || 160) / 100
+      ) * 100;
     nextDue.setDate(nextDue.getDate() + daysEstimate);
 
     return {
@@ -187,7 +200,10 @@ class MaintenanceAIService {
   predictBatteryIssue(patterns, performance) {
     const standardInterval = 50000;
     const nextDue = new Date();
-    const daysEstimate = Math.round(standardInterval / (patterns.averageIntervalKm / patterns.averageIntervalDays || 200) / 100) * 100;
+    const daysEstimate =
+      Math.round(
+        standardInterval / (patterns.averageIntervalKm / patterns.averageIntervalDays || 200) / 100
+      ) * 100;
     nextDue.setDate(nextDue.getDate() + daysEstimate);
 
     return {
@@ -250,7 +266,7 @@ class MaintenanceAIService {
     const normalRange = {
       'سيارة ركوب': { min: 6, max: 12 },
       'سيارة نقل': { min: 4, max: 8 },
-      'شاحنة': { min: 2, max: 6 },
+      شاحنة: { min: 2, max: 6 },
     };
 
     const vehicleType = vehicle.basicInfo.type;

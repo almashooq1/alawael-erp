@@ -3,7 +3,7 @@
  * مكون تحميل المستندات
  */
 
-import React, { useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import {
   Box,
   Button,
@@ -24,7 +24,8 @@ import {
   CircularProgress,
 } from '@mui/material';
 import { CloudUpload as CloudUploadIcon, Close as CloseIcon } from '@mui/icons-material';
-import documentService from '../services/documentService';
+import { statusColors, surfaceColors } from '../../theme/palette';
+import documentService from 'services/documentService';
 
 const DocumentUploader = ({ onSuccess, onClose }) => {
   const fileInputRef = useRef(null);
@@ -37,8 +38,9 @@ const DocumentUploader = ({ onSuccess, onClose }) => {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState(null);
+  const [dragOver, setDragOver] = useState(false);
 
-  const categories = ['تقارير', 'عقود', 'سياسات', 'تدريب', 'مالي', 'أخرى'];
+  const categories = ['تقارير', 'عقود', 'سياسات', 'تدريب', 'مالي', 'شهادات', 'مراسلات', 'أخرى'];
 
   const handleFileSelect = event => {
     const selectedFile = event.target.files[0];
@@ -49,18 +51,107 @@ const DocumentUploader = ({ onSuccess, onClose }) => {
         return;
       }
 
-      // التحقق من نوع الملف
+      // التحقق من نوع الملف — accept both MIME and extension
       const allowedTypes = [
+        // PDF
         'application/pdf',
+        // Microsoft Office (modern)
         'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        // Microsoft Office (legacy)
+        'application/msword',
+        'application/vnd.ms-excel',
+        'application/vnd.ms-powerpoint',
+        // Microsoft Office (macro-enabled)
+        'application/vnd.ms-word.document.macroEnabled.12',
+        'application/vnd.ms-excel.sheet.macroEnabled.12',
+        'application/vnd.ms-powerpoint.presentation.macroEnabled.12',
+        // OpenDocument
+        'application/vnd.oasis.opendocument.text',
+        'application/vnd.oasis.opendocument.spreadsheet',
+        'application/vnd.oasis.opendocument.presentation',
+        // Images
         'image/jpeg',
         'image/png',
+        'image/gif',
+        'image/bmp',
+        'image/webp',
+        'image/tiff',
+        'image/svg+xml',
+        // Text & Data
         'text/plain',
+        'text/csv',
+        'text/html',
+        'text/xml',
+        'application/xml',
+        'application/json',
+        'application/rtf',
+        'text/rtf',
+        // Archives
+        'application/zip',
+        'application/x-zip-compressed',
+        'application/x-rar-compressed',
+        'application/vnd.rar',
+        'application/x-7z-compressed',
+        'application/gzip',
+        'application/x-tar',
+        // Audio
+        'audio/mpeg',
+        'audio/wav',
+        'audio/ogg',
+        // Video
+        'video/mp4',
+        'video/webm',
+        'video/ogg',
       ];
 
-      if (!allowedTypes.includes(selectedFile.type)) {
-        setError('نوع الملف غير مدعوم');
+      const allowedExts = [
+        '.pdf',
+        '.doc',
+        '.docx',
+        '.docm',
+        '.xls',
+        '.xlsx',
+        '.xlsm',
+        '.ppt',
+        '.pptx',
+        '.pptm',
+        '.odt',
+        '.ods',
+        '.odp',
+        '.txt',
+        '.csv',
+        '.rtf',
+        '.html',
+        '.htm',
+        '.xml',
+        '.json',
+        '.jpg',
+        '.jpeg',
+        '.png',
+        '.gif',
+        '.bmp',
+        '.webp',
+        '.tiff',
+        '.tif',
+        '.svg',
+        '.zip',
+        '.rar',
+        '.7z',
+        '.gz',
+        '.tar',
+        '.mp3',
+        '.wav',
+        '.ogg',
+        '.mp4',
+        '.webm',
+        '.ogv',
+      ];
+
+      const ext = ('.' + selectedFile.name.split('.').pop()).toLowerCase();
+      if (!allowedTypes.includes(selectedFile.type) && !allowedExts.includes(ext)) {
+        setError(`نوع الملف غير مدعوم (${ext}). الأنواع المقبولة: مستندات، صور، أرشيف، صوت، فيديو`);
         return;
       }
 
@@ -88,10 +179,23 @@ const DocumentUploader = ({ onSuccess, onClose }) => {
 
     setUploading(true);
     setError(null);
+    setUploadProgress(0);
 
     try {
-      const result = await documentService.uploadDocument(file, title, description, category, tags.join(','));
+      // Simulate incremental progress while upload is in progress
+      const progressInterval = setInterval(() => {
+        setUploadProgress(prev => Math.min(prev + 10, 90));
+      }, 400);
 
+      const result = await documentService.uploadDocument(
+        file,
+        title,
+        description,
+        category,
+        tags.join(',')
+      );
+
+      clearInterval(progressInterval);
       setUploadProgress(100);
       setTimeout(() => {
         if (onSuccess) {
@@ -100,12 +204,36 @@ const DocumentUploader = ({ onSuccess, onClose }) => {
         if (onClose) {
           onClose();
         }
-      }, 1000);
+      }, 600);
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'خطأ في رفع الملف');
     } finally {
       setUploading(false);
-      setUploadProgress(0);
+    }
+  };
+
+  /* ─── Drag & Drop Handlers ─── */
+  const handleDragOver = e => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragOver(true);
+  };
+
+  const handleDragLeave = e => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragOver(false);
+  };
+
+  const handleDrop = e => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragOver(false);
+    const droppedFile = e.dataTransfer.files?.[0];
+    if (droppedFile) {
+      // Reuse same validation logic
+      const fakeEvent = { target: { files: [droppedFile] } };
+      handleFileSelect(fakeEvent);
     }
   };
 
@@ -125,27 +253,38 @@ const DocumentUploader = ({ onSuccess, onClose }) => {
           {/* منطقة التحميل */}
           <Card
             variant="outlined"
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
             sx={{
               p: 3,
               textAlign: 'center',
-              border: '2px dashed #1976d2',
+              border: `2px dashed ${dragOver ? statusColors.success : statusColors.primaryBlue}`,
               borderRadius: 2,
               cursor: 'pointer',
               transition: 'all 0.3s',
+              backgroundColor: dragOver ? surfaceColors.successLight : 'transparent',
               '&:hover': {
-                backgroundColor: '#f5f5f5',
+                backgroundColor: surfaceColors.lightGray,
               },
             }}
             onClick={() => fileInputRef.current.click()}
           >
-            <CloudUploadIcon sx={{ fontSize: 48, color: '#1976d2', mb: 1 }} />
+            <CloudUploadIcon sx={{ fontSize: 48, color: statusColors.primaryBlue, mb: 1 }} />
             <Typography variant="body1" sx={{ mb: 1 }}>
               انقر لاختيار ملف أو اسحبه هنا
             </Typography>
             <Typography variant="caption" color="textSecondary">
-              الحد الأقصى 50 MB - PDF, Word, Excel, صور
+              الحد الأقصى 50 MB — PDF, Word, Excel, PowerPoint, صور, CSV, أرشيف, صوت, فيديو
             </Typography>
-            <input ref={fileInputRef} type="file" hidden onChange={handleFileSelect} />
+            <input
+              ref={fileInputRef}
+              type="file"
+              hidden
+              onChange={handleFileSelect}
+              accept=".pdf,.doc,.docx,.docm,.xls,.xlsx,.xlsm,.ppt,.pptx,.pptm,.odt,.ods,.odp,.txt,.csv,.rtf,.html,.htm,.xml,.json,.jpg,.jpeg,.png,.gif,.bmp,.webp,.tiff,.tif,.svg,.zip,.rar,.7z,.gz,.tar,.mp3,.wav,.ogg,.mp4,.webm,.ogv"
+              aria-label="رفع ملف"
+            />
           </Card>
 
           {/* الملف المختار */}
@@ -153,7 +292,7 @@ const DocumentUploader = ({ onSuccess, onClose }) => {
             <Box
               sx={{
                 p: 2,
-                backgroundColor: '#f5f5f5',
+                backgroundColor: surfaceColors.lightGray,
                 borderRadius: 1,
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -175,7 +314,13 @@ const DocumentUploader = ({ onSuccess, onClose }) => {
           )}
 
           {/* الحقول */}
-          <TextField label="العنوان" fullWidth value={title} onChange={e => setTitle(e.target.value)} placeholder="أدخل عنوان المستند" />
+          <TextField
+            label="العنوان"
+            fullWidth
+            value={title}
+            onChange={e => setTitle(e.target.value)}
+            placeholder="أدخل عنوان المستند"
+          />
 
           <TextField
             label="الوصف"
@@ -205,7 +350,12 @@ const DocumentUploader = ({ onSuccess, onClose }) => {
               fullWidth
               value={tagInput}
               onChange={e => setTagInput(e.target.value)}
-              onKeyPress={e => e.key === 'Enter' && handleAddTag()}
+              onKeyDown={e => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleAddTag();
+                }
+              }}
               size="small"
             />
             <Box sx={{ mt: 1, display: 'flex', flexWrap: 'wrap', gap: 1 }}>

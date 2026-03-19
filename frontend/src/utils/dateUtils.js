@@ -1,167 +1,254 @@
 /**
- * Date Formatting Utilities
+ * dateUtils — Date formatting, Hijri conversion, and relative time helpers.
+ * مكتبة أدوات التاريخ — التنسيق، التحويل الهجري، والتاريخ النسبي
  */
 
-// Format date to display format
-export const formatDate = (date, format = 'DD/MM/YYYY') => {
-  if (!date) return '';
+/**
+ * Format a date to Arabic locale string.
+ * @param {string|Date} date — Date to format
+ * @param {object} [options] — Intl.DateTimeFormat options
+ * @returns {string}
+ */
+export const formatDate = (date, options = {}) => {
+  if (!date) return '—';
+  try {
+    const d = typeof date === 'string' ? new Date(date) : date;
+    if (isNaN(d.getTime())) return '—';
+    return d.toLocaleDateString('ar-SA', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      ...options,
+    });
+  } catch {
+    return '—';
+  }
+};
 
+/**
+ * Format a date to Hijri calendar.
+ * @param {string|Date} date
+ * @param {object} [options]
+ * @returns {string}
+ */
+export const formatHijri = (date, options = {}) => {
+  if (!date) return '—';
+  try {
+    const d = typeof date === 'string' ? new Date(date) : date;
+    if (isNaN(d.getTime())) return '—';
+    return d.toLocaleDateString('ar-SA-u-ca-islamic', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      ...options,
+    });
+  } catch {
+    return '—';
+  }
+};
+
+/**
+ * Format a date with time.
+ * @param {string|Date} date
+ * @returns {string}
+ */
+export const formatDateTime = date => {
+  if (!date) return '—';
+  try {
+    const d = typeof date === 'string' ? new Date(date) : date;
+    if (isNaN(d.getTime())) return '—';
+    return d.toLocaleString('ar-SA', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  } catch {
+    return '—';
+  }
+};
+
+/**
+ * Format time only (HH:MM).
+ * @param {string|Date} date
+ * @returns {string}
+ */
+export const formatTime = date => {
+  if (!date) return '—';
+  try {
+    const d = typeof date === 'string' ? new Date(date) : date;
+    if (isNaN(d.getTime())) return '—';
+    return d.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
+  } catch {
+    return '—';
+  }
+};
+
+/**
+ * Relative time string (e.g., "منذ 5 دقائق").
+ * @param {string|Date} date
+ * @returns {string}
+ */
+export const timeAgo = date => {
+  if (!date) return '';
+  try {
+    const d = typeof date === 'string' ? new Date(date) : date;
+    const now = new Date();
+    const diffMs = now - d;
+    const diffSec = Math.floor(diffMs / 1000);
+    const diffMin = Math.floor(diffSec / 60);
+    const diffHour = Math.floor(diffMin / 60);
+    const diffDay = Math.floor(diffHour / 24);
+    const diffWeek = Math.floor(diffDay / 7);
+    const diffMonth = Math.floor(diffDay / 30);
+
+    if (diffSec < 60) return 'الآن';
+    if (diffMin < 60)
+      return `منذ ${diffMin} ${diffMin === 1 ? 'دقيقة' : diffMin <= 10 ? 'دقائق' : 'دقيقة'}`;
+    if (diffHour < 24)
+      return `منذ ${diffHour} ${diffHour === 1 ? 'ساعة' : diffHour <= 10 ? 'ساعات' : 'ساعة'}`;
+    if (diffDay < 7)
+      return `منذ ${diffDay} ${diffDay === 1 ? 'يوم' : diffDay <= 10 ? 'أيام' : 'يوم'}`;
+    if (diffWeek < 5) return `منذ ${diffWeek} ${diffWeek === 1 ? 'أسبوع' : 'أسابيع'}`;
+    if (diffMonth < 12)
+      return `منذ ${diffMonth} ${diffMonth === 1 ? 'شهر' : diffMonth <= 10 ? 'أشهر' : 'شهر'}`;
+    return formatDate(d);
+  } catch {
+    return '';
+  }
+};
+
+/**
+ * Get start and end of a date (midnight to 23:59:59).
+ * @param {Date} date
+ * @returns {{ start: Date, end: Date }}
+ */
+export const getDayRange = date => {
   const d = new Date(date);
-  const day = String(d.getDate()).padStart(2, '0');
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const year = d.getFullYear();
-  const hours = String(d.getHours()).padStart(2, '0');
-  const minutes = String(d.getMinutes()).padStart(2, '0');
-
-  return format
-    .replace('DD', day)
-    .replace('MM', month)
-    .replace('YYYY', year)
-    .replace('HH', hours)
-    .replace('mm', minutes);
+  const start = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0);
+  const end = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59);
+  return { start, end };
 };
 
-// Format date to ISO string
-export const formatDateToISO = (date) => {
-  if (!date) return '';
-  return new Date(date).toISOString().split('T')[0];
+/**
+ * Get difference between two dates in days.
+ * @param {string|Date} date1
+ * @param {string|Date} date2
+ * @returns {number}
+ */
+export const daysBetween = (date1, date2) => {
+  const d1 = new Date(date1);
+  const d2 = new Date(date2);
+  return Math.round(Math.abs(d2 - d1) / (1000 * 60 * 60 * 24));
 };
 
-// Parse ISO date
-export const parseISODate = (dateString) => {
-  if (!dateString) return null;
-  return new Date(dateString);
-};
-
-// Get relative time (e.g., "2 hours ago")
-export const getRelativeTime = (date) => {
-  if (!date) return '';
-
-  const now = new Date();
-  const past = new Date(date);
-  const diffMs = now - past;
-  const diffSecs = Math.floor(diffMs / 1000);
-  const diffMins = Math.floor(diffSecs / 60);
-  const diffHours = Math.floor(diffMins / 60);
-  const diffDays = Math.floor(diffHours / 24);
-
-  if (diffSecs < 60) return 'Just now';
-  if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
-  if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
-  if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
-
-  return formatDate(date);
-};
-
-// Get date range (start and end dates)
-export const getDateRange = (days) => {
-  const end = new Date();
-  const start = new Date();
-  start.setDate(start.getDate() - days);
-
-  return {
-    start: formatDateToISO(start),
-    end: formatDateToISO(end),
-  };
-};
-
-// Get current month dates
-export const getCurrentMonthDates = () => {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth();
-
-  const start = new Date(year, month, 1);
-  const end = new Date(year, month + 1, 0);
-
-  return {
-    start: formatDateToISO(start),
-    end: formatDateToISO(end),
-  };
-};
-
-// Get quarter dates
-export const getQuarterDates = (quarter = null) => {
-  const now = new Date();
-  const year = now.getFullYear();
-  const currentQuarter = Math.floor(now.getMonth() / 3);
-  const q = quarter !== null ? quarter : currentQuarter;
-
-  const month = q * 3;
-  const start = new Date(year, month, 1);
-  const end = new Date(year, month + 3, 0);
-
-  return {
-    start: formatDateToISO(start),
-    end: formatDateToISO(end),
-  };
-};
-
-// Get year dates
-export const getYearDates = (year = null) => {
-  const y = year || new Date().getFullYear();
-  const start = new Date(y, 0, 1);
-  const end = new Date(y, 11, 31);
-
-  return {
-    start: formatDateToISO(start),
-    end: formatDateToISO(end),
-  };
-};
-
-// Check if date is today
-export const isToday = (date) => {
+/**
+ * Check if a date is today.
+ * @param {string|Date} date
+ * @returns {boolean}
+ */
+export const isToday = date => {
+  const d = new Date(date);
   const today = new Date();
-  const compareDate = new Date(date);
-
   return (
-    today.getDate() === compareDate.getDate() &&
-    today.getMonth() === compareDate.getMonth() &&
-    today.getFullYear() === compareDate.getFullYear()
+    d.getDate() === today.getDate() &&
+    d.getMonth() === today.getMonth() &&
+    d.getFullYear() === today.getFullYear()
   );
 };
 
-// Check if date is in past
-export const isPast = (date) => {
-  return new Date(date) < new Date();
+/**
+ * Check if a date is in the past.
+ * @param {string|Date} date
+ * @returns {boolean}
+ */
+export const isPast = date => new Date(date) < new Date();
+
+/**
+ * Check if a date is in the future.
+ * @param {string|Date} date
+ * @returns {boolean}
+ */
+export const isFuture = date => new Date(date) > new Date();
+
+/**
+ * Format date to YYYY-MM-DD for input fields.
+ * @param {string|Date} date
+ * @returns {string}
+ */
+export const toInputDate = date => {
+  if (!date) return '';
+  try {
+    const d = typeof date === 'string' ? new Date(date) : date;
+    return d.toISOString().split('T')[0];
+  } catch {
+    return '';
+  }
 };
 
-// Check if date is in future
-export const isFuture = (date) => {
-  return new Date(date) > new Date();
-};
+/**
+ * Arabic day names.
+ */
+export const ARABIC_DAYS = [
+  'الأحد',
+  'الإثنين',
+  'الثلاثاء',
+  'الأربعاء',
+  'الخميس',
+  'الجمعة',
+  'السبت',
+];
 
-// Get month name
-export const getMonthName = (date, locale = 'en-US') => {
-  return new Date(date).toLocaleString(locale, { month: 'long' });
-};
+/**
+ * Arabic month names.
+ */
+export const ARABIC_MONTHS = [
+  'يناير',
+  'فبراير',
+  'مارس',
+  'أبريل',
+  'مايو',
+  'يونيو',
+  'يوليو',
+  'أغسطس',
+  'سبتمبر',
+  'أكتوبر',
+  'نوفمبر',
+  'ديسمبر',
+];
 
-// Get day name
-export const getDayName = (date, locale = 'en-US') => {
-  return new Date(date).toLocaleString(locale, { weekday: 'long' });
-};
-
-// Format time duration
-export const formatDuration = (seconds) => {
-  if (seconds < 60) return `${seconds}s`;
-  if (seconds < 3600) return `${Math.floor(seconds / 60)}m`;
-  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h`;
-  return `${Math.floor(seconds / 86400)}d`;
-};
+/**
+ * Hijri month names.
+ */
+export const HIJRI_MONTHS = [
+  'محرم',
+  'صفر',
+  'ربيع الأول',
+  'ربيع الثاني',
+  'جمادى الأولى',
+  'جمادى الآخرة',
+  'رجب',
+  'شعبان',
+  'رمضان',
+  'شوال',
+  'ذو القعدة',
+  'ذو الحجة',
+];
 
 export default {
   formatDate,
-  formatDateToISO,
-  parseISODate,
-  getRelativeTime,
-  getDateRange,
-  getCurrentMonthDates,
-  getQuarterDates,
-  getYearDates,
+  formatHijri,
+  formatDateTime,
+  formatTime,
+  timeAgo,
+  getDayRange,
+  daysBetween,
   isToday,
   isPast,
   isFuture,
-  getMonthName,
-  getDayName,
-  formatDuration,
+  toInputDate,
+  ARABIC_DAYS,
+  ARABIC_MONTHS,
+  HIJRI_MONTHS,
 };

@@ -1,7 +1,11 @@
+/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 const { v4: uuidv4 } = require('uuid');
 
-const useMock = process.env.USE_MOCK_DB === 'true' || process.env.NODE_ENV === 'test' || process.env.JEST_WORKER_ID !== undefined;
+const useMock =
+  process.env.USE_MOCK_DB === 'true' ||
+  process.env.NODE_ENV === 'test' ||
+  process.env.JEST_WORKER_ID !== undefined;
 
 if (!useMock) {
   const PredictionSchema = new mongoose.Schema({
@@ -93,7 +97,9 @@ if (!useMock) {
 
       const chainable = data => ({
         sort(sortObj = {}) {
-          const [[key, direction]] = Object.entries(sortObj).length ? Object.entries(sortObj) : [['createdAt', -1]];
+          const [[key, direction]] = Object.entries(sortObj).length
+            ? Object.entries(sortObj)
+            : [['createdAt', -1]];
           const sorted = [...data].sort((a, b) => {
             const aVal = a[key] instanceof Date ? a[key].getTime() : a[key];
             const bVal = b[key] instanceof Date ? b[key].getTime() : b[key];

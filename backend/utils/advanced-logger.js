@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Advanced Logging System - نظام التسجيل المتقدم
  * Professional Logging for Alawael ERP
@@ -17,7 +18,7 @@ const LOG_LEVELS = {
   error: 50,
   fatal: 60,
   security: 70, // Custom level for security events
-  audit: 80,    // Custom level for audit logs
+  audit: 80, // Custom level for audit logs
 };
 
 /**
@@ -25,16 +26,16 @@ const LOG_LEVELS = {
  */
 const config = {
   level: process.env.LOG_LEVEL || 'info',
-  
+
   // Output
   prettyPrint: process.env.LOG_PRETTY === 'true' || process.env.NODE_ENV !== 'production',
-  
+
   // File logging
   fileLogging: process.env.LOG_FILE === 'true',
   logDirectory: process.env.LOG_DIRECTORY || './logs',
   maxFileSize: parseInt(process.env.LOG_MAX_SIZE || '10485760'), // 10MB
   maxFiles: parseInt(process.env.LOG_MAX_FILES || '5'),
-  
+
   // Redaction (sensitive fields to hide)
   redactFields: [
     'password',
@@ -50,10 +51,10 @@ const config = {
     'cvv',
     'ssn',
   ],
-  
+
   // Sampling (for high-volume logs)
   sampleRate: parseFloat(process.env.LOG_SAMPLE_RATE || '1.0'),
-  
+
   // Context
   service: process.env.SERVICE_NAME || 'alawael-erp',
   version: process.env.SERVICE_VERSION || '1.0.0',
@@ -68,7 +69,7 @@ const formatters = {
    * Format timestamp in ISO 8601
    */
   timestamp: () => `,"time":"${new Date().toISOString()}"`,
-  
+
   /**
    * Format log level
    */
@@ -76,11 +77,11 @@ const formatters = {
     const levelName = Object.keys(LOG_LEVELS).find(key => LOG_LEVELS[key] === number) || label;
     return { level: number, levelName };
   },
-  
+
   /**
    * Format bindings (base fields)
    */
-  bindings: (bindings) => ({
+  bindings: bindings => ({
     pid: bindings.pid,
     hostname: bindings.hostname,
     service: config.service,
@@ -126,58 +127,55 @@ const createBaseLogger = () => {
         },
       }
     : undefined;
-  
+
   const streams = [];
-  
+
   // Console stream
   streams.push({
     level: config.level,
     stream: process.stdout,
   });
-  
+
   // File stream (if enabled)
   if (config.fileLogging) {
     // Ensure log directory exists
     if (!fs.existsSync(config.logDirectory)) {
       fs.mkdirSync(config.logDirectory, { recursive: true });
     }
-    
+
     // All logs
     streams.push({
       level: 'trace',
-      stream: fs.createWriteStream(
-        path.join(config.logDirectory, 'app.log'),
-        { flags: 'a' }
-      ),
+      stream: fs.createWriteStream(path.join(config.logDirectory, 'app.log'), { flags: 'a' }),
     });
-    
+
     // Error logs only
     streams.push({
       level: 'error',
-      stream: fs.createWriteStream(
-        path.join(config.logDirectory, 'error.log'),
-        { flags: 'a' }
-      ),
+      stream: fs.createWriteStream(path.join(config.logDirectory, 'error.log'), { flags: 'a' }),
     });
   }
-  
-  return pino({
-    level: config.level,
-    customLevels: LOG_LEVELS,
-    formatters,
-    redact: {
-      paths: redactPaths,
-      censor: '[REDACTED]',
+
+  return pino(
+    {
+      level: config.level,
+      customLevels: LOG_LEVELS,
+      formatters,
+      redact: {
+        paths: redactPaths,
+        censor: '[REDACTED]',
+      },
+      timestamp: pino.stdTimeFunctions.isoTime,
+      serializers: {
+        req: pino.stdSerializers.req,
+        res: pino.stdSerializers.res,
+        err: pino.stdSerializers.err,
+        error: pino.stdSerializers.err,
+      },
+      transport,
     },
-    timestamp: pino.stdTimeFunctions.isoTime,
-    serializers: {
-      req: pino.stdSerializers.req,
-      res: pino.stdSerializers.res,
-      err: pino.stdSerializers.err,
-      error: pino.stdSerializers.err,
-    },
-    transport,
-  }, pino.multistream(streams));
+    pino.multistream(streams)
+  );
 };
 
 // Base logger instance
@@ -191,14 +189,14 @@ class Logger {
     this.context = context;
     this.child = baseLogger.child(context);
   }
-  
+
   /**
    * Add context to logger
    */
   withContext(context) {
     return new Logger({ ...this.context, ...context });
   }
-  
+
   /**
    * Add request context
    */
@@ -212,7 +210,7 @@ class Logger {
       userAgent: req.get('user-agent'),
     });
   }
-  
+
   /**
    * Trace level
    */
@@ -221,7 +219,7 @@ class Logger {
       this.child.trace(data, message);
     }
   }
-  
+
   /**
    * Debug level
    */
@@ -230,21 +228,21 @@ class Logger {
       this.child.debug(data, message);
     }
   }
-  
+
   /**
    * Info level
    */
   info(message, data = {}) {
     this.child.info(data, message);
   }
-  
+
   /**
    * Warn level
    */
   warn(message, data = {}) {
     this.child.warn(data, message);
   }
-  
+
   /**
    * Error level
    */
@@ -253,17 +251,17 @@ class Logger {
       ? {
           ...data,
           error: {
-            message: error.message,
+            message: 'حدث خطأ داخلي',
             stack: error.stack,
             code: error.code,
             name: error.name,
           },
         }
       : data;
-    
+
     this.child.error(errorData, message);
   }
-  
+
   /**
    * Fatal level
    */
@@ -272,38 +270,44 @@ class Logger {
       ? {
           ...data,
           error: {
-            message: error.message,
+            message: 'حدث خطأ داخلي',
             stack: error.stack,
             code: error.code,
           },
         }
       : data;
-    
+
     this.child.fatal(errorData, message);
   }
-  
+
   /**
    * Security event (custom level)
    */
   security(event, data = {}) {
-    this.child.security({
-      event,
-      ...data,
-      security: true,
-    }, `Security Event: ${event}`);
+    this.child.security(
+      {
+        event,
+        ...data,
+        security: true,
+      },
+      `Security Event: ${event}`
+    );
   }
-  
+
   /**
    * Audit log (custom level)
    */
   audit(action, data = {}) {
-    this.child.audit({
-      action,
-      ...data,
-      audit: true,
-    }, `Audit: ${action}`);
+    this.child.audit(
+      {
+        action,
+        ...data,
+        audit: true,
+      },
+      `Audit: ${action}`
+    );
   }
-  
+
   /**
    * Log API request
    */
@@ -316,14 +320,14 @@ class Logger {
       responseTime: `${responseTime}ms`,
       contentLength: res.get('content-length'),
     };
-    
+
     if (res.statusCode >= 400) {
       this.warn('API Request Failed', data);
     } else {
       this.info('API Request', data);
     }
   }
-  
+
   /**
    * Log database query
    */
@@ -335,7 +339,7 @@ class Logger {
       query: JSON.stringify(query).substring(0, 200),
     });
   }
-  
+
   /**
    * Log cache operation
    */
@@ -346,7 +350,7 @@ class Logger {
       hit,
     });
   }
-  
+
   /**
    * Log performance metric
    */
@@ -357,7 +361,7 @@ class Logger {
       unit,
     });
   }
-  
+
   /**
    * Log business event
    */
@@ -368,7 +372,7 @@ class Logger {
       ...data,
     });
   }
-  
+
   /**
    * Check sampling
    */
@@ -394,40 +398,40 @@ const logger = createLogger();
 const requestLoggingMiddleware = (req, res, next) => {
   const startTime = Date.now();
   const requestId = req.headers['x-request-id'] || uuidv4();
-  
+
   // Set request ID
   req.id = requestId;
   res.setHeader('X-Request-ID', requestId);
-  
+
   // Create request-scoped logger
   req.logger = logger.withRequest(req);
-  
+
   // Log request start
   req.logger.debug('Request Started', {
     headers: req.headers,
     body: req.body,
   });
-  
+
   // Log response on finish
   res.on('finish', () => {
     const responseTime = Date.now() - startTime;
     req.logger.logRequest(req, res, responseTime);
   });
-  
+
   // Log response error on error
-  res.on('error', (error) => {
+  res.on('error', error => {
     req.logger.error('Response Error', error);
   });
-  
+
   next();
 };
 
 /**
  * Error Logging Middleware
  */
-const errorLoggingMiddleware = (err, req, res, next) => {
+const errorLoggingMiddleware = (err, req, _res, next) => {
   const requestLogger = req.logger || logger;
-  
+
   requestLogger.error('Unhandled Error', err, {
     path: req.path,
     method: req.method,
@@ -436,7 +440,7 @@ const errorLoggingMiddleware = (err, req, res, next) => {
     params: req.params,
     user: req.user?._id || req.user?.id,
   });
-  
+
   next(err);
 };
 
@@ -444,7 +448,7 @@ const errorLoggingMiddleware = (err, req, res, next) => {
  * Morgan-like stream for HTTP logging
  */
 const logStream = {
-  write: (message) => {
+  write: message => {
     logger.info(message.trim(), { source: 'http' });
   },
 };
@@ -454,22 +458,22 @@ const logStream = {
  */
 const rotateLogs = () => {
   if (!config.fileLogging) return;
-  
+
   const logFiles = ['app.log', 'error.log'];
-  
+
   logFiles.forEach(filename => {
     const filepath = path.join(config.logDirectory, filename);
-    
+
     try {
       const stats = fs.statSync(filepath);
-      
+
       if (stats.size >= config.maxFileSize) {
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
         const newFilepath = path.join(config.logDirectory, `${filename}.${timestamp}`);
-        
+
         fs.renameSync(filepath, newFilepath);
         logger.info(`Log rotated: ${filename}`);
-        
+
         // Clean old logs
         cleanOldLogs(filename);
       }
@@ -482,8 +486,9 @@ const rotateLogs = () => {
 /**
  * Clean old log files
  */
-const cleanOldLogs = (basename) => {
-  const files = fs.readdirSync(config.logDirectory)
+const cleanOldLogs = basename => {
+  const files = fs
+    .readdirSync(config.logDirectory)
     .filter(f => f.startsWith(basename) && f !== basename)
     .map(f => ({
       name: f,
@@ -491,7 +496,7 @@ const cleanOldLogs = (basename) => {
       time: fs.statSync(path.join(config.logDirectory, f)).mtime.getTime(),
     }))
     .sort((a, b) => b.time - a.time);
-  
+
   // Remove files beyond maxFiles
   files.slice(config.maxFiles).forEach(file => {
     fs.unlinkSync(file.path);
@@ -503,7 +508,7 @@ const cleanOldLogs = (basename) => {
  * Flush logs (for graceful shutdown)
  */
 const flushLogs = async () => {
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     baseLogger.flush(() => {
       resolve();
     });

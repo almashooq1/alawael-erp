@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Disability Rehabilitation Controller
  * متحكم نظام تأهيل ذوي الإعاقة
@@ -9,6 +10,7 @@
  */
 
 const rehabilitationService = require('../services/disability-rehabilitation.service');
+const logger = require('../utils/logger');
 
 class DisabilityRehabilitationController {
   /**
@@ -45,11 +47,11 @@ class DisabilityRehabilitationController {
       }
       return res.status(201).json(result);
     } catch (error) {
-      console.error('Error in createProgram:', error);
+      logger.error('Error in createProgram:', error);
       return res.status(500).json({
         success: false,
         message: 'حدث خطأ أثناء إنشاء برنامج التأهيل',
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       });
     }
   }
@@ -70,11 +72,11 @@ class DisabilityRehabilitationController {
 
       return res.status(200).json(result);
     } catch (error) {
-      console.error('Error in getProgramById:', error);
+      logger.error('Error in getProgramById:', error);
       return res.status(500).json({
         success: false,
         message: 'حدث خطأ أثناء جلب بيانات البرنامج',
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       });
     }
   }
@@ -106,11 +108,11 @@ class DisabilityRehabilitationController {
 
       return res.status(200).json(result);
     } catch (error) {
-      console.error('Error in getAllPrograms:', error);
+      logger.error('Error in getAllPrograms:', error);
       return res.status(500).json({
         success: false,
         message: 'حدث خطأ أثناء جلب قائمة البرامج',
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       });
     }
   }
@@ -137,11 +139,11 @@ class DisabilityRehabilitationController {
 
       return res.status(200).json(result);
     } catch (error) {
-      console.error('Error in updateProgram:', error);
+      logger.error('Error in updateProgram:', error);
       return res.status(500).json({
         success: false,
         message: 'حدث خطأ أثناء تحديث البرنامج',
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       });
     }
   }
@@ -168,11 +170,11 @@ class DisabilityRehabilitationController {
 
       return res.status(201).json(result);
     } catch (error) {
-      console.error('Error in addSession:', error);
+      logger.error('Error in addSession:', error);
       return res.status(500).json({
         success: false,
         message: 'حدث خطأ أثناء إضافة الجلسة',
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       });
     }
   }
@@ -205,11 +207,11 @@ class DisabilityRehabilitationController {
 
       return res.status(200).json(result);
     } catch (error) {
-      console.error('Error in updateGoalStatus:', error);
+      logger.error('Error in updateGoalStatus:', error);
       return res.status(500).json({
         success: false,
         message: 'حدث خطأ أثناء تحديث حالة الهدف',
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       });
     }
   }
@@ -236,11 +238,11 @@ class DisabilityRehabilitationController {
 
       return res.status(201).json(result);
     } catch (error) {
-      console.error('Error in addAssessment:', error);
+      logger.error('Error in addAssessment:', error);
       return res.status(500).json({
         success: false,
         message: 'حدث خطأ أثناء إضافة التقييم',
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       });
     }
   }
@@ -267,11 +269,11 @@ class DisabilityRehabilitationController {
 
       return res.status(200).json(result);
     } catch (error) {
-      console.error('Error in completeProgram:', error);
+      logger.error('Error in completeProgram:', error);
       return res.status(500).json({
         success: false,
         message: 'حدث خطأ أثناء إنهاء البرنامج',
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       });
     }
   }
@@ -297,11 +299,11 @@ class DisabilityRehabilitationController {
 
       return res.status(200).json(result);
     } catch (error) {
-      console.error('Error in deleteProgram:', error);
+      logger.error('Error in deleteProgram:', error);
       return res.status(500).json({
         success: false,
         message: 'حدث خطأ أثناء حذف البرنامج',
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       });
     }
   }
@@ -322,11 +324,11 @@ class DisabilityRehabilitationController {
 
       return res.status(200).json(result);
     } catch (error) {
-      console.error('Error in getStatistics:', error);
+      logger.error('Error in getStatistics:', error);
       return res.status(500).json({
         success: false,
         message: 'حدث خطأ أثناء جلب الإحصائيات',
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       });
     }
   }
@@ -347,11 +349,11 @@ class DisabilityRehabilitationController {
 
       return res.status(200).json(result);
     } catch (error) {
-      console.error('Error in getMonthlyPerformance:', error);
+      logger.error('Error in getMonthlyPerformance:', error);
       return res.status(500).json({
         success: false,
         message: 'حدث خطأ أثناء جلب تقرير الأداء',
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       });
     }
   }
@@ -369,11 +371,11 @@ class DisabilityRehabilitationController {
 
       return res.status(200).json(result);
     } catch (error) {
-      console.error('Error in getBeneficiaryPrograms:', error);
+      logger.error('Error in getBeneficiaryPrograms:', error);
       return res.status(500).json({
         success: false,
         message: 'حدث خطأ أثناء جلب برامج المستفيد',
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       });
     }
   }
@@ -395,12 +397,1327 @@ class DisabilityRehabilitationController {
 
       return res.status(200).json(result);
     } catch (error) {
-      console.error('Error in getDetailedReport:', error);
+      logger.error('Error in getDetailedReport:', error);
       return res.status(500).json({
         success: false,
         message: 'حدث خطأ أثناء إنشاء التقرير',
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       });
+    }
+  }
+
+  // ============================================
+  // الميزات الجديدة - New Features
+  // ============================================
+
+  /**
+   * @route   PUT /api/v1/disability-rehabilitation/programs/:id/suspend
+   * @desc    تعليق برنامج تأهيل
+   * @access  Private
+   */
+  async suspendProgram(req, res) {
+    try {
+      const { id } = req.params;
+      const { reason, expected_resume_date } = req.body;
+      const suspendedBy = {
+        userId: req.user?.id || req.user?._id,
+        name: req.user?.name || req.user?.full_name,
+      };
+
+      const result = await rehabilitationService.suspendProgram(
+        id,
+        reason,
+        expected_resume_date,
+        suspendedBy
+      );
+
+      if (!result.success) {
+        return res.status(404).json(result);
+      }
+
+      return res.status(200).json(result);
+    } catch (error) {
+      logger.error('Error in suspendProgram:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'حدث خطأ أثناء تعليق البرنامج',
+        error: 'حدث خطأ داخلي',
+      });
+    }
+  }
+
+  /**
+   * @route   PUT /api/v1/disability-rehabilitation/programs/:id/resume
+   * @desc    استئناف برنامج معلق
+   * @access  Private
+   */
+  async resumeProgram(req, res) {
+    try {
+      const { id } = req.params;
+      const resumedBy = {
+        userId: req.user?.id || req.user?._id,
+        name: req.user?.name || req.user?.full_name,
+      };
+
+      const result = await rehabilitationService.resumeProgram(id, resumedBy);
+
+      if (!result.success) {
+        return res.status(404).json(result);
+      }
+
+      return res.status(200).json(result);
+    } catch (error) {
+      logger.error('Error in resumeProgram:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'حدث خطأ أثناء استئناف البرنامج',
+        error: 'حدث خطأ داخلي',
+      });
+    }
+  }
+
+  /**
+   * @route   POST /api/v1/disability-rehabilitation/programs/:id/transfer
+   * @desc    تحويل المستفيد إلى برنامج آخر
+   * @access  Private
+   */
+  async transferProgram(req, res) {
+    try {
+      const { id } = req.params;
+      const { target_program_id, transfer_reason, transfer_notes } = req.body;
+      const transferredBy = {
+        userId: req.user?.id || req.user?._id,
+        name: req.user?.name || req.user?.full_name,
+      };
+
+      const result = await rehabilitationService.transferProgram(
+        id,
+        target_program_id,
+        transfer_reason,
+        transfer_notes,
+        transferredBy
+      );
+
+      if (!result.success) {
+        return res.status(404).json(result);
+      }
+
+      return res.status(200).json(result);
+    } catch (error) {
+      logger.error('Error in transferProgram:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'حدث خطأ أثناء تحويل المستفيد',
+        error: 'حدث خطأ داخلي',
+      });
+    }
+  }
+
+  /**
+   * @route   PUT /api/v1/disability-rehabilitation/programs/:id/risk-assessment
+   * @desc    تحديث تقييم المخاطر
+   * @access  Private
+   */
+  async updateRiskAssessment(req, res) {
+    try {
+      const { id } = req.params;
+      const riskData = req.body;
+      const assessedBy = {
+        userId: req.user?.id || req.user?._id,
+        name: req.user?.name || req.user?.full_name,
+      };
+
+      const result = await rehabilitationService.updateRiskAssessment(id, riskData, assessedBy);
+
+      if (!result.success) {
+        return res.status(404).json(result);
+      }
+
+      return res.status(200).json(result);
+    } catch (error) {
+      logger.error('Error in updateRiskAssessment:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'حدث خطأ أثناء تحديث تقييم المخاطر',
+        error: 'حدث خطأ داخلي',
+      });
+    }
+  }
+
+  /**
+   * @route   PUT /api/v1/disability-rehabilitation/programs/:id/quality-of-life
+   * @desc    تحديث تقييم جودة الحياة
+   * @access  Private
+   */
+  async updateQualityOfLife(req, res) {
+    try {
+      const { id } = req.params;
+      const qolData = req.body;
+      const assessedBy = {
+        userId: req.user?.id || req.user?._id,
+        name: req.user?.name || req.user?.full_name,
+      };
+
+      const result = await rehabilitationService.updateQualityOfLife(id, qolData, assessedBy);
+
+      if (!result.success) {
+        return res.status(404).json(result);
+      }
+
+      return res.status(200).json(result);
+    } catch (error) {
+      logger.error('Error in updateQualityOfLife:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'حدث خطأ أثناء تحديث تقييم جودة الحياة',
+        error: 'حدث خطأ داخلي',
+      });
+    }
+  }
+
+  /**
+   * @route   PUT /api/v1/disability-rehabilitation/programs/:id/transition-plan
+   * @desc    تحديث خطة الانتقال
+   * @access  Private
+   */
+  async updateTransitionPlan(req, res) {
+    try {
+      const { id } = req.params;
+      const transitionData = req.body;
+      const updatedBy = {
+        userId: req.user?.id || req.user?._id,
+        name: req.user?.name || req.user?.full_name,
+      };
+
+      const result = await rehabilitationService.updateTransitionPlan(
+        id,
+        transitionData,
+        updatedBy
+      );
+
+      if (!result.success) {
+        return res.status(404).json(result);
+      }
+
+      return res.status(200).json(result);
+    } catch (error) {
+      logger.error('Error in updateTransitionPlan:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'حدث خطأ أثناء تحديث خطة الانتقال',
+        error: 'حدث خطأ داخلي',
+      });
+    }
+  }
+
+  /**
+   * @route   POST /api/v1/disability-rehabilitation/programs/:id/medications
+   * @desc    إضافة/تحديث الأدوية
+   * @access  Private
+   */
+  async manageMedications(req, res) {
+    try {
+      const { id } = req.params;
+      const medicationData = req.body;
+      const addedBy = {
+        userId: req.user?.id || req.user?._id,
+        name: req.user?.name || req.user?.full_name,
+      };
+
+      const result = await rehabilitationService.manageMedications(id, medicationData, addedBy);
+
+      if (!result.success) {
+        return res.status(404).json(result);
+      }
+
+      return res.status(201).json(result);
+    } catch (error) {
+      logger.error('Error in manageMedications:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'حدث خطأ أثناء إدارة الأدوية',
+        error: 'حدث خطأ داخلي',
+      });
+    }
+  }
+
+  /**
+   * @route   POST /api/v1/disability-rehabilitation/programs/:id/team-communication
+   * @desc    إضافة رسالة تواصل فريق
+   * @access  Private
+   */
+  async addTeamCommunication(req, res) {
+    try {
+      const { id } = req.params;
+      const messageData = req.body;
+      const sentBy = {
+        userId: req.user?.id || req.user?._id,
+        name: req.user?.name || req.user?.full_name,
+        role: req.user?.role || 'staff',
+      };
+
+      const result = await rehabilitationService.addTeamCommunication(id, messageData, sentBy);
+
+      if (!result.success) {
+        return res.status(404).json(result);
+      }
+
+      return res.status(201).json(result);
+    } catch (error) {
+      logger.error('Error in addTeamCommunication:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'حدث خطأ أثناء إضافة رسالة الفريق',
+        error: 'حدث خطأ داخلي',
+      });
+    }
+  }
+
+  /**
+   * @route   POST /api/v1/disability-rehabilitation/programs/:id/satisfaction-survey
+   * @desc    إضافة استبيان رضا
+   * @access  Private
+   */
+  async addSatisfactionSurvey(req, res) {
+    try {
+      const { id } = req.params;
+      const surveyData = req.body;
+
+      const result = await rehabilitationService.addSatisfactionSurvey(id, surveyData);
+
+      if (!result.success) {
+        return res.status(404).json(result);
+      }
+
+      return res.status(201).json(result);
+    } catch (error) {
+      logger.error('Error in addSatisfactionSurvey:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'حدث خطأ أثناء حفظ استبيان الرضا',
+        error: 'حدث خطأ داخلي',
+      });
+    }
+  }
+
+  /**
+   * @route   PUT /api/v1/disability-rehabilitation/programs/:id/discharge-plan
+   * @desc    تحديث خطة التخريج
+   * @access  Private
+   */
+  async updateDischargePlan(req, res) {
+    try {
+      const { id } = req.params;
+      const dischargeData = req.body;
+      const updatedBy = {
+        userId: req.user?.id || req.user?._id,
+        name: req.user?.name || req.user?.full_name,
+      };
+
+      const result = await rehabilitationService.updateDischargePlan(id, dischargeData, updatedBy);
+
+      if (!result.success) {
+        return res.status(404).json(result);
+      }
+
+      return res.status(200).json(result);
+    } catch (error) {
+      logger.error('Error in updateDischargePlan:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'حدث خطأ أثناء تحديث خطة التخريج',
+        error: 'حدث خطأ داخلي',
+      });
+    }
+  }
+
+  /**
+   * @route   PUT /api/v1/disability-rehabilitation/programs/:id/home-program
+   * @desc    تحديث البرنامج المنزلي
+   * @access  Private
+   */
+  async updateHomeProgram(req, res) {
+    try {
+      const { id } = req.params;
+      const homeProgramData = req.body;
+      const updatedBy = {
+        userId: req.user?.id || req.user?._id,
+        name: req.user?.name || req.user?.full_name,
+      };
+
+      const result = await rehabilitationService.updateHomeProgram(id, homeProgramData, updatedBy);
+
+      if (!result.success) {
+        return res.status(404).json(result);
+      }
+
+      return res.status(200).json(result);
+    } catch (error) {
+      logger.error('Error in updateHomeProgram:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'حدث خطأ أثناء تحديث البرنامج المنزلي',
+        error: 'حدث خطأ داخلي',
+      });
+    }
+  }
+
+  /**
+   * @route   POST /api/v1/disability-rehabilitation/programs/:id/vitals
+   * @desc    إضافة قياسات حيوية
+   * @access  Private
+   */
+  async addVitals(req, res) {
+    try {
+      const { id } = req.params;
+      const vitalsData = req.body;
+      const addedBy = {
+        userId: req.user?.id || req.user?._id,
+        name: req.user?.name || req.user?.full_name,
+      };
+
+      const result = await rehabilitationService.addVitals(id, vitalsData, addedBy);
+
+      if (!result.success) {
+        return res.status(404).json(result);
+      }
+
+      return res.status(201).json(result);
+    } catch (error) {
+      logger.error('Error in addVitals:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'حدث خطأ أثناء إضافة القياسات الحيوية',
+        error: 'حدث خطأ داخلي',
+      });
+    }
+  }
+
+  /**
+   * @route   PUT /api/v1/disability-rehabilitation/programs/:id/iep
+   * @desc    تحديث الخطة التعليمية الفردية
+   * @access  Private
+   */
+  async updateIEP(req, res) {
+    try {
+      const { id } = req.params;
+      const iepData = req.body;
+      const updatedBy = {
+        userId: req.user?.id || req.user?._id,
+        name: req.user?.name || req.user?.full_name,
+      };
+
+      const result = await rehabilitationService.updateIEP(id, iepData, updatedBy);
+
+      if (!result.success) {
+        return res.status(404).json(result);
+      }
+
+      return res.status(200).json(result);
+    } catch (error) {
+      logger.error('Error in updateIEP:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'حدث خطأ أثناء تحديث الخطة التعليمية الفردية',
+        error: 'حدث خطأ داخلي',
+      });
+    }
+  }
+
+  /**
+   * @route   GET /api/v1/disability-rehabilitation/programs/:id/progress-summary
+   * @desc    ملخص التقدم الشامل
+   * @access  Private
+   */
+  async getProgressSummary(req, res) {
+    try {
+      const { id } = req.params;
+
+      const result = await rehabilitationService.getProgressSummary(id);
+
+      if (!result.success) {
+        return res.status(404).json(result);
+      }
+
+      return res.status(200).json(result);
+    } catch (error) {
+      logger.error('Error in getProgressSummary:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'حدث خطأ أثناء جلب ملخص التقدم',
+        error: 'حدث خطأ داخلي',
+      });
+    }
+  }
+
+  /**
+   * @route   GET /api/v1/disability-rehabilitation/waiting-list
+   * @desc    قائمة الانتظار
+   * @access  Private
+   */
+  async getWaitingList(req, res) {
+    try {
+      const filters = {
+        priority_level: req.query.priority_level,
+        disability_type: req.query.disability_type,
+        sort: req.query.sort || 'date_added',
+      };
+
+      const result = await rehabilitationService.getWaitingList(filters);
+
+      return res.status(200).json(result);
+    } catch (error) {
+      logger.error('Error in getWaitingList:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'حدث خطأ أثناء جلب قائمة الانتظار',
+        error: 'حدث خطأ داخلي',
+      });
+    }
+  }
+
+  /**
+   * @route   GET /api/v1/disability-rehabilitation/dashboard
+   * @desc    لوحة المعلومات الشاملة
+   * @access  Private
+   */
+  async getDashboard(req, res) {
+    try {
+      const result = await rehabilitationService.getDashboard();
+
+      return res.status(200).json(result);
+    } catch (error) {
+      logger.error('Error in getDashboard:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'حدث خطأ أثناء جلب لوحة المعلومات',
+        error: 'حدث خطأ داخلي',
+      });
+    }
+  }
+
+  /**
+   * @route   GET /api/v1/disability-rehabilitation/programs/:id/export
+   * @desc    تصدير تقرير البرنامج
+   * @access  Private
+   */
+  async exportProgramReport(req, res) {
+    try {
+      const { id } = req.params;
+      const { format } = req.query; // 'json', 'csv', 'pdf'
+
+      const result = await rehabilitationService.exportProgramReport(id, format || 'json');
+
+      if (!result.success) {
+        return res.status(404).json(result);
+      }
+
+      return res.status(200).json(result);
+    } catch (error) {
+      logger.error('Error in exportProgramReport:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'حدث خطأ أثناء تصدير التقرير',
+        error: 'حدث خطأ داخلي',
+      });
+    }
+  }
+
+  // ============================================
+  // Phase 3 - الميزات المتقدمة الجديدة
+  // ============================================
+
+  /**
+   * @route   POST /api/v1/disability-rehabilitation/programs/:id/behavioral-plans
+   * @desc    إضافة خطة تدخل سلوكي
+   * @access  Private
+   */
+  async addBehavioralPlan(req, res) {
+    try {
+      const { id } = req.params;
+      const planData = req.body;
+      const addedBy = {
+        userId: req.user?.id || req.user?._id,
+        name: req.user?.name || req.user?.full_name,
+        role: req.user?.role || 'therapist',
+      };
+
+      const result = await rehabilitationService.addBehavioralPlan(id, planData, addedBy);
+
+      if (!result.success) {
+        return res.status(404).json(result);
+      }
+
+      return res.status(201).json(result);
+    } catch (error) {
+      logger.error('Error in addBehavioralPlan:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'حدث خطأ أثناء إضافة خطة التدخل السلوكي',
+        error: 'حدث خطأ داخلي',
+      });
+    }
+  }
+
+  /**
+   * @route   PUT /api/v1/disability-rehabilitation/programs/:id/behavioral-plans/:planId
+   * @desc    تحديث خطة تدخل سلوكي
+   * @access  Private
+   */
+  async updateBehavioralPlan(req, res) {
+    try {
+      const { id, planId } = req.params;
+      const planData = req.body;
+      const updatedBy = {
+        userId: req.user?.id || req.user?._id,
+        name: req.user?.name || req.user?.full_name,
+      };
+
+      const result = await rehabilitationService.updateBehavioralPlan(
+        id,
+        planId,
+        planData,
+        updatedBy
+      );
+
+      if (!result.success) {
+        return res.status(404).json(result);
+      }
+
+      return res.status(200).json(result);
+    } catch (error) {
+      logger.error('Error in updateBehavioralPlan:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'حدث خطأ أثناء تحديث خطة التدخل السلوكي',
+        error: 'حدث خطأ داخلي',
+      });
+    }
+  }
+
+  /**
+   * @route   POST /api/v1/disability-rehabilitation/programs/:id/incidents
+   * @desc    إضافة تقرير حادثة
+   * @access  Private
+   */
+  async addIncidentReport(req, res) {
+    try {
+      const { id } = req.params;
+      const incidentData = req.body;
+      const reportedBy = {
+        userId: req.user?.id || req.user?._id,
+        name: req.user?.name || req.user?.full_name,
+        role: req.user?.role || 'staff',
+      };
+
+      const result = await rehabilitationService.addIncidentReport(id, incidentData, reportedBy);
+
+      if (!result.success) {
+        return res.status(404).json(result);
+      }
+
+      return res.status(201).json(result);
+    } catch (error) {
+      logger.error('Error in addIncidentReport:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'حدث خطأ أثناء إضافة تقرير الحادثة',
+        error: 'حدث خطأ داخلي',
+      });
+    }
+  }
+
+  /**
+   * @route   PUT /api/v1/disability-rehabilitation/programs/:id/incidents/:incidentId
+   * @desc    تحديث تقرير حادثة
+   * @access  Private
+   */
+  async updateIncidentReport(req, res) {
+    try {
+      const { id, incidentId } = req.params;
+      const incidentData = req.body;
+      const updatedBy = {
+        userId: req.user?.id || req.user?._id,
+        name: req.user?.name || req.user?.full_name,
+      };
+
+      const result = await rehabilitationService.updateIncidentReport(
+        id,
+        incidentId,
+        incidentData,
+        updatedBy
+      );
+
+      if (!result.success) {
+        return res.status(404).json(result);
+      }
+
+      return res.status(200).json(result);
+    } catch (error) {
+      logger.error('Error in updateIncidentReport:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'حدث خطأ أثناء تحديث تقرير الحادثة',
+        error: 'حدث خطأ داخلي',
+      });
+    }
+  }
+
+  /**
+   * @route   POST /api/v1/disability-rehabilitation/programs/:id/appointments
+   * @desc    إضافة موعد جديد
+   * @access  Private
+   */
+  async addAppointment(req, res) {
+    try {
+      const { id } = req.params;
+      const appointmentData = req.body;
+      const addedBy = {
+        userId: req.user?.id || req.user?._id,
+        name: req.user?.name || req.user?.full_name,
+      };
+
+      const result = await rehabilitationService.addAppointment(id, appointmentData, addedBy);
+
+      if (!result.success) {
+        return res.status(404).json(result);
+      }
+
+      return res.status(201).json(result);
+    } catch (error) {
+      logger.error('Error in addAppointment:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'حدث خطأ أثناء إضافة الموعد',
+        error: 'حدث خطأ داخلي',
+      });
+    }
+  }
+
+  /**
+   * @route   PUT /api/v1/disability-rehabilitation/programs/:id/appointments/:appointmentId
+   * @desc    تحديث موعد
+   * @access  Private
+   */
+  async updateAppointment(req, res) {
+    try {
+      const { id, appointmentId } = req.params;
+      const appointmentData = req.body;
+      const updatedBy = {
+        userId: req.user?.id || req.user?._id,
+        name: req.user?.name || req.user?.full_name,
+      };
+
+      const result = await rehabilitationService.updateAppointment(
+        id,
+        appointmentId,
+        appointmentData,
+        updatedBy
+      );
+
+      if (!result.success) {
+        return res.status(404).json(result);
+      }
+
+      return res.status(200).json(result);
+    } catch (error) {
+      logger.error('Error in updateAppointment:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'حدث خطأ أثناء تحديث الموعد',
+        error: 'حدث خطأ داخلي',
+      });
+    }
+  }
+
+  /**
+   * @route   POST /api/v1/disability-rehabilitation/programs/:id/documents
+   * @desc    إضافة مستند
+   * @access  Private
+   */
+  async addDocument(req, res) {
+    try {
+      const { id } = req.params;
+      const documentData = req.body;
+      const uploadedBy = {
+        userId: req.user?.id || req.user?._id,
+        name: req.user?.name || req.user?.full_name,
+      };
+
+      const result = await rehabilitationService.addDocument(id, documentData, uploadedBy);
+
+      if (!result.success) {
+        return res.status(404).json(result);
+      }
+
+      return res.status(201).json(result);
+    } catch (error) {
+      logger.error('Error in addDocument:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'حدث خطأ أثناء إضافة المستند',
+        error: 'حدث خطأ داخلي',
+      });
+    }
+  }
+
+  /**
+   * @route   DELETE /api/v1/disability-rehabilitation/programs/:id/documents/:documentId
+   * @desc    حذف مستند
+   * @access  Private
+   */
+  async deleteDocument(req, res) {
+    try {
+      const { id, documentId } = req.params;
+      const deletedBy = {
+        userId: req.user?.id || req.user?._id,
+        name: req.user?.name || req.user?.full_name,
+      };
+
+      const result = await rehabilitationService.deleteDocument(id, documentId, deletedBy);
+
+      if (!result.success) {
+        return res.status(404).json(result);
+      }
+
+      return res.status(200).json(result);
+    } catch (error) {
+      logger.error('Error in deleteDocument:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'حدث خطأ أثناء حذف المستند',
+        error: 'حدث خطأ داخلي',
+      });
+    }
+  }
+
+  /**
+   * @route   POST /api/v1/disability-rehabilitation/programs/:id/group-activities
+   * @desc    إضافة نشاط مجموعة
+   * @access  Private
+   */
+  async addGroupActivity(req, res) {
+    try {
+      const { id } = req.params;
+      const activityData = req.body;
+      const addedBy = {
+        userId: req.user?.id || req.user?._id,
+        name: req.user?.name || req.user?.full_name,
+        role: req.user?.role || 'therapist',
+      };
+
+      const result = await rehabilitationService.addGroupActivity(id, activityData, addedBy);
+
+      if (!result.success) {
+        return res.status(404).json(result);
+      }
+
+      return res.status(201).json(result);
+    } catch (error) {
+      logger.error('Error in addGroupActivity:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'حدث خطأ أثناء إضافة نشاط المجموعة',
+        error: 'حدث خطأ داخلي',
+      });
+    }
+  }
+
+  /**
+   * @route   PUT /api/v1/disability-rehabilitation/programs/:id/emergency-contacts
+   * @desc    تحديث جهات اتصال الطوارئ
+   * @access  Private
+   */
+  async updateEmergencyContacts(req, res) {
+    try {
+      const { id } = req.params;
+      const contactsData = req.body;
+      const updatedBy = {
+        userId: req.user?.id || req.user?._id,
+        name: req.user?.name || req.user?.full_name,
+      };
+
+      const result = await rehabilitationService.updateEmergencyContacts(
+        id,
+        contactsData,
+        updatedBy
+      );
+
+      if (!result.success) {
+        return res.status(404).json(result);
+      }
+
+      return res.status(200).json(result);
+    } catch (error) {
+      logger.error('Error in updateEmergencyContacts:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'حدث خطأ أثناء تحديث جهات اتصال الطوارئ',
+        error: 'حدث خطأ داخلي',
+      });
+    }
+  }
+
+  /**
+   * @route   PUT /api/v1/disability-rehabilitation/programs/:id/cultural-preferences
+   * @desc    تحديث التفضيلات الثقافية واللغوية
+   * @access  Private
+   */
+  async updateCulturalPreferences(req, res) {
+    try {
+      const { id } = req.params;
+      const prefData = req.body;
+      const updatedBy = {
+        userId: req.user?.id || req.user?._id,
+        name: req.user?.name || req.user?.full_name,
+      };
+
+      const result = await rehabilitationService.updateCulturalPreferences(id, prefData, updatedBy);
+
+      if (!result.success) {
+        return res.status(404).json(result);
+      }
+
+      return res.status(200).json(result);
+    } catch (error) {
+      logger.error('Error in updateCulturalPreferences:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'حدث خطأ أثناء تحديث التفضيلات الثقافية',
+        error: 'حدث خطأ داخلي',
+      });
+    }
+  }
+
+  /**
+   * @route   PUT /api/v1/disability-rehabilitation/programs/:id/attendance-summary
+   * @desc    تحديث ملخص الحضور
+   * @access  Private
+   */
+  async updateAttendanceSummary(req, res) {
+    try {
+      const { id } = req.params;
+      const attendanceData = req.body;
+      const updatedBy = {
+        userId: req.user?.id || req.user?._id,
+        name: req.user?.name || req.user?.full_name,
+      };
+
+      const result = await rehabilitationService.updateAttendanceSummary(
+        id,
+        attendanceData,
+        updatedBy
+      );
+
+      if (!result.success) {
+        return res.status(404).json(result);
+      }
+
+      return res.status(200).json(result);
+    } catch (error) {
+      logger.error('Error in updateAttendanceSummary:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'حدث خطأ أثناء تحديث ملخص الحضور',
+        error: 'حدث خطأ داخلي',
+      });
+    }
+  }
+
+  /**
+   * @route   POST /api/v1/disability-rehabilitation/programs/:id/alerts
+   * @desc    إضافة تنبيه
+   * @access  Private
+   */
+  async addAlert(req, res) {
+    try {
+      const { id } = req.params;
+      const alertData = req.body;
+      const addedBy = {
+        userId: req.user?.id || req.user?._id,
+        name: req.user?.name || req.user?.full_name,
+      };
+
+      const result = await rehabilitationService.addAlert(id, alertData, addedBy);
+
+      if (!result.success) {
+        return res.status(404).json(result);
+      }
+
+      return res.status(201).json(result);
+    } catch (error) {
+      logger.error('Error in addAlert:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'حدث خطأ أثناء إضافة التنبيه',
+        error: 'حدث خطأ داخلي',
+      });
+    }
+  }
+
+  /**
+   * @route   PUT /api/v1/disability-rehabilitation/programs/:id/alerts/:alertId/dismiss
+   * @desc    تجاهل تنبيه
+   * @access  Private
+   */
+  async dismissAlert(req, res) {
+    try {
+      const { id, alertId } = req.params;
+
+      const result = await rehabilitationService.dismissAlert(id, alertId);
+
+      if (!result.success) {
+        return res.status(404).json(result);
+      }
+
+      return res.status(200).json(result);
+    } catch (error) {
+      logger.error('Error in dismissAlert:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'حدث خطأ أثناء تجاهل التنبيه',
+        error: 'حدث خطأ داخلي',
+      });
+    }
+  }
+
+  /**
+   * @route   GET /api/v1/disability-rehabilitation/analytics
+   * @desc    تحليلات متقدمة
+   * @access  Private
+   */
+  async getAnalytics(req, res) {
+    try {
+      const filters = {
+        date_from: req.query.date_from,
+        date_to: req.query.date_to,
+        disability_type: req.query.disability_type,
+      };
+
+      const result = await rehabilitationService.getAnalytics(filters);
+
+      return res.status(200).json(result);
+    } catch (error) {
+      logger.error('Error in getAnalytics:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'حدث خطأ أثناء جلب التحليلات',
+        error: 'حدث خطأ داخلي',
+      });
+    }
+  }
+
+  /**
+   * @route   GET /api/v1/disability-rehabilitation/upcoming-appointments
+   * @desc    المواعيد القادمة
+   * @access  Private
+   */
+  async getUpcomingAppointments(req, res) {
+    try {
+      const { days = 7 } = req.query;
+
+      const result = await rehabilitationService.getUpcomingAppointments(parseInt(days));
+
+      return res.status(200).json(result);
+    } catch (error) {
+      logger.error('Error in getUpcomingAppointments:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'حدث خطأ أثناء جلب المواعيد القادمة',
+        error: 'حدث خطأ داخلي',
+      });
+    }
+  }
+
+  /**
+   * @route   GET /api/v1/disability-rehabilitation/active-alerts
+   * @desc    التنبيهات النشطة
+   * @access  Private
+   */
+  async getActiveAlerts(req, res) {
+    try {
+      const result = await rehabilitationService.getActiveAlerts();
+
+      return res.status(200).json(result);
+    } catch (error) {
+      logger.error('Error in getActiveAlerts:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'حدث خطأ أثناء جلب التنبيهات',
+        error: 'حدث خطأ داخلي',
+      });
+    }
+  }
+
+  // =====================================================
+  // Phase 4: Telehealth, Financial, Notes, Referrals, Transportation
+  // =====================================================
+
+  /**
+   * @route   PUT /api/v1/disability-rehabilitation/:id/telehealth
+   * @desc    تحديث معلومات الرعاية عن بعد
+   */
+  async updateTelehealth(req, res) {
+    try {
+      const result = await rehabilitationService.updateTelehealth(req.params.id, req.body);
+      return res.status(200).json(result);
+    } catch (error) {
+      logger.error('Error in updateTelehealth:', error);
+      if (error.message?.includes('not found') || error.message?.includes('غير موجود'))
+        return res.status(404).json({ success: false, message: error.message });
+      return res
+        .status(500)
+        .json({
+          success: false,
+          message: 'حدث خطأ أثناء تحديث بيانات الرعاية عن بعد',
+          error: 'حدث خطأ داخلي',
+        });
+    }
+  }
+
+  /**
+   * @route   POST /api/v1/disability-rehabilitation/:id/telehealth/connectivity-issue
+   * @desc    تسجيل مشكلة اتصال
+   */
+  async addConnectivityIssue(req, res) {
+    try {
+      const result = await rehabilitationService.addConnectivityIssue(req.params.id, req.body);
+      return res.status(201).json(result);
+    } catch (error) {
+      logger.error('Error in addConnectivityIssue:', error);
+      if (error.message?.includes('not found') || error.message?.includes('غير موجود'))
+        return res.status(404).json({ success: false, message: error.message });
+      return res
+        .status(500)
+        .json({
+          success: false,
+          message: 'حدث خطأ أثناء تسجيل مشكلة الاتصال',
+          error: 'حدث خطأ داخلي',
+        });
+    }
+  }
+
+  /**
+   * @route   PUT /api/v1/disability-rehabilitation/:id/financial
+   * @desc    تحديث المعلومات المالية
+   */
+  async updateFinancialInfo(req, res) {
+    try {
+      const result = await rehabilitationService.updateFinancialInfo(req.params.id, req.body);
+      return res.status(200).json(result);
+    } catch (error) {
+      logger.error('Error in updateFinancialInfo:', error);
+      if (error.message?.includes('not found') || error.message?.includes('غير موجود'))
+        return res.status(404).json({ success: false, message: error.message });
+      return res
+        .status(500)
+        .json({
+          success: false,
+          message: 'حدث خطأ أثناء تحديث البيانات المالية',
+          error: 'حدث خطأ داخلي',
+        });
+    }
+  }
+
+  /**
+   * @route   POST /api/v1/disability-rehabilitation/:id/invoices
+   * @desc    إضافة فاتورة
+   */
+  async addInvoice(req, res) {
+    try {
+      const result = await rehabilitationService.addInvoice(req.params.id, req.body);
+      return res.status(201).json(result);
+    } catch (error) {
+      logger.error('Error in addInvoice:', error);
+      if (error.message?.includes('not found') || error.message?.includes('غير موجود'))
+        return res.status(404).json({ success: false, message: error.message });
+      return res
+        .status(500)
+        .json({ success: false, message: 'حدث خطأ أثناء إضافة الفاتورة', error: 'حدث خطأ داخلي' });
+    }
+  }
+
+  /**
+   * @route   PUT /api/v1/disability-rehabilitation/:id/insurance
+   * @desc    تحديث معلومات التأمين
+   */
+  async updateInsuranceInfo(req, res) {
+    try {
+      const result = await rehabilitationService.updateInsuranceInfo(req.params.id, req.body);
+      return res.status(200).json(result);
+    } catch (error) {
+      logger.error('Error in updateInsuranceInfo:', error);
+      if (error.message?.includes('not found') || error.message?.includes('غير موجود'))
+        return res.status(404).json({ success: false, message: error.message });
+      return res
+        .status(500)
+        .json({
+          success: false,
+          message: 'حدث خطأ أثناء تحديث بيانات التأمين',
+          error: 'حدث خطأ داخلي',
+        });
+    }
+  }
+
+  /**
+   * @route   POST /api/v1/disability-rehabilitation/:id/notes
+   * @desc    إضافة ملاحظة
+   */
+  async addNote(req, res) {
+    try {
+      const result = await rehabilitationService.addNote(req.params.id, req.body, req.user);
+      return res.status(201).json(result);
+    } catch (error) {
+      logger.error('Error in addNote:', error);
+      if (error.message?.includes('not found') || error.message?.includes('غير موجود'))
+        return res.status(404).json({ success: false, message: error.message });
+      return res
+        .status(500)
+        .json({ success: false, message: 'حدث خطأ أثناء إضافة الملاحظة', error: 'حدث خطأ داخلي' });
+    }
+  }
+
+  /**
+   * @route   PUT /api/v1/disability-rehabilitation/:id/notes/:noteId
+   * @desc    تحديث ملاحظة
+   */
+  async updateNote(req, res) {
+    try {
+      const result = await rehabilitationService.updateNote(
+        req.params.id,
+        req.params.noteId,
+        req.body
+      );
+      return res.status(200).json(result);
+    } catch (error) {
+      logger.error('Error in updateNote:', error);
+      if (error.message?.includes('not found') || error.message?.includes('غير موجود'))
+        return res.status(404).json({ success: false, message: error.message });
+      return res
+        .status(500)
+        .json({ success: false, message: 'حدث خطأ أثناء تحديث الملاحظة', error: 'حدث خطأ داخلي' });
+    }
+  }
+
+  /**
+   * @route   DELETE /api/v1/disability-rehabilitation/:id/notes/:noteId
+   * @desc    حذف ملاحظة
+   */
+  async deleteNote(req, res) {
+    try {
+      const result = await rehabilitationService.deleteNote(req.params.id, req.params.noteId);
+      return res.status(200).json(result);
+    } catch (error) {
+      logger.error('Error in deleteNote:', error);
+      if (error.message?.includes('not found') || error.message?.includes('غير موجود'))
+        return res.status(404).json({ success: false, message: error.message });
+      return res
+        .status(500)
+        .json({ success: false, message: 'حدث خطأ أثناء حذف الملاحظة', error: 'حدث خطأ داخلي' });
+    }
+  }
+
+  /**
+   * @route   POST /api/v1/disability-rehabilitation/:id/referrals
+   * @desc    إضافة إحالة
+   */
+  async addReferral(req, res) {
+    try {
+      const result = await rehabilitationService.addReferral(req.params.id, req.body);
+      return res.status(201).json(result);
+    } catch (error) {
+      logger.error('Error in addReferral:', error);
+      if (error.message?.includes('not found') || error.message?.includes('غير موجود'))
+        return res.status(404).json({ success: false, message: error.message });
+      return res
+        .status(500)
+        .json({ success: false, message: 'حدث خطأ أثناء إضافة الإحالة', error: 'حدث خطأ داخلي' });
+    }
+  }
+
+  /**
+   * @route   PUT /api/v1/disability-rehabilitation/:id/referrals/:referralId
+   * @desc    تحديث حالة الإحالة
+   */
+  async updateReferral(req, res) {
+    try {
+      const result = await rehabilitationService.updateReferral(
+        req.params.id,
+        req.params.referralId,
+        req.body
+      );
+      return res.status(200).json(result);
+    } catch (error) {
+      logger.error('Error in updateReferral:', error);
+      if (error.message?.includes('not found') || error.message?.includes('غير موجود'))
+        return res.status(404).json({ success: false, message: error.message });
+      return res
+        .status(500)
+        .json({ success: false, message: 'حدث خطأ أثناء تحديث الإحالة', error: 'حدث خطأ داخلي' });
+    }
+  }
+
+  /**
+   * @route   PUT /api/v1/disability-rehabilitation/:id/transportation
+   * @desc    تحديث معلومات النقل
+   */
+  async updateTransportation(req, res) {
+    try {
+      const result = await rehabilitationService.updateTransportation(req.params.id, req.body);
+      return res.status(200).json(result);
+    } catch (error) {
+      logger.error('Error in updateTransportation:', error);
+      if (error.message?.includes('not found') || error.message?.includes('غير موجود'))
+        return res.status(404).json({ success: false, message: error.message });
+      return res
+        .status(500)
+        .json({
+          success: false,
+          message: 'حدث خطأ أثناء تحديث بيانات النقل',
+          error: 'حدث خطأ داخلي',
+        });
+    }
+  }
+
+  /**
+   * @route   PUT /api/v1/disability-rehabilitation/:id/treatment-team
+   * @desc    تحديث فريق العلاج
+   */
+  async updateTreatmentTeam(req, res) {
+    try {
+      const result = await rehabilitationService.updateTreatmentTeam(req.params.id, req.body);
+      return res.status(200).json(result);
+    } catch (error) {
+      logger.error('Error in updateTreatmentTeam:', error);
+      if (error.message?.includes('not found') || error.message?.includes('غير موجود'))
+        return res.status(404).json({ success: false, message: error.message });
+      return res
+        .status(500)
+        .json({
+          success: false,
+          message: 'حدث خطأ أثناء تحديث فريق العلاج',
+          error: 'حدث خطأ داخلي',
+        });
+    }
+  }
+
+  /**
+   * @route   GET /api/v1/disability-rehabilitation/financial-summary
+   * @desc    ملخص مالي شامل
+   */
+  async getFinancialSummary(req, res) {
+    try {
+      const result = await rehabilitationService.getFinancialSummary();
+      return res.status(200).json(result);
+    } catch (error) {
+      logger.error('Error in getFinancialSummary:', error);
+      return res
+        .status(500)
+        .json({
+          success: false,
+          message: 'حدث خطأ أثناء جلب الملخص المالي',
+          error: 'حدث خطأ داخلي',
+        });
     }
   }
 }

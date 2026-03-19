@@ -125,6 +125,75 @@
         .score-good { background: #17a2b8; }
         .score-fair { background: #ffc107; }
         .score-poor { background: #dc3545; }
+        .risk-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-left: 5px;
+        }
+        .risk-low { background-color: #28a745; }
+        .risk-medium { background-color: #ffc107; }
+        .risk-high { background-color: #fd7e14; }
+        .risk-critical { background-color: #dc3545; }
+        .qol-meter {
+            height: 8px;
+            border-radius: 4px;
+            background-color: #e9ecef;
+            overflow: hidden;
+            margin-bottom: 6px;
+        }
+        .qol-meter-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.6s ease;
+        }
+        .medication-card {
+            border-right: 4px solid #0d6efd;
+            transition: transform 0.2s;
+            margin-bottom: 10px;
+            border-radius: 10px;
+        }
+        .medication-card:hover {
+            transform: translateX(-3px);
+        }
+        .vital-card {
+            border-radius: 12px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+        .team-msg {
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-right: 3px solid #6f42c1;
+        }
+        .exercise-card {
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 8px;
+        }
+        .waiting-badge {
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+        .stats-card.purple {
+            background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
+        }
+        .stats-card.teal {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+        .tab-section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e9ecef;
+        }
     </style>
 </head>
 <body>
@@ -196,6 +265,53 @@
                 </div>
             </div>
         </div>
+        <!-- Additional Statistics Row -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="stats-card purple">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 id="waitingListCount">0</h3>
+                            <p class="mb-0">قائمة الانتظار</p>
+                        </div>
+                        <i class="fas fa-hourglass-half fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card teal">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 id="highRiskCount">0</h3>
+                            <p class="mb-0">مخاطر عالية</p>
+                        </div>
+                        <i class="fas fa-exclamation-triangle fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card" style="background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); color:white;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 id="activeMedications">0</h3>
+                            <p class="mb-0">أدوية نشطة</p>
+                        </div>
+                        <i class="fas fa-pills fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card" style="background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%); color:white;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 id="avgQolScore">0%</h3>
+                            <p class="mb-0">متوسط جودة الحياة</p>
+                        </div>
+                        <i class="fas fa-heart fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- Navigation Tabs -->
         <ul class="nav nav-pills mb-4" id="rehabTabs" role="tablist">
@@ -221,7 +337,42 @@
             </li>
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="reports-tab" data-bs-toggle="pill" data-bs-target="#reports" type="button" role="tab">
-                    <i class="fas fa-chart-bar me-2"></i>التقارير والإحصائيات
+                    <i class="fas fa-chart-bar me-2"></i>التقارير
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="risk-tab" data-bs-toggle="pill" data-bs-target="#riskAssessment" type="button" role="tab">
+                    <i class="fas fa-shield-alt me-2"></i>المخاطر
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="qol-tab" data-bs-toggle="pill" data-bs-target="#qualityOfLife" type="button" role="tab">
+                    <i class="fas fa-heart me-2"></i>جودة الحياة
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="medications-tab" data-bs-toggle="pill" data-bs-target="#medications" type="button" role="tab">
+                    <i class="fas fa-pills me-2"></i>الأدوية
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="vitals-tab" data-bs-toggle="pill" data-bs-target="#vitals" type="button" role="tab">
+                    <i class="fas fa-heartbeat me-2"></i>العلامات الحيوية
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="homeProgram-tab" data-bs-toggle="pill" data-bs-target="#homeProgram" type="button" role="tab">
+                    <i class="fas fa-home me-2"></i>البرنامج المنزلي
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="teamComm-tab" data-bs-toggle="pill" data-bs-target="#teamComm" type="button" role="tab">
+                    <i class="fas fa-comments me-2"></i>تواصل الفريق
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="waitingList-tab" data-bs-toggle="pill" data-bs-target="#waitingList" type="button" role="tab">
+                    <i class="fas fa-list-ol me-2"></i>قائمة الانتظار
                 </button>
             </li>
         </ul>
@@ -251,6 +402,16 @@
                                                     <option value="learning_difficulties">صعوبات التعلم</option>
                                                     <option value="behavioral">سلوكية</option>
                                                     <option value="multiple">متعددة</option>
+                                                    <option value="cerebral_palsy">شلل دماغي</option>
+                                                    <option value="down_syndrome">متلازمة داون</option>
+                                                    <option value="adhd">اضطراب فرط الحركة</option>
+                                                    <option value="epilepsy">صرع</option>
+                                                    <option value="spinal_cord_injury">إصابة الحبل الشوكي</option>
+                                                    <option value="chronic_illness">مرض مزمن</option>
+                                                    <option value="genetic_disorder">اضطراب جيني</option>
+                                                    <option value="traumatic_brain_injury">إصابة دماغية رضية</option>
+                                                    <option value="muscular_dystrophy">ضمور عضلي</option>
+                                                    <option value="rare_disease">مرض نادر</option>
                                                 </select>
                                             </div>
                                             <div class="col-md-4">
@@ -274,7 +435,7 @@
                                 <div id="beneficiariesList" class="row">
                                     <!-- Beneficiaries will be loaded here -->
                                 </div>
-                                
+
                                 <!-- Pagination -->
                                 <nav id="beneficiariesPagination" class="mt-3">
                                     <!-- Pagination will be loaded here -->
@@ -387,10 +548,399 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Risk Assessment Tab -->
+            <div class="tab-pane fade" id="riskAssessment" role="tabpanel">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5><i class="fas fa-shield-alt me-2"></i>تقييم المخاطر</h5>
+                        <button class="btn btn-warning btn-sm" onclick="rehab.showAddRiskAssessmentModal()">
+                            <i class="fas fa-plus me-2"></i>تقييم جديد
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <!-- Risk Summary Cards -->
+                        <div class="row mb-4" id="riskSummaryCards">
+                            <div class="col-md-3">
+                                <div class="card border-success">
+                                    <div class="card-body text-center">
+                                        <span class="risk-indicator risk-low"></span>
+                                        <h4 id="riskLowCount" class="text-success">0</h4>
+                                        <small>خطر منخفض</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card border-warning">
+                                    <div class="card-body text-center">
+                                        <span class="risk-indicator risk-medium"></span>
+                                        <h4 id="riskMediumCount" class="text-warning">0</h4>
+                                        <small>خطر متوسط</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card border-danger">
+                                    <div class="card-body text-center">
+                                        <span class="risk-indicator risk-high"></span>
+                                        <h4 id="riskHighCount" class="text-danger">0</h4>
+                                        <small>خطر مرتفع</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card" style="border-color: #dc3545;">
+                                    <div class="card-body text-center">
+                                        <span class="risk-indicator risk-critical"></span>
+                                        <h4 id="riskCriticalCount" class="text-danger">0</h4>
+                                        <small>خطر حرج</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Risk List -->
+                        <div id="riskAssessmentList">
+                            <div class="text-center py-4 text-muted">
+                                <i class="fas fa-shield-alt fa-3x mb-3"></i>
+                                <p>جاري تحميل بيانات المخاطر...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quality of Life Tab -->
+            <div class="tab-pane fade" id="qualityOfLife" role="tabpanel">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5><i class="fas fa-heart me-2"></i>مؤشرات جودة الحياة</h5>
+                        <button class="btn btn-info btn-sm text-white" onclick="rehab.showUpdateQoLModal()">
+                            <i class="fas fa-edit me-2"></i>تحديث المؤشرات
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div id="qolDomainsList">
+                                    <!-- QoL domains will be rendered here -->
+                                    <div class="row" id="qolDomainsGrid">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="fw-bold">الصحة الجسدية</label>
+                                            <div class="qol-meter"><div class="qol-meter-fill bg-success" id="qol_physical_health" style="width:0%"></div></div>
+                                            <small class="text-muted" id="qol_physical_health_val">0%</small>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="fw-bold">الصحة النفسية</label>
+                                            <div class="qol-meter"><div class="qol-meter-fill bg-info" id="qol_psychological" style="width:0%"></div></div>
+                                            <small class="text-muted" id="qol_psychological_val">0%</small>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="fw-bold">العلاقات الاجتماعية</label>
+                                            <div class="qol-meter"><div class="qol-meter-fill bg-primary" id="qol_social" style="width:0%"></div></div>
+                                            <small class="text-muted" id="qol_social_val">0%</small>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="fw-bold">البيئة المحيطة</label>
+                                            <div class="qol-meter"><div class="qol-meter-fill bg-warning" id="qol_environment" style="width:0%"></div></div>
+                                            <small class="text-muted" id="qol_environment_val">0%</small>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="fw-bold">الاستقلالية</label>
+                                            <div class="qol-meter"><div class="qol-meter-fill bg-success" id="qol_independence" style="width:0%"></div></div>
+                                            <small class="text-muted" id="qol_independence_val">0%</small>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="fw-bold">المشاركة المجتمعية</label>
+                                            <div class="qol-meter"><div class="qol-meter-fill bg-info" id="qol_community" style="width:0%"></div></div>
+                                            <small class="text-muted" id="qol_community_val">0%</small>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="fw-bold">الرفاهية العاطفية</label>
+                                            <div class="qol-meter"><div class="qol-meter-fill bg-danger" id="qol_emotional" style="width:0%"></div></div>
+                                            <small class="text-muted" id="qol_emotional_val">0%</small>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="fw-bold">الرضا العام</label>
+                                            <div class="qol-meter"><div class="qol-meter-fill bg-primary" id="qol_satisfaction" style="width:0%"></div></div>
+                                            <small class="text-muted" id="qol_satisfaction_val">0%</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card">
+                                    <div class="card-header"><h6>مخطط جودة الحياة</h6></div>
+                                    <div class="card-body">
+                                        <canvas id="qolRadarChart" height="250"></canvas>
+                                    </div>
+                                </div>
+                                <div class="card mt-3">
+                                    <div class="card-header"><h6>تاريخ التقييمات</h6></div>
+                                    <div class="card-body">
+                                        <canvas id="qolHistoryChart" height="200"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Medications Tab -->
+            <div class="tab-pane fade" id="medications" role="tabpanel">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5><i class="fas fa-pills me-2"></i>إدارة الأدوية</h5>
+                        <button class="btn btn-primary btn-sm" onclick="rehab.showAddMedicationModal()">
+                            <i class="fas fa-plus me-2"></i>إضافة دواء
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <select class="form-select form-select-sm" id="medStatusFilter" onchange="rehab.filterMedications()">
+                                    <option value="">جميع الحالات</option>
+                                    <option value="active">نشط</option>
+                                    <option value="discontinued">متوقف</option>
+                                    <option value="on_hold">معلّق</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <input type="text" class="form-control form-control-sm" id="medSearch" placeholder="بحث عن دواء..." onkeyup="rehab.searchMedications()">
+                            </div>
+                        </div>
+                        <div id="medicationsList">
+                            <div class="text-center py-4 text-muted">
+                                <i class="fas fa-pills fa-3x mb-3"></i>
+                                <p>جاري تحميل الأدوية...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vitals Tab -->
+            <div class="tab-pane fade" id="vitals" role="tabpanel">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5><i class="fas fa-heartbeat me-2"></i>العلامات الحيوية</h5>
+                        <button class="btn btn-success btn-sm" onclick="rehab.showAddVitalsModal()">
+                            <i class="fas fa-plus me-2"></i>تسجيل قراءة
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-4" id="vitalsSummaryCards">
+                            <div class="col-md-2">
+                                <div class="vital-card text-center">
+                                    <i class="fas fa-thermometer-half text-danger fa-2x mb-2"></i>
+                                    <h5 id="lastTemp">--</h5>
+                                    <small>الحرارة °C</small>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="vital-card text-center">
+                                    <i class="fas fa-heartbeat text-danger fa-2x mb-2"></i>
+                                    <h5 id="lastPulse">--</h5>
+                                    <small>النبض /دقيقة</small>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="vital-card text-center">
+                                    <i class="fas fa-tint text-primary fa-2x mb-2"></i>
+                                    <h5 id="lastBP">--</h5>
+                                    <small>ضغط الدم</small>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="vital-card text-center">
+                                    <i class="fas fa-lungs text-info fa-2x mb-2"></i>
+                                    <h5 id="lastO2">--</h5>
+                                    <small>الأوكسجين %</small>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="vital-card text-center">
+                                    <i class="fas fa-weight text-success fa-2x mb-2"></i>
+                                    <h5 id="lastWeight">--</h5>
+                                    <small>الوزن كجم</small>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="vital-card text-center">
+                                    <i class="fas fa-calculator text-warning fa-2x mb-2"></i>
+                                    <h5 id="lastBMI">--</h5>
+                                    <small>مؤشر الكتلة</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header"><h6>سجل القراءات</h6></div>
+                            <div class="card-body">
+                                <canvas id="vitalsChart" height="200"></canvas>
+                            </div>
+                        </div>
+                        <div id="vitalsHistory" class="mt-3">
+                            <!-- Vitals history table will load here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Home Program Tab -->
+            <div class="tab-pane fade" id="homeProgram" role="tabpanel">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5><i class="fas fa-home me-2"></i>البرنامج المنزلي</h5>
+                        <div>
+                            <button class="btn btn-primary btn-sm me-1" onclick="rehab.showAddExerciseModal()">
+                                <i class="fas fa-plus me-2"></i>إضافة تمرين
+                            </button>
+                            <button class="btn btn-outline-success btn-sm" onclick="rehab.printHomeProgram()">
+                                <i class="fas fa-print me-2"></i>طباعة
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h4 id="totalExercises" class="text-primary">0</h4>
+                                        <small>إجمالي التمارين</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h4 id="avgCompliance" class="text-success">0%</h4>
+                                        <small>متوسط الالتزام</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card bg-light">
+                                    <div class="card-body text-center">
+                                        <h4 id="nextReviewDate" class="text-info">--</h4>
+                                        <small>تاريخ المراجعة القادم</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="exercisesList">
+                            <div class="text-center py-4 text-muted">
+                                <i class="fas fa-dumbbell fa-3x mb-3"></i>
+                                <p>جاري تحميل التمارين...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Team Communication Tab -->
+            <div class="tab-pane fade" id="teamComm" role="tabpanel">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5><i class="fas fa-comments me-2"></i>تواصل الفريق العلاجي</h5>
+                        <button class="btn btn-primary btn-sm" onclick="rehab.showAddTeamMessageModal()">
+                            <i class="fas fa-paper-plane me-2"></i>رسالة جديدة
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <select class="form-select form-select-sm" id="msgTypeFilter" onchange="rehab.filterTeamMessages()">
+                                    <option value="">جميع أنواع الرسائل</option>
+                                    <option value="update">تحديث</option>
+                                    <option value="concern">ملاحظة</option>
+                                    <option value="recommendation">توصية</option>
+                                    <option value="alert">تنبيه</option>
+                                    <option value="progress_note">ملاحظة تقدم</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <select class="form-select form-select-sm" id="msgPriorityFilter" onchange="rehab.filterTeamMessages()">
+                                    <option value="">جميع الأولويات</option>
+                                    <option value="high">عالية</option>
+                                    <option value="medium">متوسطة</option>
+                                    <option value="low">منخفضة</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="teamMessagesList">
+                            <div class="text-center py-4 text-muted">
+                                <i class="fas fa-comments fa-3x mb-3"></i>
+                                <p>جاري تحميل الرسائل...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Waiting List Tab -->
+            <div class="tab-pane fade" id="waitingList" role="tabpanel">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5><i class="fas fa-list-ol me-2"></i>قائمة الانتظار</h5>
+                        <div>
+                            <span class="badge bg-warning text-dark me-2" id="waitingTotalBadge">0 في الانتظار</span>
+                            <button class="btn btn-outline-primary btn-sm" onclick="rehab.refreshWaitingList()">
+                                <i class="fas fa-sync-alt me-2"></i>تحديث
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <select class="form-select form-select-sm" id="waitPriorityFilter" onchange="rehab.filterWaitingList()">
+                                    <option value="">جميع الأولويات</option>
+                                    <option value="urgent">عاجل</option>
+                                    <option value="high">مرتفع</option>
+                                    <option value="normal">عادي</option>
+                                    <option value="low">منخفض</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <select class="form-select form-select-sm" id="waitServiceFilter" onchange="rehab.filterWaitingList()">
+                                    <option value="">جميع الخدمات</option>
+                                    <option value="physical_therapy">علاج طبيعي</option>
+                                    <option value="occupational_therapy">علاج وظيفي</option>
+                                    <option value="speech_therapy">علاج نطق</option>
+                                    <option value="behavioral_therapy">علاج سلوكي</option>
+                                    <option value="hydrotherapy">علاج مائي</option>
+                                    <option value="sensory_integration">تكامل حسي</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="waitingListTable">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>المستفيد</th>
+                                        <th>الخدمة المطلوبة</th>
+                                        <th>الأولوية</th>
+                                        <th>تاريخ التسجيل</th>
+                                        <th>مدة الانتظار</th>
+                                        <th>الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="waitingListBody">
+                                    <tr>
+                                        <td colspan="7" class="text-center text-muted py-4">
+                                            <i class="fas fa-hourglass-half fa-2x mb-2"></i><br>
+                                            جاري تحميل قائمة الانتظار...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
-
-    <!-- Add Beneficiary Modal -->
     <div class="modal fade" id="addBeneficiaryModal" tabindex="-1">
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
@@ -466,7 +1016,16 @@
                                         <option value="learning_difficulties">صعوبات التعلم</option>
                                         <option value="behavioral">سلوكية</option>
                                         <option value="multiple">متعددة</option>
-                                        <option value="rare_diseases">أمراض نادرة</option>
+                                        <option value="cerebral_palsy">شلل دماغي</option>
+                                        <option value="down_syndrome">متلازمة داون</option>
+                                        <option value="adhd">اضطراب فرط الحركة</option>
+                                        <option value="epilepsy">صرع</option>
+                                        <option value="spinal_cord_injury">إصابة الحبل الشوكي</option>
+                                        <option value="chronic_illness">مرض مزمن</option>
+                                        <option value="genetic_disorder">اضطراب جيني</option>
+                                        <option value="traumatic_brain_injury">إصابة دماغية رضية</option>
+                                        <option value="muscular_dystrophy">ضمور عضلي</option>
+                                        <option value="rare_disease">مرض نادر</option>
                                     </select>
                                 </div>
                             </div>
@@ -549,6 +1108,478 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
                     <button type="button" class="btn btn-primary" id="createPlanButton" onclick="rehab.showCreatePlanForBeneficiary()">إنشاء خطة تأهيل</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Risk Assessment Modal -->
+    <div class="modal fade" id="addRiskAssessmentModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title"><i class="fas fa-shield-alt me-2"></i>تقييم المخاطر</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="riskAssessmentForm">
+                        <div class="mb-3">
+                            <label class="form-label">اختر المستفيد *</label>
+                            <select class="form-select" name="program_id" id="riskBeneficiarySelect" required>
+                                <option value="">-- اختر المستفيد --</option>
+                            </select>
+                        </div>
+                        <h6 class="tab-section-title">تقييم خطر السقوط</h6>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">المستوى</label>
+                                    <select class="form-select" name="fall_risk_level">
+                                        <option value="low">منخفض</option>
+                                        <option value="medium">متوسط</option>
+                                        <option value="high">مرتفع</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label class="form-label">إجراءات الوقاية</label>
+                                    <input type="text" class="form-control" name="fall_preventive_measures" placeholder="إجراءات الوقاية من السقوط">
+                                </div>
+                            </div>
+                        </div>
+                        <h6 class="tab-section-title">تقييم المخاطر السلوكية</h6>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">المستوى</label>
+                                    <select class="form-select" name="behavioral_risk_level">
+                                        <option value="low">منخفض</option>
+                                        <option value="medium">متوسط</option>
+                                        <option value="high">مرتفع</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label class="form-label">المحفزات المعروفة</label>
+                                    <input type="text" class="form-control" name="behavioral_triggers" placeholder="محفزات السلوك, افصل بفاصلة">
+                                </div>
+                            </div>
+                        </div>
+                        <h6 class="tab-section-title">تقييم المخاطر الطبية</h6>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">المستوى</label>
+                                    <select class="form-select" name="medical_risk_level">
+                                        <option value="low">منخفض</option>
+                                        <option value="medium">متوسط</option>
+                                        <option value="high">مرتفع</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label class="form-label">الحالات الطبية</label>
+                                    <input type="text" class="form-control" name="medical_conditions" placeholder="الحالات الطبية القائمة">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">مستوى الخطر العام *</label>
+                            <select class="form-select" name="overall_risk" required>
+                                <option value="low">منخفض</option>
+                                <option value="medium">متوسط</option>
+                                <option value="high">مرتفع</option>
+                                <option value="critical">حرج</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">ملاحظات</label>
+                            <textarea class="form-control" name="risk_notes" rows="2"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-warning" onclick="rehab.saveRiskAssessment()">حفظ التقييم</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- QoL Update Modal -->
+    <div class="modal fade" id="updateQoLModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title"><i class="fas fa-heart me-2"></i>تحديث مؤشرات جودة الحياة</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="qolForm">
+                        <div class="mb-3">
+                            <label class="form-label">اختر المستفيد *</label>
+                            <select class="form-select" name="program_id" id="qolBeneficiarySelect" required>
+                                <option value="">-- اختر المستفيد --</option>
+                            </select>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">الصحة الجسدية (0-100)</label>
+                                <input type="range" class="form-range" name="physical_health" min="0" max="100" value="50" oninput="this.nextElementSibling.value = this.value">
+                                <output>50</output>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">الصحة النفسية (0-100)</label>
+                                <input type="range" class="form-range" name="psychological" min="0" max="100" value="50" oninput="this.nextElementSibling.value = this.value">
+                                <output>50</output>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">العلاقات الاجتماعية (0-100)</label>
+                                <input type="range" class="form-range" name="social_relationships" min="0" max="100" value="50" oninput="this.nextElementSibling.value = this.value">
+                                <output>50</output>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">البيئة المحيطة (0-100)</label>
+                                <input type="range" class="form-range" name="environment" min="0" max="100" value="50" oninput="this.nextElementSibling.value = this.value">
+                                <output>50</output>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">الاستقلالية (0-100)</label>
+                                <input type="range" class="form-range" name="independence" min="0" max="100" value="50" oninput="this.nextElementSibling.value = this.value">
+                                <output>50</output>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">المشاركة المجتمعية (0-100)</label>
+                                <input type="range" class="form-range" name="community_participation" min="0" max="100" value="50" oninput="this.nextElementSibling.value = this.value">
+                                <output>50</output>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">الرفاهية العاطفية (0-100)</label>
+                                <input type="range" class="form-range" name="emotional_wellbeing" min="0" max="100" value="50" oninput="this.nextElementSibling.value = this.value">
+                                <output>50</output>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">الرضا العام (0-100)</label>
+                                <input type="range" class="form-range" name="overall_satisfaction" min="0" max="100" value="50" oninput="this.nextElementSibling.value = this.value">
+                                <output>50</output>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">ملاحظات التقييم</label>
+                            <textarea class="form-control" name="qol_notes" rows="2"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-info text-white" onclick="rehab.saveQualityOfLife()">حفظ المؤشرات</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Medication Modal -->
+    <div class="modal fade" id="addMedicationModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="fas fa-pills me-2"></i>إضافة دواء</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="medicationForm">
+                        <div class="mb-3">
+                            <label class="form-label">اختر المستفيد *</label>
+                            <select class="form-select" name="program_id" id="medBeneficiarySelect" required>
+                                <option value="">-- اختر المستفيد --</option>
+                            </select>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">اسم الدواء *</label>
+                                    <input type="text" class="form-control" name="medication_name" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">الجرعة *</label>
+                                    <input type="text" class="form-control" name="dosage" required placeholder="مثال: 500mg">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">التكرار *</label>
+                                    <select class="form-select" name="frequency" required>
+                                        <option value="once_daily">مرة يومياً</option>
+                                        <option value="twice_daily">مرتين يومياً</option>
+                                        <option value="three_daily">ثلاث مرات يومياً</option>
+                                        <option value="as_needed">عند الحاجة</option>
+                                        <option value="weekly">أسبوعياً</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">طريقة الإعطاء</label>
+                                    <select class="form-select" name="route">
+                                        <option value="oral">فموي</option>
+                                        <option value="injectable">حقن</option>
+                                        <option value="topical">موضعي</option>
+                                        <option value="inhaled">استنشاق</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">الطبيب الواصف</label>
+                                    <input type="text" class="form-control" name="prescribing_doctor">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">تاريخ البدء</label>
+                                    <input type="date" class="form-control" name="start_date">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">تاريخ الانتهاء</label>
+                                    <input type="date" class="form-control" name="end_date">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">الآثار الجانبية المعروفة</label>
+                            <textarea class="form-control" name="side_effects" rows="2" placeholder="آثار جانبية محتملة"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">ملاحظات</label>
+                            <textarea class="form-control" name="med_notes" rows="2"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-primary" onclick="rehab.saveMedication()">إضافة الدواء</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Vitals Modal -->
+    <div class="modal fade" id="addVitalsModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title"><i class="fas fa-heartbeat me-2"></i>تسجيل العلامات الحيوية</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="vitalsForm">
+                        <div class="mb-3">
+                            <label class="form-label">اختر المستفيد *</label>
+                            <select class="form-select" name="program_id" id="vitalsBeneficiarySelect" required>
+                                <option value="">-- اختر المستفيد --</option>
+                            </select>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">درجة الحرارة (°C)</label>
+                                <input type="number" class="form-control" name="temperature" step="0.1" placeholder="36.5">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">معدل النبض (/دقيقة)</label>
+                                <input type="number" class="form-control" name="pulse" placeholder="72">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">ضغط الدم الانقباضي</label>
+                                <input type="number" class="form-control" name="bp_systolic" placeholder="120">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">ضغط الدم الانبساطي</label>
+                                <input type="number" class="form-control" name="bp_diastolic" placeholder="80">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">تشبع الأوكسجين (%)</label>
+                                <input type="number" class="form-control" name="oxygen_saturation" placeholder="98">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">معدل التنفس</label>
+                                <input type="number" class="form-control" name="respiratory_rate" placeholder="16">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">الوزن (كجم)</label>
+                                <input type="number" class="form-control" name="weight" step="0.1" placeholder="70">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">الطول (سم)</label>
+                                <input type="number" class="form-control" name="height" step="0.1" placeholder="170">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">ملاحظات</label>
+                            <textarea class="form-control" name="vital_notes" rows="2"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-success" onclick="rehab.saveVitals()">تسجيل القراءات</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Exercise Modal -->
+    <div class="modal fade" id="addExerciseModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="fas fa-dumbbell me-2"></i>إضافة تمرين للبرنامج المنزلي</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="exerciseForm">
+                        <div class="mb-3">
+                            <label class="form-label">اختر المستفيد *</label>
+                            <select class="form-select" name="program_id" id="exerciseBeneficiarySelect" required>
+                                <option value="">-- اختر المستفيد --</option>
+                            </select>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">اسم التمرين *</label>
+                                    <input type="text" class="form-control" name="exercise_name" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">الفئة</label>
+                                    <select class="form-select" name="exercise_category">
+                                        <option value="stretching">تمارين الإطالة</option>
+                                        <option value="strengthening">تمارين التقوية</option>
+                                        <option value="balance">تمارين التوازن</option>
+                                        <option value="coordination">تمارين التنسيق</option>
+                                        <option value="endurance">تمارين التحمل</option>
+                                        <option value="speech">تمارين النطق</option>
+                                        <option value="cognitive">تمارين ذهنية</option>
+                                        <option value="sensory">تمارين حسية</option>
+                                        <option value="daily_living">أنشطة يومية</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">عدد المرات</label>
+                                    <input type="number" class="form-control" name="repetitions" value="10">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">عدد المجموعات</label>
+                                    <input type="number" class="form-control" name="sets" value="3">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">التكرار الأسبوعي</label>
+                                    <select class="form-select" name="weekly_frequency">
+                                        <option value="daily">يومياً</option>
+                                        <option value="3_weekly">3 مرات أسبوعياً</option>
+                                        <option value="5_weekly">5 مرات أسبوعياً</option>
+                                        <option value="2_weekly">مرتين أسبوعياً</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">التعليمات</label>
+                            <textarea class="form-control" name="exercise_instructions" rows="3" placeholder="وصف تفصيلي لكيفية أداء التمرين"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">احتياطات السلامة</label>
+                            <textarea class="form-control" name="precautions" rows="2" placeholder="تحذيرات أو احتياطات أثناء التمرين"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-primary" onclick="rehab.saveExercise()">إضافة التمرين</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Team Message Modal -->
+    <div class="modal fade" id="addTeamMessageModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color:white;">
+                    <h5 class="modal-title"><i class="fas fa-paper-plane me-2"></i>رسالة جديدة للفريق</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="teamMessageForm">
+                        <div class="mb-3">
+                            <label class="form-label">اختر المستفيد *</label>
+                            <select class="form-select" name="program_id" id="teamMsgBeneficiarySelect" required>
+                                <option value="">-- اختر المستفيد --</option>
+                            </select>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">نوع الرسالة *</label>
+                                    <select class="form-select" name="message_type" required>
+                                        <option value="update">تحديث</option>
+                                        <option value="concern">ملاحظة</option>
+                                        <option value="recommendation">توصية</option>
+                                        <option value="alert">تنبيه</option>
+                                        <option value="progress_note">ملاحظة تقدم</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">الأولوية</label>
+                                    <select class="form-select" name="priority">
+                                        <option value="low">منخفضة</option>
+                                        <option value="medium" selected>متوسطة</option>
+                                        <option value="high">عالية</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">الموضوع *</label>
+                            <input type="text" class="form-control" name="subject" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">الرسالة *</label>
+                            <textarea class="form-control" name="message" rows="4" required></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-primary" onclick="rehab.saveTeamMessage()">إرسال</button>
                 </div>
             </div>
         </div>

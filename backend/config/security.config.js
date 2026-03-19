@@ -4,15 +4,19 @@
  */
 
 const securityConfig = {
+  // Logger loaded lazily to avoid circular deps
+  _getLogger() {
+    return require('../utils/logger');
+  },
   // إعدادات JWT
   jwt: {
-    secret: process.env.JWT_SECRET || 'alawael-erp-super-secret-key-2026',
-    refreshSecret: process.env.JWT_REFRESH_SECRET || 'alawael-erp-refresh-secret-key-2026',
+    secret: require('./secrets').jwtSecret,
+    refreshSecret: require('./secrets').jwtRefreshSecret,
     accessTokenExpiry: process.env.JWT_ACCESS_EXPIRY || '15m',
     refreshTokenExpiry: process.env.JWT_REFRESH_EXPIRY || '7d',
     issuer: 'alawael-erp',
     audience: 'alawael-users',
-    algorithm: 'HS256'
+    algorithm: 'HS256',
   },
 
   // إعدادات المصادقة المتعددة العوامل (MFA)
@@ -25,11 +29,11 @@ const securityConfig = {
     backupCodesCount: 10,
     // طرق المصادقة المتاحة
     methods: {
-      totp: true,      // Google Authenticator / Authy
-      sms: true,       // SMS
-      email: true,     // Email OTP
-      backup: true     // Backup Codes
-    }
+      totp: true, // Google Authenticator / Authy
+      sms: true, // SMS
+      email: true, // Email OTP
+      backup: true, // Backup Codes
+    },
   },
 
   // إعدادات كلمة المرور
@@ -43,8 +47,16 @@ const securityConfig = {
     specialChars: '!@#$%^&*()_+-=[]{}|;:,.<>?',
     // منع كلمات المرور الشائعة
     commonPasswords: [
-      'password', '123456', '12345678', 'qwerty', 'abc123',
-      'monkey', 'master', 'dragon', 'letmein', 'login'
+      'password',
+      '123456',
+      '12345678',
+      'qwerty',
+      'abc123',
+      'monkey',
+      'master',
+      'dragon',
+      'letmein',
+      'login',
     ],
     // تاريخ كلمات المرور (منع إعادة استخدام آخر 5)
     historyCount: 5,
@@ -52,7 +64,7 @@ const securityConfig = {
     expiryDays: 90,
     // تأمين الحساب بعد عدد محاولات فاشلة
     maxAttempts: 5,
-    lockoutDuration: 30 // دقيقة
+    lockoutDuration: 30, // دقيقة
   },
 
   // إعدادات Rate Limiting
@@ -62,41 +74,41 @@ const securityConfig = {
       windowMs: 15 * 60 * 1000, // 15 دقيقة
       max: 100, // 100 طلب لكل IP
       message: {
-        error: 'تجاوزت الحد المسموح من الطلبات، يرجى المحاولة لاحقاً'
-      }
+        error: 'تجاوزت الحد المسموح من الطلبات، يرجى المحاولة لاحقاً',
+      },
     },
     // حد تسجيل الدخول
     login: {
       windowMs: 15 * 60 * 1000, // 15 دقيقة
       max: 5, // 5 محاولات
       message: {
-        error: 'تجاوزت الحد المسموح من محاولات تسجيل الدخول'
-      }
+        error: 'تجاوزت الحد المسموح من محاولات تسجيل الدخول',
+      },
     },
     // حد إنشاء الحساب
     register: {
       windowMs: 60 * 60 * 1000, // ساعة
       max: 3, // 3 محاولات
       message: {
-        error: 'تجاوزت الحد المسموح من إنشاء الحسابات'
-      }
+        error: 'تجاوزت الحد المسموح من إنشاء الحسابات',
+      },
     },
     // حد API
     api: {
       windowMs: 60 * 1000, // دقيقة
       max: 60, // 60 طلب
       message: {
-        error: 'تجاوزت الحد المسموح من طلبات API'
-      }
+        error: 'تجاوزت الحد المسموح من طلبات API',
+      },
     },
     // حد تصدير البيانات
     export: {
       windowMs: 60 * 60 * 1000, // ساعة
       max: 10, // 10 عمليات
       message: {
-        error: 'تجاوزت الحد المسموح من عمليات التصدير'
-      }
-    }
+        error: 'تجاوزت الحد المسموح من عمليات التصدير',
+      },
+    },
   },
 
   // إعدادات CORS
@@ -110,13 +122,13 @@ const securityConfig = {
       'Authorization',
       'X-Requested-With',
       'X-Request-ID',
-      'X-API-Key'
+      'X-API-Key',
     ],
     exposedHeaders: ['X-Total-Count', 'X-Page-Count'],
     credentials: true,
     maxAge: 86400, // 24 ساعة
     preflightContinue: false,
-    optionsSuccessStatus: 204
+    optionsSuccessStatus: 204,
   },
 
   // إعدادات Helmet للأمان
@@ -131,8 +143,8 @@ const securityConfig = {
         connectSrc: ["'self'", 'https://api.alawael.com'],
         frameSrc: ["'none'"],
         objectSrc: ["'none'"],
-        upgradeInsecureRequests: []
-      }
+        upgradeInsecureRequests: [],
+      },
     },
     crossOriginEmbedderPolicy: true,
     crossOriginOpenerPolicy: true,
@@ -143,28 +155,28 @@ const securityConfig = {
     hsts: {
       maxAge: 31536000,
       includeSubDomains: true,
-      preload: true
+      preload: true,
     },
     ieNoOpen: true,
     noSniff: true,
     originAgentCluster: true,
     permittedCrossDomainPolicies: { permittedPolicies: 'none' },
     referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
-    xssFilter: true
+    xssFilter: true,
   },
 
   // إعدادات الجلسة
   session: {
     name: 'alawael.session',
-    secret: process.env.SESSION_SECRET || 'alawael-session-secret-2026',
+    secret: require('./secrets').sessionSecret,
     resave: false,
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 24 * 60 * 60 * 1000 // يوم واحد
-    }
+      maxAge: 24 * 60 * 60 * 1000, // يوم واحد
+    },
   },
 
   // إعدادات تسجيل الدخول
@@ -174,17 +186,17 @@ const securityConfig = {
       email: true,
       phone: true,
       username: true,
-      nationalId: true
+      nationalId: true,
     },
     // تذكر الجهاز
     rememberDevice: {
       enabled: true,
-      duration: 30 // يوم
+      duration: 30, // يوم
     },
     // اكتشاف الأجهزة الجديدة
     newDeviceAlert: true,
     // إنهاء الجلسات الأخرى
-    revokeOtherSessions: true
+    revokeOtherSessions: true,
   },
 
   // إعدادات API Keys
@@ -195,8 +207,8 @@ const securityConfig = {
     headerName: 'X-API-Key',
     rateLimit: {
       windowMs: 60 * 1000, // دقيقة
-      max: 100 // 100 طلب
-    }
+      max: 100, // 100 طلب
+    },
   },
 
   // إعدادات التحقق من المدخلات
@@ -213,13 +225,15 @@ const securityConfig = {
     maxFileSize: 10 * 1024 * 1024, // 10 MB
     // أنواع الملفات المسموحة
     allowedFileTypes: [
-      'image/jpeg', 'image/png', 'image/gif',
+      'image/jpeg',
+      'image/png',
+      'image/gif',
       'application/pdf',
       'application/msword',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
       'application/vnd.ms-excel',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    ]
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    ],
   },
 
   // إعدادات التشفير
@@ -230,10 +244,7 @@ const securityConfig = {
     saltLength: 64,
     iterations: 100000,
     // الحقول المشفرة في قاعدة البيانات
-    encryptedFields: [
-      'nationalId', 'bankAccount', 'creditCard',
-      'medicalInfo', 'address'
-    ]
+    encryptedFields: ['nationalId', 'bankAccount', 'creditCard', 'medicalInfo', 'address'],
   },
 
   // إعدادات Audit Log
@@ -241,19 +252,29 @@ const securityConfig = {
     enabled: true,
     // الأحداث المسجلة
     events: [
-      'login', 'logout', 'loginFailed',
-      'passwordChange', 'passwordReset',
-      'mfaEnabled', 'mfaDisabled',
-      'profileUpdate', 'emailChange',
-      'apiCall', 'dataExport', 'dataImport',
-      'userCreate', 'userUpdate', 'userDelete',
-      'roleChange', 'permissionChange'
+      'login',
+      'logout',
+      'loginFailed',
+      'passwordChange',
+      'passwordReset',
+      'mfaEnabled',
+      'mfaDisabled',
+      'profileUpdate',
+      'emailChange',
+      'apiCall',
+      'dataExport',
+      'dataImport',
+      'userCreate',
+      'userUpdate',
+      'userDelete',
+      'roleChange',
+      'permissionChange',
     ],
     // حفظ IP و User Agent
     captureIpAddress: true,
     captureUserAgent: true,
     // فترة الاحتفاظ بالسجلات (بالأيام)
-    retentionDays: 90
+    retentionDays: 90,
   },
 
   // إعدادات حماية CSRF
@@ -262,8 +283,8 @@ const securityConfig = {
     cookie: {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict'
-    }
+      sameSite: 'strict',
+    },
   },
 
   // قائمة IP المحظورة
@@ -275,15 +296,15 @@ const securityConfig = {
     autoBlock: {
       enabled: true,
       threshold: 10,
-      duration: 24 // ساعة
-    }
+      duration: 24, // ساعة
+    },
   },
 
   // قائمة الدول المسموحة (اختياري)
   countryWhitelist: {
     enabled: false,
-    countries: ['SA', 'AE', 'KW', 'BH', 'QA', 'OM'] // دول الخليج
-  }
+    countries: ['SA', 'AE', 'KW', 'BH', 'QA', 'OM'], // دول الخليج
+  },
 };
 
 // فئة SecurityService
@@ -301,7 +322,7 @@ class SecurityService {
     const result = {
       valid: true,
       errors: [],
-      strength: 0
+      strength: 0,
     };
 
     const { password: pwdConfig } = this.config;
@@ -331,7 +352,10 @@ class SecurityService {
     }
 
     // التحقق من الأحرف الخاصة
-    if (pwdConfig.requireSpecialChars && !new RegExp(`[${pwdConfig.specialChars}]`).test(password)) {
+    if (
+      pwdConfig.requireSpecialChars &&
+      !new RegExp(`[${pwdConfig.specialChars}]`).test(password)
+    ) {
       result.errors.push('كلمة المرور يجب أن تحتوي على حرف خاص واحد على الأقل');
       result.valid = false;
     }
@@ -371,7 +395,12 @@ class SecurityService {
 
     // الأحرف الخاصة
     if (new RegExp(`[${this.config.password.specialChars}]`).test(password)) strength += 15;
-    if (new RegExp(`[${this.config.password.specialChars}].*[${this.config.password.specialChars}]`).test(password)) strength += 10;
+    if (
+      new RegExp(
+        `[${this.config.password.specialChars}].*[${this.config.password.specialChars}]`
+      ).test(password)
+    )
+      strength += 10;
 
     // تنوع الأحرف
     const uniqueChars = new Set(password).size;
@@ -405,9 +434,10 @@ class SecurityService {
    * حظر IP
    */
   blockIP(ip, durationHours = 24) {
-    const unblockAt = Date.now() + (durationHours * 60 * 60 * 1000);
+    const unblockAt = Date.now() + durationHours * 60 * 60 * 1000;
     this.blockedIPs.set(ip, unblockAt);
-    console.log(`🚫 IP محظور: ${ip} حتى ${new Date(unblockAt)}`);
+    const logger = require('../utils/logger');
+    logger.info(`IP blocked: ${ip} until ${new Date(unblockAt)}`);
   }
 
   /**
@@ -455,14 +485,13 @@ class SecurityService {
    */
   encrypt(text, key = null) {
     const crypto = require('crypto');
-    const encryptionKey = key || Buffer.from(process.env.ENCRYPTION_KEY || 'alawael-encryption-key-32-byte', 'utf-8').slice(0, 32);
+    if (!key && !process.env.ENCRYPTION_KEY) {
+      throw new Error('ENCRYPTION_KEY environment variable must be set for encryption operations');
+    }
+    const encryptionKey = key || Buffer.from(process.env.ENCRYPTION_KEY, 'utf-8').slice(0, 32);
     const iv = crypto.randomBytes(this.config.encryption.ivLength);
 
-    const cipher = crypto.createCipheriv(
-      this.config.encryption.algorithm,
-      encryptionKey,
-      iv
-    );
+    const cipher = crypto.createCipheriv(this.config.encryption.algorithm, encryptionKey, iv);
 
     let encrypted = cipher.update(text, 'utf8', 'hex');
     encrypted += cipher.final('hex');
@@ -472,7 +501,7 @@ class SecurityService {
     return {
       encrypted,
       iv: iv.toString('hex'),
-      authTag: authTag.toString('hex')
+      authTag: authTag.toString('hex'),
     };
   }
 
@@ -481,7 +510,10 @@ class SecurityService {
    */
   decrypt(encryptedData, key = null) {
     const crypto = require('crypto');
-    const encryptionKey = key || Buffer.from(process.env.ENCRYPTION_KEY || 'alawael-encryption-key-32-byte', 'utf-8').slice(0, 32);
+    if (!key && !process.env.ENCRYPTION_KEY) {
+      throw new Error('ENCRYPTION_KEY environment variable must be set for decryption operations');
+    }
+    const encryptionKey = key || Buffer.from(process.env.ENCRYPTION_KEY, 'utf-8').slice(0, 32);
 
     const decipher = crypto.createDecipheriv(
       this.config.encryption.algorithm,
@@ -521,7 +553,9 @@ class SecurityService {
 
     // التحقق من حجم الملف
     if (file.size > this.config.validation.maxFileSize) {
-      errors.push(`حجم الملف يتجاوز الحد المسموح (${this.config.validation.maxFileSize / 1024 / 1024} MB)`);
+      errors.push(
+        `حجم الملف يتجاوز الحد المسموح (${this.config.validation.maxFileSize / 1024 / 1024} MB)`
+      );
     }
 
     // التحقق من نوع الملف
@@ -531,27 +565,79 @@ class SecurityService {
 
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 }
 
-// فئة RateLimiter
+// فئة RateLimiter — Redis-backed for multi-pod K8s deployments
+// Falls back gracefully to in-memory Map when Redis is unavailable
 class RateLimiter {
   constructor(options = {}) {
     this.windowMs = options.windowMs || 60000;
     this.max = options.max || 100;
-    this.requests = new Map();
+    this.requests = new Map(); // in-memory fallback
+    this.redis = null;
+    this.prefix = options.prefix || 'rl:';
+    this._initRedis();
+  }
+
+  /** Try to connect to Redis (non-blocking, silent fallback) */
+  _initRedis() {
+    try {
+      if (
+        process.env.NODE_ENV === 'test' ||
+        process.env.USE_MOCK_DB === 'true' ||
+        process.env.DISABLE_REDIS === 'true'
+      )
+        return;
+      const { getRedisClient } = require('./redis.config');
+      const client = getRedisClient();
+      if (client && client.status !== 'end') {
+        this.redis = client;
+      }
+    } catch (_e) {
+      this.redis = null;
+    }
   }
 
   /**
-   * التحقق من الحد
+   * التحقق من الحد — async Redis path or sync in-memory fallback
    */
   check(identifier) {
+    // If Redis is available, use MULTI for atomic increment + expire
+    if (this.redis) {
+      return this._checkRedis(identifier);
+    }
+    return this._checkMemory(identifier);
+  }
+
+  /** Redis-backed check (returns a result synchronously from cache or async) */
+  async _checkRedis(identifier) {
+    const key = `${this.prefix}${identifier}`;
+    try {
+      const current = await this.redis.incr(key);
+      if (current === 1) {
+        await this.redis.pexpire(key, this.windowMs);
+      }
+      const ttl = await this.redis.pttl(key);
+      const resetAt = Date.now() + Math.max(ttl, 0);
+
+      if (current > this.max) {
+        return { allowed: false, remaining: 0, resetAt };
+      }
+      return { allowed: true, remaining: this.max - current, resetAt };
+    } catch (_e) {
+      // Redis failed mid-flight — fall back to memory
+      return this._checkMemory(identifier);
+    }
+  }
+
+  /** In-memory fallback (original implementation + stale-entry cleanup) */
+  _checkMemory(identifier) {
     const now = Date.now();
     const windowStart = now - this.windowMs;
 
-    // تنظيف الطلبات القديمة
     if (!this.requests.has(identifier)) {
       this.requests.set(identifier, []);
     }
@@ -560,22 +646,27 @@ class RateLimiter {
     const validRequests = userRequests.filter(time => time > windowStart);
     this.requests.set(identifier, validRequests);
 
-    // التحقق من الحد
     if (validRequests.length >= this.max) {
       return {
         allowed: false,
         remaining: 0,
-        resetAt: validRequests[0] + this.windowMs
+        resetAt: validRequests[0] + this.windowMs,
       };
     }
 
-    // إضافة الطلب الجديد
     validRequests.push(now);
+
+    // Periodic cleanup: purge stale keys every 1000 checks
+    if (this.requests.size > 10000) {
+      for (const [k, v] of this.requests) {
+        if (!v.length || v[v.length - 1] < windowStart) this.requests.delete(k);
+      }
+    }
 
     return {
       allowed: true,
       remaining: this.max - validRequests.length,
-      resetAt: now + this.windowMs
+      resetAt: now + this.windowMs,
     };
   }
 
@@ -584,11 +675,14 @@ class RateLimiter {
    */
   reset(identifier) {
     this.requests.delete(identifier);
+    if (this.redis) {
+      this.redis.del(`${this.prefix}${identifier}`).catch(() => {});
+    }
   }
 }
 
 module.exports = {
   securityConfig,
   SecurityService,
-  RateLimiter
+  RateLimiter,
 };

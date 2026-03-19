@@ -3,7 +3,6 @@
  * هياكل التحميل - مكونات العناصر المؤقتة
  */
 
-import React from 'react';
 import { Box, Card, CardContent, Grid, Skeleton, Stack } from '@mui/material';
 
 // Dashboard Loading Skeleton

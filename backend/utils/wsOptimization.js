@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * 🚀 WebSocket Performance Optimization
  *

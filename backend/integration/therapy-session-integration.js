@@ -1,7 +1,8 @@
+/* eslint-disable no-unused-vars, no-undef, no-empty, prefer-const, no-constant-condition, no-unused-expressions */
 /**
  * Therapeutic Session Management System - Integration Sample
  * نظام إدارة الجلسات العلاجية - عينة التكامل
- * 
+ *
  * This file shows how to integrate the therapy session system into your main Express app
  */
 
@@ -13,16 +14,17 @@
 
 // Import therapy routes
 const therapySessionRoutes = require('./routes/therapy-sessions.routes');
+const logger = require('../utils/logger');
 
 // Register with Express app
 function setupTherapyRoutes(app) {
   // Option 1: Register at /api/therapy-sessions
   app.use('/api/therapy-sessions', therapySessionRoutes);
-  
+
   // Option 2: Or with custom prefix
   // app.use('/api/v1/therapy', therapySessionRoutes);
-  
-  console.log('✓ Therapy session routes initialized');
+
+  logger.info('✓ Therapy session routes initialized');
 }
 
 // ============================================
@@ -42,7 +44,7 @@ function setupCompleteApp() {
   // Database connection
   mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/rehabilitation', {
     useNewUrlParser: true,
-    useUnifiedTopology: true
+    useUnifiedTopology: true,
   });
 
   // Load all models (IMPORTANT - must be done before routes)
@@ -56,15 +58,15 @@ function setupCompleteApp() {
 
   // Register all routes
   const therapySessionRoutes = require('./routes/therapy-sessions.routes');
-  
+
   // Therapy session routes
   app.use('/api/therapy-sessions', therapySessionRoutes);
-  
+
   // Start server
   const PORT = process.env.PORT || 3001;
   app.listen(PORT, () => {
-    console.log(`✓ Server running on port ${PORT}`);
-    console.log(`✓ Therapy sessions API available at /api/therapy-sessions`);
+    logger.info(`✓ Server running on port ${PORT}`);
+    logger.info(`✓ Therapy sessions API available at /api/therapy-sessions`);
   });
 
   return app;
@@ -78,12 +80,16 @@ const authMiddleware = require('./middleware/auth');
 
 function setupAuthenticatedTherapyRoutes(app) {
   const therapySessionRoutes = require('./routes/therapy-sessions.routes');
-  
+
   // Apply authentication to all therapy routes
-  app.use('/api/therapy-sessions', [
-    authMiddleware.authenticateUser,  // Verify token
-    authMiddleware.validateTherapyAccess  // Verify therapy access
-  ], therapySessionRoutes);
+  app.use(
+    '/api/therapy-sessions',
+    [
+      authMiddleware.authenticateUser, // Verify token
+      authMiddleware.validateTherapyAccess, // Verify therapy access
+    ],
+    therapySessionRoutes
+  );
 }
 
 // ============================================
@@ -98,12 +104,12 @@ function initializeTherapyService() {
     minBreakBetweenSessions: parseInt(process.env.MIN_SESSION_BREAK || '15'), // minutes
     maxSessionsPerDay: parseInt(process.env.MAX_SESSIONS_PER_DAY || '8'),
     documentationDeadlineHours: parseInt(process.env.DOCUMENTATION_DEADLINE || '24'),
-    sessionReminderDays: parseInt(process.env.SESSION_REMINDER_DAYS || '1')
+    sessionReminderDays: parseInt(process.env.SESSION_REMINDER_DAYS || '1'),
   };
 
   return {
     config: serviceConfig,
-    service: therapeuticSessionService
+    service: therapeuticSessionService,
   };
 }
 
@@ -117,38 +123,38 @@ const sessionEventEmitter = new EventEmitter();
 // Listen for session events
 function setupSessionEventListeners() {
   // When session is scheduled
-  sessionEventEmitter.on('session:scheduled', async (session) => {
-    console.log(`✓ Session scheduled: ${session._id}`);
-    
+  sessionEventEmitter.on('session:scheduled', async session => {
+    logger.info(`✓ Session scheduled: ${session._id}`);
+
     // Send notification (if service exists)
     try {
       // await notificationService.sendSessionScheduledNotification(session);
     } catch (error) {
-      console.error('Failed to send notification:', error);
+      logger.error('Failed to send notification:', error);
     }
   });
 
   // When session is completed
-  sessionEventEmitter.on('session:completed', async (session) => {
-    console.log(`✓ Session completed: ${session._id}`);
-    
+  sessionEventEmitter.on('session:completed', async session => {
+    logger.info(`✓ Session completed: ${session._id}`);
+
     // Trigger billing (if service exists)
     try {
       // await billingService.createSessionInvoice(session);
     } catch (error) {
-      console.error('Failed to create invoice:', error);
+      logger.error('Failed to create invoice:', error);
     }
   });
 
   // When session documentation is submitted
-  sessionEventEmitter.on('documentation:submitted', async (documentation) => {
-    console.log(`✓ Documentation submitted: ${documentation._id}`);
-    
+  sessionEventEmitter.on('documentation:submitted', async documentation => {
+    logger.info(`✓ Documentation submitted: ${documentation._id}`);
+
     // Update goals progress (if service exists)
     try {
       // await updateGoalsProgress(documentation);
     } catch (error) {
-      console.error('Failed to update goals:', error);
+      logger.error('Failed to update goals:', error);
     }
   });
 }
@@ -156,8 +162,6 @@ function setupSessionEventListeners() {
 // ============================================
 // 6. THERAPIST AVAILABILITY SETUP
 // ============================================
-
-const therapeuticSessionService = require('./services/therapeutic-session.service');
 
 // Initialize or update therapist availability
 async function setupTherapistAvailability(therapistId) {
@@ -170,19 +174,17 @@ async function setupTherapistAvailability(therapistId) {
         startTime: '09:00',
         endTime: '17:00',
         breaks: [
-          { startTime: '12:00', endTime: '13:00' } // Lunch
+          { startTime: '12:00', endTime: '13:00' }, // Lunch
         ],
-        roomPreferences: ['Room A', 'Room B']
+        roomPreferences: ['Room A', 'Room B'],
       },
       // Tuesday
       {
         dayOfWeek: 'Tuesday',
         startTime: '09:00',
         endTime: '17:00',
-        breaks: [
-          { startTime: '12:00', endTime: '13:00' }
-        ],
-        roomPreferences: ['Room A', 'Room B']
+        breaks: [{ startTime: '12:00', endTime: '13:00' }],
+        roomPreferences: ['Room A', 'Room B'],
       },
       // ... Add other days
     ],
@@ -191,8 +193,8 @@ async function setupTherapistAvailability(therapistId) {
       maxSessionsPerDay: 8,
       minBreakBetweenSessions: 15,
       specializations: ['Physical Therapy', 'Occupational Therapy'],
-      languages: ['English', 'Arabic']
-    }
+      languages: ['English', 'Arabic'],
+    },
   };
 
   try {
@@ -200,10 +202,10 @@ async function setupTherapistAvailability(therapistId) {
       therapistId,
       availability
     );
-    console.log(`✓ Availability set for therapist ${therapistId}`);
+    logger.info(`✓ Availability set for therapist ${therapistId}`);
     return result;
   } catch (error) {
-    console.error(`Failed to set availability: ${error.message}`);
+    logger.error(`Failed to set availability: ${error.message}`);
     throw error;
   }
 }
@@ -220,26 +222,26 @@ async function exampleScheduleSession() {
   const api = axios.create({
     baseURL: process.env.API_URL || 'http://localhost:3001/api',
     headers: {
-      'Authorization': `Bearer ${token}`
-    }
+      Authorization: `Bearer ${token}`,
+    },
   });
 
   try {
     const response = await api.post('/therapy-sessions', {
       beneficiary: '507f1f77bcf86cd799439011', // Beneficiary ID
-      therapist: '507f1f77bcf86cd799439012',   // Therapist ID
-      plan: '507f1f77bcf86cd799439013',       // Therapeutic Plan ID
+      therapist: '507f1f77bcf86cd799439012', // Therapist ID
+      plan: '507f1f77bcf86cd799439013', // Therapeutic Plan ID
       date: '2026-02-20',
       startTime: '09:00',
       endTime: '10:00',
       room: 'Therapy Room 1',
-      notes: 'Focus on range of motion exercises'
+      notes: 'Focus on range of motion exercises',
     });
 
-    console.log('✓ Session scheduled:', response.data.data._id);
+    logger.info('✓ Session scheduled:', response.data.data._id);
     return response.data.data;
   } catch (error) {
-    console.error('✗ Failed to schedule session:', error.response?.data?.message);
+    logger.error('✗ Failed to schedule session:', error.response?.data?.message);
   }
 }
 
@@ -251,8 +253,8 @@ async function exampleCheckAvailability() {
   const api = axios.create({
     baseURL: process.env.API_URL || 'http://localhost:3001/api',
     headers: {
-      'Authorization': `Bearer ${token}`
-    }
+      Authorization: `Bearer ${token}`,
+    },
   });
 
   try {
@@ -260,17 +262,17 @@ async function exampleCheckAvailability() {
       params: {
         date: '2026-02-20',
         startTime: '09:00',
-        endTime: '10:00'
-      }
+        endTime: '10:00',
+      },
     });
 
     if (response.data.data.available) {
-      console.log('✓ Time slot is available');
+      logger.info('✓ Time slot is available');
     } else {
-      console.log('✗ Time slot is not available:', response.data.data.reason);
+      logger.info('✗ Time slot is not available:', response.data.data.reason);
     }
   } catch (error) {
-    console.error('✗ Failed to check availability:', error.response?.data?.message);
+    logger.error('✗ Failed to check availability:', error.response?.data?.message);
   }
 }
 
@@ -282,9 +284,9 @@ async function exampleDocumentSession(sessionId) {
   const api = axios.create({
     baseURL: process.env.API_URL || 'http://localhost:3001/api',
     headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    }
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
   });
 
   try {
@@ -293,32 +295,32 @@ async function exampleDocumentSession(sessionId) {
         subjective: {
           patientReports: 'Patient reported increased pain in left shoulder',
           mood: 'Anxious',
-          cooperationLevel: 'Good'
+          cooperationLevel: 'Good',
         },
         objective: {
           observations: 'Reduced range of motion, muscle tension noted',
           accuracy: 75,
           repetitions: 12,
           assistanceLevel: 'Minimal',
-          modifications: 'Modified exercises due to pain'
+          modifications: 'Modified exercises due to pain',
         },
         assessment: {
           progressSummary: 'Good progress, slight improvement in mobility',
-          comparisonToBaseline: 'Better than initial assessment'
+          comparisonToBaseline: 'Better than initial assessment',
         },
         plan: {
           homeProgram: 'Continue stretching exercises 3x daily',
           frequency: '3 times per week',
-          notes: 'Schedule follow-up in 1 week'
-        }
+          notes: 'Schedule follow-up in 1 week',
+        },
       },
-      attachments: []
+      attachments: [],
     });
 
-    console.log('✓ Session documented:', response.data.data._id);
+    logger.info('✓ Session documented:', response.data.data._id);
     return response.data.data;
   } catch (error) {
-    console.error('✗ Failed to document session:', error.response?.data?.message);
+    logger.error('✗ Failed to document session:', error.response?.data?.message);
   }
 }
 
@@ -330,8 +332,8 @@ async function exampleGetTherapistSessions(therapistId) {
   const api = axios.create({
     baseURL: process.env.API_URL || 'http://localhost:3001/api',
     headers: {
-      'Authorization': `Bearer ${token}`
-    }
+      Authorization: `Bearer ${token}`,
+    },
   });
 
   try {
@@ -339,17 +341,17 @@ async function exampleGetTherapistSessions(therapistId) {
       params: {
         startDate: '2026-02-01',
         endDate: '2026-02-28',
-        status: 'SCHEDULED'
-      }
+        status: 'SCHEDULED',
+      },
     });
 
-    console.log(`✓ Found ${response.data.data.length} sessions`);
+    logger.info(`✓ Found ${response.data.data.length} sessions`);
     response.data.data.forEach(session => {
-      console.log(`  - ${session.date} ${session.startTime}: ${session.beneficiary.name}`);
+      logger.info(`  - ${session.date} ${session.startTime}: ${session.beneficiary.name}`);
     });
     return response.data.data;
   } catch (error) {
-    console.error('✗ Failed to get sessions:', error.response?.data?.message);
+    logger.error('✗ Failed to get sessions:', error.response?.data?.message);
   }
 }
 
@@ -361,27 +363,27 @@ async function exampleGetStatistics(therapistId) {
   const api = axios.create({
     baseURL: process.env.API_URL || 'http://localhost:3001/api',
     headers: {
-      'Authorization': `Bearer ${token}`
-    }
+      Authorization: `Bearer ${token}`,
+    },
   });
 
   try {
     const response = await api.get(`/therapy-sessions/stats/therapist/${therapistId}`, {
       params: {
         startDate: '2026-01-01',
-        endDate: '2026-02-28'
-      }
+        endDate: '2026-02-28',
+      },
     });
 
     const stats = response.data.data;
-    console.log('✓ Session Statistics:');
-    console.log(`  - Total Sessions: ${stats.totalSessions}`);
-    console.log(`  - Completion Rate: ${stats.completionRate}%`);
-    console.log(`  - Cancellation Rate: ${stats.cancellationRate}%`);
-    console.log(`  - No-Show Rate: ${stats.noShowRate}%`);
-    console.log(`  - Average Rating: ${stats.avgRating}`);
+    logger.info('✓ Session Statistics:');
+    logger.info(`  - Total Sessions: ${stats.totalSessions}`);
+    logger.info(`  - Completion Rate: ${stats.completionRate}%`);
+    logger.info(`  - Cancellation Rate: ${stats.cancellationRate}%`);
+    logger.info(`  - No-Show Rate: ${stats.noShowRate}%`);
+    logger.info(`  - Average Rating: ${stats.avgRating}`);
   } catch (error) {
-    console.error('✗ Failed to get statistics:', error.response?.data?.message);
+    logger.error('✗ Failed to get statistics:', error.response?.data?.message);
   }
 }
 
@@ -410,17 +412,17 @@ async function initializeTherapyDatabase() {
 
     // Therapist Availability indexes
     await TherapistAvailability.collection.createIndex({ therapist: 1 });
-    await TherapistAvailability.collection.createIndex({ "preferences.specializations": 1 });
+    await TherapistAvailability.collection.createIndex({ 'preferences.specializations': 1 });
 
     // Session Documentation indexes
     await SessionDocumentation.collection.createIndex({ session: 1 });
     await SessionDocumentation.collection.createIndex({ beneficiary: 1, createdAt: -1 });
-    await SessionDocumentation.collection.createIndex({ "quality.isComplete": 1 });
-    await SessionDocumentation.collection.createIndex({ "quality.reviewedAt": 1 });
+    await SessionDocumentation.collection.createIndex({ 'quality.isComplete': 1 });
+    await SessionDocumentation.collection.createIndex({ 'quality.reviewedAt': 1 });
 
-    console.log('✓ Database indexes created successfully');
+    logger.info('✓ Database indexes created successfully');
   } catch (error) {
-    console.error('✗ Failed to create indexes:', error.message);
+    logger.error('✗ Failed to create indexes:', error.message);
   }
 }
 
@@ -440,16 +442,16 @@ async function archiveOldSessions(olderThanMonths = 6) {
     const result = await TherapySession.updateMany(
       {
         status: { $in: ['COMPLETED', 'CANCELLED'] },
-        completedAt: { $lt: cutoffDate }
+        completedAt: { $lt: cutoffDate },
       },
       {
-        $set: { archived: true }
+        $set: { archived: true },
       }
     );
 
-    console.log(`✓ Archived ${result.modifiedCount} old sessions`);
+    logger.info(`✓ Archived ${result.modifiedCount} old sessions`);
   } catch (error) {
-    console.error('✗ Failed to archive sessions:', error.message);
+    logger.error('✗ Failed to archive sessions:', error.message);
   }
 }
 
@@ -466,8 +468,8 @@ async function sendDocumentationReminders() {
     const incompleteSessions = await TherapySession.find({
       status: 'COMPLETED',
       completedAt: {
-        $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) // Last 24 hours
-      }
+        $gte: new Date(Date.now() - 24 * 60 * 60 * 1000), // Last 24 hours
+      },
     }).populate('therapist');
 
     for (const session of incompleteSessions) {
@@ -477,14 +479,14 @@ async function sendDocumentationReminders() {
         await notificationService.sendReminder({
           type: 'DOCUMENTATION_DUE',
           recipient: session.therapist,
-          sessionId: session._id
+          sessionId: session._id,
         });
       }
     }
 
-    console.log(`✓ Sent ${incompleteSessions.length} documentation reminders`);
+    logger.info(`✓ Sent ${incompleteSessions.length} documentation reminders`);
   } catch (error) {
-    console.error('✗ Failed to send reminders:', error.message);
+    logger.error('✗ Failed to send reminders:', error.message);
   }
 }
 
@@ -507,12 +509,12 @@ module.exports = {
   exampleCheckAvailability,
   exampleDocumentSession,
   exampleGetTherapistSessions,
-  exampleGetStatistics
+  exampleGetStatistics,
 };
 
 /**
  * QUICK START CHECKLIST:
- * 
+ *
  * 1. ✓ Copy this file to your project
  * 2. [ ] Import setupTherapyRoutes in your app.js
  * 3. [ ] Call setupTherapyRoutes(app) after loading other routes
@@ -523,5 +525,5 @@ module.exports = {
  * 8. [ ] Set up cron jobs for archiveOldSessions() and sendDocumentationReminders()
  * 9. [ ] Integrate with UI components (TherapySessionDashboard, etc.)
  * 10. [ ] Run tests to verify all functionality
- * 
+ *
  */

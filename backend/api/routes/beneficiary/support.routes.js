@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * support.routes.js - Beneficiary Support & Counseling API Routes
  * Handles support plans, counseling sessions, and psychosocial support
@@ -10,8 +11,8 @@ const router = express.Router();
 const SupportService = require('../../../services/BeneficiaryManagement/SupportService');
 
 // Middleware
-const authenticate = (req, res, next) => {
-  // TODO: Implement JWT authentication
+const authenticate = (_req, _res, next) => {
+  // @todo [P1] Replace with real JWT auth middleware from middleware/auth.middleware.js
   next();
 };
 
@@ -41,20 +42,19 @@ router.post('/plan/create', authenticate, async (req, res) => {
         status: 'error',
         message: 'beneficiaryId is required',
         data: null,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
     }
 
     const result = await supportService.createSupportPlan(beneficiaryId, req.body);
     const statusCode = result.status === 'success' ? 201 : 400;
     return res.status(statusCode).json(result);
-
   } catch (error) {
     return res.status(500).json({
       status: 'error',
-      message: error.message,
+      message: 'حدث خطأ داخلي',
       data: null,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 });
@@ -75,20 +75,19 @@ router.post('/counseling/schedule', authenticate, async (req, res) => {
         status: 'error',
         message: 'beneficiaryId is required',
         data: null,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
     }
 
     const result = await supportService.scheduleCounselingSession(beneficiaryId, req.body);
     const statusCode = result.status === 'success' ? 201 : 400;
     return res.status(statusCode).json(result);
-
   } catch (error) {
     return res.status(500).json({
       status: 'error',
-      message: error.message,
+      message: 'حدث خطأ داخلي',
       data: null,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 });
@@ -109,20 +108,19 @@ router.post('/financial/request', authenticate, async (req, res) => {
         status: 'error',
         message: 'beneficiaryId is required',
         data: null,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
     }
 
     const result = await supportService.manageFinancialSupport(beneficiaryId, req.body);
     const statusCode = result.status === 'success' ? 201 : 400;
     return res.status(statusCode).json(result);
-
   } catch (error) {
     return res.status(500).json({
       status: 'error',
-      message: error.message,
+      message: 'حدث خطأ داخلي',
       data: null,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 });
@@ -138,19 +136,18 @@ router.get('/:beneficiaryId/resources', authenticate, async (req, res) => {
   try {
     const { beneficiaryId } = req.params;
     const options = {
-      concern: req.query.concern
+      concern: req.query.concern,
     };
 
     const result = await supportService.providePsychosocialSupport(beneficiaryId, options);
     const statusCode = result.status === 'success' ? 200 : 404;
     return res.status(statusCode).json(result);
-
   } catch (error) {
     return res.status(500).json({
       status: 'error',
-      message: error.message,
+      message: 'حدث خطأ داخلي',
       data: null,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 });
@@ -168,13 +165,12 @@ router.get('/:beneficiaryId/summary', authenticate, async (req, res) => {
     const result = await supportService.getSupportSummary(beneficiaryId);
     const statusCode = result.status === 'success' ? 200 : 404;
     return res.status(statusCode).json(result);
-
   } catch (error) {
     return res.status(500).json({
       status: 'error',
-      message: error.message,
+      message: 'حدث خطأ داخلي',
       data: null,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 });
@@ -189,7 +185,7 @@ router.get('/health', (req, res) => {
     status: 'success',
     message: 'Support service is healthy',
     service: 'SupportService',
-    timestamp: new Date()
+    timestamp: new Date(),
   });
 });
 

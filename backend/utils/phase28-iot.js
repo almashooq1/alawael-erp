@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // Phase 28: IoT & Device Management
 // Device Management, Sensor Data, Edge Computing, Predictive Maintenance
 
@@ -271,7 +272,7 @@ class IndustrialProtocolSupport {
     };
   }
 
-  subscribeMQTT(topic, callback) {
+  subscribeMQTT(topic, _callback) {
     return {
       success: true,
       topic,

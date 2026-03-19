@@ -1,5 +1,7 @@
+/* eslint-disable no-unused-vars */
 const Schedule = require('../models/Schedule');
 const logger = require('../utils/logger');
+const { escapeRegex } = require('../utils/sanitize');
 
 class ScheduleManagementService {
   /**
@@ -7,7 +9,7 @@ class ScheduleManagementService {
    */
   async getAllSchedules(query = {}) {
     try {
-      let mongoQuery = {};
+      const mongoQuery = {};
 
       // Filter by status
       if (query.status) {
@@ -27,8 +29,8 @@ class ScheduleManagementService {
       // Search by title
       if (query.search) {
         mongoQuery.$or = [
-          { title: { $regex: query.search, $options: 'i' } },
-          { description: { $regex: query.search, $options: 'i' } }
+          { title: { $regex: escapeRegex(query.search), $options: 'i' } },
+          { description: { $regex: escapeRegex(query.search), $options: 'i' } },
         ];
       }
 
@@ -59,7 +61,7 @@ class ScheduleManagementService {
         createdBy: data.createdBy,
         status: 'pending',
         attendees: [],
-        reminders: []
+        reminders: [],
       });
 
       const saved = await schedule.save();
@@ -96,7 +98,8 @@ class ScheduleManagementService {
         scheduleId,
         { $set: updates },
         { new: true, runValidators: true }
-      ).populate('createdBy', 'firstName lastName email')
+      )
+        .populate('createdBy', 'firstName lastName email')
         .populate('confirmedBy', 'firstName lastName email');
 
       if (!schedule) return null;
@@ -148,7 +151,7 @@ class ScheduleManagementService {
   async getSchedulesByDateRange(startDate, endDate) {
     try {
       const schedules = await Schedule.find({
-        startDate: { $gte: startDate, $lte: endDate }
+        startDate: { $gte: startDate, $lte: endDate },
       })
         .populate('createdBy', 'firstName lastName email')
         .sort({ startDate: 1 });
@@ -171,11 +174,12 @@ class ScheduleManagementService {
           $set: {
             status: 'confirmed',
             confirmedBy: userId,
-            confirmedAt: new Date()
-          }
+            confirmedAt: new Date(),
+          },
         },
         { new: true, runValidators: true }
-      ).populate('createdBy', 'firstName lastName email')
+      )
+        .populate('createdBy', 'firstName lastName email')
         .populate('confirmedBy', 'firstName lastName email');
 
       if (!schedule) return null;
@@ -195,10 +199,10 @@ class ScheduleManagementService {
     try {
       const totalSchedules = await Schedule.countDocuments();
       const upcomingSchedules = await Schedule.countDocuments({
-        startDate: { $gt: new Date() }
+        startDate: { $gt: new Date() },
       });
       const confirmedSchedules = await Schedule.countDocuments({
-        status: 'confirmed'
+        status: 'confirmed',
       });
 
       return {
@@ -206,13 +210,13 @@ class ScheduleManagementService {
         totalSchedules,
         upcomingSchedules,
         confirmedSchedules,
-        lastChecked: new Date()
+        lastChecked: new Date(),
       };
     } catch (error) {
       logger.error('Error in getHealthStatus:', error);
       return {
         status: 'error',
-        error: error.message
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -224,5 +228,5 @@ const scheduleManagementService = new ScheduleManagementService();
 module.exports = {
   ScheduleManagementService,
   scheduleManagementService,
-  scheduleService: scheduleManagementService
+  scheduleService: scheduleManagementService,
 };

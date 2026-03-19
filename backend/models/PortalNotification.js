@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * PortalNotification Model
  * نموذج التنبيهات في بوابة المستفيد/ولي الأمر
@@ -82,6 +83,7 @@ const PortalNotificationSchema = new Schema(
         'document',
         'message',
         'account',
+        'general',
       ],
       default: 'general',
     },
@@ -191,7 +193,6 @@ const PortalNotificationSchema = new Schema(
     isArchived: {
       type: Boolean,
       default: false,
-      index: true,
     },
     archivedAt: Date,
 
@@ -388,15 +389,13 @@ PortalNotificationSchema.methods.markAsFailed = async function (method) {
 };
 
 // Middleware
-PortalNotificationSchema.pre('save', function (next) {
+PortalNotificationSchema.pre('save', function () {
   this.updatedAt = new Date();
 
   // Automatically mark as expired if expiresAt is in the past
   if (this.expiresAt && new Date() > this.expiresAt) {
     this.isExpired = true;
   }
-
-  next();
 });
 
 // Static: Create notification helper

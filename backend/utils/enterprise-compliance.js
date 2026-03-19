@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // Phase 20: Enterprise Compliance & White-Label
 // GDPR/CCPA Compliance, SSO, Audit Logging, Data Residency
 
@@ -248,7 +249,7 @@ class ComplianceManager {
    * @param {String} userId - User ID
    * @returns {Array}
    */
-  _getUserTransactions(tenantId, userId) {
+  _getUserTransactions(_tenantId, _userId) {
     return [
       {
         id: 'txn_' + Date.now(),
@@ -282,7 +283,7 @@ class ComplianceManager {
    * @param {String} encryptionLevel - Encryption level
    * @returns {String} Encrypted data
    */
-  encryptData(data, encryptionLevel = 'AES-256') {
+  encryptData(data, _encryptionLevel = 'AES-256') {
     // Simplified - use crypto.subtle in production
     return Buffer.from(data).toString('base64');
   }
@@ -482,7 +483,7 @@ class SSO_Manager {
    * @param {Object} config - Provider config
    * @returns {Object} User data
    */
-  _validateToken(token, config) {
+  _validateToken(_token, _config) {
     // Simplified - implement proper JWT/SAML validation
     return {
       id: 'user_' + Date.now(),

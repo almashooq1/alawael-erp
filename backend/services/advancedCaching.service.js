@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Advanced Caching Service
  * خدمة التخزين المؤقت المتقدمة

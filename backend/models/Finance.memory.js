@@ -1,6 +1,8 @@
+/* eslint-disable no-unused-vars */
 // Finance Module - Financial Management System
 const fs = require('fs');
 const path = require('path');
+const logger = require('../utils/logger');
 
 // مسار قاعدة البيانات المالية
 const financePath = path.join(__dirname, '../data/finance.json');
@@ -20,7 +22,7 @@ function readFinance() {
     }
     return JSON.parse(fs.readFileSync(financePath, 'utf8'));
   } catch (error) {
-    console.error('Error reading finance data:', error);
+    logger.error('Error reading finance data:', error);
     return { invoices: [], expenses: [], budgets: [], payments: [] };
   }
 }
@@ -31,7 +33,7 @@ function writeFinance(data) {
     fs.writeFileSync(financePath, JSON.stringify(data, null, 2));
     return true;
   } catch (error) {
-    console.error('Error writing finance data:', error);
+    logger.error('Error writing finance data:', error);
     return false;
   }
 }

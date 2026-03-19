@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * AL-AWAEL ERP - PHASE 24 GOVERNANCE ENHANCEMENT TEST SUITE
  * Comprehensive testing for Governance Enhancement System

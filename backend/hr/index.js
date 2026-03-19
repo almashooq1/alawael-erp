@@ -1,14 +1,15 @@
+/* eslint-disable no-unused-vars */
 /**
  * Saudi HR Module Index
  * فهرس وحدة الموارد البشرية السعودية
  */
 
-const { 
-  SaudiHRService, 
-  Employee, 
-  LeaveRequest, 
-  Attendance, 
-  Payroll 
+const {
+  SaudiHRService,
+  Employee,
+  LeaveRequest,
+  Attendance,
+  Payroll,
 } = require('./saudi-hr-service');
 
 const hrRoutes = require('./saudi-hr-routes');
@@ -16,16 +17,16 @@ const hrRoutes = require('./saudi-hr-routes');
 module.exports = {
   // Service
   SaudiHRService,
-  
+
   // Models
   Employee,
   LeaveRequest,
   Attendance,
   Payroll,
-  
+
   // Routes
   hrRoutes,
-  
+
   // Saudi-specific features
   features: {
     gosi: {
@@ -48,7 +49,16 @@ module.exports = {
     },
     leaves: {
       name: 'إدارة الإجازات',
-      types: ['annual', 'sick', 'emergency', 'maternity', 'hajj', 'marriage', 'bereavement', 'unpaid'],
+      types: [
+        'annual',
+        'sick',
+        'emergency',
+        'maternity',
+        'hajj',
+        'marriage',
+        'bereavement',
+        'unpaid',
+      ],
     },
     attendance: {
       name: 'الحضور والانصراف',

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Camera Model - نموذج الكاميرات
  * إدارة كاميرات Hikvision والبث والتسجيل
@@ -260,7 +261,7 @@ const cameraSchema = new mongoose.Schema(
   {
     timestamps: true,
     collection: 'cameras',
-  },
+  }
 );
 
 // الفهارس
@@ -303,7 +304,10 @@ cameraSchema.methods.incrementMotionEvent = function () {
 cameraSchema.methods.recordUpload = function (bytes) {
   this.cloudSettings.lastUpload = new Date();
   this.cloudSettings.uploadedBytes += bytes;
-  this.statistics.totalUploadedGb = (this.cloudSettings.uploadedBytes / (1024 * 1024 * 1024)).toFixed(2);
+  this.statistics.totalUploadedGb = (
+    this.cloudSettings.uploadedBytes /
+    (1024 * 1024 * 1024)
+  ).toFixed(2);
   return this.save();
 };
 

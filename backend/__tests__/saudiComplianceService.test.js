@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * Saudi Compliance Service - Unit Tests
  * اختبارات خدمة الامتثال السعودي

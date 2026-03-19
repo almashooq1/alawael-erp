@@ -1,0 +1,180 @@
+{
+  "app": {
+    "name": "Alawael System",
+    "description": "Enterprise Resource Management System"
+  },
+  "api": {
+    "welcome": "Welcome to Alawael API",
+    "version": "Version",
+    "documentation": "API Documentation",
+    "healthCheck": "System Health Check"
+  },
+  "auth": {
+    "login": "Login",
+    "logout": "Logout",
+    "register": "Register",
+    "forgotPassword": "Forgot Password",
+    "resetPassword": "Reset Password",
+    "changePassword": "Change Password",
+    "invalidCredentials": "Invalid credentials",
+    "userNotFound": "User not found",
+    "userExists": "User already exists",
+    "tokenExpired": "Token has expired",
+    "tokenInvalid": "Invalid token",
+    "unauthorized": "Unauthorized access",
+    "forbidden": "Access forbidden",
+    "sessionExpired": "Session expired",
+    "passwordChanged": "Password changed successfully",
+    "passwordResetSent": "Password reset link sent"
+  },
+  "users": {
+    "created": "User created successfully",
+    "updated": "User updated successfully",
+    "deleted": "User deleted successfully",
+    "notFound": "User not found",
+    "list": "Users List",
+    "profile": "Profile",
+    "settings": "Settings"
+  },
+  "students": {
+    "created": "Student created successfully",
+    "updated": "Student updated successfully",
+    "deleted": "Student deleted successfully",
+    "notFound": "Student not found",
+    "list": "Students List",
+    "enrolled": "Student enrolled",
+    "transferred": "Student transferred"
+  },
+  "employees": {
+    "created": "Employee created successfully",
+    "updated": "Employee updated successfully",
+    "deleted": "Employee deleted successfully",
+    "notFound": "Employee not found",
+    "list": "Employees List"
+  },
+  "hr": {
+    "leaveRequested": "Leave requested",
+    "leaveApproved": "Leave approved",
+    "leaveRejected": "Leave rejected",
+    "payrollGenerated": "Payroll generated",
+    "attendanceRecorded": "Attendance recorded",
+    "wpsReportGenerated": "WPS report generated successfully",
+    "gosiReportGenerated": "GOSI report generated successfully",
+    "bankTransferReportGenerated": "Bank transfer report generated successfully",
+    "departmentComparisonGenerated": "Department comparison report generated",
+    "annualSummaryGenerated": "Annual summary report generated",
+    "varianceReportGenerated": "Variance report generated",
+    "employeeCostReportGenerated": "Employee cost report generated",
+    "deductionsReportGenerated": "Deductions report generated",
+    "reportGenerationFailed": "Failed to generate report",
+    "noPayrollData": "No payroll data found for the specified period"
+  },
+  "financial": {
+    "invoiceCreated": "Invoice created",
+    "invoicePaid": "Invoice paid",
+    "paymentProcessed": "Payment processed",
+    "paymentFailed": "Payment failed",
+    "refundProcessed": "Refund processed"
+  },
+  "inventory": {
+    "stockUpdated": "Stock updated",
+    "stockLow": "Low stock",
+    "stockOut": "Out of stock",
+    "productAdded": "Product added",
+    "productUpdated": "Product updated"
+  },
+  "documents": {
+    "uploaded": "Document uploaded",
+    "deleted": "Document deleted",
+    "notFound": "Document not found",
+    "invalidType": "Unsupported file type",
+    "tooLarge": "File too large"
+  },
+  "notifications": {
+    "sent": "Notification sent",
+    "failed": "Failed to send notification",
+    "emailSent": "Email sent",
+    "smsSent": "SMS sent"
+  },
+  "validation": {
+    "required": "This field is required",
+    "email": "Invalid email address",
+    "phone": "Invalid phone number",
+    "minLength": "Minimum {{min}} characters required",
+    "maxLength": "Maximum {{max}} characters allowed",
+    "numeric": "Must be a number",
+    "date": "Invalid date",
+    "unique": "This value already exists"
+  },
+  "errors": {
+    "generic": "An unexpected error occurred",
+    "notFound": "Resource not found",
+    "serverError": "Server error",
+    "databaseError": "Database error",
+    "networkError": "Network error",
+    "validationError": "Validation error",
+    "unauthorized": "Unauthorized access",
+    "forbidden": "Access forbidden",
+    "badRequest": "Bad request",
+    "conflict": "Data conflict",
+    "tooManyRequests": "Too many requests",
+    "serviceUnavailable": "Service unavailable"
+  },
+  "success": {
+    "created": "Created successfully",
+    "updated": "Updated successfully",
+    "deleted": "Deleted successfully",
+    "saved": "Saved successfully",
+    "sent": "Sent successfully",
+    "completed": "Operation completed successfully"
+  },
+  "pagination": {
+    "page": "Page",
+    "of": "of",
+    "total": "Total",
+    "items": "items",
+    "noResults": "No results found"
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "pending": "Pending",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "completed": "Completed",
+    "cancelled": "Cancelled",
+    "draft": "Draft",
+    "published": "Published"
+  },
+  "dates": {
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "tomorrow": "Tomorrow",
+    "thisWeek": "This Week",
+    "thisMonth": "This Month",
+    "thisYear": "This Year",
+    "months": {
+      "1": "January",
+      "2": "February",
+      "3": "March",
+      "4": "April",
+      "5": "May",
+      "6": "June",
+      "7": "July",
+      "8": "August",
+      "9": "September",
+      "10": "October",
+      "11": "November",
+      "12": "December"
+    },
+    "days": {
+      "0": "Sunday",
+      "1": "Monday",
+      "2": "Tuesday",
+      "3": "Wednesday",
+      "4": "Thursday",
+      "5": "Friday",
+      "6": "Saturday"
+    }
+  }
+}

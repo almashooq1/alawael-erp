@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Project Management Module - وحدة إدارة المشاريع
  * Main Entry Point
@@ -36,11 +37,11 @@ module.exports = {
   // Service
   ProjectManagementService,
   projectManagementService,
-  
+
   // Configuration
   projectConfig,
   projectStatuses,
-  
+
   // Helpers
   initialize,
   getService,

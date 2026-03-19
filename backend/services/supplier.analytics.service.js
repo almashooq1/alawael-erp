@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const Supplier = require('../models/Supplier.model');
 const PurchaseOrder = require('../models/PurchaseOrder.model');
 
@@ -6,7 +7,6 @@ const PurchaseOrder = require('../models/PurchaseOrder.model');
  * خدمة تحليل الموردين والأداء المتقدمة
  */
 class SupplierAnalyticsService {
-  
   /**
    * تقييم أداء المورد الشامل
    */
@@ -25,8 +25,8 @@ class SupplierAnalyticsService {
       // حساب مقاييس الأداء
       const metrics = {
         totalOrders: orders.length,
-        completedOrders: orders.filter(o => 
-          o.status === 'FULLY_RECEIVED' || o.status === 'PAID' || o.status === 'CLOSED'
+        completedOrders: orders.filter(
+          o => o.status === 'FULLY_RECEIVED' || o.status === 'PAID' || o.status === 'CLOSED'
         ).length,
         onTimeOrders: 0,
         delayedOrders: 0,
@@ -44,9 +44,10 @@ class SupplierAnalyticsService {
         metrics.totalValueOrdered += order.summary.grandTotal || 0;
 
         if (order.reception?.actualReceiptDate && order.requiredDeliveryDate) {
-          const deliveryTime = 
-            (order.reception.actualReceiptDate - order.requiredDeliveryDate) / (1000 * 60 * 60 * 24);
-          
+          const deliveryTime =
+            (order.reception.actualReceiptDate - order.requiredDeliveryDate) /
+            (1000 * 60 * 60 * 24);
+
           totalDeliveryTime += Math.max(deliveryTime, 0);
 
           if (deliveryTime <= 0) {
@@ -69,12 +70,8 @@ class SupplierAnalyticsService {
       }
 
       metrics.onTimeOrders = onTimeCount;
-      metrics.onTimePercentage = orders.length > 0 
-        ? (onTimeCount / orders.length) * 100
-        : 0;
-      metrics.averageDeliveryTime = orders.length > 0 
-        ? totalDeliveryTime / orders.length
-        : 0;
+      metrics.onTimePercentage = orders.length > 0 ? (onTimeCount / orders.length) * 100 : 0;
+      metrics.averageDeliveryTime = orders.length > 0 ? totalDeliveryTime / orders.length : 0;
 
       // تحديث بيانات المورد
       supplier.performance.totalOrders = metrics.totalOrders;
@@ -99,7 +96,7 @@ class SupplierAnalyticsService {
         },
       };
     } catch (error) {
-      return { success: false, message: error.message };
+      return { success: false, message: 'حدث خطأ داخلي' };
     }
   }
 
@@ -132,7 +129,7 @@ class SupplierAnalyticsService {
         savingsOpportunity: 0,
       };
 
-      let monthlyData = {};
+      const monthlyData = {};
 
       for (const order of orders) {
         const value = order.summary.grandTotal;
@@ -162,9 +159,7 @@ class SupplierAnalyticsService {
       }
 
       // حساب المتوسطات
-      analysis.averageOrderValue = orders.length > 0 
-        ? analysis.totalSpent / orders.length
-        : 0;
+      analysis.averageOrderValue = orders.length > 0 ? analysis.totalSpent / orders.length : 0;
 
       // بناء اتجاه التكاليف
       analysis.costTrend = Object.entries(monthlyData).map(([month, data]) => ({
@@ -182,8 +177,9 @@ class SupplierAnalyticsService {
 
         const minPrice = Math.min(...prices);
         const maxPrice = Math.max(...prices);
-        
-        if (maxPrice > minPrice * 1.1) { // إذا كان هناك فرق أكثر من 10%
+
+        if (maxPrice > minPrice * 1.1) {
+          // إذا كان هناك فرق أكثر من 10%
           product.savingsPotential = {
             currentAverage: product.average,
             lowestPrice: minPrice,
@@ -198,7 +194,7 @@ class SupplierAnalyticsService {
         data: analysis,
       };
     } catch (error) {
-      return { success: false, message: error.message };
+      return { success: false, message: 'حدث خطأ داخلي' };
     }
   }
 
@@ -207,7 +203,7 @@ class SupplierAnalyticsService {
    */
   async compareSuppliers(categoryFilter = null) {
     try {
-      let query = { status: 'ACTIVE' };
+      const query = { status: 'ACTIVE' };
       if (categoryFilter) {
         query.category = categoryFilter;
       }
@@ -238,7 +234,7 @@ class SupplierAnalyticsService {
         data: comparison,
       };
     } catch (error) {
-      return { success: false, message: error.message };
+      return { success: false, message: 'حدث خطأ داخلي' };
     }
   }
 
@@ -276,10 +272,10 @@ class SupplierAnalyticsService {
         period,
         performance: performance.data,
         financialAnalysis: costAnalysis.data,
-        
+
         // ملخص التوصيات
         recommendations: [],
-        
+
         // الإجراءات المقترحة
         actionItems: [],
       };
@@ -297,9 +293,7 @@ class SupplierAnalyticsService {
       }
 
       if (performance.data.metrics.defectiveOrders > 0) {
-        report.recommendations.push(
-          'Quality issues detected. Request quality improvement plan.'
-        );
+        report.recommendations.push('Quality issues detected. Request quality improvement plan.');
         report.actionItems.push({
           action: 'QUALITY_AUDIT',
           priority: 'HIGH',
@@ -323,7 +317,7 @@ class SupplierAnalyticsService {
         data: report,
       };
     } catch (error) {
-      return { success: false, message: error.message };
+      return { success: false, message: 'حدث خطأ داخلي' };
     }
   }
 
@@ -335,16 +329,14 @@ class SupplierAnalyticsService {
       const comparison = await this.compareSuppliers(category);
       if (!comparison.success) return comparison;
 
-      const topSuppliers = comparison.data
-        .filter(s => s.trustworthy)
-        .slice(0, limit);
+      const topSuppliers = comparison.data.filter(s => s.trustworthy).slice(0, limit);
 
       return {
         success: true,
         data: topSuppliers,
       };
     } catch (error) {
-      return { success: false, message: error.message };
+      return { success: false, message: 'حدث خطأ داخلي' };
     }
   }
 
@@ -409,7 +401,7 @@ class SupplierAnalyticsService {
         },
       };
     } catch (error) {
-      return { success: false, message: error.message };
+      return { success: false, message: 'حدث خطأ داخلي' };
     }
   }
 
@@ -448,7 +440,7 @@ class SupplierAnalyticsService {
   async supplierDiversificationReport() {
     try {
       const suppliers = await Supplier.find({ status: 'ACTIVE' });
-      
+
       const categories = {};
       let totalSpend = 0;
 
@@ -465,9 +457,7 @@ class SupplierAnalyticsService {
           'supplier.supplierId': supplier._id,
         });
 
-        const categorySpend = orders.reduce((sum, o) => 
-          sum + (o.summary.grandTotal || 0), 0
-        );
+        const categorySpend = orders.reduce((sum, o) => sum + (o.summary.grandTotal || 0), 0);
 
         categories[supplier.category].suppliers.push({
           name: supplier.name,
@@ -492,13 +482,14 @@ class SupplierAnalyticsService {
         data: {
           totalSuppliers: suppliers.length,
           categories,
-          overallRecommendation: totalSpend > 0 ? 
-            'Consider adding more suppliers for better risk mitigation' : 
-            'Insufficient data',
+          overallRecommendation:
+            totalSpend > 0
+              ? 'Consider adding more suppliers for better risk mitigation'
+              : 'Insufficient data',
         },
       };
     } catch (error) {
-      return { success: false, message: error.message };
+      return { success: false, message: 'حدث خطأ داخلي' };
     }
   }
 }

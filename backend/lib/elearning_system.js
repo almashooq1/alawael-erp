@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * E-Learning System (Distance Learning Management)
  * نظام التعلم عن بعد
@@ -397,7 +398,7 @@ class ELearningSystem {
 
     // Calculate score (example: 10 points per correct answer)
     let correctAnswers = 0;
-    let totalQuestions = assessment.totalQuestions;
+    const totalQuestions = assessment.totalQuestions;
 
     // Simulate grading
     for (let i = 0; i < Math.min(answers.length, totalQuestions); i++) {
@@ -618,7 +619,7 @@ class ELearningSystem {
   getInstructorStats(instructorId) {
     const courses = this.getInstructorCourses(instructorId);
     const totalStudents = new Set();
-    const totalLessons = 0;
+    let totalLessons = 0;
     const averageRating = 0;
 
     courses.forEach(course => {

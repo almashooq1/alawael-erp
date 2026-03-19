@@ -1,7 +1,9 @@
+/* eslint-disable no-unused-vars */
 const QRCode = require('qrcode');
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const path = require('path');
+const logger = require('./logger');
 
 // ============================================
 // QR Code Generator
@@ -38,7 +40,7 @@ async function generateQRCode(communication, baseUrl = 'http://localhost:3002') 
 
     return qrCodeDataURL;
   } catch (error) {
-    console.error('Error generating QR code:', error);
+    logger.error('Error generating QR code:', error);
     throw new Error('فشل توليد رمز QR');
   }
 }
@@ -68,7 +70,7 @@ async function saveQRCodeToFile(communication, baseUrl, outputDir = './public/qr
 
     return `/qrcodes/${filename}`;
   } catch (error) {
-    console.error('Error saving QR code:', error);
+    logger.error('Error saving QR code:', error);
     throw new Error('فشل حفظ رمز QR');
   }
 }
@@ -210,7 +212,7 @@ function generatePDF(communication, outputPath, qrCodeDataURL = null) {
         reject(error);
       });
     } catch (error) {
-      console.error('Error generating PDF:', error);
+      logger.error('Error generating PDF:', error);
       reject(error);
     }
   });
@@ -298,7 +300,7 @@ function generateSummaryPDF(communications, stats, outputPath) {
         reject(error);
       });
     } catch (error) {
-      console.error('Error generating summary PDF:', error);
+      logger.error('Error generating summary PDF:', error);
       reject(error);
     }
   });

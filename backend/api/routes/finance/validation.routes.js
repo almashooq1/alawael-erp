@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Validation Routes - مسارات التحقق والامتثال المالي
  * Financial Validation & Compliance API Routes
@@ -68,7 +69,7 @@ router.post('/journal-entry', (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'خطأ في التحقق من الإدراج المحاسبي',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -145,7 +146,7 @@ router.post('/expense', (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'خطأ في التحقق من المصروف',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -241,7 +242,7 @@ router.post('/invoice', (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'خطأ في التحقق من الفاتورة',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -265,7 +266,7 @@ router.get('/compliance-report', (req, res) => {
           status: 'passed',
           currentRatio: 2.1,
           quickRatio: 1.8,
-          status: 'healthy',
+          healthStatus: 'healthy',
         },
         debtRatios: {
           name: 'نسب الديون',
@@ -295,7 +296,7 @@ router.get('/compliance-report', (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'خطأ في جلب تقرير الامتثال',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -324,7 +325,7 @@ router.get('/suspicious-transactions', (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'خطأ في جلب المعاملات المشبوهة',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -361,7 +362,7 @@ router.get('/audit-trail', (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'خطأ في جلب سجل التدقيق',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -394,7 +395,7 @@ router.get('/violations-report', (req, res) => {
     res.status(500).json({
       status: 'error',
       message: 'خطأ في جلب تقرير الانتهاكات',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });

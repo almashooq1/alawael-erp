@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * AI/ML Service - خدمة الذكاء الاصطناعي
  * Enterprise AI Integration for Alawael ERP
@@ -11,7 +12,7 @@ const axios = require('axios');
 const aiConfig = {
   // Provider
   provider: process.env.AI_PROVIDER || 'openai', // openai, azure, anthropic, local
-  
+
   // OpenAI Configuration
   openai: {
     apiKey: process.env.OPENAI_API_KEY,
@@ -20,7 +21,7 @@ const aiConfig = {
     maxTokens: parseInt(process.env.OPENAI_MAX_TOKENS) || 4000,
     temperature: parseFloat(process.env.OPENAI_TEMPERATURE) || 0.7,
   },
-  
+
   // Azure OpenAI Configuration
   azure: {
     endpoint: process.env.AZURE_OPENAI_ENDPOINT,
@@ -28,20 +29,20 @@ const aiConfig = {
     deploymentName: process.env.AZURE_OPENAI_DEPLOYMENT || 'gpt-4',
     apiVersion: process.env.AZURE_OPENAI_VERSION || '2024-02-01',
   },
-  
+
   // Anthropic Configuration
   anthropic: {
     apiKey: process.env.ANTHROPIC_API_KEY,
     model: process.env.ANTHROPIC_MODEL || 'claude-3-opus-20240229',
     maxTokens: parseInt(process.env.ANTHROPIC_MAX_TOKENS) || 4000,
   },
-  
+
   // Local LLM Configuration (Ollama, LM Studio, etc.)
   local: {
     endpoint: process.env.LOCAL_LLM_ENDPOINT || 'http://localhost:11434',
     model: process.env.LOCAL_LLM_MODEL || 'llama2',
   },
-  
+
   // Cache settings
   cache: {
     enabled: process.env.AI_CACHE_ENABLED === 'true',
@@ -57,20 +58,20 @@ class AIService {
     this.provider = aiConfig.provider;
     this.cache = new Map();
   }
-  
+
   /**
    * Generate text completion
    */
   async complete(prompt, options = {}) {
     const cacheKey = this.getCacheKey('complete', prompt, options);
-    
+
     // Check cache
     if (aiConfig.cache.enabled && this.cache.has(cacheKey)) {
       return this.cache.get(cacheKey);
     }
-    
+
     let result;
-    
+
     switch (this.provider) {
       case 'openai':
         result = await this.openaiComplete(prompt, options);
@@ -87,16 +88,16 @@ class AIService {
       default:
         throw new Error(`Unknown AI provider: ${this.provider}`);
     }
-    
+
     // Cache result
     if (aiConfig.cache.enabled) {
       this.cache.set(cacheKey, result);
       setTimeout(() => this.cache.delete(cacheKey), aiConfig.cache.ttl * 1000);
     }
-    
+
     return result;
   }
-  
+
   /**
    * OpenAI completion
    */
@@ -114,19 +115,19 @@ class AIService {
       },
       {
         headers: {
-          'Authorization': `Bearer ${aiConfig.openai.apiKey}`,
+          Authorization: `Bearer ${aiConfig.openai.apiKey}`,
           'Content-Type': 'application/json',
         },
       }
     );
-    
+
     return {
       text: response.data.choices[0].message.content,
       usage: response.data.usage,
       model: response.data.model,
     };
   }
-  
+
   /**
    * Azure OpenAI completion
    */
@@ -147,14 +148,14 @@ class AIService {
         },
       }
     );
-    
+
     return {
       text: response.data.choices[0].message.content,
       usage: response.data.usage,
       model: aiConfig.azure.deploymentName,
     };
   }
-  
+
   /**
    * Anthropic completion
    */
@@ -165,9 +166,7 @@ class AIService {
         model: aiConfig.anthropic.model,
         max_tokens: options.maxTokens || aiConfig.anthropic.maxTokens,
         system: options.system || 'أنت مساعد ذكي لنظام ERP عربي.',
-        messages: [
-          { role: 'user', content: prompt },
-        ],
+        messages: [{ role: 'user', content: prompt }],
       },
       {
         headers: {
@@ -177,38 +176,35 @@ class AIService {
         },
       }
     );
-    
+
     return {
       text: response.data.content[0].text,
       usage: response.data.usage,
       model: response.data.model,
     };
   }
-  
+
   /**
    * Local LLM completion (Ollama)
    */
   async localComplete(prompt, options = {}) {
-    const response = await axios.post(
-      `${aiConfig.local.endpoint}/api/generate`,
-      {
-        model: aiConfig.local.model,
-        prompt: prompt,
-        stream: false,
-        options: {
-          temperature: options.temperature ?? 0.7,
-          num_predict: options.maxTokens || 2000,
-        },
-      }
-    );
-    
+    const response = await axios.post(`${aiConfig.local.endpoint}/api/generate`, {
+      model: aiConfig.local.model,
+      prompt: prompt,
+      stream: false,
+      options: {
+        temperature: options.temperature ?? 0.7,
+        num_predict: options.maxTokens || 2000,
+      },
+    });
+
     return {
       text: response.data.response,
       usage: { total_tokens: response.data.eval_count || 0 },
       model: aiConfig.local.model,
     };
   }
-  
+
   /**
    * Generate embeddings
    */
@@ -218,7 +214,7 @@ class AIService {
     }
     throw new Error('Embeddings not supported for this provider');
   }
-  
+
   /**
    * OpenAI embeddings
    */
@@ -231,18 +227,18 @@ class AIService {
       },
       {
         headers: {
-          'Authorization': `Bearer ${aiConfig.openai.apiKey}`,
+          Authorization: `Bearer ${aiConfig.openai.apiKey}`,
           'Content-Type': 'application/json',
         },
       }
     );
-    
+
     return {
       embedding: response.data.data[0].embedding,
       usage: response.data.usage,
     };
   }
-  
+
   /**
    * Analyze sentiment
    */
@@ -260,14 +256,14 @@ class AIService {
 }`;
 
     const result = await this.complete(prompt, { temperature: 0.3 });
-    
+
     try {
       return JSON.parse(result.text);
     } catch {
       return { sentiment: 'neutral', score: 0.5, emotions: [], summary: '' };
     }
   }
-  
+
   /**
    * Extract entities
    */
@@ -287,20 +283,20 @@ class AIService {
 }`;
 
     const result = await this.complete(prompt, { temperature: 0.1 });
-    
+
     try {
       return JSON.parse(result.text);
     } catch {
       return { people: [], organizations: [], locations: [], dates: [], amounts: [], products: [] };
     }
   }
-  
+
   /**
    * Summarize text
    */
   async summarize(text, options = {}) {
     const { maxLength = 200, style = 'concise' } = options;
-    
+
     const prompt = `لخص النص التالي بأسلوب ${style === 'concise' ? 'موجز' : 'مفصل'} (الحد الأقصى ${maxLength} كلمة):
 
 "${text}"`;
@@ -308,13 +304,13 @@ class AIService {
     const result = await this.complete(prompt, { temperature: 0.5 });
     return result.text;
   }
-  
+
   /**
    * Translate text
    */
   async translate(text, targetLang = 'en') {
     const langMap = { en: 'الإنجليزية', ar: 'العربية', fr: 'الفرنسية' };
-    
+
     const prompt = `ترجم النص التالي إلى اللغة ${langMap[targetLang] || targetLang}:
 
 "${text}"
@@ -324,7 +320,7 @@ class AIService {
     const result = await this.complete(prompt, { temperature: 0.3 });
     return result.text;
   }
-  
+
   /**
    * Generate report insights
    */
@@ -343,45 +339,45 @@ ${JSON.stringify(data, null, 2)}
     const result = await this.complete(prompt, { temperature: 0.7, maxTokens: 2000 });
     return result.text;
   }
-  
+
   /**
    * Smart search (semantic)
    */
   async smartSearch(query, documents) {
     // Get query embedding
     const queryEmbedding = await this.embed(query);
-    
+
     // Calculate similarity scores
     const results = documents.map(doc => ({
       ...doc,
       score: this.cosineSimilarity(queryEmbedding.embedding, doc.embedding || []),
     }));
-    
+
     // Sort by score
     results.sort((a, b) => b.score - a.score);
-    
+
     return results;
   }
-  
+
   /**
    * Calculate cosine similarity
    */
   cosineSimilarity(vecA, vecB) {
     if (vecA.length !== vecB.length) return 0;
-    
+
     let dotProduct = 0;
     let normA = 0;
     let normB = 0;
-    
+
     for (let i = 0; i < vecA.length; i++) {
       dotProduct += vecA[i] * vecB[i];
       normA += vecA[i] * vecA[i];
       normB += vecB[i] * vecB[i];
     }
-    
+
     return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
   }
-  
+
   /**
    * Generate cache key
    */
@@ -390,7 +386,7 @@ ${JSON.stringify(data, null, 2)}
     const data = `${operation}:${JSON.stringify(input)}:${JSON.stringify(options)}`;
     return crypto.createHash('md5').update(data).digest('hex');
   }
-  
+
   /**
    * Clear cache
    */
@@ -407,7 +403,7 @@ const aiService = new AIService();
  */
 
 // Smart inventory prediction
-const predictInventoryNeeds = async (historicalData) => {
+const predictInventoryNeeds = async historicalData => {
   const prompt = `بناءً على بيانات المخزون التاريخية، توقع الاحتياجات للشهر القادم:
 
 ${JSON.stringify(historicalData)}
@@ -426,7 +422,7 @@ ${JSON.stringify(historicalData)}
 };
 
 // Customer behavior analysis
-const analyzeCustomerBehavior = async (customerData) => {
+const analyzeCustomerBehavior = async customerData => {
   const prompt = `حلل سلوك العملاء بناءً على البيانات التالية:
 
 ${JSON.stringify(customerData)}

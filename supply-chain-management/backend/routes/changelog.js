@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import express from 'express';
 import ChangeLog from '../models/ChangeLog.js';
 import { authMiddleware } from '../middleware/auth.js';

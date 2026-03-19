@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Comprehensive Notification Service
  * Handles Email, SMS, Push, and In-App notifications with templates and tracking
@@ -5,6 +6,7 @@
  */
 
 const nodemailer = require('nodemailer');
+const logger = require('../utils/logger');
 
 /**
  * NotificationTemplate class
@@ -29,7 +31,7 @@ class NotificationTemplate {
     let rendered = this.body;
     let subject = this.subject;
 
-    this.variables.forEach((variable) => {
+    this.variables.forEach(variable => {
       // Handle both {{key}} and key formats
       const key = variable.replace(/{{|}}/g, '').trim();
       const value = data[key] !== undefined ? data[key] : '';
@@ -51,11 +53,12 @@ class NotificationTemplate {
    */
   validateVariables(data = {}) {
     const missing = [];
-    this.variables.forEach((variable) => {
+    this.variables.forEach(variable => {
       // Handle both {{key}} and key formats
       const key = variable.replace(/{{|}}/g, '').trim();
       if (!(key in data) || data[key] === undefined || data[key] === '') {
-        if (key) { // Only add non-empty keys to missing list
+        if (key) {
+          // Only add non-empty keys to missing list
           missing.push(key);
         }
       }
@@ -110,7 +113,7 @@ class EmailService {
 
       // Check if in test mode (host contains 'test')
       const isTestMode = this.config.host && this.config.host.includes('test');
-      
+
       let info;
       if (isTestMode) {
         // Mock the email send in test mode
@@ -142,7 +145,7 @@ class EmailService {
         type: 'email',
         to,
         status: 'failed',
-        error: error.message,
+        error: 'حدث خطأ داخلي',
         timestamp: new Date(),
         template: template.name,
       };
@@ -211,7 +214,7 @@ class SMSService {
         type: 'sms',
         to,
         status: 'failed',
-        error: error.message,
+        error: 'حدث خطأ داخلي',
         timestamp: new Date(),
         template: template.name,
       };
@@ -225,12 +228,11 @@ class SMSService {
    * Get SMS statistics
    */
   getStats() {
-    const totalCost = this.sentSMS.reduce((sum) => sum + 0.0075, 0);
+    const totalCost = this.sentSMS.reduce(sum => sum + 0.0075, 0);
     return {
       totalSent: this.sentSMS.length,
       totalFailed: this.failedSMS.length,
-      successRate:
-        this.sentSMS.length / (this.sentSMS.length + this.failedSMS.length) || 0,
+      successRate: this.sentSMS.length / (this.sentSMS.length + this.failedSMS.length) || 0,
       totalCost,
     };
   }
@@ -280,7 +282,7 @@ class PushNotificationService {
 
       const rendered = template.render(data);
       const userSubscriptions = this.subscriptions.filter(
-        (sub) => sub.userId === userId && sub.active
+        sub => sub.userId === userId && sub.active
       );
 
       if (userSubscriptions.length === 0) {
@@ -312,14 +314,14 @@ class PushNotificationService {
             id: `push_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
             userId,
             status: 'failed',
-            error: error.message,
+            error: 'حدث خطأ داخلي',
           });
         }
       }
 
       return {
-        totalSent: results.filter((r) => r.status === 'sent').length,
-        totalFailed: results.filter((r) => r.status === 'failed').length,
+        totalSent: results.filter(r => r.status === 'sent').length,
+        totalFailed: results.filter(r => r.status === 'failed').length,
         results,
       };
     } catch (error) {
@@ -327,7 +329,7 @@ class PushNotificationService {
         id: `push_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         userId,
         status: 'failed',
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       });
       throw error;
     }
@@ -342,8 +344,8 @@ class PushNotificationService {
   cleanupInactiveSubscriptions(inactiveDaysThreshold = 30) {
     const now = new Date();
     const inactiveThreshold = inactiveDaysThreshold * 24 * 60 * 60 * 1000;
-    
-    const removed = this.subscriptions.filter((sub) => {
+
+    const removed = this.subscriptions.filter(sub => {
       const daysSinceActive = now - sub.lastActive;
       if (daysSinceActive > inactiveThreshold) {
         sub.active = false;
@@ -353,7 +355,7 @@ class PushNotificationService {
     }).length;
 
     // Remove marked as inactive
-    this.subscriptions = this.subscriptions.filter((sub) => sub.active);
+    this.subscriptions = this.subscriptions.filter(sub => sub.active);
 
     return { removed };
   }
@@ -362,16 +364,16 @@ class PushNotificationService {
     return {
       totalSent: this.sentPushes.length,
       totalFailed: this.failedPushes.length,
-      activeSubscriptions: this.subscriptions.filter((s) => s.active).length,
+      activeSubscriptions: this.subscriptions.filter(s => s.active).length,
       totalSubscriptions: this.subscriptions.length,
     };
   }
 }
 
 // In-memory storage
-let notifications = new Map();
-let notificationPreferences = new Map();
-let notificationLog = new Map();
+const notifications = new Map();
+const notificationPreferences = new Map();
+const notificationLog = new Map();
 
 class NotificationService {
   /**
@@ -428,10 +430,13 @@ class NotificationService {
         ...result,
       };
     } catch (error) {
-      console.error(`[NotificationService] sendEmailWithTemplate error for ${templateName}:`, error.message);
+      logger.error(
+        `[NotificationService] sendEmailWithTemplate error for ${templateName}:`,
+        'حدث خطأ داخلي'
+      );
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -455,7 +460,7 @@ class NotificationService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -479,7 +484,7 @@ class NotificationService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -518,7 +523,7 @@ class NotificationService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -563,7 +568,7 @@ class NotificationService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -606,7 +611,7 @@ class NotificationService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -649,7 +654,7 @@ class NotificationService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -698,7 +703,7 @@ class NotificationService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -721,7 +726,7 @@ class NotificationService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -752,7 +757,7 @@ class NotificationService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -781,7 +786,7 @@ class NotificationService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -800,7 +805,7 @@ class NotificationService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -829,7 +834,7 @@ class NotificationService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -859,7 +864,7 @@ class NotificationService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -892,7 +897,7 @@ class NotificationService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -902,7 +907,9 @@ class NotificationService {
    */
   async getUnreadCount(userId) {
     try {
-      const unreadCount = Array.from(notifications.values()).filter(n => n.userId === userId && n.channel === 'in-app' && !n.read).length;
+      const unreadCount = Array.from(notifications.values()).filter(
+        n => n.userId === userId && n.channel === 'in-app' && !n.read
+      ).length;
 
       return {
         success: true,
@@ -911,7 +918,7 @@ class NotificationService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -939,7 +946,7 @@ class NotificationService {
         notificationLog.delete(keys[0]);
       }
     } catch (error) {
-      console.error('Error logging notification:', error);
+      logger.error('Error logging notification:', error);
     }
   }
 
@@ -973,7 +980,7 @@ class NotificationService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -984,11 +991,12 @@ class NotificationService {
   getStatistics() {
     try {
       const allNotifications = Array.from(notifications.values());
-      
+
       const stats = {
         email: {
           sent: allNotifications.filter(n => n.channel === 'email' && n.status === 'sent').length,
-          failed: allNotifications.filter(n => n.channel === 'email' && n.status === 'failed').length,
+          failed: allNotifications.filter(n => n.channel === 'email' && n.status === 'failed')
+            .length,
         },
         sms: {
           sent: allNotifications.filter(n => n.channel === 'sms' && n.status === 'sent').length,
@@ -996,7 +1004,8 @@ class NotificationService {
         },
         push: {
           sent: allNotifications.filter(n => n.channel === 'push' && n.status === 'sent').length,
-          failed: allNotifications.filter(n => n.channel === 'push' && n.status === 'failed').length,
+          failed: allNotifications.filter(n => n.channel === 'push' && n.status === 'failed')
+            .length,
         },
         inApp: {
           total: allNotifications.filter(n => n.channel === 'in-app').length,
@@ -1009,7 +1018,7 @@ class NotificationService {
       return stats;
     } catch (error) {
       return {
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }

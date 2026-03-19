@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * ===================================================================
  * FIXED ASSETS CONTROLLER - متحكم الأصول الثابتة
@@ -6,6 +7,7 @@
 
 const FixedAsset = require('../models/FixedAsset');
 const asyncHandler = require('express-async-handler');
+const { escapeRegex } = require('../utils/sanitize');
 
 // الحصول على جميع الأصول
 exports.getAllAssets = asyncHandler(async (req, res) => {
@@ -18,9 +20,9 @@ exports.getAllAssets = asyncHandler(async (req, res) => {
   if (department) filter.department = department;
   if (search) {
     filter.$or = [
-      { name: { $regex: search, $options: 'i' } },
-      { code: { $regex: search, $options: 'i' } },
-      { serialNumber: { $regex: search, $options: 'i' } },
+      { name: { $regex: escapeRegex(search), $options: 'i' } },
+      { code: { $regex: escapeRegex(search), $options: 'i' } },
+      { serialNumber: { $regex: escapeRegex(search), $options: 'i' } },
     ];
   }
 

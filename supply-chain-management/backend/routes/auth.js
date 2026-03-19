@@ -1,3 +1,4 @@
+﻿/* eslint-disable no-unused-vars */
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -30,19 +31,17 @@ router.post('/register', authLimiter, async (req, res) => {
   try {
     const { username, password, role } = req.body;
     if (!isStrongPassword(password)) {
-      return res
-        .status(400)
-        .json({
-          error:
-            'Password must be at least 8 characters and include uppercase, lowercase, number, and symbol.',
-        });
+      return res.status(400).json({
+        error:
+          'Password must be at least 8 characters and include uppercase, lowercase, number, and symbol.',
+      });
     }
     const hashed = await bcrypt.hash(password, 10);
     const user = new User({ username, password: hashed, role });
     await user.save();
     res.status(201).json({ message: 'User registered' });
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    res.status(400).json({ error: 'حدث خطأ في الخادم' });
   }
 });
 
@@ -59,7 +58,7 @@ router.post('/login', authLimiter, async (req, res) => {
     });
     res.json({ token, user: { username: user.username, role: user.role } });
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    res.status(400).json({ error: 'حدث خطأ في الخادم' });
   }
 });
 

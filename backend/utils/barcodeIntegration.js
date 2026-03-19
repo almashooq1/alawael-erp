@@ -1,9 +1,11 @@
+/* eslint-disable no-unused-vars */
 /**
  * Barcode Integration Helper
  * Functions to integrate barcodes with existing entities
  */
 
 const Barcode = require('../models/Barcode');
+const logger = require('./logger');
 
 // ============================================
 // 1. ATTACH BARCODE TO EXISTING ENTITY
@@ -19,7 +21,6 @@ const Barcode = require('../models/Barcode');
 const attachBarcodeToEntity = async (entityType, entityId, barcodeCode) => {
   try {
     // Step 1: Get the entity
-    let entity;
     let EntityModel;
 
     switch (entityType) {
@@ -40,7 +41,7 @@ const attachBarcodeToEntity = async (entityType, entityId, barcodeCode) => {
         throw new Error(`Unsupported entity type: ${entityType}`);
     }
 
-    entity = await EntityModel.findById(entityId);
+    const entity = await EntityModel.findById(entityId);
     if (!entity) {
       throw new Error(`${entityType} not found with ID: ${entityId}`);
     }
@@ -80,7 +81,7 @@ const attachBarcodeToEntity = async (entityType, entityId, barcodeCode) => {
       entity,
     };
   } catch (error) {
-    throw new Error(`Failed to attach barcode: ${error.message}`);
+    throw new Error(error.message);
   }
 };
 
@@ -150,7 +151,7 @@ const createEntityWithBarcode = async (entityType, entityData) => {
       barcode,
     };
   } catch (error) {
-    throw new Error(`Failed to create entity with barcode: ${error.message}`);
+    throw new Error(error.message);
   }
 };
 
@@ -181,7 +182,6 @@ const bulkAttachBarcodes = async (entityType, entityIds, barcodeOptions = {}) =>
         const barcodeCode = await Barcode.generateCode(prefix, 8);
 
         // Get entity details
-        let entity;
         let EntityModel;
 
         switch (entityType) {
@@ -198,7 +198,7 @@ const bulkAttachBarcodes = async (entityType, entityIds, barcodeOptions = {}) =>
             throw new Error(`Unsupported entity type: ${entityType}`);
         }
 
-        entity = await EntityModel.findById(entityId);
+        const entity = await EntityModel.findById(entityId);
         if (!entity) continue;
 
         // Create barcode
@@ -230,7 +230,7 @@ const bulkAttachBarcodes = async (entityType, entityIds, barcodeOptions = {}) =>
         results.push({
           entityId,
           status: 'failed',
-          error: error.message,
+          error: 'حدث خطأ داخلي',
         });
       }
     }
@@ -242,7 +242,7 @@ const bulkAttachBarcodes = async (entityType, entityIds, barcodeOptions = {}) =>
       results,
     };
   } catch (error) {
-    throw new Error(`Bulk attach failed: ${error.message}`);
+    throw new Error(error.message);
   }
 };
 
@@ -261,7 +261,6 @@ const getEntityWithBarcodeHistory = async (entityType, entityId) => {
 
   try {
     // Get entity
-    let entity;
     let EntityModel;
 
     switch (entityType) {
@@ -278,7 +277,7 @@ const getEntityWithBarcodeHistory = async (entityType, entityId) => {
         throw new Error(`Unsupported entity type: ${entityType}`);
     }
 
-    entity = await EntityModel.findById(entityId);
+    const entity = await EntityModel.findById(entityId);
     if (!entity) {
       throw new Error(`${entityType} not found`);
     }
@@ -316,7 +315,7 @@ const getEntityWithBarcodeHistory = async (entityType, entityId) => {
       },
     };
   } catch (error) {
-    throw new Error(`Failed to get entity with barcode: ${error.message}`);
+    throw new Error(error.message);
   }
 };
 
@@ -337,7 +336,7 @@ const migrateEntitiesToBarcodes = async (entityType, options = {}) => {
   try {
     let EntityModel;
     let count = 0;
-    let errors = [];
+    const errors = [];
 
     switch (entityType) {
       case 'PRODUCT':
@@ -356,12 +355,12 @@ const migrateEntitiesToBarcodes = async (entityType, options = {}) => {
     // Get all entities without barcodes
     const entities = await EntityModel.find({ barcode: { $exists: false } });
 
-    console.log(`Migrating ${entities.length} ${entityType} entities...`);
+    logger.info(`Migrating ${entities.length} ${entityType} entities...`);
 
     for (const entity of entities) {
       try {
         // Check if barcode already exists
-        let existingBarcode = await Barcode.findOne({
+        const existingBarcode = await Barcode.findOne({
           entityId: entity._id,
           entityType,
         });
@@ -393,7 +392,7 @@ const migrateEntitiesToBarcodes = async (entityType, options = {}) => {
       } catch (error) {
         errors.push({
           entityId: entity._id,
-          error: error.message,
+          error: 'حدث خطأ داخلي',
         });
       }
     }
@@ -405,7 +404,7 @@ const migrateEntitiesToBarcodes = async (entityType, options = {}) => {
       message: `Migration completed: ${count}/${entities.length} entities migrated`,
     };
   } catch (error) {
-    throw new Error(`Migration failed: ${error.message}`);
+    throw new Error(error.message);
   }
 };
 
@@ -449,7 +448,7 @@ const exampleProductRoute = async (req, res) => {
   } catch (error) {
     res.status(400).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 };

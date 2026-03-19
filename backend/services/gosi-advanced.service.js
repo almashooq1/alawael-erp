@@ -1,7 +1,8 @@
+/* eslint-disable no-unused-vars */
 /**
  * Advanced GOSI Insurance Service
  * خدمة التأمينات الاجتماعية المتقدمة
- * 
+ *
  * Features:
  * - AI-powered calculations
  * - Automatic subscriptions
@@ -20,7 +21,7 @@ class AdvancedGOSIService extends EventEmitter {
     this.gosiBaseUrl = process.env.GOSI_API_BASE_URL || 'https://api.gosi.gov.sa';
     this.apiKey = process.env.GOSI_API_KEY;
     this.mockMode = process.env.USE_MOCK_GOSI === 'true';
-    
+
     // GOSI rates as per latest regulations
     this.rates = {
       saudi: {
@@ -32,16 +33,16 @@ class AdvancedGOSIService extends EventEmitter {
         employerRate: 0.02, // 2% employer only
         employeeRate: 0,
         totalRate: 0.02,
-      }
+      },
     };
 
     this.client = axios.create({
       baseURL: this.gosiBaseUrl,
       headers: {
-        'Authorization': `Bearer ${this.apiKey}`,
-        'Content-Type': 'application/json'
+        Authorization: `Bearer ${this.apiKey}`,
+        'Content-Type': 'application/json',
       },
-      timeout: 10000
+      timeout: 10000,
     });
   }
 
@@ -52,7 +53,7 @@ class AdvancedGOSIService extends EventEmitter {
   async registerEmployee(employeeData) {
     try {
       logger.info(`Registering employee with GOSI: ${employeeData.nationalId}`);
-      
+
       const {
         nationalId,
         niqamaNumber,
@@ -64,7 +65,7 @@ class AdvancedGOSIService extends EventEmitter {
         startDate,
         jobTitle,
         establishmentId,
-        isSaudi = true
+        isSaudi = true,
       } = employeeData;
 
       // Validate required fields
@@ -90,7 +91,7 @@ class AdvancedGOSIService extends EventEmitter {
         isSaudi,
         employerContribution: calculatedData.employerContribution,
         employeeContribution: calculatedData.employeeContribution,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
 
       if (this.mockMode) {
@@ -100,18 +101,18 @@ class AdvancedGOSIService extends EventEmitter {
           registrationDate: new Date(),
           status: 'active',
           message: 'Registered successfully (Mock Mode)',
-          ...registrationPayload
+          ...registrationPayload,
         };
       }
 
       const response = await this.client.post('/subscriptions/register', registrationPayload);
-      
+
       logger.info(`Employee registered successfully: ${response.data.gosiNumber}`);
       this.emit('employee.registered', response.data);
-      
+
       return {
         success: true,
-        ...response.data
+        ...response.data,
       };
     } catch (error) {
       logger.error('Failed to register employee with GOSI', error);
@@ -126,7 +127,7 @@ class AdvancedGOSIService extends EventEmitter {
    */
   calculateGOSIContributions(basicSalary, additionalAllowances = 0, isSaudi = true) {
     try {
-      const subscriberWage = basicSalary + (additionalAllowances * 0.25); // Housing at 25%
+      const subscriberWage = basicSalary + additionalAllowances * 0.25; // Housing at 25%
       const rates = isSaudi ? this.rates.saudi : this.rates.foreign;
 
       const employerContribution = subscriberWage * rates.employerRate;
@@ -139,7 +140,7 @@ class AdvancedGOSIService extends EventEmitter {
         employeeContribution: Math.round(employeeContribution * 100) / 100,
         totalContribution: Math.round(totalContribution * 100) / 100,
         rates: rates,
-        isSaudi
+        isSaudi,
       };
     } catch (error) {
       logger.error('Failed to calculate GOSI contributions', error);
@@ -163,14 +164,14 @@ class AdvancedGOSIService extends EventEmitter {
           newSalary,
           effectiveDate: new Date(effectiveDate),
           updateDate: new Date(),
-          message: 'Wage updated successfully (Mock Mode)'
+          message: 'Wage updated successfully (Mock Mode)',
         };
       }
 
       const response = await this.client.put(`/subscriptions/${gosiNumber}/wage`, {
         newSalary,
         effectiveDate: new Date(effectiveDate).toISOString(),
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       logger.info(`GOSI wage updated successfully for: ${gosiNumber}`);
@@ -178,7 +179,7 @@ class AdvancedGOSIService extends EventEmitter {
 
       return {
         success: true,
-        ...response.data
+        ...response.data,
       };
     } catch (error) {
       logger.error('Failed to update GOSI wage', error);
@@ -202,14 +203,14 @@ class AdvancedGOSIService extends EventEmitter {
           effectiveDate: new Date(effectiveDate),
           cancellationDate: new Date(),
           certificateUrl: `https://gosi.gov.sa/certificates/${gosiNumber}_${Date.now()}.pdf`,
-          message: 'Subscription cancelled successfully (Mock Mode)'
+          message: 'Subscription cancelled successfully (Mock Mode)',
         };
       }
 
       const response = await this.client.post(`/subscriptions/${gosiNumber}/cancel`, {
         reason,
         effectiveDate: new Date(effectiveDate).toISOString(),
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       logger.info(`GOSI subscription cancelled: ${gosiNumber}`);
@@ -217,7 +218,7 @@ class AdvancedGOSIService extends EventEmitter {
 
       return {
         success: true,
-        ...response.data
+        ...response.data,
       };
     } catch (error) {
       logger.error('Failed to cancel GOSI subscription', error);
@@ -237,12 +238,12 @@ class AdvancedGOSIService extends EventEmitter {
           status: 'active',
           salary: 15000,
           startDate: new Date('2026-01-01'),
-          employeeContribution: 1462.50,
-          employerContribution: 1762.50,
+          employeeContribution: 1462.5,
+          employerContribution: 1762.5,
           lastPaymentDate: new Date(),
           nextPaymentDue: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
           balanceDue: 0,
-          complianceStatus: 'compliant'
+          complianceStatus: 'compliant',
         };
       }
 
@@ -271,13 +272,13 @@ class AdvancedGOSIService extends EventEmitter {
           issueDate: new Date(),
           expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
           certificateUrl: `https://gosi.gov.sa/certificates/${gosiNumber}_${Date.now()}.pdf`,
-          downloadUrl: `/downloads/gosi-certificate-${gosiNumber}.pdf`
+          downloadUrl: `/downloads/gosi-certificate-${gosiNumber}.pdf`,
         };
       }
 
       const response = await this.client.post(`/subscriptions/${gosiNumber}/certificate`, {
         certificateType,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       logger.info(`Certificate generated: ${response.data.certificateNumber}`);
@@ -285,7 +286,7 @@ class AdvancedGOSIService extends EventEmitter {
 
       return {
         success: true,
-        ...response.data
+        ...response.data,
       };
     } catch (error) {
       logger.error('Failed to generate GOSI certificate', error);
@@ -302,13 +303,7 @@ class AdvancedGOSIService extends EventEmitter {
     const warnings = [];
 
     try {
-      const {
-        nationalId,
-        salary,
-        lastUpdateDate,
-        isSaudi,
-        startDate
-      } = employeeData;
+      const { nationalId, salary, lastUpdateDate, isSaudi, startDate } = employeeData;
 
       // Check for salary anomalies
       if (salary < 1500 && !isSaudi) {
@@ -328,7 +323,8 @@ class AdvancedGOSIService extends EventEmitter {
 
       // Check for upcoming expirations
       if (employeeData.medicalInsuranceExpiry) {
-        const daysUntilExpiry = (employeeData.medicalInsuranceExpiry - Date.now()) / (1000 * 60 * 60 * 24);
+        const daysUntilExpiry =
+          (employeeData.medicalInsuranceExpiry - Date.now()) / (1000 * 60 * 60 * 24);
         if (daysUntilExpiry < 30 && daysUntilExpiry > 0) {
           warnings.push(`Medical insurance expires in ${Math.floor(daysUntilExpiry)} days`);
         }
@@ -339,10 +335,10 @@ class AdvancedGOSIService extends EventEmitter {
 
       return {
         compliant: issues.length === 0,
-        risk_level: issues.length > 0 ? 'high' : (warnings.length > 0 ? 'medium' : 'low'),
+        risk_level: issues.length > 0 ? 'high' : warnings.length > 0 ? 'medium' : 'low',
         issues,
         warnings,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     } catch (error) {
       logger.error('Failed to predict compliance issues', error);
@@ -351,7 +347,7 @@ class AdvancedGOSIService extends EventEmitter {
         risk_level: 'unknown',
         issues: ['Error during compliance check'],
         warnings: [],
-        error: error.message
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -365,7 +361,7 @@ class AdvancedGOSIService extends EventEmitter {
       const {
         startDate = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000), // Last 90 days
         endDate = new Date(),
-        includeWarnings = true
+        includeWarnings = true,
       } = filters;
 
       if (this.mockMode) {
@@ -378,20 +374,22 @@ class AdvancedGOSIService extends EventEmitter {
           issues: [
             { employeeId: 'EMP001', issue: 'Missing GOSI subscription' },
             { employeeId: 'EMP002', issue: 'Medical insurance expired' },
-            { employeeId: 'EMP003', issue: 'Data not updated for 4 months' }
+            { employeeId: 'EMP003', issue: 'Data not updated for 4 months' },
           ],
-          warnings: includeWarnings ? [
-            { employeeId: 'EMP004', warning: 'Medical insurance expires in 15 days' },
-            { employeeId: 'EMP005', warning: 'Data last updated 60 days ago' }
-          ] : [],
-          generatedAt: new Date()
+          warnings: includeWarnings
+            ? [
+                { employeeId: 'EMP004', warning: 'Medical insurance expires in 15 days' },
+                { employeeId: 'EMP005', warning: 'Data last updated 60 days ago' },
+              ]
+            : [],
+          generatedAt: new Date(),
         };
       }
 
       const response = await this.client.post('/reports/compliance', {
         startDate: startDate.toISOString(),
         endDate: endDate.toISOString(),
-        includeWarnings
+        includeWarnings,
       });
 
       return response.data;
@@ -406,13 +404,13 @@ class AdvancedGOSIService extends EventEmitter {
    */
   _calculateGOSIWage(basicSalary, isSaudi = true) {
     // GOSI wage includes basic salary + housing allowance (25%)
-    const subscriberWage = basicSalary + (basicSalary * 0.25);
+    const subscriberWage = basicSalary + basicSalary * 0.25;
     const rates = isSaudi ? this.rates.saudi : this.rates.foreign;
 
     return {
       subscriberWage: Math.round(subscriberWage * 100) / 100,
       employerContribution: Math.round(subscriberWage * rates.employerRate * 100) / 100,
-      employeeContribution: Math.round(subscriberWage * rates.employeeRate * 100) / 100
+      employeeContribution: Math.round(subscriberWage * rates.employeeRate * 100) / 100,
     };
   }
 

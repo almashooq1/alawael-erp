@@ -13,7 +13,7 @@ router.post('/webhook', rbac(['admin', 'integration-manager']), async (req, res)
     const status = await exportDataToWebhook({ userId, webhookUrl, payload, headers, eventType });
     res.json({ success: true, status });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'حدث خطأ في الخادم' });
   }
 });
 

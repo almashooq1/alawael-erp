@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Financial Validation Controller
  * Handles compliance checks and violation management
@@ -35,7 +36,7 @@ exports.getViolations = async (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
   }
 };
 
@@ -54,7 +55,7 @@ exports.getViolation = async (req, res) => {
 
     res.json({ success: true, data: violation });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
   }
 };
 
@@ -94,7 +95,7 @@ exports.resolveViolation = async (req, res) => {
 
     res.json({ success: true, data: violation });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
   }
 };
 
@@ -166,7 +167,7 @@ exports.generateReport = async (req, res) => {
     await report.save();
     res.json({ success: true, data: report });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
   }
 };
 
@@ -183,7 +184,7 @@ exports.getReport = async (req, res) => {
 
     res.json({ success: true, data: report });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
   }
 };
 
@@ -233,7 +234,7 @@ exports.getViolationsReport = async (req, res) => {
 
     res.json({ success: true, data: violations, stats });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
   }
 };
 
@@ -258,6 +259,6 @@ exports.bulkUpdateViolations = async (req, res) => {
 
     res.json({ success: true, data: result });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
   }
 };

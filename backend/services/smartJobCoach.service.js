@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+const logger = require('../utils/logger');
 /**
  * Smart Job Coach & Employer Integration Service (Phase 79)
  *
@@ -18,7 +20,7 @@ class SmartJobCoachService {
    * @param {object} observation
    */
   async logSiteVisit(placementId, coachId, geolocation, observation) {
-    console.log(`[JOB COACH] Visit to ${placementId} by ${coachId}`);
+    logger.info(`[JOB COACH] Visit to ${placementId} by ${coachId}`);
 
     // Logic: Verify GPS matches Employer Location (Mocked)
     const isLocationValid = true;
@@ -61,7 +63,8 @@ class SmartJobCoachService {
       submissionId: 'FDBK-' + Date.now(),
       score: (feedback.punctuality + feedback.quality) / 2,
       aiSentiment: sentiment,
-      actionItem: sentiment === 'NEGATIVE' ? 'Schedule Retraining' : 'Send Appreciation Certificate',
+      actionItem:
+        sentiment === 'NEGATIVE' ? 'Schedule Retraining' : 'Send Appreciation Certificate',
     };
   }
 

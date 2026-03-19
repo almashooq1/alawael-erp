@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+const logger = require('../utils/logger');
 /**
  * Smart Quality Control & Accreditation Service (Phase 83)
  *
@@ -18,7 +20,7 @@ class SmartQualityControlService {
    * @param {string} body - 'JCI', 'CARF', 'ISO'
    */
   async runMockSurvey(body) {
-    console.log(`Running mock survey for ${body}...`);
+    logger.info(`Running mock survey for ${body}...`);
 
     // Mock AI analysis of current system state vs standards
     const complianceScore = Math.floor(Math.random() * (100 - 80) + 80); // 80-100%
@@ -32,7 +34,10 @@ class SmartQualityControlService {
         { standard: 'JCI-4.5', issue: 'Fridge temp log missing entry on 14th', urgency: 'HIGH' },
         { standard: 'ISO-27001', issue: 'Password rotation policy overdue', urgency: 'MEDIUM' },
       ],
-      recommendations: ['Install automated IoT sensor for fridge.', 'Force password reset for Admin group.'],
+      recommendations: [
+        'Install automated IoT sensor for fridge.',
+        'Force password reset for Admin group.',
+      ],
     };
   }
 

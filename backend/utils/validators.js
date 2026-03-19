@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // backend/utils/validators.js
 const Joi = require('joi');
 

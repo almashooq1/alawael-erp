@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * ⚡ Performance Optimization Module
  * تحسينات الأداء الشاملة
@@ -9,18 +10,18 @@
  * - Database Indexing
  */
 
-const redis = require('redis');
-const compression = require('compression');
-const helmet = require('helmet');
+const Redis = require('ioredis');
+const logger = require('./logger');
+const _compression = require('compression');
+const _helmet = require('helmet');
 
 /**
  * 1️⃣ Redis Caching Layer
  */
 class CacheManager {
   constructor(redisUrl = 'redis://localhost:6379') {
-    this.client = redis.createClient({ url: redisUrl });
-    this.client.on('error', err => console.error('Redis error:', err));
-    this.client.connect();
+    this.client = new Redis(redisUrl);
+    this.client.on('error', err => logger.error('Redis error:', err));
     this.defaultTTL = 3600; // 1 hour
   }
 
@@ -30,11 +31,11 @@ class CacheManager {
   async set(key, value, ttl = this.defaultTTL) {
     try {
       const serialized = JSON.stringify(value);
-      await this.client.setEx(key, ttl, serialized);
-      console.log(`✅ Cache SET: ${key} (TTL: ${ttl}s)`);
+      await this.client.setex(key, ttl, serialized);
+      // console.log(`✅ Cache SET: ${key} (TTL: ${ttl}s)`);
       return true;
     } catch (error) {
-      console.error(`❌ Cache SET error: ${key}`, error);
+      logger.error(`❌ Cache SET error: ${key}`, error);
       return false;
     }
   }
@@ -46,13 +47,13 @@ class CacheManager {
     try {
       const value = await this.client.get(key);
       if (value) {
-        console.log(`✅ Cache HIT: ${key}`);
+        // console.log(`✅ Cache HIT: ${key}`);
         return JSON.parse(value);
       }
-      console.log(`⚠️  Cache MISS: ${key}`);
+      // console.log(`⚠️  Cache MISS: ${key}`);
       return null;
     } catch (error) {
-      console.error(`❌ Cache GET error: ${key}`, error);
+      logger.error(`❌ Cache GET error: ${key}`, error);
       return null;
     }
   }
@@ -63,10 +64,10 @@ class CacheManager {
   async delete(key) {
     try {
       await this.client.del(key);
-      console.log(`✅ Cache DEL: ${key}`);
+      // console.log(`✅ Cache DEL: ${key}`);
       return true;
     } catch (error) {
-      console.error(`❌ Cache DEL error: ${key}`, error);
+      logger.error(`❌ Cache DEL error: ${key}`, error);
       return false;
     }
   }
@@ -76,11 +77,11 @@ class CacheManager {
    */
   async clear() {
     try {
-      await this.client.flushAll();
-      console.log('✅ Cache cleared');
+      await this.client.flushall();
+      // console.log('✅ Cache cleared');
       return true;
     } catch (error) {
-      console.error('❌ Cache clear error', error);
+      logger.error('❌ Cache clear error', error);
       return false;
     }
   }
@@ -163,7 +164,7 @@ function createQueryCache(cache) {
         }
         return result;
       } catch (error) {
-        console.error(`Query error: ${operation}`, error);
+        logger.error(`Query error: ${operation}`, error);
         return null;
       }
     },
@@ -173,7 +174,7 @@ function createQueryCache(cache) {
      */
     async invalidate(pattern) {
       // In production, use Redis SCAN to find keys by pattern
-      console.log(`Invalidating cache: ${pattern}`);
+      logger.info(`Invalidating cache: ${pattern}`);
     },
   };
 }
@@ -282,9 +283,9 @@ class QueryOptimizer {
       for (const indexConfig of indexes) {
         await model.collection.createIndex(indexConfig.fields, indexConfig.options);
       }
-      console.log(`✅ Indexes created for ${model.modelName}`);
+      logger.info(`✅ Indexes created for ${model.modelName}`);
     } catch (error) {
-      console.error(`❌ Index creation error: ${error.message}`);
+      logger.error(`❌ Index creation error: ${error.message}`);
     }
   }
 }
@@ -317,7 +318,7 @@ class PerformanceMonitor {
     this.metrics.totalQueryTime += duration;
   }
 
-  recordRequest(duration) {
+  recordRequest(_duration) {
     this.metrics.requestCount++;
     this.metrics.averageResponseTime = this.metrics.totalQueryTime / this.metrics.requestCount;
   }
@@ -334,8 +335,8 @@ class PerformanceMonitor {
   }
 
   printReport() {
-    console.log('\n📊 Performance Metrics:');
-    console.log(JSON.stringify(this.getMetrics(), null, 2));
+    logger.info('\n📊 Performance Metrics:');
+    logger.info(JSON.stringify(this.getMetrics(), null, 2));
   }
 }
 

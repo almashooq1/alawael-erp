@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * ===================================================================
  * PDF GENERATOR - مولد ملفات PDF
@@ -101,7 +102,7 @@ class PDFGenerator {
    */
   static _addItemsTable(doc, invoice) {
     const tableTop = 280;
-    const itemCodeX = 50;
+    const _itemCodeX = 50;
     const descriptionX = 150;
     const quantityX = 350;
     const priceX = 420;
@@ -123,7 +124,7 @@ class PDFGenerator {
 
     // Items
     let position = tableTop + 25;
-    invoice.items.forEach((item, index) => {
+    invoice.items.forEach((item, _index) => {
       const amount = item.quantity * item.unitPrice - (item.discount || 0);
 
       doc

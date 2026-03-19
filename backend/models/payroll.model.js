@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Payroll Model - Advanced Payroll System
  * نموذج الرواتب - نظام الرواتب المتقدم
@@ -170,7 +171,15 @@ const payrollSchema = new mongoose.Schema(
     payment: {
       status: {
         type: String,
-        enum: ['draft', 'pending-approval', 'approved', 'processed', 'transferred', 'paid', 'cancelled'],
+        enum: [
+          'draft',
+          'pending-approval',
+          'approved',
+          'processed',
+          'transferred',
+          'paid',
+          'cancelled',
+        ],
         default: 'draft',
         index: true,
       },

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // Mock Genetics Database
 const SmartNotificationService = require('./smartNotificationService');
 
@@ -38,7 +39,9 @@ class SmartGenomicsService {
 
     if (geneticProfile.markers.includes('BDNF_Met')) {
       // Lower neuroplasticity potential
-      recommendations.push('Requires higher frequency of repetitions (High Reps) for motor learning.');
+      recommendations.push(
+        'Requires higher frequency of repetitions (High Reps) for motor learning.'
+      );
     }
 
     return {
@@ -58,8 +61,11 @@ class SmartGenomicsService {
 
     // Apply constraints
     if (geneticAnalysis.identifiedRisks.some(r => r.type === 'INJURY_RISK')) {
-      optimizedPlan.exercises = optimizedPlan.exercises.filter(ex => ex.intensity !== 'HIGH_IMPACT');
-      optimizedPlan.notes += ' [GENETIC MODIFICATION]: High impact exercises removed due to COL5A1 marker.';
+      optimizedPlan.exercises = optimizedPlan.exercises.filter(
+        ex => ex.intensity !== 'HIGH_IMPACT'
+      );
+      optimizedPlan.notes +=
+        ' [GENETIC MODIFICATION]: High impact exercises removed due to COL5A1 marker.';
     }
 
     return optimizedPlan;

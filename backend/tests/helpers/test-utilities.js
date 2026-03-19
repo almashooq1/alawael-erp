@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Test Utilities and Helpers
  * Shared utility functions for testing across all phases
@@ -158,8 +159,8 @@ class TestAssertions {
     expect(response.success).toBeDefined();
     expect(response.timestamp || response.createdAt).toBeDefined();
 
-    expectedFields.forEach(field => {
-      expect(response[field]).toBeDefined();
+    expectedFields.forEach(_field => {
+      expect(response[_field]).toBeDefined();
     });
   }
 
@@ -300,7 +301,7 @@ class MockServices {
         };
         return true;
       },
-      predict: function (modelName, features) {
+      predict: function (modelName, _features) {
         if (!this.models[modelName]) {
           return { success: false, error: 'Model not found' };
         }

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const swaggerJsdoc = require('swagger-jsdoc');
 
 const options = {
@@ -6,7 +7,8 @@ const options = {
     info: {
       title: 'شامل CRM & ERP API',
       version: '2.0.0',
-      description: 'توثيق شامل لـ API الخاص بنظام إدارة العلاقات والموارد البشرية والتعليم الإلكتروني',
+      description:
+        'توثيق شامل لـ API الخاص بنظام إدارة العلاقات والموارد البشرية والتعليم الإلكتروني',
       contact: {
         name: 'Dev Team',
         url: 'https://example.com',

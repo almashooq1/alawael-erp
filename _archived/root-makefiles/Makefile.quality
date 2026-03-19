@@ -1,0 +1,57 @@
+# System-Wide Quality Gate
+# Runs coordinated quality checks across all major services
+
+.PHONY: quality quality:backend quality:frontend quality:graphql quality:finance quality:supply-chain quality:all quality:quick
+
+quality:backend:
+	@echo "🔍 Backend Quality Gate..."
+	@cd erp_new_system/backend && npm run quality:ci
+
+quality:backend:push:
+	@echo "⚡ Backend Fast Quality (Phase2)..."
+	@cd erp_new_system/backend && npm run quality:push
+
+quality:graphql:
+	@echo "🔍 GraphQL Quality Gate..."
+	@cd graphql && npm run quality
+
+quality:finance:
+	@echo "🔍 Finance Module Quality Gate..."
+	@cd finance-module/backend && npm run quality
+
+quality:supply-chain:
+	@echo "🔍 Supply Chain Quality Gate..."
+	@cd supply-chain-management/backend && npm run quality
+
+quality:frontend:
+	@echo "🔍 Frontend Quality Gate..."
+	@cd supply-chain-management/frontend && npm test -- --coverage --passWithNoTests --watchAll=false || true
+
+quality:all: quality:backend quality:graphql quality:finance quality:supply-chain quality:frontend
+	@echo "✅ System-wide Quality Gate Complete (All Services)"
+
+quality:
+	@$(MAKE) quality:all
+
+# Fast smoke tests for rapid feedback
+quality:quick: quality:backend:push
+	@echo "⚡ Quick Lint Checks (All Services)..."
+	@cd graphql && npm run lint || true
+	@cd finance-module/backend && npm run lint || true
+	@cd supply-chain-management/backend && npm run lint || true
+	@echo "⚡ Frontend Quick Test..."
+	@cd supply-chain-management/frontend && npm test -- --passWithNoTests --watchAll=false --testTimeout=5000 || true
+	@echo "✅ Quick Quality Check Complete"
+
+# Individual service fast checks
+quality:graphql:fast:
+	@echo "⚡ GraphQL Lint Only..."
+	@cd graphql && npm run lint
+
+quality:finance:fast:
+	@echo "⚡ Finance Lint Only..."
+	@cd finance-module/backend && npm run lint
+
+quality:supply-chain:fast:
+	@echo "⚡ Supply Chain Lint Only..."
+	@cd supply-chain-management/backend && npm run lint

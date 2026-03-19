@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 const invoiceSchema = new mongoose.Schema(
@@ -33,12 +34,20 @@ const invoiceSchema = new mongoose.Schema(
       status: { type: String, enum: ['PENDING', 'APPROVED', 'REJECTED'], default: 'PENDING' },
     },
 
-    status: { type: String, enum: ['DRAFT', 'ISSUED', 'PARTIALLY_PAID', 'PAID', 'CANCELLED', 'OVERDUE'], default: 'DRAFT' },
-    paymentMethod: { type: String, enum: ['CASH', 'CARD', 'TRANSFER', 'INSURANCE'], default: 'CASH' },
+    status: {
+      type: String,
+      enum: ['DRAFT', 'ISSUED', 'PARTIALLY_PAID', 'PAID', 'CANCELLED', 'OVERDUE'],
+      default: 'DRAFT',
+    },
+    paymentMethod: {
+      type: String,
+      enum: ['CASH', 'CARD', 'TRANSFER', 'INSURANCE'],
+      default: 'CASH',
+    },
 
     notes: String,
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 // Auto-calc total before save
@@ -50,5 +59,15 @@ invoiceSchema.pre('save', function (next) {
   }
   next();
 });
+
+// ─── Compound Indexes ────────────────────────────────────────────────────────
+// Beneficiary invoices filtered by status (most common query pattern)
+invoiceSchema.index({ beneficiary: 1, status: 1 });
+// Dashboard: list invoices by status sorted by date
+invoiceSchema.index({ status: 1, issueDate: -1 });
+// Overdue invoice detection batch job
+invoiceSchema.index({ status: 1, dueDate: 1 });
+// Insurance claim tracking
+invoiceSchema.index({ 'insurance.status': 1, 'insurance.provider': 1 });
 
 module.exports = mongoose.models.Invoice || mongoose.model('Invoice', invoiceSchema);

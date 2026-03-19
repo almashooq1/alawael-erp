@@ -1,7 +1,10 @@
+/* eslint-disable no-unused-vars */
 /**
  * ⚡ Performance Configuration - تكوين الأداء المحسن
  * نظام ERP الألوائل - إصدار احترافي
  */
+
+const logger = require('../utils/logger');
 
 const performanceConfig = {
   // إعدادات قاعدة البيانات
@@ -27,7 +30,7 @@ const performanceConfig = {
       // Heartbeat Frequency
       heartbeatFrequencyMS: 10000,
       // Auto Index Build
-      autoIndex: process.env.NODE_ENV !== 'production'
+      autoIndex: process.env.NODE_ENV !== 'production',
     },
 
     // Query Optimization
@@ -41,7 +44,7 @@ const performanceConfig = {
       // تفعيل lean على populate
       leanPopulate: true,
       // تحديد الحقول المطلوبة فقط
-      selectOnlyRequired: true
+      selectOnlyRequired: true,
     },
 
     // Indexing Strategy
@@ -51,11 +54,17 @@ const performanceConfig = {
       // الفهارس المركبة الشائعة
       compound: {
         users: [{ email: 1 }, { nationalId: 1 }, { branch: 1, status: 1 }],
-        employees: [{ branch: 1, status: 1 }, { department: 1, status: 1 }],
+        employees: [
+          { branch: 1, status: 1 },
+          { department: 1, status: 1 },
+        ],
         transactions: [{ date: -1 }, { type: 1, date: -1 }, { branch: 1, date: -1 }],
-        attendance: [{ employee: 1, date: 1 }, { branch: 1, date: 1 }]
-      }
-    }
+        attendance: [
+          { employee: 1, date: 1 },
+          { branch: 1, date: 1 },
+        ],
+      },
+    },
   },
 
   // إعدادات الذاكرة والتخزين المؤقت
@@ -69,7 +78,7 @@ const performanceConfig = {
       // تفعيل GC التزايدية
       incremental: true,
       // GC عند ضغط الذاكرة
-      exposeGC: true
+      exposeGC: true,
     },
     // Memory Monitoring
     monitoring: {
@@ -78,8 +87,8 @@ const performanceConfig = {
       // حرج عند استخدام 90% من الذاكرة
       criticalThreshold: 0.9,
       // فحص كل 30 ثانية
-      checkInterval: 30000
-    }
+      checkInterval: 30000,
+    },
   },
 
   // إعدادات API Performance
@@ -92,7 +101,7 @@ const performanceConfig = {
       // الحد الأدنى للحجم (bytes)
       threshold: 1024,
       // مستوى الضغط (1-9)
-      level: 6
+      level: 6,
     },
 
     // Response Time
@@ -104,7 +113,7 @@ const performanceConfig = {
       // تحذير إذا تجاوز (ms)
       warningThreshold: 500,
       // حرج إذا تجاوز (ms)
-      criticalThreshold: 2000
+      criticalThreshold: 2000,
     },
 
     // Pagination
@@ -114,7 +123,7 @@ const performanceConfig = {
       // الحد الافتراضي
       defaultLimit: 20,
       // تفعيل cursor pagination
-      cursorPagination: true
+      cursorPagination: true,
     },
 
     // Request Timeout
@@ -124,8 +133,8 @@ const performanceConfig = {
       // مهلة الـ middleware
       middleware: 5000,
       // مهلة قاعدة البيانات
-      database: 10000
-    }
+      database: 10000,
+    },
   },
 
   // إعدادات Concurrent Processing
@@ -142,8 +151,8 @@ const performanceConfig = {
       // عدد العمال
       count: process.env.WORKER_COUNT || require('os').cpus().length,
       // الحد الأقصى للمهام لكل عامل
-      maxTasksPerWorker: 50
-    }
+      maxTasksPerWorker: 50,
+    },
   },
 
   // إعدادات Batch Processing
@@ -157,7 +166,7 @@ const performanceConfig = {
     // تأخير بين الدفعات (ms)
     batchDelay: 100,
     // تفعيل Parallel Batches
-    parallelBatches: true
+    parallelBatches: true,
   },
 
   // إعدادات Caching Layer
@@ -170,19 +179,17 @@ const performanceConfig = {
       // مدة الصلاحية الافتراضية (seconds)
       defaultTTL: 300,
       // تنظيف كل (seconds)
-      cleanupInterval: 60
+      cleanupInterval: 60,
     },
 
     // Query Caching
     queryCache: {
       enabled: true,
       // استعلامات قابلة للتخزين المؤقت
-      cacheableQueries: [
-        'find', 'findOne', 'countDocuments', 'aggregate'
-      ],
+      cacheableQueries: ['find', 'findOne', 'countDocuments', 'aggregate'],
       // أنماط الاستعلامات للتجاهل
-      skipPatterns: [/live/, /realtime/, /stream/]
-    }
+      skipPatterns: [/live/, /realtime/, /stream/],
+    },
   },
 
   // إعدادات Logging Performance
@@ -197,13 +204,13 @@ const performanceConfig = {
       // أقصى حجم للملف (bytes)
       maxSize: 10485760, // 10MB
       // أقصى عدد من الملفات
-      maxFiles: 5
+      maxFiles: 5,
     },
     // Sampling للطلبات الكثيرة
     sampling: {
       enabled: process.env.NODE_ENV === 'production',
-      rate: 0.1 // 10% من الطلبات
-    }
+      rate: 0.1, // 10% من الطلبات
+    },
   },
 
   // إعدادات Monitoring
@@ -215,7 +222,7 @@ const performanceConfig = {
       enabled: true,
       endpoint: '/metrics',
       // Metrics مخصصة
-      customMetrics: true
+      customMetrics: true,
     },
     // Health Checks
     healthCheck: {
@@ -226,7 +233,7 @@ const performanceConfig = {
       // فحص Redis
       checkRedis: true,
       // فحص الذاكرة
-      checkMemory: true
+      checkMemory: true,
     },
     // Performance Metrics
     metrics: {
@@ -235,11 +242,8 @@ const performanceConfig = {
       // فترة الجمع (seconds)
       interval: 60,
       // المقاييس المراد جمعها
-      types: [
-        'cpu', 'memory', 'eventLoop', 'gc',
-        'http', 'database', 'cache'
-      ]
-    }
+      types: ['cpu', 'memory', 'eventLoop', 'gc', 'http', 'database', 'cache'],
+    },
   },
 
   // إعدادات Cluster Mode
@@ -253,8 +257,8 @@ const performanceConfig = {
     // أقصى محاولات إعادة التشغيل
     maxRespawnAttempts: 5,
     // تأخير إعادة التشغيل (ms)
-    respawnDelay: 1000
-  }
+    respawnDelay: 1000,
+  },
 };
 
 // فئة PerformanceMonitor
@@ -264,7 +268,7 @@ class PerformanceMonitor {
       requests: { total: 0, success: 0, errors: 0 },
       responseTimes: [],
       memoryUsage: [],
-      cpuUsage: []
+      cpuUsage: [],
     };
     this.startTime = Date.now();
     this.config = performanceConfig;
@@ -294,13 +298,13 @@ class PerformanceMonitor {
       heapUsed: memoryUsage.heapUsed,
       heapTotal: memoryUsage.heapTotal,
       external: memoryUsage.external,
-      rss: memoryUsage.rss
+      rss: memoryUsage.rss,
     });
 
     this.metrics.cpuUsage.push({
       timestamp: Date.now(),
       user: cpuUsage.user,
-      system: cpuUsage.system
+      system: cpuUsage.system,
     });
 
     // الاحتفاظ بآخر 100 قراءة فقط
@@ -323,14 +327,14 @@ class PerformanceMonitor {
     const usedRatio = memoryUsage.heapUsed / memory.maxHeapSize;
 
     if (usedRatio >= memory.monitoring.criticalThreshold) {
-      console.error(`🔴 حرج: استخدام الذاكرة ${(usedRatio * 100).toFixed(1)}%`);
+      logger.error(`🔴 حرج: استخدام الذاكرة ${(usedRatio * 100).toFixed(1)}%`);
       // محاولة تنظيف الذاكرة
       if (global.gc) {
         global.gc();
-        console.log('🧹 تم تشغيل Garbage Collection');
+        logger.info('🧹 تم تشغيل Garbage Collection');
       }
     } else if (usedRatio >= memory.monitoring.warningThreshold) {
-      console.warn(`🟡 تحذير: استخدام الذاكرة ${(usedRatio * 100).toFixed(1)}%`);
+      logger.warn(`🟡 تحذير: استخدام الذاكرة ${(usedRatio * 100).toFixed(1)}%`);
     }
   }
 
@@ -348,7 +352,7 @@ class PerformanceMonitor {
     if (responseTime > 0) {
       this.metrics.responseTimes.push({
         timestamp: Date.now(),
-        duration: responseTime
+        duration: responseTime,
       });
 
       // الاحتفاظ بآخر 1000 طلب
@@ -367,9 +371,10 @@ class PerformanceMonitor {
 
     // حساب متوسط وقت الاستجابة
     const responseTimes = this.metrics.responseTimes.map(r => r.duration);
-    const avgResponseTime = responseTimes.length > 0
-      ? responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length
-      : 0;
+    const avgResponseTime =
+      responseTimes.length > 0
+        ? responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length
+        : 0;
 
     // حساب معدل الطلبات في الثانية
     const requestsPerSecond = this.metrics.requests.total / (uptime / 1000);
@@ -380,26 +385,27 @@ class PerformanceMonitor {
     return {
       uptime: {
         seconds: Math.floor(uptime / 1000),
-        formatted: this.formatUptime(uptime)
+        formatted: this.formatUptime(uptime),
       },
       requests: {
         total: this.metrics.requests.total,
         success: this.metrics.requests.success,
         errors: this.metrics.requests.errors,
-        successRate: this.metrics.requests.total > 0
-          ? ((this.metrics.requests.success / this.metrics.requests.total) * 100).toFixed(2)
-          : 100,
-        perSecond: requestsPerSecond.toFixed(2)
+        successRate:
+          this.metrics.requests.total > 0
+            ? ((this.metrics.requests.success / this.metrics.requests.total) * 100).toFixed(2)
+            : 100,
+        perSecond: requestsPerSecond.toFixed(2),
       },
       responseTime: {
         average: Math.round(avgResponseTime),
         min: responseTimes.length > 0 ? Math.min(...responseTimes) : 0,
         max: responseTimes.length > 0 ? Math.max(...responseTimes) : 0,
         p95: this.calculatePercentile(responseTimes, 95),
-        p99: this.calculatePercentile(responseTimes, 99)
+        p99: this.calculatePercentile(responseTimes, 99),
       },
       memory: latestMemory || process.memoryUsage(),
-      timestamp: now
+      timestamp: now,
     };
   }
 
@@ -441,7 +447,7 @@ class PerformanceMonitor {
       requests: { total: 0, success: 0, errors: 0 },
       responseTimes: [],
       memoryUsage: [],
-      cpuUsage: []
+      cpuUsage: [],
     };
     this.startTime = Date.now();
   }
@@ -530,9 +536,10 @@ class QueryOptimizer {
     return {
       collection,
       fields: indexFields,
-      suggestion: Object.keys(indexFields).length > 0
-        ? `db.${collection}.createIndex(${JSON.stringify(indexFields)})`
-        : null
+      suggestion:
+        Object.keys(indexFields).length > 0
+          ? `db.${collection}.createIndex(${JSON.stringify(indexFields)})`
+          : null,
     };
   }
 }
@@ -550,7 +557,7 @@ class MemoryManager {
   set(key, value, ttl = 300) {
     this.cache.set(key, {
       value,
-      expiresAt: Date.now() + (ttl * 1000)
+      expiresAt: Date.now() + ttl * 1000,
     });
 
     // تنظيف إذا تجاوز الحد
@@ -595,7 +602,7 @@ class MemoryManager {
       }
     }
 
-    console.log(`🧹 تم تنظيف ${cleaned} عنصر من الذاكرة المؤقتة`);
+    logger.info(`🧹 تم تنظيف ${cleaned} عنصر من الذاكرة المؤقتة`);
     return cleaned;
   }
 
@@ -604,7 +611,7 @@ class MemoryManager {
    */
   clear() {
     this.cache.clear();
-    console.log('🧹 تم مسح كل الذاكرة المؤقتة');
+    logger.info('🧹 تم مسح كل الذاكرة المؤقتة');
   }
 
   /**
@@ -624,7 +631,7 @@ class MemoryManager {
       heapTotal: this.formatBytes(usage.heapTotal),
       external: this.formatBytes(usage.external),
       rss: this.formatBytes(usage.rss),
-      percentage: ((usage.heapUsed / this.config.maxHeapSize) * 100).toFixed(1)
+      percentage: ((usage.heapUsed / this.config.maxHeapSize) * 100).toFixed(1),
     };
   }
 
@@ -644,5 +651,5 @@ module.exports = {
   performanceConfig,
   PerformanceMonitor,
   QueryOptimizer,
-  MemoryManager
+  MemoryManager,
 };

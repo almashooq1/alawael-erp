@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+const logger = require('../utils/logger');
 /**
  * Smart Neuro-Feedback & BCI Service (Phase 94)
  * Brain-Computer Interface Integration.
@@ -43,7 +45,7 @@ class SmartNeuroFeedbackService {
    * Establishes a baseline for the specific child (brains vary wildy).
    */
   async calibrateBaseline(patientId) {
-    console.log(`Calibrating EEG baseline for ${patientId}...`);
+    logger.info(`Calibrating EEG baseline for ${patientId}...`);
 
     // Mock calibration process (30 seconds of open eyes, 30 seconds closed)
     return {

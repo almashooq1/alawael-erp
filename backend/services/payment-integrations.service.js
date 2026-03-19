@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Payment Integrations Service
  * Stripe & PayPal Integration
@@ -80,7 +81,7 @@ class PaymentIntegrationService {
       };
     } catch (error) {
       this.logger.log('error', 'Failed to create Stripe payment intent', {
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       });
       throw error;
     }

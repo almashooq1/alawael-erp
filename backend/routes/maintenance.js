@@ -1,3 +1,4 @@
+﻿/* eslint-disable no-unused-vars */
 const express = require('express');
 const router = express.Router();
 const asyncHandler = require('express-async-handler');
@@ -9,11 +10,11 @@ const logger = require('../utils/logger');
 const maintenanceService = new MaintenanceService();
 
 // Middleware to verify service is ready
-router.use((req, res, next) => {
+router.use((_req, res, next) => {
   if (!maintenanceService) {
-    return res.status(503).json({ 
+    return res.status(503).json({
       error: 'Service unavailable',
-      message: 'Maintenance service not initialized'
+      message: 'Maintenance service not initialized',
     });
   }
   next();
@@ -24,7 +25,8 @@ router.use((req, res, next) => {
  * @desc    Get all maintenance schedules
  * @access  Private
  */
-router.get('/schedules',
+router.get(
+  '/schedules',
   authenticate,
   asyncHandler(async (req, res) => {
     try {
@@ -32,13 +34,13 @@ router.get('/schedules',
       res.status(200).json({
         success: true,
         count: schedules.length,
-        data: schedules
+        data: schedules,
       });
     } catch (error) {
       logger.error('Error fetching schedules:', error);
       res.status(500).json({
         success: false,
-        error: error.message || 'Failed to fetch schedules'
+        error: 'حدث خطأ في الخادم' || 'Failed to fetch schedules',
       });
     }
   })
@@ -49,15 +51,18 @@ router.get('/schedules',
  * @desc    Create maintenance schedule
  * @access  Private/Manager
  */
-router.post('/schedules',
+router.post(
+  '/schedules',
+  authenticate,
   asyncHandler(async (req, res) => {
     try {
-      const { vehicleId, maintenanceType, scheduledDate, estimatedDuration, description } = req.body;
+      const { vehicleId, maintenanceType, scheduledDate, estimatedDuration, description } =
+        req.body;
 
       if (!vehicleId || !maintenanceType || !scheduledDate) {
         return res.status(400).json({
           success: false,
-          error: 'Vehicle ID, maintenance type, and scheduled date are required'
+          error: 'Vehicle ID, maintenance type, and scheduled date are required',
         });
       }
 
@@ -67,18 +72,18 @@ router.post('/schedules',
         scheduledDate,
         estimatedDuration,
         description,
-        createdBy: req.user.id
+        createdBy: req.user.id,
       });
 
       res.status(201).json({
         success: true,
-        data: schedule
+        data: schedule,
       });
     } catch (error) {
       logger.error('Error creating schedule:', error);
       res.status(500).json({
         success: false,
-        error: error.message || 'Failed to create schedule'
+        error: 'حدث خطأ في الخادم' || 'Failed to create schedule',
       });
     }
   })
@@ -89,27 +94,29 @@ router.post('/schedules',
  * @desc    Get specific maintenance schedule
  * @access  Private
  */
-router.get('/schedules/:scheduleId',
+router.get(
+  '/schedules/:scheduleId',
+  authenticate,
   asyncHandler(async (req, res) => {
     try {
       const schedule = await maintenanceService.getScheduleById(req.params.scheduleId);
-      
+
       if (!schedule) {
         return res.status(404).json({
           success: false,
-          error: 'Schedule not found'
+          error: 'Schedule not found',
         });
       }
 
       res.status(200).json({
         success: true,
-        data: schedule
+        data: schedule,
       });
     } catch (error) {
       logger.error('Error fetching schedule:', error);
       res.status(500).json({
         success: false,
-        error: error.message || 'Failed to fetch schedule'
+        error: 'حدث خطأ في الخادم' || 'Failed to fetch schedule',
       });
     }
   })
@@ -120,30 +127,29 @@ router.get('/schedules/:scheduleId',
  * @desc    Update maintenance schedule
  * @access  Private/Manager
  */
-router.put('/schedules/:scheduleId',
+router.put(
+  '/schedules/:scheduleId',
+  authenticate,
   asyncHandler(async (req, res) => {
     try {
-      const schedule = await maintenanceService.updateSchedule(
-        req.params.scheduleId,
-        req.body
-      );
+      const schedule = await maintenanceService.updateSchedule(req.params.scheduleId, req.body);
 
       if (!schedule) {
         return res.status(404).json({
           success: false,
-          error: 'Schedule not found'
+          error: 'Schedule not found',
         });
       }
 
       res.status(200).json({
         success: true,
-        data: schedule
+        data: schedule,
       });
     } catch (error) {
       logger.error('Error updating schedule:', error);
       res.status(500).json({
         success: false,
-        error: error.message || 'Failed to update schedule'
+        error: 'حدث خطأ في الخادم' || 'Failed to update schedule',
       });
     }
   })
@@ -154,7 +160,9 @@ router.put('/schedules/:scheduleId',
  * @desc    Delete maintenance schedule
  * @access  Private/Admin
  */
-router.delete('/schedules/:scheduleId',
+router.delete(
+  '/schedules/:scheduleId',
+  authenticate,
   asyncHandler(async (req, res) => {
     try {
       const result = await maintenanceService.deleteSchedule(req.params.scheduleId);
@@ -162,19 +170,19 @@ router.delete('/schedules/:scheduleId',
       if (!result) {
         return res.status(404).json({
           success: false,
-          error: 'Schedule not found'
+          error: 'Schedule not found',
         });
       }
 
       res.status(200).json({
         success: true,
-        message: 'Schedule deleted successfully'
+        message: 'Schedule deleted successfully',
       });
     } catch (error) {
       logger.error('Error deleting schedule:', error);
       res.status(500).json({
         success: false,
-        error: error.message || 'Failed to delete schedule'
+        error: 'حدث خطأ في الخادم' || 'Failed to delete schedule',
       });
     }
   })
@@ -185,27 +193,29 @@ router.delete('/schedules/:scheduleId',
  * @desc    Predict next maintenance for vehicle
  * @access  Private
  */
-router.get('/predict/:vehicleId',
+router.get(
+  '/predict/:vehicleId',
+  authenticate,
   asyncHandler(async (req, res) => {
     try {
       const prediction = await maintenanceService.predictMaintenanceNeeds(req.params.vehicleId);
-      
+
       if (!prediction) {
         return res.status(404).json({
           success: false,
-          error: 'Vehicle not found'
+          error: 'Vehicle not found',
         });
       }
 
       res.status(200).json({
         success: true,
-        data: prediction
+        data: prediction,
       });
     } catch (error) {
       logger.error('Error predicting maintenance:', error);
       res.status(500).json({
         success: false,
-        error: error.message || 'Failed to predict maintenance'
+        error: 'حدث خطأ في الخادم' || 'Failed to predict maintenance',
       });
     }
   })
@@ -216,7 +226,9 @@ router.get('/predict/:vehicleId',
  * @desc    Create maintenance record
  * @access  Private/Technician
  */
-router.post('/records',
+router.post(
+  '/records',
+  authenticate,
   asyncHandler(async (req, res) => {
     try {
       const { vehicleId, maintenanceType, completionDate, cost, notes, parts } = req.body;
@@ -224,7 +236,7 @@ router.post('/records',
       if (!vehicleId || !maintenanceType || !completionDate) {
         return res.status(400).json({
           success: false,
-          error: 'Vehicle ID, maintenance type, and completion date are required'
+          error: 'Vehicle ID, maintenance type, and completion date are required',
         });
       }
 
@@ -235,18 +247,18 @@ router.post('/records',
         cost,
         notes,
         parts,
-        technician: req.user.id
+        technician: req.user.id,
       });
 
       res.status(201).json({
         success: true,
-        data: record
+        data: record,
       });
     } catch (error) {
       logger.error('Error creating record:', error);
       res.status(500).json({
         success: false,
-        error: error.message || 'Failed to create record'
+        error: 'حدث خطأ في الخادم' || 'Failed to create record',
       });
     }
   })
@@ -257,27 +269,29 @@ router.post('/records',
  * @desc    Get specific maintenance record
  * @access  Private
  */
-router.get('/records/:recordId',
+router.get(
+  '/records/:recordId',
+  authenticate,
   asyncHandler(async (req, res) => {
     try {
       const record = await maintenanceService.getRecordById(req.params.recordId);
-      
+
       if (!record) {
         return res.status(404).json({
           success: false,
-          error: 'Record not found'
+          error: 'Record not found',
         });
       }
 
       res.status(200).json({
         success: true,
-        data: record
+        data: record,
       });
     } catch (error) {
       logger.error('Error fetching record:', error);
       res.status(500).json({
         success: false,
-        error: error.message || 'Failed to fetch record'
+        error: 'حدث خطأ في الخادم' || 'Failed to fetch record',
       });
     }
   })
@@ -288,39 +302,41 @@ router.get('/records/:recordId',
  * @desc    Get maintenance history for vehicle
  * @access  Private
  */
-router.get('/vehicle/:vehicleId/history',
+router.get(
+  '/vehicle/:vehicleId/history',
+  authenticate,
   asyncHandler(async (req, res) => {
     try {
       const history = await maintenanceService.getVehicleMaintenanceHistory(req.params.vehicleId);
-      
+
       if (!history) {
         return res.status(404).json({
           success: false,
-          error: 'Vehicle not found'
+          error: 'Vehicle not found',
         });
       }
 
       res.status(200).json({
         success: true,
-        data: history
+        data: history,
       });
     } catch (error) {
       logger.error('Error fetching history:', error);
       res.status(500).json({
         success: false,
-        error: error.message || 'Failed to fetch history'
+        error: 'حدث خطأ في الخادم' || 'Failed to fetch history',
       });
     }
   })
 );
 
 // Error handling middleware
-router.use((err, req, res, next) => {
+router.use((err, _req, res, _next) => {
   logger.error('Router error:', err);
   res.status(500).json({
     success: false,
     error: 'An unexpected error occurred',
-    message: err.message
+    message: 'حدث خطأ في الخادم',
   });
 });
 

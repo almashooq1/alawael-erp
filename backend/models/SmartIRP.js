@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 /**
@@ -561,7 +562,7 @@ smartIRPSchema.methods.scheduleNextReview = function () {
   if (!this.autoReview.enabled) return null;
 
   const now = new Date();
-  let nextDate = new Date(now);
+  const nextDate = new Date(now);
 
   switch (this.autoReview.frequency) {
     case 'weekly':

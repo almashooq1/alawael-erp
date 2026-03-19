@@ -87,7 +87,7 @@ router.get('/overview', async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -160,7 +160,7 @@ router.get('/expirations', async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -184,7 +184,7 @@ router.get('/compliance-report', async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -229,7 +229,7 @@ router.get('/nitaqat', async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -278,7 +278,7 @@ router.get('/departments', async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -331,7 +331,7 @@ router.get('/salary-stats', async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -369,7 +369,7 @@ router.get('/recent-activities', async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -415,7 +415,7 @@ router.get('/search', async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });

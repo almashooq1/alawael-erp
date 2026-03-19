@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Disability Assessment Model
  * نموذج تقييم الإعاقة - Comprehensive Assessment Metrics
@@ -21,7 +22,10 @@ const assessmentDetailsSchema = new Schema(
     assessor_name: { type: String, required: true },
     assessment_date: { type: Date, default: Date.now },
     next_assessment_date: { type: Date },
-    assessment_method: { type: String, enum: ['clinical', 'psychological', 'functional', 'educational', 'vocational'] },
+    assessment_method: {
+      type: String,
+      enum: ['clinical', 'psychological', 'functional', 'educational', 'vocational'],
+    },
 
     // ICF Domains (International Classification of Functioning)
     icf_body_functions: {
@@ -63,11 +67,14 @@ const assessmentDetailsSchema = new Schema(
       occupation: String,
       experience: String,
       coping_styles: [String],
-      motivation_level: { type: String, enum: ['very_low', 'low', 'moderate', 'high', 'very_high'] },
+      motivation_level: {
+        type: String,
+        enum: ['very_low', 'low', 'moderate', 'high', 'very_high'],
+      },
       adaptive_capacity: Number, // 0-100
     },
   },
-  { _id: false },
+  { _id: false }
 );
 
 // Disability Type Sub-schema
@@ -101,7 +108,7 @@ const disabilityTypeSchema = new Schema(
     duration_years: Number,
     progression_status: { type: String, enum: ['stable', 'improving', 'declining', 'variable'] },
   },
-  { _id: false },
+  { _id: false }
 );
 
 // Functional Ability Profile
@@ -145,7 +152,7 @@ const functionalAbilitySchema = new Schema(
       participation_readiness: Number,
     },
   },
-  { _id: false },
+  { _id: false }
 );
 
 // Main Schema
@@ -272,7 +279,7 @@ const disabilityAssessmentSchema = new Schema(
   {
     timestamps: true,
     collection: 'disability_assessments',
-  },
+  }
 );
 
 // Indexes
@@ -341,7 +348,9 @@ disabilityAssessmentSchema.methods.getProgressMetrics = function (previousAssess
     composite_score_change: currentComposite - previousComposite,
     improvement_percentage: ((currentComposite - previousComposite) / previousComposite) * 100,
     is_improving: currentComposite > previousComposite,
-    assessment_period_days: Math.ceil((this.createdAt - previousAssessment.createdAt) / (1000 * 60 * 60 * 24)),
+    assessment_period_days: Math.ceil(
+      (this.createdAt - previousAssessment.createdAt) / (1000 * 60 * 60 * 24)
+    ),
   };
 };
 
@@ -388,8 +397,12 @@ disabilityAssessmentSchema.statics.findBySeverity = function (severity) {
 
 disabilityAssessmentSchema.statics.getAssessmentStatistics = async function () {
   const total = await this.countDocuments();
-  const by_type = await this.aggregate([{ $group: { _id: '$disability_profile.type', count: { $sum: 1 } } }]);
-  const by_severity = await this.aggregate([{ $group: { _id: '$disability_profile.severity', count: { $sum: 1 } } }]);
+  const by_type = await this.aggregate([
+    { $group: { _id: '$disability_profile.type', count: { $sum: 1 } } },
+  ]);
+  const by_severity = await this.aggregate([
+    { $group: { _id: '$disability_profile.severity', count: { $sum: 1 } } },
+  ]);
   const avg_composite = await this.aggregate([
     {
       $group: {

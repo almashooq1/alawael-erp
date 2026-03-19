@@ -1,7 +1,8 @@
+/* eslint-disable no-unused-vars */
 /**
  * خدمة العمليات الجماعية
  * Batch Operations Service
- * 
+ *
  * معالجة العمليات على دفعات كبيرة من البيانات:
  * - معالجة الرواتب لعدة موظفين/أقسام
  * - الموافقات الجماعية
@@ -12,6 +13,7 @@
 const Payroll = require('../models/payroll.model');
 const CompensationStructure = require('../models/compensation.model').CompensationStructure;
 const PayrollCalculationService = require('./payrollCalculationService');
+const logger = require('../utils/logger');
 
 class BatchOperationsService {
   /**
@@ -29,18 +31,18 @@ class BatchOperationsService {
         totalAmount: 0,
         startTime,
         endTime: null,
-        duration: 0
-      }
+        duration: 0,
+      },
     };
 
     try {
       // بناء الاستعلام
-      let query = { status: 'draft' };
-      
+      const query = { status: 'draft' };
+
       if (filters.employeeIds?.length) {
         query.employeeId = { $in: filters.employeeIds };
       }
-      
+
       if (filters.departments?.length) {
         query.department = { $in: filters.departments };
       }
@@ -48,7 +50,7 @@ class BatchOperationsService {
       if (filters.dateRange) {
         query.payPeriod = {
           $gte: new Date(filters.dateRange.start),
-          $lte: new Date(filters.dateRange.end)
+          $lte: new Date(filters.dateRange.end),
         };
       }
 
@@ -61,14 +63,14 @@ class BatchOperationsService {
           if (!payroll.employeeId || !payroll.payPeriod) {
             results.skipped.push({
               payrollId: payroll._id,
-              reason: 'بيانات ناقصة'
+              reason: 'بيانات ناقصة',
             });
             continue;
           }
 
           // حساب الراتب
           const calculations = await PayrollCalculationService.calculateCompleteSalary(payroll);
-          
+
           // تحديث السجل
           payroll.basicSalary = calculations.basicSalary || payroll.basicSalary;
           payroll.allowances = calculations.allowances || payroll.allowances;
@@ -84,7 +86,7 @@ class BatchOperationsService {
           results.success.push({
             payrollId: payroll._id,
             employeeId: payroll.employeeId,
-            netSalary: calculations.netSalary
+            netSalary: calculations.netSalary,
           });
 
           results.summary.totalAmount += calculations.netSalary || 0;
@@ -92,7 +94,7 @@ class BatchOperationsService {
           results.failed.push({
             payrollId: payroll._id,
             employeeId: payroll.employeeId,
-            error: error.message
+            error: 'حدث خطأ داخلي',
           });
         }
       }
@@ -103,7 +105,7 @@ class BatchOperationsService {
 
       return results;
     } catch (error) {
-      throw new Error('خطأ في معالجة دفعة الرواتب: ' + error.message);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -119,8 +121,8 @@ class BatchOperationsService {
       summary: {
         total: payrollIds.length,
         approved: 0,
-        failed: 0
-      }
+        failed: 0,
+      },
     };
 
     try {
@@ -131,7 +133,7 @@ class BatchOperationsService {
           if (!payroll) {
             results.skipped.push({
               payrollId,
-              reason: 'لم يتم العثور على السجل'
+              reason: 'لم يتم العثور على السجل',
             });
             continue;
           }
@@ -139,7 +141,7 @@ class BatchOperationsService {
           if (payroll.status !== 'pending') {
             results.skipped.push({
               payrollId,
-              reason: `الحالة الحالية: ${payroll.status}`
+              reason: `الحالة الحالية: ${payroll.status}`,
             });
             continue;
           }
@@ -151,12 +153,12 @@ class BatchOperationsService {
             approverId: approverInfo.userId,
             approvalLevel: approverInfo.level || 'manager',
             approvedAt: new Date(),
-            comments: approverInfo.comments
+            comments: approverInfo.comments,
           });
 
           // التحقق من الموافقات المطلوبة
           const requiredApprovals = this.getRequiredApprovals(payroll.tier || 'standard');
-          
+
           if (payroll.approvals.length >= requiredApprovals) {
             payroll.status = 'approved';
             payroll.approvedAt = new Date();
@@ -167,14 +169,14 @@ class BatchOperationsService {
           results.approved.push({
             payrollId,
             status: payroll.status,
-            approvalCount: payroll.approvals.length
+            approvalCount: payroll.approvals.length,
           });
 
           results.summary.approved++;
         } catch (error) {
           results.failed.push({
             payrollId,
-            error: error.message
+            error: 'حدث خطأ داخلي',
           });
           results.summary.failed++;
         }
@@ -182,7 +184,7 @@ class BatchOperationsService {
 
       return results;
     } catch (error) {
-      throw new Error('خطأ في الموافقة الجماعية: ' + error.message);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -201,8 +203,8 @@ class BatchOperationsService {
         bankFees: 0,
         netAmount: 0,
         transferDate: new Date(),
-        referenceNumber: this.generateReferenceNumber()
-      }
+        referenceNumber: this.generateReferenceNumber(),
+      },
     };
 
     try {
@@ -213,7 +215,7 @@ class BatchOperationsService {
           if (!payroll) {
             results.pending.push({
               payrollId,
-              reason: 'لم يتم العثور على السجل'
+              reason: 'لم يتم العثور على السجل',
             });
             continue;
           }
@@ -221,7 +223,7 @@ class BatchOperationsService {
           if (payroll.status !== 'approved') {
             results.pending.push({
               payrollId,
-              reason: 'الراتب لم يتم الموافقة عليه بعد'
+              reason: 'الراتب لم يتم الموافقة عليه بعد',
             });
             continue;
           }
@@ -234,7 +236,7 @@ class BatchOperationsService {
             transferDate: results.summary.transferDate,
             status: 'initiated',
             bankCode: transferInfo.bankCode,
-            accountNumber: transferInfo.accountNumber?.slice(-4) // حفظ آخر 4 أرقام فقط
+            accountNumber: transferInfo.accountNumber?.slice(-4), // حفظ آخر 4 أرقام فقط
           };
 
           payroll.status = 'transferred';
@@ -247,7 +249,7 @@ class BatchOperationsService {
             payrollId,
             amount: payroll.netSalary,
             bankFee: payroll.transfer.bankFee,
-            employeeId: payroll.employeeId
+            employeeId: payroll.employeeId,
           });
 
           results.summary.amount += payroll.netSalary;
@@ -255,7 +257,7 @@ class BatchOperationsService {
         } catch (error) {
           results.failed.push({
             payrollId,
-            error: error.message
+            error: 'حدث خطأ داخلي',
           });
         }
       }
@@ -264,7 +266,7 @@ class BatchOperationsService {
 
       return results;
     } catch (error) {
-      throw new Error('خطأ في تحويل الدفع الجماعي: ' + error.message);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -281,7 +283,7 @@ class BatchOperationsService {
       'transferred',
       'paid',
       'rejected',
-      'cancelled'
+      'cancelled',
     ];
 
     if (!validStatuses.includes(newStatus)) {
@@ -294,8 +296,8 @@ class BatchOperationsService {
       summary: {
         total: payrollIds.length,
         updated: 0,
-        failed: 0
-      }
+        failed: 0,
+      },
     };
 
     try {
@@ -304,7 +306,7 @@ class BatchOperationsService {
         {
           status: newStatus,
           updatedAt: new Date(),
-          updatedBy
+          updatedBy,
         }
       );
 
@@ -313,7 +315,7 @@ class BatchOperationsService {
 
       return results;
     } catch (error) {
-      throw new Error('خطأ في تحديث الحالات: ' + error.message);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -322,12 +324,7 @@ class BatchOperationsService {
    * Schedule recurring operations
    */
   async scheduleRecurringOperation(config) {
-    const validOperations = [
-      'monthlyPayroll',
-      'quarterlyBonus',
-      'annualIncrement',
-      'leaveAccrual'
-    ];
+    const validOperations = ['monthlyPayroll', 'quarterlyBonus', 'annualIncrement', 'leaveAccrual'];
 
     if (!validOperations.includes(config.operationType)) {
       throw new Error(`نوع العملية غير معروف: ${config.operationType}`);
@@ -343,15 +340,15 @@ class BatchOperationsService {
         createdAt: new Date(),
         createdBy: config.userId,
         _id: this.generateScheduleId(),
-        history: []
+        history: [],
       };
 
       // حفظ في قاعدة البيانات أو في ذاكرة التخزين المؤقت
       // يمكن عمل مجموعة منفصلة للجداول
-      
+
       return schedule;
     } catch (error) {
-      throw new Error('خطأ في جدولة العملية: ' + error.message);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -363,7 +360,7 @@ class BatchOperationsService {
     try {
       // يمكن استرجاع من قاعدة البيانات
       // أو من خدمة تخزين الحالة المؤقتة
-      
+
       return {
         batchId,
         status: 'processing',
@@ -373,10 +370,10 @@ class BatchOperationsService {
         failedItems: 2,
         message: 'جارٍ المعالجة...',
         startedAt: new Date(Date.now() - 5 * 60000),
-        estimatedCompletionTime: new Date(Date.now() + 10 * 60000)
+        estimatedCompletionTime: new Date(Date.now() + 10 * 60000),
       };
     } catch (error) {
-      throw new Error('خطأ في استرجاع حالة العملية: ' + error.message);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -392,10 +389,10 @@ class BatchOperationsService {
         cancelledAt: new Date(),
         reason,
         itemsAffected: 45,
-        message: 'تم إلغاء العملية بنجاح'
+        message: 'تم إلغاء العملية بنجاح',
       };
     } catch (error) {
-      throw new Error('خطأ في إلغاء العملية: ' + error.message);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -409,7 +406,7 @@ class BatchOperationsService {
       standard: 1,
       management: 2,
       senior: 3,
-      executive: 4
+      executive: 4,
     };
     return approvalMap[tier] || 2;
   }
@@ -432,7 +429,7 @@ class BatchOperationsService {
     let retryCount = 0;
     const retryResults = {
       recovered: [],
-      stillFailed: results.failed || []
+      stillFailed: results.failed || [],
     };
 
     for (const failedItem of results.failed || []) {
@@ -442,7 +439,7 @@ class BatchOperationsService {
           // يمكن إضافة منطق إعادة المحاولة هنا
           retryCount++;
         } catch (error) {
-          // لا تزال تفشل
+          logger.warn('Batch retry failed for item:', error.message);
         }
       }
     }
@@ -463,13 +460,13 @@ class BatchOperationsService {
       }
       return JSON.stringify(results, null, 2);
     } catch (error) {
-      throw new Error('خطأ في تصدير النتائج: ' + error.message);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
   convertToCSV(results) {
     let csv = 'الحالة,المعرف,الموظف,المبلغ,التاريخ\n';
-    
+
     for (const item of results.success || []) {
       csv += `نجح,${item.payrollId},${item.employeeId},${item.netSalary},${new Date().toLocaleDateString('ar-SA')}\n`;
     }
@@ -487,11 +484,9 @@ class BatchOperationsService {
       sheets: [
         {
           name: 'النتائج',
-          rows: [
-            ['الحالة', 'المعرف', 'الموظف', 'المبلغ', 'التاريخ']
-          ]
-        }
-      ]
+          rows: [['الحالة', 'المعرف', 'الموظف', 'المبلغ', 'التاريخ']],
+        },
+      ],
     };
 
     return workbook;

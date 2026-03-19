@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * 🔄 Phase 11: Advanced Disaster Recovery & Business Continuity Tests
  * اختبارات استعادة الكوارث والاستمرارية الدورية

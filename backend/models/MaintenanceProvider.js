@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Maintenance Provider Model - نموذج مراكز ومزودي الصيانة
  *
@@ -74,14 +75,7 @@ const MaintenanceProviderSchema = new Schema(
         description: String,
         category: {
           type: String,
-          enum: [
-            'روتينية',
-            'وقائية',
-            'تصحيحية',
-            'متخصصة',
-            'فحص',
-            'استبدال',
-          ],
+          enum: ['روتينية', 'وقائية', 'تصحيحية', 'متخصصة', 'فحص', 'استبدال'],
         },
         availability: Boolean,
       },
@@ -288,10 +282,7 @@ MaintenanceProviderSchema.index({ 'credentials.licenseExpiryDate': 1 });
 MaintenanceProviderSchema.virtual('completionRate').get(function () {
   if (this.performance.totalServices > 0) {
     return (
-      (
-        (this.performance.completedServices / this.performance.totalServices) *
-        100
-      ).toFixed(2) + '%'
+      ((this.performance.completedServices / this.performance.totalServices) * 100).toFixed(2) + '%'
     );
   }
   return '0%';

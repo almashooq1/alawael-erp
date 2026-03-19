@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Intelligent Workflow Module Index
  * فهرس وحدة سير العمل الذكي
@@ -16,16 +17,16 @@ const workflowRoutes = require('./workflow-routes');
 module.exports = {
   // Engine
   IntelligentWorkflowEngine,
-  
+
   // Models
   WorkflowDefinition,
   WorkflowInstance,
   TaskInstance,
   WorkflowAuditLog,
-  
+
   // Routes
   workflowRoutes,
-  
+
   // Step Types
   stepTypes: {
     start: { name: 'بداية', nameEn: 'Start' },
@@ -38,7 +39,7 @@ module.exports = {
     subprocess: { name: 'عملية فرعية', nameEn: 'Subprocess' },
     integration: { name: 'تكامل', nameEn: 'Integration' },
   },
-  
+
   // Categories
   categories: {
     approval: { name: 'موافقات', nameEn: 'Approval' },
@@ -48,7 +49,7 @@ module.exports = {
     project: { name: 'مشاريع', nameEn: 'Project' },
     custom: { name: 'مخصص', nameEn: 'Custom' },
   },
-  
+
   // Task Statuses
   taskStatuses: {
     pending: { name: 'قيد الانتظار', color: '#9CA3AF' },
@@ -59,7 +60,7 @@ module.exports = {
     skipped: { name: 'تم تخطيه', color: '#6B7280' },
     error: { name: 'خطأ', color: '#DC2626' },
   },
-  
+
   // Workflow Statuses
   workflowStatuses: {
     running: { name: 'قيد التشغيل', color: '#3B82F6' },
@@ -68,7 +69,7 @@ module.exports = {
     error: { name: 'خطأ', color: '#DC2626' },
     suspended: { name: 'معلق', color: '#F59E0B' },
   },
-  
+
   // Assignment Types
   assignmentTypes: {
     user: { name: 'مستخدم محدد', nameEn: 'Specific User' },

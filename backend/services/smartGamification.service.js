@@ -1,5 +1,7 @@
+/* eslint-disable no-unused-vars */
 const { Badge, BeneficiaryWallet } = require('../models/Gamification');
 const SmartNotificationService = require('./smartNotificationService');
+const logger = require('../utils/logger');
 
 class SmartGamificationService {
   /**
@@ -31,7 +33,7 @@ class SmartGamificationService {
           pointsValue: 150,
         },
       ]);
-      console.log('Gamification Badges Seeded');
+      logger.info('Gamification Badges Seeded');
     }
   }
 

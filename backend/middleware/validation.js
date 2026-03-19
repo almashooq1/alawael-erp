@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * ✅ Validation Middleware - التحقق من صحة المدخلات
  * نظام ERP الألوائل - إصدار احترافي
@@ -17,8 +18,8 @@ const handleValidationErrors = (req, res, next) => {
       errors: errors.array().map(err => ({
         field: err.path,
         message: err.msg,
-        value: err.value
-      }))
+        value: err.value,
+      })),
     });
   }
   next();
@@ -62,16 +63,14 @@ const validateRegistration = [
     .matches(/^(\+966|0)?5\d{8}$/)
     .withMessage('رقم الجوال غير صالح'),
 
-  handleValidationErrors
+  handleValidationErrors,
 ];
 
 /**
  * التحقق من تغيير كلمة المرور
  */
 const validatePasswordChange = [
-  body('currentPassword')
-    .notEmpty()
-    .withMessage('كلمة المرور الحالية مطلوبة'),
+  body('currentPassword').notEmpty().withMessage('كلمة المرور الحالية مطلوبة'),
 
   body('newPassword')
     .isLength({ min: 8 })
@@ -98,67 +97,50 @@ const validatePasswordChange = [
       return true;
     }),
 
-  handleValidationErrors
+  handleValidationErrors,
 ];
 
 /**
  * التحقق من تسجيل الدخول
  */
 const validateLogin = [
-  body('email')
-    .isEmail()
-    .withMessage('يرجى إدخال بريد إلكتروني صالح')
-    .normalizeEmail(),
+  body('email').isEmail().withMessage('يرجى إدخال بريد إلكتروني صالح').normalizeEmail(),
 
-  body('password')
-    .notEmpty()
-    .withMessage('كلمة المرور مطلوبة'),
+  body('password').notEmpty().withMessage('كلمة المرور مطلوبة'),
 
-  handleValidationErrors
+  handleValidationErrors,
 ];
 
 /**
  * التحقق من معرف MongoDB
  */
 const validateObjectId = (paramName = 'id') => [
-  param(paramName)
-    .isMongoId()
-    .withMessage(`معرف ${paramName} غير صالح`),
+  param(paramName).isMongoId().withMessage(`معرف ${paramName} غير صالح`),
 
-  handleValidationErrors
+  handleValidationErrors,
 ];
 
 /**
  * التحقق من الترقيم
  */
 const validatePagination = [
-  query('page')
-    .optional()
-    .isInt({ min: 1 })
-    .withMessage('رقم الصفحة يجب أن يكون رقماً موجباً'),
+  query('page').optional().isInt({ min: 1 }).withMessage('رقم الصفحة يجب أن يكون رقماً موجباً'),
 
-  query('limit')
-    .optional()
-    .isInt({ min: 1, max: 100 })
-    .withMessage('الحد يجب أن يكون بين 1 و 100'),
+  query('limit').optional().isInt({ min: 1, max: 100 }).withMessage('الحد يجب أن يكون بين 1 و 100'),
 
   query('sort')
     .optional()
     .matches(/^-?[a-zA-Z_,]+$/)
     .withMessage('حقل الترتيب غير صالح'),
 
-  handleValidationErrors
+  handleValidationErrors,
 ];
 
 /**
  * التحقق من التواريخ
  */
 const validateDateRange = [
-  query('startDate')
-    .optional()
-    .isISO8601()
-    .withMessage('تاريخ البداية غير صالح')
-    .toDate(),
+  query('startDate').optional().isISO8601().withMessage('تاريخ البداية غير صالح').toDate(),
 
   query('endDate')
     .optional()
@@ -172,7 +154,7 @@ const validateDateRange = [
       return true;
     }),
 
-  handleValidationErrors
+  handleValidationErrors,
 ];
 
 /**
@@ -181,14 +163,14 @@ const validateDateRange = [
 const validateFileUpload = (options = {}) => {
   const {
     maxSize = 10 * 1024 * 1024, // 10MB
-    allowedTypes = ['image/jpeg', 'image/png', 'application/pdf']
+    allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'],
   } = options;
 
   return (req, res, next) => {
     if (!req.file && !req.files) {
       return res.status(400).json({
         success: false,
-        message: 'لم يتم رفع أي ملف'
+        message: 'لم يتم رفع أي ملف',
       });
     }
 
@@ -199,7 +181,7 @@ const validateFileUpload = (options = {}) => {
       if (file.size > maxSize) {
         return res.status(400).json({
           success: false,
-          message: `حجم الملف يتجاوز الحد المسموح (${maxSize / 1024 / 1024} MB)`
+          message: `حجم الملف يتجاوز الحد المسموح (${maxSize / 1024 / 1024} MB)`,
         });
       }
 
@@ -207,7 +189,7 @@ const validateFileUpload = (options = {}) => {
       if (!allowedTypes.includes(file.mimetype)) {
         return res.status(400).json({
           success: false,
-          message: `نوع الملف غير مسموح: ${file.mimetype}`
+          message: `نوع الملف غير مسموح: ${file.mimetype}`,
         });
       }
     }
@@ -221,7 +203,7 @@ const validateFileUpload = (options = {}) => {
  */
 const sanitizeInput = (req, res, next) => {
   // تنظيف النصوص من HTML
-  const sanitizeValue = (value) => {
+  const sanitizeValue = value => {
     if (typeof value === 'string') {
       return value
         .replace(/</g, '<')
@@ -258,10 +240,22 @@ const sanitizeInput = (req, res, next) => {
  * منع حقن NoSQL
  */
 const preventNoSQLInjection = (req, res, next) => {
-  const checkForInjection = (obj) => {
+  const checkForInjection = obj => {
     if (!obj || typeof obj !== 'object') return false;
 
-    const dangerousKeys = ['$gt', '$lt', '$gte', '$lte', '$ne', '$in', '$nin', '$or', '$and', '$regex', '$where'];
+    const dangerousKeys = [
+      '$gt',
+      '$lt',
+      '$gte',
+      '$lte',
+      '$ne',
+      '$in',
+      '$nin',
+      '$or',
+      '$and',
+      '$regex',
+      '$where',
+    ];
 
     for (const key of Object.keys(obj)) {
       if (dangerousKeys.includes(key)) {
@@ -277,7 +271,7 @@ const preventNoSQLInjection = (req, res, next) => {
   if (checkForInjection(req.body) || checkForInjection(req.query)) {
     return res.status(400).json({
       success: false,
-      message: 'تم اكتشاف محاولة حقن غير صالحة'
+      message: 'تم اكتشاف محاولة حقن غير صالحة',
     });
   }
 
@@ -291,11 +285,11 @@ const passwordPolicy = {
   requireUppercase: true,
   requireLowercase: true,
   requireNumbers: true,
-  requireSpecialChars: true
+  requireSpecialChars: true,
 };
 
 // Backward compatibility functions
-const validatePassword = (password) => {
+const validatePassword = password => {
   const result = { valid: true, errors: [] };
 
   // Handle null/undefined
@@ -325,7 +319,7 @@ const validatePassword = (password) => {
     result.errors.push('كلمة المرور يجب أن تحتوي على رقم');
     result.valid = false;
   }
-  if (passwordPolicy.requireSpecialChars && !/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+  if (passwordPolicy.requireSpecialChars && !/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)) {
     result.errors.push('كلمة المرور يجب أن تحتوي على حرف خاص');
     result.valid = false;
   }
@@ -333,34 +327,34 @@ const validatePassword = (password) => {
   return result;
 };
 
-const validateEmail = (email) => {
+const validateEmail = email => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return {
     valid: emailRegex.test(email),
-    errors: emailRegex.test(email) ? [] : ['البريد الإلكتروني غير صالح']
+    errors: emailRegex.test(email) ? [] : ['البريد الإلكتروني غير صالح'],
   };
 };
 
-const validateFullName = (name) => {
+const validateFullName = name => {
   return {
     valid: name && name.length >= 2 && name.length <= 100,
-    errors: (!name || name.length < 2) ? ['الاسم يجب أن يكون حرفين على الأقل'] : []
+    errors: !name || name.length < 2 ? ['الاسم يجب أن يكون حرفين على الأقل'] : [],
   };
 };
 
-const validatePhone = (phone) => {
+const validatePhone = phone => {
   const phoneRegex = /^(\+966|0)?5\d{8}$/;
   return {
     valid: phoneRegex.test(phone),
-    errors: phoneRegex.test(phone) ? [] : ['رقم الجوال غير صالح']
+    errors: phoneRegex.test(phone) ? [] : ['رقم الجوال غير صالح'],
   };
 };
 
-const validateNationalId = (nationalId) => {
+const validateNationalId = nationalId => {
   const idRegex = /^[12]\d{9}$/;
   return {
     valid: idRegex.test(nationalId),
-    errors: idRegex.test(nationalId) ? [] : ['رقم الهوية غير صالح']
+    errors: idRegex.test(nationalId) ? [] : ['رقم الهوية غير صالح'],
   };
 };
 
@@ -374,11 +368,7 @@ const validateProfileUpdate = [
     .withMessage('الاسم يجب أن يكون بين 2 و 100 حرف')
     .trim(),
 
-  body('email')
-    .optional()
-    .isEmail()
-    .withMessage('يرجى إدخال بريد إلكتروني صالح')
-    .normalizeEmail(),
+  body('email').optional().isEmail().withMessage('يرجى إدخال بريد إلكتروني صالح').normalizeEmail(),
 
   body('phone')
     .optional()
@@ -390,7 +380,7 @@ const validateProfileUpdate = [
     .isIn(['user', 'admin', 'manager', 'employee', 'hr', 'accountant'])
     .withMessage('الدور غير صالح'),
 
-  handleValidationErrors
+  handleValidationErrors,
 ];
 
 module.exports = {
@@ -412,5 +402,5 @@ module.exports = {
   validateEmail,
   validateFullName,
   validatePhone,
-  validateNationalId
+  validateNationalId,
 };

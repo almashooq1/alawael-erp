@@ -107,13 +107,16 @@ const logger = winston.createLogger({
 
 /**
  * Middleware لـ logging الطلبات والاستجابات
+ * Includes requestId from req.id for end-to-end tracing
  */
 const requestLoggingMiddleware = (req, res, next) => {
   const startTime = Date.now();
   const originalSend = res.send;
+  const requestId = req.id || undefined;
 
   // تسجيل بيانات الطلب
   const requestLog = {
+    requestId,
     method: req.method,
     path: req.path,
     query: Object.keys(req.query).length > 0 ? req.query : undefined,
@@ -129,6 +132,7 @@ const requestLoggingMiddleware = (req, res, next) => {
     const duration = Date.now() - startTime;
 
     const responseLog = {
+      requestId,
       method: req.method,
       path: req.path,
       statusCode: res.statusCode,
@@ -215,6 +219,60 @@ const logDatabaseOperation = (operation, collection, duration, success = true) =
 const getLogger = () => logger;
 
 /**
+ * Create a child logger with a bound requestId for scoped tracing.
+ * Usage: const log = createChildLogger(req.id);
+ *        log.info('Something happened');
+ */
+const createChildLogger = requestId => {
+  if (!requestId) return logger;
+  return logger.child({ requestId });
+};
+
+/**
+ * Sensitive-field sanitizer.
+ * Strips passwords, tokens, secrets, and credit card numbers from log metadata.
+ * Use before passing user-supplied data to any log call.
+ */
+const SENSITIVE_KEYS = new Set([
+  'password',
+  'passwordHash',
+  'newPassword',
+  'oldPassword',
+  'confirmPassword',
+  'token',
+  'accessToken',
+  'refreshToken',
+  'resetToken',
+  'apiKey',
+  'apiSecret',
+  'secret',
+  'authorization',
+  'cookie',
+  'creditCard',
+  'cardNumber',
+  'cvv',
+  'ssn',
+]);
+
+const sanitizeLogData = (data, depth = 0) => {
+  if (depth > 5 || data === null || data === undefined) return data;
+  if (typeof data !== 'object') return data;
+  if (Array.isArray(data)) return data.map(item => sanitizeLogData(item, depth + 1));
+
+  const sanitized = {};
+  for (const [key, value] of Object.entries(data)) {
+    if (SENSITIVE_KEYS.has(key.toLowerCase ? key.toLowerCase() : key)) {
+      sanitized[key] = '[REDACTED]';
+    } else if (typeof value === 'object' && value !== null) {
+      sanitized[key] = sanitizeLogData(value, depth + 1);
+    } else {
+      sanitized[key] = value;
+    }
+  }
+  return sanitized;
+};
+
+/**
  * تنظيف logs القديمة
  */
 const cleanupOldLogs = (daysToKeep = 7) => {
@@ -234,6 +292,8 @@ const cleanupOldLogs = (daysToKeep = 7) => {
 module.exports = {
   logger,
   getLogger,
+  createChildLogger,
+  sanitizeLogData,
   requestLoggingMiddleware,
   logError,
   logPerformance,

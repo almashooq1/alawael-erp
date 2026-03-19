@@ -1,4 +1,5 @@
-import api from '../utils/api';
+import api from './api.client';
+import logger from 'utils/logger';
 
 /**
  * خدمة التقارير الذكية
@@ -18,11 +19,9 @@ const smartReportsService = {
    */
   getComprehensiveReport: async (filters = {}) => {
     try {
-      const response = await api.post('/reports/comprehensive', filters);
-      const data = await response.json();
-      return data;
+      return api.post('/reports/comprehensive', filters);
     } catch (error) {
-      console.error('Error fetching comprehensive report:', error);
+      logger.error('Error fetching comprehensive report:', error);
       throw error;
     }
   },
@@ -37,14 +36,12 @@ const smartReportsService = {
    */
   getPerformanceAnalysis: async (period = 'monthly', filters = {}) => {
     try {
-      const response = await api.post('/reports/performance', {
+      return api.post('/reports/performance', {
         period,
         ...filters,
       });
-      const data = await response.json();
-      return data;
     } catch (error) {
-      console.error('Error fetching performance analysis:', error);
+      logger.error('Error fetching performance analysis:', error);
       throw error;
     }
   },
@@ -59,13 +56,11 @@ const smartReportsService = {
    */
   getTrendAnalysis: async (metric, days = 30) => {
     try {
-      const response = await api.get('/reports/trends', {
+      return api.get('/reports/trends', {
         params: { metric, days },
       });
-      const data = await response.json();
-      return data;
     } catch (error) {
-      console.error('Error fetching trend analysis:', error);
+      logger.error('Error fetching trend analysis:', error);
       throw error;
     }
   },
@@ -80,14 +75,12 @@ const smartReportsService = {
    */
   getComparativeReport: async (periods, metrics) => {
     try {
-      const response = await api.post('/reports/comparative', {
+      return api.post('/reports/comparative', {
         periods,
         metrics,
       });
-      const data = await response.json();
-      return data;
     } catch (error) {
-      console.error('Error fetching comparative report:', error);
+      logger.error('Error fetching comparative report:', error);
       throw error;
     }
   },
@@ -102,11 +95,9 @@ const smartReportsService = {
    */
   getDetailedReport: async (type, filters = {}) => {
     try {
-      const response = await api.post(`/reports/${type}/detailed`, filters);
-      const data = await response.json();
-      return data;
+      return api.post(`/reports/${type}/detailed`, filters);
     } catch (error) {
-      console.error(`Error fetching ${type} detailed report:`, error);
+      logger.error(`Error fetching ${type} detailed report:`, error);
       throw error;
     }
   },
@@ -120,11 +111,9 @@ const smartReportsService = {
    */
   getRecommendations: async data => {
     try {
-      const response = await api.post('/reports/recommendations', data);
-      const result = await response.json();
-      return result;
+      return api.post('/reports/recommendations', data);
     } catch (error) {
-      console.error('Error fetching recommendations:', error);
+      logger.error('Error fetching recommendations:', error);
       throw error;
     }
   },
@@ -138,11 +127,9 @@ const smartReportsService = {
    */
   getExecutiveSummary: async (filters = {}) => {
     try {
-      const response = await api.post('/reports/executive-summary', filters);
-      const data = await response.json();
-      return data;
+      return api.post('/reports/executive-summary', filters);
     } catch (error) {
-      console.error('Error fetching executive summary:', error);
+      logger.error('Error fetching executive summary:', error);
       throw error;
     }
   },
@@ -156,11 +143,9 @@ const smartReportsService = {
    */
   getKPIs: async (filters = {}) => {
     try {
-      const response = await api.post('/reports/kpis', filters);
-      const data = await response.json();
-      return data;
+      return api.post('/reports/kpis', filters);
     } catch (error) {
-      console.error('Error fetching KPIs:', error);
+      logger.error('Error fetching KPIs:', error);
       throw error;
     }
   },
@@ -174,11 +159,9 @@ const smartReportsService = {
    */
   getSWOTAnalysis: async (filters = {}) => {
     try {
-      const response = await api.post('/reports/swot', filters);
-      const data = await response.json();
-      return data;
+      return api.post('/reports/swot', filters);
     } catch (error) {
-      console.error('Error fetching SWOT analysis:', error);
+      logger.error('Error fetching SWOT analysis:', error);
       throw error;
     }
   },
@@ -193,13 +176,11 @@ const smartReportsService = {
    */
   getForecasts: async (metric, days = 30) => {
     try {
-      const response = await api.get('/reports/forecasts', {
+      return api.get('/reports/forecasts', {
         params: { metric, days },
       });
-      const data = await response.json();
-      return data;
     } catch (error) {
-      console.error('Error fetching forecasts:', error);
+      logger.error('Error fetching forecasts:', error);
       throw error;
     }
   },
@@ -213,11 +194,9 @@ const smartReportsService = {
    */
   getAnomalies: async (filters = {}) => {
     try {
-      const response = await api.post('/reports/anomalies', filters);
-      const data = await response.json();
-      return data;
+      return api.post('/reports/anomalies', filters);
     } catch (error) {
-      console.error('Error fetching anomalies:', error);
+      logger.error('Error fetching anomalies:', error);
       throw error;
     }
   },
@@ -231,11 +210,9 @@ const smartReportsService = {
    */
   saveCustomReport: async reportData => {
     try {
-      const response = await api.post('/reports/custom/save', reportData);
-      const data = await response.json();
-      return data;
+      return api.post('/reports/custom/save', reportData);
     } catch (error) {
-      console.error('Error saving custom report:', error);
+      logger.error('Error saving custom report:', error);
       throw error;
     }
   },
@@ -249,11 +226,9 @@ const smartReportsService = {
    */
   getSavedReports: async (filters = {}) => {
     try {
-      const response = await api.post('/reports/custom/list', filters);
-      const data = await response.json();
-      return data;
+      return api.post('/reports/custom/list', filters);
     } catch (error) {
-      console.error('Error fetching saved reports:', error);
+      logger.error('Error fetching saved reports:', error);
       throw error;
     }
   },
@@ -267,11 +242,9 @@ const smartReportsService = {
    */
   getSavedReport: async reportId => {
     try {
-      const response = await api.get(`/reports/custom/${reportId}`);
-      const data = await response.json();
-      return data;
+      return api.get(`/reports/custom/${reportId}`);
     } catch (error) {
-      console.error(`Error fetching saved report ${reportId}:`, error);
+      logger.error(`Error fetching saved report ${reportId}:`, error);
       throw error;
     }
   },
@@ -285,11 +258,9 @@ const smartReportsService = {
    */
   deleteSavedReport: async reportId => {
     try {
-      const response = await api.delete(`/reports/custom/${reportId}`);
-      const data = await response.json();
-      return data;
+      return api.delete(`/reports/custom/${reportId}`);
     } catch (error) {
-      console.error(`Error deleting saved report ${reportId}:`, error);
+      logger.error(`Error deleting saved report ${reportId}:`, error);
       throw error;
     }
   },
@@ -303,11 +274,9 @@ const smartReportsService = {
    */
   scheduleReport: async scheduleData => {
     try {
-      const response = await api.post('/reports/schedule', scheduleData);
-      const data = await response.json();
-      return data;
+      return api.post('/reports/schedule', scheduleData);
     } catch (error) {
-      console.error('Error scheduling report:', error);
+      logger.error('Error scheduling report:', error);
       throw error;
     }
   },
@@ -321,11 +290,9 @@ const smartReportsService = {
    */
   sendReportEmail: async emailData => {
     try {
-      const response = await api.post('/reports/send-email', emailData);
-      const data = await response.json();
-      return data;
+      return api.post('/reports/send-email', emailData);
     } catch (error) {
-      console.error('Error sending report email:', error);
+      logger.error('Error sending report email:', error);
       throw error;
     }
   },
@@ -339,11 +306,9 @@ const smartReportsService = {
    */
   getTemplate: async templateId => {
     try {
-      const response = await api.get(`/reports/templates/${templateId}`);
-      const data = await response.json();
-      return data;
+      return api.get(`/reports/templates/${templateId}`);
     } catch (error) {
-      console.error(`Error fetching template ${templateId}:`, error);
+      logger.error(`Error fetching template ${templateId}:`, error);
       throw error;
     }
   },
@@ -356,11 +321,9 @@ const smartReportsService = {
    */
   getAvailableReports: async () => {
     try {
-      const response = await api.get('/reports/available');
-      const data = await response.json();
-      return data;
+      return api.get('/reports/available');
     } catch (error) {
-      console.error('Error fetching available reports:', error);
+      logger.error('Error fetching available reports:', error);
       throw error;
     }
   },
@@ -375,14 +338,12 @@ const smartReportsService = {
    */
   analyzeData: async (data, options = {}) => {
     try {
-      const response = await api.post('/reports/analyze', {
+      return api.post('/reports/analyze', {
         data,
         ...options,
       });
-      const result = await response.json();
-      return result;
     } catch (error) {
-      console.error('Error analyzing data:', error);
+      logger.error('Error analyzing data:', error);
       throw error;
     }
   },

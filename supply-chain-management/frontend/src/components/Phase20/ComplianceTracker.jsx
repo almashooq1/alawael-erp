@@ -14,11 +14,11 @@ const ComplianceTracker = () => {
     name: '',
     framework: 'ISO27001',
     requirement: '',
-    owner: ''
+    owner: '',
   });
   const [evidenceForm, setEvidenceForm] = useState({
     document: '',
-    description: ''
+    description: '',
   });
 
   const frameworks = [
@@ -26,7 +26,7 @@ const ComplianceTracker = () => {
     { value: 'GDPR', label: '📋 GDPR - Data Protection' },
     { value: 'HIPAA', label: '🏥 HIPAA - Healthcare' },
     { value: 'PCI-DSS', label: '💳 PCI-DSS - Payment Security' },
-    { value: 'SOX', label: '📊 SOX - Financial Reporting' }
+    { value: 'SOX', label: '📊 SOX - Financial Reporting' },
   ];
 
   const handleCreateControl = async () => {
@@ -39,7 +39,7 @@ const ComplianceTracker = () => {
       const response = await fetch('/api/v1/risk-management/compliance-controls', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newControl)
+        body: JSON.stringify(newControl),
       });
 
       if (response.ok) {
@@ -49,7 +49,7 @@ const ComplianceTracker = () => {
           name: '',
           framework: 'ISO27001',
           requirement: '',
-          owner: ''
+          owner: '',
         });
         setShowForm(false);
         alert('Compliance control created!');
@@ -71,7 +71,7 @@ const ComplianceTracker = () => {
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(evidenceForm)
+          body: JSON.stringify(evidenceForm),
         }
       );
 
@@ -91,14 +91,12 @@ const ComplianceTracker = () => {
         {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status: newStatus })
+          body: JSON.stringify({ status: newStatus }),
         }
       );
 
       if (response.ok) {
-        const updated = controls.map(c =>
-          c.id === controlId ? {...c, status: newStatus} : c
-        );
+        const updated = controls.map(c => (c.id === controlId ? { ...c, status: newStatus } : c));
         setControls(updated);
       }
     } catch (error) {
@@ -106,18 +104,18 @@ const ComplianceTracker = () => {
     }
   };
 
-  const getStatusColor = (status) => {
+  const getStatusColor = status => {
     const colors = {
       planned: '#3b82f6',
       implemented: '#f59e0b',
       compliant: '#10b981',
       non_compliant: '#ef4444',
-      partial: '#8b5cf6'
+      partial: '#8b5cf6',
     };
     return colors[status] || '#6b7280';
   };
 
-  const getFrameworkLabel = (framework) => {
+  const getFrameworkLabel = framework => {
     return frameworks.find(f => f.value === framework)?.label || framework;
   };
 
@@ -125,10 +123,7 @@ const ComplianceTracker = () => {
     <div className="compliance-tracker">
       <div className="header">
         <h1>✅ Compliance Management</h1>
-        <button 
-          className="btn-primary"
-          onClick={() => setShowForm(!showForm)}
-        >
+        <button className="btn-primary" onClick={() => setShowForm(!showForm)}>
           {showForm ? '✕ Cancel' : '+ New Control'}
         </button>
       </div>
@@ -142,7 +137,7 @@ const ComplianceTracker = () => {
               type="text"
               placeholder="e.g., Data Encryption"
               value={newControl.name}
-              onChange={(e) => setNewControl({...newControl, name: e.target.value})}
+              onChange={e => setNewControl({ ...newControl, name: e.target.value })}
             />
           </div>
 
@@ -151,10 +146,12 @@ const ComplianceTracker = () => {
               <label>Framework *</label>
               <select
                 value={newControl.framework}
-                onChange={(e) => setNewControl({...newControl, framework: e.target.value})}
+                onChange={e => setNewControl({ ...newControl, framework: e.target.value })}
               >
                 {frameworks.map(f => (
-                  <option key={f.value} value={f.value}>{f.label}</option>
+                  <option key={f.value} value={f.value}>
+                    {f.label}
+                  </option>
                 ))}
               </select>
             </div>
@@ -165,7 +162,7 @@ const ComplianceTracker = () => {
                 type="text"
                 placeholder="Department or person"
                 value={newControl.owner}
-                onChange={(e) => setNewControl({...newControl, owner: e.target.value})}
+                onChange={e => setNewControl({ ...newControl, owner: e.target.value })}
               />
             </div>
           </div>
@@ -176,7 +173,7 @@ const ComplianceTracker = () => {
               placeholder="Specific compliance requirement"
               rows="3"
               value={newControl.requirement}
-              onChange={(e) => setNewControl({...newControl, requirement: e.target.value})}
+              onChange={e => setNewControl({ ...newControl, requirement: e.target.value })}
             />
           </div>
 
@@ -195,14 +192,14 @@ const ComplianceTracker = () => {
         <div className="evidence-modal">
           <div className="modal-content">
             <h3>Submit Evidence: {selectedControl.name}</h3>
-            
+
             <div className="form-group">
               <label>Document/Evidence *</label>
               <input
                 type="text"
                 placeholder="Document name or reference"
                 value={evidenceForm.document}
-                onChange={(e) => setEvidenceForm({...evidenceForm, document: e.target.value})}
+                onChange={e => setEvidenceForm({ ...evidenceForm, document: e.target.value })}
               />
             </div>
 
@@ -212,7 +209,7 @@ const ComplianceTracker = () => {
                 placeholder="How this evidence meets the requirement"
                 rows="3"
                 value={evidenceForm.description}
-                onChange={(e) => setEvidenceForm({...evidenceForm, description: e.target.value})}
+                onChange={e => setEvidenceForm({ ...evidenceForm, description: e.target.value })}
               />
             </div>
 
@@ -243,7 +240,7 @@ const ComplianceTracker = () => {
                       <div key={control.id} className="control-card">
                         <div className="control-header">
                           <h4>{control.name}</h4>
-                          <div 
+                          <div
                             className="status-badge"
                             style={{ backgroundColor: getStatusColor(control.status) }}
                           >
@@ -253,16 +250,14 @@ const ComplianceTracker = () => {
 
                         <p className="requirement">{control.requirement}</p>
 
-                        {control.owner && (
-                          <div className="owner">👤 {control.owner}</div>
-                        )}
+                        {control.owner && <div className="owner">👤 {control.owner}</div>}
 
                         <div className="progress-tracker">
                           <label>Evidence Progress</label>
                           <div className="progress-bar">
-                            <div 
-                              style={{ 
-                                width: `${((control.evidenceProvided || 0) / (control.evidenceRequired || 1) * 100)}%` 
+                            <div
+                              style={{
+                                width: `${((control.evidenceProvided || 0) / (control.evidenceRequired || 1)) * 100}%`,
                               }}
                             ></div>
                           </div>
@@ -272,7 +267,7 @@ const ComplianceTracker = () => {
                         </div>
 
                         <div className="control-actions">
-                          <button 
+                          <button
                             className="btn-secondary"
                             onClick={() => setSelectedControl(control)}
                           >
@@ -281,7 +276,7 @@ const ComplianceTracker = () => {
 
                           <select
                             value={control.status || 'planned'}
-                            onChange={(e) => handleUpdateStatus(control.id, e.target.value)}
+                            onChange={e => handleUpdateStatus(control.id, e.target.value)}
                             className="status-select"
                           >
                             <option value="planned">Planned</option>

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // const Beneficiary = require('../models/Beneficiary'); // Mock
 
 class SmartArchivingService {

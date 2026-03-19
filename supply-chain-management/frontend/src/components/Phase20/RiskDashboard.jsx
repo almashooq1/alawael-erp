@@ -17,23 +17,17 @@ const RiskDashboard = () => {
     name: '',
     category: 'operational',
     description: '',
-    owner: ''
+    owner: '',
   });
 
-  const riskCategories = [
-    'operational',
-    'financial',
-    'compliance',
-    'strategic',
-    'reputational'
-  ];
+  const riskCategories = ['operational', 'financial', 'compliance', 'strategic', 'reputational'];
 
   const riskLevels = [
     { level: 'critical', color: '#dc2626', range: '20+' },
     { level: 'high', color: '#f97316', range: '12-19' },
     { level: 'medium', color: '#eab308', range: '6-11' },
     { level: 'low', color: '#22c55e', range: '3-5' },
-    { level: 'minimal', color: '#6b7280', range: '1-2' }
+    { level: 'minimal', color: '#6b7280', range: '1-2' },
   ];
 
   useEffect(() => {
@@ -78,7 +72,7 @@ const RiskDashboard = () => {
       const response = await fetch('/api/v1/risk-management/risks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newRisk)
+        body: JSON.stringify(newRisk),
       });
 
       if (response.ok) {
@@ -93,7 +87,7 @@ const RiskDashboard = () => {
     }
   };
 
-  const handleAssessRisk = async (riskId) => {
+  const handleAssessRisk = async riskId => {
     const likelihood = parseInt(prompt('Likelihood (1-5):') || '3');
     const impact = parseInt(prompt('Impact (1-5):') || '3');
 
@@ -103,7 +97,7 @@ const RiskDashboard = () => {
       const response = await fetch(`/api/v1/risk-management/risks/${riskId}/assess`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ likelihood, impact })
+        body: JSON.stringify({ likelihood, impact }),
       });
 
       if (response.ok) {
@@ -116,7 +110,7 @@ const RiskDashboard = () => {
     }
   };
 
-  const getRiskLevelColor = (score) => {
+  const getRiskLevelColor = score => {
     const numScore = parseInt(score) || 0;
     if (numScore >= 20) return '#dc2626';
     if (numScore >= 12) return '#f97316';
@@ -125,7 +119,7 @@ const RiskDashboard = () => {
     return '#6b7280';
   };
 
-  const getRiskLevelLabel = (score) => {
+  const getRiskLevelLabel = score => {
     const numScore = parseInt(score) || 0;
     if (numScore >= 20) return 'CRITICAL';
     if (numScore >= 12) return 'HIGH';
@@ -144,10 +138,7 @@ const RiskDashboard = () => {
     <div className="risk-dashboard">
       <div className="header">
         <h1>⚠️ Risk Management</h1>
-        <button 
-          className="btn-primary"
-          onClick={() => setShowForm(!showForm)}
-        >
+        <button className="btn-primary" onClick={() => setShowForm(!showForm)}>
           {showForm ? '✕ Cancel' : '+ Identify Risk'}
         </button>
       </div>
@@ -161,7 +152,7 @@ const RiskDashboard = () => {
               type="text"
               placeholder="e.g., Data Breach Risk"
               value={newRisk.name}
-              onChange={(e) => setNewRisk({...newRisk, name: e.target.value})}
+              onChange={e => setNewRisk({ ...newRisk, name: e.target.value })}
             />
           </div>
 
@@ -170,10 +161,12 @@ const RiskDashboard = () => {
               <label>Category *</label>
               <select
                 value={newRisk.category}
-                onChange={(e) => setNewRisk({...newRisk, category: e.target.value})}
+                onChange={e => setNewRisk({ ...newRisk, category: e.target.value })}
               >
                 {riskCategories.map(cat => (
-                  <option key={cat} value={cat}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</option>
+                  <option key={cat} value={cat}>
+                    {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                  </option>
                 ))}
               </select>
             </div>
@@ -184,7 +177,7 @@ const RiskDashboard = () => {
                 type="text"
                 placeholder="Department or person"
                 value={newRisk.owner}
-                onChange={(e) => setNewRisk({...newRisk, owner: e.target.value})}
+                onChange={e => setNewRisk({ ...newRisk, owner: e.target.value })}
               />
             </div>
           </div>
@@ -195,7 +188,7 @@ const RiskDashboard = () => {
               placeholder="Detailed description of the risk"
               rows="4"
               value={newRisk.description}
-              onChange={(e) => setNewRisk({...newRisk, description: e.target.value})}
+              onChange={e => setNewRisk({ ...newRisk, description: e.target.value })}
             />
           </div>
 
@@ -262,20 +255,16 @@ const RiskDashboard = () => {
       )}
 
       <div className="filters">
-        <select
-          value={filterCategory}
-          onChange={(e) => setFilterCategory(e.target.value)}
-        >
+        <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)}>
           <option value="all">All Categories</option>
           {riskCategories.map(cat => (
-            <option key={cat} value={cat}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</option>
+            <option key={cat} value={cat}>
+              {cat.charAt(0).toUpperCase() + cat.slice(1)}
+            </option>
           ))}
         </select>
 
-        <select
-          value={filterLevel}
-          onChange={(e) => setFilterLevel(e.target.value)}
-        >
+        <select value={filterLevel} onChange={e => setFilterLevel(e.target.value)}>
           <option value="all">All Risk Levels</option>
           <option value="CRITICAL">🔴 Critical</option>
           <option value="HIGH">🟠 High</option>
@@ -290,14 +279,14 @@ const RiskDashboard = () => {
         {filteredRisks.length === 0 ? (
           <p className="empty-state">No risks found in this category/level</p>
         ) : (
-          filteredRisks.map((risk) => (
+          filteredRisks.map(risk => (
             <div key={risk.id} className="risk-card">
               <div className="risk-header">
                 <div>
                   <h3>{risk.name}</h3>
                   <p className="category">{risk.category}</p>
                 </div>
-                <div 
+                <div
                   className="risk-score"
                   style={{ backgroundColor: getRiskLevelColor(risk.riskScore) }}
                 >
@@ -315,16 +304,10 @@ const RiskDashboard = () => {
               </div>
 
               <div className="risk-actions">
-                <button 
-                  className="btn-secondary"
-                  onClick={() => handleAssessRisk(risk.id)}
-                >
+                <button className="btn-secondary" onClick={() => handleAssessRisk(risk.id)}>
                   📈 Assess Risk
                 </button>
-                <button 
-                  className="btn-secondary"
-                  onClick={() => setSelectedRisk(risk)}
-                >
+                <button className="btn-secondary" onClick={() => setSelectedRisk(risk)}>
                   🛡️ Add Mitigation
                 </button>
                 <button className="btn-secondary">📋 View Details</button>
@@ -340,7 +323,9 @@ const RiskDashboard = () => {
           {riskLevels.map(item => (
             <div key={item.level} className="legend-item">
               <div style={{ backgroundColor: item.color }}></div>
-              <span>{item.level.toUpperCase()} ({item.range})</span>
+              <span>
+                {item.level.toUpperCase()} ({item.range})
+              </span>
             </div>
           ))}
         </div>

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * 🏥 System Health Visualization
  *
@@ -7,6 +8,8 @@
  * - Component health tracking
  * - Visual indicators and alerts
  */
+
+const logger = require('../utils/logger');
 
 class HealthChecker {
   constructor(options = {}) {
@@ -60,7 +63,7 @@ class HealthChecker {
     if (!check) return null;
 
     const startTime = Date.now();
-    let result = {
+    const result = {
       name,
       status: 'unknown',
       message: '',
@@ -92,7 +95,7 @@ class HealthChecker {
     } catch (error) {
       result.duration = Date.now() - startTime;
       result.status = 'unhealthy';
-      result.message = error.message;
+      result.message = 'حدث خطأ داخلي';
       result.severity = check.critical ? 'critical' : 'warning';
     }
 
@@ -113,7 +116,7 @@ class HealthChecker {
         const result = await this.runCheck(name);
         if (result) results.push(result);
       } catch (error) {
-        console.error(`[HealthChecker] Error running check ${name}:`, error);
+        logger.error(`[HealthChecker] Error running check ${name}:`, error);
       }
     }
 
@@ -284,8 +287,8 @@ class HealthChecker {
     <div class="check-item ${check.status}">
       <div class="check-title">${check.name}</div>
       <div class="check-detail">
-        Status: <strong>${check.status}</strong> | 
-        Duration: ${check.duration}ms | 
+        Status: <strong>${check.status}</strong> |
+        Duration: ${check.duration}ms |
         Message: ${check.message}
       </div>
     </div>

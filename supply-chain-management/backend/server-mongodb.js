@@ -1,5 +1,7 @@
+﻿/* eslint-disable no-unused-vars */
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
 const dotenv = require('dotenv');
 const path = require('path');
 const mongoose = require('mongoose');
@@ -13,11 +15,21 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+if (!process.env.JWT_SECRET) {
+  console.error('CRITICAL: JWT_SECRET environment variable is not set!');
+  process.exit(1);
+}
+const JWT_SECRET = process.env.JWT_SECRET;
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/supply-chain';
 
 // Middleware
-app.use(cors());
+app.use(helmet());
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : ['http://localhost:3000', 'http://localhost:5173'],
+    credentials: true,
+  }),
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -38,17 +50,17 @@ mongoose
     useUnifiedTopology: true,
   })
   .then(() => {
-    console.log('✅ MongoDB connected successfully');
+    // console.log('✅ MongoDB connected successfully');
     seedDatabase();
   })
   .catch(err => {
     console.error('❌ MongoDB connection error:', err);
-    console.log('⚠️ Running in fallback mode with in-memory data...');
+    // console.log('⚠️ Running in fallback mode with in-memory data...');
   });
 
 // Connection event listeners
 mongoose.connection.on('connected', () => {
-  console.log('Mongoose connected to MongoDB');
+  // console.log('Mongoose connected to MongoDB');
 });
 
 mongoose.connection.on('error', err => {
@@ -65,7 +77,7 @@ async function seedDatabase() {
     // Check if data already exists
     const supplierCount = await Supplier.countDocuments();
     if (supplierCount > 0) {
-      console.log('Database already seeded');
+      // console.log('Database already seeded');
       return;
     }
 
@@ -241,14 +253,14 @@ async function seedDatabase() {
       },
     ]);
 
-    console.log('✅ Database seeded successfully');
+    // console.log('✅ Database seeded successfully');
   } catch (err) {
     console.error('Error seeding database:', err);
   }
 }
 
 // Health check
-app.get('/health', (req, res) => {
+app.get('/health', (_req, res) => {
   const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
   res.json({
     status: 'ok',
@@ -264,30 +276,38 @@ app.post('/api/auth/login', async (req, res) => {
   try {
     const { username, password, email } = req.body;
 
-    // For demo: accept any user with correct password
-    const passwordMatch = password === 'Admin@123456' || password === 'admin@123456';
+    // Look up user from MongoDB
+    const User = require('./models/User');
+    const user = await User.findOne({ $or: [{ username }, { username: email }] });
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        error: 'Invalid credentials',
+      });
+    }
+
+    const passwordMatch = await bcrypt.compare(password, user.password);
 
     if (!passwordMatch) {
       return res.status(401).json({
         success: false,
         error: 'Invalid credentials',
-        message: 'Wrong password',
       });
     }
 
-    // Generate demo token
-    const token = jwt.sign({ id: '1', username: username || 'admin', role: 'admin' }, JWT_SECRET, {
-      expiresIn: '7d',
+    // Generate token
+    const token = jwt.sign({ id: user._id, username: user.username, role: user.role }, JWT_SECRET, {
+      expiresIn: '1h',
     });
 
     return res.json({
       success: true,
       token,
       user: {
-        _id: '1',
-        username: username || 'admin',
-        email: email || 'admin@alawael.com',
-        role: 'admin',
+        _id: user._id,
+        username: user.username,
+        role: user.role,
       },
     });
   } catch (err) {
@@ -295,7 +315,7 @@ app.post('/api/auth/login', async (req, res) => {
     return res.status(500).json({
       success: false,
       error: 'Server error',
-      message: err.message,
+      message: 'حدث خطأ أثناء تسجيل الدخول',
     });
   }
 });
@@ -349,7 +369,7 @@ app.post('/api/auth/register', async (req, res) => {
     return res.status(500).json({
       success: false,
       error: 'Server error',
-      message: err.message,
+      message: 'حدث خطأ أثناء إنشاء الحساب',
     });
   }
 });
@@ -384,9 +404,7 @@ app.get('/api/dashboard/stats', async (req, res) => {
     const totalSuppliers = await Supplier.countDocuments();
     const totalProducts = await Product.countDocuments();
     const totalOrders = await Order.countDocuments();
-    const totalInventory = await Inventory.aggregate([
-      { $group: { _id: null, total: { $sum: '$quantity' } } },
-    ]);
+    const totalInventory = await Inventory.aggregate([{ $group: { _id: null, total: { $sum: '$quantity' } } }]);
 
     res.json({
       success: true,
@@ -398,16 +416,14 @@ app.get('/api/dashboard/stats', async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'حدث خطأ في الخادم' });
   }
 });
 
 app.get('/api/dashboard/advanced-reports', async (req, res) => {
   try {
     // Orders by status
-    const ordersByStatus = await Order.aggregate([
-      { $group: { _id: '$status', count: { $sum: 1 } } },
-    ]);
+    const ordersByStatus = await Order.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]);
 
     // Top suppliers
     const topSuppliers = await Supplier.find().limit(5).sort({ rating: -1 });
@@ -416,9 +432,7 @@ app.get('/api/dashboard/advanced-reports', async (req, res) => {
     const recentOrders = await Order.find().limit(10).sort({ date: -1 });
 
     // Inventory status
-    const inventoryStatus = await Inventory.aggregate([
-      { $group: { _id: '$status', count: { $sum: 1 } } },
-    ]);
+    const inventoryStatus = await Inventory.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]);
 
     res.json({
       success: true,
@@ -426,9 +440,7 @@ app.get('/api/dashboard/advanced-reports', async (req, res) => {
         supplierCount: await Supplier.countDocuments(),
         productCount: await Product.countDocuments(),
         orderCount: await Order.countDocuments(),
-        totalInventory:
-          (await Inventory.aggregate([{ $group: { _id: null, total: { $sum: '$quantity' } } }]))[0]
-            ?.total || 0,
+        totalInventory: (await Inventory.aggregate([{ $group: { _id: null, total: { $sum: '$quantity' } } }]))[0]?.total || 0,
         ordersByStatus: ordersByStatus.map(item => ({
           name: item._id,
           value: item.count,
@@ -453,7 +465,7 @@ app.get('/api/dashboard/advanced-reports', async (req, res) => {
     });
   } catch (err) {
     console.error('Dashboard error:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'حدث خطأ في الخادم' });
   }
 });
 
@@ -498,7 +510,7 @@ app.post('/api/barcode/qr-code', async (req, res) => {
     });
   } catch (err) {
     console.error('QR Code error:', err);
-    res.status(500).json({ error: 'Failed to generate QR code', message: err.message });
+    res.status(500).json({ error: 'Failed to generate QR code' });
   }
 });
 
@@ -546,7 +558,7 @@ app.post('/api/barcode/barcode', async (req, res) => {
     });
   } catch (err) {
     console.error('Barcode error:', err);
-    res.status(500).json({ error: 'Failed to generate barcode', message: err.message });
+    res.status(500).json({ error: 'Failed to generate barcode' });
   }
 });
 
@@ -602,7 +614,7 @@ app.post('/api/barcode/batch', async (req, res) => {
           data: item.data,
           type: item.type,
           status: 'error',
-          error: itemErr.message,
+          error: 'Barcode generation failed',
         });
         errorCount++;
       }
@@ -629,7 +641,7 @@ app.post('/api/barcode/batch', async (req, res) => {
     });
   } catch (err) {
     console.error('Batch generation error:', err);
-    res.status(500).json({ error: 'Failed to generate batch', message: err.message });
+    res.status(500).json({ error: 'Failed to generate batch' });
   }
 });
 
@@ -663,7 +675,7 @@ app.get('/api/barcode/statistics', async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'حدث خطأ في الخادم' });
   }
 });
 
@@ -674,7 +686,7 @@ app.get('/api/suppliers', async (req, res) => {
     const suppliers = await Supplier.find();
     res.json({ success: true, data: suppliers });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'حدث خطأ في الخادم' });
   }
 });
 
@@ -696,7 +708,7 @@ app.post('/api/suppliers', async (req, res) => {
 
     res.status(201).json({ success: true, data: supplier });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'حدث خطأ في الخادم' });
   }
 });
 
@@ -708,7 +720,7 @@ app.put('/api/suppliers/:id', async (req, res) => {
     }
     res.json({ success: true, data: supplier });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'حدث خطأ في الخادم' });
   }
 });
 
@@ -717,7 +729,7 @@ app.delete('/api/suppliers/:id', async (req, res) => {
     await Supplier.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'Supplier deleted' });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'حدث خطأ في الخادم' });
   }
 });
 
@@ -728,7 +740,7 @@ app.get('/api/products', async (req, res) => {
     const products = await Product.find();
     res.json({ success: true, data: products });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'حدث خطأ في الخادم' });
   }
 });
 
@@ -750,7 +762,7 @@ app.post('/api/products', async (req, res) => {
 
     res.status(201).json({ success: true, data: product });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'حدث خطأ في الخادم' });
   }
 });
 
@@ -762,7 +774,7 @@ app.put('/api/products/:id', async (req, res) => {
     }
     res.json({ success: true, data: product });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'حدث خطأ في الخادم' });
   }
 });
 
@@ -771,7 +783,7 @@ app.delete('/api/products/:id', async (req, res) => {
     await Product.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'Product deleted' });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'حدث خطأ في الخادم' });
   }
 });
 
@@ -782,7 +794,7 @@ app.get('/api/inventory', async (req, res) => {
     const inventory = await Inventory.find();
     res.json({ success: true, data: inventory });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'حدث خطأ في الخادم' });
   }
 });
 
@@ -802,7 +814,7 @@ app.post('/api/inventory', async (req, res) => {
 
     res.status(201).json({ success: true, data: inv });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'حدث خطأ في الخادم' });
   }
 });
 
@@ -814,7 +826,7 @@ app.put('/api/inventory/:id', async (req, res) => {
     }
     res.json({ success: true, data: inv });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'حدث خطأ في الخادم' });
   }
 });
 
@@ -823,7 +835,7 @@ app.delete('/api/inventory/:id', async (req, res) => {
     await Inventory.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'Inventory deleted' });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'حدث خطأ في الخادم' });
   }
 });
 
@@ -834,7 +846,7 @@ app.get('/api/orders', async (req, res) => {
     const orders = await Order.find();
     res.json({ success: true, data: orders });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'حدث خطأ في الخادم' });
   }
 });
 
@@ -855,7 +867,7 @@ app.post('/api/orders', async (req, res) => {
 
     res.status(201).json({ success: true, data: order });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'حدث خطأ في الخادم' });
   }
 });
 
@@ -867,7 +879,7 @@ app.put('/api/orders/:id', async (req, res) => {
     }
     res.json({ success: true, data: order });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'حدث خطأ في الخادم' });
   }
 });
 
@@ -876,7 +888,7 @@ app.delete('/api/orders/:id', async (req, res) => {
     await Order.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'Order deleted' });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'حدث خطأ في الخادم' });
   }
 });
 
@@ -887,7 +899,7 @@ app.get('/api/shipments', async (req, res) => {
     const shipments = await Shipment.find();
     res.json({ success: true, data: shipments });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'حدث خطأ في الخادم' });
   }
 });
 
@@ -907,7 +919,7 @@ app.post('/api/shipments', async (req, res) => {
 
     res.status(201).json({ success: true, data: shipment });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'حدث خطأ في الخادم' });
   }
 });
 
@@ -919,7 +931,7 @@ app.put('/api/shipments/:id', async (req, res) => {
     }
     res.json({ success: true, data: shipment });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'حدث خطأ في الخادم' });
   }
 });
 
@@ -928,7 +940,7 @@ app.delete('/api/shipments/:id', async (req, res) => {
     await Shipment.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'Shipment deleted' });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'حدث خطأ في الخادم' });
   }
 });
 
@@ -939,7 +951,7 @@ app.get('/api/audit-logs', async (req, res) => {
     const logs = await AuditLog.find().sort({ timestamp: -1 }).limit(100);
     res.json({ success: true, data: logs });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'حدث خطأ في الخادم' });
   }
 });
 
@@ -949,6 +961,6 @@ app.get('*', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`\n✅ Supply Chain Backend Server running on http://localhost:${PORT}`);
-  console.log(`\n📝 Demo Credentials:\n   Username: admin\n   Password: Admin@123456\n`);
+  // console.log(`\n✅ Supply Chain Backend Server running on http://localhost:${PORT}`);
+  // console.log(`\n📏 Demo Credentials:\n   Username: admin\n   Password: Admin@123456\n`);
 });

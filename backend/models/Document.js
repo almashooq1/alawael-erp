@@ -1,9 +1,11 @@
+/* eslint-disable no-unused-vars */
 /**
  * Document Model
  * نموذج إدارة المستندات - تخزين البيانات الوصفية للملفات
  */
 
 const mongoose = require('mongoose');
+const { escapeRegex } = require('../utils/sanitize');
 
 const DocumentSchema = new mongoose.Schema(
   {
@@ -19,7 +21,50 @@ const DocumentSchema = new mongoose.Schema(
     },
     fileType: {
       type: String,
-      enum: ['pdf', 'docx', 'xlsx', 'jpg', 'png', 'txt', 'pptx', 'zip', 'other'],
+      // All supported types — must stay in sync with KNOWN_FILE_TYPES in documents.routes.js
+      enum: [
+        'pdf',
+        'doc',
+        'docx',
+        'docm',
+        'xls',
+        'xlsx',
+        'xlsm',
+        'ppt',
+        'pptx',
+        'pptm',
+        'odt',
+        'ods',
+        'odp',
+        'txt',
+        'csv',
+        'rtf',
+        'html',
+        'htm',
+        'xml',
+        'json',
+        'jpg',
+        'jpeg',
+        'png',
+        'gif',
+        'bmp',
+        'webp',
+        'tiff',
+        'tif',
+        'svg',
+        'zip',
+        'rar',
+        '7z',
+        'gz',
+        'tar',
+        'mp3',
+        'wav',
+        'ogg',
+        'mp4',
+        'webm',
+        'ogv',
+        'other',
+      ],
       default: 'other',
     },
     mimeType: {
@@ -47,7 +92,7 @@ const DocumentSchema = new mongoose.Schema(
     },
     category: {
       type: String,
-      enum: ['تقارير', 'عقود', 'سياسات', 'تدريب', 'مالي', 'أخرى'],
+      enum: ['تقارير', 'عقود', 'سياسات', 'تدريب', 'مالي', 'شهادات', 'مراسلات', 'أخرى'],
       default: 'أخرى',
     },
     tags: [String],
@@ -230,7 +275,7 @@ const DocumentSchema = new mongoose.Schema(
   {
     timestamps: true,
     collection: 'documents',
-  },
+  }
 );
 
 // الفهارس
@@ -240,13 +285,18 @@ DocumentSchema.index({ title: 'text', description: 'text', tags: 'text' });
 DocumentSchema.index({ 'sharedWith.userId': 1 });
 DocumentSchema.index({ folder: 1 });
 DocumentSchema.index({ status: 1 });
+DocumentSchema.index({ expiryDate: 1 });
 
 // تحديث معلومات البحث قبل الحفظ
-DocumentSchema.pre('save', function (next) {
+DocumentSchema.pre('save', function () {
   if (this.isModified('title') || this.isModified('description') || this.isModified('tags')) {
-    this.searchKeywords = [this.title, this.description, ...(this.tags || []), this.originalFileName].filter(Boolean);
+    this.searchKeywords = [
+      this.title,
+      this.description,
+      ...(this.tags || []),
+      this.originalFileName,
+    ].filter(Boolean);
   }
-  next();
 });
 
 // إرجاع حجم الملف بصيغة قابلة للقراءة
@@ -269,20 +319,21 @@ DocumentSchema.methods.hasAccess = function (userId, requiredPermission = 'view'
   // التحقق من المشاركة المباشرة
   const sharedUser = this.sharedWith.find(share => share.userId.toString() === userId.toString());
   if (sharedUser) {
-    const permissions = {
-      view: ['view', 'edit', 'download', 'share'],
-      edit: ['edit', 'download', 'share'],
-      download: ['download', 'share'],
-      share: ['share'],
-    };
-    return permissions[requiredPermission].includes(sharedUser.permission);
+    // Permission hierarchy: share > edit > download > view
+    const hierarchy = { share: 4, edit: 3, download: 2, view: 1 };
+    return (hierarchy[sharedUser.permission] || 0) >= (hierarchy[requiredPermission] || 0);
   }
 
   return this.isPublic && requiredPermission === 'view';
 };
 
 // إضافة سجل النشاط
-DocumentSchema.methods.addActivityLog = function (action, performedBy, performedByName, details = '') {
+DocumentSchema.methods.addActivityLog = function (
+  action,
+  performedBy,
+  performedByName,
+  details = ''
+) {
   this.activityLog.push({
     action,
     performedBy,
@@ -292,48 +343,49 @@ DocumentSchema.methods.addActivityLog = function (action, performedBy, performed
 };
 
 // Statics - Methods for Document class
-DocumentSchema.statics.searchDocuments = async function(query, filters = {}) {
+DocumentSchema.statics.searchDocuments = async function (query, filters = {}) {
   let searchQuery = this.where();
 
   if (query) {
     searchQuery = searchQuery.or([
-      { title: { $regex: query, $options: 'i' } },
-      { description: { $regex: query, $options: 'i' } },
-      { tags: { $in: [new RegExp(query, 'i')] } },
-      { extractedText: { $regex: query, $options: 'i' } },
+      { title: { $regex: escapeRegex(query), $options: 'i' } },
+      { description: { $regex: escapeRegex(query), $options: 'i' } },
+      { tags: { $in: [new RegExp(escapeRegex(query), 'i')] } },
+      { extractedText: { $regex: escapeRegex(query), $options: 'i' } },
     ]);
   }
 
   if (filters.category) searchQuery = searchQuery.where('category').equals(filters.category);
   if (filters.uploadedBy) searchQuery = searchQuery.where('uploadedBy').equals(filters.uploadedBy);
   if (filters.status) searchQuery = searchQuery.where('status').equals(filters.status);
-  if (filters.isArchived !== undefined) searchQuery = searchQuery.where('isArchived').equals(filters.isArchived);
+  if (filters.isArchived !== undefined)
+    searchQuery = searchQuery.where('isArchived').equals(filters.isArchived);
 
   return searchQuery.sort({ createdAt: -1 });
 };
 
-DocumentSchema.statics.findRecent = function(limit = 10) {
+DocumentSchema.statics.findRecent = function (limit = 10) {
   return this.find({ isArchived: false })
     .sort({ createdAt: -1 })
     .limit(limit)
     .populate('uploadedBy', 'name email');
 };
 
-DocumentSchema.statics.findByCategory = function(category) {
+DocumentSchema.statics.findByCategory = function (category) {
   return this.find({ category, isArchived: false }).sort({ createdAt: -1 });
 };
 
-DocumentSchema.statics.findExpiring = function(daysFromNow = 30) {
+DocumentSchema.statics.findExpiring = function (daysFromNow = 30) {
   const futureDate = new Date();
   futureDate.setDate(futureDate.getDate() + daysFromNow);
-  
+
   return this.find({
     expiryDate: { $gte: new Date(), $lte: futureDate },
     isArchived: false,
   }).sort({ expiryDate: 1 });
 };
 
-DocumentSchema.statics.getMostDownloaded = function(limit = 10) {
+DocumentSchema.statics.getMostDownloaded = function (limit = 10) {
   return this.find({ isArchived: false })
     .sort({ downloadCount: -1 })
     .limit(limit)
@@ -341,23 +393,23 @@ DocumentSchema.statics.getMostDownloaded = function(limit = 10) {
 };
 
 // Virtual for file extension
-DocumentSchema.virtual('extension').get(function() {
+DocumentSchema.virtual('extension').get(function () {
   const parts = this.originalFileName.split('.');
   return parts.length > 1 ? parts[parts.length - 1].toLowerCase() : 'unknown';
 });
 
 // Virtual for age in days
-DocumentSchema.virtual('ageDays').get(function() {
+DocumentSchema.virtual('ageDays').get(function () {
   const now = new Date();
   const created = new Date(this.createdAt);
   return Math.floor((now - created) / (1000 * 60 * 60 * 24));
 });
 
 // Virtual for is expiring soon
-DocumentSchema.virtual('isExpiringSoon').get(function() {
+DocumentSchema.virtual('isExpiringSoon').get(function () {
   if (!this.expiryDate) return false;
   const daysUntilExpiry = Math.floor((this.expiryDate - new Date()) / (1000 * 60 * 60 * 24));
   return daysUntilExpiry <= 30 && daysUntilExpiry >= 0;
 });
 
-module.exports = mongoose.model('Document', DocumentSchema);
+module.exports = mongoose.models.Document || mongoose.model('Document', DocumentSchema);

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Government Integration Connector
  * نظام التكامل مع الجهات الحكومية
@@ -84,7 +85,7 @@ class GovernmentConnector extends EventEmitter {
         return response;
       },
       error => {
-        this.logRequest(error.config, error.response?.status, 'error', error.message);
+        this.logRequest(error.config, error.response?.status, 'error', 'حدث خطأ داخلي');
         this.handleCircuitBreaker(error);
         return Promise.reject(error);
       }
@@ -107,8 +108,8 @@ class GovernmentConnector extends EventEmitter {
       this.emit('token-refreshed', { expiresIn: response.data.expires_in });
       return this.accessToken;
     } catch (error) {
-      this.emit('token-error', { error: error.message });
-      throw new Error(`Failed to refresh government API token: ${error.message}`);
+      this.emit('token-error', { error: 'حدث خطأ داخلي' });
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -211,10 +212,10 @@ class GovernmentConnector extends EventEmitter {
         return this.executeWithRetry(fn, operationName, retries + 1);
       }
 
-      this.emit('operation-failed', { operation: operationName, error: error.message });
+      this.emit('operation-failed', { operation: operationName, error: 'حدث خطأ داخلي' });
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
         status: error.response?.status,
       };
     }
@@ -269,9 +270,9 @@ class GovernmentConnector extends EventEmitter {
       headers: this.maskSensitiveHeaders(config?.headers),
     };
 
-    // Send to audit service (TODO: implement audit queue)
+    // Emit to audit service (@todo [P3] implement persistent audit queue)
     this.emit('audit-log', log);
-    console.log('[GOV-CONNECTOR]', JSON.stringify(log));
+    // console.log('[GOV-CONNECTOR]', JSON.stringify(log));
   }
 
   /**
@@ -293,7 +294,7 @@ class GovernmentConnector extends EventEmitter {
       const response = await this.client.get('/health', { timeout: 5000 });
       return { healthy: true, status: response.status };
     } catch (error) {
-      return { healthy: false, error: error.message };
+      return { healthy: false, error: 'حدث خطأ داخلي' };
     }
   }
 }

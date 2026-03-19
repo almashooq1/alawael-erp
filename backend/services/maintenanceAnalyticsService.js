@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Maintenance Analytics Service - خدمة تحليلات الصيانة
  *
@@ -105,7 +106,8 @@ class MaintenanceAnalyticsService {
     const costByCategory = {};
     tasks.forEach(task => {
       const cat = task.category;
-      costByCategory[cat] = (costByCategory[cat] || 0) + (task.actualCost || task.estimatedCost || 0);
+      costByCategory[cat] =
+        (costByCategory[cat] || 0) + (task.actualCost || task.estimatedCost || 0);
     });
 
     return {
@@ -131,10 +133,11 @@ class MaintenanceAnalyticsService {
     };
 
     if (tasks.length > 0) {
-      const onTimeTasks = tasks.filter(
-        t => t.completedDate && t.completedDate <= t.scheduledDate
-      );
-      performance.completionRate = ((tasks.filter(t => t.status === 'مكتملة').length / tasks.length) * 100).toFixed(2);
+      const onTimeTasks = tasks.filter(t => t.completedDate && t.completedDate <= t.scheduledDate);
+      performance.completionRate = (
+        (tasks.filter(t => t.status === 'مكتملة').length / tasks.length) *
+        100
+      ).toFixed(2);
       performance.onTimeRate = ((onTimeTasks.length / tasks.length) * 100).toFixed(2);
 
       const delays = tasks
@@ -236,8 +239,10 @@ class MaintenanceAnalyticsService {
       }
     });
 
-    metrics.averageCompletionTime = completedCount > 0 ? (totalTime / completedCount).toFixed(2) : 0;
-    metrics.averageDowntime = tasks.length > 0 ? (metrics.totalDowntime / tasks.length).toFixed(2) : 0;
+    metrics.averageCompletionTime =
+      completedCount > 0 ? (totalTime / completedCount).toFixed(2) : 0;
+    metrics.averageDowntime =
+      tasks.length > 0 ? (metrics.totalDowntime / tasks.length).toFixed(2) : 0;
     metrics.totalDowntime = metrics.totalDowntime.toFixed(2);
 
     return metrics;
@@ -296,7 +301,10 @@ class MaintenanceAnalyticsService {
 
     if (provider.performance.averageRating < 3) {
       recommendation = 'غير موصى به';
-    } else if (provider.performance.averageRating < 4 || provider.performance.onTimeCompletionRate < 80) {
+    } else if (
+      provider.performance.averageRating < 4 ||
+      provider.performance.onTimeCompletionRate < 80
+    ) {
       recommendation = 'توخي الحذر';
     }
 

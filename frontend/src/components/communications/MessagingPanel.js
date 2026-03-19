@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Grid,
@@ -28,8 +28,17 @@ import {
   Delete as DeleteIcon,
   Group as GroupIcon,
 } from '@mui/icons-material';
+import { getStatusColor } from 'utils/statusColors';
+import logger from 'utils/logger';
+import { gradients } from 'theme/palette';
 
-const MessagingPanel = ({ conversations = [], messages = [], onSendMessage, selectedConversation, onSelectConversation }) => {
+const MessagingPanel = ({
+  conversations = [],
+  _messages = [],
+  onSendMessage,
+  selectedConversation,
+  onSelectConversation,
+}) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [messageInput, setMessageInput] = useState('');
   const [filteredConversations, setFilteredConversations] = useState(conversations);
@@ -41,7 +50,7 @@ const MessagingPanel = ({ conversations = [], messages = [], onSendMessage, sele
       const filtered = conversations.filter(
         conv =>
           conv.participant.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          conv.lastMessage.toLowerCase().includes(searchQuery.toLowerCase()),
+          conv.lastMessage.toLowerCase().includes(searchQuery.toLowerCase())
       );
       setFilteredConversations(filtered);
     } else {
@@ -49,17 +58,11 @@ const MessagingPanel = ({ conversations = [], messages = [], onSendMessage, sele
     }
   }, [searchQuery, conversations]);
 
-  useEffect(() => {
-    if (selectedConversation) {
-      // تحميل رسائل المحادثة
-      loadConversationMessages(selectedConversation.id);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedConversation]);
-
-  const loadConversationMessages = async conversationId => {
+  const loadConversationMessages = useCallback(async conversationId => {
     try {
-      const response = await fetch(`/api/ai-communications/conversations/${conversationId}/messages`);
+      const response = await fetch(
+        `/api/ai-communications/conversations/${conversationId}/messages`
+      );
       const data = await response.json();
 
       if (data.success) {
@@ -69,12 +72,19 @@ const MessagingPanel = ({ conversations = [], messages = [], onSendMessage, sele
         setConversationMessages(getMockMessages(conversationId));
       }
     } catch (error) {
-      console.error('Error loading messages:', error);
+      logger.error('Error loading messages:', error);
       setConversationMessages(getMockMessages(conversationId));
     }
-  };
+  }, []);
 
-  const getMockMessages = conversationId => {
+  useEffect(() => {
+    if (selectedConversation) {
+      // تحميل رسائل المحادثة
+      loadConversationMessages(selectedConversation.id);
+    }
+  }, [selectedConversation, loadConversationMessages]);
+
+  const getMockMessages = _conversationId => {
     const now = Date.now();
     return [
       {
@@ -135,10 +145,6 @@ const MessagingPanel = ({ conversations = [], messages = [], onSendMessage, sele
     return date.toLocaleDateString('ar-SA', { month: 'short', day: 'numeric' });
   };
 
-  const getStatusColor = status => {
-    return status === 'online' ? 'success' : 'default';
-  };
-
   return (
     <Grid container sx={{ height: '600px' }}>
       {/* قائمة المحادثات */}
@@ -189,7 +195,9 @@ const MessagingPanel = ({ conversations = [], messages = [], onSendMessage, sele
 
               <ListItemText
                 primary={
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Box
+                    sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                  >
                     <Typography variant="subtitle2" noWrap>
                       {conversation.participant}
                     </Typography>
@@ -199,12 +207,24 @@ const MessagingPanel = ({ conversations = [], messages = [], onSendMessage, sele
                   </Box>
                 }
                 secondary={
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Typography variant="body2" color="text.secondary" noWrap sx={{ flex: 1, mr: 1 }}>
+                  <Box
+                    sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                  >
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      noWrap
+                      sx={{ flex: 1, mr: 1 }}
+                    >
                       {conversation.lastMessage}
                     </Typography>
                     {conversation.unread > 0 && (
-                      <Chip label={conversation.unread} color="primary" size="small" sx={{ height: 20, fontSize: '0.75rem' }} />
+                      <Chip
+                        label={conversation.unread}
+                        color="primary"
+                        size="small"
+                        sx={{ height: 20, fontSize: '0.75rem' }}
+                      />
                     )}
                   </Box>
                 }
@@ -255,19 +275,27 @@ const MessagingPanel = ({ conversations = [], messages = [], onSendMessage, sele
 
               <Box>
                 <Tooltip title="تمييز بنجمة">
-                  <IconButton size="small">
+                  <IconButton size="small" aria-label="تمييز بنجمة">
                     <StarIcon />
                   </IconButton>
                 </Tooltip>
                 <Tooltip title="أرشفة">
-                  <IconButton size="small">
+                  <IconButton size="small" aria-label="أرشفة">
                     <ArchiveIcon />
                   </IconButton>
                 </Tooltip>
-                <IconButton size="small" onClick={e => setMenuAnchor(e.currentTarget)}>
+                <IconButton
+                  size="small"
+                  aria-label="المزيد من الخيارات"
+                  onClick={e => setMenuAnchor(e.currentTarget)}
+                >
                   <MoreVertIcon />
                 </IconButton>
-                <Menu anchorEl={menuAnchor} open={Boolean(menuAnchor)} onClose={() => setMenuAnchor(null)}>
+                <Menu
+                  anchorEl={menuAnchor}
+                  open={Boolean(menuAnchor)}
+                  onClose={() => setMenuAnchor(null)}
+                >
                   <MenuItem onClick={() => setMenuAnchor(null)}>
                     <DeleteIcon sx={{ mr: 1 }} fontSize="small" />
                     حذف المحادثة
@@ -283,7 +311,7 @@ const MessagingPanel = ({ conversations = [], messages = [], onSendMessage, sele
                 overflowY: 'auto',
                 p: 2,
                 bgcolor: '#f5f5f5',
-                backgroundImage: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+                backgroundImage: gradients.subtle,
               }}
             >
               {conversationMessages.map(message => (
@@ -302,7 +330,8 @@ const MessagingPanel = ({ conversations = [], messages = [], onSendMessage, sele
                       maxWidth: '70%',
                       bgcolor: message.sender === 'me' ? 'primary.main' : 'white',
                       color: message.sender === 'me' ? 'white' : 'text.primary',
-                      borderRadius: message.sender === 'me' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
+                      borderRadius:
+                        message.sender === 'me' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
                     }}
                   >
                     <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
@@ -337,7 +366,7 @@ const MessagingPanel = ({ conversations = [], messages = [], onSendMessage, sele
               }}
             >
               <Box sx={{ display: 'flex', gap: 1 }}>
-                <IconButton>
+                <IconButton aria-label="إرفاق">
                   <AttachIcon />
                 </IconButton>
                 <TextField
@@ -353,6 +382,7 @@ const MessagingPanel = ({ conversations = [], messages = [], onSendMessage, sele
                 />
                 <IconButton
                   color="primary"
+                  aria-label="إرسال"
                   onClick={handleSendMessage}
                   disabled={!messageInput.trim()}
                   sx={{

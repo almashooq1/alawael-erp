@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Core Middleware for Supply Chain Management System
  * - Authentication
@@ -25,20 +26,22 @@ const authMiddleware = (req, res, next) => {
     const token = authHeader?.split(' ')[1];
 
     if (!token) {
-      // Allow request but mark as unauthenticated
       req.userId = null;
       return next();
     }
 
-    // In production, verify JWT
-    // For now, accept any token and extract user ID
+    if (!process.env.JWT_SECRET) {
+      console.error('CRITICAL: JWT_SECRET environment variable is not set!');
+      return res.status(500).json({ success: false, error: 'Server configuration error' });
+    }
+
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'dev-secret-key');
-      req.userId = decoded.userId || decoded.sub || 'user-123';
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      req.userId = decoded.userId || decoded.sub || decoded.id;
       req.user = decoded;
     } catch (err) {
-      // Invalid token, continue without auth
-      req.userId = req.body.userId || 'user-123';
+      // Invalid token — reject, do NOT fall through
+      return res.status(401).json({ success: false, error: 'Invalid or expired token' });
     }
 
     next();
@@ -51,7 +54,7 @@ const authMiddleware = (req, res, next) => {
  * Error Handler Middleware
  * Centralized error handling
  */
-const errorHandler = (err, req, res, next) => {
+const errorHandler = (err, _req, res, _next) => {
   console.error('Error:', err);
 
   // Mongoose validation error
@@ -87,7 +90,7 @@ const errorHandler = (err, req, res, next) => {
   res.status(err.status || 500).json({
     success: false,
     error: err.name || 'Server Error',
-    message: err.message || 'Internal server error',
+    message: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error',
   });
 };
 
@@ -98,10 +101,7 @@ const errorHandler = (err, req, res, next) => {
 const corsMiddleware = (req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-  res.header(
-    'Access-Control-Allow-Headers',
-    'Origin, X-Requested-With, Content-Type, Accept, Authorization'
-  );
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
 
   if (req.method === 'OPTIONS') {
     return res.sendStatus(200);
@@ -119,7 +119,7 @@ const requestLogger = (req, res, next) => {
 
   res.on('finish', () => {
     const duration = Date.now() - startTime;
-    console.log(`[${req.method}] ${req.path} - ${res.statusCode} (${duration}ms)`);
+    // console.log(`[${req.method}] ${req.path} - ${res.statusCode} (${duration}ms)`);
   });
 
   next();

@@ -1,3 +1,4 @@
+﻿/* eslint-disable no-unused-vars */
 const express = require('express');
 const router = express.Router();
 const asyncHandler = require('express-async-handler');
@@ -9,11 +10,11 @@ const logger = require('../utils/logger');
 const analyticsService = new PerformanceAnalyticsService();
 
 // Middleware to verify service is ready
-router.use((req, res, next) => {
+router.use((_req, res, next) => {
   if (!analyticsService) {
-    return res.status(503).json({ 
+    return res.status(503).json({
       error: 'Service unavailable',
-      message: 'Performance analytics service not initialized'
+      message: 'Performance analytics service not initialized',
     });
   }
   next();
@@ -24,20 +25,21 @@ router.use((req, res, next) => {
  * @desc    Get performance overview
  * @access  Private
  */
-router.get('/overview',
+router.get(
+  '/overview',
   authenticate,
   asyncHandler(async (req, res) => {
     try {
       const overview = await analyticsService.getOverview(req.query);
       res.status(200).json({
         success: true,
-        data: overview
+        data: overview,
       });
     } catch (error) {
       logger.error('Error fetching analytics overview:', error);
       res.status(500).json({
         success: false,
-        error: error.message || 'Failed to fetch analytics'
+        error: 'حدث خطأ في الخادم' || 'Failed to fetch analytics',
       });
     }
   })
@@ -48,20 +50,21 @@ router.get('/overview',
  * @desc    Get analytics dashboard
  * @access  Private
  */
-router.get('/dashboard',
+router.get(
+  '/dashboard',
   authenticate,
   asyncHandler(async (req, res) => {
     try {
       const dashboard = await analyticsService.getDashboard(req.query);
       res.status(200).json({
         success: true,
-        data: dashboard
+        data: dashboard,
       });
     } catch (error) {
       logger.error('Error fetching dashboard:', error);
       res.status(500).json({
         success: false,
-        error: error.message || 'Failed to fetch dashboard'
+        error: 'حدث خطأ في الخادم' || 'Failed to fetch dashboard',
       });
     }
   })
@@ -72,24 +75,22 @@ router.get('/dashboard',
  * @desc    Get analytics for specific module
  * @access  Private
  */
-router.get('/module/:moduleName',
+router.get(
+  '/module/:moduleName',
   authenticate,
   asyncHandler(async (req, res) => {
     try {
-      const analytics = await analyticsService.getModuleAnalytics(
-        req.params.moduleName,
-        req.query
-      );
-      
+      const analytics = await analyticsService.getModuleAnalytics(req.params.moduleName, req.query);
+
       res.status(200).json({
         success: true,
-        data: analytics
+        data: analytics,
       });
     } catch (error) {
       logger.error('Error fetching module analytics:', error);
       res.status(500).json({
         success: false,
-        error: error.message || 'Failed to fetch analytics'
+        error: 'حدث خطأ في الخادم' || 'Failed to fetch analytics',
       });
     }
   })
@@ -100,30 +101,29 @@ router.get('/module/:moduleName',
  * @desc    Get analytics for specific user
  * @access  Private
  */
-router.get('/user/:userId',
+router.get(
+  '/user/:userId',
   authenticate,
   asyncHandler(async (req, res) => {
     try {
-      const analytics = await analyticsService.getUserAnalytics(
-        req.params.userId
-      );
-      
+      const analytics = await analyticsService.getUserAnalytics(req.params.userId);
+
       if (!analytics) {
         return res.status(404).json({
           success: false,
-          error: 'User analytics not found'
+          error: 'User analytics not found',
         });
       }
 
       res.status(200).json({
         success: true,
-        data: analytics
+        data: analytics,
       });
     } catch (error) {
       logger.error('Error fetching user analytics:', error);
       res.status(500).json({
         success: false,
-        error: error.message || 'Failed to fetch analytics'
+        error: 'حدث خطأ في الخادم' || 'Failed to fetch analytics',
       });
     }
   })
@@ -134,21 +134,22 @@ router.get('/user/:userId',
  * @desc    Get performance trends
  * @access  Private
  */
-router.get('/performance-trends',
+router.get(
+  '/performance-trends',
   authenticate,
   asyncHandler(async (req, res) => {
     try {
       const trends = await analyticsService.getPerformanceTrends(req.query);
-      
+
       res.status(200).json({
         success: true,
-        data: trends
+        data: trends,
       });
     } catch (error) {
       logger.error('Error fetching trends:', error);
       res.status(500).json({
         success: false,
-        error: error.message || 'Failed to fetch trends'
+        error: 'حدث خطأ في الخادم' || 'Failed to fetch trends',
       });
     }
   })
@@ -159,21 +160,22 @@ router.get('/performance-trends',
  * @desc    Get key performance indicators
  * @access  Private
  */
-router.get('/kpi',
+router.get(
+  '/kpi',
   authenticate,
   asyncHandler(async (req, res) => {
     try {
       const kpis = await analyticsService.getKPIs(req.query);
-      
+
       res.status(200).json({
         success: true,
-        data: kpis
+        data: kpis,
       });
     } catch (error) {
       logger.error('Error fetching KPIs:', error);
       res.status(500).json({
         success: false,
-        error: error.message || 'Failed to fetch KPIs'
+        error: 'حدث خطأ في الخادم' || 'Failed to fetch KPIs',
       });
     }
   })
@@ -184,7 +186,8 @@ router.get('/kpi',
  * @desc    Track custom event
  * @access  Private
  */
-router.post('/track-event',
+router.post(
+  '/track-event',
   authenticate,
   asyncHandler(async (req, res) => {
     try {
@@ -193,7 +196,7 @@ router.post('/track-event',
       if (!eventName) {
         return res.status(400).json({
           success: false,
-          error: 'Event name is required'
+          error: 'Event name is required',
         });
       }
 
@@ -202,18 +205,18 @@ router.post('/track-event',
         eventData,
         metadata,
         userId: req.user.id,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       res.status(201).json({
         success: true,
-        data: tracked
+        data: tracked,
       });
     } catch (error) {
       logger.error('Error tracking event:', error);
       res.status(500).json({
         success: false,
-        error: error.message || 'Failed to track event'
+        error: 'حدث خطأ في الخادم' || 'Failed to track event',
       });
     }
   })
@@ -224,33 +227,34 @@ router.post('/track-event',
  * @desc    Get analytics service health
  * @access  Private
  */
-router.get('/health-check',
+router.get(
+  '/health-check',
   authenticate,
   asyncHandler(async (req, res) => {
     try {
       const health = await analyticsService.getHealthStatus();
-      
+
       res.status(200).json({
         success: true,
-        data: health
+        data: health,
       });
     } catch (error) {
       logger.error('Error checking health:', error);
       res.status(500).json({
         success: false,
-        error: error.message || 'Failed to check health'
+        error: 'حدث خطأ في الخادم' || 'Failed to check health',
       });
     }
   })
 );
 
 // Error handling middleware
-router.use((err, req, res, next) => {
+router.use((err, _req, res, _next) => {
   logger.error('Router error:', err);
   res.status(500).json({
     success: false,
     error: 'An unexpected error occurred',
-    message: err.message
+    message: 'حدث خطأ في الخادم',
   });
 });
 

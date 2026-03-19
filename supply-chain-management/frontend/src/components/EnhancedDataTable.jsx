@@ -78,14 +78,14 @@ export default function EnhancedDataTable({ entityType = 'suppliers', columns = 
     fetchData(newPage, rowsPerPage, searchTerm, filterStatus);
   };
 
-  const handleChangeRowsPerPage = (event) => {
+  const handleChangeRowsPerPage = event => {
     const newRowsPerPage = parseInt(event.target.value, 10);
     setRowsPerPage(newRowsPerPage);
     fetchData(0, newRowsPerPage, searchTerm, filterStatus);
   };
 
   // Handle search
-  const handleSearch = (e) => {
+  const handleSearch = e => {
     const value = e.target.value;
     setSearchTerm(value);
     setPage(0);
@@ -93,7 +93,7 @@ export default function EnhancedDataTable({ entityType = 'suppliers', columns = 
   };
 
   // Handle filter
-  const handleFilterChange = (e) => {
+  const handleFilterChange = e => {
     const value = e.target.value;
     setFilterStatus(value);
     setPage(0);
@@ -132,7 +132,7 @@ export default function EnhancedDataTable({ entityType = 'suppliers', columns = 
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async id => {
     if (window.confirm('Are you sure you want to delete this item?')) {
       try {
         await apiClient.delete(`/api/${entityType}/${id}`);
@@ -144,13 +144,13 @@ export default function EnhancedDataTable({ entityType = 'suppliers', columns = 
   };
 
   // Get status color
-  const getStatusColor = (status) => {
+  const getStatusColor = status => {
     const colors = {
-      'active': 'success',
-      'inactive': 'error',
-      'pending': 'warning',
-      'completed': 'success',
-      'cancelled': 'error'
+      active: 'success',
+      inactive: 'error',
+      pending: 'warning',
+      completed: 'success',
+      cancelled: 'error',
     };
     return colors[status] || 'default';
   };
@@ -181,7 +181,7 @@ export default function EnhancedDataTable({ entityType = 'suppliers', columns = 
               value={searchTerm}
               onChange={handleSearch}
               InputProps={{
-                startAdornment: <SearchIcon sx={{ mr: 1, color: 'action.active' }} />
+                startAdornment: <SearchIcon sx={{ mr: 1, color: 'action.active' }} />,
               }}
               size="small"
             />
@@ -215,7 +215,7 @@ export default function EnhancedDataTable({ entityType = 'suppliers', columns = 
               <Table>
                 <TableHead sx={{ backgroundColor: '#f5f5f5' }}>
                   <TableRow>
-                    {columns.map((col) => (
+                    {columns.map(col => (
                       <TableCell key={col.id} align={col.align || 'left'}>
                         <strong>{col.label}</strong>
                       </TableCell>
@@ -226,12 +226,9 @@ export default function EnhancedDataTable({ entityType = 'suppliers', columns = 
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {data.map((row) => (
-                    <TableRow
-                      key={row._id}
-                      sx={{ '&:hover': { backgroundColor: '#f9f9f9' } }}
-                    >
-                      {columns.map((col) => (
+                  {data.map(row => (
+                    <TableRow key={row._id} sx={{ '&:hover': { backgroundColor: '#f9f9f9' } }}>
+                      {columns.map(col => (
                         <TableCell key={col.id} align={col.align || 'left'}>
                           {col.format ? col.format(row[col.id]) : row[col.id]}
                           {col.id === 'status' && (
@@ -284,18 +281,16 @@ export default function EnhancedDataTable({ entityType = 'suppliers', columns = 
 
       {/* Add/Edit Dialog */}
       <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>
-          {editingId ? 'Edit Item' : 'Add New Item'}
-        </DialogTitle>
+        <DialogTitle>{editingId ? 'Edit Item' : 'Add New Item'}</DialogTitle>
         <DialogContent sx={{ pt: 2 }}>
           {/* Dynamic form fields */}
-          {columns.map((col) => (
+          {columns.map(col => (
             <TextField
               key={col.id}
               fullWidth
               label={col.label}
               value={formData[col.id] || ''}
-              onChange={(e) => setFormData({ ...formData, [col.id]: e.target.value })}
+              onChange={e => setFormData({ ...formData, [col.id]: e.target.value })}
               margin="normal"
               type={col.type || 'text'}
             />

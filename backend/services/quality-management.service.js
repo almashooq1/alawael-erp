@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * ALAWAEL ERP - QUALITY MANAGEMENT & ADVANCED REPORTING SERVICE
  * Quality Metrics, Defect Tracking, Process Audits, Advanced Analytics
@@ -70,13 +71,13 @@ class QualityManagementService {
       this.qualityMetrics.push(metric);
       return metric;
     } catch (error) {
-      throw new Error(`Failed to create quality metric: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
   updateMetricValue(metricId, newValue, comments = '') {
     try {
-      const metric = this.qualityMetrics.find((m) => m.id === metricId);
+      const metric = this.qualityMetrics.find(m => m.id === metricId);
       if (!metric) {
         throw new Error(`Metric ${metricId} not found`);
       }
@@ -85,7 +86,12 @@ class QualityManagementService {
       metric.currentValue = newValue;
       metric.updatedAt = new Date();
 
-      const trend = newValue > previousValue ? 'increasing' : newValue < previousValue ? 'decreasing' : 'stable';
+      const trend =
+        newValue > previousValue
+          ? 'increasing'
+          : newValue < previousValue
+            ? 'decreasing'
+            : 'stable';
       metric.trend = trend;
 
       metric.performanceStatus = newValue >= metric.targetValue * 0.95 ? 'on-track' : 'at-risk';
@@ -108,7 +114,7 @@ class QualityManagementService {
 
       return metric;
     } catch (error) {
-      throw new Error(`Failed to update metric: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -117,18 +123,18 @@ class QualityManagementService {
       let results = [...this.qualityMetrics];
 
       if (filters.type) {
-        results = results.filter((m) => m.type === filters.type);
+        results = results.filter(m => m.type === filters.type);
       }
       if (filters.department) {
-        results = results.filter((m) => m.department === filters.department);
+        results = results.filter(m => m.department === filters.department);
       }
       if (filters.status) {
-        results = results.filter((m) => m.status === filters.status);
+        results = results.filter(m => m.status === filters.status);
       }
 
       return results;
     } catch (error) {
-      throw new Error(`Failed to get quality metrics: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -179,13 +185,13 @@ class QualityManagementService {
       this.defects.push(defect);
       return defect;
     } catch (error) {
-      throw new Error(`Failed to report defect: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
   updateDefectStatus(defectId, newStatus, resolution = null) {
     try {
-      const defect = this.defects.find((d) => d.id === defectId);
+      const defect = this.defects.find(d => d.id === defectId);
       if (!defect) {
         throw new Error(`Defect ${defectId} not found`);
       }
@@ -200,7 +206,7 @@ class QualityManagementService {
 
       return defect;
     } catch (error) {
-      throw new Error(`Failed to update defect: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -209,18 +215,18 @@ class QualityManagementService {
       let results = [...this.defects];
 
       if (filters.status) {
-        results = results.filter((d) => d.status === filters.status);
+        results = results.filter(d => d.status === filters.status);
       }
       if (filters.severity) {
-        results = results.filter((d) => d.severity === filters.severity);
+        results = results.filter(d => d.severity === filters.severity);
       }
       if (filters.assignedTo) {
-        results = results.filter((d) => d.assignedTo === filters.assignedTo);
+        results = results.filter(d => d.assignedTo === filters.assignedTo);
       }
 
       return results.sort((a, b) => a.priority - b.priority);
     } catch (error) {
-      throw new Error(`Failed to get defects: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -230,7 +236,7 @@ class QualityManagementService {
 
   performRootCauseAnalysis(defectId, analysisData) {
     try {
-      const defect = this.defects.find((d) => d.id === defectId);
+      const defect = this.defects.find(d => d.id === defectId);
       if (!defect) {
         throw new Error(`Defect ${defectId} not found`);
       }
@@ -252,13 +258,13 @@ class QualityManagementService {
       defect.rootCause = rca;
       return rca;
     } catch (error) {
-      throw new Error(`Failed to perform RCA: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
   createCorrectionAction(defectId, actionData) {
     try {
-      const defect = this.defects.find((d) => d.id === defectId);
+      const defect = this.defects.find(d => d.id === defectId);
       if (!defect) {
         throw new Error(`Defect ${defectId} not found`);
       }
@@ -288,7 +294,7 @@ class QualityManagementService {
 
       return action;
     } catch (error) {
-      throw new Error(`Failed to create correction action: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -331,13 +337,13 @@ class QualityManagementService {
       this.audits.push(audit);
       return audit;
     } catch (error) {
-      throw new Error(`Failed to conduct audit: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
   addAuditFinding(auditId, finding) {
     try {
-      const audit = this.audits.find((a) => a.id === auditId);
+      const audit = this.audits.find(a => a.id === auditId);
       if (!audit) {
         throw new Error(`Audit ${auditId} not found`);
       }
@@ -360,7 +366,7 @@ class QualityManagementService {
 
       return auditFinding;
     } catch (error) {
-      throw new Error(`Failed to add audit finding: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -395,13 +401,15 @@ class QualityManagementService {
 
       // Quality Metrics Summary
       const selectedMetrics =
-        metrics.length > 0 ? this.qualityMetrics.filter((m) => metrics.includes(m.id)) : this.qualityMetrics;
+        metrics.length > 0
+          ? this.qualityMetrics.filter(m => metrics.includes(m.id))
+          : this.qualityMetrics;
 
       report.sections.metricsSummary = {
         total: selectedMetrics.length,
-        onTrack: selectedMetrics.filter((m) => m.performanceStatus === 'on-track').length,
-        atRisk: selectedMetrics.filter((m) => m.performanceStatus === 'at-risk').length,
-        metrics: selectedMetrics.map((m) => ({
+        onTrack: selectedMetrics.filter(m => m.performanceStatus === 'on-track').length,
+        atRisk: selectedMetrics.filter(m => m.performanceStatus === 'at-risk').length,
+        metrics: selectedMetrics.map(m => ({
           id: m.id,
           name: m.name,
           current: m.currentValue,
@@ -413,44 +421,43 @@ class QualityManagementService {
 
       // Defect Analysis
       if (includeDefects) {
-        const relevantDefects = this.defects.filter((d) => {
+        const relevantDefects = this.defects.filter(d => {
           const isInPeriod = new Date(d.createdAt) >= new Date(period.startDate);
-          const isInDept =
-            departments.length === 0 || departments.includes(d.affectedArea);
+          const isInDept = departments.length === 0 || departments.includes(d.affectedArea);
           return isInPeriod && isInDept;
         });
 
         report.sections.defectAnalysis = {
           total: relevantDefects.length,
-          open: relevantDefects.filter((d) => d.status === 'open').length,
-          resolved: relevantDefects.filter((d) => d.status === 'resolved').length,
+          open: relevantDefects.filter(d => d.status === 'open').length,
+          resolved: relevantDefects.filter(d => d.status === 'resolved').length,
           bySeverity: {
-            critical: relevantDefects.filter((d) => d.severity === 'critical').length,
-            high: relevantDefects.filter((d) => d.severity === 'high').length,
-            medium: relevantDefects.filter((d) => d.severity === 'medium').length,
-            low: relevantDefects.filter((d) => d.severity === 'low').length,
+            critical: relevantDefects.filter(d => d.severity === 'critical').length,
+            high: relevantDefects.filter(d => d.severity === 'high').length,
+            medium: relevantDefects.filter(d => d.severity === 'medium').length,
+            low: relevantDefects.filter(d => d.severity === 'low').length,
           },
           avgResolutionTime:
             relevantDefects
-              .filter((d) => d.resolvedAt)
+              .filter(d => d.resolvedAt)
               .reduce((sum, d) => sum + (d.resolvedAt - d.createdAt), 0) /
-              Math.max(relevantDefects.filter((d) => d.resolvedAt).length, 1) /
-              (1000 * 60 * 60 * 24),
+            Math.max(relevantDefects.filter(d => d.resolvedAt).length, 1) /
+            (1000 * 60 * 60 * 24),
         };
       }
 
       // Audit Summary
       if (includeAudits) {
         const relevantAudits = this.audits.filter(
-          (a) =>
+          a =>
             new Date(a.auditDate) >= new Date(period.startDate) &&
             (departments.length === 0 || departments.includes(a.department))
         );
 
         report.sections.auditSummary = {
           total: relevantAudits.length,
-          completed: relevantAudits.filter((a) => a.status === 'completed').length,
-          inProgress: relevantAudits.filter((a) => a.status === 'in-progress').length,
+          completed: relevantAudits.filter(a => a.status === 'completed').length,
+          inProgress: relevantAudits.filter(a => a.status === 'in-progress').length,
           totalFindings: relevantAudits.reduce((sum, a) => sum + a.findings.length, 0),
           nonConformities: relevantAudits.reduce((sum, a) => sum + a.nonConformities.length, 0),
         };
@@ -459,7 +466,7 @@ class QualityManagementService {
       this.reports.push(report);
       return report;
     } catch (error) {
-      throw new Error(`Failed to generate quality report: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -484,7 +491,7 @@ class QualityManagementService {
       this.dashboards.push(dashboard);
       return dashboard;
     } catch (error) {
-      throw new Error(`Failed to create quality dashboard: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -530,15 +537,13 @@ class QualityManagementService {
 
   analyzeTrends(metricId, period = 90) {
     try {
-      const metric = this.qualityMetrics.find((m) => m.id === metricId);
+      const metric = this.qualityMetrics.find(m => m.id === metricId);
       if (!metric) {
         throw new Error(`Metric ${metricId} not found`);
       }
 
       const threshold = new Date(Date.now() - period * 24 * 60 * 60 * 1000);
-      const measurements = metric.measurements.filter(
-        (m) => new Date(m.timestamp) >= threshold
-      );
+      const measurements = metric.measurements.filter(m => new Date(m.timestamp) >= threshold);
 
       if (measurements.length === 0) {
         return {
@@ -548,7 +553,7 @@ class QualityManagementService {
         };
       }
 
-      const values = measurements.map((m) => m.value);
+      const values = measurements.map(m => m.value);
       const average = values.reduce((a, b) => a + b, 0) / values.length;
       const trend = values[values.length - 1] > average ? 'improving' : 'declining';
 
@@ -569,7 +574,7 @@ class QualityManagementService {
         measurements: measurements.slice(-10), // Last 10 measurements
       };
     } catch (error) {
-      throw new Error(`Failed to analyze trends: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -579,15 +584,7 @@ class QualityManagementService {
 
   defineProcess(processData) {
     try {
-      const {
-        name,
-        description,
-        owner,
-        steps,
-        inputs,
-        outputs,
-        kpis = [],
-      } = processData;
+      const { name, description, owner, steps, inputs, outputs, kpis = [] } = processData;
 
       if (!name || !owner) {
         throw new Error('Missing required fields: name, owner');
@@ -613,7 +610,7 @@ class QualityManagementService {
       this.processes.push(process);
       return process;
     } catch (error) {
-      throw new Error(`Failed to define process: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -623,7 +620,7 @@ class QualityManagementService {
 
   getQualityDashboardData(dashboardId) {
     try {
-      const dashboard = this.dashboards.find((d) => d.id === dashboardId);
+      const dashboard = this.dashboards.find(d => d.id === dashboardId);
       if (!dashboard) {
         throw new Error(`Dashboard ${dashboardId} not found`);
       }
@@ -631,24 +628,23 @@ class QualityManagementService {
       const dashboardData = {
         dashboard: dashboard.name,
         generatedAt: new Date(),
-        widgets: dashboard.widgets.map((widget) => ({
+        widgets: dashboard.widgets.map(widget => ({
           ...widget,
           data: this._getWidgetData(widget),
         })),
         summary: {
           totalMetrics: dashboard.metrics.length,
           metricsOnTrack: this.qualityMetrics.filter(
-            (m) =>
-              dashboard.metrics.includes(m.id) && m.performanceStatus === 'on-track'
+            m => dashboard.metrics.includes(m.id) && m.performanceStatus === 'on-track'
           ).length,
-          openDefects: this.defects.filter((d) => d.status === 'open').length,
-          pendingAudits: this.audits.filter((a) => a.status === 'in-progress').length,
+          openDefects: this.defects.filter(d => d.status === 'open').length,
+          pendingAudits: this.audits.filter(a => a.status === 'in-progress').length,
         },
       };
 
       return dashboardData;
     } catch (error) {
-      throw new Error(`Failed to get dashboard data: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -657,8 +653,8 @@ class QualityManagementService {
 
     switch (widget.type) {
       case 'kpi-cards':
-        data.cards = widget.metrics.map((metricId) => {
-          const metric = this.qualityMetrics.find((m) => m.id === metricId);
+        data.cards = widget.metrics.map(metricId => {
+          const metric = this.qualityMetrics.find(m => m.id === metricId);
           return metric
             ? {
                 name: metric.name,
@@ -671,17 +667,17 @@ class QualityManagementService {
         break;
 
       case 'pie-chart':
-        data.critical = this.defects.filter((d) => d.severity === 'critical').length;
-        data.high = this.defects.filter((d) => d.severity === 'high').length;
-        data.medium = this.defects.filter((d) => d.severity === 'medium').length;
-        data.low = this.defects.filter((d) => d.severity === 'low').length;
+        data.critical = this.defects.filter(d => d.severity === 'critical').length;
+        data.high = this.defects.filter(d => d.severity === 'high').length;
+        data.medium = this.defects.filter(d => d.severity === 'medium').length;
+        data.low = this.defects.filter(d => d.severity === 'low').length;
         break;
 
       case 'status-board':
         data.totalAudits = this.audits.length;
-        data.completedAudits = this.audits.filter((a) => a.status === 'completed').length;
+        data.completedAudits = this.audits.filter(a => a.status === 'completed').length;
         data.complianceRate = (
-          (this.audits.filter((a) => a.status === 'completed').length / this.audits.length) *
+          (this.audits.filter(a => a.status === 'completed').length / this.audits.length) *
           100
         ).toFixed(1);
         break;

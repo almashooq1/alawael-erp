@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Service Worker - Progressive Web App Support
  * Enables offline functionality and app-like experience

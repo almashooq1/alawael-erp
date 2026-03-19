@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Authentication Middleware - مكون المصادقة
  *
@@ -8,7 +9,15 @@
  * ✅ Token Refresh Logic
  */
 
+const logger = require('../utils/logger');
+const {
+  ROLES,
+  hasPermission: configHasPermission,
+  getRoleLevel,
+} = require('../config/rbac.config');
+
 const jwt = require('jsonwebtoken');
+const { jwtSecret } = require('../config/secrets');
 const User = require('../models/User');
 const Session = require('../models/Session');
 
@@ -17,8 +26,12 @@ const Session = require('../models/Session');
  * التحقق من صحة التوكن وإعداد سياق المستخدم
  */
 const authenticateToken = async (req, res, next) => {
-  // BYPASS FOR SMART TESTING
-  if (process.env.SMART_TEST_MODE === 'true') {
+  // SMART_TEST_MODE: only in test env with jest (never in production/development)
+  if (
+    process.env.NODE_ENV === 'test' &&
+    process.env.SMART_TEST_MODE === 'true' &&
+    process.env.JEST_WORKER_ID
+  ) {
     const authHeader = req.headers['authorization'];
     if (!authHeader) {
       return res.status(401).json({
@@ -28,30 +41,11 @@ const authenticateToken = async (req, res, next) => {
       });
     }
 
-    let testUserId =
-      req.body?.employeeId ||
-      req.params?.employeeId ||
-      req.query?.employeeId ||
-      req.headers['x-employee-id'] ||
-      req.headers['x-user-id'];
-
-    if (!testUserId) {
-      try {
-        const Employee = require('../models/Employee');
-        const anyEmployee = await Employee.findOne();
-        if (anyEmployee) {
-          testUserId = anyEmployee._id.toString();
-        }
-      } catch (err) {
-        // Non-fatal in test mode; fallback below
-      }
-    }
-
     req.user = {
-      id: testUserId || 'mock_tester',
-      _id: testUserId || 'mock_tester',
-      role: 'admin',
-      permissions: ['ALL'],
+      id: req.headers['x-user-id'] || 'test_user',
+      _id: req.headers['x-user-id'] || 'test_user',
+      role: req.headers['x-user-role'] || 'user',
+      permissions: (req.headers['x-user-permissions'] || '').split(',').filter(Boolean),
     };
     req.userId = req.user.id;
     req.userRole = req.user.role;
@@ -72,7 +66,7 @@ const authenticateToken = async (req, res, next) => {
     }
 
     // Verify JWT
-    jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key', async (err, user) => {
+    jwt.verify(token, jwtSecret, async (err, user) => {
       if (err) {
         if (err.name === 'TokenExpiredError') {
           return res.status(401).json({
@@ -116,7 +110,7 @@ const authenticateToken = async (req, res, next) => {
         }
       } catch (sessionError) {
         // Session validation optional - continue if DB unavailable
-        console.warn('Session validation skipped:', sessionError.message);
+        logger.warn('Session validation skipped:', { error: sessionError.message });
       }
 
       // Attach user info
@@ -128,10 +122,11 @@ const authenticateToken = async (req, res, next) => {
       next();
     });
   } catch (error) {
+    logger.error('Authentication error:', error.message);
     return res.status(500).json({
       success: false,
       error: 'Authentication error',
-      message: error.message,
+      message: 'حدث خطأ في المصادقة',
     });
   }
 };
@@ -148,7 +143,8 @@ const requireAdmin = (req, res, next) => {
     });
   }
 
-  if (req.user.role !== 'admin') {
+  const role = (req.user.role || '').toLowerCase();
+  if (role !== ROLES.ADMIN && role !== ROLES.SUPER_ADMIN) {
     return res.status(403).json({
       success: false,
       error: 'Admin access required',
@@ -166,8 +162,13 @@ const requireAdmin = (req, res, next) => {
 const requireRole = (...args) => {
   const allowedRoles = args.flat();
   return (req, res, next) => {
-    // BYPASS FOR SMART TESTING (Inside factory too just in case)
-    if (process.env.SMART_TEST_MODE === 'true') return next();
+    // Test bypass only when running inside Jest
+    if (
+      process.env.NODE_ENV === 'test' &&
+      process.env.SMART_TEST_MODE === 'true' &&
+      process.env.JEST_WORKER_ID
+    )
+      return next();
 
     if (!req.user) {
       return res.status(401).json({
@@ -233,7 +234,7 @@ const optionalAuth = (req, res, next) => {
     return next();
   }
 
-  jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key', (err, user) => {
+  jwt.verify(token, jwtSecret, (err, user) => {
     if (!err) {
       req.user = user;
       req.userId = user.id || user.sub;
@@ -264,7 +265,7 @@ const extractToken = req => {
  */
 const verifyToken = token => {
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+    const decoded = jwt.verify(token, jwtSecret);
     return decoded;
   } catch (error) {
     return null;
@@ -283,7 +284,7 @@ const generateToken = (userData, expiresIn = '24h') => {
       role: userData.role,
       permissions: userData.permissions || [],
     },
-    process.env.JWT_SECRET || 'your-secret-key',
+    jwtSecret,
     { expiresIn }
   );
 };
@@ -302,12 +303,25 @@ const refreshToken = (req, res) => {
       });
     }
 
-    // فك التوكن بدون التحقق من الانتهاء
-    const decoded = jwt.decode(token);
-    if (!decoded) {
+    // Verify token signature (allow expired tokens for refresh)
+    const { jwtRefreshSecret } = require('../config/secrets');
+    let decoded;
+    try {
+      decoded = jwt.verify(token, jwtSecret, { ignoreExpiration: true });
+    } catch (verifyErr) {
       return res.status(403).json({
         success: false,
-        error: 'Invalid token format',
+        error: 'Invalid token — cannot refresh',
+      });
+    }
+
+    // Reject tokens older than refresh window (7 days)
+    const tokenAge = Math.floor(Date.now() / 1000) - (decoded.iat || 0);
+    const MAX_REFRESH_WINDOW = 7 * 24 * 60 * 60; // 7 days in seconds
+    if (tokenAge > MAX_REFRESH_WINDOW) {
+      return res.status(403).json({
+        success: false,
+        error: 'Token too old to refresh — please re-login',
       });
     }
 
@@ -322,13 +336,14 @@ const refreshToken = (req, res) => {
     return res.json({
       success: true,
       token: newToken,
-      expiresIn: '24h',
+      expiresIn: '1h',
     });
   } catch (error) {
+    logger.error('Token refresh failed:', error.message);
     return res.status(500).json({
       success: false,
       error: 'Token refresh failed',
-      message: error.message,
+      message: 'حدث خطأ في تجديد الرمز',
     });
   }
 };
@@ -338,13 +353,9 @@ const refreshToken = (req, res) => {
  */
 const generateTokenWithSession = async (userData, ipAddress, userAgent, expiresIn = '24h') => {
   const token = generateToken(userData, expiresIn);
-  const refreshToken = jwt.sign(
-    { id: userData.id, type: 'refresh' },
-    process.env.JWT_SECRET || 'your-secret-key',
-    {
-      expiresIn: '7d',
-    }
-  );
+  const refreshToken = jwt.sign({ id: userData.id, type: 'refresh' }, jwtSecret, {
+    expiresIn: '7d',
+  });
 
   // Create session record
   try {
@@ -359,7 +370,7 @@ const generateTokenWithSession = async (userData, ipAddress, userAgent, expiresI
       isActive: true,
     });
   } catch (error) {
-    console.warn('Session creation failed:', error.message);
+    logger.warn('Session creation failed:', { error: error.message });
   }
 
   return { token, refreshToken };
@@ -376,7 +387,8 @@ const revokeToken = async token => {
     }
     return { success: true };
   } catch (error) {
-    return { success: false, error: error.message };
+    logger.error('Token revocation failed:', error.message);
+    return { success: false, error: 'فشل إلغاء الجلسة' };
   }
 };
 
@@ -390,9 +402,23 @@ const requirePermissions = (...permissions) => {
     }
 
     const userPermissions = req.permissions || req.user.permissions || [];
-    const hasAll = permissions.every(
-      perm => userPermissions.includes(perm) || userPermissions.includes('ALL')
-    );
+    if (userPermissions.includes('*:*')) return next();
+
+    const hasAll = permissions.every(perm => {
+      if (userPermissions.includes(perm)) return true;
+      // Delegate resource:action checks to rbac.config engine
+      const [resource, action] = perm.split(':');
+      if (resource && action) {
+        return configHasPermission(
+          (req.user.role || 'guest').toLowerCase(),
+          resource,
+          action,
+          req.user.customPermissions,
+          req.user.deniedPermissions
+        );
+      }
+      return false;
+    });
 
     if (!hasAll) {
       return res.status(403).json({

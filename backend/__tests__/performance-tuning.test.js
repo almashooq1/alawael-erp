@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * 🚀 Phase 12: Advanced Performance Tuning & Optimization Tests
  * اختبارات شاملة لتحسين الأداء والتحسينات المتقدمة

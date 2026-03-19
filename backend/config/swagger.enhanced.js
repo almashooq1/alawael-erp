@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Enhanced Swagger/OpenAPI Configuration
  * تحسين توثيق API المتقدم

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 const inventoryItemSchema = new mongoose.Schema({
@@ -9,4 +10,5 @@ const inventoryItemSchema = new mongoose.Schema({
   lastUpdated: { type: Date, default: Date.now },
 });
 
-module.exports = mongoose.models.InventoryItem || mongoose.model('InventoryItem', inventoryItemSchema);
+module.exports =
+  mongoose.models.InventoryItem || mongoose.model('InventoryItem', inventoryItemSchema);

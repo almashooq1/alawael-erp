@@ -1,3 +1,4 @@
+﻿/* eslint-disable no-unused-vars */
 const express = require('express');
 const router = express.Router();
 const asyncHandler = require('express-async-handler');
@@ -9,11 +10,11 @@ const logger = require('../utils/logger');
 const scheduleService = new ScheduleManagementService();
 
 // Middleware to verify service is ready
-router.use((req, res, next) => {
+router.use((_req, res, next) => {
   if (!scheduleService) {
-    return res.status(503).json({ 
+    return res.status(503).json({
       error: 'Service unavailable',
-      message: 'Schedule management service not initialized'
+      message: 'Schedule management service not initialized',
     });
   }
   next();
@@ -24,7 +25,8 @@ router.use((req, res, next) => {
  * @desc    Get all schedules
  * @access  Private
  */
-router.get('/',
+router.get(
+  '/',
   authenticate,
   asyncHandler(async (req, res) => {
     try {
@@ -32,13 +34,13 @@ router.get('/',
       res.status(200).json({
         success: true,
         count: schedules.length,
-        data: schedules
+        data: schedules,
       });
     } catch (error) {
       logger.error('Error fetching schedules:', error);
       res.status(500).json({
         success: false,
-        error: error.message || 'Failed to fetch schedules'
+        error: 'حدث خطأ في الخادم' || 'Failed to fetch schedules',
       });
     }
   })
@@ -49,7 +51,8 @@ router.get('/',
  * @desc    Create new schedule
  * @access  Private/Manager
  */
-router.post('/',
+router.post(
+  '/',
   authenticate,
   authorize(['manager', 'admin']),
   asyncHandler(async (req, res) => {
@@ -59,7 +62,7 @@ router.post('/',
       if (!title || !startDate || !resourceId) {
         return res.status(400).json({
           success: false,
-          error: 'Title, startDate, and resourceId are required'
+          error: 'Title, startDate, and resourceId are required',
         });
       }
 
@@ -70,119 +73,18 @@ router.post('/',
         endDate: endDate ? new Date(endDate) : null,
         resourceId,
         type: type || 'event',
-        createdBy: req.user.id
+        createdBy: req.user.id,
       });
 
       res.status(201).json({
         success: true,
-        data: schedule
+        data: schedule,
       });
     } catch (error) {
       logger.error('Error creating schedule:', error);
       res.status(500).json({
         success: false,
-        error: error.message || 'Failed to create schedule'
-      });
-    }
-  })
-);
-
-/**
- * @route   GET /api/v1/schedules/:scheduleId
- * @desc    Get specific schedule
- * @access  Private
- */
-router.get('/:scheduleId',
-  authenticate,
-  asyncHandler(async (req, res) => {
-    try {
-      const schedule = await scheduleService.getScheduleById(req.params.scheduleId);
-      
-      if (!schedule) {
-        return res.status(404).json({
-          success: false,
-          error: 'Schedule not found'
-        });
-      }
-
-      res.status(200).json({
-        success: true,
-        data: schedule
-      });
-    } catch (error) {
-      logger.error('Error fetching schedule:', error);
-      res.status(500).json({
-        success: false,
-        error: error.message || 'Failed to fetch schedule'
-      });
-    }
-  })
-);
-
-/**
- * @route   PUT /api/v1/schedules/:scheduleId
- * @desc    Update schedule
- * @access  Private/Manager
- */
-router.put('/:scheduleId',
-  authenticate,
-  authorize(['manager', 'admin']),
-  asyncHandler(async (req, res) => {
-    try {
-      const schedule = await scheduleService.updateSchedule(
-        req.params.scheduleId,
-        req.body
-      );
-
-      if (!schedule) {
-        return res.status(404).json({
-          success: false,
-          error: 'Schedule not found'
-        });
-      }
-
-      res.status(200).json({
-        success: true,
-        data: schedule
-      });
-    } catch (error) {
-      logger.error('Error updating schedule:', error);
-      res.status(500).json({
-        success: false,
-        error: error.message || 'Failed to update schedule'
-      });
-    }
-  })
-);
-
-/**
- * @route   DELETE /api/v1/schedules/:scheduleId
- * @desc    Delete schedule
- * @access  Private/Admin
- */
-router.delete('/:scheduleId',
-  authenticate,
-  authorize(['admin']),
-  asyncHandler(async (req, res) => {
-    try {
-      const result = await scheduleService.deleteSchedule(req.params.scheduleId);
-
-      if (!result) {
-        return res.status(404).json({
-          success: false,
-          error: 'Schedule not found'
-        });
-      }
-
-      res.status(200).json({
-        success: true,
-        message: 'Schedule deleted successfully'
-      });
-    } catch (error) {
-      logger.error('Error deleting schedule:', error);
-      res.status(500).json({
-        success: false,
-        error: error.message || 'Failed to delete schedule'
+        error: 'حدث خطأ في الخادم' || 'Failed to create schedule',
       });
     }
   })
@@ -193,22 +95,23 @@ router.delete('/:scheduleId',
  * @desc    Get schedules for specific resource
  * @access  Private
  */
-router.get('/resource/:resourceId',
+router.get(
+  '/resource/:resourceId',
   authenticate,
   asyncHandler(async (req, res) => {
     try {
       const schedules = await scheduleService.getSchedulesByResource(req.params.resourceId);
-      
+
       res.status(200).json({
         success: true,
         count: schedules.length,
-        data: schedules
+        data: schedules,
       });
     } catch (error) {
       logger.error('Error fetching resource schedules:', error);
       res.status(500).json({
         success: false,
-        error: error.message || 'Failed to fetch schedules'
+        error: 'حدث خطأ في الخادم' || 'Failed to fetch schedules',
       });
     }
   })
@@ -219,7 +122,8 @@ router.get('/resource/:resourceId',
  * @desc    Get schedules within date range
  * @access  Private
  */
-router.get('/date-range/:startDate/:endDate',
+router.get(
+  '/date-range/:startDate/:endDate',
   authenticate,
   asyncHandler(async (req, res) => {
     try {
@@ -227,17 +131,118 @@ router.get('/date-range/:startDate/:endDate',
         new Date(req.params.startDate),
         new Date(req.params.endDate)
       );
-      
+
       res.status(200).json({
         success: true,
         count: schedules.length,
-        data: schedules
+        data: schedules,
       });
     } catch (error) {
       logger.error('Error fetching schedules by date range:', error);
       res.status(500).json({
         success: false,
-        error: error.message || 'Failed to fetch schedules'
+        error: 'حدث خطأ في الخادم' || 'Failed to fetch schedules',
+      });
+    }
+  })
+);
+
+/**
+ * @route   GET /api/v1/schedules/:scheduleId
+ * @desc    Get specific schedule
+ * @access  Private
+ */
+router.get(
+  '/:scheduleId',
+  authenticate,
+  asyncHandler(async (req, res) => {
+    try {
+      const schedule = await scheduleService.getScheduleById(req.params.scheduleId);
+
+      if (!schedule) {
+        return res.status(404).json({
+          success: false,
+          error: 'Schedule not found',
+        });
+      }
+
+      res.status(200).json({
+        success: true,
+        data: schedule,
+      });
+    } catch (error) {
+      logger.error('Error fetching schedule:', error);
+      res.status(500).json({
+        success: false,
+        error: 'حدث خطأ في الخادم' || 'Failed to fetch schedule',
+      });
+    }
+  })
+);
+
+/**
+ * @route   PUT /api/v1/schedules/:scheduleId
+ * @desc    Update schedule
+ * @access  Private/Manager
+ */
+router.put(
+  '/:scheduleId',
+  authenticate,
+  authorize(['manager', 'admin']),
+  asyncHandler(async (req, res) => {
+    try {
+      const schedule = await scheduleService.updateSchedule(req.params.scheduleId, req.body);
+
+      if (!schedule) {
+        return res.status(404).json({
+          success: false,
+          error: 'Schedule not found',
+        });
+      }
+
+      res.status(200).json({
+        success: true,
+        data: schedule,
+      });
+    } catch (error) {
+      logger.error('Error updating schedule:', error);
+      res.status(500).json({
+        success: false,
+        error: 'حدث خطأ في الخادم' || 'Failed to update schedule',
+      });
+    }
+  })
+);
+
+/**
+ * @route   DELETE /api/v1/schedules/:scheduleId
+ * @desc    Delete schedule
+ * @access  Private/Admin
+ */
+router.delete(
+  '/:scheduleId',
+  authenticate,
+  authorize(['admin']),
+  asyncHandler(async (req, res) => {
+    try {
+      const result = await scheduleService.deleteSchedule(req.params.scheduleId);
+
+      if (!result) {
+        return res.status(404).json({
+          success: false,
+          error: 'Schedule not found',
+        });
+      }
+
+      res.status(200).json({
+        success: true,
+        message: 'Schedule deleted successfully',
+      });
+    } catch (error) {
+      logger.error('Error deleting schedule:', error);
+      res.status(500).json({
+        success: false,
+        error: 'حدث خطأ في الخادم' || 'Failed to delete schedule',
       });
     }
   })
@@ -248,43 +253,41 @@ router.get('/date-range/:startDate/:endDate',
  * @desc    Confirm schedule
  * @access  Private
  */
-router.post('/:scheduleId/confirm',
+router.post(
+  '/:scheduleId/confirm',
   authenticate,
   asyncHandler(async (req, res) => {
     try {
-      const schedule = await scheduleService.confirmSchedule(
-        req.params.scheduleId,
-        req.user.id
-      );
+      const schedule = await scheduleService.confirmSchedule(req.params.scheduleId, req.user.id);
 
       if (!schedule) {
         return res.status(404).json({
           success: false,
-          error: 'Schedule not found'
+          error: 'Schedule not found',
         });
       }
 
       res.status(200).json({
         success: true,
-        data: schedule
+        data: schedule,
       });
     } catch (error) {
       logger.error('Error confirming schedule:', error);
       res.status(500).json({
         success: false,
-        error: error.message || 'Failed to confirm schedule'
+        error: 'حدث خطأ في الخادم' || 'Failed to confirm schedule',
       });
     }
   })
 );
 
 // Error handling middleware
-router.use((err, req, res, next) => {
+router.use((err, _req, res, _next) => {
   logger.error('Router error:', err);
   res.status(500).json({
     success: false,
     error: 'An unexpected error occurred',
-    message: err.message
+    message: 'حدث خطأ في الخادم',
   });
 });
 

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Models Index - Central Export Point
  * تصدير جميع نماذج Mongoose من قاعدة البيانات
@@ -23,6 +24,15 @@ const Document = require('./Document');
 const Notification = require('./Notification');
 const AuditLog = require('./AuditLog');
 
+// Financial Models
+const FinancialJournalEntry = require('./FinancialJournalEntry');
+const CashFlow = require('./CashFlow');
+const RiskAssessment = require('./RiskAssessment');
+const FinancialReport = require('./FinancialReport');
+const ValidationRule = require('./ValidationRule');
+const ComplianceMetric = require('./ComplianceMetric');
+const ForecastModel = require('./ForecastModel');
+
 module.exports = {
   // Phase 3 - MongoDB Models
   Asset,
@@ -43,4 +53,13 @@ module.exports = {
   Document,
   Notification,
   AuditLog,
+
+  // Financial Models
+  FinancialJournalEntry,
+  CashFlow,
+  RiskAssessment,
+  FinancialReport,
+  ValidationRule,
+  ComplianceMetric,
+  ForecastModel,
 };

@@ -6,6 +6,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './IncidentManagement.css';
 
+const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+
 const IncidentManagement = () => {
   const [incidents, setIncidents] = useState([]);
   const [filteredIncidents, setFilteredIncidents] = useState([]);
@@ -22,17 +24,17 @@ const IncidentManagement = () => {
     description: '',
     category: 'SECURITY_BREACH',
     severity: 'MEDIUM',
-    priority: 'P3'
+    priority: 'P3',
   });
 
   // جلب الحوادث
   const fetchIncidents = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:5000/api/incidents', {
+      const response = await axios.get(`${API_BASE}/incidents`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
       });
       setIncidents(response.data.data);
       console.log('✅ Incidents loaded:', response.data.data.length);
@@ -48,10 +50,11 @@ const IncidentManagement = () => {
     let filtered = incidents;
 
     if (searchTerm) {
-      filtered = filtered.filter(inc =>
-        inc.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        inc.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        inc.incidentNumber?.toLowerCase().includes(searchTerm.toLowerCase())
+      filtered = filtered.filter(
+        inc =>
+          inc.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          inc.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          inc.incidentNumber?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -81,11 +84,11 @@ const IncidentManagement = () => {
   }, []);
 
   // التعامل مع التغييرات في النموذج
-  const handleInputChange = (e) => {
+  const handleInputChange = e => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -95,29 +98,25 @@ const IncidentManagement = () => {
       if (editingId) {
         // تحديث
         const response = await axios.put(
-          `http://localhost:5000/api/incidents/${editingId}`,
+          `${API_BASE}/incidents/${editingId}`,
           formData,
           {
             headers: {
-              Authorization: `Bearer ${localStorage.getItem('token')}`
-            }
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+            },
           }
         );
         console.log('✅ Incident updated:', response.data);
       } else {
         // إنشاء جديد
-        const response = await axios.post(
-          'http://localhost:5000/api/incidents',
-          formData,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem('token')}`
-            }
-          }
-        );
+        const response = await axios.post(`${API_BASE}/incidents`, formData, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
         console.log('✅ Incident created:', response.data);
       }
-      
+
       // إعادة جلب البيانات
       await fetchIncidents();
       setShowModal(false);
@@ -128,18 +127,15 @@ const IncidentManagement = () => {
   };
 
   // حذف الحادثة
-  const handleDeleteIncident = async (id) => {
+  const handleDeleteIncident = async id => {
     if (!window.confirm('هل تريد حقاً حذف هذه الحادثة؟')) return;
 
     try {
-      await axios.delete(
-        `http://localhost:5000/api/incidents/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-          }
-        }
-      );
+      await axios.delete(`${API_BASE}/incidents/${id}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
       console.log('✅ Incident deleted');
       await fetchIncidents();
     } catch (error) {
@@ -148,13 +144,13 @@ const IncidentManagement = () => {
   };
 
   // تحرير الحادثة
-  const handleEditIncident = (incident) => {
+  const handleEditIncident = incident => {
     setFormData({
       title: incident.title,
       description: incident.description,
       category: incident.category,
       severity: incident.severity,
-      priority: incident.priority
+      priority: incident.priority,
     });
     setEditingId(incident._id);
     setShowModal(true);
@@ -167,7 +163,7 @@ const IncidentManagement = () => {
       description: '',
       category: 'SECURITY_BREACH',
       severity: 'MEDIUM',
-      priority: 'P3'
+      priority: 'P3',
     });
     setEditingId(null);
   };
@@ -179,18 +175,18 @@ const IncidentManagement = () => {
   };
 
   // الحصول على اللون حسب الخطورة
-  const getSeverityColor = (severity) => {
+  const getSeverityColor = severity => {
     const colors = {
       CRITICAL: '#dc3545',
       HIGH: '#fd7e14',
       MEDIUM: '#ffc107',
-      LOW: '#28a745'
+      LOW: '#28a745',
     };
     return colors[severity] || '#6c757d';
   };
 
   // الحصول على اللون حسب الحالة
-  const getStatusColor = (status) => {
+  const getStatusColor = status => {
     const colors = {
       REPORTED: '#17a2b8',
       ACKNOWLEDGED: '#0066cc',
@@ -199,7 +195,7 @@ const IncidentManagement = () => {
       IN_RESOLUTION: '#fd7e14',
       RESOLVED: '#28a745',
       CLOSED: '#6c757d',
-      REOPENED: '#dc3545'
+      REOPENED: '#dc3545',
     };
     return colors[status] || '#6c757d';
   };
@@ -218,7 +214,7 @@ const IncidentManagement = () => {
     'HUMAN_ERROR',
     'THIRD_PARTY_ISSUE',
     'ENVIRONMENTAL',
-    'OTHER'
+    'OTHER',
   ];
 
   const statusOptions = [
@@ -229,14 +225,20 @@ const IncidentManagement = () => {
     'IN_RESOLUTION',
     'RESOLVED',
     'CLOSED',
-    'REOPENED'
+    'REOPENED',
   ];
 
   return (
     <div className="incident-management">
       <div className="incident-header">
         <h1>📋 إدارة الحوادث | Incident Management</h1>
-        <button className="btn-add" onClick={() => { resetForm(); setShowModal(true); }}>
+        <button
+          className="btn-add"
+          onClick={() => {
+            resetForm();
+            setShowModal(true);
+          }}
+        >
           ➕ إضافة حادثة جديدة
         </button>
       </div>
@@ -247,24 +249,26 @@ const IncidentManagement = () => {
           type="text"
           placeholder="🔍 بحث عن حادثة..."
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={e => setSearchTerm(e.target.value)}
           className="search-input"
         />
 
         <select
           value={filterStatus}
-          onChange={(e) => setFilterStatus(e.target.value)}
+          onChange={e => setFilterStatus(e.target.value)}
           className="filter-select"
         >
           <option value="">جميع الحالات</option>
           {statusOptions.map(status => (
-            <option key={status} value={status}>{status}</option>
+            <option key={status} value={status}>
+              {status}
+            </option>
           ))}
         </select>
 
         <select
           value={filterSeverity}
-          onChange={(e) => setFilterSeverity(e.target.value)}
+          onChange={e => setFilterSeverity(e.target.value)}
           className="filter-select"
         >
           <option value="">جميع مستويات الخطورة</option>
@@ -276,12 +280,14 @@ const IncidentManagement = () => {
 
         <select
           value={filterCategory}
-          onChange={(e) => setFilterCategory(e.target.value)}
+          onChange={e => setFilterCategory(e.target.value)}
           className="filter-select"
         >
           <option value="">جميع الأنواع</option>
           {categoryOptions.map(cat => (
-            <option key={cat} value={cat}>{cat}</option>
+            <option key={cat} value={cat}>
+              {cat}
+            </option>
           ))}
         </select>
       </div>
@@ -370,10 +376,12 @@ const IncidentManagement = () => {
       {/* نموذج إضافة/تحرير الحادثة */}
       {showModal && (
         <div className="modal-overlay" onClick={handleCloseModal}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h2>{editingId ? '✏️ تحرير الحادثة' : '➕ حادثة جديدة'}</h2>
-              <button className="btn-close" onClick={handleCloseModal}>✕</button>
+              <button className="btn-close" onClick={handleCloseModal}>
+                ✕
+              </button>
             </div>
 
             <div className="modal-body">
@@ -411,7 +419,9 @@ const IncidentManagement = () => {
                     className="form-input"
                   >
                     {categoryOptions.map(cat => (
-                      <option key={cat} value={cat}>{cat}</option>
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -450,7 +460,9 @@ const IncidentManagement = () => {
             </div>
 
             <div className="modal-footer">
-              <button className="btn-cancel" onClick={handleCloseModal}>إلغاء</button>
+              <button className="btn-cancel" onClick={handleCloseModal}>
+                إلغاء
+              </button>
               <button className="btn-save" onClick={handleSaveIncident}>
                 💾 {editingId ? 'تحديث' : 'حفظ'}
               </button>

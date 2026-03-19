@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * Phase 6: Service Layer & Security Testing
  * Tests business logic, authorization, RBAC, and security scenarios

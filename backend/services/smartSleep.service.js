@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Smart Sleep & Bio-Rhythm Service (Phase 90)
  *

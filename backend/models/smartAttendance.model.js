@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * SMART ATTENDANCE MODELS - PHASE 85
  * نماذج الحضور والانصراف الذكية المتقدمة

@@ -1,4 +1,5 @@
-const mongoose = require('mongoose');
+/* eslint-disable no-undef, no-unused-vars */
+const _mongoose = require('mongoose');
 
 // Set env before require
 process.env.USE_MOCK_DB = 'false';
@@ -10,9 +11,31 @@ const Lesson = require('../models/lesson.model');
 const Enrollment = require('../models/enrollment.model');
 
 // Mock Models
-jest.mock('../models/course.model');
-jest.mock('../models/lesson.model');
-jest.mock('../models/enrollment.model');
+jest.mock('../models/course.model', () => {
+  const mock = jest.fn();
+  mock.find = jest.fn();
+  mock.findOne = jest.fn();
+  mock.findById = jest.fn();
+  mock.findByIdAndUpdate = jest.fn();
+  mock.countDocuments = jest.fn();
+  return mock;
+});
+jest.mock('../models/lesson.model', () => {
+  const mock = jest.fn();
+  mock.find = jest.fn();
+  mock.findOne = jest.fn();
+  mock.findById = jest.fn();
+  mock.countDocuments = jest.fn();
+  return mock;
+});
+jest.mock('../models/enrollment.model', () => {
+  const mock = jest.fn();
+  mock.find = jest.fn();
+  mock.findOne = jest.fn();
+  mock.findById = jest.fn();
+  mock.findByIdAndUpdate = jest.fn();
+  return mock;
+});
 
 describe('E-Learning Service', () => {
   let saveMock;
@@ -89,7 +112,9 @@ describe('E-Learning Service', () => {
     it('should add a lesson successfully', async () => {
       const data = { title: 'New Lesson', order: 1 };
       await eLearningService.addLesson({ ...data, courseId: 'course1' });
-      expect(Lesson).toHaveBeenCalledWith(expect.objectContaining({ ...data, courseId: 'course1' }));
+      expect(Lesson).toHaveBeenCalledWith(
+        expect.objectContaining({ ...data, courseId: 'course1' })
+      );
       expect(saveMock).toHaveBeenCalled();
     });
   });

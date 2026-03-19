@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const crypto = require('crypto');
 const TherapySession = require('../models/TherapySession');
 const SmartVoiceService = require('./smartVoice.service'); // Link to Phase 30
@@ -49,7 +50,10 @@ class SmartTelehealthService {
       attentionScore,
       engagementLevel,
       insights,
-      recommendation: engagementLevel === 'LOW' ? 'Try more interactive visual aids next time.' : 'Maintain current strategy.',
+      recommendation:
+        engagementLevel === 'LOW'
+          ? 'Try more interactive visual aids next time.'
+          : 'Maintain current strategy.',
     };
   }
 

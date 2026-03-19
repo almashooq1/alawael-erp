@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Workflow API Routes - Backend
  * مسارات API لنظام سير العمل والمصادقات
@@ -6,6 +7,7 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
+const { jwtSecret } = require('../../config/secrets');
 
 // Middleware للتحقق من المصادقة
 const authenticateToken = (req, res, next) => {
@@ -16,7 +18,7 @@ const authenticateToken = (req, res, next) => {
     return res.status(401).json({ error: 'Access token required' });
   }
 
-  jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key', (err, user) => {
+  jwt.verify(token, jwtSecret, (err, user) => {
     if (err) return res.status(403).json({ error: 'Invalid token' });
     req.user = user;
     next();
@@ -48,7 +50,10 @@ router.get('/workflows', authenticateToken, async (req, res) => {
     if (status) results = results.filter(w => w.status === status);
     if (priority) results = results.filter(w => w.priority === priority);
     if (category) results = results.filter(w => w.category === category);
-    if (userId) results = results.filter(w => w.initiator === userId || w.stages.some(s => s.assignees.includes(userId)));
+    if (userId)
+      results = results.filter(
+        w => w.initiator === userId || w.stages.some(s => s.assignees.includes(userId))
+      );
 
     res.json({
       success: true,
@@ -58,7 +63,7 @@ router.get('/workflows', authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -140,7 +145,7 @@ router.post('/workflows', authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -169,7 +174,7 @@ router.get('/workflows/:id', authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -277,7 +282,7 @@ router.post('/workflows/:id/approve', authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -339,7 +344,7 @@ router.post('/workflows/:id/delegate', authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -379,7 +384,7 @@ router.get('/analytics', authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -399,7 +404,7 @@ router.get('/templates', authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -429,7 +434,7 @@ router.get('/audit-log', authenticateToken, async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 });
@@ -449,7 +454,10 @@ function calculateExpectedCompletion(stages) {
 
 function canAccessWorkflow(user, workflow) {
   // Check if user is initiator or assigned to any stage
-  return workflow.initiator === user.id || workflow.stages.some(stage => stage.assignees.includes(user.id));
+  return (
+    workflow.initiator === user.id ||
+    workflow.stages.some(stage => stage.assignees.includes(user.id))
+  );
 }
 
 function groupBy(array, key) {
@@ -514,7 +522,9 @@ function addAuditLog(action, userId, workflowId, details) {
 
 async function sendNotification(workflow, eventType, data = {}) {
   // في التطبيق الحقيقي، أرسل إشعارات عبر البريد الإلكتروني، SMS، Push
-  console.log(`Notification sent: ${eventType} for workflow ${workflow.id}`);
+  // In real app, send notifications via email, SMS, push
+  const logger = require('../../utils/logger');
+  logger.debug(`Notification sent: ${eventType} for workflow ${workflow.id}`);
   return true;
 }
 

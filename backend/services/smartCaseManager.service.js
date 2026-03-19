@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Smart Case Management Service
  *
@@ -31,7 +32,10 @@ class SmartCaseManagerService {
     const riskLevel = 'LOW';
 
     // Simple heuristic for demo
-    if (goalsList.some(g => g.type === 'PHYSICAL_ACTIVITY') && goalsList.some(g => g.type === 'RESTRICTED_MOVEMENT')) {
+    if (
+      goalsList.some(g => g.type === 'PHYSICAL_ACTIVITY') &&
+      goalsList.some(g => g.type === 'RESTRICTED_MOVEMENT')
+    ) {
       conflicts.push({
         severity: 'HIGH',
         description: 'Physical Therapy goal conflicts with Medical precaution.',

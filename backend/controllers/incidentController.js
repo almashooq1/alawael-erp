@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // backend/controllers/incidentController.js
 // معالجات الحوادث
 // Incident Management Controllers
@@ -15,21 +16,18 @@ class IncidentController {
         return res.status(400).json({ errors: errors.array() });
       }
 
-      const incident = await incidentService.createIncident(
-        req.body,
-        req.user._id
-      );
+      const incident = await incidentService.createIncident(req.body, req.user._id);
 
       res.status(201).json({
         success: true,
         message: 'تم إنشاء الحادثة بنجاح',
-        data: incident
+        data: incident,
       });
     } catch (error) {
       logger.error('Error in createIncident', { error: error.message });
       res.status(500).json({
         success: false,
-        message: error.message
+        message: 'حدث خطأ داخلي',
       });
     }
   }
@@ -44,7 +42,7 @@ class IncidentController {
         severity: severity || null,
         category: category || null,
         priority: priority || null,
-        searchText: search || null
+        searchText: search || null,
       };
 
       // تنظيف الفلاتر من null
@@ -63,13 +61,13 @@ class IncidentController {
       res.status(200).json({
         success: true,
         data: result.incidents,
-        pagination: result.pagination
+        pagination: result.pagination,
       });
     } catch (error) {
       logger.error('Error in getAllIncidents', { error: error.message });
       res.status(500).json({
         success: false,
-        message: error.message
+        message: 'حدث خطأ داخلي',
       });
     }
   }
@@ -81,13 +79,13 @@ class IncidentController {
 
       res.status(200).json({
         success: true,
-        data: incident
+        data: incident,
       });
     } catch (error) {
       logger.error('Error in getIncidentById', { error: error.message });
       res.status(404).json({
         success: false,
-        message: error.message
+        message: 'حدث خطأ داخلي',
       });
     }
   }
@@ -100,22 +98,18 @@ class IncidentController {
         return res.status(400).json({ errors: errors.array() });
       }
 
-      const incident = await incidentService.updateIncident(
-        req.params.id,
-        req.body,
-        req.user._id
-      );
+      const incident = await incidentService.updateIncident(req.params.id, req.body, req.user._id);
 
       res.status(200).json({
         success: true,
         message: 'تم تحديث الحادثة بنجاح',
-        data: incident
+        data: incident,
       });
     } catch (error) {
       logger.error('Error in updateIncident', { error: error.message });
       res.status(500).json({
         success: false,
-        message: error.message
+        message: 'حدث خطأ داخلي',
       });
     }
   }
@@ -123,20 +117,17 @@ class IncidentController {
   // 5. حذف حادثة
   async deleteIncident(req, res) {
     try {
-      const result = await incidentService.deleteIncident(
-        req.params.id,
-        req.user._id
-      );
+      const result = await incidentService.deleteIncident(req.params.id, req.user._id);
 
       res.status(200).json({
         success: true,
-        message: result.message
+        message: result.message,
       });
     } catch (error) {
       logger.error('Error in deleteIncident', { error: error.message });
       res.status(500).json({
         success: false,
-        message: error.message
+        message: 'حدث خطأ داخلي',
       });
     }
   }
@@ -160,13 +151,13 @@ class IncidentController {
       res.status(200).json({
         success: true,
         message: `تم تحديث حالة الحادثة إلى ${status}`,
-        data: incident
+        data: incident,
       });
     } catch (error) {
       logger.error('Error in updateStatus', { error: error.message });
       res.status(500).json({
         success: false,
-        message: error.message
+        message: 'حدث خطأ داخلي',
       });
     }
   }
@@ -190,13 +181,13 @@ class IncidentController {
       res.status(200).json({
         success: true,
         message: 'تم إسناد الحادثة بنجاح',
-        data: incident
+        data: incident,
       });
     } catch (error) {
       logger.error('Error in assignIncident', { error: error.message });
       res.status(500).json({
         success: false,
-        message: error.message
+        message: 'حدث خطأ داخلي',
       });
     }
   }
@@ -209,22 +200,18 @@ class IncidentController {
         return res.status(400).json({ errors: errors.array() });
       }
 
-      const incident = await incidentService.addResponder(
-        req.params.id,
-        req.body,
-        req.user._id
-      );
+      const incident = await incidentService.addResponder(req.params.id, req.body, req.user._id);
 
       res.status(200).json({
         success: true,
         message: 'تم إضافة المستجيب بنجاح',
-        data: incident
+        data: incident,
       });
     } catch (error) {
       logger.error('Error in addResponder', { error: error.message });
       res.status(500).json({
         success: false,
-        message: error.message
+        message: 'حدث خطأ داخلي',
       });
     }
   }
@@ -246,13 +233,13 @@ class IncidentController {
       res.status(200).json({
         success: true,
         message: 'تم تصعيد الحادثة بنجاح',
-        data: incident
+        data: incident,
       });
     } catch (error) {
       logger.error('Error in escalateIncident', { error: error.message });
       res.status(500).json({
         success: false,
-        message: error.message
+        message: 'حدث خطأ داخلي',
       });
     }
   }
@@ -265,22 +252,18 @@ class IncidentController {
         return res.status(400).json({ errors: errors.array() });
       }
 
-      const incident = await incidentService.addComment(
-        req.params.id,
-        req.body,
-        req.user._id
-      );
+      const incident = await incidentService.addComment(req.params.id, req.body, req.user._id);
 
       res.status(200).json({
         success: true,
         message: 'تم إضافة التعليق بنجاح',
-        data: incident
+        data: incident,
       });
     } catch (error) {
       logger.error('Error in addComment', { error: error.message });
       res.status(500).json({
         success: false,
-        message: error.message
+        message: 'حدث خطأ داخلي',
       });
     }
   }
@@ -293,7 +276,7 @@ class IncidentController {
       if (!req.file) {
         return res.status(400).json({
           success: false,
-          message: 'يجب تحميل ملف'
+          message: 'يجب تحميل ملف',
         });
       }
 
@@ -305,7 +288,7 @@ class IncidentController {
           fileType: req.file.mimetype,
           fileSize: req.file.size,
           description,
-          attachmentType
+          attachmentType,
         },
         req.user._id
       );
@@ -313,13 +296,13 @@ class IncidentController {
       res.status(200).json({
         success: true,
         message: 'تم تحميل المرفق بنجاح',
-        data: incident
+        data: incident,
       });
     } catch (error) {
       logger.error('Error in addAttachment', { error: error.message });
       res.status(500).json({
         success: false,
-        message: error.message
+        message: 'حدث خطأ داخلي',
       });
     }
   }
@@ -332,22 +315,18 @@ class IncidentController {
         return res.status(400).json({ errors: errors.array() });
       }
 
-      const incident = await incidentService.resolveIncident(
-        req.params.id,
-        req.body,
-        req.user._id
-      );
+      const incident = await incidentService.resolveIncident(req.params.id, req.body, req.user._id);
 
       res.status(200).json({
         success: true,
         message: 'تم حل الحادثة بنجاح',
-        data: incident
+        data: incident,
       });
     } catch (error) {
       logger.error('Error in resolveIncident', { error: error.message });
       res.status(500).json({
         success: false,
-        message: error.message
+        message: 'حدث خطأ داخلي',
       });
     }
   }
@@ -360,22 +339,18 @@ class IncidentController {
         return res.status(400).json({ errors: errors.array() });
       }
 
-      const incident = await incidentService.closeIncident(
-        req.params.id,
-        req.body,
-        req.user._id
-      );
+      const incident = await incidentService.closeIncident(req.params.id, req.body, req.user._id);
 
       res.status(200).json({
         success: true,
         message: 'تم إغلاق الحادثة بنجاح',
-        data: incident
+        data: incident,
       });
     } catch (error) {
       logger.error('Error in closeIncident', { error: error.message });
       res.status(500).json({
         success: false,
-        message: error.message
+        message: 'حدث خطأ داخلي',
       });
     }
   }
@@ -383,19 +358,17 @@ class IncidentController {
   // 14. توليد تقرير
   async generateReport(req, res) {
     try {
-      const report = await incidentService.generateIncidentReport(
-        req.params.id
-      );
+      const report = await incidentService.generateIncidentReport(req.params.id);
 
       res.status(200).json({
         success: true,
-        data: report
+        data: report,
       });
     } catch (error) {
       logger.error('Error in generateReport', { error: error.message });
       res.status(500).json({
         success: false,
-        message: error.message
+        message: 'حدث خطأ داخلي',
       });
     }
   }
@@ -412,7 +385,7 @@ class IncidentController {
       if (startDate && endDate) {
         filters.dateRange = {
           start: new Date(startDate),
-          end: new Date(endDate)
+          end: new Date(endDate),
         };
       }
 
@@ -420,13 +393,13 @@ class IncidentController {
 
       res.status(200).json({
         success: true,
-        data: statistics
+        data: statistics,
       });
     } catch (error) {
       logger.error('Error in getStatistics', { error: error.message });
       res.status(500).json({
         success: false,
-        message: error.message
+        message: 'حدث خطأ داخلي',
       });
     }
   }
@@ -439,14 +412,14 @@ class IncidentController {
       if (!q) {
         return res.status(400).json({
           success: false,
-          message: 'يجب إدخال نص البحث'
+          message: 'يجب إدخال نص البحث',
         });
       }
 
       const filters = {
         severity: severity || null,
         status: status || null,
-        category: category || null
+        category: category || null,
       };
 
       // تنظيف الفلاتر من null
@@ -466,13 +439,13 @@ class IncidentController {
       res.status(200).json({
         success: true,
         data: result.incidents,
-        pagination: result.pagination
+        pagination: result.pagination,
       });
     } catch (error) {
       logger.error('Error in searchIncidents', { error: error.message });
       res.status(500).json({
         success: false,
-        message: error.message
+        message: 'حدث خطأ داخلي',
       });
     }
   }
@@ -480,21 +453,18 @@ class IncidentController {
   // 17. أرشفة الحادثة
   async archiveIncident(req, res) {
     try {
-      const incident = await incidentService.archiveIncident(
-        req.params.id,
-        req.user._id
-      );
+      const incident = await incidentService.archiveIncident(req.params.id, req.user._id);
 
       res.status(200).json({
         success: true,
         message: 'تم أرشفة الحادثة بنجاح',
-        data: incident
+        data: incident,
       });
     } catch (error) {
       logger.error('Error in archiveIncident', { error: error.message });
       res.status(500).json({
         success: false,
-        message: error.message
+        message: 'حدث خطأ داخلي',
       });
     }
   }
@@ -509,13 +479,13 @@ class IncidentController {
 
       res.status(200).json({
         success: true,
-        data: incidents
+        data: incidents,
       });
     } catch (error) {
       logger.error('Error in getRelatedIncidents', { error: error.message });
       res.status(500).json({
         success: false,
-        message: error.message
+        message: 'حدث خطأ داخلي',
       });
     }
   }
@@ -534,13 +504,13 @@ class IncidentController {
       res.status(200).json({
         success: true,
         data: result.incidents,
-        count: result.pagination.total
+        count: result.pagination.total,
       });
     } catch (error) {
       logger.error('Error in getPendingIncidents', { error: error.message });
       res.status(500).json({
         success: false,
-        message: error.message
+        message: 'حدث خطأ داخلي',
       });
     }
   }
@@ -548,22 +518,18 @@ class IncidentController {
   // 20. الحوادث الحرجة
   async getCriticalIncidents(req, res) {
     try {
-      const result = await incidentService.getAllIncidents(
-        { severity: 'CRITICAL' },
-        1,
-        20
-      );
+      const result = await incidentService.getAllIncidents({ severity: 'CRITICAL' }, 1, 20);
 
       res.status(200).json({
         success: true,
         data: result.incidents,
-        count: result.pagination.total
+        count: result.pagination.total,
       });
     } catch (error) {
       logger.error('Error in getCriticalIncidents', { error: error.message });
       res.status(500).json({
         success: false,
-        message: error.message
+        message: 'حدث خطأ داخلي',
       });
     }
   }

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const Document = require('../models/Document');
 const crypto = require('crypto');
 
@@ -31,7 +32,10 @@ class DmsService {
   async signDocument(docId, userId, signaturePin) {
     const doc = await Document.findById(docId);
     // In real app: Verify PIN against user profile
-    const signatureHash = crypto.createHash('sha256').update(`${docId}-${userId}-${new Date().toISOString()}`).digest('hex');
+    const signatureHash = crypto
+      .createHash('sha256')
+      .update(`${docId}-${userId}-${new Date().toISOString()}`)
+      .digest('hex');
 
     doc.signatures.push({
       signedBy: userId,
@@ -70,7 +74,10 @@ class DmsService {
   }
 
   async getDocument(docId) {
-    return await Document.findById(docId).populate('signatures.signedBy', 'firstName lastName email');
+    return await Document.findById(docId).populate(
+      'signatures.signedBy',
+      'firstName lastName email'
+    );
   }
 }
 

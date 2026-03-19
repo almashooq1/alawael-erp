@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * PHASE 16: ANALYTICS DASHBOARD
  * Real-time Reports & Visualizations
@@ -32,7 +33,7 @@ export class AnalyticsDashboardManager {
 
       return { success: true, dashboard };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -58,7 +59,7 @@ export class AnalyticsDashboardManager {
 
       return { success: true, widget };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -73,7 +74,7 @@ export class AnalyticsDashboardManager {
 
       return { success: true };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -91,7 +92,7 @@ export class AnalyticsDashboardManager {
 
       return { success: true };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -116,7 +117,7 @@ export class AnalyticsDashboardManager {
         dashboard: { ...dashboard, widgets: enrichedWidgets },
       };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -184,7 +185,7 @@ export class ReportGenerator {
       await this.db.collection('reports').insertOne(report);
       return { success: true, report };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -212,7 +213,7 @@ export class ReportGenerator {
       await this.db.collection('reports').insertOne(report);
       return { success: true, report };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -262,7 +263,7 @@ export class ReportGenerator {
       await this.db.collection('reports').insertOne(report);
       return { success: true, report };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -302,7 +303,7 @@ export class ReportGenerator {
       await this.db.collection('reports').insertOne(report);
       return { success: true, report };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -359,7 +360,7 @@ export class ExportService {
         filename: `${filename}.csv`,
       };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -384,7 +385,7 @@ export class ExportService {
         filename: `export_${Date.now()}.xlsx`,
       };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -407,7 +408,7 @@ export class ExportService {
         filename: `${filename}.pdf`,
       };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -426,7 +427,7 @@ export class ExportService {
         filename: `${filename}.json`,
       };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 }

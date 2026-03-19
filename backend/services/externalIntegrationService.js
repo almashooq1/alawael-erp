@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * External Integration Service
  * خدمة التكامل مع الأنظمة الخارجية
@@ -85,7 +86,7 @@ class ExternalIntegrationService {
       return {
         success: false,
         message: 'فشل تكوين Slack',
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -111,7 +112,7 @@ class ExternalIntegrationService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -156,7 +157,7 @@ class ExternalIntegrationService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -185,7 +186,7 @@ class ExternalIntegrationService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -209,7 +210,7 @@ class ExternalIntegrationService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -250,7 +251,7 @@ class ExternalIntegrationService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -276,7 +277,7 @@ class ExternalIntegrationService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -311,7 +312,7 @@ class ExternalIntegrationService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -321,7 +322,9 @@ class ExternalIntegrationService {
    */
   async triggerWebhooks(event, data) {
     try {
-      const matchingWebhooks = Array.from(this.webhooks.values()).filter(w => w.event === event && w.active);
+      const matchingWebhooks = Array.from(this.webhooks.values()).filter(
+        w => w.event === event && w.active
+      );
 
       const results = [];
 
@@ -341,7 +344,7 @@ class ExternalIntegrationService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -388,7 +391,7 @@ class ExternalIntegrationService {
 
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
         attempt,
       };
     }
@@ -422,7 +425,7 @@ class ExternalIntegrationService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -474,7 +477,7 @@ class ExternalIntegrationService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -558,7 +561,7 @@ class ExternalIntegrationService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -583,7 +586,7 @@ class ExternalIntegrationService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }

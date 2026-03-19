@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * ALAWAEL ERP - PERFORMANCE MANAGEMENT SERVICE
  * Advanced Performance Reviews, Competency Assessment, Goal Tracking
@@ -74,7 +75,7 @@ class PerformanceManagementService {
 
       return review;
     } catch (error) {
-      throw new Error(`Failed to create review: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -89,7 +90,7 @@ class PerformanceManagementService {
         completeness: this._calculateReviewCompleteness(review),
       };
     } catch (error) {
-      throw new Error(`Failed to retrieve review: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -111,7 +112,7 @@ class PerformanceManagementService {
 
       return review;
     } catch (error) {
-      throw new Error(`Failed to update review: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -143,7 +144,7 @@ class PerformanceManagementService {
 
       return review;
     } catch (error) {
-      throw new Error(`Failed to finalize review: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -174,7 +175,7 @@ class PerformanceManagementService {
 
       return feedback;
     } catch (error) {
-      throw new Error(`Failed to add feedback: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -183,7 +184,7 @@ class PerformanceManagementService {
       const reviews = this.reviews.filter(r => r.employeeId === employeeId);
       return reviews.sort((a, b) => b.reviewDate - a.reviewDate);
     } catch (error) {
-      throw new Error(`Failed to retrieve employee reviews: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -215,7 +216,7 @@ class PerformanceManagementService {
         ratingDistribution: this._calculateRatingDistribution(filtered),
       };
     } catch (error) {
-      throw new Error(`Failed to get review stats: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -244,7 +245,7 @@ class PerformanceManagementService {
       this.competencies.push(competency);
       return competency;
     } catch (error) {
-      throw new Error(`Failed to create competency: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -271,7 +272,7 @@ class PerformanceManagementService {
       this.competencies.push(assessment);
       return assessment;
     } catch (error) {
-      throw new Error(`Failed to assess employee: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -287,7 +288,7 @@ class PerformanceManagementService {
         developmentPriority: assessment.gaps.length > 0 ? 'high' : 'low',
       };
     } catch (error) {
-      throw new Error(`Failed to get competency gaps: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -313,7 +314,7 @@ class PerformanceManagementService {
       this.developmentPlans.push(plan);
       return plan;
     } catch (error) {
-      throw new Error(`Failed to create development plan: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -358,7 +359,7 @@ class PerformanceManagementService {
       this.goals.push(goal);
       return goal;
     } catch (error) {
-      throw new Error(`Failed to set goal: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -377,7 +378,7 @@ class PerformanceManagementService {
 
       return goal;
     } catch (error) {
-      throw new Error(`Failed to update goal progress: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -399,7 +400,7 @@ class PerformanceManagementService {
             : 0,
       };
     } catch (error) {
-      throw new Error(`Failed to get employee goals: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -425,7 +426,7 @@ class PerformanceManagementService {
             : 0,
       };
     } catch (error) {
-      throw new Error(`Failed to track achievement: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -465,7 +466,7 @@ class PerformanceManagementService {
       this.kpis.push(kpi);
       return kpi;
     } catch (error) {
-      throw new Error(`Failed to define KPI: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -485,7 +486,7 @@ class PerformanceManagementService {
         performanceStatus: actualValue >= kpi.targetValue ? 'achieved' : 'below-target',
       };
     } catch (error) {
-      throw new Error(`Failed to track metric: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -523,7 +524,7 @@ class PerformanceManagementService {
         performanceLevel: this._getPerformanceLevel(performanceScore),
       };
     } catch (error) {
-      throw new Error(`Failed to calculate scores: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -550,7 +551,7 @@ class PerformanceManagementService {
         },
       };
     } catch (error) {
-      throw new Error(`Failed to benchmark performance: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -592,7 +593,7 @@ class PerformanceManagementService {
 
       return rankings;
     } catch (error) {
-      throw new Error(`Failed to rank employees: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -615,7 +616,7 @@ class PerformanceManagementService {
         },
       };
     } catch (error) {
-      throw new Error(`Failed to calculate distribution: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -631,7 +632,7 @@ class PerformanceManagementService {
         recommendations: this._getRetentionRecommendations(riskLevel),
       };
     } catch (error) {
-      throw new Error(`Failed to assess retention risk: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 

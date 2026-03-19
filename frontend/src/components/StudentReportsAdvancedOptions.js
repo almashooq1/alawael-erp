@@ -3,13 +3,13 @@
  * مكون الخيارات المتقدمة للتقارير
  */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { triggerBlobDownload } from 'utils/downloadHelper';
 import {
   Box,
   Card,
   CardContent,
   Typography,
-  Grid,
   Button,
   Tabs,
   Tab,
@@ -19,10 +19,6 @@ import {
   DialogContent,
   DialogActions,
   TextField,
-  FormControlLabel,
-  Checkbox,
-  RadioGroup,
-  Radio,
   Alert,
 } from '@mui/material';
 import {
@@ -32,6 +28,9 @@ import {
   TrendingUp as TrendingUpIcon,
   Autorenew as AutorenewIcon,
 } from '@mui/icons-material';
+import { getToken } from 'utils/tokenStorage';
+import logger from 'utils/logger';
+import { useSnackbar } from 'contexts/SnackbarContext';
 
 function TabPanel({ children, value, index, ...other }) {
   return (
@@ -48,6 +47,7 @@ function TabPanel({ children, value, index, ...other }) {
 }
 
 const StudentReportsAdvancedOptions = ({ studentId, onReportGenerated }) => {
+  const showSnackbar = useSnackbar();
   const [activeTab, setActiveTab] = useState(0);
   const [exportDialog, setExportDialog] = useState(false);
   const [scheduleDialog, setScheduleDialog] = useState(false);
@@ -87,24 +87,19 @@ const StudentReportsAdvancedOptions = ({ studentId, onReportGenerated }) => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${getToken()}`,
         },
         body: JSON.stringify(payload),
       });
 
       if (response.ok) {
         const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
         const ext = exportConfig.format === 'excel' ? 'xlsx' : exportConfig.format;
-        a.download = `student-report.${ext}`;
-        a.click();
-        window.URL.revokeObjectURL(url);
+        triggerBlobDownload(blob, `student-report.${ext}`);
         setExportDialog(false);
       }
     } catch (error) {
-      console.error('Error exporting report:', error);
+      logger.error('Error exporting report:', error);
     }
   };
 
@@ -115,7 +110,7 @@ const StudentReportsAdvancedOptions = ({ studentId, onReportGenerated }) => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${getToken()}`,
         },
         body: JSON.stringify({
           ...scheduleConfig,
@@ -124,11 +119,11 @@ const StudentReportsAdvancedOptions = ({ studentId, onReportGenerated }) => {
       });
 
       if (response.ok) {
-        alert('تم جدولة التقرير بنجاح');
+        showSnackbar('تم جدولة التقرير بنجاح', 'success');
         setScheduleDialog(false);
       }
     } catch (error) {
-      console.error('Error scheduling report:', error);
+      logger.error('Error scheduling report:', error);
     }
   };
 
@@ -138,7 +133,7 @@ const StudentReportsAdvancedOptions = ({ studentId, onReportGenerated }) => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${getToken()}`,
         },
         body: JSON.stringify({
           period1: {
@@ -158,7 +153,7 @@ const StudentReportsAdvancedOptions = ({ studentId, onReportGenerated }) => {
         setCompareDialog(false);
       }
     } catch (error) {
-      console.error('Error comparing reports:', error);
+      logger.error('Error comparing reports:', error);
     }
   };
 

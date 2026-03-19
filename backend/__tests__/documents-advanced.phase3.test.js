@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * Phase 3 - Advanced Document Management Tests
  * Tests for document versioning, collaboration, and workflow features

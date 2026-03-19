@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const Inventory = require('../models/InventoryItem'); // Assuming this exists or we mock
 const TherapySession = require('../models/TherapySession');
 
@@ -36,7 +37,9 @@ class SmartInventoryService {
     }
 
     return predictions.sort(
-      (a, b) => (a.daysUntilEmpty === '99+' ? 100 : a.daysUntilEmpty) - (b.daysUntilEmpty === '99+' ? 100 : b.daysUntilEmpty),
+      (a, b) =>
+        (a.daysUntilEmpty === '99+' ? 100 : a.daysUntilEmpty) -
+        (b.daysUntilEmpty === '99+' ? 100 : b.daysUntilEmpty)
     );
   }
 
@@ -47,8 +50,20 @@ class SmartInventoryService {
   static async checkMaintenanceStatus() {
     const equipment = [
       { id: 1, name: 'Lokomat Pro', lastService: '2025-10-01', usageHours: 450, maxHours: 500 },
-      { id: 2, name: 'Spider Cage Audit', lastService: '2025-12-01', usageHours: 120, maxHours: 1000 },
-      { id: 3, name: 'Pediatric Treadmill', lastService: '2025-11-15', usageHours: 190, maxHours: 200 },
+      {
+        id: 2,
+        name: 'Spider Cage Audit',
+        lastService: '2025-12-01',
+        usageHours: 120,
+        maxHours: 1000,
+      },
+      {
+        id: 3,
+        name: 'Pediatric Treadmill',
+        lastService: '2025-11-15',
+        usageHours: 190,
+        maxHours: 200,
+      },
     ];
 
     const alerts = [];

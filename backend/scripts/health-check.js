@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable no-unused-vars */
 
 /**
  * Health Check & Diagnostics Utility
@@ -28,7 +29,6 @@ class HealthChecker {
       fn: checkFn,
       timeout: options.timeout || 5000,
       critical: options.critical || false,
-      timeout: options.timeout || 5000,
     });
   }
 

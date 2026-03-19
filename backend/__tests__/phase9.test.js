@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * Phase 9 Unit Tests
  * Jest tests for advanced features
@@ -9,7 +11,7 @@ describe('Phase 9 Advanced Features Test Suite', () => {
   describe('Advanced Security Module', () => {
     describe('MFAService', () => {
       it('should generate TOTP secret and QR code', () => {
-        const userId = 'user123';
+        const _userId = 'user123';
         // Mock implementation
         const result = {
           secret: 'JBSWY3DPEHPK3PXP',
@@ -22,16 +24,16 @@ describe('Phase 9 Advanced Features Test Suite', () => {
       });
 
       it('should verify valid TOTP token', () => {
-        const token = '123456';
-        const secret = 'JBSWY3DPEHPK3PXP';
+        const _token = '123456';
+        const _secret = 'JBSWY3DPEHPK3PXP';
         // In real implementation, would use speakeasy verify
         const isValid = true; // Mock
         expect(isValid).toBe(true);
       });
 
       it('should reject invalid TOTP token', () => {
-        const token = 'invalid';
-        const secret = 'JBSWY3DPEHPK3PXP';
+        const _token = 'invalid';
+        const _secret = 'JBSWY3DPEHPK3PXP';
         const isValid = false; // Mock
         expect(isValid).toBe(false);
       });
@@ -39,18 +41,18 @@ describe('Phase 9 Advanced Features Test Suite', () => {
 
     describe('AdvancedRBAC', () => {
       it('should check user permissions', () => {
-        const user = { role: 'manager' };
-        const resource = 'employee_data';
-        const action = 'read';
+        const _user = { role: 'manager' };
+        const _resource = 'employee_data';
+        const _action = 'read';
 
         const hasPermission = true; // Mock
         expect(hasPermission).toBe(true);
       });
 
       it('should deny access for insufficient permissions', () => {
-        const user = { role: 'employee' };
-        const resource = 'salary_data';
-        const action = 'modify';
+        const _user = { role: 'employee' };
+        const _resource = 'salary_data';
+        const _action = 'modify';
 
         const hasPermission = false; // Mock
         expect(hasPermission).toBe(false);
@@ -87,7 +89,7 @@ describe('Phase 9 Advanced Features Test Suite', () => {
       });
 
       it('should retrieve audit logs with filters', () => {
-        const filters = {
+        const _filters = {
           userId: 'user123',
           action: 'login',
         };
@@ -466,7 +468,7 @@ describe('Phase 9 Advanced Features Test Suite', () => {
       });
 
       it('should categorize feedback comments', () => {
-        const comment = 'Salary is too low for this market';
+        const _comment = 'Salary is too low for this market';
         const category = {
           categories: [{ category: 'compensation' }],
           primaryCategory: 'compensation',
@@ -476,7 +478,7 @@ describe('Phase 9 Advanced Features Test Suite', () => {
       });
 
       it('should extract key topics', () => {
-        const text = 'We need better training and career development opportunities';
+        const _text = 'We need better training and career development opportunities';
         const topics = [
           { word: 'training', frequency: 1 },
           { word: 'career', frequency: 1 },

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './EmployeePoliciesAcknowledgement.css';
 
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
 
 const EmployeePoliciesAcknowledgement = () => {
   const [pendingPolicies, setPendingPolicies] = useState([]);
@@ -13,7 +13,7 @@ const EmployeePoliciesAcknowledgement = () => {
     total: 0,
     pending: 0,
     acknowledged: 0,
-    overdue: 0
+    overdue: 0,
   });
 
   useEffect(() => {
@@ -38,7 +38,7 @@ const EmployeePoliciesAcknowledgement = () => {
         total: allPolicies.length,
         pending: pending.length,
         acknowledged: acknowledged.length,
-        overdue: pending.filter(p => new Date(p.dueDate) < new Date()).length
+        overdue: pending.filter(p => new Date(p.dueDate) < new Date()).length,
       });
     } catch (error) {
       console.error('Error fetching policies:', error);
@@ -47,11 +47,9 @@ const EmployeePoliciesAcknowledgement = () => {
     }
   };
 
-  const handleSelectPolicy = (policyId) => {
+  const handleSelectPolicy = policyId => {
     setSelectedPolicies(prev =>
-      prev.includes(policyId)
-        ? prev.filter(id => id !== policyId)
-        : [...prev, policyId]
+      prev.includes(policyId) ? prev.filter(id => id !== policyId) : [...prev, policyId]
     );
   };
 
@@ -74,7 +72,7 @@ const EmployeePoliciesAcknowledgement = () => {
       await axios.post(`${API_BASE}/policies/acknowledge/batch`, {
         policyIds: selectedPolicies,
         acknowledgedBy: 'EMPLOYEE_ID', // Should come from auth
-        ipAddress: getClientIP()
+        ipAddress: getClientIP(),
       });
 
       alert('تم الاعتراف بالسياسات بنجاح');
@@ -93,14 +91,14 @@ const EmployeePoliciesAcknowledgement = () => {
     return 'CLIENT_IP';
   };
 
-  const getDaysUntilDue = (dueDate) => {
+  const getDaysUntilDue = dueDate => {
     const now = new Date();
     const due = new Date(dueDate);
     const diffTime = Math.ceil((due - now) / (1000 * 60 * 60 * 24));
     return diffTime;
   };
 
-  const isOverdue = (dueDate) => {
+  const isOverdue = dueDate => {
     return getDaysUntilDue(dueDate) < 0;
   };
 
@@ -165,8 +163,12 @@ const EmployeePoliciesAcknowledgement = () => {
                     <div className="policy-content">
                       <div className="policy-title">
                         <h3>{policy.policyName}</h3>
-                        <span className={`due-badge ${overdue ? 'overdue' : daysLeft <= 3 ? 'warning' : ''}`}>
-                          {overdue ? `متأخر بـ ${Math.abs(daysLeft)} يوم` : `${daysLeft} أيام متبقية`}
+                        <span
+                          className={`due-badge ${overdue ? 'overdue' : daysLeft <= 3 ? 'warning' : ''}`}
+                        >
+                          {overdue
+                            ? `متأخر بـ ${Math.abs(daysLeft)} يوم`
+                            : `${daysLeft} أيام متبقية`}
                         </span>
                       </div>
                       <p className="policy-description">{policy.description}</p>
@@ -176,7 +178,8 @@ const EmployeePoliciesAcknowledgement = () => {
                           <strong>النوع:</strong> {policy.policyType}
                         </span>
                         <span className="meta-item">
-                          <strong>الموعد النهائي:</strong> {new Date(policy.dueDate).toLocaleDateString('ar')}
+                          <strong>الموعد النهائي:</strong>{' '}
+                          {new Date(policy.dueDate).toLocaleDateString('ar')}
                         </span>
                       </div>
                     </div>
@@ -222,9 +225,7 @@ const EmployeePoliciesAcknowledgement = () => {
               ))}
             </div>
           ) : (
-            <div className="no-data">
-              لم يتم الاعتراف بأي سياسات بعد
-            </div>
+            <div className="no-data">لم يتم الاعتراف بأي سياسات بعد</div>
           )}
         </div>
       </div>

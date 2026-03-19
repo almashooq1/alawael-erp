@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * AL-AWAEL ERP - PHASE 22: PERFORMANCE MANAGEMENT TESTS
  * Comprehensive test suite for performance management system

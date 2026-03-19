@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Integration Hub - مركز التكاملات
  * Enterprise Integration Platform for Alawael ERP
@@ -5,6 +6,7 @@
 
 const mongoose = require('mongoose');
 const axios = require('axios');
+const logger = require('../utils/logger');
 
 /**
  * Integration Configuration
@@ -29,14 +31,14 @@ const integrationConfig = {
     // Saudi Government
     government: ['zatca', 'absher', 'muqeem', 'gosi'],
   },
-  
+
   // Retry configuration
   retry: {
     maxAttempts: 3,
     delay: 5000,
     multiplier: 2,
   },
-  
+
   // Rate limits
   rateLimits: {
     windowMs: 60000, // 1 minute
@@ -47,103 +49,113 @@ const integrationConfig = {
 /**
  * Integration Schema
  */
-const IntegrationSchema = new mongoose.Schema({
-  // Identification
-  name: { type: String, required: true },
-  provider: { type: String, required: true },
-  category: { type: String, required: true },
-  
-  // Configuration
-  config: {
-    endpoint: String,
-    apiKey: String,
-    secretKey: String,
-    webhookUrl: String,
-    sandbox: { type: Boolean, default: true },
-    timeout: { type: Number, default: 30000 },
-    custom: mongoose.Schema.Types.Mixed,
+const IntegrationSchema = new mongoose.Schema(
+  {
+    // Identification
+    name: { type: String, required: true },
+    provider: { type: String, required: true },
+    category: { type: String, required: true },
+
+    // Configuration
+    config: {
+      endpoint: String,
+      apiKey: String,
+      secretKey: String,
+      webhookUrl: String,
+      sandbox: { type: Boolean, default: true },
+      timeout: { type: Number, default: 30000 },
+      custom: mongoose.Schema.Types.Mixed,
+    },
+
+    // Authentication
+    auth: {
+      type: { type: String, enum: ['api_key', 'oauth2', 'basic', 'bearer', 'custom'] },
+      credentials: mongoose.Schema.Types.Mixed,
+      token: String,
+      tokenExpiry: Date,
+      refreshToken: String,
+    },
+
+    // Sync settings
+    sync: {
+      enabled: { type: Boolean, default: false },
+      interval: Number, // minutes
+      lastSync: Date,
+      lastSyncStatus: String,
+    },
+
+    // Mappings
+    mappings: [
+      {
+        localField: String,
+        remoteField: String,
+        transform: String, // transformation function
+      },
+    ],
+
+    // Webhooks
+    webhooks: [
+      {
+        event: String,
+        handler: String,
+        active: { type: Boolean, default: true },
+      },
+    ],
+
+    // Status
+    status: { type: String, enum: ['active', 'inactive', 'error'], default: 'active' },
+    lastError: String,
+
+    // Metadata
+    tenantId: String,
+    createdBy: String,
+
+    // Timestamps
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: Date,
   },
-  
-  // Authentication
-  auth: {
-    type: { type: String, enum: ['api_key', 'oauth2', 'basic', 'bearer', 'custom'] },
-    credentials: mongoose.Schema.Types.Mixed,
-    token: String,
-    tokenExpiry: Date,
-    refreshToken: String,
-  },
-  
-  // Sync settings
-  sync: {
-    enabled: { type: Boolean, default: false },
-    interval: Number, // minutes
-    lastSync: Date,
-    lastSyncStatus: String,
-  },
-  
-  // Mappings
-  mappings: [{
-    localField: String,
-    remoteField: String,
-    transform: String, // transformation function
-  }],
-  
-  // Webhooks
-  webhooks: [{
-    event: String,
-    handler: String,
-    active: { type: Boolean, default: true },
-  }],
-  
-  // Status
-  status: { type: String, enum: ['active', 'inactive', 'error'], default: 'active' },
-  lastError: String,
-  
-  // Metadata
-  tenantId: String,
-  createdBy: String,
-  
-  // Timestamps
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: Date,
-}, {
-  collection: 'integrations',
-});
+  {
+    collection: 'integrations',
+  }
+);
 
 /**
  * Integration Log Schema
  */
-const IntegrationLogSchema = new mongoose.Schema({
-  integrationId: { type: mongoose.Schema.Types.ObjectId, ref: 'Integration' },
-  provider: String,
-  
-  // Request details
-  direction: { type: String, enum: ['inbound', 'outbound'] },
-  method: String,
-  endpoint: String,
-  headers: mongoose.Schema.Types.Mixed,
-  body: mongoose.Schema.Types.Mixed,
-  
-  // Response details
-  statusCode: Number,
-  response: mongoose.Schema.Types.Mixed,
-  
-  // Timing
-  duration: Number,
-  timestamp: { type: Date, default: Date.now },
-  
-  // Status
-  status: { type: String, enum: ['success', 'error', 'pending'] },
-  error: String,
-  
-  // Retry
-  retryCount: { type: Number, default: 0 },
-  
-  // Tenant
-  tenantId: String,
-}, {
-  collection: 'integration_logs',
-});
+const IntegrationLogSchema = new mongoose.Schema(
+  {
+    integrationId: { type: mongoose.Schema.Types.ObjectId, ref: 'Integration' },
+    provider: String,
+
+    // Request details
+    direction: { type: String, enum: ['inbound', 'outbound'] },
+    method: String,
+    endpoint: String,
+    headers: mongoose.Schema.Types.Mixed,
+    body: mongoose.Schema.Types.Mixed,
+
+    // Response details
+    statusCode: Number,
+    response: mongoose.Schema.Types.Mixed,
+
+    // Timing
+    duration: Number,
+    timestamp: { type: Date, default: Date.now },
+
+    // Status
+    status: { type: String, enum: ['success', 'error', 'pending'] },
+    error: String,
+
+    // Retry
+    retryCount: { type: Number, default: 0 },
+
+    // Tenant
+    tenantId: String,
+  },
+  {
+    collection: 'integration_logs',
+  }
+);
 
 // Indexes
 IntegrationLogSchema.index({ integrationId: 1, timestamp: -1 });
@@ -159,20 +171,20 @@ class IntegrationHub {
     this.providers = new Map();
     this.webhooks = new Map();
   }
-  
+
   /**
    * Initialize hub
    */
   async initialize(connection) {
     this.Integration = connection.model('Integration', IntegrationSchema);
     this.IntegrationLog = connection.model('IntegrationLog', IntegrationLogSchema);
-    
+
     // Register built-in providers
     this.registerBuiltinProviders();
-    
-    console.log('✅ Integration Hub initialized');
+
+    logger.info('✅ Integration Hub initialized');
   }
-  
+
   /**
    * Register built-in providers
    */
@@ -187,7 +199,7 @@ class IntegrationHub {
         checkCompliance: { method: 'GET', path: '/compliance/{id}' },
       },
     });
-    
+
     // Salla (Saudi E-commerce)
     this.registerProvider('salla', {
       category: 'ecommerce',
@@ -199,7 +211,7 @@ class IntegrationHub {
         updateOrder: { method: 'PUT', path: '/orders/{id}' },
       },
     });
-    
+
     // Zid (Saudi E-commerce)
     this.registerProvider('zid', {
       category: 'ecommerce',
@@ -210,7 +222,7 @@ class IntegrationHub {
         getOrders: { method: 'GET', path: '/v1/orders' },
       },
     });
-    
+
     // Moyasar (Saudi Payment)
     this.registerProvider('moyasar', {
       category: 'payment',
@@ -222,7 +234,7 @@ class IntegrationHub {
         createInvoice: { method: 'POST', path: '/invoices' },
       },
     });
-    
+
     // Tabby (Buy Now Pay Later)
     this.registerProvider('tabby', {
       category: 'payment',
@@ -233,7 +245,7 @@ class IntegrationHub {
         capturePayment: { method: 'POST', path: '/payments/{id}/capture' },
       },
     });
-    
+
     // Slack
     this.registerProvider('slack', {
       category: 'communication',
@@ -243,7 +255,7 @@ class IntegrationHub {
         postMessage: { method: 'POST', path: '/chat.postMessage' },
       },
     });
-    
+
     // Stripe
     this.registerProvider('stripe', {
       category: 'payment',
@@ -256,14 +268,14 @@ class IntegrationHub {
       },
     });
   }
-  
+
   /**
    * Register provider
    */
   registerProvider(name, config) {
     this.providers.set(name, config);
   }
-  
+
   /**
    * Create integration
    */
@@ -271,21 +283,21 @@ class IntegrationHub {
     const integration = await this.Integration.create(data);
     return integration;
   }
-  
+
   /**
    * Get integration
    */
   async getIntegration(id) {
     return this.Integration.findById(id);
   }
-  
+
   /**
    * List integrations
    */
   async listIntegrations(filter = {}) {
     return this.Integration.find(filter);
   }
-  
+
   /**
    * Update integration
    */
@@ -293,40 +305,40 @@ class IntegrationHub {
     data.updatedAt = new Date();
     return this.Integration.findByIdAndUpdate(id, data, { new: true });
   }
-  
+
   /**
    * Delete integration
    */
   async deleteIntegration(id) {
     return this.Integration.findByIdAndDelete(id);
   }
-  
+
   /**
    * Test integration connection
    */
   async testConnection(id) {
     const integration = await this.getIntegration(id);
     if (!integration) throw new Error('Integration not found');
-    
+
     const provider = this.providers.get(integration.provider);
     if (!provider) throw new Error('Provider not supported');
-    
+
     try {
       // Attempt a simple request to test connection
       const response = await this.makeRequest(integration, 'get', '/');
       return { success: true, message: 'Connection successful' };
     } catch (error) {
-      return { success: false, message: error.message };
+      return { success: false, message: 'حدث خطأ داخلي' };
     }
   }
-  
+
   /**
    * Make API request
    */
   async makeRequest(integration, method, endpoint, data = {}) {
     const provider = this.providers.get(integration.provider);
     if (!provider) throw new Error('Provider not supported');
-    
+
     const startTime = Date.now();
     const logEntry = {
       integrationId: integration._id,
@@ -337,7 +349,7 @@ class IntegrationHub {
       status: 'pending',
       tenantId: integration.tenantId,
     };
-    
+
     try {
       // Build request config
       const config = {
@@ -348,56 +360,56 @@ class IntegrationHub {
         params: method === 'get' ? data : undefined,
         timeout: integration.config.timeout || 30000,
       };
-      
+
       logEntry.headers = this.sanitizeHeaders(config.headers);
       logEntry.body = data;
-      
+
       // Make request
       const response = await axios(config);
-      
+
       // Log success
       logEntry.statusCode = response.status;
       logEntry.response = response.data;
       logEntry.status = 'success';
       logEntry.duration = Date.now() - startTime;
-      
+
       await this.IntegrationLog.create(logEntry);
-      
+
       return response.data;
-      
     } catch (error) {
       // Log error
       logEntry.statusCode = error.response?.status;
       logEntry.response = error.response?.data;
       logEntry.status = 'error';
-      logEntry.error = error.message;
+      logEntry.error = 'حدث خطأ داخلي';
       logEntry.duration = Date.now() - startTime;
-      
+
       await this.IntegrationLog.create(logEntry);
-      
+
       throw error;
     }
   }
-  
+
   /**
    * Build headers based on auth type
    */
   buildHeaders(integration, provider) {
     const headers = {
       'Content-Type': 'application/json',
-      'Accept': 'application/json',
+      Accept: 'application/json',
     };
-    
+
     switch (integration.auth.type) {
       case 'bearer':
         headers['Authorization'] = `Bearer ${integration.auth.credentials.token}`;
         break;
-      case 'basic':
+      case 'basic': {
         const credentials = Buffer.from(
           `${integration.auth.credentials.username}:${integration.auth.credentials.password}`
         ).toString('base64');
         headers['Authorization'] = `Basic ${credentials}`;
         break;
+      }
       case 'api_key':
         headers['X-API-Key'] = integration.auth.credentials.apiKey;
         break;
@@ -407,38 +419,38 @@ class IntegrationHub {
         }
         break;
     }
-    
+
     return headers;
   }
-  
+
   /**
    * Sanitize headers for logging
    */
   sanitizeHeaders(headers) {
     const sanitized = { ...headers };
     const sensitiveFields = ['authorization', 'x-api-key', 'token', 'secret'];
-    
+
     for (const field of sensitiveFields) {
       if (sanitized[field]) {
         sanitized[field] = '***REDACTED***';
       }
     }
-    
+
     return sanitized;
   }
-  
+
   /**
    * Handle incoming webhook
    */
   async handleWebhook(provider, payload, signature) {
     const integration = await this.Integration.findOne({ provider });
     if (!integration) throw new Error('Integration not found');
-    
+
     // Verify signature if provided
     if (integration.config.webhookSecret && signature) {
       // Verify webhook signature
     }
-    
+
     // Log webhook
     const logEntry = await this.IntegrationLog.create({
       integrationId: integration._id,
@@ -450,50 +462,50 @@ class IntegrationHub {
       status: 'success',
       tenantId: integration.tenantId,
     });
-    
+
     // Process webhook based on provider
     const handler = this.webhooks.get(provider);
     if (handler) {
       await handler(payload, integration);
     }
-    
+
     return { received: true, logId: logEntry._id };
   }
-  
+
   /**
    * Register webhook handler
    */
   registerWebhookHandler(provider, handler) {
     this.webhooks.set(provider, handler);
   }
-  
+
   /**
    * Sync data
    */
   async sync(integrationId) {
     const integration = await this.getIntegration(integrationId);
     if (!integration) throw new Error('Integration not found');
-    
+
     try {
       // Perform sync based on provider
       const provider = this.providers.get(integration.provider);
       if (!provider) throw new Error('Provider not supported');
-      
+
       // Update sync status
       integration.sync.lastSync = new Date();
       integration.sync.lastSyncStatus = 'success';
       await integration.save();
-      
+
       return { success: true, timestamp: integration.sync.lastSync };
     } catch (error) {
       integration.sync.lastSyncStatus = 'error';
-      integration.lastError = error.message;
+      integration.lastError = 'حدث خطأ داخلي';
       await integration.save();
-      
+
       throw error;
     }
   }
-  
+
   /**
    * Get integration logs
    */
@@ -502,12 +514,12 @@ class IntegrationHub {
     if (options.status) filter.status = options.status;
     if (options.startDate) filter.timestamp = { $gte: options.startDate };
     if (options.endDate) filter.timestamp = { ...filter.timestamp, $lte: options.endDate };
-    
+
     return this.IntegrationLog.find(filter)
       .sort({ timestamp: -1 })
       .limit(options.limit || 100);
   }
-  
+
   /**
    * Get integration statistics
    */
@@ -522,10 +534,10 @@ class IntegrationHub {
         },
       },
     ]);
-    
+
     const total = await this.IntegrationLog.countDocuments({ integrationId });
     const success = stats.find(s => s._id === 'success')?.count || 0;
-    
+
     return {
       total,
       success,
@@ -534,18 +546,18 @@ class IntegrationHub {
       avgDuration: stats.reduce((sum, s) => sum + (s.avgDuration || 0), 0) / stats.length,
     };
   }
-  
+
   /**
    * Refresh OAuth token
    */
   async refreshToken(integrationId) {
     const integration = await this.getIntegration(integrationId);
     if (!integration) throw new Error('Integration not found');
-    
+
     if (integration.auth.type !== 'oauth2') {
       throw new Error('Integration does not use OAuth2');
     }
-    
+
     // Implementation depends on provider
     // This is a placeholder
     return { refreshed: true };
@@ -576,7 +588,7 @@ const integrationTemplates = {
       { event: 'compliance.check', handler: 'handleComplianceCheck' },
     ],
   },
-  
+
   // Salla Integration
   salla: {
     name: 'سلة',
@@ -594,7 +606,7 @@ const integrationTemplates = {
       interval: 30, // minutes
     },
   },
-  
+
   // Moyasar Integration
   moyasar: {
     name: 'مياسر للدفع',
@@ -608,7 +620,7 @@ const integrationTemplates = {
       type: 'basic',
     },
   },
-  
+
   // Tabby Integration
   tabby: {
     name: 'تابي',

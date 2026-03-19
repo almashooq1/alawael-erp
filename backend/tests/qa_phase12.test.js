@@ -1,3 +1,4 @@
+/* eslint-disable no-undef, no-unused-vars */
 const SmartQualityService = require('../services/smartQuality.service');
 const SmartNotificationService = require('../services/smartNotificationService');
 const Employee = require('../models/Employee');
@@ -51,7 +52,7 @@ describe('Phase 12: QA & Smart Compliance Scanning', () => {
         expect.objectContaining({
           domain: 'HR',
           severity: 'WARNING',
-        }),
+        })
       );
     });
   });
@@ -93,7 +94,9 @@ describe('Phase 12: QA & Smart Compliance Scanning', () => {
       // We spy on the static methods of the class itself to isolate testing of the aggregator
       const spyHR = jest.spyOn(SmartQualityService, 'scanHRCompliance').mockResolvedValue(2);
       const spyFleet = jest.spyOn(SmartQualityService, 'scanFleetCompliance').mockResolvedValue(1);
-      const spyClinical = jest.spyOn(SmartQualityService, 'scanClinicalQuality').mockResolvedValue(0);
+      const spyClinical = jest
+        .spyOn(SmartQualityService, 'scanClinicalQuality')
+        .mockResolvedValue(0);
 
       const result = await SmartQualityService.runFullComplianceScan('AdminUser');
 

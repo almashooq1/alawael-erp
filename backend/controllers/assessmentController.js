@@ -1,6 +1,7 @@
+/* eslint-disable no-unused-vars */
 /**
  * Assessment Controller
- * 
+ *
  * معالجات الطلبات HTTP لنظام التقييمات
  */
 

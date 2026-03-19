@@ -37,7 +37,7 @@ router.post('/verify/national-id', async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -66,7 +66,7 @@ router.post('/verify/iqama', async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -87,7 +87,7 @@ router.get('/iqama/:iqamaNumber/expiry', async (req: Request, res: Response) => 
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -111,7 +111,7 @@ router.post('/mol/contract/register', async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -132,7 +132,7 @@ router.put('/mol/contract/:contractId', async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -159,7 +159,7 @@ router.post('/mol/contract/:contractId/terminate', async (req: Request, res: Res
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -180,7 +180,7 @@ router.get('/mol/establishment/:establishmentId/nitaqat', async (req: Request, r
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -201,7 +201,7 @@ router.post('/mol/wps/submit', async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -225,7 +225,7 @@ router.post('/gosi/register', async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -248,7 +248,7 @@ router.put('/gosi/:gosiNumber/wage', async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -269,7 +269,7 @@ router.post('/gosi/calculate', async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -296,7 +296,7 @@ router.post('/gosi/:gosiNumber/cancel', async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -320,7 +320,7 @@ router.post('/medical-insurance/register', async (req: Request, res: Response) =
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -346,7 +346,7 @@ router.post('/medical-insurance/:policyNumber/renew', async (req: Request, res: 
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -367,7 +367,7 @@ router.get('/medical-insurance/:policyNumber/validity', async (req: Request, res
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -393,7 +393,7 @@ router.post('/exit-reentry/request', async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -414,7 +414,7 @@ router.get('/exit-reentry/:requestId', async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -436,7 +436,7 @@ router.post('/final-exit/request', async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -460,7 +460,7 @@ router.post('/compliance/check', async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -481,7 +481,7 @@ router.get('/employee/:employeeId/status', async (req: Request, res: Response) =
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -506,7 +506,7 @@ router.post('/employees', async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -545,7 +545,7 @@ router.get('/employees', async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -572,7 +572,7 @@ router.get('/employees/:id', async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -603,7 +603,7 @@ router.put('/employees/:id', async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });
@@ -630,7 +630,7 @@ router.delete('/employees/:id', async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
     });
   }
 });

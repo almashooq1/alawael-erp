@@ -1,9 +1,11 @@
+/* eslint-disable no-unused-vars */
 /**
  * Workflow Automation Engine - Phase 9
  * Automated business process workflows
  */
 
 const EventEmitter = require('events');
+const logger = require('../utils/logger');
 
 class WorkflowEngine extends EventEmitter {
   constructor(db) {
@@ -285,7 +287,7 @@ class WorkflowEngine extends EventEmitter {
 
       return execution;
     } catch (error) {
-      console.error(`Error executing step ${step.id}:`, error);
+      logger.error(`Error executing step ${step.id}:`, error);
       throw error;
     }
   }
@@ -363,7 +365,6 @@ class WorkflowEngine extends EventEmitter {
     };
 
     await this.db.collection('workflow_tasks').insertOne(task);
-    instance.assignments.push(task.id);
 
     return task;
   }
@@ -385,7 +386,7 @@ class WorkflowEngine extends EventEmitter {
   /**
    * Validate leave request
    */
-  async validateLeaveRequest(context) {
+  async validateLeaveRequest(_context) {
     // Validate leave balance, dates, etc.
     return {
       valid: true,
@@ -397,7 +398,7 @@ class WorkflowEngine extends EventEmitter {
    * Notify employee
    */
   async notifyEmployee(context) {
-    console.log(`Notifying employee: ${context.employeeId}`);
+    logger.info(`Notifying employee: ${context.employeeId}`);
     return { sent: true };
   }
 
@@ -405,7 +406,7 @@ class WorkflowEngine extends EventEmitter {
    * Create employee account
    */
   async createEmployeeAccount(context) {
-    console.log(`Creating account for: ${context.employeeName}`);
+    logger.info(`Creating account for: ${context.employeeName}`);
     return {
       accountCreated: true,
       username: context.employeeId,
@@ -415,8 +416,8 @@ class WorkflowEngine extends EventEmitter {
   /**
    * Notify review start
    */
-  async notifyReviewStart(context) {
-    console.log('Notifying managers of review period');
+  async notifyReviewStart(_context) {
+    logger.info('Notifying managers of review period');
     return { notified: true };
   }
 
@@ -424,15 +425,15 @@ class WorkflowEngine extends EventEmitter {
    * Archive review
    */
   async archiveReview(context) {
-    console.log(`Archiving review for: ${context.employeeId}`);
+    logger.info(`Archiving review for: ${context.employeeId}`);
     return { archived: true };
   }
 
   /**
    * Send notification
    */
-  async sendNotification(template, context) {
-    console.log(`Sending notification: ${template}`);
+  async sendNotification(template, _context) {
+    logger.info(`Sending notification: ${template}`);
     return { sent: true };
   }
 

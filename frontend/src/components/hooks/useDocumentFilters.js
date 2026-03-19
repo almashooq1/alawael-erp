@@ -4,6 +4,8 @@
  */
 
 import { useState, useCallback, useEffect } from 'react';
+import logger from 'utils/logger';
+import { getDocumentListPrefs, setDocumentListPrefs } from 'utils/storageService';
 
 export const useDocumentFilters = () => {
   // Search & Filter States
@@ -28,9 +30,8 @@ export const useDocumentFilters = () => {
   // Load preferences from localStorage
   useEffect(() => {
     try {
-      const raw = localStorage.getItem('documentListPrefs');
-      if (raw) {
-        const prefs = JSON.parse(raw);
+      const prefs = getDocumentListPrefs();
+      if (prefs) {
         if (prefs.categoryFilter) setCategoryFilter(prefs.categoryFilter);
         if (prefs.sortBy) setSortBy(prefs.sortBy);
         if (prefs.sortOrder) setSortOrder(prefs.sortOrder);
@@ -41,7 +42,7 @@ export const useDocumentFilters = () => {
         if (Array.isArray(prefs.tagFilter)) setTagFilter(prefs.tagFilter);
       }
     } catch (e) {
-      console.error('Failed to load preferences:', e);
+      logger.error('Failed to load preferences:', e);
     }
   }, []);
 
@@ -58,9 +59,9 @@ export const useDocumentFilters = () => {
         maxSizeKB,
         tagFilter,
       };
-      localStorage.setItem('documentListPrefs', JSON.stringify(prefs));
+      setDocumentListPrefs(prefs);
     } catch (e) {
-      console.error('Failed to save preferences:', e);
+      logger.error('Failed to save preferences:', e);
     }
   }, [categoryFilter, sortBy, sortOrder, fromDate, toDate, minSizeKB, maxSizeKB, tagFilter]);
 
@@ -88,7 +89,7 @@ export const useDocumentFilters = () => {
         setSortOrder('desc');
       }
     },
-    [sortBy, sortOrder],
+    [sortBy, sortOrder]
   );
 
   return {

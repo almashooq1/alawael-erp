@@ -1,4 +1,5 @@
-const MessagingService = require('../services/messagingService');
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */\nconst MessagingService = require('../services/messagingService');
 
 describe('Phase 3 Extension: Real-Time Messaging', () => {
   const userId1 = 'user-1';

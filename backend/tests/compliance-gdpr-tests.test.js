@@ -1,3 +1,4 @@
+/* eslint-disable no-undef, no-unused-vars */
 /**
  * 🏛️ Compliance, GDPR & Data Privacy Testing Suite
  * مجموعة اختبارات الامتثال و GDPR وخصوصية البيانات
@@ -44,9 +45,9 @@ describe('📋 GDPR Compliance Testing', () => {
         },
       };
 
-      Object.entries(user.consents).forEach(([category, settings]) => {
+      Object.entries(user.consents).forEach(([_category, settings]) => {
         if (typeof settings === 'object') {
-          Object.entries(settings).forEach(([type, consent]) => {
+          Object.entries(settings).forEach(([_type, consent]) => {
             expect(typeof consent).toBe('boolean');
           });
         } else {
@@ -101,7 +102,7 @@ describe('📋 GDPR Compliance Testing', () => {
         ],
       };
 
-      const exportFormats = ['json', 'csv', 'xml'];
+      const _exportFormats = ['json', 'csv', 'xml'];
 
       expect(userData.personalInfo).toBeDefined();
       expect(userData.activityLog).toBeInstanceOf(Array);
@@ -232,7 +233,7 @@ describe('📋 GDPR Compliance Testing', () => {
     });
 
     test('should remove personal identifiers even when data is retained', async () => {
-      const originalRecord = {
+      const _originalRecord = {
         id: 'rec-123',
         userId: 'user123',
         userName: 'john_doe',

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Beneficiary Model
  * نموذج المستفيدين لمراكز تأهيل ذوي الإعاقة

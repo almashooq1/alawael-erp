@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Conversation Model - Phase 3
  * نموذج المحادثات للدردشة الفورية
@@ -170,7 +171,7 @@ const conversationSchema = new mongoose.Schema(
     timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
-  },
+  }
 );
 
 // Indexes for performance
@@ -315,7 +316,12 @@ conversationSchema.statics.createPrivateConversation = async function (userId1, 
 };
 
 // Static: إنشاء محادثة جماعية
-conversationSchema.statics.createGroupConversation = async function (creatorId, name, description, participantIds = []) {
+conversationSchema.statics.createGroupConversation = async function (
+  creatorId,
+  name,
+  description,
+  participantIds = []
+) {
   const participants = [
     { user: creatorId, role: 'admin', isActive: true },
     ...participantIds.map(id => ({ user: id, role: 'member', isActive: true })),

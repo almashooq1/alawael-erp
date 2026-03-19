@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 const goalBankSchema = new mongoose.Schema(
@@ -15,14 +16,18 @@ const goalBankSchema = new mongoose.Schema(
     targetAgeMin: { type: Number, required: true }, // Years
     targetAgeMax: { type: Number, required: true }, // Years
 
-    difficulty: { type: String, enum: ['BEGINNER', 'INTERMEDIATE', 'ADVANCED'], default: 'BEGINNER' },
+    difficulty: {
+      type: String,
+      enum: ['BEGINNER', 'INTERMEDIATE', 'ADVANCED'],
+      default: 'BEGINNER',
+    },
 
     // Measurement
     measurementCriteria: { type: String }, // e.g. "4 out of 5 trials"
 
     tags: [String],
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 // Index for search suggestions

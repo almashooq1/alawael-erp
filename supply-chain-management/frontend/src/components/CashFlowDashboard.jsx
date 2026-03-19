@@ -1,7 +1,7 @@
 /**
  * CashFlowDashboard Component
  * لوحة التدفق النقدي ومراقبة السيولة
- * 
+ *
  * Features:
  * - رسوم بيانية للتدفق النقدي
  * - توقعات السيولة
@@ -58,10 +58,7 @@ const CashFlowDashboard = () => {
   const [cashData, setCashData] = useState([]);
   const [forecasts, setForecasts] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [dateRange, setDateRange] = useState([
-    dayjs().subtract(6, 'months'),
-    dayjs(),
-  ]);
+  const [dateRange, setDateRange] = useState([dayjs().subtract(6, 'months'), dayjs()]);
   const [selectedAccount, setSelectedAccount] = useState('all');
   const [stats, setStats] = useState({
     totalInflow: 0,
@@ -85,19 +82,16 @@ const CashFlowDashboard = () => {
         account: selectedAccount,
       });
 
-      const response = await fetch(
-        `/api/finance/cash-flow/detailed-report?${params}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const response = await fetch(`/api/finance/cash-flow/detailed-report?${params}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       if (!response.ok) throw new Error('Failed to fetch cash flow data');
 
       const data = await response.json();
       setCashData(data.data.dailyFlows || []);
       calculateStats(data.data.dailyFlows || []);
-      
+
       // Fetch forecasts
       fetchForecasts();
     } catch (error) {
@@ -124,7 +118,7 @@ const CashFlowDashboard = () => {
     }
   };
 
-  const calculateStats = (data) => {
+  const calculateStats = data => {
     const stats = {
       totalInflow: data.reduce((sum, item) => sum + (item.inflow || 0), 0),
       totalOutflow: data.reduce((sum, item) => sum + (item.outflow || 0), 0),
@@ -144,7 +138,7 @@ const CashFlowDashboard = () => {
     setStats(stats);
   };
 
-  const exportData = async (format) => {
+  const exportData = async format => {
     try {
       const token = localStorage.getItem('authToken');
       const params = new URLSearchParams({
@@ -154,12 +148,9 @@ const CashFlowDashboard = () => {
         format,
       });
 
-      const response = await fetch(
-        `/api/finance/cash-flow/export?${params}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const response = await fetch(`/api/finance/cash-flow/export?${params}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       if (!response.ok) throw new Error('Export failed');
 
@@ -202,19 +193,19 @@ const CashFlowDashboard = () => {
       title: 'التاريخ',
       dataIndex: 'date',
       key: 'date',
-      render: (date) => dayjs(date).format('DD/MM/YYYY'),
+      render: date => dayjs(date).format('DD/MM/YYYY'),
     },
     {
       title: 'الرصيد الافتتاحي',
       dataIndex: 'openingBalance',
       key: 'opening',
-      render: (value) => `ر.س ${Number(value).toLocaleString('ar-SA')}`,
+      render: value => `ر.س ${Number(value).toLocaleString('ar-SA')}`,
     },
     {
       title: 'التدفق الداخلي',
       dataIndex: 'inflow',
       key: 'inflow',
-      render: (value) => (
+      render: value => (
         <span style={{ color: '#52c41a' }}>
           <ArrowUpOutlined /> ر.س {Number(value).toLocaleString('ar-SA')}
         </span>
@@ -224,7 +215,7 @@ const CashFlowDashboard = () => {
       title: 'التدفق الخارجي',
       dataIndex: 'outflow',
       key: 'outflow',
-      render: (value) => (
+      render: value => (
         <span style={{ color: '#ff4d4f' }}>
           <ArrowDownOutlined /> ر.س {Number(value).toLocaleString('ar-SA')}
         </span>
@@ -234,13 +225,13 @@ const CashFlowDashboard = () => {
       title: 'الرصيد الختامي',
       dataIndex: 'closingBalance',
       key: 'closing',
-      render: (value) => `ر.س ${Number(value).toLocaleString('ar-SA')}`,
+      render: value => `ر.س ${Number(value).toLocaleString('ar-SA')}`,
     },
     {
       title: 'الفئة',
       dataIndex: 'category',
       key: 'category',
-      render: (text) => <span>{text || 'عام'}</span>,
+      render: text => <span>{text || 'عام'}</span>,
     },
   ];
 
@@ -301,7 +292,7 @@ const CashFlowDashboard = () => {
           <Col xs={24} sm={12} md={8}>
             <DatePicker.RangePicker
               value={dateRange}
-              onChange={(dates) => setDateRange(dates)}
+              onChange={dates => setDateRange(dates)}
               style={{ width: '100%' }}
               className="rtl"
             />
@@ -428,10 +419,7 @@ const CashFlowDashboard = () => {
                     >
                       Excel
                     </Button>
-                    <Button
-                      icon={<FilePdfOutlined />}
-                      onClick={() => exportData('pdf')}
-                    >
+                    <Button icon={<FilePdfOutlined />} onClick={() => exportData('pdf')}>
                       PDF
                     </Button>
                   </div>

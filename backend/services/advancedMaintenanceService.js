@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars, no-undef, no-empty, prefer-const, no-constant-condition, no-unused-expressions */
 /**
  * Advanced Maintenance Service - خدمة الصيانة المتقدمة
  *
@@ -75,10 +76,7 @@ class AdvancedMaintenanceService {
       // حساب تلك المستحقة والقريبة
       const dueSoon = schedules.filter(s => s.isDue);
       const comingSoon = schedules.filter(
-        s =>
-          s.daysUntilDue >= 0 &&
-          s.daysUntilDue <= 7 &&
-          !dueSoon.includes(s)
+        s => s.daysUntilDue >= 0 && s.daysUntilDue <= 7 && !dueSoon.includes(s)
       );
 
       return {
@@ -200,9 +198,7 @@ class AdvancedMaintenanceService {
       } else if (progress === 100) {
         task.status = 'مكتملة';
         task.completedDate = new Date();
-        task.actualDuration = Math.round(
-          (task.completedDate - task.startedDate) / (1000 * 60)
-        );
+        task.actualDuration = Math.round((task.completedDate - task.startedDate) / (1000 * 60));
       }
 
       // تسجيل النشاط
@@ -286,9 +282,8 @@ class AdvancedMaintenanceService {
 
       // محاكاة نظام تشخيص ذكي
       const diagnosticKnowledge = {
-        'صرير':
-          'يمكن أن يكون بسبب الفرامل أو المعلقات. يُنصح بفحص الفرامل أولاً.',
-        'تسرب': 'فحص السوائل والمحرك. قد يكون تسريب زيت أو سائل تبريد.',
+        صرير: 'يمكن أن يكون بسبب الفرامل أو المعلقات. يُنصح بفحص الفرامل أولاً.',
+        تسرب: 'فحص السوائل والمحرك. قد يكون تسريب زيت أو سائل تبريد.',
         'أداء ضعيف': 'تحقق من فلاتر الهواء والوقود وشمعات الإشعال.',
         'رائحة حرق': 'قد يكون بسبب الكلتش أو مشكلة في الكهرباء.',
       };
@@ -373,7 +368,8 @@ class AdvancedMaintenanceService {
    */
   async createAutoPurchaseOrder(inventoryId) {
     try {
-      const inventory = await MaintenanceInventory.findById(inventoryId).populate('preferredSupplier');
+      const inventory =
+        await MaintenanceInventory.findById(inventoryId).populate('preferredSupplier');
 
       if (!inventory) {
         throw new Error('الصنف غير موجود');
@@ -388,7 +384,10 @@ class AdvancedMaintenanceService {
       const purchaseOrder = {
         poNumber: `PO-${Date.now()}`,
         supplierId: inventory.preferredSupplier._id,
-        quantityOrdered: Math.max(quantityNeeded, inventory.suppliers[0]?.minimumOrderQuantity || 1),
+        quantityOrdered: Math.max(
+          quantityNeeded,
+          inventory.suppliers[0]?.minimumOrderQuantity || 1
+        ),
         orderDate: new Date(),
         expectedDeliveryDate: new Date(
           Date.now() + (inventory.suppliers[0]?.leadTime || 7) * 24 * 60 * 60 * 1000
@@ -501,7 +500,13 @@ class AdvancedMaintenanceService {
       if (vehicle.violations.length > 5) healthScore -= 15;
 
       const healthStatus =
-        healthScore >= 80 ? 'ممتاز' : healthScore >= 60 ? 'جيد' : healthScore >= 40 ? 'مقبول' : 'سيء';
+        healthScore >= 80
+          ? 'ممتاز'
+          : healthScore >= 60
+            ? 'جيد'
+            : healthScore >= 40
+              ? 'مقبول'
+              : 'سيء';
 
       return {
         success: true,

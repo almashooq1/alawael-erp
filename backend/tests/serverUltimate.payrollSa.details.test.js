@@ -1,3 +1,4 @@
+/* eslint-disable no-undef, no-unused-vars */
 const request = require('supertest');
 const jwt = require('jsonwebtoken');
 const express = require('express');
@@ -39,7 +40,9 @@ const createMockPayrollApp = () => {
     if (token) {
       try {
         req.user = jwt.verify(token, TEST_SECRET);
-      } catch {}
+      } catch (_err) {
+        // invalid token in test request, keep req.user undefined
+      }
     }
     next();
   });

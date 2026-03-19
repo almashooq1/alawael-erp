@@ -131,12 +131,7 @@ export default function AdvancedAnalyticsDashboard() {
           />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <StatCard
-            title="Total Orders"
-            value={stats?.orderCount || 0}
-            color="#FF9800"
-            icon="📋"
-          />
+          <StatCard title="Total Orders" value={stats?.orderCount || 0} color="#FF9800" icon="📋" />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
           <StatCard
@@ -250,11 +245,7 @@ export default function AdvancedAnalyticsDashboard() {
                         Orders: {supplier.orders}
                       </Typography>
                     </Box>
-                    <Chip
-                      label={`${supplier.rating} ⭐`}
-                      color="primary"
-                      variant="outlined"
-                    />
+                    <Chip label={`${supplier.rating} ⭐`} color="primary" variant="outlined" />
                   </Box>
                 ))}
               </Box>
@@ -286,10 +277,7 @@ export default function AdvancedAnalyticsDashboard() {
                   <Typography variant="body2" sx={{ color: '#666', mb: 1 }}>
                     {metric.label}
                   </Typography>
-                  <Typography
-                    variant="h5"
-                    sx={{ fontWeight: 'bold', color: metric.color }}
-                  >
+                  <Typography variant="h5" sx={{ fontWeight: 'bold', color: metric.color }}>
                     {metric.value}
                   </Typography>
                 </Box>

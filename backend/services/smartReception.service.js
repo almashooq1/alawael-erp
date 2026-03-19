@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+const logger = require('../utils/logger');
 /**
  * Smart Reception & Visitor Service (Phase 78)
  *
@@ -18,7 +20,7 @@ class SmartReceptionService {
    */
   async selfCheckIn(type, identifier) {
     // type = 'QR' or 'NATIONAL_ID'
-    console.log(`Self check-in: ${type} - ${identifier}`);
+    logger.info(`Self check-in: ${type} - ${identifier}`);
 
     // Mock finding booking
     const appointment = {

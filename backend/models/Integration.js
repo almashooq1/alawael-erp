@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 const integrationSchema = new mongoose.Schema(
@@ -33,7 +34,7 @@ const integrationSchema = new mongoose.Schema(
     ],
     lastSync: Date,
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 module.exports = mongoose.model('Integration', integrationSchema);

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Telehealth Integration Service
  * خدمة تكامل الرعاية الصحية عن بعد
@@ -8,6 +9,7 @@
 const axios = require('axios');
 const EventEmitter = require('events');
 const jwt = require('jsonwebtoken');
+const logger = require('../utils/logger');
 
 class TelehealthService extends EventEmitter {
   constructor() {
@@ -29,11 +31,11 @@ class TelehealthService extends EventEmitter {
         this.RtcTokenBuilder = RtcTokenBuilder;
       } else if (this.videoProvider === 'jitsi') {
         // Jitsi Meet uses room-based approach
-        console.log('✅ Jitsi Telehealth provider initialized');
+        logger.info('✅ Jitsi Telehealth provider initialized');
       }
-      console.log(`✅ Telehealth service initialized with ${this.videoProvider}`);
+      logger.info(`✅ Telehealth service initialized with ${this.videoProvider}`);
     } catch (error) {
-      console.error('Telehealth initialization error:', error);
+      logger.error('Telehealth initialization error:', error);
     }
   }
 
@@ -49,7 +51,7 @@ class TelehealthService extends EventEmitter {
         beneficiaryId,
         scheduledTime,
         duration = 60, // minutes
-        requirements = []
+        requirements = [],
       } = sessionData;
 
       // Generate video room ID
@@ -58,7 +60,7 @@ class TelehealthService extends EventEmitter {
       // Generate access tokens for both participants
       const tokens = {
         therapist: this.generateAccessToken(therapistId, roomId, true),
-        patient: this.generateAccessToken(beneficiaryId, roomId, false)
+        patient: this.generateAccessToken(beneficiaryId, roomId, false),
       };
 
       // Store session in active sessions map
@@ -75,7 +77,7 @@ class TelehealthService extends EventEmitter {
         recordings: [],
         vitals: [],
         notes: [],
-        events: []
+        events: [],
       };
 
       this.activeSessions.set(roomId, telehealthSession);
@@ -85,7 +87,7 @@ class TelehealthService extends EventEmitter {
         sessionId,
         roomId,
         tokens,
-        videoProvider: this.videoProvider
+        videoProvider: this.videoProvider,
       });
 
       return {
@@ -95,10 +97,10 @@ class TelehealthService extends EventEmitter {
         tokens,
         videoProvider: this.videoProvider,
         joinUrl: this.generateJoinUrl(roomId),
-        startTime: telehealthSession.startTime
+        startTime: telehealthSession.startTime,
       };
     } catch (error) {
-      console.error('Failed to initiate teletherapy session:', error);
+      logger.error('Failed to initiate teletherapy session:', error);
       throw error;
     }
   }
@@ -122,7 +124,7 @@ class TelehealthService extends EventEmitter {
         respiratoryRate: vitalData.respiratoryRate,
         oxygenSaturation: vitalData.oxygenSaturation,
         temperature: vitalData.temperature,
-        stress: vitalData.stressLevel || this.calculateStressLevel(vitalData)
+        stress: vitalData.stressLevel || this.calculateStressLevel(vitalData),
       };
 
       session.vitals.push(vitalRecord);
@@ -134,18 +136,18 @@ class TelehealthService extends EventEmitter {
           roomId,
           userId,
           alerts,
-          vital: vitalRecord
+          vital: vitalRecord,
         });
       }
 
       return {
         recorded: true,
         vital: vitalRecord,
-        alerts
+        alerts,
       };
     } catch (error) {
-      console.error('Vital signs monitoring error:', error);
-      return { recorded: false, error: error.message };
+      logger.error('Vital signs monitoring error:', error);
+      return { recorded: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -166,18 +168,18 @@ class TelehealthService extends EventEmitter {
         content: note.content,
         type: note.type, // observation, intervention, patient_response
         relevantVitals: note.vitalIndices || [],
-        images: note.attachments || []
+        images: note.attachments || [],
       };
 
       session.notes.push(sessionNote);
 
       return {
         success: true,
-        note: sessionNote
+        note: sessionNote,
       };
     } catch (error) {
-      console.error('Session note error:', error);
-      return { success: false, error: error.message };
+      logger.error('Session note error:', error);
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -190,16 +192,16 @@ class TelehealthService extends EventEmitter {
       this.emit('teletherapy:screen-share-start', {
         roomId,
         userId,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       return {
         success: true,
-        screenShareEnabled: true
+        screenShareEnabled: true,
       };
     } catch (error) {
-      console.error('Screen sharing error:', error);
-      return { success: false, error: error.message };
+      logger.error('Screen sharing error:', error);
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -219,23 +221,23 @@ class TelehealthService extends EventEmitter {
         timestamp: new Date(),
         content: message.content,
         type: message.type, // text, file, resource, prescription
-        metadata: message.metadata || {}
+        metadata: message.metadata || {},
       };
 
       session.events.push(msgRecord);
 
       this.emit('teletherapy:message', {
         roomId,
-        message: msgRecord
+        message: msgRecord,
       });
 
       return {
         success: true,
-        message: msgRecord
+        message: msgRecord,
       };
     } catch (error) {
-      console.error('Message sending error:', error);
-      return { success: false, error: error.message };
+      logger.error('Message sending error:', error);
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -250,9 +252,7 @@ class TelehealthService extends EventEmitter {
         throw new Error('Session not found');
       }
 
-      const actualDuration = Math.floor(
-        (new Date() - session.startTime) / 60000
-      );
+      const actualDuration = Math.floor((new Date() - session.startTime) / 60000);
 
       // Prepare session summary
       const sessionSummary = {
@@ -270,7 +270,7 @@ class TelehealthService extends EventEmitter {
         recordingPath: endData.recordingPath,
         sessionNotes: session.notes,
         vitalsLog: session.vitals,
-        status: 'completed'
+        status: 'completed',
       };
 
       // Save session recording if available
@@ -286,11 +286,11 @@ class TelehealthService extends EventEmitter {
 
       return {
         success: true,
-        summary: sessionSummary
+        summary: sessionSummary,
       };
     } catch (error) {
-      console.error('End session error:', error);
-      return { success: false, error: error.message };
+      logger.error('End session error:', error);
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -308,19 +308,19 @@ class TelehealthService extends EventEmitter {
         reminders: [
           { minutesBefore: 1440, status: 'sent' }, // 1 day
           { minutesBefore: 120, status: 'pending' }, // 2 hours
-          { minutesBefore: 15, status: 'pending' } // 15 minutes
-        ]
+          { minutesBefore: 15, status: 'pending' }, // 15 minutes
+        ],
       };
 
       this.emit('teletherapy:reminder-scheduled', reminderData);
 
       return {
         success: true,
-        reminders: reminderData.reminders
+        reminders: reminderData.reminders,
       };
     } catch (error) {
-      console.error('Reminder scheduling error:', error);
-      return { success: false, error: error.message };
+      logger.error('Reminder scheduling error:', error);
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -338,11 +338,11 @@ class TelehealthService extends EventEmitter {
         recordingPath,
         duration: 60, // minutes
         size: 1024, // MB
-        quality: '1080p'
+        quality: '1080p',
       };
     } catch (error) {
-      console.error('Recording retrieval error:', error);
-      return { success: false, error: error.message };
+      logger.error('Recording retrieval error:', error);
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -353,9 +353,7 @@ class TelehealthService extends EventEmitter {
   async generateSessionReport(sessionId) {
     try {
       const session = this.activeSessions.get(
-        Array.from(this.activeSessions.values()).find(
-          s => s.sessionId === sessionId
-        )?.roomId
+        Array.from(this.activeSessions.values()).find(s => s.sessionId === sessionId)?.roomId
       );
 
       return {
@@ -367,12 +365,12 @@ class TelehealthService extends EventEmitter {
           vitalsSummary: {},
           observationsSummary: 'Patient showed good engagement',
           recommendations: ['Continue weekly sessions'],
-          followUpNeeded: false
-        }
+          followUpNeeded: false,
+        },
       };
     } catch (error) {
-      console.error('Report generation error:', error);
-      return { success: false, error: error.message };
+      logger.error('Report generation error:', error);
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -410,14 +408,19 @@ class TelehealthService extends EventEmitter {
           moderator: isTherapist,
           userinfo: {
             id: userId,
-            name: isTherapist ? 'Therapist' : 'Patient'
-          }
+            name: isTherapist ? 'Therapist' : 'Patient',
+          },
         };
 
-        return jwt.sign(payload, process.env.JITSI_SECRET || 'secret');
+        const jitsiSecret = process.env.JITSI_SECRET;
+        if (!jitsiSecret) {
+          logger.error('JITSI_SECRET env var is not set — cannot sign token');
+          return null;
+        }
+        return jwt.sign(payload, jitsiSecret);
       }
     } catch (error) {
-      console.error('Token generation error:', error);
+      logger.error('Token generation error:', error);
       return null;
     }
   }
@@ -444,7 +447,7 @@ class TelehealthService extends EventEmitter {
       alerts.push({
         type: 'elevated_heart_rate',
         severity: 'warning',
-        message: 'Heart rate elevated'
+        message: 'Heart rate elevated',
       });
     }
 
@@ -452,7 +455,7 @@ class TelehealthService extends EventEmitter {
       alerts.push({
         type: 'elevated_bp',
         severity: 'warning',
-        message: 'Blood pressure elevated'
+        message: 'Blood pressure elevated',
       });
     }
 
@@ -460,7 +463,7 @@ class TelehealthService extends EventEmitter {
       alerts.push({
         type: 'low_oxygen',
         severity: 'critical',
-        message: 'Oxygen saturation low'
+        message: 'Oxygen saturation low',
       });
     }
 
@@ -478,13 +481,13 @@ class TelehealthService extends EventEmitter {
       measurements: vitals.length,
       avgHeartRate: Math.round(avgHeartRate),
       bpTrend: `${firstBP?.systolic}/${firstBP?.diastolic} → ${lastBP?.systolic}/${lastBP?.diastolic}`,
-      avgOxygen: Math.round(vitals.reduce((sum, v) => sum + v.oxygenSaturation, 0) / vitals.length)
+      avgOxygen: Math.round(vitals.reduce((sum, v) => sum + v.oxygenSaturation, 0) / vitals.length),
     };
   }
 
   async saveSessionRecording(sessionId, recordingPath) {
     // Implementation would save to cloud storage
-    console.log(`Recording saved for session ${sessionId}`);
+    logger.info(`Recording saved for session ${sessionId}`);
   }
 }
 

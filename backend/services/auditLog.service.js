@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * خدمة سجل التدقيق الذكي (Audit Log Service)
  * خدمة شاملة لإدارة وتحليل سجلات التدقيق
@@ -10,6 +11,7 @@ const {
   OperationStatus,
 } = require('../models/auditLog.model');
 const { encrypt } = require('../utils/fieldEncryption');
+const logger = require('../utils/logger');
 let geoip;
 let UAParser;
 
@@ -154,7 +156,7 @@ class AuditLogService {
 
       return auditLog;
     } catch (err) {
-      console.error('Error logging audit event:', err);
+      logger.error('Error logging audit event:', err);
       // لا نرمي خطأ لتجنب توقف العملية الأساسية
       return null;
     }
@@ -183,7 +185,7 @@ class AuditLogService {
       message: success
         ? `User ${user?.username} ${type} successfully`
         : `Failed ${type} attempt for ${user?.username || 'unknown user'}`,
-      error: error ? { message: error.message } : null,
+      error: error ? { message: 'حدث خطأ داخلي' } : null,
       tags: ['authentication', type],
     });
   }
@@ -627,7 +629,7 @@ class AuditLogService {
    */
   static async notifyCriticalEvent(auditLog) {
     // يمكن تكامله مع نظام الإشعارات
-    console.warn('CRITICAL AUDIT EVENT:', {
+    logger.warn('CRITICAL AUDIT EVENT:', {
       eventType: auditLog.eventType,
       message: auditLog.message,
       user: auditLog.username,
@@ -663,7 +665,7 @@ class AuditLogService {
       await auditLog.save();
       return auditLog;
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 }

@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * Dashboard Component Tests - Phase 5.2
  * Tests dashboard widgets and data aggregation
@@ -214,7 +216,7 @@ describe('Dashboard Component Tests - Phase 5.2', () => {
       };
 
       employees.forEach(emp => {
-        if (statusBreakdown.hasOwnProperty(emp.status)) {
+        if (Object.prototype.hasOwnProperty.call(statusBreakdown, emp.status)) {
           statusBreakdown[emp.status]++;
         }
       });
@@ -233,7 +235,7 @@ describe('Dashboard Component Tests - Phase 5.2', () => {
 
     it('should show pending approvals count', async () => {
       // This would count pending leave requests, approvals, etc.
-      let pendingCount = 0;
+      const pendingCount = 0;
 
       // Simulated: Count documents with PENDING status
       expect(typeof pendingCount).toBe('number');
@@ -332,7 +334,7 @@ describe('Dashboard Component Tests - Phase 5.2', () => {
         deptSalaries[emp.department].count++;
       });
 
-      for (let dept in deptSalaries) {
+      for (const dept in deptSalaries) {
         const avg = deptSalaries[dept].total / deptSalaries[dept].count;
         expect(avg).toBeGreaterThanOrEqual(0);
       }

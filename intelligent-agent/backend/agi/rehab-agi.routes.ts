@@ -44,7 +44,7 @@ router.post('/beneficiary/analyze', async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error('خطأ في تحليل المستفيد:', error);
     res.status(500).json({
-      error: error.message
+      error: 'حدث خطأ داخلي'
     });
   }
 });
@@ -75,7 +75,7 @@ router.post('/beneficiary/suggest-program', async (req: Request, res: Response) 
   } catch (error: any) {
     console.error('خطأ في اقتراح البرنامج:', error);
     res.status(500).json({
-      error: error.message
+      error: 'حدث خطأ داخلي'
     });
   }
 });
@@ -107,7 +107,7 @@ router.post('/beneficiary/predict-progress', async (req: Request, res: Response)
   } catch (error: any) {
     console.error('خطأ في التنبؤ:', error);
     res.status(500).json({
-      error: error.message
+      error: 'حدث خطأ داخلي'
     });
   }
 });
@@ -138,7 +138,7 @@ router.post('/program/analyze-effectiveness', async (req: Request, res: Response
   } catch (error: any) {
     console.error('خطأ في تحليل البرنامج:', error);
     res.status(500).json({
-      error: error.message
+      error: 'حدث خطأ داخلي'
     });
   }
 });
@@ -169,7 +169,7 @@ router.post('/schedule/optimize', async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error('خطأ في تحسين الجدولة:', error);
     res.status(500).json({
-      error: error.message
+      error: 'حدث خطأ داخلي'
     });
   }
 });
@@ -200,7 +200,7 @@ router.post('/report/comprehensive', async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error('خطأ في توليد التقرير:', error);
     res.status(500).json({
-      error: error.message
+      error: 'حدث خطأ داخلي'
     });
   }
 });
@@ -231,7 +231,7 @@ router.post('/erp/sync-beneficiary', async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error('خطأ في المزامنة:', error);
     res.status(500).json({
-      error: error.message
+      error: 'حدث خطأ داخلي'
     });
   }
 });
@@ -255,7 +255,7 @@ router.post('/erp/create-invoice', async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error('خطأ في إنشاء الفاتورة:', error);
     res.status(500).json({
-      error: error.message
+      error: 'حدث خطأ داخلي'
     });
   }
 });
@@ -279,7 +279,7 @@ router.post('/erp/record-payment', async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error('خطأ في تسجيل الدفعة:', error);
     res.status(500).json({
-      error: error.message
+      error: 'حدث خطأ داخلي'
     });
   }
 });
@@ -303,7 +303,7 @@ router.post('/erp/book-resource', async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error('خطأ في حجز المورد:', error);
     res.status(500).json({
-      error: error.message
+      error: 'حدث خطأ داخلي'
     });
   }
 });
@@ -328,7 +328,7 @@ router.get('/erp/financial-summary/:beneficiaryId', async (req: Request, res: Re
   } catch (error: any) {
     console.error('خطأ في الحصول على الملخص المالي:', error);
     res.status(500).json({
-      error: error.message
+      error: 'حدث خطأ داخلي'
     });
   }
 });
@@ -359,7 +359,7 @@ router.get('/erp/schedule', async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error('خطأ في الحصول على الجدول:', error);
     res.status(500).json({
-      error: error.message
+      error: 'حدث خطأ داخلي'
     });
   }
 });
@@ -384,7 +384,7 @@ router.put('/erp/session/:sessionId/status', async (req: Request, res: Response)
   } catch (error: any) {
     console.error('خطأ في تحديث حالة الجلسة:', error);
     res.status(500).json({
-      error: error.message
+      error: 'حدث خطأ داخلي'
     });
   }
 });
@@ -408,7 +408,7 @@ router.post('/erp/send-notification', async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error('خطأ في إرسال الإشعار:', error);
     res.status(500).json({
-      error: error.message
+      error: 'حدث خطأ داخلي'
     });
   }
 });
@@ -432,7 +432,7 @@ router.post('/erp/analyze-data', async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error('خطأ في تحليل البيانات:', error);
     res.status(500).json({
-      error: error.message
+      error: 'حدث خطأ داخلي'
     });
   }
 });
@@ -456,7 +456,7 @@ router.post('/erp/full-sync', async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error('خطأ في المزامنة الشاملة:', error);
     res.status(500).json({
-      error: error.message
+      error: 'حدث خطأ داخلي'
     });
   }
 });

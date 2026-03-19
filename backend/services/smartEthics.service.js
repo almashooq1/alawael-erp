@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+const logger = require('../utils/logger');
 /**
  * Smart Ethics & Bio-Safety Service (Phase 87)
  *
@@ -18,7 +20,7 @@ class SmartEthicsService {
    * Critical for high-risk therapies or data sharing.
    */
   async captureConsent(patientId, guardianId, formType, videoHash) {
-    console.log(`Processing consent for ${patientId} by ${guardianId}`);
+    logger.info(`Processing consent for ${patientId} by ${guardianId}`);
 
     // AI Validation: Check if videoHash is valid (mock) and matches face ID
     const isValid = videoHash && videoHash.length > 5;

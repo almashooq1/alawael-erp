@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * 📊 Real-time Dashboard System
  *
@@ -7,6 +8,8 @@
  * - Service status monitoring
  * - Alert visualization
  */
+
+const logger = require('../utils/logger');
 
 class DashboardManager {
   constructor() {
@@ -137,8 +140,7 @@ class DashboardManager {
   recordError(error) {
     this.metrics.recentErrors.push({
       timestamp: Date.now(),
-      message: error.message,
-      stack: error.stack,
+      message: 'خطأ داخلي',
       severity: error.severity || 'error',
     });
 
@@ -178,7 +180,7 @@ class DashboardManager {
       try {
         subscriber.callback(dashboardData);
       } catch (error) {
-        console.error('[Dashboard] Notification error:', error.message);
+        logger.error('[Dashboard] Notification error:', error.message);
       }
     });
   }
@@ -236,7 +238,7 @@ class DashboardManager {
 function dashboardMiddleware(dashboardManager) {
   return io => {
     io.on('connection', socket => {
-      console.log('[Dashboard] Client connected:', socket.id);
+      logger.info('[Dashboard] Client connected:', socket.id);
 
       // Subscribe to dashboard updates
       dashboardManager.subscribe(socket.id, data => {
@@ -260,7 +262,7 @@ function dashboardMiddleware(dashboardManager) {
       });
 
       socket.on('disconnect', () => {
-        console.log('[Dashboard] Client disconnected:', socket.id);
+        logger.info('[Dashboard] Client disconnected:', socket.id);
         dashboardManager.unsubscribe(socket.id);
       });
     });

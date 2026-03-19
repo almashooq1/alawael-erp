@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+const logger = require('../utils/logger');
 /**
  * ⚖️ GDPR/HIPAA Compliance Framework
  *
@@ -197,7 +199,7 @@ class ComplianceFramework {
       breach.notificationStatus = 'notified';
       breach.notificationSent = Date.now();
 
-      console.log(`[Compliance] Breach notifications sent to ${breach.affectedUsers.length} users`);
+      logger.info(`[Compliance] Breach notifications sent to ${breach.affectedUsers.length} users`);
     }, notificationDelay);
   }
 

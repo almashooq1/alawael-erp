@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * SMS Integration Service
  * Twilio SMS and WhatsApp Integration
@@ -65,7 +66,7 @@ class SMSIntegrationService {
       };
     } catch (error) {
       this.logger.log('error', 'Failed to send SMS', {
-        error: error.message,
+        error: 'حدث خطأ داخلي',
         to: phoneNumber,
       });
       throw error;
@@ -104,7 +105,7 @@ class SMSIntegrationService {
       };
     } catch (error) {
       this.logger.log('error', 'Failed to send WhatsApp message', {
-        error: error.message,
+        error: 'حدث خطأ داخلي',
         to: phoneNumber,
       });
       throw error;
@@ -159,7 +160,7 @@ class SMSIntegrationService {
           const result = await this.sendSMS(phoneNumber, message, options);
           results.push({ phoneNumber, ...result });
         } catch (error) {
-          results.push({ phoneNumber, success: false, error: error.message });
+          results.push({ phoneNumber, success: false, error: 'حدث خطأ داخلي' });
         }
       }
 

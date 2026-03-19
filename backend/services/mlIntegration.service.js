@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * ML Model Integration Service
  * خدمة تكامل نماذج التعلم الآلي
@@ -224,7 +225,7 @@ class MLIntegrationService {
     };
   }
 
-  async getPredictionWithProfile(profileId, modelName) {
+  async getPredictionWithProfileAsync(profileId, modelName) {
     return {
       success: true,
       profileId,

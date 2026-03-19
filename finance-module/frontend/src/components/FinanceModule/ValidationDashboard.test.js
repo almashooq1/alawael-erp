@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * ValidationDashboard Tests
  * Component and integration tests
@@ -16,7 +18,7 @@ const localStorageMock = {
   getItem: jest.fn(() => 'fake-token'),
   setItem: jest.fn(),
   removeItem: jest.fn(),
-  clear: jest.fn()
+  clear: jest.fn(),
 };
 Object.defineProperty(window, 'localStorage', { value: localStorageMock });
 
@@ -36,9 +38,9 @@ describe('ValidationDashboard Component', () => {
             total: 0,
             complianceRate: 100,
             bySeverity: { critical: 0, high: 0, medium: 0, low: 0 },
-            byStatus: { detected: 0, investigating: 0, resolved: 0, waived: 0 }
-          }
-        })
+            byStatus: { detected: 0, investigating: 0, resolved: 0, waived: 0 },
+          },
+        }),
       });
 
       render(<ValidationDashboard />);
@@ -57,9 +59,9 @@ describe('ValidationDashboard Component', () => {
             total: 5,
             bySeverity: { critical: 1, high: 2, medium: 2, low: 0 },
             byStatus: { detected: 3, investigating: 1, resolved: 1, waived: 0 },
-            complianceRate: 80
-          }
-        })
+            complianceRate: 80,
+          },
+        }),
       });
 
       render(<ValidationDashboard />);
@@ -81,9 +83,9 @@ describe('ValidationDashboard Component', () => {
             total: 0,
             complianceRate: 100,
             bySeverity: { critical: 0, high: 0, medium: 0, low: 0 },
-            byStatus: { detected: 0, investigating: 0, resolved: 0, waived: 0 }
-          }
-        })
+            byStatus: { detected: 0, investigating: 0, resolved: 0, waived: 0 },
+          },
+        }),
       });
 
       render(<ValidationDashboard />);
@@ -105,8 +107,8 @@ describe('ValidationDashboard Component', () => {
           severity: 'high',
           amount: 1000,
           status: 'detected',
-          detectionDate: '2025-02-16'
-        }
+          detectionDate: '2025-02-16',
+        },
       ];
 
       fetch.mockResolvedValueOnce({
@@ -117,9 +119,9 @@ describe('ValidationDashboard Component', () => {
             total: 1,
             complianceRate: 90,
             bySeverity: { critical: 0, high: 1, medium: 0, low: 0 },
-            byStatus: { detected: 1, investigating: 0, resolved: 0, waived: 0 }
-          }
-        })
+            byStatus: { detected: 1, investigating: 0, resolved: 0, waived: 0 },
+          },
+        }),
       });
 
       render(<ValidationDashboard />);
@@ -159,9 +161,9 @@ describe('ValidationDashboard Component', () => {
             total: 0,
             complianceRate: 100,
             bySeverity: { critical: 0, high: 0, medium: 0, low: 0 },
-            byStatus: { detected: 0, investigating: 0, resolved: 0, waived: 0 }
-          }
-        })
+            byStatus: { detected: 0, investigating: 0, resolved: 0, waived: 0 },
+          },
+        }),
       });
 
       render(<ValidationDashboard />);
@@ -191,9 +193,9 @@ describe('ValidationDashboard Component', () => {
             total: 0,
             complianceRate: 100,
             bySeverity: { critical: 0, high: 0, medium: 0, low: 0 },
-            byStatus: { detected: 0, investigating: 0, resolved: 0, waived: 0 }
-          }
-        })
+            byStatus: { detected: 0, investigating: 0, resolved: 0, waived: 0 },
+          },
+        }),
       });
 
       render(<ValidationDashboard />);
@@ -219,9 +221,9 @@ describe('ValidationDashboard Component', () => {
             total: 0,
             complianceRate: 100,
             bySeverity: { critical: 0, high: 0, medium: 0, low: 0 },
-            byStatus: { detected: 0, investigating: 0, resolved: 0, waived: 0 }
-          }
-        })
+            byStatus: { detected: 0, investigating: 0, resolved: 0, waived: 0 },
+          },
+        }),
       });
 
       const { rerender } = render(<ValidationDashboard />);
@@ -248,8 +250,8 @@ describe('ValidationDashboard Component', () => {
           amount: 1000,
           status: 'detected',
           detectionDate: '2025-02-16',
-          description: 'Test violation'
-        }
+          description: 'Test violation',
+        },
       ];
 
       fetch.mockResolvedValueOnce({
@@ -260,9 +262,9 @@ describe('ValidationDashboard Component', () => {
             total: 1,
             complianceRate: 90,
             bySeverity: { critical: 0, high: 1, medium: 0, low: 0 },
-            byStatus: { detected: 1, investigating: 0, resolved: 0, waived: 0 }
-          }
-        })
+            byStatus: { detected: 1, investigating: 0, resolved: 0, waived: 0 },
+          },
+        }),
       });
 
       render(<ValidationDashboard />);
@@ -286,8 +288,8 @@ describe('ValidationDashboard Component', () => {
           severity: 'high',
           amount: 1000,
           status: 'detected',
-          detectionDate: '2025-02-16'
-        }
+          detectionDate: '2025-02-16',
+        },
       ];
 
       fetch
@@ -299,13 +301,13 @@ describe('ValidationDashboard Component', () => {
               total: 1,
               complianceRate: 90,
               bySeverity: { critical: 0, high: 1, medium: 0, low: 0 },
-              byStatus: { detected: 1, investigating: 0, resolved: 0, waived: 0 }
-            }
-          })
+              byStatus: { detected: 1, investigating: 0, resolved: 0, waived: 0 },
+            },
+          }),
         })
         .mockResolvedValueOnce({
           ok: true,
-          json: async () => ({ success: true })
+          json: async () => ({ success: true }),
         })
         .mockResolvedValueOnce({
           ok: true,
@@ -315,9 +317,9 @@ describe('ValidationDashboard Component', () => {
               total: 0,
               complianceRate: 100,
               bySeverity: { critical: 0, high: 0, medium: 0, low: 0 },
-              byStatus: { detected: 0, investigating: 0, resolved: 0, waived: 0 }
-            }
-          })
+              byStatus: { detected: 0, investigating: 0, resolved: 0, waived: 0 },
+            },
+          }),
         });
 
       render(<ValidationDashboard />);
@@ -340,7 +342,7 @@ describe('ValidationDashboard Component', () => {
         expect(fetch).toHaveBeenCalledWith(
           expect.stringContaining('/violations/1/resolve'),
           expect.objectContaining({
-            method: 'POST'
+            method: 'POST',
           })
         );
       });
@@ -357,9 +359,9 @@ describe('ValidationDashboard Component', () => {
             total: 0,
             complianceRate: 100,
             bySeverity: { critical: 0, high: 0, medium: 0, low: 0 },
-            byStatus: { detected: 0, investigating: 0, resolved: 0, waived: 0 }
-          }
-        })
+            byStatus: { detected: 0, investigating: 0, resolved: 0, waived: 0 },
+          },
+        }),
       });
 
       render(<ValidationDashboard />);
@@ -380,9 +382,9 @@ describe('ValidationDashboard Component', () => {
             total: 0,
             complianceRate: 100,
             bySeverity: { critical: 0, high: 0, medium: 0, low: 0 },
-            byStatus: { detected: 0, investigating: 0, resolved: 0, waived: 0 }
-          }
-        })
+            byStatus: { detected: 0, investigating: 0, resolved: 0, waived: 0 },
+          },
+        }),
       });
 
       render(<ValidationDashboard />);
@@ -401,7 +403,7 @@ describe('ValidationDashboard Component', () => {
         expect(fetch).toHaveBeenCalledWith(
           '/api/validation/reports/generate',
           expect.objectContaining({
-            method: 'POST'
+            method: 'POST',
           })
         );
       });
@@ -418,9 +420,9 @@ describe('ValidationDashboard Component', () => {
             total: 10,
             complianceRate: 75.5,
             bySeverity: { critical: 3, high: 2, medium: 3, low: 2 },
-            byStatus: { detected: 5, investigating: 2, resolved: 2, waived: 1 }
-          }
-        })
+            byStatus: { detected: 5, investigating: 2, resolved: 2, waived: 1 },
+          },
+        }),
       });
 
       render(<ValidationDashboard />);
@@ -444,9 +446,9 @@ describe('ValidationDashboard Component', () => {
             total: 0,
             complianceRate: 100,
             bySeverity: { critical: 0, high: 0, medium: 0, low: 0 },
-            byStatus: { detected: 0, investigating: 0, resolved: 0, waived: 0 }
-          }
-        })
+            byStatus: { detected: 0, investigating: 0, resolved: 0, waived: 0 },
+          },
+        }),
       });
 
       render(<ValidationDashboard />);
@@ -470,9 +472,9 @@ describe('ValidationDashboard Component', () => {
             total: 0,
             complianceRate: 100,
             bySeverity: { critical: 0, high: 0, medium: 0, low: 0 },
-            byStatus: { detected: 0, investigating: 0, resolved: 0, waived: 0 }
-          }
-        })
+            byStatus: { detected: 0, investigating: 0, resolved: 0, waived: 0 },
+          },
+        }),
       });
 
       render(<ValidationDashboard />);
@@ -490,7 +492,7 @@ describe('ValidationDashboard Component', () => {
           severity: 'high',
           amount: 1500.5,
           status: 'detected',
-          detectionDate: '2025-02-16'
+          detectionDate: '2025-02-16',
         },
         {
           _id: '2',
@@ -498,8 +500,8 @@ describe('ValidationDashboard Component', () => {
           severity: 'medium',
           amount: 500,
           status: 'resolved',
-          detectionDate: '2025-02-15'
-        }
+          detectionDate: '2025-02-15',
+        },
       ];
 
       fetch.mockResolvedValueOnce({
@@ -510,9 +512,9 @@ describe('ValidationDashboard Component', () => {
             total: 2,
             complianceRate: 50,
             bySeverity: { critical: 0, high: 1, medium: 1, low: 0 },
-            byStatus: { detected: 1, investigating: 0, resolved: 1, waived: 0 }
-          }
-        })
+            byStatus: { detected: 1, investigating: 0, resolved: 1, waived: 0 },
+          },
+        }),
       });
 
       render(<ValidationDashboard />);
@@ -536,9 +538,9 @@ describe('ValidationDashboard Component', () => {
             total: 0,
             complianceRate: 100,
             bySeverity: { critical: 0, high: 0, medium: 0, low: 0 },
-            byStatus: { detected: 0, investigating: 0, resolved: 0, waived: 0 }
-          }
-        })
+            byStatus: { detected: 0, investigating: 0, resolved: 0, waived: 0 },
+          },
+        }),
       });
 
       render(<ValidationDashboard />);
@@ -548,8 +550,8 @@ describe('ValidationDashboard Component', () => {
           expect.any(String),
           expect.objectContaining({
             headers: expect.objectContaining({
-              Authorization: 'Bearer fake-token'
-            })
+              Authorization: 'Bearer fake-token',
+            }),
           })
         );
       });
@@ -566,9 +568,9 @@ describe('ValidationDashboard Component', () => {
             total: 10,
             complianceRate: 80,
             bySeverity: { critical: 3, high: 2, medium: 3, low: 2 },
-            byStatus: { detected: 5, investigating: 2, resolved: 2, waived: 1 }
-          }
-        })
+            byStatus: { detected: 5, investigating: 2, resolved: 2, waived: 1 },
+          },
+        }),
       });
 
       render(<ValidationDashboard />);
@@ -587,9 +589,9 @@ describe('ValidationDashboard Component', () => {
             total: 10,
             complianceRate: 80,
             bySeverity: { critical: 3, high: 2, medium: 3, low: 2 },
-            byStatus: { detected: 5, investigating: 2, resolved: 2, waived: 1 }
-          }
-        })
+            byStatus: { detected: 5, investigating: 2, resolved: 2, waived: 1 },
+          },
+        }),
       });
 
       render(<ValidationDashboard />);

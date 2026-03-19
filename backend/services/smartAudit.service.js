@@ -1,9 +1,12 @@
+/* eslint-disable no-unused-vars */
 /**
  * Smart Audit & Data Privacy Service (Phase 67)
  *
  * Handles compliance, immutable logging, and data protection (DLP).
  * Ensures the system meets HIPAA/GDPR/National Cybersecurity standards.
  */
+
+const logger = require('../utils/logger');
 
 class SmartAuditService {
   constructor() {
@@ -31,7 +34,7 @@ class SmartAuditService {
     };
 
     this.auditTrail.push(entry);
-    console.log(`[AUDIT] User ${userId} performed ${action} on ${resource}`);
+    logger.info(`[AUDIT] User ${userId} performed ${action} on ${resource}`);
 
     return entry;
   }
@@ -40,7 +43,9 @@ class SmartAuditService {
    * Retrieve Audit Logs for an entity (Compliance Review)
    */
   async getLogs(resourceId, filters = {}) {
-    return this.auditTrail.filter(log => log.resource.includes(resourceId)).sort((a, b) => b.timestamp - a.timestamp);
+    return this.auditTrail
+      .filter(log => log.resource.includes(resourceId))
+      .sort((a, b) => b.timestamp - a.timestamp);
   }
 
   /**

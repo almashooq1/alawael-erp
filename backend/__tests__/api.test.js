@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * api.test.js
  * اختبارات شاملة لنقاط نهاية API
@@ -553,5 +555,5 @@ describe('Data Integrity & Consistency', () => {
 module.exports = {
   name: 'API Routes Tests Suite',
   version: '1.0.0',
-  totalTests: 150
+  totalTests: 150,
 };

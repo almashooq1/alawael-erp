@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Phase 4 Database Seeder - Test Data Generation
  * Purpose: Populate MongoDB with comprehensive test data for Phase 4 validation
@@ -220,11 +221,7 @@ const seedDisabilityPrograms = async () => {
       startDate: new Date('2024-01-01'),
       duration: 12, // months
       therapistRequired: 'Physical Therapist',
-      goals: [
-        'Improve walking ability',
-        'Increase independence',
-        'Strengthen leg muscles',
-      ],
+      goals: ['Improve walking ability', 'Increase independence', 'Strengthen leg muscles'],
     },
     {
       name: 'Speech & Hearing Rehabilitation',
@@ -250,11 +247,7 @@ const seedDisabilityPrograms = async () => {
       startDate: new Date('2023-11-01'),
       duration: 6,
       therapistRequired: 'Psychologist/Counselor',
-      goals: [
-        'Mental health improvement',
-        'Cognitive skill development',
-        'Stress management',
-      ],
+      goals: ['Mental health improvement', 'Cognitive skill development', 'Stress management'],
     },
   ];
 
@@ -270,7 +263,7 @@ const seedDisabilityPrograms = async () => {
   }
 };
 
-const seedSchedules = async (programs) => {
+const seedSchedules = async programs => {
   console.log('\n📝 Seeding Schedules...');
   const schedules = [];
 
@@ -307,7 +300,7 @@ const seedSchedules = async (programs) => {
   }
 };
 
-const seedAssessments = async (programs) => {
+const seedAssessments = async programs => {
   console.log('\n📝 Seeding Assessments...');
   const assessments = [];
 
@@ -341,7 +334,7 @@ const seedAssessments = async (programs) => {
   }
 };
 
-const seedAnalytics = async (programs) => {
+const seedAnalytics = async programs => {
   console.log('\n📝 Seeding Analytics Data...');
   const analytics = [];
 
@@ -375,7 +368,7 @@ const seedAnalytics = async (programs) => {
   }
 };
 
-const seedMaintenanceRecords = async (assets) => {
+const seedMaintenanceRecords = async assets => {
   console.log('\n📝 Seeding Maintenance Records...');
   const maintenance = [];
 
@@ -409,7 +402,7 @@ const seedMaintenanceRecords = async (assets) => {
   }
 };
 
-const seedMaintenancePredictions = async (assets) => {
+const seedMaintenancePredictions = async assets => {
   console.log('\n📝 Seeding Maintenance Predictions...');
   const predictions = [];
 
@@ -430,13 +423,10 @@ const seedMaintenancePredictions = async (assets) => {
   }
 
   try {
-    const createdPredictions = await MaintenancePrediction.insertMany(
-      predictions,
-      { ordered: false }
-    );
-    console.log(
-      `✅ Created ${createdPredictions.length} maintenance predictions`
-    );
+    const createdPredictions = await MaintenancePrediction.insertMany(predictions, {
+      ordered: false,
+    });
+    console.log(`✅ Created ${createdPredictions.length} maintenance predictions`);
     return createdPredictions;
   } catch (error) {
     console.warn(`⚠️ Prediction seeding partial: ${error.message}`);
@@ -464,7 +454,7 @@ const seedDatabase = async () => {
       Analytics.deleteMany({}),
       Maintenance.deleteMany({}),
       MaintenancePrediction.deleteMany({}),
-    ]).catch((err) => console.warn('⚠️ Clear warning:', err.message));
+    ]).catch(err => console.warn('⚠️ Clear warning:', err.message));
 
     // Execute seeding in sequence
     const users = await seedUsers();

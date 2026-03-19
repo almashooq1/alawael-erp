@@ -16,7 +16,11 @@
     "build:ios": "eas build --platform ios",
     "build:android": "eas build --platform android",
     "submit:ios": "eas submit --platform ios",
-    "submit:android": "eas submit --platform android"
+    "submit:android": "eas submit --platform android",
+    "quality:guard": "npm run type-check && npm run lint",
+    "quality:fast": "npm run quality:guard && npm test -- --passWithNoTests",
+    "quality:ci": "npm run quality:guard && npm test -- --coverage --passWithNoTests",
+    "quality": "npm run quality:ci"
   },
   "dependencies": {
     "react": "^18.2.0",

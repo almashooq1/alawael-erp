@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * Reporting Routes Comprehensive Test Suite - Phase 2
  * Tests for advanced report generation and analytics
@@ -18,8 +20,9 @@ jest.mock('../services/advancedReportingService', () => {
         data: { totalTransactions: 150, totalAmount: 50000, ...((options && options.data) || {}) },
         generatedAt: new Date(),
         status: 'completed',
-        charts: (options && options.chartTypes) ? { types: options.chartTypes } : undefined,
-        comparison: (options && options.compareWith) ? { compareWith: options.compareWith } : undefined,
+        charts: options && options.chartTypes ? { types: options.chartTypes } : undefined,
+        comparison:
+          options && options.compareWith ? { compareWith: options.compareWith } : undefined,
         ...options,
       };
     }),
@@ -58,7 +61,6 @@ jest.mock('../services/advancedReportingService', () => {
     })),
   };
 });
-
 
 // Mock auth middleware
 jest.mock('../middleware/auth', () => ({
@@ -104,6 +106,7 @@ jest.mock('../utils/logger', () => ({
   info: jest.fn(),
   error: jest.fn(),
   warn: jest.fn(),
+  debug: jest.fn(),
 }));
 
 describe('Reporting Routes - Phase 2 Coverage', () => {
@@ -120,8 +123,8 @@ describe('Reporting Routes - Phase 2 Coverage', () => {
         .expect(201);
 
       expect(res.body).toHaveProperty('success', true);
-      expect(res.body.report).toHaveProperty('_id');
-      expect(res.body.report.type).toBe('summary');
+      expect(res.body.data).toHaveProperty('_id');
+      expect(res.body.data.type).toBe('summary');
     });
 
     it('should generate detailed report', async () => {
@@ -135,7 +138,7 @@ describe('Reporting Routes - Phase 2 Coverage', () => {
         })
         .expect(201);
 
-      expect(res.body.report.type).toBe('detailed');
+      expect(res.body.data.type).toBe('detailed');
     });
 
     it('should generate analytics report', async () => {
@@ -149,7 +152,7 @@ describe('Reporting Routes - Phase 2 Coverage', () => {
         })
         .expect(201);
 
-      expect(res.body.report).toHaveProperty('data');
+      expect(res.body.data).toHaveProperty('data');
     });
 
     it('should generate custom report with filters', async () => {
@@ -166,7 +169,7 @@ describe('Reporting Routes - Phase 2 Coverage', () => {
         })
         .expect(201);
 
-      expect(res.body.report).toBeDefined();
+      expect(res.body.data).toBeDefined();
     });
 
     it('should include charts in report', async () => {
@@ -182,7 +185,7 @@ describe('Reporting Routes - Phase 2 Coverage', () => {
         })
         .expect(201);
 
-      expect(res.body.report).toHaveProperty('charts');
+      expect(res.body.data).toHaveProperty('charts');
     });
 
     it('should generate report with comparison', async () => {
@@ -197,7 +200,7 @@ describe('Reporting Routes - Phase 2 Coverage', () => {
         })
         .expect(201);
 
-      expect(res.body.report).toHaveProperty('comparison');
+      expect(res.body.data).toHaveProperty('comparison');
     });
 
     it('should handle report generation errors', async () => {
@@ -237,45 +240,45 @@ describe('Reporting Routes - Phase 2 Coverage', () => {
       const res = await request(app).get('/api/reports').expect(200);
 
       expect(res.body).toHaveProperty('success', true);
-      expect(Array.isArray(res.body.reports)).toBe(true);
+      expect(Array.isArray(res.body.data)).toBe(true);
     });
 
     it('should get reports with pagination', async () => {
       const res = await request(app).get('/api/reports?page=1&limit=10').expect(200);
 
-      expect(res.body.reports).toBeDefined();
+      expect(res.body.data).toBeDefined();
       expect(res.body.pagination).toBeDefined();
     });
 
     it('should filter reports by type', async () => {
       const res = await request(app).get('/api/reports?type=summary').expect(200);
 
-      expect(res.body.reports).toBeDefined();
+      expect(res.body.data).toBeDefined();
     });
 
     it('should filter reports by status', async () => {
       const res = await request(app).get('/api/reports?status=completed').expect(200);
 
-      expect(res.body.reports).toBeDefined();
+      expect(res.body.data).toBeDefined();
     });
 
     it('should search reports by name', async () => {
       const res = await request(app).get('/api/reports/search?q=sales').expect(200);
 
-      expect(res.body.reports).toBeDefined();
+      expect(res.body.data).toBeDefined();
     });
 
     it('should get single report by ID', async () => {
       const res = await request(app).get('/api/reports/report123').expect(200);
 
       expect(res.body).toHaveProperty('success', true);
-      expect(res.body.report).toHaveProperty('_id');
+      expect(res.body.data).toHaveProperty('_id');
     });
 
     it('should sort reports by date', async () => {
       const res = await request(app).get('/api/reports?sort=-generatedAt').expect(200);
 
-      expect(res.body.reports).toBeDefined();
+      expect(res.body.data).toBeDefined();
     });
 
     it('should get report statistics', async () => {
@@ -431,19 +434,19 @@ describe('Reporting Routes - Phase 2 Coverage', () => {
     it('should filter by date range', async () => {
       const res = await request(app).get('/api/reports?from=2026-01-01&to=2026-02-10').expect(200);
 
-      expect(res.body.reports).toBeDefined();
+      expect(res.body.data).toBeDefined();
     });
 
     it('should filter by department', async () => {
       const res = await request(app).get('/api/reports?department=sales').expect(200);
 
-      expect(res.body.reports).toBeDefined();
+      expect(res.body.data).toBeDefined();
     });
 
     it('should filter by region', async () => {
       const res = await request(app).get('/api/reports?region=north').expect(200);
 
-      expect(res.body.reports).toBeDefined();
+      expect(res.body.data).toBeDefined();
     });
 
     it('should apply multiple filters', async () => {
@@ -451,19 +454,19 @@ describe('Reporting Routes - Phase 2 Coverage', () => {
         .get('/api/reports?department=sales&region=north&type=summary')
         .expect(200);
 
-      expect(res.body.reports).toBeDefined();
+      expect(res.body.data).toBeDefined();
     });
 
     it('should sort by generation date', async () => {
       const res = await request(app).get('/api/reports?sort=-generatedAt').expect(200);
 
-      expect(res.body.reports).toBeDefined();
+      expect(res.body.data).toBeDefined();
     });
 
     it('should sort by name', async () => {
       const res = await request(app).get('/api/reports?sort=name').expect(200);
 
-      expect(res.body.reports).toBeDefined();
+      expect(res.body.data).toBeDefined();
     });
   });
 
@@ -529,7 +532,7 @@ describe('Reporting Routes - Phase 2 Coverage', () => {
     it('should get shared reports', async () => {
       const res = await request(app).get('/api/reports/shared-with-me').expect(200);
 
-      expect(Array.isArray(res.body.reports)).toBe(true);
+      expect(Array.isArray(res.body.data)).toBe(true);
     });
 
     it('should revoke share access', async () => {
@@ -589,7 +592,7 @@ describe('Reporting Routes - Phase 2 Coverage', () => {
         })
         .expect(201);
 
-      expect(res.body.report).toHaveProperty('_id');
+      expect(res.body.data).toHaveProperty('_id');
     });
 
     it('should add tags to report', async () => {
@@ -684,7 +687,7 @@ describe('Reporting Routes - Phase 2 Coverage', () => {
         })
         .expect(201);
 
-      expect(res.body.report).toBeDefined();
+      expect(res.body.data).toBeDefined();
     });
 
     it('should handle empty result sets in reports', async () => {
@@ -706,7 +709,7 @@ describe('Reporting Routes - Phase 2 Coverage', () => {
         })
         .expect(201);
 
-      expect(res.body.report).toBeDefined();
+      expect(res.body.data).toBeDefined();
     });
 
     it('should handle special characters in report names', async () => {
@@ -721,7 +724,7 @@ describe('Reporting Routes - Phase 2 Coverage', () => {
         })
         .expect(201);
 
-      expect(res.body.report).toBeDefined();
+      expect(res.body.data).toBeDefined();
     });
   });
 });

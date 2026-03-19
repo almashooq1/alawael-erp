@@ -1,16 +1,19 @@
+/* eslint-disable no-unused-vars */
 // Enhanced Socket.IO Integration for Real-time Notifications
 // File: backend/services/socketHandler.js
 
+const logger = require('../utils/logger');
+
 module.exports = function setupSocketHandler(io) {
   io.on('connection', socket => {
-    console.log(`[Socket.IO] Client connected: ${socket.id}`);
+    logger.info(`[Socket.IO] Client connected: ${socket.id}`);
 
     // Join user to their personal room
     socket.on('authenticate', data => {
       const userId = data.userId;
       socket.userId = userId;
       socket.join(`user_${userId}`);
-      console.log(`[Socket.IO] User ${userId} authenticated on socket ${socket.id}`);
+      logger.info(`[Socket.IO] User ${userId} authenticated on socket ${socket.id}`);
 
       // Send confirmation
       socket.emit('authenticated', {
@@ -34,12 +37,12 @@ module.exports = function setupSocketHandler(io) {
 
     // Disconnect handler
     socket.on('disconnect', () => {
-      console.log(`[Socket.IO] Client disconnected: ${socket.id}`);
+      logger.info(`[Socket.IO] Client disconnected: ${socket.id}`);
     });
 
     // Error handler
     socket.on('error', error => {
-      console.error(`[Socket.IO] Error for socket ${socket.id}:`, error);
+      logger.error(`[Socket.IO] Error for socket ${socket.id}:`, error);
     });
   });
 
@@ -54,7 +57,7 @@ module.exports = function setupSocketHandler(io) {
         email: beneficiary.email,
         timestamp: new Date(),
       });
-      console.log(`[Socket] Beneficiary created event emitted: ${beneficiary.fileNumber}`);
+      logger.info(`[Socket] Beneficiary created event emitted: ${beneficiary.fileNumber}`);
     },
 
     // Emit beneficiary updated event
@@ -66,7 +69,7 @@ module.exports = function setupSocketHandler(io) {
         lastName: beneficiary.lastName,
         timestamp: new Date(),
       });
-      console.log(`[Socket] Beneficiary updated event emitted: ${beneficiary.fileNumber}`);
+      logger.info(`[Socket] Beneficiary updated event emitted: ${beneficiary.fileNumber}`);
     },
 
     // Emit beneficiary deleted event
@@ -78,7 +81,7 @@ module.exports = function setupSocketHandler(io) {
         lastName: beneficiary.lastName,
         timestamp: new Date(),
       });
-      console.log(`[Socket] Beneficiary deleted event emitted: ${beneficiary.fileNumber}`);
+      logger.info(`[Socket] Beneficiary deleted event emitted: ${beneficiary.fileNumber}`);
     },
 
     // Emit medical record added event
@@ -90,7 +93,7 @@ module.exports = function setupSocketHandler(io) {
         doctorId: record.doctorId,
         timestamp: new Date(),
       });
-      console.log(`[Socket] Medical record added event emitted for beneficiary: ${beneficiaryId}`);
+      logger.info(`[Socket] Medical record added event emitted for beneficiary: ${beneficiaryId}`);
     },
 
     // Emit error event
@@ -100,7 +103,7 @@ module.exports = function setupSocketHandler(io) {
         severity,
         timestamp: new Date(),
       });
-      console.error(`[Socket] Error event emitted: ${message}`);
+      logger.error(`[Socket] Error event emitted: ${message}`);
     },
 
     // Emit to specific user

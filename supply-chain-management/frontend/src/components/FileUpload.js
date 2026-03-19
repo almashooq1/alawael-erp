@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * FileUpload.js
  * مكون React احترافي وقابل لإعادة الاستخدام لرفع الملفات مع دعم السحب والإفلات، معاينة الصور، حذف الملفات، إعادة رفع الملفات الفاشلة، مؤشرات تقدم وتحميل، رسائل نجاح/خطأ موحدة، والتحقق من نوع/حجم الملف.
@@ -54,7 +55,7 @@ export default function FileUpload({
       setError(`الحد الأقصى ${maxFiles} ملفات.`);
       return false;
     }
-    for (let file of selected) {
+    for (const file of selected) {
       if (accept !== '*/*' && !file.type.match(accept.replace('*', '.*'))) {
         setError(`نوع الملف غير مدعوم: ${file.name}`);
         return false;
@@ -68,7 +69,7 @@ export default function FileUpload({
   };
 
   const handleSelect = e => {
-    let selected = Array.from(e.target.files);
+    const selected = Array.from(e.target.files);
     if (!validateFiles(selected)) return;
     setFiles(selected);
     setError(null);
@@ -118,7 +119,7 @@ export default function FileUpload({
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-    let dropped = Array.from(e.dataTransfer.files);
+    const dropped = Array.from(e.dataTransfer.files);
     if (!validateFiles(dropped)) return;
     setFiles(dropped);
     setError(null);
@@ -152,7 +153,7 @@ export default function FileUpload({
     const results = [];
     let allSuccess = true;
     const indices = onlyIdx !== null ? [onlyIdx] : files.map((_, i) => i);
-    for (let i of indices) {
+    for (const i of indices) {
       const formData = new FormData();
       formData.append(multiple ? 'attachments' : 'image', files[i]);
       try {

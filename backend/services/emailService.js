@@ -1,5 +1,7 @@
+/* eslint-disable no-unused-vars */
 const nodemailer = require('nodemailer');
 const dotenv = require('dotenv');
+const logger = require('../utils/logger');
 
 dotenv.config();
 
@@ -26,15 +28,15 @@ const emailTemplates = {
       <div dir="rtl" style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #667eea;">مرحباً بك! 👋</h2>
         <p>مرحباً بك <strong>${user.fullName}</strong> في نظام الأوائل ERP.</p>
-        
+
         <div style="background-color: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
           <h3>بيانات دخولك:</h3>
           <p><strong>البريد الإلكتروني:</strong> ${user.email}</p>
           <p><strong>الرابط:</strong> <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}">http://localhost:3000</a></p>
         </div>
-        
+
         <p>يمكنك الآن تسجيل الدخول واستخدام جميع مزايا النظام.</p>
-        
+
         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; color: #666; font-size: 12px;">
           <p>© 2026 نظام الأوائل ERP. جميع الحقوق محفوظة.</p>
         </div>
@@ -48,22 +50,22 @@ const emailTemplates = {
       <div dir="rtl" style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #667eea;">إعادة تعيين كلمة المرور</h2>
         <p>مرحباً ${user.fullName}،</p>
-        
+
         <p>تلقينا طلباً لإعادة تعيين كلمة مرورك. اضغط على الرابط أدناه:</p>
-        
+
         <div style="margin: 30px 0;">
           <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password/${resetToken}"
              style="background-color: #667eea; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
             إعادة تعيين كلمة المرور
           </a>
         </div>
-        
+
         <p style="color: #666; font-size: 12px;">
           أو انسخ واذهب إلى: ${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password/${resetToken}
         </p>
-        
+
         <p style="color: #d32f2f;">⚠️ هذا الرابط سينتهي بعد ساعة واحدة</p>
-        
+
         <p>إذا لم تطلب هذا الإجراء، تجاهل هذا البريد.</p>
       </div>
     `,
@@ -75,9 +77,9 @@ const emailTemplates = {
       <div dir="rtl" style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #667eea;">تأكيد بريدك الإلكتروني</h2>
         <p>مرحباً ${user.fullName}،</p>
-        
+
         <p>اضغط على الرابط أدناه لتأكيد بريدك الإلكتروني:</p>
-        
+
         <div style="margin: 30px 0;">
           <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/verify-email/${verificationToken}"
              style="background-color: #2e7d32; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
@@ -94,7 +96,7 @@ const emailTemplates = {
       <div dir="rtl" style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #667eea;">إشعار الموظفين</h2>
         <p>تم ${action} بيانات الموظف: <strong>${employee.name}</strong></p>
-        
+
         <div style="background-color: #f5f5f5; padding: 20px; border-radius: 8px;">
           <p><strong>الاسم:</strong> ${employee.name}</p>
           <p><strong>البريد الإلكتروني:</strong> ${employee.email}</p>
@@ -110,14 +112,14 @@ const emailTemplates = {
     html: `
       <div dir="rtl" style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #667eea;">فاتورة جديدة</h2>
-        
+
         <div style="background-color: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
           <p><strong>رقم الفاتورة:</strong> ${invoice.number}</p>
           <p><strong>التاريخ:</strong> ${invoice.date}</p>
           <p><strong>المبلغ:</strong> ${invoice.amount} ريال</p>
           <p><strong>الحالة:</strong> ${invoice.status}</p>
         </div>
-        
+
         <p>يمكنك تحميل الفاتورة من خلال صفحة المستندات في النظام.</p>
       </div>
     `,
@@ -129,13 +131,13 @@ const emailTemplates = {
       <div dir="rtl" style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #667eea;">تقرير جديد</h2>
         <p>التقرير: <strong>${report.title}</strong></p>
-        
+
         <div style="background-color: #f5f5f5; padding: 20px; border-radius: 8px;">
           <p><strong>الفترة:</strong> ${report.period}</p>
           <p><strong>التاريخ:</strong> ${report.date}</p>
           <p><strong>الملخص:</strong> ${report.summary}</p>
         </div>
-        
+
         <p>انقر <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/reports">هنا</a> لعرض التقرير كاملاً.</p>
       </div>
     `,
@@ -147,7 +149,7 @@ const emailTemplates = {
       <div dir="rtl" style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #667eea;">${notification.title}</h2>
         <p>${notification.message}</p>
-        
+
         ${
           notification.actionUrl
             ? `
@@ -186,11 +188,11 @@ const sendEmail = async (to, templateName, data) => {
     };
 
     const info = await transporter.sendMail(mailOptions);
-    console.log(`✅ Email sent to ${to}: ${info.messageId}`);
+    logger.info(`✅ Email sent to ${to}: ${info.messageId}`);
     return { success: true, messageId: info.messageId };
   } catch (error) {
-    console.error(`❌ Error sending email to ${to}:`, error.message);
-    return { success: false, error: error.message };
+    logger.error(`❌ Error sending email to ${to}:`, error.message);
+    return { success: false, error: 'حدث خطأ داخلي' };
   }
 };
 
@@ -217,10 +219,42 @@ const sendBulkEmail = async (recipients, templateName, data) => {
 const verifyEmailService = async () => {
   try {
     await transporter.verify();
-    console.log('✅ Email service is ready to send emails');
+    logger.info('✅ Email service is ready to send emails');
     return { success: true, message: 'Email service verified' };
   } catch (error) {
-    console.error('❌ Email service error:', error.message);
+    logger.error('❌ Email service error:', error.message);
+    return { success: false, error: 'حدث خطأ داخلي' };
+  }
+};
+
+/**
+ * Send 2FA Enabled Email
+ * @param {string} email - Recipient email
+ * @param {string} username - User's username
+ * @returns {Promise}
+ */
+const send2FAEnabledEmail = async (email, username) => {
+  try {
+    const { emailIntegration } = require('./email-integration.service');
+    return await emailIntegration.send2FAEnabledEmail(email, username);
+  } catch (error) {
+    logger.error(`Error sending 2FA enabled email to ${email}:`, error.message);
+    return { success: false, error: error.message };
+  }
+};
+
+/**
+ * Send 2FA Disabled Email
+ * @param {string} email - Recipient email
+ * @param {string} username - User's username
+ * @returns {Promise}
+ */
+const send2FADisabledEmail = async (email, username) => {
+  try {
+    const { emailIntegration } = require('./email-integration.service');
+    return await emailIntegration.send2FADisabledEmail(email, username);
+  } catch (error) {
+    logger.error(`Error sending 2FA disabled email to ${email}:`, error.message);
     return { success: false, error: error.message };
   }
 };
@@ -231,4 +265,6 @@ module.exports = {
   verifyEmailService,
   emailTemplates,
   transporter,
+  send2FAEnabledEmail,
+  send2FADisabledEmail,
 };

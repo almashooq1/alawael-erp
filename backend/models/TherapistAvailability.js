@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 const availabilitySlotSchema = new mongoose.Schema({
@@ -58,7 +59,7 @@ const therapistAvailabilitySchema = new mongoose.Schema(
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 therapistAvailabilitySchema.index({ therapist: 1, 'recurringSchedule.isActive': 1 });

@@ -1,0 +1,28 @@
+/**
+ * Test Configuration Update
+ * Add these scripts to your package.json
+ */
+
+{
+  "scripts": {
+    "test": "jest --detectOpenHandles",
+    "test:watch": "jest --watch --maxWorkers=50%",
+    "test:coverage": "jest --coverage --maxWorkers=50%",
+    "test:unit": "jest --testPathPattern='(__tests__|test)' --testPathIgnorePatterns='(integration|e2e|security)' --maxWorkers=50%",
+    "test:integration": "jest --testPathPattern='integration' --maxWorkers=25%",
+    "test:e2e": "jest --testPathPattern='e2e' --maxWorkers=25%",
+    "test:security": "jest --testPathPattern='security' --maxWorkers=50%",
+    "test:all": "npm run test:unit && npm run test:integration && npm run test:e2e && npm run test:security",
+    "test:debug": "node --inspect-brk ./node_modules/.bin/jest --runInBand --maxWorkers=1",
+    "test:perf": "jest --testPathPattern='performance|perf' --verbose",
+    "test:report": "npm test -- --coverage && node scripts/test-coverage.js"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0",
+    "supertest": "^6.3.0",
+    "@babel/core": "^7.22.0",
+    "@babel/preset-env": "^7.22.0",
+    "babel-jest": "^29.0.0",
+    "jest-extended": "^4.0.0"
+  }
+}

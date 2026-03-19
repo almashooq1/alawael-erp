@@ -11,7 +11,7 @@ export const fetchPayments = createAsyncThunk('payments/fetchPayments', async (_
     const response = await mobileApiService.get('/payments', { cache: true });
     return response;
   } catch (error) {
-    return rejectWithValue(error.message);
+    return rejectWithValue('An internal error occurred');
   }
 });
 
@@ -20,7 +20,7 @@ export const initiatePayment = createAsyncThunk('payments/initiatePayment', asyn
     const response = await mobileApiService.post('/payments/initiate', paymentData);
     return response;
   } catch (error) {
-    return rejectWithValue(error.message);
+    return rejectWithValue('An internal error occurred');
   }
 });
 
@@ -29,7 +29,7 @@ export const checkPaymentStatus = createAsyncThunk('payments/checkStatus', async
     const response = await mobileApiService.get(`/payments/${transactionId}/status`);
     return response;
   } catch (error) {
-    return rejectWithValue(error.message);
+    return rejectWithValue('An internal error occurred');
   }
 });
 

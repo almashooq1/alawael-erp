@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * ============================================
  * ALERT & NOTIFICATION SERVICE
@@ -9,6 +10,7 @@ const nodemailer = require('nodemailer');
 const twilio = require('twilio');
 const mongoose = require('mongoose');
 const EventEmitter = require('events');
+const logger = require('../utils/logger');
 
 // Alert Model Schema
 const alertSchema = new mongoose.Schema({
@@ -134,7 +136,7 @@ class AlertService extends EventEmitter {
 
       return savedAlert;
     } catch (error) {
-      console.error(`❌ Failed to create alert: ${error.message}`);
+      logger.error(`❌ Failed to create alert: ${error.message}`);
       throw error;
     }
   }
@@ -174,13 +176,13 @@ class AlertService extends EventEmitter {
           status: 'sent',
         });
       } catch (error) {
-        console.error(`❌ Failed to send ${channel} notification: ${error.message}`);
+        logger.error(`❌ Failed to send ${channel} notification: ${error.message}`);
 
         notifications.push({
           method: channel,
           sentAt: new Date(),
           status: 'failed',
-          error: error.message,
+          error: 'حدث خطأ داخلي',
         });
       }
     }
@@ -341,7 +343,7 @@ class AlertService extends EventEmitter {
 
       return alert;
     } catch (error) {
-      throw new Error(`Failed to acknowledge alert: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -365,7 +367,7 @@ class AlertService extends EventEmitter {
 
       return alert;
     } catch (error) {
-      throw new Error(`Failed to resolve alert: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -420,7 +422,7 @@ class AlertService extends EventEmitter {
 
       return alerts;
     } catch (error) {
-      throw new Error(`Failed to retrieve alert history: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -453,7 +455,7 @@ class AlertService extends EventEmitter {
 
       return stats;
     } catch (error) {
-      throw new Error(`Failed to generate statistics: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -503,15 +505,15 @@ class AlertService extends EventEmitter {
             resolvedAt: { $lt: cutoffDate },
           });
 
-          console.log(`🗑️  Cleaned up ${result.deletedCount} old alerts`);
+          // console.log(`🗑️  Cleaned up ${result.deletedCount} old alerts`);
         } catch (error) {
-          console.error(`❌ Alert cleanup failed: ${error.message}`);
+          logger.error(`❌ Alert cleanup failed: ${error.message}`);
         }
       },
       60 * 60 * 1000
     ); // Every hour
 
-    console.log('✅ Auto alert cleanup configured');
+    // console.log('✅ Auto alert cleanup configured');
   }
 }
 

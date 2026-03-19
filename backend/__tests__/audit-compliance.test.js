@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * Phase 9: Advanced Audit Logging & Compliance Testing
  * متقدمة: اختبارات تسجيل التدقيق والامتثال

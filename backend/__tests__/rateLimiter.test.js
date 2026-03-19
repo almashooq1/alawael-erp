@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 const rateLimit = require('express-rate-limit');
 
 describe('Rate Limiting Middleware', () => {

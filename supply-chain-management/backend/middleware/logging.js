@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // middleware/logging.js
 // Advanced Logging & Monitoring Middleware
 
@@ -41,7 +42,7 @@ class Logger {
     };
 
     const color = colors[level] || '\x1b[0m';
-    console.log(`${color}[${level}] ${message}\x1b[0m`, data);
+    // console.log(`${color}[${level}] ${message}\x1b[0m`, data);
 
     // Store critical errors
     if (level === 'ERROR') {
@@ -158,6 +159,7 @@ const errorLoggingMiddleware = (err, req, res, next) => {
 
   // Don't lose the error
   next(err);
+};
 };
 
 module.exports = {

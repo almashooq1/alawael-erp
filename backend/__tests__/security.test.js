@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 const { getClientIP, logSecurityEvent } = require('../utils/security');
 
 // Mock console for testing
@@ -101,7 +103,7 @@ describe('Security Utils', () => {
             userId: 'user-1',
             ip: '192.168.1.1',
           }),
-        }),
+        })
       );
     });
 
@@ -120,7 +122,7 @@ describe('Security Utils', () => {
         expect.objectContaining({
           eventName: 'SYSTEM_START',
           details: {},
-        }),
+        })
       );
     });
 
@@ -130,7 +132,7 @@ describe('Security Utils', () => {
       expect(result).toEqual(
         expect.objectContaining({
           eventName: 'SYSTEM_STOP',
-        }),
+        })
       );
     });
 

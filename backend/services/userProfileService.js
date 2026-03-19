@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Advanced User Profile Service
  * Manages user profiles with advanced features
@@ -6,10 +7,11 @@
 const fs = require('fs').promises;
 const path = require('path');
 const bcryptjs = require('bcryptjs');
+const logger = require('../utils/logger');
 
 // In-memory storage for demo (replace with MongoDB)
-let userProfiles = new Map();
-let profileImages = new Map();
+const userProfiles = new Map();
+const profileImages = new Map();
 
 class UserProfileService {
   /**
@@ -38,7 +40,7 @@ class UserProfileService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -64,7 +66,7 @@ class UserProfileService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -103,7 +105,7 @@ class UserProfileService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -132,7 +134,7 @@ class UserProfileService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -169,7 +171,7 @@ class UserProfileService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -199,7 +201,7 @@ class UserProfileService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -227,7 +229,7 @@ class UserProfileService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -257,7 +259,7 @@ class UserProfileService {
 
       userProfiles.set(userId, profile);
     } catch (error) {
-      console.error('Error logging activity:', error);
+      logger.error('Error logging activity:', error);
     }
   }
 
@@ -288,7 +290,7 @@ class UserProfileService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -313,7 +315,7 @@ class UserProfileService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -347,7 +349,7 @@ class UserProfileService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -360,7 +362,9 @@ class UserProfileService {
       // Delete image if exists
       const imageData = profileImages.get(userId);
       if (imageData) {
-        await fs.unlink(imageData.path).catch(() => {});
+        await fs
+          .unlink(imageData.path)
+          .catch(err => logger.warn('Profile image cleanup failed:', err.message));
       }
 
       userProfiles.delete(userId);
@@ -373,7 +377,7 @@ class UserProfileService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -394,7 +398,7 @@ class UserProfileService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -423,7 +427,7 @@ class UserProfileService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }

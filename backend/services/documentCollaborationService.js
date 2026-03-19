@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Document Collaboration Service - Phase 3
  * Handles document versioning, collaboration, and workflow management

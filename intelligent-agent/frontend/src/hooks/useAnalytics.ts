@@ -110,7 +110,7 @@ class AnalyticsManager {
     this.trackEvent({
       category: 'error',
       action: 'exception',
-      label: error.message,
+      label: 'operation_error',
       metadata: {
         stack: error.stack,
         context,

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Export/Import Service
  * Handle Excel and PDF export/import operations
@@ -318,7 +319,7 @@ class ExportImportService {
       } catch (error) {
         errors.push({
           row: rowNumber,
-          error: error.message,
+          error: 'حدث خطأ داخلي',
         });
       }
     });
@@ -333,7 +334,7 @@ class ExportImportService {
       } catch (error) {
         errors.push({
           program: programData.program_info.name_ar,
-          error: error.message,
+          error: 'حدث خطأ داخلي',
         });
       }
     }

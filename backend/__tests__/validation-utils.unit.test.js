@@ -1,7 +1,9 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * Unit Tests for Validation Utilities
  * Testing email, phone, national ID, password, and other validators
- * 
+ *
  * Coverage focus: Improving statement/function coverage for validation.js
  */
 

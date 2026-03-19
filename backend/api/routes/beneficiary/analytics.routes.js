@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * analytics.routes.js - Beneficiary Analytics & Reporting API Routes
  * Handles analytics, predictions, and comprehensive reporting
@@ -10,8 +11,8 @@ const router = express.Router();
 const AnalyticsService = require('../../../services/BeneficiaryManagement/AnalyticsService');
 
 // Middleware
-const authenticate = (req, res, next) => {
-  // TODO: Implement JWT authentication
+const authenticate = (_req, _res, next) => {
+  // @todo [P1] Replace with real JWT auth middleware from middleware/auth.middleware.js
   next();
 };
 
@@ -36,19 +37,18 @@ router.get('/:beneficiaryId/individual', authenticate, async (req, res) => {
   try {
     const { beneficiaryId } = req.params;
     const options = {
-      period: req.query.period || 'semester'
+      period: req.query.period || 'semester',
     };
 
     const result = await analyticsService.getIndividualAnalytics(beneficiaryId, options);
     const statusCode = result.status === 'success' ? 200 : 404;
     return res.status(statusCode).json(result);
-
   } catch (error) {
     return res.status(500).json({
       status: 'error',
-      message: error.message,
+      message: 'حدث خطأ داخلي',
       data: null,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 });
@@ -66,19 +66,18 @@ router.get('/group/comparison', authenticate, async (req, res) => {
     const criteria = {
       program: req.query.program,
       academicYear: req.query.academicYear,
-      cohort: req.query.cohort
+      cohort: req.query.cohort,
     };
 
     const result = await analyticsService.getGroupAnalytics(criteria);
     const statusCode = result.status === 'success' ? 200 : 404;
     return res.status(statusCode).json(result);
-
   } catch (error) {
     return res.status(500).json({
       status: 'error',
-      message: error.message,
+      message: 'حدث خطأ داخلي',
       data: null,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 });
@@ -94,19 +93,18 @@ router.get('/:beneficiaryId/report', authenticate, async (req, res) => {
   try {
     const { beneficiaryId } = req.params;
     const options = {
-      reportType: req.query.reportType || 'comprehensive'
+      reportType: req.query.reportType || 'comprehensive',
     };
 
     const result = await analyticsService.generatePerformanceReport(beneficiaryId, options);
     const statusCode = result.status === 'success' ? 200 : 404;
     return res.status(statusCode).json(result);
-
   } catch (error) {
     return res.status(500).json({
       status: 'error',
-      message: error.message,
+      message: 'حدث خطأ داخلي',
       data: null,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 });
@@ -124,13 +122,12 @@ router.get('/:beneficiaryId/predict-outcomes', authenticate, async (req, res) =>
     const result = await analyticsService.predictAcademicOutcomes(beneficiaryId);
     const statusCode = result.status === 'success' ? 200 : 404;
     return res.status(statusCode).json(result);
-
   } catch (error) {
     return res.status(500).json({
       status: 'error',
-      message: error.message,
+      message: 'حدث خطأ داخلي',
       data: null,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 });
@@ -149,7 +146,7 @@ router.post('/:beneficiaryId/export-report', authenticate, async (req, res) => {
 
     // Generate comprehensive report
     const reportResult = await analyticsService.generatePerformanceReport(beneficiaryId, {
-      reportType: 'comprehensive'
+      reportType: 'comprehensive',
     });
 
     if (reportResult.status !== 'success') {
@@ -157,13 +154,13 @@ router.post('/:beneficiaryId/export-report', authenticate, async (req, res) => {
     }
 
     // For now, return JSON format
-    // TODO: Implement PDF and Excel export
+    // @todo [P2] Implement PDF (pdfkit) and Excel (exceljs) export formats
     if (format === 'json') {
       return res.status(200).json({
         status: 'success',
         message: 'Report exported successfully',
         data: reportResult.data,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
     }
 
@@ -171,15 +168,14 @@ router.post('/:beneficiaryId/export-report', authenticate, async (req, res) => {
       status: 'error',
       message: `Format ${format} is not yet supported`,
       data: null,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
-
   } catch (error) {
     return res.status(500).json({
       status: 'error',
-      message: error.message,
+      message: 'حدث خطأ داخلي',
       data: null,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 });
@@ -194,7 +190,7 @@ router.get('/health', (req, res) => {
     status: 'success',
     message: 'Analytics service is healthy',
     service: 'AnalyticsService',
-    timestamp: new Date()
+    timestamp: new Date(),
   });
 });
 

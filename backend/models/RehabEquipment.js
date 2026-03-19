@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 const rehabEquipmentSchema = new mongoose.Schema(
@@ -12,7 +13,11 @@ const rehabEquipmentSchema = new mongoose.Schema(
     minThreshold: { type: Number, default: 5 }, // Low stock alert level
 
     // Asset Management
-    condition: { type: String, enum: ['NEW', 'GOOD', 'NEEDS_MAINTENANCE', 'RETIRED'], default: 'GOOD' },
+    condition: {
+      type: String,
+      enum: ['NEW', 'GOOD', 'NEEDS_MAINTENANCE', 'RETIRED'],
+      default: 'GOOD',
+    },
     lastMaintenanceDate: Date,
     nextMaintenanceDate: Date,
 
@@ -21,7 +26,7 @@ const rehabEquipmentSchema = new mongoose.Schema(
 
     location: { type: String }, // Room 1, Warehouse
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 module.exports = mongoose.model('RehabEquipment', rehabEquipmentSchema);

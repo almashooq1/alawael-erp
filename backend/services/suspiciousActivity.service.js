@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Suspicious Activity Detection Service
  * خدمة كشف النشاط المشبوه
@@ -16,6 +17,7 @@ const Session = require('../models/Session');
 const AuditLogger = require('./audit-logger');
 const emailService = require('./emailService');
 const smsService = require('./smsService');
+const logger = require('../utils/logger');
 
 class SuspiciousActivityDetector {
   constructor() {
@@ -78,7 +80,7 @@ class SuspiciousActivityDetector {
 
       return { suspicious, alerts, blocked: false };
     } catch (error) {
-      console.error('Error checking login activity:', error);
+      logger.error('Error checking login activity:', error);
       return { suspicious: false, alerts: [], blocked: false };
     }
   }
@@ -191,7 +193,7 @@ class SuspiciousActivityDetector {
 
       return null;
     } catch (error) {
-      console.error('Error checking concurrent locations:', error);
+      logger.error('Error checking concurrent locations:', error);
       return null;
     }
   }
@@ -222,7 +224,7 @@ class SuspiciousActivityDetector {
 
       return null;
     } catch (error) {
-      console.error('Error checking new device:', error);
+      logger.error('Error checking new device:', error);
       return null;
     }
   }
@@ -271,7 +273,7 @@ class SuspiciousActivityDetector {
 
       return null;
     } catch (error) {
-      console.error('Error checking impossible travel:', error);
+      logger.error('Error checking impossible travel:', error);
       return null;
     }
   }
@@ -345,7 +347,7 @@ class SuspiciousActivityDetector {
         await this.sendSecurityAlert(userId, alerts);
       }
     } catch (error) {
-      console.error('Error logging suspicious activity:', error);
+      logger.error('Error logging suspicious activity:', error);
     }
   }
 
@@ -363,7 +365,7 @@ class SuspiciousActivityDetector {
       try {
         await emailService.sendSecurityAlert(user.email, user.username, message);
       } catch (emailError) {
-        console.warn('Failed to send security alert email:', emailError);
+        logger.warn('Failed to send security alert email:', emailError);
       }
 
       // Send SMS for critical alerts
@@ -371,11 +373,11 @@ class SuspiciousActivityDetector {
         try {
           await smsService.sendSecurityAlert(user.phone, alerts.length);
         } catch (smsError) {
-          console.warn('Failed to send security alert SMS:', smsError);
+          logger.warn('Failed to send security alert SMS:', smsError);
         }
       }
     } catch (error) {
-      console.error('Error sending security alert:', error);
+      logger.error('Error sending security alert:', error);
     }
   }
 
@@ -402,7 +404,7 @@ class SuspiciousActivityDetector {
         recentSuspiciousActivities: recentActivities.length,
       };
     } catch (error) {
-      console.error('Error getting security stats:', error);
+      logger.error('Error getting security stats:', error);
       return null;
     }
   }

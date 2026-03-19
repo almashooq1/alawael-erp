@@ -196,7 +196,7 @@ export class AGILongtermPlanning extends EventEmitter {
 
       return detailedPlan;
     } catch (error: any) {
-      this.emit('planning:error', { goal, error: error.message });
+      this.emit('planning:error', { goal, error: 'حدث خطأ داخلي' });
       throw error;
     }
   }

@@ -1,15 +1,16 @@
+/* eslint-disable no-unused-vars */
 const DisabilityProgram = require('../models/DisabilityProgram');
 const DisabilitySession = require('../models/DisabilitySession');
 const Goal = require('../models/Goal');
 const Assessment = require('../models/Assessment');
 const logger = require('../utils/logger');
+const { escapeRegex } = require('../utils/sanitize');
 
 /**
  * DisabilityRehabilitationService
  * Manages all disability rehabilitation programs, sessions, goals, and assessments
  */
 class DisabilityRehabilitationService {
-
   // ============ PROGRAM MANAGEMENT ============
 
   /**
@@ -17,7 +18,7 @@ class DisabilityRehabilitationService {
    */
   async getAllPrograms(query = {}) {
     try {
-      let mongoQuery = {};
+      const mongoQuery = {};
 
       if (query.category) {
         mongoQuery.category = query.category;
@@ -27,8 +28,8 @@ class DisabilityRehabilitationService {
       }
       if (query.search) {
         mongoQuery.$or = [
-          { name: { $regex: query.search, $options: 'i' } },
-          { description: { $regex: query.search, $options: 'i' } }
+          { name: { $regex: escapeRegex(query.search), $options: 'i' } },
+          { description: { $regex: escapeRegex(query.search), $options: 'i' } },
         ];
       }
 
@@ -59,7 +60,7 @@ class DisabilityRehabilitationService {
         endDate: data.endDate,
         createdBy: data.createdBy,
         therapists: data.therapists || [],
-        status: 'active'
+        status: 'active',
       });
 
       const saved = await program.save();
@@ -95,8 +96,9 @@ class DisabilityRehabilitationService {
         programId,
         { ...data, updatedAt: new Date() },
         { new: true, runValidators: true }
-      ).populate('createdBy', 'firstName lastName email')
-       .populate('therapists', 'firstName lastName email');
+      )
+        .populate('createdBy', 'firstName lastName email')
+        .populate('therapists', 'firstName lastName email');
 
       if (!program) return null;
 
@@ -141,7 +143,7 @@ class DisabilityRehabilitationService {
         objectives: data.objectives || [],
         activities: data.activities || [],
         notes: data.notes || '',
-        status: 'scheduled'
+        status: 'scheduled',
       });
 
       const saved = await session.save();
@@ -158,7 +160,7 @@ class DisabilityRehabilitationService {
    */
   async getAllSessions(query = {}) {
     try {
-      let mongoQuery = {};
+      const mongoQuery = {};
 
       if (query.programId) {
         mongoQuery.programId = query.programId;
@@ -211,9 +213,10 @@ class DisabilityRehabilitationService {
         sessionId,
         { ...data, updatedAt: new Date() },
         { new: true, runValidators: true }
-      ).populate('therapist', 'firstName lastName email')
-       .populate('participantId', 'firstName lastName email')
-       .populate('createdBy', 'firstName lastName email');
+      )
+        .populate('therapist', 'firstName lastName email')
+        .populate('participantId', 'firstName lastName email')
+        .populate('createdBy', 'firstName lastName email');
 
       if (!session) return null;
 
@@ -243,7 +246,7 @@ class DisabilityRehabilitationService {
         baselineValue: data.baselineValue,
         unit: data.unit,
         targetDate: data.targetDate,
-        status: 'not-started'
+        status: 'not-started',
       });
 
       const saved = await goal.save();
@@ -294,8 +297,9 @@ class DisabilityRehabilitationService {
         goalId,
         { ...data, updatedAt: new Date() },
         { new: true, runValidators: true }
-      ).populate('createdBy', 'firstName lastName email')
-       .populate('participantId', 'firstName lastName email');
+      )
+        .populate('createdBy', 'firstName lastName email')
+        .populate('participantId', 'firstName lastName email');
 
       if (!goal) return null;
 
@@ -325,7 +329,7 @@ class DisabilityRehabilitationService {
         results: data.results,
         observations: data.observations,
         recommendations: data.recommendations || [],
-        status: 'completed'
+        status: 'completed',
       });
 
       // Calculate score from results
@@ -339,7 +343,6 @@ class DisabilityRehabilitationService {
       throw error;
     }
   }
-
 
   /**
    * Get specific assessment by ID
@@ -380,7 +383,7 @@ class DisabilityRehabilitationService {
       const [goals, assessments, sessions] = await Promise.all([
         this.getGoalsByBeneficiary(beneficiaryId),
         this.getAssessmentsByBeneficiary(beneficiaryId),
-        DisabilitySession.find({ participantId: beneficiaryId })
+        DisabilitySession.find({ participantId: beneficiaryId }),
       ]);
 
       if (goals.length === 0 && assessments.length === 0 && sessions.length === 0) {
@@ -391,27 +394,28 @@ class DisabilityRehabilitationService {
       const completedGoals = goals.filter(g => g.status === 'achieved').length;
       const totalSessions = sessions.length;
       const attendedSessions = sessions.filter(s => s.attendance === 'present').length;
-      const averageScore = assessments.length > 0
-        ? (assessments.reduce((sum, a) => sum + (a.score || 0), 0) / assessments.length).toFixed(2)
-        : 0;
+      const averageScore =
+        assessments.length > 0
+          ? (assessments.reduce((sum, a) => sum + (a.score || 0), 0) / assessments.length).toFixed(
+              2
+            )
+          : 0;
 
       return {
         beneficiaryId,
         totalGoals: goals.length,
         completedGoals,
-        progressPercentage: goals.length > 0
-          ? ((completedGoals / goals.length) * 100).toFixed(2)
-          : 0,
+        progressPercentage:
+          goals.length > 0 ? ((completedGoals / goals.length) * 100).toFixed(2) : 0,
         totalSessions,
         attendedSessions,
-        attendanceRate: totalSessions > 0
-          ? ((attendedSessions / totalSessions) * 100).toFixed(2)
-          : 0,
+        attendanceRate:
+          totalSessions > 0 ? ((attendedSessions / totalSessions) * 100).toFixed(2) : 0,
         assessmentCount: assessments.length,
         averageScore,
         latestAssessment: assessments[0] || null,
         goals: goals.slice(0, 5),
-        recentSessions: sessions.slice(0, 3)
+        recentSessions: sessions.slice(0, 3),
       };
     } catch (error) {
       logger.error('Error getting performance:', error);
@@ -444,7 +448,7 @@ class DisabilityRehabilitationService {
         DisabilityProgram.countDocuments(),
         DisabilitySession.countDocuments(),
         Goal.countDocuments(),
-        Assessment.countDocuments()
+        Assessment.countDocuments(),
       ]);
 
       return {
@@ -453,14 +457,14 @@ class DisabilityRehabilitationService {
         programsCount,
         sessionsCount,
         goalsCount,
-        assessmentsCount
+        assessmentsCount,
       };
     } catch (error) {
       logger.error('Error getting health status:', error);
       return {
         service: 'DisabilityRehabilitationService',
         status: 'error',
-        error: error.message
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -471,5 +475,5 @@ const disabilityRehabilitationService = new DisabilityRehabilitationService();
 
 module.exports = {
   DisabilityRehabilitationService,
-  disabilityRehabilitationService
+  disabilityRehabilitationService,
 };

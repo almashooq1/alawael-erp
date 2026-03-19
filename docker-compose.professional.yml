@@ -1,0 +1,390 @@
+###############################################################################
+# Al-Awael ERP — Professional Docker Compose (All Services)
+# نظام الأوائل ERP — Docker Compose الاحترافي لجميع الخدمات
+#
+# Services:
+#   - api-gateway    : API Gateway (port 8080)
+#   - backend        : Main Express API (port 3001)
+#   - frontend       : React SPA via Nginx (port 3004)
+#   - mongodb        : MongoDB 7.0 (port 27017)
+#   - redis          : Redis 7 (port 6379)
+#   - whatsapp       : WhatsApp Service (port 3010)
+#   - intelligent    : AI Agent Service (port 3020)
+#   - finance        : Finance Module (port 3030)
+#   - scm-backend    : Supply Chain Backend (port 3040)
+#   - scm-frontend   : Supply Chain Frontend (port 3045)
+#   - secretary-ai   : Smart Secretary (Python, port 3050)
+#
+# Usage:
+#   docker compose up -d                  # Start all
+#   docker compose up backend frontend    # Start specific services
+#   docker compose --profile monitoring up # Start with monitoring
+#   docker compose logs -f backend        # Follow backend logs
+###############################################################################
+
+version: "3.9"
+
+# ─── Shared Configuration ─────────────────────────────────────────────────────
+x-common-env: &common-env
+  NODE_ENV: ${NODE_ENV:-development}
+  TZ: Asia/Riyadh
+  LOG_LEVEL: ${LOG_LEVEL:-info}
+
+x-healthcheck-defaults: &healthcheck-defaults
+  interval: 30s
+  timeout: 10s
+  retries: 3
+  start_period: 40s
+
+x-restart-policy: &restart-policy
+  restart: unless-stopped
+
+# ─── Networks ─────────────────────────────────────────────────────────────────
+networks:
+  alawael-net:
+    driver: bridge
+    name: alawael-network
+  monitoring-net:
+    driver: bridge
+    name: monitoring-network
+
+# ─── Volumes ──────────────────────────────────────────────────────────────────
+volumes:
+  mongodb-data:
+    name: alawael-mongodb-data
+  redis-data:
+    name: alawael-redis-data
+  upload-data:
+    name: alawael-uploads
+  logs-data:
+    name: alawael-logs
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SERVICES
+# ═══════════════════════════════════════════════════════════════════════════════
+
+services:
+
+  # ─── MongoDB ──────────────────────────────────────────────────────────────
+  mongodb:
+    image: mongo:7.0
+    container_name: alawael-mongodb
+    <<: *restart-policy
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER:?Set MONGO_ROOT_USER in .env}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:?Set MONGO_ROOT_PASSWORD in .env}
+      MONGO_INITDB_DATABASE: alawael_erp
+    ports:
+      - "${MONGO_PORT:-27017}:27017"
+    volumes:
+      - mongodb-data:/data/db
+      - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
+    networks:
+      - alawael-net
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      <<: *healthcheck-defaults
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: "1.5"
+
+  # ─── Redis ────────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: alawael-redis
+    <<: *restart-policy
+    command: >
+      redis-server
+        --maxmemory 256mb
+        --maxmemory-policy allkeys-lru
+        --appendonly yes
+        --requirepass ${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - alawael-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}", "ping"]
+      <<: *healthcheck-defaults
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: "0.5"
+
+  # ─── API Gateway ─────────────────────────────────────────────────────────
+  api-gateway:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    container_name: alawael-gateway
+    <<: *restart-policy
+    environment:
+      <<: *common-env
+      GATEWAY_PORT: 8080
+      AUTH_SERVICE_URL: http://backend:3001
+      HR_SERVICE_URL: http://backend:3001
+      FINANCE_SERVICE_URL: http://finance-backend:3030
+      REPORTS_SERVICE_URL: http://backend:3001
+      NOTIFICATIONS_SERVICE_URL: http://backend:3001
+      SCM_SERVICE_URL: http://scm-backend:3040
+      WHATSAPP_SERVICE_URL: http://whatsapp:3010
+      INTELLIGENT_AGENT_URL: http://intelligent-agent:3020
+    ports:
+      - "${GATEWAY_PORT:-8080}:8080"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - alawael-net
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/health"]
+      <<: *healthcheck-defaults
+
+  # ─── Backend (Main API) ──────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+        NODE_ENV: ${NODE_ENV:-development}
+    container_name: alawael-backend
+    <<: *restart-policy
+    environment:
+      <<: *common-env
+      PORT: 3001
+      MONGODB_URI: mongodb://${MONGO_ROOT_USER:?Set MONGO_ROOT_USER}:${MONGO_ROOT_PASSWORD:?Set MONGO_ROOT_PASSWORD}@mongodb:27017/alawael_erp?authSource=admin
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}
+      REDIS_ENABLED: "true"
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env}
+      JWT_EXPIRE: ${JWT_EXPIRE:-7d}
+      FRONTEND_URL: http://localhost:${FRONTEND_PORT:-3004}
+      CORS_ORIGINS: http://localhost:3004,http://localhost:3000,http://localhost:8080
+      ENABLE_AUTO_BACKUP: "true"
+    ports:
+      - "${BACKEND_PORT:-3001}:3001"
+    volumes:
+      - upload-data:/app/uploads
+      - logs-data:/app/logs
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - alawael-net
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3001/health"]
+      <<: *healthcheck-defaults
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: "1.0"
+
+  # ─── Frontend (React SPA) ────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        REACT_APP_API_URL: ${REACT_APP_API_URL:-http://localhost:8080/api}
+    container_name: alawael-frontend
+    <<: *restart-policy
+    environment:
+      REACT_APP_API_URL: ${REACT_APP_API_URL:-http://localhost:8080/api}
+    ports:
+      - "${FRONTEND_PORT:-3004}:80"
+    depends_on:
+      - api-gateway
+    networks:
+      - alawael-net
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:80"]
+      <<: *healthcheck-defaults
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: "0.25"
+
+  # ─── WhatsApp Service ────────────────────────────────────────────────────
+  whatsapp:
+    build:
+      context: ./whatsapp
+      dockerfile: Dockerfile
+    container_name: alawael-whatsapp
+    <<: *restart-policy
+    environment:
+      <<: *common-env
+      PORT: 3010
+      DATABASE_URL: mongodb://${MONGO_ROOT_USER:?Set MONGO_ROOT_USER}:${MONGO_ROOT_PASSWORD:?Set MONGO_ROOT_PASSWORD}@mongodb:27017/alawael_whatsapp?authSource=admin
+      REDIS_URL: redis://:${REDIS_PASSWORD:?Set REDIS_PASSWORD}@redis:6379
+      WHATSAPP_API_TOKEN: ${WHATSAPP_API_TOKEN:-}
+      WHATSAPP_PHONE_ID: ${WHATSAPP_PHONE_ID:-}
+      WHATSAPP_WEBHOOK_SECRET: ${WHATSAPP_WEBHOOK_SECRET:-}
+    ports:
+      - "${WHATSAPP_PORT:-3010}:3010"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - alawael-net
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: "0.5"
+
+  # ─── Intelligent Agent ───────────────────────────────────────────────────
+  intelligent-agent:
+    build:
+      context: ./intelligent-agent
+      dockerfile: Dockerfile
+    container_name: alawael-intelligent-agent
+    <<: *restart-policy
+    environment:
+      <<: *common-env
+      PORT: 3020
+      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-SecurePass2026!}@mongodb:27017/alawael_agent?authSource=admin
+      REDIS_URL: redis://:${REDIS_PASSWORD:-RedisPass2026!}@redis:6379
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      BACKEND_URL: http://backend:3001
+    ports:
+      - "${AGENT_PORT:-3020}:3020"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - alawael-net
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: "1.0"
+
+  # ─── Finance Module ──────────────────────────────────────────────────────
+  finance-backend:
+    build:
+      context: ./finance-module/backend
+      dockerfile: ../Dockerfile.finance
+    container_name: alawael-finance
+    <<: *restart-policy
+    environment:
+      <<: *common-env
+      PORT: 3030
+      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-SecurePass2026!}@mongodb:27017/alawael_finance?authSource=admin
+      BACKEND_URL: http://backend:3001
+    ports:
+      - "${FINANCE_PORT:-3030}:3030"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - alawael-net
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: "0.5"
+
+  # ─── Supply Chain Backend ────────────────────────────────────────────────
+  scm-backend:
+    build:
+      context: ./supply-chain-management/backend
+      dockerfile: Dockerfile
+    container_name: alawael-scm-backend
+    <<: *restart-policy
+    environment:
+      <<: *common-env
+      PORT: 3040
+      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-SecurePass2026!}@mongodb:27017/alawael_scm?authSource=admin
+      BACKEND_URL: http://backend:3001
+    ports:
+      - "${SCM_BACKEND_PORT:-3040}:3040"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - alawael-net
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: "0.5"
+
+  # ─── Secretary AI (Python) ──────────────────────────────────────────────
+  secretary-ai:
+    build:
+      context: ./secretary_ai
+      dockerfile: Dockerfile
+    container_name: alawael-secretary-ai
+    <<: *restart-policy
+    environment:
+      PORT: 3050
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      BACKEND_URL: http://backend:3001
+    ports:
+      - "${SECRETARY_PORT:-3050}:3050"
+    depends_on:
+      - backend
+    networks:
+      - alawael-net
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: "0.5"
+
+  # ═════════════════════════════════════════════════════════════════════════
+  # MONITORING STACK (optional, use --profile monitoring)
+  # ═════════════════════════════════════════════════════════════════════════
+
+  # Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: alawael-prometheus
+    profiles: ["monitoring"]
+    <<: *restart-policy
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    networks:
+      - alawael-net
+      - monitoring-net
+
+  # Grafana
+  grafana:
+    image: grafana/grafana:latest
+    container_name: alawael-grafana
+    profiles: ["monitoring"]
+    <<: *restart-policy
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-Admin2026!}
+      GF_SECURITY_ADMIN_USER: admin
+    ports:
+      - "3060:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - monitoring-net
+
+  # Loki (Log Aggregation)
+  loki:
+    image: grafana/loki:latest
+    container_name: alawael-loki
+    profiles: ["monitoring"]
+    <<: *restart-policy
+    ports:
+      - "3100:3100"
+    networks:
+      - monitoring-net

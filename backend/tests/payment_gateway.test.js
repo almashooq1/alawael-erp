@@ -1,4 +1,5 @@
-const mongoose = require('mongoose');
+/* eslint-disable no-undef, no-unused-vars */
+const _mongoose = require('mongoose');
 const PaymentServiceClass = require('../services/payment-gateway.service');
 const paymentService = new PaymentServiceClass();
 const Payment = require('../models/payment.model');
@@ -46,7 +47,7 @@ describe('Payment Gateway Service', () => {
       const originalProcess = paymentService.processStripePayment;
       paymentService.processStripePayment = jest.fn().mockResolvedValue({ success: true });
 
-      const sub = await paymentService.createSubscription('user123', 'basic', 'monthly');
+      const _sub = await paymentService.createSubscription('user123', 'basic', 'monthly');
 
       expect(Subscription).toHaveBeenCalled();
       expect(saveMock).toHaveBeenCalled();

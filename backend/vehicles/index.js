@@ -1,7 +1,10 @@
+/* eslint-disable no-unused-vars */
 /**
  * Vehicle Management Module - وحدة إدارة المركبات
  * Comprehensive Vehicle & Traffic Management for Saudi Arabia
  */
+
+const logger = require('../utils/logger');
 
 // Generic Vehicle Service
 const {
@@ -57,7 +60,9 @@ async function initialize(connection) {
   await saudiTrafficService.initialize(connection);
   await studentTransportService.initialize(connection);
   await rehabilitationTransportService.initialize(connection);
-  console.log('✅ Vehicle Module initialized (Generic + Saudi + Traffic + Student + Rehabilitation)');
+  logger.info(
+    '✅ Vehicle Module initialized (Generic + Saudi + Traffic + Student + Rehabilitation)'
+  );
   return {
     vehicleManagementService,
     saudiVehicleService,

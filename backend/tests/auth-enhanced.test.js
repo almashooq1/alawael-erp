@@ -1,3 +1,4 @@
+/* eslint-disable no-undef, no-unused-vars */
 /**
  * 🧪 Authentication System - Enhanced Comprehensive Tests
  * نظام المصادقة - اختبارات محسّنة وشاملة
@@ -15,16 +16,23 @@ process.env.JWT_EXPIRY = '1h';
 process.env.REFRESH_TOKEN_EXPIRY = '7d';
 
 // Mock rate limiter EARLY
+const _noopMiddleware = (req, res, next) => next();
 jest.mock('../middleware/rateLimiter', () => ({
-  apiLimiter: (req, res, next) => next(),
-  authLimiter: (req, res, next) => next(),
-  authRateLimiter: (req, res, next) => next(),
-  passwordLimiter: (req, res, next) => next(),
-  createAccountLimiter: (req, res, next) => next(),
-  advancedApiLimiter: (req, res, next) => next(),
+  apiLimiter: _noopMiddleware,
+  authLimiter: _noopMiddleware,
+  authRateLimiter: _noopMiddleware,
+  passwordLimiter: _noopMiddleware,
+  createAccountLimiter: _noopMiddleware,
+  advancedApiLimiter: _noopMiddleware,
+  loginLimiter: _noopMiddleware,
+  sensitiveOperationLimiter: _noopMiddleware,
+  generalLimiter: _noopMiddleware,
+  registerLimiter: _noopMiddleware,
+  exportLimiter: _noopMiddleware,
+  createCustomLimiter: () => _noopMiddleware,
 }));
 
-const mongoose = require('mongoose');
+const _mongoose = require('mongoose');
 const request = require('supertest');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
@@ -86,7 +94,7 @@ beforeEach(async () => {
 // 🔐 Helper Functions
 // ============================================
 
-const createTestUser = async (overrides = {}) => {
+const _createTestUser = async (overrides = {}) => {
   const defaults = {
     email: 'testuser@example.com',
     password: 'Test@12345678',
@@ -577,7 +585,7 @@ describe('📋 Session Management', () => {
   });
 
   test('should manage multiple sessions', async () => {
-    const sessionPromises = Array.from({ length: 5 }, (_, i) =>
+    const sessionPromises = Array.from({ length: 5 }, (_unused, _i) =>
       request(app)
         .post('/api/auth/login')
         .send({

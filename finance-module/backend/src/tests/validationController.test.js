@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * Validation Controller Tests
  * API endpoint testing
@@ -32,7 +34,7 @@ describe('Validation Controller', () => {
         violationType: 'amount_mismatch',
         severity: 'high',
         description: 'Test violation',
-        amount: 1000
+        amount: 1000,
       });
 
       const response = await request(app)
@@ -50,7 +52,7 @@ describe('Validation Controller', () => {
         transactionId: new mongoose.Types.ObjectId(),
         violationType: 'amount_mismatch',
         severity: 'high',
-        status: 'detected'
+        status: 'detected',
       });
 
       const response = await request(app)
@@ -66,7 +68,7 @@ describe('Validation Controller', () => {
       await Violation.create({
         transactionId: new mongoose.Types.ObjectId(),
         violationType: 'amount_mismatch',
-        severity: 'critical'
+        severity: 'critical',
       });
 
       const response = await request(app)
@@ -80,7 +82,7 @@ describe('Validation Controller', () => {
     test('should filter violations by type', async () => {
       await Violation.create({
         transactionId: new mongoose.Types.ObjectId(),
-        violationType: 'duplicate'
+        violationType: 'duplicate',
       });
 
       const response = await request(app)
@@ -96,7 +98,7 @@ describe('Validation Controller', () => {
         await Violation.create({
           transactionId: new mongoose.Types.ObjectId(),
           violationType: 'amount_mismatch',
-          severity: 'high'
+          severity: 'high',
         });
       }
 
@@ -117,7 +119,7 @@ describe('Validation Controller', () => {
         transactionId: new mongoose.Types.ObjectId(),
         violationType: 'amount_mismatch',
         severity: 'high',
-        description: 'Test violation'
+        description: 'Test violation',
       });
 
       const response = await request(app)
@@ -148,7 +150,7 @@ describe('Validation Controller', () => {
         transactionId: new mongoose.Types.ObjectId(),
         violationType: 'amount_mismatch',
         severity: 'high',
-        status: 'detected'
+        status: 'detected',
       });
 
       const response = await request(app)
@@ -157,7 +159,7 @@ describe('Validation Controller', () => {
         .send({
           resolution_notes: 'Issue resolved',
           correctionAmount: 500,
-          status: 'resolved'
+          status: 'resolved',
         });
 
       expect(response.status).toBe(200);
@@ -171,7 +173,7 @@ describe('Validation Controller', () => {
         transactionId: new mongoose.Types.ObjectId(),
         violationType: 'amount_mismatch',
         status: 'detected',
-        auditTrail: []
+        auditTrail: [],
       });
 
       await request(app)
@@ -179,7 +181,7 @@ describe('Validation Controller', () => {
         .set('Authorization', 'Bearer test-token')
         .send({
           resolution_notes: 'Fixed',
-          status: 'resolved'
+          status: 'resolved',
         });
 
       const updated = await Violation.findById(violation._id);
@@ -194,14 +196,14 @@ describe('Validation Controller', () => {
         transactionId: new mongoose.Types.ObjectId(),
         violationType: 'amount_mismatch',
         severity: 'critical',
-        status: 'detected'
+        status: 'detected',
       });
 
       await Violation.create({
         transactionId: new mongoose.Types.ObjectId(),
         violationType: 'duplicate',
         severity: 'high',
-        status: 'resolved'
+        status: 'resolved',
       });
 
       const response = await request(app)
@@ -232,13 +234,13 @@ describe('Validation Controller', () => {
       await Violation.create({
         transactionId: new mongoose.Types.ObjectId(),
         violationType: 'amount_mismatch',
-        status: 'resolved'
+        status: 'resolved',
       });
 
       await Violation.create({
         transactionId: new mongoose.Types.ObjectId(),
         violationType: 'duplicate',
-        status: 'detected'
+        status: 'detected',
       });
 
       const response = await request(app)
@@ -257,7 +259,7 @@ describe('Validation Controller', () => {
         transactionId: new mongoose.Types.ObjectId(),
         violationType: 'amount_mismatch',
         severity: 'critical',
-        status: 'detected'
+        status: 'detected',
       });
 
       const response = await request(app)
@@ -265,7 +267,7 @@ describe('Validation Controller', () => {
         .set('Authorization', 'Bearer test-token')
         .send({
           startDate: '2025-02-01',
-          endDate: '2025-02-28'
+          endDate: '2025-02-28',
         });
 
       expect(response.status).toBe(200);
@@ -280,7 +282,7 @@ describe('Validation Controller', () => {
           transactionId: new mongoose.Types.ObjectId(),
           violationType: 'amount_mismatch',
           severity: 'high',
-          status: 'detected'
+          status: 'detected',
         });
       }
 
@@ -289,7 +291,7 @@ describe('Validation Controller', () => {
           transactionId: new mongoose.Types.ObjectId(),
           violationType: 'duplicate',
           severity: 'medium',
-          status: 'resolved'
+          status: 'resolved',
         });
       }
 
@@ -298,7 +300,7 @@ describe('Validation Controller', () => {
         .set('Authorization', 'Bearer test-token')
         .send({
           startDate: '2025-02-01',
-          endDate: '2025-02-28'
+          endDate: '2025-02-28',
         });
 
       expect(response.status).toBe(200);
@@ -314,7 +316,7 @@ describe('Validation Controller', () => {
         .set('Authorization', 'Bearer test-token')
         .send({
           startDate: '2025-02-01',
-          endDate: '2025-02-28'
+          endDate: '2025-02-28',
         });
 
       expect(response.status).toBe(200);
@@ -328,22 +330,22 @@ describe('Validation Controller', () => {
       const report = await ValidationReport.create({
         reportPeriod: {
           startDate: new Date('2025-02-01'),
-          endDate: new Date('2025-02-28')
+          endDate: new Date('2025-02-28'),
         },
         generatedBy: new mongoose.Types.ObjectId(),
         violationCountByType: {
           amount_mismatch: 2,
-          missing_entry: 1
+          missing_entry: 1,
         },
         violationsCount: {
           critical: 1,
           high: 2,
           medium: 0,
-          low: 0
+          low: 0,
         },
         complianceMetrics: {
-          resolutionRate: 60
-        }
+          resolutionRate: 60,
+        },
       });
 
       const response = await request(app)
@@ -361,13 +363,13 @@ describe('Validation Controller', () => {
       const v1 = await Violation.create({
         transactionId: new mongoose.Types.ObjectId(),
         violationType: 'amount_mismatch',
-        status: 'detected'
+        status: 'detected',
       });
 
       const v2 = await Violation.create({
         transactionId: new mongoose.Types.ObjectId(),
         violationType: 'duplicate',
-        status: 'detected'
+        status: 'detected',
       });
 
       const response = await request(app)
@@ -376,7 +378,7 @@ describe('Validation Controller', () => {
         .send({
           violationIds: [v1._id, v2._id],
           status: 'waived',
-          notes: 'Bulk resolved'
+          notes: 'Bulk resolved',
         });
 
       expect(response.status).toBe(200);
@@ -391,8 +393,7 @@ describe('Validation Controller', () => {
 
   describe('Authorization', () => {
     test('should require authentication', async () => {
-      const response = await request(app)
-        .get('/api/validation/violations');
+      const response = await request(app).get('/api/validation/violations');
 
       expect(response.status).toBe(401);
     });
@@ -400,7 +401,7 @@ describe('Validation Controller', () => {
     test('should require auditor role for resolve', async () => {
       const violation = await Violation.create({
         transactionId: new mongoose.Types.ObjectId(),
-        violationType: 'amount_mismatch'
+        violationType: 'amount_mismatch',
       });
 
       const response = await request(app)
@@ -408,7 +409,7 @@ describe('Validation Controller', () => {
         .set('Authorization', 'Bearer user-token')
         .send({
           resolution_notes: 'Test',
-          status: 'resolved'
+          status: 'resolved',
         });
 
       // Would return 403 if user doesn't have auditor role
@@ -437,7 +438,7 @@ describe('Validation Controller', () => {
         .set('Authorization', 'Bearer test-token')
         .send({
           violationIds: 'not-an-array',
-          status: 'invalid-status'
+          status: 'invalid-status',
         });
 
       expect(response.status).toBeGreaterThanOrEqual(400);

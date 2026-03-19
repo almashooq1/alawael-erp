@@ -1,294 +1,222 @@
-# نظام الأوائل - ERP System
+# نظام الأوائل - Frontend
 
-واجهة احترافية وذكية لإدارة مراكز التدريب والعلم
+واجهة المستخدم لنظام إدارة مراكز التأهيل والتدريب — Al-Awael ERP System
 
-## 🎯 نظرة عامة
+## نظرة عامة
 
-**نظام الأوائل** هو نظام إدارة متكامل تم تطويره بأعلى معايير الاحترافية والذكاء مع:
+واجهة React احترافية مبنية بـ Material-UI مع دعم كامل للعربية (RTL) تشمل:
 
-- ✅ واجهة عربية RTL احترافية 100%
-- ✅ معايير الوصول WCAG 2.1 AAA
-- ✅ استجابة كاملة (Mobile-first)
-- ✅ نظام تصميم متقدم
-- ✅ أداء عالي جداً
+- واجهة عربية RTL احترافية 100%
+- نظام تصميم MUI متقدم مع ثيم مخصص
+- 525+ ملف مصدر عبر 40+ مكون فرعي
+- 27 مجموعة اختبار، 534 اختبار (100% ناجح)
+- ESLint: 0 أخطاء، 0 تحذيرات
+- استجابة كاملة (Mobile-first)
 
-## 🚀 البدء السريع
+## التقنيات
+
+| التقنية | الإصدار | الاستخدام |
+|---------|---------|-----------|
+| React | 18.2 | إطار الواجهة |
+| React Router | 6.20 | التوجيه (SPA) |
+| Material-UI (MUI) | 5.15 | مكتبة المكونات |
+| Emotion | 11.11 | الأنماط (CSS-in-JS) |
+| Recharts | 3.7 | الرسوم البيانية |
+| Chart.js | 4.4 | الرسوم البيانية المتقدمة |
+| Axios | 1.13 | HTTP Client |
+| i18next | 23.11 | الترجمة والتعريب |
+| Socket.IO Client | 4.8 | الاتصال الفوري |
+| React Scripts (CRA) | 5.0.1 | أدوات البناء |
+
+## البدء السريع
 
 ### المتطلبات
 
-- Node.js 16+
-- npm 8+
+- Node.js 18+
+- npm 9+
 
 ### التثبيت
 
 ```bash
-# 1. الانتقال إلى مجلد frontend
+# الانتقال إلى مجلد frontend
 cd frontend
 
-# 2. تثبيت الحزم
+# تثبيت الحزم
 npm install
 
-# 3. بدء الخادم الإنمائي
-npm run dev
+# بدء خادم التطوير
+npm start
 ```
 
 ### الوصول
 
 ```
-http://localhost:5173
+http://localhost:3000
 ```
 
-## 📁 هيكل المشروع
+## الأوامر المتاحة
+
+```bash
+npm start            # بدء خادم التطوير
+npm run build        # بناء نسخة الإنتاج
+npm test             # تشغيل الاختبارات (وضع المراقبة)
+npm run lint         # فحص الكود بـ ESLint
+npm run lint:fix     # إصلاح مشاكل ESLint تلقائياً
+npm run format       # تنسيق الكود بـ Prettier
+npm run format:check # التحقق من التنسيق
+npm run quality:ci   # فحص الجودة الشامل + التغطية
+```
+
+## هيكل المشروع
 
 ```
 frontend/
-├── index.html                    # الصفحة الرئيسية
-├── package.json                  # الحزم والتبعيات
-├── vite.config.js               # إعدادات Vite
-└── src/
-    ├── main.js                  # نقطة الدخول
-    ├── App.vue                  # المكون الرئيسي
-    ├── style.css                # نظام التصميم (65KB)
-    ├── components/              # المكونات
-    │   ├── Layout/              # مكونات التخطيط
-    │   │   ├── Navbar.vue
-    │   │   ├── Sidebar.vue
-    │   │   └── Footer.vue
-    │   └── Dashboard/           # مكونات لوحة التحكم
-    │       ├── StatCard.vue
-    │       └── ActivityChart.vue
-    ├── views/                   # الصفحات
-    │   ├── Dashboard.vue
-    │   ├── Students.vue
-    │   ├── Programs.vue
-    │   ├── Plans.vue
-    │   ├── Sessions.vue
-    │   ├── Settings.vue
-    │   ├── Reports.vue
-    │   └── NotFound.vue
-    └── router/
-        └── index.js             # نظام التوجيه
+├── public/                       # الملفات الثابتة
+├── src/
+│   ├── App.js                   # المكون الرئيسي + التوجيه
+│   ├── index.js                 # نقطة الدخول
+│   ├── i18n.js                  # إعدادات الترجمة
+│   ├── theme.js                 # ثيم MUI المخصص
+│   ├── setupTests.js            # إعداد بيئة الاختبار
+│   │
+│   ├── components/              # المكونات (40+ مجلد فرعي)
+│   │   ├── Layout/              # الهيكل العام (Navbar, Sidebar)
+│   │   ├── FinanceModule/       # الوحدة المالية
+│   │   ├── hr/                  # الموارد البشرية
+│   │   ├── therapy/             # جلسات العلاج
+│   │   ├── beneficiary/         # المستفيدين
+│   │   ├── maintenance/         # الصيانة
+│   │   ├── communications/      # الاتصالات والدردشة
+│   │   ├── notifications/       # الإشعارات
+│   │   ├── dashboards/          # لوحات التحكم
+│   │   ├── ui/                  # مكونات واجهة عامة
+│   │   ├── ErrorBoundary.jsx    # التقاط الأخطاء
+│   │   └── ...                  # مكونات إضافية
+│   │
+│   ├── pages/                   # الصفحات
+│   │   ├── Goals/               # الأهداف
+│   │   ├── Reports/             # التقارير
+│   │   └── ...                  # صفحات إضافية
+│   │
+│   ├── services/                # خدمات API
+│   │   ├── HRAPIService.js      # خدمة الموارد البشرية
+│   │   ├── maintenanceService.js # خدمة الصيانة
+│   │   └── ...                  # خدمات إضافية
+│   │
+│   ├── hooks/                   # React Hooks مخصصة
+│   ├── contexts/                # React Contexts
+│   ├── store/                   # Redux Store
+│   ├── config/                  # إعدادات التطبيق
+│   ├── utils/                   # أدوات مساعدة
+│   ├── locales/                 # ملفات الترجمة
+│   ├── styles/                  # أنماط CSS عامة
+│   └── __tests__/               # اختبارات شاملة
+│
+├── .eslintrc.json               # إعدادات ESLint
+├── .prettierrc.json             # إعدادات Prettier
+├── jsconfig.json                # إعدادات المسارات
+└── package.json                 # التبعيات والسكربتات
 ```
 
-## 🎨 نظام التصميم
+## نظام التصميم
 
-### الألوان
+### الخطوط
 
-- **Primary:** أزرق (6 تدرجات)
-- **Success:** أخضر (6 تدرجات)
-- **Warning:** برتقالي (6 تدرجات)
-- **Error:** أحمر (6 تدرجات)
-- **Gray:** رمادي (9 تدرجات)
+- **Cairo** — الخط الأساسي (عربي)
+- **Tajawal** — خط ثانوي (عربي)
 
-### Typography
+### الألوان (MUI Theme)
 
-- الخط: Cairo من Google Fonts
-- الأحجام: 11px إلى 32px
-- الأوزان: 200-900
+- **Primary:** أزرق (#1976d2)
+- **Secondary:** بنفسجي (#9c27b0)
+- **Success:** أخضر (#2e7d32)
+- **Warning:** برتقالي (#ed6c02)
+- **Error:** أحمر (#d32f2f)
 
-### Spacing
+### المكونات الأساسية
 
-- نظام 8 نقاط: 4px, 8px, 12px, 16px, 24px, 32px, 48px
+مبني بالكامل على **Material-UI v5** مع Emotion CSS-in-JS:
 
-## 📊 المكونات الرئيسية
+```jsx
+import { Button, Card, Typography } from '@mui/material';
 
-### 1. Navbar
+<Card sx={{ p: 3, direction: 'rtl' }}>
+  <Typography variant="h5">لوحة التحكم</Typography>
+  <Button variant="contained" color="primary">
+    عرض التفاصيل
+  </Button>
+</Card>
+```
 
-شريط التنقل العلوي يحتوي على:
+## Path Aliases
 
-- شعار وعنوان النظام
-- شريط بحث متقدم
-- نظام إشعارات مع عداد
-- قائمة المستخدم
+```javascript
+@components/*  → src/components/*
+@pages/*       → src/pages/*
+@services/*    → src/services/*
+@hooks/*       → src/hooks/*
+@utils/*       → src/utils/*
+@config/*      → src/config/*
+@store/*       → src/store/*
+@contexts/*    → src/contexts/*
+```
 
-### 2. Sidebar
-
-القائمة الجانبية مع:
-
-- قائمة ملاحة متقدمة
-- قوائم منسدلة متداخلة
-- حفظ الحالة محلياً
-- تقليل/توسيع
-
-### 3. StatCard
-
-بطاقة الإحصائيات مع:
-
-- أرقام مع صيغ متعددة
-- مؤشرات اتجاه
-- 5 أنماط مختلفة
-
-### 4. ActivityChart
-
-مخطط النشاط مع:
-
-- تكامل Chart.js
-- 3 فترات زمنية
-- بيانات ديناميكية
-
-## 💻 الأوامر المتاحة
+## متغيرات البيئة
 
 ```bash
-# بدء الخادم الإنمائي
-npm run dev
-
-# بناء للإنتاج
-npm run build
-
-# عرض المعاينة
-npm run preview
-
-# فحص الكود
-npm run lint
-
-# تنسيق الكود
-npm run format
+# .env.example
+REACT_APP_API_URL=http://localhost:3001/api    # عنوان الـ API
+REACT_APP_API_TIMEOUT=30000                     # مهلة الاتصال
+REACT_APP_ENVIRONMENT=development               # بيئة التشغيل
+REACT_APP_ENABLE_ADMIN=true                     # تفعيل لوحة الإدارة
+REACT_APP_ENABLE_NOTIFICATIONS=true             # تفعيل الإشعارات
 ```
 
-## ✨ الميزات
+## الاختبارات
 
-### سهولة الاستخدام
+```bash
+# تشغيل جميع الاختبارات
+npm test -- --watchAll=false --no-coverage
 
-- ✅ Keyboard navigation كاملة
-- ✅ Screen reader support
-- ✅ Focus states واضحة
-- ✅ Color contrast عالي
-- ✅ Touch targets 44x44px+
-
-### الاستجابة
-
-- ✅ Mobile (480px)
-- ✅ Tablet (768px)
-- ✅ Desktop (1024px+)
-- ✅ Large screens (1400px+)
-
-### الأداء
-
-- ✅ Dynamic imports للمسارات
-- ✅ Lazy loading للمكونات
-- ✅ Code splitting محسّن
-- ✅ Image optimization
-
-## 🔧 التكوين المتقدم
-
-### Vite Configuration
-
-```javascript
-// vite.config.js
-export default defineConfig({
-  plugins: [vue()],
-  resolve: {
-    alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url)),
-    },
-  },
-  server: {
-    port: 5173,
-    host: true,
-  },
-});
+# مع التغطية
+npm run quality:ci
 ```
 
-### Router Configuration
+**النتائج الحالية:**
+- 27 مجموعة اختبار — 100% ناجح
+- 534 اختبار — 100% ناجح
+- تغطية: branches 60%+, functions 65%+, lines 70%+
 
-```javascript
-// router/index.js
-const routes = [
-  {
-    path: '/',
-    component: App,
-    children: [
-      { path: 'dashboard', name: 'dashboard', component: Dashboard },
-      { path: 'students', name: 'students', component: Students },
-      // ... المزيد من المسارات
-    ],
-  },
-];
-```
+## جودة الكود
 
-## 📱 المتصفحات المدعومة
+- **ESLint:** 0 أخطاء، 0 تحذيرات
+- **Prettier:** تنسيق موحد
+- **Git Hooks:** lint-staged + ESLint + Prettier على كل commit
+- **Unused Imports:** حذف تلقائي عبر eslint-plugin-unused-imports
+
+## المتصفحات المدعومة
 
 | المتصفح | الإصدار |
-| ------- | ------- |
-| Chrome  | 90+     |
-| Firefox | 88+     |
-| Safari  | 14+     |
-| Edge    | 90+     |
+|---------|---------|
+| Chrome | 90+ |
+| Firefox | 88+ |
+| Safari | 14+ |
+| Edge | 90+ |
 
-## 🎓 أمثلة الاستخدام
-
-### استخدام StatCard
-
-```vue
-<StatCard
-  label="إجمالي الطلاب"
-  :value="1234"
-  icon="👥"
-  variant="primary"
-  format="number"
-  :trend="{ type: 'up', value: 12, period: 'من الشهر الماضي' }"
-/>
-```
-
-### استخدام ActivityChart
-
-```vue
-<ActivityChart title="نشاط الطلاب" type="line" show-stats />
-```
-
-### التنقل
-
-```vue
-<router-link to="/students">
-  الطلاب
-</router-link>
-```
-
-## 🚢 النشر
-
-### بناء المشروع
+## البناء للإنتاج
 
 ```bash
 npm run build
 ```
 
-### المجلد الناتج
+ينتج مجلد `build/` يحتوي على ملفات HTML/CSS/JS محسّنة وجاهزة للنشر.
 
-```
-dist/
-├── index.html
-├── assets/
-│   ├── app-[hash].js
-│   ├── app-[hash].css
-│   └── ...
-```
+## الترخيص
 
-## 🔒 الأمان
-
-- ✅ XSS Protection (Vue escaping)
-- ✅ CSRF Protection (Token-based)
-- ✅ Input Validation
-- ✅ Secure headers
-- ✅ HTTPS Ready
-
-## 📞 الدعم
-
-للمساعدة والدعم:
-
-- 📧 info@alawael.com
-- 📱 +20 123 456 7890
-- 📍 Cairo, Egypt
-
-## 📄 الترخيص
-
-© 2025 Alawael Systems. جميع الحقوق محفوظة.
-
-## 🎉 شكراً
-
-شكراً لاستخدام نظام الأوائل!
+© 2026 Al-Awael Systems. جميع الحقوق محفوظة.
 
 ---
 
-**الإصدار:** 1.0.0  
-**آخر تحديث:** 2025-01-14  
-**الحالة:** ✅ جاهز للإنتاج
+**الإصدار:** 1.0.0
+**آخر تحديث:** 2026-03-05
+**الحالة:** جاهز للإنتاج

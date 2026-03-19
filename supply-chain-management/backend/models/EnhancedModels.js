@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Enhanced Models with Better Indexes and Optimization
  * Replaces existing models with production-grade versions

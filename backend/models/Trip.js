@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Trip Model - نموذج الرحلة
  *
@@ -164,7 +165,7 @@ const TripSchema = new Schema(
   },
   {
     timestamps: true,
-  },
+  }
 );
 
 // الفهارس
@@ -209,9 +210,9 @@ TripSchema.methods.recordViolation = function (violation) {
 
 TripSchema.methods.calculateDrivingQuality = function () {
   // حساب نقاط جودة القيادة
-  let smoothness = Math.max(0, 100 - this.events.filter(e => e.eventType === 'تسريع').length * 5);
-  let safety = Math.max(0, 100 - this.violations.length * 10);
-  let efficiency = Math.max(0, 100 - this.speedingIncidents.length * 3);
+  const smoothness = Math.max(0, 100 - this.events.filter(e => e.eventType === 'تسريع').length * 5);
+  const safety = Math.max(0, 100 - this.violations.length * 10);
+  const efficiency = Math.max(0, 100 - this.speedingIncidents.length * 3);
 
   this.drivingQuality = {
     smoothnessScore: smoothness,

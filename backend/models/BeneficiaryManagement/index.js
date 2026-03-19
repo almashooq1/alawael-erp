@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * index.js - Unified Model Exports
  * Central export point for all Beneficiary Management models
@@ -38,7 +39,7 @@ module.exports = {
    * @param {Object} mongoose - Mongoose instance
    * @returns {Object} All models
    */
-  initializeModels: function(mongoose) {
+  initializeModels: function (mongoose) {
     return {
       Beneficiary,
       AcademicRecord,
@@ -48,7 +49,7 @@ module.exports = {
       SkillsDevelopment,
       SupportPlan,
       CounselingSession,
-      FinancialSupport
+      FinancialSupport,
     };
   },
 
@@ -56,7 +57,7 @@ module.exports = {
    * Get all models
    * @returns {Array} Array of all models
    */
-  getAllModels: function() {
+  getAllModels: function () {
     return [
       Beneficiary,
       AcademicRecord,
@@ -66,7 +67,7 @@ module.exports = {
       SkillsDevelopment,
       SupportPlan,
       CounselingSession,
-      FinancialSupport
+      FinancialSupport,
     ];
   },
 
@@ -75,13 +76,13 @@ module.exports = {
    * @param {string} category - 'academic', 'financial', 'achievements', 'support'
    * @returns {Array} Models in specified category
    */
-  getModelsByCategory: function(category) {
+  getModelsByCategory: function (category) {
     const categories = {
       academic: [Beneficiary, AcademicRecord, AttendanceRecord],
       financial: [Scholarship, FinancialSupport],
       achievements: [Achievement, SkillsDevelopment],
-      support: [SupportPlan, CounselingSession]
+      support: [SupportPlan, CounselingSession],
     };
     return categories[category] || [];
-  }
+  },
 };

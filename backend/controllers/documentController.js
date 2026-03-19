@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Document Controller
  * تحكم إدارة المستندات - التعامل مع جميع عمليات المستندات
@@ -6,6 +7,7 @@
 const fs = require('fs');
 const path = require('path');
 const Document = require('../models/Document');
+const logger = require('../utils/logger');
 
 // إنشاء مجلد التحميل إذا لم يكن موجوداً
 const uploadsDir = path.join(__dirname, '../uploads');
@@ -65,7 +67,7 @@ exports.uploadDocument = async (req, res) => {
     if (req.file) {
       fs.unlinkSync(req.file.path);
     }
-    res.status(500).json({ message: 'خطأ في تحميل المستند', error: error.message });
+    res.status(500).json({ message: 'خطأ في تحميل المستند' });
   }
 };
 
@@ -75,7 +77,7 @@ exports.getAllDocuments = async (req, res) => {
     const { category, search, folder, sortBy = '-createdAt' } = req.query;
     const userId = req.user?.id;
 
-    let query = { status: { $ne: 'محذوف' } };
+    const query = { status: { $ne: 'محذوف' } };
 
     // البحث حسب الفئة
     if (category) {
@@ -107,7 +109,10 @@ exports.getAllDocuments = async (req, res) => {
 
     // تحديث عدد المرات التي تم عرض المستند
     if (userId) {
-      await Document.updateMany({ _id: { $in: documents.map(d => d._id) } }, { $inc: { viewCount: 1 } });
+      await Document.updateMany(
+        { _id: { $in: documents.map(d => d._id) } },
+        { $inc: { viewCount: 1 } }
+      );
     }
 
     res.json({
@@ -115,7 +120,7 @@ exports.getAllDocuments = async (req, res) => {
       documents,
     });
   } catch (error) {
-    res.status(500).json({ message: 'خطأ في جلب المستندات', error: error.message });
+    res.status(500).json({ message: 'خطأ في جلب المستندات' });
   }
 };
 
@@ -125,7 +130,9 @@ exports.getDocumentById = async (req, res) => {
     const { id } = req.params;
     const userId = req.user?.id;
 
-    const document = await Document.findById(id).populate('uploadedBy', 'name email').populate('sharedWith.userId', 'name email');
+    const document = await Document.findById(id)
+      .populate('uploadedBy', 'name email')
+      .populate('sharedWith.userId', 'name email');
 
     if (!document) {
       return res.status(404).json({ message: 'المستند غير موجود' });
@@ -142,7 +149,7 @@ exports.getDocumentById = async (req, res) => {
 
     res.json(document);
   } catch (error) {
-    res.status(500).json({ message: 'خطأ في جلب المستند', error: error.message });
+    res.status(500).json({ message: 'خطأ في جلب المستند' });
   }
 };
 
@@ -160,7 +167,10 @@ exports.updateDocument = async (req, res) => {
     }
 
     // التحقق من الملكية أو التعديل
-    if (!document.hasAccess(userId, 'edit') && document.uploadedBy.toString() !== userId.toString()) {
+    if (
+      !document.hasAccess(userId, 'edit') &&
+      document.uploadedBy.toString() !== userId.toString()
+    ) {
       return res.status(403).json({ message: 'ليس لديك صلاحية تعديل هذا المستند' });
     }
 
@@ -181,7 +191,7 @@ exports.updateDocument = async (req, res) => {
       document,
     });
   } catch (error) {
-    res.status(500).json({ message: 'خطأ في تحديث المستند', error: error.message });
+    res.status(500).json({ message: 'خطأ في تحديث المستند' });
   }
 };
 
@@ -215,11 +225,11 @@ exports.downloadDocument = async (req, res) => {
     // إرسال الملف
     res.download(document.filePath, document.originalFileName, err => {
       if (err) {
-        console.error('خطأ في التنزيل:', err);
+        logger.error('خطأ في التنزيل:', err);
       }
     });
   } catch (error) {
-    res.status(500).json({ message: 'خطأ في تنزيل المستند', error: error.message });
+    res.status(500).json({ message: 'خطأ في تنزيل المستند' });
   }
 };
 
@@ -256,7 +266,12 @@ exports.shareDocument = async (req, res) => {
       });
     }
 
-    document.addActivityLog('مشاركة', userId, req.user?.name || 'ضيف', `تم مشاركة المستند مع ${email}`);
+    document.addActivityLog(
+      'مشاركة',
+      userId,
+      req.user?.name || 'ضيف',
+      `تم مشاركة المستند مع ${email}`
+    );
     await document.save();
 
     res.json({
@@ -264,7 +279,7 @@ exports.shareDocument = async (req, res) => {
       document,
     });
   } catch (error) {
-    res.status(500).json({ message: 'خطأ في مشاركة المستند', error: error.message });
+    res.status(500).json({ message: 'خطأ في مشاركة المستند' });
   }
 };
 
@@ -295,7 +310,7 @@ exports.revokeAccess = async (req, res) => {
       document,
     });
   } catch (error) {
-    res.status(500).json({ message: 'خطأ في إزالة الوصول', error: error.message });
+    res.status(500).json({ message: 'خطأ في إزالة الوصول' });
   }
 };
 
@@ -329,7 +344,7 @@ exports.deleteDocument = async (req, res) => {
       document,
     });
   } catch (error) {
-    res.status(500).json({ message: 'خطأ في حذف المستند', error: error.message });
+    res.status(500).json({ message: 'خطأ في حذف المستند' });
   }
 };
 
@@ -359,7 +374,7 @@ exports.restoreDocument = async (req, res) => {
       document,
     });
   } catch (error) {
-    res.status(500).json({ message: 'خطأ في استرجاع المستند', error: error.message });
+    res.status(500).json({ message: 'خطأ في استرجاع المستند' });
   }
 };
 
@@ -410,7 +425,7 @@ exports.getDocumentStats = async (req, res) => {
       byCategory: stats,
     });
   } catch (error) {
-    res.status(500).json({ message: 'خطأ في جلب الإحصائيات', error: error.message });
+    res.status(500).json({ message: 'خطأ في جلب الإحصائيات' });
   }
 };
 
@@ -420,7 +435,7 @@ exports.searchDocuments = async (req, res) => {
     const { q, category, dateFrom, dateTo } = req.query;
     const userId = req.user?.id;
 
-    let query = { status: { $ne: 'محذوف' } };
+    const query = { status: { $ne: 'محذوف' } };
 
     if (q) {
       query.$text = { $search: q };
@@ -447,14 +462,16 @@ exports.searchDocuments = async (req, res) => {
       query.isPublic = true;
     }
 
-    const documents = await Document.find(query).populate('uploadedBy', 'name email').sort('-createdAt');
+    const documents = await Document.find(query)
+      .populate('uploadedBy', 'name email')
+      .sort('-createdAt');
 
     res.json({
       total: documents.length,
       documents,
     });
   } catch (error) {
-    res.status(500).json({ message: 'خطأ في البحث', error: error.message });
+    res.status(500).json({ message: 'خطأ في البحث' });
   }
 };
 
@@ -483,6 +500,6 @@ exports.getFolders = async (req, res) => {
 
     res.json(folders);
   } catch (error) {
-    res.status(500).json({ message: 'خطأ في جلب المجلدات', error: error.message });
+    res.status(500).json({ message: 'خطأ في جلب المجلدات' });
   }
 };

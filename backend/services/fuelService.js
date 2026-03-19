@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * =====================================================
  * FUEL TRACKING SERVICE - خدمة تتبع الوقود

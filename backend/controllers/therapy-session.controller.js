@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Therapeutic Session Controller
  * التحكم في الجلسات العلاجية
@@ -18,7 +19,7 @@ class TherapeuticSessionController {
     } catch (error) {
       return res.status(500).json({
         success: false,
-        message: error.message,
+        message: 'حدث خطأ داخلي',
       });
     }
   }
@@ -43,14 +44,14 @@ class TherapeuticSessionController {
         therapistId,
         startDate,
         endDate,
-        status,
+        status
       );
 
       return res.status(result.success ? 200 : 400).json(result);
     } catch (error) {
       return res.status(500).json({
         success: false,
-        message: error.message,
+        message: 'حدث خطأ داخلي',
       });
     }
   }
@@ -64,16 +65,13 @@ class TherapeuticSessionController {
       const { beneficiaryId } = req.params;
       const { planId } = req.query;
 
-      const result = await therapeuticSessionService.getBeneficiarySessions(
-        beneficiaryId,
-        planId,
-      );
+      const result = await therapeuticSessionService.getBeneficiarySessions(beneficiaryId, planId);
 
       return res.status(result.success ? 200 : 400).json(result);
     } catch (error) {
       return res.status(500).json({
         success: false,
-        message: error.message,
+        message: 'حدث خطأ داخلي',
       });
     }
   }
@@ -104,7 +102,7 @@ class TherapeuticSessionController {
     } catch (error) {
       return res.status(500).json({
         success: false,
-        message: error.message,
+        message: 'حدث خطأ داخلي',
       });
     }
   }
@@ -131,7 +129,7 @@ class TherapeuticSessionController {
     } catch (error) {
       return res.status(500).json({
         success: false,
-        message: error.message,
+        message: 'حدث خطأ داخلي',
       });
     }
   }
@@ -150,7 +148,7 @@ class TherapeuticSessionController {
     } catch (error) {
       return res.status(500).json({
         success: false,
-        message: error.message,
+        message: 'حدث خطأ داخلي',
       });
     }
   }
@@ -175,14 +173,14 @@ class TherapeuticSessionController {
         sessionId,
         date,
         startTime,
-        endTime,
+        endTime
       );
 
       return res.status(result.success ? 200 : 400).json(result);
     } catch (error) {
       return res.status(500).json({
         success: false,
-        message: error.message,
+        message: 'حدث خطأ داخلي',
       });
     }
   }
@@ -206,14 +204,14 @@ class TherapeuticSessionController {
       const result = await therapeuticSessionService.getSessionStatistics(
         therapistId,
         startDate,
-        endDate,
+        endDate
       );
 
       return res.status(result.success ? 200 : 400).json(result);
     } catch (error) {
       return res.status(500).json({
         success: false,
-        message: error.message,
+        message: 'حدث خطأ داخلي',
       });
     }
   }
@@ -238,14 +236,14 @@ class TherapeuticSessionController {
         therapistId,
         date,
         startTime,
-        endTime,
+        endTime
       );
 
       return res.status(result.available ? 200 : 409).json(result);
     } catch (error) {
       return res.status(500).json({
         success: false,
-        message: error.message,
+        message: 'حدث خطأ داخلي',
       });
     }
   }
@@ -265,7 +263,7 @@ class TherapeuticSessionController {
     } catch (error) {
       return res.status(500).json({
         success: false,
-        message: error.message,
+        message: 'حدث خطأ داخلي',
       });
     }
   }
@@ -280,14 +278,14 @@ class TherapeuticSessionController {
 
       const result = await therapeuticSessionService.setTherapistAvailability(
         therapistId,
-        req.body,
+        req.body
       );
 
       return res.status(result.success ? 200 : 400).json(result);
     } catch (error) {
       return res.status(500).json({
         success: false,
-        message: error.message,
+        message: 'حدث خطأ داخلي',
       });
     }
   }
@@ -306,7 +304,7 @@ class TherapeuticSessionController {
     } catch (error) {
       return res.status(500).json({
         success: false,
-        message: error.message,
+        message: 'حدث خطأ داخلي',
       });
     }
   }
@@ -337,7 +335,7 @@ class TherapeuticSessionController {
     } catch (error) {
       return res.status(500).json({
         success: false,
-        message: error.message,
+        message: 'حدث خطأ داخلي',
       });
     }
   }
@@ -363,7 +361,7 @@ class TherapeuticSessionController {
           sessionId,
           newDate,
           newStartTime,
-          newEndTime,
+          newEndTime
         );
         results.push({
           sessionId,
@@ -371,7 +369,7 @@ class TherapeuticSessionController {
         });
       }
 
-      const successful = results.filter((r) => r.success).length;
+      const successful = results.filter(r => r.success).length;
 
       return res.status(200).json({
         success: true,
@@ -381,7 +379,7 @@ class TherapeuticSessionController {
     } catch (error) {
       return res.status(500).json({
         success: false,
-        message: error.message,
+        message: 'حدث خطأ داخلي',
       });
     }
   }
@@ -411,7 +409,7 @@ class TherapeuticSessionController {
     } catch (error) {
       return res.status(500).json({
         success: false,
-        message: error.message,
+        message: 'حدث خطأ داخلي',
       });
     }
   }
@@ -432,14 +430,16 @@ class TherapeuticSessionController {
           status: 'COMPLETED',
           attendance: {
             isPresent: true,
-            arrivalTime: arrivalTime || new Date().toLocaleTimeString('en-US', {
-              hour: '2-digit',
-              minute: '2-digit',
-            }),
+            arrivalTime:
+              arrivalTime ||
+              new Date().toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+              }),
           },
           rating: rating || null,
         },
-        { new: true },
+        { new: true }
       );
 
       if (!session) {
@@ -457,7 +457,7 @@ class TherapeuticSessionController {
     } catch (error) {
       return res.status(500).json({
         success: false,
-        message: error.message,
+        message: 'حدث خطأ داخلي',
       });
     }
   }
@@ -471,10 +471,7 @@ class TherapeuticSessionController {
       const { sessionId } = req.params;
       const { reason } = req.body;
 
-      const result = await therapeuticSessionService.updateSessionStatus(
-        sessionId,
-        'NO_SHOW',
-      );
+      const result = await therapeuticSessionService.updateSessionStatus(sessionId, 'NO_SHOW');
 
       if (result.success && reason) {
         const TherapySession = require('../models/TherapySession');
@@ -487,7 +484,7 @@ class TherapeuticSessionController {
     } catch (error) {
       return res.status(500).json({
         success: false,
-        message: error.message,
+        message: 'حدث خطأ داخلي',
       });
     }
   }

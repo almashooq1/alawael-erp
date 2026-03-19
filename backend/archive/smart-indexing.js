@@ -1,9 +1,11 @@
+/* eslint-disable no-unused-vars */
 /**
  * Smart Indexing Service - خدمة الفهرسة الذكية
  * AI-Powered Document Indexing & Classification
  */
 
 const mongoose = require('mongoose');
+const logger = require('../utils/logger');
 
 /**
  * Smart Indexing Configuration
@@ -14,20 +16,20 @@ const smartIndexingConfig = {
     provider: process.env.AI_PROVIDER || 'openai',
     model: process.env.AI_MODEL || 'gpt-4',
   },
-  
+
   // Indexing settings
   indexing: {
     batchSize: 10,
     maxTokens: 4000,
     embeddingModel: 'text-embedding-3-small',
   },
-  
+
   // Classification
   classification: {
     confidence: 0.75,
     autoClassify: true,
   },
-  
+
   // Entity extraction
   entities: {
     people: true,
@@ -42,124 +44,156 @@ const smartIndexingConfig = {
 /**
  * Document Index Schema
  */
-const DocumentIndexSchema = new mongoose.Schema({
-  documentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Document' },
-  
-  // Embeddings (vector representation)
-  embeddings: {
-    vector: [Number],
-    model: String,
-    generatedAt: Date,
-  },
-  
-  // AI-generated summary
-  summary: {
-    short: String, // 1-2 sentences
-    medium: String, // 1 paragraph
-    long: String, // Multiple paragraphs
-  },
-  
-  // Keywords & Topics
-  keywords: [{
-    word: String,
-    score: Number,
-    type: { type: String, enum: ['topic', 'entity', 'concept', 'term'] },
-  }],
-  
-  // Entities
-  entities: {
-    people: [{
-      name: String,
-      role: String,
-      mentions: [Number], // Page numbers or positions
-    }],
-    organizations: [{
-      name: String,
-      type: String,
-      mentions: [Number],
-    }],
-    dates: [{
-      value: Date,
-      text: String,
-      type: { type: String, enum: ['document_date', 'due_date', 'event_date', 'reference_date'] },
-    }],
-    amounts: [{
-      value: Number,
-      currency: String,
-      text: String,
-      context: String,
-    }],
-    locations: [{
-      name: String,
-      type: String,
-      mentions: [Number],
-    }],
-    references: [{
-      type: String, // invoice_number, contract_id, etc.
-      value: String,
-      context: String,
-    }],
-  },
-  
-  // Classification
-  classification: {
-    predicted: { type: String }, // AI predicted category
-    confidence: Number,
-    alternatives: [{
-      category: String,
-      confidence: Number,
-    }],
-    manual: { type: String }, // Manual override
-    subcategories: [String],
-    tags: [String],
-  },
-  
-  // Sentiment
-  sentiment: {
-    overall: { type: String, enum: ['positive', 'negative', 'neutral', 'mixed'] },
-    score: Number, // -1 to 1
-    aspects: [{
-      aspect: String,
-      sentiment: String,
-      score: Number,
-    }],
-  },
-  
-  // Language
-  language: {
-    detected: String,
-    confidence: Number,
-    dominant: String,
-    mixed: Boolean,
-  },
-  
-  // Topics
-  topics: [{
-    name: String,
-    relevance: Number,
-    keywords: [String],
-  }],
-  
-  // Relations
-  relatedDocuments: [{
+const DocumentIndexSchema = new mongoose.Schema(
+  {
     documentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Document' },
-    relationship: String,
-    confidence: Number,
-  }],
-  
-  // Processing status
-  status: { type: String, enum: ['pending', 'processing', 'completed', 'failed'], default: 'pending' },
-  processedAt: Date,
-  error: String,
-  
-  // Tenant
-  tenantId: String,
-  
-  // Timestamps
-  createdAt: { type: Date, default: Date.now },
-}, {
-  collection: 'document_indexes',
-});
+
+    // Embeddings (vector representation)
+    embeddings: {
+      vector: [Number],
+      model: String,
+      generatedAt: Date,
+    },
+
+    // AI-generated summary
+    summary: {
+      short: String, // 1-2 sentences
+      medium: String, // 1 paragraph
+      long: String, // Multiple paragraphs
+    },
+
+    // Keywords & Topics
+    keywords: [
+      {
+        word: String,
+        score: Number,
+        type: { type: String, enum: ['topic', 'entity', 'concept', 'term'] },
+      },
+    ],
+
+    // Entities
+    entities: {
+      people: [
+        {
+          name: String,
+          role: String,
+          mentions: [Number], // Page numbers or positions
+        },
+      ],
+      organizations: [
+        {
+          name: String,
+          type: String,
+          mentions: [Number],
+        },
+      ],
+      dates: [
+        {
+          value: Date,
+          text: String,
+          type: {
+            type: String,
+            enum: ['document_date', 'due_date', 'event_date', 'reference_date'],
+          },
+        },
+      ],
+      amounts: [
+        {
+          value: Number,
+          currency: String,
+          text: String,
+          context: String,
+        },
+      ],
+      locations: [
+        {
+          name: String,
+          type: String,
+          mentions: [Number],
+        },
+      ],
+      references: [
+        {
+          type: String, // invoice_number, contract_id, etc.
+          value: String,
+          context: String,
+        },
+      ],
+    },
+
+    // Classification
+    classification: {
+      predicted: { type: String }, // AI predicted category
+      confidence: Number,
+      alternatives: [
+        {
+          category: String,
+          confidence: Number,
+        },
+      ],
+      manual: { type: String }, // Manual override
+      subcategories: [String],
+      tags: [String],
+    },
+
+    // Sentiment
+    sentiment: {
+      overall: { type: String, enum: ['positive', 'negative', 'neutral', 'mixed'] },
+      score: Number, // -1 to 1
+      aspects: [
+        {
+          aspect: String,
+          sentiment: String,
+          score: Number,
+        },
+      ],
+    },
+
+    // Language
+    language: {
+      detected: String,
+      confidence: Number,
+      dominant: String,
+      mixed: Boolean,
+    },
+
+    // Topics
+    topics: [
+      {
+        name: String,
+        relevance: Number,
+        keywords: [String],
+      },
+    ],
+
+    // Relations
+    relatedDocuments: [
+      {
+        documentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Document' },
+        relationship: String,
+        confidence: Number,
+      },
+    ],
+
+    // Processing status
+    status: {
+      type: String,
+      enum: ['pending', 'processing', 'completed', 'failed'],
+      default: 'pending',
+    },
+    processedAt: Date,
+    error: String,
+
+    // Tenant
+    tenantId: String,
+
+    // Timestamps
+    createdAt: { type: Date, default: Date.now },
+  },
+  {
+    collection: 'document_indexes',
+  }
+);
 
 // Indexes
 DocumentIndexSchema.index({ documentId: 1 });
@@ -174,22 +208,22 @@ class SmartIndexingService {
     this.DocumentIndex = null;
     this.aiProvider = null;
   }
-  
+
   /**
    * Initialize service
    */
   async initialize(connection) {
     this.DocumentIndex = connection.model('DocumentIndex', DocumentIndexSchema);
-    console.log('✅ Smart Indexing Service initialized');
+    logger.info('✅ Smart Indexing Service initialized');
   }
-  
+
   /**
    * Index document
    */
   async indexDocument(documentId, content, metadata = {}) {
     // Create index record
     let index = await this.DocumentIndex.findOne({ documentId });
-    
+
     if (!index) {
       index = await this.DocumentIndex.create({
         documentId,
@@ -197,13 +231,13 @@ class SmartIndexingService {
         tenantId: metadata.tenantId,
       });
     }
-    
+
     // Process in background
     this.processDocument(index, content, metadata).catch(console.error);
-    
+
     return index;
   }
-  
+
   /**
    * Process document
    */
@@ -211,16 +245,9 @@ class SmartIndexingService {
     try {
       index.status = 'processing';
       await index.save();
-      
+
       // Run all analysis in parallel
-      const [
-        classification,
-        entities,
-        keywords,
-        summary,
-        sentiment,
-        language,
-      ] = await Promise.all([
+      const [classification, entities, keywords, summary, sentiment, language] = await Promise.all([
         this.classifyDocument(content),
         this.extractEntities(content),
         this.extractKeywords(content),
@@ -228,7 +255,7 @@ class SmartIndexingService {
         this.analyzeSentiment(content),
         this.detectLanguage(content),
       ]);
-      
+
       // Update index
       index.classification = classification;
       index.entities = entities;
@@ -238,36 +265,43 @@ class SmartIndexingService {
       index.language = language;
       index.status = 'completed';
       index.processedAt = new Date();
-      
+
       await index.save();
-      
+
       // Find related documents
       await this.findRelatedDocuments(index);
-      
+
       return index;
-      
     } catch (error) {
       index.status = 'failed';
-      index.error = error.message;
+      index.error = 'حدث خطأ داخلي';
       await index.save();
       throw error;
     }
   }
-  
+
   /**
    * Classify document
    */
   async classifyDocument(content) {
     const categories = [
-      'financial', 'legal', 'hr', 'contracts', 'correspondence',
-      'technical', 'marketing', 'operations', 'reports', 'other'
+      'financial',
+      'legal',
+      'hr',
+      'contracts',
+      'correspondence',
+      'technical',
+      'marketing',
+      'operations',
+      'reports',
+      'other',
     ];
-    
+
     // Use AI to classify
     // This is a simplified version
     const categoryScores = {};
     const contentLower = content.toLowerCase();
-    
+
     // Simple keyword-based classification (would be replaced with AI)
     const categoryKeywords = {
       financial: ['فاتورة', 'دفع', 'مبلغ', 'invoice', 'payment', 'amount'],
@@ -277,10 +311,10 @@ class SmartIndexingService {
       correspondence: ['خطاب', 'رسالة', 'letter', 'email'],
       technical: ['تقرير فني', 'مواصفات', 'technical', 'specification'],
     };
-    
+
     let maxScore = 0;
     let predicted = 'other';
-    
+
     for (const [category, keywords] of Object.entries(categoryKeywords)) {
       const score = keywords.filter(kw => contentLower.includes(kw)).length;
       categoryScores[category] = score;
@@ -289,10 +323,10 @@ class SmartIndexingService {
         predicted = category;
       }
     }
-    
+
     const totalScore = Object.values(categoryScores).reduce((a, b) => a + b, 0) || 1;
     const confidence = maxScore / totalScore;
-    
+
     return {
       predicted,
       confidence: Math.min(confidence, 0.95),
@@ -306,7 +340,7 @@ class SmartIndexingService {
         })),
     };
   }
-  
+
   /**
    * Extract entities
    */
@@ -319,13 +353,13 @@ class SmartIndexingService {
       locations: [],
       references: [],
     };
-    
+
     // Extract amounts (currency patterns)
     const amountPatterns = [
       /(\d+(?:,\d{3})*(?:\.\d{2})?)\s*(ريال|ر\.س|SAR|دولار|USD)/gi,
       /SAR\s*(\d+(?:,\d{3})*(?:\.\d{2})?)/gi,
     ];
-    
+
     for (const pattern of amountPatterns) {
       let match;
       while ((match = pattern.exec(content)) !== null) {
@@ -340,13 +374,10 @@ class SmartIndexingService {
         }
       }
     }
-    
+
     // Extract dates
-    const datePatterns = [
-      /(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})/g,
-      /(\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2})/g,
-    ];
-    
+    const datePatterns = [/(\d{1,2}[-/]\d{1,2}[-/]\d{2,4})/g, /(\d{4}[-/]\d{1,2}[-/]\d{1,2})/g];
+
     for (const pattern of datePatterns) {
       let match;
       while ((match = pattern.exec(content)) !== null) {
@@ -364,14 +395,14 @@ class SmartIndexingService {
         }
       }
     }
-    
+
     // Extract reference numbers
     const refPatterns = [
-      /(?:رقم|مرجع|رقم المرجع|Ref|Reference)[:\s]*([A-Z0-9\-\/]+)/gi,
-      /(?:فاتورة|Invoice)[:\s]*([A-Z0-9\-]+)/gi,
-      /(?:عقد|Contract)[:\s]*([A-Z0-9\-]+)/gi,
+      /(?:رقم|مرجع|رقم المرجع|Ref|Reference)[:/\s]*([A-Z0-9-/]+)/gi,
+      /(?:فاتورة|Invoice)[:/\s]*([A-Z0-9-]+)/gi,
+      /(?:عقد|Contract)[:/\s]*([A-Z0-9-]+)/gi,
     ];
-    
+
     for (const pattern of refPatterns) {
       let match;
       while ((match = pattern.exec(content)) !== null) {
@@ -382,10 +413,10 @@ class SmartIndexingService {
         });
       }
     }
-    
+
     return entities;
   }
-  
+
   /**
    * Get context around a position
    */
@@ -394,7 +425,7 @@ class SmartIndexingService {
     const end = Math.min(content.length, position + length);
     return content.substring(start, end);
   }
-  
+
   /**
    * Extract keywords
    */
@@ -402,17 +433,38 @@ class SmartIndexingService {
     // Simple TF-IDF style extraction
     const words = content.toLowerCase().match(/\b[\u0600-\u06FFa-zA-Z]{3,}\b/g) || [];
     const stopWords = new Set([
-      'من', 'إلى', 'على', 'في', 'عن', 'مع', 'هذا', 'هذه', 'ذلك', 'التي', 'الذي',
-      'the', 'a', 'an', 'is', 'are', 'was', 'were', 'be', 'been', 'have', 'has', 'had',
+      'من',
+      'إلى',
+      'على',
+      'في',
+      'عن',
+      'مع',
+      'هذا',
+      'هذه',
+      'ذلك',
+      'التي',
+      'الذي',
+      'the',
+      'a',
+      'an',
+      'is',
+      'are',
+      'was',
+      'were',
+      'be',
+      'been',
+      'have',
+      'has',
+      'had',
     ]);
-    
+
     const frequency = {};
     for (const word of words) {
       if (!stopWords.has(word)) {
         frequency[word] = (frequency[word] || 0) + 1;
       }
     }
-    
+
     return Object.entries(frequency)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 20)
@@ -422,45 +474,45 @@ class SmartIndexingService {
         type: 'term',
       }));
   }
-  
+
   /**
    * Generate summary
    */
   async generateSummary(content) {
     // Extract first 200 characters for short summary
     const sentences = content.match(/[^.!?。।۔]+[.!?。।۔]+/g) || [content];
-    
+
     return {
       short: sentences[0]?.substring(0, 200) || '',
       medium: sentences.slice(0, 3).join(' ').substring(0, 500),
       long: content.substring(0, 2000),
     };
   }
-  
+
   /**
    * Analyze sentiment
    */
   async analyzeSentiment(content) {
     const positiveWords = ['ممتاز', 'رائع', 'نجاح', 'تقدم', 'excellent', 'success', 'good'];
     const negativeWords = ['فشل', 'مشكلة', 'تأخير', 'failure', 'problem', 'delay', 'bad'];
-    
+
     const contentLower = content.toLowerCase();
     const positive = positiveWords.filter(w => contentLower.includes(w)).length;
     const negative = negativeWords.filter(w => contentLower.includes(w)).length;
-    
+
     const score = (positive - negative) / Math.max(positive + negative, 1);
-    
+
     let overall = 'neutral';
     if (score > 0.3) overall = 'positive';
     else if (score < -0.3) overall = 'negative';
     else if (Math.abs(score) > 0.1) overall = 'mixed';
-    
+
     return {
       overall,
       score,
     };
   }
-  
+
   /**
    * Detect language
    */
@@ -468,14 +520,14 @@ class SmartIndexingService {
     const arabicChars = (content.match(/[\u0600-\u06FF]/g) || []).length;
     const englishChars = (content.match(/[a-zA-Z]/g) || []).length;
     const total = arabicChars + englishChars;
-    
+
     if (total === 0) {
       return { detected: 'unknown', confidence: 0, dominant: 'unknown', mixed: false };
     }
-    
+
     const arabicRatio = arabicChars / total;
     const englishRatio = englishChars / total;
-    
+
     return {
       detected: arabicRatio > 0.5 ? 'ar' : 'en',
       confidence: Math.max(arabicRatio, englishRatio),
@@ -483,35 +535,35 @@ class SmartIndexingService {
       mixed: arabicRatio > 0.2 && englishRatio > 0.2,
     };
   }
-  
+
   /**
    * Find related documents
    */
   async findRelatedDocuments(index) {
     // Find documents with similar keywords
     const keywords = index.keywords.slice(0, 10).map(k => k.word);
-    
+
     const related = await this.DocumentIndex.find({
       _id: { $ne: index._id },
       'keywords.word': { $in: keywords },
     }).limit(10);
-    
+
     index.relatedDocuments = related.map(r => ({
       documentId: r.documentId,
       relationship: 'similar_content',
       confidence: 0.5, // Would calculate actual similarity
     }));
-    
+
     await index.save();
   }
-  
+
   /**
    * Search with semantic understanding
    */
   async semanticSearch(query, options = {}) {
     // Extract keywords from query
     const queryKeywords = query.toLowerCase().match(/\b[\u0600-\u06FFa-zA-Z]{3,}\b/g) || [];
-    
+
     // Find documents with matching keywords
     const results = await this.DocumentIndex.find({
       $or: [
@@ -522,7 +574,7 @@ class SmartIndexingService {
     })
       .sort({ 'keywords.score': -1 })
       .limit(options.limit || 20);
-    
+
     return results.map(r => ({
       documentId: r.documentId,
       score: this.calculateRelevanceScore(queryKeywords, r.keywords),
@@ -530,7 +582,7 @@ class SmartIndexingService {
       summary: r.summary.short,
     }));
   }
-  
+
   /**
    * Calculate relevance score
    */
@@ -539,32 +591,32 @@ class SmartIndexingService {
     const matches = queryKeywords.filter(k => docWords.has(k)).length;
     return matches / Math.max(queryKeywords.length, 1);
   }
-  
+
   /**
    * Get document index
    */
   async getDocumentIndex(documentId) {
     return this.DocumentIndex.findOne({ documentId });
   }
-  
+
   /**
    * Batch index documents
    */
   async batchIndex(documents) {
     const results = [];
-    
+
     for (const doc of documents) {
       try {
         const index = await this.indexDocument(doc.id, doc.content, doc.metadata);
         results.push({ documentId: doc.id, status: 'queued', indexId: index._id });
       } catch (error) {
-        results.push({ documentId: doc.id, status: 'error', error: error.message });
+        results.push({ documentId: doc.id, status: 'error', error: 'حدث خطأ داخلي' });
       }
     }
-    
+
     return results;
   }
-  
+
   /**
    * Get statistics
    */
@@ -575,12 +627,12 @@ class SmartIndexingService {
       this.DocumentIndex.countDocuments({ status: 'pending' }),
       this.DocumentIndex.countDocuments({ status: 'failed' }),
     ]);
-    
+
     const byCategory = await this.DocumentIndex.aggregate([
       { $match: { status: 'completed' } },
       { $group: { _id: '$classification.predicted', count: { $sum: 1 } } },
     ]);
-    
+
     return {
       total,
       completed,

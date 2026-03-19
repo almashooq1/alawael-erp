@@ -17,13 +17,18 @@ const HOST = process.env.HOST || '0.0.0.0';
 // ✅ Middleware
 app.use(helmet());
 app.use(compression());
-app.use(cors());
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : ['http://localhost:3000', 'http://localhost:5173'],
+    credentials: true,
+  }),
+);
 app.use(morgan('combined'));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // ✅ Health Check
-app.get('/health', (req, res) => {
+app.get('/health', (_req, res) => {
   res.status(200).json({
     status: 'healthy',
     timestamp: new Date().toISOString(),
@@ -34,18 +39,12 @@ app.get('/health', (req, res) => {
 });
 
 // ✅ Status Endpoint
-app.get('/status', (req, res) => {
+app.get('/status', (_req, res) => {
   res.status(200).json({
     status: 'running',
     name: 'Intelligent Agent Server',
     timestamp: new Date().toISOString(),
-    features: [
-      'AI/ML Processing',
-      'GraphQL API',
-      'WebSocket Support',
-      'Real-time Analytics',
-      'Advanced ML Models',
-    ],
+    features: ['AI/ML Processing', 'GraphQL API', 'WebSocket Support', 'Real-time Analytics', 'Advanced ML Models'],
   });
 });
 
@@ -80,7 +79,7 @@ app.post('/api/ml/process', express.json(), (req, res) => {
       },
     });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(400).json({ error: 'حدث خطأ داخلي' });
   }
 });
 
@@ -124,10 +123,10 @@ app.use((req, res) => {
 });
 
 // ✅ Error Handler
-app.use((err, req, res, next) => {
+app.use((err, _req, res, _next) => {
   console.error('Error:', err);
   res.status(err.status || 500).json({
-    error: err.message || 'Internal Server Error',
+    error: process.env.NODE_ENV === 'development' ? err.message : 'Internal Server Error',
     stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
   });
 });

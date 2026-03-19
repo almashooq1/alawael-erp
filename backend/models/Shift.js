@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 const shiftSchema = new mongoose.Schema(
@@ -10,7 +11,7 @@ const shiftSchema = new mongoose.Schema(
     assignedStaff: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Employee' }],
     isActive: { type: Boolean, default: true },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 module.exports = mongoose.model('Shift', shiftSchema);

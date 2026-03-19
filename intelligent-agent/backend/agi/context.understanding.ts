@@ -243,7 +243,7 @@ export class AGIContextUnderstanding extends EventEmitter {
 
       return contextModel;
     } catch (error: any) {
-      this.emit('understanding:error', { input, error: error.message });
+      this.emit('understanding:error', { input, error: 'حدث خطأ داخلي' });
       throw error;
     }
   }

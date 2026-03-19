@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * SMART CAMERA MANAGER SERVICE
  * خدمة إدارة الكاميرات وأجهزة البصمة
@@ -100,7 +101,7 @@ class SmartCameraManager extends EventEmitter {
         camera,
       };
     } catch (error) {
-      throw new Error(`Camera Registration Error: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -157,9 +158,9 @@ class SmartCameraManager extends EventEmitter {
         camera.connectionStatus = 'OFFLINE';
       }
 
-      this.emit('camera-connection-failed', { cameraId, error: error.message });
+      this.emit('camera-connection-failed', { cameraId, error: 'حدث خطأ داخلي' });
 
-      throw new Error(`Camera Connection Error: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -187,7 +188,7 @@ class SmartCameraManager extends EventEmitter {
         message: `تم قطع الاتصال بالكاميرا: ${cameraId}`,
       };
     } catch (error) {
-      throw new Error(`Disconnection Error: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -232,7 +233,7 @@ class SmartCameraManager extends EventEmitter {
         },
       };
     } catch (error) {
-      throw new Error(`Stream Start Error: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -254,7 +255,7 @@ class SmartCameraManager extends EventEmitter {
         message: `تم توقف البث من الكاميرا: ${cameraId}`,
       };
     } catch (error) {
-      throw new Error(`Stream Stop Error: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -307,7 +308,7 @@ class SmartCameraManager extends EventEmitter {
       // Clear after 24 hours
       setTimeout(() => clearInterval(captureLoop), 24 * 60 * 60 * 1000);
     } catch (error) {
-      throw new Error(`Frame Capture Error: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -364,7 +365,7 @@ class SmartCameraManager extends EventEmitter {
         device,
       };
     } catch (error) {
-      throw new Error(`Device Registration Error: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -395,7 +396,7 @@ class SmartCameraManager extends EventEmitter {
         },
       };
     } catch (error) {
-      throw new Error(`Device Connection Error: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -439,7 +440,7 @@ class SmartCameraManager extends EventEmitter {
         calibration: camera.calibration,
       };
     } catch (error) {
-      throw new Error(`Calibration Error: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -483,7 +484,7 @@ class SmartCameraManager extends EventEmitter {
         appliedSettings: camera.calibration,
       };
     } catch (error) {
-      throw new Error(`Auto-Calibration Error: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -533,7 +534,7 @@ class SmartCameraManager extends EventEmitter {
 
       return health;
     } catch (error) {
-      throw new Error(`Health Monitoring Error: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -574,7 +575,7 @@ class SmartCameraManager extends EventEmitter {
         return statuses;
       }
     } catch (error) {
-      throw new Error(`Status Retrieval Error: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -624,7 +625,7 @@ class SmartCameraManager extends EventEmitter {
 
       return recording;
     } catch (error) {
-      throw new Error(`Recording Start Error: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -657,7 +658,7 @@ class SmartCameraManager extends EventEmitter {
 
       throw new Error('Recording not found');
     } catch (error) {
-      throw new Error(`Recording Stop Error: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -744,7 +745,7 @@ class SmartCameraManager extends EventEmitter {
         },
       };
     } catch (error) {
-      throw new Error(`Summary Error: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 }

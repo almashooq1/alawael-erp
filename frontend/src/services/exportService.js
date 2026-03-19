@@ -1,14 +1,14 @@
 import * as XLSX from 'xlsx';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
+import logger from 'utils/logger';
+import { brandColors, surfaceColors } from 'theme/palette';
+import { getOrgBranding } from 'utils/storageService';
+import { triggerBlobDownload } from 'utils/downloadHelper';
 
 // إعدادات التخصيص المؤسسي (شعار/ألوان)
 const getBranding = () => {
-  return {
-    logo: localStorage.getItem('orgLogo') || '',
-    color: localStorage.getItem('orgColor') || '#667eea',
-    name: localStorage.getItem('orgName') || '',
-  };
+  return getOrgBranding();
 };
 
 /**
@@ -55,7 +55,7 @@ const exportService = {
 
       XLSX.writeFile(wb, `${fileName}.xlsx`);
     } catch (error) {
-      console.error('Error exporting to Excel:', error);
+      logger.error('Error exporting to Excel:', error);
       throw error;
     }
   },
@@ -74,18 +74,9 @@ const exportService = {
       const csv = XLSX.utils.sheet_to_csv(ws);
 
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement('a');
-      const url = URL.createObjectURL(blob);
-
-      link.setAttribute('href', url);
-      link.setAttribute('download', `${fileName}.csv`);
-      link.style.visibility = 'hidden';
-
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      triggerBlobDownload(blob, `${fileName}.csv`);
     } catch (error) {
-      console.error('Error exporting to CSV:', error);
+      logger.error('Error exporting to CSV:', error);
       throw error;
     }
   },
@@ -127,6 +118,8 @@ const exportService = {
         logoImg.src = branding.logo;
         await new Promise(resolve => {
           logoImg.onload = resolve;
+          logoImg.onerror = () => resolve(); // Skip logo on error
+          setTimeout(resolve, 5000); // Timeout after 5s
         });
         pdf.addImage(logoImg, 'PNG', 10, 5, 30, 18);
       }
@@ -153,6 +146,8 @@ const exportService = {
           logoImg.src = branding.logo;
           await new Promise(resolve => {
             logoImg.onload = resolve;
+            logoImg.onerror = () => resolve();
+            setTimeout(resolve, 5000);
           });
           pdf.addImage(logoImg, 'PNG', 10, 5, 30, 18);
         }
@@ -176,7 +171,7 @@ const exportService = {
 
       pdf.save(`${fileName}.pdf`);
     } catch (error) {
-      console.error('Error exporting to PDF:', error);
+      logger.error('Error exporting to PDF:', error);
       throw error;
     }
   },
@@ -250,7 +245,7 @@ const exportService = {
 
       pdf.save(`${fileName}.pdf`);
     } catch (error) {
-      console.error('Error exporting to advanced PDF:', error);
+      logger.error('Error exporting to advanced PDF:', error);
       throw error;
     }
   },
@@ -267,18 +262,9 @@ const exportService = {
     try {
       const json = JSON.stringify(data, null, 2);
       const blob = new Blob([json], { type: 'application/json' });
-      const link = document.createElement('a');
-      const url = URL.createObjectURL(blob);
-
-      link.setAttribute('href', url);
-      link.setAttribute('download', `${fileName}.json`);
-      link.style.visibility = 'hidden';
-
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      triggerBlobDownload(blob, `${fileName}.json`);
     } catch (error) {
-      console.error('Error exporting to JSON:', error);
+      logger.error('Error exporting to JSON:', error);
       throw error;
     }
   },
@@ -295,7 +281,7 @@ const exportService = {
       await navigator.clipboard.writeText(text);
       return true;
     } catch (error) {
-      console.error('Error copying to clipboard:', error);
+      logger.error('Error copying to clipboard:', error);
       throw error;
     }
   },
@@ -316,6 +302,9 @@ const exportService = {
       }
 
       const printWindow = window.open('', '', 'height=600,width=800');
+      if (!printWindow) {
+        throw new Error('تعذر فتح نافذة الطباعة - يرجى السماح بالنوافذ المنبثقة');
+      }
       const content = element.innerHTML;
 
       printWindow.document.write(`
@@ -325,9 +314,9 @@ const exportService = {
             <style>
               body { font-family: Arial, sans-serif; direction: rtl; }
               table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-              th, td { border: 1px solid #ddd; padding: 12px; text-align: right; }
-              th { background-color: #667eea; color: white; }
-              h1 { text-align: center; color: #667eea; }
+              th, td { border: 1px solid ${surfaceColors.borderLight}; padding: 12px; text-align: right; }
+              th { background-color: ${brandColors.primaryStart}; color: white; }
+              h1 { text-align: center; color: ${brandColors.primaryStart}; }
             </style>
           </head>
           <body>
@@ -340,8 +329,40 @@ const exportService = {
       printWindow.document.close();
       printWindow.print();
     } catch (error) {
-      console.error('Error printing:', error);
+      logger.error('Error printing:', error);
       throw error;
+    }
+  },
+
+  /**
+   * تصدير بيانات عام بحسب الصيغة
+   * Generic export by format (excel, csv, pdf)
+   *
+   * @param {Array} data - البيانات المراد تصديرها
+   * @param {string} format - صيغة التصدير ('excel' | 'csv' | 'pdf')
+   * @param {Object} options - خيارات التصدير
+   * @returns {{ success: boolean, message: string }}
+   */
+  exportData: (data, format = 'excel', options = {}) => {
+    try {
+      const filename = options.filename || 'export';
+      switch (format.toLowerCase()) {
+        case 'excel':
+        case 'xlsx':
+          exportService.toExcel(data, filename, options);
+          return { success: true, message: `✅ تم تصدير ${data.length} صف إلى Excel` };
+        case 'csv':
+          exportService.toCSV(data, filename);
+          return { success: true, message: `✅ تم تصدير ${data.length} صف إلى CSV` };
+        case 'pdf':
+          exportService.tableToAdvancedPDF(data, options.columns || [], filename, options);
+          return { success: true, message: `✅ تم تصدير ${data.length} صف إلى PDF` };
+        default:
+          return { success: false, message: `❌ صيغة تصدير غير مدعومة: ${format}` };
+      }
+    } catch (error) {
+      logger.error('Export error:', error);
+      return { success: false, message: '❌ خطأ في التصدير: ' + error.message };
     }
   },
 };

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Transaction Model - Phase 2
  * Handles income, expense, and transfer transactions

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // Compatibility proxy for routes expecting "../middleware/authMiddleware"
 // Re-exports from the existing auth implementation to ensure uniform usage.
 const auth = require('./auth.middleware.js');

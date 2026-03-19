@@ -1,5 +1,9 @@
 import express from 'express';
-import { classifyProcessRisk, predictDelayProbability, generateAIRecommendation } from '../models/process.ml';
+import {
+  classifyProcessRisk,
+  predictDelayProbability,
+  generateAIRecommendation,
+} from '../models/process.ml';
 import { Process } from '../models/process.model';
 
 const router = express.Router();
@@ -11,34 +15,46 @@ const mockProcess: Process = {
   steps: [
     { id: '1', name: 'مراجعة', type: 'manual', status: 'done' },
     { id: '2', name: 'موافقة', type: 'approval', status: 'done' },
-    { id: '3', name: 'تنفيذ', type: 'automated', status: 'in_progress', dueDate: new Date(Date.now() - 3*24*60*60*1000).toISOString() },
-    { id: '4', name: 'اختبار', type: 'manual', status: 'pending', dueDate: new Date(Date.now() + 2*24*60*60*1000).toISOString() },
-    { id: '5', name: 'إغلاق', type: 'automated', status: 'pending' }
+    {
+      id: '3',
+      name: 'تنفيذ',
+      type: 'automated',
+      status: 'in_progress',
+      dueDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+    },
+    {
+      id: '4',
+      name: 'اختبار',
+      type: 'manual',
+      status: 'pending',
+      dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
+    },
+    { id: '5', name: 'إغلاق', type: 'automated', status: 'pending' },
   ],
   createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString()
+  updatedAt: new Date().toISOString(),
 };
 
 // GET /api/ai/risk-classification
-router.get('/risk-classification', (req, res) => {
+router.get('/risk-classification', (_req, res) => {
   const riskLevel = classifyProcessRisk(mockProcess);
   res.json({ riskLevel });
 });
 
 // GET /api/ai/delay-probability
-router.get('/delay-probability', (req, res) => {
+router.get('/delay-probability', (_req, res) => {
   const probability = predictDelayProbability(mockProcess);
   res.json({ delayProbability: (probability * 100).toFixed(2) + '%' });
 });
 
 // GET /api/ai/recommendation
-router.get('/recommendation', (req, res) => {
+router.get('/recommendation', (_req, res) => {
   const recommendation = generateAIRecommendation(mockProcess);
   res.json({ recommendation });
 });
 
 // GET /api/ai/full-analysis
-router.get('/full-analysis', (req, res) => {
+router.get('/full-analysis', (_req, res) => {
   const analysis = {
     processName: mockProcess.name,
     riskLevel: classifyProcessRisk(mockProcess),
@@ -47,7 +63,7 @@ router.get('/full-analysis', (req, res) => {
     totalSteps: mockProcess.steps.length,
     completedSteps: mockProcess.steps.filter(s => s.status === 'done').length,
     inProgressSteps: mockProcess.steps.filter(s => s.status === 'in_progress').length,
-    pendingSteps: mockProcess.steps.filter(s => s.status === 'pending').length
+    pendingSteps: mockProcess.steps.filter(s => s.status === 'pending').length,
   };
   res.json(analysis);
 });

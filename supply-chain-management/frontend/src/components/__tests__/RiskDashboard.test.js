@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * RiskDashboard.test.js
  * اختبارات شاملة لـ RiskDashboard
@@ -9,7 +10,12 @@ import userEvent from '@testing-library/user-event';
 import RiskDashboard from '../RiskDashboard';
 import * as API from '../../services/api';
 
-jest.mock('../../services/api');
+jest.mock('../../services/api', () => ({
+  getRisks: jest.fn(),
+  updateRisk: jest.fn(),
+  exportRisks: jest.fn(),
+}));
+
 jest.mock('antd', () => ({
   ...jest.requireActual('antd'),
   message: {
@@ -17,11 +23,6 @@ jest.mock('antd', () => ({
     success: jest.fn(),
   },
 }));
-
-// Setup API mocks
-API.getRisks = jest.fn();
-API.updateRisk = jest.fn();
-API.exportRisks = jest.fn();
 
 describe('RiskDashboard', () => {
   const mockRisks = [
@@ -57,17 +58,17 @@ describe('RiskDashboard', () => {
   describe('Component Rendering', () => {
     test('يجب أن يرسم المكون بنجاح', async () => {
       API.getRisks.mockResolvedValue({ data: { risks: mockRisks, metrics: {} } });
-      
+
       render(<RiskDashboard />);
-      
+
       expect(screen.getByText(/لوحة إدارة المخاطر/i)).toBeInTheDocument();
     });
 
     test('يجب عرض المقاييس الرئيسية', async () => {
       API.getRisks.mockResolvedValue({ data: { risks: mockRisks, metrics: {} } });
-      
+
       render(<RiskDashboard />);
-      
+
       await new Promise(resolve => setTimeout(resolve, 500));
       expect(screen.getByText(/لوحة/i)).toBeInTheDocument();
     });
@@ -76,17 +77,17 @@ describe('RiskDashboard', () => {
   describe('Health Status', () => {
     test('يجب حساب حالة النظام بشكل صحيح', async () => {
       API.getRisks.mockResolvedValue({ data: { risks: mockRisks, metrics: {} } });
-      
+
       render(<RiskDashboard />);
-      
+
       await new Promise(resolve => setTimeout(resolve, 500));
     });
 
     test('يجب حساب درجة المخاطر بشكل صحيح', async () => {
       API.getRisks.mockResolvedValue({ data: { risks: mockRisks, metrics: {} } });
-      
+
       render(<RiskDashboard />);
-      
+
       await new Promise(resolve => setTimeout(resolve, 500));
     });
   });
@@ -94,18 +95,18 @@ describe('RiskDashboard', () => {
   describe('Risk Statistics', () => {
     test('يجب حساب المخاطر الحرجة بشكل صحيح', async () => {
       API.getRisks.mockResolvedValue({ data: { risks: mockRisks, metrics: {} } });
-      
+
       render(<RiskDashboard />);
-      
+
       await new Promise(resolve => setTimeout(resolve, 500));
       expect(screen.getByText(/لوحة/i)).toBeInTheDocument();
     });
 
     test('يجب حساب المخاطر العالية بشكل صحيح', async () => {
       API.getRisks.mockResolvedValue({ data: { risks: mockRisks, metrics: {} } });
-      
+
       render(<RiskDashboard />);
-      
+
       await new Promise(resolve => setTimeout(resolve, 500));
       expect(screen.getByText(/لوحة/i)).toBeInTheDocument();
     });
@@ -114,9 +115,9 @@ describe('RiskDashboard', () => {
   describe('Filtering', () => {
     test('يجب تطبيق فلتر الخطورة', async () => {
       API.getRisks.mockResolvedValue({ data: { risks: mockRisks, metrics: {} } });
-      
+
       render(<RiskDashboard />);
-      
+
       await new Promise(resolve => setTimeout(resolve, 500));
       expect(screen.getByText(/لوحة/i)).toBeInTheDocument();
     });
@@ -125,9 +126,9 @@ describe('RiskDashboard', () => {
   describe('Risk Matrix', () => {
     test('يجب رسم مصفوفة المخاطر بشكل صحيح', async () => {
       API.getRisks.mockResolvedValue({ data: { risks: mockRisks, metrics: {} } });
-      
+
       const { container } = render(<RiskDashboard />);
-      
+
       await new Promise(resolve => setTimeout(resolve, 500));
     });
   });
@@ -135,21 +136,21 @@ describe('RiskDashboard', () => {
   describe('Detail Modal', () => {
     test('يجب فتح نافذة التفاصيل عند النقر على مخاطرة', async () => {
       API.getRisks.mockResolvedValue({ data: { risks: mockRisks, metrics: {} } });
-      
+
       render(<RiskDashboard />);
-      
+
       await new Promise(resolve => setTimeout(resolve, 500));
-      
+
       expect(screen.getByText(/لوحة/i)).toBeInTheDocument();
     });
 
     test('يجب عرض إجراءات التخفيف في النافذة', async () => {
       API.getRisks.mockResolvedValue({ data: { risks: mockRisks, metrics: {} } });
-      
+
       render(<RiskDashboard />);
-      
+
       await new Promise(resolve => setTimeout(resolve, 500));
-      
+
       expect(screen.getByText(/لوحة/i)).toBeInTheDocument();
     });
   });
@@ -158,11 +159,11 @@ describe('RiskDashboard', () => {
     test('يجب تصدير البيانات بصيغة PDF', async () => {
       API.getRisks.mockResolvedValue({ data: { risks: mockRisks, metrics: {} } });
       API.exportRisks.mockResolvedValue(new Blob());
-      
+
       render(<RiskDashboard />);
-      
+
       await new Promise(resolve => setTimeout(resolve, 500));
-      
+
       expect(screen.getByText(/لوحة/i)).toBeInTheDocument();
     });
   });
@@ -170,13 +171,13 @@ describe('RiskDashboard', () => {
   describe('Error Handling', () => {
     test('يجب معالجة أخطاء جلب البيانات', async () => {
       API.getRisks.mockRejectedValue(new Error('API Error'));
-      
+
       const { message } = require('antd');
-      
+
       render(<RiskDashboard />);
-      
+
       await new Promise(resolve => setTimeout(resolve, 500));
-      
+
       expect(message.error).toHaveBeenCalled();
     });
   });

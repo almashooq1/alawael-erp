@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * PHASE 104: Smart VR Neuro-Feedback Integration
  * "The Reality Interface" - Connects the Therapeutic Plan to an immersive VR environment.
@@ -5,10 +6,11 @@
  */
 
 const SmartAutoPrescriptionService = require('./smartAutoPrescription.service');
+const logger = require('../utils/logger');
 
 class SmartVRService {
   constructor() {
-    console.log('System: Smart VR Neuro-Feedback Engine - Initialized');
+    logger.info('System: Smart VR Neuro-Feedback Engine - Initialized');
     this.activeSessions = new Map();
   }
 

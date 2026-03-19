@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+const logger = require('../utils/logger');
 /**
  * Smart Clinical Knowledge Base (Phase 73)
  *
@@ -10,8 +12,18 @@ class SmartKnowledgeService {
   constructor() {
     // Mock Vector Database Index
     this.caseIndex = [
-      { id: 'CASE-88', tags: ['autism', 'aggression', 'sensory'], outcome: 'SUCCESS', intervention: 'Deep Pressure Therapy + PECS' },
-      { id: 'CASE-92', tags: ['speech', 'apraxia'], outcome: 'SUCCESS', intervention: 'PROMPT Therapy' },
+      {
+        id: 'CASE-88',
+        tags: ['autism', 'aggression', 'sensory'],
+        outcome: 'SUCCESS',
+        intervention: 'Deep Pressure Therapy + PECS',
+      },
+      {
+        id: 'CASE-92',
+        tags: ['speech', 'apraxia'],
+        outcome: 'SUCCESS',
+        intervention: 'PROMPT Therapy',
+      },
     ];
   }
 
@@ -21,10 +33,12 @@ class SmartKnowledgeService {
    */
   async searchClinicalWisdom(query) {
     // Simulate AI Vector Search
-    console.log(`[KNOWLEDGE] Searching for: "${query}"`);
+    logger.info(`[KNOWLEDGE] Searching for: "${query}"`);
 
     // Mock results based on keywords
-    const results = this.caseIndex.filter(c => query.toLowerCase().includes(c.tags[0]) || query.toLowerCase().includes(c.tags[1]));
+    const results = this.caseIndex.filter(
+      c => query.toLowerCase().includes(c.tags[0]) || query.toLowerCase().includes(c.tags[1])
+    );
 
     return {
       query,
@@ -37,7 +51,8 @@ class SmartKnowledgeService {
                 id: 'AI-REC-01',
                 title: 'Recommended Protocol for query context',
                 relevance: '92%',
-                summary: 'Based on 50 similar cases, "Sensory Integration" combined with "Visual Schedules" showed fastest improvement.',
+                summary:
+                  'Based on 50 similar cases, "Sensory Integration" combined with "Visual Schedules" showed fastest improvement.',
               },
             ],
     };

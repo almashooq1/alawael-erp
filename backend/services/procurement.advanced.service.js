@@ -1,15 +1,16 @@
+/* eslint-disable no-unused-vars */
 const Supplier = require('../models/Supplier.model');
 const PurchaseRequest = require('../models/PurchaseRequest.model');
 const PurchaseOrder = require('../models/PurchaseOrder.model');
 const Inventory = require('../models/Inventory.model');
 const Contract = require('../models/Contract.model');
+const logger = require('../utils/logger');
 
 /**
  * Advanced Procurement Service
  * خدمة إدارة المشتريات المتقدمة والذكية
  */
 class ProcurementService {
-  
   // ===== إدارة طلبات الشراء =====
 
   /**
@@ -53,7 +54,7 @@ class ProcurementService {
     } catch (error) {
       return {
         success: false,
-        message: error.message,
+        message: 'حدث خطأ داخلي',
         data: null,
       };
     }
@@ -64,12 +65,10 @@ class ProcurementService {
    */
   async getPendingRequests(department = null, limit = 10) {
     try {
-      let query = { status: 'PENDING_APPROVAL' };
+      const query = { status: 'PENDING_APPROVAL' };
       if (department) query.department = department;
 
-      const requests = await PurchaseRequest.find(query)
-        .sort({ createdAt: -1 })
-        .limit(limit);
+      const requests = await PurchaseRequest.find(query).sort({ createdAt: -1 }).limit(limit);
 
       return {
         success: true,
@@ -77,7 +76,7 @@ class ProcurementService {
         count: requests.length,
       };
     } catch (error) {
-      return { success: false, message: error.message };
+      return { success: false, message: 'حدث خطأ داخلي' };
     }
   }
 
@@ -109,7 +108,7 @@ class ProcurementService {
         data: pr,
       };
     } catch (error) {
-      return { success: false, message: error.message };
+      return { success: false, message: 'حدث خطأ داخلي' };
     }
   }
 
@@ -132,7 +131,7 @@ class ProcurementService {
         data: pr,
       };
     } catch (error) {
-      return { success: false, message: error.message };
+      return { success: false, message: 'حدث خطأ داخلي' };
     }
   }
 
@@ -200,7 +199,7 @@ class ProcurementService {
         data: purchaseOrders,
       };
     } catch (error) {
-      return { success: false, message: error.message };
+      return { success: false, message: 'حدث خطأ داخلي' };
     }
   }
 
@@ -228,7 +227,7 @@ class ProcurementService {
         data: po,
       };
     } catch (error) {
-      return { success: false, message: error.message };
+      return { success: false, message: 'حدث خطأ داخلي' };
     }
   }
 
@@ -272,7 +271,7 @@ class ProcurementService {
         data: po,
       };
     } catch (error) {
-      return { success: false, message: error.message };
+      return { success: false, message: 'حدث خطأ داخلي' };
     }
   }
 
@@ -297,7 +296,7 @@ class ProcurementService {
         data: po,
       };
     } catch (error) {
-      return { success: false, message: error.message };
+      return { success: false, message: 'حدث خطأ داخلي' };
     }
   }
 
@@ -331,7 +330,7 @@ class ProcurementService {
       const quotes = suppliers.map(supplier => {
         const product = supplier.products.find(p => p.productCode === itemCode);
         const discount = supplier.getBestPrice(quantity);
-        const finalPrice = product.unitPrice - (product.unitPrice * discount / 100);
+        const finalPrice = product.unitPrice - (product.unitPrice * discount) / 100;
 
         return {
           supplierId: supplier._id,
@@ -390,7 +389,7 @@ class ProcurementService {
         data: rfq,
       };
     } catch (error) {
-      return { success: false, message: error.message };
+      return { success: false, message: 'حدث خطأ داخلي' };
     }
   }
 
@@ -405,9 +404,8 @@ class ProcurementService {
 
       const alerts = lowStockItems.map(item => {
         const consumptionRate = item.statistics?.averageMonthlyConsumption || 0;
-        const daysRemaining = consumptionRate > 0 
-          ? Math.ceil((item.quantity / consumptionRate) * 30)
-          : 0;
+        const daysRemaining =
+          consumptionRate > 0 ? Math.ceil((item.quantity / consumptionRate) * 30) : 0;
 
         return {
           itemCode: item.productCode,
@@ -428,7 +426,7 @@ class ProcurementService {
         timestamp: new Date(),
       };
     } catch (error) {
-      return { success: false, message: error.message };
+      return { success: false, message: 'حدث خطأ داخلي' };
     }
   }
 
@@ -464,7 +462,7 @@ class ProcurementService {
         data: recommendations,
       };
     } catch (error) {
-      return { success: false, message: error.message };
+      return { success: false, message: 'حدث خطأ داخلي' };
     }
   }
 
@@ -502,7 +500,7 @@ class ProcurementService {
    */
   async notifySupplier(purchaseOrder) {
     // سيتم دمج مع نظام البريد/الإشعارات
-    console.log(`Notification sent to supplier: ${purchaseOrder.supplier.supplierEmail}`);
+    logger.info(`Notification sent to supplier: ${purchaseOrder.supplier.supplierEmail}`);
     return true;
   }
 
@@ -530,7 +528,7 @@ class ProcurementService {
         data: total,
       };
     } catch (error) {
-      return { success: false, message: error.message };
+      return { success: false, message: 'حدث خطأ داخلي' };
     }
   }
 }

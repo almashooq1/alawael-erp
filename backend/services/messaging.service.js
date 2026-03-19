@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Messaging Service - Phase 2 & 3
  * Handles message creation, retrieval, updates, and deletion
@@ -47,7 +48,13 @@ const getMessages = async (options = {}) => {
   try {
     // Return mock data for Phase 2
     // In Phase 3, this would query the database
-    const { page = 1, limit = 20, conversationId, unread, userId } = options;
+    const {
+      page: _page = 1,
+      limit: _limit = 20,
+      conversationId: _conversationId,
+      unread: _unread,
+      userId: _userId,
+    } = options;
 
     return [
       {
@@ -75,7 +82,7 @@ const getMessages = async (options = {}) => {
 /**
  * Get a specific message by ID
  */
-const getMessage = async (messageId, userId) => {
+const getMessage = async (messageId, _userId) => {
   try {
     return {
       _id: messageId,
@@ -169,31 +176,23 @@ const bulkDeleteMessages = async (messageIds, userId) => {
  * Search messages
  */
 const searchMessages = async (query, userId, options = {}) => {
-  try {
-    return [
-      {
-        _id: 'msg-search-001',
-        content: 'matching message content',
-        sender: 'user-001',
-      },
-    ];
-  } catch (error) {
-    throw error;
-  }
+  return [
+    {
+      _id: 'msg-search-001',
+      content: 'matching message content',
+      sender: 'user-001',
+    },
+  ];
 };
 
 /**
  * Get unread message count
  */
 const getUnreadCount = async userId => {
-  try {
-    return {
-      userId,
-      unreadCount: 3,
-    };
-  } catch (error) {
-    throw error;
-  }
+  return {
+    userId,
+    unreadCount: 3,
+  };
 };
 
 /**
@@ -309,11 +308,7 @@ const leaveThread = async (threadId, userId) => {
  * Get unread messages
  */
 const getUnreadMessages = async userId => {
-  try {
-    return [];
-  } catch (error) {
-    throw error;
-  }
+  return [];
 };
 
 /**

@@ -28,10 +28,7 @@ const setupSwaggerUI = require('./config/swagger-ui');
 setupSwaggerUI(app);
 
 // Mount API routes
-app.use(
-  '/api/disability-rehabilitation',
-  require('./routes/disability-rehabilitation.routes')
-);
+app.use('/api/disability-rehabilitation', require('./routes/disability-rehabilitation.routes'));
 ```
 
 #### Step 3: Access Swagger UI

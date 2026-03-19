@@ -1,7 +1,10 @@
+/* eslint-disable no-unused-vars */
 /**
  * Chat Handler
  * معالج الدردشة الفورية
  */
+
+const logger = require('../../utils/logger');
 
 /**
  * Handle chat/messaging events
@@ -26,7 +29,7 @@ function chatHandler(socket, io, activeSubscriptions) {
       joinedAt: new Date(),
     });
 
-    console.log(`[Chat] ${socket.id} joined room ${roomId}`);
+    logger.info(`[Chat] ${socket.id} joined room ${roomId}`);
 
     // Notify room members
     socket.to(room).emit('chat:user-joined', {
@@ -54,7 +57,7 @@ function chatHandler(socket, io, activeSubscriptions) {
       activeSubscriptions.delete(socket.id);
     }
 
-    console.log(`[Chat] ${socket.id} left room ${roomId}`);
+    logger.info(`[Chat] ${socket.id} left room ${roomId}`);
 
     // Notify room members
     socket.to(room).emit('chat:user-left', {
@@ -88,7 +91,7 @@ function chatHandler(socket, io, activeSubscriptions) {
     // Broadcast to room (including sender)
     io.to(room).emit('chat:message', messageData);
 
-    console.log(`[Chat] Message sent to room ${roomId}`);
+    logger.info(`[Chat] Message sent to room ${roomId}`);
 
     // Confirm to sender
     socket.emit('chat:message-sent', {

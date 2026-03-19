@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 class SmartMarketingService {
   /**
    * Lead Scoring Engine

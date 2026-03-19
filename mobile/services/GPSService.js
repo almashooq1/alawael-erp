@@ -89,7 +89,7 @@ export class GPSService {
       console.error('Upload Location Error:', error.message);
       return {
         success: false,
-        error: error.message,
+        error: 'An internal error occurred',
       };
     }
   }

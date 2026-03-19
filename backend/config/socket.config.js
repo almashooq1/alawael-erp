@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Socket.IO Configuration - Phase 3
  * إعداد Socket.IO للدردشة الفورية
@@ -12,6 +13,7 @@
 
 const socketIO = require('socket.io');
 const jwt = require('jsonwebtoken');
+const logger = require('../utils/logger');
 const Message = require('../models/message.model');
 const Conversation = require('../models/conversation.model');
 
@@ -31,30 +33,60 @@ class SocketManager {
     this.setupMiddleware();
     this.setupEventHandlers();
 
-    console.log('✅ Socket.IO initialized for Messaging');
+    logger.info('Socket.IO initialized for Messaging');
   }
 
   /**
    * إعداد Middleware للمصادقة
    */
   setupMiddleware() {
+    // 1) Authentication middleware
     this.io.use((socket, next) => {
       try {
-        const token = socket.handshake.auth.token || socket.handshake.headers.authorization?.replace('Bearer ', '');
+        const token =
+          socket.handshake.auth.token ||
+          socket.handshake.headers.authorization?.replace('Bearer ', '');
 
         if (!token) {
           return next(new Error('Authentication error: No token provided'));
         }
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+        const { jwtSecret } = require('./secrets');
+        const decoded = jwt.verify(token, jwtSecret);
         socket.userId = decoded.id || decoded.userId;
         socket.userEmail = decoded.email;
 
         next();
       } catch (error) {
-        console.error('Socket authentication error:', error);
+        logger.error('Socket authentication error:', error);
         next(new Error('Authentication error: Invalid token'));
       }
+    });
+
+    // 2) Per-socket event rate limiting (prevents flooding)
+    this.io.use((socket, next) => {
+      const MAX_EVENTS = 50; // max events per window
+      const WINDOW_MS = 10000; // 10 seconds
+      let eventTimestamps = [];
+
+      const originalOnEvent = socket.onevent?.bind(socket);
+      if (originalOnEvent) {
+        socket.onevent = packet => {
+          const now = Date.now();
+          eventTimestamps = eventTimestamps.filter(t => t > now - WINDOW_MS);
+          eventTimestamps.push(now);
+
+          if (eventTimestamps.length > MAX_EVENTS) {
+            logger.warn(
+              `Socket flood detected: user ${socket.userId}, events=${eventTimestamps.length}/${WINDOW_MS}ms`
+            );
+            socket.emit('error', { message: 'Rate limit exceeded' });
+            return; // drop the event
+          }
+          originalOnEvent(packet);
+        };
+      }
+      next();
     });
   }
 
@@ -63,7 +95,7 @@ class SocketManager {
    */
   setupEventHandlers() {
     this.io.on('connection', socket => {
-      console.log(`✅ User connected: ${socket.userId}`);
+      logger.info(`User connected: ${socket.userId}`);
 
       // تسجيل المستخدم
       this.users.set(socket.userId, socket.id);
@@ -100,9 +132,9 @@ class SocketManager {
         socket.join(`conversation:${conv._id}`);
       });
 
-      console.log(`📱 User ${socket.userId} joined ${conversations.length} conversations`);
+      logger.info(`User ${socket.userId} joined ${conversations.length} conversations`);
     } catch (error) {
-      console.error('Error joining conversations:', error);
+      logger.error('Error joining conversations:', error);
     }
   }
 
@@ -153,8 +185,8 @@ class SocketManager {
           });
         }
       } catch (error) {
-        console.error('Error sending message:', error);
-        socket.emit('message_error', { error: error.message });
+        logger.error('Error sending message:', error);
+        socket.emit('message_error', { error: 'حدث خطأ داخلي' });
       }
     });
   }
@@ -179,7 +211,7 @@ class SocketManager {
           });
         }
       } catch (error) {
-        console.error('Error handling typing:', error);
+        logger.error('Error handling typing:', error);
       }
     });
   }
@@ -202,7 +234,7 @@ class SocketManager {
           });
         }
       } catch (error) {
-        console.error('Error handling stop typing:', error);
+        logger.error('Error handling stop typing:', error);
       }
     });
   }
@@ -233,7 +265,7 @@ class SocketManager {
           });
         }
       } catch (error) {
-        console.error('Error marking message as read:', error);
+        logger.error('Error marking message as read:', error);
       }
     });
   }
@@ -260,7 +292,7 @@ class SocketManager {
           }
         }
       } catch (error) {
-        console.error('Error marking message as delivered:', error);
+        logger.error('Error marking message as delivered:', error);
       }
     });
   }
@@ -272,7 +304,7 @@ class SocketManager {
     socket.on('join_conversation', data => {
       const { conversationId } = data;
       socket.join(`conversation:${conversationId}`);
-      console.log(`📱 User ${socket.userId} joined conversation ${conversationId}`);
+      logger.info(`User ${socket.userId} joined conversation ${conversationId}`);
     });
   }
 
@@ -283,7 +315,7 @@ class SocketManager {
     socket.on('leave_conversation', data => {
       const { conversationId } = data;
       socket.leave(`conversation:${conversationId}`);
-      console.log(`📱 User ${socket.userId} left conversation ${conversationId}`);
+      logger.info(`User ${socket.userId} left conversation ${conversationId}`);
     });
   }
 
@@ -292,7 +324,7 @@ class SocketManager {
    */
   handleDisconnect(socket) {
     socket.on('disconnect', () => {
-      console.log(`❌ User disconnected: ${socket.userId}`);
+      logger.info(`User disconnected: ${socket.userId}`);
 
       // إزالة المستخدم من القائمة
       this.users.delete(socket.userId);
@@ -330,7 +362,10 @@ class SocketManager {
     if (excludeUserId) {
       const socketId = this.users.get(excludeUserId);
       if (socketId) {
-        this.io.to(`conversation:${conversationId}`).except(socketId).emit('notification', notification);
+        this.io
+          .to(`conversation:${conversationId}`)
+          .except(socketId)
+          .emit('notification', notification);
         return;
       }
     }

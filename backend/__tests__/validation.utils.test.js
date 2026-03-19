@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * ✅ Validation Utils Tests
  * Comprehensive test suite for input validation functions

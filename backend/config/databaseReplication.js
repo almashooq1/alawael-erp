@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * 🔄 Database Replication System
  *
@@ -8,11 +9,12 @@
  */
 
 const mongoose = require('mongoose');
+const logger = require('../utils/logger');
 
 class DatabaseReplicationManager {
   constructor(options = {}) {
     this.options = {
-      masterUrl: options.masterUrl || process.env.MONGO_URI,
+      masterUrl: options.masterUrl || process.env.MONGODB_URI || process.env.MONGO_URI,
       replicas: options.replicas || [], // Array of replica URLs
       replicationLag: options.replicationLag || 100, // ms
       healthCheckInterval: options.healthCheckInterval || 30000, // 30s
@@ -49,7 +51,7 @@ class DatabaseReplicationManager {
         minPoolSize: 10,
       });
 
-      console.log('[DBReplication] Master connected');
+      logger.info('[DBReplication] Master connected');
 
       // Replica connections
       for (const replicaUrl of this.options.replicas) {
@@ -64,9 +66,9 @@ class DatabaseReplicationManager {
           this.connections.replicas.set(replicaUrl, replicaConn);
           this.replicaHealth.set(replicaUrl, { healthy: true, lastCheck: Date.now() });
 
-          console.log(`[DBReplication] Replica connected: ${replicaUrl}`);
+          logger.info(`[DBReplication] Replica connected: ${replicaUrl}`);
         } catch (error) {
-          console.error(`[DBReplication] Failed to connect replica: ${replicaUrl}`, error.message);
+          logger.error(`[DBReplication] Failed to connect replica: ${replicaUrl}`, error.message);
           this.replicaHealth.set(replicaUrl, { healthy: false, lastCheck: Date.now() });
         }
       }
@@ -74,7 +76,7 @@ class DatabaseReplicationManager {
       // Start health checks
       this.startHealthChecks();
     } catch (error) {
-      console.error('[DBReplication] Master connection failed:', error.message);
+      logger.error('[DBReplication] Master connection failed:', error.message);
       throw error;
     }
   }
@@ -129,7 +131,7 @@ class DatabaseReplicationManager {
       if (conn !== this.connections.master) {
         this.stats.replicaFailures++;
         this.replicaHealth.set(this.getReplicaUrl(conn), { healthy: false, lastCheck: Date.now() });
-        console.log('[DBReplication] Replica failed, falling back to master');
+        logger.info('[DBReplication] Replica failed, falling back to master');
         return this.executeRead(model, query, options);
       }
       throw error;
@@ -152,7 +154,7 @@ class DatabaseReplicationManager {
         return await Model.deleteOne(data);
       }
     } catch (error) {
-      console.error(`[DBReplication] Write operation failed: ${operation}`, error.message);
+      logger.error(`[DBReplication] Write operation failed: ${operation}`, error.message);
       throw error;
     }
   }
@@ -182,14 +184,20 @@ class DatabaseReplicationManager {
       const masterStatus = await masterDb
         .admin()
         .replSetGetStatus()
-        .catch(() => null);
+        .catch(err => {
+          logger.warn('Master replSetGetStatus failed:', err.message);
+          return null;
+        });
 
       // Get read timestamp from replica
       const replicaDb = replicaConn.db;
       const replicaStatus = await replicaDb
         .admin()
         .replSetGetStatus()
-        .catch(() => null);
+        .catch(err => {
+          logger.warn('Replica replSetGetStatus failed:', err.message);
+          return null;
+        });
 
       if (!masterStatus || !replicaStatus) return null;
 
@@ -199,7 +207,7 @@ class DatabaseReplicationManager {
 
       return Math.max(0, masterTime - replicaTime);
     } catch (error) {
-      console.error('[DBReplication] Lag check failed:', error.message);
+      logger.error('[DBReplication] Lag check failed:', error.message);
       return null;
     }
   }
@@ -231,7 +239,7 @@ class DatabaseReplicationManager {
             lastCheck: Date.now(),
             error: error.message,
           });
-          console.error(`[DBReplication] Health check failed for ${replicaUrl}:`, error.message);
+          logger.error(`[DBReplication] Health check failed for ${replicaUrl}:`, error.message);
         }
       }
     }, this.options.healthCheckInterval);
@@ -277,7 +285,7 @@ class DatabaseReplicationManager {
 
     if (healthyReplicas.length > 0) {
       const newMasterUrl = healthyReplicas[0];
-      console.log(`[DBReplication] Failover triggered: promoting ${newMasterUrl}`);
+      logger.info(`[DBReplication] Failover triggered: promoting ${newMasterUrl}`);
 
       this.options.masterUrl = newMasterUrl;
       this.stats.failovers++;
@@ -295,10 +303,10 @@ class DatabaseReplicationManager {
           minPoolSize: 10,
         });
 
-        console.log('[DBReplication] Failover complete');
+        logger.info('[DBReplication] Failover complete');
         return true;
       } catch (error) {
-        console.error('[DBReplication] Failover failed:', error.message);
+        logger.error('[DBReplication] Failover failed:', error.message);
         return false;
       }
     }

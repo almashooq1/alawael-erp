@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * خادم WebSocket للإشعارات الفعلية
  * WebSocket Server for Real-time Notifications
@@ -39,7 +40,7 @@ class NotificationServer {
     });
 
     // Health check endpoint
-    this.app.get('/health', (req, res) => {
+    this.app.get('/health', (_req, res) => {
       res.json({
         status: 'ok',
         timestamp: new Date().toISOString(),
@@ -81,7 +82,7 @@ class NotificationServer {
         clientId,
         timestamp: new Date().toISOString(),
         message: 'اتصل بنجاح | Successfully connected',
-      }),
+      })
     );
 
     // Message handler

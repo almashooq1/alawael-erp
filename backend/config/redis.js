@@ -1,9 +1,11 @@
+/* eslint-disable no-unused-vars */
 /**
  * Redis Configuration
  * إعدادات Redis Cache
  */
 
-const redis = require('redis');
+const Redis = require('ioredis');
+const logger = require('../utils/logger');
 
 let redisClient = null;
 let isConnected = false;
@@ -22,64 +24,60 @@ const CACHE_TTL = parseInt(process.env.CACHE_TTL) || 3600; // Default 1 hour
 async function initializeRedis() {
   // Hard disables: explicit flag, missing URL, or mock DB mode
   if (DISABLE_REDIS || !REDIS_ENABLED || !REDIS_URL) {
-    console.log('ℹ️  Redis is disabled (DISABLE_REDIS=true or REDIS_DISABLED/URL missing)');
+    logger.info('ℹ️  Redis is disabled (DISABLE_REDIS=true or REDIS_DISABLED/URL missing)');
     return null;
   }
 
   try {
-    console.log('🔄 Connecting to Redis...');
+    logger.info('🔄 Connecting to Redis...');
 
-    // Create Redis client
-    redisClient = redis.createClient({
-      url: REDIS_URL,
+    // Create Redis client (ioredis)
+    redisClient = new Redis(REDIS_URL, {
       password: REDIS_PASSWORD,
-      socket: {
-        reconnectStrategy: retries => {
-          if (retries > 10) {
-            console.error('❌ Redis: Too many reconnection attempts');
-            return new Error('Too many reconnection attempts');
-          }
-          return Math.min(retries * 100, 3000);
-        },
+      retryStrategy: retries => {
+        if (retries > 10) {
+          logger.error('❌ Redis: Too many reconnection attempts');
+          return null;
+        }
+        return Math.min(retries * 100, 3000);
       },
     });
 
     // Error handler
     redisClient.on('error', err => {
-      console.error('❌ Redis Error:', err.message);
+      logger.error('❌ Redis Error:', err.message);
       isConnected = false;
     });
 
     // Connect handler
     redisClient.on('connect', () => {
-      console.log('🔄 Redis: Connecting...');
+      logger.info('🔄 Redis: Connecting...');
     });
 
     // Ready handler
     redisClient.on('ready', () => {
-      console.log('✅ Redis: Connected and ready');
+      logger.info('✅ Redis: Connected and ready');
       isConnected = true;
     });
 
     // Reconnecting handler
     redisClient.on('reconnecting', () => {
-      console.log('🔄 Redis: Reconnecting...');
+      logger.info('🔄 Redis: Reconnecting...');
       isConnected = false;
     });
 
     // End handler
     redisClient.on('end', () => {
-      console.log('⚠️  Redis: Connection closed');
+      logger.info('⚠️  Redis: Connection closed');
       isConnected = false;
     });
 
-    // Connect to Redis
-    await redisClient.connect();
+    // ioredis auto-connects
 
     return redisClient;
   } catch (error) {
-    console.error('❌ Redis initialization failed:', error.message);
-    console.log('⚠️  Continuing without Redis cache');
+    logger.error('❌ Redis initialization failed:', error.message);
+    logger.info('⚠️  Continuing without Redis cache');
     return null;
   }
 }
@@ -100,7 +98,7 @@ async function get(key) {
     }
     return null;
   } catch (error) {
-    console.error(`Redis GET error for key "${key}":`, error.message);
+    logger.error(`Redis GET error for key "${key}":`, error.message);
     return null;
   }
 }
@@ -116,10 +114,10 @@ async function set(key, value, ttl = CACHE_TTL) {
 
   try {
     const serialized = JSON.stringify(value);
-    await redisClient.setEx(key, ttl, serialized);
+    await redisClient.setex(key, ttl, serialized);
     return true;
   } catch (error) {
-    console.error(`Redis SET error for key "${key}":`, error.message);
+    logger.error(`Redis SET error for key "${key}":`, error.message);
     return false;
   }
 }
@@ -137,7 +135,7 @@ async function del(key) {
     await redisClient.del(key);
     return true;
   } catch (error) {
-    console.error(`Redis DEL error for key "${key}":`, error.message);
+    logger.error(`Redis DEL error for key "${key}":`, error.message);
     return false;
   }
 }
@@ -159,7 +157,7 @@ async function delPattern(pattern) {
     await redisClient.del(keys);
     return keys.length;
   } catch (error) {
-    console.error(`Redis DEL pattern error for "${pattern}":`, error.message);
+    logger.error(`Redis DEL pattern error for "${pattern}":`, error.message);
     return 0;
   }
 }
@@ -177,7 +175,7 @@ async function exists(key) {
     const result = await redisClient.exists(key);
     return result === 1;
   } catch (error) {
-    console.error(`Redis EXISTS error for key "${key}":`, error.message);
+    logger.error(`Redis EXISTS error for key "${key}":`, error.message);
     return false;
   }
 }
@@ -195,7 +193,7 @@ async function expire(key, seconds) {
     await redisClient.expire(key, seconds);
     return true;
   } catch (error) {
-    console.error(`Redis EXPIRE error for key "${key}":`, error.message);
+    logger.error(`Redis EXPIRE error for key "${key}":`, error.message);
     return false;
   }
 }
@@ -210,11 +208,11 @@ async function flushAll() {
   }
 
   try {
-    await redisClient.flushAll();
-    console.log('✅ Redis: Cache flushed');
+    await redisClient.flushall();
+    logger.info('✅ Redis: Cache flushed');
     return true;
   } catch (error) {
-    console.error('Redis FLUSHALL error:', error.message);
+    logger.error('Redis FLUSHALL error:', error.message);
     return false;
   }
 }
@@ -257,7 +255,7 @@ async function info() {
 async function close() {
   if (redisClient) {
     await redisClient.quit();
-    console.log('✅ Redis: Connection closed gracefully');
+    logger.info('✅ Redis: Connection closed gracefully');
   }
 }
 
@@ -274,7 +272,7 @@ async function getStats() {
   }
 
   try {
-    const dbSize = await redisClient.dbSize();
+    const dbSize = await redisClient.dbsize();
     const infoStats = await redisClient.info('stats');
 
     return {

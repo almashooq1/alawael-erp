@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Cloud Storage Service
  * خدمة تخزين الفيديو على السحابة (AWS S3 و Google Cloud)
@@ -8,6 +9,7 @@ const { Storage } = require('@google-cloud/storage');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const logger = require('../utils/logger');
 
 class CloudStorageService {
   constructor(config = {}) {
@@ -82,10 +84,10 @@ class CloudStorageService {
         etag: result.ETag,
       };
     } catch (error) {
-      console.error('❌ خطأ في رفع S3:', error.message);
+      logger.error('❌ خطأ في رفع S3:', error.message);
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -131,7 +133,7 @@ class CloudStorageService {
 
         // إرسال تحديث التقدم
         const progress = Math.round(((i + 1) / numChunks) * 100);
-        console.log(`📤 تقدم الرفع: ${progress}%`);
+        logger.info(`📤 تقدم الرفع: ${progress}%`);
       }
 
       // إكمال الرفع
@@ -155,10 +157,10 @@ class CloudStorageService {
         etag: result.ETag,
       };
     } catch (error) {
-      console.error('❌ خطأ في الرفع متعدد الأجزاء:', error.message);
+      logger.error('❌ خطأ في الرفع متعدد الأجزاء:', error.message);
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -201,10 +203,10 @@ class CloudStorageService {
         uploadedAt: new Date(),
       };
     } catch (error) {
-      console.error('❌ خطأ في رفع GCS:', error.message);
+      logger.error('❌ خطأ في رفع GCS:', error.message);
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -229,10 +231,10 @@ class CloudStorageService {
         size: data.Body.length,
       };
     } catch (error) {
-      console.error('❌ خطأ في تحميل S3:', error.message);
+      logger.error('❌ خطأ في تحميل S3:', error.message);
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -254,10 +256,10 @@ class CloudStorageService {
         message: `تم حذف الملف ${key}`,
       };
     } catch (error) {
-      console.error('❌ خطأ في حذف S3:', error.message);
+      logger.error('❌ خطأ في حذف S3:', error.message);
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -275,10 +277,10 @@ class CloudStorageService {
         message: `تم حذف الملف ${key}`,
       };
     } catch (error) {
-      console.error('❌ خطأ في حذف GCS:', error.message);
+      logger.error('❌ خطأ في حذف GCS:', error.message);
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -309,7 +311,7 @@ class CloudStorageService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -335,7 +337,7 @@ class CloudStorageService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -370,7 +372,7 @@ class CloudStorageService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -399,7 +401,7 @@ class CloudStorageService {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   }

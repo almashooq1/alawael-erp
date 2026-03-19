@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 const beneficiarySchema = new mongoose.Schema({
@@ -7,5 +8,8 @@ const beneficiarySchema = new mongoose.Schema({
   status: { type: String, enum: ['ACTIVE', 'INACTIVE'], default: 'ACTIVE' },
   createdAt: { type: Date, default: Date.now },
 });
+
+// Compound index: filter active beneficiaries sorted by name (admin list view)
+beneficiarySchema.index({ status: 1, name: 1 });
 
 module.exports = mongoose.models.Beneficiary || mongoose.model('Beneficiary', beneficiarySchema);

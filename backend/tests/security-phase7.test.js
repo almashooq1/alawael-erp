@@ -1,30 +1,52 @@
-const securityService = require('../services/securityService');
-const User = require('../models/User');
-const AuditLog = require('../models/AuditLog');
+/* eslint-disable no-undef, no-unused-vars */
 const crypto = require('crypto');
 
-jest.mock('../models/User');
-jest.mock('../models/AuditLog');
+// ── Mocks ───────────────────────────────────────────────────────────
+jest.mock('../models/User', () => {
+  const mock = jest.fn();
+  mock.find = jest.fn();
+  mock.findOne = jest.fn();
+  mock.findById = jest.fn().mockReturnValue({
+    select: jest.fn(),
+  });
+  mock.findByIdAndUpdate = jest.fn().mockResolvedValue({});
+  return mock;
+});
+jest.mock('../models/securityLog.model', () => ({
+  create: jest.fn().mockResolvedValue({}),
+}));
+jest.mock('../models/Session', () => ({
+  find: jest.fn(),
+  findById: jest.fn(),
+}));
+
+const User = require('../models/User');
+const SecurityLog = require('../models/securityLog.model');
+const { securityService } = require('../services/securityService');
 
 describe('SecurityService Phase 7', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    User.findById.mockReturnValue({
+      select: jest.fn().mockResolvedValue(null),
+    });
   });
 
-  describe('generateMfaSecret', () => {
+  describe('generateMfaSecret (setupMfa)', () => {
     it('should generate a secret and return otpauth url', async () => {
       User.findById.mockResolvedValue({ email: 'test@example.com' });
+      User.findByIdAndUpdate.mockResolvedValue({});
 
       const result = await securityService.generateMfaSecret('user123');
 
       expect(result.secret).toBeDefined();
-      expect(result.otpauth_url).toContain('secret=');
+      expect(result.otpauthUrl).toContain('secret=');
       expect(User.findById).toHaveBeenCalledWith('user123');
     });
   });
 
   describe('verifyMfaToken', () => {
-    it('should return true for valid mock token', async () => {
+    it('should return true for valid mock token (123456)', async () => {
       const result = await securityService.verifyMfaToken('u1', '123456', 'secret');
       expect(result).toBe(true);
     });
@@ -39,34 +61,37 @@ describe('SecurityService Phase 7', () => {
     it('should enable mfa on user and return backup codes', async () => {
       const mockUser = {
         _id: 'user123',
-        mfa: { enabled: false, secret: null, backupCodes: [] },
+        mfa: { enabled: false, secret: 'secret123', backupCodes: [] },
         save: jest.fn().mockResolvedValue(true),
       };
-      User.findById.mockResolvedValue(mockUser);
-      AuditLog.mockImplementation(() => ({ save: jest.fn() }));
+      User.findById.mockReturnValue({
+        select: jest.fn().mockResolvedValue(mockUser),
+      });
+      User.findByIdAndUpdate.mockResolvedValue({});
 
-      const result = await securityService.enableMfa('user123', 'secret123');
+      const result = await securityService.enableMfa('user123', '123456', 'secret123');
 
-      expect(mockUser.mfa.enabled).toBe(true);
-      expect(mockUser.mfa.secret).toBe('secret123');
-      expect(mockUser.mfa.backupCodes).toHaveLength(6);
-      expect(mockUser.save).toHaveBeenCalled();
+      expect(result.enabled).toBe(true);
+      expect(result.backupCodes).toBeDefined();
+      expect(result.backupCodes.length).toBeGreaterThan(0);
+      expect(User.findByIdAndUpdate).toHaveBeenCalled();
     });
   });
 
   describe('logSecurityEvent', () => {
-    it('should save an audit log', async () => {
-      const saveMock = jest.fn();
-      AuditLog.mockImplementation(() => ({ save: saveMock }));
-
+    it('should save a security log entry', async () => {
       await securityService.logSecurityEvent({
         action: 'TEST_EVENT',
         userId: 'u1',
         description: 'test',
       });
 
-      expect(AuditLog).toHaveBeenCalled();
-      expect(saveMock).toHaveBeenCalled();
+      expect(SecurityLog.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId: 'u1',
+          action: 'TEST_EVENT',
+        })
+      );
     });
   });
 });

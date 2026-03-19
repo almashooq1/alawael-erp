@@ -1,0 +1,180 @@
+{
+  "app": {
+    "name": "نظام العلاويل",
+    "description": "نظام إدارة موارد المؤسسات"
+  },
+  "api": {
+    "welcome": "مرحباً بك في API نظام العلاويل",
+    "version": "الإصدار",
+    "documentation": "توثيق API",
+    "healthCheck": "فحص صحة النظام"
+  },
+  "auth": {
+    "login": "تسجيل الدخول",
+    "logout": "تسجيل الخروج",
+    "register": "إنشاء حساب",
+    "forgotPassword": "نسيت كلمة المرور",
+    "resetPassword": "إعادة تعيين كلمة المرور",
+    "changePassword": "تغيير كلمة المرور",
+    "invalidCredentials": "بيانات الدخول غير صحيحة",
+    "userNotFound": "المستخدم غير موجود",
+    "userExists": "المستخدم موجود بالفعل",
+    "tokenExpired": "انتهت صلاحية الرمز",
+    "tokenInvalid": "رمز غير صالح",
+    "unauthorized": "غير مصرح بالوصول",
+    "forbidden": "الوصول محظور",
+    "sessionExpired": "انتهت الجلسة",
+    "passwordChanged": "تم تغيير كلمة المرور بنجاح",
+    "passwordResetSent": "تم إرسال رابط إعادة تعيين كلمة المرور"
+  },
+  "users": {
+    "created": "تم إنشاء المستخدم بنجاح",
+    "updated": "تم تحديث المستخدم بنجاح",
+    "deleted": "تم حذف المستخدم بنجاح",
+    "notFound": "المستخدم غير موجود",
+    "list": "قائمة المستخدمين",
+    "profile": "الملف الشخصي",
+    "settings": "الإعدادات"
+  },
+  "students": {
+    "created": "تم إنشاء الطالب بنجاح",
+    "updated": "تم تحديث بيانات الطالب بنجاح",
+    "deleted": "تم حذف الطالب بنجاح",
+    "notFound": "الطالب غير موجود",
+    "list": "قائمة الطلاب",
+    "enrolled": "تم تسجيل الطالب",
+    "transferred": "تم نقل الطالب"
+  },
+  "employees": {
+    "created": "تم إنشاء الموظف بنجاح",
+    "updated": "تم تحديث بيانات الموظف بنجاح",
+    "deleted": "تم حذف الموظف بنجاح",
+    "notFound": "الموظف غير موجود",
+    "list": "قائمة الموظفين"
+  },
+  "hr": {
+    "leaveRequested": "تم تقديم طلب الإجازة",
+    "leaveApproved": "تمت الموافقة على الإجازة",
+    "leaveRejected": "تم رفض الإجازة",
+    "payrollGenerated": "تم إصدار كشف المرتبات",
+    "attendanceRecorded": "تم تسجيل الحضور",
+    "wpsReportGenerated": "تم توليد تقرير حماية الأجور بنجاح",
+    "gosiReportGenerated": "تم توليد تقرير التأمينات بنجاح",
+    "bankTransferReportGenerated": "تم توليد تقرير التحويل البنكي بنجاح",
+    "departmentComparisonGenerated": "تم توليد تقرير مقارنة الأقسام",
+    "annualSummaryGenerated": "تم توليد التقرير السنوي",
+    "varianceReportGenerated": "تم توليد تقرير الفروقات",
+    "employeeCostReportGenerated": "تم توليد تقرير تكلفة الموظف",
+    "deductionsReportGenerated": "تم توليد تقرير الخصومات",
+    "reportGenerationFailed": "فشل في توليد التقرير",
+    "noPayrollData": "لا توجد بيانات رواتب للفترة المحددة"
+  },
+  "financial": {
+    "invoiceCreated": "تم إنشاء الفاتورة",
+    "invoicePaid": "تم دفع الفاتورة",
+    "paymentProcessed": "تم معالجة الدفع",
+    "paymentFailed": "فشلت عملية الدفع",
+    "refundProcessed": "تم معالجة الاسترداد"
+  },
+  "inventory": {
+    "stockUpdated": "تم تحديث المخزون",
+    "stockLow": "مخزون منخفض",
+    "stockOut": "نفاد المخزون",
+    "productAdded": "تم إضافة المنتج",
+    "productUpdated": "تم تحديث المنتج"
+  },
+  "documents": {
+    "uploaded": "تم رفع المستند",
+    "deleted": "تم حذف المستند",
+    "notFound": "المستند غير موجود",
+    "invalidType": "نوع الملف غير مدعوم",
+    "tooLarge": "حجم الملف كبير جداً"
+  },
+  "notifications": {
+    "sent": "تم إرسال الإشعار",
+    "failed": "فشل إرسال الإشعار",
+    "emailSent": "تم إرسال البريد الإلكتروني",
+    "smsSent": "تم إرسال الرسالة النصية"
+  },
+  "validation": {
+    "required": "هذا الحقل مطلوب",
+    "email": "البريد الإلكتروني غير صالح",
+    "phone": "رقم الهاتف غير صالح",
+    "minLength": "الحد الأدنى {{min}} أحرف",
+    "maxLength": "الحد الأقصى {{max}} أحرف",
+    "numeric": "يجب أن يكون رقماً",
+    "date": "التاريخ غير صالح",
+    "unique": "هذه القيمة موجودة بالفعل"
+  },
+  "errors": {
+    "generic": "حدث خطأ غير متوقع",
+    "notFound": "المورد غير موجود",
+    "serverError": "خطأ في الخادم",
+    "databaseError": "خطأ في قاعدة البيانات",
+    "networkError": "خطأ في الشبكة",
+    "validationError": "خطأ في التحقق من البيانات",
+    "unauthorized": "غير مصرح بالوصول",
+    "forbidden": "الوصول محظور",
+    "badRequest": "طلب غير صالح",
+    "conflict": "تعارض في البيانات",
+    "tooManyRequests": "عدد طلبات كثير",
+    "serviceUnavailable": "الخدمة غير متاحة"
+  },
+  "success": {
+    "created": "تم الإنشاء بنجاح",
+    "updated": "تم التحديث بنجاح",
+    "deleted": "تم الحذف بنجاح",
+    "saved": "تم الحفظ بنجاح",
+    "sent": "تم الإرسال بنجاح",
+    "completed": "تمت العملية بنجاح"
+  },
+  "pagination": {
+    "page": "الصفحة",
+    "of": "من",
+    "total": "الإجمالي",
+    "items": "عناصر",
+    "noResults": "لا توجد نتائج"
+  },
+  "status": {
+    "active": "نشط",
+    "inactive": "غير نشط",
+    "pending": "قيد الانتظار",
+    "approved": "موافق عليه",
+    "rejected": "مرفوض",
+    "completed": "مكتمل",
+    "cancelled": "ملغي",
+    "draft": "مسودة",
+    "published": "منشور"
+  },
+  "dates": {
+    "today": "اليوم",
+    "yesterday": "أمس",
+    "tomorrow": "غداً",
+    "thisWeek": "هذا الأسبوع",
+    "thisMonth": "هذا الشهر",
+    "thisYear": "هذا العام",
+    "months": {
+      "1": "يناير",
+      "2": "فبراير",
+      "3": "مارس",
+      "4": "أبريل",
+      "5": "مايو",
+      "6": "يونيو",
+      "7": "يوليو",
+      "8": "أغسطس",
+      "9": "سبتمبر",
+      "10": "أكتوبر",
+      "11": "نوفمبر",
+      "12": "ديسمبر"
+    },
+    "days": {
+      "0": "الأحد",
+      "1": "الاثنين",
+      "2": "الثلاثاء",
+      "3": "الأربعاء",
+      "4": "الخميس",
+      "5": "الجمعة",
+      "6": "السبت"
+    }
+  }
+}

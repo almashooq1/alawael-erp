@@ -1,0 +1,151 @@
+/* eslint-disable no-unused-vars */
+const express = require('express');
+const router = express.Router();
+const { authenticate, authorize } = require('../middleware/auth');
+const logger = require('../utils/logger');
+
+router.use(authenticate);
+
+const getProject = () => require('../models/project.model');
+const getTask = () => require('../models/task.model');
+
+// GET /projects
+router.get('/projects', async (req, res) => {
+  try {
+    const Project = getProject();
+    const { page = 1, limit = 20, status } = req.query;
+    const filter = {};
+    if (status) filter.status = status;
+    const skip = (Math.max(1, +page) - 1) * +limit;
+    const [data, total] = await Promise.all([
+      Project.find(filter).sort({ createdAt: -1 }).skip(skip).limit(+limit).lean(),
+      Project.countDocuments(filter),
+    ]);
+    res.json({ success: true, data, pagination: { page: +page, limit: +limit, total } });
+  } catch (err) {
+    logger.error('PM projects error:', err);
+    res.status(500).json({ success: false, message: 'خطأ في جلب المشاريع' });
+  }
+});
+
+// GET /projects/:id
+router.get('/projects/:id', async (req, res) => {
+  try {
+    const Project = getProject();
+    const project = await Project.findById(req.params.id).lean();
+    if (!project) return res.status(404).json({ success: false, message: 'المشروع غير موجود' });
+    res.json({ success: true, data: project });
+  } catch (err) {
+    logger.error('PM project detail error:', err);
+    res.status(500).json({ success: false, message: 'خطأ في جلب المشروع' });
+  }
+});
+
+// GET /projects/:pid/tasks
+router.get('/projects/:pid/tasks', async (req, res) => {
+  try {
+    const Task = getTask();
+    const data = await Task.find({ projectId: req.params.pid }).sort({ createdAt: -1 }).lean();
+    res.json({ success: true, data });
+  } catch (err) {
+    logger.error('PM project tasks error:', err);
+    res.status(500).json({ success: false, message: 'خطأ في جلب المهام' });
+  }
+});
+
+// POST /projects
+router.post('/projects', authorize(['admin', 'manager']), async (req, res) => {
+  try {
+    const Project = getProject();
+    const project = await Project.create({ ...req.body, createdBy: req.user?.id });
+    res.status(201).json({ success: true, data: project, message: 'تم إنشاء المشروع' });
+  } catch (err) {
+    logger.error('PM project create error:', err);
+    res.status(500).json({ success: false, message: 'خطأ في إنشاء المشروع' });
+  }
+});
+
+// POST /tasks
+router.post('/tasks', async (req, res) => {
+  try {
+    const Task = getTask();
+    const task = await Task.create({ ...req.body, assignedBy: req.user?.id });
+    res.status(201).json({ success: true, data: task, message: 'تم إنشاء المهمة' });
+  } catch (err) {
+    logger.error('PM task create error:', err);
+    res.status(500).json({ success: false, message: 'خطأ في إنشاء المهمة' });
+  }
+});
+
+// PUT /projects/:id
+router.put('/projects/:id', authorize(['admin', 'manager']), async (req, res) => {
+  try {
+    const Project = getProject();
+    const {
+      name,
+      description,
+      department,
+      status,
+      priority,
+      startDate,
+      endDate,
+      budget,
+      team,
+      milestones,
+    } = req.body;
+    const project = await Project.findByIdAndUpdate(
+      req.params.id,
+      {
+        name,
+        description,
+        department,
+        status,
+        priority,
+        startDate,
+        endDate,
+        budget,
+        team,
+        milestones,
+      },
+      { new: true, runValidators: true }
+    ).lean();
+    if (!project) return res.status(404).json({ success: false, message: 'المشروع غير موجود' });
+    res.json({ success: true, data: project, message: 'تم تحديث المشروع' });
+  } catch (err) {
+    logger.error('PM project update error:', err);
+    res.status(500).json({ success: false, message: 'خطأ في تحديث المشروع' });
+  }
+});
+
+// PATCH /tasks/:id
+router.patch('/tasks/:id', async (req, res) => {
+  try {
+    const Task = getTask();
+    const { title, description, project, assignedTo, status, priority, dueDate, progress } =
+      req.body;
+    const task = await Task.findByIdAndUpdate(
+      req.params.id,
+      { title, description, project, assignedTo, status, priority, dueDate, progress },
+      { new: true }
+    ).lean();
+    if (!task) return res.status(404).json({ success: false, message: 'المهمة غير موجودة' });
+    res.json({ success: true, data: task, message: 'تم تحديث المهمة' });
+  } catch (err) {
+    logger.error('PM task update error:', err);
+    res.status(500).json({ success: false, message: 'خطأ في تحديث المهمة' });
+  }
+});
+
+// DELETE /tasks/:id
+router.delete('/tasks/:id', async (req, res) => {
+  try {
+    const Task = getTask();
+    await Task.findByIdAndDelete(req.params.id);
+    res.json({ success: true, message: 'تم حذف المهمة' });
+  } catch (err) {
+    logger.error('PM task delete error:', err);
+    res.status(500).json({ success: false, message: 'خطأ في حذف المهمة' });
+  }
+});
+
+module.exports = router;

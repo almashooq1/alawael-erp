@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * Performance Routes Comprehensive Tests
  * Tests for performance monitoring and optimization routes

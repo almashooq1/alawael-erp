@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * ALAWAEL ERP - ADVANCED CRM & CUSTOMER MANAGEMENT SERVICE
  * Customer Profiles, Lead Management, Opportunity Tracking, Analytics
@@ -82,13 +83,13 @@ class CRMService {
       this.customers.push(customer);
       return customer;
     } catch (error) {
-      throw new Error(`Failed to create customer: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
   async updateCustomer(customerId, updates) {
     try {
-      const customer = this.customers.find((c) => c.id === customerId);
+      const customer = this.customers.find(c => c.id === customerId);
       if (!customer) {
         throw new Error(`Customer ${customerId} not found`);
       }
@@ -96,21 +97,19 @@ class CRMService {
       Object.assign(customer, updates, { updatedAt: new Date() });
       return customer;
     } catch (error) {
-      throw new Error(`Failed to update customer: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
   async getCustomerProfile(customerId) {
     try {
-      const customer = this.customers.find((c) => c.id === customerId);
+      const customer = this.customers.find(c => c.id === customerId);
       if (!customer) {
         throw new Error(`Customer ${customerId} not found`);
       }
 
-      const relatedOpportunities = this.opportunities.filter(
-        (o) => o.customerId === customerId
-      );
-      const relatedActivities = this.activities.filter((a) => a.customerId === customerId);
+      const relatedOpportunities = this.opportunities.filter(o => o.customerId === customerId);
+      const relatedActivities = this.activities.filter(a => a.customerId === customerId);
 
       return {
         ...customer,
@@ -121,7 +120,7 @@ class CRMService {
         opportunityValue: relatedOpportunities.reduce((sum, o) => sum + o.value, 0),
       };
     } catch (error) {
-      throw new Error(`Failed to get customer profile: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -130,18 +129,18 @@ class CRMService {
       let results = [...this.customers];
 
       if (filters.segment) {
-        results = results.filter((c) => c.segment === filters.segment);
+        results = results.filter(c => c.segment === filters.segment);
       }
       if (filters.industry) {
-        results = results.filter((c) => c.industry === filters.industry);
+        results = results.filter(c => c.industry === filters.industry);
       }
       if (filters.status) {
-        results = results.filter((c) => c.status === filters.status);
+        results = results.filter(c => c.status === filters.status);
       }
       if (filters.search) {
         const search = filters.search.toLowerCase();
         results = results.filter(
-          (c) =>
+          c =>
             c.fullName.toLowerCase().includes(search) ||
             c.email.toLowerCase().includes(search) ||
             (c.company && c.company.toLowerCase().includes(search))
@@ -150,7 +149,7 @@ class CRMService {
 
       return results;
     } catch (error) {
-      throw new Error(`Failed to get customers: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -188,13 +187,13 @@ class CRMService {
       this.leads.push(lead);
       return lead;
     } catch (error) {
-      throw new Error(`Failed to create lead: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
   async scoreLead(leadId, scoreData) {
     try {
-      const lead = this.leads.find((l) => l.id === leadId);
+      const lead = this.leads.find(l => l.id === leadId);
       if (!lead) {
         throw new Error(`Lead ${leadId} not found`);
       }
@@ -217,13 +216,13 @@ class CRMService {
 
       return lead;
     } catch (error) {
-      throw new Error(`Failed to score lead: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
   async convertLead(leadId, customerId) {
     try {
-      const lead = this.leads.find((l) => l.id === leadId);
+      const lead = this.leads.find(l => l.id === leadId);
       if (!lead) {
         throw new Error(`Lead ${leadId} not found`);
       }
@@ -234,7 +233,7 @@ class CRMService {
 
       return lead;
     } catch (error) {
-      throw new Error(`Failed to convert lead: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -243,18 +242,18 @@ class CRMService {
       let results = [...this.leads];
 
       if (filters.status) {
-        results = results.filter((l) => l.status === filters.status);
+        results = results.filter(l => l.status === filters.status);
       }
       if (filters.source) {
-        results = results.filter((l) => l.source === filters.source);
+        results = results.filter(l => l.source === filters.source);
       }
       if (filters.minScore !== undefined) {
-        results = results.filter((l) => l.score >= filters.minScore);
+        results = results.filter(l => l.score >= filters.minScore);
       }
 
       return results.sort((a, b) => b.score - a.score);
     } catch (error) {
-      throw new Error(`Failed to get leads: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -300,13 +299,13 @@ class CRMService {
       this.opportunities.push(opportunity);
       return opportunity;
     } catch (error) {
-      throw new Error(`Failed to create opportunity: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
   async updateOpportunityStage(opportunityId, newStage) {
     try {
-      const opp = this.opportunities.find((o) => o.id === opportunityId);
+      const opp = this.opportunities.find(o => o.id === opportunityId);
       if (!opp) {
         throw new Error(`Opportunity ${opportunityId} not found`);
       }
@@ -338,15 +337,15 @@ class CRMService {
 
       return opp;
     } catch (error) {
-      throw new Error(`Failed to update opportunity stage: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
   async getOpportunitiesByCustomer(customerId) {
     try {
-      const opps = this.opportunities.filter((o) => o.customerId === customerId);
+      const opps = this.opportunities.filter(o => o.customerId === customerId);
       const total = opps.reduce((sum, o) => sum + o.value, 0);
-      const won = opps.filter((o) => o.won).reduce((sum, o) => sum + o.value, 0);
+      const won = opps.filter(o => o.won).reduce((sum, o) => sum + o.value, 0);
 
       return {
         opportunities: opps,
@@ -355,23 +354,17 @@ class CRMService {
         winRate: opps.length > 0 ? (won / total) * 100 : 0,
       };
     } catch (error) {
-      throw new Error(`Failed to get opportunities: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
   async getSalesPipeline() {
     try {
-      const stages = [
-        'prospecting',
-        'qualification',
-        'proposal',
-        'negotiation',
-        'closing',
-      ];
+      const stages = ['prospecting', 'qualification', 'proposal', 'negotiation', 'closing'];
       const pipeline = {};
 
-      stages.forEach((stage) => {
-        const opps = this.opportunities.filter((o) => o.stage === stage && !o.lost);
+      stages.forEach(stage => {
+        const opps = this.opportunities.filter(o => o.stage === stage && !o.lost);
         pipeline[stage] = {
           count: opps.length,
           value: opps.reduce((sum, o) => sum + o.value, 0),
@@ -381,7 +374,7 @@ class CRMService {
 
       return pipeline;
     } catch (error) {
-      throw new Error(`Failed to get sales pipeline: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -413,7 +406,7 @@ class CRMService {
       this.activities.push(activity);
 
       // Update customer last interaction
-      const customer = this.customers.find((c) => c.id === customerId);
+      const customer = this.customers.find(c => c.id === customerId);
       if (customer) {
         customer.lastInteraction = new Date();
         customer.interactionCount = (customer.interactionCount || 0) + 1;
@@ -421,13 +414,13 @@ class CRMService {
 
       return activity;
     } catch (error) {
-      throw new Error(`Failed to log activity: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
   async completeActivity(activityId) {
     try {
-      const activity = this.activities.find((a) => a.id === activityId);
+      const activity = this.activities.find(a => a.id === activityId);
       if (!activity) {
         throw new Error(`Activity ${activityId} not found`);
       }
@@ -436,20 +429,20 @@ class CRMService {
       activity.completedAt = new Date();
       return activity;
     } catch (error) {
-      throw new Error(`Failed to complete activity: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
   async getCustomerActivities(customerId, limit = 50) {
     try {
       const activities = this.activities
-        .filter((a) => a.customerId === customerId)
+        .filter(a => a.customerId === customerId)
         .sort((a, b) => b.createdAt - a.createdAt)
         .slice(0, limit);
 
       return activities;
     } catch (error) {
-      throw new Error(`Failed to get customer activities: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -479,7 +472,7 @@ class CRMService {
       this.recalculateSegments();
       return segment;
     } catch (error) {
-      throw new Error(`Failed to create segment: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -487,7 +480,7 @@ class CRMService {
     try {
       return Array.from(this.segments.values());
     } catch (error) {
-      throw new Error(`Failed to get segments: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -499,8 +492,8 @@ class CRMService {
   }
 
   recalculateSegments() {
-    this.segments.forEach((segment) => {
-      segment.memberCount = this.customers.filter((c) => c.segment === segment.name).length;
+    this.segments.forEach(segment => {
+      segment.memberCount = this.customers.filter(c => c.segment === segment.name).length;
     });
   }
 
@@ -512,39 +505,43 @@ class CRMService {
     try {
       const totalCustomers = this.customers.length;
       const totalLeads = this.leads.length;
-      const convertedLeads = this.leads.filter((l) => l.status === 'converted').length;
+      const convertedLeads = this.leads.filter(l => l.status === 'converted').length;
       const conversionRate = totalLeads > 0 ? (convertedLeads / totalLeads) * 100 : 0;
 
-      const opportunities = this.opportunities.filter((o) => !o.lost);
+      const opportunities = this.opportunities.filter(o => !o.lost);
       const totalPipelineValue = opportunities.reduce((sum, o) => sum + o.value, 0);
-      const wonOpportunities = this.opportunities.filter((o) => o.won);
+      const wonOpportunities = this.opportunities.filter(o => o.won);
       const totalRevenue = wonOpportunities.reduce((sum, o) => sum + o.value, 0);
 
       const avgDealSize = opportunities.length > 0 ? totalPipelineValue / opportunities.length : 0;
-      const winRate = this.opportunities.length > 0
-        ? (wonOpportunities.length / this.opportunities.length) * 100
-        : 0;
+      const winRate =
+        this.opportunities.length > 0
+          ? (wonOpportunities.length / this.opportunities.length) * 100
+          : 0;
 
       const customerLifetimeValue = this.customers.reduce(
-        (sum, c) => sum + (this.opportunities.filter((o) => o.customerId === c.id && o.won)
-          .reduce((s, o) => s + o.value, 0) || 0),
+        (sum, c) =>
+          sum +
+          (this.opportunities
+            .filter(o => o.customerId === c.id && o.won)
+            .reduce((s, o) => s + o.value, 0) || 0),
         0
       );
 
       const avgCustomerValue = totalCustomers > 0 ? customerLifetimeValue / totalCustomers : 0;
 
       const topCustomers = this.customers
-        .map((c) => ({
+        .map(c => ({
           ...c,
           value: this.opportunities
-            .filter((o) => o.customerId === c.id && o.won)
+            .filter(o => o.customerId === c.id && o.won)
             .reduce((sum, o) => sum + o.value, 0),
         }))
         .sort((a, b) => b.value - a.value)
         .slice(0, 10);
 
       const hotLeads = this.leads
-        .filter((l) => l.status !== 'converted' && l.score >= 80)
+        .filter(l => l.status !== 'converted' && l.score >= 80)
         .sort((a, b) => b.score - a.score);
 
       return {
@@ -563,30 +560,27 @@ class CRMService {
         pipelineByStage: await this.getSalesPipeline(),
       };
     } catch (error) {
-      throw new Error(`Failed to get CRM analytics: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
   async getCustomerInsights(customerId) {
     try {
-      const customer = this.customers.find((c) => c.id === customerId);
+      const customer = this.customers.find(c => c.id === customerId);
       if (!customer) {
         throw new Error(`Customer ${customerId} not found`);
       }
 
-      const relatedOpportunities = this.opportunities.filter(
-        (o) => o.customerId === customerId
-      );
-      const activities = this.activities.filter((a) => a.customerId === customerId);
+      const relatedOpportunities = this.opportunities.filter(o => o.customerId === customerId);
+      const activities = this.activities.filter(a => a.customerId === customerId);
 
       const totalValue = relatedOpportunities.reduce((sum, o) => sum + o.value, 0);
-      const wonValue = relatedOpportunities
-        .filter((o) => o.won)
-        .reduce((sum, o) => sum + o.value, 0);
-      const avgResponseTime = activities.length > 0
-        ? activities.reduce((sum, a) => sum + (a.completedAt - a.createdAt || 0), 0) /
-          activities.length
-        : 0;
+      const wonValue = relatedOpportunities.filter(o => o.won).reduce((sum, o) => sum + o.value, 0);
+      const avgResponseTime =
+        activities.length > 0
+          ? activities.reduce((sum, a) => sum + (a.completedAt - a.createdAt || 0), 0) /
+            activities.length
+          : 0;
 
       return {
         customer,
@@ -603,7 +597,7 @@ class CRMService {
         },
       };
     } catch (error) {
-      throw new Error(`Failed to get customer insights: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -638,16 +632,16 @@ class CRMService {
       this.contactHierarchy.push(contact);
       return contact;
     } catch (error) {
-      throw new Error(`Failed to create contact: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
   async getCustomerContacts(customerId) {
     try {
-      const contacts = this.contactHierarchy.filter((c) => c.customerId === customerId);
+      const contacts = this.contactHierarchy.filter(c => c.customerId === customerId);
       return contacts;
     } catch (error) {
-      throw new Error(`Failed to get customer contacts: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -657,19 +651,12 @@ class CRMService {
 
   async updateCustomerLifecycleStage(customerId, stage) {
     try {
-      const customer = this.customers.find((c) => c.id === customerId);
+      const customer = this.customers.find(c => c.id === customerId);
       if (!customer) {
         throw new Error(`Customer ${customerId} not found`);
       }
 
-      const validStages = [
-        'prospect',
-        'customer',
-        'power_user',
-        'advocate',
-        'at_risk',
-        'inactive',
-      ];
+      const validStages = ['prospect', 'customer', 'power_user', 'advocate', 'at_risk', 'inactive'];
       if (!validStages.includes(stage)) {
         throw new Error(`Invalid lifecycle stage: ${stage}`);
       }
@@ -679,36 +666,30 @@ class CRMService {
 
       return customer;
     } catch (error) {
-      throw new Error(`Failed to update lifecycle stage: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
   async getCustomerLifecycleReport() {
     try {
-      const stages = [
-        'prospect',
-        'customer',
-        'power_user',
-        'advocate',
-        'at_risk',
-        'inactive',
-      ];
+      const stages = ['prospect', 'customer', 'power_user', 'advocate', 'at_risk', 'inactive'];
       const report = {};
 
-      stages.forEach((stage) => {
-        const customers = this.customers.filter((c) => c.lifecycleStage === stage);
+      stages.forEach(stage => {
+        const customers = this.customers.filter(c => c.lifecycleStage === stage);
         report[stage] = {
           count: customers.length,
           customers: customers,
-          avgValue: customers.length > 0
-            ? customers.reduce((sum, c) => sum + (c.totalValue || 0), 0) / customers.length
-            : 0,
+          avgValue:
+            customers.length > 0
+              ? customers.reduce((sum, c) => sum + (c.totalValue || 0), 0) / customers.length
+              : 0,
         };
       });
 
       return report;
     } catch (error) {
-      throw new Error(`Failed to get lifecycle report: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 }

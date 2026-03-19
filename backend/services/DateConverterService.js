@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * ========================================
  * محوِّل التاريخ - Date Converter Service
@@ -59,14 +60,27 @@ class DateConverterService {
       const a = Math.floor((14 - m) / 12);
       const y2 = y + 4800 - a;
       const m2 = m + 12 * a - 3;
-      const jdn = d + Math.floor((153 * m2 + 2) / 5) + 365 * y2 + Math.floor(y2 / 4) - Math.floor(y2 / 100) + Math.floor(y2 / 400) - 32045;
+      const jdn =
+        d +
+        Math.floor((153 * m2 + 2) / 5) +
+        365 * y2 +
+        Math.floor(y2 / 4) -
+        Math.floor(y2 / 100) +
+        Math.floor(y2 / 400) -
+        32045;
 
       // تحويل JDN إلى هجري (خوارزمية قياسية)
       let l = jdn - 1948440 + 10632;
       const n = Math.floor((l - 1) / 10631);
       l = l - 10631 * n + 354;
-      const j = Math.floor((10985 - l) / 5316) * Math.floor((50 * l) / 17719) + Math.floor(l / 5670) * Math.floor((43 * l) / 15238);
-      l = l - Math.floor((30 - j) / 15) * Math.floor((17719 * j) / 50) - Math.floor(j / 16) * Math.floor((15238 * j) / 43) + 29;
+      const j =
+        Math.floor((10985 - l) / 5316) * Math.floor((50 * l) / 17719) +
+        Math.floor(l / 5670) * Math.floor((43 * l) / 15238);
+      l =
+        l -
+        Math.floor((30 - j) / 15) * Math.floor((17719 * j) / 50) -
+        Math.floor(j / 16) * Math.floor((15238 * j) / 43) +
+        29;
       const hijriMonth = Math.floor((24 * l) / 709);
       const hijriDay = l - Math.floor((709 * hijriMonth) / 24);
       const hijriYear = 30 * n + j - 30;
@@ -121,7 +135,12 @@ class DateConverterService {
 
       // تحويل هجري إلى رقم اليوم اليوليوسي (JDN)
       const jdn =
-        hijriDay + Math.ceil(29.5 * (hijriMonth - 1)) + (hijriYear - 1) * 354 + Math.floor((3 + 11 * hijriYear) / 30) + 1948440 - 385;
+        hijriDay +
+        Math.ceil(29.5 * (hijriMonth - 1)) +
+        (hijriYear - 1) * 354 +
+        Math.floor((3 + 11 * hijriYear) / 30) +
+        1948440 -
+        385;
 
       // تحويل JDN إلى ميلادي (خوارزمية قياسية)
       let l = jdn + 68569;
@@ -231,7 +250,20 @@ class DateConverterService {
    * أسماء الأشهر الميلادية بالعربية
    */
   static getGregorianMonthNameAr(month) {
-    const months = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+    const months = [
+      'يناير',
+      'فبراير',
+      'مارس',
+      'أبريل',
+      'مايو',
+      'يونيو',
+      'يوليو',
+      'أغسطس',
+      'سبتمبر',
+      'أكتوبر',
+      'نوفمبر',
+      'ديسمبر',
+    ];
     return months[month - 1] || '';
   }
 

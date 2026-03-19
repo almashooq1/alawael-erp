@@ -3,10 +3,9 @@
  * زر تبديل الثيم - الوضع الليلي/النهاري
  */
 
-import React from 'react';
 import { IconButton, Tooltip } from '@mui/material';
 import { Brightness4, Brightness7 } from '@mui/icons-material';
-import { useThemeMode } from '../../contexts/ThemeContext';
+import { useThemeMode } from 'contexts/ThemeContext';
 
 const ThemeToggle = ({ sx = {} }) => {
   const { mode, toggleTheme } = useThemeMode();
@@ -22,7 +21,7 @@ const ThemeToggle = ({ sx = {} }) => {
             transform: 'rotate(180deg)',
           },
         }}
-        aria-label="toggle theme"
+        aria-label="تبديل الوضع"
       >
         {mode === 'dark' ? <Brightness7 /> : <Brightness4 />}
       </IconButton>

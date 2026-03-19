@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * ╔════════════════════════════════════════════════════════════════════════════╗
  * ║           PHASE 29: ADVANCED AI INTEGRATION (2,500+ LOC)                  ║
@@ -90,7 +91,7 @@ class LLMIntegrationEngine {
     };
   }
 
-  simulateLLMResponse(provider, prompt, options = {}) {
+  simulateLLMResponse(provider, prompt, _options = {}) {
     const responses = {
       gpt: `GPT Response: ${prompt.substring(0, 30)}... [Analysis: Comprehensive. Confidence: 92%]`,
       claude: `Claude Analysis: ${prompt.substring(0, 30)}... [Depth: High. Safety: Verified]`,
@@ -261,7 +262,7 @@ class AutonomousWorkflowOrchestrator {
       workflow.successCount++;
     } catch (error) {
       execution.status = 'failed';
-      execution.error = error.message;
+      execution.error = 'حدث خطأ داخلي';
     }
 
     execution.duration = Date.now() - execution.startTime.getTime();
@@ -273,7 +274,7 @@ class AutonomousWorkflowOrchestrator {
     const stepStartTime = Date.now();
     const agent = this.agents.get(step.agentId);
 
-    let stepResult = {
+    const stepResult = {
       stepNumber: step.stepNumber,
       agentId: step.agentId,
       action: step.action,
@@ -297,7 +298,7 @@ class AutonomousWorkflowOrchestrator {
       stepResult.status = 'success';
     } catch (error) {
       stepResult.status = 'failed';
-      stepResult.error = error.message;
+      stepResult.error = 'حدث خطأ داخلي';
     }
 
     stepResult.duration = Date.now() - stepStartTime;
@@ -305,7 +306,7 @@ class AutonomousWorkflowOrchestrator {
     return stepResult;
   }
 
-  async makeAutonomousDecision(agent, step, context) {
+  async makeAutonomousDecision(agent, step, _context) {
     const options = step.options || [];
     const decision = {
       agentId: agent.id,
@@ -397,7 +398,7 @@ class PredictiveBusinessIntelligence {
 
     const predictionId = `pred-${Date.now()}`;
 
-    let prediction = {
+    const prediction = {
       id: predictionId,
       modelId,
       modelType: model.type,
@@ -611,7 +612,7 @@ class AIPoweredAutomationEngine {
       automation.successCount++;
     } catch (error) {
       execution.status = 'failed';
-      execution.error = error.message;
+      execution.error = 'حدث خطأ داخلي';
       automation.failureCount++;
     }
 
@@ -622,7 +623,7 @@ class AIPoweredAutomationEngine {
     return execution;
   }
 
-  executeAction(action, context) {
+  executeAction(action, _context) {
     let result;
     switch (action.type) {
       case 'send_email':
@@ -712,7 +713,7 @@ class IntelligentRecommendationsSystem {
     return profile;
   }
 
-  generateRecommendations(userId, context = {}) {
+  generateRecommendations(userId, _context = {}) {
     const profile = this.userProfiles.get(userId);
     if (!profile) throw new Error('User profile not found');
 

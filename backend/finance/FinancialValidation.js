@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * ===================================================================
  * FINANCIAL VALIDATION & COMPLIANCE MODULE
@@ -706,7 +707,7 @@ class FinancialValidation extends EventEmitter {
   }
 
   convertReportToHTML(report) {
-    let html = `
+    const html = `
       <!DOCTYPE html>
       <html dir="rtl" lang="ar">
       <head>

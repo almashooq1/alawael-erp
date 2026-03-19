@@ -98,6 +98,16 @@
                                 <option value="educational">تعليمي</option>
                                 <option value="social">اجتماعي</option>
                                 <option value="vocational">مهني</option>
+                                <option value="cognitive">تأهيل معرفي</option>
+                                <option value="psychological">دعم نفسي</option>
+                                <option value="sensory_integration">تكامل حسي</option>
+                                <option value="art_therapy">علاج بالفن</option>
+                                <option value="music_therapy">علاج بالموسيقى</option>
+                                <option value="hydrotherapy">علاج مائي</option>
+                                <option value="assistive_technology">تقنيات مساعدة</option>
+                                <option value="family_training">تدريب الأسرة</option>
+                                <option value="life_skills">مهارات حياتية</option>
+                                <option value="early_intervention">تدخل مبكر</option>
                             </select>
                         </div>
                     </div>
@@ -239,6 +249,12 @@
                                 <option value="progress">تقييم تقدم</option>
                                 <option value="final">تقييم نهائي</option>
                                 <option value="periodic">تقييم دوري</option>
+                                <option value="functional">تقييم وظيفي</option>
+                                <option value="neurological">تقييم عصبي</option>
+                                <option value="psychological">تقييم نفسي</option>
+                                <option value="developmental">تقييم تطوري</option>
+                                <option value="risk">تقييم مخاطر</option>
+                                <option value="discharge">تقييم خروج</option>
                             </select>
                         </div>
                     </div>
@@ -252,7 +268,7 @@
                             <input type="text" class="form-control" id="assessmentAssessor" placeholder="اسم المختص المقيم">
                         </div>
                     </div>
-                    
+
                     <!-- Assessment Areas -->
                     <h6 class="mb-3 text-primary">مجالات التقييم</h6>
                     <div class="row">
@@ -285,7 +301,7 @@
                             <input type="number" class="form-control" id="behavioralScore" min="0" max="100">
                         </div>
                     </div>
-                    
+
                     <div class="mb-3">
                         <label for="assessmentResults" class="form-label">نتائج التقييم</label>
                         <textarea class="form-control" id="assessmentResults" rows="3"></textarea>
@@ -338,6 +354,12 @@
                                 <option value="social">المهارات الاجتماعية</option>
                                 <option value="self_care">مهارات الرعاية الذاتية</option>
                                 <option value="behavioral">السلوك التكيفي</option>
+                                <option value="sensory">المهارات الحسية</option>
+                                <option value="emotional">التنظيم العاطفي</option>
+                                <option value="academic">المهارات الأكاديمية</option>
+                                <option value="vocational">المهارات المهنية</option>
+                                <option value="daily_living">مهارات الحياة اليومية</option>
+                                <option value="physical_fitness">اللياقة البدنية</option>
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
@@ -391,6 +413,1379 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Risk Assessment Modal -->
+<div class="modal fade" id="riskAssessmentModal" tabindex="-1" aria-labelledby="riskAssessmentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="riskAssessmentModalLabel"><i class="fas fa-shield-alt me-2"></i>تقييم المخاطر</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="riskAssessmentForm">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="riskBeneficiary" class="form-label">المستفيد *</label>
+                            <select class="form-select" id="riskBeneficiary" required>
+                                <option value="">اختر المستفيد</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="riskLevel" class="form-label">مستوى المخاطر *</label>
+                            <select class="form-select" id="riskLevel" required>
+                                <option value="">اختر المستوى</option>
+                                <option value="low">منخفض</option>
+                                <option value="medium">متوسط</option>
+                                <option value="high">عالي</option>
+                                <option value="critical">حرج</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="riskType" class="form-label">نوع المخاطر *</label>
+                            <select class="form-select" id="riskType" required>
+                                <option value="">اختر النوع</option>
+                                <option value="fall">خطر السقوط</option>
+                                <option value="medical">خطر طبي</option>
+                                <option value="behavioral">خطر سلوكي</option>
+                                <option value="self_harm">إيذاء النفس</option>
+                                <option value="elopement">خطر الهروب</option>
+                                <option value="aspiration">خطر الاستنشاق</option>
+                                <option value="seizure">خطر النوبات</option>
+                                <option value="skin_integrity">سلامة الجلد</option>
+                                <option value="nutrition">خطر غذائي</option>
+                                <option value="infection">خطر العدوى</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="riskAssessor" class="form-label">المقيّم</label>
+                            <input type="text" class="form-control" id="riskAssessor" placeholder="اسم المقيّم">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="riskFactors" class="form-label">عوامل الخطر</label>
+                        <textarea class="form-control" id="riskFactors" rows="3" placeholder="صف عوامل الخطر المحددة"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="riskMitigations" class="form-label">إجراءات التخفيف</label>
+                        <textarea class="form-control" id="riskMitigations" rows="3" placeholder="أدخل كل إجراء في سطر منفصل"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="riskNotes" class="form-label">ملاحظات إضافية</label>
+                        <textarea class="form-control" id="riskNotes" rows="2"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-danger" onclick="saveRiskAssessment()">حفظ التقييم</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Medication Modal -->
+<div class="modal fade" id="medicationModal" tabindex="-1" aria-labelledby="medicationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background: #20c997; color: white;">
+                <h5 class="modal-title" id="medicationModalLabel"><i class="fas fa-pills me-2"></i>إضافة دواء</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="medicationForm">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="medBeneficiary" class="form-label">المستفيد *</label>
+                            <select class="form-select" id="medBeneficiary" required>
+                                <option value="">اختر المستفيد</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="medName" class="form-label">اسم الدواء *</label>
+                            <input type="text" class="form-control" id="medName" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="medDosage" class="form-label">الجرعة *</label>
+                            <input type="text" class="form-control" id="medDosage" placeholder="مثال: 500 ملغ" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="medFrequency" class="form-label">التكرار *</label>
+                            <select class="form-select" id="medFrequency" required>
+                                <option value="">اختر التكرار</option>
+                                <option value="once_daily">مرة يومياً</option>
+                                <option value="twice_daily">مرتين يومياً</option>
+                                <option value="three_daily">ثلاث مرات يومياً</option>
+                                <option value="four_daily">أربع مرات يومياً</option>
+                                <option value="as_needed">عند الحاجة</option>
+                                <option value="weekly">أسبوعياً</option>
+                                <option value="monthly">شهرياً</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="medRoute" class="form-label">طريقة الإعطاء</label>
+                            <select class="form-select" id="medRoute">
+                                <option value="">اختر الطريقة</option>
+                                <option value="oral">فموي</option>
+                                <option value="injection">حقن</option>
+                                <option value="topical">موضعي</option>
+                                <option value="inhalation">استنشاق</option>
+                                <option value="sublingual">تحت اللسان</option>
+                                <option value="rectal">شرجي</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="medStartDate" class="form-label">تاريخ البدء *</label>
+                            <input type="date" class="form-control" id="medStartDate" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="medEndDate" class="form-label">تاريخ الانتهاء</label>
+                            <input type="date" class="form-control" id="medEndDate">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="medPrescriber" class="form-label">الطبيب الواصف</label>
+                            <input type="text" class="form-control" id="medPrescriber">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="medPurpose" class="form-label">الغرض من الدواء</label>
+                        <textarea class="form-control" id="medPurpose" rows="2"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="medSideEffects" class="form-label">الأعراض الجانبية المحتملة</label>
+                        <textarea class="form-control" id="medSideEffects" rows="2" placeholder="أدخل كل عرض في سطر منفصل"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="medNotes" class="form-label">ملاحظات</label>
+                        <textarea class="form-control" id="medNotes" rows="2"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-success" onclick="saveMedication()">حفظ الدواء</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Vitals Modal -->
+<div class="modal fade" id="vitalsModal" tabindex="-1" aria-labelledby="vitalsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="vitalsModalLabel"><i class="fas fa-heartbeat me-2"></i>تسجيل العلامات الحيوية</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="vitalsForm">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="vitalsBeneficiary" class="form-label">المستفيد *</label>
+                            <select class="form-select" id="vitalsBeneficiary" required>
+                                <option value="">اختر المستفيد</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="vitalsDate" class="form-label">تاريخ القياس *</label>
+                            <input type="datetime-local" class="form-control" id="vitalsDate" required>
+                        </div>
+                    </div>
+                    <h6 class="mb-3 text-primary">القياسات</h6>
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label for="vitalsBPSystolic" class="form-label">الضغط الانقباضي</label>
+                            <input type="number" class="form-control" id="vitalsBPSystolic" min="60" max="250" placeholder="mmHg">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="vitalsBPDiastolic" class="form-label">الضغط الانبساطي</label>
+                            <input type="number" class="form-control" id="vitalsBPDiastolic" min="40" max="150" placeholder="mmHg">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="vitalsHeartRate" class="form-label">معدل النبض</label>
+                            <input type="number" class="form-control" id="vitalsHeartRate" min="30" max="220" placeholder="bpm">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="vitalsTemperature" class="form-label">درجة الحرارة</label>
+                            <input type="number" class="form-control" id="vitalsTemperature" min="34" max="42" step="0.1" placeholder="°C">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label for="vitalsO2Saturation" class="form-label">تشبع الأكسجين</label>
+                            <input type="number" class="form-control" id="vitalsO2Saturation" min="50" max="100" placeholder="%">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="vitalsRespRate" class="form-label">معدل التنفس</label>
+                            <input type="number" class="form-control" id="vitalsRespRate" min="8" max="60" placeholder="/min">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="vitalsWeight" class="form-label">الوزن (كغ)</label>
+                            <input type="number" class="form-control" id="vitalsWeight" min="1" max="300" step="0.1">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="vitalsHeight" class="form-label">الطول (سم)</label>
+                            <input type="number" class="form-control" id="vitalsHeight" min="30" max="250" step="0.1">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="vitalsPainLevel" class="form-label">مستوى الألم (0-10)</label>
+                            <input type="range" class="form-range" id="vitalsPainLevel" min="0" max="10" value="0" oninput="$('#painLevelValue').text(this.value)">
+                            <span class="text-center d-block" id="painLevelValue">0</span>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="vitalsBloodSugar" class="form-label">سكر الدم</label>
+                            <input type="number" class="form-control" id="vitalsBloodSugar" min="20" max="600" placeholder="mg/dL">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="vitalsRecorder" class="form-label">مسجل بواسطة</label>
+                            <input type="text" class="form-control" id="vitalsRecorder">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="vitalsNotes" class="form-label">ملاحظات</label>
+                        <textarea class="form-control" id="vitalsNotes" rows="2"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-danger" onclick="saveVitals()">حفظ القياسات</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Team Message Modal -->
+<div class="modal fade" id="teamMessageModal" tabindex="-1" aria-labelledby="teamMessageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background: #6f42c1; color: white;">
+                <h5 class="modal-title" id="teamMessageModalLabel"><i class="fas fa-comments me-2"></i>رسالة جديدة للفريق</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="teamMessageForm">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="msgBeneficiary" class="form-label">المستفيد (اختياري)</label>
+                            <select class="form-select" id="msgBeneficiary">
+                                <option value="">عام - بدون مستفيد محدد</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="msgType" class="form-label">نوع الرسالة *</label>
+                            <select class="form-select" id="msgType" required>
+                                <option value="">اختر النوع</option>
+                                <option value="update">تحديث حالة</option>
+                                <option value="alert">تنبيه</option>
+                                <option value="request">طلب</option>
+                                <option value="note">ملاحظة</option>
+                                <option value="consultation">استشارة</option>
+                                <option value="referral">إحالة</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="msgPriority" class="form-label">الأولوية *</label>
+                            <select class="form-select" id="msgPriority" required>
+                                <option value="normal">عادية</option>
+                                <option value="urgent">عاجلة</option>
+                                <option value="low">منخفضة</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="msgRecipient" class="form-label">الموجهة إلى</label>
+                            <input type="text" class="form-control" id="msgRecipient" placeholder="اسم أو تخصص المستلم">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="msgSubject" class="form-label">الموضوع *</label>
+                        <input type="text" class="form-control" id="msgSubject" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="msgContent" class="form-label">محتوى الرسالة *</label>
+                        <textarea class="form-control" id="msgContent" rows="4" required></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn" style="background: #6f42c1; color: white;" onclick="saveTeamMessage()">إرسال الرسالة</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Appointment Modal -->
+<div class="modal fade" id="appointmentModal" tabindex="-1" aria-labelledby="appointmentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #fd7e14, #e8590c);">
+                <h5 class="modal-title text-white" id="appointmentModalLabel"><i class="fas fa-calendar-check me-2"></i>إضافة موعد جديد</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="appointmentForm">
+                    <input type="hidden" id="appointmentId">
+                    <input type="hidden" id="appointmentProgramId">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="appointmentBeneficiary" class="form-label">المستفيد *</label>
+                            <select class="form-select" id="appointmentBeneficiary" required>
+                                <option value="">اختر المستفيد</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="appointmentType" class="form-label">نوع الموعد *</label>
+                            <select class="form-select" id="appointmentType" required>
+                                <option value="">اختر النوع</option>
+                                <option value="initial_assessment">تقييم أولي</option>
+                                <option value="follow_up">متابعة</option>
+                                <option value="therapy_session">جلسة علاجية</option>
+                                <option value="medical_consultation">استشارة طبية</option>
+                                <option value="psychological_session">جلسة نفسية</option>
+                                <option value="speech_therapy">علاج نطق</option>
+                                <option value="occupational_therapy">علاج وظيفي</option>
+                                <option value="physical_therapy">علاج طبيعي</option>
+                                <option value="group_session">جلسة جماعية</option>
+                                <option value="family_meeting">اجتماع أسري</option>
+                                <option value="iep_review">مراجعة IEP</option>
+                                <option value="other">أخرى</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="appointmentDate" class="form-label">التاريخ *</label>
+                            <input type="date" class="form-control" id="appointmentDate" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="appointmentStartTime" class="form-label">وقت البداية *</label>
+                            <input type="time" class="form-control" id="appointmentStartTime" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="appointmentEndTime" class="form-label">وقت النهاية</label>
+                            <input type="time" class="form-control" id="appointmentEndTime">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="appointmentDuration" class="form-label">المدة (دقيقة)</label>
+                            <input type="number" class="form-control" id="appointmentDuration" value="60" min="15" max="480">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="appointmentProvider" class="form-label">مقدم الخدمة *</label>
+                            <input type="text" class="form-control" id="appointmentProvider" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="appointmentLocation" class="form-label">الموقع</label>
+                            <input type="text" class="form-control" id="appointmentLocation">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="appointmentStatus" class="form-label">الحالة</label>
+                            <select class="form-select" id="appointmentStatus">
+                                <option value="scheduled">مجدول</option>
+                                <option value="confirmed">مؤكد</option>
+                                <option value="completed">مكتمل</option>
+                                <option value="cancelled">ملغي</option>
+                                <option value="no_show">لم يحضر</option>
+                                <option value="rescheduled">معاد جدولة</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="form-check mt-4">
+                                <input class="form-check-input" type="checkbox" id="appointmentRecurring">
+                                <label class="form-check-label" for="appointmentRecurring">موعد متكرر</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="appointmentNotes" class="form-label">ملاحظات</label>
+                        <textarea class="form-control" id="appointmentNotes" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn" style="background: #fd7e14; color: white;" onclick="saveAppointment()">حفظ الموعد</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Incident Modal -->
+<div class="modal fade" id="incidentModal" tabindex="-1" aria-labelledby="incidentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #dc3545, #c82333);">
+                <h5 class="modal-title text-white" id="incidentModalLabel"><i class="fas fa-exclamation-triangle me-2"></i>تسجيل حادثة</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="incidentForm">
+                    <input type="hidden" id="incidentId">
+                    <input type="hidden" id="incidentProgramId">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="incidentBeneficiary" class="form-label">المستفيد *</label>
+                            <select class="form-select" id="incidentBeneficiary" required>
+                                <option value="">اختر المستفيد</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="incidentType" class="form-label">نوع الحادثة *</label>
+                            <select class="form-select" id="incidentType" required>
+                                <option value="">اختر النوع</option>
+                                <option value="fall">سقوط</option>
+                                <option value="injury">إصابة</option>
+                                <option value="behavioral">سلوكي</option>
+                                <option value="medication_error">خطأ دوائي</option>
+                                <option value="elopement">هروب</option>
+                                <option value="property_damage">تلف ممتلكات</option>
+                                <option value="verbal_aggression">عدوان لفظي</option>
+                                <option value="physical_aggression">عدوان جسدي</option>
+                                <option value="self_harm">إيذاء ذاتي</option>
+                                <option value="seizure">نوبة صرع</option>
+                                <option value="allergic_reaction">ردة فعل تحسسية</option>
+                                <option value="equipment_malfunction">عطل أجهزة</option>
+                                <option value="environmental">بيئي</option>
+                                <option value="other">أخرى</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="incidentSeverity" class="form-label">مستوى الخطورة *</label>
+                            <select class="form-select" id="incidentSeverity" required>
+                                <option value="">اختر المستوى</option>
+                                <option value="minor">بسيط</option>
+                                <option value="moderate">متوسط</option>
+                                <option value="major">كبير</option>
+                                <option value="critical">حرج</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="incidentDate" class="form-label">تاريخ الحادثة *</label>
+                            <input type="date" class="form-control" id="incidentDate" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="incidentTime" class="form-label">وقت الحادثة</label>
+                            <input type="time" class="form-control" id="incidentTime">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="incidentLocation" class="form-label">موقع الحادثة *</label>
+                            <input type="text" class="form-control" id="incidentLocation" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="incidentWitnesses" class="form-label">الشهود</label>
+                            <input type="text" class="form-control" id="incidentWitnesses" placeholder="أسماء الشهود مفصولة بفاصلة">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="incidentDescription" class="form-label">وصف الحادثة *</label>
+                        <textarea class="form-control" id="incidentDescription" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="incidentInjuries" class="form-label">الإصابات الناتجة</label>
+                        <textarea class="form-control" id="incidentInjuries" rows="2"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="incidentActions" class="form-label">الإجراءات المتخذة</label>
+                        <textarea class="form-control" id="incidentActions" rows="2"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="incidentPreventive" class="form-label">الإجراءات الوقائية</label>
+                        <textarea class="form-control" id="incidentPreventive" rows="2"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-danger" onclick="saveIncident()">تسجيل الحادثة</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Behavioral Plan Modal -->
+<div class="modal fade" id="behavioralPlanModal" tabindex="-1" aria-labelledby="behavioralPlanModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #17a2b8, #138496);">
+                <h5 class="modal-title text-white" id="behavioralPlanModalLabel"><i class="fas fa-brain me-2"></i>خطة التدخل السلوكي</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="behavioralPlanForm">
+                    <input type="hidden" id="bipId">
+                    <input type="hidden" id="bipProgramId">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="bipBeneficiary" class="form-label">المستفيد *</label>
+                            <select class="form-select" id="bipBeneficiary" required>
+                                <option value="">اختر المستفيد</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="bipStatus" class="form-label">الحالة</label>
+                            <select class="form-select" id="bipStatus">
+                                <option value="draft">مسودة</option>
+                                <option value="active">نشط</option>
+                                <option value="under_review">قيد المراجعة</option>
+                                <option value="completed">مكتمل</option>
+                                <option value="discontinued">متوقف</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="bipTargetBehavior" class="form-label">السلوك المستهدف *</label>
+                            <input type="text" class="form-control" id="bipTargetBehavior" required placeholder="وصف السلوك المراد تعديله">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="bipBehaviorFunction" class="form-label">وظيفة السلوك *</label>
+                            <select class="form-select" id="bipBehaviorFunction" required>
+                                <option value="">اختر الوظيفة</option>
+                                <option value="attention_seeking">طلب الانتباه</option>
+                                <option value="escape_avoidance">الهروب/التجنب</option>
+                                <option value="access_tangible">الوصول لشيء ملموس</option>
+                                <option value="sensory_stimulation">تحفيز حسي</option>
+                                <option value="communication">التواصل</option>
+                                <option value="self_regulation">التنظيم الذاتي</option>
+                                <option value="unknown">غير محدد</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="bipAntecedents" class="form-label">المثيرات القبلية</label>
+                            <textarea class="form-control" id="bipAntecedents" rows="2" placeholder="ما يحدث قبل السلوك"></textarea>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="bipConsequences" class="form-label">النتائج</label>
+                            <textarea class="form-control" id="bipConsequences" rows="2" placeholder="ما يحدث بعد السلوك"></textarea>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="bipReplacementBehaviors" class="form-label">السلوكيات البديلة</label>
+                        <textarea class="form-control" id="bipReplacementBehaviors" rows="2" placeholder="السلوكيات المرغوبة البديلة"></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="bipStrategy" class="form-label">استراتيجية التدخل *</label>
+                            <select class="form-select" id="bipStrategy" required>
+                                <option value="">اختر الاستراتيجية</option>
+                                <option value="positive_reinforcement">التعزيز الإيجابي</option>
+                                <option value="negative_reinforcement">التعزيز السلبي</option>
+                                <option value="extinction">الإطفاء</option>
+                                <option value="differential_reinforcement">التعزيز التفاضلي</option>
+                                <option value="antecedent_modification">تعديل المثيرات</option>
+                                <option value="functional_communication">التواصل الوظيفي</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="bipDataCollection" class="form-label">طريقة جمع البيانات</label>
+                            <select class="form-select" id="bipDataCollection">
+                                <option value="">اختر الطريقة</option>
+                                <option value="frequency">التكرار</option>
+                                <option value="duration">المدة</option>
+                                <option value="interval">الفترات الزمنية</option>
+                                <option value="latency">زمن الاستجابة</option>
+                                <option value="abc_recording">تسجيل ABC</option>
+                                <option value="scatterplot">المخطط التشتتي</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="bipBaselineData" class="form-label">بيانات خط الأساس</label>
+                            <input type="text" class="form-control" id="bipBaselineData" placeholder="مثل: 5 مرات/يوم">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="bipCurrentData" class="form-label">البيانات الحالية</label>
+                            <input type="text" class="form-control" id="bipCurrentData">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="bipEffectiveness" class="form-label">الفعالية (%)</label>
+                            <input type="number" class="form-control" id="bipEffectiveness" min="0" max="100">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="bipNotes" class="form-label">ملاحظات إضافية</label>
+                        <textarea class="form-control" id="bipNotes" rows="2"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn" style="background: #17a2b8; color: white;" onclick="saveBehavioralPlan()">حفظ الخطة</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Document Modal -->
+<div class="modal fade" id="documentModal" tabindex="-1" aria-labelledby="documentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #6610f2, #520dc2);">
+                <h5 class="modal-title text-white" id="documentModalLabel"><i class="fas fa-file-upload me-2"></i>رفع مستند</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="documentForm">
+                    <input type="hidden" id="documentId">
+                    <input type="hidden" id="documentProgramId">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="documentBeneficiary" class="form-label">المستفيد *</label>
+                            <select class="form-select" id="documentBeneficiary" required>
+                                <option value="">اختر المستفيد</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="documentType" class="form-label">نوع المستند *</label>
+                            <select class="form-select" id="documentType" required>
+                                <option value="">اختر النوع</option>
+                                <option value="medical_report">تقرير طبي</option>
+                                <option value="assessment_report">تقرير تقييم</option>
+                                <option value="iep_document">وثيقة IEP</option>
+                                <option value="therapy_note">ملاحظة علاجية</option>
+                                <option value="consent_form">نموذج موافقة</option>
+                                <option value="insurance_document">مستند تأمين</option>
+                                <option value="prescription">وصفة طبية</option>
+                                <option value="lab_result">نتيجة مختبر</option>
+                                <option value="imaging">تصوير طبي</option>
+                                <option value="referral_letter">خطاب إحالة</option>
+                                <option value="discharge_summary">ملخص خروج</option>
+                                <option value="progress_report">تقرير تقدم</option>
+                                <option value="legal_document">مستند قانوني</option>
+                                <option value="identification">هوية</option>
+                                <option value="other">أخرى</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="documentTitle" class="form-label">عنوان المستند *</label>
+                            <input type="text" class="form-control" id="documentTitle" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="documentFile" class="form-label">الملف</label>
+                            <input type="file" class="form-control" id="documentFile">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="documentExpiry" class="form-label">تاريخ الانتهاء</label>
+                            <input type="date" class="form-control" id="documentExpiry">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="documentTags" class="form-label">الوسوم</label>
+                            <input type="text" class="form-control" id="documentTags" placeholder="وسوم مفصولة بفاصلة">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="documentDescription" class="form-label">الوصف</label>
+                        <textarea class="form-control" id="documentDescription" rows="2"></textarea>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="documentConfidential">
+                        <label class="form-check-label" for="documentConfidential">
+                            <i class="fas fa-lock me-1"></i>مستند سري
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn" style="background: #6610f2; color: white;" onclick="saveDocument()">رفع المستند</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Group Activity Modal -->
+<div class="modal fade" id="groupActivityModal" tabindex="-1" aria-labelledby="groupActivityModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #28a745, #218838);">
+                <h5 class="modal-title text-white" id="groupActivityModalLabel"><i class="fas fa-users-cog me-2"></i>نشاط جماعي جديد</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="groupActivityForm">
+                    <input type="hidden" id="activityId">
+                    <input type="hidden" id="activityProgramId">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="activityType" class="form-label">نوع النشاط *</label>
+                            <select class="form-select" id="activityType" required>
+                                <option value="">اختر النوع</option>
+                                <option value="social_skills">مهارات اجتماعية</option>
+                                <option value="art_therapy">علاج بالفن</option>
+                                <option value="music_therapy">علاج بالموسيقى</option>
+                                <option value="physical_exercise">تمارين بدنية</option>
+                                <option value="cognitive_training">تدريب ذهني</option>
+                                <option value="life_skills">مهارات حياتية</option>
+                                <option value="recreational">ترفيهي</option>
+                                <option value="educational">تعليمي</option>
+                                <option value="vocational">مهني</option>
+                                <option value="support_group">مجموعة دعم</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="activityGroupName" class="form-label">اسم المجموعة *</label>
+                            <input type="text" class="form-control" id="activityGroupName" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="activityDate" class="form-label">التاريخ *</label>
+                            <input type="date" class="form-control" id="activityDate" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="activityDuration" class="form-label">المدة (دقيقة)</label>
+                            <input type="number" class="form-control" id="activityDuration" value="60" min="15">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="activityFacilitator" class="form-label">المشرف</label>
+                            <input type="text" class="form-control" id="activityFacilitator">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="activityObjectives" class="form-label">الأهداف</label>
+                        <textarea class="form-control" id="activityObjectives" rows="2" placeholder="أهداف النشاط"></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="activityParticipation" class="form-label">مستوى المشاركة</label>
+                            <select class="form-select" id="activityParticipation">
+                                <option value="full">مشاركة كاملة</option>
+                                <option value="partial">مشاركة جزئية</option>
+                                <option value="observer">مراقب</option>
+                                <option value="refused">رفض المشاركة</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="activitySocialRating" class="form-label">تقييم التفاعل الاجتماعي (1-10)</label>
+                            <input type="number" class="form-control" id="activitySocialRating" min="1" max="10" value="5">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="activityNotes" class="form-label">ملاحظات</label>
+                        <textarea class="form-control" id="activityNotes" rows="2"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-success" onclick="saveGroupActivity()">حفظ النشاط</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Alert Modal -->
+<div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #ffc107, #e0a800);">
+                <h5 class="modal-title" id="alertModalLabel"><i class="fas fa-bell me-2"></i>إضافة تنبيه</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="alertForm">
+                    <input type="hidden" id="alertId">
+                    <input type="hidden" id="alertProgramId">
+                    <div class="mb-3">
+                        <label for="alertBeneficiary" class="form-label">المستفيد *</label>
+                        <select class="form-select" id="alertBeneficiary" required>
+                            <option value="">اختر المستفيد</option>
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="alertType" class="form-label">نوع التنبيه *</label>
+                            <select class="form-select" id="alertType" required>
+                                <option value="">اختر النوع</option>
+                                <option value="medication_due">دواء مستحق</option>
+                                <option value="appointment_reminder">تذكير بموعد</option>
+                                <option value="assessment_due">تقييم مستحق</option>
+                                <option value="goal_deadline">موعد هدف</option>
+                                <option value="document_expiry">انتهاء مستند</option>
+                                <option value="risk_level_change">تغير مستوى الخطر</option>
+                                <option value="attendance_concern">قلق بشأن الحضور</option>
+                                <option value="behavior_escalation">تصعيد سلوكي</option>
+                                <option value="insurance_expiry">انتهاء تأمين</option>
+                                <option value="iep_review_due">مراجعة IEP مستحقة</option>
+                                <option value="discharge_planning">تخطيط خروج</option>
+                                <option value="family_follow_up">متابعة أسرية</option>
+                                <option value="general">عام</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="alertPriority" class="form-label">الأولوية *</label>
+                            <select class="form-select" id="alertPriority" required>
+                                <option value="low">منخفضة</option>
+                                <option value="medium" selected>متوسطة</option>
+                                <option value="high">عالية</option>
+                                <option value="urgent">عاجلة</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="alertTitle" class="form-label">العنوان *</label>
+                        <input type="text" class="form-control" id="alertTitle" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="alertMessage" class="form-label">الرسالة *</label>
+                        <textarea class="form-control" id="alertMessage" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="alertDueDate" class="form-label">تاريخ الاستحقاق</label>
+                        <input type="date" class="form-control" id="alertDueDate">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-warning" onclick="saveAlert()">إنشاء التنبيه</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!-- ═══════        Phase 4 Modals               ═══════ -->
+<!-- ═══════════════════════════════════════════════════ -->
+
+<!-- Telehealth Settings Modal -->
+<div class="modal fade" id="telehealthModal" tabindex="-1" aria-labelledby="telehealthModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="telehealthModalLabel"><i class="fas fa-video me-2"></i>إعدادات الرعاية عن بعد</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="telehealthForm">
+                    <input type="hidden" id="telehealthProgramId">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="telehealthPlatform" class="form-label">المنصة المفضلة *</label>
+                            <select class="form-select" id="telehealthPlatformSelect" required>
+                                <option value="">اختر المنصة</option>
+                                <option value="zoom">Zoom</option>
+                                <option value="teams">Microsoft Teams</option>
+                                <option value="google_meet">Google Meet</option>
+                                <option value="skype">Skype</option>
+                                <option value="custom">مخصص</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="telehealthConnectionQuality" class="form-label">جودة الاتصال</label>
+                            <select class="form-select" id="telehealthConnectionQuality">
+                                <option value="">اختر الجودة</option>
+                                <option value="excellent">ممتازة</option>
+                                <option value="good">جيدة</option>
+                                <option value="fair">مقبولة</option>
+                                <option value="poor">ضعيفة</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="telehealthEffectivenessRating" class="form-label">تقييم الفعالية</label>
+                            <select class="form-select" id="telehealthEffectivenessRating">
+                                <option value="">اختر التقييم</option>
+                                <option value="highly_effective">فعال للغاية</option>
+                                <option value="effective">فعال</option>
+                                <option value="moderately_effective">فعال بشكل معتدل</option>
+                                <option value="slightly_effective">فعال بشكل طفيف</option>
+                                <option value="not_effective">غير فعال</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">التجهيزات</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="telehealthHasCamera" checked>
+                                <label class="form-check-label" for="telehealthHasCamera">كاميرا</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="telehealthHasMic" checked>
+                                <label class="form-check-label" for="telehealthHasMic">ميكروفون</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="telehealthHasInternet">
+                                <label class="form-check-label" for="telehealthHasInternet">إنترنت مستقر</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="telehealthNotes" class="form-label">ملاحظات</label>
+                        <textarea class="form-control" id="telehealthNotes" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary" onclick="saveTelehealth()">حفظ الإعدادات</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Financial Info Modal -->
+<div class="modal fade" id="financialModal" tabindex="-1" aria-labelledby="financialModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="financialModalLabel"><i class="fas fa-money-bill-wave me-2"></i>المعلومات المالية</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="financialForm">
+                    <input type="hidden" id="financialProgramId">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="financialFundingSource" class="form-label">مصدر التمويل *</label>
+                            <select class="form-select" id="financialFundingSource" required>
+                                <option value="">اختر مصدر التمويل</option>
+                                <option value="government">حكومي</option>
+                                <option value="insurance">تأمين</option>
+                                <option value="self_pay">دفع ذاتي</option>
+                                <option value="charity">خيري</option>
+                                <option value="scholarship">منحة</option>
+                                <option value="ngo">منظمة غير ربحية</option>
+                                <option value="employer">جهة العمل</option>
+                                <option value="mixed">مختلط</option>
+                                <option value="other">أخرى</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="financialPaymentStatus" class="form-label">حالة الدفع</label>
+                            <select class="form-select" id="financialPaymentStatus">
+                                <option value="">اختر الحالة</option>
+                                <option value="paid">مدفوع</option>
+                                <option value="partial">مدفوع جزئياً</option>
+                                <option value="pending">قيد الانتظار</option>
+                                <option value="overdue">متأخر</option>
+                                <option value="waived">معفى</option>
+                                <option value="refunded">مسترد</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="financialTotalCostInput" class="form-label">التكلفة الإجمالية *</label>
+                            <input type="number" class="form-control" id="financialTotalCostInput" step="0.01" min="0" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="financialAmountPaidInput" class="form-label">المبلغ المدفوع</label>
+                            <input type="number" class="form-control" id="financialAmountPaidInput" step="0.01" min="0" value="0">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="financialAmountCovered" class="form-label">المبلغ المغطى تأمينياً</label>
+                            <input type="number" class="form-control" id="financialAmountCovered" step="0.01" min="0" value="0">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="financialApprovalNumber" class="form-label">رقم الموافقة</label>
+                        <input type="text" class="form-control" id="financialApprovalNumber">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary" onclick="saveFinancialInfo()">حفظ</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Invoice Modal -->
+<div class="modal fade" id="invoiceModal" tabindex="-1" aria-labelledby="invoiceModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="invoiceModalLabel"><i class="fas fa-file-invoice me-2"></i>فاتورة جديدة</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="invoiceForm">
+                    <input type="hidden" id="invoiceProgramId">
+                    <div class="mb-3">
+                        <label for="invoiceAmount" class="form-label">المبلغ *</label>
+                        <input type="number" class="form-control" id="invoiceAmount" step="0.01" min="0" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="invoiceDescription" class="form-label">الوصف *</label>
+                        <input type="text" class="form-control" id="invoiceDescription" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="invoiceDueDate" class="form-label">تاريخ الاستحقاق</label>
+                        <input type="date" class="form-control" id="invoiceDueDate">
+                    </div>
+                    <div class="mb-3">
+                        <label for="invoiceStatus" class="form-label">الحالة</label>
+                        <select class="form-select" id="invoiceStatus">
+                            <option value="draft">مسودة</option>
+                            <option value="sent">مرسلة</option>
+                            <option value="paid">مدفوعة</option>
+                            <option value="overdue">متأخرة</option>
+                            <option value="cancelled">ملغاة</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary" onclick="saveInvoice()">إنشاء الفاتورة</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Insurance Info Modal -->
+<div class="modal fade" id="insuranceModal" tabindex="-1" aria-labelledby="insuranceModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="insuranceModalLabel"><i class="fas fa-shield-alt me-2"></i>معلومات التأمين</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="insuranceForm">
+                    <input type="hidden" id="insuranceProgramIdInput">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="insuranceProviderInput" class="form-label">مقدم التأمين *</label>
+                            <input type="text" class="form-control" id="insuranceProviderInput" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="insurancePolicyNumberInput" class="form-label">رقم الوثيقة *</label>
+                            <input type="text" class="form-control" id="insurancePolicyNumberInput" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="insuranceCoverageTypeInput" class="form-label">نوع التغطية *</label>
+                            <select class="form-select" id="insuranceCoverageTypeInput" required>
+                                <option value="">اختر نوع التغطية</option>
+                                <option value="full">كاملة</option>
+                                <option value="partial">جزئية</option>
+                                <option value="therapy_only">علاجية فقط</option>
+                                <option value="none">بدون تغطية</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="insuranceGroupNumber" class="form-label">رقم المجموعة</label>
+                            <input type="text" class="form-control" id="insuranceGroupNumber">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="insuranceAnnualLimit" class="form-label">الحد السنوي</label>
+                            <input type="number" class="form-control" id="insuranceAnnualLimit" step="0.01" min="0">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="insuranceAmountUsed" class="form-label">المبلغ المستخدم</label>
+                            <input type="number" class="form-control" id="insuranceAmountUsed" step="0.01" min="0" value="0">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="insuranceExpiryDate" class="form-label">تاريخ الانتهاء</label>
+                            <input type="date" class="form-control" id="insuranceExpiryDate">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">الخدمات المشمولة</label>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input insurance-service" type="checkbox" value="physical_therapy" id="insPhysical">
+                                    <label class="form-check-label" for="insPhysical">العلاج الطبيعي</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input insurance-service" type="checkbox" value="occupational_therapy" id="insOccupational">
+                                    <label class="form-check-label" for="insOccupational">العلاج الوظيفي</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input insurance-service" type="checkbox" value="speech_therapy" id="insSpeech">
+                                    <label class="form-check-label" for="insSpeech">علاج النطق</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input insurance-service" type="checkbox" value="psychological" id="insPsychological">
+                                    <label class="form-check-label" for="insPsychological">العلاج النفسي</label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input insurance-service" type="checkbox" value="medical_equipment" id="insEquipment">
+                                    <label class="form-check-label" for="insEquipment">الأجهزة الطبية</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary" onclick="saveInsuranceInfo()">حفظ</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Note Modal -->
+<div class="modal fade" id="noteModal" tabindex="-1" aria-labelledby="noteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="noteModalLabel"><i class="fas fa-sticky-note me-2"></i>إضافة ملاحظة</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="noteForm">
+                    <input type="hidden" id="noteProgramId">
+                    <input type="hidden" id="noteId">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="noteType" class="form-label">نوع الملاحظة *</label>
+                            <select class="form-select" id="noteType" required>
+                                <option value="">اختر النوع</option>
+                                <option value="progress">تقدم</option>
+                                <option value="clinical">سريرية</option>
+                                <option value="behavioral">سلوكية</option>
+                                <option value="family">عائلية</option>
+                                <option value="administrative">إدارية</option>
+                                <option value="therapy">علاجية</option>
+                                <option value="medical">طبية</option>
+                                <option value="educational">تعليمية</option>
+                                <option value="social">اجتماعية</option>
+                                <option value="follow_up">متابعة</option>
+                                <option value="general">عامة</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="notePriority" class="form-label">الأولوية</label>
+                            <select class="form-select" id="notePriority">
+                                <option value="low">منخفضة</option>
+                                <option value="medium" selected>متوسطة</option>
+                                <option value="high">عالية</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="noteTitle" class="form-label">العنوان *</label>
+                        <input type="text" class="form-control" id="noteTitle" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="noteContent" class="form-label">المحتوى *</label>
+                        <textarea class="form-control" id="noteContent" rows="5" required></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="noteIsConfidential">
+                                <label class="form-check-label" for="noteIsConfidential">سرية</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="noteFollowUpRequired">
+                                <label class="form-check-label" for="noteFollowUpRequired">تتطلب متابعة</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3" id="noteFollowUpDateGroup" style="display:none;">
+                        <label for="noteFollowUpDate" class="form-label">تاريخ المتابعة</label>
+                        <input type="date" class="form-control" id="noteFollowUpDate">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary" onclick="saveNote()">حفظ الملاحظة</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Referral Modal -->
+<div class="modal fade" id="referralModal" tabindex="-1" aria-labelledby="referralModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="referralModalLabel"><i class="fas fa-share-square me-2"></i>إحالة جديدة</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="referralForm">
+                    <input type="hidden" id="referralProgramId">
+                    <input type="hidden" id="referralId">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="referralTo" class="form-label">المحال إليه *</label>
+                            <input type="text" class="form-control" id="referralTo" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="referralFacility" class="form-label">المنشأة</label>
+                            <input type="text" class="form-control" id="referralFacility">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="referralReason" class="form-label">سبب الإحالة *</label>
+                        <textarea class="form-control" id="referralReason" rows="3" required></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="referralPriority" class="form-label">الأولوية</label>
+                            <select class="form-select" id="referralPriority">
+                                <option value="routine">عادية</option>
+                                <option value="urgent">عاجلة</option>
+                                <option value="emergency">طارئة</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="referralStatus" class="form-label">الحالة</label>
+                            <select class="form-select" id="referralStatusSelect">
+                                <option value="pending">قيد الانتظار</option>
+                                <option value="accepted">مقبولة</option>
+                                <option value="rejected">مرفوضة</option>
+                                <option value="completed">مكتملة</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="referralNotes" class="form-label">ملاحظات إضافية</label>
+                        <textarea class="form-control" id="referralNotes" rows="2"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary" onclick="saveReferral()">حفظ الإحالة</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Transportation Modal -->
+<div class="modal fade" id="transportationModal" tabindex="-1" aria-labelledby="transportationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="transportationModalLabel"><i class="fas fa-bus me-2"></i>بيانات النقل والمواصلات</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="transportationForm">
+                    <input type="hidden" id="transportationProgramId">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="transportationTypeSelect" class="form-label">نوع النقل *</label>
+                            <select class="form-select" id="transportationTypeSelect" required>
+                                <option value="">اختر نوع النقل</option>
+                                <option value="private">خاص</option>
+                                <option value="public">عام</option>
+                                <option value="ambulance">إسعاف</option>
+                                <option value="specialized">متخصص</option>
+                                <option value="other">أخرى</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="transportationProviderInput" class="form-label">مقدم الخدمة</label>
+                            <input type="text" class="form-control" id="transportationProviderInput">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="transportationDistanceInput" class="form-label">المسافة (كم)</label>
+                            <input type="number" class="form-control" id="transportationDistanceInput" step="0.1" min="0">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="transportationCostCoveredByInput" class="form-label">الجهة المسؤولة عن التكلفة</label>
+                            <input type="text" class="form-control" id="transportationCostCoveredByInput">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="transportationWheelchairAccessible">
+                                <label class="form-check-label" for="transportationWheelchairAccessible">مهيأ لكراسي متحركة</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="transportationNeedsEscort">
+                                <label class="form-check-label" for="transportationNeedsEscort">يحتاج مرافق</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="transportationSpecialNeedsInput" class="form-label">احتياجات خاصة</label>
+                        <textarea class="form-control" id="transportationSpecialNeedsInput" rows="2"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="transportationNotesInput" class="form-label">ملاحظات</label>
+                        <textarea class="form-control" id="transportationNotesInput" rows="2"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary" onclick="saveTransportation()">حفظ</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Treatment Team Modal -->
+<div class="modal fade" id="treatmentTeamModal" tabindex="-1" aria-labelledby="treatmentTeamModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="treatmentTeamModalLabel"><i class="fas fa-user-md me-2"></i>فريق العلاج</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="treatmentTeamForm">
+                    <input type="hidden" id="treatmentTeamProgramId">
+                    <div id="teamMembersContainer">
+                        <!-- Dynamic team member rows will be added here -->
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-primary mt-2" onclick="addTeamMemberRow()">
+                        <i class="fas fa-plus me-1"></i>إضافة عضو
+                    </button>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                <button type="button" class="btn btn-primary" onclick="saveTreatmentTeam()">حفظ الفريق</button>
             </div>
         </div>
     </div>

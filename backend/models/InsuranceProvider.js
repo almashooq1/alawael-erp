@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 const insuranceProviderSchema = new mongoose.Schema(
@@ -9,7 +10,7 @@ const insuranceProviderSchema = new mongoose.Schema(
     coverageDetails: { type: mongoose.Schema.Types.Mixed }, // Custom JSON for rules
     isActive: { type: Boolean, default: true },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 module.exports = mongoose.model('InsuranceProvider', insuranceProviderSchema);

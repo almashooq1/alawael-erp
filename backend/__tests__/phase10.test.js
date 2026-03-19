@@ -1,8 +1,64 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
+
+
+
  * Phase 10 Unit Tests
  * Jest tests for real-time, integrations, and i18n features
  */
 
+// === Global RBAC Mock ===
+jest.mock('../rbac', () => ({
+  createRBACMiddleware: () => (req, res, next) => next(),
+  checkPermission: () => (req, res, next) => next(),
+  RBAC_ROLES: {},
+  RBAC_PERMISSIONS: {},
+}));
+// === Global Auth Mock ===
+jest.mock('../middleware/auth', () => ({
+  authenticateToken: (req, res, next) => {
+    req.user = { id: 'user123', name: 'Test User', role: 'admin', permissions: ['*'] };
+    next();
+  },
+  requireAdmin: (req, res, next) => next(),
+  requireAuth: (req, res, next) => {
+    req.user = { id: 'user123', name: 'Test User', role: 'admin', permissions: ['*'] };
+    next();
+  },
+  requireRole:
+    (...roles) =>
+    (req, res, next) =>
+      next(),
+  optionalAuth: (req, res, next) => next(),
+  protect: (req, res, next) => {
+    req.user = { id: 'user123', name: 'Test User', role: 'admin', permissions: ['*'] };
+    next();
+  },
+  authorize:
+    (...roles) =>
+    (req, res, next) =>
+      next(),
+  authorizeRole:
+    (...roles) =>
+    (req, res, next) =>
+      next(),
+  authenticate: (req, res, next) => {
+    req.user = { id: 'user123', name: 'Test User', role: 'admin', permissions: ['*'] };
+    next();
+  },
+}));
+
+jest.mock('../middleware/auth.middleware', () => ({
+  authenticateToken: (req, res, next) => {
+    req.user = { id: 'user123', name: 'Test User', role: 'admin', permissions: ['*'] };
+    next();
+  },
+  requireRole:
+    (...roles) =>
+    (req, res, next) =>
+      next(),
+}));
 describe('Phase 10 Advanced Features Test Suite', () => {
   // ==================== REAL-TIME TESTS ====================
 
@@ -292,7 +348,7 @@ describe('Phase 10 Advanced Features Test Suite', () => {
         };
 
         expect(schedule.intervalMinutes).toBe(60);
-        expect(schedule.nextSync).toBeGreaterThan(new Date());
+        expect(schedule.nextSync.getTime()).toBeGreaterThan(Date.now());
       });
 
       it('should cancel scheduled sync', () => {

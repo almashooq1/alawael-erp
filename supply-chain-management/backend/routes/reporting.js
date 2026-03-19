@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const express = require('express');
 const reportingService = require('../services/reportingService');
 const Report = require('../models/Report');
@@ -40,10 +41,10 @@ router.post(
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error.message,
+        error: 'حدث خطأ في الخادم',
       });
     }
-  })
+  }),
 );
 
 // Get report by ID
@@ -68,10 +69,10 @@ router.get(
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error.message,
+        error: 'حدث خطأ في الخادم',
       });
     }
-  })
+  }),
 );
 
 // Refresh report
@@ -90,10 +91,10 @@ router.post(
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error.message,
+        error: 'حدث خطأ في الخادم',
       });
     }
-  })
+  }),
 );
 
 // Schedule report
@@ -121,10 +122,10 @@ router.post(
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error.message,
+        error: 'حدث خطأ في الخادم',
       });
     }
-  })
+  }),
 );
 
 // Export report
@@ -164,10 +165,10 @@ router.post(
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error.message,
+        error: 'حدث خطأ في الخادم',
       });
     }
-  })
+  }),
 );
 
 // Delete report
@@ -195,10 +196,10 @@ router.delete(
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error.message,
+        error: 'حدث خطأ في الخادم',
       });
     }
-  })
+  }),
 );
 
 // ============================================
@@ -223,10 +224,10 @@ router.post(
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error.message,
+        error: 'حدث خطأ في الخادم',
       });
     }
-  })
+  }),
 );
 
 // Get dashboard
@@ -246,10 +247,10 @@ router.get(
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error.message,
+        error: 'حدث خطأ في الخادم',
       });
     }
-  })
+  }),
 );
 
 // Update dashboard
@@ -270,10 +271,10 @@ router.put(
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error.message,
+        error: 'حدث خطأ في الخادم',
       });
     }
-  })
+  }),
 );
 
 // Share dashboard
@@ -291,13 +292,7 @@ router.post(
         });
       }
 
-      const dashboard = await reportingService.shareDashboard(
-        dashboardId,
-        userId,
-        email,
-        name,
-        permission
-      );
+      const dashboard = await reportingService.shareDashboard(dashboardId, userId, email, name, permission);
 
       res.json({
         success: true,
@@ -307,10 +302,10 @@ router.post(
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error.message,
+        error: 'حدث خطأ في الخادم',
       });
     }
-  })
+  }),
 );
 
 // Export dashboard
@@ -338,10 +333,10 @@ router.post(
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error.message,
+        error: 'حدث خطأ في الخادم',
       });
     }
-  })
+  }),
 );
 
 // Delete dashboard
@@ -359,10 +354,10 @@ router.delete(
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error.message,
+        error: 'حدث خطأ في الخادم',
       });
     }
-  })
+  }),
 );
 
 // ============================================
@@ -387,10 +382,10 @@ router.post(
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error.message,
+        error: 'حدث خطأ في الخادم',
       });
     }
-  })
+  }),
 );
 
 // Get template
@@ -415,10 +410,10 @@ router.get(
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error.message,
+        error: 'حدث خطأ في الخادم',
       });
     }
-  })
+  }),
 );
 
 // List templates
@@ -433,9 +428,7 @@ router.get(
         query.category = category;
       }
 
-      const templates = await ReportTemplate.find(query)
-        .limit(parseInt(limit))
-        .skip(parseInt(offset));
+      const templates = await ReportTemplate.find(query).limit(parseInt(limit)).skip(parseInt(offset));
 
       const total = await ReportTemplate.countDocuments(query);
 
@@ -449,10 +442,10 @@ router.get(
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error.message,
+        error: 'حدث خطأ في الخادم',
       });
     }
-  })
+  }),
 );
 
 // Approve template
@@ -480,10 +473,10 @@ router.post(
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error.message,
+        error: 'حدث خطأ في الخادم',
       });
     }
-  })
+  }),
 );
 
 // ============================================
@@ -505,10 +498,10 @@ router.get(
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error.message,
+        error: 'حدث خطأ في الخادم',
       });
     }
-  })
+  }),
 );
 
 // Get dashboard analytics
@@ -525,10 +518,10 @@ router.get(
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error.message,
+        error: 'حدث خطأ في الخادم',
       });
     }
-  })
+  }),
 );
 
 // Get template analytics
@@ -545,10 +538,10 @@ router.get(
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error.message,
+        error: 'حدث خطأ في الخادم',
       });
     }
-  })
+  }),
 );
 
 // System statistics
@@ -565,10 +558,10 @@ router.get(
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error.message,
+        error: 'حدث خطأ في الخادم',
       });
     }
-  })
+  }),
 );
 
 // ============================================
@@ -590,10 +583,10 @@ router.post(
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error.message,
+        error: 'حدث خطأ في الخادم',
       });
     }
-  })
+  }),
 );
 
 // Search templates
@@ -620,18 +613,18 @@ router.get(
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error.message,
+        error: 'حدث خطأ في الخادم',
       });
     }
-  })
+  }),
 );
 
 // Error handling middleware
-router.use((err, req, res, next) => {
+router.use((err, _req, res, _next) => {
   console.error('Reporting Route Error:', err);
   res.status(500).json({
     success: false,
-    error: err.message || 'Internal server error',
+    error: 'حدث خطأ في الخادم',
   });
 });
 

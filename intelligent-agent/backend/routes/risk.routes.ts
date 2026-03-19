@@ -9,7 +9,7 @@ import { sendRiskToIntegration } from './risk.integration.routes';
 const router = Router();
 
 // --- Risk CRUD ---
-router.get('/risks', async (req, res) => {
+router.get('/risks', async (_req, res) => {
   const risks = await Risk.find();
   res.json(risks);
 });
@@ -19,7 +19,6 @@ router.get('/risks/:id', async (req, res) => {
   if (!risk) return res.status(404).json({ error: 'Not found' });
   res.json(risk);
 });
-
 
 // Only admin or risk_manager can create
 router.post('/risks', requireRole(['admin', 'risk_manager']), async (req: any, res) => {
@@ -39,10 +38,14 @@ router.post('/risks', requireRole(['admin', 'risk_manager']), async (req: any, r
   res.status(201).json(risk);
 });
 
-
 // Only admin or risk_manager can update
 router.put('/risks/:id', requireRole(['admin', 'risk_manager']), async (req: any, res) => {
-  const risk = await Risk.findByIdAndUpdate(req.params.id, req.body, { new: true });
+  const { title, description, category, likelihood, impact, mitigation, status, owner } = req.body;
+  const risk = await Risk.findByIdAndUpdate(
+    req.params.id,
+    { title, description, category, likelihood, impact, mitigation, status, owner },
+    { new: true },
+  );
   if (!risk) return res.status(404).json({ error: 'Not found' });
   await RiskAuditLog.create({
     riskId: req.params.id,
@@ -58,7 +61,6 @@ router.put('/risks/:id', requireRole(['admin', 'risk_manager']), async (req: any
   res.json(risk);
 });
 
-
 // Only admin can delete
 router.delete('/risks/:id', requireRole(['admin']), async (req: any, res) => {
   const risk = await Risk.findByIdAndDelete(req.params.id);
@@ -73,11 +75,10 @@ router.delete('/risks/:id', requireRole(['admin']), async (req: any, res) => {
 });
 
 // --- Risk Assessment CRUD ---
-router.get('/risk-assessments', async (req, res) => {
+router.get('/risk-assessments', async (_req, res) => {
   const assessments = await RiskAssessment.find().populate('risk');
   res.json(assessments);
 });
-
 
 // Only admin or risk_manager can assess
 router.post('/risk-assessments', requireRole(['admin', 'risk_manager']), async (req, res) => {
@@ -109,11 +110,10 @@ router.post('/risk-assessments', requireRole(['admin', 'risk_manager']), async (
 });
 
 // --- Risk Event CRUD ---
-router.get('/risk-events', async (req, res) => {
+router.get('/risk-events', async (_req, res) => {
   const events = await RiskEvent.find().populate('risk');
   res.json(events);
 });
-
 
 // Only admin or risk_manager can add events
 router.post('/risk-events', requireRole(['admin', 'risk_manager']), async (req, res) => {

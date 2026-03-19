@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Password Security Service
  * خدمة أمان كلمات المرور
@@ -15,6 +16,7 @@ const bcrypt = require('bcryptjs');
 const axios = require('axios');
 const User = require('../models/User');
 const AuditLogger = require('./audit-logger');
+const logger = require('../utils/logger');
 
 class PasswordSecurityService {
   constructor() {
@@ -108,8 +110,8 @@ class PasswordSecurityService {
 
       return { compromised: false };
     } catch (error) {
-      console.warn('Failed to check compromised password:', error.message);
-      return { compromised: false, error: error.message };
+      logger.warn('Failed to check compromised password:', error.message);
+      return { compromised: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -133,7 +135,7 @@ class PasswordSecurityService {
 
       return false;
     } catch (error) {
-      console.error('Error checking password reuse:', error);
+      logger.error('Error checking password reuse:', error);
       return false;
     }
   }
@@ -151,7 +153,7 @@ class PasswordSecurityService {
       const daysSinceChange = (Date.now() - user.passwordChangedAt) / (1000 * 60 * 60 * 24);
       return daysSinceChange >= this.PASSWORD_EXPIRY_DAYS;
     } catch (error) {
-      console.error('Error checking password rotation:', error);
+      logger.error('Error checking password rotation:', error);
       return false;
     }
   }
@@ -199,10 +201,10 @@ class PasswordSecurityService {
         compromisedCheck,
       };
     } catch (error) {
-      console.error('Error validating password change:', error);
+      logger.error('Error validating password change:', error);
       return {
         valid: false,
-        errors: [error.message],
+        errors: ['حدث خطأ داخلي'],
       };
     }
   }
@@ -258,7 +260,7 @@ class PasswordSecurityService {
         message: 'Password changed successfully',
       };
     } catch (error) {
-      console.error('Error changing password:', error);
+      logger.error('Error changing password:', error);
       throw error;
     }
   }
@@ -285,7 +287,7 @@ class PasswordSecurityService {
 
       return { success: true };
     } catch (error) {
-      console.error('Error forcing password reset:', error);
+      logger.error('Error forcing password reset:', error);
       throw error;
     }
   }
@@ -321,7 +323,7 @@ class PasswordSecurityService {
         passwordHistoryCount: user.passwordHistory?.length || 0,
       };
     } catch (error) {
-      console.error('Error getting password security info:', error);
+      logger.error('Error getting password security info:', error);
       throw error;
     }
   }
@@ -374,7 +376,7 @@ class PasswordSecurityService {
 
       return users;
     } catch (error) {
-      console.error('Error getting users needing rotation:', error);
+      logger.error('Error getting users needing rotation:', error);
       return [];
     }
   }

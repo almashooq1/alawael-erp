@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * CashFlow Controller
  * Manages cash flow data, forecasting, and reserves
@@ -36,7 +37,7 @@ exports.getCashFlowSummary = async (req, res) => {
 
     res.json({ success: true, data: summary });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
   }
 };
 
@@ -55,7 +56,7 @@ exports.getCashFlow = async (req, res) => {
 
     res.json({ success: true, data: cashFlow });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
   }
 };
 
@@ -87,7 +88,7 @@ exports.createCashFlow = async (req, res) => {
     await cashFlow.save();
     res.json({ success: true, data: cashFlow });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
   }
 };
 
@@ -100,7 +101,7 @@ exports.getForecasts = async (req, res) => {
 
     res.json({ success: true, data: forecasts });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
   }
 };
 
@@ -196,7 +197,7 @@ exports.generateForecast = async (req, res) => {
     await forecast.save();
     res.json({ success: true, data: forecast });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
   }
 };
 
@@ -208,7 +209,7 @@ exports.getReserves = async (req, res) => {
 
     res.json({ success: true, data: reserves });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
   }
 };
 
@@ -231,7 +232,7 @@ exports.updateReserve = async (req, res) => {
 
     res.json({ success: true, data: reserve });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
   }
 };
 
@@ -275,7 +276,7 @@ exports.recordReserveTransaction = async (req, res) => {
     await reserve.save();
     res.json({ success: true, data: reserve });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
   }
 };
 
@@ -351,6 +352,6 @@ exports.analyzeCashFlow = async (req, res) => {
     await analysis.save();
     res.json({ success: true, data: analysis });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
   }
 };

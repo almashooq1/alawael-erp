@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * 🔍 Distributed Tracing System
  *
@@ -9,6 +10,7 @@
  */
 
 const crypto = require('crypto');
+const logger = require('../utils/logger');
 
 class TraceContext {
   constructor(traceId, spanId, parentSpanId = null) {
@@ -55,7 +57,7 @@ class TraceContext {
       status: this.status,
       tags: this.tags,
       events: this.events,
-      error: this.error ? { message: this.error.message, stack: this.error.stack } : null,
+      error: this.error ? { message: 'خطأ داخلي' } : null,
     };
   }
 }
@@ -171,7 +173,7 @@ class DistributedTracer {
         exporter.export(trace);
         this.stats.tracesExported++;
       } catch (error) {
-        console.error('[Tracing] Export error:', error.message);
+        logger.error('[Tracing] Export error:', error.message);
       }
     });
   }
@@ -313,7 +315,7 @@ function tracingMiddleware(tracer) {
 class ConsoleExporter {
   export(trace) {
     if (trace.status === 'ERROR') {
-      console.error('[Trace]', JSON.stringify(trace.toJSON(), null, 2));
+      logger.error('[Trace]', JSON.stringify(trace.toJSON(), null, 2));
     }
   }
 }

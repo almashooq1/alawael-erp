@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * User/Authentication Model Unit Tests - Phase 4
  * Comprehensive testing of user authentication, authorization, and profile management
@@ -19,7 +21,7 @@ const createTestUser = (overrides = {}) => ({
   status: 'active',
   createdAt: new Date(),
   lastLogin: new Date(),
-  ...overrides
+  ...overrides,
 });
 
 describe('User/Authentication Model - Unit Tests', () => {
@@ -90,7 +92,7 @@ describe('User/Authentication Model - Unit Tests', () => {
     it('should authenticate with valid credentials', () => {
       const user = createTestUser({
         email: 'user@company.com',
-        password: 'SecurePass123!'
+        password: 'SecurePass123!',
       });
 
       expect(user.email).toBeTruthy();
@@ -128,11 +130,9 @@ describe('User/Authentication Model - Unit Tests', () => {
 
     it('should generate JWT token on login', () => {
       const user = createTestUser();
-      const token = jwt.sign(
-        { userId: user.id, role: user.role },
-        'secret-key',
-        { expiresIn: '24h' }
-      );
+      const token = jwt.sign({ userId: user.id, role: user.role }, 'secret-key', {
+        expiresIn: '24h',
+      });
 
       expect(token).toBeTruthy();
       expect(typeof token).toBe('string');
@@ -200,7 +200,7 @@ describe('User/Authentication Model - Unit Tests', () => {
       const roles = {
         admin: ['read', 'write', 'delete', 'manage-users'],
         manager: ['read', 'write', 'manage-team'],
-        user: ['read', 'write-own']
+        user: ['read', 'write-own'],
       };
 
       const userPermissions = roles['user'];
@@ -261,11 +261,13 @@ describe('User/Authentication Model - Unit Tests', () => {
     it('should track password changes', () => {
       const passwordChanges = [
         { date: '2024-01-15', ipAddress: '192.168.1.1' },
-        { date: '2024-04-20', ipAddress: '192.168.1.2' }
+        { date: '2024-04-20', ipAddress: '192.168.1.2' },
       ];
 
       expect(passwordChanges).toHaveLength(2);
-      expect(new Date(passwordChanges[1].date).getTime()).toBeGreaterThan(new Date(passwordChanges[0].date).getTime());
+      expect(new Date(passwordChanges[1].date).getTime()).toBeGreaterThan(
+        new Date(passwordChanges[0].date).getTime()
+      );
     });
   });
 
@@ -289,8 +291,18 @@ describe('User/Authentication Model - Unit Tests', () => {
 
     it('should track profile update history', () => {
       const updates = [
-        { field: 'fullName', oldValue: 'Old Name', newValue: 'New Name', timestamp: new Date('2024-01-01') },
-        { field: 'email', oldValue: 'old@company.com', newValue: 'new@company.com', timestamp: new Date('2024-02-01') }
+        {
+          field: 'fullName',
+          oldValue: 'Old Name',
+          newValue: 'New Name',
+          timestamp: new Date('2024-01-01'),
+        },
+        {
+          field: 'email',
+          oldValue: 'old@company.com',
+          newValue: 'new@company.com',
+          timestamp: new Date('2024-02-01'),
+        },
       ];
 
       expect(updates).toHaveLength(2);
@@ -309,7 +321,7 @@ describe('User/Authentication Model - Unit Tests', () => {
       const preferences = {
         theme: 'dark',
         language: 'en',
-        notifications: true
+        notifications: true,
       };
 
       expect(preferences.theme).toBe('dark');
@@ -344,7 +356,7 @@ describe('User/Authentication Model - Unit Tests', () => {
       const statusHistory = [
         { status: 'active', timestamp: new Date('2023-01-01') },
         { status: 'inactive', timestamp: new Date('2024-01-01') },
-        { status: 'active', timestamp: new Date('2024-06-01') }
+        { status: 'active', timestamp: new Date('2024-06-01') },
       ];
 
       expect(statusHistory).toHaveLength(3);
@@ -356,7 +368,7 @@ describe('User/Authentication Model - Unit Tests', () => {
     it('should track login attempts', () => {
       const loginAttempts = [
         { timestamp: new Date('2024-01-01 10:00'), success: true },
-        { timestamp: new Date('2024-01-01 14:30'), success: true }
+        { timestamp: new Date('2024-01-01 14:30'), success: true },
       ];
 
       expect(loginAttempts).toHaveLength(2);
@@ -372,7 +384,7 @@ describe('User/Authentication Model - Unit Tests', () => {
     it('should track login from different IP addresses', () => {
       const loginHistory = [
         { ipAddress: '192.168.1.1', timestamp: new Date('2024-01-01'), location: 'Office' },
-        { ipAddress: '203.0.113.42', timestamp: new Date('2024-01-02'), location: 'Home' }
+        { ipAddress: '203.0.113.42', timestamp: new Date('2024-01-02'), location: 'Home' },
       ];
 
       const uniqueIPs = new Set(loginHistory.map(l => l.ipAddress));
@@ -392,7 +404,7 @@ describe('User/Authentication Model - Unit Tests', () => {
       const auditLog = [
         { action: 'login', timestamp: new Date(), details: 'Successful login' },
         { action: 'update_profile', timestamp: new Date(), details: 'Updated email' },
-        { action: 'logout', timestamp: new Date(), details: 'User logout' }
+        { action: 'logout', timestamp: new Date(), details: 'User logout' },
       ];
 
       expect(auditLog).toHaveLength(3);
@@ -401,7 +413,7 @@ describe('User/Authentication Model - Unit Tests', () => {
 
     it('should log permission changes', () => {
       const permissionLog = [
-        { oldRole: 'user', newRole: 'manager', timestamp: new Date(), changedBy: 'admin' }
+        { oldRole: 'user', newRole: 'manager', timestamp: new Date(), changedBy: 'admin' },
       ];
 
       expect(permissionLog[0].oldRole).toBe('user');
@@ -445,7 +457,7 @@ describe('User/Authentication Model - Unit Tests', () => {
     it('should handle concurrent login attempts', () => {
       const loginAttempts = [
         { timestamp: new Date('2024-01-01 10:00:00.001') },
-        { timestamp: new Date('2024-01-01 10:00:00.002') }
+        { timestamp: new Date('2024-01-01 10:00:00.002') },
       ];
 
       // Should prevent duplicate sessions

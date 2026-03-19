@@ -1,8 +1,20 @@
+/* eslint-disable no-undef, no-unused-vars */
 /**
  * Notifications Routes Comprehensive Test Suite - Phase 2
  * Tests for notification management and delivery
  * Target: Improve from 24.41% to 50%+ coverage
  */
+
+// Mock RBAC module to bypass role-based permission checks in tests
+jest.mock('../rbac', () => ({
+  createRBACMiddleware: () => (req, res, next) => next(),
+  checkPermission: () => (req, res, next) => next(),
+  RBAC_ROLES: {},
+  RBAC_PERMISSIONS: {},
+}));
+
+// Mock validateObjectId to allow test-friendly IDs
+jest.mock('../middleware/validateObjectId', () => () => (req, res, next) => next());
 
 // Mock notifications service
 jest.mock('../services/notifications.service', () => {
@@ -311,6 +323,7 @@ jest.mock('../utils/logger', () => ({
   info: jest.fn(),
   error: jest.fn(),
   warn: jest.fn(),
+  debug: jest.fn(),
 }));
 
 // NOW require modules after all mocks are set up

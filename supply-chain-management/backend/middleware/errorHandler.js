@@ -1,9 +1,10 @@
+/* eslint-disable no-unused-vars */
 /**
  * Global Error Handler Middleware
  * Centralizes error handling for all routes
  */
 
-export const errorHandler = (err, req, res, next) => {
+export const errorHandler = (err, req, res, _next) => {
   console.error('Error:', {
     message: err.message,
     stack: err.stack,
@@ -65,8 +66,8 @@ export const errorHandler = (err, req, res, next) => {
     return res.status(err.statusCode).json({
       status: 'error',
       code: err.code || 'APP_ERROR',
-      message: err.message,
-      details: err.details,
+      message: process.env.NODE_ENV === 'production' ? 'An application error occurred' : err.message,
+      details: process.env.NODE_ENV === 'production' ? undefined : err.details,
     });
   }
 

@@ -1,4 +1,4 @@
-/**
+/* eslint-disable no-unused-vars */ /**
  * 🗂️ Advanced Intelligent Archiving System
  * نظام الأرشفة الإلكترونية الذكي المتقدم
  *
@@ -61,7 +61,17 @@ class AdvancedArchivingSystem {
     return {
       // الوثائق المالية
       FINANCIAL: {
-        keywords: ['فاتورة', 'دفع', 'صرف', 'إيرادات', 'مصروفات', 'ميزانية', 'تقرير مالي', 'وثيقة مالية', 'مالية'],
+        keywords: [
+          'فاتورة',
+          'دفع',
+          'صرف',
+          'إيرادات',
+          'مصروفات',
+          'ميزانية',
+          'تقرير مالي',
+          'وثيقة مالية',
+          'مالية',
+        ],
         priority: 'high',
         retention: 2555, // 7 سنوات
         icon: '💰',
@@ -354,13 +364,13 @@ class AdvancedArchivingSystem {
     } catch (error) {
       this.logActivity({
         type: 'ARCHIVE_ERROR',
-        error: error.message,
+        error: 'حدث خطأ داخلي',
         timestamp: new Date(),
       });
 
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
         archiveId,
       };
     }
@@ -373,7 +383,9 @@ class AdvancedArchivingSystem {
     // استخراج البيانات من document
     const data = document.data || document.content;
     const type = document.type || 'txt';
-    const size = document.size || (data ? (typeof data === 'string' ? data.length : JSON.stringify(data).length) : 0);
+    const size =
+      document.size ||
+      (data ? (typeof data === 'string' ? data.length : JSON.stringify(data).length) : 0);
 
     // تحديد مستوى الضغط بناءً على الحجم والنوع
     let compressionLevel = 6; // افتراضي
@@ -402,7 +414,8 @@ class AdvancedArchivingSystem {
           return reject(new Error('Invalid data for compression'));
         }
 
-        const buffer = typeof data === 'string' ? Buffer.from(data) : Buffer.from(JSON.stringify(data));
+        const buffer =
+          typeof data === 'string' ? Buffer.from(data) : Buffer.from(JSON.stringify(data));
         const compressed = zlib.gzipSync(buffer);
 
         resolve({
@@ -446,7 +459,11 @@ class AdvancedArchivingSystem {
       days = retentionDaysOrDoc;
     } else if (options && options.retentionDays) {
       days = options.retentionDays;
-    } else if (retentionDaysOrDoc && typeof retentionDaysOrDoc === 'object' && retentionDaysOrDoc.retentionDays) {
+    } else if (
+      retentionDaysOrDoc &&
+      typeof retentionDaysOrDoc === 'object' &&
+      retentionDaysOrDoc.retentionDays
+    ) {
       days = retentionDaysOrDoc.retentionDays;
     }
 
@@ -579,7 +596,9 @@ class AdvancedArchivingSystem {
     score += priorityScore[archive.classification.priority] || 0;
 
     // نقاط إضافية للمستندات الحديثة
-    const daysSinceCreated = Math.floor((Date.now() - new Date(archive.metadata.createdAt)) / (1000 * 60 * 60 * 24));
+    const daysSinceCreated = Math.floor(
+      (Date.now() - new Date(archive.metadata.createdAt)) / (1000 * 60 * 60 * 24)
+    );
     if (daysSinceCreated < 30) score += 20;
     else if (daysSinceCreated < 90) score += 10;
 
@@ -647,7 +666,7 @@ class AdvancedArchivingSystem {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
         archiveId,
       };
     }
@@ -792,9 +811,14 @@ class AdvancedArchivingSystem {
       generalStats: {
         totalArchives: this.archives.size,
         totalSize: this.calculateTotalSize(),
-        totalCompressed: Array.from(this.archives.values()).reduce((sum, a) => sum + a.compressedSize, 0),
+        totalCompressed: Array.from(this.archives.values()).reduce(
+          (sum, a) => sum + a.compressedSize,
+          0
+        ),
         averageCompressionRatio: this.calculateAverageCompression(),
-        totalSpaceSaved: this.calculateTotalSize() - Array.from(this.archives.values()).reduce((sum, a) => sum + a.compressedSize, 0),
+        totalSpaceSaved:
+          this.calculateTotalSize() -
+          Array.from(this.archives.values()).reduce((sum, a) => sum + a.compressedSize, 0),
       },
       byCategory: {},
       byPriority: {},
@@ -833,7 +857,10 @@ class AdvancedArchivingSystem {
     if (this.archives.size === 0) return 0;
 
     const totalOriginal = this.calculateTotalSize();
-    const totalCompressed = Array.from(this.archives.values()).reduce((sum, a) => sum + a.compressedSize, 0);
+    const totalCompressed = Array.from(this.archives.values()).reduce(
+      (sum, a) => sum + a.compressedSize,
+      0
+    );
 
     if (totalOriginal === 0) return 0;
     // Return compression ratio (0-1), where 1 means no compression, 0.5 means 50% reduction

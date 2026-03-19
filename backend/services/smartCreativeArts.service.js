@@ -1,9 +1,12 @@
+/* eslint-disable no-unused-vars */
 /**
  * Smart Creative Arts Therapy Service (Phase 89)
  *
  * Manages Music and Art Therapy interventions.
  * Uses AI to analyze creative output for emotional indicators.
  */
+
+const logger = require('../utils/logger');
 
 class SmartCreativeArtsService {
   constructor() {
@@ -15,7 +18,7 @@ class SmartCreativeArtsService {
    * Uses Computer Vision (mocked) to detect color palette and stroke intensity.
    */
   async analyzeArtwork(patientId, imagePath) {
-    console.log(`Analyzing artwork for ${patientId}...`);
+    logger.info(`Analyzing artwork for ${patientId}...`);
 
     // Mock AI Computer Vision Analysis
     // In reality, darker colors + heavy strokes might indicate aggression/depression.
@@ -26,7 +29,8 @@ class SmartCreativeArtsService {
       dominantColors: ['#FF0000', '#000000'], // Red & Black
       detectedMood: 'Agitated/Intense',
       strokePressure: 'High',
-      recommendation: 'Consider calming sensory session (Snoezelen) before next manufacturing task.',
+      recommendation:
+        'Consider calming sensory session (Snoezelen) before next manufacturing task.',
     };
 
     return mockAnalysis;

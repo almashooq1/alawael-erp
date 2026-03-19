@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 const medicalRecordSchema = new mongoose.Schema({
@@ -50,11 +51,15 @@ const beneficiaryFileSchema = new mongoose.Schema(
 
     // Rehabilitation
     currentPlanId: { type: mongoose.Schema.Types.ObjectId }, // Link to Rehab Plan Module
-    programStatus: { type: String, enum: ['ACTIVE', 'COMPLETED', 'HOLD', 'ASSESSMENT'], default: 'ASSESSMENT' },
+    programStatus: {
+      type: String,
+      enum: ['ACTIVE', 'COMPLETED', 'HOLD', 'ASSESSMENT'],
+      default: 'ASSESSMENT',
+    },
 
     balance: { type: Number, default: 0 }, // Financial Balance
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 module.exports = mongoose.model('BeneficiaryFile', beneficiaryFileSchema);

@@ -1,4 +1,4 @@
-import React from 'react';
+/* eslint-disable no-unused-vars */
 import { render } from '@testing-library/react';
 import OrderList from './OrderList';
 import apiClient from '../utils/api';

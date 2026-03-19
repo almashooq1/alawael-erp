@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Smart Notifications System
  * نظام الإشعارات الذكية
@@ -431,7 +432,7 @@ class NotificationAnalytics {
    * تسجيل حدث
    */
   trackEvent(event, data) {
-    if (this.metrics.hasOwnProperty(event)) {
+    if (Object.prototype.hasOwnProperty.call(this.metrics, event)) {
       this.metrics[event]++;
     }
 

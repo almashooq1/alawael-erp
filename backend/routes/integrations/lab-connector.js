@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Laboratory Integration Connector
  * نظام التكامل مع المختبرات
@@ -14,6 +15,7 @@
 const axios = require('axios');
 const crypto = require('crypto');
 const EventEmitter = require('events');
+const logger = require('../../utils/logger');
 
 class LabConnector extends EventEmitter {
   constructor(config = {}) {
@@ -199,7 +201,7 @@ class LabConnector extends EventEmitter {
       } catch (error) {
         meta.retries++;
         if (meta.retries > this.config.maxRetries) {
-          this.emit('reconciliation-failed', { orderId, error: error.message });
+          this.emit('reconciliation-failed', { orderId, error: 'حدث خطأ داخلي' });
           this.pendingReconciliation.delete(orderId);
         }
       }
@@ -301,10 +303,10 @@ class LabConnector extends EventEmitter {
         return this.executeWithRetry(fn, operationName, retries + 1);
       }
 
-      this.emit('operation-failed', { operation: operationName, error: error.message });
+      this.emit('operation-failed', { operation: operationName, error: 'حدث خطأ داخلي' });
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
         status: error.response?.status,
       };
     }
@@ -335,7 +337,7 @@ class LabConnector extends EventEmitter {
     };
 
     this.emit('poison-queue', queueEntry);
-    console.warn(`[LAB-CONNECTOR] Added to poison queue:`, queueEntry);
+    logger.warn(`[LAB-CONNECTOR] Added to poison queue:`, queueEntry);
   }
 
   /**
@@ -345,7 +347,7 @@ class LabConnector extends EventEmitter {
     const log = {
       timestamp: new Date().toISOString(),
       status: error.response?.status,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
       endpoint: error.config?.url,
     };
     this.emit('error-logged', log);
@@ -359,7 +361,7 @@ class LabConnector extends EventEmitter {
       const response = await this.client.get('/health', { timeout: 5000 });
       return { healthy: true, status: response.status };
     } catch (error) {
-      return { healthy: false, error: error.message };
+      return { healthy: false, error: 'حدث خطأ داخلي' };
     }
   }
 }

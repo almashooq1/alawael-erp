@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * ===================================================================
  * FIXED ASSETS MODEL - نموذج الأصول الثابتة
@@ -348,14 +349,11 @@ const fixedAssetSchema = new mongoose.Schema(
 // INDEXES - لتحسين الأداء
 // ===================================================================
 
-fixedAssetSchema.index({ code: 1 });
 fixedAssetSchema.index({ category: 1, status: 1 });
 fixedAssetSchema.index({ department: 1 });
 fixedAssetSchema.index({ branch: 1 });
 fixedAssetSchema.index({ responsiblePerson: 1 });
 fixedAssetSchema.index({ purchaseDate: -1 });
-fixedAssetSchema.index({ barcode: 1 }, { sparse: true });
-fixedAssetSchema.index({ rfidTag: 1 }, { sparse: true });
 fixedAssetSchema.index({ 'insurance.expiryDate': 1 });
 fixedAssetSchema.index({ 'maintenanceSchedule.nextMaintenanceDate': 1 });
 
@@ -414,14 +412,16 @@ fixedAssetSchema.methods.calculateAnnualDepreciation = function () {
     case 'straight-line':
       return depreciableAmount / this.usefulLife;
 
-    case 'declining-balance':
+    case 'declining-balance': {
       const rate = this.depreciationRate || 200 / this.usefulLife;
       return this.bookValue * (rate / 100);
+    }
 
-    case 'sum-of-years':
+    case 'sum-of-years': {
       const remainingLife = this.usefulLife - this.ageInYears;
       const sumOfYears = (this.usefulLife * (this.usefulLife + 1)) / 2;
       return (depreciableAmount * remainingLife) / sumOfYears;
+    }
 
     default:
       return depreciableAmount / this.usefulLife;
@@ -640,10 +640,10 @@ fixedAssetSchema.statics.getMonthlyDepreciationReport = async function (year, mo
 // ===================================================================
 
 // قبل الحفظ - التحقق من صحة البيانات
-fixedAssetSchema.pre('save', function (next) {
+fixedAssetSchema.pre('save', function () {
   // التحقق من أن القيمة المتبقية أقل من تكلفة الشراء
   if (this.salvageValue >= this.purchaseCost) {
-    return next(new Error('القيمة المتبقية يجب أن تكون أقل من تكلفة الشراء'));
+    throw new Error('القيمة المتبقية يجب أن تكون أقل من تكلفة الشراء');
   }
 
   // حساب معدل الإهلاك إذا لم يكن محددًا
@@ -655,8 +655,6 @@ fixedAssetSchema.pre('save', function (next) {
   if (!this.barcode) {
     this.barcode = `FA${Date.now()}${Math.floor(Math.random() * 1000)}`;
   }
-
-  next();
 });
 
 // ===================================================================

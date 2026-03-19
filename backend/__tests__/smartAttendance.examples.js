@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * SMART ATTENDANCE SYSTEM - USAGE EXAMPLES & TESTS
  * أمثلة الاستخدام والاختبارات

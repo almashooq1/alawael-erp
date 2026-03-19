@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * 🔗 Advanced Backend Integration Module
  * Professional System Integration & Enhancement
@@ -5,6 +6,7 @@
  */
 
 const express = require('express');
+const logger = require('./logger');
 const {
   AdvancedErrorTracker,
   apiVersionMiddleware,
@@ -66,7 +68,7 @@ function setupAdvancedMiddleware(app) {
 
       // Log slow requests
       if (metric.isCritical) {
-        console.warn(`⚠️ Critical performance: ${req.method} ${req.path} took ${duration}ms`);
+        logger.warn(`⚠️ Critical performance: ${req.method} ${req.path} took ${duration}ms`);
       }
     });
 
@@ -133,7 +135,7 @@ function setupAdvancedRoutes(app) {
       const tracked = errorTracker.track(error, { endpoint: '/system/health/comprehensive' });
       res.status(500).json({
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
         trackingId: tracked.id,
       });
     }
@@ -160,7 +162,7 @@ function setupAdvancedRoutes(app) {
       const tracked = errorTracker.track(error, { endpoint: '/performance/analytics' });
       res.status(500).json({
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
         trackingId: tracked.id,
       });
     }
@@ -187,7 +189,7 @@ function setupAdvancedRoutes(app) {
       const tracked = errorTracker.track(error, { endpoint: '/cache/performance' });
       res.status(500).json({
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
         trackingId: tracked.id,
       });
     }
@@ -214,7 +216,7 @@ function setupAdvancedRoutes(app) {
       const tracked = errorTracker.track(error, { endpoint: '/security/audit' });
       res.status(500).json({
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
         trackingId: tracked.id,
       });
     }
@@ -237,7 +239,7 @@ function setupAdvancedRoutes(app) {
     } catch (error) {
       res.status(500).json({
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       });
     }
   });
@@ -293,7 +295,7 @@ function setupAdvancedRoutes(app) {
       const tracked = errorTracker.track(error, { endpoint: '/system/recommendations' });
       res.status(500).json({
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
         trackingId: tracked.id,
       });
     }
@@ -320,7 +322,7 @@ function setupAdvancedRoutes(app) {
       const tracked = errorTracker.track(error, { endpoint: '/cache/clear' });
       res.status(500).json({
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
         trackingId: tracked.id,
       });
     }
@@ -347,7 +349,7 @@ function setupAdvancedRoutes(app) {
       const tracked = errorTracker.track(error, { endpoint: '/cache/cleanup' });
       res.status(500).json({
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
         trackingId: tracked.id,
       });
     }
@@ -373,7 +375,7 @@ function setupAdvancedRoutes(app) {
       const tracked = errorTracker.track(error, { endpoint: '/errors/:errorId/resolve' });
       res.status(500).json({
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
         trackingId: tracked.id,
       });
     }
@@ -399,7 +401,7 @@ function registerHealthChecks() {
     } catch (error) {
       return {
         status: 'error',
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       };
     }
   });

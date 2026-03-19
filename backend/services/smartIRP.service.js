@@ -1,5 +1,7 @@
+/* eslint-disable no-unused-vars */
 const SmartIRP = require('../models/SmartIRP');
 const mongoose = require('mongoose');
+const logger = require('../utils/logger');
 
 /**
  * Smart IRP Service
@@ -13,23 +15,23 @@ class SmartIRPService {
     try {
       // Generate unique IRP number
       const irpNumber = await this.generateIRPNumber();
-      
+
       const irp = new SmartIRP({
         ...data,
         irpNumber,
-        createdBy: userId
+        createdBy: userId,
       });
-      
+
       // Add initial history entry
       irp.addHistory('created', userId, { initialData: data });
-      
+
       await irp.save();
       return irp;
     } catch (error) {
-      throw new Error(`Failed to create IRP: ${error.message}`);
+      throw new Error(error.message);
     }
   }
-  
+
   /**
    * Generate unique IRP number
    */
@@ -38,13 +40,13 @@ class SmartIRPService {
     const count = await SmartIRP.countDocuments({
       createdAt: {
         $gte: new Date(year, 0, 1),
-        $lt: new Date(year + 1, 0, 1)
-      }
+        $lt: new Date(year + 1, 0, 1),
+      },
     });
-    
+
     return `IRP-${year}-${String(count + 1).padStart(5, '0')}`;
   }
-  
+
   /**
    * Add SMART goal to IRP
    */
@@ -52,41 +54,41 @@ class SmartIRPService {
     try {
       const irp = await SmartIRP.findById(irpId);
       if (!irp) throw new Error('IRP not found');
-      
+
       // Validate SMART criteria
       this.validateSMARTGoal(goalData);
-      
+
       // Initialize measurable fields
       goalData.measurable.current = goalData.measurable.baseline || 0;
       goalData.achievementPercentage = 0;
       goalData.status = 'active';
-      
+
       irp.goals.push(goalData);
       irp.updateKPIs();
       irp.addHistory('goal_added', userId, { goalTitle: goalData.title });
-      
+
       await irp.save();
-      
+
       // Schedule alerts check
       await this.checkAndSendAlerts(irp);
-      
+
       return irp;
     } catch (error) {
-      throw new Error(`Failed to add goal: ${error.message}`);
+      throw new Error(error.message);
     }
   }
-  
+
   /**
    * Validate SMART goal criteria
    */
   static validateSMARTGoal(goal) {
     const errors = [];
-    
+
     // Specific
     if (!goal.specific || !goal.specific.what) {
       errors.push('Goal must specify WHAT will be accomplished');
     }
-    
+
     // Measurable
     if (!goal.measurable || goal.measurable.target === undefined) {
       errors.push('Goal must have a measurable target');
@@ -94,22 +96,25 @@ class SmartIRPService {
     if (!goal.measurable.metric) {
       errors.push('Goal must specify HOW it will be measured');
     }
-    
+
     // Time-bound
     if (!goal.timeBound || !goal.timeBound.startDate || !goal.timeBound.targetDate) {
       errors.push('Goal must have start and target dates');
     }
-    if (goal.timeBound && new Date(goal.timeBound.targetDate) <= new Date(goal.timeBound.startDate)) {
+    if (
+      goal.timeBound &&
+      new Date(goal.timeBound.targetDate) <= new Date(goal.timeBound.startDate)
+    ) {
       errors.push('Target date must be after start date');
     }
-    
+
     if (errors.length > 0) {
       throw new Error(`SMART goal validation failed: ${errors.join(', ')}`);
     }
-    
+
     return true;
   }
-  
+
   /**
    * Update goal progress
    */
@@ -117,32 +122,32 @@ class SmartIRPService {
     try {
       const irp = await SmartIRP.findById(irpId);
       if (!irp) throw new Error('IRP not found');
-      
+
       const goal = irp.goals.id(goalId);
       if (!goal) throw new Error('Goal not found');
-      
+
       // Add progress update
       const progressUpdate = {
         date: progressData.date || new Date(),
         value: progressData.value,
         notes: progressData.notes,
         recordedBy: userId,
-        attachments: progressData.attachments || []
+        attachments: progressData.attachments || [],
       };
-      
+
       // Calculate percentage
       const { baseline, target } = goal.measurable;
       const progress = progressData.value - baseline;
       const totalRequired = target - baseline;
       const percentage = Math.min(100, Math.max(0, Math.round((progress / totalRequired) * 100)));
-      
+
       progressUpdate.percentage = percentage;
       goal.progressUpdates.push(progressUpdate);
-      
+
       // Update current value and achievement percentage
       goal.measurable.current = progressData.value;
       goal.achievementPercentage = percentage;
-      
+
       // Auto-update status based on progress
       if (percentage >= 100) {
         goal.status = 'achieved';
@@ -150,7 +155,7 @@ class SmartIRPService {
         const elapsed = new Date() - new Date(goal.timeBound.startDate);
         const total = new Date(goal.timeBound.targetDate) - new Date(goal.timeBound.startDate);
         const expectedProgress = (elapsed / total) * 100;
-        
+
         if (percentage >= expectedProgress - 10) {
           goal.status = 'on_track';
         } else if (percentage >= expectedProgress - 20) {
@@ -159,7 +164,7 @@ class SmartIRPService {
           goal.status = 'delayed';
         }
       }
-      
+
       // Check milestones
       goal.measurable.milestones.forEach(milestone => {
         if (!milestone.achieved && progressData.value >= milestone.value) {
@@ -167,25 +172,25 @@ class SmartIRPService {
           milestone.achievedDate = new Date();
         }
       });
-      
+
       irp.updateKPIs();
       irp.addHistory('progress_updated', userId, {
         goalTitle: goal.title,
         value: progressData.value,
-        percentage
+        percentage,
       });
-      
+
       await irp.save();
-      
+
       // Check for alerts
       await this.checkAndSendAlerts(irp);
-      
+
       return { irp, goal, percentage };
     } catch (error) {
-      throw new Error(`Failed to update progress: ${error.message}`);
+      throw new Error(error.message);
     }
   }
-  
+
   /**
    * Perform periodic assessment
    */
@@ -193,13 +198,13 @@ class SmartIRPService {
     try {
       const irp = await SmartIRP.findById(irpId);
       if (!irp) throw new Error('IRP not found');
-      
+
       const assessment = {
         ...assessmentData,
         date: assessmentData.date || new Date(),
-        assessor: userId
+        assessor: userId,
       };
-      
+
       // Calculate next assessment date
       const nextDate = new Date(assessment.date);
       switch (assessment.type) {
@@ -216,9 +221,9 @@ class SmartIRPService {
           nextDate.setMonth(nextDate.getMonth() + 3); // Default quarterly
       }
       assessment.nextAssessmentDate = nextDate;
-      
+
       irp.assessments.push(assessment);
-      
+
       // Apply goal modifications from assessment
       if (assessment.goalsToModify) {
         assessment.goalsToModify.forEach(mod => {
@@ -239,33 +244,33 @@ class SmartIRPService {
           }
         });
       }
-      
+
       irp.updateKPIs();
       irp.addHistory('assessment_completed', userId, {
         type: assessment.type,
-        overallProgress: assessment.overallProgress
+        overallProgress: assessment.overallProgress,
       });
-      
+
       await irp.save();
-      
+
       // Generate and send report to family
       await this.generateFamilyReport(irp, assessment);
-      
+
       return irp;
     } catch (error) {
-      throw new Error(`Failed to perform assessment: ${error.message}`);
+      throw new Error(error.message);
     }
   }
-  
+
   /**
    * Check for alerts and send notifications
    */
   static async checkAndSendAlerts(irp) {
     try {
       const alerts = irp.checkForAlerts();
-      
+
       if (alerts.length === 0) return;
-      
+
       // Add alerts to goals
       alerts.forEach(alert => {
         const goal = irp.goals[alert.goalIndex];
@@ -275,29 +280,26 @@ class SmartIRPService {
             severity: alert.severity,
             message: alert.message,
             date: alert.date,
-            acknowledged: false
+            acknowledged: false,
           });
         }
       });
-      
+
       await irp.save();
-      
+
       // Send notifications to team members and alert recipients
-      const recipients = [
-        ...irp.team.map(t => t.member),
-        ...irp.autoReview.alertRecipients
-      ];
-      
-      // TODO: Integrate with notification system
+      const recipients = [...irp.team.map(t => t.member), ...irp.autoReview.alertRecipients];
+
+      // @todo [P2] Integrate with NotificationService for alert delivery
       // await NotificationService.sendBulk(recipients, alerts);
-      
+
       return alerts;
     } catch (error) {
-      console.error('Error checking alerts:', error);
+      logger.error('Error checking alerts:', error);
       return [];
     }
   }
-  
+
   /**
    * Perform automatic review
    */
@@ -305,16 +307,16 @@ class SmartIRPService {
     try {
       const irp = await SmartIRP.findById(irpId);
       if (!irp) throw new Error('IRP not found');
-      
+
       // Check all goals for progress issues
       const alerts = irp.checkForAlerts();
-      
+
       // Update KPIs
       irp.updateKPIs();
-      
+
       // Schedule next review
       irp.scheduleNextReview();
-      
+
       // Create review summary
       const reviewSummary = {
         date: new Date(),
@@ -324,24 +326,24 @@ class SmartIRPService {
         goalsDelayed: irp.kpis.goalsDelayed,
         goalsAchieved: irp.kpis.goalsAchieved,
         overallProgress: irp.kpis.overallProgress,
-        alertsGenerated: alerts.length
+        alertsGenerated: alerts.length,
       };
-      
+
       irp.addHistory('auto_review_completed', null, reviewSummary);
-      
+
       await irp.save();
-      
+
       // Send alerts if any
       if (alerts.length > 0 && irp.autoReview.autoAlerts) {
         await this.checkAndSendAlerts(irp);
       }
-      
+
       return { irp, reviewSummary, alerts };
     } catch (error) {
-      throw new Error(`Auto review failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
-  
+
   /**
    * Generate family progress report
    */
@@ -352,7 +354,7 @@ class SmartIRPService {
         generatedDate: new Date(),
         reportPeriod: {
           start: assessment ? assessment.date : irp.autoReview.lastReviewDate || irp.createdAt,
-          end: new Date()
+          end: new Date(),
         },
         content: {
           beneficiaryName: irp.beneficiaryName,
@@ -360,38 +362,40 @@ class SmartIRPService {
           goalsAchieved: irp.kpis.goalsAchieved,
           goalsOnTrack: irp.kpis.goalsOnTrack,
           goalsAtRisk: irp.kpis.goalsAtRisk,
-          assessment: assessment ? {
-            overallProgress: assessment.overallProgress,
-            notes: assessment.overallNotes,
-            recommendations: assessment.recommendations
-          } : null,
+          assessment: assessment
+            ? {
+                overallProgress: assessment.overallProgress,
+                notes: assessment.overallNotes,
+                recommendations: assessment.recommendations,
+              }
+            : null,
           goalsSummary: irp.goals.map(g => ({
             title: g.title,
             category: g.category,
             status: g.status,
             achievement: g.achievementPercentage,
-            targetDate: g.timeBound.targetDate
-          }))
-        }
+            targetDate: g.timeBound.targetDate,
+          })),
+        },
       };
-      
-      // TODO: Generate PDF report
+
+      // @todo [P2] Generate PDF report via pdfkit/puppeteer
       // reportData.url = await PDFService.generateReport(reportData);
       reportData.url = `/reports/irp/${irp._id}/family-report-${Date.now()}.pdf`;
-      
+
       irp.reports.push(reportData);
       await irp.save();
-      
-      // TODO: Send email to family
+
+      // @todo [P2] Send family progress report via EmailService
       // await EmailService.sendFamilyReport(irp, reportData);
-      
+
       return reportData;
     } catch (error) {
-      console.error('Error generating family report:', error);
+      logger.error('Error generating family report:', error);
       throw error;
     }
   }
-  
+
   /**
    * Get IRP statistics and analytics
    */
@@ -399,7 +403,7 @@ class SmartIRPService {
     try {
       const irp = await SmartIRP.findById(irpId);
       if (!irp) throw new Error('IRP not found');
-      
+
       // Calculate progress over time
       const progressTimeline = [];
       irp.goals.forEach(goal => {
@@ -408,18 +412,26 @@ class SmartIRPService {
             date: update.date,
             goalTitle: goal.title,
             value: update.value,
-            percentage: update.percentage
+            percentage: update.percentage,
           });
         });
       });
-      
+
       // Sort by date
       progressTimeline.sort((a, b) => a.date - b.date);
-      
+
       // Calculate domain-specific progress
       const domainProgress = {};
-      const domains = ['motor', 'cognitive', 'social', 'communication', 'self_care', 'behavioral', 'academic'];
-      
+      const domains = [
+        'motor',
+        'cognitive',
+        'social',
+        'communication',
+        'self_care',
+        'behavioral',
+        'academic',
+      ];
+
       domains.forEach(domain => {
         const domainGoals = irp.goals.filter(g => g.category === domain);
         if (domainGoals.length > 0) {
@@ -430,17 +442,17 @@ class SmartIRPService {
             achieved: domainGoals.filter(g => g.status === 'achieved').length,
             onTrack: domainGoals.filter(g => g.status === 'on_track').length,
             atRisk: domainGoals.filter(g => g.status === 'at_risk').length,
-            delayed: domainGoals.filter(g => g.status === 'delayed').length
+            delayed: domainGoals.filter(g => g.status === 'delayed').length,
           };
         }
       });
-      
+
       // Calculate velocity (progress per month)
       const startDate = new Date(irp.createdAt);
       const now = new Date();
       const monthsElapsed = (now - startDate) / (1000 * 60 * 60 * 24 * 30);
       const velocity = monthsElapsed > 0 ? irp.kpis.overallProgress / monthsElapsed : 0;
-      
+
       return {
         overall: {
           progress: irp.kpis.overallProgress,
@@ -449,21 +461,23 @@ class SmartIRPService {
           goalsOnTrack: irp.kpis.goalsOnTrack,
           goalsAtRisk: irp.kpis.goalsAtRisk,
           goalsDelayed: irp.kpis.goalsDelayed,
-          velocity: Math.round(velocity * 10) / 10
+          velocity: Math.round(velocity * 10) / 10,
         },
         progressTimeline,
         domainProgress,
         benchmarks: irp.kpis.benchmarks,
-        recentAlerts: irp.goals.reduce((alerts, goal) => {
-          const unacknowledged = goal.alerts.filter(a => !a.acknowledged);
-          return [...alerts, ...unacknowledged];
-        }, []).slice(0, 10)
+        recentAlerts: irp.goals
+          .reduce((alerts, goal) => {
+            const unacknowledged = goal.alerts.filter(a => !a.acknowledged);
+            return [...alerts, ...unacknowledged];
+          }, [])
+          .slice(0, 10),
       };
     } catch (error) {
-      throw new Error(`Failed to get analytics: ${error.message}`);
+      throw new Error(error.message);
     }
   }
-  
+
   /**
    * Compare with benchmarks
    */
@@ -471,57 +485,64 @@ class SmartIRPService {
     try {
       const irp = await SmartIRP.findById(irpId);
       if (!irp) throw new Error('IRP not found');
-      
+
       // Calculate national average
       const allIRPs = await SmartIRP.find({ status: 'active' });
-      const nationalAvg = allIRPs.reduce((sum, i) => sum + i.kpis.overallProgress, 0) / allIRPs.length;
-      
+      const nationalAvg =
+        allIRPs.reduce((sum, i) => sum + i.kpis.overallProgress, 0) / allIRPs.length;
+
       // Calculate program average
       const programIRPs = await SmartIRP.find({
         program: irp.program,
-        status: 'active'
+        status: 'active',
       });
-      const programAvg = programIRPs.reduce((sum, i) => sum + i.kpis.overallProgress, 0) / programIRPs.length;
-      
+      const programAvg =
+        programIRPs.reduce((sum, i) => sum + i.kpis.overallProgress, 0) / programIRPs.length;
+
       // Calculate age group average
       const ageGroupIRPs = await SmartIRP.find({
         beneficiaryAge: { $gte: irp.beneficiaryAge - 2, $lte: irp.beneficiaryAge + 2 },
-        status: 'active'
+        status: 'active',
       });
-      const ageGroupAvg = ageGroupIRPs.reduce((sum, i) => sum + i.kpis.overallProgress, 0) / ageGroupIRPs.length;
-      
+      const ageGroupAvg =
+        ageGroupIRPs.reduce((sum, i) => sum + i.kpis.overallProgress, 0) / ageGroupIRPs.length;
+
       // Update benchmarks
       irp.kpis.benchmarks = {
         nationalAverage: Math.round(nationalAvg),
         programAverage: Math.round(programAvg),
         ageGroupAverage: Math.round(ageGroupAvg),
-        comparisonStatus: irp.kpis.overallProgress > programAvg ? 'above_average' :
-                         irp.kpis.overallProgress < programAvg - 10 ? 'below_average' : 'average'
+        comparisonStatus:
+          irp.kpis.overallProgress > programAvg
+            ? 'above_average'
+            : irp.kpis.overallProgress < programAvg - 10
+              ? 'below_average'
+              : 'average',
       };
-      
+
       await irp.save();
-      
+
       return irp.kpis.benchmarks;
     } catch (error) {
-      throw new Error(`Failed to update benchmarks: ${error.message}`);
+      throw new Error(error.message);
     }
   }
-  
+
   /**
    * Run scheduled auto-reviews for all IRPs
    */
   static async runScheduledReviews() {
     try {
       const now = new Date();
-      
+
       const irpsForReview = await SmartIRP.find({
         status: 'active',
         'autoReview.enabled': true,
-        'autoReview.nextReviewDate': { $lte: now }
+        'autoReview.nextReviewDate': { $lte: now },
       });
-      
+
       const results = [];
-      
+
       for (const irp of irpsForReview) {
         try {
           const result = await this.performAutoReview(irp._id);
@@ -529,26 +550,26 @@ class SmartIRPService {
             irpId: irp._id,
             irpNumber: irp.irpNumber,
             success: true,
-            ...result.reviewSummary
+            ...result.reviewSummary,
           });
         } catch (error) {
           results.push({
             irpId: irp._id,
             irpNumber: irp.irpNumber,
             success: false,
-            error: error.message
+            error: 'حدث خطأ داخلي',
           });
         }
       }
-      
+
       return {
         totalReviewed: results.length,
         successful: results.filter(r => r.success).length,
         failed: results.filter(r => !r.success).length,
-        results
+        results,
       };
     } catch (error) {
-      throw new Error(`Scheduled reviews failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 }

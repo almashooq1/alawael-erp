@@ -3,16 +3,15 @@
  * مكونات واجهة المستخدم الموافقة لمعايير الوصول
  */
 
-import React from 'react';
 import { Button, IconButton, TextField, Chip } from '@mui/material';
 
 // Accessible Button with proper ARIA labels
-export const AccessibleButton = ({ 
-  children, 
-  ariaLabel, 
-  onClick, 
+export const AccessibleButton = ({
+  children,
+  ariaLabel,
+  onClick,
   disabled = false,
-  ...props 
+  ...props
 }) => (
   <Button
     onClick={onClick}
@@ -26,17 +25,17 @@ export const AccessibleButton = ({
 );
 
 // Accessible Icon Button
-export const AccessibleIconButton = ({ 
-  icon, 
-  ariaLabel, 
-  onClick, 
+export const AccessibleIconButton = ({
+  icon,
+  ariaLabel,
+  onClick,
   disabled = false,
-  ...props 
+  ...props
 }) => (
   <IconButton
     onClick={onClick}
     disabled={disabled}
-    aria-label={ariaLabel}
+    aria-label={ariaLabel || 'زر'}
     aria-disabled={disabled}
     {...props}
   >
@@ -45,12 +44,12 @@ export const AccessibleIconButton = ({
 );
 
 // Accessible Form Field
-export const AccessibleTextField = ({ 
-  label, 
-  error, 
-  helperText, 
+export const AccessibleTextField = ({
+  label,
+  error,
+  helperText,
   required = false,
-  ...props 
+  ...props
 }) => (
   <TextField
     label={label}
@@ -65,11 +64,11 @@ export const AccessibleTextField = ({
 );
 
 // Accessible Status Chip
-export const AccessibleChip = ({ 
-  label, 
-  color, 
+export const AccessibleChip = ({
+  label,
+  color,
   ariaLabel,
-  ...props 
+  ...props
 }) => (
   <Chip
     label={label}
@@ -124,7 +123,7 @@ export const LiveRegion = ({ children, ariaLive = 'polite', ariaAtomic = true })
   </div>
 );
 
-export default {
+const AccessibleComponents = {
   AccessibleButton,
   AccessibleIconButton,
   AccessibleTextField,
@@ -132,3 +131,5 @@ export default {
   SkipLink,
   LiveRegion,
 };
+
+export default AccessibleComponents;

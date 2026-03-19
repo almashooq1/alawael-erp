@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable no-unused-vars */
 
 /**
  * 💾 Automated Backup Manager
@@ -14,7 +15,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { execSync, spawn } = require('child_process');
+const { execSync, execFileSync, spawn } = require('child_process');
 const CronJob = require('cron').CronJob;
 const nodemailer = require('nodemailer');
 
@@ -116,9 +117,11 @@ class BackupManager {
       // Create backup
       log.info('📦 جاري تنفيذ mongodump...');
 
-      const command = `mongodump --uri="${this.config.mongodb.uri}" --archive="${backupFile}" --gzip`;
-
-      execSync(command, { stdio: 'pipe' });
+      execFileSync(
+        'mongodump',
+        [`--uri=${this.config.mongodb.uri}`, `--archive=${backupFile}`, '--gzip'],
+        { stdio: 'pipe' }
+      );
 
       // Get file size
       const stats = fs.statSync(backupFile);
@@ -157,13 +160,16 @@ class BackupManager {
     try {
       log.info('🔐 جاري تشفير النسخة الاحتياطية...');
 
-      const password = process.env.BACKUP_ENCRYPTION_PASSWORD || 'secure-backup-key';
+      const { backupEncryptionPassword } = require('../config/secrets');
+      const password = backupEncryptionPassword;
       const encryptedFile = `${filePath}.enc`;
 
       // Using openssl for encryption
-      const command = `openssl enc -aes-256-cbc -salt -in "${filePath}" -out "${encryptedFile}" -k "${password}"`;
-
-      execSync(command, { stdio: 'pipe' });
+      execFileSync(
+        'openssl',
+        ['enc', '-aes-256-cbc', '-salt', '-in', filePath, '-out', encryptedFile, '-k', password],
+        { stdio: 'pipe' }
+      );
 
       // Remove original file
       fs.unlinkSync(filePath);
@@ -189,9 +195,16 @@ class BackupManager {
       const fileName = path.basename(filePath);
       const s3Path = `backups/${backupType}/${new Date().getFullYear()}/${fileName}`;
 
-      const awsCommand = `aws s3 cp "${filePath}" "s3://${this.config.cloud.s3.bucket}/${s3Path}" --region ${this.config.cloud.s3.region}`;
+      const awsArgs = [
+        's3',
+        'cp',
+        filePath,
+        `s3://${this.config.cloud.s3.bucket}/${s3Path}`,
+        '--region',
+        this.config.cloud.s3.region,
+      ];
 
-      execSync(awsCommand, { stdio: 'pipe' });
+      execFileSync('aws', awsArgs, { stdio: 'pipe' });
 
       log.success(`☁️ تم التحميل إلى AWS S3: ${s3Path}`);
     } catch (error) {
@@ -271,21 +284,26 @@ class BackupManager {
       if (backupFile.endsWith('.enc')) {
         log.info('🔓 جاري فك التشفير...');
 
-        const password = process.env.BACKUP_ENCRYPTION_PASSWORD || 'secure-backup-key';
+        const { backupEncryptionPassword } = require('../config/secrets');
+        const password = backupEncryptionPassword;
         const decryptedFile = backupFile.replace('.enc', '.dec');
 
-        const command = `openssl enc -aes-256-cbc -d -in "${backupFile}" -out "${decryptedFile}" -k "${password}"`;
-
-        execSync(command, { stdio: 'pipe' });
+        execFileSync(
+          'openssl',
+          ['enc', '-aes-256-cbc', '-d', '-in', backupFile, '-out', decryptedFile, '-k', password],
+          { stdio: 'pipe' }
+        );
         fileToRestore = decryptedFile;
       }
 
       // Restore
-      log.info('📥 جاري استرجاع البيانات من MongoDB...');
+      log.info('ِ📥 جاري استرجاع البيانات من MongoDB...');
 
-      const command = `mongorestore --uri="${this.config.mongodb.uri}" --archive="${fileToRestore}" --gzip`;
-
-      execSync(command, { stdio: 'pipe' });
+      execFileSync(
+        'mongorestore',
+        [`--uri=${this.config.mongodb.uri}`, `--archive=${fileToRestore}`, '--gzip'],
+        { stdio: 'pipe' }
+      );
 
       log.success('✅ تم استرجاع البيانات بنجاح');
 
@@ -461,10 +479,11 @@ async function main() {
       await manager.verifyBackup(args[1]);
       break;
 
-    case 'stats':
+    case 'stats': {
       const stats = manager.getStats();
       console.log(JSON.stringify(stats, null, 2));
       break;
+    }
 
     case 'start':
       log.success('✅ جدولة النسخ الاحتياطية التلقائية قيد التشغيل...');

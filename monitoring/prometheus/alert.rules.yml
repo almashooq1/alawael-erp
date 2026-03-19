@@ -1,0 +1,163 @@
+groups:
+  - name: quality_alerts
+    interval: 30s
+    rules:
+      # High test failure rate alert
+      - alert: HighTestFailureRate
+        expr: (quality_tests_failed / quality_tests_total) > 0.2
+        for: 5m
+        labels:
+          severity: warning
+          category: quality
+        annotations:
+          summary: "High test failure rate detected"
+          description: "Service {{ $labels.service }} has {{ $value | humanizePercentage }} test failure rate"
+
+      # Critical failure rate
+      - alert: CriticalTestFailureRate
+        expr: (quality_tests_failed / quality_tests_total) > 0.5
+        for: 2m
+        labels:
+          severity: critical
+          category: quality
+        annotations:
+          summary: "CRITICAL: Very high test failure rate"
+          description: "Service {{ $labels.service }} has {{ $value | humanizePercentage }} test failure rate (CRITICAL)"
+
+      # Service down
+      - alert: ServiceDown
+        expr: up{job=~"backend|graphql|dashboard-api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          category: availability
+        annotations:
+          summary: "Service is down"
+          description: "{{ $labels.job }} service is down for more than 1 minute"
+
+      # Low test coverage
+      - alert: LowTestCoverage
+        expr: quality_test_coverage < 70
+        for: 10m
+        labels:
+          severity: warning
+          category: quality
+        annotations:
+          summary: "Low test coverage detected"
+          description: "Service {{ $labels.service }} has only {{ $value }}% test coverage"
+
+      # Consecutive test failures
+      - alert: ConsecutiveTestFailures
+        expr: quality_consecutive_failures >= 3
+        for: 1m
+        labels:
+          severity: critical
+          category: quality
+        annotations:
+          summary: "Multiple consecutive test failures"
+          description: "Service {{ $labels.service }} has {{ $value }} consecutive failures"
+
+      # Test duration too long
+      - alert: SlowTests
+        expr: quality_test_duration_seconds > 300
+        for: 5m
+        labels:
+          severity: warning
+          category: performance
+        annotations:
+          summary: "Tests taking too long"
+          description: "Service {{ $labels.service }} tests took {{ $value }}s to complete"
+
+      # System health degraded
+      - alert: SystemHealthDegraded
+        expr: quality_system_health_score < 70
+        for: 5m
+        labels:
+          severity: warning
+          category: health
+        annotations:
+          summary: "System health degraded"
+          description: "Overall system health score is {{ $value }}%"
+
+      # System health critical
+      - alert: SystemHealthCritical
+        expr: quality_system_health_score < 50
+        for: 2m
+        labels:
+          severity: critical
+          category: health
+        annotations:
+          summary: "CRITICAL: System health is critical"
+          description: "Overall system health score is only {{ $value }}%"
+
+  - name: infrastructure_alerts
+    interval: 30s
+    rules:
+      # High CPU usage
+      - alert: HighCPUUsage
+        expr: 100 - (avg by (instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+          category: infrastructure
+        annotations:
+          summary: "High CPU usage detected"
+          description: "CPU usage is {{ $value | humanize }}% on {{ $labels.instance }}"
+
+      # High memory usage
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+          category: infrastructure
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is {{ $value | humanize }}% on {{ $labels.instance }}"
+
+      # Disk space low
+      - alert: DiskSpaceLow
+        expr: (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) * 100 < 15
+        for: 5m
+        labels:
+          severity: warning
+          category: infrastructure
+        annotations:
+          summary: "Disk space running low"
+          description: "Only {{ $value | humanize }}% disk space available on {{ $labels.instance }}"
+
+      # API response time high
+      - alert: HighAPIResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 1
+        for: 5m
+        labels:
+          severity: warning
+          category: performance
+        annotations:
+          summary: "API response time is high"
+          description: "95th percentile response time is {{ $value }}s for {{ $labels.job }}"
+
+  - name: business_metrics
+    interval: 60s
+    rules:
+      # Deployment success rate
+      - alert: LowDeploymentSuccessRate
+        expr: (rate(deployments_total{status="success"}[1h]) / rate(deployments_total[1h])) < 0.8
+        for: 10m
+        labels:
+          severity: warning
+          category: deployment
+        annotations:
+          summary: "Low deployment success rate"
+          description: "Only {{ $value | humanizePercentage }} of deployments succeeded in the last hour"
+
+      # Quality trend declining
+      - alert: QualityTrendDeclining
+        expr: deriv(quality_tests_passed_total[30m]) < -5
+        for: 15m
+        labels:
+          severity: warning
+          category: trend
+        annotations:
+          summary: "Quality trend is declining"
+          description: "Test pass rate has been declining for {{ $labels.service }}"

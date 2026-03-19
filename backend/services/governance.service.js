@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * ALAWAEL ERP - GOVERNANCE & COMPLIANCE SERVICE
  * Audit Trails, Regulatory Compliance, Data Governance
@@ -75,7 +76,7 @@ class GovernanceService {
 
       return auditLog;
     } catch (error) {
-      throw new Error(`Audit logging failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -103,7 +104,7 @@ class GovernanceService {
         logs,
       };
     } catch (error) {
-      throw new Error(`Failed to retrieve audit trail: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -137,7 +138,7 @@ class GovernanceService {
         suspiciousActivities: this._identifySuspiciousActivities(userLogs),
       };
     } catch (error) {
-      throw new Error(`Failed to generate activity report: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -170,7 +171,7 @@ class GovernanceService {
       this._enforceMaxSize(this.complianceEvents, this.maxComplianceEvents);
       return complianceEvent;
     } catch (error) {
-      throw new Error(`Compliance tracking failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -192,7 +193,7 @@ class GovernanceService {
         },
       };
     } catch (error) {
-      throw new Error(`GDPR compliance check failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -214,7 +215,7 @@ class GovernanceService {
         },
       };
     } catch (error) {
-      throw new Error(`HIPAA compliance check failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -235,7 +236,7 @@ class GovernanceService {
         },
       };
     } catch (error) {
-      throw new Error(`PCI-DSS compliance check failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -267,7 +268,7 @@ class GovernanceService {
       this.governancePolicies.set(policy.id, policy);
       return policy;
     } catch (error) {
-      throw new Error(`Policy creation failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -284,7 +285,7 @@ class GovernanceService {
         policies,
       };
     } catch (error) {
-      throw new Error(`Failed to retrieve policies: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -305,7 +306,7 @@ class GovernanceService {
 
       return classificationRecord;
     } catch (error) {
-      throw new Error(`Data classification failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -330,7 +331,7 @@ class GovernanceService {
       this.dataRetentionRules.set(resourceType, policy);
       return policy;
     } catch (error) {
-      throw new Error(`Failed to set retention policy: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -341,7 +342,7 @@ class GovernanceService {
         policies: Array.from(this.dataRetentionRules.values()),
       };
     } catch (error) {
-      throw new Error(`Failed to retrieve retention policies: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -368,7 +369,7 @@ class GovernanceService {
 
       return purgeSchedule;
     } catch (error) {
-      throw new Error(`Failed to schedule purge: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -400,7 +401,7 @@ class GovernanceService {
       this._enforceMaxSize(this.accessLogs, this.maxAccessLogs);
       return accessLog;
     } catch (error) {
-      throw new Error(`Access audit failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -424,7 +425,7 @@ class GovernanceService {
         logs: accessLogs,
       };
     } catch (error) {
-      throw new Error(`Failed to generate access report: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -442,7 +443,7 @@ class GovernanceService {
 
       return log;
     } catch (error) {
-      throw new Error(`Access review failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -471,7 +472,7 @@ class GovernanceService {
         recommendations: this._generateComplianceRecommendations(),
       };
     } catch (error) {
-      throw new Error(`Compliance report generation failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -495,7 +496,7 @@ class GovernanceService {
         topUsers: this._getTopUsers(relevantLogs),
       };
     } catch (error) {
-      throw new Error(`Audit report generation failed: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 

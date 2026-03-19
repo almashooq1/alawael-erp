@@ -108,10 +108,7 @@ export class FraudDetectionService extends EventEmitter {
     this.behavioralProfiles = new Map();
     this.blacklist = new Set();
     this.whitelist = new Set();
-    this.mockMode =
-      process.env.FRAUD_DETECTION_MOCK === 'true' ||
-      process.env.NODE_ENV === 'test' ||
-      !!process.env.VITEST_WORKER_ID;
+    this.mockMode = process.env.FRAUD_DETECTION_MOCK === 'true' || process.env.NODE_ENV === 'test' || !!process.env.VITEST_WORKER_ID;
 
     // Initialize with default ML weights
     this.modelWeights = {
@@ -136,10 +133,7 @@ export class FraudDetectionService extends EventEmitter {
    * Analyze transaction for fraud
    * تحليل المعاملة للكشف عن الاحتيال
    */
-  async detectFraud(
-    transaction: any,
-    accountProfile: BehavioralProfile | null
-  ): Promise<FraudDetectionResult> {
+  async detectFraud(transaction: any, accountProfile: BehavioralProfile | null): Promise<FraudDetectionResult> {
     try {
       this.logger.info(`Analyzing transaction: ${transaction.transactionId}`);
 
@@ -222,8 +216,8 @@ export class FraudDetectionService extends EventEmitter {
         riskScore: 50,
         mlScore: 0,
         rulesTriggered: ['ERROR_IN_DETECTION'],
-        anomalyIndicators: [error.message],
-        reasoning: `Error in fraud detection: ${error.message}`,
+        anomalyIndicators: ['حدث خطأ داخلي'],
+        reasoning: 'حدث خطأ داخلي',
         timestamp: new Date(),
         confidence: 60,
       };
@@ -237,7 +231,7 @@ export class FraudDetectionService extends EventEmitter {
   private applyFraudRules(transaction: any): number {
     let totalScore = 0;
 
-    this.ruleSets.forEach((rule) => {
+    this.ruleSets.forEach(rule => {
       if (!rule.enabled) return;
 
       let ruleMatched = true;
@@ -287,10 +281,7 @@ export class FraudDetectionService extends EventEmitter {
    * Analyze behavioral anomalies
    * تحليل الشذوذ السلوكي
    */
-  private analyzeBehavior(
-    transaction: any,
-    profile: BehavioralProfile
-  ): number {
+  private analyzeBehavior(transaction: any, profile: BehavioralProfile): number {
     let score = 0;
 
     // Amount anomaly (20 points max)
@@ -311,10 +302,7 @@ export class FraudDetectionService extends EventEmitter {
     }
 
     // Destination anomaly (15 points max)
-    if (
-      profile.frequentDestinations.length > 0 &&
-      !profile.frequentDestinations.includes(transaction.destinationIban)
-    ) {
+    if (profile.frequentDestinations.length > 0 && !profile.frequentDestinations.includes(transaction.destinationIban)) {
       score += 12;
     }
 
@@ -329,10 +317,7 @@ export class FraudDetectionService extends EventEmitter {
    * Machine Learning scoring engine
    * محرك التصنيف الآلي
    */
-  private async mlScoringEngine(
-    transaction: any,
-    profile: BehavioralProfile | null
-  ): Promise<number> {
+  private async mlScoringEngine(transaction: any, profile: BehavioralProfile | null): Promise<number> {
     try {
       if (this.mockMode) {
         return Math.random() * 30; // Mock ML score
@@ -362,18 +347,13 @@ export class FraudDetectionService extends EventEmitter {
       hourOfDay: new Date(transaction.initiatedAt).getHours() / 24,
       dayOfWeek: new Date(transaction.initiatedAt).getDay() / 7,
       isWeekend: new Date(transaction.initiatedAt).getDay() >= 5 ? 1 : 0,
-      isNightTime: [22, 23, 0, 1, 2, 3, 4, 5, 6].includes(
-        new Date(transaction.initiatedAt).getHours()
-      )
-        ? 1
-        : 0,
+      isNightTime: [22, 23, 0, 1, 2, 3, 4, 5, 6].includes(new Date(transaction.initiatedAt).getHours()) ? 1 : 0,
     };
 
     if (profile) {
       features.amountRatioToAverage = transaction.amount / profile.averageTransactionAmount;
       features.amountRatioToMax = transaction.amount / profile.maxTransactionAmount;
-      features.frequencyDeviation =
-        transaction.amount / profile.averageDailyTransactions;
+      features.frequencyDeviation = transaction.amount / profile.averageDailyTransactions;
     }
 
     return features;
@@ -407,10 +387,7 @@ export class FraudDetectionService extends EventEmitter {
    * Build behavioral profile from transaction history
    * بناء الملف السلوكي من سجل المعاملات
    */
-  async buildBehavioralProfile(
-    accountId: string,
-    transactions: any[]
-  ): Promise<BehavioralProfile> {
+  async buildBehavioralProfile(accountId: string, transactions: any[]): Promise<BehavioralProfile> {
     try {
       this.logger.info(`Building behavioral profile for: ${accountId}`);
 
@@ -419,35 +396,23 @@ export class FraudDetectionService extends EventEmitter {
       }
 
       // Calculate average amounts
-      const amounts = transactions.map((t) => t.amount);
+      const amounts = transactions.map(t => t.amount);
       const averageAmount = amounts.reduce((a, b) => a + b, 0) / amounts.length;
       const maxAmount = Math.max(...amounts);
       const minAmount = Math.min(...amounts);
 
       // Calculate transaction frequency
-      const uniqueDays = new Set(
-        transactions.map((t) => new Date(t.initiatedAt).toDateString())
-      ).size;
+      const uniqueDays = new Set(transactions.map(t => new Date(t.initiatedAt).toDateString())).size;
       const averageDailyTransactions = transactions.length / Math.max(uniqueDays, 1);
 
       // Analyze transaction patterns
-      const hours = transactions.map((t) => new Date(t.initiatedAt).getHours());
-      const usualHours = [...new Set(hours)].filter(
-        (h) => hours.filter((x) => x === h).length > transactions.length / 24
-      );
+      const hours = transactions.map(t => new Date(t.initiatedAt).getHours());
+      const usualHours = [...new Set(hours)].filter(h => hours.filter(x => x === h).length > transactions.length / 24);
 
-      const days = transactions.map((t) => new Date(t.initiatedAt).getDay());
-      const usualDays = [...new Set(days)].filter(
-        (d) => days.filter((x) => x === d).length > transactions.length / 7
-      );
+      const days = transactions.map(t => new Date(t.initiatedAt).getDay());
+      const usualDays = [...new Set(days)].filter(d => days.filter(x => x === d).length > transactions.length / 7);
 
-      const frequentDestinations = [
-        ...new Set(
-          transactions
-            .map((t) => t.destinationIban)
-            .filter((d) => d !== null)
-        ),
-      ].slice(0, 10);
+      const frequentDestinations = [...new Set(transactions.map(t => t.destinationIban).filter(d => d !== null))].slice(0, 10);
 
       const profile: BehavioralProfile = {
         accountId,
@@ -497,10 +462,7 @@ export class FraudDetectionService extends EventEmitter {
    * Update behavioral profile with new transaction
    * تحديث الملف السلوكي بمعاملة جديدة
    */
-  async updateProfile(
-    accountId: string,
-    transaction: any
-  ): Promise<void> {
+  async updateProfile(accountId: string, transaction: any): Promise<void> {
     try {
       const profile = this.behavioralProfiles.get(accountId) || this.getEmptyProfile(accountId);
 
@@ -508,8 +470,7 @@ export class FraudDetectionService extends EventEmitter {
       profile.lastTransactionDate = new Date(transaction.initiatedAt);
 
       // Update average amounts with exponential moving average
-      profile.averageTransactionAmount =
-        profile.averageTransactionAmount * 0.9 + transaction.amount * 0.1;
+      profile.averageTransactionAmount = profile.averageTransactionAmount * 0.9 + transaction.amount * 0.1;
 
       // Update max if needed
       profile.maxTransactionAmount = Math.max(profile.maxTransactionAmount, transaction.amount);
@@ -567,10 +528,7 @@ export class FraudDetectionService extends EventEmitter {
    * التحقق مما إذا كانت المعاملة في القائمة السوداء
    */
   private isBlacklisted(transaction: any): boolean {
-    return (
-      this.blacklist.has(transaction.sourceIban) ||
-      this.blacklist.has(transaction.destinationIban)
-    );
+    return this.blacklist.has(transaction.sourceIban) || this.blacklist.has(transaction.destinationIban);
   }
 
   /**
@@ -578,10 +536,7 @@ export class FraudDetectionService extends EventEmitter {
    * التحقق مما إذا كانت المعاملة في القائمة البيضاء
    */
   private isWhitelisted(transaction: any): boolean {
-    return (
-      this.whitelist.has(transaction.sourceIban) &&
-      this.whitelist.has(transaction.destinationIban)
-    );
+    return this.whitelist.has(transaction.sourceIban) && this.whitelist.has(transaction.destinationIban);
   }
 
   // ============================================
@@ -696,12 +651,7 @@ export class FraudDetectionService extends EventEmitter {
    * Create fraud alert
    * إنشاء تنبيه احتيال
    */
-  async createFraudAlert(
-    transactionId: string,
-    accountId: string,
-    reason: string,
-    amount: number
-  ): Promise<FraudAlert> {
+  async createFraudAlert(transactionId: string, accountId: string, reason: string, amount: number): Promise<FraudAlert> {
     const alert: FraudAlert = {
       alertId: `ALERT-${Date.now()}-${Math.random().toString(36).substring(7)}`,
       transactionId,
@@ -721,10 +671,7 @@ export class FraudDetectionService extends EventEmitter {
    * Resolve fraud alert
    * حل تنبيه احتيال
    */
-  async resolveFraudAlert(
-    alertId: string,
-    status: 'resolved' | 'false-positive'
-  ): Promise<void> {
+  async resolveFraudAlert(alertId: string, status: 'resolved' | 'false-positive'): Promise<void> {
     this.logger.info(`Resolving alert: ${alertId}`, { status });
     this.emit('fraudAlertResolved', { alertId, status });
   }

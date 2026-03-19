@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * ML Monitoring Service - Stub for testing
  * Provides ML model monitoring and tracking

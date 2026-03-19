@@ -1,3 +1,4 @@
+/* eslint-disable no-undef, no-unused-vars */
 const DmsServiceClass = require('../services/dmsService');
 const dmsService = new DmsServiceClass();
 const Document = require('../models/Document');

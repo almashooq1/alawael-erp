@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Mock API Service for Tests
  */

@@ -11,7 +11,7 @@ export const fetchLicenses = createAsyncThunk('licenses/fetchLicenses', async (_
     const response = await mobileApiService.get('/licenses', { cache: true });
     return response;
   } catch (error) {
-    return rejectWithValue(error.message);
+    return rejectWithValue('An internal error occurred');
   }
 });
 
@@ -20,7 +20,7 @@ export const fetchLicenseDetail = createAsyncThunk('licenses/fetchLicenseDetail'
     const response = await mobileApiService.get(`/licenses/${licenseId}`);
     return response;
   } catch (error) {
-    return rejectWithValue(error.message);
+    return rejectWithValue('An internal error occurred');
   }
 });
 
@@ -29,7 +29,7 @@ export const renewLicense = createAsyncThunk('licenses/renewLicense', async (lic
     const response = await mobileApiService.post(`/licenses/${licenseId}/renew`, {});
     return response;
   } catch (error) {
-    return rejectWithValue(error.message);
+    return rejectWithValue('An internal error occurred');
   }
 });
 

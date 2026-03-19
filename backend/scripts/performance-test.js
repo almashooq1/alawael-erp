@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable no-unused-vars */
 
 /**
  * 🚀 Performance Testing Script
@@ -23,24 +24,26 @@ const ENDPOINTS = [
 ];
 
 // Results storage
-let results = {
+const results = {
   startTime: null,
   endTime: null,
-  tests: []
+  tests: [],
 };
 
 /**
  * Make HTTP request
  */
-const makeRequest = (url) => {
+const makeRequest = url => {
   return new Promise((resolve, reject) => {
     const urlObj = new URL(url);
     const client = urlObj.protocol === 'https:' ? https : http;
     const startTime = Date.now();
 
-    const req = client.get(url, { timeout: 5000 }, (res) => {
+    const req = client.get(url, { timeout: 5000 }, res => {
       let data = '';
-      res.on('data', chunk => { data += chunk; });
+      res.on('data', chunk => {
+        data += chunk;
+      });
       res.on('end', () => {
         const duration = Date.now() - startTime;
         const cached = res.headers['x-cache'] === 'HIT';
@@ -59,7 +62,7 @@ const makeRequest = (url) => {
 /**
  * Run test for single endpoint
  */
-const testEndpoint = async (endpoint) => {
+const testEndpoint = async endpoint => {
   console.log(`\n📊 Testing: ${endpoint.name}`);
   const url = BASE_URL + endpoint.path;
   const times = [];
@@ -116,7 +119,7 @@ const testEndpoint = async (endpoint) => {
     median: times.sort((a, b) => a - b)[Math.floor(times.length / 2)],
     p95: times.sort((a, b) => a - b)[Math.floor(times.length * 0.95)],
     p99: times.sort((a, b) => a - b)[Math.floor(times.length * 0.99)],
-    cacheHitRate: Math.round((cacheHits.filter(h => h).length / times.length) * 100)
+    cacheHitRate: Math.round((cacheHits.filter(h => h).length / times.length) * 100),
   };
 
   // Display results
@@ -178,7 +181,9 @@ const runPerformanceTest = async () => {
 
   console.log(`\n📊 Overall Metrics:`);
   console.log(`   Total Requests: ${totalRequests}`);
-  console.log(`   Successful: ${totalSuccessful} (${Math.round((totalSuccessful / totalRequests) * 100)}%)`);
+  console.log(
+    `   Successful: ${totalSuccessful} (${Math.round((totalSuccessful / totalRequests) * 100)}%)`
+  );
   console.log(`   Average Response Time: ${avgResponseTime}ms`);
   console.log(`   Average Cache Hit Rate: ${averageCacheHit}%`);
   console.log(`   Test Duration: ${results.endTime - results.startTime}ms`);

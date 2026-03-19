@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * 🔍 Advanced Log Aggregation System
  *
@@ -10,6 +11,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const logger = require('../utils/logger');
 
 class LogAggregator {
   constructor(options = {}) {
@@ -334,7 +336,7 @@ class LogAggregator {
         });
 
         if (this.logs.length < initialLength) {
-          console.log(`[LogAggregator] Removed ${initialLength - this.logs.length} old logs`);
+          logger.info(`[LogAggregator] Removed ${initialLength - this.logs.length} old logs`);
         }
       },
       60 * 60 * 1000

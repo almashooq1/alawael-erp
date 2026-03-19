@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * Phase 7 - ML & Advanced Analytics Test Suite
  * Comprehensive tests for analytics, predictions, anomaly detection, and insights

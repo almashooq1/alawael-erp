@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Advanced HR Services
  * خدمات الموارد البشرية المتقدمة
@@ -24,7 +25,9 @@ class HRService {
 
       // توليد رقم الموظف
       const lastEmployee = await Employee.findOne().sort({ employeeId: -1 });
-      const newEmployeeId = 'EMP' + String((parseInt(lastEmployee?.employeeId.replace('EMP', '')) || 0) + 1).padStart(5, '0');
+      const newEmployeeId =
+        'EMP' +
+        String((parseInt(lastEmployee?.employeeId.replace('EMP', '')) || 0) + 1).padStart(5, '0');
 
       const employee = new Employee({
         ...employeeData,
@@ -33,7 +36,7 @@ class HRService {
 
       return await employee.save();
     } catch (error) {
-      throw new Error(`خطأ في إنشاء الموظف: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -51,14 +54,16 @@ class HRService {
 
       return await employee.save();
     } catch (error) {
-      throw new Error(`خطأ في تحديث الموظف: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
   // الحصول على ملف الموظف الشامل
   async getEmployeeProfile(employeeId) {
     try {
-      const employee = await Employee.findById(employeeId).populate('manager', 'fullName position').populate('projects');
+      const employee = await Employee.findById(employeeId)
+        .populate('manager', 'fullName position')
+        .populate('projects');
 
       if (!employee) {
         throw new Error('الموظف غير موجود');
@@ -75,7 +80,7 @@ class HRService {
         performanceReviews: performanceReviews.slice(0, 5),
       };
     } catch (error) {
-      throw new Error(`خطأ في جلب ملف الموظف: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -122,7 +127,7 @@ class HRService {
 
       return payrolls;
     } catch (error) {
-      throw new Error(`خطأ في إنشاء كشف الرواتب: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -131,12 +136,12 @@ class HRService {
     try {
       const payrolls = await Payroll.updateMany(
         { month, paymentStatus: 'pending' },
-        { paymentStatus: 'processed', approvalDate: new Date() },
+        { paymentStatus: 'processed', approvalDate: new Date() }
       );
 
       return payrolls;
     } catch (error) {
-      throw new Error(`خطأ في معالجة الرواتب: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -145,12 +150,12 @@ class HRService {
     try {
       const payrolls = await Payroll.updateMany(
         { month, paymentStatus: 'processed' },
-        { paymentStatus: 'transferred', paymentDate: new Date() },
+        { paymentStatus: 'transferred', paymentDate: new Date() }
       );
 
       return payrolls;
     } catch (error) {
-      throw new Error(`خطأ في تحويل الرواتب: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -158,14 +163,17 @@ class HRService {
   async getMonthlyPayrollSummary(month) {
     try {
       const summary = await Payroll.getMonthlyTotalPayroll(month);
-      const payrolls = await Payroll.find({ month }).populate('employeeId', 'fullName position department');
+      const payrolls = await Payroll.find({ month }).populate(
+        'employeeId',
+        'fullName position department'
+      );
 
       return {
         summary,
         payrolls,
       };
     } catch (error) {
-      throw new Error(`خطأ في جلب ملخص الرواتب: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -179,7 +187,7 @@ class HRService {
       const training = new Training(trainingData);
       return await training.save();
     } catch (error) {
-      throw new Error(`خطأ في إنشاء برنامج التدريب: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -197,7 +205,7 @@ class HRService {
 
       return training;
     } catch (error) {
-      throw new Error(`خطأ في تسجيل الموظفين: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -212,7 +220,7 @@ class HRService {
       await training.updateParticipantStatus(employeeId, 'completed', score);
       return training;
     } catch (error) {
-      throw new Error(`خطأ في إكمال البرنامج: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -231,7 +239,7 @@ class HRService {
       performance.calculateOverallRating();
       return await performance.save();
     } catch (error) {
-      throw new Error(`خطأ في إنشاء تقييم الأداء: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -245,7 +253,7 @@ class HRService {
 
       return await employee.addPerformanceRating(rating, 'manager', comments);
     } catch (error) {
-      throw new Error(`خطأ في إضافة التقييم: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -300,7 +308,7 @@ class HRService {
         averageTenure: tenure[0]?.avgTenure || 0,
       };
     } catch (error) {
-      throw new Error(`خطأ في جلب الإحصائيات: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -309,25 +317,30 @@ class HRService {
     try {
       return await Employee.getContractExpiringEmployees(daysThreshold);
     } catch (error) {
-      throw new Error(`خطأ في جلب العقود المنتهية: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
   // التقييمات المعلقة
   async getPendingReviews() {
     try {
-      return await Performance.find({ status: { $in: ['draft', 'submitted', 'reviewed'] } }).populate('employeeId', 'fullName');
+      return await Performance.find({
+        status: { $in: ['draft', 'submitted', 'reviewed'] },
+      }).populate('employeeId', 'fullName');
     } catch (error) {
-      throw new Error(`خطأ في جلب التقييمات المعلقة: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
   // الرواتب المعلقة
   async getPendingPayrolls() {
     try {
-      return await Payroll.find({ paymentStatus: { $in: ['pending', 'processed'] } }).populate('employeeId', 'fullName');
+      return await Payroll.find({ paymentStatus: { $in: ['pending', 'processed'] } }).populate(
+        'employeeId',
+        'fullName'
+      );
     } catch (error) {
-      throw new Error(`خطأ في جلب الرواتب المعلقة: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 
@@ -359,7 +372,7 @@ class HRService {
 
       return await Employee.find(query).limit(50);
     } catch (error) {
-      throw new Error(`خطأ في البحث: ${error.message}`);
+      throw new Error('حدث خطأ داخلي');
     }
   }
 }

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Project Management Routes
  * مسارات إدارة المشاريع
@@ -5,7 +6,11 @@
 
 const express = require('express');
 const router = express.Router();
+const { authenticateToken } = require('../../middleware/auth');
 const projectService = require('../../services/projectManagementService');
+
+// Require authentication for all project routes
+router.use(authenticateToken);
 
 // ===== Project CRUD =====
 

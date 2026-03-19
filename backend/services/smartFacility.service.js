@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const SmartNotificationService = require('./smartNotificationService');
 // Mock Database Models for simulation
 const MaintenanceLog = require('../models/Inventory'); // Reusing inventory for assets
@@ -52,7 +53,7 @@ class SmartFacilityService {
       await SmartNotificationService.broadcastToRole(
         'FACILITY_MANAGER',
         `Equipment Alert: ${equipmentId} is ${diagnostics.status}`,
-        'URGENT',
+        'URGENT'
       );
     }
 

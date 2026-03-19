@@ -1,7 +1,7 @@
 /**
  * ReportingDashboard Component
  * لوحة التقارير المالية المتقدمة
- * 
+ *
  * Features:
  * - تقارير مالية شاملة
  * - تحليل المقاييس المالية
@@ -61,10 +61,7 @@ const ReportingDashboard = () => {
   const [loading, setLoading] = useState(false);
   const [reportType, setReportType] = useState('income-statement');
   const [period, setPeriod] = useState('monthly');
-  const [dateRange, setDateRange] = useState([
-    dayjs().subtract(1, 'year'),
-    dayjs(),
-  ]);
+  const [dateRange, setDateRange] = useState([dayjs().subtract(1, 'year'), dayjs()]);
   const [metrics, setMetrics] = useState({});
   const [comparison, setComparison] = useState([]);
 
@@ -80,12 +77,9 @@ const ReportingDashboard = () => {
         to: dateRange[1].format('YYYY-MM-DD'),
       });
 
-      const response = await fetch(
-        `/api/finance/reporting/financial-report?${params}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const response = await fetch(`/api/finance/reporting/financial-report?${params}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       if (!response.ok) throw new Error('Failed to fetch reports');
 
@@ -101,7 +95,7 @@ const ReportingDashboard = () => {
     }
   }, [reportType, period, dateRange]);
 
-  const generateReport = async (format) => {
+  const generateReport = async format => {
     try {
       const token = localStorage.getItem('authToken');
       const params = new URLSearchParams({
@@ -113,12 +107,9 @@ const ReportingDashboard = () => {
       });
 
       setLoading(true);
-      const response = await fetch(
-        `/api/finance/reporting/generate-report?${params}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const response = await fetch(`/api/finance/reporting/generate-report?${params}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       if (!response.ok) throw new Error('Generation failed');
 
@@ -137,13 +128,13 @@ const ReportingDashboard = () => {
     }
   };
 
-  const scheduleReport = async (frequency) => {
+  const scheduleReport = async frequency => {
     try {
       const token = localStorage.getItem('authToken');
       const response = await fetch('/api/finance/reporting/schedule', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -202,24 +193,20 @@ const ReportingDashboard = () => {
       title: 'الفترة الحالية',
       dataIndex: 'current',
       key: 'current',
-      render: (value) => (
-        <span>ر.س {Number(value || 0).toLocaleString('ar-SA')}</span>
-      ),
+      render: value => <span>ر.س {Number(value || 0).toLocaleString('ar-SA')}</span>,
     },
     {
       title: 'الفترة السابقة',
       dataIndex: 'previous',
       key: 'previous',
-      render: (value) => (
-        <span>ر.س {Number(value || 0).toLocaleString('ar-SA')}</span>
-      ),
+      render: value => <span>ر.س {Number(value || 0).toLocaleString('ar-SA')}</span>,
     },
     {
       title: 'التغيير',
       dataIndex: 'change',
       key: 'change',
       render: (_, record) => {
-        const change = (record.current - record.previous) || 0;
+        const change = record.current - record.previous || 0;
         const percentage = record.previous ? ((change / record.previous) * 100).toFixed(2) : 0;
         return (
           <Space>
@@ -244,7 +231,7 @@ const ReportingDashboard = () => {
       title: 'القيمة',
       dataIndex: 'value',
       key: 'value',
-      render: (value) => <strong>{value}</strong>,
+      render: value => <strong>{value}</strong>,
     },
     {
       title: 'التقييم',
@@ -351,7 +338,7 @@ const ReportingDashboard = () => {
           <Col xs={24} sm={12} md={6}>
             <DatePicker.RangePicker
               value={dateRange}
-              onChange={(dates) => setDateRange(dates)}
+              onChange={dates => setDateRange(dates)}
               style={{ width: '100%' }}
             />
           </Col>
@@ -399,7 +386,7 @@ const ReportingDashboard = () => {
                 { label: 'أسبوعي', value: 'weekly' },
                 { label: 'شهري', value: 'monthly' },
               ]}
-              onChange={(freq) => scheduleReport(freq)}
+              onChange={freq => scheduleReport(freq)}
               style={{ width: '100%' }}
             />
           </Col>
@@ -442,18 +429,8 @@ const ReportingDashboard = () => {
                         <YAxis />
                         <RechartsTooltip />
                         <Legend />
-                        <Line
-                          type="monotone"
-                          dataKey="actual"
-                          stroke="#1890ff"
-                          name="الفعلي"
-                        />
-                        <Line
-                          type="monotone"
-                          dataKey="budget"
-                          stroke="#52c41a"
-                          name="الميزانية"
-                        />
+                        <Line type="monotone" dataKey="actual" stroke="#1890ff" name="الفعلي" />
+                        <Line type="monotone" dataKey="budget" stroke="#52c41a" name="الميزانية" />
                       </LineChart>
                     </ResponsiveContainer>
                   </Card>
@@ -531,7 +508,13 @@ const Input = ({ placeholder, style }) => (
   <input
     type="text"
     placeholder={placeholder}
-    style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #d9d9d9', ...style }}
+    style={{
+      width: '100%',
+      padding: '8px',
+      borderRadius: '4px',
+      border: '1px solid #d9d9d9',
+      ...style,
+    }}
   />
 );
 

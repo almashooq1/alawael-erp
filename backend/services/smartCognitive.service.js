@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * PHASE 100: Smart Cognitive Training Unit
  * Provides computerized cognitive exercises with auto-adaptive difficulty.
@@ -6,6 +7,7 @@
 
 const SmartDigitalTwinService = require('./smartDigitalTwin.service'); // To update the twin
 // const Patient = require('../models/Beneficiary'); // Assuming we link to patient
+const logger = require('../utils/logger');
 
 class SmartCognitiveService {
   constructor() {
@@ -142,8 +144,8 @@ class SmartCognitiveService {
     try {
       // In a full system, this would call the Twin service
       // const twinUpdate = await SmartDigitalTwinService.updateCognitiveState(...)
-    } catch (e) {
-      console.warn('Twin update skipped in mock');
+    } catch (_e) {
+      logger.warn('Twin update skipped in mock');
     }
 
     return {
@@ -167,7 +169,9 @@ class SmartCognitiveService {
       summary[domain] = {
         currentLevel: progress[domain].level,
         sessionsCompleted: progress[domain].history.length,
-        averageScore: progress[domain].history.reduce((a, b) => a + b.score, 0) / (progress[domain].history.length || 1),
+        averageScore:
+          progress[domain].history.reduce((a, b) => a + b.score, 0) /
+          (progress[domain].history.length || 1),
       };
     });
 

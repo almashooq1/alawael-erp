@@ -1,0 +1,451 @@
+/**
+ * Student Management System - Styling
+ * CSS styles for Student Portal and Admin Dashboard
+ */
+
+/* ============ STUDENT DASHBOARD ============ */
+
+.student-dashboard {
+  padding: 24px;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+.student-dashboard.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+/* Dashboard Header */
+.dashboard-header {
+  margin-bottom: 24px;
+}
+
+.header-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.header-card :global(.ant-card-body) {
+  padding: 24px;
+}
+
+.student-avatar {
+  border: 4px solid white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.header-content h1 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 600;
+  color: white;
+}
+
+.header-content p {
+  margin: 8px 0;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 14px;
+}
+
+.student-id {
+  font-weight: 500;
+}
+
+.major {
+  font-size: 13px;
+}
+
+/* Statistics Row */
+.statistics-row {
+  margin-bottom: 24px;
+}
+
+.statistics-row :global(.ant-card) {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.statistics-row :global(.ant-card:hover) {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.statistics-row :global(.ant-statistic-title) {
+  font-size: 12px;
+  color: #8c8c8c;
+  font-weight: 500;
+}
+
+.statistics-row :global(.ant-statistic-content) {
+  font-size: 24px;
+  color: #1890ff;
+  font-weight: 600;
+}
+
+/* Main Content Card */
+.main-content-card {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.main-content-card :global(.ant-card-body) {
+  padding: 24px;
+}
+
+/* Tab Content */
+.tab-content {
+  padding: 20px 0;
+}
+
+.action-buttons {
+  margin-bottom: 16px;
+}
+
+.action-buttons :global(.ant-btn) {
+  margin-right: 8px;
+  margin-bottom: 8px;
+}
+
+/* Announcements */
+.announcements {
+  padding: 16px 0;
+}
+
+.announcements :global(.ant-card) {
+  border-left: 4px solid #1890ff;
+}
+
+/* Quick Actions */
+.quick-actions {
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Table Styling */
+:global(.ant-table) {
+  font-size: 13px;
+}
+
+:global(.ant-table-thead > tr > th) {
+  background-color: #fafafa;
+  border-bottom: 2px solid #f0f0f0;
+  font-weight: 600;
+}
+
+:global(.ant-table-tbody > tr:hover > td) {
+  background-color: #f5f5f5;
+}
+
+/* Tags */
+:global(.ant-tag) {
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+:global(.ant-tag-green) {
+  background-color: #f6ffed;
+  border-color: #b7eb8f;
+  color: #52c41a;
+}
+
+:global(.ant-tag-blue) {
+  background-color: #e6f7ff;
+  border-color: #91d5ff;
+  color: #1890ff;
+}
+
+:global(.ant-tag-orange) {
+  background-color: #fff7e6;
+  border-color: #ffd591;
+  color: #fa8c16;
+}
+
+/* Progress Bar */
+:global(.ant-progress) {
+  margin: 16px 0;
+}
+
+/* ============ ADMIN DASHBOARD ============ */
+
+.admin-dashboard {
+  padding: 24px;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+.admin-dashboard .statistics-row {
+  margin-bottom: 24px;
+}
+
+.admin-dashboard .main-content-card {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 24px;
+}
+
+/* Modal Styling */
+:global(.ant-modal-content) {
+  border-radius: 8px;
+}
+
+:global(.ant-modal-header) {
+  border-bottom: 1px solid #f0f0f0;
+  padding: 16px 24px;
+}
+
+:global(.ant-modal-title) {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1890ff;
+}
+
+:global(.ant-form-item) {
+  margin-bottom: 16px;
+}
+
+:global(.ant-form-item-label > label) {
+  font-weight: 500;
+  color: #262626;
+}
+
+/* Input Styling */
+:global(.ant-input),
+:global(.ant-select),
+:global(.ant-picker) {
+  border-radius: 4px;
+  border: 1px solid #d9d9d9;
+  transition: all 0.3s ease;
+}
+
+:global(.ant-input:hover),
+:global(.ant-select:hover),
+:global(.ant-picker:hover) {
+  border-color: #1890ff;
+}
+
+:global(.ant-input:focus),
+:global(.ant-select:focus),
+:global(.ant-picker:focus) {
+  border-color: #1890ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}
+
+/* Button Styling */
+:global(.ant-btn-primary) {
+  background-color: #1890ff;
+  border-color: #1890ff;
+  border-radius: 4px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+:global(.ant-btn-primary:hover) {
+  background-color: #40a9ff;
+  border-color: #40a9ff;
+}
+
+:global(.ant-btn-default) {
+  border-radius: 4px;
+  border-color: #d9d9d9;
+  color: #1890ff;
+  transition: all 0.3s ease;
+}
+
+:global(.ant-btn-default:hover) {
+  color: #40a9ff;
+  border-color: #40a9ff;
+}
+
+:global(.ant-btn-danger) {
+  background-color: #ff4d4f;
+  border-color: #ff4d4f;
+  border-radius: 4px;
+}
+
+:global(.ant-btn-danger:hover) {
+  background-color: #ff7875;
+  border-color: #ff7875;
+}
+
+/* Popover/Tooltip */
+:global(.ant-popover-inner-content) {
+  padding: 12px 16px;
+}
+
+:global(.ant-tooltip-inner) {
+  border-radius: 4px;
+  background-color: rgba(0, 0, 0, 0.85);
+  padding: 8px 12px;
+  font-size: 12px;
+}
+
+/* Drawer Styling */
+:global(.ant-drawer) {
+  border-radius: 8px 0 0 8px;
+}
+
+:global(.ant-drawer-header) {
+  border-bottom: 1px solid #f0f0f0;
+  padding: 16px 24px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .student-dashboard,
+  .admin-dashboard {
+    padding: 16px;
+  }
+
+  .header-card :global(.ant-card-body) {
+    padding: 16px;
+  }
+
+  .header-content h1 {
+    font-size: 22px;
+  }
+
+  .statistics-row :global(.ant-col) {
+    margin-bottom: 12px;
+  }
+
+  .action-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .action-buttons :global(.ant-btn) {
+    margin-right: 0;
+    margin-bottom: 0;
+  }
+
+  :global(.ant-table) {
+    font-size: 12px;
+  }
+
+  :global(.ant-table-thead > tr > th) {
+    padding: 12px 8px;
+  }
+
+  :global(.ant-table-tbody > tr > td) {
+    padding: 12px 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .student-dashboard,
+  .admin-dashboard {
+    padding: 8px;
+  }
+
+  .header-content h1 {
+    font-size: 18px;
+  }
+
+  .header-content p {
+    font-size: 12px;
+  }
+
+  .statistics-row :global(.ant-statistic-title) {
+    font-size: 11px;
+  }
+
+  .statistics-row :global(.ant-statistic-content) {
+    font-size: 18px;
+  }
+
+  :global(.ant-table) {
+    font-size: 11px;
+  }
+}
+
+/* Animation */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.student-dashboard,
+.admin-dashboard {
+  animation: slideIn 0.3s ease-out;
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .student-dashboard,
+  .admin-dashboard {
+    background-color: #141414;
+  }
+
+  .main-content-card {
+    background-color: #1f1f1f;
+  }
+
+  .main-content-card :global(.ant-card-body) {
+    background-color: #1f1f1f;
+  }
+
+  .header-card {
+    background: linear-gradient(135deg, #1890ff 0%, #1f1f1f 100%);
+  }
+
+  .tab-content {
+    background-color: #1f1f1f;
+  }
+
+  .quick-actions {
+    background-color: #1f1f1f;
+  }
+
+  :global(.ant-table) {
+    background-color: #1f1f1f;
+  }
+
+  :global(.ant-table-thead > tr > th) {
+    background-color: #262626;
+  }
+
+  :global(.ant-table-tbody > tr:hover > td) {
+    background-color: #262626;
+  }
+}
+
+/* Print Styling */
+@media print {
+  .dashboard-header {
+    margin-bottom: 16px;
+  }
+
+  .statistics-row {
+    margin-bottom: 16px;
+    page-break-inside: avoid;
+  }
+
+  .main-content-card {
+    box-shadow: none;
+    border: 1px solid #d9d9d9;
+  }
+
+  .quick-actions {
+    display: none;
+  }
+
+  :global(.ant-btn) {
+    display: none;
+  }
+}

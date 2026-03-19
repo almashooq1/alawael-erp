@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const SmartNotificationService = require('./smartNotificationService');
 
 /**
@@ -27,7 +28,11 @@ class SmartSupportService {
     };
 
     // Notify the department head
-    await SmartNotificationService.broadcastToRole(assignedRole, `New ${ticketData.type}: ${ticketData.category}`, 'WARNING');
+    await SmartNotificationService.broadcastToRole(
+      assignedRole,
+      `New ${ticketData.type}: ${ticketData.category}`,
+      'WARNING'
+    );
 
     return newTicket;
   }

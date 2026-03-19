@@ -15,7 +15,8 @@
  * ✅ Loading states
  */
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { triggerUrlDownload } from 'utils/downloadHelper';
 import {
   Dialog,
   DialogTitle,
@@ -41,6 +42,7 @@ import {
   RotateRight as RotateRightIcon,
   Print as PrintIcon,
 } from '@mui/icons-material';
+import { gradients, surfaceColors } from 'theme/palette';
 
 const FilePreviewDialog = ({ open, onClose, file, files = [], currentIndex = 0, onNavigate }) => {
   const [loading, setLoading] = useState(true);
@@ -99,10 +101,7 @@ const FilePreviewDialog = ({ open, onClose, file, files = [], currentIndex = 0, 
 
   const handleDownload = () => {
     if (previewUrl) {
-      const link = document.createElement('a');
-      link.href = previewUrl;
-      link.download = file.originalFileName || file.name || 'download';
-      link.click();
+      triggerUrlDownload(previewUrl, file.originalFileName || file.name || 'download');
     }
   };
 
@@ -133,7 +132,10 @@ const FilePreviewDialog = ({ open, onClose, file, files = [], currentIndex = 0, 
     const mimeType = file.fileType || file.type || '';
 
     // Images
-    if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'].includes(extension) || mimeType.startsWith('image/')) {
+    if (
+      ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'].includes(extension) ||
+      mimeType.startsWith('image/')
+    ) {
       return 'image';
     }
 
@@ -153,7 +155,10 @@ const FilePreviewDialog = ({ open, onClose, file, files = [], currentIndex = 0, 
     }
 
     // Text
-    if (['txt', 'md', 'json', 'xml', 'csv', 'log'].includes(extension) || mimeType.startsWith('text/')) {
+    if (
+      ['txt', 'md', 'json', 'xml', 'csv', 'log'].includes(extension) ||
+      mimeType.startsWith('text/')
+    ) {
       return 'text';
     }
 
@@ -163,7 +168,9 @@ const FilePreviewDialog = ({ open, onClose, file, files = [], currentIndex = 0, 
   const renderPreview = () => {
     if (loading) {
       return (
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 400 }}>
+        <Box
+          sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 400 }}
+        >
           <CircularProgress />
         </Box>
       );
@@ -209,7 +216,13 @@ const FilePreviewDialog = ({ open, onClose, file, files = [], currentIndex = 0, 
       case 'pdf':
         return (
           <Box sx={{ width: '100%', height: '70vh' }}>
-            <iframe src={previewUrl} width="100%" height="100%" style={{ border: 'none' }} title="PDF Preview" />
+            <iframe
+              src={previewUrl}
+              width="100%"
+              height="100%"
+              style={{ border: 'none' }}
+              title="PDF Preview"
+            />
           </Box>
         );
 
@@ -224,7 +237,15 @@ const FilePreviewDialog = ({ open, onClose, file, files = [], currentIndex = 0, 
 
       case 'audio':
         return (
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 200, p: 3 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              minHeight: 200,
+              p: 3,
+            }}
+          >
             <audio controls style={{ width: '100%' }} src={previewUrl}>
               متصفحك لا يدعم تشغيل الصوت.
             </audio>
@@ -238,7 +259,7 @@ const FilePreviewDialog = ({ open, onClose, file, files = [], currentIndex = 0, 
               src={previewUrl}
               width="100%"
               height="600px"
-              style={{ border: '1px solid #ddd', borderRadius: '8px' }}
+              style={{ border: `1px solid ${surfaceColors.borderLight}`, borderRadius: '8px' }}
               title="Text Preview"
             />
           </Box>
@@ -280,7 +301,7 @@ const FilePreviewDialog = ({ open, onClose, file, files = [], currentIndex = 0, 
       {/* Title Bar */}
       <DialogTitle
         sx={{
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          background: gradients.primary,
           color: 'white',
           display: 'flex',
           alignItems: 'center',
@@ -301,7 +322,7 @@ const FilePreviewDialog = ({ open, onClose, file, files = [], currentIndex = 0, 
             />
           )}
         </Box>
-        <IconButton onClick={onClose} sx={{ color: 'white' }}>
+        <IconButton onClick={onClose} sx={{ color: 'white' }} aria-label="إغلاق">
           <CloseIcon />
         </IconButton>
       </DialogTitle>
@@ -314,20 +335,30 @@ const FilePreviewDialog = ({ open, onClose, file, files = [], currentIndex = 0, 
           justifyContent: 'space-between',
           px: 2,
           py: 1,
-          borderBottom: '1px solid #e0e0e0',
-          bgcolor: '#f5f5f5',
+          borderBottom: `1px solid ${surfaceColors.divider}`,
+          bgcolor: surfaceColors.lightGray,
         }}
       >
         <Stack direction="row" spacing={1}>
           {canZoom && (
             <>
               <Tooltip title="تكبير">
-                <IconButton size="small" onClick={handleZoomIn} disabled={zoom >= 200}>
+                <IconButton
+                  size="small"
+                  onClick={handleZoomIn}
+                  disabled={zoom >= 200}
+                  aria-label="تكبير"
+                >
                   <ZoomInIcon />
                 </IconButton>
               </Tooltip>
               <Tooltip title="تصغير">
-                <IconButton size="small" onClick={handleZoomOut} disabled={zoom <= 50}>
+                <IconButton
+                  size="small"
+                  onClick={handleZoomOut}
+                  disabled={zoom <= 50}
+                  aria-label="تصغير"
+                >
                   <ZoomOutIcon />
                 </IconButton>
               </Tooltip>
@@ -338,14 +369,14 @@ const FilePreviewDialog = ({ open, onClose, file, files = [], currentIndex = 0, 
           )}
           {canRotate && (
             <Tooltip title="تدوير">
-              <IconButton size="small" onClick={handleRotate}>
+              <IconButton size="small" onClick={handleRotate} aria-label="تدوير">
                 <RotateRightIcon />
               </IconButton>
             </Tooltip>
           )}
           {canPrint && (
             <Tooltip title="طباعة">
-              <IconButton size="small" onClick={handlePrint}>
+              <IconButton size="small" onClick={handlePrint} aria-label="طباعة">
                 <PrintIcon />
               </IconButton>
             </Tooltip>
@@ -357,7 +388,12 @@ const FilePreviewDialog = ({ open, onClose, file, files = [], currentIndex = 0, 
             <>
               <Tooltip title="السابق">
                 <span>
-                  <IconButton size="small" onClick={() => handleNavigate('prev')} disabled={currentIndex === 0}>
+                  <IconButton
+                    size="small"
+                    onClick={() => handleNavigate('prev')}
+                    disabled={currentIndex === 0}
+                    aria-label="الصفحة السابقة"
+                  >
                     <NavigateBeforeIcon />
                   </IconButton>
                 </span>
@@ -367,7 +403,12 @@ const FilePreviewDialog = ({ open, onClose, file, files = [], currentIndex = 0, 
               </Typography>
               <Tooltip title="التالي">
                 <span>
-                  <IconButton size="small" onClick={() => handleNavigate('next')} disabled={currentIndex >= files.length - 1}>
+                  <IconButton
+                    size="small"
+                    onClick={() => handleNavigate('next')}
+                    disabled={currentIndex >= files.length - 1}
+                    aria-label="الصفحة التالية"
+                  >
                     <NavigateNextIcon />
                   </IconButton>
                 </span>
@@ -381,7 +422,7 @@ const FilePreviewDialog = ({ open, onClose, file, files = [], currentIndex = 0, 
       <DialogContent sx={{ p: 0, overflow: 'hidden' }}>{renderPreview()}</DialogContent>
 
       {/* Actions */}
-      <DialogActions sx={{ px: 3, py: 2, borderTop: '1px solid #e0e0e0' }}>
+      <DialogActions sx={{ px: 3, py: 2, borderTop: `1px solid ${surfaceColors.divider}` }}>
         <Button onClick={onClose} variant="outlined" sx={{ borderRadius: 2 }}>
           إغلاق
         </Button>
@@ -391,7 +432,7 @@ const FilePreviewDialog = ({ open, onClose, file, files = [], currentIndex = 0, 
           startIcon={<DownloadIcon />}
           sx={{
             borderRadius: 2,
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            background: gradients.primary,
           }}
         >
           تنزيل

@@ -1,7 +1,8 @@
+/* eslint-disable no-undef, no-unused-vars */
 const DmsServiceClass = require('../services/dmsService');
 const dmsService = new DmsServiceClass();
 const Document = require('../models/Document');
-const User = require('../models/User');
+const _User = require('../models/User');
 
 // Mock Mongoose Models
 jest.mock('../models/Document');
@@ -52,7 +53,9 @@ describe('Phase 8: Document Management+ (DMS)', () => {
     test('createNewVersion should throw if document not found', async () => {
       Document.findById.mockResolvedValue(null);
 
-      await expect(dmsInstance.createNewVersion('badId', {}, 'u1')).rejects.toThrow('Document not found');
+      await expect(dmsInstance.createNewVersion('badId', {}, 'u1')).rejects.toThrow(
+        'Document not found'
+      );
     });
   });
 

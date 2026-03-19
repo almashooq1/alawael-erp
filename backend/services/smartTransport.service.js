@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+const logger = require('../utils/logger');
 /**
  * PHASE 114: Smart Transport & Logistics Unit
  * Manages ambulance dispatch, patient transport scheduling, and fleet tracking.
@@ -5,7 +7,7 @@
 
 class SmartTransportService {
   constructor() {
-    console.log('System: Smart Transport & Logistics Unit - Initialized');
+    logger.info('System: Smart Transport & Logistics Unit - Initialized');
 
     // In-memory mock DB
     this.vehicles = new Map();
@@ -88,8 +90,9 @@ class SmartTransportService {
     // Naive mock: Find first available vehicle of correct type
     const requiredType = priority === 'EMERGENCY' ? 'AMBULANCE' : 'SHUTTLE';
     return (
-      Array.from(this.vehicles.values()).find(v => v.status === 'AVAILABLE' && v.type === requiredType) ||
-      Array.from(this.vehicles.values()).find(v => v.status === 'AVAILABLE')
+      Array.from(this.vehicles.values()).find(
+        v => v.status === 'AVAILABLE' && v.type === requiredType
+      ) || Array.from(this.vehicles.values()).find(v => v.status === 'AVAILABLE')
     ); // Fallback
   }
 

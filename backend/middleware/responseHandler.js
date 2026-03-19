@@ -8,6 +8,17 @@ const responseHandler = (req, res, next) => {
       success: true,
       message,
       data,
+      requestId: req.id || undefined,
+    });
+  };
+
+  // Created response (201)
+  res.created = (data, message = 'Created successfully') => {
+    return res.status(201).json({
+      success: true,
+      message,
+      data,
+      requestId: req.id || undefined,
     });
   };
 
@@ -17,22 +28,42 @@ const responseHandler = (req, res, next) => {
       success: false,
       message,
       data,
+      requestId: req.id || undefined,
+    });
+  };
+
+  // Validation error response (400)
+  res.validationError = (errors, message = 'Validation failed') => {
+    return res.status(400).json({
+      success: false,
+      message,
+      errors: Array.isArray(errors) ? errors : [errors],
+      requestId: req.id || undefined,
     });
   };
 
   // Paginated response
   res.paginated = (data, total, limit, offset, message = 'Success') => {
+    const parsedLimit = parseInt(limit) || 20;
+    const parsedOffset = parseInt(offset) || 0;
     return res.status(200).json({
       success: true,
       message,
       data,
       pagination: {
         total,
-        limit: parseInt(limit),
-        offset: parseInt(offset),
-        pages: Math.ceil(total / limit),
+        limit: parsedLimit,
+        offset: parsedOffset,
+        pages: Math.ceil(total / parsedLimit),
+        hasMore: parsedOffset + parsedLimit < total,
       },
+      requestId: req.id || undefined,
     });
+  };
+
+  // No content response (204)
+  res.noContent = () => {
+    return res.status(204).end();
   };
 
   next();

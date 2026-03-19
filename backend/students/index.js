@@ -1,13 +1,12 @@
+/* eslint-disable no-unused-vars */
 /**
  * Student Management Module
  * وحدة إدارة الطلاب الشاملة لمراكز التأهيل
  */
 
-const {
-  StudentService,
-  studentService,
-  studentConfig,
-} = require('./student-service');
+const logger = require('../utils/logger');
+
+const { StudentService, studentService, studentConfig } = require('./student-service');
 
 const studentRoutes = require('./student-routes');
 
@@ -16,7 +15,7 @@ const studentRoutes = require('./student-routes');
  */
 async function initialize(connection) {
   await studentService.initialize(connection);
-  console.log('✅ Student Module initialized');
+  logger.info('✅ Student Module initialized');
   return { studentService };
 }
 
@@ -45,13 +44,13 @@ module.exports = {
   // Service
   StudentService,
   studentService,
-  
+
   // Configuration
   studentConfig,
-  
+
   // Routes
   studentRoutes,
-  
+
   // Helpers
   initialize,
   getServices,

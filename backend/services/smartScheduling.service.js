@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const TherapySession = require('../models/TherapySession');
 const Waitlist = require('../models/Waitlist');
 const Employee = require('../models/Employee');
@@ -96,7 +97,7 @@ class SmartSchedulingService {
         'Gap Filler Opportunity',
         `Session cancelled on ${session.date.toDateString()}. ${bestCandidate.beneficiary.firstName} is on waitlist for this time!`,
         'info',
-        `/rehab/waitlist/${bestCandidate._id}`,
+        `/rehab/waitlist/${bestCandidate._id}`
       );
 
       return { foundReplacement: true, candidate: bestCandidate };

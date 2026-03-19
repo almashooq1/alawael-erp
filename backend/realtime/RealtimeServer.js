@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars, no-undef, no-empty, prefer-const, no-constant-condition, no-unused-expressions */
 /**
  * Real-time Communication Server - Phase 10
  * WebSocket server for live updates, notifications, and collaborative features
@@ -6,6 +7,7 @@
 const WebSocket = require('ws');
 const { EventEmitter } = require('events');
 const jwt = require('jsonwebtoken');
+const logger = require('../utils/logger');
 
 class RealtimeServer extends EventEmitter {
   constructor(httpServer, options = {}) {
@@ -110,7 +112,7 @@ class RealtimeServer extends EventEmitter {
           this.emit('message:received', { clientId, message });
       }
     } catch (error) {
-      console.error('Message handling error:', error);
+      logger.error('Message handling error:', error);
     }
   }
 
@@ -244,7 +246,7 @@ class RealtimeServer extends EventEmitter {
   }
 
   handleError(clientId, error) {
-    console.error(`WebSocket error for ${clientId}:`, error);
+    logger.error(`WebSocket error for ${clientId}:`, error);
     this.emit('client:error', { clientId, error });
   }
 
@@ -279,8 +281,8 @@ class RealtimeServer extends EventEmitter {
 
   authenticateToken(token) {
     try {
-      const secret = process.env.JWT_SECRET || 'secret-key';
-      const decoded = jwt.verify(token, secret);
+      const { jwtSecret } = require('../config/secrets');
+      const decoded = jwt.verify(token, jwtSecret);
       return decoded.userId;
     } catch (error) {
       return null;

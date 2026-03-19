@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 const { v4: uuidv4 } = require('uuid');
 
@@ -73,7 +74,9 @@ if (!useMock) {
 
       const chainable = data => ({
         sort(sortObj = {}) {
-          const [[key, direction]] = Object.entries(sortObj).length ? Object.entries(sortObj) : [['createdAt', -1]];
+          const [[key, direction]] = Object.entries(sortObj).length
+            ? Object.entries(sortObj)
+            : [['createdAt', -1]];
           const sorted = [...data].sort((a, b) => {
             const aVal = a[key] instanceof Date ? a[key].getTime() : a[key];
             const bVal = b[key] instanceof Date ? b[key].getTime() : b[key];

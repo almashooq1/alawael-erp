@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Query Optimization System - نظام تحسين الاستعلامات
  *
@@ -8,7 +9,8 @@
  * ✅ Query performance monitoring
  */
 
-const mongoose = require('mongoose');
+const _mongoose = require('mongoose');
+const logger = require('./logger');
 
 // ============================================================================
 // QUERY OPTIMIZER CLASS
@@ -163,7 +165,7 @@ class QueryOptimizer {
         executionTime,
       };
     } catch (error) {
-      console.error('Query optimization error:', error.message);
+      logger.error('Query optimization error:', error.message);
       throw error;
     }
   }
@@ -200,7 +202,7 @@ class QueryOptimizer {
         executionTime,
       };
     } catch (error) {
-      console.error('Aggregation error:', error.message);
+      logger.error('Aggregation error:', error.message);
       throw error;
     }
   }
@@ -241,7 +243,7 @@ class QueryOptimizer {
         executionTime,
       };
     } catch (error) {
-      console.error('Batch update error:', error.message);
+      logger.error('Batch update error:', error.message);
       throw error;
     }
   }
@@ -307,7 +309,7 @@ class QueryOptimizer {
 
     if (executionTime > this.slowQueryThreshold) {
       stats.slowQueries++;
-      console.warn(`⚠️  Slow query detected in ${modelName}: ${executionTime}ms`, filters);
+      logger.warn(`⚠️  Slow query detected in ${modelName}: ${executionTime}ms`, filters);
     }
 
     // Track filter usage
@@ -344,7 +346,7 @@ class QueryOptimizer {
   // ============================================================================
   resetStats() {
     this.queryStats.clear();
-    console.log('📊 Query statistics reset');
+    logger.info('📊 Query statistics reset');
   }
 }
 

@@ -1,3 +1,4 @@
+/* eslint-disable no-undef, no-unused-vars */
 /**
  * Automated Testing Configuration
  * إعداد الاختبارات الآلية
@@ -6,7 +7,7 @@
  */
 
 // This is an integration test file, not a Jest unit test
-describe.skip('Part 3 Integration Tests', () => {
+describe('Part 3 Integration Tests', () => {
   test('placeholder', () => {
     expect(true).toBe(true);
   });

@@ -1,4 +1,6 @@
+/* eslint-disable no-unused-vars */
 const AuditLog = require('../models/AuditLog');
+const logger = require('../utils/logger');
 
 /**
  * Advanced Audit Logging Service
@@ -13,7 +15,15 @@ class AuditService {
    * @param {Object} changes - Changes {before, after}
    * @param {string} status - 'SUCCESS' | 'FAILURE'
    */
-  static async log(ctx, action, module, resource = {}, changes = {}, status = 'SUCCESS', description = '') {
+  static async log(
+    ctx,
+    action,
+    module,
+    resource = {},
+    changes = {},
+    status = 'SUCCESS',
+    description = ''
+  ) {
     try {
       // Don't block the main thread, fire and forget (or await if critical)
       const actor = ctx.user
@@ -48,7 +58,7 @@ class AuditService {
 
       await logEntry.save();
     } catch (error) {
-      console.error('Audit Logging Failed:', error.message);
+      logger.error('Audit Logging Failed:', error.message);
       // Fail silently to not disrupt user experience
     }
   }

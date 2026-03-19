@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Container,
@@ -17,9 +17,12 @@ import {
   Card,
   CardContent,
 } from '@mui/material';
-import { Add as AddIcon } from '@mui/icons-material';
-import axios from 'axios';
+import { Add as AddIcon, Assignment as AssignmentIcon } from '@mui/icons-material';
+import apiClient from 'services/api.client';
 import { useNavigate } from 'react-router-dom';
+import logger from 'utils/logger';
+import { useSnackbar } from 'contexts/SnackbarContext';
+import { gradients } from '../../theme/palette';
 
 // Section Types Definition
 const DOMAINS = {
@@ -29,6 +32,7 @@ const DOMAINS = {
 };
 
 function CreateCarePlan() {
+  const showSnackbar = useSnackbar();
   const navigate = useNavigate();
   const [activeStep, setActiveStep] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -45,13 +49,19 @@ function CreateCarePlan() {
   });
 
   useEffect(() => {
-    // 1. Fetch Students (Mock or Real)
-    // axios.get('/api/students').then(res => setStudents(res.data));
-    // For now, using mock if endpoint not ready
-    setStudents([
-      { _id: '678509efc8619e0780280459', name: 'أحمد محمد' }, // Example ID from existing mock data usually
-      { _id: '678509efc8619e0780280460', name: 'سارة علي' },
-    ]);
+    const fetchStudents = async () => {
+      try {
+        const res = await apiClient.get('/integrated-care/students');
+        const list = Array.isArray(res) ? res : res?.data || [];
+        setStudents(list);
+      } catch {
+        setStudents([
+          { _id: '678509efc8619e0780280459', name: 'أحمد محمد' },
+          { _id: '678509efc8619e0780280460', name: 'سارة علي' },
+        ]);
+      }
+    };
+    fetchStudents();
   }, []);
 
   // --- HANDLERS ---
@@ -133,11 +143,11 @@ function CreateCarePlan() {
   const handleSubmit = async () => {
     try {
       setLoading(true);
-      await axios.post('/api/integrated-care/plans', formData);
+      await apiClient.post('/integrated-care/plans', formData);
       navigate('/integrated-care');
     } catch (err) {
-      console.error(err);
-      alert('Error creating plan');
+      logger.error(err);
+      showSnackbar('خطأ في إنشاء الخطة', 'error');
     } finally {
       setLoading(false);
     }
@@ -145,8 +155,8 @@ function CreateCarePlan() {
 
   // --- RENDERERS ---
 
-  const renderSectionStep = (sectionName, title) => {
-    if (!formData[sectionName].enabled) return <Typography>This section is disabled.</Typography>;
+  const renderSectionStep = (sectionName, _title) => {
+    if (!formData[sectionName].enabled) return <Typography>هذا القسم غير مفعّل.</Typography>;
 
     return (
       <Grid container spacing={3}>
@@ -160,7 +170,7 @@ function CreateCarePlan() {
 
                 <TextField
                   fullWidth
-                  label="General Notes / Baseline"
+                  label="ملاحظات عامة / خط الأساس"
                   multiline
                   rows={2}
                   sx={{ mb: 2 }}
@@ -168,19 +178,19 @@ function CreateCarePlan() {
                 />
 
                 <Typography variant="subtitle2" gutterBottom>
-                  Goals:
+                  الأهداف:
                 </Typography>
                 {(formData[sectionName].domains?.[domain]?.goals || []).map((goal, idx) => (
                   <Box key={idx} sx={{ display: 'flex', gap: 1, mb: 1 }}>
                     <TextField
-                      label="Goal Title"
+                      label="عنوان الهدف"
                       size="small"
                       fullWidth
                       value={goal.title}
                       onChange={e => updateGoal(sectionName, domain, idx, 'title', e.target.value)}
                     />
                     <TextField
-                      label="Target Criteria"
+                      label="معايير الهدف"
                       size="small"
                       sx={{ width: '150px' }}
                       value={goal.target}
@@ -194,7 +204,7 @@ function CreateCarePlan() {
                   size="small"
                   onClick={() => addGoal(sectionName, domain)}
                 >
-                  Add Goal
+                  إضافة هدف
                 </Button>
               </CardContent>
             </Card>
@@ -205,18 +215,31 @@ function CreateCarePlan() {
   };
 
   const steps = [
-    'Basic Info',
-    'Educational Plan',
-    'Therapeutic Plan',
-    'Life Skills Plan',
-    'Review',
+    'المعلومات الأساسية',
+    'الخطة التعليمية',
+    'الخطة العلاجية',
+    'خطة المهارات الحياتية',
+    'المراجعة',
   ];
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+      {/* Header */}
+      <Box sx={{ background: gradients.success, borderRadius: 2, p: 3, mb: 4, color: 'white' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <AssignmentIcon sx={{ fontSize: 40 }} />
+          <Box>
+            <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+              إنشاء خطة رعاية
+            </Typography>
+            <Typography variant="body2">إعداد خطة رعاية متكاملة للمستفيد</Typography>
+          </Box>
+        </Box>
+      </Box>
+
       <Paper sx={{ p: 4 }}>
         <Typography variant="h4" gutterBottom>
-          Create Integrated Care Plan
+          إنشاء خطة رعاية متكاملة
         </Typography>
 
         <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
@@ -234,7 +257,7 @@ function CreateCarePlan() {
                 <TextField
                   select
                   fullWidth
-                  label="Beneficiary"
+                  label="المستفيد"
                   name="beneficiary"
                   value={formData.beneficiary}
                   onChange={handleBasicChange}
@@ -250,7 +273,7 @@ function CreateCarePlan() {
                 <TextField
                   type="date"
                   fullWidth
-                  label="Start Date"
+                  label="تاريخ البداية"
                   name="startDate"
                   value={formData.startDate}
                   onChange={handleBasicChange}
@@ -258,8 +281,8 @@ function CreateCarePlan() {
                 />
               </Grid>
               <Grid item xs={12}>
-                <Divider sx={{ my: 2 }}>Select Enabled Modules</Divider>
-                <div style={{ display: 'flex', gap: '20px' }}>
+                <Divider sx={{ my: 2 }}>اختيار الأقسام المفعلة</Divider>
+                <Box sx={{ display: 'flex', gap: '20px' }}>
                   <FormControlLabel
                     control={
                       <Switch
@@ -267,7 +290,7 @@ function CreateCarePlan() {
                         onChange={() => handleSectionToggle('educational')}
                       />
                     }
-                    label="Educational Plan"
+                    label="الخطة التعليمية"
                   />
                   <FormControlLabel
                     control={
@@ -276,7 +299,7 @@ function CreateCarePlan() {
                         onChange={() => handleSectionToggle('therapeutic')}
                       />
                     }
-                    label="Therapeutic Plan"
+                    label="الخطة العلاجية"
                   />
                   <FormControlLabel
                     control={
@@ -285,9 +308,9 @@ function CreateCarePlan() {
                         onChange={() => handleSectionToggle('lifeSkills')}
                       />
                     }
-                    label="Life Skills Plan"
+                    label="خطة المهارات الحياتية"
                   />
-                </div>
+                </Box>
               </Grid>
             </Grid>
           )}
@@ -298,15 +321,15 @@ function CreateCarePlan() {
 
           {activeStep === 4 && (
             <Box>
-              <Typography variant="h6">Summary</Typography>
-              <Typography>Beneficiary ID: {formData.beneficiary}</Typography>
-              <Typography>Start Date: {formData.startDate}</Typography>
+              <Typography variant="h6">الملخص</Typography>
+              <Typography>رقم المستفيد: {formData.beneficiary}</Typography>
+              <Typography>تاريخ البداية: {formData.startDate}</Typography>
               <Typography>
-                Modules:
+                الأقسام:
                 {[
-                  formData.educational.enabled ? ' Educational ' : '',
-                  formData.therapeutic.enabled ? ' Therapeutic ' : '',
-                  formData.lifeSkills.enabled ? ' Life Skills ' : '',
+                  formData.educational.enabled ? ' تعليمي ' : '',
+                  formData.therapeutic.enabled ? ' علاجي ' : '',
+                  formData.lifeSkills.enabled ? ' مهارات حياتية ' : '',
                 ]}
               </Typography>
               <Button
@@ -318,7 +341,7 @@ function CreateCarePlan() {
                 onClick={handleSubmit}
                 disabled={loading}
               >
-                {loading ? 'Creating...' : 'Create Plan'}
+                {loading ? 'جاري الإنشاء...' : 'إنشاء الخطة'}
               </Button>
             </Box>
           )}
@@ -326,11 +349,11 @@ function CreateCarePlan() {
 
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
           <Button disabled={activeStep === 0} onClick={() => setActiveStep(prev => prev - 1)}>
-            Back
+            السابق
           </Button>
           {activeStep < steps.length - 1 && (
             <Button variant="contained" onClick={() => setActiveStep(prev => prev + 1)}>
-              Next
+              التالي
             </Button>
           )}
         </Box>

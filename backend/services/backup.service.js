@@ -1,7 +1,9 @@
+/* eslint-disable no-unused-vars */
 const fs = require('fs');
 const path = require('path');
 const { spawn } = require('child_process');
 const AuditService = require('./audit.service');
+const logger = require('../utils/logger');
 
 // Resolve a writable backup directory and fall back gracefully if the first choice fails.
 const DEFAULT_BACKUP_DIR = path.join(__dirname, '../../backups/auto');
@@ -12,7 +14,7 @@ const ensureBackupDir = targetDir => {
     fs.mkdirSync(targetDir, { recursive: true });
     return targetDir;
   } catch (err) {
-    console.error(`⚠️  Backup dir not writable (${targetDir}): ${err.message}`);
+    logger.error(`⚠️  Backup dir not writable (${targetDir}): ${err.message}`);
     return null;
   }
 };
@@ -21,7 +23,7 @@ let BACKUP_DIR = process.env.BACKUP_DIR || DEFAULT_BACKUP_DIR;
 BACKUP_DIR = ensureBackupDir(BACKUP_DIR) || ensureBackupDir(FALLBACK_BACKUP_DIR);
 
 if (!BACKUP_DIR) {
-  console.error('❌ Backup directory unavailable; backup operations will be disabled.');
+  logger.error('❌ Backup directory unavailable; backup operations will be disabled.');
 }
 
 class BackupService {

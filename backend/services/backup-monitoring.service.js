@@ -1,9 +1,10 @@
+/* eslint-disable no-unused-vars */
 /**
  * ═══════════════════════════════════════════════════════════════════════
  * BACKUP MONITORING SERVICE
  * خدمة مراقبة النسخ الاحتياطية - نظام المراقبة الشامل
  * ═══════════════════════════════════════════════════════════════════════
- * 
+ *
  * Features:
  * ✅ Health Status Monitoring
  * ✅ Performance Metrics
@@ -17,6 +18,7 @@
 const EventEmitter = require('events');
 const path = require('path');
 const fs = require('fs').promises;
+const logger = require('../utils/logger');
 
 class BackupMonitoringService extends EventEmitter {
   constructor() {
@@ -45,7 +47,7 @@ class BackupMonitoringService extends EventEmitter {
    */
   async initializeMonitoring() {
     try {
-      console.log('🔍 Initializing backup monitoring system...');
+      // console.log('🔍 Initializing backup monitoring system...');
 
       // Start periodic health checks
       this.startHealthCheck();
@@ -56,9 +58,9 @@ class BackupMonitoringService extends EventEmitter {
       // Start alert manager
       this.startAlertManager();
 
-      console.log('✅ Monitoring system initialized');
+      // console.log('✅ Monitoring system initialized');
     } catch (error) {
-      console.error('❌ Failed to initialize monitoring:', error.message);
+      logger.error('❌ Failed to initialize monitoring:', error.message);
     }
   }
 
@@ -67,25 +69,28 @@ class BackupMonitoringService extends EventEmitter {
    * بدء مراقبة صحة النظام
    */
   startHealthCheck() {
-    const interval = setInterval(async () => {
-      try {
-        const health = await this.checkHealth();
-        this.healthStatus = health.status;
+    const interval = setInterval(
+      async () => {
+        try {
+          const health = await this.checkHealth();
+          this.healthStatus = health.status;
 
-        if (health.status !== 'HEALTHY') {
-          this.createAlert({
-            level: 'WARNING',
-            type: 'HEALTH_CHECK',
-            message: `Backup system health is ${health.status}`,
-            details: health.issues,
-          });
+          if (health.status !== 'HEALTHY') {
+            this.createAlert({
+              level: 'WARNING',
+              type: 'HEALTH_CHECK',
+              message: `Backup system health is ${health.status}`,
+              details: health.issues,
+            });
+          }
+
+          this.emit('health:checked', health);
+        } catch (error) {
+          logger.error('Health check error:', error.message);
         }
-
-        this.emit('health:checked', health);
-      } catch (error) {
-        console.error('Health check error:', error.message);
-      }
-    }, 5 * 60 * 1000); // Every 5 minutes
+      },
+      5 * 60 * 1000
+    ); // Every 5 minutes
 
     this.monitoringIntervals.set('health-check', interval);
   }
@@ -101,7 +106,7 @@ class BackupMonitoringService extends EventEmitter {
         this.updateMetrics(metrics);
         this.emit('metrics:collected', metrics);
       } catch (error) {
-        console.error('Metrics collection error:', error.message);
+        logger.error('Metrics collection error:', error.message);
       }
     }, 60 * 1000); // Every 1 minute
 
@@ -118,7 +123,7 @@ class BackupMonitoringService extends EventEmitter {
         await this.processAlerts();
         this.emit('alerts:processed', this.alerts);
       } catch (error) {
-        console.error('Alert processing error:', error.message);
+        logger.error('Alert processing error:', error.message);
       }
     }, 30 * 1000); // Every 30 seconds
 
@@ -196,7 +201,7 @@ class BackupMonitoringService extends EventEmitter {
       return {
         status: 'ERROR',
         timestamp: new Date(),
-        issues: [`Health check error: ${error.message}`],
+        issues: ['حدث خطأ داخلي'],
       };
     }
   }
@@ -213,29 +218,34 @@ class BackupMonitoringService extends EventEmitter {
       const completedBackups = backups.filter(b => b.status === 'COMPLETED');
       const failedBackups = backups.filter(b => b.status === 'FAILED');
 
-      const durations = completedBackups
-        .map(b => b.duration || 0)
-        .filter(d => d > 0);
+      const durations = completedBackups.map(b => b.duration || 0).filter(d => d > 0);
 
-      const sizes = completedBackups
-        .map(b => b.size || 0)
-        .filter(s => s > 0);
+      const sizes = completedBackups.map(b => b.size || 0).filter(s => s > 0);
 
       return {
         totalBackups: backups.length,
         successfulBackups: completedBackups.length,
         failedBackups: failedBackups.length,
         successRate: backups.length > 0 ? completedBackups.length / backups.length : 0,
-        averageDuration: durations.length > 0 ? durations.reduce((a, b) => a + b) / durations.length : 0,
+        averageDuration:
+          durations.length > 0 ? durations.reduce((a, b) => a + b) / durations.length : 0,
         averageSize: sizes.length > 0 ? sizes.reduce((a, b) => a + b) / sizes.length : 0,
         totalSize: sizes.reduce((a, b) => a + b, 0),
-        lastBackupTime: metadata.lastBackup ? new Date(backups.find(b => b.id === metadata.lastBackup)?.startTime) : null,
-        oldestBackup: backups.length > 0 ? new Date(Math.min(...backups.map(b => new Date(b.startTime)))) : null,
-        newestBackup: backups.length > 0 ? new Date(Math.max(...backups.map(b => new Date(b.startTime)))) : null,
+        lastBackupTime: metadata.lastBackup
+          ? new Date(backups.find(b => b.id === metadata.lastBackup)?.startTime)
+          : null,
+        oldestBackup:
+          backups.length > 0
+            ? new Date(Math.min(...backups.map(b => new Date(b.startTime))))
+            : null,
+        newestBackup:
+          backups.length > 0
+            ? new Date(Math.max(...backups.map(b => new Date(b.startTime))))
+            : null,
         timestamp: new Date(),
       };
     } catch (error) {
-      console.error('Error collecting metrics:', error.message);
+      logger.error('Error collecting metrics:', error.message);
       return null;
     }
   }
@@ -306,7 +316,7 @@ class BackupMonitoringService extends EventEmitter {
     } catch (error) {
       return {
         valid: false,
-        issues: [`Validation error: ${error.message}`],
+        issues: ['حدث خطأ داخلي'],
       };
     }
   }
@@ -331,7 +341,7 @@ class BackupMonitoringService extends EventEmitter {
     }
 
     this.emit('alert:created', newAlert);
-    console.log(`⚠️  Alert [${newAlert.level}]: ${newAlert.message}`);
+    // console.log(`⚠️  Alert [${newAlert.level}]: ${newAlert.message}`);
 
     return newAlert;
   }
@@ -385,7 +395,7 @@ class BackupMonitoringService extends EventEmitter {
         }
       }
     } catch (error) {
-      console.error('Alert processing error:', error.message);
+      logger.error('Alert processing error:', error.message);
     }
   }
 
@@ -396,14 +406,14 @@ class BackupMonitoringService extends EventEmitter {
   async sendNotification(alert) {
     try {
       // This can be integrated with email, SMS, or push notification services
-      console.log(`📢 Notification: [${alert.level}] ${alert.message}`);
+      // console.log(`📢 Notification: [${alert.level}] ${alert.message}`);
       this.emit('notification:sent', {
         alertId: alert.id,
         message: alert.message,
         timestamp: new Date(),
       });
     } catch (error) {
-      console.error('Notification error:', error.message);
+      logger.error('Notification error:', error.message);
     }
   }
 
@@ -429,18 +439,24 @@ class BackupMonitoringService extends EventEmitter {
         successfulBackups: relevantBackups.filter(b => b.status === 'COMPLETED').length,
         failedBackups: relevantBackups.filter(b => b.status === 'FAILED').length,
         skippedBackups: relevantBackups.filter(b => b.status === 'SKIPPED').length,
-        successRate: relevantBackups.length > 0 
-          ? (relevantBackups.filter(b => b.status === 'COMPLETED').length / relevantBackups.length * 100).toFixed(2) + '%'
-          : 'N/A',
+        successRate:
+          relevantBackups.length > 0
+            ? (
+                (relevantBackups.filter(b => b.status === 'COMPLETED').length /
+                  relevantBackups.length) *
+                100
+              ).toFixed(2) + '%'
+            : 'N/A',
         averageSize: this.formatFileSize(
           relevantBackups.reduce((sum, b) => sum + (b.size || 0), 0) / (relevantBackups.length || 1)
         ),
-        totalSize: this.formatFileSize(
-          relevantBackups.reduce((sum, b) => sum + (b.size || 0), 0)
-        ),
-        averageDuration: Math.round(
-          relevantBackups.reduce((sum, b) => sum + (b.duration || 0), 0) / (relevantBackups.length || 1) / 1000
-        ) + 's',
+        totalSize: this.formatFileSize(relevantBackups.reduce((sum, b) => sum + (b.size || 0), 0)),
+        averageDuration:
+          Math.round(
+            relevantBackups.reduce((sum, b) => sum + (b.duration || 0), 0) /
+              (relevantBackups.length || 1) /
+              1000
+          ) + 's',
         backups: relevantBackups.map(b => ({
           id: b.id,
           status: b.status,
@@ -453,7 +469,7 @@ class BackupMonitoringService extends EventEmitter {
 
       return report;
     } catch (error) {
-      console.error('Report generation error:', error.message);
+      logger.error('Report generation error:', error.message);
       return null;
     }
   }
@@ -542,7 +558,7 @@ class BackupMonitoringService extends EventEmitter {
   stop() {
     for (const [name, interval] of this.monitoringIntervals) {
       clearInterval(interval);
-      console.log(`⏹️  Stopped monitoring: ${name}`);
+      // console.log(`⏹️  Stopped monitoring: ${name}`);
     }
     this.monitoringIntervals.clear();
   }

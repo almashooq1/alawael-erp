@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import express from 'express';
 import Supplier from '../models/Supplier.js';
 import Product from '../models/Product.js';
@@ -8,7 +9,7 @@ import Shipment from '../models/Shipment.js';
 const router = express.Router();
 
 // إحصائيات سريعة للنظام
-router.get('/stats', async (req, res) => {
+router.get('/stats', async (_req, res) => {
   try {
     const [suppliers, products, inventory, orders, shipments] = await Promise.all([
       Supplier.countDocuments(),
@@ -24,13 +25,13 @@ router.get('/stats', async (req, res) => {
       orders,
       shipments,
     });
-  } catch (err) {
+  } catch (_err) {
     res.status(500).json({ error: 'خطأ في جلب الإحصائيات' });
   }
 });
 
 // تقارير متقدمة
-router.get('/advanced-reports', async (req, res) => {
+router.get('/advanced-reports', async (_req, res) => {
   try {
     // الطلبات حسب الحالة
     const ordersByStatus = await Order.aggregate([
@@ -66,7 +67,7 @@ router.get('/advanced-reports', async (req, res) => {
       productsPerSupplier,
       ordersByMonth,
     });
-  } catch (err) {
+  } catch (_err) {
     res.status(500).json({ error: 'خطأ في جلب التقارير المتقدمة' });
   }
 });

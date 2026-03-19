@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // Ensure environment variables are set or fallback to mocks
 const stripeSecret = process.env.STRIPE_SECRET_KEY || 'sk_test_mock';
 const stripe = require('stripe')(stripeSecret);
@@ -8,6 +9,7 @@ const Razorpay = require('razorpay');
 const Payment = require('../models/payment.model');
 const Invoice = require('../models/invoice.model');
 const Subscription = require('../models/subscription.model');
+const logger = require('../utils/logger');
 
 // Mock external services if credentials are missing
 const isMock = process.env.NODE_ENV === 'test' || !process.env.STRIPE_SECRET_KEY;
@@ -19,7 +21,11 @@ if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
     key_secret: process.env.RAZORPAY_KEY_SECRET,
   });
 } else {
-  razorpay = { orders: { create: async () => ({ id: 'order_mock_' + Date.now(), amount: 0, currency: 'SAR' }) } };
+  razorpay = {
+    orders: {
+      create: async () => ({ id: 'order_mock_' + Date.now(), amount: 0, currency: 'SAR' }),
+    },
+  };
 }
 
 paypal.configure({
@@ -38,7 +44,11 @@ class PaymentGatewayService {
 
       let paymentIntent;
       if (isMock) {
-        paymentIntent = { id: 'pi_mock_' + Date.now(), client_secret: 'secret_mock', status: 'succeeded' };
+        paymentIntent = {
+          id: 'pi_mock_' + Date.now(),
+          client_secret: 'secret_mock',
+          status: 'succeeded',
+        };
       } else {
         paymentIntent = await stripe.paymentIntents.create({
           amount: Math.round(amount * 100),
@@ -67,7 +77,7 @@ class PaymentGatewayService {
         payment: payment,
       };
     } catch (error) {
-      console.error('Stripe Payment Error:', error);
+      logger.error('Stripe Payment Error:', error);
       throw error;
     }
   }
@@ -76,7 +86,12 @@ class PaymentGatewayService {
    * معالجة الدفع عبر PayPal
    */
   async processPayPalPayment(userId, amount, description) {
-    if (isMock) return { success: true, paymentId: 'pay_mock_' + Date.now(), redirectUrl: 'http://localhost:3000/mock-success' };
+    if (isMock)
+      return {
+        success: true,
+        paymentId: 'pay_mock_' + Date.now(),
+        redirectUrl: 'http://localhost:3000/mock-success',
+      };
 
     try {
       const payment_json = {
@@ -88,7 +103,11 @@ class PaymentGatewayService {
         },
         transactions: [
           {
-            amount: { total: amount.toString(), currency: 'SAR', details: { subtotal: amount.toString() } },
+            amount: {
+              total: amount.toString(),
+              currency: 'SAR',
+              details: { subtotal: amount.toString() },
+            },
             description: description,
           },
         ],
@@ -125,7 +144,7 @@ class PaymentGatewayService {
         });
       });
     } catch (error) {
-      console.error('PayPal Payment Error:', error);
+      logger.error('PayPal Payment Error:', error);
       throw error;
     }
   }
@@ -161,7 +180,7 @@ class PaymentGatewayService {
         currency: order.currency,
       };
     } catch (error) {
-      console.error('Razorpay Payment Error:', error);
+      logger.error('Razorpay Payment Error:', error);
       throw error;
     }
   }
@@ -194,7 +213,7 @@ class PaymentGatewayService {
         installments: installments,
       };
     } catch (error) {
-      console.error('Installment Error:', error);
+      logger.error('Installment Error:', error);
       throw error;
     }
   }
@@ -208,7 +227,9 @@ class PaymentGatewayService {
       if (!payment) throw new Error('Payment not found');
 
       if (payment.stripePaymentIntentId && !isMock) {
-        const paymentIntent = await stripe.paymentIntents.confirm(payment.stripePaymentIntentId, { payment_method: token });
+        const paymentIntent = await stripe.paymentIntents.confirm(payment.stripePaymentIntentId, {
+          payment_method: token,
+        });
         payment.status = paymentIntent.status === 'succeeded' ? 'completed' : 'failed';
         payment.completedAt = paymentIntent.status === 'succeeded' ? new Date() : null;
       } else {
@@ -224,7 +245,7 @@ class PaymentGatewayService {
         payment: payment,
       };
     } catch (error) {
-      console.error('Confirm Payment Error:', error);
+      logger.error('Confirm Payment Error:', error);
       throw error;
     }
   }
@@ -252,7 +273,7 @@ class PaymentGatewayService {
       await payment.save();
       return { success: true, message: 'Refund successful', payment };
     } catch (error) {
-      console.error('Refund Error:', error);
+      logger.error('Refund Error:', error);
       throw error;
     }
   }
@@ -294,7 +315,7 @@ class PaymentGatewayService {
 
       return subscription;
     } catch (error) {
-      console.error('Create Subscription Error:', error);
+      logger.error('Create Subscription Error:', error);
       throw error;
     }
   }
@@ -320,7 +341,7 @@ class PaymentGatewayService {
       await invoice.save();
       return invoice;
     } catch (error) {
-      console.error('Create Invoice Error:', error);
+      logger.error('Create Invoice Error:', error);
       throw error;
     }
   }
@@ -330,27 +351,33 @@ class PaymentGatewayService {
       const payments = await Payment.find({ userId: userId }).sort({ createdAt: -1 }).limit(limit);
       return payments;
     } catch (error) {
-      console.error(error);
+      logger.error(error);
       return [];
     }
   }
 
   async getAllPayments(limit = 100) {
     try {
-      const payments = await Payment.find().sort({ createdAt: -1 }).limit(limit).populate('userId', 'name email');
+      const payments = await Payment.find()
+        .sort({ createdAt: -1 })
+        .limit(limit)
+        .populate('userId', 'name email');
       return payments;
     } catch (error) {
-      console.error(error);
+      logger.error(error);
       return [];
     }
   }
 
   async getAllInvoices(limit = 100) {
     try {
-      const invoices = await Invoice.find().sort({ createdAt: -1 }).limit(limit).populate('userId', 'name email');
+      const invoices = await Invoice.find()
+        .sort({ createdAt: -1 })
+        .limit(limit)
+        .populate('userId', 'name email');
       return invoices;
     } catch (error) {
-      console.error(error);
+      logger.error(error);
       return [];
     }
   }

@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * 📊 Advanced Monitoring & Observability Tests
  * اختبارات شاملة للمراقبة والملاحظة المتقدمة

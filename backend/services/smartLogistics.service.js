@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const SmartNotificationService = require('./smartNotificationService');
 
 /**
@@ -12,9 +13,23 @@ class SmartLogisticsService {
   static async checkStockAndReorder() {
     // Mock Database of Items
     const inventory = [
-      { id: 1, name: 'Surgical Masks', category: 'MEDICAL_CONSUMABLE', stock: 50, parLevel: 100, unit: 'Box' },
+      {
+        id: 1,
+        name: 'Surgical Masks',
+        category: 'MEDICAL_CONSUMABLE',
+        stock: 50,
+        parLevel: 100,
+        unit: 'Box',
+      },
       { id: 2, name: 'Sensory Sand', category: 'EDUCATIONAL', stock: 5, parLevel: 2, unit: 'Kg' }, // OK
-      { id: 3, name: 'Wheelchair Tires (12")', category: 'SPARE_PARTS', stock: 1, parLevel: 4, unit: 'Pair' },
+      {
+        id: 3,
+        name: 'Wheelchair Tires (12")',
+        category: 'SPARE_PARTS',
+        stock: 1,
+        parLevel: 4,
+        unit: 'Pair',
+      },
     ];
 
     const purchaseRequests = [];
@@ -35,7 +50,7 @@ class SmartLogisticsService {
       await SmartNotificationService.broadcastToRole(
         'PROCUREMENT_OFFICER',
         `Stock Alert: ${purchaseRequests.length} items need reordering.`,
-        'INFO',
+        'INFO'
       );
     }
 
@@ -48,8 +63,20 @@ class SmartLogisticsService {
    */
   static async checkAssetLifecycle() {
     const assets = [
-      { id: 'A001', name: 'Pediatric Wheelchair', purchaseDate: '2020-01-01', lifespanYears: 5, value: 5000 },
-      { id: 'A002', name: 'Smart Board', purchaseDate: '2022-06-01', lifespanYears: 7, value: 3000 },
+      {
+        id: 'A001',
+        name: 'Pediatric Wheelchair',
+        purchaseDate: '2020-01-01',
+        lifespanYears: 5,
+        value: 5000,
+      },
+      {
+        id: 'A002',
+        name: 'Smart Board',
+        purchaseDate: '2022-06-01',
+        lifespanYears: 7,
+        value: 3000,
+      },
     ];
 
     const report = assets.map(asset => {

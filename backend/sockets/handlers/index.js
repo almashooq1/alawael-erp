@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Socket.IO Handlers - Centralized Event Management
  * مدير أحداث Socket.IO المركزي
@@ -7,6 +8,7 @@ const moduleHandler = require('./moduleHandler');
 const dashboardHandler = require('./dashboardHandler');
 const notificationHandler = require('./notificationHandler');
 const chatHandler = require('./chatHandler');
+const logger = require('../../utils/logger');
 
 // Active subscriptions tracking
 const activeSubscriptions = new Map();
@@ -16,13 +18,14 @@ const activeSubscriptions = new Map();
  * تهيئة جميع معالجات Socket
  */
 function initializeHandlers(io) {
-  console.log('[Socket.IO] Initializing handlers...');
+  logger.info('[Socket.IO] Initializing handlers...');
 
   io.on('connection', socket => {
-    const userId = socket.handshake.query.userId || 'anonymous';
-    console.log(`[Socket.IO] Client connected: ${socket.id} (User: ${userId})`);
+    // Use JWT-verified userId set by auth middleware; never trust raw query params
+    const userId = socket.userId || socket.user?.id || 'anonymous';
+    logger.info(`[Socket.IO] Client connected: ${socket.id} (User: ${userId})`);
 
-    // Store user info
+    // Persist verified user info
     socket.userId = userId;
     socket.joinedAt = new Date();
 
@@ -39,7 +42,7 @@ function initializeHandlers(io) {
 
     // Disconnect handler
     socket.on('disconnect', reason => {
-      console.log(`[Socket.IO] Client disconnected: ${socket.id} (Reason: ${reason})`);
+      logger.info(`[Socket.IO] Client disconnected: ${socket.id} (Reason: ${reason})`);
 
       // Cleanup subscriptions
       activeSubscriptions.delete(socket.id);
@@ -52,7 +55,7 @@ function initializeHandlers(io) {
 
     // Error handler
     socket.on('error', error => {
-      console.error(`[Socket.IO] Socket error (${socket.id}):`, error);
+      logger.error(`[Socket.IO] Socket error (${socket.id}):`, error);
       socket.emit('error', {
         message: 'حدث خطأ في الاتصال',
         code: 'SOCKET_ERROR',
@@ -71,10 +74,10 @@ function initializeHandlers(io) {
 
   // Global error handling
   io.engine.on('connection_error', err => {
-    console.error('[Socket.IO] Connection error:', err);
+    logger.error('[Socket.IO] Connection error:', err);
   });
 
-  console.log('[Socket.IO] All handlers initialized successfully');
+  logger.info('[Socket.IO] All handlers initialized successfully');
 }
 
 /**

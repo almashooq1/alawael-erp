@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * AttendanceService.js - Beneficiary Attendance Management Service
  * Handles attendance tracking, reporting, and alert generation
@@ -58,9 +59,9 @@ class AttendanceService extends EventEmitter {
             action: 'RECORD_CREATED',
             user: attendanceData.recordedBy || 'system',
             timestamp: new Date(),
-            changes: 'Attendance record created'
-          }
-        ]
+            changes: 'Attendance record created',
+          },
+        ],
       };
 
       // Save to database
@@ -71,7 +72,7 @@ class AttendanceService extends EventEmitter {
         beneficiaryId,
         status: attendanceData.status,
         date: attendanceData.date,
-        recordId: saved.insertedId
+        recordId: saved.insertedId,
       });
 
       // Check if alert needed
@@ -80,7 +81,7 @@ class AttendanceService extends EventEmitter {
           beneficiaryId,
           alertType: attendanceData.status.toUpperCase(),
           date: attendanceData.date,
-          message: `Attendance alert: ${attendanceData.status} on ${attendanceData.date}`
+          message: `Attendance alert: ${attendanceData.status} on ${attendanceData.date}`,
         });
       }
 
@@ -88,21 +89,20 @@ class AttendanceService extends EventEmitter {
         status: 'success',
         message: 'Attendance recorded successfully',
         data: { recordId: saved.insertedId, ...record },
-        timestamp: new Date()
+        timestamp: new Date(),
       };
-
     } catch (error) {
       this.emit('attendance:error', {
         action: 'recordAttendance',
-        error: error.message,
-        beneficiaryId
+        error: 'حدث خطأ داخلي',
+        beneficiaryId,
       });
 
       return {
         status: 'error',
-        message: error.message,
+        message: 'حدث خطأ داخلي',
         data: null,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     }
   }
@@ -141,7 +141,8 @@ class AttendanceService extends EventEmitter {
       }
 
       // Get records
-      const records = await this.db.collection(this.attendanceCollection)
+      const records = await this.db
+        .collection(this.attendanceCollection)
         .find(query)
         .sort({ date: -1 })
         .toArray();
@@ -159,17 +160,16 @@ class AttendanceService extends EventEmitter {
           records: records.slice(0, 100), // Limit to last 100 records
           reportDate: new Date(),
           periodFrom: options.startDate,
-          periodTo: options.endDate
+          periodTo: options.endDate,
         },
-        timestamp: new Date()
+        timestamp: new Date(),
       };
-
     } catch (error) {
       return {
         status: 'error',
-        message: error.message,
+        message: 'حدث خطأ داخلي',
         data: null,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     }
   }
@@ -191,7 +191,8 @@ class AttendanceService extends EventEmitter {
       const period = options.period || 'semester';
 
       // Get attendance records for period
-      const records = await this.db.collection(this.attendanceCollection)
+      const records = await this.db
+        .collection(this.attendanceCollection)
         .find({ beneficiaryId })
         .toArray();
 
@@ -202,9 +203,9 @@ class AttendanceService extends EventEmitter {
           data: {
             beneficiaryId,
             statusOk: true,
-            alerts: []
+            alerts: [],
           },
-          timestamp: new Date()
+          timestamp: new Date(),
         };
       }
 
@@ -220,18 +221,18 @@ class AttendanceService extends EventEmitter {
         alerts.push({
           severity: 'HIGH',
           type: 'LOW_ATTENDANCE',
-          message: `Attendance rate (${(attendanceRate * 100).toFixed(2)}%) is below threshold (${(this.alertThreshold * 100)}%)`,
+          message: `Attendance rate (${(attendanceRate * 100).toFixed(2)}%) is below threshold (${this.alertThreshold * 100}%)`,
           attendanceRate,
           threshold: this.alertThreshold,
           recordCount: records.length,
-          presentDays: presentCount
+          presentDays: presentCount,
         });
 
         this.emit('attendance:threshold-alert', {
           beneficiaryId,
           attendanceRate,
           threshold: this.alertThreshold,
-          severity: 'HIGH'
+          severity: 'HIGH',
         });
       }
 
@@ -242,7 +243,7 @@ class AttendanceService extends EventEmitter {
           severity: 'MEDIUM',
           type: 'CONSECUTIVE_ABSENCES',
           message: `${consecutiveAbsences.length} consecutive absence(s) detected`,
-          consecutiveAbsences
+          consecutiveAbsences,
         });
       }
 
@@ -256,17 +257,16 @@ class AttendanceService extends EventEmitter {
           presentDays: presentCount,
           totalRecords: records.length,
           alerts,
-          period
+          period,
         },
-        timestamp: new Date()
+        timestamp: new Date(),
       };
-
     } catch (error) {
       return {
         status: 'error',
-        message: error.message,
+        message: 'حدث خطأ داخلي',
         data: null,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     }
   }
@@ -298,10 +298,12 @@ class AttendanceService extends EventEmitter {
             ...record,
             createdAt: new Date(),
             updatedAt: new Date(),
-            auditLog: [{
-              action: 'BULK_UPLOAD',
-              timestamp: new Date()
-            }]
+            auditLog: [
+              {
+                action: 'BULK_UPLOAD',
+                timestamp: new Date(),
+              },
+            ],
           });
         } catch (e) {
           errors.push(`Record ${index + 1}: ${e.message}`);
@@ -313,13 +315,12 @@ class AttendanceService extends EventEmitter {
       }
 
       // Insert all records
-      const result = await this.db.collection(this.attendanceCollection)
-        .insertMany(validRecords);
+      const result = await this.db.collection(this.attendanceCollection).insertMany(validRecords);
 
       this.emit('attendance:bulk-upload', {
         uploadedCount: validRecords.length,
         totalCount: records.length,
-        errors: errors.length > 0 ? errors : null
+        errors: errors.length > 0 ? errors : null,
       });
 
       return {
@@ -329,17 +330,16 @@ class AttendanceService extends EventEmitter {
           uploadedCount: validRecords.length,
           totalCount: records.length,
           failedCount: records.length - validRecords.length,
-          errors: errors.length > 0 ? errors.slice(0, 10) : []
+          errors: errors.length > 0 ? errors.slice(0, 10) : [],
         },
-        timestamp: new Date()
+        timestamp: new Date(),
       };
-
     } catch (error) {
       return {
         status: 'error',
-        message: error.message,
+        message: 'حدث خطأ داخلي',
         data: null,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     }
   }
@@ -359,7 +359,7 @@ class AttendanceService extends EventEmitter {
         late: 0,
         excused: 0,
         attendanceRate: '0%',
-        absenceRate: '0%'
+        absenceRate: '0%',
       };
     }
 
@@ -369,13 +369,11 @@ class AttendanceService extends EventEmitter {
     const excused = records.filter(r => r.status === 'excused').length;
     const validRecords = records.filter(r => r.status !== 'excused');
 
-    const attendanceRate = validRecords.length > 0
-      ? ((present / validRecords.length) * 100).toFixed(2)
-      : 0;
+    const attendanceRate =
+      validRecords.length > 0 ? ((present / validRecords.length) * 100).toFixed(2) : 0;
 
-    const absenceRate = validRecords.length > 0
-      ? ((absent / validRecords.length) * 100).toFixed(2)
-      : 0;
+    const absenceRate =
+      validRecords.length > 0 ? ((absent / validRecords.length) * 100).toFixed(2) : 0;
 
     return {
       totalSessions: records.length,
@@ -385,7 +383,7 @@ class AttendanceService extends EventEmitter {
       excused,
       attendanceRate: attendanceRate + '%',
       absenceRate: absenceRate + '%',
-      averageAttendance: attendanceRate
+      averageAttendance: attendanceRate,
     };
   }
 
@@ -402,8 +400,10 @@ class AttendanceService extends EventEmitter {
 
     sorted.forEach((record, index) => {
       if (record.status === 'absent') {
-        if (consecutiveGroup.length === 0 ||
-            this.areDatesConsecutive(consecutiveGroup[consecutiveGroup.length - 1].date, record.date)) {
+        if (
+          consecutiveGroup.length === 0 ||
+          this.areDatesConsecutive(consecutiveGroup[consecutiveGroup.length - 1].date, record.date)
+        ) {
           consecutiveGroup.push(record);
         } else {
           if (consecutiveGroup.length >= 2) {
@@ -460,26 +460,28 @@ class AttendanceService extends EventEmitter {
 
       const records = report.data.records;
       const csvHeader = 'Date,Status,Course ID,Notes\n';
-      const csvRows = records.map(r =>
-        `${r.date.toISOString().split('T')[0]},${r.status},${r.courseId || 'N/A'},${r.notes || ''}`
-      ).join('\n');
+      const csvRows = records
+        .map(
+          r =>
+            `${r.date.toISOString().split('T')[0]},${r.status},${r.courseId || 'N/A'},${r.notes || ''}`
+        )
+        .join('\n');
 
       return {
         status: 'success',
         message: 'Attendance data exported to CSV',
         data: {
           csv: csvHeader + csvRows,
-          recordCount: records.length
+          recordCount: records.length,
         },
-        timestamp: new Date()
+        timestamp: new Date(),
       };
-
     } catch (error) {
       return {
         status: 'error',
-        message: error.message,
+        message: 'حدث خطأ داخلي',
         data: null,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     }
   }

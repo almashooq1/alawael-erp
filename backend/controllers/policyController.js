@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const PolicyService = require('../services/policyService');
 const { validationResult } = require('express-validator');
 const logger = require('../utils/logger');
@@ -19,14 +20,14 @@ class PolicyController {
       const policyData = {
         ...req.body,
         createdBy: userId,
-        createdByName: req.user?.name
+        createdByName: req.user?.name,
       };
 
       const result = await PolicyService.createPolicy(policyData);
       res.status(201).json(result);
     } catch (error) {
       logger.error(`Error in createPolicy: ${error.message}`);
-      res.status(500).json({ success: false, error: error.message });
+      res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
     }
   }
 
@@ -41,14 +42,14 @@ class PolicyController {
       const updateData = {
         ...req.body,
         updatedBy: userId,
-        updatedByName: req.user?.name
+        updatedByName: req.user?.name,
       };
 
       const result = await PolicyService.updatePolicy(policyId, updateData);
       res.json(result);
     } catch (error) {
       logger.error(`Error in updatePolicy: ${error.message}`);
-      res.status(500).json({ success: false, error: error.message });
+      res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
     }
   }
 
@@ -62,8 +63,8 @@ class PolicyController {
       res.json({ success: true, policy });
     } catch (error) {
       logger.error(`Error in getPolicy: ${error.message}`);
-      const statusCode = error.message.includes('غير موجودة') ? 404 : 500;
-      res.status(statusCode).json({ success: false, error: error.message });
+      const statusCode = (error.message || '').includes('غير موجودة') ? 404 : 500;
+      res.status(statusCode).json({ success: false, error: 'حدث خطأ في الخادم' });
     }
   }
 
@@ -78,14 +79,14 @@ class PolicyController {
         department: req.query.department,
         searchTerm: req.query.search,
         page: parseInt(req.query.page) || 1,
-        limit: parseInt(req.query.limit) || 10
+        limit: parseInt(req.query.limit) || 10,
       };
 
       const result = await PolicyService.getPolicies(filters);
       res.json(result);
     } catch (error) {
       logger.error(`Error in getPolicies: ${error.message}`);
-      res.status(500).json({ success: false, error: error.message });
+      res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
     }
   }
 
@@ -98,7 +99,7 @@ class PolicyController {
       res.json({ success: true, data: policies });
     } catch (error) {
       logger.error(`Error in getActivePolicies: ${error.message}`);
-      res.status(500).json({ success: false, error: error.message });
+      res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
     }
   }
 
@@ -112,8 +113,8 @@ class PolicyController {
       res.json(result);
     } catch (error) {
       logger.error(`Error in deletePolicy: ${error.message}`);
-      const statusCode = error.message.includes('غير موجودة') ? 404 : 400;
-      res.status(statusCode).json({ success: false, error: error.message });
+      const statusCode = (error.message || '').includes('غير موجودة') ? 404 : 400;
+      res.status(statusCode).json({ success: false, error: 'حدث خطأ في الخادم' });
     }
   }
 
@@ -131,7 +132,7 @@ class PolicyController {
       res.json(result);
     } catch (error) {
       logger.error(`Error in submitForApproval: ${error.message}`);
-      res.status(500).json({ success: false, error: error.message });
+      res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
     }
   }
 
@@ -145,16 +146,11 @@ class PolicyController {
       const userId = req.user?.id;
       const userName = req.user?.name;
 
-      const result = await PolicyService.approvePolicy(
-        policyId,
-        approverRole,
-        userName,
-        comments
-      );
+      const result = await PolicyService.approvePolicy(policyId, approverRole, userName, comments);
       res.json(result);
     } catch (error) {
       logger.error(`Error in approvePolicy: ${error.message}`);
-      res.status(500).json({ success: false, error: error.message });
+      res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
     }
   }
 
@@ -167,16 +163,11 @@ class PolicyController {
       const { approverRole, reason } = req.body;
       const userName = req.user?.name;
 
-      const result = await PolicyService.rejectPolicy(
-        policyId,
-        approverRole,
-        userName,
-        reason
-      );
+      const result = await PolicyService.rejectPolicy(policyId, approverRole, userName, reason);
       res.json(result);
     } catch (error) {
       logger.error(`Error in rejectPolicy: ${error.message}`);
-      res.status(500).json({ success: false, error: error.message });
+      res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
     }
   }
 
@@ -185,15 +176,15 @@ class PolicyController {
    */
   async getPendingApprovals(req, res) {
     try {
-      const policies = await PolicyService.getPolicies({ 
+      const policies = await PolicyService.getPolicies({
         status: 'PENDING_APPROVAL',
         page: req.query.page,
-        limit: req.query.limit
+        limit: req.query.limit,
       });
       res.json(policies);
     } catch (error) {
       logger.error(`Error in getPendingApprovals: ${error.message}`);
-      res.status(500).json({ success: false, error: error.message });
+      res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
     }
   }
 
@@ -211,7 +202,7 @@ class PolicyController {
       res.json(result);
     } catch (error) {
       logger.error(`Error in sendForAcknowledgement: ${error.message}`);
-      res.status(500).json({ success: false, error: error.message });
+      res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
     }
   }
 
@@ -228,7 +219,7 @@ class PolicyController {
       res.json(result);
     } catch (error) {
       logger.error(`Error in acknowledgePolicies: ${error.message}`);
-      res.status(500).json({ success: false, error: error.message });
+      res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
     }
   }
 
@@ -243,14 +234,14 @@ class PolicyController {
         department: req.query.department,
         overdue: req.query.overdue === 'true',
         page: parseInt(req.query.page) || 1,
-        limit: parseInt(req.query.limit) || 20
+        limit: parseInt(req.query.limit) || 20,
       };
 
       const result = await PolicyService.getPendingAcknowledgements(filters);
       res.json(result);
     } catch (error) {
       logger.error(`Error in getPendingAcknowledgements: ${error.message}`);
-      res.status(500).json({ success: false, error: error.message });
+      res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
     }
   }
 
@@ -264,7 +255,7 @@ class PolicyController {
       res.json(result);
     } catch (error) {
       logger.error(`Error in getAcknowledgementReports: ${error.message}`);
-      res.status(500).json({ success: false, error: error.message });
+      res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
     }
   }
 
@@ -288,7 +279,7 @@ class PolicyController {
       { value: 'COMPENSATION', label: 'التعويضات' },
       { value: 'TRAINING_DEVELOPMENT', label: 'التدريب والتطوير' },
       { value: 'WORKPLACE_RIGHTS', label: 'حقوق مكان العمل' },
-      { value: 'OTHER', label: 'أخرى' }
+      { value: 'OTHER', label: 'أخرى' },
     ];
 
     res.json({ success: true, types });
@@ -303,7 +294,7 @@ class PolicyController {
       { value: 'PENDING_APPROVAL', label: 'قيد الموافقة' },
       { value: 'ACTIVE', label: 'نشطة' },
       { value: 'ARCHIVED', label: 'مؤرشفة' },
-      { value: 'SUSPENDED', label: 'معلقة' }
+      { value: 'SUSPENDED', label: 'معلقة' },
     ];
 
     res.json({ success: true, statuses });
@@ -315,20 +306,20 @@ class PolicyController {
   async getStatistics(req, res) {
     try {
       const policies = await PolicyService.getPolicies({ limit: 1000 });
-      
+
       const stats = {
         totalPolicies: policies.pagination.total,
         activePolicies: policies.data.filter(p => p.status === 'ACTIVE').length,
         draftPolicies: policies.data.filter(p => p.status === 'DRAFT').length,
         pendingApproval: policies.data.filter(p => p.status === 'PENDING_APPROVAL').length,
         archivedPolicies: policies.data.filter(p => p.status === 'ARCHIVED').length,
-        byType: this._countByType(policies.data)
+        byType: this._countByType(policies.data),
       };
 
       res.json({ success: true, stats });
     } catch (error) {
       logger.error(`Error in getStatistics: ${error.message}`);
-      res.status(500).json({ success: false, error: error.message });
+      res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
     }
   }
 

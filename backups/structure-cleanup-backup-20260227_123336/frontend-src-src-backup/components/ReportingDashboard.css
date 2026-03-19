@@ -1,0 +1,579 @@
+/**
+ * ReportingDashboard Styles
+ * أنماط لوحة التقارير
+ */
+
+.reporting-dashboard {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  min-height: 100vh;
+  direction: rtl;
+}
+
+/* ============================================
+   HEADER
+   ============================================ */
+.dashboard-header {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  text-align: center;
+  margin-bottom: 30px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-header h1 {
+  margin: 0;
+  font-size: 2.5em;
+  color: #f5576c;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-header .subtitle {
+  margin: 10px 0 0 0;
+  font-size: 1.1em;
+  color: #666;
+}
+
+/* ============================================
+   TABS
+   ============================================ */
+.tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  background: white;
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.tab-button {
+  padding: 12px 25px;
+  border: 2px solid transparent;
+  background: #ecf0f1;
+  color: #666;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  font-size: 1em;
+}
+
+.tab-button:hover {
+  background: #f093fb;
+  color: white;
+  transform: translateY(-2px);
+}
+
+.tab-button.active {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+  box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
+}
+
+/* ============================================
+   TAB CONTENT
+   ============================================ */
+.tab-content {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================
+   SECTION HEADER
+   ============================================ */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #ecf0f1;
+}
+
+.section-header h2 {
+  margin: 0;
+  color: #333;
+  font-size: 1.8em;
+}
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+.btn-primary {
+  padding: 12px 25px;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  font-size: 1em;
+}
+
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  padding: 10px 20px;
+  background: #ecf0f1;
+  color: #666;
+  border: 1px solid #bdc3c7;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+  background: #bdc3c7;
+  color: white;
+}
+
+.btn-small {
+  padding: 8px 15px;
+  background: #f5576c;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: all 0.3s ease;
+}
+
+.btn-small:hover {
+  background: #d63147;
+}
+
+/* ============================================
+   FORMS
+   ============================================ */
+.form-card {
+  background: #f8f9fa;
+  padding: 25px;
+  border-radius: 12px;
+  margin-bottom: 30px;
+  border: 2px solid #ecf0f1;
+}
+
+.form-card h3 {
+  margin: 0 0 20px 0;
+  color: #333;
+  font-size: 1.3em;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+  color: #333;
+  font-size: 0.95em;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1em;
+  font-family: inherit;
+  direction: rtl;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #f5576c;
+  box-shadow: 0 0 0 3px rgba(245, 87, 108, 0.1);
+}
+
+.date-range {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.date-range input {
+  flex: 1;
+}
+
+.date-range span {
+  color: #666;
+  font-weight: bold;
+}
+
+.form-actions {
+  display: flex;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+/* ============================================
+   TEMPLATES GRID
+   ============================================ */
+.templates-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.template-card {
+  padding: 20px;
+  background: #f8f9fa;
+  border: 2px solid #ecf0f1;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.template-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  border-color: #f5576c;
+}
+
+.template-card.selected {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+  border-color: #f5576c;
+}
+
+.template-icon {
+  font-size: 3em;
+  margin-bottom: 15px;
+}
+
+.template-card h3 {
+  margin: 0 0 10px 0;
+  font-size: 1.1em;
+}
+
+.template-description {
+  margin: 10px 0;
+  font-size: 0.9em;
+  opacity: 0.8;
+}
+
+.template-format {
+  display: inline-block;
+  padding: 5px 15px;
+  background: #667eea;
+  color: white;
+  border-radius: 20px;
+  font-size: 0.8em;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.template-card.selected .template-format {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* ============================================
+   GENERATE FORM
+   ============================================ */
+.generate-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.selected-template {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 12px;
+  border: 2px solid #f5576c;
+}
+
+.template-info h3 {
+  margin: 0 0 10px 0;
+  color: #f5576c;
+}
+
+.template-info p {
+  margin: 8px 0;
+  color: #666;
+}
+
+.filters-card {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 12px;
+}
+
+.filters-card h3 {
+  margin: 0 0 15px 0;
+  color: #333;
+}
+
+/* ============================================
+   SCHEDULES LIST
+   ============================================ */
+.schedules-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.schedule-card {
+  padding: 20px;
+  background: #f8f9fa;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+.schedule-card:hover {
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  border-color: #f5576c;
+}
+
+.schedule-info h3 {
+  margin: 0;
+  color: #333;
+  font-size: 1.1em;
+}
+
+.schedule-info p {
+  margin: 8px 0 0 0;
+  color: #666;
+  font-size: 0.9em;
+}
+
+.schedule-actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* ============================================
+   REPORTS LIST
+   ============================================ */
+.reports-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.report-card {
+  padding: 20px;
+  background: #f8f9fa;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.report-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  border-color: #f5576c;
+}
+
+.report-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  margin-bottom: 15px;
+}
+
+.report-header h3 {
+  margin: 0;
+  color: #333;
+  flex: 1;
+}
+
+.report-date {
+  background: #f5576c;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 0.8em;
+  white-space: nowrap;
+}
+
+.report-content-preview {
+  margin: 15px 0;
+  padding: 15px;
+  background: white;
+  border-radius: 8px;
+  border-left: 3px solid #f5576c;
+}
+
+.report-content-preview p {
+  margin: 0;
+  color: #666;
+  font-size: 0.9em;
+  line-height: 1.5;
+}
+
+.report-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+/* ============================================
+   HISTORY LIST
+   ============================================ */
+.history-list {
+  margin-top: 20px;
+}
+
+.history-item {
+  padding: 15px;
+  background: #f8f9fa;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  transition: all 0.3s ease;
+}
+
+.history-item:hover {
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  background: white;
+}
+
+.history-info h4 {
+  margin: 0;
+  color: #333;
+  font-size: 1.05em;
+}
+
+.history-info p {
+  margin: 5px 0 0 0;
+  color: #666;
+  font-size: 0.85em;
+}
+
+.history-status {
+  padding: 8px 15px;
+  background: #27ae60;
+  color: white;
+  border-radius: 6px;
+  font-size: 0.85em;
+  font-weight: bold;
+}
+
+/* ============================================
+   EMPTY STATE
+   ============================================ */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+  font-size: 1.1em;
+}
+
+.empty-state p {
+  margin: 5px 0;
+}
+
+.empty-state p:first-child {
+  font-size: 1.2em;
+  font-weight: bold;
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+@media (max-width: 768px) {
+  .reporting-dashboard {
+    padding: 10px;
+  }
+
+  .dashboard-header {
+    padding: 20px;
+  }
+
+  .dashboard-header h1 {
+    font-size: 1.8em;
+  }
+
+  .section-header {
+    flex-direction: column;
+    align-items: start;
+    gap: 15px;
+  }
+
+  .generate-form {
+    grid-template-columns: 1fr;
+  }
+
+  .templates-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+
+  .tabs {
+    flex-direction: column;
+  }
+
+  .tab-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-header h1 {
+    font-size: 1.5em;
+  }
+
+  .templates-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .schedules-list {
+    grid-template-columns: 1fr;
+  }
+
+  .reports-list {
+    grid-template-columns: 1fr;
+  }
+
+  .section-header {
+    padding-bottom: 15px;
+  }
+}

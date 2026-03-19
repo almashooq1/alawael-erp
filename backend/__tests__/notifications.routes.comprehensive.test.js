@@ -1,4 +1,7 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 const express = require('express');
+
 const request = require('supertest');
 
 // MOCKS
@@ -45,9 +48,22 @@ jest.mock('../middleware/auth', () => ({
     req.user = { _id: 'user-123', id: 'user-123', role: 'user' };
     next();
   },
+  authorize: () => (req, res, next) => next(),
+  authorizeRole: () => (req, res, next) => next(),
 }));
+
+// Mock validateObjectId to allow test-friendly IDs
+jest.mock('../middleware/validateObjectId', () => () => (req, res, next) => next());
+
 const notificationRoutes = require('../routes/notifications.routes');
 
+// === Global RBAC Mock ===
+jest.mock('../rbac', () => ({
+  createRBACMiddleware: () => (req, res, next) => next(),
+  checkPermission: () => (req, res, next) => next(),
+  RBAC_ROLES: {},
+  RBAC_PERMISSIONS: {},
+}));
 describe('Notification Routes Comprehensive Tests', () => {
   let app;
 

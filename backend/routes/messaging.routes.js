@@ -1,3 +1,4 @@
+﻿/* eslint-disable no-unused-vars */
 /**
  * Messaging Routes - Phase 2
  * Simple message management API
@@ -44,7 +45,7 @@ router.get('/unread/count', async (req, res) => {
     return res.status(500).json({
       success: false,
       message: 'Failed to get unread count',
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -76,7 +77,7 @@ router.get('/search', async (req, res) => {
     return res.status(500).json({
       success: false,
       message: 'Failed to search messages',
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -102,7 +103,7 @@ router.get('/stats', async (req, res) => {
     return res.status(500).json({
       success: false,
       message: 'Failed to get statistics',
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -127,7 +128,7 @@ router.get('/unread', async (req, res) => {
     return res.status(500).json({
       success: false,
       message: 'Failed to retrieve unread messages',
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -160,7 +161,7 @@ router.post('/clear-unread', async (req, res) => {
     return res.status(500).json({
       success: false,
       message: 'Failed to clear unread status',
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -234,7 +235,7 @@ router.post('/', async (req, res) => {
     return res.status(500).json({
       success: false,
       message: 'Failed to create message',
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -282,7 +283,7 @@ router.get('/', async (req, res) => {
     return res.status(500).json({
       success: false,
       message: 'Failed to retrieve messages',
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -344,7 +345,7 @@ router.post('/group', async (req, res) => {
     return res.status(500).json({
       success: false,
       message: 'Failed to create group message',
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -413,7 +414,7 @@ router.post('/schedule', async (req, res) => {
     return res.status(500).json({
       success: false,
       message: 'Failed to schedule message',
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -471,7 +472,7 @@ router.get('/:id', async (req, res) => {
     return res.status(500).json({
       success: false,
       message: 'Failed to retrieve message',
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -539,7 +540,7 @@ router.put('/:id', async (req, res) => {
     return res.status(500).json({
       success: false,
       message: 'Failed to update message',
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -582,7 +583,7 @@ router.post('/:id/mark-as-read', async (req, res) => {
     return res.status(500).json({
       success: false,
       message: 'Failed to mark message as read',
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -620,7 +621,7 @@ router.patch('/:id/read', async (req, res) => {
     return res.status(500).json({
       success: false,
       message: 'Failed to mark message as read',
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -658,7 +659,7 @@ router.patch('/mark-read', async (req, res) => {
     return res.status(500).json({
       success: false,
       message: 'Failed to mark messages as read',
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -704,7 +705,7 @@ router.post('/:id/react', async (req, res) => {
     return res.status(500).json({
       success: false,
       message: 'Failed to add reaction',
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -766,7 +767,7 @@ router.post('/:id/forward', async (req, res) => {
     return res.status(500).json({
       success: false,
       message: 'Failed to forward message',
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -826,7 +827,7 @@ router.delete('/:id', async (req, res) => {
     return res.status(500).json({
       success: false,
       message: 'Failed to delete message',
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -866,7 +867,7 @@ router.post('/delete-bulk', async (req, res) => {
     return res.status(500).json({
       success: false,
       message: 'Failed to delete messages',
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -912,7 +913,7 @@ router.post('/send', async (req, res) => {
     return res.status(500).json({
       success: false,
       message: 'Failed to send message',
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -945,7 +946,7 @@ router.get('/conversation/:id', async (req, res) => {
     return res.status(500).json({
       success: false,
       message: 'Failed to get conversation messages',
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -978,7 +979,7 @@ router.post('/mark-read/:conversationId', async (req, res) => {
     return res.status(500).json({
       success: false,
       message: 'Failed to mark conversation as read',
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -1017,7 +1018,7 @@ router.patch('/conversations/:id/mark-read', async (req, res) => {
     return res.status(500).json({
       success: false,
       message: 'Failed to mark conversation as read',
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });

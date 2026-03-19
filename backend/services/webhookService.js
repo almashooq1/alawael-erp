@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const Webhook = require('../models/Webhook');
 const WebhookDelivery = require('../models/WebhookDelivery');
 const logger = require('../utils/logger');
@@ -8,7 +9,6 @@ const crypto = require('crypto');
  * Manages webhook registration, delivery, and history
  */
 class WebhookService {
-
   // ============ WEBHOOK MANAGEMENT ============
 
   /**
@@ -27,7 +27,7 @@ class WebhookService {
         isActive: true,
         totalDeliveries: 0,
         successfulDeliveries: 0,
-        failedDeliveries: 0
+        failedDeliveries: 0,
       });
 
       const saved = await webhook.save();
@@ -44,7 +44,7 @@ class WebhookService {
    */
   async getAllWebhooks(query = {}) {
     try {
-      let mongoQuery = {};
+      const mongoQuery = {};
 
       if (query.event) {
         mongoQuery.events = query.event;
@@ -69,8 +69,10 @@ class WebhookService {
    */
   async getWebhookById(webhookId) {
     try {
-      const webhook = await Webhook.findById(webhookId)
-        .populate('createdBy', 'firstName lastName email');
+      const webhook = await Webhook.findById(webhookId).populate(
+        'createdBy',
+        'firstName lastName email'
+      );
       return webhook || null;
     } catch (error) {
       logger.error('Error getting webhook:', error);
@@ -130,7 +132,7 @@ class WebhookService {
       if (!webhook.events.includes(event)) {
         return {
           success: false,
-          reason: 'Webhook not subscribed to this event'
+          reason: 'Webhook not subscribed to this event',
         };
       }
 
@@ -140,7 +142,7 @@ class WebhookService {
         eventData: payload,
         url: webhook.url,
         status: 'pending',
-        scheduledTime: new Date()
+        scheduledTime: new Date(),
       });
 
       const saved = await delivery.save();
@@ -148,7 +150,7 @@ class WebhookService {
       // Update webhook statistics
       await Webhook.findByIdAndUpdate(webhookId, {
         $inc: { totalDeliveries: 1 },
-        lastDeliveryDate: new Date()
+        lastDeliveryDate: new Date(),
       });
 
       // Simulate delivery result
@@ -158,11 +160,11 @@ class WebhookService {
           status: 'delivered',
           responseStatus: 200,
           sentTime: new Date(),
-          executionTimeMs: Math.floor(Math.random() * 500)
+          executionTimeMs: Math.floor(Math.random() * 500),
         });
 
         await Webhook.findByIdAndUpdate(webhookId, {
-          $inc: { successfulDeliveries: 1 }
+          $inc: { successfulDeliveries: 1 },
         });
       } else {
         await WebhookDelivery.findByIdAndUpdate(saved._id, {
@@ -170,11 +172,11 @@ class WebhookService {
           responseStatus: 500,
           errorMessage: 'Delivery failed',
           sentTime: new Date(),
-          nextRetryTime: new Date(Date.now() + 60000)
+          nextRetryTime: new Date(Date.now() + 60000),
         });
 
         await Webhook.findByIdAndUpdate(webhookId, {
-          $inc: { failedDeliveries: 1 }
+          $inc: { failedDeliveries: 1 },
         });
       }
 
@@ -182,7 +184,7 @@ class WebhookService {
       return {
         success: result,
         deliveryId: saved._id,
-        status: result ? 'delivered' : 'failed'
+        status: result ? 'delivered' : 'failed',
       };
     } catch (error) {
       logger.error('Error triggering webhook:', error);
@@ -202,7 +204,7 @@ class WebhookService {
         test: true,
         timestamp: new Date().toISOString(),
         events: webhook.events,
-        message: 'This is a test webhook delivery'
+        message: 'This is a test webhook delivery',
       };
 
       const delivery = new WebhookDelivery({
@@ -215,7 +217,7 @@ class WebhookService {
         sentTime: new Date(),
         completedTime: new Date(),
         responseStatus: 200,
-        executionTimeMs: Math.floor(Math.random() * 1000)
+        executionTimeMs: Math.floor(Math.random() * 1000),
       });
 
       const saved = await delivery.save();
@@ -224,7 +226,7 @@ class WebhookService {
       return {
         success: true,
         deliveryId: saved._id,
-        delivery: saved
+        delivery: saved,
       };
     } catch (error) {
       logger.error('Error testing webhook:', error);
@@ -237,7 +239,7 @@ class WebhookService {
    */
   async getDeliveryHistory(webhookId, query = {}) {
     try {
-      let mongoQuery = { webhookId };
+      const mongoQuery = { webhookId };
 
       if (query.event) {
         mongoQuery.event = query.event;
@@ -295,11 +297,11 @@ class WebhookService {
       const deliveries = await WebhookDelivery.countDocuments({ webhookId });
       const successful = await WebhookDelivery.countDocuments({
         webhookId,
-        status: 'delivered'
+        status: 'delivered',
       });
       const failed = await WebhookDelivery.countDocuments({
         webhookId,
-        status: 'failed'
+        status: 'failed',
       });
 
       return {
@@ -307,11 +309,9 @@ class WebhookService {
         totalDeliveries: deliveries,
         successfulDeliveries: successful,
         failedDeliveries: failed,
-        successRate: deliveries > 0
-          ? ((successful / deliveries) * 100).toFixed(2)
-          : 0,
+        successRate: deliveries > 0 ? ((successful / deliveries) * 100).toFixed(2) : 0,
         lastDelivery: webhook.lastDeliveryDate,
-        lastDeliveryStatus: webhook.lastDeliveryStatus
+        lastDeliveryStatus: webhook.lastDeliveryStatus,
       };
     } catch (error) {
       logger.error('Error getting statistics:', error);
@@ -369,7 +369,7 @@ class WebhookService {
       const [webhooksCount, deliveriesCount, activeCount] = await Promise.all([
         Webhook.countDocuments(),
         WebhookDelivery.countDocuments(),
-        Webhook.countDocuments({ isActive: true })
+        Webhook.countDocuments({ isActive: true }),
       ]);
 
       return {
@@ -377,14 +377,14 @@ class WebhookService {
         status: 'operational',
         webhooksCount,
         deliveriesCount,
-        activeWebhooks: activeCount
+        activeWebhooks: activeCount,
       };
     } catch (error) {
       logger.error('Error getting health status:', error);
       return {
         service: 'WebhookService',
         status: 'error',
-        error: error.message
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -395,5 +395,5 @@ const webhookService = new WebhookService();
 
 module.exports = {
   WebhookService,
-  webhookService
+  webhookService,
 };

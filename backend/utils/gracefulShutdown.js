@@ -1,7 +1,10 @@
+/* eslint-disable no-unused-vars */
 /**
  * Graceful Shutdown Handler
  * معالج إيقاف التشغيل السلس
  */
+
+const logger = require('./logger');
 
 let isShuttingDown = false;
 
@@ -12,39 +15,43 @@ let isShuttingDown = false;
 const setupGracefulShutdown = (server, io = null) => {
   const shutdown = async signal => {
     if (isShuttingDown) {
-      console.log('Shutdown already in progress...');
+      // console.log('Shutdown already in progress...');
       return;
     }
 
     isShuttingDown = true;
-    console.log(`\n${signal} received. Starting graceful shutdown...`);
+    logger.info(`\n${signal} received. Starting graceful shutdown...`);
+
+    // Clear KPI and dashboard update intervals
+    if (server._kpiInterval) clearInterval(server._kpiInterval);
+    if (server._dashboardInterval) clearInterval(server._dashboardInterval);
 
     // Stop accepting new connections
     server.close(() => {
-      console.log('✅ HTTP server closed');
+      // console.log('✅ HTTP server closed');
     });
 
     // Set timeout for forced shutdown
     const forceShutdownTimeout = setTimeout(() => {
-      console.error('❌ Forced shutdown after timeout');
+      logger.error('❌ Forced shutdown after timeout');
       process.exit(1);
     }, 30000); // 30 seconds
 
     try {
       // Close Socket.IO connections
       if (io) {
-        console.log('🔌 Closing Socket.IO connections...');
+        // console.log('🔌 Closing Socket.IO connections...');
         io.close(() => {
-          console.log('✅ Socket.IO connections closed');
+          // console.log('✅ Socket.IO connections closed');
         });
       }
 
       // Close database connection
       const mongoose = require('mongoose');
       if (mongoose.connection.readyState === 1) {
-        console.log('🗄️  Closing MongoDB connection...');
+        // console.log('🗄️  Closing MongoDB connection...');
         await mongoose.connection.close();
-        console.log('✅ MongoDB connection closed');
+        // console.log('✅ MongoDB connection closed');
       }
 
       // Close Redis connection
@@ -52,19 +59,19 @@ const setupGracefulShutdown = (server, io = null) => {
         const { getRedisClient } = require('../config/performance');
         const redisClient = getRedisClient();
         if (redisClient) {
-          console.log('⚡ Closing Redis connection...');
+          // console.log('⚡ Closing Redis connection...');
           await redisClient.quit();
-          console.log('✅ Redis connection closed');
+          // console.log('✅ Redis connection closed');
         }
       } catch (error) {
-        console.log('ℹ️  No Redis connection to close');
+        // console.log('ℹ️  No Redis connection to close');
       }
 
       clearTimeout(forceShutdownTimeout);
-      console.log('✅ Graceful shutdown completed successfully');
+      logger.info('✅ Graceful shutdown completed successfully');
       process.exit(0);
     } catch (error) {
-      console.error('❌ Error during shutdown:', error);
+      logger.error('❌ Error during shutdown:', error);
       clearTimeout(forceShutdownTimeout);
       process.exit(1);
     }
@@ -87,7 +94,7 @@ const setupGracefulShutdown = (server, io = null) => {
     });
   }
 
-  console.log('✅ Graceful shutdown handlers registered');
+  // console.log('✅ Graceful shutdown handlers registered');
 };
 
 /**

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const QRCode = require('qrcode');
 const bwipjs = require('bwip-js');
 const canvas = require('canvas');
@@ -44,7 +45,7 @@ class BarcodeService {
       return qrDataUrl;
     } catch (error) {
       logger.error(`Error generating QR Code: ${error.message}`);
-      throw new Error(`QR Code generation failed: ${error.message}`);
+      throw new Error('Operation failed');
     }
   }
 
@@ -90,7 +91,7 @@ class BarcodeService {
       return dataUrl;
     } catch (error) {
       logger.error(`Error generating barcode: ${error.message}`);
-      throw new Error(`Barcode generation failed: ${error.message}`);
+      throw new Error('Operation failed');
     }
   }
 
@@ -149,7 +150,7 @@ class BarcodeService {
             data,
             type,
             status: 'error',
-            error: itemError.message,
+            error: 'Barcode generation failed',
             index: i + 1,
           });
 
@@ -174,7 +175,7 @@ class BarcodeService {
       return results;
     } catch (error) {
       logger.error(`Batch generation error: ${error.message}`);
-      throw new Error(`Batch generation failed: ${error.message}`);
+      throw new Error('Operation failed');
     }
   }
 
@@ -202,7 +203,7 @@ class BarcodeService {
       return stats;
     } catch (error) {
       logger.error(`Error getting statistics: ${error.message}`);
-      throw new Error(`Statistics retrieval failed: ${error.message}`);
+      throw new Error('Operation failed');
     }
   }
 }

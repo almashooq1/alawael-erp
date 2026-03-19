@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+const logger = require('../utils/logger');
 /**
  * Smart Sensory Diet Service (Phase 93)
  *
@@ -28,9 +30,9 @@ class SmartSensoryDietService {
    * Based on Child's Sensory Profile (e.g., "Seeker" vs "Avoider")
    */
   async generateDailyDiet(patientId, profileType) {
-    console.log(`Generating Sensory Diet for ${patientId} (${profileType})...`);
+    logger.info(`Generating Sensory Diet for ${patientId} (${profileType})...`);
 
-    let dietPlan = [];
+    const dietPlan = [];
 
     if (profileType === 'SENSORY_SEEKER') {
       // Need intense input to register

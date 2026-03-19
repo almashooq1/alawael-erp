@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * DocumentVersion Model - Phase 3
  * Handles document versioning, history tracking, and collaborative editing

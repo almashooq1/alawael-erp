@@ -1,7 +1,8 @@
+/* eslint-disable no-unused-vars */
 /**
  * خدمة توليد الراتب الورقي (Payslip)
  * Payslip Generation Service
- * 
+ *
  * يوفر طرقا لتوليد ملفات PDF وصور الراتب الشاملة
  */
 
@@ -20,13 +21,13 @@ class PayslipGenerationService {
         email: payroll.employeeEmail,
         employeeId: payroll.employeeId,
         department: payroll.departmentId,
-        position: employee?.position || 'موظف'
+        position: employee?.position || 'موظف',
       },
       payrollInfo: {
         month: payroll.month,
         year: payroll.year,
         processDate: new Date(),
-        status: payroll.status
+        status: payroll.status,
       },
       earnings: {
         baseSalary: payroll.baseSalary,
@@ -35,30 +36,31 @@ class PayslipGenerationService {
         incentives: payroll.incentives || {},
         totalIncentives: payroll.calculations?.totalIncentives || 0,
         overtime: payroll.attendance?.overtime || {},
-        totalEarnings: (payroll.calculations?.totalGross || 0) + (payroll.calculations?.totalIncentives || 0)
+        totalEarnings:
+          (payroll.calculations?.totalGross || 0) + (payroll.calculations?.totalIncentives || 0),
       },
       deductions: {
         taxes: {
           incomeTax: payroll.taxes?.incomeTax?.amount || 0,
           socialSecurity: payroll.taxes?.socialSecurity?.amount || 0,
           healthInsurance: payroll.taxes?.healthInsurance?.amount || 0,
-          GOSI: payroll.taxes?.GOSI?.amount || 0
+          GOSI: payroll.taxes?.GOSI?.amount || 0,
         },
         penalties: payroll.penalties || {},
-        totalDeductions: payroll.calculations?.totalDeductions || 0
+        totalDeductions: payroll.calculations?.totalDeductions || 0,
       },
       summary: {
         grossSalary: payroll.calculations?.totalGross || 0,
         netSalary: payroll.calculations?.totalNet || 0,
-        netPayable: payroll.calculations?.netPayable || 0
+        netPayable: payroll.calculations?.netPayable || 0,
       },
       bankDetails: {
         method: payroll.paymentMethod || 'bank_transfer',
         account: payroll.bankAccount || 'N/A',
-        transactionRef: payroll.transactionReference || 'معلق'
+        transactionRef: payroll.transactionReference || 'معلق',
       },
       approvals: payroll.approvals || {},
-      notes: []
+      notes: [],
     };
   }
 
@@ -71,7 +73,7 @@ class PayslipGenerationService {
         const doc = new PDFDocument({
           margin: 40,
           size: 'A4',
-          bufferPages: true
+          bufferPages: true,
         });
 
         const output = fs.createWriteStream(outputPath);
@@ -85,11 +87,17 @@ class PayslipGenerationService {
         // معلومات الشركة (يمكن تخصيصها)
         doc.fontSize(9).font('Helvetica').text('شركة الألوائيل ERP', { align: 'center' });
         doc.text('AlAwael Enterprise Resource Planning', { align: 'center' });
-        doc.moveTo(50, doc.y + 5).lineTo(550, doc.y + 5).stroke();
+        doc
+          .moveTo(50, doc.y + 5)
+          .lineTo(550, doc.y + 5)
+          .stroke();
         doc.moveDown(1);
 
         // معلومات الموظف
-        doc.fontSize(11).font('Helvetica-Bold').text('معلومات الموظف | Employee Information:', { underline: true });
+        doc
+          .fontSize(11)
+          .font('Helvetica-Bold')
+          .text('معلومات الموظف | Employee Information:', { underline: true });
         doc.fontSize(9).font('Helvetica');
 
         const employeeY = doc.y;
@@ -97,7 +105,9 @@ class PayslipGenerationService {
         doc.text(`البريد الإلكتروني | Email: ${payroll.employeeEmail}`, 50);
         doc.text(`معرف الموظف | ID: ${payroll.employeeId}`, 50);
 
-        doc.fontSize(9).text(`الشهر | Month: ${this.getMonthName(payroll.month)} ${payroll.year}`, 350);
+        doc
+          .fontSize(9)
+          .text(`الشهر | Month: ${this.getMonthName(payroll.month)} ${payroll.year}`, 350);
         doc.text(`الحالة | Status: ${this.getStatusLabel(payroll.status)}`, 350);
         doc.moveDown(0.5);
 
@@ -108,19 +118,23 @@ class PayslipGenerationService {
         const earningsData = [
           ['الوصف | Description', 'المبلغ | Amount', 'ملاحظات | Notes'],
           ['الراتب الأساسي | Base Salary', `${payroll.baseSalary.toFixed(2)} SAR`, ''],
-          ...payroll.allowances.map(a => [
-            a.name,
-            `${a.amount.toFixed(2)} SAR`,
-            a.type || ''
-          ]),
-          ['الحوافز | Incentives', `${payroll.calculations?.totalIncentives?.toFixed(2) || '0.00'} SAR`, 'الأداء و الحضور'],
-          ['المجموع الأولي | Subtotal', `${payroll.calculations?.totalGross?.toFixed(2) || '0.00'} SAR`, '']
+          ...payroll.allowances.map(a => [a.name, `${a.amount.toFixed(2)} SAR`, a.type || '']),
+          [
+            'الحوافز | Incentives',
+            `${payroll.calculations?.totalIncentives?.toFixed(2) || '0.00'} SAR`,
+            'الأداء و الحضور',
+          ],
+          [
+            'المجموع الأولي | Subtotal',
+            `${payroll.calculations?.totalGross?.toFixed(2) || '0.00'} SAR`,
+            '',
+          ],
         ];
 
         this.drawTable(doc, earningsData, 50, doc.y, {
           width: 500,
           rowHeight: 20,
-          headerBg: '#d3d3d3'
+          headerBg: '#d3d3d3',
         });
 
         doc.moveDown(1);
@@ -131,17 +145,33 @@ class PayslipGenerationService {
 
         const deductionsData = [
           ['الوصف | Description', 'النسبة | Rate', 'المبلغ | Amount'],
-          ['ضريبة الدخل | Income Tax', `${(payroll.taxes?.incomeTax?.percentage || 0).toFixed(1)}%`, `${(payroll.taxes?.incomeTax?.amount || 0).toFixed(2)} SAR`],
-          ['الضمان الاجتماعي | Social Security', '6%', `${(payroll.taxes?.socialSecurity?.amount || 0).toFixed(2)} SAR`],
-          ['التأمين الصحي | Health Insurance', '2%', `${(payroll.taxes?.healthInsurance?.amount || 0).toFixed(2)} SAR`],
+          [
+            'ضريبة الدخل | Income Tax',
+            `${(payroll.taxes?.incomeTax?.percentage || 0).toFixed(1)}%`,
+            `${(payroll.taxes?.incomeTax?.amount || 0).toFixed(2)} SAR`,
+          ],
+          [
+            'الضمان الاجتماعي | Social Security',
+            '6%',
+            `${(payroll.taxes?.socialSecurity?.amount || 0).toFixed(2)} SAR`,
+          ],
+          [
+            'التأمين الصحي | Health Insurance',
+            '2%',
+            `${(payroll.taxes?.healthInsurance?.amount || 0).toFixed(2)} SAR`,
+          ],
           ['GOSI (التأمينات)', '3%', `${(payroll.taxes?.GOSI?.amount || 0).toFixed(2)} SAR`],
-          ['المجموع | Total Deductions', '', `${(payroll.calculations?.totalDeductions || 0).toFixed(2)} SAR`]
+          [
+            'المجموع | Total Deductions',
+            '',
+            `${(payroll.calculations?.totalDeductions || 0).toFixed(2)} SAR`,
+          ],
         ];
 
         this.drawTable(doc, deductionsData, 50, doc.y, {
           width: 500,
           rowHeight: 20,
-          headerBg: '#d3d3d3'
+          headerBg: '#d3d3d3',
         });
 
         doc.moveDown(1);
@@ -155,33 +185,45 @@ class PayslipGenerationService {
 
         // الإجمالي الإجمالي
         doc.fontSize(11).font('Helvetica-Bold').text('الراتب الإجمالي | Gross Salary:', summaryX);
-        doc.fontSize(11).font('Helvetica-Bold').text(
-          `${(payroll.calculations?.totalGross || 0).toFixed(2)} SAR`,
-          summaryX + summaryLineWidth,
-          doc.y - 16,
-          { align: 'right' }
-        );
+        doc
+          .fontSize(11)
+          .font('Helvetica-Bold')
+          .text(
+            `${(payroll.calculations?.totalGross || 0).toFixed(2)} SAR`,
+            summaryX + summaryLineWidth,
+            doc.y - 16,
+            { align: 'right' }
+          );
         doc.moveDown(0.8);
 
         // الخصومات
         doc.fontSize(11).font('Helvetica').text('الخصومات | Deductions:', summaryX);
-        doc.fontSize(11).font('Helvetica').text(
-          `(${(payroll.calculations?.totalDeductions || 0).toFixed(2)} SAR)`,
-          summaryX + summaryLineWidth,
-          doc.y - 16,
-          { align: 'right' }
-        );
+        doc
+          .fontSize(11)
+          .font('Helvetica')
+          .text(
+            `(${(payroll.calculations?.totalDeductions || 0).toFixed(2)} SAR)`,
+            summaryX + summaryLineWidth,
+            doc.y - 16,
+            { align: 'right' }
+          );
         doc.moveDown(0.8);
 
         // الراتب الصافي
-        doc.moveTo(summaryX, doc.y + 5).lineTo(summaryX + summaryLineWidth, doc.y + 5).stroke();
+        doc
+          .moveTo(summaryX, doc.y + 5)
+          .lineTo(summaryX + summaryLineWidth, doc.y + 5)
+          .stroke();
         doc.fontSize(12).font('Helvetica-Bold').text('الراتب الصافي | Net Salary:', summaryX);
-        doc.fontSize(12).font('Helvetica-Bold').text(
-          `${(payroll.calculations?.totalNet || 0).toFixed(2)} SAR`,
-          summaryX + summaryLineWidth,
-          doc.y - 19,
-          { align: 'right' }
-        );
+        doc
+          .fontSize(12)
+          .font('Helvetica-Bold')
+          .text(
+            `${(payroll.calculations?.totalNet || 0).toFixed(2)} SAR`,
+            summaryX + summaryLineWidth,
+            doc.y - 19,
+            { align: 'right' }
+          );
         doc.moveDown(1);
 
         // بيانات البنك
@@ -194,7 +236,9 @@ class PayslipGenerationService {
             doc.text(`رقم المرجع | Reference: ${payroll.transactionReference}`);
           }
           if (payroll.paymentDate) {
-            doc.text(`تاريخ الدفع | Payment Date: ${new Date(payroll.paymentDate).toLocaleDateString('ar-SA')}`);
+            doc.text(
+              `تاريخ الدفع | Payment Date: ${new Date(payroll.paymentDate).toLocaleDateString('ar-SA')}`
+            );
           }
           doc.moveDown(0.5);
         }
@@ -204,28 +248,33 @@ class PayslipGenerationService {
         doc.fontSize(8).font('Helvetica');
 
         if (payroll.approvals?.preparedBy) {
-          doc.text(`تم التحضير بواسطة | Prepared by: ${payroll.approvals.preparedBy.name} - ${new Date(payroll.approvals.preparedBy.date).toLocaleDateString('ar-SA')}`);
+          doc.text(
+            `تم التحضير بواسطة | Prepared by: ${payroll.approvals.preparedBy.name} - ${new Date(payroll.approvals.preparedBy.date).toLocaleDateString('ar-SA')}`
+          );
         }
         if (payroll.approvals?.approvedBy) {
-          doc.text(`تمت الموافقة من | Approved by: ${payroll.approvals.approvedBy.name} - ${new Date(payroll.approvals.approvedBy.date).toLocaleDateString('ar-SA')}`);
+          doc.text(
+            `تمت الموافقة من | Approved by: ${payroll.approvals.approvedBy.name} - ${new Date(payroll.approvals.approvedBy.date).toLocaleDateString('ar-SA')}`
+          );
         }
 
         doc.moveDown(1);
 
         // التذييل
-        doc.fontSize(8).text(
-          'هذا المستند سري وموجه للموظف المحترم فقط. | This document is confidential and strictly for the employee.',
-          50,
-          doc.page.height - 50,
-          { align: 'center', width: 500 }
-        );
+        doc
+          .fontSize(8)
+          .text(
+            'هذا المستند سري وموجه للموظف المحترم فقط. | This document is confidential and strictly for the employee.',
+            50,
+            doc.page.height - 50,
+            { align: 'center', width: 500 }
+          );
 
         doc.end();
 
         output.on('finish', () => {
           resolve(outputPath);
         });
-
       } catch (error) {
         reject(error);
       }
@@ -265,7 +314,7 @@ class PayslipGenerationService {
           width: columnWidth - 10,
           height: rowHeight - 10,
           align: cellIndex === row.length - 1 ? 'right' : 'left',
-          lineBreak: false
+          lineBreak: false,
         });
 
         currentX += columnWidth;
@@ -284,8 +333,18 @@ class PayslipGenerationService {
    */
   static getMonthName(month) {
     const months = [
-      'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
-      'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'
+      'يناير',
+      'فبراير',
+      'مارس',
+      'أبريل',
+      'مايو',
+      'يونيو',
+      'يوليو',
+      'أغسطس',
+      'سبتمبر',
+      'أكتوبر',
+      'نوفمبر',
+      'ديسمبر',
     ];
     return months[month - 1] || 'الشهر المجهول';
   }
@@ -295,13 +354,13 @@ class PayslipGenerationService {
    */
   static getStatusLabel(status) {
     const labels = {
-      'draft': 'مسودة',
+      draft: 'مسودة',
       'pending-approval': 'قيد الموافقة',
-      'approved': 'موافق عليه',
-      'processed': 'معالج',
-      'transferred': 'محول',
-      'paid': 'مدفوع',
-      'cancelled': 'ملغى'
+      approved: 'موافق عليه',
+      processed: 'معالج',
+      transferred: 'محول',
+      paid: 'مدفوع',
+      cancelled: 'ملغى',
     };
     return labels[status] || status;
   }
@@ -324,7 +383,7 @@ class PayslipGenerationService {
     return {
       fileName,
       filePath,
-      url: `/uploads/payslips/${fileName}`
+      url: `/uploads/payslips/${fileName}`,
     };
   }
 
@@ -419,12 +478,16 @@ class PayslipGenerationService {
             <td class="amount">${payslipData.earnings.baseSalary.toFixed(2)} SAR</td>
             <td>الراتب الأساسي</td>
           </tr>
-          ${payslipData.earnings.allowances.map(a => `
+          ${payslipData.earnings.allowances
+            .map(
+              a => `
           <tr>
             <td class="amount">${(a.amount || 0).toFixed(2)} SAR</td>
             <td>${a.name}</td>
           </tr>
-          `).join('')}
+          `
+            )
+            .join('')}
           <tr>
             <td class="amount">${payslipData.earnings.totalIncentives.toFixed(2)} SAR</td>
             <td>الحوافز</td>

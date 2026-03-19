@@ -1,7 +1,8 @@
+/* eslint-disable no-unused-vars */
 /**
  * 🔔 نظام الإنذارات والتنبيهات المتقدمة
  * Advanced Alert & Notification Service
- * 
+ *
  * نظام متكامل للإنذارات والتنبيهات في الوقت الفعلي
  */
 
@@ -25,7 +26,7 @@ class AlertNotificationService {
         threshold: 120,
         unit: 'km/h',
         severity: 'high',
-        enabled: true
+        enabled: true,
       },
       {
         id: 'safety-fatigue',
@@ -34,7 +35,7 @@ class AlertNotificationService {
         threshold: 8,
         unit: 'hours',
         severity: 'critical',
-        enabled: true
+        enabled: true,
       },
       // تنبيهات الصيانة
       {
@@ -44,7 +45,7 @@ class AlertNotificationService {
         threshold: 5000,
         unit: 'km',
         severity: 'medium',
-        enabled: true
+        enabled: true,
       },
       {
         id: 'maintenance-tire',
@@ -53,7 +54,7 @@ class AlertNotificationService {
         threshold: 10000,
         unit: 'km',
         severity: 'medium',
-        enabled: true
+        enabled: true,
       },
       // تنبيهات الوقود
       {
@@ -63,7 +64,7 @@ class AlertNotificationService {
         threshold: 12,
         unit: 'km/l',
         severity: 'low',
-        enabled: true
+        enabled: true,
       },
       // تنبيهات التأمين
       {
@@ -73,8 +74,8 @@ class AlertNotificationService {
         threshold: 30,
         unit: 'days',
         severity: 'high',
-        enabled: true
-      }
+        enabled: true,
+      },
     ];
   }
 
@@ -87,7 +88,7 @@ class AlertNotificationService {
       acknowledged: false,
       acknowledgedAt: null,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     this.alerts.push(alert);
@@ -99,7 +100,7 @@ class AlertNotificationService {
       title: `⚠️ ${alert.title}`,
       message: alert.description,
       severity: alert.severity,
-      recipients: alert.recipients || []
+      recipients: alert.recipients || [],
     });
 
     return alert;
@@ -108,12 +109,12 @@ class AlertNotificationService {
   // إنشاء تنبيه أمان
   createSafetyAlert(vehicleId, driverId, alertType, details) {
     const alertMessages = {
-      'speeding': 'تم تجاوز السرعة المحددة',
+      speeding: 'تم تجاوز السرعة المحددة',
       'harsh-braking': 'كبح مفاجئ اكتُشف',
       'sharp-turn': 'منعطف حاد اكتُشف',
-      'fatigue': 'علامات إرهاق السائق',
+      fatigue: 'علامات إرهاق السائق',
       'phone-use': 'استخدام الهاتف أثناء القيادة',
-      'wrong-lane': 'تغيير غير آمن للحارة'
+      'wrong-lane': 'تغيير غير آمن للحارة',
     };
 
     return this.createAlert({
@@ -125,7 +126,7 @@ class AlertNotificationService {
       driverId,
       alertType,
       details,
-      recipients: ['admin@fleet.com']
+      recipients: ['admin@fleet.com'],
     });
   }
 
@@ -136,7 +137,7 @@ class AlertNotificationService {
       ...notificationData,
       status: 'sent',
       readBy: [],
-      createdAt: new Date()
+      createdAt: new Date(),
     };
 
     this.notifications.push(notification);
@@ -162,7 +163,7 @@ class AlertNotificationService {
       alerts: results.sort((a, b) => {
         const severityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
         return severityOrder[a.severity] - severityOrder[b.severity];
-      })
+      }),
     };
   }
 
@@ -215,7 +216,7 @@ class AlertNotificationService {
 
     return {
       count: results.length,
-      alerts: results.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, limit)
+      alerts: results.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, limit),
     };
   }
 
@@ -242,27 +243,31 @@ class AlertNotificationService {
         maintenance: periodAlerts.filter(a => a.type === 'maintenance').length,
         fuel: periodAlerts.filter(a => a.type === 'fuel').length,
         insurance: periodAlerts.filter(a => a.type === 'insurance').length,
-        other: periodAlerts.filter(a => !['safety', 'maintenance', 'fuel', 'insurance'].includes(a.type)).length
+        other: periodAlerts.filter(
+          a => !['safety', 'maintenance', 'fuel', 'insurance'].includes(a.type)
+        ).length,
       },
       bySeverity: {
         critical: periodAlerts.filter(a => a.severity === 'critical').length,
         high: periodAlerts.filter(a => a.severity === 'high').length,
         medium: periodAlerts.filter(a => a.severity === 'medium').length,
-        low: periodAlerts.filter(a => a.severity === 'low').length
+        low: periodAlerts.filter(a => a.severity === 'low').length,
       },
       acknowledged: periodAlerts.filter(a => a.acknowledged).length,
-      pending: periodAlerts.filter(a => !a.acknowledged).length
+      pending: periodAlerts.filter(a => !a.acknowledged).length,
     };
   }
 
   // إشعارات معلقة
   getPendingNotifications(userId) {
     return {
-      count: this.notifications.filter(n => n.recipients.includes(userId) && n.readBy.indexOf(userId) === -1).length,
+      count: this.notifications.filter(
+        n => n.recipients.includes(userId) && n.readBy.indexOf(userId) === -1
+      ).length,
       notifications: this.notifications
         .filter(n => n.recipients.includes(userId))
         .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-        .slice(0, 20)
+        .slice(0, 20),
     };
   }
 
@@ -284,7 +289,7 @@ class AlertNotificationService {
       id: `custom-${Date.now()}`,
       ...ruleData,
       enabled: true,
-      createdAt: new Date()
+      createdAt: new Date(),
     };
 
     this.alertRules.push(rule);
@@ -309,10 +314,11 @@ class AlertNotificationService {
 
   // تقرير الإنذارات
   getAlertReport(vehicleId, startDate, endDate) {
-    const vehicleAlerts = this.alerts.filter(a => 
-      a.vehicleId === vehicleId &&
-      new Date(a.createdAt) >= new Date(startDate) &&
-      new Date(a.createdAt) <= new Date(endDate)
+    const vehicleAlerts = this.alerts.filter(
+      a =>
+        a.vehicleId === vehicleId &&
+        new Date(a.createdAt) >= new Date(startDate) &&
+        new Date(a.createdAt) <= new Date(endDate)
     );
 
     const typeBreakdown = {};
@@ -329,16 +335,17 @@ class AlertNotificationService {
       totalAlerts: vehicleAlerts.length,
       typeBreakdown,
       severityBreakdown,
-      acknowledgedRate: vehicleAlerts.filter(a => a.acknowledged).length / vehicleAlerts.length * 100,
+      acknowledgedRate:
+        (vehicleAlerts.filter(a => a.acknowledged).length / vehicleAlerts.length) * 100,
       averageTimeToAcknowledge: this.calculateAverageAcknowledgeTime(vehicleAlerts),
-      criticalAlerts: vehicleAlerts.filter(a => a.severity === 'critical')
+      criticalAlerts: vehicleAlerts.filter(a => a.severity === 'critical'),
     };
   }
 
   // حساب متوسط وقت التأكيد
   calculateAverageAcknowledgeTime(alerts) {
     const acknowledgedAlerts = alerts.filter(a => a.acknowledged && a.acknowledgedAt);
-    
+
     if (acknowledgedAlerts.length === 0) return 0;
 
     const totalTime = acknowledgedAlerts.reduce((sum, a) => {
@@ -355,7 +362,7 @@ class AlertNotificationService {
       highRiskVehicles: this.getHighRiskVehicles(),
       highRiskDrivers: this.getHighRiskDrivers(),
       timePatterns: this.getTimePatterns(),
-      recommendations: []
+      recommendations: [],
     };
 
     if (patterns.mostCommonType) {
@@ -371,7 +378,7 @@ class AlertNotificationService {
       types[a.type] = (types[a.type] || 0) + 1;
     });
 
-    const maxType = Object.entries(types).reduce((a, b) => a[1] > b[1] ? a : b, [null, 0]);
+    const maxType = Object.entries(types).reduce((a, b) => (a[1] > b[1] ? a : b), [null, 0]);
     return { type: maxType[0], count: maxType[1] };
   }
 

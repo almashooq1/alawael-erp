@@ -1,4 +1,4 @@
-/**
+/* eslint-disable no-unused-vars */ /**
  * Advanced Messaging & Alert System
  * نظام الرسائل والإشعارات المتقدم
  *
@@ -164,23 +164,25 @@ class AdvancedMessagingAlertSystem {
     // محاكاة الإرسال
     switch (channel) {
       case 'email':
-        console.log(`📧 إرسال بريد إلى ${message.recipientId}: ${message.subject}`);
+        // console.log(`📧 إرسال بريد إلى ${message.recipientId}: ${message.subject}`);
         return true; // محاكاة النجاح
 
       case 'sms':
-        console.log(`📱 إرسال رسالة نصية إلى ${message.recipientId}: ${message.body.substring(0, 50)}...`);
+        // console.log(
+        //   `📱 إرسال رسالة نصية إلى ${message.recipientId}: ${message.body.substring(0, 50)}...`
+        // );
         return true;
 
       case 'push':
-        console.log(`🔔 إرسال إشعار فوري إلى ${message.recipientId}`);
+        // console.log(`🔔 إرسال إشعار فوري إلى ${message.recipientId}`);
         return true;
 
       case 'inApp':
-        console.log(`💬 إضافة رسالة داخل التطبيق`);
+        // console.log(`💬 إضافة رسالة داخل التطبيق`);
         return true;
 
       case 'webhook':
-        console.log(`🔗 إرسال إلى webhook: ${message.metadata.webhookUrl}`);
+        // console.log(`🔗 إرسال إلى webhook: ${message.metadata.webhookUrl}`);
         return true;
 
       default:
@@ -324,7 +326,10 @@ class AdvancedMessagingAlertSystem {
     const revisions = workflows.reduce((sum, w) => sum + (w.revisions || 0), 0);
 
     const score =
-      100 - (slaBreaches / totalWorkflows) * 30 - (rejections / totalWorkflows) * 30 - Math.min(revisions / totalWorkflows, 1) * 20;
+      100 -
+      (slaBreaches / totalWorkflows) * 30 -
+      (rejections / totalWorkflows) * 30 -
+      Math.min(revisions / totalWorkflows, 1) * 20;
 
     return Math.max(0, Math.round(score));
   }
@@ -391,7 +396,7 @@ class AdvancedMessagingAlertSystem {
         {
           channels: ['email', 'push', 'inApp'],
           priority: 'high',
-        },
+        }
       );
 
       results.push(result);
@@ -404,7 +409,7 @@ class AdvancedMessagingAlertSystem {
    * تصعيد المشكلة
    */
   async escalateIssue(rule, alert, workflows) {
-    console.log(`🚨 تصعيد المشكلة: ${rule.name}`);
+    // console.log(`🚨 تصعيد المشكلة: ${rule.name}`);
     // في تطبيق حقيقي، قد تصعد إلى مدير أعلى
     return { success: true, escalated: true };
   }
@@ -414,7 +419,7 @@ class AdvancedMessagingAlertSystem {
    */
   async pauseWorkflows(alert, workflows) {
     const affectedCount = workflows.length;
-    console.log(`⏸️ إيقاف ${affectedCount} سير عمل`);
+    // console.log(`⏸️ إيقاف ${affectedCount} سير عمل`);
     return { success: true, pausedCount: affectedCount };
   }
 
@@ -423,7 +428,7 @@ class AdvancedMessagingAlertSystem {
    */
   async cancelWorkflows(alert, workflows) {
     const affectedCount = workflows.length;
-    console.log(`❌ إلغاء ${affectedCount} سير عمل`);
+    // console.log(`❌ إلغاء ${affectedCount} سير عمل`);
     return { success: true, cancelledCount: affectedCount };
   }
 

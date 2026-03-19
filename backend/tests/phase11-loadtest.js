@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * @file phase11-loadtest.js
  * @description Phase 11 System Integration - Load Test Suite

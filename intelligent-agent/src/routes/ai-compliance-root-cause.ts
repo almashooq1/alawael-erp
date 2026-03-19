@@ -12,7 +12,7 @@ router.post('/compliance-root-cause', rbac(['admin', 'compliance-manager']), asy
     const result = await analyzeRootCause(event);
     res.json({ result });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'حدث خطأ في الخادم' });
   }
 });
 

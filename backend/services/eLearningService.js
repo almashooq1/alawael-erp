@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // Mock fallback
 const useMock = process.env.USE_MOCK_DB === 'true';
 
@@ -22,8 +23,20 @@ class ELearningService {
   async getAllCourses(filter = {}) {
     if (useMock) {
       return [
-        { _id: 'course1', title: 'Intro to AI', category: 'technical', isPublished: true, instructor: { name: 'Dr. AI' } },
-        { _id: 'course2', title: 'Communication Skills', category: 'soft-skills', isPublished: true, instructor: { name: 'Coach Sarah' } },
+        {
+          _id: 'course1',
+          title: 'Intro to AI',
+          category: 'technical',
+          isPublished: true,
+          instructor: { name: 'Dr. AI' },
+        },
+        {
+          _id: 'course2',
+          title: 'Communication Skills',
+          category: 'soft-skills',
+          isPublished: true,
+          instructor: { name: 'Coach Sarah' },
+        },
       ];
     }
     return await Course.find(filter).populate('instructor', 'name email').sort({ createdAt: -1 });
@@ -96,7 +109,8 @@ class ELearningService {
   // --- Enrollment & Progress ---
 
   async enrollStudent(userId, courseId) {
-    if (useMock) return { _id: 'enroll_' + Date.now(), student: userId, course: courseId, progress: 0 };
+    if (useMock)
+      return { _id: 'enroll_' + Date.now(), student: userId, course: courseId, progress: 0 };
 
     // Check if already enrolled
     const existing = await Enrollment.findOne({ student: userId, course: courseId });
@@ -119,7 +133,9 @@ class ELearningService {
         },
       ];
     }
-    return await Enrollment.find({ student: userId }).populate('course', 'title thumbnailUrl category').sort('-enrolledAt');
+    return await Enrollment.find({ student: userId })
+      .populate('course', 'title thumbnailUrl category')
+      .sort('-enrolledAt');
   }
 
   async completeLesson(userId, courseId, lessonId) {
@@ -135,7 +151,8 @@ class ELearningService {
       // Calculate Progress
       const totalLessons = await Lesson.countDocuments({ courseId });
       const completedCount = enrollment.completedLessons.length;
-      enrollment.progress = totalLessons === 0 ? 0 : Math.round((completedCount / totalLessons) * 100);
+      enrollment.progress =
+        totalLessons === 0 ? 0 : Math.round((completedCount / totalLessons) * 100);
 
       if (enrollment.progress === 100 && !enrollment.isCompleted) {
         enrollment.isCompleted = true;

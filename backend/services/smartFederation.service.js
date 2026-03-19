@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 class SmartFederationService {
   /**
    * Cross-Branch Aggregation

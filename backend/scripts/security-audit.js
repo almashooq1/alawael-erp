@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable no-unused-vars */
 
 /**
  * 🔒 Security Audit Script
@@ -17,15 +18,15 @@ const colors = {
   green: '\x1b[32m',
   yellow: '\x1b[33m',
   blue: '\x1b[34m',
-  cyan: '\x1b[36m'
+  cyan: '\x1b[36m',
 };
 
 const log = {
-  info: (msg) => console.log(`${colors.cyan}ℹ️ ${msg}${colors.reset}`),
-  success: (msg) => console.log(`${colors.green}✅ ${msg}${colors.reset}`),
-  warn: (msg) => console.log(`${colors.yellow}⚠️  ${msg}${colors.reset}`),
-  error: (msg) => console.log(`${colors.red}❌ ${msg}${colors.reset}`),
-  title: (msg) => console.log(`\n${colors.blue}${msg}${colors.reset}\n`)
+  info: msg => console.log(`${colors.cyan}ℹ️ ${msg}${colors.reset}`),
+  success: msg => console.log(`${colors.green}✅ ${msg}${colors.reset}`),
+  warn: msg => console.log(`${colors.yellow}⚠️  ${msg}${colors.reset}`),
+  error: msg => console.log(`${colors.red}❌ ${msg}${colors.reset}`),
+  title: msg => console.log(`\n${colors.blue}${msg}${colors.reset}\n`),
 };
 
 // Results storage
@@ -34,12 +35,13 @@ const auditResults = {
   summary: {
     passed: 0,
     failed: 0,
-    warnings: 0
+    warnings: 0,
   },
   checks: [],
   vulnerabilities: [],
-  recommendations: []
+  recommendations: [],
 };
 
 /**
  * Add check result
+ */

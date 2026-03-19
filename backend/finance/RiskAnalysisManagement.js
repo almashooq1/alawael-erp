@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * ===================================================================
  * RISK ANALYSIS & MANAGEMENT MODULE
@@ -243,7 +244,7 @@ class RiskAnalysisManagement extends EventEmitter {
 
     // فحص 2: توثيق المعاملات
     let documentedTransactions = 0;
-    let totalTransactions = this.fs.journals.size;
+    const totalTransactions = this.fs.journals.size;
 
     for (const journal of this.fs.journals.values()) {
       if (journal.attachments && journal.attachments.length > 0) {

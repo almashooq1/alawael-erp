@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const express = require('express');
 const ChangeLog = require('../models/ChangeLog');
 const { sendMail } = require('../utils/mailer');
@@ -21,8 +22,7 @@ router.post('/:id/review', authMiddleware, async (req, res) => {
     }
     supplier.reviews.push({ user: req.user._id, rating, comment });
     // تحديث متوسط التقييم
-    supplier.rating =
-      supplier.reviews.reduce((acc, r) => acc + r.rating, 0) / supplier.reviews.length;
+    supplier.rating = supplier.reviews.reduce((acc, r) => acc + r.rating, 0) / supplier.reviews.length;
     await supplier.save();
     await logAction({
       user: req.user,
@@ -38,11 +38,11 @@ router.post('/:id/review', authMiddleware, async (req, res) => {
         subject: `تقييم جديد للمورد: ${supplier.name}`,
         text: `تم إضافة تقييم جديد للمورد ${supplier.name}\nالتقييم: ${rating}\nالتعليق: ${comment || '-'}\nمن المستخدم: ${req.user.email || req.user._id}`,
       });
-    } catch (e) {
+    } catch (_e) {
       /* تجاهل فشل البريد */
     }
     res.json({ rating: supplier.rating, reviews: supplier.reviews });
-  } catch (err) {
+  } catch (_err) {
     res.status(500).json({ error: 'فشل إضافة التقييم' });
   }
 });
@@ -55,66 +55,87 @@ const router = express.Router();
 
 // Get all suppliers
 router.get('/', authMiddleware, async (req, res) => {
-  const suppliers = await Supplier.find();
-  res.json(suppliers);
+  try {
+    const suppliers = await Supplier.find();
+    res.json(suppliers);
+  } catch (_err) {
+    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+  }
 });
 
 // Create supplier
 router.post('/', authMiddleware, async (req, res) => {
-  const supplier = new Supplier(req.body);
-  await supplier.save();
-  await logAction({
-    user: req.user,
-    action: 'create',
-    entity: 'Supplier',
-    entityId: supplier._id,
-    details: { data: req.body },
-  });
-  res.status(201).json(supplier);
+  try {
+    const supplier = new Supplier(req.body);
+    await supplier.save();
+    await logAction({
+      user: req.user,
+      action: 'create',
+      entity: 'Supplier',
+      entityId: supplier._id,
+      details: { data: req.body },
+    });
+    res.status(201).json(supplier);
+  } catch (_err) {
+    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+  }
 });
 
 // Update supplier
 router.put('/:id', authMiddleware, async (req, res) => {
-  const before = await Supplier.findById(req.params.id);
-  const supplier = await Supplier.findByIdAndUpdate(req.params.id, req.body, { new: true });
-  await logAction({
-    user: req.user,
-    action: 'update',
-    entity: 'Supplier',
-    entityId: supplier._id,
-    details: { before, after: supplier },
-  });
-  await ChangeLog.create({
-    entity: 'Supplier',
-    entityId: supplier._id,
-    action: 'update',
-    user: req.user._id,
-    before,
-    after: supplier,
-  });
-  res.json(supplier);
+  try {
+    const before = await Supplier.findById(req.params.id);
+    const { name, contactPerson, email, phone, address, category, status, notes } = req.body;
+    const supplier = await Supplier.findByIdAndUpdate(
+      req.params.id,
+      { name, contactPerson, email, phone, address, category, status, notes },
+      { new: true },
+    );
+    await logAction({
+      user: req.user,
+      action: 'update',
+      entity: 'Supplier',
+      entityId: supplier._id,
+      details: { before, after: supplier },
+    });
+    await ChangeLog.create({
+      entity: 'Supplier',
+      entityId: supplier._id,
+      action: 'update',
+      user: req.user._id,
+      before,
+      after: supplier,
+    });
+    res.json(supplier);
+  } catch (_err) {
+    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+  }
 });
 
 // Delete supplier
 router.delete('/:id', authMiddleware, async (req, res) => {
-  const before = await Supplier.findById(req.params.id);
-  await Supplier.findByIdAndDelete(req.params.id);
-  await logAction({
-    user: req.user,
-    action: 'delete',
-    entity: 'Supplier',
-    entityId: req.params.id,
-    details: { before },
-  });
-  await ChangeLog.create({
-    entity: 'Supplier',
-    entityId: req.params.id,
-    action: 'delete',
-    user: req.user._id,
-    before,
-    after: null,
-  });
-  res.status(204).end();
+  try {
+    const before = await Supplier.findById(req.params.id);
+    await Supplier.findByIdAndDelete(req.params.id);
+    await logAction({
+      user: req.user,
+      action: 'delete',
+      entity: 'Supplier',
+      entityId: req.params.id,
+      details: { before },
+    });
+    await ChangeLog.create({
+      entity: 'Supplier',
+      entityId: req.params.id,
+      action: 'delete',
+      user: req.user._id,
+      before,
+      after: null,
+    });
+    res.status(204).end();
+  } catch (_err) {
+    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+  }
 });
 
 module.exports = router;

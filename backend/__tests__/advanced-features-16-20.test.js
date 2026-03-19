@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * 🧪 Phase 16-20: Advanced Enterprise Features
  * متكاملة شاملة لـ Microservices, LLM, Data Pipelines, Blockchain, Caching

@@ -1,5 +1,7 @@
+/* eslint-disable no-unused-vars */
 const fs = require('fs');
 const path = require('path');
+const logger = require('../utils/logger');
 
 const DB_PATH = path.join(__dirname, '../data/db.json');
 const isTestEnv = process.env.NODE_ENV === 'test' || !!process.env.JEST_WORKER_ID;
@@ -33,7 +35,7 @@ function read() {
     }
     return readFromDisk();
   } catch (error) {
-    console.error('خطأ في قراءة قاعدة البيانات:', error);
+    logger.error('خطأ في قراءة قاعدة البيانات:', error);
     return { ...defaultData };
   }
 }
@@ -53,7 +55,7 @@ function write(data) {
     fs.writeFileSync(DB_PATH, JSON.stringify(nextData, null, 2));
     return true;
   } catch (error) {
-    console.error('خطأ في كتابة قاعدة البيانات:', error);
+    logger.error('خطأ في كتابة قاعدة البيانات:', error);
     return false;
   }
 }

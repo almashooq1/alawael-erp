@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const PurchaseOrder = require('../models/PurchaseOrder.model');
 const PurchaseRequest = require('../models/PurchaseRequest.model');
 const Supplier = require('../models/Supplier.model');
@@ -9,7 +10,6 @@ const Contract = require('../models/Contract.model');
  * خدمة التقارير المتقدمة للمشتريات
  */
 class ProcurementReportingService {
-
   /**
    * تقرير النفقات الشامل
    */
@@ -72,7 +72,7 @@ class ProcurementReportingService {
         }
         stats.monthlyTrend[month].spend += amount;
         stats.monthlyTrend[month].orderCount++;
-        stats.monthlyTrend[month].averageValue = 
+        stats.monthlyTrend[month].averageValue =
           stats.monthlyTrend[month].spend / stats.monthlyTrend[month].orderCount;
 
         // حسب المنتجات
@@ -91,14 +91,13 @@ class ProcurementReportingService {
         }
       }
 
-      stats.averageOrderValue = orders.length > 0 
-        ? stats.totalSpend / orders.length
-        : 0;
+      stats.averageOrderValue = orders.length > 0 ? stats.totalSpend / orders.length : 0;
 
       // تحويل Sets إلى Arrays
       for (const category in stats.spendByCategory) {
-        stats.spendByCategory[category].itemNames = 
-          Array.from(stats.spendByCategory[category].itemNames);
+        stats.spendByCategory[category].itemNames = Array.from(
+          stats.spendByCategory[category].itemNames
+        );
       }
 
       // التصنيفات (Pareto Analysis)
@@ -114,7 +113,7 @@ class ProcurementReportingService {
         },
       };
     } catch (error) {
-      return { success: false, message: error.message };
+      return { success: false, message: 'حدث خطأ داخلي' };
     }
   }
 
@@ -122,11 +121,10 @@ class ProcurementReportingService {
    * تحليل قانون باريتو (80/20)
    */
   analyzeParetoDistribution(suppliers) {
-    const sorted = Object.entries(suppliers)
-      .sort((a, b) => b['1'].amount - a['1'].amount);
+    const sorted = Object.entries(suppliers).sort((a, b) => b['1'].amount - a['1'].amount);
 
     let cumulativeSpend = 0;
-    let totalSpend = sorted.reduce((sum, item) => sum + item['1'].amount, 0);
+    const totalSpend = sorted.reduce((sum, item) => sum + item['1'].amount, 0);
 
     const result = {
       topSuppliers: [],
@@ -156,7 +154,7 @@ class ProcurementReportingService {
     const percentage = (topSpend / totalSpend) * 100;
 
     if (percentage >= 80) {
-      result.strategyRecommendation = 
+      result.strategyRecommendation =
         `${topCount} suppliers account for ${percentage.toFixed(1)}% of spend. ` +
         'Focus on strengthening these relationships and negotiating better terms.';
     }
@@ -171,27 +169,26 @@ class ProcurementReportingService {
     const insights = [];
 
     // أعلى موردين
-    const topSupplier = Object.entries(stats.spendBySupplier)
-      .sort((a, b) => b['1'].amount - a['1'].amount)[0];
+    const topSupplier = Object.entries(stats.spendBySupplier).sort(
+      (a, b) => b['1'].amount - a['1'].amount
+    )[0];
     if (topSupplier) {
       insights.push(
         `Top supplier: ${topSupplier[0]} with ${topSupplier[1].orderCount} orders ` +
-        `totaling $${topSupplier[1].amount.toFixed(2)}`
+          `totaling $${topSupplier[1].amount.toFixed(2)}`
       );
     }
 
     // نطاق الطلب
     if (stats.highestOrder > stats.lowestOrder * 5) {
-      insights.push(
-        'Wide variation in order values detected. Consider standardizing order sizes.'
-      );
+      insights.push('Wide variation in order values detected. Consider standardizing order sizes.');
     }
 
     // متوسط قيمة الطلب
     if (stats.averageOrderValue > 10000) {
       insights.push(
         `High average order value: $${stats.averageOrderValue.toFixed(2)}. ` +
-        'Monitor for consolidation opportunities.'
+          'Monitor for consolidation opportunities.'
       );
     }
 
@@ -215,15 +212,15 @@ class ProcurementReportingService {
       };
 
       for (const supplier of suppliers) {
-        const supplierOrders = orders.filter(o => 
-          o.supplier?.supplierId === supplier._id.toString()
+        const supplierOrders = orders.filter(
+          o => o.supplier?.supplierId === supplier._id.toString()
         );
 
         if (supplierOrders.length === 0) continue;
 
         // حساب المقاييس
         let onTimeCount = 0;
-        let totalDefects = 0;
+        const totalDefects = 0;
         let totalQualityIssues = 0;
         let totalSpend = 0;
 
@@ -251,9 +248,9 @@ class ProcurementReportingService {
           orderMetrics: {
             totalOrders: supplierOrders.length,
             onTimeDeliveries: onTimeCount,
-            onTimePercentage: (onTimeCount / supplierOrders.length * 100).toFixed(1),
+            onTimePercentage: ((onTimeCount / supplierOrders.length) * 100).toFixed(1),
             totalQualityIssues,
-            averageQualityScore: 100 - ((totalQualityIssues / supplierOrders.length) * 10),
+            averageQualityScore: 100 - (totalQualityIssues / supplierOrders.length) * 10,
           },
           financialMetrics: {
             totalSpend,
@@ -268,13 +265,16 @@ class ProcurementReportingService {
       }
 
       // حساب النسب المئوية للإنفاق
-      const totalSpendAll = report.suppliers.reduce((sum, s) => 
-        sum + s.financialMetrics.totalSpend, 0
+      const totalSpendAll = report.suppliers.reduce(
+        (sum, s) => sum + s.financialMetrics.totalSpend,
+        0
       );
 
       for (const supplier of report.suppliers) {
-        supplier.financialMetrics.percentageOfSpend = 
-          ((supplier.financialMetrics.totalSpend / totalSpendAll) * 100).toFixed(2);
+        supplier.financialMetrics.percentageOfSpend = (
+          (supplier.financialMetrics.totalSpend / totalSpendAll) *
+          100
+        ).toFixed(2);
       }
 
       // ترتيب حسب الأداء
@@ -285,7 +285,7 @@ class ProcurementReportingService {
         data: report,
       };
     } catch (error) {
-      return { success: false, message: error.message };
+      return { success: false, message: 'حدث خطأ داخلي' };
     }
   }
 
@@ -343,18 +343,18 @@ class ProcurementReportingService {
             onTimeDeliveryRate: this.calculateOnTimeDeliveryRate(orders),
           },
           inventory: {
-            outstandingDeliveries: orders.filter(o => 
-              !['CLOSED', 'CANCELLED'].includes(o.status)
-            ).length,
+            outstandingDeliveries: orders.filter(o => !['CLOSED', 'CANCELLED'].includes(o.status))
+              .length,
             fullyReceivedOrders: orders.filter(o => o.status === 'FULLY_RECEIVED').length,
             partiallyReceivedOrders: orders.filter(o => o.status === 'PARTIALLY_RECEIVED').length,
           },
           payment: {
             invoicedOrders: orders.filter(o => o.invoicing?.invoiceNumber).length,
             paidOrders: orders.filter(o => o.invoicing?.paymentStatus === 'FULLY_PAID').length,
-            outstandingPayments: orders.filter(o => 
-              o.invoicing?.paymentStatus === 'NOT_PAID' || 
-              o.invoicing?.paymentStatus === 'PARTIALLY_PAID'
+            outstandingPayments: orders.filter(
+              o =>
+                o.invoicing?.paymentStatus === 'NOT_PAID' ||
+                o.invoicing?.paymentStatus === 'PARTIALLY_PAID'
             ).length,
           },
         },
@@ -369,7 +369,7 @@ class ProcurementReportingService {
         data: report,
       };
     } catch (error) {
-      return { success: false, message: error.message };
+      return { success: false, message: 'حدث خطأ داخلي' };
     }
   }
 
@@ -438,30 +438,40 @@ class ProcurementReportingService {
     return {
       approvalEfficiency: {
         name: 'Approval Efficiency',
-        value: ((processes.procurement.approvedRequests / 
-                (processes.procurement.approvedRequests + processes.procurement.rejectedRequests)) * 100).toFixed(1),
+        value: (
+          (processes.procurement.approvedRequests /
+            (processes.procurement.approvedRequests + processes.procurement.rejectedRequests)) *
+          100
+        ).toFixed(1),
         unit: '%',
         target: 85,
         status: 'METRIC',
       },
       orderFulfillmentRate: {
         name: 'Order Fulfillment Rate',
-        value: ((processes.ordering.issuedOrders / processes.ordering.totalOrders) * 100).toFixed(1),
+        value: ((processes.ordering.issuedOrders / processes.ordering.totalOrders) * 100).toFixed(
+          1
+        ),
         unit: '%',
         target: 95,
         status: 'METRIC',
       },
       onTimeDeliveryKPI: {
         name: 'On-Time Delivery Rate',
-        value: processes.inventory.fullyReceivedOrders > 0 ? 
-          ((processes.ordering.onTimeDeliveryRate) / 100 * 100).toFixed(1) : 'N/A',
+        value:
+          processes.inventory.fullyReceivedOrders > 0
+            ? ((processes.ordering.onTimeDeliveryRate / 100) * 100).toFixed(1)
+            : 'N/A',
         unit: '%',
         target: 90,
       },
       paymentTimeliness: {
         name: 'Payment Timeliness',
-        value: ((processes.payment.paidOrders / 
-                (processes.payment.paidOrders + processes.payment.outstandingPayments)) * 100).toFixed(1),
+        value: (
+          (processes.payment.paidOrders /
+            (processes.payment.paidOrders + processes.payment.outstandingPayments)) *
+          100
+        ).toFixed(1),
         unit: '%',
         target: 95,
       },
@@ -536,7 +546,7 @@ class ProcurementReportingService {
 
       // ترتيب حسب الخطورة
       alerts.sort((a, b) => {
-        const severityOrder = { 'CRITICAL': 0, 'HIGH': 1, 'MEDIUM': 2, 'LOW': 3 };
+        const severityOrder = { CRITICAL: 0, HIGH: 1, MEDIUM: 2, LOW: 3 };
         return severityOrder[a.severity] - severityOrder[b.severity];
       });
 
@@ -549,7 +559,7 @@ class ProcurementReportingService {
         },
       };
     } catch (error) {
-      return { success: false, message: error.message };
+      return { success: false, message: 'حدث خطأ داخلي' };
     }
   }
 
@@ -612,7 +622,7 @@ class ProcurementReportingService {
         data: report,
       };
     } catch (error) {
-      return { success: false, message: error.message };
+      return { success: false, message: 'حدث خطأ داخلي' };
     }
   }
 }

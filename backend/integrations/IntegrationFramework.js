@@ -1,7 +1,10 @@
+/* eslint-disable no-unused-vars */
 /**
  * Integration Framework - Phase 10
  * Pluggable framework for ERP, banking, and third-party system integrations
  */
+
+const logger = require('../utils/logger');
 
 class IntegrationFramework {
   constructor() {
@@ -84,7 +87,7 @@ class IntegrationFramework {
       try {
         await callback(data);
       } catch (error) {
-        console.error(`Webhook error for ${event}:`, error);
+        logger.error(`Webhook error for ${event}:`, error);
       }
     }
   }
@@ -436,7 +439,7 @@ class DataSyncManager {
       try {
         await this.framework.syncIntegration(name, dataType);
       } catch (error) {
-        console.error(`Sync error for ${name}/${dataType}:`, error);
+        logger.error(`Sync error for ${name}/${dataType}:`, error);
       }
     }, intervalMs);
 

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * PHASE 17: CUSTOM WORKFLOW BUILDER
  * Visual Workflow Designer & Automation Engine
@@ -39,7 +40,7 @@ class WorkflowEngine {
 
       return { success: true, workflow };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -65,7 +66,7 @@ class WorkflowEngine {
 
       return { success: true, step };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -91,7 +92,7 @@ class WorkflowEngine {
 
       return { success: true, condition };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -149,7 +150,7 @@ class WorkflowEngine {
 
       return { success: true, execution };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -175,14 +176,14 @@ class WorkflowEngine {
           return { success: true, action: step.type };
       }
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
   /**
    * Send email step
    */
-  async sendEmailStep(step, data) {
+  async sendEmailStep(step, _data) {
     return {
       success: true,
       action: 'email_sent',
@@ -195,7 +196,7 @@ class WorkflowEngine {
   /**
    * Send notification step
    */
-  async sendNotificationStep(step, data) {
+  async sendNotificationStep(step, _data) {
     return {
       success: true,
       action: 'notification_sent',
@@ -208,7 +209,7 @@ class WorkflowEngine {
   /**
    * Update record step
    */
-  async updateRecordStep(step, data) {
+  async updateRecordStep(step, _data) {
     try {
       const result = await this.db
         .collection(step.config?.collection)
@@ -220,14 +221,14 @@ class WorkflowEngine {
         modifiedCount: result.modifiedCount,
       };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
   /**
    * Create record step
    */
-  async createRecordStep(step, data) {
+  async createRecordStep(step, _data) {
     try {
       const result = await this.db.collection(step.config?.collection).insertOne({
         ...step.config?.data,
@@ -240,14 +241,14 @@ class WorkflowEngine {
         insertedId: result.insertedId,
       };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
   /**
    * Delay step
    */
-  async delayStep(step, data) {
+  async delayStep(step, _data) {
     return new Promise(resolve => {
       setTimeout(() => {
         resolve({
@@ -276,7 +277,7 @@ class WorkflowEngine {
         status: response.status,
       };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -347,7 +348,7 @@ class WorkflowEngine {
       this.workflows.delete(workflowId);
       return { success: true };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -375,7 +376,7 @@ class WorkflowEngine {
       await this.db.collection('workflows').updateOne({ id: workflowId }, { $set: { enabled } });
       return { success: true };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'حدث خطأ داخلي' };
     }
   }
 }

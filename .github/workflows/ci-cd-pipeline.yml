@@ -1,476 +1,495 @@
 name: CI/CD Pipeline - Production Ready
 
 on:
-    push:
-        branches: [main, develop]
-    pull_request:
-        branches: [main, develop]
-    schedule:
-        - cron: "0 2 * * *" # Daily at 2 AM
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    - cron: '0 2 * * *' # Daily at 2 AM
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
-    REGISTRY: ghcr.io
-    IMAGE_NAME: ${{ github.repository }}
-    DOCKER_BUILDKIT: 1
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  DOCKER_BUILDKIT: 1
+  NODE_VERSION: '18'
 
 jobs:
-    # ======================================
-    # 1. CODE QUALITY & LINTING
-    # ======================================
-    code-quality:
-        runs-on: ubuntu-latest
-        name: Code Quality Checks
+  # ======================================
+  # 1. CODE QUALITY & LINTING
+  # ======================================
+  code-quality:
+    runs-on: ubuntu-latest
+    name: Code Quality Checks
 
-        steps:
-            - uses: actions/checkout@v3
+    steps:
+      - uses: actions/checkout@v4
 
-            - name: Set up Python
-              uses: actions/setup-python@v4
-              with:
-                  python-version: "3.11"
-                  cache: "pip"
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
 
-            - name: Install dependencies
-              run: |
-                  pip install -r backend/requirements.txt
-                  pip install pylint flake8 black isort
+      - name: Install Backend Dependencies
+        run: cd backend && npm ci
 
-            - name: Run Black formatter check
-              run: black --check backend/
+      - name: Lint Backend
+        run: cd backend && npm run lint
 
-            - name: Run isort check
-              run: isort --check-only backend/
+      - name: Check Backend Formatting
+        run: cd backend && npm run format:check || echo "::warning::Backend formatting issues found"
 
-            - name: Run Flake8 linter
-              run: flake8 backend/ --count --select=E9,F63,F7,F82 --show-source --statistics
+      - name: Install Frontend Dependencies
+        run: cd frontend && npm ci
 
-            - name: Run Pylint
-              continue-on-error: true
-              run: pylint backend/**/*.py --fail-under=7.0
+      - name: Lint Frontend
+        run: cd frontend && npm run lint
 
-            - name: Set up Node.js
-              uses: actions/setup-node@v3
-              with:
-                  node-version: "18"
-                  cache: "npm"
-                  cache-dependency-path: frontend/package-lock.json
+  # ======================================
+  # 2. SECURITY SCANNING
+  # ======================================
+  security:
+    runs-on: ubuntu-latest
+    name: Security Scanning
 
-            - name: Lint Frontend
-              run: |
-                  cd frontend
-                  npm ci
-                  npm run lint || true
-                  npm run format-check || true
+    steps:
+      - uses: actions/checkout@v4
 
-    # ======================================
-    # 2. SECURITY SCANNING
-    # ======================================
-    security:
-        runs-on: ubuntu-latest
-        name: Security Scanning
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
 
-        steps:
-            - uses: actions/checkout@v3
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'table'
+          severity: 'CRITICAL,HIGH'
+          exit-code: '0'
+        continue-on-error: true
 
-            - name: Run Trivy vulnerability scanner
-              uses: aquasecurity/trivy-action@master
-              with:
-                  scan-type: "fs"
-                  scan-ref: "."
-                  format: "sarif"
-                  output: "trivy-results.sarif"
+      - name: Audit Backend Dependencies
+        run: |
+          cd backend
+          npm ci
+          npm audit --audit-level=high || echo "::warning::Backend npm audit found vulnerabilities"
 
-            - name: Upload Trivy results
-              uses: github/codeql-action/upload-sarif@v2
-              with:
-                  sarif_file: "trivy-results.sarif"
+      - name: Audit Frontend Dependencies
+        run: |
+          cd frontend
+          npm ci
+          npm audit --audit-level=high || echo "::warning::Frontend npm audit found vulnerabilities"
 
-            - name: Run OWASP Dependency Check
-              uses: dependency-check/Dependency-Check_Action@main
-              with:
-                  project: "Rehabilitation Center Management System"
-                  path: "."
-                  format: "JSON"
-                  args: >
-                      --enableExperimental
+  # ======================================
+  # 3. BACKEND UNIT TESTS
+  # ======================================
+  test-backend:
+    runs-on: ubuntu-latest
+    name: Backend Unit Tests
+    needs: code-quality
 
-            - name: Upload dependency check results
-              uses: actions/upload-artifact@v3
-              with:
-                  name: dependency-check-report
-                  path: dependency-check-report.json
+    steps:
+      - uses: actions/checkout@v4
 
-    # ======================================
-    # 3. UNIT TESTS - BACKEND
-    # ======================================
-    test-backend:
-        runs-on: ubuntu-latest
-        name: Backend Unit & Integration Tests
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
 
-        services:
-            mongodb:
-                image: mongo:6.0
-                options: >-
-                    --health-cmd mongosh
-                    --health-interval 10s
-                    --health-timeout 5s
-                    --health-retries 5
-                ports:
-                    - 27017:27017
-                env:
-                    MONGO_INITDB_DATABASE: test
+      - name: Install dependencies
+        run: cd backend && npm ci
 
-            redis:
-                image: redis:6-alpine
-                options: >-
-                    --health-cmd "redis-cli ping"
-                    --health-interval 10s
-                    --health-timeout 5s
-                    --health-retries 5
-                ports:
-                    - 6379:6379
+      - name: Run maintenance mock guard
+        run: cd backend && npm run test:guard:maintenance-mocks
 
-        steps:
-            - uses: actions/checkout@v3
+      - name: Run all backend tests
+        run: cd backend && npm test -- --ci --runInBand --passWithNoTests --forceExit
+        env:
+          NODE_ENV: test
+          USE_MOCK_DB: 'true'
+          DISABLE_REDIS: 'true'
+          JWT_SECRET: ci-test-secret
+          JWT_REFRESH_SECRET: ci-test-refresh-secret
 
-            - name: Set up Node.js
-              uses: actions/setup-node@v3
-              with:
-                  node-version: "18"
-                  cache: "npm"
-                  cache-dependency-path: backend/package-lock.json
+      - name: Run coverage report
+        if: github.event_name == 'pull_request'
+        run: cd backend && npm test -- --coverage --ci --runInBand --forceExit
+        env:
+          NODE_ENV: test
+          USE_MOCK_DB: 'true'
+          DISABLE_REDIS: 'true'
+          JWT_SECRET: ci-test-secret
+          JWT_REFRESH_SECRET: ci-test-refresh-secret
 
-            - name: Install dependencies
-              run: |
-                  cd backend
-                  npm ci
-
-            - name: Run unit tests
-              run: |
-                  cd backend
-                  npm test -- --testNamePattern='unit' --maxWorkers=2 --forceExit --no-coverage
-              env:
-                  NODE_ENV: test
-                  MONGODB_URI: mongodb://localhost:27017/test
-                  REDIS_URL: redis://localhost:6379/1
-              continue-on-error: true
-
-            - name: Run integration tests
-              run: |
-                  cd backend
-                  npm test -- --testNamePattern='integration' --maxWorkers=1 --forceExit --no-coverage
-              env:
-                  NODE_ENV: test
-                  MONGODB_URI: mongodb://localhost:27017/test
-                  REDIS_URL: redis://localhost:6379/1
-              continue-on-error: true
-
-            - name: Run coverage report
-              run: |
-                  cd backend
-                  npm test -- --coverage --maxWorkers=2 --forceExit || true
-              env:
-                  NODE_ENV: test
-                  MONGODB_URI: mongodb://localhost:27017/test
-                  REDIS_URL: redis://localhost:6379/1
-
-            - name: Upload test results
-              if: always()
-              uses: actions/upload-artifact@v3
-              with:
-                  name: backend-test-results
-                  path: backend/test-results/
-
-            - name: Upload coverage reports
-              uses: codecov/codecov-action@v3
-              with:
-                  files: ./backend/coverage/coverage-final.json
-                  flags: backend
-                  name: backend-coverage
-              continue-on-error: true
-
-    # ======================================
-    # 4. UNIT TESTS - FRONTEND
-    # ======================================
-    test-frontend:
-        runs-on: ubuntu-latest
-        name: Frontend Unit Tests
-
-        steps:
-            - uses: actions/checkout@v3
-
-            - name: Set up Node.js
-              uses: actions/setup-node@v3
-              with:
-                  node-version: "18"
-                  cache: "npm"
-                  cache-dependency-path: frontend/package-lock.json
-
-            - name: Install dependencies
-              run: |
-                  cd frontend
-                  npm ci
-
-            - name: Run Jest tests
-              run: |
-                  cd frontend
-                  npm test -- --coverage --watchAll=false
-
-            - name: Upload coverage to Codecov
-              uses: codecov/codecov-action@v3
-              with:
-                  file: ./frontend/coverage/coverage-final.json
-                  flags: frontend
-                  name: frontend-coverage
-
-    # ======================================
-    # 5. BUILD DOCKER IMAGES
-    # ======================================
-    build:
-        needs: [code-quality, security, test-backend, test-frontend]
-        runs-on: ubuntu-latest
-        name: Build Docker Images
-        permissions:
-            contents: read
-            packages: write
-
-        steps:
-            - uses: actions/checkout@v3
-
-            - name: Set up Docker Buildx
-              uses: docker/setup-buildx-action@v2
-
-            - name: Log in to Container Registry
-              uses: docker/login-action@v2
-              with:
-                  registry: ${{ env.REGISTRY }}
-                  username: ${{ github.actor }}
-                  password: ${{ secrets.GITHUB_TOKEN }}
-
-            - name: Extract metadata
-              id: meta
-              uses: docker/metadata-action@v4
-              with:
-                  images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-                  tags: |
-                      type=ref,event=branch
-                      type=semver,pattern={{version}}
-                      type=semver,pattern={{major}}.{{minor}}
-                      type=sha
-
-            - name: Build and push Docker image
-              uses: docker/build-push-action@v4
-              with:
-                  context: .
-                  file: ./Dockerfile.production
-                  push: true
-                  tags: ${{ steps.meta.outputs.tags }}
-                  labels: ${{ steps.meta.outputs.labels }}
-                  cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache
-                  cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache,mode=max
-
-    # ======================================
-    # 6. PERFORMANCE TESTING
-    # ======================================
-    performance-tests:
-        needs: build
-        runs-on: ubuntu-latest
-        name: Performance Tests
-
-        steps:
-            - uses: actions/checkout@v3
-
-            - name: Set up Python
-              uses: actions/setup-python@v4
-              with:
-                  python-version: "3.11"
-
-            - name: Install Locust
-              run: pip install locust
-
-            - name: Run load testing
-              continue-on-error: true
-              run: |
-                  locust -f backend/tests/performance/locustfile.py \
-                    --headless \
-                    -u 100 \
-                    -r 10 \
-                    --run-time 2m \
-                    --host http://localhost:5000 || true
-
-    # ======================================
-    # 7. E2E TESTS
-    # ======================================
-    e2e-tests:
-        needs: build
-        runs-on: ubuntu-latest
-        name: E2E Tests
-
-        steps:
-            - uses: actions/checkout@v3
-
-            - name: Set up Node.js
-              uses: actions/setup-node@v3
-              with:
-                  node-version: "18"
-
-            - name: Install Cypress
-              run: npm install -D cypress
-
-            - name: Run Cypress E2E tests
-              continue-on-error: true
-              uses: cypress-io/github-action@v5
-              with:
-                  working-directory: frontend
-                  browser: chrome
-                  record: false
-
-    # ======================================
-    # 8. DEPLOY TO STAGING
-    # ======================================
-    # 8. DEPLOY TO STAGING
-    # ======================================
-    deploy-staging:
-        if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
-        needs: [build, performance-tests, e2e-tests]
-        runs-on: ubuntu-latest
-        name: Deploy to Staging
-        environment:
-            name: staging
-            url: ${{ secrets.STAGING_SERVER_URL }}
-
-        steps:
-            - uses: actions/checkout@v3
-
-            - name: Setup SSH
-              run: |
-                  mkdir -p ~/.ssh
-                  echo "${{ secrets.STAGING_KEY }}" > ~/.ssh/id_rsa
-                  chmod 600 ~/.ssh/id_rsa
-                  ssh-keyscan -H ${{ secrets.STAGING_HOST }} >> ~/.ssh/known_hosts
-
-            - name: Deploy to staging
-              env:
-                  STAGING_HOST: ${{ secrets.STAGING_HOST }}
-                  STAGING_USER: ${{ secrets.STAGING_USER }}
-              run: |
-                  ssh $STAGING_USER@$STAGING_HOST "cd /app && bash deploy-production.sh staging deploy"
-
-            - name: Health check
-              run: |
-                  STAGING_URL="${{ secrets.STAGING_SERVER_URL }}"
-                  for i in {1..30}; do
-                    if curl -f "$STAGING_URL/api/health" 2>/dev/null; then
-                      echo "✅ Staging deployment successful"
-                      exit 0
-                    fi
-                    echo "Waiting for staging to be ready... ($i/30)"
-                    sleep 10
-                  done
-                  echo "⚠️ Health check timed out, but deployment may be successful"
-                  exit 0
-
-            - name: Notify success
-              if: success()
-              run: |
-                  echo "✅ Staging deployment completed successfully"
-                  echo "URL: ${{ secrets.STAGING_SERVER_URL }}"
-
-    # ======================================
-    # 9. DEPLOY TO PRODUCTION
-    # ======================================
-    deploy-production:
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        needs: [build, performance-tests, e2e-tests]
-        runs-on: ubuntu-latest
-        name: Deploy to Production
-        environment:
-            name: production
-            url: ${{ secrets.PROD_SERVER_URL }}
-
-        steps:
-            - uses: actions/checkout@v3
-
-            - name: Setup SSH
-              run: |
-                  mkdir -p ~/.ssh
-                  echo "${{ secrets.PROD_KEY }}" > ~/.ssh/id_rsa
-                  chmod 600 ~/.ssh/id_rsa
-                  ssh-keyscan -H ${{ secrets.PROD_HOST }} >> ~/.ssh/known_hosts
-
-            - name: Deploy to production
-              env:
-                  PROD_HOST: ${{ secrets.PROD_HOST }}
-                  PROD_USER: ${{ secrets.PROD_USER }}
-              run: |
-                  ssh $PROD_USER@$PROD_HOST "cd /app && bash deploy-production.sh production deploy"
-
-            - name: Warm up caches
-              run: |
-                  PROD_URL="${{ secrets.PROD_SERVER_URL }}"
-                  curl -X POST "$PROD_URL/api/health/warmup" 2>/dev/null || true
-
-            - name: Health check
-              run: |
-                  PROD_URL="${{ secrets.PROD_SERVER_URL }}"
-                  for i in {1..30}; do
-                    if curl -f "$PROD_URL/api/health" 2>/dev/null; then
-                      echo "✅ Production deployment successful"
-                      exit 0
-                    fi
-                    echo "Waiting for production to be ready... ($i/30)"
-                    sleep 10
-                  done
-                  echo "❌ Production health check failed"
-                  exit 1
-
-            - name: Notify success
-              if: success()
-              run: |
-                  echo "✅ Production deployment completed successfully"
-                  echo "URL: ${{ secrets.PROD_SERVER_URL }}"
-
-            - name: Notify deployment
-              if: always()
-              uses: slackapi/slack-github-action@v1
-              with:
-                  payload: |
-                      {
-                          "text": "Deployment Status: ${{ job.status }}",
-                          "blocks": [
-                              {
-                                  "type": "section",
-                                  "text": {
-                                      "type": "mrkdwn",
-                                      "text": "*Repository:* ${{ github.repository }}\n*Status:* ${{ job.status }}\n*Commit:* ${{ github.sha }}"
-                                  }
-                              }
-                          ]
-                      }
-              env:
-                  SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
-                  SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
-
-    # ======================================
-    # 10. CLEANUP & REPORTING
-    # ======================================
-    cleanup:
+      - name: Upload coverage artifact
         if: always()
-        needs: [code-quality, security, test-backend, test-frontend, build]
-        runs-on: ubuntu-latest
-        name: Cleanup & Reporting
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage
+          path: backend/coverage/
+          retention-days: 7
+        continue-on-error: true
 
-        steps:
-            - name: Generate report
-              run: |
-                  echo "# CI/CD Pipeline Report" >> $GITHUB_STEP_SUMMARY
-                  echo "- Code Quality: ✅" >> $GITHUB_STEP_SUMMARY
-                  echo "- Security Scanning: ✅" >> $GITHUB_STEP_SUMMARY
-                  echo "- Backend Tests: ✅" >> $GITHUB_STEP_SUMMARY
-                  echo "- Frontend Tests: ✅" >> $GITHUB_STEP_SUMMARY
-                  echo "- Docker Build: ✅" >> $GITHUB_STEP_SUMMARY
+  # ======================================
+  # 4. FRONTEND UNIT TESTS
+  # ======================================
+  test-frontend:
+    runs-on: ubuntu-latest
+    name: Frontend Unit Tests
+    needs: code-quality
 
-            - name: Delete old artifacts
-              uses: geekyeggo/delete-artifact@v2
-              with:
-                  name: "*"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: cd frontend && npm ci
+
+      - name: Run frontend tests
+        run: cd frontend && npm test -- --coverage --watchAll=false --ci --passWithNoTests
+        env:
+          CI: true
+
+      - name: Upload coverage artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-coverage
+          path: frontend/coverage/
+          retention-days: 7
+        continue-on-error: true
+
+  # ======================================
+  # 5. PERFORMANCE TESTS
+  # ======================================
+  performance-tests:
+    runs-on: ubuntu-latest
+    name: Performance Tests
+    needs: [test-backend]
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        run: cd backend && npm ci
+
+      - name: Run performance tests
+        run: cd backend && npm run test:perf || echo "::warning::Performance tests had issues"
+        env:
+          NODE_ENV: test
+          USE_MOCK_DB: 'true'
+          DISABLE_REDIS: 'true'
+        continue-on-error: true
+
+  # ======================================
+  # 6. E2E TESTS
+  # ======================================
+  e2e-tests:
+    runs-on: ubuntu-latest
+    name: E2E Tests
+    needs: [test-backend, test-frontend]
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install all dependencies
+        run: |
+          cd backend && npm ci
+          cd ../frontend && npm ci
+
+      - name: Start backend server
+        run: |
+          cd backend
+          npm start &
+          sleep 10
+        env:
+          NODE_ENV: test
+          PORT: 5000
+          USE_MOCK_DB: 'true'
+          DISABLE_REDIS: 'true'
+          JWT_SECRET: ci-test-secret
+          JWT_REFRESH_SECRET: ci-test-refresh-secret
+
+      - name: Start frontend server
+        run: |
+          cd frontend
+          npm start &
+          sleep 15
+        env:
+          REACT_APP_API_URL: http://localhost:5000/api
+          BROWSER: none
+
+      - name: Run Cypress E2E tests
+        uses: cypress-io/github-action@v6
+        with:
+          working-directory: frontend
+          browser: chrome
+          wait-on: 'http://localhost:3000'
+          wait-on-timeout: 60
+
+      - name: Upload Cypress screenshots
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: frontend/cypress/screenshots
+          retention-days: 7
+
+      - name: Upload Cypress videos
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cypress-videos
+          path: frontend/cypress/videos
+          retention-days: 7
+
+  # ======================================
+  # 7. BUILD DOCKER IMAGES
+  # ======================================
+  build:
+    needs: [test-backend, test-frontend]
+    runs-on: ubuntu-latest
+    name: Build Docker Images
+    if: github.event_name == 'push'
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (Backend)
+        id: meta-backend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/backend
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=sha
+
+      - name: Build and push Backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ steps.meta-backend.outputs.tags }}
+          labels: ${{ steps.meta-backend.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Extract metadata (Frontend)
+        id: meta-frontend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/frontend
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=sha
+
+      - name: Build and push Frontend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: true
+          tags: ${{ steps.meta-frontend.outputs.tags }}
+          labels: ${{ steps.meta-frontend.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ======================================
+  # 8. DEPLOY TO STAGING
+  # ======================================
+  deploy-staging:
+    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+    needs: [build]
+    runs-on: ubuntu-latest
+    name: Deploy to Staging
+    environment:
+      name: staging
+      url: ${{ secrets.STAGING_SERVER_URL }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.STAGING_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.STAGING_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy to staging
+        env:
+          STAGING_HOST: ${{ secrets.STAGING_HOST }}
+          STAGING_USER: ${{ secrets.STAGING_USER }}
+        run: |
+          ssh $STAGING_USER@$STAGING_HOST "cd /app && bash deploy-production.sh staging deploy"
+
+      - name: Health check
+        run: |
+          STAGING_URL="${{ secrets.STAGING_SERVER_URL }}"
+          for i in $(seq 1 30); do
+            if curl -sf "$STAGING_URL/api/health" > /dev/null 2>&1; then
+              echo "Staging deployment successful"
+              exit 0
+            fi
+            echo "Waiting for staging to be ready... ($i/30)"
+            sleep 10
+          done
+          echo "Staging health check failed"
+          exit 1
+
+  # ======================================
+  # 9. DEPLOY TO PRODUCTION
+  # ======================================
+  deploy-production:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: [build]
+    runs-on: ubuntu-latest
+    name: Deploy to Production
+    environment:
+      name: production
+      url: ${{ secrets.PROD_SERVER_URL }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.PROD_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.PROD_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy to production
+        env:
+          PROD_HOST: ${{ secrets.PROD_HOST }}
+          PROD_USER: ${{ secrets.PROD_USER }}
+        run: |
+          ssh $PROD_USER@$PROD_HOST "cd /app && bash deploy-production.sh production deploy"
+
+      - name: Health check
+        run: |
+          PROD_URL="${{ secrets.PROD_SERVER_URL }}"
+          for i in $(seq 1 30); do
+            if curl -sf "$PROD_URL/api/health" > /dev/null 2>&1; then
+              echo "Production deployment successful"
+              exit 0
+            fi
+            echo "Waiting for production to be ready... ($i/30)"
+            sleep 10
+          done
+          echo "Production health check failed"
+          exit 1
+
+      - name: Notify deployment
+        if: always()
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "Production Deploy: ${{ job.status }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*AlAwael ERP Production Deploy*\n*Status:* ${{ job.status }}\n*Branch:* `${{ github.ref_name }}`\n*Commit:* `${{ github.sha }}`\n*By:* ${{ github.actor }}"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+        continue-on-error: true
+
+  # ======================================
+  # 10. CLEANUP & REPORTING
+  # ======================================
+  cleanup:
+    runs-on: ubuntu-latest
+    name: Cleanup & Reporting
+    needs: [test-backend, test-frontend, security]
+    if: always()
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download coverage artifacts
+        uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+          path: coverage-reports
+        continue-on-error: true
+
+      - name: Generate pipeline summary
+        run: |
+          echo "## Pipeline Summary" >> $GITHUB_STEP_SUMMARY
+          echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Backend Tests | ${{ needs.test-backend.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Frontend Tests | ${{ needs.test-frontend.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Security Scan | ${{ needs.security.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Triggered by:** ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload combined reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: pipeline-reports
+          path: coverage-reports/
+          retention-days: 14
+        continue-on-error: true

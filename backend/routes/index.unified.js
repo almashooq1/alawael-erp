@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * 📦 Unified Routes Index - فهرس المسارات الموحد
  * نقطة تجميع واحدة لجميع المسارات
@@ -6,6 +7,7 @@
 
 const express = require('express');
 const router = express.Router();
+const logger = require('../utils/logger');
 
 // ============================================
 // استيراد المسارات الموحدة
@@ -24,19 +26,27 @@ let authRoutes, userRoutes, financeRoutes, dashboardRoutes;
 
 try {
   authRoutes = require('./auth.routes');
-} catch (e) { authRoutes = null; }
+} catch (e) {
+  authRoutes = null;
+}
 
 try {
   userRoutes = require('./user.routes');
-} catch (e) { userRoutes = null; }
+} catch (e) {
+  userRoutes = null;
+}
 
 try {
   financeRoutes = require('./finance.routes');
-} catch (e) { financeRoutes = null; }
+} catch (e) {
+  financeRoutes = null;
+}
 
 try {
   dashboardRoutes = require('./dashboard.routes');
-} catch (e) { dashboardRoutes = null; }
+} catch (e) {
+  dashboardRoutes = null;
+}
 
 // ============================================
 // Health Check
@@ -47,12 +57,12 @@ try {
  * @desc    فحص صحة النظام
  * @access  Public
  */
-router.get('/health', (req, res) => {
+router.get('/health', (_req, res) => {
   res.json({
     success: true,
     message: 'نظام الأوقاف يعمل بشكل صحيح',
     timestamp: new Date(),
-    version: '2.0.0'
+    version: '2.0.0',
   });
 });
 
@@ -85,8 +95,8 @@ router.use((req, res, next) => {
       'Dashboard: /api/dashboard/*',
       'Auth: /api/auth/*',
       'Users: /api/users/*',
-      'Finance: /api/finance/*'
-    ]
+      'Finance: /api/finance/*',
+    ],
   });
 });
 
@@ -94,13 +104,13 @@ router.use((req, res, next) => {
 // معالجة الأخطاء
 // ============================================
 
-router.use((err, req, res, next) => {
-  console.error('❌ Route Error:', err);
+router.use((err, _req, res, _next) => {
+  logger.error('❌ Route Error:', { message: err.message, stack: err.stack });
 
   res.status(err.status || 500).json({
     success: false,
-    message: err.message || 'خطأ داخلي في الخادم',
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+    message: 'خطأ داخلي في الخادم',
+    ...(process.env.NODE_ENV === 'development' && { detail: err.message, stack: err.stack }),
   });
 });
 

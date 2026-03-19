@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * ===================================================================
  * ACCOUNTING INVOICE CONTROLLER - متحكم الفواتير المحاسبية
@@ -6,6 +7,8 @@
 
 const AccountingInvoice = require('../models/AccountingInvoice');
 const AccountingPayment = require('../models/AccountingPayment');
+const logger = require('../utils/logger');
+const { escapeRegex } = require('../utils/sanitize');
 
 // @desc    Get all invoices
 // @route   GET /api/accounting/invoices
@@ -26,8 +29,8 @@ exports.getAllInvoices = async (req, res) => {
 
     if (search) {
       query.$or = [
-        { invoiceNumber: { $regex: search, $options: 'i' } },
-        { customerName: { $regex: search, $options: 'i' } },
+        { invoiceNumber: { $regex: escapeRegex(search), $options: 'i' } },
+        { customerName: { $regex: escapeRegex(search), $options: 'i' } },
       ];
     }
 
@@ -40,11 +43,11 @@ exports.getAllInvoices = async (req, res) => {
       data: invoices,
     });
   } catch (error) {
-    console.error('Error fetching invoices:', error);
+    logger.error('Error fetching invoices:', error);
     res.status(500).json({
       success: false,
       message: 'حدث خطأ أثناء جلب الفواتير',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 };
@@ -94,11 +97,11 @@ exports.getInvoiceStats = async (req, res) => {
       data: stats,
     });
   } catch (error) {
-    console.error('Error fetching invoice stats:', error);
+    logger.error('Error fetching invoice stats:', error);
     res.status(500).json({
       success: false,
       message: 'حدث خطأ أثناء جلب الإحصائيات',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 };
@@ -124,11 +127,11 @@ exports.getInvoiceById = async (req, res) => {
       data: invoice,
     });
   } catch (error) {
-    console.error('Error fetching invoice:', error);
+    logger.error('Error fetching invoice:', error);
     res.status(500).json({
       success: false,
       message: 'حدث خطأ أثناء جلب الفاتورة',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 };
@@ -157,11 +160,11 @@ exports.createInvoice = async (req, res) => {
       message: 'تم إنشاء الفاتورة بنجاح',
     });
   } catch (error) {
-    console.error('Error creating invoice:', error);
+    logger.error('Error creating invoice:', error);
     res.status(400).json({
       success: false,
       message: 'حدث خطأ أثناء إنشاء الفاتورة',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 };
@@ -200,11 +203,11 @@ exports.updateInvoice = async (req, res) => {
       message: 'تم تحديث الفاتورة بنجاح',
     });
   } catch (error) {
-    console.error('Error updating invoice:', error);
+    logger.error('Error updating invoice:', error);
     res.status(400).json({
       success: false,
       message: 'حدث خطأ أثناء تحديث الفاتورة',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 };
@@ -238,11 +241,11 @@ exports.deleteInvoice = async (req, res) => {
       message: 'تم حذف الفاتورة بنجاح',
     });
   } catch (error) {
-    console.error('Error deleting invoice:', error);
+    logger.error('Error deleting invoice:', error);
     res.status(500).json({
       success: false,
       message: 'حدث خطأ أثناء حذف الفاتورة',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 };
@@ -296,11 +299,11 @@ exports.recordPayment = async (req, res) => {
       message: 'تم تسجيل الدفعة بنجاح',
     });
   } catch (error) {
-    console.error('Error recording payment:', error);
+    logger.error('Error recording payment:', error);
     res.status(400).json({
       success: false,
       message: 'حدث خطأ أثناء تسجيل الدفعة',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 };
@@ -326,7 +329,8 @@ exports.sendInvoice = async (req, res) => {
 
     await invoice.save();
 
-    // TODO: إضافة منطق إرسال البريد الإلكتروني هنا
+    // @todo [P2] Integrate email service (e.g. nodemailer) to send invoice to customer
+    logger.warn('Invoice email sending not yet implemented — status updated only');
 
     res.json({
       success: true,
@@ -334,11 +338,11 @@ exports.sendInvoice = async (req, res) => {
       message: 'تم إرسال الفاتورة بنجاح',
     });
   } catch (error) {
-    console.error('Error sending invoice:', error);
+    logger.error('Error sending invoice:', error);
     res.status(500).json({
       success: false,
       message: 'حدث خطأ أثناء إرسال الفاتورة',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 };
@@ -357,8 +361,8 @@ exports.downloadInvoicePDF = async (req, res) => {
       });
     }
 
-    // TODO: إضافة منطق إنشاء PDF هنا باستخدام pdfkit
-    // مثال مبسط:
+    // @todo [P2] Integrate pdfkit or puppeteer to generate downloadable invoice PDF
+    logger.warn('Invoice PDF generation not yet implemented — returning raw data');
 
     res.json({
       success: true,
@@ -366,11 +370,11 @@ exports.downloadInvoicePDF = async (req, res) => {
       data: invoice,
     });
   } catch (error) {
-    console.error('Error generating PDF:', error);
+    logger.error('Error generating PDF:', error);
     res.status(500).json({
       success: false,
       message: 'حدث خطأ أثناء إنشاء PDF',
-      error: error.message,
+      error: 'حدث خطأ داخلي',
     });
   }
 };

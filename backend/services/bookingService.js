@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * 🚗 نظام الحجوزات والتجهيزات
  * Booking & Scheduling Service

@@ -1,7 +1,10 @@
+/* eslint-disable no-unused-vars */
 /**
  * Advanced Analytics Service - Phase 9
  * KPI tracking, predictive analytics, and business intelligence
  */
+
+const logger = require('../utils/logger');
 
 class AnalyticsService {
   constructor(db) {
@@ -362,7 +365,7 @@ class AnalyticsService {
    */
   async exportReportAsPDF(report) {
     // Implementation would use pdfkit to generate PDF
-    console.log(`Exporting report: ${report.title}`);
+    logger.info(`Exporting report: ${report.title}`);
     return {
       filename: `report_${Date.now()}.pdf`,
       size: 1024 * 100, // bytes
@@ -374,7 +377,7 @@ class AnalyticsService {
    */
   async exportReportAsCSV(report) {
     // Implementation would generate CSV data
-    console.log(`Exporting report as CSV: ${report.title}`);
+    logger.info(`Exporting report as CSV: ${report.title}`);
     return {
       filename: `report_${Date.now()}.csv`,
       headers: Object.keys(report.metrics),

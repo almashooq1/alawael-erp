@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * AnalyticsService.js - Beneficiary Analytics & Reporting Service
  * Handles advanced analytics, predictive analysis, and comprehensive reporting
@@ -36,7 +37,8 @@ class AnalyticsService extends EventEmitter {
       const { ObjectId } = require('mongodb');
 
       // Get beneficiary profile
-      const beneficiary = await this.db.collection('beneficiaries')
+      const beneficiary = await this.db
+        .collection('beneficiaries')
         .findOne({ _id: new ObjectId(beneficiaryId) });
 
       if (!beneficiary) {
@@ -50,7 +52,7 @@ class AnalyticsService extends EventEmitter {
         behavioral: await this.analyzeBehavioralMetrics(beneficiaryId, period),
         engagement: await this.analyzeEngagementMetrics(beneficiaryId, period),
         financial: await this.analyzeFinancialMetrics(beneficiaryId, period),
-        wellbeing: await this.analyzeWellbeingMetrics(beneficiaryId, period)
+        wellbeing: await this.analyzeWellbeingMetrics(beneficiaryId, period),
       };
 
       // Calculate overall score
@@ -67,15 +69,14 @@ class AnalyticsService extends EventEmitter {
           overallScore,
           insights: this.generateInsights(metrics, overallScore),
         },
-        timestamp: new Date()
+        timestamp: new Date(),
       };
-
     } catch (error) {
       return {
         status: 'error',
-        message: error.message,
+        message: 'حدث خطأ داخلي',
         data: null,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     }
   }
@@ -98,16 +99,14 @@ class AnalyticsService extends EventEmitter {
       if (criteria.cohort) query.cohort = criteria.cohort;
 
       // Get matching beneficiaries
-      const beneficiaries = await this.db.collection('beneficiaries')
-        .find(query)
-        .toArray();
+      const beneficiaries = await this.db.collection('beneficiaries').find(query).toArray();
 
       if (beneficiaries.length === 0) {
         return {
           status: 'success',
           message: 'No beneficiaries found matching criteria',
           data: { groupSize: 0, metrics: {} },
-          timestamp: new Date()
+          timestamp: new Date(),
         };
       }
 
@@ -117,7 +116,7 @@ class AnalyticsService extends EventEmitter {
         academicMetrics: await this.aggregateAcademicMetrics(beneficiaries),
         attendanceMetrics: await this.aggregateAttendanceMetrics(beneficiaries),
         behavioralMetrics: await this.aggregateBehavioralMetrics(beneficiaries),
-        engagementMetrics: await this.aggregateEngagementMetrics(beneficiaries)
+        engagementMetrics: await this.aggregateEngagementMetrics(beneficiaries),
       };
 
       return {
@@ -126,17 +125,16 @@ class AnalyticsService extends EventEmitter {
         data: {
           criteria,
           ...aggregated,
-          comparativeAnalysis: this.generateComparativeAnalysis(aggregated)
+          comparativeAnalysis: this.generateComparativeAnalysis(aggregated),
         },
-        timestamp: new Date()
+        timestamp: new Date(),
       };
-
     } catch (error) {
       return {
         status: 'error',
-        message: error.message,
+        message: 'حدث خطأ داخلي',
         data: null,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     }
   }
@@ -155,7 +153,8 @@ class AnalyticsService extends EventEmitter {
       const { ObjectId } = require('mongodb');
 
       // Get beneficiary
-      const beneficiary = await this.db.collection('beneficiaries')
+      const beneficiary = await this.db
+        .collection('beneficiaries')
         .findOne({ _id: new ObjectId(beneficiaryId) });
 
       if (!beneficiary) {
@@ -169,7 +168,7 @@ class AnalyticsService extends EventEmitter {
         generatedDate: new Date(),
         reportType,
         reportNumber: `RPT-${Date.now()}`,
-        executive_summary: ''
+        executive_summary: '',
       };
 
       switch (reportType) {
@@ -178,7 +177,7 @@ class AnalyticsService extends EventEmitter {
             ...report,
             academicPerformance: await this.analyzeAcademicMetrics(beneficiaryId, 'year'),
             courses: await this.getCoursesData(beneficiaryId),
-            trends: await this.analyzeAcademicTrends(beneficiaryId)
+            trends: await this.analyzeAcademicTrends(beneficiaryId),
           };
           break;
 
@@ -187,7 +186,7 @@ class AnalyticsService extends EventEmitter {
             ...report,
             behavioralMetrics: await this.analyzeBehavioralMetrics(beneficiaryId, 'year'),
             incidents: await this.getBehavioralIncidents(beneficiaryId),
-            recommendations: this.generateBehavioralRecommendations(beneficiaryId)
+            recommendations: this.generateBehavioralRecommendations(beneficiaryId),
           };
           break;
 
@@ -201,7 +200,7 @@ class AnalyticsService extends EventEmitter {
             engagement: await this.analyzeEngagementMetrics(beneficiaryId, 'year'),
             strengths: [],
             areasForImprovement: [],
-            recommendations: []
+            recommendations: [],
           };
       }
 
@@ -212,15 +211,14 @@ class AnalyticsService extends EventEmitter {
         status: 'success',
         message: 'Performance report generated',
         data: report,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
-
     } catch (error) {
       return {
         status: 'error',
-        message: error.message,
+        message: 'حدث خطأ داخلي',
         data: null,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     }
   }
@@ -238,18 +236,19 @@ class AnalyticsService extends EventEmitter {
       }
 
       // Get historical data
-      const grades = await this.db.collection('academicRecords')
-        .findOne({ beneficiaryId });
+      const grades = await this.db.collection('academicRecords').findOne({ beneficiaryId });
 
-      const attendance = await this.db.collection('attendanceRecords')
+      const attendance = await this.db
+        .collection('attendanceRecords')
         .find({ beneficiaryId })
         .toArray();
 
       // Build prediction model (simplified)
       const gpaHistory = grades?.gpaHistory || [];
-      const attendanceRate = attendance.length > 0
-        ? (attendance.filter(a => a.status === 'present').length / attendance.length) * 100
-        : 50;
+      const attendanceRate =
+        attendance.length > 0
+          ? (attendance.filter(a => a.status === 'present').length / attendance.length) * 100
+          : 50;
 
       // Calculate trend
       const trend = this.calculateTrend(gpaHistory);
@@ -274,18 +273,17 @@ class AnalyticsService extends EventEmitter {
           predictions: {
             nextSemesterGPA: prediction.predicted.toFixed(2),
             graduationLikelihood: (prediction.graduationChance * 100).toFixed(2) + '%',
-            academicStanding: this.predictAcademicStanding(prediction.predicted)
-          }
+            academicStanding: this.predictAcademicStanding(prediction.predicted),
+          },
         },
-        timestamp: new Date()
+        timestamp: new Date(),
       };
-
     } catch (error) {
       return {
         status: 'error',
-        message: error.message,
+        message: 'حدث خطأ داخلي',
         data: null,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     }
   }
@@ -293,8 +291,7 @@ class AnalyticsService extends EventEmitter {
   // ========== HELPER METHODS ==========
 
   async analyzeAcademicMetrics(beneficiaryId, period) {
-    const grades = await this.db.collection('academicRecords')
-      .findOne({ beneficiaryId });
+    const grades = await this.db.collection('academicRecords').findOne({ beneficiaryId });
 
     return {
       currentGPA: grades?.currentGPA || 0,
@@ -303,14 +300,12 @@ class AnalyticsService extends EventEmitter {
       remainingCourses: grades?.remainingCourses || 0,
       academicStanding: this.getAcademicStanding(grades?.currentGPA || 0),
       strengths: [],
-      weaknesses: []
+      weaknesses: [],
     };
   }
 
   async analyzeAttendanceMetrics(beneficiaryId, period) {
-    const records = await this.db.collection('attendanceRecords')
-      .find({ beneficiaryId })
-      .toArray();
+    const records = await this.db.collection('attendanceRecords').find({ beneficiaryId }).toArray();
 
     const present = records.filter(r => r.status === 'present').length;
     const absent = records.filter(r => r.status === 'absent').length;
@@ -322,12 +317,13 @@ class AnalyticsService extends EventEmitter {
       absentDays: absent,
       lateDays: late,
       attendanceRate: records.length > 0 ? ((present / records.length) * 100).toFixed(2) : 0,
-      trend: absent > present ? 'declining' : 'improving'
+      trend: absent > present ? 'declining' : 'improving',
     };
   }
 
   async analyzeBehavioralMetrics(beneficiaryId, period) {
-    const incidents = await this.db.collection('behavioralIncidents')
+    const incidents = await this.db
+      .collection('behavioralIncidents')
       .find({ beneficiaryId })
       .toArray();
 
@@ -335,16 +331,15 @@ class AnalyticsService extends EventEmitter {
       totalIncidents: incidents.length,
       recentIncidents: incidents.slice(-3),
       severity: this.categorizeIncidents(incidents),
-      trend: incidents.length > 0 ? 'needs_attention' : 'good'
+      trend: incidents.length > 0 ? 'needs_attention' : 'good',
     };
   }
 
   async analyzeEngagementMetrics(beneficiaryId, period) {
-    const achievements = await this.db.collection('achievements')
-      .find({ beneficiaryId })
-      .toArray();
+    const achievements = await this.db.collection('achievements').find({ beneficiaryId }).toArray();
 
-    const activities = await this.db.collection('studentActivities')
+    const activities = await this.db
+      .collection('studentActivities')
       .find({ beneficiaryId })
       .toArray();
 
@@ -352,34 +347,32 @@ class AnalyticsService extends EventEmitter {
       totalAchievements: achievements.length,
       totalActivities: activities.length,
       activeInvolvement: activities.filter(a => a.status === 'ACTIVE').length,
-      engagementScore: ((achievements.length + activities.length) / 50 * 100).toFixed(2)
+      engagementScore: (((achievements.length + activities.length) / 50) * 100).toFixed(2),
     };
   }
 
   async analyzeFinancialMetrics(beneficiaryId, period) {
-    const support = await this.db.collection('financialSupport')
-      .find({ beneficiaryId })
-      .toArray();
+    const support = await this.db.collection('financialSupport').find({ beneficiaryId }).toArray();
 
-    const scholarships = await this.db.collection('scholarships')
-      .find({ beneficiaryId })
-      .toArray();
+    const scholarships = await this.db.collection('scholarships').find({ beneficiaryId }).toArray();
 
     return {
       scholarshipsCount: scholarships.length,
       activeScholarships: scholarships.filter(s => s.status === 'ACTIVE').length,
       totalScholarshipAmount: scholarships.reduce((sum, s) => sum + (s.approvedAmount || 0), 0),
       financialSupportRequests: support.length,
-      approvedSupport: support.filter(s => s.status === 'APPROVED').length
+      approvedSupport: support.filter(s => s.status === 'APPROVED').length,
     };
   }
 
   async analyzeWellbeingMetrics(beneficiaryId, period) {
-    const sessions = await this.db.collection('counselingSessions')
+    const sessions = await this.db
+      .collection('counselingSessions')
       .find({ beneficiaryId })
       .toArray();
 
-    const supportPlan = await this.db.collection('supportPlans')
+    const supportPlan = await this.db
+      .collection('supportPlans')
       .findOne({ beneficiaryId, status: 'ACTIVE' });
 
     return {
@@ -387,7 +380,7 @@ class AnalyticsService extends EventEmitter {
       counselingSessions: sessions.length,
       completedSessions: sessions.filter(s => s.status === 'COMPLETED').length,
       upcomingSessions: sessions.filter(s => s.status === 'SCHEDULED').length,
-      wellbeingScore: supportPlan ? 'monitored' : 'baseline'
+      wellbeingScore: supportPlan ? 'monitored' : 'baseline',
     };
   }
 
@@ -420,7 +413,7 @@ class AnalyticsService extends EventEmitter {
     return {
       predicted,
       confidence: 0.75,
-      graduationChance: predicted >= 2.0 ? 0.85 : 0.4
+      graduationChance: predicted >= 2.0 ? 0.85 : 0.4,
     };
   }
 
@@ -452,10 +445,10 @@ class AnalyticsService extends EventEmitter {
     const scores = {
       academic: (metrics.academic.currentGPA / 4) * 100,
       attendance: parseInt(metrics.attendance.attendanceRate),
-      behavioral: 100 - (metrics.behavioral.totalIncidents * 10),
+      behavioral: 100 - metrics.behavioral.totalIncidents * 10,
       engagement: parseInt(metrics.engagement.engagementScore) || 50,
       financial: 80,
-      wellbeing: 80
+      wellbeing: 80,
     };
 
     const avg = Object.values(scores).reduce((a, b) => a + b, 0) / Object.keys(scores).length;
@@ -481,8 +474,10 @@ class AnalyticsService extends EventEmitter {
   }
 
   generateExecutiveSummary(report) {
-    return `Performance report for ${report.name} generated on ${report.generatedDate.toLocaleDateString()}. ` +
-           `Overall status requires review. Please see detailed metrics below.`;
+    return (
+      `Performance report for ${report.name} generated on ${report.generatedDate.toLocaleDateString()}. ` +
+      `Overall status requires review. Please see detailed metrics below.`
+    );
   }
 
   generateAcademicRecommendations(riskLevel) {
@@ -491,7 +486,7 @@ class AnalyticsService extends EventEmitter {
         'Seek academic tutoring immediately',
         'Meet with academic advisor',
         'Consider reduced course load',
-        'Utilize study groups and peer support'
+        'Utilize study groups and peer support',
       ];
     }
     return ['Continue current academic plan'];
@@ -507,13 +502,14 @@ class AnalyticsService extends EventEmitter {
     return {
       minor: incidents.filter(i => i.severity === 'MINOR').length,
       major: incidents.filter(i => i.severity === 'MAJOR').length,
-      critical: incidents.filter(i => i.severity === 'CRITICAL').length
+      critical: incidents.filter(i => i.severity === 'CRITICAL').length,
     };
   }
 
   async aggregateAcademicMetrics(beneficiaries) {
     const gpas = beneficiaries.map(b => 3.0).filter(g => g > 0); // Placeholder
-    const avgGPA = gpas.length > 0 ? (gpas.reduce((a, b) => a + b, 0) / gpas.length).toFixed(2) : '0';
+    const avgGPA =
+      gpas.length > 0 ? (gpas.reduce((a, b) => a + b, 0) / gpas.length).toFixed(2) : '0';
     return { averageGPA: avgGPA, distribution: {} };
   }
 
@@ -534,7 +530,7 @@ class AnalyticsService extends EventEmitter {
       academicComparison: 'Group GPA is comparable to institution average',
       attendanceComparison: 'Attendance is above institutional average',
       behavioralComparison: 'Behavioral metrics are positive',
-      engagementComparison: 'Strong group engagement'
+      engagementComparison: 'Strong group engagement',
     };
   }
 

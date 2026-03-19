@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Request Validation Middleware
  * التحقق من صحة الطلبات

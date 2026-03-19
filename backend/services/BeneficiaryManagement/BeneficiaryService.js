@@ -1,1 +1,483 @@
-// backend/services/BeneficiaryManagement/BeneficiaryService.js\n\n/**\n * خدمة إدارة المستفيدين والطلاب\n * Comprehensive Beneficiary Management Service\n * \n * التاريخ: فبراير 15، 2026\n * الإصدار: 1.0\n * الحالة: عملي وشامل\n */\n\nconst mongoose = require('mongoose');\nconst { EventEmitter } = require('events');\nconst crypto = require('crypto');\n\nclass BeneficiaryService extends EventEmitter {\n  \n  constructor(db) {\n    super();\n    this.db = db;\n    this.validateInputs = true;\n    this.autoNotify = true;\n    this.logger = null;\n  }\n\n  /**\n   * إنشاء مستفيد جديد\n   * Create new beneficiary with complete profile\n   */\n  async createBeneficiary(beneficiaryData) {\n    try {\n      // التحقق من صحة البيانات\n      this.validateBeneficiaryData(beneficiaryData);\n      \n      // التحقق من عدم وجود هوية مكررة\n      const existingBeneficiary = await this.db.collection('beneficiaries').findOne({\n        'personalData.idNumber': beneficiaryData.personalData.idNumber\n      });\n      \n      if (existingBeneficiary) {\n        throw new Error('رقم الهوية موجود بالفعل | ID Number already exists');\n      }\n      \n      // إنشاء الملف الشخصي الأساسي\n      const beneficiary = {\n        ...beneficiaryData,\n        personalData: {\n          ...beneficiaryData.personalData,\n          accountStatus: 'active',\n          verificationStatus: 'pending'\n        },\n        performanceMetrics: {\n          cumulativeGPA: 0,\n          currentSemesterGPA: 0,\n          totalCreditsEarned: 0,\n          totalCreditsRequired: 0,\n          academicStatus: 'pending',\n          lastUpdated: new Date()\n        },\n        attendanceRate: {\n          totalClasses: 0,\n          attendedClasses: 0,\n          percentage: 0,\n          lastUpdated: new Date()\n        },\n        createdAt: new Date(),\n        updatedAt: new Date(),\n        auditLog: [\n          {\n            action: 'created',\n            timestamp: new Date(),\n            details: 'Initial beneficiary creation'\n          }\n        ]\n      };\n      \n      // حفظ في قاعدة البيانات\n      const result = await this.db.collection('beneficiaries').insertOne(beneficiary);\n      \n      // إرسال إشعار البريد الإلكتروني\n      if (this.autoNotify) {\n        this.emit('beneficiary:created', {\n          beneficiaryId: result.insertedId,\n          email: beneficiaryData.personalData.email,\n          name: `${beneficiaryData.personalData.firstName} ${beneficiaryData.personalData.lastName}`\n        });\n      }\n      \n      return result.insertedId;\n      \n    } catch (error) {\n      throw new Error(`Failed to create beneficiary: ${error.message}`);\n    }\n  }\n\n  /**\n   * تحديث بيانات المستفيد\n   * Update beneficiary information\n   */\n  async updateBeneficiary(beneficiaryId, updateData) {\n    try {\n      const beneficiaryObjectId = new mongoose.Types.ObjectId(beneficiaryId);\n      \n      // حفظ البيانات القديمة للمقارنة\n      const oldBeneficiary = await this.db.collection('beneficiaries').findOne({\n        _id: beneficiaryObjectId\n      });\n      \n      if (!oldBeneficiary) {\n        throw new Error('المستفيد غير موجود | Beneficiary not found');\n      }\n      \n      // تحديث البيانات\n      const updateResult = await this.db.collection('beneficiaries').updateOne(\n        { _id: beneficiaryObjectId },\n        {\n          $set: {\n            ...updateData,\n            updatedAt: new Date()\n          },\n          $push: {\n            auditLog: {\n              action: 'updated',\n              timestamp: new Date(),\n              changes: this.compareObjects(oldBeneficiary, updateData)\n            }\n          }\n        }\n      );\n      \n      if (updateResult.modifiedCount === 0) {\n        throw new Error('لم يتم تحديث أي حقول | No fields were updated');\n      }\n      \n      // إرسال إشعار التحديث\n      if (this.autoNotify) {\n        this.emit('beneficiary:updated', {\n          beneficiaryId,\n          email: updateData.personalData?.email || oldBeneficiary.personalData.email,\n          changedFields: Object.keys(updateData)\n        });\n      }\n      \n      return updateResult;\n      \n    } catch (error) {\n      throw new Error(`Failed to update beneficiary: ${error.message}`);\n    }\n  }\n\n  /**\n   * الحصول على ملف المستفيد الكامل\n   * Get complete beneficiary profile\n   */\n  async getBeneficiaryProfile(beneficiaryId) {\n    try {\n      const beneficiaryObjectId = new mongoose.Types.ObjectId(beneficiaryId);\n      \n      // جلب البيانات الأساسية\n      const beneficiary = await this.db.collection('beneficiaries').findOne({\n        _id: beneficiaryObjectId\n      });\n      \n      if (!beneficiary) {\n        throw new Error('المستفيد غير موجود | Beneficiary not found');\n      }\n      \n      // جلب السجلات الأكاديمية\n      const academicRecords = await this.db.collection('academicRecords').find({\n        beneficiaryId: beneficiaryObjectId\n      }).toArray();\n      \n      // جلب الحضور\n      const attendance = await this.db.collection('attendanceRecords').find({\n        beneficiaryId: beneficiaryObjectId\n      }).toArray();\n      \n      // جلب الإنجازات\n      const achievements = await this.db.collection('achievements').find({\n        beneficiaryId: beneficiaryObjectId\n      }).toArray();\n      \n      // جلب المنح الدراسية\n      const scholarships = await this.db.collection('scholarships').find({\n        beneficiaryId: beneficiaryObjectId\n      }).toArray();\n      \n      // حساب الإحصائيات\n      const stats = await this.calculateBeneficiaryStatistics(beneficiaryId);\n      \n      return {\n        personalInfo: beneficiary.personalData,\n        academicInfo: beneficiary.academicInfo,\n        financialInfo: beneficiary.financialInfo,\n        performanceMetrics: beneficiary.performanceMetrics,\n        attendanceRate: beneficiary.attendanceRate,\n        academicRecords,\n        attendance,\n        achievements,\n        scholarships,\n        statistics: stats,\n        lastUpdated: beneficiary.updatedAt\n      };\n      \n    } catch (error) {\n      throw new Error(`Failed to get beneficiary profile: ${error.message}`);\n    }\n  }\n\n  /**\n   * البحث والتصفية المتقدم\n   * Advanced search and filtering\n   */\n  async searchBeneficiaries(filters = {}) {\n    try {\n      const query = this.buildSearchQuery(filters);\n      \n      const benefits = await this.db.collection('beneficiaries')\n        .find(query)\n        .sort(filters.sortBy || { createdAt: -1 })\n        .skip(filters.skip || 0)\n        .limit(filters.limit || 50)\n        .toArray();\n      \n      // حساب الإجمالي\n      const total = await this.db.collection('beneficiaries').countDocuments(query);\n      \n      return {\n        results: benefits,\n        total,\n        page: Math.ceil((filters.skip || 0) / (filters.limit || 50)) + 1,\n        pageSize: filters.limit || 50,\n        totalPages: Math.ceil(total / (filters.limit || 50))\n      };\n      \n    } catch (error) {\n      throw new Error(`Search failed: ${error.message}`);\n    }\n  }\n\n  /**\n   * تقييم الحالة الصحية الأكاديمية\n   * Evaluate academic health status\n   */\n  async evaluateBeneficiaryStatus(beneficiaryId) {\n    try {\n      const beneficiary = await this.db.collection('beneficiaries').findOne({\n        _id: new mongoose.Types.ObjectId(beneficiaryId)\n      });\n      \n      if (!beneficiary) {\n        throw new Error('المستفيد غير موجود');\n      }\n      \n      const gpa = beneficiary.performanceMetrics.cumulativeGPA;\n      const attendancePercentage = beneficiary.attendanceRate.percentage;\n      \n      let academicStatus, riskLevel, recommendations = [];\n      \n      // تحديد الحالة الأكاديمية\n      if (gpa >= 3.7 && attendancePercentage >= 95) {\n        academicStatus = 'excellent';\n        riskLevel = 'none';\n      } else if (gpa >= 3.0 && attendancePercentage >= 90) {\n        academicStatus = 'good';\n        riskLevel = 'low';\n      } else if (gpa >= 2.0 && attendancePercentage >= 80) {\n        academicStatus = 'satisfactory';\n        riskLevel = 'medium';\n        recommendations.push('Consider additional study support');\n      } else if (gpa >= 1.5 && attendancePercentage >= 70) {\n        academicStatus = 'warning';\n        riskLevel = 'high';\n        recommendations.push('Enroll in tutoring programs immediately');\n        recommendations.push('Meet with academic advisor');\n      } else {\n        academicStatus = 'probation';\n        riskLevel = 'critical';\n        recommendations.push('Urgent intervention required');\n        recommendations.push('Consider course load reduction');\n        recommendations.push('Mandatory counseling sessions');\n      }\n      \n      // تحديث الحالة\n      await this.db.collection('beneficiaries').updateOne(\n        { _id: new mongoose.Types.ObjectId(beneficiaryId) },\n        {\n          $set: {\n            'performanceMetrics.academicStatus': academicStatus,\n            'performanceMetrics.riskLevel': riskLevel,\n            'performanceMetrics.lastEvaluation': new Date()\n          }\n        }\n      );\n      \n      return {\n        beneficiaryId,\n        academicStatus,\n        gpa,\n        attendancePercentage,\n        riskLevel,\n        recommendations,\n        evaluatedAt: new Date()\n      };\n      \n    } catch (error) {\n      throw new Error(`Status evaluation failed: ${error.message}`);\n    }\n  }\n\n  /**\n   * استخراج التقارير الشاملة\n   * Generate comprehensive reports\n   */\n  async generateBeneficiaryReport(beneficiaryId, reportType = 'comprehensive') {\n    try {\n      const beneficiary = await this.getBeneficiaryProfile(beneficiaryId);\n      \n      let report = {\n        beneficiaryId,\n        generatedAt: new Date(),\n        reportType\n      };\n      \n      switch (reportType) {\n        case 'academic':\n          report = {\n            ...report,\n            personalInfo: beneficiary.personalInfo,\n            academicInfo: beneficiary.academicInfo,\n            performanceMetrics: beneficiary.performanceMetrics,\n            academicRecords: beneficiary.academicRecords\n          };\n          break;\n          \n        case 'attendance':\n          report = {\n            ...report,\n            personalInfo: beneficiary.personalInfo,\n            attendanceRate: beneficiary.attendanceRate,\n            attendance: beneficiary.attendance\n          };\n          break;\n          \n        case 'financial':\n          report = {\n            ...report,\n            personalInfo: beneficiary.personalInfo,\n            financialInfo: beneficiary.financialInfo,\n            scholarships: beneficiary.scholarships\n          };\n          break;\n          \n        case 'achievements':\n          report = {\n            ...report,\n            personalInfo: beneficiary.personalInfo,\n            achievements: beneficiary.achievements,\n            statistics: beneficiary.statistics\n          };\n          break;\n          \n        case 'comprehensive':\n        default:\n          report = beneficiary;\n          break;\n      }\n      \n      // حفظ التقرير\n      await this.db.collection('generatedReports').insertOne({\n        beneficiaryId: new mongoose.Types.ObjectId(beneficiaryId),\n        reportType,\n        content: report,\n        createdAt: new Date()\n      });\n      \n      return report;\n      \n    } catch (error) {\n      throw new Error(`Report generation failed: ${error.message}`);\n    }\n  }\n\n  /**\n   * طرق مساعدة (Helper Methods)\n   */\n  \n  validateBeneficiaryData(data) {\n    if (!data.personalData) throw new Error('Personal data is required');\n    if (!data.personalData.firstName) throw new Error('First name is required');\n    if (!data.personalData.lastName) throw new Error('Last name is required');\n    if (!data.personalData.email) throw new Error('Email is required');\n    if (!data.personalData.idNumber) throw new Error('ID Number is required');\n    return true;\n  }\n\n  compareObjects(oldObj, newObj) {\n    const changes = {};\n    for (const key in newObj) {\n      if (JSON.stringify(oldObj[key]) !== JSON.stringify(newObj[key])) {\n        changes[key] = {\n          old: oldObj[key],\n          new: newObj[key]\n        };\n      }\n    }\n    return changes;\n  }\n\n  buildSearchQuery(filters) {\n    const query = {};\n    \n    if (filters.search) {\n      query.$or = [\n        { 'personalData.firstName': { $regex: filters.search, $options: 'i' } },\n        { 'personalData.lastName': { $regex: filters.search, $options: 'i' } },\n        { 'personalData.idNumber': filters.search }\n      ];\n    }\n    \n    if (filters.program) {\n      query['academicInfo.currentProgram'] = filters.program;\n    }\n    \n    if (filters.status) {\n      query['academicInfo.status'] = filters.status;\n    }\n    \n    if (filters.year) {\n      query['academicInfo.currentYear'] = filters.year;\n    }\n    \n    return query;\n  }\n\n  async calculateBeneficiaryStatistics(beneficiaryId) {\n    try {\n      const beneficiaryObjectId = new mongoose.Types.ObjectId(beneficiaryId);\n      \n      const grades = await this.db.collection('grades').find({\n        beneficiaryId: beneficiaryObjectId\n      }).toArray();\n      \n      const achievements = await this.db.collection('achievements').countDocuments({\n        beneficiaryId: beneficiaryObjectId\n      });\n      \n      const scholarships = await this.db.collection('scholarships').countDocuments({\n        beneficiaryId: beneficiaryObjectId,\n        status: 'active'\n      });\n      \n      return {\n        totalCourses: grades.length,\n        averageGrade: grades.length > 0\n          ? (grades.reduce((sum, g) => sum + g.grade, 0) / grades.length).toFixed(2)\n          : 0,\n        passedCourses: grades.filter(g => g.grade >= 2.0).length,\n        failedCourses: grades.filter(g => g.grade < 2.0).length,\n        achievements,\n        activeScholarships: scholarships\n      };\n      \n    } catch (error) {\n      return {};\n    }\n  }\n}\n\nmodule.exports = BeneficiaryService;\n
+/* eslint-disable no-unused-vars */
+// backend/services/BeneficiaryManagement/BeneficiaryService.js
+
+/**
+ * خدمة إدارة المستفيدين والطلاب
+ * Comprehensive Beneficiary Management Service
+ *
+ * التاريخ: فبراير 15، 2026
+ * الإصدار: 1.0
+ * الحالة: عملي وشامل
+ */
+
+const mongoose = require('mongoose');
+const { EventEmitter } = require('events');
+const crypto = require('crypto');
+const { escapeRegex } = require('../../utils/sanitize');
+
+class BeneficiaryService extends EventEmitter {
+  constructor(db) {
+    super();
+    this.db = db;
+    this.validateInputs = true;
+    this.autoNotify = true;
+    this.logger = null;
+  }
+
+  /**
+   * إنشاء مستفيد جديد
+   * Create new beneficiary with complete profile
+   */
+  async createBeneficiary(beneficiaryData) {
+    try {
+      // التحقق من صحة البيانات
+      this.validateBeneficiaryData(beneficiaryData);
+
+      // التحقق من عدم وجود هوية مكررة
+      const existingBeneficiary = await this.db.collection('beneficiaries').findOne({
+        'personalData.idNumber': beneficiaryData.personalData.idNumber,
+      });
+
+      if (existingBeneficiary) {
+        throw new Error('رقم الهوية موجود بالفعل | ID Number already exists');
+      }
+
+      // إنشاء الملف الشخصي الأساسي
+      const beneficiary = {
+        ...beneficiaryData,
+        personalData: {
+          ...beneficiaryData.personalData,
+          accountStatus: 'active',
+          verificationStatus: 'pending',
+        },
+        performanceMetrics: {
+          cumulativeGPA: 0,
+          currentSemesterGPA: 0,
+          totalCreditsEarned: 0,
+          totalCreditsRequired: 0,
+          academicStatus: 'pending',
+          lastUpdated: new Date(),
+        },
+        attendanceRate: {
+          totalClasses: 0,
+          attendedClasses: 0,
+          percentage: 0,
+          lastUpdated: new Date(),
+        },
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        auditLog: [
+          {
+            action: 'created',
+            timestamp: new Date(),
+            details: 'Initial beneficiary creation',
+          },
+        ],
+      };
+
+      // حفظ في قاعدة البيانات
+      const result = await this.db.collection('beneficiaries').insertOne(beneficiary);
+
+      // إرسال إشعار البريد الإلكتروني
+      if (this.autoNotify) {
+        this.emit('beneficiary:created', {
+          beneficiaryId: result.insertedId,
+          email: beneficiaryData.personalData.email,
+          name: `${beneficiaryData.personalData.firstName} ${beneficiaryData.personalData.lastName}`,
+        });
+      }
+
+      return result.insertedId;
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+
+  /**
+   * تحديث بيانات المستفيد
+   * Update beneficiary information
+   */
+  async updateBeneficiary(beneficiaryId, updateData) {
+    try {
+      const beneficiaryObjectId = new mongoose.Types.ObjectId(beneficiaryId);
+
+      // حفظ البيانات القديمة للمقارنة
+      const oldBeneficiary = await this.db.collection('beneficiaries').findOne({
+        _id: beneficiaryObjectId,
+      });
+
+      if (!oldBeneficiary) {
+        throw new Error('المستفيد غير موجود | Beneficiary not found');
+      }
+
+      // تحديث البيانات
+      const updateResult = await this.db.collection('beneficiaries').updateOne(
+        { _id: beneficiaryObjectId },
+        {
+          $set: {
+            ...updateData,
+            updatedAt: new Date(),
+          },
+          $push: {
+            auditLog: {
+              action: 'updated',
+              timestamp: new Date(),
+              changes: this.compareObjects(oldBeneficiary, updateData),
+            },
+          },
+        }
+      );
+
+      if (updateResult.modifiedCount === 0) {
+        throw new Error('لم يتم تحديث أي حقول | No fields were updated');
+      }
+
+      // إرسال إشعار التحديث
+      if (this.autoNotify) {
+        this.emit('beneficiary:updated', {
+          beneficiaryId,
+          email: updateData.personalData?.email || oldBeneficiary.personalData.email,
+          changedFields: Object.keys(updateData),
+        });
+      }
+
+      return updateResult;
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+
+  /**
+   * الحصول على ملف المستفيد الكامل
+   * Get complete beneficiary profile
+   */
+  async getBeneficiaryProfile(beneficiaryId) {
+    try {
+      const beneficiaryObjectId = new mongoose.Types.ObjectId(beneficiaryId);
+
+      // جلب البيانات الأساسية
+      const beneficiary = await this.db.collection('beneficiaries').findOne({
+        _id: beneficiaryObjectId,
+      });
+
+      if (!beneficiary) {
+        throw new Error('المستفيد غير موجود | Beneficiary not found');
+      }
+
+      // جلب السجلات الأكاديمية
+      const academicRecords = await this.db
+        .collection('academicRecords')
+        .find({
+          beneficiaryId: beneficiaryObjectId,
+        })
+        .toArray();
+
+      // جلب الحضور
+      const attendance = await this.db
+        .collection('attendanceRecords')
+        .find({
+          beneficiaryId: beneficiaryObjectId,
+        })
+        .toArray();
+
+      // جلب الإنجازات
+      const achievements = await this.db
+        .collection('achievements')
+        .find({
+          beneficiaryId: beneficiaryObjectId,
+        })
+        .toArray();
+
+      // جلب المنح الدراسية
+      const scholarships = await this.db
+        .collection('scholarships')
+        .find({
+          beneficiaryId: beneficiaryObjectId,
+        })
+        .toArray();
+
+      // حساب الإحصائيات
+      const stats = await this.calculateBeneficiaryStatistics(beneficiaryId);
+
+      return {
+        personalInfo: beneficiary.personalData,
+        academicInfo: beneficiary.academicInfo,
+        financialInfo: beneficiary.financialInfo,
+        performanceMetrics: beneficiary.performanceMetrics,
+        attendanceRate: beneficiary.attendanceRate,
+        academicRecords,
+        attendance,
+        achievements,
+        scholarships,
+        statistics: stats,
+        lastUpdated: beneficiary.updatedAt,
+      };
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+
+  /**
+   * البحث والتصفية المتقدم
+   * Advanced search and filtering
+   */
+  async searchBeneficiaries(filters = {}) {
+    try {
+      const query = this.buildSearchQuery(filters);
+
+      const benefits = await this.db
+        .collection('beneficiaries')
+        .find(query)
+        .sort(filters.sortBy || { createdAt: -1 })
+        .skip(filters.skip || 0)
+        .limit(filters.limit || 50)
+        .toArray();
+
+      // حساب الإجمالي
+      const total = await this.db.collection('beneficiaries').countDocuments(query);
+
+      return {
+        results: benefits,
+        total,
+        page: Math.ceil((filters.skip || 0) / (filters.limit || 50)) + 1,
+        pageSize: filters.limit || 50,
+        totalPages: Math.ceil(total / (filters.limit || 50)),
+      };
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+
+  /**
+   * تقييم الحالة الصحية الأكاديمية
+   * Evaluate academic health status
+   */
+  async evaluateBeneficiaryStatus(beneficiaryId) {
+    try {
+      const beneficiary = await this.db.collection('beneficiaries').findOne({
+        _id: new mongoose.Types.ObjectId(beneficiaryId),
+      });
+
+      if (!beneficiary) {
+        throw new Error('المستفيد غير موجود');
+      }
+
+      const gpa = beneficiary.performanceMetrics.cumulativeGPA;
+      const attendancePercentage = beneficiary.attendanceRate.percentage;
+
+      let academicStatus,
+        riskLevel,
+        recommendations = [];
+
+      // تحديد الحالة الأكاديمية
+      if (gpa >= 3.7 && attendancePercentage >= 95) {
+        academicStatus = 'excellent';
+        riskLevel = 'none';
+      } else if (gpa >= 3.0 && attendancePercentage >= 90) {
+        academicStatus = 'good';
+        riskLevel = 'low';
+      } else if (gpa >= 2.0 && attendancePercentage >= 80) {
+        academicStatus = 'satisfactory';
+        riskLevel = 'medium';
+        recommendations.push('Consider additional study support');
+      } else if (gpa >= 1.5 && attendancePercentage >= 70) {
+        academicStatus = 'warning';
+        riskLevel = 'high';
+        recommendations.push('Enroll in tutoring programs immediately');
+        recommendations.push('Meet with academic advisor');
+      } else {
+        academicStatus = 'probation';
+        riskLevel = 'critical';
+        recommendations.push('Urgent intervention required');
+        recommendations.push('Consider course load reduction');
+        recommendations.push('Mandatory counseling sessions');
+      }
+
+      // تحديث الحالة
+      await this.db.collection('beneficiaries').updateOne(
+        { _id: new mongoose.Types.ObjectId(beneficiaryId) },
+        {
+          $set: {
+            'performanceMetrics.academicStatus': academicStatus,
+            'performanceMetrics.riskLevel': riskLevel,
+            'performanceMetrics.lastEvaluation': new Date(),
+          },
+        }
+      );
+
+      return {
+        beneficiaryId,
+        academicStatus,
+        gpa,
+        attendancePercentage,
+        riskLevel,
+        recommendations,
+        evaluatedAt: new Date(),
+      };
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+
+  /**
+   * استخراج التقارير الشاملة
+   * Generate comprehensive reports
+   */
+  async generateBeneficiaryReport(beneficiaryId, reportType = 'comprehensive') {
+    try {
+      const beneficiary = await this.getBeneficiaryProfile(beneficiaryId);
+
+      let report = {
+        beneficiaryId,
+        generatedAt: new Date(),
+        reportType,
+      };
+
+      switch (reportType) {
+        case 'academic':
+          report = {
+            ...report,
+            personalInfo: beneficiary.personalInfo,
+            academicInfo: beneficiary.academicInfo,
+            performanceMetrics: beneficiary.performanceMetrics,
+            academicRecords: beneficiary.academicRecords,
+          };
+          break;
+
+        case 'attendance':
+          report = {
+            ...report,
+            personalInfo: beneficiary.personalInfo,
+            attendanceRate: beneficiary.attendanceRate,
+            attendance: beneficiary.attendance,
+          };
+          break;
+
+        case 'financial':
+          report = {
+            ...report,
+            personalInfo: beneficiary.personalInfo,
+            financialInfo: beneficiary.financialInfo,
+            scholarships: beneficiary.scholarships,
+          };
+          break;
+
+        case 'achievements':
+          report = {
+            ...report,
+            personalInfo: beneficiary.personalInfo,
+            achievements: beneficiary.achievements,
+            statistics: beneficiary.statistics,
+          };
+          break;
+
+        case 'comprehensive':
+        default:
+          report = beneficiary;
+          break;
+      }
+
+      // حفظ التقرير
+      await this.db.collection('generatedReports').insertOne({
+        beneficiaryId: new mongoose.Types.ObjectId(beneficiaryId),
+        reportType,
+        content: report,
+        createdAt: new Date(),
+      });
+
+      return report;
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+
+  /**
+   * طرق مساعدة (Helper Methods)
+   */
+
+  validateBeneficiaryData(data) {
+    if (!data.personalData) throw new Error('Personal data is required');
+    if (!data.personalData.firstName) throw new Error('First name is required');
+    if (!data.personalData.lastName) throw new Error('Last name is required');
+    if (!data.personalData.email) throw new Error('Email is required');
+    if (!data.personalData.idNumber) throw new Error('ID Number is required');
+    return true;
+  }
+
+  compareObjects(oldObj, newObj) {
+    const changes = {};
+    for (const key in newObj) {
+      if (JSON.stringify(oldObj[key]) !== JSON.stringify(newObj[key])) {
+        changes[key] = {
+          old: oldObj[key],
+          new: newObj[key],
+        };
+      }
+    }
+    return changes;
+  }
+
+  buildSearchQuery(filters) {
+    const query = {};
+
+    if (filters.search) {
+      query.$or = [
+        { 'personalData.firstName': { $regex: escapeRegex(filters.search), $options: 'i' } },
+        { 'personalData.lastName': { $regex: escapeRegex(filters.search), $options: 'i' } },
+        { 'personalData.idNumber': filters.search },
+      ];
+    }
+
+    if (filters.program) {
+      query['academicInfo.currentProgram'] = filters.program;
+    }
+
+    if (filters.status) {
+      query['academicInfo.status'] = filters.status;
+    }
+
+    if (filters.year) {
+      query['academicInfo.currentYear'] = filters.year;
+    }
+
+    return query;
+  }
+
+  async calculateBeneficiaryStatistics(beneficiaryId) {
+    try {
+      const beneficiaryObjectId = new mongoose.Types.ObjectId(beneficiaryId);
+
+      const grades = await this.db
+        .collection('grades')
+        .find({
+          beneficiaryId: beneficiaryObjectId,
+        })
+        .toArray();
+
+      const achievements = await this.db.collection('achievements').countDocuments({
+        beneficiaryId: beneficiaryObjectId,
+      });
+
+      const scholarships = await this.db.collection('scholarships').countDocuments({
+        beneficiaryId: beneficiaryObjectId,
+        status: 'active',
+      });
+
+      return {
+        totalCourses: grades.length,
+        averageGrade:
+          grades.length > 0
+            ? (grades.reduce((sum, g) => sum + g.grade, 0) / grades.length).toFixed(2)
+            : 0,
+        passedCourses: grades.filter(g => g.grade >= 2.0).length,
+        failedCourses: grades.filter(g => g.grade < 2.0).length,
+        achievements,
+        activeScholarships: scholarships,
+      };
+    } catch (error) {
+      return {};
+    }
+  }
+}
+
+module.exports = BeneficiaryService;

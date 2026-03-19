@@ -1,4 +1,6 @@
+/* eslint-disable no-unused-vars */
 const SmartDigitalTwinService = require('./smartDigitalTwin.service');
+const logger = require('../utils/logger');
 
 class SmartWearableService {
   constructor() {
@@ -54,7 +56,7 @@ class SmartWearableService {
       // For this demo, we mock the twin update if the service is available
       // await SmartDigitalTwinService.updatePhysiologicalState(patientId, telemetry);
     } catch (err) {
-      console.warn('Digital Twin update failed:', err.message);
+      logger.warn('Digital Twin update failed:', err.message);
     }
 
     return {

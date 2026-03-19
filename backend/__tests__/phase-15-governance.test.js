@@ -1,7 +1,9 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * ALAWAEL ERP - GOVERNANCE & COMPLIANCE TESTS
  * Phase 15 - Governance & Compliance
- * 
+ *
  * Test Suites:
  * - Audit Logging (5+ tests)
  * - Regulatory Compliance (5+ tests)
@@ -257,7 +259,10 @@ describe('Phase 15: Governance & Compliance', () => {
     });
 
     test('should enforce data classification', async () => {
-      const classification = await governanceService.enforceDataClassification('data_1', 'confidential');
+      const classification = await governanceService.enforceDataClassification(
+        'data_1',
+        'confidential'
+      );
 
       expect(classification).toBeDefined();
       expect(classification.dataId).toBe('data_1');
@@ -287,9 +292,9 @@ describe('Phase 15: Governance & Compliance', () => {
     });
 
     test('should fail with invalid retention parameters', async () => {
-      await expect(
-        governanceService.setDataRetentionPolicy('', 0)
-      ).rejects.toThrow('Invalid retention policy parameters');
+      await expect(governanceService.setDataRetentionPolicy('', 0)).rejects.toThrow(
+        'Invalid retention policy parameters'
+      );
     });
 
     test('should retrieve retention policies', async () => {
@@ -315,9 +320,9 @@ describe('Phase 15: Governance & Compliance', () => {
     });
 
     test('should fail to purge without policy', async () => {
-      await expect(
-        governanceService.scheduleDataPurge('nonexistent_type', 30)
-      ).rejects.toThrow('No retention policy found');
+      await expect(governanceService.scheduleDataPurge('nonexistent_type', 30)).rejects.toThrow(
+        'No retention policy found'
+      );
     });
   });
 
@@ -447,7 +452,10 @@ describe('Phase 15: Governance & Compliance', () => {
       expect(report.totalAuditEvents).toBeGreaterThan(0);
       expect(report.eventsByAction).toBeDefined();
       expect(report.eventsByResource).toBeDefined();
-      const failureRate = typeof report.failureRate === 'string' ? parseFloat(report.failureRate) : report.failureRate;
+      const failureRate =
+        typeof report.failureRate === 'string'
+          ? parseFloat(report.failureRate)
+          : report.failureRate;
       expect(failureRate).toBeGreaterThanOrEqual(0);
       expect(Array.isArray(report.topUsers)).toBe(true);
     });

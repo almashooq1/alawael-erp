@@ -1,4 +1,6 @@
+/* eslint-disable no-unused-vars */
 const socketIO = require('socket.io');
+const logger = require('./logger');
 
 let io = null;
 const connectedUsers = new Map(); // userId -> socketId
@@ -8,21 +10,25 @@ const connectedUsers = new Map(); // userId -> socketId
  * @param {Object} server - HTTP Server instance
  */
 function setupWebSocket(server) {
+  const allowedOrigins = process.env.CORS_ORIGINS
+    ? process.env.CORS_ORIGINS.split(',')
+    : ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:5173'];
+
   io = socketIO(server, {
     cors: {
-      origin: '*',
+      origin: process.env.NODE_ENV === 'production' ? allowedOrigins : '*',
       methods: ['GET', 'POST'],
     },
   });
 
   io.on('connection', socket => {
-    console.log(`✅ User connected: ${socket.id}`);
+    // console.log(`✅ User connected: ${socket.id}`);
 
     // تسجيل المستخدم
     socket.on('register', userId => {
       connectedUsers.set(userId, socket.id);
       socket.userId = userId;
-      console.log(`👤 User registered: ${userId}`);
+      // console.log(`👤 User registered: ${userId}`);
 
       // إرسال تأكيد الاتصال
       socket.emit('registered', {
@@ -34,35 +40,35 @@ function setupWebSocket(server) {
     // الانضمام لغرفة معينة (مثلاً: غرفة قسم معين)
     socket.on('join-room', roomId => {
       socket.join(roomId);
-      console.log(`🚪 User ${socket.userId} joined room: ${roomId}`);
+      // console.log(`🚺 User ${socket.userId} joined room: ${roomId}`);
     });
 
     // مغادرة غرفة
     socket.on('leave-room', roomId => {
       socket.leave(roomId);
-      console.log(`🚪 User ${socket.userId} left room: ${roomId}`);
+      // console.log(`🚺 User ${socket.userId} left room: ${roomId}`);
     });
 
     // قراءة إشعار
-    socket.on('mark-notification-read', notificationId => {
-      console.log(`✓ Notification ${notificationId} marked as read by ${socket.userId}`);
+    socket.on('mark-notification-read', _notificationId => {
+      // console.log(`✓ Notification ${notificationId} marked as read by ${socket.userId}`);
     });
 
     // قطع الاتصال
     socket.on('disconnect', () => {
       if (socket.userId) {
         connectedUsers.delete(socket.userId);
-        console.log(`❌ User disconnected: ${socket.userId}`);
+        // console.log(`❌ User disconnected: ${socket.userId}`);
       }
     });
 
     // معالجة الأخطاء
     socket.on('error', error => {
-      console.error('Socket error:', error);
+      logger.error('Socket error:', error);
     });
   });
 
-  console.log('🔌 WebSocket server initialized');
+  // console.log('🔌 WebSocket server initialized');
   return io;
 }
 
@@ -73,17 +79,17 @@ function setupWebSocket(server) {
  */
 function sendNotificationToUser(userId, notification) {
   if (!io) {
-    console.warn('WebSocket not initialized');
+    logger.warn('WebSocket not initialized');
     return false;
   }
 
   const socketId = connectedUsers.get(userId);
   if (socketId) {
     io.to(socketId).emit('notification', notification);
-    console.log(`📬 Notification sent to user ${userId}`);
+    // console.log(`📬 Notification sent to user ${userId}`);
     return true;
   } else {
-    console.log(`⚠️  User ${userId} not connected`);
+    // console.log(`⚠️  User ${userId} not connected`);
     return false;
   }
 }
@@ -95,12 +101,12 @@ function sendNotificationToUser(userId, notification) {
  */
 function sendNotificationToRoom(roomId, notification) {
   if (!io) {
-    console.warn('WebSocket not initialized');
+    logger.warn('WebSocket not initialized');
     return false;
   }
 
   io.to(roomId).emit('notification', notification);
-  console.log(`📢 Notification sent to room ${roomId}`);
+  // console.log(`📢 Notification sent to room ${roomId}`);
   return true;
 }
 
@@ -110,12 +116,12 @@ function sendNotificationToRoom(roomId, notification) {
  */
 function broadcastNotification(notification) {
   if (!io) {
-    console.warn('WebSocket not initialized');
+    logger.warn('WebSocket not initialized');
     return false;
   }
 
   io.emit('notification', notification);
-  console.log(`📡 Notification broadcasted to all users`);
+  // console.log(`📡 Notification broadcasted to all users`);
   return true;
 }
 

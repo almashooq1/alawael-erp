@@ -1,33 +1,35 @@
-﻿/**
+/* eslint-disable no-unused-vars */
+/**
  * PDF Generator Service - خدمة توليد PDF
  * Enterprise PDF Generation for Alawael ERP
  */
 
-const fs = require("fs").promises;
-const path = require("path");
+const fs = require('fs').promises;
+const path = require('path');
+const logger = require('../utils/logger');
 
 /**
  * PDF Configuration
  */
 const pdfConfig = {
   defaults: {
-    format: "A4",
-    orientation: "portrait",
-    margin: { top: "20mm", right: "15mm", bottom: "20mm", left: "15mm" },
+    format: 'A4',
+    orientation: 'portrait',
+    margin: { top: '20mm', right: '15mm', bottom: '20mm', left: '15mm' },
     printBackground: true,
   },
   storage: {
-    path: process.env.PDF_STORAGE_PATH || "./storage/pdfs",
-    tempPath: process.env.PDF_TEMP_PATH || "./storage/pdfs/temp",
+    path: process.env.PDF_STORAGE_PATH || './storage/pdfs',
+    tempPath: process.env.PDF_TEMP_PATH || './storage/pdfs/temp',
   },
-  templatesPath: process.env.PDF_TEMPLATES_PATH || "./templates/pdf",
+  templatesPath: process.env.PDF_TEMPLATES_PATH || './templates/pdf',
   company: {
-    name: process.env.COMPANY_NAME || "نظام الأهداف ERP",
-    address: process.env.COMPANY_ADDRESS || "المملكة العربية السعودية",
-    phone: process.env.COMPANY_PHONE || "",
-    email: process.env.COMPANY_EMAIL || "",
-    logo: process.env.COMPANY_LOGO || "",
-    website: process.env.COMPANY_WEBSITE || "",
+    name: process.env.COMPANY_NAME || 'نظام الأهداف ERP',
+    address: process.env.COMPANY_ADDRESS || 'المملكة العربية السعودية',
+    phone: process.env.COMPANY_PHONE || '',
+    email: process.env.COMPANY_EMAIL || '',
+    logo: process.env.COMPANY_LOGO || '',
+    website: process.env.COMPANY_WEBSITE || '',
   },
 };
 
@@ -47,7 +49,7 @@ class PDFGenerator {
       const html = this.getInvoiceTemplate(data);
       return await this.generateFromHTML(html);
     } catch (error) {
-      console.error("Error generating invoice PDF:", error);
+      logger.error('Error generating invoice PDF:', error);
       throw error;
     }
   }
@@ -56,21 +58,32 @@ class PDFGenerator {
    * Get invoice template
    */
   getInvoiceTemplate(data) {
-    const itemsHtml = Array.isArray(data.items) 
-      ? data.items.map(item => 
-          "<tr><td>" + (item.description || "") + "</td>" +
-          "<td>" + (item.quantity || 0) + "</td>" +
-          "<td>" + (item.unitPrice || 0) + "</td>" +
-          "<td>" + (item.total || 0) + "</td></tr>"
-        ).join("")
-      : "<tr><td colspan=\"4\">لا توجد عناصر</td></tr>";
+    const itemsHtml = Array.isArray(data.items)
+      ? data.items
+          .map(
+            item =>
+              '<tr><td>' +
+              (item.description || '') +
+              '</td>' +
+              '<td>' +
+              (item.quantity || 0) +
+              '</td>' +
+              '<td>' +
+              (item.unitPrice || 0) +
+              '</td>' +
+              '<td>' +
+              (item.total || 0) +
+              '</td></tr>'
+          )
+          .join('')
+      : '<tr><td colspan="4">لا توجد عناصر</td></tr>';
 
     return `
 <!DOCTYPE html>
 <html dir="rtl" lang="ar">
 <head>
   <meta charset="UTF-8">
-  <title>فاتورة رقم ${data.invoiceNumber || ""}</title>
+  <title>فاتورة رقم ${data.invoiceNumber || ''}</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: "Segoe UI", Tahoma, Arial, sans-serif; font-size: 12px; line-height: 1.6; color: #333; }
@@ -95,8 +108,8 @@ class PDFGenerator {
       </div>
       <div class="invoice-info">
         <h2>فاتورة</h2>
-        <p>رقم: ${data.invoiceNumber || ""}</p>
-        <p>تاريخ: ${data.invoiceDate || ""}</p>
+        <p>رقم: ${data.invoiceNumber || ''}</p>
+        <p>تاريخ: ${data.invoiceDate || ''}</p>
       </div>
     </div>
     <table>
@@ -133,7 +146,7 @@ class PDFGenerator {
     try {
       return html;
     } catch (error) {
-      console.error("Error generating PDF from HTML:", error);
+      logger.error('Error generating PDF from HTML:', error);
       throw error;
     }
   }

@@ -1,5 +1,7 @@
+/* eslint-disable no-unused-vars */
 const axios = require('axios');
 const dotenv = require('dotenv');
+const logger = require('../utils/logger');
 
 dotenv.config();
 
@@ -29,8 +31,8 @@ const sendSMS = async (toNumber, message) => {
       throw new Error(`Unknown SMS provider: ${smsConfig.provider}`);
     }
   } catch (error) {
-    console.error(`❌ Error sending SMS to ${toNumber}:`, error.message);
-    return { success: false, error: error.message };
+    logger.error(`❌ Error sending SMS to ${toNumber}:`, error.message);
+    return { success: false, error: 'حدث خطأ داخلي' };
   }
 };
 
@@ -48,7 +50,7 @@ const sendTwilioSMS = async (toNumber, message) => {
       to: toNumber,
     });
 
-    console.log(`✅ SMS sent to ${toNumber}: ${result.sid}`);
+    logger.info(`✅ SMS sent to ${toNumber}: ${result.sid}`);
     return { success: true, messageId: result.sid };
   } catch (error) {
     throw error;
@@ -71,7 +73,7 @@ const sendVonageSMS = async (toNumber, message) => {
     });
 
     if (response.data.messages[0]['status'] === '0') {
-      console.log(`✅ SMS sent to ${toNumber}: ${response.data.messages[0]['message-id']}`);
+      logger.info(`✅ SMS sent to ${toNumber}: ${response.data.messages[0]['message-id']}`);
       return { success: true, messageId: response.data.messages[0]['message-id'] };
     } else {
       throw new Error(`Vonage error: ${response.data.messages[0]['error-text']}`);
@@ -87,19 +89,26 @@ const smsTemplates = {
 
   employeeAlert: (name, action) => `إشعار: تم ${action} بيانات الموظف ${name}. - نظام الأوائل ERP`,
 
-  orderConfirmation: (orderId, amount) => `تم تأكيد طلبك #${orderId} بقيمة ${amount} ريال. - نظام الأوائل ERP`,
+  orderConfirmation: (orderId, amount) =>
+    `تم تأكيد طلبك #${orderId} بقيمة ${amount} ريال. - نظام الأوائل ERP`,
 
-  deliveryNotification: (orderId, date) => `سيتم توصيل طلبك #${orderId} في ${date}. - نظام الأوائل ERP`,
+  deliveryNotification: (orderId, date) =>
+    `سيتم توصيل طلبك #${orderId} في ${date}. - نظام الأوائل ERP`,
 
-  paymentReminder: (amount, dueDate) => `تذكير: دفعة بقيمة ${amount} ريال تستحق في ${dueDate}. - نظام الأوائل ERP`,
+  paymentReminder: (amount, dueDate) =>
+    `تذكير: دفعة بقيمة ${amount} ريال تستحق في ${dueDate}. - نظام الأوائل ERP`,
 
-  securityAlert: action => `⚠️ تنبيه أمان: ${action}. إذا لم تقم بهذا الإجراء، غير كلمة المرور فوراً. - نظام الأوائل ERP`,
+  securityAlert: action =>
+    `⚠️ تنبيه أمان: ${action}. إذا لم تقم بهذا الإجراء، غير كلمة المرور فوراً. - نظام الأوائل ERP`,
 
-  courseReminder: (courseName, startDate) => `تذكير: الدورة "${courseName}" تبدأ في ${startDate}. سجل الآن! - نظام الأوائل ERP`,
+  courseReminder: (courseName, startDate) =>
+    `تذكير: الدورة "${courseName}" تبدأ في ${startDate}. سجل الآن! - نظام الأوائل ERP`,
 
-  appointmentReminder: (appointmentDate, time) => `تذكير: لديك موعد في ${appointmentDate} الساعة ${time}. - نظام الأوائل ERP`,
+  appointmentReminder: (appointmentDate, time) =>
+    `تذكير: لديك موعد في ${appointmentDate} الساعة ${time}. - نظام الأوائل ERP`,
 
-  reportNotification: reportTitle => `التقرير "${reportTitle}" جاهز للعرض. اضغط للعرض: ${process.env.FRONTEND_URL || 'localhost:3000'}`,
+  reportNotification: reportTitle =>
+    `التقرير "${reportTitle}" جاهز للعرض. اضغط للعرض: ${process.env.FRONTEND_URL || 'localhost:3000'}`,
 
   customMessage: message => message,
 };
@@ -121,8 +130,8 @@ const sendSMSWithTemplate = async (toNumber, templateName, data) => {
     const message = template(data);
     return await sendSMS(toNumber, message);
   } catch (error) {
-    console.error(`❌ Error sending SMS to ${toNumber}:`, error.message);
-    return { success: false, error: error.message };
+    logger.error(`❌ Error sending SMS to ${toNumber}:`, error.message);
+    return { success: false, error: 'حدث خطأ داخلي' };
   }
 };
 
@@ -160,7 +169,7 @@ const checkSMSBalance = async () => {
     }
     return { success: false, error: 'Balance check not supported for this provider' };
   } catch (error) {
-    return { success: false, error: error.message };
+    return { success: false, error: 'حدث خطأ داخلي' };
   }
 };
 

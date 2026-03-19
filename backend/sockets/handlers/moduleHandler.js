@@ -1,9 +1,11 @@
+/* eslint-disable no-unused-vars */
 /**
  * Module KPI Handler
  * معالج مؤشرات الأداء للوحدات
  */
 
 const { getModuleKPIs } = require('../../utils/kpiCalculator');
+const logger = require('../../utils/logger');
 
 /**
  * Handle module subscription events
@@ -27,7 +29,7 @@ function moduleHandler(socket, io, activeSubscriptions) {
       subscribedAt: new Date(),
     });
 
-    console.log(`[Module] ${socket.id} subscribed to ${moduleKey}`);
+    logger.info(`[Module] ${socket.id} subscribed to ${moduleKey}`);
 
     // Send initial KPI data
     try {
@@ -38,7 +40,7 @@ function moduleHandler(socket, io, activeSubscriptions) {
         timestamp: new Date().toISOString(),
       });
     } catch (error) {
-      console.error(`[Module] Error fetching KPIs for ${moduleKey}:`, error);
+      logger.error(`[Module] Error fetching KPIs for ${moduleKey}:`, error);
       socket.emit('error', {
         message: `فشل جلب بيانات ${moduleKey}`,
         moduleKey,
@@ -60,7 +62,7 @@ function moduleHandler(socket, io, activeSubscriptions) {
           timestamp: new Date().toISOString(),
         });
       } catch (error) {
-        console.error(`[Module] Periodic update error for ${moduleKey}:`, error);
+        logger.error(`[Module] Periodic update error for ${moduleKey}:`, error);
         clearInterval(interval);
       }
     }, 15000);
@@ -83,7 +85,7 @@ function moduleHandler(socket, io, activeSubscriptions) {
       activeSubscriptions.delete(socket.id);
     }
 
-    console.log(`[Module] ${socket.id} unsubscribed from ${moduleKey}`);
+    logger.info(`[Module] ${socket.id} unsubscribed from ${moduleKey}`);
 
     socket.emit('module:unsubscribed', { moduleKey });
   });

@@ -1,0 +1,14 @@
+# Build output
+build/
+
+# Test coverage
+coverage/
+
+# Dependencies
+node_modules/
+
+# Package lock
+package-lock.json
+
+# Source maps
+*.map

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Container,
@@ -10,11 +10,15 @@ import {
   MenuItem,
   Rating,
 } from '@mui/material';
-import { Save as SaveIcon } from '@mui/icons-material';
-import axios from 'axios';
+import { Save as SaveIcon, EventNote as EventNoteIcon } from '@mui/icons-material';
+import apiClient from 'services/api.client';
 import { useNavigate } from 'react-router-dom';
+import logger from 'utils/logger';
+import { useSnackbar } from 'contexts/SnackbarContext';
+import { gradients } from '../../theme/palette';
 
 function RecordSession() {
+  const showSnackbar = useSnackbar();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [students, setStudents] = useState([]);
@@ -32,31 +36,29 @@ function RecordSession() {
   });
 
   useEffect(() => {
-    // Mock students fetch
-    setStudents([
-      { _id: '678509efc8619e0780280459', name: 'أحمد محمد' },
-      { _id: '678509efc8619e0780280460', name: 'سارة علي' },
-    ]);
+    const fetchStudents = async () => {
+      try {
+        const res = await apiClient.get('/integrated-care/students');
+        const list = res?.data || res || [];
+        setStudents(Array.isArray(list) ? list : []);
+      } catch (err) {
+        logger.error('Failed to load students:', err);
+        setStudents([]);
+      }
+    };
+    fetchStudents();
   }, []);
 
   const handleStudentSelect = async studentId => {
     setSessionData({ ...sessionData, student: studentId });
     setLoading(true);
     try {
-      // In real app: GET /api/integrated-care/plans/student/:id
-      // For now, simulating fetching the active plan
-      // const res = await axios.get(`/api/integrated-care/plans/student/${studentId}`);
-      // setActivePlan(res.data);
-
-      // Mock Plan for demonstration
-      const mockPlanGoals = [
-        { id: 'g1', title: 'Improve reading fluency', domain: 'Academic' },
-        { id: 'g2', title: 'Eye contact duration', domain: 'Behavioral' },
-        { id: 'g3', title: 'Tie shoelaces', domain: 'SelfCare' },
-      ];
-      setAvailableGoals(mockPlanGoals);
+      const res = await apiClient.get(`/integrated-care/plans/student/${studentId}`);
+      const goals = res?.goals || [];
+      setAvailableGoals(goals.map(g => ({ id: g.id, title: g.title, domain: g.domain || g.type })));
     } catch (err) {
-      console.error(err);
+      logger.error(err);
+      setAvailableGoals([]);
     } finally {
       setLoading(false);
     }
@@ -92,12 +94,12 @@ function RecordSession() {
   const handleSubmit = async () => {
     try {
       setLoading(true);
-      await axios.post('/api/integrated-care/sessions', sessionData);
-      alert('Session logged successfully!');
+      await apiClient.post('/integrated-care/sessions', sessionData);
+      showSnackbar('تم تسجيل الجلسة بنجاح!', 'success');
       navigate('/integrated-care');
     } catch (err) {
-      console.error(err);
-      alert('Failed to log session');
+      logger.error(err);
+      showSnackbar('فشل تسجيل الجلسة', 'error');
     } finally {
       setLoading(false);
     }
@@ -105,9 +107,22 @@ function RecordSession() {
 
   return (
     <Container maxWidth="md" sx={{ mt: 4 }}>
+      {/* Header */}
+      <Box sx={{ background: gradients.primary, borderRadius: 2, p: 3, mb: 4, color: 'white' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <EventNoteIcon sx={{ fontSize: 40 }} />
+          <Box>
+            <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+              تسجيل جلسة
+            </Typography>
+            <Typography variant="body2">توثيق وتسجيل بيانات الجلسة العلاجية</Typography>
+          </Box>
+        </Box>
+      </Box>
+
       <Paper sx={{ p: 4 }}>
         <Typography variant="h4" gutterBottom>
-          Log Daily Session
+          تسجيل جلسة يومية
         </Typography>
 
         <Grid container spacing={3} sx={{ mt: 1 }}>
@@ -115,7 +130,7 @@ function RecordSession() {
             <TextField
               select
               fullWidth
-              label="Select Student"
+              label="اختيار الطالب"
               value={sessionData.student}
               onChange={e => handleStudentSelect(e.target.value)}
             >
@@ -130,7 +145,7 @@ function RecordSession() {
             <TextField
               type="date"
               fullWidth
-              label="Session Date"
+              label="تاريخ الجلسة"
               value={sessionData.date}
               onChange={e => setSessionData({ ...sessionData, date: e.target.value })}
               InputLabelProps={{ shrink: true }}
@@ -140,7 +155,7 @@ function RecordSession() {
             <TextField
               fullWidth
               type="number"
-              label="Duration (Minutes)"
+              label="المدة (دقائق)"
               value={sessionData.duration}
               onChange={e => setSessionData({ ...sessionData, duration: e.target.value })}
             />
@@ -149,24 +164,22 @@ function RecordSession() {
             <TextField
               select
               fullWidth
-              label="Session Type"
+              label="نوع الجلسة"
               value={sessionData.sessionType}
               onChange={e => setSessionData({ ...sessionData, sessionType: e.target.value })}
             >
-              <MenuItem value="INDIVIDUAL">Individual</MenuItem>
-              <MenuItem value="GROUP">Group</MenuItem>
+              <MenuItem value="INDIVIDUAL">فردية</MenuItem>
+              <MenuItem value="GROUP">جماعية</MenuItem>
             </TextField>
           </Grid>
         </Grid>
 
         <Box sx={{ mt: 4 }}>
           <Typography variant="h6" gutterBottom>
-            Select Goals Worked On:
+            اختر الأهداف التي تم العمل عليها:
           </Typography>
           {availableGoals.length === 0 && (
-            <Typography color="text.secondary">
-              Select a student first to see active goals.
-            </Typography>
+            <Typography color="text.secondary">اختر طالباً أولاً لعرض الأهداف النشطة.</Typography>
           )}
 
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 3 }}>
@@ -186,14 +199,14 @@ function RecordSession() {
           </Box>
 
           {/* Goals Details Inputs */}
-          {sessionData.goalsWorkedOn.map((g, index) => (
+          {sessionData.goalsWorkedOn.map((g, _index) => (
             <Paper variant="outlined" sx={{ p: 2, mb: 2, bgcolor: '#f5f5f5' }} key={g.goalId}>
               <Typography variant="subtitle2" gutterBottom>
                 {g.goalTitle}
               </Typography>
               <Grid container spacing={2} alignItems="center">
                 <Grid item xs={12} sm={4}>
-                  <Typography component="legend">Performance (1-5)</Typography>
+                  <Typography component="legend">الأداء (1-5)</Typography>
                   <Rating
                     value={g.score}
                     onChange={(e, val) => updateGoalData(g.goalId, 'score', val)}
@@ -203,7 +216,7 @@ function RecordSession() {
                   <TextField
                     fullWidth
                     size="small"
-                    placeholder="Specific comments/observations for this goal..."
+                    placeholder="ملاحظات خاصة بهذا الهدف..."
                     value={g.comments}
                     onChange={e => updateGoalData(g.goalId, 'comments', e.target.value)}
                   />
@@ -216,7 +229,7 @@ function RecordSession() {
             fullWidth
             multiline
             rows={3}
-            label="Global Session Notes"
+            label="ملاحظات عامة عن الجلسة"
             sx={{ mt: 2 }}
             value={sessionData.globalNotes}
             onChange={e => setSessionData({ ...sessionData, globalNotes: e.target.value })}
@@ -231,7 +244,7 @@ function RecordSession() {
           onClick={handleSubmit}
           disabled={loading || !sessionData.student}
         >
-          Save Log
+          حفظ السجل
         </Button>
       </Paper>
     </Container>

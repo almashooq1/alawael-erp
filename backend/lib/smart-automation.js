@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * 🤖 Smart Automation System
  * Intelligent workflow automation and orchestration
@@ -239,13 +240,20 @@ class SmartAutomation {
       if (!value) return false;
 
       switch (condition.operator) {
-        case '>': return value > condition.value;
-        case '<': return value < condition.value;
-        case '>=': return value >= condition.value;
-        case '<=': return value <= condition.value;
-        case '==': return value === condition.value;
-        case '!=': return value !== condition.value;
-        default: return false;
+        case '>':
+          return value > condition.value;
+        case '<':
+          return value < condition.value;
+        case '>=':
+          return value >= condition.value;
+        case '<=':
+          return value <= condition.value;
+        case '==':
+          return value === condition.value;
+        case '!=':
+          return value !== condition.value;
+        default:
+          return false;
       }
     }
 
@@ -323,7 +331,7 @@ class WorkflowExecutor {
       for (const step of workflow.definition.steps) {
         const stepResult = await this.executeStep(step, input);
         results.steps.push(stepResult);
-        
+
         if (stepResult.error) {
           results.status = 'failed';
           break;
@@ -335,7 +343,7 @@ class WorkflowExecutor {
       }
     } catch (error) {
       results.status = 'error';
-      results.error = error.message;
+      results.error = 'حدث خطأ داخلي';
     }
 
     results.endTime = new Date();
@@ -369,7 +377,7 @@ class WorkflowExecutor {
       }
     } catch (error) {
       stepResult.status = 'failed';
-      stepResult.error = error.message;
+      stepResult.error = 'حدث خطأ داخلي';
     }
 
     return stepResult;

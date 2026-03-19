@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Barcode Model
  * Handles barcode generation, storage, and management
@@ -150,7 +151,6 @@ const BarcodeSchema = new mongoose.Schema({
   // Batch information
   batchId: {
     type: String,
-    index: true,
   },
 
   batchNumber: Number,
@@ -214,7 +214,7 @@ const BarcodeSchema = new mongoose.Schema({
 
 // Indexes
 // Note: code field has unique:true (creates automatic index), so no need for compound index with code
-BarcodeSchema.index({ status: 1 });
+// Note: status field has index:true in schema definition
 BarcodeSchema.index({ entityType: 1, entityId: 1 });
 BarcodeSchema.index({ createdAt: -1 });
 BarcodeSchema.index({ lastScannedAt: -1 });

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Smart AAC Prediction Service (Phase 92)
  * (Augmentative and Alternative Communication)
@@ -5,6 +6,8 @@
  * Provides "Predictive Text/Symbols" for non-verbal children.
  * Context-aware: Knows if it's lunch time or play time.
  */
+
+const logger = require('../utils/logger');
 
 class SmartAACService {
   constructor() {
@@ -21,7 +24,7 @@ class SmartAACService {
    */
   async predictNextSymbol(userId, currentSentence, context) {
     // context: { time: '12:00', location: 'Cafeteria' }
-    console.log(`Predicting AAC for context: ${context.location}`);
+    logger.info(`Predicting AAC for context: ${context.location}`);
 
     let suggestions = [];
 

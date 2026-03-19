@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 const transportScheduleSchema = new mongoose.Schema(
@@ -11,7 +12,11 @@ const transportScheduleSchema = new mongoose.Schema(
     passengers: [
       {
         beneficiary: { type: mongoose.Schema.Types.ObjectId, ref: 'BeneficiaryFile' },
-        status: { type: String, enum: ['SCHEDULED', 'BOARDED', 'ARRIVED', 'ABSENT'], default: 'SCHEDULED' },
+        status: {
+          type: String,
+          enum: ['SCHEDULED', 'BOARDED', 'ARRIVED', 'ABSENT'],
+          default: 'SCHEDULED',
+        },
         boardedTime: Date,
         arrivedTime: Date,
         location: {
@@ -24,7 +29,7 @@ const transportScheduleSchema = new mongoose.Schema(
 
     status: { type: String, enum: ['PENDING', 'IN_PROGRESS', 'COMPLETED'], default: 'PENDING' },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 // Prevent dupes for same bus same time

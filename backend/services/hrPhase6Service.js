@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const Employee = require('../models/employee.model');
 const Payroll = require('../models/payroll.model');
 const Attendance = require('../models/attendance.model');
@@ -118,7 +119,11 @@ class HRPhase6Service {
   }
 
   async approveLeave(leaveId, approverId) {
-    return await Leave.findByIdAndUpdate(leaveId, { status: 'approved', approvedBy: approverId }, { new: true });
+    return await Leave.findByIdAndUpdate(
+      leaveId,
+      { status: 'approved', approvedBy: approverId },
+      { new: true }
+    );
   }
 
   async getLeaves(status) {

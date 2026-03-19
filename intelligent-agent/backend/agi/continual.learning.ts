@@ -232,7 +232,7 @@ export class AGIContinualLearning extends EventEmitter {
 
       this.emit('learning:complete', fullExperience);
     } catch (error: any) {
-      this.emit('learning:error', { experience: fullExperience, error: error.message });
+      this.emit('learning:error', { experience: fullExperience, error: 'حدث خطأ داخلي' });
       throw error;
     }
   }

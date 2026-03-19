@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Guardian Model
  * نموذج ولي الأمر في بوابة المستفيد/ولي الأمر
@@ -42,7 +43,7 @@ const GuardianSchema = new Schema(
       required: [true, 'البريد الإلكتروني مطلوب'],
       unique: true,
       lowercase: true,
-      match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'صيغة البريد غير صحيحة'],
+      match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'صيغة البريد غير صحيحة'],
     },
     phone: {
       type: String,
@@ -58,7 +59,19 @@ const GuardianSchema = new Schema(
     // Relationship معلومات العلاقة
     relationship: {
       type: String,
-      enum: ['father', 'mother', 'grandfather', 'grandmother', 'uncle', 'aunt', 'brother', 'sister', 'cousin', 'legal_guardian', 'other'],
+      enum: [
+        'father',
+        'mother',
+        'grandfather',
+        'grandmother',
+        'uncle',
+        'aunt',
+        'brother',
+        'sister',
+        'cousin',
+        'legal_guardian',
+        'other',
+      ],
       required: [true, 'العلاقة مطلوبة'],
     },
     beneficiaries: [
@@ -213,8 +226,6 @@ const GuardianSchema = new Schema(
 );
 
 // Indexes
-GuardianSchema.index({ email: 1 });
-GuardianSchema.index({ idNumber: 1 });
 GuardianSchema.index({ beneficiaries: 1 });
 GuardianSchema.index({ accountStatus: 1 });
 GuardianSchema.index({ createdAt: -1 });
@@ -307,7 +318,7 @@ GuardianSchema.methods.addBeneficiary = async function (beneficiaryId) {
 };
 
 GuardianSchema.methods.removeBeneficiary = async function (beneficiaryId) {
-  this.beneficiaries = this.beneficiaries.filter((id) => !id.equals(beneficiaryId));
+  this.beneficiaries = this.beneficiaries.filter(id => !id.equals(beneficiaryId));
   return this.save();
 };
 
@@ -320,24 +331,11 @@ GuardianSchema.methods.linkBeneficiary = async function (beneficiaryId) {
   }
 
   await this.addBeneficiary(beneficiaryId);
-  if (!beneficiary.guardians.includes(this._id)) {
-    beneficiary.guardians.push(this._id);
-    await beneficiary.save();
-  }
-
   return this;
 };
 
 GuardianSchema.methods.unlinkBeneficiary = async function (beneficiaryId) {
-  const Beneficiary = mongoose.model('Beneficiary');
-  const beneficiary = await Beneficiary.findById(beneficiaryId);
-
   await this.removeBeneficiary(beneficiaryId);
-  if (beneficiary && beneficiary.guardians.includes(this._id)) {
-    beneficiary.guardians = beneficiary.guardians.filter((id) => !id.equals(this._id));
-    await beneficiary.save();
-  }
-
   return this;
 };
 
@@ -410,9 +408,8 @@ GuardianSchema.methods.activateAccount = async function () {
 };
 
 // Middleware
-GuardianSchema.pre('save', function (next) {
+GuardianSchema.pre('save', function () {
   this.updatedAt = new Date();
-  next();
 });
 
 module.exports = mongoose.model('Guardian', GuardianSchema);

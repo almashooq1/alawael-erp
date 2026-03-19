@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Insurance Integration Connector
  * نظام التكامل مع شركات التأمين
@@ -12,6 +13,7 @@
 
 const axios = require('axios');
 const crypto = require('crypto');
+const logger = require('../../utils/logger');
 const EventEmitter = require('events');
 
 class InsuranceConnector extends EventEmitter {
@@ -186,7 +188,7 @@ class InsuranceConnector extends EventEmitter {
       case 'claim.pending':
         return this.handleClaimPending(data);
       default:
-        console.warn(`Unknown webhook event: ${event}`);
+        logger.warn(`Unknown webhook event: ${event}`);
     }
   }
 
@@ -244,10 +246,10 @@ class InsuranceConnector extends EventEmitter {
         return this.executeWithRetry(fn, operationName, retries + 1);
       }
 
-      this.emit('operation-failed', { operation: operationName, error: error.message });
+      this.emit('operation-failed', { operation: operationName, error: 'حدث خطأ داخلي' });
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
         status: error.response?.status,
       };
     }
@@ -290,11 +292,11 @@ class InsuranceConnector extends EventEmitter {
     const log = {
       timestamp: new Date().toISOString(),
       status: error.response?.status,
-      message: error.message,
+      message: 'حدث خطأ داخلي',
       endpoint: error.config?.url,
     };
     this.emit('error-logged', log);
-    console.error('[INSURANCE-CONNECTOR]', JSON.stringify(log));
+    logger.error('[INSURANCE-CONNECTOR]', JSON.stringify(log));
   }
 
   /**
@@ -305,7 +307,7 @@ class InsuranceConnector extends EventEmitter {
       const response = await this.client.get('/health', { timeout: 5000 });
       return { healthy: true, status: response.status };
     } catch (error) {
-      return { healthy: false, error: error.message };
+      return { healthy: false, error: 'حدث خطأ داخلي' };
     }
   }
 }

@@ -1,5 +1,7 @@
+/* eslint-disable no-unused-vars */
 const Report = require('../models/Report');
 const logger = require('../utils/logger');
+const { escapeRegex } = require('../utils/sanitize');
 
 class ReportService {
   /**
@@ -7,7 +9,7 @@ class ReportService {
    */
   async getAvailableReports(query = {}) {
     try {
-      let mongoQuery = {};
+      const mongoQuery = {};
 
       // Filter by status
       if (query.status) {
@@ -21,7 +23,7 @@ class ReportService {
 
       // Search by title
       if (query.search) {
-        mongoQuery.title = { $regex: query.search, $options: 'i' };
+        mongoQuery.title = { $regex: escapeRegex(query.search), $options: 'i' };
       }
 
       const reports = await Report.find(mongoQuery)
@@ -50,7 +52,7 @@ class ReportService {
         requestedBy: data.requestedBy,
         requestedAt: data.requestedAt,
         filters: data.filters,
-        content: this._generateReportContent(data.reportType, data.filters)
+        content: this._generateReportContent(data.reportType, data.filters),
       });
 
       const saved = await report.save();
@@ -80,15 +82,18 @@ class ReportService {
       reportType,
       generatedAt: new Date(),
       filters,
-      sections: []
+      sections: [],
     };
 
     switch (reportType) {
       case 'disability-summary':
         baseContent.sections = [
-          { title: 'Executive Summary', data: { programs: 5, beneficiaries: 150, completion: '85%' } },
+          {
+            title: 'Executive Summary',
+            data: { programs: 5, beneficiaries: 150, completion: '85%' },
+          },
           { title: 'Program Performance', data: { avgScore: 8.5, retention: '92%' } },
-          { title: 'Goals Achievement', data: { completed: 245, inProgress: 187 } }
+          { title: 'Goals Achievement', data: { completed: 245, inProgress: 187 } },
         ];
         break;
 
@@ -96,7 +101,7 @@ class ReportService {
         baseContent.sections = [
           { title: 'Scheduled Maintenance', data: { total: 50, completed: 35, pending: 15 } },
           { title: 'Cost Analysis', data: { totalCost: 50000, avgCost: 1000 } },
-          { title: 'Downtime', data: { hours: 120, percentage: 2.5 } }
+          { title: 'Downtime', data: { hours: 120, percentage: 2.5 } },
         ];
         break;
 
@@ -104,13 +109,13 @@ class ReportService {
         baseContent.sections = [
           { title: 'System Performance', data: { uptime: '99.9%', avgResponse: '75ms' } },
           { title: 'Module Statistics', data: { requests: 50000, errors: 500 } },
-          { title: 'User Activity', data: { activeUsers: 250, sessions: 1200 } }
+          { title: 'User Activity', data: { activeUsers: 250, sessions: 1200 } },
         ];
         break;
 
       default:
         baseContent.sections = [
-          { title: 'Summary', data: { status: 'generated', timestamp: new Date() } }
+          { title: 'Summary', data: { status: 'generated', timestamp: new Date() } },
         ];
     }
 
@@ -131,8 +136,10 @@ class ReportService {
    */
   async getReportById(reportId) {
     try {
-      const report = await Report.findById(reportId)
-        .populate('requestedBy', 'firstName lastName email');
+      const report = await Report.findById(reportId).populate(
+        'requestedBy',
+        'firstName lastName email'
+      );
 
       return report || null;
     } catch (error) {
@@ -171,7 +178,7 @@ class ReportService {
         mimeType,
         data,
         filename: `${reportId}.${extension}`,
-        size: data.length
+        size: data.length,
       };
     } catch (error) {
       logger.error('Error in downloadReport:', error);
@@ -226,20 +233,20 @@ class ReportService {
           totalPrograms: 5,
           totalBeneficiaries: 150,
           completionRate: '85%',
-          averageScore: 8.5
+          averageScore: 8.5,
         },
         breakdown: {
           byProgram: [
             { name: 'Physical Therapy', beneficiaries: 50, completion: '90%' },
             { name: 'Cognitive Training', beneficiaries: 40, completion: '75%' },
-            { name: 'Occupational Therapy', beneficiaries: 60, completion: '85%' }
+            { name: 'Occupational Therapy', beneficiaries: 60, completion: '85%' },
           ],
           byStatus: {
             active: 120,
             completed: 25,
-            onHold: 5
-          }
-        }
+            onHold: 5,
+          },
+        },
       };
 
       return report;
@@ -261,21 +268,21 @@ class ReportService {
           totalSchedules: 50,
           completedThisMonth: 35,
           pendingSchedules: 15,
-          dueThisWeek: 8
+          dueThisWeek: 8,
         },
         breakdown: {
           byType: [
             { type: 'Preventive', count: 30, cost: 30000 },
             { type: 'Corrective', count: 15, cost: 15000 },
-            { type: 'Predictive', count: 5, cost: 5000 }
+            { type: 'Predictive', count: 5, cost: 5000 },
           ],
           costAnalysis: {
             totalCost: 50000,
             averageCost: 1000,
             performanceBudget: 45000,
-            variance: 5000
-          }
-        }
+            variance: 5000,
+          },
+        },
       };
 
       return report;
@@ -299,9 +306,9 @@ class ReportService {
         reports: reports.map(r => ({
           id: r._id,
           title: r.title,
-          size: r.fileSize
+          size: r.fileSize,
         })),
-        totalSize: 0
+        totalSize: 0,
       };
 
       // Calculate total size
@@ -350,13 +357,13 @@ class ReportService {
         status: 'healthy',
         reportsCount,
         scheduledReports: scheduledCount,
-        lastChecked: new Date()
+        lastChecked: new Date(),
       };
     } catch (error) {
       logger.error('Error in getHealthStatus:', error);
       return {
         status: 'error',
-        error: error.message
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -367,5 +374,5 @@ const reportService = new ReportService();
 
 module.exports = {
   ReportService,
-  reportService
+  reportService,
 };

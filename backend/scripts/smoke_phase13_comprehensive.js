@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable no-unused-vars */
 /**
  * Comprehensive Phase 13 Smoke Tests
  * Tests all 8 advanced feature routes with proper JWT auth
@@ -109,7 +110,12 @@ async function runTests() {
   // Test each endpoint with valid auth
   for (const testCase of testCases) {
     try {
-      const { status, body } = await makeRequest(testCase.path, testCase.method, token, testCase.body);
+      const { status, body } = await makeRequest(
+        testCase.path,
+        testCase.method,
+        token,
+        testCase.body
+      );
       const isValid = status >= 200 && status < 300;
       const result = {
         test: testCase.name,
@@ -147,7 +153,12 @@ async function runTests() {
   for (const testCase of testCases.slice(0, 2)) {
     // Test with invalid token
     try {
-      const { status } = await makeRequest(testCase.path, testCase.method, invalidToken, testCase.body);
+      const { status } = await makeRequest(
+        testCase.path,
+        testCase.method,
+        invalidToken,
+        testCase.body
+      );
       const authEnforced = status === 401 || status === 403;
 
       if (authEnforced) {

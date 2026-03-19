@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * ScholarshipService.js - Beneficiary Scholarship Management Service
  * Handles scholarship applications, approvals, and disbursements
@@ -45,7 +46,7 @@ class ScholarshipService extends EventEmitter {
           status: 'error',
           message: 'Beneficiary does not meet scholarship eligibility criteria',
           data: { eligibilityChecks: eligibility.reasons },
-          timestamp: new Date()
+          timestamp: new Date(),
         };
       }
 
@@ -61,12 +62,14 @@ class ScholarshipService extends EventEmitter {
         eligibilityChecks: eligibility.details,
         createdAt: new Date(),
         updatedAt: new Date(),
-        auditLog: [{
-          action: 'APPLICATION_SUBMITTED',
-          user: 'beneficiary',
-          timestamp: new Date(),
-          details: 'Scholarship application submitted'
-        }]
+        auditLog: [
+          {
+            action: 'APPLICATION_SUBMITTED',
+            user: 'beneficiary',
+            timestamp: new Date(),
+            details: 'Scholarship application submitted',
+          },
+        ],
       };
 
       // Save application
@@ -76,7 +79,7 @@ class ScholarshipService extends EventEmitter {
         beneficiaryId,
         programName: applicationData.programName,
         applicationId: saved.insertedId,
-        amount: applicationData.requestedAmount
+        amount: applicationData.requestedAmount,
       });
 
       return {
@@ -87,17 +90,16 @@ class ScholarshipService extends EventEmitter {
           status: application.status,
           programName: applicationData.programName,
           requestedAmount: applicationData.requestedAmount,
-          nextSteps: 'Application will be reviewed by scholarship committee'
+          nextSteps: 'Application will be reviewed by scholarship committee',
         },
-        timestamp: new Date()
+        timestamp: new Date(),
       };
-
     } catch (error) {
       return {
         status: 'error',
-        message: error.message,
+        message: 'حدث خطأ داخلي',
         data: null,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     }
   }
@@ -120,7 +122,8 @@ class ScholarshipService extends EventEmitter {
 
       // Get application
       const { ObjectId } = require('mongodb');
-      const application = await this.db.collection(this.scholarshipCollection)
+      const application = await this.db
+        .collection(this.scholarshipCollection)
         .findOne({ _id: new ObjectId(applicationId) });
 
       if (!application) {
@@ -140,20 +143,22 @@ class ScholarshipService extends EventEmitter {
             action: 'APPLICATION_APPROVED',
             user: approvalData.approvedBy,
             timestamp: new Date(),
-            details: `Approved for ${approvalData.approvedAmount}`
-          }
-        }
+            details: `Approved for ${approvalData.approvedAmount}`,
+          },
+        },
       };
 
-      await this.db.collection(this.scholarshipCollection).updateOne(
-        { _id: new ObjectId(applicationId) },
-        { $set: updateData, $push: { auditLog: updateData.$push.auditLog } }
-      );
+      await this.db
+        .collection(this.scholarshipCollection)
+        .updateOne(
+          { _id: new ObjectId(applicationId) },
+          { $set: updateData, $push: { auditLog: updateData.$push.auditLog } }
+        );
 
       this.emit('scholarship:approved', {
         applicationId,
         approvedAmount: approvalData.approvedAmount,
-        approvedBy: approvalData.approvedBy
+        approvedBy: approvalData.approvedBy,
       });
 
       return {
@@ -163,17 +168,16 @@ class ScholarshipService extends EventEmitter {
           applicationId,
           approvedAmount: approvalData.approvedAmount,
           status: 'APPROVED',
-          nextStep: 'Payment will be processed according to disbursement schedule'
+          nextStep: 'Payment will be processed according to disbursement schedule',
         },
-        timestamp: new Date()
+        timestamp: new Date(),
       };
-
     } catch (error) {
       return {
         status: 'error',
-        message: error.message,
+        message: 'حدث خطأ داخلي',
         data: null,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     }
   }
@@ -196,7 +200,8 @@ class ScholarshipService extends EventEmitter {
 
       // Get application
       const { ObjectId } = require('mongodb');
-      const application = await this.db.collection(this.scholarshipCollection)
+      const application = await this.db
+        .collection(this.scholarshipCollection)
         .findOne({ _id: new ObjectId(applicationId) });
 
       if (!application) {
@@ -217,7 +222,7 @@ class ScholarshipService extends EventEmitter {
         processedBy: paymentData.processedBy,
         processedDate: new Date(),
         referenceNumber: `SCL-${Date.now()}`,
-        createdAt: new Date()
+        createdAt: new Date(),
       };
 
       // Save payment
@@ -233,9 +238,9 @@ class ScholarshipService extends EventEmitter {
               action: 'PAYMENT_PROCESSED',
               user: paymentData.processedBy,
               timestamp: new Date(),
-              details: `Payment of ${paymentData.amount} processed via ${paymentData.disbursementMethod}`
-            }
-          }
+              details: `Payment of ${paymentData.amount} processed via ${paymentData.disbursementMethod}`,
+            },
+          },
         }
       );
 
@@ -243,7 +248,7 @@ class ScholarshipService extends EventEmitter {
         applicationId,
         beneficiaryId: application.beneficiaryId,
         amount: paymentData.amount,
-        referenceNumber: payment.referenceNumber
+        referenceNumber: payment.referenceNumber,
       });
 
       return {
@@ -255,17 +260,16 @@ class ScholarshipService extends EventEmitter {
           amount: paymentData.amount,
           referenceNumber: payment.referenceNumber,
           disbursementMethod: paymentData.disbursementMethod,
-          status: 'COMPLETED'
+          status: 'COMPLETED',
         },
-        timestamp: new Date()
+        timestamp: new Date(),
       };
-
     } catch (error) {
       return {
         status: 'error',
-        message: error.message,
+        message: 'حدث خطأ داخلي',
         data: null,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     }
   }
@@ -283,7 +287,8 @@ class ScholarshipService extends EventEmitter {
       }
 
       const { ObjectId } = require('mongodb');
-      const application = await this.db.collection(this.scholarshipCollection)
+      const application = await this.db
+        .collection(this.scholarshipCollection)
         .findOne({ _id: new ObjectId(applicationId) });
 
       if (!application) {
@@ -291,10 +296,12 @@ class ScholarshipService extends EventEmitter {
       }
 
       // Get beneficiary academic data
-      const beneficiary = await this.db.collection('beneficiaries')
+      const beneficiary = await this.db
+        .collection('beneficiaries')
         .findOne({ _id: new ObjectId(application.beneficiaryId) });
 
-      const grades = await this.db.collection('academicRecords')
+      const grades = await this.db
+        .collection('academicRecords')
         .findOne({ beneficiaryId: application.beneficiaryId });
 
       // Check performance requirements
@@ -304,7 +311,7 @@ class ScholarshipService extends EventEmitter {
         programName: application.programName,
         approvedAmount: application.approvedAmount,
         checkDate: new Date(),
-        requirements: {}
+        requirements: {},
       };
 
       // Minimum GPA requirement (typically 2.0 - 3.0)
@@ -320,13 +327,14 @@ class ScholarshipService extends EventEmitter {
             severity: 'HIGH',
             type: 'LOW_GPA',
             message: `GPA (${currentGPA}) is below minimum requirement (${minGPA})`,
-            action: 'REVIEW_REQUIRED'
+            action: 'REVIEW_REQUIRED',
           });
         }
       }
 
       // Attendance requirement (typically 80%)
-      const attendance = await this.db.collection('attendanceRecords')
+      const attendance = await this.db
+        .collection('attendanceRecords')
         .find({ beneficiaryId: application.beneficiaryId })
         .toArray();
 
@@ -343,7 +351,7 @@ class ScholarshipService extends EventEmitter {
             severity: 'MEDIUM',
             type: 'LOW_ATTENDANCE',
             message: `Attendance rate (${rate.toFixed(2)}%) is below requirement (${minAttendance}%)`,
-            action: 'NOTIFICATION_SENT'
+            action: 'NOTIFICATION_SENT',
           });
         }
       }
@@ -355,7 +363,7 @@ class ScholarshipService extends EventEmitter {
         this.emit('scholarship:performance-alert', {
           applicationId,
           beneficiaryId: application.beneficiaryId,
-          alerts: alerts
+          alerts: alerts,
         });
       }
 
@@ -365,17 +373,16 @@ class ScholarshipService extends EventEmitter {
         data: {
           ...details,
           alerts,
-          statusOk: alerts.filter(a => a.severity === 'HIGH').length === 0
+          statusOk: alerts.filter(a => a.severity === 'HIGH').length === 0,
         },
-        timestamp: new Date()
+        timestamp: new Date(),
       };
-
     } catch (error) {
       return {
         status: 'error',
-        message: error.message,
+        message: 'حدث خطأ داخلي',
         data: null,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     }
   }
@@ -396,7 +403,8 @@ class ScholarshipService extends EventEmitter {
       const { ObjectId } = require('mongodb');
 
       // Get beneficiary
-      const beneficiary = await this.db.collection('beneficiaries')
+      const beneficiary = await this.db
+        .collection('beneficiaries')
         .findOne({ _id: new ObjectId(beneficiaryId) });
 
       if (!beneficiary) {
@@ -414,11 +422,10 @@ class ScholarshipService extends EventEmitter {
       }
 
       // Check for existing scholarships
-      const existingScholarship = await this.db.collection(this.scholarshipCollection)
-        .findOne({
-          beneficiaryId,
-          status: { $in: ['APPROVED', 'ACTIVE'] }
-        });
+      const existingScholarship = await this.db.collection(this.scholarshipCollection).findOne({
+        beneficiaryId,
+        status: { $in: ['APPROVED', 'ACTIVE'] },
+      });
 
       if (existingScholarship) {
         reasons.push('Beneficiary already has an active scholarship');
@@ -427,8 +434,7 @@ class ScholarshipService extends EventEmitter {
       }
 
       // Check academic standing
-      const grades = await this.db.collection('academicRecords')
-        .findOne({ beneficiaryId });
+      const grades = await this.db.collection('academicRecords').findOne({ beneficiaryId });
 
       if (grades && grades.currentGPA) {
         details.currentGPA = grades.currentGPA;
@@ -440,7 +446,8 @@ class ScholarshipService extends EventEmitter {
       }
 
       // Check for disciplinary issues
-      const disciplinary = await this.db.collection('disciplinaryRecords')
+      const disciplinary = await this.db
+        .collection('disciplinaryRecords')
         .findOne({ beneficiaryId, status: 'ACTIVE' });
 
       if (disciplinary) {
@@ -452,11 +459,10 @@ class ScholarshipService extends EventEmitter {
       return {
         eligible: reasons.length === 0,
         reasons,
-        details
+        details,
       };
-
     } catch (error) {
-      reasons.push(`Error validating eligibility: ${error.message}`);
+      reasons.push('حدث خطأ داخلي');
       return { eligible: false, reasons, details };
     }
   }
@@ -474,12 +480,13 @@ class ScholarshipService extends EventEmitter {
           $group: {
             _id: '$status',
             count: { $sum: 1 },
-            totalAmount: { $sum: '$approvedAmount' }
-          }
-        }
+            totalAmount: { $sum: '$approvedAmount' },
+          },
+        },
       ];
 
-      const stats = await this.db.collection(this.scholarshipCollection)
+      const stats = await this.db
+        .collection(this.scholarshipCollection)
         .aggregate(pipeline)
         .toArray();
 
@@ -488,17 +495,16 @@ class ScholarshipService extends EventEmitter {
         message: 'Scholarship statistics retrieved',
         data: {
           byStatus: stats,
-          generatedAt: new Date()
+          generatedAt: new Date(),
         },
-        timestamp: new Date()
+        timestamp: new Date(),
       };
-
     } catch (error) {
       return {
         status: 'error',
-        message: error.message,
+        message: 'حدث خطأ داخلي',
         data: null,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     }
   }

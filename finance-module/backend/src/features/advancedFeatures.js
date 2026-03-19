@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Advanced Finance Module Features
  * ML-Based Forecasting, WebSocket Real-Time Updates, Notifications
@@ -87,7 +88,7 @@ class MLCashFlowForecaster {
       console.error('[ML Forecaster] Error:', error);
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
         fallbackForecast: this._generateBasicForecast(historicalData, periods)
       };
     }

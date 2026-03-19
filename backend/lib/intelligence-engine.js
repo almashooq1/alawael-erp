@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * 🧠 Intelligent Engine System
  * Advanced AI/ML-powered features for smart system operations

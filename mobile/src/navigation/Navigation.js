@@ -27,7 +27,7 @@ export class MobileNavigationManager {
       });
       return { success: true, navigated: true };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'An internal error occurred' };
     }
   }
 
@@ -91,7 +91,7 @@ export class BiometricAuth {
       }
       return { success: false };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'An internal error occurred' };
     }
   }
 
@@ -222,7 +222,7 @@ export class AppContainer {
       }
       return { success: true };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'An internal error occurred' };
     }
   }
 
@@ -234,7 +234,7 @@ export class AppContainer {
       await AsyncStorage.setItem('user', JSON.stringify(user));
       return { success: true };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'An internal error occurred' };
     }
   }
 
@@ -247,7 +247,7 @@ export class AppContainer {
       await AsyncStorage.removeItem('user');
       return { success: true };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'An internal error occurred' };
     }
   }
 }
@@ -283,7 +283,7 @@ export class DeepLinkHandler {
 
       return { success: false, error: 'Link not found' };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'An internal error occurred' };
     }
   }
 
@@ -318,7 +318,7 @@ export class LocalStorageManager {
       await AsyncStorage.setItem(key, JSON.stringify(data));
       return { success: true };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'An internal error occurred' };
     }
   }
 
@@ -342,7 +342,7 @@ export class LocalStorageManager {
       await AsyncStorage.removeItem(key);
       return { success: true };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'An internal error occurred' };
     }
   }
 
@@ -354,7 +354,7 @@ export class LocalStorageManager {
       await AsyncStorage.clear();
       return { success: true };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'An internal error occurred' };
     }
   }
 }
@@ -390,7 +390,7 @@ export class SyncManager {
       await LocalStorageManager.deleteData('pending_sync');
       return { success: true, synced: pendingData.length };
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: 'An internal error occurred' };
     }
   }
 

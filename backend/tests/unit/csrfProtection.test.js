@@ -1,3 +1,4 @@
+/* eslint-disable no-undef, no-unused-vars */
 const csrfProtection = require('../../middleware/csrfProtection');
 
 describe('csrfProtection middleware', () => {

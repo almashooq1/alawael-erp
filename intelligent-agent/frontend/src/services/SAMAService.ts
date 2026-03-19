@@ -29,15 +29,15 @@ class SAMAServiceClass {
   private getHeaders(token: string, additionalHeaders?: Record<string, string>): Record<string, string> {
     return {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
       ...additionalHeaders,
     };
   }
 
   private async handleResponse(response: Response) {
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ message: 'Unknown error' }));
-      throw new Error(error.message || `API Error: ${response.statusText}`);
+      await response.json().catch(() => ({}));
+      throw new Error('حدث خطأ داخلي');
     }
     return response.json();
   }

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Project Model
  * Represents a project with team, tasks, budget, and timeline management

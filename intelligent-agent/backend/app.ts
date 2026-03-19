@@ -111,7 +111,7 @@ if (NODE_ENV === 'development') {
 
 // Mock user middleware for testing
 if (NODE_ENV !== 'production') {
-  app.use((req, res, next) => {
+  app.use((req, _res, next) => {
     (req as any).user = { role: 'admin', username: 'test-admin', id: 'user_123' };
     next();
   });

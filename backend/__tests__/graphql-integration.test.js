@@ -1,3 +1,4 @@
+/* eslint-disable no-undef, no-unused-vars */
 /**
  * 🧪 Phase 15: Advanced GraphQL Integration Tests
  * اختبارات GraphQL متقدمة - Schema, Queries, Mutations, Subscriptions

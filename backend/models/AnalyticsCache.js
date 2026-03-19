@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 const analyticsCacheSchema = new mongoose.Schema(
@@ -21,7 +22,7 @@ const analyticsCacheSchema = new mongoose.Schema(
       required: true,
     },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 // Auto-delete expired documents

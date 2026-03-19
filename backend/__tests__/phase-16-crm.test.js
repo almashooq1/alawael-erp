@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * ALAWAEL ERP - PHASE 16: CRM & CUSTOMER MANAGEMENT TEST SUITE
  * Comprehensive unit tests for CRM service and routes
@@ -6,7 +8,7 @@
 
 const crmService = require('../services/crm.service');
 
-describe.skip('Phase 16: Advanced CRM & Customer Management', () => {
+describe('Phase 16: Advanced CRM & Customer Management', () => {
   beforeEach(() => {
     // Reset service state before each test
     crmService.customers = [];

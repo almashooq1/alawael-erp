@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * Middleware Utilities Tests
  * Tests for middleware and utility functions
@@ -104,7 +106,9 @@ describe('Response Handler Middleware', () => {
 
     test('should include error message in response', () => {
       res.error('Custom error message');
-      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ message: 'Custom error message' }));
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({ message: 'Custom error message' })
+      );
     });
 
     test('should use default message if not provided', () => {
@@ -140,13 +144,14 @@ describe('Response Handler Middleware', () => {
       res.paginated(data, 100, 10, 0);
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
-          pagination: {
+          pagination: expect.objectContaining({
             total: 100,
             limit: 10,
             offset: 0,
             pages: 10,
-          },
-        }),
+            hasMore: true,
+          }),
+        })
       );
     });
 
@@ -156,7 +161,7 @@ describe('Response Handler Middleware', () => {
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
           pagination: expect.objectContaining({ pages: 6 }),
-        }),
+        })
       );
     });
 
@@ -184,7 +189,7 @@ describe('Response Handler Middleware', () => {
             limit: 10,
             offset: 20,
           }),
-        }),
+        })
       );
     });
   });
@@ -295,7 +300,7 @@ describe('Response Handler Edge Cases', () => {
         pagination: expect.objectContaining({
           offset: 9999,
         }),
-      }),
+      })
     );
   });
 

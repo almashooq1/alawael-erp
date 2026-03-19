@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * AL-AWAEL ERP - PHASE 23: LEARNING & DEVELOPMENT TESTS
  * Comprehensive test suite for learning & development system

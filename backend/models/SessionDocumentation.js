@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 // SOAP Note Structure (Subjective, Objective, Assessment, Plan)
@@ -44,7 +45,6 @@ const sessionDocumentationSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'TherapySession',
       required: true,
-      index: true,
     },
 
     beneficiary: {
@@ -136,7 +136,7 @@ const sessionDocumentationSchema = new mongoose.Schema(
       },
     ],
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 sessionDocumentationSchema.index({ session: 1 });

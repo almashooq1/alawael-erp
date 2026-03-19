@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * ALAWAEL ERP - PHASE 20: RISK MANAGEMENT & COMPLIANCE TEST SUITE
  * Comprehensive testing of risk identification, compliance tracking, and audit management

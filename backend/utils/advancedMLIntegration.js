@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * 🤖 Advanced ML/AI Integration Module
  * نظام التعلم الآلي المتقدم
@@ -12,6 +13,7 @@
 
 const tf = require('@tensorflow/tfjs');
 const math = require('mathjs');
+const logger = require('./logger');
 
 /**
  * 1️⃣ Deep Learning Neural Network
@@ -69,7 +71,7 @@ class NeuralNetworkModel {
     });
 
     this.model = model;
-    console.log('✅ Neural Network Model Built');
+    // console.log('✅ Neural Network Model Built');
     return model;
   }
 
@@ -82,7 +84,7 @@ class NeuralNetworkModel {
     }
 
     this.isTraining = true;
-    console.log(`🚀 Training started (${epochs} epochs)`);
+    // console.log(`🚀 Training started (${epochs} epochs)`);
 
     try {
       const xs = tf.tensor2d(trainingData);
@@ -95,10 +97,10 @@ class NeuralNetworkModel {
         shuffle: true,
         verbose: 1,
         callbacks: {
-          onEpochEnd: (epoch, logs) => {
-            console.log(
-              `Epoch ${epoch + 1}/${epochs} - loss: ${logs.loss.toFixed(4)}, accuracy: ${logs.acc.toFixed(4)}`
-            );
+          onEpochEnd: (_epoch, _logs) => {
+            // console.log(
+            //   `Epoch ${epoch + 1}/${epochs} - loss: ${logs.loss.toFixed(4)}, accuracy: ${logs.acc.toFixed(4)}`
+            // );
           },
         },
       });
@@ -107,10 +109,10 @@ class NeuralNetworkModel {
       ys.dispose();
 
       this.isTraining = false;
-      console.log('✅ Training completed');
+      // console.log('✅ Training completed');
       return history;
     } catch (error) {
-      console.error('❌ Training error:', error);
+      logger.error('❌ Training error:', error);
       this.isTraining = false;
       return null;
     }
@@ -121,7 +123,7 @@ class NeuralNetworkModel {
    */
   async predict(data) {
     if (!this.model) {
-      console.error('❌ Model not built');
+      logger.error('❌ Model not built');
       return null;
     }
 
@@ -135,7 +137,7 @@ class NeuralNetworkModel {
 
       return Array.from(result)[0];
     } catch (error) {
-      console.error('❌ Prediction error:', error);
+      logger.error('❌ Prediction error:', error);
       return null;
     }
   }
@@ -288,8 +290,8 @@ class RecommendationEngine {
   /**
    * Generate treatment recommendations
    */
-  static generateTreatmentRecommendations(assessmentResults, history) {
-    const recommendations = [];
+  static generateTreatmentRecommendations(assessmentResults, _history) {
+    const _recommendations = [];
 
     // Based on assessment type
     const assessmentType = assessmentResults.assessmentType || 'general';
@@ -357,7 +359,7 @@ class RecommendationEngine {
   /**
    * Recommend next assessment type
    */
-  static recommendNextAssessment(currentType, history) {
+  static recommendNextAssessment(currentType, _history) {
     const assessmentSequence = [
       'initial',
       'cognitive',

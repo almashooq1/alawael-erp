@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { triggerBlobDownload } from 'utils/downloadHelper';
 import {
   Container,
   Grid,
@@ -39,10 +40,15 @@ import {
   CheckCircle,
   Schedule,
 } from '@mui/icons-material';
+import { getToken } from 'utils/tokenStorage';
+import logger from 'utils/logger';
+import { useSnackbar } from 'contexts/SnackbarContext';
+import { statusColors, neutralColors, assessmentColors, chartColors } from '../../theme/palette';
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'];
+const COLORS = chartColors.analytics;
 
 const AnalyticsDashboard = () => {
+  const showSnackbar = useSnackbar();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [dashboardData, setDashboardData] = useState(null);
@@ -50,18 +56,13 @@ const AnalyticsDashboard = () => {
   const [selectedTab, setSelectedTab] = useState(0);
   const [dateRange, setDateRange] = useState('all');
 
-  useEffect(() => {
-    fetchDashboardData();
-    fetchMonthlyTrends();
-  }, [dateRange]);
-
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     try {
       setLoading(true);
       const params = dateRange !== 'all' ? `?dateRange=${dateRange}` : '';
       const response = await fetch(`/api/analytics/dashboard${params}`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${getToken()}`,
         },
       });
 
@@ -75,14 +76,14 @@ const AnalyticsDashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [dateRange]);
 
-  const fetchMonthlyTrends = async () => {
+  const fetchMonthlyTrends = useCallback(async () => {
     try {
       const params = dateRange !== 'all' ? `?dateRange=${dateRange}` : '';
       const response = await fetch(`/api/analytics/trends/monthly${params}`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${getToken()}`,
         },
       });
 
@@ -91,28 +92,29 @@ const AnalyticsDashboard = () => {
       const data = await response.json();
       setMonthlyTrends(data);
     } catch (err) {
-      console.error('Monthly trends error:', err);
+      logger.error('Monthly trends error:', err);
     }
-  };
+  }, [dateRange]);
+
+  useEffect(() => {
+    fetchDashboardData();
+    fetchMonthlyTrends();
+  }, [fetchDashboardData, fetchMonthlyTrends]);
 
   const handleExportReport = async () => {
     try {
       const response = await fetch('/api/analytics/export?format=json', {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${getToken()}`,
         },
       });
 
       if (!response.ok) throw new Error('فشل في تصدير التقرير');
 
       const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `analytics-report-${new Date().toISOString()}.json`;
-      a.click();
+      triggerBlobDownload(blob, `analytics-report-${new Date().toISOString()}.json`);
     } catch (err) {
-      alert('فشل في تصدير التقرير: ' + err.message);
+      showSnackbar('فشل في تصدير التقرير: ' + err.message, 'error');
     }
   };
 
@@ -140,7 +142,7 @@ const AnalyticsDashboard = () => {
     );
   }
 
-  const { summary, distribution, trends, goals, attendance, budget } = dashboardData;
+  const { summary, distribution, _trends, goals, attendance, budget } = dashboardData;
 
   // Prepare chart data
   const disabilityTypeData = distribution.byDisabilityType.map(item => ({
@@ -209,7 +211,7 @@ const AnalyticsDashboard = () => {
               <Card elevation={3}>
                 <CardContent>
                   <Box display="flex" alignItems="center" mb={1}>
-                    <Assessment sx={{ fontSize: 40, color: '#1976d2', mr: 2 }} />
+                    <Assessment sx={{ fontSize: 40, color: statusColors.primaryBlue, mr: 2 }} />
                     <Box>
                       <Typography variant="h4">{summary.total}</Typography>
                       <Typography color="textSecondary">إجمالي البرامج</Typography>
@@ -223,7 +225,7 @@ const AnalyticsDashboard = () => {
               <Card elevation={3}>
                 <CardContent>
                   <Box display="flex" alignItems="center" mb={1}>
-                    <PeopleAlt sx={{ fontSize: 40, color: '#2e7d32', mr: 2 }} />
+                    <PeopleAlt sx={{ fontSize: 40, color: assessmentColors.normal, mr: 2 }} />
                     <Box>
                       <Typography variant="h4">{summary.active}</Typography>
                       <Typography color="textSecondary">برامج نشطة</Typography>
@@ -237,7 +239,7 @@ const AnalyticsDashboard = () => {
               <Card elevation={3}>
                 <CardContent>
                   <Box display="flex" alignItems="center" mb={1}>
-                    <CheckCircle sx={{ fontSize: 40, color: '#ed6c02', mr: 2 }} />
+                    <CheckCircle sx={{ fontSize: 40, color: assessmentColors.moderate, mr: 2 }} />
                     <Box>
                       <Typography variant="h4">{summary.completed}</Typography>
                       <Typography color="textSecondary">برامج مكتملة</Typography>
@@ -251,7 +253,7 @@ const AnalyticsDashboard = () => {
               <Card elevation={3}>
                 <CardContent>
                   <Box display="flex" alignItems="center" mb={1}>
-                    <TrendingUp sx={{ fontSize: 40, color: '#9c27b0', mr: 2 }} />
+                    <TrendingUp sx={{ fontSize: 40, color: statusColors.purple, mr: 2 }} />
                     <Box>
                       <Typography variant="h4">{summary.successRate.toFixed(1)}%</Typography>
                       <Typography color="textSecondary">معدل النجاح</Typography>
@@ -265,7 +267,7 @@ const AnalyticsDashboard = () => {
               <Card elevation={3}>
                 <CardContent>
                   <Box display="flex" alignItems="center" mb={1}>
-                    <Schedule sx={{ fontSize: 40, color: '#d32f2f', mr: 2 }} />
+                    <Schedule sx={{ fontSize: 40, color: assessmentColors.severe, mr: 2 }} />
                     <Box>
                       <Typography variant="h4">{summary.averageDuration}</Typography>
                       <Typography color="textSecondary">متوسط المدة (أيام)</Typography>
@@ -279,7 +281,7 @@ const AnalyticsDashboard = () => {
               <Card elevation={3}>
                 <CardContent>
                   <Box display="flex" alignItems="center" mb={1}>
-                    <AttachMoney sx={{ fontSize: 40, color: '#00796b', mr: 2 }} />
+                    <AttachMoney sx={{ fontSize: 40, color: statusColors.tealDark, mr: 2 }} />
                     <Box>
                       <Typography variant="h4">{budget.utilizationRate.toFixed(1)}%</Typography>
                       <Typography color="textSecondary">معدل استخدام الميزانية</Typography>
@@ -334,7 +336,7 @@ const AnalyticsDashboard = () => {
                       <YAxis />
                       <Tooltip />
                       <Legend />
-                      <Bar dataKey="value" fill="#8884d8" />
+                      <Bar dataKey="value" fill={chartColors.purple} />
                     </BarChart>
                   </ResponsiveContainer>
                 </CardContent>
@@ -359,12 +361,22 @@ const AnalyticsDashboard = () => {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Line type="monotone" dataKey="total" stroke="#8884d8" name="إجمالي البرامج" />
-                    <Line type="monotone" dataKey="completed" stroke="#82ca9d" name="مكتملة" />
+                    <Line
+                      type="monotone"
+                      dataKey="total"
+                      stroke={chartColors.purple}
+                      name="إجمالي البرامج"
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="completed"
+                      stroke={chartColors.green}
+                      name="مكتملة"
+                    />
                     <Line
                       type="monotone"
                       dataKey="successRate"
-                      stroke="#ffc658"
+                      stroke={chartColors.amber}
                       name="معدل النجاح %"
                     />
                   </LineChart>
@@ -390,7 +402,7 @@ const AnalyticsDashboard = () => {
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="achievementRate" fill="#82ca9d" name="معدل التحقيق %" />
+                    <Bar dataKey="achievementRate" fill={chartColors.green} name="معدل التحقيق %" />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -445,8 +457,8 @@ const AnalyticsDashboard = () => {
                       outerRadius={100}
                       label
                     >
-                      <Cell fill="#4caf50" />
-                      <Cell fill="#f44336" />
+                      <Cell fill={statusColors.success} />
+                      <Cell fill={statusColors.error} />
                     </Pie>
                     <Tooltip />
                     <Legend />
@@ -466,16 +478,16 @@ const AnalyticsDashboard = () => {
                   <Typography variant="body1" gutterBottom>
                     إجمالي الجلسات: {attendance.totalSessions}
                   </Typography>
-                  <Typography variant="body1" gutterBottom sx={{ color: '#4caf50' }}>
+                  <Typography variant="body1" gutterBottom sx={{ color: statusColors.success }}>
                     حضور: {attendance.attended}
                   </Typography>
-                  <Typography variant="body1" gutterBottom sx={{ color: '#ff9800' }}>
+                  <Typography variant="body1" gutterBottom sx={{ color: statusColors.warning }}>
                     غياب بعذر: {attendance.excusedAbsent}
                   </Typography>
-                  <Typography variant="body1" gutterBottom sx={{ color: '#f44336' }}>
+                  <Typography variant="body1" gutterBottom sx={{ color: statusColors.error }}>
                     غياب: {attendance.absent}
                   </Typography>
-                  <Typography variant="body1" gutterBottom sx={{ color: '#9e9e9e' }}>
+                  <Typography variant="body1" gutterBottom sx={{ color: neutralColors.inactive }}>
                     ملغاة: {attendance.cancelled}
                   </Typography>
                   <Typography variant="h5" color="primary" sx={{ mt: 2 }}>
@@ -508,7 +520,7 @@ const AnalyticsDashboard = () => {
                     <XAxis dataKey="name" />
                     <YAxis />
                     <Tooltip />
-                    <Bar dataKey="value" fill="#8884d8" />
+                    <Bar dataKey="value" fill={chartColors.purple} />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>

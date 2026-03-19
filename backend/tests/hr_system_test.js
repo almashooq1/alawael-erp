@@ -1,11 +1,12 @@
+/* eslint-disable no-unused-vars */
 /**
  * ====================================================================
  * اختبارات شاملة لنظام الموارد البشرية
  * Comprehensive Tests for HR Management System
  * ====================================================================
- * 
+ *
  * مجموعة اختبارات شاملة لجميع وظائف نظام الموارد البشرية
- * 
+ *
  * @version 1.0.0
  * @date 2026-01-22
  */
@@ -30,11 +31,11 @@ class HRSystemTest {
       console.log(`✅ PASS: ${message}`);
     } else {
       this.failedTests++;
-      this.testResults.push({ 
-        status: 'FAIL', 
-        message, 
-        expected, 
-        actual 
+      this.testResults.push({
+        status: 'FAIL',
+        message,
+        expected,
+        actual,
       });
       console.log(`❌ FAIL: ${message}`);
       console.log(`   Expected: ${expected}, Got: ${actual}`);
@@ -75,11 +76,11 @@ class HRSystemTest {
       console.log(`✅ PASS: ${message}`);
     } else {
       this.failedTests++;
-      this.testResults.push({ 
-        status: 'FAIL', 
-        message, 
-        minimum, 
-        actual 
+      this.testResults.push({
+        status: 'FAIL',
+        message,
+        minimum,
+        actual,
       });
       console.log(`❌ FAIL: ${message} - Expected > ${minimum}, Got: ${actual}`);
     }
@@ -122,14 +123,22 @@ class HRSystemTest {
     // الحصول على الموظف
     const getResult = this.hrSystem.getEmployee(addResult.employeeId);
     this.assertTrue(getResult.success, 'Should retrieve employee');
-    this.assertEqual(getResult.employee.personalInfo.firstName, 'Test', 'Should have correct first name');
+    this.assertEqual(
+      getResult.employee.personalInfo.firstName,
+      'Test',
+      'Should have correct first name'
+    );
 
     // تحديث الموظف
     const updateResult = this.hrSystem.updateEmployee(addResult.employeeId, {
-      personalInfo: { firstName: 'Updated' }
+      personalInfo: { firstName: 'Updated' },
     });
     this.assertTrue(updateResult.success, 'Should update employee');
-    this.assertEqual(updateResult.employee.personalInfo.firstName, 'Updated', 'Should have updated name');
+    this.assertEqual(
+      updateResult.employee.personalInfo.firstName,
+      'Updated',
+      'Should have updated name'
+    );
 
     // جلب جميع الموظفين
     const allEmployees = this.hrSystem.getAllEmployees();
@@ -137,7 +146,10 @@ class HRSystemTest {
     this.assertGreaterThan(allEmployees.count, 0, 'Should have at least one employee');
 
     // تعطيل الموظف
-    const deactivateResult = this.hrSystem.deactivateEmployee(addResult.employeeId, 'Test termination');
+    const deactivateResult = this.hrSystem.deactivateEmployee(
+      addResult.employeeId,
+      'Test termination'
+    );
     this.assertTrue(deactivateResult.success, 'Should deactivate employee');
   }
 
@@ -340,9 +352,9 @@ class HRSystemTest {
 
     // إكمال التدريب
     const completeResult = this.hrSystem.completeEmployeeTraining(
-      addResult.trainingId, 
-      employeeId, 
-      'A', 
+      addResult.trainingId,
+      employeeId,
+      'A',
       'Excellent participation'
     );
     this.assertTrue(completeResult.success, 'Should complete training');
@@ -469,7 +481,7 @@ class HRSystemTest {
     console.log('         اختبارات نظام الموارد البشرية المتقدم         ');
     console.log('      Advanced HR Management System - Test Suite        ');
     console.log('═══════════════════════════════════════════════════════════');
-    
+
     const startTime = Date.now();
 
     try {
@@ -507,7 +519,7 @@ class HRSystemTest {
     console.log(`✅ نجح: ${this.passedTests}`);
     console.log(`❌ فشل: ${this.failedTests}`);
     console.log(`⏱️  المدة: ${duration} ثانية`);
-    
+
     const successRate = ((this.passedTests / this.totalTests) * 100).toFixed(2);
     console.log(`📈 نسبة النجاح: ${successRate}%`);
 

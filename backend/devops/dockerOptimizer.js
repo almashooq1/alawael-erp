@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * 🐳 Docker Optimization & Multi-Stage Builds
  *
@@ -117,7 +118,7 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-      - MONGO_URI=mongodb://mongo:27017/alawael
+      - MONGODB_URI=mongodb://mongo:27017/alawael
       - REDIS_URL=redis://redis:6379
     depends_on:
       - mongo

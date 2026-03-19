@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * ALAWAEL ERP - PHASE 19: CUSTOMER EXPERIENCE & SATISFACTION MANAGEMENT SERVICE
  * Customer feedback, NPS tracking, complaint resolution, experience metrics
@@ -651,8 +652,8 @@ class CustomerExperienceService {
     ];
 
     const textLower = text.toLowerCase();
-    let positiveCount = positiveKeywords.filter(k => textLower.includes(k)).length;
-    let negativeCount = negativeKeywords.filter(k => textLower.includes(k)).length;
+    const positiveCount = positiveKeywords.filter(k => textLower.includes(k)).length;
+    const negativeCount = negativeKeywords.filter(k => textLower.includes(k)).length;
 
     if (positiveCount > negativeCount) return 'positive';
     if (negativeCount > positiveCount) return 'negative';
@@ -684,8 +685,8 @@ class CustomerExperienceService {
     ];
 
     const textLower = text.toLowerCase();
-    let positiveCount = positiveKeywords.filter(k => textLower.includes(k)).length;
-    let negativeCount = negativeKeywords.filter(k => textLower.includes(k)).length;
+    const positiveCount = positiveKeywords.filter(k => textLower.includes(k)).length;
+    const negativeCount = negativeKeywords.filter(k => textLower.includes(k)).length;
 
     const score = ((positiveCount - negativeCount) / (positiveCount + negativeCount || 1)) * 100;
     return Math.max(-100, Math.min(100, score)).toFixed(2);

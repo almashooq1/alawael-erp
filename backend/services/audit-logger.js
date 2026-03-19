@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Audit Logger Service - GDPR/HIPAA Compliance
  * Logs all sensitive operations for compliance and security audits
@@ -5,6 +6,7 @@
 
 const mongoose = require('mongoose');
 const crypto = require('crypto');
+const logger = require('../utils/logger');
 
 // Audit Log Schema
 const AuditLogSchema = new mongoose.Schema({
@@ -45,7 +47,7 @@ class AuditLogger {
       await logEntry.save();
       return logEntry;
     } catch (error) {
-      console.error('Audit logging error:', error);
+      logger.error('Audit logging error:', error);
       // Don't throw - audit logging should not break the application
     }
   }

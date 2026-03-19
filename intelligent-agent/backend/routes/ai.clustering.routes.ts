@@ -31,7 +31,7 @@ router.post('/init', (req: express.Request, res: express.Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -72,7 +72,7 @@ router.post('/fit', (req: express.Request, res: express.Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -109,7 +109,7 @@ router.post('/predict', (req: express.Request, res: express.Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -140,7 +140,7 @@ router.post('/elbow', (req: express.Request, res: express.Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -167,7 +167,7 @@ router.get('/summary', (req: express.Request, res: express.Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'حدث خطأ في الخادم',
     });
   }
 });

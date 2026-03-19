@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Advanced Reporting Service
  * PDF export, scheduled reports, email delivery, custom queries
@@ -48,14 +49,10 @@ class ReportTemplate {
     // Validate columns exist in first row
     if (data.length > 0) {
       const firstRow = data[0];
-      const missingFields = this.fields.filter(
-        (f) => !(f.key in firstRow) && !f.optional
-      );
+      const missingFields = this.fields.filter(f => !(f.key in firstRow) && !f.optional);
 
       if (missingFields.length > 0) {
-        errors.push(
-          `Missing required fields: ${missingFields.map((f) => f.key).join(', ')}`
-        );
+        errors.push(`Missing required fields: ${missingFields.map(f => f.key).join(', ')}`);
       }
     }
 
@@ -96,7 +93,7 @@ class ReportGenerator {
 
         // Collect PDF data
         const chunks = [];
-        doc.on('data', (chunk) => chunks.push(chunk));
+        doc.on('data', chunk => chunks.push(chunk));
         doc.on('end', () => {
           const pdfBuffer = Buffer.concat(chunks);
           resolve({
@@ -136,7 +133,7 @@ class ReportGenerator {
       const worksheet = workbook.addWorksheet(this.template.name);
 
       // Add header
-      const columns = this.template.fields.map((f) => ({
+      const columns = this.template.fields.map(f => ({
         header: f.label || f.key,
         key: f.key,
         width: f.width || 15,
@@ -153,14 +150,14 @@ class ReportGenerator {
       };
 
       // Add data rows
-      data.forEach((row) => {
+      data.forEach(row => {
         worksheet.addRow(row);
       });
 
       // Auto-fit columns
-      worksheet.columns.forEach((col) => {
+      worksheet.columns.forEach(col => {
         let maxLength = 0;
-        col.eachCell?.({ includeEmpty: true }, (cell) => {
+        col.eachCell?.({ includeEmpty: true }, cell => {
           const cellLength = cell.value?.toString().length || 0;
           if (cellLength > maxLength) {
             maxLength = cellLength;
@@ -195,21 +192,17 @@ class ReportGenerator {
       }
 
       // Build CSV
-      const headers = this.template.fields.map((f) => f.label || f.key);
-      const rows = data.map((row) =>
-        this.template.fields.map((f) => {
+      const headers = this.template.fields.map(f => f.label || f.key);
+      const rows = data.map(row =>
+        this.template.fields.map(f => {
           const value = row[f.key];
           const stringValue = String(value || '');
           // Escape quotes and wrap if contains comma
-          return stringValue.includes(',')
-            ? `"${stringValue.replace(/"/g, '""')}"`
-            : stringValue;
+          return stringValue.includes(',') ? `"${stringValue.replace(/"/g, '""')}"` : stringValue;
         })
       );
 
-      const csv =
-        [headers.join(',')].concat(rows.map((r) => r.join(','))).join('\n') +
-        '\n';
+      const csv = [headers.join(',')].concat(rows.map(r => r.join(','))).join('\n') + '\n';
 
       return {
         success: true,
@@ -236,11 +229,12 @@ class ReportGenerator {
       .text(this.template.description || '', { align: 'center' });
 
     doc.moveDown(0.3);
-    doc
-      .fontSize(9)
-      .text(`Generated: ${format(new Date(), 'PPPp')}`, { align: 'right' });
+    doc.fontSize(9).text(`Generated: ${format(new Date(), 'PPPp')}`, { align: 'right' });
 
-    doc.moveTo(50, doc.y).lineTo(doc.page.width - 50, doc.y).stroke();
+    doc
+      .moveTo(50, doc.y)
+      .lineTo(doc.page.width - 50, doc.y)
+      .stroke();
     doc.moveDown(1);
   }
 
@@ -248,8 +242,7 @@ class ReportGenerator {
    * Add PDF table
    */
   _addPDFTable(doc, data) {
-    const pageWidth =
-      this.template.options.pageSize === 'A4' ? 595 : 612;
+    const pageWidth = this.template.options.pageSize === 'A4' ? 595 : 612;
     const availableWidth = pageWidth - 80;
 
     const columns = this.template.fields;
@@ -275,11 +268,11 @@ class ReportGenerator {
 
     // Table rows
     doc.fontSize(9).font('Helvetica');
-    data.slice(0, 100).forEach((row) => {
+    data.slice(0, 100).forEach(row => {
       // Limit to 100 rows per page
       let maxHeight = 15;
 
-      columns.forEach((col) => {
+      columns.forEach(col => {
         const value = row[col.key] || '';
         const wrappedText = doc.heightOfString(String(value), {
           width: columnWidth - 5,
@@ -312,7 +305,10 @@ class ReportGenerator {
   _addPDFSummary(doc, data) {
     if (!this.template.options.includeSummary) return;
 
-    doc.moveTo(40, doc.y).lineTo(doc.page.width - 40, doc.y).stroke();
+    doc
+      .moveTo(40, doc.y)
+      .lineTo(doc.page.width - 40, doc.y)
+      .stroke();
     doc.moveDown(0.5);
 
     doc.fontSize(12).font('Helvetica-Bold').text('Summary', { underline: true });
@@ -370,11 +366,11 @@ class ReportScheduler {
     let reports = Array.from(this.schedules.values());
 
     if (filter.enabled !== undefined) {
-      reports = reports.filter((r) => r.enabled === filter.enabled);
+      reports = reports.filter(r => r.enabled === filter.enabled);
     }
 
     if (filter.template) {
-      reports = reports.filter((r) => r.templateName === filter.template);
+      reports = reports.filter(r => r.templateName === filter.template);
     }
 
     return reports;
@@ -398,10 +394,7 @@ class ReportScheduler {
 
       // Update schedule
       schedule.lastRun = new Date();
-      schedule.nextRun = this._calculateNextRun(
-        schedule.frequency,
-        schedule.time
-      );
+      schedule.nextRun = this._calculateNextRun(schedule.frequency, schedule.time);
       schedule.runCount++;
 
       // Track execution
@@ -431,7 +424,7 @@ class ReportScheduler {
         scheduledReportId: reportId,
         timestamp: new Date(),
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       });
 
       throw error;
@@ -445,7 +438,7 @@ class ReportScheduler {
     const now = new Date();
 
     switch (frequency) {
-      case 'daily':
+      case 'daily': {
         const daily = new Date(now);
         const [hours, minutes] = time.split(':').map(Number);
         daily.setHours(hours, minutes, 0, 0);
@@ -453,16 +446,19 @@ class ReportScheduler {
           daily.setDate(daily.getDate() + 1);
         }
         return daily;
+      }
 
-      case 'weekly':
+      case 'weekly': {
         const weekly = new Date(now);
-        weekly.setDate(weekly.getDate() + 7); // TODO: handle day of week
+        weekly.setDate(weekly.getDate() + 7); // @todo Handle specific day-of-week scheduling
         return weekly;
+      }
 
-      case 'monthly':
+      case 'monthly': {
         const monthly = new Date(now);
         monthly.setMonth(monthly.getMonth() + 1);
         return monthly;
+      }
 
       default:
         return null;
@@ -636,7 +632,7 @@ class ReportingService {
     const byFormat = {};
     const byTemplate = {};
 
-    this.generatedReports.forEach((report) => {
+    this.generatedReports.forEach(report => {
       byFormat[report.format] = (byFormat[report.format] || 0) + 1;
       byTemplate[report.template] = (byTemplate[report.template] || 0) + 1;
     });

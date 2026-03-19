@@ -1,7 +1,7 @@
 /**
  * ComplianceDashboard Component
  * لوحة الامتثال والحوكمة
- * 
+ *
  * Features:
  * - متابعة الامتثال
  * - مؤشرات الحوكمة
@@ -66,10 +66,7 @@ const ComplianceDashboard = () => {
   const [loading, setLoading] = useState(false);
   const [selectedViolation, setSelectedViolation] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
-  const [dateRange, setDateRange] = useState([
-    dayjs().subtract(12, 'months'),
-    dayjs(),
-  ]);
+  const [dateRange, setDateRange] = useState([dayjs().subtract(12, 'months'), dayjs()]);
   const [stats, setStats] = useState({
     complianceRate: 0,
     totalRules: 0,
@@ -91,12 +88,9 @@ const ComplianceDashboard = () => {
         to: dateRange[1].format('YYYY-MM-DD'),
       });
 
-      const response = await fetch(
-        `/api/finance/compliance/summary?${params}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const response = await fetch(`/api/finance/compliance/summary?${params}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       if (!response.ok) throw new Error('Failed to fetch compliance data');
 
@@ -113,7 +107,7 @@ const ComplianceDashboard = () => {
     }
   }, [dateRange]);
 
-  const calculateStats = (data) => {
+  const calculateStats = data => {
     const compliant = data.compliance.filter(c => c.status === 'compliant').length;
     const total = data.compliance.length || 1;
     const stats = {
@@ -129,7 +123,7 @@ const ComplianceDashboard = () => {
     setStats(stats);
   };
 
-  const calculateAvgResolution = (violations) => {
+  const calculateAvgResolution = violations => {
     if (!violations || violations.length === 0) return 0;
     const resolved = violations.filter(v => v.resolvedDate);
     if (resolved.length === 0) return 0;
@@ -140,23 +134,20 @@ const ComplianceDashboard = () => {
     return (totalDays / resolved.length).toFixed(1);
   };
 
-  const resolveViolation = async (violationId) => {
+  const resolveViolation = async violationId => {
     try {
       const token = localStorage.getItem('authToken');
-      const response = await fetch(
-        `/api/finance/compliance/${violationId}/resolve`,
-        {
-          method: 'PATCH',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            status: 'resolved',
-            resolutionNotes: selectedViolation.resolutionNotes,
-          }),
-        }
-      );
+      const response = await fetch(`/api/finance/compliance/${violationId}/resolve`, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          status: 'resolved',
+          resolutionNotes: selectedViolation.resolutionNotes,
+        }),
+      });
 
       if (!response.ok) throw new Error('Resolution failed');
 
@@ -175,7 +166,7 @@ const ComplianceDashboard = () => {
       const response = await fetch(`/api/finance/compliance/schedule-audit`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -200,7 +191,7 @@ const ComplianceDashboard = () => {
   }, [dateRange]);
 
   // ===== Data Preparation =====
-  const complianceTrend = complianceData.map((item) => ({
+  const complianceTrend = complianceData.map(item => ({
     date: dayjs(item.date).format('DD/MM'),
     compliant: item.compliant,
     violating: item.violating,
@@ -232,7 +223,7 @@ const ComplianceDashboard = () => {
       title: 'الخطورة',
       dataIndex: 'severity',
       key: 'severity',
-      render: (severity) => {
+      render: severity => {
         let color = 'default';
         if (severity === 'critical') color = 'red';
         else if (severity === 'high') color = 'orange';
@@ -245,13 +236,13 @@ const ComplianceDashboard = () => {
       title: 'تاريخ الاكتشاف',
       dataIndex: 'createdAt',
       key: 'createdAt',
-      render: (date) => dayjs(date).format('DD/MM/YYYY'),
+      render: date => dayjs(date).format('DD/MM/YYYY'),
     },
     {
       title: 'الحالة',
       dataIndex: 'status',
       key: 'status',
-      render: (status) => (
+      render: status => (
         <Badge
           status={status === 'resolved' ? 'success' : 'processing'}
           text={status === 'resolved' ? 'محلول' : 'قيد المعالجة'}
@@ -282,13 +273,13 @@ const ComplianceDashboard = () => {
       title: 'التاريخ والوقت',
       dataIndex: 'timestamp',
       key: 'timestamp',
-      render: (time) => dayjs(time).format('DD/MM/YYYY HH:mm'),
+      render: time => dayjs(time).format('DD/MM/YYYY HH:mm'),
     },
     {
       title: 'النوع',
       dataIndex: 'eventType',
       key: 'eventType',
-      render: (type) => <Tag>{type}</Tag>,
+      render: type => <Tag>{type}</Tag>,
     },
     {
       title: 'المستخدم',
@@ -305,12 +296,7 @@ const ComplianceDashboard = () => {
       title: 'النتيجة',
       dataIndex: 'result',
       key: 'result',
-      render: (result) => (
-        <Badge
-          status={result === 'success' ? 'success' : 'error'}
-          text={result}
-        />
-      ),
+      render: result => <Badge status={result === 'success' ? 'success' : 'error'} text={result} />,
     },
   ];
 
@@ -421,7 +407,7 @@ const ComplianceDashboard = () => {
           <Col xs={24} sm={12} md={8}>
             <DatePicker.RangePicker
               value={dateRange}
-              onChange={(dates) => setDateRange(dates)}
+              onChange={dates => setDateRange(dates)}
               style={{ width: '100%' }}
             />
           </Col>
@@ -437,11 +423,7 @@ const ComplianceDashboard = () => {
             </Button>
           </Col>
           <Col xs={24} sm={12} md={8}>
-            <Button
-              block
-              onClick={scheduleAudit}
-              icon={<CheckCircleOutlined />}
-            >
+            <Button block onClick={scheduleAudit} icon={<CheckCircleOutlined />}>
               جدولة تدقيق
             </Button>
           </Col>
@@ -510,11 +492,7 @@ const ComplianceDashboard = () => {
             title="المخالفات والمشاكل"
             extra={
               <div>
-                <Button
-                  icon={<FileExcelOutlined />}
-                  size="small"
-                  style={{ marginRight: 8 }}
-                >
+                <Button icon={<FileExcelOutlined />} size="small" style={{ marginRight: 8 }}>
                   Excel
                 </Button>
                 <Button icon={<FilePdfOutlined />} size="small">
@@ -533,7 +511,7 @@ const ComplianceDashboard = () => {
                 rowKey="id"
                 pagination={{
                   pageSize: 5,
-                  showTotal: (total) => `إجمالي: ${total} مخالفة`,
+                  showTotal: total => `إجمالي: ${total} مخالفة`,
                 }}
                 size="small"
               />
@@ -597,17 +575,14 @@ const ComplianceDashboard = () => {
                       <strong>الوصف:</strong> {selectedViolation.description}
                     </p>
                     <p>
-                      <strong>القانون/المعيار:</strong>{' '}
-                      {selectedViolation.regulation}
+                      <strong>القانون/المعيار:</strong> {selectedViolation.regulation}
                     </p>
                     <p>
                       <strong>الفئة:</strong> {selectedViolation.category}
                     </p>
                     <p>
                       <strong>تاريخ الاكتشاف:</strong>{' '}
-                      {dayjs(selectedViolation.createdAt).format(
-                        'DD/MM/YYYY HH:mm'
-                      )}
+                      {dayjs(selectedViolation.createdAt).format('DD/MM/YYYY HH:mm')}
                     </p>
                   </div>
                 ),

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * ⭐ نظام تقييم وتقييم أداء السائقين
  * Driver Performance & Rating Service

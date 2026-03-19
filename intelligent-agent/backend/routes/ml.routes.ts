@@ -22,17 +22,8 @@ import {
   exportComprehensiveReportPDF,
   exportComprehensiveReportExcel,
 } from '../utils/ml.export';
-import {
-  aggregateAlerts,
-  detectAlertPatterns,
-  comparePerformance,
-  generateIntelligentSummary,
-} from '../utils/ml.aggregation';
-import {
-  shouldRetrain,
-  executeRetraining,
-  getRetrainingStatus,
-} from '../utils/ml.auto-retrain';
+import { aggregateAlerts, detectAlertPatterns, comparePerformance, generateIntelligentSummary } from '../utils/ml.aggregation';
+import { shouldRetrain, executeRetraining, getRetrainingStatus } from '../utils/ml.auto-retrain';
 
 const router: Router = express.Router();
 
@@ -63,7 +54,7 @@ router.post('/classify', async (req: Request, res: Response) => {
     console.error('Classification error:', error);
     res.status(500).json({
       success: false,
-      error: error.message || 'Classification failed',
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -95,7 +86,7 @@ router.post('/predict/delay', async (req: Request, res: Response) => {
     console.error('Prediction error:', error);
     res.status(500).json({
       success: false,
-      error: error.message || 'Prediction failed',
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -130,7 +121,7 @@ router.post('/predict/batch', async (req: Request, res: Response) => {
     console.error('Batch prediction error:', error);
     res.status(500).json({
       success: false,
-      error: error.message || 'Batch prediction failed',
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -169,7 +160,7 @@ router.post('/train', async (req: Request, res: Response) => {
     console.error('Training error:', error);
     res.status(500).json({
       success: false,
-      error: error.message || 'Training failed',
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -184,10 +175,7 @@ router.get('/metrics', async (req: Request, res: Response) => {
     const limitParam = Number(req.query.limit || 1000);
     const limit = Number.isFinite(limitParam) && limitParam > 0 ? Math.min(limitParam, 10000) : 1000;
 
-    const feedbackRecords = await MLFeedback.find()
-      .sort({ createdAt: -1 })
-      .limit(limit)
-      .lean();
+    const feedbackRecords = await MLFeedback.find().sort({ createdAt: -1 }).limit(limit).lean();
 
     const metrics = feedbackRecords.length
       ? {
@@ -197,7 +185,7 @@ router.get('/metrics', async (req: Request, res: Response) => {
               actual: record.actual,
               timestamp: record.createdAt?.toISOString?.() || new Date().toISOString(),
               processId: record.processId,
-            }))
+            })),
           ),
           sampleCount: feedbackRecords.length,
         }
@@ -215,7 +203,7 @@ router.get('/metrics', async (req: Request, res: Response) => {
     console.error('Metrics error:', error);
     res.status(500).json({
       success: false,
-      error: error.message || 'Failed to get metrics',
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -328,7 +316,7 @@ router.post('/feedback', async (req: Request, res: Response) => {
     console.error('Feedback error:', error);
     res.status(500).json({
       success: false,
-      error: error.message || 'Feedback recording failed',
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -345,11 +333,7 @@ router.get('/feedback', async (req: Request, res: Response) => {
     const limit = Number.isFinite(limitParam) && limitParam > 0 ? Math.min(limitParam, 500) : 50;
     const offset = Number.isFinite(offsetParam) && offsetParam >= 0 ? offsetParam : 0;
 
-    const records = await MLFeedback.find()
-      .sort({ createdAt: -1 })
-      .skip(offset)
-      .limit(limit)
-      .lean();
+    const records = await MLFeedback.find().sort({ createdAt: -1 }).skip(offset).limit(limit).lean();
 
     res.json({
       success: true,
@@ -365,7 +349,7 @@ router.get('/feedback', async (req: Request, res: Response) => {
     console.error('Feedback list error:', error);
     res.status(500).json({
       success: false,
-      error: error.message || 'Failed to retrieve feedback records',
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -409,7 +393,7 @@ router.get('/drift', async (req: Request, res: Response) => {
         actual: record.actual,
         timestamp: record.createdAt?.toISOString?.() || new Date().toISOString(),
         processId: record.processId,
-      }))
+      })),
     );
 
     const baselineMetrics = mlService.calculateDetailedMetricsFromRecords(
@@ -418,7 +402,7 @@ router.get('/drift', async (req: Request, res: Response) => {
         actual: record.actual,
         timestamp: record.createdAt?.toISOString?.() || new Date().toISOString(),
         processId: record.processId,
-      }))
+      })),
     );
 
     const accuracyDrop = baselineMetrics.accuracy - recentMetrics.accuracy;
@@ -498,7 +482,7 @@ router.get('/drift', async (req: Request, res: Response) => {
     console.error('Drift error:', error);
     res.status(500).json({
       success: false,
-      error: error.message || 'Drift analysis failed',
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -519,11 +503,7 @@ router.get('/drift/events', async (req: Request, res: Response) => {
 
     const filter = status ? { status } : {};
 
-    const events = await MLDriftEvent.find(filter)
-      .sort({ createdAt: -1 })
-      .skip(offset)
-      .limit(limit)
-      .lean();
+    const events = await MLDriftEvent.find(filter).sort({ createdAt: -1 }).skip(offset).limit(limit).lean();
 
     res.json({
       success: true,
@@ -539,7 +519,7 @@ router.get('/drift/events', async (req: Request, res: Response) => {
     console.error('Drift events error:', error);
     res.status(500).json({
       success: false,
-      error: error.message || 'Failed to retrieve drift events',
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -565,11 +545,7 @@ router.get('/alerts', async (req: Request, res: Response) => {
     if (source) filter.source = source;
     if (unread === 'true') filter.read = false;
 
-    const alerts = await MLAlert.find(filter)
-      .sort({ createdAt: -1 })
-      .skip(offset)
-      .limit(limit)
-      .lean();
+    const alerts = await MLAlert.find(filter).sort({ createdAt: -1 }).skip(offset).limit(limit).lean();
 
     const [totalCount, unreadCount, highCount, mediumCount, lowCount] = await Promise.all([
       MLAlert.countDocuments(),
@@ -600,7 +576,7 @@ router.get('/alerts', async (req: Request, res: Response) => {
     console.error('ML alerts error:', error);
     res.status(500).json({
       success: false,
-      error: error.message || 'Failed to retrieve ML alerts',
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -612,11 +588,7 @@ router.get('/alerts', async (req: Request, res: Response) => {
  */
 router.patch('/alerts/:id/read', async (req: Request, res: Response) => {
   try {
-    const alert = await MLAlert.findByIdAndUpdate(
-      req.params.id,
-      { read: true, readAt: new Date() },
-      { new: true }
-    ).lean();
+    const alert = await MLAlert.findByIdAndUpdate(req.params.id, { read: true, readAt: new Date() }, { new: true }).lean();
 
     if (!alert) {
       return res.status(404).json({
@@ -634,7 +606,7 @@ router.patch('/alerts/:id/read', async (req: Request, res: Response) => {
     console.error('ML alert read error:', error);
     res.status(500).json({
       success: false,
-      error: error.message || 'Failed to update alert',
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -646,10 +618,7 @@ router.patch('/alerts/:id/read', async (req: Request, res: Response) => {
  */
 router.patch('/alerts/read-all', async (req: Request, res: Response) => {
   try {
-    const result = await MLAlert.updateMany(
-      { read: false },
-      { read: true, readAt: new Date() }
-    );
+    const result = await MLAlert.updateMany({ read: false }, { read: true, readAt: new Date() });
 
     const matched = 'matchedCount' in result ? result.matchedCount : 0;
     const modified = 'modifiedCount' in result ? result.modifiedCount : 0;
@@ -666,7 +635,7 @@ router.patch('/alerts/read-all', async (req: Request, res: Response) => {
     console.error('ML alerts read-all error:', error);
     res.status(500).json({
       success: false,
-      error: error.message || 'Failed to update alerts',
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -691,7 +660,7 @@ router.delete('/alerts/read', async (req: Request, res: Response) => {
     console.error('ML alerts delete error:', error);
     res.status(500).json({
       success: false,
-      error: error.message || 'Failed to delete read alerts',
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -716,7 +685,7 @@ router.delete('/alerts', async (req: Request, res: Response) => {
     console.error('ML alerts delete-all error:', error);
     res.status(500).json({
       success: false,
-      error: error.message || 'Failed to delete alerts',
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -738,10 +707,7 @@ router.post('/analyze/complete', async (req: Request, res: Response) => {
     }
 
     // Run all analyses in parallel
-    const [classification, delayPrediction] = await Promise.all([
-      classifyProcessRiskAdvanced(process),
-      predictDelayAdvanced(process),
-    ]);
+    const [classification, delayPrediction] = await Promise.all([classifyProcessRiskAdvanced(process), predictDelayAdvanced(process)]);
 
     res.json({
       success: true,
@@ -763,7 +729,7 @@ router.post('/analyze/complete', async (req: Request, res: Response) => {
     console.error('Analysis error:', error);
     res.status(500).json({
       success: false,
-      error: error.message || 'Analysis failed',
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -780,14 +746,7 @@ router.get('/health', (req: Request, res: Response) => {
       service: 'ML Service',
       status: 'operational',
       version: '2.0.0',
-      features: [
-        'deep_learning',
-        'risk_classification',
-        'delay_prediction',
-        'bottleneck_detection',
-        'batch_processing',
-        'model_training',
-      ],
+      features: ['deep_learning', 'risk_classification', 'delay_prediction', 'bottleneck_detection', 'batch_processing', 'model_training'],
       timestamp: new Date().toISOString(),
     },
   });
@@ -834,7 +793,7 @@ router.post('/explain', async (req: Request, res: Response) => {
     console.error('Explain error:', error);
     res.status(500).json({
       success: false,
-      error: error.message || 'Explanation failed',
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -890,7 +849,7 @@ router.post('/compare', async (req: Request, res: Response) => {
     console.error('Compare error:', error);
     res.status(500).json({
       success: false,
-      error: error.message || 'Comparison failed',
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -911,29 +870,18 @@ router.post('/optimize', async (req: Request, res: Response) => {
       });
     }
 
-    const [classification, prediction] = await Promise.all([
-      classifyProcessRiskAdvanced(process),
-      predictDelayAdvanced(process),
-    ]);
+    const [classification, prediction] = await Promise.all([classifyProcessRiskAdvanced(process), predictDelayAdvanced(process)]);
 
     // Generate optimization plan
     const optimizationPlan = {
       priority: classification.risk === 'high' ? 'urgent' : classification.risk === 'medium' ? 'high' : 'normal',
-      actions: [
-        ...classification.recommendations,
-        ...prediction.risks.flatMap(r => r.mitigation),
-      ],
+      actions: [...classification.recommendations, ...prediction.risks.flatMap(r => r.mitigation)],
       quickWins: [
         prediction.bottlenecks.length > 0 ? `حل ${prediction.bottlenecks.length} اختناقات محددة` : null,
         classification.features.criticalSteps > 0 ? `تسريع ${classification.features.criticalSteps} موافقات` : null,
         classification.features.velocity < 1 ? 'زيادة سرعة التنفيذ' : null,
       ].filter(Boolean),
-      longTerm: [
-        'تحسين عمليات الموافقات',
-        'أتمتة المهام المتكررة',
-        'بناء قاعدة معرفة',
-        'تدريب الفريق',
-      ],
+      longTerm: ['تحسين عمليات الموافقات', 'أتمتة المهام المتكررة', 'بناء قاعدة معرفة', 'تدريب الفريق'],
       estimatedImpact: {
         timeReduction: `${Math.round(prediction.delayProbability * 30)}%`,
         riskReduction: classification.risk === 'high' ? 'high' : 'medium',
@@ -950,7 +898,7 @@ router.post('/optimize', async (req: Request, res: Response) => {
     console.error('Optimization error:', error);
     res.status(500).json({
       success: false,
-      error: error.message || 'Optimization failed',
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -969,16 +917,13 @@ router.get('/export/feedback/csv', async (req: Request, res: Response) => {
     const csv = await exportFeedbackCSV(start, end);
 
     res.setHeader('Content-Type', 'text/csv');
-    res.setHeader(
-      'Content-Disposition',
-      `attachment; filename=ml-feedback-${new Date().toISOString().split('T')[0]}.csv`
-    );
+    res.setHeader('Content-Disposition', `attachment; filename=ml-feedback-${new Date().toISOString().split('T')[0]}.csv`);
     res.send(csv);
   } catch (error: any) {
     console.error('Export feedback error:', error);
     res.status(500).json({
       success: false,
-      error: error.message || 'Export failed',
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -997,16 +942,13 @@ router.get('/export/drift/csv', async (req: Request, res: Response) => {
     const csv = await exportDriftEventsCSV(start, end);
 
     res.setHeader('Content-Type', 'text/csv');
-    res.setHeader(
-      'Content-Disposition',
-      `attachment; filename=ml-drift-events-${new Date().toISOString().split('T')[0]}.csv`
-    );
+    res.setHeader('Content-Disposition', `attachment; filename=ml-drift-events-${new Date().toISOString().split('T')[0]}.csv`);
     res.send(csv);
   } catch (error: any) {
     console.error('Export drift error:', error);
     res.status(500).json({
       success: false,
-      error: error.message || 'Export failed',
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -1026,16 +968,13 @@ router.get('/export/alerts/csv', async (req: Request, res: Response) => {
     const csv = await exportAlertsCSV(sev, src, unr);
 
     res.setHeader('Content-Type', 'text/csv');
-    res.setHeader(
-      'Content-Disposition',
-      `attachment; filename=ml-alerts-${new Date().toISOString().split('T')[0]}.csv`
-    );
+    res.setHeader('Content-Disposition', `attachment; filename=ml-alerts-${new Date().toISOString().split('T')[0]}.csv`);
     res.send(csv);
   } catch (error: any) {
     console.error('Export alerts error:', error);
     res.status(500).json({
       success: false,
-      error: error.message || 'Export failed',
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -1048,10 +987,7 @@ router.get('/export/alerts/csv', async (req: Request, res: Response) => {
 router.get('/export/report/pdf', async (req: Request, res: Response) => {
   try {
     // Get latest metrics, drift status, and alerts
-    const feedbackRecords = await MLFeedback.find()
-      .sort({ createdAt: -1 })
-      .limit(1000)
-      .lean();
+    const feedbackRecords = await MLFeedback.find().sort({ createdAt: -1 }).limit(1000).lean();
 
     const metrics = feedbackRecords.length
       ? mlService.calculateDetailedMetricsFromRecords(
@@ -1060,14 +996,11 @@ router.get('/export/report/pdf', async (req: Request, res: Response) => {
             actual: record.actual,
             timestamp: record.createdAt?.toISOString?.() || new Date().toISOString(),
             processId: record.processId,
-          }))
+          })),
         )
       : mlService.getModelMetrics();
 
-    const driftEvents = await MLDriftEvent.find()
-      .sort({ createdAt: -1 })
-      .limit(1)
-      .lean();
+    const driftEvents = await MLDriftEvent.find().sort({ createdAt: -1 }).limit(1).lean();
 
     const driftStatus = driftEvents.length > 0 ? driftEvents[0] : { status: 'stable' };
 
@@ -1078,7 +1011,7 @@ router.get('/export/report/pdf', async (req: Request, res: Response) => {
     console.error('Export PDF error:', error);
     res.status(500).json({
       success: false,
-      error: error.message || 'Export failed',
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -1091,10 +1024,7 @@ router.get('/export/report/pdf', async (req: Request, res: Response) => {
 router.get('/export/report/excel', async (req: Request, res: Response) => {
   try {
     // Get data for all sheets
-    const feedbackRecords = await MLFeedback.find()
-      .sort({ createdAt: -1 })
-      .limit(1000)
-      .lean();
+    const feedbackRecords = await MLFeedback.find().sort({ createdAt: -1 }).limit(1000).lean();
 
     const metrics = feedbackRecords.length
       ? mlService.calculateDetailedMetricsFromRecords(
@@ -1103,7 +1033,7 @@ router.get('/export/report/excel', async (req: Request, res: Response) => {
             actual: record.actual,
             timestamp: record.createdAt?.toISOString?.() || new Date().toISOString(),
             processId: record.processId,
-          }))
+          })),
         )
       : mlService.getModelMetrics();
 
@@ -1118,7 +1048,7 @@ router.get('/export/report/excel', async (req: Request, res: Response) => {
     console.error('Export Excel error:', error);
     res.status(500).json({
       success: false,
-      error: error.message || 'Export failed',
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -1146,7 +1076,7 @@ router.get('/aggregation/alerts', async (req: Request, res: Response) => {
     console.error('Aggregation error:', error);
     res.status(500).json({
       success: false,
-      error: error.message || 'Aggregation failed',
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -1172,7 +1102,7 @@ router.get('/patterns', async (req: Request, res: Response) => {
     console.error('Pattern detection error:', error);
     res.status(500).json({
       success: false,
-      error: error.message || 'Pattern detection failed',
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -1202,7 +1132,7 @@ router.get('/performance/compare', async (req: Request, res: Response) => {
     console.error('Performance comparison error:', error);
     res.status(500).json({
       success: false,
-      error: error.message || 'Comparison failed',
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -1228,7 +1158,7 @@ router.get('/summary', async (req: Request, res: Response) => {
     console.error('Summary generation error:', error);
     res.status(500).json({
       success: false,
-      error: error.message || 'Summary generation failed',
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -1251,7 +1181,7 @@ router.get('/retraining/status', async (req: Request, res: Response) => {
     console.error('Retraining status error:', error);
     res.status(500).json({
       success: false,
-      error: error.message || 'Failed to get status',
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -1275,7 +1205,7 @@ router.post('/retraining/check', async (req: Request, res: Response) => {
     console.error('Retraining check error:', error);
     res.status(500).json({
       success: false,
-      error: error.message || 'Check failed',
+      error: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -1299,7 +1229,7 @@ router.post('/retraining/execute', async (req: Request, res: Response) => {
     console.error('Retraining execution error:', error);
     res.status(500).json({
       success: false,
-      error: error.message || 'Retraining failed',
+      error: 'حدث خطأ في الخادم',
     });
   }
 });

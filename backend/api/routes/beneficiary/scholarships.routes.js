@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * scholarships.routes.js - Scholarship Management API Routes
  * Handles scholarship applications, approvals, and disbursements
@@ -10,8 +11,8 @@ const router = express.Router();
 const ScholarshipService = require('../../../services/BeneficiaryManagement/ScholarshipService');
 
 // Middleware
-const authenticate = (req, res, next) => {
-  // TODO: Implement JWT authentication
+const authenticate = (_req, _res, next) => {
+  // @todo [P1] Replace with real JWT auth middleware from middleware/auth.middleware.js
   next();
 };
 
@@ -41,20 +42,19 @@ router.post('/apply', authenticate, async (req, res) => {
         status: 'error',
         message: 'beneficiaryId is required',
         data: null,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
     }
 
     const result = await scholarshipService.applyForScholarship(beneficiaryId, req.body);
     const statusCode = result.status === 'success' ? 201 : 400;
     return res.status(statusCode).json(result);
-
   } catch (error) {
     return res.status(500).json({
       status: 'error',
-      message: error.message,
+      message: 'حدث خطأ داخلي',
       data: null,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 });
@@ -75,20 +75,19 @@ router.put('/:applicationId/approve', authenticate, async (req, res) => {
         status: 'error',
         message: 'applicationId is required',
         data: null,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
     }
 
     const result = await scholarshipService.approveScholarship(applicationId, req.body);
     const statusCode = result.status === 'success' ? 200 : 400;
     return res.status(statusCode).json(result);
-
   } catch (error) {
     return res.status(500).json({
       status: 'error',
-      message: error.message,
+      message: 'حدث خطأ داخلي',
       data: null,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 });
@@ -109,20 +108,19 @@ router.post('/:applicationId/process-payment', authenticate, async (req, res) =>
         status: 'error',
         message: 'applicationId is required',
         data: null,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
     }
 
     const result = await scholarshipService.processScholarshipPayment(applicationId, req.body);
     const statusCode = result.status === 'success' ? 201 : 400;
     return res.status(statusCode).json(result);
-
   } catch (error) {
     return res.status(500).json({
       status: 'error',
-      message: error.message,
+      message: 'حدث خطأ داخلي',
       data: null,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 });
@@ -142,20 +140,19 @@ router.get('/:applicationId/performance', authenticate, async (req, res) => {
         status: 'error',
         message: 'applicationId is required',
         data: null,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
     }
 
     const result = await scholarshipService.monitorScholarshipPerformance(applicationId);
     const statusCode = result.status === 'success' ? 200 : 404;
     return res.status(statusCode).json(result);
-
   } catch (error) {
     return res.status(500).json({
       status: 'error',
-      message: error.message,
+      message: 'حدث خطأ داخلي',
       data: null,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 });
@@ -170,13 +167,12 @@ router.get('/statistics', authenticate, async (req, res) => {
     const result = await scholarshipService.getScholarshipStatistics();
     const statusCode = result.status === 'success' ? 200 : 400;
     return res.status(statusCode).json(result);
-
   } catch (error) {
     return res.status(500).json({
       status: 'error',
-      message: error.message,
+      message: 'حدث خطأ داخلي',
       data: null,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 });
@@ -191,7 +187,7 @@ router.get('/health', (req, res) => {
     status: 'success',
     message: 'Scholarship service is healthy',
     service: 'ScholarshipService',
-    timestamp: new Date()
+    timestamp: new Date(),
   });
 });
 

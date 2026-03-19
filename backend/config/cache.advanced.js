@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Advanced Caching Strategy - استراتيجية التخزين المؤقت المتقدمة
  *
@@ -10,6 +11,7 @@
 
 const Redis = require('ioredis');
 const NodeCache = require('node-cache');
+const logger = require('../utils/logger');
 
 // ============================================================================
 // CONFIGURATION
@@ -81,16 +83,16 @@ class CacheManager {
       this.redisCache = new Redis(CACHE_CONFIG.redis);
 
       this.redisCache.on('connect', () => {
-        console.log('✅ Redis Cache Connected');
+        // console.log('✅ Redis Cache Connected');
         this.redisConnected = true;
       });
 
       this.redisCache.on('error', err => {
-        console.error('❌ Redis Cache Error:', err.message);
+        logger.error('Redis Cache Error:', { error: err.message });
         this.redisConnected = false;
       });
     } catch (error) {
-      console.error('❌ Failed to initialize Redis:', error.message);
+      logger.error('Failed to initialize Redis:', { error: error.message });
       this.redisConnected = false;
     }
   }
@@ -130,7 +132,7 @@ class CacheManager {
       this.stats.misses++;
       return null;
     } catch (error) {
-      console.error(`Cache GET error for key ${key}:`, error.message);
+      logger.error(`Cache GET error for key ${key}:`, { error: error.message });
       this.stats.misses++;
       return null;
     }
@@ -154,7 +156,7 @@ class CacheManager {
       this.stats.sets++;
       return true;
     } catch (error) {
-      console.error(`Cache SET error for key ${key}:`, error.message);
+      logger.error(`Cache SET error for key ${key}:`, { error: error.message });
       return false;
     }
   }
@@ -175,7 +177,7 @@ class CacheManager {
       this.stats.deletes++;
       return true;
     } catch (error) {
-      console.error(`Cache DELETE error for key ${key}:`, error.message);
+      logger.error(`Cache DELETE error for key ${key}:`, { error: error.message });
       return false;
     }
   }
@@ -216,10 +218,10 @@ class CacheManager {
         await new Promise(resolve => stream.on('end', resolve));
       }
 
-      console.log(`🗑️ Invalidated ${deletedCount} keys matching pattern: ${pattern}`);
+      // console.log(`🗑️ Invalidated ${deletedCount} keys matching pattern: ${pattern}`);
       return deletedCount;
     } catch (error) {
-      console.error(`Cache INVALIDATE error for pattern ${pattern}:`, error.message);
+      logger.error(`Cache INVALIDATE error for pattern ${pattern}:`, error.message);
       return 0;
     }
   }
@@ -231,7 +233,7 @@ class CacheManager {
     const { ttl = CACHE_CONFIG.ttl.api, batchSize = 10 } = options;
 
     try {
-      console.log(`🔥 Cache warming started for ${keys.length} keys...`);
+      // console.log(`🔥 Cache warming started for ${keys.length} keys...`);
       let warmedCount = 0;
 
       // Process in batches
@@ -247,16 +249,16 @@ class CacheManager {
                 warmedCount++;
               }
             } catch (err) {
-              console.error(`Failed to warm cache for key ${key}:`, err.message);
+              logger.error(`Failed to warm cache for key ${key}:`, err.message);
             }
           })
         );
       }
 
-      console.log(`✅ Cache warming completed: ${warmedCount}/${keys.length} keys`);
+      // console.log(`✅ Cache warming completed: ${warmedCount}/${keys.length} keys`);
       return warmedCount;
     } catch (error) {
-      console.error('Cache WARM error:', error.message);
+      logger.error('Cache WARM error:', error.message);
       return 0;
     }
   }
@@ -301,10 +303,10 @@ class CacheManager {
         await this.redisCache.flushdb();
       }
 
-      console.log('🗑️ All caches flushed');
+      // console.log('🗑️ All caches flushed');
       return true;
     } catch (error) {
-      console.error('Cache FLUSH error:', error.message);
+      logger.error('Cache FLUSH error:', error.message);
       return false;
     }
   }
@@ -350,7 +352,7 @@ function cacheMiddleware(options = {}) {
       const originalJson = res.json.bind(res);
       res.json = data => {
         // Cache the response
-        cacheManager.set(cacheKey, data, ttl).catch(console.error);
+        cacheManager.set(cacheKey, data, ttl).catch(err => logger.error('Cache set error:', err));
 
         // Send response
         return originalJson(data);
@@ -358,7 +360,7 @@ function cacheMiddleware(options = {}) {
 
       next();
     } catch (error) {
-      console.error('Cache middleware error:', error.message);
+      logger.error('Cache middleware error:', error.message);
       next();
     }
   };

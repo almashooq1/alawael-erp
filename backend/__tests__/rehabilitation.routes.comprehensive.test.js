@@ -1,4 +1,9 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 const express = require('express');
+
+
+
 const request = require('supertest');
 
 // MOCKS
@@ -18,6 +23,31 @@ jest.mock('../utils/errorHandler', () => ({
 
 const rehabilitationRoutes = require('../routes/rehabilitation.routes');
 
+
+// === Global RBAC Mock ===
+jest.mock('../rbac', () => ({
+  createRBACMiddleware: () => (req, res, next) => next(),
+  checkPermission: () => (req, res, next) => next(),
+  RBAC_ROLES: {},
+  RBAC_PERMISSIONS: {},
+}));
+// === Global Auth Mock ===
+jest.mock('../middleware/auth', () => ({
+  authenticateToken: (req, res, next) => { req.user = { id: 'user123', name: 'Test User', role: 'admin', permissions: ['*'] }; next(); },
+  requireAdmin: (req, res, next) => next(),
+  requireAuth: (req, res, next) => { req.user = { id: 'user123', name: 'Test User', role: 'admin', permissions: ['*'] }; next(); },
+  requireRole: (...roles) => (req, res, next) => next(),
+  optionalAuth: (req, res, next) => next(),
+  protect: (req, res, next) => { req.user = { id: 'user123', name: 'Test User', role: 'admin', permissions: ['*'] }; next(); },
+  authorize: (...roles) => (req, res, next) => next(),
+  authorizeRole: (...roles) => (req, res, next) => next(),
+  authenticate: (req, res, next) => { req.user = { id: 'user123', name: 'Test User', role: 'admin', permissions: ['*'] }; next(); },
+}));
+
+jest.mock('../middleware/auth.middleware', () => ({
+  authenticateToken: (req, res, next) => { req.user = { id: 'user123', name: 'Test User', role: 'admin', permissions: ['*'] }; next(); },
+  requireRole: (...roles) => (req, res, next) => next(),
+}));
 describe('Rehabilitation Routes Comprehensive Tests', () => {
   let app;
 
@@ -27,7 +57,7 @@ describe('Rehabilitation Routes Comprehensive Tests', () => {
     app.use(express.json());
     app.use('/api/rehabilitation', rehabilitationRoutes);
 
-    app.use((err, req, res, next) => {
+    app.use((err, _req, res, _next) => {
       res.status(500).json({ success: false, error: err.message });
     });
   });

@@ -1,7 +1,8 @@
+/* eslint-disable no-unused-vars */
 /**
  * Advanced GOSI Notification Service
  * خدمة الإشعارات الذكية المتقدمة
- * 
+ *
  * Features:
  * - Multi-channel notifications (Email, SMS, Push, In-app)
  * - Smart scheduling
@@ -28,8 +29,8 @@ class GOSINotificationService extends EventEmitter {
       secure: false,
       auth: {
         user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS
-      }
+        pass: process.env.SMTP_PASS,
+      },
     });
 
     // Notification templates
@@ -39,7 +40,7 @@ class GOSINotificationService extends EventEmitter {
       compliance_issue_alert: this._getTemplateComplianceAlert(),
       salary_update_confirmation: this._getTemplateSalaryUpdate(),
       document_expiry_reminder: this._getTemplateDocumentReminder(),
-      compliance_report_ready: this._getTemplateReportReady()
+      compliance_report_ready: this._getTemplateReportReady(),
     };
   }
 
@@ -57,7 +58,7 @@ class GOSINotificationService extends EventEmitter {
         subject,
         message,
         actionUrl,
-        scheduleTime = null
+        scheduleTime = null,
       } = notificationData;
 
       // Validate recipient
@@ -85,7 +86,7 @@ class GOSINotificationService extends EventEmitter {
         createdAt: new Date(),
         scheduledFor: scheduleTime,
         sentAt: null,
-        readAt: null
+        readAt: null,
       };
 
       // Save to database
@@ -120,7 +121,7 @@ class GOSINotificationService extends EventEmitter {
           const result = await this.sendNotification(recipient, notificationData);
           results.push({ recipient: recipient._id, ...result });
         } catch (error) {
-          results.push({ recipient: recipient._id, error: error.message });
+          results.push({ recipient: recipient._id, error: 'حدث خطأ داخلي' });
         }
       }
 
@@ -147,8 +148,8 @@ class GOSINotificationService extends EventEmitter {
         salary: gosiData.salary,
         startDate: gosiData.startDate,
         employerContribution: gosiData.employerContribution,
-        employeeContribution: gosiData.employeeContribution
-      }
+        employeeContribution: gosiData.employeeContribution,
+      },
     });
   }
 
@@ -166,9 +167,9 @@ class GOSINotificationService extends EventEmitter {
         policyNumber: insuranceData.policyNumber,
         expiryDate: insuranceData.expiryDate,
         daysRemaining: insuranceData.daysRemaining,
-        renewalInstructions: 'يرجى التواصل مع قسم الموارد البشرية'
+        renewalInstructions: 'يرجى التواصل مع قسم الموارد البشرية',
       },
-      actionUrl: '/insurance/renew'
+      actionUrl: '/insurance/renew',
     });
   }
 
@@ -186,9 +187,9 @@ class GOSINotificationService extends EventEmitter {
         issue: issueData.issue,
         severity: issueData.severity,
         action: issueData.action,
-        deadline: issueData.deadline
+        deadline: issueData.deadline,
       },
-      actionUrl: '/compliance/details'
+      actionUrl: '/compliance/details',
     });
   }
 
@@ -206,9 +207,9 @@ class GOSINotificationService extends EventEmitter {
         previousSalary: salaryData.previousSalary,
         newSalary: salaryData.newSalary,
         effectiveDate: salaryData.effectiveDate,
-        increase: salaryData.newSalary - salaryData.previousSalary
+        increase: salaryData.newSalary - salaryData.previousSalary,
       },
-      actionUrl: '/payroll/details'
+      actionUrl: '/payroll/details',
     });
   }
 
@@ -223,7 +224,7 @@ class GOSINotificationService extends EventEmitter {
         offset = 0,
         status = null, // null, 'read', 'unread'
         types = null,
-        sorted = 'desc'
+        sorted = 'desc',
       } = filters;
 
       // This would normally query the database
@@ -240,7 +241,7 @@ class GOSINotificationService extends EventEmitter {
           channels: ['email', 'in-app'],
           readAt: null,
           createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
-          actionUrl: '/insurance/details'
+          actionUrl: '/insurance/details',
         },
         {
           id: 'notif002',
@@ -253,8 +254,8 @@ class GOSINotificationService extends EventEmitter {
           channels: ['email', 'sms'],
           readAt: null,
           createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
-          actionUrl: '/insurance/renew'
-        }
+          actionUrl: '/insurance/renew',
+        },
       ];
 
       // Apply filters
@@ -282,7 +283,7 @@ class GOSINotificationService extends EventEmitter {
         total: filtered.length,
         limit,
         offset,
-        notifications: paginated
+        notifications: paginated,
       };
     } catch (error) {
       logger.error('Failed to get notifications', error);
@@ -299,7 +300,7 @@ class GOSINotificationService extends EventEmitter {
       // Update database
       await this._updateNotification(notificationId, {
         status: 'read',
-        readAt: new Date()
+        readAt: new Date(),
       });
 
       logger.info(`Notification marked as read: ${notificationId}`);
@@ -315,33 +316,28 @@ class GOSINotificationService extends EventEmitter {
    * الحصول على إحصائيات الإشعارات
    */
   async getNotificationStats(userId) {
-    try {
-      return {
-        total: 45,
-        unread: 8,
-        byType: {
-          'gosi_registration_confirmation': 5,
-          'medical_insurance_expiry_warning': 8,
-          'compliance_issue_alert': 12,
-          'salary_update_confirmation': 15,
-          'document_expiry_reminder': 5
-        },
-        byChannel: {
-          'email': 35,
-          'sms': 8,
-          'push': 15,
-          'in-app': 45
-        },
-        byPriority: {
-          'critical': 2,
-          'high': 15,
-          'normal': 28
-        }
-      };
-    } catch (error) {
-      logger.error('Failed to get notification statistics', error);
-      throw error;
-    }
+    return {
+      total: 45,
+      unread: 8,
+      byType: {
+        gosi_registration_confirmation: 5,
+        medical_insurance_expiry_warning: 8,
+        compliance_issue_alert: 12,
+        salary_update_confirmation: 15,
+        document_expiry_reminder: 5,
+      },
+      byChannel: {
+        email: 35,
+        sms: 8,
+        push: 15,
+        'in-app': 45,
+      },
+      byPriority: {
+        critical: 2,
+        high: 15,
+        normal: 28,
+      },
+    };
   }
 
   /**
@@ -391,7 +387,7 @@ class GOSINotificationService extends EventEmitter {
       to: recipient.email,
       subject: notification.subject,
       html: this._generateEmailHTML(notification),
-      text: notification.message
+      text: notification.message,
     };
 
     await this.emailService.sendMail(mailOptions);
@@ -439,9 +435,9 @@ class GOSINotificationService extends EventEmitter {
       quietHours: {
         enabled: false,
         start: '22:00',
-        end: '08:00'
+        end: '08:00',
       },
-      disabledNotificationTypes: []
+      disabledNotificationTypes: [],
     };
   }
 
@@ -454,10 +450,12 @@ class GOSINotificationService extends EventEmitter {
     if (preferences.quietHours?.enabled) {
       const now = new Date();
       const currentTime = now.getHours() * 60 + now.getMinutes();
-      const startTime = parseInt(preferences.quietHours.start.split(':')[0]) * 60 +
-                       parseInt(preferences.quietHours.start.split(':')[1]);
-      const endTime = parseInt(preferences.quietHours.end.split(':')[0]) * 60 +
-                     parseInt(preferences.quietHours.end.split(':')[1]);
+      const startTime =
+        parseInt(preferences.quietHours.start.split(':')[0]) * 60 +
+        parseInt(preferences.quietHours.start.split(':')[1]);
+      const endTime =
+        parseInt(preferences.quietHours.end.split(':')[0]) * 60 +
+        parseInt(preferences.quietHours.end.split(':')[1]);
 
       if (currentTime >= startTime && currentTime <= endTime) {
         return false;
@@ -473,12 +471,12 @@ class GOSINotificationService extends EventEmitter {
 
   _getSubject(type) {
     const subjects = {
-      'gosi_registration_confirmation': '✅ تم تسجيلك في التأمينات الاجتماعية',
-      'medical_insurance_expiry_warning': '⚠️ تحذير: التأمين الطبي ينتهي قريباً',
-      'compliance_issue_alert': '🚨 تنبيه امتثال',
-      'salary_update_confirmation': '💰 تم تحديث راتبك',
-      'document_expiry_reminder': '📄 تذكير: وثيقة تنتهي صلاحيتها',
-      'compliance_report_ready': '📊 تقرير الامتثال جاهز للعرض'
+      gosi_registration_confirmation: '✅ تم تسجيلك في التأمينات الاجتماعية',
+      medical_insurance_expiry_warning: '⚠️ تحذير: التأمين الطبي ينتهي قريباً',
+      compliance_issue_alert: '🚨 تنبيه امتثال',
+      salary_update_confirmation: '💰 تم تحديث راتبك',
+      document_expiry_reminder: '📄 تذكير: وثيقة تنتهي صلاحيتها',
+      compliance_report_ready: '📊 تقرير الامتثال جاهز للعرض',
     };
     return subjects[type] || 'إشعار جديد';
   }

@@ -1,8 +1,9 @@
+/* eslint-disable no-unused-vars */
 /**
  * ===================================================================
  * SMART INVOICE SERVICE - خدمة الفوترة الذكية
  * ===================================================================
- * 
+ *
  * خدمة شاملة تتعامل مع:
  * - إنشاء وتحديث الفواتير
  * - معالجة المدفوعات
@@ -90,12 +91,7 @@ class SmartInvoiceService {
 
       // تسجيل سجل التدقيق
       const changes = this._detectChanges(previousData, invoice.toObject());
-      await this.addAuditTrail(
-        invoice._id,
-        'UPDATE',
-        userId,
-        changes
-      );
+      await this.addAuditTrail(invoice._id, 'UPDATE', userId, changes);
 
       logger.info(`تم تحديث الفاتورة: ${invoice.invoiceNumber}`);
 
@@ -154,10 +150,7 @@ class SmartInvoiceService {
         sortOrder = -1,
       } = filters;
 
-      const {
-        page = 1,
-        limit = 20,
-      } = pagination;
+      const { page = 1, limit = 20 } = pagination;
 
       // بناء كائن البحث
       const query = {};
@@ -227,12 +220,7 @@ class SmartInvoiceService {
         throw new Error('الفاتورة غير موجودة');
       }
 
-      const {
-        amount,
-        method,
-        reference,
-        discount = 0,
-      } = paymentData;
+      const { amount, method, reference, discount = 0 } = paymentData;
 
       // التحقق من المبلغ
       if (amount <= 0) {
@@ -376,9 +364,7 @@ class SmartInvoiceService {
    */
   async getAlmostOverdueInvoices(daysThreshold = 3) {
     try {
-      const almostOverdueInvoices = await SmartInvoice.findAlmostOverdue(
-        daysThreshold
-      );
+      const almostOverdueInvoices = await SmartInvoice.findAlmostOverdue(daysThreshold);
 
       return {
         success: true,
@@ -451,7 +437,7 @@ class SmartInvoiceService {
       const customerRiskLevel = invoice.customer.riskLevel;
 
       let confidence = 0.5;
-      let predictedPaymentDays = daysUntilDue;
+      const predictedPaymentDays = daysUntilDue;
       let riskScore = 0;
 
       // تحسين التنبؤ بناءً على البيانات التاريخية
@@ -503,39 +489,27 @@ class SmartInvoiceService {
 
       // توصيات بناءً على حالة الفاتورة
       if (invoice.isOverdue) {
-        recommendations.push(
-          'الفاتورة متأخرة - يُنصح بإرسال تنبيه فوري للعميل'
-        );
-        recommendations.push(
-          'فكر في تطبيق رسوم التأخير حسب شروط الدفع'
-        );
+        recommendations.push('الفاتورة متأخرة - يُنصح بإرسال تنبيه فوري للعميل');
+        recommendations.push('فكر في تطبيق رسوم التأخير حسب شروط الدفع');
       }
 
       if (invoice.daysUntilDue <= 3 && invoice.daysUntilDue > 0) {
-        recommendations.push(
-          'الفاتورة قريبة من الاستحقاق - يُنصح بإرسال تذكير ودي'
-        );
+        recommendations.push('الفاتورة قريبة من الاستحقاق - يُنصح بإرسال تذكير ودي');
       }
 
       // توصيات بناءً على حالة العميل
       if (invoice.customer.riskLevel === 'high') {
-        recommendations.push(
-          'هذا العميل له مستوى خطر عالي - يُنصح بمتابعة دقيقة'
-        );
+        recommendations.push('هذا العميل له مستوى خطر عالي - يُنصح بمتابعة دقيقة');
       }
 
       // توصيات بناءً على نسبة الدفع
       if (invoice.paymentPercentage >= 50 && invoice.paymentPercentage < 100) {
-        recommendations.push(
-          'الفاتورة لديها دفعة جزئية - يُنصح بمتابعة الرصيد المتبقي'
-        );
+        recommendations.push('الفاتورة لديها دفعة جزئية - يُنصح بمتابعة الرصيد المتبقي');
       }
 
       // توصيات مالية
       if (invoice.totalAmount < 1000) {
-        recommendations.push(
-          'الفاتورة صغيرة - فكر في دمج عدة فواتير صغيرة معاً'
-        );
+        recommendations.push('الفاتورة صغيرة - فكر في دمج عدة فواتير صغيرة معاً');
       }
 
       invoice.smartData.aiRecommendations = recommendations;
@@ -630,10 +604,7 @@ class SmartInvoiceService {
     const changes = {};
 
     Object.keys(currentData).forEach(key => {
-      if (
-        JSON.stringify(previousData[key]) !==
-        JSON.stringify(currentData[key])
-      ) {
+      if (JSON.stringify(previousData[key]) !== JSON.stringify(currentData[key])) {
         changes[key] = {
           old: previousData[key],
           new: currentData[key],
@@ -651,8 +622,7 @@ class SmartInvoiceService {
     try {
       const invoices = await SmartInvoice.find(filters);
 
-      let csv =
-        'رقم الفاتورة,اسم العميل,المبلغ,الحالة,تاريخ الاستحقاق,المبلغ المدفوع\n';
+      let csv = 'رقم الفاتورة,اسم العميل,المبلغ,الحالة,تاريخ الاستحقاق,المبلغ المدفوع\n';
 
       invoices.forEach(invoice => {
         csv += `"${invoice.invoiceNumber}","${invoice.customer.name}","${invoice.totalAmount}","${invoice.status}","${invoice.dueDate.toLocaleDateString('ar-SA')}","${invoice.paidAmount}"\n`;

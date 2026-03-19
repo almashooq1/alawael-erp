@@ -1,8 +1,10 @@
+/* eslint-disable no-undef, no-unused-vars */
 /**
  * 🔗 Advanced Integration Testing Suite
  * مجموعة اختبارات التكامل المتقدمة
  */
 
+/* eslint-disable no-undef */
 const request = require('supertest');
 
 // ============================================

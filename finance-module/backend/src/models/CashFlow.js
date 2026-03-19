@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Cash Flow Model
  * Manages financial flows (inflows, outflows, forecasts, reserves)

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * PortalMessage Model
  * نموذج الرسائل في بوابة المستفيد/ولي الأمر
@@ -278,9 +279,8 @@ PortalMessageSchema.methods.softDelete = async function () {
 };
 
 // Middleware
-PortalMessageSchema.pre('save', function (next) {
+PortalMessageSchema.pre('save', function () {
   this.updatedAt = new Date();
-  next();
 });
 
 module.exports = mongoose.model('PortalMessage', PortalMessageSchema);

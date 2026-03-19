@@ -1,11 +1,11 @@
+/* eslint-disable no-undef, no-unused-vars */
 const mongoose = require('mongoose');
 
 // Use mock DB for testing with mocked models
 process.env.NODE_ENV = 'test';
 process.env.USE_MOCK_DB = 'true';
 
-const ProjectManagementServiceClass = require('../services/projectManagementService');
-const projectService = new ProjectManagementServiceClass();
+const projectService = require('../services/projectManagementService');
 
 describe('Phase 4: Project Management Service', () => {
   let mockProjectId;

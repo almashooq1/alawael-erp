@@ -1,0 +1,211 @@
+# Default values for ALAWAEL Quality Dashboard Helm Chart
+
+# Namespace
+namespace: alawael
+
+# Global settings
+global:
+  environment: production
+  domain: alawael.example.com
+  tls:
+    enabled: true
+    issuer: letsencrypt-prod
+
+# Backend Configuration
+backend:
+  enabled: true
+  replicaCount: 3
+
+  image:
+    repository: alawael-backend
+    tag: latest
+    pullPolicy: IfNotPresent
+
+  port: 3001
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+
+  config:
+    nodeEnv: production
+    logLevel: info
+    logToFile: true
+    cacheEnabled: true
+    rateLimitWindowMs: 900000
+    rateLimitMaxRequests: 100
+
+  persistence:
+    enabled: true
+    data:
+      storageClass: standard
+      size: 5Gi
+    logs:
+      storageClass: standard
+      size: 2Gi
+
+# Frontend Configuration
+frontend:
+  enabled: true
+  replicaCount: 2
+
+  image:
+    repository: alawael-frontend
+    tag: latest
+    pullPolicy: IfNotPresent
+
+  port: 80
+
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 300m
+      memory: 256Mi
+
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 75
+
+# PostgreSQL Configuration
+postgres:
+  enabled: true
+
+  image:
+    repository: postgres
+    tag: 16-alpine
+
+  auth:
+    username: alawael
+    password: alawael_change_me
+    database: alawael
+
+  persistence:
+    enabled: true
+    storageClass: standard
+    size: 10Gi
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
+
+# Redis Configuration
+redis:
+  enabled: true
+
+  image:
+    repository: redis
+    tag: 7-alpine
+
+  persistence:
+    enabled: true
+    storageClass: standard
+    size: 2Gi
+
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 300m
+      memory: 512Mi
+
+# Prometheus Configuration
+prometheus:
+  enabled: true
+
+  image:
+    repository: prom/prometheus
+    tag: latest
+
+  retention: 15d
+
+  persistence:
+    enabled: true
+    storageClass: standard
+    size: 10Gi
+
+# Grafana Configuration
+grafana:
+  enabled: true
+
+  image:
+    repository: grafana/grafana
+    tag: latest
+
+  adminPassword: admin_change_me
+
+  persistence:
+    enabled: true
+    storageClass: standard
+    size: 1Gi
+
+# Service Configuration
+service:
+  frontend:
+    type: LoadBalancer
+    port: 80
+  backend:
+    type: ClusterIP
+    port: 3001
+
+# Ingress Configuration
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/proxy-body-size: 100m
+
+# Security & RBAC
+rbac:
+  enabled: true
+
+# Network Policies
+networkPolicy:
+  enabled: true
+
+# Pod Disruption Budgets
+podDisruptionBudget:
+  enabled: true
+  backend:
+    minAvailable: 2
+  frontend:
+    minAvailable: 1
+
+# Monitoring
+monitoring:
+  enabled: true
+  interval: 30s
+  scrapeTimeout: 10s
+
+# Logging
+logging:
+  enabled: true
+  level: info
+  format: json
+
+# Backup
+backup:
+  enabled: false
+  schedule: "0 2 * * *"
+  retention: 7d

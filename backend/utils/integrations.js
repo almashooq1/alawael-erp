@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // Phase 19: Advanced Integrations & GraphQL
 // Webhook System, Third-party Connectors, GraphQL API
 
@@ -72,7 +73,7 @@ class WebhookDispatcher {
           results.push({
             webhookId,
             status: 'failed',
-            error: error.message,
+            error: 'حدث خطأ داخلي',
             willRetry: true,
           });
         }
@@ -138,7 +139,7 @@ class WebhookDispatcher {
       webhook.deliveryLog.push({
         timestamp: new Date(),
         status: 'failed',
-        error: error.message,
+        error: 'حدث خطأ داخلي',
       });
       throw error;
     }
@@ -360,7 +361,7 @@ class ThirdPartyIntegration {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
         integrationId,
       };
     }
@@ -390,7 +391,7 @@ class ThirdPartyIntegration {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
+        error: 'حدث خطأ داخلي',
         integrationId,
       };
     }
@@ -437,71 +438,71 @@ class GenericConnector {
     this.credentials = credentials;
   }
 
-  async fetch(credentials, endpoints) {
+  async fetch(_credentials, _endpoints) {
     // Generic fetch implementation
     return [];
   }
 
-  async push(credentials, data) {
+  async push(_credentials, _data) {
     return { success: true };
   }
 }
 
 class StripeConnector extends GenericConnector {
-  async fetch(credentials, endpoints) {
+  async fetch(_credentials, _endpoints) {
     // Stripe API calls
     return { customers: [], invoices: [], transactions: [] };
   }
 
-  async push(credentials, data) {
+  async push(_credentials, _data) {
     // Create invoice, charge, etc.
     return { invoiceId: 'inv_' + Date.now() };
   }
 }
 
 class SalesforceConnector extends GenericConnector {
-  async fetch(credentials, endpoints) {
+  async fetch(_credentials, _endpoints) {
     // Salesforce SOQL queries
     return { contacts: [], opportunities: [], accounts: [] };
   }
 
-  async push(credentials, data) {
+  async push(_credentials, _data) {
     // Create Salesforce records
     return { recordId: '001' + Math.random().toString().substr(2, 12) };
   }
 }
 
 class SlackConnector extends GenericConnector {
-  async fetch(credentials, endpoints) {
+  async fetch(_credentials, _endpoints) {
     // Fetch Slack messages, channels
     return { messages: [], channels: [] };
   }
 
-  async push(credentials, data) {
+  async push(_credentials, _data) {
     // Send Slack message
     return { messageTs: Date.now() / 1000 };
   }
 }
 
 class GitHubConnector extends GenericConnector {
-  async fetch(credentials, endpoints) {
+  async fetch(_credentials, _endpoints) {
     // Fetch GitHub repos, issues, PRs
     return { repositories: [], issues: [], pullRequests: [] };
   }
 
-  async push(credentials, data) {
+  async push(_credentials, _data) {
     // Create GitHub issue
     return { issueNumber: Math.floor(Math.random() * 1000) };
   }
 }
 
 class ShopifyConnector extends GenericConnector {
-  async fetch(credentials, endpoints) {
+  async fetch(_credentials, _endpoints) {
     // Fetch Shopify products, orders
     return { products: [], orders: [], customers: [] };
   }
 
-  async push(credentials, data) {
+  async push(_credentials, _data) {
     // Create Shopify order
     return { orderId: 'gid://shopify/Order/' + Date.now() };
   }
@@ -511,28 +512,34 @@ class ShopifyConnector extends GenericConnector {
 const GraphQLSchema = {
   Query: {
     tenant: (parent, { id }) => ({ id }),
-    tenants: (parent, { limit }) => [],
-    users: (parent, { tenantId, limit }) => [],
-    user: (parent, { id }) => ({ id }),
-    analytics: (parent, { tenantId, dateRange }) => ({}),
-    integrations: (parent, { tenantId }) => [],
-    webhooks: (parent, { tenantId }) => [],
+    tenants: (_parent, { limit: _limit }) => [],
+    users: (_parent, { tenantId: _tenantId, limit: _limit }) => [],
+    user: (_parent, { id }) => ({ id }),
+    analytics: (_parent, { tenantId: _tenantId, dateRange: _dateRange }) => ({}),
+    integrations: (_parent, { tenantId: _tenantId }) => [],
+    webhooks: (_parent, { tenantId: _tenantId }) => [],
   },
   Mutation: {
-    createTenant: (parent, { input }) => ({ id: 'tenant_' + Date.now() }),
-    updateTenant: (parent, { id, input }) => ({ id }),
-    addUser: (parent, { tenantId, input }) => ({ id: 'user_' + Date.now() }),
-    createWorkflow: (parent, { tenantId, input }) => ({ id: 'wf_' + Date.now() }),
-    executeWorkflow: (parent, { id }) => ({ success: true }),
-    registerIntegration: (parent, { tenantId, input }) => ({ id: 'int_' + Date.now() }),
-    registerWebhook: (parent, { tenantId, input }) => ({ id: 'wh_' + Date.now() }),
+    createTenant: (_parent, { input: _input }) => ({ id: 'tenant_' + Date.now() }),
+    updateTenant: (_parent, { id, input: _input }) => ({ id }),
+    addUser: (_parent, { tenantId: _tenantId, input: _input }) => ({ id: 'user_' + Date.now() }),
+    createWorkflow: (_parent, { tenantId: _tenantId, input: _input }) => ({
+      id: 'wf_' + Date.now(),
+    }),
+    executeWorkflow: (_parent, { id: _id }) => ({ success: true }),
+    registerIntegration: (_parent, { tenantId: _tenantId, input: _input }) => ({
+      id: 'int_' + Date.now(),
+    }),
+    registerWebhook: (_parent, { tenantId: _tenantId, input: _input }) => ({
+      id: 'wh_' + Date.now(),
+    }),
   },
   Subscription: {
     tenantCreated: {
       subscribe: () => ({}),
     },
     eventTriggered: {
-      subscribe: (parent, { tenantId }) => ({}),
+      subscribe: (_parent, { tenantId: _tenantId }) => ({}),
     },
   },
 };

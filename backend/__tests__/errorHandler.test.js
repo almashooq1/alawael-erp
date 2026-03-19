@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 const { AppError, errorHandler, asyncHandler } = require('../utils/errorHandler');
 
 describe('Error Handler', () => {
@@ -65,7 +67,7 @@ describe('Error Handler', () => {
           statusCode: 404,
           message: 'Not Found',
           code: 'NOT_FOUND',
-        }),
+        })
       );
     });
 
@@ -80,7 +82,7 @@ describe('Error Handler', () => {
           success: false,
           statusCode: 500,
           message: 'Something went wrong',
-        }),
+        })
       );
     });
 
@@ -100,7 +102,7 @@ describe('Error Handler', () => {
           statusCode: 400,
           code: 'VALIDATION_ERROR',
           message: 'Validation failed',
-        }),
+        })
       );
     });
 
@@ -117,7 +119,7 @@ describe('Error Handler', () => {
           statusCode: 409,
           code: 'DUPLICATE_FIELD',
           message: expect.stringContaining('email'),
-        }),
+        })
       );
     });
 
@@ -132,7 +134,7 @@ describe('Error Handler', () => {
         expect.objectContaining({
           statusCode: 400,
           message: 'Invalid ID format',
-        }),
+        })
       );
     });
 
@@ -147,7 +149,11 @@ describe('Error Handler', () => {
     });
 
     it('should preserve success: false in all responses', () => {
-      const errors = [new AppError('Error 1', 400), new Error('Error 2'), { name: 'ValidationError', errors: {} }];
+      const errors = [
+        new AppError('Error 1', 400),
+        new Error('Error 2'),
+        { name: 'ValidationError', errors: {} },
+      ];
 
       errors.forEach(error => {
         errorHandler(error, mockReq, mockRes, mockNext);

@@ -1,7 +1,8 @@
+/* eslint-disable no-unused-vars */
 /**
  * AL-AWAEL ERP - LEARNING & DEVELOPMENT SERVICE
  * Phase 23 - Learning & Development System
- * 
+ *
  * Features:
  * - Learning program management
  * - Training enrollment & tracking
@@ -79,7 +80,7 @@ class LearningDevelopmentService {
       this.learningPrograms.push(program);
       return program;
     } catch (error) {
-      throw new Error(`Failed to create learning program: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -91,7 +92,7 @@ class LearningDevelopmentService {
       Object.assign(program, updates, { updatedAt: new Date() });
       return program;
     } catch (error) {
-      throw new Error(`Failed to update program: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -106,7 +107,7 @@ class LearningDevelopmentService {
         ...enrollmentStats,
       };
     } catch (error) {
-      throw new Error(`Failed to retrieve program: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -128,7 +129,7 @@ class LearningDevelopmentService {
         programs: list,
       };
     } catch (error) {
-      throw new Error(`Failed to list programs: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -141,7 +142,7 @@ class LearningDevelopmentService {
       program.updatedAt = new Date();
       return program;
     } catch (error) {
-      throw new Error(`Failed to archive program: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -195,7 +196,7 @@ class LearningDevelopmentService {
 
       return enrollment;
     } catch (error) {
-      throw new Error(`Failed to enroll employee: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -222,7 +223,7 @@ class LearningDevelopmentService {
       Object.assign(enrollment, additionalData);
       return enrollment;
     } catch (error) {
-      throw new Error(`Failed to update enrollment: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -233,15 +234,16 @@ class LearningDevelopmentService {
 
       return enrollment;
     } catch (error) {
-      throw new Error(`Failed to retrieve enrollment: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
   trackMandatoryTraining(employeeId) {
     try {
       const mandatoryTraining = this.enrollments.filter(
-        e => e.employeeId === employeeId && 
-        this.learningPrograms.find(p => p.id === e.programId)?.isMandatory
+        e =>
+          e.employeeId === employeeId &&
+          this.learningPrograms.find(p => p.id === e.programId)?.isMandatory
       );
 
       const tracking = mandatoryTraining.map(t => {
@@ -249,14 +251,16 @@ class LearningDevelopmentService {
         return {
           enrollment: t,
           program: program?.name,
-          daysUntilDue: t.dueDate ? Math.ceil((new Date(t.dueDate) - new Date()) / (1000 * 60 * 60 * 24)) : null,
+          daysUntilDue: t.dueDate
+            ? Math.ceil((new Date(t.dueDate) - new Date()) / (1000 * 60 * 60 * 24))
+            : null,
           compliance: t.status === 'completed' ? 'compliant' : 'pending',
         };
       });
 
       return tracking;
     } catch (error) {
-      throw new Error(`Failed to track mandatory training: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -275,7 +279,8 @@ class LearningDevelopmentService {
       }
 
       const completionCount = enrollments.filter(e => e.status === 'completed').length;
-      const completionRate = enrollments.length > 0 ? (completionCount / enrollments.length) * 100 : 0;
+      const completionRate =
+        enrollments.length > 0 ? (completionCount / enrollments.length) * 100 : 0;
 
       const byProgram = {};
       this.learningPrograms.forEach(prog => {
@@ -295,7 +300,7 @@ class LearningDevelopmentService {
         byProgram,
       };
     } catch (error) {
-      throw new Error(`Failed to calculate completion rates: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -309,15 +314,19 @@ class LearningDevelopmentService {
           program: program?.name,
           enrollmentStatus: enrollment.status,
           score: enrollment.assessmentScore,
-          scorePercentage: enrollment.assessmentScore ? (enrollment.assessmentScore / 100) * 100 : 0,
+          scorePercentage: enrollment.assessmentScore
+            ? (enrollment.assessmentScore / 100) * 100
+            : 0,
           grade: this._getGrade(enrollment.assessmentScore),
           completedAt: enrollment.completedAt,
         };
       });
 
-      const averageScore = scores.filter(s => s.score).length > 0
-        ? scores.filter(s => s.score).reduce((sum, s) => sum + s.score, 0) / scores.filter(s => s.score).length
-        : 0;
+      const averageScore =
+        scores.filter(s => s.score).length > 0
+          ? scores.filter(s => s.score).reduce((sum, s) => sum + s.score, 0) /
+            scores.filter(s => s.score).length
+          : 0;
 
       return {
         employeeId,
@@ -326,7 +335,7 @@ class LearningDevelopmentService {
         totalAssessments: scores.length,
       };
     } catch (error) {
-      throw new Error(`Failed to get assessment scores: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -339,7 +348,8 @@ class LearningDevelopmentService {
         preAssessmentLevel: skill.initialLevel,
         postAssessmentLevel: skill.currentLevel,
         improvement: skill.currentLevel - skill.initialLevel,
-        improvementPercentage: ((skill.currentLevel - skill.initialLevel) / skill.initialLevel) * 100,
+        improvementPercentage:
+          ((skill.currentLevel - skill.initialLevel) / skill.initialLevel) * 100,
         developmentPlanId: skill.developmentPlanId,
       }));
 
@@ -353,7 +363,7 @@ class LearningDevelopmentService {
         averageImprovement: avgImprovement,
       };
     } catch (error) {
-      throw new Error(`Failed to track skill improvement: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -366,10 +376,15 @@ class LearningDevelopmentService {
       const completedEnrollments = programEnrollments.filter(e => e.status === 'completed');
 
       const totalCost = program.cost * programEnrollments.length;
-      const completionRate = programEnrollments.length > 0 ? (completedEnrollments.length / programEnrollments.length) * 100 : 0;
-      const avgAssessmentScore = completedEnrollments.length > 0
-        ? completedEnrollments.reduce((sum, e) => sum + (e.assessmentScore || 0), 0) / completedEnrollments.length
-        : 0;
+      const completionRate =
+        programEnrollments.length > 0
+          ? (completedEnrollments.length / programEnrollments.length) * 100
+          : 0;
+      const avgAssessmentScore =
+        completedEnrollments.length > 0
+          ? completedEnrollments.reduce((sum, e) => sum + (e.assessmentScore || 0), 0) /
+            completedEnrollments.length
+          : 0;
 
       // Simplified ROI: (Average Score / 100) * Total Participants * 1000 (benefit factor)
       const estimatedBenefit = (avgAssessmentScore / 100) * programEnrollments.length * 1000;
@@ -387,7 +402,7 @@ class LearningDevelopmentService {
         roi_status: roi >= 50 ? 'excellent' : roi >= 0 ? 'positive' : 'negative',
       };
     } catch (error) {
-      throw new Error(`Failed to measure learning ROI: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -413,7 +428,7 @@ class LearningDevelopmentService {
 
       return report;
     } catch (error) {
-      throw new Error(`Failed to generate learning report: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -452,7 +467,7 @@ class LearningDevelopmentService {
       this.certifications.push(certification);
       return certification;
     } catch (error) {
-      throw new Error(`Failed to define certification path: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -474,7 +489,7 @@ class LearningDevelopmentService {
       this.assessments.push(examRecord);
       return examRecord;
     } catch (error) {
-      throw new Error(`Failed to track exam status: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -496,7 +511,7 @@ class LearningDevelopmentService {
 
       return license;
     } catch (error) {
-      throw new Error(`Failed to manage license renewal: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -534,7 +549,7 @@ class LearningDevelopmentService {
       this.externalIntegrations.push(integration);
       return integration;
     } catch (error) {
-      throw new Error(`Failed to integrate third-party platform: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -561,7 +576,7 @@ class LearningDevelopmentService {
 
       return syncResult;
     } catch (error) {
-      throw new Error(`Failed to sync learning content: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 

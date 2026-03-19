@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * 🧪 Test Database Helper
  * Handles safe database operations for integration tests
@@ -18,7 +19,7 @@ class TestDBHelper {
         await delay(200); // Larger delay to prevent buffer overflow
         return doc;
       } catch (error) {
-        const isBufferingError = error.message.includes('buffering timed out');
+        const isBufferingError = (error.message || '').includes('buffering timed out');
         if (isBufferingError || i < retries - 1) {
           // Exponential backoff: 300ms, 600ms, 1200ms, 2400ms
           const backoffMs = 300 * Math.pow(2, i);
@@ -117,7 +118,7 @@ class TestDBHelper {
    * Get seeded data (return existing if available)
    */
   static async getSeedData(Model, filter, createFn) {
-    let existing = await Model.findOne(filter);
+    const existing = await Model.findOne(filter);
     if (existing) return existing;
 
     return await this.createDocument(Model, await createFn());

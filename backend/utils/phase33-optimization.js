@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * ╔════════════════════════════════════════════════════════════════════════════╗
  * ║          PHASE 33: SYSTEM OPTIMIZATION (1,800+ LOC)                       ║
@@ -208,7 +209,7 @@ class AdvancedCachingStrategy {
     return policy;
   }
 
-  warmupCache(cacheId, dataSource) {
+  warmupCache(cacheId, _dataSource) {
     const cache = this.caches.get(cacheId);
     if (!cache) throw new Error('Cache not found');
 

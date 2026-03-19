@@ -1,3 +1,4 @@
+/* eslint-disable no-undef, no-unused-vars */
 /**
  * Comprehensive Barcode Service Unit Tests
  * Run: npm test -- barcode.test.js

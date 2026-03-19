@@ -1,9 +1,10 @@
+/* eslint-disable no-undef, no-unused-vars */
 /**
  * 🧪 Phases 2-10 Complete Test Suite - Enhanced & Comprehensive
  * مراحل 2-10 - مجموعة اختبارات محسّنة وشاملة جداً
  */
 
-const mongoose = require('mongoose');
+const _mongoose = require('mongoose');
 
 // Mock all Phase models
 jest.mock('../models/elearning.model');

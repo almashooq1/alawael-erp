@@ -1,6 +1,8 @@
+/* eslint-disable no-unused-vars */
 const GoalBank = require('../models/GoalBank');
 const TherapeuticPlan = require('../models/TherapeuticPlan');
 const SmartNotificationService = require('./smartNotificationService');
+const logger = require('../utils/logger');
 
 class SmartClinicalService {
   /**
@@ -51,7 +53,7 @@ class SmartClinicalService {
           difficulty: 'INTERMEDIATE',
         },
       ]);
-      console.log('Goal Bank Seeded');
+      logger.info('Goal Bank Seeded');
     }
   }
 
@@ -92,7 +94,7 @@ class SmartClinicalService {
           'Clinical Alert: Stalled Progress',
           `Therapy plan for ${plan.beneficiary.firstName} hasn't been updated in 30 days. Review required.`,
           'WARNING',
-          `/rehab/plans/${plan._id}`,
+          `/rehab/plans/${plan._id}`
         );
       }
       return { message: `Flagged ${stalledPlans.length} stalled plans.` };

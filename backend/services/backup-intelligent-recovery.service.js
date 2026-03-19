@@ -1,9 +1,9 @@
-/**
+/* eslint-disable no-unused-vars */ /**
  * ═══════════════════════════════════════════════════════════════════════
  * INTELLIGENT RECOVERY & OPTIMIZATION SYSTEM
  * نظام الاسترجاع الذكي والتحسين الديناميكي
  * ═══════════════════════════════════════════════════════════════════════
- * 
+ *
  * Features:
  * ✅ Intelligent Restore Selection
  * ✅ Binary Search For Data Point
@@ -17,6 +17,7 @@
 const EventEmitter = require('events');
 const fs = require('fs').promises;
 const path = require('path');
+const logger = require('../utils/logger');
 
 class IntelligentRecovery extends EventEmitter {
   constructor(options = {}) {
@@ -35,9 +36,9 @@ class IntelligentRecovery extends EventEmitter {
   async initializeRecovery() {
     try {
       await fs.mkdir(this.dataPath, { recursive: true });
-      console.log('✅ Intelligent recovery system initialized');
+      // console.log('✅ Intelligent recovery system initialized');
     } catch (error) {
-      console.error('❌ Recovery initialization failed:', error.message);
+      logger.error('❌ Recovery initialization failed:', error.message);
     }
   }
 
@@ -61,14 +62,14 @@ class IntelligentRecovery extends EventEmitter {
       // Calculate overall fitness score
       const weights = { integrity: 0.4, completeness: 0.3, recency: 0.2, accessibility: 0.1 };
       fitness.overallScore = Object.keys(weights).reduce((sum, key) => {
-        return sum + (fitness.scores[key] * weights[key]);
+        return sum + fitness.scores[key] * weights[key];
       }, 0);
 
       fitness.recommendation = this.getRecoveryRecommendation(fitness);
 
       return fitness;
     } catch (error) {
-      console.error('❌ Backup fitness analysis failed:', error.message);
+      logger.error('❌ Backup fitness analysis failed:', error.message);
       throw error;
     }
   }
@@ -90,12 +91,8 @@ class IntelligentRecovery extends EventEmitter {
       let candidates = availableBackups.filter(b => {
         const age = new Date() - new Date(b.createdAt);
         const maxAge = criteria.maxAge || 7 * 24 * 60 * 60 * 1000; // 7 days
-        
-        return (
-          b.integrity >= minimumIntegrity &&
-          age <= maxAge &&
-          (allowPartial || b.isComplete)
-        );
+
+        return b.integrity >= minimumIntegrity && age <= maxAge && (allowPartial || b.isComplete);
       });
 
       if (candidates.length === 0) {
@@ -116,7 +113,7 @@ class IntelligentRecovery extends EventEmitter {
 
         // Time proximity score
         const timeDiff = Math.abs(new Date(b.createdAt) - targetTime);
-        score.factors.timeProximity = Math.max(0, 100 - (timeDiff / 1000 / 60 / 60)); // Higher for closer times
+        score.factors.timeProximity = Math.max(0, 100 - timeDiff / 1000 / 60 / 60); // Higher for closer times
         score.score += score.factors.timeProximity * 0.4;
 
         // Integrity score
@@ -144,7 +141,7 @@ class IntelligentRecovery extends EventEmitter {
         })),
       };
     } catch (error) {
-      console.error('❌ Backup selection failed:', error.message);
+      logger.error('❌ Backup selection failed:', error.message);
       throw error;
     }
   }
@@ -171,8 +168,7 @@ class IntelligentRecovery extends EventEmitter {
 
       const after = backups
         .filter(b => new Date(b.createdAt) >= targetTime)
-        .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
-        [0];
+        .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))[0];
 
       plan.selectedBackup = before || after;
       plan.alternativeBackup = after || before;
@@ -223,7 +219,7 @@ class IntelligentRecovery extends EventEmitter {
 
       return plan;
     } catch (error) {
-      console.error('❌ Point-in-time recovery planning failed:', error.message);
+      logger.error('❌ Point-in-time recovery planning failed:', error.message);
       throw error;
     }
   }
@@ -297,7 +293,7 @@ class IntelligentRecovery extends EventEmitter {
 
       return plan;
     } catch (error) {
-      console.error('❌ Selective restore planning failed:', error.message);
+      logger.error('❌ Selective restore planning failed:', error.message);
       throw error;
     }
   }
@@ -339,7 +335,7 @@ class IntelligentRecovery extends EventEmitter {
 
       return plan;
     } catch (error) {
-      console.error('❌ Optimized recovery plan generation failed:', error.message);
+      logger.error('❌ Optimized recovery plan generation failed:', error.message);
       throw error;
     }
   }
@@ -374,7 +370,7 @@ class IntelligentRecovery extends EventEmitter {
       this.emit('recovery:step-completed', { planId, step });
       return result;
     } catch (error) {
-      console.error('❌ Recovery step execution failed:', error.message);
+      logger.error('❌ Recovery step execution failed:', error.message);
       throw error;
     }
   }
@@ -431,11 +427,11 @@ class IntelligentRecovery extends EventEmitter {
       };
 
       this.emit('failover:initiated', failover);
-      console.log('⚠️  Automated failover initiated');
+      // console.log('⚠️  Automated failover initiated');
 
       return failover;
     } catch (error) {
-      console.error('❌ Automated failover failed:', error.message);
+      logger.error('❌ Automated failover failed:', error.message);
       throw error;
     }
   }
@@ -461,7 +457,7 @@ class IntelligentRecovery extends EventEmitter {
   calculateRecency(createdAt) {
     const age = new Date() - new Date(createdAt);
     const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 days
-    return Math.max(0, 1 - (age / maxAge));
+    return Math.max(0, 1 - age / maxAge);
   }
 
   /**

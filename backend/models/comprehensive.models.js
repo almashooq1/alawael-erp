@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Therapy Sessions Model
  * نظام جدولة وإدارة الجلسات العلاجية

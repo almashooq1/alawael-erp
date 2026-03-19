@@ -1,9 +1,11 @@
+/* eslint-disable no-unused-vars */
 /**
  * Dashboard Handler
  * معالج لوحة القيادة
  */
 
 const { getSummarySystems, getTopKPIs } = require('../../utils/kpiCalculator');
+const logger = require('../../utils/logger');
 
 /**
  * Handle dashboard subscription events
@@ -20,7 +22,7 @@ function dashboardHandler(socket, io, activeSubscriptions) {
       subscribedAt: new Date(),
     });
 
-    console.log(`[Dashboard] ${socket.id} subscribed to dashboard`);
+    logger.info(`[Dashboard] ${socket.id} subscribed to dashboard`);
 
     // Send initial dashboard data
     try {
@@ -31,7 +33,7 @@ function dashboardHandler(socket, io, activeSubscriptions) {
       };
       socket.emit('dashboard:update', dashboardData);
     } catch (error) {
-      console.error('[Dashboard] Error fetching initial data:', error);
+      logger.error('[Dashboard] Error fetching initial data:', error);
       socket.emit('error', { message: 'فشل جلب بيانات لوحة القيادة' });
     }
 
@@ -50,7 +52,7 @@ function dashboardHandler(socket, io, activeSubscriptions) {
         };
         socket.emit('dashboard:update', dashboardData);
       } catch (error) {
-        console.error('[Dashboard] Periodic update error:', error);
+        logger.error('[Dashboard] Periodic update error:', error);
         clearInterval(interval);
       }
     }, 30000);
@@ -69,7 +71,7 @@ function dashboardHandler(socket, io, activeSubscriptions) {
       activeSubscriptions.delete(socket.id);
     }
 
-    console.log(`[Dashboard] ${socket.id} unsubscribed from dashboard`);
+    logger.info(`[Dashboard] ${socket.id} unsubscribed from dashboard`);
     socket.emit('dashboard:unsubscribed');
   });
 

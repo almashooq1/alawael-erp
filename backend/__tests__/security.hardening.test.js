@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * 🔒 Security Hardening Test Suite
  * Phase 4: Security Hardening

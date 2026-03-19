@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * achievements.routes.js - Achievement & Recognition API Routes
  * Handles achievement recording, skill tracking, and activity management
@@ -10,8 +11,8 @@ const router = express.Router();
 const AchievementService = require('../../../services/BeneficiaryManagement/AchievementService');
 
 // Middleware
-const authenticate = (req, res, next) => {
-  // TODO: Implement JWT authentication
+const authenticate = (_req, _res, next) => {
+  // @todo [P1] Replace with real JWT auth middleware from middleware/auth.middleware.js
   next();
 };
 
@@ -41,20 +42,19 @@ router.post('/record', authenticate, async (req, res) => {
         status: 'error',
         message: 'beneficiaryId is required',
         data: null,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
     }
 
     const result = await achievementService.recordAchievement(beneficiaryId, req.body);
     const statusCode = result.status === 'success' ? 201 : 400;
     return res.status(statusCode).json(result);
-
   } catch (error) {
     return res.status(500).json({
       status: 'error',
-      message: error.message,
+      message: 'حدث خطأ داخلي',
       data: null,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 });
@@ -73,13 +73,12 @@ router.post('/:beneficiaryId/skills/track', authenticate, async (req, res) => {
     const result = await achievementService.trackSkillsDevelopment(beneficiaryId, req.body);
     const statusCode = result.status === 'success' ? 201 : 400;
     return res.status(statusCode).json(result);
-
   } catch (error) {
     return res.status(500).json({
       status: 'error',
-      message: error.message,
+      message: 'حدث خطأ داخلي',
       data: null,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 });
@@ -98,13 +97,12 @@ router.post('/:beneficiaryId/activities/track', authenticate, async (req, res) =
     const result = await achievementService.trackStudentInvolvement(beneficiaryId, req.body);
     const statusCode = result.status === 'success' ? 201 : 400;
     return res.status(statusCode).json(result);
-
   } catch (error) {
     return res.status(500).json({
       status: 'error',
-      message: error.message,
+      message: 'حدث خطأ داخلي',
       data: null,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 });
@@ -122,13 +120,12 @@ router.get('/:beneficiaryId/points', authenticate, async (req, res) => {
     const result = await achievementService.manageAchievementPoints(beneficiaryId);
     const statusCode = result.status === 'success' ? 200 : 404;
     return res.status(statusCode).json(result);
-
   } catch (error) {
     return res.status(500).json({
       status: 'error',
-      message: error.message,
+      message: 'حدث خطأ داخلي',
       data: null,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 });
@@ -146,13 +143,12 @@ router.get('/:beneficiaryId/summary', authenticate, async (req, res) => {
     const result = await achievementService.getBeneficiaryAchievementSummary(beneficiaryId);
     const statusCode = result.status === 'success' ? 200 : 404;
     return res.status(statusCode).json(result);
-
   } catch (error) {
     return res.status(500).json({
       status: 'error',
-      message: error.message,
+      message: 'حدث خطأ داخلي',
       data: null,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 });
@@ -167,7 +163,7 @@ router.get('/health', (req, res) => {
     status: 'success',
     message: 'Achievement service is healthy',
     service: 'AchievementService',
-    timestamp: new Date()
+    timestamp: new Date(),
   });
 });
 

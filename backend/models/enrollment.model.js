@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 const enrollmentSchema = new mongoose.Schema(
@@ -41,7 +42,7 @@ const enrollmentSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  },
+  }
 );
 
 // Compound index to ensure a student can enroll in a course only once

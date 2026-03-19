@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Supply & Support System Between Branches
  * نظام الإمداد والمساندة بين الفروع

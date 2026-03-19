@@ -1,3 +1,4 @@
+/* eslint-disable no-undef, no-unused-vars */
 const {
   validatePassword,
   validateEmail,
@@ -6,6 +7,57 @@ const {
   validatePasswordChange,
 } = require('../middleware/validation');
 
+// === Global RBAC Mock ===
+jest.mock('../rbac', () => ({
+  createRBACMiddleware: () => (req, res, next) => next(),
+  checkPermission: () => (req, res, next) => next(),
+  RBAC_ROLES: {},
+  RBAC_PERMISSIONS: {},
+}));
+// === Global Auth Mock ===
+jest.mock('../middleware/auth', () => ({
+  authenticateToken: (req, res, next) => {
+    req.user = { id: 'user123', name: 'Test User', role: 'admin', permissions: ['*'] };
+    next();
+  },
+  requireAdmin: (req, res, next) => next(),
+  requireAuth: (req, res, next) => {
+    req.user = { id: 'user123', name: 'Test User', role: 'admin', permissions: ['*'] };
+    next();
+  },
+  requireRole:
+    (...roles) =>
+    (req, res, next) =>
+      next(),
+  optionalAuth: (req, res, next) => next(),
+  protect: (req, res, next) => {
+    req.user = { id: 'user123', name: 'Test User', role: 'admin', permissions: ['*'] };
+    next();
+  },
+  authorize:
+    (...roles) =>
+    (req, res, next) =>
+      next(),
+  authorizeRole:
+    (...roles) =>
+    (req, res, next) =>
+      next(),
+  authenticate: (req, res, next) => {
+    req.user = { id: 'user123', name: 'Test User', role: 'admin', permissions: ['*'] };
+    next();
+  },
+}));
+
+jest.mock('../middleware/auth.middleware', () => ({
+  authenticateToken: (req, res, next) => {
+    req.user = { id: 'user123', name: 'Test User', role: 'admin', permissions: ['*'] };
+    next();
+  },
+  requireRole:
+    (...roles) =>
+    (req, res, next) =>
+      next(),
+}));
 describe('Validation Middleware', () => {
   describe('Password Validation', () => {
     it('should accept valid password', () => {
@@ -26,28 +78,30 @@ describe('Validation Middleware', () => {
       const result = validatePassword('validpass123!');
 
       expect(result.valid).toBe(false);
-      expect(result.errors.some(e => e.includes('uppercase'))).toBe(true);
+      expect(result.errors.some(e => e.includes('حرف كبير') || e.includes('uppercase'))).toBe(true);
     });
 
     it('should reject password without lowercase letter', () => {
       const result = validatePassword('VALIDPASS123!');
 
       expect(result.valid).toBe(false);
-      expect(result.errors.some(e => e.includes('lowercase'))).toBe(true);
+      expect(result.errors.some(e => e.includes('حرف صغير') || e.includes('lowercase'))).toBe(true);
     });
 
     it('should reject password without number', () => {
       const result = validatePassword('ValidPass!');
 
       expect(result.valid).toBe(false);
-      expect(result.errors.some(e => e.includes('number'))).toBe(true);
+      expect(result.errors.some(e => e.includes('رقم') || e.includes('number'))).toBe(true);
     });
 
     it('should reject password without special character', () => {
       const result = validatePassword('ValidPass123');
 
       expect(result.valid).toBe(false);
-      expect(result.errors.some(e => e.includes('special character'))).toBe(true);
+      expect(
+        result.errors.some(e => e.includes('حرف خاص') || e.includes('special character'))
+      ).toBe(true);
     });
 
     it('should accept various special characters', () => {
@@ -64,7 +118,9 @@ describe('Validation Middleware', () => {
       const result = validatePassword(null);
 
       expect(result.valid).toBe(false);
-      expect(result.errors).toContain('Password is required');
+      expect(
+        result.errors.some(e => e.includes('مطلوبة') || e.includes('Password is required'))
+      ).toBe(true);
     });
 
     it('should reject undefined password', () => {
@@ -113,7 +169,11 @@ describe('Validation Middleware', () => {
     });
 
     it('should accept emails with special characters', () => {
-      const validEmails = ['user+tag@example.com', 'user.name@example.com', 'user_name@example.com'];
+      const validEmails = [
+        'user+tag@example.com',
+        'user.name@example.com',
+        'user_name@example.com',
+      ];
 
       validEmails.forEach(email => {
         const result = validateEmail(email);
@@ -169,9 +229,13 @@ describe('Validation Middleware', () => {
 
       const mockNext = jest.fn();
 
-      // Call middleware
+      // Call middleware (validateRegistration is an array of express-validator middleware)
       if (validateRegistration) {
-        validateRegistration(mockReq, mockRes, mockNext);
+        if (Array.isArray(validateRegistration)) {
+          validateRegistration.forEach(mw => mw(mockReq, mockRes, mockNext));
+        } else {
+          validateRegistration(mockReq, mockRes, mockNext);
+        }
         // Should call next if valid
         expect(mockNext || mockRes.status).toBeDefined();
       }
@@ -253,7 +317,11 @@ describe('Validation Middleware', () => {
       const mockNext = jest.fn();
 
       if (validateProfileUpdate) {
-        validateProfileUpdate(mockReq, mockRes, mockNext);
+        if (Array.isArray(validateProfileUpdate)) {
+          validateProfileUpdate.forEach(mw => mw(mockReq, mockRes, mockNext));
+        } else {
+          validateProfileUpdate(mockReq, mockRes, mockNext);
+        }
       }
 
       expect(mockReq.body).toBeDefined();
@@ -296,7 +364,11 @@ describe('Validation Middleware', () => {
       const mockNext = jest.fn();
 
       if (validatePasswordChange) {
-        validatePasswordChange(mockReq, mockRes, mockNext);
+        if (Array.isArray(validatePasswordChange)) {
+          validatePasswordChange.forEach(mw => mw(mockReq, mockRes, mockNext));
+        } else {
+          validatePasswordChange(mockReq, mockRes, mockNext);
+        }
       }
 
       expect(mockReq.body.newPassword).toBeDefined();

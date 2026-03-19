@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * KPI Calculator Utility
  * Provides module-level key performance indicators

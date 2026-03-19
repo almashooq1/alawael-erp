@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const db = require('../config/inMemoryDB');
 
 class Employee {
@@ -44,7 +45,10 @@ class Employee {
       if (filters.search) {
         const search = filters.search.toLowerCase();
         employees = employees.filter(
-          e => e.fullName?.toLowerCase().includes(search) || e.email?.toLowerCase().includes(search) || e.nationalId?.includes(search),
+          e =>
+            e.fullName?.toLowerCase().includes(search) ||
+            e.email?.toLowerCase().includes(search) ||
+            e.nationalId?.includes(search)
         );
       }
 

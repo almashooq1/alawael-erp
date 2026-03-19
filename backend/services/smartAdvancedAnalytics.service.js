@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // Mock Models
 const TherapySession = require('../models/TherapySession');
 const GoalBank = require('../models/GoalBank');
@@ -35,7 +36,12 @@ class SmartAdvancedAnalyticsService {
     return [
       { department: 'Speech Therapy', goalsMastered: 120, goalsAttempted: 150, rate: '80%' },
       { department: 'Physical Therapy', goalsMastered: 85, goalsAttempted: 100, rate: '85%' },
-      { department: 'Occupational Therapy', goalsMastered: 40, goalsAttempted: 90, rate: '44% (Attention Needed)' },
+      {
+        department: 'Occupational Therapy',
+        goalsMastered: 40,
+        goalsAttempted: 90,
+        rate: '44% (Attention Needed)',
+      },
     ];
   }
 

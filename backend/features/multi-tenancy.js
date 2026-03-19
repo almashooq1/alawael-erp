@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Multi-Tenancy Support System
  * نظام دعم المستأجرين المتعددين

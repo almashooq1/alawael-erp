@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Advanced Machine Learning Service - Phase 7
  * Handles ML models, predictions, anomaly detection, and insights
@@ -262,7 +263,6 @@ class MLService extends EventEmitter {
    */
   async createPredictionModel(modelData) {
     try {
-
       const predictionModel = new Prediction({
         predictionId: `pred_${Date.now()}`,
         modelName: modelData.name,
@@ -387,7 +387,6 @@ class MLService extends EventEmitter {
    */
   async generateInsights(analyticsType, filters = {}) {
     try {
-
       const insights = [
         {
           insightId: `insight_${Date.now()}_1`,

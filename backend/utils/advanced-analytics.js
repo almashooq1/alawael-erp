@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Advanced Analytics Engine
  * محرك التحليلات المتقدمة

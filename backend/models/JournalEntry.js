@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * ===================================================================
  * JOURNAL ENTRY MODEL - نموذج قيد اليومية
@@ -10,7 +11,16 @@ const journalEntryLineSchema = new mongoose.Schema({
   accountId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Account',
-    required: true,
+  },
+  // اسم الحساب (نصي)
+  account: {
+    type: String,
+    trim: true,
+  },
+  // كود الحساب (نصي)
+  accountCode: {
+    type: String,
+    trim: true,
   },
   debit: {
     type: Number,
@@ -23,6 +33,7 @@ const journalEntryLineSchema = new mongoose.Schema({
     min: 0,
   },
   description: String,
+  note: String,
   costCenter: String,
   projectId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -32,11 +43,17 @@ const journalEntryLineSchema = new mongoose.Schema({
 
 const journalEntrySchema = new mongoose.Schema(
   {
-    // الرقم المرجعي
+    // الرقم المرجعي / رقم القيد
     reference: {
       type: String,
-      required: true,
       unique: true,
+      sparse: true,
+    },
+    // رقم القيد (مولّد تلقائياً)
+    entryNumber: {
+      type: String,
+      unique: true,
+      sparse: true,
     },
 
     // التاريخ
@@ -124,10 +141,11 @@ const journalEntrySchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    // اسم المنشئ (نصي)
+    createdByName: String,
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
-      required: true,
     },
     updatedBy: {
       type: mongoose.Schema.Types.ObjectId,
@@ -139,8 +157,18 @@ const journalEntrySchema = new mongoose.Schema(
   }
 );
 
+// Auto-generate entryNumber before save
+journalEntrySchema.pre('save', async function () {
+  if (!this.entryNumber) {
+    const count = await this.constructor.countDocuments();
+    this.entryNumber = `JE-${String(count + 1).padStart(3, '0')}`;
+  }
+  if (!this.reference) {
+    this.reference = this.entryNumber;
+  }
+});
+
 // فهرسة
-// Note: reference already has unique:true (creates automatic index)
 journalEntrySchema.index({ date: -1 });
 journalEntrySchema.index({ status: 1 });
 journalEntrySchema.index({ 'lines.accountId': 1 });

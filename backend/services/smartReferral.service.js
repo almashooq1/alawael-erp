@@ -1,4 +1,6 @@
+/* eslint-disable no-unused-vars */
 const fs = require('fs');
+const logger = require('../utils/logger');
 // In real production, we would require 'tesseract.js' or google-vision-api
 // const tesseract = require('tesseract.js');
 
@@ -17,7 +19,7 @@ class SmartReferralService {
     // For Demo/Architecture purposes, we simulate extraction based on filename or random valid data
     // This proves the Integration Point exists
 
-    console.log(`[Smart OCR] Processing file: ${file.originalname}`);
+    logger.info(`[Smart OCR] Processing file: ${file.originalname}`);
 
     return {
       confidence: 0.92,

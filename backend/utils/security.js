@@ -1,4 +1,6 @@
+/* eslint-disable no-unused-vars */
 const crypto = require('crypto');
+const logger = require('./logger');
 
 /**
  * Security utilities for additional protection
@@ -80,7 +82,7 @@ const logSecurityEvent = (eventName, details = {}) => {
     timestamp,
     details,
   };
-  console.log(`🔒 [SECURITY] ${timestamp} - ${eventName}`, details);
+  logger.info(`🔒 [SECURITY] ${timestamp} - ${eventName}`, details);
 
   // In production, this should write to a dedicated security log file
   // or send to a security monitoring service

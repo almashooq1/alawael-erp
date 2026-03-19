@@ -1,212 +1,227 @@
+/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 /**
  * Purchase Request Schema - نموذج طلبات الشراء
  * يمثل الطلب الأولي قبل تحويله لأمر شراء رسمي
  */
-const PurchaseRequestSchema = new mongoose.Schema({
-  // ===== معلومات الطلب الأساسية =====
-  requestNumber: {
-    type: String,
-    required: true,
-    unique: true,
-    uppercase: true,
-  }, // PR-2026-0001
-  
-  requestDate: {
-    type: Date,
-    default: Date.now,
-  },
-  
-  requiredDate: {
-    type: Date,
-    required: true,
-  }, // تاريخ الحاجة للبضاعة
-  
-  status: {
-    type: String,
-    enum: [
-      'DRAFT', // مسودة
-      'PENDING_APPROVAL', // قيد الموافقة
-      'APPROVED', // موافق عليه
-      'REJECTED', // مرفوض
-      'CONVERTED_TO_PO', // تم تحويله لأمر شراء
-      'CANCELLED', // ملغى
-    ],
-    default: 'DRAFT',
-  },
-  
-  priority: {
-    type: String,
-    enum: ['LOW', 'NORMAL', 'HIGH', 'URGENT'],
-    default: 'NORMAL',
-  },
-  
-  // ===== بيانات المشتري والقسم =====
-  requester: {
-    userId: mongoose.Schema.Types.ObjectId,
-    name: String,
-    department: String,
-    email: String,
-    phoneNumber: String,
-  },
-  
-  department: String, // قسم الطلب
-  costCenter: String, // مركز التكلفة
-  
-  // ===== تفاصيل البضاعة =====
-  items: [{
-    itemId: mongoose.Schema.Types.ObjectId,
-    itemCode: String,
-    itemName: String,
-    description: String,
-    quantity: {
-      type: Number,
-      required: true,
-      min: 1,
-    },
-    unit: {
+const PurchaseRequestSchema = new mongoose.Schema(
+  {
+    // ===== معلومات الطلب الأساسية =====
+    requestNumber: {
       type: String,
-      enum: ['PIECE', 'BOX', 'BAG', 'CARTON', 'KG', 'LITER', 'METER', 'OTHER'],
-      default: 'PIECE',
+      required: true,
+      unique: true,
+      uppercase: true,
+    }, // PR-2026-0001
+
+    requestDate: {
+      type: Date,
+      default: Date.now,
     },
-    estimatedUnitPrice: Number,
-    estimatedTotal: Number,
-    notes: String,
-    specifications: String,
-  }],
-  
-  // ===== المبلغ والميزانية =====
-  summary: {
-    totalItems: Number, // عدد الأصناف
-    totalQuantity: Number, // الكمية الإجمالية
-    estimatedValue: {
-      type: Number,
-      default: 0,
-    }, // القيمة المتوقعة
-    estimatedTax: Number,
-    estimatedTotal: Number,
-    budgetAvailable: Boolean,
-    costAllocation: [{
-      costCenter: String,
-      percentage: Number,
-      amount: Number,
-    }],
-  },
-  
-  // ===== طريقة الشراء =====
-  purchaseMethod: {
-    type: String,
-    enum: [
-      'DIRECT_PURCHASE', // شراء مباشر
-      'COMPETITIVE_BIDDING', // طلب عروض
-      'NEGOTIATION', // مفاوضات
-      'EMERGENCY', // طوارئ
-      'FRAMEWORK_AGREEMENT', // اتفاقية إطار
-    ],
-    default: 'COMPETITIVE_BIDDING',
-  },
-  
-  minimumSuppliers: {
-    type: Number,
-    default: 3,
-  }, // عدد العروض المطلوبة
-  
-  // ===== سير العمل والموافقات =====
-  approvalworkflow: {
-    type: String,
-    enum: ['SIMPLE', 'STANDARD', 'COMPLEX', 'SPECIAL'],
-    default: 'STANDARD',
-  },
-  
-  approvals: [{
-    approverId: mongoose.Schema.Types.ObjectId,
-    approverName: String,
-    approverRole: String,
-    level: Number, // مستوى الموافقة
+
+    requiredDate: {
+      type: Date,
+      required: true,
+    }, // تاريخ الحاجة للبضاعة
+
     status: {
       type: String,
-      enum: ['PENDING', 'APPROVED', 'REJECTED'],
-      default: 'PENDING',
+      enum: [
+        'DRAFT', // مسودة
+        'PENDING_APPROVAL', // قيد الموافقة
+        'APPROVED', // موافق عليه
+        'REJECTED', // مرفوض
+        'CONVERTED_TO_PO', // تم تحويله لأمر شراء
+        'CANCELLED', // ملغى
+      ],
+      default: 'DRAFT',
     },
-    comments: String,
-    approvalDate: Date,
-    delegatedTo: mongoose.Schema.Types.ObjectId, // في حالة التفويض
-  }],
-  
-  currentApprovalLevel: {
-    type: Number,
-    default: 1,
+
+    priority: {
+      type: String,
+      enum: ['LOW', 'NORMAL', 'HIGH', 'URGENT'],
+      default: 'NORMAL',
+    },
+
+    // ===== بيانات المشتري والقسم =====
+    requester: {
+      userId: mongoose.Schema.Types.ObjectId,
+      name: String,
+      department: String,
+      email: String,
+      phoneNumber: String,
+    },
+
+    department: String, // قسم الطلب
+    costCenter: String, // مركز التكلفة
+
+    // ===== تفاصيل البضاعة =====
+    items: [
+      {
+        itemId: mongoose.Schema.Types.ObjectId,
+        itemCode: String,
+        itemName: String,
+        description: String,
+        quantity: {
+          type: Number,
+          required: true,
+          min: 1,
+        },
+        unit: {
+          type: String,
+          enum: ['PIECE', 'BOX', 'BAG', 'CARTON', 'KG', 'LITER', 'METER', 'OTHER'],
+          default: 'PIECE',
+        },
+        estimatedUnitPrice: Number,
+        estimatedTotal: Number,
+        notes: String,
+        specifications: String,
+      },
+    ],
+
+    // ===== المبلغ والميزانية =====
+    summary: {
+      totalItems: Number, // عدد الأصناف
+      totalQuantity: Number, // الكمية الإجمالية
+      estimatedValue: {
+        type: Number,
+        default: 0,
+      }, // القيمة المتوقعة
+      estimatedTax: Number,
+      estimatedTotal: Number,
+      budgetAvailable: Boolean,
+      costAllocation: [
+        {
+          costCenter: String,
+          percentage: Number,
+          amount: Number,
+        },
+      ],
+    },
+
+    // ===== طريقة الشراء =====
+    purchaseMethod: {
+      type: String,
+      enum: [
+        'DIRECT_PURCHASE', // شراء مباشر
+        'COMPETITIVE_BIDDING', // طلب عروض
+        'NEGOTIATION', // مفاوضات
+        'EMERGENCY', // طوارئ
+        'FRAMEWORK_AGREEMENT', // اتفاقية إطار
+      ],
+      default: 'COMPETITIVE_BIDDING',
+    },
+
+    minimumSuppliers: {
+      type: Number,
+      default: 3,
+    }, // عدد العروض المطلوبة
+
+    // ===== سير العمل والموافقات =====
+    approvalworkflow: {
+      type: String,
+      enum: ['SIMPLE', 'STANDARD', 'COMPLEX', 'SPECIAL'],
+      default: 'STANDARD',
+    },
+
+    approvals: [
+      {
+        approverId: mongoose.Schema.Types.ObjectId,
+        approverName: String,
+        approverRole: String,
+        level: Number, // مستوى الموافقة
+        status: {
+          type: String,
+          enum: ['PENDING', 'APPROVED', 'REJECTED'],
+          default: 'PENDING',
+        },
+        comments: String,
+        approvalDate: Date,
+        delegatedTo: mongoose.Schema.Types.ObjectId, // في حالة التفويض
+      },
+    ],
+
+    currentApprovalLevel: {
+      type: Number,
+      default: 1,
+    },
+
+    isApproved: {
+      type: Boolean,
+      default: false,
+    },
+
+    // ===== ملاحظات وإرفاقات =====
+    justification: String, // تبرير الطلب
+    businessCase: String, // الحالة التجارية
+    notes: String,
+
+    attachments: [
+      {
+        fileName: String,
+        fileUrl: String,
+        fileType: String,
+        uploadDate: Date,
+      },
+    ],
+
+    // ===== تحويل لأمر شراء =====
+    relatedPurchaseOrder: {
+      poId: mongoose.Schema.Types.ObjectId,
+      poNumber: String,
+      conversionDate: Date,
+    },
+
+    // ===== المراجع =====
+    referenceNumbers: [String], // RFQ, Purchase Requisition, etc.
+    projectCode: String,
+    contractReference: String,
+
+    // ===== معايير الاختيار =====
+    selectionCriteria: [
+      {
+        criterion: String,
+        weight: Number, // وزن المعيار %
+        description: String,
+      },
+    ],
+
+    // ===== الأحداث والتغييرات =====
+    history: [
+      {
+        event: String,
+        changedBy: mongoose.Schema.Types.ObjectId,
+        timestamp: { type: Date, default: Date.now },
+        details: String,
+      },
+    ],
+
+    // ===== البيانات الوصفية =====
+    createdBy: mongoose.Schema.Types.ObjectId,
+    createdAt: { type: Date, default: Date.now },
+    updatedBy: mongoose.Schema.Types.ObjectId,
+    updatedAt: { type: Date, default: Date.now },
+    submittedAt: Date,
+    expectedApprovalDate: Date,
+
+    // ===== حقول إضافية =====
+    tags: [String],
+    isUrgent: { type: Boolean, default: false },
+    reminderDate: Date,
+    source: {
+      type: String,
+      enum: ['MANUAL', 'AUTOMATED', 'SYSTEM', 'API'],
+      default: 'MANUAL',
+    },
   },
-  
-  isApproved: {
-    type: Boolean,
-    default: false,
-  },
-  
-  // ===== ملاحظات وإرفاقات =====
-  justification: String, // تبرير الطلب
-  businessCase: String, // الحالة التجارية
-  notes: String,
-  
-  attachments: [{
-    fileName: String,
-    fileUrl: String,
-    fileType: String,
-    uploadDate: Date,
-  }],
-  
-  // ===== تحويل لأمر شراء =====
-  relatedPurchaseOrder: {
-    poId: mongoose.Schema.Types.ObjectId,
-    poNumber: String,
-    conversionDate: Date,
-  },
-  
-  // ===== المراجع =====
-  referenceNumbers: [String], // RFQ, Purchase Requisition, etc.
-  projectCode: String,
-  contractReference: String,
-  
-  // ===== معايير الاختيار =====
-  selectionCriteria: [{
-    criterion: String,
-    weight: Number, // وزن المعيار %
-    description: String,
-  }],
-  
-  // ===== الأحداث والتغييرات =====
-  history: [{
-    event: String,
-    changedBy: mongoose.Schema.Types.ObjectId,
-    timestamp: { type: Date, default: Date.now },
-    details: String,
-  }],
-  
-  // ===== البيانات الوصفية =====
-  createdBy: mongoose.Schema.Types.ObjectId,
-  createdAt: { type: Date, default: Date.now },
-  updatedBy: mongoose.Schema.Types.ObjectId,
-  updatedAt: { type: Date, default: Date.now },
-  submittedAt: Date,
-  expectedApprovalDate: Date,
-  
-  // ===== حقول إضافية =====
-  tags: [String],
-  isUrgent: { type: Boolean, default: false },
-  reminderDate: Date,
-  source: {
-    type: String,
-    enum: ['MANUAL', 'AUTOMATED', 'SYSTEM', 'API'],
-    default: 'MANUAL',
-  },
-}, {
-  timestamps: true,
-  collection: 'purchase_requests',
-});
+  {
+    timestamps: true,
+    collection: 'purchase_requests',
+  }
+);
 
 // Indexes
-PurchaseRequestSchema.index({ requestNumber: 1 });
 PurchaseRequestSchema.index({ status: 1 });
 PurchaseRequestSchema.index({ requiredDate: 1 });
 PurchaseRequestSchema.index({ requester: 1 });
@@ -216,16 +231,16 @@ PurchaseRequestSchema.index({ 'summary.estimatedValue': -1 });
 PurchaseRequestSchema.index({ priority: 1 });
 
 // Virtuals
-PurchaseRequestSchema.virtual('daysUntilRequired').get(function() {
+PurchaseRequestSchema.virtual('daysUntilRequired').get(function () {
   const days = Math.ceil((this.requiredDate - new Date()) / (1000 * 60 * 60 * 24));
   return Math.max(days, 0);
 });
 
-PurchaseRequestSchema.virtual('isOverdue').get(function() {
+PurchaseRequestSchema.virtual('isOverdue').get(function () {
   return this.requiredDate < new Date() && this.status !== 'CONVERTED_TO_PO';
 });
 
-PurchaseRequestSchema.virtual('approvalProgress').get(function() {
+PurchaseRequestSchema.virtual('approvalProgress').get(function () {
   if (this.approvals.length === 0) return 0;
   const approved = this.approvals.filter(a => a.status === 'APPROVED').length;
   return (approved / this.approvals.length) * 100;

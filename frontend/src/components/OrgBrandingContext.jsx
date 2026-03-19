@@ -1,12 +1,30 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import orgBrandingService from '../services/orgBrandingService';
+import { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import orgBrandingService from 'services/orgBrandingService';
+import { getOrgBranding, setOrgBranding } from 'utils/storageService';
 
 const OrgBrandingContext = createContext();
 
 export const useOrgBranding = () => useContext(OrgBrandingContext);
 
+const DEFAULT_BRANDING = {
+  name: 'نظام مراكز الأوائل للرعاية النهارية',
+  nameEn: 'Al-Awael Day Care Centers System',
+  shortName: 'الأوائل',
+  color: '#667eea',
+  secondaryColor: '#764ba2',
+  accentColor: '#f093fb',
+  logo: '/logo.svg',
+  favicon: '',
+  tagline: 'رعاية متميزة... مستقبل مشرق',
+  fontFamily: 'Cairo',
+  borderRadius: 8,
+  sidebarStyle: 'default',
+  darkMode: false,
+  enableAnimations: true,
+};
+
 export const OrgBrandingProvider = ({ orgId, children }) => {
-  const [branding, setBranding] = useState({ name: '', color: '#667eea', logo: '' });
+  const [branding, setBranding] = useState(DEFAULT_BRANDING);
   const [loading, setLoading] = useState(true);
 
   // مزامنة تلقائية عند التحميل أو تغيير orgId
@@ -17,23 +35,14 @@ export const OrgBrandingProvider = ({ orgId, children }) => {
       try {
         const data = await orgBrandingService.fetch(orgId);
         if (!ignore && data) {
-          setBranding({
-            name: data.name || '',
-            color: data.color || '#667eea',
-            logo: data.logo || '',
-          });
-          // مزامنة مع localStorage
-          localStorage.setItem('orgName', data.name || '');
-          localStorage.setItem('orgColor', data.color || '#667eea');
-          if (data.logo) localStorage.setItem('orgLogo', data.logo);
+          const merged = { ...DEFAULT_BRANDING, ...data };
+          setBranding(merged);
+          setOrgBranding(merged);
         }
       } catch {
-        // fallback: استخدم localStorage
-        setBranding({
-          name: localStorage.getItem('orgName') || '',
-          color: localStorage.getItem('orgColor') || '#667eea',
-          logo: localStorage.getItem('orgLogo') || '',
-        });
+        // fallback: استخدم localStorage أو الافتراضي
+        const cached = getOrgBranding();
+        setBranding(cached?.name ? { ...DEFAULT_BRANDING, ...cached } : DEFAULT_BRANDING);
       } finally {
         setLoading(false);
       }
@@ -42,8 +51,23 @@ export const OrgBrandingProvider = ({ orgId, children }) => {
     return () => { ignore = true; };
   }, [orgId]);
 
+  // تحديث الهوية المؤسسية
+  const updateBranding = useCallback(async (newData) => {
+    try {
+      const merged = { ...branding, ...newData };
+      setBranding(merged);
+      setOrgBranding(merged);
+      if (orgId) {
+        await orgBrandingService.update(orgId, newData);
+      }
+      return true;
+    } catch {
+      return false;
+    }
+  }, [branding, orgId]);
+
   return (
-    <OrgBrandingContext.Provider value={{ branding, loading }}>
+    <OrgBrandingContext.Provider value={{ branding, loading, updateBranding, DEFAULT_BRANDING }}>
       {children}
     </OrgBrandingContext.Provider>
   );

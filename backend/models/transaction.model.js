@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // Alias for backward compatibility
 try {
   module.exports =

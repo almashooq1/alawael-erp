@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useEffect, useState } from 'react';
 import apiClient from '../utils/api';
 import ShipmentForm from './ShipmentForm';

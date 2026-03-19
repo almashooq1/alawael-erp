@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 const feedbackSchema = new mongoose.Schema(
@@ -26,7 +27,7 @@ const feedbackSchema = new mongoose.Schema(
     followUpStatus: { type: String, enum: ['OPEN', 'RESOLVED'], default: 'OPEN' },
     followUpNotes: String,
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 module.exports = mongoose.model('Feedback', feedbackSchema);

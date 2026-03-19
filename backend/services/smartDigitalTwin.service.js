@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Smart Digital Twin Service (Phase 95)
  *
@@ -9,6 +10,7 @@
 const SmartSensoryDietService = require('./smartSensoryDiet.service');
 const SmartSleepService = require('./smartSleep.service');
 const SmartBehaviorService = require('./smartBehavior.service');
+const logger = require('../utils/logger');
 
 class SmartDigitalTwinService {
   /**
@@ -16,7 +18,7 @@ class SmartDigitalTwinService {
    * Pulls live data from all subsystems to build a snapshot.
    */
   async getDigitalTwin(patientId) {
-    console.log(`Constructing Digital Twin for ${patientId}...`);
+    logger.info(`Constructing Digital Twin for ${patientId}...`);
 
     // 1. Fetch Sub-system Data (Mocked parallel fetch)
     const sensoryProfile = 'SENSORY_SEEKER'; // Derived from SmartSensoryService
@@ -58,7 +60,10 @@ class SmartDigitalTwinService {
     const warnings = [];
 
     // Logic: Cannot push a Hypotonic child with Sleep Deficit too hard
-    if (digitalTwin.physiological.sleepQuality === 'DEFICIT' && digitalTwin.physiological.muscleTone === 'HYPOTONIC') {
+    if (
+      digitalTwin.physiological.sleepQuality === 'DEFICIT' &&
+      digitalTwin.physiological.muscleTone === 'HYPOTONIC'
+    ) {
       warnings.push({
         severity: 'HIGH',
         issue: 'Physical Exhaustion Risk',

@@ -1,4 +1,6 @@
+/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
+const logger = require('../utils/logger');
 
 // We'll need a JournalEntry model schema conceptually
 // const JournalEntry = require('../models/JournalEntry'); // Mocked for this service
@@ -29,7 +31,7 @@ class FinanceCoreService {
 
     // await JournalEntry.create(journalEntry);
     // For demo, return the object
-    console.log('[FinanceCore] Posted Journal Entry:', journalEntry);
+    logger.info('[FinanceCore] Posted Journal Entry:', journalEntry);
     return journalEntry;
   }
 
@@ -70,7 +72,10 @@ class FinanceCoreService {
         netProfit,
         marginPercent: margin.toFixed(2) + '%',
       },
-      recommendation: margin < 20 ? 'Low Margin. Consider raising price or reducing session duration.' : 'Healthy Margin.',
+      recommendation:
+        margin < 20
+          ? 'Low Margin. Consider raising price or reducing session duration.'
+          : 'Healthy Margin.',
     };
   }
 }

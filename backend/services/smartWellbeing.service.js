@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // Mock Models
 const Employee = require('../models/Employee');
 const SmartNotificationService = require('./smartNotificationService');
@@ -40,7 +41,11 @@ class SmartWellbeingService {
       therapistId,
       riskScore, // 90
       riskLevel: riskScore > 80 ? 'CRITICAL' : riskScore > 50 ? 'MODERATE' : 'LOW',
-      contributingFactors: ['High Severity Ratio', 'After-hours work detected', 'Decreased note quality'],
+      contributingFactors: [
+        'High Severity Ratio',
+        'After-hours work detected',
+        'Decreased note quality',
+      ],
     };
   }
 
@@ -54,7 +59,7 @@ class SmartWellbeingService {
         therapistId,
         'Wellness Check-in',
         'We noticed you have been working very hard on difficult cases. Please see the Clinical Director to adjust your schedule.',
-        'INFO',
+        'INFO'
       );
       return { action: 'SCHEDULE_ADJUSTMENT', reason: 'Critical Burnout Risk' };
     }

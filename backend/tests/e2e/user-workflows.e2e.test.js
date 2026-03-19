@@ -1,3 +1,4 @@
+/* eslint-disable no-undef, no-unused-vars */
 /**
  * End-to-End (E2E) Tests
  * Complete user workflows from start to finish

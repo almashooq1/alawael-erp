@@ -1,4 +1,13 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 const jwt = require('jsonwebtoken');
+
+// Mock token blacklist so tests don't need Redis
+jest.mock('../utils/tokenBlacklist', () => ({
+  isBlacklisted: jest.fn().mockResolvedValue(false),
+  add: jest.fn().mockResolvedValue(undefined),
+}));
+
 const { authenticateToken, requireAdmin } = require('../middleware/auth');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this-in-production';
@@ -24,7 +33,11 @@ describe('Authentication Middleware', () => {
 
   describe('authenticateToken', () => {
     it('should pass valid token', done => {
-      const validToken = jwt.sign({ userId: 'user-1', email: 'test@example.com', role: 'user' }, JWT_SECRET, { expiresIn: '24h' });
+      const validToken = jwt.sign(
+        { userId: 'user-1', email: 'test@example.com', role: 'user' },
+        JWT_SECRET,
+        { expiresIn: '24h' }
+      );
 
       mockReq.headers.authorization = `Bearer ${validToken}`;
 
@@ -47,7 +60,7 @@ describe('Authentication Middleware', () => {
         expect.objectContaining({
           success: false,
           message: expect.stringContaining('required'),
-        }),
+        })
       );
       expect(mockNext).not.toHaveBeenCalled();
     });
@@ -63,7 +76,7 @@ describe('Authentication Middleware', () => {
           expect.objectContaining({
             success: false,
             message: expect.stringContaining('Invalid'),
-          }),
+          })
         );
         expect(mockNext).not.toHaveBeenCalled();
         done();
@@ -71,7 +84,11 @@ describe('Authentication Middleware', () => {
     });
 
     it('should reject expired token', done => {
-      const expiredToken = jwt.sign({ userId: 'user-1', email: 'test@example.com', role: 'user' }, JWT_SECRET, { expiresIn: '0s' });
+      const expiredToken = jwt.sign(
+        { userId: 'user-1', email: 'test@example.com', role: 'user' },
+        JWT_SECRET,
+        { expiresIn: '0s' }
+      );
 
       mockReq.headers.authorization = `Bearer ${expiredToken}`;
 
@@ -85,7 +102,7 @@ describe('Authentication Middleware', () => {
             expect.objectContaining({
               success: false,
               expired: true,
-            }),
+            })
           );
           expect(mockNext).not.toHaveBeenCalled();
           done();
@@ -103,7 +120,11 @@ describe('Authentication Middleware', () => {
     });
 
     it('should set user object on request', done => {
-      const validToken = jwt.sign({ userId: 'user-1', email: 'test@example.com', role: 'user' }, JWT_SECRET, { expiresIn: '24h' });
+      const validToken = jwt.sign(
+        { userId: 'user-1', email: 'test@example.com', role: 'user' },
+        JWT_SECRET,
+        { expiresIn: '24h' }
+      );
 
       mockReq.headers.authorization = `Bearer ${validToken}`;
 
@@ -115,7 +136,7 @@ describe('Authentication Middleware', () => {
             userId: 'user-1',
             email: 'test@example.com',
             role: 'user',
-          }),
+          })
         );
         done();
       }, 100);
@@ -150,7 +171,7 @@ describe('Authentication Middleware', () => {
         expect.objectContaining({
           success: false,
           message: expect.stringContaining('Admin'),
-        }),
+        })
       );
       expect(mockNext).not.toHaveBeenCalled();
     });
@@ -179,7 +200,11 @@ describe('Authentication Middleware', () => {
 
   describe('Token extraction', () => {
     it('should extract token from Bearer scheme', done => {
-      const token = jwt.sign({ userId: 'user-1', email: 'test@example.com', role: 'user' }, JWT_SECRET, { expiresIn: '24h' });
+      const token = jwt.sign(
+        { userId: 'user-1', email: 'test@example.com', role: 'user' },
+        JWT_SECRET,
+        { expiresIn: '24h' }
+      );
 
       mockReq.headers.authorization = `Bearer ${token}`;
 
@@ -201,7 +226,11 @@ describe('Authentication Middleware', () => {
     });
 
     it('should handle multiple spaces in Bearer scheme', done => {
-      const token = jwt.sign({ userId: 'user-1', email: 'test@example.com', role: 'user' }, JWT_SECRET, { expiresIn: '24h' });
+      const token = jwt.sign(
+        { userId: 'user-1', email: 'test@example.com', role: 'user' },
+        JWT_SECRET,
+        { expiresIn: '24h' }
+      );
 
       mockReq.headers.authorization = `Bearer  ${token}`;
 
@@ -229,7 +258,11 @@ describe('Authentication Middleware', () => {
     });
 
     it('should set correct status for different error types', done => {
-      const expiredToken = jwt.sign({ userId: 'user-1', email: 'test@example.com', role: 'user' }, JWT_SECRET, { expiresIn: '0s' });
+      const expiredToken = jwt.sign(
+        { userId: 'user-1', email: 'test@example.com', role: 'user' },
+        JWT_SECRET,
+        { expiresIn: '0s' }
+      );
 
       mockReq.headers.authorization = `Bearer ${expiredToken}`;
 

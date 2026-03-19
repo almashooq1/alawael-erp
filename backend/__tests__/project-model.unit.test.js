@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * Project/Workflow Model Unit Tests - Phase 4
  * Comprehensive testing of project management, workflow, and task tracking

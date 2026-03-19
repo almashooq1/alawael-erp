@@ -1,4 +1,6 @@
+/* eslint-disable no-unused-vars */
 const { v4: uuid } = require('uuid');
+const logger = require('../utils/logger');
 
 class SmartNotificationService {
   constructor() {
@@ -70,7 +72,9 @@ class SmartNotificationService {
   }
 
   getUnreadNotifications(recipientId) {
-    return Array.from(this.notifications.values()).filter(n => n.recipientId === recipientId && !n.isRead);
+    return Array.from(this.notifications.values()).filter(
+      n => n.recipientId === recipientId && !n.isRead
+    );
   }
 
   getAllNotifications(recipientId) {
@@ -121,7 +125,7 @@ class SmartNotificationService {
 
   // Static method for static tests/mocking
   static async send(recipientId, title, message, type = 'INFO', link = null) {
-    console.log(`[NOTIFICATION] To: ${recipientId} | ${title}`);
+    logger.info(`[NOTIFICATION] To: ${recipientId} | ${title}`);
     return { success: true, id: uuid() };
   }
 }

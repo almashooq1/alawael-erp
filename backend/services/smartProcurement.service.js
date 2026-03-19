@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Smart Procurement & Supplier Integration (Phase 74)
  *
@@ -22,8 +23,20 @@ class SmartProcurementService {
     return {
       timestamp: new Date(),
       alerts: [
-        { itemId: 'ITEM-GLOVES', currentStock: 50, burnRate: 20, daysRemaining: 2.5, urgency: 'HIGH' },
-        { itemId: 'ITEM-SENSORY-SAND', currentStock: 5, burnRate: 0.1, daysRemaining: 50, urgency: 'LOW' },
+        {
+          itemId: 'ITEM-GLOVES',
+          currentStock: 50,
+          burnRate: 20,
+          daysRemaining: 2.5,
+          urgency: 'HIGH',
+        },
+        {
+          itemId: 'ITEM-SENSORY-SAND',
+          currentStock: 5,
+          burnRate: 0.1,
+          daysRemaining: 50,
+          urgency: 'LOW',
+        },
       ],
     };
   }

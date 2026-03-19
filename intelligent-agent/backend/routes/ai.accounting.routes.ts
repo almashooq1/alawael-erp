@@ -43,7 +43,7 @@ router.get('/health', async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       status: 'disconnected',
-      message: error.message || 'Accounting integration failed',
+      message: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -72,7 +72,7 @@ router.get('/summary', async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: error.message || 'Failed to load accounting summary',
+      message: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -96,7 +96,7 @@ router.get('/insights', async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: error.message || 'Failed to generate insights',
+      message: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -120,7 +120,7 @@ router.get('/reports/advanced', async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: error.message || 'Failed to generate advanced accounting report',
+      message: 'حدث خطأ في الخادم',
     });
   }
 });
@@ -144,7 +144,7 @@ router.get('/forecast', async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: error.message || 'Failed to generate financial forecast',
+      message: 'حدث خطأ في الخادم',
     });
   }
 });

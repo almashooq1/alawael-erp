@@ -1,9 +1,10 @@
+/* eslint-disable no-unused-vars */
 /**
  * ═══════════════════════════════════════════════════════════════════════
  * ADVANCED ANALYTICS & PREDICTIVE SYSTEM
  * نظام التحليلات المتقدمة والتنبؤات الذكية
  * ═══════════════════════════════════════════════════════════════════════
- * 
+ *
  * Features:
  * ✅ Machine Learning Predictions
  * ✅ Anomaly Detection
@@ -17,6 +18,7 @@
 const EventEmitter = require('events');
 const fs = require('fs').promises;
 const path = require('path');
+const logger = require('../utils/logger');
 
 class AdvancedAnalytics extends EventEmitter {
   constructor(options = {}) {
@@ -41,10 +43,10 @@ class AdvancedAnalytics extends EventEmitter {
     try {
       await fs.mkdir(this.dataPath, { recursive: true });
       await this.loadAnalyticsData();
-      console.log('✅ Analytics system initialized');
+      // console.log('✅ Analytics system initialized');
       this.startContinuousAnalysis();
     } catch (error) {
-      console.error('❌ Analytics initialization failed:', error.message);
+      logger.error('❌ Analytics initialization failed:', error.message);
     }
   }
 
@@ -81,7 +83,7 @@ class AdvancedAnalytics extends EventEmitter {
 
       return analysis;
     } catch (error) {
-      console.error('❌ Performance analysis failed:', error.message);
+      logger.error('❌ Performance analysis failed:', error.message);
       throw error;
     }
   }
@@ -113,8 +115,10 @@ class AdvancedAnalytics extends EventEmitter {
       }
 
       // Check compression ratio
-      const avgCompression = durations.length > 0 ? 
-        this.metrics.reduce((sum, m) => sum + m.compressionRatio, 0) / this.metrics.length : 0;
+      const avgCompression =
+        durations.length > 0
+          ? this.metrics.reduce((sum, m) => sum + m.compressionRatio, 0) / this.metrics.length
+          : 0;
 
       if (backupData.compressionRatio < avgCompression * 0.5) {
         anomalies.push({
@@ -151,7 +155,7 @@ class AdvancedAnalytics extends EventEmitter {
   predictSuccessRate(daysAhead = 7) {
     try {
       const recentMetrics = this.getRecentMetrics(7);
-      
+
       if (recentMetrics.length === 0) {
         return { prediction: 95, confidence: 0.5, reason: 'Insufficient historical data' };
       }
@@ -161,7 +165,7 @@ class AdvancedAnalytics extends EventEmitter {
 
       // Simple trend extrapolation
       const trend = this.calculateTrend(recentMetrics);
-      const prediction = Math.min(100, Math.max(0, currentRate + (trend * daysAhead)));
+      const prediction = Math.min(100, Math.max(0, currentRate + trend * daysAhead));
 
       return {
         prediction: parseFloat(prediction.toFixed(2)),
@@ -171,8 +175,8 @@ class AdvancedAnalytics extends EventEmitter {
         daysAhead,
       };
     } catch (error) {
-      console.error('❌ Success rate prediction failed:', error.message);
-      return { prediction: 95, confidence: 0, error: error.message };
+      logger.error('❌ Success rate prediction failed:', error.message);
+      return { prediction: 95, confidence: 0, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -188,7 +192,8 @@ class AdvancedAnalytics extends EventEmitter {
         return { estimation: 300000, confidence: 0.2, reason: 'No historical data' };
       }
 
-      const avgDuration = recentMetrics.reduce((sum, m) => sum + m.duration, 0) / recentMetrics.length;
+      const avgDuration =
+        recentMetrics.reduce((sum, m) => sum + m.duration, 0) / recentMetrics.length;
       const avgSize = recentMetrics.reduce((sum, m) => sum + m.size, 0) / recentMetrics.length;
 
       let estimation = avgDuration;
@@ -200,9 +205,11 @@ class AdvancedAnalytics extends EventEmitter {
       }
 
       // Calculate throughput
-      const throughput = recentMetrics.length > 0 ?
-        recentMetrics.reduce((sum, m) => sum + m.size, 0) / 
-        (recentMetrics.reduce((sum, m) => sum + m.duration, 0) / 1000) : 0;
+      const throughput =
+        recentMetrics.length > 0
+          ? recentMetrics.reduce((sum, m) => sum + m.size, 0) /
+            (recentMetrics.reduce((sum, m) => sum + m.duration, 0) / 1000)
+          : 0;
 
       return {
         estimatedDuration: Math.round(estimation),
@@ -212,8 +219,8 @@ class AdvancedAnalytics extends EventEmitter {
         baselineMetrics: recentMetrics.length,
       };
     } catch (error) {
-      console.error('❌ Duration estimation failed:', error.message);
-      return { estimatedDuration: 300000, confidence: 0, error: error.message };
+      logger.error('❌ Duration estimation failed:', error.message);
+      return { estimatedDuration: 300000, confidence: 0, error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -231,7 +238,8 @@ class AdvancedAnalytics extends EventEmitter {
       }
 
       // Recommendation 1: Compression
-      const avgCompression = metrics.reduce((sum, m) => sum + m.compressionRatio, 0) / metrics.length;
+      const avgCompression =
+        metrics.reduce((sum, m) => sum + m.compressionRatio, 0) / metrics.length;
       if (avgCompression < 40) {
         recommendations.push({
           type: 'COMPRESSION',
@@ -245,7 +253,8 @@ class AdvancedAnalytics extends EventEmitter {
 
       // Recommendation 2: Backup timing
       const avgDuration = metrics.reduce((sum, m) => sum + m.duration, 0) / metrics.length;
-      if (avgDuration > 60 * 60 * 1000) { // > 1 hour
+      if (avgDuration > 60 * 60 * 1000) {
+        // > 1 hour
         recommendations.push({
           type: 'SCHEDULING',
           priority: 'MEDIUM',
@@ -284,7 +293,7 @@ class AdvancedAnalytics extends EventEmitter {
 
       return recommendations;
     } catch (error) {
-      console.error('❌ Recommendation generation failed:', error.message);
+      logger.error('❌ Recommendation generation failed:', error.message);
       return [];
     }
   }
@@ -357,8 +366,8 @@ class AdvancedAnalytics extends EventEmitter {
         baselineMetrics: metrics.length,
       };
     } catch (error) {
-      console.error('❌ Risk assessment failed:', error.message);
-      return { riskScore: 50, riskLevel: 'UNKNOWN', error: error.message };
+      logger.error('❌ Risk assessment failed:', error.message);
+      return { riskScore: 50, riskLevel: 'UNKNOWN', error: 'حدث خطأ داخلي' };
     }
   }
 
@@ -413,7 +422,7 @@ class AdvancedAnalytics extends EventEmitter {
       this.anomalies = data.anomalies || [];
       this.recommendations = data.recommendations || [];
     } catch (error) {
-      console.log('ℹ️  No analytics data found, starting fresh');
+      // console.log('ℹ️  No analytics data found, starting fresh');
     }
   }
 
@@ -429,8 +438,13 @@ class AdvancedAnalytics extends EventEmitter {
         summary: {
           totalBackups: this.metrics.length,
           successfulBackups: this.metrics.filter(m => m.success).length,
-          successRate: ((this.metrics.filter(m => m.success).length / this.metrics.length) * 100).toFixed(2),
-          averageDuration: Math.round(this.metrics.reduce((sum, m) => sum + m.duration, 0) / this.metrics.length),
+          successRate: (
+            (this.metrics.filter(m => m.success).length / this.metrics.length) *
+            100
+          ).toFixed(2),
+          averageDuration: Math.round(
+            this.metrics.reduce((sum, m) => sum + m.duration, 0) / this.metrics.length
+          ),
           totalDataSize: this.metrics.reduce((sum, m) => sum + m.size, 0),
         },
         predictions: {
@@ -444,7 +458,7 @@ class AdvancedAnalytics extends EventEmitter {
 
       return report;
     } catch (error) {
-      console.error('❌ Report export failed:', error.message);
+      logger.error('❌ Report export failed:', error.message);
       throw error;
     }
   }

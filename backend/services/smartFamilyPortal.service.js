@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const TherapySession = require('../models/TherapySession');
 const Invoice = require('../models/Invoice');
 const TherapeuticPlan = require('../models/TherapeuticPlan');
@@ -26,7 +27,10 @@ class SmartFamilyPortalService {
     const totalDue = pendingInvoices.reduce((acc, inv) => acc + inv.totalAmount, 0);
 
     // 3. Clinical Progress Snippet
-    const activePlan = await TherapeuticPlan.findOne({ beneficiary: beneficiaryId, status: 'ACTIVE' });
+    const activePlan = await TherapeuticPlan.findOne({
+      beneficiary: beneficiaryId,
+      status: 'ACTIVE',
+    });
     let latestGoal = 'No active goals';
     if (activePlan && activePlan.disciplines.length > 0) {
       // Just grab the first active short term goal

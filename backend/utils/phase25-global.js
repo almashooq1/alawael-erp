@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // Phase 25: Global Expansion
 // Multi-Currency, Multi-Language, Regional Compliance, Tax Calculation
 
@@ -45,7 +46,7 @@ class MultiCurrencyEngine {
 
   convertCurrency(amount, fromCurrency, toCurrency) {
     const rateKey = `${fromCurrency}_${toCurrency}`;
-    const reverseKey = `${toCurrency}${fromCurrency}`;
+    const _reverseKey = `${toCurrency}${fromCurrency}`;
 
     let rate = this.exchangeRates.get(rateKey);
     if (!rate) {

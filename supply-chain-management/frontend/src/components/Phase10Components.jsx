@@ -4,19 +4,12 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import {
-  Wifi,
-  Zap,
-  Globe,
-  PlugIcon,
-  Clock,
-  AlertTriangle
-} from 'lucide-react';
+import { Wifi, Zap, Globe, PlugIcon, Clock, AlertTriangle } from 'lucide-react';
 
 // ==================== REAL-TIME COMPONENTS ====================
 
 export const RealtimeStatusComponent = () => {
-  const [status, status.setStatus] = useState('disconnected');
+  const [status, setStatus] = useState('disconnected');
   const [connectionTime, setConnectionTime] = useState(null);
   const [messageCount, setMessageCount] = useState(0);
 
@@ -32,8 +25,8 @@ export const RealtimeStatusComponent = () => {
           setConnectionTime(new Date());
         };
 
-        ws.onmessage = (event) => {
-          setMessageCount((prev) => prev + 1);
+        ws.onmessage = event => {
+          setMessageCount(prev => prev + 1);
         };
 
         ws.onclose = () => {
@@ -59,8 +52,8 @@ export const RealtimeStatusComponent = () => {
             status === 'connected'
               ? 'text-green-600'
               : status === 'error'
-              ? 'text-red-600'
-              : 'text-gray-400'
+                ? 'text-red-600'
+                : 'text-gray-400'
           }`}
         />
         <h2 className="text-xl font-bold">Real-time Connection</h2>
@@ -74,8 +67,8 @@ export const RealtimeStatusComponent = () => {
               status === 'connected'
                 ? 'text-green-600'
                 : status === 'error'
-                ? 'text-red-600'
-                : 'text-yellow-600'
+                  ? 'text-red-600'
+                  : 'text-yellow-600'
             }`}
           >
             {status.toUpperCase()}
@@ -84,17 +77,13 @@ export const RealtimeStatusComponent = () => {
 
         <div className="bg-gray-50 rounded p-4">
           <p className="text-gray-600 text-sm">Messages</p>
-          <p className="text-2xl font-bold mt-2 text-blue-600">
-            {messageCount}
-          </p>
+          <p className="text-2xl font-bold mt-2 text-blue-600">{messageCount}</p>
         </div>
 
         <div className="bg-gray-50 rounded p-4 col-span-2">
           <p className="text-gray-600 text-sm">Connected Since</p>
           <p className="text-sm mt-2">
-            {connectionTime
-              ? connectionTime.toLocaleString()
-              : 'Not connected'}
+            {connectionTime ? connectionTime.toLocaleString() : 'Not connected'}
           </p>
         </div>
       </div>
@@ -125,15 +114,11 @@ export const IntegrationManagementComponent = () => {
     }
   };
 
-  const testConnection = async (integrationName) => {
+  const testConnection = async integrationName => {
     try {
-      const response = await fetch(
-        `/api/integrations/${integrationName}/test`
-      );
+      const response = await fetch(`/api/integrations/${integrationName}/test`);
       const data = await response.json();
-      alert(
-        `Connection ${data.data.connected ? 'successful' : 'failed'}`
-      );
+      alert(`Connection ${data.data.connected ? 'successful' : 'failed'}`);
     } catch (error) {
       alert('Connection test failed');
     }
@@ -157,27 +142,21 @@ export const IntegrationManagementComponent = () => {
       {loading ? (
         <p className="text-center py-8">Loading integrations...</p>
       ) : integrations.length === 0 ? (
-        <p className="text-center py-8 text-gray-500">
-          No integrations configured
-        </p>
+        <p className="text-center py-8 text-gray-500">No integrations configured</p>
       ) : (
         <div className="space-y-4">
-          {integrations.map((integration) => (
+          {integrations.map(integration => (
             <div
               key={integration.name}
               className="border rounded-lg p-4 hover:shadow-md transition"
             >
               <div className="flex items-start justify-between">
                 <div>
-                  <h3 className="font-semibold text-lg">
-                    {integration.name}
-                  </h3>
+                  <h3 className="font-semibold text-lg">{integration.name}</h3>
                   <p className="text-sm text-gray-600 mt-1">
                     Last sync:{' '}
                     {integration.lastSync
-                      ? new Date(
-                          integration.lastSync
-                        ).toLocaleString()
+                      ? new Date(integration.lastSync).toLocaleString()
                       : 'Never'}
                   </p>
                 </div>
@@ -222,10 +201,7 @@ export const IntegrationManagementComponent = () => {
 
 // ==================== I18N COMPONENTS ====================
 
-export const LanguageSelectorComponent = ({
-  onLanguageChange,
-  currentLanguage = 'en'
-}) => {
+export const LanguageSelectorComponent = ({ onLanguageChange, currentLanguage = 'en' }) => {
   const [languages, setLanguages] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -253,10 +229,10 @@ export const LanguageSelectorComponent = ({
       ) : (
         <select
           value={currentLanguage}
-          onChange={(e) => onLanguageChange(e.target.value)}
+          onChange={e => onLanguageChange(e.target.value)}
           className="border rounded px-3 py-2 text-sm font-medium"
         >
-          {languages.map((lang) => (
+          {languages.map(lang => (
             <option key={lang.code} value={lang.code}>
               {lang.flag} {lang.nativeName}
             </option>
@@ -282,17 +258,15 @@ export const LocaleFormatterComponent = () => {
         body: JSON.stringify({
           language,
           type: formatType,
-          value
-        })
+          value,
+        }),
       });
 
       const data = await response.json();
       setFormatted(data.data.formatted);
 
       // Get text direction
-      const dirResponse = await fetch(
-        `/api/i18n/text-direction/${language}`
-      );
+      const dirResponse = await fetch(`/api/i18n/text-direction/${language}`);
       const dirData = await dirResponse.json();
       setTextDirection(dirData.data.direction);
     } catch (error) {
@@ -310,12 +284,10 @@ export const LocaleFormatterComponent = () => {
       <div className="space-y-4">
         <div className="grid grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-2">
-              Language
-            </label>
+            <label className="block text-sm font-medium mb-2">Language</label>
             <select
               value={language}
-              onChange={(e) => setLanguage(e.target.value)}
+              onChange={e => setLanguage(e.target.value)}
               className="w-full border rounded px-3 py-2 text-sm"
             >
               <option value="en">English</option>
@@ -329,12 +301,10 @@ export const LocaleFormatterComponent = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">
-              Format Type
-            </label>
+            <label className="block text-sm font-medium mb-2">Format Type</label>
             <select
               value={formatType}
-              onChange={(e) => setFormatType(e.target.value)}
+              onChange={e => setFormatType(e.target.value)}
               className="w-full border rounded px-3 py-2 text-sm"
             >
               <option value="currency">Currency</option>
@@ -344,13 +314,11 @@ export const LocaleFormatterComponent = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">
-              Value
-            </label>
+            <label className="block text-sm font-medium mb-2">Value</label>
             <input
               type="text"
               value={value}
-              onChange={(e) => setValue(e.target.value)}
+              onChange={e => setValue(e.target.value)}
               className="w-full border rounded px-3 py-2 text-sm"
               placeholder="Enter value"
             />
@@ -365,10 +333,7 @@ export const LocaleFormatterComponent = () => {
         </button>
 
         {formatted && (
-          <div
-            className="bg-gray-50 rounded p-4 border border-gray-200"
-            dir={textDirection}
-          >
+          <div className="bg-gray-50 rounded p-4 border border-gray-200" dir={textDirection}>
             <p className="text-sm text-gray-600">Formatted Result:</p>
             <p className="text-2xl font-bold mt-2">{formatted}</p>
             <p className="text-xs text-gray-500 mt-2">
@@ -390,16 +355,13 @@ export const NotificationCenterComponent = () => {
   useEffect(() => {
     const connectWebSocket = () => {
       try {
-        const protocol =
-          window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const socket = new WebSocket(
-          `${protocol}//${window.location.host}/ws`
-        );
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const socket = new WebSocket(`${protocol}//${window.location.host}/ws`);
 
-        socket.onmessage = (event) => {
+        socket.onmessage = event => {
           const message = JSON.parse(event.data);
           if (message.type === 'notification') {
-            setNotifications((prev) => [message.data, ...prev].slice(0, 10));
+            setNotifications(prev => [message.data, ...prev].slice(0, 10));
           }
         };
 
@@ -422,16 +384,12 @@ export const NotificationCenterComponent = () => {
         <Zap className="w-6 h-6 text-yellow-600" />
         <h2 className="text-xl font-bold">Notifications</h2>
         {ws && ws.readyState === WebSocket.OPEN && (
-          <span className="ml-auto text-xs text-green-600 font-semibold">
-            Live
-          </span>
+          <span className="ml-auto text-xs text-green-600 font-semibold">Live</span>
         )}
       </div>
 
       {notifications.length === 0 ? (
-        <p className="text-center py-8 text-gray-500">
-          No notifications
-        </p>
+        <p className="text-center py-8 text-gray-500">No notifications</p>
       ) : (
         <div className="space-y-3">
           {notifications.map((notif, idx) => (
@@ -441,13 +399,11 @@ export const NotificationCenterComponent = () => {
                 notif.type === 'error'
                   ? 'border-red-500 bg-red-50'
                   : notif.type === 'success'
-                  ? 'border-green-500 bg-green-50'
-                  : 'border-blue-500 bg-blue-50'
+                    ? 'border-green-500 bg-green-50'
+                    : 'border-blue-500 bg-blue-50'
               }`}
             >
-              <p className="font-semibold text-sm">
-                {notif.message}
-              </p>
+              <p className="font-semibold text-sm">{notif.message}</p>
               {notif.timestamp && (
                 <p className="text-xs text-gray-500 mt-1">
                   {new Date(notif.timestamp).toLocaleTimeString()}
@@ -466,5 +422,5 @@ export default {
   IntegrationManagementComponent,
   LanguageSelectorComponent,
   LocaleFormatterComponent,
-  NotificationCenterComponent
+  NotificationCenterComponent,
 };

@@ -1,7 +1,10 @@
+/* eslint-disable no-unused-vars */
 /**
  * Rehabilitation Dashboard Module
  * وحدة لوحة تحكم مراكز التأهيل
  */
+
+const logger = require('../utils/logger');
 
 const {
   RehabilitationDashboardService,
@@ -16,7 +19,7 @@ const rehabilitationDashboardRoutes = require('./rehabilitation-dashboard-routes
  */
 async function initialize(connection, services = {}) {
   await rehabilitationDashboardService.initialize(connection, services);
-  console.log('✅ Rehabilitation Dashboard Module initialized');
+  logger.info('✅ Rehabilitation Dashboard Module initialized');
   return { rehabilitationDashboardService };
 }
 
@@ -45,13 +48,13 @@ module.exports = {
   // Service
   RehabilitationDashboardService,
   rehabilitationDashboardService,
-  
+
   // Configuration
   dashboardConfig,
-  
+
   // Routes
   rehabilitationDashboardRoutes,
-  
+
   // Helpers
   initialize,
   getServices,

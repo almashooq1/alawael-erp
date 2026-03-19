@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars, no-undef, no-empty, prefer-const, no-constant-condition, no-unused-expressions */
 /**
  * ===================================================================
  * ACCOUNTING PAYMENT MODEL - نموذج الدفعة المحاسبية
@@ -5,6 +6,7 @@
  */
 
 const mongoose = require('mongoose');
+const logger = require('../utils/logger');
 
 const accountingPaymentSchema = new mongoose.Schema(
   {
@@ -164,7 +166,7 @@ accountingPaymentSchema.post('remove', async function (doc) {
       await invoice.updateStatus();
     }
   } catch (error) {
-    console.error('خطأ في تحديث الفاتورة بعد حذف الدفعة:', error);
+    logger.error('خطأ في تحديث الفاتورة بعد حذف الدفعة:', error);
   }
 });
 

@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+const logger = require('../utils/logger');
 /**
  * Smart Simulation & Forecasting Service (Phase 96)
  *
@@ -11,7 +13,7 @@ class SmartSimulationService {
    */
   async simulateIntervention(patientId, currentTwin, proposedChange) {
     // proposedChange: { type: 'INCREASE_THERAPY', hours: 2, discipline: 'SPEECH' }
-    console.log(`Simulating future for ${patientId} with change: ${proposedChange.type}`);
+    logger.info(`Simulating future for ${patientId} with change: ${proposedChange.type}`);
 
     // Mock Prediction Logic (The "Crystal Ball")
     const prediction = {
@@ -116,7 +118,9 @@ class SmartSimulationService {
     return {
       date,
       profile: dayProfile,
-      bottlenecks: simulationLog.filter(l => l.waitingRoomStatus === 'OVERCROWDED' || l.parkingStatus === 'FULL'),
+      bottlenecks: simulationLog.filter(
+        l => l.waitingRoomStatus === 'OVERCROWDED' || l.parkingStatus === 'FULL'
+      ),
       hourlyFlow: simulationLog,
     };
   }

@@ -1,5 +1,7 @@
+/* eslint-disable no-unused-vars */
 const Asset = require('../models/Asset');
 const logger = require('../utils/logger');
+const { escapeRegex } = require('../utils/sanitize');
 
 class AssetManagementService {
   /**
@@ -7,7 +9,7 @@ class AssetManagementService {
    */
   async getAllAssets(query = {}) {
     try {
-      let mongoQuery = {};
+      const mongoQuery = {};
 
       // Filter by status
       if (query.status) {
@@ -27,8 +29,8 @@ class AssetManagementService {
       // Search by name or description
       if (query.search) {
         mongoQuery.$or = [
-          { name: { $regex: query.search, $options: 'i' } },
-          { description: { $regex: query.search, $options: 'i' } }
+          { name: { $regex: escapeRegex(query.search), $options: 'i' } },
+          { description: { $regex: escapeRegex(query.search), $options: 'i' } },
         ];
       }
 
@@ -55,9 +57,9 @@ class AssetManagementService {
         value: data.value || 0,
         location: data.location || 'Unknown',
         status: data.status || 'active',
-        depreciationRate: data.depreciationRate || 0.10,
+        depreciationRate: data.depreciationRate || 0.1,
         createdBy: data.createdBy,
-        tags: data.tags || []
+        tags: data.tags || [],
       });
 
       const saved = await asset.save();
@@ -74,8 +76,7 @@ class AssetManagementService {
    */
   async getAssetById(assetId) {
     try {
-      const asset = await Asset.findById(assetId)
-        .populate('createdBy', 'firstName lastName email');
+      const asset = await Asset.findById(assetId).populate('createdBy', 'firstName lastName email');
 
       if (!asset) return null;
       return asset;
@@ -149,7 +150,7 @@ class AssetManagementService {
       const report = {
         generatedAt: new Date(),
         totalAssets: assets.length,
-        assets: []
+        assets: [],
       };
 
       let totalOriginalValue = 0;
@@ -160,10 +161,8 @@ class AssetManagementService {
           (Date.now() - asset.purchaseDate.getTime()) / (30 * 24 * 60 * 60 * 1000)
         );
 
-        const depreciatedValue = asset.value * Math.pow(
-          1 - asset.depreciationRate,
-          monthsOwned / 12
-        );
+        const depreciatedValue =
+          asset.value * Math.pow(1 - asset.depreciationRate, monthsOwned / 12);
 
         const totalDepreciation = asset.value - depreciatedValue;
 
@@ -179,7 +178,7 @@ class AssetManagementService {
           monthsOwned,
           depreciationRate: asset.depreciationRate,
           totalDepreciation: Math.round(totalDepreciation),
-          depreciationPercentage: ((totalDepreciation / asset.value) * 100).toFixed(2)
+          depreciationPercentage: ((totalDepreciation / asset.value) * 100).toFixed(2),
         });
       });
 
@@ -187,9 +186,10 @@ class AssetManagementService {
         totalOriginalValue,
         totalDepreciatedValue: Math.round(totalDepreciatedValue),
         totalDepreciation: Math.round(totalOriginalValue - totalDepreciatedValue),
-        depreciationPercentage: totalOriginalValue > 0
-          ? (((totalOriginalValue - totalDepreciatedValue) / totalOriginalValue) * 100).toFixed(2)
-          : 0
+        depreciationPercentage:
+          totalOriginalValue > 0
+            ? (((totalOriginalValue - totalDepreciatedValue) / totalOriginalValue) * 100).toFixed(2)
+            : 0,
       };
 
       return report;
@@ -209,13 +209,13 @@ class AssetManagementService {
       return {
         status: 'healthy',
         assetsCount: count,
-        lastChecked: new Date()
+        lastChecked: new Date(),
       };
     } catch (error) {
       logger.error('Error in getHealthStatus:', error);
       return {
         status: 'error',
-        error: error.message
+        error: 'حدث خطأ داخلي',
       };
     }
   }
@@ -227,5 +227,5 @@ const assetManagementService = new AssetManagementService();
 module.exports = {
   AssetManagementService,
   assetManagementService,
-  assetService: assetManagementService
+  assetService: assetManagementService,
 };

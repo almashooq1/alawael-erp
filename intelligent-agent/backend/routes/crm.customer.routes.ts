@@ -4,7 +4,7 @@ import Customer from '../models/crm.customer.model';
 const router = express.Router();
 
 // Get all customers
-router.get('/', async (req, res) => {
+router.get('/', async (_req, res) => {
   try {
     const customers = await Customer.find();
     res.json(customers);
@@ -39,7 +39,12 @@ router.post('/', async (req, res) => {
 // Update customer
 router.put('/:id', async (req, res) => {
   try {
-    const customer = await Customer.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const { name, email, phone, company, status, notes, address, industry } = req.body;
+    const customer = await Customer.findByIdAndUpdate(
+      req.params.id,
+      { name, email, phone, company, status, notes, address, industry },
+      { new: true },
+    );
     if (!customer) return res.status(404).json({ error: 'Customer not found' });
     res.json(customer);
   } catch (err) {

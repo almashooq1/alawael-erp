@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * API Performance Benchmark
  * قياس أداء الـ API
@@ -135,12 +136,18 @@ async function benchmarkEndpoint(endpoint, requestCount) {
   const failedResponses = responses.filter(r => !r.success);
 
   const avgTime = successfulResponses.length
-    ? (successfulResponses.reduce((sum, r) => sum + r.responseTime, 0) / successfulResponses.length).toFixed(2)
+    ? (
+        successfulResponses.reduce((sum, r) => sum + r.responseTime, 0) / successfulResponses.length
+      ).toFixed(2)
     : 'N/A';
 
-  const minTime = successfulResponses.length ? Math.min(...successfulResponses.map(r => r.responseTime)) : 'N/A';
+  const minTime = successfulResponses.length
+    ? Math.min(...successfulResponses.map(r => r.responseTime))
+    : 'N/A';
 
-  const maxTime = successfulResponses.length ? Math.max(...successfulResponses.map(r => r.responseTime)) : 'N/A';
+  const maxTime = successfulResponses.length
+    ? Math.max(...successfulResponses.map(r => r.responseTime))
+    : 'N/A';
 
   const slowCount = successfulResponses.filter(r => r.responseTime > 1000).length;
 
@@ -162,9 +169,11 @@ async function benchmarkEndpoint(endpoint, requestCount) {
     results.slowRequests.push({
       endpoint: endpoint.name,
       slowCount,
-      avgSlowTime: (successfulResponses.filter(r => r.responseTime > 1000).reduce((sum, r) => sum + r.responseTime, 0) / slowCount).toFixed(
-        2,
-      ),
+      avgSlowTime: (
+        successfulResponses
+          .filter(r => r.responseTime > 1000)
+          .reduce((sum, r) => sum + r.responseTime, 0) / slowCount
+      ).toFixed(2),
     });
   }
 
@@ -198,7 +207,7 @@ function generateReport() {
     ['Total Requests', results.totalRequests],
     ['Total Time', `${results.totalTime}ms`],
     ['Average Response Time', `${(results.totalTime / results.totalRequests).toFixed(2)}ms`],
-    ['Slow Requests (>1000ms)', results.slowRequests.length],
+    ['Slow Requests (>1000ms)', results.slowRequests.length]
   );
 
   console.log('📈 Summary:');
@@ -248,14 +257,18 @@ function generateReport() {
   // Check for slow endpoints
   Object.entries(results.endpoints).forEach(([name, stats]) => {
     if (parseFloat(stats.avgTime) > 500) {
-      recommendations.push(`  • ${name}: High average response time (${stats.avgTime}ms). Consider adding caching or optimization.`);
+      recommendations.push(
+        `  • ${name}: High average response time (${stats.avgTime}ms). Consider adding caching or optimization.`
+      );
     }
   });
 
   // Check for failures
   Object.entries(results.endpoints).forEach(([name, stats]) => {
     if (stats.failureCount > 0) {
-      recommendations.push(`  • ${name}: ${stats.failureCount} failed requests. Check error handling and timeouts.`);
+      recommendations.push(
+        `  • ${name}: ${stats.failureCount} failed requests. Check error handling and timeouts.`
+      );
     }
   });
 

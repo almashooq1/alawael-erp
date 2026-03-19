@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * Advanced Search Service Tests
  * اختبارات الخدمة المتقدمة للبحث
@@ -112,17 +114,23 @@ describe('AdvancedSearchService Tests', () => {
   // ============================================
   describe('Filter Operations', () => {
     test('should filter by exact value', () => {
-      const result = searchService.filter(sampleData, [{ field: 'status', operator: 'equals', value: 'active' }]);
+      const result = searchService.filter(sampleData, [
+        { field: 'status', operator: 'equals', value: 'active' },
+      ]);
       assert(result.length === 2, 'Should find 2 active users');
     });
 
     test('should filter with greater than operator', () => {
-      const result = searchService.filter(sampleData, [{ field: 'salary', operator: 'gt', value: 4600 }]);
+      const result = searchService.filter(sampleData, [
+        { field: 'salary', operator: 'gt', value: 4600 },
+      ]);
       assert(result.length === 2, 'Should find users with salary > 4600');
     });
 
     test('should filter with less than operator', () => {
-      const result = searchService.filter(sampleData, [{ field: 'salary', operator: 'lt', value: 5000 }]);
+      const result = searchService.filter(sampleData, [
+        { field: 'salary', operator: 'lt', value: 5000 },
+      ]);
       assert(result.length === 1, 'Should find users with salary < 5000');
     });
 
@@ -135,17 +143,23 @@ describe('AdvancedSearchService Tests', () => {
     });
 
     test('should filter with IN operator', () => {
-      const result = searchService.filter(sampleData, [{ field: 'department', operator: 'in', value: ['Engineering', 'Marketing'] }]);
+      const result = searchService.filter(sampleData, [
+        { field: 'department', operator: 'in', value: ['Engineering', 'Marketing'] },
+      ]);
       assert(result.length === 3, 'Should find all Engineering and Marketing members');
     });
 
     test('should filter with CONTAINS operator', () => {
-      const result = searchService.filter(sampleData, [{ field: 'email', operator: 'contains', value: '@example.com' }]);
+      const result = searchService.filter(sampleData, [
+        { field: 'email', operator: 'contains', value: '@example.com' },
+      ]);
       assert(result.length === 3, 'Should find all with @example.com email');
     });
 
     test('should handle date range filter', () => {
-      const result = searchService.filter(sampleData, [{ field: 'joinDate', operator: 'gte', value: '2023-01-01' }]);
+      const result = searchService.filter(sampleData, [
+        { field: 'joinDate', operator: 'gte', value: '2023-01-01' },
+      ]);
       assert(result.length === 2, 'Should find users joined after 2023-01-01');
     });
   });
@@ -378,7 +392,10 @@ describe('AdvancedSearchService Tests', () => {
     test('should cache frequently used facets', () => {
       const result1 = searchService.generateFacets(sampleData, 'department');
       const result2 = searchService.generateFacets(sampleData, 'department');
-      assert(JSON.stringify(result1) === JSON.stringify(result2), 'Should return consistent results');
+      assert(
+        JSON.stringify(result1) === JSON.stringify(result2),
+        'Should return consistent results'
+      );
     });
   });
 

@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-undef */
 const Joi = require('joi');
 const { authValidators, employeeValidators } = require('../utils/validators');
 
@@ -59,7 +61,12 @@ describe('Validators', () => {
       });
 
       it('should allow various valid email formats', () => {
-        const validEmails = ['user@example.com', 'user.name@example.com', 'user+tag@example.co.uk', 'user_name@example.org'];
+        const validEmails = [
+          'user@example.com',
+          'user.name@example.com',
+          'user+tag@example.co.uk',
+          'user_name@example.org',
+        ];
 
         validEmails.forEach(email => {
           const result = authValidators.login.validate({
@@ -145,7 +152,9 @@ describe('Validators', () => {
           salary: 5000,
         };
 
-        const result = authValidators.employee?.create?.validate?.(validData) || { value: validData };
+        const result = authValidators.employee?.create?.validate?.(validData) || {
+          value: validData,
+        };
 
         expect(result.value).toBeDefined();
       });

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const db = require('../config/inMemoryDB');
 
 class Attendance {
@@ -26,7 +27,12 @@ class Attendance {
       const attendances = db.read().attendances || [];
       const dateStr = new Date(date).toISOString().split('T')[0];
 
-      return attendances.find(a => a.employeeId === employeeId && new Date(a.date).toISOString().split('T')[0] === dateStr) || null;
+      return (
+        attendances.find(
+          a =>
+            a.employeeId === employeeId && new Date(a.date).toISOString().split('T')[0] === dateStr
+        ) || null
+      );
     } catch (error) {
       throw error;
     }
@@ -47,7 +53,9 @@ class Attendance {
       const start = new Date(startDate);
       const end = new Date(endDate);
 
-      return attendances.filter(a => a.employeeId === employeeId && new Date(a.date) >= start && new Date(a.date) <= end);
+      return attendances.filter(
+        a => a.employeeId === employeeId && new Date(a.date) >= start && new Date(a.date) <= end
+      );
     } catch (error) {
       throw error;
     }

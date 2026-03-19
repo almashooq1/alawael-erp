@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const axios = require('axios');
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
@@ -11,7 +12,9 @@ const API_URL = 'http://127.0.0.1:3001/api/ai-predictions';
 
 // Generate a valid token
 const userId = 'user-123'; // Mock user ID
-const token = jwt.sign({ userId: userId, email: 'demo@alawael.com', role: 'admin' }, JWT_SECRET, { expiresIn: '1h' });
+const token = jwt.sign({ userId: userId, email: 'demo@alawael.com', role: 'admin' }, JWT_SECRET, {
+  expiresIn: '1h',
+});
 
 const seedData = async () => {
   try {

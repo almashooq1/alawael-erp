@@ -1,11 +1,12 @@
+/* eslint-disable no-unused-vars */
 /**
  * ═══════════════════════════════════════════════════════════════════════
- * 
+ *
  *   Test Suite - نظام الألعاب التفاعلية لتأهيل ذوي الإعاقة
  *   Interactive Games Rehabilitation System - Comprehensive Tests
- * 
+ *
  *   مجموعة اختبارات شاملة للتحقق من جميع وظائف النظام
- * 
+ *
  * ═══════════════════════════════════════════════════════════════════════
  */
 
@@ -23,7 +24,7 @@ class RehabSystemTest {
   /**
    * دوال مساعدة للاختبارات - Test Helper Functions
    */
-  
+
   assertEqual(actual, expected, message) {
     this.totalTests++;
     if (actual === expected) {
@@ -32,11 +33,11 @@ class RehabSystemTest {
       return true;
     } else {
       this.failedTests++;
-      this.testResults.push({ 
-        status: 'FAIL', 
-        message, 
-        expected, 
-        actual 
+      this.testResults.push({
+        status: 'FAIL',
+        message,
+        expected,
+        actual,
       });
       return false;
     }
@@ -50,10 +51,10 @@ class RehabSystemTest {
       return true;
     } else {
       this.failedTests++;
-      this.testResults.push({ 
-        status: 'FAIL', 
-        message, 
-        error: 'Value is null or undefined' 
+      this.testResults.push({
+        status: 'FAIL',
+        message,
+        error: 'Value is null or undefined',
       });
       return false;
     }
@@ -67,10 +68,10 @@ class RehabSystemTest {
       return true;
     } else {
       this.failedTests++;
-      this.testResults.push({ 
-        status: 'FAIL', 
-        message, 
-        error: 'Condition is false' 
+      this.testResults.push({
+        status: 'FAIL',
+        message,
+        error: 'Condition is false',
       });
       return false;
     }
@@ -84,11 +85,11 @@ class RehabSystemTest {
       return true;
     } else {
       this.failedTests++;
-      this.testResults.push({ 
-        status: 'FAIL', 
-        message, 
-        expected: `> ${minimum}`, 
-        actual 
+      this.testResults.push({
+        status: 'FAIL',
+        message,
+        expected: `> ${minimum}`,
+        actual,
       });
       return false;
     }
@@ -102,7 +103,7 @@ class RehabSystemTest {
 
   testPatientManagement() {
     console.log('\n🧪 اختبار 1: إدارة المرضى');
-    
+
     // إضافة مريض
     const patient = this.system.addPatient({
       name: 'مريض تجريبي',
@@ -116,7 +117,7 @@ class RehabSystemTest {
       email: 'test@test.com',
       phone: '+201000000000',
       address: 'عنوان تجريبي',
-      emergencyContact: '+201111111111'
+      emergencyContact: '+201111111111',
     });
 
     this.assertNotNull(patient, 'يجب أن يتم إنشاء المريض بنجاح');
@@ -142,14 +143,14 @@ class RehabSystemTest {
 
   testTherapistManagement() {
     console.log('\n🧪 اختبار 2: إدارة المعالجين');
-    
+
     const therapist = this.system.addTherapist({
       name: 'د. معالج تجريبي',
       specialization: 'physical',
       credentials: ['شهادة 1', 'شهادة 2'],
       experience: 5,
       email: 'therapist@test.com',
-      phone: '+201222222222'
+      phone: '+201222222222',
     });
 
     this.assertNotNull(therapist, 'يجب إنشاء المعالج بنجاح');
@@ -160,7 +161,7 @@ class RehabSystemTest {
     // الحصول على المعالج
     const retrievedTherapist = this.system.getTherapist(therapist.id);
     this.assertNotNull(retrievedTherapist, 'يجب استرجاع المعالج بنجاح');
-    
+
     // الحصول على إحصائيات المعالج
     const stats = this.system.getTherapistStats(therapist.id);
     this.assertNotNull(stats, 'يجب الحصول على إحصائيات المعالج');
@@ -174,7 +175,7 @@ class RehabSystemTest {
 
   testGamesManagement() {
     console.log('\n🧪 اختبار 3: إدارة الألعاب');
-    
+
     const game = this.system.addGame({
       title: 'لعبة تجريبية',
       titleEn: 'Test Game',
@@ -189,7 +190,7 @@ class RehabSystemTest {
       instructions: 'تعليمات اللعبة',
       maxScore: 100,
       passingScore: 60,
-      levels: [{ level: 1, description: 'مستوى 1', duration: 5 }]
+      levels: [{ level: 1, description: 'مستوى 1', duration: 5 }],
     });
 
     this.assertNotNull(game, 'يجب إنشاء اللعبة بنجاح');
@@ -210,7 +211,7 @@ class RehabSystemTest {
 
   testSessionManagement() {
     console.log('\n🧪 اختبار 4: إدارة الجلسات');
-    
+
     // الحصول على أول مريض ومعالج ولعبة من النظام
     const patients = this.system.getAllPatients();
     const therapists = Array.from(this.system.therapists.values());
@@ -228,7 +229,7 @@ class RehabSystemTest {
       type: 'training',
       scheduledDate: new Date().toISOString(),
       duration: 15,
-      goals: ['هدف الجلسة']
+      goals: ['هدف الجلسة'],
     });
 
     this.assertNotNull(session, 'يجب إنشاء الجلسة بنجاح');
@@ -245,7 +246,7 @@ class RehabSystemTest {
       speed: 80,
       consistency: 85,
       independence: 90,
-      engagement: 95
+      engagement: 95,
     });
     this.assertEqual(completedSession.status, 'completed', 'يجب أن تكون الجلسة مكتملة');
     this.assertEqual(completedSession.results.score, 85, 'يجب حفظ النتيجة بشكل صحيح');
@@ -259,7 +260,7 @@ class RehabSystemTest {
 
   testProgressTracking() {
     console.log('\n🧪 اختبار 5: تتبع التقدم');
-    
+
     const patients = this.system.getAllPatients();
     if (patients.length === 0) {
       console.log('⚠️ تخطي الاختبار: لا يوجد مرضى');
@@ -279,7 +280,7 @@ class RehabSystemTest {
 
   testAchievements() {
     console.log('\n🧪 اختبار 6: الإنجازات');
-    
+
     const patients = this.system.getAllPatients();
     if (patients.length === 0) {
       console.log('⚠️ تخطي الاختبار: لا يوجد مرضى');
@@ -292,7 +293,7 @@ class RehabSystemTest {
       titleEn: 'Test Achievement',
       description: 'وصف الإنجاز',
       icon: '🏆',
-      points: 50
+      points: 50,
     });
 
     this.assertNotNull(achievement, 'يجب إنشاء الإنجاز بنجاح');
@@ -311,7 +312,7 @@ class RehabSystemTest {
 
   testAssessments() {
     console.log('\n🧪 اختبار 7: التقييمات');
-    
+
     const patients = this.system.getAllPatients();
     const therapists = Array.from(this.system.therapists.values());
 
@@ -328,7 +329,7 @@ class RehabSystemTest {
       motor: { score: 80 },
       scores: { overall: 82 },
       observations: 'ملاحظات التقييم',
-      recommendations: ['توصية 1', 'توصية 2']
+      recommendations: ['توصية 1', 'توصية 2'],
     });
 
     this.assertNotNull(assessment, 'يجب إنشاء التقييم بنجاح');
@@ -347,7 +348,7 @@ class RehabSystemTest {
 
   testExercises() {
     console.log('\n🧪 اختبار 8: التمارين المخصصة');
-    
+
     const patients = this.system.getAllPatients();
     const therapists = Array.from(this.system.therapists.values());
 
@@ -366,7 +367,7 @@ class RehabSystemTest {
       duration: 10,
       frequency: 'daily',
       instructions: ['خطوة 1', 'خطوة 2'],
-      targetAreas: ['الذراعين', 'الساقين']
+      targetAreas: ['الذراعين', 'الساقين'],
     });
 
     this.assertNotNull(exercise, 'يجب إنشاء التمرين بنجاح');
@@ -385,7 +386,7 @@ class RehabSystemTest {
 
   testReports() {
     console.log('\n🧪 اختبار 9: التقارير');
-    
+
     const patients = this.system.getAllPatients();
     if (patients.length === 0) {
       console.log('⚠️ تخطي الاختبار: لا يوجد مرضى');
@@ -406,7 +407,7 @@ class RehabSystemTest {
 
   testDashboard() {
     console.log('\n🧪 اختبار 10: لوحة المعلومات');
-    
+
     const patients = this.system.getAllPatients();
     if (patients.length === 0) {
       console.log('⚠️ تخطي الاختبار: لا يوجد مرضى');
@@ -427,7 +428,7 @@ class RehabSystemTest {
 
   testSystemStats() {
     console.log('\n🧪 اختبار 11: إحصائيات النظام');
-    
+
     const stats = this.system.getSystemStats();
     this.assertNotNull(stats, 'يجب الحصول على إحصائيات النظام');
     this.assertNotNull(stats.patients, 'يجب أن تحتوي على إحصائيات المرضى');
@@ -444,7 +445,7 @@ class RehabSystemTest {
 
   testSearchAndFilter() {
     console.log('\n🧪 اختبار 12: البحث والفلترة');
-    
+
     // البحث عن الألعاب
     const cognitiveGames = this.system.searchGames({ category: 'cognitive' });
     this.assertNotNull(cognitiveGames, 'يجب الحصول على نتائج بحث');
@@ -523,14 +524,16 @@ class RehabSystemTest {
     console.log(`✅ نجح:               ${this.passedTests}`);
     console.log(`❌ فشل:               ${this.failedTests}`);
     console.log(`⏱️  المدة:             ${duration} ثانية`);
-    console.log(`📊 معدل النجاح:       ${((this.passedTests / this.totalTests) * 100).toFixed(1)}%`);
-    
+    console.log(
+      `📊 معدل النجاح:       ${((this.passedTests / this.totalTests) * 100).toFixed(1)}%`
+    );
+
     if (this.failedTests === 0) {
       console.log('\n🎉 جميع الاختبارات نجحت! النظام جاهز للاستخدام');
     } else {
       console.log('\n⚠️ بعض الاختبارات فشلت. يرجى مراجعة الأخطاء أعلاه');
     }
-    
+
     console.log('\n═══════════════════════════════════════════════════════════\n');
   }
 }

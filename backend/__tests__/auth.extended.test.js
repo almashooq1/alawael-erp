@@ -5,7 +5,6 @@ const request = require('supertest');
 const app = require('../server');
 const db = require('../config/inMemoryDB');
 const jwt = require('jsonwebtoken');
-
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this-in-production';
 
 // === Global RBAC Mock ===

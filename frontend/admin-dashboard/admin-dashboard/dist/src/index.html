@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="api-base-url" content="https://api.example.com" />
+    <meta name="ws-url" content="wss://ws.example.com" />
+    <meta name="frontend-url" content="https://frontend.example.com" />
+    <title>Alaweal Center - لوحة التحكم الإدارية</title>
+    <script type="module" crossorigin src="/assets/main-DFR0ngT_.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/main-BFa_GlVY.css">
+  </head>
+  <body>
+    <!-- API Configuration -->
+    <script>
+      // Load from environment variables or use defaults
+      window.APP_CONFIG = {
+        API_BASE_URL: 'https://api.example.com' || 'http://localhost:3000/api',
+        WS_URL: 'wss://ws.example.com' || 'ws://localhost:3000',
+        FRONTEND_URL: 'https://frontend.example.com' || window.location.origin,
+        API_TIMEOUT: parseInt('10000' || '30000', 10),
+        NODE_ENV: 'production' || 'development',
+      };
+    </script>
+
+    <!-- Styles -->
+
+    <!-- Advanced Systems CSS (loaded dynamically) -->
+    <script>
+      // Load CSS for all advanced systems dynamically
+      window.addEventListener('DOMContentLoaded', () => {
+        import('/assets/systems-registry-CzLBibWJ.js').then(module => {
+          const systemsRegistry = module.default;
+          systemsRegistry.loadAllSystemsCSS();
+        });
+      });
+    </script>
+
+    <!-- Scripts -->
+
+    <script>
+      // Initialize connection status component
+      window.addEventListener('DOMContentLoaded', () => {
+        import('/assets/connection-status-Bjp5WHbh.js').then(module => {
+          const connectionStatus = module.default;
+          connectionStatus.mount('body');
+        });
+      });
+    </script>
+
+    <!-- Rest of your HTML content -->
+    <div id="app">
+      <div class="dashboard-header">
+        <div class="header-left">
+          <h1>لوحة التحكم الإدارية</h1>
+          <span class="role-badge admin">أدمن</span>
+        </div>
+        <div class="header-right">
+          <span class="user-name" id="adminUserName"></span>
+          <button class="btn-logout" id="logoutBtn">تسجيل الخروج</button>
+        </div>
+      </div>
+      <div class="main-content">
+        <nav class="main-nav">
+          <button class="tab-btn" data-section="dashboard">الرئيسية</button>
+          <button class="tab-btn" data-section="users">المستخدمون</button>
+          <button class="tab-btn" data-section="logs">سجل الأحداث</button>
+          <button class="tab-btn" data-section="permissions">إدارة الصلاحيات</button>
+          <button class="tab-btn" data-section="advanced-maintenance">إدارة الصيانة المتقدم</button>
+        </nav>
+        <section id="dashboardSection" class="content-section active"></section>
+        <section id="usersSection" class="content-section"></section>
+        <section id="logsSection" class="content-section">
+          <div class="logs-header">
+            <h2>سجل الأحداث</h2>
+            <div class="logs-actions">
+              <input type="text" id="logsSearch" placeholder="بحث في السجلات..." />
+              <select id="logsLevelFilter">
+                <option value="">كل المستويات</option>
+                <option value="info">معلومات</option>
+                <option value="warning">تحذير</option>
+                <option value="error">خطأ</option>
+              </select>
+              <button id="logsExportBtn">تصدير</button>
+            </div>
+          </div>
+          <div id="logsContainer" class="logs-list"></div>
+        </section>
+        <section id="permissionsSection" class="content-section">
+          <div class="permissions-header">
+            <h2>إدارة الصلاحيات والأدوار</h2>
+            <div class="permissions-actions">
+              <button id="addRoleBtn">إضافة دور</button>
+              <button id="addPermissionBtn">إضافة صلاحية</button>
+            </div>
+          </div>
+          <div class="permissions-roles">
+            <h3>الأدوار</h3>
+            <div id="rolesList"></div>
+          </div>
+          <div class="permissions-perms">
+            <h3>الصلاحيات</h3>
+            <div id="permissionsList"></div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </body>
+</html>

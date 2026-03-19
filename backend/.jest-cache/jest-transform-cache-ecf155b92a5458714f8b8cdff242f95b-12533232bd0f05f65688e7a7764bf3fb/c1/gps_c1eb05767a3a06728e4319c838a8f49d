@@ -1,0 +1,100 @@
+eff86f2469afc52acd410cddf279c8ac
+/**
+ * GPS Tracking Routes
+ * مسارات تتبع GPS المتقدمة
+ * Phase 30 - Real-time GPS Tracking
+ */
+
+const express = require('express');
+const GPSTrackingController = require('../controllers/gpsTracking.controller');
+const router = express.Router();
+
+/**
+ * ===== Location Recording =====
+ */
+
+/**
+ * تسجيل موقع جديد في الوقت الفعلي
+ * POST /api/gps/location
+ */
+router.post('/location', GPSTrackingController.recordLocation);
+
+/**
+ * ===== Current Location =====
+ */
+
+/**
+ * الحصول على الموقع الحالي للسائق
+ * GET /api/gps/location/:driverId
+ */
+router.get('/location/:driverId', GPSTrackingController.getCurrentLocation);
+
+/**
+ * ===== Route & History =====
+ */
+
+/**
+ * الحصول على خريطة المسار
+ * GET /api/gps/route/:driverId?startTime=2024-01-01&endTime=2024-01-02
+ */
+router.get('/route/:driverId', GPSTrackingController.getRouteMap);
+
+/**
+ * الحصول على سجل الموقع الكامل
+ * GET /api/gps/history/:driverId?startTime=...&endTime=...&limit=100
+ */
+router.get('/history/:driverId', GPSTrackingController.getLocationHistory);
+
+/**
+ * ===== Behavior Analysis =====
+ */
+
+/**
+ * الحصول على تقرير السلوك والقيادة
+ * GET /api/gps/behavior/:driverId?startTime=...&endTime=...
+ */
+router.get('/behavior/:driverId', GPSTrackingController.getBehaviorReport);
+
+/**
+ * ===== Fleet Operations =====
+ */
+
+/**
+ * البحث عن السائقين بالقرب من موقع معين
+ * GET /api/gps/nearby?longitude=...&latitude=...&distance=1000
+ */
+router.get('/nearby', GPSTrackingController.findNearbyDrivers);
+
+/**
+ * الحصول على إحصائيات الأسطول
+ * GET /api/gps/fleet-stats?timeRange=today&driverId=...
+ */
+router.get('/fleet-stats', GPSTrackingController.getFleetStatistics);
+
+/**
+ * ===== Alerts & Notifications =====
+ */
+
+/**
+ * الحصول على التنبيهات النشطة للسائق
+ * GET /api/gps/active-alerts/:driverId?limit=10
+ */
+router.get('/active-alerts/:driverId', GPSTrackingController.getActiveAlerts);
+
+/**
+ * تأكيد/الاعتراف بتنبيه
+ * POST /api/gps/acknowledge-alert/:locationId/:alertIndex
+ */
+router.post('/acknowledge-alert/:locationId/:alertIndex', GPSTrackingController.acknowledgeAlert);
+
+/**
+ * ===== Data Export =====
+ */
+
+/**
+ * تصدير بيانات التتبع (CSV/PDF)
+ * GET /api/gps/export/:driverId?format=csv&startTime=...&endTime=...
+ */
+router.get('/export/:driverId', GPSTrackingController.exportTrackingData);
+module.exports = router;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJleHByZXNzIiwicmVxdWlyZSIsIkdQU1RyYWNraW5nQ29udHJvbGxlciIsInJvdXRlciIsIlJvdXRlciIsInBvc3QiLCJyZWNvcmRMb2NhdGlvbiIsImdldCIsImdldEN1cnJlbnRMb2NhdGlvbiIsImdldFJvdXRlTWFwIiwiZ2V0TG9jYXRpb25IaXN0b3J5IiwiZ2V0QmVoYXZpb3JSZXBvcnQiLCJmaW5kTmVhcmJ5RHJpdmVycyIsImdldEZsZWV0U3RhdGlzdGljcyIsImdldEFjdGl2ZUFsZXJ0cyIsImFja25vd2xlZGdlQWxlcnQiLCJleHBvcnRUcmFja2luZ0RhdGEiLCJtb2R1bGUiLCJleHBvcnRzIl0sInNvdXJjZXMiOlsiZ3BzLmpzIl0sInNvdXJjZXNDb250ZW50IjpbIi8qKlxyXG4gKiBHUFMgVHJhY2tpbmcgUm91dGVzXHJcbiAqINmF2LPYp9ix2KfYqiDYqtiq2KjYuSBHUFMg2KfZhNmF2KrZgtiv2YXYqVxyXG4gKiBQaGFzZSAzMCAtIFJlYWwtdGltZSBHUFMgVHJhY2tpbmdcclxuICovXHJcblxyXG5jb25zdCBleHByZXNzID0gcmVxdWlyZSgnZXhwcmVzcycpO1xyXG5jb25zdCBHUFNUcmFja2luZ0NvbnRyb2xsZXIgPSByZXF1aXJlKCcuLi9jb250cm9sbGVycy9ncHNUcmFja2luZy5jb250cm9sbGVyJyk7XHJcblxyXG5jb25zdCByb3V0ZXIgPSBleHByZXNzLlJvdXRlcigpO1xyXG5cclxuLyoqXHJcbiAqID09PT09IExvY2F0aW9uIFJlY29yZGluZyA9PT09PVxyXG4gKi9cclxuXHJcbi8qKlxyXG4gKiDYqtiz2KzZitmEINmF2YjZgti5INis2K/ZitivINmB2Yog2KfZhNmI2YLYqiDYp9mE2YHYudmE2YpcclxuICogUE9TVCAvYXBpL2dwcy9sb2NhdGlvblxyXG4gKi9cclxucm91dGVyLnBvc3QoJy9sb2NhdGlvbicsIEdQU1RyYWNraW5nQ29udHJvbGxlci5yZWNvcmRMb2NhdGlvbik7XHJcblxyXG4vKipcclxuICogPT09PT0gQ3VycmVudCBMb2NhdGlvbiA9PT09PVxyXG4gKi9cclxuXHJcbi8qKlxyXG4gKiDYp9mE2K3YtdmI2YQg2LnZhNmJINin2YTZhdmI2YLYuSDYp9mE2K3Yp9mE2Yog2YTZhNiz2KfYptmCXHJcbiAqIEdFVCAvYXBpL2dwcy9sb2NhdGlvbi86ZHJpdmVySWRcclxuICovXHJcbnJvdXRlci5nZXQoJy9sb2NhdGlvbi86ZHJpdmVySWQnLCBHUFNUcmFja2luZ0NvbnRyb2xsZXIuZ2V0Q3VycmVudExvY2F0aW9uKTtcclxuXHJcbi8qKlxyXG4gKiA9PT09PSBSb3V0ZSAmIEhpc3RvcnkgPT09PT1cclxuICovXHJcblxyXG4vKipcclxuICog2KfZhNit2LXZiNmEINi52YTZiSDYrtix2YrYt9ipINin2YTZhdiz2KfYsVxyXG4gKiBHRVQgL2FwaS9ncHMvcm91dGUvOmRyaXZlcklkP3N0YXJ0VGltZT0yMDI0LTAxLTAxJmVuZFRpbWU9MjAyNC0wMS0wMlxyXG4gKi9cclxucm91dGVyLmdldCgnL3JvdXRlLzpkcml2ZXJJZCcsIEdQU1RyYWNraW5nQ29udHJvbGxlci5nZXRSb3V0ZU1hcCk7XHJcblxyXG4vKipcclxuICog2KfZhNit2LXZiNmEINi52YTZiSDYs9is2YQg2KfZhNmF2YjZgti5INin2YTZg9in2YXZhFxyXG4gKiBHRVQgL2FwaS9ncHMvaGlzdG9yeS86ZHJpdmVySWQ/c3RhcnRUaW1lPS4uLiZlbmRUaW1lPS4uLiZsaW1pdD0xMDBcclxuICovXHJcbnJvdXRlci5nZXQoJy9oaXN0b3J5Lzpkcml2ZXJJZCcsIEdQU1RyYWNraW5nQ29udHJvbGxlci5nZXRMb2NhdGlvbkhpc3RvcnkpO1xyXG5cclxuLyoqXHJcbiAqID09PT09IEJlaGF2aW9yIEFuYWx5c2lzID09PT09XHJcbiAqL1xyXG5cclxuLyoqXHJcbiAqINin2YTYrdi12YjZhCDYudmE2Ykg2KrZgtix2YrYsSDYp9mE2LPZhNmI2YMg2YjYp9mE2YLZitin2K/YqVxyXG4gKiBHRVQgL2FwaS9ncHMvYmVoYXZpb3IvOmRyaXZlcklkP3N0YXJ0VGltZT0uLi4mZW5kVGltZT0uLi5cclxuICovXHJcbnJvdXRlci5nZXQoJy9iZWhhdmlvci86ZHJpdmVySWQnLCBHUFNUcmFja2luZ0NvbnRyb2xsZXIuZ2V0QmVoYXZpb3JSZXBvcnQpO1xyXG5cclxuLyoqXHJcbiAqID09PT09IEZsZWV0IE9wZXJhdGlvbnMgPT09PT1cclxuICovXHJcblxyXG4vKipcclxuICog2KfZhNio2K3YqyDYudmGINin2YTYs9in2KbZgtmK2YYg2KjYp9mE2YLYsdioINmF2YYg2YXZiNmC2Lkg2YXYudmK2YZcclxuICogR0VUIC9hcGkvZ3BzL25lYXJieT9sb25naXR1ZGU9Li4uJmxhdGl0dWRlPS4uLiZkaXN0YW5jZT0xMDAwXHJcbiAqL1xyXG5yb3V0ZXIuZ2V0KCcvbmVhcmJ5JywgR1BTVHJhY2tpbmdDb250cm9sbGVyLmZpbmROZWFyYnlEcml2ZXJzKTtcclxuXHJcbi8qKlxyXG4gKiDYp9mE2K3YtdmI2YQg2LnZhNmJINil2K3Ytdin2KbZitin2Kog2KfZhNij2LPYt9mI2YRcclxuICogR0VUIC9hcGkvZ3BzL2ZsZWV0LXN0YXRzP3RpbWVSYW5nZT10b2RheSZkcml2ZXJJZD0uLi5cclxuICovXHJcbnJvdXRlci5nZXQoJy9mbGVldC1zdGF0cycsIEdQU1RyYWNraW5nQ29udHJvbGxlci5nZXRGbGVldFN0YXRpc3RpY3MpO1xyXG5cclxuLyoqXHJcbiAqID09PT09IEFsZXJ0cyAmIE5vdGlmaWNhdGlvbnMgPT09PT1cclxuICovXHJcblxyXG4vKipcclxuICog2KfZhNit2LXZiNmEINi52YTZiSDYp9mE2KrZhtio2YrZh9in2Kog2KfZhNmG2LTYt9ipINmE2YTYs9in2KbZglxyXG4gKiBHRVQgL2FwaS9ncHMvYWN0aXZlLWFsZXJ0cy86ZHJpdmVySWQ/bGltaXQ9MTBcclxuICovXHJcbnJvdXRlci5nZXQoJy9hY3RpdmUtYWxlcnRzLzpkcml2ZXJJZCcsIEdQU1RyYWNraW5nQ29udHJvbGxlci5nZXRBY3RpdmVBbGVydHMpO1xyXG5cclxuLyoqXHJcbiAqINiq2KPZg9mK2K8v2KfZhNin2LnYqtix2KfZgSDYqNiq2YbYqNmK2YdcclxuICogUE9TVCAvYXBpL2dwcy9hY2tub3dsZWRnZS1hbGVydC86bG9jYXRpb25JZC86YWxlcnRJbmRleFxyXG4gKi9cclxucm91dGVyLnBvc3QoJy9hY2tub3dsZWRnZS1hbGVydC86bG9jYXRpb25JZC86YWxlcnRJbmRleCcsIEdQU1RyYWNraW5nQ29udHJvbGxlci5hY2tub3dsZWRnZUFsZXJ0KTtcclxuXHJcbi8qKlxyXG4gKiA9PT09PSBEYXRhIEV4cG9ydCA9PT09PVxyXG4gKi9cclxuXHJcbi8qKlxyXG4gKiDYqti12K/ZitixINio2YrYp9mG2KfYqiDYp9mE2KrYqtio2LkgKENTVi9QREYpXHJcbiAqIEdFVCAvYXBpL2dwcy9leHBvcnQvOmRyaXZlcklkP2Zvcm1hdD1jc3Ymc3RhcnRUaW1lPS4uLiZlbmRUaW1lPS4uLlxyXG4gKi9cclxucm91dGVyLmdldCgnL2V4cG9ydC86ZHJpdmVySWQnLCBHUFNUcmFja2luZ0NvbnRyb2xsZXIuZXhwb3J0VHJhY2tpbmdEYXRhKTtcclxuXHJcbm1vZHVsZS5leHBvcnRzID0gcm91dGVyO1xyXG4iXSwibWFwcGluZ3MiOiJBQUFBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7O0FBRUEsTUFBTUEsT0FBTyxHQUFHQyxPQUFPLENBQUMsU0FBUyxDQUFDO0FBQ2xDLE1BQU1DLHFCQUFxQixHQUFHRCxPQUFPLENBQUMsdUNBQXVDLENBQUM7QUFFOUUsTUFBTUUsTUFBTSxHQUFHSCxPQUFPLENBQUNJLE1BQU0sQ0FBQyxDQUFDOztBQUUvQjtBQUNBO0FBQ0E7O0FBRUE7QUFDQTtBQUNBO0FBQ0E7QUFDQUQsTUFBTSxDQUFDRSxJQUFJLENBQUMsV0FBVyxFQUFFSCxxQkFBcUIsQ0FBQ0ksY0FBYyxDQUFDOztBQUU5RDtBQUNBO0FBQ0E7O0FBRUE7QUFDQTtBQUNBO0FBQ0E7QUFDQUgsTUFBTSxDQUFDSSxHQUFHLENBQUMscUJBQXFCLEVBQUVMLHFCQUFxQixDQUFDTSxrQkFBa0IsQ0FBQzs7QUFFM0U7QUFDQTtBQUNBOztBQUVBO0FBQ0E7QUFDQTtBQUNBO0FBQ0FMLE1BQU0sQ0FBQ0ksR0FBRyxDQUFDLGtCQUFrQixFQUFFTCxxQkFBcUIsQ0FBQ08sV0FBVyxDQUFDOztBQUVqRTtBQUNBO0FBQ0E7QUFDQTtBQUNBTixNQUFNLENBQUNJLEdBQUcsQ0FBQyxvQkFBb0IsRUFBRUwscUJBQXFCLENBQUNRLGtCQUFrQixDQUFDOztBQUUxRTtBQUNBO0FBQ0E7O0FBRUE7QUFDQTtBQUNBO0FBQ0E7QUFDQVAsTUFBTSxDQUFDSSxHQUFHLENBQUMscUJBQXFCLEVBQUVMLHFCQUFxQixDQUFDUyxpQkFBaUIsQ0FBQzs7QUFFMUU7QUFDQTtBQUNBOztBQUVBO0FBQ0E7QUFDQTtBQUNBO0FBQ0FSLE1BQU0sQ0FBQ0ksR0FBRyxDQUFDLFNBQVMsRUFBRUwscUJBQXFCLENBQUNVLGlCQUFpQixDQUFDOztBQUU5RDtBQUNBO0FBQ0E7QUFDQTtBQUNBVCxNQUFNLENBQUNJLEdBQUcsQ0FBQyxjQUFjLEVBQUVMLHFCQUFxQixDQUFDVyxrQkFBa0IsQ0FBQzs7QUFFcEU7QUFDQTtBQUNBOztBQUVBO0FBQ0E7QUFDQTtBQUNBO0FBQ0FWLE1BQU0sQ0FBQ0ksR0FBRyxDQUFDLDBCQUEwQixFQUFFTCxxQkFBcUIsQ0FBQ1ksZUFBZSxDQUFDOztBQUU3RTtBQUNBO0FBQ0E7QUFDQTtBQUNBWCxNQUFNLENBQUNFLElBQUksQ0FBQyw0Q0FBNEMsRUFBRUgscUJBQXFCLENBQUNhLGdCQUFnQixDQUFDOztBQUVqRztBQUNBO0FBQ0E7O0FBRUE7QUFDQTtBQUNBO0FBQ0E7QUFDQVosTUFBTSxDQUFDSSxHQUFHLENBQUMsbUJBQW1CLEVBQUVMLHFCQUFxQixDQUFDYyxrQkFBa0IsQ0FBQztBQUV6RUMsTUFBTSxDQUFDQyxPQUFPLEdBQUdmLE1BQU0iLCJpZ25vcmVMaXN0IjpbXX0=

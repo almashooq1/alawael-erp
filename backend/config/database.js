@@ -11,6 +11,15 @@ const RETRY_CONFIG = {
   backoffMultiplier: Number(process.env.DB_BACKOFF_MULTIPLIER) || 2,
 };
 
+// ==================== CONNECTION RETRY CONFIGURATION ====================
+// Configuration for exponential backoff retry strategy
+const RETRY_CONFIG = {
+  maxRetries: process.env.DB_MAX_RETRIES || 5,
+  initialDelay: process.env.DB_INITIAL_RETRY_DELAY || 1000, // 1 second
+  maxDelay: process.env.DB_MAX_RETRY_DELAY || 32000, // 32 seconds
+  backoffMultiplier: process.env.DB_BACKOFF_MULTIPLIER || 2,
+};
+
 let isConnected = false;
 let mongoServer;
 

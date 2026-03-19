@@ -1,0 +1,409 @@
+/**
+ * Notification Center Styles
+ * أنماط مركز الإشعارات
+ */
+
+.notification-center {
+  position: relative;
+}
+
+/* ==================== Notification Bell ==================== */
+
+.notification-bell {
+  transition: transform 0.2s ease;
+}
+
+.notification-bell:hover {
+  transform: scale(1.1);
+}
+
+.notification-bell .MuiBadge-badge {
+  animation: pulse 2s infinite;
+}
+
+/* ==================== Notification Menu ==================== */
+
+.notification-menu .MuiPaper-root {
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+/* ==================== Notification Item ==================== */
+
+.notification-item {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-left: 4px solid transparent;
+}
+
+.notification-item.unread {
+  background-color: #f0f7ff;
+  border-left-color: #1976d2;
+}
+
+.notification-item:hover {
+  background-color: #f5f5f5;
+}
+
+.notification-item .MuiListItemText-primary {
+  font-weight: 500;
+}
+
+.notification-item .MuiListItemText-secondary {
+  margin-top: 4px;
+}
+
+/* ==================== Notification Types ==================== */
+
+.notification-item.type-success {
+  border-left-color: #4caf50;
+}
+
+.notification-item.type-warning {
+  border-left-color: #ff9800;
+}
+
+.notification-item.type-error,
+.notification-item.type-critical {
+  border-left-color: #f44336;
+}
+
+.notification-item.type-info {
+  border-left-color: #2196f3;
+}
+
+/* ==================== Priority Badges ==================== */
+
+.priority-badge {
+  font-size: 11px;
+  height: 20px;
+  font-weight: 600;
+}
+
+.priority-badge.urgent {
+  background-color: #f44336;
+  color: white;
+  animation: blink 1s infinite;
+}
+
+.priority-badge.high {
+  background-color: #ff9800;
+  color: white;
+}
+
+.priority-badge.medium {
+  background-color: #2196f3;
+  color: white;
+}
+
+.priority-badge.low {
+  background-color: #9e9e9e;
+  color: white;
+}
+
+/* ==================== Settings Dialog ==================== */
+
+.notification-settings {
+  max-width: 600px;
+}
+
+.notification-settings .MuiDialogTitle-root {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.notification-settings .MuiFormControlLabel-root {
+  display: flex;
+  margin-bottom: 8px;
+}
+
+/* ==================== Tabs ==================== */
+
+.notification-center .MuiTabs-root {
+  min-height: 40px;
+}
+
+.notification-center .MuiTab-root {
+  min-height: 40px;
+  font-size: 13px;
+  text-transform: none;
+}
+
+/* ==================== Empty State ==================== */
+
+.notifications-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  color: #757575;
+}
+
+.notifications-empty-icon {
+  font-size: 64px;
+  color: #bdbdbd;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+/* ==================== Statistics Cards ==================== */
+
+.notification-stat-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.notification-stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.notification-stat-card .stat-value {
+  font-size: 36px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.notification-stat-card .stat-label {
+  color: #757575;
+  font-size: 14px;
+}
+
+/* ==================== Notification Toast ==================== */
+
+.notification-toast {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  padding: 16px;
+  max-width: 400px;
+  z-index: 9999;
+  animation: slideIn 0.3s ease-out;
+}
+
+.notification-toast.success {
+  border-left: 4px solid #4caf50;
+}
+
+.notification-toast.warning {
+  border-left: 4px solid #ff9800;
+}
+
+.notification-toast.error {
+  border-left: 4px solid #f44336;
+}
+
+.notification-toast.info {
+  border-left: 4px solid #2196f3;
+}
+
+/* ==================== Animations ==================== */
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.1);
+  }
+}
+
+@keyframes blink {
+  0%,
+  50%,
+  100% {
+    opacity: 1;
+  }
+  25%,
+  75% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.notification-item {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* ==================== Loading State ==================== */
+
+.notification-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+}
+
+.notification-loading .MuiCircularProgress-root {
+  color: #667eea;
+}
+
+/* ==================== Scrollbar ==================== */
+
+.notification-menu .MuiList-root::-webkit-scrollbar {
+  width: 6px;
+}
+
+.notification-menu .MuiList-root::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.notification-menu .MuiList-root::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 3px;
+}
+
+.notification-menu .MuiList-root::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* ==================== Category Icons ==================== */
+
+.notification-category-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+}
+
+.notification-category-icon.system {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.notification-category-icon.sales {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.notification-category-icon.inventory {
+  background-color: #fff3e0;
+  color: #f57c00;
+}
+
+.notification-category-icon.hr {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+}
+
+.notification-category-icon.finance {
+  background-color: #e0f2f1;
+  color: #00695c;
+}
+
+.notification-category-icon.security {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+/* ==================== Time Indicator ==================== */
+
+.notification-time {
+  font-size: 11px;
+  color: #999;
+  margin-top: 4px;
+}
+
+.notification-time.recent {
+  color: #4caf50;
+  font-weight: 500;
+}
+
+/* ==================== Action Buttons ==================== */
+
+.notification-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.notification-actions .MuiButton-root {
+  text-transform: none;
+  font-size: 12px;
+}
+
+/* ==================== Responsive Design ==================== */
+
+@media (max-width: 768px) {
+  .notification-menu .MuiPaper-root {
+    width: 100vw !important;
+    max-width: 100vw;
+    height: 100vh;
+    max-height: 100vh;
+    margin: 0;
+    border-radius: 0;
+  }
+
+  .notification-toast {
+    right: 10px;
+    left: 10px;
+    max-width: calc(100vw - 20px);
+  }
+
+  .notification-stat-card .stat-value {
+    font-size: 28px;
+  }
+}
+
+/* ==================== Dark Mode Support ==================== */
+
+@media (prefers-color-scheme: dark) {
+  .notification-item.unread {
+    background-color: #1a1a2e;
+    border-left-color: #4da6ff;
+  }
+
+  .notification-item:hover {
+    background-color: #16213e;
+  }
+
+  .notification-toast {
+    background: #1a1a2e;
+    color: white;
+  }
+}
+
+/* ==================== Print Styles ==================== */
+
+@media print {
+  .notification-bell,
+  .notification-actions,
+  .notification-menu {
+    display: none !important;
+  }
+}

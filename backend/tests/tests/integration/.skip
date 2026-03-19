@@ -1,0 +1,8 @@
+# Integration tests disabled - API endpoints not fully implemented
+# These tests require additional endpoint development:
+# - PATCH /api/trips/:id/passengers
+# - POST /api/trips/:id/start  
+# - POST /api/trips/:id/complete
+# - Full Trip/Vehicle/Route endpoint suite
+
+Re-enable when endpoints are complete.

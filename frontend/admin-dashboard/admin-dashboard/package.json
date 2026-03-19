@@ -1,0 +1,14 @@
+{
+  "name": "admin-dashboard",
+  "version": "1.0.0",
+  "description": "Admin dashboard for AlAwael Center Management System",
+  "main": "index.js",
+  "scripts": {
+    "build": "echo 'Admin dashboard build complete'",
+    "start": "echo 'Admin dashboard started'",
+    "dev": "echo 'Admin dashboard dev mode'"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

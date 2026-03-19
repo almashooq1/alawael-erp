@@ -1,0 +1,10 @@
+{
+    "login": "Login",
+    "dashboard": "Dashboard",
+    "employees": "Employees",
+    "attendance": "Attendance",
+    "leaves": "Leaves",
+    "payroll": "Payroll",
+    "performance": "Performance Evaluation",
+    "logout": "Logout"
+}

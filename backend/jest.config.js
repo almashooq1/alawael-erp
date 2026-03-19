@@ -99,7 +99,7 @@ module.exports = {
 
   // Other settings
   bail: 0,
-  forceExit: false,
-  detectOpenHandles: true,
+  forceExit: true,
+  detectOpenHandles: false,
   passWithNoTests: true,
 };

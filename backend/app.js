@@ -349,7 +349,6 @@ app.get('/readiness', (req, res) => {
 
 // System info — restricted in production (no internal flags exposed)
 app.get('/api/info', (req, res) => {
-  const isProd = process.env.NODE_ENV === 'production';
   res.json({
     status: 'OK',
     version: '3.0.0',

@@ -11,15 +11,6 @@ const RETRY_CONFIG = {
   backoffMultiplier: Number(process.env.DB_BACKOFF_MULTIPLIER) || 2,
 };
 
-// ==================== CONNECTION RETRY CONFIGURATION ====================
-// Configuration for exponential backoff retry strategy
-const RETRY_CONFIG = {
-  maxRetries: process.env.DB_MAX_RETRIES || 5,
-  initialDelay: process.env.DB_INITIAL_RETRY_DELAY || 1000, // 1 second
-  maxDelay: process.env.DB_MAX_RETRY_DELAY || 32000, // 32 seconds
-  backoffMultiplier: process.env.DB_BACKOFF_MULTIPLIER || 2,
-};
-
 let isConnected = false;
 let mongoServer;
 
@@ -73,8 +64,8 @@ const connectDB = async () => {
         ),
       ]);
 
-      const startupTime = Date.now() - startTime;
-      // console.log(`✅ MongoDB Memory Server started in ${startupTime}ms`);
+      const _startupTime = Date.now() - startTime;
+      // console.log(`✅ MongoDB Memory Server started in ${_startupTime}ms`);
 
       const uri = mongoServer.getUri();
       // console.log(`🔗 Connecting to: ${uri.substring(0, 50)}...`);
@@ -348,7 +339,7 @@ const getPoolMetrics = () => {
 const enableSlowQueryProfiling = (thresholdMs = 500) => {
   if (process.env.NODE_ENV === 'test') return;
 
-  mongoose.set('debug', (collectionName, method, query, doc, options) => {
+  mongoose.set('debug', (collectionName, method, query, _doc, _options) => {
     // mongoose 'debug' fires for EVERY query — we only want slow ones.
     // Record timing manually via pre/post hooks would be more accurate,
     // but this piggy-backs on the built-in flag with zero model changes.

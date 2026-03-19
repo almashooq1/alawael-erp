@@ -142,7 +142,7 @@ describe('Driver Routes - Phase 3 Coverage', () => {
       if (res.status >= 400) return;
 
       expect(res.body).toHaveProperty('success', true);
-      expect(Array.isArray(res.body.drivers)).toBe(true);
+      expect(Array.isArray(res.body.data.drivers)).toBe(true);
     });
 
     it('should get driver by ID', async () => {
@@ -163,14 +163,14 @@ describe('Driver Routes - Phase 3 Coverage', () => {
       const res = await request(app).get('/api/drivers?status=active');
       if (res.status >= 400) return;
 
-      expect(res.body.drivers).toBeDefined();
+      expect(res.body.data.drivers).toBeDefined();
     });
 
     it('should filter drivers by license status', async () => {
       const res = await request(app).get('/api/drivers?licenseStatus=valid');
       if (res.status >= 400) return;
 
-      expect(res.body.drivers).toBeDefined();
+      expect(res.body.data.drivers).toBeDefined();
     });
 
     it('should update driver profile', async () => {
@@ -576,12 +576,17 @@ describe('Driver Routes - Phase 3 Coverage', () => {
     });
 
     it('should handle database errors', async () => {
-      const driverService = require('../services/driverService');
-      driverService.getDrivers.mockRejectedValueOnce(new Error('DB Error'));
+      const Driver = require('../models/Driver');
+      const mockQuery = {
+        populate: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        sort: jest.fn().mockRejectedValueOnce(new Error('DB Error')),
+      };
+      jest.spyOn(Driver, 'find').mockReturnValueOnce(mockQuery);
 
       const res = await request(app).get('/api/drivers');
-      if (res.status >= 400) return;
-
+      expect(res.status).toBe(500);
       expect(res.body).toHaveProperty('success', false);
     });
 

@@ -35,43 +35,111 @@ echo -e "${YELLOW}⚙️  إعداد السيرفر لـ: ${DOMAIN}${NC}"
 echo ""
 
 # ─── 1. System Update ─────────────────────────────────────────────────
-echo -e "${GREEN}[1/8] تحديث النظام...${NC}"
+echo -e "${GREEN}[1/10] تحديث النظام...${NC}"
 apt update && apt upgrade -y
-apt install -y curl wget git build-essential nginx certbot python3-certbot-nginx ufw
+apt install -y curl wget git build-essential nginx certbot python3-certbot-nginx ufw gnupg
 
-# ─── 2. Install Node.js 20 LTS ────────────────────────────────────────
-echo -e "${GREEN}[2/8] تثبيت Node.js 20 LTS...${NC}"
+# ─── 2. Install MongoDB 7.0 ───────────────────────────────────────────
+echo -e "${GREEN}[2/10] تثبيت MongoDB 7.0...${NC}"
+if ! command -v mongod &> /dev/null; then
+  # Import MongoDB public GPG Key
+  curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | \
+    gpg --dearmor -o /usr/share/keyrings/mongodb-server-7.0.gpg
+
+  # Detect OS and add appropriate repo
+  OS_CODENAME=$(lsb_release -cs 2>/dev/null || echo "jammy")
+  echo "deb [ signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] https://repo.mongodb.org/apt/ubuntu ${OS_CODENAME}/mongodb-org/7.0 multiverse" | \
+    tee /etc/apt/sources.list.d/mongodb-org-7.0.list
+
+  apt update
+  apt install -y mongodb-org
+
+  # Start & enable MongoDB
+  systemctl start mongod
+  systemctl enable mongod
+  echo -e "${GREEN}  ✅ MongoDB 7.0 installed and started${NC}"
+else
+  echo -e "${YELLOW}  ⏭️  MongoDB already installed: $(mongod --version | head -1)${NC}"
+  systemctl start mongod 2>/dev/null || true
+fi
+
+# ─── 2b. Configure MongoDB Authentication ─────────────────────────────
+echo -e "${GREEN}  🔐 Setting up MongoDB authentication...${NC}"
+
+# Generate a secure random password
+MONGO_PASS=$(openssl rand -base64 24 | tr -dc 'A-Za-z0-9' | head -c 32)
+echo "${MONGO_PASS}" > /root/.mongo_pass
+chmod 600 /root/.mongo_pass
+
+# Create admin user and app database user
+mongosh --quiet --eval "
+use admin;
+try {
+  db.createUser({
+    user: 'alawael_admin',
+    pwd: '${MONGO_PASS}',
+    roles: [
+      { role: 'readWrite', db: 'alawael_erp' },
+      { role: 'dbAdmin', db: 'alawael_erp' },
+      { role: 'userAdminAnyDatabase', db: 'admin' }
+    ]
+  });
+  print('✅ MongoDB user created successfully');
+} catch(e) {
+  if (e.codeName === 'DuplicateKey' || e.code === 51003) {
+    print('⏭️  User already exists, updating password...');
+    db.changeUserPassword('alawael_admin', '${MONGO_PASS}');
+  } else { throw e; }
+}"
+
+# Enable authentication in MongoDB config
+if ! grep -q 'authorization: enabled' /etc/mongod.conf; then
+  cat >> /etc/mongod.conf << 'MONGOAUTH'
+
+security:
+  authorization: enabled
+MONGOAUTH
+  systemctl restart mongod
+  echo -e "${GREEN}  ✅ MongoDB authentication enabled${NC}"
+fi
+
+echo -e "${GREEN}  📋 MongoDB URI: mongodb://alawael_admin:${MONGO_PASS}@127.0.0.1:27017/alawael_erp?authSource=admin${NC}"
+echo -e "${YELLOW}  ⚠️  Password saved to /root/.mongo_pass${NC}"
+echo ""
+
+# ─── 3. Install Node.js 20 LTS ────────────────────────────────────────
+echo -e "${GREEN}[3/10] تثبيت Node.js 20 LTS...${NC}"
 if ! command -v node &> /dev/null || [[ $(node -v | cut -d. -f1 | tr -d v) -lt 18 ]]; then
   curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
   apt install -y nodejs
 fi
 echo "Node.js $(node -v) | npm $(npm -v)"
 
-# ─── 3. Install PM2 ───────────────────────────────────────────────────
-echo -e "${GREEN}[3/8] تثبيت PM2...${NC}"
+# ─── 4. Install PM2 ───────────────────────────────────────────────────
+echo -e "${GREEN}[4/10] تثبيت PM2...${NC}"
 npm install -g pm2
 pm2 install pm2-logrotate
 pm2 set pm2-logrotate:max_size 10M
 pm2 set pm2-logrotate:retain 7
 
-# ─── 4. Create App User & Directories ─────────────────────────────────
-echo -e "${GREEN}[4/8] إنشاء المستخدم والمجلدات...${NC}"
+# ─── 5. Create App User & Directories ─────────────────────────────────
+echo -e "${GREEN}[5/10] إنشاء المستخدم والمجلدات...${NC}"
 if ! id "${APP_USER}" &>/dev/null; then
   adduser --disabled-password --gecos "" ${APP_USER}
 fi
 mkdir -p ${APP_DIR}/backend ${APP_DIR}/frontend ${LOG_DIR} /var/www/certbot
 chown -R ${APP_USER}:${APP_USER} /home/${APP_USER}
 
-# ─── 5. Firewall ──────────────────────────────────────────────────────
-echo -e "${GREEN}[5/8] إعداد جدار الحماية...${NC}"
+# ─── 6. Firewall ──────────────────────────────────────────────────────
+echo -e "${GREEN}[6/10] إعداد جدار الحماية...${NC}"
 ufw default deny incoming
 ufw default allow outgoing
 ufw allow ssh
 ufw allow 'Nginx Full'
 ufw --force enable
 
-# ─── 6. Configure Nginx ───────────────────────────────────────────────
-echo -e "${GREEN}[6/8] إعداد Nginx...${NC}"
+# ─── 7. Configure Nginx ───────────────────────────────────────────────
+echo -e "${GREEN}[7/10] إعداد Nginx...${NC}"
 
 # Remove default site
 rm -f /etc/nginx/sites-enabled/default
@@ -187,8 +255,8 @@ sed -i "s|APP_DIR_PLACEHOLDER|${APP_DIR}|g" /etc/nginx/sites-available/alawael
 # Enable site
 ln -sf /etc/nginx/sites-available/alawael /etc/nginx/sites-enabled/alawael
 
-# ─── 7. SSL Certificate ───────────────────────────────────────────────
-echo -e "${GREEN}[7/8] إعداد شهادة SSL...${NC}"
+# ─── 8. SSL Certificate ───────────────────────────────────────────────
+echo -e "${GREEN}[8/10] إعداد شهادة SSL...${NC}"
 
 # First start nginx without SSL for certbot challenge
 cat > /etc/nginx/sites-available/alawael-temp << EOF
@@ -221,18 +289,32 @@ nginx -t && systemctl reload nginx
 # Auto-renewal
 echo "0 3 * * * certbot renew --quiet --post-hook 'systemctl reload nginx'" | crontab -
 
-# ─── 8. PM2 Startup ───────────────────────────────────────────────────
-echo -e "${GREEN}[8/8] إعداد PM2 للتشغيل التلقائي...${NC}"
+# ─── 9. PM2 Startup ───────────────────────────────────────────────────
+echo -e "${GREEN}[9/10] إعداد PM2 للتشغيل التلقائي...${NC}"
 pm2 startup systemd -u ${APP_USER} --hp /home/${APP_USER}
+
+# ─── 10. MongoDB Backup Cron ──────────────────────────────────────────
+echo -e "${GREEN}[10/10] إعداد النسخ الاحتياطي اليومي لـ MongoDB...${NC}"
+mkdir -p /home/${APP_USER}/backups/mongodb
+chown -R ${APP_USER}:${APP_USER} /home/${APP_USER}/backups
+
+# Daily backup at 2 AM
+MONGO_PASS_ESCAPED=$(cat /root/.mongo_pass)
+(crontab -l 2>/dev/null; echo "0 2 * * * mongodump --uri='mongodb://alawael_admin:${MONGO_PASS_ESCAPED}@127.0.0.1:27017/alawael_erp?authSource=admin' --out=/home/${APP_USER}/backups/mongodb/\$(date +\%Y\%m\%d) --gzip && find /home/${APP_USER}/backups/mongodb -maxdepth 1 -mtime +7 -type d -exec rm -rf {} + 2>/dev/null") | sort -u | crontab -
 
 echo ""
 echo -e "${BLUE}════════════════════════════════════════════════════════════${NC}"
 echo -e "${GREEN}  ✅ تم إعداد السيرفر بنجاح!${NC}"
 echo -e "${BLUE}════════════════════════════════════════════════════════════${NC}"
 echo ""
+echo -e "${YELLOW}📋 MongoDB Connection:${NC}"
+echo -e "  URI: mongodb://alawael_admin:${MONGO_PASS}@127.0.0.1:27017/alawael_erp?authSource=admin"
+echo -e "  Password file: /root/.mongo_pass"
+echo ""
+echo -e "${YELLOW}⚠️  مهم: حدّث MONGODB_URI في ملف .env بالكلمة أعلاه${NC}"
+echo ""
 echo -e "${YELLOW}الخطوات التالية:${NC}"
 echo -e "  1. ارفع الملفات إلى ${APP_DIR} (راجع deploy.sh)"
-echo -e "  2. أنشئ قاعدة بيانات MongoDB Atlas"
-echo -e "  3. عدّل ملف .env بالإعدادات الصحيحة"
-echo -e "  4. شغّل: sudo -u ${APP_USER} bash deploy.sh"
+echo -e "  2. عدّل ملف .env → حدّث MONGODB_URI بالكلمة المولّدة"
+echo -e "  3. شغّل: sudo -u ${APP_USER} bash deploy.sh"
 echo ""

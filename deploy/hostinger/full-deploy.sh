@@ -5,7 +5,7 @@
 #
 #  هذا السكربت يعمل كل شيء بأمر واحد:
 #    1. تحديث النظام وتثبيت الأدوات
-#    2. تثبيت MongoDB 7.0 مع Authentication
+#    2. تثبيت MongoDB 8.0 مع Authentication
 #    3. تثبيت Node.js 20 LTS + PM2
 #    4. إنشاء المستخدم والمجلدات
 #    5. سحب المشروع من GitHub
@@ -87,24 +87,35 @@ apt upgrade -y -qq
 apt install -y -qq curl wget git build-essential nginx certbot python3-certbot-nginx \
   ufw gnupg lsb-release software-properties-common jq unzip fail2ban
 
+# Stop & disable Apache if running (conflicts with Nginx on port 80)
+if systemctl is-active --quiet apache2 2>/dev/null; then
+  systemctl stop apache2
+  systemctl disable apache2
+  log_warn "Apache2 stopped & disabled (Nginx will use port 80)"
+fi
+
 log_ok "تم تحديث النظام"
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  STEP 2: Install MongoDB 7.0
 # ══════════════════════════════════════════════════════════════════════════════
-log_step 2 "تثبيت MongoDB 7.0 Community Edition"
+log_step 2 "تثبيت MongoDB 8.0 Community Edition"
 
 if ! command -v mongod &> /dev/null; then
-  # Import MongoDB GPG Key
-  curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | \
-    gpg --dearmor -o /usr/share/keyrings/mongodb-server-7.0.gpg 2>/dev/null
+  # Remove any old MongoDB 7.0 repo that may have been added
+  rm -f /etc/apt/sources.list.d/mongodb-org-7.0.list
+  rm -f /usr/share/keyrings/mongodb-server-7.0.gpg
 
-  # Detect OS codename
-  OS_CODENAME=$(lsb_release -cs 2>/dev/null || echo "jammy")
+  # Import MongoDB 8.0 GPG Key
+  curl -fsSL https://www.mongodb.org/static/pgp/server-8.0.asc | \
+    gpg --dearmor -o /usr/share/keyrings/mongodb-server-8.0.gpg 2>/dev/null
+
+  # Detect OS codename — MongoDB 8.0 supports noble (24.04)
+  OS_CODENAME=$(lsb_release -cs 2>/dev/null || echo "noble")
 
   # Add repo
-  echo "deb [ signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] https://repo.mongodb.org/apt/ubuntu ${OS_CODENAME}/mongodb-org/7.0 multiverse" | \
-    tee /etc/apt/sources.list.d/mongodb-org-7.0.list > /dev/null
+  echo "deb [ signed-by=/usr/share/keyrings/mongodb-server-8.0.gpg ] https://repo.mongodb.org/apt/ubuntu ${OS_CODENAME}/mongodb-org/8.0 multiverse" | \
+    tee /etc/apt/sources.list.d/mongodb-org-8.0.list > /dev/null
 
   apt update -qq
   apt install -y -qq mongodb-org
@@ -112,7 +123,7 @@ if ! command -v mongod &> /dev/null; then
   # Start & enable
   systemctl start mongod
   systemctl enable mongod
-  log_ok "MongoDB 7.0 تم تثبيته وتشغيله"
+  log_ok "MongoDB 8.0 تم تثبيته وتشغيله"
 else
   log_warn "MongoDB مثبّت مسبقاً: $(mongod --version | head -1)"
   systemctl start mongod 2>/dev/null || true

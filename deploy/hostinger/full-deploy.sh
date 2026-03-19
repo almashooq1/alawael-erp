@@ -94,10 +94,24 @@ if systemctl is-active --quiet apache2 2>/dev/null; then
   log_warn "Apache2 stopped & disabled (Nginx will use port 80)"
 fi
 
+# ─── Create Swap if needed (React build is memory-hungry) ──────────────────
+if [ ! -f /swapfile ]; then
+  echo -e "${CYAN}  💾 إنشاء Swap 2GB...${NC}"
+  fallocate -l 2G /swapfile
+  chmod 600 /swapfile
+  mkswap /swapfile > /dev/null
+  swapon /swapfile
+  echo '/swapfile none swap sw 0 0' >> /etc/fstab
+  log_ok "Swap 2GB created & enabled"
+else
+  swapon /swapfile 2>/dev/null || true
+  log_ok "Swap already exists"
+fi
+
 log_ok "تم تحديث النظام"
 
 # ══════════════════════════════════════════════════════════════════════════════
-#  STEP 2: Install MongoDB 7.0
+#  STEP 2: Install MongoDB 8.0
 # ══════════════════════════════════════════════════════════════════════════════
 log_step 2 "تثبيت MongoDB 8.0 Community Edition"
 
@@ -321,7 +335,8 @@ log_ok "Backend packages installed"
 echo -e "${CYAN}  🏗️  بناء Frontend...${NC}"
 cd ${APP_DIR}/frontend
 sudo -u ${APP_USER} npm ci --no-audit --no-fund 2>&1 | tail -1
-sudo -u ${APP_USER} npm run build 2>&1 | tail -3
+echo -e "${CYAN}  🔨 Building React app (may take a few minutes)...${NC}"
+sudo -u ${APP_USER} env NODE_OPTIONS="--max-old-space-size=1024" GENERATE_SOURCEMAP=false CI=false npm run build 2>&1 | tail -5
 
 if [ ! -d "${APP_DIR}/frontend/build" ]; then
   log_err "فشل بناء Frontend!"

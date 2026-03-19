@@ -328,13 +328,13 @@ log_ok "ملف .env تم إنشاؤه"
 # ─── Install Backend Dependencies ──────────────────────────────────────────
 echo -e "${CYAN}  📦 تثبيت حزم Backend...${NC}"
 cd ${APP_DIR}/backend
-sudo -u ${APP_USER} npm ci --production --no-audit --no-fund 2>&1 | tail -1
+sudo -u ${APP_USER} npm install --production --no-audit --no-fund 2>&1 | tail -3
 log_ok "Backend packages installed"
 
 # ─── Build Frontend ────────────────────────────────────────────────────────
 echo -e "${CYAN}  🏗️  بناء Frontend...${NC}"
 cd ${APP_DIR}/frontend
-sudo -u ${APP_USER} npm ci --no-audit --no-fund 2>&1 | tail -1
+sudo -u ${APP_USER} npm install --no-audit --no-fund 2>&1 | tail -3
 echo -e "${CYAN}  🔨 Building React app (may take a few minutes)...${NC}"
 sudo -u ${APP_USER} env NODE_OPTIONS="--max-old-space-size=1024" GENERATE_SOURCEMAP=false CI=false npm run build 2>&1 | tail -5
 

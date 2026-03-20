@@ -258,7 +258,7 @@ cat > ${APP_DIR}/backend/.env << ENVFILE
 
 # Application
 NODE_ENV=production
-PORT=3001
+PORT=5000
 APP_NAME=alawael-erp
 APP_VERSION=1.0.0
 TZ=Asia/Riyadh
@@ -469,7 +469,7 @@ server {
     # API with rate limiting
     location /api/ {
         limit_req zone=api_limit burst=20 nodelay;
-        proxy_pass http://127.0.0.1:3001;
+        proxy_pass http://127.0.0.1:5000;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
@@ -485,7 +485,7 @@ server {
     # Login with strict rate limiting
     location /api/auth/login {
         limit_req zone=login_limit burst=5 nodelay;
-        proxy_pass http://127.0.0.1:3001;
+        proxy_pass http://127.0.0.1:5000;
         proxy_http_version 1.1;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
@@ -495,7 +495,7 @@ server {
 
     # WebSocket (Socket.IO)
     location /socket.io/ {
-        proxy_pass http://127.0.0.1:3001;
+        proxy_pass http://127.0.0.1:5000;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
@@ -510,7 +510,7 @@ server {
 
     # Health check
     location /health {
-        proxy_pass http://127.0.0.1:3001/health;
+        proxy_pass http://127.0.0.1:5000/health;
         access_log off;
     }
 
@@ -567,7 +567,7 @@ echo -e "${CYAN}  ⏳ انتظار بدء التطبيق...${NC}"
 sleep 5
 
 # Health check
-HEALTH=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:3001/health 2>/dev/null || echo "000")
+HEALTH=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:5000/health 2>/dev/null || echo "000")
 if [ "${HEALTH}" = "200" ]; then
   log_ok "Backend يعمل بنجاح (HTTP 200)"
 else

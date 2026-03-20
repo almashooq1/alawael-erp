@@ -9,7 +9,7 @@
  * 6. Achievement Board   (لوحة الإنجازات)
  */
 
-const logger = console;
+const _logger = console;
 
 /* ─── In-memory stores ─── */
 const telehealthStore = new Map();
@@ -27,10 +27,10 @@ let waitingListId = 21000;
 let achievementId = 22000;
 
 /* ─── Constants ─── */
-const SESSION_TYPES = ['video', 'audio', 'chat', 'hybrid'];
-const PLATFORMS = ['zoom', 'teams', 'internal', 'google-meet'];
-const TRAINING_TYPES = ['clinical', 'observation', 'practicum', 'supervision', 'workshop'];
-const CONSENT_TYPES = [
+const _SESSION_TYPES = ['video', 'audio', 'chat', 'hybrid'];
+const _PLATFORMS = ['zoom', 'teams', 'internal', 'google-meet'];
+const _TRAINING_TYPES = ['clinical', 'observation', 'practicum', 'supervision', 'workshop'];
+const _CONSENT_TYPES = [
   'treatment',
   'assessment',
   'data-sharing',
@@ -38,15 +38,15 @@ const CONSENT_TYPES = [
   'research',
   'telehealth',
 ];
-const QUALITY_CATEGORIES = [
+const _QUALITY_CATEGORIES = [
   'clinical-audit',
   'compliance',
   'patient-safety',
   'documentation',
   'process-improvement',
 ];
-const PRIORITY_LEVELS = ['urgent', 'high', 'medium', 'low'];
-const BADGE_TYPES = [
+const _PRIORITY_LEVELS = ['urgent', 'high', 'medium', 'low'];
+const _BADGE_TYPES = [
   'milestone',
   'excellence',
   'innovation',

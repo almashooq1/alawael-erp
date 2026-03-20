@@ -15,7 +15,7 @@ class BigDataPerformanceTest {
       queryResponse: 1000, // milliseconds
       bulkOperations: 5000,
       aggregation: 2000,
-      search: 1500
+      search: 1500,
     };
   }
 
@@ -40,12 +40,12 @@ class BigDataPerformanceTest {
           speed: Math.floor(Math.random() * 200),
           altitude: 100 + Math.floor(Math.random() * 1000),
           timestamp: new Date(),
-          accuracy: Math.random() * 10
+          accuracy: Math.random() * 10,
         }));
 
         // محاكاة إدراج دفعي
-        const response = await this.client.post('/gps/bulk-insert', {
-          locations
+        const _response = await this.client.post('/gps/bulk-insert', {
+          locations,
         });
 
         const endTime = performance.now();
@@ -58,20 +58,20 @@ class BigDataPerformanceTest {
           throughput: (size / (duration / 1000)).toFixed(0),
           memoryUsed: `${Math.round((endMem - startMem) / 1024 / 1024)}MB`,
           passed: duration < this.performanceThresholds.bulkOperations,
-          threshold: this.performanceThresholds.bulkOperations
+          threshold: this.performanceThresholds.bulkOperations,
         });
       } catch (error) {
         results.push({
           size,
           error: error.message,
-          passed: false
+          passed: false,
         });
       }
     }
 
     this.results.push({
       test: 'Bulk Insert Performance',
-      details: results
+      details: results,
     });
   }
 
@@ -86,12 +86,14 @@ class BigDataPerformanceTest {
       { type: 'speed', query: { minSpeed: 50, maxSpeed: 150 } },
       { type: 'time', query: { from: new Date(Date.now() - 86400000), to: new Date() } },
       { type: 'vehicle', query: { vehicleId: 'vehicle-1' } },
-      { type: 'complex', query: { 
+      {
+        type: 'complex',
+        query: {
           vehicleId: /vehicle-[0-9]{1,3}/,
           speed: { $gt: 50, $lt: 150 },
-          timestamp: { $gte: new Date(Date.now() - 3600000) }
-        }
-      }
+          timestamp: { $gte: new Date(Date.now() - 3600000) },
+        },
+      },
     ];
 
     const searchResults = [];
@@ -101,7 +103,7 @@ class BigDataPerformanceTest {
 
       try {
         const response = await this.client.get('/gps/search', {
-          params: search.query
+          params: search.query,
         });
 
         const endTime = performance.now();
@@ -112,20 +114,20 @@ class BigDataPerformanceTest {
           duration: duration.toFixed(2),
           resultsCount: response.data?.data?.length || 0,
           passed: duration < this.performanceThresholds.search,
-          threshold: this.performanceThresholds.search
+          threshold: this.performanceThresholds.search,
         });
       } catch (error) {
         searchResults.push({
           type: search.type,
           error: error.message,
-          passed: false
+          passed: false,
         });
       }
     }
 
     this.results.push({
       test: 'Search Performance',
-      details: searchResults
+      details: searchResults,
     });
   }
 
@@ -138,36 +140,36 @@ class BigDataPerformanceTest {
     const aggregations = [
       {
         name: 'Average Speed by Vehicle',
-        endpoint: '/analytics/average-speed-by-vehicle'
+        endpoint: '/analytics/average-speed-by-vehicle',
       },
       {
         name: 'Distance Traveled',
-        endpoint: '/analytics/distance-traveled'
+        endpoint: '/analytics/distance-traveled',
       },
       {
         name: 'Fleet Heatmap',
-        endpoint: '/analytics/heatmap'
+        endpoint: '/analytics/heatmap',
       },
       {
         name: 'Fuel Efficiency',
-        endpoint: '/analytics/fuel-efficiency'
+        endpoint: '/analytics/fuel-efficiency',
       },
       {
         name: 'Route Optimization',
-        endpoint: '/routes/optimize'
+        endpoint: '/routes/optimize',
       },
       {
         name: 'Predictive Maintenance',
-        endpoint: '/ml/predict-maintenance'
+        endpoint: '/ml/predict-maintenance',
       },
       {
         name: 'Accident Risk Analysis',
-        endpoint: '/ml/predict-accident-risk'
+        endpoint: '/ml/predict-accident-risk',
       },
       {
         name: 'Driver Behavior',
-        endpoint: '/analytics/driver-behavior'
-      }
+        endpoint: '/analytics/driver-behavior',
+      },
     ];
 
     const aggResults = [];
@@ -177,11 +179,11 @@ class BigDataPerformanceTest {
 
       try {
         const response = await this.client.get(agg.endpoint, {
-          params: { 
+          params: {
             from: new Date(Date.now() - 86400000 * 30),
             to: new Date(),
-            limit: 10000
-          }
+            limit: 10000,
+          },
         });
 
         const endTime = performance.now();
@@ -192,20 +194,20 @@ class BigDataPerformanceTest {
           duration: duration.toFixed(2),
           dataPoints: response.data?.data?.length || 0,
           passed: duration < this.performanceThresholds.aggregation,
-          threshold: this.performanceThresholds.aggregation
+          threshold: this.performanceThresholds.aggregation,
         });
       } catch (error) {
         aggResults.push({
           name: agg.name,
           error: error.message || 'Request failed',
-          passed: false
+          passed: false,
         });
       }
     }
 
     this.results.push({
       test: 'Aggregation Performance',
-      details: aggResults
+      details: aggResults,
     });
   }
 
@@ -222,24 +224,24 @@ class BigDataPerformanceTest {
         data: {
           filter: { vehicleId: { $regex: 'vehicle-' } },
           update: { $set: { synced: true } },
-          limit: 1000
-        }
+          limit: 1000,
+        },
       },
       {
         operation: 'Delete old records',
         endpoint: '/gps/bulk-delete',
         data: {
-          filter: { timestamp: { $lt: new Date(Date.now() - 86400000 * 90) } }
-        }
+          filter: { timestamp: { $lt: new Date(Date.now() - 86400000 * 90) } },
+        },
       },
       {
         operation: 'Archive historical data',
         endpoint: '/archive/migrate',
         data: {
           from: new Date(Date.now() - 86400000 * 365),
-          to: new Date(Date.now() - 86400000 * 90)
-        }
-      }
+          to: new Date(Date.now() - 86400000 * 90),
+        },
+      },
     ];
 
     const bulkResults = [];
@@ -258,20 +260,20 @@ class BigDataPerformanceTest {
           duration: duration.toFixed(2),
           affectedRecords: response.data?.modifiedCount || 0,
           passed: duration < this.performanceThresholds.bulkOperations,
-          threshold: this.performanceThresholds.bulkOperations
+          threshold: this.performanceThresholds.bulkOperations,
         });
       } catch (error) {
         bulkResults.push({
           operation: op.operation,
           error: error.message,
-          passed: false
+          passed: false,
         });
       }
     }
 
     this.results.push({
       test: 'Bulk Update/Delete Performance',
-      details: bulkResults
+      details: bulkResults,
     });
   }
 
@@ -284,39 +286,39 @@ class BigDataPerformanceTest {
     const indexTests = [
       {
         name: 'Index on vehicleId',
-        description: 'Single field index'
+        description: 'Single field index',
       },
       {
         name: 'Index on timestamp',
-        description: 'Time-based queries'
+        description: 'Time-based queries',
       },
       {
         name: 'Compound Index on vehicleId + timestamp',
-        description: 'Multi-field index'
+        description: 'Multi-field index',
       },
       {
         name: 'Geospatial Index',
-        description: 'Location-based queries'
+        description: 'Location-based queries',
       },
       {
         name: 'Text Index',
-        description: 'Full-text search'
+        description: 'Full-text search',
       },
       {
         name: 'TTL Index',
-        description: 'Automatic data expiration'
-      }
+        description: 'Automatic data expiration',
+      },
     ];
 
     const indexResults = indexTests.map(test => ({
       ...test,
       status: 'Configured',
-      impact: 'Reduces query time by 80-95%'
+      impact: 'Reduces query time by 80-95%',
     }));
 
     this.results.push({
       test: 'Index And Query Optimization',
-      details: indexResults
+      details: indexResults,
     });
   }
 
@@ -334,8 +336,8 @@ class BigDataPerformanceTest {
       await this.client.post('/transactions/simple', {
         operations: [
           { type: 'update', collection: 'vehicles', query: { id: 1 } },
-          { type: 'insert', collection: 'logs', data: { message: 'updated' } }
-        ]
+          { type: 'insert', collection: 'logs', data: { message: 'updated' } },
+        ],
       });
     } catch (error) {
       // expected
@@ -346,7 +348,7 @@ class BigDataPerformanceTest {
       type: 'Simple Transaction (2 ops)',
       duration: simpleTxDuration.toFixed(2),
       throughput: (1000 / simpleTxDuration).toFixed(0),
-      passed: simpleTxDuration < 500
+      passed: simpleTxDuration < 500,
     });
 
     // معاملة معقدة
@@ -357,8 +359,8 @@ class BigDataPerformanceTest {
           type: 'update',
           collection: 'vehicles',
           query: { id: i },
-          update: { lastUpdated: new Date() }
-        }))
+          update: { lastUpdated: new Date() },
+        })),
       });
     } catch (error) {
       // expected
@@ -369,12 +371,12 @@ class BigDataPerformanceTest {
       type: 'Complex Transaction (10 ops)',
       duration: complexTxDuration.toFixed(2),
       throughput: (1000 / complexTxDuration).toFixed(0),
-      passed: complexTxDuration < 1000
+      passed: complexTxDuration < 1000,
     });
 
     this.results.push({
       test: 'Transaction Performance',
-      details: txResults
+      details: txResults,
     });
   }
 
@@ -387,35 +389,35 @@ class BigDataPerformanceTest {
     const cacheTests = [
       {
         name: 'Cache Hit',
-        description: 'Data available in cache'
+        description: 'Data available in cache',
       },
       {
         name: 'Cache Miss',
-        description: 'Data not in cache, fetch from DB'
+        description: 'Data not in cache, fetch from DB',
       },
       {
         name: 'Cache Invalidation',
-        description: 'Update cache on data change'
+        description: 'Update cache on data change',
       },
       {
         name: 'Distributed Cache',
-        description: 'Redis cluster caching'
+        description: 'Redis cluster caching',
       },
       {
         name: 'Cache Warmup',
-        description: 'Pre-populate cache'
-      }
+        description: 'Pre-populate cache',
+      },
     ];
 
     const cacheResults = cacheTests.map(test => ({
       ...test,
       expectedImprovement: '10x-100x faster',
-      status: 'Configured'
+      status: 'Configured',
     }));
 
     this.results.push({
       test: 'Caching Performance',
-      details: cacheResults
+      details: cacheResults,
     });
   }
 
@@ -433,7 +435,7 @@ class BigDataPerformanceTest {
 
       try {
         const response = await this.client.get('/gps/locations', {
-          params: { page: 1, pageSize }
+          params: { page: 1, pageSize },
         });
 
         const duration = performance.now() - startTime;
@@ -442,20 +444,20 @@ class BigDataPerformanceTest {
           pageSize,
           duration: duration.toFixed(2),
           recordsReturned: response.data?.data?.length || 0,
-          passed: duration < 500
+          passed: duration < 500,
         });
       } catch (error) {
         paginationResults.push({
           pageSize,
           error: error.message,
-          passed: false
+          passed: false,
         });
       }
     }
 
     this.results.push({
       test: 'Pagination Performance',
-      details: paginationResults
+      details: paginationResults,
     });
   }
 
@@ -469,34 +471,34 @@ class BigDataPerformanceTest {
       {
         name: 'CSV Import (10,000 rows)',
         size: '~2MB',
-        expectedTime: '< 5 sec'
+        expectedTime: '< 5 sec',
       },
       {
         name: 'CSV Import (100,000 rows)',
         size: '~20MB',
-        expectedTime: '< 30 sec'
+        expectedTime: '< 30 sec',
       },
       {
         name: 'JSON Array Parse (50MB)',
         size: '50MB',
-        expectedTime: '< 10 sec'
+        expectedTime: '< 10 sec',
       },
       {
         name: 'Streaming Data (1GB)',
         size: '1GB',
-        expectedTime: '< 60 sec'
-      }
+        expectedTime: '< 60 sec',
+      },
     ];
 
     const fileResults = fileTests.map(test => ({
       ...test,
       status: 'Ready for testing',
-      implementation: 'Stream-based processing'
+      implementation: 'Stream-based processing',
     }));
 
     this.results.push({
       test: 'Large File Processing',
-      details: fileResults
+      details: fileResults,
     });
   }
 
@@ -510,38 +512,38 @@ class BigDataPerformanceTest {
       {
         name: 'Incremental Backup',
         expectedDuration: '< 5 minutes',
-        expectedDataSize: 'Compressed'
+        expectedDataSize: 'Compressed',
       },
       {
         name: 'Full Backup',
         expectedDuration: '< 30 minutes',
-        expectedDataSize: 'Compressed'
+        expectedDataSize: 'Compressed',
       },
       {
         name: 'Automated Backup',
         frequency: 'Every 4 hours',
-        retention: '90 days'
+        retention: '90 days',
       },
       {
         name: 'Point-in-Time Recovery',
         capability: 'Supported',
-        granularity: 'Per transaction'
+        granularity: 'Per transaction',
       },
       {
         name: 'Disaster Recovery',
         rto: '< 1 hour',
-        rpo: '< 15 minutes'
-      }
+        rpo: '< 15 minutes',
+      },
     ];
 
     const backupResults = backupTests.map(test => ({
       ...test,
-      status: 'Configured'
+      status: 'Configured',
     }));
 
     this.results.push({
       test: 'Backup & Restore Performance',
-      details: backupResults
+      details: backupResults,
     });
   }
 
@@ -577,14 +579,14 @@ class BigDataPerformanceTest {
 
     this.results.forEach(result => {
       console.log(`\n📌 ${result.test}:`);
-      
+
       if (Array.isArray(result.details)) {
         result.details.forEach(detail => {
           const status = detail.passed ? '✓' : detail.error ? '✗' : '→';
-          const msg = detail.error ? 
-            `${detail.name || detail.operation || detail.type}: ${detail.error}` :
-            `${detail.name || detail.operation || detail.type}: ${detail.duration}ms (${detail.passed ? 'PASS' : 'SLOW'})`;
-          
+          const msg = detail.error
+            ? `${detail.name || detail.operation || detail.type}: ${detail.error}`
+            : `${detail.name || detail.operation || detail.type}: ${detail.duration}ms (${detail.passed ? 'PASS' : 'SLOW'})`;
+
           console.log(`   ${status} ${msg}`);
         });
       }
@@ -602,7 +604,7 @@ class BigDataPerformanceTest {
       timestamp: new Date().toISOString(),
       baseURL: this.baseURL,
       thresholds: this.performanceThresholds,
-      results: this.results
+      results: this.results,
     };
   }
 }

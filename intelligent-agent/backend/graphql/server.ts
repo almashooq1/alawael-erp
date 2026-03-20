@@ -23,22 +23,24 @@ export async function createGraphQLServer(app: express.Application) {
     context: ({ req }) => {
       // Get auth token from header
       const token = req.headers.authorization?.replace('Bearer ', '');
-      
+
       if (token) {
         try {
-          const user = jwt.verify(token, process.env.JWT_SECRET || 'secret');
+          const jwtSecret = process.env.JWT_SECRET;
+          if (!jwtSecret) {
+            return {};
+          }
+          const user = jwt.verify(token, jwtSecret);
           return { user };
         } catch (error) {
           return {};
         }
       }
-      
+
       return {};
     },
-    plugins: [
-      ApolloServerPluginDrainHttpServer({ httpServer })
-    ],
-    formatError: (error) => {
+    plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
+    formatError: error => {
       console.error('GraphQL Error:', error);
       return {
         message: 'حدث خطأ داخلي',
@@ -46,20 +48,20 @@ export async function createGraphQLServer(app: express.Application) {
         path: error.path,
         extensions: {
           code: error.extensions?.code,
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       };
-    }
+    },
   });
 
   await server.start();
-  server.applyMiddleware({ 
-    app, 
+  server.applyMiddleware({
+    app,
     path: '/graphql',
     cors: {
       origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-      credentials: true
-    }
+      credentials: true,
+    },
   });
 
   console.log(`🚀 GraphQL Server ready at http://localhost:3001${server.graphqlPath}`);

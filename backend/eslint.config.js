@@ -23,6 +23,18 @@ module.exports = [
       'erp_new_system/**',
       // Circular symlink issue
       'intelligent-agent/**',
+      // Dead-code nested duplicate directories (not required by app entry points)
+      'controllers/controllers/**',
+      'middleware/middleware/**',
+      'models/models/**',
+      'services/services/**',
+      'routes/routes/**',
+      'config/config/**',
+      'utils/utils/**',
+      // k6 load tests (ES module syntax — run by k6, not Node)
+      'tests/load/**',
+      // Standalone test runners (not Jest — use import/ES modules)
+      'tests/tests/loadTesting.js',
     ],
   },
   // Base JavaScript configuration
@@ -30,7 +42,7 @@ module.exports = [
     files: ['**/*.js'],
     languageOptions: {
       ecmaVersion: 2022,
-      sourceType: 'module',
+      sourceType: 'commonjs',
       globals: {
         ...globals.node,
         process: 'readonly',

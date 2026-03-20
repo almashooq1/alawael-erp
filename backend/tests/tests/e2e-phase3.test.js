@@ -10,13 +10,13 @@ const assert = require('assert');
 const BASE_URL = 'http://localhost:3009';
 let testsPassed = 0;
 let testsFailed = 0;
-let testResults = [];
+const testResults = [];
 
 // State for testing workflows
 let createdSupplierId = null;
 let createdInventoryId = null;
 let createdOrderId = null;
-let createdShipmentId = null;
+let _createdShipmentId = null;
 
 // HTTP Helper
 function httpRequest(method, path, body = null) {
@@ -33,9 +33,9 @@ function httpRequest(method, path, body = null) {
       timeout: 5000,
     };
 
-    const req = http.request(options, (res) => {
+    const req = http.request(options, res => {
       let data = '';
-      res.on('data', chunk => data += chunk);
+      res.on('data', chunk => (data += chunk));
       res.on('end', () => {
         try {
           const json = data ? JSON.parse(data) : {};
@@ -96,7 +96,7 @@ async function runPhase3() {
   // ===== WORKFLOW 1: Complete Supplier Registration =====
   console.log('🏢 Workflow 1: Supplier Registration Flow');
 
-  let supplierData = {
+  const supplierData = {
     name: 'Integration Test Supplier ' + Date.now(),
     email: 'supplier-' + Date.now() + '@test.com',
     phone: '+966501234567',
@@ -137,7 +137,7 @@ async function runPhase3() {
   // ===== WORKFLOW 2: Inventory Management Flow =====
   console.log('\n📦 Workflow 2: Inventory Management Flow');
 
-  let inventoryData = {
+  const inventoryData = {
     sku: 'SKU-INTEGRATION-' + Date.now(),
     name: 'Integration Test Product',
     category: 'Industrial Equipment',
@@ -169,20 +169,23 @@ async function runPhase3() {
   await test('Retrieve inventory item list', async () => {
     const res = await httpRequest('GET', '/api/supply-chain/inventory');
     assert.strictEqual(res.status, 200);
-    assert.ok(Array.isArray(res.data.data) || res.data.data.products, 'Should return inventory list');
+    assert.ok(
+      Array.isArray(res.data.data) || res.data.data.products,
+      'Should return inventory list'
+    );
   });
 
   // ===== WORKFLOW 3: Purchase Order Lifecycle =====
   console.log('\n📋 Workflow 3: Purchase Order Lifecycle');
 
-  let orderData = {
+  const orderData = {
     supplierId: createdSupplierId || '1',
     items: [
       {
         itemId: createdInventoryId || 'SKU-001',
         quantity: 50,
         unitPrice: 2500,
-      }
+      },
     ],
     totalAmount: 125000,
     priority: 'high',
@@ -212,7 +215,7 @@ async function runPhase3() {
   // ===== WORKFLOW 4: Shipment Tracking =====
   console.log('\n🚚 Workflow 4: Shipment Tracking Flow');
 
-  let shipmentData = {
+  const shipmentData = {
     orderId: createdOrderId || '1',
     origin: 'Supplier Warehouse',
     destination: 'Our Distribution Center',
@@ -224,10 +227,10 @@ async function runPhase3() {
     const res = await httpRequest('POST', '/api/supply-chain/shipments', shipmentData);
     if (res.status === 400) {
       console.log('     Info: Shipment validation returned 400, using mock ID');
-      createdShipmentId = 'shipment-mock-1';
+      _createdShipmentId = 'shipment-mock-1';
     } else {
       assert.ok([200, 201].includes(res.status), `Expected 200/201 but got ${res.status}`);
-      createdShipmentId = res.data.data?._id || res.data.data?.id || 'shipment-1';
+      _createdShipmentId = res.data.data?._id || res.data.data?.id || 'shipment-1';
     }
   });
 
@@ -251,7 +254,10 @@ async function runPhase3() {
   await test('List all shipments', async () => {
     const res = await httpRequest('GET', '/api/supply-chain/shipments');
     assert.strictEqual(res.status, 200);
-    assert.ok(Array.isArray(res.data.data) || res.data.data !== undefined, 'Should return shipments');
+    assert.ok(
+      Array.isArray(res.data.data) || res.data.data !== undefined,
+      'Should return shipments'
+    );
   });
 
   // ===== WORKFLOW 5: Analytics & Reporting =====
@@ -262,9 +268,9 @@ async function runPhase3() {
     assert.strictEqual(res.status, 200);
     const analyticsData = res.data.data || res.data;
     assert.ok(
-      analyticsData.totalOrders !== undefined || 
-      analyticsData.supplierCount !== undefined ||
-      analyticsData.totalSuppliers !== undefined,
+      analyticsData.totalOrders !== undefined ||
+        analyticsData.supplierCount !== undefined ||
+        analyticsData.totalSuppliers !== undefined,
       'Should return analytics metrics'
     );
   });
@@ -295,7 +301,7 @@ async function runPhase3() {
     // Both should have same structure
     assert.ok(
       (Array.isArray(res1.data.data) && Array.isArray(res2.data.data)) ||
-      (res1.data.data?.suppliers && res2.data.data?.suppliers),
+        (res1.data.data?.suppliers && res2.data.data?.suppliers),
       'Data format should be consistent'
     );
   });
@@ -309,7 +315,7 @@ async function runPhase3() {
     });
     // Should return error but not crash
     assert.ok([400, 404, 500].includes(res.status), `Got unexpected status ${res.status}`);
-    
+
     // System should still work
     const statusRes = await httpRequest('GET', '/api/supply-chain/status');
     assert.strictEqual(statusRes.status, 200);
@@ -329,7 +335,10 @@ async function runPhase3() {
     // First creation - may fail validation or succeed
     const res1 = await httpRequest('POST', '/api/supply-chain/suppliers', data);
     // Either succeeds or fails with validation - both are acceptable
-    assert.ok([200, 201, 400].includes(res1.status), `First creation got unexpected status ${res1.status}`);
+    assert.ok(
+      [200, 201, 400].includes(res1.status),
+      `First creation got unexpected status ${res1.status}`
+    );
 
     // Second creation with same email
     const res2 = await httpRequest('POST', '/api/supply-chain/suppliers', {

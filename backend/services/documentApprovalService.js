@@ -11,7 +11,7 @@
  */
 
 const EventEmitter = require('events');
-const crypto = require('crypto');
+const _crypto = require('crypto');
 
 const APPROVAL_STATUSES = {
   PENDING: 'pending',
@@ -396,7 +396,7 @@ class DocumentApprovalService extends EventEmitter {
         }
         break;
 
-      case WORKFLOW_TYPES.MAJORITY:
+      case WORKFLOW_TYPES.MAJORITY: {
         const total = requiredSteps.length;
         const majority = Math.ceil(total / 2);
         if (approvedSteps.filter(s => s.required).length >= majority) {
@@ -409,6 +409,7 @@ class DocumentApprovalService extends EventEmitter {
           this.emit('approvalRejected', request);
         }
         break;
+      }
     }
   }
 
@@ -551,7 +552,7 @@ class DocumentApprovalService extends EventEmitter {
   /**
    * Get approval statistics — إحصائيات الموافقات
    */
-  async getStatistics(options = {}) {
+  async getStatistics(_options = {}) {
     const requests = Array.from(this.approvalRequests.values());
 
     const byStatus = {};

@@ -177,6 +177,7 @@ class MFAService {
       sessionId,
       userId,
       method,
+      status: 'pending',
       expiresAt,
       attempts: 0,
       maxAttempts: 5,

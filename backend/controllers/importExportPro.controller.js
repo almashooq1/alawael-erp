@@ -62,7 +62,7 @@ const createExport = async (req, res) => {
  */
 const previewExport = async (req, res) => {
   try {
-    const userId = req.user?.userId || req.user?._id || req.user?.id;
+    const _userId = req.user?.userId || req.user?._id || req.user?.id;
     const { module, fields, query, dateRange } = req.body;
 
     if (!module) {

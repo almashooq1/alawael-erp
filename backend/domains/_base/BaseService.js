@@ -11,7 +11,7 @@
  */
 
 const { EventEmitter } = require('events');
-const logger = require('../../utils/logger');
+const _logger = require('../../utils/logger');
 
 class BaseService extends EventEmitter {
   /**
@@ -140,12 +140,12 @@ class BaseService extends EventEmitter {
 
   // ─── Lifecycle Hooks (override in subclass) ─────────────────────────────
 
-  async beforeCreate(data, context) {}
-  async afterCreate(entity, context) {}
-  async beforeUpdate(id, data, existing, context) {}
-  async afterUpdate(entity, previous, context) {}
-  async beforeDelete(id, existing, context) {}
-  async afterDelete(entity, context) {}
+  async beforeCreate(_data, _context) {}
+  async afterCreate(_entity, _context) {}
+  async beforeUpdate(_id, _data, _existing, _context) {}
+  async afterUpdate(_entity, _previous, _context) {}
+  async beforeDelete(_id, _existing, _context) {}
+  async afterDelete(_entity, _context) {}
 
   // ─── Cache Methods ──────────────────────────────────────────────────────
 

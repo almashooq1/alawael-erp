@@ -173,7 +173,22 @@ const connectDB = async () => {
   logger.error(`\n❌ All ${maxRetries} connection attempts failed`);
   logger.error(`   Error: ${lastError.message}`);
 
-  const allowFallback = process.env.DISABLE_MOCK_FALLBACK !== 'true';
+  // SAFETY: Never use in-memory fallback in production — it would serve empty data
+  const isProduction = process.env.NODE_ENV === 'production';
+  const allowFallback = !isProduction && process.env.DISABLE_MOCK_FALLBACK !== 'true';
+
+  if (isProduction) {
+    logger.error(
+      '❌ CRITICAL: MongoDB connection failed in production. Refusing to fall back to in-memory DB.'
+    );
+    logger.error('   The application will not serve requests until MongoDB is available.');
+    connectionHealth.isConnected = false;
+    connectionHealth.lastErrorMessage = lastError.message;
+    connectionHealth.lastErrorTime = new Date();
+    throw new Error(
+      `MongoDB connection failed in production after ${maxRetries} retries: ${lastError.message}`
+    );
+  }
 
   if (allowFallback) {
     // console.log('\n🔄 Attempting to use mock database as fallback...');

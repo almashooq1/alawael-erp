@@ -14,7 +14,13 @@
  * ═══════════════════════════════════════════════════════════════════════
  */
 
-const AWS = require('aws-sdk');
+const {
+  S3Client,
+  GetObjectCommand,
+  ListObjectsV2Command,
+  DeleteObjectsCommand,
+} = require('@aws-sdk/client-s3');
+const { Upload } = require('@aws-sdk/lib-storage');
 const fs = require('fs').promises;
 const path = require('path');
 const logger = require('../utils/logger');
@@ -214,10 +220,12 @@ class MultiLocationBackupStorage {
    */
   async storeS3(backupFile, backupMetadata, location) {
     try {
-      const s3 = new AWS.S3({
-        accessKeyId: location.config.accessKeyId,
-        secretAccessKey: location.config.secretAccessKey,
+      const s3 = new S3Client({
         region: location.region,
+        credentials: {
+          accessKeyId: location.config.accessKeyId,
+          secretAccessKey: location.config.secretAccessKey,
+        },
       });
 
       const fileContent = await fs.readFile(backupFile);
@@ -237,7 +245,8 @@ class MultiLocationBackupStorage {
         StorageClass: 'STANDARD_IA', // Cheaper for infrequent access
       };
 
-      const result = await s3.upload(params).promise();
+      const upload = new Upload({ client: s3, params });
+      const result = await upload.done();
 
       return {
         bucket: location.bucket,
@@ -375,10 +384,12 @@ class MultiLocationBackupStorage {
    */
   async retrieveS3(backupId, location) {
     try {
-      const s3 = new AWS.S3({
-        accessKeyId: location.config.accessKeyId,
-        secretAccessKey: location.config.secretAccessKey,
+      const s3 = new S3Client({
         region: location.region,
+        credentials: {
+          accessKeyId: location.config.accessKeyId,
+          secretAccessKey: location.config.secretAccessKey,
+        },
       });
 
       const params = {
@@ -386,17 +397,22 @@ class MultiLocationBackupStorage {
         Prefix: `backups/${backupId}/`,
       };
 
-      const list = await s3.listObjectsV2(params).promise();
+      const list = await s3.send(new ListObjectsV2Command(params));
 
       if (!list.Contents || list.Contents.length === 0) {
         throw new Error('Backup not found in S3');
       }
 
       const objectKey = list.Contents[0].Key;
-      const data = await s3.getObject({ Bucket: location.bucket, Key: objectKey }).promise();
+      const data = await s3.send(new GetObjectCommand({ Bucket: location.bucket, Key: objectKey }));
+
+      const chunks = [];
+      for await (const chunk of data.Body) {
+        chunks.push(chunk);
+      }
 
       return {
-        content: data.Body,
+        content: Buffer.concat(chunks),
         location: 'AWS_S3',
         key: objectKey,
       };
@@ -476,10 +492,12 @@ class MultiLocationBackupStorage {
    */
   async deleteS3(backupId, location) {
     try {
-      const s3 = new AWS.S3({
-        accessKeyId: location.config.accessKeyId,
-        secretAccessKey: location.config.secretAccessKey,
+      const s3 = new S3Client({
         region: location.region,
+        credentials: {
+          accessKeyId: location.config.accessKeyId,
+          secretAccessKey: location.config.secretAccessKey,
+        },
       });
 
       const params = {
@@ -487,7 +505,7 @@ class MultiLocationBackupStorage {
         Prefix: `backups/${backupId}/`,
       };
 
-      const list = await s3.listObjectsV2(params).promise();
+      const list = await s3.send(new ListObjectsV2Command(params));
 
       if (!list.Contents) return true;
 
@@ -498,7 +516,7 @@ class MultiLocationBackupStorage {
         },
       };
 
-      await s3.deleteObjects(deleteParams).promise();
+      await s3.send(new DeleteObjectsCommand(deleteParams));
       return true;
     } catch (error) {
       throw new Error(error.message);

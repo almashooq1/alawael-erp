@@ -17,7 +17,8 @@
   },
   "scripts": {
     "start": "node server.js",
-    "start:prod": "NODE_ENV=production node server.js",
+    "start:prod": "node --max-old-space-size=1024 server.js",
+    "validate:env": "node validate-env.js",
     "dev": "nodemon server.js",
     "smoke:basic": "node scripts/smoke-basic.js",
     "smoke:health": "node scripts/smoke-health.js",
@@ -56,8 +57,10 @@
     "docker:build": "docker compose build"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "3.1013.0",
+    "@aws-sdk/lib-storage": "3.1013.0",
+    "@aws-sdk/s3-request-presigner": "3.1013.0",
     "@sendgrid/mail": "^8.1.6",
-    "aws-sdk": "^2.1693.0",
     "axios": "^1.13.2",
     "bcryptjs": "^2.4.3",
     "cloudinary": "^2.9.0",
@@ -74,7 +77,7 @@
     "express-rate-limit": "^8.2.1",
     "express-validator": "^7.3.1",
     "express-xss-sanitizer": "2.0.1",
-    "firebase-admin": "^13.6.0",
+    "firebase-admin": "13.7.0",
     "form-data": "^4.0.5",
     "helmet": "^7.1.0",
     "hpp": "^0.2.3",
@@ -104,8 +107,7 @@
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
     "twilio": "^5.12.0",
-    "uuid": "^8.3.2",
-    "xlsx": "^0.18.5"
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@faker-js/faker": "^10.2.0",
@@ -116,5 +118,8 @@
     "prettier": "^3.0.0",
     "puppeteer": "^24.36.1",
     "supertest": "^6.3.4"
+  },
+  "overrides": {
+    "fast-xml-parser": ">=5.5.7"
   }
 }

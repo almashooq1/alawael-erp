@@ -2,7 +2,7 @@
  * بيانات البذر الأساسية - أنواع المقاييس والبرامج
  * Seed Data: Measurement Types & Rehabilitation Programs
  * ====================================================
- * 
+ *
  * هذا الملف يحتوي على جميع المقاييس والبرامج الأساسية المدعومة
  * استخدمه لـ: npm run seed:measurements
  */
@@ -31,43 +31,43 @@ const measurementTypes = [
         minScore: 40,
         maxScore: 54,
         description: 'إعاقة ذهنية عميقة جداً',
-        recommendations: ['تأهيل كثيف', 'رعاية متخصصة كاملة']
+        recommendations: ['تأهيل كثيف', 'رعاية متخصصة كاملة'],
       },
       {
         level: 'SEVERE',
         minScore: 55,
         maxScore: 69,
         description: 'إعاقة ذهنية شديدة',
-        recommendations: ['برامج مكثفة', 'إشراف دائم']
+        recommendations: ['برامج مكثفة', 'إشراف دائم'],
       },
       {
         level: 'MODERATE',
         minScore: 70,
         maxScore: 84,
         description: 'إعاقة ذهنية متوسطة',
-        recommendations: ['برامج تدريبية', 'دعم أسري']
+        recommendations: ['برامج تدريبية', 'دعم أسري'],
       },
       {
         level: 'MILD',
         minScore: 85,
         maxScore: 99,
         description: 'إعاقة ذهنية خفيفة',
-        recommendations: ['برامج تربوية', 'تعليم خاص']
+        recommendations: ['برامج تربوية', 'تعليم خاص'],
       },
       {
         level: 'BORDERLINE',
         minScore: 100,
         maxScore: 109,
         description: 'قريب من الطبيعي',
-        recommendations: ['دعم تعليمي متخصص']
-      }
+        recommendations: ['دعم تعليمي متخصص'],
+      },
     ],
     domains: [
       { code: 'VERBAL', name: 'القدرة اللفظية', weight: 25 },
       { code: 'PERCEPTUAL', name: 'القدرة الإدراكية', weight: 25 },
       { code: 'WORKING_MEMORY', name: 'الذاكرة العاملة', weight: 25 },
-      { code: 'PROCESSING_SPEED', name: 'سرعة المعالجة', weight: 25 }
-    ]
+      { code: 'PROCESSING_SPEED', name: 'سرعة المعالجة', weight: 25 },
+    ],
   },
 
   {
@@ -83,7 +83,7 @@ const measurementTypes = [
     normSource: 'Raven',
     scoringMethod: 'PERCENTILE',
     scoreRange: { min: 1, max: 99 },
-    administratedBy: 'PSYCHOLOGIST'
+    administratedBy: 'PSYCHOLOGIST',
   },
 
   {
@@ -102,8 +102,8 @@ const measurementTypes = [
       { code: 'COMMUNICATION', name: 'التواصل', weight: 30 },
       { code: 'DAILY_LIVING', name: 'مهارات الحياة اليومية', weight: 35 },
       { code: 'SOCIALIZATION', name: 'المهارات الاجتماعية', weight: 20 },
-      { code: 'MOTOR_SKILLS', name: 'المهارات الحركية', weight: 15 }
-    ]
+      { code: 'MOTOR_SKILLS', name: 'المهارات الحركية', weight: 15 },
+    ],
   },
 
   {
@@ -116,7 +116,7 @@ const measurementTypes = [
     ageRange: { minAge: 0, maxAge: 3, description: 'من الميلاد إلى 3 سنوات' },
     estimatedTime: 75,
     isStandardized: true,
-    administratedBy: 'PSYCHOLOGIST'
+    administratedBy: 'PSYCHOLOGIST',
   },
 
   // ============================
@@ -136,8 +136,8 @@ const measurementTypes = [
     domains: [
       { code: 'READING', name: 'القراءة', weight: 33 },
       { code: 'WRITING', name: 'الكتابة', weight: 33 },
-      { code: 'ARITHMETIC', name: 'الحساب', weight: 34 }
-    ]
+      { code: 'ARITHMETIC', name: 'الحساب', weight: 34 },
+    ],
   },
 
   {
@@ -156,8 +156,8 @@ const measurementTypes = [
       { code: 'FLUENCY', name: 'الطلاقة', weight: 15 },
       { code: 'VOICE', name: 'جودة الصوت', weight: 10 },
       { code: 'RECEPTIVE_LANGUAGE', name: 'اللغة الاستقبالية', weight: 25 },
-      { code: 'EXPRESSIVE_LANGUAGE', name: 'اللغة التعبيرية', weight: 25 }
-    ]
+      { code: 'EXPRESSIVE_LANGUAGE', name: 'اللغة التعبيرية', weight: 25 },
+    ],
   },
 
   // ============================
@@ -179,21 +179,21 @@ const measurementTypes = [
       { code: 'AGGRESSION', name: 'السلوك العدواني', weight: 30 },
       { code: 'WITHDRAWAL', name: 'السلوك الانسحابي', weight: 20 },
       { code: 'HYPERACTIVITY', name: 'فرط الحركة', weight: 25 },
-      { code: 'NON_COMPLIANCE', name: 'عدم الالتزام', weight: 25 }
-    ]
+      { code: 'NON_COMPLIANCE', name: 'عدم الالتزام', weight: 25 },
+    ],
   },
 
   {
     code: 'ADHD_001',
     nameAr: 'مقياس فرط الحركة ونقص الانتباه',
-    nameEn': 'ADHD Rating Scale',
+    nameEn: 'ADHD Rating Scale',
     category: 'BEHAVIORAL',
     description: 'تشخيص اضطراب نقص الانتباه وفرط الحركة',
     targetDisabilities: ['DEVELOPMENTAL', 'INTELLECTUAL'],
     ageRange: { minAge: 5, maxAge: 16 },
     estimatedTime: 15,
     isStandardized: true,
-    scoringMethod: 'LIKERT'
+    scoringMethod: 'LIKERT',
   },
 
   {
@@ -206,7 +206,7 @@ const measurementTypes = [
     ageRange: { minAge: 6, maxAge: 18 },
     estimatedTime: 20,
     isStandardized: true,
-    scoringMethod: 'LIKERT'
+    scoringMethod: 'LIKERT',
   },
 
   // ============================
@@ -223,13 +223,13 @@ const measurementTypes = [
     estimatedTime: 5,
     isStandardized: true,
     scoringMethod: 'CHECKLIST',
-    administratedBy: 'PSYCHOLOGIST'
+    administratedBy: 'PSYCHOLOGIST',
   },
 
   {
     code: 'AUTISM_002',
     nameAr: 'ADOS-2 - مقياس التوحد التشخيصي المعياري',
-    nameEn': 'Autism Diagnostic Observation Schedule',
+    nameEn: 'Autism Diagnostic Observation Schedule',
     category: 'AUTISM_SPECTRUM',
     description: 'مقياس معياري شامل لتشخيص التوحد',
     targetDisabilities: ['AUTISM'],
@@ -237,7 +237,7 @@ const measurementTypes = [
     estimatedTime: 60,
     isStandardized: true,
     administratedBy: 'PSYCHOLOGIST',
-    requiredCertifications: ['ADOS-2-Certification']
+    requiredCertifications: ['ADOS-2-Certification'],
   },
 
   {
@@ -253,8 +253,8 @@ const measurementTypes = [
       { code: 'VERBAL_COMMUNICATION', name: 'التواصل اللفظي', weight: 30 },
       { code: 'NONVERBAL_COMMUNICATION', name: 'التواصل غير اللفظي', weight: 30 },
       { code: 'SOCIAL_INTERACTION', name: 'التفاعل الاجتماعي', weight: 25 },
-      { code: 'PLAY_INTERACTION', name: 'اللعب التفاعلي', weight: 15 }
-    ]
+      { code: 'PLAY_INTERACTION', name: 'اللعب التفاعلي', weight: 15 },
+    ],
   },
 
   // ============================
@@ -274,8 +274,8 @@ const measurementTypes = [
       { code: 'EATING', name: 'الأكل والشرب', weight: 25 },
       { code: 'DRESSING', name: 'اللبس', weight: 25 },
       { code: 'GROOMING', name: 'النظافة الشخصية', weight: 25 },
-      { code: 'TOILETING', name: 'استخدام المرحاض', weight: 25 }
-    ]
+      { code: 'TOILETING', name: 'استخدام المرحاض', weight: 25 },
+    ],
   },
 
   {
@@ -290,8 +290,8 @@ const measurementTypes = [
     domains: [
       { code: 'CLEANING', name: 'التنظيف والترتيب', weight: 33 },
       { code: 'FOOD_PREP', name: 'إعداد الطعام', weight: 33 },
-      { code: 'SAFETY', name: 'السلامة المنزلية', weight: 34 }
-    ]
+      { code: 'SAFETY', name: 'السلامة المنزلية', weight: 34 },
+    ],
   },
 
   {
@@ -306,8 +306,8 @@ const measurementTypes = [
     administratedBy: 'PHYSIOTHERAPIST',
     domains: [
       { code: 'GROSS_MOTOR', name: 'المهارات الحركية الكبيرة', weight: 50 },
-      { code: 'FINE_MOTOR', name: 'المهارات الحركية الدقيقة', weight: 50 }
-    ]
+      { code: 'FINE_MOTOR', name: 'المهارات الحركية الدقيقة', weight: 50 },
+    ],
   },
 
   // ============================
@@ -327,8 +327,8 @@ const measurementTypes = [
       { code: 'ATTENTION', name: 'الانتباه والتركيز', weight: 25 },
       { code: 'STAMINA', name: 'التحمل والصبر', weight: 25 },
       { code: 'COMPLIANCE', name: 'الالتزام بالتعليمات', weight: 25 },
-      { code: 'SPEED_ACCURACY', name: 'سرعة الأداء والدقة', weight: 25 }
-    ]
+      { code: 'SPEED_ACCURACY', name: 'سرعة الأداء والدقة', weight: 25 },
+    ],
   },
 
   {
@@ -343,9 +343,9 @@ const measurementTypes = [
     domains: [
       { code: 'PUNCTUALITY', name: 'الالتزام بالمواعيد', weight: 30 },
       { code: 'SAFETY', name: 'السلامة المهنية', weight: 35 },
-      { code: 'TEAMWORK', name: 'العمل الجماعي', weight: 35 }
-    ]
-  }
+      { code: 'TEAMWORK', name: 'العمل الجماعي', weight: 35 },
+    ],
+  },
 ];
 
 // ============================
@@ -370,8 +370,8 @@ const rehabilitationPrograms = [
           minScore: 30,
           maxScore: 70,
           levels: ['PROFOUND', 'SEVERE', 'MODERATE'],
-          mandatory: true
-        }
+          mandatory: true,
+        },
       },
       {
         measurementTypeId: 'DAILY_001',
@@ -379,47 +379,47 @@ const rehabilitationPrograms = [
           minScore: 0,
           maxScore: 40,
           levels: ['SEVERE', 'MODERATE', 'MILD'],
-          mandatory: false
-        }
-      }
+          mandatory: false,
+        },
+      },
     ],
     objectives: [
       {
         code: 'OBJ-001',
         description: 'تطوير مهارات الأكل والشرب بشكل مستقل',
         measurableIndicators: ['استخدام الملعقة بشكل صحيح', 'الشرب من الكوب'],
-        priority: 'HIGH'
+        priority: 'HIGH',
       },
       {
         code: 'OBJ-002',
         description: 'تطوير مهارات النظافة الشخصية',
         measurableIndicators: ['غسل اليدين', 'تنظيف الأسنان', 'الاستحمام'],
-        priority: 'HIGH'
+        priority: 'HIGH',
       },
       {
         code: 'OBJ-003',
         description: 'تطوير مهارات ارتداء الملابس',
         measurableIndicators: ['ارتداء الملابس بمساعدة', 'اختيار الملابس المناسبة'],
-        priority: 'MEDIUM'
-      }
+        priority: 'MEDIUM',
+      },
     ],
     sessionConfig: {
       standardDuration: 60,
       recommendedFrequency: {
         sessionsPerWeek: 3,
         totalSessions: 24,
-        totalDurationWeeks: 8
+        totalDurationWeeks: 8,
       },
       groupSessionInfo: {
         isGroupEligible: true,
         maxGroupSize: 4,
-        minParticipants: 2
+        minParticipants: 2,
       },
       homeBasedComponent: {
         hasHomeProgram: true,
         frequencyPerWeek: 5,
-        estimatedTime: 30
-      }
+        estimatedTime: 30,
+      },
     },
     phases: [
       {
@@ -432,11 +432,11 @@ const rehabilitationPrograms = [
           {
             activityName: 'ألعاب حسية وتفاعلية',
             frequency: '3x/week',
-            duration: 20
-          }
+            duration: 20,
+          },
         ],
         progressCriteria: ['إظهار اهتمام بالأنشطة', 'المشاركة الإيجابية'],
-        exitCriteria: ['جاهزية للمرحلة الثانية']
+        exitCriteria: ['جاهزية للمرحلة الثانية'],
       },
       {
         phaseNumber: 2,
@@ -445,7 +445,7 @@ const rehabilitationPrograms = [
         duration: 4,
         goals: ['إتقان مهارات الأكل والشرب', 'بدء تعلم النظافة الشخصية'],
         progressCriteria: ['استخدام الملعقة بجزء من الاستقلالية'],
-        exitCriteria: ['إتقان 2 من 4 مهارات']
+        exitCriteria: ['إتقان 2 من 4 مهارات'],
       },
       {
         phaseNumber: 3,
@@ -453,22 +453,22 @@ const rehabilitationPrograms = [
         phaseNameEn: 'Skills Enhancement',
         duration: 2,
         goals: ['الاستقلالية الكاملة في المهارات المختارة'],
-        exitCriteria: ['إتقان كامل بدون مساعدة']
-      }
+        exitCriteria: ['إتقان كامل بدون مساعدة'],
+      },
     ],
     familySupportComponent: {
       parentTraining: {
         required: true,
         topics: ['تقنيات التعزيز الإيجابي', 'استراتيجيات التعليم', 'إدارة السلوك'],
-        frequency: 'Weekly'
+        frequency: 'Weekly',
       },
       homeProgram: {
         description: 'برنامج يومي بسيط في المنزل',
         activities: ['تدريب على الأكل', 'النظافة الشخصية', 'اللبس'],
         frequency: '5x/week',
-        parentGuidance: 'دليل والدي شامل مع صور توضيحية'
-      }
-    }
+        parentGuidance: 'دليل والدي شامل مع صور توضيحية',
+      },
+    },
   },
 
   {
@@ -485,10 +485,10 @@ const rehabilitationPrograms = [
           minScore: 40,
           maxScore: 80,
           levels: ['MODERATE', 'MILD'],
-          mandatory: false
-        }
-      }
-    ]
+          mandatory: false,
+        },
+      },
+    ],
   },
 
   {
@@ -505,10 +505,10 @@ const rehabilitationPrograms = [
           minScore: 0,
           maxScore: 70,
           levels: ['SEVERE', 'MODERATE', 'MILD'],
-          mandatory: true
-        }
-      }
-    ]
+          mandatory: true,
+        },
+      },
+    ],
   },
 
   {
@@ -524,9 +524,9 @@ const rehabilitationPrograms = [
         activationRules: {
           minScore: 15,
           maxScore: 20,
-          mandatory: true
-        }
-      }
+          mandatory: true,
+        },
+      },
     ],
     requiredResources: {
       staff: [
@@ -534,10 +534,10 @@ const rehabilitationPrograms = [
           role: 'ABA Therapist',
           qualification: 'Bachelor in Psychology or related',
           certifications: ['RBT', 'BCBA'],
-          hoursPerWeek: 20
-        }
-      ]
-    }
+          hoursPerWeek: 20,
+        },
+      ],
+    },
   },
 
   {
@@ -553,24 +553,24 @@ const rehabilitationPrograms = [
         activationRules: {
           minScore: 0,
           maxScore: 60,
-          mandatory: true
-        }
-      }
+          mandatory: true,
+        },
+      },
     ],
     requiredResources: {
       staff: [
         {
           role: 'Physiotherapist',
           qualification: 'Bachelor in Physiotherapy',
-          hoursPerWeek: 15
-        }
+          hoursPerWeek: 15,
+        },
       ],
       equipment: [
         { name: 'معدات العلاج الطبيعي', quantity: 1 },
         { name: 'كرات توازن', quantity: 5 },
-        { name: 'سلالم توازن', quantity: 2 }
-      ]
-    }
+        { name: 'سلالم توازن', quantity: 2 },
+      ],
+    },
   },
 
   {
@@ -588,15 +588,15 @@ const rehabilitationPrograms = [
           minScore: 50,
           maxScore: 100,
           levels: ['MILD'],
-          mandatory: true
-        }
-      }
+          mandatory: true,
+        },
+      },
     ],
     programDuration: {
       estimatedWeeks: 12,
       flexible: true,
-      extensionCriteria: ['عدم إتقان المهارات المطلوبة', 'الحاجة لمراجعة إضافية']
-    }
+      extensionCriteria: ['عدم إتقان المهارات المطلوبة', 'الحاجة لمراجعة إضافية'],
+    },
   },
 
   {
@@ -612,11 +612,11 @@ const rehabilitationPrograms = [
         activationRules: {
           minScore: 0,
           maxScore: 50,
-          mandatory: true
-        }
-      }
-    ]
-  }
+          mandatory: true,
+        },
+      },
+    ],
+  },
 ];
 
 // ============================
@@ -626,40 +626,52 @@ async function seedMeasurementSystem() {
   try {
     const {
       MeasurementType,
-      MeasurementMaster
+      MeasurementMaster: _MeasurementMaster1,
     } = require('../models/MeasurementModels');
 
     const {
       RehabilitationProgram,
-      ProgramCategory
+      ProgramCategory,
     } = require('../models/RehabilitationProgramModels');
 
     console.log('🌱 جارٍ إضافة أنواع المقاييس...');
-    
+
     // إضافة أنواع المقاييس
     const createdTypes = await MeasurementType.insertMany(measurementTypes);
     console.log(`✅ تم إضافة ${createdTypes.length} نوع مقياس`);
 
     console.log('🌱 جارٍ إضافة فئات البرامج...');
-    
+
     // إضافة فئات البرامج
     const categories = [
       { code: 'DAILY_LIVING', nameAr: 'مهارات الحياة اليومية', nameEn: 'Daily Living Skills' },
-      { code: 'LANGUAGE_COMMUNICATION', nameAr: 'التواصل واللغة', nameEn: 'Language & Communication' },
-      { code: 'SOCIAL_EMOTIONAL', nameAr: 'المهارات الاجتماعية والعاطفية', nameEn: 'Social & Emotional Skills' },
+      {
+        code: 'LANGUAGE_COMMUNICATION',
+        nameAr: 'التواصل واللغة',
+        nameEn: 'Language & Communication',
+      },
+      {
+        code: 'SOCIAL_EMOTIONAL',
+        nameAr: 'المهارات الاجتماعية والعاطفية',
+        nameEn: 'Social & Emotional Skills',
+      },
       { code: 'MOTOR_SKILLS', nameAr: 'المهارات الحركية', nameEn: 'Motor Skills' },
-      { code: 'AUTISM_SPECTRUM', nameAr: 'برامج التوحد المتخصصة', nameEn: 'Autism Spectrum Programs' },
+      {
+        code: 'AUTISM_SPECTRUM',
+        nameAr: 'برامج التوحد المتخصصة',
+        nameEn: 'Autism Spectrum Programs',
+      },
       { code: 'ACADEMIC', nameAr: 'البرامج الأكاديمية', nameEn: 'Academic Programs' },
       { code: 'VOCATIONAL', nameAr: 'البرامج المهنية', nameEn: 'Vocational Programs' },
       { code: 'BEHAVIORAL', nameAr: 'تعديل السلوك', nameEn: 'Behavioral Modification' },
-      { code: 'PSYCHOLOGICAL', nameAr: 'الدعم النفسي', nameEn: 'Psychological Support' }
+      { code: 'PSYCHOLOGICAL', nameAr: 'الدعم النفسي', nameEn: 'Psychological Support' },
     ];
 
     const createdCategories = await ProgramCategory.insertMany(categories);
     console.log(`✅ تم إضافة ${createdCategories.length} فئات برامج`);
 
     console.log('🌱 جارٍ إضافة البرامج التأهيلية...');
-    
+
     // إضافة البرامج مع معرفات الفئات الصحيحة
     const programsData = rehabilitationPrograms.map(prog => {
       const category = createdCategories.find(c => c.code === prog.categoryCode);
@@ -668,8 +680,8 @@ async function seedMeasurementSystem() {
         categoryId: category._id,
         linkedMeasurements: prog.linkedMeasurements.map(lm => ({
           ...lm,
-          measurementTypeId: createdTypes.find(t => t.code === lm.measurementTypeId)?._id
-        }))
+          measurementTypeId: createdTypes.find(t => t.code === lm.measurementTypeId)?._id,
+        })),
       };
     });
 
@@ -686,9 +698,8 @@ async function seedMeasurementSystem() {
     return {
       measurementTypes: createdTypes,
       programCategories: createdCategories,
-      programs: createdPrograms
+      programs: createdPrograms,
     };
-
   } catch (error) {
     console.error('❌ خطأ في البذر:', error);
     throw error;
@@ -699,7 +710,7 @@ module.exports = {
   measurementTypes,
   rehabilitationPrograms,
   seedMeasurementSystem,
-  seedAdvancedMeasurementsAndPrograms: seedAdvancedMeasurementsAndPrograms
+  seedAdvancedMeasurementsAndPrograms: seedAdvancedMeasurementsAndPrograms,
 };
 
 // ============================
@@ -710,25 +721,27 @@ async function seedAdvancedMeasurementsAndPrograms() {
   try {
     const {
       MeasurementType,
-      MeasurementMaster
+      MeasurementMaster: _MeasurementMaster2,
     } = require('../models/MeasurementModels');
 
     const {
       RehabilitationProgram,
-      ProgramCategory
+      ProgramCategory,
     } = require('../models/RehabilitationProgramModels');
 
     const {
       advancedMeasurementTypes,
       advancedRehabilitationPrograms,
-      newProgramCategories
+      newProgramCategories,
     } = require('./advanced-measurements-programs.seed');
 
     console.log('\n🚀 جارٍ إضافة المقاييس والبرامج المتقدمة...\n');
 
     // إضافة المقاييس الجديدة
     console.log('🌱 جارٍ إضافة 50+ مقياس متقدم...');
-    const createdAdvancedTypes = await MeasurementType.insertMany(advancedMeasurementTypes, { ordered: false }).catch(err => {
+    const createdAdvancedTypes = await MeasurementType.insertMany(advancedMeasurementTypes, {
+      ordered: false,
+    }).catch(_err => {
       console.log(`⚠️  بعض المقاييس موجودة بالفعل`);
       return [];
     });
@@ -738,18 +751,32 @@ async function seedAdvancedMeasurementsAndPrograms() {
     console.log('🌱 جارٍ إضافة فئات برامج جديدة...');
     const allCategories = [
       { code: 'DAILY_LIVING', nameAr: 'مهارات الحياة اليومية', nameEn: 'Daily Living Skills' },
-      { code: 'LANGUAGE_COMMUNICATION', nameAr: 'التواصل واللغة', nameEn: 'Language & Communication' },
-      { code: 'SOCIAL_EMOTIONAL', nameAr: 'المهارات الاجتماعية والعاطفية', nameEn: 'Social & Emotional Skills' },
+      {
+        code: 'LANGUAGE_COMMUNICATION',
+        nameAr: 'التواصل واللغة',
+        nameEn: 'Language & Communication',
+      },
+      {
+        code: 'SOCIAL_EMOTIONAL',
+        nameAr: 'المهارات الاجتماعية والعاطفية',
+        nameEn: 'Social & Emotional Skills',
+      },
       { code: 'MOTOR_SKILLS', nameAr: 'المهارات الحركية', nameEn: 'Motor Skills' },
-      { code: 'AUTISM_SPECTRUM', nameAr: 'برامج التوحد المتخصصة', nameEn: 'Autism Spectrum Programs' },
+      {
+        code: 'AUTISM_SPECTRUM',
+        nameAr: 'برامج التوحد المتخصصة',
+        nameEn: 'Autism Spectrum Programs',
+      },
       { code: 'ACADEMIC', nameAr: 'البرامج الأكاديمية', nameEn: 'Academic Programs' },
       { code: 'VOCATIONAL', nameAr: 'البرامج المهنية', nameEn: 'Vocational Programs' },
       { code: 'BEHAVIORAL', nameAr: 'تعديل السلوك', nameEn: 'Behavioral Modification' },
       { code: 'PSYCHOLOGICAL', nameAr: 'الدعم النفسي', nameEn: 'Psychological Support' },
-      ...newProgramCategories
+      ...newProgramCategories,
     ];
 
-    const createdCategories = await ProgramCategory.insertMany(allCategories, { ordered: false }).catch(err => {
+    const createdCategories = await ProgramCategory.insertMany(allCategories, {
+      ordered: false,
+    }).catch(_err => {
       console.log(`⚠️  بعض الفئات موجودة بالفعل`);
       return [];
     });
@@ -757,10 +784,10 @@ async function seedAdvancedMeasurementsAndPrograms() {
 
     // إضافة البرامج المتقدمة
     console.log('🌱 جارٍ إضافة البرامج المتقدمة...');
-    
+
     const allTypes = await MeasurementType.find({});
     const allCats = await ProgramCategory.find({});
-    
+
     const programsWithIds = advancedRehabilitationPrograms.map(prog => {
       const category = allCats.find(c => c.code === prog.categoryCode);
       return {
@@ -768,12 +795,14 @@ async function seedAdvancedMeasurementsAndPrograms() {
         categoryId: category?._id,
         linkedMeasurements: prog.linkedMeasurements.map(lm => ({
           ...lm,
-          measurementTypeId: allTypes.find(t => t.code === lm.measurementTypeCode)?._id
-        }))
+          measurementTypeId: allTypes.find(t => t.code === lm.measurementTypeCode)?._id,
+        })),
       };
     });
 
-    const createdPrograms = await RehabilitationProgram.insertMany(programsWithIds, { ordered: false }).catch(err => {
+    const createdPrograms = await RehabilitationProgram.insertMany(programsWithIds, {
+      ordered: false,
+    }).catch(_err => {
       console.log(`⚠️  بعض البرامج موجودة بالفعل`);
       return [];
     });
@@ -784,7 +813,7 @@ async function seedAdvancedMeasurementsAndPrograms() {
       - المقاييس المتقدمة: ${createdAdvancedTypes.length}
       - فئات البرامج الجديدة: ${createdCategories.length}
       - البرامج المتقدمة: ${createdPrograms.length}
-      
+
     📈 الإجمالي الشامل:
       - إجمالي المقاييس: 100+
       - إجمالي البرامج: 60+
@@ -794,9 +823,8 @@ async function seedAdvancedMeasurementsAndPrograms() {
     return {
       advancedMeasurementTypes: createdAdvancedTypes,
       programCategories: createdCategories,
-      advancedPrograms: createdPrograms
+      advancedPrograms: createdPrograms,
     };
-
   } catch (error) {
     console.error('❌ خطأ في البذر المتقدم:', error.message);
     throw error;
@@ -811,21 +839,24 @@ if (require.main === module) {
   const mongoose = require('mongoose');
   require('dotenv').config();
 
-  async function executeSeeding() {
+  const executeSeeding = async function () {
     try {
       // الاتصال بـ MongoDB
-      const mongoUri = process.env.MONGOOSE_URI || process.env.MONGODB_URI || 'mongodb://localhost:27017/rehabilitation-system';
-      
+      const mongoUri =
+        process.env.MONGOOSE_URI ||
+        process.env.MONGODB_URI ||
+        'mongodb://localhost:27017/rehabilitation-system';
+
       console.log('🔌 جارٍ الاتصال بـ MongoDB...');
       await mongoose.connect(mongoUri, {
         useNewUrlParser: true,
-        useUnifiedTopology: true
+        useUnifiedTopology: true,
       });
       console.log('✅ متصل بـ MongoDB');
 
       // تنفيذ البذر
       const result = await seedMeasurementSystem();
-      
+
       console.log('\n✨ تم إكمال البذر بنجاح!');
       console.log(JSON.stringify(result, null, 2));
 
@@ -833,12 +864,11 @@ if (require.main === module) {
       await mongoose.connection.close();
       console.log('🔌 تم إغلاق الاتصال');
       process.exit(0);
-
     } catch (error) {
       console.error('❌ خطأ:', error.message);
       process.exit(1);
     }
-  }
+  };
 
   executeSeeding();
 }

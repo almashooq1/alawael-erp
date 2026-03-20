@@ -1,17 +1,17 @@
 /**
  * tests/database.integration.test.js
  * Database Integration Tests
- * 
+ *
  * Tests the repository layer and database operations
  * Verifies all CRUD operations work correctly
- * 
+ *
  * Run: npm test -- tests/database.integration.test.js
  */
 
-const { connectDB, disconnectDB } = require('../config/database');
-const repository = require('../repositories/supplyChainRepository');
-const { resetDatabase, seedData } = require('../seeds/initDatabase');
-const { Supplier, Product, PurchaseOrder, Shipment } = require('../models');
+const { connectDB, disconnectDB } = require('../../config/database');
+const repository = require('../../repositories/supplyChainRepository');
+const { resetDatabase, _seedData } = require('../../seeds/initDatabase');
+const { _Supplier, _Product, _PurchaseOrder, _Shipment } = require('../../models');
 
 describe('🗄️  Database Integration Tests', () => {
   let supplierId;
@@ -164,11 +164,7 @@ describe('🗄️  Database Integration Tests', () => {
 
     test('should update product quantity', async () => {
       // Sell 5 units
-      const updated = await repository.updateProductQuantity(
-        productId,
-        -5,
-        'Sold to customer'
-      );
+      const updated = await repository.updateProductQuantity(productId, -5, 'Sold to customer');
 
       expect(updated.quantity).toBe(45); // 50 - 5
     });
@@ -238,11 +234,7 @@ describe('🗄️  Database Integration Tests', () => {
     });
 
     test('should update order to shipped', async () => {
-      const updated = await repository.updateOrderStatus(
-        orderId,
-        'shipped',
-        'Dispatched via DHL'
-      );
+      const updated = await repository.updateOrderStatus(orderId, 'shipped', 'Dispatched via DHL');
 
       expect(updated.status).toBe('shipped');
     });
@@ -454,7 +446,7 @@ describe('🗄️  Database Integration Tests', () => {
 
     test('should query by filter efficiently', async () => {
       const startTime = Date.now();
-      const suppliers = await repository.listSuppliers({
+      const _suppliers = await repository.listSuppliers({
         status: 'active',
         limit: 50,
       });

@@ -4,14 +4,13 @@
  * Date: February 20, 2026
  */
 
-const cacheLayer = require('./middleware/cacheLayer');
-const securityHardening = require('./middleware/securityHardening');
-const analyticsDashboard = require('./services/analyticsDashboard');
-const notificationSystem = require('./services/notificationSystem');
-const featureFlags = require('./services/featureFlags');
+const cacheLayer = require('../../middleware/cacheLayer');
+const securityHardening = require('../../middleware/securityHardening');
+const analyticsDashboard = require('../../services/analyticsDashboard');
+const notificationSystem = require('../../services/notificationSystem');
+const featureFlags = require('../../services/featureFlags');
 
 describe('🚀 Advanced Features Integration Tests', () => {
-  
   // ============================================
   // CACHE LAYER TESTS
   // ============================================
@@ -73,7 +72,7 @@ describe('🚀 Advanced Features Integration Tests', () => {
       const original = { sensitive: 'data' };
       const encrypted = securityHardening.encryptField(original, 'sensitive');
       expect(encrypted.sensitive).not.toEqual(original.sensitive);
-      
+
       const decrypted = securityHardening.decryptField(encrypted, 'sensitive');
       expect(decrypted.sensitive).toEqual(original.sensitive);
     });
@@ -91,23 +90,21 @@ describe('🚀 Advanced Features Integration Tests', () => {
 
     it('should record user activity', () => {
       analyticsDashboard.recordUserActivity('user123', 'viewed_product', {
-        productId: 'prod_001'
+        productId: 'prod_001',
       });
       expect(true).toBe(true);
     });
 
     it('should record errors', () => {
-      analyticsDashboard.recordError(
-        'Database connection failed',
-        'Connection timeout',
-        { service: 'mongodb' }
-      );
+      analyticsDashboard.recordError('Database connection failed', 'Connection timeout', {
+        service: 'mongodb',
+      });
       expect(true).toBe(true);
     });
 
     it('should record performance metrics', () => {
       analyticsDashboard.recordPerformance('api_response_time', 45, {
-        endpoint: '/api/orders'
+        endpoint: '/api/orders',
       });
       expect(true).toBe(true);
     });
@@ -135,7 +132,7 @@ describe('🚀 Advanced Features Integration Tests', () => {
         title: 'Test Notification',
         message: 'This is a test notification',
         channels: ['inapp'],
-        priority: 'normal'
+        priority: 'normal',
       });
       expect(result).toBeDefined();
     });
@@ -145,7 +142,7 @@ describe('🚀 Advanced Features Integration Tests', () => {
         {
           userId: 'user123',
           title: 'Email Test',
-          message: 'Test email notification'
+          message: 'Test email notification',
         },
         'email'
       );
@@ -187,18 +184,15 @@ describe('🚀 Advanced Features Integration Tests', () => {
     });
 
     it('should create A/B experiment', () => {
-      featureFlags.createExperiment('test_experiment', 
-        ['control', 'variant'],
-        { control: 0.5, variant: 0.5 }
-      );
+      featureFlags.createExperiment('test_experiment', ['control', 'variant'], {
+        control: 0.5,
+        variant: 0.5,
+      });
       expect(true).toBe(true);
     });
 
     it('should get user variant in experiment', () => {
-      featureFlags.createExperiment('exp_test', 
-        ['a', 'b'],
-        { a: 0.5, b: 0.5 }
-      );
+      featureFlags.createExperiment('exp_test', ['a', 'b'], { a: 0.5, b: 0.5 });
       const variant = featureFlags.getUserVariant('exp_test', 'user123');
       expect(['a', 'b']).toContain(variant);
     });
@@ -232,7 +226,7 @@ describe('🚀 Advanced Features Integration Tests', () => {
           userId: 'user123',
           title: 'Secure Message',
           message: 'This is a secure notification',
-          channels: ['email']
+          channels: ['email'],
         });
       }
       expect(true).toBe(true);
@@ -242,7 +236,7 @@ describe('🚀 Advanced Features Integration Tests', () => {
       const featureEnabled = featureFlags.isEnabled('enable_advanced_analytics', 'user123');
       if (featureEnabled) {
         analyticsDashboard.recordPerformance('feature_test', 100, {
-          feature: 'advanced_analytics'
+          feature: 'advanced_analytics',
         });
       }
       expect(true).toBe(true);
@@ -251,11 +245,11 @@ describe('🚀 Advanced Features Integration Tests', () => {
     it('should create end-to-end feature workflow', async () => {
       // 1. Check feature flag
       const enabled = featureFlags.isEnabled('enable_notifications_v2', 'user123');
-      
+
       // 2. Record analytics
       analyticsDashboard.recordUserActivity('user123', 'feature_accessed', {
         feature: 'notifications_v2',
-        enabled: enabled
+        enabled: enabled,
       });
 
       // 3. Apply security
@@ -269,7 +263,7 @@ describe('🚀 Advanced Features Integration Tests', () => {
           title: 'Feature Update',
           message: 'Notifications V2 is now enabled for you',
           channels: ['email', 'inapp'],
-          priority: 'high'
+          priority: 'high',
         });
       }
 
@@ -287,7 +281,7 @@ describe('🚀 Advanced Features Integration Tests', () => {
     it('should cache data within 5ms', () => {
       const start = Date.now();
       cacheLayer.setCache('bench:1', { data: 'test' }, 3600);
-      const cached = cacheLayer.getCache('bench:1');
+      const _cached = cacheLayer.getCache('bench:1');
       const elapsed = Date.now() - start;
       expect(elapsed).toBeLessThan(5);
     });
@@ -313,7 +307,6 @@ describe('🚀 Advanced Features Integration Tests', () => {
       expect(elapsed).toBeLessThan(1);
     });
   });
-
 });
 
 describe('✅ Advanced Features Summary', () => {
@@ -330,7 +323,7 @@ describe('✅ Advanced Features Summary', () => {
     ✅ Notification System: READY
     ✅ Feature Flags & A/B Testing: READY
     ✅ PWA Service Worker: READY
-    
+
     🎯 Total Features: 6/6 ✅
     📊 Test Coverage: 100%
     ⚡ Performance: Optimized

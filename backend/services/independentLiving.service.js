@@ -8,7 +8,7 @@ const ADLAssessment = require('../models/ADLAssessment');
 const IndependentLivingPlan = require('../models/IndependentLivingPlan');
 const IndependentLivingProgress = require('../models/IndependentLivingProgress');
 const SupportedHousing = require('../models/SupportedHousing');
-const logger = require('../utils/logger');
+const _logger = require('../utils/logger');
 
 class IndependentLivingService {
   // ═══════════════════════════════════════════════════════

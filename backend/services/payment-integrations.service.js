@@ -21,9 +21,12 @@ const AuditLogger = require('./audit-logger');
 class PaymentIntegrationService {
   constructor() {
     // Initialize Stripe
-    this.stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_mock', {
-      apiVersion: '2023-10-16',
-    });
+    this.stripeConfigured = !!process.env.STRIPE_SECRET_KEY;
+    this.stripe = this.stripeConfigured
+      ? new Stripe(process.env.STRIPE_SECRET_KEY, {
+          apiVersion: '2023-10-16',
+        })
+      : null;
 
     // Initialize PayPal
     paypal.configure({

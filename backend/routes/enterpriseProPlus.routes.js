@@ -40,8 +40,8 @@ const {
 } = require('../models/EnterpriseProPlus');
 
 // Helper
-const oid = id => new mongoose.Types.ObjectId(id);
-const safeBody = (body, fields) => {
+const _oid = id => new mongoose.Types.ObjectId(id);
+const _safeBody = (body, fields) => {
   const obj = {};
   fields.forEach(f => {
     if (body[f] !== undefined) obj[f] = body[f];

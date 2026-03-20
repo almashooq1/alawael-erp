@@ -299,13 +299,11 @@ router.post('/favorites/toggle', authMiddleware, async (req, res) => {
       label,
       color,
     });
-    res
-      .status(201)
-      .json({
-        success: true,
-        data: { isFavorite: true, favorite: fav },
-        message: 'تمت الإضافة للمفضلة',
-      });
+    res.status(201).json({
+      success: true,
+      data: { isFavorite: true, favorite: fav },
+      message: 'تمت الإضافة للمفضلة',
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: 'حدث خطأ' });
   }
@@ -1323,12 +1321,16 @@ router.get('/calendar', authMiddleware, async (req, res) => {
 
     // Instance deadlines
     const instances = await WorkflowInstance.find({
-      $or: [{ requester: userId }, { currentAssignee: userId }],
-      status: 'running',
-      $or: [
-        { 'sla.deadline': { $gte: startDate, $lte: endDate } },
-        { dueDate: { $gte: startDate, $lte: endDate } },
+      $and: [
+        { $or: [{ requester: userId }, { currentAssignee: userId }] },
+        {
+          $or: [
+            { 'sla.deadline': { $gte: startDate, $lte: endDate } },
+            { dueDate: { $gte: startDate, $lte: endDate } },
+          ],
+        },
       ],
+      status: 'running',
     })
       .populate('definition', 'name nameAr category')
       .lean();

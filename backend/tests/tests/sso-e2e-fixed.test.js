@@ -11,13 +11,13 @@ const SSO_BASE = `${BASE_URL}/api/sso`;
 const testUser = {
   email: 'test@example.com',
   password: 'Test@123456',
-  name: 'Test User'
+  name: 'Test User',
 };
 
 let authToken = '';
 let refreshToken = '';
-let sessionId = '';
-let userId = '';
+let _sessionId = '';
+let _userId = '';
 
 // Helper function to make HTTP requests
 function makeRequest(method, path, body = null, fullPath = false) {
@@ -28,9 +28,9 @@ function makeRequest(method, path, body = null, fullPath = false) {
     } else {
       fullUrl = `${SSO_BASE}${path}`;
     }
-    
+
     const url = new URL(fullUrl);
-    
+
     const options = {
       hostname: url.hostname,
       port: url.port || 3002,
@@ -38,13 +38,13 @@ function makeRequest(method, path, body = null, fullPath = false) {
       method: method,
       headers: {
         'Content-Type': 'application/json',
-        ...(authToken && { 'Authorization': `Bearer ${authToken}` })
-      }
+        ...(authToken && { Authorization: `Bearer ${authToken}` }),
+      },
     };
 
-    const req = http.request(options, (res) => {
+    const req = http.request(options, res => {
       let data = '';
-      res.on('data', chunk => data += chunk);
+      res.on('data', chunk => (data += chunk));
       res.on('end', () => {
         try {
           const parsed = JSON.parse(data);
@@ -82,11 +82,11 @@ const tests = {
   'Login - Valid Credentials': async () => {
     const res = await makeRequest('POST', '/login', {
       email: testUser.email,
-      password: testUser.password
+      password: testUser.password,
     });
     console.log(`   Login: POST /api/sso/login -> ${res.status}`);
     assert(res.status === 200 || res.status === 201, `Expected 200/201, got ${res.status}`);
-    
+
     if (res.body.token) {
       authToken = res.body.token;
       console.log('   ✅ PASS - Token received');
@@ -96,15 +96,15 @@ const tests = {
     } else {
       console.log('   ✅ PASS - Login accepted (mock mode)');
     }
-    
+
     if (res.body.refreshToken) refreshToken = res.body.refreshToken;
-    if (res.body.user?.id) userId = res.body.user.id;
-    if (res.body.session?.id) sessionId = res.body.session.id;
+    if (res.body.user?.id) _userId = res.body.user.id;
+    if (res.body.session?.id) _sessionId = res.body.session.id;
   },
 
   'Login - Missing Email': async () => {
     const res = await makeRequest('POST', '/login', {
-      password: testUser.password
+      password: testUser.password,
     });
     console.log(`   Missing Email: POST /api/sso/login -> ${res.status}`);
     assert(res.status >= 400, `Should reject, got ${res.status}`);
@@ -113,7 +113,7 @@ const tests = {
 
   'Login - Missing Password': async () => {
     const res = await makeRequest('POST', '/login', {
-      email: testUser.email
+      email: testUser.email,
     });
     console.log(`   Missing Password: POST /api/sso/login -> ${res.status}`);
     assert(res.status >= 400, `Should reject, got ${res.status}`);
@@ -127,7 +127,7 @@ const tests = {
       return;
     }
     const res = await makeRequest('POST', '/verify-token', {
-      token: authToken
+      token: authToken,
     });
     console.log(`   Verify Token: POST /api/sso/verify-token -> ${res.status}`);
     assert(res.status === 200 || res.status === 401, `Got ${res.status}`);
@@ -140,7 +140,7 @@ const tests = {
       return;
     }
     const res = await makeRequest('POST', '/refresh-token', {
-      refreshToken: refreshToken || authToken
+      refreshToken: refreshToken || authToken,
     });
     console.log(`   Refresh Token: POST /api/sso/refresh-token -> ${res.status}`);
     assert(res.status === 200 || res.status === 401, `Got ${res.status}`);
@@ -153,7 +153,7 @@ const tests = {
       return;
     }
     const res = await makeRequest('POST', '/introspect', {
-      token: authToken
+      token: authToken,
     });
     console.log(`   Introspect Token: POST /api/sso/introspect -> ${res.status}`);
     assert(res.status === 200 || res.status === 401, `Got ${res.status}`);
@@ -181,9 +181,15 @@ const tests = {
 
   // OAuth Tests
   'OAuth Authorize': async () => {
-    const res = await makeRequest('GET', '/oauth2/authorize?client_id=test&redirect_uri=http://localhost:3000/callback');
+    const res = await makeRequest(
+      'GET',
+      '/oauth2/authorize?client_id=test&redirect_uri=http://localhost:3000/callback'
+    );
     console.log(`   OAuth Authorize: GET /api/sso/oauth2/authorize -> ${res.status}`);
-    assert(res.status === 200 || res.status === 301 || res.status === 302 || res.status === 400, `Got ${res.status}`);
+    assert(
+      res.status === 200 || res.status === 301 || res.status === 302 || res.status === 400,
+      `Got ${res.status}`
+    );
     console.log('   ✅ PASS');
   },
 
@@ -191,7 +197,7 @@ const tests = {
     const res = await makeRequest('POST', '/oauth2/token', {
       grant_type: 'authorization_code',
       code: 'test_code',
-      client_id: 'test'
+      client_id: 'test',
     });
     console.log(`   OAuth Token: POST /api/sso/oauth2/token -> ${res.status}`);
     assert(res.status === 200 || res.status === 400, `Got ${res.status}`);
@@ -199,7 +205,7 @@ const tests = {
   },
 
   // Logout Tests
-  'Logout': async () => {
+  Logout: async () => {
     const res = await makeRequest('POST', '/logout');
     console.log(`   Logout: POST /api/sso/logout -> ${res.status}`);
     assert(res.status === 200 || res.status === 401, `Expected 200/401, got ${res.status}`);
@@ -211,14 +217,14 @@ const tests = {
     console.log(`   Logout All: POST /api/sso/logout-all -> ${res.status}`);
     assert(res.status === 200 || res.status === 401, `Expected 200/401, got ${res.status}`);
     console.log('   ✅ PASS');
-  }
+  },
 };
 
 // Run tests
 async function runTests() {
   console.log('\n🧪 SSO E2E Test Suite');
   console.log('═'.repeat(50));
-  
+
   let passed = 0;
   let failed = 0;
   const results = [];

@@ -48,7 +48,7 @@ let testBeneficiary2Id;
 let testPaymentId;
 let testMessageId;
 let testNotificationId;
-let testProgressId;
+let _testProgressId;
 
 const TEST_PREFIX = `GUAR-TEST-${Date.now()}`;
 
@@ -167,7 +167,7 @@ beforeAll(async () => {
     reportGeneratedAt: new Date(),
     reportSentToGuardian: true,
   });
-  testProgressId = progress._id.toString();
+  _testProgressId = progress._id.toString();
 
   // Second month progress
   await BeneficiaryProgress.create({

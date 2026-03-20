@@ -2,33 +2,34 @@
  * Executive Dashboard Integration Tests
  * Comprehensive test suite for all dashboard services
  */
+/* global app validKPIId validToken validDashboardId */
 
 const request = require('supertest');
 const expect = require('chai').expect;
 
+// Mock data (module-level for exports)
+const mockKPI = {
+  name: 'Revenue',
+  name_ar: 'الإيرادات',
+  category: 'Financial',
+  description: 'Monthly revenue in USD',
+  target: 100000,
+  current: 95000,
+  unit: 'USD',
+  owner: 'CFO',
+  frequency: 'Monthly',
+};
+
+const mockAlertRule = {
+  name: 'Revenue Alert',
+  condition: 'below',
+  threshold: 80000,
+  severity: 'critical',
+  notifyUsers: ['admin@company.com'],
+  notifyChannels: ['email', 'in-app'],
+};
+
 describe('Executive Dashboard Integration Tests', () => {
-  // Mock data
-  const mockKPI = {
-    name: 'Revenue',
-    name_ar: 'الإيرادات',
-    category: 'Financial',
-    description: 'Monthly revenue in USD',
-    target: 100000,
-    current: 95000,
-    unit: 'USD',
-    owner: 'CFO',
-    frequency: 'Monthly',
-  };
-
-  const mockAlertRule = {
-    name: 'Revenue Alert',
-    condition: 'below',
-    threshold: 80000,
-    severity: 'critical',
-    notifyUsers: ['admin@company.com'],
-    notifyChannels: ['email', 'in-app'],
-  };
-
   describe('Executive Analytics Service', () => {
     it('should create a KPI', function (done) {
       request(app)
@@ -247,7 +248,7 @@ describe('Executive Dashboard Integration Tests', () => {
       request(app)
         .delete(`/api/executive-dashboard/kpis/${validKPIId}/alerts/${createdRuleId}`)
         .expect(200)
-        .end((err, res) => {
+        .end((err, _res) => {
           if (err) return done(err);
           done();
         });
@@ -329,7 +330,7 @@ describe('Executive Dashboard Integration Tests', () => {
         .get('/api/executive-dashboard/export/pdf')
         .expect(200)
         .expect('Content-Type', /application\/pdf/)
-        .end((err, res) => {
+        .end((err, _res) => {
           if (err) return done(err);
           done();
         });
@@ -340,7 +341,7 @@ describe('Executive Dashboard Integration Tests', () => {
         .get('/api/executive-dashboard/export/excel')
         .expect(200)
         .expect('Content-Type', /application\/vnd.openxmlformats/)
-        .end((err, res) => {
+        .end((err, _res) => {
           if (err) return done(err);
           done();
         });
@@ -351,7 +352,7 @@ describe('Executive Dashboard Integration Tests', () => {
         .get('/api/executive-dashboard/export/csv')
         .expect(200)
         .expect('Content-Type', /text\/csv/)
-        .end((err, res) => {
+        .end((err, _res) => {
           if (err) return done(err);
           done();
         });
@@ -471,7 +472,7 @@ describe('Executive Dashboard Integration Tests', () => {
       request(app)
         .get('/api/executive-dashboard')
         .expect(401)
-        .end((err, res) => {
+        .end((err, _res) => {
           if (err) return done(err);
           done();
         });
@@ -482,7 +483,7 @@ describe('Executive Dashboard Integration Tests', () => {
         .get('/api/executive-dashboard')
         .set('Authorization', `Bearer ${validToken}`)
         .expect(200)
-        .end((err, res) => {
+        .end((err, _res) => {
           if (err) return done(err);
           done();
         });
@@ -495,7 +496,7 @@ describe('Executive Dashboard Integration Tests', () => {
         .get('/api/executive-dashboard/kpis/invalid-id')
         .set('Authorization', `Bearer ${validToken}`)
         .expect(404)
-        .end((err, res) => {
+        .end((err, _res) => {
           if (err) return done(err);
           done();
         });
@@ -507,7 +508,7 @@ describe('Executive Dashboard Integration Tests', () => {
         .set('Authorization', `Bearer ${validToken}`)
         .send({ name: 'Test' }) // Missing required fields
         .expect(400)
-        .end((err, res) => {
+        .end((err, _res) => {
           if (err) return done(err);
           done();
         });

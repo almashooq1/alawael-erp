@@ -1080,7 +1080,7 @@ const accessibilityAudit = {
         'digitalAccessibility',
         'serviceAccessibility',
       ];
-      let scores = [];
+      const scores = [];
       for (const d of domains) {
         if (record[d]) {
           const subScores = Object.values(record[d])

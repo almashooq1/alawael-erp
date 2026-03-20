@@ -3,6 +3,8 @@
  * GPS Tracking, Fleet Dashboard, Security, WebSocket, ML, Notifications, API, Performance Tests
  */
 
+const mongoose = require('mongoose');
+
 describe('SmartGPSTracking Service - Basic Tests', () => {
   test('location tracking placeholder test', () => {
     expect(true).toBe(true);
@@ -145,7 +147,6 @@ describe('Integration Tests - System Workflows', () => {
   });
 });
 
-
 // ====== 1. اختبارات الخدمات الأساسية ======
 
 describe('SmartGPSTracking Service', () => {
@@ -153,9 +154,9 @@ describe('SmartGPSTracking Service', () => {
   let vehicleData;
 
   beforeAll(() => {
-    const SmartGPSTracking = require('../services/smartGPSTracking.service');
+    const SmartGPSTracking = require('../../services/smartGPSTracking.service');
     gpsService = new SmartGPSTracking();
-    
+
     vehicleData = {
       vehicleId: 'vehicle_test_001',
       latitude: 24.7136,
@@ -163,7 +164,7 @@ describe('SmartGPSTracking Service', () => {
       speed: 80,
       bearing: 45,
       altitude: 500,
-      gpsAccuracy: 5
+      gpsAccuracy: 5,
     };
   });
 
@@ -171,7 +172,7 @@ describe('SmartGPSTracking Service', () => {
     test('should update vehicle location with intelligence', async () => {
       try {
         const result = await gpsService.updateLocationWithIntelligence(vehicleData);
-        
+
         expect(result).toHaveProperty('enrichedData');
         expect(result.enrichedData).toHaveProperty('distance');
         expect(result.enrichedData).toHaveProperty('speedPercentile');
@@ -207,7 +208,7 @@ describe('SmartGPSTracking Service', () => {
       try {
         const anomalousData = { ...vehicleData, speed: 500 };
         const anomalies = gpsService.detectAnomalies(anomalousData);
-        
+
         expect(Array.isArray(anomalies)).toBe(true);
         expect(anomalies.length).toBeGreaterThan(0);
         expect(anomalies[0].type).toBe('impossible_speed');
@@ -222,9 +223,9 @@ describe('SmartGPSTracking Service', () => {
         const newData = {
           ...vehicleData,
           latitude: 60.0,
-          longitude: 120.0
+          longitude: 120.0,
         };
-        
+
         const anomalies = gpsService.detectAnomalies(newData, previousData);
         expect(anomalies.some(a => a.type === 'sudden_location_jump')).toBe(true);
       } catch (e) {
@@ -237,9 +238,9 @@ describe('SmartGPSTracking Service', () => {
         const suspiciousPattern = [
           { ...vehicleData, latitude: 24.7, longitude: 46.6, timestamp: Date.now() },
           { ...vehicleData, latitude: 24.8, longitude: 46.7, timestamp: Date.now() + 100 },
-          { ...vehicleData, latitude: 24.9, longitude: 46.8, timestamp: Date.now() + 200 }
+          { ...vehicleData, latitude: 24.9, longitude: 46.8, timestamp: Date.now() + 200 },
         ];
-        
+
         const anomaly = gpsService.detectGPSSpoofing(suspiciousPattern);
         expect(typeof anomaly).toBe('object');
         expect(anomaly).toHaveProperty('detected');
@@ -254,14 +255,14 @@ describe('SmartGPSTracking Service', () => {
       try {
         const eta = gpsService.predictETA({
           currentLocation: { lat: 24.7136, lng: 46.6753 },
-          destination: { lat: 24.7500, lng: 46.7000 },
+          destination: { lat: 24.75, lng: 46.7 },
           currentSpeed: 80,
           trafficLevel: 'moderate',
           weather: 'clear',
           timeOfDay: 14,
-          dayOfWeek: 3
+          dayOfWeek: 3,
         });
-        
+
         expect(eta).toHaveProperty('minutes');
         expect(eta).toHaveProperty('confidence');
         expect(eta.minutes).toBeGreaterThan(0);
@@ -277,15 +278,15 @@ describe('SmartGPSTracking Service', () => {
         const etaLightTraffic = gpsService.predictETA({
           currentSpeed: 80,
           distance: 50,
-          trafficLevel: 'light'
+          trafficLevel: 'light',
         });
-        
+
         const etaHeavyTraffic = gpsService.predictETA({
           currentSpeed: 80,
           distance: 50,
-          trafficLevel: 'heavy'
+          trafficLevel: 'heavy',
         });
-        
+
         expect(etaHeavyTraffic.minutes).toBeGreaterThan(etaLightTraffic.minutes);
       } catch (e) {
         expect(true).toBe(true);
@@ -299,11 +300,11 @@ describe('SmartGPSTracking Service', () => {
         const anomalyData = {
           type: 'harsh_acceleration',
           severity: 'warning',
-          value: 9.5
+          value: 9.5,
         };
-        
+
         const alerts = gpsService.generateSmartAlerts([anomalyData]);
-        
+
         expect(Array.isArray(alerts)).toBe(true);
         expect(alerts.length).toBeGreaterThan(0);
         expect(alerts[0]).toHaveProperty('message');
@@ -318,9 +319,9 @@ describe('SmartGPSTracking Service', () => {
         const alerts = gpsService.generateSmartAlerts([
           { type: 'harsh_acceleration', severity: 'info' },
           { type: 'possible_accident', severity: 'critical' },
-          { type: 'fuel_warning', severity: 'warning' }
+          { type: 'fuel_warning', severity: 'warning' },
         ]);
-        
+
         expect(alerts[0].priority).toBe('critical');
       } catch (e) {
         expect(true).toBe(true);
@@ -332,13 +333,15 @@ describe('SmartGPSTracking Service', () => {
 // ====== 2. اختبارات Dashboard Service ======
 
 describe('SmartFleetDashboard Service', () => {
-  let dashboardService;
-  
+  let _dashboardService;
+
   beforeAll(() => {
     try {
-      const SmartFleetDashboard = require('../services/smartFleetDashboard.service');
-      dashboardService = new SmartFleetDashboard();
-    } catch (e) {}
+      const SmartFleetDashboard = require('../../services/smartFleetDashboard.service');
+      _dashboardService = new SmartFleetDashboard();
+    } catch (_e) {
+      /* module not available */
+    }
   });
 
   describe('Fleet Analytics', () => {
@@ -376,7 +379,7 @@ describe('SmartFleetDashboard Service', () => {
           harshBrakes: 15,
           harshAccelerations: 8,
           overSpeedingIncidents: 2,
-          fatigue: 0.3
+          fatigue: 0.3,
         };
         expect(metrics).toBeDefined();
       } catch (e) {
@@ -407,20 +410,22 @@ describe('SmartFleetDashboard Service', () => {
 // ====== 3. اختبارات GPS Security Service ======
 
 describe('GPS Security Service', () => {
-  let securityService;
-  let testData;
+  let _securityService;
+  let _testData;
 
   beforeAll(() => {
     try {
-      const GPSSecurity = require('../services/gpsSecurityService');
-      securityService = new GPSSecurity();
-      
-      testData = {
+      const GPSSecurity = require('../../services/gpsSecurityService');
+      _securityService = new GPSSecurity();
+
+      _testData = {
         vehicleId: 'vehicle_123',
         latitude: 24.7136,
-        longitude: 46.6753
+        longitude: 46.6753,
       };
-    } catch (e) {}
+    } catch (_e) {
+      /* module not available */
+    }
   });
 
   describe('Data Encryption', () => {
@@ -491,13 +496,15 @@ describe('GPS Security Service', () => {
 // ====== 4. اختبارات WebSocket Service ======
 
 describe('SmartGPS WebSocket Service', () => {
-  let wsService;
+  let _wsService;
 
   beforeAll(() => {
     try {
-      const SmartGPSWebSocket = require('../services/smartGPSWebSocket.service');
-      wsService = new SmartGPSWebSocket();
-    } catch (e) {}
+      const SmartGPSWebSocket = require('../../services/smartGPSWebSocket.service');
+      _wsService = new SmartGPSWebSocket();
+    } catch (_e) {
+      /* module not available */
+    }
   });
 
   describe('Client Management', () => {
@@ -543,7 +550,7 @@ describe('SmartGPS WebSocket Service', () => {
           type: 'critical',
           message: 'Possible accident',
           severity: 'high',
-          vehicleId: 'vehicle_123'
+          vehicleId: 'vehicle_123',
         };
         expect(alert).toBeDefined();
       } catch (e) {
@@ -556,13 +563,15 @@ describe('SmartGPS WebSocket Service', () => {
 // ====== 5. اختبارات ML Models ======
 
 describe('ML Models', () => {
-  let mlService;
+  let _mlService;
 
   beforeAll(async () => {
     try {
-      const AdvancedMLModels = require('../services/advancedMLModels.service');
-      mlService = new AdvancedMLModels();
-    } catch (e) {}
+      const AdvancedMLModels = require('../../services/advancedMLModels.service');
+      _mlService = new AdvancedMLModels();
+    } catch (_e) {
+      /* module not available */
+    }
   });
 
   describe('Accident Prediction', () => {
@@ -574,7 +583,7 @@ describe('ML Models', () => {
           timeOfDay: 14,
           weather: 2,
           driverHistory: 1,
-          fatigue: 5
+          fatigue: 5,
         };
         expect(input).toBeDefined();
       } catch (e) {
@@ -625,13 +634,15 @@ describe('ML Models', () => {
 // ====== 6. اختبارات Notification Service ======
 
 describe('Notification Service', () => {
-  let notificationService;
+  let _notificationService;
 
   beforeAll(() => {
     try {
-      const AdvancedNotificationService = require('../services/advancedNotificationService');
-      notificationService = new AdvancedNotificationService();
-    } catch (e) {}
+      const AdvancedNotificationService = require('../../services/advancedNotificationService');
+      _notificationService = new AdvancedNotificationService();
+    } catch (_e) {
+      /* module not available */
+    }
   });
 
   describe('Notification Sending', () => {
@@ -682,9 +693,11 @@ describe('API Endpoints', () => {
 
   beforeAll(() => {
     try {
-      app = require('../app');
+      app = require('../../app');
       server = app.listen(PORT);
-    } catch (e) {}
+    } catch (_e) {
+      /* module not available */
+    }
   });
 
   afterAll(() => {
@@ -781,71 +794,71 @@ describe('Performance Tests', () => {
 // ====== 9. اختبارات قاعدة البيانات ======
 
 describe('Database Operations', () => {
-  let db;
+  let _db;
 
-  before(async () => {
+  beforeAll(async () => {
     // الاتصال بقاعدة بيانات الاختبار
-    db = await mongoose.connect(process.env.TEST_MONGODB_URI);
+    _db = await mongoose.connect(process.env.TEST_MONGODB_URI || process.env.MONGODB_URI);
   });
 
-  after(async () => {
+  afterAll(async () => {
     await mongoose.connection.close();
   });
 
   describe('Vehicle Collection', () => {
     it('should create vehicle document', async () => {
-      const Vehicle = require('../models/advancedDatabase').Vehicle;
-      
+      const Vehicle = require('../../models/advancedDatabase').Vehicle;
+
       const vehicle = await Vehicle.create({
         plateNumber: 'TEST001',
         type: 'bus',
         status: 'active',
         currentLocation: {
           type: 'Point',
-          coordinates: [46.6753, 24.7136]
-        }
+          coordinates: [46.6753, 24.7136],
+        },
       });
-      
-      expect(vehicle._id).to.exist;
-      expect(vehicle.plateNumber).to.equal('TEST001');
+
+      expect(vehicle._id).toBeDefined();
+      expect(vehicle.plateNumber).toBe('TEST001');
     });
 
     it('should retrieve vehicle by plateNumber', async () => {
-      const Vehicle = require('../models/advancedDatabase').Vehicle;
-      
+      const Vehicle = require('../../models/advancedDatabase').Vehicle;
+
       const vehicle = await Vehicle.findOne({ plateNumber: 'TEST001' });
-      
-      expect(vehicle).to.exist;
-      expect(vehicle.plateNumber).to.equal('TEST001');
+
+      expect(vehicle).toBeDefined();
+      expect(vehicle.plateNumber).toBe('TEST001');
     });
 
     it('should find vehicles near location', async () => {
-      const Vehicle = require('../models/advancedDatabase').Vehicle;
-      
+      const Vehicle = require('../../models/advancedDatabase').Vehicle;
+
       const vehicles = await Vehicle.find({
         currentLocation: {
           $near: {
             $geometry: {
               type: 'Point',
-              coordinates: [46.6753, 24.7136]
+              coordinates: [46.6753, 24.7136],
             },
-            $maxDistance: 5000
-          }
-        }
+            $maxDistance: 5000,
+          },
+        },
       });
-      
+
       expect(vehicles).to.be.an('array');
     });
   });
 
   describe('Index Performance', () => {
     it('should use indexes for fast queries', async () => {
-      const Vehicle = require('../models/advancedDatabase').Vehicle;
-      
+      const Vehicle = require('../../models/advancedDatabase').Vehicle;
+
       const startTime = Date.now();
-      
+
       await Vehicle.findOne({ plateNumber: 'TEST001' });
-      
+
       const queryTime = Date.now() - startTime;
       expect(queryTime).to.be.lessThan(10); // يجب أن يكون سريع جداً مع الفهرس
     });
@@ -874,6 +887,6 @@ module.exports = {
   testConfig: {
     timeout: 10000,
     reporter: 'json',
-    coverage: { threshold: 80 }
-  }
+    coverage: { threshold: 80 },
+  },
 };

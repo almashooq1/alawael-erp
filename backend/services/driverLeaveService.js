@@ -3,7 +3,7 @@
  */
 
 const DriverLeave = require('../models/DriverLeave');
-const logger = require('../utils/logger');
+const _logger = require('../utils/logger');
 
 class DriverLeaveService {
   static async create(data) {

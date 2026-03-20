@@ -3,7 +3,7 @@
  */
 
 const FleetReservation = require('../models/FleetReservation');
-const logger = require('../utils/logger');
+const _logger = require('../utils/logger');
 
 class FleetReservationService {
   static async create(data) {

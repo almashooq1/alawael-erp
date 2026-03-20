@@ -3,7 +3,7 @@
 // Export Service - PDF and Excel
 // ===================================
 
-const XLSX = require('xlsx');
+const ExcelJS = require('exceljs');
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const path = require('path');
@@ -23,27 +23,17 @@ async function exportToExcel(data, filename, options = {}) {
     const { sheetName = 'Sheet1', columns = null, title = null } = options;
 
     // Create workbook
-    const workbook = XLSX.utils.book_new();
-
-    // Prepare data
-    let worksheetData = data;
-
-    // Add title row if specified
-    if (title) {
-      worksheetData = [[title], [], ...data];
-    }
+    const workbook = new ExcelJS.Workbook();
 
     // Create worksheet
-    const worksheet = XLSX.utils.json_to_sheet(worksheetData, {
-      header: columns || undefined,
-      skipHeader: false,
-    });
+    const worksheet = workbook.addWorksheet(sheetName);
 
     // Auto-size columns
     const maxWidth = 50;
     const colWidths = {};
 
     // Calculate column widths
+    const keys = data.length > 0 ? Object.keys(data[0]) : columns || [];
     data.forEach(row => {
       Object.keys(row).forEach(key => {
         const value = String(row[key] || '');
@@ -52,17 +42,30 @@ async function exportToExcel(data, filename, options = {}) {
       });
     });
 
-    // Set column widths
-    worksheet['!cols'] = Object.values(colWidths).map(w => ({ wch: w + 2 }));
+    // Set columns (headers + keys + widths)
+    const colDefs = (columns || keys).map(key => ({
+      header: key,
+      key,
+      width: (colWidths[key] || 10) + 2,
+    }));
+    worksheet.columns = colDefs;
 
-    // Add worksheet to workbook
-    XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+    // Add title row if specified
+    if (title) {
+      worksheet.spliceRows(1, 0, [title], []);
+    }
+
+    // Add data rows
+    worksheet.addRows(data);
+
+    // Style header row
+    worksheet.getRow(title ? 3 : 1).font = { bold: true };
 
     // Generate file path
     const filePath = path.join(exportsDir, `${filename}.xlsx`);
 
-    // Write file
-    XLSX.writeFile(workbook, filePath);
+    // Write file (async)
+    await workbook.xlsx.writeFile(filePath);
 
     return {
       success: true,

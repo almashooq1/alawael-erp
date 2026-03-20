@@ -5,7 +5,7 @@
 
 let EcommerceService;
 try {
-  EcommerceService = require('../../services/EcommerceService');
+  EcommerceService = require('../../../services/EcommerceService');
 } catch (error) {
   console.warn('⚠️  EcommerceService not available:', error.message);
 }
@@ -85,9 +85,7 @@ describe('EcommerceService', () => {
     });
 
     it('should throw error for invalid product ID', async () => {
-      await expect(
-        EcommerceService.getProductDetails('invalid_id')
-      ).rejects.toThrow();
+      await expect(EcommerceService.getProductDetails('invalid_id')).rejects.toThrow();
     });
   });
 
@@ -134,9 +132,7 @@ describe('EcommerceService', () => {
       const products7days = await EcommerceService.getNewProducts(100, 7);
 
       // More products in 30 days than 7 days
-      expect(products30days.length).toBeGreaterThanOrEqual(
-        products7days.length
-      );
+      expect(products30days.length).toBeGreaterThanOrEqual(products7days.length);
     });
   });
 
@@ -213,9 +209,7 @@ describe('EcommerceService', () => {
     });
 
     it('should throw error for invalid coupon', async () => {
-      await expect(
-        EcommerceService.applyCoupon('user123', 'INVALID')
-      ).rejects.toThrow();
+      await expect(EcommerceService.applyCoupon('user123', 'INVALID')).rejects.toThrow();
     });
 
     it('should enforce minimum purchase requirement', async () => {

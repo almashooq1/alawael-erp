@@ -5,13 +5,13 @@
 
 const request = require('supertest');
 const mongoose = require('mongoose');
-const app = require('../../app');
-const Vehicle = require('../../models/Vehicle');
-const User = require('../../models/User');
+const app = require('../../../app');
+const Vehicle = require('../../../models/Vehicle');
+const User = require('../../../models/User');
 
 describe('Vehicle Management - Integration Tests', () => {
   let authToken;
-  let testUserId;
+  let _testUserId;
   let vehicleId;
 
   // Setup: Create test user and get auth token
@@ -29,7 +29,7 @@ describe('Vehicle Management - Integration Tests', () => {
       password: 'Test@123456',
       role: 'manager',
     });
-    testUserId = testUser._id;
+    _testUserId = testUser._id;
 
     // Create test driver user
     const testDriver = await User.create({

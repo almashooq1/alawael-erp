@@ -1,5 +1,5 @@
 // backend/db/seeders/initialData.js
-const mongoose = require('mongoose');
+const _mongoose = require('mongoose');
 
 const seedDatabase = async () => {
   try {

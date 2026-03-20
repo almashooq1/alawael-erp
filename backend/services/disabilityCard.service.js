@@ -22,7 +22,7 @@ const getDisabilityCard = () => {
 };
 
 let User;
-const getUser = () => {
+const _getUser = () => {
   if (!User) User = require('../models/User');
   return User;
 };
@@ -697,7 +697,7 @@ class DisabilityCardService {
   /**
    * Verify Absher status (التحقق من أبشر)
    */
-  async verifyAbsherStatus(cardId, userId) {
+  async verifyAbsherStatus(cardId, _userId) {
     const Card = getDisabilityCard();
     const card = await Card.findById(cardId);
     if (!card) throw new Error('البطاقة غير موجودة');

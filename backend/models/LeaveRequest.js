@@ -305,7 +305,7 @@ leaveRequestSchema.statics.getLeaveStatistics = async function (filters = {}) {
 /**
  * المعلّقة للمدير
  */
-leaveRequestSchema.statics.getPendingForManager = function (managerId) {
+leaveRequestSchema.statics.getPendingForManager = function (_managerId) {
   return this.find({
     status: 'pending',
   }).sort({ createdAt: -1 });

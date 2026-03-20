@@ -3,7 +3,7 @@
  */
 
 const FleetAlert = require('../models/FleetAlert');
-const logger = require('../utils/logger');
+const _logger = require('../utils/logger');
 
 class FleetAlertService {
   static async create(data) {

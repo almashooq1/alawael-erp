@@ -30,15 +30,6 @@ const logger = require('../utils/logger');
 const { asyncHandler, AppError } = require('../middleware/errorHandler.enhanced');
 
 // ─── Models ──────────────────────────────────────────────────────────────────
-let Account, JournalEntry, Expense, AccountingInvoice, CostCenter, FixedAsset, Transaction, Budget;
-let RecurringTransaction,
-  BankReconciliation,
-  CreditNote,
-  FiscalPeriod,
-  Donation,
-  ExchangeRate,
-  WithholdingTax;
-
 const safeRequire = (path, name) => {
   try {
     return require(path);
@@ -48,21 +39,21 @@ const safeRequire = (path, name) => {
   }
 };
 
-Account = safeRequire('../models/Account', 'Account');
-JournalEntry = safeRequire('../models/JournalEntry', 'JournalEntry');
-Expense = safeRequire('../models/Expense', 'Expense');
-AccountingInvoice = safeRequire('../models/AccountingInvoice', 'AccountingInvoice');
-CostCenter = safeRequire('../models/CostCenter', 'CostCenter');
-FixedAsset = safeRequire('../models/FixedAsset', 'FixedAsset');
-Transaction = safeRequire('../models/Transaction', 'Transaction');
-Budget = safeRequire('../models/Budget', 'Budget');
-RecurringTransaction = safeRequire('../models/RecurringTransaction', 'RecurringTransaction');
-BankReconciliation = safeRequire('../models/BankReconciliation', 'BankReconciliation');
-CreditNote = safeRequire('../models/CreditNote', 'CreditNote');
-FiscalPeriod = safeRequire('../models/FiscalPeriod', 'FiscalPeriod');
-Donation = safeRequire('../models/Donation', 'Donation');
-ExchangeRate = safeRequire('../models/ExchangeRate', 'ExchangeRate');
-WithholdingTax = safeRequire('../models/WithholdingTax', 'WithholdingTax');
+const Account = safeRequire('../models/Account', 'Account');
+const JournalEntry = safeRequire('../models/JournalEntry', 'JournalEntry');
+const Expense = safeRequire('../models/Expense', 'Expense');
+const AccountingInvoice = safeRequire('../models/AccountingInvoice', 'AccountingInvoice');
+const CostCenter = safeRequire('../models/CostCenter', 'CostCenter');
+const FixedAsset = safeRequire('../models/FixedAsset', 'FixedAsset');
+const Transaction = safeRequire('../models/Transaction', 'Transaction');
+const Budget = safeRequire('../models/Budget', 'Budget');
+const RecurringTransaction = safeRequire('../models/RecurringTransaction', 'RecurringTransaction');
+const BankReconciliation = safeRequire('../models/BankReconciliation', 'BankReconciliation');
+const CreditNote = safeRequire('../models/CreditNote', 'CreditNote');
+const FiscalPeriod = safeRequire('../models/FiscalPeriod', 'FiscalPeriod');
+const Donation = safeRequire('../models/Donation', 'Donation');
+const ExchangeRate = safeRequire('../models/ExchangeRate', 'ExchangeRate');
+const WithholdingTax = safeRequire('../models/WithholdingTax', 'WithholdingTax');
 
 // Auth required for all routes
 router.use(authenticateToken);
@@ -1089,13 +1080,11 @@ router.post(
     });
 
     await note.save();
-    res
-      .status(201)
-      .json({
-        success: true,
-        data: note,
-        message: `تم إنشاء إشعار ${type === 'credit' ? 'دائن' : 'مدين'}`,
-      });
+    res.status(201).json({
+      success: true,
+      data: note,
+      message: `تم إنشاء إشعار ${type === 'credit' ? 'دائن' : 'مدين'}`,
+    });
   })
 );
 
@@ -1369,15 +1358,15 @@ router.delete(
 router.get(
   '/financial-ratios',
   asyncHandler(async (req, res) => {
-    let totalAssets = 850000,
-      currentAssets = 380000,
-      totalLiabilities = 320000,
-      currentLiabilities = 140000;
+    let totalAssets = 850000;
+    const currentAssets = 380000;
+    let totalLiabilities = 320000;
+    const currentLiabilities = 140000;
     let totalEquity = 530000,
       totalRevenue = 380000,
-      totalExpenses = 285000,
-      inventory = 120000;
-    let receivables = 85000,
+      totalExpenses = 285000;
+    const inventory = 120000;
+    const receivables = 85000,
       costOfGoods = 200000,
       cashBalance = 125000;
 

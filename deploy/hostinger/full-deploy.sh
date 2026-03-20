@@ -42,10 +42,11 @@ GITHUB_REPO="https://github.com/almashooq1/alawael-erp.git"
 GITHUB_BRANCH="main"
 NODE_VERSION="20"
 
-# ─── Pre-generated Secrets ─────────────────────────────────────────────────────
-JWT_SECRET="2446bdda83db4430eb5e1723be95853c08fc3adaf834c2ab4902c41891874f54e9a6c4364d8c67031f79e0e4ff403395993b3e1f21e93f3b8d84afc30a5b6f4b"
-JWT_REFRESH_SECRET="5943dea61925779b6dd36decb8c1a8397123dbab3859636330ff1941bcf8fc8d4ae9b68d649938a62926fb3b5e6a02a1387a8203e5cae82306d8648b2d5a5481"
-SESSION_SECRET="c7775fab0344d6ddc33fee32493b7969baa267bbc7ce64fbf5983e929a73c547ad611c57a5661573f1766d9b241ee6e987af194966a903351b445586296db77b"
+# ─── Auto-generated Secrets (generated fresh at deploy time) ──────────────────
+JWT_SECRET=$(openssl rand -hex 64)
+JWT_REFRESH_SECRET=$(openssl rand -hex 64)
+SESSION_SECRET=$(openssl rand -hex 64)
+ENCRYPTION_KEY=$(openssl rand -hex 32)
 
 # ─── Functions ─────────────────────────────────────────────────────────────────
 log_step() {
@@ -164,8 +165,7 @@ try {
     pwd: '${MONGO_PASS}',
     roles: [
       { role: 'readWrite', db: 'alawael_erp' },
-      { role: 'dbAdmin', db: 'alawael_erp' },
-      { role: 'userAdminAnyDatabase', db: 'admin' }
+      { role: 'dbAdmin', db: 'alawael_erp' }
     ]
   });
   print('User created');
@@ -258,7 +258,7 @@ cat > ${APP_DIR}/backend/.env << ENVFILE
 
 # Application
 NODE_ENV=production
-PORT=5000
+PORT=3001
 APP_NAME=alawael-erp
 APP_VERSION=1.0.0
 TZ=Asia/Riyadh
@@ -469,7 +469,7 @@ server {
     # API with rate limiting
     location /api/ {
         limit_req zone=api_limit burst=20 nodelay;
-        proxy_pass http://127.0.0.1:5000;
+        proxy_pass http://127.0.0.1:3001;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
@@ -485,7 +485,7 @@ server {
     # Login with strict rate limiting
     location /api/auth/login {
         limit_req zone=login_limit burst=5 nodelay;
-        proxy_pass http://127.0.0.1:5000;
+        proxy_pass http://127.0.0.1:3001;
         proxy_http_version 1.1;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
@@ -495,7 +495,7 @@ server {
 
     # WebSocket (Socket.IO)
     location /socket.io/ {
-        proxy_pass http://127.0.0.1:5000;
+        proxy_pass http://127.0.0.1:3001;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
@@ -510,7 +510,7 @@ server {
 
     # Health check
     location /health {
-        proxy_pass http://127.0.0.1:5000/health;
+        proxy_pass http://127.0.0.1:3001/health;
         access_log off;
     }
 
@@ -567,7 +567,7 @@ echo -e "${CYAN}  ⏳ انتظار بدء التطبيق...${NC}"
 sleep 5
 
 # Health check
-HEALTH=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:5000/health 2>/dev/null || echo "000")
+HEALTH=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:3001/health 2>/dev/null || echo "000")
 if [ "${HEALTH}" = "200" ]; then
   log_ok "Backend يعمل بنجاح (HTTP 200)"
 else
@@ -583,8 +583,17 @@ else
 fi
 
 # ─── Daily MongoDB Backup at 2 AM ─────────────────────────────────────────
-MONGO_PASS_FILE=$(cat /root/.mongo_pass)
-(crontab -l 2>/dev/null; echo "0 2 * * * mongodump --uri='mongodb://alawael_admin:${MONGO_PASS_FILE}@127.0.0.1:27017/alawael_erp?authSource=admin' --out=${BACKUP_DIR}/mongodb/\$(date +\%Y\%m\%d) --gzip && find ${BACKUP_DIR}/mongodb -maxdepth 1 -mtime +7 -type d -exec rm -rf {} + 2>/dev/null") | sort -u | crontab -
+# Use a dedicated backup script to avoid exposing password in crontab
+cat > /home/${APP_USER}/backup-mongodb.sh << 'BACKUP_SCRIPT'
+#!/bin/bash
+MONGO_PASS=$(cat /root/.mongo_pass)
+BACKUP_DIR="/home/alawael/backups"
+mongodump --uri="mongodb://alawael_admin:${MONGO_PASS}@127.0.0.1:27017/alawael_erp?authSource=admin" \
+  --out="${BACKUP_DIR}/mongodb/$(date +%Y%m%d)" --gzip
+find "${BACKUP_DIR}/mongodb" -maxdepth 1 -mtime +7 -type d -exec rm -rf {} + 2>/dev/null
+BACKUP_SCRIPT
+chmod 700 /home/${APP_USER}/backup-mongodb.sh
+(crontab -l 2>/dev/null; echo "0 2 * * * /home/${APP_USER}/backup-mongodb.sh") | sort -u | crontab -
 
 log_ok "نسخ احتياطي يومي مُفعّل (2 AM، 7 أيام)"
 

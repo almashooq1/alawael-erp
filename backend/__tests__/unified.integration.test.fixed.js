@@ -2,7 +2,7 @@
  * Comprehensive Unit and Integration Tests for alawael-unified
  * Tests singleton pattern, authentication, authorization, and OAuth flow
  * Uses mock service injection via setServiceInstances()
- * 
+ *
  * Run with: jest __tests__/unified.integration.test.corrected.js
  */
 
@@ -11,7 +11,7 @@ const {
   getAuthenticationService,
   getOAuth2Provider,
   getSecurityService,
-  getUserService,
+  _getUserService,
   getPermissionService,
   getUnifiedJWTSecret,
   setServiceInstances,
@@ -36,7 +36,7 @@ const createMockReq = (overrides = {}) => {
     ip: '127.0.0.1',
     method: 'GET',
     path: '/test',
-    get: (header) => header === 'user-agent' ? 'Test Agent' : null,
+    get: header => (header === 'user-agent' ? 'Test Agent' : null),
     ...overrides,
   };
 };
@@ -45,11 +45,11 @@ const createMockRes = () => {
   const res = {
     statusCode: 200,
     jsonData: null,
-    status: function(code) {
+    status: function (code) {
       this.statusCode = code;
       return this;
     },
-    json: function(data) {
+    json: function (data) {
       this.jsonData = data;
       return this;
     },
@@ -64,11 +64,9 @@ const createMockNext = () => jest.fn();
  */
 const generateTestToken = () => {
   const JWT_SECRET = getUnifiedJWTSecret();
-  return jwt.sign(
-    { id: 'test-user-123', email: 'test@example.com', role: 'user' },
-    JWT_SECRET,
-    { expiresIn: '24h' }
-  );
+  return jwt.sign({ id: 'test-user-123', email: 'test@example.com', role: 'user' }, JWT_SECRET, {
+    expiresIn: '24h',
+  });
 };
 
 /**
@@ -97,13 +95,13 @@ describe('Singleton Pattern', () => {
 
   test('should support dependency injection of services', () => {
     const mockAuth = {
-      generateToken: jest.fn((user) => `token-${user.id}`),
-      verifyToken: jest.fn((token) => ({ id: 'user-456' })),
+      generateToken: jest.fn(user => `token-${user.id}`),
+      verifyToken: jest.fn(_token => ({ id: 'user-456' })),
     };
-    
+
     setServiceInstances({ authenticationService: mockAuth });
     const injected = getAuthenticationService();
-    
+
     injected.generateToken({ id: 'test' });
     expect(mockAuth.generateToken).toHaveBeenCalledWith({ id: 'test' });
   });
@@ -113,12 +111,12 @@ describe('Singleton Pattern', () => {
       generateToken: jest.fn(),
       verifyToken: jest.fn(),
     };
-    
+
     setServiceInstances({ authenticationService: mockAuth });
     expect(getAuthenticationService()).toBe(mockAuth);
-    
+
     resetServiceInstances();
-    
+
     const fresh = getAuthenticationService();
     expect(fresh).not.toBe(mockAuth);
   });
@@ -126,9 +124,9 @@ describe('Singleton Pattern', () => {
   test('should track active singletons', () => {
     getAuthenticationService();
     getOAuth2Provider();
-    
+
     const active = getActiveSingletons();
-    
+
     expect(active).toBeDefined();
     expect(typeof active).toBe('object');
   });
@@ -140,14 +138,14 @@ describe('Singleton Pattern', () => {
 describe('Authentication Middleware', () => {
   beforeEach(() => {
     const mockAuth = {
-      generateToken: jest.fn((user) => `token-${user.id}`),
-      verifyToken: jest.fn((token) => ({ id: 'user-123' })),
+      generateToken: jest.fn(user => `token-${user.id}`),
+      verifyToken: jest.fn(_token => ({ id: 'user-123' })),
     };
     const mockOAuth = {
       exchangeCodeForToken: jest.fn(),
       refreshToken: jest.fn(),
     };
-    
+
     setServiceInstances({
       authenticationService: mockAuth,
       oauth2Provider: mockOAuth,
@@ -214,8 +212,8 @@ describe('Authentication Middleware', () => {
 describe('Authorization Middleware', () => {
   beforeEach(() => {
     const mockAuth = {
-      generateToken: jest.fn((user) => `token-${user.id}`),
-      verifyToken: jest.fn((token) => ({ id: 'user-123' })),
+      generateToken: jest.fn(user => `token-${user.id}`),
+      verifyToken: jest.fn(_token => ({ id: 'user-123' })),
     };
     setServiceInstances({ authenticationService: mockAuth });
   });
@@ -291,11 +289,11 @@ describe('Authorization Middleware', () => {
 describe('Token Management', () => {
   beforeEach(() => {
     const mockAuth = {
-      generateToken: jest.fn((user) => {
+      generateToken: jest.fn(user => {
         const JWT_SECRET = getUnifiedJWTSecret();
         return jwt.sign(user, JWT_SECRET, { expiresIn: '24h' });
       }),
-      verifyToken: jest.fn((token) => {
+      verifyToken: jest.fn(token => {
         try {
           const JWT_SECRET = getUnifiedJWTSecret();
           return jwt.verify(token, JWT_SECRET);
@@ -314,7 +312,7 @@ describe('Token Management', () => {
   test('should generate valid JWT token', () => {
     const auth = getAuthenticationService();
     const user = { id: 'user-123', email: 'test@example.com', role: 'user' };
-    
+
     const token = auth.generateToken(user);
     expect(token).toBeDefined();
     expect(typeof token).toBe('string');
@@ -362,7 +360,7 @@ describe('Service Instances', () => {
 
     setServiceInstances({ authenticationService: customAuth });
     const injected = getAuthenticationService();
-    
+
     expect(injected).toBeDefined();
     expect(typeof injected.generateToken).toBe('function');
     const token = injected.generateToken();

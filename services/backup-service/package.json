@@ -1,0 +1,21 @@
+{
+  "name": "alawael-backup-service",
+  "version": "1.0.0",
+  "description": "خدمة النسخ الاحتياطي التلقائي لنظام الأوائل",
+  "main": "server.js",
+  "scripts": {
+    "backup:now": "node -e \"const axios=require('axios');axios.post('http://localhost:3090/api/backups').then(r=>console.log(r.data))\"",
+    "dev": "nodemon server.js",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.450.0",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "node-cron": "^3.0.3",
+    "winston": "^3.11.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}

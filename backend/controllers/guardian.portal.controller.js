@@ -16,6 +16,7 @@ const BeneficiaryProgress = require('../models/BeneficiaryProgress');
 const PortalMessage = require('../models/PortalMessage');
 const PortalPayment = require('../models/PortalPayment');
 const PortalNotification = require('../models/PortalNotification');
+const mongoose = require('mongoose');
 const { AppError, catchAsync } = require('../utils/errorHandler');
 const { sendEmail } = require('../services/email.service');
 const GuardianService = require('../services/guardian.service');

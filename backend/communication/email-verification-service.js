@@ -8,6 +8,7 @@ const mongoose = require('mongoose');
 const crypto = require('crypto');
 const dns = require('dns').promises;
 const { promisify } = require('util');
+const logger = require('../utils/logger');
 
 // Email Verification Schema
 const EmailVerificationSchema = new mongoose.Schema({

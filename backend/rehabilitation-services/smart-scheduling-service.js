@@ -335,18 +335,18 @@ class SmartSchedulingService {
     return byDate;
   }
 
-  async _getAvailableSlots(therapistId, dateRange) {
+  async _getAvailableSlots(_therapistId, _dateRange) {
     return []; // يتم حسابها بناءً على جدول العمل
   }
 
-  _createReminders(aptData) {
+  _createReminders(_aptData) {
     return [
       { type: 'sms', timing: '24h_before', status: 'pending' },
       { type: 'sms', timing: '2h_before', status: 'pending' },
     ];
   }
 
-  async _createRecurringAppointments(baseApt) {
+  async _createRecurringAppointments(_baseApt) {
     // placeholder: يتم إنشاء مواعيد متكررة حسب نمط التكرار
   }
 

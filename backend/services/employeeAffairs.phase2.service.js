@@ -61,7 +61,7 @@ const getShiftModels = () => {
   }
   return { ShiftDefinition, ShiftAssignment, ShiftSwapRequest };
 };
-const getEmployee = () => {
+const _getEmployee = () => {
   if (!Employee) Employee = require('../models/employee.model');
   return Employee;
 };

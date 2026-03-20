@@ -346,7 +346,7 @@ router.put('/:studentId/:id', async (req, res) => {
 // POST /medication-reminder — تنبيه دواء
 router.post('/:studentId/medication-reminder', async (req, res) => {
   try {
-    const { medicationName, time, notes } = req.body;
+    const { medicationName, time: _time, notes } = req.body;
     const record = new HealthRecord({
       studentId: req.params.studentId,
       type: 'دواء',

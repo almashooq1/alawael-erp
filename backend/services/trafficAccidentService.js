@@ -9,7 +9,7 @@ const Driver = require('../models/Driver');
 const Vehicle = require('../models/Vehicle');
 const logger = require('../utils/logger');
 const PDFDocument = require('pdfkit');
-const xlsx = require('xlsx');
+const ExcelJS = require('exceljs');
 
 class TrafficAccidentService {
   /**
@@ -604,9 +604,14 @@ class TrafficAccidentService {
         المحقق: report.investigation.investigatingOfficer?.name || 'N/A',
       }));
 
-      const worksheet = xlsx.utils.json_to_ws(data);
-      const workbook = xlsx.utils.book_new();
-      xlsx.utils.book_append_sheet(workbook, worksheet, 'تقارير الحوادث');
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('تقارير الحوادث');
+
+      // Set columns from data keys
+      const keys = data.length > 0 ? Object.keys(data[0]) : [];
+      worksheet.columns = keys.map(key => ({ header: key, key, width: 20 }));
+      worksheet.addRows(data);
+      worksheet.getRow(1).font = { bold: true };
 
       return workbook;
     } catch (error) {

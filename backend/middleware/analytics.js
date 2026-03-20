@@ -12,7 +12,7 @@ module.exports = {
     }
   },
 
-  trackError: (error, req) => {
+  trackError: (error, _req) => {
     // Track error analytics
     if (process.env.NODE_ENV !== 'test') {
       console.log(`[Analytics Error] ${error.message}`);
@@ -24,5 +24,5 @@ module.exports = {
     if (process.env.NODE_ENV !== 'test') {
       console.log(`[Analytics Event] ${eventName}`, data);
     }
-  }
+  },
 };

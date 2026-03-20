@@ -370,7 +370,7 @@ class AppointmentService {
     };
 
     const interval = intervalDays[parent.recurrence] || 7;
-    let currentDate = new Date(parent.date);
+    const currentDate = new Date(parent.date);
     currentDate.setDate(currentDate.getDate() + interval);
     const endDate = new Date(parent.recurrenceEnd);
 
@@ -441,7 +441,7 @@ class AppointmentService {
     const interval = intervalDays[parent.recurrence] || 7;
 
     const generated = [];
-    let currentDate = new Date(parent.date);
+    const currentDate = new Date(parent.date);
     currentDate.setDate(currentDate.getDate() + interval);
 
     while (currentDate <= endDate) {

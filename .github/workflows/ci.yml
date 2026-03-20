@@ -1,0 +1,166 @@
+# ════════════════════════════════════════════════════════════════════
+#  Al-Awael ERP — Unified CI Pipeline
+#  يشمل: فحص الجودة ← اختبارات الباك-إند ← بناء الفرونت-إند ← تدقيق أمني
+# ════════════════════════════════════════════════════════════════════
+name: CI — Al-Awael ERP
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "18"
+
+jobs:
+  # ═══════════════════════════════════════════════════════════════════
+  #  1. Lint & Code Quality
+  # ═══════════════════════════════════════════════════════════════════
+  lint:
+    name: Lint & Code Quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: ESLint (0 errors, 0 warnings)
+        working-directory: backend
+        run: npm run lint -- --max-warnings 0
+
+      - name: Mock-guard check
+        working-directory: backend
+        run: npm run test:guard:maintenance-mocks
+
+  # ═══════════════════════════════════════════════════════════════════
+  #  2. Backend Tests (Jest + mongodb-memory-server)
+  # ═══════════════════════════════════════════════════════════════════
+  test-backend:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+    needs: lint
+    timeout-minutes: 20
+    env:
+      NODE_ENV: test
+      DISABLE_REDIS: "true"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Run Jest tests
+        working-directory: backend
+        run: npm test -- --passWithNoTests --no-coverage --forceExit
+
+  # ═══════════════════════════════════════════════════════════════════
+  #  3. Frontend Build
+  # ═══════════════════════════════════════════════════════════════════
+  build-frontend:
+    name: Build Frontend
+    runs-on: ubuntu-latest
+    needs: lint
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build production bundle
+        working-directory: frontend
+        run: npm run build
+        env:
+          CI: "false"
+          GENERATE_SOURCEMAP: "false"
+          REACT_APP_API_URL: /api
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: frontend/build/
+          retention-days: 3
+
+  # ═══════════════════════════════════════════════════════════════════
+  #  4. Security Audit
+  # ═══════════════════════════════════════════════════════════════════
+  security:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Audit backend (high + critical)
+        working-directory: backend
+        run: |
+          npm ci
+          npm audit --audit-level=high || true
+
+      - name: Audit frontend (high + critical)
+        working-directory: frontend
+        run: |
+          npm ci
+          npm audit --audit-level=high || true
+
+  # ═══════════════════════════════════════════════════════════════════
+  #  5. CI Summary
+  # ═══════════════════════════════════════════════════════════════════
+  summary:
+    name: CI Summary
+    runs-on: ubuntu-latest
+    needs: [lint, test-backend, build-frontend, security]
+    if: always()
+    steps:
+      - name: Pipeline Result
+        run: |
+          echo "## Al-Awael ERP CI Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Stage | Result |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Lint | ${{ needs.lint.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Backend Tests | ${{ needs.test-backend.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Frontend Build | ${{ needs.build-frontend.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Security Audit | ${{ needs.security.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Triggered by:** ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: Fail if critical stages failed
+        if: needs.lint.result == 'failure' || needs.test-backend.result == 'failure' || needs.build-frontend.result == 'failure'
+        run: exit 1

@@ -39,7 +39,7 @@ class MudadService {
    */
   async getConfig(organizationId) {
     try {
-      let config = await MudadConfig.findOne({ organizationId, isActive: true });
+      const config = await MudadConfig.findOne({ organizationId, isActive: true });
       if (!config) {
         return {
           exists: false,

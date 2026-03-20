@@ -325,7 +325,7 @@ class PlayTherapyService {
     return activities;
   }
 
-  _recommendMaterials(data) {
+  _recommendMaterials(_data) {
     return [
       'صندوق رمل',
       'دمى وعرائس',

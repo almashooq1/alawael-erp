@@ -8,7 +8,7 @@
 // ============================================================================
 // 1. DASHBOARD MANAGER
 // ============================================================================
-export class AnalyticsDashboardManager {
+class AnalyticsDashboardManager {
   constructor(database) {
     this.db = database;
     this.cachedDashboards = new Map();
@@ -140,7 +140,7 @@ export class AnalyticsDashboardManager {
 // ============================================================================
 // 2. REPORT GENERATOR
 // ============================================================================
-export class ReportGenerator {
+class ReportGenerator {
   constructor(database) {
     this.db = database;
   }
@@ -326,7 +326,7 @@ export class ReportGenerator {
 // ============================================================================
 // 3. EXPORT SERVICE
 // ============================================================================
-export class ExportService {
+class ExportService {
   /**
    * Export to CSV
    */
@@ -435,7 +435,7 @@ export class ExportService {
 // ============================================================================
 // 4. REAL-TIME DATA STREAM
 // ============================================================================
-export class RealTimeDataStream {
+class RealTimeDataStream {
   constructor(io) {
     this.io = io;
     this.subscriptions = new Map();
@@ -494,7 +494,7 @@ export class RealTimeDataStream {
 // ============================================================================
 // 5. DATA VISUALIZATION CONFIG
 // ============================================================================
-export const visualizationConfig = {
+const visualizationConfig = {
   // Chart types
   charts: {
     line: {
@@ -558,7 +558,7 @@ export const visualizationConfig = {
   },
 };
 
-export default {
+module.exports = {
   AnalyticsDashboardManager,
   ReportGenerator,
   ExportService,

@@ -46,7 +46,7 @@ class ChatbotEngine {
   static async processIncomingMessage(tenantId, contactPhone, messageText, conversationId) {
     try {
       // التحقق من وجود جلسة نشطة
-      let session = await ChatbotSession.findOne({
+      const session = await ChatbotSession.findOne({
         tenantId,
         contactPhone,
         status: { $in: ['active', 'waiting_input'] },
@@ -130,7 +130,7 @@ class ChatbotEngine {
         case 'starts_with':
           if (lowerText.startsWith(pattern.toLowerCase())) return true;
           break;
-        case 'keyword':
+        case 'keyword': {
           // تطابق الكلمة كاملة
           const wordRegex = new RegExp(
             `\\b${pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`,
@@ -138,6 +138,7 @@ class ChatbotEngine {
           );
           if (wordRegex.test(text)) return true;
           break;
+        }
         case 'regex':
           try {
             const regex = new RegExp(pattern, rule.patternFlags || 'i');
@@ -543,7 +544,7 @@ class MessageScheduler {
       return;
     if (recurrence.endDate && new Date() >= new Date(recurrence.endDate)) return;
 
-    let nextDate = new Date(msg.scheduledAt);
+    const nextDate = new Date(msg.scheduledAt);
 
     switch (recurrence.pattern) {
       case 'daily':

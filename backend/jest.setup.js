@@ -185,9 +185,11 @@ jest.mock(
           }
           return null;
         }),
-        create: jest.fn(async (...args) => {
+        create: jest.fn(async function (...args) {
           const docs = Array.isArray(args[0]) ? args[0] : args;
-          const coll = store.assets; // Default to assets
+          const collName = this._collectionName || 'assets';
+          if (!store[collName]) store[collName] = [];
+          const coll = store[collName];
           const res = [];
           for (const doc of docs) {
             const newDoc = {
@@ -201,8 +203,10 @@ jest.mock(
           }
           return docs.length === 1 ? res[0] : res;
         }),
-        insertMany: jest.fn(async docs => {
-          const coll = store.assets;
+        insertMany: jest.fn(async function (docs) {
+          const collName = this._collectionName || 'assets';
+          if (!store[collName]) store[collName] = [];
+          const coll = store[collName];
           const res = [];
           for (const doc of docs) {
             const newDoc = { _id: new Types.ObjectId(), ...doc, createdAt: new Date() };
@@ -291,6 +295,12 @@ jest.mock(
       if (!mockModels[name]) {
         mockModels[name] = createModel();
       }
+      // Track collection name for create/insertMany operations
+      const collKey = name.toLowerCase();
+      if (!store[collKey]) store[collKey] = [];
+      mockModels[name]._collectionName = collKey;
+      mockModels[name].modelName = name;
+      mockModels[name].collection = { name: collKey, collectionName: collKey };
       return mockModels[name];
     });
 
@@ -338,6 +348,43 @@ global.console = {
   error: jest.fn(),
   warn: jest.fn(),
 };
+
+// ─── MongoMemoryServer URI override ────────────────────────────────
+// Integration tests (jest.unmock('mongoose')) read .env at module-load time,
+// overwriting process.env.MONGODB_URI with the real (authenticated) server.
+// This beforeAll runs AFTER test module-level code but BEFORE the test's own
+// beforeAll, so it re-overrides the env var to point at the in-memory server.
+const _fs = require('fs');
+const _path = require('path');
+const _uriFile = _path.join(__dirname, '.test-mongo-uri');
+
+beforeAll(() => {
+  try {
+    const memUri = _fs.readFileSync(_uriFile, 'utf-8').trim();
+    if (memUri) {
+      process.env.MONGO_URI = memUri;
+      process.env.MONGODB_URI = memUri;
+    }
+  } catch {
+    // globalSetup may not have written the file (e.g. missing mongodb-memory-server)
+  }
+});
+
+// ─── Global teardown: close leaked handles so workers exit cleanly ──
+afterAll(async () => {
+  // 1. Disconnect real mongoose if any test unmocked it and opened a connection
+  try {
+    const realMongoose = jest.requireActual('mongoose');
+    if (realMongoose.connection && realMongoose.connection.readyState !== 0) {
+      await realMongoose.disconnect();
+    }
+  } catch {
+    // mongoose may not be importable or already disconnected
+  }
+
+  // 2. Clear fake timers if active
+  jest.clearAllTimers();
+});
 
 // Mock database store
 global.mockDatabase = {

@@ -3,7 +3,7 @@
  * Comprehensive Tests for Measurement & Program System
  */
 
-const request = require('supertest');
+const _request = require('supertest');
 const axios = require('axios');
 
 // ============================
@@ -15,7 +15,7 @@ describe('📊 Measurement System Tests', () => {
   describe('GET /measurements/types', () => {
     it('✅ يجب جلب جميع أنواع المقاييس', async () => {
       const response = await axios.get(`${baseURL}/measurements/types`);
-      
+
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
       expect(Array.isArray(response.data.data)).toBe(true);
@@ -23,47 +23,38 @@ describe('📊 Measurement System Tests', () => {
     });
 
     it('✅ يجب تصفية أنواع المقاييس حسب الفئة', async () => {
-      const response = await axios.get(
-        `${baseURL}/measurements/types?category=GENERAL`
-      );
-      
+      const response = await axios.get(`${baseURL}/measurements/types?category=GENERAL`);
+
       expect(response.status).toBe(200);
       expect(response.data.data.every(t => t.category === 'GENERAL')).toBe(true);
     });
 
     it('✅ يجب تصفية أنواع المقاييس حسب الإعاقة', async () => {
-      const response = await axios.get(
-        `${baseURL}/measurements/types?targetDisability=AUTISM`
-      );
-      
+      const response = await axios.get(`${baseURL}/measurements/types?targetDisability=AUTISM`);
+
       expect(response.status).toBe(200);
-      expect(response.data.data.every(t => 
-        t.targetDisabilities.includes('AUTISM')
-      )).toBe(true);
+      expect(response.data.data.every(t => t.targetDisabilities.includes('AUTISM'))).toBe(true);
     });
   });
 
   describe('POST /measurements/results/:beneficiaryId', () => {
     it('✅ يجب تسجيل نتيجة قياس وتفعيل برامج', async () => {
-      const response = await axios.post(
-        `${baseURL}/measurements/results/BN-TEST-001`,
-        {
-          measurementId: 'MEAS-IQ-WECHSLER-001',
-          typeId: 'INTEL_001',
-          rawScore: 45,
-          standardScore: 40,
-          overallLevel: 'SEVERE',
-          interpretation: {
-            summary: 'نتيجة إعاقة ذهنية شديدة',
-            strengths: ['قد يكون لديه مهارات جسدية'],
-            weaknesses: ['ضعف كبير في القدرات العقلية']
-          },
-          administratedBy: {
-            userId: 'PSYCH-001',
-            name: 'د. علي أحمد'
-          }
-        }
-      );
+      const response = await axios.post(`${baseURL}/measurements/results/BN-TEST-001`, {
+        measurementId: 'MEAS-IQ-WECHSLER-001',
+        typeId: 'INTEL_001',
+        rawScore: 45,
+        standardScore: 40,
+        overallLevel: 'SEVERE',
+        interpretation: {
+          summary: 'نتيجة إعاقة ذهنية شديدة',
+          strengths: ['قد يكون لديه مهارات جسدية'],
+          weaknesses: ['ضعف كبير في القدرات العقلية'],
+        },
+        administratedBy: {
+          userId: 'PSYCH-001',
+          name: 'د. علي أحمد',
+        },
+      });
 
       expect(response.status).toBe(201);
       expect(response.data.success).toBe(true);
@@ -73,58 +64,49 @@ describe('📊 Measurement System Tests', () => {
     });
 
     it('✅ يجب أن تفعل برامج الحياة اليومية للإعاقة الذهنية', async () => {
-      const response = await axios.post(
-        `${baseURL}/measurements/results/BN-TEST-002`,
-        {
-          measurementId: 'MEAS-ADAPTIVE-001',
-          typeId: 'ADAPT_001',
-          rawScore: 50,
-          overallLevel: 'MODERATE',
-          administratedBy: { userId: 'PSYCH-002', name: 'د. فاطمة محمد' }
-        }
-      );
+      const response = await axios.post(`${baseURL}/measurements/results/BN-TEST-002`, {
+        measurementId: 'MEAS-ADAPTIVE-001',
+        typeId: 'ADAPT_001',
+        rawScore: 50,
+        overallLevel: 'MODERATE',
+        administratedBy: { userId: 'PSYCH-002', name: 'د. فاطمة محمد' },
+      });
 
       const programs = response.data.data.automatedPrograms.analyzedPrograms;
-      
+
       // يجب أن تتضمن برنامج العناية بالذات
-      expect(programs.some(p => 
-        p.programName.includes('العناية') || 
-        p.programName.includes('Self-Care')
-      )).toBe(true);
+      expect(
+        programs.some(p => p.programName.includes('العناية') || p.programName.includes('Self-Care'))
+      ).toBe(true);
     });
 
     it('✅ يجب أن تفعل برامج التوحد عند اكتشاف أعراض', async () => {
-      const response = await axios.post(
-        `${baseURL}/measurements/results/BN-TEST-003`,
-        {
-          measurementId: 'MEAS-AUTISM-MCHAT',
-          typeId: 'AUTISM_001',
-          rawScore: 18,
-          overallLevel: 'SEVERE',
-          administratedBy: { userId: 'PSYCH-003' }
-        }
-      );
+      const response = await axios.post(`${baseURL}/measurements/results/BN-TEST-003`, {
+        measurementId: 'MEAS-AUTISM-MCHAT',
+        typeId: 'AUTISM_001',
+        rawScore: 18,
+        overallLevel: 'SEVERE',
+        administratedBy: { userId: 'PSYCH-003' },
+      });
 
       const programs = response.data.data.automatedPrograms.analyzedPrograms;
-      
-      // يجب أن تتضمن برامج التوحد والتواصل
-      expect(programs.some(p => 
-        p.programName.includes('التوحد') || 
-        p.programName.includes('Autism')
-      )).toBe(true);
 
-      expect(programs.some(p => 
-        p.programName.includes('تواصل') || 
-        p.programName.includes('Communication')
-      )).toBe(true);
+      // يجب أن تتضمن برامج التوحد والتواصل
+      expect(
+        programs.some(p => p.programName.includes('التوحد') || p.programName.includes('Autism'))
+      ).toBe(true);
+
+      expect(
+        programs.some(
+          p => p.programName.includes('تواصل') || p.programName.includes('Communication')
+        )
+      ).toBe(true);
     });
   });
 
   describe('GET /measurements/results/:beneficiaryId', () => {
     it('✅ يجب جلب جميع نتائج المستفيد', async () => {
-      const response = await axios.get(
-        `${baseURL}/measurements/results/BN-TEST-001`
-      );
+      const response = await axios.get(`${baseURL}/measurements/results/BN-TEST-001`);
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
@@ -139,7 +121,7 @@ describe('📊 Measurement System Tests', () => {
         measurementId: 'MEAS-IQ-WECHSLER-001',
         typeId: 'INTEL_001',
         rawScore: 45,
-        overallLevel: 'SEVERE'
+        overallLevel: 'SEVERE',
       });
 
       // تسجيل نتيجة ثانية بعد برنامج
@@ -147,7 +129,7 @@ describe('📊 Measurement System Tests', () => {
         measurementId: 'MEAS-IQ-WECHSLER-001',
         typeId: 'INTEL_001',
         rawScore: 52,
-        overallLevel: 'MODERATE'
+        overallLevel: 'MODERATE',
       });
 
       const response = await axios.get(
@@ -179,25 +161,19 @@ describe('🏥 Rehabilitation Programs Tests', () => {
     });
 
     it('✅ يجب تصفية البرامج حسب نوع الإعاقة', async () => {
-      const response = await axios.get(
-        `${baseURL}/programs?disability=INTELLECTUAL`
-      );
+      const response = await axios.get(`${baseURL}/programs?disability=INTELLECTUAL`);
 
       expect(response.status).toBe(200);
-      expect(response.data.data.every(p => 
-        p.targetDisabilities.includes('INTELLECTUAL')
-      )).toBe(true);
+      expect(response.data.data.every(p => p.targetDisabilities.includes('INTELLECTUAL'))).toBe(
+        true
+      );
     });
 
     it('✅ يجب تصفية البرامج حسب مستوى الشدة', async () => {
-      const response = await axios.get(
-        `${baseURL}/programs?severity=SEVERE`
-      );
+      const response = await axios.get(`${baseURL}/programs?severity=SEVERE`);
 
       expect(response.status).toBe(200);
-      expect(response.data.data.every(p => 
-        p.suitableSeverityLevels.includes('SEVERE')
-      )).toBe(true);
+      expect(response.data.data.every(p => p.suitableSeverityLevels.includes('SEVERE'))).toBe(true);
     });
   });
 
@@ -212,12 +188,12 @@ describe('🏥 Rehabilitation Programs Tests', () => {
           sessionType: 'INDIVIDUAL',
           content: {
             objectives: ['تعليم مهارات الأكل'],
-            activitiesPerformed: ['ممارسة استخدام الملعقة']
+            activitiesPerformed: ['ممارسة استخدام الملعقة'],
           },
           performance: {
             beneficiaryEngagement: 'GOOD',
-            taskCompletion: 75
-          }
+            taskCompletion: 75,
+          },
         }
       );
 
@@ -239,9 +215,7 @@ describe('🏥 Rehabilitation Programs Tests', () => {
 
   describe('GET /programs/active/:beneficiaryId', () => {
     it('✅ يجب جلب البرامج النشطة للمستفيد', async () => {
-      const response = await axios.get(
-        `${baseURL}/programs/active/BN-TEST-005`
-      );
+      const response = await axios.get(`${baseURL}/programs/active/BN-TEST-005`);
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
@@ -266,43 +240,40 @@ describe('📋 Individual Rehabilitation Plan Tests', () => {
 
   describe('POST /rehabilitation-plans/:beneficiaryId', () => {
     it('✅ يجب إنشاء خطة تأهيل فردية', async () => {
-      const response = await axios.post(
-        `${baseURL}/rehabilitation-plans/BN-TEST-006`,
-        {
-          beneficiaryInfo: {
-            name: 'محمد علي',
-            disabilityType: 'INTELLECTUAL',
-            severityLevel: 'MODERATE',
-            age: 12
+      const response = await axios.post(`${baseURL}/rehabilitation-plans/BN-TEST-006`, {
+        beneficiaryInfo: {
+          name: 'محمد علي',
+          disabilityType: 'INTELLECTUAL',
+          severityLevel: 'MODERATE',
+          age: 12,
+        },
+        planningTeam: [
+          {
+            role: 'Team Leader',
+            userId: 'USER-001',
+            name: 'د. سلمى محمد',
+            specialty: 'Psychology',
           },
-          planningTeam: [
-            {
-              role: 'Team Leader',
-              userId: 'USER-001',
-              name: 'د. سلمى محمد',
-              specialty: 'Psychology'
-            }
-          ],
-          vision: {
-            longTermGoals: ['اكتساب الاستقلالية الذاتية']
+        ],
+        vision: {
+          longTermGoals: ['اكتساب الاستقلالية الذاتية'],
+        },
+        mission: {
+          shortTermObjectives: ['تطوير مهارات الحياة اليومية'],
+        },
+        rehabilitationAreas: [
+          {
+            areaName: 'مهارات الحياة اليومية',
+            currentLevel: 'Low',
+            targetLevel: 'Moderate',
+            priority: 'HIGH',
           },
-          mission: {
-            shortTermObjectives: ['تطوير مهارات الحياة اليومية']
-          },
-          rehabilitationAreas: [
-            {
-              areaName: 'مهارات الحياة اليومية',
-              currentLevel: 'Low',
-              targetLevel: 'Moderate',
-              priority: 'HIGH'
-            }
-          ],
-          planPeriod: {
-            startDate: '2026-02-20',
-            endDate: '2026-05-20'
-          }
-        }
-      );
+        ],
+        planPeriod: {
+          startDate: '2026-02-20',
+          endDate: '2026-05-20',
+        },
+      });
 
       expect(response.status).toBe(201);
       expect(response.data.success).toBe(true);
@@ -311,9 +282,7 @@ describe('📋 Individual Rehabilitation Plan Tests', () => {
     });
 
     it('✅ يجب جلب خطة التأهيل', async () => {
-      const response = await axios.get(
-        `${baseURL}/rehabilitation-plans/BN-TEST-006`
-      );
+      const response = await axios.get(`${baseURL}/rehabilitation-plans/BN-TEST-006`);
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
@@ -322,39 +291,29 @@ describe('📋 Individual Rehabilitation Plan Tests', () => {
 
     it('✅ يجب تحديث خطة التأهيل', async () => {
       // جلب الخطة أولاً
-      const getResponse = await axios.get(
-        `${baseURL}/rehabilitation-plans/BN-TEST-006`
-      );
+      const getResponse = await axios.get(`${baseURL}/rehabilitation-plans/BN-TEST-006`);
 
       const planId = getResponse.data.data._id;
 
-      const updateResponse = await axios.put(
-        `${baseURL}/rehabilitation-plans/${planId}`,
-        {
-          recommendations: {
-            atHome: ['التدريب اليومي على مهارات الأكل'],
-            atCenter: ['جلسات علاجية منتظمة']
-          }
-        }
-      );
+      const updateResponse = await axios.put(`${baseURL}/rehabilitation-plans/${planId}`, {
+        recommendations: {
+          atHome: ['التدريب اليومي على مهارات الأكل'],
+          atCenter: ['جلسات علاجية منتظمة'],
+        },
+      });
 
       expect(updateResponse.status).toBe(200);
       expect(updateResponse.data.success).toBe(true);
     });
 
     it('✅ يجب الموافقة على خطة التأهيل', async () => {
-      const getResponse = await axios.get(
-        `${baseURL}/rehabilitation-plans/BN-TEST-006`
-      );
+      const getResponse = await axios.get(`${baseURL}/rehabilitation-plans/BN-TEST-006`);
 
       const planId = getResponse.data.data._id;
 
-      const approveResponse = await axios.put(
-        `${baseURL}/rehabilitation-plans/${planId}/approve`,
-        {
-          approvalNotes: 'تمت مراجعة الخطة وتم الموافقة عليها'
-        }
-      );
+      const approveResponse = await axios.put(`${baseURL}/rehabilitation-plans/${planId}/approve`, {
+        approvalNotes: 'تمت مراجعة الخطة وتم الموافقة عليها',
+      });
 
       expect(approveResponse.status).toBe(200);
       expect(approveResponse.data.success).toBe(true);
@@ -371,9 +330,7 @@ describe('📈 Comprehensive Reports Tests', () => {
 
   describe('GET /reports/:beneficiaryId/comprehensive', () => {
     it('✅ يجب توليد تقرير شامل', async () => {
-      const response = await axios.get(
-        `${baseURL}/reports/BN-TEST-006/comprehensive`
-      );
+      const response = await axios.get(`${baseURL}/reports/BN-TEST-006/comprehensive`);
 
       expect(response.status).toBe(200);
       expect(response.data.success).toBe(true);
@@ -385,9 +342,7 @@ describe('📈 Comprehensive Reports Tests', () => {
     });
 
     it('✅ يجب أن يتضمن التقرير البيانات الأساسية', async () => {
-      const response = await axios.get(
-        `${baseURL}/reports/BN-TEST-006/comprehensive`
-      );
+      const response = await axios.get(`${baseURL}/reports/BN-TEST-006/comprehensive`);
 
       const { summary } = response.data.data;
 
@@ -407,19 +362,15 @@ describe('⚙️ Smart Linkage Engine Tests', () => {
 
   it('✅ يجب تفعيل البرامج المناسبة تلقائياً', async () => {
     // 1. تسجيل مقياس
-    const measurementResponse = await axios.post(
-      `${baseURL}/measurements/results/BN-SMART-TEST`,
-      {
-        measurementId: 'MEAS-ADAPTIVE-001',
-        typeId: 'ADAPT_001',
-        rawScore: 50,
-        overallLevel: 'MODERATE',
-        administratedBy: { userId: 'PSYCH-TEST' }
-      }
-    );
+    const measurementResponse = await axios.post(`${baseURL}/measurements/results/BN-SMART-TEST`, {
+      measurementId: 'MEAS-ADAPTIVE-001',
+      typeId: 'ADAPT_001',
+      rawScore: 50,
+      overallLevel: 'MODERATE',
+      administratedBy: { userId: 'PSYCH-TEST' },
+    });
 
-    const activatedPrograms = 
-      measurementResponse.data.data.automatedPrograms.analyzedPrograms;
+    const activatedPrograms = measurementResponse.data.data.automatedPrograms.analyzedPrograms;
 
     // 2. التحقق من تفعيل البرامج
     expect(activatedPrograms.length).toBeGreaterThan(0);
@@ -439,31 +390,24 @@ describe('⚙️ Smart Linkage Engine Tests', () => {
 
   it('✅ يجب ربط البرامج بشكل ذكي حسب الشدة', async () => {
     // قياس شديد
-    const severeResponse = await axios.post(
-      `${baseURL}/measurements/results/BN-SEVERE-TEST`,
-      {
-        measurementId: 'MEAS-IQ-WECHSLER-001',
-        typeId: 'INTEL_001',
-        rawScore: 40,
-        overallLevel: 'SEVERE',
-        administratedBy: { userId: 'PSYCH-TEST' }
-      }
-    );
+    const severeResponse = await axios.post(`${baseURL}/measurements/results/BN-SEVERE-TEST`, {
+      measurementId: 'MEAS-IQ-WECHSLER-001',
+      typeId: 'INTEL_001',
+      rawScore: 40,
+      overallLevel: 'SEVERE',
+      administratedBy: { userId: 'PSYCH-TEST' },
+    });
 
-    const severePrograms = 
-      severeResponse.data.data.automatedPrograms.analyzedPrograms;
+    const severePrograms = severeResponse.data.data.automatedPrograms.analyzedPrograms;
 
     // قياس خفيف
-    const mildResponse = await axios.post(
-      `${baseURL}/measurements/results/BN-MILD-TEST`,
-      {
-        measurementId: 'MEAS-IQ-WECHSLER-001',
-        typeId: 'INTEL_001',
-        rawScore: 90,
-        overallLevel: 'MILD',
-        administratedBy: { userId: 'PSYCH-TEST' }
-      }
-    );
+    const mildResponse = await axios.post(`${baseURL}/measurements/results/BN-MILD-TEST`, {
+      measurementId: 'MEAS-IQ-WECHSLER-001',
+      typeId: 'INTEL_001',
+      rawScore: 90,
+      overallLevel: 'MILD',
+      administratedBy: { userId: 'PSYCH-TEST' },
+    });
 
     const mildPrograms = mildResponse.data.data.automatedPrograms.analyzedPrograms;
 
@@ -489,17 +433,14 @@ describe('🎯 Integrated Real-World Scenarios', () => {
 
     // 1. تسجيل المقاييس الأولية
     console.log('✅ تسجيل مقاييس التقييم الأولي...');
-    const measResult = await axios.post(
-      `${baseURL}/measurements/results/${beneficiaryId}`,
-      {
-        measurementId: 'MEAS-ADAPTIVE-001',
-        typeId: 'ADAPT_001',
-        rawScore: 55,
-        standardScore: 50,
-        overallLevel: 'MODERATE',
-        administratedBy: { userId: 'PSYCH-001', name: 'د. علي' }
-      }
-    );
+    const measResult = await axios.post(`${baseURL}/measurements/results/${beneficiaryId}`, {
+      measurementId: 'MEAS-ADAPTIVE-001',
+      typeId: 'ADAPT_001',
+      rawScore: 55,
+      standardScore: 50,
+      overallLevel: 'MODERATE',
+      administratedBy: { userId: 'PSYCH-001', name: 'د. علي' },
+    });
 
     const programs = measResult.data.data.automatedPrograms.analyzedPrograms;
     expect(programs.length).toBeGreaterThan(0);
@@ -507,32 +448,29 @@ describe('🎯 Integrated Real-World Scenarios', () => {
 
     // 2. إنشاء الخطة التأهيلية
     console.log('✅ إنشاء خطة التأهيل الفردية...');
-    const irpResponse = await axios.post(
-      `${baseURL}/rehabilitation-plans/${beneficiaryId}`,
-      {
-        beneficiaryInfo: {
-          name: 'أحمد محمد',
-          age: 10,
-          disabilityType: 'INTELLECTUAL',
-          severityLevel: 'MODERATE'
+    const irpResponse = await axios.post(`${baseURL}/rehabilitation-plans/${beneficiaryId}`, {
+      beneficiaryInfo: {
+        name: 'أحمد محمد',
+        age: 10,
+        disabilityType: 'INTELLECTUAL',
+        severityLevel: 'MODERATE',
+      },
+      planningTeam: [
+        {
+          role: 'Coordinator',
+          userId: 'COORD-001',
+          name: 'فريق التأهيل المتخصص',
         },
-        planningTeam: [
-          {
-            role: 'Coordinator',
-            userId: 'COORD-001',
-            name: 'فريق التأهيل المتخصص'
-          }
-        ],
-        rehabilitationAreas: programs.slice(0, 3).map(prog => ({
-          areaName: prog.programName,
-          priority: 'HIGH'
-        })),
-        planPeriod: {
-          startDate: new Date(),
-          endDate: new Date(Date.now() + 3 * 30 * 24 * 60 * 60 * 1000) // 3 months
-        }
-      }
-    );
+      ],
+      rehabilitationAreas: programs.slice(0, 3).map(prog => ({
+        areaName: prog.programName,
+        priority: 'HIGH',
+      })),
+      planPeriod: {
+        startDate: new Date(),
+        endDate: new Date(Date.now() + 3 * 30 * 24 * 60 * 60 * 1000), // 3 months
+      },
+    });
 
     expect(irpResponse.status).toBe(201);
     console.log(`✅ تم إنشاء الخطة: ${irpResponse.data.data.planCode}`);
@@ -548,7 +486,7 @@ describe('🎯 Integrated Real-World Scenarios', () => {
         sessionDuration: 60,
         sessionType: 'INDIVIDUAL',
         content: { objectives: [`بدء برنامج ${firstProgram.programName}`] },
-        performance: { beneficiaryEngagement: 'GOOD', taskCompletion: 70 }
+        performance: { beneficiaryEngagement: 'GOOD', taskCompletion: 70 },
       }
     );
 
@@ -557,9 +495,7 @@ describe('🎯 Integrated Real-World Scenarios', () => {
 
     // 4. التقرير الشامل
     console.log('✅ إنشاء تقرير شامل...');
-    const reportResponse = await axios.get(
-      `${baseURL}/reports/${beneficiaryId}/comprehensive`
-    );
+    const reportResponse = await axios.get(`${baseURL}/reports/${beneficiaryId}/comprehensive`);
 
     expect(reportResponse.status).toBe(200);
     console.log('✅ تم إنشاء التقرير الشامل بنجاح');
@@ -582,7 +518,7 @@ describe('⚡ Performance Tests', () => {
       typeId: 'ADAPT_001',
       rawScore: 50,
       overallLevel: 'MODERATE',
-      administratedBy: { userId: 'PERF-TEST' }
+      administratedBy: { userId: 'PERF-TEST' },
     });
 
     const endTime = Date.now();

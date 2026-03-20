@@ -28,7 +28,7 @@ const { authenticate, authorize } = require('../middleware/advancedAuth');
 // ==================== Multer Configuration ====================
 
 // إنشاء مجلد المرفقات إذا لم يكن موجوداً
-const uploadDir = path.join(__dirname, '../../uploads/correspondences');
+const uploadDir = path.join(__dirname, '../uploads/correspondences');
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }

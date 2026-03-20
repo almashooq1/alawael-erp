@@ -3,7 +3,7 @@
  */
 
 const FleetParking = require('../models/FleetParking');
-const logger = require('../utils/logger');
+const _logger = require('../utils/logger');
 
 class FleetParkingService {
   static async create(data) {

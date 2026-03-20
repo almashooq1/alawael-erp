@@ -10,6 +10,7 @@
  */
 
 const DisabilityRehabilitation = require('../models/disability-rehabilitation.model');
+const DisabilityRehabilitationProgram = DisabilityRehabilitation;
 const mongoose = require('mongoose');
 const logger = require('../utils/logger');
 const { escapeRegex } = require('../utils/sanitize');
@@ -2620,47 +2621,43 @@ class DisabilityRehabilitationService {
    */
   async getUpcomingAppointments(days = 7) {
     try {
-      try {
-        const now = new Date();
-        const futureDate = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
+      const now = new Date();
+      const futureDate = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
 
-        const programs = await DisabilityRehabilitation.find({
-          is_active: true,
-          'appointments.date': { $gte: now, $lte: futureDate },
-          'appointments.status': { $in: ['scheduled', 'confirmed'] },
-        })
-          .select('program_id beneficiary.full_name_ar appointments')
-          .lean();
+      const programs = await DisabilityRehabilitation.find({
+        is_active: true,
+        'appointments.date': { $gte: now, $lte: futureDate },
+        'appointments.status': { $in: ['scheduled', 'confirmed'] },
+      })
+        .select('program_id beneficiary.full_name_ar appointments')
+        .lean();
 
-        const appointments = [];
-        programs.forEach(program => {
-          program.appointments.forEach(apt => {
-            if (
-              new Date(apt.date) >= now &&
-              new Date(apt.date) <= futureDate &&
-              ['scheduled', 'confirmed'].includes(apt.status)
-            ) {
-              appointments.push({
-                ...apt,
-                program_id: program.program_id,
-                beneficiary_name: program.beneficiary?.full_name_ar,
-              });
-            }
-          });
+      const appointments = [];
+      programs.forEach(program => {
+        program.appointments.forEach(apt => {
+          if (
+            new Date(apt.date) >= now &&
+            new Date(apt.date) <= futureDate &&
+            ['scheduled', 'confirmed'].includes(apt.status)
+          ) {
+            appointments.push({
+              ...apt,
+              program_id: program.program_id,
+              beneficiary_name: program.beneficiary?.full_name_ar,
+            });
+          }
         });
+      });
 
-        appointments.sort((a, b) => new Date(a.date) - new Date(b.date));
+      appointments.sort((a, b) => new Date(a.date) - new Date(b.date));
 
-        return {
-          success: true,
-          data: appointments,
-          count: appointments.length,
-        };
-      } catch (dbError) {
-        return { success: true, data: [], count: 0 };
-      }
-    } catch (error) {
-      throw new Error(error.message);
+      return {
+        success: true,
+        data: appointments,
+        count: appointments.length,
+      };
+    } catch (dbError) {
+      return { success: true, data: [], count: 0 };
     }
   }
 
@@ -2669,42 +2666,38 @@ class DisabilityRehabilitationService {
    */
   async getActiveAlerts() {
     try {
-      try {
-        const programs = await DisabilityRehabilitation.find({
-          is_active: true,
-          'alerts.is_dismissed': false,
-        })
-          .select('program_id beneficiary.full_name_ar alerts')
-          .lean();
+      const programs = await DisabilityRehabilitation.find({
+        is_active: true,
+        'alerts.is_dismissed': false,
+      })
+        .select('program_id beneficiary.full_name_ar alerts')
+        .lean();
 
-        const activeAlerts = [];
-        programs.forEach(program => {
-          program.alerts.forEach(alert => {
-            if (!alert.is_dismissed) {
-              activeAlerts.push({
-                ...alert,
-                program_id: program.program_id,
-                beneficiary_name: program.beneficiary?.full_name_ar,
-              });
-            }
-          });
+      const activeAlerts = [];
+      programs.forEach(program => {
+        program.alerts.forEach(alert => {
+          if (!alert.is_dismissed) {
+            activeAlerts.push({
+              ...alert,
+              program_id: program.program_id,
+              beneficiary_name: program.beneficiary?.full_name_ar,
+            });
+          }
         });
+      });
 
-        activeAlerts.sort((a, b) => {
-          const priorityOrder = { urgent: 0, high: 1, medium: 2, low: 3 };
-          return (priorityOrder[a.priority] || 3) - (priorityOrder[b.priority] || 3);
-        });
+      activeAlerts.sort((a, b) => {
+        const priorityOrder = { urgent: 0, high: 1, medium: 2, low: 3 };
+        return (priorityOrder[a.priority] || 3) - (priorityOrder[b.priority] || 3);
+      });
 
-        return {
-          success: true,
-          data: activeAlerts,
-          count: activeAlerts.length,
-        };
-      } catch (dbError) {
-        return { success: true, data: [], count: 0 };
-      }
-    } catch (error) {
-      throw new Error(error.message);
+      return {
+        success: true,
+        data: activeAlerts,
+        count: activeAlerts.length,
+      };
+    } catch (dbError) {
+      return { success: true, data: [], count: 0 };
     }
   }
 

@@ -46,7 +46,7 @@ import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import exportService from '../utils/exportService';
 import { adminService } from '../services/adminService';
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 
 const AdminUsersManagement = () => {
   const [users, setUsers] = useState([]);
@@ -158,7 +158,7 @@ const AdminUsersManagement = () => {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = evt => {
+    reader.onload = async evt => {
       const data = evt.target.result;
       let usersArr = [];
       if (file.name.endsWith('.csv')) {
@@ -175,9 +175,23 @@ const AdminUsersManagement = () => {
         });
       } else {
         // Excel
-        const workbook = XLSX.read(data, { type: 'binary' });
-        const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        usersArr = XLSX.utils.sheet_to_json(sheet);
+        const workbook = new ExcelJS.Workbook();
+        await workbook.xlsx.load(data);
+        const worksheet = workbook.worksheets[0];
+        const headers = [];
+        worksheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
+          if (rowNumber === 1) {
+            row.eachCell((cell, colNumber) => {
+              headers[colNumber] = cell.value;
+            });
+          } else {
+            const rowData = {};
+            row.eachCell((cell, colNumber) => {
+              rowData[headers[colNumber]] = cell.value;
+            });
+            usersArr.push(rowData);
+          }
+        });
       }
       // دمج مع المستخدمين الحاليين (أو استبدال حسب الحاجة)
       setUsers(prev => [...prev, ...usersArr]);
@@ -187,7 +201,7 @@ const AdminUsersManagement = () => {
     if (file.name.endsWith('.csv')) {
       reader.readAsText(file);
     } else {
-      reader.readAsBinaryString(file);
+      reader.readAsArrayBuffer(file);
     }
     e.target.value = '';
   };

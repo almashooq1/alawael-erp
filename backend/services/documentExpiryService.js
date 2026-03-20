@@ -386,7 +386,7 @@ class DocumentExpiryService extends EventEmitter {
    */
   async getStatistics() {
     const total = this.trackedDocuments.size;
-    const now = new Date();
+    const _now = new Date();
     let active = 0,
       expiringSoon = 0,
       expired = 0,

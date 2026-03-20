@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 // Ensure environment variables are set or fallback to mocks
-const stripeSecret = process.env.STRIPE_SECRET_KEY || 'sk_test_mock';
-const stripe = require('stripe')(stripeSecret);
+const stripeSecret = process.env.STRIPE_SECRET_KEY || '';
+const stripe = stripeSecret ? require('stripe')(stripeSecret) : null;
 const paypal = require('paypal-rest-sdk');
 const Razorpay = require('razorpay');
 // const nodemailer = require('nodemailer'); // Optional for now
@@ -30,8 +30,8 @@ if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
 
 paypal.configure({
   mode: process.env.PAYPAL_MODE || 'sandbox',
-  client_id: process.env.PAYPAL_CLIENT_ID || 'mock_client_id',
-  client_secret: process.env.PAYPAL_CLIENT_SECRET || 'mock_client_secret',
+  client_id: process.env.PAYPAL_CLIENT_ID || '',
+  client_secret: process.env.PAYPAL_CLIENT_SECRET || '',
 });
 
 class PaymentGatewayService {

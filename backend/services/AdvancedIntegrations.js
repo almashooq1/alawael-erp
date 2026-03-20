@@ -5,8 +5,8 @@
  * Google Maps, SMS, Email, Payment Processing, Push Notifications
  */
 
-import axios from 'axios';
-import logger from '../utils/logger.js';
+const axios = require('axios');
+const logger = require('../utils/logger.js');
 
 /**
  * ================================================================
@@ -878,14 +878,20 @@ class IntegrationOrchestrator {
 }
 
 // Export services
-export const googleMapsService = new GoogleMapsService();
-export const smsService = new SMSService();
-export const emailService = new EmailService();
-export const paymentService = new PaymentService();
-export const notificationService = new NotificationService();
-export const integrationOrchestrator = new IntegrationOrchestrator();
+const googleMapsService = new GoogleMapsService();
+const smsService = new SMSService();
+const emailService = new EmailService();
+const paymentService = new PaymentService();
+const notificationService = new NotificationService();
+const integrationOrchestrator = new IntegrationOrchestrator();
 
-export default {
+module.exports = {
+  googleMapsService,
+  smsService,
+  emailService,
+  paymentService,
+  notificationService,
+  integrationOrchestrator,
   GoogleMapsService,
   SMSService,
   EmailService,

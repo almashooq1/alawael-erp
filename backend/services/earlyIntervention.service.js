@@ -319,7 +319,7 @@ class EarlyInterventionService {
     return milestone;
   }
 
-  async updateMilestone(id, data, userId) {
+  async updateMilestone(id, data, _userId) {
     // Recalculate delay if ages changed
     if (data.actualAgeMonths !== undefined || data.expectedAgeMonths !== undefined) {
       const existing = await DevelopmentalMilestone.findById(id);

@@ -5,23 +5,26 @@
  */
 
 const axios = require('axios');
-const mongoose = require('mongoose');
+const _mongoose = require('mongoose');
 
 const API_URL = process.env.API_URL || 'http://localhost:3001';
-const DB_URI = process.env.MONGOOSE_URI || process.env.MONGODB_URI || 'mongodb://localhost:27017/rehabilitation-system';
+const _DB_URI =
+  process.env.MONGOOSE_URI ||
+  process.env.MONGODB_URI ||
+  'mongodb://localhost:27017/rehabilitation-system';
 
 // بيانات الاختبار
-const testBeneficiary = {
+const _testBeneficiary = {
   name: 'أحمد محمد',
   disabilityType: 'INTELLECTUAL',
-  ageGroup: 'ADULT'
+  ageGroup: 'ADULT',
 };
 
-const testMeasurement = {
+const _testMeasurement = {
   measurementTypeCode: 'INTEL_001',
   rawScore: 65,
   standardScore: 85,
-  performanceLevel: 'AVERAGE'
+  performanceLevel: 'AVERAGE',
 };
 
 // ============================
@@ -29,10 +32,10 @@ const testMeasurement = {
 // ============================
 async function runMeasurementTests() {
   console.log('🧪 بدء اختبارات نظام المقاييس...\n');
-  
+
   let testsPassed = 0;
   let testsFailed = 0;
-  let testData = {};
+  const testData = {};
 
   try {
     // ============================
@@ -96,20 +99,15 @@ async function runMeasurementTests() {
     // الاختبار 4: فحص المسارات الأساسية
     // ============================
     console.log('📝 الاختبار 4: فحص المسارات الأساسية...');
-    const routes = [
-      '/types',
-      '/masters',
-      '/programs',
-      '/programs/:id'
-    ];
-    
+    const routes = ['/types', '/masters', '/programs', '/programs/:id'];
+
     let routesOK = 0;
     for (const route of routes) {
       try {
         if (route.includes(':id')) {
           const id = 'test-id';
           const fullRoute = route.replace(':id', id);
-          const response = await axios.get(`${API_URL}/api/measurements${fullRoute}`).catch(_e => {
+          const _response = await axios.get(`${API_URL}/api/measurements${fullRoute}`).catch(_e => {
             // 404 is expected for test-id
             if (_e.response?.status === 404) return true;
             throw _e;
@@ -128,7 +126,7 @@ async function runMeasurementTests() {
         }
       }
     }
-    
+
     if (routesOK >= routes.length - 1) {
       console.log(`✅ جميع المسارات الأساسية موجودة (${routesOK}/${routes.length})\n`);
       testsPassed++;
@@ -164,7 +162,6 @@ async function runMeasurementTests() {
     }
 
     return { testsPassed, testsFailed, testData };
-
   } catch (_error) {
     console.error('❌ خطأ غير متوقع:', _error.message);
     return { testsPassed, testsFailed: testsFailed + 1 };
@@ -175,12 +172,14 @@ async function runMeasurementTests() {
 // تنفيذ الاختبارات
 // ============================
 if (require.main === module) {
-  runMeasurementTests().then(results => {
-    process.exit(results.testsFailed > 0 ? 1 : 0);
-  }).catch(error => {
-    console.error('❌ خطأ:', error);
-    process.exit(1);
-  });
+  runMeasurementTests()
+    .then(results => {
+      process.exit(results.testsFailed > 0 ? 1 : 0);
+    })
+    .catch(error => {
+      console.error('❌ خطأ:', error);
+      process.exit(1);
+    });
 }
 
 module.exports = { runMeasurementTests };

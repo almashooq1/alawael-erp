@@ -15,9 +15,9 @@ export class WebSocketService {
     this.io = new SocketIOServer(httpServer, {
       cors: {
         origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-        credentials: true
+        credentials: true,
       },
-      path: '/ws'
+      path: '/ws',
     });
 
     this.setupMiddleware();
@@ -34,7 +34,10 @@ export class WebSocketService {
       }
 
       try {
-        const decoded: any = jwt.verify(token, process.env.JWT_SECRET || 'secret');
+        if (!process.env.JWT_SECRET) {
+          return next(new Error('Authentication error: JWT_SECRET not configured'));
+        }
+        const decoded: any = jwt.verify(token, process.env.JWT_SECRET);
         socket.userId = decoded.id;
         socket.username = decoded.username;
         next();
@@ -61,7 +64,7 @@ export class WebSocketService {
       socket.emit('connected', {
         message: 'Connected to WebSocket server',
         userId: socket.userId,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
 
       // Broadcast user online status
@@ -69,19 +72,19 @@ export class WebSocketService {
         userId: socket.userId,
         username: socket.username,
         status: 'online',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
 
       // Handle joining project room
       socket.on('project:join', (projectId: string) => {
         socket.join(`project:${projectId}`);
         console.log(`User ${socket.username} joined project ${projectId}`);
-        
+
         socket.to(`project:${projectId}`).emit('project:user-joined', {
           userId: socket.userId,
           username: socket.username,
           projectId,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
       });
 
@@ -89,12 +92,12 @@ export class WebSocketService {
       socket.on('project:leave', (projectId: string) => {
         socket.leave(`project:${projectId}`);
         console.log(`User ${socket.username} left project ${projectId}`);
-        
+
         socket.to(`project:${projectId}`).emit('project:user-left', {
           userId: socket.userId,
           username: socket.username,
           projectId,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
       });
 
@@ -105,7 +108,7 @@ export class WebSocketService {
           modelName: data.modelName,
           userId: socket.userId,
           username: socket.username,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
       });
 
@@ -115,7 +118,7 @@ export class WebSocketService {
           datasetId: data.datasetId,
           progress: data.progress,
           userId: socket.userId,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
       });
 
@@ -127,7 +130,7 @@ export class WebSocketService {
           username: socket.username,
           message: data.message,
           projectId: data.projectId,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
       });
 
@@ -136,7 +139,7 @@ export class WebSocketService {
         socket.to(`project:${data.projectId}`).emit('chat:user-typing', {
           userId: socket.userId,
           username: socket.username,
-          projectId: data.projectId
+          projectId: data.projectId,
         });
       });
 
@@ -144,7 +147,7 @@ export class WebSocketService {
         socket.to(`project:${data.projectId}`).emit('chat:user-stopped-typing', {
           userId: socket.userId,
           username: socket.username,
-          projectId: data.projectId
+          projectId: data.projectId,
         });
       });
 
@@ -154,7 +157,7 @@ export class WebSocketService {
           userId: socket.userId,
           username: socket.username,
           position: data.position,
-          color: data.color
+          color: data.color,
         });
       });
 
@@ -173,13 +176,13 @@ export class WebSocketService {
           userSockets.delete(socket.id);
           if (userSockets.size === 0) {
             this.connectedUsers.delete(socket.userId);
-            
+
             // Broadcast user offline status
             this.io.emit('user:status', {
               userId: socket.userId,
               username: socket.username,
               status: 'offline',
-              timestamp: new Date().toISOString()
+              timestamp: new Date().toISOString(),
             });
           }
         }
@@ -193,14 +196,14 @@ export class WebSocketService {
     this.io.to(`project:${projectId}`).emit('project:updated', {
       projectId,
       update,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 
   public notifyModelTrainingProgress(projectId: string, progress: any) {
     this.io.to(`project:${projectId}`).emit('model:training-progress', {
       ...progress,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 
@@ -209,28 +212,28 @@ export class WebSocketService {
       modelId: model.id,
       status: model.status,
       accuracy: model.accuracy,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 
   public notifyNewPrediction(projectId: string, prediction: any) {
     this.io.to(`project:${projectId}`).emit('prediction:new', {
       ...prediction,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 
   public notifyUser(userId: string, notification: any) {
     this.io.to(`user:${userId}`).emit('notification:new', {
       ...notification,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 
   public notifyAllUsers(notification: any) {
     this.io.emit('notification:broadcast', {
       ...notification,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 
@@ -260,10 +263,10 @@ const wsService = new WebSocketService(httpServer);
 // Use in routes
 app.post('/api/projects/:id/update', async (req, res) => {
   const project = await updateProject(req.params.id, req.body);
-  
+
   // Notify all users in the project
   wsService.notifyProjectUpdate(req.params.id, project);
-  
+
   res.json(project);
 });
 

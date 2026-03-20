@@ -10,7 +10,7 @@ const CivilPartnership = require('../models/CivilPartnership');
 const EventParticipation = require('../models/EventParticipation');
 const IntegrationAssessment = require('../models/IntegrationAssessment');
 const AwarenessProgram = require('../models/AwarenessProgram');
-const logger = require('../utils/logger');
+const _logger = require('../utils/logger');
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // COMMUNITY ACTIVITIES — الأنشطة المجتمعية

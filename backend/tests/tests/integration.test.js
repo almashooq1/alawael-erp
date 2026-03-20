@@ -4,7 +4,7 @@
  */
 
 const request = require('supertest');
-const BranchERPIntegrationService = require('../integration/erp-branch-integration');
+const BranchERPIntegrationService = require('../../integration/erp-branch-integration');
 
 describe('BranchERPIntegrationService', () => {
   let service;
@@ -60,20 +60,20 @@ describe('BranchERPIntegrationService', () => {
           name: 'Branch 1',
           status: 'ACTIVE',
           location: 'Cairo',
-          revenue: 100000
+          revenue: 100000,
         },
         {
           id: 2,
           name: 'Branch 2',
           status: 'ACTIVE',
           location: 'Alexandria',
-          revenue: 80000
-        }
+          revenue: 80000,
+        },
       ];
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => ({ data: mockBranches, success: true })
+        json: async () => ({ data: mockBranches, success: true }),
       });
 
       const result = await service.syncBranchesToERP();
@@ -86,7 +86,7 @@ describe('BranchERPIntegrationService', () => {
     it('should handle sync errors gracefully', async () => {
       mockFetch.mockResolvedValueOnce({
         ok: false,
-        json: async () => ({ error: 'Connection failed' })
+        json: async () => ({ error: 'Connection failed' }),
       });
 
       const result = await service.syncBranchesToERP();
@@ -104,8 +104,8 @@ describe('BranchERPIntegrationService', () => {
           manager_name: 'John Doe',
           operating_hours: '09:00-18:00',
           phone: '+201001234567',
-          email: 'branch@test.com'
-        }
+          email: 'branch@test.com',
+        },
       ];
 
       const processed = service.processBranchesForERP(mockData);
@@ -123,7 +123,7 @@ describe('BranchERPIntegrationService', () => {
         { input: 'CLOSED', expected: 'CLOSED' },
         { input: 'SUSPENDED', expected: 'SUSPENDED' },
         { input: 'PLANNED', expected: 'PLANNED' },
-        { input: 'UNKNOWN', expected: 'INACTIVE' }
+        { input: 'UNKNOWN', expected: 'INACTIVE' },
       ];
 
       testCases.forEach(({ input, expected }) => {
@@ -141,13 +141,13 @@ describe('BranchERPIntegrationService', () => {
         kpis: {
           revenue: { value: 100000, target: 120000 },
           margin: { value: 25, target: 30 },
-          satisfaction: { value: 4.5, target: 4.8 }
-        }
+          satisfaction: { value: 4.5, target: 4.8 },
+        },
       };
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => mockMetrics
+        json: async () => mockMetrics,
       });
 
       const result = await service.getBranchPerformanceMetrics(1);
@@ -169,7 +169,7 @@ describe('BranchERPIntegrationService', () => {
     it('should validate branch ID parameter', async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => ({})
+        json: async () => ({}),
       });
 
       await service.getBranchPerformanceMetrics(null);
@@ -188,17 +188,15 @@ describe('BranchERPIntegrationService', () => {
         totalValue: 250000,
         stockLevels: [
           { sku: 'ITEM001', quantity: 100, value: 10000 },
-          { sku: 'ITEM002', quantity: 200, value: 20000 }
+          { sku: 'ITEM002', quantity: 200, value: 20000 },
         ],
         turnoverRate: 12.5,
-        reorderSuggestions: [
-          { sku: 'ITEM001', suggestedQty: 50 }
-        ]
+        reorderSuggestions: [{ sku: 'ITEM001', suggestedQty: 50 }],
       };
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => mockInventory
+        json: async () => mockInventory,
       });
 
       const result = await service.getBranchInventory(1);
@@ -211,12 +209,12 @@ describe('BranchERPIntegrationService', () => {
     it('should aggregate inventory across multiple calls', async () => {
       const mockInventory = {
         totalItems: 5000,
-        totalValue: 250000
+        totalValue: 250000,
       };
 
       mockFetch.mockResolvedValue({
         ok: true,
-        json: async () => mockInventory
+        json: async () => mockInventory,
       });
 
       const inv1 = await service.getBranchInventory(1);
@@ -230,14 +228,14 @@ describe('BranchERPIntegrationService', () => {
       const mockInventory = {
         stockLevels: [
           { sku: 'CRITICAL', quantity: 5, urgency: 'HIGH' },
-          { sku: 'WARNING', quantity: 50, urgency: 'MEDIUM' }
+          { sku: 'WARNING', quantity: 50, urgency: 'MEDIUM' },
         ],
-        alerts: ['Stock below minimum for CRITICAL items']
+        alerts: ['Stock below minimum for CRITICAL items'],
       };
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => mockInventory
+        json: async () => mockInventory,
       });
 
       const result = await service.getBranchInventory(1);
@@ -255,13 +253,13 @@ describe('BranchERPIntegrationService', () => {
         metrics: {
           hoursOperating: 9,
           transactionCount: 234,
-          averageTransactionValue: 450
-        }
+          averageTransactionValue: 450,
+        },
       };
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => mockReport
+        json: async () => mockReport,
       });
 
       const result = await service.getBranchReports(1, 'OPERATIONAL');
@@ -275,12 +273,12 @@ describe('BranchERPIntegrationService', () => {
         type: 'FINANCIAL',
         totalRevenue: 100000,
         totalExpenses: 75000,
-        netProfit: 25000
+        netProfit: 25000,
       };
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => mockReport
+        json: async () => mockReport,
       });
 
       const result = await service.getBranchReports(1, 'FINANCIAL');
@@ -294,12 +292,12 @@ describe('BranchERPIntegrationService', () => {
         type: 'QUALITY',
         customerSatisfaction: 4.7,
         complaintCount: 3,
-        resolutionRate: 100
+        resolutionRate: 100,
       };
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => mockReport
+        json: async () => mockReport,
       });
 
       const result = await service.getBranchReports(1, 'QUALITY');
@@ -311,11 +309,11 @@ describe('BranchERPIntegrationService', () => {
     it('should validate report type parameter', async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => ({})
+        json: async () => ({}),
       });
 
       const validTypes = ['OPERATIONAL', 'FINANCIAL', 'QUALITY'];
-      
+
       for (const type of validTypes) {
         await service.getBranchReports(1, type);
       }
@@ -333,23 +331,23 @@ describe('BranchERPIntegrationService', () => {
           predictedDemand: [
             { date: '2025-02-18', demand: 150 },
             { date: '2025-02-19', demand: 155 },
-            { date: '2025-02-20', demand: 160 }
-          ]
+            { date: '2025-02-20', demand: 160 },
+          ],
         },
         budgetForecast: {
           expectedRevenue: 3500000,
           expectedExpenses: 2500000,
-          projectedProfit: 1000000
+          projectedProfit: 1000000,
         },
         performanceForecast: {
           predictedScore: 87,
-          risks: ['Supply chain delays', 'Weather impact']
-        }
+          risks: ['Supply chain delays', 'Weather impact'],
+        },
       };
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => mockForecasts
+        json: async () => mockForecasts,
       });
 
       const result = await service.getBranchForecasts(1);
@@ -363,13 +361,13 @@ describe('BranchERPIntegrationService', () => {
       const mockForecasts = {
         demandForecast: {
           accuracy: 87.5,
-          confidenceLevel: 0.92
-        }
+          confidenceLevel: 0.92,
+        },
       };
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => mockForecasts
+        json: async () => mockForecasts,
       });
 
       const result = await service.getBranchForecasts(1);
@@ -383,14 +381,14 @@ describe('BranchERPIntegrationService', () => {
         performanceForecast: {
           risks: [
             { type: 'SUPPLY', severity: 'HIGH', description: 'Supplier delays' },
-            { type: 'DEMAND', severity: 'MEDIUM', description: 'Market volatility' }
-          ]
-        }
+            { type: 'DEMAND', severity: 'MEDIUM', description: 'Market volatility' },
+          ],
+        },
       };
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => mockForecasts
+        json: async () => mockForecasts,
       });
 
       const result = await service.getBranchForecasts(1);
@@ -406,7 +404,7 @@ describe('BranchERPIntegrationService', () => {
 
       mockFetch.mockResolvedValue({
         ok: true,
-        json: async () => ({ success: true })
+        json: async () => ({ success: true }),
       });
 
       service.startContinuousSync();
@@ -422,7 +420,7 @@ describe('BranchERPIntegrationService', () => {
 
       mockFetch.mockResolvedValue({
         ok: true,
-        json: async () => ({ success: true })
+        json: async () => ({ success: true }),
       });
 
       const syncSpy = jest.spyOn(service, 'syncBranchesToERP');
@@ -439,11 +437,11 @@ describe('BranchERPIntegrationService', () => {
 
       mockFetch.mockResolvedValue({
         ok: true,
-        json: async () => ({ success: true })
+        json: async () => ({ success: true }),
       });
 
       service.startContinuousSync();
-      const intervalId = service.syncIntervalId;
+      const _intervalId = service.syncIntervalId;
 
       service.stopContinuousSync();
       expect(service.syncIntervalId).toBeUndefined();
@@ -454,10 +452,8 @@ describe('BranchERPIntegrationService', () => {
 
   describe('Error Handling and Edge Cases', () => {
     it('should handle network timeouts', async () => {
-      mockFetch.mockImplementationOnce(() => 
-        new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Timeout')), 100)
-        )
+      mockFetch.mockImplementationOnce(
+        () => new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 100))
       );
 
       const result = await service.syncBranchesToERP();
@@ -469,7 +465,9 @@ describe('BranchERPIntegrationService', () => {
     it('should handle malformed JSON responses', async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => { throw new Error('Invalid JSON'); }
+        json: async () => {
+          throw new Error('Invalid JSON');
+        },
       });
 
       const result = await service.syncBranchesToERP();
@@ -481,7 +479,7 @@ describe('BranchERPIntegrationService', () => {
       mockFetch.mockResolvedValueOnce({
         ok: false,
         status: 401,
-        json: async () => ({ error: 'Unauthorized' })
+        json: async () => ({ error: 'Unauthorized' }),
       });
 
       const result = await service.syncBranchesToERP();
@@ -493,7 +491,7 @@ describe('BranchERPIntegrationService', () => {
       mockFetch.mockResolvedValueOnce({
         ok: false,
         status: 429,
-        json: async () => ({ error: 'Too many requests' })
+        json: async () => ({ error: 'Too many requests' }),
       });
 
       const result = await service.syncBranchesToERP();
@@ -504,7 +502,7 @@ describe('BranchERPIntegrationService', () => {
     it('should include timestamp in all responses', async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => ({ success: true })
+        json: async () => ({ success: true }),
       });
 
       const result = await service.syncBranchesToERP();
@@ -519,7 +517,7 @@ describe('BranchERPIntegrationService', () => {
       const validBranch = {
         id: 1,
         name: 'Test Branch',
-        status: 'ACTIVE'
+        status: 'ACTIVE',
       };
 
       const result = service.processBranchesForERP([validBranch]);
@@ -530,7 +528,7 @@ describe('BranchERPIntegrationService', () => {
 
     it('should handle missing required fields', () => {
       const invalidBranch = {
-        name: 'Test Branch'
+        name: 'Test Branch',
         // Missing id and status
       };
 
@@ -544,7 +542,7 @@ describe('BranchERPIntegrationService', () => {
       const branchWithSpecialChars = {
         id: 1,
         name: "Test <Branch> & 'Quotes'",
-        status: 'ACTIVE'
+        status: 'ACTIVE',
       };
 
       const result = service.processBranchesForERP([branchWithSpecialChars]);
@@ -558,12 +556,12 @@ describe('BranchERPIntegrationService', () => {
       const bulkBranches = Array.from({ length: 100 }, (_, i) => ({
         id: i + 1,
         name: `Branch ${i + 1}`,
-        status: 'ACTIVE'
+        status: 'ACTIVE',
       }));
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => ({ data: bulkBranches, success: true })
+        json: async () => ({ data: bulkBranches, success: true }),
       });
 
       const result = await service.syncBranchesToERP();
@@ -576,7 +574,7 @@ describe('BranchERPIntegrationService', () => {
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => ({ data: [], success: true })
+        json: async () => ({ data: [], success: true }),
       });
 
       await service.syncBranchesToERP();
@@ -589,12 +587,12 @@ describe('BranchERPIntegrationService', () => {
       const largeBranches = Array.from({ length: 1000 }, (_, i) => ({
         id: i,
         name: `Branch ${i}`,
-        metrics: { revenue: Math.random() * 1000000 }
+        metrics: { revenue: Math.random() * 1000000 },
       }));
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: async () => ({ data: largeBranches, success: true })
+        json: async () => ({ data: largeBranches, success: true }),
       });
 
       const result = await service.syncBranchesToERP();
@@ -610,14 +608,14 @@ describe('BranchERPIntegrationService', () => {
 
 describe('Integration API Endpoints', () => {
   let app;
-  let server;
+  let _server;
 
   beforeEach(() => {
     // Mock Express app setup
     app = {
       get: jest.fn(),
       post: jest.fn(),
-      use: jest.fn()
+      use: jest.fn(),
     };
   });
 
@@ -631,7 +629,7 @@ describe('Integration API Endpoints', () => {
       const requests = [
         request(app).get('/api/integration/health'),
         request(app).get('/api/integration/branches/1/kpis'),
-        request(app).get('/api/integration/branches/1/inventory-sync')
+        request(app).get('/api/integration/branches/1/inventory-sync'),
       ];
 
       const results = await Promise.all(requests);

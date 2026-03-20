@@ -28,19 +28,19 @@ const getDocumentation = () => {
   if (!_SessionDocumentation) _SessionDocumentation = require('../models/SessionDocumentation');
   return _SessionDocumentation;
 };
-const getCaseManagement = () => {
+const _getCaseManagement = () => {
   if (!_CaseManagement) _CaseManagement = require('../models/CaseManagement');
   return _CaseManagement;
 };
-const getBeneficiary = () => {
+const _getBeneficiary = () => {
   if (!_Beneficiary) _Beneficiary = require('../models/Beneficiary');
   return _Beneficiary;
 };
-const getDocument = () => {
+const _getDocument = () => {
   if (!_Document) _Document = require('../models/Document');
   return _Document;
 };
-const getMessage = () => {
+const _getMessage = () => {
   if (!_Message) _Message = require('../models/message.model');
   return _Message;
 };
@@ -51,7 +51,7 @@ const startOfDay = (d = new Date()) => {
   dt.setHours(0, 0, 0, 0);
   return dt;
 };
-const endOfDay = (d = new Date()) => {
+const _endOfDay = (d = new Date()) => {
   const dt = new Date(d);
   dt.setHours(23, 59, 59, 999);
   return dt;
@@ -204,7 +204,7 @@ class TherapistPortalExtendedService {
   /**
    * جلب التقييمات للمعالج
    */
-  async getAssessments(therapistId, query = {}) {
+  async getAssessments(therapistId, _query = {}) {
     // جلب من الذاكرة + نماذج التقييم المعيارية
     const stored = [...assessmentsStore.values()].filter(a => a.therapistId === therapistId);
 
@@ -426,7 +426,7 @@ class TherapistPortalExtendedService {
   /**
    * جلب أنشطة التطوير المهني
    */
-  async getProfessionalDev(therapistId, query = {}) {
+  async getProfessionalDev(therapistId, _query = {}) {
     const stored = [...professionalDevStore.values()].filter(pd => pd.therapistId === therapistId);
 
     const categories = [
@@ -689,7 +689,7 @@ class TherapistPortalExtendedService {
    */
   async getProductivityReport(therapistId) {
     const Session = getTherapySession();
-    const now = new Date();
+    const _now = new Date();
 
     const [today, thisWeek, thisMonth, last30, last90] = await Promise.all([
       Session.countDocuments({

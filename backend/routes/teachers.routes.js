@@ -123,7 +123,7 @@ router.get('/:id/workload', validateObjectId('id'), async (req, res) => {
 // ── Get available teachers for slot ──────────────────────────
 router.get('/available/slot', async (req, res) => {
   try {
-    const { day, periodNumber, subjectId, department } = req.query;
+    const { day, periodNumber: _periodNumber, subjectId, department } = req.query;
     const filter = { status: 'active' };
     if (department) filter.department = department;
     if (subjectId) filter.subjects = subjectId;

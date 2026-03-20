@@ -5,8 +5,8 @@
 
 const request = require('supertest');
 const express = require('express');
-const IntegrationHubService = require('../services/integrationHub.service');
-const IntegrationHubController = require('../controllers/integrationHub.controller');
+const IntegrationHubService = require('../../../services/integrationHub.service');
+const IntegrationHubController = require('../../../controllers/integrationHub.controller');
 
 describe('Phase 26: Advanced Integrations Hub', () => {
   let app;
@@ -100,13 +100,16 @@ describe('Phase 26: Advanced Integrations Hub', () => {
         tenantId: 'tenant_123',
       });
 
+      // Enable the workflow (created as disabled by default)
+      workflow.workflow.enabled = true;
+
       const execution = await IntegrationHubService.executeWorkflow(workflow.workflow.id, {
         testData: 'value',
       });
 
       expect(execution.workflowId).toBe(workflow.workflow.id);
       expect(execution.status).toBeDefined();
-      expect(execution.actions).toBeInstanceOf(Array);
+      expect(execution.steps).toBeInstanceOf(Array);
     });
 
     it('should register a webhook', () => {
@@ -117,7 +120,7 @@ describe('Phase 26: Advanced Integrations Hub', () => {
       );
 
       expect(result.success).toBe(true);
-      expect(result.webhook.webhookId).toBeDefined();
+      expect(result.webhook.id).toBeDefined();
       expect(result.webhook.events).toHaveLength(2);
     });
 
@@ -179,16 +182,15 @@ describe('Phase 26: Advanced Integrations Hub', () => {
     it('should get statistics', () => {
       const stats = IntegrationHubService.getStatistics();
 
-      expect(stats.totalConnectors).toBeGreaterThanOrEqual(5);
-      expect(stats.connectorsByStatus).toBeDefined();
-      expect(stats.totalWorkflows).toBeGreaterThanOrEqual(0);
-      expect(stats.webhooksRegistered).toBeGreaterThanOrEqual(0);
-      expect(stats.marketplaceApps).toBeGreaterThanOrEqual(0);
+      expect(stats.connectors.total).toBeGreaterThanOrEqual(5);
+      expect(stats.workflows.total).toBeGreaterThanOrEqual(0);
+      expect(stats.webhooks.total).toBeGreaterThanOrEqual(0);
+      expect(stats.marketplace.totalApps).toBeGreaterThanOrEqual(0);
     });
 
-    it('should emit events', (done) => {
-      IntegrationHubService.once('connector:registered', (connector) => {
-        expect(connector.id).toBe('event_test');
+    it('should emit events', done => {
+      IntegrationHubService.once('connector:registered', event => {
+        expect(event.connector.id).toBe('event_test');
         done();
       });
 
@@ -215,13 +217,11 @@ describe('Phase 26: Advanced Integrations Hub', () => {
           IntegrationHubController.registerConnector
         );
 
-        const response = await request(app)
-          .post('/connectors/register')
-          .send({
-            connectorId: 'test_connector',
-            name: 'Test Connector',
-            provider: 'test',
-          });
+        const response = await request(app).post('/connectors/register').send({
+          connectorId: 'test_connector',
+          name: 'Test Connector',
+          provider: 'test',
+        });
 
         expect(response.status).toBe(201);
         expect(response.body.success).toBe(true);
@@ -285,11 +285,9 @@ describe('Phase 26: Advanced Integrations Hub', () => {
       it('should return 400 for missing required fields', async () => {
         app.post('/workflows', IntegrationHubController.createWorkflow);
 
-        const response = await request(app)
-          .post('/workflows')
-          .send({
-            description: 'Missing name and trigger',
-          });
+        const response = await request(app).post('/workflows').send({
+          description: 'Missing name and trigger',
+        });
 
         expect(response.status).toBe(400);
         expect(response.body.success).toBe(false);
@@ -300,13 +298,11 @@ describe('Phase 26: Advanced Integrations Hub', () => {
       it('should publish app to marketplace', async () => {
         app.post('/marketplace/apps', IntegrationHubController.publishApp);
 
-        const response = await request(app)
-          .post('/marketplace/apps')
-          .send({
-            name: 'Test App',
-            author: 'test@example.com',
-            category: 'productivity',
-          });
+        const response = await request(app).post('/marketplace/apps').send({
+          name: 'Test App',
+          author: 'test@example.com',
+          category: 'productivity',
+        });
 
         expect(response.status).toBe(201);
         expect(response.body.success).toBe(true);
@@ -342,9 +338,9 @@ describe('Phase 26: Advanced Integrations Hub', () => {
 
         expect(response.status).toBe(200);
         expect(response.body.success).toBe(true);
-        expect(response.body.data.totalConnectors).toBeDefined();
-        expect(response.body.data.totalWorkflows).toBeDefined();
-        expect(response.body.data.webhooksRegistered).toBeDefined();
+        expect(response.body.data.connectors.total).toBeDefined();
+        expect(response.body.data.workflows.total).toBeDefined();
+        expect(response.body.data.webhooks.total).toBeDefined();
       });
     });
   });
@@ -385,7 +381,8 @@ describe('Phase 26: Advanced Integrations Hub', () => {
       );
       expect(webhookResult.success).toBe(true);
 
-      // 4. Execute workflow
+      // 4. Enable and execute workflow
+      workflowResult.workflow.enabled = true;
       const execution = await IntegrationHubService.executeWorkflow(workflowResult.workflow.id, {
         testData: 'value',
       });
@@ -393,9 +390,9 @@ describe('Phase 26: Advanced Integrations Hub', () => {
 
       // 5. Verify statistics updated
       const stats = IntegrationHubService.getStatistics();
-      expect(stats.totalConnectors).toBeGreaterThan(5); // Should include test_flow
-      expect(stats.totalWorkflows).toBeGreaterThan(0);
-      expect(stats.webhooksRegistered).toBeGreaterThan(0);
+      expect(stats.connectors.total).toBeGreaterThan(5); // Should include test_flow
+      expect(stats.workflows.total).toBeGreaterThan(0);
+      expect(stats.webhooks.total).toBeGreaterThan(0);
     });
   });
 
@@ -405,8 +402,14 @@ describe('Phase 26: Advanced Integrations Hub', () => {
 
   describe('Error Handling', () => {
     it('should handle missing connector gracefully', async () => {
-      const result = await IntegrationHubService.executeWorkflow('nonexistent_workflow_id', {});
-      expect(result).toBeDefined();
+      try {
+        await IntegrationHubService.executeWorkflow('nonexistent_workflow_id', {});
+        // Should not reach here
+        expect(true).toBe(false);
+      } catch (error) {
+        expect(error).toBeDefined();
+        expect(error.message).toContain('not found');
+      }
     });
 
     it('should handle invalid JSON in trigger data', async () => {
@@ -417,6 +420,9 @@ describe('Phase 26: Advanced Integrations Hub', () => {
         tenantId: 'tenant_123',
       });
 
+      // Enable the workflow (created as disabled by default)
+      workflow.workflow.enabled = true;
+
       const execution = await IntegrationHubService.executeWorkflow(workflow.workflow.id, null);
       expect(execution).toBeDefined();
     });
@@ -424,11 +430,9 @@ describe('Phase 26: Advanced Integrations Hub', () => {
     it('should validate required fields', async () => {
       app.post('/workflows', IntegrationHubController.createWorkflow);
 
-      const response = await request(app)
-        .post('/workflows')
-        .send({
-          description: 'No name or trigger',
-        });
+      const response = await request(app).post('/workflows').send({
+        description: 'No name or trigger',
+      });
 
       expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);

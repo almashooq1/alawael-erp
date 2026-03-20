@@ -14,13 +14,13 @@ const SSO_BASE = `${BASE_URL}/api/sso`;
 const testUser = {
   email: 'test@example.com',
   password: 'Test@123456',
-  name: 'Test User'
+  name: 'Test User',
 };
 
 let authToken = '';
 let refreshToken = '';
-let sessionId = '';
-let userId = '';
+const _sessionId = '';
+let _userId = '';
 
 // Helper function to make HTTP requests
 function makeRequest(method, path, body = null, fullPath = false) {
@@ -33,13 +33,13 @@ function makeRequest(method, path, body = null, fullPath = false) {
       method: method,
       headers: {
         'Content-Type': 'application/json',
-        ...(authToken && { 'Authorization': `Bearer ${authToken}` })
-      }
+        ...(authToken && { Authorization: `Bearer ${authToken}` }),
+      },
     };
 
-    const req = http.request(options, (res) => {
+    const req = http.request(options, res => {
       let data = '';
-      res.on('data', chunk => data += chunk);
+      res.on('data', chunk => (data += chunk));
       res.on('end', () => {
         try {
           const parsed = JSON.parse(data);
@@ -78,14 +78,14 @@ const tests = {
     try {
       const res = await makeRequest('POST', '/login', {
         email: testUser.email,
-        password: testUser.password
+        password: testUser.password,
       });
-      
+
       if (res.status === 201 || res.status === 200) {
         assert(res.body.token, 'Should return access token');
         authToken = res.body.token;
         if (res.body.refreshToken) refreshToken = res.body.refreshToken;
-        if (res.body.user?.id) userId = res.body.user.id;
+        if (res.body.user?.id) _userId = res.body.user.id;
         console.log('✅ Login successful');
       } else {
         // Mock mode returns 200 with session
@@ -99,7 +99,7 @@ const tests = {
 
   'Login - Missing Email': async () => {
     const res = await makeRequest('POST', '/login', {
-      password: 'password'
+      password: 'password',
     });
     assert(res.status >= 400, 'Should return error without email');
     console.log('✅ Email validation working');
@@ -107,7 +107,7 @@ const tests = {
 
   'Login - Missing Password': async () => {
     const res = await makeRequest('POST', '/login', {
-      email: 'test@example.com'
+      email: 'test@example.com',
     });
     assert(res.status >= 400, 'Should return error without password');
     console.log('✅ Password validation working');
@@ -119,9 +119,9 @@ const tests = {
       console.log('⚠️  Token verification skipped (no token)');
       return;
     }
-    
+
     const res = await makeRequest('POST', '/verify-token', {
-      token: authToken
+      token: authToken,
     });
     assert(res.status === 200 || res.status === 400, 'Should verify or reject token');
     console.log('✅ Token verification working');
@@ -132,9 +132,9 @@ const tests = {
       console.log('⚠️  Token refresh skipped (no refresh token)');
       return;
     }
-    
+
     const res = await makeRequest('POST', '/refresh-token', {
-      refreshToken: refreshToken
+      refreshToken: refreshToken,
     });
     assert(res.status === 200 || res.status === 400, 'Should handle token refresh');
     if (res.status === 200 && res.body.token) {
@@ -148,7 +148,7 @@ const tests = {
       console.log('⚠️  User info skipped (no token)');
       return;
     }
-    
+
     const res = await makeRequest('GET', '/userinfo');
     assert(res.status === 200 || res.status === 401, 'Should return user info or unauthorized');
     console.log('✅ User info endpoint working');
@@ -169,17 +169,23 @@ const tests = {
 
   // OAuth Tests
   'OAuth Authorize Endpoint': async () => {
-    const res = await makeRequest('GET', '/oauth2/authorize?client_id=test&redirect_uri=http://localhost:3000&scope=openid');
-    assert(res.status === 200 || res.status === 302 || res.status === 400, 'Should handle OAuth authorize');
+    const res = await makeRequest(
+      'GET',
+      '/oauth2/authorize?client_id=test&redirect_uri=http://localhost:3000&scope=openid'
+    );
+    assert(
+      res.status === 200 || res.status === 302 || res.status === 400,
+      'Should handle OAuth authorize'
+    );
     console.log('✅ OAuth authorize endpoint working');
   },
 
   // Logout Tests
-  'Logout': async () => {
+  Logout: async () => {
     const res = await makeRequest('POST', '/logout');
     assert(res.status === 200 || res.status === 401, 'Should handle logout');
     console.log('✅ Logout endpoint working');
-  }
+  },
 };
 
 // Run all tests

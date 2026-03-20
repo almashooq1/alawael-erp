@@ -15,7 +15,7 @@ const TRAFFIC_ACCIDENT_PERMISSIONS = [
     category: 'accident_reports',
     resource: 'traffic_accidents',
     action: 'read',
-    level: 1
+    level: 1,
   },
   {
     id: 'create_accident_report',
@@ -24,7 +24,7 @@ const TRAFFIC_ACCIDENT_PERMISSIONS = [
     category: 'accident_reports',
     resource: 'traffic_accidents',
     action: 'create',
-    level: 2
+    level: 2,
   },
   {
     id: 'edit_accident_report',
@@ -33,7 +33,7 @@ const TRAFFIC_ACCIDENT_PERMISSIONS = [
     category: 'accident_reports',
     resource: 'traffic_accidents',
     action: 'update',
-    level: 2
+    level: 2,
   },
   {
     id: 'delete_accident_report',
@@ -42,7 +42,7 @@ const TRAFFIC_ACCIDENT_PERMISSIONS = [
     category: 'accident_reports',
     resource: 'traffic_accidents',
     action: 'delete',
-    level: 3
+    level: 3,
   },
   {
     id: 'start_investigation',
@@ -51,7 +51,7 @@ const TRAFFIC_ACCIDENT_PERMISSIONS = [
     category: 'investigation',
     resource: 'accident_investigation',
     action: 'start',
-    level: 2
+    level: 2,
   },
   {
     id: 'complete_investigation',
@@ -60,7 +60,7 @@ const TRAFFIC_ACCIDENT_PERMISSIONS = [
     category: 'investigation',
     resource: 'accident_investigation',
     action: 'complete',
-    level: 3
+    level: 3,
   },
   {
     id: 'determine_liability',
@@ -69,7 +69,7 @@ const TRAFFIC_ACCIDENT_PERMISSIONS = [
     category: 'liability',
     resource: 'accident_liability',
     action: 'determine',
-    level: 3
+    level: 3,
   },
   {
     id: 'view_accident_statistics',
@@ -78,7 +78,7 @@ const TRAFFIC_ACCIDENT_PERMISSIONS = [
     category: 'analytics',
     resource: 'accident_statistics',
     action: 'read',
-    level: 1
+    level: 1,
   },
   {
     id: 'view_accident_analytics',
@@ -87,7 +87,7 @@ const TRAFFIC_ACCIDENT_PERMISSIONS = [
     category: 'analytics',
     resource: 'accident_analytics',
     action: 'read',
-    level: 2
+    level: 2,
   },
   {
     id: 'export_report',
@@ -96,8 +96,8 @@ const TRAFFIC_ACCIDENT_PERMISSIONS = [
     category: 'export',
     resource: 'accident_export',
     action: 'export',
-    level: 1
-  }
+    level: 1,
+  },
 ];
 
 // Default role-permission mappings
@@ -112,7 +112,7 @@ const ROLE_PERMISSION_MAPPINGS = {
     'determine_liability',
     'view_accident_statistics',
     'view_accident_analytics',
-    'export_report'
+    'export_report',
   ],
   traffic_officer: [
     'view_accident_reports',
@@ -122,7 +122,7 @@ const ROLE_PERMISSION_MAPPINGS = {
     'determine_liability',
     'view_accident_statistics',
     'view_accident_analytics',
-    'export_report'
+    'export_report',
   ],
   investigator: [
     'view_accident_reports',
@@ -133,7 +133,7 @@ const ROLE_PERMISSION_MAPPINGS = {
     'determine_liability',
     'view_accident_statistics',
     'view_accident_analytics',
-    'export_report'
+    'export_report',
   ],
   supervisor: [
     'view_accident_reports',
@@ -141,58 +141,55 @@ const ROLE_PERMISSION_MAPPINGS = {
     'complete_investigation',
     'view_accident_statistics',
     'view_accident_analytics',
-    'export_report'
+    'export_report',
   ],
   staff: [
     'view_accident_reports',
     'create_accident_report',
     'view_accident_statistics',
-    'export_report'
+    'export_report',
   ],
-  viewer: [
-    'view_accident_reports',
-    'view_accident_statistics',
-    'view_accident_analytics'
-  ]
+  viewer: ['view_accident_reports', 'view_accident_statistics', 'view_accident_analytics'],
 };
 
 async function seedPermissions() {
   try {
     // Connect to MongoDB
-    const mongoUri = process.env.MONGOOSE_URI || 
-                     process.env.MONGODB_URI || 
-                     'mongodb://localhost:27017/erp_system';
-    
+    const mongoUri =
+      process.env.MONGOOSE_URI || process.env.MONGODB_URI || 'mongodb://localhost:27017/erp_system';
+
     console.log('🔌 جارٍ الاتصال بـ MongoDB...');
     console.log(`   📍 URI: ${mongoUri}`);
-    
+
     await mongoose.connect(mongoUri, {
       useNewUrlParser: true,
-      useUnifiedTopology: true
+      useUnifiedTopology: true,
     });
-    
+
     console.log('✅ متصل بـ MongoDB بنجاح\n');
 
     // Get or create Permission collection
     const db = mongoose.connection.db;
     const permissionCollection = db.collection('permissions');
     const roleCollection = db.collection('roles');
-    
+
     console.log('📝 جارٍ بذر صلاحيات نظام تقارير الحوادث المرورية...\n');
 
     // ========================================
     // SEED PERMISSIONS
     // ========================================
-    
+
     // Check if permissions already exist
     const existingCount = await permissionCollection.countDocuments({
-      category: 'accident_reports'
+      category: 'accident_reports',
     });
 
     if (existingCount > 0) {
       console.log('⚠️  صلاحيات الحوادث المرورية موجودة بالفعل');
       const result = await permissionCollection.deleteMany({
-        category: { $in: ['accident_reports', 'investigation', 'liability', 'analytics', 'export'] }
+        category: {
+          $in: ['accident_reports', 'investigation', 'liability', 'analytics', 'export'],
+        },
       });
       console.log(`   ✨ تم حذف ${result.deletedCount} صلاحية قديمة\n`);
     }
@@ -203,7 +200,7 @@ async function seedPermissions() {
         ...perm,
         createdAt: new Date(),
         updatedAt: new Date(),
-        enabled: true
+        enabled: true,
       }))
     );
 
@@ -226,16 +223,16 @@ async function seedPermissions() {
         displayName: roleName.replace(/_/g, ' ').toUpperCase(),
         permissions: permissions,
         category: 'traffic_accident',
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
 
-      const result = await roleCollection.findOneAndUpdate(
+      const _result = await roleCollection.findOneAndUpdate(
         { name: roleName },
         {
           $set: roleData,
           $setOnInsert: {
-            createdAt: new Date()
-          }
+            createdAt: new Date(),
+          },
         },
         { upsert: true, returnDocument: 'after' }
       );
@@ -251,8 +248,10 @@ async function seedPermissions() {
 
     const totalPermissions = await permissionCollection.countDocuments();
     const totalRoles = await roleCollection.countDocuments();
-    const trafficAccidentPerms = await permissionCollection.countDocuments({
-      category: { $in: Object.keys(ROLE_PERMISSION_MAPPINGS[Object.keys(ROLE_PERMISSION_MAPPINGS)[0]]) }
+    const _trafficAccidentPerms = await permissionCollection.countDocuments({
+      category: {
+        $in: Object.keys(ROLE_PERMISSION_MAPPINGS[Object.keys(ROLE_PERMISSION_MAPPINGS)[0]]),
+      },
     });
 
     console.log('📊 ملخص البذر:');
@@ -299,15 +298,14 @@ async function seedPermissions() {
     await mongoose.connection.close();
     console.log('🔌 تم قطع الاتصال بـ MongoDB\n');
     process.exit(0);
-
   } catch (error) {
     console.error('\n❌ خطأ في بذر الصلاحيات:', error.message);
     console.error('\n📋 تفاصيل الخطأ:\n', error);
-    
+
     if (mongoose.connection.readyState === 1) {
       await mongoose.connection.close();
     }
-    
+
     process.exit(1);
   }
 }
@@ -318,7 +316,7 @@ async function seedPermissions() {
 module.exports = {
   TRAFFIC_ACCIDENT_PERMISSIONS,
   ROLE_PERMISSION_MAPPINGS,
-  seedPermissions
+  seedPermissions,
 };
 
 // Run if called directly
@@ -328,18 +326,18 @@ if (require.main === module) {
 
 /**
  * Usage:
- * 
+ *
  * 1. Direct execution:
  *    node seeds/traffic-accident-permissions.seed.js
- * 
+ *
  * 2. From another script:
  *    const { seedPermissions } = require('./seeds/traffic-accident-permissions.seed.js');
  *    await seedPermissions();
- * 
+ *
  * Environment variables:
  *    MONGOOSE_URI - MongoDB connection string
  *    MONGODB_URI - MongoDB connection string (fallback)
- * 
+ *
  * Default connection:
  *    mongodb://localhost:27017/erp_system
  */

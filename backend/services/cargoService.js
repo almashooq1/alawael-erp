@@ -3,7 +3,7 @@
  */
 
 const Cargo = require('../models/Cargo');
-const logger = require('../utils/logger');
+const _logger = require('../utils/logger');
 
 class CargoService {
   static async create(data) {

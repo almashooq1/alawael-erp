@@ -4,7 +4,7 @@
  * Run: node scripts/security-test.js
  */
 
-const crypto = require('crypto');
+const _crypto = require('crypto');
 
 // Color codes for output
 const COLORS = {
@@ -13,7 +13,7 @@ const COLORS = {
   red: '\x1b[31m',
   yellow: '\x1b[33m',
   blue: '\x1b[34m',
-  cyan: '\x1b[36m'
+  cyan: '\x1b[36m',
 };
 
 /**
@@ -25,7 +25,7 @@ class SecurityTestSuite {
     this.results = {
       passed: 0,
       failed: 0,
-      warnings: 0
+      warnings: 0,
     };
     this.startTime = Date.now();
   }
@@ -34,7 +34,9 @@ class SecurityTestSuite {
    * Log test result
    */
   logTest(name, passed, details = '') {
-    const status = passed ? `${COLORS.green}✓ PASS${COLORS.reset}` : `${COLORS.red}✗ FAIL${COLORS.reset}`;
+    const status = passed
+      ? `${COLORS.green}✓ PASS${COLORS.reset}`
+      : `${COLORS.red}✗ FAIL${COLORS.reset}`;
     console.log(`  ${status} - ${name}`);
     if (details) {
       console.log(`    ${COLORS.cyan}${details}${COLORS.reset}`);
@@ -87,9 +89,13 @@ class SecurityTestSuite {
       // Test secret generation
       const secret = speakeasy.generateSecret({
         name: 'Test',
-        issuer: 'AlAwael'
+        issuer: 'AlAwael',
       });
-      this.logTest('2FA secret generation', !!secret.base32, `Secret: ${secret.base32.substring(0, 10)}...`);
+      this.logTest(
+        '2FA secret generation',
+        !!secret.base32,
+        `Secret: ${secret.base32.substring(0, 10)}...`
+      );
 
       // Test token verification
       const token = speakeasy.totp({ secret: secret.base32 });
@@ -97,16 +103,19 @@ class SecurityTestSuite {
         secret: secret.base32,
         encoding: 'base32',
         token,
-        window: 2
+        window: 2,
       });
       this.logTest('TOTP token verification', verified, `Token: ${token}`);
 
       // Test backup codes
-      const backupCodes = Array.from({ length: 10 }, () => 
+      const backupCodes = Array.from({ length: 10 }, () =>
         Math.random().toString(36).substring(2, 10).toUpperCase()
       );
-      this.logTest('Backup code generation', backupCodes.length === 10, `Generated ${backupCodes.length} codes`);
-
+      this.logTest(
+        'Backup code generation',
+        backupCodes.length === 10,
+        `Generated ${backupCodes.length} codes`
+      );
     } catch (error) {
       this.logTest('2FA Module Check', false, error.message);
       this.logWarning('2FA Installation', 'Run: npm install speakeasy qrcode');
@@ -120,7 +129,9 @@ class SecurityTestSuite {
     console.log(`\n${COLORS.blue}2. Account Security${COLORS.reset}`);
 
     try {
-      const { AccountSecurityManager } = require('../erp_new_system/backend/middleware/accountSecurity.middleware');
+      const {
+        AccountSecurityManager,
+      } = require('../erp_new_system/backend/middleware/accountSecurity.middleware');
       const manager = new AccountSecurityManager();
 
       // Test max login attempts
@@ -138,7 +149,11 @@ class SecurityTestSuite {
 
       // Test session management
       const session = manager.registerSession(userId, '192.168.1.1', 'Mozilla/5.0', 'device-123');
-      this.logTest('Session registration', !!session.sessionId, `Session ID: ${session.sessionId.substring(0, 8)}...`);
+      this.logTest(
+        'Session registration',
+        !!session.sessionId,
+        `Session ID: ${session.sessionId.substring(0, 8)}...`
+      );
 
       // Test session verification
       const verification = manager.verifySession(userId, session.sessionId);
@@ -163,12 +178,18 @@ class SecurityTestSuite {
     console.log(`\n${COLORS.blue}3. Data Protection & Encryption${COLORS.reset}`);
 
     try {
-      const { DataProtectionManager } = require('../erp_new_system/backend/middleware/dataProtection.middleware');
+      const {
+        DataProtectionManager,
+      } = require('../erp_new_system/backend/middleware/dataProtection.middleware');
 
       // Test encryption
       const testData = 'sensitive-email@example.com';
       const encrypted = DataProtectionManager.encrypt(testData);
-      this.logTest('Data encryption', !!encrypted && encrypted.includes(':'), `Encrypted: ${encrypted.substring(0, 30)}...`);
+      this.logTest(
+        'Data encryption',
+        !!encrypted && encrypted.includes(':'),
+        `Encrypted: ${encrypted.substring(0, 30)}...`
+      );
 
       // Test decryption
       const decrypted = DataProtectionManager.decrypt(encrypted);
@@ -178,23 +199,34 @@ class SecurityTestSuite {
       const userData = {
         email: 'john.doe@example.com',
         phoneNumber: '1234567890',
-        ssn: '123456789'
+        ssn: '123456789',
       };
       const masked = DataProtectionManager.maskPII(userData);
       this.logTest('PII masking - Email', masked.email.includes('*'), `Masked: ${masked.email}`);
-      this.logTest('PII masking - Phone', masked.phoneNumber.includes('*'), `Masked: ${masked.phoneNumber}`);
+      this.logTest(
+        'PII masking - Phone',
+        masked.phoneNumber.includes('*'),
+        `Masked: ${masked.phoneNumber}`
+      );
       this.logTest('PII masking - SSN', masked.ssn.includes('*'), `Masked: ${masked.ssn}`);
 
       // Test data hashing
       const hash = DataProtectionManager.hash('test-data');
-      this.logTest('Data hashing (SHA256)', hash.length === 64, `Hash: ${hash.substring(0, 20)}...`);
+      this.logTest(
+        'Data hashing (SHA256)',
+        hash.length === 64,
+        `Hash: ${hash.substring(0, 20)}...`
+      );
 
       // Test data retention
       const oneMonthAgo = new Date();
       oneMonthAgo.setDate(oneMonthAgo.getDate() - 30);
       const shouldRetain = DataProtectionManager.shouldRetainData(oneMonthAgo, 'auditLogs');
-      this.logTest('Data retention check', !shouldRetain, `30-day old audit log should not be retained`);
-
+      this.logTest(
+        'Data retention check',
+        !shouldRetain,
+        `30-day old audit log should not be retained`
+      );
     } catch (error) {
       this.logTest('Data Protection Module', false, error.message);
     }
@@ -207,7 +239,10 @@ class SecurityTestSuite {
     console.log(`\n${COLORS.blue}4. Security Logging & Monitoring${COLORS.reset}`);
 
     try {
-      const { SecurityLogger, EVENT_TYPES } = require('../erp_new_system/backend/middleware/securityLogging.middleware');
+      const {
+        SecurityLogger,
+        EVENT_TYPES,
+      } = require('../erp_new_system/backend/middleware/securityLogging.middleware');
       const logger = new SecurityLogger('./logs/test-security');
 
       // Test event logging
@@ -216,7 +251,7 @@ class SecurityTestSuite {
         username: 'testuser',
         ip: '192.168.1.1',
         action: 'User logged in',
-        resource: '/auth/login'
+        resource: '/auth/login',
       });
       this.logTest('Security event logging', !!event.timestamp, `Event ID: ${event.timestamp}`);
 
@@ -224,17 +259,24 @@ class SecurityTestSuite {
       const criticalEvent = logger.logEvent(EVENT_TYPES.LOGIN_LOCKED, {
         userId: 'test-user',
         ip: '192.168.1.1',
-        action: 'Account locked'
+        action: 'Account locked',
       });
-      this.logTest('Critical event severity', criticalEvent.severity === 'CRITICAL', `Severity: ${criticalEvent.severity}`);
+      this.logTest(
+        'Critical event severity',
+        criticalEvent.severity === 'CRITICAL',
+        `Severity: ${criticalEvent.severity}`
+      );
 
       // Test event queue
-      this.logTest('Event queue', logger.eventQueue.length > 0, `${logger.eventQueue.length} events queued`);
+      this.logTest(
+        'Event queue',
+        logger.eventQueue.length > 0,
+        `${logger.eventQueue.length} events queued`
+      );
 
       // Cleanup
       logger.flushToDisk();
       logger.destroy();
-
     } catch (error) {
       this.logTest('Security Logging Module', false, error.message);
     }
@@ -256,21 +298,24 @@ class SecurityTestSuite {
       const sensitiveFiles = ['.env.local', '.env.development.local', 'config.json'];
       const gitignore = fs.readFileSync('.gitignore', 'utf8');
       const hasSensitiveInGitignore = sensitiveFiles.every(f => gitignore.includes(f));
-      this.logTest('Sensitive files in .gitignore', hasSensitiveInGitignore, 'All sensitive files properly ignored');
+      this.logTest(
+        'Sensitive files in .gitignore',
+        hasSensitiveInGitignore,
+        'All sensitive files properly ignored'
+      );
 
       // Check for hardcoded secrets
       const packageJson = require('../erp_new_system/backend/package.json');
       const suspiciousKeys = ['password', 'secret', 'token', 'key', 'apiKey'];
-      const foundSecrets = suspiciousKeys.filter(key => 
+      const foundSecrets = suspiciousKeys.filter(key =>
         JSON.stringify(packageJson).toLowerCase().includes(key)
       );
-      
+
       if (foundSecrets.length === 0) {
         this.logTest('No hardcoded secrets in package.json', true);
       } else {
         this.logWarning('Hardcoded Secrets', `Found potential secrets: ${foundSecrets.join(', ')}`);
       }
-
     } catch (error) {
       this.logTest('Environment Security Check', false, error.message);
     }
@@ -284,36 +329,39 @@ class SecurityTestSuite {
 
     try {
       const { execSync } = require('child_process');
-      
+
       // Run npm audit
       try {
-        const auditOutput = execSync('npm audit --json', { 
+        const auditOutput = execSync('npm audit --json', {
           cwd: './erp_new_system/backend',
-          encoding: 'utf8' 
+          encoding: 'utf8',
         });
-        
+
         const auditData = JSON.parse(auditOutput);
         const vulnerabilities = auditData.metadata?.vulnerabilities || {};
-        
-        this.logTest('npm audit - Critical vulnerabilities', 
-          (vulnerabilities.critical || 0) === 0, 
+
+        this.logTest(
+          'npm audit - Critical vulnerabilities',
+          (vulnerabilities.critical || 0) === 0,
           `Critical: ${vulnerabilities.critical || 0}`
         );
-        
-        this.logTest('npm audit - High vulnerabilities', 
-          (vulnerabilities.high || 0) === 0, 
+
+        this.logTest(
+          'npm audit - High vulnerabilities',
+          (vulnerabilities.high || 0) === 0,
           `High: ${vulnerabilities.high || 0}`
         );
 
         if ((vulnerabilities.moderate || 0) > 0) {
-          this.logWarning('Moderate Vulnerabilities', `${vulnerabilities.moderate} moderate vulnerabilities found`);
+          this.logWarning(
+            'Moderate Vulnerabilities',
+            `${vulnerabilities.moderate} moderate vulnerabilities found`
+          );
         }
-
       } catch (error) {
         // npm audit might fail if vulnerabilities exist
         this.logWarning('npm audit check', 'Run "npm audit" manually to see vulnerabilities');
       }
-
     } catch (error) {
       this.logTest('Dependency Scan', false, error.message);
     }
@@ -324,14 +372,17 @@ class SecurityTestSuite {
    */
   printSummary() {
     const duration = ((Date.now() - this.startTime) / 1000).toFixed(2);
-    
+
     console.log(`\n${COLORS.blue}=== TEST SUMMARY ===${COLORS.reset}`);
     console.log(`  ${COLORS.green}✓ Passed: ${this.results.passed}${COLORS.reset}`);
     console.log(`  ${COLORS.red}✗ Failed: ${this.results.failed}${COLORS.reset}`);
     console.log(`  ${COLORS.yellow}⚠ Warnings: ${this.results.warnings}${COLORS.reset}`);
     console.log(`  ⏱ Duration: ${duration}s`);
 
-    const passRate = ((this.results.passed / (this.results.passed + this.results.failed)) * 100).toFixed(1);
+    const passRate = (
+      (this.results.passed / (this.results.passed + this.results.failed)) *
+      100
+    ).toFixed(1);
     console.log(`\n${COLORS.green}Security Score: ${passRate}%${COLORS.reset}`);
 
     if (this.results.failed === 0 && this.results.warnings === 0) {

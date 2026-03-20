@@ -24,10 +24,10 @@ class MasterTestRunner {
         'resources',
         'integration',
         'bigdata',
-        'e2e'
+        'e2e',
       ],
       reportPath: config.reportPath || './test-reports',
-      ...config
+      ...config,
     };
 
     this.allResults = {
@@ -36,9 +36,9 @@ class MasterTestRunner {
         nodeVersion: process.version,
         platform: process.platform,
         arch: process.arch,
-        cpus: require('os').cpus().length
+        cpus: require('os').cpus().length,
       },
-      testSuites: {}
+      testSuites: {},
     };
 
     this.testOrder = ['security', 'vulnerability', 'resources', 'integration', 'bigdata', 'e2e'];
@@ -62,7 +62,7 @@ class MasterTestRunner {
       passed: audit.results.passed.length,
       failed: audit.results.failed.length,
       warnings: audit.results.warnings.length,
-      results: audit.results
+      results: audit.results,
     };
   }
 
@@ -85,7 +85,7 @@ class MasterTestRunner {
       high: scanner.vulnerabilities.high.length,
       medium: scanner.vulnerabilities.medium.length,
       low: scanner.vulnerabilities.low.length,
-      info: scanner.vulnerabilities.info.length
+      info: scanner.vulnerabilities.info.length,
     };
   }
 
@@ -105,7 +105,7 @@ class MasterTestRunner {
     this.allResults.testSuites.resources = {
       status: 'COMPLETED',
       testsRun: profiler.results.length,
-      results: profiler.exportToJSON()
+      results: profiler.exportToJSON(),
     };
   }
 
@@ -126,7 +126,7 @@ class MasterTestRunner {
       status: integration.results.failed.length === 0 ? 'PASSED' : 'FAILED',
       passed: integration.results.passed.length,
       failed: integration.results.failed.length,
-      warnings: integration.results.warnings.length
+      warnings: integration.results.warnings.length,
     };
   }
 
@@ -146,7 +146,7 @@ class MasterTestRunner {
     this.allResults.testSuites.bigdata = {
       status: 'COMPLETED',
       testsRun: bigData.results.length,
-      results: bigData.exportToJSON()
+      results: bigData.exportToJSON(),
     };
   }
 
@@ -168,7 +168,7 @@ class MasterTestRunner {
       passed: e2e.results.passed,
       failed: e2e.results.failed,
       totalDuration: e2e.results.duration,
-      scenarios: e2e.results.scenarios
+      scenarios: e2e.results.scenarios,
     };
   }
 
@@ -215,7 +215,7 @@ class MasterTestRunner {
           console.error(`❌ خطأ في اختبار ${test}:`, error.message);
           this.allResults.testSuites[test] = {
             status: 'ERROR',
-            error: error.message
+            error: error.message,
           };
         }
       }
@@ -252,24 +252,23 @@ class MasterTestRunner {
         resources: 'اختبار الموارد',
         integration: 'اختبار التكامل',
         bigdata: 'اختبار البيانات الضخمة',
-        e2e: 'اختبارات E2E'
+        e2e: 'اختبارات E2E',
       }[test];
 
-      let status = suite.status;
+      const status = suite.status;
       let details = '';
 
       if (suite.passed !== undefined && suite.failed !== undefined) {
         details = `${suite.passed} نجح, ${suite.failed} فشل`;
       } else if (suite.critical !== undefined) {
-        const totalIssues = suite.critical + suite.high + suite.medium + suite.low;
+        const _totalIssues = suite.critical + suite.high + suite.medium + suite.low;
         details = `${suite.critical} حرج, ${suite.high} عالي`;
       } else if (suite.testsRun !== undefined) {
         details = `${suite.testsRun} اختبار`;
       }
 
-      const statusDisplay = status === 'PASSED' ? '✅' : 
-                           status === 'FAILED' ? '❌' :
-                           status === 'ERROR' ? '⚠️' : '➡️';
+      const statusDisplay =
+        status === 'PASSED' ? '✅' : status === 'FAILED' ? '❌' : status === 'ERROR' ? '⚠️' : '➡️';
 
       console.log(`${testName.padEnd(24)} | ${statusDisplay} ${status.padEnd(8)} | ${details}`);
     }
@@ -280,7 +279,9 @@ class MasterTestRunner {
     console.log('📈 الملخص العام:');
     console.log(`   عدد مجموعات الاختبار: ${Object.keys(this.allResults.testSuites).length}`);
     console.log(`   الوقت الإجمالي: ${(this.allResults.totalDuration / 1000).toFixed(2)}s`);
-    console.log(`   البيئة: ${this.allResults.environment.platform} (${this.allResults.environment.arch})`);
+    console.log(
+      `   البيئة: ${this.allResults.environment.platform} (${this.allResults.environment.arch})`
+    );
     console.log(`   إصدار Node: ${this.allResults.environment.nodeVersion}`);
     console.log(`   عدد المعالجات: ${this.allResults.environment.cpus}\n`);
 
@@ -355,7 +356,7 @@ class MasterTestRunner {
     <div class="container">
         <h1>🧪 تقرير الاختبارات الشامل</h1>
         <p class="timestamp">تاريخ التقرير: ${timestamp}</p>
-        
+
         <div class="info">
             <h3>معلومات البيئة</h3>
             <ul>
@@ -373,36 +374,38 @@ class MasterTestRunner {
                 <th>الحالة</th>
                 <th>التفاصيل</th>
             </tr>
-            ${this.testOrder.map(test => {
-              const suite = this.allResults.testSuites[test];
-              if (!suite) return '';
-              
-              const testName = {
-                security: 'اختبارات الأمان',
-                vulnerability: 'فحص الثغرات',
-                resources: 'اختبار الموارد',
-                integration: 'اختبار التكامل',
-                bigdata: 'اختبار البيانات الضخمة',
-                e2e: 'اختبارات E2E'
-              }[test];
+            ${this.testOrder
+              .map(test => {
+                const suite = this.allResults.testSuites[test];
+                if (!suite) return '';
 
-              const statusClass = suite.status === 'PASSED' ? 'passed' : 'failed';
-              let details = '';
+                const testName = {
+                  security: 'اختبارات الأمان',
+                  vulnerability: 'فحص الثغرات',
+                  resources: 'اختبار الموارد',
+                  integration: 'اختبار التكامل',
+                  bigdata: 'اختبار البيانات الضخمة',
+                  e2e: 'اختبارات E2E',
+                }[test];
 
-              if (suite.passed !== undefined && suite.failed !== undefined) {
-                details = `${suite.passed} نجح, ${suite.failed} فشل`;
-              } else if (suite.critical !== undefined) {
-                details = `${suite.critical} حرج, ${suite.high} عالي`;
-              }
+                const statusClass = suite.status === 'PASSED' ? 'passed' : 'failed';
+                let details = '';
 
-              return `
+                if (suite.passed !== undefined && suite.failed !== undefined) {
+                  details = `${suite.passed} نجح, ${suite.failed} فشل`;
+                } else if (suite.critical !== undefined) {
+                  details = `${suite.critical} حرج, ${suite.high} عالي`;
+                }
+
+                return `
                 <tr>
                     <td>${testName}</td>
                     <td class="${statusClass}">${suite.status}</td>
                     <td>${details}</td>
                 </tr>
               `;
-            }).join('')}
+              })
+              .join('')}
         </table>
 
         <h2>الملاحظات</h2>
@@ -446,7 +449,7 @@ class MasterTestRunner {
         resources: 'اختبار الموارد',
         integration: 'اختبار التكامل',
         bigdata: 'اختبار البيانات الضخمة',
-        e2e: 'اختبارات E2E'
+        e2e: 'اختبارات E2E',
       }[test];
 
       let details = '';
@@ -472,14 +475,9 @@ if (require.main === module) {
   const runner = new MasterTestRunner({
     baseURL: process.env.API_URL || 'http://localhost:5000/api/v1',
     reportPath: process.env.REPORT_PATH || './test-reports',
-    includeTests: process.env.TESTS ? process.env.TESTS.split(',') : [
-      'security',
-      'vulnerability',
-      'resources',
-      'integration',
-      'bigdata',
-      'e2e'
-    ]
+    includeTests: process.env.TESTS
+      ? process.env.TESTS.split(',')
+      : ['security', 'vulnerability', 'resources', 'integration', 'bigdata', 'e2e'],
   });
 
   runner.runAll().catch(error => {

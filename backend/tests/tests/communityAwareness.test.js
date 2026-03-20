@@ -1,14 +1,14 @@
 const request = require('supertest');
 const mongoose = require('mongoose');
-const app = require('../app');
-const EducationalContent = require('../models/EducationalContent');
-const VirtualSession = require('../models/VirtualSession');
-const DigitalLibrary = require('../models/DigitalLibrary');
-const SubscriptionPlan = require('../models/SubscriptionPlan');
-const UserSubscription = require('../models/UserSubscription');
+const app = require('../../app');
+const _EducationalContent = require('../../models/EducationalContent');
+const _VirtualSession = require('../../models/VirtualSession');
+const _DigitalLibrary = require('../../models/DigitalLibrary');
+const _SubscriptionPlan = require('../../models/SubscriptionPlan');
+const _UserSubscription = require('../../models/UserSubscription');
 
 let authToken;
-let userId;
+let _userId;
 let contentId;
 let sessionId;
 let libraryId;
@@ -17,7 +17,7 @@ let planId;
 describe('Community Awareness System Tests', () => {
   beforeAll(async () => {
     // Setup test data
-    userId = new mongoose.Types.ObjectId();
+    _userId = new mongoose.Types.ObjectId();
     authToken = 'test_token_123'; // في التطبيق الفعلي، استخدم JWT حقيقي
   });
 

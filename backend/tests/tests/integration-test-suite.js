@@ -29,13 +29,13 @@ class IntegrationTestSuite {
         method: method,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.API_TOKEN || ''}`
-        }
+          Authorization: `Bearer ${process.env.API_TOKEN || ''}`,
+        },
       };
 
-      const req = http.request(options, (res) => {
+      const req = http.request(options, res => {
         let body = '';
-        res.on('data', chunk => body += chunk);
+        res.on('data', chunk => (body += chunk));
         res.on('end', () => {
           try {
             const parsed = JSON.parse(body);
@@ -77,8 +77,10 @@ class IntegrationTestSuite {
 
     await this.test('Branch API health check', async () => {
       const response = await this.makeRequest('GET', `${this.branchBaseUrl}/branches`);
-      assert(response.status === 200 || response.status === 401, 
-        `Expected 200 or 401, got ${response.status}`);
+      assert(
+        response.status === 200 || response.status === 401,
+        `Expected 200 or 401, got ${response.status}`
+      );
     });
 
     await this.test('Branch API returns valid structure', async () => {
@@ -120,35 +122,45 @@ class IntegrationTestSuite {
 
     await this.test('Branch sync endpoint exists', async () => {
       const response = await this.makeRequest('POST', `${this.integrationUrl}/sync/branches`);
-      assert(response.status === 200 || response.status === 401, 
-        `Invalid status: ${response.status}`);
+      assert(
+        response.status === 200 || response.status === 401,
+        `Invalid status: ${response.status}`
+      );
     });
 
     await this.test('KPI endpoint accessible', async () => {
       const branchId = 1;
-      const response = await this.makeRequest('GET', 
-        `${this.integrationUrl}/branches/${branchId}/kpis`);
+      const response = await this.makeRequest(
+        'GET',
+        `${this.integrationUrl}/branches/${branchId}/kpis`
+      );
       assert(response.status < 500, `Server error: ${response.status}`);
     });
 
     await this.test('Inventory sync endpoint accessible', async () => {
       const branchId = 1;
-      const response = await this.makeRequest('GET', 
-        `${this.integrationUrl}/branches/${branchId}/inventory-sync`);
+      const response = await this.makeRequest(
+        'GET',
+        `${this.integrationUrl}/branches/${branchId}/inventory-sync`
+      );
       assert(response.status < 500, `Server error: ${response.status}`);
     });
 
     await this.test('Forecasts endpoint accessible', async () => {
       const branchId = 1;
-      const response = await this.makeRequest('GET', 
-        `${this.integrationUrl}/branches/${branchId}/forecasts`);
+      const response = await this.makeRequest(
+        'GET',
+        `${this.integrationUrl}/branches/${branchId}/forecasts`
+      );
       assert(response.status < 500, `Server error: ${response.status}`);
     });
 
     await this.test('Dashboard endpoint accessible', async () => {
       const branchId = 1;
-      const response = await this.makeRequest('GET', 
-        `${this.integrationUrl}/branches/${branchId}/dashboard`);
+      const response = await this.makeRequest(
+        'GET',
+        `${this.integrationUrl}/branches/${branchId}/dashboard`
+      );
       assert(response.status < 500, `Server error: ${response.status}`);
     });
   }
@@ -162,15 +174,13 @@ class IntegrationTestSuite {
 
     await this.test('Branch data can be synced', async () => {
       const response = await this.makeRequest('POST', `${this.integrationUrl}/sync/branches`);
-      assert(response.data.success || response.status === 200, 
-        'Sync operation failed');
+      assert(response.data.success || response.status === 200, 'Sync operation failed');
     });
 
     await this.test('Sync returns branch count', async () => {
       const response = await this.makeRequest('POST', `${this.integrationUrl}/sync/branches`);
       if (response.data.success) {
-        assert(typeof response.data.synced_count === 'number', 
-          'Missing synced_count in response');
+        assert(typeof response.data.synced_count === 'number', 'Missing synced_count in response');
       }
     });
 
@@ -188,23 +198,25 @@ class IntegrationTestSuite {
     console.log('\n=== Testing Error Handling ===\n');
 
     await this.test('Invalid branch ID returns proper error', async () => {
-      const response = await this.makeRequest('GET', 
-        `${this.integrationUrl}/branches/999999/kpis`);
-      assert(response.status === 404 || response.data.success === false, 
-        'Should handle invalid ID');
+      const response = await this.makeRequest('GET', `${this.integrationUrl}/branches/999999/kpis`);
+      assert(
+        response.status === 404 || response.data.success === false,
+        'Should handle invalid ID'
+      );
     });
 
     await this.test('Missing required parameters handled', async () => {
-      const response = await this.makeRequest('GET', 
-        `${this.integrationUrl}/branches/null/forecasts`);
+      const response = await this.makeRequest(
+        'GET',
+        `${this.integrationUrl}/branches/null/forecasts`
+      );
       assert(response.status < 500, 'Server error not handled');
     });
 
     await this.test('Timeout handling works', async () => {
       // Test with a very long timeout
       this.test.timeout = 5000;
-      const response = await this.makeRequest('GET', 
-        `${this.integrationUrl}/health`);
+      const response = await this.makeRequest('GET', `${this.integrationUrl}/health`);
       assert(response.status < 600, 'Request failed');
     });
   }
@@ -218,22 +230,24 @@ class IntegrationTestSuite {
 
     await this.test('Branch sync completes in reasonable time', async () => {
       const start = Date.now();
-      const response = await this.makeRequest('POST', `${this.integrationUrl}/sync/branches`);
+      const _response = await this.makeRequest('POST', `${this.integrationUrl}/sync/branches`);
       const duration = Date.now() - start;
       assert(duration < 30000, `Sync took ${duration}ms, expected < 30000ms`);
     });
 
     await this.test('Dashboard aggregation within timeout', async () => {
       const start = Date.now();
-      const response = await this.makeRequest('GET', 
-        `${this.integrationUrl}/branches/1/dashboard`);
+      const _response = await this.makeRequest(
+        'GET',
+        `${this.integrationUrl}/branches/1/dashboard`
+      );
       const duration = Date.now() - start;
       assert(duration < 20000, `Dashboard took ${duration}ms, expected < 20000ms`);
     });
 
     await this.test('API responds within latency threshold', async () => {
       const start = Date.now();
-      const response = await this.makeRequest('GET', `${this.integrationUrl}/health`);
+      const _response = await this.makeRequest('GET', `${this.integrationUrl}/health`);
       const duration = Date.now() - start;
       assert(duration < 1000, `Health check took ${duration}ms, expected < 1000ms`);
     });
@@ -276,7 +290,9 @@ class IntegrationTestSuite {
     console.log(`Total Tests: ${this.passCount + this.failCount}`);
     console.log(`✓ Passed: ${this.passCount}`);
     console.log(`✗ Failed: ${this.failCount}`);
-    console.log(`Success Rate: ${((this.passCount / (this.passCount + this.failCount)) * 100).toFixed(2)}%\n`);
+    console.log(
+      `Success Rate: ${((this.passCount / (this.passCount + this.failCount)) * 100).toFixed(2)}%\n`
+    );
 
     if (this.failCount > 0) {
       console.log('Failed Tests:');
@@ -303,12 +319,12 @@ async function main() {
   const config = {
     erpUrl: process.env.ERP_URL || 'http://localhost:3001',
     branchUrl: process.env.BRANCH_URL || 'http://localhost:5000/api/v2',
-    integrationUrl: process.env.INTEGRATION_URL || 'http://localhost:3001/api/integration'
+    integrationUrl: process.env.INTEGRATION_URL || 'http://localhost:3001/api/integration',
   };
 
   const suite = new IntegrationTestSuite(config);
   const success = await suite.runAll();
-  
+
   process.exit(success ? 0 : 1);
 }
 

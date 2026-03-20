@@ -9,7 +9,7 @@ const mongoSanitize = require('express-mongo-sanitize');
 const validator = require('validator');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
-const axios = require('axios');
+const _axios = require('axios');
 
 // ====== 1. مكافحة DDoS والحد من المعدل ======
 
@@ -24,10 +24,10 @@ class DDoSProtection {
       message: 'عدد كبير جداً من الطلبات من هذا العنوان، يرجى المحاولة لاحقاً.',
       standardHeaders: true,
       legacyHeaders: false,
-      skip: (req) => {
+      skip: req => {
         // تخطي الـ Healthcheck endpoints
         return req.path === '/health';
-      }
+      },
     });
   }
 
@@ -39,7 +39,7 @@ class DDoSProtection {
       windowMs: 5 * 60 * 1000, // 5 دقائق
       max: 10, // 10 طلبات فقط
       skipSuccessfulRequests: true,
-      message: 'الكثير من محاولات الفشل، يرجى المحاولة لاحقاً.'
+      message: 'الكثير من محاولات الفشل، يرجى المحاولة لاحقاً.',
     });
   }
 
@@ -50,10 +50,10 @@ class DDoSProtection {
     return rateLimit({
       windowMs,
       max,
-      keyGenerator: (req) => {
+      keyGenerator: req => {
         // استخدم معرف المستخدم بدلاً من IP
         return req.user?.id || req.ip;
-      }
+      },
     });
   }
 
@@ -88,7 +88,7 @@ class DDoSProtection {
             isAttack: true,
             ip: clientIp,
             requestCount: data.count,
-            timeWindow: timeDiff
+            timeWindow: timeDiff,
           };
         }
       }
@@ -107,7 +107,7 @@ class DDoSProtection {
     if (blockedIPs.includes(clientIp)) {
       return res.status(403).json({
         status: 'error',
-        message: 'تم حظر عنوانك'
+        message: 'تم حظر عنوانك',
       });
     }
 
@@ -123,10 +123,12 @@ class RequestValidation {
    */
   static sanitizeInput(app) {
     // حماية النماذج من الـ Query Injection
-    app.use(mongoSanitize({
-      allowBatch: false,
-      allowDots: false
-    }));
+    app.use(
+      mongoSanitize({
+        allowBatch: false,
+        allowDots: false,
+      })
+    );
 
     return app;
   }
@@ -188,7 +190,7 @@ class RequestValidation {
 
     return {
       isValid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -217,7 +219,8 @@ class RequestValidation {
     // تحقق من الطابع الزمني (منع replay attacks)
     const now = Date.now();
     const diff = now - parseInt(timestamp);
-    if (diff > 5 * 60 * 1000) { // 5 دقائق
+    if (diff > 5 * 60 * 1000) {
+      // 5 دقائق
       return false;
     }
 
@@ -242,7 +245,7 @@ class JWTSecurity {
       expiresIn,
       algorithm: 'HS512',
       issuer: 'gps-fleet-system',
-      audience: 'fleet-app'
+      audience: 'fleet-app',
     });
   }
 
@@ -254,7 +257,7 @@ class JWTSecurity {
       const decoded = jwt.verify(token, process.env.JWT_SECRET, {
         algorithms: ['HS512'],
         issuer: 'gps-fleet-system',
-        audience: 'fleet-app'
+        audience: 'fleet-app',
       });
 
       // تحقق من أن التوكن لم يتم إلغاؤه (Blacklist)
@@ -302,7 +305,7 @@ class JWTSecurity {
   static generateRefreshToken(payload) {
     return jwt.sign(payload, process.env.REFRESH_TOKEN_SECRET, {
       expiresIn: '7d',
-      algorithm: 'HS512'
+      algorithm: 'HS512',
     });
   }
 
@@ -311,16 +314,14 @@ class JWTSecurity {
    */
   static refreshAccessToken(refreshToken) {
     try {
-      const decoded = jwt.verify(
-        refreshToken,
-        process.env.REFRESH_TOKEN_SECRET,
-        { algorithms: ['HS512'] }
-      );
+      const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, {
+        algorithms: ['HS512'],
+      });
 
       return this.generateSecureToken({
         id: decoded.id,
         email: decoded.email,
-        role: decoded.role
+        role: decoded.role,
       });
     } catch (error) {
       console.error('Refresh token failed:', error.message);
@@ -365,7 +366,7 @@ class APIKeyManagement {
 
     return {
       newKey,
-      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 يوم
+      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 يوم
     };
   }
 }
@@ -380,7 +381,7 @@ class SecurityHeaders {
     app.use((req, res, next) => {
       const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [
         'http://localhost:3000',
-        'http://localhost:3001'
+        'http://localhost:3001',
       ];
 
       const origin = req.headers.origin;
@@ -406,34 +407,36 @@ class SecurityHeaders {
    * استخدام Helmet لتأمين Headers
    */
   static secureHeaders(app) {
-    app.use(helmet({
-      // منع Clickjacking
-      frameguard: {
-        action: 'deny'
-      },
-      // منع MIME Sniffing
-      noSniff: true,
-      // تفعيل XSS Protection
-      xssFilter: true,
-      // تقليل Referrer Info
-      referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
-      // Content Security Policy
-      contentSecurityPolicy: {
-        directives: {
-          defaultSrc: ["'self'"],
-          scriptSrc: ["'self'", "'unsafe-inline'"],
-          styleSrc: ["'self'", "'unsafe-inline'"],
-          imgSrc: ["'self'", 'data:', 'https:'],
-          connectSrc: ["'self'", 'https:']
-        }
-      },
-      // Strict Transport Security
-      hsts: {
-        maxAge: 365 * 24 * 60 * 60, // سنة واحدة
-        includeSubDomains: true,
-        preload: true
-      }
-    }));
+    app.use(
+      helmet({
+        // منع Clickjacking
+        frameguard: {
+          action: 'deny',
+        },
+        // منع MIME Sniffing
+        noSniff: true,
+        // تفعيل XSS Protection
+        xssFilter: true,
+        // تقليل Referrer Info
+        referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+        // Content Security Policy
+        contentSecurityPolicy: {
+          directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", "'unsafe-inline'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            imgSrc: ["'self'", 'data:', 'https:'],
+            connectSrc: ["'self'", 'https:'],
+          },
+        },
+        // Strict Transport Security
+        hsts: {
+          maxAge: 365 * 24 * 60 * 60, // سنة واحدة
+          includeSubDomains: true,
+          preload: true,
+        },
+      })
+    );
   }
 
   /**
@@ -503,7 +506,7 @@ class SecurityAuiting {
       timestamp,
       event,
       details,
-      severity: details.severity || 'info'
+      severity: details.severity || 'info',
     };
 
     // احفظ في قاعدة البيانات
@@ -534,7 +537,7 @@ class SecurityAuiting {
       timestamp: new Date(),
       userId,
       activity,
-      ipAddress
+      ipAddress,
     };
 
     // احفظ في قاعدة البيانات
@@ -549,9 +552,9 @@ class SecurityAuiting {
     // مثل: عدد محاولات فاشلة متكررة، تغييرات كبيرة في موقع الجغرافية، إلخ
 
     const suspiciousPatterns = {
-      'multiple_failed_logins': { threshold: 5, timeWindow: 10 * 60 * 1000 }, // 5 محاولات في 10 دقائق
-      'unusual_location': { threshold: 1 }, // تغيير موقع جغرافي غير متوقع
-      'bulk_export': { threshold: 1000 } // محاولة تنزيل بيانات كبيرة
+      multiple_failed_logins: { threshold: 5, timeWindow: 10 * 60 * 1000 }, // 5 محاولات في 10 دقائق
+      unusual_location: { threshold: 1 }, // تغيير موقع جغرافي غير متوقع
+      bulk_export: { threshold: 1000 }, // محاولة تنزيل بيانات كبيرة
     };
 
     if (suspiciousPatterns[activity.type]) {
@@ -561,7 +564,7 @@ class SecurityAuiting {
           userId,
           activity: activity.type,
           count: activity.count,
-          severity: 'high'
+          severity: 'high',
         });
 
         return true;
@@ -596,7 +599,7 @@ class SecurityTesting {
   static checkPasswordStrength(password) {
     const strength = {
       score: 0,
-      feedback: []
+      feedback: [],
     };
 
     // الحد الأدنى 8 أحرف
@@ -654,7 +657,7 @@ module.exports = {
   SecurityTesting,
 
   // خادم أمان متكامل
-  setupSecurityMiddleware: function(app) {
+  setupSecurityMiddleware: function (app) {
     // الترتيب مهم جداً
     DDoSProtection.blockSuspiciousIP(app);
     const generalRateLimiter = DDoSProtection.createGeneralRateLimiter();
@@ -667,5 +670,5 @@ module.exports = {
     RequestValidation.sanitizeInput(app);
 
     console.log('✅ All security middleware configured');
-  }
+  },
 };

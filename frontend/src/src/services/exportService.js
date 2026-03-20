@@ -1,4 +1,4 @@
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 
@@ -29,31 +29,57 @@ const exportService = {
    * @param {Object} options - خيارات إضافية
    * @returns {void}
    */
-  toExcel: (data, fileName = 'export', options = {}) => {
+  toExcel: async (data, fileName = 'export', options = {}) => {
     try {
       const branding = getBranding();
-      const ws = XLSX.utils.json_to_sheet(data);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, options.sheetName || 'Sheet1');
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet(options.sheetName || 'Sheet1');
 
-      // تنسيق الأعمدة
-      if (options.columnWidths) {
-        ws['!cols'] = options.columnWidths.map(w => ({ wch: w }));
+      // Set columns from data keys
+      if (data.length > 0) {
+        const keys = Object.keys(data[0]);
+        worksheet.columns = keys.map((key, i) => ({
+          header: key,
+          key,
+          width: options.columnWidths ? options.columnWidths[i] : 20,
+        }));
       }
 
-      // تعيين الألوان للرأس
-      if (options.headerStyle || branding.color) {
-        const headerRange = XLSX.utils.decode_range(ws['!ref']);
-        for (let C = headerRange.s.c; C <= headerRange.e.c; ++C) {
-          const address = XLSX.utils.encode_cell({ r: 0, c: C });
-          if (!ws[address]) continue;
-          ws[address].s = options.headerStyle || {
-            fill: { fgColor: { rgb: branding.color.replace('#', '') } },
+      // Add data rows
+      worksheet.addRows(data);
+
+      // Style header row
+      const headerRow = worksheet.getRow(1);
+      headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      if (options.headerStyle && options.headerStyle.fill) {
+        headerRow.eachCell(cell => {
+          cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: options.headerStyle.fill.fgColor.rgb },
           };
-        }
+        });
+      } else if (branding.color) {
+        const argb = 'FF' + branding.color.replace('#', '');
+        headerRow.eachCell(cell => {
+          cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb },
+          };
+        });
       }
 
-      XLSX.writeFile(wb, `${fileName}.xlsx`);
+      // Write to buffer and download
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `${fileName}.xlsx`;
+      link.click();
+      URL.revokeObjectURL(link.href);
     } catch (error) {
       console.error('Error exporting to Excel:', error);
       throw error;
@@ -70,8 +96,21 @@ const exportService = {
    */
   toCSV: (data, fileName = 'export') => {
     try {
-      const ws = XLSX.utils.json_to_sheet(data);
-      const csv = XLSX.utils.sheet_to_csv(ws);
+      if (!data || data.length === 0) throw new Error('No data to export');
+      const keys = Object.keys(data[0]);
+      const csvRows = [
+        keys.map(k => `"${k}"`).join(','),
+        ...data.map(row =>
+          keys
+            .map(k => {
+              const v = row[k];
+              const escaped = v !== null && v !== undefined ? String(v).replace(/"/g, '""') : '';
+              return `"${escaped}"`;
+            })
+            .join(',')
+        ),
+      ];
+      const csv = csvRows.join('\n');
 
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement('a');

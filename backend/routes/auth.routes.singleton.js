@@ -2,7 +2,7 @@
  * Authentication Routes with Singleton Pattern
  * OAuth 2.0, JWT, and session management endpoints
  * All routes use singleton service instances
- * 
+ *
  * Usage:
  * const authRoutes = require('./auth.routes.singleton');
  * app.use('/auth', authRoutes);
@@ -13,7 +13,7 @@ const jwt = require('jsonwebtoken');
 const router = express.Router();
 
 const {
-  getAuthenticationService,
+  _getAuthenticationService,
   getOAuth2Provider,
   getSecurityService,
   getUserService,
@@ -23,9 +23,9 @@ const {
 
 const {
   authenticate,
-  optionalAuth,
-  extractToken,
-  generateTokenHelper,
+  _optionalAuth,
+  _extractToken,
+  _generateTokenHelper,
   logActivity,
 } = require('../../middleware/authentication.middleware.singleton');
 
@@ -38,14 +38,14 @@ const JWT_REFRESH_EXPIRE = process.env.JWT_REFRESH_EXPIRE || '7d';
 /**
  * POST /auth/register
  * Register new user account
- * 
+ *
  * Body:
  * {
  *   "email": "user@example.com",
  *   "password": "secure-password",
  *   "name": "User Name"
  * }
- * 
+ *
  * Returns: User object with JWT tokens
  */
 router.post('/register', async (req, res) => {
@@ -97,11 +97,9 @@ router.post('/register', async (req, res) => {
       { expiresIn: JWT_EXPIRE }
     );
 
-    const refreshToken = jwt.sign(
-      { id: newUser.id, email: newUser.email },
-      JWT_REFRESH_SECRET,
-      { expiresIn: JWT_REFRESH_EXPIRE }
-    );
+    const refreshToken = jwt.sign({ id: newUser.id, email: newUser.email }, JWT_REFRESH_SECRET, {
+      expiresIn: JWT_REFRESH_EXPIRE,
+    });
 
     logActivity(req, 'USER_REGISTERED', { userId: newUser.id, email });
 
@@ -131,13 +129,13 @@ router.post('/register', async (req, res) => {
 /**
  * POST /auth/login
  * Authenticate user and return JWT tokens
- * 
+ *
  * Body:
  * {
  *   "email": "user@example.com",
  *   "password": "secure-password"
  * }
- * 
+ *
  * Returns: User object with JWT and refresh tokens
  */
 router.post('/login', async (req, res) => {
@@ -190,17 +188,13 @@ router.post('/login', async (req, res) => {
     const JWT_SECRET = getUnifiedJWTSecret();
     const JWT_REFRESH_SECRET = getUnifiedJWTRefreshSecret();
 
-    const accessToken = jwt.sign(
-      { id: user.id, email: user.email, role: user.role },
-      JWT_SECRET,
-      { expiresIn: JWT_EXPIRE }
-    );
+    const accessToken = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET, {
+      expiresIn: JWT_EXPIRE,
+    });
 
-    const refreshToken = jwt.sign(
-      { id: user.id, email: user.email },
-      JWT_REFRESH_SECRET,
-      { expiresIn: JWT_REFRESH_EXPIRE }
-    );
+    const refreshToken = jwt.sign({ id: user.id, email: user.email }, JWT_REFRESH_SECRET, {
+      expiresIn: JWT_REFRESH_EXPIRE,
+    });
 
     logActivity(req, 'USER_LOGIN', { userId: user.id, email });
 
@@ -230,12 +224,12 @@ router.post('/login', async (req, res) => {
 /**
  * POST /auth/refresh
  * Refresh JWT access token using refresh token
- * 
+ *
  * Body:
  * {
  *   "refreshToken": "jwt-refresh-token"
  * }
- * 
+ *
  * Returns: New access token
  */
 router.post('/refresh', async (req, res) => {
@@ -299,7 +293,7 @@ router.post('/refresh', async (req, res) => {
 /**
  * POST /auth/logout
  * Logout user and invalidate tokens
- * 
+ *
  * Returns: Success message
  */
 router.post('/logout', authenticate, (req, res) => {
@@ -323,7 +317,7 @@ router.post('/logout', authenticate, (req, res) => {
 /**
  * GET /auth/me
  * Get current authenticated user profile
- * 
+ *
  * Returns: Current user object
  */
 router.get('/me', authenticate, checkActiveUser, async (req, res) => {
@@ -365,7 +359,7 @@ router.get('/me', authenticate, checkActiveUser, async (req, res) => {
 /**
  * POST /auth/verify-email
  * Send email verification link
- * 
+ *
  * Returns: Success message
  */
 router.post('/verify-email', authenticate, async (req, res) => {
@@ -395,9 +389,9 @@ router.post('/verify-email', authenticate, async (req, res) => {
 /**
  * GET /auth/oauth/authorize/{provider}
  * Initiate OAuth flow for specified provider
- * 
+ *
  * @param provider - OAuth provider (google, github, etc.)
- * 
+ *
  * Returns: OAuth authorization URL
  */
 router.get('/oauth/authorize/:provider', (req, res) => {
@@ -436,18 +430,18 @@ router.get('/oauth/authorize/:provider', (req, res) => {
 /**
  * GET /auth/oauth/callback
  * OAuth provider callback handler
- * 
+ *
  * Query:
  * {
  *   "code": "authorization-code",
  *   "state": "state-param"
  * }
- * 
+ *
  * Returns: User object with JWT tokens
  */
 router.get('/oauth/callback', async (req, res) => {
   try {
-    const { code, state, provider } = req.query;
+    const { code, state: _state, provider } = req.query;
 
     if (!code) {
       return res.status(400).json({
@@ -494,17 +488,13 @@ router.get('/oauth/callback', async (req, res) => {
     const JWT_SECRET = getUnifiedJWTSecret();
     const JWT_REFRESH_SECRET = getUnifiedJWTRefreshSecret();
 
-    const accessToken = jwt.sign(
-      { id: user.id, email: user.email, role: user.role },
-      JWT_SECRET,
-      { expiresIn: JWT_EXPIRE }
-    );
+    const accessToken = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET, {
+      expiresIn: JWT_EXPIRE,
+    });
 
-    const refreshToken = jwt.sign(
-      { id: user.id, email: user.email },
-      JWT_REFRESH_SECRET,
-      { expiresIn: JWT_REFRESH_EXPIRE }
-    );
+    const refreshToken = jwt.sign({ id: user.id, email: user.email }, JWT_REFRESH_SECRET, {
+      expiresIn: JWT_REFRESH_EXPIRE,
+    });
 
     logActivity(req, 'OAUTH_LOGIN', { userId: user.id, provider });
 
@@ -534,12 +524,12 @@ router.get('/oauth/callback', async (req, res) => {
 /**
  * POST /auth/verify-token
  * Verify if a token is valid
- * 
+ *
  * Body:
  * {
  *   "token": "jwt-token"
  * }
- * 
+ *
  * Returns: Token validation result
  */
 router.post('/verify-token', (req, res) => {

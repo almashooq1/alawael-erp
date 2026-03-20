@@ -43,12 +43,21 @@ __tests__
 jest.config.js
 cypress/
 .nyc_output/
+test-templates/
+test-utils/
+tests/
+e2e/
 
 # Documentation
 docs/
 README.md
 CHANGELOG.md
 *.md
+
+# Archived/Legacy
+_archived/
+archive/
+backups/
 
 # CI/CD
 .github

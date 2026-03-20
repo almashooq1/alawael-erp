@@ -19,7 +19,7 @@
  */
 
 const mongoose = require('mongoose');
-const logger = require('../utils/logger');
+const _logger = require('../utils/logger');
 
 // ─── Lazy model loaders (test-safe) ─────────────────────────────────────
 let _TherapySession, _TherapistAvailability, _TherapyRoom, _TherapeuticPlan;
@@ -29,7 +29,7 @@ const getSession = () => {
   if (!_TherapySession) _TherapySession = require('../models/TherapySession');
   return _TherapySession;
 };
-const getAvailability = () => {
+const _getAvailability = () => {
   if (!_TherapistAvailability) _TherapistAvailability = require('../models/TherapistAvailability');
   return _TherapistAvailability;
 };
@@ -37,11 +37,11 @@ const getRoom = () => {
   if (!_TherapyRoom) _TherapyRoom = require('../models/TherapyRoom');
   return _TherapyRoom;
 };
-const getPlan = () => {
+const _getPlan = () => {
   if (!_TherapeuticPlan) _TherapeuticPlan = require('../models/TherapeuticPlan');
   return _TherapeuticPlan;
 };
-const getBeneficiary = () => {
+const _getBeneficiary = () => {
   if (!_Beneficiary) _Beneficiary = require('../models/Beneficiary');
   return _Beneficiary;
 };
@@ -49,7 +49,7 @@ const getEmployee = () => {
   if (!_Employee) _Employee = require('../models/Employee');
   return _Employee;
 };
-const getDocumentation = () => {
+const _getDocumentation = () => {
   if (!_SessionDocumentation) _SessionDocumentation = require('../models/SessionDocumentation');
   return _SessionDocumentation;
 };
@@ -97,7 +97,7 @@ class TherapySessionAnalyticsService {
   /**
    * Get comprehensive dashboard overview with all KPIs
    */
-  async getDashboardOverview(query = {}) {
+  async getDashboardOverview(_query = {}) {
     const Session = getSession();
     const today = startOfDay();
     const todayEnd = endOfDay();
@@ -333,21 +333,21 @@ class TherapySessionAnalyticsService {
     const end = endDate ? new Date(endDate) : new Date();
     const start = startDate ? new Date(startDate) : subtractDays(end, Number(days));
 
-    let dateFormat;
+    let _dateFormat;
     let groupId;
 
     switch (period) {
       case 'weekly':
-        dateFormat = '%Y-W%V';
+        _dateFormat = '%Y-W%V';
         groupId = { $dateToString: { format: '%Y-%m-%d', date: '$date' } };
         break;
       case 'monthly':
-        dateFormat = '%Y-%m';
+        _dateFormat = '%Y-%m';
         groupId = { $dateToString: { format: '%Y-%m', date: '$date' } };
         break;
       case 'daily':
       default:
-        dateFormat = '%Y-%m-%d';
+        _dateFormat = '%Y-%m-%d';
         groupId = { $dateToString: { format: '%Y-%m-%d', date: '$date' } };
     }
 
@@ -1253,7 +1253,7 @@ class TherapySessionAnalyticsService {
    */
   async getWaitlist(query = {}) {
     const Session = getSession();
-    const { therapistId, sessionType, date } = query;
+    const { therapistId, sessionType, date: _date } = query;
 
     // Find sessions that are rescheduled or have cancellation slots
     const recentCancellations = await Session.find({

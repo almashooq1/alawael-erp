@@ -9,7 +9,7 @@ const resources = {
   intervals: new Set(),
   connections: new Set(),
   servers: new Set(),
-  promises: new Set()
+  promises: new Set(),
 };
 
 /**
@@ -72,11 +72,7 @@ function createTimeoutPromise(delay) {
  * Wait for a condition with timeout
  */
 async function waitFor(condition, options = {}) {
-  const {
-    timeout = 5000,
-    interval = 100,
-    message = 'Condition not met within timeout'
-  } = options;
+  const { timeout = 5000, interval = 100, message = 'Condition not met within timeout' } = options;
 
   const startTime = Date.now();
 
@@ -140,7 +136,7 @@ async function cleanupResources() {
   for (const server of resources.servers) {
     try {
       await new Promise((resolve, reject) => {
-        server.close((error) => {
+        server.close(error => {
           if (error) reject(error);
           else resolve();
         });
@@ -156,9 +152,9 @@ async function cleanupResources() {
  * Create a test timeout wrapper
  */
 function withTimeout(testFn, customTimeout = 30000) {
-  return async function() {
+  return async function () {
     const timeoutPromise = new Promise((_, reject) => {
-      const timeoutId = trackTimeout(() => {
+      const _timeoutId = trackTimeout(() => {
         reject(new Error(`Test timeout after ${customTimeout}ms`));
       }, customTimeout);
     });
@@ -253,7 +249,7 @@ class DatabaseHelper {
   static async connectAndClear(uri, dbName) {
     const mongoose = require('mongoose');
     await mongoose.connect(uri, {
-      dbName: dbName || 'test_db'
+      dbName: dbName || 'test_db',
     });
   }
 
@@ -288,5 +284,5 @@ module.exports = {
   MockFactory,
   HTTPHelper,
   DatabaseHelper,
-  getResources: () => ({ ...resources })
+  getResources: () => ({ ...resources }),
 };

@@ -6,7 +6,7 @@
 import { useState, useEffect } from 'react';
 import { adminService } from 'services/adminService';
 import exportService from 'services/exportService';
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 import logger from 'utils/logger';
 import { useSnackbar } from 'contexts/SnackbarContext';
 import { useAuth } from 'contexts/AuthContext';
@@ -158,7 +158,7 @@ export default function useAdminUsers() {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = evt => {
+    reader.onload = async evt => {
       const raw = evt.target.result;
       let usersArr = [];
       if (file.name.endsWith('.csv')) {
@@ -173,9 +173,23 @@ export default function useAdminUsers() {
           return obj;
         });
       } else {
-        const workbook = XLSX.read(raw, { type: 'binary' });
-        const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        usersArr = XLSX.utils.sheet_to_json(sheet);
+        const workbook = new ExcelJS.Workbook();
+        await workbook.xlsx.load(raw);
+        const worksheet = workbook.worksheets[0];
+        const headers = [];
+        worksheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
+          if (rowNumber === 1) {
+            row.eachCell((cell, colNumber) => {
+              headers[colNumber] = cell.value;
+            });
+          } else {
+            const rowData = {};
+            row.eachCell((cell, colNumber) => {
+              rowData[headers[colNumber]] = cell.value;
+            });
+            usersArr.push(rowData);
+          }
+        });
       }
       setUsers(prev => [...prev, ...usersArr]);
       setFilteredUsers(prev => [...prev, ...usersArr]);
@@ -184,7 +198,7 @@ export default function useAdminUsers() {
     if (file.name.endsWith('.csv')) {
       reader.readAsText(file);
     } else {
-      reader.readAsBinaryString(file);
+      reader.readAsArrayBuffer(file);
     }
     e.target.value = '';
   };

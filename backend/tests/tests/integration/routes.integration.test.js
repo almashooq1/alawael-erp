@@ -5,9 +5,9 @@
 
 const request = require('supertest');
 const mongoose = require('mongoose');
-const app = require('../../app');
-const TransportRoute = require('../../models/TransportRoute');
-const User = require('../../models/User');
+const app = require('../../../app');
+const TransportRoute = require('../../../models/TransportRoute');
+const User = require('../../../models/User');
 
 describe('Transport Route Management - Integration Tests', () => {
   let authToken;
@@ -20,7 +20,7 @@ describe('Transport Route Management - Integration Tests', () => {
     await User.deleteMany({});
 
     // Create test user
-    const testUser = await User.create({
+    const _testUser = await User.create({
       name: 'Test Admin',
       email: 'routeadmin@test.com',
       password: 'Test@123456',
@@ -534,7 +534,7 @@ describe('Transport Route Management - Integration Tests', () => {
 
       // Route optimization may return 200 or 400 depending on implementation
       expect([200, 400]).toContain(response.status);
-      
+
       // If successful, check response format
       if (response.status === 200) {
         expect(response.body.success).toBe(true);

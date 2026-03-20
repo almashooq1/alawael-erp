@@ -22,9 +22,9 @@ const PDFDocument = require('pdfkit');
 const { parse: csvParse } = require('csv-parse/sync');
 const { stringify: csvStringify } = require('csv-stringify/sync');
 const mongoose = require('mongoose');
-const crypto = require('crypto');
+const _crypto = require('crypto');
 const path = require('path');
-const fs = require('fs');
+const _fs = require('fs');
 const archiver = require('archiver');
 
 const ImportExportJob = require('../models/ImportExportJob');
@@ -1125,7 +1125,7 @@ class ImportExportProService {
   /**
    * Export to JSON
    */
-  async _exportToJSON(data, fields, module, options = {}) {
+  async _exportToJSON(data, fields, module, _options = {}) {
     const columns = this._resolveColumns(data, fields, module);
     const moduleInfo = MODULE_REGISTRY[module] || { label: module, labelEn: module };
 
@@ -1319,7 +1319,7 @@ class ImportExportProService {
   /**
    * Export to XML
    */
-  async _exportToXML(data, fields, module, options = {}) {
+  async _exportToXML(data, fields, module, _options = {}) {
     const moduleInfo = MODULE_REGISTRY[module] || { label: module, labelEn: module };
     const columns = this._resolveColumns(data, fields, module);
 
@@ -2235,7 +2235,7 @@ class ImportExportProService {
       return [];
     }
 
-    let mongoQuery = { ...query };
+    const mongoQuery = { ...query };
 
     // Apply date range
     if (dateRange && dateRange.field) {
@@ -2245,7 +2245,7 @@ class ImportExportProService {
     }
 
     // Build projection
-    let projection = {};
+    const projection = {};
     if (fields && fields.length > 0) {
       fields.forEach(f => {
         projection[f] = 1;
@@ -2456,7 +2456,7 @@ class ImportExportProService {
   /**
    * Validate import data (enhanced with Saudi-specific validators)
    */
-  _validateImportData(data, mappings, module) {
+  _validateImportData(data, mappings, _module) {
     const errors = [];
     const warnings = [];
     let validRows = 0;
@@ -2567,7 +2567,7 @@ class ImportExportProService {
                 }
               }
               break;
-            case 'boolean':
+            case 'boolean': {
               const boolValid = ['true', 'false', '1', '0', 'yes', 'no', 'نعم', 'لا', 'صح', 'خطأ'];
               if (!boolValid.includes(strVal.toLowerCase().trim())) {
                 warnings.push({
@@ -2580,6 +2580,7 @@ class ImportExportProService {
                 });
               }
               break;
+            }
             case 'select':
               if (
                 mapping.options &&
@@ -2775,27 +2776,31 @@ class ImportExportProService {
         return str.replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي');
       case 'removeArabicDiacritics':
         return str.replace(/[\u0610-\u061A\u064B-\u065F\u0670]/g, '');
-      case 'saudiPhone':
+      case 'saudiPhone': {
         // Normalize to +966 format
-        let phone = str.replace(/[\s\-()]/g, '');
+        let phone = str.replace(/[-\s()]/g, '');
         if (phone.startsWith('00966')) phone = '+966' + phone.substring(5);
         else if (phone.startsWith('966')) phone = '+' + phone;
         else if (phone.startsWith('05')) phone = '+966' + phone.substring(1);
         else if (phone.startsWith('5') && phone.length === 9) phone = '+966' + phone;
         return phone;
+      }
       case 'cleanNumber':
-        return str.replace(/[^0-9.\-]/g, '');
+        return str.replace(/[^0-9.-]/g, '');
       case 'extractDigits':
         return str.replace(/\D/g, '');
-      case 'currency_sar':
-        const num = parseFloat(str.replace(/[^0-9.\-]/g, ''));
+      case 'currency_sar': {
+        const num = parseFloat(str.replace(/[^0-9.-]/g, ''));
         return isNaN(num) ? str : num.toFixed(2);
-      case 'percentToDecimal':
+      }
+      case 'percentToDecimal': {
         const pct = parseFloat(str.replace('%', ''));
         return isNaN(pct) ? str : (pct / 100).toString();
-      case 'booleanNormalize':
+      }
+      case 'booleanNormalize': {
         const trueVals = ['true', '1', 'yes', 'نعم', 'صح', 'موافق', 'y'];
         return trueVals.includes(str.toLowerCase().trim()) ? 'true' : 'false';
+      }
       default:
         if (rule.startsWith('dateFormat:')) {
           return new Date(value).toISOString().split('T')[0];
@@ -2985,7 +2990,7 @@ class ImportExportProService {
         }
 
         // Execute the export
-        const exportResult = await this.createExport({
+        const _exportResult = await this.createExport({
           module: job.dataSource.module,
           format: job.format,
           fields: job.dataSource.fields,
@@ -3119,6 +3124,7 @@ class ImportExportProService {
         if (typeof val === 'string') {
           val = val.trim();
           if (options.normalizeSpaces !== false) val = val.replace(/\s+/g, ' ');
+          // eslint-disable-next-line no-control-regex
           if (options.removeInvisibleChars) val = val.replace(/[\x00-\x1F\x7F]/g, '');
         }
 
@@ -3169,7 +3175,7 @@ class ImportExportProService {
   /**
    * Generate data quality report
    */
-  generateDataQualityReport(data, mappings, module) {
+  generateDataQualityReport(data, mappings, _module) {
     const report = {
       totalRows: data.length,
       completeness: {},
@@ -3238,13 +3244,25 @@ class ImportExportProService {
         switch (expectedType) {
           case 'number':
           case 'currency':
-            isNaN(Number(String(val).replace(/[,\s]/g, ''))) ? inconsistent++ : consistent++;
+            if (isNaN(Number(String(val).replace(/[,\s]/g, '')))) {
+              inconsistent++;
+            } else {
+              consistent++;
+            }
             break;
           case 'date':
-            isNaN(Date.parse(val)) ? inconsistent++ : consistent++;
+            if (isNaN(Date.parse(val))) {
+              inconsistent++;
+            } else {
+              consistent++;
+            }
             break;
           case 'email':
-            /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(val)) ? consistent++ : inconsistent++;
+            if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(val))) {
+              consistent++;
+            } else {
+              inconsistent++;
+            }
             break;
           default:
             consistent++;
@@ -3269,7 +3287,7 @@ class ImportExportProService {
    * Calculate overall data quality score (0-100)
    */
   _calculateDataQualityScore(report) {
-    let scores = [];
+    const scores = [];
 
     // Completeness score
     const compValues = Object.values(report.completeness);

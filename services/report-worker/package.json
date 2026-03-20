@@ -1,0 +1,26 @@
+{
+  "name": "alawael-report-worker",
+  "version": "1.0.0",
+  "description": "خدمة توليد التقارير — PDF, Excel, CSV",
+  "main": "server.js",
+  "scripts": {
+    "dev": "nodemon server.js",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "bullmq": "^5.1.0",
+    "csv-stringify": "^6.4.4",
+    "dotenv": "^16.3.1",
+    "exceljs": "^4.4.0",
+    "express": "^4.18.2",
+    "handlebars": "^4.7.8",
+    "ioredis": "^5.3.2",
+    "mongoose": "^8.0.0",
+    "pdf-lib": "^1.17.1",
+    "pdfkit": "^0.14.0",
+    "winston": "^3.11.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}

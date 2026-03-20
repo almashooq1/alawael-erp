@@ -2289,21 +2289,34 @@ import { I18nManager } from './modules/i18n';
 import { rbacApi, requirePermission } from './modules/rbac';
 
 // --- Export Contracts Endpoints ---
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 
 // استيراد العقود من ملف Excel أو JSON
-app.post('/v1/contracts/import', upload.single('file'), (req, res) => {
+app.post('/v1/contracts/import', upload.single('file'), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'لم يتم رفع أي ملف' });
   const ext = req.file.originalname.split('.').pop()?.toLowerCase();
-  let contracts = [];
+  let contracts: any[] = [];
   try {
     if (ext === 'xlsx' || ext === 'xls') {
-      const workbook = XLSX.readFile(req.file.path);
-      const sheetName = workbook.SheetNames[0];
-      const sheet = workbook.Sheets[sheetName];
-      contracts = XLSX.utils.sheet_to_json(sheet);
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.readFile(req.file.path);
+      const worksheet = workbook.worksheets[0];
+      const headers: string[] = [];
+      worksheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
+        if (rowNumber === 1) {
+          row.eachCell((cell, colNumber) => {
+            headers[colNumber - 1] = String(cell.value);
+          });
+        } else {
+          const obj: Record<string, any> = {};
+          row.eachCell((cell, colNumber) => {
+            obj[headers[colNumber - 1]] = cell.value;
+          });
+          contracts.push(obj);
+        }
+      });
     } else if (ext === 'json') {
       const raw = fs.readFileSync(req.file.path, 'utf-8');
       contracts = JSON.parse(raw);
@@ -2352,13 +2365,16 @@ function filterContracts(contracts: any[], query: Record<string, any>) {
   return filtered;
 }
 
-app.get('/v1/contracts/export/excel', (req, res) => {
+app.get('/v1/contracts/export/excel', async (req, res) => {
   let contracts = contractManager.listContracts();
   contracts = filterContracts(contracts, req.query);
-  const ws = XLSX.utils.json_to_sheet(contracts);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Contracts');
-  const buf = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+  const wb = new ExcelJS.Workbook();
+  const ws = wb.addWorksheet('Contracts');
+  if (contracts.length > 0) {
+    ws.columns = Object.keys(contracts[0]).map(key => ({ header: key, key, width: 20 }));
+    ws.addRows(contracts);
+  }
+  const buf = await wb.xlsx.writeBuffer();
   res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
   res.setHeader('Content-Disposition', 'attachment; filename=contracts_export.xlsx');
   res.end(buf);

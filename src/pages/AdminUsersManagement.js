@@ -46,7 +46,7 @@ import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import exportService from '../utils/exportService';
 import { adminService } from '../services/adminService';
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 
 const AdminUsersManagement = () => {
   const [users, setUsers] = useState([]);
@@ -94,10 +94,7 @@ const AdminUsersManagement = () => {
 
     if (search) {
       filtered = filtered.filter(
-        user =>
-          user.name.toLowerCase().includes(search) ||
-          user.email.toLowerCase().includes(search) ||
-          user.phone.includes(search)
+        user => user.name.toLowerCase().includes(search) || user.email.toLowerCase().includes(search) || user.phone.includes(search),
       );
     }
 
@@ -158,7 +155,7 @@ const AdminUsersManagement = () => {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = evt => {
+    reader.onload = async evt => {
       const data = evt.target.result;
       let usersArr = [];
       if (file.name.endsWith('.csv')) {
@@ -175,9 +172,23 @@ const AdminUsersManagement = () => {
         });
       } else {
         // Excel
-        const workbook = XLSX.read(data, { type: 'binary' });
-        const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        usersArr = XLSX.utils.sheet_to_json(sheet);
+        const workbook = new ExcelJS.Workbook();
+        await workbook.xlsx.load(data);
+        const worksheet = workbook.worksheets[0];
+        const headers = [];
+        worksheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
+          if (rowNumber === 1) {
+            row.eachCell((cell, colNumber) => {
+              headers[colNumber] = cell.value;
+            });
+          } else {
+            const rowData = {};
+            row.eachCell((cell, colNumber) => {
+              rowData[headers[colNumber]] = cell.value;
+            });
+            usersArr.push(rowData);
+          }
+        });
       }
       // دمج مع المستخدمين الحاليين (أو استبدال حسب الحاجة)
       setUsers(prev => [...prev, ...usersArr]);
@@ -187,7 +198,7 @@ const AdminUsersManagement = () => {
     if (file.name.endsWith('.csv')) {
       reader.readAsText(file);
     } else {
-      reader.readAsBinaryString(file);
+      reader.readAsArrayBuffer(file);
     }
     e.target.value = '';
   };
@@ -234,31 +245,13 @@ const AdminUsersManagement = () => {
             </Box>
           </Box>
           <Box sx={{ display: 'flex', gap: 1 }}>
-            <Button
-              variant="outlined"
-              color="info"
-              size="small"
-              startIcon={<FileDownloadIcon />}
-              onClick={() => handleExport('excel')}
-            >
+            <Button variant="outlined" color="info" size="small" startIcon={<FileDownloadIcon />} onClick={() => handleExport('excel')}>
               تصدير Excel
             </Button>
-            <Button
-              variant="outlined"
-              color="info"
-              size="small"
-              startIcon={<FileDownloadIcon />}
-              onClick={() => handleExport('csv')}
-            >
+            <Button variant="outlined" color="info" size="small" startIcon={<FileDownloadIcon />} onClick={() => handleExport('csv')}>
               تصدير CSV
             </Button>
-            <Button
-              variant="outlined"
-              color="success"
-              size="small"
-              component="label"
-              startIcon={<UploadFileIcon />}
-            >
+            <Button variant="outlined" color="success" size="small" component="label" startIcon={<UploadFileIcon />}>
               استيراد
               <input type="file" accept=".xlsx,.xls,.csv" hidden onChange={handleImport} />
             </Button>
@@ -396,13 +389,7 @@ const AdminUsersManagement = () => {
             </Grid>
 
             <Grid item xs={12} sm={6} md={2}>
-              <ToggleButtonGroup
-                value={viewMode}
-                exclusive
-                onChange={(e, newMode) => setViewMode(newMode)}
-                fullWidth
-                size="small"
-              >
+              <ToggleButtonGroup value={viewMode} exclusive onChange={(e, newMode) => setViewMode(newMode)} fullWidth size="small">
                 <ToggleButton value="table">
                   <ViewWeekIcon fontSize="small" />
                 </ToggleButton>
@@ -432,66 +419,60 @@ const AdminUsersManagement = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredUsers
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map(user => (
-                  <TableRow key={user.id} hover>
-                    <TableCell>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Box
-                          sx={{
-                            width: 32,
-                            height: 32,
-                            borderRadius: '50%',
-                            backgroundColor: '#667eea',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            color: 'white',
-                            fontSize: 12,
-                            fontWeight: 'bold',
-                          }}
-                        >
-                          {user.name.charAt(0)}
-                        </Box>
-                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                          {user.name}
-                        </Typography>
+              {filteredUsers.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(user => (
+                <TableRow key={user.id} hover>
+                  <TableCell>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Box
+                        sx={{
+                          width: 32,
+                          height: 32,
+                          borderRadius: '50%',
+                          backgroundColor: '#667eea',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: 'white',
+                          fontSize: 12,
+                          fontWeight: 'bold',
+                        }}
+                      >
+                        {user.name.charAt(0)}
                       </Box>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body2">{user.email}</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body2">{user.phone}</Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Chip label={user.role} size="small" variant="outlined" />
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        label={user.status}
-                        color={user.status === 'نشط' ? 'success' : 'default'}
-                        size="small"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="caption">{user.createdDate}</Typography>
-                    </TableCell>
-                    <TableCell sx={{ textAlign: 'center' }}>
-                      <Tooltip title="تعديل">
-                        <IconButton size="small" onClick={() => handleOpenDialog(user)}>
-                          <EditIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="حذف">
-                        <IconButton size="small" onClick={() => handleDeleteUser(user.id)}>
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                        {user.name}
+                      </Typography>
+                    </Box>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body2">{user.email}</Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body2">{user.phone}</Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Chip label={user.role} size="small" variant="outlined" />
+                  </TableCell>
+                  <TableCell>
+                    <Chip label={user.status} color={user.status === 'نشط' ? 'success' : 'default'} size="small" />
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="caption">{user.createdDate}</Typography>
+                  </TableCell>
+                  <TableCell sx={{ textAlign: 'center' }}>
+                    <Tooltip title="تعديل">
+                      <IconButton size="small" onClick={() => handleOpenDialog(user)}>
+                        <EditIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="حذف">
+                      <IconButton size="small" onClick={() => handleDeleteUser(user.id)}>
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  </TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
         </TableContainer>
@@ -512,25 +493,9 @@ const AdminUsersManagement = () => {
         <DialogTitle>{editingUser ? 'تعديل المستخدم' : 'إضافة مستخدم جديد'}</DialogTitle>
         <DialogContent>
           <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <TextField
-              fullWidth
-              label="الاسم الكامل"
-              defaultValue={editingUser?.name || ''}
-              size="small"
-            />
-            <TextField
-              fullWidth
-              label="البريد الإلكتروني"
-              type="email"
-              defaultValue={editingUser?.email || ''}
-              size="small"
-            />
-            <TextField
-              fullWidth
-              label="الهاتف"
-              defaultValue={editingUser?.phone || ''}
-              size="small"
-            />
+            <TextField fullWidth label="الاسم الكامل" defaultValue={editingUser?.name || ''} size="small" />
+            <TextField fullWidth label="البريد الإلكتروني" type="email" defaultValue={editingUser?.email || ''} size="small" />
+            <TextField fullWidth label="الهاتف" defaultValue={editingUser?.phone || ''} size="small" />
             <FormControl fullWidth size="small">
               <InputLabel>الدور</InputLabel>
               <Select label="الدور" defaultValue={editingUser?.role || 'طالب'}>

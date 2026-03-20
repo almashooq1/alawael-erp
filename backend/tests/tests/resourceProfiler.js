@@ -23,7 +23,7 @@ class ResourceProfiler {
       heapTotal: `${Math.round(used.heapTotal / 1024 / 1024)}MB`,
       external: `${Math.round(used.external / 1024 / 1024)}MB`,
       rss: `${Math.round(used.rss / 1024 / 1024)}MB`,
-      arrayBuffers: `${Math.round(used.arrayBuffers / 1024 / 1024)}MB`
+      arrayBuffers: `${Math.round(used.arrayBuffers / 1024 / 1024)}MB`,
     };
   }
 
@@ -45,7 +45,7 @@ class ResourceProfiler {
     return {
       cpuCount: cpus.length,
       idlePercent: Math.round((totalIdle / totalTick) * 100),
-      busyPercent: Math.round(100 - (totalIdle / totalTick) * 100)
+      busyPercent: Math.round(100 - (totalIdle / totalTick) * 100),
     };
   }
 
@@ -58,7 +58,7 @@ class ResourceProfiler {
     const startTime = performance.now();
 
     const iterations = 100000;
-    let data = [];
+    const data = [];
 
     for (let i = 0; i < iterations; i++) {
       const str = `Location-${i}-${Date.now()}-${Math.random()}`;
@@ -75,7 +75,7 @@ class ResourceProfiler {
       iterations,
       duration: `${(endTime - startTime).toFixed(2)}ms`,
       memoryDelta: `${Math.round((endMem - startMem) / 1024 / 1024)}MB`,
-      throughput: `${(iterations / ((endTime - startTime) / 1000)).toFixed(0)} ops/sec`
+      throughput: `${(iterations / ((endTime - startTime) / 1000)).toFixed(0)} ops/sec`,
     };
   }
 
@@ -100,8 +100,8 @@ class ResourceProfiler {
         metadata: {
           driver: `driver-${i % 100}`,
           route: `route-${i % 50}`,
-          status: ['active', 'idle', 'maintenance'][i % 3]
-        }
+          status: ['active', 'idle', 'maintenance'][i % 3],
+        },
       };
 
       const json = JSON.stringify(obj);
@@ -117,7 +117,7 @@ class ResourceProfiler {
       iterations: processed,
       duration: `${(endTime - startTime).toFixed(2)}ms`,
       memoryDelta: `${Math.round((endMem - startMem) / 1024 / 1024)}MB`,
-      throughput: `${(processed / ((endTime - startTime) / 1000)).toFixed(0)} ops/sec`
+      throughput: `${(processed / ((endTime - startTime) / 1000)).toFixed(0)} ops/sec`,
     };
   }
 
@@ -133,7 +133,7 @@ class ResourceProfiler {
     const largeArray = Array.from({ length: 1000000 }, (_, i) => ({
       id: i,
       value: Math.random(),
-      timestamp: Date.now()
+      timestamp: Date.now(),
     }));
 
     // عمليات مختلفة
@@ -150,7 +150,7 @@ class ResourceProfiler {
       arraySize: largeArray.length,
       duration: `${(endTime - startTime).toFixed(2)}ms`,
       memoryDelta: `${Math.round((endMem - startMem) / 1024 / 1024)}MB`,
-      throughput: `${(largeArray.length / ((endTime - startTime) / 1000)).toFixed(0)} items/sec`
+      throughput: `${(largeArray.length / ((endTime - startTime) / 1000)).toFixed(0)} items/sec`,
     };
   }
 
@@ -183,7 +183,7 @@ class ResourceProfiler {
       iterations: processed,
       duration: `${(endTime - startTime).toFixed(2)}ms`,
       memoryDelta: `${Math.round((endMem - startMem) / 1024 / 1024)}MB`,
-      throughput: `${(processed / ((endTime - startTime) / 1000)).toFixed(0)} ops/sec`
+      throughput: `${(processed / ((endTime - startTime) / 1000)).toFixed(0)} ops/sec`,
     };
   }
 
@@ -214,7 +214,7 @@ class ResourceProfiler {
       duration: `${(endTime - startTime).toFixed(2)}ms`,
       memoryDelta: `${Math.round((endMem - startMem) / 1024 / 1024)}MB`,
       throughput: `${(iterations / ((endTime - startTime) / 1000)).toFixed(0)} ops/sec`,
-      result: result.toFixed(6)
+      result: result.toFixed(6),
     };
   }
 
@@ -239,8 +239,8 @@ class ResourceProfiler {
       encrypted += cipher.final('hex');
 
       const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
-      let decrypted = decipher.update(encrypted, 'hex', 'utf8');
-      decrypted += decipher.final('utf8');
+      let _decrypted = decipher.update(encrypted, 'hex', 'utf8');
+      _decrypted += decipher.final('utf8');
     }
 
     const endTime = performance.now();
@@ -251,7 +251,7 @@ class ResourceProfiler {
       iterations,
       duration: `${(endTime - startTime).toFixed(2)}ms`,
       memoryDelta: `${Math.round((endMem - startMem) / 1024 / 1024)}MB`,
-      throughput: `${(iterations / ((endTime - startTime) / 1000)).toFixed(0)} ops/sec`
+      throughput: `${(iterations / ((endTime - startTime) / 1000)).toFixed(0)} ops/sec`,
     };
   }
 
@@ -269,7 +269,7 @@ class ResourceProfiler {
       /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/i,
       /^\+?[1-9]\d{1,14}$/,
       /^[A-Z]{3,5}-[0-9]{1,5}$/,
-      /^(-?\d+\.?\d*|-?\.\d+)$/
+      /^(-?\d+\.?\d*|-?\.\d+)$/,
     ];
 
     let matched = 0;
@@ -295,7 +295,7 @@ class ResourceProfiler {
       matched,
       duration: `${(endTime - startTime).toFixed(2)}ms`,
       memoryDelta: `${Math.round((endMem - startMem) / 1024 / 1024)}MB`,
-      throughput: `${(iterations / ((endTime - startTime) / 1000)).toFixed(0)} ops/sec`
+      throughput: `${(iterations / ((endTime - startTime) / 1000)).toFixed(0)} ops/sec`,
     };
   }
 
@@ -316,7 +316,7 @@ class ResourceProfiler {
       globalLeaks.push({
         id: i,
         data: Array(100).fill(Math.random()),
-        timestamp: new Date()
+        timestamp: new Date(),
       });
     }
 
@@ -340,7 +340,10 @@ class ResourceProfiler {
       peakMemory: `${Math.round(midMem.heapUsed / 1024 / 1024)}MB`,
       finalMemory: `${Math.round(endMem.heapUsed / 1024 / 1024)}MB`,
       leaked: `${Math.round((endMem.heapUsed - startMem.heapUsed) / 1024 / 1024)}MB`,
-      status: Math.round((endMem.heapUsed - startMem.heapUsed) / 1024 / 1024) > 50 ? 'LEAK DETECTED' : 'OK'
+      status:
+        Math.round((endMem.heapUsed - startMem.heapUsed) / 1024 / 1024) > 50
+          ? 'LEAK DETECTED'
+          : 'OK',
     };
   }
 
@@ -428,9 +431,9 @@ class ResourceProfiler {
         totalMemory: `${Math.round(os.totalmem() / 1024 / 1024 / 1024)}GB`,
         freeMemory: `${Math.round(os.freemem() / 1024 / 1024 / 1024)}GB`,
         platform: os.platform(),
-        arch: os.arch()
+        arch: os.arch(),
       },
-      results: this.results
+      results: this.results,
     };
   }
 }

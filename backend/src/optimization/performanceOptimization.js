@@ -8,6 +8,7 @@ const redis = require('redis');
 const compression = require('compression');
 const cluster = require('cluster');
 const os = require('os');
+const express = require('express');
 
 // ====== 1. نظام الذاكرة المؤقتة (Caching) ======
 
@@ -20,7 +21,7 @@ class CachingStrategy {
     this.redisClient = redis.createClient({
       host: process.env.REDIS_HOST || 'localhost',
       port: process.env.REDIS_PORT || 6379,
-      password: process.env.REDIS_PASSWORD
+      password: process.env.REDIS_PASSWORD,
     });
 
     this.initializeRedis();
@@ -31,7 +32,7 @@ class CachingStrategy {
       console.log('✅ Redis connected');
     });
 
-    this.redisClient.on('error', (err) => {
+    this.redisClient.on('error', err => {
       console.error('❌ Redis error:', err);
     });
   }
@@ -69,7 +70,7 @@ class CachingStrategy {
 
     // حفظ متعدد المستويات
     this.memoryCache.set(key, data, ttl);
-    this.redisClient.setex(key, ttl, JSON.stringify(data), (err) => {
+    this.redisClient.setex(key, ttl, JSON.stringify(data), err => {
       if (err) console.error('Redis cache error:', err);
     });
 
@@ -92,7 +93,7 @@ class CachingStrategy {
     this.redisClient.keys(`${pattern}*`, (err, keys) => {
       if (err) return;
       if (keys.length > 0) {
-        this.redisClient.del(...keys, (err) => {
+        this.redisClient.del(...keys, err => {
           if (!err) console.log(`🔄 Cache invalidated: ${pattern}`);
         });
       }
@@ -103,38 +104,50 @@ class CachingStrategy {
    * استراتيجيات التخزين المخصصة
    */
   async cacheFleetSnapshot() {
-    return this.getFromCache('fleet:snapshot', async () => {
-      // احصل على لقطة الأسطول من DB
-      // هذه الدالة ستُستبدل بدالة حقيقية
-      return {
-        timestamp: new Date(),
-        vehicles: [],
-        stats: {}
-      };
-    }, 300); // 5 دقائق تحديث
+    return this.getFromCache(
+      'fleet:snapshot',
+      async () => {
+        // احصل على لقطة الأسطول من DB
+        // هذه الدالة ستُستبدل بدالة حقيقية
+        return {
+          timestamp: new Date(),
+          vehicles: [],
+          stats: {},
+        };
+      },
+      300
+    ); // 5 دقائق تحديث
   }
 
   async cacheDriverPerformance(driverId) {
-    return this.getFromCache(`driver:performance:${driverId}`, async () => {
-      // احصل على أداء السائق من DB
-      return {
-        driverId,
-        safetyScore: 0,
-        violations: 0
-      };
-    }, 1800); // 30 دقيقة تحديث
+    return this.getFromCache(
+      `driver:performance:${driverId}`,
+      async () => {
+        // احصل على أداء السائق من DB
+        return {
+          driverId,
+          safetyScore: 0,
+          violations: 0,
+        };
+      },
+      1800
+    ); // 30 دقيقة تحديث
   }
 
   async cacheVehicleLocation(vehicleId) {
-    return this.getFromCache(`vehicle:location:${vehicleId}`, async () => {
-      // احصل على موقع المركبة من DB
-      return {
-        vehicleId,
-        latitude: 0,
-        longitude: 0,
-        timestamp: new Date()
-      };
-    }, 30); // 30 ثانية تحديث
+    return this.getFromCache(
+      `vehicle:location:${vehicleId}`,
+      async () => {
+        // احصل على موقع المركبة من DB
+        return {
+          vehicleId,
+          latitude: 0,
+          longitude: 0,
+          timestamp: new Date(),
+        };
+      },
+      30
+    ); // 30 ثانية تحديث
   }
 }
 
@@ -190,7 +203,7 @@ class DatabaseOptimization {
     // تفعيل lean() للاستعلامات القراءة فقط
     const Vehicle = this.mongoose.model('Vehicle');
 
-    Vehicle.find = function(query) {
+    Vehicle.find = function (_query) {
       return this.lean().exec();
     };
 
@@ -209,12 +222,12 @@ class DatabaseOptimization {
           _id: '$status',
           count: { $sum: 1 },
           avgSpeed: { $avg: '$gps.speed' },
-          avgFuel: { $avg: '$fuel.current' }
-        }
+          avgFuel: { $avg: '$fuel.current' },
+        },
       },
       {
-        $sort: { count: -1 }
-      }
+        $sort: { count: -1 },
+      },
     ]);
 
     return stats;
@@ -231,12 +244,15 @@ class DatabaseOptimization {
         $near: {
           $geometry: {
             type: 'Point',
-            coordinates: coordinates
+            coordinates: coordinates,
           },
-          $maxDistance: maxDistance
-        }
-      }
-    }).select('plateNumber status gps.speed').lean().exec();
+          $maxDistance: maxDistance,
+        },
+      },
+    })
+      .select('plateNumber status gps.speed')
+      .lean()
+      .exec();
   }
 
   /**
@@ -247,7 +263,7 @@ class DatabaseOptimization {
     const cutoffDate = new Date(Date.now() - daysOld * 24 * 60 * 60 * 1000);
 
     const archived = await Trip.deleteMany({
-      'schedule.actualEnd': { $lt: cutoffDate }
+      'schedule.actualEnd': { $lt: cutoffDate },
     });
 
     console.log(`📦 Archived ${archived.deletedCount} old trips`);
@@ -262,16 +278,18 @@ class ExpressOptimization {
    * إضافة Compression للـ Response
    */
   static enableCompression(app) {
-    app.use(compression({
-      level: 6,
-      threshold: 1000,
-      filter: (req, res) => {
-        if (req.headers['x-no-compression']) {
-          return false;
-        }
-        return compression.filter(req, res);
-      }
-    }));
+    app.use(
+      compression({
+        level: 6,
+        threshold: 1000,
+        filter: (req, res) => {
+          if (req.headers['x-no-compression']) {
+            return false;
+          }
+          return compression.filter(req, res);
+        },
+      })
+    );
 
     console.log('✅ Response compression enabled');
   }
@@ -284,13 +302,12 @@ class ExpressOptimization {
       const { requests } = req.body;
 
       // معالجة الطلبات المتعددة في دعوة واحدة
-      Promise.all(
-        requests.map(req => 
-          executeRequest(req.method, req.path, req.data)
-        )
-      ).then(results => {
-        res.json({ results });
-      });
+      const _executeRequest = (method, path, data) => Promise.resolve({ method, path, data });
+      Promise.all(requests.map(req => _executeRequest(req.method, req.path, req.data))).then(
+        results => {
+          res.json({ results });
+        }
+      );
     });
 
     console.log('✅ Request batching enabled');
@@ -303,7 +320,7 @@ class ExpressOptimization {
     app.use((req, res, next) => {
       const originalJson = res.json;
 
-      res.json = function(data) {
+      res.json = function (data) {
         res.set('Cache-Control', 'public, max-age=300');
         return originalJson.call(this, data);
       };
@@ -316,13 +333,13 @@ class ExpressOptimization {
    * تحسين معالجة الأخطاء
    */
   static setupErrorHandling(app) {
-    app.use((err, req, res, next) => {
+    app.use((err, req, res, _next) => {
       console.error('Error:', err);
 
       res.status(err.status || 500).json({
         status: 'error',
         message: err.message,
-        ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+        ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
       });
     });
   }
@@ -380,7 +397,7 @@ class WebSocketOptimization {
       lat: Math.round(data.latitude * 10000) / 10000,
       lng: Math.round(data.longitude * 10000) / 10000,
       sp: data.speed,
-      ts: Math.floor(data.timestamp / 1000)
+      ts: Math.floor(data.timestamp / 1000),
     };
   }
 }
@@ -413,7 +430,7 @@ class MemoryOptimization {
    */
   static optimizeStreams(response) {
     // استخدام Streams بدلاً من تحميل البيانات كاملة
-    return response.pipe((err) => {
+    return response.pipe(err => {
       if (err) console.error('Stream error:', err);
     });
   }
@@ -447,7 +464,7 @@ class LoadBalancing {
       }
 
       // إعادة إنشاء worker في حالة الفشل
-      cluster.on('exit', (worker, code, signal) => {
+      cluster.on('exit', (worker, _code, _signal) => {
         console.log(`⚠️ Worker ${worker.process.pid} died`);
         cluster.fork();
       });
@@ -468,15 +485,18 @@ class LoadBalancing {
     const executing = [];
 
     for (const [index, task] of tasks.entries()) {
-      const promise = Promise.resolve().then(() => task()).then(
-        result => results[index] = result
-      );
+      const promise = Promise.resolve()
+        .then(() => task())
+        .then(result => (results[index] = result));
 
       executing.push(promise);
 
       if (executing.length >= maxConcurrent) {
         await Promise.race(executing);
-        executing.splice(executing.findIndex(p => p === promise), 1);
+        executing.splice(
+          executing.findIndex(p => p === promise),
+          1
+        );
       }
     }
 
@@ -491,7 +511,7 @@ class NetworkOptimization {
   /**
    * استخدام HTTP/2
    */
-  static enableHttp2(app) {
+  static enableHttp2(_app) {
     // تحقق من أن السيرفر يستخدم HTTPS مع HTTP/2
     console.log('✅ HTTP/2 enabled');
   }
@@ -499,7 +519,7 @@ class NetworkOptimization {
   /**
    * تحسين مرات الاتصال قصيرة المدى
    */
-  static setupConnectionPooling(mongoDB) {
+  static setupConnectionPooling(_mongoDB) {
     // يتم إعداده تلقائياً في Mongoose
     // minPoolSize = 10, maxPoolSize = 30
     console.log('✅ Connection pooling configured');
@@ -514,7 +534,7 @@ class NetworkOptimization {
       id: data.vehicleId,
       lat: data.latitude,
       lng: data.longitude,
-      sp: data.speed
+      sp: data.speed,
     };
   }
 
@@ -522,10 +542,12 @@ class NetworkOptimization {
    * استخدام CDN للملفات الثابتة
    */
   static setupCDN(app) {
-    app.use(express.static('public', {
-      maxAge: '1d',
-      etag: false
-    }));
+    app.use(
+      express.static('public', {
+        maxAge: '1d',
+        etag: false,
+      })
+    );
 
     console.log('✅ CDN configured');
   }
@@ -568,12 +590,12 @@ class PerformanceMonitoring {
       memory: {
         heapUsed: `${Math.round(memUsage.heapUsed / 1024 / 1024)} MB`,
         heapTotal: `${Math.round(memUsage.heapTotal / 1024 / 1024)} MB`,
-        external: `${Math.round(memUsage.external / 1024 / 1024)} MB`
+        external: `${Math.round(memUsage.external / 1024 / 1024)} MB`,
       },
       cpu: {
         user: cpuUsage.user,
-        system: cpuUsage.system
-      }
+        system: cpuUsage.system,
+      },
     };
   }
 
@@ -606,39 +628,39 @@ module.exports = {
     caching: {
       enabled: true,
       ttl: 600,
-      multiLevel: true
+      multiLevel: true,
     },
     database: {
       indexing: true,
       aggregation: true,
-      archiving: true
+      archiving: true,
     },
     express: {
       compression: true,
       caching: true,
-      batching: true
+      batching: true,
     },
     websocket: {
       batching: true,
       compression: true,
-      throttling: true
+      throttling: true,
     },
     memory: {
       monitoring: true,
-      cleanup: true
+      cleanup: true,
     },
     cpu: {
       clustering: true,
-      parallelized: true
+      parallelized: true,
     },
     network: {
       http2: true,
       cdn: true,
-      pooling: true
+      pooling: true,
     },
     monitoring: {
       slowQueries: true,
-      performanceMetrics: true
-    }
-  }
+      performanceMetrics: true,
+    },
+  },
 };

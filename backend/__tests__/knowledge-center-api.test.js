@@ -198,7 +198,7 @@ describe('Knowledge Center Routes', () => {
   test('DELETE /articles/:id/comment/:commentId — deletes a comment', async () => {
     if (!articleId) return;
     // Add a comment first, then delete it
-    const addRes = await request(app)
+    const _addRes = await request(app)
       .post(`/api/knowledge-center/articles/${articleId}/comment`)
       .send({ text: 'تعليق للحذف' });
     // Get the article to find comment id

@@ -15,7 +15,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticateToken, authorize } = require('../middleware/auth');
 const service = require('../services/employeeAffairs.expanded.service');
-const logger = require('../utils/logger');
+const _logger = require('../utils/logger');
 
 // ─── Async wrapper ──────────────────────────────────────────────────────────
 const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);

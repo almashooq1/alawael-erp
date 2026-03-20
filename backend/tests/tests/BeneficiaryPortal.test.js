@@ -5,11 +5,11 @@
  */
 
 const request = require('supertest');
-const app = require('../app');
+const app = require('../../app');
 
 describe('Beneficiary Portal - Tests', () => {
   let beneficiaryToken;
-  let beneficiaryId;
+  let _beneficiaryId;
 
   beforeAll(async () => {
     // Setup test data if needed
@@ -18,21 +18,19 @@ describe('Beneficiary Portal - Tests', () => {
   describe('Authentication', () => {
     test('should register new beneficiary', async () => {
       try {
-        const res = await request(app)
-          .post('/api/beneficiary/auth/register')
-          .send({
-            firstName: 'محمد',
-            lastName: 'أحمد',
-            email: 'beneficiary@test.com',
-            phone: '+966501234567',
-            password: 'TestPass123!',
-            confirmPassword: 'TestPass123!',
-          });
+        const res = await request(app).post('/api/beneficiary/auth/register').send({
+          firstName: 'محمد',
+          lastName: 'أحمد',
+          email: 'beneficiary@test.com',
+          phone: '+966501234567',
+          password: 'TestPass123!',
+          confirmPassword: 'TestPass123!',
+        });
 
         if (res.status === 201 || res.status === 200) {
           expect(res.body.success).toBe(true);
           if (res.body.beneficiary) {
-            beneficiaryId = res.body.beneficiary._id || res.body.beneficiary.id;
+            _beneficiaryId = res.body.beneficiary._id || res.body.beneficiary.id;
             beneficiaryToken = res.body.token;
           }
         } else if (res.status === 404) {
@@ -46,12 +44,10 @@ describe('Beneficiary Portal - Tests', () => {
 
     test('should login beneficiary', async () => {
       try {
-        const res = await request(app)
-          .post('/api/beneficiary/auth/login')
-          .send({
-            email: 'beneficiary@test.com',
-            password: 'TestPass123!',
-          });
+        const res = await request(app).post('/api/beneficiary/auth/login').send({
+          email: 'beneficiary@test.com',
+          password: 'TestPass123!',
+        });
 
         if (res.status === 200) {
           expect(res.body.success).toBe(true);

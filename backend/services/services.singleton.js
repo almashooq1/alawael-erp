@@ -2,12 +2,12 @@
  * Unified Service Singleton Factory
  * Ensures single instance of each service across the entire application
  * Implements Dependency Injection for testability
- * 
+ *
  * Pattern:
  * - Each service is instantiated once (singleton)
  * - Services can receive other services as parameters (DI)
  * - Test support via setServiceInstances() and resetServiceInstances()
- * 
+ *
  * Usage:
  * const { getAuthenticationService, getOAuth2Provider } = require('./services.singleton');
  * const authService = getAuthenticationService();
@@ -24,7 +24,7 @@ let permissionServiceInstance = null;
 /**
  * Get singleton instance of AuthenticationService
  * Performs lazy initialization on first call
- * 
+ *
  * @returns {AuthenticationService} Single instance of auth service
  */
 function getAuthenticationService() {
@@ -35,10 +35,10 @@ function getAuthenticationService() {
     } catch (error) {
       console.warn('AuthenticationService not found, using mock for testing');
       authenticationServiceInstance = {
-        generateToken: (user) => `token-${user.id}`,
-        verifyToken: (token) => ({ id: 'user-123', role: 'user' }),
-        refreshToken: (token) => `new-token-${Date.now()}`,
-        validateCredentials: (username, password) => ({ id: 'user-123' }),
+        generateToken: _user => `token-${_user.id}`,
+        verifyToken: _token => ({ id: 'user-123', role: 'user' }),
+        refreshToken: _token => `new-token-${Date.now()}`,
+        validateCredentials: (_username, _password) => ({ id: 'user-123' }),
       };
     }
   }
@@ -48,7 +48,7 @@ function getAuthenticationService() {
 /**
  * Get singleton instance of OAuth2Provider with dependency injection
  * OAuth2 service receives AuthenticationService as parameter (DI pattern)
- * 
+ *
  * @param {AuthenticationService} authService - Auth service instance (optional, uses singleton if not provided)
  * @returns {OAuth2Provider} Single instance of OAuth2 provider
  */
@@ -60,19 +60,19 @@ function getOAuth2Provider(authService = null) {
       oauth2ProviderInstance = new OAuth2Provider(auth);
     } catch (error) {
       console.warn('OAuth2Provider not found, using mock for testing');
-      const auth = authService || getAuthenticationService();
+      const _auth = authService || getAuthenticationService();
       oauth2ProviderInstance = {
-        exchangeCodeForToken: async (provider, code) => ({
+        exchangeCodeForToken: async (_provider, _code) => ({
           accessToken: `access-${Date.now()}`,
           refreshToken: `refresh-${Date.now()}`,
           idToken: `id-${Date.now()}`,
         }),
-        validateAccessToken: async (token, provider) => ({ valid: true, userId: 'user-123' }),
-        refreshOAuthToken: async (refreshToken, provider) => ({
+        validateAccessToken: async (_token, _provider) => ({ valid: true, userId: 'user-123' }),
+        refreshOAuthToken: async (_refreshToken, _provider) => ({
           accessToken: `new-access-${Date.now()}`,
           refreshToken: `new-refresh-${Date.now()}`,
         }),
-        getUserProfile: async (provider, accessToken) => ({
+        getUserProfile: async (_provider, _accessToken) => ({
           id: 'user-123',
           email: 'user@example.com',
           name: 'Test User',
@@ -86,7 +86,7 @@ function getOAuth2Provider(authService = null) {
 /**
  * Get singleton instance of SecurityService
  * Handles security-related operations and configurations
- * 
+ *
  * @returns {SecurityService} Single instance of security service
  */
 function getSecurityService() {
@@ -97,12 +97,12 @@ function getSecurityService() {
     } catch (error) {
       console.warn('SecurityService not found, using mock for testing');
       securityServiceInstance = {
-        verifyToken: (token, secret) => ({ valid: true, decoded: { id: 'user-123' } }),
-        generateToken: (payload, secret) => `token-${Date.now()}`,
-        validatePermission: (role, permission) => true,
-        checkOwnership: (userId, resourceId) => true,
-        hashPassword: (password) => `hashed-${password}`,
-        verifyPassword: (password, hash) => true,
+        verifyToken: (_token, _secret) => ({ valid: true, decoded: { id: 'user-123' } }),
+        generateToken: (_payload, _secret) => `token-${Date.now()}`,
+        validatePermission: (_role, _permission) => true,
+        checkOwnership: (_userId, _resourceId) => true,
+        hashPassword: _password => `hashed-${_password}`,
+        verifyPassword: (_password, _hash) => true,
       };
     }
   }
@@ -112,7 +112,7 @@ function getSecurityService() {
 /**
  * Get singleton instance of UserService
  * Handles user-related operations
- * 
+ *
  * @returns {UserService} Single instance of user service
  */
 function getUserService() {
@@ -123,12 +123,12 @@ function getUserService() {
     } catch (error) {
       console.warn('UserService not found, using mock for testing');
       userServiceInstance = {
-        findById: async (id) => ({ id, name: 'User', email: 'user@example.com' }),
-        findByEmail: async (email) => ({ id: 'user-123', email, name: 'User' }),
-        create: async (data) => ({ id: 'user-123', ...data }),
-        update: async (id, data) => ({ id, ...data }),
-        delete: async (id) => ({ id, deleted: true }),
-        getProfile: async (id) => ({ id, name: 'User', email: 'user@example.com' }),
+        findById: async _id => ({ id: _id, name: 'User', email: 'user@example.com' }),
+        findByEmail: async _email => ({ id: 'user-123', email: _email, name: 'User' }),
+        create: async _data => ({ id: 'user-123', ..._data }),
+        update: async (_id, _data) => ({ id: _id, ..._data }),
+        delete: async _id => ({ id: _id, deleted: true }),
+        getProfile: async _id => ({ id: _id, name: 'User', email: 'user@example.com' }),
       };
     }
   }
@@ -138,7 +138,7 @@ function getUserService() {
 /**
  * Get singleton instance of PermissionService
  * Handles role and permission management
- * 
+ *
  * @returns {PermissionService} Single instance of permission service
  */
 function getPermissionService() {
@@ -149,12 +149,12 @@ function getPermissionService() {
     } catch (error) {
       console.warn('PermissionService not found, using mock for testing');
       permissionServiceInstance = {
-        checkPermission: (userId, permission) => true,
-        hasRole: (userId, role) => true,
-        assignRole: async (userId, role) => ({ userId, role, assigned: true }),
-        revokeRole: async (userId, role) => ({ userId, role, revoked: true }),
-        listPermissions: async (userId) => ['read', 'write'],
-        listRoles: async (userId) => ['user', 'admin'],
+        checkPermission: (_userId, _permission) => true,
+        hasRole: (_userId, _role) => true,
+        assignRole: async (_userId, _role) => ({ userId: _userId, role: _role, assigned: true }),
+        revokeRole: async (_userId, _role) => ({ userId: _userId, role: _role, revoked: true }),
+        listPermissions: async _userId => ['read', 'write'],
+        listRoles: async _userId => ['user', 'admin'],
       };
     }
   }
@@ -164,7 +164,7 @@ function getPermissionService() {
 /**
  * Get unified JWT secret from environment or fallback
  * Single source of truth for all JWT operations
- * 
+ *
  * @returns {string} JWT secret
  */
 function getUnifiedJWTSecret() {
@@ -173,7 +173,7 @@ function getUnifiedJWTSecret() {
 
 /**
  * Get JWT refresh secret from environment or use main secret
- * 
+ *
  * @returns {string} JWT refresh secret
  */
 function getUnifiedJWTRefreshSecret() {
@@ -184,17 +184,24 @@ function getUnifiedJWTRefreshSecret() {
  * Set service instances for testing
  * Allows injection of mock services during test execution
  * Accepts either object or positional parameters for flexibility
- * 
+ *
  * @param {Object|AuthenticationService} servicesOrAuth - Object with services or auth service
  * @param {OAuth2Provider} oauth2Service - Mock OAuth2 provider (if first arg is auth)
  * @param {SecurityService} securityService - Mock security service
  * @param {UserService} userService - Mock user service
  * @param {PermissionService} permissionService - Mock permission service
  */
-function setServiceInstances(servicesOrAuth, oauth2Service, securityService, userService, permissionService) {
+function setServiceInstances(
+  servicesOrAuth,
+  oauth2Service,
+  securityService,
+  userService,
+  permissionService
+) {
   // Support object parameter (modern approach)
   if (servicesOrAuth && typeof servicesOrAuth === 'object' && oauth2Service === undefined) {
-    authenticationServiceInstance = servicesOrAuth.authenticationService || authenticationServiceInstance;
+    authenticationServiceInstance =
+      servicesOrAuth.authenticationService || authenticationServiceInstance;
     oauth2ProviderInstance = servicesOrAuth.oauth2Provider || oauth2ProviderInstance;
     securityServiceInstance = servicesOrAuth.securityService || securityServiceInstance;
     userServiceInstance = servicesOrAuth.userService || userServiceInstance;
@@ -212,7 +219,7 @@ function setServiceInstances(servicesOrAuth, oauth2Service, securityService, use
 /**
  * Reset all service instances to null
  * Used in test cleanup (afterEach) to prevent test pollution
- * 
+ *
  * @returns {void}
  */
 function resetServiceInstances() {
@@ -226,7 +233,7 @@ function resetServiceInstances() {
 /**
  * Get active singleton instances for monitoring/debugging
  * Useful for verifying which services are currently instantiated
- * 
+ *
  * @returns {Object} Map of service instances
  */
 function getActiveSingletons() {
@@ -247,15 +254,15 @@ module.exports = {
   getSecurityService,
   getUserService,
   getPermissionService,
-  
+
   // Secret getters
   getUnifiedJWTSecret,
   getUnifiedJWTRefreshSecret,
-  
+
   // Testing support
   setServiceInstances,
   resetServiceInstances,
-  
+
   // Monitoring
   getActiveSingletons,
 };

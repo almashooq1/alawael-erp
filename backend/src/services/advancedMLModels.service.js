@@ -15,7 +15,7 @@ class AdvancedMLModels {
       accidents: [],
       maintenance: [],
       routes: [],
-      fuelConsumption: []
+      fuelConsumption: [],
     };
   }
 
@@ -39,35 +39,35 @@ class AdvancedMLModels {
         tf.layers.dense({
           units: 128,
           activation: 'relu',
-          inputShape: [6]
+          inputShape: [6],
         }),
         tf.layers.dropout({ rate: 0.3 }),
 
         // Hidden layers
         tf.layers.dense({
           units: 64,
-          activation: 'relu'
+          activation: 'relu',
         }),
         tf.layers.dropout({ rate: 0.3 }),
 
         tf.layers.dense({
           units: 32,
-          activation: 'relu'
+          activation: 'relu',
         }),
         tf.layers.dropout({ rate: 0.2 }),
 
         // Output layer: probability of accident (0-1)
         tf.layers.dense({
           units: 1,
-          activation: 'sigmoid'
-        })
-      ]
+          activation: 'sigmoid',
+        }),
+      ],
     });
 
     model.compile({
       optimizer: tf.train.adam(0.001),
       loss: 'binaryCrossentropy',
-      metrics: ['accuracy', 'auc']
+      metrics: ['accuracy', 'auc'],
     });
 
     this.models.accidentPrediction = model;
@@ -93,35 +93,35 @@ class AdvancedMLModels {
         tf.layers.dense({
           units: 64,
           activation: 'relu',
-          inputShape: [6]
+          inputShape: [6],
         }),
         tf.layers.batchNormalization(),
         tf.layers.dropout({ rate: 0.2 }),
 
         tf.layers.dense({
           units: 32,
-          activation: 'relu'
+          activation: 'relu',
         }),
         tf.layers.batchNormalization(),
         tf.layers.dropout({ rate: 0.2 }),
 
         tf.layers.dense({
           units: 16,
-          activation: 'relu'
+          activation: 'relu',
         }),
 
         // Output: نسبة احتمالية الحاجة للصيانة (0-1)
         tf.layers.dense({
           units: 1,
-          activation: 'sigmoid'
-        })
-      ]
+          activation: 'sigmoid',
+        }),
+      ],
     });
 
     model.compile({
       optimizer: tf.train.adam(0.0005),
       loss: 'meanSquaredError',
-      metrics: ['mae']
+      metrics: ['mae'],
     });
 
     this.models.maintenancePrediction = model;
@@ -149,33 +149,33 @@ class AdvancedMLModels {
         tf.layers.dense({
           units: 64,
           activation: 'elu',
-          inputShape: [8]
+          inputShape: [8],
         }),
         tf.layers.dropout({ rate: 0.25 }),
 
         tf.layers.dense({
           units: 32,
-          activation: 'elu'
+          activation: 'elu',
         }),
         tf.layers.dropout({ rate: 0.25 }),
 
         tf.layers.dense({
           units: 16,
-          activation: 'relu'
+          activation: 'relu',
         }),
 
         // Output: استهلاك الوقود بـ لتر/100كم
         tf.layers.dense({
           units: 1,
-          activation: 'relu'
-        })
-      ]
+          activation: 'relu',
+        }),
+      ],
     });
 
     model.compile({
       optimizer: tf.train.adam(0.001),
       loss: 'meanAbsoluteError',
-      metrics: ['mae', 'mse']
+      metrics: ['mae', 'mse'],
     });
 
     this.models.fuelConsumption = model;
@@ -202,32 +202,32 @@ class AdvancedMLModels {
         tf.layers.dense({
           units: 128,
           activation: 'relu',
-          inputShape: [7]
+          inputShape: [7],
         }),
         tf.layers.dropout({ rate: 0.3 }),
 
         tf.layers.dense({
           units: 64,
-          activation: 'relu'
+          activation: 'relu',
         }),
 
         tf.layers.dense({
           units: 32,
-          activation: 'relu'
+          activation: 'relu',
         }),
 
         // Output: أفضل مؤشر مسار (0-100)
         tf.layers.dense({
           units: 1,
-          activation: 'sigmoid'
-        })
-      ]
+          activation: 'sigmoid',
+        }),
+      ],
     });
 
     model.compile({
       optimizer: tf.train.adam(0.001),
       loss: 'meanSquaredError',
-      metrics: ['mae']
+      metrics: ['mae'],
     });
 
     this.models.routeOptimization = model;
@@ -259,8 +259,8 @@ class AdvancedMLModels {
             console.log(
               `Epoch ${epoch + 1}/${epochs} - Loss: ${logs.loss.toFixed(4)}, Accuracy: ${logs.acc?.toFixed(4) || 'N/A'}`
             );
-          }
-        }
+          },
+        },
       });
 
       console.log(`✅ تم التدريب بنجاح`);
@@ -293,7 +293,7 @@ class AdvancedMLModels {
       input.timeOfDay / 24,
       input.weather / 5,
       input.driverHistory / 10,
-      input.fatigue / 10
+      input.fatigue / 10,
     ];
 
     const tensor = tf.tensor2d([normalized]);
@@ -306,7 +306,7 @@ class AdvancedMLModels {
     return {
       riskScore: Math.round(riskScore * 100),
       riskLevel: riskScore > 0.7 ? 'عالي' : riskScore > 0.4 ? 'متوسط' : 'منخفض',
-      recommendations: this.getAccidentRecommendations(riskScore, input)
+      recommendations: this.getAccidentRecommendations(riskScore, input),
     };
   }
 
@@ -333,7 +333,7 @@ class AdvancedMLModels {
       input.temperature / 120,
       input.brakingFrequency / 100,
       Math.min(input.lastMaintenance / 365, 1),
-      input.fuelAnomalies / 100
+      input.fuelAnomalies / 100,
     ];
 
     const tensor = tf.tensor2d([normalized]);
@@ -347,7 +347,7 @@ class AdvancedMLModels {
       needScore: Math.round(needScore * 100),
       priority: needScore > 0.7 ? 'عالية' : needScore > 0.4 ? 'متوسطة' : 'منخفضة',
       estimatedDaysUntilMaintenance: Math.max(1, Math.round((1 - needScore) * 30)),
-      requiredServices: this.getMaintenanceServices(needScore, input)
+      requiredServices: this.getMaintenanceServices(needScore, input),
     };
   }
 
@@ -378,7 +378,7 @@ class AdvancedMLModels {
       Math.min(input.engineAge / 20, 1),
       Math.min(input.load / 5000, 1),
       input.engineTemp / 120,
-      input.brakingRate / 100
+      input.brakingRate / 100,
     ];
 
     const tensor = tf.tensor2d([normalized]);
@@ -397,7 +397,7 @@ class AdvancedMLModels {
       consumationPer100km: (consumption * 100).toFixed(2),
       estimatedRange,
       fuelWarning: estimatedRange < 50,
-      optimizations: this.getFuelOptimizations(input, consumption)
+      optimizations: this.getFuelOptimizations(input, consumption),
     };
   }
 
@@ -426,7 +426,7 @@ class AdvancedMLModels {
       input.roadType / 2,
       input.timeOfDay / 24,
       input.dayOfWeek / 6,
-      input.congestion / 100
+      input.congestion / 100,
     ];
 
     const tensor = tf.tensor2d([normalized]);
@@ -438,9 +438,9 @@ class AdvancedMLModels {
 
     return {
       routeEfficiency: Math.round(routeScore * 100),
-      estimatedTime: Math.round(input.totalDistance / 60 * (1 - routeScore * 0.3)),
+      estimatedTime: Math.round((input.totalDistance / 60) * (1 - routeScore * 0.3)),
       estimatedFuel: (input.totalDistance * 0.08 * (1 + (1 - routeScore) * 0.2)).toFixed(2),
-      suggestedAlternatives: this.getRouteAlternatives(input, routeScore)
+      suggestedAlternatives: this.getRouteAlternatives(input, routeScore),
     };
   }
 
@@ -464,20 +464,16 @@ class AdvancedMLModels {
 
     return {
       inputs: normalizedInputs,
-      outputs: outputs.map(o => [o])
+      outputs: outputs.map(o => [o]),
     };
   }
 
   getMinValues(matrix) {
-    return matrix[0].map((_, col) =>
-      Math.min(...matrix.map(row => row[col]))
-    );
+    return matrix[0].map((_, col) => Math.min(...matrix.map(row => row[col])));
   }
 
   getMaxValues(matrix) {
-    return matrix[0].map((_, col) =>
-      Math.max(...matrix.map(row => row[col]))
-    );
+    return matrix[0].map((_, col) => Math.max(...matrix.map(row => row[col])));
   }
 
   getAccidentRecommendations(riskScore, input) {
@@ -524,7 +520,7 @@ class AdvancedMLModels {
     return services;
   }
 
-  getFuelOptimizations(input, consumption) {
+  getFuelOptimizations(input, _consumption) {
     const optimizations = [];
 
     if (input.speed > 100) {
@@ -553,7 +549,7 @@ class AdvancedMLModels {
       alternatives.push({
         description: 'تجنب الطرق السريعة الرئيسية',
         efficiency: routeScore + 0.15,
-        timeEstimate: input.totalDistance / 40
+        timeEstimate: input.totalDistance / 40,
       });
     }
 
@@ -561,7 +557,7 @@ class AdvancedMLModels {
       alternatives.push({
         description: 'اختر وقت سفر مختلف لتجنب ذروة الاختناق',
         efficiency: routeScore + 0.25,
-        timeEstimate: input.totalDistance / 70
+        timeEstimate: input.totalDistance / 70,
       });
     }
 
@@ -586,7 +582,7 @@ class AdvancedMLModels {
       'accidentPrediction',
       'maintenancePrediction',
       'fuelConsumption',
-      'routeOptimization'
+      'routeOptimization',
     ];
 
     for (const modelName of modelNames) {

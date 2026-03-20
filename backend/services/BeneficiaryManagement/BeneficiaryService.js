@@ -265,9 +265,8 @@ class BeneficiaryService extends EventEmitter {
       const gpa = beneficiary.performanceMetrics.cumulativeGPA;
       const attendancePercentage = beneficiary.attendanceRate.percentage;
 
-      let academicStatus,
-        riskLevel,
-        recommendations = [];
+      let academicStatus, riskLevel;
+      const recommendations = [];
 
       // تحديد الحالة الأكاديمية
       if (gpa >= 3.7 && attendancePercentage >= 95) {

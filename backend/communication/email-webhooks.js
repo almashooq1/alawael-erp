@@ -6,6 +6,7 @@
 
 const crypto = require('crypto');
 const mongoose = require('mongoose');
+const logger = require('../utils/logger');
 
 // Webhook Event Schema
 const WebhookEventSchema = new mongoose.Schema({

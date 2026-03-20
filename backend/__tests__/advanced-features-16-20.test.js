@@ -597,14 +597,13 @@ describe('🚀 Phases 16-20: Advanced Enterprise Features', () => {
       expect(stats.hitRate).toBeGreaterThan(0);
     });
 
-    test('should clear expired entries', () => {
+    test('should clear expired entries', async () => {
       const expiringCache = new AdvancedCache({ ttl: 1 });
       expiringCache.set('temp', 'value');
-      setTimeout(() => {
-        expiringCache.get('temp');
-        const stats = expiringCache.getStats();
-        expect(stats.misses).toBeGreaterThan(0);
-      }, 1100);
+      await new Promise(resolve => setTimeout(resolve, 1100));
+      expiringCache.get('temp');
+      const stats = expiringCache.getStats();
+      expect(stats.misses).toBeGreaterThan(0);
     });
 
     test('should support custom TTL', () => {

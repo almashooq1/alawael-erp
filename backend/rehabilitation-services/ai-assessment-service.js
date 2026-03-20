@@ -267,7 +267,7 @@ class AIAssessmentService {
     return milestones;
   }
 
-  _identifyRisks(assessment, serviceType) {
+  _identifyRisks(assessment, _serviceType) {
     const risks = [];
     if ((assessment.history.complianceRate || 50) < 40)
       risks.push({ risk: 'عدم الانتظام في الحضور', level: 'high' });
@@ -294,7 +294,7 @@ class AIAssessmentService {
     return services;
   }
 
-  _recommendIntensity(assessment, serviceType) {
+  _recommendIntensity(assessment, _serviceType) {
     const riskScore = this._calcOverallRisk(assessment);
     if (riskScore >= 70) return { sessionsPerWeek: 5, sessionDuration: 60, label: 'مكثف جداً' };
     if (riskScore >= 50) return { sessionsPerWeek: 3, sessionDuration: 45, label: 'مكثف' };

@@ -3,7 +3,7 @@
  */
 
 const { TrafficFine, TollTransaction } = require('../models/TrafficFine');
-const logger = require('../utils/logger');
+const _logger = require('../utils/logger');
 
 class TrafficFineService {
   // ─── Traffic Fines ────────────────────────────────────────────────

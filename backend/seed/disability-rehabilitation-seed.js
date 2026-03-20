@@ -10,8 +10,7 @@ const mongoose = require('mongoose');
 const path = require('path');
 
 // Connect to MongoDB
-const mongoUri =
-  process.env.MONGODB_URI || 'mongodb://admin:password@localhost:27017/alaweal_db?authSource=admin';
+const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/alawael_db';
 
 mongoose
   .connect(mongoUri, {

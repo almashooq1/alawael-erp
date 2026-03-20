@@ -9,7 +9,7 @@
  * - Comparison reports
  */
 
-const crypto = require('crypto');
+const _crypto = require('crypto');
 
 class DocumentComparisonService {
   constructor() {

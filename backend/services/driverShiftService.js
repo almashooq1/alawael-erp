@@ -3,7 +3,7 @@
  */
 
 const { DriverShift, ShiftTemplate } = require('../models/DriverShift');
-const logger = require('../utils/logger');
+const _logger = require('../utils/logger');
 
 class DriverShiftService {
   // ─── Shifts ───────────────────────────────────────────────────────

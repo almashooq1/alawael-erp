@@ -3,12 +3,7 @@
  * Initialize test environment and global configuration
  */
 
-const {
-  cleanupResources,
-  MockFactory,
-  HTTPHelper,
-  DatabaseHelper
-} = require('./test-helpers');
+const { cleanupResources, MockFactory, HTTPHelper, DatabaseHelper } = require('./test-helpers');
 
 // =============================================
 // ENVIRONMENT SETUP
@@ -43,7 +38,7 @@ global.fetch.mockImplementation(() =>
   Promise.resolve({
     ok: true,
     status: 200,
-    json: async () => ({})
+    json: async () => ({}),
   })
 );
 
@@ -74,7 +69,7 @@ console.error = (...args) => {
 };
 
 console.warn = (...args) => {
-  const message = args[0]?.toString?.() || '';
+  const _message = args[0]?.toString?.() || '';
 
   // Log all warnings
   originalConsoleWarn(...args);
@@ -90,7 +85,7 @@ console.warn = (...args) => {
 global.mockSuccessResponse = (data = {}, status = 200) => ({
   ok: status < 400,
   status,
-  json: async () => ({ success: true, ...data })
+  json: async () => ({ success: true, ...data }),
 });
 
 /**
@@ -99,14 +94,13 @@ global.mockSuccessResponse = (data = {}, status = 200) => ({
 global.mockErrorResponse = (error = 'Error', status = 500) => ({
   ok: false,
   status,
-  json: async () => ({ success: false, error })
+  json: async () => ({ success: false, error }),
 });
 
 /**
  * Create a mock timeout
  */
-global.mockTimeout = () =>
-  Promise.reject(new Error('Timeout'));
+global.mockTimeout = () => Promise.reject(new Error('Timeout'));
 
 /**
  * Reset all mocks
@@ -123,7 +117,7 @@ global.testHelpers = {
   cleanupResources,
   MockFactory,
   HTTPHelper,
-  DatabaseHelper
+  DatabaseHelper,
 };
 
 // =============================================
@@ -136,17 +130,14 @@ expect.extend({
    */
   toBeValidERPResponse(received) {
     const pass =
-      received &&
-      typeof received === 'object' &&
-      'success' in received &&
-      'timestamp' in received;
+      received && typeof received === 'object' && 'success' in received && 'timestamp' in received;
 
     return {
       pass,
       message: () =>
         pass
           ? `Expected response not to be valid ERP format`
-          : `Expected response to be valid ERP format with 'success' and 'timestamp' properties`
+          : `Expected response to be valid ERP format with 'success' and 'timestamp' properties`,
     };
   },
 
@@ -161,7 +152,7 @@ expect.extend({
       message: () =>
         pass
           ? `Expected ${received} not to be within range ${floor} - ${ceiling}`
-          : `Expected ${received} to be within range ${floor} - ${ceiling}`
+          : `Expected ${received} to be within range ${floor} - ${ceiling}`,
     };
   },
 
@@ -177,9 +168,9 @@ expect.extend({
       message: () =>
         pass
           ? `Expected status not to be valid`
-          : `Expected status to be one of: ${validStatuses.join(', ')}, but got: ${received}`
+          : `Expected status to be one of: ${validStatuses.join(', ')}, but got: ${received}`,
     };
-  }
+  },
 });
 
 // =============================================
@@ -201,7 +192,7 @@ global.assertResponseStructure = (response, expectedFields = []) => {
 /**
  * Assert error structure
  */
-global.assertErrorStructure = (response) => {
+global.assertErrorStructure = response => {
   expect(response).toBeDefined();
   expect(response).toHaveProperty('error');
   expect(response).toHaveProperty('timestamp');
@@ -225,7 +216,7 @@ const cleanupFunctions = [];
 /**
  * Register cleanup function
  */
-global.registerCleanup = (fn) => {
+global.registerCleanup = fn => {
   cleanupFunctions.push(fn);
 };
 
@@ -301,7 +292,7 @@ console.log('');
 // =============================================
 
 // Track uncaught exceptions
-process.on('uncaughtException', (error) => {
+process.on('uncaughtException', error => {
   console.error('Uncaught Exception:', error);
 });
 
@@ -318,12 +309,12 @@ process.on('unhandledRejection', (reason, promise) => {
 const activeTimers = {
   timeouts: [],
   intervals: [],
-  handles: []
+  handles: [],
 };
 
 // Override setTimeout to track timers
 const originalSetTimeout = global.setTimeout;
-global.setTimeout = function(...args) {
+global.setTimeout = function (...args) {
   const timeout = originalSetTimeout.apply(this, args);
   activeTimers.timeouts.push(timeout);
   return timeout;
@@ -331,7 +322,7 @@ global.setTimeout = function(...args) {
 
 // Override setInterval to track intervals
 const originalSetInterval = global.setInterval;
-global.setInterval = function(...args) {
+global.setInterval = function (...args) {
   const interval = originalSetInterval.apply(this, args);
   activeTimers.intervals.push(interval);
   return interval;
@@ -342,7 +333,7 @@ Object.assign(global.setTimeout, originalSetTimeout);
 Object.assign(global.setInterval, originalSetInterval);
 
 // Clean up function for timers
-function cleanupAllTimers() {
+function _cleanupAllTimers() {
   // Clear timeouts
   activeTimers.timeouts.forEach(timeout => {
     clearTimeout(timeout);

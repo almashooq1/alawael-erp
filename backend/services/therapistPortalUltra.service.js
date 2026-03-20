@@ -15,26 +15,26 @@
 // ─── Lazy model loaders ──────────────────────────────────────────────────────
 let _TherapySession, _Beneficiary, _CaseManagement;
 
-const getTherapySession = () => {
+const _getTherapySession = () => {
   if (!_TherapySession) _TherapySession = require('../models/TherapySession');
   return _TherapySession;
 };
-const getBeneficiary = () => {
+const _getBeneficiary = () => {
   if (!_Beneficiary) _Beneficiary = require('../models/Beneficiary');
   return _Beneficiary;
 };
-const getCaseManagement = () => {
+const _getCaseManagement = () => {
   if (!_CaseManagement) _CaseManagement = require('../models/CaseManagement');
   return _CaseManagement;
 };
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
-const startOfDay = (d = new Date()) => {
+const _startOfDay = (d = new Date()) => {
   const dt = new Date(d);
   dt.setHours(0, 0, 0, 0);
   return dt;
 };
-const endOfDay = (d = new Date()) => {
+const _endOfDay = (d = new Date()) => {
   const dt = new Date(d);
   dt.setHours(23, 59, 59, 999);
   return dt;
@@ -366,7 +366,7 @@ SEED_RESEARCH.forEach(r => researchStore.set(r.id, r));
 // ═════════════════════════════════════════════════════════════════════════════
 class TherapistPortalUltraService {
   // ─── Referral Management ─────────────────────────────────────────────────
-  async getReferrals(therapistId) {
+  async getReferrals(_therapistId) {
     const all = [...referralsStore.values()];
     return {
       success: true,
@@ -382,7 +382,7 @@ class TherapistPortalUltraService {
     };
   }
 
-  async createReferral(data, therapistId) {
+  async createReferral(data, _therapistId) {
     const referral = {
       id: ++_referralId,
       ...data,
@@ -416,7 +416,7 @@ class TherapistPortalUltraService {
   }
 
   // ─── Group Therapy ───────────────────────────────────────────────────────
-  async getGroups(therapistId) {
+  async getGroups(_therapistId) {
     const all = [...groupTherapyStore.values()];
     return {
       success: true,
@@ -432,7 +432,7 @@ class TherapistPortalUltraService {
     };
   }
 
-  async createGroup(data, therapistId) {
+  async createGroup(data, _therapistId) {
     const group = {
       id: ++_groupId,
       ...data,
@@ -479,7 +479,7 @@ class TherapistPortalUltraService {
   }
 
   // ─── Equipment Management ────────────────────────────────────────────────
-  async getEquipment(therapistId) {
+  async getEquipment(_therapistId) {
     const all = [...equipmentStore.values()];
     return {
       success: true,
@@ -606,7 +606,7 @@ class TherapistPortalUltraService {
   }
 
   // ─── Safety Protocols ────────────────────────────────────────────────────
-  async getSafetyProtocols(therapistId) {
+  async getSafetyProtocols(_therapistId) {
     const all = [...safetyStore.values()];
     return {
       success: true,
@@ -670,7 +670,7 @@ class TherapistPortalUltraService {
   }
 
   // ─── Clinical Research ───────────────────────────────────────────────────
-  async getResearch(therapistId) {
+  async getResearch(_therapistId) {
     const all = [...researchStore.values()];
     return {
       success: true,
@@ -685,7 +685,7 @@ class TherapistPortalUltraService {
     };
   }
 
-  async createResearch(data, therapistId) {
+  async createResearch(data, _therapistId) {
     const research = {
       id: ++_researchId,
       ...data,

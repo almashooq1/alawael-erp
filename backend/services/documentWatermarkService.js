@@ -129,7 +129,7 @@ class DocumentWatermarkService extends EventEmitter {
       type = 'text', // text, image, qr, dynamic
       preset,
       text,
-      imageUrl,
+      imageUrl: _imageUrl,
       position = 'center',
       opacity = 0.15,
       fontSize = 40,

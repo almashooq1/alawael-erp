@@ -71,7 +71,7 @@ class BaseDomainModule {
    * تسجيل Middleware خاص بالدومين
    * @param {import('express').Router} router
    */
-  registerMiddleware(router) {
+  registerMiddleware(_router) {
     // Override in subclass if needed
   }
 

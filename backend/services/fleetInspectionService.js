@@ -3,7 +3,7 @@
  */
 
 const { FleetInspection, FleetInspectionTemplate } = require('../models/FleetInspection');
-const logger = require('../utils/logger');
+const _logger = require('../utils/logger');
 
 class FleetInspectionService {
   // ─── Inspections ──────────────────────────────────────────────────

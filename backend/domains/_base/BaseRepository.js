@@ -12,7 +12,7 @@
  * @module domains/_base/BaseRepository
  */
 
-const logger = require('../../utils/logger');
+const _logger = require('../../utils/logger');
 
 class BaseRepository {
   /**

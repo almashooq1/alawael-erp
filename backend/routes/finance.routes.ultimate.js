@@ -105,7 +105,7 @@ router.post(
       organization: req.user.organization,
     });
     if (!doc) throw new AppError('Consolidation not found', 404);
-    let totals = {
+    const totals = {
       totalAssets: 0,
       totalLiabilities: 0,
       totalEquity: 0,

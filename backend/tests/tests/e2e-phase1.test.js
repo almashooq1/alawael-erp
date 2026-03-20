@@ -10,7 +10,7 @@ const assert = require('assert');
 const BASE_URL = 'http://localhost:3009';
 let testsPassed = 0;
 let testsFailed = 0;
-let testResults = [];
+const testResults = [];
 
 // HTTP Helper
 function httpRequest(method, path, body = null) {
@@ -27,9 +27,9 @@ function httpRequest(method, path, body = null) {
       timeout: 5000,
     };
 
-    const req = http.request(options, (res) => {
+    const req = http.request(options, res => {
       let data = '';
-      res.on('data', chunk => data += chunk);
+      res.on('data', chunk => (data += chunk));
       res.on('end', () => {
         try {
           const json = data ? JSON.parse(data) : {};
@@ -125,7 +125,7 @@ async function runPhase1() {
 
   // 3. Inventory
   console.log('\n📦 Inventory Endpoints:');
-  let inventoryId;
+  let _inventoryId;
 
   await test('GET /api/supply-chain/inventory returns items', async () => {
     const res = await httpRequest('GET', '/api/supply-chain/inventory');
@@ -144,13 +144,13 @@ async function runPhase1() {
     });
     // Accept both 200 and 201 for mock mode
     if ([200, 201].includes(res.status)) {
-      inventoryId = res.data.data?._id || 'test-item';
+      _inventoryId = res.data.data?._id || 'test-item';
     }
   });
 
   // 4. Purchase Orders
   console.log('\n📋 Purchase Order Endpoints:');
-  let orderId;
+  let _orderId;
 
   await test('GET /api/supply-chain/orders returns orders', async () => {
     const res = await httpRequest('GET', '/api/supply-chain/orders');
@@ -165,7 +165,7 @@ async function runPhase1() {
     });
     // 201 for created or 200 for success
     assert.ok([200, 201].includes(res.status), `Expected 200 or 201 but got ${res.status}`);
-    orderId = res.data.data?._id;
+    _orderId = res.data.data?._id;
   });
 
   // 5. Shipments
@@ -184,7 +184,10 @@ async function runPhase1() {
     assert.strictEqual(res.status, 200);
     // Analytics data structure check - either direct properties or nested in data.data
     const analyticsData = res.data.data || res.data;
-    assert.ok(analyticsData.totalOrders !== undefined || analyticsData.supplierCount !== undefined, 'Should contain analytics data');
+    assert.ok(
+      analyticsData.totalOrders !== undefined || analyticsData.supplierCount !== undefined,
+      'Should contain analytics data'
+    );
   });
 
   console.log('\n' + '═'.repeat(50));
@@ -239,7 +242,7 @@ async function main() {
   // Run tests
   await runPhase1();
   printSummary();
-  
+
   process.exit(testsFailed > 0 ? 1 : 0);
 }
 

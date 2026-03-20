@@ -396,7 +396,7 @@ class LearningDisabilitiesService {
     return tech;
   }
 
-  _suggestHomeActivities(data) {
+  _suggestHomeActivities(_data) {
     return [
       { activity: 'قراءة يومية لمدة 15 دقيقة مع أحد الوالدين', frequency: 'يومياً' },
       { activity: 'ألعاب كلمات وألغاز', frequency: '3 مرات أسبوعياً' },

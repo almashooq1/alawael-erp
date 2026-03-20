@@ -183,6 +183,7 @@ class PostRehabFollowUpService {
     const postRehabCase = await PostRehabCase.findById(caseId);
     if (!postRehabCase) throw new Error('حالة المتابعة غير موجودة');
 
+    if (!postRehabCase.alerts) postRehabCase.alerts = [];
     postRehabCase.alerts.push(alertData);
 
     // Auto-escalate priority if critical alert

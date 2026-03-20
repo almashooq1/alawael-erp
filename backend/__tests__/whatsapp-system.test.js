@@ -33,7 +33,7 @@ const mongoose = require('mongoose');
 // ─── Mock heavy/external dependencies ───────────────────────────────
 
 jest.mock('axios');
-const axios = require('axios');
+const _axios = require('axios');
 
 jest.mock('../rbac', () => ({
   createRBACMiddleware: () => (_req, _res, next) => next(),
@@ -372,7 +372,7 @@ let Message, Conversation, Template, OTP, BulkMessage, WebhookEvent;
 
 const TEST_PREFIX = `WA-TEST-${Date.now()}`;
 const testTenantId = new mongoose.Types.ObjectId();
-const testUserId = new mongoose.Types.ObjectId();
+const _testUserId = new mongoose.Types.ObjectId();
 
 beforeAll(async () => {
   const uri =

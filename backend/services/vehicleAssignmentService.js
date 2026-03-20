@@ -3,7 +3,7 @@
  */
 
 const VehicleAssignment = require('../models/VehicleAssignment');
-const logger = require('../utils/logger');
+const _logger = require('../utils/logger');
 
 class VehicleAssignmentService {
   static async create(data) {

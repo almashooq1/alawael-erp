@@ -3,7 +3,7 @@
  */
 
 const VehicleInsurance = require('../models/VehicleInsurance');
-const logger = require('../utils/logger');
+const _logger = require('../utils/logger');
 
 class VehicleInsuranceService {
   static async create(data) {

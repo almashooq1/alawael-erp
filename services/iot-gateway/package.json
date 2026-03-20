@@ -1,0 +1,24 @@
+{
+  "name": "alawael-iot-gateway",
+  "version": "1.0.0",
+  "description": "بوابة إنترنت الأشياء — ZKTeco, Hikvision, Biometric, Wearables",
+  "main": "server.js",
+  "scripts": {
+    "dev": "nodemon server.js",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.2",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "ioredis": "^5.3.2",
+    "mongoose": "^8.0.0",
+    "mqtt": "^5.3.0",
+    "net": "^1.0.2",
+    "winston": "^3.11.0",
+    "ws": "^8.16.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}

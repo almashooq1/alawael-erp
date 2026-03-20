@@ -21,26 +21,26 @@ function makeRequest(method, path, body = null) {
       path: urlObj.pathname + urlObj.search,
       method: method,
       headers: {
-        'Content-Type': 'application/json'
-      }
+        'Content-Type': 'application/json',
+      },
     };
 
-    const req = http.request(options, (res) => {
+    const req = http.request(options, res => {
       let data = '';
-      res.on('data', chunk => data += chunk);
+      res.on('data', chunk => (data += chunk));
       res.on('end', () => {
         try {
           const parsed = data ? JSON.parse(data) : {};
           resolve({
             status: res.statusCode,
             headers: res.headers,
-            body: parsed
+            body: parsed,
           });
         } catch (e) {
           resolve({
             status: res.statusCode,
             headers: res.headers,
-            body: data
+            body: data,
           });
         }
       });
@@ -59,7 +59,7 @@ const results = {
   passed: 0,
   failed: 0,
   errors: [],
-  details: []
+  details: [],
 };
 
 /**
@@ -110,7 +110,7 @@ async function runTests() {
       email: 'e2etest@test.com',
       phone: '+966501234567',
       address: 'Riyadh, Saudi Arabia',
-      category: 'electronics'
+      category: 'electronics',
     });
     assertEquals(res.status, 201, 'Should return 201 Created');
     assert(res.body.data && res.body.data._id, 'Should return supplier with ID');
@@ -134,7 +134,7 @@ async function runTests() {
   // 4. PUT /suppliers/:id
   await test('PUT /suppliers/:id - Update supplier', async () => {
     const res = await makeRequest('PUT', `${BASE_URL}${API_BASE}/suppliers/${supplierId}`, {
-      name: 'Updated E2E Test Supplier'
+      name: 'Updated E2E Test Supplier',
     });
     assertEquals(res.status, 200, 'Should return 200 OK');
     assertEquals(res.body.data.name, 'Updated E2E Test Supplier', 'Should update supplier name');
@@ -160,7 +160,7 @@ async function runTests() {
       quantity: 50,
       minLevel: 10,
       supplierId: supplierId,
-      unit: 'piece'
+      unit: 'piece',
     });
     assertEquals(res.status, 201, 'Should return 201 Created');
     assert(res.body.data && res.body.data._id, 'Should return product with ID');
@@ -171,7 +171,7 @@ async function runTests() {
   await test('PATCH /inventory/:id - Update inventory quantity', async () => {
     const res = await makeRequest('PATCH', `${BASE_URL}${API_BASE}/inventory/${productId}`, {
       quantityChange: 10,
-      reason: 'E2E Test Restock'
+      reason: 'E2E Test Restock',
     });
     assertEquals(res.status, 200, 'Should return 200 OK');
     assertEquals(res.body.data.newQuantity, 60, 'Should update quantity correctly');
@@ -192,12 +192,10 @@ async function runTests() {
   await test('POST /orders - Create purchase order', async () => {
     const res = await makeRequest('POST', `${BASE_URL}${API_BASE}/orders`, {
       supplierId: supplierId,
-      items: [
-        { productId: productId, quantity: 10, price: 1000 }
-      ],
+      items: [{ productId: productId, quantity: 10, price: 1000 }],
       totalAmount: 10000,
       priority: 'normal',
-      dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+      dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
     });
     assertEquals(res.status, 201, 'Should return 201 Created');
     assert(res.body.data && res.body.data._id, 'Should return order with ID');
@@ -222,7 +220,7 @@ async function runTests() {
   await test('PATCH /orders/:id/status - Update order status', async () => {
     const res = await makeRequest('PATCH', `${BASE_URL}${API_BASE}/orders/${orderId}/status`, {
       status: 'confirmed',
-      note: 'E2E Test Confirmation'
+      note: 'E2E Test Confirmation',
     });
     assertEquals(res.status, 200, 'Should return 200 OK');
     assertEquals(res.body.data.status, 'confirmed', 'Should update order status');
@@ -231,7 +229,7 @@ async function runTests() {
   // 13. Error case: PATCH invalid status
   await test('PATCH /orders/:id/status - 400 Bad Request (invalid status)', async () => {
     const res = await makeRequest('PATCH', `${BASE_URL}${API_BASE}/orders/${orderId}/status`, {
-      status: 'invalid_status'
+      status: 'invalid_status',
     });
     assertEquals(res.status, 400, 'Should return 400 for invalid status');
   });
@@ -246,7 +244,7 @@ async function runTests() {
       orderId: orderId,
       carrier: 'DHL Express',
       estimatedDelivery: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-      origin: 'Riyadh Warehouse'
+      origin: 'Riyadh Warehouse',
     });
     assertEquals(res.status, 201, 'Should return 201 Created');
     assert(res.body.data && res.body.data._id, 'Should return shipment with ID');
@@ -255,10 +253,14 @@ async function runTests() {
 
   // 15. PATCH /shipments/:id/status
   await test('PATCH /shipments/:id/status - Update shipment status', async () => {
-    const res = await makeRequest('PATCH', `${BASE_URL}${API_BASE}/shipments/${shipmentId}/status`, {
-      status: 'in-transit',
-      location: 'Jeddah Distribution Center'
-    });
+    const res = await makeRequest(
+      'PATCH',
+      `${BASE_URL}${API_BASE}/shipments/${shipmentId}/status`,
+      {
+        status: 'in-transit',
+        location: 'Jeddah Distribution Center',
+      }
+    );
     assertEquals(res.status, 200, 'Should return 200 OK');
     assertEquals(res.body.data.status, 'in-transit', 'Should update shipment status');
   });
@@ -266,7 +268,7 @@ async function runTests() {
   // 16. GET /shipments/track/:trackingNumber
   await test('GET /shipments/track/:trackingNumber - Track shipment', async () => {
     // First get the shipment to get tracking number
-    const getRes = await makeRequest('GET', `${BASE_URL}${API_BASE}/orders/${orderId}`);
+    const _getRes = await makeRequest('GET', `${BASE_URL}${API_BASE}/orders/${orderId}`);
     // For this test, we'll just verify the endpoint works
     const shipmentList = await makeRequest('GET', `${BASE_URL}${API_BASE}/status`);
     assertEquals(shipmentList.status, 200, 'Should return 200 OK');
@@ -275,7 +277,7 @@ async function runTests() {
   // 17. Error case: POST shipment without required fields
   await test('POST /shipments - 400 Bad Request (missing fields)', async () => {
     const res = await makeRequest('POST', `${BASE_URL}${API_BASE}/shipments`, {
-      orderId: orderId
+      orderId: orderId,
       // Missing carrier and estimatedDelivery
     });
     assertEquals(res.status, 400, 'Should return 400 for missing required fields');
@@ -328,7 +330,9 @@ async function runTests() {
   console.log(`✅ Passed: ${results.passed}`);
   console.log(`❌ Failed: ${results.failed}`);
   console.log(`📈 Total:  ${results.passed + results.failed}`);
-  console.log(`🎯 Success Rate: ${((results.passed / (results.passed + results.failed)) * 100).toFixed(2)}%`);
+  console.log(
+    `🎯 Success Rate: ${((results.passed / (results.passed + results.failed)) * 100).toFixed(2)}%`
+  );
 
   if (results.failed > 0) {
     console.log('\n❌ Failed Tests:');

@@ -4592,7 +4592,7 @@ router.get('/comprehensive-report/:beneficiaryId', async (req, res) => {
         logger.warn('Learning disabilities report failed:', err.message);
         return null;
       }),
-      teleRehabilitation.getReport(beneficiaryId).catch(err => {
+      teleRehab.getReport(beneficiaryId).catch(err => {
         logger.warn('Tele-rehabilitation report failed:', err.message);
         return null;
       }),
@@ -4608,7 +4608,7 @@ router.get('/comprehensive-report/:beneficiaryId', async (req, res) => {
         logger.warn('Community integration report failed:', err.message);
         return null;
       }),
-      assistiveTechnology.getReport(beneficiaryId).catch(err => {
+      assistiveTech.getReport(beneficiaryId).catch(err => {
         logger.warn('Assistive technology report failed:', err.message);
         return null;
       }),
@@ -4620,7 +4620,7 @@ router.get('/comprehensive-report/:beneficiaryId', async (req, res) => {
         logger.warn('Special education report failed:', err.message);
         return null;
       }),
-      residentialRehabilitation.getReport(beneficiaryId).catch(err => {
+      residentialRehab.getReport(beneficiaryId).catch(err => {
         logger.warn('Residential rehab report failed:', err.message);
         return null;
       }),

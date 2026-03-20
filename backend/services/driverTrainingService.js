@@ -3,7 +3,7 @@
  */
 
 const { DriverTraining, DriverCertification } = require('../models/DriverTraining');
-const logger = require('../utils/logger');
+const _logger = require('../utils/logger');
 
 class DriverTrainingService {
   // ─── Training Programs ────────────────────────────────────────────

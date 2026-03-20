@@ -10,7 +10,7 @@ const assert = require('assert');
 const BASE_URL = 'http://localhost:3009';
 let testsPassed = 0;
 let testsFailed = 0;
-let testResults = [];
+const testResults = [];
 
 // HTTP Helper
 function httpRequest(method, path, body = null) {

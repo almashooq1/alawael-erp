@@ -5,11 +5,11 @@
 
 const request = require('supertest');
 const express = require('express');
-const SSOService = require('../services/sso.service');
-const OAuthService = require('../services/oauth.service');
-const SSOSecurityService = require('../services/sso-security.service');
-const ssoRoutes = require('../routes/sso.routes');
-const { _verifySSOToken, _requireRole } = require('../middleware/sso-auth.middleware');
+const SSOService = require('../../services/sso.service');
+const OAuthService = require('../../services/oauth.service');
+const SSOSecurityService = require('../../services/sso-security.service');
+const ssoRoutes = require('../../routes/sso.routes');
+const { _verifySSOToken, _requireRole } = require('../../middleware/sso-auth.middleware');
 
 // Setup test app
 const app = express();
@@ -18,17 +18,17 @@ app.use('/api/sso', ssoRoutes);
 
 // Initialize services
 let ssoService, oAuthService, securityService;
-let serviceAvailable = false;
+let _serviceAvailable = false;
 
 beforeAll(async () => {
   try {
     ssoService = new SSOService();
     oAuthService = new OAuthService();
     securityService = new SSOSecurityService();
-    serviceAvailable = true;
+    _serviceAvailable = true;
   } catch (_e) {
     // Services not available
-    serviceAvailable = false;
+    _serviceAvailable = false;
   }
 });
 
@@ -42,7 +42,7 @@ describe('SSO Core Service Tests', () => {
       try {
         const session = await ssoService.createSession('user123', {
           email: 'user@example.com',
-          role: 'user'
+          role: 'user',
         });
 
         expect(session).toBeDefined();
@@ -56,7 +56,7 @@ describe('SSO Core Service Tests', () => {
     it('should verify a valid session', async () => {
       try {
         const session = await ssoService.createSession('user123', {
-          email: 'user@example.com'
+          email: 'user@example.com',
         });
 
         if (session && session.sessionId) {
@@ -77,10 +77,7 @@ describe('SSO Core Service Tests', () => {
 
     it('should reject invalid session', async () => {
       try {
-        const verification = await ssoService.verifySession(
-          'invalid-session-id',
-          'invalid-token'
-        );
+        const verification = await ssoService.verifySession('invalid-session-id', 'invalid-token');
         expect(verification).toBeDefined();
       } catch (_e) {
         expect(true).toBe(true);
@@ -138,10 +135,7 @@ describe('SSO Core Service Tests', () => {
 
     it('should reject expired refresh token', async () => {
       try {
-        await ssoService.refreshAccessToken(
-          'invalid-session',
-          'invalid-token'
-        );
+        await ssoService.refreshAccessToken('invalid-session', 'invalid-token');
         expect(true).toBe(false); // Should throw error
       } catch (_error) {
         expect(_error.message).toBeDefined();
@@ -244,7 +238,7 @@ describe('OAuth 2.0 Service Tests', () => {
         clientName: 'Test App',
         redirectUris: ['https://app.example.com/callback'],
         responseTypes: ['code'],
-        grantTypes: ['authorization_code']
+        grantTypes: ['authorization_code'],
       });
 
       expect(client.clientId).toBeDefined();
@@ -305,13 +299,13 @@ describe('Security Service Tests', () => {
       for (let i = 0; i < 4; i++) {
         await securityService.detectSuspiciousActivity(userId, {
           type: 'failed',
-          ipAddress: '192.168.1.1'
+          ipAddress: '192.168.1.1',
         });
       }
 
       const activity = await securityService.detectSuspiciousActivity(userId, {
         type: 'failed',
-        ipAddress: '192.168.1.1'
+        ipAddress: '192.168.1.1',
       });
 
       expect(activity.suspicious).toBe(true);
@@ -321,7 +315,7 @@ describe('Security Service Tests', () => {
       const activities = [
         { type: 'failed', ipAddress: '192.168.1.1' },
         { type: 'failed', ipAddress: '192.168.1.2' },
-        { type: 'failed', ipAddress: '192.168.1.3' }
+        { type: 'failed', ipAddress: '192.168.1.3' },
       ];
 
       const score = securityService.calculateSuspicionScore('user123', activities);
@@ -337,7 +331,7 @@ describe('Security Service Tests', () => {
         userAgent: 'Mozilla/5.0...',
         acceptLanguage: 'en-US,en;q=0.9',
         screenResolution: '1920x1080',
-        timezone: 'UTC+3'
+        timezone: 'UTC+3',
       });
 
       expect(fingerprint.fingerprint).toBeDefined();
@@ -351,11 +345,7 @@ describe('Security Service Tests', () => {
       const userId = 'user123';
       const ipAddress = '192.168.1.1';
 
-      const whitelist = await securityService.whitelistIP(
-        userId,
-        ipAddress,
-        'My Laptop'
-      );
+      const whitelist = await securityService.whitelistIP(userId, ipAddress, 'My Laptop');
 
       expect(whitelist).toBeDefined();
       expect(whitelist.length).toBeGreaterThan(0);
@@ -373,10 +363,7 @@ describe('Security Service Tests', () => {
 
     it('should return false for non-whitelisted IP', async () => {
       const userId = 'user123';
-      const isWhitelisted = await securityService.isIPWhitelisted(
-        userId,
-        '999.999.999.999'
-      );
+      const isWhitelisted = await securityService.isIPWhitelisted(userId, '999.999.999.999');
 
       expect(isWhitelisted).toBe(false);
     });
@@ -386,7 +373,7 @@ describe('Security Service Tests', () => {
     it('should log audit events', async () => {
       const event = await securityService.logAuditEvent('LOGIN_SUCCESS', {
         email: 'user@example.com',
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
 
       expect(event).toBeDefined();
@@ -396,12 +383,12 @@ describe('Security Service Tests', () => {
 
     it('should get audit logs', async () => {
       await securityService.logAuditEvent('LOGIN_FAILED', {
-        email: 'user@example.com'
+        email: 'user@example.com',
       });
 
       const logs = await securityService.getAuditLog({
         eventType: 'LOGIN_FAILED',
-        limit: 10
+        limit: 10,
       });
 
       expect(logs).toBeDefined();
@@ -413,12 +400,10 @@ describe('Security Service Tests', () => {
 describe('SSO API Routes Tests', () => {
   describe('Login/Logout Endpoints', () => {
     it('should login user', async () => {
-      const response = await request(app)
-        .post('/api/sso/login')
-        .send({
-          email: 'user@example.com',
-          password: 'password123'
-        });
+      const response = await request(app).post('/api/sso/login').send({
+        email: 'user@example.com',
+        password: 'password123',
+      });
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
@@ -427,9 +412,7 @@ describe('SSO API Routes Tests', () => {
     });
 
     it('should reject login without credentials', async () => {
-      const response = await request(app)
-        .post('/api/sso/login')
-        .send({});
+      const response = await request(app).post('/api/sso/login').send({});
 
       expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);
@@ -439,20 +422,16 @@ describe('SSO API Routes Tests', () => {
   describe('Token Endpoints', () => {
     it('should verify token', async () => {
       // First login
-      const loginRes = await request(app)
-        .post('/api/sso/login')
-        .send({
-          email: 'user@example.com',
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/sso/login').send({
+        email: 'user@example.com',
+        password: 'password123',
+      });
 
       // Then verify
-      const verifyRes = await request(app)
-        .post('/api/sso/verify-token')
-        .send({
-          token: loginRes.body.data.accessToken,
-          sessionId: loginRes.body.data.sessionId
-        });
+      const verifyRes = await request(app).post('/api/sso/verify-token').send({
+        token: loginRes.body.data.accessToken,
+        sessionId: loginRes.body.data.sessionId,
+      });
 
       expect(verifyRes.status).toBe(200);
       expect(verifyRes.body.success).toBe(true);
@@ -460,19 +439,15 @@ describe('SSO API Routes Tests', () => {
     });
 
     it('should refresh token', async () => {
-      const loginRes = await request(app)
-        .post('/api/sso/login')
-        .send({
-          email: 'user@example.com',
-          password: 'password123'
-        });
+      const loginRes = await request(app).post('/api/sso/login').send({
+        email: 'user@example.com',
+        password: 'password123',
+      });
 
-      const refreshRes = await request(app)
-        .post('/api/sso/refresh-token')
-        .send({
-          sessionId: loginRes.body.data.sessionId,
-          refreshToken: loginRes.body.data.refreshToken
-        });
+      const refreshRes = await request(app).post('/api/sso/refresh-token').send({
+        sessionId: loginRes.body.data.sessionId,
+        refreshToken: loginRes.body.data.refreshToken,
+      });
 
       expect(refreshRes.status).toBe(200);
       expect(refreshRes.body.data.accessToken).toBeDefined();
@@ -483,12 +458,10 @@ describe('SSO API Routes Tests', () => {
 describe('Integration Tests', () => {
   it('should complete full login -> verify -> refresh -> logout flow', async () => {
     // 1. Login
-    const loginRes = await request(app)
-      .post('/api/sso/login')
-      .send({
-        email: 'integration@example.com',
-        password: 'password123'
-      });
+    const loginRes = await request(app).post('/api/sso/login').send({
+      email: 'integration@example.com',
+      password: 'password123',
+    });
 
     expect(loginRes.status).toBe(200);
     const { sessionId, accessToken, refreshToken } = loginRes.body.data;
@@ -522,5 +495,5 @@ describe('Integration Tests', () => {
 module.exports = {
   ssoService,
   oAuthService,
-  securityService
+  securityService,
 };

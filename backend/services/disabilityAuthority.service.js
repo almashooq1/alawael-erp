@@ -68,7 +68,7 @@ class DisabilityAuthorityService {
   /**
    * تحديث تقرير
    */
-  static async updateReport(id, data, userId) {
+  static async updateReport(id, data, _userId) {
     const report = await DisabilityAuthorityReport.findOne({ _id: id, isDeleted: false });
     if (!report) throw new Error('التقرير غير موجود');
     if (['submitted', 'acknowledged'].includes(report.status)) {
@@ -425,7 +425,7 @@ class DisabilityAuthorityService {
     }
   }
 
-  static async _collectServiceStats(branch, startDate, endDate) {
+  static async _collectServiceStats(_branch, _startDate, _endDate) {
     return {
       totalSessions: 0,
       totalHours: 0,
@@ -438,7 +438,7 @@ class DisabilityAuthorityService {
     };
   }
 
-  static async _collectStaffStats(branch) {
+  static async _collectStaffStats(_branch) {
     return {
       totalStaff: 0,
       bySpecialization: [],
@@ -448,7 +448,7 @@ class DisabilityAuthorityService {
     };
   }
 
-  static async _collectQualityIndicators(branch, startDate, endDate) {
+  static async _collectQualityIndicators(_branch, _startDate, _endDate) {
     return {
       overallSatisfactionRate: 0,
       familySatisfactionRate: 0,
@@ -460,7 +460,7 @@ class DisabilityAuthorityService {
     };
   }
 
-  static async _collectOutcomeIndicators(branch, startDate, endDate) {
+  static async _collectOutcomeIndicators(_branch, _startDate, _endDate) {
     return {
       goalAchievementRate: 0,
       independenceLevelImprovement: 0,

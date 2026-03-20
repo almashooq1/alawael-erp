@@ -1,0 +1,84 @@
+###############################################################################
+# Al-Awael ERP — Docker Compose Production Override
+# نظام الأوائل ERP — إعدادات Docker Compose للإنتاج
+#
+# Usage:
+#   docker compose -f docker-compose.professional.yml -f docker-compose.production.yml up -d
+###############################################################################
+
+services:
+
+  # ─── MongoDB (Production Hardened) ────────────────────────────────────────
+  mongodb:
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+          cpus: "2.0"
+        reservations:
+          memory: 2G
+          cpus: "1.0"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+
+  # ─── Redis (Production Hardened) ──────────────────────────────────────────
+  redis:
+    command: >
+      redis-server
+        --maxmemory 512mb
+        --maxmemory-policy allkeys-lru
+        --appendonly yes
+        --requirepass ${REDIS_PASSWORD:-changeme}
+        --rename-command FLUSHALL ""
+        --rename-command FLUSHDB ""
+        --rename-command DEBUG ""
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: "1.0"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "3"
+
+  # ─── Backend (Production) ────────────────────────────────────────────────
+  backend:
+    environment:
+      NODE_ENV: production
+      LOG_LEVEL: warn
+      ENABLE_SWAGGER: "false"
+      RATE_LIMIT_MAX_REQUESTS: 100
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: "2.0"
+        reservations:
+          memory: 512M
+          cpus: "0.5"
+      replicas: 2
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "10"
+    restart: always
+
+  # ─── Frontend (Production) ──────────────────────────────────────────────
+  frontend:
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: "0.5"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    restart: always

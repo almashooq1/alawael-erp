@@ -4,8 +4,8 @@
  * تقارير شاملة ومقارنة دورية ومؤسسية بمعايير ICF الدولية
  */
 
-const { ICFAssessment, ICFBenchmark } = require('../models/ICFAssessment');
-const logger = require('../utils/logger');
+const { ICFAssessment, ICFBenchmark: _ICFBenchmark } = require('../models/ICFAssessment');
+const _logger = require('../utils/logger');
 
 /* ─── Domain Labels ────────────────────────────────────────────────────────── */
 

@@ -715,7 +715,7 @@ class EmployeeAffairsExpandedService {
   /**
    * تنفيذ الترقية/النقل
    */
-  async executePromotionTransfer(id, data) {
+  async executePromotionTransfer(id, _data) {
     const Model = getPromotionTransfer();
     const request = await Model.findById(id);
     if (!request) throw new Error('الطلب غير موجود');

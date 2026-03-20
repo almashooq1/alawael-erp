@@ -31,6 +31,8 @@ build/
 .env.*.local
 .env.docker          # Docker-specific env file
 .env.production      # Production env file
+deploy/**/.env*      # All .env files in deploy subdirectories
+!deploy/**/.env*.example
 
 # Docker volumes and cache
 docker_volumes/

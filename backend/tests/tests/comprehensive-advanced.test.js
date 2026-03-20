@@ -1,7 +1,7 @@
 /**
  * Advanced Comprehensive Testing Suite
  * مجموعة اختبارات متقدمة شاملة جداً
- * 
+ *
  * يتضمن:
  * ✅ اختبارات الأداء (Performance Tests)
  * ✅ اختبارات الأمان (Security Tests)
@@ -12,7 +12,7 @@
  */
 
 const axios = require('axios');
-const assert = require('assert');
+const _assert = require('assert');
 
 // ========================
 // Configuration
@@ -41,7 +41,7 @@ class TestRunner {
   async runTest(name, testFn) {
     this.results.total++;
     const testStartTime = Date.now();
-    
+
     try {
       await testFn();
       this.results.passed++;
@@ -50,13 +50,18 @@ class TestRunner {
     } catch (error) {
       this.results.failed++;
       console.error(`❌ ${name}: ${error.message}`);
-      this.tests.push({ name, status: 'FAILED', error: error.message, duration: Date.now() - testStartTime });
+      this.tests.push({
+        name,
+        status: 'FAILED',
+        error: error.message,
+        duration: Date.now() - testStartTime,
+      });
     }
   }
 
   async runAll(tests) {
     this.startTime = Date.now();
-    
+
     console.log('\n' + '='.repeat(80));
     console.log('🧪 بدء مجموعة الاختبارات المتقدمة الشاملة');
     console.log('='.repeat(80) + '\n');
@@ -71,7 +76,7 @@ class TestRunner {
 
   printSummary() {
     const passPercentage = ((this.results.passed / this.results.total) * 100).toFixed(2);
-    
+
     console.log('\n' + '='.repeat(80));
     console.log('📊 ملخص النتائج');
     console.log('='.repeat(80));
@@ -104,9 +109,11 @@ const performanceTests = [
       const startTime = Date.now();
       await axios.get(`${API_BASE_URL}/measurements`, { timeout: TIMEOUT });
       const duration = Date.now() - startTime;
-      
+
       if (duration > PERFORMANCE_THRESHOLD) {
-        throw new Error(`الاستدعاء استغرق ${duration}ms (يجب أن يكون أقل من ${PERFORMANCE_THRESHOLD}ms)`);
+        throw new Error(
+          `الاستدعاء استغرق ${duration}ms (يجب أن يكون أقل من ${PERFORMANCE_THRESHOLD}ms)`
+        );
       }
     },
   },
@@ -117,7 +124,7 @@ const performanceTests = [
       const startTime = Date.now();
       await axios.get(`${API_BASE_URL}/programs`, { timeout: TIMEOUT });
       const duration = Date.now() - startTime;
-      
+
       if (duration > PERFORMANCE_THRESHOLD) {
         throw new Error(`الاستدعاء استغرق ${duration}ms`);
       }
@@ -128,18 +135,24 @@ const performanceTests = [
     name: 'اختبار الأداء - الربط الذكي',
     fn: async () => {
       const startTime = Date.now();
-      
-      const result = await axios.post(`${API_BASE_URL}/measurements/analyze-and-link`, {
-        measurementCode: 'INTEL_003',
-        interpretationLevel: 'MODERATE',
-      }, { timeout: TIMEOUT });
-      
+
+      const result = await axios.post(
+        `${API_BASE_URL}/measurements/analyze-and-link`,
+        {
+          measurementCode: 'INTEL_003',
+          interpretationLevel: 'MODERATE',
+        },
+        { timeout: TIMEOUT }
+      );
+
       const duration = Date.now() - startTime;
-      
+
       if (duration > PERFORMANCE_THRESHOLD * 2) {
-        throw new Error(`الربط استغرق ${duration}ms (يجب أن يكون أقل من ${PERFORMANCE_THRESHOLD * 2}ms)`);
+        throw new Error(
+          `الربط استغرق ${duration}ms (يجب أن يكون أقل من ${PERFORMANCE_THRESHOLD * 2}ms)`
+        );
       }
-      
+
       if (!result.data.recommendedPrograms) {
         throw new Error('لم يتم إرجاع البرامج الموصى بها');
       }
@@ -150,16 +163,20 @@ const performanceTests = [
     name: 'اختبار الأداء - إنشاء مقياس نتيجة',
     fn: async () => {
       const startTime = Date.now();
-      
-      await axios.post(`${API_BASE_URL}/measurements/results`, {
-        measurementCode: 'MOTOR_002',
-        score: 75,
-        interpretationLevel: 'AVERAGE',
-        beneficiaryId: 'test-user-1',
-      }, { timeout: TIMEOUT });
-      
+
+      await axios.post(
+        `${API_BASE_URL}/measurements/results`,
+        {
+          measurementCode: 'MOTOR_002',
+          score: 75,
+          interpretationLevel: 'AVERAGE',
+          beneficiaryId: 'test-user-1',
+        },
+        { timeout: TIMEOUT }
+      );
+
       const duration = Date.now() - startTime;
-      
+
       if (duration > PERFORMANCE_THRESHOLD) {
         throw new Error(`الإنشاء استغرق ${duration}ms`);
       }
@@ -176,12 +193,16 @@ const securityTests = [
     name: 'اختبار الأمان - التحقق من صحة الإدخال',
     fn: async () => {
       try {
-        await axios.post(`${API_BASE_URL}/measurements/results`, {
-          measurementCode: 'INVALID<script>alert("XSS")</script>',
-          score: 1000, // أكبر من الحد الأقصى
-          beneficiaryId: 'test<img src=x>',
-        }, { timeout: TIMEOUT });
-        
+        await axios.post(
+          `${API_BASE_URL}/measurements/results`,
+          {
+            measurementCode: 'INVALID<script>alert("XSS")</script>',
+            score: 1000, // أكبر من الحد الأقصى
+            beneficiaryId: 'test<img src=x>',
+          },
+          { timeout: TIMEOUT }
+        );
+
         throw new Error('يجب أن يرفض الإدخال غير الصحيح');
       } catch (error) {
         if (error.response && error.response.status >= 400) {
@@ -197,13 +218,17 @@ const securityTests = [
     name: 'اختبار الأمان - التحقق من نطاق الدرجات',
     fn: async () => {
       try {
-        await axios.post(`${API_BASE_URL}/measurements/results`, {
-          measurementCode: 'INTEL_003',
-          score: -50,
-          interpretationLevel: 'NORMAL',
-          beneficiaryId: 'test-user-1',
-        }, { timeout: TIMEOUT });
-        
+        await axios.post(
+          `${API_BASE_URL}/measurements/results`,
+          {
+            measurementCode: 'INTEL_003',
+            score: -50,
+            interpretationLevel: 'NORMAL',
+            beneficiaryId: 'test-user-1',
+          },
+          { timeout: TIMEOUT }
+        );
+
         throw new Error('يجب أن يرفض الدرجات السالبة');
       } catch (error) {
         if (error.response && error.response.status >= 400) {
@@ -218,11 +243,15 @@ const securityTests = [
     name: 'اختبار الأمان - معالجة الحقول المفقودة',
     fn: async () => {
       try {
-        await axios.post(`${API_BASE_URL}/measurements/results`, {
-          measurementCode: 'MOTOR_002',
-          // حقول مفقودة
-        }, { timeout: TIMEOUT });
-        
+        await axios.post(
+          `${API_BASE_URL}/measurements/results`,
+          {
+            measurementCode: 'MOTOR_002',
+            // حقول مفقودة
+          },
+          { timeout: TIMEOUT }
+        );
+
         throw new Error('يجب أن يرفض الطلب بحقول مفقودة');
       } catch (error) {
         if (error.response && error.response.status >= 400) {
@@ -237,11 +266,15 @@ const securityTests = [
     name: 'اختبار الأمان - التحقق من صحة رموز المقاييس',
     fn: async () => {
       try {
-        await axios.post(`${API_BASE_URL}/measurements/analyze-and-link`, {
-          measurementCode: 'NONEXISTENT_CODE_12345',
-          interpretationLevel: 'NORMAL',
-        }, { timeout: TIMEOUT });
-        
+        await axios.post(
+          `${API_BASE_URL}/measurements/analyze-and-link`,
+          {
+            measurementCode: 'NONEXISTENT_CODE_12345',
+            interpretationLevel: 'NORMAL',
+          },
+          { timeout: TIMEOUT }
+        );
+
         throw new Error('يجب أن يرفض رموز المقاييس غير الموجودة');
       } catch (error) {
         if (error.response && error.response.status >= 400) {
@@ -262,13 +295,17 @@ const integrationTests = [
     name: 'اختبار التكامل - القراءة والكتابة والقراءة مرة أخرى',
     fn: async () => {
       // اكتب نتيجة
-      const writeResult = await axios.post(`${API_BASE_URL}/measurements/results`, {
-        measurementCode: 'LANG_001',
-        score: 85,
-        interpretationLevel: 'ABOVE_AVERAGE',
-        beneficiaryId: 'test-integration-1',
-        notes: 'اختبار التكامل',
-      }, { timeout: TIMEOUT });
+      const writeResult = await axios.post(
+        `${API_BASE_URL}/measurements/results`,
+        {
+          measurementCode: 'LANG_001',
+          score: 85,
+          interpretationLevel: 'ABOVE_AVERAGE',
+          beneficiaryId: 'test-integration-1',
+          notes: 'اختبار التكامل',
+        },
+        { timeout: TIMEOUT }
+      );
 
       if (!writeResult.data.id) {
         throw new Error('لم يتم إرجاع معرف النتيجة');
@@ -289,12 +326,16 @@ const integrationTests = [
   {
     name: 'اختبار التكامل - ربط نتيجة بالبرامج تلقائياً',
     fn: async () => {
-      const result = await axios.post(`${API_BASE_URL}/measurements/results`, {
-        measurementCode: 'AUTISM_004',
-        score: 35,
-        interpretationLevel: 'SEVERE_IMPAIRMENT',
-        beneficiaryId: 'test-integration-2',
-      }, { timeout: TIMEOUT });
+      const result = await axios.post(
+        `${API_BASE_URL}/measurements/results`,
+        {
+          measurementCode: 'AUTISM_004',
+          score: 35,
+          interpretationLevel: 'SEVERE_IMPAIRMENT',
+          beneficiaryId: 'test-integration-2',
+        },
+        { timeout: TIMEOUT }
+      );
 
       if (!result.data.activatedPrograms || result.data.activatedPrograms.length === 0) {
         throw new Error('لم يتم تنشيط أي برامج تلقائياً');
@@ -302,7 +343,7 @@ const integrationTests = [
 
       const programs = result.data.activatedPrograms;
       const hasCriticalPrograms = programs.some(p => p.recommendationLevel === 'CRITICAL');
-      
+
       if (!hasCriticalPrograms) {
         throw new Error('يجب أن تكون هناك برامج حرجة للحالات الشديدة');
       }
@@ -312,10 +353,9 @@ const integrationTests = [
   {
     name: 'اختبار التكامل - الحصول على تقرير شامل',
     fn: async () => {
-      const report = await axios.get(
-        `${API_BASE_URL}/measurements/report/test-integration-1`,
-        { timeout: TIMEOUT }
-      );
+      const report = await axios.get(`${API_BASE_URL}/measurements/report/test-integration-1`, {
+        timeout: TIMEOUT,
+      });
 
       if (!report.data.measurements) {
         throw new Error('التقرير لا يحتوي على قائمة المقاييس');
@@ -341,18 +381,21 @@ const integrationTests = [
       ];
 
       for (const measurement of measurements) {
-        await axios.post(`${API_BASE_URL}/measurements/results`, {
-          measurementCode: measurement.code,
-          score: measurement.score,
-          interpretationLevel: measurement.level,
-          beneficiaryId: 'test-multi-measure',
-        }, { timeout: TIMEOUT });
+        await axios.post(
+          `${API_BASE_URL}/measurements/results`,
+          {
+            measurementCode: measurement.code,
+            score: measurement.score,
+            interpretationLevel: measurement.level,
+            beneficiaryId: 'test-multi-measure',
+          },
+          { timeout: TIMEOUT }
+        );
       }
 
-      const report = await axios.get(
-        `${API_BASE_URL}/measurements/report/test-multi-measure`,
-        { timeout: TIMEOUT }
-      );
+      const report = await axios.get(`${API_BASE_URL}/measurements/report/test-multi-measure`, {
+        timeout: TIMEOUT,
+      });
 
       if (report.data.measurements.length !== 3) {
         throw new Error('يجب أن يكون هناك 3 مقاييس في التقرير');
@@ -364,20 +407,24 @@ const integrationTests = [
     name: 'اختبار التكامل - استدعاءات متعددة متزامنة',
     fn: async () => {
       const promises = [];
-      
+
       for (let i = 0; i < 10; i++) {
         promises.push(
-          axios.post(`${API_BASE_URL}/measurements/results`, {
-            measurementCode: `ELITE_TEST_${i}`,
-            score: 50 + (i * 5),
-            interpretationLevel: 'AVERAGE',
-            beneficiaryId: `test-concurrent-${i}`,
-          }, { timeout: TIMEOUT })
+          axios.post(
+            `${API_BASE_URL}/measurements/results`,
+            {
+              measurementCode: `ELITE_TEST_${i}`,
+              score: 50 + i * 5,
+              interpretationLevel: 'AVERAGE',
+              beneficiaryId: `test-concurrent-${i}`,
+            },
+            { timeout: TIMEOUT }
+          )
         );
       }
 
       const results = await Promise.all(promises);
-      
+
       if (results.length !== 10) {
         throw new Error('اقل من 10 استدعاءات نجحت');
       }
@@ -407,24 +454,34 @@ const complexScenarioTests = [
       ];
 
       for (const measurement of measurements) {
-        await axios.post(`${API_BASE_URL}/measurements/results`, {
-          measurementCode: measurement.code,
-          score: measurement.score,
-          interpretationLevel: measurement.level,
-          beneficiaryId: 'case-autism-severe',
-        }, { timeout: TIMEOUT });
+        await axios.post(
+          `${API_BASE_URL}/measurements/results`,
+          {
+            measurementCode: measurement.code,
+            score: measurement.score,
+            interpretationLevel: measurement.level,
+            beneficiaryId: 'case-autism-severe',
+          },
+          { timeout: TIMEOUT }
+        );
       }
 
-      const analysis = await axios.post(`${API_BASE_URL}/measurements/analyze-and-link`, {
-        measurementCode: 'AUTISM_004',
-        interpretationLevel: 'SEVERE_IMPAIRMENT',
-      }, { timeout: TIMEOUT });
+      const analysis = await axios.post(
+        `${API_BASE_URL}/measurements/analyze-and-link`,
+        {
+          measurementCode: 'AUTISM_004',
+          interpretationLevel: 'SEVERE_IMPAIRMENT',
+        },
+        { timeout: TIMEOUT }
+      );
 
       if (!analysis.data.recommendedPrograms) {
         throw new Error('لم يتم الحصول على برامج موصى بها');
       }
 
-      const criticalPrograms = analysis.data.recommendedPrograms.filter(p => p.priority === 'CRITICAL');
+      const criticalPrograms = analysis.data.recommendedPrograms.filter(
+        p => p.priority === 'CRITICAL'
+      );
       if (criticalPrograms.length === 0) {
         throw new Error('يجب أن تكون هناك برامج حرجة');
       }
@@ -442,18 +499,21 @@ const complexScenarioTests = [
       ];
 
       for (const measurement of measurements) {
-        await axios.post(`${API_BASE_URL}/measurements/results`, {
-          measurementCode: measurement.code,
-          score: measurement.score,
-          interpretationLevel: measurement.level,
-          beneficiaryId: 'case-learning-complex',
-        }, { timeout: TIMEOUT });
+        await axios.post(
+          `${API_BASE_URL}/measurements/results`,
+          {
+            measurementCode: measurement.code,
+            score: measurement.score,
+            interpretationLevel: measurement.level,
+            beneficiaryId: 'case-learning-complex',
+          },
+          { timeout: TIMEOUT }
+        );
       }
 
-      const report = await axios.get(
-        `${API_BASE_URL}/measurements/report/case-learning-complex`,
-        { timeout: TIMEOUT }
-      );
+      const report = await axios.get(`${API_BASE_URL}/measurements/report/case-learning-complex`, {
+        timeout: TIMEOUT,
+      });
 
       if (!report.data.summary) {
         throw new Error('يجب أن يكون هناك ملخص');
@@ -476,23 +536,31 @@ const complexScenarioTests = [
       ];
 
       for (const measurement of measurements) {
-        await axios.post(`${API_BASE_URL}/measurements/results`, {
-          measurementCode: measurement.code,
-          score: measurement.score,
-          interpretationLevel: measurement.level,
-          beneficiaryId: 'case-motor-cognitive',
-        }, { timeout: TIMEOUT });
+        await axios.post(
+          `${API_BASE_URL}/measurements/results`,
+          {
+            measurementCode: measurement.code,
+            score: measurement.score,
+            interpretationLevel: measurement.level,
+            beneficiaryId: 'case-motor-cognitive',
+          },
+          { timeout: TIMEOUT }
+        );
       }
 
-      const analysis = await axios.post(`${API_BASE_URL}/measurements/analyze-and-link`, {
-        measurementCode: 'PHYSIO_ELITE_001',
-        interpretationLevel: 'SEVERE_IMPAIRMENT',
-      }, { timeout: TIMEOUT });
-
-      const hasMotorPrograms = analysis.data.recommendedPrograms.some(p => 
-        p.id && p.id.includes('MOTOR')
+      const analysis = await axios.post(
+        `${API_BASE_URL}/measurements/analyze-and-link`,
+        {
+          measurementCode: 'PHYSIO_ELITE_001',
+          interpretationLevel: 'SEVERE_IMPAIRMENT',
+        },
+        { timeout: TIMEOUT }
       );
-      
+
+      const hasMotorPrograms = analysis.data.recommendedPrograms.some(
+        p => p.id && p.id.includes('MOTOR')
+      );
+
       if (!hasMotorPrograms) {
         throw new Error('يجب أن تكون هناك برامج حركية');
       }
@@ -509,7 +577,7 @@ const stressTests = [
     name: 'اختبار الإجهاد - 50 استدعاء متتالي',
     fn: async () => {
       const startTime = Date.now();
-      
+
       for (let i = 0; i < 50; i++) {
         try {
           await axios.get(`${API_BASE_URL}/measurements`, { timeout: TIMEOUT });
@@ -517,10 +585,10 @@ const stressTests = [
           throw new Error(`فشل الاستدعاء ${i + 1}: ${error.message}`);
         }
       }
-      
+
       const duration = Date.now() - startTime;
       console.log(`    ⏱️  50 استدعاء في ${duration}ms`);
-      
+
       if (duration > 15000) {
         throw new Error(`الاستدعاءات استغرقت وقتاً طويلاً جداً: ${duration}ms`);
       }
@@ -531,15 +599,19 @@ const stressTests = [
     name: 'اختبار الإجهاد - 20 عملية كتابة متزامن',
     fn: async () => {
       const promises = [];
-      
+
       for (let i = 0; i < 20; i++) {
         promises.push(
-          axios.post(`${API_BASE_URL}/measurements/results`, {
-            measurementCode: 'MOTOR_002',
-            score: Math.floor(Math.random() * 100),
-            interpretationLevel: 'AVERAGE',
-            beneficiaryId: `stress-test-${i}`,
-          }, { timeout: TIMEOUT })
+          axios.post(
+            `${API_BASE_URL}/measurements/results`,
+            {
+              measurementCode: 'MOTOR_002',
+              score: Math.floor(Math.random() * 100),
+              interpretationLevel: 'AVERAGE',
+              beneficiaryId: `stress-test-${i}`,
+            },
+            { timeout: TIMEOUT }
+          )
         );
       }
 
@@ -561,7 +633,7 @@ const dataValidationTests = [
     name: 'اختبار البيانات - التحقق من وجود بيانات المقاييس',
     fn: async () => {
       const result = await axios.get(`${API_BASE_URL}/measurements`, { timeout: TIMEOUT });
-      
+
       if (!Array.isArray(result.data)) {
         throw new Error('يجب أن تكون النتيجة مصفوفة');
       }
@@ -572,7 +644,7 @@ const dataValidationTests = [
 
       const measurement = result.data[0];
       const requiredFields = ['code', 'name', 'description', 'category'];
-      
+
       for (const field of requiredFields) {
         if (!measurement[field]) {
           throw new Error(`المقياس يفتقد الحقل: ${field}`);
@@ -585,7 +657,7 @@ const dataValidationTests = [
     name: 'اختبار البيانات - التحقق من وجود بيانات البرامج',
     fn: async () => {
       const result = await axios.get(`${API_BASE_URL}/programs`, { timeout: TIMEOUT });
-      
+
       if (!Array.isArray(result.data)) {
         throw new Error('يجب أن تكون النتيجة مصفوفة');
       }
@@ -596,7 +668,7 @@ const dataValidationTests = [
 
       const program = result.data[0];
       const requiredFields = ['code', 'name', 'description', 'category'];
-      
+
       for (const field of requiredFields) {
         if (!program[field]) {
           throw new Error(`البرنامج يفتقد الحقل: ${field}`);
@@ -610,7 +682,7 @@ const dataValidationTests = [
     fn: async () => {
       const measurements = await axios.get(`${API_BASE_URL}/measurements`, { timeout: TIMEOUT });
       const categories = new Set(measurements.data.map(m => m.category));
-      
+
       if (categories.size === 0) {
         throw new Error('يجب أن يكون هناك فئات على الأقل');
       }
@@ -656,14 +728,14 @@ async function runAllTests() {
 
   for (const category of allTests) {
     console.log(`\n${category.category}\n` + '─'.repeat(50));
-    
+
     for (const test of category.tests) {
       await runner.runTest(test.name, test.fn);
     }
   }
 
   runner.printSummary();
-  
+
   return runner.results.failed === 0;
 }
 

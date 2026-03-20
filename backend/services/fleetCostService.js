@@ -162,7 +162,9 @@ class FleetCostService {
       b.costEntries
         .filter(e => e.vehicleId?.toString() === vehicleId)
         .forEach(e => {
-          const key = costBreakdown.hasOwnProperty(e.category) ? e.category : 'other';
+          const key = Object.prototype.hasOwnProperty.call(costBreakdown, e.category)
+            ? e.category
+            : 'other';
           costBreakdown[key] += e.amount;
         });
     });

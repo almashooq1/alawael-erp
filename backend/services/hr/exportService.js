@@ -4,7 +4,7 @@
  * تصدير بيانات الموارد البشرية إلى Excel و PDF
  */
 
-const XLSX = require('xlsx');
+const ExcelJS = require('exceljs');
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const path = require('path');
@@ -44,32 +44,28 @@ class HRExportService {
         'تاريخ انتهاء العقد': emp.employment?.contractEndDate?.toLocaleDateString('ar-EG'),
       }));
 
-      const workbook = XLSX.utils.book_new();
-      const worksheet = XLSX.utils.json_to_sheet(data);
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('الموظفون');
 
-      // تعيين عرض الأعمدة
-      const colWidths = [
-        { wch: 12 },
-        { wch: 20 },
-        { wch: 20 },
-        { wch: 15 },
-        { wch: 15 },
-        { wch: 15 },
-        { wch: 12 },
-        { wch: 12 },
-        { wch: 15 },
-        { wch: 15 },
-        { wch: 15 },
-        { wch: 18 },
-      ];
-      worksheet['!cols'] = colWidths;
+      // تعيين عرض الأعمدة مع العناوين والمفاتيح
+      const headers = Object.keys(data[0] || {});
+      const colWidthValues = [12, 20, 20, 15, 15, 15, 12, 12, 15, 15, 15, 18];
+      worksheet.columns = headers.map((key, i) => ({
+        header: key,
+        key,
+        width: colWidthValues[i] || 15,
+      }));
 
-      XLSX.utils.book_append_sheet(workbook, worksheet, 'الموظفون');
+      // إضافة البيانات
+      worksheet.addRows(data);
+
+      // تنسيق صف العناوين
+      worksheet.getRow(1).font = { bold: true };
 
       const fileName = `employees_${new Date().toISOString().split('T')[0]}.xlsx`;
       const filePath = path.join(exportsDir, fileName);
 
-      XLSX.writeFile(workbook, filePath);
+      await workbook.xlsx.writeFile(filePath);
 
       return {
         success: true,
@@ -107,30 +103,28 @@ class HRExportService {
         'حالة الدفع': p.paymentStatus,
       }));
 
-      const workbook = XLSX.utils.book_new();
-      const worksheet = XLSX.utils.json_to_sheet(data);
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('الرواتب');
 
-      const colWidths = [
-        { wch: 12 },
-        { wch: 20 },
-        { wch: 15 },
-        { wch: 15 },
-        { wch: 15 },
-        { wch: 12 },
-        { wch: 12 },
-        { wch: 12 },
-        { wch: 12 },
-        { wch: 12 },
-        { wch: 15 },
-      ];
-      worksheet['!cols'] = colWidths;
+      // تعيين عرض الأعمدة مع العناوين والمفاتيح
+      const headers = Object.keys(data[0] || {});
+      const colWidthValues = [12, 20, 15, 15, 15, 12, 12, 12, 12, 12, 15];
+      worksheet.columns = headers.map((key, i) => ({
+        header: key,
+        key,
+        width: colWidthValues[i] || 15,
+      }));
 
-      XLSX.utils.book_append_sheet(workbook, worksheet, 'الرواتب');
+      // إضافة البيانات
+      worksheet.addRows(data);
+
+      // تنسيق صف العناوين
+      worksheet.getRow(1).font = { bold: true };
 
       const fileName = `payroll_${monthStr}.xlsx`;
       const filePath = path.join(exportsDir, fileName);
 
-      XLSX.writeFile(workbook, filePath);
+      await workbook.xlsx.writeFile(filePath);
 
       return {
         success: true,

@@ -9,8 +9,8 @@
  *  - Benchmarking comparisons
  *  - Data export to research platforms
  */
-const mongoose = require('mongoose');
-const logger = require('../utils/logger');
+const _mongoose = require('mongoose');
+const _logger = require('../utils/logger');
 
 const ResearchStudy = require('../models/ResearchStudy');
 const OutcomeMeasure = require('../models/OutcomeMeasure');

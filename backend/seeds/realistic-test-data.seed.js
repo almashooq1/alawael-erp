@@ -1,7 +1,7 @@
 /**
  * Realistic Test Data - Actual Cases from Rehabilitation Centers
  * بيانات اختبار واقعية - حالات حقيقية من مراكز التأهيل
- * 
+ *
  * تتضمن:
  * - 10 حالات حقيقية معقدة
  * - سيناريوهات من مراكز التأهيل الفعلية
@@ -132,7 +132,7 @@ const realisticTestCases = [
         interpretationLevel: 'AVERAGE',
         date: '2024-05-20',
         notes: 'نطق غير واضح لكن المفهوم كافٍ',
-        standardDeviation: const.NEAR_ZERO,
+        standardDeviation: 0,
       },
       {
         code: 'COGNITION_ELITE_001',
@@ -748,19 +748,19 @@ const realisticTestCases = [
  */
 function validateRealisticCases() {
   const requiredFields = ['id', 'name', 'age', 'gender', 'primaryDisability', 'measurements'];
-  
+
   realisticTestCases.forEach((testCase, index) => {
     requiredFields.forEach(field => {
       if (!testCase[field]) {
         throw new Error(`الحالة ${index}: الحقل ${field} مفقود`);
       }
     });
-    
+
     if (!Array.isArray(testCase.measurements) || testCase.measurements.length === 0) {
       throw new Error(`الحالة ${index}: يجب أن يكون هناك قياسات على الأقل`);
     }
   });
-  
+
   return true;
 }
 
@@ -770,13 +770,15 @@ function validateRealisticCases() {
 async function seedRealisticTestData() {
   try {
     console.log('\n📊 جاري تحميل بيانات الحالات الحقيقية...\n');
-    
+
     validateRealisticCases();
-    
+
     // This would be integrated with database
     console.log(`✅ تم التحقق من ${realisticTestCases.length} حالة حقيقية`);
-    console.log(`📝 الحالات تغطي ${new Set(realisticTestCases.map(c => c.primaryDisability)).size} إعاقة رئيسية`);
-    
+    console.log(
+      `📝 الحالات تغطي ${new Set(realisticTestCases.map(c => c.primaryDisability)).size} إعاقة رئيسية`
+    );
+
     return {
       success: true,
       totalCases: realisticTestCases.length,

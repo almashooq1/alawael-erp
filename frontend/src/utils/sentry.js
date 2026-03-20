@@ -34,7 +34,7 @@ export async function initSentry() {
   }
 
   try {
-    SentryModule = await import('@sentry/react');
+    SentryModule = await import(/* webpackIgnore: true */ '@sentry/react');
 
     SentryModule.init({
       dsn: SENTRY_DSN,

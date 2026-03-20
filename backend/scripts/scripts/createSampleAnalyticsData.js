@@ -7,7 +7,7 @@
  */
 
 const mongoose = require('mongoose');
-const { KPI, ReportTemplate, Dashboard, Prediction } = require('../models/analytics');
+const { KPI, ReportTemplate, Dashboard, Prediction: _Prediction } = require('../models/analytics');
 
 // Sample KPIs
 const sampleKPIs = [

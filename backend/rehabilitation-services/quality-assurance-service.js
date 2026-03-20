@@ -52,7 +52,7 @@ class QualityAssuranceService {
    */
   async conductAudit(auditData) {
     const id = `qa-a-${Date.now()}`;
-    const standardsList = [...this.standards.values()];
+    const _standardsList = [...this.standards.values()];
 
     const audit = {
       id,

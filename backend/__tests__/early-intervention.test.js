@@ -15,7 +15,7 @@ process.env.NODE_ENV = 'test';
 process.env.JWT_SECRET = process.env.JWT_SECRET || 'test-secret-key';
 
 // ── Mock auth before requiring app ──
-jest.mock('../../middleware/auth', () => ({
+jest.mock('../middleware/auth', () => ({
   authenticate: (req, _res, next) => {
     req.user = {
       id: '507f1f77bcf86cd799439011',
@@ -57,7 +57,7 @@ const request = require('supertest');
 let app;
 
 beforeAll(() => {
-  app = require('../../server');
+  app = require('../server');
 });
 
 afterEach(() => {
@@ -711,7 +711,7 @@ describe('Early Intervention System — Dashboard API', () => {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 describe('Early Intervention Service — Unit Tests', () => {
-  const service = require('../../services/earlyIntervention.service');
+  const service = require('../services/earlyIntervention.service');
 
   describe('_getStandardMilestones', () => {
     it('should return standard milestones covering all domains', () => {

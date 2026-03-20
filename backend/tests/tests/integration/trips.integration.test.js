@@ -5,11 +5,11 @@
 
 const request = require('supertest');
 const mongoose = require('mongoose');
-const app = require('../../app');
-const Trip = require('../../models/Trip');
-const Vehicle = require('../../models/Vehicle');
-const TransportRoute = require('../../models/TransportRoute');
-const User = require('../../models/User');
+const app = require('../../../app');
+const Trip = require('../../../models/Trip');
+const Vehicle = require('../../../models/Vehicle');
+const TransportRoute = require('../../../models/TransportRoute');
+const User = require('../../../models/User');
 
 describe('Trip Management - Integration Tests', () => {
   let authToken;
@@ -251,7 +251,7 @@ describe('Trip Management - Integration Tests', () => {
       expect(trip.route).toBeDefined();
       expect(trip.vehicle).toBeDefined();
       expect(trip.driver).toBeDefined();
-      
+
       // Check if route is populated or just an ID
       if (trip.route && typeof trip.route === 'object' && trip.route.name) {
         expect(trip.route.name).toBe('Test Route');
@@ -273,8 +273,8 @@ describe('Trip Management - Integration Tests', () => {
         passengers: {
           capacity: 30,
           current: 15,
-          list: []
-        }
+          list: [],
+        },
       });
       tripId = trip._id;
     });
@@ -286,20 +286,32 @@ describe('Trip Management - Integration Tests', () => {
         .expect(200);
 
       expect(response.body.success).toBe(true);
-      
+
       // Check if refs are populated or just IDs
-      if (response.body.data.route && typeof response.body.data.route === 'object' && response.body.data.route.name) {
+      if (
+        response.body.data.route &&
+        typeof response.body.data.route === 'object' &&
+        response.body.data.route.name
+      ) {
         expect(response.body.data.route.name).toBe('Test Route');
       }
-      
-      if (response.body.data.vehicle && typeof response.body.data.vehicle === 'object' && response.body.data.vehicle.plateNumber) {
+
+      if (
+        response.body.data.vehicle &&
+        typeof response.body.data.vehicle === 'object' &&
+        response.body.data.vehicle.plateNumber
+      ) {
         expect(response.body.data.vehicle.plateNumber).toBe('TRIP-001');
       }
-      
-      if (response.body.data.driver && typeof response.body.data.driver === 'object' && response.body.data.driver.name) {
+
+      if (
+        response.body.data.driver &&
+        typeof response.body.data.driver === 'object' &&
+        response.body.data.driver.name
+      ) {
         expect(response.body.data.driver.name).toBe('Test Driver');
       }
-      
+
       if (response.body.data.passengers && response.body.data.passengers.current !== undefined) {
         expect(response.body.data.passengers.current).toBe(15);
       }

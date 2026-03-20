@@ -3,7 +3,7 @@
  * خدمة الدعم النفسي والصحة النفسية
  */
 
-const mongoose = require('mongoose');
+const _mongoose = require('mongoose');
 const {
   CounselingSession,
   MentalHealthProgram,

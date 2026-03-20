@@ -21,14 +21,14 @@ const { body, param, validationResult } = require('express-validator');
 const { authenticateToken } = require('../middleware/auth.middleware');
 const {
   requirePermission,
-  ROLES,
+  _ROLES,
   RESOURCES,
   ACTIONS,
 } = require('../middleware/rbac.v2.middleware');
 const {
   ALL_ROLES,
   ROLE_HIERARCHY,
-  ROLE_PERMISSIONS,
+  _ROLE_PERMISSIONS,
   flattenPermissions,
   resolvePermissions,
   getRoleLabel,

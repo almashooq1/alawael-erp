@@ -26,7 +26,7 @@ async function sendPush({ tokens, title, body, data }) {
     tokens,
   };
   try {
-    const response = await admin.messaging().sendMulticast(message);
+    const response = await admin.messaging().sendEachForMulticast(message);
     return { success: true, response };
   } catch (error) {
     return { success: false, error };

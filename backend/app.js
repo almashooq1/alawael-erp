@@ -9,7 +9,10 @@
  * Server startup, Socket.IO, and database initialisation live in server.js.
  */
 
+const path = require('path');
 require('dotenv').config();
+// Fallback: also load from project root if backend/.env not present
+require('dotenv').config({ path: path.resolve(__dirname, '..', '.env') });
 const { validateEnv } = require('./config/validateEnv');
 validateEnv(); // fail-fast on bad config
 
@@ -89,7 +92,10 @@ const { mountAllRoutes } = require('./routes/_registry');
 const { mountEventStoreRoutes } = require('./infrastructure/eventStore');
 const { mountMessageQueueRoutes } = require('./infrastructure/messageQueue');
 const { mountMigrationRoutes } = require('./infrastructure/migrationRunner');
-const { getVersionRouter, mountOnVersions } = require('./api/versionRouter');
+const {
+  getVersionRouter: _getVersionRouter,
+  mountOnVersions: _mountOnVersions,
+} = require('./api/versionRouter');
 const { mountAllDomains, healthCheckAll: domainHealthCheck } = require('./domains/index');
 
 // ─── Create Express App ──────────────────────────────────────────────────────

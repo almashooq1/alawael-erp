@@ -145,7 +145,7 @@ class TaqatService {
     }
   }
 
-  async updateJobOpportunity(id, data, userId) {
+  async updateJobOpportunity(id, data, _userId) {
     try {
       const job = await TaqatJobOpportunity.findByIdAndUpdate(id, data, {
         new: true,

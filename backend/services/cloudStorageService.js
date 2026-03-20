@@ -4,7 +4,21 @@
  * خدمة تخزين الفيديو على السحابة (AWS S3 و Google Cloud)
  */
 
-const AWS = require('aws-sdk');
+const {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+  DeleteObjectCommand,
+  HeadObjectCommand,
+  ListObjectsV2Command,
+  CreateMultipartUploadCommand,
+  UploadPartCommand,
+  CompleteMultipartUploadCommand,
+  GetBucketAclCommand,
+  GetBucketVersioningCommand,
+} = require('@aws-sdk/client-s3');
+const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
+const { Upload } = require('@aws-sdk/lib-storage');
 const { Storage } = require('@google-cloud/storage');
 const fs = require('fs');
 const path = require('path');
@@ -15,10 +29,12 @@ class CloudStorageService {
   constructor(config = {}) {
     // إعداد AWS S3
     if (config.awsAccessKeyId) {
-      this.s3 = new AWS.S3({
-        accessKeyId: config.awsAccessKeyId,
-        secretAccessKey: config.awsSecretAccessKey,
+      this.s3 = new S3Client({
         region: config.awsRegion || 'us-east-1',
+        credentials: {
+          accessKeyId: config.awsAccessKeyId,
+          secretAccessKey: config.awsSecretAccessKey,
+        },
       });
       this.s3BucketName = config.s3BucketName;
     }
@@ -71,7 +87,8 @@ class CloudStorageService {
         return this.multipartUploadS3(filePath, params, metadata);
       }
 
-      const result = await this.s3.upload(params).promise();
+      const upload = new Upload({ client: this.s3, params });
+      const result = await upload.done();
 
       return {
         success: true,
@@ -101,7 +118,7 @@ class CloudStorageService {
       const numChunks = Math.ceil(fileSize / this.chunkSize);
 
       // بدء الرفع متعدد الأجزاء
-      const multipartUpload = await this.s3.createMultipartUpload(baseParams).promise();
+      const multipartUpload = await this.s3.send(new CreateMultipartUploadCommand(baseParams));
 
       const uploadId = multipartUpload.UploadId;
       const parts = [];
@@ -125,7 +142,7 @@ class CloudStorageService {
           Body: chunk,
         };
 
-        const result = await this.s3.uploadPart(partParams).promise();
+        const result = await this.s3.send(new UploadPartCommand(partParams));
         parts.push({
           ETag: result.ETag,
           PartNumber: i + 1,
@@ -144,7 +161,7 @@ class CloudStorageService {
         MultipartUpload: { Parts: parts },
       };
 
-      const result = await this.s3.completeMultipartUpload(completeParams).promise();
+      const result = await this.s3.send(new CompleteMultipartUploadCommand(completeParams));
 
       return {
         success: true,
@@ -221,14 +238,20 @@ class CloudStorageService {
         Key: key,
       };
 
-      const data = await this.s3.getObject(params).promise();
+      const data = await this.s3.send(new GetObjectCommand(params));
 
-      fs.writeFileSync(outputPath, data.Body);
+      const chunks = [];
+      for await (const chunk of data.Body) {
+        chunks.push(chunk);
+      }
+      const bodyBuffer = Buffer.concat(chunks);
+
+      fs.writeFileSync(outputPath, bodyBuffer);
 
       return {
         success: true,
         path: outputPath,
-        size: data.Body.length,
+        size: bodyBuffer.length,
       };
     } catch (error) {
       logger.error('❌ خطأ في تحميل S3:', error.message);
@@ -249,7 +272,7 @@ class CloudStorageService {
         Key: key,
       };
 
-      await this.s3.deleteObject(params).promise();
+      await this.s3.send(new DeleteObjectCommand(params));
 
       return {
         success: true,
@@ -295,7 +318,7 @@ class CloudStorageService {
         Key: key,
       };
 
-      const data = await this.s3.headObject(params).promise();
+      const data = await this.s3.send(new HeadObjectCommand(params));
 
       return {
         success: true,
@@ -321,13 +344,12 @@ class CloudStorageService {
    */
   async getPresignedUrl(key, expiresIn = 3600) {
     try {
-      const params = {
+      const command = new GetObjectCommand({
         Bucket: this.s3BucketName,
         Key: key,
-        Expires: expiresIn,
-      };
+      });
 
-      const url = this.s3.getSignedUrl('getObject', params);
+      const url = await getSignedUrl(this.s3, command, { expiresIn });
 
       return {
         success: true,
@@ -353,7 +375,7 @@ class CloudStorageService {
         MaxKeys: limit,
       };
 
-      const data = await this.s3.listObjectsV2(params).promise();
+      const data = await this.s3.send(new ListObjectsV2Command(params));
 
       const files =
         data.Contents?.map(item => ({
@@ -387,8 +409,8 @@ class CloudStorageService {
       };
 
       // الحصول على حجم الدلو (يتطلب CloudWatch)
-      const acl = await this.s3.getBucketAcl(params).promise();
-      const versioning = await this.s3.getBucketVersioning(params).promise();
+      const acl = await this.s3.send(new GetBucketAclCommand(params));
+      const versioning = await this.s3.send(new GetBucketVersioningCommand(params));
 
       return {
         success: true,

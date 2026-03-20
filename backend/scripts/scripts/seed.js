@@ -3,7 +3,7 @@
 
 const mongoose = require('mongoose');
 const { connectDB } = require('../config/database');
-const { User, Page, Post, Media, Analytics } = require('../models/schemas');
+const { User, Page, Post, Media, Analytics: _Analytics } = require('../models/schemas');
 
 // Sample data
 const sampleUsers = [

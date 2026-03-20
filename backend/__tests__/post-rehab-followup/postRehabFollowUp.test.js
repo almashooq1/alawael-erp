@@ -79,9 +79,10 @@ const {
 const postRehabService = require('../../services/postRehabFollowUp.service');
 
 describe('Post-Rehabilitation Follow-Up System — نظام المتابعة ما بعد التأهيل', () => {
+  let _mockDb;
   beforeEach(() => {
     jest.clearAllMocks();
-    mockDb = {
+    _mockDb = {
       postRehabCases: [],
       followUpVisits: [],
       impactMeasurements: [],
@@ -141,22 +142,6 @@ describe('Post-Rehabilitation Follow-Up System — نظام المتابعة م�
     });
 
     test('should get case by ID', async () => {
-      const mockCase = {
-        _id: 'case123',
-        caseNumber: 'PRF-2026-00001',
-        status: 'ACTIVE',
-      };
-      PostRehabCase.findById.mockReturnValue({
-        populate: jest.fn().mockReturnThis(),
-        then: resolve => resolve(mockCase),
-      });
-      // Use direct mock for simpler test
-      PostRehabCase.findById.mockReturnValueOnce({
-        populate: jest.fn(function () {
-          return this;
-        }),
-      });
-
       // The actual service method chains .populate() calls
       // For simplicity, we test that the service method exists and handles input
       expect(postRehabService.getCaseById).toBeDefined();
@@ -165,14 +150,12 @@ describe('Post-Rehabilitation Follow-Up System — نظام المتابعة م�
     test('should get overdue cases', async () => {
       PostRehabCase.find.mockReturnValue({
         populate: jest.fn().mockReturnThis(),
-        sort: jest
-          .fn()
-          .mockResolvedValue([
-            {
-              caseNumber: 'PRF-2026-00001',
-              followUpPlan: { nextScheduledVisit: new Date('2026-01-01') },
-            },
-          ]),
+        sort: jest.fn().mockResolvedValue([
+          {
+            caseNumber: 'PRF-2026-00001',
+            followUpPlan: { nextScheduledVisit: new Date('2026-01-01') },
+          },
+        ]),
       });
 
       const result = await postRehabService.getOverdueCases();

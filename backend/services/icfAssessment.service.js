@@ -166,7 +166,7 @@ class ICFAssessmentService {
   /**
    * تغيير حالة التقييم
    */
-  static async changeStatus(id, newStatus, userId, notes) {
+  static async changeStatus(id, newStatus, userId, _notes) {
     const assessment = await ICFAssessment.findOne({ _id: id, isDeleted: false });
     if (!assessment) throw new Error('التقييم غير موجود');
 

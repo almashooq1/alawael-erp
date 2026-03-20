@@ -10,7 +10,7 @@
  * - Arabic RTL support
  */
 
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 
@@ -30,7 +30,7 @@ class ExportService {
    * @param {string} filename - Output filename
    * @param {Object} options - Export options (columns, formatting, etc.)
    */
-  exportToExcel(data, filename = 'export', options = {}) {
+  async exportToExcel(data, filename = 'export', options = {}) {
     try {
       const {
         columns = null, // Array of column definitions: [{ key: 'name', label: 'الاسم', width: 20 }]
@@ -72,42 +72,56 @@ class ExportService {
         exportData = [...headerRows, ...exportData];
       }
 
-      // Create worksheet
-      const ws = XLSX.utils.json_to_sheet(exportData, {
-        header: columns ? columns.map(col => col.label || col.key) : undefined,
-      });
+      // Create workbook and worksheet
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet(sheetName);
 
-      // Apply column widths if specified
-      if (columns && formatting) {
-        ws['!cols'] = columns.map(col => ({ wch: col.width || 15 }));
-      }
+      // Set columns
+      const colDefs = columns
+        ? columns.map(col => ({
+            header: col.label || col.key,
+            key: col.label || col.key,
+            width: col.width || 15,
+          }))
+        : exportData.length > 0
+          ? Object.keys(exportData[0]).map(key => ({ header: key, key, width: 15 }))
+          : [];
+      worksheet.columns = colDefs;
 
-      // إضافة صورة الشعار إذا توفرت (ملاحظة: XLSX لا يدعم الصور مباشرة، يمكن دعمها لاحقاً عبر مكتبات متقدمة)
+      // Add data rows
+      worksheet.addRows(exportData);
 
-      // Add styling for headers (if using xlsx-js-style library)
+      // Add styling for headers
       if (formatting) {
-        const range = XLSX.utils.decode_range(ws['!ref']);
-        for (let C = range.s.c; C <= range.e.c; ++C) {
-          const cellAddress = XLSX.utils.encode_cell({ r: 0, c: C });
-          if (!ws[cellAddress]) continue;
-          // Style header cells (أول صف = الهوية، ثاني صف = رؤوس الأعمدة)
-          ws[cellAddress].s = {
-            font: {
-              bold: true,
-              color: { rgb: C === 0 && headerRows.length > 0 ? '667EEA' : 'FFFFFF' },
+        const headerRow = worksheet.getRow(1);
+        headerRow.eachCell((cell, colNumber) => {
+          cell.font = {
+            bold: true,
+            color: {
+              argb: colNumber === 1 && headerRows.length > 0 ? 'FF667EEA' : 'FFFFFFFF',
             },
-            fill: { fgColor: { rgb: C === 0 && headerRows.length > 0 ? 'F8F9FF' : '667EEA' } },
-            alignment: { horizontal: 'center', vertical: 'center' },
           };
-        }
+          cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: {
+              argb: colNumber === 1 && headerRows.length > 0 ? 'FFF8F9FF' : 'FF667EEA',
+            },
+          };
+          cell.alignment = { horizontal: 'center', vertical: 'middle' };
+        });
       }
 
-      // Create workbook
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, sheetName);
-
-      // Save file
-      XLSX.writeFile(wb, `${filename}.xlsx`);
+      // Write to buffer and download
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `${filename}.xlsx`;
+      link.click();
+      URL.revokeObjectURL(link.href);
 
       return { success: true, message: `✅ تم تصدير ${data.length} صف إلى Excel` };
     } catch (error) {

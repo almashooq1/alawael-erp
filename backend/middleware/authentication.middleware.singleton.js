@@ -2,7 +2,7 @@
  * Authentication Middleware with Singleton Pattern
  * Handles JWT verification and token management
  * All operations use singleton service instances
- * 
+ *
  * Usage:
  * const auth = require('./authentication.middleware.singleton');
  * app.use(auth.authenticate);
@@ -21,7 +21,7 @@ const {
  * Main authentication middleware
  * Verifies JWT token and attaches user to request
  * Required: Authorization header with Bearer token
- * 
+ *
  * @param {Request} req - Express request
  * @param {Response} res - Express response
  * @param {Function} next - Express next middleware
@@ -29,7 +29,7 @@ const {
 const authenticate = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
-    
+
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return res.status(401).json({
         success: false,
@@ -40,7 +40,7 @@ const authenticate = async (req, res, next) => {
 
     const token = authHeader.split(' ')[1];
     const JWT_SECRET = getUnifiedJWTSecret();
-    
+
     jwt.verify(token, JWT_SECRET, (err, decoded) => {
       if (err) {
         return res.status(401).json({
@@ -69,7 +69,7 @@ const authenticate = async (req, res, next) => {
  * Optional authentication middleware
  * Does not require token but validates if present
  * Next middleware called regardless of token validity
- * 
+ *
  * @param {Request} req - Express request
  * @param {Response} res - Express response
  * @param {Function} next - Express next middleware
@@ -77,7 +77,7 @@ const authenticate = async (req, res, next) => {
 const optionalAuth = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
-    
+
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       // No token provided, continue without user
       req.user = null;
@@ -86,7 +86,7 @@ const optionalAuth = async (req, res, next) => {
 
     const token = authHeader.split(' ')[1];
     const JWT_SECRET = getUnifiedJWTSecret();
-    
+
     jwt.verify(token, JWT_SECRET, (err, decoded) => {
       if (err) {
         // Invalid token, continue without user
@@ -108,7 +108,7 @@ const optionalAuth = async (req, res, next) => {
 /**
  * Require specific role(s)
  * User must have at least one of the provided roles
- * 
+ *
  * @param {...string} roles - Required roles
  * @returns {Function} Express middleware
  */
@@ -138,7 +138,7 @@ const requireRole = (...roles) => {
 /**
  * Require admin role specifically
  * Shorthand for requireRole('admin')
- * 
+ *
  * @param {Request} req - Express request
  * @param {Response} res - Express response
  * @param {Function} next - Express next middleware
@@ -148,11 +148,11 @@ const requireAdmin = requireRole('admin', 'superadmin');
 /**
  * Require specific permission
  * Uses security service to check permission
- * 
+ *
  * @param {string} permission - Required permission
  * @returns {Function} Express middleware
  */
-const requirePermission = (permission) => {
+const requirePermission = permission => {
   return async (req, res, next) => {
     try {
       if (!req.user) {
@@ -191,7 +191,7 @@ const requirePermission = (permission) => {
 /**
  * Require multiple permissions
  * User must have all provided permissions
- * 
+ *
  * @param {...string} permissions - Required permissions
  * @returns {Function} Express middleware
  */
@@ -207,7 +207,7 @@ const requirePermissions = (...permissions) => {
       }
 
       const securityService = getSecurityService();
-      
+
       for (const permission of permissions) {
         const hasPermission = securityService.validatePermission(req.user.role, permission);
         if (!hasPermission) {
@@ -235,11 +235,11 @@ const requirePermissions = (...permissions) => {
 /**
  * Check ownership of resource
  * Verifies user owns the resource identified by paramName
- * 
+ *
  * @param {string} paramName - URL parameter name (e.g., 'userId', 'postId')
  * @returns {Function} Express middleware
  */
-const checkOwnership = (paramName) => {
+const checkOwnership = paramName => {
   return async (req, res, next) => {
     try {
       if (!req.user) {
@@ -287,12 +287,12 @@ const checkOwnership = (paramName) => {
 /**
  * Token refresh handler
  * Verifies refresh token and issues new access token
- * 
+ *
  * @param {Request} req - Express request (expects refreshToken in body)
  * @param {Response} res - Express response
  * @param {Function} next - Express next middleware
  */
-const refreshToken = async (req, res, next) => {
+const refreshToken = async (req, res, _next) => {
   try {
     const { refreshToken } = req.body;
 
@@ -305,7 +305,7 @@ const refreshToken = async (req, res, next) => {
     }
 
     const JWT_REFRESH_SECRET = getUnifiedJWTRefreshSecret();
-    
+
     jwt.verify(refreshToken, JWT_REFRESH_SECRET, async (err, decoded) => {
       if (err) {
         return res.status(401).json({
@@ -317,9 +317,9 @@ const refreshToken = async (req, res, next) => {
 
       try {
         // Use auth service to generate new token
-        const authService = getAuthenticationService();
+        const _authService = getAuthenticationService();
         const JWT_SECRET = getUnifiedJWTSecret();
-        
+
         const newToken = jwt.sign(
           { id: decoded.id, email: decoded.email, role: decoded.role },
           JWT_SECRET,
@@ -354,13 +354,13 @@ const refreshToken = async (req, res, next) => {
 /**
  * Extract token from authorization header
  * Helper function used by other middleware
- * 
+ *
  * @param {Request} req - Express request
  * @returns {string|null} Token or null if not found
  */
-const extractToken = (req) => {
+const extractToken = req => {
   const authHeader = req.headers.authorization;
-  
+
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return null;
   }
@@ -371,11 +371,11 @@ const extractToken = (req) => {
 /**
  * Verify token validity
  * Helper function used by other middleware
- * 
+ *
  * @param {string} token - JWT token to verify
  * @returns {Object|null} Decoded token or null if invalid
  */
-const verifyTokenHelper = (token) => {
+const verifyTokenHelper = token => {
   try {
     const JWT_SECRET = getUnifiedJWTSecret();
     return jwt.verify(token, JWT_SECRET);
@@ -387,14 +387,14 @@ const verifyTokenHelper = (token) => {
 /**
  * Generate new token
  * Helper function used by routes
- * 
+ *
  * @param {Object} user - User object
  * @param {Object} options - Token options
  * @returns {string} Generated JWT token
  */
 const generateTokenHelper = (user, options = {}) => {
   const JWT_SECRET = getUnifiedJWTSecret();
-  
+
   const payload = {
     id: user.id,
     email: user.email,
@@ -411,7 +411,7 @@ const generateTokenHelper = (user, options = {}) => {
 /**
  * Log authentication activity
  * Used for audit trails
- * 
+ *
  * @param {Request} req - Express request
  * @param {string} action - Action performed
  * @param {Object} details - Additional details

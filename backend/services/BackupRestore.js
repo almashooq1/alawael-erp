@@ -12,7 +12,8 @@ const path = require('path');
 const zlib = require('zlib');
 const { exec } = require('child_process');
 const { promisify } = require('util');
-const AWS = require('aws-sdk');
+const { S3Client, GetObjectCommand, ListObjectsV2Command } = require('@aws-sdk/client-s3');
+const { Upload } = require('@aws-sdk/lib-storage');
 const logger = require('../utils/logger');
 
 const execPromise = promisify(exec);
@@ -22,10 +23,12 @@ class BackupRestoreService {
     this.backupDir = process.env.BACKUP_STORAGE_PATH || './backups';
 
     // Initialize AWS S3
-    this.s3 = new AWS.S3({
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    this.s3 = new S3Client({
       region: process.env.AWS_REGION,
+      credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+      },
     });
 
     this.s3Bucket = process.env.AWS_S3_BUCKET;
@@ -156,7 +159,8 @@ class BackupRestoreService {
         },
       };
 
-      const result = await this.s3.upload(params).promise();
+      const upload = new Upload({ client: this.s3, params });
+      const result = await upload.done();
 
       return {
         success: true,
@@ -178,15 +182,19 @@ class BackupRestoreService {
         Key: s3Key,
       };
 
-      const result = await this.s3.getObject(params).promise();
+      const result = await this.s3.send(new GetObjectCommand(params));
 
       const localPath = path.join(this.backupDir, path.basename(s3Key));
 
       // Ensure directory exists
       await fs.mkdir(this.backupDir, { recursive: true });
 
-      // Write file
-      await fs.writeFile(localPath, result.Body);
+      // Write file - Body is a stream in v3
+      const chunks = [];
+      for await (const chunk of result.Body) {
+        chunks.push(chunk);
+      }
+      await fs.writeFile(localPath, Buffer.concat(chunks));
 
       return {
         success: true,
@@ -207,7 +215,7 @@ class BackupRestoreService {
         Prefix: prefix,
       };
 
-      const result = await this.s3.listObjectsV2(params).promise();
+      const result = await this.s3.send(new ListObjectsV2Command(params));
 
       return {
         success: true,

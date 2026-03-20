@@ -5,7 +5,7 @@
  */
 
 const DispatchOrder = require('../models/DispatchOrder');
-const Vehicle = require('../models/Vehicle');
+const _Vehicle = require('../models/Vehicle');
 const logger = require('../utils/logger');
 
 class DispatchService {

@@ -100,13 +100,17 @@ module.exports = {
    */
   deploy: {
     production: {
-      user: 'cpanel_username',
-      host: 'yourdomain.com',
+      user: process.env.DEPLOY_USER || 'deploy',
+      host: process.env.DEPLOY_HOST || 'your-server.com',
       ref: 'origin/main',
-      repo: 'git@github.com:yourusername/alawael-backend.git',
-      path: '/home/cpanel_username/public_html/backend',
-      'post-deploy': 'npm ci --only=production && pm2 reload ecosystem.config.js --env production',
+      repo: 'git@github.com:almashooq1/alawael-erp.git',
+      path: process.env.DEPLOY_PATH || '/home/deploy/alawael-erp',
+      'post-deploy':
+        'cd backend && npm ci --only=production && pm2 reload ecosystem.config.js --env production',
       'pre-deploy-local': 'echo "Deploying to production..."',
+      env: {
+        NODE_ENV: 'production',
+      },
     },
   },
 };

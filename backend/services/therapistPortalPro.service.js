@@ -15,15 +15,15 @@
 // ─── Lazy model loaders ──────────────────────────────────────────────────────
 let _TherapySession, _Beneficiary, _CaseManagement;
 
-const getTherapySession = () => {
+const _getTherapySession = () => {
   if (!_TherapySession) _TherapySession = require('../models/TherapySession');
   return _TherapySession;
 };
-const getBeneficiary = () => {
+const _getBeneficiary = () => {
   if (!_Beneficiary) _Beneficiary = require('../models/Beneficiary');
   return _Beneficiary;
 };
-const getCaseManagement = () => {
+const _getCaseManagement = () => {
   if (!_CaseManagement) _CaseManagement = require('../models/CaseManagement');
   return _CaseManagement;
 };
@@ -336,7 +336,7 @@ class TherapistPortalProService {
 
   async getDailyTasks(therapistId, query = {}) {
     const tasks = [...tasksStore.values()].filter(t => t.therapistId === therapistId);
-    const date = query.date ? new Date(query.date) : new Date();
+    const _date = query.date ? new Date(query.date) : new Date();
 
     let filtered = tasks;
     if (query.status && query.status !== 'all') {

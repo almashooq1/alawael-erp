@@ -93,7 +93,8 @@ intelligent-agent/.next/
 *.pth
 *.h5
 *.model
-models/
+# models/ — DO NOT ignore backend/models (needed for app)
+intelligent-agent/models/
 data/large/
 
 # Misc

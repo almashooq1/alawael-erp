@@ -268,10 +268,12 @@ MONGODB_URI=${MONGODB_URI}
 MONGODB_MAX_POOL_SIZE=50
 USE_MOCK_DB=false
 
+# Encryption
+ENCRYPTION_KEY=$(openssl rand -hex 32)
+
 # Redis (Disabled)
 DISABLE_REDIS=true
 REDIS_ENABLED=false
-REDIS_URL=
 
 # JWT
 JWT_SECRET=${JWT_SECRET}
@@ -291,11 +293,11 @@ FRONTEND_URL=https://${DOMAIN}
 BACKEND_URL=https://${DOMAIN}
 API_BASE_URL=https://${DOMAIN}/api
 
-# Email (configure later)
+# Email (configure later — leave commented until ready)
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
-SMTP_USER=
-SMTP_PASS=
+# SMTP_USER=
+# SMTP_PASS=
 SMTP_SECURE=false
 EMAIL_FROM=noreply@${DOMAIN}
 EMAIL_FROM_NAME=Al-Awael ERP

@@ -48,7 +48,7 @@ module.exports = {
       },
       {
         name: 'employees_text_search',
-        default_language: 'arabic',
+        default_language: 'none',
         weights: { 'name.ar': 10, 'name.en': 10, employeeId: 5, department: 3 },
       }
     );

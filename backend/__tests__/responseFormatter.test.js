@@ -50,7 +50,9 @@ describe('SuccessResponse', () => {
     const res = mockRes();
     new SuccessResponse({ ok: 1 }).send(res, 201);
     expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ success: true, data: { ok: 1 } }));
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({ success: true, data: { ok: 1 } })
+    );
   });
 
   test('.send() defaults to 200', () => {
@@ -122,7 +124,9 @@ describe('ErrorResponse', () => {
     const res = mockRes();
     new ErrorResponse('Not found', 'NOT_FOUND', [], 404).send(res);
     expect(res.status).toHaveBeenCalledWith(404);
-    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ success: false, error: 'Not found' }));
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({ success: false, error: 'Not found' })
+    );
   });
 });
 
@@ -140,13 +144,16 @@ describe('ErrorTypes', () => {
     ['ServiceUnavailable', 503, 'SERVICE_UNAVAILABLE'],
   ];
 
-  test.each(cases)('%s returns statusCode %i and code %s', (factory, expectedStatus, expectedCode) => {
-    const err = ErrorTypes[factory]();
-    expect(err).toBeInstanceOf(ErrorResponse);
-    expect(err.statusCode).toBe(expectedStatus);
-    expect(err.code).toBe(expectedCode);
-    expect(err.success).toBe(false);
-  });
+  test.each(cases)(
+    '%s returns statusCode %i and code %s',
+    (factory, expectedStatus, expectedCode) => {
+      const err = ErrorTypes[factory]();
+      expect(err).toBeInstanceOf(ErrorResponse);
+      expect(err.statusCode).toBe(expectedStatus);
+      expect(err.code).toBe(expectedCode);
+      expect(err.success).toBe(false);
+    }
+  );
 
   test('BadRequest accepts custom message and errors', () => {
     const err = ErrorTypes.BadRequest('Missing field', ['name is required']);
@@ -177,7 +184,9 @@ describe('sendSuccess', () => {
     const res = mockRes();
     sendSuccess(res, { id: 1 }, 'OK');
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ success: true, data: { id: 1 } }));
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({ success: true, data: { id: 1 } })
+    );
   });
 
   test('supports custom statusCode', () => {
@@ -192,7 +201,9 @@ describe('sendCreated', () => {
     const res = mockRes();
     sendCreated(res, { id: 2 });
     expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ success: true, data: { id: 2 } }));
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({ success: true, data: { id: 2 } })
+    );
   });
 });
 
@@ -218,7 +229,9 @@ describe('sendError', () => {
     const res = mockRes();
     sendError(res, 'bad');
     expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ success: false, error: 'bad' }));
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({ success: false, error: 'bad' })
+    );
   });
 
   test('sends error with custom status', () => {

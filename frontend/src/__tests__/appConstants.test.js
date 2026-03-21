@@ -242,15 +242,15 @@ describe('PATTERNS.SAUDI_ID', () => {
   const p = PATTERNS.SAUDI_ID;
 
   test.each([
-    ['1012345678', true],  // starts with 1 (citizen)
-    ['2012345678', true],  // starts with 2 (resident)
+    ['1012345678', true], // starts with 1 (citizen)
+    ['2012345678', true], // starts with 2 (resident)
   ])('%s → %s', (id, expected) => {
     expect(p.test(id)).toBe(expected);
   });
 
   test.each([
     ['3012345678', false], // starts with 3
-    ['101234567', false],  // 9 digits
+    ['101234567', false], // 9 digits
     ['10123456789', false], // 11 digits
     ['abcdefghij', false],
   ])('%s → %s (invalid)', (id, expected) => {
@@ -271,8 +271,8 @@ describe('PATTERNS.SAUDI_PHONE', () => {
   });
 
   test.each([
-    ['0612345678', false],  // 06 not 05
-    ['05123456', false],    // too short
+    ['0612345678', false], // 06 not 05
+    ['05123456', false], // too short
     ['051234567890', false], // too long
     ['abc', false],
   ])('%s → invalid', (phone, expected) => {
@@ -310,7 +310,7 @@ describe('PATTERNS.SAUDI_IBAN', () => {
 
   test.each([
     ['US0380000000608010167519', false], // wrong country
-    ['SA03', false],                   // too short
+    ['SA03', false], // too short
     ['sa0380000000608010167519', true], // case insensitive
   ])('%s → %s', (iban, expected) => {
     expect(p.test(iban)).toBe(expected);
@@ -327,7 +327,7 @@ describe('PATTERNS.VAT_NUMBER', () => {
   test.each([
     ['200012345678903', false], // starts with 2
     ['300012345678904', false], // ends with 4
-    ['30001234567890', false],  // 14 digits
+    ['30001234567890', false], // 14 digits
   ])('%s → invalid', (vat, expected) => {
     expect(p.test(vat)).toBe(expected);
   });
@@ -341,7 +341,7 @@ describe('PATTERNS.CR_NUMBER', () => {
   });
 
   test.each([
-    ['123456789', false],   // 9 digits
+    ['123456789', false], // 9 digits
     ['12345678901', false], // 11 digits
     ['abcdefghij', false],
   ])('%s → invalid', (cr, expected) => {

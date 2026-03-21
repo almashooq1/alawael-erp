@@ -58,9 +58,7 @@ router.get('/dashboard', async (_req, res) => {
         ])
       : [];
 
-    const recentTx = WHTx
-      ? await WHTx.find().sort({ createdAt: -1 }).limit(10).lean()
-      : [];
+    const recentTx = WHTx ? await WHTx.find().sort({ createdAt: -1 }).limit(10).lean() : [];
 
     res.json({
       success: true,
@@ -71,7 +69,9 @@ router.get('/dashboard', async (_req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في تحميل لوحة المستودعات', error: err.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في تحميل لوحة المستودعات', error: err.message });
   }
 });
 
@@ -125,7 +125,10 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const WH = safeModel('Warehouse');
-    const data = await WH.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    const data = await WH.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
     if (!data) return res.status(404).json({ success: false, message: 'المستودع غير موجود' });
     res.json({ success: true, data });
   } catch (err) {
@@ -157,7 +160,11 @@ router.get('/:warehouseId/items', async (req, res) => {
     if (status) filter.status = status;
     if (search) filter.nameAr = { $regex: search, $options: 'i' };
     const total = await WHItem.countDocuments(filter);
-    const data = await WHItem.find(filter).sort({ nameAr: 1 }).skip((page - 1) * limit).limit(Number(limit)).lean();
+    const data = await WHItem.find(filter)
+      .sort({ nameAr: 1 })
+      .skip((page - 1) * limit)
+      .limit(Number(limit))
+      .lean();
     res.json({ success: true, data, pagination: { page: +page, limit: +limit, total } });
   } catch (err) {
     res.status(500).json({ success: false, message: 'خطأ في جلب الأصناف', error: err.message });
@@ -198,7 +205,11 @@ router.get('/transactions/list', async (req, res) => {
     if (status) filter.status = status;
     if (warehouse) filter.warehouse = warehouse;
     const total = await WHTx.countDocuments(filter);
-    const data = await WHTx.find(filter).sort({ createdAt: -1 }).skip((page - 1) * limit).limit(Number(limit)).lean();
+    const data = await WHTx.find(filter)
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(Number(limit))
+      .lean();
     res.json({ success: true, data, pagination: { page: +page, limit: +limit, total } });
   } catch (err) {
     res.status(500).json({ success: false, message: 'خطأ في جلب الحركات', error: err.message });
@@ -209,7 +220,11 @@ router.post('/transactions', async (req, res) => {
   try {
     const WHTx = safeModel('WarehouseTransaction');
     const num = `WH-TX-${Date.now()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
-    const data = await WHTx.create({ ...req.body, transactionNumber: num, requestedBy: req.user?._id });
+    const data = await WHTx.create({
+      ...req.body,
+      transactionNumber: num,
+      requestedBy: req.user?._id,
+    });
     res.status(201).json({ success: true, data });
   } catch (err) {
     res.status(500).json({ success: false, message: 'خطأ في إنشاء الحركة', error: err.message });

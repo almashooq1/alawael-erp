@@ -12,19 +12,46 @@ const enterpriseRiskSchema = new mongoose.Schema(
     titleEn: { type: String },
     category: {
       type: String,
-      enum: ['strategic', 'operational', 'financial', 'compliance', 'reputational', 'technology', 'environmental', 'safety', 'legal', 'other'],
+      enum: [
+        'strategic',
+        'operational',
+        'financial',
+        'compliance',
+        'reputational',
+        'technology',
+        'environmental',
+        'safety',
+        'legal',
+        'other',
+      ],
       default: 'operational',
     },
     description: String,
     source: String,
     owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     department: String,
-    probability: { type: String, enum: ['very_low', 'low', 'medium', 'high', 'very_high'], default: 'medium' },
-    impact: { type: String, enum: ['very_low', 'low', 'medium', 'high', 'very_high'], default: 'medium' },
+    probability: {
+      type: String,
+      enum: ['very_low', 'low', 'medium', 'high', 'very_high'],
+      default: 'medium',
+    },
+    impact: {
+      type: String,
+      enum: ['very_low', 'low', 'medium', 'high', 'very_high'],
+      default: 'medium',
+    },
     riskScore: { type: Number, default: 0 },
     status: {
       type: String,
-      enum: ['identified', 'assessed', 'mitigating', 'monitoring', 'resolved', 'accepted', 'closed'],
+      enum: [
+        'identified',
+        'assessed',
+        'mitigating',
+        'monitoring',
+        'resolved',
+        'accepted',
+        'closed',
+      ],
       default: 'identified',
     },
     priority: { type: String, enum: ['critical', 'high', 'medium', 'low'], default: 'medium' },
@@ -35,14 +62,29 @@ const enterpriseRiskSchema = new mongoose.Schema(
         action: String,
         responsible: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
         dueDate: Date,
-        status: { type: String, enum: ['planned', 'in_progress', 'completed', 'cancelled'], default: 'planned' },
-        effectiveness: { type: String, enum: ['not_started', 'partial', 'effective', 'ineffective'], default: 'not_started' },
+        status: {
+          type: String,
+          enum: ['planned', 'in_progress', 'completed', 'cancelled'],
+          default: 'planned',
+        },
+        effectiveness: {
+          type: String,
+          enum: ['not_started', 'partial', 'effective', 'ineffective'],
+          default: 'not_started',
+        },
         notes: String,
       },
     ],
     indicators: [{ name: String, threshold: String, currentValue: String }],
     attachments: [{ name: String, url: String }],
-    history: [{ date: { type: Date, default: Date.now }, action: String, user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, notes: String }],
+    history: [
+      {
+        date: { type: Date, default: Date.now },
+        action: String,
+        user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        notes: String,
+      },
+    ],
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   },
   { timestamps: true }
@@ -72,16 +114,26 @@ const riskAssessmentSchema = new mongoose.Schema(
         recommendations: String,
       },
     ],
-    overallRiskLevel: { type: String, enum: ['low', 'medium', 'high', 'critical'], default: 'medium' },
+    overallRiskLevel: {
+      type: String,
+      enum: ['low', 'medium', 'high', 'critical'],
+      default: 'medium',
+    },
     findings: String,
     recommendations: String,
-    status: { type: String, enum: ['draft', 'in_progress', 'completed', 'reviewed'], default: 'draft' },
+    status: {
+      type: String,
+      enum: ['draft', 'in_progress', 'completed', 'reviewed'],
+      default: 'draft',
+    },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   },
   { timestamps: true }
 );
 
-const EnterpriseRisk = mongoose.models.EnterpriseRisk || mongoose.model('EnterpriseRisk', enterpriseRiskSchema);
-const RiskAssessment = mongoose.models.RiskAssessment || mongoose.model('RiskAssessment', riskAssessmentSchema);
+const EnterpriseRisk =
+  mongoose.models.EnterpriseRisk || mongoose.model('EnterpriseRisk', enterpriseRiskSchema);
+const RiskAssessment =
+  mongoose.models.RiskAssessment || mongoose.model('RiskAssessment', riskAssessmentSchema);
 
 module.exports = { EnterpriseRisk, RiskAssessment };

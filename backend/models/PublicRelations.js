@@ -10,10 +10,26 @@ const mediaCoverageSchema = new mongoose.Schema(
     titleAr: { type: String, required: true },
     type: {
       type: String,
-      enum: ['press_release', 'news_article', 'tv_coverage', 'radio', 'social_media', 'interview', 'report', 'other'],
+      enum: [
+        'press_release',
+        'news_article',
+        'tv_coverage',
+        'radio',
+        'social_media',
+        'interview',
+        'report',
+        'other',
+      ],
       default: 'press_release',
     },
-    outlet: { name: String, type: { type: String, enum: ['newspaper', 'tv', 'radio', 'website', 'social_media', 'magazine'] }, contact: String },
+    outlet: {
+      name: String,
+      type: {
+        type: String,
+        enum: ['newspaper', 'tv', 'radio', 'website', 'social_media', 'magazine'],
+      },
+      contact: String,
+    },
     publicationDate: Date,
     content: String,
     sentiment: { type: String, enum: ['positive', 'neutral', 'negative'], default: 'neutral' },
@@ -33,16 +49,33 @@ const campaignSchema = new mongoose.Schema(
     titleAr: { type: String, required: true },
     type: {
       type: String,
-      enum: ['awareness', 'promotional', 'crisis', 'branding', 'community', 'internal', 'social_responsibility'],
+      enum: [
+        'awareness',
+        'promotional',
+        'crisis',
+        'branding',
+        'community',
+        'internal',
+        'social_responsibility',
+      ],
       default: 'awareness',
     },
     description: String,
     objectives: [String],
     targetAudience: [String],
-    channels: [{ type: String, enum: ['social_media', 'tv', 'radio', 'print', 'digital', 'outdoor', 'events'] }],
+    channels: [
+      {
+        type: String,
+        enum: ['social_media', 'tv', 'radio', 'print', 'digital', 'outdoor', 'events'],
+      },
+    ],
     startDate: Date,
     endDate: Date,
-    budget: { estimated: { type: Number, default: 0 }, actual: { type: Number, default: 0 }, currency: { type: String, default: 'SAR' } },
+    budget: {
+      estimated: { type: Number, default: 0 },
+      actual: { type: Number, default: 0 },
+      currency: { type: String, default: 'SAR' },
+    },
     kpis: [{ metric: String, target: Number, actual: Number }],
     status: {
       type: String,
@@ -69,13 +102,18 @@ const partnershipSchema = new mongoose.Schema(
     endDate: Date,
     description: String,
     agreements: [{ title: String, signDate: Date, expiryDate: Date }],
-    status: { type: String, enum: ['active', 'pending', 'expired', 'terminated'], default: 'pending' },
+    status: {
+      type: String,
+      enum: ['active', 'pending', 'expired', 'terminated'],
+      default: 'pending',
+    },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   },
   { timestamps: true }
 );
 
-const MediaCoverage = mongoose.models.MediaCoverage || mongoose.model('MediaCoverage', mediaCoverageSchema);
+const MediaCoverage =
+  mongoose.models.MediaCoverage || mongoose.model('MediaCoverage', mediaCoverageSchema);
 const Campaign = mongoose.models.Campaign || mongoose.model('Campaign', campaignSchema);
 const Partnership = mongoose.models.Partnership || mongoose.model('Partnership', partnershipSchema);
 

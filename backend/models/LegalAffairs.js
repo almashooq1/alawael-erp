@@ -10,17 +10,43 @@ const legalCaseSchema = new mongoose.Schema(
     title: { type: String, required: true, trim: true },
     type: {
       type: String,
-      enum: ['litigation', 'arbitration', 'labor', 'commercial', 'administrative', 'regulatory', 'other'],
+      enum: [
+        'litigation',
+        'arbitration',
+        'labor',
+        'commercial',
+        'administrative',
+        'regulatory',
+        'other',
+      ],
       required: true,
     },
     category: {
       type: String,
-      enum: ['internal', 'external', 'government', 'insurance', 'contract_dispute', 'employment', 'compliance'],
+      enum: [
+        'internal',
+        'external',
+        'government',
+        'insurance',
+        'contract_dispute',
+        'employment',
+        'compliance',
+      ],
       default: 'external',
     },
     status: {
       type: String,
-      enum: ['open', 'in_progress', 'pending_hearing', 'pending_judgment', 'appealed', 'closed', 'settled', 'won', 'lost'],
+      enum: [
+        'open',
+        'in_progress',
+        'pending_hearing',
+        'pending_judgment',
+        'appealed',
+        'closed',
+        'settled',
+        'won',
+        'lost',
+      ],
       default: 'open',
     },
     priority: { type: String, enum: ['low', 'medium', 'high', 'critical'], default: 'medium' },
@@ -75,7 +101,14 @@ const legalConsultationSchema = new mongoose.Schema(
     title: { type: String, required: true, trim: true },
     type: {
       type: String,
-      enum: ['contract_review', 'legal_opinion', 'compliance', 'risk_assessment', 'general', 'employment'],
+      enum: [
+        'contract_review',
+        'legal_opinion',
+        'compliance',
+        'risk_assessment',
+        'general',
+        'employment',
+      ],
       default: 'general',
     },
     requestedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
@@ -108,7 +141,11 @@ legalConsultationSchema.index({ dueDate: 1 });
 const legalContractTemplateSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true },
-    type: { type: String, enum: ['employment', 'vendor', 'service', 'lease', 'nda', 'partnership', 'other'], required: true },
+    type: {
+      type: String,
+      enum: ['employment', 'vendor', 'service', 'lease', 'nda', 'partnership', 'other'],
+      required: true,
+    },
     content: String,
     clauses: [{ title: String, text: String, isRequired: { type: Boolean, default: true } }],
     status: { type: String, enum: ['active', 'draft', 'archived'], default: 'active' },
@@ -119,7 +156,10 @@ const legalContractTemplateSchema = new mongoose.Schema(
 );
 
 const LegalCase = mongoose.models.LegalCase || mongoose.model('LegalCase', legalCaseSchema);
-const LegalConsultation = mongoose.models.LegalConsultation || mongoose.model('LegalConsultation', legalConsultationSchema);
-const LegalContractTemplate = mongoose.models.LegalContractTemplate || mongoose.model('LegalContractTemplate', legalContractTemplateSchema);
+const LegalConsultation =
+  mongoose.models.LegalConsultation || mongoose.model('LegalConsultation', legalConsultationSchema);
+const LegalContractTemplate =
+  mongoose.models.LegalContractTemplate ||
+  mongoose.model('LegalContractTemplate', legalContractTemplateSchema);
 
 module.exports = { LegalCase, LegalConsultation, LegalContractTemplate };

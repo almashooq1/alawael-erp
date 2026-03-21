@@ -21,3 +21,7 @@ export { default as TrainingRoutes } from './TrainingRoutes';
 export { default as EventManagementRoutes } from './EventManagementRoutes';
 export { default as PublicRelationsRoutes } from './PublicRelationsRoutes';
 export { default as RiskManagementRoutes } from './RiskManagementRoutes';
+export { default as InternalAuditRoutes } from './InternalAuditRoutes';
+export { default as AssetManagementRoutes } from './AssetManagementRoutes';
+export { default as HelpDeskRoutes } from './HelpDeskRoutes';
+export { default as HSERoutes } from './HSERoutes';

@@ -809,10 +809,39 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   safeMount(app, ['/api/warehouse', '/api/v1/warehouse'], '../routes/warehouse.routes');
   safeMount(app, ['/api/legal-affairs', '/api/v1/legal-affairs'], '../routes/legal-affairs.routes');
   safeMount(app, ['/api/training', '/api/v1/training'], '../routes/training.routes');
-  safeMount(app, ['/api/events-management', '/api/v1/events-management'], '../routes/events-management.routes');
-  safeMount(app, ['/api/public-relations', '/api/v1/public-relations'], '../routes/public-relations.routes');
-  safeMount(app, ['/api/enterprise-risk', '/api/v1/enterprise-risk'], '../routes/enterprise-risk.routes');
-  logger.info('New systems mounted (6 modules: warehouse, legal-affairs, training, events, public-relations, enterprise-risk)');
+  safeMount(
+    app,
+    ['/api/events-management', '/api/v1/events-management'],
+    '../routes/events-management.routes'
+  );
+  safeMount(
+    app,
+    ['/api/public-relations', '/api/v1/public-relations'],
+    '../routes/public-relations.routes'
+  );
+  safeMount(
+    app,
+    ['/api/enterprise-risk', '/api/v1/enterprise-risk'],
+    '../routes/enterprise-risk.routes'
+  );
+  logger.info(
+    'New systems mounted (6 modules: warehouse, legal-affairs, training, events, public-relations, enterprise-risk)'
+  );
+
+  // ── Phase 9: Help Desk + HSE ─────────────────────────────────────────
+  safeMount(
+    app,
+    ['/api/helpdesk', '/api/v1/helpdesk'],
+    '../routes/helpdesk.routes'
+  );
+  safeMount(
+    app,
+    ['/api/hse', '/api/v1/hse'],
+    '../routes/hse.routes'
+  );
+  logger.info(
+    'New systems mounted (2 modules: helpdesk, hse)'
+  );
 };
 
 module.exports = { mountAllRoutes, dualMount, safeMount };

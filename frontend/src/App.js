@@ -40,6 +40,10 @@ import {
   EventManagementRoutes,
   PublicRelationsRoutes,
   RiskManagementRoutes,
+  InternalAuditRoutes,
+  AssetManagementRoutes,
+  HelpDeskRoutes,
+  HSERoutes,
 } from './routes';
 
 // Pages — Keep eagerly loaded (critical path / small)
@@ -203,6 +207,10 @@ function AppContent() {
                               {EventManagementRoutes()}
                               {PublicRelationsRoutes()}
                               {RiskManagementRoutes()}
+                              {InternalAuditRoutes()}
+                              {AssetManagementRoutes()}
+                              {HelpDeskRoutes()}
+                              {HSERoutes()}
                               {/* === Shared / Cross-cutting Routes === */}
                               {/* AI & Analytics */}
                               <Route

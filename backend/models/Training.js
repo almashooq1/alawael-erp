@@ -11,7 +11,16 @@ const trainingCourseSchema = new mongoose.Schema(
     titleEn: { type: String },
     category: {
       type: String,
-      enum: ['technical', 'leadership', 'soft_skills', 'compliance', 'safety', 'professional', 'language', 'other'],
+      enum: [
+        'technical',
+        'leadership',
+        'soft_skills',
+        'compliance',
+        'safety',
+        'professional',
+        'language',
+        'other',
+      ],
       default: 'technical',
     },
     type: {
@@ -52,7 +61,11 @@ const trainingSessionSchema = new mongoose.Schema(
         employee: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
         name: String,
         department: String,
-        attendance: { type: String, enum: ['registered', 'attended', 'absent', 'cancelled'], default: 'registered' },
+        attendance: {
+          type: String,
+          enum: ['registered', 'attended', 'absent', 'cancelled'],
+          default: 'registered',
+        },
         score: Number,
         certificateIssued: { type: Boolean, default: false },
         feedback: { rating: Number, comment: String },
@@ -97,8 +110,11 @@ const trainingPlanSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const TrainingCourse = mongoose.models.TrainingCourse || mongoose.model('TrainingCourse', trainingCourseSchema);
-const TrainingSession = mongoose.models.TrainingSession || mongoose.model('TrainingSession', trainingSessionSchema);
-const TrainingPlan = mongoose.models.TrainingPlan || mongoose.model('TrainingPlan', trainingPlanSchema);
+const TrainingCourse =
+  mongoose.models.TrainingCourse || mongoose.model('TrainingCourse', trainingCourseSchema);
+const TrainingSession =
+  mongoose.models.TrainingSession || mongoose.model('TrainingSession', trainingSessionSchema);
+const TrainingPlan =
+  mongoose.models.TrainingPlan || mongoose.model('TrainingPlan', trainingPlanSchema);
 
 module.exports = { TrainingCourse, TrainingSession, TrainingPlan };

@@ -11,7 +11,18 @@ const eventSchema = new mongoose.Schema(
     titleEn: { type: String },
     type: {
       type: String,
-      enum: ['conference', 'seminar', 'workshop', 'ceremony', 'exhibition', 'meeting', 'training', 'social', 'sports', 'other'],
+      enum: [
+        'conference',
+        'seminar',
+        'workshop',
+        'ceremony',
+        'exhibition',
+        'meeting',
+        'training',
+        'social',
+        'sports',
+        'other',
+      ],
       default: 'seminar',
     },
     category: {
@@ -22,9 +33,22 @@ const eventSchema = new mongoose.Schema(
     description: String,
     startDate: { type: Date, required: true },
     endDate: { type: Date, required: true },
-    location: { name: String, address: String, capacity: Number, isVirtual: { type: Boolean, default: false }, virtualLink: String },
-    organizer: { department: String, contactPerson: { type: mongoose.Schema.Types.ObjectId, ref: 'User' } },
-    budget: { estimated: { type: Number, default: 0 }, actual: { type: Number, default: 0 }, currency: { type: String, default: 'SAR' } },
+    location: {
+      name: String,
+      address: String,
+      capacity: Number,
+      isVirtual: { type: Boolean, default: false },
+      virtualLink: String,
+    },
+    organizer: {
+      department: String,
+      contactPerson: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    },
+    budget: {
+      estimated: { type: Number, default: 0 },
+      actual: { type: Number, default: 0 },
+      currency: { type: String, default: 'SAR' },
+    },
     sponsors: [{ name: String, contribution: Number }],
     speakers: [{ name: String, title: String, topic: String, bio: String }],
     agenda: [{ time: String, title: String, speaker: String, duration: Number }],
@@ -32,7 +56,16 @@ const eventSchema = new mongoose.Schema(
     registrationDeadline: Date,
     status: {
       type: String,
-      enum: ['draft', 'planning', 'approved', 'registration_open', 'in_progress', 'completed', 'cancelled', 'postponed'],
+      enum: [
+        'draft',
+        'planning',
+        'approved',
+        'registration_open',
+        'in_progress',
+        'completed',
+        'cancelled',
+        'postponed',
+      ],
       default: 'draft',
     },
     tags: [String],
@@ -52,8 +85,16 @@ const eventRegistrationSchema = new mongoose.Schema(
     phone: String,
     department: String,
     organization: String,
-    role: { type: String, enum: ['attendee', 'speaker', 'volunteer', 'vip', 'organizer'], default: 'attendee' },
-    status: { type: String, enum: ['registered', 'confirmed', 'attended', 'cancelled', 'no_show'], default: 'registered' },
+    role: {
+      type: String,
+      enum: ['attendee', 'speaker', 'volunteer', 'vip', 'organizer'],
+      default: 'attendee',
+    },
+    status: {
+      type: String,
+      enum: ['registered', 'confirmed', 'attended', 'cancelled', 'no_show'],
+      default: 'registered',
+    },
     checkInTime: Date,
     feedback: { rating: { type: Number, min: 1, max: 5 }, comment: String },
     certificateIssued: { type: Boolean, default: false },
@@ -62,6 +103,7 @@ const eventRegistrationSchema = new mongoose.Schema(
 );
 
 const Event = mongoose.models.Event || mongoose.model('Event', eventSchema);
-const EventRegistration = mongoose.models.EventRegistration || mongoose.model('EventRegistration', eventRegistrationSchema);
+const EventRegistration =
+  mongoose.models.EventRegistration || mongoose.model('EventRegistration', eventRegistrationSchema);
 
 module.exports = { Event, EventRegistration };

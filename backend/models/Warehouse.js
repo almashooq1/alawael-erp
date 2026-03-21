@@ -62,7 +62,16 @@ const warehouseItemSchema = new mongoose.Schema(
     nameEn: { type: String, trim: true },
     category: {
       type: String,
-      enum: ['equipment', 'supplies', 'medical', 'food', 'cleaning', 'office', 'educational', 'other'],
+      enum: [
+        'equipment',
+        'supplies',
+        'medical',
+        'food',
+        'cleaning',
+        'office',
+        'educational',
+        'other',
+      ],
       default: 'supplies',
     },
     unit: { type: String, default: 'piece' },
@@ -75,7 +84,11 @@ const warehouseItemSchema = new mongoose.Schema(
     barcode: String,
     expiryDate: Date,
     lastStockCheck: Date,
-    status: { type: String, enum: ['available', 'low', 'out_of_stock', 'expired', 'reserved'], default: 'available' },
+    status: {
+      type: String,
+      enum: ['available', 'low', 'out_of_stock', 'expired', 'reserved'],
+      default: 'available',
+    },
   },
   { timestamps: true }
 );
@@ -128,7 +141,10 @@ warehouseTransactionSchema.index({ type: 1, status: 1 });
 warehouseTransactionSchema.index({ status: 1, createdAt: -1 });
 
 const Warehouse = mongoose.models.Warehouse || mongoose.model('Warehouse', warehouseSchema);
-const WarehouseItem = mongoose.models.WarehouseItem || mongoose.model('WarehouseItem', warehouseItemSchema);
-const WarehouseTransaction = mongoose.models.WarehouseTransaction || mongoose.model('WarehouseTransaction', warehouseTransactionSchema);
+const WarehouseItem =
+  mongoose.models.WarehouseItem || mongoose.model('WarehouseItem', warehouseItemSchema);
+const WarehouseTransaction =
+  mongoose.models.WarehouseTransaction ||
+  mongoose.model('WarehouseTransaction', warehouseTransactionSchema);
 
 module.exports = { Warehouse, WarehouseItem, WarehouseTransaction };

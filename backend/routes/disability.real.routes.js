@@ -202,6 +202,7 @@ router.post('/assessment/perform', async (req, res) => {
     });
 
     // حفظ في قاعدة البيانات أيضاً
+    let persisted = true;
     try {
       const DisabilityAssessment = require('../models/disability-assessment.model');
       await DisabilityAssessment.create({
@@ -221,10 +222,18 @@ router.post('/assessment/perform', async (req, res) => {
         created_by: req.user?.id,
       });
     } catch (dbErr) {
-      logger.warn('Could not persist assessment to DB:', dbErr.message);
+      persisted = false;
+      logger.error('CRITICAL: Failed to persist assessment to DB:', dbErr.message);
     }
 
-    res.status(201).json({ success: true, data: result, message: 'تم تنفيذ التقييم بنجاح' });
+    res.status(201).json({
+      success: true,
+      data: result,
+      persisted,
+      message: persisted
+        ? 'تم تنفيذ التقييم بنجاح'
+        : 'تم تنفيذ التقييم لكن فشل الحفظ في قاعدة البيانات. يرجى إعادة المحاولة.',
+    });
   } catch (err) {
     logger.error('Perform assessment error:', err);
     res.status(500).json({ success: false, message: err.message || 'خطأ في تنفيذ التقييم' });

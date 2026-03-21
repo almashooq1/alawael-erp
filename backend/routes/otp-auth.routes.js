@@ -363,25 +363,37 @@ router.post(
         throw new UnauthorizedError(result.error);
       }
 
-      // @todo [P1] Replace demo user with User.findOne() + session creation
-      // مستخدم تجريبي (@stub)
-      const demoUser = {
-        id: '1',
-        email: identifier.includes('@') ? identifier : 'user@alawael.sa',
-        phone: identifier.includes('@') ? '0500000000' : identifier,
-        name: 'مستخدم النظام',
-        role: 'user',
-      };
+      // البحث عن المستخدم في قاعدة البيانات بالبريد أو الجوال
+      const isEmail = identifier.includes('@');
+      const query = isEmail ? { email: identifier } : { phone: identifier };
+      const user = await User.findOne(query);
+
+      if (!user) {
+        throw new UnauthorizedError('المستخدم غير مسجل. يرجى إنشاء حساب أولاً');
+      }
+
+      if (!user.isActive) {
+        throw new UnauthorizedError('هذا الحساب غير مفعل');
+      }
+
+      // تحديث آخر تسجيل دخول
+      user.lastLogin = new Date();
+      user.loginHistory.push({
+        date: new Date(),
+        ip: req.ip || req.socket?.remoteAddress,
+        device: req.headers['user-agent'],
+      });
+      await user.save();
 
       // إنشاء التوكن
       const token = jwt.sign(
-        { id: demoUser.id, email: demoUser.email, phone: demoUser.phone, role: demoUser.role },
+        { id: user._id, email: user.email, phone: user.phone, role: user.role },
         JWT_SECRET,
         { expiresIn: JWT_EXPIRE }
       );
 
       // إنشاء Refresh Token
-      const refreshToken = jwt.sign({ id: demoUser.id, type: 'refresh' }, JWT_SECRET, {
+      const refreshToken = jwt.sign({ id: user._id, type: 'refresh' }, JWT_SECRET, {
         expiresIn: '30d',
       });
 
@@ -393,11 +405,11 @@ router.post(
           refreshToken,
           expiresIn: 7 * 24 * 60 * 60, // 7 أيام بالثواني
           user: {
-            id: demoUser.id,
-            email: demoUser.email,
-            phone: demoUser.phone,
-            name: demoUser.name,
-            role: demoUser.role,
+            id: user._id,
+            email: user.email,
+            phone: user.phone,
+            name: user.fullName,
+            role: user.role,
           },
         },
       });
@@ -431,7 +443,16 @@ router.post(
 
       const { identifier, name, method = 'auto' } = req.body;
 
-      // @todo [P1] Check for existing user before OTP registration
+      // التحقق من عدم وجود المستخدم مسبقاً
+      const isEmail = identifier.includes('@');
+      const existQuery = isEmail ? { email: identifier } : { phone: identifier };
+      const existingUser = await User.findOne(existQuery);
+      if (existingUser) {
+        return res.status(400).json({
+          success: false,
+          message: 'هذا الحساب مسجل مسبقاً. يرجى تسجيل الدخول',
+        });
+      }
 
       const metadata = {
         ipAddress: req.ip || req.socket?.remoteAddress,
@@ -492,21 +513,43 @@ router.post(
         throw new UnauthorizedError(result.error);
       }
 
-      // @todo [P1] Persist new user to database
-      const newUser = {
-        id: Date.now().toString(),
-        email: identifier.includes('@') ? identifier : null,
-        phone: identifier.includes('@') ? null : identifier,
-        name,
+      // التحقق من عدم وجود المستخدم مسبقاً
+      const isEmail = identifier.includes('@');
+      const existQuery = isEmail ? { email: identifier } : { phone: identifier };
+      const existingUser = await User.findOne(existQuery);
+      if (existingUser) {
+        return res.status(400).json({
+          success: false,
+          message: 'هذا الحساب مسجل مسبقاً. يرجى تسجيل الدخول',
+        });
+      }
+
+      // إنشاء المستخدم في قاعدة البيانات
+      const userData = {
+        fullName: name,
         role: 'user',
-        emailVerified: identifier.includes('@'),
-        phoneVerified: !identifier.includes('@'),
-        createdAt: new Date(),
+        isActive: true,
       };
+
+      if (isEmail) {
+        userData.email = identifier;
+        userData.emailVerified = true;
+      } else {
+        userData.phone = identifier;
+        userData.phoneVerified = true;
+      }
+
+      // حفظ كلمة المرور إذا تم تقديمها
+      if (password) {
+        userData.password = password;
+      }
+
+      const newUser = new User(userData);
+      await newUser.save();
 
       // إنشاء التوكن
       const token = jwt.sign(
-        { id: newUser.id, email: newUser.email, phone: newUser.phone, role: newUser.role },
+        { id: newUser._id, email: newUser.email, phone: newUser.phone, role: newUser.role },
         JWT_SECRET,
         { expiresIn: JWT_EXPIRE }
       );
@@ -517,10 +560,10 @@ router.post(
         data: {
           token,
           user: {
-            id: newUser.id,
+            id: newUser._id,
             email: newUser.email,
             phone: newUser.phone,
-            name: newUser.name,
+            name: newUser.fullName,
             role: newUser.role,
           },
         },

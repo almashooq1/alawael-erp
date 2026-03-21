@@ -2,17 +2,30 @@
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
+  username: {
+    type: String,
+    unique: true,
+    sparse: true,
+    trim: true,
+    minlength: [3, 'Username must be at least 3 characters'],
+    maxlength: [50, 'Username cannot exceed 50 characters'],
+  },
   email: {
     type: String,
-    required: [true, 'Email is required'],
     unique: true,
+    sparse: true,
     lowercase: true,
     trim: true,
     match: [/^\S+@\S+\.\S+$/, 'Please provide a valid email address'],
   },
+  phone: {
+    type: String,
+    unique: true,
+    sparse: true,
+    trim: true,
+  },
   password: {
     type: String,
-    required: [true, 'Password is required'],
     minlength: [8, 'Password must be at least 8 characters long'],
     select: false,
   },
@@ -22,6 +35,30 @@ const userSchema = new mongoose.Schema({
     trim: true,
     minlength: [2, 'Full name must be at least 2 characters'],
     maxlength: [100, 'Full name cannot exceed 100 characters'],
+  },
+  isActive: {
+    type: Boolean,
+    default: true,
+  },
+  branch: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Branch',
+  },
+  emailVerified: {
+    type: Boolean,
+    default: false,
+  },
+  phoneVerified: {
+    type: Boolean,
+    default: false,
+  },
+  resetPasswordToken: {
+    type: String,
+    select: false,
+  },
+  resetPasswordExpires: {
+    type: Date,
+    select: false,
   },
   role: {
     type: String,
@@ -220,8 +257,16 @@ userSchema.methods.resetLoginAttempts = function () {
   });
 };
 
+// Pre-validate: ensure at least one identifier (email, phone, or username) exists
+userSchema.pre('validate', function (next) {
+  if (!this.email && !this.phone && !this.username) {
+    return next(new Error('At least one identifier (email, phone, or username) is required'));
+  }
+  next();
+});
+
 // ─── Indexes ─────────────────────────────────────────────────────────────────
-// email already has { unique: true } → implicit unique index
+// email, username, phone have { unique: true, sparse: true } → allow null but enforce uniqueness
 userSchema.index({ role: 1 }); // RBAC queries: list users by role
 userSchema.index({ createdAt: -1 }); // Admin listings sorted by newest
 userSchema.index({ lastLogin: -1 }); // Last-active reports

@@ -270,7 +270,27 @@ class GovernmentConnector extends EventEmitter {
       headers: this.maskSensitiveHeaders(config?.headers),
     };
 
-    // Emit to audit service (@todo [P3] implement persistent audit queue)
+    // Persist audit log to database for compliance
+    try {
+      const mongoose = require('mongoose');
+      // Use a lightweight audit collection for government API logs
+      const AuditLog =
+        mongoose.models.GovAuditLog ||
+        mongoose.model(
+          'GovAuditLog',
+          new mongoose.Schema(log, { timestamps: true, strict: false })
+        );
+      AuditLog.create(log).catch(err => {
+        const auditLogger = require('../../utils/logger');
+        auditLogger.error('Failed to persist government audit log:', err.message);
+      });
+    } catch (persistErr) {
+      // Fall back to file logging if DB is unavailable
+      const auditLogger = require('../../utils/logger');
+      auditLogger.error('Gov audit persistence failed:', persistErr.message);
+      auditLogger.warn('[GOV-AUDIT]', JSON.stringify(log));
+    }
+
     this.emit('audit-log', log);
     // console.log('[GOV-CONNECTOR]', JSON.stringify(log));
   }

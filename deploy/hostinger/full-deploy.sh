@@ -399,7 +399,7 @@ echo -e "${CYAN}  🏗️  بناء Frontend...${NC}"
 cd ${APP_DIR}/frontend
 sudo -u ${APP_USER} npm install --no-audit --no-fund 2>&1 | tail -3
 echo -e "${CYAN}  🔨 Building React app (may take a few minutes)...${NC}"
-sudo -u ${APP_USER} env NODE_OPTIONS="--max-old-space-size=1024" GENERATE_SOURCEMAP=false CI=false npm run build 2>&1 | tail -5
+sudo -u ${APP_USER} env NODE_OPTIONS="--max-old-space-size=4096" GENERATE_SOURCEMAP=false CI=false npm run build 2>&1 | tail -5
 
 if [ ! -d "${APP_DIR}/frontend/build" ]; then
   log_err "فشل بناء Frontend!"

@@ -205,8 +205,8 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 // ─── Body Parsing ────────────────────────────────────────────────────────────
-app.use(express.json({ limit: '256kb' }));
-app.use(express.urlencoded({ extended: true, limit: '256kb' }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // ─── Input Sanitization ─────────────────────────────────────────────────────
 app.use(sanitizeInput);

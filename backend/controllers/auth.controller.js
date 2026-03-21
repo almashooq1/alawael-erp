@@ -9,6 +9,7 @@ const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 const logger = require('../utils/logger');
 const { jwtSecret } = require('../config/secrets');
+const { sendEmail, emailTemplates, transporter } = require('../services/emailService');
 
 // تكوين JWT
 const JWT_SECRET = jwtSecret;
@@ -30,8 +31,10 @@ const login = async (req, res) => {
       });
     }
 
-    // البحث عن المستخدم
-    const user = await User.findOne({ username });
+    // البحث عن المستخدم باسم المستخدم أو البريد الإلكتروني
+    const user = await User.findOne({
+      $or: [{ username }, { email: username }],
+    }).select('+password');
     if (!user) {
       return res.status(401).json({
         success: false,
@@ -80,7 +83,7 @@ const login = async (req, res) => {
           id: user._id,
           username: user.username,
           email: user.email,
-          name: user.name,
+          name: user.fullName,
           role: user.role,
           branch: user.branch,
         },
@@ -131,9 +134,10 @@ const register = async (req, res) => {
       username,
       email,
       password,
-      name,
+      fullName: name,
       role: safeRole,
       branch,
+      isActive: true,
     });
 
     await user.save();
@@ -158,7 +162,7 @@ const register = async (req, res) => {
           id: user._id,
           username: user.username,
           email: user.email,
-          name: user.name,
+          name: user.fullName,
           role: user.role,
           branch: user.branch,
         },
@@ -293,8 +297,19 @@ const forgotPassword = async (req, res) => {
     user.resetPasswordExpires = Date.now() + 3600000; // ساعة واحدة
     await user.save();
 
-    // @todo [P1] Send password reset email via nodemailer/SendGrid with resetToken link
-    logger.warn('Password reset email not yet implemented — token generated only');
+    // إرسال بريد إعادة تعيين كلمة المرور
+    try {
+      const template = emailTemplates.passwordReset(user, resetToken);
+      await transporter.sendMail({
+        from: process.env.EMAIL_FROM || `"نظام الأوائل ERP" <${process.env.EMAIL_USER}>`,
+        to: user.email,
+        ...template,
+      });
+      logger.info(`Password reset email sent to ${user.email}`);
+    } catch (emailErr) {
+      logger.error('Failed to send password reset email:', emailErr.message);
+      // لا نفشل العملية - الرمز محفوظ ويمكن استخدامه
+    }
 
     res.json({
       success: true,
@@ -329,7 +344,9 @@ const resetPassword = async (req, res) => {
 
     // التحقق من الرمز
     const decoded = jwt.verify(token, JWT_SECRET);
-    const user = await User.findById(decoded.id);
+    const user = await User.findById(decoded.id).select(
+      '+resetPasswordToken +resetPasswordExpires'
+    );
 
     if (!user || user.resetPasswordToken !== token) {
       return res.status(400).json({

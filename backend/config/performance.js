@@ -60,6 +60,12 @@ const initializeRedis = () => {
 const cacheMiddleware = (ttl = 300, prefix = 'cache:') => {
   return async (req, res, next) => {
     if (!redis || req.method !== 'GET') {
+      // For write operations (POST/PUT/PATCH/DELETE), invalidate related cache
+      if (redis && req.method !== 'GET' && req.method !== 'OPTIONS' && req.method !== 'HEAD') {
+        // Extract the base API path (e.g., /api/accounting/expenses/:id -> /api/accounting/expenses)
+        const basePath = (req.originalUrl || req.url).split('?')[0].replace(/\/[a-f0-9]{24}$/i, '');
+        clearCache(`${prefix}${basePath}*`).catch(() => {});
+      }
       return next();
     }
 

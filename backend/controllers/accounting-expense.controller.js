@@ -6,6 +6,7 @@
  */
 
 const AccountingExpense = require('../models/AccountingExpense');
+const JournalEntry = require('../models/JournalEntry');
 const logger = require('../utils/logger');
 const { escapeRegex } = require('../utils/sanitize');
 
@@ -305,7 +306,78 @@ exports.approveExpense = async (req, res) => {
     await expense.approve(req.user?._id);
     await expense.populate('approvedBy', 'name email');
 
-    // @todo [P1] Auto-create journal entry on expense approval (accounting double-entry)
+    // إنشاء قيد يومية تلقائي عند الموافقة على المصروف (القيد المزدوج)
+    try {
+      // خريطة أكواد الحسابات حسب فئة المصروف
+      const expenseAccountMap = {
+        salaries: { code: '5100', name: 'مصروفات الرواتب والأجور' },
+        rent: { code: '5200', name: 'مصروفات الإيجار' },
+        utilities: { code: '5300', name: 'مصروفات المرافق' },
+        supplies: { code: '5400', name: 'مصروفات المستلزمات' },
+        marketing: { code: '5500', name: 'مصروفات التسويق' },
+        transportation: { code: '5600', name: 'مصروفات المواصلات' },
+        maintenance: { code: '5700', name: 'مصروفات الصيانة' },
+        insurance: { code: '5800', name: 'مصروفات التأمينات' },
+        professional: { code: '5900', name: 'مصروفات الخدمات المهنية' },
+        training: { code: '6000', name: 'مصروفات التدريب' },
+        travel: { code: '6100', name: 'مصروفات السفر' },
+        meals: { code: '6200', name: 'مصروفات الوجبات' },
+        depreciation: { code: '6300', name: 'مصروفات الاستهلاك' },
+        other: { code: '6900', name: 'مصروفات أخرى' },
+      };
+
+      const paymentAccountMap = {
+        cash: { code: '1100', name: 'الصندوق (النقدية)' },
+        bank: { code: '1200', name: 'البنك' },
+        credit: { code: '2100', name: 'بطاقات الائتمان' },
+        cheque: { code: '1200', name: 'البنك' },
+      };
+
+      const expenseAccount = expenseAccountMap[expense.category] || expenseAccountMap.other;
+      const paymentAccount = paymentAccountMap[expense.paymentMethod] || paymentAccountMap.cash;
+
+      const journalEntry = new JournalEntry({
+        date: expense.date || new Date(),
+        description: `مصروف: ${expense.description} - ${expense.vendor || 'بدون مورد'}`,
+        type: 'automatic',
+        status: 'posted',
+        postedBy: req.user?._id,
+        postedAt: new Date(),
+        sourceDocument: {
+          type: 'expense',
+          id: expense._id,
+        },
+        lines: [
+          {
+            accountCode: expenseAccount.code,
+            account: expenseAccount.name,
+            debit: expense.amount,
+            credit: 0,
+            description: expense.description,
+          },
+          {
+            accountCode: paymentAccount.code,
+            account: paymentAccount.name,
+            debit: 0,
+            credit: expense.amount,
+            description: `سداد ${expense.description}`,
+          },
+        ],
+        createdBy: req.user?._id,
+        createdByName: req.user?.name || req.user?.fullName,
+      });
+
+      await journalEntry.save();
+
+      // ربط القيد بالمصروف
+      expense.journalEntry = journalEntry._id;
+      await expense.save();
+
+      logger.info(`Journal entry ${journalEntry.entryNumber} created for expense ${expense._id}`);
+    } catch (jeError) {
+      // لا نفشل الموافقة إذا فشل إنشاء القيد - نسجل التحذير فقط
+      logger.error('Failed to create journal entry for expense approval:', jeError);
+    }
 
     res.json({
       success: true,

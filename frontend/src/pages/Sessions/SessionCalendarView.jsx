@@ -286,7 +286,7 @@ export default function SessionCalendarView() {
             <Grid item xs={12} md={4}>
               <Stack direction="row" spacing={1} alignItems="center">
                 <IconButton onClick={goPrev}><NextIcon /></IconButton>
-                <Button variant="outlined" size="small" startIcon={<TodayIcon />} onClick={goToday}>اليوم</Button>
+                <Button variant="outlined" size="small" startIcon={<TodayIcon />} onClick={goToToday}>اليوم</Button>
                 <IconButton onClick={goNext}><PrevIcon /></IconButton>
                 <Typography variant="h6" fontWeight={600} sx={{ mx: 1 }}>
                   {headerTitle}

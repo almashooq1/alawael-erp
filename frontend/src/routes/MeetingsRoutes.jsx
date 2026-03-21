@@ -4,7 +4,7 @@
 import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
-const MeetingsDashboard = lazyWithRetry(() => import('../pages/Meetings/MeetingsDashboard'));
+const MeetingsDashboard = lazyWithRetry(() => import('../pages/meetings/MeetingsDashboard'));
 const MeetingManagementPage = lazyWithRetry(() => import('../pages/meetings/MeetingManagementPage'));
 
 export default function MeetingsRoutes() {

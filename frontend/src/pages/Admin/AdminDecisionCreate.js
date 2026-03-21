@@ -2,11 +2,38 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import administrationService from '../../services/administration.service';
 
-
-
-
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients } from '../../theme/palette';
+import {
+  Autocomplete,
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Divider,
+  FormControl,
+  FormControlLabel,
+  Grid,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  Step,
+  StepLabel,
+  Stepper,
+  Switch,
+  TextField,
+  Typography
+} from '@mui/material';
+import People from '@mui/icons-material/People';
+import ArrowBack from '@mui/icons-material/ArrowBack';
+import ArrowForward from '@mui/icons-material/ArrowForward';
+import Save from '@mui/icons-material/Save';
+import Send from '@mui/icons-material/Send';
 
 /* ═══ Constants ══════════════════════════════════════════════════════════════ */
 const documentTypes = [

@@ -4,12 +4,34 @@
 
 import { useState, useEffect } from 'react';
 
-
-
-
 import apiClient from 'services/api.client';
 import logger from 'utils/logger';
 import { gradients, statusColors } from '../../theme/palette';
+import {
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Divider,
+  Grid,
+  LinearProgress,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  Tab,
+  Tabs,
+  Typography
+} from '@mui/material';
+import PeopleIcon from '@mui/icons-material/People';
+import SpeedIcon from '@mui/icons-material/Speed';
+import StorageIcon from '@mui/icons-material/Storage';
+import CloudIcon from '@mui/icons-material/Cloud';
+import SettingsIcon from '@mui/icons-material/Settings';
+import SecurityIcon from '@mui/icons-material/Security';
+import ReportIcon from '@mui/icons-material/Report';
 
 const systemStats = [
   { label: 'المستخدمون النشطون', value: '127', icon: <PeopleIcon />, color: statusColors.primaryBlue },

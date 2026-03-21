@@ -1,9 +1,55 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 
-
-
 import zktecoService from 'services/zktecoService';
 import { gradients } from '../../theme/palette';
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  FormControlLabel,
+  Grid,
+  IconButton,
+  InputAdornment,
+  LinearProgress,
+  Paper,
+  Snackbar,
+  Switch,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import ErrorIcon from '@mui/icons-material/Error';
+import SettingsIcon from '@mui/icons-material/Settings';
+import FingerprintIcon from '@mui/icons-material/Fingerprint';
+import SyncIcon from '@mui/icons-material/Sync';
+import AddIcon from '@mui/icons-material/Add';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import DeviceHubIcon from '@mui/icons-material/DeviceHub';
+import PeopleIcon from '@mui/icons-material/People';
+import SearchIcon from '@mui/icons-material/Search';
+import ScheduleIcon from '@mui/icons-material/Schedule';
+import HistoryIcon from '@mui/icons-material/History';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import LinkIcon from '@mui/icons-material/Link';
+import WarningIcon from '@mui/icons-material/Warning';
 
 /* ═══════════════════════════════════════════════
    Constants

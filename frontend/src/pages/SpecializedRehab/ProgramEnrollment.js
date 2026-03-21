@@ -8,13 +8,48 @@ import {
   alpha,
 } from '@mui/material';
 
-
 import {
   REHAB_PROGRAM_TEMPLATES_CATALOG,
   PROGRAM_CATEGORY_LABELS,
   rehabProgramTemplatesService,
 } from 'services/specializedRehab.service';
 import { useSnackbar } from 'contexts/SnackbarContext';
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  FormControl,
+  Grid,
+  IconButton,
+  InputAdornment,
+  InputLabel,
+  LinearProgress,
+  MenuItem,
+  Paper,
+  Select,
+  Stack,
+  Tab,
+  Tabs,
+  TextField,
+  Typography
+} from '@mui/material';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import PersonIcon from '@mui/icons-material/Person';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import SaveIcon from '@mui/icons-material/Save';
+import CloseIcon from '@mui/icons-material/Close';
+import AddIcon from '@mui/icons-material/Add';
+import { CalendarIcon } from 'utils/iconAliases';
 
 /* ── helpers ── */
 const STATUS_MAP = {

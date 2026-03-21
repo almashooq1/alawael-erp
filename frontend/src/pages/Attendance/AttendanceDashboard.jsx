@@ -3,10 +3,23 @@
  */
 import { useState, useEffect } from 'react';
 
-
-
-
 import apiClient from '../../services/api';
+import {
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Grid,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Tooltip,
+  Typography
+} from '@mui/material';
 
 const PIE_COLORS = ['#4caf50', '#f44336', '#ff9800', '#2196f3'];
 const statusLabels = { present: 'حاضر', absent: 'غائب', late: 'متأخر', early_departure: 'انصراف مبكر', on_leave: 'إجازة' };

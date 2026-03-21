@@ -4,6 +4,7 @@
  */
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import SimpleLogin from 'pages/common/SimpleLogin';
 
 // ── Mocks ─────────────────────────────────────────────────────────
 
@@ -37,7 +38,6 @@ jest.mock('utils/lazyLoader', () => ({
 }));
 
 // Import after mocks
-import SimpleLogin from 'pages/common/SimpleLogin';
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -48,8 +48,7 @@ beforeEach(() => {
 // ═══════════════════════════════════════════════════════════════════
 // Helper: password field needs selector:'input' because MUI visibility toggle
 // button also has aria-label containing "كلمة المرور"
-const getPasswordField = () =>
-  screen.getByLabelText(/كلمة المرور/i, { selector: 'input' });
+const getPasswordField = () => screen.getByLabelText(/كلمة المرور/i, { selector: 'input' });
 
 describe('SimpleLogin rendering', () => {
   test('renders email and password fields', () => {
@@ -157,7 +156,7 @@ describe('SimpleLogin submit', () => {
     mockLogin.mockReturnValue(
       new Promise(resolve => {
         resolveLogin = resolve;
-      }),
+      })
     );
 
     render(<SimpleLogin />);

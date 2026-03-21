@@ -8,6 +8,7 @@
  */
 
 import useDisabilityAssessment from './useDisabilityAssessment';
+import { Container, LinearProgress, Typography } from '@mui/material';
 
 const DisabilityAssessmentScales = () => {
   const state = useDisabilityAssessment();

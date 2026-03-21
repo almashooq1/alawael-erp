@@ -4,15 +4,68 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 
-
-
-
-
 import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, chartColors, statusColors } from '../../theme/palette';
 import logger from '../../utils/logger';
 import studentManagementService from '../../services/studentManagementService';
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Collapse,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  FormControl,
+  Grid,
+  IconButton,
+  InputLabel,
+  LinearProgress,
+  MenuItem,
+  Paper,
+  Select,
+  Switch,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import ReportIcon from '@mui/icons-material/Report';
+import CompareIcon from '@mui/icons-material/Compare';
+import PeopleIcon from '@mui/icons-material/People';
+import TimelineIcon from '@mui/icons-material/Timeline';
+import AnalyticsIcon from '@mui/icons-material/Analytics';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import StarIcon from '@mui/icons-material/Star';
+import ScheduleIcon from '@mui/icons-material/Schedule';
+import EmailIcon from '@mui/icons-material/Email';
+import WhatsAppIcon from '@mui/icons-material/WhatsApp';
+import AddIcon from '@mui/icons-material/Add';
+import ExpandIcon from '@mui/icons-material/Expand';
+import PauseIcon from '@mui/icons-material/Pause';
+import SendIcon from '@mui/icons-material/Send';
+import HistoryIcon from '@mui/icons-material/History';
+import DeleteIcon from '@mui/icons-material/Delete';
+import PrintIcon from '@mui/icons-material/Print';
+import ErrorIcon from '@mui/icons-material/Error';
+import { CollapseIcon, ViewIcon } from 'utils/iconAliases';
 
 /* ──────── Helper Components ──────── */
 const SectionHeader = ({ icon, title, subtitle, action }) => (

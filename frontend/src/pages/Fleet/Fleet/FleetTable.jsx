@@ -6,6 +6,21 @@ import {
   Paper,
 } from '@mui/material';
 import { TABS } from './fleetManagement.constants';
+import {
+  Box,
+  Chip,
+  IconButton,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 // ─── Column definitions per tab ─────────────────────────────
 const COLUMNS = {

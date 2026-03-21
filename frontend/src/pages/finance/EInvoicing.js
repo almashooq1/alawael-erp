@@ -4,9 +4,36 @@ import {
   Paper,
 } from '@mui/material';
 
-
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, statusColors } from '../../theme/palette';
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  IconButton,
+  MenuItem,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import SendIcon from '@mui/icons-material/Send';
+import { PdfIcon } from 'utils/iconAliases';
 
 const demoInvoices = [
   {

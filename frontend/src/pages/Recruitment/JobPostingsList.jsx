@@ -3,8 +3,32 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 
-
 import { getJobs, createJob, updateJob, deleteJob } from '../../services/recruitment.service';
+import {
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  MenuItem,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TablePagination,
+  TableRow,
+  TextField,
+  Typography
+} from '@mui/material';
+import Refresh from '@mui/icons-material/Refresh';
+import Add from '@mui/icons-material/Add';
+import Edit from '@mui/icons-material/Edit';
+import Delete from '@mui/icons-material/Delete';
 
 const typeOptions = [
   { value: 'full_time', label: 'دوام كامل' }, { value: 'part_time', label: 'دوام جزئي' },

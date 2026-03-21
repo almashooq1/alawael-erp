@@ -11,9 +11,57 @@ import {
   alpha,
 } from '@mui/material';
 
-
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import workflowService from '../../services/workflow.service';
+import {
+  Alert,
+  Avatar,
+  Badge,
+  Box,
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  FormControl,
+  FormControlLabel,
+  Grid,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Select,
+  Skeleton,
+  Step,
+  StepContent,
+  StepLabel,
+  Stepper,
+  Switch,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import PendingIcon from '@mui/icons-material/Pending';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import AddIcon from '@mui/icons-material/Add';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import ThumbUpIcon from '@mui/icons-material/ThumbUp';
+import ThumbDownIcon from '@mui/icons-material/ThumbDown';
+import TimelineIcon from '@mui/icons-material/Timeline';
+import SaveIcon from '@mui/icons-material/Save';
 
 const STATUS_CONFIG = {
   pending: { label: 'في الانتظار', color: '#FF9800', icon: <PendingIcon /> },

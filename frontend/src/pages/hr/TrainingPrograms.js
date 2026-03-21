@@ -8,9 +8,51 @@ import {
   useTheme,
 } from '@mui/material';
 
-
 import { programsService, MOCK_PROGRAMS } from 'services/trainingService';
 import { useSnackbar } from 'contexts/SnackbarContext';
+import {
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  IconButton,
+  InputAdornment,
+  LinearProgress,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  MenuItem,
+  Rating,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import AddIcon from '@mui/icons-material/Add';
+import SearchIcon from '@mui/icons-material/Search';
+import SchoolIcon from '@mui/icons-material/School';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import CloseIcon from '@mui/icons-material/Close';
+import GroupIcon from '@mui/icons-material/Group';
+import StarIcon from '@mui/icons-material/Star';
+import CheckIcon from '@mui/icons-material/Check';
+import { ViewIcon } from 'utils/iconAliases';
 
 const categories = [
   'التطوير المهني',

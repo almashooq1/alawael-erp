@@ -1,11 +1,28 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 
-
-
-
 import apiClient from '../../services/api.client';
 import { gradients, statusColors, surfaceColors, chartColors } from '../../theme/palette';
 import { useSnackbar } from '../../contexts/SnackbarContext';
+import {
+  Alert,
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  Container,
+  Divider,
+  Grid,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Paper,
+  Skeleton,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import MemoryIcon from '@mui/icons-material/Memory';
+import ErrorIcon from '@mui/icons-material/Error';
 
 /* ───────── formatUptime ───────── */
 const formatUptime = (seconds) => {

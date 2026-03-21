@@ -8,9 +8,46 @@ import {
   alpha,
 } from '@mui/material';
 
-
 import { useSnackbar } from 'contexts/SnackbarContext';
 import { therapySessionService } from 'services/disabilityRehabService';
+import {
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Grid,
+  IconButton,
+  InputAdornment,
+  MenuItem,
+  Paper,
+  Rating,
+  Stack,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import TimerIcon from '@mui/icons-material/Timer';
+import CancelIcon from '@mui/icons-material/Cancel';
+import AddIcon from '@mui/icons-material/Add';
+import SearchIcon from '@mui/icons-material/Search';
+import ScheduleIcon from '@mui/icons-material/Schedule';
+import StartIcon from '@mui/icons-material/Start';
+import SaveIcon from '@mui/icons-material/Save';
+import CloseIcon from '@mui/icons-material/Close';
+import { CalendarIcon, ViewIcon } from 'utils/iconAliases';
 
 const SESSION_CATEGORIES = [
   'علاج طبيعي',

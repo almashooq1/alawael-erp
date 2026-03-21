@@ -3,11 +3,23 @@
  */
 import { useState, useEffect } from 'react';
 
-
-
-
-
 import { getDashboard } from '../../services/internalAudit.service';
+import {
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Grid,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Tooltip,
+  Typography
+} from '@mui/material';
 
 const statusMap = {
   completed: { label: 'مكتمل', color: 'success' },

@@ -8,9 +8,48 @@ import {
   useTheme,
 } from '@mui/material';
 
-
 import { leadsService, MOCK_LEADS } from 'services/crmService';
 import { useSnackbar } from 'contexts/SnackbarContext';
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  IconButton,
+  InputAdornment,
+  LinearProgress,
+  MenuItem,
+  Slider,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  Tabs,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import AddIcon from '@mui/icons-material/Add';
+import SearchIcon from '@mui/icons-material/Search';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import CloseIcon from '@mui/icons-material/Close';
+import PersonIcon from '@mui/icons-material/Person';
+import PhoneIcon from '@mui/icons-material/Phone';
+import EmailIcon from '@mui/icons-material/Email';
+import MoneyIcon from '@mui/icons-material/Money';
+import { TrendIcon, ViewIcon } from 'utils/iconAliases';
 
 const leadStages = ['جديد', 'اتصال أولي', 'عرض مقدم', 'تفاوض', 'مغلق - ربح', 'مغلق - خسارة'];
 const leadSources = ['موقع إلكتروني', 'إحالة', 'معرض', 'إعلان', 'شبكات اجتماعية', 'اتصال مباشر'];

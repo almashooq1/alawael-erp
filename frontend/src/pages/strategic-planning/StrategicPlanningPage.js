@@ -7,10 +7,44 @@ import {
   Paper,
 } from '@mui/material';
 
-
-
-
 import strategicPlanningService from '../../services/strategicPlanning.service';
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  IconButton,
+  LinearProgress,
+  MenuItem,
+  Stack,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  TextField,
+  Typography
+} from '@mui/material';
+import FlagIcon from '@mui/icons-material/Flag';
+import AddIcon from '@mui/icons-material/Add';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import CheckIcon from '@mui/icons-material/Check';
+import SpeedIcon from '@mui/icons-material/Speed';
+import TimelineIcon from '@mui/icons-material/Timeline';
+import EditIcon from '@mui/icons-material/Edit';
+import { ChartIcon } from 'utils/iconAliases';
 
 /* ══════════════ بيانات تجريبية ══════════════ */
 const DEMO_GOALS = [

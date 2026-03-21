@@ -7,6 +7,26 @@ import { useTheme,
 } from '@mui/material';
 
 import { gradients, statusColors, brandColors, chartColors } from 'theme/palette';
+import {
+  Box,
+  Chip,
+  Divider,
+  Grid,
+  IconButton,
+  MenuItem,
+  Paper,
+  Select,
+  ToggleButton,
+  ToggleButtonGroup,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import TrendingDownIcon from '@mui/icons-material/TrendingDown';
+import ShowChartIcon from '@mui/icons-material/ShowChart';
+import BarChartIcon from '@mui/icons-material/BarChart';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 
 const PERIOD_OPTIONS = [
   { value: 'week', label: 'أسبوع' },

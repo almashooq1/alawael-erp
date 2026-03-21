@@ -4,15 +4,40 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-
-
-
 import electronicDirectivesService from '../../services/electronicDirectives.service';
 import {
   DIRECTIVE_TYPES,
   DIRECTIVE_PRIORITIES,
   DIRECTIVE_STATUS,
 } from './constants';
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Divider,
+  Grid,
+  IconButton,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemSecondaryAction,
+  ListItemText,
+  Paper,
+  Skeleton,
+  Typography
+} from '@mui/material';
+import CampaignIcon from '@mui/icons-material/Campaign';
+import PolicyIcon from '@mui/icons-material/Policy';
+import AddIcon from '@mui/icons-material/Add';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import WarningIcon from '@mui/icons-material/Warning';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import { ViewIcon } from 'utils/iconAliases';
 
 /* ═══ Stat Card ════════════════════════════════════════════════ */
 function StatCard({ title, value, icon, color, onClick, loading }) {

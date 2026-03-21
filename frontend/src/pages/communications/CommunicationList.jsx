@@ -3,14 +3,33 @@
  */
 
 
-
-
-
 import {
   COMMUNICATION_TYPES,
   COMMUNICATION_STATUS,
   PRIORITY_LEVELS,
 } from './communicationsConstants';
+import {
+  Avatar,
+  Badge,
+  Box,
+  Card,
+  Chip,
+  Divider,
+  IconButton,
+  LinearProgress,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import EmailIcon from '@mui/icons-material/Email';
+import ReplyIcon from '@mui/icons-material/Reply';
+import StarIcon from '@mui/icons-material/Star';
+import StarBorderIcon from '@mui/icons-material/StarBorder';
+import ArchiveIcon from '@mui/icons-material/Archive';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const CommunicationList = ({
   communications,

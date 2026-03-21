@@ -1,4 +1,14 @@
-import { alpha } from '@mui/material';
+import {
+  Avatar,
+  Box,
+  Chip,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  Typography,
+  alpha
+} from '@mui/material';
 
 /**
  * TimelineList — Vertical activity timeline.

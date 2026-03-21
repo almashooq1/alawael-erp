@@ -5,13 +5,64 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 
-
-
-
 import documentService from 'services/documentService';
 import logger from 'utils/logger';
 import { gradients, brandColors } from 'theme/palette';
 import { useSnackbar } from '../../contexts/SnackbarContext';
+import {
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  Grid,
+  IconButton,
+  InputAdornment,
+  InputLabel,
+  LinearProgress,
+  MenuItem,
+  Paper,
+  Select,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  Tabs,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import ImageIcon from '@mui/icons-material/Image';
+import AudioFileIcon from '@mui/icons-material/AudioFile';
+import VideoFileIcon from '@mui/icons-material/VideoFile';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import UploadIcon from '@mui/icons-material/Upload';
+import ScannerIcon from '@mui/icons-material/Scanner';
+import StorageIcon from '@mui/icons-material/Storage';
+import PendingIcon from '@mui/icons-material/Pending';
+import FolderIcon from '@mui/icons-material/Folder';
+import CategoryIcon from '@mui/icons-material/Category';
+import AnalyticsIcon from '@mui/icons-material/Analytics';
+import HistoryIcon from '@mui/icons-material/History';
+import SearchIcon from '@mui/icons-material/Search';
+import FolderOpenIcon from '@mui/icons-material/FolderOpen';
+import DownloadIcon from '@mui/icons-material/Download';
+import ShareIcon from '@mui/icons-material/Share';
+import RestoreIcon from '@mui/icons-material/Restore';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { ExcelIcon, FileIcon, PdfIcon, SharedIcon, ViewIcon, ZipIcon } from 'utils/iconAliases';
 
 /* ──── helpers ──── */
 const formatFileSize = bytes => {

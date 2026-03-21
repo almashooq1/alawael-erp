@@ -3,9 +3,26 @@
  */
 import { useState, useEffect } from 'react';
 
-
-
 import apiClient from '../../services/api';
+import {
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  Grid,
+  LinearProgress,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import EventIcon from '@mui/icons-material/Event';
+import { TrendIcon } from 'utils/iconAliases';
 
 const COLORS = ['#00897b', '#1976d2', '#f57c00', '#7b1fa2', '#c62828'];
 

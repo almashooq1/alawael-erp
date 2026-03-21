@@ -7,9 +7,6 @@ import {
   Paper,
 } from '@mui/material';
 
-
-
-
 import {
   complaintsService,
   complaintsReportsService,
@@ -17,6 +14,43 @@ import {
   MOCK_COMPLAINTS_DASHBOARD,
 } from 'services/complaintsService';
 import { useSnackbar } from 'contexts/SnackbarContext';
+import {
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  IconButton,
+  InputAdornment,
+  LinearProgress,
+  MenuItem,
+  Rating,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  Tabs,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import AddIcon from '@mui/icons-material/Add';
+import SearchIcon from '@mui/icons-material/Search';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import CloseIcon from '@mui/icons-material/Close';
+import { ViewIcon } from 'utils/iconAliases';
 
 const COLORS = ['#E53935', '#FB8C00', '#1E88E5', '#43A047', '#8E24AA', '#00897B'];
 const complaintCategories = [

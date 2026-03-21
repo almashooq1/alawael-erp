@@ -1,13 +1,41 @@
 import { useState, useEffect } from 'react';
 
-
-
-
 import { adminService } from 'services/adminService';
 import logger from 'utils/logger';
 import { gradients, statusColors, surfaceColors, neutralColors, brandColors } from 'theme/palette';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
+import {
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  Chip,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  IconButton,
+  LinearProgress,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import TimelineIcon from '@mui/icons-material/Timeline';
+import WarningIcon from '@mui/icons-material/Warning';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 
 const AdminDashboard = () => {
   const showSnackbar = useSnackbar();

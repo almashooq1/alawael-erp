@@ -4,6 +4,19 @@
 import { Paper,
 } from '@mui/material';
 import { OP_STATUS_COLORS, COL_MAP } from './constants';
+import {
+  Chip,
+  IconButton,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tooltip
+} from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const OperationsTable = ({ activeTab, tabs, data, openEdit, handleDelete }) => {
   const key = tabs[activeTab]?.key;

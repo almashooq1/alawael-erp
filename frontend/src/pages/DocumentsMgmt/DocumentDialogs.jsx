@@ -11,11 +11,26 @@
  */
 
 
-
-
-
 import { getStatusColor } from 'utils/statusColors';
 import { formatFileSize } from './useDocumentsPage';
+import {
+  Box,
+  Button,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  Grid,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
+  Typography
+} from '@mui/material';
+import UploadIcon from '@mui/icons-material/Upload';
+import DownloadIcon from '@mui/icons-material/Download';
 
 export const UploadDialog = ({ open, onClose, categories, onSubmit }) => (
   <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>

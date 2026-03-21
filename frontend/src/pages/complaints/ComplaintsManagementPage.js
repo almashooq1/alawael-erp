@@ -6,8 +6,45 @@ import {
   Paper,
 } from '@mui/material';
 
-
 import { complaintsService } from '../../services/complaintsService';
+import {
+  Alert,
+  Avatar,
+  Badge,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  IconButton,
+  LinearProgress,
+  MenuItem,
+  Stack,
+  Step,
+  StepLabel,
+  Stepper,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  TextField,
+  Typography
+} from '@mui/material';
+import PendingIcon from '@mui/icons-material/Pending';
+import AddIcon from '@mui/icons-material/Add';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import ChatIcon from '@mui/icons-material/Chat';
+import PersonIcon from '@mui/icons-material/Person';
 
 const DEMO_COMPLAINTS = [
   {

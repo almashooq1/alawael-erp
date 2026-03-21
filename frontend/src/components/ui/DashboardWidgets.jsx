@@ -14,8 +14,23 @@
 import {
   useTheme, alpha } from '@mui/material';
 
-
 import { motion } from 'framer-motion';
+import {
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Grid,
+  LinearProgress,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  Stack,
+  Typography
+} from '@mui/material';
 
 // ─── STAT CARD ───────────────────────────────────────────────────────────────
 export const StatCard = ({

@@ -1,8 +1,5 @@
 import { useState, useEffect } from 'react';
 
-
-
-
 import { useNavigate } from 'react-router-dom';
 import { useSocket } from 'contexts/SocketContext';
 
@@ -11,6 +8,27 @@ import logger from 'utils/logger';
 import { gradients } from 'theme/palette';
 import communicationsService from 'services/communicationsService';
 import { useSnackbar } from '../../contexts/SnackbarContext';
+import {
+  Badge,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CircularProgress,
+  Container,
+  Grid,
+  IconButton,
+  Tab,
+  Tabs,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import AddIcon from '@mui/icons-material/Add';
+import ChatIcon from '@mui/icons-material/Chat';
+import EmailIcon from '@mui/icons-material/Email';
+import ForumIcon from '@mui/icons-material/Forum';
+import { BotIcon } from 'utils/iconAliases';
 
 function Communications() {
   const navigate = useNavigate();

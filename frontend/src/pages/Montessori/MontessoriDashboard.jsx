@@ -16,13 +16,40 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTheme, alpha,
 } from '@mui/material';
 
-
-
 import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, statusColors } from '../../theme/palette';
 import logger from '../../utils/logger';
 import montessoriService from '../../services/montessoriService';
+import {
+  Avatar,
+  Badge,
+  Box,
+  Button,
+  Card,
+  CardActionArea,
+  Chip,
+  CircularProgress,
+  Container,
+  Grid,
+  IconButton,
+  LinearProgress,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  Paper,
+  Skeleton,
+  Stack,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import DownloadIcon from '@mui/icons-material/Download';
+import PrintIcon from '@mui/icons-material/Print';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import InsightsIcon from '@mui/icons-material/Insights';
+import StarIcon from '@mui/icons-material/Star';
 
 /* ─── Animated counter hook (same pattern as StatCard v3) ─── */
 const useAnimatedCounter = (endValue, duration = 1200) => {

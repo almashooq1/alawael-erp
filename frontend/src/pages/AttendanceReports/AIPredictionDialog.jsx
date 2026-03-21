@@ -1,7 +1,17 @@
 import React from 'react';
-
-
-
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  LinearProgress,
+  Typography
+} from '@mui/material';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import TableViewIcon from '@mui/icons-material/TableView';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
 
 const AIPredictionDialog = ({ open, onClose, aiLoading, aiError, aiPrediction, onExport }) => (
   <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>

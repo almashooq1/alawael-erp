@@ -7,9 +7,6 @@ import {
   Paper,
 } from '@mui/material';
 
-
-
-
 import {
   campaignsService,
   donorsService,
@@ -21,6 +18,41 @@ import {
   MOCK_DONATIONS_DASHBOARD,
 } from 'services/donationsService';
 import { useSnackbar } from 'contexts/SnackbarContext';
+import {
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  IconButton,
+  InputAdornment,
+  LinearProgress,
+  MenuItem,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import AddIcon from '@mui/icons-material/Add';
+import CampaignIcon from '@mui/icons-material/Campaign';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import SearchIcon from '@mui/icons-material/Search';
+import CloseIcon from '@mui/icons-material/Close';
 
 const COLORS = ['#E91E63', '#9C27B0', '#3F51B5', '#009688', '#FF9800', '#795548'];
 const formatCurrency = v =>

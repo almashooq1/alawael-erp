@@ -6,6 +6,16 @@
 
 import { brandColors } from 'theme/palette';
 import { ROLES } from './registerConstants';
+import {
+  Alert,
+  Box,
+  CardContent,
+  Checkbox,
+  Fade,
+  FormControlLabel,
+  Grid,
+  Typography
+} from '@mui/material';
 
 const StepRoleSelection = ({
   formData,

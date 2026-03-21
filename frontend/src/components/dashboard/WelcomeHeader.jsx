@@ -11,6 +11,41 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from 'contexts/AuthContext';
 import { formatCurrency, formatNumber, getGreeting, getArabicDate } from 'services/dashboardService';
 import { gradients, statusColors, brandColors } from '../../theme/palette';
+import {
+  Badge,
+  Box,
+  Button,
+  Chip,
+  Divider,
+  Grow,
+  IconButton,
+  ListItemIcon,
+  ListItemText,
+  MenuItem,
+  MenuList,
+  Paper,
+  Popper,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import CircleIcon from '@mui/icons-material/Circle';
+import CachedIcon from '@mui/icons-material/Cached';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import TrendingDownIcon from '@mui/icons-material/TrendingDown';
+import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
+import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import GetAppIcon from '@mui/icons-material/GetApp';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import PeopleIcon from '@mui/icons-material/People';
+import AccessibilityNewIcon from '@mui/icons-material/AccessibilityNew';
+import EventNoteIcon from '@mui/icons-material/EventNote';
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 
 /* ── Mini Stat Chip (memo'd to prevent unnecessary re-renders) ─ */
 const MiniStat = React.memo(({ icon, label, value, gradient }) => (

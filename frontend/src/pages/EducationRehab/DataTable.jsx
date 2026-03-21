@@ -7,6 +7,19 @@ import {
 } from '@mui/material';
 import { surfaceColors } from '../../theme/palette';
 import { statusColors, colMap, tabs } from './constants';
+import {
+  Chip,
+  IconButton,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tooltip
+} from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const DataTable = ({ data, activeTab, onEdit, onDelete }) => {
   const key = tabs[activeTab]?.key;

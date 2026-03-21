@@ -8,11 +8,28 @@
 
 import { Link } from 'react-router-dom';
 
-
 import { gradients, brandColors, surfaceColors } from 'theme/palette';
 import CustomStepIcon from './CustomStepIcon';
 import { STEPS } from './registerConstants';
 import useRegisterForm from './useRegisterForm';
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  CircularProgress,
+  Container,
+  LinearProgress,
+  Paper,
+  Slide,
+  Step,
+  StepLabel,
+  Stepper,
+  Typography
+} from '@mui/material';
+import ArrowForward from '@mui/icons-material/ArrowForward';
+import ArrowBack from '@mui/icons-material/ArrowBack';
+import CheckCircle from '@mui/icons-material/CheckCircle';
 
 // ═══════════════════════════════════════════════════
 //  Register Component

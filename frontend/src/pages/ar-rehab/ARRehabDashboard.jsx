@@ -3,10 +3,22 @@
  */
 import { useState, useEffect } from 'react';
 
-
-
-
 import { getDashboard } from '../../services/arRehabService';
+import {
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Grid,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Typography
+} from '@mui/material';
 
 const sessionStatusLabels = { active: 'نشطة', completed: 'مكتملة', paused: 'متوقفة', cancelled: 'ملغاة' };
 const sessionStatusColors = { active: 'success', completed: 'info', paused: 'warning', cancelled: 'error' };

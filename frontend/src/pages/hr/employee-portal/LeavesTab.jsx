@@ -1,6 +1,23 @@
 import {
   Paper,
 } from '@mui/material';
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Grid,
+  LinearProgress,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography
+} from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
 
 const LEAVE_TYPE_LABELS = {
   annual: 'سنوية',

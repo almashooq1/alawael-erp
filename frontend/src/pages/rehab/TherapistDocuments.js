@@ -1,14 +1,46 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 
-
-
-
 import { therapistService } from 'services/therapistService';
 import documentService from 'services/documentService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, statusColors, surfaceColors, neutralColors } from '../../theme/palette';
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  Grid,
+  InputAdornment,
+  InputLabel,
+  LinearProgress,
+  MenuItem,
+  Paper,
+  Select,
+  TextField,
+  Typography
+} from '@mui/material';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import ImageIcon from '@mui/icons-material/Image';
+import AudioFileIcon from '@mui/icons-material/AudioFile';
+import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
+import DescriptionIcon from '@mui/icons-material/Description';
+import SearchIcon from '@mui/icons-material/Search';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import ScannerIcon from '@mui/icons-material/Scanner';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import DownloadIcon from '@mui/icons-material/Download';
+import DeleteIcon from '@mui/icons-material/Delete';
+import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 
 const TherapistDocuments = () => {
   const { currentUser } = useAuth();

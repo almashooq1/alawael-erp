@@ -3,14 +3,41 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 
-
-
-
 import {
   getShiftDefinitions,
   createShiftDefinition,
   getShiftStats,
 } from '../../services/hr/employeeAffairsPhase2Service';
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Grid,
+  MenuItem,
+  Paper,
+  Snackbar,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  TextField,
+  Typography
+} from '@mui/material';
+import GroupIcon from '@mui/icons-material/Group';
+import AddIcon from '@mui/icons-material/Add';
 
 const SHIFT_TYPES = ['صباحي', 'مسائي', 'ليلي', 'مرن', 'متقطع', 'مناوبة'];
 const DAYS = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس'];

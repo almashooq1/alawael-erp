@@ -4,8 +4,33 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 
-
 import familySatisfactionService from '../../services/familySatisfaction.service';
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Divider,
+  Grid,
+  IconButton,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  Typography
+} from '@mui/material';
+import Add from '@mui/icons-material/Add';
+import Refresh from '@mui/icons-material/Refresh';
+import Star from '@mui/icons-material/Star';
+import TrendingUp from '@mui/icons-material/TrendingUp';
+import Assessment from '@mui/icons-material/Assessment';
 
 const npsColors = { promoter: 'success', passive: 'warning', detractor: 'error' };
 const npsLabels = { promoter: 'مروّج', passive: 'محايد', detractor: 'منتقد' };

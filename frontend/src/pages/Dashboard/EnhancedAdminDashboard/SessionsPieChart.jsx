@@ -1,6 +1,7 @@
 
 
 import { brandColors } from 'theme/palette';
+import { Card, CardContent, Typography } from '@mui/material';
 
 /** Sessions-by-category pie chart */
 const SessionsPieChart = ({ sessionsByCategory }) => (

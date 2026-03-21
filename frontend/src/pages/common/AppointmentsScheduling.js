@@ -1,8 +1,5 @@
 import { useState, useEffect } from 'react';
 
-
-
-
 import { parentService } from 'services/parentService';
 import api from 'services/api.client';
 import { getStatusColor } from 'utils/statusColors';
@@ -10,6 +7,38 @@ import logger from 'utils/logger';
 import { gradients, brandColors, neutralColors, surfaceColors } from 'theme/palette';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
+import {
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  Chip,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  Grid,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Select,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography
+} from '@mui/material';
+import DateRangeIcon from '@mui/icons-material/DateRange';
+import AddIcon from '@mui/icons-material/Add';
+import EditIcon from '@mui/icons-material/Edit';
+import CheckIcon from '@mui/icons-material/Check';
 
 const AppointmentsScheduling = () => {
   const { currentUser } = useAuth();

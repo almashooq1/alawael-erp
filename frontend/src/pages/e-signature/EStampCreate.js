@@ -2,11 +2,36 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import eStampService from '../../services/eStamp.service';
 
-
-
-
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients } from '../../theme/palette';
+import {
+  Avatar,
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  Divider,
+  FormControlLabel,
+  Grid,
+  IconButton,
+  MenuItem,
+  Paper,
+  Slider,
+  Step,
+  StepLabel,
+  Stepper,
+  Switch,
+  TextField,
+  ToggleButton,
+  ToggleButtonGroup,
+  Typography
+} from '@mui/material';
+import Verified from '@mui/icons-material/Verified';
+import ArrowBack from '@mui/icons-material/ArrowBack';
+import Delete from '@mui/icons-material/Delete';
+import ArrowForward from '@mui/icons-material/ArrowForward';
+import Save from '@mui/icons-material/Save';
+import Send from '@mui/icons-material/Send';
 
 /* ═══ Constants ══════════════════════════════════════════════════════════════ */
 const stampTypes = [

@@ -4,10 +4,24 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import { useTheme } from '@mui/material';
+import {
+  Box,
+  Chip,
+  Grid,
+  Paper,
+  Tooltip,
+  Typography,
+  useTheme
+} from '@mui/material';
 
 import { formatCurrency } from 'services/dashboardService';
 import { chartColors, brandColors, statusColors, gradients, neutralColors } from 'theme/palette';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import TrendingDownIcon from '@mui/icons-material/TrendingDown';
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
+import MoneyOffIcon from '@mui/icons-material/MoneyOff';
+import SavingsIcon from '@mui/icons-material/Savings';
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 
 const EXPENSE_COLORS = chartColors.expense;
 

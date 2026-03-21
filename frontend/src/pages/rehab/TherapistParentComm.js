@@ -1,13 +1,44 @@
 import { useState, useEffect } from 'react';
 
-
-
-
 import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { statusColors, neutralColors } from '../../theme/palette';
+import {
+  Avatar,
+  Badge,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  Grid,
+  IconButton,
+  InputAdornment,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  Tab,
+  Tabs,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import SendIcon from '@mui/icons-material/Send';
+import MessageIcon from '@mui/icons-material/Message';
+import InboxIcon from '@mui/icons-material/Inbox';
+import PeopleIcon from '@mui/icons-material/People';
+import SearchIcon from '@mui/icons-material/Search';
+import DeleteIcon from '@mui/icons-material/Delete';
+import CloseIcon from '@mui/icons-material/Close';
 
 const MESSAGE_TYPES = [
   { value: 'general', label: 'عام', color: '#3b82f6' },

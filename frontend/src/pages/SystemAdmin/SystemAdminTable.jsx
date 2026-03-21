@@ -6,6 +6,20 @@ import {
   Paper,
 } from '@mui/material';
 import { STATUS_COLORS, COL_MAP } from './systemAdmin.constants';
+import {
+  Chip,
+  IconButton,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const SystemAdminTable = ({ activeTab, tabs, data, openEdit, handleDelete }) => {
   const key = tabs[activeTab]?.key;

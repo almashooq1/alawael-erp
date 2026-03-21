@@ -12,11 +12,68 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 
-
-
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, statusColors, chartColors } from '../../theme/palette';
 import hrInsuranceService from '../../services/hrInsuranceService';
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Alert,
+  Avatar,
+  Badge,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  FormControl,
+  Grid,
+  IconButton,
+  InputAdornment,
+  InputLabel,
+  LinearProgress,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemSecondaryAction,
+  ListItemText,
+  MenuItem,
+  Paper,
+  Select,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  Tabs,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import PendingIcon from '@mui/icons-material/Pending';
+import WarningIcon from '@mui/icons-material/Warning';
+import CancelIcon from '@mui/icons-material/Cancel';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import AddIcon from '@mui/icons-material/Add';
+import PeopleIcon from '@mui/icons-material/People';
+import ReportIcon from '@mui/icons-material/Report';
+import MoneyIcon from '@mui/icons-material/Money';
+import SearchIcon from '@mui/icons-material/Search';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import { ActiveIcon, ViewIcon } from 'utils/iconAliases';
 
 // ─── Status & Class Config ───────────────────────────────────────────────────
 const STATUS_CONFIG = {

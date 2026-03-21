@@ -8,9 +8,44 @@ import {
   alpha,
 } from '@mui/material';
 
-
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import workflowService from '../../services/workflow.service';
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControlLabel,
+  Grid,
+  IconButton,
+  Paper,
+  Skeleton,
+  Stack,
+  Switch,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import ArrowBack from '@mui/icons-material/ArrowBack';
+import Add from '@mui/icons-material/Add';
+import Refresh from '@mui/icons-material/Refresh';
+import Check from '@mui/icons-material/Check';
+import Cancel from '@mui/icons-material/Cancel';
 
 const statusConfig = {
   active: { label: 'نشط', color: 'success' },

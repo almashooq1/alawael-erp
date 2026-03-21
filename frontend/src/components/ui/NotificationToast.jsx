@@ -17,8 +17,18 @@ import { createContext, useContext, useState, useCallback, useRef } from 'react'
 import {
   useTheme,
 } from '@mui/material';
-
-
+import {
+  Box,
+  Button,
+  IconButton,
+  LinearProgress,
+  Paper,
+  Typography
+} from '@mui/material';
+import ErrorIcon from '@mui/icons-material/Error';
+import WarningIcon from '@mui/icons-material/Warning';
+import InfoIcon from '@mui/icons-material/Info';
+import CloseIcon from '@mui/icons-material/Close';
 
 // ─── Config ──────────────────────────────────────────────────────────────────
 const TOAST_DEFAULTS = {

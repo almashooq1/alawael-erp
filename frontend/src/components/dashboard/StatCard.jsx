@@ -4,7 +4,13 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
-import { useTheme } from '@mui/material';
+import {
+  Box,
+  Paper,
+  Tooltip,
+  Typography,
+  useTheme
+} from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import PeopleIcon from '@mui/icons-material/People';
 import AccessibilityNewIcon from '@mui/icons-material/AccessibilityNew';
@@ -16,6 +22,9 @@ import HowToRegIcon from '@mui/icons-material/HowToReg';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import { formatNumber } from 'services/dashboardService';
 import { gradients as paletteGradients, statusColors } from 'theme/palette';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 
 const ICON_MAP = {
   People: PeopleIcon,

@@ -3,10 +3,23 @@
  * صفحة إدارة الأسطول — المنسق الرئيسي
  */
 
-
 import { gradients } from '../../theme/palette';
 import { TABS, STAT_CARDS } from './Fleet/fleetManagement.constants';
 import useFleetManagement from './Fleet/useFleetManagement';
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CircularProgress,
+  Container,
+  Grid,
+  Tab,
+  Tabs,
+  Typography
+} from '@mui/material';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import AddIcon from '@mui/icons-material/Add';
 
 const FleetManagement = () => {
   const {

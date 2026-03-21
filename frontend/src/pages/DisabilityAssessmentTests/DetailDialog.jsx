@@ -5,9 +5,29 @@ import {
   Paper,
 } from '@mui/material';
 
-
 import { surfaceColors } from '../../theme/palette';
 import { getLevelColor } from './constants';
+import {
+  Alert,
+  Box,
+  Chip,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  IconButton,
+  LinearProgress,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import PrintIcon from '@mui/icons-material/Print';
+import CloseIcon from '@mui/icons-material/Close';
 
 const DetailDialog = ({ open, onClose, selectedResult, tests }) => (
   <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>

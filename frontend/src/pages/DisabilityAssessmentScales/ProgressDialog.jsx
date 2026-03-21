@@ -4,11 +4,33 @@
  */
 import { useState, useEffect } from 'react';
 
-
-
-
 import assessmentService from 'services/assessmentService';
 import logger from 'utils/logger';
+import {
+  Alert,
+  Box,
+  Button,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  FormControl,
+  Grid,
+  IconButton,
+  InputLabel,
+  LinearProgress,
+  MenuItem,
+  Paper,
+  Select,
+  Typography
+} from '@mui/material';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import TrendingDownIcon from '@mui/icons-material/TrendingDown';
+import TrendingFlatIcon from '@mui/icons-material/TrendingFlat';
+import TimelineIcon from '@mui/icons-material/Timeline';
+import CloseIcon from '@mui/icons-material/Close';
 
 const ProgressDialog = ({ open, onClose, scales, beneficiaries }) => {
   const [selectedBeneficiary, setSelectedBeneficiary] = useState('');

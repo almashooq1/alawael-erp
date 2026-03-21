@@ -31,18 +31,13 @@ function TestConsumer() {
     <div>
       <span data-testid="user">{currentUser ? JSON.stringify(currentUser) : 'null'}</span>
       <span data-testid="error">{error || 'none'}</span>
-      <button
-        data-testid="login-btn"
-        onClick={() => login('admin@test.com', 'Admin@123')}
-      >
+      <button data-testid="login-btn" onClick={() => login('admin@test.com', 'Admin@123')}>
         Login
       </button>
       <button data-testid="logout-btn" onClick={logout}>
         Logout
       </button>
-      <span data-testid="perm">
-        {String(hasPermission('users', 'read'))}
-      </span>
+      <span data-testid="perm">{String(hasPermission('users', 'read'))}</span>
     </div>
   );
 }
@@ -51,7 +46,7 @@ function renderWithAuth() {
   return render(
     <AuthProvider>
       <TestConsumer />
-    </AuthProvider>,
+    </AuthProvider>
   );
 }
 

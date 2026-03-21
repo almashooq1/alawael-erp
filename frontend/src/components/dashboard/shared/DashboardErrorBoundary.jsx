@@ -6,6 +6,14 @@
 import { Component } from 'react';
 import logger from '../../../utils/logger';
 import { statusColors, gradients } from '../../../theme/palette';
+import {
+  Box,
+  Button,
+  Paper,
+  Typography
+} from '@mui/material';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import RefreshIcon from '@mui/icons-material/Refresh';
 
 class DashboardErrorBoundary extends Component {
   constructor(props) {

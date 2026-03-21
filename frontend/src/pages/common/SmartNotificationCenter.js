@@ -2,11 +2,38 @@ import { useState, useEffect } from 'react';
 import smartNotificationsService from '../../services/smartNotifications.service';
 import { useRealTimeNotifications, useSocketEmit } from '../../contexts/SocketContext';
 
-
-
-
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, statusColors } from '../../theme/palette';
+import {
+  Badge,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  FormControlLabel,
+  Grid,
+  IconButton,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemSecondaryAction,
+  ListItemText,
+  Paper,
+  Switch,
+  Tab,
+  Tabs,
+  Typography
+} from '@mui/material';
+import ApprovalIcon from '@mui/icons-material/Approval';
+import NotificationsActive from '@mui/icons-material/NotificationsActive';
+import SettingsIcon from '@mui/icons-material/Settings';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const demoNotifications = [
   {

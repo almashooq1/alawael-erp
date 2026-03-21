@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import hrService from 'services/hrService';
 import { neutralColors } from '../../theme/palette';
 import { LEAVE_TYPE_MAP, LEAVE_BALANCES, STATUS_CONFIG, EMPTY_FORM } from './constants';
+import { LeaveIcon } from 'utils/iconAliases';
 
 export const useLeaveManagement = () => {
   const [leaves, setLeaves] = useState([]);

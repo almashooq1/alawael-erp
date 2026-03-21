@@ -1,4 +1,4 @@
-import { useTheme } from '@mui/material';
+import { Box, Typography, useTheme } from '@mui/material';
 
 const BarChart = ({ data = [], labels = [], height = 200, color = '#0f766e' }) => {
   const theme = useTheme();

@@ -17,8 +17,22 @@ import {
   DirectionsCar,
 } from '@mui/icons-material';
 
-
 import { getOperationsAnalytics, getTrends } from '../../services/biDashboard.service';
+import {
+  Alert,
+  Box,
+  Card,
+  CardContent,
+  CircularProgress,
+  Divider,
+  Grid,
+  Icon,
+  IconButton,
+  Paper,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import Refresh from '@mui/icons-material/Refresh';
 
 const STATUS_COLORS = {
   completed: '#4CAF50',

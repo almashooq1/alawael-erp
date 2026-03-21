@@ -5,6 +5,34 @@ import { useState, useEffect, useCallback } from 'react';
 import { useTheme, alpha,
 } from '@mui/material';
 import { getPlans, createPlan, updatePlan } from '../../services/training.service';
+import {
+  Alert,
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import Refresh from '@mui/icons-material/Refresh';
+import Add from '@mui/icons-material/Add';
+import Edit from '@mui/icons-material/Edit';
 
 const STATUS_LABELS = { draft: 'مسودة', pending_approval: 'بانتظار الاعتماد', approved: 'معتمدة', in_progress: 'قيد التنفيذ', completed: 'مكتملة' };
 const STATUS_COLORS = { draft: 'default', pending_approval: 'warning', approved: 'info', in_progress: 'success', completed: 'primary' };

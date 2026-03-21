@@ -3,11 +3,23 @@
  */
 import { useState, useEffect } from 'react';
 
-
-
-
-
 import { getDashboard } from '../../services/crisisManagement.service';
+import {
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Grid,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Tooltip,
+  Typography
+} from '@mui/material';
 
 const severityLabels = { minor: 'بسيط', moderate: 'متوسط', major: 'كبير', critical: 'حرج' };
 const severityColors = { minor: '#4caf50', moderate: '#ff9800', major: '#f44336', critical: '#9c27b0' };

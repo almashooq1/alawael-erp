@@ -6,6 +6,17 @@
 
 
 // تصنيفات المراسلات
+import EmailIcon from '@mui/icons-material/Email';
+import SendIcon from '@mui/icons-material/Send';
+import MessageIcon from '@mui/icons-material/Message';
+import BusinessIcon from '@mui/icons-material/Business';
+import DraftsIcon from '@mui/icons-material/Drafts';
+import PendingIcon from '@mui/icons-material/Pending';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import ReplyIcon from '@mui/icons-material/Reply';
+import ArchiveIcon from '@mui/icons-material/Archive';
+import ErrorIcon from '@mui/icons-material/Error';
 export const COMMUNICATION_TYPES = {
   incoming: { label: 'وارد', color: 'primary', icon: <EmailIcon /> },
   outgoing: { label: 'صادر', color: 'success', icon: <SendIcon /> },

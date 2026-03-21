@@ -8,8 +8,27 @@ import {
   useTheme,
 } from '@mui/material';
 
-
 import { Link, useLocation } from 'react-router-dom';
+import {
+  AppBar,
+  Box,
+  Drawer,
+  IconButton,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Toolbar,
+  Typography
+} from '@mui/material';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import SchoolIcon from '@mui/icons-material/School';
+import AccessibilityIcon from '@mui/icons-material/Accessibility';
+import QuizIcon from '@mui/icons-material/Quiz';
+import SettingsIcon from '@mui/icons-material/Settings';
+import MenuIcon from '@mui/icons-material/Menu';
 
 const menuItems = [
   { text: 'لوحة التحكم', icon: <DashboardIcon />, path: '/dashboard' },

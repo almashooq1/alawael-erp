@@ -8,15 +8,37 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
-
-
-
-
-
 import { gradients, brandColors } from 'theme/palette';
 import studentManagementService from 'services/studentManagementService';
 import { useAuth } from 'contexts/AuthContext';
 import logger from 'utils/logger';
+import {
+  Alert,
+  Autocomplete,
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Grid,
+  Paper,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography
+} from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import PrintIcon from '@mui/icons-material/Print';
+import CompareIcon from '@mui/icons-material/Compare';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const STUDENT_COLORS = ['#4facfe', '#43e97b', '#fa709a', '#fee140', '#a18cd1', '#f093fb', '#4158D0', '#ff6b6b', '#00d2ff', '#7F00FF'];
 

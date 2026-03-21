@@ -3,10 +3,22 @@
  */
 import { useState, useEffect } from 'react';
 
-
-
-
 import { meetingsService, dashboardService } from '../../services/mdtCoordinationService';
+import {
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Grid,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Typography
+} from '@mui/material';
 
 const meetStatusLabels = { scheduled: 'مجدول', in_progress: 'جارٍ', completed: 'مكتمل', cancelled: 'ملغى' };
 const meetStatusColors = { scheduled: 'info', in_progress: 'warning', completed: 'success', cancelled: 'error' };

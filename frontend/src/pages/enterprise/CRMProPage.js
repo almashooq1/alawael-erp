@@ -8,9 +8,47 @@ import {
   alpha,
 } from '@mui/material';
 
-
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import enterpriseProService from '../../services/enterprisePro.service';
+import {
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  Grid,
+  IconButton,
+  InputAdornment,
+  LinearProgress,
+  MenuItem,
+  Paper,
+  Select,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  TextField,
+  Typography
+} from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import SearchIcon from '@mui/icons-material/Search';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EmailIcon from '@mui/icons-material/Email';
+import PhoneIcon from '@mui/icons-material/Phone';
+import BusinessIcon from '@mui/icons-material/Business';
+import SaveIcon from '@mui/icons-material/Save';
 
 const CONTACT_TYPES = { individual: 'فرد', company: 'شركة', lead: 'عميل محتمل', partner: 'شريك' };
 const _DEAL_STATUSES = {

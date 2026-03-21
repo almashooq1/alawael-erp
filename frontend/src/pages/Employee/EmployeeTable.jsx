@@ -3,10 +3,29 @@
  * جدول بيانات الموظفين
  */
 
-
-
 import { STATUS_MAP } from './employeeManagement.constants';
 import { DEPT_COLORS } from '../../constants/departmentColors';
+import {
+  Avatar,
+  Box,
+  Chip,
+  CircularProgress,
+  IconButton,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import PersonIcon from '@mui/icons-material/Person';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { CopyIcon, ViewIcon } from 'utils/iconAliases';
 
 const EmployeeTable = ({
   loading, filtered, page, rowsPerPage, setPage, setRowsPerPage,

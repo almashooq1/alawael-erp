@@ -1,9 +1,16 @@
 /**
  * DashboardSearchBar — Section filter with filtered count badge
  */
-import { useTheme } from '@mui/material';
+import {
+  Box,
+  Chip,
+  InputAdornment,
+  TextField,
+  useTheme
+} from '@mui/material';
 import { brandColors, statusColors } from 'theme/palette';
 import { SECTIONS } from '../dashboardConstants';
+import SearchIcon from '@mui/icons-material/Search';
 
 const DashboardSearchBar = ({ searchQuery, onSearchChange, visibleSections }) => {
   const theme = useTheme();

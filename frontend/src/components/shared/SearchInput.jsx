@@ -1,4 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
+import { IconButton, InputAdornment, TextField } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
+import ClearIcon from '@mui/icons-material/Clear';
 
 /**
  * SearchInput — Debounced search text field.

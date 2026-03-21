@@ -7,10 +7,30 @@ import {
   useTheme,
 } from '@mui/material';
 
-
-
-
 import { trainingReportsService, MOCK_TRAINING_DASHBOARD } from 'services/trainingService';
+import {
+  Avatar,
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  Grid,
+  IconButton,
+  LinearProgress,
+  List,
+  ListItem,
+  ListItemText,
+  Paper,
+  Tab,
+  Tabs,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import SchoolIcon from '@mui/icons-material/School';
+import PeopleIcon from '@mui/icons-material/People';
+import StarIcon from '@mui/icons-material/Star';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import { TrendIcon } from 'utils/iconAliases';
 
 const COLORS = ['#42A5F5', '#66BB6A', '#FFA726', '#EF5350', '#AB47BC', '#26A69A'];
 

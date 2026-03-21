@@ -4,9 +4,30 @@
  */
 
 
-
-
 // ─── Filter Dialog ────────────────────────────────────────
+import {
+  Alert,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  FormControl,
+  InputLabel,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
+  Select,
+  Snackbar,
+  Stack
+} from '@mui/material';
+import Download from '@mui/icons-material/Download';
+import Visibility from '@mui/icons-material/Visibility';
+import Edit from '@mui/icons-material/Edit';
+import Star from '@mui/icons-material/Star';
+import Delete from '@mui/icons-material/Delete';
 export const FilterDialog = ({ open, onClose, filters, setFilters, applyFilters }) => (
   <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
     <DialogTitle>الفلاتر المتقدمة</DialogTitle>

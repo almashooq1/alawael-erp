@@ -1,6 +1,11 @@
-import { alpha } from '@mui/material';
-
-
+import { Chip, alpha } from '@mui/material';
+import CheckIcon from '@mui/icons-material/Check';
+import PendingIcon from '@mui/icons-material/Pending';
+import CancelIcon from '@mui/icons-material/Cancel';
+import DoneAllIcon from '@mui/icons-material/DoneAll';
+import WarningIcon from '@mui/icons-material/Warning';
+import DoneIcon from '@mui/icons-material/Done';
+import { ActiveIcon } from 'utils/iconAliases';
 
 /* ─── Status → { label, color, icon } map ─── */
 const STATUS_CONFIGS = {

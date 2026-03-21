@@ -2,11 +2,29 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import eStampService from '../../services/eStamp.service';
 
-
-
-
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients } from '../../theme/palette';
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  Divider,
+  Grid,
+  InputAdornment,
+  Paper,
+  TextField,
+  Typography
+} from '@mui/material';
+import Verified from '@mui/icons-material/Verified';
+import ArrowBack from '@mui/icons-material/ArrowBack';
+import Search from '@mui/icons-material/Search';
+import Cancel from '@mui/icons-material/Cancel';
+import CheckCircle from '@mui/icons-material/CheckCircle';
+import Description from '@mui/icons-material/Description';
+import ContentCopy from '@mui/icons-material/ContentCopy';
 
 const typeLabels = {
   official: 'رسمي',

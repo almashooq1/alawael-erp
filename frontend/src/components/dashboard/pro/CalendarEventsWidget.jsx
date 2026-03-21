@@ -7,6 +7,31 @@ import {
   useTheme,
 } from '@mui/material';
 import { gradients, statusColors, brandColors } from 'theme/palette';
+import {
+  Avatar,
+  Box,
+  Chip,
+  Divider,
+  Grid,
+  IconButton,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  Paper,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import GroupIcon from '@mui/icons-material/Group';
+import EventIcon from '@mui/icons-material/Event';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import VideoCallIcon from '@mui/icons-material/VideoCall';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import AddIcon from '@mui/icons-material/Add';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
 
 const DAYS_AR = ['أحد', 'اثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت'];
 const MONTHS_AR = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];

@@ -8,9 +8,45 @@ import {
   useTheme,
 } from '@mui/material';
 
-
 import { contactsService, MOCK_CONTACTS } from 'services/crmService';
 import { useSnackbar } from 'contexts/SnackbarContext';
+import {
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  IconButton,
+  InputAdornment,
+  LinearProgress,
+  MenuItem,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import AddIcon from '@mui/icons-material/Add';
+import SearchIcon from '@mui/icons-material/Search';
+import BusinessIcon from '@mui/icons-material/Business';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import CloseIcon from '@mui/icons-material/Close';
+import PhoneIcon from '@mui/icons-material/Phone';
+import EmailIcon from '@mui/icons-material/Email';
+import { ViewIcon } from 'utils/iconAliases';
 
 const contactTypes = ['شركة', 'فرد', 'جهة حكومية', 'مؤسسة تعليمية', 'منظمة غير ربحية'];
 const statuses = ['نشط', 'غير نشط', 'معلق'];

@@ -4,12 +4,50 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 
-
-
-
 import { useNavigate } from 'react-router-dom';
 import { gradients } from '../../theme/palette';
 import educationSystemService from '../../services/educationSystem.service';
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Checkbox,
+  Chip,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  FormControl,
+  FormControlLabel,
+  FormGroup,
+  Grid,
+  IconButton,
+  InputAdornment,
+  InputLabel,
+  LinearProgress,
+  MenuItem,
+  Paper,
+  Select,
+  Switch,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import SearchIcon from '@mui/icons-material/Search';
+import PeopleIcon from '@mui/icons-material/People';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const { classroomService } = educationSystemService;
 

@@ -4,9 +4,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
-
-
-
 import electronicDirectivesService from '../../services/electronicDirectives.service';
 import {
   DIRECTIVE_TYPES,
@@ -16,6 +13,49 @@ import {
   RECIPIENT_TYPES,
   ACTION_STATUS,
 } from './constants';
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Grid,
+  IconButton,
+  LinearProgress,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemSecondaryAction,
+  ListItemText,
+  Paper,
+  Skeleton,
+  Snackbar,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import CampaignIcon from '@mui/icons-material/Campaign';
+import PolicyIcon from '@mui/icons-material/Policy';
+import EditIcon from '@mui/icons-material/Edit';
+import CancelIcon from '@mui/icons-material/Cancel';
+import CheckIcon from '@mui/icons-material/Check';
+import DoneIcon from '@mui/icons-material/Done';
+import WarningIcon from '@mui/icons-material/Warning';
+import ScheduleIcon from '@mui/icons-material/Schedule';
+import DeleteIcon from '@mui/icons-material/Delete';
+import PersonIcon from '@mui/icons-material/Person';
+import { AttachIcon } from 'utils/iconAliases';
 
 const typeIcons = {
   instruction: <InstructionIcon />,

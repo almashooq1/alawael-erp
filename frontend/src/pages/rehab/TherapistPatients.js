@@ -3,13 +3,45 @@ import {
   Paper,
 } from '@mui/material';
 
-
 import { therapistService } from 'services/therapistService';
 import { getStatusColor } from 'utils/statusColors';
 import logger from 'utils/logger';
 import { gradients, statusColors, surfaceColors, neutralColors } from 'theme/palette';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
+import {
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  InputAdornment,
+  LinearProgress,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  ToggleButton,
+  ToggleButtonGroup,
+  Typography
+} from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
+import ViewListIcon from '@mui/icons-material/ViewList';
+import ViewAgendaIcon from '@mui/icons-material/ViewAgenda';
+import AddIcon from '@mui/icons-material/Add';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import PhoneIcon from '@mui/icons-material/Phone';
+import EmailIcon from '@mui/icons-material/Email';
 
 const TherapistPatients = () => {
   const { currentUser } = useAuth();

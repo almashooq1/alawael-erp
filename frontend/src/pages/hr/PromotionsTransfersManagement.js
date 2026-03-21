@@ -6,7 +6,6 @@ import {
   Paper,
 } from '@mui/material';
 
-
 import {
   getPromotionTransfers,
   createPromotionTransfer,
@@ -14,6 +13,36 @@ import {
   approvePromotionTransferStep,
   executePromotionTransfer,
 } from '../../services/hr/employeeAffairsExpandedService';
+import {
+  Alert,
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  IconButton,
+  MenuItem,
+  Snackbar,
+  Step,
+  StepLabel,
+  Stepper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import { ViewIcon } from 'utils/iconAliases';
 
 const REQUEST_TYPES = ['ترقية', 'نقل داخلي', 'نقل خارجي', 'انتداب', 'إعارة', 'تكليف'];
 

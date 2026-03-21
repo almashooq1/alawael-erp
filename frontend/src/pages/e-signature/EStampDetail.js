@@ -2,10 +2,48 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import eStampService from '../../services/eStamp.service';
 
-
-
-
 import { useSnackbar } from '../../contexts/SnackbarContext';
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Grid,
+  IconButton,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  MenuItem,
+  Paper,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  TextField,
+  Typography
+} from '@mui/material';
+import Verified from '@mui/icons-material/Verified';
+import ArrowBack from '@mui/icons-material/ArrowBack';
+import Send from '@mui/icons-material/Send';
+import CheckCircle from '@mui/icons-material/CheckCircle';
+import Refresh from '@mui/icons-material/Refresh';
+import Lock from '@mui/icons-material/Lock';
+import History from '@mui/icons-material/History';
+import ContentCopy from '@mui/icons-material/ContentCopy';
+import People from '@mui/icons-material/People';
+import Delete from '@mui/icons-material/Delete';
 
 /* ═══ Helpers ════════════════════════════════════════════════════════════════ */
 const typeLabels = {

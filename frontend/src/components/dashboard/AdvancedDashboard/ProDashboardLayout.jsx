@@ -9,6 +9,21 @@ import { gradients, brandColors } from 'theme/palette';
 import {
   DEFAULT_PREFERENCES,
 } from '../pro';
+import {
+  Box,
+  Chip,
+  Collapse,
+  Fab,
+  Grid,
+  IconButton,
+  Stack,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import DashboardCustomizeIcon from '@mui/icons-material/DashboardCustomize';
 
 /* ─── Section Wrapper ─── */
 const ProSection = ({ id, title, icon, children, collapsed, onToggle, delay = 0 }) => (

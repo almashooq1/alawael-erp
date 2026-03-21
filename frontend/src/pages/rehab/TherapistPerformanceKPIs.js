@@ -1,12 +1,34 @@
 import { useState, useEffect } from 'react';
 
-
-
-
 import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
+import {
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Grid,
+  IconButton,
+  LinearProgress,
+  Paper,
+  TextField,
+  Typography
+} from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import CloseIcon from '@mui/icons-material/Close';
 
 const KPI_LABELS = {
   sessionsCompleted: { label: 'الجلسات المكتملة', icon: '📋', color: '#3b82f6' },

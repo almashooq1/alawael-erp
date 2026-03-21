@@ -7,6 +7,18 @@ import {
   COMMUNICATION_STATUS,
   PRIORITY_LEVELS,
 } from './communicationsConstants';
+import {
+  Card,
+  Chip,
+  FormControl,
+  Grid,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField
+} from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
+import FilterIcon from '@mui/icons-material/Filter';
 
 const CommunicationFilters = ({
   searchQuery,

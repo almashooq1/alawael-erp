@@ -1,13 +1,39 @@
 import { useState, useEffect } from 'react';
 
-
-
-
 import { parentService } from 'services/parentService';
 import logger from 'utils/logger';
 import { gradients, brandColors, statusColors, neutralColors, surfaceColors } from 'theme/palette';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
+import {
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  Chip,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  LinearProgress,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  Typography
+} from '@mui/material';
+import SchoolIcon from '@mui/icons-material/School';
+import PhoneIcon from '@mui/icons-material/Phone';
+import EmailIcon from '@mui/icons-material/Email';
+import WarningIcon from '@mui/icons-material/Warning';
 
 const ParentDashboard = () => {
   const { currentUser } = useAuth();

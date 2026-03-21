@@ -14,12 +14,42 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 
-
-
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, chartColors, statusColors } from '../../theme/palette';
 import logger from '../../utils/logger';
 import { therapistService } from '../../services/therapistService';
+import {
+  Badge,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Grid,
+  IconButton,
+  LinearProgress,
+  MenuItem,
+  Paper,
+  Stack,
+  TextField,
+  ToggleButton,
+  ToggleButtonGroup,
+  Typography
+} from '@mui/material';
+import CheckCircle from '@mui/icons-material/CheckCircle';
+import Cancel from '@mui/icons-material/Cancel';
+import TodayIcon from '@mui/icons-material/Today';
+import ScheduleIcon from '@mui/icons-material/Schedule';
+import CloseIcon from '@mui/icons-material/Close';
+import PersonIcon from '@mui/icons-material/Person';
+import RoomIcon from '@mui/icons-material/Room';
+import { CalendarIcon } from 'utils/iconAliases';
 
 /* ──────── Arabic locale data ──────── */
 const AR_MONTHS = [

@@ -3,11 +3,24 @@
  */
 import { useState, useEffect } from 'react';
 
-
-
-
-
 import { getDashboard } from '../../services/assetManagement.service';
+import {
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Grid,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import { ActiveIcon } from 'utils/iconAliases';
 
 const statusMap = {
   active: { label: 'نشط', color: 'success' },

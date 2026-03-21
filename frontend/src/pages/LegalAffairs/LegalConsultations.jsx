@@ -5,6 +5,34 @@ import { useState, useEffect, useCallback } from 'react';
 import { useTheme, alpha,
 } from '@mui/material';
 import { getConsultations, createConsultation, updateConsultation } from '../../services/legalAffairs.service';
+import {
+  Alert,
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import Refresh from '@mui/icons-material/Refresh';
+import Add from '@mui/icons-material/Add';
+import Edit from '@mui/icons-material/Edit';
 
 const TYPE_LABELS = { contract_review: 'مراجعة عقد', legal_opinion: 'رأي قانوني', compliance: 'امتثال', risk_assessment: 'تقييم مخاطر', general: 'عامة', employment: 'توظيف' };
 const STATUS_LABELS = { pending: 'معلقة', in_review: 'قيد المراجعة', completed: 'مكتملة', cancelled: 'ملغاة' };

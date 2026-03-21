@@ -1,13 +1,43 @@
 import { useState, useEffect, useMemo } from 'react';
 
-
-
 import apiClient from 'services/api.client';
 import logger from 'utils/logger';
 import { getOrgEmployees, setOrgEmployees } from 'utils/storageService';
 import { useSnackbar } from 'contexts/SnackbarContext';
 import { gradients, statusColors, neutralColors, surfaceColors } from 'theme/palette';
 import { useConfirmDialog } from 'components/common/ConfirmDialog';
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Container,
+  Dialog,
+  Grid,
+  IconButton,
+  List,
+  ListItem,
+  ListItemText,
+  Paper,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Tabs,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import BusinessIcon from '@mui/icons-material/Business';
+import PeopleIcon from '@mui/icons-material/People';
+import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const OrganizationChart = () => {
   const showSnackbar = useSnackbar();

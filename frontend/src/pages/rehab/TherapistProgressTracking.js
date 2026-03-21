@@ -1,13 +1,46 @@
 import { useState, useEffect } from 'react';
 
-
-
-
 import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { statusColors, neutralColors } from '../../theme/palette';
+import {
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  FormControl,
+  Grid,
+  IconButton,
+  InputAdornment,
+  InputLabel,
+  LinearProgress,
+  MenuItem,
+  Paper,
+  Select,
+  Tab,
+  Tabs,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import PersonIcon from '@mui/icons-material/Person';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import SearchIcon from '@mui/icons-material/Search';
+import TimelineIcon from '@mui/icons-material/Timeline';
+import DeleteIcon from '@mui/icons-material/Delete';
+import CloseIcon from '@mui/icons-material/Close';
+import { CalendarIcon, ChartIcon, TrendIcon } from 'utils/iconAliases';
 
 const DOMAINS = [
   { value: 'motor', label: 'حركي', color: '#3b82f6' },

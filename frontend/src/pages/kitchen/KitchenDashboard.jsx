@@ -3,9 +3,27 @@
  */
 import { useState, useEffect } from 'react';
 
-
-
 import apiClient from '../../services/api';
+import {
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  Grid,
+  LinearProgress,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import MenuIcon from '@mui/icons-material/Menu';
+import InventoryIcon from '@mui/icons-material/Inventory';
+import PeopleIcon from '@mui/icons-material/People';
 
 const COLORS = ['#e65100', '#2e7d32', '#1565c0', '#6a1b9a', '#c62828', '#00838f'];
 

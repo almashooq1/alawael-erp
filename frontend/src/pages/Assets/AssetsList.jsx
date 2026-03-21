@@ -3,8 +3,32 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 
-
 import { getAssets, createAsset, updateAsset, deleteAsset } from '../../services/assetManagement.service';
+import {
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  MenuItem,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TablePagination,
+  TableRow,
+  TextField,
+  Typography
+} from '@mui/material';
+import Refresh from '@mui/icons-material/Refresh';
+import Add from '@mui/icons-material/Add';
+import Edit from '@mui/icons-material/Edit';
+import Delete from '@mui/icons-material/Delete';
 
 const categoryOptions = [
   { value: 'vehicles', label: 'مركبات' },

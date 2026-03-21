@@ -4,8 +4,25 @@
  */
 
 
-
 import { brandColors, surfaceColors } from '../../theme/palette';
+import {
+  Box,
+  Card,
+  CardHeader,
+  Chip,
+  IconButton,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const UsersTable = ({
   filteredUsers,

@@ -5,6 +5,23 @@
 
 import { PROGRAMS, SHIFTS, WEEK_DAYS } from '../studentRegistrationConfig';
 import { brandColors } from 'theme/palette';
+import {
+  Alert,
+  Box,
+  Card,
+  Chip,
+  Divider,
+  Fade,
+  FormControl,
+  Grid,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
+  Typography
+} from '@mui/material';
+import School from '@mui/icons-material/School';
+import CheckCircle from '@mui/icons-material/CheckCircle';
 
 const ProgramsStep = ({ formData, fieldErrors, handleChange, handleMultiSelect }) => (
   <Fade in timeout={400}>

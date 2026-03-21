@@ -4,6 +4,15 @@
 import React from 'react';
 import { statusColors } from '../../theme/palette';
 import { STATUS_MAP } from './constants';
+import {
+  Box,
+  Button,
+  Chip,
+  Divider,
+  Grid,
+  Paper,
+  Typography
+} from '@mui/material';
 
 const BottomRow = ({ leaves, reviews, navigate }) => (
   <Grid container spacing={3}>

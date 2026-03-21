@@ -3,12 +3,24 @@
  * Manages assets, equipment, maintenance, schedules, licenses, and branches.
  */
 
-
-
-
 import { gradients } from '../../theme/palette';
 
 import useOperationsManagement from './useOperationsManagement';
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Container,
+  Grid,
+  LinearProgress,
+  Paper,
+  Tab,
+  Tabs,
+  Typography
+} from '@mui/material';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import AddIcon from '@mui/icons-material/Add';
 
 const OperationsManagement = () => {
   const ctx = useOperationsManagement();

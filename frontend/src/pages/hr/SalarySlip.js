@@ -1,12 +1,29 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 
-
-
-
 import { useParams, useNavigate } from 'react-router-dom';
 import payrollService from 'services/payrollService';
 import logger from 'utils/logger';
 import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';
+import {
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Container,
+  Divider,
+  Grid,
+  LinearProgress,
+  Table,
+  TableBody,
+  TableCell,
+  TableRow,
+  Typography
+} from '@mui/material';
+import PrintIcon from '@mui/icons-material/Print';
+import DownloadIcon from '@mui/icons-material/Download';
+import PersonIcon from '@mui/icons-material/Person';
 
 const allowanceLabels = {
   housing: 'بدل سكن',

@@ -5,6 +5,26 @@ import { useState, useEffect, useCallback } from 'react';
 import { useTheme, alpha,
 } from '@mui/material';
 import { getTrainingDashboard } from '../../services/training.service';
+import {
+  Alert,
+  Box,
+  Chip,
+  CircularProgress,
+  Grid,
+  IconButton,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import School from '@mui/icons-material/School';
+import Groups from '@mui/icons-material/Groups';
+import CheckCircle from '@mui/icons-material/CheckCircle';
+import Refresh from '@mui/icons-material/Refresh';
 
 const CAT_LABELS = { technical: 'تقنية', leadership: 'قيادة', soft_skills: 'مهارات ناعمة', compliance: 'امتثال', safety: 'سلامة', professional: 'مهنية', language: 'لغات', other: 'أخرى' };
 const COLORS = ['#2196f3', '#4caf50', '#ff9800', '#e91e63', '#9c27b0', '#00bcd4', '#795548', '#607d8b'];

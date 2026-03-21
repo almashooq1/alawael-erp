@@ -8,9 +8,39 @@ import {
   alpha,
 } from '@mui/material';
 
-
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import workflowService from '../../services/workflow.service';
+import {
+  Box,
+  Button,
+  Chip,
+  Divider,
+  FormControl,
+  IconButton,
+  InputAdornment,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  Skeleton,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import Description from '@mui/icons-material/Description';
+import Assignment from '@mui/icons-material/Assignment';
+import TuneRounded from '@mui/icons-material/TuneRounded';
+import ArrowBack from '@mui/icons-material/ArrowBack';
+import Search from '@mui/icons-material/Search';
+import OpenInNew from '@mui/icons-material/OpenInNew';
 
 const typeConfig = {
   instance: { label: 'سير العمل', color: '#6366f1', icon: <Description fontSize="small" /> },

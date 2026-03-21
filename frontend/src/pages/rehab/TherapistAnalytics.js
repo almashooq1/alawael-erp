@@ -1,13 +1,37 @@
 import { useState, useEffect } from 'react';
 
-
-
-
 import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { statusColors, neutralColors, surfaceColors } from '../../theme/palette';
+import {
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  Container,
+  Divider,
+  FormControl,
+  Grid,
+  LinearProgress,
+  MenuItem,
+  Paper,
+  Select,
+  Typography
+} from '@mui/material';
+import AnalyticsIcon from '@mui/icons-material/Analytics';
+import ScheduleIcon from '@mui/icons-material/Schedule';
+import CheckIcon from '@mui/icons-material/Check';
+import SpeedIcon from '@mui/icons-material/Speed';
+import StarIcon from '@mui/icons-material/Star';
+import PeopleIcon from '@mui/icons-material/People';
+import CancelIcon from '@mui/icons-material/Cancel';
+import TimelineIcon from '@mui/icons-material/Timeline';
+import PieChartIcon from '@mui/icons-material/PieChart';
+import FlagIcon from '@mui/icons-material/Flag';
+import BarChartIcon from '@mui/icons-material/BarChart';
+import { DocIcon } from 'utils/iconAliases';
 
 const TherapistAnalytics = () => {
   const { currentUser } = useAuth();

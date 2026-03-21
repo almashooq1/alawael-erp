@@ -17,8 +17,31 @@ import {
   AttachMoney,
 } from '@mui/icons-material';
 
-
 import { getFinanceAnalytics, getCashflow } from '../../services/biDashboard.service';
+import {
+  Alert,
+  Box,
+  Card,
+  CardContent,
+  CircularProgress,
+  Grid,
+  Icon,
+  IconButton,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  ToggleButton,
+  ToggleButtonGroup,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import TrendingUp from '@mui/icons-material/TrendingUp';
+import TrendingDown from '@mui/icons-material/TrendingDown';
+import Refresh from '@mui/icons-material/Refresh';
 
 function formatCurrency(amount) {
   return new Intl.NumberFormat('ar-SA', { style: 'currency', currency: 'SAR', maximumFractionDigits: 0 }).format(

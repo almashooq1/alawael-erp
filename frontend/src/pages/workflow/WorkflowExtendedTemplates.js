@@ -9,9 +9,44 @@ import {
   alpha,
 } from '@mui/material';
 
-
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import workflowService from '../../services/workflow.service';
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Grid,
+  IconButton,
+  Skeleton,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import AttachMoney from '@mui/icons-material/AttachMoney';
+import School from '@mui/icons-material/School';
+import Description from '@mui/icons-material/Description';
+import Assessment from '@mui/icons-material/Assessment';
+import ArrowBack from '@mui/icons-material/ArrowBack';
+import Refresh from '@mui/icons-material/Refresh';
+import ListAlt from '@mui/icons-material/ListAlt';
+import Visibility from '@mui/icons-material/Visibility';
+import CheckCircle from '@mui/icons-material/CheckCircle';
 
 const TEMPLATE_ICONS = {
   'salary-advance': <AttachMoney />,

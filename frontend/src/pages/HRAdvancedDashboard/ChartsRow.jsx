@@ -5,6 +5,12 @@ import React from 'react';
 
 
 import { statusColors } from '../../theme/palette';
+import {
+  Box,
+  Grid,
+  Paper,
+  Typography
+} from '@mui/material';
 
 const ChartsRow = ({ attendanceChartData, departmentChartData }) => (
   <Grid container spacing={3} sx={{ mb: 3 }}>

@@ -6,12 +6,40 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 
-
-
-
 import { statusColors, surfaceColors } from '../../theme/palette';
 import documentService from 'services/documentService';
 import logger from 'utils/logger';
+import {
+  Alert,
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  FormControl,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  Slider,
+  Stack,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import ScannerIcon from '@mui/icons-material/Scanner';
+import CloseIcon from '@mui/icons-material/Close';
+import CameraIcon from '@mui/icons-material/Camera';
+import FlipIcon from '@mui/icons-material/Flip';
+import ZoomOutIcon from '@mui/icons-material/ZoomOut';
+import ZoomInIcon from '@mui/icons-material/ZoomIn';
+import ImageIcon from '@mui/icons-material/Image';
+import UploadIcon from '@mui/icons-material/Upload';
 
 /* ─── Filter Presets ─── */
 const FILTER_PRESETS = [

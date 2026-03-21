@@ -3,8 +3,12 @@
  * الثوابت والتهيئة والتحقق
  */
 
-
 import { statusColors } from '../../theme/palette';
+import MaleIcon from '@mui/icons-material/Male';
+import FemaleIcon from '@mui/icons-material/Female';
+import PersonIcon from '@mui/icons-material/Person';
+import WorkIcon from '@mui/icons-material/Work';
+import { ActiveIcon, InactiveIcon } from 'utils/iconAliases';
 
 export const DEPARTMENTS = [
   'تقنية المعلومات',

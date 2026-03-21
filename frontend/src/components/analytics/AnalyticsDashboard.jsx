@@ -4,12 +4,33 @@
 
 import { useState, useEffect } from 'react';
 
-
-
-
 import apiClient from 'services/api.client';
 import logger from 'utils/logger';
 import { statusColors } from '../../theme/palette';
+import {
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  FormControl,
+  Grid,
+  InputLabel,
+  LinearProgress,
+  MenuItem,
+  Select,
+  Tab,
+  Tabs,
+  Typography
+} from '@mui/material';
+import PeopleIcon from '@mui/icons-material/People';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import TimelineIcon from '@mui/icons-material/Timeline';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import DownloadIcon from '@mui/icons-material/Download';
+import BarChartIcon from '@mui/icons-material/BarChart';
+import { CalendarIcon, TrendIcon } from 'utils/iconAliases';
 
 const kpiCards = [
   { label: 'إجمالي المستفيدين', value: '2,847', change: '+12%', icon: <PeopleIcon />, color: statusColors.primaryBlue, trend: 'up' },

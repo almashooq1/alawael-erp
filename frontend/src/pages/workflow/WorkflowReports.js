@@ -8,9 +8,50 @@ import {
   alpha,
 } from '@mui/material';
 
-
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import workflowService from '../../services/workflow.service';
+import {
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  FormControl,
+  Grid,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  Skeleton,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import TrendingUp from '@mui/icons-material/TrendingUp';
+import People from '@mui/icons-material/People';
+import ArrowBack from '@mui/icons-material/ArrowBack';
+import Assessment from '@mui/icons-material/Assessment';
+import Add from '@mui/icons-material/Add';
+import Refresh from '@mui/icons-material/Refresh';
+import Schedule from '@mui/icons-material/Schedule';
+import PlayArrow from '@mui/icons-material/PlayArrow';
+import Edit from '@mui/icons-material/Edit';
+import Delete from '@mui/icons-material/Delete';
 
 const REPORT_TYPES = [
   {

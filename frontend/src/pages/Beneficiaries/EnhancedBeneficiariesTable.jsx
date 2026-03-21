@@ -14,6 +14,7 @@
  */
 
 import useBeneficiariesTable from './useBeneficiariesTable';
+import { Box } from '@mui/material';
 
 
 

@@ -12,8 +12,40 @@ import {
   Paper,
 } from '@mui/material';
 
-
 import noorService from '../../services/noor.service';
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  IconButton,
+  LinearProgress,
+  MenuItem,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import SchoolIcon from '@mui/icons-material/School';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import SyncIcon from '@mui/icons-material/Sync';
+import ReportIcon from '@mui/icons-material/Report';
+import AddIcon from '@mui/icons-material/Add';
 
 /* ─── Status label maps ─── */
 const enrollmentStatusMap = {

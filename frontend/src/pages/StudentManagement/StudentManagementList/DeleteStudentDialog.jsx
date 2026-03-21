@@ -2,6 +2,14 @@
 
 
 /** Delete confirmation dialog */
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle
+} from '@mui/material';
 const DeleteStudentDialog = ({ open, student, onClose, onConfirm }) => (
   <Dialog open={open} onClose={onClose}>
     <DialogTitle sx={{ fontWeight: 'bold' }}>تأكيد الحذف</DialogTitle>

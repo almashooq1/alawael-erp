@@ -6,6 +6,42 @@ import { useState, useMemo, useCallback } from 'react';
 import { useTheme,
 } from '@mui/material';
 import { gradients, statusColors } from 'theme/palette';
+import {
+  Avatar,
+  Badge,
+  Box,
+  Button,
+  Chip,
+  Collapse,
+  Divider,
+  IconButton,
+  InputAdornment,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  Paper,
+  Tab,
+  Tabs,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import SecurityIcon from '@mui/icons-material/Security';
+import PaymentIcon from '@mui/icons-material/Payment';
+import GroupIcon from '@mui/icons-material/Group';
+import EventIcon from '@mui/icons-material/Event';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import VolumeUpIcon from '@mui/icons-material/VolumeUp';
+import VolumeOffIcon from '@mui/icons-material/VolumeOff';
+import DoneAllIcon from '@mui/icons-material/DoneAll';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import SearchIcon from '@mui/icons-material/Search';
 
 const CATEGORIES = [
   { id: 'all', label: 'الكل', icon: <NotificationsActiveIcon fontSize="small" /> },

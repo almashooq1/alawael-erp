@@ -1,11 +1,66 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 
-
-
 import hrService from 'services/hrService';
 import zktecoService from 'services/zktecoService';
 import { gradients, statusColors, neutralColors, surfaceColors, leaveColors } from '../../theme/palette';
 import { DEPT_COLORS } from '../../constants/departmentColors';
+import {
+  Alert,
+  Avatar,
+  Badge,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Grid,
+  IconButton,
+  InputAdornment,
+  LinearProgress,
+  MenuItem,
+  Paper,
+  Snackbar,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  Tabs,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import TimelapseIcon from '@mui/icons-material/Timelapse';
+import TodayIcon from '@mui/icons-material/Today';
+import ReportIcon from '@mui/icons-material/Report';
+import WarningIcon from '@mui/icons-material/Warning';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import DownloadIcon from '@mui/icons-material/Download';
+import PrintIcon from '@mui/icons-material/Print';
+import FingerprintIcon from '@mui/icons-material/Fingerprint';
+import SyncIcon from '@mui/icons-material/Sync';
+import PeopleIcon from '@mui/icons-material/People';
+import SearchIcon from '@mui/icons-material/Search';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import ScheduleIcon from '@mui/icons-material/Schedule';
+import EditIcon from '@mui/icons-material/Edit';
+import HistoryIcon from '@mui/icons-material/History';
+import DateRangeIcon from '@mui/icons-material/DateRange';
+import EventAvailableIcon from '@mui/icons-material/EventAvailable';
+import EventBusyIcon from '@mui/icons-material/EventBusy';
+import CloseIcon from '@mui/icons-material/Close';
+import SaveIcon from '@mui/icons-material/Save';
+import { CalendarIcon, ChartIcon, LeaveIcon, ViewIcon } from 'utils/iconAliases';
 
 /* ═══════════════════════════════════════════════
    Constants & Configuration

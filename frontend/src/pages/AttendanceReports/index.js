@@ -1,10 +1,39 @@
 
 
-
-
 import { gradients, surfaceColors } from 'theme/palette';
 import useAttendanceReports from './useAttendanceReports';
 import { attendanceColumns, getStatusChipColor } from './constants';
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  Chip,
+  Container,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  Grid,
+  InputLabel,
+  LinearProgress,
+  MenuItem,
+  Select,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography
+} from '@mui/material';
+import EventNoteIcon from '@mui/icons-material/EventNote';
+import TableViewIcon from '@mui/icons-material/TableView';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
 
 const AttendanceReports = () => {
   const {

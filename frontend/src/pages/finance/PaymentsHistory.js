@@ -1,14 +1,44 @@
 import { useState, useEffect } from 'react';
 
-
-
-
 import { parentService } from 'services/parentService';
 import { getStatusColor } from 'utils/statusColors';
 import logger from 'utils/logger';
 import { gradients, neutralColors, surfaceColors, brandColors } from 'theme/palette';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  Chip,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  Grid,
+  InputAdornment,
+  InputLabel,
+  MenuItem,
+  Select,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  TextField,
+  Typography
+} from '@mui/material';
+import PaymentIcon from '@mui/icons-material/Payment';
+import SearchIcon from '@mui/icons-material/Search';
+import PrintIcon from '@mui/icons-material/Print';
+import DownloadIcon from '@mui/icons-material/Download';
 
 const PaymentsHistory = () => {
   const { currentUser } = useAuth();

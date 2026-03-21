@@ -1,13 +1,26 @@
 import { useEffect, useState } from 'react';
 
-
-
-
 import apiClient from 'services/api.client';
 import logger from 'utils/logger';
 import { getUserId } from 'utils/storageService';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, statusColors, chartColors } from '../../theme/palette';
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  Chip,
+  CircularProgress,
+  Container,
+  Grid,
+  LinearProgress,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import PsychologyIcon from '@mui/icons-material/Psychology';
 
 const AIAnalyticsDashboard = () => {
   const showSnackbar = useSnackbar();

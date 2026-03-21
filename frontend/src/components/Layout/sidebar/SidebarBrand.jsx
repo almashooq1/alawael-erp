@@ -5,6 +5,9 @@
 
 
 
+import { Box, IconButton, Typography } from '@mui/material';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 const LOGO_URL = '/logo.svg';
 
 const SidebarBrand = ({ collapsed, isMobile, onToggleCollapse, theme, customLogo, customName }) => {

@@ -2,12 +2,43 @@
  * LeaveManagement — Orchestrator
  */
 
-
-
-
 import { gradients, statusColors, assessmentColors } from '../../theme/palette';
 import { LEAVE_TYPES, EMPTY_FORM } from './constants';
 import { useLeaveManagement } from './useLeaveManagement';
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Container,
+  Divider,
+  Grid,
+  IconButton,
+  InputAdornment,
+  LinearProgress,
+  MenuItem,
+  Paper,
+  Snackbar,
+  Tab,
+  Tabs,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import WarningIcon from '@mui/icons-material/Warning';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import DownloadIcon from '@mui/icons-material/Download';
+import PrintIcon from '@mui/icons-material/Print';
+import AddIcon from '@mui/icons-material/Add';
+import PendingIcon from '@mui/icons-material/Pending';
+import BalanceIcon from '@mui/icons-material/Balance';
+import SearchIcon from '@mui/icons-material/Search';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import { LeaveIcon } from 'utils/iconAliases';
 
 const LeaveManagement = () => {
   const {

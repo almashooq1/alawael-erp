@@ -6,6 +6,45 @@ import { useState, useCallback } from 'react';
 import { useTheme,
 } from '@mui/material';
 import { gradients, brandColors } from 'theme/palette';
+import {
+  Avatar,
+  Box,
+  Button,
+  Divider,
+  Drawer,
+  FormControlLabel,
+  Grid,
+  IconButton,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemSecondaryAction,
+  ListItemText,
+  Slider,
+  Switch,
+  ToggleButton,
+  ToggleButtonGroup,
+  Typography
+} from '@mui/material';
+import SpeedIcon from '@mui/icons-material/Speed';
+import AnalyticsIcon from '@mui/icons-material/Analytics';
+import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
+import TaskAltIcon from '@mui/icons-material/TaskAlt';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import PersonIcon from '@mui/icons-material/Person';
+import BarChartIcon from '@mui/icons-material/BarChart';
+import SecurityIcon from '@mui/icons-material/Security';
+import ViewStreamIcon from '@mui/icons-material/ViewStream';
+import ViewModuleIcon from '@mui/icons-material/ViewModule';
+import ViewCompactIcon from '@mui/icons-material/ViewCompact';
+import DashboardCustomizeIcon from '@mui/icons-material/DashboardCustomize';
+import CloseIcon from '@mui/icons-material/Close';
+import GridViewIcon from '@mui/icons-material/GridView';
+import PaletteIcon from '@mui/icons-material/Palette';
+import TextFieldsIcon from '@mui/icons-material/TextFields';
+import SettingsIcon from '@mui/icons-material/Settings';
+import RestoreIcon from '@mui/icons-material/Restore';
+import SaveIcon from '@mui/icons-material/Save';
 
 const WIDGETS = [
   { id: 'kpi', label: 'بطاقات KPI', icon: <SpeedIcon />, defaultVisible: true, description: 'مؤشرات الأداء الرئيسية' },

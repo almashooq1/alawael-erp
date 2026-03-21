@@ -3,11 +3,23 @@
  */
 import { useState, useEffect } from 'react';
 
-
-
-
-
 import { getDashboard } from '../../services/recruitment.service';
+import {
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Grid,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Tooltip,
+  Typography
+} from '@mui/material';
 
 const stageLabels = {
   new: 'جديد', screening: 'فرز', shortlisted: 'مرشح', interview: 'مقابلة',

@@ -1,10 +1,31 @@
 
 
-
-
 import { useState } from 'react';
 import assessmentService from 'services/assessmentService';
 import { SCALE_ICONS } from './constants';
+import {
+  Alert,
+  Box,
+  Button,
+  Chip,
+  Collapse,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  Slider,
+  TextField,
+  Typography
+} from '@mui/material';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import CloseIcon from '@mui/icons-material/Close';
+import BarChartIcon from '@mui/icons-material/BarChart';
 
 /* ── Auto-recommendation engine based on domain scores ── */
 const generateAutoRecommendations = (scale, domainScores) => {

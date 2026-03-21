@@ -1,4 +1,5 @@
 import { forwardRef } from 'react';
+import { Box, Divider, Typography } from '@mui/material';
 
 /**
  * PrintLayout — Print-ready layout wrapper that shows only when printing.

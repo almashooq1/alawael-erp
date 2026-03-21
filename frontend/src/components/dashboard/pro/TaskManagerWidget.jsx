@@ -7,6 +7,30 @@ import {
   useTheme,
 } from '@mui/material';
 import { gradients, statusColors, brandColors } from 'theme/palette';
+import {
+  Box,
+  Button,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Grid,
+  IconButton,
+  InputAdornment,
+  LinearProgress,
+  Paper,
+  TextField,
+  Typography
+} from '@mui/material';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import PersonIcon from '@mui/icons-material/Person';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import SearchIcon from '@mui/icons-material/Search';
+import AddIcon from '@mui/icons-material/Add';
 
 const PRIORITY_CONFIG = {
   urgent: { label: 'عاجل', color: statusColors.error, icon: '🔴' },

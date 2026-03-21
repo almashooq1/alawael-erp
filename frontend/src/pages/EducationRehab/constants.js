@@ -2,7 +2,6 @@
  * EducationRehab – shared constants, config maps & demo data.
  */
 
-
 import { statusColors as paletteStatus } from '../../theme/palette';
 
 // ── Chip color map ──────────────────────────

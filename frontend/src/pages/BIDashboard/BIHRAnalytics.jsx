@@ -17,8 +17,22 @@ import {
   Star,
 } from '@mui/icons-material';
 
-
 import { getHRAnalytics, getDepartmentComparison } from '../../services/biDashboard.service';
+import {
+  Alert,
+  Box,
+  Card,
+  CardContent,
+  CircularProgress,
+  Grid,
+  Icon,
+  IconButton,
+  LinearProgress,
+  Paper,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import Refresh from '@mui/icons-material/Refresh';
 
 const COLORS = ['#2196F3', '#4CAF50', '#FF9800', '#F44336', '#9C27B0', '#00BCD4', '#FF5722', '#795548', '#607D8B', '#E91E63'];
 

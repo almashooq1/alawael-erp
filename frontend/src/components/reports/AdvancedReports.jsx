@@ -7,9 +7,35 @@ import {
   Paper,
 } from '@mui/material';
 
-
 import logger from 'utils/logger';
 import { statusColors } from '../../theme/palette';
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Grid,
+  IconButton,
+  InputAdornment,
+  LinearProgress,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import SearchIcon from '@mui/icons-material/Search';
+import FilterIcon from '@mui/icons-material/Filter';
+import DateRangeIcon from '@mui/icons-material/DateRange';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import DownloadIcon from '@mui/icons-material/Download';
+import { ExcelIcon, PdfIcon } from 'utils/iconAliases';
 
 const reportCategories = [
   { id: 'financial', label: 'التقارير المالية', count: 12, color: statusColors.primaryBlue },

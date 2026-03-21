@@ -1,14 +1,32 @@
 import { useState, useEffect, useCallback } from 'react';
 import computeStatusCounts from '../../utils/computeStatusCounts';
 
-
-
-
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, chartColors, statusColors, neutralColors, brandColors } from '../../theme/palette';
 import logger from '../../utils/logger';
 import contractsService from '../../services/contracts.service';
 import { useNavigate } from 'react-router-dom';
+import {
+  Box,
+  Button,
+  Chip,
+  Container,
+  Grid,
+  LinearProgress,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography
+} from '@mui/material';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import WarningIcon from '@mui/icons-material/Warning';
+import MoneyIcon from '@mui/icons-material/Money';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import { ActiveIcon, DocIcon } from 'utils/iconAliases';
 
 /* ──────── بيانات تجريبية ──────── */
 const DEMO_STATS = {

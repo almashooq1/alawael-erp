@@ -7,6 +7,26 @@ import { useTheme,
 } from '@mui/material';
 import { useAuth } from 'contexts/AuthContext';
 import { gradients, statusColors, brandColors, rankColors } from 'theme/palette';
+import {
+  Avatar,
+  Badge,
+  Box,
+  Chip,
+  Divider,
+  Grid,
+  LinearProgress,
+  Paper,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import StarIcon from '@mui/icons-material/Star';
+import WhatshotIcon from '@mui/icons-material/Whatshot';
+import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
+import TaskAltIcon from '@mui/icons-material/TaskAlt';
+import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
+import AutoGraphIcon from '@mui/icons-material/AutoGraph';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
 
 const DAILY_GOALS = [
   { id: 'sessions', label: 'الجلسات المنجزة', current: 8, target: 10, icon: '📋', color: brandColors.primaryStart },

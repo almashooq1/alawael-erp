@@ -9,12 +9,40 @@ import {
   alpha,
 } from '@mui/material';
 
-
 import { useSnackbar } from 'contexts/SnackbarContext';
 import {
   rehabReportService,
   rehabProgramService,
 } from 'services/disabilityRehabService';
+import {
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Grid,
+  LinearProgress,
+  Rating,
+  Stack,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  Typography
+} from '@mui/material';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import DownloadIcon from '@mui/icons-material/Download';
+import PeopleIcon from '@mui/icons-material/People';
+import ReportIcon from '@mui/icons-material/Report';
+import CheckIcon from '@mui/icons-material/Check';
+import StarIcon from '@mui/icons-material/Star';
+import { TrendIcon } from 'utils/iconAliases';
 
 const fmtNum = n => (n ?? 0).toLocaleString('ar-SA');
 const pctColor = v => (v >= 80 ? 'success' : v >= 50 ? 'warning' : 'error');

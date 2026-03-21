@@ -3,15 +3,55 @@ import {
   alpha,
 } from '@mui/material';
 
-
-
-
 import { useNavigate } from 'react-router-dom';
 import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { gradients, statusColors, surfaceColors, neutralColors } from 'theme/palette';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
+import {
+  Avatar,
+  Badge,
+  Box,
+  Button,
+  Card,
+  CardActionArea,
+  CardContent,
+  Chip,
+  Container,
+  Divider,
+  Grid,
+  IconButton,
+  LinearProgress,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  Paper,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import EventIcon from '@mui/icons-material/Event';
+import CasesIcon from '@mui/icons-material/Cases';
+import MessageIcon from '@mui/icons-material/Message';
+import PersonIcon from '@mui/icons-material/Person';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
+import SpeedIcon from '@mui/icons-material/Speed';
+import StarIcon from '@mui/icons-material/Star';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import CheckIcon from '@mui/icons-material/Check';
+import CancelIcon from '@mui/icons-material/Cancel';
+import ScheduleIcon from '@mui/icons-material/Schedule';
+import { AIIcon, CalendarIcon } from 'utils/iconAliases';
 
 /* ────────────────────────────── helpers ────────────────────────────── */
 const statCardGradients = [

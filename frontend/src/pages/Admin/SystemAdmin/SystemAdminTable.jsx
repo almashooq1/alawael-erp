@@ -1,9 +1,24 @@
 
 
-
 /* ------------------------------------------------------------------ */
 /*  Column definitions per tab key                                     */
 /* ------------------------------------------------------------------ */
+import {
+  Box,
+  Chip,
+  IconButton,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 const COLUMNS = {
   inventory:     [
     { key: 'id', label: '#' },

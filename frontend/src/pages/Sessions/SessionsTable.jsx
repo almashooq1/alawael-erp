@@ -9,6 +9,40 @@ import {
   SESSION_TYPES, STATUS_MAP, STATUS_FILTER_OPTIONS,
   getTypeColor, getSessionType, formatDate, formatTime,
 } from './constants';
+import {
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Collapse,
+  IconButton,
+  InputAdornment,
+  MenuItem,
+  Skeleton,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
+import FilterList from '@mui/icons-material/FilterList';
+import EventIcon from '@mui/icons-material/Event';
+import AddIcon from '@mui/icons-material/Add';
+import CalendarToday from '@mui/icons-material/CalendarToday';
+import Person from '@mui/icons-material/Person';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const SessionsTable = ({
   filtered, loading, totalCount, search, setSearch,

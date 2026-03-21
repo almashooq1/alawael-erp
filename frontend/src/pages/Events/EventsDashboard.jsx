@@ -5,6 +5,25 @@ import { useState, useEffect, useCallback } from 'react';
 import { useTheme, alpha,
 } from '@mui/material';
 import { getEventsDashboard } from '../../services/events.service';
+import {
+  Alert,
+  Box,
+  Chip,
+  CircularProgress,
+  Grid,
+  IconButton,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import Event from '@mui/icons-material/Event';
+import People from '@mui/icons-material/People';
+import Refresh from '@mui/icons-material/Refresh';
 
 const TYPE_LABELS = { conference: 'مؤتمر', seminar: 'ندوة', workshop: 'ورشة عمل', ceremony: 'حفل', exhibition: 'معرض', meeting: 'اجتماع', training: 'تدريب', social: 'اجتماعي', sports: 'رياضي', other: 'أخرى' };
 const COLORS = ['#1976d2', '#388e3c', '#f57c00', '#d32f2f', '#7b1fa2', '#0097a7', '#5d4037', '#455a64', '#c2185b', '#00838f'];

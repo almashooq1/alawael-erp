@@ -17,8 +17,22 @@
  * ═══════════════════════════════════════════════════════════
  */
 
-
-
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import MonitorIcon from '@mui/icons-material/Monitor';
+import PeopleIcon from '@mui/icons-material/People';
+import ScheduleIcon from '@mui/icons-material/Schedule';
+import SchoolIcon from '@mui/icons-material/School';
+import AnalyticsIcon from '@mui/icons-material/Analytics';
+import SettingsIcon from '@mui/icons-material/Settings';
+import SecurityIcon from '@mui/icons-material/Security';
+import KitchenIcon from '@mui/icons-material/Kitchen';
+import WarehouseIcon from '@mui/icons-material/Warehouse';
+import MessageIcon from '@mui/icons-material/Message';
+import CampaignIcon from '@mui/icons-material/Campaign';
+import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
+import AccountTreeIcon from '@mui/icons-material/AccountTree';
+import TaskIcon from '@mui/icons-material/Task';
+import EventIcon from '@mui/icons-material/Event';
 const getNavigationItems = () => [
   // ═══════════════════════════════════════════════════════
   //  ① الرئيسية — Core Navigation

@@ -1,11 +1,63 @@
 import { useState, useEffect, useCallback } from 'react';
 import knowledgeCenterService from '../../services/knowledgeCenter.service';
 
-
-
-
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients } from '../../theme/palette';
+import {
+  Alert,
+  Avatar,
+  Badge,
+  Box,
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Grid,
+  IconButton,
+  InputAdornment,
+  LinearProgress,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemSecondaryAction,
+  ListItemText,
+  MenuItem,
+  Pagination,
+  Paper,
+  Rating,
+  Skeleton,
+  Tab,
+  Tabs,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import PendingIcon from '@mui/icons-material/Pending';
+import ArchiveIcon from '@mui/icons-material/Archive';
+import ArticleIcon from '@mui/icons-material/Article';
+import BookmarkIcon from '@mui/icons-material/Bookmark';
+import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
+import CommentIcon from '@mui/icons-material/Comment';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import SearchIcon from '@mui/icons-material/Search';
+import BookIcon from '@mui/icons-material/Book';
+import AddIcon from '@mui/icons-material/Add';
+import CategoryIcon from '@mui/icons-material/Category';
+import FilterIcon from '@mui/icons-material/Filter';
+import StarIcon from '@mui/icons-material/Star';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import AnalyticsIcon from '@mui/icons-material/Analytics';
+import CloseIcon from '@mui/icons-material/Close';
+import SendIcon from '@mui/icons-material/Send';
+import { ViewIcon } from 'utils/iconAliases';
 
 /* ── Constants ──────────────────────────────────────────────────────── */
 const STATUS_MAP = {

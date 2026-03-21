@@ -8,9 +8,43 @@ import {
   alpha,
 } from '@mui/material';
 
-
 import { useSnackbar } from 'contexts/SnackbarContext';
 import { rehabProgramService } from 'services/disabilityRehabService';
+import {
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Grid,
+  IconButton,
+  InputAdornment,
+  LinearProgress,
+  MenuItem,
+  Paper,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import SearchIcon from '@mui/icons-material/Search';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import SaveIcon from '@mui/icons-material/Save';
+import CloseIcon from '@mui/icons-material/Close';
+import PersonIcon from '@mui/icons-material/Person';
+import { CalendarIcon, TrendIcon, ViewIcon } from 'utils/iconAliases';
 
 const DISABILITY_TYPES = ['حركية', 'نطقية', 'سمعية', 'بصرية', 'ذهنية', 'توحد', 'متعددة'];
 const PROGRAM_TYPES = [

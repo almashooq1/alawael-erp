@@ -5,9 +5,24 @@ import {
   Paper,
 } from '@mui/material';
 
-
 import { fmt } from './employeePortalData';
 import { gradients } from '../../theme/palette';
+import {
+  Box,
+  Button,
+  Grid,
+  IconButton,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import PrintIcon from '@mui/icons-material/Print';
+import { ViewIcon } from 'utils/iconAliases';
 
 export default function PayslipsTab({
   payslips,

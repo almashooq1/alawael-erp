@@ -15,8 +15,24 @@ import {
   alpha,
 } from '@mui/material';
 
-
 import { motion } from 'framer-motion';
+import {
+  Backdrop,
+  Box,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  Typography
+} from '@mui/material';
+import ErrorIcon from '@mui/icons-material/Error';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import DeleteIcon from '@mui/icons-material/Delete';
+import WarningIcon from '@mui/icons-material/Warning';
+import CloseIcon from '@mui/icons-material/Close';
 
 // ─── EMPTY STATE ─────────────────────────────────────────────────────────────
 export const EmptyState = ({

@@ -7,17 +7,72 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import smartDocumentsService from 'services/smartDocumentsService';
 import DOMPurify from 'dompurify';
 
-
 import {
   Paper,
   alpha,
 } from '@mui/material';
 
-
 import logger from 'utils/logger';
 import { gradients } from '../../theme/palette';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { useAuth } from 'contexts/AuthContext';
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Fade,
+  FormControl,
+  Grid,
+  IconButton,
+  InputAdornment,
+  InputLabel,
+  LinearProgress,
+  MenuItem,
+  Rating,
+  Select,
+  Step,
+  StepLabel,
+  Stepper,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  Tabs,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import HtmlIcon from '@mui/icons-material/Html';
+import AddIcon from '@mui/icons-material/Add';
+import AnalyticsIcon from '@mui/icons-material/Analytics';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import ScheduleIcon from '@mui/icons-material/Schedule';
+import SearchIcon from '@mui/icons-material/Search';
+import PrintIcon from '@mui/icons-material/Print';
+import DownloadIcon from '@mui/icons-material/Download';
+import CloseIcon from '@mui/icons-material/Close';
+import DeleteIcon from '@mui/icons-material/Delete';
+import SpeedIcon from '@mui/icons-material/Speed';
+import EditIcon from '@mui/icons-material/Edit';
+import TranslateIcon from '@mui/icons-material/Translate';
+import CategoryIcon from '@mui/icons-material/Category';
+import SpellcheckIcon from '@mui/icons-material/Spellcheck';
+import { AIIcon, DocIcon, ExcelIcon, PdfIcon, ViewIcon } from 'utils/iconAliases';
 
 /* ═══ Helpers ═══ */
 const fmtDate = d =>

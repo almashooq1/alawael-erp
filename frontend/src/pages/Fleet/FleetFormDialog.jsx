@@ -5,6 +5,19 @@
 
 
 import { TABS } from './fleetManagement.constants';
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField
+} from '@mui/material';
 
 const FleetFormDialog = ({ dialogOpen, setDialogOpen, dialogType, editItem, form, setForm, handleSave }) => (
   <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>

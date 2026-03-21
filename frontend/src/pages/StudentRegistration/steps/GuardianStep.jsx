@@ -4,6 +4,23 @@
 
 
 import { statusColors } from 'theme/palette';
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Badge,
+  Box,
+  Divider,
+  Fade,
+  Grid,
+  InputAdornment,
+  TextField,
+  Typography
+} from '@mui/material';
+import ExpandMore from '@mui/icons-material/ExpandMore';
+import Person from '@mui/icons-material/Person';
+import Phone from '@mui/icons-material/Phone';
+import Email from '@mui/icons-material/Email';
 
 const GuardianStep = ({ formData, fieldErrors, handleChange }) => (
   <Fade in timeout={400}>

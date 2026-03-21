@@ -1,8 +1,5 @@
 import { useState, useEffect } from 'react';
 
-
-
-
 import { adminService } from 'services/adminService';
 import api from 'services/api.client';
 import logger from 'utils/logger';
@@ -10,6 +7,42 @@ import { gradients, brandColors, neutralColors, surfaceColors } from 'theme/pale
 import { useAuth } from 'contexts/AuthContext';
 import { useConfirmDialog } from 'components/common/ConfirmDialog';
 import { useSnackbar } from '../../contexts/SnackbarContext';
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  Chip,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  Grid,
+  IconButton,
+  InputLabel,
+  LinearProgress,
+  MenuItem,
+  Select,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import BusinessIcon from '@mui/icons-material/Business';
+import AddIcon from '@mui/icons-material/Add';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import PhoneIcon from '@mui/icons-material/Phone';
+import EmailIcon from '@mui/icons-material/Email';
 
 const AdminClinicManagement = () => {
   const showSnackbar = useSnackbar();

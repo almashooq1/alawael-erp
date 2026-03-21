@@ -1,11 +1,32 @@
 import { useState, useEffect } from 'react';
 
-
 import { parentService } from 'services/parentService';
 import logger from 'utils/logger';
 import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
+import {
+  Avatar,
+  Box,
+  Card,
+  CardContent,
+  CardHeader,
+  Chip,
+  Container,
+  Grid,
+  LinearProgress,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  Typography
+} from '@mui/material';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 
 const ChildrenProgress = () => {
   const { currentUser } = useAuth();

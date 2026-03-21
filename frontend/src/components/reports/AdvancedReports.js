@@ -4,10 +4,33 @@ import {
   Paper,
 } from '@mui/material';
 
-
 import { getToken } from 'utils/tokenStorage';
 import logger from 'utils/logger';
 import { statusColors, neutralColors, chartColors } from '../../theme/palette';
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Container,
+  FormControl,
+  Grid,
+  InputLabel,
+  MenuItem,
+  Select,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import Download from '@mui/icons-material/Download';
 
 const AdvancedReports = () => {
   const [loading, setLoading] = useState(false);

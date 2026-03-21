@@ -10,9 +10,37 @@ import {
   alpha,
 } from '@mui/material';
 
-
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import workflowService from '../../services/workflow.service';
+import {
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Divider,
+  Grid,
+  IconButton,
+  Paper,
+  Skeleton,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import AddIcon from '@mui/icons-material/Add';
+import StartIcon from '@mui/icons-material/Start';
+import TaskIcon from '@mui/icons-material/Task';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import CategoryIcon from '@mui/icons-material/Category';
+import TimerIcon from '@mui/icons-material/Timer';
+import { TrendIcon } from 'utils/iconAliases';
 
 // ─── KPI Card ──────────────────────────────────────────────────────────────
 const KPICard = ({ title, value, icon, color, subtitle, onClick }) => (

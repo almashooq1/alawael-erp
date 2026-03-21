@@ -1,9 +1,18 @@
 import { useState, useEffect } from 'react';
 
-
-
-
 import { surfaceColors, neutralColors, statusColors } from 'theme/palette';
+import {
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Container,
+  Grid,
+  Typography
+} from '@mui/material';
+import TrendingUp from '@mui/icons-material/TrendingUp';
+import Warning from '@mui/icons-material/Warning';
 
 const API = process.env.REACT_APP_API_URL || '/api';
 

@@ -3,9 +3,25 @@
  */
 import { useState, useEffect } from 'react';
 
-
-
 import apiClient from '../../services/api';
+import {
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  Grid,
+  LinearProgress,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import ScienceIcon from '@mui/icons-material/Science';
 
 const COLORS = ['#7b1fa2', '#1976d2', '#388e3c', '#f57c00', '#d32f2f'];
 

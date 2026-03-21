@@ -8,6 +8,30 @@ import {
   DISABILITY_LABELS,
   HEAD_CELLS,
 } from './studentManagement.constants';
+import {
+  Avatar,
+  Box,
+  Button,
+  Chip,
+  IconButton,
+  Paper,
+  Skeleton,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  TableSortLabel,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import Add from '@mui/icons-material/Add';
+import Visibility from '@mui/icons-material/Visibility';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import Edit from '@mui/icons-material/Edit';
+import Delete from '@mui/icons-material/Delete';
 
 /** Sortable table with pagination, skeleton, and empty state */
 const StudentTable = ({

@@ -1,8 +1,5 @@
 import { useState, useEffect } from 'react';
 
-
-
-
 import { adminService } from 'services/adminService';
 import api from 'services/api.client';
 import { getStatusColor } from 'utils/statusColors';
@@ -11,6 +8,40 @@ import { gradients } from 'theme/palette';
 import { useAuth } from 'contexts/AuthContext';
 import { useConfirmDialog } from 'components/common/ConfirmDialog';
 import { useSnackbar } from '../../contexts/SnackbarContext';
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  Chip,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  FormControlLabel,
+  Grid,
+  IconButton,
+  InputLabel,
+  LinearProgress,
+  MenuItem,
+  Select,
+  Switch,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import SendIcon from '@mui/icons-material/Send';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const AdminNotifications = () => {
   const showSnackbar = useSnackbar();

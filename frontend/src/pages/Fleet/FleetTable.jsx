@@ -6,6 +6,20 @@ import { Paper,
 } from '@mui/material';
 import { STATUS_CHIP_COLORS, TABS, COLUMNS, HEADERS } from './fleetManagement.constants';
 import { surfaceColors } from '../../theme/palette';
+import {
+  Chip,
+  IconButton,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const FleetTable = ({ activeTab, data, openEdit, handleDelete }) => {
   const currentKey = TABS[activeTab]?.key;

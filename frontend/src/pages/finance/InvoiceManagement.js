@@ -1,12 +1,45 @@
 import { useState, useEffect, useCallback } from 'react';
 
-
-
-
 import accountingService from 'services/accountingService';
 import logger from 'utils/logger';
 import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';
 import { useSnackbar } from '../../contexts/SnackbarContext';
+import {
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Grid,
+  IconButton,
+  InputAdornment,
+  LinearProgress,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import SearchIcon from '@mui/icons-material/Search';
+import SendIcon from '@mui/icons-material/Send';
+import PrintIcon from '@mui/icons-material/Print';
+import MoneyIcon from '@mui/icons-material/Money';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { ViewIcon } from 'utils/iconAliases';
 
 const InvoiceManagement = () => {
   const showSnackbar = useSnackbar();

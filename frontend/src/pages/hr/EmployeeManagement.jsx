@@ -3,10 +3,41 @@
  * 880 → ~120 lines | Sub-files: Employee/
  */
 
-
 import { gradients } from '../../theme/palette';
 import { DEPARTMENTS, STATUS_MAP, STAT_CARDS } from './Employee/employeeManagement.constants';
 import useEmployeeManagement from './Employee/useEmployeeManagement';
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  IconButton,
+  InputAdornment,
+  MenuItem,
+  Paper,
+  Snackbar,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import PeopleIcon from '@mui/icons-material/People';
+import WarningIcon from '@mui/icons-material/Warning';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import DownloadIcon from '@mui/icons-material/Download';
+import AddIcon from '@mui/icons-material/Add';
+import SearchIcon from '@mui/icons-material/Search';
+import FilterIcon from '@mui/icons-material/Filter';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { ActiveIcon, CalendarIcon, InactiveIcon } from 'utils/iconAliases';
 
 /* ─── Icon map for stat cards ─── */
 const STAT_ICONS = [<PeopleIcon />, <ActiveIcon />, <CalendarIcon />, <InactiveIcon />, <DeptIcon />];

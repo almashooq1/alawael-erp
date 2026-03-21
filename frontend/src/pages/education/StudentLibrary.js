@@ -5,13 +5,44 @@
 
 import { useState, useEffect, useCallback } from 'react';
 
-
-
-
 import { placeholderImage } from 'utils/placeholderImage';
 import { gradients, statusColors } from 'theme/palette';
 import lmsService from 'services/lmsService';
 import { useSnackbar } from '../../contexts/SnackbarContext';
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  CardMedia,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  IconButton,
+  InputAdornment,
+  LinearProgress,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Paper,
+  Stack,
+  TextField,
+  Typography
+} from '@mui/material';
+import BookIcon from '@mui/icons-material/Book';
+import SearchIcon from '@mui/icons-material/Search';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import CategoryIcon from '@mui/icons-material/Category';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import DownloadIcon from '@mui/icons-material/Download';
+import { AudioIcon, PdfIcon, VideoIcon, ViewIcon } from 'utils/iconAliases';
 
 const StudentLibrary = () => {
   const [loading, setLoading] = useState(true);

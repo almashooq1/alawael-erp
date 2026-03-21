@@ -8,8 +8,37 @@ import {
   useTheme,
   alpha,
 } from '@mui/material';
-
-
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  FormControl,
+  Grid,
+  InputLabel,
+  LinearProgress,
+  MenuItem,
+  Select,
+  Stack,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  Typography
+} from '@mui/material';
+import DoneIcon from '@mui/icons-material/Done';
+import TimelineIcon from '@mui/icons-material/Timeline';
+import GroupIcon from '@mui/icons-material/Group';
+import SpeedIcon from '@mui/icons-material/Speed';
+import StarIcon from '@mui/icons-material/Star';
+import { CalendarIcon, ChartIcon } from 'utils/iconAliases';
 
 /* ── Demo enrollments ── */
 const DEMO_ENROLLMENTS = [

@@ -1,8 +1,21 @@
 
 
-
-
 import { brandColors } from 'theme/palette';
+import {
+  Box,
+  Card,
+  CardContent,
+  Grid,
+  LinearProgress,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import CheckIcon from '@mui/icons-material/Check';
+import ScheduleIcon from '@mui/icons-material/Schedule';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import TrendingDownIcon from '@mui/icons-material/TrendingDown';
+import MessageIcon from '@mui/icons-material/Message';
+import { BotIcon } from 'utils/iconAliases';
 
 const AnalyticsDashboard = ({ stats }) => {
   // بيانات الرسوم البيانية

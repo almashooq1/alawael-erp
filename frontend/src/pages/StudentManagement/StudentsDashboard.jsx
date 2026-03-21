@@ -1,13 +1,36 @@
 import { useState, useEffect, useCallback } from 'react';
 
-
-
-
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, chartColors, statusColors, neutralColors, severityColors, brandColors } from '../../theme/palette';
 import logger from '../../utils/logger';
 import studentManagementService from '../../services/studentManagementService';
 import { useNavigate } from 'react-router-dom';
+import {
+  Alert,
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  Container,
+  Divider,
+  Grid,
+  LinearProgress,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import PeopleIcon from '@mui/icons-material/People';
+import WarningIcon from '@mui/icons-material/Warning';
+import SpeedIcon from '@mui/icons-material/Speed';
+import StarIcon from '@mui/icons-material/Star';
+import { ActiveIcon } from 'utils/iconAliases';
 
 /* ──────── ثوابت ──────── */
 const STATUS_MAP = {

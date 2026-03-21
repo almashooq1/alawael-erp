@@ -1,17 +1,36 @@
 import { useState, useEffect } from 'react';
 // Statistics Cards Section
 
-
-
-
-
-
 import { adminService } from 'services/adminService';
 import exportService from 'services/exportService';
 import logger from 'utils/logger';
 import { useSnackbar } from 'contexts/SnackbarContext';
 import { gradients, brandColors, statusColors, surfaceColors } from 'theme/palette';
 import { useAuth } from 'contexts/AuthContext';
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  Container,
+  Grid,
+  LinearProgress,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  ToggleButton,
+  ToggleButtonGroup,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import QueryStatsIcon from '@mui/icons-material/QueryStats';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import PrintIcon from '@mui/icons-material/Print';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 
 const AdminReportsAnalytics = () => {
   const { currentUser } = useAuth();

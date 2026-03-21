@@ -21,7 +21,12 @@
  * 🆕 Stats and analytics
  */
 
-import { Paper } from '@mui/material';
+import {
+  Alert,
+  Paper,
+  Snackbar,
+  TablePagination
+} from '@mui/material';
 import { useDocumentFilters } from 'components/hooks/useDocumentFilters';
 import { useDocumentDialogs } from 'components/hooks/useDocumentDialogs';
 import { useDocumentSelection } from 'components/hooks/useDocumentSelection';

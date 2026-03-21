@@ -7,10 +7,41 @@ import {
   useTheme,
 } from '@mui/material';
 
-
-
-
 import { MOCK_CRM_DASHBOARD, crmReportsService, seedService } from 'services/crmService';
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Divider,
+  Grid,
+  IconButton,
+  LinearProgress,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  Paper,
+  Snackbar,
+  Tab,
+  Tabs,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import PeopleIcon from '@mui/icons-material/People';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import HandshakeIcon from '@mui/icons-material/Handshake';
+import MoneyIcon from '@mui/icons-material/Money';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import CheckIcon from '@mui/icons-material/Check';
+import CancelIcon from '@mui/icons-material/Cancel';
+import PhoneIcon from '@mui/icons-material/Phone';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import WarningIcon from '@mui/icons-material/Warning';
+import { CalendarIcon } from 'utils/iconAliases';
 
 const COLORS = ['#4FC3F7', '#81C784', '#FFB74D', '#E57373', '#BA68C8', '#4DB6AC'];
 

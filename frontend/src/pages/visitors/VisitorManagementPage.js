@@ -6,8 +6,41 @@ import {
   Paper,
 } from '@mui/material';
 
-
 import visitorsService from '../../services/visitors.service';
+import {
+  Alert,
+  Avatar,
+  Badge,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  IconButton,
+  LinearProgress,
+  Stack,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  TextField,
+  Typography
+} from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import BadgeIcon from '@mui/icons-material/Badge';
+import TodayIcon from '@mui/icons-material/Today';
+import EditIcon from '@mui/icons-material/Edit';
 
 const DEMO_VISITORS = [
   {

@@ -3,8 +3,21 @@
  */
 
 
-
 import { brandColors, surfaceColors } from 'theme/palette';
+import {
+  Box,
+  Chip,
+  Fade,
+  IconButton,
+  InputAdornment,
+  LinearProgress,
+  TextField,
+  Typography
+} from '@mui/material';
+import Lock from '@mui/icons-material/Lock';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import Visibility from '@mui/icons-material/Visibility';
+import CheckCircle from '@mui/icons-material/CheckCircle';
 
 const StepPassword = ({
   formData,

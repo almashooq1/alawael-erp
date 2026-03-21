@@ -7,9 +7,21 @@
  * viewing results and tracking progress.
  */
 
-
 import { gradients } from '../../theme/palette';
 import useAssessmentTests from './useAssessmentTests';
+import {
+  Box,
+  Button,
+  Container,
+  LinearProgress,
+  Paper,
+  Tab,
+  Tabs,
+  Typography
+} from '@mui/material';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import QuizIcon from '@mui/icons-material/Quiz';
+import HistoryIcon from '@mui/icons-material/History';
 
 const DisabilityAssessmentTests = () => {
   const h = useAssessmentTests();

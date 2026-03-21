@@ -12,9 +12,67 @@ import {
 } from '@mui/material';
 
 
-
-
 import documentAdvancedService from '../../services/documentAdvancedService';
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  FormControl,
+  Grid,
+  IconButton,
+  InputLabel,
+  LinearProgress,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemSecondaryAction,
+  ListItemText,
+  MenuItem,
+  Select,
+  Snackbar,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import StarIcon from '@mui/icons-material/Star';
+import HistoryIcon from '@mui/icons-material/History';
+import ApprovalIcon from '@mui/icons-material/Approval';
+import TimerIcon from '@mui/icons-material/Timer';
+import DeleteIcon from '@mui/icons-material/Delete';
+import CommentIcon from '@mui/icons-material/Comment';
+import CompareIcon from '@mui/icons-material/Compare';
+import QrCodeIcon from '@mui/icons-material/QrCode';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import AddIcon from '@mui/icons-material/Add';
+import StarBorderIcon from '@mui/icons-material/StarBorder';
+import DownloadIcon from '@mui/icons-material/Download';
+import VerifiedIcon from '@mui/icons-material/Verified';
+import CheckIcon from '@mui/icons-material/Check';
+import CancelIcon from '@mui/icons-material/Cancel';
+import ErrorIcon from '@mui/icons-material/Error';
+import WarningIcon from '@mui/icons-material/Warning';
+import InfoIcon from '@mui/icons-material/Info';
+import ScheduleIcon from '@mui/icons-material/Schedule';
+import RestoreIcon from '@mui/icons-material/Restore';
+import BookmarkIcon from '@mui/icons-material/Bookmark';
 
 // ── Tab Panel ────────────────────────────────────────────────────────────────
 function TabPanel({ children, value, index, ...props }) {

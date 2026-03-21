@@ -7,7 +7,6 @@ import {
   Paper,
 } from '@mui/material';
 
-
 import electronicDirectivesService from '../../services/electronicDirectives.service';
 import {
   DIRECTIVE_TYPES,
@@ -17,6 +16,37 @@ import {
   priorityOptions,
   statusOptions,
 } from './constants';
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Chip,
+  FormControl,
+  Grid,
+  IconButton,
+  InputAdornment,
+  InputLabel,
+  MenuItem,
+  Select,
+  Skeleton,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import CampaignIcon from '@mui/icons-material/Campaign';
+import PolicyIcon from '@mui/icons-material/Policy';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import AddIcon from '@mui/icons-material/Add';
+import SearchIcon from '@mui/icons-material/Search';
+import { ViewIcon } from 'utils/iconAliases';
 
 const typeIcons = {
   instruction: <InstructionIcon fontSize="small" />,

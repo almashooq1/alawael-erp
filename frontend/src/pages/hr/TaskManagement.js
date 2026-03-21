@@ -6,7 +6,6 @@ import {
   Paper,
 } from '@mui/material';
 
-
 import {
   getTasks,
   createTask,
@@ -15,6 +14,37 @@ import {
   addTaskComment,
   getTaskStats,
 } from '../../services/hr/employeeAffairsPhase2Service';
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  IconButton,
+  LinearProgress,
+  MenuItem,
+  Snackbar,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import FlagIcon from '@mui/icons-material/Flag';
+import { ViewIcon } from 'utils/iconAliases';
 
 const TYPES = ['مهمة عادية', 'تكليف رسمي', 'مشروع', 'مهمة عاجلة', 'متابعة', 'تحسين', 'بحث ودراسة'];
 const PRIORITIES = ['منخفضة', 'متوسطة', 'عالية', 'حرجة'];

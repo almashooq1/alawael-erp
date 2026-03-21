@@ -1,12 +1,29 @@
 import { useState, useEffect } from 'react';
 
-
 import { useNavigate, useLocation } from 'react-router-dom';
 import { modulesAPI, withMockFallback } from 'services/api';
 import moduleMocks from 'data/moduleMocks';
 import logger from 'utils/logger';
 import { gradients, statusColors, surfaceColors, chartColors } from '../../theme/palette';
 import { useSnackbar } from '../../contexts/SnackbarContext';
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Divider,
+  Grid,
+  List,
+  ListItem,
+  ListItemText,
+  Skeleton,
+  Stack,
+  Typography
+} from '@mui/material';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 
 const ModulePage = ({ title, moduleKey = 'reports' }) => {
   const navigate = useNavigate();

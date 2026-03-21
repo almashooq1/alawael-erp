@@ -4,12 +4,35 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 
-
-
-
 import assessmentService from 'services/assessmentService';
 import logger from 'utils/logger';
 import { SCALE_ICONS } from './constants';
+import {
+  Alert,
+  Avatar,
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  Divider,
+  FormControl,
+  Grid,
+  InputLabel,
+  LinearProgress,
+  MenuItem,
+  Paper,
+  Select,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import AnalyticsIcon from '@mui/icons-material/Analytics';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import CompareIcon from '@mui/icons-material/Compare';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import TrendingDownIcon from '@mui/icons-material/TrendingDown';
+import PersonIcon from '@mui/icons-material/Person';
+import StarIcon from '@mui/icons-material/Star';
+import WarningIcon from '@mui/icons-material/Warning';
 
 /* ── Score bar with label ── */
 const ScoreBar = ({ label, score, maxScore, color }) => {

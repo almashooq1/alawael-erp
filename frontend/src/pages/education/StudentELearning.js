@@ -5,12 +5,46 @@
 
 import { useState, useEffect, useCallback } from 'react';
 
-
-
-
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import api from 'services/api';
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  IconButton,
+  InputAdornment,
+  LinearProgress,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Paper,
+  Rating,
+  Stack,
+  Tab,
+  Tabs,
+  TextField,
+  Typography
+} from '@mui/material';
+import BookIcon from '@mui/icons-material/Book';
+import QuizIcon from '@mui/icons-material/Quiz';
+import SchoolIcon from '@mui/icons-material/School';
+import CheckIcon from '@mui/icons-material/Check';
+import TimerIcon from '@mui/icons-material/Timer';
+import SearchIcon from '@mui/icons-material/Search';
+import CloseIcon from '@mui/icons-material/Close';
+import PeopleIcon from '@mui/icons-material/People';
+import LockIcon from '@mui/icons-material/Lock';
+import { AttachIcon } from 'utils/iconAliases';
 
 const categoryColors = {
   أكاديمي: '#3498db',

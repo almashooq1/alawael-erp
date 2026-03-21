@@ -1,7 +1,22 @@
 
 
-
 import { surfaceColors } from '../../theme/palette';
+import {
+  Alert,
+  Box,
+  Chip,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  IconButton,
+  LinearProgress,
+  Paper,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import PrintIcon from '@mui/icons-material/Print';
+import CloseIcon from '@mui/icons-material/Close';
 
 /**
  * Dialog showing the full detail of a single assessment result:

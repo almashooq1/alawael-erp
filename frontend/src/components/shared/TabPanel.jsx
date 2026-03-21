@@ -8,6 +8,7 @@
  * @param {object} [sx]     — Extra styles
  * @param {boolean}[keepMounted] — Keep content in DOM when hidden
  */
+import { Box } from '@mui/material';
 const TabPanel = ({ value, index, children, sx, keepMounted = false, ...rest }) => {
   const isActive = value === index;
   if (!keepMounted && !isActive) return null;

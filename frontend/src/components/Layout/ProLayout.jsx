@@ -12,7 +12,12 @@
 
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useTheme, useMediaQuery } from '@mui/material';
+import {
+  Box,
+  Fade,
+  useMediaQuery,
+  useTheme
+} from '@mui/material';
 import { SIDEBAR_WIDTH, SIDEBAR_COLLAPSED } from './sidebar';
 
 const SIDEBAR_STATE_KEY = 'alawael-sidebar-collapsed';

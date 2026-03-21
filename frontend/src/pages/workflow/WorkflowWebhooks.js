@@ -8,9 +8,52 @@ import {
   alpha,
 } from '@mui/material';
 
-
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import workflowService from '../../services/workflow.service';
+import {
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  FormControl,
+  FormControlLabel,
+  Grid,
+  IconButton,
+  InputLabel,
+  Link,
+  MenuItem,
+  Paper,
+  Select,
+  Skeleton,
+  Stack,
+  Switch,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import ArrowBack from '@mui/icons-material/ArrowBack';
+import Add from '@mui/icons-material/Add';
+import Refresh from '@mui/icons-material/Refresh';
+import CheckCircle from '@mui/icons-material/CheckCircle';
+import Error from '@mui/icons-material/Error';
+import Send from '@mui/icons-material/Send';
+import History from '@mui/icons-material/History';
+import Edit from '@mui/icons-material/Edit';
+import Delete from '@mui/icons-material/Delete';
 
 const EVENT_TYPES = [
   { value: 'instance.created', label: 'إنشاء سير عمل' },

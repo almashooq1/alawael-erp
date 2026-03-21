@@ -21,6 +21,11 @@ import {
 import { gradients } from 'theme/palette';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from 'contexts/SnackbarContext';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import PsychologyIcon from '@mui/icons-material/Psychology';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 
 export const DEFAULT_FILTERS = {
   dateFrom: '2025-09-01',

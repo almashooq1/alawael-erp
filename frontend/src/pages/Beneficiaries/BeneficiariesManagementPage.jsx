@@ -18,9 +18,6 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 
-
-
-
 import { useNavigate } from 'react-router-dom';
 import {
   Chart as ChartJS,
@@ -40,6 +37,43 @@ import { gradients, brandColors, surfaceColors } from 'theme/palette';
 import beneficiaryService from 'services/beneficiaryService';
 import { PAGE_SIZE } from './beneficiariesConstants';
 import { useBeneficiariesChartData } from './useBeneficiariesChartData';
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Container,
+  Fade,
+  FormControl,
+  Grid,
+  IconButton,
+  InputAdornment,
+  InputLabel,
+  MenuItem,
+  Pagination,
+  Select,
+  Skeleton,
+  Snackbar,
+  Stack,
+  TextField,
+  ToggleButton,
+  ToggleButtonGroup,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import Groups from '@mui/icons-material/Groups';
+import PersonAdd from '@mui/icons-material/PersonAdd';
+import Refresh from '@mui/icons-material/Refresh';
+import Upload from '@mui/icons-material/Upload';
+import Download from '@mui/icons-material/Download';
+import CheckCircle from '@mui/icons-material/CheckCircle';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import Assignment from '@mui/icons-material/Assignment';
+import School from '@mui/icons-material/School';
+import Search from '@mui/icons-material/Search';
 
 // ── Register ChartJS ────────────────────────────
 ChartJS.register(

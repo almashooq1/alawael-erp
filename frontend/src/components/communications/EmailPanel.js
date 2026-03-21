@@ -1,11 +1,40 @@
 import { useState, useEffect, useCallback } from 'react';
 
-
-
-
 import { useOrgBranding } from 'components/OrgBrandingContext';
 import logger from 'utils/logger';
 import { useSnackbar } from 'contexts/SnackbarContext';
+import {
+  Avatar,
+  Box,
+  Button,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  FormControl,
+  Grid,
+  IconButton,
+  InputLabel,
+  List,
+  ListItem,
+  ListItemSecondaryAction,
+  ListItemText,
+  MenuItem,
+  Select,
+  TextField,
+  Typography
+} from '@mui/material';
+import InboxIcon from '@mui/icons-material/Inbox';
+import SendIcon from '@mui/icons-material/Send';
+import DraftsIcon from '@mui/icons-material/Drafts';
+import StarIcon from '@mui/icons-material/Star';
+import EmailIcon from '@mui/icons-material/Email';
+import ReplyIcon from '@mui/icons-material/Reply';
+import ForwardIcon from '@mui/icons-material/Forward';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { AttachIcon } from 'utils/iconAliases';
 
 // Mock function to send security alert email
 export function sendSecurityEmailAlert({ _subject, _body, _to = 'admin@alawael.com' }) {

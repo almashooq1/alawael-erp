@@ -3,6 +3,19 @@
  */
 
 import { DIALOG_FIELDS } from './constants';
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField
+} from '@mui/material';
 
 const OperationsDialog = ({
   open, onClose, dialogType, editItem, form, setForm, onSave, tabs,

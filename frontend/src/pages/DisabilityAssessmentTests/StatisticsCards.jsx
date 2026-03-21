@@ -2,8 +2,17 @@
  * StatisticsCards – 4 KPI cards for assessment tests
  */
 
-
 import { gradients } from '../../theme/palette';
+import {
+  Card,
+  CardContent,
+  Grid,
+  Typography
+} from '@mui/material';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import PersonIcon from '@mui/icons-material/Person';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import BarChartIcon from '@mui/icons-material/BarChart';
 
 const StatisticsCards = ({ statistics }) => (
   <Grid container spacing={2} sx={{ mb: 4 }}>

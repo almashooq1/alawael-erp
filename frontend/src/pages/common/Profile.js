@@ -1,11 +1,23 @@
 import { useState, useEffect } from 'react';
 
-
-
-
 import { useAuth } from 'contexts/AuthContext';
 import apiClient from 'services/api.client';
 import { gradients } from 'theme/palette';
+import {
+  Avatar,
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  Container,
+  Divider,
+  Grid,
+  Paper,
+  TextField,
+  Typography
+} from '@mui/material';
+import PersonIcon from '@mui/icons-material/Person';
+import SaveIcon from '@mui/icons-material/Save';
 
 function Profile() {
   const { currentUser } = useAuth();

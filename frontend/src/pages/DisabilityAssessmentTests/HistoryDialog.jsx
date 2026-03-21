@@ -5,9 +5,31 @@ import {
   Paper,
 } from '@mui/material';
 
-
 import { surfaceColors } from '../../theme/palette';
 import { getLevelColor } from './constants';
+import {
+  Box,
+  Chip,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  Grid,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Select,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tooltip
+} from '@mui/material';
+import HistoryIcon from '@mui/icons-material/History';
+import CloseIcon from '@mui/icons-material/Close';
+import BarChartIcon from '@mui/icons-material/BarChart';
 
 const HistoryDialog = ({
   open, onClose,

@@ -86,6 +86,9 @@ import {
   MDTCoordinationRoutes,
   ARRehabRoutes,
 } from './routes';
+import { CssBaseline } from '@mui/material';
+import Login from '@mui/icons-material/Login';
+import Home from '@mui/icons-material/Home';
 
 // Pages — Keep eagerly loaded (critical path / small)
 

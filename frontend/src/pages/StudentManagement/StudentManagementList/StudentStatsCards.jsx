@@ -1,5 +1,14 @@
 
 /** 4 KPI stat cards for student management */
+import {
+  Avatar,
+  Box,
+  CardContent,
+  Fade,
+  Grid,
+  Skeleton,
+  Typography
+} from '@mui/material';
 const StudentStatsCards = ({ statCards, loading }) => (
   <Grid container spacing={2} sx={{ mb: 3 }}>
     {statCards.map((card, i) => (

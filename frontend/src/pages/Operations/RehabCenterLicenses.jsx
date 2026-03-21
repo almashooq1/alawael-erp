@@ -6,8 +6,65 @@ import { useState, useEffect, useCallback } from 'react';
 import { Paper,
 } from '@mui/material';
 
-
 import rehabLicenseService from '../../services/rehabLicense.service';
+import {
+  Alert,
+  Avatar,
+  Badge,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  FormControl,
+  Grid,
+  IconButton,
+  InputAdornment,
+  InputLabel,
+  LinearProgress,
+  MenuItem,
+  Select,
+  Snackbar,
+  Stack,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  Tabs,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import CheckCircle from '@mui/icons-material/CheckCircle';
+import ErrorIcon from '@mui/icons-material/Error';
+import WarningIcon from '@mui/icons-material/Warning';
+import CancelIcon from '@mui/icons-material/Cancel';
+import ArchiveIcon from '@mui/icons-material/Archive';
+import TaskIcon from '@mui/icons-material/Task';
+import EventIcon from '@mui/icons-material/Event';
+import AnalyticsIcon from '@mui/icons-material/Analytics';
+import SearchIcon from '@mui/icons-material/Search';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import HistoryIcon from '@mui/icons-material/History';
+import DeleteIcon from '@mui/icons-material/Delete';
+import UnarchiveIcon from '@mui/icons-material/Unarchive';
+import WatchIcon from '@mui/icons-material/Watch';
+import CompareIcon from '@mui/icons-material/Compare';
+import ChecklistIcon from '@mui/icons-material/Checklist';
+import CommentIcon from '@mui/icons-material/Comment';
+import { CalendarIcon, DocIcon, ViewIcon } from 'utils/iconAliases';
 
 // ==================== ثوابت ====================
 const CATEGORY_CONFIG = {

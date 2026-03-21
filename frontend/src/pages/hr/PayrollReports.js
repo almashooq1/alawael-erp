@@ -1,12 +1,45 @@
 import { useState, useCallback } from 'react';
 
-
-
-
 import payrollService from 'services/payrollService';
 import logger from 'utils/logger';
 import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';
 import { useSnackbar } from '../../contexts/SnackbarContext';
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Collapse,
+  Container,
+  Divider,
+  FormControl,
+  Grid,
+  IconButton,
+  InputLabel,
+  LinearProgress,
+  MenuItem,
+  Paper,
+  Select,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import ReportIcon from '@mui/icons-material/Report';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import PrintIcon from '@mui/icons-material/Print';
+import DownloadIcon from '@mui/icons-material/Download';
+import ExpandIcon from '@mui/icons-material/Expand';
+import { ChartIcon, CollapseIcon, ExcelIcon } from 'utils/iconAliases';
 
 // ─── Report Type Definitions ───
 const REPORT_TYPES = [

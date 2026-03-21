@@ -5,14 +5,44 @@
 
 import { useState, useEffect, useCallback } from 'react';
 
-
-
-
 import studentPortalService from 'services/studentPortalService';
 import logger from 'utils/logger';
 import { gradients, statusColors, neutralColors } from 'theme/palette';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Alert,
+  Avatar,
+  Badge,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Divider,
+  Grid,
+  InputAdornment,
+  LinearProgress,
+  Paper,
+  Stack,
+  TextField,
+  ToggleButton,
+  ToggleButtonGroup,
+  Typography
+} from '@mui/material';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import CampaignIcon from '@mui/icons-material/Campaign';
+import EventIcon from '@mui/icons-material/Event';
+import SchoolIcon from '@mui/icons-material/School';
+import SearchIcon from '@mui/icons-material/Search';
+import FilterIcon from '@mui/icons-material/Filter';
+import PersonIcon from '@mui/icons-material/Person';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import InfoIcon from '@mui/icons-material/Info';
+import { CalendarIcon, ViewIcon } from 'utils/iconAliases';
 
 const StudentAnnouncements = () => {
   const { currentUser } = useAuth();

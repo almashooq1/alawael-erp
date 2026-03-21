@@ -3,9 +3,25 @@
  */
 import { useState, useEffect } from 'react';
 
-
-
 import apiClient from '../../services/api';
+import {
+  Box,
+  Card,
+  CardContent,
+  Grid,
+  LinearProgress,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import HomeIcon from '@mui/icons-material/Home';
+import TrainIcon from '@mui/icons-material/Train';
 
 const COLORS = ['#00897b', '#1976d2', '#f57c00', '#d32f2f', '#7b1fa2'];
 

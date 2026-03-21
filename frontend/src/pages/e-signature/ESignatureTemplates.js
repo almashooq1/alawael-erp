@@ -2,11 +2,38 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import eSignatureService from '../../services/eSignature.service';
 
-
-
-
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients } from '../../theme/palette';
+import {
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  FormControlLabel,
+  Grid,
+  IconButton,
+  MenuItem,
+  Paper,
+  Switch,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import Description from '@mui/icons-material/Description';
+import ArrowBack from '@mui/icons-material/ArrowBack';
+import AddIcon from '@mui/icons-material/Add';
+import Refresh from '@mui/icons-material/Refresh';
+import Edit from '@mui/icons-material/Edit';
+import ContentCopy from '@mui/icons-material/ContentCopy';
+import Delete from '@mui/icons-material/Delete';
 
 /* ═══ Categories ════════════════════════════════════════════════════════ */
 const categories = [

@@ -6,13 +6,39 @@ import {
   Paper,
 } from '@mui/material';
 
-
 import {
   getDisciplinaryActions,
   createDisciplinaryAction,
   getDisciplinaryActionById,
   approveDisciplinaryAction,
 } from '../../services/hr/employeeAffairsExpandedService';
+import {
+  Alert,
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  IconButton,
+  MenuItem,
+  Snackbar,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import { ViewIcon } from 'utils/iconAliases';
 
 const ACTION_TYPES = [
   'تنبيه شفهي',

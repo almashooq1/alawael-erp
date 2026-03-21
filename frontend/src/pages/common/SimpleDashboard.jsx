@@ -6,9 +6,27 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getToken, getUserData, clearAuthData } from 'utils/tokenStorage';
-
-
-
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Chip,
+  Divider,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Paper,
+  Typography
+} from '@mui/material';
+import LogoutIcon from '@mui/icons-material/Logout';
+import CheckIcon from '@mui/icons-material/Check';
+import PersonIcon from '@mui/icons-material/Person';
+import EmailIcon from '@mui/icons-material/Email';
+import CelebrationIcon from '@mui/icons-material/Celebration';
+import InfoIcon from '@mui/icons-material/Info';
+import TimerIcon from '@mui/icons-material/Timer';
 
 const SimpleDashboard = () => {
   const navigate = useNavigate();

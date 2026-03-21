@@ -1,11 +1,43 @@
 import { useState, useEffect, useCallback } from 'react';
 
-
-
-
 import { licenseService } from 'services/operationsService';
 import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';
 import { useSnackbar } from '../../contexts/SnackbarContext';
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  Grid,
+  IconButton,
+  InputAdornment,
+  InputLabel,
+  LinearProgress,
+  MenuItem,
+  Select,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import PendingIcon from '@mui/icons-material/Pending';
+import AddIcon from '@mui/icons-material/Add';
+import SearchIcon from '@mui/icons-material/Search';
+import { ActiveIcon, ViewIcon } from 'utils/iconAliases';
 
 const statusConfig = {
   active: { label: 'ساري', color: 'success', icon: <ActiveIcon fontSize="small" /> },

@@ -24,6 +24,16 @@ import {
 } from 'chart.js';
 import { gradients } from '../../theme/palette';
 import useDocumentsPage from './useDocumentsPage';
+import {
+  Box,
+  Button,
+  Container,
+  Paper,
+  Tab,
+  Tabs,
+  Typography
+} from '@mui/material';
+import UploadIcon from '@mui/icons-material/Upload';
 
 // Register Chart.js components
 ChartJS.register(

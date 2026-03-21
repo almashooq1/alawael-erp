@@ -3,8 +3,9 @@
  * ثوابت إدارة الأسطول
  */
 
-
 import { statusColors as paletteStatus } from '../../theme/palette';
+import PersonIcon from '@mui/icons-material/Person';
+import RouteIcon from '@mui/icons-material/Route';
 
 /** Chip color map (MUI color prop) for entity statuses */
 export const STATUS_CHIP_COLORS = {

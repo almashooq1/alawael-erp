@@ -4,8 +4,41 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 
-
 import treatmentAuthorizationService from '../../services/treatmentAuthorization.service';
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Grid,
+  IconButton,
+  LinearProgress,
+  Step,
+  StepLabel,
+  Stepper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import Refresh from '@mui/icons-material/Refresh';
+import WarningAmber from '@mui/icons-material/WarningAmber';
+import CheckCircle from '@mui/icons-material/CheckCircle';
+import Cancel from '@mui/icons-material/Cancel';
+import AttachMoney from '@mui/icons-material/AttachMoney';
+import Send from '@mui/icons-material/Send';
 
 const statusLabels = {
   draft: 'مسودة', pending_review: 'قيد المراجعة الداخلية',

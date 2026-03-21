@@ -2,11 +2,38 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import administrationService from '../../services/administration.service';
 
-
-
-
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients } from '../../theme/palette';
+import {
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Divider,
+  Grid,
+  IconButton,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import CheckCircle from '@mui/icons-material/CheckCircle';
+import Mail from '@mui/icons-material/Mail';
+import WarningAmber from '@mui/icons-material/WarningAmber';
+import Business from '@mui/icons-material/Business';
+import AddIcon from '@mui/icons-material/Add';
+import Refresh from '@mui/icons-material/Refresh';
+import Description from '@mui/icons-material/Description';
+import Assignment from '@mui/icons-material/Assignment';
+import ArrowForward from '@mui/icons-material/ArrowForward';
 
 /* ═══ Helpers ════════════════════════════════════════════════════════════════ */
 const decisionStatusConfig = {

@@ -6,8 +6,48 @@ import {
   Paper,
 } from '@mui/material';
 
-
 import adminCommunicationsService from '../../services/adminCommunications.service';
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  FormControlLabel,
+  Grid,
+  IconButton,
+  InputAdornment,
+  InputLabel,
+  MenuItem,
+  Select,
+  Skeleton,
+  Snackbar,
+  Switch,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import AddIcon from '@mui/icons-material/Add';
+import SearchIcon from '@mui/icons-material/Search';
+import BusinessIcon from '@mui/icons-material/Business';
+import EditIcon from '@mui/icons-material/Edit';
+import PhoneIcon from '@mui/icons-material/Phone';
+import EmailIcon from '@mui/icons-material/Email';
+import WebIcon from '@mui/icons-material/Web';
 
 const ENTITY_TYPES = {
   government: { label: 'حكومية', color: '#1976d2', icon: <GovIcon /> },

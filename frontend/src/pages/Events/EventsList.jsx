@@ -5,6 +5,36 @@ import { useState, useEffect, useCallback } from 'react';
 import { useTheme, alpha,
 } from '@mui/material';
 import { getEvents, createEvent, updateEvent, deleteEvent } from '../../services/events.service';
+import {
+  Alert,
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import Refresh from '@mui/icons-material/Refresh';
+import Add from '@mui/icons-material/Add';
+import EventIcon from '@mui/icons-material/Event';
+import Edit from '@mui/icons-material/Edit';
+import Delete from '@mui/icons-material/Delete';
 
 const TYPE_LABELS = { conference: 'مؤتمر', seminar: 'ندوة', workshop: 'ورشة عمل', ceremony: 'حفل', exhibition: 'معرض', meeting: 'اجتماع', training: 'تدريب', social: 'اجتماعي', sports: 'رياضي', other: 'أخرى' };
 const STATUS_LABELS = { draft: 'مسودة', planning: 'تخطيط', approved: 'معتمدة', registration_open: 'التسجيل مفتوح', in_progress: 'قيد التنفيذ', completed: 'مكتملة', cancelled: 'ملغاة', postponed: 'مؤجلة' };

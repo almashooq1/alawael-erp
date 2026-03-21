@@ -5,6 +5,27 @@ import { useState, useEffect, useCallback } from 'react';
 import { useTheme, alpha,
 } from '@mui/material';
 import { getTransactions, approveTransaction, completeTransaction } from '../../services/warehouse.service';
+import {
+  Alert,
+  Box,
+  Chip,
+  CircularProgress,
+  FormControl,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import Refresh from '@mui/icons-material/Refresh';
+import CheckCircle from '@mui/icons-material/CheckCircle';
 
 const TX_TYPE = { receive: 'استلام', issue: 'صرف', transfer: 'تحويل', return: 'إرجاع', adjustment: 'تسوية', disposal: 'إتلاف', count: 'جرد' };
 const TX_STATUS = { draft: 'مسودة', pending: 'معلق', approved: 'معتمد', completed: 'مكتمل', rejected: 'مرفوض', cancelled: 'ملغي' };

@@ -11,13 +11,42 @@ import {
   alpha,
 } from '@mui/material';
 
-
 import {
   getReports,
   createReport,
   updateReport,
   deleteReport,
 } from '../../services/biDashboard.service';
+import {
+  Alert,
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import Refresh from '@mui/icons-material/Refresh';
+import Add from '@mui/icons-material/Add';
+import FilterList from '@mui/icons-material/FilterList';
+import Description from '@mui/icons-material/Description';
+import Edit from '@mui/icons-material/Edit';
+import Delete from '@mui/icons-material/Delete';
 
 const CATEGORIES = [
   { value: '', label: 'الكل' },

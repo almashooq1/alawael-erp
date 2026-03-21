@@ -3,11 +3,32 @@
  * عرض بيانات الموظف في وضع العرض
  */
 
-
-
 import { STATUS_MAP, CONTRACT_TYPES, GENDERS, MARITAL_STATUS } from './employeeManagement.constants';
 import { DEPT_COLORS } from '../../constants/departmentColors';
 import { statusColors } from '../../theme/palette';
+import {
+  Avatar,
+  Box,
+  Chip,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Grid,
+  IconButton,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import PrintIcon from '@mui/icons-material/Print';
+import EditIcon from '@mui/icons-material/Edit';
+import CloseIcon from '@mui/icons-material/Close';
+import PersonIcon from '@mui/icons-material/Person';
+import NatIcon from '@mui/icons-material/Nat';
+import WorkIcon from '@mui/icons-material/Work';
+import BadgeIcon from '@mui/icons-material/Badge';
+import PhoneIcon from '@mui/icons-material/Phone';
+import EmailIcon from '@mui/icons-material/Email';
+import HomeIcon from '@mui/icons-material/Home';
+import { CalendarIcon } from 'utils/iconAliases';
 
 /* ─── Shared section header ─── */
 export const SectionHeader = ({ icon, title, subtitle }) => (

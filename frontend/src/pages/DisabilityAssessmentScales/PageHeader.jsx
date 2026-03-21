@@ -1,8 +1,27 @@
 
 
-
-
 import { gradients } from '../../theme/palette';
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Grid,
+  Paper,
+  Stack,
+  Tab,
+  Tabs,
+  Typography
+} from '@mui/material';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import AccessibilityIcon from '@mui/icons-material/Accessibility';
+import RecommendIcon from '@mui/icons-material/Recommend';
+import TimelineIcon from '@mui/icons-material/Timeline';
+import HistoryIcon from '@mui/icons-material/History';
+import PersonIcon from '@mui/icons-material/Person';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import BarChartIcon from '@mui/icons-material/BarChart';
+import AnalyticsIcon from '@mui/icons-material/Analytics';
 
 /**
  * Page header: gradient banner, title row with action buttons,

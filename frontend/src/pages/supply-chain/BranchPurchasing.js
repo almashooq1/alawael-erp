@@ -7,7 +7,6 @@ import {
   Paper,
 } from '@mui/material';
 
-
 import { useSnackbar } from 'contexts/SnackbarContext';
 import { gradients, surfaceColors } from 'theme/palette';
 import {
@@ -16,6 +15,45 @@ import {
   vendorContractService,
   branchService,
 } from 'services/branchWarehouseService';
+import {
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  FormControl,
+  Grid,
+  IconButton,
+  InputAdornment,
+  InputLabel,
+  LinearProgress,
+  MenuItem,
+  Select,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import PendingIcon from '@mui/icons-material/Pending';
+import AddIcon from '@mui/icons-material/Add';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import ReceiptIcon from '@mui/icons-material/Receipt';
+import SearchIcon from '@mui/icons-material/Search';
+import { ViewIcon } from 'utils/iconAliases';
 
 const prStatusConfig = {
   draft: { label: 'مسودة', color: 'default' },

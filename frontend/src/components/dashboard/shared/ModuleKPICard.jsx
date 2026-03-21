@@ -11,6 +11,13 @@
  */
 
 import React from 'react';
+import {
+  Avatar,
+  Box,
+  Card,
+  CardContent,
+  Typography
+} from '@mui/material';
 
 const ModuleKPICard = React.memo(({ title, value, subtitle, icon, color }) => (
   <Card

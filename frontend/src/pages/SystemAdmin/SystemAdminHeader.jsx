@@ -3,10 +3,18 @@
  * Extracted from SystemAdmin.js
  */
 
-
-
-
 import { gradients } from '../../theme/palette';
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Grid,
+  Typography
+} from '@mui/material';
+import SettingsIcon from '@mui/icons-material/Settings';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import AddIcon from '@mui/icons-material/Add';
 
 const SystemAdminHeader = ({ stats, loadData, openCreate, activeTab, tabs }) => (
   <>

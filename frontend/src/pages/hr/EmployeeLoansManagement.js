@@ -6,7 +6,6 @@ import {
   Paper,
 } from '@mui/material';
 
-
 import {
   getLoans,
   createLoan,
@@ -14,6 +13,36 @@ import {
   approveLoanStep,
   getLoanStats,
 } from '../../services/hr/employeeAffairsExpandedService';
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  IconButton,
+  LinearProgress,
+  MenuItem,
+  Snackbar,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import { ViewIcon } from 'utils/iconAliases';
 
 const LOAN_TYPES = ['سلفة راتب', 'قرض شخصي', 'سلفة طوارئ', 'قرض سكني', 'قرض تعليمي', 'قرض طبي'];
 

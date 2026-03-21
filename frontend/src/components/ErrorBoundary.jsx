@@ -1,6 +1,7 @@
 import React from 'react';
 import logger from 'utils/logger';
 import { captureException } from 'utils/sentry';
+import { Box, Button, Typography } from '@mui/material';
 
 /**
  * Global Error Boundary

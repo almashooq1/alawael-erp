@@ -4,8 +4,33 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 
-
 import taqatService from '../../services/taqat.service';
+import {
+  Alert,
+  Avatar,
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Grid,
+  IconButton,
+  LinearProgress,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  Typography
+} from '@mui/material';
+import Refresh from '@mui/icons-material/Refresh';
+import Person from '@mui/icons-material/Person';
+import Work from '@mui/icons-material/Work';
+import CheckCircle from '@mui/icons-material/CheckCircle';
+import Assessment from '@mui/icons-material/Assessment';
 
 const applicationStatusLabels = {
   submitted: 'مقدّم', screening: 'فرز', shortlisted: 'قائمة قصيرة',

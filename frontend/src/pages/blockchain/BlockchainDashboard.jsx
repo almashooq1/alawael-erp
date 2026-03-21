@@ -3,9 +3,23 @@
  */
 import { useState, useEffect } from 'react';
 
-
-
 import { getDashboard, certificatesService, templatesService } from '../../services/blockchainService';
+import {
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Grid,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Typography
+} from '@mui/material';
+import DashboardIcon from '@mui/icons-material/Dashboard';
 
 const statusLabels = { draft: 'مسودة', issued: 'مصدرة', signed: 'موقعة', revoked: 'ملغاة' };
 const statusColors = { draft: 'default', issued: 'info', signed: 'success', revoked: 'error' };

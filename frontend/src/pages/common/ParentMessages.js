@@ -1,14 +1,38 @@
 import { useState, useEffect } from 'react';
 
-
-
-
 import { parentService } from 'services/parentService';
 import messagesService from 'services/messagesService';
 import logger from 'utils/logger';
 import { useSnackbar } from 'contexts/SnackbarContext';
 import { gradients, brandColors, neutralColors, surfaceColors } from 'theme/palette';
 import { useAuth } from 'contexts/AuthContext';
+import {
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  Chip,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  IconButton,
+  List,
+  ListItem,
+  Tab,
+  Tabs,
+  TextField,
+  Typography
+} from '@mui/material';
+import MessageIcon from '@mui/icons-material/Message';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
+import SendIcon from '@mui/icons-material/Send';
+import StarBorderIcon from '@mui/icons-material/StarBorder';
+import ReplyIcon from '@mui/icons-material/Reply';
 
 const ParentMessages = () => {
   const { currentUser } = useAuth();

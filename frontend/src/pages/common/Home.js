@@ -1,14 +1,35 @@
 import { useState, useEffect, useMemo } from 'react';
 
-
-
-
 import { useNavigate } from 'react-router-dom';
 import moduleMocks from 'data/moduleMocks';
 import { useRealTimeKPIs } from 'contexts/SocketContext';
 import { dashboardAPI } from 'services/api';
 import { gradients, statusColors } from '../../theme/palette';
 import { useSnackbar } from '../../contexts/SnackbarContext';
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Divider,
+  Grid,
+  IconButton,
+  Stack,
+  Typography
+} from '@mui/material';
+import AccountTreeIcon from '@mui/icons-material/AccountTree';
+import QueryStatsIcon from '@mui/icons-material/QueryStats';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import GroupsIcon from '@mui/icons-material/Groups';
+import SupportAgentIcon from '@mui/icons-material/SupportAgent';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import ScienceIcon from '@mui/icons-material/Science';
+import ShieldIcon from '@mui/icons-material/Shield';
+import HomeIcon from '@mui/icons-material/Home';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 
 const moduleGroups = [
   {

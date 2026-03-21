@@ -4,6 +4,17 @@
 
 
 
+import {
+  Alert,
+  Box,
+  Checkbox,
+  Divider,
+  Fade,
+  FormControlLabel,
+  FormGroup,
+  Grid,
+  TextField
+} from '@mui/material';
 const MedicalStep = ({ formData, handleChange, setFormData }) => (
   <Fade in timeout={400}>
     <Box>

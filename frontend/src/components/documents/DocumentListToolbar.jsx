@@ -4,9 +4,30 @@
  */
 
 
-
-
 import { CATEGORIES } from './documentListConstants';
+import {
+  Badge,
+  Box,
+  Button,
+  Chip,
+  Collapse,
+  FormControl,
+  IconButton,
+  InputAdornment,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  Stack,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import DataObjectIcon from '@mui/icons-material/DataObject';
+import ViewColumnIcon from '@mui/icons-material/ViewColumn';
 
 const DocumentListToolbar = ({
   filters,

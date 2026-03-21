@@ -9,12 +9,47 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
-
-
-
 import { gradients, brandColors } from 'theme/palette';
 import studentManagementService from 'services/studentManagementService';
 import logger from 'utils/logger';
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Divider,
+  Grid,
+  LinearProgress,
+  Paper,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography
+} from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import PrintIcon from '@mui/icons-material/Print';
+import EventNoteIcon from '@mui/icons-material/EventNote';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import SchoolIcon from '@mui/icons-material/School';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import WarningIcon from '@mui/icons-material/Warning';
+import PersonIcon from '@mui/icons-material/Person';
+import AccessibleIcon from '@mui/icons-material/Accessible';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import TimelineIcon from '@mui/icons-material/Timeline';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import LightbulbIcon from '@mui/icons-material/Lightbulb';
+import PsychologyIcon from '@mui/icons-material/Psychology';
+import DescriptionIcon from '@mui/icons-material/Description';
+import PhoneIcon from '@mui/icons-material/Phone';
 
 // ─── Section Header Component ────────────────────
 const SectionHeader = ({ icon, title, subtitle, gradient = gradients.primary }) => (

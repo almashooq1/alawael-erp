@@ -14,9 +14,40 @@ import {
   alpha,
 } from '@mui/material';
 
-
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import workflowService from '../../services/workflow.service';
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  FormControlLabel,
+  Grid,
+  IconButton,
+  InputAdornment,
+  MenuItem,
+  Paper,
+  Switch,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import StartIcon from '@mui/icons-material/Start';
+import TaskIcon from '@mui/icons-material/Task';
+import ApprovalIcon from '@mui/icons-material/Approval';
+import SaveIcon from '@mui/icons-material/Save';
+import PublishIcon from '@mui/icons-material/Publish';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import AddIcon from '@mui/icons-material/Add';
 
 // ─── Step type configuration ────────────────────────────────────────────────
 const STEP_TYPES = [

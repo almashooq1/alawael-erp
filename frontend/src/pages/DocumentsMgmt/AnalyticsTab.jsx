@@ -13,6 +13,20 @@
 
 
 import { chartColors } from '../../theme/palette';
+import {
+  Alert,
+  Card,
+  CardContent,
+  Grid,
+  LinearProgress,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography
+} from '@mui/material';
 
 export const TemplatesTab = () => (
   <Grid container spacing={3}>

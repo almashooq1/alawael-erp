@@ -20,8 +20,27 @@ import {
   Speed,
 } from '@mui/icons-material';
 
-
 import { getOverview, getKPIs, getRealtime, getTrends } from '../../services/biDashboard.service';
+import {
+  Alert,
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Grid,
+  Icon,
+  IconButton,
+  Paper,
+  ToggleButton,
+  ToggleButtonGroup,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import TrendingUp from '@mui/icons-material/TrendingUp';
+import TrendingDown from '@mui/icons-material/TrendingDown';
+import Assignment from '@mui/icons-material/Assignment';
+import Refresh from '@mui/icons-material/Refresh';
 
 const PERIOD_OPTIONS = [
   { value: 'week', label: 'أسبوع' },

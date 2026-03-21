@@ -4,6 +4,15 @@
 
 
 import { brandColors } from 'theme/palette';
+import {
+  Card,
+  CardContent,
+  Chip,
+  Grid,
+  Stack,
+  Tooltip,
+  Typography
+} from '@mui/material';
 
 const StudentReportCharts = ({
   safeTrends, hasGpaTrend, hasAttendanceTrend, safeSubjects, safeSkills,

@@ -4,9 +4,34 @@ import {
   Paper,
 } from '@mui/material';
 
-
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, statusColors, surfaceColors } from '../../theme/palette';
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import WarningIcon from '@mui/icons-material/Warning';
+import ShieldIcon from '@mui/icons-material/Shield';
+import AddIcon from '@mui/icons-material/Add';
 
 const demoRisks = [
   {

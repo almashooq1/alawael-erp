@@ -5,6 +5,24 @@ import { useState, useEffect, useCallback } from 'react';
 import { useTheme, alpha,
 } from '@mui/material';
 import { getLegalDashboard } from '../../services/legalAffairs.service';
+import {
+  Alert,
+  Box,
+  Chip,
+  CircularProgress,
+  Grid,
+  IconButton,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import AttachMoney from '@mui/icons-material/AttachMoney';
+import Refresh from '@mui/icons-material/Refresh';
 
 const TYPE_LABELS = { litigation: 'تقاضي', arbitration: 'تحكيم', labor: 'عمالية', commercial: 'تجارية', administrative: 'إدارية', regulatory: 'تنظيمية', other: 'أخرى' };
 const STATUS_LABELS = { open: 'مفتوحة', in_progress: 'جارية', pending_hearing: 'بانتظار جلسة', pending_judgment: 'بانتظار حكم', appealed: 'مستأنفة', closed: 'مغلقة', settled: 'تسوية', won: 'ربح', lost: 'خسارة' };

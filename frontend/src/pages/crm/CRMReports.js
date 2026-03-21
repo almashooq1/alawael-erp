@@ -7,10 +7,30 @@ import {
   useTheme,
 } from '@mui/material';
 
-
-
-
 import { crmReportsService, MOCK_CONVERSION_REPORT, MOCK_CRM_DASHBOARD } from 'services/crmService';
+import {
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  Grid,
+  IconButton,
+  LinearProgress,
+  Paper,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import TimelineIcon from '@mui/icons-material/Timeline';
+import { TrendIcon } from 'utils/iconAliases';
 
 const COLORS = ['#4FC3F7', '#81C784', '#FFB74D', '#E57373', '#BA68C8', '#4DB6AC'];
 

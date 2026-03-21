@@ -3,9 +3,25 @@
  */
 import { useState, useEffect } from 'react';
 
-
-
 import apiClient from '../../services/api';
+import {
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  Grid,
+  LinearProgress,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import ScheduleIcon from '@mui/icons-material/Schedule';
 
 const COLORS = ['#0288d1', '#388e3c', '#f57c00', '#d32f2f', '#7b1fa2'];
 

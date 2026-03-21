@@ -1,6 +1,14 @@
 
 
 import { statusColors } from 'theme/palette';
+import {
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  Stack,
+  Typography
+} from '@mui/material';
 
 /** Revenue & expenses area chart with time-range chips */
 const RevenueChart = ({ revenueData, timeRange, setTimeRange }) => (

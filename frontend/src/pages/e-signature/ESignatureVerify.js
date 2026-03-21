@@ -2,11 +2,39 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import eSignatureService from '../../services/eSignature.service';
 
-
-
-
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients } from '../../theme/palette';
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Divider,
+  Grid,
+  IconButton,
+  InputAdornment,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  Paper,
+  TextField,
+  Typography
+} from '@mui/material';
+import ArrowBack from '@mui/icons-material/ArrowBack';
+import Search from '@mui/icons-material/Search';
+import Verified from '@mui/icons-material/Verified';
+import Description from '@mui/icons-material/Description';
+import ContentCopy from '@mui/icons-material/ContentCopy';
+import CheckCircle from '@mui/icons-material/CheckCircle';
+import Cancel from '@mui/icons-material/Cancel';
+import Person from '@mui/icons-material/Person';
+import Schedule from '@mui/icons-material/Schedule';
+import History from '@mui/icons-material/History';
 
 /* ═══ Audit Action Labels ════════════════════════════════════════════════ */
 const auditActionMap = {

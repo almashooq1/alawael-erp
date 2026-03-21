@@ -5,13 +5,41 @@
 
 import { useState, useEffect, useCallback } from 'react';
 
-
-
-
 import { gradients } from 'theme/palette';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import api from 'services/api';
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  FormControlLabel,
+  Grid,
+  IconButton,
+  LinearProgress,
+  MenuItem,
+  Paper,
+  Slider,
+  Stack,
+  Switch,
+  Tab,
+  Tabs,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import CheckIcon from '@mui/icons-material/Check';
+import AddIcon from '@mui/icons-material/Add';
+import WaterIcon from '@mui/icons-material/Water';
+import CloseIcon from '@mui/icons-material/Close';
 
 const moodOptions = [
   { value: 'سعيد جداً', emoji: '😄', color: '#2ecc71' },

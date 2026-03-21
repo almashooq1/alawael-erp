@@ -5,6 +5,24 @@ import { useState, useEffect, useCallback } from 'react';
 import { useTheme, alpha,
 } from '@mui/material';
 import { getPRDashboard } from '../../services/publicRelations.service';
+import {
+  Alert,
+  Box,
+  Chip,
+  CircularProgress,
+  Grid,
+  IconButton,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import ThumbUp from '@mui/icons-material/ThumbUp';
+import Refresh from '@mui/icons-material/Refresh';
 
 const SENTIMENT_LABELS = { positive: 'إيجابي', neutral: 'محايد', negative: 'سلبي' };
 const SENTIMENT_COLORS = { positive: '#4caf50', neutral: '#ff9800', negative: '#f44336' };

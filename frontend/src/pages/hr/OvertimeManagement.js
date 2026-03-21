@@ -7,7 +7,6 @@ import {
   Paper,
 } from '@mui/material';
 
-
 import {
   getOvertimeRequests,
   createOvertimeRequest,
@@ -15,6 +14,37 @@ import {
   approveOvertimeStep,
   getOvertimeStats,
 } from '../../services/hr/employeeAffairsExpandedService';
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Grid,
+  IconButton,
+  MenuItem,
+  Snackbar,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import WeekendIcon from '@mui/icons-material/Weekend';
+import AddIcon from '@mui/icons-material/Add';
+import { ViewIcon } from 'utils/iconAliases';
 
 const OVERTIME_TYPES = [
   { value: 'عادي', label: 'عادي (×1.5)', multiplier: 1.5, icon: <ClockIcon />, color: '#1976d2' },

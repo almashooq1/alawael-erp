@@ -1,8 +1,20 @@
 import { useState, useCallback, useMemo } from 'react';
-
-
-
-
+import {
+  Badge,
+  Box,
+  Button,
+  Chip,
+  Collapse,
+  FormControl,
+  IconButton,
+  InputAdornment,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  TextField,
+  Tooltip
+} from '@mui/material';
 
 /**
  * FilterBar — Reusable search + filter bar with expandable advanced filters.
@@ -14,6 +26,11 @@ import { useState, useCallback, useMemo } from 'react';
  * @param {Array}    [props.filters]           — [{id,label,options:[{value,label}],value,multiple?}]
  * @param {function} [props.onFilterChange]    — (filterId, value) => void
  * @param {string}   [props.dateFrom]          — Start date value
+import SearchIcon from '@mui/icons-material/Search';
+import ClearIcon from '@mui/icons-material/Clear';
+import FilterIcon from '@mui/icons-material/Filter';
+import ExpandIcon from '@mui/icons-material/Expand';
+import { CollapseIcon } from 'utils/iconAliases';
  * @param {string}   [props.dateTo]            — End date value
  * @param {function} [props.onDateChange]      — (field, value) => void
  * @param {boolean}  [props.showDateFilter]    — Show date range

@@ -7,7 +7,6 @@ import {
   Paper,
 } from '@mui/material';
 
-
 import { useSnackbar } from 'contexts/SnackbarContext';
 import { gradients, brandColors, surfaceColors } from 'theme/palette';
 import {
@@ -16,6 +15,32 @@ import {
   stockTransferService,
   purchaseRequestService,
 } from 'services/branchWarehouseService';
+import {
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Divider,
+  Grid,
+  LinearProgress,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  Typography
+} from '@mui/material';
+import InventoryIcon from '@mui/icons-material/Inventory';
+import WarehouseIcon from '@mui/icons-material/Warehouse';
+import WarningIcon from '@mui/icons-material/Warning';
+import ReportIcon from '@mui/icons-material/Report';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import CompareIcon from '@mui/icons-material/Compare';
 
 const BranchReports = () => {
   const { showSnackbar } = useSnackbar();

@@ -7,9 +7,6 @@ import {
   useTheme,
 } from '@mui/material';
 
-
-
-
 import {
   trainingReportsService,
   MOCK_TRAINING_DASHBOARD,
@@ -17,6 +14,29 @@ import {
   MOCK_CERTIFICATIONS,
 } from 'services/trainingService';
 import { useSnackbar } from 'contexts/SnackbarContext';
+import {
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  Grid,
+  IconButton,
+  LinearProgress,
+  Paper,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import SchoolIcon from '@mui/icons-material/School';
+import GroupIcon from '@mui/icons-material/Group';
+import RefreshIcon from '@mui/icons-material/Refresh';
 
 const COLORS = [
   '#0277BD',

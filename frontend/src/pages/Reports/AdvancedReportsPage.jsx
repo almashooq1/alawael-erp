@@ -11,9 +11,6 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 
-
-
-
 import exportService from 'services/exportService';
 import smartReportsService from 'services/smartReportsService';
 import notificationService from 'services/notificationService';
@@ -22,6 +19,36 @@ import logger from 'utils/logger';
 import { gradients } from '../../theme/palette';
 import { useConfirmDialog } from '../../components/common/ConfirmDialog';
 import { useSnackbar } from '../../contexts/SnackbarContext';
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  Grid,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  Tab,
+  Tabs,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import Assessment from '@mui/icons-material/Assessment';
+import Refresh from '@mui/icons-material/Refresh';
+import TrendingUp from '@mui/icons-material/TrendingUp';
+import Download from '@mui/icons-material/Download';
+import Share from '@mui/icons-material/Share';
+import Delete from '@mui/icons-material/Delete';
 
 // Static sample reports data
 const SAMPLE_REPORTS = [

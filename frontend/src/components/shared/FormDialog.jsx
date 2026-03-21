@@ -1,6 +1,5 @@
 
 
-
 /**
  * FormDialog — Modal dialog with form content, standardized layout.
  *
@@ -19,6 +18,19 @@
  * @param {node}     [extraActions] — Additional action buttons
  * @param {string}   [submitColor] — Submit button color
  */
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  IconButton,
+  Typography
+} from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 const FormDialog = ({
   open,
   onClose,

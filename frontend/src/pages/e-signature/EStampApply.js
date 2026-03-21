@@ -2,11 +2,36 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import eStampService from '../../services/eStamp.service';
 
-
-
-
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients } from '../../theme/palette';
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Grid,
+  MenuItem,
+  Paper,
+  Slider,
+  Step,
+  StepLabel,
+  Stepper,
+  TextField,
+  Typography
+} from '@mui/material';
+import ArrowBack from '@mui/icons-material/ArrowBack';
+import Verified from '@mui/icons-material/Verified';
+import Description from '@mui/icons-material/Description';
+import ArrowForward from '@mui/icons-material/ArrowForward';
+import CheckCircle from '@mui/icons-material/CheckCircle';
+import ContentCopy from '@mui/icons-material/ContentCopy';
 
 const documentTypes = [
   { value: 'official_letter', label: 'خطاب رسمي' },

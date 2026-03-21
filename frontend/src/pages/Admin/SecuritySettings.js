@@ -1,12 +1,62 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 
-
-
-
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { useConfirmDialog } from '../../components/common/ConfirmDialog';
 import { gradients } from '../../theme/palette';
 import securityService from '../../services/security.service';
+import {
+  Alert,
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  FormControlLabel,
+  Grid,
+  IconButton,
+  InputAdornment,
+  LinearProgress,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Paper,
+  Slider,
+  Switch,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Tabs,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import SecurityIcon from '@mui/icons-material/Security';
+import History from '@mui/icons-material/History';
+import Assessment from '@mui/icons-material/Assessment';
+import VpnKey from '@mui/icons-material/VpnKey';
+import CheckCircle from '@mui/icons-material/CheckCircle';
+import ErrorIcon from '@mui/icons-material/Error';
+import Refresh from '@mui/icons-material/Refresh';
+import Lock from '@mui/icons-material/Lock';
+import Logout from '@mui/icons-material/Logout';
+import Delete from '@mui/icons-material/Delete';
+import Settings from '@mui/icons-material/Settings';
+import Warning from '@mui/icons-material/Warning';
+import Add from '@mui/icons-material/Add';
+import Save from '@mui/icons-material/Save';
+import TrendingUp from '@mui/icons-material/TrendingUp';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import Visibility from '@mui/icons-material/Visibility';
+import { CopyIcon } from 'utils/iconAliases';
 
 /* ─── Tab Panel ─── */
 function TabPanel({ children, value, index, ...other }) {

@@ -1,7 +1,26 @@
 import { useState, useEffect } from 'react';
 
-
 import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
+import {
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Container,
+  LinearProgress,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  Typography
+} from '@mui/material';
+import TrendingDown from '@mui/icons-material/TrendingDown';
+import Timer from '@mui/icons-material/Timer';
 
 const API = process.env.REACT_APP_API_URL || '/api';
 

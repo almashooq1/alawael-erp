@@ -3,11 +3,24 @@
  */
 import { useState, useEffect } from 'react';
 
-
-
-
-
 import { getDashboard } from '../../services/projectManagement.service';
+import {
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Grid,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import { ActiveIcon } from 'utils/iconAliases';
 
 const statusLabels = { active: 'نشط', completed: 'مكتمل', on_hold: 'معلق', access_request: 'طلب وصول' };
 const statusColors = { active: 'primary', completed: 'success', on_hold: 'warning', access_request: 'info' };

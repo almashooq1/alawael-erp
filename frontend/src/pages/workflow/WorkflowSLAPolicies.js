@@ -10,9 +10,52 @@ import {
   alpha,
 } from '@mui/material';
 
-
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import workflowService from '../../services/workflow.service';
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  FormControl,
+  Grid,
+  IconButton,
+  InputLabel,
+  LinearProgress,
+  MenuItem,
+  Select,
+  Skeleton,
+  Switch,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import SpeedIcon from '@mui/icons-material/Speed';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import AddIcon from '@mui/icons-material/Add';
+import CheckIcon from '@mui/icons-material/Check';
+import ErrorIcon from '@mui/icons-material/Error';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import TimerIcon from '@mui/icons-material/Timer';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import SaveIcon from '@mui/icons-material/Save';
+import { TrendIcon } from 'utils/iconAliases';
 
 const PRIORITY_MAP = { critical: 'حرج', high: 'عالي', medium: 'متوسط', low: 'منخفض' };
 const PRIORITY_COLORS = { critical: '#D32F2F', high: '#F57C00', medium: '#FFC107', low: '#4CAF50' };

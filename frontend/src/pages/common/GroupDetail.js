@@ -1,8 +1,26 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 
-
 import groupsService from 'services/groupsService';
+import {
+  Avatar,
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Container,
+  Divider,
+  Grid,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  Paper,
+  Typography
+} from '@mui/material';
+import GroupIcon from '@mui/icons-material/Group';
+import PersonIcon from '@mui/icons-material/Person';
 
 function GroupDetail() {
   const { id } = useParams();

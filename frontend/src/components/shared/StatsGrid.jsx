@@ -1,4 +1,12 @@
-import { alpha } from '@mui/material';
+import {
+  Avatar,
+  Box,
+  Card,
+  CardContent,
+  Grid,
+  Typography,
+  alpha
+} from '@mui/material';
 
 /**
  * StatsGrid — Displays a grid of stat cards with icons, values, trends.

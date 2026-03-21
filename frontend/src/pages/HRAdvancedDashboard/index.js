@@ -11,11 +11,27 @@
  */
 import { useNavigate } from 'react-router-dom';
 
-
-
-
 import { gradients } from '../../theme/palette';
 import useHRDashboard from './useHRDashboard';
+import {
+  Alert,
+  Box,
+  Chip,
+  CircularProgress,
+  Container,
+  Grid,
+  IconButton,
+  LinearProgress,
+  Paper,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import PeopleIcon from '@mui/icons-material/People';
+import WarningIcon from '@mui/icons-material/Warning';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import CancelIcon from '@mui/icons-material/Cancel';
+import ReportIcon from '@mui/icons-material/Report';
+import { LeaveIcon } from 'utils/iconAliases';
 
 const HRAdvancedDashboard = () => {
   const navigate = useNavigate();

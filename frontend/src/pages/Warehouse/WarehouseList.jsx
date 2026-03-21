@@ -5,6 +5,34 @@ import { useState, useEffect, useCallback } from 'react';
 import { TableRow, useTheme, alpha,
 } from '@mui/material';
 import { getWarehouses, createWarehouse, updateWarehouse, deleteWarehouse } from '../../services/warehouse.service';
+import {
+  Alert,
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import Refresh from '@mui/icons-material/Refresh';
+import Add from '@mui/icons-material/Add';
+import Edit from '@mui/icons-material/Edit';
+import Delete from '@mui/icons-material/Delete';
 
 const TYPE_LABELS = { main: 'رئيسي', sub: 'فرعي', transit: 'عبور', quarantine: 'حجر', returns: 'مرتجعات' };
 const STATUS_LABELS = { active: 'نشط', inactive: 'غير نشط', maintenance: 'صيانة', closed: 'مغلق' };

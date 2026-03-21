@@ -3,8 +3,10 @@
  * بيانات تجريبية وثوابت بوابة الموظف
  */
 
-
 import { leaveColors } from '../../theme/palette';
+import PendingIcon from '@mui/icons-material/Pending';
+import MoneyIcon from '@mui/icons-material/Money';
+import { CalendarIcon } from 'utils/iconAliases';
 
 /* ─── Leave Types ─── */
 export const LEAVE_TYPES = {

@@ -5,6 +5,34 @@ import { useState, useEffect, useCallback } from 'react';
 import { useTheme, alpha,
 } from '@mui/material';
 import { getCampaigns, createCampaign, updateCampaign } from '../../services/publicRelations.service';
+import {
+  Alert,
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import Refresh from '@mui/icons-material/Refresh';
+import Add from '@mui/icons-material/Add';
+import Edit from '@mui/icons-material/Edit';
 
 const TYPE_LABELS = { awareness: 'توعوية', promotional: 'ترويجية', crisis: 'أزمات', branding: 'هوية', community: 'مجتمعية', internal: 'داخلية', social_responsibility: 'مسؤولية اجتماعية' };
 const STATUS_LABELS = { draft: 'مسودة', planning: 'تخطيط', active: 'نشطة', paused: 'متوقفة', completed: 'مكتملة', cancelled: 'ملغاة' };

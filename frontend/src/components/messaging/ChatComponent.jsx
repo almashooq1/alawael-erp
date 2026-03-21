@@ -7,8 +7,24 @@ import { useState, useRef, useEffect } from 'react';
 import {
   useTheme,
 } from '@mui/material';
-
-
+import {
+  Avatar,
+  Box,
+  Chip,
+  Divider,
+  IconButton,
+  InputAdornment,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  Paper,
+  TextField,
+  Typography
+} from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
+import SendIcon from '@mui/icons-material/Send';
+import { AttachIcon } from 'utils/iconAliases';
 
 const DEMO_MESSAGES = [
   {

@@ -4,10 +4,38 @@ import {
 } from '@mui/material';
 import apiClient from 'services/api.client';
 
-
 import logger from 'utils/logger';
 import { gradients } from '../../theme/palette';
 import { useSnackbar } from '../../contexts/SnackbarContext';
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Container,
+  FormControl,
+  Grid,
+  InputLabel,
+  MenuItem,
+  Select,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  TextField,
+  Typography
+} from '@mui/material';
+import AttachMoney from '@mui/icons-material/AttachMoney';
+import Description from '@mui/icons-material/Description';
+import HistoryIcon from '@mui/icons-material/History';
+import DashboardIcon from '@mui/icons-material/Dashboard';
 
 // بيانات تجريبية
 const demoHistory = [

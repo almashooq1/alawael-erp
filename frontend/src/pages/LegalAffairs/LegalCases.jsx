@@ -5,6 +5,33 @@ import { useState, useEffect, useCallback } from 'react';
 import { TableRow, useTheme, alpha,
 } from '@mui/material';
 import { getLegalCases, createLegalCase, updateLegalCase } from '../../services/legalAffairs.service';
+import {
+  Alert,
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import Refresh from '@mui/icons-material/Refresh';
+import Add from '@mui/icons-material/Add';
+import Edit from '@mui/icons-material/Edit';
 
 const TYPE_LABELS = { litigation: 'تقاضي', arbitration: 'تحكيم', labor: 'عمالية', commercial: 'تجارية', administrative: 'إدارية', regulatory: 'تنظيمية', other: 'أخرى' };
 const STATUS_LABELS = { open: 'مفتوحة', in_progress: 'جارية', pending_hearing: 'بانتظار جلسة', pending_judgment: 'بانتظار حكم', closed: 'مغلقة', settled: 'تسوية', won: 'ربح', lost: 'خسارة' };

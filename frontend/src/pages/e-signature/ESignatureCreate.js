@@ -2,11 +2,39 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import eSignatureService from '../../services/eSignature.service';
 
-
-
-
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients } from '../../theme/palette';
+import {
+  Alert,
+  Autocomplete,
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  FormControlLabel,
+  Grid,
+  IconButton,
+  MenuItem,
+  Paper,
+  Step,
+  StepLabel,
+  Stepper,
+  Switch,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import ArrowBack from '@mui/icons-material/ArrowBack';
+import Description from '@mui/icons-material/Description';
+import Person from '@mui/icons-material/Person';
+import AddIcon from '@mui/icons-material/Add';
+import DragIndicator from '@mui/icons-material/DragIndicator';
+import Delete from '@mui/icons-material/Delete';
+import Settings from '@mui/icons-material/Settings';
+import ArrowForward from '@mui/icons-material/ArrowForward';
+import Send from '@mui/icons-material/Send';
 
 /* ═══ Constants ═══════════════════════════════════════════════════════════ */
 const docTypes = [

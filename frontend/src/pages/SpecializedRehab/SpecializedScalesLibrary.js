@@ -8,12 +8,50 @@ import {
   alpha,
 } from '@mui/material';
 
-
 import {
   SPECIALIZED_SCALES_CATALOG,
   SCALE_CATEGORY_LABELS,
   DISABILITY_LABELS,
 } from 'services/specializedRehab.service';
+import {
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  Chip,
+  Collapse,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Grid,
+  IconButton,
+  InputAdornment,
+  LinearProgress,
+  Paper,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography
+} from '@mui/material';
+import PsychologyIcon from '@mui/icons-material/Psychology';
+import MemoryIcon from '@mui/icons-material/Memory';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import SearchIcon from '@mui/icons-material/Search';
+import FilterIcon from '@mui/icons-material/Filter';
+import InfoIcon from '@mui/icons-material/Info';
+import CloseIcon from '@mui/icons-material/Close';
+import ExpandIcon from '@mui/icons-material/Expand';
+import StarIcon from '@mui/icons-material/Star';
+import { CollapseIcon } from 'utils/iconAliases';
 
 /* ───── icon lookup ───── */
 const CATEGORY_ICONS = {

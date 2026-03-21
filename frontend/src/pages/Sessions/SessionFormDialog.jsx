@@ -6,6 +6,29 @@ import { Fade,
 } from '@mui/material';
 
 import { SESSION_TYPES, RECURRENCE_OPTIONS, STATUS_MAP } from './constants';
+import {
+  Alert,
+  Box,
+  Button,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Grid,
+  IconButton,
+  InputAdornment,
+  MenuItem,
+  Stack,
+  TextField,
+  Typography
+} from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
+import CalendarToday from '@mui/icons-material/CalendarToday';
+import Person from '@mui/icons-material/Person';
+import EditIcon from '@mui/icons-material/Edit';
+import AddIcon from '@mui/icons-material/Add';
 
 const SessionFormDialog = ({
   open, onClose, editingSession, form, setForm, saving, formError, onSave,

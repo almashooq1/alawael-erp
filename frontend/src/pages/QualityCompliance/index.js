@@ -1,10 +1,24 @@
 
 
-
-
 import { gradients } from '../../theme/palette';
 import useQualityCompliance from './useQualityCompliance';
 import { tabs, colMap } from './constants';
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Container,
+  Grid,
+  LinearProgress,
+  Paper,
+  Tab,
+  Tabs,
+  Typography
+} from '@mui/material';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import AddIcon from '@mui/icons-material/Add';
 
 const QualityCompliance = () => {
   const {

@@ -1,8 +1,23 @@
 import { useState, useEffect } from 'react';
 
-
 import apiClient from 'services/api.client';
 import { gradients } from 'theme/palette';
+import {
+  Avatar,
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Container,
+  Grid,
+  InputAdornment,
+  Paper,
+  TextField,
+  Typography
+} from '@mui/material';
+import PeopleIcon from '@mui/icons-material/People';
+import SearchIcon from '@mui/icons-material/Search';
 
 function Friends() {
   const [colleagues, setColleagues] = useState([]);

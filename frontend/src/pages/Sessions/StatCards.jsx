@@ -4,6 +4,20 @@
  */
 
 import { gradients } from '../../theme/palette';
+import {
+  Avatar,
+  Box,
+  Card,
+  CardContent,
+  Grid,
+  Skeleton,
+  Typography
+} from '@mui/material';
+import Assignment from '@mui/icons-material/Assignment';
+import Schedule from '@mui/icons-material/Schedule';
+import ThumbUp from '@mui/icons-material/ThumbUp';
+import CheckCircle from '@mui/icons-material/CheckCircle';
+import Cancel from '@mui/icons-material/Cancel';
 
 const STAT_DEFS = [
   { key: 'total',     label: 'إجمالي الجلسات',   icon: <Assignment fontSize="large" />,  gradient: gradients.primary },

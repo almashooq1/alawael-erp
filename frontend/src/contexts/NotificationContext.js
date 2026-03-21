@@ -6,6 +6,7 @@ import logger from 'utils/logger';
 import { getNotificationPrefs, setNotificationPrefs } from 'utils/storageService';
 import { useAuth } from './AuthContext';
 import { getToken } from 'utils/tokenStorage';
+import { Alert, Snackbar } from '@mui/material';
 
 const NotificationContext = createContext();
 

@@ -4,9 +4,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-
-
-
 import electronicDirectivesService from '../../services/electronicDirectives.service';
 import {
   typeOptions,
@@ -14,6 +11,32 @@ import {
   issuerOptions,
   recipientTypeOptions,
 } from './constants';
+import {
+  Alert,
+  Autocomplete,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  FormControl,
+  FormControlLabel,
+  Grid,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  Snackbar,
+  Switch,
+  TextField,
+  Typography
+} from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
+import SaveIcon from '@mui/icons-material/Save';
+import SendIcon from '@mui/icons-material/Send';
+import { AttachIcon } from 'utils/iconAliases';
 
 export default function ComposeDirective() {
   const navigate = useNavigate();

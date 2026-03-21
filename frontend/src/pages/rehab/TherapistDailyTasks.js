@@ -1,13 +1,43 @@
 import { useState, useEffect } from 'react';
 
-
-
-
 import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { statusColors, neutralColors } from '../../theme/palette';
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  Grid,
+  IconButton,
+  InputAdornment,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import TaskIcon from '@mui/icons-material/Task';
+import AddIcon from '@mui/icons-material/Add';
+import ScheduleIcon from '@mui/icons-material/Schedule';
+import DoneIcon from '@mui/icons-material/Done';
+import WarningIcon from '@mui/icons-material/Warning';
+import FlagIcon from '@mui/icons-material/Flag';
+import SearchIcon from '@mui/icons-material/Search';
+import CheckIcon from '@mui/icons-material/Check';
+import DeleteIcon from '@mui/icons-material/Delete';
+import CloseIcon from '@mui/icons-material/Close';
 
 const CATEGORIES = [
   { value: 'session_prep', label: 'تحضير جلسة', color: '#3b82f6' },

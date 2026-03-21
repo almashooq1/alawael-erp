@@ -5,6 +5,19 @@
 
 
 import { RATING_CONFIG, FIELD_SETS } from './performanceEvaluation.constants';
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField
+} from '@mui/material';
 
 const PerformanceDialog = ({
   dialogOpen,

@@ -10,6 +10,12 @@
  * @param {string}  [icon]      — Title emoji icon
  * @param {object}  [sx]        — Extra card styles
  */
+import {
+  Box,
+  Card,
+  CardContent,
+  Typography
+} from '@mui/material';
 const ChartCard = ({
   title,
   subtitle,

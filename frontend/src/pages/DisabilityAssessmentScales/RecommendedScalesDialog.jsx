@@ -4,12 +4,35 @@
  */
 import { useState } from 'react';
 
-
-
-
 import assessmentService from 'services/assessmentService';
 import logger from 'utils/logger';
 import { SCALE_ICONS } from './constants';
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  Grid,
+  IconButton,
+  InputLabel,
+  LinearProgress,
+  MenuItem,
+  Select,
+  Typography
+} from '@mui/material';
+import RecommendIcon from '@mui/icons-material/Recommend';
+import CloseIcon from '@mui/icons-material/Close';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import AddIcon from '@mui/icons-material/Add';
 
 const DISABILITY_TYPE_OPTIONS = [
   { value: 'physical', label: 'إعاقة حركية' },

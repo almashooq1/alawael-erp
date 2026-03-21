@@ -4,6 +4,13 @@
  */
 
 
+import {
+  Box,
+  Collapse,
+  Grid,
+  Stack,
+  Typography
+} from '@mui/material';
 const BeneficiariesRowDetail = ({ row, isOpen }) => (
   <Collapse in={isOpen} timeout="auto" unmountOnExit>
     <Box sx={{ margin: 2, p: 2, bgcolor: 'background.default', borderRadius: 1 }}>

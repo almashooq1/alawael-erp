@@ -3,7 +3,20 @@
  */
 
 
-
+import {
+  Alert,
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  Divider,
+  Grid,
+  LinearProgress,
+  Paper,
+  Stack,
+  Typography
+} from '@mui/material';
+import InsightsIcon from '@mui/icons-material/Insights';
 const StudentReportInsights = ({
   safeInsights, safeRiskSignals, safeRecommendations,
   safeComparison, comparisonCurrentLabel, comparisonCurrentSummary,

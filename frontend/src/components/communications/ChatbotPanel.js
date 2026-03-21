@@ -1,11 +1,23 @@
 import { useState, useEffect, useRef } from 'react';
 
-
-
-
 import { getToken } from 'utils/tokenStorage';
 import logger from 'utils/logger';
 import { gradients } from 'theme/palette';
+import {
+  Avatar,
+  Box,
+  Chip,
+  CircularProgress,
+  Fade,
+  IconButton,
+  Paper,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import SendIcon from '@mui/icons-material/Send';
+import { AIIcon, BotIcon, QuestionIcon, TipIcon } from 'utils/iconAliases';
 
 const ChatbotPanel = () => {
   const [messages, setMessages] = useState([]);

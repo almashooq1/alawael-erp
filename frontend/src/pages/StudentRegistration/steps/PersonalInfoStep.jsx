@@ -3,7 +3,23 @@
  */
 
 
-
+import {
+  Badge,
+  Box,
+  Divider,
+  Fade,
+  FormControl,
+  Grid,
+  InputAdornment,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
+  Typography
+} from '@mui/material';
+import Person from '@mui/icons-material/Person';
+import Flag from '@mui/icons-material/Flag';
+import Home from '@mui/icons-material/Home';
 const PersonalInfoStep = ({ formData, fieldErrors, handleChange, calculatedAge }) => (
   <Fade in timeout={400}>
     <Box>

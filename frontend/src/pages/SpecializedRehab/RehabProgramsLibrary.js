@@ -8,12 +8,58 @@ import {
   alpha,
 } from '@mui/material';
 
-
 import {
   REHAB_PROGRAM_TEMPLATES_CATALOG,
   PROGRAM_CATEGORY_LABELS,
   DISABILITY_LABELS,
 } from 'services/specializedRehab.service';
+import {
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  Chip,
+  Collapse,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Grid,
+  IconButton,
+  InputAdornment,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Paper,
+  Stack,
+  Step,
+  StepContent,
+  StepLabel,
+  Stepper,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import PsychologyIcon from '@mui/icons-material/Psychology';
+import MemoryIcon from '@mui/icons-material/Memory';
+import WorkIcon from '@mui/icons-material/Work';
+import HomeIcon from '@mui/icons-material/Home';
+import GroupsIcon from '@mui/icons-material/Groups';
+import PublicIcon from '@mui/icons-material/Public';
+import DevicesIcon from '@mui/icons-material/Devices';
+import SearchIcon from '@mui/icons-material/Search';
+import FilterIcon from '@mui/icons-material/Filter';
+import SpeedIcon from '@mui/icons-material/Speed';
+import InfoIcon from '@mui/icons-material/Info';
+import CloseIcon from '@mui/icons-material/Close';
+import CheckIcon from '@mui/icons-material/Check';
+import PeopleIcon from '@mui/icons-material/People';
+import ExpandIcon from '@mui/icons-material/Expand';
+import { CalendarIcon, CollapseIcon } from 'utils/iconAliases';
 
 /* ───── helpers ───── */
 const CATEGORY_ICONS = {

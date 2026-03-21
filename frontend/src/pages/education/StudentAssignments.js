@@ -5,15 +5,41 @@
 
 import { useState, useEffect, useCallback } from 'react';
 
-
-
-
 import studentPortalService from 'services/studentPortalService';
 import { getStatusHexColor } from 'utils/statusColors';
 import logger from 'utils/logger';
 import { gradients, statusColors, neutralColors } from 'theme/palette';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Grid,
+  IconButton,
+  LinearProgress,
+  Paper,
+  Stack,
+  Tab,
+  Tabs,
+  TextField,
+  Typography
+} from '@mui/material';
+import PendingIcon from '@mui/icons-material/Pending';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import UploadIcon from '@mui/icons-material/Upload';
+import DownloadIcon from '@mui/icons-material/Download';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
+import { CalendarIcon } from 'utils/iconAliases';
 
 const StudentAssignments = () => {
   const { currentUser } = useAuth();

@@ -5,6 +5,24 @@ import { useState, useEffect } from 'react';
 
 import { Draw, Approval as Stamp, Verified, PendingActions } from '@mui/icons-material';
 import apiClient from '../../services/api';
+import {
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  Grid,
+  Icon,
+  LinearProgress,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tooltip,
+  Typography
+} from '@mui/material';
 
 const COLORS = ['#4caf50', '#ff9800', '#f44336', '#2196f3', '#9c27b0'];
 

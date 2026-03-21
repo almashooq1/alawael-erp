@@ -3,11 +3,23 @@
  */
 import { useState, useEffect } from 'react';
 
-
-
-
-
 import { getDashboard } from '../../services/helpdesk.service';
+import {
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Grid,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Tooltip,
+  Typography
+} from '@mui/material';
 
 const priorityColors = { low: '#4caf50', medium: '#2196f3', high: '#ff9800', critical: '#f44336' };
 const priorityLabels = { low: 'منخفض', medium: 'متوسط', high: 'مرتفع', critical: 'حرج' };

@@ -1,4 +1,11 @@
 import { useNavigate } from 'react-router-dom';
+import {
+  Box,
+  Button,
+  Container,
+  Paper,
+  Typography
+} from '@mui/material';
 
 function NotFound() {
   const navigate = useNavigate();

@@ -21,10 +21,45 @@ import {
   alpha,
 } from '@mui/material';
 
-
 import { useAuth } from '../../contexts/AuthContext';
 import { useThemeMode } from '../../contexts/ThemeContext';
 import { SIDEBAR_WIDTH, SIDEBAR_COLLAPSED } from './sidebar';
+import {
+  AppBar,
+  Avatar,
+  Badge,
+  Box,
+  Breadcrumbs,
+  Chip,
+  Divider,
+  IconButton,
+  InputBase,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
+  Popover,
+  Toolbar,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import MenuIcon from '@mui/icons-material/Menu';
+import NavigateNextIcon from '@mui/icons-material/NavigateNext';
+import HomeIcon from '@mui/icons-material/Home';
+import SearchIcon from '@mui/icons-material/Search';
+import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
+import FullscreenIcon from '@mui/icons-material/Fullscreen';
+import LightModeIcon from '@mui/icons-material/LightMode';
+import DarkModeIcon from '@mui/icons-material/DarkMode';
+import LanguageIcon from '@mui/icons-material/Language';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import CircleIcon from '@mui/icons-material/Circle';
+import PersonIcon from '@mui/icons-material/Person';
+import SettingsIcon from '@mui/icons-material/Settings';
+import LogoutIcon from '@mui/icons-material/Logout';
 
 // ─── Breadcrumb Map ──────────────────────────────────────────────────────────
 const BREADCRUMB_MAP = {

@@ -5,12 +5,38 @@
 
 import { useState, useEffect, useCallback } from 'react';
 
-
-
-
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import api from 'services/api';
+import {
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Grid,
+  IconButton,
+  LinearProgress,
+  Paper,
+  Stack,
+  Tab,
+  Tabs,
+  Typography
+} from '@mui/material';
+import StarsIcon from '@mui/icons-material/Stars';
+import BadgeIcon from '@mui/icons-material/Badge';
+import LeaderboardIcon from '@mui/icons-material/Leaderboard';
+import HistoryIcon from '@mui/icons-material/History';
+import LockIcon from '@mui/icons-material/Lock';
+import RedeemIcon from '@mui/icons-material/Redeem';
+import CheckIcon from '@mui/icons-material/Check';
+import CloseIcon from '@mui/icons-material/Close';
 
 const levelColors = {
   مبتدئ: '#95a5a6',

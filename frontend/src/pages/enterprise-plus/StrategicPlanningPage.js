@@ -4,12 +4,41 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 
-
 import { alpha } from '@mui/material/styles';
-
 
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import * as svc from '../../services/enterpriseProPlus.service';
+import {
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  IconButton,
+  LinearProgress,
+  MenuItem,
+  Paper,
+  Stack,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Tabs,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import EditIcon from '@mui/icons-material/Edit';
+import TimelineIcon from '@mui/icons-material/Timeline';
+import CloseIcon from '@mui/icons-material/Close';
 
 const PERSPECTIVES = {
   financial: { label: 'مالي', color: '#2e7d32' },

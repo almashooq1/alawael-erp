@@ -8,14 +8,45 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-
-
-
-
 import { gradients, brandColors } from 'theme/palette';
 import studentManagementService from 'services/studentManagementService';
 import { useAuth } from 'contexts/AuthContext';
 import logger from 'utils/logger';
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Divider,
+  Grid,
+  LinearProgress,
+  MenuItem,
+  Paper,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import PrintIcon from '@mui/icons-material/Print';
+import GroupIcon from '@mui/icons-material/Group';
+import EventAvailableIcon from '@mui/icons-material/EventAvailable';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import SchoolIcon from '@mui/icons-material/School';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import WarningIcon from '@mui/icons-material/Warning';
+import AccessibleIcon from '@mui/icons-material/Accessible';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 
 const COLORS = ['#4facfe', '#43e97b', '#fa709a', '#fee140', '#a18cd1', '#f093fb', '#4158D0', '#ff6b6b'];
 

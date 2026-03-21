@@ -11,9 +11,60 @@
  * - Saudi SAMA-regulated company integration
  */
 import { useState, useEffect, useCallback } from 'react';
-import { Paper } from '@mui/material';
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  FormControl,
+  Grid,
+  IconButton,
+  InputAdornment,
+  InputLabel,
+  LinearProgress,
+  MenuItem,
+  Paper,
+  Select,
+  Step,
+  StepLabel,
+  Stepper,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  Tabs,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
 
 import insuranceService from '../../services/insurance.service';
+import PolicyIcon from '@mui/icons-material/Policy';
+import CheckIcon from '@mui/icons-material/Check';
+import WarningIcon from '@mui/icons-material/Warning';
+import MoneyIcon from '@mui/icons-material/Money';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import ShieldIcon from '@mui/icons-material/Shield';
+import SearchIcon from '@mui/icons-material/Search';
+import AddIcon from '@mui/icons-material/Add';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import CloseIcon from '@mui/icons-material/Close';
+import { ViewIcon } from 'utils/iconAliases';
 
 /* ─── Constants ──────────────────────────────────────────────────────── */
 const TABS = [

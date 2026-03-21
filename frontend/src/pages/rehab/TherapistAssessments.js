@@ -3,12 +3,40 @@ import {
   Paper,
 } from '@mui/material';
 
-
 import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, statusColors, neutralColors, surfaceColors } from '../../theme/palette';
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  IconButton,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import CategoryIcon from '@mui/icons-material/Category';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { ChartIcon } from 'utils/iconAliases';
 
 const TherapistAssessments = () => {
   const { currentUser } = useAuth();

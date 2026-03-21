@@ -3,10 +3,24 @@
  */
 import { useState, useEffect } from 'react';
 
-
-
-
 import apiClient from '../../services/api';
+import {
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Grid,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import { DocIcon, LeaveIcon } from 'utils/iconAliases';
 
 const PIE_COLORS = ['#1976d2', '#4caf50', '#ff9800', '#f44336', '#9c27b0', '#00bcd4'];
 const leaveStatusLabels = { pending: 'قيد الانتظار', approved: 'معتمدة', rejected: 'مرفوضة' };

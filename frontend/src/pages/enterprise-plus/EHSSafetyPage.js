@@ -4,12 +4,40 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 
-
 import { alpha } from '@mui/material/styles';
-
 
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import * as svc from '../../services/enterpriseProPlus.service';
+import {
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  IconButton,
+  LinearProgress,
+  MenuItem,
+  Paper,
+  Stack,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Tabs,
+  TextField,
+  Typography
+} from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import WorkIcon from '@mui/icons-material/Work';
+import EditIcon from '@mui/icons-material/Edit';
+import CloseIcon from '@mui/icons-material/Close';
 
 const INCIDENT_TYPES = {
   injury: 'إصابة',

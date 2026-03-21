@@ -1,15 +1,31 @@
 import { useState, useEffect, useCallback } from 'react';
 import computeStatusCounts from '../../utils/computeStatusCounts';
 
-
-
-
-
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, chartColors, statusColors, neutralColors, brandColors, progressColors } from '../../theme/palette';
 import logger from '../../utils/logger';
 import beneficiaryService from '../../services/beneficiaryService';
 import { useNavigate } from 'react-router-dom';
+import {
+  Box,
+  Button,
+  Chip,
+  Container,
+  Grid,
+  LinearProgress,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography
+} from '@mui/material';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import PeopleIcon from '@mui/icons-material/People';
+import PendingIcon from '@mui/icons-material/Pending';
+import { ActiveIcon } from 'utils/iconAliases';
 
 /* ──────── ثوابت ──────── */
 const CATEGORY_LABELS = { physical: 'حركية', mental: 'ذهنية', sensory: 'حسية', multiple: 'متعددة', other: 'أخرى' };

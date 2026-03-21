@@ -10,9 +10,43 @@ import {
   alpha,
 } from '@mui/material';
 
-
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import workflowService from '../../services/workflow.service';
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Divider,
+  FormControl,
+  Grid,
+  IconButton,
+  LinearProgress,
+  MenuItem,
+  Paper,
+  Select,
+  Skeleton,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  Typography
+} from '@mui/material';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import CheckIcon from '@mui/icons-material/Check';
+import ScheduleIcon from '@mui/icons-material/Schedule';
+import WarningIcon from '@mui/icons-material/Warning';
+import TimerIcon from '@mui/icons-material/Timer';
+import GroupIcon from '@mui/icons-material/Group';
+import CategoryIcon from '@mui/icons-material/Category';
 
 function KPIStatCard({ title, value, subtitle, icon, color, trend }) {
   return (

@@ -1,11 +1,35 @@
 import { useState, useEffect, useCallback } from 'react';
 
-
-
-
 import { getStatusColor } from 'utils/statusColors';
 import logger from 'utils/logger';
 import { gradients } from 'theme/palette';
+import {
+  Avatar,
+  Badge,
+  Box,
+  Chip,
+  Grid,
+  IconButton,
+  InputAdornment,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  Menu,
+  MenuItem,
+  Paper,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
+import StarIcon from '@mui/icons-material/Star';
+import ArchiveIcon from '@mui/icons-material/Archive';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import DeleteIcon from '@mui/icons-material/Delete';
+import SendIcon from '@mui/icons-material/Send';
+import GroupIcon from '@mui/icons-material/Group';
+import { AttachIcon } from 'utils/iconAliases';
 
 const MessagingPanel = ({
   conversations = [],

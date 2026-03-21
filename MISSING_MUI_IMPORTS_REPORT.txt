@@ -1,0 +1,1811 @@
+# Missing MUI Imports Report
+# Date: 2026-03-21
+# Root cause: commit 4182e7d (unused-imports cleanup removed actually-used MUI imports)
+# Total files affected: 602
+# Total missing import references: 3519
+
+frontend/src/components/CompensationStructureManagement/CompensationForm.jsx
+  Missing: Box
+
+frontend/src/components/CompensationStructureManagement/StructureCard.jsx
+  Missing: Box,CardContent
+
+frontend/src/components/CompensationStructureManagement/index.js
+  Missing: Box,DialogTitle,DialogContent
+
+frontend/src/components/CustomColumnSelector.jsx
+  Missing: FormGroup
+
+frontend/src/components/ExportImportManager.js
+  Missing: Box,CardContent,InputLabel,ListItem,ListItemIcon
+
+frontend/src/components/IncentivesManagement.jsx
+  Missing: Box,DialogTitle,Table,TableBody,TableCell,TableContainer,TableHead,TableRow,Tab
+
+frontend/src/components/Layout/LayoutWithTheme.jsx
+  Missing: List,ListItemIcon,Toolbar
+
+frontend/src/components/Layout/ProHeader.jsx
+  Missing: ListItemText,ListItemIcon,ListItemAvatar
+
+frontend/src/components/Layout/sidebar/SidebarBrand.jsx
+  Missing: Box
+
+frontend/src/components/Media/MediaUploadDialog.jsx
+  Missing: Box,DialogContent,DialogActions,InputLabel
+
+frontend/src/components/Media/MediaViewer.jsx
+  Missing: Box,InputLabel
+
+frontend/src/components/PayrollAnalyticsDashboard.jsx
+  Missing: Box,TableBody,TableCell,TableContainer,TableHead
+
+frontend/src/components/PayrollDashboard.jsx
+  Missing: Box,CardContent,Table,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/components/SmartReportsDashboard.jsx
+  Missing: Box,Card,CardContent,DialogTitle,DialogActions,Table,TableBody,TableHead,Tab
+
+frontend/src/components/StudentReportsAdvancedOptions.js
+  Missing: Box,CardContent,DialogTitle,DialogContent,DialogActions,Tab
+
+frontend/src/components/analytics/AnalyticsDashboard.js
+  Missing: Box,CardContent,Tab,InputLabel,Container
+
+frontend/src/components/analytics/AnalyticsDashboard.jsx
+  Missing: Box,CardContent,Tab,InputLabel
+
+frontend/src/components/common/ConfirmDialog.jsx
+  Missing: DialogContent
+
+frontend/src/components/common/DragDropUpload.js
+  Missing: Box
+
+frontend/src/components/common/FilePreviewDialog.js
+  Missing: Typography
+
+frontend/src/components/communications/AnalyticsDashboard.js
+  Missing: Card,CardContent
+
+frontend/src/components/communications/EmailPanel.js
+  Missing: DialogTitle,DialogContent,DialogActions,InputLabel,List
+
+frontend/src/components/communications/MessagingPanel.js
+  Missing: Box,ListItemAvatar
+
+frontend/src/components/compensation/CompensationFormDialog.jsx
+  Missing: Box
+
+frontend/src/components/compensation/CompensationStructureCard.jsx
+  Missing: Box,CardContent
+
+frontend/src/components/compensation/CompensationStructureManagement.jsx
+  Missing: Box,DialogTitle,DialogContent
+
+frontend/src/components/dashboard/ActivityFeed.jsx
+  Missing: Box,Tab,ListItemAvatar
+
+frontend/src/components/dashboard/AdvancedDashboard/DashboardStatusBanners.jsx
+  Missing: Box
+
+frontend/src/components/dashboard/AdvancedDashboard/ProDashboardLayout.jsx
+  Missing: Box
+
+frontend/src/components/dashboard/ClinicalOverview.jsx
+  Missing: Box
+
+frontend/src/components/dashboard/DashboardCharts.jsx
+  Missing: Box
+
+frontend/src/components/dashboard/HROverview.jsx
+  Missing: Box
+
+frontend/src/components/dashboard/ModulesSummary.jsx
+  Missing: Box
+
+frontend/src/components/dashboard/OperationsOverview.jsx
+  Missing: Box
+
+frontend/src/components/dashboard/SystemHealth.jsx
+  Missing: Box
+
+frontend/src/components/dashboard/WelcomeHeader.jsx
+  Missing: Box
+
+frontend/src/components/dashboard/pro/AdvancedAnalyticsPanel.jsx
+  Missing: Box
+
+frontend/src/components/dashboard/pro/CalendarEventsWidget.jsx
+  Missing: Box
+
+frontend/src/components/dashboard/pro/DashboardCustomizer.jsx
+  Missing: Box,TextField
+
+frontend/src/components/dashboard/pro/NotificationCenter.jsx
+  Missing: Box,Tab,ListItemAvatar
+
+frontend/src/components/dashboard/pro/TaskManagerWidget.jsx
+  Missing: Box,DialogContent,DialogActions
+
+frontend/src/components/dashboard/pro/UserProductivityWidget.jsx
+  Missing: Box
+
+frontend/src/components/dashboard/shared/ModuleKPICard.jsx
+  Missing: Box
+
+frontend/src/components/documents/DocumentListDialogs.jsx
+  Missing: Box,InputLabel
+
+frontend/src/components/documents/DocumentListMenus.jsx
+  Missing: Typography
+
+frontend/src/components/documents/DocumentListTable.jsx
+  Missing: Table,TableBody,TableCell,TableRow
+
+frontend/src/components/documents/DocumentListToolbar.jsx
+  Missing: InputLabel
+
+frontend/src/components/documents/DocumentScanner.js
+  Missing: Box,DialogTitle,InputLabel
+
+frontend/src/components/documents/DocumentUploader.js
+  Missing: Box,DialogTitle,DialogContent,DialogActions,InputLabel
+
+frontend/src/components/messaging/ChatComponent.jsx
+  Missing: Box,ListItemAvatar
+
+frontend/src/components/reports/AdvancedReports.js
+  Missing: CardContent,Table,TableBody,TableCell,TableHead,TableRow,InputLabel
+
+frontend/src/components/reports/AdvancedReports.jsx
+  Missing: Box,Table,TableBody,TableCell,TableHead
+
+frontend/src/components/shared/ChartCard.jsx
+  Missing: Box,CardContent
+
+frontend/src/components/shared/ExportMenu.jsx
+  Missing: ListItemText,ListItemIcon
+
+frontend/src/components/shared/FilterBar.jsx
+  Missing: InputLabel
+
+frontend/src/components/shared/FormDialog.jsx
+  Missing: Box
+
+frontend/src/components/shared/InfoCard.jsx
+  Missing: CardContent
+
+frontend/src/components/shared/PrintLayout.jsx
+  Missing: Box
+
+frontend/src/components/ui/DashboardWidgets.jsx
+  Missing: Box,CardContent,ListItemAvatar
+
+frontend/src/components/ui/LoadingSkeleton.jsx
+  Missing: Box,CardContent
+
+frontend/src/components/ui/ProDataTable.jsx
+  Missing: Box,TableBody,TableCell,TableHead,TableRow,ListItemText
+
+frontend/src/components/ui/ProForm.jsx
+  Missing: Box,InputLabel,FormHelperText
+
+frontend/src/pages/Admin/AdminAuditLogs.js
+  Missing: Box,Card,CardContent,DialogTitle,DialogContent,DialogActions,TableBody,TableCell,TableHead,InputLabel
+
+frontend/src/pages/Admin/AdminClinicManagement.js
+  Missing: Box,Card,CardContent,DialogTitle,DialogContent,DialogActions,Table,TableBody,TableCell,TableContainer,TableHead,InputLabel
+
+frontend/src/pages/Admin/AdminCorrespondence.js
+  Missing: Box,DialogTitle,DialogContent,DialogActions,Table,TableBody,TableCell,TableContainer,TableHead,Tab,InputLabel
+
+frontend/src/pages/Admin/AdminDashboard.js
+  Missing: Box,Card,CardContent,DialogTitle,DialogContent,DialogActions,Table,TableBody,TableCell,TableContainer,TableHead
+
+frontend/src/pages/Admin/AdminDecisionCreate.js
+  Missing: Box,InputLabel,StepLabel
+
+frontend/src/pages/Admin/AdminDecisionDetail.js
+  Missing: Box,Typography,DialogTitle,DialogContent,DialogActions,TableBody,TableCell,TableContainer,TableHead,Tab,List,ListItemIcon
+
+frontend/src/pages/Admin/AdminDecisions.js
+  Missing: Box,DialogTitle,DialogContent,DialogActions,Table,TableBody,TableCell,TableContainer,TableHead,Tab,InputLabel
+
+frontend/src/pages/Admin/AdminDelegations.js
+  Missing: Box,DialogTitle,DialogContent,DialogActions,Table,TableBody,TableCell,TableContainer,TableHead,Tab,InputLabel,Divider
+
+frontend/src/pages/Admin/AdminNotifications.js
+  Missing: Box,Card,CardContent,DialogTitle,DialogContent,DialogActions,TableBody,TableCell,TableHead,InputLabel
+
+frontend/src/pages/Admin/AdminPaymentsBilling.js
+  Missing: Box,Card,CardContent,DialogTitle,DialogContent,DialogActions,TableBody,TableCell,TableHead,InputLabel
+
+frontend/src/pages/Admin/AdminReportsAnalytics.js
+  Missing: Box,Card,CardContent,Table,TableBody,TableCell,TableContainer,TableHead
+
+frontend/src/pages/Admin/AdminSystemSettings.js
+  Missing: Box,CardContent,DialogContent,DialogActions,Tab,InputLabel,List,ListItemIcon
+
+frontend/src/pages/Admin/Administration.js
+  Missing: Box,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/Admin/AdvancedAdminPanel.js
+  Missing: Box,Typography,Card,CardContent,DialogTitle,DialogContent,DialogActions,Table,TableBody,TableCell,TableRow,Tab,InputLabel
+
+frontend/src/pages/Admin/AdvancedAdminPanel.jsx
+  Missing: Box,CardContent,Tab,List,ListItem,ListItemAvatar
+
+frontend/src/pages/Admin/BrandingSettings.jsx
+  Missing: Box,TextField,CardContent,DialogContent,DialogActions,Tab,InputLabel
+
+frontend/src/pages/Admin/ExecutiveDashboard.js
+  Missing: Box,Typography,CardContent
+
+frontend/src/pages/Admin/SecuritySettings.js
+  Missing: Box,DialogContent,TableBody,TableCell,TableHead,TableRow,Tab,ListItemIcon
+
+frontend/src/pages/Admin/SystemAdmin.js
+  Missing: Tab
+
+frontend/src/pages/Admin/SystemAdmin/SystemAdminHeader.jsx
+  Missing: Box
+
+frontend/src/pages/Admin/SystemAdmin/SystemAdminTable.jsx
+  Missing: TableBody,TableHead,TableRow
+
+frontend/src/pages/AdminUsers/UserFormDialog.jsx
+  Missing: DialogTitle,DialogContent,DialogActions,InputLabel
+
+frontend/src/pages/AdminUsers/UsersTable.jsx
+  Missing: Card,Table,TableBody,TableCell,TableContainer,TableHead
+
+frontend/src/pages/AdminUsers/index.js
+  Missing: Box,CardContent,InputLabel
+
+frontend/src/pages/Assets/AssetDashboard.jsx
+  Missing: Box,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/Assets/AssetsList.jsx
+  Missing: Box,Paper,DialogTitle,DialogActions,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/Attendance/AttendanceDashboard.jsx
+  Missing: Box,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/AttendanceReports/AIPredictionDialog.jsx
+  Missing: DialogTitle,DialogActions
+
+frontend/src/pages/AttendanceReports/MeetingDialog.jsx
+  Missing: DialogTitle,DialogActions,InputLabel
+
+frontend/src/pages/AttendanceReports/index.js
+  Missing: Box,Typography,Card,DialogTitle,DialogContent,TableBody,TableCell,TableContainer,TableHead,InputLabel
+
+frontend/src/pages/BIDashboard/BIExecutiveOverview.jsx
+  Missing: Box
+
+frontend/src/pages/BIDashboard/BIFinanceAnalytics.jsx
+  Missing: Box,TableBody,TableCell,TableContainer,TableHead
+
+frontend/src/pages/BIDashboard/BIHRAnalytics.jsx
+  Missing: Box
+
+frontend/src/pages/BIDashboard/BIOperationsAnalytics.jsx
+  Missing: Box
+
+frontend/src/pages/BIDashboard/BIReportBuilder.jsx
+  Missing: Box,Typography,DialogTitle,DialogContent,DialogActions,Table,TableBody,TableCell,TableHead,InputLabel
+
+frontend/src/pages/BIDashboard/BITrendExplorer.jsx
+  Missing: Box,InputLabel
+
+frontend/src/pages/Beneficiaries/BeneficiariesDashboard.jsx
+  Missing: Box,Table,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/Beneficiaries/BeneficiariesDialogs.jsx
+  Missing: DialogTitle,DialogContent,DialogActions,InputLabel,ListItemText,ListItemIcon
+
+frontend/src/pages/Beneficiaries/BeneficiariesManagementPage.jsx
+  Missing: Box,CardContent,InputLabel
+
+frontend/src/pages/Beneficiaries/BeneficiariesRowDetail.jsx
+  Missing: Box
+
+frontend/src/pages/Beneficiaries/BeneficiariesTableBody.jsx
+  Missing: Box,Table,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/Beneficiaries/BeneficiariesToolbar.jsx
+  Missing: Box,CardContent
+
+frontend/src/pages/Beneficiaries/BeneficiaryCard.jsx
+  Missing: Box
+
+frontend/src/pages/ComprehensiveStudentReport/ComprehensiveStudentReport.jsx
+  Missing: Box,CardContent,TableBody,TableCell,TableContainer,TableHead
+
+frontend/src/pages/Contracts/ContractDashboard.jsx
+  Missing: Box
+
+frontend/src/pages/Contracts/ContractsList.jsx
+  Missing: Box,Paper,DialogTitle,DialogActions,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/Crisis/CrisisDashboard.jsx
+  Missing: Box,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/Crisis/CrisisIncidentsList.jsx
+  Missing: Box,Paper,DialogTitle,DialogActions,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/Dashboard/AdvancedDashboardUI.js
+  Missing: Box,CardContent,MenuItem,List
+
+frontend/src/pages/Dashboard/EnhancedAdminDashboard/EnhancedAdminDashboard.jsx
+  Missing: CardContent
+
+frontend/src/pages/Dashboard/EnhancedAdminDashboard/QuickActionsPanel.jsx
+  Missing: CardContent
+
+frontend/src/pages/Dashboard/EnhancedAdminDashboard/RecentActivities.jsx
+  Missing: CardContent,List,ListItemButton,ListItemAvatar
+
+frontend/src/pages/Dashboard/EnhancedAdminDashboard/RevenueChart.jsx
+  Missing: CardContent
+
+frontend/src/pages/Dashboard/EnhancedAdminDashboard/SessionsPieChart.jsx
+  Missing: CardContent
+
+frontend/src/pages/Dashboard/EnhancedAdminDashboard/StatisticsCards.jsx
+  Missing: Box,CardContent
+
+frontend/src/pages/Dashboard/EnhancedAdminDashboard/UpcomingAppointments.jsx
+  Missing: CardContent,List,ListItemAvatar
+
+frontend/src/pages/Dashboard/EnhancedAdminDashboard/WeeklyProgressChart.jsx
+  Missing: CardContent
+
+frontend/src/pages/DisabilityAssessmentScales/AnalyticsTab.jsx
+  Missing: Box,CardContent,InputLabel
+
+frontend/src/pages/DisabilityAssessmentScales/AssessmentDialog.jsx
+  Missing: InputLabel
+
+frontend/src/pages/DisabilityAssessmentScales/BatchAssessmentDialog.jsx
+  Missing: Box,InputLabel
+
+frontend/src/pages/DisabilityAssessmentScales/DetailDialog.jsx
+  Missing: Box
+
+frontend/src/pages/DisabilityAssessmentScales/HistoryDialog.jsx
+  Missing: DialogContent,TableBody,TableCell,TableHead,TableRow,InputLabel
+
+frontend/src/pages/DisabilityAssessmentScales/PageHeader.jsx
+  Missing: Box,Tab
+
+frontend/src/pages/DisabilityAssessmentScales/ProgressDialog.jsx
+  Missing: Box,InputLabel
+
+frontend/src/pages/DisabilityAssessmentScales/RecentResultsTab.jsx
+  Missing: CardContent
+
+frontend/src/pages/DisabilityAssessmentScales/RecommendedScalesDialog.jsx
+  Missing: Box,CardContent,InputLabel
+
+frontend/src/pages/DisabilityAssessmentScales/ScaleCardsTab.jsx
+  Missing: Box
+
+frontend/src/pages/DisabilityAssessmentTests/DetailDialog.jsx
+  Missing: Box,TableBody,TableCell,TableHead
+
+frontend/src/pages/DisabilityAssessmentTests/HistoryDialog.jsx
+  Missing: DialogContent,TableBody,TableCell,TableHead,TableRow,InputLabel
+
+frontend/src/pages/DisabilityAssessmentTests/RecentResults.jsx
+  Missing: CardContent
+
+frontend/src/pages/DisabilityAssessmentTests/TestCards.jsx
+  Missing: Box
+
+frontend/src/pages/DisabilityAssessmentTests/TestWizardDialog.jsx
+  Missing: Box,InputLabel,StepLabel
+
+frontend/src/pages/DisabilityAssessmentTests/index.jsx
+  Missing: Box,Tab
+
+frontend/src/pages/DocumentsMgmt/AnalyticsTab.jsx
+  Missing: Card,CardContent,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/DocumentsMgmt/DashboardTab.jsx
+  Missing: Box,CardContent
+
+frontend/src/pages/DocumentsMgmt/DocumentDialogs.jsx
+  Missing: Typography,DialogTitle,DialogContent,DialogActions,InputLabel
+
+frontend/src/pages/DocumentsMgmt/DocumentsListTab.jsx
+  Missing: Box,Card,CardContent,CardActions,InputLabel
+
+frontend/src/pages/DocumentsMgmt/index.js
+  Missing: Box,Tab
+
+frontend/src/pages/EducationRehab/DataTable.jsx
+  Missing: Table,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/EducationRehab/ItemFormDialog.jsx
+  Missing: DialogTitle,DialogContent,DialogActions,InputLabel
+
+frontend/src/pages/EducationRehab/index.js
+  Missing: Box,Tab
+
+frontend/src/pages/EducationSystem/AcademicYearManagement.js
+  Missing: TableBody,TableCell,TableContainer,TableHead,TableRow,InputLabel,List,ListItemIcon
+
+frontend/src/pages/EducationSystem/ClassroomManagement.js
+  Missing: Table,TableBody,TableCell,TableContainer,TableHead,TableRow,InputLabel
+
+frontend/src/pages/EducationSystem/CurriculumBuilder.js
+  Missing: Box,List,ListItemIcon,AccordionDetails
+
+frontend/src/pages/EducationSystem/EducationSystemDashboard.js
+  Missing: Box
+
+frontend/src/pages/EducationSystem/ExamManagement.js
+  Missing: Box,TableBody,TableCell,TableContainer,TableHead,TableRow,InputLabel,List,ListItemIcon
+
+frontend/src/pages/EducationSystem/GradebookPage.js
+  Missing: Box,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/EducationSystem/SubjectManagement.js
+  Missing: Box,Table,TableBody,TableCell,TableContainer,TableHead,TableRow,InputLabel
+
+frontend/src/pages/EducationSystem/TeacherManagement.js
+  Missing: Box,Typography,DialogActions,Table,TableBody,TableCell,TableContainer,TableHead,TableRow,InputLabel
+
+frontend/src/pages/EducationSystem/TimetableBuilder.js
+  Missing: Box,TableBody,TableContainer,TableHead,TableRow,InputLabel
+
+frontend/src/pages/Employee/EmployeeFormDialog.jsx
+  Missing: Box
+
+frontend/src/pages/Employee/EmployeeProfileView.jsx
+  Missing: Box
+
+frontend/src/pages/Employee/EmployeeTable.jsx
+  Missing: Box,Table,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/EmployeeAffairs/EmployeeAffairsDashboard.jsx
+  Missing: Box,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/Events/EventsDashboard.jsx
+  Missing: Box,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/Events/EventsList.jsx
+  Missing: Box,Typography,DialogTitle,DialogContent,DialogActions,Table,TableBody,TableCell,TableHead,InputLabel
+
+frontend/src/pages/Fleet/Fleet/FleetTable.jsx
+  Missing: TableBody,TableHead
+
+frontend/src/pages/Fleet/FleetDashboard.jsx
+  Missing: Box,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/Fleet/FleetFormDialog.jsx
+  Missing: DialogTitle,DialogContent,DialogActions,InputLabel
+
+frontend/src/pages/Fleet/FleetManagement.js
+  Missing: Box,Tab
+
+frontend/src/pages/Fleet/FleetTable.jsx
+  Missing: Table,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/Fleet/TransportManagement.js
+  Missing: Box,Typography,CardContent,DialogContent,TableBody,TableCell,TableHead,TableRow,Tab,InputLabel
+
+frontend/src/pages/Fleet/VehicleManagement.js
+  Missing: Box,Typography,DialogContent,DialogActions,Table,TableBody,TableCell,TableHead,TableRow,Tab,InputLabel
+
+frontend/src/pages/HRAdvancedDashboard/BottomRow.jsx
+  Missing: Box
+
+frontend/src/pages/HRAdvancedDashboard/KPICard.jsx
+  Missing: Box
+
+frontend/src/pages/HRAdvancedDashboard/index.js
+  Missing: Box
+
+frontend/src/pages/HRInsurance/HRInsuranceDashboard.jsx
+  Missing: Box,DialogTitle,DialogActions,TableBody,TableCell,TableContainer,TableHead,TableRow,Tab,InputLabel,AccordionDetails,ListItemAvatar
+
+frontend/src/pages/HSE/HSEDashboard.jsx
+  Missing: Box
+
+frontend/src/pages/HSE/IncidentsList.jsx
+  Missing: Box,Paper,DialogTitle,DialogActions,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/HelpDesk/HelpDeskDashboard.jsx
+  Missing: Box,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/HelpDesk/TicketsList.jsx
+  Missing: Box,Paper,DialogTitle,DialogActions,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/IntegratedCare/CarePlansDashboard.js
+  Missing: Box,Card,Table,TableBody,TableCell,TableContainer,TableHead,TableRow,Tab,List
+
+frontend/src/pages/IntegratedCare/CreateCarePlan.js
+  Missing: Box,Typography,CardContent,StepLabel
+
+frontend/src/pages/IntegratedCare/RecordSession.js
+  Missing: Box
+
+frontend/src/pages/InternalAudit/AuditDashboard.jsx
+  Missing: Box,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/InternalAudit/AuditFindings.jsx
+  Missing: Box,Paper,DialogTitle,DialogActions,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/InternalAudit/AuditPlansList.jsx
+  Missing: Box,Paper,DialogTitle,DialogActions,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/LeaveManagement/LeaveDashboard.jsx
+  Missing: CardContent,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/LeaveManagement/LeaveDialogs.jsx
+  Missing: Box
+
+frontend/src/pages/LeaveManagement/LeaveTable.jsx
+  Missing: Box,Table,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/LeaveManagement/index.js
+  Missing: Box,Tab
+
+frontend/src/pages/LegalAffairs/LegalCases.jsx
+  Missing: Box,DialogTitle,DialogActions,Table,TableBody,TableCell,TableHead,InputLabel
+
+frontend/src/pages/LegalAffairs/LegalConsultations.jsx
+  Missing: Box,DialogTitle,DialogActions,Table,TableBody,TableCell,TableHead,InputLabel
+
+frontend/src/pages/LegalAffairs/LegalDashboard.jsx
+  Missing: Box,TableBody,TableCell,TableHead
+
+frontend/src/pages/Media/MediaLibrary.jsx
+  Missing: Box,Typography,CardContent,DialogTitle,DialogContent,DialogActions,Tab,InputLabel
+
+frontend/src/pages/Messaging/MessagingDashboard.jsx
+  Missing: Box,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/Montessori/MontessoriDashboard.jsx
+  Missing: Box,ListItemAvatar
+
+frontend/src/pages/Montessori/MontessoriPrograms.jsx
+  Missing: Box,DialogActions
+
+frontend/src/pages/Montessori/MontessoriSessions.jsx
+  Missing: Box,DialogActions,Table,TableBody,TableCell,TableContainer,TableHead,Tab
+
+frontend/src/pages/Montessori/MontessoriStudents.jsx
+  Missing: Box,CardContent,DialogActions,Table,TableBody,TableCell,TableContainer,TableHead,Tab
+
+frontend/src/pages/Montessori/MontessoriTeam.jsx
+  Missing: Box,DialogActions,Table,TableBody,TableCell,TableContainer,TableHead,Tab
+
+frontend/src/pages/Operations/EquipmentManagement.js
+  Missing: Box,Typography,Table,TableBody,TableCell,TableContainer,TableHead,TableRow,InputLabel
+
+frontend/src/pages/Operations/IncidentManagement.js
+  Missing: Box,Typography,Table,TableBody,TableCell,TableContainer,TableHead,TableRow,InputLabel
+
+frontend/src/pages/Operations/InternalAuditPage.js
+  Missing: Box,Typography,Table,TableBody,TableCell,TableContainer,TableHead,TableRow,Tab,InputLabel
+
+frontend/src/pages/Operations/LicenseManagement.js
+  Missing: Box,Typography,Table,TableBody,TableCell,TableContainer,TableHead,TableRow,InputLabel
+
+frontend/src/pages/Operations/MaintenanceDashboard.js
+  Missing: Box,Typography,CardContent,DialogTitle,DialogContent,DialogActions,Table,TableBody,TableCell,TableHead,Tab
+
+frontend/src/pages/Operations/OperationsDashboard.jsx
+  Missing: Box,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/Operations/OperationsDialog.jsx
+  Missing: DialogTitle,DialogContent,DialogActions,InputLabel
+
+frontend/src/pages/Operations/OperationsTable.jsx
+  Missing: Table,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/Operations/RehabCenterLicenses.jsx
+  Missing: Box,Typography,Card,CardContent,DialogContent,DialogActions,TableBody,TableCell,TableContainer,TableHead,TableRow,Tab,InputLabel
+
+frontend/src/pages/Operations/RiskAssessment.js
+  Missing: Box,DialogTitle,DialogContent,DialogActions,Table,TableBody,TableCell,TableHead,Tab
+
+frontend/src/pages/Operations/VisitorRegistry.js
+  Missing: Box,DialogTitle,DialogContent,DialogActions,TableBody,TableCell,TableHead,TableRow,Tab,InputLabel,List,ListItemAvatar
+
+frontend/src/pages/Operations/index.js
+  Missing: Box,Tab
+
+frontend/src/pages/ParentStudentReport/ParentStudentReport.jsx
+  Missing: Box,CardContent
+
+frontend/src/pages/Payroll/PayrollDashboard.jsx
+  Missing: Box,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/Performance/PerformanceDashboard.jsx
+  Missing: CardContent,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/Performance/PerformanceDialog.jsx
+  Missing: InputLabel
+
+frontend/src/pages/Performance/PerformanceHeader.jsx
+  Missing: Box
+
+frontend/src/pages/Performance/PerformanceStatsCards.jsx
+  Missing: Box
+
+frontend/src/pages/Performance/PerformanceTable.jsx
+  Missing: Table,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/Performance/index.js
+  Missing: Tab
+
+frontend/src/pages/PeriodicStudentReport/PeriodicStudentReport.jsx
+  Missing: CardContent,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/Procurement/ProcurementDashboard.jsx
+  Missing: Box
+
+frontend/src/pages/Procurement/PurchaseOrdersList.jsx
+  Missing: Box,Paper,DialogTitle,DialogActions,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/Projects/ProjectDashboard.jsx
+  Missing: Box,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/Projects/ProjectsList.jsx
+  Missing: Box,Paper,DialogTitle,DialogActions,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/PublicRelations/CampaignsList.jsx
+  Missing: Box,DialogTitle,DialogActions,Table,TableBody,TableCell,TableHead,InputLabel
+
+frontend/src/pages/PublicRelations/PRDashboard.jsx
+  Missing: Box,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/Quality/QualityDashboard.jsx
+  Missing: Box,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/QualityCompliance/DataTable.jsx
+  Missing: Table,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/QualityCompliance/FormDialog.jsx
+  Missing: DialogTitle,DialogContent,DialogActions,InputLabel
+
+frontend/src/pages/QualityCompliance/index.js
+  Missing: Box,Tab
+
+frontend/src/pages/Recruitment/JobPostingsList.jsx
+  Missing: Box,Paper,DialogTitle,DialogActions,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/Recruitment/RecruitmentDashboard.jsx
+  Missing: Box,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/Register/Register.js
+  Missing: Box
+
+frontend/src/pages/Register/StepBasicInfo.jsx
+  Missing: Box
+
+frontend/src/pages/Register/StepPassword.jsx
+  Missing: Box
+
+frontend/src/pages/Register/StepRoleSelection.jsx
+  Missing: Box
+
+frontend/src/pages/Register/SuccessView.jsx
+  Missing: Box
+
+frontend/src/pages/Reports/AdvancedReportsPage.jsx
+  Missing: Box,Card,CardContent,DialogTitle,DialogActions,Tab,InputLabel
+
+frontend/src/pages/Reports/ReportsDashboard.jsx
+  Missing: CardContent,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/RiskManagement/RiskDashboard.jsx
+  Missing: Box,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/RiskManagement/RiskRegister.jsx
+  Missing: Box,Typography,DialogTitle,DialogContent,DialogActions,Table,TableBody,TableCell,TableHead,InputLabel
+
+frontend/src/pages/Sessions/DeleteConfirmDialog.jsx
+  Missing: Typography,DialogTitle,DialogContent,DialogActions
+
+frontend/src/pages/Sessions/SessionAnalyticsDashboard.jsx
+  Missing: Box,CardContent,TableBody,TableCell,TableContainer,TableHead,TableRow,Tab
+
+frontend/src/pages/Sessions/SessionCalendarView.jsx
+  Missing: Box,DialogContent
+
+frontend/src/pages/Sessions/SessionsDashboard.jsx
+  Missing: Box,Table,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/Sessions/SessionsTable.jsx
+  Missing: Box,CardContent,Table,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/Sessions/StatCards.jsx
+  Missing: Box
+
+frontend/src/pages/SpecializedRehab/BehaviorManagement.js
+  Missing: Box,CardContent,DialogTitle,DialogActions,Table,TableBody,TableCell,TableHead,Tab,InputLabel
+
+frontend/src/pages/SpecializedRehab/ProgramEnrollment.js
+  Missing: Box,CardContent,DialogTitle,DialogActions,Tab,InputLabel
+
+frontend/src/pages/SpecializedRehab/RehabProgramsLibrary.js
+  Missing: Box
+
+frontend/src/pages/SpecializedRehab/RehabProgressTracking.js
+  Missing: Box,CardContent,Table,TableBody,TableCell,TableContainer,TableHead,Tab,InputLabel
+
+frontend/src/pages/SpecializedRehab/ScaleAdministration.js
+  Missing: Box,CardContent,Table,TableBody,TableCell,TableContainer,TableHead,TableRow,Tab,Step,StepLabel
+
+frontend/src/pages/SpecializedRehab/SpecializedScalesLibrary.js
+  Missing: Box,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/StrategicPlanning/StrategicDashboard.jsx
+  Missing: Box,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/StudentComparisonReport/StudentComparisonReport.jsx
+  Missing: CardContent,TableBody,TableContainer,TableHead,TableRow
+
+frontend/src/pages/StudentManagement/StudentManagementList/DeleteStudentDialog.jsx
+  Missing: DialogContent,DialogActions
+
+frontend/src/pages/StudentManagement/StudentManagementList/StudentManagementList.jsx
+  Missing: Box
+
+frontend/src/pages/StudentManagement/StudentManagementList/StudentStatsCards.jsx
+  Missing: Box
+
+frontend/src/pages/StudentManagement/StudentManagementList/StudentTable.jsx
+  Missing: Box,Table,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/StudentManagement/StudentManagementList/StudentToolbar.jsx
+  Missing: InputLabel
+
+frontend/src/pages/StudentManagement/StudentReportsCenter.jsx
+  Missing: Box,CardContent,DialogTitle,DialogContent,DialogActions,Table,TableBody,TableCell,TableContainer,TableHead,TableRow,Tab,InputLabel
+
+frontend/src/pages/StudentManagement/StudentsDashboard.jsx
+  Missing: Box,Table,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/StudentRegistration/RegistrationSuccess.jsx
+  Missing: Box
+
+frontend/src/pages/StudentRegistration/StudentRegistrationForm.jsx
+  Missing: Box
+
+frontend/src/pages/StudentRegistration/steps/DisabilityStep.jsx
+  Missing: Box,InputLabel
+
+frontend/src/pages/StudentRegistration/steps/GuardianStep.jsx
+  Missing: Box,AccordionDetails
+
+frontend/src/pages/StudentRegistration/steps/MedicalStep.jsx
+  Missing: Box
+
+frontend/src/pages/StudentRegistration/steps/PersonalInfoStep.jsx
+  Missing: Box,InputLabel
+
+frontend/src/pages/StudentRegistration/steps/ProgramsStep.jsx
+  Missing: Box,InputLabel
+
+frontend/src/pages/StudentRegistration/steps/ReviewStep.jsx
+  Missing: Box,CardContent,TableBody,TableCell,TableRow
+
+frontend/src/pages/StudentReports/StudentReportCharts.jsx
+  Missing: CardContent
+
+frontend/src/pages/StudentReports/StudentReportInsights.jsx
+  Missing: CardContent
+
+frontend/src/pages/StudentReports/StudentReports.js
+  Missing: Box,CardContent
+
+frontend/src/pages/StudentReportsCenter/StudentReportsCenter.jsx
+  Missing: Box,DialogContent,DialogActions,ListItemAvatar
+
+frontend/src/pages/SystemAdmin/SystemAdminDialog.jsx
+  Missing: DialogTitle,DialogContent,DialogActions,InputLabel
+
+frontend/src/pages/SystemAdmin/SystemAdminHeader.jsx
+  Missing: Box
+
+frontend/src/pages/SystemAdmin/SystemAdminTable.jsx
+  Missing: Table,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/Training/CoursesList.jsx
+  Missing: Box,Typography,DialogTitle,DialogContent,DialogActions,Table,TableBody,TableCell,TableHead,InputLabel
+
+frontend/src/pages/Training/TrainingDashboard.jsx
+  Missing: Box,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/Training/TrainingPlans.jsx
+  Missing: Box,DialogTitle,DialogActions,Table,TableBody,TableCell,TableHead,InputLabel
+
+frontend/src/pages/Warehouse/WarehouseDashboard.jsx
+  Missing: Box,TableBody,TableCell,TableHead
+
+frontend/src/pages/Warehouse/WarehouseList.jsx
+  Missing: Box,DialogTitle,DialogActions,Table,TableBody,TableCell,TableHead,InputLabel
+
+frontend/src/pages/Warehouse/WarehouseTransactions.jsx
+  Missing: Box,TableBody,TableCell,TableHead,InputLabel
+
+frontend/src/pages/admin-communications/AdminCommunicationsDashboard.jsx
+  Missing: Box,CardContent,ListItemIcon
+
+frontend/src/pages/admin-communications/ComposeCorrespondence.jsx
+  Missing: Box,CardContent,InputLabel,ListItemIcon,StepLabel
+
+frontend/src/pages/admin-communications/CorrespondenceDetail.jsx
+  Missing: Box,Card,CardContent,DialogTitle,DialogContent,DialogActions,Tab,InputLabel,List,ListItemIcon
+
+frontend/src/pages/admin-communications/CorrespondenceList.jsx
+  Missing: Box,TableBody,TableCell,TableContainer,TableHead,TableRow,InputLabel
+
+frontend/src/pages/admin-communications/ExternalEntitiesManagement.jsx
+  Missing: Box,DialogTitle,DialogContent,DialogActions,Table,TableBody,TableCell,TableHead,TableRow,Tab,InputLabel
+
+frontend/src/pages/admin-communications/TemplatesManagement.jsx
+  Missing: Box,DialogTitle,DialogContent,DialogActions,InputLabel
+
+frontend/src/pages/ar-rehab/ARRehabDashboard.jsx
+  Missing: Box,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/blockchain/BlockchainDashboard.jsx
+  Missing: Box,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/cms/CMSDashboard.jsx
+  Missing: Typography,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/common/AIAnalyticsDashboard.js
+  Missing: Box,Typography,Card,CardContent
+
+frontend/src/pages/common/Activity.js
+  Missing: Box,List,ListItemIcon
+
+frontend/src/pages/common/AdvancedTickets.js
+  Missing: Box,Card,DialogTitle,DialogContent,DialogActions,Table,TableBody,TableCell,TableHead,TableRow,Tab
+
+frontend/src/pages/common/AppointmentsScheduling.js
+  Missing: Box,Typography,Card,CardContent,DialogTitle,DialogActions,Table,TableBody,TableCell,TableContainer,TableHead,InputLabel
+
+frontend/src/pages/common/ComplaintsManagement.js
+  Missing: Box,Typography,DialogTitle,DialogContent,DialogActions,Table,TableBody,TableCell,TableHead,Tab
+
+frontend/src/pages/common/FormTemplates.js
+  Missing: Box,Table,TableBody,TableCell,TableHead,Tab,InputLabel,StepLabel
+
+frontend/src/pages/common/Friends.js
+  Missing: Box
+
+frontend/src/pages/common/GroupDetail.js
+  Missing: Box,Card,List,ListItemAvatar
+
+frontend/src/pages/common/Groups.js
+  Missing: Box,DialogTitle,DialogContent,Avatar,ListItemAvatar
+
+frontend/src/pages/common/Home.js
+  Missing: Box,CardContent
+
+frontend/src/pages/common/KnowledgeCenter.js
+  Missing: Box,Typography,DialogTitle,DialogContent,DialogActions,Tab,List,ListItemAvatar
+
+frontend/src/pages/common/MeetingsManagement.js
+  Missing: Box,Card,DialogTitle,DialogContent,DialogActions,Table,TableBody,TableCell,TableHead,TableRow,Tab
+
+frontend/src/pages/common/ModulePage.js
+  Missing: Box,CardContent
+
+frontend/src/pages/common/MonitoringDashboard.jsx
+  Missing: Box
+
+frontend/src/pages/common/ParentDashboard.js
+  Missing: Box,Card,CardContent,DialogTitle,DialogContent,DialogActions,Table,TableBody,TableCell,TableContainer,TableHead,Tab
+
+frontend/src/pages/common/ParentMessages.js
+  Missing: Box,Typography,Card,CardContent,DialogTitle,DialogActions,Tab
+
+frontend/src/pages/common/Profile.js
+  Missing: Box
+
+frontend/src/pages/common/ProjectManagementDashboard.js
+  Missing: Box,Typography,DialogTitle,DialogContent,DialogActions,InputLabel
+
+frontend/src/pages/common/QualityDashboard.jsx
+  Missing: Box,Table,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/common/SimpleDashboard.jsx
+  Missing: Box,ListItem,ListItemIcon
+
+frontend/src/pages/common/SmartNotificationCenter.js
+  Missing: Box,Paper,Card,DialogTitle,DialogContent,DialogActions,Tab,List,ListItem,ListItemIcon
+
+frontend/src/pages/common/TaskManagement.js
+  Missing: Box,Typography,DialogTitle,DialogContent,DialogActions,Table,TableBody,TableCell,TableHead,Tab
+
+frontend/src/pages/communications/CommunicationFilters.jsx
+  Missing: InputLabel
+
+frontend/src/pages/communications/CommunicationList.jsx
+  Missing: Card,List,ListItem,ListItemAvatar
+
+frontend/src/pages/communications/CommunicationStatsCards.jsx
+  Missing: CardContent
+
+frontend/src/pages/communications/Communications.js
+  Missing: Box,Card,CardContent,Tab
+
+frontend/src/pages/communications/MessagingPage.js
+  Missing: Box
+
+frontend/src/pages/communications/NewCommunicationDialog.jsx
+  Missing: DialogTitle,DialogContent,DialogActions,InputLabel
+
+frontend/src/pages/community/CommunityDashboard.jsx
+  Missing: Typography,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/complaints/ComplaintsDashboard.jsx
+  Missing: CardContent,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/complaints/ComplaintsManagementPage.js
+  Missing: Box,DialogTitle,DialogActions,TableBody,TableCell,TableHead,Tab,StepLabel
+
+frontend/src/pages/crm/CRMDashboard.js
+  Missing: Box,CardContent,Tab,List,ListItemAvatar
+
+frontend/src/pages/crm/CRMReports.js
+  Missing: Box,CardContent,TableBody,TableCell,TableContainer,TableHead,TableRow,Tab
+
+frontend/src/pages/crm/ContactsManagement.js
+  Missing: Box,Typography,DialogTitle,DialogContent,DialogActions,Table,TableBody,TableCell,TableHead
+
+frontend/src/pages/crm/LeadsManagement.js
+  Missing: Box,Typography,DialogTitle,DialogContent,DialogActions,Table,TableBody,TableCell,TableHead,Tab
+
+frontend/src/pages/disabilityAuthority/DisabilityAuthorityDashboard.jsx
+  Missing: Box,Card,CardContent,TableBody,TableCell,TableContainer,TableHead,TableRow,Tab,AccordionDetails
+
+frontend/src/pages/documents/DocumentAdvancedPage.js
+  Missing: Box,Typography,Card,CardContent,DialogTitle,DialogContent,DialogActions,Table,TableBody,TableCell,TableHead,TableRow,Tab,InputLabel,List,ListItemIcon
+
+frontend/src/pages/documents/Documents.js
+  Missing: Box,CardContent,Tab,InputLabel
+
+frontend/src/pages/documents/DocumentsDashboard.jsx
+  Missing: Box,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/documents/DocumentsMgmt.js
+  Missing: Box,Typography,DialogTitle,DialogContent,DialogActions,TableBody,TableCell,TableContainer,TableHead,TableRow,Tab,InputLabel
+
+frontend/src/pages/documents/DocumentsReports.js
+  Missing: Box,Typography,Card,CardContent,DialogTitle,DialogActions,Tab,ListItemIcon
+
+frontend/src/pages/documents/ElectronicArchiving.js
+  Missing: Box,Typography,CardContent,DialogContent,TableBody,TableCell,TableHead,TableRow,Tab,InputLabel
+
+frontend/src/pages/documents/SmartDocumentsPage.js
+  Missing: Box,Typography,DialogTitle,DialogContent,DialogActions,TableBody,TableCell,TableHead,TableRow,Tab,InputLabel
+
+frontend/src/pages/e-signature/ESignature.js
+  Missing: Box,Table,TableBody,TableCell,TableHead,TableRow,Tab
+
+frontend/src/pages/e-signature/ESignatureCreate.js
+  Missing: Typography,CardContent,StepLabel
+
+frontend/src/pages/e-signature/ESignatureDashboard.jsx
+  Missing: CardContent,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/e-signature/ESignatureSigning.js
+  Missing: Box,CardContent,DialogActions,Tab,Avatar,List,ListItemAvatar
+
+frontend/src/pages/e-signature/ESignatureTemplates.js
+  Missing: Box
+
+frontend/src/pages/e-signature/ESignatureVerify.js
+  Missing: Box,CardContent,List,ListItemAvatar
+
+frontend/src/pages/e-signature/EStamp.js
+  Missing: Box,Table,TableBody,TableCell,TableContainer,TableHead,Tab
+
+frontend/src/pages/e-signature/EStampApply.js
+  Missing: Box,StepLabel
+
+frontend/src/pages/e-signature/EStampCreate.js
+  Missing: Box,StepLabel
+
+frontend/src/pages/e-signature/EStampDetail.js
+  Missing: Box,DialogTitle,DialogContent,DialogActions,Table,TableBody,TableCell,TableContainer,TableHead,Tab,List,ListItemIcon
+
+frontend/src/pages/e-signature/EStampVerify.js
+  Missing: Box
+
+frontend/src/pages/earlyIntervention/EarlyInterventionDashboard.jsx
+  Missing: Box,Typography,CardContent,DialogTitle,DialogContent,DialogActions,TableBody,TableCell,TableHead,TableRow,Tab
+
+frontend/src/pages/ecommerce/ECommerceDashboard.jsx
+  Missing: Typography,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/education/ChildrenProgress.js
+  Missing: Box,Typography,Card,CardContent,Table,TableBody,TableCell,TableContainer,TableHead,Tab
+
+frontend/src/pages/education/CourseViewer.js
+  Missing: Box,Typography,List,ListItemIcon
+
+frontend/src/pages/education/ELearningDashboard.js
+  Missing: CardActions,DialogTitle,DialogContent,DialogActions,Tab
+
+frontend/src/pages/education/StudentAnnouncements.js
+  Missing: Box,CardContent,AccordionDetails
+
+frontend/src/pages/education/StudentAssignments.js
+  Missing: Box,CardContent,DialogActions,Tab
+
+frontend/src/pages/education/StudentAttendance.js
+  Missing: Box,Card,CardContent,Table,TableBody,TableCell,TableContainer,TableHead
+
+frontend/src/pages/education/StudentCertificates.js
+  Missing: Box,CardContent,DialogTitle,DialogActions,Tab
+
+frontend/src/pages/education/StudentComplaints.js
+  Missing: Box,CardContent,DialogTitle,DialogActions,Tab,List,ListItemAvatar
+
+frontend/src/pages/education/StudentELearning.js
+  Missing: Box,CardContent,DialogActions,Tab,List
+
+frontend/src/pages/education/StudentEvents.js
+  Missing: Box,CardContent,DialogTitle,DialogContent,DialogActions,Tab
+
+frontend/src/pages/education/StudentGrades.js
+  Missing: Box,CardContent,TableBody,TableCell,TableContainer,TableHead,AccordionDetails
+
+frontend/src/pages/education/StudentHealthTracker.js
+  Missing: Box,Typography,CardContent,DialogTitle,DialogActions,Tab
+
+frontend/src/pages/education/StudentLibrary.js
+  Missing: Box,CardContent,CardActions,DialogActions,ListItem,ListItemIcon
+
+frontend/src/pages/education/StudentMessages.js
+  Missing: Box,DialogActions,ListItemAvatar
+
+frontend/src/pages/education/StudentPortal.js
+  Missing: CardContent
+
+frontend/src/pages/education/StudentRewardsStore.js
+  Missing: Box,Typography,CardContent,DialogTitle,DialogContent,DialogActions,Tab
+
+frontend/src/pages/education/StudentSchedule.js
+  Missing: Box,CardContent,Table,TableBody,TableCell,TableRow
+
+frontend/src/pages/electronic-directives/ComposeDirective.jsx
+  Missing: Box,CardContent,InputLabel
+
+frontend/src/pages/electronic-directives/DirectiveDetail.jsx
+  Missing: Box,DialogTitle,DialogContent,DialogActions,TableBody,TableCell,TableContainer,TableHead,TableRow,ListItemIcon
+
+frontend/src/pages/electronic-directives/DirectivesDashboard.jsx
+  Missing: Box,CardContent,ListItemIcon
+
+frontend/src/pages/electronic-directives/DirectivesList.jsx
+  Missing: Table,TableBody,TableCell,TableHead,TableRow,InputLabel
+
+frontend/src/pages/employee-portal/DocumentsTab.jsx
+  Missing: Box,CardContent,CardActions
+
+frontend/src/pages/employee-portal/LeavesTab.jsx
+  Missing: Box,CardContent,Table,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/employee-portal/PayslipsTab.jsx
+  Missing: Box,Table,TableBody,TableCell,TableHead
+
+frontend/src/pages/employee-portal/ProfileTab.jsx
+  Missing: Box,CardContent
+
+frontend/src/pages/employee-portal/RequestsTab.jsx
+  Missing: Box,Table,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/enterprise-plus/EHSSafetyPage.js
+  Missing: Box,CardContent,DialogTitle,TableBody,TableCell,TableHead,TableRow,Tab
+
+frontend/src/pages/enterprise-plus/FacilityManagementPage.js
+  Missing: Box,CardContent,DialogTitle,TableBody,TableCell,TableHead,TableRow,Tab
+
+frontend/src/pages/enterprise-plus/ITSMPage.js
+  Missing: Box,CardContent,DialogTitle,TableBody,TableCell,TableHead,TableRow,Tab
+
+frontend/src/pages/enterprise-plus/StrategicPlanningPage.js
+  Missing: Box,CardContent,DialogTitle,TableBody,TableCell,TableHead,TableRow,Tab
+
+frontend/src/pages/enterprise-plus/TalentAcquisitionPage.js
+  Missing: Box,CardContent,DialogTitle,DialogActions,TableBody,TableCell,TableHead,TableRow,Tab
+
+frontend/src/pages/enterprise-plus/VendorManagementPage.js
+  Missing: Box,CardContent,DialogTitle,TableBody,TableCell,TableHead,TableRow,Tab
+
+frontend/src/pages/enterprise-ultra/BusinessContinuityPage.js
+  Missing: Box,CardContent,DialogTitle,DialogContent,DialogActions,TableBody,TableCell,TableHead,TableRow,Tab
+
+frontend/src/pages/enterprise-ultra/CorporateGovernancePage.js
+  Missing: Box,CardContent,DialogTitle,DialogContent,DialogActions,TableBody,TableCell,TableHead,TableRow,Tab
+
+frontend/src/pages/enterprise-ultra/CustomerExperiencePage.js
+  Missing: Box,CardContent,DialogTitle,DialogContent,DialogActions,TableBody,TableCell,TableHead,TableRow,Tab
+
+frontend/src/pages/enterprise-ultra/DigitalTransformationPage.js
+  Missing: Box,CardContent,DialogTitle,DialogContent,DialogActions,TableBody,TableCell,TableHead,TableRow,Tab
+
+frontend/src/pages/enterprise-ultra/LegalManagementPage.js
+  Missing: Box,CardContent,DialogTitle,DialogContent,DialogActions,TableBody,TableCell,TableHead,TableRow,Tab
+
+frontend/src/pages/enterprise-ultra/SustainabilityPage.js
+  Missing: Box,Typography,CardContent,DialogTitle,DialogContent,DialogActions,TableBody,TableCell,TableHead,TableRow,Tab
+
+frontend/src/pages/enterprise/AuditComplianceHub.js
+  Missing: Box,Card,CardContent,DialogTitle,DialogContent,DialogActions,TableBody,TableCell,TableContainer,TableHead,TableRow,Tab
+
+frontend/src/pages/enterprise/CRMProPage.js
+  Missing: Box,DialogTitle,DialogActions,TableBody,TableCell,TableContainer,TableHead,TableRow,Tab
+
+frontend/src/pages/enterprise/CalendarHubPage.js
+  Missing: Box,Card,CardContent,DialogTitle,DialogActions,Tab,List,ListItemIcon
+
+frontend/src/pages/enterprise/ImportExportHub.jsx
+  Missing: Box,CardContent,Table,TableBody,TableCell,TableContainer,TableHead,TableRow,Tab,InputLabel,Accordion,AccordionDetails,Step,StepLabel
+
+frontend/src/pages/enterprise/ProjectProPage.js
+  Missing: Box,CardContent,DialogTitle,DialogActions,TableBody,TableCell,TableContainer,TableHead,TableRow,Tab
+
+frontend/src/pages/enterprise/ReportBuilderPage.js
+  Missing: Box,CardContent,DialogTitle,DialogActions,TableBody,TableCell,TableContainer,TableHead,TableRow,Tab,Divider
+
+frontend/src/pages/enterprise/WarehouseIntelPage.js
+  Missing: Box,CardContent,DialogTitle,DialogActions,TableBody,TableCell,TableContainer,TableHead,TableRow,Tab,Divider
+
+frontend/src/pages/facility/FacilityDashboard.jsx
+  Missing: CardContent,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/facility/FacilityManagementPage.js
+  Missing: Box,CardContent,DialogTitle,TableBody,TableCell,TableHead,Tab
+
+frontend/src/pages/familySatisfaction/FamilySatisfactionDashboard.jsx
+  Missing: Box,Card,CardContent,TableBody,TableCell,TableContainer,TableHead,TableRow,Tab
+
+frontend/src/pages/finance/AccountReconciliation.js
+  Missing: DialogContent,DialogActions,Table,TableBody,TableContainer,TableHead,TableRow,Tab
+
+frontend/src/pages/finance/AccountingDashboard.js
+  Missing: Box,CardContent,TableBody,TableCell,TableContainer,TableHead
+
+frontend/src/pages/finance/AgedReports.js
+  Missing: Table,TableBody,TableCell,TableContainer,TableHead,Tab
+
+frontend/src/pages/finance/AuditTrail.js
+  Missing: Box,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/finance/BalanceSheet.js
+  Missing: Box,CardContent,TableBody,TableContainer,TableRow
+
+frontend/src/pages/finance/BankAccounts.js
+  Missing: Box,DialogActions,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/finance/BankGuarantees.js
+  Missing: CardContent,DialogContent,DialogActions,Table,TableBody,TableContainer,TableHead,TableRow,Tab
+
+frontend/src/pages/finance/BankReconciliation.js
+  Missing: Box,DialogActions,Table,TableBody,TableCell,TableContainer,TableHead
+
+frontend/src/pages/finance/BudgetManagement.js
+  Missing: Box,DialogTitle,DialogContent,DialogActions,Table,TableBody,TableCell,TableHead,Tab
+
+frontend/src/pages/finance/BudgetVariance.js
+  Missing: Box,TableBody,TableCell,TableContainer,TableHead
+
+frontend/src/pages/finance/CashFlowManagement.js
+  Missing: Box,CardContent,TableBody,TableContainer,TableHead,TableRow
+
+frontend/src/pages/finance/ChartOfAccounts.js
+  Missing: Box,Table,TableBody,TableCell,TableContainer,TableHead,TableRow,InputLabel
+
+frontend/src/pages/finance/ChequeManagement.js
+  Missing: Box,DialogContent,TableBody,TableCell,TableContainer,TableHead,TableRow,Tab
+
+frontend/src/pages/finance/CompanyLoans.js
+  Missing: Box,Typography,CardContent,DialogContent,DialogActions,Table,TableBody,TableContainer,TableHead,TableRow,Tab
+
+frontend/src/pages/finance/ComplianceControls.js
+  Missing: DialogContent,DialogActions,Table,TableBody,TableContainer,TableHead,TableRow,Tab
+
+frontend/src/pages/finance/CostAllocation.js
+  Missing: Box,DialogContent,DialogActions,Table,TableBody,TableContainer,TableHead,TableRow,Tab
+
+frontend/src/pages/finance/CostCenters.js
+  Missing: Box,Table,TableBody,TableCell,TableContainer,TableHead,TableRow,InputLabel
+
+frontend/src/pages/finance/CreditDebitNotes.js
+  Missing: Box,DialogActions,Table,TableBody,TableCell,TableContainer,TableHead,Tab
+
+frontend/src/pages/finance/CreditManagement.js
+  Missing: Typography,DialogContent,DialogActions,Table,TableBody,TableContainer,TableHead,TableRow,Tab
+
+frontend/src/pages/finance/CustomerStatements.js
+  Missing: Box,TableBody,TableCell,TableContainer,TableHead
+
+frontend/src/pages/finance/DebtManagement.js
+  Missing: Box,CardContent,DialogContent,DialogActions,Table,TableBody,TableContainer,TableHead,TableRow,Tab
+
+frontend/src/pages/finance/DepreciationSchedule.js
+  Missing: Box,TableBody,TableCell,TableContainer,TableHead
+
+frontend/src/pages/finance/DonationsDashboard.js
+  Missing: Box,Typography,DialogTitle,DialogContent,DialogActions,Table,TableBody,TableCell,TableHead,Tab
+
+frontend/src/pages/finance/DunningManagement.js
+  Missing: Typography,DialogContent,DialogActions,Table,TableBody,TableContainer,TableHead,TableRow,Tab
+
+frontend/src/pages/finance/EInvoicing.js
+  Missing: Box,Card,DialogTitle,DialogContent,DialogActions,Table,TableBody,TableCell,TableHead,TableRow,Tab
+
+frontend/src/pages/finance/EmployeeLoans.js
+  Missing: Box,Typography,DialogActions,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/finance/ExecutiveSummary.js
+  Missing: Box,CardContent
+
+frontend/src/pages/finance/ExpenseManagement.js
+  Missing: Box,CardContent,Table,TableBody,TableCell,TableContainer,TableHead,TableRow,InputLabel
+
+frontend/src/pages/finance/FinancialApprovals.js
+  Missing: Box,Typography,CardContent,DialogContent,DialogActions,Table,TableBody,TableContainer,TableHead,TableRow,Tab,StepLabel
+
+frontend/src/pages/finance/FinancialAuditManager.js
+  Missing: Box,DialogContent,DialogActions,Table,TableBody,TableContainer,TableHead,TableRow,Tab
+
+frontend/src/pages/finance/FinancialConsolidation.js
+  Missing: Box,Typography,CardContent,DialogContent,DialogActions,Table,TableBody,TableContainer,TableHead,TableRow,Tab
+
+frontend/src/pages/finance/FinancialDashboardBuilder.js
+  Missing: Box,DialogContent,DialogActions,Tab
+
+frontend/src/pages/finance/FinancialPlanning.js
+  Missing: Typography,CardContent,DialogContent,DialogActions,Table,TableBody,TableContainer,TableHead,TableRow,Tab
+
+frontend/src/pages/finance/FinancialReports.js
+  Missing: Box,CardContent,TableBody,TableContainer,Tab
+
+frontend/src/pages/finance/FinancialSettings.js
+  Missing: Box,Tab
+
+frontend/src/pages/finance/FinancialWorkflow.js
+  Missing: Box,DialogContent,DialogActions,Table,TableBody,TableContainer,TableHead,TableRow,Tab
+
+frontend/src/pages/finance/FiscalPeriods.js
+  Missing: Box,Table,TableBody,TableCell,TableContainer,TableHead
+
+frontend/src/pages/finance/FixedAssets.js
+  Missing: Box,Typography,Table,TableBody,TableCell,TableContainer,TableHead,TableRow,Tab,InputLabel
+
+frontend/src/pages/finance/GeneralLedger.js
+  Missing: Box,CardContent,Table,TableBody,TableCell,TableContainer,TableHead,TableRow,InputLabel
+
+frontend/src/pages/finance/IntercompanySettlement.js
+  Missing: DialogContent,DialogActions,Table,TableBody,TableContainer,TableHead,TableRow,Tab
+
+frontend/src/pages/finance/InvestmentPortfolio.js
+  Missing: Typography,CardContent,DialogContent,DialogActions,Table,TableBody,TableContainer,TableHead,TableRow,Tab
+
+frontend/src/pages/finance/InvoiceManagement.js
+  Missing: Box,Typography,Table,TableBody,TableCell,TableContainer,TableHead,TableRow,Tab
+
+frontend/src/pages/finance/JournalEntries.js
+  Missing: Box,Table,TableBody,TableCell,TableContainer,TableHead,TableRow,InputLabel
+
+frontend/src/pages/finance/LeaseAccounting.js
+  Missing: Typography,CardContent,DialogContent,DialogActions,Table,TableBody,TableContainer,TableHead,TableRow,Tab
+
+frontend/src/pages/finance/MultiCurrency.js
+  Missing: Box,DialogContent,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/finance/PaymentDashboard.js
+  Missing: Box,CardContent,Table,TableBody,TableCell,TableHead,TableRow,Tab,InputLabel
+
+frontend/src/pages/finance/PaymentVouchers.js
+  Missing: Box,DialogContent,TableBody,TableCell,TableContainer,TableHead,TableRow,Tab
+
+frontend/src/pages/finance/PaymentsHistory.js
+  Missing: Box,Typography,Card,CardContent,DialogTitle,DialogActions,Table,TableBody,TableCell,TableContainer,TableHead,TableRow,Tab,InputLabel
+
+frontend/src/pages/finance/PeriodClosing.js
+  Missing: Box,DialogContent,DialogActions,Table,TableBody,TableContainer,TableHead,TableRow
+
+frontend/src/pages/finance/PettyCashManagement.js
+  Missing: Box,CardContent,DialogActions,TableBody,TableCell,TableContainer,TableHead,TableRow,Tab
+
+frontend/src/pages/finance/ProfitLoss.js
+  Missing: Box,CardContent,TableBody,TableContainer,TableHead,TableRow
+
+frontend/src/pages/finance/RecurringTransactions.js
+  Missing: Box,DialogActions,Table,TableBody,TableCell,TableContainer,TableHead
+
+frontend/src/pages/finance/RevenueRecognition.js
+  Missing: Typography,CardContent,DialogContent,DialogActions,Table,TableBody,TableContainer,TableHead,TableRow,Tab
+
+frontend/src/pages/finance/RiskManagement.js
+  Missing: Box,CardContent,DialogContent,DialogActions,Table,TableBody,TableContainer,TableHead,TableRow,Tab
+
+frontend/src/pages/finance/TaxCalendar.js
+  Missing: Box,DialogContent,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/finance/TaxFilingTracker.js
+  Missing: DialogContent,DialogActions,Table,TableBody,TableContainer,TableHead,TableRow,Tab
+
+frontend/src/pages/finance/TaxPlanning.js
+  Missing: Box,DialogContent,DialogActions,Table,TableBody,TableContainer,TableHead,TableRow,Tab
+
+frontend/src/pages/finance/TreasuryForecasting.js
+  Missing: DialogContent,DialogActions,Table,TableBody,TableContainer,TableHead,TableRow,Tab
+
+frontend/src/pages/finance/TreasuryManagement.js
+  Missing: Box,CardContent,DialogContent,DialogActions,Table,TableBody,TableContainer,TableHead,TableRow,Tab
+
+frontend/src/pages/finance/TrialBalance.js
+  Missing: Box,TableBody,TableCell,TableContainer,TableHead,IconButton
+
+frontend/src/pages/finance/VATZakatManagement.js
+  Missing: Box,Typography,CardContent,Table,TableBody,TableCell,TableContainer,TableHead,TableRow,Tab
+
+frontend/src/pages/finance/VendorPayments.js
+  Missing: Box,CardContent,TableBody,TableCell,TableContainer,TableHead,TableRow,Tab
+
+frontend/src/pages/finance/WithholdingTaxPage.js
+  Missing: Box,DialogContent,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/gosi/GosiDashboard.jsx
+  Missing: Box,Typography,Card,CardContent,DialogTitle,DialogContent,DialogActions,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/gps-tracking/GPSTrackingDashboard.jsx
+  Missing: Typography,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/guardian/GuardianPortalDashboard.jsx
+  Missing: Box,Card,CardContent,TableBody,TableCell,TableHead,TableRow,Tab,IconButton,List,ListItem,ListItemAvatar
+
+frontend/src/pages/hr/AttendanceManagement.jsx
+  Missing: Box,Table,TableBody,TableCell,TableContainer,TableHead,TableRow,Tab
+
+frontend/src/pages/hr/AttendanceReports.js
+  Missing: Box,Table,TableBody,TableCell,TableHead,TableRow,Tab
+
+frontend/src/pages/hr/BenefitsManagement.js
+  Missing: Box,Card,CardContent,DialogTitle,DialogContent,DialogActions,TableBody,TableCell,TableHead,TableRow,Tab
+
+frontend/src/pages/hr/ComplaintsManagement.js
+  Missing: Typography,Card,CardContent,DialogTitle,DialogContent,DialogActions,Table,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/hr/ContractManagement.js
+  Missing: Box,Card,CardContent,DialogTitle,DialogContent,DialogActions,TableBody,TableCell,TableHead,TableRow,Tab
+
+frontend/src/pages/hr/CustodyManagement.js
+  Missing: Typography,DialogTitle,DialogContent,DialogActions,Table,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/hr/DisciplinaryActionsManagement.js
+  Missing: Typography,DialogTitle,DialogContent,DialogActions,Table,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/hr/Employee/EmployeeFormDialog.jsx
+  Missing: Box
+
+frontend/src/pages/hr/Employee/EmployeeTable.jsx
+  Missing: Box,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/hr/EmployeeClearanceManagement.js
+  Missing: Box,Card,CardContent,DialogTitle,DialogContent,DialogActions,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/hr/EmployeeLettersManagement.js
+  Missing: Typography,Card,DialogTitle,DialogContent,DialogActions,Table,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/hr/EmployeeLoansManagement.js
+  Missing: Box,Typography,Card,CardContent,DialogTitle,DialogContent,DialogActions,Table,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/hr/EmployeeManagement.jsx
+  Missing: Box,DialogContent
+
+frontend/src/pages/hr/EmployeePortal.js
+  Missing: Box,Tab
+
+frontend/src/pages/hr/EmployeeWarningsManagement.js
+  Missing: Box,Card,CardContent,DialogTitle,DialogContent,DialogActions,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/hr/EndOfServiceBenefits.js
+  Missing: Box,CardContent,Table,TableBody,TableCell,TableContainer,TableHead,TableRow,InputLabel
+
+frontend/src/pages/hr/ExitReentryVisaManagement.js
+  Missing: Box,Card,CardContent,DialogTitle,DialogContent,DialogActions,TableBody,TableCell,TableHead,TableRow,Tab
+
+frontend/src/pages/hr/HousingTransportationManagement.js
+  Missing: CardContent,DialogTitle,DialogContent,DialogActions,Table,TableBody,TableCell,TableHead,TableRow,Tab
+
+frontend/src/pages/hr/InsuranceManagement.js
+  Missing: Box,Typography,Card,CardContent,DialogTitle,DialogContent,DialogActions,TableBody,TableCell,TableContainer,TableHead,TableRow,Tab,InputLabel,StepLabel
+
+frontend/src/pages/hr/KPIDashboard.js
+  Missing: Box,DialogTitle,DialogContent,DialogActions,Table,TableBody,TableCell,TableHead,Tab
+
+frontend/src/pages/hr/OrganizationChart.jsx
+  Missing: Box,CardContent,TableBody,TableHead,Tab
+
+frontend/src/pages/hr/OvertimeManagement.js
+  Missing: Typography,DialogTitle,DialogContent,DialogActions,Table,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/hr/PayrollProcessing.js
+  Missing: Box,CardContent,Table,TableBody,TableCell,TableContainer,TableHead,InputLabel,StepLabel
+
+frontend/src/pages/hr/PayrollReports.js
+  Missing: Box,CardContent,TableBody,TableCell,TableContainer,TableHead,Tab,InputLabel
+
+frontend/src/pages/hr/PayrollSettings.js
+  Missing: Box,CardContent,TableBody,TableCell
+
+frontend/src/pages/hr/Performance/PerformanceDialog.jsx
+  Missing: InputLabel
+
+frontend/src/pages/hr/Performance/PerformanceHeader.jsx
+  Missing: Box
+
+frontend/src/pages/hr/Performance/PerformanceStatsCards.jsx
+  Missing: Box
+
+frontend/src/pages/hr/Performance/PerformanceTable.jsx
+  Missing: Table,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/hr/PerformanceEvaluation.js
+  Missing: Tab
+
+frontend/src/pages/hr/PromotionsTransfersManagement.js
+  Missing: Typography,DialogTitle,DialogContent,DialogActions,Table,TableBody,TableCell,TableHead,TableRow,StepLabel
+
+frontend/src/pages/hr/RecruitmentDashboard.js
+  Missing: Box,Typography,DialogTitle,DialogContent,DialogActions,Table,TableBody,TableCell,TableHead,Tab
+
+frontend/src/pages/hr/RewardsManagement.js
+  Missing: Typography,DialogTitle,DialogContent,DialogActions,Table,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/hr/SalarySlip.js
+  Missing: Box,TableBody,TableCell,TableRow
+
+frontend/src/pages/hr/ShiftManagement.js
+  Missing: Box,Typography,CardContent,DialogTitle,DialogContent,DialogActions,Table,TableBody,TableCell,TableContainer,TableHead,TableRow,Tab
+
+frontend/src/pages/hr/TaskManagement.js
+  Missing: Typography,DialogTitle,DialogContent,DialogActions,Table,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/hr/TrainingDashboard.js
+  Missing: Box,CardContent,Tab
+
+frontend/src/pages/hr/TrainingPrograms.js
+  Missing: Box,Typography,DialogTitle,DialogContent,DialogActions,Table,TableBody,TableCell,TableHead
+
+frontend/src/pages/hr/TrainingReports.js
+  Missing: Box,Table,TableBody,TableCell,TableContainer,TableHead,Tab
+
+frontend/src/pages/hr/VacationSettlementManagement.js
+  Missing: Box,Card,CardContent,DialogTitle,DialogContent,DialogActions,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/hr/WorkPermitsManagement.js
+  Missing: Typography,DialogTitle,DialogContent,DialogActions,Table,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/hr/ZKTecoDeviceManagement.jsx
+  Missing: Box,CardContent,DialogTitle,DialogActions,TableBody,TableCell,TableContainer,TableHead,TableRow,Divider
+
+frontend/src/pages/hr/employee-portal/DocumentsTab.jsx
+  Missing: CardContent
+
+frontend/src/pages/hr/employee-portal/EmployeePortalDialogs.jsx
+  Missing: InputLabel
+
+frontend/src/pages/hr/employee-portal/LeavesTab.jsx
+  Missing: Box,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/hr/employee-portal/PayslipsTab.jsx
+  Missing: Box,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/hr/employee-portal/ProfileTab.jsx
+  Missing: Box,CardContent
+
+frontend/src/pages/hr/employee-portal/RequestsTab.jsx
+  Missing: Box,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/icf/ICFAssessmentDashboard.jsx
+  Missing: Box,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/independent-living/IndependentLivingDashboard.jsx
+  Missing: Typography,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/iot/IoTDashboard.jsx
+  Missing: Typography,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/kitchen/KitchenDashboard.jsx
+  Missing: Typography,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/knowledge/KnowledgeCenterPage.js
+  Missing: Box,DialogTitle,DialogActions,Tab
+
+frontend/src/pages/knowledge/KnowledgeDashboard.jsx
+  Missing: CardContent,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/laundry/LaundryDashboard.jsx
+  Missing: Typography,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/mdt/MDTCoordinationDashboard.jsx
+  Missing: Box,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/medical-files/MedicalFilesDashboard.jsx
+  Missing: Typography,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/meetings/MeetingManagementPage.js
+  Missing: Box,DialogTitle,TableBody,TableCell,TableHead,Tab
+
+frontend/src/pages/meetings/MeetingsDashboard.jsx
+  Missing: Box,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/mhpss/MHPSSDashboard.jsx
+  Missing: Typography,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/mudad/MudadDashboard.jsx
+  Missing: Box,Card,CardContent,DialogTitle,DialogContent,DialogActions,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/noor/NoorDashboard.jsx
+  Missing: Box,Card,CardContent,DialogTitle,DialogContent,DialogActions,TableBody,TableCell,TableHead,TableRow,Tab
+
+frontend/src/pages/org-structure/OrgDashboard.jsx
+  Missing: CardContent,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/org-structure/OrgStructurePage.js
+  Missing: Box,DialogTitle,TableBody,TableCell,TableHead,Tab
+
+frontend/src/pages/postRehab/PostRehabFollowupDashboard.jsx
+  Missing: Box,CardContent,DialogTitle,DialogContent,DialogActions,TableBody,TableCell,TableHead,TableRow,Tab
+
+frontend/src/pages/qiwa/QiwaDashboard.jsx
+  Missing: Box,Typography,Card,CardContent,DialogTitle,DialogContent,DialogActions,TableBody,TableCell,TableHead,TableRow,Tab
+
+frontend/src/pages/rehab/AssistiveDevicesManagement.js
+  Missing: Box,CardContent,TableBody,TableCell,TableContainer,TableHead,TableRow,Tab
+
+frontend/src/pages/rehab/DisabilityRehabDashboard.js
+  Missing: Box,TableBody,TableCell,TableContainer,TableHead,Tab
+
+frontend/src/pages/rehab/DisabilityRehabReports.js
+  Missing: Box,CardContent,Table,TableBody,TableCell,TableContainer,TableHead,Tab
+
+frontend/src/pages/rehab/RehabProgramManagement.js
+  Missing: Box,Table,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/rehab/TherapistAchievements.js
+  Missing: Box,DialogActions,InputLabel
+
+frontend/src/pages/rehab/TherapistAnalytics.js
+  Missing: Box,Typography,CardContent
+
+frontend/src/pages/rehab/TherapistAssessments.js
+  Missing: Box,Typography,CardContent,DialogTitle,DialogActions,Table,TableBody,TableCell,TableHead,Tab
+
+frontend/src/pages/rehab/TherapistCases.js
+  Missing: Box,Typography,CardContent,Accordion,AccordionDetails
+
+frontend/src/pages/rehab/TherapistClinicalLibrary.js
+  Missing: Box,DialogActions,InputLabel
+
+frontend/src/pages/rehab/TherapistClinicalResearch.js
+  Missing: Box,CardContent,DialogTitle,DialogActions,InputLabel
+
+frontend/src/pages/rehab/TherapistCommunications.js
+  Missing: Box,Typography,Card,CardContent,DialogTitle,DialogActions,MenuItem
+
+frontend/src/pages/rehab/TherapistConsentManagement.js
+  Missing: Box,CardContent,DialogActions,InputLabel
+
+frontend/src/pages/rehab/TherapistConsultations.js
+  Missing: Box,CardContent,DialogTitle,DialogActions,InputLabel,List
+
+frontend/src/pages/rehab/TherapistDailyTasks.js
+  Missing: Box,DialogActions,InputLabel
+
+frontend/src/pages/rehab/TherapistDashboard.js
+  Missing: Box,Typography,CardContent,TableBody,TableCell,TableContainer,TableHead,Tab
+
+frontend/src/pages/rehab/TherapistDocTemplates.js
+  Missing: Box,DialogActions,InputLabel
+
+frontend/src/pages/rehab/TherapistDocuments.js
+  Missing: Box,Typography,CardContent,DialogTitle,DialogContent,DialogActions,InputLabel
+
+frontend/src/pages/rehab/TherapistEquipment.js
+  Missing: Box,CardContent,DialogTitle,DialogActions,InputLabel
+
+frontend/src/pages/rehab/TherapistFieldTraining.js
+  Missing: Box,CardContent,DialogTitle,DialogActions,InputLabel
+
+frontend/src/pages/rehab/TherapistGroupTherapy.js
+  Missing: Box,CardContent,DialogTitle,DialogActions,InputLabel,ListItemAvatar
+
+frontend/src/pages/rehab/TherapistMessages.js
+  Missing: Box,Typography,ListItemIcon
+
+frontend/src/pages/rehab/TherapistParentComm.js
+  Missing: Box,DialogActions,Tab,InputLabel
+
+frontend/src/pages/rehab/TherapistPatients.js
+  Missing: Box,Typography,CardContent,Table,TableBody,TableCell,TableHead
+
+frontend/src/pages/rehab/TherapistPerformanceKPIs.js
+  Missing: Box,CardContent,DialogActions
+
+frontend/src/pages/rehab/TherapistPrescriptions.js
+  Missing: Box,Typography,CardContent,DialogTitle,DialogActions,InputLabel
+
+frontend/src/pages/rehab/TherapistProfessionalDev.js
+  Missing: Box,Typography,CardContent,DialogTitle,DialogActions,InputLabel,List,ListItemAvatar
+
+frontend/src/pages/rehab/TherapistProgressTracking.js
+  Missing: Box,CardContent,DialogActions,Tab,InputLabel
+
+frontend/src/pages/rehab/TherapistQualityReports.js
+  Missing: Box,CardContent,DialogTitle,DialogActions,InputLabel
+
+frontend/src/pages/rehab/TherapistReferrals.js
+  Missing: Box,CardContent,DialogActions,InputLabel
+
+frontend/src/pages/rehab/TherapistReports.js
+  Missing: Typography,CardContent,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/rehab/TherapistSafetyProtocols.js
+  Missing: Box,CardContent,DialogTitle,DialogActions,InputLabel,ListItemIcon,StepLabel
+
+frontend/src/pages/rehab/TherapistSchedule.js
+  Missing: Box,Typography,CardContent,InputLabel
+
+frontend/src/pages/rehab/TherapistSessions.js
+  Missing: Box,Typography,CardContent,DialogTitle,DialogContent,Accordion,AccordionDetails
+
+frontend/src/pages/rehab/TherapistSmartGoals.js
+  Missing: Box,CardContent,DialogActions,InputLabel,Divider
+
+frontend/src/pages/rehab/TherapistTelehealth.js
+  Missing: Box,CardContent,DialogActions,InputLabel
+
+frontend/src/pages/rehab/TherapistTreatmentPlans.js
+  Missing: Box,Typography,CardContent,DialogTitle,DialogActions,InputLabel
+
+frontend/src/pages/rehab/TherapistWaitingList.js
+  Missing: Box,CardContent,DialogActions,InputLabel
+
+frontend/src/pages/rehab/TherapySessionAdmin.js
+  Missing: Box,TableBody,TableCell,TableContainer,TableHead,TableRow,Tab
+
+frontend/src/pages/research/ResearchDashboard.jsx
+  Missing: Typography,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/sso-admin/SSOAdminDashboard.jsx
+  Missing: Typography,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/strategic-planning/StrategicPlanningPage.js
+  Missing: Box,CardContent,DialogTitle,TableBody,TableCell,TableHead,Tab
+
+frontend/src/pages/succession/SuccessionDashboard.jsx
+  Missing: CardContent,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/succession/SuccessionPlanningPage.js
+  Missing: Box,CardContent,DialogTitle,DialogActions,TableBody,TableCell,TableHead,Tab
+
+frontend/src/pages/supply-chain/BranchPurchasing.js
+  Missing: Box,DialogTitle,DialogContent,DialogActions,Table,TableBody,TableCell,TableHead,Tab,InputLabel
+
+frontend/src/pages/supply-chain/BranchReports.js
+  Missing: Box,CardContent,Table,TableBody,TableCell,TableHead,Tab
+
+frontend/src/pages/supply-chain/BranchWarehouseManagement.js
+  Missing: Box,CardContent,DialogTitle,DialogContent,DialogActions,Table,TableBody,TableCell,TableHead,Tab,InputLabel
+
+frontend/src/pages/supply-chain/ContractsDashboard.jsx
+  Missing: Box,Table,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/supply-chain/ContractsManagement.js
+  Missing: Box,Card,DialogTitle,DialogContent,DialogActions,Table,TableBody,TableCell,TableHead,TableRow,Tab
+
+frontend/src/pages/supply-chain/InventoryManagement.js
+  Missing: Box,Table,TableBody,TableCell,TableContainer,TableHead,TableRow,Tab,InputLabel
+
+frontend/src/pages/supply-chain/PurchasingManagement.js
+  Missing: Box,Table,TableBody,TableCell,TableContainer,TableHead,Tab,InputLabel
+
+frontend/src/pages/supply-chain/StockTransfers.js
+  Missing: Box,DialogTitle,DialogContent,DialogActions,Table,TableBody,TableCell,TableHead,Tab,InputLabel,StepLabel
+
+frontend/src/pages/supply-chain/SupplyChainDashboard.jsx
+  Missing: CardContent,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/supply-chain/VendorManagement.js
+  Missing: Box,Typography,DialogTitle,DialogContent,DialogActions,Table,TableBody,TableCell,TableHead,Tab
+
+frontend/src/pages/taqat/TaqatDashboard.jsx
+  Missing: Box,Card,CardContent,TableBody,TableCell,TableContainer,TableHead,TableRow,Tab
+
+frontend/src/pages/treatmentAuthorization/TreatmentAuthorizationDashboard.jsx
+  Missing: Box,Card,CardContent,DialogTitle,DialogContent,DialogActions,TableBody,TableCell,TableContainer,TableHead,TableRow,StepLabel
+
+frontend/src/pages/visitors/VisitorManagementPage.js
+  Missing: Box,DialogTitle,TableBody,TableCell,TableHead,Tab
+
+frontend/src/pages/visitors/VisitorsDashboard.jsx
+  Missing: CardContent,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/volunteer/VolunteerDashboard.jsx
+  Missing: Typography,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/waitlist/WaitlistDashboard.jsx
+  Missing: Typography,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/workflow/WorkflowAnalytics.js
+  Missing: Box,CardContent,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/workflow/WorkflowApprovalChains.js
+  Missing: DialogTitle,DialogContent,DialogActions,Table,TableBody,TableCell,TableHead,TableRow,Tab,InputLabel
+
+frontend/src/pages/workflow/WorkflowAutomations.js
+  Missing: DialogTitle,DialogContent,DialogActions,Table,TableBody,TableCell,TableHead,TableRow,Tab,InputLabel
+
+frontend/src/pages/workflow/WorkflowBuilder.js
+  Missing: Box,DialogTitle,DialogActions,Divider
+
+frontend/src/pages/workflow/WorkflowCalendar.js
+  Missing: Box,DialogActions,InputLabel
+
+frontend/src/pages/workflow/WorkflowDashboard.js
+  Missing: Box,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/workflow/WorkflowDelegation.js
+  Missing: Box,DialogActions,Table,TableBody,TableCell,TableContainer,TableHead,TableRow,Tab
+
+frontend/src/pages/workflow/WorkflowEscalations.js
+  Missing: DialogTitle,DialogContent,DialogActions,Table,TableBody,TableCell,TableHead,TableRow,Tab,InputLabel
+
+frontend/src/pages/workflow/WorkflowExtendedTemplates.js
+  Missing: Box,DialogTitle,DialogActions,TableBody,TableCell,TableHead,TableRow
+
+frontend/src/pages/workflow/WorkflowFormBuilder.js
+  Missing: DialogTitle,DialogContent,DialogActions,TableBody,TableCell,TableContainer,TableHead,TableRow,InputLabel
+
+frontend/src/pages/workflow/WorkflowInstanceDetail.js
+  Missing: Box,DialogTitle,DialogActions
+
+frontend/src/pages/workflow/WorkflowInstances.js
+  Missing: Box,Paper,Table,TableBody,TableCell,TableContainer,TableHead,TableRow,Tab
+
+frontend/src/pages/workflow/WorkflowKPIDashboard.js
+  Missing: Table,TableBody,TableCell,TableContainer,TableHead,TableRow,Tab
+
+frontend/src/pages/workflow/WorkflowMyTasks.js
+  Missing: Box,Paper,DialogTitle,DialogActions,Table,TableBody,TableCell,TableContainer,TableHead,TableRow,Tab
+
+frontend/src/pages/workflow/WorkflowNotificationPrefs.js
+  Missing: Box
+
+frontend/src/pages/workflow/WorkflowReports.js
+  Missing: Box,Paper,DialogTitle,DialogActions,Table,TableBody,TableCell,TableContainer,TableHead,TableRow,InputLabel
+
+frontend/src/pages/workflow/WorkflowSLAPolicies.js
+  Missing: CardContent,DialogTitle,DialogContent,DialogActions,Table,TableBody,TableCell,TableContainer,TableHead,TableRow,Tab,InputLabel,Divider
+
+frontend/src/pages/workflow/WorkflowSearch.js
+  Missing: Box,Paper,Table,TableBody,TableCell,TableContainer,TableHead,TableRow,Tab,InputLabel
+
+frontend/src/pages/workflow/WorkflowTags.js
+  Missing: Box,Paper,DialogTitle,DialogActions,Table,TableBody,TableCell,TableContainer,TableHead,TableRow
+
+frontend/src/pages/workflow/WorkflowTemplates.js
+  Missing: Box,DialogTitle,DialogActions,Step
+
+frontend/src/pages/workflow/WorkflowWebhooks.js
+  Missing: Box,Paper,DialogTitle,DialogActions,Table,TableBody,TableCell,TableContainer,TableHead,TableRow,InputLabel

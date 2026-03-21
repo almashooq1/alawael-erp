@@ -3,10 +3,23 @@
  */
 import { useState, useEffect } from 'react';
 
-
-
-
 import { assessmentsService, reportsService } from '../../services/icfAssessmentService';
+import {
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Grid,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Typography
+} from '@mui/material';
+import CompareIcon from '@mui/icons-material/Compare';
 
 const statusLabels = { draft: 'مسودة', in_progress: 'قيد التقييم', completed: 'مكتمل', reviewed: 'مراجع' };
 const statusColors = { draft: 'default', in_progress: 'warning', completed: 'success', reviewed: 'info' };

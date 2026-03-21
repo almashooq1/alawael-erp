@@ -4,10 +4,21 @@
  */
 
 import React, { useState } from 'react';
-import { useTheme } from '@mui/material';
-
+import {
+  Box,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  Paper,
+  Tooltip,
+  Typography,
+  useTheme
+} from '@mui/material';
 
 import { chartColors, brandColors, surfaceColors, surfaceColorsDark, neutralColors } from 'theme/palette';
+import FullscreenIcon from '@mui/icons-material/Fullscreen';
+import CloseIcon from '@mui/icons-material/Close';
 
 const COLORS = chartColors.main;
 

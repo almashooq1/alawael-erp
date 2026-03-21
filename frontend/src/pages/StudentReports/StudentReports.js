@@ -6,9 +6,25 @@
  */
 
 
-
-
 import useStudentReport from './useStudentReport';
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Grid,
+  LinearProgress,
+  MenuItem,
+  Paper,
+  Stack,
+  TextField,
+  Typography
+} from '@mui/material';
+import DownloadIcon from '@mui/icons-material/Download';
+import AutoGraphIcon from '@mui/icons-material/AutoGraph';
 
 const StudentReports = () => {
   const {

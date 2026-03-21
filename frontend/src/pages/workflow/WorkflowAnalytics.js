@@ -11,9 +11,33 @@ import {
   alpha,
 } from '@mui/material';
 
-
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import workflowService from '../../services/workflow.service';
+import {
+  Avatar,
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  Grid,
+  IconButton,
+  LinearProgress,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import AnalyticsIcon from '@mui/icons-material/Analytics';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import TimerIcon from '@mui/icons-material/Timer';
+import CategoryIcon from '@mui/icons-material/Category';
+import PersonIcon from '@mui/icons-material/Person';
+import { TrendIcon } from 'utils/iconAliases';
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 const CATEGORY_LABELS = {

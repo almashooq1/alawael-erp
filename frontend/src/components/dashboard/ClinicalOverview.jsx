@@ -4,8 +4,23 @@
  */
 
 import React from 'react';
-import { useTheme } from '@mui/material';
+import {
+  Box,
+  Chip,
+  Grid,
+  LinearProgress,
+  Paper,
+  Typography,
+  useTheme
+} from '@mui/material';
 import { chartColors, brandColors } from 'theme/palette';
+import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import FlagIcon from '@mui/icons-material/Flag';
+import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
+import StarIcon from '@mui/icons-material/Star';
+import AccessibilityNewIcon from '@mui/icons-material/AccessibilityNew';
+import AssessmentIcon from '@mui/icons-material/Assessment';
 
 const COLORS = chartColors.main;
 

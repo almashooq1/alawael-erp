@@ -3,6 +3,14 @@
  * Extracted from PerformanceEvaluation.js
  */
 
+import {
+  Avatar,
+  Box,
+  Card,
+  CardContent,
+  Grid,
+  Typography
+} from '@mui/material';
 const PerformanceStatsCards = ({ stats }) => (
   <Grid container spacing={2} sx={{ mb: 3 }}>
     {stats.map((s, i) => (

@@ -8,12 +8,33 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
-
-
-
 import { gradients, brandColors } from 'theme/palette';
 import studentManagementService from 'services/studentManagementService';
 import logger from 'utils/logger';
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Divider,
+  Grid,
+  LinearProgress,
+  Paper,
+  Stack,
+  Typography
+} from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import PrintIcon from '@mui/icons-material/Print';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import StarIcon from '@mui/icons-material/Star';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import SchoolIcon from '@mui/icons-material/School';
+import InfoIcon from '@mui/icons-material/Info';
 
 // Color for level badges
 const levelColor = (level) => {

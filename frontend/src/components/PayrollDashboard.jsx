@@ -9,9 +9,43 @@ import {
   Paper,
 } from '@mui/material';
 
-
 import { DEPT_COLORS } from '../constants/departmentColors';
 import { statusColors, neutralColors, surfaceColors } from '../theme/palette';
+import {
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Grid,
+  IconButton,
+  LinearProgress,
+  MenuItem,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import PendingIcon from '@mui/icons-material/Pending';
+import MoneyIcon from '@mui/icons-material/Money';
+import DownloadIcon from '@mui/icons-material/Download';
+import PrintIcon from '@mui/icons-material/Print';
+import WalletIcon from '@mui/icons-material/Wallet';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import GroupsIcon from '@mui/icons-material/Groups';
+import ReceiptIcon from '@mui/icons-material/Receipt';
+import { ChartIcon, TrendIcon, ViewIcon } from 'utils/iconAliases';
 
 /* ─── Constants ─── */
 

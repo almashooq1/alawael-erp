@@ -4,8 +4,22 @@
  */
 
 import React from 'react';
-import { useTheme } from '@mui/material';
+import {
+  Box,
+  Chip,
+  Paper,
+  Tooltip,
+  Typography,
+  useTheme
+} from '@mui/material';
 import { statusColors, brandColors } from '../../theme/palette';
+import StorageIcon from '@mui/icons-material/Storage';
+import TimerIcon from '@mui/icons-material/Timer';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import ErrorIcon from '@mui/icons-material/Error';
+import MemoryIcon from '@mui/icons-material/Memory';
+import SpeedIcon from '@mui/icons-material/Speed';
+import DnsIcon from '@mui/icons-material/Dns';
 
 const formatUptime = (seconds) => {
   if (!seconds) return '0 ثانية';

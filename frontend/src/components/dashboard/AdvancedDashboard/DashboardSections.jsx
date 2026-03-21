@@ -2,6 +2,7 @@
  * DashboardSections — All 8 collapsible dashboard section blocks + Pro Tools
  */
 import { lazy } from 'react';
+import { Box, Collapse, Grid } from '@mui/material';
 
 const FinanceOverview = lazy(() => import('../FinanceOverview'));
 const ClinicalOverview = lazy(() => import('../ClinicalOverview'));

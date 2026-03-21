@@ -3,7 +3,6 @@ import {
   Paper,
 } from '@mui/material';
 
-
 import {
   fetchWarnings,
   createWarning,
@@ -12,6 +11,34 @@ import {
   appealWarning,
   fetchWarningStats,
 } from '../../services/hr/employeeAffairsPhase3Service';
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  IconButton,
+  LinearProgress,
+  MenuItem,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import WarningIcon from '@mui/icons-material/Warning';
+import AddIcon from '@mui/icons-material/Add';
+import RefreshIcon from '@mui/icons-material/Refresh';
 
 const statusColors = {
   مسودة: 'default',

@@ -21,7 +21,17 @@
  */
 
 import { useState, useCallback } from 'react';
-
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Typography
+} from '@mui/material';
+import WarningIcon from '@mui/icons-material/Warning';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // ConfirmDialog Component

@@ -1,8 +1,14 @@
 
 
-
-
-
+import {
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  Grid,
+  Typography
+} from '@mui/material';
+import { FileIcon } from 'utils/iconAliases';
 const TYPE_META = {
   contract: { icon: <ContractIcon fontSize="large" />, label: 'عقد', color: '#1565c0' },
   certificate: { icon: <CertIcon fontSize="large" />, label: 'شهادة', color: '#2e7d32' },

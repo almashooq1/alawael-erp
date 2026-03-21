@@ -8,9 +8,6 @@ import {
   useTheme,
 } from '@mui/material';
 
-
-
-
 import {
   jobPostingsService,
   applicantsService,
@@ -20,6 +17,46 @@ import {
   MOCK_RECRUITMENT_DASHBOARD,
 } from 'services/recruitmentService';
 import { useSnackbar } from 'contexts/SnackbarContext';
+import {
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  IconButton,
+  InputAdornment,
+  LinearProgress,
+  MenuItem,
+  Rating,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  Tabs,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import AddIcon from '@mui/icons-material/Add';
+import SearchIcon from '@mui/icons-material/Search';
+import WorkIcon from '@mui/icons-material/Work';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import CloseIcon from '@mui/icons-material/Close';
+import EmailIcon from '@mui/icons-material/Email';
+import PhoneIcon from '@mui/icons-material/Phone';
+import { ViewIcon } from 'utils/iconAliases';
 
 const COLORS = ['#1565C0', '#00897B', '#F4511E', '#8E24AA', '#43A047', '#FF8F00', '#5C6BC0'];
 

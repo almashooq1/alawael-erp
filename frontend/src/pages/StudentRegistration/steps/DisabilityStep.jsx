@@ -5,6 +5,19 @@
 
 import { DISABILITY_TYPES, SEVERITY_LEVELS } from '../studentRegistrationConfig';
 import { statusColors } from 'theme/palette';
+import {
+  Box,
+  Chip,
+  Fade,
+  FormControl,
+  Grid,
+  InputLabel,
+  LinearProgress,
+  MenuItem,
+  Select,
+  TextField,
+  Typography
+} from '@mui/material';
 
 const SEVERITY_BAR_COLORS = {
   mild: statusColors.success,

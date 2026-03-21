@@ -5,6 +5,25 @@ import { useState, useEffect, useCallback } from 'react';
 import { useTheme, alpha,
 } from '@mui/material';
 import { getWarehouseDashboard } from '../../services/warehouse.service';
+import {
+  Alert,
+  Box,
+  Chip,
+  CircularProgress,
+  Grid,
+  IconButton,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import WarehouseIcon from '@mui/icons-material/Warehouse';
+import Warning from '@mui/icons-material/Warning';
+import Refresh from '@mui/icons-material/Refresh';
 
 const CATEGORY_LABELS = {
   equipment: 'معدات', supplies: 'مستلزمات', medical: 'طبية', food: 'غذائية',

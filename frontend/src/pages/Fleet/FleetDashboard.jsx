@@ -1,14 +1,30 @@
 import { useState, useEffect, useCallback } from 'react';
 import computeStatusCounts from '../../utils/computeStatusCounts';
 
-
-
-
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, chartColors, statusColors } from '../../theme/palette';
 import logger from '../../utils/logger';
 import fleetService from '../../services/fleet.service';
 import { useNavigate } from 'react-router-dom';
+import {
+  Box,
+  Button,
+  Chip,
+  Container,
+  Grid,
+  LinearProgress,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography
+} from '@mui/material';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import RouteIcon from '@mui/icons-material/Route';
+import SpeedIcon from '@mui/icons-material/Speed';
 
 /* ──────── بيانات تجريبية ──────── */
 const DEMO_STATS = {

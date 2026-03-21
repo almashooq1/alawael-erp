@@ -2,11 +2,54 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import administrationService from '../../services/administration.service';
 
-
-
-
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients } from '../../theme/palette';
+import {
+  Autocomplete,
+  Avatar,
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  FormControl,
+  FormControlLabel,
+  Grid,
+  IconButton,
+  InputAdornment,
+  InputLabel,
+  Menu,
+  MenuItem,
+  Paper,
+  Select,
+  Switch,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  Tabs,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import ArrowBack from '@mui/icons-material/ArrowBack';
+import AddIcon from '@mui/icons-material/Add';
+import Search from '@mui/icons-material/Search';
+import Refresh from '@mui/icons-material/Refresh';
+import Person from '@mui/icons-material/Person';
+import WarningAmber from '@mui/icons-material/WarningAmber';
+import MoreVert from '@mui/icons-material/MoreVert';
+import PlayArrow from '@mui/icons-material/PlayArrow';
+import CheckCircle from '@mui/icons-material/CheckCircle';
+import Update from '@mui/icons-material/Update';
 
 /* ═══ Helpers ════════════════════════════════════════════════════════════════ */
 const statusConfig = {

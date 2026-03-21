@@ -1,10 +1,24 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
-
 import apiClient from 'services/api.client';
 import logger from 'utils/logger';
 import { gradients } from 'theme/palette';
+import {
+  Box,
+  Button,
+  Container,
+  Divider,
+  Grid,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Paper,
+  Typography
+} from '@mui/material';
+import SchoolIcon from '@mui/icons-material/School';
+import AddIcon from '@mui/icons-material/Add';
 
 const CourseViewer = () => {
   const { id } = useParams();

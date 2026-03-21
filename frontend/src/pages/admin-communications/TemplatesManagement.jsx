@@ -3,11 +3,40 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 
-
-
-
 import adminCommunicationsService from '../../services/adminCommunications.service';
 import { CORRESPONDENCE_TYPES } from './constants';
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  FormControl,
+  Grid,
+  IconButton,
+  InputAdornment,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  Skeleton,
+  Snackbar,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import SearchIcon from '@mui/icons-material/Search';
+import PreviewIcon from '@mui/icons-material/Preview';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { CopyIcon } from 'utils/iconAliases';
 
 export default function TemplatesManagement() {
   const [templates, setTemplates] = useState([]);

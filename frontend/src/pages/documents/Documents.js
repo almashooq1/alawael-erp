@@ -11,13 +11,64 @@ import {
   useTheme,
 } from '@mui/material';
 
-
-
-
 import documentService from 'services/documentService';
 import logger from 'utils/logger';
 import { gradients, brandColors } from 'theme/palette';
 import { useSnackbar } from '../../contexts/SnackbarContext';
+import {
+  Avatar,
+  Badge,
+  Box,
+  Breadcrumbs,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Fade,
+  FormControl,
+  Grid,
+  IconButton,
+  InputAdornment,
+  InputLabel,
+  LinearProgress,
+  Link,
+  MenuItem,
+  Paper,
+  Select,
+  Stack,
+  Tab,
+  Tabs,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import AnalyticsIcon from '@mui/icons-material/Analytics';
+import SecurityIcon from '@mui/icons-material/Security';
+import FilePresentIcon from '@mui/icons-material/FilePresent';
+import CloudDoneIcon from '@mui/icons-material/CloudDone';
+import FolderIcon from '@mui/icons-material/Folder';
+import ImageIcon from '@mui/icons-material/Image';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import HomeIcon from '@mui/icons-material/Home';
+import FolderOpenIcon from '@mui/icons-material/FolderOpen';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import ScannerIcon from '@mui/icons-material/Scanner';
+import StorageIcon from '@mui/icons-material/Storage';
+import PendingIcon from '@mui/icons-material/Pending';
+import DownloadIcon from '@mui/icons-material/Download';
+import SpeedIcon from '@mui/icons-material/Speed';
+import CategoryIcon from '@mui/icons-material/Category';
+import SearchIcon from '@mui/icons-material/Search';
+import GridViewIcon from '@mui/icons-material/GridView';
+import ShareIcon from '@mui/icons-material/Share';
+import { AudioIcon, ChartIcon, ExcelIcon, FileIcon, ListViewIcon, NewFolderIcon, PdfIcon, PptIcon, RecentIcon, SharedIcon, TextIcon, TrendIcon, VideoIcon, ViewIcon, ZipIcon } from 'utils/iconAliases';
 
 /* ──── Constants ──── */
 const CATEGORY_COLORS = {

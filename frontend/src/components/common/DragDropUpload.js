@@ -17,10 +17,29 @@
 
 import { useState, useCallback, useRef } from 'react';
 
-
-
-
 import { gradients } from 'theme/palette';
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  Chip,
+  Grid,
+  IconButton,
+  LinearProgress,
+  Paper,
+  Stack,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import ImageIcon from '@mui/icons-material/Image';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import ErrorIcon from '@mui/icons-material/Error';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { AudioIcon, DocIcon, FileIcon, PdfIcon, VideoIcon } from 'utils/iconAliases';
 
 const DragDropUpload = ({
   onUpload,

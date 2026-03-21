@@ -17,13 +17,46 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTheme, alpha,
 } from '@mui/material';
 
-
-
 import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { useConfirmDialog } from '../../components/common/ConfirmDialog';
 import { gradients } from '../../theme/palette';
 import montessoriService from '../../services/montessoriService';
+import {
+  Avatar,
+  Box,
+  Button,
+  Chip,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  IconButton,
+  InputAdornment,
+  LinearProgress,
+  MenuItem,
+  Paper,
+  Stack,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import DownloadIcon from '@mui/icons-material/Download';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import SearchIcon from '@mui/icons-material/Search';
+import AddIcon from '@mui/icons-material/Add';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 /* ─── Animated counter ─── */
 const useAnimatedCounter = (endValue, duration = 1200) => {

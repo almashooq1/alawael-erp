@@ -4,6 +4,50 @@ import DOMPurify from 'dompurify';
 import administrationService from '../../services/administration.service';
 
 import { useSnackbar } from '../../contexts/SnackbarContext';
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Grid,
+  IconButton,
+  LinearProgress,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Paper,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import ArrowBack from '@mui/icons-material/ArrowBack';
+import Send from '@mui/icons-material/Send';
+import CheckCircle from '@mui/icons-material/CheckCircle';
+import Cancel from '@mui/icons-material/Cancel';
+import Visibility from '@mui/icons-material/Visibility';
+import Refresh from '@mui/icons-material/Refresh';
+import Flag from '@mui/icons-material/Flag';
+import Lock from '@mui/icons-material/Lock';
+import People from '@mui/icons-material/People';
+import History from '@mui/icons-material/History';
 
 /* ═══ Helpers ════════════════════════════════════════════════════════════════ */
 const docTypeLabels = {

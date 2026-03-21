@@ -2,11 +2,39 @@
  * TestWizardDialog – multi-step test wizard dialog
  */
 
-
-
 import assessmentService from '../../services/assessmentService';
 import { surfaceColors } from '../../theme/palette';
 import { TEST_ICONS } from './constants';
+import {
+  Alert,
+  Box,
+  Button,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  FormControl,
+  FormControlLabel,
+  FormLabel,
+  IconButton,
+  InputLabel,
+  LinearProgress,
+  MenuItem,
+  Paper,
+  Radio,
+  RadioGroup,
+  Select,
+  Step,
+  StepLabel,
+  Stepper,
+  TextField,
+  Typography
+} from '@mui/material';
+import QuizIcon from '@mui/icons-material/Quiz';
+import CloseIcon from '@mui/icons-material/Close';
+import DoneIcon from '@mui/icons-material/Done';
 
 const TestWizardDialog = ({
   open, onClose,

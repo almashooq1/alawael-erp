@@ -1,14 +1,43 @@
 import { useState, useEffect } from 'react';
 
-
-
-
 import { adminService } from 'services/adminService';
 import exportService from 'services/exportService';
 import logger from 'utils/logger';
 import { useSnackbar } from 'contexts/SnackbarContext';
 import { gradients, brandColors, surfaceColors } from 'theme/palette';
 import { useAuth } from 'contexts/AuthContext';
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  Chip,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  Grid,
+  InputAdornment,
+  InputLabel,
+  LinearProgress,
+  MenuItem,
+  Select,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography
+} from '@mui/material';
+import HistoryIcon from '@mui/icons-material/History';
+import DownloadIcon from '@mui/icons-material/Download';
+import FilterAltIcon from '@mui/icons-material/FilterAlt';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 
 const AdminAuditLogs = () => {
   const { currentUser } = useAuth();

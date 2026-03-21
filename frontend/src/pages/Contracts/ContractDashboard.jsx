@@ -3,11 +3,18 @@
  */
 import { useState, useEffect } from 'react';
 
-
-
-
-
 import { getDashboard } from '../../services/contractManagement.service';
+import {
+  Box,
+  Card,
+  CardContent,
+  CircularProgress,
+  Grid,
+  Paper,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import { ActiveIcon } from 'utils/iconAliases';
 
 const typeLabels = {
   SERVICE_AGREEMENT: 'عقد خدمات', SUPPLY_AGREEMENT: 'عقد توريد',

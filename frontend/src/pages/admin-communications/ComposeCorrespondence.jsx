@@ -5,9 +5,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
-
-
-
 import { gradients } from '../../theme/palette';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import adminCommunicationsService from '../../services/adminCommunications.service';
@@ -18,6 +15,44 @@ import {
   SENDER_TYPES,
   DEPARTMENTS,
 } from './constants';
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Divider,
+  FormControl,
+  FormControlLabel,
+  Grid,
+  IconButton,
+  InputLabel,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemSecondaryAction,
+  ListItemText,
+  MenuItem,
+  Paper,
+  Select,
+  Stack,
+  Step,
+  StepLabel,
+  Stepper,
+  Switch,
+  TextField,
+  Typography
+} from '@mui/material';
+import Person from '@mui/icons-material/Person';
+import Business from '@mui/icons-material/Business';
+import PersonAdd from '@mui/icons-material/PersonAdd';
+import AddIcon from '@mui/icons-material/Add';
+import AttachFile from '@mui/icons-material/AttachFile';
+import DeleteIcon from '@mui/icons-material/Delete';
+import ArrowBack from '@mui/icons-material/ArrowBack';
+import SaveIcon from '@mui/icons-material/Save';
+import SendIcon from '@mui/icons-material/Send';
 
 const steps = ['بيانات المراسلة', 'المحتوى والمرفقات', 'المراجعة والإرسال'];
 

@@ -4,6 +4,10 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { gradients } from 'theme/palette';
 import studentManagementService from 'services/studentManagementService';
+import People from '@mui/icons-material/People';
+import CheckCircle from '@mui/icons-material/CheckCircle';
+import TrendingUp from '@mui/icons-material/TrendingUp';
+import Warning from '@mui/icons-material/Warning';
 
 const useStudentList = () => {
   // ─── State ──────────────────────────────────

@@ -14,11 +14,19 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from 'contexts/AuthContext';
+import {
+  Alert,
+  Box,
+  Button,
+  Typography
+} from '@mui/material';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // AUTH GUARD — حراسة المصادقة
 // ═══════════════════════════════════════════════════════════════════════════
 
+import WifiOffIcon from '@mui/icons-material/WifiOff';
+import LockIcon from '@mui/icons-material/Lock';
 /**
  * Protects routes that require authentication.
  * Redirects to login if user is not authenticated.

@@ -8,9 +8,30 @@ import {
   alpha,
 } from '@mui/material';
 
-
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import workflowService from '../../services/workflow.service';
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Divider,
+  IconButton,
+  Paper,
+  Skeleton,
+  Stack,
+  Switch,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import Email from '@mui/icons-material/Email';
+import Assignment from '@mui/icons-material/Assignment';
+import Description from '@mui/icons-material/Description';
+import Flag from '@mui/icons-material/Flag';
+import ArrowBack from '@mui/icons-material/ArrowBack';
+import Notifications from '@mui/icons-material/Notifications';
+import Save from '@mui/icons-material/Save';
+import Refresh from '@mui/icons-material/Refresh';
 
 const CHANNELS = [
   { key: 'inApp', label: 'داخل التطبيق', icon: <DesktopWindows fontSize="small" /> },

@@ -9,10 +9,25 @@
  *   index.js            – this file (layout + wiring)
  */
 
-
 import { gradients } from '../../theme/palette';
 import useEducationRehab from './useEducationRehab';
 import { tabs, buildStats } from './constants';
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Container,
+  Grid,
+  LinearProgress,
+  Paper,
+  Tab,
+  Tabs,
+  Typography
+} from '@mui/material';
+import SchoolIcon from '@mui/icons-material/School';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import AddIcon from '@mui/icons-material/Add';
 
 const EducationRehab = () => {
   const {

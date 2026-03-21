@@ -11,10 +11,25 @@ import {
   alpha,
 } from '@mui/material';
 
-
-
-
 import { getTrends } from '../../services/biDashboard.service';
+import {
+  Alert,
+  Box,
+  Chip,
+  CircularProgress,
+  FormControl,
+  Grid,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import TrendingUp from '@mui/icons-material/TrendingUp';
+import TrendingDown from '@mui/icons-material/TrendingDown';
+import Refresh from '@mui/icons-material/Refresh';
 
 const METRICS = [
   { value: 'revenue', label: 'الإيرادات', color: '#4CAF50', icon: '💰' },

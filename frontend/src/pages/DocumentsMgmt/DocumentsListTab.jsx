@@ -11,11 +11,32 @@
  */
 
 
-
-
-
 import { getStatusColor } from 'utils/statusColors';
 import { formatFileSize } from './useDocumentsPage';
+import {
+  Box,
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  Chip,
+  FormControl,
+  Grid,
+  InputAdornment,
+  InputLabel,
+  LinearProgress,
+  MenuItem,
+  Paper,
+  Select,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
+import LockIcon from '@mui/icons-material/Lock';
+import DownloadIcon from '@mui/icons-material/Download';
+import ShareIcon from '@mui/icons-material/Share';
+import { ViewIcon } from 'utils/iconAliases';
 
 const DocumentsListTab = ({
   documents,

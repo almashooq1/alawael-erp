@@ -1,13 +1,65 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 
-
-
-
 import { adminService } from '../../services/adminService';
 import logger from '../../utils/logger';
 import { gradients, brandColors, statusColors } from '../../theme/palette';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  Chip,
+  CircularProgress,
+  Collapse,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Fade,
+  FormControl,
+  FormControlLabel,
+  Grid,
+  IconButton,
+  InputLabel,
+  LinearProgress,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  MenuItem,
+  Paper,
+  Select,
+  Stack,
+  Switch,
+  Tab,
+  Tabs,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import SettingsIcon from '@mui/icons-material/Settings';
+import PaletteIcon from '@mui/icons-material/Palette';
+import SecurityIcon from '@mui/icons-material/Security';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import EmailIcon from '@mui/icons-material/Email';
+import BackupIcon from '@mui/icons-material/Backup';
+import PublicIcon from '@mui/icons-material/Public';
+import WarningIcon from '@mui/icons-material/Warning';
+import SaveIcon from '@mui/icons-material/Save';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import DownloadIcon from '@mui/icons-material/Download';
+import UploadIcon from '@mui/icons-material/Upload';
+import HistoryIcon from '@mui/icons-material/History';
+import BuildIcon from '@mui/icons-material/Build';
+import SendIcon from '@mui/icons-material/Send';
 
 // ─── Tab Panel ───────────────────────────────────────────────
 function TabPanel({ children, value, index, ...other }) {

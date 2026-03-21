@@ -3,10 +3,45 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 
-
-
-
 import knowledgeCenterService from '../../services/knowledgeCenter.service';
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  Chip,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Grid,
+  IconButton,
+  InputAdornment,
+  LinearProgress,
+  MenuItem,
+  Rating,
+  Stack,
+  Tab,
+  Tabs,
+  TextField,
+  Typography
+} from '@mui/material';
+import BookIcon from '@mui/icons-material/Book';
+import AddIcon from '@mui/icons-material/Add';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import ArticleIcon from '@mui/icons-material/Article';
+import StarIcon from '@mui/icons-material/Star';
+import CategoryIcon from '@mui/icons-material/Category';
+import SearchIcon from '@mui/icons-material/Search';
+import BookmarkIcon from '@mui/icons-material/Bookmark';
+import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
+import SchoolIcon from '@mui/icons-material/School';
+import { ViewIcon } from 'utils/iconAliases';
 
 const DEMO_ARTICLES = [
   {

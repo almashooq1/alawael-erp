@@ -1,6 +1,20 @@
 
 
 import { statusColors } from 'theme/palette';
+import {
+  Avatar,
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  Stack,
+  Typography
+} from '@mui/material';
+import Schedule from '@mui/icons-material/Schedule';
 
 /** Upcoming appointments list card */
 const UpcomingAppointments = ({ upcomingAppointments }) => (

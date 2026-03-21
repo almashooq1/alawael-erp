@@ -1,6 +1,18 @@
 
 
 import { gradients } from 'theme/palette';
+import {
+  Alert,
+  Badge,
+  Box,
+  Button,
+  Grid,
+  IconButton,
+  Stack,
+  Typography
+} from '@mui/material';
+import Notifications from '@mui/icons-material/Notifications';
+import Refresh from '@mui/icons-material/Refresh';
 
 /** Gradient header banner + optional error alert */
 const DashboardHeader = ({ loading, dashError, fetchDashboard }) => (

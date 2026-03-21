@@ -3,6 +3,22 @@ import {
   Paper,
 } from '@mui/material';
 import { statusColors } from './constants';
+import {
+  Box,
+  Chip,
+  IconButton,
+  LinearProgress,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const DataTable = ({ items, cols, headers, onEdit, onDelete }) => (
   <TableContainer component={Paper} sx={{ mt: 2 }}>

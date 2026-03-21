@@ -1,14 +1,34 @@
 // Phase 4: Project Management Dashboard
 import { useState, useEffect, useCallback } from 'react';
 
-
-
-
 import projectManagementService from 'services/projectManagement.service';
 import logger from 'utils/logger';
 import { getUserData } from 'utils/tokenStorage';
 import { useSnackbar } from 'contexts/SnackbarContext';
 import { gradients, statusColors, neutralColors } from '../../theme/palette';
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  Grid,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  TextField,
+  Typography
+} from '@mui/material';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import AddIcon from '@mui/icons-material/Add';
+import TaskIcon from '@mui/icons-material/Task';
 
 const ProjectManagementDashboard = () => {
   const showSnackbar = useSnackbar();

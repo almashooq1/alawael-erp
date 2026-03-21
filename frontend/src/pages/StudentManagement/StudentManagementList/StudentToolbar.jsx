@@ -3,6 +3,27 @@
 import { useNavigate } from 'react-router-dom';
 import { gradients } from 'theme/palette';
 import { STATUS_MAP, DISABILITY_LABELS } from './studentManagement.constants';
+import {
+  Box,
+  Button,
+  Chip,
+  FormControl,
+  IconButton,
+  InputAdornment,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import Search from '@mui/icons-material/Search';
+import Close from '@mui/icons-material/Close';
+import Refresh from '@mui/icons-material/Refresh';
+import Download from '@mui/icons-material/Download';
+import Add from '@mui/icons-material/Add';
+import FilterList from '@mui/icons-material/FilterList';
 
 /** Search bar, filter dropdowns, action buttons, and result count */
 const StudentToolbar = ({

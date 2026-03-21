@@ -4,7 +4,6 @@
  */
 import { useState, useEffect } from 'react';
 
-
 import {
   CalendarMonth as CalendarIcon,
   MenuBook as SubjectIcon,
@@ -19,6 +18,20 @@ import {
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { gradients } from '../../theme/palette';
+import {
+  Avatar,
+  Box,
+  Card,
+  CardActionArea,
+  CardContent,
+  Container,
+  Grid,
+  Icon,
+  LinearProgress,
+  Paper,
+  Typography
+} from '@mui/material';
+import SchoolIcon from '@mui/icons-material/School';
 
 /* ── demo stats (fallback) ──────────────────────────────────── */
 const defaultStats = {

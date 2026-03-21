@@ -8,6 +8,23 @@ import {
 import { DEPT_COLORS } from '../../../constants/departmentColors';
 import { statusColors, surfaceColors, neutralColors } from '../../../theme/palette';
 import { STATUS_CONFIG, RATING_CONFIG, COL_MAP } from './performanceEvaluation.constants';
+import {
+  Avatar,
+  Box,
+  Chip,
+  IconButton,
+  LinearProgress,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 /* ─── Cell Renderer ─── */
 const renderCell = (col, value, _row) => {

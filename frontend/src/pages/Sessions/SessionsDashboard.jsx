@@ -1,16 +1,36 @@
 import { useState, useEffect, useCallback } from 'react';
 import computeStatusCounts from '../../utils/computeStatusCounts';
 
-
-
-
-
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, chartColors, statusColors } from '../../theme/palette';
 import logger from '../../utils/logger';
 import therapySessionsService from '../../services/therapySessions.service';
 import { useNavigate } from 'react-router-dom';
 import { STATUS_MAP as CONST_STATUS_MAP, getSessionType } from './constants';
+import {
+  Box,
+  Button,
+  Chip,
+  Container,
+  Grid,
+  LinearProgress,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography
+} from '@mui/material';
+import ScheduleIcon from '@mui/icons-material/Schedule';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import TodayIcon from '@mui/icons-material/Today';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import GroupsIcon from '@mui/icons-material/Groups';
 
 /* ──────── بيانات تجريبية ──────── */
 const DEMO_STATS = {

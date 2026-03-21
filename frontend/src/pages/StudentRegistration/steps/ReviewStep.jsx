@@ -7,6 +7,20 @@ import {
   DISABILITY_TYPES, SEVERITY_LEVELS, PROGRAMS, SHIFTS, WEEK_DAYS,
 } from '../studentRegistrationConfig';
 import { gradients } from 'theme/palette';
+import {
+  Alert,
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  Fade,
+  Table,
+  TableBody,
+  TableCell,
+  TableRow,
+  Typography
+} from '@mui/material';
+import CheckCircle from '@mui/icons-material/CheckCircle';
 
 const ReviewStep = ({ formData, submitError, calculatedAge }) => (
   <Fade in timeout={400}>

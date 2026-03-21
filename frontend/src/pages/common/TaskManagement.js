@@ -7,9 +7,6 @@ import {
   Paper,
 } from '@mui/material';
 
-
-
-
 import {
   tasksService,
   taskReportsService,
@@ -17,6 +14,44 @@ import {
   MOCK_TASK_DASHBOARD,
 } from 'services/taskService';
 import { useSnackbar } from 'contexts/SnackbarContext';
+import {
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  IconButton,
+  InputAdornment,
+  LinearProgress,
+  MenuItem,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  Tabs,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import AddIcon from '@mui/icons-material/Add';
+import SearchIcon from '@mui/icons-material/Search';
+import TaskIcon from '@mui/icons-material/Task';
+import EditIcon from '@mui/icons-material/Edit';
+import StartIcon from '@mui/icons-material/Start';
+import DeleteIcon from '@mui/icons-material/Delete';
+import CloseIcon from '@mui/icons-material/Close';
+import { ViewIcon } from 'utils/iconAliases';
 
 const COLORS = ['#9E9E9E', '#1E88E5', '#43A047', '#FB8C00', '#E53935', '#8E24AA'];
 const taskStatuses = ['لم تبدأ', 'قيد التنفيذ', 'مكتمل'];

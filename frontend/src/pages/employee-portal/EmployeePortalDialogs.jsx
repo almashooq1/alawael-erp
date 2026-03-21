@@ -3,8 +3,22 @@
  * Extracted from EmployeePortal.js for maintainability
  */
 
-
 import { LEAVE_TYPES, REQUEST_TYPES, fmt } from './employeePortalData';
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Grid,
+  MenuItem,
+  Paper,
+  TextField,
+  Typography
+} from '@mui/material';
+import DownloadIcon from '@mui/icons-material/Download';
 
 /* ─── Leave Request Dialog ─── */
 export function LeaveDialog({

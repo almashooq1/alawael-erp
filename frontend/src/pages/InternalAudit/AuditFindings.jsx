@@ -3,8 +3,31 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 
-
 import { getFindings, createFinding, updateFinding } from '../../services/internalAudit.service';
+import {
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  MenuItem,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TablePagination,
+  TableRow,
+  TextField,
+  Typography
+} from '@mui/material';
+import Refresh from '@mui/icons-material/Refresh';
+import Add from '@mui/icons-material/Add';
+import Edit from '@mui/icons-material/Edit';
 
 const severityOptions = [
   { value: 'minor', label: 'طفيفة', color: 'info' },

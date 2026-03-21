@@ -6,6 +6,19 @@ import {
   Paper,
 } from '@mui/material';
 import { REQUEST_TYPES, STATUS_MAP } from './employeePortalData';
+import {
+  Box,
+  Button,
+  Chip,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography
+} from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
 
 export default function RequestsTab({ requests, onOpenDialog }) {
   return (

@@ -11,6 +11,13 @@
  */
 
 import { statusColors } from '../../theme/palette';
+import {
+  Box,
+  Card,
+  CardContent,
+  Grid,
+  Typography
+} from '@mui/material';
 
 const DashboardTab = ({ stats, categories, setSelectedCategory, setActiveTab }) => (
   <Grid container spacing={3}>

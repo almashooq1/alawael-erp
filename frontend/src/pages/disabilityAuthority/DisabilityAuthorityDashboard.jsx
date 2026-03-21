@@ -4,8 +4,36 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 
-
 import disabilityAuthorityService from '../../services/disabilityAuthority.service';
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Grid,
+  IconButton,
+  LinearProgress,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  Typography
+} from '@mui/material';
+import Refresh from '@mui/icons-material/Refresh';
+import Assessment from '@mui/icons-material/Assessment';
+import Star from '@mui/icons-material/Star';
+import Add from '@mui/icons-material/Add';
+import ExpandMore from '@mui/icons-material/ExpandMore';
 
 const reportStatusLabels = {
   draft: 'مسودة', under_review: 'قيد المراجعة', approved: 'معتمد',

@@ -1,4 +1,10 @@
-import { alpha } from '@mui/material';
+import {
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  alpha
+} from '@mui/material';
 
 /**
  * InfoCard — Informational display card with icon, title, and content.

@@ -4,12 +4,36 @@
  */
 import { useState, useMemo } from 'react';
 
-
-
-
 import assessmentService from 'services/assessmentService';
 import logger from 'utils/logger';
 import { SCALE_ICONS } from './constants';
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Checkbox,
+  Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  FormControl,
+  FormControlLabel,
+  IconButton,
+  InputLabel,
+  LinearProgress,
+  MenuItem,
+  Paper,
+  Select,
+  Slider,
+  TextField,
+  Typography
+} from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import SaveIcon from '@mui/icons-material/Save';
 
 const BatchAssessmentDialog = ({
   open,

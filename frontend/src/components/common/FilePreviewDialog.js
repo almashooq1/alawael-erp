@@ -18,10 +18,30 @@
 import { useState, useEffect } from 'react';
 import { triggerUrlDownload } from 'utils/downloadHelper';
 
-
-
-
 import { gradients, surfaceColors } from 'theme/palette';
+import {
+  Alert,
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  Stack,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
+import ZoomInIcon from '@mui/icons-material/ZoomIn';
+import ZoomOutIcon from '@mui/icons-material/ZoomOut';
+import RotateRightIcon from '@mui/icons-material/RotateRight';
+import PrintIcon from '@mui/icons-material/Print';
+import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
+import NavigateNextIcon from '@mui/icons-material/NavigateNext';
+import DownloadIcon from '@mui/icons-material/Download';
 
 const FilePreviewDialog = ({ open, onClose, file, files = [], currentIndex = 0, onNavigate }) => {
   const [loading, setLoading] = useState(true);

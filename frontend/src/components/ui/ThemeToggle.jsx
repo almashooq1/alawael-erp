@@ -4,6 +4,7 @@
  */
 
 import { useThemeMode } from 'contexts/ThemeContext';
+import { IconButton, Tooltip } from '@mui/material';
 
 const ThemeToggle = ({ sx = {} }) => {
   const { mode, toggleTheme } = useThemeMode();

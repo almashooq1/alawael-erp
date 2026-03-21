@@ -2,11 +2,26 @@
  * CompensationStructureManagement — StructureCard (expandable)
  */
 
-
-
-
 import { statusColors, neutralColors } from '../../theme/palette';
 import { SCOPE_LABELS } from './constants';
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Collapse,
+  Divider,
+  Grid,
+  IconButton,
+  Paper,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import ExpandIcon from '@mui/icons-material/Expand';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { ActiveIcon, AllowanceIcon, CollapseIcon, CopyIcon, DeductionIcon, InactiveIcon, MoneyIcon } from 'utils/iconAliases';
 
 const StructureCard = ({
   structure, expanded, onToggle,

@@ -4,10 +4,29 @@
  */
 
 
-
-
 import { gradients, statusColors, neutralColors } from 'theme/palette';
 import { useCompensation } from './useCompensation';
+import {
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  IconButton,
+  LinearProgress,
+  Paper,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import AddIcon from '@mui/icons-material/Add';
+import { ActiveIcon, AllowanceIcon, LeaveIcon, StructureIcon } from 'utils/iconAliases';
 
 const CompensationStructureManagement = () => {
   const {

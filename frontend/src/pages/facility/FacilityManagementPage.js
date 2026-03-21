@@ -6,8 +6,41 @@ import {
   Paper,
 } from '@mui/material';
 
-
 import facilityService from '../../services/facility.service';
+import {
+  Alert,
+  Avatar,
+  Badge,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  IconButton,
+  LinearProgress,
+  MenuItem,
+  Stack,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  TextField,
+  Typography
+} from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import RoomIcon from '@mui/icons-material/Room';
+import EditIcon from '@mui/icons-material/Edit';
 
 const DEMO_ROOMS = [
   {

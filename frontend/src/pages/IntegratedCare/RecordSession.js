@@ -1,11 +1,23 @@
 import { useState, useEffect } from 'react';
 
-
 import apiClient from 'services/api.client';
 import { useNavigate } from 'react-router-dom';
 import logger from 'utils/logger';
 import { useSnackbar } from 'contexts/SnackbarContext';
 import { gradients } from '../../theme/palette';
+import {
+  Box,
+  Button,
+  Container,
+  Grid,
+  MenuItem,
+  Paper,
+  Rating,
+  TextField,
+  Typography
+} from '@mui/material';
+import EventNoteIcon from '@mui/icons-material/EventNote';
+import SaveIcon from '@mui/icons-material/Save';
 
 function RecordSession() {
   const showSnackbar = useSnackbar();

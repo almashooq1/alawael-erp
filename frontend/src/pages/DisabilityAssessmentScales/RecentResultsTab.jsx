@@ -1,6 +1,16 @@
 
 
 import { surfaceColors } from '../../theme/palette';
+import {
+  Alert,
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  Grid,
+  LinearProgress,
+  Typography
+} from '@mui/material';
 
 /**
  * Tab 1 — shows the most recent assessment results with domain mini‑bars.

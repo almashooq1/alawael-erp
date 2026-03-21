@@ -2,9 +2,28 @@
  * EmployeeTable – paginated table for employee list.
  */
 
-
-
 import { STATUS_MAP } from './employeeManagement.constants';
+import {
+  Avatar,
+  Box,
+  Chip,
+  IconButton,
+  Paper,
+  Skeleton,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { CopyIcon, ViewIcon } from 'utils/iconAliases';
 
 /* ── helpers ── */
 const stringToColor = (str = '') => {

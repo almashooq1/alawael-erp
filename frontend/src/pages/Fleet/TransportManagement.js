@@ -4,12 +4,71 @@
  * @created 2026-03-13
  */
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Paper, alpha, useTheme } from '@mui/material';
+import {
+  Avatar,
+  Badge,
+  Box,
+  Breadcrumbs,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Fade,
+  FormControl,
+  Grid,
+  IconButton,
+  InputAdornment,
+  InputLabel,
+  Link,
+  MenuItem,
+  Paper,
+  Rating,
+  Select,
+  Stack,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  Tabs,
+  TextField,
+  Tooltip,
+  Typography,
+  alpha,
+  useTheme
+} from '@mui/material';
 
 import transportService from 'services/transportService';
 import logger from 'utils/logger';
 import { gradients } from 'theme/palette';
 import { useSnackbar } from '../../contexts/SnackbarContext';
+import CheckIcon from '@mui/icons-material/Check';
+import WarningIcon from '@mui/icons-material/Warning';
+import CancelIcon from '@mui/icons-material/Cancel';
+import HomeIcon from '@mui/icons-material/Home';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import RouteIcon from '@mui/icons-material/Route';
+import SpeedIcon from '@mui/icons-material/Speed';
+import AnalyticsIcon from '@mui/icons-material/Analytics';
+import SearchIcon from '@mui/icons-material/Search';
+import AddIcon from '@mui/icons-material/Add';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import PhoneIcon from '@mui/icons-material/Phone';
+import StarIcon from '@mui/icons-material/Star';
+import SaveIcon from '@mui/icons-material/Save';
+import CloseIcon from '@mui/icons-material/Close';
+import { TrendIcon, ViewIcon } from 'utils/iconAliases';
 
 /* ═══ Constants ═══ */
 const STATUS_MAP = {

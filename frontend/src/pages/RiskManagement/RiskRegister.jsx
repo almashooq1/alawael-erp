@@ -5,6 +5,36 @@ import { useState, useEffect, useCallback } from 'react';
 import { useTheme, alpha,
 } from '@mui/material';
 import { getRisks, createRisk, updateRisk, deleteRisk } from '../../services/riskManagement.service';
+import {
+  Alert,
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import Refresh from '@mui/icons-material/Refresh';
+import Add from '@mui/icons-material/Add';
+import Warning from '@mui/icons-material/Warning';
+import Edit from '@mui/icons-material/Edit';
+import Delete from '@mui/icons-material/Delete';
 
 const CAT_LABELS = { strategic: 'استراتيجي', operational: 'تشغيلي', financial: 'مالي', compliance: 'امتثال', reputational: 'سمعة', technology: 'تقنية', environmental: 'بيئي', safety: 'سلامة', legal: 'قانوني', other: 'أخرى' };
 const STATUS_LABELS = { identified: 'محددة', assessed: 'مقيّمة', mitigating: 'قيد التخفيف', monitoring: 'مراقبة', resolved: 'محلولة', accepted: 'مقبولة', closed: 'مغلقة' };

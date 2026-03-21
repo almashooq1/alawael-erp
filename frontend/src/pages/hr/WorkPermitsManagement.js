@@ -6,7 +6,6 @@ import {
   Paper,
 } from '@mui/material';
 
-
 import {
   getWorkPermits,
   createWorkPermit,
@@ -15,6 +14,37 @@ import {
   getExpiringPermits,
   getWorkPermitStats,
 } from '../../services/hr/employeeAffairsPhase2Service';
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Grid,
+  IconButton,
+  MenuItem,
+  Snackbar,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import WarningIcon from '@mui/icons-material/Warning';
+import AddIcon from '@mui/icons-material/Add';
+import { ViewIcon } from 'utils/iconAliases';
 
 const DOC_TYPES = [
   'إقامة',

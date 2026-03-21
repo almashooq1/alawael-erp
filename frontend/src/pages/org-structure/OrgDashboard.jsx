@@ -5,6 +5,24 @@ import { useState, useEffect } from 'react';
 
 import { AccountTree, Business, People, BadgeOutlined } from '@mui/icons-material';
 import apiClient from '../../services/api';
+import {
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  Grid,
+  Icon,
+  LinearProgress,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tooltip,
+  Typography
+} from '@mui/material';
 
 const KPICard = ({ icon: Icon, title, value, color }) => (
   <Card sx={{ height: '100%' }}>

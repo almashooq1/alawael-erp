@@ -2,8 +2,23 @@
  * LeaveManagement — Table with leave rows + pagination
  */
 
-
 import { STATUS_CONFIG } from './constants';
+import {
+  Avatar,
+  Box,
+  Chip,
+  IconButton,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import { ViewIcon } from 'utils/iconAliases';
 
 const LeaveTable = ({
   filtered, page, setPage, rowsPerPage, setRowsPerPage,

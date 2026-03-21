@@ -11,13 +11,65 @@
  */
 import { useState, useCallback, useRef } from 'react';
 
-
-
-
 import { gradients } from 'theme/palette';
 import { useSnackbar } from 'contexts/SnackbarContext';
 import { useAuth } from 'contexts/AuthContext';
 import logger from 'utils/logger';
+import {
+  Alert,
+  Avatar,
+  Badge,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  Chip,
+  CircularProgress,
+  Collapse,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Fade,
+  FormControl,
+  FormControlLabel,
+  Grid,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  Slider,
+  Stack,
+  Switch,
+  Tab,
+  Tabs,
+  TextField,
+  Typography
+} from '@mui/material';
+import ImageIcon from '@mui/icons-material/Image';
+import PaletteIcon from '@mui/icons-material/Palette';
+import TextFieldsIcon from '@mui/icons-material/TextFields';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import TuneIcon from '@mui/icons-material/Tune';
+import BrushIcon from '@mui/icons-material/Brush';
+import PreviewIcon from '@mui/icons-material/Preview';
+import SaveIcon from '@mui/icons-material/Save';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import CameraIcon from '@mui/icons-material/Camera';
+import UploadIcon from '@mui/icons-material/Upload';
+import DeleteIcon from '@mui/icons-material/Delete';
+import WallpaperIcon from '@mui/icons-material/Wallpaper';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import CheckIcon from '@mui/icons-material/Check';
+import ColorLensIcon from '@mui/icons-material/ColorLens';
+import GradientIcon from '@mui/icons-material/Gradient';
+import DarkModeIcon from '@mui/icons-material/DarkMode';
+import SettingsIcon from '@mui/icons-material/Settings';
+import RefreshIcon from '@mui/icons-material/Refresh';
 
 // =================== تعريف الثيمات المُعدّة مسبقاً ===================
 const PRESET_THEMES = [

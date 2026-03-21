@@ -6,6 +6,17 @@
  * StudentTable, DeleteStudentDialog
  */
 import useStudentList from './useStudentList';
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Container,
+  Slide,
+  Snackbar,
+  Typography
+} from '@mui/material';
+import School from '@mui/icons-material/School';
 
 const StudentManagementList = () => {
   const {

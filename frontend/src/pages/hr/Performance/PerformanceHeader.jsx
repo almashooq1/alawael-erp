@@ -3,8 +3,18 @@
  * Extracted from PerformanceEvaluation.js
  */
 
-
 import { gradients } from '../../../theme/palette';
+import {
+  Avatar,
+  Box,
+  Button,
+  Paper,
+  Typography
+} from '@mui/material';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import DownloadIcon from '@mui/icons-material/Download';
+import PrintIcon from '@mui/icons-material/Print';
+import RefreshIcon from '@mui/icons-material/Refresh';
 
 const PerformanceHeader = ({ handleExportCSV, loadData }) => (
   <>

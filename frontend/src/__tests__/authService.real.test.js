@@ -4,6 +4,10 @@
  */
 
 // Mock apiClient before imports
+import authService from 'services/auth.service';
+import apiClient from 'services/api.client';
+import { removeToken, getToken, getUserData, removeUserData } from 'utils/tokenStorage';
+import { getPortal, removePortal } from 'utils/storageService';
 jest.mock('services/api.client', () => ({
   post: jest.fn(),
   get: jest.fn(),
@@ -23,10 +27,6 @@ jest.mock('utils/storageService', () => ({
   removePortal: jest.fn(),
 }));
 
-import authService from 'services/auth.service';
-import apiClient from 'services/api.client';
-import { removeToken, getToken, getUserData, removeUserData } from 'utils/tokenStorage';
-import { getPortal, removePortal } from 'utils/storageService';
 
 beforeEach(() => {
   jest.clearAllMocks();

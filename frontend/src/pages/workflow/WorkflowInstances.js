@@ -10,9 +10,36 @@ import {
   alpha,
 } from '@mui/material';
 
-
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import workflowService from '../../services/workflow.service';
+import {
+  Avatar,
+  Box,
+  Button,
+  Chip,
+  IconButton,
+  InputAdornment,
+  LinearProgress,
+  Paper,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  Tabs,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import CancelIcon from '@mui/icons-material/Cancel';
+import ErrorIcon from '@mui/icons-material/Error';
+import StartIcon from '@mui/icons-material/Start';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import SearchIcon from '@mui/icons-material/Search';
+import { ViewIcon } from 'utils/iconAliases';
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 const INSTANCE_STATUS = {

@@ -5,6 +5,23 @@ import {
   Paper,
 } from '@mui/material';
 import { LEAVE_TYPES, STATUS_MAP } from './employeePortalData';
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Grid,
+  LinearProgress,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography
+} from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
 
 export default function LeavesTab({ leaveBalances, leaveHistory, onOpenLeaveDialog }) {
   return (

@@ -13,6 +13,7 @@
  */
 import { SIDEBAR_WIDTH } from './sidebarConstants';
 import useSidebarNav from './useSidebarNav';
+import { Box, Drawer } from '@mui/material';
 
 const ProSidebar = ({ open, onClose, collapsed, onToggleCollapse }) => {
   const nav = useSidebarNav({ collapsed, onClose });

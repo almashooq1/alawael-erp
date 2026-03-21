@@ -2,11 +2,22 @@
  * ProfileTab — بوابة الموظف: تبويب الملف الشخصي
  */
 
-
-
-
 import { statusColors } from '../../theme/palette';
 import { fmt } from './employeePortalData';
+import {
+  Box,
+  Card,
+  CardContent,
+  Divider,
+  Grid,
+  Typography
+} from '@mui/material';
+import PersonIcon from '@mui/icons-material/Person';
+import BadgeIcon from '@mui/icons-material/Badge';
+import WorkIcon from '@mui/icons-material/Work';
+import PhoneIcon from '@mui/icons-material/Phone';
+import EmailIcon from '@mui/icons-material/Email';
+import { CalendarIcon } from 'utils/iconAliases';
 
 export default function ProfileTab({
   profile,

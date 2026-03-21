@@ -1,12 +1,34 @@
 import { useState, useEffect } from 'react';
 
-
-
-
 import accountingService from 'services/accountingService';
 import logger from 'utils/logger';
 import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';
 import { useSnackbar } from '../../contexts/SnackbarContext';
+import {
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Container,
+  Divider,
+  FormControl,
+  Grid,
+  LinearProgress,
+  MenuItem,
+  Select,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableRow,
+  Tabs,
+  Typography
+} from '@mui/material';
+import BalanceIcon from '@mui/icons-material/Balance';
+import ReportIcon from '@mui/icons-material/Report';
+import { ChartIcon, ExcelIcon, PdfIcon } from 'utils/iconAliases';
 
 const FinancialReports = () => {
   const showSnackbar = useSnackbar();

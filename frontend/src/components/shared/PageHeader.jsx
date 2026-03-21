@@ -1,4 +1,13 @@
-import { alpha } from '@mui/material';
+import {
+  Box,
+  Breadcrumbs,
+  Chip,
+  IconButton,
+  Link,
+  Tooltip,
+  Typography,
+  alpha
+} from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { gradients } from 'theme/palette';
 
@@ -10,6 +19,7 @@ import { gradients } from 'theme/palette';
  * @param {string}  [props.subtitle]   — Optional subtitle
  * @param {string}  [props.gradient]   — Override gradient (default: primary)
  * @param {Array}   [props.breadcrumbs]— [{label,path},...] breadcrumb items
+import HomeIcon from '@mui/icons-material/Home';
  * @param {Array}   [props.chips]      — [{label,icon?,color?},...] info chips
  * @param {node}    [props.actions]    — Right-side action buttons
  * @param {node}    [props.avatar]     — Left avatar / icon

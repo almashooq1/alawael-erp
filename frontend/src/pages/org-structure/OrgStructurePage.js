@@ -6,8 +6,43 @@ import {
   Paper,
 } from '@mui/material';
 
-
 import orgStructureService from '../../services/orgStructure.service';
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  IconButton,
+  LinearProgress,
+  MenuItem,
+  Stack,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  TextField,
+  Typography
+} from '@mui/material';
+import ExpandIcon from '@mui/icons-material/Expand';
+import EditIcon from '@mui/icons-material/Edit';
+import AddIcon from '@mui/icons-material/Add';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import GroupIcon from '@mui/icons-material/Group';
+import WorkIcon from '@mui/icons-material/Work';
+import { CollapseIcon } from 'utils/iconAliases';
 
 const DEMO_DEPARTMENTS = [
   {

@@ -2,6 +2,7 @@
  * Register Page — Constants & Utility Functions
  */
 import { gradients, statusColors, assessmentColors, surfaceColors } from 'theme/palette';
+import School from '@mui/icons-material/School';
 
 // ─── Password Strength Logic ─────────────────────────
 export const getPasswordStrength = password => {

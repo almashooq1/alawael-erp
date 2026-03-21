@@ -1,12 +1,31 @@
 import { useState, useEffect, useCallback } from 'react';
 
-
-
-
 import payrollService from 'services/payrollService';
 import logger from 'utils/logger';
 import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';
 import { useSnackbar } from '../../contexts/SnackbarContext';
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Container,
+  Divider,
+  Grid,
+  InputAdornment,
+  LinearProgress,
+  Table,
+  TableBody,
+  TableCell,
+  TableRow,
+  TextField,
+  Typography
+} from '@mui/material';
+import SettingsIcon from '@mui/icons-material/Settings';
+import SaveIcon from '@mui/icons-material/Save';
 
 const PayrollSettings = () => {
   const showSnackbar = useSnackbar();

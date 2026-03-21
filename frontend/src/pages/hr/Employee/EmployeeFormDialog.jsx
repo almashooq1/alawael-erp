@@ -3,9 +3,33 @@
  * Steps: 0 = personal info, 1 = employment info, 2 = documents.
  */
 
-
-
 import { DEPARTMENTS, STATUS_MAP } from './employeeManagement.constants';
+import {
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Grid,
+  IconButton,
+  MenuItem,
+  Stack,
+  Step,
+  StepLabel,
+  Stepper,
+  TextField,
+  Typography
+} from '@mui/material';
+import PersonIcon from '@mui/icons-material/Person';
+import WorkIcon from '@mui/icons-material/Work';
+import UploadIcon from '@mui/icons-material/Upload';
+import PrintIcon from '@mui/icons-material/Print';
+import CloseIcon from '@mui/icons-material/Close';
+import SaveIcon from '@mui/icons-material/Save';
 
 /* ── step labels ── */
 const STEPS = [

@@ -2,8 +2,7 @@
  * Operations constants — statusColors, tabs config, column maps, dialog fields
  */
 
-
-
+import ScheduleIcon from '@mui/icons-material/Schedule';
 export const OP_STATUS_COLORS = {
   active: 'success',
   operational: 'success',

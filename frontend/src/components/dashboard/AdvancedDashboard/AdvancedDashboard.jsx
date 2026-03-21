@@ -2,7 +2,7 @@
  * 📊 Advanced Dashboard v3 — Orchestrator
  * لوحة التحكم التنفيذية المحسّنة مع شريط تنقل سريع بين الأقسام
  */
-import { useTheme } from '@mui/material';
+import { Box, useTheme } from '@mui/material';
 import { SECTIONS } from '../dashboardConstants';
 import { useAdvancedDashboard } from './useAdvancedDashboard';
 import { gradients } from 'theme/palette';

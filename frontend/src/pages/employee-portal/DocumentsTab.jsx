@@ -3,11 +3,22 @@
  * Extracted from EmployeePortal.js for maintainability
  */
 
-
-
-
 import { statusColors } from '../../theme/palette';
 import documentService from 'services/documentService';
+import {
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  CircularProgress,
+  Grid,
+  Typography
+} from '@mui/material';
+import FolderOpenIcon from '@mui/icons-material/FolderOpen';
+import DownloadIcon from '@mui/icons-material/Download';
+import { DocIcon } from 'utils/iconAliases';
 
 export default function DocumentsTab({ documents, loading }) {
   const handleDownload = async doc => {

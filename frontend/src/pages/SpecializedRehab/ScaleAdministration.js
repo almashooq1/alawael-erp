@@ -9,13 +9,48 @@ import {
   alpha,
 } from '@mui/material';
 
-
 import {
   SPECIALIZED_SCALES_CATALOG,
   SCALE_CATEGORY_LABELS,
   specializedScalesService,
 } from 'services/specializedRehab.service';
 import { useSnackbar } from 'contexts/SnackbarContext';
+import {
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Divider,
+  Grid,
+  InputAdornment,
+  LinearProgress,
+  Slider,
+  Stack,
+  Step,
+  StepLabel,
+  Stepper,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  TextField,
+  Typography
+} from '@mui/material';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import HistoryIcon from '@mui/icons-material/History';
+import TimerIcon from '@mui/icons-material/Timer';
+import PersonIcon from '@mui/icons-material/Person';
+import ForwardIcon from '@mui/icons-material/Forward';
+import SaveIcon from '@mui/icons-material/Save';
+import RefreshIcon from '@mui/icons-material/Refresh';
 
 const SEVERITY_COLORS = {
   normal: '#4CAF50',

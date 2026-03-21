@@ -3,10 +3,24 @@
  */
 import { useState, useEffect } from 'react';
 
-
-
-
 import apiClient from '../../services/api';
+import {
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Grid,
+  LinearProgress,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Tooltip,
+  Typography
+} from '@mui/material';
 
 const PIE_COLORS = ['#4caf50', '#ff9800', '#f44336', '#1976d2', '#9c27b0'];
 const complianceLevels = { full: 'ممتثل', partial: 'جزئي', non_compliant: 'غير ممتثل', pending: 'قيد المراجعة' };

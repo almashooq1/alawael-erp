@@ -10,13 +10,80 @@ import {
   useTheme,
 } from '@mui/material';
 
-
-
-
 import archivingService from 'services/archivingService';
 import logger from 'utils/logger';
 import { gradients } from 'theme/palette';
 import { useSnackbar } from '../../contexts/SnackbarContext';
+import {
+  Avatar,
+  Badge,
+  Box,
+  Breadcrumbs,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Fade,
+  FormControl,
+  Grid,
+  IconButton,
+  InputAdornment,
+  InputLabel,
+  LinearProgress,
+  Link,
+  MenuItem,
+  Select,
+  Stack,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  Tabs,
+  TextField,
+  Tooltip,
+  Typography
+} from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import CheckIcon from '@mui/icons-material/Check';
+import ArchiveIcon from '@mui/icons-material/Archive';
+import WarningIcon from '@mui/icons-material/Warning';
+import RestoreIcon from '@mui/icons-material/Restore';
+import DeleteIcon from '@mui/icons-material/Delete';
+import ImageIcon from '@mui/icons-material/Image';
+import LockIcon from '@mui/icons-material/Lock';
+import LockOpenIcon from '@mui/icons-material/LockOpen';
+import HomeIcon from '@mui/icons-material/Home';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import StorageIcon from '@mui/icons-material/Storage';
+import HistoryIcon from '@mui/icons-material/History';
+import CategoryIcon from '@mui/icons-material/Category';
+import SecurityIcon from '@mui/icons-material/Security';
+import AnalyticsIcon from '@mui/icons-material/Analytics';
+import UploadIcon from '@mui/icons-material/Upload';
+import FilterIcon from '@mui/icons-material/Filter';
+import SearchIcon from '@mui/icons-material/Search';
+import DownloadIcon from '@mui/icons-material/Download';
+import ShareIcon from '@mui/icons-material/Share';
+import PrintIcon from '@mui/icons-material/Print';
+import ShieldIcon from '@mui/icons-material/Shield';
+import TimerIcon from '@mui/icons-material/Timer';
+import PersonIcon from '@mui/icons-material/Person';
+import SaveIcon from '@mui/icons-material/Save';
+import CloseIcon from '@mui/icons-material/Close';
+import TagIcon from '@mui/icons-material/Tag';
+import FolderIcon from '@mui/icons-material/Folder';
+import { DocIcon, ExcelIcon, FileIcon, PdfIcon, PptIcon, TrendIcon, ViewIcon, ZipIcon } from 'utils/iconAliases';
 
 /* ═══ Helpers ═══ */
 const STATUS_MAP = {

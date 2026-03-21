@@ -8,7 +8,6 @@ import {
   alpha,
 } from '@mui/material';
 
-
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from 'contexts/SnackbarContext';
 import {
@@ -17,6 +16,37 @@ import {
   therapySessionService,
   assistiveDeviceService,
 } from 'services/disabilityRehabService';
+import {
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Divider,
+  Grid,
+  LinearProgress,
+  Paper,
+  Stack,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  Typography
+} from '@mui/material';
+import PeopleIcon from '@mui/icons-material/People';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import DevicesIcon from '@mui/icons-material/Devices';
+import CheckIcon from '@mui/icons-material/Check';
+import SpeedIcon from '@mui/icons-material/Speed';
+import WarningIcon from '@mui/icons-material/Warning';
+import ScheduleIcon from '@mui/icons-material/Schedule';
+import { TrendIcon } from 'utils/iconAliases';
 
 /* ───── helpers ───── */
 const fmtNum = n => (n ?? 0).toLocaleString('ar-SA');

@@ -1,13 +1,34 @@
 import { useState, useEffect, useCallback } from 'react';
 
-
-
-
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, chartColors, statusColors, neutralColors } from '../../theme/palette';
 import logger from '../../utils/logger';
 import operationsService from '../../services/operations.service';
 import { useNavigate } from 'react-router-dom';
+import {
+  Box,
+  Button,
+  Chip,
+  Container,
+  Grid,
+  LinearProgress,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography
+} from '@mui/material';
+import SettingsIcon from '@mui/icons-material/Settings';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import InventoryIcon from '@mui/icons-material/Inventory';
+import EngineeringIcon from '@mui/icons-material/Engineering';
+import BuildIcon from '@mui/icons-material/Build';
+import WarningIcon from '@mui/icons-material/Warning';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import BusinessIcon from '@mui/icons-material/Business';
 
 /* ──────── بيانات تجريبية ──────── */
 const DEMO_STATS = {

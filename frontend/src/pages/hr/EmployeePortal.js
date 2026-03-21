@@ -12,11 +12,9 @@ import { DEPT_COLORS } from '../../constants/departmentColors';
 import employeePortalService from '../../services/employeePortal.service';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 
-
 import { gradients, statusColors } from '../../theme/palette';
 
 /* Sub-components */
-
 
 import {
   demoProfile,
@@ -26,6 +24,21 @@ import {
   demoDocuments,
   demoRequests,
 } from './employee-portal/employeePortalData';
+import {
+  Avatar,
+  Box,
+  Button,
+  Chip,
+  Paper,
+  Stack,
+  Tab,
+  Tabs,
+  Typography
+} from '@mui/material';
+import PersonIcon from '@mui/icons-material/Person';
+import BadgeIcon from '@mui/icons-material/Badge';
+import PrintIcon from '@mui/icons-material/Print';
+import { DocIcon, LeaveIcon } from 'utils/iconAliases';
 
 /* ─── Component ─── */
 export default function EmployeePortal() {

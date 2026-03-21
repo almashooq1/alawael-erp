@@ -9,6 +9,39 @@ import { Paper,
 } from '@mui/material';
 
 import guardianApi from '../../services/guardianPortal.service';
+import {
+  Alert,
+  Avatar,
+  Badge,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Divider,
+  Grid,
+  IconButton,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  Typography
+} from '@mui/material';
+import PersonIcon from '@mui/icons-material/Person';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import MessageIcon from '@mui/icons-material/Message';
+import PaymentIcon from '@mui/icons-material/Payment';
+import StarIcon from '@mui/icons-material/Star';
+import { CalendarIcon } from 'utils/iconAliases';
 
 export default function GuardianPortalDashboard() {
   const [tab, setTab] = useState(0);

@@ -1,14 +1,31 @@
 import { useState, useEffect, useCallback } from 'react';
 
-
-
-
-
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, chartColors, statusColors, brandColors } from '../../theme/palette';
 import logger from '../../utils/logger';
 import qualityService from '../../services/quality.service';
 import { useNavigate } from 'react-router-dom';
+import {
+  Box,
+  Button,
+  Chip,
+  Container,
+  Grid,
+  LinearProgress,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography
+} from '@mui/material';
+import SecurityIcon from '@mui/icons-material/Security';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import ErrorIcon from '@mui/icons-material/Error';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 
 /* ──────── بيانات تجريبية ──────── */
 const DEMO_STATS = {

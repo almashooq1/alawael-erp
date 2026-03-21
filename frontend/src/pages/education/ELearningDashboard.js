@@ -1,13 +1,36 @@
 // Phase 5: E-Learning Dashboard
 import { useState, useEffect, useCallback } from 'react';
 
-
 import { useNavigate } from 'react-router-dom';
 import eLearningService from 'services/eLearning.service';
 import { placeholderImage } from 'utils/placeholderImage';
 import logger from 'utils/logger';
 import { useSnackbar } from 'contexts/SnackbarContext';
 import { gradients } from '../../theme/palette';
+import {
+  Box,
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  CardMedia,
+  Chip,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  LinearProgress,
+  MenuItem,
+  Tab,
+  Tabs,
+  TextField,
+  Typography
+} from '@mui/material';
+import SchoolIcon from '@mui/icons-material/School';
+import AddIcon from '@mui/icons-material/Add';
+import PlayArrow from '@mui/icons-material/PlayArrow';
 
 // بيانات تجريبية للدورات
 const demoCourses = [

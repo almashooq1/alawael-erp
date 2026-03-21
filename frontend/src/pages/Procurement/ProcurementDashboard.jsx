@@ -3,11 +3,17 @@
  */
 import { useState, useEffect } from 'react';
 
-
-
-
-
 import { getDashboard } from '../../services/procurement.service';
+import {
+  Box,
+  Card,
+  CardContent,
+  CircularProgress,
+  Grid,
+  Paper,
+  Tooltip,
+  Typography
+} from '@mui/material';
 
 const statusLabels = { draft: 'مسودة', submitted: 'مقدّم', approved: 'معتمد', ordered: 'تم الطلب', received: 'مستلم' };
 const PIE_COLORS = ['#607d8b', '#2196f3', '#4caf50', '#ff9800', '#1976d2'];

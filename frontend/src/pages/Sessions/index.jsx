@@ -5,8 +5,20 @@
  * Uses /api/therapy-sessions endpoints via therapySessions.service.js.
  */
 
-
 import useSessionsManagement from './useSessionsManagement';
+import {
+  Alert,
+  Box,
+  Button,
+  Container,
+  Grid,
+  IconButton,
+  Stack,
+  Typography
+} from '@mui/material';
+import EventIcon from '@mui/icons-material/Event';
+import AddIcon from '@mui/icons-material/Add';
+import Refresh from '@mui/icons-material/Refresh';
 
 const SessionsManagement = () => {
   const ctx = useSessionsManagement();

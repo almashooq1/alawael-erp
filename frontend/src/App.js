@@ -50,6 +50,14 @@ import {
   RecruitmentRoutes,
   FleetRoutes,
   CrisisManagementRoutes,
+  PayrollRoutes,
+  EmployeeAffairsRoutes,
+  AttendanceRoutes,
+  MessagingRoutes,
+  QualityComplianceRoutes,
+  StrategicPlanningRoutes,
+  DocumentManagementRoutes,
+  MeetingsRoutes,
 } from './routes';
 
 // Pages — Keep eagerly loaded (critical path / small)
@@ -223,6 +231,14 @@ function AppContent() {
                               {RecruitmentRoutes()}
                               {FleetRoutes()}
                               {CrisisManagementRoutes()}
+                              {PayrollRoutes()}
+                              {EmployeeAffairsRoutes()}
+                              {AttendanceRoutes()}
+                              {MessagingRoutes()}
+                              {QualityComplianceRoutes()}
+                              {StrategicPlanningRoutes()}
+                              {DocumentManagementRoutes()}
+                              {MeetingsRoutes()}
                               {/* === Shared / Cross-cutting Routes === */}
                               {/* AI & Analytics */}
                               <Route

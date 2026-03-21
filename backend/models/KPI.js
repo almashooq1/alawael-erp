@@ -10,7 +10,7 @@ const measurementSchema = new mongoose.Schema({
 
 const kpiSchema = new mongoose.Schema(
   {
-    kpiId: { type: String, required: true, unique: true, index: true },
+    kpiId: { type: String, required: true, unique: true },
     name: { type: String, required: true, minlength: 3, maxlength: 200 },
     description: { type: String, maxlength: 500 },
     category: {

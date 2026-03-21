@@ -154,7 +154,6 @@ const SchoolBusSchema = new mongoose.Schema(
 );
 
 // Indexes
-SchoolBusSchema.index({ busId: 1 });
 SchoolBusSchema.index({ 'school.schoolId': 1 });
 SchoolBusSchema.index({ 'driver.driverId': 1 });
 

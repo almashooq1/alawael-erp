@@ -418,7 +418,6 @@ earlyInterventionChildSchema.pre('save', async function (next) {
 });
 
 // Indexes
-earlyInterventionChildSchema.index({ childNumber: 1 });
 earlyInterventionChildSchema.index({ nationalId: 1 });
 earlyInterventionChildSchema.index({ status: 1 });
 earlyInterventionChildSchema.index({ 'birthInfo.birthDate': 1 });
@@ -738,7 +737,6 @@ ifspSchema.pre('save', async function (next) {
 });
 
 ifspSchema.index({ child: 1 });
-ifspSchema.index({ planNumber: 1 });
 ifspSchema.index({ status: 1 });
 ifspSchema.index({ serviceCoordinator: 1 });
 ifspSchema.index({ startDate: -1 });
@@ -900,7 +898,6 @@ earlyReferralSchema.pre('save', async function (next) {
   next();
 });
 
-earlyReferralSchema.index({ referralNumber: 1 });
 earlyReferralSchema.index({ child: 1 });
 earlyReferralSchema.index({ status: 1 });
 earlyReferralSchema.index({ referralDirection: 1 });

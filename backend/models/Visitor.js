@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 
 const visitorSchema = new mongoose.Schema(
   {
-    visitorId: { type: String, required: true, unique: true, index: true },
+    visitorId: { type: String, required: true, unique: true },
     fullName: { type: String, required: true, minlength: 2, maxlength: 100 },
     nationalId: { type: String },
     phone: { type: String },

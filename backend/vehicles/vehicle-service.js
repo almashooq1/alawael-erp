@@ -205,7 +205,6 @@ const VehicleSchema = new mongoose.Schema(
 );
 
 // Indexes
-VehicleSchema.index({ plateNumber: 1 });
 VehicleSchema.index({ status: 1 });
 VehicleSchema.index({ 'assignment.currentDriver.userId': 1 });
 

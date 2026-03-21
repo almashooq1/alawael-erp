@@ -22,7 +22,7 @@ const attendeeSchema = new mongoose.Schema({
 
 const meetingSchema = new mongoose.Schema(
   {
-    meetingId: { type: String, required: true, unique: true, index: true },
+    meetingId: { type: String, required: true, unique: true },
     title: { type: String, required: true, minlength: 3, maxlength: 200 },
     description: { type: String, maxlength: 1000 },
     type: {

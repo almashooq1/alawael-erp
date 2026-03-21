@@ -44,7 +44,7 @@ const TaqatJobSeekerSchema = new Schema(
     },
 
     // المعلومات الشخصية
-    nationalId: { type: String, required: true, unique: true, index: true },
+    nationalId: { type: String, required: true, unique: true },
     fullName: {
       ar: { type: String, required: true },
       en: { type: String },

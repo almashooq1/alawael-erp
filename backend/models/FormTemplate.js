@@ -324,7 +324,7 @@ const VersionSchema = new mongoose.Schema(
 const FormTemplateSchema = new mongoose.Schema(
   {
     // Identity
-    templateId: { type: String, required: true, unique: true, index: true },
+    templateId: { type: String, required: true, unique: true },
     name: { type: String, required: true, trim: true },
     nameEn: { type: String, trim: true },
     description: { type: String, trim: true },

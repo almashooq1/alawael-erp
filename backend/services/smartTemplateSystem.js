@@ -21,7 +21,7 @@ const logger = require('../utils/logger');
 
 const templateSchema = new mongoose.Schema({
   // معلومات أساسية
-  templateId: { type: String, unique: true, index: true },
+  templateId: { type: String, unique: true },
   name: String,
   category: {
     type: String,

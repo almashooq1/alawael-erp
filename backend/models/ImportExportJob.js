@@ -51,7 +51,7 @@ const validationErrorSchema = new mongoose.Schema(
 const importExportJobSchema = new mongoose.Schema(
   {
     // Job Identity
-    jobId: { type: String, unique: true, index: true },
+    jobId: { type: String, unique: true },
     jobName: { type: String, required: true, trim: true },
     jobNameAr: { type: String, trim: true },
 

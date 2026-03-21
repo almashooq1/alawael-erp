@@ -54,7 +54,7 @@ const importExportTemplateSchema = new mongoose.Schema(
     nameAr: { type: String, trim: true },
     description: { type: String },
     descriptionAr: { type: String },
-    slug: { type: String, unique: true, index: true },
+    slug: { type: String, unique: true },
 
     // Template Type
     type: {

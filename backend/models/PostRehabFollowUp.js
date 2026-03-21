@@ -241,7 +241,6 @@ postRehabCaseSchema.index({ beneficiary: 1, status: 1 });
 postRehabCaseSchema.index({ status: 1, 'followUpPlan.nextScheduledVisit': 1 });
 postRehabCaseSchema.index({ assignedSpecialist: 1, status: 1 });
 postRehabCaseSchema.index({ dischargeDate: 1 });
-postRehabCaseSchema.index({ caseNumber: 1 }, { unique: true });
 
 // ── Auto-generate case number ──
 postRehabCaseSchema.pre('save', async function (next) {
@@ -758,7 +757,6 @@ const reEnrollmentRequestSchema = new mongoose.Schema(
 reEnrollmentRequestSchema.index({ postRehabCase: 1, status: 1 });
 reEnrollmentRequestSchema.index({ beneficiary: 1 });
 reEnrollmentRequestSchema.index({ status: 1, urgencyLevel: 1 });
-reEnrollmentRequestSchema.index({ requestNumber: 1 }, { unique: true });
 
 // ── Auto-generate request number ──
 reEnrollmentRequestSchema.pre('save', async function (next) {

@@ -112,7 +112,7 @@ const mdtBeneficiaryCaseSchema = new mongoose.Schema({
 
 const mdtMeetingSchema = new mongoose.Schema(
   {
-    meetingNumber: { type: String, unique: true, required: true, index: true },
+    meetingNumber: { type: String, unique: true, required: true },
     title: { type: String, required: true, minlength: 3, maxlength: 300 },
     description: { type: String, maxlength: 2000 },
     type: {
@@ -265,7 +265,7 @@ const therapistContributionSchema = new mongoose.Schema({
 
 const unifiedRehabPlanSchema = new mongoose.Schema(
   {
-    planNumber: { type: String, unique: true, required: true, index: true },
+    planNumber: { type: String, unique: true, required: true },
     beneficiary: { type: mongoose.Schema.Types.ObjectId, ref: 'Beneficiary', required: true },
     beneficiaryName: { type: String },
     title: { type: String, required: true },
@@ -350,7 +350,7 @@ unifiedRehabPlanSchema.pre('save', function (next) {
 
 const referralTicketSchema = new mongoose.Schema(
   {
-    ticketNumber: { type: String, unique: true, required: true, index: true },
+    ticketNumber: { type: String, unique: true, required: true },
     beneficiary: { type: mongoose.Schema.Types.ObjectId, ref: 'Beneficiary', required: true },
     beneficiaryName: { type: String },
     referredBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },

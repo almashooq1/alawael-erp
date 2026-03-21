@@ -8,7 +8,7 @@ const mongoose = require('mongoose');
 
 const forecastModelSchema = new mongoose.Schema(
   {
-    modelId: { type: String, required: true, unique: true, index: true },
+    modelId: { type: String, required: true, unique: true },
     organizationId: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,

@@ -13,7 +13,7 @@ const lineItemSchema = new mongoose.Schema({
 
 const eInvoiceSchema = new mongoose.Schema(
   {
-    invoiceNumber: { type: String, required: true, unique: true, index: true },
+    invoiceNumber: { type: String, required: true, unique: true },
     invoiceType: {
       type: String,
       enum: ['standard', 'simplified', 'credit_note', 'debit_note'],

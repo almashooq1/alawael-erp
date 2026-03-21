@@ -637,7 +637,7 @@ icfAssessmentSchema.methods.calculateScores = function () {
 
 const icfCodeReferenceSchema = new mongoose.Schema(
   {
-    code: { type: String, required: true, unique: true, index: true },
+    code: { type: String, required: true, unique: true },
     component: {
       type: String,
       required: true,

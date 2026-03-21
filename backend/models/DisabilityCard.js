@@ -347,7 +347,7 @@ const disabilityCardSchema = new Schema(
     },
 
     // ── Card Details ────────────────────────────────────────────────────────
-    card_number: { type: String, unique: true, index: true },
+    card_number: { type: String, unique: true },
     card_status: {
       type: String,
       enum: CARD_STATUSES,
@@ -431,7 +431,6 @@ if (typeof disabilityCardSchema.index === 'function') {
     'classification.disability_type': 1,
     'classification.disability_degree': 1,
   });
-  disabilityCardSchema.index({ 'mohr_integration.national_card_number': 1 });
   disabilityCardSchema.index({ national_id: 1, card_status: 1 });
   disabilityCardSchema.index({ auto_renewal_enabled: 1, expiry_date: 1 });
   disabilityCardSchema.index({ organization: 1, card_status: 1 });

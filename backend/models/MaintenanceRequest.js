@@ -6,7 +6,7 @@ const mongoose = require('mongoose');
 
 const maintenanceRequestSchema = new mongoose.Schema(
   {
-    requestId: { type: String, unique: true, index: true },
+    requestId: { type: String, unique: true },
     room: { type: mongoose.Schema.Types.ObjectId, ref: 'Room' },
     title: { type: String, required: true, trim: true, maxlength: 200 },
     description: { type: String, required: true, maxlength: 2000 },

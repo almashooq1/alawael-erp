@@ -12,7 +12,7 @@ const responseSchema = new mongoose.Schema({
 
 const complaintSchema = new mongoose.Schema(
   {
-    complaintId: { type: String, unique: true, index: true },
+    complaintId: { type: String, unique: true },
     type: {
       type: String,
       required: true,

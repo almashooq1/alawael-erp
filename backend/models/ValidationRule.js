@@ -8,7 +8,7 @@ const mongoose = require('mongoose');
 
 const validationRuleSchema = new mongoose.Schema(
   {
-    ruleId: { type: String, required: true, unique: true, index: true },
+    ruleId: { type: String, required: true, unique: true },
     organizationId: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,

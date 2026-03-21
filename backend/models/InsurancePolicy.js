@@ -149,7 +149,7 @@ const ClaimSchema = new mongoose.Schema(
 const InsurancePolicySchema = new mongoose.Schema(
   {
     // معلومات الوثيقة
-    policyNumber: { type: String, required: true, unique: true, index: true },
+    policyNumber: { type: String, required: true, unique: true },
     companyKey: {
       type: String,
       enum: Object.keys(SAUDI_INSURANCE_COMPANIES),

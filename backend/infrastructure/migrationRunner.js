@@ -216,13 +216,17 @@ class MigrationRunner {
           await mod.up(db, mongoose);
           const executionTimeMs = Date.now() - start;
 
-          await this.MigrationModel.create({
-            version: migration.version,
-            name: migration.name,
-            checksum: migration.checksum,
-            executionTimeMs,
-            status: 'applied',
-          });
+          await this.MigrationModel.findOneAndUpdate(
+            { version: migration.version },
+            {
+              name: migration.name,
+              checksum: migration.checksum,
+              executionTimeMs,
+              status: 'applied',
+              appliedAt: new Date(),
+            },
+            { upsert: true }
+          );
 
           results.push({
             version: migration.version,
@@ -234,12 +238,15 @@ class MigrationRunner {
           logger.info(`  ✅ Applied ${migration.file} (${executionTimeMs}ms)`);
         } catch (error) {
           logger.error(`  ❌ Failed ${migration.file}: ${error.message}`);
-          await this.MigrationModel.create({
-            version: migration.version,
-            name: migration.name,
-            checksum: migration.checksum,
-            status: 'failed',
-          });
+          await this.MigrationModel.findOneAndUpdate(
+            { version: migration.version },
+            {
+              name: migration.name,
+              checksum: migration.checksum,
+              status: 'failed',
+            },
+            { upsert: true }
+          ).catch(() => {});
           throw error;
         }
       }

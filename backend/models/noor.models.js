@@ -19,7 +19,7 @@ const NoorStudentSchema = new Schema(
       required: true,
       index: true,
     },
-    noorId: { type: String, required: true, unique: true, index: true },
+    noorId: { type: String, required: true, unique: true },
     nationalId: { type: String, required: true, index: true },
     studentName: {
       ar: { type: String, required: true },

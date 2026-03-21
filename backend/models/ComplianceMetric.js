@@ -8,7 +8,7 @@ const mongoose = require('mongoose');
 
 const complianceMetricSchema = new mongoose.Schema(
   {
-    metricId: { type: String, required: true, unique: true, index: true },
+    metricId: { type: String, required: true, unique: true },
     organizationId: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,

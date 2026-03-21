@@ -163,7 +163,6 @@ const BlockchainCertificateSchema = new Schema(
   { timestamps: true }
 );
 
-BlockchainCertificateSchema.index({ certificateNumber: 1 });
 BlockchainCertificateSchema.index({ 'recipient.nationalId': 1, category: 1 });
 BlockchainCertificateSchema.index({ 'blockchain.transactionHash': 1 });
 BlockchainCertificateSchema.index({ hash: 1 });

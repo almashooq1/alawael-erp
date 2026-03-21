@@ -24,7 +24,6 @@ const outcomeMeasureSchema = new mongoose.Schema(
       required: true,
       trim: true,
       uppercase: true,
-      index: true,
     },
     description: {
       type: String,

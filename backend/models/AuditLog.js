@@ -8,7 +8,7 @@ const mongoose = require('mongoose');
 
 const auditLogSchema = new mongoose.Schema(
   {
-    logId: { type: String, required: true, unique: true, index: true },
+    logId: { type: String, required: true, unique: true },
     organizationId: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,

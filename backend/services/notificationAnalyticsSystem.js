@@ -21,7 +21,7 @@ const EventEmitter = require('events');
 // ═══════════════════════════════════════════════════════════════
 
 const notificationMetricsSchema = new mongoose.Schema({
-  metricsId: { type: String, unique: true, index: true },
+  metricsId: { type: String, unique: true },
   timestamp: { type: Date, default: Date.now, index: true },
 
   // فترة التجميع

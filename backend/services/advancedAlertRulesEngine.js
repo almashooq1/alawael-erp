@@ -21,7 +21,7 @@ const EventEmitter = require('events');
 // ═══════════════════════════════════════════════════════════════
 
 const alertRuleSchema = new mongoose.Schema({
-  ruleId: { type: String, unique: true, index: true },
+  ruleId: { type: String, unique: true },
   name: { type: String, required: true },
   description: String,
 

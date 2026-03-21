@@ -102,13 +102,13 @@ describe('getMimeType', () => {
 
   test('returns MIME for .docx', () => {
     expect(getMimeType('report.docx')).toBe(
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
     );
   });
 
   test('returns MIME for .xlsx', () => {
     expect(getMimeType('data.xlsx')).toBe(
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     );
   });
 

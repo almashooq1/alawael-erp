@@ -39,3 +39,27 @@ export { default as QualityComplianceRoutes } from './QualityComplianceRoutes';
 export { default as StrategicPlanningRoutes } from './StrategicPlanningRoutes';
 export { default as DocumentManagementRoutes } from './DocumentManagementRoutes';
 export { default as MeetingsRoutes } from './MeetingsRoutes';
+
+// === Phase: 22 New Systems ===
+export { default as SupplyChainRoutes } from './SupplyChainRoutes';
+export { default as PerformanceRoutes } from './PerformanceRoutes';
+export { default as StudentManagementRoutes } from './StudentManagementRoutes';
+export { default as DisabilityRoutes } from './DisabilityRoutes';
+export { default as VisitorsRoutes } from './VisitorsRoutes';
+export { default as ComplaintsRoutes } from './ComplaintsRoutes';
+export { default as FacilityRoutes } from './FacilityRoutes';
+export { default as KnowledgeCenterRoutes } from './KnowledgeCenterRoutes';
+export { default as IntegratedCareRoutes } from './IntegratedCareRoutes';
+export { default as SessionsRoutes } from './SessionsRoutes';
+export { default as ESignatureRoutes } from './ESignatureRoutes';
+export { default as TreatmentAuthRoutes } from './TreatmentAuthRoutes';
+export { default as FamilySatisfactionRoutes } from './FamilySatisfactionRoutes';
+export { default as SuccessionRoutes } from './SuccessionRoutes';
+export { default as MontessoriRoutes } from './MontessoriRoutes';
+export { default as BeneficiaryRoutes } from './BeneficiaryRoutes';
+export { default as LeaveManagementRoutes } from './LeaveManagementRoutes';
+export { default as HRInsuranceRoutes } from './HRInsuranceRoutes';
+export { default as OrgStructureRoutes } from './OrgStructureRoutes';
+export { default as ReportsRoutes } from './ReportsRoutes';
+export { default as CRMRoutes } from './CRMRoutes';
+export { default as OperationsRoutes } from './OperationsRoutes';

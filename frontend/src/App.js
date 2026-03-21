@@ -58,6 +58,28 @@ import {
   StrategicPlanningRoutes,
   DocumentManagementRoutes,
   MeetingsRoutes,
+  SupplyChainRoutes,
+  PerformanceRoutes,
+  StudentManagementRoutes,
+  DisabilityRoutes,
+  VisitorsRoutes,
+  ComplaintsRoutes,
+  FacilityRoutes,
+  KnowledgeCenterRoutes,
+  IntegratedCareRoutes,
+  SessionsRoutes,
+  ESignatureRoutes,
+  TreatmentAuthRoutes,
+  FamilySatisfactionRoutes,
+  SuccessionRoutes,
+  MontessoriRoutes,
+  BeneficiaryRoutes,
+  LeaveManagementRoutes,
+  HRInsuranceRoutes,
+  OrgStructureRoutes,
+  ReportsRoutes,
+  CRMRoutes,
+  OperationsRoutes,
 } from './routes';
 
 // Pages — Keep eagerly loaded (critical path / small)
@@ -239,6 +261,29 @@ function AppContent() {
                               {StrategicPlanningRoutes()}
                               {DocumentManagementRoutes()}
                               {MeetingsRoutes()}
+                              {/* === 22 New Systems === */}
+                              {SupplyChainRoutes()}
+                              {PerformanceRoutes()}
+                              {StudentManagementRoutes()}
+                              {DisabilityRoutes()}
+                              {VisitorsRoutes()}
+                              {ComplaintsRoutes()}
+                              {FacilityRoutes()}
+                              {KnowledgeCenterRoutes()}
+                              {IntegratedCareRoutes()}
+                              {SessionsRoutes()}
+                              {ESignatureRoutes()}
+                              {TreatmentAuthRoutes()}
+                              {FamilySatisfactionRoutes()}
+                              {SuccessionRoutes()}
+                              {MontessoriRoutes()}
+                              {BeneficiaryRoutes()}
+                              {LeaveManagementRoutes()}
+                              {HRInsuranceRoutes()}
+                              {OrgStructureRoutes()}
+                              {ReportsRoutes()}
+                              {CRMRoutes()}
+                              {OperationsRoutes()}
                               {/* === Shared / Cross-cutting Routes === */}
                               {/* AI & Analytics */}
                               <Route

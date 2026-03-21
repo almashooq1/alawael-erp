@@ -96,7 +96,59 @@ export const certificationsService = {
 };
 
 // ═══════════════════════════════════════════
-// 4. TRAINING REPORTS — تقارير التدريب
+// 4. TRAINING SESSIONS — جلسات التدريب
+// ═══════════════════════════════════════════
+export const sessionsService = {
+  getAll: safe(async (params = {}) => {
+    const r = await apiClient.get('/training/sessions', { params });
+    return r.data;
+  }),
+  getById: safe(async id => {
+    const r = await apiClient.get(`/training/sessions/${id}`);
+    return r.data;
+  }),
+  create: safe(async data => {
+    const r = await apiClient.post('/training/sessions', data);
+    return r.data;
+  }),
+  update: safe(async (id, data) => {
+    const r = await apiClient.put(`/training/sessions/${id}`, data);
+    return r.data;
+  }),
+  remove: safe(async id => {
+    const r = await apiClient.delete(`/training/sessions/${id}`);
+    return r.data;
+  }),
+};
+
+// ═══════════════════════════════════════════
+// 5. TRAINING PLANS — خطط التدريب
+// ═══════════════════════════════════════════
+export const plansService = {
+  getAll: safe(async () => {
+    const r = await apiClient.get('/training/plans');
+    return r.data;
+  }),
+  getById: safe(async id => {
+    const r = await apiClient.get(`/training/plans/${id}`);
+    return r.data;
+  }),
+  create: safe(async data => {
+    const r = await apiClient.post('/training/plans', data);
+    return r.data;
+  }),
+  update: safe(async (id, data) => {
+    const r = await apiClient.put(`/training/plans/${id}`, data);
+    return r.data;
+  }),
+  remove: safe(async id => {
+    const r = await apiClient.delete(`/training/plans/${id}`);
+    return r.data;
+  }),
+};
+
+// ═══════════════════════════════════════════
+// 6. TRAINING REPORTS — تقارير التدريب
 // ═══════════════════════════════════════════
 export const trainingReportsService = {
   getDashboardStats: safe(async () => {

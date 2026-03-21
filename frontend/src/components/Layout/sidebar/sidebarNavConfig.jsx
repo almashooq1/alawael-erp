@@ -392,7 +392,7 @@ const getNavigationItems = () => [
     roles: ['admin', 'super_admin', 'manager', 'accountant'],
   },
   {
-    id: 'donations',
+    id: 'donations-section',
     label: 'التبرعات والرعاية',
     icon: <DonationsIcon />,
     path: '/donations',
@@ -935,13 +935,6 @@ const getNavigationItems = () => [
     roles: ['admin', 'super_admin', 'receptionist', 'security'],
   },
   {
-    id: 'knowledge-center',
-    label: 'مركز المعرفة',
-    icon: <KnowledgeIcon />,
-    path: '/knowledge-center',
-    roles: ['*'],
-  },
-  {
     id: 'complaints-management',
     label: 'الشكاوى والمقترحات',
     icon: <ComplaintsIcon />,
@@ -997,20 +990,7 @@ const getNavigationItems = () => [
     path: '/waitlist',
     roles: ['admin', 'super_admin', 'manager', 'receptionist'],
   },
-  {
-    id: 'mhpss',
-    label: 'الدعم النفسي (MHPSS)',
-    icon: <MHPSSIcon />,
-    path: '/mhpss',
-    roles: ['admin', 'super_admin', 'manager', 'therapist', 'social_worker'],
-  },
-  {
-    id: 'independent-living',
-    label: 'العيش المستقل',
-    icon: <IndependentLivingIcon />,
-    path: '/independent-living',
-    roles: ['admin', 'super_admin', 'manager', 'therapist'],
-  },
+
   {
     id: 'community-integration',
     label: 'التكامل المجتمعي',

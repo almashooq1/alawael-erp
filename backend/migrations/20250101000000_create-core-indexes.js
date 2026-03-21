@@ -9,12 +9,12 @@
 
 module.exports = {
   async up(db) {
-    // Users indexes – drop legacy non-sparse email index if it exists
+    // Users indexes – drop legacy non-sparse email index; Mongoose User model
+    // will recreate it with the correct { unique: true, sparse: true } options.
     await db
       .collection('users')
       .dropIndex('email_1')
       .catch(() => {});
-    await db.collection('users').createIndex({ email: 1 }, { unique: true, sparse: true });
     await db.collection('users').createIndex({ role: 1, isActive: 1 });
     await db.collection('users').createIndex({ createdAt: -1 });
 

@@ -20,7 +20,7 @@ module.exports = {
       },
       {
         name: 'beneficiaries_text_search',
-        default_language: 'arabic',
+        default_language: 'none',
         weights: { 'name.ar': 10, 'name.en': 10, nationalId: 5, notes: 1 },
       }
     );

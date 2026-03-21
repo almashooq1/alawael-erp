@@ -123,7 +123,6 @@ const integrationAssessmentSchema = new mongoose.Schema(
       type: String,
       enum: ['minimal', 'partial', 'moderate', 'substantial', 'full'],
       required: true,
-      index: true,
     },
     trend: {
       type: String,

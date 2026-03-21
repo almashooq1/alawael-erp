@@ -777,44 +777,44 @@ const TransformationKPISchema = new Schema(
 
 module.exports = {
   // 1. Legal
-  LegalCase: mongoose.model('LegalCase', LegalCaseSchema),
-  CourtHearing: mongoose.model('CourtHearing', CourtHearingSchema),
-  PowerOfAttorney: mongoose.model('PowerOfAttorney', PowerOfAttorneySchema),
-  LegalOpinion: mongoose.model('LegalOpinion', LegalOpinionSchema),
-  RegulatoryFiling: mongoose.model('RegulatoryFiling', RegulatoryFilingSchema),
+  LegalCase: mongoose.models.LegalCase || mongoose.model('LegalCase', LegalCaseSchema),
+  CourtHearing: mongoose.models.CourtHearing || mongoose.model('CourtHearing', CourtHearingSchema),
+  PowerOfAttorney: mongoose.models.PowerOfAttorney || mongoose.model('PowerOfAttorney', PowerOfAttorneySchema),
+  LegalOpinion: mongoose.models.LegalOpinion || mongoose.model('LegalOpinion', LegalOpinionSchema),
+  RegulatoryFiling: mongoose.models.RegulatoryFiling || mongoose.model('RegulatoryFiling', RegulatoryFilingSchema),
 
   // 2. Governance
-  BoardMeeting: mongoose.model('BoardMeeting', BoardMeetingSchema),
-  BoardCommittee: mongoose.model('BoardCommittee', BoardCommitteeSchema),
-  BoardResolution: mongoose.model('BoardResolution', BoardResolutionSchema),
-  GovernancePolicy: mongoose.model('GovernancePolicy', GovernancePolicySchema),
-  GovernanceReport: mongoose.model('GovernanceReport', GovernanceReportSchema),
+  BoardMeeting: mongoose.models.BoardMeeting || mongoose.model('BoardMeeting', BoardMeetingSchema),
+  BoardCommittee: mongoose.models.BoardCommittee || mongoose.model('BoardCommittee', BoardCommitteeSchema),
+  BoardResolution: mongoose.models.BoardResolution || mongoose.model('BoardResolution', BoardResolutionSchema),
+  GovernancePolicy: mongoose.models.GovernancePolicy || mongoose.model('GovernancePolicy', GovernancePolicySchema),
+  GovernanceReport: mongoose.models.GovernanceReport || mongoose.model('GovernanceReport', GovernanceReportSchema),
 
   // 3. Business Continuity
-  BCPPlan: mongoose.model('BCPPlan', BCPPlanSchema),
-  BusinessImpactAnalysis: mongoose.model('BusinessImpactAnalysis', BusinessImpactAnalysisSchema),
-  CrisisIncident: mongoose.model('CrisisIncident', CrisisIncidentSchema),
-  BCDrill: mongoose.model('BCDrill', BCDrillSchema),
-  DisasterRecoveryPlan: mongoose.model('DisasterRecoveryPlan', DisasterRecoveryPlanSchema),
+  BCPPlan: mongoose.models.BCPPlan || mongoose.model('BCPPlan', BCPPlanSchema),
+  BusinessImpactAnalysis: mongoose.models.BusinessImpactAnalysis || mongoose.model('BusinessImpactAnalysis', BusinessImpactAnalysisSchema),
+  CrisisIncident: mongoose.models.CrisisIncident || mongoose.model('CrisisIncident', CrisisIncidentSchema),
+  BCDrill: mongoose.models.BCDrill || mongoose.model('BCDrill', BCDrillSchema),
+  DisasterRecoveryPlan: mongoose.models.DisasterRecoveryPlan || mongoose.model('DisasterRecoveryPlan', DisasterRecoveryPlanSchema),
 
   // 4. Customer Experience
-  CXSurvey: mongoose.model('CXSurvey', CXSurveySchema),
-  CXFeedback: mongoose.model('CXFeedback', CXFeedbackSchema),
-  CXComplaint: mongoose.model('CXComplaint', CXComplaintSchema),
-  CustomerJourney: mongoose.model('CustomerJourney', CustomerJourneySchema),
-  ServiceBenchmark: mongoose.model('ServiceBenchmark', ServiceBenchmarkSchema),
+  CXSurvey: mongoose.models.CXSurvey || mongoose.model('CXSurvey', CXSurveySchema),
+  CXFeedback: mongoose.models.CXFeedback || mongoose.model('CXFeedback', CXFeedbackSchema),
+  CXComplaint: mongoose.models.CXComplaint || mongoose.model('CXComplaint', CXComplaintSchema),
+  CustomerJourney: mongoose.models.CustomerJourney || mongoose.model('CustomerJourney', CustomerJourneySchema),
+  ServiceBenchmark: mongoose.models.ServiceBenchmark || mongoose.model('ServiceBenchmark', ServiceBenchmarkSchema),
 
   // 5. Sustainability
-  EnergyReading: mongoose.model('EnergyReading', EnergyReadingSchema),
-  CarbonFootprint: mongoose.model('CarbonFootprint', CarbonFootprintSchema),
-  WasteRecord: mongoose.model('WasteRecord', WasteRecordSchema),
-  ESGReport: mongoose.model('ESGReport', ESGReportSchema),
-  SustainabilityGoal: mongoose.model('SustainabilityGoal', SustainabilityGoalSchema),
+  EnergyReading: mongoose.models.EnergyReading || mongoose.model('EnergyReading', EnergyReadingSchema),
+  CarbonFootprint: mongoose.models.CarbonFootprint || mongoose.model('CarbonFootprint', CarbonFootprintSchema),
+  WasteRecord: mongoose.models.WasteRecord || mongoose.model('WasteRecord', WasteRecordSchema),
+  ESGReport: mongoose.models.ESGReport || mongoose.model('ESGReport', ESGReportSchema),
+  SustainabilityGoal: mongoose.models.SustainabilityGoal || mongoose.model('SustainabilityGoal', SustainabilityGoalSchema),
 
   // 6. Digital Transformation
-  MaturityAssessment: mongoose.model('MaturityAssessment', MaturityAssessmentSchema),
-  InnovationIdea: mongoose.model('InnovationIdea', InnovationIdeaSchema),
-  InnovationProject: mongoose.model('InnovationProject', InnovationProjectSchema),
-  TechRadarEntry: mongoose.model('TechRadarEntry', TechRadarEntrySchema),
-  TransformationKPI: mongoose.model('TransformationKPI', TransformationKPISchema),
+  MaturityAssessment: mongoose.models.MaturityAssessment || mongoose.model('MaturityAssessment', MaturityAssessmentSchema),
+  InnovationIdea: mongoose.models.InnovationIdea || mongoose.model('InnovationIdea', InnovationIdeaSchema),
+  InnovationProject: mongoose.models.InnovationProject || mongoose.model('InnovationProject', InnovationProjectSchema),
+  TechRadarEntry: mongoose.models.TechRadarEntry || mongoose.model('TechRadarEntry', TechRadarEntrySchema),
+  TransformationKPI: mongoose.models.TransformationKPI || mongoose.model('TransformationKPI', TransformationKPISchema),
 };

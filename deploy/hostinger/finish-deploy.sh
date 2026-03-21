@@ -130,6 +130,9 @@ RATE_LIMIT_WINDOW_MS=900000
 RATE_LIMIT_MAX_REQUESTS=100
 MAX_LOGIN_ATTEMPTS=5
 
+# Database TLS (disable for local MongoDB without SSL)
+DB_TLS=false
+
 # Logging
 LOG_LEVEL=warn
 LOG_FORMAT=json

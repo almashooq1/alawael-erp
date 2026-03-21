@@ -74,7 +74,10 @@ describe('setMaintenanceMode', () => {
     fs.existsSync.mockReturnValue(false);
     setMaintenanceMode(true);
     expect(fs.writeFileSync).toHaveBeenCalledTimes(1);
-    expect(fs.writeFileSync).toHaveBeenCalledWith(expect.stringContaining('maintenance.flag'), expect.any(String));
+    expect(fs.writeFileSync).toHaveBeenCalledWith(
+      expect.stringContaining('maintenance.flag'),
+      expect.any(String)
+    );
   });
 
   test('does NOT create flag file when already in maintenance', () => {
@@ -166,7 +169,9 @@ describe('maintenanceMiddleware', () => {
 
   test('blocks when token is invalid', () => {
     fs.existsSync.mockReturnValue(true);
-    jwt.verify.mockImplementation(() => { throw new Error('invalid'); });
+    jwt.verify.mockImplementation(() => {
+      throw new Error('invalid');
+    });
     const req = createReq({ headers: { authorization: 'Bearer bad-token' } });
     const res = createRes();
     maintenanceMiddleware(req, res, next);

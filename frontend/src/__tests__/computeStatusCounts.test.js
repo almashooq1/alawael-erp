@@ -18,12 +18,9 @@ import computeStatusCounts from '../utils/computeStatusCounts';
 describe('computeStatusCounts', () => {
   // ─── Guard: non-array inputs ────────────────────────
   describe('non-array input guard', () => {
-    it.each([null, undefined, 42, 'string', {}, true])(
-      'returns { _total: 0 } for %p',
-      input => {
-        expect(computeStatusCounts(input)).toEqual({ _total: 0 });
-      },
-    );
+    it.each([null, undefined, 42, 'string', {}, true])('returns { _total: 0 } for %p', input => {
+      expect(computeStatusCounts(input)).toEqual({ _total: 0 });
+    });
   });
 
   // ─── Empty array ────────────────────────────────────

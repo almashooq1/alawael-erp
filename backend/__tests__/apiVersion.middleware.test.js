@@ -39,7 +39,9 @@ const createReq = (overrides = {}) => ({
 const createRes = () => {
   const headers = {};
   const res = {
-    setHeader: jest.fn((k, v) => { headers[k] = v; }),
+    setHeader: jest.fn((k, v) => {
+      headers[k] = v;
+    }),
     set: jest.fn(),
     status: jest.fn().mockReturnThis(),
     json: jest.fn().mockReturnThis(),

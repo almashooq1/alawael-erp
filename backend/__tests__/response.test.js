@@ -51,17 +51,13 @@ describe('successResponse', () => {
   test('data can be an array', () => {
     const res = createRes();
     successResponse(res, [1, 2, 3]);
-    expect(res.json).toHaveBeenCalledWith(
-      expect.objectContaining({ data: [1, 2, 3] })
-    );
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ data: [1, 2, 3] }));
   });
 
   test('data can be null', () => {
     const res = createRes();
     successResponse(res, null);
-    expect(res.json).toHaveBeenCalledWith(
-      expect.objectContaining({ success: true, data: null })
-    );
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ success: true, data: null }));
   });
 });
 
@@ -93,9 +89,7 @@ describe('errorResponse', () => {
     const res = createRes();
     const errors = [{ field: 'email', msg: 'required' }];
     errorResponse(res, 'Validation', 422, errors);
-    expect(res.json).toHaveBeenCalledWith(
-      expect.objectContaining({ errors })
-    );
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ errors }));
   });
 
   test('omits errors field when null', () => {

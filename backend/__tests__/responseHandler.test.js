@@ -50,7 +50,7 @@ describe('responseHandler middleware', () => {
           message: 'Success',
           data: { id: 1 },
           requestId: 'req-abc-123',
-        }),
+        })
       );
     });
 
@@ -59,16 +59,14 @@ describe('responseHandler middleware', () => {
       res.success(null, 'Done', 202);
       expect(statusFn).toHaveBeenCalledWith(202);
       expect(jsonFn).toHaveBeenCalledWith(
-        expect.objectContaining({ success: true, message: 'Done', data: null }),
+        expect.objectContaining({ success: true, message: 'Done', data: null })
       );
     });
 
     it('omits requestId when req.id is undefined', () => {
       const { res, jsonFn } = createMocks({ id: undefined });
       res.success('data');
-      expect(jsonFn).toHaveBeenCalledWith(
-        expect.objectContaining({ requestId: undefined }),
-      );
+      expect(jsonFn).toHaveBeenCalledWith(expect.objectContaining({ requestId: undefined }));
     });
   });
 
@@ -83,16 +81,14 @@ describe('responseHandler middleware', () => {
           success: true,
           message: 'Created successfully',
           data: { id: 99 },
-        }),
+        })
       );
     });
 
     it('accepts custom message', () => {
       const { res, jsonFn } = createMocks();
       res.created(null, 'تم الإنشاء');
-      expect(jsonFn).toHaveBeenCalledWith(
-        expect.objectContaining({ message: 'تم الإنشاء' }),
-      );
+      expect(jsonFn).toHaveBeenCalledWith(expect.objectContaining({ message: 'تم الإنشاء' }));
     });
   });
 
@@ -103,7 +99,7 @@ describe('responseHandler middleware', () => {
       res.error();
       expect(statusFn).toHaveBeenCalledWith(500);
       expect(jsonFn).toHaveBeenCalledWith(
-        expect.objectContaining({ success: false, message: 'Error', data: null }),
+        expect.objectContaining({ success: false, message: 'Error', data: null })
       );
     });
 
@@ -116,7 +112,7 @@ describe('responseHandler middleware', () => {
           success: false,
           message: 'Not found',
           data: { hint: 'check ID' },
-        }),
+        })
       );
     });
   });
@@ -133,23 +129,21 @@ describe('responseHandler middleware', () => {
           success: false,
           message: 'Validation failed',
           errors: errs,
-        }),
+        })
       );
     });
 
     it('wraps single error string into array', () => {
       const { res, jsonFn } = createMocks();
       res.validationError('email invalid');
-      expect(jsonFn).toHaveBeenCalledWith(
-        expect.objectContaining({ errors: ['email invalid'] }),
-      );
+      expect(jsonFn).toHaveBeenCalledWith(expect.objectContaining({ errors: ['email invalid'] }));
     });
 
     it('accepts custom message', () => {
       const { res, jsonFn } = createMocks();
       res.validationError([], 'Custom validation msg');
       expect(jsonFn).toHaveBeenCalledWith(
-        expect.objectContaining({ message: 'Custom validation msg' }),
+        expect.objectContaining({ message: 'Custom validation msg' })
       );
     });
   });

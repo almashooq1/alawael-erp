@@ -15,11 +15,28 @@ describe('API Endpoints', () => {
   // ─── Structure ──────────────────────────────────────
   describe('structure', () => {
     const expectedGroups = [
-      'AUTH', 'DASHBOARD', 'MODULES', 'USERS', 'CRM',
-      'FINANCE', 'HR', 'PAYROLL', 'STUDENTS', 'BENEFICIARIES',
-      'SESSIONS', 'CARE_PLANS', 'DISABILITY', 'INVENTORY',
-      'PURCHASING', 'DOCUMENTS', 'NOTIFICATIONS', 'QUALITY',
-      'FLEET', 'MESSAGES', 'REPORTS', 'SETTINGS',
+      'AUTH',
+      'DASHBOARD',
+      'MODULES',
+      'USERS',
+      'CRM',
+      'FINANCE',
+      'HR',
+      'PAYROLL',
+      'STUDENTS',
+      'BENEFICIARIES',
+      'SESSIONS',
+      'CARE_PLANS',
+      'DISABILITY',
+      'INVENTORY',
+      'PURCHASING',
+      'DOCUMENTS',
+      'NOTIFICATIONS',
+      'QUALITY',
+      'FLEET',
+      'MESSAGES',
+      'REPORTS',
+      'SETTINGS',
     ];
 
     it.each(expectedGroups)('has %s group', group => {

@@ -15,7 +15,12 @@ jest.mock('../utils/logger', () => ({
   debug: jest.fn(),
 }));
 
-const { ApiResponse, validate, commonValidators, requestContext } = require('../middleware/dto.middleware');
+const {
+  ApiResponse,
+  validate,
+  commonValidators,
+  requestContext,
+} = require('../middleware/dto.middleware');
 
 // ── helpers ──────────────────────────────────────────────────────────────
 const mockRes = () => {

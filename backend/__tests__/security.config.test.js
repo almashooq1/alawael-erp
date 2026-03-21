@@ -161,9 +161,7 @@ describe('SecurityService', () => {
     });
 
     it('should cap at 100', () => {
-      const strength = service.calculatePasswordStrength(
-        'AbCdEfGh!@#$%^&*12345678901234567890'
-      );
+      const strength = service.calculatePasswordStrength('AbCdEfGh!@#$%^&*12345678901234567890');
       expect(strength).toBeLessThanOrEqual(100);
     });
 

@@ -44,7 +44,7 @@ describe('MODULE_REGISTRY', () => {
         expect(typeof entry.resource).toBe('string');
         expect(entry.resource.length).toBeGreaterThan(0);
         expect(Array.isArray(entry.roles)).toBe(true);
-      },
+      }
     );
 
     it('all role arrays contain only strings', () => {
@@ -142,7 +142,7 @@ describe('getModulesForRole()', () => {
   it('excludes admin-only modules for regular employee', () => {
     const mods = getModulesForRole('employee');
     const adminOnly = MODULE_REGISTRY.filter(
-      m => m.roles.length > 0 && !m.roles.includes('employee'),
+      m => m.roles.length > 0 && !m.roles.includes('employee')
     );
     adminOnly.forEach(restricted => {
       expect(mods.find(m => m.key === restricted.key)).toBeUndefined();

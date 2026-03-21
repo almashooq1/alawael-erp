@@ -12,39 +12,15 @@
  * @version 2.0.0
  */
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import {
-  Container, Typography, Grid, Paper, Box, Avatar,
-  Chip, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  LinearProgress, Button, TextField, MenuItem, Skeleton, IconButton,
-  Tooltip, Dialog, DialogTitle, DialogContent, DialogActions,
-  Tab, Tabs, Stack, List, ListItem, ListItemText,
-  ListItemIcon, InputAdornment, Card, CardContent, useTheme, alpha,
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { useTheme, alpha,
 } from '@mui/material';
-import {
-  ChildCare as ChildIcon,
-  Add as AddIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  Search as SearchIcon,
-  Refresh as RefreshIcon,
-  ArrowBack as BackIcon,
-  Visibility as ViewIcon,
-  PlaylistAddCheck as PlanIcon,
-  Assessment as EvalIcon,
-  Male as MaleIcon,
-  Female as FemaleIcon,
-  CheckCircle as CheckIcon,
-  HourglassEmpty as PendingIcon,
-  Download as DownloadIcon,
-} from '@mui/icons-material';
-import { motion } from 'framer-motion';
+
+
 import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import ConfirmDialog, { useConfirmDialog } from '../../components/common/ConfirmDialog';
-import { gradients, statusColors } from '../../theme/palette';
-import EmptyState from '../../components/dashboard/shared/EmptyState';
-import DashboardErrorBoundary from '../../components/dashboard/shared/DashboardErrorBoundary';
+import { useConfirmDialog } from '../../components/common/ConfirmDialog';
+import { gradients } from '../../theme/palette';
 import logger from '../../utils/logger';
 import montessoriService from '../../services/montessoriService';
 

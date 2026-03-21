@@ -1,6 +1,3 @@
-import { Card, CardContent, Typography, Box, IconButton, Tooltip, alpha } from '@mui/material';
-import { MoreVert as MoreIcon, Fullscreen as FullscreenIcon } from '@mui/icons-material';
-import { ResponsiveContainer } from 'recharts';
 
 /**
  * ChartCard — Wrapper card for Recharts charts with title, actions, and responsive container.

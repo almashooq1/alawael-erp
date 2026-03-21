@@ -2,18 +2,9 @@
  * Laundry Dashboard — لوحة معلومات المغسلة
  */
 import { useState, useEffect } from 'react';
-import {
-  Box, Grid, Card, CardContent, Typography, Paper,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Chip, LinearProgress
-} from '@mui/material';
-import {
-  LocalLaundryService as LaundryIcon,
-  Assignment as OrderIcon,
-  Build as MachineIcon,
-  Schedule as ScheduleIcon
-} from '@mui/icons-material';
-import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+
+
+
 import apiClient from '../../services/api';
 
 const COLORS = ['#0288d1', '#388e3c', '#f57c00', '#d32f2f', '#7b1fa2'];

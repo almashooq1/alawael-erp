@@ -2,64 +2,15 @@
  * 🕒 إدارة الجلسات العلاجية (مستوى إداري) — Therapy Session Admin
  * AlAwael ERP — All sessions across therapists: schedule, documentation, filtering
  */
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
-  Box,
-  Typography,
-  Paper,
-  Grid,
-  Card,
-  CardContent,
-  Chip,
-  Avatar,
-  LinearProgress,
-  Divider,
-  IconButton,
-  Tooltip,
-  Button,
-  Tab,
-  Tabs,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TextField,
-  MenuItem,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Stack,
-  CircularProgress,
   useTheme,
   alpha,
-  InputAdornment,
-  Rating,
 } from '@mui/material';
-import {
-  Schedule as ScheduleIcon,
-  Add as AddIcon,
-  Edit as EditIcon,
-  Search as SearchIcon,
-  Visibility as ViewIcon,
-  CheckCircle as CompleteIcon,
-  PlayCircle as StartIcon,
-  Cancel as CancelIcon,
-  Person as PersonIcon,
-  CalendarToday as CalendarIcon,
-  MeetingRoom as RoomIcon,
-  Timer as TimerIcon,
-  Assessment as AssessIcon,
-  Close as CloseIcon,
-  Save as SaveIcon,
-  EventAvailable as EventIcon,
-  Groups as GroupIcon,
-  Star as StarIcon,
-} from '@mui/icons-material';
+
+
 import { useSnackbar } from 'contexts/SnackbarContext';
-import { therapySessionService, rehabProgramService } from 'services/disabilityRehabService';
+import { therapySessionService } from 'services/disabilityRehabService';
 
 const SESSION_CATEGORIES = [
   'علاج طبيعي',

@@ -1,59 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import administrationService from '../../services/administration.service';
-import {
-  Box,
-  Typography,
-  Paper,
-  Button,
-  Grid,
-  Card,
-  CardContent,
-  Chip,
-  IconButton,
-  TextField,
-  InputAdornment,
-  Tab,
-  Tabs,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TablePagination,
-  Avatar,
-  CircularProgress,
-  Tooltip,
-  Menu,
-  MenuItem,
-  Divider,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  FormControl,
-  InputLabel,
-  Select,
-} from '@mui/material';
-import {
-  Add as AddIcon,
-  Search,
-  Refresh,
-  Mail,
-  MailOutline,
-  MoreVert,
-  Visibility,
-  Forward,
-  CheckCircle,
-  Archive,
-  Reply,
-  AddTask,
-  ArrowBack,
-  CallReceived,
-  CallMade,
-  WarningAmber,
-} from '@mui/icons-material';
+
+
+
+
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients } from '../../theme/palette';
 

@@ -1,35 +1,8 @@
 import { useState, useEffect } from 'react';
-import {
-  Box,
-  Container,
-  Grid,
-  Card,
-  CardContent,
-  CardHeader,
-  Typography,
-  LinearProgress,
-  Avatar,
-  Chip,
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Tabs,
-  Tab,
-} from '@mui/material';
-import {
-  Phone as PhoneIcon,
-  Email as EmailIcon,
-  Warning as WarningIcon,
-  School as SchoolIcon,
-} from '@mui/icons-material';
+
+
+
+
 import { parentService } from 'services/parentService';
 import logger from 'utils/logger';
 import { gradients, brandColors, statusColors, neutralColors, surfaceColors } from 'theme/palette';

@@ -1,9 +1,7 @@
 /**
  * لوحة تحكم الصحة والسلامة — HSE Dashboard
  */
-import React, { useState, useEffect } from 'react';
-import { Box, Typography, Grid, Paper, CircularProgress, Chip } from '@mui/material';
-import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { useState, useEffect } from 'react';
 import { getDashboard } from '../../services/hse.service';
 
 const COLORS = ['#4caf50', '#ff9800', '#f44336', '#9c27b0', '#607d8b'];

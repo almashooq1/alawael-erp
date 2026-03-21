@@ -1,7 +1,6 @@
 /**
  * Messaging Center Routes — مسارات مركز الرسائل
  */
-import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const MessagingDashboard = lazyWithRetry(() => import('../pages/Messaging/MessagingDashboard'));

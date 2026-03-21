@@ -3,44 +3,10 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import {
-  Box,
-  Container,
-  Typography,
-  Card,
-  CardContent,
-  Grid,
-  Button,
-  Chip,
-  Avatar,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   Paper,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  MenuItem,
-  LinearProgress,
-  Tabs,
-  Tab,
-  IconButton,
-  Stack,
-  Alert,
 } from '@mui/material';
-import {
-  Groups as MeetingIcon,
-  Add as AddIcon,
-  Refresh as RefreshIcon,
-  Edit as EditIcon,
-  Description as MinutesIcon,
-  CheckCircle as RSVPIcon,
-  CalendarMonth as CalendarIcon,
-} from '@mui/icons-material';
+
+
 import meetingsService from '../../services/meetings.service';
 
 const DEMO_MEETINGS = [

@@ -1,7 +1,6 @@
 /**
  * Complaints Routes — مسارات الشكاوى والمقترحات
  */
-import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const ComplaintsDashboard = lazyWithRetry(() => import('../pages/complaints/ComplaintsDashboard'));

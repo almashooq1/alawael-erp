@@ -1,48 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Box,
-  Container,
-  Card,
-  CardContent,
-  Typography,
-  Avatar,
-  Grid,
-  Button,
-  TextField,
-  InputAdornment,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Chip,
-  LinearProgress,
-  Tabs,
-  Tab,
-  IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Tooltip,
-} from '@mui/material';
-import {
-  FactCheck as AuditIcon,
-  Add as AddIcon,
-  Search as SearchIcon,
-  Assignment as PlanIcon,
-  ReportProblem as NCRIcon,
-  BugReport as CAPAIcon,
-  Visibility as ViewIcon,
-  CalendarMonth as CalIcon,
-} from '@mui/icons-material';
+import { useState, useEffect, useCallback } from 'react';
+
+
+
+
 import { auditService } from 'services/operationsService';
-import logger from 'utils/logger';
 import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 

@@ -1,7 +1,6 @@
 /**
  * Risk Management Routes — مسارات إدارة المخاطر
  */
-import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const RiskDashboard = lazyWithRetry(() => import('../pages/RiskManagement/RiskDashboard'));

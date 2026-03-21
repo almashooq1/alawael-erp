@@ -1,17 +1,8 @@
 /**
  * LeaveManagement — Dialogs (New Leave, View Detail, Approve/Reject)
  */
-import {
-  Box, Typography, Grid, Paper, Button, TextField, Dialog, DialogTitle,
-  DialogContent, DialogActions, MenuItem, Alert, IconButton, Chip,
-  Avatar, Tooltip, Divider, CircularProgress, InputAdornment,
-} from '@mui/material';
-import {
-  Add as AddIcon, Close as CloseIcon,
-  CheckCircle as ApproveIcon, Cancel as RejectIcon,
-  CalendarMonth as CalendarIcon, Timer as TimerIcon,
-  Person as PersonIcon, Edit as EditIcon,
-} from '@mui/icons-material';
+
+
 import { LEAVE_TYPES, LEAVE_TYPE_MAP, STATUS_CONFIG } from './constants';
 
 /* ═══ New Leave Request Dialog ═══ */

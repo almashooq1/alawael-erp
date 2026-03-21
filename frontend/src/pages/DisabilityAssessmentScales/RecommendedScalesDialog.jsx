@@ -3,34 +3,10 @@
  * Fetches recommended scales from the backend based on disability type.
  */
 import { useState } from 'react';
-import {
-  Box,
-  Typography,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  IconButton,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Alert,
-  LinearProgress,
-  Chip,
-  Grid,
-  Card,
-  CardContent,
-  CardActions,
-  Avatar,
-} from '@mui/material';
-import {
-  Close as CloseIcon,
-  Recommend as RecommendIcon,
-  Assessment as AssessmentIcon,
-  Add as AddIcon,
-} from '@mui/icons-material';
+
+
+
+
 import assessmentService from 'services/assessmentService';
 import logger from 'utils/logger';
 import { SCALE_ICONS } from './constants';

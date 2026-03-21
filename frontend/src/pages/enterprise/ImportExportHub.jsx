@@ -12,72 +12,10 @@
  * - Module browser
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Box, Paper, Typography, Grid, Card, CardContent, CardActions,
-  Button, IconButton, Tabs, Tab, Chip, TextField, MenuItem,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Dialog, DialogTitle, DialogContent, DialogActions,
-  Stepper, Step, StepLabel, StepContent,
-  LinearProgress, CircularProgress, Alert, AlertTitle,
-  Tooltip, Divider, Badge, Avatar, Switch, FormControlLabel,
-  List, ListItem, ListItemIcon, ListItemText,
-  Accordion, AccordionSummary, AccordionDetails,
-  Fade, Collapse, InputAdornment, Select, FormControl, InputLabel,
-  Checkbox, Slider, Rating,
-} from '@mui/material';
-import {
-  CloudUpload as UploadIcon,
-  CloudDownload as DownloadIcon,
-  Description as FileIcon,
-  Assessment as StatsIcon,
-  History as HistoryIcon,
-  Settings as SettingsIcon,
-  Refresh as RefreshIcon,
-  Search as SearchIcon,
-  Delete as DeleteIcon,
-  Replay as RetryIcon,
-  Cancel as CancelIcon,
-  CheckCircle as SuccessIcon,
-  Error as ErrorIcon,
-  Warning as WarningIcon,
-  Info as InfoIcon,
-  ExpandMore as ExpandIcon,
-  FileCopy as TemplateIcon,
-  ViewModule as ModuleIcon,
-  GetApp as GetAppIcon,
-  Publish as PublishIcon,
-  TableChart as ExcelIcon,
-  PictureAsPdf as PdfIcon,
-  Code as JsonIcon,
-  TextSnippet as CsvIcon,
-  Archive as ZipIcon,
-  DataObject as XmlIcon,
-  Storage as DataIcon,
-  TrendingUp as TrendIcon,
-  Speed as SpeedIcon,
-  Visibility as PreviewIcon,
-  Map as MapIcon,
-  PlayArrow as RunIcon,
-  Stop as StopIcon,
-  DoneAll as DoneAllIcon,
-  FolderOpen as FolderIcon,
-  SwapHoriz as SwapIcon,
-  ArrowForward as ArrowIcon,
-  ArrowBack as BackIcon,
-  Schedule as ScheduleIcon,
-  BarChart as BarChartIcon,
-  HighQuality as QualityIcon,
-  Timer as TimerIcon,
-  PowerSettingsNew as ToggleOnIcon,
-  SelectAll as SelectAllIcon,
-  Transform as TransformIcon,
-  CheckBox as CheckBoxIcon,
-  CheckBoxOutlineBlank as CheckBoxBlankIcon,
-  DonutLarge as DonutIcon,
-  TrendingDown as TrendDownIcon,
-  AutoFixHigh as AutoFixIcon,
-} from '@mui/icons-material';
+import { useState, useEffect, useCallback } from 'react';
+
+
+
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import importExportProService from '../../services/importExportPro.service';
 

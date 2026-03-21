@@ -1,33 +1,8 @@
 import { useState, useEffect } from 'react';
-import {
-  Box,
-  Container,
-  Card,
-  CardContent,
-  Typography,
-  Avatar,
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Grid,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Rating,
-  InputAdornment,
-} from '@mui/material';
-import {
-  ExpandMore as ExpandMoreIcon,
-  Add as AddIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  Download as DownloadIcon,
-  Search as SearchIcon,
-  EventNote as SessionsIcon,
-} from '@mui/icons-material';
+
+
+
+
 import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';

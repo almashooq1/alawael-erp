@@ -3,15 +3,8 @@
  * القوائم المنسدلة: السياق، التحديد، والأعمدة
  */
 
-import { Menu, MenuItem, Divider, Typography, Checkbox } from '@mui/material';
-import {
-  Visibility as VisibilityIcon,
-  Edit as EditIcon,
-  Download as DownloadIcon,
-  Share as ShareIcon,
-  Info as InfoIcon,
-  Delete as DeleteIcon,
-} from '@mui/icons-material';
+
+
 import { COLUMN_DEFINITIONS } from './documentListConstants';
 import { statusColors, surfaceColors, leaveColors } from 'theme/palette';
 

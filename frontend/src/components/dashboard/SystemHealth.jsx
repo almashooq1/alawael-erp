@@ -4,15 +4,7 @@
  */
 
 import React from 'react';
-import { Box, Paper, Typography, Chip, useTheme, Tooltip } from '@mui/material';
-import { motion } from 'framer-motion';
-import StorageIcon from '@mui/icons-material/Storage';
-import MemoryIcon from '@mui/icons-material/Memory';
-import TimerIcon from '@mui/icons-material/Timer';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import ErrorIcon from '@mui/icons-material/Error';
-import SpeedIcon from '@mui/icons-material/Speed';
-import DnsIcon from '@mui/icons-material/Dns';
+import { useTheme } from '@mui/material';
 import { statusColors, brandColors } from '../../theme/palette';
 
 const formatUptime = (seconds) => {

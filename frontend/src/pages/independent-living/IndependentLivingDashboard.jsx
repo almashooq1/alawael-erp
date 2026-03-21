@@ -2,18 +2,9 @@
  * Independent Living Dashboard — لوحة برامج العيش المستقل
  */
 import { useState, useEffect } from 'react';
-import {
-  Box, Grid, Card, CardContent, Typography, Paper,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Chip, LinearProgress
-} from '@mui/material';
-import {
-  Home as HomeIcon,
-  School as TrainIcon,
-  TrendingUp as ProgressIcon,
-  Assessment as AssessIcon
-} from '@mui/icons-material';
-import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+
+
+
 import apiClient from '../../services/api';
 
 const COLORS = ['#00897b', '#1976d2', '#f57c00', '#d32f2f', '#7b1fa2'];

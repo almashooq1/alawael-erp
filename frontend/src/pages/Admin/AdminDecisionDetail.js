@@ -1,61 +1,12 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import DOMPurify from 'dompurify';
 import administrationService from '../../services/administration.service';
-import {
-  Box,
-  Typography,
-  Paper,
-  Button,
-  Grid,
-  Card,
-  CardContent,
-  Chip,
-  IconButton,
-  Avatar,
-  Divider,
-  Tooltip,
-  CircularProgress,
-  Tab,
-  Tabs,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Alert,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  LinearProgress,
-} from '@mui/material';
-import {
-  ArrowBack,
-  Edit,
-  CheckCircle,
-  Cancel,
-  Block,
-  Refresh,
-  Gavel,
-  History,
-  People,
-  Send,
-  Archive,
-  Campaign,
-  Comment,
-  Visibility,
-  AccessTime,
-  Flag,
-  Lock,
-} from '@mui/icons-material';
+
+
+
+
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import { gradients } from '../../theme/palette';
 
 /* ═══ Helpers ════════════════════════════════════════════════════════════════ */
 const docTypeLabels = {
@@ -494,7 +445,7 @@ export default function AdminDecisionDetail() {
             <Paper variant="outlined" sx={{ p: 2, mt: 1 }}>
               <Typography
                 sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.8 }}
-                dangerouslySetInnerHTML={{ __html: decision.body }}
+                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(decision.body) }}
               />
             </Paper>
           </Box>

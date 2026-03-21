@@ -1,41 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import contractsService from '../../services/contracts.service';
 import {
-  Box,
-  Typography,
   Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Button,
-  Chip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  MenuItem,
-  Grid,
-  Card,
-  CardContent,
-  IconButton,
-  Tabs,
-  Tab,
-  Tooltip,
 } from '@mui/material';
-import {
-  Add as AddIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  Description as ContractIcon,
-  AutorenewOutlined as RenewIcon,
-} from '@mui/icons-material';
+
+
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, statusColors } from '../../theme/palette';
-import ConfirmDialog, { useConfirmDialog } from '../../components/common/ConfirmDialog';
+import { useConfirmDialog } from '../../components/common/ConfirmDialog';
 
 const demoData = [
   {

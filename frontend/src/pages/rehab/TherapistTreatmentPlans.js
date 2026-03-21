@@ -1,41 +1,8 @@
 import { useState, useEffect } from 'react';
-import {
-  Box,
-  Container,
-  Card,
-  CardContent,
-  Typography,
-  Grid,
-  Button,
-  TextField,
-  Chip,
-  LinearProgress,
-  IconButton,
-  InputAdornment,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Tooltip,
-  Paper,
-  Divider,
-} from '@mui/material';
-import {
-  Add as AddIcon,
-  Search as SearchIcon,
-  Assignment as PlanIcon,
-  Flag as FlagIcon,
-  CheckCircle as CheckIcon,
-  Schedule as ScheduleIcon,
-  TrendingUp as TrendingUpIcon,
-  Edit as EditIcon,
-  Visibility as ViewIcon,
-  FilterList as FilterIcon,
-} from '@mui/icons-material';
+
+
+
+
 import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';

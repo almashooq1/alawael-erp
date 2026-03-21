@@ -1,14 +1,9 @@
 /**
  * Legal Dashboard — لوحة الشؤون القانونية
  */
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Box, Grid, Paper, Typography, CircularProgress, IconButton, Tooltip, Alert, Chip,
-  Table, TableHead, TableBody, TableRow, TableCell, useTheme, alpha,
+import { useState, useEffect, useCallback } from 'react';
+import { useTheme, alpha,
 } from '@mui/material';
-import { Refresh, Gavel, EventNote, Balance, AttachMoney } from '@mui/icons-material';
-import { PieChart, Pie, Cell, BarChart, Bar, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip as RTooltip } from 'recharts';
-import { motion } from 'framer-motion';
 import { getLegalDashboard } from '../../services/legalAffairs.service';
 
 const TYPE_LABELS = { litigation: 'تقاضي', arbitration: 'تحكيم', labor: 'عمالية', commercial: 'تجارية', administrative: 'إدارية', regulatory: 'تنظيمية', other: 'أخرى' };

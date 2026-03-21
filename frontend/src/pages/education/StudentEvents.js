@@ -4,44 +4,10 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import {
-  Box,
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  Button,
-  Chip,
-  Stack,
-  Paper,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  IconButton,
-  LinearProgress,
-  Tabs,
-  Tab,
-  TextField,
-  Rating,
-  Alert,
-} from '@mui/material';
-import {
-  Event as EventIcon,
-  CalendarMonth as CalendarIcon,
-  LocationOn as LocationIcon,
-  People as PeopleIcon,
-  AccessTime as TimeIcon,
-  CheckCircle as CheckIcon,
-  Close as CloseIcon,
-  Star as StarIcon,
-  EmojiEvents as TrophyIcon,
-  Celebration as CelebrationIcon,
-  SportsBasketball as SportsIcon,
-  School as AcademicIcon,
-  Palette as ArtIcon,
-  VolunteerActivism as VolunteerIcon,
-} from '@mui/icons-material';
+
+
+
+
 import { gradients } from 'theme/palette';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';

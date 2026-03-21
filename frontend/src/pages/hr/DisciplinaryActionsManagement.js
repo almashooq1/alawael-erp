@@ -1,49 +1,17 @@
 /**
  * Disciplinary Actions Management — إدارة الإنذارات والإجراءات التأديبية
  */
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
-  Box,
-  Typography,
   Paper,
-  Button,
-  Chip,
-  TextField,
-  MenuItem,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Grid,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TablePagination,
-  IconButton,
-  Tooltip,
-  Card,
-  CardContent,
-  Alert,
-  Snackbar,
-  CircularProgress,
 } from '@mui/material';
-import {
-  Add as AddIcon,
-  Visibility as ViewIcon,
-  Gavel as GavelIcon,
-  Warning as WarningIcon,
-  ThumbUp as ApproveIcon,
-  AppRegistration as AppealIcon,
-} from '@mui/icons-material';
+
+
 import {
   getDisciplinaryActions,
   createDisciplinaryAction,
   getDisciplinaryActionById,
   approveDisciplinaryAction,
-  fileDisciplinaryAppeal,
 } from '../../services/hr/employeeAffairsExpandedService';
 
 const ACTION_TYPES = [

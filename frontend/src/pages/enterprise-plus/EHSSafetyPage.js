@@ -2,47 +2,12 @@
  * EHS — Environmental, Health & Safety — السلامة والصحة المهنية والبيئة
  * Safety Incidents, Inspections, Hazard Reports, PPE, Training
  */
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Box,
-  Typography,
-  Paper,
-  Grid,
-  Button,
-  TextField,
-  IconButton,
-  Chip,
-  Avatar,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  MenuItem,
-  Tab,
-  Tabs,
-  Card,
-  CardContent,
-  LinearProgress,
-  Stack,
-} from '@mui/material';
+import { useState, useEffect, useCallback } from 'react';
+
+
 import { alpha } from '@mui/material/styles';
-import {
-  Add as AddIcon,
-  Edit as EditIcon,
-  Close as CloseIcon,
-  Inventory as InspectionIcon,
-  Warning as HazardIcon,
-  Shield as PPEIcon,
-  School as TrainingIcon,
-  ReportProblem as IncidentIcon,
-  CheckCircle as CompleteIcon,
-  LocalHospital as MedicalIcon,
-  Construction as WorkIcon,
-} from '@mui/icons-material';
+
+
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import * as svc from '../../services/enterpriseProPlus.service';
 

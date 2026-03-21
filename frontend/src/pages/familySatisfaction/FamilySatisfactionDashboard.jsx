@@ -3,17 +3,8 @@
  * Family Satisfaction Surveys Dashboard
  */
 import { useState, useEffect, useCallback } from 'react';
-import {
-  Box, Card, CardContent, Typography, Grid, Button, Chip, Table,
-  TableBody, TableCell, TableContainer, TableHead, TableRow,
-  CircularProgress, Alert, IconButton, Tabs, Tab, LinearProgress,
-  Avatar, Divider,
-} from '@mui/material';
-import {
-  Refresh, Add, SentimentVerySatisfied, SentimentSatisfied,
-  SentimentDissatisfied, ThumbUp, ThumbDown, Assessment,
-  QuestionAnswer, TrendingUp, Star,
-} from '@mui/icons-material';
+
+
 import familySatisfactionService from '../../services/familySatisfaction.service';
 
 const npsColors = { promoter: 'success', passive: 'warning', detractor: 'error' };

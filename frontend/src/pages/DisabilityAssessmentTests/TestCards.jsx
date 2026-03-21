@@ -1,14 +1,9 @@
 /**
  * TestCards – Tab 0: Available test cards grid
  */
-import {
-  Box, Grid, Card, CardContent, CardActions, Typography,
-  Button, Chip, Divider, Avatar,
-} from '@mui/material';
-import {
-  Quiz as QuizIcon,
-  Add as AddIcon,
-} from '@mui/icons-material';
+
+
+
 import { TEST_ICONS } from './constants';
 
 const TestCards = ({ tests, onOpenTest }) => (

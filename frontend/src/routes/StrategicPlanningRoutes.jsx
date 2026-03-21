@@ -1,7 +1,6 @@
 /**
  * Strategic Planning Routes — مسارات التخطيط الاستراتيجي
  */
-import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const StrategicDashboard = lazyWithRetry(() => import('../pages/StrategicPlanning/StrategicDashboard'));

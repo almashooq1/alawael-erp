@@ -1,5 +1,7 @@
 const js = require('@eslint/js');
 const globals = require('globals');
+const unusedImports = require('eslint-plugin-unused-imports');
+const reactHooks = require('eslint-plugin-react-hooks');
 
 module.exports = [
   {
@@ -14,6 +16,10 @@ module.exports = [
   },
   {
     files: ['**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx'],
+    plugins: {
+      'unused-imports': unusedImports,
+      'react-hooks': reactHooks,
+    },
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'module',
@@ -31,13 +37,19 @@ module.exports = [
     },
     rules: {
       ...js.configs.recommended.rules,
-      'no-unused-vars': ['warn', { 
-        argsIgnorePattern: '^_',
+      'no-unused-vars': 'off',
+      'unused-imports/no-unused-imports': 'warn',
+      'unused-imports/no-unused-vars': ['warn', {
+        vars: 'all',
         varsIgnorePattern: '^_',
+        args: 'after-used',
+        argsIgnorePattern: '^_',
         caughtErrors: 'none',
       }],
       'no-console': 'warn',
       'no-undef': 'warn',
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
     },
   },
   {

@@ -2,60 +2,13 @@
  * 🦽 إدارة الأجهزة المساعدة — Assistive Devices Management
  * AlAwael ERP — Equipment inventory, assignment, maintenance, tracking
  */
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
-  Box,
-  Typography,
-  Paper,
-  Grid,
-  Card,
-  CardContent,
-  Chip,
-  Avatar,
-  LinearProgress,
-  Divider,
-  IconButton,
-  Tooltip,
-  Button,
-  Tab,
-  Tabs,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TextField,
-  MenuItem,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Stack,
-  CircularProgress,
   useTheme,
   alpha,
-  InputAdornment,
 } from '@mui/material';
-import {
-  Devices as DeviceIcon,
-  Add as AddIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  Search as SearchIcon,
-  Visibility as ViewIcon,
-  AssignmentInd as AssignIcon,
-  AssignmentReturn as ReturnIcon,
-  Build as MaintenanceIcon,
-  CheckCircle as CheckIcon,
-  Warning as WarningIcon,
-  Inventory as InventoryIcon,
-  AttachMoney as CostIcon,
-  Close as CloseIcon,
-  Save as SaveIcon,
-  Category as CategoryIcon,
-  CalendarToday as CalendarIcon,
-} from '@mui/icons-material';
+
+
 import { useSnackbar } from 'contexts/SnackbarContext';
 import { assistiveDeviceService } from 'services/disabilityRehabService';
 

@@ -9,8 +9,6 @@
  */
 
 import React from 'react';
-import { Box, Typography } from '@mui/material';
-import InboxIcon from '@mui/icons-material/Inbox';
 
 const EmptyState = React.memo(({
   icon,

@@ -2,58 +2,13 @@
  * WorkflowCalendar – تقويم سير العمل
  * Calendar view showing tasks, deadlines, and reminders grouped by date.
  */
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Box,
-  Grid,
-  Paper,
-  Typography,
-  Button,
-  IconButton,
-  Tooltip,
-  Chip,
-  Card,
-  CardContent,
-  Skeleton,
-  Divider,
   alpha,
-  Avatar,
-  Badge,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Stack,
-  ToggleButton,
-  ToggleButtonGroup,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
 } from '@mui/material';
-import {
-  CalendarMonth,
-  ChevronLeft,
-  ChevronRight,
-  Refresh,
-  Today,
-  Assignment,
-  AccessAlarm,
-  Flag,
-  Event,
-  Circle,
-  ArrowBack,
-  ViewWeek,
-  ViewModule,
-  PriorityHigh,
-  Timer,
-  Person,
-} from '@mui/icons-material';
+
+
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import workflowService from '../../services/workflow.service';
 

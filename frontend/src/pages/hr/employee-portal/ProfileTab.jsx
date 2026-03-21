@@ -1,30 +1,7 @@
-import React from 'react';
-import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  Grid,
-  Avatar,
-  Chip,
-  Divider,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-} from '@mui/material';
-import {
-  Person as PersonIcon,
-  Badge as BadgeIcon,
-  Business as BusinessIcon,
-  Phone as PhoneIcon,
-  Email as EmailIcon,
-  CalendarMonth as CalendarIcon,
-  EventAvailable as EventAvailableIcon,
-  Assignment as AssignmentIcon,
-  AccountBalanceWallet as WalletIcon,
-  Folder as FolderIcon,
-} from '@mui/icons-material';
+
+
+
+
 
 /**
  * ProfileTab – Employee overview card with personal details and summary stats.

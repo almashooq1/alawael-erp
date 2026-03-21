@@ -1,5 +1,4 @@
-import { Box, Container, Typography, Chip, IconButton, Tooltip, Breadcrumbs, Link, alpha } from '@mui/material';
-import { ArrowBack as BackIcon, Home as HomeIcon, NavigateNext as NextIcon } from '@mui/icons-material';
+import { alpha } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { gradients } from 'theme/palette';
 

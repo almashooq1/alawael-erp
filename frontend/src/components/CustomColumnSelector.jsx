@@ -1,4 +1,3 @@
-import { Checkbox, FormControlLabel, FormGroup, Button, Box } from '@mui/material';
 
 /**
  * مكون اختيار الأعمدة المخصصة للجدول

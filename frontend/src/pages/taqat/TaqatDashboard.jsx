@@ -3,16 +3,8 @@
  * Taqat Employment Platform Dashboard
  */
 import { useState, useEffect, useCallback } from 'react';
-import {
-  Box, Card, CardContent, Typography, Grid, Button, Chip, Table,
-  TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
-  CircularProgress, Alert, Tabs, Tab, IconButton, Avatar, LinearProgress,
-  Dialog, DialogTitle, DialogContent, DialogActions, TextField, MenuItem,
-} from '@mui/material';
-import {
-  Work, Person, School, TrendingUp, Refresh, Add,
-  Assessment, Search, CheckCircle, HourglassEmpty,
-} from '@mui/icons-material';
+
+
 import taqatService from '../../services/taqat.service';
 
 const applicationStatusLabels = {

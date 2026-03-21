@@ -2,23 +2,10 @@
  * لوحة تحكم نظام التعليم
  * Education System Dashboard
  */
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
+
+
 import {
-  Container,
-  Grid,
-  Paper,
-  Box,
-  Typography,
-  Card,
-  CardContent,
-  CardActionArea,
-  LinearProgress,
-  Chip,
-  Avatar,
-  Divider,
-} from '@mui/material';
-import {
-  School as SchoolIcon,
   CalendarMonth as CalendarIcon,
   MenuBook as SubjectIcon,
   Person as TeacherIcon,
@@ -29,7 +16,6 @@ import {
   Grade as GradeIcon,
   TrendingUp as TrendIcon,
   Groups as StudentsIcon,
-  CheckCircle as CheckIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { gradients } from '../../theme/palette';

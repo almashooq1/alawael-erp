@@ -1,44 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import {
-  Box,
-  Container,
-  Card,
-  CardContent,
-  Typography,
-  Grid,
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Chip,
-  InputAdornment,
-  Paper,
-  CircularProgress,
-  LinearProgress,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-} from '@mui/material';
-import {
-  CloudUpload as CloudUploadIcon,
-  Download as DownloadIcon,
-  Delete as DeleteIcon,
-  Visibility as VisibilityIcon,
-  Search as SearchIcon,
-  Description as DescriptionIcon,
-  Image as ImageIcon,
-  AudioFile as AudioFileIcon,
-  VideoLibrary as VideoLibraryIcon,
-  PictureAsPdf as PictureAsPdfIcon,
-  FolderOpen as FolderOpenIcon,
-  Scanner as ScannerIcon,
-} from '@mui/icons-material';
+
+
+
+
 import { therapistService } from 'services/therapistService';
 import documentService from 'services/documentService';
-import DocumentScanner from 'components/documents/DocumentScanner';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';

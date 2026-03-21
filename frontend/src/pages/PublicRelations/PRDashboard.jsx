@@ -1,13 +1,9 @@
 /**
  * PR Dashboard — لوحة العلاقات العامة والإعلام
  */
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Box, Paper, Typography, CircularProgress, IconButton, Tooltip, Alert, Chip, Grid, useTheme, alpha,
-  Table, TableHead, TableBody, TableRow, TableCell,
+import { useState, useEffect, useCallback } from 'react';
+import { useTheme, alpha,
 } from '@mui/material';
-import { Refresh, Campaign, Newspaper, Handshake, ThumbUp } from '@mui/icons-material';
-import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RTooltip, ResponsiveContainer } from 'recharts';
 import { getPRDashboard } from '../../services/publicRelations.service';
 
 const SENTIMENT_LABELS = { positive: 'إيجابي', neutral: 'محايد', negative: 'سلبي' };

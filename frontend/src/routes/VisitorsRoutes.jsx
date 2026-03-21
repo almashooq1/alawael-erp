@@ -1,7 +1,6 @@
 /**
  * Visitors Routes — مسارات إدارة الزوار
  */
-import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const VisitorsDashboard = lazyWithRetry(() => import('../pages/visitors/VisitorsDashboard'));

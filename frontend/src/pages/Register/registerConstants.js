@@ -1,7 +1,6 @@
 /**
  * Register Page — Constants & Utility Functions
  */
-import { School, SupervisorAccount, AdminPanelSettings } from '@mui/icons-material';
 import { gradients, statusColors, assessmentColors, surfaceColors } from 'theme/palette';
 
 // ─── Password Strength Logic ─────────────────────────

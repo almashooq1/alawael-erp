@@ -1,51 +1,12 @@
 import { useState, useEffect } from 'react';
-import {
-  Box,
-  Container,
-  Card,
-  CardContent,
-  Typography,
-  Grid,
-  Button,
-  TextField,
-  Chip,
-  IconButton,
-  InputAdornment,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Tooltip,
-  Paper,
-  Avatar,
-  Divider,
-  Badge,
-} from '@mui/material';
-import {
-  Add as AddIcon,
-  Search as SearchIcon,
-  Build as EquipmentIcon,
-  Delete as DeleteIcon,
-  Close as CloseIcon,
-  Edit as EditIcon,
-  BookmarkAdd as BookIcon,
-  BookmarkRemove as ReturnIcon,
-  Engineering as MaintenanceIcon,
-  CheckCircle as AvailableIcon,
-  Cancel as UnavailableIcon,
-  LocationOn as LocationIcon,
-  CalendarToday as DateIcon,
-  QrCode as SerialIcon,
-} from '@mui/icons-material';
+
+
+
+
 import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import { statusColors, neutralColors, surfaceColors } from '../../theme/palette';
 
 const CATEGORIES = [
   { id: 'mobility', nameAr: 'أجهزة التنقل', icon: '🦽', color: '#3b82f6' },

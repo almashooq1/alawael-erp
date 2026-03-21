@@ -1,49 +1,8 @@
 import { useState, useEffect } from 'react';
-import {
-  Box,
-  Container,
-  Card,
-  CardContent,
-  Typography,
-  Grid,
-  Button,
-  TextField,
-  Chip,
-  IconButton,
-  InputAdornment,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Tooltip,
-  Paper,
-  CardMedia,
-  Tabs,
-  Tab,
-  Avatar,
-  CardActions,
-  Badge,
-} from '@mui/material';
-import {
-  Add as AddIcon,
-  Search as SearchIcon,
-  LibraryBooks as LibraryIcon,
-  Delete as DeleteIcon,
-  Close as CloseIcon,
-  BookmarkBorder as BookmarkIcon,
-  Category as CategoryIcon,
-  Star as StarIcon,
-  Download as DownloadIcon,
-  Visibility as ViewIcon,
-  Article as ArticleIcon,
-  Science as ScienceIcon,
-  MenuBook as GuideIcon,
-  Bookmark as BookmarkFilledIcon,
-} from '@mui/icons-material';
+
+
+
+
 import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';

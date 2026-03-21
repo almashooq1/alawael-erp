@@ -2,68 +2,15 @@
  * ♿ إدارة البرامج التأهيلية — Rehabilitation Program Management
  * AlAwael ERP — Full CRUD: programs, goals, sessions, assessments, progress tracking
  */
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
-  Box,
-  Typography,
-  Paper,
-  Grid,
-  Card,
-  CardContent,
-  Chip,
-  Avatar,
-  LinearProgress,
-  Divider,
-  IconButton,
-  Tooltip,
-  Button,
-  Tab,
-  Tabs,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TextField,
-  MenuItem,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Stack,
-  CircularProgress,
   useTheme,
   alpha,
-  InputAdornment,
-  Collapse,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
 } from '@mui/material';
-import {
-  AccessibleForward as RehabIcon,
-  Add as AddIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  Search as SearchIcon,
-  FilterList as FilterIcon,
-  Visibility as ViewIcon,
-  CheckCircle as CompleteIcon,
-  Flag as GoalIcon,
-  PlayCircle as SessionIcon,
-  Assessment as AssessIcon,
-  ExpandMore as ExpandIcon,
-  ExpandLess as CollapseIcon,
-  Person as PersonIcon,
-  CalendarToday as CalendarIcon,
-  TrendingUp as TrendIcon,
-  Close as CloseIcon,
-  Save as SaveIcon,
-} from '@mui/icons-material';
+
+
 import { useSnackbar } from 'contexts/SnackbarContext';
-import { rehabProgramService, specializedProgramService } from 'services/disabilityRehabService';
+import { rehabProgramService } from 'services/disabilityRehabService';
 
 const DISABILITY_TYPES = ['حركية', 'نطقية', 'سمعية', 'بصرية', 'ذهنية', 'توحد', 'متعددة'];
 const PROGRAM_TYPES = [

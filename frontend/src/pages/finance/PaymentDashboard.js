@@ -1,38 +1,10 @@
 import { useEffect, useState, useCallback } from 'react';
 import {
-  Container,
   Paper,
-  Typography,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Button,
-  Box,
-  Card,
-  CardContent,
-  Grid,
-  Chip,
-  Tabs,
-  Tab,
-  TextField,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Select,
-  Alert,
-  CircularProgress,
 } from '@mui/material';
 import apiClient from 'services/api.client';
-import {
-  CreditCard,
-  Description,
-  History as HistoryIcon,
-  Dashboard as DashboardIcon,
-  AttachMoney,
-} from '@mui/icons-material';
+
+
 import logger from 'utils/logger';
 import { gradients } from '../../theme/palette';
 import { useSnackbar } from '../../contexts/SnackbarContext';

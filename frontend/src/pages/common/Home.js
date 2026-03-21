@@ -1,33 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
-import {
-  Box,
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  Button,
-  Divider,
-  Stack,
-  Chip,
-  IconButton,
-  Alert,
-} from '@mui/material';
-import {
-  TrendingUp as TrendingUpIcon,
-  Shield as ShieldIcon,
-  AccountTree as AccountTreeIcon,
-  Groups as GroupsIcon,
-  AccessTime as AccessTimeIcon,
-  Science as ScienceIcon,
-  QueryStats as QueryStatsIcon,
-  SupportAgent as SupportAgentIcon,
-  ArrowForward as ArrowForwardIcon,
-  ErrorOutline as ErrorOutlineIcon,
-  Home as HomeIcon,
-} from '@mui/icons-material';
+
+
+
+
 import { useNavigate } from 'react-router-dom';
 import moduleMocks from 'data/moduleMocks';
-import Sparkline from 'components/Sparkline';
 import { useRealTimeKPIs } from 'contexts/SocketContext';
 import { dashboardAPI } from 'services/api';
 import { gradients, statusColors } from '../../theme/palette';

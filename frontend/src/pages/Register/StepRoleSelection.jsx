@@ -2,19 +2,9 @@
  * StepRoleSelection — Step 2: Role cards + terms checkbox
  */
 
-import {
-  Box,
-  Typography,
-  Grid,
-  CardContent,
-  Alert,
-  FormControlLabel,
-  Checkbox,
-  Link as MuiLink,
-  Fade,
-} from '@mui/material';
+
+
 import { brandColors } from 'theme/palette';
-import { RoleCard } from './Register.styled';
 import { ROLES } from './registerConstants';
 
 const StepRoleSelection = ({

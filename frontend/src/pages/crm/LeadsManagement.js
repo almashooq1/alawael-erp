@@ -4,54 +4,11 @@
  */
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  Grid,
-  Chip,
-  Avatar,
-  Button,
-  IconButton,
-  Tooltip,
-  TextField,
-  MenuItem,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TablePagination,
   Paper,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  LinearProgress,
-  Tab,
-  Tabs,
-  InputAdornment,
-  Slider,
   useTheme,
 } from '@mui/material';
-import {
-  Add as AddIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  Search as SearchIcon,
-  Refresh as RefreshIcon,
-  TrendingUp as TrendIcon,
-  SwapHoriz as ConvertIcon,
-  Close as CloseIcon,
-  Visibility as ViewIcon,
-  ArrowForward as ArrowIcon,
-  FiberManualRecord as DotIcon,
-  MonetizationOn as MoneyIcon,
-  Person as PersonIcon,
-  Phone as PhoneIcon,
-  Email as EmailIcon,
-} from '@mui/icons-material';
+
+
 import { leadsService, MOCK_LEADS } from 'services/crmService';
 import { useSnackbar } from 'contexts/SnackbarContext';
 

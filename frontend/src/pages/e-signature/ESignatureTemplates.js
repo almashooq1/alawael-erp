@@ -1,48 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import eSignatureService from '../../services/eSignature.service';
-import {
-  Box,
-  Typography,
-  Paper,
-  Button,
-  Grid,
-  Card,
-  CardContent,
-  Chip,
-  IconButton,
-  TextField,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  MenuItem,
-  Avatar,
-  Divider,
-  Tooltip,
-  Alert,
-  CircularProgress,
-  Switch,
-  FormControlLabel,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-} from '@mui/material';
-import {
-  Add as AddIcon,
-  Edit,
-  Delete,
-  Description,
-  ArrowBack,
-  ContentCopy,
-  Visibility,
-  Settings,
-  Category,
-  Refresh,
-} from '@mui/icons-material';
+
+
+
+
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients } from '../../theme/palette';
 

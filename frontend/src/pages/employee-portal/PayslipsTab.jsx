@@ -1,26 +1,11 @@
 /**
  * PayslipsTab — بوابة الموظف: تبويب كشوف الرواتب
  */
-import React from 'react';
 import {
-  Box,
-  Grid,
-  Typography,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Button,
   Paper,
-  IconButton,
-  Tooltip,
 } from '@mui/material';
-import {
-  Print as PrintIcon,
-  Visibility as ViewIcon,
-} from '@mui/icons-material';
+
+
 import { fmt } from './employeePortalData';
 import { gradients } from '../../theme/palette';
 

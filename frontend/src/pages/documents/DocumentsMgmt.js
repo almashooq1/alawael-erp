@@ -4,74 +4,11 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import {
-  Box,
-  Container,
-  Typography,
-  Button,
-  Card,
-  CardContent,
-  Grid,
-  TextField,
-  InputAdornment,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  CircularProgress,
-  Paper,
-  Tabs,
-  Tab,
-  Chip,
-  IconButton,
-  Tooltip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  TableContainer,
-  TablePagination,
-  LinearProgress,
-  Avatar,
-} from '@mui/material';
-import {
-  CloudUpload as UploadIcon,
-  Search as SearchIcon,
-  Folder as FolderIcon,
-  Description as FileIcon,
-  PictureAsPdf as PdfIcon,
-  Image as ImageIcon,
-  TableChart as ExcelIcon,
-  TextSnippet as TextIcon,
-  Slideshow as PptxIcon,
-  Archive as ZipIcon,
-  InsertDriveFile as OtherFileIcon,
-  Download as DownloadIcon,
-  Visibility as ViewIcon,
-  Delete as DeleteIcon,
-  Restore as RestoreIcon,
-  Share as ShareIcon,
-  Category as CategoryIcon,
-  Assessment as AnalyticsIcon,
-  History as HistoryIcon,
-  Refresh as RefreshIcon,
-  Storage as StorageIcon,
-  PeopleAlt as SharedIcon,
-  HourglassEmpty as PendingIcon,
-  FolderOpen as FolderOpenIcon,
-  Scanner as ScannerIcon,
-  AudioFile as AudioFileIcon,
-  VideoLibrary as VideoFileIcon,
-  DataObject as DataIcon,
-} from '@mui/icons-material';
+
+
+
+
 import documentService from 'services/documentService';
-import DocumentUploader from 'components/documents/DocumentUploader';
-import DocumentScanner from 'components/documents/DocumentScanner';
 import logger from 'utils/logger';
 import { gradients, brandColors } from 'theme/palette';
 import { useSnackbar } from '../../contexts/SnackbarContext';

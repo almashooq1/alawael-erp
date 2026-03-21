@@ -1,21 +1,11 @@
 /**
  * لوحة تحكم الحضور والانصراف — Attendance Dashboard
  */
-import React, { useState, useEffect } from 'react';
-import {
-  Box, Grid, Paper, Typography, Card, CardContent, CircularProgress, Chip,
-  Table, TableHead, TableRow, TableCell, TableBody,
-} from '@mui/material';
-import {
-  PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer, Legend,
-} from 'recharts';
-import {
-  Fingerprint as BiometricIcon,
-  CheckCircle as PresentIcon,
-  Cancel as AbsentIcon,
-  AccessTime as LateIcon,
-} from '@mui/icons-material';
+import { useState, useEffect } from 'react';
+
+
+
+
 import apiClient from '../../services/api';
 
 const PIE_COLORS = ['#4caf50', '#f44336', '#ff9800', '#2196f3'];

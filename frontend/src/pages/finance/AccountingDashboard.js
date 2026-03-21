@@ -1,34 +1,8 @@
 import { useState, useEffect } from 'react';
-import {
-  Box,
-  Container,
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  Avatar,
-  Chip,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  LinearProgress,
-  Divider,
-} from '@mui/material';
-import {
-  AccountBalance as AccountIcon,
-  TrendingUp,
-  TrendingDown,
-  Receipt as InvoiceIcon,
-  MoneyOff as ExpenseIcon,
-  AccountBalanceWallet as WalletIcon,
-  Assessment as ReportIcon,
-  Warning as WarningIcon,
-  ArrowUpward,
-  ArrowDownward,
-} from '@mui/icons-material';
+
+
+
+
 import { useNavigate } from 'react-router-dom';
 import accountingService from 'services/accountingService';
 import logger from 'utils/logger';

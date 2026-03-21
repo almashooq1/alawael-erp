@@ -2,8 +2,6 @@
  * SuccessView — Post-registration success animation
  */
 
-import { Container, Box, Typography, Avatar, CircularProgress, Fade } from '@mui/material';
-import { CheckCircle } from '@mui/icons-material';
 import { brandColors } from 'theme/palette';
 
 const SuccessView = () => (

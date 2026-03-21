@@ -10,26 +10,10 @@
  */
 
 import React, { useState, useCallback, useRef } from 'react';
-import {
-  Dialog, DialogTitle, DialogContent, DialogActions,
-  Box, Typography, Button, IconButton, LinearProgress,
-  TextField, Select, MenuItem, FormControl, InputLabel,
-  Chip, Avatar, Divider,
-} from '@mui/material';
-import {
-  CloudUpload as UploadIcon,
-  Close as CloseIcon,
-  CheckCircle as SuccessIcon,
-  Error as ErrorIcon,
-  Delete as RemoveIcon,
-  Image as ImageIcon,
-  Videocam as VideoIcon,
-  AudioFile as AudioIcon,
-  Description as DocIcon,
-  Archive as ArchiveIcon,
-  InsertDriveFile as FileIcon,
-} from '@mui/icons-material';
-import { brandColors, statusColors, surfaceColors, neutralColors, gradients } from '../../theme/palette';
+
+
+
+import { brandColors, statusColors, surfaceColors, neutralColors } from '../../theme/palette';
 import mediaService from '../../services/mediaService';
 
 const MAX_FILES = 20;

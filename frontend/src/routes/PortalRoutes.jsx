@@ -2,7 +2,6 @@
  * Portal Routes (Student, Therapist, Parent)
  * مسارات البوابات (الطالب، المعالج، ولي الأمر)
  */
-import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 // Student Portal

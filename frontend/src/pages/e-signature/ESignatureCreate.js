@@ -1,44 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import eSignatureService from '../../services/eSignature.service';
-import {
-  Box,
-  Typography,
-  Paper,
-  Button,
-  TextField,
-  Grid,
-  Card,
-  CardContent,
-  Stepper,
-  Step,
-  StepLabel,
-  MenuItem,
-  Chip,
-  IconButton,
-  Switch,
-  FormControlLabel,
-  Divider,
-  Alert,
-  Avatar,
-  Autocomplete,
-  Tooltip,
-} from '@mui/material';
-import {
-  ArrowBack,
-  ArrowForward,
-  Save,
-  Send,
-  Add as AddIcon,
-  Delete,
-  Draw as SignIcon,
-  Person,
-  Description,
-  Settings,
-  Preview,
-  DragIndicator,
-  PriorityHigh,
-} from '@mui/icons-material';
+
+
+
+
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients } from '../../theme/palette';
 

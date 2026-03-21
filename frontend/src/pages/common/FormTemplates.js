@@ -3,75 +3,12 @@
  * AlAwael ERP — Ready-made form templates for beneficiaries, HR, admin & finance
  * @created 2026-03-13
  */
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
-  Box,
-  Typography,
   Paper,
-  Grid,
-  Card,
-  CardContent,
-  CardActions,
-  Button,
-  IconButton,
-  Tooltip,
-  TextField,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Chip,
-  Alert,
-  CircularProgress,
-  Tabs,
-  Tab,
-  Divider,
-  MenuItem,
-  Select,
-  FormControl,
-  InputLabel,
-  FormControlLabel,
-  Checkbox,
-  Radio,
-  RadioGroup,
-  FormLabel,
-  InputAdornment,
-  Badge,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Fade,
-  Switch,
-  Stepper,
-  Step,
-  StepLabel,
 } from '@mui/material';
-import {
-  Description as FormIcon,
-  Search as SearchIcon,
-  Send as SendIcon,
-  Visibility as ViewIcon,
-  Assignment as SubmissionIcon,
-  CheckCircle as ApprovedIcon,
-  Cancel as RejectedIcon,
-  HourglassEmpty as PendingIcon,
-  Dashboard as StatsIcon,
-  FilterList as FilterIcon,
-  Print as PrintIcon,
-  Close as CloseIcon,
-  ArrowBack as BackIcon,
-  TrendingUp as TrendIcon,
-  People as PeopleIcon,
-  Business as AdminIcon,
-  AttachMoney as FinanceIcon,
-  Accessibility as BeneficiaryIcon,
-  Article as ArticleIcon,
-  Add as AddIcon,
-  Refresh as RefreshIcon,
-} from '@mui/icons-material';
+
+
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import formTemplatesService from '../../services/formTemplatesService';
 

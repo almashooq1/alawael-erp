@@ -2,22 +2,9 @@
  * 👤 UserProductivityWidget — ويدجت إنتاجية المستخدم
  * Professional user productivity tracker with goals, streaks, and achievements
  */
-import React, { useState, useMemo } from 'react';
-import {
-  Box, Paper, Typography, Grid, LinearProgress, Chip, Avatar,
-  IconButton, Tooltip, useTheme, Divider, Badge,
+import { useMemo } from 'react';
+import { useTheme,
 } from '@mui/material';
-import { motion } from 'framer-motion';
-import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
-import WhatshotIcon from '@mui/icons-material/Whatshot';
-import StarIcon from '@mui/icons-material/Star';
-import TaskAltIcon from '@mui/icons-material/TaskAlt';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import AutoGraphIcon from '@mui/icons-material/AutoGraph';
-import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
-import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
 import { useAuth } from 'contexts/AuthContext';
 import { gradients, statusColors, brandColors, rankColors } from 'theme/palette';
 

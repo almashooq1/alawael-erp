@@ -4,52 +4,13 @@
  * Real-time KPI analytics, bottleneck analysis, workload distribution,
  * completion trends, and category breakdowns.
  */
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Box,
-  Paper,
-  Typography,
-  Button,
-  Grid,
-  Card,
-  CardContent,
-  IconButton,
-  Chip,
-  Divider,
-  MenuItem,
-  Select,
-  FormControl,
-  Tabs,
-  Tab,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Avatar,
-  LinearProgress,
   alpha,
-  Skeleton,
-  Alert,
 } from '@mui/material';
-import {
-  Refresh as RefreshIcon,
-  ArrowBack as BackIcon,
-  TrendingUp as TrendUpIcon,
-  TrendingDown as TrendDownIcon,
-  Assessment as AssessmentIcon,
-  Group as GroupIcon,
-  Warning as WarningIcon,
-  Timer as TimerIcon,
-  CheckCircle as CheckIcon,
-  Schedule as ScheduleIcon,
-  Category as CategoryIcon,
-  CameraAlt as SnapshotIcon,
-  BugReport as BottleneckIcon,
-  PieChart as PieIcon,
-} from '@mui/icons-material';
+
+
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import workflowService from '../../services/workflow.service';
 

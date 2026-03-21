@@ -2,57 +2,14 @@
  * WorkflowExtendedTemplates – قوالب سير العمل المتقدمة
  * Extended workflow templates: salary advance, maintenance, transfer, training, etc.
  */
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Box,
-  Grid,
   Paper,
-  Typography,
-  Button,
-  IconButton,
-  Tooltip,
-  Chip,
-  Card,
-  CardContent,
-  Skeleton,
   alpha,
-  Avatar,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Stack,
-  Divider,
-  Alert,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
 } from '@mui/material';
-import {
-  ArrowBack,
-  Refresh,
-  FileCopy,
-  RocketLaunch,
-  Category,
-  AttachMoney,
-  Build,
-  SwapHoriz,
-  School,
-  Gavel,
-  Description,
-  ExitToApp,
-  FlightTakeoff,
-  Assessment,
-  ReportProblem,
-  Visibility,
-  CheckCircle,
-  ListAlt,
-} from '@mui/icons-material';
+
+
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import workflowService from '../../services/workflow.service';
 

@@ -1,14 +1,9 @@
 /**
  * Warehouse Dashboard — لوحة تحكم المستودعات
  */
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Box, Grid, Paper, Typography, CircularProgress, IconButton, Tooltip, Alert, Chip,
-  Table, TableHead, TableBody, TableRow, TableCell, useTheme, alpha,
+import { useState, useEffect, useCallback } from 'react';
+import { useTheme, alpha,
 } from '@mui/material';
-import { Refresh, Warehouse as WarehouseIcon, Inventory2, Warning, Receipt } from '@mui/icons-material';
-import { PieChart, Pie, Cell, BarChart, Bar, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip as RTooltip } from 'recharts';
-import { motion } from 'framer-motion';
 import { getWarehouseDashboard } from '../../services/warehouse.service';
 
 const CATEGORY_LABELS = {

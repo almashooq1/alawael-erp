@@ -1,47 +1,9 @@
 import { useState, useEffect } from 'react';
 import {
-  Box,
-  Container,
-  Card,
-  CardContent,
-  Typography,
-  Grid,
-  Button,
-  TextField,
-  Chip,
-  IconButton,
-  InputAdornment,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
   Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Tooltip,
-  Rating,
-  Tabs,
-  Tab,
 } from '@mui/material';
-import {
-  Add as AddIcon,
-  Search as SearchIcon,
-  Assessment as AssessmentIcon,
-  Psychology as PsychologyIcon,
-  BarChart as ChartIcon,
-  Delete as DeleteIcon,
-  Visibility as ViewIcon,
-  Star as StarIcon,
-  Category as CategoryIcon,
-} from '@mui/icons-material';
+
+
 import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';

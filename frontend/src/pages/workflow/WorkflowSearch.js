@@ -2,53 +2,13 @@
  * WorkflowSearch – البحث المتقدم
  * Global search across workflow instances, tasks, definitions, comments, and tags.
  */
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Box,
-  Paper,
-  Typography,
-  Button,
-  IconButton,
-  Tooltip,
-  Chip,
-  TextField,
-  InputAdornment,
-  Skeleton,
   alpha,
-  Avatar,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Tabs,
-  Tab,
-  Divider,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Grid,
-  Card,
-  CardContent,
 } from '@mui/material';
-import {
-  ArrowBack,
-  Search,
-  Refresh,
-  Assignment,
-  Description,
-  Label,
-  Comment,
-  Person,
-  CalendarMonth,
-  Circle,
-  OpenInNew,
-  FilterList,
-  TuneRounded,
-} from '@mui/icons-material';
+
+
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import workflowService from '../../services/workflow.service';
 

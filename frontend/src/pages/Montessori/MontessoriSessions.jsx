@@ -13,41 +13,16 @@
  * @version 2.0.0
  */
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import {
-  Container, Typography, Grid, Paper, Box, Avatar,
-  Chip, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  LinearProgress, Button, TextField, MenuItem, IconButton,
-  Tooltip, Dialog, DialogTitle, DialogContent, DialogActions,
-  Tab, Tabs, Stack, InputAdornment, useTheme, alpha,
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { useTheme, alpha,
 } from '@mui/material';
-import {
-  Event as SessionIcon,
-  Assessment as EvalIcon,
-  Add as AddIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  Search as SearchIcon,
-  Refresh as RefreshIcon,
-  ArrowBack as BackIcon,
-  CheckCircle as PresentIcon,
-  Cancel as AbsentIcon,
-  Schedule as ClockIcon,
-  Download as DownloadIcon,
-} from '@mui/icons-material';
-import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RTooltip,
-  ResponsiveContainer, PieChart, Pie, Cell,
-} from 'recharts';
-import { motion } from 'framer-motion';
+
+
+
 import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import ConfirmDialog, { useConfirmDialog } from '../../components/common/ConfirmDialog';
-import { gradients, statusColors } from '../../theme/palette';
-import { ChartTooltip } from '../../components/dashboard/shared/ChartTooltip';
-import EmptyState from '../../components/dashboard/shared/EmptyState';
-import DashboardErrorBoundary from '../../components/dashboard/shared/DashboardErrorBoundary';
-import logger from '../../utils/logger';
+import { useConfirmDialog } from '../../components/common/ConfirmDialog';
+import { gradients } from '../../theme/palette';
 import montessoriService from '../../services/montessoriService';
 
 /* ─── Animated counter ─── */

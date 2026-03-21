@@ -1,30 +1,8 @@
 import { useState, useCallback, useMemo } from 'react';
-import {
-  Box,
-  TextField,
-  InputAdornment,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Chip,
-  Button,
-  IconButton,
-  Tooltip,
-  Collapse,
-  Paper,
-  Badge,
-  alpha,
-} from '@mui/material';
-import {
-  Search as SearchIcon,
-  FilterList as FilterIcon,
-  Clear as ClearIcon,
-  DateRange as DateIcon,
-  ExpandMore as ExpandIcon,
-  ExpandLess as CollapseIcon,
-} from '@mui/icons-material';
-import { useDebounce } from 'hooks';
+
+
+
+
 
 /**
  * FilterBar — Reusable search + filter bar with expandable advanced filters.

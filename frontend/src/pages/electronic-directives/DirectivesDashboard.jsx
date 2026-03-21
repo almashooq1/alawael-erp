@@ -1,48 +1,12 @@
 /**
  * Electronic Directives Dashboard — لوحة تحكم التوجيهات الإلكترونية
  */
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Box,
-  Typography,
-  Grid,
-  Card,
-  CardContent,
-  Paper,
-  Button,
-  Chip,
-  LinearProgress,
-  Divider,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
-  ListItemSecondaryAction,
-  Avatar,
-  IconButton,
-  Tooltip,
-  Skeleton,
-  Alert,
-} from '@mui/material';
-import {
-  Campaign as CampaignIcon,
-  Gavel as DecisionIcon,
-  Description as MemoIcon,
-  NotificationsActive as UrgentIcon,
-  PolicyOutlined as PolicyIcon,
-  Rule as ProcedureIcon,
-  Assignment as InstructionIcon,
-  Add as AddIcon,
-  ArrowForward as ArrowForwardIcon,
-  TrendingUp as TrendingUpIcon,
-  Warning as WarningIcon,
-  CheckCircle as CheckCircleIcon,
-  AccessTime as AccessTimeIcon,
-  Visibility as ViewIcon,
-  Speed as SpeedIcon,
-  FiberNew as NewIcon,
-} from '@mui/icons-material';
+
+
+
+
 import electronicDirectivesService from '../../services/electronicDirectives.service';
 import {
   DIRECTIVE_TYPES,

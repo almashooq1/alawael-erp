@@ -1,11 +1,5 @@
-import { Card, CardContent, Typography } from '@mui/material';
-import {
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip as ChartTooltip,
-  ResponsiveContainer,
-} from 'recharts';
+
+
 import { brandColors } from 'theme/palette';
 
 /** Sessions-by-category pie chart */

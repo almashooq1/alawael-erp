@@ -2,56 +2,13 @@
  * 📊 مكتبة المقاييس المتخصصة — Specialized Assessment Scales Library
  * AlAwael ERP — Browse, filter, and manage specialized disability assessment scales
  */
-import React, { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import {
-  Box,
-  Typography,
-  Paper,
-  Grid,
-  Card,
-  CardContent,
-  CardActions,
-  Chip,
-  TextField,
-  InputAdornment,
-  Button,
-  Avatar,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  IconButton,
-  Divider,
-  Stack,
-  LinearProgress,
-  Collapse,
   useTheme,
   alpha,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
 } from '@mui/material';
-import {
-  Search as SearchIcon,
-  Psychology as PsychologyIcon,
-  DirectionsRun as MotorIcon,
-  Memory as MemoryIcon,
-  RecordVoiceOver as SpeechIcon,
-  EmojiPeople as BehaviorIcon,
-  ChildCare as DevIcon,
-  AccessibilityNew as AdaptiveIcon,
-  FilterList as FilterIcon,
-  Info as InfoIcon,
-  Schedule as ClockIcon,
-  Star as StarIcon,
-  ExpandMore as ExpandIcon,
-  ExpandLess as CollapseIcon,
-  Assignment as AssignmentIcon,
-  Close as CloseIcon,
-} from '@mui/icons-material';
+
+
 import {
   SPECIALIZED_SCALES_CATALOG,
   SCALE_CATEGORY_LABELS,

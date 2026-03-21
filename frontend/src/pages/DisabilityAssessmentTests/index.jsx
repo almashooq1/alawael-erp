@@ -6,21 +6,10 @@
  * adaptive behavior), allows conducting tests with item-level scoring,
  * viewing results and tracking progress.
  */
-import { Container, Box, Typography, Button, Paper, Tabs, Tab, LinearProgress } from '@mui/material';
-import {
-  Quiz as QuizIcon,
-  History as HistoryIcon,
-  Assignment as AssignmentIcon,
-} from '@mui/icons-material';
+
+
 import { gradients } from '../../theme/palette';
-import { TabPanel } from './constants';
 import useAssessmentTests from './useAssessmentTests';
-import StatisticsCards from './StatisticsCards';
-import TestCards from './TestCards';
-import RecentResults from './RecentResults';
-import TestWizardDialog from './TestWizardDialog';
-import HistoryDialog from './HistoryDialog';
-import DetailDialog from './DetailDialog';
 
 const DisabilityAssessmentTests = () => {
   const h = useAssessmentTests();

@@ -1,18 +1,12 @@
 /**
  * لوحة تحكم التنسيق متعدد التخصصات — MDT Coordination Dashboard
  */
-import React, { useState, useEffect } from 'react';
-import {
-  Box, Grid, Paper, Typography, Card, CardContent, Chip,
-  Table, TableHead, TableRow, TableCell, TableBody, CircularProgress,
-} from '@mui/material';
-import {
-  Groups as MeetingIcon,
-  ListAlt as PlanIcon,
-  SwapHoriz as RefIcon,
-  Dashboard as DashIcon,
-} from '@mui/icons-material';
-import { meetingsService, dashboardService, plansService, referralsService } from '../../services/mdtCoordinationService';
+import { useState, useEffect } from 'react';
+
+
+
+
+import { meetingsService, dashboardService } from '../../services/mdtCoordinationService';
 
 const meetStatusLabels = { scheduled: 'مجدول', in_progress: 'جارٍ', completed: 'مكتمل', cancelled: 'ملغى' };
 const meetStatusColors = { scheduled: 'info', in_progress: 'warning', completed: 'success', cancelled: 'error' };

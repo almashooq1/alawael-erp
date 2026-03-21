@@ -2,8 +2,6 @@
  * Admin Portal Routes
  * مسارات بوابة الإدارة
  */
-import { Route } from 'react-router-dom';
-import { RoleGuard } from '../components/guards/RouteGuards';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const AdminDashboard = lazyWithRetry(() => import('../pages/Admin/AdminDashboard'));

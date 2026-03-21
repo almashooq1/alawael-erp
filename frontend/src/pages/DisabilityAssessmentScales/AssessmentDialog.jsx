@@ -1,29 +1,7 @@
-import {
-  Box,
-  Typography,
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Chip,
-  Slider,
-  Alert,
-  Paper,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  IconButton,
-  Collapse,
-} from '@mui/material';
-import {
-  Assessment as AssessmentIcon,
-  Close as CloseIcon,
-  BarChart as BarChartIcon,
-  TipsAndUpdates as TipsIcon,
-} from '@mui/icons-material';
+
+
+
+
 import { useState } from 'react';
 import assessmentService from 'services/assessmentService';
 import { SCALE_ICONS } from './constants';

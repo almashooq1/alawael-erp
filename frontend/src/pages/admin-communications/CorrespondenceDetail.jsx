@@ -1,70 +1,12 @@
 /**
  * Correspondence Detail — عرض تفاصيل المراسلة
  */
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import {
-  Box,
-  Typography,
-  Paper,
-  Button,
-  Grid,
-  Card,
-  CardContent,
-  Chip,
-  Divider,
-  IconButton,
-  Avatar,
-  CircularProgress,
-  Tooltip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Stack,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
-  ListItemSecondaryAction,
-  Tab,
-  Tabs,
-  Alert,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-} from '@mui/material';
-import {
-  ArrowBack,
-  Send as SendIcon,
-  Reply,
-  Forward,
-  Archive,
-  Print,
-  Download,
-  CheckCircle,
-  Cancel,
-  AttachFile,
-  InsertDriveFile,
-  History,
-  Person,
-  Business,
-  CalendarMonth,
-  Lock,
-  LockOpen,
-  Visibility,
-  Edit,
-  MoreVert,
-  CallReceived,
-  CallMade,
-  ThumbUp,
-  ThumbDown,
-  Share,
-  ContentCopy,
-  Directions,
-} from '@mui/icons-material';
+
+
+
+
 import { gradients } from '../../theme/palette';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import adminCommunicationsService from '../../services/adminCommunications.service';

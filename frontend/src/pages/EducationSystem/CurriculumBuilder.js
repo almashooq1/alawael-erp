@@ -2,65 +2,11 @@
  * إدارة المناهج الدراسية
  * Curriculum Builder
  */
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Container,
-  Grid,
-  Paper,
-  Box,
-  Typography,
-  Button,
-  Card,
-  CardContent,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Chip,
-  IconButton,
-  Tooltip,
-  LinearProgress,
-  Alert,
-  MenuItem,
-  Select,
-  InputLabel,
-  FormControl,
-  Avatar,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
-  ListItemSecondaryAction,
-  Divider,
-  Stepper,
-  Step,
-  StepLabel,
-  StepContent,
-} from '@mui/material';
-import {
-  Add as AddIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  AutoStories as CurriculumIcon,
-  ArrowBack as BackIcon,
-  ExpandMore as ExpandIcon,
-  LibraryBooks as UnitIcon,
-  MenuBook as LessonIcon,
-  CheckCircle as ApproveIcon,
-  Pending as PendingIcon,
-  Speed as ProgressIcon,
-  Search as SearchIcon,
-} from '@mui/icons-material';
+import { useState, useEffect, useCallback } from 'react';
+
+
+
+
 import { useNavigate } from 'react-router-dom';
 import { gradients } from '../../theme/palette';
 import educationSystemService from '../../services/educationSystem.service';

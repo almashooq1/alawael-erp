@@ -10,49 +10,17 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import {
-  Box,
-  Container,
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  Button,
-  Tabs,
-  Tab,
-  Paper,
-  Chip,
-  IconButton,
-  Tooltip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel
-} from '@mui/material';
-import {
-  Refresh,
-  Share,
-  Delete,
-  Download,
-  Assessment,
-  TrendingUp,
-  FileDownload
-} from '@mui/icons-material';
-import SmartReportsDashboard from 'components/SmartReportsDashboard';
-import AdvancedChartsComponent from 'components/AdvancedChartsComponent';
+
+
+
+
 import exportService from 'services/exportService';
 import smartReportsService from 'services/smartReportsService';
 import notificationService from 'services/notificationService';
 import { WS_URL } from 'config/apiConfig';
-import { motion } from 'framer-motion';
 import logger from 'utils/logger';
 import { gradients } from '../../theme/palette';
-import ConfirmDialog, { useConfirmDialog } from '../../components/common/ConfirmDialog';
+import { useConfirmDialog } from '../../components/common/ConfirmDialog';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 
 // Static sample reports data

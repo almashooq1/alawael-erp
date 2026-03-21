@@ -1,43 +1,10 @@
-import React from 'react';
-import {
-  Container,
-  Box,
-  Typography,
-  Grid,
-  Card,
-  CardContent,
-  CardHeader,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Chip,
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  LinearProgress,
-} from '@mui/material';
-import {
-  EventNote as EventNoteIcon,
-  CheckCircle as CheckCircleIcon,
-  Cancel as CancelIcon,
-  PictureAsPdf as PictureAsPdfIcon,
-  TableView as TableViewIcon,
-  FileDownload as FileDownloadIcon,
-} from '@mui/icons-material';
-import CustomColumnSelector from 'components/CustomColumnSelector';
+
+
+
+
 import { gradients, surfaceColors } from 'theme/palette';
 import useAttendanceReports from './useAttendanceReports';
 import { attendanceColumns, getStatusChipColor } from './constants';
-import AIPredictionDialog from './AIPredictionDialog';
-import MeetingDialog from './MeetingDialog';
 
 const AttendanceReports = () => {
   const {

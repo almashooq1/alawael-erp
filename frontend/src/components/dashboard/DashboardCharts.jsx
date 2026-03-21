@@ -4,16 +4,10 @@
  */
 
 import React, { useState } from 'react';
-import { Box, Paper, Typography, useTheme, IconButton, Dialog, DialogTitle, DialogContent, Tooltip } from '@mui/material';
-import { motion } from 'framer-motion';
-import {
-  AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
-  XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Legend,
-} from 'recharts';
-import { ChartTooltip } from './shared/ChartTooltip';
+import { useTheme } from '@mui/material';
+
+
 import { chartColors, brandColors, surfaceColors, surfaceColorsDark, neutralColors } from 'theme/palette';
-import FullscreenIcon from '@mui/icons-material/Fullscreen';
-import CloseIcon from '@mui/icons-material/Close';
 
 const COLORS = chartColors.main;
 

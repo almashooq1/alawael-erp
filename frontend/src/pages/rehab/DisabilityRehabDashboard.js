@@ -2,51 +2,13 @@
  * ♿ لوحة تحكم تأهيل ذوي الإعاقة — Disability Rehabilitation Dashboard
  * AlAwael ERP — Unified overview: KPIs, distribution, trends, recent programs & sessions
  */
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
-  Box,
-  Typography,
-  Paper,
-  Grid,
-  Card,
-  CardContent,
-  Chip,
-  Avatar,
-  LinearProgress,
-  Divider,
-  IconButton,
-  Tooltip,
-  Button,
-  Tab,
-  Tabs,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  CircularProgress,
-  Stack,
   useTheme,
   alpha,
 } from '@mui/material';
-import {
-  AccessibleForward as RehabIcon,
-  TrendingUp as TrendIcon,
-  People as PeopleIcon,
-  EventNote as SessionIcon,
-  EmojiEvents as GoalIcon,
-  Assessment as AssessmentIcon,
-  Devices as DevicesIcon,
-  LocalHospital as TherapistIcon,
-  CalendarToday as CalendarIcon,
-  ArrowForward as ArrowIcon,
-  Refresh as RefreshIcon,
-  Speed as SpeedIcon,
-  CheckCircle as CheckIcon,
-  Warning as WarningIcon,
-  Schedule as ScheduleIcon,
-} from '@mui/icons-material';
+
+
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from 'contexts/SnackbarContext';
 import {

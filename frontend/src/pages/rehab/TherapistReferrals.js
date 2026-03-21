@@ -1,50 +1,12 @@
 import { useState, useEffect } from 'react';
-import {
-  Box,
-  Container,
-  Card,
-  CardContent,
-  Typography,
-  Grid,
-  Button,
-  TextField,
-  Chip,
-  IconButton,
-  InputAdornment,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Tooltip,
-  Paper,
-  Avatar,
-  Divider,
-} from '@mui/material';
-import {
-  Add as AddIcon,
-  Search as SearchIcon,
-  SwapHoriz as ReferralIcon,
-  Delete as DeleteIcon,
-  Close as CloseIcon,
-  Edit as EditIcon,
-  CheckCircle as AcceptIcon,
-  HourglassEmpty as PendingIcon,
-  Send as SendIcon,
-  PersonAdd as PersonAddIcon,
-  LocalHospital as HospitalIcon,
-  ArrowForward as ArrowIcon,
-  Warning as UrgentIcon,
-  Description as NoteIcon,
-} from '@mui/icons-material';
+
+
+
+
 import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import { statusColors, neutralColors, surfaceColors } from '../../theme/palette';
 
 const PRIORITIES = [
   { value: 'low', label: 'منخفضة', color: '#6b7280' },

@@ -1,42 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import {
-  Box,
-  Container,
-  Card,
-  CardContent,
-  Typography,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  CircularProgress,
-  Button,
-  Chip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  MenuItem,
-  IconButton,
-  Tooltip,
-  Grid,
-  Tabs,
-  Tab,
-} from '@mui/material';
-import {
-  AccountBalanceWallet,
-  Refresh,
-  Add,
-  TrendingUp,
-  TrendingDown,
-  SwapHoriz,
-  ShowChart,
-  Speed,
-  Assessment,
-} from '@mui/icons-material';
+
+
+
+
 import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
 
 const API = process.env.REACT_APP_API_URL || '/api';

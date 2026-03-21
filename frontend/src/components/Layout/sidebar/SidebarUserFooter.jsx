@@ -1,7 +1,6 @@
 /**
  * SidebarUserFooter — User avatar, name, and role at sidebar bottom.
  */
-import { Box, Avatar, Typography, Tooltip } from '@mui/material';
 
 const SidebarUserFooter = ({ collapsed, isMobile, currentUser, onNavigate, theme }) => {
   if (!currentUser) return null;

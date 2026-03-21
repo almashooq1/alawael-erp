@@ -1,43 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import {
-  Box,
-  Container,
-  Card,
-  CardContent,
-  Typography,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Chip,
-  CircularProgress,
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  MenuItem,
-  IconButton,
-  Tooltip,
-  Tabs,
-  Tab,
-  Alert,
-  Divider,
-} from '@mui/material';
-import {
-  Add,
-  Receipt,
-  Payment,
-  CheckCircle,
-  PostAdd,
-  Delete,
-  AccountBalanceWallet,
-  TrendingUp,
-  TrendingDown,
-} from '@mui/icons-material';
+
+
+
+
 import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
 
 const API = process.env.REACT_APP_API_URL || '/api';

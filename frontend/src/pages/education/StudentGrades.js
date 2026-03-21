@@ -4,34 +4,10 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import {
-  Box,
-  Paper,
-  Typography,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Card,
-  CardContent,
-  Grid,
-  LinearProgress,
-  Chip,
-  Stack,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Avatar,
-} from '@mui/material';
-import {
-  ExpandMore as ExpandMoreIcon,
-  TrendingUp as TrendingUpIcon,
-  Assessment as AssessmentIcon,
-  EmojiEvents as TrophyIcon,
-  CalendarToday as CalendarIcon,
-} from '@mui/icons-material';
+
+
+
+
 import studentPortalService from 'services/studentPortalService';
 import logger from 'utils/logger';
 import { gradients, progressColors, brandColors, surfaceColors } from 'theme/palette';

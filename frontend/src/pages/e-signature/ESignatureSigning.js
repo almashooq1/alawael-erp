@@ -1,65 +1,12 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import eSignatureService from '../../services/eSignature.service';
-import {
-  Box,
-  Typography,
-  Paper,
-  Button,
-  Grid,
-  Card,
-  CardContent,
-  Chip,
-  Tabs,
-  Tab,
-  TextField,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Avatar,
-  Divider,
-  IconButton,
-  Tooltip,
-  LinearProgress,
-  Alert,
-  Timeline,
-  TimelineItem,
-  TimelineSeparator,
-  TimelineConnector,
-  TimelineContent,
-  TimelineDot,
-  CircularProgress,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemAvatar,
-  Stepper,
-  Step,
-  StepLabel,
-} from '@mui/material';
-import {
-  Draw as DrawIcon,
-  Keyboard,
-  Upload as UploadIcon,
-  CheckCircle,
-  Cancel,
-  ArrowBack,
-  Send,
-  History,
-  Comment as CommentIcon,
-  Person,
-  Schedule,
-  VerifiedUser,
-  Warning,
-  Refresh,
-  Download,
-  Visibility,
-  Share,
-  Print,
-} from '@mui/icons-material';
+
+
+
+
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import { gradients, statusColors } from '../../theme/palette';
+import { gradients } from '../../theme/palette';
 
 /* ═══ Status Map ═════════════════════════════════════════════════════════ */
 const statusMap = {

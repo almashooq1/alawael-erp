@@ -1,19 +1,12 @@
 /**
  * CompensationStructureManagement — StructureCard (expandable)
  */
-import {
-  Typography, Grid, Paper, Box, Button, Card, CardContent,
-  Chip, IconButton, Tooltip, Collapse, Divider,
-} from '@mui/material';
-import {
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  ExpandMore as ExpandIcon,
-  ExpandLess as CollapseIcon, ContentCopy as CopyIcon,
-  RemoveCircle as DeductionIcon,
-} from '@mui/icons-material';
+
+
+
+
 import { statusColors, neutralColors } from '../../theme/palette';
-import { SCOPE_LABELS, ICONS } from './constants';
+import { SCOPE_LABELS } from './constants';
 
 const StructureCard = ({
   structure, expanded, onToggle,

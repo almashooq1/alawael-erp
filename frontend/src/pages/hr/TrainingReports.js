@@ -4,59 +4,12 @@
  */
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  Grid,
-  Chip,
-  Button,
-  IconButton,
-  Tooltip,
-  TextField,
-  MenuItem,
-  Tabs,
-  Tab,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  LinearProgress,
   useTheme,
 } from '@mui/material';
-import {
-  Refresh as RefreshIcon,
-  Assessment as ReportIcon,
-  TrendingUp as TrendIcon,
-  Download as DownloadIcon,
-  School as SchoolIcon,
-  Group as GroupIcon,
-  EmojiEvents as TrophyIcon,
-  Assignment as CertIcon,
-} from '@mui/icons-material';
-import {
-  BarChart,
-  Bar,
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip as RTooltip,
-  ResponsiveContainer,
-  Legend,
-  RadarChart,
-  Radar,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
-} from 'recharts';
+
+
+
+
 import {
   trainingReportsService,
   MOCK_TRAINING_DASHBOARD,

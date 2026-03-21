@@ -2,18 +2,9 @@
  * CompensationFormDialog — Multi-section form for create/edit structure
  */
 
-import {
-  Dialog, DialogTitle, DialogContent, DialogActions,
-  Grid, Paper, Box, Typography, TextField, Button, MenuItem,
-  IconButton, Switch, FormControlLabel, Chip, CircularProgress, Divider,
-} from '@mui/material';
-import {
-  Add as AddIcon,
-  Delete as DeleteIcon,
-  Close as CloseIcon,
-  Save as SaveIcon,
-  Business as StructureIcon,
-} from '@mui/icons-material';
+
+
+
 import { SCOPE_LABELS, FORM_SECTIONS } from './compensationConstants';
 
 const CompensationFormDialog = ({

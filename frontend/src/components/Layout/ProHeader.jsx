@@ -16,47 +16,12 @@
 import { useState, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  AppBar,
-  Toolbar,
-  Box,
-  Typography,
-  IconButton,
-  Badge,
-  Avatar,
-  Menu,
-  MenuItem,
-  ListItemIcon,
-  ListItemText,
-  Divider,
-  Breadcrumbs,
-  Link as MuiLink,
-  InputBase,
-  Tooltip,
-  Chip,
-  Popover,
-  List,
-  ListItem,
-  ListItemAvatar,
   useTheme,
   useMediaQuery,
   alpha,
 } from '@mui/material';
-import {
-  Menu as MenuIcon,
-  Search as SearchIcon,
-  Notifications as NotificationsIcon,
-  DarkMode as DarkModeIcon,
-  LightMode as LightModeIcon,
-  Person as PersonIcon,
-  Settings as SettingsIcon,
-  Logout as LogoutIcon,
-  Language as LanguageIcon,
-  NavigateNext as NavigateNextIcon,
-  Home as HomeIcon,
-  Fullscreen as FullscreenIcon,
-  FullscreenExit as FullscreenExitIcon,
-  Circle as CircleIcon,
-} from '@mui/icons-material';
+
+
 import { useAuth } from '../../contexts/AuthContext';
 import { useThemeMode } from '../../contexts/ThemeContext';
 import { SIDEBAR_WIDTH, SIDEBAR_COLLAPSED } from './sidebar';

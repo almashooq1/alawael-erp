@@ -1,6 +1,7 @@
-import ExcelJS from 'exceljs';
-import { jsPDF } from 'jspdf';
-import html2canvas from 'html2canvas';
+// Heavy libs loaded on-demand (code-split)
+// import ExcelJS from 'exceljs';       → dynamic
+// import { jsPDF } from 'jspdf';       → dynamic
+// import html2canvas from 'html2canvas' → dynamic
 import logger from 'utils/logger';
 import { brandColors, surfaceColors } from 'theme/palette';
 import { getOrgBranding } from 'utils/storageService';
@@ -32,6 +33,7 @@ const exportService = {
   toExcel: async (data, fileName = 'export', options = {}) => {
     try {
       const branding = getBranding();
+      const ExcelJS = (await import('exceljs')).default;
       const workbook = new ExcelJS.Workbook();
       const worksheet = workbook.addWorksheet(options.sheetName || 'Sheet1');
 
@@ -133,6 +135,7 @@ const exportService = {
         throw new Error(`Element with id "${elementId}" not found`);
       }
 
+      const html2canvas = (await import('html2canvas')).default;
       const canvas = await html2canvas(element, {
         scale: 2,
         logging: false,
@@ -141,6 +144,7 @@ const exportService = {
       });
 
       const imgData = canvas.toDataURL('image/png');
+      const { jsPDF } = await import('jspdf');
       const pdf = new jsPDF({
         orientation: options.orientation || 'portrait',
         unit: 'mm',
@@ -223,6 +227,7 @@ const exportService = {
    */
   tableToAdvancedPDF: async (data, columns, fileName = 'export', options = {}) => {
     try {
+      const { jsPDF } = await import('jspdf');
       const pdf = new jsPDF({
         orientation: options.orientation || 'landscape',
         unit: 'mm',

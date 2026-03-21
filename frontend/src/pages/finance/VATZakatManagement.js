@@ -1,41 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Box,
-  Container,
-  Card,
-  CardContent,
-  Typography,
-  Avatar,
-  Chip,
-  Button,
-  Grid,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  LinearProgress,
-  TextField,
-  IconButton,
-  Tooltip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Tabs,
-  Tab,
-  Divider,
-} from '@mui/material';
-import {
-  Receipt as VATIcon,
-  Search as SearchIcon,
-  Add as AddIcon,
-  Visibility as ViewIcon,
-  Send as FileIcon,
-  Print as PrintIcon,
-  AccountBalance as ZakatIcon,
-} from '@mui/icons-material';
+import { useState, useEffect, useCallback } from 'react';
+
+
+
+
 import accountingService from 'services/accountingService';
 import logger from 'utils/logger';
 import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';

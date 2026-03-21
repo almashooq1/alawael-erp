@@ -10,13 +10,10 @@
  * - RTL-aware (sidebar on right side)
  */
 
-import { useState, useEffect, Suspense } from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
-import { Box, useTheme, useMediaQuery, Fade } from '@mui/material';
-import ProSidebar, { SIDEBAR_WIDTH, SIDEBAR_COLLAPSED } from './sidebar';
-import ProHeader from './ProHeader';
-import { DashboardSkeleton } from '../ui/LoadingSkeleton';
-import RouteErrorBoundary from '../shared/RouteErrorBoundary';
+import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
+import { useTheme, useMediaQuery } from '@mui/material';
+import { SIDEBAR_WIDTH, SIDEBAR_COLLAPSED } from './sidebar';
 
 const SIDEBAR_STATE_KEY = 'alawael-sidebar-collapsed';
 

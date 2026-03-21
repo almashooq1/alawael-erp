@@ -1,34 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import {
-  Box,
-  Container,
-  Card,
-  CardContent,
-  Typography,
-  CircularProgress,
-  Button,
-  TextField,
-  MenuItem,
-  Switch,
-  FormControlLabel,
-  Tabs,
-  Tab,
-  Divider,
-  Alert,
-  Snackbar,
-  Chip,
-} from '@mui/material';
-import {
-  Save,
-  Settings,
-  Receipt,
-  AccountBalance,
-  Notifications,
-  Assessment,
-  Backup,
-  Business,
-  Preview,
-} from '@mui/icons-material';
+
+
+
+
 import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
 
 const API = process.env.REACT_APP_API_URL || '/api';

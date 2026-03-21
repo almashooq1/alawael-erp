@@ -3,32 +3,14 @@
  * 4-tab admin page: Performance Evaluations, Succession Planning, Medical Files, Smart Scheduling
  * Split into sub-components under pages/Performance/
  */
-import React, { useMemo, useCallback } from 'react';
-import {
-  Container,
-  Typography,
-  Box,
-  Button,
-  Paper,
-  Tab,
-  Tabs,
-  LinearProgress,
-} from '@mui/material';
-import {
-  Add as AddIcon,
-  TrendingUp as PerformanceIcon,
-  SwapHoriz as SuccessionIcon,
-  MedicalServices as MedicalIcon,
-  SmartToy as SchedulerIcon,
-} from '@mui/icons-material';
+import { useMemo, useCallback } from 'react';
+
+
+
+
 import { useSnackbar } from 'contexts/SnackbarContext';
-import ConfirmDialog from '../../components/common/ConfirmDialog';
 import { COL_MAP } from './Performance/performanceEvaluation.constants';
 import usePerformanceData from './Performance/usePerformanceData';
-import PerformanceHeader from './Performance/PerformanceHeader';
-import PerformanceStatsCards from './Performance/PerformanceStatsCards';
-import PerformanceTable from './Performance/PerformanceTable';
-import PerformanceDialog from './Performance/PerformanceDialog';
 
 const PerformanceEvaluation = () => {
   const showSnackbar = useSnackbar();

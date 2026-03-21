@@ -2,7 +2,6 @@
  * ICF Assessment Routes
  * مسارات تقييمات ICF الوظيفية
  */
-import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const ICFAssessmentDashboard = lazyWithRetry(

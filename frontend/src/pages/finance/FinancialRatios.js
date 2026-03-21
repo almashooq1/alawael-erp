@@ -1,25 +1,9 @@
 import { useState, useEffect } from 'react';
-import {
-  Box,
-  Container,
-  Card,
-  CardContent,
-  Typography,
-  Grid,
-  CircularProgress,
-  LinearProgress,
-  Divider,
-  Chip,
-} from '@mui/material';
-import {
-  TrendingUp,
-  TrendingDown,
-  AccountBalance,
-  Speed,
-  Assessment,
-  Warning,
-} from '@mui/icons-material';
-import { surfaceColors, neutralColors, brandColors, statusColors } from 'theme/palette';
+
+
+
+
+import { surfaceColors, neutralColors, statusColors } from 'theme/palette';
 
 const API = process.env.REACT_APP_API_URL || '/api';
 

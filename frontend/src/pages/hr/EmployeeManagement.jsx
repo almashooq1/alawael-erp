@@ -2,23 +2,11 @@
  * EmployeeManagement.jsx — Thin orchestrator
  * 880 → ~120 lines | Sub-files: Employee/
  */
-import {
-  Container, Typography, Grid, Paper, Box, Button, TextField, Card, CardContent,
-  Chip, Avatar, IconButton, Dialog, DialogTitle, DialogContent, DialogActions,
-  InputAdornment, MenuItem, Alert, Snackbar, Tooltip,
-} from '@mui/material';
-import {
-  Add as AddIcon, Search as SearchIcon, FilterList as FilterIcon,
-  PersonOff as InactiveIcon, CheckCircle as ActiveIcon, Download as DownloadIcon,
-  Delete as DeleteIcon, CalendarMonth as CalendarIcon,
-  Business as DeptIcon, Warning as WarningIcon, Refresh as RefreshIcon,
-  Groups as PeopleIcon,
-} from '@mui/icons-material';
+
+
 import { gradients } from '../../theme/palette';
 import { DEPARTMENTS, STATUS_MAP, STAT_CARDS } from './Employee/employeeManagement.constants';
 import useEmployeeManagement from './Employee/useEmployeeManagement';
-import EmployeeTable from './Employee/EmployeeTable';
-import EmployeeFormDialog from './Employee/EmployeeFormDialog';
 
 /* ─── Icon map for stat cards ─── */
 const STAT_ICONS = [<PeopleIcon />, <ActiveIcon />, <CalendarIcon />, <InactiveIcon />, <DeptIcon />];

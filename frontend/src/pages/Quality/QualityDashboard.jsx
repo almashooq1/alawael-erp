@@ -1,21 +1,11 @@
 /**
  * لوحة تحكم الجودة والامتثال — Quality & Compliance Dashboard
  */
-import React, { useState, useEffect } from 'react';
-import {
-  Box, Grid, Paper, Typography, Card, CardContent, CircularProgress, Chip,
-  Table, TableHead, TableRow, TableCell, TableBody, LinearProgress,
-} from '@mui/material';
-import {
-  PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer, Legend,
-} from 'recharts';
-import {
-  VerifiedUser as QualityIcon,
-  Gavel as ComplianceIcon,
-  Assessment as AuditIcon,
-  TrendingUp as IndicatorIcon,
-} from '@mui/icons-material';
+import { useState, useEffect } from 'react';
+
+
+
+
 import apiClient from '../../services/api';
 
 const PIE_COLORS = ['#4caf50', '#ff9800', '#f44336', '#1976d2', '#9c27b0'];

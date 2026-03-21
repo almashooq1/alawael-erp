@@ -1,37 +1,9 @@
 import { useState, useEffect } from 'react';
-import {
-  Box,
-  Container,
-  Card,
-  CardContent,
-  Typography,
-  CircularProgress,
-  Grid,
-  Divider,
-  Chip,
-  LinearProgress,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-} from '@mui/material';
-import {
-  Dashboard,
-  TrendingUp,
-  TrendingDown,
-  AccountBalance,
-  Warning,
-  CheckCircle,
-  Info,
-  MonetizationOn,
-  Receipt,
-  Assessment,
-  Speed,
-  ArrowUpward,
-  ArrowDownward,
-  RemoveCircle,
-} from '@mui/icons-material';
-import { surfaceColors, neutralColors, brandColors, statusColors } from 'theme/palette';
+
+
+
+
+import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
 
 const API = process.env.REACT_APP_API_URL || '/api';
 

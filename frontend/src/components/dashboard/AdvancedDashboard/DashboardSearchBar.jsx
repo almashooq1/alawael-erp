@@ -1,9 +1,7 @@
 /**
  * DashboardSearchBar — Section filter with filtered count badge
  */
-import React from 'react';
-import { Box, TextField, InputAdornment, Chip, useTheme } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
+import { useTheme } from '@mui/material';
 import { brandColors, statusColors } from 'theme/palette';
 import { SECTIONS } from '../dashboardConstants';
 

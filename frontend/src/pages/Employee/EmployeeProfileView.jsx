@@ -2,19 +2,9 @@
  * EmployeeProfileView.jsx — Profile view mode + shared SectionHeader
  * عرض بيانات الموظف في وضع العرض
  */
-import {
-  Typography, Grid, Box, Chip, Avatar, IconButton, DialogTitle,
-  DialogContent, Tooltip, Divider,
-} from '@mui/material';
-import {
-  Edit as EditIcon, Close as CloseIcon, Person as PersonIcon,
-  Work as WorkIcon, Phone as PhoneIcon, Email as EmailIcon,
-  Badge as BadgeIcon, CalendarMonth as CalendarIcon,
-  Business as DeptIcon, Print as PrintIcon,
-  Cake as BirthIcon, Flag as NatIcon, CreditCard as IdIcon,
-  Home as HomeIcon, LocationCity as CityIcon, LocalHospital as EmergIcon,
-  AccountBalance as BankIcon,
-} from '@mui/icons-material';
+
+
+
 import { STATUS_MAP, CONTRACT_TYPES, GENDERS, MARITAL_STATUS } from './employeeManagement.constants';
 import { DEPT_COLORS } from '../../constants/departmentColors';
 import { statusColors } from '../../theme/palette';

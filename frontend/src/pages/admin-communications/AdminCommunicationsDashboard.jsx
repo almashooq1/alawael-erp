@@ -1,50 +1,12 @@
 /**
  * Administrative Communications Dashboard — لوحة تحكم الاتصالات الإدارية
  */
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Box,
-  Typography,
-  Grid,
-  Card,
-  CardContent,
-  CardActionArea,
-  Paper,
-  Button,
-  Chip,
-  LinearProgress,
-  Divider,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
-  ListItemSecondaryAction,
-  Avatar,
-  IconButton,
-  Tooltip,
-  Skeleton,
-} from '@mui/material';
-import {
-  Mail as MailIcon,
-  Send as SendIcon,
-  Inbox as InboxIcon,
-  Drafts as DraftsIcon,
-  Archive as ArchiveIcon,
-  Warning as WarningIcon,
-  TrendingUp as TrendingUpIcon,
-  AccessTime as AccessTimeIcon,
-  CheckCircle as CheckCircleIcon,
-  Add as AddIcon,
-  ArrowForward as ArrowForwardIcon,
-  MailOutline,
-  CallReceived,
-  CallMade,
-  Notifications,
-  Assignment,
-  Speed,
-  FiberNew,
-} from '@mui/icons-material';
+
+
+
+
 import { gradients } from '../../theme/palette';
 import adminCommunicationsService from '../../services/adminCommunications.service';
 

@@ -4,18 +4,10 @@
  * Saudi social insurance (GOSI) integration: employee registration,
  * contribution calculations, compliance reporting, certificates.
  */
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Box, Typography, Card, CardContent, Grid, Button, Table, TableBody,
-  TableCell, TableContainer, TableHead, TableRow, Paper, Chip, TextField,
-  Dialog, DialogTitle, DialogContent, DialogActions, Alert, CircularProgress,
-  Tabs, Tab, IconButton, Tooltip,
+import { useState, useEffect, useCallback } from 'react';
+import { Paper,
 } from '@mui/material';
-import {
-  Security as GosiIcon, PersonAdd as RegisterIcon, Calculate as CalcIcon,
-  Assessment as ReportIcon, Refresh as RefreshIcon, Add as AddIcon,
-  Description as CertIcon, CheckCircle as CheckIcon, Warning as WarnIcon,
-} from '@mui/icons-material';
+
 import gosiApi from '../../services/gosi.service';
 
 export default function GosiDashboard() {

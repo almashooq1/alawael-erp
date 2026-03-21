@@ -1,7 +1,6 @@
 /**
  * DashboardGlobalStyles — Print CSS, keyboard focus ring, skip-to-content
  */
-import React from 'react';
 import { brandColors, surfaceColors, neutralColors } from 'theme/palette';
 
 const DashboardGlobalStyles = () => (

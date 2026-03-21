@@ -1,52 +1,13 @@
 import { useState, useEffect } from 'react';
-import {
-  Box,
-  Container,
-  Card,
-  CardContent,
-  Typography,
-  Grid,
-  Button,
-  Chip,
-  IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Paper,
-  Tooltip,
-  LinearProgress,
-  Divider,
-  Avatar,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-} from '@mui/material';
-import {
-  Add as AddIcon,
-  School as SchoolIcon,
-  EmojiEvents as TrophyIcon,
-  CardMembership as CertIcon,
-  Groups as GroupsIcon,
-  Science as ScienceIcon,
-  Build as BuildIcon,
-  TrendingUp as TrendingUpIcon,
-  CalendarToday as CalendarIcon,
-  Timer as TimerIcon,
-  Star as StarIcon,
-  CheckCircle as CheckIcon,
-} from '@mui/icons-material';
+
+
+
+
 import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import { gradients, statusColors, neutralColors, surfaceColors } from '../../theme/palette';
+import { statusColors, neutralColors, surfaceColors } from '../../theme/palette';
 
 const categoryIcons = {
   courses: <SchoolIcon />,

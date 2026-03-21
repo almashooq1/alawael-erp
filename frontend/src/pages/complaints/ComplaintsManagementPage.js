@@ -3,51 +3,10 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import {
-  Box,
-  Container,
-  Typography,
-  Card,
-  CardContent,
-  Grid,
-  Button,
-  Chip,
-  Avatar,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   Paper,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  MenuItem,
-  LinearProgress,
-  Tabs,
-  Tab,
-  IconButton,
-  Stack,
-  Alert,
-  Badge,
-  Stepper,
-  Step,
-  StepLabel,
 } from '@mui/material';
-import {
-  ReportProblem as ComplaintIcon,
-  Add as AddIcon,
-  Refresh as RefreshIcon,
-  CheckCircle as ResolvedIcon,
-  HourglassTop as PendingIcon,
-  Cancel as RejectedIcon,
-  Assignment as AssignIcon,
-  Lightbulb as SuggestionIcon,
-  Chat as ChatIcon,
-  PersonOutline as PersonIcon,
-} from '@mui/icons-material';
+
+
 import { complaintsService } from '../../services/complaintsService';
 
 const DEMO_COMPLAINTS = [

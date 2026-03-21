@@ -1,53 +1,10 @@
 import { useState, useEffect } from 'react';
-import {
-  Box,
-  Container,
-  Grid,
-  Typography,
-  Card,
-  CardContent,
-  Button,
-  IconButton,
-  Avatar,
-  Badge,
-  Menu,
-  MenuItem,
-  Tooltip,
-  Divider,
-  LinearProgress,
-  Chip,
-  TextField,
-  AppBar,
-  Drawer,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  CssBaseline,
-} from '@mui/material';
-import {
-  Dashboard as DashboardIcon,
-  Settings as SettingsIcon,
-  Notifications as NotificationsIcon,
-  Menu as MenuIcon,
-  Close as CloseIcon,
-  Search as SearchIcon,
-  Analytics as AnalyticsIcon,
-  Assessment as ReportIcon,
-  Upload as UploadIcon,
-  Star as StarIcon,
-  Help as HelpIcon,
-} from '@mui/icons-material';
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip as ChartTooltip,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts';
+
+
+
+
+
+
 import apiClient from 'services/api.client';
 import { gradients, statusColors, surfaceColors, neutralColors } from '../../theme/palette';
 import { useSnackbar } from '../../contexts/SnackbarContext';

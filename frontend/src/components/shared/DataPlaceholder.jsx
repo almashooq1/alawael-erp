@@ -1,5 +1,3 @@
-import { Box, Typography, alpha } from '@mui/material';
-import { Warning as WarningIcon, SearchOff as EmptyIcon, ErrorOutline as ErrorIcon, CheckCircle as SuccessIcon } from '@mui/icons-material';
 
 /**
  * DataPlaceholder — Unified empty/error/loading/success state display.

@@ -1,30 +1,10 @@
 /**
  * CompensationStructureManagement — Orchestrator (index)
  */
-import {
-  Container,
-  Typography,
-  Grid,
-  Paper,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Avatar,
-  IconButton,
-  Tooltip,
-  LinearProgress,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-} from '@mui/material';
-import { Add as AddIcon, Refresh as RefreshIcon } from '@mui/icons-material';
+
+
 import { gradients, statusColors, neutralColors } from '../../theme/palette';
-import { ICONS } from './constants';
 import useCompensation from './useCompensation';
-import StructureCard from './StructureCard';
-import CompensationForm from './CompensationForm';
 
 const CompensationStructureManagement = () => {
   const {

@@ -1,7 +1,6 @@
 /**
  * Public Relations Routes — مسارات العلاقات العامة والإعلام
  */
-import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const PRDashboard = lazyWithRetry(() => import('../pages/PublicRelations/PRDashboard'));

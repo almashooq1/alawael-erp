@@ -2,16 +2,10 @@
  * HistoryDialog – search/filter test results in a table
  */
 import {
-  Box, Grid, Dialog, DialogTitle, DialogContent,
-  IconButton, Chip, Tooltip,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Paper, FormControl, InputLabel, Select, MenuItem,
+  Paper,
 } from '@mui/material';
-import {
-  History as HistoryIcon,
-  Close as CloseIcon,
-  BarChart as BarChartIcon,
-} from '@mui/icons-material';
+
+
 import { surfaceColors } from '../../theme/palette';
 import { getLevelColor } from './constants';
 

@@ -2,27 +2,13 @@
  * 🚀 ProDashboardLayout — لوحة التحكم الاحترافية المتكاملة
  * Integrates all pro widgets into a unified professional dashboard experience
  */
-import React, { useState, useCallback, useMemo, lazy, Suspense } from 'react';
-import {
-  Box, Grid, Typography, Fab, Tooltip, useTheme, Chip, Stack,
-  IconButton, Collapse, Paper, Zoom,
+import { useState, useCallback, useMemo } from 'react';
+import { useTheme,
 } from '@mui/material';
-import { motion, AnimatePresence } from 'framer-motion';
-import DashboardCustomizeIcon from '@mui/icons-material/DashboardCustomize';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
-import { gradients, brandColors, statusColors } from 'theme/palette';
+import { gradients, brandColors } from 'theme/palette';
 import {
-  NotificationCenter,
-  AdvancedAnalyticsPanel,
-  UserProductivityWidget,
-  TaskManagerWidget,
-  CalendarEventsWidget,
-  DashboardCustomizer,
   DEFAULT_PREFERENCES,
 } from '../pro';
-import DashboardErrorBoundary from '../shared/DashboardErrorBoundary';
 
 /* ─── Section Wrapper ─── */
 const ProSection = ({ id, title, icon, children, collapsed, onToggle, delay = 0 }) => (

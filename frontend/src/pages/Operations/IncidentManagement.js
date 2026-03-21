@@ -1,46 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Box,
-  Container,
-  Card,
-  CardContent,
-  Typography,
-  Avatar,
-  Grid,
-  Button,
-  TextField,
-  InputAdornment,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Chip,
-  LinearProgress,
-  IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Tooltip,
-} from '@mui/material';
-import {
-  ReportProblem as IncIcon,
-  Add as AddIcon,
-  Search as SearchIcon,
-  Visibility as ViewIcon,
-  PersonAdd as AssignIcon,
-  ArrowUpward as EscalateIcon,
-  CheckCircle as ResolveIcon,
-  Warning as CritIcon,
-} from '@mui/icons-material';
+import { useState, useEffect, useCallback } from 'react';
+
+
+
+
 import { incidentService } from 'services/operationsService';
-import logger from 'utils/logger';
 import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 

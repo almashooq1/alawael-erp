@@ -2,21 +2,9 @@
  * RequestsTab — Employee portal requests listing + table
  * Extracted from EmployeePortal.js for maintainability
  */
-import React from 'react';
 import {
-  Box,
-  Typography,
-  Button,
-  Chip,
   Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
 } from '@mui/material';
-import { Add as AddIcon } from '@mui/icons-material';
 import { REQUEST_TYPES, STATUS_MAP } from './employeePortalData';
 
 export default function RequestsTab({ requests, onOpenDialog }) {

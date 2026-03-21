@@ -1,30 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import {
-  Box,
-  Container,
-  Card,
-  CardContent,
-  Typography,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  CircularProgress,
-  TextField,
-  Button,
-  Chip,
-  Divider,
-} from '@mui/material';
-import {
-  TrendingUp,
-  TrendingDown,
-  Assessment,
-  CalendarMonth,
-  ArrowUpward,
-  ArrowDownward,
-} from '@mui/icons-material';
+
+
+
+
 import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
 
 const API = process.env.REACT_APP_API_URL || '/api';

@@ -1,36 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import riskAssessmentService from '../../services/riskAssessment.service';
 import {
-  Box,
-  Typography,
   Paper,
-  Grid,
-  Card,
-  CardContent,
-  Button,
-  Chip,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Tabs,
-  Tab,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Tooltip,
 } from '@mui/material';
-import {
-  Add as AddIcon,
-  Warning as WarningIcon,
-  Shield as ShieldIcon,
-  TrendingDown as LowIcon,
-  TrendingUp as HighIcon,
-} from '@mui/icons-material';
+
+
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, statusColors, surfaceColors } from '../../theme/palette';
 

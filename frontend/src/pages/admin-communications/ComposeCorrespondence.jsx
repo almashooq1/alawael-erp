@@ -2,49 +2,12 @@
  * Compose Correspondence — إنشاء مراسلة جديدة
  * متطابق مع Backend Correspondence Schema
  */
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import {
-  Box,
-  Typography,
-  Paper,
-  Button,
-  Grid,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Chip,
-  IconButton,
-  Stepper,
-  Step,
-  StepLabel,
-  Divider,
-  Card,
-  CardContent,
-  Stack,
-  Switch,
-  FormControlLabel,
-  Alert,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
-  ListItemSecondaryAction,
-} from '@mui/material';
-import {
-  ArrowBack,
-  Send as SendIcon,
-  Save as SaveIcon,
-  AttachFile,
-  Delete as DeleteIcon,
-  Add as AddIcon,
-  InsertDriveFile,
-  Person,
-  Business,
-  PersonAdd,
-} from '@mui/icons-material';
+
+
+
+
 import { gradients } from '../../theme/palette';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import adminCommunicationsService from '../../services/adminCommunications.service';

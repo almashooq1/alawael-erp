@@ -5,52 +5,13 @@
  * Features: CRUD forms, drag-and-drop field ordering, field type catalog,
  * validation rules, conditional visibility, and form preview.
  */
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Box,
-  Paper,
-  Typography,
-  Button,
-  Grid,
-  Card,
-  CardContent,
-  CardActions,
-  TextField,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  IconButton,
-  Chip,
-  Divider,
-  MenuItem,
-  Select,
-  FormControl,
-  InputLabel,
-  Switch,
-  FormControlLabel,
-  Tooltip,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   alpha,
-  Skeleton,
-  Alert,
 } from '@mui/material';
-import {
-  Add as AddIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  ContentCopy as CloneIcon,
-  Refresh as RefreshIcon,
 
-  ArrowBack as BackIcon,
-  Save as SaveIcon,
-} from '@mui/icons-material';
+
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import workflowService from '../../services/workflow.service';
 

@@ -1,7 +1,6 @@
 /**
  * Training & Development Routes — مسارات التدريب والتطوير
  */
-import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const TrainingDashboard = lazyWithRetry(() => import('../pages/Training/TrainingDashboard'));

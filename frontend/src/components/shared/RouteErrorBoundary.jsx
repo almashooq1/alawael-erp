@@ -8,10 +8,6 @@
  */
 
 import { Component } from 'react';
-import { Box, Paper, Typography, Button, Stack } from '@mui/material';
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import HomeIcon from '@mui/icons-material/Home';
 import logger from '../../utils/logger';
 import { gradients, statusColors, brandColors } from '../../theme/palette';
 

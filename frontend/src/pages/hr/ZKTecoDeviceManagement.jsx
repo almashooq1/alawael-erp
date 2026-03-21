@@ -1,45 +1,9 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import {
-  Container, Typography, Grid, Paper, Box, Button, TextField, Card, CardContent,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Chip, Avatar, IconButton, Alert, Snackbar, Tooltip, CircularProgress,
-  Dialog, DialogTitle, DialogContent, DialogActions, Divider, Switch,
-  FormControlLabel, MenuItem, LinearProgress, Tabs, Tab, Badge,
-  List, ListItem, ListItemText, ListItemIcon, ListItemSecondaryAction,
-  InputAdornment, Collapse, Accordion, AccordionSummary, AccordionDetails,
-} from '@mui/material';
-import {
-  Fingerprint as FingerprintIcon,
-  Router as DeviceIcon,
-  Wifi as OnlineIcon,
-  WifiOff as OfflineIcon,
-  Sync as SyncIcon,
-  Add as AddIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  PlayArrow as ConnectIcon,
-  Stop as DisconnectIcon,
-  CheckCircle as SuccessIcon,
-  Error as ErrorIcon,
-  Warning as WarningIcon,
-  NetworkCheck as TestIcon,
-  Schedule as ScheduleIcon,
-  People as PeopleIcon,
-  History as HistoryIcon,
-  Settings as SettingsIcon,
-  Refresh as RefreshIcon,
-  Close as CloseIcon,
-  Search as SearchIcon,
-  Link as LinkIcon,
-  LinkOff as UnlinkIcon,
-  ExpandMore as ExpandMoreIcon,
-  AccessTime as TimeIcon,
-  CloudSync as CloudSyncIcon,
-  DeviceHub as DeviceHubIcon,
-  Info as InfoIcon,
-} from '@mui/icons-material';
+
+
+
 import zktecoService from 'services/zktecoService';
-import { gradients, statusColors, surfaceColors } from '../../theme/palette';
+import { gradients } from '../../theme/palette';
 
 /* ═══════════════════════════════════════════════
    Constants

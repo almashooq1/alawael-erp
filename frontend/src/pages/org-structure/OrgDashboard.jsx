@@ -2,12 +2,8 @@
  * Org Structure Dashboard — لوحة تحكم الهيكل التنظيمي
  */
 import { useState, useEffect } from 'react';
-import {
-  Box, Grid, Card, CardContent, Typography, Table, TableBody, TableCell,
-  TableContainer, TableHead, TableRow, Paper, Chip, LinearProgress
-} from '@mui/material';
+
 import { AccountTree, Business, People, BadgeOutlined } from '@mui/icons-material';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import apiClient from '../../services/api';
 
 const KPICard = ({ icon: Icon, title, value, color }) => (

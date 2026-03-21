@@ -1,21 +1,12 @@
 /**
  * لوحة تحكم المشتريات — Procurement Dashboard
  */
-import React, { useState, useEffect } from 'react';
-import {
-  Box, Grid, Paper, Typography, Card, CardContent, Chip,
-  Table, TableHead, TableRow, TableCell, TableBody, CircularProgress,
-} from '@mui/material';
-import {
-  PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer, Legend,
-} from 'recharts';
-import {
-  ShoppingCart as OrderIcon,
-  Store as VendorIcon,
-  Assignment as RequestIcon,
-  AttachMoney as SpendIcon,
-} from '@mui/icons-material';
+import { useState, useEffect } from 'react';
+
+
+
+
+
 import { getDashboard } from '../../services/procurement.service';
 
 const statusLabels = { draft: 'مسودة', submitted: 'مقدّم', approved: 'معتمد', ordered: 'تم الطلب', received: 'مستلم' };

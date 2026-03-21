@@ -1,66 +1,9 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import knowledgeCenterService from '../../services/knowledgeCenter.service';
-import {
-  Box,
-  Typography,
-  Paper,
-  Grid,
-  Card,
-  CardContent,
-  CardActions,
-  Button,
-  Chip,
-  TextField,
-  InputAdornment,
-  Tabs,
-  Tab,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Divider,
-  IconButton,
-  Avatar,
-  Rating,
-  Tooltip,
-  CircularProgress,
-  Pagination,
-  Badge,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemAvatar,
-  ListItemSecondaryAction,
-  MenuItem,
-  LinearProgress,
-  Alert,
-  Skeleton,
-} from '@mui/material';
-import {
-  Search as SearchIcon,
-  Add as AddIcon,
-  MenuBook as BookIcon,
-  Visibility as ViewIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  Bookmark as BookmarkIcon,
-  BookmarkBorder as BookmarkBorderIcon,
-  Comment as CommentIcon,
-  Star as StarIcon,
-  TrendingUp as TrendingIcon,
-  Category as CategoryIcon,
-  Analytics as AnalyticsIcon,
-  Send as SendIcon,
-  Close as CloseIcon,
-  Article as ArticleIcon,
-  CheckCircle as ApprovedIcon,
-  HourglassEmpty as PendingIcon,
-  Drafts as DraftIcon,
-  Archive as ArchiveIcon,
-  Refresh as RefreshIcon,
-  Storage as SeedIcon,
-  FilterList as FilterIcon,
-} from '@mui/icons-material';
+
+
+
+
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients } from '../../theme/palette';
 

@@ -5,53 +5,10 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import {
-  Box,
-  Paper,
-  Typography,
-  Grid,
-  Card,
-  CardContent,
-  Button,
-  IconButton,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Chip,
-  TextField,
-  MenuItem,
-  Select,
-  FormControl,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  LinearProgress,
-  Tab,
-  Tabs,
-  Avatar,
-  InputAdornment,
   alpha,
 } from '@mui/material';
-import {
-  Refresh as RefreshIcon,
-  People as CRMIcon,
-  Add as AddIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  Search as SearchIcon,
-  Phone as PhoneIcon,
-  Email as EmailIcon,
-  Business as BusinessIcon,
-  MonetizationOn as DealIcon,
-  ArrowForward as MoveIcon,
-  ViewKanban as KanbanIcon,
-  Timeline as ActivityIcon,
-  Dashboard as DashIcon,
-  Save as SaveIcon,
-} from '@mui/icons-material';
+
+
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import enterpriseProService from '../../services/enterprisePro.service';
 

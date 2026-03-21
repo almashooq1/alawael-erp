@@ -2,66 +2,14 @@
  * 💝 لوحة إدارة التبرعات والرعاية — Donations & Sponsorship Dashboard
  * AlAwael ERP
  */
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  Grid,
-  Chip,
-  Avatar,
-  Button,
-  IconButton,
-  Tooltip,
-  TextField,
-  MenuItem,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TablePagination,
   Paper,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  LinearProgress,
-  InputAdornment,
-  Tabs,
-  Tab,
-  useTheme,
 } from '@mui/material';
-import {
-  Add as AddIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  Search as SearchIcon,
-  Refresh as RefreshIcon,
-  Close as CloseIcon,
-  Visibility as ViewIcon,
-  VolunteerActivism as DonateIcon,
-  Campaign as CampaignIcon,
-  People as DonorsIcon,
-  Receipt as ReceiptIcon,
-} from '@mui/icons-material';
-import {
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip as RTooltip,
-  ResponsiveContainer,
-  Legend,
-} from 'recharts';
+
+
+
+
 import {
   campaignsService,
   donorsService,

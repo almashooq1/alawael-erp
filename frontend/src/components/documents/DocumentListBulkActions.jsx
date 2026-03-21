@@ -3,16 +3,8 @@
  * إجراءات جماعية سريعة
  */
 
-import { SpeedDial, SpeedDialAction, SpeedDialIcon } from '@mui/material';
-import {
-  GetApp as GetAppIcon,
-  DeleteSweep as DeleteSweepIcon,
-  FileDownload as FileDownloadIcon,
-  DataObject as DataObjectIcon,
-  Share as ShareIcon,
-  LocalOffer as LocalOfferIcon,
-  Category as CategoryIcon,
-} from '@mui/icons-material';
+
+
 
 const DocumentListBulkActions = ({
   selectedCount,

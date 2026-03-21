@@ -9,72 +9,12 @@
  * - تعديل تذييل الصفحة
  * - معاينة التغييرات في الوقت الفعلي
  */
-import { useState, useEffect, useCallback, useRef } from 'react';
-import {
-  Box,
-  Container,
-  Grid,
-  Card,
-  CardContent,
-  CardHeader,
-  Typography,
-  TextField,
-  Button,
-  Switch,
-  FormControlLabel,
-  Divider,
-  Alert,
-  Avatar,
-  Chip,
-  Tabs,
-  Tab,
-  IconButton,
-  Tooltip,
-  Paper,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Slider,
-  Stack,
-  Badge,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  CircularProgress,
-  Fade,
-  Collapse,
-} from '@mui/material';
-import {
-  Palette as PaletteIcon,
-  Image as ImageIcon,
-  TextFields as TextFieldsIcon,
-  Save as SaveIcon,
-  Refresh as RefreshIcon,
-  Preview as PreviewIcon,
-  Upload as UploadIcon,
-  Delete as DeleteIcon,
-  Brush as BrushIcon,
-  FormatColorFill as ColorFillIcon,
-  Settings as SettingsIcon,
-  Dashboard as DashboardIcon,
-  PhotoCamera as CameraIcon,
-  Visibility as VisibilityIcon,
-  ColorLens as ColorLensIcon,
-  AutoAwesome as AutoAwesomeIcon,
-  TuneRounded as TuneIcon,
-  DesignServices as DesignIcon,
-  WbSunny as LightModeIcon,
-  DarkMode as DarkModeIcon,
-  Wallpaper as WallpaperIcon,
-  FormatSize as FontSizeIcon,
-  BorderStyle as BorderIcon,
-  RoundedCorner as RadiusIcon,
-  Gradient as GradientIcon,
-  CheckCircle as CheckIcon,
-} from '@mui/icons-material';
-import { gradients, brandColors } from 'theme/palette';
+import { useState, useCallback, useRef } from 'react';
+
+
+
+
+import { gradients } from 'theme/palette';
 import { useSnackbar } from 'contexts/SnackbarContext';
 import { useAuth } from 'contexts/AuthContext';
 import logger from 'utils/logger';

@@ -15,47 +15,16 @@
  * @version 1.0.0
  */
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import {
-  Container, Typography, Grid, Paper, Box, Card, CardContent, Avatar,
-  Chip, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  LinearProgress, Button, Tab, Tabs, TextField, MenuItem, Skeleton,
-  IconButton, Tooltip, Divider, Alert, Stack,
-} from '@mui/material';
-import {
-  Analytics as AnalyticsIcon,
-  TrendingUp as TrendingUpIcon,
-  TrendingDown as TrendingDownIcon,
-  CheckCircle as CheckCircleIcon,
-  Cancel as CancelIcon,
-  PersonOff as NoShowIcon,
-  Schedule as ScheduleIcon,
-  AccessTime as AccessTimeIcon,
-  Groups as GroupsIcon,
-  MeetingRoom as RoomIcon,
-  AttachMoney as MoneyIcon,
-  TrackChanges as GoalIcon,
-  FileDownload as ExportIcon,
-  Refresh as RefreshIcon,
-  CalendarMonth as CalendarIcon,
-  EventBusy as CancelAnalysisIcon,
-  BarChart as BarChartIcon,
-  PieChart as PieChartIcon,
-} from '@mui/icons-material';
-import {
-  BarChart, Bar, PieChart, Pie, Cell, LineChart, Line, AreaChart, Area,
-  XAxis, YAxis, CartesianGrid, Tooltip as RTooltip,
-  ResponsiveContainer, Legend, RadarChart, Radar,
-  PolarGrid, PolarAngleAxis, PolarRadiusAxis,
-} from 'recharts';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+
+
+
+
+
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, chartColors, statusColors } from '../../theme/palette';
 import logger from '../../utils/logger';
 import { therapistService } from '../../services/therapistService';
-import ModuleKPICard from '../../components/dashboard/shared/ModuleKPICard';
-import EmptyState from '../../components/dashboard/shared/EmptyState';
-import DashboardErrorBoundary from '../../components/dashboard/shared/DashboardErrorBoundary';
 
 /* ──────────── Demo / fallback data ──────────── */
 

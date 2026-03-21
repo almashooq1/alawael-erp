@@ -2,12 +2,8 @@
  * E-Signature Dashboard — لوحة تحكم التوقيع الإلكتروني
  */
 import { useState, useEffect } from 'react';
-import {
-  Box, Grid, Card, CardContent, Typography, Table, TableBody, TableCell,
-  TableContainer, TableHead, TableRow, Paper, Chip, LinearProgress
-} from '@mui/material';
+
 import { Draw, Approval as Stamp, Verified, PendingActions } from '@mui/icons-material';
-import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import apiClient from '../../services/api';
 
 const COLORS = ['#4caf50', '#ff9800', '#f44336', '#2196f3', '#9c27b0'];

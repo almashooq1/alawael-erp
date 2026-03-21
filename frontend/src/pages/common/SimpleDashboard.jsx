@@ -6,20 +6,9 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getToken, getUserData, clearAuthData } from 'utils/tokenStorage';
-import {
-  Box, Paper, Typography, Button, Avatar, Chip, List, ListItem,
-  ListItemIcon, ListItemText, Divider, Alert,
-} from '@mui/material';
-import {
-  Logout as LogoutIcon,
-  CheckCircle as CheckIcon,
-  Person as PersonIcon,
-  Email as EmailIcon,
-  AdminPanelSettings as RoleIcon,
-  Celebration as CelebrationIcon,
-  Info as InfoIcon,
-  Timer as TimerIcon,
-} from '@mui/icons-material';
+
+
+
 
 const SimpleDashboard = () => {
   const navigate = useNavigate();

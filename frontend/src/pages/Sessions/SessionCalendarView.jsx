@@ -12,41 +12,14 @@
  * @version 1.0.0
  */
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import {
-  Container, Typography, Grid, Paper, Box, Card, CardContent,
-  Chip, Button, IconButton, Tooltip, TextField, MenuItem,
-  LinearProgress, Dialog, DialogTitle, DialogContent, DialogActions,
-  Avatar, Stack, Divider, ToggleButton, ToggleButtonGroup,
-  Badge,
-} from '@mui/material';
-import {
-  CalendarMonth as CalendarIcon,
-  ChevronLeft as PrevIcon,
-  ChevronRight as NextIcon,
-  Today as TodayIcon,
-  ViewWeek as WeekIcon,
-  ViewModule as MonthIcon,
-  ViewDay as DayIcon,
-  FilterList as FilterIcon,
-  Close as CloseIcon,
-  Schedule as ScheduleIcon,
-  Person as PersonIcon,
-  MeetingRoom as RoomIcon,
-  LocalHospital as TypeIcon,
-  Info as InfoIcon,
-  CheckCircle,
-  Cancel,
-  HourglassEmpty,
-  PersonOff,
-  EventAvailable,
-} from '@mui/icons-material';
-import { motion } from 'framer-motion';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+
+
+
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, chartColors, statusColors } from '../../theme/palette';
 import logger from '../../utils/logger';
 import { therapistService } from '../../services/therapistService';
-import DashboardErrorBoundary from '../../components/dashboard/shared/DashboardErrorBoundary';
 
 /* ──────── Arabic locale data ──────── */
 const AR_MONTHS = [

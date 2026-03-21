@@ -2,68 +2,17 @@
  * 🔄 تحويلات المخزون بين الفروع — Stock Transfers Between Branches
  * AlAwael ERP — Inter-Branch Transfer Management
  */
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
-  Box,
-  Typography,
-  Card,
-  CardContent,
-  Grid,
-  Tabs,
-  Tab,
-  TextField,
-  InputAdornment,
-  Button,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   Paper,
-  Chip,
-  IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  LinearProgress,
-  Avatar,
-  Stepper,
-  Step,
-  StepLabel,
-  Divider,
-  Stack,
-  Alert,
-  Tooltip,
 } from '@mui/material';
-import {
-  Search as SearchIcon,
-  Add as AddIcon,
-  LocalShipping as ShippingIcon,
-  SwapHoriz as TransferIcon,
-  Inventory as InventoryIcon,
-  CheckCircle as CheckIcon,
-  Cancel as CancelIcon,
-  Schedule as PendingIcon,
-  Drafts as DraftIcon,
-  Refresh as RefreshIcon,
-  Visibility as ViewIcon,
-  Send as SendIcon,
-  CallReceived as ReceiveIcon,
-  ArrowForward as ArrowIcon,
-  AssignmentTurnedIn as CompleteIcon,
-} from '@mui/icons-material';
+
+
 import { useSnackbar } from 'contexts/SnackbarContext';
-import { gradients, statusColors, surfaceColors } from 'theme/palette';
+import { gradients, surfaceColors } from 'theme/palette';
 import {
   stockTransferService,
   warehouseService,
-  branchService,
 } from 'services/branchWarehouseService';
 
 const statusConfig = {

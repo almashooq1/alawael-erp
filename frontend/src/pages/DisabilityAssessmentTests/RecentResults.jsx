@@ -1,9 +1,7 @@
 /**
  * RecentResults – Tab 1: Recent test results
  */
-import {
-  Box, Grid, Card, CardContent, Typography, Chip, LinearProgress, Alert,
-} from '@mui/material';
+
 import { surfaceColors } from '../../theme/palette';
 import { getLevelColor } from './constants';
 

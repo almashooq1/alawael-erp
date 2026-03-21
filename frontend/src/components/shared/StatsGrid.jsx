@@ -1,5 +1,4 @@
-import { Box, Card, CardContent, Typography, Avatar, Grid, alpha } from '@mui/material';
-import { TrendingUp as UpIcon, TrendingDown as DownIcon, TrendingFlat as FlatIcon } from '@mui/icons-material';
+import { alpha } from '@mui/material';
 
 /**
  * StatsGrid — Displays a grid of stat cards with icons, values, trends.

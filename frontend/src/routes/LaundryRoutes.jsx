@@ -1,7 +1,6 @@
 /**
  * Laundry Routes — مسارات المغسلة
  */
-import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const LaundryDashboard = lazyWithRetry(() => import('../pages/laundry/LaundryDashboard'));

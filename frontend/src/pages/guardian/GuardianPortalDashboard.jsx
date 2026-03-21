@@ -4,20 +4,10 @@
  * Parent/guardian portal: beneficiary progress, attendance,
  * payments, messages, appointments, IEP tracking.
  */
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Box, Typography, Card, CardContent, Grid, Button, Table, TableBody,
-  TableCell, TableContainer, TableHead, TableRow, Paper, Chip, Tabs,
-  Tab, Alert, CircularProgress, LinearProgress, Avatar, List, ListItem,
-  ListItemAvatar, ListItemText, Divider, IconButton, Tooltip, Badge,
+import { useState, useEffect, useCallback } from 'react';
+import { Paper,
 } from '@mui/material';
-import {
-  Person as PersonIcon, School as SchoolIcon, TrendingUp as ProgressIcon,
-  EventNote as AttendanceIcon, Payment as PaymentIcon, Message as MessageIcon,
-  Notifications as NotifIcon, CalendarMonth as CalendarIcon,
-  Assessment as ReportIcon, Refresh as RefreshIcon, Description as IEPIcon,
-  ChildCare as ChildIcon, Star as StarIcon,
-} from '@mui/icons-material';
+
 import guardianApi from '../../services/guardianPortal.service';
 
 export default function GuardianPortalDashboard() {

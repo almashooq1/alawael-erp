@@ -1,7 +1,6 @@
 /**
  * Montessori Routes — مسارات منتسوري
  */
-import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const MontessoriDashboard = lazyWithRetry(() => import('../pages/Montessori/MontessoriDashboard'));

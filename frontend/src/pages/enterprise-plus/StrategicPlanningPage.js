@@ -2,48 +2,12 @@
  * Strategic Planning & OKR Management — التخطيط الاستراتيجي وإدارة الأهداف
  * Strategic Objectives, Key Results, Initiatives, Balanced Scorecard
  */
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Box,
-  Typography,
-  Paper,
-  Grid,
-  Button,
-  TextField,
-  IconButton,
-  Chip,
-  Avatar,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  MenuItem,
-  Tab,
-  Tabs,
-  Card,
-  CardContent,
-  LinearProgress,
-  Stack,
-  Tooltip,
-} from '@mui/material';
+import { useState, useEffect, useCallback } from 'react';
+
+
 import { alpha } from '@mui/material/styles';
-import {
-  Add as AddIcon,
-  Edit as EditIcon,
-  Close as CloseIcon,
-  Flag as ObjectiveIcon,
-  TrackChanges as KRIcon,
-  RocketLaunch as InitiativeIcon,
-  Dashboard as ScorecardIcon,
-  TrendingUp as TrendUpIcon,
-  TrendingDown as TrendDownIcon,
-  AccountTree as CascadeIcon,
-  Timeline as TimelineIcon,
-} from '@mui/icons-material';
+
+
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import * as svc from '../../services/enterpriseProPlus.service';
 

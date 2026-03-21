@@ -1,52 +1,15 @@
 /**
  * Shift Management — نظام إدارة الورديات
  */
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Box,
-  Typography,
-  Paper,
-  Button,
-  Chip,
-  TextField,
-  MenuItem,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Grid,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  IconButton,
-  Tooltip,
-  Card,
-  CardContent,
-  Alert,
-  Snackbar,
-  CircularProgress,
-  Tabs,
-  Tab,
-  Divider,
-} from '@mui/material';
-import {
-  Add as AddIcon,
-  Visibility as ViewIcon,
-  Schedule as ClockIcon,
-  SwapHoriz as SwapIcon,
-  Group as GroupIcon,
-  NightsStay as NightIcon,
-  WbSunny as DayIcon,
-} from '@mui/icons-material';
+import { useState, useEffect, useCallback } from 'react';
+
+
+
+
 import {
   getShiftDefinitions,
   createShiftDefinition,
   getShiftStats,
-  createShiftSwapRequest,
-  approveShiftSwap,
 } from '../../services/hr/employeeAffairsPhase2Service';
 
 const SHIFT_TYPES = ['صباحي', 'مسائي', 'ليلي', 'مرن', 'متقطع', 'مناوبة'];

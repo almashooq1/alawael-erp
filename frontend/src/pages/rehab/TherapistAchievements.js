@@ -1,46 +1,12 @@
 import { useState, useEffect } from 'react';
-import {
-  Box,
-  Container,
-  Card,
-  CardContent,
-  Typography,
-  Grid,
-  Button,
-  TextField,
-  Chip,
-  IconButton,
-  InputAdornment,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Tooltip,
-  Paper,
-  Avatar,
-  Divider,
-} from '@mui/material';
-import {
-  Add as AddIcon,
-  Search as SearchIcon,
-  EmojiEvents as TrophyIcon,
-  Delete as DeleteIcon,
-  Close as CloseIcon,
-  Edit as EditIcon,
-  Star as StarIcon,
-  WorkspacePremium as BadgeIcon,
-  MilitaryTech as MedalIcon,
-  CalendarToday as DateIcon,
-} from '@mui/icons-material';
+
+
+
+
 import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import { statusColors, neutralColors, surfaceColors } from '../../theme/palette';
 
 const BADGE_TYPES = [
   {

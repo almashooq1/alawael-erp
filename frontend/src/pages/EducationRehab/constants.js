@@ -1,13 +1,8 @@
 /**
  * EducationRehab – shared constants, config maps & demo data.
  */
-import {
-  MenuBook as KnowledgeIcon,
-  Article as CMSIcon,
-  ChildCare as MontessoriIcon,
-  Accessibility as ProgramsIcon,
-  People as CommunityIcon,
-} from '@mui/icons-material';
+
+
 import { statusColors as paletteStatus } from '../../theme/palette';
 
 // ── Chip color map ──────────────────────────

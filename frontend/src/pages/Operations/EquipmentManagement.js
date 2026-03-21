@@ -1,50 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Box,
-  Container,
-  Card,
-  CardContent,
-  Typography,
-  Avatar,
-  Grid,
-  Button,
-  TextField,
-  InputAdornment,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Chip,
-  LinearProgress,
-  Tabs,
-  Tab,
-  IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Tooltip,
-  Divider,
-} from '@mui/material';
-import {
-  Build as EqIcon,
-  Add as AddIcon,
-  Search as SearchIcon,
-  Engineering as MaintIcon,
-  Visibility as ViewIcon,
-  Edit as EditIcon,
-  Warning as WarnIcon,
-  CheckCircle as OkIcon,
-  Pause as StandbyIcon,
-} from '@mui/icons-material';
+import { useState, useEffect, useCallback } from 'react';
+
+
+
+
 import { equipmentService } from 'services/operationsService';
-import logger from 'utils/logger';
 import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 

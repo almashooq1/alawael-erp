@@ -4,10 +4,8 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import { Box, Paper, Typography, Grid, ButtonBase, useTheme, TextField, InputAdornment } from '@mui/material';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useTheme } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import SearchIcon from '@mui/icons-material/Search';
 import PeopleIcon from '@mui/icons-material/People';
 import AccessibilityNewIcon from '@mui/icons-material/AccessibilityNew';
 import BadgeIcon from '@mui/icons-material/Badge';

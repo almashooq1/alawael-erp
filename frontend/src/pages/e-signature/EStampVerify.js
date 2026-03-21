@@ -1,30 +1,10 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import eStampService from '../../services/eStamp.service';
-import {
-  Box,
-  Typography,
-  Paper,
-  Button,
-  Grid,
-  TextField,
-  Avatar,
-  CircularProgress,
-  Chip,
-  Divider,
-  Alert,
-  InputAdornment,
-} from '@mui/material';
-import {
-  Search,
-  Verified,
-  ArrowBack,
-  CheckCircle,
-  Cancel,
-  ContentCopy,
-  Description,
-  CalendarMonth,
-} from '@mui/icons-material';
+
+
+
+
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients } from '../../theme/palette';
 

@@ -2,11 +2,8 @@
  * SidebarBrand — Logo icon, system name, collapse toggle.
  * يدعم تحميل الشعار المخصص من إعدادات الهوية المؤسسية
  */
-import { Box, Typography, IconButton } from '@mui/material';
-import {
-  ChevronRight as ChevronRightIcon,
-  ChevronLeft as ChevronLeftIcon,
-} from '@mui/icons-material';
+
+
 
 const LOGO_URL = '/logo.svg';
 

@@ -1,36 +1,9 @@
 import { useState, useEffect } from 'react';
-import {
-  Box,
-  Container,
-  Card,
-  CardContent,
-  Typography,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Chip,
-  CircularProgress,
-  TextField,
-  MenuItem,
-  IconButton,
-  Tooltip,
-  InputAdornment,
-} from '@mui/material';
-import {
-  History,
-  Search,
-  FilterList,
-  Person,
-  Edit,
-  Delete,
-  Add as AddIcon,
-  Visibility,
-  Settings,
-} from '@mui/icons-material';
-import { surfaceColors, neutralColors, brandColors, statusColors } from 'theme/palette';
+
+
+
+
+import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
 
 const API = process.env.REACT_APP_API_URL || '/api';
 

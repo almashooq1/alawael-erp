@@ -1,7 +1,6 @@
 /**
  * Asset Management Routes — مسارات إدارة الأصول
  */
-import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const AssetDashboard = lazyWithRetry(() => import('../pages/Assets/AssetDashboard'));

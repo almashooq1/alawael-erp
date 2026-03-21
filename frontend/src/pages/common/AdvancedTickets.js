@@ -1,40 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import advancedTicketsService from '../../services/advancedTickets.service';
 import { useSocketEvent } from '../../contexts/SocketContext';
 import {
-  Box,
-  Typography,
   Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Button,
-  Chip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  MenuItem,
-  Grid,
-  Card,
-  CardContent,
-  IconButton,
-  Tabs,
-  Tab,
-  Tooltip,
-  LinearProgress,
 } from '@mui/material';
-import {
-  Add as AddIcon,
-  Edit as EditIcon,
-  ConfirmationNumber as TicketIcon,
-  ArrowUpward as EscalateIcon,
-  Comment as CommentIcon,
-} from '@mui/icons-material';
+
+
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, statusColors } from '../../theme/palette';
 

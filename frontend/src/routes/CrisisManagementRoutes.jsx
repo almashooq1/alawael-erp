@@ -1,7 +1,6 @@
 /**
  * Crisis Management Routes — مسارات إدارة الأزمات
  */
-import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const CrisisDashboard = lazyWithRetry(() => import('../pages/Crisis/CrisisDashboard'));

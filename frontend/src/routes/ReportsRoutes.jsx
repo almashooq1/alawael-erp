@@ -1,7 +1,6 @@
 /**
  * Reports Center Routes — مسارات مركز التقارير
  */
-import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const ReportsDashboard = lazyWithRetry(() => import('../pages/Reports/ReportsDashboard'));

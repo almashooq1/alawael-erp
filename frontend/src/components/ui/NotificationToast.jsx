@@ -15,22 +15,10 @@
 
 import { createContext, useContext, useState, useCallback, useRef } from 'react';
 import {
-  Box,
-  Paper,
-  Typography,
-  IconButton,
-  Button,
-  LinearProgress,
   useTheme,
 } from '@mui/material';
-import {
-  CheckCircle as SuccessIcon,
-  ErrorOutline as ErrorIcon,
-  WarningAmber as WarningIcon,
-  InfoOutlined as InfoIcon,
-  Close as CloseIcon,
-} from '@mui/icons-material';
-import { AnimatePresence, motion } from 'framer-motion';
+
+
 
 // ─── Config ──────────────────────────────────────────────────────────────────
 const TOAST_DEFAULTS = {

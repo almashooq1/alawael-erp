@@ -20,4 +20,5 @@ export const deleteJob = id => jobPostingsService.remove(id);
 /* ── Applications ── */
 export const getApplications = () => applicantsService.getAll();
 export const createApplication = body => applicantsService.create(body);
-export const updateApplicationStage = (id, body) => applicantsService.updateStage(id, body.stage || body);
+export const updateApplicationStage = (id, body) =>
+  applicantsService.updateStage(id, body.stage || body);

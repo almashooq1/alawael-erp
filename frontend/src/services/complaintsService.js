@@ -296,13 +296,21 @@ export const complaintsService = {
 
   // ── Source-filtered shortcuts ─────────────────────────────────
   getEmployeeComplaints: params =>
-    safe(() => apiClient.get('/complaints', { params: { ...params, source: 'employee' } }).then(r => r.data)),
+    safe(() =>
+      apiClient.get('/complaints', { params: { ...params, source: 'employee' } }).then(r => r.data)
+    ),
   getStudentComplaints: params =>
-    safe(() => apiClient.get('/complaints', { params: { ...params, source: 'student' } }).then(r => r.data)),
+    safe(() =>
+      apiClient.get('/complaints', { params: { ...params, source: 'student' } }).then(r => r.data)
+    ),
   getCustomerComplaints: params =>
-    safe(() => apiClient.get('/complaints', { params: { ...params, source: 'customer' } }).then(r => r.data)),
+    safe(() =>
+      apiClient.get('/complaints', { params: { ...params, source: 'customer' } }).then(r => r.data)
+    ),
   getParentComplaints: params =>
-    safe(() => apiClient.get('/complaints', { params: { ...params, source: 'parent' } }).then(r => r.data)),
+    safe(() =>
+      apiClient.get('/complaints', { params: { ...params, source: 'parent' } }).then(r => r.data)
+    ),
 
   // ── Legacy aliases (backward compat) ──────────────────────────
   createEmployeeComplaint: data =>

@@ -1,7 +1,7 @@
 /**
  * Internal Audit Service — خدمة التدقيق الداخلي
  */
-import apiClient from './apiClient';
+import apiClient from './api.client';
 
 const BASE = '/api/internal-audit';
 

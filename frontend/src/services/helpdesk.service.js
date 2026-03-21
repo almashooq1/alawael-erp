@@ -1,7 +1,7 @@
 /**
  * Help Desk Service — خدمة مكتب المساعدة
  */
-import apiClient from './apiClient';
+import apiClient from './api.client';
 
 const BASE = '/api/helpdesk';
 

@@ -1,7 +1,7 @@
 /**
  * Asset Management Service — خدمة إدارة الأصول
  */
-import apiClient from './apiClient';
+import apiClient from './api.client';
 
 const BASE = '/api/assets';
 

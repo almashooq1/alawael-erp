@@ -29,20 +29,32 @@ const TAB_KEYS = ['evaluations', 'succession', 'medical', 'scheduler'];
 export default function PerformanceEvaluations() {
   const {
     confirmState,
-    activeTab, setActiveTab,
-    data, loading, stats,
-    dialogOpen, setDialogOpen,
-    dialogType, editItem, form, setForm,
+    activeTab,
+    setActiveTab,
+    data,
+    loading,
+    stats,
+    dialogOpen,
+    setDialogOpen,
+    dialogType,
+    editItem,
+    form,
+    setForm,
     loadData,
-    openCreate, openEdit,
-    handleSave, handleDelete,
+    openCreate,
+    openEdit,
+    handleSave,
+    handleDelete,
   } = usePerformanceData();
 
   const handleExportCSV = () => {
     const key = TAB_KEYS[activeTab];
     const items = data[key] || [];
     if (!items.length) return;
-    const csv = [Object.keys(items[0]).join(','), ...items.map(r => Object.values(r).join(','))].join('\n');
+    const csv = [
+      Object.keys(items[0]).join(','),
+      ...items.map(r => Object.values(r).join(',')),
+    ].join('\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
@@ -72,8 +84,8 @@ export default function PerformanceEvaluations() {
       <PerformanceTable
         rows={rows}
         loading={loading}
-        onEdit={(item) => openEdit(currentKey, item)}
-        onDelete={(id) => handleDelete(currentKey, id)}
+        onEdit={item => openEdit(currentKey, item)}
+        onDelete={id => handleDelete(currentKey, id)}
       />
 
       <PerformanceDialog

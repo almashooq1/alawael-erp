@@ -77,6 +77,21 @@ import {
   Flag as StrategicIcon,
   TrendingUp as SuccessionIcon,
   MeetingRoom as FacilityRoomIcon,
+  // ─── Phase: 14 Additional Systems ───
+  MedicalInformation as MedicalFilesIcon,
+  Restaurant as KitchenIcon,
+  LocalLaundryService as LaundryIcon,
+  Groups as CommunityIcon,
+  Favorite as VolunteerIcon,
+  Psychology as MHPSSIcon,
+  Home as IndependentLivingIcon,
+  Science as ResearchIcon,
+  ShoppingCart as ECommerceIcon,
+  Article as CMSIcon,
+  HourglassBottom as WaitlistIcon,
+  GpsFixed as GPSTrackingIcon,
+  Sensors as IoTIcon,
+  VpnKey as SSOIcon,
 } from '@mui/icons-material';
 
 const getNavigationItems = () => [
@@ -160,6 +175,34 @@ const getNavigationItems = () => [
       { id: 'sessions-dashboard', label: 'لوحة تحكم الجلسات', path: '/sessions-dashboard' },
       { id: 'sessions-manage', label: 'إدارة الجلسات', path: '/sessions' },
     ],
+  },
+  {
+    id: 'medical-files',
+    label: 'الملفات الطبية',
+    icon: <MedicalFilesIcon />,
+    path: '/medical-files',
+    roles: ['admin', 'super_admin', 'doctor', 'therapist'],
+  },
+  {
+    id: 'mhpss',
+    label: 'الدعم النفسي والاجتماعي',
+    icon: <MHPSSIcon />,
+    path: '/mhpss',
+    roles: ['admin', 'super_admin', 'therapist', 'social_worker'],
+  },
+  {
+    id: 'independent-living',
+    label: 'الحياة المستقلة',
+    icon: <IndependentLivingIcon />,
+    path: '/independent-living',
+    roles: ['admin', 'super_admin', 'therapist', 'social_worker'],
+  },
+  {
+    id: 'waitlist',
+    label: 'قائمة الانتظار',
+    icon: <WaitlistIcon />,
+    path: '/waitlist',
+    roles: ['admin', 'super_admin', 'manager', 'receptionist'],
   },
   {
     id: 'education',
@@ -426,6 +469,34 @@ const getNavigationItems = () => [
     path: '/risk-assessment',
     roles: ['admin', 'super_admin', 'manager'],
   },
+  {
+    id: 'kitchen',
+    label: 'إدارة المطبخ',
+    icon: <KitchenIcon />,
+    path: '/kitchen',
+    roles: ['admin', 'super_admin', 'manager', 'operations_manager'],
+  },
+  {
+    id: 'laundry',
+    label: 'إدارة المغسلة',
+    icon: <LaundryIcon />,
+    path: '/laundry',
+    roles: ['admin', 'super_admin', 'manager', 'operations_manager'],
+  },
+  {
+    id: 'gps-tracking',
+    label: 'تتبع GPS',
+    icon: <GPSTrackingIcon />,
+    path: '/gps-tracking',
+    roles: ['admin', 'super_admin', 'manager', 'fleet_manager'],
+  },
+  {
+    id: 'iot-management',
+    label: 'إنترنت الأشياء (IoT)',
+    icon: <IoTIcon />,
+    path: '/iot',
+    roles: ['admin', 'super_admin', 'manager', 'operations_manager'],
+  },
 
   // ═══════════════════════════════════════════════════════
   //  ⑥ التواصل والمراسلات — Communications & Messaging
@@ -538,6 +609,13 @@ const getNavigationItems = () => [
     path: '/form-templates',
     roles: ['*'],
   },
+  {
+    id: 'cms',
+    label: 'إدارة المحتوى',
+    icon: <CMSIcon />,
+    path: '/cms',
+    roles: ['admin', 'super_admin', 'manager', 'content_manager'],
+  },
 
   // ═══════════════════════════════════════════════════════
   //  ⑧ التحليلات والذكاء — Analytics & Intelligence
@@ -582,6 +660,13 @@ const getNavigationItems = () => [
     icon: <KPIChartIcon />,
     path: '/kpi-dashboard',
     roles: ['admin', 'super_admin', 'manager'],
+  },
+  {
+    id: 'research',
+    label: 'البحث والدراسات',
+    icon: <ResearchIcon />,
+    path: '/research',
+    roles: ['admin', 'super_admin', 'manager', 'researcher'],
   },
 
   // ═══════════════════════════════════════════════════════
@@ -648,6 +733,13 @@ const getNavigationItems = () => [
     icon: <KnowledgeIcon />,
     path: '/knowledge-center',
     roles: ['*'],
+  },
+  {
+    id: 'ecommerce',
+    label: 'المتجر الإلكتروني',
+    icon: <ECommerceIcon />,
+    path: '/ecommerce',
+    roles: ['admin', 'super_admin', 'manager', 'sales'],
   },
 
   // ═══════════════════════════════════════════════════════
@@ -812,6 +904,20 @@ const getNavigationItems = () => [
     path: '/facility-management',
     roles: ['admin', 'super_admin', 'facility_manager'],
   },
+  {
+    id: 'community-integration',
+    label: 'التكامل المجتمعي',
+    icon: <CommunityIcon />,
+    path: '/community',
+    roles: ['admin', 'super_admin', 'manager', 'social_worker'],
+  },
+  {
+    id: 'volunteer-management',
+    label: 'إدارة المتطوعين',
+    icon: <VolunteerIcon />,
+    path: '/volunteers',
+    roles: ['admin', 'super_admin', 'manager', 'hr_manager'],
+  },
 
   // ═══════════════════════════════════════════════════════
   //  ⑬ الإدارة والنظام — System Administration
@@ -843,6 +949,13 @@ const getNavigationItems = () => [
     label: 'الأمان',
     icon: <SecurityIcon />,
     path: '/security',
+    roles: ['admin', 'super_admin'],
+  },
+  {
+    id: 'sso-admin',
+    label: 'الدخول الموحد (SSO)',
+    icon: <SSOIcon />,
+    path: '/sso-admin',
     roles: ['admin', 'super_admin'],
   },
   {

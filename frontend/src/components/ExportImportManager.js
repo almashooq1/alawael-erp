@@ -1,10 +1,7 @@
 import { useState } from 'react';
 import { triggerBlobDownload } from 'utils/downloadHelper';
 
-
-import {
-  Error,
-} from '@mui/icons-material';
+import { Error } from '@mui/icons-material';
 import Close from '@mui/icons-material/Close';
 import Info from '@mui/icons-material/Info';
 import Description from '@mui/icons-material/Description';
@@ -30,7 +27,7 @@ import {
   MenuItem,
   Select,
   TextField,
-  Typography
+  Typography,
 } from '@mui/material';
 
 const ExportImportManager = () => {

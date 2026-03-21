@@ -6,10 +6,7 @@
  */
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import {
-  alpha,
-  useTheme,
-} from '@mui/material';
+import { alpha, useTheme } from '@mui/material';
 
 import documentService from 'services/documentService';
 import logger from 'utils/logger';
@@ -47,7 +44,7 @@ import {
   Tabs,
   TextField,
   Tooltip,
-  Typography
+  Typography,
 } from '@mui/material';
 import AnalyticsIcon from '@mui/icons-material/Analytics';
 import SecurityIcon from '@mui/icons-material/Security';
@@ -68,7 +65,23 @@ import CategoryIcon from '@mui/icons-material/Category';
 import SearchIcon from '@mui/icons-material/Search';
 import GridViewIcon from '@mui/icons-material/GridView';
 import ShareIcon from '@mui/icons-material/Share';
-import { AudioIcon, ChartIcon, ExcelIcon, FileIcon, ListViewIcon, NewFolderIcon, PdfIcon, PptIcon, RecentIcon, SharedIcon, TextIcon, TrendIcon, VideoIcon, ViewIcon, ZipIcon } from 'utils/iconAliases';
+import {
+  AudioIcon,
+  ChartIcon,
+  ExcelIcon,
+  FileIcon,
+  ListViewIcon,
+  NewFolderIcon,
+  PdfIcon,
+  PptIcon,
+  RecentIcon,
+  SharedIcon,
+  TextIcon,
+  TrendIcon,
+  VideoIcon,
+  ViewIcon,
+  ZipIcon,
+} from 'utils/iconAliases';
 
 /* ──── Constants ──── */
 const CATEGORY_COLORS = {

@@ -4,11 +4,7 @@
  * @created 2026-03-13
  */
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import {
-  Paper,
-  alpha,
-  useTheme,
-} from '@mui/material';
+import { Paper, alpha, useTheme } from '@mui/material';
 
 import archivingService from 'services/archivingService';
 import logger from 'utils/logger';
@@ -52,7 +48,7 @@ import {
   Tabs,
   TextField,
   Tooltip,
-  Typography
+  Typography,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import CheckIcon from '@mui/icons-material/Check';
@@ -83,7 +79,16 @@ import SaveIcon from '@mui/icons-material/Save';
 import CloseIcon from '@mui/icons-material/Close';
 import TagIcon from '@mui/icons-material/Tag';
 import FolderIcon from '@mui/icons-material/Folder';
-import { DocIcon, ExcelIcon, FileIcon, PdfIcon, PptIcon, TrendIcon, ViewIcon, ZipIcon } from 'utils/iconAliases';
+import {
+  DocIcon,
+  ExcelIcon,
+  FileIcon,
+  PdfIcon,
+  PptIcon,
+  TrendIcon,
+  ViewIcon,
+  ZipIcon,
+} from 'utils/iconAliases';
 
 /* ═══ Helpers ═══ */
 const STATUS_MAP = {

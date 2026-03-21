@@ -22,7 +22,9 @@ const buildRes = () => {
       listeners[event] = cb;
     }),
     set: jest.fn(),
-    setHeader: jest.fn((k, v) => { headers[k] = v; }),
+    setHeader: jest.fn((k, v) => {
+      headers[k] = v;
+    }),
     send: jest.fn(),
     end: jest.fn(),
     _listeners: listeners,

@@ -106,9 +106,7 @@ describe('apiKeyAuth middleware', () => {
     await apiKeyAuth(req, res, next);
 
     expect(res.status).toHaveBeenCalledWith(401);
-    expect(res.json).toHaveBeenCalledWith(
-      expect.objectContaining({ success: false })
-    );
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ success: false }));
     expect(next).not.toHaveBeenCalled();
   });
 
@@ -175,8 +173,6 @@ describe('apiKeyAuth middleware', () => {
     await apiKeyAuth(req, res, next);
 
     expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith(
-      expect.objectContaining({ message: expect.any(String) })
-    );
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ message: expect.any(String) }));
   });
 });

@@ -20,7 +20,9 @@ const buildReq = (path = '/api/products') => ({
 const buildRes = () => {
   const headers = {};
   const res = {
-    setHeader: jest.fn((k, v) => { headers[k] = v; }),
+    setHeader: jest.fn((k, v) => {
+      headers[k] = v;
+    }),
     _headers: headers,
   };
   return res;
@@ -41,10 +43,7 @@ describe('securityHeaders middleware', () => {
 
     securityHeaders(req, res, next);
 
-    expect(res.setHeader).toHaveBeenCalledWith(
-      'Permissions-Policy',
-      expect.any(String)
-    );
+    expect(res.setHeader).toHaveBeenCalledWith('Permissions-Policy', expect.any(String));
     // Verify the header includes at least standard directives
     const ppCall = res.setHeader.mock.calls.find(c => c[0] === 'Permissions-Policy');
     expect(ppCall[1]).toMatch(/camera/);
@@ -62,10 +61,7 @@ describe('securityHeaders middleware', () => {
       'Cache-Control',
       expect.stringContaining('no-store')
     );
-    expect(res.setHeader).toHaveBeenCalledWith(
-      'Pragma',
-      'no-cache'
-    );
+    expect(res.setHeader).toHaveBeenCalledWith('Pragma', 'no-cache');
   });
 
   it('should add no-cache headers for /api/v1/auth routes', () => {
@@ -88,9 +84,7 @@ describe('securityHeaders middleware', () => {
 
     securityHeaders(req, res, next);
 
-    const cacheCall = res.setHeader.mock.calls.find(
-      c => c[0] === 'Cache-Control'
-    );
+    const cacheCall = res.setHeader.mock.calls.find(c => c[0] === 'Cache-Control');
     expect(cacheCall).toBeUndefined();
   });
 

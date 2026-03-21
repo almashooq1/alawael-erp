@@ -148,21 +148,18 @@ describe('auditCrudMiddleware(entityType)', () => {
     ['GET', 'READ'],
   ];
 
-  it.each(cases)(
-    'should map HTTP method %s to CRUD action %s',
-    (method, expectedAction) => {
-      const mw = auditCrudMiddleware('order');
-      const req = buildReq({ method });
-      const res = buildRes(200);
-      const next = buildNext();
+  it.each(cases)('should map HTTP method %s to CRUD action %s', (method, expectedAction) => {
+    const mw = auditCrudMiddleware('order');
+    const req = buildReq({ method });
+    const res = buildRes(200);
+    const next = buildNext();
 
-      invokeAndSend(mw, req, res, next);
+    invokeAndSend(mw, req, res, next);
 
-      expect(AuditService.log).toHaveBeenCalledTimes(1);
-      const call = AuditService.log.mock.calls[0];
-      expect(call[1]).toBe(`${expectedAction}_ORDER`);
-    }
-  );
+    expect(AuditService.log).toHaveBeenCalledTimes(1);
+    const call = AuditService.log.mock.calls[0];
+    expect(call[1]).toBe(`${expectedAction}_ORDER`);
+  });
 });
 
 // ── auditBruteForceMiddleware ────────────────────────────────────────────────

@@ -30,9 +30,7 @@ describe('sendSuccess', () => {
   test('accepts custom message', () => {
     const res = mockRes();
     sendSuccess(res, [], 'تم الجلب');
-    expect(res.json).toHaveBeenCalledWith(
-      expect.objectContaining({ message: 'تم الجلب' })
-    );
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ message: 'تم الجلب' }));
   });
 
   test('accepts custom status code', () => {
@@ -44,18 +42,14 @@ describe('sendSuccess', () => {
   test('handles null data', () => {
     const res = mockRes();
     sendSuccess(res, null);
-    expect(res.json).toHaveBeenCalledWith(
-      expect.objectContaining({ success: true, data: null })
-    );
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ success: true, data: null }));
   });
 
   test('handles array data', () => {
     const res = mockRes();
     const data = [{ a: 1 }, { a: 2 }];
     sendSuccess(res, data);
-    expect(res.json).toHaveBeenCalledWith(
-      expect.objectContaining({ data })
-    );
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ data }));
   });
 
   test('returns res for chaining', () => {

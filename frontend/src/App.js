@@ -33,6 +33,13 @@ import {
   EnterpriseUltraRoutes,
   GovernmentIntegrationRoutes,
   AdministrativeSystemsRoutes,
+  BIDashboardRoutes,
+  WarehouseRoutes,
+  LegalAffairsRoutes,
+  TrainingRoutes,
+  EventManagementRoutes,
+  PublicRelationsRoutes,
+  RiskManagementRoutes,
 } from './routes';
 
 // Pages — Keep eagerly loaded (critical path / small)
@@ -189,6 +196,13 @@ function AppContent() {
                               {EnterpriseUltraRoutes()}
                               {GovernmentIntegrationRoutes()}
                               {AdministrativeSystemsRoutes()}
+                              {BIDashboardRoutes()}
+                              {WarehouseRoutes()}
+                              {LegalAffairsRoutes()}
+                              {TrainingRoutes()}
+                              {EventManagementRoutes()}
+                              {PublicRelationsRoutes()}
+                              {RiskManagementRoutes()}
                               {/* === Shared / Cross-cutting Routes === */}
                               {/* AI & Analytics */}
                               <Route

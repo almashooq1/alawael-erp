@@ -800,6 +800,19 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   logger.info(
     'Phase 6 new systems mounted (5 modules: crisis/emergency, recruitment, IoT, blockchain certificates, AR/XR rehabilitation)'
   );
+
+  // ── BI Dashboard — نظام التقارير والتحليلات ──────────────────────────────
+  safeMount(app, ['/api/bi-dashboard', '/api/v1/bi-dashboard'], '../routes/bi-dashboard.routes');
+  logger.info('BI Dashboard system mounted (analytics, KPIs, trend explorer, report builder)');
+
+  // ── New Systems — الأنظمة الجديدة ──────────────────────────────────────
+  safeMount(app, ['/api/warehouse', '/api/v1/warehouse'], '../routes/warehouse.routes');
+  safeMount(app, ['/api/legal-affairs', '/api/v1/legal-affairs'], '../routes/legal-affairs.routes');
+  safeMount(app, ['/api/training', '/api/v1/training'], '../routes/training.routes');
+  safeMount(app, ['/api/events-management', '/api/v1/events-management'], '../routes/events-management.routes');
+  safeMount(app, ['/api/public-relations', '/api/v1/public-relations'], '../routes/public-relations.routes');
+  safeMount(app, ['/api/enterprise-risk', '/api/v1/enterprise-risk'], '../routes/enterprise-risk.routes');
+  logger.info('New systems mounted (6 modules: warehouse, legal-affairs, training, events, public-relations, enterprise-risk)');
 };
 
 module.exports = { mountAllRoutes, dualMount, safeMount };

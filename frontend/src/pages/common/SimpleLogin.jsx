@@ -10,7 +10,7 @@
  * - Dev-only test credentials
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -37,10 +37,20 @@ import { useAuth } from 'contexts/AuthContext';
 import logger from 'utils/logger';
 import { useSnackbar } from 'contexts/SnackbarContext';
 import { gradients } from 'theme/palette';
+import { prefetchRoutes } from 'utils/lazyLoader';
 
 const SimpleLogin = () => {
   const showSnackbar = useSnackbar();
   const { login } = useAuth();
+
+  // Prefetch dashboard & core routes while user types credentials
+  useEffect(() => {
+    prefetchRoutes([
+      () => import('components/dashboard/AdvancedDashboard'),
+      () => import('pages/common/Home'),
+      () => import('components/Layout/ProLayout'),
+    ]);
+  }, []);
   const [email, setEmail] = useState(
     process.env.NODE_ENV === 'development' ? 'admin@alawael.com' : ''
   );

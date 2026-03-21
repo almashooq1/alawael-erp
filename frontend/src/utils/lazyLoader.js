@@ -57,3 +57,29 @@ export const lazyWithRetry = (importFunc, retries = 3) => {
 };
 
 export default lazyWithRetry;
+
+/**
+ * Prefetch route chunks during idle time
+ * استباق تحميل الصفحات أثناء وقت الخمول
+ * @param {Array<Function>} importFunctions - Array of dynamic import functions
+ */
+export const prefetchRoutes = importFunctions => {
+  if (typeof window === 'undefined') return;
+
+  const prefetch = () => {
+    importFunctions.forEach(importFn => {
+      try {
+        importFn();
+      } catch {
+        // Silently ignore prefetch failures
+      }
+    });
+  };
+
+  // Use requestIdleCallback if available, otherwise setTimeout
+  if ('requestIdleCallback' in window) {
+    window.requestIdleCallback(prefetch, { timeout: 5000 });
+  } else {
+    setTimeout(prefetch, 2000);
+  }
+};

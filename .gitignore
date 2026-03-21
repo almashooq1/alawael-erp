@@ -206,5 +206,10 @@ __pycache__/
 .pytest_cache/
 *.pyc
 backend/.test-mongo-uri
-_deploy_vps.py
-_verify_vps.py
+
+# VPS helper scripts (contain credentials)
+_*.py
+!**/__init__.py
+_*.js
+_*.txt
+_*.ps1

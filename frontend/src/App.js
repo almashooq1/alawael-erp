@@ -170,9 +170,8 @@ const cacheRtl = createCache({
 // Performance monitoring
 if (typeof window !== 'undefined') {
   window.addEventListener('load', logPerformanceMetrics);
-  if (process.env.NODE_ENV === 'development') {
-    reportWebVitals(logPerformanceMetrics);
-  }
+  // Report Web Vitals in all environments (CLS, INP, FCP, LCP, TTFB)
+  reportWebVitals(logPerformanceMetrics);
 }
 
 function App() {

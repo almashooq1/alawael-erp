@@ -92,16 +92,15 @@ try {
   } else { throw e; }
 }"
 
-# Enable authentication in MongoDB config
-if ! grep -q 'authorization: enabled' /etc/mongod.conf; then
-  cat >> /etc/mongod.conf << 'MONGOAUTH'
+# Enable authentication in MongoDB config (safely remove duplicates first)
+sed -i '/^security:/,/^[^ ]/{ /^security:/d; /^  authorization:/d; }' /etc/mongod.conf 2>/dev/null
+cat >> /etc/mongod.conf << 'MONGOAUTH'
 
 security:
   authorization: enabled
 MONGOAUTH
-  systemctl restart mongod
-  echo -e "${GREEN}  ✅ MongoDB authentication enabled${NC}"
-fi
+systemctl restart mongod
+echo -e "${GREEN}  ✅ MongoDB authentication enabled${NC}"
 
 echo -e "${GREEN}  📋 MongoDB URI: mongodb://alawael_admin:${MONGO_PASS}@127.0.0.1:27017/alawael_erp?authSource=admin${NC}"
 echo -e "${YELLOW}  ⚠️  Password saved to /root/.mongo_pass${NC}"

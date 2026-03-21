@@ -141,7 +141,30 @@ if ! command -v mongod &> /dev/null; then
   log_ok "MongoDB 8.0 تم تثبيته وتشغيله"
 else
   log_warn "MongoDB مثبّت مسبقاً: $(mongod --version | head -1)"
-  systemctl start mongod 2>/dev/null || true
+
+  # ─── Fix duplicate security blocks in mongod.conf (from previous runs) ─────
+  if grep -c '^security:' /etc/mongod.conf 2>/dev/null | grep -q '[2-9]'; then
+    log_warn "Fixing duplicate security blocks in mongod.conf..."
+    # Remove ALL security blocks, will re-add one cleanly below
+    sed -i '/^security:/,/^  authorization:.*$/d' /etc/mongod.conf
+    # Also remove any leftover blank lines from deletion
+    sed -i '/^$/N;/^\n$/d' /etc/mongod.conf
+  fi
+
+  systemctl start mongod 2>/dev/null || {
+    # If start fails, check if config is broken
+    log_warn "MongoDB failed to start, checking config..."
+    # Remove any duplicate security sections entirely
+    python3 -c "
+import re
+with open('/etc/mongod.conf') as f: t = f.read()
+# Remove all security blocks
+t = re.sub(r'\nsecurity:\s*\n\s*authorization:\s*enabled\s*', '', t)
+with open('/etc/mongod.conf','w') as f: f.write(t)
+print('Cleaned mongod.conf')
+" 2>/dev/null || sed -i '/^security:/,/^  authorization:.*$/d' /etc/mongod.conf
+    systemctl start mongod
+  }
 fi
 
 # ─── MongoDB Authentication ────────────────────────────────────────────────────
@@ -151,11 +174,46 @@ MONGO_PASS=$(openssl rand -base64 32 | tr -dc 'A-Za-z0-9' | head -c 32)
 echo "${MONGO_PASS}" > /root/.mongo_pass
 chmod 600 /root/.mongo_pass
 
-# Wait for MongoDB to be ready
+# Wait for MongoDB to be ready (up to 20 seconds)
 for i in {1..10}; do
   if mongosh --quiet --eval "db.runCommand({ping:1})" &>/dev/null; then break; fi
+  echo -e "${CYAN}  ⏳ Waiting for MongoDB... (${i}/10)${NC}"
   sleep 2
 done
+
+# Verify MongoDB is actually running
+if ! mongosh --quiet --eval "db.runCommand({ping:1})" &>/dev/null; then
+  log_err "MongoDB is not running! Checking logs..."
+  journalctl -u mongod --no-pager -n 10
+  log_err "Attempting config fix..."
+  # Nuclear option: reset to clean config
+  cp /etc/mongod.conf /etc/mongod.conf.broken
+  cat > /etc/mongod.conf << 'CLEANCONF'
+# mongod.conf - cleaned by deploy script
+
+storage:
+  dbPath: /var/lib/mongodb
+
+systemLog:
+  destination: file
+  logAppend: true
+  path: /var/log/mongodb/mongod.log
+
+net:
+  port: 27017
+  bindIp: 127.0.0.1
+
+processManagement:
+  timeZoneInfo: /usr/share/zoneinfo
+CLEANCONF
+  systemctl restart mongod
+  sleep 3
+  if ! mongosh --quiet --eval "db.runCommand({ping:1})" &>/dev/null; then
+    log_err "MongoDB still not running after config reset. Check: journalctl -u mongod"
+    exit 1
+  fi
+  log_ok "MongoDB recovered with clean config"
+fi
 
 mongosh --quiet --eval "
 use admin;
@@ -177,15 +235,18 @@ try {
 }
 "
 
-# Enable auth
-if ! grep -q 'authorization: enabled' /etc/mongod.conf; then
-  cat >> /etc/mongod.conf << 'MONGOAUTH'
+# Enable auth (safely — remove any existing security blocks first, then add one)
+sed -i '/^security:/,/^[^ ]/{ /^security:/d; /^  authorization:/d; }' /etc/mongod.conf 2>/dev/null
+# Remove empty lines left behind
+sed -i '/^$/N;/^\n$/d' /etc/mongod.conf 2>/dev/null
+# Add clean security block
+cat >> /etc/mongod.conf << 'MONGOAUTH'
 
 security:
   authorization: enabled
 MONGOAUTH
-  systemctl restart mongod
-fi
+systemctl restart mongod
+sleep 2
 
 MONGODB_URI="mongodb://alawael_admin:${MONGO_PASS}@127.0.0.1:27017/alawael_erp?authSource=admin"
 log_ok "MongoDB جاهز مع Authentication"

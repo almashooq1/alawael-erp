@@ -6,7 +6,7 @@ import {
   Box, Grid, Card, CardContent, Typography, Table, TableBody, TableCell,
   TableContainer, TableHead, TableRow, Paper, Chip, LinearProgress
 } from '@mui/material';
-import { Draw, Stamp, Verified, PendingActions } from '@mui/icons-material';
+import { Draw, Approval as Stamp, Verified, PendingActions } from '@mui/icons-material';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import apiClient from '../../services/api';
 

@@ -37,7 +37,7 @@ import {
   Settings,
   Preview,
   DragIndicator,
-  HighPriority,
+  PriorityHigh,
 } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients } from '../../theme/palette';

@@ -9,7 +9,11 @@
 
 module.exports = {
   async up(db) {
-    // Users indexes
+    // Users indexes – drop legacy non-sparse email index if it exists
+    await db
+      .collection('users')
+      .dropIndex('email_1')
+      .catch(() => {});
     await db.collection('users').createIndex({ email: 1 }, { unique: true, sparse: true });
     await db.collection('users').createIndex({ role: 1, isActive: 1 });
     await db.collection('users').createIndex({ createdAt: -1 });

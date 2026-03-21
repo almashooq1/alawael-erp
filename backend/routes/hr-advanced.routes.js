@@ -633,7 +633,7 @@ router.post(
       const leave = await Leave.findByIdAndUpdate(
         req.params.id,
         {
-          status: 'موافق عليه',
+          status: 'approved',
           approvedBy: req.user?.id,
           approvalDate: new Date(),
         },
@@ -661,7 +661,7 @@ router.post(
       const leave = await Leave.findByIdAndUpdate(
         req.params.id,
         {
-          status: 'مرفوض',
+          status: 'rejected',
           rejectionReason: req.body.reason || '',
         },
         { new: true }

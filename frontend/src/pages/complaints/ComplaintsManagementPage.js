@@ -48,7 +48,7 @@ import {
   Chat as ChatIcon,
   PersonOutline as PersonIcon,
 } from '@mui/icons-material';
-import complaintsService from '../../services/complaints.service';
+import { complaintsService } from '../../services/complaintsService';
 
 const DEMO_COMPLAINTS = [
   {

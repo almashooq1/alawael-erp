@@ -281,9 +281,42 @@ export const complaintsService = {
   update: (id, data) => safe(() => apiClient.put(`/complaints/${id}`, data).then(r => r.data)),
   remove: id => safe(() => apiClient.delete(`/complaints/${id}`).then(r => r.data)),
   resolve: (id, resolution) =>
-    safe(() => apiClient.patch(`/complaints/${id}/resolve`, { resolution }).then(r => r.data)),
+    safe(() => apiClient.post(`/complaints/${id}/resolve`, { resolution }).then(r => r.data)),
   rate: (id, rating) =>
-    safe(() => apiClient.patch(`/complaints/${id}/rate`, { rating }).then(r => r.data)),
+    safe(() => apiClient.post(`/complaints/${id}/rate`, { rating }).then(r => r.data)),
+
+  // ── Actions (merged from complaints.service.js) ──────────────
+  respond: (id, data) =>
+    safe(() => apiClient.post(`/complaints/${id}/respond`, data).then(r => r.data)),
+  escalate: (id, data) =>
+    safe(() => apiClient.post(`/complaints/${id}/escalate`, data).then(r => r.data)),
+
+  // ── Stats ─────────────────────────────────────────────────────
+  getStats: () => safe(() => apiClient.get('/complaints/stats').then(r => r.data)),
+
+  // ── Source-filtered shortcuts ─────────────────────────────────
+  getEmployeeComplaints: params =>
+    safe(() => apiClient.get('/complaints', { params: { ...params, source: 'employee' } }).then(r => r.data)),
+  getStudentComplaints: params =>
+    safe(() => apiClient.get('/complaints', { params: { ...params, source: 'student' } }).then(r => r.data)),
+  getCustomerComplaints: params =>
+    safe(() => apiClient.get('/complaints', { params: { ...params, source: 'customer' } }).then(r => r.data)),
+  getParentComplaints: params =>
+    safe(() => apiClient.get('/complaints', { params: { ...params, source: 'parent' } }).then(r => r.data)),
+
+  // ── Legacy aliases (backward compat) ──────────────────────────
+  createEmployeeComplaint: data =>
+    safe(() => apiClient.post('/complaints', { ...data, source: 'employee' }).then(r => r.data)),
+  createStudentComplaint: data =>
+    safe(() => apiClient.post('/complaints', { ...data, source: 'student' }).then(r => r.data)),
+  createCustomerComplaint: data =>
+    safe(() => apiClient.post('/complaints', { ...data, source: 'customer' }).then(r => r.data)),
+  updateEmployeeComplaint: (id, data) =>
+    safe(() => apiClient.put(`/complaints/${id}`, data).then(r => r.data)),
+  updateStudentComplaint: (id, data) =>
+    safe(() => apiClient.put(`/complaints/${id}`, data).then(r => r.data)),
+  resolveComplaint: (id, data) =>
+    safe(() => apiClient.post(`/complaints/${id}/resolve`, data).then(r => r.data)),
 };
 
 export const complaintsReportsService = {

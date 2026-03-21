@@ -832,6 +832,21 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   safeMount(app, ['/api/helpdesk', '/api/v1/helpdesk'], '../routes/helpdesk.routes');
   safeMount(app, ['/api/hse', '/api/v1/hse'], '../routes/hse.routes');
   logger.info('New systems mounted (2 modules: helpdesk, hse)');
+
+  // ── Donations & Sponsors — التبرعات والرعاية ────────────────────────
+  safeMount(app, ['/api/campaigns', '/api/v1/campaigns'], '../routes/campaigns.real.routes');
+  safeMount(app, ['/api/donors', '/api/v1/donors'], '../routes/donors.real.routes');
+  safeMount(app, ['/api/donations', '/api/v1/donations'], '../routes/donations.real.routes');
+  logger.info('Donations system mounted (3 modules: campaigns, donors, donations)');
+
+  // ── Vendor Management — إدارة الموردين ──────────────────────────────
+  safeMount(app, ['/api/vendors', '/api/v1/vendors'], '../routes/vendors.real.routes');
+  safeMount(
+    app,
+    ['/api/vendor-evaluations', '/api/v1/vendor-evaluations'],
+    '../routes/vendor-evaluations.real.routes'
+  );
+  logger.info('Vendor management mounted (2 modules: vendors, vendor-evaluations)');
 };
 
 module.exports = { mountAllRoutes, dualMount, safeMount };

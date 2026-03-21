@@ -92,10 +92,7 @@ describe('calculateFinancialRatios', () => {
   });
 
   test('skips ratios if partial data', () => {
-    const r = calculateFinancialRatios(
-      { currentAssets: 300, currentLiabilities: 100 },
-      {}
-    );
+    const r = calculateFinancialRatios({ currentAssets: 300, currentLiabilities: 100 }, {});
     expect(r.currentRatio).toBe(3);
     expect(r.profitMargin).toBeUndefined();
   });
@@ -164,7 +161,7 @@ describe('calculatePresentValue', () => {
    =============================================================== */
 describe('calculateFutureValue', () => {
   test('FV of 5000 at 10% over 3 years', () => {
-    const fv = calculateFutureValue(5000, 0.10, 3);
+    const fv = calculateFutureValue(5000, 0.1, 3);
     expect(fv).toBeCloseTo(6655, 0);
   });
 
@@ -178,7 +175,7 @@ describe('calculateFutureValue', () => {
    =============================================================== */
 describe('calculateNPV', () => {
   test('classic NPV: initial investment + cash flows', () => {
-    const npv = calculateNPV([-100000, 30000, 40000, 50000, 30000], 0.10);
+    const npv = calculateNPV([-100000, 30000, 40000, 50000, 30000], 0.1);
     // index 0 is year 0 (not discounted): -100000 + 30000/1.1 + 40000/1.21 + 50000/1.331 + 30000/1.4641
     expect(npv).toBeCloseTo(18386.72, 0);
   });
@@ -234,7 +231,7 @@ describe('calculatePaybackPeriod', () => {
    =============================================================== */
 describe('calculateTradeDiscount', () => {
   test('10% discount on 1000', () => {
-    const r = calculateTradeDiscount(1000, 0.10);
+    const r = calculateTradeDiscount(1000, 0.1);
     expect(r.discountAmount).toBe(100);
     expect(r.netPrice).toBe(900);
   });

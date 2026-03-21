@@ -10,7 +10,7 @@ const router = express.Router();
 const PolicyController = require('../controllers/policyController');
 const { authenticate, authorize } = require('../middleware/auth');
 
-const controller = new PolicyController();
+const controller = PolicyController;
 
 router.use(authenticate);
 

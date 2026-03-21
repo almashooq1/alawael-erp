@@ -461,7 +461,4 @@ router.use((err, _req, res, _next) => {
 // EXPORTS
 // =============================================
 
-module.exports = {
-  router,
-  integrationService,
-};
+module.exports = router;

@@ -10,7 +10,7 @@ const router = express.Router();
 const IncidentController = require('../controllers/incidentController');
 const { authenticate, authorize } = require('../middleware/auth');
 
-const controller = new IncidentController();
+const controller = IncidentController;
 
 router.use(authenticate);
 

@@ -864,7 +864,7 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   safeMount(app, ['/api/advanced-analytics', '/api/v1/advanced-analytics'], '../routes/advancedAnalytics.routes');
   safeMount(app, ['/api/ai-recommendations', '/api/v1/ai-recommendations'], '../routes/ai.recommendations.routes');
   safeMount(app, ['/api/ai-notifications', '/api/v1/ai-notifications'], '../routes/aiNotifications');
-  safeMount(app, ['/api/ml', '/api/v1/ml'], '../routes/ml.routes');
+  // safeMount(app, ['/api/ml', '/api/v1/ml'], '../routes/ml.routes'); // Skipped: requires @tensorflow/tfjs (~400MB)
   safeMount(app, ['/api/smart-gps', '/api/v1/smart-gps'], '../routes/smartGpsTracking.routes');
   safeMount(app, ['/api/smart-notifications-engine', '/api/v1/smart-notifications-engine'], '../routes/smartNotifications.routes');
   logger.info('Phase 10-B mounted (6 modules: advanced-analytics, ai-recommendations, ai-notifications, ml, smart-gps, smart-notifications-engine)');

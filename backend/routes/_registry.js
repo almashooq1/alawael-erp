@@ -893,6 +893,13 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   logger.info('Phase 10-E mounted (6 modules: database, date-converter, moi-passport, performance, system-optimization, traffic-accident-analytics)');
 
   logger.info('✅ Phase 10 complete — 28 previously unmounted route files now active');
+
+  // ── Phase 11: Orphan Model Routes — مسارات CRUD للنماذج اليتيمة ───
+  safeMount(app, ['/api/gamification', '/api/v1/gamification'], '../routes/gamification.routes');
+  safeMount(app, ['/api/subscriptions', '/api/v1/subscriptions'], '../routes/subscription.routes');
+  safeMount(app, ['/api/api-keys', '/api/v1/api-keys'], '../routes/apiKey.routes');
+  safeMount(app, ['/api/smart-irp', '/api/v1/smart-irp'], '../routes/smartIRP.routes');
+  logger.info('Phase 11 mounted (4 modules: gamification, subscriptions, api-keys, smart-irp)');
 };
 
 module.exports = { mountAllRoutes, dualMount, safeMount };

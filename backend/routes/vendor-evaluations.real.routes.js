@@ -55,7 +55,13 @@ router.post('/', async (req, res) => {
     const Vendor = require('../models/Vendor');
 
     // Calculate overall score
-    const scores = ['qualityScore', 'deliveryScore', 'priceScore', 'communicationScore', 'complianceScore'];
+    const scores = [
+      'qualityScore',
+      'deliveryScore',
+      'priceScore',
+      'communicationScore',
+      'complianceScore',
+    ];
     const validScores = scores.filter(s => req.body[s] != null);
     const overallScore =
       validScores.length > 0

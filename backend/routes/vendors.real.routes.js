@@ -20,9 +20,7 @@ router.get('/dashboard/stats', async (req, res) => {
       Vendor.countDocuments({ isDeleted: { $ne: true } }),
       Vendor.countDocuments({ status: 'active', isDeleted: { $ne: true } }),
       Vendor.countDocuments({ status: 'blacklisted', isDeleted: { $ne: true } }),
-      VendorEvaluation.aggregate([
-        { $group: { _id: null, avgScore: { $avg: '$overallScore' } } },
-      ]),
+      VendorEvaluation.aggregate([{ $group: { _id: null, avgScore: { $avg: '$overallScore' } } }]),
     ]);
 
     // By category

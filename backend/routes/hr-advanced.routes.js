@@ -623,59 +623,74 @@ router.get('/leaves/:id', authenticateToken, async (req, res) => {
  * الموافقة على إجازة
  * POST /api/hr-advanced/leaves/:id/approve
  */
-router.post('/leaves/:id/approve', authenticateToken, authorizeRole(['HR', 'Admin', 'Manager']), async (req, res) => {
-  try {
-    const Leave = require('../models/HR/Leave');
-    const leave = await Leave.findByIdAndUpdate(
-      req.params.id,
-      {
-        status: 'موافق عليه',
-        approvedBy: req.user?.id,
-        approvalDate: new Date(),
-      },
-      { new: true }
-    ).lean();
-    if (!leave) return res.status(404).json({ success: false, message: 'الإجازة غير موجودة' });
-    res.json({ success: true, data: leave, message: 'تمت الموافقة على الإجازة' });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'خطأ في الموافقة على الإجازة' });
+router.post(
+  '/leaves/:id/approve',
+  authenticateToken,
+  authorizeRole(['HR', 'Admin', 'Manager']),
+  async (req, res) => {
+    try {
+      const Leave = require('../models/HR/Leave');
+      const leave = await Leave.findByIdAndUpdate(
+        req.params.id,
+        {
+          status: 'موافق عليه',
+          approvedBy: req.user?.id,
+          approvalDate: new Date(),
+        },
+        { new: true }
+      ).lean();
+      if (!leave) return res.status(404).json({ success: false, message: 'الإجازة غير موجودة' });
+      res.json({ success: true, data: leave, message: 'تمت الموافقة على الإجازة' });
+    } catch (error) {
+      res.status(500).json({ success: false, message: 'خطأ في الموافقة على الإجازة' });
+    }
   }
-});
+);
 
 /**
  * رفض إجازة
  * POST /api/hr-advanced/leaves/:id/reject
  */
-router.post('/leaves/:id/reject', authenticateToken, authorizeRole(['HR', 'Admin', 'Manager']), async (req, res) => {
-  try {
-    const Leave = require('../models/HR/Leave');
-    const leave = await Leave.findByIdAndUpdate(
-      req.params.id,
-      {
-        status: 'مرفوض',
-        rejectionReason: req.body.reason || '',
-      },
-      { new: true }
-    ).lean();
-    if (!leave) return res.status(404).json({ success: false, message: 'الإجازة غير موجودة' });
-    res.json({ success: true, data: leave, message: 'تم رفض الإجازة' });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'خطأ في رفض الإجازة' });
+router.post(
+  '/leaves/:id/reject',
+  authenticateToken,
+  authorizeRole(['HR', 'Admin', 'Manager']),
+  async (req, res) => {
+    try {
+      const Leave = require('../models/HR/Leave');
+      const leave = await Leave.findByIdAndUpdate(
+        req.params.id,
+        {
+          status: 'مرفوض',
+          rejectionReason: req.body.reason || '',
+        },
+        { new: true }
+      ).lean();
+      if (!leave) return res.status(404).json({ success: false, message: 'الإجازة غير موجودة' });
+      res.json({ success: true, data: leave, message: 'تم رفض الإجازة' });
+    } catch (error) {
+      res.status(500).json({ success: false, message: 'خطأ في رفض الإجازة' });
+    }
   }
-});
+);
 
 /**
  * حذف إجازة
  * DELETE /api/hr-advanced/leaves/:id
  */
-router.delete('/leaves/:id', authenticateToken, authorizeRole(['HR', 'Admin']), async (req, res) => {
-  try {
-    const Leave = require('../models/HR/Leave');
-    await Leave.findByIdAndDelete(req.params.id);
-    res.json({ success: true, message: 'تم حذف الإجازة' });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'خطأ في حذف الإجازة' });
+router.delete(
+  '/leaves/:id',
+  authenticateToken,
+  authorizeRole(['HR', 'Admin']),
+  async (req, res) => {
+    try {
+      const Leave = require('../models/HR/Leave');
+      await Leave.findByIdAndDelete(req.params.id);
+      res.json({ success: true, message: 'تم حذف الإجازة' });
+    } catch (error) {
+      res.status(500).json({ success: false, message: 'خطأ في حذف الإجازة' });
+    }
   }
-});
+);
 
 module.exports = router;

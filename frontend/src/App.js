@@ -44,6 +44,12 @@ import {
   AssetManagementRoutes,
   HelpDeskRoutes,
   HSERoutes,
+  ProjectManagementRoutes,
+  ContractManagementRoutes,
+  ProcurementRoutes,
+  RecruitmentRoutes,
+  FleetRoutes,
+  CrisisManagementRoutes,
 } from './routes';
 
 // Pages — Keep eagerly loaded (critical path / small)
@@ -211,6 +217,12 @@ function AppContent() {
                               {AssetManagementRoutes()}
                               {HelpDeskRoutes()}
                               {HSERoutes()}
+                              {ProjectManagementRoutes()}
+                              {ContractManagementRoutes()}
+                              {ProcurementRoutes()}
+                              {RecruitmentRoutes()}
+                              {FleetRoutes()}
+                              {CrisisManagementRoutes()}
                               {/* === Shared / Cross-cutting Routes === */}
                               {/* AI & Analytics */}
                               <Route

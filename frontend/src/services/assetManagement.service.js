@@ -34,9 +34,30 @@ export const getDashboard = async () => {
           { status: 'مستبعد', count: 20 },
         ],
         recentAssets: [
-          { _id: '1', name: 'جهاز حاسب محمول Dell', category: 'equipment', status: 'active', value: 4500, location: 'المكتب الرئيسي' },
-          { _id: '2', name: 'طابعة HP LaserJet', category: 'equipment', status: 'active', value: 2800, location: 'الطابق الثاني' },
-          { _id: '3', name: 'سيارة تويوتا كامري', category: 'vehicles', status: 'maintenance', value: 85000, location: 'المرآب' },
+          {
+            _id: '1',
+            name: 'جهاز حاسب محمول Dell',
+            category: 'equipment',
+            status: 'active',
+            value: 4500,
+            location: 'المكتب الرئيسي',
+          },
+          {
+            _id: '2',
+            name: 'طابعة HP LaserJet',
+            category: 'equipment',
+            status: 'active',
+            value: 2800,
+            location: 'الطابق الثاني',
+          },
+          {
+            _id: '3',
+            name: 'سيارة تويوتا كامري',
+            category: 'vehicles',
+            status: 'maintenance',
+            value: 85000,
+            location: 'المرآب',
+          },
         ],
       },
     };
@@ -52,17 +73,53 @@ export const getAssets = async (params = {}) => {
     return {
       success: true,
       data: [
-        { _id: '1', name: 'جهاز حاسب محمول Dell', category: 'equipment', status: 'active', value: 4500, location: 'المكتب الرئيسي', depreciationRate: 0.2, purchaseDate: '2025-06-15' },
-        { _id: '2', name: 'طابعة HP LaserJet', category: 'office', status: 'active', value: 2800, location: 'الطابق الثاني', depreciationRate: 0.15, purchaseDate: '2025-03-10' },
-        { _id: '3', name: 'سيارة تويوتا كامري 2025', category: 'vehicles', status: 'maintenance', value: 85000, location: 'المرآب', depreciationRate: 0.1, purchaseDate: '2025-01-20' },
-        { _id: '4', name: 'مكتب تنفيذي', category: 'office', status: 'active', value: 3200, location: 'مكتب المدير', depreciationRate: 0.1, purchaseDate: '2024-11-05' },
+        {
+          _id: '1',
+          name: 'جهاز حاسب محمول Dell',
+          category: 'equipment',
+          status: 'active',
+          value: 4500,
+          location: 'المكتب الرئيسي',
+          depreciationRate: 0.2,
+          purchaseDate: '2025-06-15',
+        },
+        {
+          _id: '2',
+          name: 'طابعة HP LaserJet',
+          category: 'office',
+          status: 'active',
+          value: 2800,
+          location: 'الطابق الثاني',
+          depreciationRate: 0.15,
+          purchaseDate: '2025-03-10',
+        },
+        {
+          _id: '3',
+          name: 'سيارة تويوتا كامري 2025',
+          category: 'vehicles',
+          status: 'maintenance',
+          value: 85000,
+          location: 'المرآب',
+          depreciationRate: 0.1,
+          purchaseDate: '2025-01-20',
+        },
+        {
+          _id: '4',
+          name: 'مكتب تنفيذي',
+          category: 'office',
+          status: 'active',
+          value: 3200,
+          location: 'مكتب المدير',
+          depreciationRate: 0.1,
+          purchaseDate: '2024-11-05',
+        },
       ],
       pagination: { total: 4, page: 1, limit: 10 },
     };
   }
 };
 
-export const createAsset = async (assetData) => {
+export const createAsset = async assetData => {
   try {
     const { data } = await apiClient.post(BASE, assetData);
     return data;
@@ -80,7 +137,7 @@ export const updateAsset = async (id, assetData) => {
   }
 };
 
-export const deleteAsset = async (id) => {
+export const deleteAsset = async id => {
   try {
     const { data } = await apiClient.delete(`${BASE}/${id}`);
     return data;
@@ -90,7 +147,7 @@ export const deleteAsset = async (id) => {
 };
 
 /* ── Maintenance ──────────────────────── */
-export const getMaintenanceRecords = async (assetId) => {
+export const getMaintenanceRecords = async assetId => {
   try {
     const { data } = await apiClient.get(`${BASE}/${assetId}/maintenance`);
     return data;
@@ -98,7 +155,14 @@ export const getMaintenanceRecords = async (assetId) => {
     return {
       success: true,
       data: [
-        { _id: '1', type: 'preventive', description: 'صيانة دورية', cost: 500, date: '2026-01-15', status: 'completed' },
+        {
+          _id: '1',
+          type: 'preventive',
+          description: 'صيانة دورية',
+          cost: 500,
+          date: '2026-01-15',
+          status: 'completed',
+        },
       ],
     };
   }

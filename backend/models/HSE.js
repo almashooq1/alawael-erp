@@ -12,7 +12,18 @@ const incidentSchema = new mongoose.Schema(
     incidentType: {
       type: String,
       required: true,
-      enum: ['injury', 'near_miss', 'property_damage', 'environmental', 'fire', 'chemical', 'electrical', 'fall', 'vehicle', 'other'],
+      enum: [
+        'injury',
+        'near_miss',
+        'property_damage',
+        'environmental',
+        'fire',
+        'chemical',
+        'electrical',
+        'fall',
+        'vehicle',
+        'other',
+      ],
       default: 'other',
     },
     severity: {
@@ -49,7 +60,9 @@ const incidentSchema = new mongoose.Schema(
         status: { type: String, enum: ['pending', 'in_progress', 'completed'], default: 'pending' },
       },
     ],
-    attachments: [{ fileName: String, fileUrl: String, uploadedAt: { type: Date, default: Date.now } }],
+    attachments: [
+      { fileName: String, fileUrl: String, uploadedAt: { type: Date, default: Date.now } },
+    ],
     closedAt: { type: Date },
     closedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   },

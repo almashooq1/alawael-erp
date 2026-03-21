@@ -12,7 +12,10 @@ router.get('/dashboard', authenticate, async (req, res) => {
       HelpDeskTicket.countDocuments({ status: 'open' }),
       HelpDeskTicket.countDocuments({ status: 'in_progress' }),
       HelpDeskTicket.countDocuments({ status: { $in: ['resolved', 'closed'] } }),
-      HelpDeskTicket.countDocuments({ priority: 'critical', status: { $nin: ['resolved', 'closed'] } }),
+      HelpDeskTicket.countDocuments({
+        priority: 'critical',
+        status: { $nin: ['resolved', 'closed'] },
+      }),
     ]);
 
     const byCategory = await HelpDeskTicket.aggregate([
@@ -33,15 +36,24 @@ router.get('/dashboard', authenticate, async (req, res) => {
     res.json({
       success: true,
       data: {
-        total, open, inProgress, resolved, critical,
-        slaBreached: await HelpDeskTicket.countDocuments({ slaBreached: true, status: { $nin: ['resolved', 'closed'] } }),
-        byCategory: byCategory.map((c) => ({ category: c._id, count: c.count })),
-        byPriority: byPriority.map((p) => ({ priority: p._id, count: p.count })),
+        total,
+        open,
+        inProgress,
+        resolved,
+        critical,
+        slaBreached: await HelpDeskTicket.countDocuments({
+          slaBreached: true,
+          status: { $nin: ['resolved', 'closed'] },
+        }),
+        byCategory: byCategory.map(c => ({ category: c._id, count: c.count })),
+        byPriority: byPriority.map(p => ({ priority: p._id, count: p.count })),
         recentTickets,
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'خطأ في جلب بيانات لوحة التحكم', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في جلب بيانات لوحة التحكم', error: error.message });
   }
 });
 
@@ -83,7 +95,10 @@ router.post('/tickets', authenticate, async (req, res) => {
 
 router.put('/tickets/:id', authenticate, async (req, res) => {
   try {
-    const ticket = await HelpDeskTicket.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    const ticket = await HelpDeskTicket.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
     if (!ticket) return res.status(404).json({ success: false, message: 'التذكرة غير موجودة' });
     res.json({ success: true, data: ticket });
   } catch (error) {
@@ -106,7 +121,11 @@ router.post('/tickets/:id/comments', authenticate, async (req, res) => {
   try {
     const ticket = await HelpDeskTicket.findById(req.params.id);
     if (!ticket) return res.status(404).json({ success: false, message: 'التذكرة غير موجودة' });
-    ticket.comments.push({ user: req.user._id, text: req.body.text, isInternal: req.body.isInternal || false });
+    ticket.comments.push({
+      user: req.user._id,
+      text: req.body.text,
+      isInternal: req.body.isInternal || false,
+    });
     await ticket.save();
     res.json({ success: true, data: ticket });
   } catch (error) {
@@ -123,7 +142,11 @@ router.get('/articles', authenticate, async (req, res) => {
     if (status) filter.status = status;
 
     const [data, total] = await Promise.all([
-      HelpDeskArticle.find(filter).sort({ createdAt: -1 }).skip((page - 1) * limit).limit(+limit).lean(),
+      HelpDeskArticle.find(filter)
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(+limit)
+        .lean(),
       HelpDeskArticle.countDocuments(filter),
     ]);
 

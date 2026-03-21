@@ -7,7 +7,14 @@ const { SafetyIncident, SafetyInspection } = require('../models/HSE');
 // ── Dashboard ────────────────────────────────────────────────────────
 router.get('/dashboard', authenticate, async (req, res) => {
   try {
-    const [totalIncidents, openIncidents, investigating, closed, totalInspections, scheduledInspections] = await Promise.all([
+    const [
+      totalIncidents,
+      openIncidents,
+      investigating,
+      closed,
+      totalInspections,
+      scheduledInspections,
+    ] = await Promise.all([
       SafetyIncident.countDocuments(),
       SafetyIncident.countDocuments({ status: 'reported' }),
       SafetyIncident.countDocuments({ status: 'under_investigation' }),
@@ -34,15 +41,21 @@ router.get('/dashboard', authenticate, async (req, res) => {
     res.json({
       success: true,
       data: {
-        totalIncidents, openIncidents, investigating, closed,
-        totalInspections, scheduledInspections,
-        bySeverity: bySeverity.map((s) => ({ severity: s._id, count: s.count })),
-        byType: byType.map((t) => ({ type: t._id, count: t.count })),
+        totalIncidents,
+        openIncidents,
+        investigating,
+        closed,
+        totalInspections,
+        scheduledInspections,
+        bySeverity: bySeverity.map(s => ({ severity: s._id, count: s.count })),
+        byType: byType.map(t => ({ type: t._id, count: t.count })),
         recentIncidents,
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'خطأ في جلب بيانات لوحة التحكم', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في جلب بيانات لوحة التحكم', error: error.message });
   }
 });
 
@@ -59,7 +72,11 @@ router.get('/incidents', authenticate, async (req, res) => {
       .limit(Number(limit))
       .lean();
     const total = await SafetyIncident.countDocuments(filter);
-    res.json({ success: true, data: docs, pagination: { total, page: Number(page), pages: Math.ceil(total / limit) } });
+    res.json({
+      success: true,
+      data: docs,
+      pagination: { total, page: Number(page), pages: Math.ceil(total / limit) },
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: 'خطأ في جلب الحوادث', error: error.message });
   }
@@ -77,7 +94,10 @@ router.post('/incidents', authenticate, async (req, res) => {
 
 router.put('/incidents/:id', authenticate, async (req, res) => {
   try {
-    const doc = await SafetyIncident.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    const doc = await SafetyIncident.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
     if (!doc) return res.status(404).json({ success: false, message: 'الحادثة غير موجودة' });
     res.json({ success: true, data: doc });
   } catch (error) {
@@ -85,15 +105,20 @@ router.put('/incidents/:id', authenticate, async (req, res) => {
   }
 });
 
-router.delete('/incidents/:id', authenticate, authorize('admin', 'hse_manager'), async (req, res) => {
-  try {
-    const doc = await SafetyIncident.findByIdAndDelete(req.params.id);
-    if (!doc) return res.status(404).json({ success: false, message: 'الحادثة غير موجودة' });
-    res.json({ success: true, message: 'تم حذف الحادثة بنجاح' });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'خطأ في حذف الحادثة', error: error.message });
+router.delete(
+  '/incidents/:id',
+  authenticate,
+  authorize('admin', 'hse_manager'),
+  async (req, res) => {
+    try {
+      const doc = await SafetyIncident.findByIdAndDelete(req.params.id);
+      if (!doc) return res.status(404).json({ success: false, message: 'الحادثة غير موجودة' });
+      res.json({ success: true, message: 'تم حذف الحادثة بنجاح' });
+    } catch (error) {
+      res.status(500).json({ success: false, message: 'خطأ في حذف الحادثة', error: error.message });
+    }
   }
-});
+);
 
 // ── Inspections CRUD ─────────────────────────────────────────────────
 router.get('/inspections', authenticate, async (req, res) => {
@@ -107,7 +132,11 @@ router.get('/inspections', authenticate, async (req, res) => {
       .limit(Number(limit))
       .lean();
     const total = await SafetyInspection.countDocuments(filter);
-    res.json({ success: true, data: docs, pagination: { total, page: Number(page), pages: Math.ceil(total / limit) } });
+    res.json({
+      success: true,
+      data: docs,
+      pagination: { total, page: Number(page), pages: Math.ceil(total / limit) },
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: 'خطأ في جلب التفتيشات', error: error.message });
   }
@@ -125,7 +154,10 @@ router.post('/inspections', authenticate, async (req, res) => {
 
 router.put('/inspections/:id', authenticate, async (req, res) => {
   try {
-    const doc = await SafetyInspection.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    const doc = await SafetyInspection.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
     if (!doc) return res.status(404).json({ success: false, message: 'التفتيش غير موجود' });
     res.json({ success: true, data: doc });
   } catch (error) {
@@ -133,14 +165,19 @@ router.put('/inspections/:id', authenticate, async (req, res) => {
   }
 });
 
-router.delete('/inspections/:id', authenticate, authorize('admin', 'hse_manager'), async (req, res) => {
-  try {
-    const doc = await SafetyInspection.findByIdAndDelete(req.params.id);
-    if (!doc) return res.status(404).json({ success: false, message: 'التفتيش غير موجود' });
-    res.json({ success: true, message: 'تم حذف التفتيش بنجاح' });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'خطأ في حذف التفتيش', error: error.message });
+router.delete(
+  '/inspections/:id',
+  authenticate,
+  authorize('admin', 'hse_manager'),
+  async (req, res) => {
+    try {
+      const doc = await SafetyInspection.findByIdAndDelete(req.params.id);
+      if (!doc) return res.status(404).json({ success: false, message: 'التفتيش غير موجود' });
+      res.json({ success: true, message: 'تم حذف التفتيش بنجاح' });
+    } catch (error) {
+      res.status(500).json({ success: false, message: 'خطأ في حذف التفتيش', error: error.message });
+    }
   }
-});
+);
 
 module.exports = router;

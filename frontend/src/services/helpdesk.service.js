@@ -34,9 +34,33 @@ export const getDashboard = async () => {
           { priority: 'critical', count: 9 },
         ],
         recentTickets: [
-          { _id: '1', ticketNumber: 'HD-00001', titleAr: 'مشكلة في تسجيل الدخول', category: 'access', priority: 'high', status: 'open', createdAt: '2026-03-20' },
-          { _id: '2', ticketNumber: 'HD-00002', titleAr: 'طلب تثبيت برنامج', category: 'software', priority: 'medium', status: 'in_progress', createdAt: '2026-03-19' },
-          { _id: '3', ticketNumber: 'HD-00003', titleAr: 'عطل في الطابعة', category: 'hardware', priority: 'low', status: 'resolved', createdAt: '2026-03-18' },
+          {
+            _id: '1',
+            ticketNumber: 'HD-00001',
+            titleAr: 'مشكلة في تسجيل الدخول',
+            category: 'access',
+            priority: 'high',
+            status: 'open',
+            createdAt: '2026-03-20',
+          },
+          {
+            _id: '2',
+            ticketNumber: 'HD-00002',
+            titleAr: 'طلب تثبيت برنامج',
+            category: 'software',
+            priority: 'medium',
+            status: 'in_progress',
+            createdAt: '2026-03-19',
+          },
+          {
+            _id: '3',
+            ticketNumber: 'HD-00003',
+            titleAr: 'عطل في الطابعة',
+            category: 'hardware',
+            priority: 'low',
+            status: 'resolved',
+            createdAt: '2026-03-18',
+          },
         ],
       },
     };
@@ -51,17 +75,53 @@ export const getTickets = async (params = {}) => {
     return {
       success: true,
       data: [
-        { _id: '1', ticketNumber: 'HD-00001', titleAr: 'مشكلة في تسجيل الدخول', category: 'access', priority: 'high', status: 'open', requesterDepartment: 'المالية', createdAt: '2026-03-20' },
-        { _id: '2', ticketNumber: 'HD-00002', titleAr: 'طلب تثبيت برنامج Office', category: 'software', priority: 'medium', status: 'in_progress', requesterDepartment: 'الموارد البشرية', createdAt: '2026-03-19' },
-        { _id: '3', ticketNumber: 'HD-00003', titleAr: 'عطل في الطابعة الرئيسية', category: 'hardware', priority: 'low', status: 'resolved', requesterDepartment: 'الإدارة', createdAt: '2026-03-18' },
-        { _id: '4', ticketNumber: 'HD-00004', titleAr: 'بطء في الشبكة', category: 'network', priority: 'critical', status: 'assigned', requesterDepartment: 'تقنية المعلومات', createdAt: '2026-03-17' },
+        {
+          _id: '1',
+          ticketNumber: 'HD-00001',
+          titleAr: 'مشكلة في تسجيل الدخول',
+          category: 'access',
+          priority: 'high',
+          status: 'open',
+          requesterDepartment: 'المالية',
+          createdAt: '2026-03-20',
+        },
+        {
+          _id: '2',
+          ticketNumber: 'HD-00002',
+          titleAr: 'طلب تثبيت برنامج Office',
+          category: 'software',
+          priority: 'medium',
+          status: 'in_progress',
+          requesterDepartment: 'الموارد البشرية',
+          createdAt: '2026-03-19',
+        },
+        {
+          _id: '3',
+          ticketNumber: 'HD-00003',
+          titleAr: 'عطل في الطابعة الرئيسية',
+          category: 'hardware',
+          priority: 'low',
+          status: 'resolved',
+          requesterDepartment: 'الإدارة',
+          createdAt: '2026-03-18',
+        },
+        {
+          _id: '4',
+          ticketNumber: 'HD-00004',
+          titleAr: 'بطء في الشبكة',
+          category: 'network',
+          priority: 'critical',
+          status: 'assigned',
+          requesterDepartment: 'تقنية المعلومات',
+          createdAt: '2026-03-17',
+        },
       ],
       pagination: { total: 4, page: 1, limit: 10 },
     };
   }
 };
 
-export const createTicket = async (ticketData) => {
+export const createTicket = async ticketData => {
   try {
     const { data } = await apiClient.post(`${BASE}/tickets`, ticketData);
     return data;
@@ -79,7 +139,7 @@ export const updateTicket = async (id, ticketData) => {
   }
 };
 
-export const deleteTicket = async (id) => {
+export const deleteTicket = async id => {
   try {
     const { data } = await apiClient.delete(`${BASE}/tickets/${id}`);
     return data;

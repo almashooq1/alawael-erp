@@ -829,19 +829,9 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   );
 
   // ── Phase 9: Help Desk + HSE ─────────────────────────────────────────
-  safeMount(
-    app,
-    ['/api/helpdesk', '/api/v1/helpdesk'],
-    '../routes/helpdesk.routes'
-  );
-  safeMount(
-    app,
-    ['/api/hse', '/api/v1/hse'],
-    '../routes/hse.routes'
-  );
-  logger.info(
-    'New systems mounted (2 modules: helpdesk, hse)'
-  );
+  safeMount(app, ['/api/helpdesk', '/api/v1/helpdesk'], '../routes/helpdesk.routes');
+  safeMount(app, ['/api/hse', '/api/v1/hse'], '../routes/hse.routes');
+  logger.info('New systems mounted (2 modules: helpdesk, hse)');
 };
 
 module.exports = { mountAllRoutes, dualMount, safeMount };

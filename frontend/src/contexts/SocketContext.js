@@ -13,7 +13,8 @@ const isDev = process.env.NODE_ENV === 'development';
 const SocketContext = createContext(null);
 
 // Socket connection configuration
-const SOCKET_URL = process.env.REACT_APP_SOCKET_URL || process.env.REACT_APP_WS_URL || 'http://localhost:3000';
+const SOCKET_URL =
+  process.env.REACT_APP_SOCKET_URL || process.env.REACT_APP_WS_URL || 'http://localhost:3000';
 const SOCKET_OPTIONS = {
   reconnection: true,
   reconnectionDelay: 1000,
@@ -122,7 +123,7 @@ export const useSocketEmit = () => {
         console.warn('Socket not connected. Event not sent:', eventName);
       }
     },
-    [socket],
+    [socket]
   );
 };
 

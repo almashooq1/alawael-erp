@@ -11,10 +11,7 @@
  * - Saudi SAMA-regulated company integration
  */
 import { useState, useEffect, useCallback } from 'react';
-import {
-  Paper,
-} from '@mui/material';
-
+import { Paper } from '@mui/material';
 
 import insuranceService from '../../services/insurance.service';
 
@@ -330,7 +327,9 @@ export default function InsuranceManagement() {
     try {
       const res = await insuranceService.getPolicyClaims(policy._id);
       setSelectedPolicy(prev => ({ ...prev, claimsData: res.data?.data }));
-    } catch (_) { /* claims may not exist */ }
+    } catch (_) {
+      /* claims may not exist */
+    }
     setDetailDialog(true);
   };
 

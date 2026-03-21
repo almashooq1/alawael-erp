@@ -5,14 +5,7 @@ const reactHooks = require('eslint-plugin-react-hooks');
 
 module.exports = [
   {
-    ignores: [
-      'node_modules/**',
-      'coverage/**',
-      'build/**',
-      'dist/**',
-      '.git/**',
-      '*.log',
-    ],
+    ignores: ['node_modules/**', 'coverage/**', 'build/**', 'dist/**', '.git/**', '*.log'],
   },
   {
     files: ['**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx'],
@@ -39,13 +32,16 @@ module.exports = [
       ...js.configs.recommended.rules,
       'no-unused-vars': 'off',
       'unused-imports/no-unused-imports': 'warn',
-      'unused-imports/no-unused-vars': ['warn', {
-        vars: 'all',
-        varsIgnorePattern: '^_',
-        args: 'after-used',
-        argsIgnorePattern: '^_',
-        caughtErrors: 'none',
-      }],
+      'unused-imports/no-unused-vars': [
+        'warn',
+        {
+          vars: 'all',
+          varsIgnorePattern: '^_',
+          args: 'after-used',
+          argsIgnorePattern: '^_',
+          caughtErrors: 'none',
+        },
+      ],
       'no-console': 'warn',
       'no-undef': 'warn',
       'react-hooks/rules-of-hooks': 'error',
@@ -68,11 +64,14 @@ module.exports = [
       },
     },
     rules: {
-      'no-unused-vars': ['warn', { 
-        argsIgnorePattern: '^_',
-        varsIgnorePattern: '^_',
-        caughtErrors: 'none',
-      }],
+      'no-unused-vars': [
+        'warn',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrors: 'none',
+        },
+      ],
     },
   },
 ];

@@ -6,11 +6,7 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Paper,
-  alpha,
-} from '@mui/material';
-
+import { Paper, alpha } from '@mui/material';
 
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import workflowService from '../../services/workflow.service';
@@ -689,7 +685,9 @@ export default function WorkflowAutomations() {
                     onChange={e => {
                       try {
                         updateAction(idx, 'config', JSON.parse(e.target.value));
-                      } catch (_) { /* invalid JSON, ignore */ }
+                      } catch (_) {
+                        /* invalid JSON, ignore */
+                      }
                     }}
                   />
                 </Grid>

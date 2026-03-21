@@ -3,9 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import DOMPurify from 'dompurify';
 import administrationService from '../../services/administration.service';
 
-
-
-
 import { useSnackbar } from '../../contexts/SnackbarContext';
 
 /* ═══ Helpers ════════════════════════════════════════════════════════════════ */

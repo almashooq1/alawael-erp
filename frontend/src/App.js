@@ -94,6 +94,10 @@ import {
   GPSTrackingRoutes,
   IoTRoutes,
   SSOAdminRoutes,
+  BlockchainRoutes,
+  ICFAssessmentRoutes,
+  MDTCoordinationRoutes,
+  ARRehabRoutes,
 } from './routes';
 
 // Pages — Keep eagerly loaded (critical path / small)
@@ -311,6 +315,10 @@ function AppContent() {
                               {GPSTrackingRoutes()}
                               {IoTRoutes()}
                               {SSOAdminRoutes()}
+                              {BlockchainRoutes()}
+                              {ICFAssessmentRoutes()}
+                              {MDTCoordinationRoutes()}
+                              {ARRehabRoutes()}
                               {/* === Shared / Cross-cutting Routes === */}
                               {/* AI & Analytics */}
                               <Route

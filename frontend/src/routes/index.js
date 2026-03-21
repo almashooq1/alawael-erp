@@ -79,3 +79,9 @@ export { default as WaitlistRoutes } from './WaitlistRoutes';
 export { default as GPSTrackingRoutes } from './GPSTrackingRoutes';
 export { default as IoTRoutes } from './IoTRoutes';
 export { default as SSOAdminRoutes } from './SSOAdminRoutes';
+
+// === Phase: Advanced Systems (Blockchain, ICF, MDT, AR-Rehab) ===
+export { default as BlockchainRoutes } from './BlockchainRoutes';
+export { default as ICFAssessmentRoutes } from './ICFAssessmentRoutes';
+export { default as MDTCoordinationRoutes } from './MDTCoordinationRoutes';
+export { default as ARRehabRoutes } from './ARRehabRoutes';

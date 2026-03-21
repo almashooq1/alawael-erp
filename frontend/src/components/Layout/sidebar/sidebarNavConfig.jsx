@@ -103,6 +103,11 @@ import {
   SupportAgent as HelpDeskIcon,
   Balance as LegalIcon,
   RecentActors as EmployeeAffairsIcon,
+  // ─── Phase: Advanced Systems (Blockchain, ICF, MDT, AR-Rehab) ───
+  Token as BlockchainIcon,
+  Assessment as ICFIcon,
+  GroupWork as MDTIcon,
+  ViewInAr as ARRehabIcon,
 } from '@mui/icons-material';
 
 const getNavigationItems = () => [
@@ -1059,6 +1064,35 @@ const getNavigationItems = () => [
     icon: <SSOIcon />,
     path: '/sso-admin',
     roles: ['admin', 'super_admin'],
+  },
+  // ─── أنظمة متقدمة: بلوكتشين، ICF، MDT، واقع معزز ───
+  {
+    id: 'blockchain-certificates',
+    label: 'شهادات البلوكتشين',
+    icon: <BlockchainIcon />,
+    path: '/blockchain-certificates',
+    roles: ['admin', 'super_admin'],
+  },
+  {
+    id: 'icf-assessments',
+    label: 'تقييمات ICF',
+    icon: <ICFIcon />,
+    path: '/icf-assessments',
+    roles: ['admin', 'super_admin', 'therapist', 'specialist'],
+  },
+  {
+    id: 'mdt-coordination',
+    label: 'التنسيق متعدد التخصصات',
+    icon: <MDTIcon />,
+    path: '/mdt-coordination',
+    roles: ['admin', 'super_admin', 'therapist', 'specialist', 'doctor'],
+  },
+  {
+    id: 'ar-rehab',
+    label: 'تأهيل الواقع المعزز',
+    icon: <ARRehabIcon />,
+    path: '/ar-rehab',
+    roles: ['admin', 'super_admin', 'therapist', 'specialist'],
   },
   {
     id: 'settings',

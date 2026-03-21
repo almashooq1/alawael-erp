@@ -847,6 +847,52 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
     '../routes/vendor-evaluations.real.routes'
   );
   logger.info('Vendor management mounted (2 modules: vendors, vendor-evaluations)');
+
+  // ── Phase 10: Unmounted Route Files — ملفات مسارات غير مُثبّتة ─────
+  // High priority — auth & executive
+  safeMount(app, ['/api/otp-auth', '/api/v1/otp-auth'], '../routes/otp-auth.routes');
+  safeMount(app, ['/api/executive-dashboard', '/api/v1/executive-dashboard'], '../routes/executive-dashboard');
+  safeMount(app, ['/api/executive-dashboard-enhanced', '/api/v1/executive-dashboard-enhanced'], '../routes/executive-dashboard-enhanced');
+  safeMount(app, ['/api/incidents', '/api/v1/incidents'], '../routes/incidentRoutes');
+  safeMount(app, ['/api/policies', '/api/v1/policies'], '../routes/policyRoutes');
+  safeMount(app, ['/api/fcm', '/api/v1/fcm'], '../routes/fcm');
+  safeMount(app, ['/api/cache-management', '/api/v1/cache-management'], '../routes/cache-management.routes');
+  safeMount(app, ['/api/tenants', '/api/v1/tenants'], '../routes/tenant.routes');
+  logger.info('Phase 10-A mounted (8 modules: otp-auth, executive-dashboard ×2, incidents, policies, fcm, cache-management, tenants)');
+
+  // Medium priority — analytics & AI
+  safeMount(app, ['/api/advanced-analytics', '/api/v1/advanced-analytics'], '../routes/advancedAnalytics.routes');
+  safeMount(app, ['/api/ai-recommendations', '/api/v1/ai-recommendations'], '../routes/ai.recommendations.routes');
+  safeMount(app, ['/api/ai-notifications', '/api/v1/ai-notifications'], '../routes/aiNotifications');
+  safeMount(app, ['/api/ml', '/api/v1/ml'], '../routes/ml.routes');
+  safeMount(app, ['/api/smart-gps', '/api/v1/smart-gps'], '../routes/smartGpsTracking.routes');
+  safeMount(app, ['/api/smart-notifications-engine', '/api/v1/smart-notifications-engine'], '../routes/smartNotifications.routes');
+  logger.info('Phase 10-B mounted (6 modules: advanced-analytics, ai-recommendations, ai-notifications, ml, smart-gps, smart-notifications-engine)');
+
+  // Sessions, profiles, collaboration
+  safeMount(app, ['/api/advanced-sessions', '/api/v1/advanced-sessions'], '../routes/advancedSessions');
+  safeMount(app, ['/api/employee-profiles', '/api/v1/employee-profiles'], '../routes/employeeProfile');
+  safeMount(app, ['/api/collaboration', '/api/v1/collaboration'], '../routes/realtimeCollaboration.routes');
+  safeMount(app, ['/api/community-awareness', '/api/v1/community-awareness'], '../routes/communityAwarenessRoutes');
+  logger.info('Phase 10-C mounted (4 modules: advanced-sessions, employee-profiles, collaboration, community-awareness)');
+
+  // Dashboard, integrations, utilities
+  safeMount(app, ['/api/dashboard-unified', '/api/v1/dashboard-unified'], '../routes/dashboard.routes.unified');
+  safeMount(app, ['/api/dashboard/widgets', '/api/v1/dashboard/widgets'], '../routes/dashboardWidget.routes');
+  safeMount(app, ['/api/integrations-hub', '/api/v1/integrations-hub'], '../routes/integrations.routes');
+  safeMount(app, ['/api/branch-integration', '/api/v1/branch-integration'], '../routes/branch-integration.routes');
+  logger.info('Phase 10-D mounted (4 modules: dashboard-unified, dashboard-widgets, integrations-hub, branch-integration)');
+
+  // Admin utilities & government
+  safeMount(app, ['/api/database', '/api/v1/database'], '../routes/database.routes');
+  safeMount(app, ['/api/date-converter', '/api/v1/date-converter'], '../routes/dateConverterRoutes');
+  safeMount(app, ['/api/moi-passport', '/api/v1/moi-passport'], '../routes/moi-passport.routes');
+  safeMount(app, ['/api/performance', '/api/v1/performance'], '../routes/performance');
+  safeMount(app, ['/api/system-optimization', '/api/v1/system-optimization'], '../routes/system-optimization.routes');
+  safeMount(app, ['/api/traffic-accidents/analytics', '/api/v1/traffic-accidents/analytics'], '../routes/trafficAccidentAnalytics');
+  logger.info('Phase 10-E mounted (6 modules: database, date-converter, moi-passport, performance, system-optimization, traffic-accident-analytics)');
+
+  logger.info('✅ Phase 10 complete — 28 previously unmounted route files now active');
 };
 
 module.exports = { mountAllRoutes, dualMount, safeMount };

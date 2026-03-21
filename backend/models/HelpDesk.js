@@ -60,7 +60,7 @@ const ticketSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-ticketSchema.index({ ticketNumber: 1 });
+// ticketNumber already has unique:true → index auto-created
 ticketSchema.index({ status: 1, priority: 1 });
 ticketSchema.index({ requester: 1 });
 ticketSchema.index({ assignedTo: 1 });

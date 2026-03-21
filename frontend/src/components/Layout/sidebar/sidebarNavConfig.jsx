@@ -92,6 +92,17 @@ import {
   GpsFixed as GPSTrackingIcon,
   Sensors as IoTIcon,
   VpnKey as SSOIcon,
+  // ─── Phase 10: Missing Sidebar Systems ───
+  Warehouse as WarehouseIcon,
+  LocalShipping as SupplyChainIcon,
+  HealthAndSafety as HSEIcon,
+  Warning as CrisisIcon,
+  Event as EventIcon,
+  RecordVoiceOver as PRIcon,
+  BarChart as BIDashboardIcon,
+  SupportAgent as HelpDeskIcon,
+  Balance as LegalIcon,
+  RecentActors as EmployeeAffairsIcon,
 } from '@mui/icons-material';
 
 const getNavigationItems = () => [
@@ -497,6 +508,41 @@ const getNavigationItems = () => [
     path: '/iot',
     roles: ['admin', 'super_admin', 'manager', 'operations_manager'],
   },
+  {
+    id: 'warehouse',
+    label: 'إدارة المستودعات',
+    icon: <WarehouseIcon />,
+    path: '/warehouse',
+    roles: ['admin', 'super_admin', 'manager', 'operations_manager'],
+  },
+  {
+    id: 'supply-chain',
+    label: 'سلسلة الإمداد',
+    icon: <SupplyChainIcon />,
+    path: '/supply-chain',
+    roles: ['admin', 'super_admin', 'manager', 'operations_manager'],
+  },
+  {
+    id: 'hse',
+    label: 'الصحة والسلامة (HSE)',
+    icon: <HSEIcon />,
+    path: '/hse',
+    roles: ['admin', 'super_admin', 'manager', 'operations_manager', 'hse_officer'],
+  },
+  {
+    id: 'crisis-management',
+    label: 'إدارة الأزمات',
+    icon: <CrisisIcon />,
+    path: '/crisis',
+    roles: ['admin', 'super_admin', 'manager'],
+  },
+  {
+    id: 'helpdesk',
+    label: 'الدعم الفني (HelpDesk)',
+    icon: <HelpDeskIcon />,
+    path: '/helpdesk',
+    roles: ['*'],
+  },
 
   // ═══════════════════════════════════════════════════════
   //  ⑥ التواصل والمراسلات — Communications & Messaging
@@ -551,6 +597,13 @@ const getNavigationItems = () => [
     icon: <MeetingIcon />,
     path: '/meetings',
     roles: ['*'],
+  },
+  {
+    id: 'public-relations',
+    label: 'العلاقات العامة',
+    icon: <PRIcon />,
+    path: '/public-relations',
+    roles: ['admin', 'super_admin', 'manager', 'pr_officer'],
   },
 
   // ═══════════════════════════════════════════════════════
@@ -667,6 +720,13 @@ const getNavigationItems = () => [
     icon: <ResearchIcon />,
     path: '/research',
     roles: ['admin', 'super_admin', 'manager', 'researcher'],
+  },
+  {
+    id: 'bi-dashboard',
+    label: 'لوحة BI التحليلية',
+    icon: <BIDashboardIcon />,
+    path: '/bi-dashboard',
+    roles: ['admin', 'super_admin', 'manager'],
   },
 
   // ═══════════════════════════════════════════════════════
@@ -903,6 +963,48 @@ const getNavigationItems = () => [
     icon: <FacilityRoomIcon />,
     path: '/facility-management',
     roles: ['admin', 'super_admin', 'facility_manager'],
+  },
+  {
+    id: 'legal-affairs',
+    label: 'الشؤون القانونية',
+    icon: <LegalIcon />,
+    path: '/legal-affairs',
+    roles: ['admin', 'super_admin', 'manager', 'legal_officer'],
+  },
+  {
+    id: 'events-management',
+    label: 'إدارة الفعاليات',
+    icon: <EventIcon />,
+    path: '/events',
+    roles: ['admin', 'super_admin', 'manager', 'pr_officer'],
+  },
+  {
+    id: 'employee-affairs',
+    label: 'شؤون الموظفين',
+    icon: <EmployeeAffairsIcon />,
+    path: '/employee-affairs',
+    roles: ['admin', 'super_admin', 'hr_manager'],
+  },
+  {
+    id: 'waitlist-management',
+    label: 'قائمة الانتظار',
+    icon: <WaitlistIcon />,
+    path: '/waitlist',
+    roles: ['admin', 'super_admin', 'manager', 'receptionist'],
+  },
+  {
+    id: 'mhpss',
+    label: 'الدعم النفسي (MHPSS)',
+    icon: <MHPSSIcon />,
+    path: '/mhpss',
+    roles: ['admin', 'super_admin', 'manager', 'therapist', 'social_worker'],
+  },
+  {
+    id: 'independent-living',
+    label: 'العيش المستقل',
+    icon: <IndependentLivingIcon />,
+    path: '/independent-living',
+    roles: ['admin', 'super_admin', 'manager', 'therapist'],
   },
   {
     id: 'community-integration',

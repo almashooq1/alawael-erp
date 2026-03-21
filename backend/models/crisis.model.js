@@ -316,9 +316,13 @@ const emergencyContactSchema = new Schema(
 emergencyContactSchema.index({ category: 1, priority: 1 });
 emergencyContactSchema.index({ center: 1, isActive: 1 });
 
-const EmergencyPlan = mongoose.models.EmergencyPlan || mongoose.model('EmergencyPlan', emergencyPlanSchema);
-const CrisisIncident = mongoose.models.CrisisIncident || mongoose.model('CrisisIncident', crisisIncidentSchema);
-const EmergencyDrill = mongoose.models.EmergencyDrill || mongoose.model('EmergencyDrill', emergencyDrillSchema);
-const EmergencyContact = mongoose.models.EmergencyContact || mongoose.model('EmergencyContact', emergencyContactSchema);
+const EmergencyPlan =
+  mongoose.models.EmergencyPlan || mongoose.model('EmergencyPlan', emergencyPlanSchema);
+const CrisisIncident =
+  mongoose.models.CrisisIncident || mongoose.model('CrisisIncident', crisisIncidentSchema);
+const EmergencyDrill =
+  mongoose.models.EmergencyDrill || mongoose.model('EmergencyDrill', emergencyDrillSchema);
+const EmergencyContact =
+  mongoose.models.EmergencyContact || mongoose.model('EmergencyContact', emergencyContactSchema);
 
 module.exports = { EmergencyPlan, CrisisIncident, EmergencyDrill, EmergencyContact };

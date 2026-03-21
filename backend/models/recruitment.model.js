@@ -247,7 +247,8 @@ interviewSchema.index({ application: 1, scheduledDate: 1 });
 interviewSchema.index({ status: 1, scheduledDate: 1 });
 
 const JobPosting = mongoose.models.JobPosting || mongoose.model('JobPosting', jobPostingSchema);
-const JobApplication = mongoose.models.JobApplication || mongoose.model('JobApplication', jobApplicationSchema);
+const JobApplication =
+  mongoose.models.JobApplication || mongoose.model('JobApplication', jobApplicationSchema);
 const Interview = mongoose.models.Interview || mongoose.model('Interview', interviewSchema);
 
 module.exports = { JobPosting, JobApplication, Interview, Employee };

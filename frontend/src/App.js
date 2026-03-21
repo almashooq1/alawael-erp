@@ -80,6 +80,20 @@ import {
   ReportsRoutes,
   CRMRoutes,
   OperationsRoutes,
+  MedicalFilesRoutes,
+  KitchenRoutes,
+  LaundryRoutes,
+  CommunityRoutes,
+  VolunteerRoutes,
+  MHPSSRoutes,
+  IndependentLivingRoutes,
+  ResearchRoutes,
+  ECommerceRoutes,
+  CMSRoutes,
+  WaitlistRoutes,
+  GPSTrackingRoutes,
+  IoTRoutes,
+  SSOAdminRoutes,
 } from './routes';
 
 // Pages — Keep eagerly loaded (critical path / small)
@@ -284,6 +298,20 @@ function AppContent() {
                               {ReportsRoutes()}
                               {CRMRoutes()}
                               {OperationsRoutes()}
+                              {MedicalFilesRoutes()}
+                              {KitchenRoutes()}
+                              {LaundryRoutes()}
+                              {CommunityRoutes()}
+                              {VolunteerRoutes()}
+                              {MHPSSRoutes()}
+                              {IndependentLivingRoutes()}
+                              {ResearchRoutes()}
+                              {ECommerceRoutes()}
+                              {CMSRoutes()}
+                              {WaitlistRoutes()}
+                              {GPSTrackingRoutes()}
+                              {IoTRoutes()}
+                              {SSOAdminRoutes()}
                               {/* === Shared / Cross-cutting Routes === */}
                               {/* AI & Analytics */}
                               <Route

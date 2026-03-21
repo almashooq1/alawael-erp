@@ -63,3 +63,19 @@ export { default as OrgStructureRoutes } from './OrgStructureRoutes';
 export { default as ReportsRoutes } from './ReportsRoutes';
 export { default as CRMRoutes } from './CRMRoutes';
 export { default as OperationsRoutes } from './OperationsRoutes';
+
+// === Phase: 14 Additional Systems ===
+export { default as MedicalFilesRoutes } from './MedicalFilesRoutes';
+export { default as KitchenRoutes } from './KitchenRoutes';
+export { default as LaundryRoutes } from './LaundryRoutes';
+export { default as CommunityRoutes } from './CommunityRoutes';
+export { default as VolunteerRoutes } from './VolunteerRoutes';
+export { default as MHPSSRoutes } from './MHPSSRoutes';
+export { default as IndependentLivingRoutes } from './IndependentLivingRoutes';
+export { default as ResearchRoutes } from './ResearchRoutes';
+export { default as ECommerceRoutes } from './ECommerceRoutes';
+export { default as CMSRoutes } from './CMSRoutes';
+export { default as WaitlistRoutes } from './WaitlistRoutes';
+export { default as GPSTrackingRoutes } from './GPSTrackingRoutes';
+export { default as IoTRoutes } from './IoTRoutes';
+export { default as SSOAdminRoutes } from './SSOAdminRoutes';

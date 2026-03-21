@@ -74,7 +74,10 @@ router.put('/:id', requireAuth, requireRole(['admin']), async (req, res) => {
     if (expiresAt !== undefined) update.expiresAt = expiresAt;
     if (isActive !== undefined) update.isActive = isActive;
 
-    const key = await ApiKey.findByIdAndUpdate(req.params.id, update, { new: true, runValidators: true });
+    const key = await ApiKey.findByIdAndUpdate(req.params.id, update, {
+      new: true,
+      runValidators: true,
+    });
     if (!key) return res.status(404).json({ success: false, message: 'API key not found' });
     res.json({ success: true, data: key });
   } catch (err) {

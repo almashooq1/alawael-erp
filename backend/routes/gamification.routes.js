@@ -38,7 +38,10 @@ router.post('/badges', requireAuth, requireRole(['admin']), async (req, res) => 
 /** PUT /api/gamification/badges/:id — update badge (admin) */
 router.put('/badges/:id', requireAuth, requireRole(['admin']), async (req, res) => {
   try {
-    const badge = await Badge.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    const badge = await Badge.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
     if (!badge) return res.status(404).json({ success: false, message: 'Badge not found' });
     res.json({ success: true, data: badge });
   } catch (err) {
@@ -79,7 +82,11 @@ router.get('/wallets', requireAuth, async (req, res) => {
     const { page = 1, limit = 20 } = req.query;
     const skip = (page - 1) * limit;
     const [wallets, total] = await Promise.all([
-      BeneficiaryWallet.find().populate('beneficiary', 'name fileNumber').sort({ totalPoints: -1 }).skip(skip).limit(+limit),
+      BeneficiaryWallet.find()
+        .populate('beneficiary', 'name fileNumber')
+        .sort({ totalPoints: -1 })
+        .skip(skip)
+        .limit(+limit),
       BeneficiaryWallet.countDocuments(),
     ]);
     res.json({ success: true, data: wallets, total, page: +page, pages: Math.ceil(total / limit) });
@@ -108,9 +115,15 @@ router.post('/award', requireAuth, async (req, res) => {
   try {
     const { beneficiaryId, actionType, points } = req.body;
     if (!beneficiaryId || !actionType) {
-      return res.status(400).json({ success: false, message: 'beneficiaryId and actionType required' });
+      return res
+        .status(400)
+        .json({ success: false, message: 'beneficiaryId and actionType required' });
     }
-    const result = await SmartGamificationService.awardAction(beneficiaryId, actionType, points || 10);
+    const result = await SmartGamificationService.awardAction(
+      beneficiaryId,
+      actionType,
+      points || 10
+    );
     res.json({ success: true, data: result });
   } catch (err) {
     logger.error('gamification award error:', err);

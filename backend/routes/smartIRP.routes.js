@@ -68,7 +68,10 @@ router.post('/', requireAuth, async (req, res) => {
 /** PUT /api/smart-irp/:id — update IRP metadata */
 router.put('/:id', requireAuth, async (req, res) => {
   try {
-    const irp = await SmartIRP.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    const irp = await SmartIRP.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
     if (!irp) return res.status(404).json({ success: false, message: 'IRP not found' });
     res.json({ success: true, data: irp });
   } catch (err) {
@@ -80,7 +83,11 @@ router.put('/:id', requireAuth, async (req, res) => {
 /** DELETE /api/smart-irp/:id — archive IRP */
 router.delete('/:id', requireAuth, requireRole(['admin', 'manager']), async (req, res) => {
   try {
-    const irp = await SmartIRP.findByIdAndUpdate(req.params.id, { status: 'archived' }, { new: true });
+    const irp = await SmartIRP.findByIdAndUpdate(
+      req.params.id,
+      { status: 'archived' },
+      { new: true }
+    );
     if (!irp) return res.status(404).json({ success: false, message: 'IRP not found' });
     res.json({ success: true, message: 'IRP archived', data: irp });
   } catch (err) {
@@ -105,7 +112,12 @@ router.post('/:id/goals', requireAuth, async (req, res) => {
 /** PUT /api/smart-irp/:id/goals/:goalId/progress — update goal progress */
 router.put('/:id/goals/:goalId/progress', requireAuth, async (req, res) => {
   try {
-    const irp = await SmartIRPService.updateGoalProgress(req.params.id, req.params.goalId, req.body, req.user._id);
+    const irp = await SmartIRPService.updateGoalProgress(
+      req.params.id,
+      req.params.goalId,
+      req.body,
+      req.user._id
+    );
     res.json({ success: true, data: irp });
   } catch (err) {
     logger.error('smart-irp goal-progress error:', err);
@@ -162,15 +174,20 @@ router.get('/:id/family-report', requireAuth, async (req, res) => {
 });
 
 /** POST /api/smart-irp/:id/auto-review — trigger automatic review */
-router.post('/:id/auto-review', requireAuth, requireRole(['admin', 'manager']), async (req, res) => {
-  try {
-    const irp = await SmartIRPService.performAutoReview(req.params.id);
-    res.json({ success: true, data: irp });
-  } catch (err) {
-    logger.error('smart-irp auto-review error:', err);
-    res.status(500).json({ success: false, message: err.message });
+router.post(
+  '/:id/auto-review',
+  requireAuth,
+  requireRole(['admin', 'manager']),
+  async (req, res) => {
+    try {
+      const irp = await SmartIRPService.performAutoReview(req.params.id);
+      res.json({ success: true, data: irp });
+    } catch (err) {
+      logger.error('smart-irp auto-review error:', err);
+      res.status(500).json({ success: false, message: err.message });
+    }
   }
-});
+);
 
 /** POST /api/smart-irp/scheduled-reviews — run all scheduled reviews (admin) */
 router.post('/scheduled-reviews', requireAuth, requireRole(['admin']), async (req, res) => {

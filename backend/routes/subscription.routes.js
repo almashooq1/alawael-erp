@@ -54,7 +54,10 @@ router.post('/plans', requireAuth, requireRole(['admin']), async (req, res) => {
 /** PUT /api/subscriptions/plans/:id — update plan (admin) */
 router.put('/plans/:id', requireAuth, requireRole(['admin']), async (req, res) => {
   try {
-    const plan = await SubscriptionPlan.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    const plan = await SubscriptionPlan.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
     if (!plan) return res.status(404).json({ success: false, message: 'Plan not found' });
     res.json({ success: true, data: plan });
   } catch (err) {
@@ -66,9 +69,14 @@ router.put('/plans/:id', requireAuth, requireRole(['admin']), async (req, res) =
 /** DELETE /api/subscriptions/plans/:id — delete plan (admin) */
 router.delete('/plans/:id', requireAuth, requireRole(['admin']), async (req, res) => {
   try {
-    const activeUsers = await UserSubscription.countDocuments({ planId: req.params.id, status: 'active' });
+    const activeUsers = await UserSubscription.countDocuments({
+      planId: req.params.id,
+      status: 'active',
+    });
     if (activeUsers > 0) {
-      return res.status(400).json({ success: false, message: `Cannot delete: ${activeUsers} active subscribers` });
+      return res
+        .status(400)
+        .json({ success: false, message: `Cannot delete: ${activeUsers} active subscribers` });
     }
     const plan = await SubscriptionPlan.findByIdAndDelete(req.params.id);
     if (!plan) return res.status(404).json({ success: false, message: 'Plan not found' });
@@ -93,7 +101,12 @@ router.get('/', requireAuth, async (req, res) => {
     if (status) filter.status = status;
 
     const [subs, total] = await Promise.all([
-      UserSubscription.find(filter).populate('planId', 'name price').populate('userId', 'name email').sort({ createdAt: -1 }).skip(skip).limit(+limit),
+      UserSubscription.find(filter)
+        .populate('planId', 'name price')
+        .populate('userId', 'name email')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(+limit),
       UserSubscription.countDocuments(filter),
     ]);
     res.json({ success: true, data: subs, total, page: +page, pages: Math.ceil(total / limit) });
@@ -106,7 +119,9 @@ router.get('/', requireAuth, async (req, res) => {
 /** GET /api/subscriptions/my — get current user subscription */
 router.get('/my', requireAuth, async (req, res) => {
   try {
-    const sub = await UserSubscription.findOne({ userId: req.user._id, status: 'active' }).populate('planId');
+    const sub = await UserSubscription.findOne({ userId: req.user._id, status: 'active' }).populate(
+      'planId'
+    );
     res.json({ success: true, data: sub });
   } catch (err) {
     logger.error('my subscription error:', err);
@@ -120,11 +135,15 @@ router.post('/', requireAuth, async (req, res) => {
     const { planId, subscriptionType = 'monthly', paymentMethod } = req.body;
     const plan = await SubscriptionPlan.findById(planId);
     if (!plan) return res.status(404).json({ success: false, message: 'Plan not found' });
-    if (!plan.isActive) return res.status(400).json({ success: false, message: 'Plan is not active' });
+    if (!plan.isActive)
+      return res.status(400).json({ success: false, message: 'Plan is not active' });
 
     // Check for existing active subscription
     const existing = await UserSubscription.findOne({ userId: req.user._id, status: 'active' });
-    if (existing) return res.status(400).json({ success: false, message: 'Already subscribed. Cancel or upgrade first.' });
+    if (existing)
+      return res
+        .status(400)
+        .json({ success: false, message: 'Already subscribed. Cancel or upgrade first.' });
 
     const price = subscriptionType === 'annual' ? plan.price.annual : plan.price.monthly;
     const startDate = new Date();
@@ -202,7 +221,14 @@ router.get('/stats', requireAuth, requireRole(['admin']), async (req, res) => {
       UserSubscription.aggregate([
         { $match: { status: 'active' } },
         { $group: { _id: '$planId', count: { $sum: 1 } } },
-        { $lookup: { from: 'subscriptionplans', localField: '_id', foreignField: '_id', as: 'plan' } },
+        {
+          $lookup: {
+            from: 'subscriptionplans',
+            localField: '_id',
+            foreignField: '_id',
+            as: 'plan',
+          },
+        },
         { $unwind: { path: '$plan', preserveNullAndEmptyArrays: true } },
         { $project: { planName: '$plan.name', count: 1 } },
       ]),

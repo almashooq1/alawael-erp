@@ -208,7 +208,9 @@ describe('🏥 DisabilityAssessment Model — Enhanced Features', () => {
 
     test('should have getActivitiesParticipationSummary method', () => {
       if (!DisabilityAssessment?.schema) return;
-      expect(typeof DisabilityAssessment.schema.methods.getActivitiesParticipationSummary).toBe('function');
+      expect(typeof DisabilityAssessment.schema.methods.getActivitiesParticipationSummary).toBe(
+        'function'
+      );
     });
 
     test('should have getSelfCareIndependence method', () => {
@@ -223,7 +225,9 @@ describe('🏥 DisabilityAssessment Model — Enhanced Features', () => {
 
     test('should have generateComprehensiveProfile method', () => {
       if (!DisabilityAssessment?.schema) return;
-      expect(typeof DisabilityAssessment.schema.methods.generateComprehensiveProfile).toBe('function');
+      expect(typeof DisabilityAssessment.schema.methods.generateComprehensiveProfile).toBe(
+        'function'
+      );
     });
 
     test('getICFBodyFunctionSummary should return summary object', () => {
@@ -247,7 +251,9 @@ describe('🏥 DisabilityAssessment Model — Enhanced Features', () => {
         expect(summary).toBeDefined();
         expect(typeof summary).toBe('object');
       } catch {
-        expect(typeof DisabilityAssessment.schema.methods?.getICFBodyFunctionSummary).toBe('function');
+        expect(typeof DisabilityAssessment.schema.methods?.getICFBodyFunctionSummary).toBe(
+          'function'
+        );
       }
     });
 
@@ -257,14 +263,19 @@ describe('🏥 DisabilityAssessment Model — Enhanced Features', () => {
         const doc = new DisabilityAssessment({
           beneficiary: '507f1f77bcf86cd799439011',
           functional_abilities: {
-            self_care: { level: 3, details: { bathing: 2, dressing: 3, grooming: 4, toileting: 2 } },
+            self_care: {
+              level: 3,
+              details: { bathing: 2, dressing: 3, grooming: 4, toileting: 2 },
+            },
           },
         });
         const result = doc.getSelfCareIndependence();
         expect(result).toBeDefined();
         expect(typeof result).toBe('object');
       } catch {
-        expect(typeof DisabilityAssessment.schema.methods?.getSelfCareIndependence).toBe('function');
+        expect(typeof DisabilityAssessment.schema.methods?.getSelfCareIndependence).toBe(
+          'function'
+        );
       }
     });
 
@@ -324,7 +335,9 @@ describe('🏥 DisabilityAssessment Model — Enhanced Features', () => {
         expect(profile).toBeDefined();
         expect(typeof profile).toBe('object');
       } catch {
-        expect(typeof DisabilityAssessment.schema.methods?.generateComprehensiveProfile).toBe('function');
+        expect(typeof DisabilityAssessment.schema.methods?.generateComprehensiveProfile).toBe(
+          'function'
+        );
       }
     });
   });
@@ -366,8 +379,10 @@ describe('🏥 DisabilityAssessment Model — Enhanced Features', () => {
   describe('Pre-save Hook', () => {
     test('should have pre-save middleware registered', () => {
       if (!DisabilityAssessment?.schema) return;
-      const preSave = DisabilityAssessment.schema.s?.hooks?._pres?.get?.('save') ||
-        DisabilityAssessment.schema._hooks?.save?.pre || [];
+      const preSave =
+        DisabilityAssessment.schema.s?.hooks?._pres?.get?.('save') ||
+        DisabilityAssessment.schema._hooks?.save?.pre ||
+        [];
       // Just validate the model has hooks — Mongoose internals vary
       expect(DisabilityAssessment.schema).toBeDefined();
     });
@@ -543,7 +558,7 @@ describe('🏠 ADLAssessment Model — Enhanced Features', () => {
       if (!ADLAssessment?.schema) return;
       const hasStatic =
         typeof ADLAssessment.getADLStatistics === 'function' ||
-        typeof (ADLAssessment.schema.statics?.getADLStatistics) === 'function';
+        typeof ADLAssessment.schema.statics?.getADLStatistics === 'function';
       expect(hasStatic).toBe(true);
     });
 
@@ -551,7 +566,7 @@ describe('🏠 ADLAssessment Model — Enhanced Features', () => {
       if (!ADLAssessment?.schema) return;
       const hasStatic =
         typeof ADLAssessment.getBeneficiaryADLProgress === 'function' ||
-        typeof (ADLAssessment.schema.statics?.getBeneficiaryADLProgress) === 'function';
+        typeof ADLAssessment.schema.statics?.getBeneficiaryADLProgress === 'function';
       expect(hasStatic).toBe(true);
     });
   });
@@ -663,9 +678,7 @@ describe('🌐 Disability Assessment Routes — New Endpoints', () => {
   describe('GET /api/disability/adl/:beneficiaryId', () => {
     test('should return ADL assessments for beneficiary', async () => {
       if (skipIf) return;
-      const res = await request(app).get(
-        '/api/disability/adl/507f1f77bcf86cd799439011'
-      );
+      const res = await request(app).get('/api/disability/adl/507f1f77bcf86cd799439011');
       expect([200, 404, 500]).toContain(res.status);
     });
   });
@@ -690,9 +703,7 @@ describe('🌐 Disability Assessment Routes — New Endpoints', () => {
   describe('GET /api/disability/adl/:beneficiaryId/progress', () => {
     test('should return ADL progress data', async () => {
       if (skipIf) return;
-      const res = await request(app).get(
-        '/api/disability/adl/507f1f77bcf86cd799439011/progress'
-      );
+      const res = await request(app).get('/api/disability/adl/507f1f77bcf86cd799439011/progress');
       expect([200, 404, 500]).toContain(res.status);
     });
   });
@@ -1155,8 +1166,20 @@ function buildDisabilityScales() {
       interpretation: [
         { min: 0, max: 25, level: 'totalDependence', label: 'اعتماد كلي', color: '#c62828' },
         { min: 26, max: 50, level: 'highDependence', label: 'اعتماد مرتفع', color: '#e65100' },
-        { min: 51, max: 75, level: 'moderateIndependence', label: 'استقلالية متوسطة', color: '#f9a825' },
-        { min: 76, max: 90, level: 'highIndependence', label: 'استقلالية مرتفعة', color: '#66bb6a' },
+        {
+          min: 51,
+          max: 75,
+          level: 'moderateIndependence',
+          label: 'استقلالية متوسطة',
+          color: '#f9a825',
+        },
+        {
+          min: 76,
+          max: 90,
+          level: 'highIndependence',
+          label: 'استقلالية مرتفعة',
+          color: '#66bb6a',
+        },
         { min: 91, max: 100, level: 'fullIndependence', label: 'كاملة', color: '#2e7d32' },
       ],
     },

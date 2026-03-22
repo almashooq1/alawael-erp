@@ -268,7 +268,8 @@ adlAssessmentSchema.virtual('skillDistribution').get(function () {
     ...(this.communicationSkills || []),
     ...(this.safetySkills || []),
   ];
-  if (!allSkills.length) return { independent: 0, supervision: 0, partialAssist: 0, fullAssist: 0, unable: 0 };
+  if (!allSkills.length)
+    return { independent: 0, supervision: 0, partialAssist: 0, fullAssist: 0, unable: 0 };
 
   return {
     independent: allSkills.filter(s => s.rating === 5).length,
@@ -302,7 +303,16 @@ adlAssessmentSchema.virtual('improvementAreas').get(function () {
 adlAssessmentSchema.methods.getProgressFromPrevious = function (previousAssessment) {
   if (!previousAssessment) return null;
 
-  const categories = ['cooking', 'cleaning', 'shopping', 'transportation', 'personal_care', 'money_management', 'communication', 'safety'];
+  const categories = [
+    'cooking',
+    'cleaning',
+    'shopping',
+    'transportation',
+    'personal_care',
+    'money_management',
+    'communication',
+    'safety',
+  ];
   const categoryChanges = categories.map(cat => ({
     category: cat,
     current: this.categoryScores?.[cat] || 0,
@@ -319,9 +329,12 @@ adlAssessmentSchema.methods.getProgressFromPrevious = function (previousAssessme
     categoryChanges,
     improvedCategories: categoryChanges.filter(c => c.change > 0),
     declinedCategories: categoryChanges.filter(c => c.change < 0),
-    daysBetween: this.assessmentDate && previousAssessment.assessmentDate
-      ? Math.ceil((this.assessmentDate - previousAssessment.assessmentDate) / (1000 * 60 * 60 * 24))
-      : null,
+    daysBetween:
+      this.assessmentDate && previousAssessment.assessmentDate
+        ? Math.ceil(
+            (this.assessmentDate - previousAssessment.assessmentDate) / (1000 * 60 * 60 * 24)
+          )
+        : null,
   };
 };
 
@@ -347,7 +360,9 @@ adlAssessmentSchema.methods.generateADLReport = function () {
     improvementAreas: improvements,
     priorityAreas: this.priorityAreas,
     recommendations: this.recommendations,
-    independencePercentage: dist.total ? Math.round(((dist.independent + dist.supervision) / dist.total) * 100) : 0,
+    independencePercentage: dist.total
+      ? Math.round(((dist.independent + dist.supervision) / dist.total) * 100)
+      : 0,
   };
 };
 
@@ -378,20 +393,22 @@ adlAssessmentSchema.statics.getADLStatistics = async function () {
   const [total, byType, avgScores, byLevel] = await Promise.all([
     this.countDocuments(),
     this.aggregate([{ $group: { _id: '$assessmentType', count: { $sum: 1 } } }]),
-    this.aggregate([{
-      $group: {
-        _id: null,
-        avgOverall: { $avg: '$overallScore' },
-        avgCooking: { $avg: '$categoryScores.cooking' },
-        avgCleaning: { $avg: '$categoryScores.cleaning' },
-        avgShopping: { $avg: '$categoryScores.shopping' },
-        avgTransportation: { $avg: '$categoryScores.transportation' },
-        avgPersonalCare: { $avg: '$categoryScores.personal_care' },
-        avgMoneyManagement: { $avg: '$categoryScores.money_management' },
-        avgCommunication: { $avg: '$categoryScores.communication' },
-        avgSafety: { $avg: '$categoryScores.safety' },
+    this.aggregate([
+      {
+        $group: {
+          _id: null,
+          avgOverall: { $avg: '$overallScore' },
+          avgCooking: { $avg: '$categoryScores.cooking' },
+          avgCleaning: { $avg: '$categoryScores.cleaning' },
+          avgShopping: { $avg: '$categoryScores.shopping' },
+          avgTransportation: { $avg: '$categoryScores.transportation' },
+          avgPersonalCare: { $avg: '$categoryScores.personal_care' },
+          avgMoneyManagement: { $avg: '$categoryScores.money_management' },
+          avgCommunication: { $avg: '$categoryScores.communication' },
+          avgSafety: { $avg: '$categoryScores.safety' },
+        },
       },
-    }]),
+    ]),
     this.aggregate([{ $group: { _id: '$independenceLevel', count: { $sum: 1 } } }]),
   ]);
 
@@ -430,8 +447,16 @@ adlAssessmentSchema.statics.getBeneficiaryADLProgress = async function (benefici
     assessmentCount: assessments.length,
     trend: change > 5 ? 'improving' : change < -5 ? 'declining' : 'stable',
     overallChange: change,
-    firstAssessment: { date: first.assessmentDate, score: first.overallScore, level: first.independenceLevel },
-    lastAssessment: { date: last.assessmentDate, score: last.overallScore, level: last.independenceLevel },
+    firstAssessment: {
+      date: first.assessmentDate,
+      score: first.overallScore,
+      level: first.independenceLevel,
+    },
+    lastAssessment: {
+      date: last.assessmentDate,
+      score: last.overallScore,
+      level: last.independenceLevel,
+    },
     assessments: assessments.map(a => ({
       date: a.assessmentDate,
       type: a.assessmentType,

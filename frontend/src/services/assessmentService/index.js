@@ -439,9 +439,7 @@ const assessmentService = {
 
   async getSelfCareIndependence(beneficiaryId) {
     try {
-      const response = await apiClient.get(
-        `/disability/assessment/self-care/${beneficiaryId}`
-      );
+      const response = await apiClient.get(`/disability/assessment/self-care/${beneficiaryId}`);
       return response;
     } catch (err) {
       logger.warn('Self-care independence API error:', err?.message);
@@ -453,9 +451,7 @@ const assessmentService = {
 
   async getICFSummary(beneficiaryId) {
     try {
-      const response = await apiClient.get(
-        `/disability/assessment/icf-summary/${beneficiaryId}`
-      );
+      const response = await apiClient.get(`/disability/assessment/icf-summary/${beneficiaryId}`);
       return response;
     } catch (err) {
       logger.warn('ICF summary API error:', err?.message);
@@ -467,9 +463,7 @@ const assessmentService = {
 
   async getRiskAnalysis(beneficiaryId) {
     try {
-      const response = await apiClient.get(
-        `/disability/assessment/risk-analysis/${beneficiaryId}`
-      );
+      const response = await apiClient.get(`/disability/assessment/risk-analysis/${beneficiaryId}`);
       return response;
     } catch (err) {
       logger.warn('Risk analysis API error:', err?.message);
@@ -580,18 +574,28 @@ const assessmentService = {
 
   getDisabilityScales() {
     const disabilityScaleIds = [
-      'barthelIndex', 'whodas2', 'gmfcs', 'vinelandAdaptive',
-      'scim', 'functionalIndependence', 'sensoryProfile', 'assistiveTech',
+      'barthelIndex',
+      'whodas2',
+      'gmfcs',
+      'vinelandAdaptive',
+      'scim',
+      'functionalIndependence',
+      'sensoryProfile',
+      'assistiveTech',
     ];
     return ASSESSMENT_SCALES.filter(s => disabilityScaleIds.includes(s.id));
   },
 
   getDisabilityTests() {
     const disabilityTestIds = [
-      'motorDisabilityAssessment', 'visualDisabilityAssessment',
-      'hearingDisabilityAssessment', 'intellectualDisabilityAssessment',
-      'autismFunctionalAssessment', 'cerebralPalsyAssessment',
-      'vocationalRehabAssessment', 'disabilityQoLAssessment',
+      'motorDisabilityAssessment',
+      'visualDisabilityAssessment',
+      'hearingDisabilityAssessment',
+      'intellectualDisabilityAssessment',
+      'autismFunctionalAssessment',
+      'cerebralPalsyAssessment',
+      'vocationalRehabAssessment',
+      'disabilityQoLAssessment',
     ];
     return ASSESSMENT_TESTS.filter(t => disabilityTestIds.includes(t.id));
   },

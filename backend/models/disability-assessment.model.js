@@ -475,7 +475,10 @@ disabilityAssessmentSchema.virtual('functionalIndependenceIndex').get(function (
 
   // Communication
   if (fa.communication) {
-    const cItems = [fa.communication.understanding?.level, fa.communication.expression?.level].filter(v => v != null);
+    const cItems = [
+      fa.communication.understanding?.level,
+      fa.communication.expression?.level,
+    ].filter(v => v != null);
     if (cItems.length) scores.push((cItems.reduce((a, b) => a + b, 0) / cItems.length) * 20);
   }
 
@@ -539,7 +542,8 @@ disabilityAssessmentSchema.methods.getICFBodyFunctionSummary = function () {
   const domains = Object.entries(bf)
     .filter(([, v]) => v?.score != null)
     .map(([key, v]) => ({ domain: key, score: v.score, remarks: v.remarks || '' }));
-  if (!domains.length) return { domains, averageScore: 0, weakestDomain: null, strongestDomain: null };
+  if (!domains.length)
+    return { domains, averageScore: 0, weakestDomain: null, strongestDomain: null };
   const avg = Math.round(domains.reduce((s, d) => s + d.score, 0) / domains.length);
   const sorted = [...domains].sort((a, b) => a.score - b.score);
   return {
@@ -562,7 +566,9 @@ disabilityAssessmentSchema.methods.getActivitiesParticipationSummary = function 
     severeDifficulties: domains.filter(d => d.difficulty === 'severe'),
     mildDifficulties: domains.filter(d => d.difficulty === 'mild'),
     moderateDifficulties: domains.filter(d => d.difficulty === 'moderate'),
-    averageScore: domains.length ? Math.round(domains.reduce((s, d) => s + d.score, 0) / domains.length) : 0,
+    averageScore: domains.length
+      ? Math.round(domains.reduce((s, d) => s + d.score, 0) / domains.length)
+      : 0,
   };
 };
 
@@ -626,7 +632,13 @@ disabilityAssessmentSchema.methods.calculateRehabPriority = function () {
   else if (priorityScore >= 120) label = 'عالية';
   else if (priorityScore >= 80) label = 'متوسطة';
 
-  return { priorityScore: Math.round(priorityScore), label, isReady, riskLevel, compositeScore: composite };
+  return {
+    priorityScore: Math.round(priorityScore),
+    label,
+    isReady,
+    riskLevel,
+    compositeScore: composite,
+  };
 };
 
 // ── Method: generate comprehensive profile ──
@@ -644,17 +656,23 @@ disabilityAssessmentSchema.methods.generateComprehensiveProfile = function () {
       total: this.assistive_devices?.length || 0,
       needsReplacement: (this.assistive_devices || []).filter(d => d.needs_replacement).length,
       avgEffectiveness: this.assistive_devices?.length
-        ? Math.round(this.assistive_devices.reduce((s, d) => s + (d.effectiveness || 0), 0) / this.assistive_devices.length)
+        ? Math.round(
+            this.assistive_devices.reduce((s, d) => s + (d.effectiveness || 0), 0) /
+              this.assistive_devices.length
+          )
         : 0,
     },
     pendingRecommendations: (this.recommendations || []).filter(r => r.status === 'pending').length,
-    completedRecommendations: (this.recommendations || []).filter(r => r.status === 'completed').length,
+    completedRecommendations: (this.recommendations || []).filter(r => r.status === 'completed')
+      .length,
   };
 };
 
 // ── Static: get assessments by risk level ──
 disabilityAssessmentSchema.statics.getByRiskLevel = async function (riskLevel) {
-  const assessments = await this.find({ assessment_status: { $in: ['active', 'completed'] } }).lean();
+  const assessments = await this.find({
+    assessment_status: { $in: ['active', 'completed'] },
+  }).lean();
   // Filter by computed risk level
   return assessments.filter(a => {
     const highCount = (a.risk_factors || []).filter(r => r.severity === 'high').length;
@@ -671,16 +689,20 @@ disabilityAssessmentSchema.statics.getByRiskLevel = async function (riskLevel) {
 disabilityAssessmentSchema.statics.getDisabilityDistribution = async function () {
   const [byType, bySeverity, byStatus, byProgression] = await Promise.all([
     this.aggregate([
-      { $group: { _id: '$disability_profile.type', count: { $sum: 1 }, avgAge: { $avg: { $subtract: [new Date().getFullYear(), { $year: '$date_of_birth' }] } } } },
+      {
+        $group: {
+          _id: '$disability_profile.type',
+          count: { $sum: 1 },
+          avgAge: { $avg: { $subtract: [new Date().getFullYear(), { $year: '$date_of_birth' }] } },
+        },
+      },
       { $sort: { count: -1 } },
     ]),
     this.aggregate([
       { $group: { _id: '$disability_profile.severity', count: { $sum: 1 } } },
       { $sort: { count: -1 } },
     ]),
-    this.aggregate([
-      { $group: { _id: '$assessment_status', count: { $sum: 1 } } },
-    ]),
+    this.aggregate([{ $group: { _id: '$assessment_status', count: { $sum: 1 } } }]),
     this.aggregate([
       { $group: { _id: '$disability_profile.progression_status', count: { $sum: 1 } } },
     ]),
@@ -691,23 +713,39 @@ disabilityAssessmentSchema.statics.getDisabilityDistribution = async function ()
 // ── Static: get functional abilities summary across all beneficiaries ──
 disabilityAssessmentSchema.statics.getFunctionalAbilitiesSummary = async function () {
   const assessments = await this.find({
-    'functional_abilities': { $exists: true },
+    functional_abilities: { $exists: true },
     assessment_status: { $in: ['active', 'completed'] },
   }).lean();
 
   if (!assessments.length) return { count: 0, domains: {} };
 
-  const domainTotals = { mobility: [], self_care: [], communication: [], cognitive: [], social_emotional: [] };
+  const domainTotals = {
+    mobility: [],
+    self_care: [],
+    communication: [],
+    cognitive: [],
+    social_emotional: [],
+  };
 
   assessments.forEach(a => {
     const fa = a.functional_abilities;
-    if (fa?.mobility?.endurance_level != null) domainTotals.mobility.push(fa.mobility.endurance_level);
+    if (fa?.mobility?.endurance_level != null)
+      domainTotals.mobility.push(fa.mobility.endurance_level);
     if (fa?.self_care) {
-      const levels = [fa.self_care.feeding?.level, fa.self_care.toileting?.level, fa.self_care.bathing?.level, fa.self_care.dressing?.level, fa.self_care.grooming?.level].filter(v => v != null);
-      if (levels.length) domainTotals.self_care.push((levels.reduce((a, b) => a + b, 0) / levels.length) * 20);
+      const levels = [
+        fa.self_care.feeding?.level,
+        fa.self_care.toileting?.level,
+        fa.self_care.bathing?.level,
+        fa.self_care.dressing?.level,
+        fa.self_care.grooming?.level,
+      ].filter(v => v != null);
+      if (levels.length)
+        domainTotals.self_care.push((levels.reduce((a, b) => a + b, 0) / levels.length) * 20);
     }
-    if (fa?.cognitive?.problem_solving != null) domainTotals.cognitive.push(fa.cognitive.problem_solving);
-    if (fa?.social_emotional?.social_interaction != null) domainTotals.social_emotional.push(fa.social_emotional.social_interaction);
+    if (fa?.cognitive?.problem_solving != null)
+      domainTotals.cognitive.push(fa.cognitive.problem_solving);
+    if (fa?.social_emotional?.social_interaction != null)
+      domainTotals.social_emotional.push(fa.social_emotional.social_interaction);
   });
 
   const domains = {};
@@ -726,7 +764,7 @@ disabilityAssessmentSchema.statics.getFunctionalAbilitiesSummary = async functio
 // ── Static: get rehabilitation readiness overview ──
 disabilityAssessmentSchema.statics.getRehabReadinessOverview = async function () {
   const assessments = await this.find({
-    'rehabilitation_readiness': { $exists: true },
+    rehabilitation_readiness: { $exists: true },
     assessment_status: { $in: ['active', 'completed'] },
   }).lean();
 
@@ -755,13 +793,13 @@ disabilityAssessmentSchema.statics.getRehabReadinessOverview = async function ()
 disabilityAssessmentSchema.pre('save', function (next) {
   const r = this.rehabilitation_readiness;
   if (r && r.motivation_score != null && r.cognitive_capacity != null) {
-    const avg = (
-      (r.motivation_score || 0) +
-      (r.cognitive_capacity || 0) +
-      (r.physical_capacity || 0) +
-      (r.family_support || 0) +
-      (r.resource_availability || 0)
-    ) / 5;
+    const avg =
+      ((r.motivation_score || 0) +
+        (r.cognitive_capacity || 0) +
+        (r.physical_capacity || 0) +
+        (r.family_support || 0) +
+        (r.resource_availability || 0)) /
+      5;
 
     if (avg >= 70) r.overall_readiness = 'high';
     else if (avg >= 40) r.overall_readiness = 'moderate';

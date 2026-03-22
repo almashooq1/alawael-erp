@@ -98,6 +98,13 @@ const {
 } = require('./api/versionRouter');
 const { mountAllDomains, healthCheckAll: domainHealthCheck } = require('./domains/index');
 
+// ─── Integration Layer (cross-module event-driven architecture) ──────────────
+const { integrationBus, mountIntegrationBusRoutes } = require('./integration/systemIntegrationBus');
+const { moduleConnector, mountModuleConnectorRoutes } = require('./integration/moduleConnector');
+const { createIntegrationContextMiddleware, mountIntegrationContextRoutes } = require('./middleware/integrationContext.middleware');
+const { initializeCrossModuleSubscribers } = require('./integration/crossModuleSubscribers');
+const { ALL_CONTRACTS } = require('./events/contracts/domainEventContracts');
+
 // ─── Create Express App ──────────────────────────────────────────────────────
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -375,6 +382,9 @@ app.get('/api/info', (req, res) => {
 // Serve static files
 app.use(express.static('public'));
 
+// ─── Integration Context Middleware (distributed tracing) ────────────────────
+app.use(createIntegrationContextMiddleware({ integrationBus, serviceName: 'alawael-erp' }));
+
 // ─── Route Mounting (centralised in routes/_registry.js) ─────────────────────
 mountAllRoutes(app, { authRateLimiter });
 
@@ -397,6 +407,43 @@ app.get('/api/v2/domains/health', async (_req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 });
+
+// ─── Integration Bus Initialization (cross-module event-driven architecture) ─
+try {
+  // Initialize the integration bus with existing infrastructure singletons
+  const { eventStore } = require('./infrastructure/eventStore');
+  const { getMessageQueue } = require('./infrastructure/messageQueue');
+  const socketEmitter = (() => {
+    try { return require('./utils/socketEmitter'); } catch { return null; }
+  })();
+
+  integrationBus.initialize({
+    eventStore,
+    messageQueue: getMessageQueue(),
+    socketEmitter,
+  });
+
+  // Register all domain event contracts
+  for (const [domain, contracts] of Object.entries(ALL_CONTRACTS)) {
+    const events = Object.values(contracts).map(c => c.eventType);
+    integrationBus.registerDomain(domain, { version: '1.0.0', events });
+  }
+
+  // Initialize the module connector
+  moduleConnector.initialize({ integrationBus });
+
+  // Wire cross-module subscribers
+  initializeCrossModuleSubscribers(integrationBus, moduleConnector);
+
+  // Mount integration API routes
+  mountIntegrationBusRoutes(app);
+  mountModuleConnectorRoutes(app);
+  mountIntegrationContextRoutes(app);
+
+  logger.info('[Integration] ✓ System integration bus initialized successfully');
+} catch (err) {
+  logger.warn('[Integration] Integration bus initialization skipped:', err.message);
+}
 
 // Root endpoint
 app.get('/', (req, res) => {

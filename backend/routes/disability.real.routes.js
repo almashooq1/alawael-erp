@@ -497,8 +497,9 @@ router.get('/assessment/comprehensive-profile/:beneficiaryId', async (req, res) 
     const { beneficiaryId } = req.params;
     const DisabilityAssessment = require('../models/disability-assessment.model');
 
-    const assessment = await DisabilityAssessment.findOne({ beneficiary_id: beneficiaryId })
-      .sort({ createdAt: -1 });
+    const assessment = await DisabilityAssessment.findOne({ beneficiary_id: beneficiaryId }).sort({
+      createdAt: -1,
+    });
 
     if (!assessment) {
       return res.status(404).json({ success: false, message: 'لا يوجد تقييم لهذا المستفيد' });
@@ -518,8 +519,9 @@ router.get('/assessment/rehab-priority/:beneficiaryId', async (req, res) => {
     const { beneficiaryId } = req.params;
     const DisabilityAssessment = require('../models/disability-assessment.model');
 
-    const assessment = await DisabilityAssessment.findOne({ beneficiary_id: beneficiaryId })
-      .sort({ createdAt: -1 });
+    const assessment = await DisabilityAssessment.findOne({ beneficiary_id: beneficiaryId }).sort({
+      createdAt: -1,
+    });
 
     if (!assessment) {
       return res.status(404).json({ success: false, message: 'لا يوجد تقييم لهذا المستفيد' });
@@ -539,8 +541,9 @@ router.get('/assessment/self-care/:beneficiaryId', async (req, res) => {
     const { beneficiaryId } = req.params;
     const DisabilityAssessment = require('../models/disability-assessment.model');
 
-    const assessment = await DisabilityAssessment.findOne({ beneficiary_id: beneficiaryId })
-      .sort({ createdAt: -1 });
+    const assessment = await DisabilityAssessment.findOne({ beneficiary_id: beneficiaryId }).sort({
+      createdAt: -1,
+    });
 
     if (!assessment) {
       return res.status(404).json({ success: false, message: 'لا يوجد تقييم' });
@@ -560,8 +563,9 @@ router.get('/assessment/icf-summary/:beneficiaryId', async (req, res) => {
     const { beneficiaryId } = req.params;
     const DisabilityAssessment = require('../models/disability-assessment.model');
 
-    const assessment = await DisabilityAssessment.findOne({ beneficiary_id: beneficiaryId })
-      .sort({ createdAt: -1 });
+    const assessment = await DisabilityAssessment.findOne({ beneficiary_id: beneficiaryId }).sort({
+      createdAt: -1,
+    });
 
     if (!assessment) {
       return res.status(404).json({ success: false, message: 'لا يوجد تقييم' });
@@ -582,8 +586,9 @@ router.get('/assessment/risk-analysis/:beneficiaryId', async (req, res) => {
     const { beneficiaryId } = req.params;
     const DisabilityAssessment = require('../models/disability-assessment.model');
 
-    const assessment = await DisabilityAssessment.findOne({ beneficiary_id: beneficiaryId })
-      .sort({ createdAt: -1 });
+    const assessment = await DisabilityAssessment.findOne({ beneficiary_id: beneficiaryId }).sort({
+      createdAt: -1,
+    });
 
     if (!assessment) {
       return res.status(404).json({ success: false, message: 'لا يوجد تقييم' });
@@ -598,7 +603,9 @@ router.get('/assessment/risk-analysis/:beneficiaryId', async (req, res) => {
         riskCount: (assessment.risk_factors || []).length,
         highRisks: (assessment.risk_factors || []).filter(r => r.severity === 'high'),
         protectiveCount: (assessment.protective_factors || []).length,
-        strongProtective: (assessment.protective_factors || []).filter(f => f.strength_level === 'strong'),
+        strongProtective: (assessment.protective_factors || []).filter(
+          f => f.strength_level === 'strong'
+        ),
       },
     });
   } catch (err) {
@@ -661,7 +668,10 @@ router.get('/risk-overview', async (_req, res) => {
         medium: medium.length,
         low: low.length,
         total: critical.length + high.length + medium.length + low.length,
-        criticalBeneficiaries: critical.map(a => ({ id: a.beneficiary_id, name: a.beneficiary_name })),
+        criticalBeneficiaries: critical.map(a => ({
+          id: a.beneficiary_id,
+          name: a.beneficiary_name,
+        })),
         highRiskBeneficiaries: high.map(a => ({ id: a.beneficiary_id, name: a.beneficiary_name })),
       },
     });
@@ -693,7 +703,9 @@ router.post('/adl', async (req, res) => {
       ...req.body,
       assessor: req.user?.id,
     });
-    res.status(201).json({ success: true, data: assessment, message: 'تم حفظ تقييم مهارات الحياة اليومية' });
+    res
+      .status(201)
+      .json({ success: true, data: assessment, message: 'تم حفظ تقييم مهارات الحياة اليومية' });
   } catch (err) {
     logger.error('ADL assessment create error:', err);
     res.status(500).json({ success: false, message: 'خطأ في إنشاء تقييم ADL' });
@@ -728,8 +740,9 @@ router.get('/adl-statistics', async (_req, res) => {
 router.get('/adl/:beneficiaryId/training-plan', async (req, res) => {
   try {
     const ADLAssessment = require('../models/ADLAssessment');
-    const assessment = await ADLAssessment.findOne({ beneficiary: req.params.beneficiaryId })
-      .sort({ assessmentDate: -1 });
+    const assessment = await ADLAssessment.findOne({ beneficiary: req.params.beneficiaryId }).sort({
+      assessmentDate: -1,
+    });
 
     if (!assessment) {
       return res.status(404).json({ success: false, message: 'لا يوجد تقييم ADL لهذا المستفيد' });

@@ -25,7 +25,7 @@ on:
 
 env:
   APP_DIR: /home/alawael/app
-  NODE_VERSION: '20'
+  NODE_VERSION: '22'
 
 # Prevent concurrent deployments
 concurrency:

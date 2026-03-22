@@ -114,8 +114,7 @@ class TrendAnalyzer {
     const intercept = (sumY - slope * sumX) / n;
     const forecast = slope * n + intercept;
 
-    const pctChange =
-      slice[0] !== 0 ? ((slice[n - 1] - slice[0]) / Math.abs(slice[0])) * 100 : 0;
+    const pctChange = slice[0] !== 0 ? ((slice[n - 1] - slice[0]) / Math.abs(slice[0])) * 100 : 0;
 
     let direction, trend;
     if (pctChange > 10) {
@@ -441,7 +440,11 @@ class AnalyticsService {
       if (fire) {
         const entry = { ...alert, value: metric.value, timestamp: new Date() };
         triggered.push(entry);
-        if (!this._activeAlerts.find(a => a.metricName === alert.metricName && a.threshold === alert.threshold)) {
+        if (
+          !this._activeAlerts.find(
+            a => a.metricName === alert.metricName && a.threshold === alert.threshold
+          )
+        ) {
           this._activeAlerts.push(entry);
         }
       }
@@ -470,7 +473,11 @@ class AnalyticsService {
       if (m.status === 'critical') criticalMetrics.push(m);
     }
     return {
-      summary: { total: this._metrics.size, warnings: warningMetrics.length, criticals: criticalMetrics.length },
+      summary: {
+        total: this._metrics.size,
+        warnings: warningMetrics.length,
+        criticals: criticalMetrics.length,
+      },
       warningMetrics,
       criticalMetrics,
     };

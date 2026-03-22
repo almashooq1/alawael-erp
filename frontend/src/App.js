@@ -1,10 +1,23 @@
+import { Suspense } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { ThemeProvider } from '@mui/material/styles';
+import { CssBaseline } from '@mui/material';
+import { CacheProvider } from '@emotion/react';
 import createCache from '@emotion/cache';
 import { prefixer } from 'stylis';
 import rtlPlugin from 'stylis-plugin-rtl';
-import { useAuth } from './contexts/AuthContext';
-import { useThemeMode } from './contexts/ThemeContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { SocketProvider } from './contexts/SocketContext';
+import { NotificationProvider } from './contexts/NotificationContext';
+import { SnackbarProvider } from './contexts/SnackbarContext';
+import { ThemeModeProvider, useThemeMode } from './contexts/ThemeContext';
+import { DashboardSkeleton } from './components/ui/LoadingSkeleton';
+import ErrorBoundary from './components/ErrorBoundary';
+import { SessionTimeoutGuard } from './components/guards/RouteGuards';
 import { reportWebVitals, logPerformanceMetrics } from './utils/performanceMonitor';
 import { lazyWithRetry } from './utils/lazyLoader';
+import ProLayout from './components/Layout/ProLayout';
+import { ToastProvider } from './components/ui/NotificationToast';
 
 // Route Modules
 import {
@@ -86,11 +99,12 @@ import {
   MDTCoordinationRoutes,
   ARRehabRoutes,
 } from './routes';
-import { CssBaseline } from '@mui/material';
-import Login from '@mui/icons-material/Login';
-import Home from '@mui/icons-material/Home';
 
 // Pages — Keep eagerly loaded (critical path / small)
+import Login from './pages/common/SimpleLogin';
+import Register from './pages/Register';
+import NotFound from './pages/common/NotFound';
+import Home from './pages/common/Home';
 
 // Lazy-loaded pages — Only those remaining in App.js (shared / top-level)
 const Dashboard = lazyWithRetry(() => import('./pages/common/SimpleDashboard'));

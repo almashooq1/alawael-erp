@@ -19,7 +19,10 @@ class WebhookEvent {
   }
 
   generateSignature(secret) {
-    this.signature = crypto.createHmac('sha256', secret).update(JSON.stringify(this.data)).digest('hex');
+    this.signature = crypto
+      .createHmac('sha256', secret)
+      .update(JSON.stringify(this.data))
+      .digest('hex');
     return this.signature;
   }
 
@@ -146,11 +149,22 @@ class APIIntegration {
     if (!endpoint) throw new Error(`Endpoint "${name}" not registered`);
     this.callCount++;
     this.lastCall = new Date();
-    return { success: true, endpoint: name, method: endpoint.method, params, timestamp: this.lastCall };
+    return {
+      success: true,
+      endpoint: name,
+      method: endpoint.method,
+      params,
+      timestamp: this.lastCall,
+    };
   }
 
   getSummary() {
-    return { name: this.name, baseURL: this.baseURL, endpoints: this.endpoints.size, callCount: this.callCount };
+    return {
+      name: this.name,
+      baseURL: this.baseURL,
+      endpoints: this.endpoints.size,
+      callCount: this.callCount,
+    };
   }
 }
 
@@ -190,13 +204,24 @@ class IntegrationService extends EventEmitter {
       throw new Error('Integration not found or inactive');
     }
     try {
-      logger.info(`[IntegrationService] Sending webhook to ${integration.config.webhookUrl}`, payload);
-      integration.logs.push({ action: 'WEBHOOK_DISPATCH', status: 'SUCCESS', message: 'Payload sent successfully' });
+      logger.info(
+        `[IntegrationService] Sending webhook to ${integration.config.webhookUrl}`,
+        payload
+      );
+      integration.logs.push({
+        action: 'WEBHOOK_DISPATCH',
+        status: 'SUCCESS',
+        message: 'Payload sent successfully',
+      });
       integration.lastSync = new Date();
       await integration.save();
       return { success: true, timestamp: new Date() };
     } catch (error) {
-      integration.logs.push({ action: 'WEBHOOK_DISPATCH', status: 'FAILED', message: 'حدث خطأ داخلي' });
+      integration.logs.push({
+        action: 'WEBHOOK_DISPATCH',
+        status: 'FAILED',
+        message: 'حدث خطأ داخلي',
+      });
       await integration.save();
       throw error;
     }
@@ -314,7 +339,11 @@ class IntegrationService extends EventEmitter {
   exportConfiguration() {
     return {
       webhooks: this.getAllWebhooks().map(w => ({ id: w.id, url: w.url, events: w.events })),
-      connectors: Array.from(this._connectors.values()).map(c => ({ id: c.id, name: c.name, type: c.type })),
+      connectors: Array.from(this._connectors.values()).map(c => ({
+        id: c.id,
+        name: c.name,
+        type: c.type,
+      })),
       statistics: this.getStatistics(),
     };
   }

@@ -17,6 +17,8 @@ const helmetMiddleware = helmet({
       objectSrc: ["'none'"],
       mediaSrc: ["'self'"],
       frameSrc: ["'none'"],
+      // Explicitly disable upgrade-insecure-requests (breaks HTTP-only IP access)
+      upgradeInsecureRequests: null,
     },
   },
 
@@ -39,12 +41,9 @@ const helmetMiddleware = helmet({
   // Hide Powered By
   hidePoweredBy: true,
 
-  // HSTS (HTTP Strict Transport Security)
-  hsts: {
-    maxAge: 31536000, // 1 year
-    includeSubDomains: true,
-    preload: true,
-  },
+  // HSTS — disabled: site is accessed via HTTP on bare IP with self-signed cert.
+  // Enable only when a real TLS certificate is deployed.
+  hsts: false,
 
   // IE No Open
   ieNoOpen: true,

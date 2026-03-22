@@ -315,9 +315,7 @@ const assessmentService = {
 
   async getQuickAssessmentStats(beneficiaryId) {
     try {
-      const response = await apiClient.get(
-        `/measurements/quick-assessment/stats/${beneficiaryId}`
-      );
+      const response = await apiClient.get(`/measurements/quick-assessment/stats/${beneficiaryId}`);
       return response;
     } catch (err) {
       logger.warn('Quick assessment stats API error:', err?.message);
@@ -341,9 +339,7 @@ const assessmentService = {
 
   async getRehabPlanProgress(beneficiaryId) {
     try {
-      const response = await apiClient.get(
-        `/measurements/rehab-plan/${beneficiaryId}/progress`
-      );
+      const response = await apiClient.get(`/measurements/rehab-plan/${beneficiaryId}/progress`);
       return response;
     } catch (err) {
       logger.warn('Rehab plan progress API error:', err?.message);
@@ -404,6 +400,210 @@ const assessmentService = {
         maxScore: t.maxScore,
         sectionCount: t.sections?.length || 0,
       })),
+    };
+  },
+
+  /* ═══════════════════════════════════════════════════════════════════
+   *  خدمات تقييم متقدمة لذوي الإعاقة — Disability Assessment APIs
+   * ═══════════════════════════════════════════════════════════════════ */
+
+  /* ── الملف الشامل للمستفيد (Comprehensive Profile) ── */
+
+  async getComprehensiveProfile(beneficiaryId) {
+    try {
+      const response = await apiClient.get(
+        `/disability/assessment/comprehensive-profile/${beneficiaryId}`
+      );
+      return response;
+    } catch (err) {
+      logger.warn('Comprehensive profile API error:', err?.message);
+      return { success: false, data: null };
+    }
+  },
+
+  /* ── أولوية التأهيل (Rehab Priority) ── */
+
+  async getRehabPriority(beneficiaryId) {
+    try {
+      const response = await apiClient.get(
+        `/disability/assessment/rehab-priority/${beneficiaryId}`
+      );
+      return response;
+    } catch (err) {
+      logger.warn('Rehab priority API error:', err?.message);
+      return { success: false, data: null };
+    }
+  },
+
+  /* ── استقلالية الرعاية الذاتية (Self-Care Independence) ── */
+
+  async getSelfCareIndependence(beneficiaryId) {
+    try {
+      const response = await apiClient.get(
+        `/disability/assessment/self-care/${beneficiaryId}`
+      );
+      return response;
+    } catch (err) {
+      logger.warn('Self-care independence API error:', err?.message);
+      return { success: false, data: null };
+    }
+  },
+
+  /* ── ملخص ICF التصنيف الدولي (ICF Summary) ── */
+
+  async getICFSummary(beneficiaryId) {
+    try {
+      const response = await apiClient.get(
+        `/disability/assessment/icf-summary/${beneficiaryId}`
+      );
+      return response;
+    } catch (err) {
+      logger.warn('ICF summary API error:', err?.message);
+      return { success: false, data: null };
+    }
+  },
+
+  /* ── تحليل المخاطر (Risk Analysis) ── */
+
+  async getRiskAnalysis(beneficiaryId) {
+    try {
+      const response = await apiClient.get(
+        `/disability/assessment/risk-analysis/${beneficiaryId}`
+      );
+      return response;
+    } catch (err) {
+      logger.warn('Risk analysis API error:', err?.message);
+      return { success: false, data: null };
+    }
+  },
+
+  /* ── توزيع الإعاقات (Disability Distribution) ── */
+
+  async getDisabilityDistribution() {
+    try {
+      const response = await apiClient.get('/disability/distribution');
+      return response;
+    } catch (err) {
+      logger.warn('Disability distribution API error:', err?.message);
+      return { success: false, data: null };
+    }
+  },
+
+  /* ── ملخص القدرات الوظيفية (Functional Summary) ── */
+
+  async getFunctionalSummary() {
+    try {
+      const response = await apiClient.get('/disability/functional-summary');
+      return response;
+    } catch (err) {
+      logger.warn('Functional summary API error:', err?.message);
+      return { success: false, data: null };
+    }
+  },
+
+  /* ── نظرة عامة على جاهزية التأهيل (Rehab Readiness) ── */
+
+  async getRehabReadinessOverview() {
+    try {
+      const response = await apiClient.get('/disability/rehab-readiness');
+      return response;
+    } catch (err) {
+      logger.warn('Rehab readiness API error:', err?.message);
+      return { success: false, data: null };
+    }
+  },
+
+  /* ── نظرة عامة على مستويات المخاطر (Risk Overview) ── */
+
+  async getRiskOverview() {
+    try {
+      const response = await apiClient.get('/disability/risk-overview');
+      return response;
+    } catch (err) {
+      logger.warn('Risk overview API error:', err?.message);
+      return { success: false, data: null };
+    }
+  },
+
+  /* ── أنشطة الحياة اليومية ADL ── */
+
+  async getADLAssessments(beneficiaryId) {
+    try {
+      const response = await apiClient.get(`/disability/adl/${beneficiaryId}`);
+      return response;
+    } catch (err) {
+      logger.warn('ADL assessments API error:', err?.message);
+      return { success: false, data: [] };
+    }
+  },
+
+  async createADLAssessment(payload) {
+    try {
+      return await apiClient.post('/disability/adl', payload);
+    } catch (err) {
+      logger.error('Create ADL assessment failed:', err?.message);
+      throw new Error('فشل إنشاء تقييم أنشطة الحياة اليومية');
+    }
+  },
+
+  async getADLProgress(beneficiaryId) {
+    try {
+      const response = await apiClient.get(`/disability/adl/${beneficiaryId}/progress`);
+      return response;
+    } catch (err) {
+      logger.warn('ADL progress API error:', err?.message);
+      return { success: false, data: null };
+    }
+  },
+
+  async getADLStatistics() {
+    try {
+      const response = await apiClient.get('/disability/adl-statistics');
+      return response;
+    } catch (err) {
+      logger.warn('ADL statistics API error:', err?.message);
+      return { success: false, data: null };
+    }
+  },
+
+  async getADLTrainingPlan(beneficiaryId) {
+    try {
+      const response = await apiClient.get(`/disability/adl/${beneficiaryId}/training-plan`);
+      return response;
+    } catch (err) {
+      logger.warn('ADL training plan API error:', err?.message);
+      return { success: false, data: null };
+    }
+  },
+
+  /* ── Disability-specific test/scale helpers ── */
+
+  getDisabilityScales() {
+    const disabilityScaleIds = [
+      'barthelIndex', 'whodas2', 'gmfcs', 'vinelandAdaptive',
+      'scim', 'functionalIndependence', 'sensoryProfile', 'assistiveTech',
+    ];
+    return ASSESSMENT_SCALES.filter(s => disabilityScaleIds.includes(s.id));
+  },
+
+  getDisabilityTests() {
+    const disabilityTestIds = [
+      'motorDisabilityAssessment', 'visualDisabilityAssessment',
+      'hearingDisabilityAssessment', 'intellectualDisabilityAssessment',
+      'autismFunctionalAssessment', 'cerebralPalsyAssessment',
+      'vocationalRehabAssessment', 'disabilityQoLAssessment',
+    ];
+    return ASSESSMENT_TESTS.filter(t => disabilityTestIds.includes(t.id));
+  },
+
+  getFullAssessmentSummary() {
+    return {
+      totalScales: ASSESSMENT_SCALES.length,
+      totalTests: ASSESSMENT_TESTS.length,
+      disabilityScales: this.getDisabilityScales().length,
+      disabilityTests: this.getDisabilityTests().length,
+      totalDomains: ASSESSMENT_SCALES.reduce((sum, s) => sum + (s.domains?.length || 0), 0),
+      totalCategories: ASSESSMENT_TESTS.reduce((sum, t) => sum + (t.categories?.length || 0), 0),
     };
   },
 };

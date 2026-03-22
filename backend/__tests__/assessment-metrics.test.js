@@ -63,10 +63,7 @@ jest.mock('../middleware/auth', () => ({
     (..._roles) =>
     (_req, _res, next) =>
       next(),
-  authorizeRole:
-    (_roles) =>
-    (_req, _res, next) =>
-      next(),
+  authorizeRole: _roles => (_req, _res, next) => next(),
   optionalAuth: (_req, _res, next) => next(),
   protect: (req, _res, next) => {
     req.user = { id: 'user-test-001', role: 'admin' };
@@ -214,9 +211,7 @@ jest.mock('../services/MeasurementService', () => {
       };
     }
     static async getQuickAssessments(_beneficiaryId) {
-      return [
-        { _id: 'qa-001', assessmentType: 'behavioral', totalScore: 80, percentageScore: 80 },
-      ];
+      return [{ _id: 'qa-001', assessmentType: 'behavioral', totalScore: 80, percentageScore: 80 }];
     }
     static async createRehabPlan(data) {
       return { _id: 'plan-001', ...data };
@@ -254,12 +249,14 @@ describe('Assessment Routes — /api/assessments', () => {
 
   describe('POST /api/assessments', () => {
     it('should create a new assessment', async () => {
-      const res = await request(app).post('/api/assessments').send({
-        caseId: 'case-001',
-        beneficiaryId: 'ben-001',
-        assessmentType: 'initial',
-        scores: { communication: 3, socialSkills: 4, dailyLiving: 2 },
-      });
+      const res = await request(app)
+        .post('/api/assessments')
+        .send({
+          caseId: 'case-001',
+          beneficiaryId: 'ben-001',
+          assessmentType: 'initial',
+          scores: { communication: 3, socialSkills: 4, dailyLiving: 2 },
+        });
       expect([200, 201, 400, 404]).toContain(res.status);
       if (res.status === 201) {
         expect(res.body.success).toBe(true);
@@ -498,17 +495,19 @@ describe('Measurement Routes — Enhanced Endpoints', () => {
 
   describe('POST /api/measurements/results', () => {
     it('should record a measurement result', async () => {
-      const res = await request(app).post('/api/measurements/results').send({
-        beneficiaryId: 'ben-001',
-        measurementTypeId: 'type-001',
-        measurementMasterId: 'master-001',
-        totalScore: 75,
-        overallLevel: 'متوسط',
-        domainScores: [
-          { domain: 'communication', rawScore: 25, maxScore: 30 },
-          { domain: 'socialSkills', rawScore: 20, maxScore: 30 },
-        ],
-      });
+      const res = await request(app)
+        .post('/api/measurements/results')
+        .send({
+          beneficiaryId: 'ben-001',
+          measurementTypeId: 'type-001',
+          measurementMasterId: 'master-001',
+          totalScore: 75,
+          overallLevel: 'متوسط',
+          domainScores: [
+            { domain: 'communication', rawScore: 25, maxScore: 30 },
+            { domain: 'socialSkills', rawScore: 20, maxScore: 30 },
+          ],
+        });
       expect([200, 201, 400, 404]).toContain(res.status);
     });
   });
@@ -522,15 +521,17 @@ describe('Measurement Routes — Enhanced Endpoints', () => {
 
   describe('POST /api/measurements/quick-assessment', () => {
     it('should create a quick assessment with change tracking', async () => {
-      const res = await request(app).post('/api/measurements/quick-assessment').send({
-        beneficiaryId: 'ben-001',
-        assessmentType: 'behavioral',
-        totalScore: 80,
-        maxScore: 100,
-        duration: 30,
-        environment: 'THERAPY_ROOM',
-        observations: { cooperation: 'excellent', attention: 'good' },
-      });
+      const res = await request(app)
+        .post('/api/measurements/quick-assessment')
+        .send({
+          beneficiaryId: 'ben-001',
+          assessmentType: 'behavioral',
+          totalScore: 80,
+          maxScore: 100,
+          duration: 30,
+          environment: 'THERAPY_ROOM',
+          observations: { cooperation: 'excellent', attention: 'good' },
+        });
       expect([200, 201, 400, 404]).toContain(res.status);
     });
   });
@@ -610,19 +611,21 @@ describe('Measurement Routes — Enhanced Endpoints', () => {
 
   describe('POST /api/measurements/rehab-plan', () => {
     it('should create an individual rehab plan', async () => {
-      const res = await request(app).post('/api/measurements/rehab-plan').send({
-        beneficiaryId: 'ben-001',
-        planCode: 'IRP-2025-001',
-        linkedPrograms: [
-          {
-            programId: 'prog-1',
-            programName: 'جلسات نطق',
-            totalSessions: 12,
-            completedSessions: 0,
-          },
-        ],
-        milestones: [{ title: 'نطق جمل من 3 كلمات', status: 'not_started' }],
-      });
+      const res = await request(app)
+        .post('/api/measurements/rehab-plan')
+        .send({
+          beneficiaryId: 'ben-001',
+          planCode: 'IRP-2025-001',
+          linkedPrograms: [
+            {
+              programId: 'prog-1',
+              programName: 'جلسات نطق',
+              totalSessions: 12,
+              completedSessions: 0,
+            },
+          ],
+          milestones: [{ title: 'نطق جمل من 3 كلمات', status: 'not_started' }],
+        });
       expect([200, 201, 400, 404]).toContain(res.status);
     });
   });
@@ -684,7 +687,7 @@ describe('ProgramAssessment Model — Enhanced Features', () => {
       const approx =
         d *
         Math.exp((-zScore * zScore) / 2) *
-        (0.319381530 * t -
+        (0.31938153 * t -
           0.356563782 * t * t +
           1.781477937 * t * t * t -
           1.821255978 * t * t * t * t +
@@ -735,7 +738,7 @@ describe('ProgramAssessment Model — Enhanced Features', () => {
       let ssTot = 0,
         ssRes = 0;
       scores.forEach((y, x) => {
-        const yHat = (sumY / n - slope * (sumX / n)) + slope * x;
+        const yHat = sumY / n - slope * (sumX / n) + slope * x;
         ssTot += (y - meanY) ** 2;
         ssRes += (y - yHat) ** 2;
       });
@@ -860,7 +863,8 @@ describe('MeasurementModels — Enhanced Features', () => {
     it('should handle maxScore of 0 gracefully', () => {
       const totalScore = 0;
       const maxScore = 0;
-      const percentageScore = maxScore > 0 ? Math.round((totalScore / maxScore) * 100 * 100) / 100 : 0;
+      const percentageScore =
+        maxScore > 0 ? Math.round((totalScore / maxScore) * 100 * 100) / 100 : 0;
       expect(percentageScore).toBe(0);
     });
 
@@ -870,7 +874,8 @@ describe('MeasurementModels — Enhanced Features', () => {
       const absoluteChange = current - previous;
       const percentageChange =
         previous > 0 ? Math.round(((current - previous) / previous) * 100 * 100) / 100 : 0;
-      const direction = absoluteChange > 0 ? 'improved' : absoluteChange < 0 ? 'declined' : 'stable';
+      const direction =
+        absoluteChange > 0 ? 'improved' : absoluteChange < 0 ? 'declined' : 'stable';
 
       expect(absoluteChange).toBe(10);
       expect(percentageChange).toBeCloseTo(13.33, 1);
@@ -922,12 +927,11 @@ describe('MeasurementModels — Enhanced Features', () => {
         totalPrograms: programs.length,
         activePrograms: programs.filter(p => p.completedSessions < p.totalSessions).length,
         completedPrograms: programs.filter(p => p.completedSessions >= p.totalSessions).length,
-        sessionCompletionRate:
-          Math.round(
-            (programs.reduce((s, p) => s + p.completedSessions, 0) /
-              programs.reduce((s, p) => s + p.totalSessions, 0)) *
-              100
-          ),
+        sessionCompletionRate: Math.round(
+          (programs.reduce((s, p) => s + p.completedSessions, 0) /
+            programs.reduce((s, p) => s + p.totalSessions, 0)) *
+            100
+        ),
         avgSuccessRate:
           Math.round(
             (programs.reduce((s, p) => s + (p.averageSuccessRate || 0), 0) / programs.length) * 100
@@ -1166,7 +1170,18 @@ function generateScaleValidationData() {
     id,
     name: `مقياس ${id}`,
     nameEn: `${id} Scale`,
-    maxScore: id === 'functionalIndependence' ? 126 : id === 'sensoryProcessing' ? 120 : id === 'autismSeverity' ? 60 : id === 'attentionDeficit' ? 54 : id === 'communityIntegrationReadiness' ? 120 : 100,
+    maxScore:
+      id === 'functionalIndependence'
+        ? 126
+        : id === 'sensoryProcessing'
+          ? 120
+          : id === 'autismSeverity'
+            ? 60
+            : id === 'attentionDeficit'
+              ? 54
+              : id === 'communityIntegrationReadiness'
+                ? 120
+                : 100,
     icon: 'Assessment',
     color: '#333',
     domains: generateDomains(id),
@@ -1224,10 +1239,7 @@ function generateDomains(scaleId) {
   if (domainMap[scaleId]) return domainMap[scaleId];
 
   // Default domains for original scales
-  const maxScore =
-    scaleId === 'communityIntegrationReadiness'
-      ? 120
-      : 100;
+  const maxScore = scaleId === 'communityIntegrationReadiness' ? 120 : 100;
   const domainCount = maxScore === 120 ? 6 : 5;
   const perDomain = maxScore / domainCount;
   return Array.from({ length: domainCount }, (_, i) => ({
@@ -1265,7 +1277,21 @@ function generateTestValidationData() {
     id,
     name: `اختبار ${id}`,
     nameEn: `${id} Test`,
-    maxScore: id.includes('oralMotor') ? 48 : id.includes('sensoryProfile') ? 60 : id.includes('academicReadiness') ? 60 : id.includes('socialSkills') ? 60 : id.includes('selfCare') ? 60 : id.includes('vocational') ? 60 : id.includes('executive') ? 75 : 80,
+    maxScore: id.includes('oralMotor')
+      ? 48
+      : id.includes('sensoryProfile')
+        ? 60
+        : id.includes('academicReadiness')
+          ? 60
+          : id.includes('socialSkills')
+            ? 60
+            : id.includes('selfCare')
+              ? 60
+              : id.includes('vocational')
+                ? 60
+                : id.includes('executive')
+                  ? 75
+                  : 80,
     type: 'itemLevel',
     icon: 'Assessment',
     color: '#333',

@@ -803,10 +803,7 @@ QuickAssessmentSchema.methods.calculateTotalScore = function () {
  */
 IndividualRehabPlanSchema.methods.getProgressSummary = function () {
   const programs = this.activePrograms || [];
-  const totalSessions = programs.reduce(
-    (sum, p) => sum + (p.progress?.sessionsPlanned || 0),
-    0
-  );
+  const totalSessions = programs.reduce((sum, p) => sum + (p.progress?.sessionsPlanned || 0), 0);
   const completedSessions = programs.reduce(
     (sum, p) => sum + (p.progress?.sessionsCompleted || 0),
     0
@@ -821,7 +818,9 @@ IndividualRehabPlanSchema.methods.getProgressSummary = function () {
     completedPrograms: programs.filter(p => p.status === 'COMPLETED').length,
     totalSessions,
     completedSessions,
-    sessionCompletionRate: totalSessions ? Math.round((completedSessions / totalSessions) * 100) : 0,
+    sessionCompletionRate: totalSessions
+      ? Math.round((completedSessions / totalSessions) * 100)
+      : 0,
     averageSuccessRate: Math.round(avgSuccess),
   };
 };
@@ -856,10 +855,7 @@ MeasurementResultSchema.statics.getTrend = async function (beneficiaryId, typeId
   const meanY = sumY / n;
   const intercept = meanY - slope * (sumX / n);
 
-  const ssReg = scores.reduce(
-    (sum, _, i) => sum + Math.pow(slope * i + intercept - meanY, 2),
-    0
-  );
+  const ssReg = scores.reduce((sum, _, i) => sum + Math.pow(slope * i + intercept - meanY, 2), 0);
   const ssTot = scores.reduce((sum, y) => sum + Math.pow(y - meanY, 2), 0);
   const rSquared = ssTot > 0 ? ssReg / ssTot : 0;
 
@@ -992,7 +988,8 @@ QuickAssessmentSchema.pre('save', async function (next) {
     this.changeFromPrevious = {
       absoluteChange: currentScore - prevScore,
       percentageChange: prevScore ? Math.round(((currentScore - prevScore) / prevScore) * 100) : 0,
-      direction: currentScore > prevScore ? 'improved' : currentScore < prevScore ? 'declined' : 'stable',
+      direction:
+        currentScore > prevScore ? 'improved' : currentScore < prevScore ? 'declined' : 'stable',
     };
   }
   next();

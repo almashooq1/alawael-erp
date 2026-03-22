@@ -447,7 +447,9 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'montessori/auth', montessoriAuthRoutes);
   dualMount(app, 'measurements', measurementsRoutes);
   dualMount(app, 'assessments', assessmentRoutes);
-  logger.info('Assessment CRUD+Workflow routes mounted (10 endpoints — create/read/update/delete, approve/reject/archive, statistics, search, pending)');
+  logger.info(
+    'Assessment CRUD+Workflow routes mounted (10 endpoints — create/read/update/delete, approve/reject/archive, statistics, search, pending)'
+  );
   dualMount(app, 'succession-planning', successionPlanningRoutes);
   dualMount(app, 'mobile', mobileAppRoutes);
   dualMount(app, 'zkteco', zktecoRoutes);

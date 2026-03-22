@@ -437,4 +437,339 @@ disabilityAssessmentSchema.statics.getReadyForRehabilitationCount = async functi
   return assessments.filter(a => a.isReadyForRehabilitation()).length;
 };
 
+// ═══════════════════════════════════════════════════════════════
+// ── NEW: Enhanced Methods for Disability Assessment
+// ═══════════════════════════════════════════════════════════════
+
+// ── Virtual: age calculation ──
+disabilityAssessmentSchema.virtual('age').get(function () {
+  if (!this.date_of_birth) return null;
+  const now = new Date();
+  const dob = new Date(this.date_of_birth);
+  let age = now.getFullYear() - dob.getFullYear();
+  const monthDiff = now.getMonth() - dob.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && now.getDate() < dob.getDate())) age--;
+  return age;
+});
+
+// ── Virtual: functional independence index (0-100) ──
+disabilityAssessmentSchema.virtual('functionalIndependenceIndex').get(function () {
+  const fa = this.functional_abilities;
+  if (!fa) return 0;
+  const scores = [];
+
+  // Mobility score
+  if (fa.mobility?.endurance_level != null) scores.push(fa.mobility.endurance_level);
+
+  // Self-care average
+  if (fa.self_care) {
+    const scItems = [
+      fa.self_care.feeding?.level,
+      fa.self_care.toileting?.level,
+      fa.self_care.bathing?.level,
+      fa.self_care.dressing?.level,
+      fa.self_care.grooming?.level,
+    ].filter(v => v != null);
+    if (scItems.length) scores.push((scItems.reduce((a, b) => a + b, 0) / scItems.length) * 20);
+  }
+
+  // Communication
+  if (fa.communication) {
+    const cItems = [fa.communication.understanding?.level, fa.communication.expression?.level].filter(v => v != null);
+    if (cItems.length) scores.push((cItems.reduce((a, b) => a + b, 0) / cItems.length) * 20);
+  }
+
+  // Cognitive
+  if (fa.cognitive) {
+    const cogItems = [
+      fa.cognitive.memory?.short_term,
+      fa.cognitive.attention_span,
+      fa.cognitive.problem_solving,
+      fa.cognitive.learning_ability,
+    ].filter(v => v != null);
+    if (cogItems.length) scores.push(cogItems.reduce((a, b) => a + b, 0) / cogItems.length);
+  }
+
+  // Social-emotional
+  if (fa.social_emotional) {
+    const seItems = [
+      fa.social_emotional.social_interaction,
+      fa.social_emotional.emotional_regulation,
+      fa.social_emotional.independence_level,
+      fa.social_emotional.participation_readiness,
+    ].filter(v => v != null);
+    if (seItems.length) scores.push(seItems.reduce((a, b) => a + b, 0) / seItems.length);
+  }
+
+  return scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
+});
+
+// ── Virtual: overall risk level ──
+disabilityAssessmentSchema.virtual('overallRiskLevel').get(function () {
+  if (!this.risk_factors || this.risk_factors.length === 0) return 'low';
+  const highCount = this.risk_factors.filter(r => r.severity === 'high').length;
+  const medCount = this.risk_factors.filter(r => r.severity === 'medium').length;
+  if (highCount >= 2) return 'critical';
+  if (highCount >= 1 || medCount >= 3) return 'high';
+  if (medCount >= 1) return 'medium';
+  return 'low';
+});
+
+// ── Virtual: environmental support score ──
+disabilityAssessmentSchema.virtual('environmentalSupportScore').get(function () {
+  const env = this.assessment_details?.environmental_factors;
+  if (!env) return 0;
+  const influences = [
+    env.products_technology?.influence,
+    env.natural_social_environment?.influence,
+    env.support_relationships?.influence,
+    env.attitudes?.influence,
+    env.services_systems_policies?.influence,
+  ].filter(v => v != null);
+  if (!influences.length) return 0;
+  // Scale from -4..+4 to 0..100
+  const avg = influences.reduce((a, b) => a + b, 0) / influences.length;
+  return Math.round(((avg + 4) / 8) * 100);
+});
+
+// ── Method: get ICF body function summary ──
+disabilityAssessmentSchema.methods.getICFBodyFunctionSummary = function () {
+  const bf = this.assessment_details?.icf_body_functions;
+  if (!bf) return { domains: [], averageScore: 0, weakestDomain: null, strongestDomain: null };
+  const domains = Object.entries(bf)
+    .filter(([, v]) => v?.score != null)
+    .map(([key, v]) => ({ domain: key, score: v.score, remarks: v.remarks || '' }));
+  if (!domains.length) return { domains, averageScore: 0, weakestDomain: null, strongestDomain: null };
+  const avg = Math.round(domains.reduce((s, d) => s + d.score, 0) / domains.length);
+  const sorted = [...domains].sort((a, b) => a.score - b.score);
+  return {
+    domains,
+    averageScore: avg,
+    weakestDomain: sorted[0],
+    strongestDomain: sorted[sorted.length - 1],
+  };
+};
+
+// ── Method: get activities participation summary ──
+disabilityAssessmentSchema.methods.getActivitiesParticipationSummary = function () {
+  const ap = this.assessment_details?.activities_participation;
+  if (!ap) return { domains: [], severeDifficulties: [], mildDifficulties: [] };
+  const domains = Object.entries(ap)
+    .filter(([, v]) => v?.score != null)
+    .map(([key, v]) => ({ domain: key, score: v.score, difficulty: v.difficulty || 'unknown' }));
+  return {
+    domains,
+    severeDifficulties: domains.filter(d => d.difficulty === 'severe'),
+    mildDifficulties: domains.filter(d => d.difficulty === 'mild'),
+    moderateDifficulties: domains.filter(d => d.difficulty === 'moderate'),
+    averageScore: domains.length ? Math.round(domains.reduce((s, d) => s + d.score, 0) / domains.length) : 0,
+  };
+};
+
+// ── Method: get self-care independence level ──
+disabilityAssessmentSchema.methods.getSelfCareIndependence = function () {
+  const sc = this.functional_abilities?.self_care;
+  if (!sc) return { level: 'unknown', score: 0, details: {} };
+
+  const items = {
+    feeding: sc.feeding?.level || 0,
+    toileting: sc.toileting?.level || 0,
+    bathing: sc.bathing?.level || 0,
+    dressing: sc.dressing?.level || 0,
+    grooming: sc.grooming?.level || 0,
+  };
+
+  const vals = Object.values(items);
+  const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
+  const pct = Math.round((avg / 5) * 100);
+
+  let level = 'dependent';
+  if (pct >= 80) level = 'independent';
+  else if (pct >= 60) level = 'mostly_independent';
+  else if (pct >= 40) level = 'partially_independent';
+  else if (pct >= 20) level = 'mostly_dependent';
+
+  const needsAssistance = Object.entries(items)
+    .filter(([, v]) => v <= 2)
+    .map(([k]) => k);
+
+  return { level, score: pct, details: items, needsAssistance };
+};
+
+// ── Method: calculate rehabilitation priority ──
+disabilityAssessmentSchema.methods.calculateRehabPriority = function () {
+  const composite = this.calculateCompositeScore();
+  const riskLevel = this.overallRiskLevel;
+  const isReady = this.isReadyForRehabilitation();
+
+  let priorityScore = 100 - composite; // Lower composite = higher priority
+
+  // Adjust by risk level
+  if (riskLevel === 'critical') priorityScore += 30;
+  else if (riskLevel === 'high') priorityScore += 20;
+  else if (riskLevel === 'medium') priorityScore += 10;
+
+  // Adjust by readiness
+  if (isReady) priorityScore += 15;
+
+  // Adjust by severity
+  const severity = this.disability_profile?.severity;
+  if (severity === 'profound') priorityScore += 25;
+  else if (severity === 'severe') priorityScore += 20;
+  else if (severity === 'moderate') priorityScore += 10;
+
+  // Cap at 0-200
+  priorityScore = Math.max(0, Math.min(200, priorityScore));
+
+  let label = 'منخفضة';
+  if (priorityScore >= 150) label = 'حرجة';
+  else if (priorityScore >= 120) label = 'عالية';
+  else if (priorityScore >= 80) label = 'متوسطة';
+
+  return { priorityScore: Math.round(priorityScore), label, isReady, riskLevel, compositeScore: composite };
+};
+
+// ── Method: generate comprehensive profile ──
+disabilityAssessmentSchema.methods.generateComprehensiveProfile = function () {
+  return {
+    ...this.generateAssessmentReport(),
+    functionalIndependenceIndex: this.functionalIndependenceIndex,
+    overallRiskLevel: this.overallRiskLevel,
+    environmentalSupportScore: this.environmentalSupportScore,
+    icfBodyFunctions: this.getICFBodyFunctionSummary(),
+    activitiesParticipation: this.getActivitiesParticipationSummary(),
+    selfCareIndependence: this.getSelfCareIndependence(),
+    rehabPriority: this.calculateRehabPriority(),
+    assistiveDevicesSummary: {
+      total: this.assistive_devices?.length || 0,
+      needsReplacement: (this.assistive_devices || []).filter(d => d.needs_replacement).length,
+      avgEffectiveness: this.assistive_devices?.length
+        ? Math.round(this.assistive_devices.reduce((s, d) => s + (d.effectiveness || 0), 0) / this.assistive_devices.length)
+        : 0,
+    },
+    pendingRecommendations: (this.recommendations || []).filter(r => r.status === 'pending').length,
+    completedRecommendations: (this.recommendations || []).filter(r => r.status === 'completed').length,
+  };
+};
+
+// ── Static: get assessments by risk level ──
+disabilityAssessmentSchema.statics.getByRiskLevel = async function (riskLevel) {
+  const assessments = await this.find({ assessment_status: { $in: ['active', 'completed'] } }).lean();
+  // Filter by computed risk level
+  return assessments.filter(a => {
+    const highCount = (a.risk_factors || []).filter(r => r.severity === 'high').length;
+    const medCount = (a.risk_factors || []).filter(r => r.severity === 'medium').length;
+    let level = 'low';
+    if (highCount >= 2) level = 'critical';
+    else if (highCount >= 1 || medCount >= 3) level = 'high';
+    else if (medCount >= 1) level = 'medium';
+    return level === riskLevel;
+  });
+};
+
+// ── Static: get distribution by disability type and severity ──
+disabilityAssessmentSchema.statics.getDisabilityDistribution = async function () {
+  const [byType, bySeverity, byStatus, byProgression] = await Promise.all([
+    this.aggregate([
+      { $group: { _id: '$disability_profile.type', count: { $sum: 1 }, avgAge: { $avg: { $subtract: [new Date().getFullYear(), { $year: '$date_of_birth' }] } } } },
+      { $sort: { count: -1 } },
+    ]),
+    this.aggregate([
+      { $group: { _id: '$disability_profile.severity', count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+    ]),
+    this.aggregate([
+      { $group: { _id: '$assessment_status', count: { $sum: 1 } } },
+    ]),
+    this.aggregate([
+      { $group: { _id: '$disability_profile.progression_status', count: { $sum: 1 } } },
+    ]),
+  ]);
+  return { byType, bySeverity, byStatus, byProgression, generatedAt: new Date() };
+};
+
+// ── Static: get functional abilities summary across all beneficiaries ──
+disabilityAssessmentSchema.statics.getFunctionalAbilitiesSummary = async function () {
+  const assessments = await this.find({
+    'functional_abilities': { $exists: true },
+    assessment_status: { $in: ['active', 'completed'] },
+  }).lean();
+
+  if (!assessments.length) return { count: 0, domains: {} };
+
+  const domainTotals = { mobility: [], self_care: [], communication: [], cognitive: [], social_emotional: [] };
+
+  assessments.forEach(a => {
+    const fa = a.functional_abilities;
+    if (fa?.mobility?.endurance_level != null) domainTotals.mobility.push(fa.mobility.endurance_level);
+    if (fa?.self_care) {
+      const levels = [fa.self_care.feeding?.level, fa.self_care.toileting?.level, fa.self_care.bathing?.level, fa.self_care.dressing?.level, fa.self_care.grooming?.level].filter(v => v != null);
+      if (levels.length) domainTotals.self_care.push((levels.reduce((a, b) => a + b, 0) / levels.length) * 20);
+    }
+    if (fa?.cognitive?.problem_solving != null) domainTotals.cognitive.push(fa.cognitive.problem_solving);
+    if (fa?.social_emotional?.social_interaction != null) domainTotals.social_emotional.push(fa.social_emotional.social_interaction);
+  });
+
+  const domains = {};
+  for (const [key, vals] of Object.entries(domainTotals)) {
+    domains[key] = {
+      count: vals.length,
+      average: vals.length ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length) : 0,
+      min: vals.length ? Math.min(...vals) : 0,
+      max: vals.length ? Math.max(...vals) : 0,
+    };
+  }
+
+  return { count: assessments.length, domains };
+};
+
+// ── Static: get rehabilitation readiness overview ──
+disabilityAssessmentSchema.statics.getRehabReadinessOverview = async function () {
+  const assessments = await this.find({
+    'rehabilitation_readiness': { $exists: true },
+    assessment_status: { $in: ['active', 'completed'] },
+  }).lean();
+
+  const overview = { total: assessments.length, high: 0, moderate: 0, low: 0, details: [] };
+  assessments.forEach(a => {
+    const r = a.rehabilitation_readiness;
+    if (r?.overall_readiness === 'high') overview.high++;
+    else if (r?.overall_readiness === 'moderate') overview.moderate++;
+    else overview.low++;
+
+    overview.details.push({
+      beneficiary_id: a.beneficiary_id,
+      beneficiary_name: a.beneficiary_name,
+      readiness: r?.overall_readiness || 'unknown',
+      motivation: r?.motivation_score || 0,
+      cognitive: r?.cognitive_capacity || 0,
+      physical: r?.physical_capacity || 0,
+      family_support: r?.family_support || 0,
+    });
+  });
+
+  return overview;
+};
+
+// ── Pre-save: auto-calculate rehabilitation readiness level ──
+disabilityAssessmentSchema.pre('save', function (next) {
+  const r = this.rehabilitation_readiness;
+  if (r && r.motivation_score != null && r.cognitive_capacity != null) {
+    const avg = (
+      (r.motivation_score || 0) +
+      (r.cognitive_capacity || 0) +
+      (r.physical_capacity || 0) +
+      (r.family_support || 0) +
+      (r.resource_availability || 0)
+    ) / 5;
+
+    if (avg >= 70) r.overall_readiness = 'high';
+    else if (avg >= 40) r.overall_readiness = 'moderate';
+    else r.overall_readiness = 'low';
+  }
+
+  this.last_updated = new Date();
+  next();
+});
+
 module.exports = mongoose.model('DisabilityAssessment', disabilityAssessmentSchema);

@@ -486,4 +486,271 @@ router.get('/assessment/compare/:beneficiaryId', async (req, res) => {
   }
 });
 
+/* ═══════════════════════════════════════════════════════════════
+ * NEW: Enhanced Disability Assessment Endpoints
+ * مسارات متقدمة لتقييم ذوي الإعاقة
+ * ═══════════════════════════════════════════════════════════════ */
+
+// GET /assessment/comprehensive-profile/:beneficiaryId — ملف التقييم الشامل المحسّن
+router.get('/assessment/comprehensive-profile/:beneficiaryId', async (req, res) => {
+  try {
+    const { beneficiaryId } = req.params;
+    const DisabilityAssessment = require('../models/disability-assessment.model');
+
+    const assessment = await DisabilityAssessment.findOne({ beneficiary_id: beneficiaryId })
+      .sort({ createdAt: -1 });
+
+    if (!assessment) {
+      return res.status(404).json({ success: false, message: 'لا يوجد تقييم لهذا المستفيد' });
+    }
+
+    const profile = assessment.generateComprehensiveProfile();
+    res.json({ success: true, data: profile });
+  } catch (err) {
+    logger.error('Comprehensive profile error:', err);
+    res.status(500).json({ success: false, message: 'خطأ في جلب الملف الشامل' });
+  }
+});
+
+// GET /assessment/rehab-priority/:beneficiaryId — أولوية التأهيل
+router.get('/assessment/rehab-priority/:beneficiaryId', async (req, res) => {
+  try {
+    const { beneficiaryId } = req.params;
+    const DisabilityAssessment = require('../models/disability-assessment.model');
+
+    const assessment = await DisabilityAssessment.findOne({ beneficiary_id: beneficiaryId })
+      .sort({ createdAt: -1 });
+
+    if (!assessment) {
+      return res.status(404).json({ success: false, message: 'لا يوجد تقييم لهذا المستفيد' });
+    }
+
+    const priority = assessment.calculateRehabPriority();
+    res.json({ success: true, data: priority });
+  } catch (err) {
+    logger.error('Rehab priority error:', err);
+    res.status(500).json({ success: false, message: 'خطأ في حساب أولوية التأهيل' });
+  }
+});
+
+// GET /assessment/self-care/:beneficiaryId — مستوى الاستقلالية في العناية الذاتية
+router.get('/assessment/self-care/:beneficiaryId', async (req, res) => {
+  try {
+    const { beneficiaryId } = req.params;
+    const DisabilityAssessment = require('../models/disability-assessment.model');
+
+    const assessment = await DisabilityAssessment.findOne({ beneficiary_id: beneficiaryId })
+      .sort({ createdAt: -1 });
+
+    if (!assessment) {
+      return res.status(404).json({ success: false, message: 'لا يوجد تقييم' });
+    }
+
+    const selfCare = assessment.getSelfCareIndependence();
+    res.json({ success: true, data: selfCare });
+  } catch (err) {
+    logger.error('Self-care assessment error:', err);
+    res.status(500).json({ success: false, message: 'خطأ في تقييم العناية الذاتية' });
+  }
+});
+
+// GET /assessment/icf-summary/:beneficiaryId — ملخص ICF
+router.get('/assessment/icf-summary/:beneficiaryId', async (req, res) => {
+  try {
+    const { beneficiaryId } = req.params;
+    const DisabilityAssessment = require('../models/disability-assessment.model');
+
+    const assessment = await DisabilityAssessment.findOne({ beneficiary_id: beneficiaryId })
+      .sort({ createdAt: -1 });
+
+    if (!assessment) {
+      return res.status(404).json({ success: false, message: 'لا يوجد تقييم' });
+    }
+
+    const icf = assessment.getICFBodyFunctionSummary();
+    const activities = assessment.getActivitiesParticipationSummary();
+    res.json({ success: true, data: { bodyFunctions: icf, activitiesParticipation: activities } });
+  } catch (err) {
+    logger.error('ICF summary error:', err);
+    res.status(500).json({ success: false, message: 'خطأ في ملخص ICF' });
+  }
+});
+
+// GET /assessment/risk-analysis/:beneficiaryId — تحليل المخاطر
+router.get('/assessment/risk-analysis/:beneficiaryId', async (req, res) => {
+  try {
+    const { beneficiaryId } = req.params;
+    const DisabilityAssessment = require('../models/disability-assessment.model');
+
+    const assessment = await DisabilityAssessment.findOne({ beneficiary_id: beneficiaryId })
+      .sort({ createdAt: -1 });
+
+    if (!assessment) {
+      return res.status(404).json({ success: false, message: 'لا يوجد تقييم' });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        overallRiskLevel: assessment.overallRiskLevel,
+        riskFactors: assessment.risk_factors || [],
+        protectiveFactors: assessment.protective_factors || [],
+        riskCount: (assessment.risk_factors || []).length,
+        highRisks: (assessment.risk_factors || []).filter(r => r.severity === 'high'),
+        protectiveCount: (assessment.protective_factors || []).length,
+        strongProtective: (assessment.protective_factors || []).filter(f => f.strength_level === 'strong'),
+      },
+    });
+  } catch (err) {
+    logger.error('Risk analysis error:', err);
+    res.status(500).json({ success: false, message: 'خطأ في تحليل المخاطر' });
+  }
+});
+
+// GET /distribution — توزيع الإعاقات
+router.get('/distribution', async (_req, res) => {
+  try {
+    const DisabilityAssessment = require('../models/disability-assessment.model');
+    const distribution = await DisabilityAssessment.getDisabilityDistribution();
+    res.json({ success: true, data: distribution });
+  } catch (err) {
+    logger.error('Distribution error:', err);
+    res.status(500).json({ success: false, message: 'خطأ في بيانات التوزيع' });
+  }
+});
+
+// GET /functional-summary — ملخص القدرات الوظيفية
+router.get('/functional-summary', async (_req, res) => {
+  try {
+    const DisabilityAssessment = require('../models/disability-assessment.model');
+    const summary = await DisabilityAssessment.getFunctionalAbilitiesSummary();
+    res.json({ success: true, data: summary });
+  } catch (err) {
+    logger.error('Functional summary error:', err);
+    res.status(500).json({ success: false, message: 'خطأ في ملخص القدرات' });
+  }
+});
+
+// GET /rehab-readiness — نظرة عامة على الجاهزية للتأهيل
+router.get('/rehab-readiness', async (_req, res) => {
+  try {
+    const DisabilityAssessment = require('../models/disability-assessment.model');
+    const overview = await DisabilityAssessment.getRehabReadinessOverview();
+    res.json({ success: true, data: overview });
+  } catch (err) {
+    logger.error('Rehab readiness error:', err);
+    res.status(500).json({ success: false, message: 'خطأ في بيانات الجاهزية' });
+  }
+});
+
+// GET /risk-overview — نظرة عامة على المخاطر
+router.get('/risk-overview', async (_req, res) => {
+  try {
+    const DisabilityAssessment = require('../models/disability-assessment.model');
+    const [critical, high, medium, low] = await Promise.all([
+      DisabilityAssessment.getByRiskLevel('critical'),
+      DisabilityAssessment.getByRiskLevel('high'),
+      DisabilityAssessment.getByRiskLevel('medium'),
+      DisabilityAssessment.getByRiskLevel('low'),
+    ]);
+    res.json({
+      success: true,
+      data: {
+        critical: critical.length,
+        high: high.length,
+        medium: medium.length,
+        low: low.length,
+        total: critical.length + high.length + medium.length + low.length,
+        criticalBeneficiaries: critical.map(a => ({ id: a.beneficiary_id, name: a.beneficiary_name })),
+        highRiskBeneficiaries: high.map(a => ({ id: a.beneficiary_id, name: a.beneficiary_name })),
+      },
+    });
+  } catch (err) {
+    logger.error('Risk overview error:', err);
+    res.status(500).json({ success: false, message: 'خطأ في نظرة المخاطر' });
+  }
+});
+
+// GET /adl/:beneficiaryId — تقييم مهارات الحياة اليومية
+router.get('/adl/:beneficiaryId', async (req, res) => {
+  try {
+    const ADLAssessment = require('../models/ADLAssessment');
+    const assessments = await ADLAssessment.find({ beneficiary: req.params.beneficiaryId })
+      .sort({ assessmentDate: -1 })
+      .lean();
+    res.json({ success: true, data: assessments, count: assessments.length });
+  } catch (err) {
+    logger.error('ADL assessment fetch error:', err);
+    res.status(500).json({ success: false, message: 'خطأ في جلب تقييمات ADL' });
+  }
+});
+
+// POST /adl — إنشاء تقييم ADL جديد
+router.post('/adl', async (req, res) => {
+  try {
+    const ADLAssessment = require('../models/ADLAssessment');
+    const assessment = await ADLAssessment.create({
+      ...req.body,
+      assessor: req.user?.id,
+    });
+    res.status(201).json({ success: true, data: assessment, message: 'تم حفظ تقييم مهارات الحياة اليومية' });
+  } catch (err) {
+    logger.error('ADL assessment create error:', err);
+    res.status(500).json({ success: false, message: 'خطأ في إنشاء تقييم ADL' });
+  }
+});
+
+// GET /adl/:beneficiaryId/progress — تقدم ADL عبر الزمن
+router.get('/adl/:beneficiaryId/progress', async (req, res) => {
+  try {
+    const ADLAssessment = require('../models/ADLAssessment');
+    const progress = await ADLAssessment.getBeneficiaryADLProgress(req.params.beneficiaryId);
+    res.json({ success: true, data: progress });
+  } catch (err) {
+    logger.error('ADL progress error:', err);
+    res.status(500).json({ success: false, message: 'خطأ في جلب تقدم ADL' });
+  }
+});
+
+// GET /adl-statistics — إحصائيات ADL العامة
+router.get('/adl-statistics', async (_req, res) => {
+  try {
+    const ADLAssessment = require('../models/ADLAssessment');
+    const stats = await ADLAssessment.getADLStatistics();
+    res.json({ success: true, data: stats });
+  } catch (err) {
+    logger.error('ADL statistics error:', err);
+    res.status(500).json({ success: false, message: 'خطأ في إحصائيات ADL' });
+  }
+});
+
+// GET /adl/:beneficiaryId/training-plan — خطة تدريب مقترحة بناءً على تقييم ADL
+router.get('/adl/:beneficiaryId/training-plan', async (req, res) => {
+  try {
+    const ADLAssessment = require('../models/ADLAssessment');
+    const assessment = await ADLAssessment.findOne({ beneficiary: req.params.beneficiaryId })
+      .sort({ assessmentDate: -1 });
+
+    if (!assessment) {
+      return res.status(404).json({ success: false, message: 'لا يوجد تقييم ADL لهذا المستفيد' });
+    }
+
+    const suggestions = assessment.getTrainingPlanSuggestions();
+    const report = assessment.generateADLReport();
+    res.json({
+      success: true,
+      data: {
+        trainingSuggestions: suggestions,
+        currentLevel: report.independenceLevel,
+        overallScore: report.overallScore,
+        strengths: report.strengths,
+        improvementAreas: report.improvementAreas,
+      },
+    });
+  } catch (err) {
+    logger.error('ADL training plan error:', err);
+    res.status(500).json({ success: false, message: 'خطأ في إنشاء خطة التدريب' });
+  }
+});
+
 module.exports = router;

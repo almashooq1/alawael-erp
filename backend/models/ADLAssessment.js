@@ -256,4 +256,190 @@ adlAssessmentSchema.virtual('totalSkillsAssessed').get(function () {
   );
 });
 
+// ─── Virtual: skill distribution categories ───
+adlAssessmentSchema.virtual('skillDistribution').get(function () {
+  const allSkills = [
+    ...(this.cookingSkills || []),
+    ...(this.cleaningSkills || []),
+    ...(this.shoppingSkills || []),
+    ...(this.transportationSkills || []),
+    ...(this.personalCareSkills || []),
+    ...(this.moneyManagementSkills || []),
+    ...(this.communicationSkills || []),
+    ...(this.safetySkills || []),
+  ];
+  if (!allSkills.length) return { independent: 0, supervision: 0, partialAssist: 0, fullAssist: 0, unable: 0 };
+
+  return {
+    independent: allSkills.filter(s => s.rating === 5).length,
+    supervision: allSkills.filter(s => s.rating === 4).length,
+    partialAssist: allSkills.filter(s => s.rating === 3).length,
+    fullAssist: allSkills.filter(s => s.rating === 2).length,
+    unable: allSkills.filter(s => s.rating === 1).length,
+    total: allSkills.length,
+  };
+});
+
+// ─── Virtual: improvement areas ───
+adlAssessmentSchema.virtual('improvementAreas').get(function () {
+  const categories = {
+    cooking: this.categoryScores?.cooking || 0,
+    cleaning: this.categoryScores?.cleaning || 0,
+    shopping: this.categoryScores?.shopping || 0,
+    transportation: this.categoryScores?.transportation || 0,
+    personal_care: this.categoryScores?.personal_care || 0,
+    money_management: this.categoryScores?.money_management || 0,
+    communication: this.categoryScores?.communication || 0,
+    safety: this.categoryScores?.safety || 0,
+  };
+  return Object.entries(categories)
+    .filter(([, score]) => score < 50)
+    .sort(([, a], [, b]) => a - b)
+    .map(([category, score]) => ({ category, score }));
+});
+
+// ─── Method: get progress compared to previous assessment ───
+adlAssessmentSchema.methods.getProgressFromPrevious = function (previousAssessment) {
+  if (!previousAssessment) return null;
+
+  const categories = ['cooking', 'cleaning', 'shopping', 'transportation', 'personal_care', 'money_management', 'communication', 'safety'];
+  const categoryChanges = categories.map(cat => ({
+    category: cat,
+    current: this.categoryScores?.[cat] || 0,
+    previous: previousAssessment.categoryScores?.[cat] || 0,
+    change: (this.categoryScores?.[cat] || 0) - (previousAssessment.categoryScores?.[cat] || 0),
+  }));
+
+  return {
+    overallChange: this.overallScore - (previousAssessment.overallScore || 0),
+    overallImprovement: this.overallScore > (previousAssessment.overallScore || 0),
+    previousLevel: previousAssessment.independenceLevel,
+    currentLevel: this.independenceLevel,
+    levelImproved: this.overallScore > (previousAssessment.overallScore || 0),
+    categoryChanges,
+    improvedCategories: categoryChanges.filter(c => c.change > 0),
+    declinedCategories: categoryChanges.filter(c => c.change < 0),
+    daysBetween: this.assessmentDate && previousAssessment.assessmentDate
+      ? Math.ceil((this.assessmentDate - previousAssessment.assessmentDate) / (1000 * 60 * 60 * 24))
+      : null,
+  };
+};
+
+// ─── Method: generate ADL report ───
+adlAssessmentSchema.methods.generateADLReport = function () {
+  const dist = this.skillDistribution;
+  const improvements = this.improvementAreas;
+  const strengths = Object.entries(this.categoryScores?.toObject?.() || this.categoryScores || {})
+    .filter(([, score]) => score >= 75)
+    .map(([cat, score]) => ({ category: cat, score }));
+
+  return {
+    beneficiary: this.beneficiary,
+    assessor: this.assessor,
+    date: this.assessmentDate,
+    type: this.assessmentType,
+    overallScore: this.overallScore,
+    independenceLevel: this.independenceLevel,
+    totalSkillsAssessed: this.totalSkillsAssessed,
+    skillDistribution: dist,
+    categoryScores: this.categoryScores,
+    strengths,
+    improvementAreas: improvements,
+    priorityAreas: this.priorityAreas,
+    recommendations: this.recommendations,
+    independencePercentage: dist.total ? Math.round(((dist.independent + dist.supervision) / dist.total) * 100) : 0,
+  };
+};
+
+// ─── Method: get training plan suggestions ───
+adlAssessmentSchema.methods.getTrainingPlanSuggestions = function () {
+  const TRAINING_MAP = {
+    cooking: { nameAr: 'برنامج تدريب الطبخ', focus: 'تحضير الوجبات والسلامة في المطبخ' },
+    cleaning: { nameAr: 'برنامج مهارات التنظيف', focus: 'ترتيب وتنظيف المنزل' },
+    shopping: { nameAr: 'برنامج مهارات التسوق', focus: 'التسوق وإدارة المشتريات' },
+    transportation: { nameAr: 'برنامج استخدام المواصلات', focus: 'التنقل المستقل' },
+    personal_care: { nameAr: 'برنامج العناية الشخصية', focus: 'النظافة الذاتية واللبس' },
+    money_management: { nameAr: 'برنامج إدارة المال', focus: 'التعامل مع المال والميزانية' },
+    communication: { nameAr: 'برنامج التواصل', focus: 'استخدام الهاتف والتواصل الاجتماعي' },
+    safety: { nameAr: 'برنامج السلامة', focus: 'الأمان في المنزل والطوارئ' },
+  };
+
+  const improvements = this.improvementAreas;
+  return improvements.map(area => ({
+    ...area,
+    ...TRAINING_MAP[area.category],
+    priority: area.score < 25 ? 'عالية' : area.score < 50 ? 'متوسطة' : 'منخفضة',
+    estimatedDuration: area.score < 25 ? '12 أسبوع' : area.score < 50 ? '8 أسابيع' : '4 أسابيع',
+  }));
+};
+
+// ─── Static: get ADL statistics ───
+adlAssessmentSchema.statics.getADLStatistics = async function () {
+  const [total, byType, avgScores, byLevel] = await Promise.all([
+    this.countDocuments(),
+    this.aggregate([{ $group: { _id: '$assessmentType', count: { $sum: 1 } } }]),
+    this.aggregate([{
+      $group: {
+        _id: null,
+        avgOverall: { $avg: '$overallScore' },
+        avgCooking: { $avg: '$categoryScores.cooking' },
+        avgCleaning: { $avg: '$categoryScores.cleaning' },
+        avgShopping: { $avg: '$categoryScores.shopping' },
+        avgTransportation: { $avg: '$categoryScores.transportation' },
+        avgPersonalCare: { $avg: '$categoryScores.personal_care' },
+        avgMoneyManagement: { $avg: '$categoryScores.money_management' },
+        avgCommunication: { $avg: '$categoryScores.communication' },
+        avgSafety: { $avg: '$categoryScores.safety' },
+      },
+    }]),
+    this.aggregate([{ $group: { _id: '$independenceLevel', count: { $sum: 1 } } }]),
+  ]);
+
+  return {
+    total,
+    byAssessmentType: byType,
+    averageScores: avgScores[0] || {},
+    byIndependenceLevel: byLevel,
+  };
+};
+
+// ─── Static: get beneficiary progress over time ───
+adlAssessmentSchema.statics.getBeneficiaryADLProgress = async function (beneficiaryId) {
+  const assessments = await this.find({ beneficiary: beneficiaryId })
+    .sort({ assessmentDate: 1 })
+    .lean();
+
+  if (assessments.length < 2) {
+    return {
+      assessmentCount: assessments.length,
+      trend: 'insufficient_data',
+      assessments: assessments.map(a => ({
+        date: a.assessmentDate,
+        type: a.assessmentType,
+        overallScore: a.overallScore,
+        level: a.independenceLevel,
+      })),
+    };
+  }
+
+  const first = assessments[0];
+  const last = assessments[assessments.length - 1];
+  const change = (last.overallScore || 0) - (first.overallScore || 0);
+
+  return {
+    assessmentCount: assessments.length,
+    trend: change > 5 ? 'improving' : change < -5 ? 'declining' : 'stable',
+    overallChange: change,
+    firstAssessment: { date: first.assessmentDate, score: first.overallScore, level: first.independenceLevel },
+    lastAssessment: { date: last.assessmentDate, score: last.overallScore, level: last.independenceLevel },
+    assessments: assessments.map(a => ({
+      date: a.assessmentDate,
+      type: a.assessmentType,
+      overallScore: a.overallScore,
+      level: a.independenceLevel,
+      categoryScores: a.categoryScores,
+    })),
+  };
+};
+
 module.exports = mongoose.model('ADLAssessment', adlAssessmentSchema);

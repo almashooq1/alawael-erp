@@ -1180,8 +1180,7 @@ const ASSESSMENT_SCALES = [
     id: 'emotionalRegulation',
     name: 'مقياس التنظيم الانفعالي',
     nameEn: 'Emotional Regulation Scale',
-    description:
-      'تقييم القدرة على التعرف على المشاعر وتنظيمها والتعبير عنها والتعامل مع الإحباط',
+    description: 'تقييم القدرة على التعرف على المشاعر وتنظيمها والتعبير عنها والتعامل مع الإحباط',
     maxScore: 100,
     icon: 'SelfImprovement',
     color: '#e91e63',
@@ -1273,8 +1272,7 @@ const ASSESSMENT_SCALES = [
     id: 'functionalIndependence',
     name: 'مقياس الاستقلالية الوظيفية (FIM)',
     nameEn: 'Functional Independence Measure',
-    description:
-      'تقييم مستوى الاستقلالية في الرعاية الذاتية والتنقل والتواصل والإدراك الاجتماعي',
+    description: 'تقييم مستوى الاستقلالية في الرعاية الذاتية والتنقل والتواصل والإدراك الاجتماعي',
     maxScore: 126,
     icon: 'Accessibility',
     color: '#00838f',
@@ -1321,8 +1319,7 @@ const ASSESSMENT_SCALES = [
     id: 'qualityOfLife',
     name: 'مقياس جودة الحياة',
     nameEn: 'Quality of Life Scale',
-    description:
-      'تقييم جودة الحياة في الجوانب الجسدية والنفسية والاجتماعية والبيئية والروحية',
+    description: 'تقييم جودة الحياة في الجوانب الجسدية والنفسية والاجتماعية والبيئية والروحية',
     maxScore: 100,
     icon: 'Favorite',
     color: '#c62828',
@@ -1441,8 +1438,7 @@ const ASSESSMENT_SCALES = [
     id: 'speechLanguage',
     name: 'مقياس النطق واللغة الشامل',
     nameEn: 'Comprehensive Speech-Language Scale',
-    description:
-      'تقييم مهارات النطق والطلاقة والفهم اللغوي والتعبير اللغوي والبراغماتية',
+    description: 'تقييم مهارات النطق والطلاقة والفهم اللغوي والتعبير اللغوي والبراغماتية',
     maxScore: 100,
     icon: 'Campaign',
     color: '#0277bd',
@@ -1527,6 +1523,464 @@ const ASSESSMENT_SCALES = [
         max: 100,
         level: 'ready',
         label: 'جاهز للانتقال',
+        color: assessmentColors.normal,
+      },
+    ],
+  },
+
+  /* ───────────────────────────────────────────────────────────
+   *  مقاييس متخصصة لذوي الإعاقة  (8 مقاييس – 33‑40)
+   * ─────────────────────────────────────────────────────────── */
+
+  // 33 — Barthel Index (مؤشر بارثل للأنشطة اليومية)
+  {
+    id: 'barthelIndex',
+    name: 'مؤشر بارثل للأنشطة اليومية',
+    nameEn: 'Barthel Index of ADL',
+    description:
+      'مقياس معياري دولي لتقييم مستوى الاستقلالية في الأنشطة اليومية الأساسية العشر لذوي الإعاقة الجسدية',
+    maxScore: 100,
+    icon: 'Accessibility',
+    color: '#1565c0',
+    domains: [
+      { key: 'feeding', name: 'تناول الطعام', maxScore: 10 },
+      { key: 'bathing', name: 'الاستحمام', maxScore: 5 },
+      { key: 'grooming', name: 'العناية الشخصية', maxScore: 5 },
+      { key: 'dressing', name: 'ارتداء الملابس', maxScore: 10 },
+      { key: 'bowels', name: 'التحكم بالأمعاء', maxScore: 10 },
+      { key: 'bladder', name: 'التحكم بالمثانة', maxScore: 10 },
+      { key: 'toiletUse', name: 'استخدام المرحاض', maxScore: 10 },
+      { key: 'transfers', name: 'الانتقال (سرير/كرسي)', maxScore: 15 },
+      { key: 'mobilityLevel', name: 'التنقل', maxScore: 15 },
+      { key: 'stairs', name: 'صعود الدرج', maxScore: 10 },
+    ],
+    interpretation: [
+      {
+        min: 0,
+        max: 20,
+        level: 'totalDependence',
+        label: 'اعتماد كلي',
+        color: assessmentColors.severe,
+      },
+      {
+        min: 21,
+        max: 60,
+        level: 'severeDependence',
+        label: 'اعتماد شديد',
+        color: '#e65100',
+      },
+      {
+        min: 61,
+        max: 90,
+        level: 'moderateDependence',
+        label: 'اعتماد متوسط',
+        color: assessmentColors.moderate,
+      },
+      {
+        min: 91,
+        max: 99,
+        level: 'slightDependence',
+        label: 'اعتماد طفيف',
+        color: assessmentColors.mild,
+      },
+      {
+        min: 100,
+        max: 100,
+        level: 'independent',
+        label: 'مستقل تماماً',
+        color: assessmentColors.normal,
+      },
+    ],
+  },
+
+  // 34 — WHODAS 2.0 (مقياس تقييم الإعاقة – منظمة الصحة العالمية)
+  {
+    id: 'whodas2',
+    name: 'مقياس تقييم الإعاقة (WHODAS 2.0)',
+    nameEn: 'WHO Disability Assessment Schedule 2.0',
+    description:
+      'مقياس منظمة الصحة العالمية لتقييم مستوى الإعاقة عبر ستة مجالات وظيفية حسب التصنيف الدولي ICF',
+    maxScore: 100,
+    icon: 'Public',
+    color: '#00695c',
+    domains: [
+      { key: 'cognition', name: 'الإدراك والفهم', maxScore: 17 },
+      { key: 'mobility', name: 'التنقل والحركة', maxScore: 17 },
+      { key: 'selfCare', name: 'الرعاية الذاتية', maxScore: 17 },
+      { key: 'gettingAlong', name: 'التعامل مع الآخرين', maxScore: 17 },
+      { key: 'lifeActivities', name: 'أنشطة الحياة', maxScore: 16 },
+      { key: 'participation', name: 'المشاركة المجتمعية', maxScore: 16 },
+    ],
+    interpretation: [
+      {
+        min: 0,
+        max: 4,
+        level: 'none',
+        label: 'لا توجد إعاقة',
+        color: assessmentColors.normal,
+      },
+      {
+        min: 5,
+        max: 24,
+        level: 'mild',
+        label: 'إعاقة خفيفة',
+        color: assessmentColors.mild,
+      },
+      {
+        min: 25,
+        max: 49,
+        level: 'moderate',
+        label: 'إعاقة متوسطة',
+        color: assessmentColors.moderate,
+      },
+      {
+        min: 50,
+        max: 95,
+        level: 'severe',
+        label: 'إعاقة شديدة',
+        color: assessmentColors.severe,
+      },
+      {
+        min: 96,
+        max: 100,
+        level: 'complete',
+        label: 'إعاقة كاملة',
+        color: '#b71c1c',
+      },
+    ],
+  },
+
+  // 35 — Gross Motor Function Classification System (GMFCS)
+  {
+    id: 'gmfcs',
+    name: 'مقياس تصنيف الوظائف الحركية الكبرى (GMFCS)',
+    nameEn: 'Gross Motor Function Classification System',
+    description:
+      'تصنيف القدرات الحركية الكبرى للأطفال ذوي الشلل الدماغي عبر خمسة مستويات وظيفية معيارية',
+    maxScore: 100,
+    icon: 'DirectionsWalk',
+    color: '#4a148c',
+    domains: [
+      { key: 'selfInitiatedMovement', name: 'الحركة الذاتية', maxScore: 20 },
+      { key: 'sitting', name: 'الجلوس والتوازن', maxScore: 20 },
+      { key: 'standing', name: 'الوقوف', maxScore: 20 },
+      { key: 'walking', name: 'المشي', maxScore: 20 },
+      { key: 'wheeledMobility', name: 'التنقل بالكرسي المتحرك', maxScore: 20 },
+    ],
+    interpretation: [
+      {
+        min: 0,
+        max: 20,
+        level: 'levelV',
+        label: 'المستوى V – نقل يدوي بالكامل',
+        color: assessmentColors.severe,
+      },
+      {
+        min: 21,
+        max: 40,
+        level: 'levelIV',
+        label: 'المستوى IV – تنقل محدود بمساعدة',
+        color: '#e65100',
+      },
+      {
+        min: 41,
+        max: 60,
+        level: 'levelIII',
+        label: 'المستوى III – مشي بأدوات مساعدة',
+        color: assessmentColors.moderate,
+      },
+      {
+        min: 61,
+        max: 80,
+        level: 'levelII',
+        label: 'المستوى II – مشي مع صعوبات',
+        color: assessmentColors.mild,
+      },
+      {
+        min: 81,
+        max: 100,
+        level: 'levelI',
+        label: 'المستوى I – مشي دون قيود',
+        color: assessmentColors.normal,
+      },
+    ],
+  },
+
+  // 36 — Vineland Adaptive Behavior (مقياس فاينلاند للسلوك التكيفي)
+  {
+    id: 'vinelandAdaptive',
+    name: 'مقياس فاينلاند للسلوك التكيفي',
+    nameEn: 'Vineland Adaptive Behavior Scale (VABS-3)',
+    description:
+      'تقييم السلوك التكيفي في مجالات التواصل والحياة اليومية والتنشئة الاجتماعية والمهارات الحركية للأفراد ذوي الإعاقة الذهنية والنمائية',
+    maxScore: 100,
+    icon: 'Psychology',
+    color: '#ad1457',
+    domains: [
+      { key: 'communicationDomain', name: 'التواصل (استقبالي/تعبيري/كتابي)', maxScore: 25 },
+      { key: 'dailyLivingSkills', name: 'مهارات الحياة اليومية', maxScore: 25 },
+      { key: 'socialization', name: 'التنشئة الاجتماعية', maxScore: 25 },
+      { key: 'motorSkills', name: 'المهارات الحركية', maxScore: 25 },
+    ],
+    interpretation: [
+      {
+        min: 0,
+        max: 20,
+        level: 'low',
+        label: 'مستوى تكيفي منخفض',
+        color: assessmentColors.severe,
+      },
+      {
+        min: 21,
+        max: 40,
+        level: 'belowAverage',
+        label: 'أقل من المتوسط',
+        color: assessmentColors.moderate,
+      },
+      {
+        min: 41,
+        max: 60,
+        level: 'adequate',
+        label: 'مستوى تكيفي ملائم',
+        color: assessmentColors.mild,
+      },
+      {
+        min: 61,
+        max: 80,
+        level: 'aboveAverage',
+        label: 'فوق المتوسط',
+        color: assessmentColors.normal,
+      },
+      {
+        min: 81,
+        max: 100,
+        level: 'high',
+        label: 'مستوى تكيفي مرتفع',
+        color: '#1b5e20',
+      },
+    ],
+  },
+
+  // 37 — Spinal Cord Independence Measure (مقياس استقلالية إصابات الحبل الشوكي)
+  {
+    id: 'scim',
+    name: 'مقياس استقلالية إصابات الحبل الشوكي (SCIM III)',
+    nameEn: 'Spinal Cord Independence Measure III',
+    description:
+      'مقياس متخصص لتقييم مستوى الاستقلالية الوظيفية لمصابي الحبل الشوكي في الرعاية الذاتية والتنفس والتنقل',
+    maxScore: 100,
+    icon: 'Accessible',
+    color: '#0d47a1',
+    domains: [
+      { key: 'selfCare', name: 'الرعاية الذاتية', maxScore: 20 },
+      { key: 'respiration', name: 'التنفس والتحكم بالمصرّات', maxScore: 40 },
+      { key: 'mobilityRoom', name: 'التنقل في الغرفة والمرحاض', maxScore: 10 },
+      { key: 'mobilityIndoors', name: 'التنقل الداخلي والخارجي', maxScore: 30 },
+    ],
+    interpretation: [
+      {
+        min: 0,
+        max: 25,
+        level: 'totalDependence',
+        label: 'اعتماد كلي – رعاية دائمة',
+        color: assessmentColors.severe,
+      },
+      {
+        min: 26,
+        max: 50,
+        level: 'highDependence',
+        label: 'اعتماد مرتفع',
+        color: '#e65100',
+      },
+      {
+        min: 51,
+        max: 75,
+        level: 'moderateIndependence',
+        label: 'استقلالية متوسطة',
+        color: assessmentColors.moderate,
+      },
+      {
+        min: 76,
+        max: 90,
+        level: 'highIndependence',
+        label: 'استقلالية مرتفعة',
+        color: assessmentColors.mild,
+      },
+      {
+        min: 91,
+        max: 100,
+        level: 'fullIndependence',
+        label: 'استقلالية كاملة',
+        color: assessmentColors.normal,
+      },
+    ],
+  },
+
+  // 38 — Functional Independence Measure (مقياس الاستقلالية الوظيفية)
+  {
+    id: 'functionalIndependence',
+    name: 'مقياس الاستقلالية الوظيفية (FIM)',
+    nameEn: 'Functional Independence Measure',
+    description:
+      'مقياس دولي معتمد لتقييم مستوى الاستقلالية الوظيفية في المهارات الحركية والإدراكية لمرضى إعادة التأهيل',
+    maxScore: 126,
+    icon: 'EmojiPeople',
+    color: '#283593',
+    domains: [
+      { key: 'selfCareMotor', name: 'الرعاية الذاتية', maxScore: 42 },
+      { key: 'sphincterControl', name: 'التحكم بالمصرّات', maxScore: 14 },
+      { key: 'transfers', name: 'الانتقال والتحويل', maxScore: 21 },
+      { key: 'locomotion', name: 'التنقل', maxScore: 14 },
+      { key: 'communicationCog', name: 'التواصل', maxScore: 14 },
+      { key: 'socialCognition', name: 'الإدراك الاجتماعي', maxScore: 21 },
+    ],
+    interpretation: [
+      {
+        min: 18,
+        max: 35,
+        level: 'totalAssist',
+        label: 'مساعدة كاملة',
+        color: assessmentColors.severe,
+      },
+      {
+        min: 36,
+        max: 53,
+        level: 'maxAssist',
+        label: 'مساعدة قصوى',
+        color: '#e65100',
+      },
+      {
+        min: 54,
+        max: 71,
+        level: 'modAssist',
+        label: 'مساعدة متوسطة',
+        color: assessmentColors.moderate,
+      },
+      {
+        min: 72,
+        max: 89,
+        level: 'minAssist',
+        label: 'مساعدة بسيطة',
+        color: assessmentColors.mild,
+      },
+      {
+        min: 90,
+        max: 107,
+        level: 'supervision',
+        label: 'إشراف فقط',
+        color: '#66bb6a',
+      },
+      {
+        min: 108,
+        max: 126,
+        level: 'independent',
+        label: 'استقلال كامل',
+        color: assessmentColors.normal,
+      },
+    ],
+  },
+
+  // 39 — Sensory Profile (مقياس الملف الحسي)
+  {
+    id: 'sensoryProfile',
+    name: 'مقياس الملف الحسي',
+    nameEn: 'Sensory Profile Assessment',
+    description:
+      'تقييم أنماط المعالجة الحسية ومستوى الاستجابة للمثيرات الحسية لدى الأطفال ذوي اضطرابات المعالجة الحسية والتوحد',
+    maxScore: 100,
+    icon: 'Visibility',
+    color: '#e65100',
+    domains: [
+      { key: 'auditory', name: 'المعالجة السمعية', maxScore: 17 },
+      { key: 'visual', name: 'المعالجة البصرية', maxScore: 17 },
+      { key: 'tactile', name: 'المعالجة اللمسية', maxScore: 17 },
+      { key: 'vestibular', name: 'المعالجة الدهليزية', maxScore: 17 },
+      { key: 'oralSensory', name: 'المعالجة الحسية الفموية', maxScore: 16 },
+      { key: 'multisensory', name: 'المعالجة متعددة الحواس', maxScore: 16 },
+    ],
+    interpretation: [
+      {
+        min: 0,
+        max: 24,
+        level: 'definite',
+        label: 'اختلاف حسي واضح',
+        color: assessmentColors.severe,
+      },
+      {
+        min: 25,
+        max: 39,
+        level: 'probable',
+        label: 'اختلاف حسي محتمل',
+        color: assessmentColors.moderate,
+      },
+      {
+        min: 40,
+        max: 59,
+        level: 'typical',
+        label: 'معالجة حسية نمطية',
+        color: assessmentColors.mild,
+      },
+      {
+        min: 60,
+        max: 79,
+        level: 'aboveTypical',
+        label: 'استجابة حسية جيدة',
+        color: assessmentColors.normal,
+      },
+      {
+        min: 80,
+        max: 100,
+        level: 'optimal',
+        label: 'تكامل حسي ممتاز',
+        color: '#1b5e20',
+      },
+    ],
+  },
+
+  // 40 — Assistive Technology Assessment (مقياس تقييم التقنيات المساعدة)
+  {
+    id: 'assistiveTech',
+    name: 'مقياس تقييم التقنيات المساعدة',
+    nameEn: 'Assistive Technology Assessment Scale',
+    description:
+      'تقييم مدى الحاجة والكفاءة في استخدام التقنيات المساعدة والأجهزة التعويضية لذوي الإعاقة',
+    maxScore: 100,
+    icon: 'Devices',
+    color: '#37474f',
+    domains: [
+      { key: 'needsIdentification', name: 'تحديد الاحتياجات', maxScore: 20 },
+      { key: 'deviceMatch', name: 'ملاءمة الجهاز/التقنية', maxScore: 20 },
+      { key: 'userCompetence', name: 'كفاءة المستخدم', maxScore: 20 },
+      { key: 'environmentFit', name: 'ملاءمة البيئة', maxScore: 20 },
+      { key: 'functionalGain', name: 'المكسب الوظيفي', maxScore: 20 },
+    ],
+    interpretation: [
+      {
+        min: 0,
+        max: 24,
+        level: 'inadequate',
+        label: 'حاجة ماسة للتدخل التقني',
+        color: assessmentColors.severe,
+      },
+      {
+        min: 25,
+        max: 49,
+        level: 'partial',
+        label: 'تغطية جزئية للاحتياجات',
+        color: assessmentColors.moderate,
+      },
+      {
+        min: 50,
+        max: 74,
+        level: 'adequate',
+        label: 'تغطية ملائمة',
+        color: assessmentColors.mild,
+      },
+      {
+        min: 75,
+        max: 100,
+        level: 'optimal',
+        label: 'تكامل تقني ممتاز',
         color: assessmentColors.normal,
       },
     ],

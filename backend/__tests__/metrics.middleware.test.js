@@ -90,7 +90,7 @@ describe('metricsHandler', () => {
     // Check via set or setHeader
     const setCall = res.set.mock.calls.find(c => c[0] === 'Content-Type');
     const setHeaderCall = res.setHeader.mock.calls.find(c => c[0] === 'Content-Type');
-      const _contentType = setCall ? setCall[1] : setHeaderCall ? setHeaderCall[1] : null;
+    const _contentType = setCall ? setCall[1] : setHeaderCall ? setHeaderCall[1] : null;
 
     // Either send or end is called with the body
     const body = res.send.mock.calls[0]?.[0] || res.end.mock.calls[0]?.[0] || '';

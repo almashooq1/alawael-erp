@@ -88,11 +88,19 @@ router.get('/', async (req, res) => {
     if (minAge || maxAge) {
       const now = new Date();
       if (maxAge) {
-        const minDate = new Date(now.getFullYear() - parseInt(maxAge, 10) - 1, now.getMonth(), now.getDate());
+        const minDate = new Date(
+          now.getFullYear() - parseInt(maxAge, 10) - 1,
+          now.getMonth(),
+          now.getDate()
+        );
         filter.dateOfBirth = { $gte: minDate };
       }
       if (minAge) {
-        const maxDate = new Date(now.getFullYear() - parseInt(minAge, 10), now.getMonth(), now.getDate());
+        const maxDate = new Date(
+          now.getFullYear() - parseInt(minAge, 10),
+          now.getMonth(),
+          now.getDate()
+        );
         filter.dateOfBirth = { ...filter.dateOfBirth, $lte: maxDate };
       }
     }
@@ -130,7 +138,9 @@ router.get('/', async (req, res) => {
     });
   } catch (error) {
     logger.error('Beneficiaries list error:', error);
-    res.status(500).json({ success: false, message: 'فشل في تحميل المستفيدين', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'فشل في تحميل المستفيدين', error: error.message });
   }
 });
 
@@ -157,7 +167,20 @@ router.get('/statistics', async (req, res) => {
       { $sort: { '_id.year': 1, '_id.month': 1 } },
     ]);
 
-    const months = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+    const months = [
+      'يناير',
+      'فبراير',
+      'مارس',
+      'أبريل',
+      'مايو',
+      'يونيو',
+      'يوليو',
+      'أغسطس',
+      'سبتمبر',
+      'أكتوبر',
+      'نوفمبر',
+      'ديسمبر',
+    ];
     const monthlyData = monthlyReg.map(r => ({
       month: months[r._id.month - 1],
       registrations: r.registrations,
@@ -184,7 +207,13 @@ router.get('/statistics', async (req, res) => {
       },
     ]);
 
-    const ageLabels = { 0: '3-6 سنوات', 7: '7-12 سنة', 13: '13-18 سنة', 19: '19-25 سنة', 26: '25+ سنة' };
+    const ageLabels = {
+      0: '3-6 سنوات',
+      7: '7-12 سنة',
+      13: '13-18 سنة',
+      19: '19-25 سنة',
+      26: '25+ سنة',
+    };
     const ageDistFormatted = ageDist
       .filter(a => a._id !== 'unknown')
       .map(a => ({ range: ageLabels[a._id] || `${a._id}+`, count: a.count }));
@@ -219,7 +248,9 @@ router.get('/statistics', async (req, res) => {
     });
   } catch (error) {
     logger.error('Beneficiaries statistics error:', error);
-    res.status(500).json({ success: false, message: 'فشل في تحميل الإحصائيات', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'فشل في تحميل الإحصائيات', error: error.message });
   }
 });
 
@@ -231,7 +262,9 @@ router.get('/recent', async (req, res) => {
   try {
     const limit = parseInt(req.query.limit, 10) || 10;
     const data = await Beneficiary.find({ isArchived: { $ne: true } })
-      .select('firstName lastName firstName_ar lastName_ar name category status progress sessions createdAt joinDate disability')
+      .select(
+        'firstName lastName firstName_ar lastName_ar name category status progress sessions createdAt joinDate disability'
+      )
       .sort({ createdAt: -1 })
       .limit(limit)
       .lean({ virtuals: true });
@@ -327,14 +360,29 @@ router.get('/:id', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const {
-      firstName, middleName, lastName,
-      firstName_ar, lastName_ar, firstName_en, lastName_en,
-      dateOfBirth, gender, nationalId, mrn,
-      email, phone, address,
-      disability, category,
-      medicalInfo, educationInfo,
-      familyMembers, emergencyContacts,
-      status, tags, generalNotes,
+      firstName,
+      middleName,
+      lastName,
+      firstName_ar,
+      lastName_ar,
+      firstName_en,
+      lastName_en,
+      dateOfBirth,
+      gender,
+      nationalId,
+      mrn,
+      email,
+      phone,
+      address,
+      disability,
+      category,
+      medicalInfo,
+      educationInfo,
+      familyMembers,
+      emergencyContacts,
+      status,
+      tags,
+      generalNotes,
     } = req.body;
 
     // Validate required fields
@@ -405,7 +453,9 @@ router.post('/', async (req, res) => {
       return res.status(409).json({ success: false, message: `القيمة مكررة: ${field}` });
     }
     logger.error('Beneficiary create error:', error);
-    res.status(500).json({ success: false, message: 'فشل في إنشاء المستفيد', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'فشل في إنشاء المستفيد', error: error.message });
   }
 });
 
@@ -435,11 +485,10 @@ router.put('/:id', async (req, res) => {
       updateData.name = `${updateData.firstName_ar} ${updateData.lastName_ar}`;
     }
 
-    const beneficiary = await Beneficiary.findByIdAndUpdate(
-      req.params.id,
-      updateData,
-      { new: true, runValidators: true }
-    ).select('-password -twoFactorSecret -accountVerificationCode');
+    const beneficiary = await Beneficiary.findByIdAndUpdate(req.params.id, updateData, {
+      new: true,
+      runValidators: true,
+    }).select('-password -twoFactorSecret -accountVerificationCode');
 
     if (!beneficiary) {
       return res.status(404).json({ success: false, message: 'المستفيد غير موجود' });
@@ -458,7 +507,9 @@ router.put('/:id', async (req, res) => {
       return res.status(409).json({ success: false, message: `القيمة مكررة: ${field}` });
     }
     logger.error('Beneficiary update error:', error);
-    res.status(500).json({ success: false, message: 'فشل في تحديث بيانات المستفيد', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'فشل في تحديث بيانات المستفيد', error: error.message });
   }
 });
 
@@ -562,20 +613,19 @@ router.post('/bulk-action', async (req, res) => {
       case 'delete':
         result = await Beneficiary.updateMany(
           { _id: { $in: ids } },
-          { isArchived: true, archivedDate: new Date(), archivedReason: data?.reason || 'حذف جماعي', status: 'inactive' }
+          {
+            isArchived: true,
+            archivedDate: new Date(),
+            archivedReason: data?.reason || 'حذف جماعي',
+            status: 'inactive',
+          }
         );
         break;
       case 'activate':
-        result = await Beneficiary.updateMany(
-          { _id: { $in: ids } },
-          { status: 'active' }
-        );
+        result = await Beneficiary.updateMany({ _id: { $in: ids } }, { status: 'active' });
         break;
       case 'deactivate':
-        result = await Beneficiary.updateMany(
-          { _id: { $in: ids } },
-          { status: 'inactive' }
-        );
+        result = await Beneficiary.updateMany({ _id: { $in: ids } }, { status: 'inactive' });
         break;
       case 'update-status':
         result = await Beneficiary.updateMany(
@@ -621,8 +671,15 @@ router.post('/:id/progress', async (req, res) => {
       teacherNotes,
     } = req.body;
 
-    if (!month || academicScore === undefined || attendanceRate === undefined || behaviorRating === undefined) {
-      return res.status(400).json({ success: false, message: 'بيانات ناقصة: الشهر والدرجة والحضور والسلوك مطلوبة' });
+    if (
+      !month ||
+      academicScore === undefined ||
+      attendanceRate === undefined ||
+      behaviorRating === undefined
+    ) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'بيانات ناقصة: الشهر والدرجة والحضور والسلوك مطلوبة' });
     }
 
     // Check beneficiary exists
@@ -635,9 +692,8 @@ router.post('/:id/progress', async (req, res) => {
     const prevProgress = await BeneficiaryProgress.findOne({ beneficiaryId }).sort({ month: -1 });
     const previousMonthScore = prevProgress?.academicScore || 0;
     const scoreImprovement = academicScore - previousMonthScore;
-    const activityCompletionRate = totalActivities > 0
-      ? Math.round((completedActivities / totalActivities) * 100)
-      : 0;
+    const activityCompletionRate =
+      totalActivities > 0 ? Math.round((completedActivities / totalActivities) * 100) : 0;
 
     // Determine performance
     let overallPerformance = 'needs_improvement';

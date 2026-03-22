@@ -19,15 +19,18 @@ const beneficiaryService = {
   remove: async (id, reason) => api.delete(`/beneficiaries/${id}`, { data: { reason } }),
   restore: async id => api.patch(`/beneficiaries/${id}/restore`),
   updateStatus: async (id, status) => api.patch(`/beneficiaries/${id}/status`, { status }),
-  bulkAction: async (action, ids, data) => api.post('/beneficiaries/bulk-action', { action, ids, data }),
+  bulkAction: async (action, ids, data) =>
+    api.post('/beneficiaries/bulk-action', { action, ids, data }),
 
   // ==================== STATISTICS & REPORTS ====================
   getStatistics: async () => api.get('/beneficiaries/statistics'),
   getRecent: async (limit = 5) => api.get('/beneficiaries/recent', { params: { limit } }),
-  exportData: async (params = {}) => api.get('/beneficiaries/export', { params, responseType: 'blob' }),
+  exportData: async (params = {}) =>
+    api.get('/beneficiaries/export', { params, responseType: 'blob' }),
 
   // ==================== PROGRESS TRACKING ====================
-  getProgressHistory: async (id, limit = 12) => api.get(`/beneficiaries/${id}/progress`, { params: { limit } }),
+  getProgressHistory: async (id, limit = 12) =>
+    api.get(`/beneficiaries/${id}/progress`, { params: { limit } }),
   addProgress: async (id, data) => api.post(`/beneficiaries/${id}/progress`, data),
 
   // ==================== PORTAL AUTH ====================

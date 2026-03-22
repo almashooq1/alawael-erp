@@ -329,7 +329,16 @@ const beneficiarySchema = new mongoose.Schema(
     // ── Status & Lifecycle ─────────────────────────────────
     status: {
       type: String,
-      enum: ['active', 'inactive', 'pending', 'transferred', 'deceased', 'graduated', 'ACTIVE', 'INACTIVE'],
+      enum: [
+        'active',
+        'inactive',
+        'pending',
+        'transferred',
+        'deceased',
+        'graduated',
+        'ACTIVE',
+        'INACTIVE',
+      ],
       default: 'active',
       index: true,
     },
@@ -439,7 +448,7 @@ beneficiarySchema.virtual('primaryGuardian').get(function () {
 
 // ─── Pre-save Middleware ────────────────────────────────────────────────────
 
-beneficiarySchema.pre('save', async function (next) {
+beneficiarySchema.pre('save', async function () {
   // Auto-populate legacy "name" field for backward compatibility
   if (!this.name && (this.firstName || this.firstName_ar)) {
     this.name =
@@ -467,8 +476,6 @@ beneficiarySchema.pre('save', async function (next) {
   if (this.isModified('password') && this.password) {
     this.password = await bcrypt.hash(this.password, 12);
   }
-
-  next();
 });
 
 // ─── Instance Methods ───────────────────────────────────────────────────────
@@ -549,7 +556,11 @@ beneficiarySchema.statics.advancedSearch = function (filters) {
   if (filters.minAge || filters.maxAge) {
     const now = new Date();
     if (filters.maxAge) {
-      const minDate = new Date(now.getFullYear() - filters.maxAge - 1, now.getMonth(), now.getDate());
+      const minDate = new Date(
+        now.getFullYear() - filters.maxAge - 1,
+        now.getMonth(),
+        now.getDate()
+      );
       query.dateOfBirth = { $gte: minDate };
     }
     if (filters.minAge) {
@@ -562,7 +573,11 @@ beneficiarySchema.statics.advancedSearch = function (filters) {
   const limit = filters.limit || 50;
   const skip = filters.skip || 0;
 
-  return this.find(query).sort(sort).skip(skip).limit(limit).select('-password -twoFactorSecret -accountVerificationCode');
+  return this.find(query)
+    .sort(sort)
+    .skip(skip)
+    .limit(limit)
+    .select('-password -twoFactorSecret -accountVerificationCode');
 };
 
 beneficiarySchema.statics.getStatistics = async function () {
@@ -591,7 +606,14 @@ beneficiarySchema.statics.getStatistics = async function () {
     ]),
   ]);
 
-  const stats = counts[0] || { total: 0, active: 0, pending: 0, inactive: 0, avgProgress: 0, avgSessions: 0 };
+  const stats = counts[0] || {
+    total: 0,
+    active: 0,
+    pending: 0,
+    inactive: 0,
+    avgProgress: 0,
+    avgSessions: 0,
+  };
 
   // New this month
   const now = new Date();
@@ -607,9 +629,14 @@ beneficiarySchema.statics.getStatistics = async function () {
     newThisMonth,
     avgProgress: Math.round(stats.avgProgress || 0),
     avgSessions: parseFloat((stats.avgSessions || 0).toFixed(1)),
-    completionRate: stats.total > 0
-      ? Math.round((await this.countDocuments({ isArchived: { $ne: true }, progress: { $gte: 80 } })) / stats.total * 100)
-      : 0,
+    completionRate:
+      stats.total > 0
+        ? Math.round(
+            ((await this.countDocuments({ isArchived: { $ne: true }, progress: { $gte: 80 } })) /
+              stats.total) *
+              100
+          )
+        : 0,
     byCategory: byCategory.map(c => ({ category: c._id, count: c.count })),
     byStatus: byStatus.map(s => ({ status: s._id, count: s.count })),
   };

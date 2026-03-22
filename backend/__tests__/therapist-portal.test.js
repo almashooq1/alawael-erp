@@ -87,11 +87,12 @@ beforeAll(async () => {
 
   // 1. Test beneficiary (patient)
   const beneficiary = await Beneficiary.create({
-    name: `مستفيد ${TEST_PREFIX}`,
+    firstName: 'مستفيد',
+    lastName: TEST_PREFIX,
     mrn: `MRN-${TEST_PREFIX}`,
     status: 'ACTIVE',
     dob: new Date('2010-05-15'),
-    gender: 'ذكر',
+    gender: 'male',
   });
   testBeneficiaryId = beneficiary._id.toString();
 

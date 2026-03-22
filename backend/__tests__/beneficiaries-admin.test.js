@@ -48,8 +48,14 @@ jest.mock('../middleware/auth', () => {
     authenticateToken: passthrough,
     protect: passthrough,
     requireAuth: passthrough,
-    requireAdmin: (req, res, next) => { req.user = mockTestUser; next(); },
-    optionalAuth: (req, res, next) => { req.user = mockTestUser; next(); },
+    requireAdmin: (req, res, next) => {
+      req.user = mockTestUser;
+      next();
+    },
+    optionalAuth: (req, res, next) => {
+      req.user = mockTestUser;
+      next();
+    },
     requireRole: () => passthrough,
     authorize: () => passthrough,
     authorizeRole: () => passthrough,
@@ -293,9 +299,7 @@ describe('Beneficiaries Admin Module', () => {
   // ═══════════════════════════════════════════════════════════════════════════
   describe('PATCH /api/beneficiaries/:id/status', () => {
     test('should reject missing status', async () => {
-      const res = await request(app)
-        .patch(`/api/beneficiaries/${fakeId}/status`)
-        .send({});
+      const res = await request(app).patch(`/api/beneficiaries/${fakeId}/status`).send({});
       expect([400, 404, 500, 503]).toContain(res.status);
     });
 
@@ -352,15 +356,13 @@ describe('Beneficiaries Admin Module', () => {
   // ═══════════════════════════════════════════════════════════════════════════
   describe('Progress Tracking', () => {
     test('POST /api/beneficiaries/:id/progress — add progress', async () => {
-      const res = await request(app)
-        .post(`/api/beneficiaries/${fakeId}/progress`)
-        .send({
-          month: '2026-03',
-          academicScore: 85,
-          attendanceRate: 92,
-          behaviorRating: 8,
-          notes: 'تحسن ملحوظ',
-        });
+      const res = await request(app).post(`/api/beneficiaries/${fakeId}/progress`).send({
+        month: '2026-03',
+        academicScore: 85,
+        attendanceRate: 92,
+        behaviorRating: 8,
+        notes: 'تحسن ملحوظ',
+      });
       expect([200, 201, 404, 500, 503]).toContain(res.status);
     });
 
@@ -423,8 +425,7 @@ describe('Beneficiaries Admin Module', () => {
       expect([200, 404, 500]).toContain(archiveRes.status);
 
       // 5. Restore
-      const restoreRes = await request(app)
-        .patch(`/api/beneficiaries/${createdId}/restore`);
+      const restoreRes = await request(app).patch(`/api/beneficiaries/${createdId}/restore`);
       expect([200, 404, 500]).toContain(restoreRes.status);
     });
   });

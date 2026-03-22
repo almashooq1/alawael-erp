@@ -17,19 +17,26 @@ const mockPut = jest.fn(() => Promise.resolve({ data: { data: {} } }));
 const mockDelete = jest.fn(() => Promise.resolve({ data: { data: {} } }));
 const mockPatch = jest.fn(() => Promise.resolve({ data: { data: {} } }));
 const mockCreate = jest.fn(() => ({
-  get: mockGet, post: mockPost, put: mockPut, delete: mockDelete, patch: mockPatch,
+  get: mockGet,
+  post: mockPost,
+  put: mockPut,
+  delete: mockDelete,
+  patch: mockPatch,
   interceptors: { request: { use: jest.fn() }, response: { use: jest.fn() } },
 }));
 
 jest.mock('axios', () => ({
   create: mockCreate,
-  get: mockGet, post: mockPost, put: mockPut, delete: mockDelete, patch: mockPatch,
+  get: mockGet,
+  post: mockPost,
+  put: mockPut,
+  delete: mockDelete,
+  patch: mockPatch,
   interceptors: { request: { use: jest.fn() }, response: { use: jest.fn() } },
 }));
 
 // ═══════════════════════════════════════════════════════════════════════════════
 describe('Beneficiaries Frontend Module', () => {
-
   // ═══════════════════════════════════════════════════════════════════════════
   // SERVICE TESTS
   // ═══════════════════════════════════════════════════════════════════════════
@@ -42,12 +49,23 @@ describe('Beneficiaries Frontend Module', () => {
     });
 
     test('should export default object with expected methods', () => {
-      service = require('../services/beneficiaryService').default || require('../services/beneficiaryService');
+      service =
+        require('../services/beneficiaryService').default ||
+        require('../services/beneficiaryService');
       expect(service).toBeDefined();
       const expectedMethods = [
-        'getAll', 'getById', 'create', 'update', 'remove',
-        'getStatistics', 'getRecent', 'exportData',
-        'register', 'login', 'getSchedule', 'getProgress',
+        'getAll',
+        'getById',
+        'create',
+        'update',
+        'remove',
+        'getStatistics',
+        'getRecent',
+        'exportData',
+        'register',
+        'login',
+        'getSchedule',
+        'getProgress',
       ];
       expectedMethods.forEach(method => {
         expect(typeof service[method]).toBe('function');
@@ -55,74 +73,111 @@ describe('Beneficiaries Frontend Module', () => {
     });
 
     test('getAll should exist and accept params', () => {
-      service = require('../services/beneficiaryService').default || require('../services/beneficiaryService');
+      service =
+        require('../services/beneficiaryService').default ||
+        require('../services/beneficiaryService');
       expect(typeof service.getAll).toBe('function');
     });
 
     test('getById should accept an id argument', () => {
-      service = require('../services/beneficiaryService').default || require('../services/beneficiaryService');
+      service =
+        require('../services/beneficiaryService').default ||
+        require('../services/beneficiaryService');
       expect(typeof service.getById).toBe('function');
     });
 
     test('create should accept data argument', () => {
-      service = require('../services/beneficiaryService').default || require('../services/beneficiaryService');
+      service =
+        require('../services/beneficiaryService').default ||
+        require('../services/beneficiaryService');
       expect(typeof service.create).toBe('function');
     });
 
     test('update should accept id and data', () => {
-      service = require('../services/beneficiaryService').default || require('../services/beneficiaryService');
+      service =
+        require('../services/beneficiaryService').default ||
+        require('../services/beneficiaryService');
       expect(typeof service.update).toBe('function');
     });
 
     test('remove should accept id and optional reason', () => {
-      service = require('../services/beneficiaryService').default || require('../services/beneficiaryService');
+      service =
+        require('../services/beneficiaryService').default ||
+        require('../services/beneficiaryService');
       expect(typeof service.remove).toBe('function');
     });
 
     test('restore should accept id', () => {
-      service = require('../services/beneficiaryService').default || require('../services/beneficiaryService');
+      service =
+        require('../services/beneficiaryService').default ||
+        require('../services/beneficiaryService');
       expect(typeof service.restore).toBe('function');
     });
 
     test('updateStatus should accept id and status', () => {
-      service = require('../services/beneficiaryService').default || require('../services/beneficiaryService');
+      service =
+        require('../services/beneficiaryService').default ||
+        require('../services/beneficiaryService');
       expect(typeof service.updateStatus).toBe('function');
     });
 
     test('bulkAction should accept action and ids', () => {
-      service = require('../services/beneficiaryService').default || require('../services/beneficiaryService');
+      service =
+        require('../services/beneficiaryService').default ||
+        require('../services/beneficiaryService');
       expect(typeof service.bulkAction).toBe('function');
     });
 
     test('getStatistics should exist', () => {
-      service = require('../services/beneficiaryService').default || require('../services/beneficiaryService');
+      service =
+        require('../services/beneficiaryService').default ||
+        require('../services/beneficiaryService');
       expect(typeof service.getStatistics).toBe('function');
     });
 
     test('getRecent should exist', () => {
-      service = require('../services/beneficiaryService').default || require('../services/beneficiaryService');
+      service =
+        require('../services/beneficiaryService').default ||
+        require('../services/beneficiaryService');
       expect(typeof service.getRecent).toBe('function');
     });
 
     test('exportData should accept format', () => {
-      service = require('../services/beneficiaryService').default || require('../services/beneficiaryService');
+      service =
+        require('../services/beneficiaryService').default ||
+        require('../services/beneficiaryService');
       expect(typeof service.exportData).toBe('function');
     });
 
     test('getProgressHistory should exist', () => {
-      service = require('../services/beneficiaryService').default || require('../services/beneficiaryService');
+      service =
+        require('../services/beneficiaryService').default ||
+        require('../services/beneficiaryService');
       expect(typeof service.getProgressHistory).toBe('function');
     });
 
     test('addProgress should accept id and data', () => {
-      service = require('../services/beneficiaryService').default || require('../services/beneficiaryService');
+      service =
+        require('../services/beneficiaryService').default ||
+        require('../services/beneficiaryService');
       expect(typeof service.addProgress).toBe('function');
     });
 
     test('portal methods should exist', () => {
-      service = require('../services/beneficiaryService').default || require('../services/beneficiaryService');
-      ['register', 'login', 'getSchedule', 'getProgress', 'getMessages',
-       'getSurveys', 'getProfile', 'updateProfile', 'getDocuments', 'getNotifications',
+      service =
+        require('../services/beneficiaryService').default ||
+        require('../services/beneficiaryService');
+      [
+        'register',
+        'login',
+        'getSchedule',
+        'getProgress',
+        'getMessages',
+        'getSurveys',
+        'getProfile',
+        'updateProfile',
+        'getDocuments',
+        'getNotifications',
       ].forEach(m => {
         expect(typeof service[m]).toBe('function');
       });
@@ -196,8 +251,21 @@ describe('Beneficiaries Frontend Module', () => {
   // STATUS / CATEGORY MAPPINGS
   // ═══════════════════════════════════════════════════════════════════════════
   describe('UI Mappings', () => {
-    const STATUS_LABELS = { active: 'نشط', inactive: 'غير نشط', pending: 'قيد الانتظار', transferred: 'محوّل', graduated: 'متخرج' };
-    const CATEGORY_LABELS = { physical: 'حركية', mental: 'ذهنية', sensory: 'حسية', multiple: 'متعددة', learning: 'تعلم', speech: 'نطق' };
+    const STATUS_LABELS = {
+      active: 'نشط',
+      inactive: 'غير نشط',
+      pending: 'قيد الانتظار',
+      transferred: 'محوّل',
+      graduated: 'متخرج',
+    };
+    const CATEGORY_LABELS = {
+      physical: 'حركية',
+      mental: 'ذهنية',
+      sensory: 'حسية',
+      multiple: 'متعددة',
+      learning: 'تعلم',
+      speech: 'نطق',
+    };
 
     test('should map all status values', () => {
       ['active', 'inactive', 'pending', 'transferred', 'graduated'].forEach(s => {
@@ -224,9 +292,33 @@ describe('Beneficiaries Frontend Module', () => {
   // ═══════════════════════════════════════════════════════════════════════════
   describe('Client-side Filtering', () => {
     const mockBeneficiaries = [
-      { name: 'أحمد محمد', firstName_ar: 'أحمد', lastName_ar: 'محمد', status: 'active', category: 'physical', gender: 'male', nationalId: '111' },
-      { name: 'سارة عبدالله', firstName_ar: 'سارة', lastName_ar: 'عبدالله', status: 'pending', category: 'mental', gender: 'female', nationalId: '222' },
-      { name: 'خالد ناصر', firstName_ar: 'خالد', lastName_ar: 'ناصر', status: 'inactive', category: 'sensory', gender: 'male', nationalId: '333' },
+      {
+        name: 'أحمد محمد',
+        firstName_ar: 'أحمد',
+        lastName_ar: 'محمد',
+        status: 'active',
+        category: 'physical',
+        gender: 'male',
+        nationalId: '111',
+      },
+      {
+        name: 'سارة عبدالله',
+        firstName_ar: 'سارة',
+        lastName_ar: 'عبدالله',
+        status: 'pending',
+        category: 'mental',
+        gender: 'female',
+        nationalId: '222',
+      },
+      {
+        name: 'خالد ناصر',
+        firstName_ar: 'خالد',
+        lastName_ar: 'ناصر',
+        status: 'inactive',
+        category: 'sensory',
+        gender: 'male',
+        nationalId: '333',
+      },
     ];
 
     test('should filter by status', () => {
@@ -242,8 +334,8 @@ describe('Beneficiaries Frontend Module', () => {
 
     test('should search by name (Arabic)', () => {
       const q = 'سارة';
-      const result = mockBeneficiaries.filter(b =>
-        (b.name || '').includes(q) || (b.firstName_ar || '').includes(q)
+      const result = mockBeneficiaries.filter(
+        b => (b.name || '').includes(q) || (b.firstName_ar || '').includes(q)
       );
       expect(result).toHaveLength(1);
     });
@@ -254,7 +346,9 @@ describe('Beneficiaries Frontend Module', () => {
     });
 
     test('should combine status + category filter', () => {
-      const result = mockBeneficiaries.filter(b => b.status === 'active' && b.category === 'physical');
+      const result = mockBeneficiaries.filter(
+        b => b.status === 'active' && b.category === 'physical'
+      );
       expect(result).toHaveLength(1);
     });
 

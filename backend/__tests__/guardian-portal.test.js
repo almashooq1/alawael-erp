@@ -111,7 +111,8 @@ beforeAll(async () => {
 
   // 1. Test beneficiary (child)
   const beneficiary = await Beneficiary.create({
-    name: `مستفيد ${TEST_PREFIX}`,
+    firstName: 'مستفيد',
+    lastName: TEST_PREFIX,
     mrn: `MRN-${TEST_PREFIX}-1`,
     email: `ben1-${TEST_PREFIX}@test.com`,
     status: 'ACTIVE',
@@ -121,7 +122,8 @@ beforeAll(async () => {
 
   // 2. Second beneficiary for comparison tests
   const beneficiary2 = await Beneficiary.create({
-    name: `مستفيد ثاني ${TEST_PREFIX}`,
+    firstName: 'مستفيد',
+    lastName: `ثاني ${TEST_PREFIX}`,
     mrn: `MRN-${TEST_PREFIX}-2`,
     email: `ben2-${TEST_PREFIX}@test.com`,
     status: 'ACTIVE',
@@ -424,7 +426,8 @@ describe('Guardian Portal — Beneficiaries', () => {
 
   test('POST /api/guardian/beneficiaries/link — links a new beneficiary', async () => {
     const newBen = await Beneficiary.create({
-      name: `ربط اختبار ${TEST_PREFIX}`,
+      firstName: 'ربط',
+      lastName: `اختبار ${TEST_PREFIX}`,
       mrn: `MRN-${TEST_PREFIX}-LINK`,
       email: `link-${TEST_PREFIX}@test.com`,
       status: 'ACTIVE',
@@ -448,7 +451,8 @@ describe('Guardian Portal — Beneficiaries', () => {
   test('DELETE /api/guardian/beneficiaries/:id/unlink — unlinks beneficiary', async () => {
     // Link a temp beneficiary first
     const tempBen = await Beneficiary.create({
-      name: `فك ربط ${TEST_PREFIX}`,
+      firstName: 'فك',
+      lastName: `ربط ${TEST_PREFIX}`,
       mrn: `MRN-${TEST_PREFIX}-UNLINK`,
       email: `unlink-${TEST_PREFIX}@test.com`,
       status: 'ACTIVE',

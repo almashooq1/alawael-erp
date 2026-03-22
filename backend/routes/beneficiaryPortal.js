@@ -626,7 +626,8 @@ router.post('/profile/change-password', authenticateBeneficiary, async (req, res
     if (!passwordRegex.test(newPassword)) {
       return res.status(400).json({
         success: false,
-        message: 'Password must be at least 8 characters with uppercase, lowercase, number and special character',
+        message:
+          'Password must be at least 8 characters with uppercase, lowercase, number and special character',
       });
     }
 

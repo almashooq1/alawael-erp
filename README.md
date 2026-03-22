@@ -1,15 +1,15 @@
 # ALAWAEL ERP System
 
-**Unified enterprise resource planning platform with quality-first development**
+**نظام مراكز الأوائل للرعاية النهارية — Unified ERP Platform**
 
-> **Status**: ✅ Production Ready | **Backend**: 57+ test suites, all passing | **Frontend**: React + Material-UI | **Last Update**: March 19, 2026
+> **Status**: ✅ Production Ready | **Backend**: 258 test suites (7,319 tests) | **Frontend**: React 18 + MUI 5 | **CI**: GitHub Actions ✅ | **VPS**: Deployed
 
 ## Prerequisites
 
 | Tool | Version | Required |
 |------|---------|----------|
-| Node.js | >= 18.0.0 | Yes |
-| npm | >= 9.0.0 | Yes |
+| Node.js | >= 22.0.0 | Yes |
+| npm | >= 11.0.0 | Yes |
 | MongoDB | >= 6.0 | Yes (or set `USE_MOCK_DB=true`) |
 | Redis | >= 7.0 | Optional (set `DISABLE_REDIS=true`) |
 | Docker | >= 24.0 | Optional (for containerized deployment) |
@@ -36,8 +36,8 @@ npm run dev:all        # Backend + Frontend
 
 ### Quality Commands
 ```bash
-npm test               # Run backend tests (894 tests)
-npm run test:frontend  # Run frontend tests (534 tests)
+npm test               # Run backend tests (7,319 tests)
+npm run test:frontend  # Run frontend tests
 npm run lint           # ESLint checks
 ```
 
@@ -45,19 +45,58 @@ npm run lint           # ESLint checks
 
 ```
 alawael-erp/
-├── backend/               # Node.js/Express API (✅ 29/29 suites, 894/894 tests)
-├── frontend/              # React web application
-├── graphql/               # GraphQL server
-├── intelligent-agent/     # AI/ML services
-├── finance-module/        # Finance & payment operations
-├── supply-chain/          # Supply chain management
-├── mobile/                # Mobile application
-├── docs/                  # Documentation hub
-│   ├── archive/          # Historical documentation
-│   └── [current guides]
-├── scripts/               # Utility & deployment scripts
-├── .github/workflows/     # CI/CD automation
-└── [configuration files]
+│
+├── backend/                    # 🔧 Node.js/Express API Server
+│   ├── __tests__/             #    258 test suites, 7,319 tests
+│   ├── controllers/           #    Route controllers
+│   ├── models/                #    Mongoose schemas
+│   ├── middleware/             #    Express middleware
+│   ├── routes/                #    API routes
+│   ├── services/              #    Business logic
+│   ├── config/                #    Configuration
+│   └── server.js              #    Entry point
+│
+├── frontend/                   # 🌐 React 18 Web App (MUI 5)
+│   ├── src/                   #    Source code
+│   ├── public/                #    Static assets
+│   └── build/                 #    Production build (565 chunks)
+│
+├── deploy/                     # 🚀 Deployment & Infrastructure
+│   ├── hostinger/             #    VPS deploy scripts (PM2, Nginx)
+│   ├── docker/                #    Docker production configs
+│   ├── terraform/             #    IaC (Terraform)
+│   └── ssl/                   #    SSL setup scripts
+│
+├── k8s/                        # ☸️  Kubernetes manifests
+├── helm/                       # ⎈  Helm charts
+│
+├── docs/                       # 📚 Documentation Hub
+│   ├── api/                   #    API documentation
+│   ├── architecture/          #    System architecture
+│   └── *.md                   #    Guides & reports
+│
+├── .github/workflows/          # 🔄 CI/CD (5 jobs: lint, test, build, security, summary)
+│
+├── alawael-wiki/               # 📖 Project Wiki
+├── scripts/                    # 🛠️  Utility scripts
+├── monitoring/                 # 📊 Monitoring configs
+├── tests/                      # 🧪 Integration/E2E tests
+│
+├── supply-chain-management/    # 📦 SCM Module
+├── finance-module/             # 💰 Finance Module
+├── intelligent-agent/          # 🤖 AI/ML Services
+├── mobile/                     # 📱 Mobile App
+├── whatsapp/                   # 💬 WhatsApp Integration
+├── gateway/                    # 🔌 API Gateway
+├── graphql/                    # 📊 GraphQL Server
+│
+├── docker-compose.yml          # Docker: Development
+├── docker-compose.production.yml
+├── docker-compose.professional.yml
+├── Dockerfile                  # Main Dockerfile
+├── nginx.conf                  # Root Nginx config
+├── package.json                # Monorepo root
+└── README.md
 ```
 
 ## ✨ Key Features
@@ -73,10 +112,11 @@ alawael-erp/
 ### Core Services
 | Service | Status | Details |
 |---------|--------|---------|
-| Backend | ✅ STABLE | 894/894 tests, 0 regressions |
-| Frontend | ✅ READY | React + Material-UI |
+| Backend | ✅ STABLE | 258 suites, 7,319 tests, 0 failures |
+| Frontend | ✅ READY | React 18 + MUI 5 (565 chunks) |
 | Database | ✅ STABLE | MongoDB + Redis |
-| Infrastructure | ✅ READY | Docker + Kubernetes |
+| CI/CD | ✅ GREEN | 5 jobs all passing |
+| VPS | ✅ LIVE | PM2 cluster at 72.60.84.56 |
 
 ## 📚 Essential Documentation
 
@@ -91,7 +131,7 @@ alawael-erp/
 - **[INTEGRATIONS_README.md](INTEGRATIONS_README.md)** - Service integrations
 
 ### Operations
-- **[DEPLOYMENT_RUNBOOK.md](DEPLOYMENT_RUNBOOK.md)** - Production deployment
+- **[DEPLOYMENT_RUNBOOK.md](docs/DEPLOYMENT_RUNBOOK.md)** - Production deployment
 - **[MONITORING_SYSTEM.md](MONITORING_SYSTEM.md)** - Health monitoring
 - **[QUICK_REFERENCE.md](QUICK_REFERENCE.md)** - Quick command reference
 
@@ -149,25 +189,26 @@ $env:GITHUB_TOKEN = "<your-token>"
 
 | Metric | Value | Status |
 |--------|-------|--------|
-| Test Suites | 29/29 | ✅ All passing |
-| Test Cases | 894/894 | ✅ All passing |
-| Coverage | Full | ✅ Maintained |
+| Test Suites | 258/258 | ✅ All passing |
+| Test Cases | 7,319/7,319 | ✅ All passing |
+| CI Jobs | 5/5 | ✅ Green |
 | Regressions | 0 | ✅ Zero |
 | Guard Script | Active | ✅ Enforced |
-| CI/CD Pipelines | 5+ | ✅ Automated |
+| VPS Deploy | Live | ✅ Healthy |
 
 ## 🛠️ Project Status
 
 ### Backend
-- **Tests**: 29 suites, 894 tests (all passing)
+- **Tests**: 258 suites, 7,319 tests (all passing)
 - **Coverage**: Full test coverage
 - **Quality**: No regressions, guard script active
-- **Stability**: Production-ready
+- **Stability**: Production-ready, deployed on VPS
 
 ### Frontend
-- **Framework**: React + Material-UI
-- **Quality**: Ready for integration
-- **Status**: Development complete
+- **Framework**: React 18 + Material-UI 5
+- **Build**: 565 JS chunks in production
+- **Quality**: Production build verified
+- **Status**: Deployed and live
 
 ### System
 - **Infrastructure**: Docker & Kubernetes ready
@@ -224,19 +265,19 @@ npm run test:guard:maintenance-mocks
 ## 🎯 Key Achievements
 
 ```
-✅ 29/29 Backend Test Suites Passing
-✅ 894/894 Individual Tests Passing
+✅ 258/258 Backend Test Suites Passing
+✅ 7,319/7,319 Individual Tests Passing
 ✅ Zero Test Regressions
 ✅ Full Test Coverage Maintained
 ✅ Guard Scripts Active (Mock Centralization)
-✅ Dual-Gate CI/CD (Push + PR)
-✅ Branch Protection Ready
+✅ CI/CD Green (5 Jobs)
+✅ VPS Deployed & Healthy
 ✅ System Documentation Complete
 ✅ Production Ready Status
 ```
 
 ---
 
-**ALAWAEL ERP System** - Enterprise-grade resource management
-**Version**: v1.0.0 | **Status**: ✅ Production Ready
-**Last Update**: March 19, 2026
+**ALAWAEL ERP System** - Enterprise-grade resource management for rehabilitation day-care centers
+**Version**: v3.0.0 | **Status**: ✅ Production Ready
+**Last Update**: March 22, 2026

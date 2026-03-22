@@ -309,9 +309,26 @@
   "files.maxMemoryForLargeFilesMB": 2048,
   "files.saveConflictResolution": "overwriteFileOnDisk",
 
+  // ────────────────────────────────────────────────────────────
+  // 📁 Explorer: File Nesting (Professional Grouping)
+  // ────────────────────────────────────────────────────────────
+
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.expand": false,
+  "explorer.fileNesting.patterns": {
+    "package.json": "package-lock.json, .npmrc, .nvmrc, .node-version, .eslintrc*, eslint.config.*, .prettierrc*, .prettierignore, .editorconfig, .eslintignore, tsconfig.json, jsconfig.json, .vscodeignore, .dockerignore, Procfile, LICENSE",
+    "Dockerfile": "docker-compose*.yml, .dockerignore",
+    "README.md": "CONTRIBUTING.md, CHANGELOG.md, CODE_OF_CONDUCT.md, SECURITY.md",
+    ".gitignore": ".deploymentconfig, .env.example, .env.docker, .env.production, .env.production.template",
+    "*.js": "$(capture).test.js, $(capture).spec.js, $(capture).d.ts, $(capture).js.map",
+    "*.ts": "$(capture).test.ts, $(capture).spec.ts, $(capture).d.ts, $(capture).js, $(capture).js.map"
+  },
+
   // Explorer
   "explorer.compactFolders": true,
   "explorer.incrementalNaming": "smart",
+  "explorer.sortOrder": "type",
+  "explorer.sortOrderLexicographicOptions": "unicode",
 
   // Problems Panel
   "problems.decorations.enabled": false,

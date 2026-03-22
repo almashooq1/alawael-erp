@@ -1,54 +1,90 @@
-# Dependencies
+# ═══════════════════════════════════════════════════════════════
+# Al-Awael ERP — .gitignore
+# ═══════════════════════════════════════════════════════════════
+
+# ───────────────────────────────────────────────────────────────
+# 1. Dependencies
+# ───────────────────────────────────────────────────────────────
 node_modules/
 yarn.lock
+.npm
+.node_repl_history
 
-# Logs
+# ───────────────────────────────────────────────────────────────
+# 2. Environment & Secrets
+# ───────────────────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+.env.docker
+.env.production
+deploy/**/.env*
+!deploy/**/.env*.example
+**/find-password*
+**/generate-hash*
+**/register.json
+**/login.json
+intelligent-agent/backend/.env
+_archived/security-debris/
+
+# ───────────────────────────────────────────────────────────────
+# 3. Build Outputs & Source Maps
+# ───────────────────────────────────────────────────────────────
+dist/
+build/
+out/
+.next/
+coverage/
+.nyc_output/
+*.js.map
+*.ts.map
+*.css.map
+*.map
+
+# ───────────────────────────────────────────────────────────────
+# 4. Logs & Runtime
+# ───────────────────────────────────────────────────────────────
 *.log
+*.log.*
+logs/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
-
-# Runtime data
 pids/
 *.pid
 *.seed
 *.pid.lock
 
-# Temp directories
+# ───────────────────────────────────────────────────────────────
+# 5. Temp & Cache
+# ───────────────────────────────────────────────────────────────
 tmp/
 temp/
 .tmp/
-
-# Cache directories
 .cache/
-dist/
-build/
-
-# Environment files
-.env
-.env.local
-.env.*.local
-.env.docker          # Docker-specific env file
-.env.production      # Production env file
-deploy/**/.env*      # All .env files in deploy subdirectories
-!deploy/**/.env*.example
-
-# Docker volumes and cache
+*.tmp
+*.temp
 docker_volumes/
 .docker/
 docker-compose.override.local.yml
 
-# SSL certificates
+# ───────────────────────────────────────────────────────────────
+# 6. SSL & Certificates
+# ───────────────────────────────────────────────────────────────
 ssl/
 *.pem
 *.key
 *.crt
 
-# IDE
+# ───────────────────────────────────────────────────────────────
+# 7. IDE & OS
+# ───────────────────────────────────────────────────────────────
 .vscode/launch.json
 .vscode/tasks.json
 .vscode/extensions.json
+.vscode/settings.json.backup*
+.vscode/*.log
 # Keep settings.json for consistent configuration
 !.vscode/settings.json
 .idea/
@@ -56,133 +92,75 @@ ssl/
 *.swo
 *~
 .DS_Store
-
-# OS
 Thumbs.db
-.DS_Store
+desktop.ini
 
-# Test coverage
-coverage/
-.nyc_output/
-
-# Build outputs
-dist/
-out/
-
-# Large binary files that cause issues
+# ───────────────────────────────────────────────────────────────
+# 8. Large Binaries & ML Models
+# ───────────────────────────────────────────────────────────────
 *.exe
 *.dll
+*.o
+*.so
+*.dylib
 tensorflow.dll
 tensorflow.lib
 tensorflow/
 esbuild.exe
 mongod-*.exe
-*.o
-*.so
-*.dylib
-
-# Large source maps (causing VS Code slowdown)
-*.js.map
-*.ts.map
-*.css.map
-
-# ML/AI models and large data files
-intelligent-agent/node_modules/
-intelligent-agent/dist/
-intelligent-agent/.next/
 *.pb
 *.ckpt
 *.pth
 *.h5
 *.model
-# models/ — DO NOT ignore backend/models (needed for app)
+intelligent-agent/node_modules/
+intelligent-agent/dist/
+intelligent-agent/.next/
 intelligent-agent/models/
 data/large/
 
-# Misc
-uploads/
-.pytest_cache/
-__pycache__/
-*.pyc
-.db
-*.db-journal
-
-# Chrome extensions and large plugin files
-**/chrome/*
-**/plugins/*
-**/extensions/*
-
-# ═══════════════════════════════════════════════════════════════
-# Added by cleanup script - VS Code Performance
-# ═══════════════════════════════════════════════════════════════
-
-# Source maps
-*.map
-
-# Log files
-*.log
-logs/
-*.log.*
-
-# Build outputs
-dist/
-build/
-.next/
-out/
-coverage/
-
-# VS Code
-.vscode/settings.json.backup
-.vscode/*.log
-
-# Temporary files
-*.tmp
-*.temp
-*.swp
-*.swo
-*~
-
-# OS files
-.DS_Store
-Thumbs.db
-desktop.ini
-
-# Node
-.npm
-.node_repl_history
-
-# Testing
-.nyc_output/
+# ───────────────────────────────────────────────────────────────
+# 9. Testing Outputs
+# ───────────────────────────────────────────────────────────────
 test-results/
 playwright-report/
-
-# Security-sensitive files (must never be committed)
-**/find-password*
-**/generate-hash*
-**/register.json
-**/login.json
-_archived/security-debris/
-intelligent-agent/backend/.env
-
-# ═══════════════════════════════════════════════════════════════
-# Temporary / Debug / Audit files (prevent accumulation)
-# ═══════════════════════════════════════════════════════════════
-
-# Underscore-prefixed temp scripts & outputs
-_*.txt
-_*.ps1
-_*.json
-__*.txt
-
-# Jest & test output files (root & backend)
 jest-*.txt
 jest_*.txt
 jest-output.json
 jest-*.json
 test_*.txt
 test-results*.txt
+backend/.test-mongo-uri
 
-# Audit/session reports
+# ───────────────────────────────────────────────────────────────
+# 10. Uploads & Misc
+# ───────────────────────────────────────────────────────────────
+uploads/
+.pytest_cache/
+__pycache__/
+*.pyc
+.db
+*.db-journal
+**/chrome/*
+**/plugins/*
+**/extensions/*
+
+# ───────────────────────────────────────────────────────────────
+# 11. Temp Scripts & Debug (ops/ directory)
+# Contains VPS deploy/debug scripts with credentials
+# ───────────────────────────────────────────────────────────────
+ops/
+_*.py
+!**/__init__.py
+_*.js
+_*.txt
+_*.ps1
+_*.json
+__*.txt
+
+# ───────────────────────────────────────────────────────────────
+# 12. Session Reports & Audit Files
+# ───────────────────────────────────────────────────────────────
 AUDIT_REPORT.md
 AUDIT_SESSION_*.md
 CODE_QUALITY_AUDIT_*.md
@@ -190,26 +168,9 @@ E2E_TESTING_*.md
 FRONTEND_BUG_REPORT.md
 TASK*_PHASES_*.md
 BACKEND_AUDIT_REPORT.md
-
-# ESLint & performance outputs
 eslint-results.json
 performance-test-*.json
 port*-process.json
-
-# Analysis outputs
 dead-analysis.txt
 dead-files-report.txt
 build_output.txt
-
-# Python cache
-__pycache__/
-.pytest_cache/
-*.pyc
-backend/.test-mongo-uri
-
-# VPS helper scripts (contain credentials)
-_*.py
-!**/__init__.py
-_*.js
-_*.txt
-_*.ps1

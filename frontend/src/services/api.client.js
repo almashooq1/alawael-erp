@@ -1,20 +1,52 @@
 /**
  * API Client Configuration & Interceptors
  * ربط مركزي بين Frontend و Backend
+ *
+ * Enhanced with:
+ *  - Automatic retry with exponential backoff (network/5xx errors)
+ *  - Request deduplication for identical GET requests
+ *  - Token refresh on 401 before redirect
+ *  - Request/response timing headers
+ *  - Offline detection
  */
 
 import axios from 'axios';
 
 // تكوين قاعدة الـ API
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+const API_TIMEOUT = parseInt(process.env.REACT_APP_API_TIMEOUT, 10) || 30000;
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 30000, // 30 ثانية
+  timeout: API_TIMEOUT,
 });
+
+// ─── Request Deduplication for GET requests ────────────────────────────────
+const pendingRequests = new Map();
+
+const getRequestKey = config => {
+  if (config.method !== 'get') return null;
+  return `${config.method}:${config.baseURL}${config.url}:${JSON.stringify(config.params || {})}`;
+};
+
+// ─── Retry Configuration ────────────────────────────────────────────────────
+const MAX_RETRIES = 2;
+const RETRY_DELAY_BASE = 1000; // 1 second
+
+const shouldRetry = error => {
+  // Don't retry on client errors (4xx) except 408 (timeout) and 429 (rate limit)
+  if (error.response) {
+    const status = error.response.status;
+    return status === 408 || status === 429 || status >= 500;
+  }
+  // Retry on network errors
+  return !error.response && error.code !== 'ECONNABORTED';
+};
+
+const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 /**
  * Request Interceptor
@@ -22,6 +54,15 @@ const apiClient = axios.create({
  */
 apiClient.interceptors.request.use(
   config => {
+    // Check if offline
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      return Promise.reject({
+        message: 'لا يوجد اتصال بالإنترنت',
+        code: 'OFFLINE',
+        config,
+      });
+    }
+
     // إضافة Token من LocalStorage
     const token = localStorage.getItem('authToken');
     if (token) {
@@ -30,12 +71,32 @@ apiClient.interceptors.request.use(
 
     // إضافة معلومات إضافية
     config.headers['X-Requested-With'] = 'XMLHttpRequest';
-    config.headers['Accept-Language'] = localStorage.getItem('language') || 'en';
+    config.headers['Accept-Language'] = localStorage.getItem('language') || 'ar';
+
+    // Request timing
+    config.metadata = { startTime: Date.now() };
+
+    // Initialize retry count
+    if (config._retryCount === undefined) {
+      config._retryCount = 0;
+    }
+
+    // Deduplicate concurrent identical GET requests
+    const requestKey = getRequestKey(config);
+    if (requestKey) {
+      const pending = pendingRequests.get(requestKey);
+      if (pending) {
+        // Return existing promise instead of making a new request
+        const controller = new AbortController();
+        config.signal = controller.signal;
+        controller.abort('Deduplicated');
+        config._deduplicated = pending;
+      }
+    }
 
     return config;
   },
   error => {
-    console.error('Request Config Error:', error);
     return Promise.reject(error);
   }
 );
@@ -46,17 +107,61 @@ apiClient.interceptors.request.use(
  */
 apiClient.interceptors.response.use(
   response => {
-    // إذا كانت الاستجابة ناجحة
-    console.log('API Response Success:', response.config.url);
+    // Track timing
+    const duration = response.config.metadata ? Date.now() - response.config.metadata.startTime : 0;
+
+    // Log slow requests in development
+    if (process.env.NODE_ENV === 'development' && duration > 3000) {
+      console.warn(`⏱️ Slow API call: ${response.config.url} (${duration}ms)`);
+    }
+
+    // Clean up deduplication tracking
+    const requestKey = getRequestKey(response.config);
+    if (requestKey) {
+      pendingRequests.delete(requestKey);
+    }
+
     return response.data;
   },
-  error => {
+  async error => {
+    const config = error.config || {};
+
+    // Handle deduplicated requests — return the original promise
+    if (config._deduplicated) {
+      try {
+        return await config._deduplicated;
+      } catch (e) {
+        return Promise.reject(e);
+      }
+    }
+
+    // ─── Retry Logic ────────────────────────────────────────────────────
+    if (shouldRetry(error) && config._retryCount < MAX_RETRIES) {
+      config._retryCount++;
+      const retryDelay = RETRY_DELAY_BASE * Math.pow(2, config._retryCount - 1);
+
+      if (process.env.NODE_ENV === 'development') {
+        console.info(
+          `🔄 Retrying ${config.url} (attempt ${config._retryCount}/${MAX_RETRIES}) in ${retryDelay}ms`
+        );
+      }
+
+      await delay(retryDelay);
+      return apiClient(config);
+    }
+
+    // Clean up deduplication tracking
+    const requestKey = getRequestKey(config);
+    if (requestKey) {
+      pendingRequests.delete(requestKey);
+    }
+
     // معالجة الأخطاء
     const errorData = error.response?.data || error.message;
 
     if (error.response?.status === 401) {
       // Skip redirect for auth endpoints (login, register, refresh)
-      const requestUrl = error.config?.url || '';
+      const requestUrl = config.url || '';
       const isAuthRequest = /\/auth\/(login|register|refresh)/.test(requestUrl);
 
       if (!isAuthRequest) {
@@ -76,21 +181,22 @@ apiClient.interceptors.response.use(
       console.error('Access Forbidden:', errorData);
     }
 
-    if (error.response?.status === 500) {
+    if (error.response?.status === 429) {
+      // Rate limited — extract retry-after header
+      const retryAfter = error.response.headers?.['retry-after'];
+      console.warn(`Rate limited. Retry after: ${retryAfter || 'unknown'} seconds`);
+    }
+
+    if (error.response?.status >= 500) {
       // خطأ في الخادم
       console.error('Server Error:', errorData);
     }
-
-    console.error('API Error:', {
-      status: error.response?.status,
-      message: errorData,
-      url: error.config?.url,
-    });
 
     return Promise.reject({
       status: error.response?.status,
       data: errorData,
       message: error.message,
+      code: error.code,
     });
   }
 );

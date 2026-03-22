@@ -121,7 +121,7 @@ export const useSocketEmit = () => {
         console.warn('Socket not connected. Event not sent:', eventName);
       }
     },
-    [socket],
+    [socket]
   );
 };
 

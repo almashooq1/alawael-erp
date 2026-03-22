@@ -1,9 +1,41 @@
 /**
  * Enhanced Error Handler Middleware
  * معالج الأخطاء المحسّن
+ *
+ * Features:
+ *  - Structured error classification
+ *  - Request correlation via requestId
+ *  - Rate limit & timeout error detection
+ *  - Error frequency tracking (circuit-breaker style)
+ *  - Production-safe messages (no stack leak)
  */
 
 const logger = require('../utils/logger');
+
+// Track error frequency for alerting
+const errorFrequency = {
+  counts: new Map(),
+  windowMs: 60000, // 1 minute window
+  threshold: 50, // alert if >50 errors/min
+  lastReset: Date.now(),
+};
+
+const trackError = code => {
+  const now = Date.now();
+  if (now - errorFrequency.lastReset > errorFrequency.windowMs) {
+    errorFrequency.counts.clear();
+    errorFrequency.lastReset = now;
+  }
+  const count = (errorFrequency.counts.get(code) || 0) + 1;
+  errorFrequency.counts.set(code, count);
+  if (count === errorFrequency.threshold) {
+    logger.error(`⚠️ ERROR SPIKE: ${code} reached ${count} occurrences in 1 minute`);
+  }
+};
+
+const getErrorStats = () => {
+  return Object.fromEntries(errorFrequency.counts);
+};
 
 /**
  * Custom Application Error
@@ -138,6 +170,31 @@ const errorHandler = (err, req, res, _next) => {
   err.statusCode = err.statusCode || 500;
   err.code = err.code || 'INTERNAL_ERROR';
 
+  // Track error frequency
+  trackError(err.code);
+
+  // Handle specific framework errors
+  if (err.type === 'entity.too.large') {
+    err.statusCode = 413;
+    err.code = 'PAYLOAD_TOO_LARGE';
+    err.message = 'حجم الطلب كبير جدًا';
+    err.isOperational = true;
+  }
+
+  if (err.code === 'EBADCSRFTOKEN') {
+    err.statusCode = 403;
+    err.code = 'CSRF_ERROR';
+    err.message = 'Invalid CSRF token';
+    err.isOperational = true;
+  }
+
+  if (err.code === 'ECONNABORTED' || err.message?.includes('timeout')) {
+    err.statusCode = 408;
+    err.code = 'REQUEST_TIMEOUT';
+    err.message = 'انتهت مهلة الطلب';
+    err.isOperational = true;
+  }
+
   if (process.env.NODE_ENV === 'development') {
     sendErrorDev(err, req, res);
   } else {
@@ -170,6 +227,11 @@ const errorHandler = (err, req, res, _next) => {
       error = handleJWTExpiredError();
     }
 
+    // Rate limit exceeded
+    if (err.statusCode === 429) {
+      error = new AppError('تم تجاوز الحد الأقصى للطلبات', 429, 'RATE_LIMIT_EXCEEDED');
+    }
+
     sendErrorProd(error, req, res);
   }
 };
@@ -195,15 +257,15 @@ const notFoundHandler = (req, res) => {
 const unhandledRejectionHandler = () => {
   process.on('unhandledRejection', err => {
     logger.error('UNHANDLED REJECTION — shutting down', {
-      name: err.name,
+      name: err?.name || 'Unknown',
       message: 'حدث خطأ داخلي',
-      stack: err.stack,
+      stack: err?.stack,
     });
 
-    // Give time for logs to flush
+    // Give time for logs to flush, then exit
     setTimeout(() => {
       process.exit(1);
-    }, 1000);
+    }, 2000);
   });
 };
 
@@ -213,11 +275,12 @@ const unhandledRejectionHandler = () => {
 const uncaughtExceptionHandler = () => {
   process.on('uncaughtException', err => {
     logger.error('UNCAUGHT EXCEPTION — shutting down', {
-      name: err.name,
+      name: err?.name || 'Unknown',
       message: 'حدث خطأ داخلي',
-      stack: err.stack,
+      stack: err?.stack,
     });
 
+    // Immediate exit for uncaught exceptions — state is unreliable
     process.exit(1);
   });
 };
@@ -229,4 +292,5 @@ module.exports = {
   notFoundHandler,
   unhandledRejectionHandler,
   uncaughtExceptionHandler,
+  getErrorStats,
 };

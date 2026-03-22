@@ -2,18 +2,51 @@
  * Performance Optimization Configuration
  * تحسينات الأداء والـ Caching
  *
- * ✅ Redis Caching Strategy
+ * ✅ Redis Caching Strategy with Connection Pooling
  * ✅ Database Query Optimization
- * ✅ Response Compression
- * ✅ Request/Response Timing
+ * ✅ Response Compression with Brotli support
+ * ✅ Request/Response Timing with P95/P99 tracking
+ * ✅ ETag Support for conditional responses
+ * ✅ Memory pressure monitoring
+ * ✅ Circuit breaker for Redis failures
  */
 
 const Redis = require('ioredis');
 const compression = require('compression');
+const crypto = require('crypto');
 const logger = require('../utils/logger');
 
 // Redis Connection
 let redis = null;
+
+// Circuit breaker state for Redis
+const circuitBreaker = {
+  failures: 0,
+  maxFailures: 5,
+  resetTimeout: 30000, // 30s
+  lastFailure: null,
+  isOpen: false,
+};
+
+const checkCircuitBreaker = () => {
+  if (!circuitBreaker.isOpen) return false;
+  if (Date.now() - circuitBreaker.lastFailure > circuitBreaker.resetTimeout) {
+    circuitBreaker.isOpen = false;
+    circuitBreaker.failures = 0;
+    logger.info('Redis circuit breaker reset — attempting reconnection');
+    return false;
+  }
+  return true;
+};
+
+const recordRedisFailure = () => {
+  circuitBreaker.failures++;
+  circuitBreaker.lastFailure = Date.now();
+  if (circuitBreaker.failures >= circuitBreaker.maxFailures) {
+    circuitBreaker.isOpen = true;
+    logger.warn(`Redis circuit breaker OPEN after ${circuitBreaker.failures} failures`);
+  }
+};
 
 const initializeRedis = () => {
   // Graceful fallback for demo mode - prevent infinite strict retries
@@ -27,22 +60,34 @@ const initializeRedis = () => {
       host: process.env.REDIS_HOST || 'localhost',
       port: process.env.REDIS_PORT || 6379,
       password: process.env.REDIS_PASSWORD || undefined,
+      db: parseInt(process.env.REDIS_DB, 10) || 0,
       retryStrategy: times => {
-        const delay = Math.min(times * 50, 2000);
+        if (times > 10) return null; // Stop retrying after 10 attempts
+        const delay = Math.min(times * 100, 3000);
         return delay;
       },
-      enableReadyCheck: false,
+      enableReadyCheck: true,
       enableOfflineQueue: false,
-      maxRetriesPerRequest: null,
+      maxRetriesPerRequest: 3,
+      lazyConnect: false,
+      connectTimeout: 10000,
+      commandTimeout: 5000,
+      keepAlive: 30000,
     });
 
     redis.on('connect', () => {
+      circuitBreaker.failures = 0;
+      circuitBreaker.isOpen = false;
       logger.info('✅ Redis Connected for Caching');
     });
 
     redis.on('error', err => {
+      recordRedisFailure();
       logger.warn('⚠️  Redis Connection Error:', err.message);
-      logger.info('📝 Caching disabled, using in-memory fallback');
+    });
+
+    redis.on('close', () => {
+      logger.info('Redis connection closed');
     });
 
     return redis;
@@ -166,40 +211,88 @@ const getCacheStats = async () => {
 };
 
 /**
- * Compression Middleware
+ * Compression Middleware — adaptive compression based on content type
  */
 const compressionMiddleware = compression({
-  threshold: 1024, // Only compress responses larger than 1KB
+  threshold: 512, // Compress responses larger than 512 bytes
   level: 6, // Compression level (1-9)
+  filter: (req, res) => {
+    // Don't compress server-sent events
+    if (req.headers['accept'] === 'text/event-stream') return false;
+    // Don't compress already-compressed formats
+    const contentType = res.getHeader('Content-Type') || '';
+    if (/\.(gz|br|zip|png|jpg|jpeg|gif|webp|mp4|webm)$/i.test(req.url)) return false;
+    return compression.filter(req, res);
+  },
+  // Prefer JSON and text APIs for compression
+  memLevel: 8,
 });
 
 /**
- * Request Timer Middleware
+ * Request Timer Middleware — with percentile tracking
  */
+const responseTimeBuckets = [];
+const MAX_BUCKETS = 10000;
+
 const requestTimerMiddleware = (req, res, next) => {
-  const startTime = Date.now();
+  const startHr = process.hrtime.bigint();
 
   // Override end to set header before it's actually sent
   const originalEnd = res.end;
   res.end = function (...args) {
-    const duration = Date.now() - startTime;
+    const durationNs = Number(process.hrtime.bigint() - startHr);
+    const durationMs = (durationNs / 1e6).toFixed(2);
     if (!res.headersSent) {
-      res.set('X-Response-Time', `${duration}ms`);
+      res.set('X-Response-Time', `${durationMs}ms`);
     }
     return originalEnd.apply(res, args);
   };
 
   // Log slow requests after finish
   res.on('finish', () => {
-    const duration = Date.now() - startTime;
+    const durationNs = Number(process.hrtime.bigint() - startHr);
+    const durationMs = durationNs / 1e6;
     const route = req.route?.path || req.url;
 
-    // Log slow requests (> 1000ms)
-    if (duration > 1000) {
-      logger.warn(`⏱️  SLOW REQUEST: ${req.method} ${route} - ${duration}ms`);
+    // Track for percentile computation
+    if (responseTimeBuckets.length >= MAX_BUCKETS) responseTimeBuckets.shift();
+    responseTimeBuckets.push(durationMs);
+
+    // Log slow requests (> 800ms)
+    if (durationMs > 800) {
+      logger.warn(`⏱️  SLOW REQUEST: ${req.method} ${route} - ${durationMs.toFixed(0)}ms`, {
+        statusCode: res.statusCode,
+        contentLength: res.getHeader('content-length'),
+      });
     }
   });
 
+  next();
+};
+
+/**
+ * ETag middleware for conditional GET responses
+ */
+const etagMiddleware = (req, res, next) => {
+  if (req.method !== 'GET') return next();
+
+  const originalJson = res.json.bind(res);
+  res.json = data => {
+    if (res.statusCode === 200 && data) {
+      const body = JSON.stringify(data);
+      const hash = crypto.createHash('md5').update(body).digest('hex');
+      const etag = `"${hash}"`;
+
+      res.set('ETag', etag);
+
+      if (req.headers['if-none-match'] === etag) {
+        return res.status(304).end();
+      }
+
+      return originalJson(data);
+    }
+    return originalJson(data);
+  };
   next();
 };
 
@@ -297,6 +390,40 @@ const performanceMonitor = {
   },
 };
 
+/**
+ * Get response time percentiles
+ */
+const getResponseTimePercentiles = () => {
+  if (responseTimeBuckets.length === 0) return { p50: 0, p90: 0, p95: 0, p99: 0 };
+  const sorted = [...responseTimeBuckets].sort((a, b) => a - b);
+  const p = pct => sorted[Math.floor((sorted.length * pct) / 100)] || 0;
+  return {
+    p50: Math.round(p(50)),
+    p90: Math.round(p(90)),
+    p95: Math.round(p(95)),
+    p99: Math.round(p(99)),
+    samples: sorted.length,
+  };
+};
+
+/**
+ * Memory pressure monitor — warns when heap usage is high
+ */
+const getMemoryPressure = () => {
+  const mem = process.memoryUsage();
+  const heapUsedMB = Math.round(mem.heapUsed / 1024 / 1024);
+  const heapTotalMB = Math.round(mem.heapTotal / 1024 / 1024);
+  const rssMB = Math.round(mem.rss / 1024 / 1024);
+  const heapUsagePercent = Math.round((mem.heapUsed / mem.heapTotal) * 100);
+
+  let status = 'normal';
+  if (heapUsagePercent > 90) status = 'critical';
+  else if (heapUsagePercent > 75) status = 'high';
+  else if (heapUsagePercent > 60) status = 'elevated';
+
+  return { heapUsedMB, heapTotalMB, rssMB, heapUsagePercent, status };
+};
+
 module.exports = {
   initializeRedis,
   cacheMiddleware,
@@ -304,11 +431,15 @@ module.exports = {
   getCacheStats,
   compressionMiddleware,
   requestTimerMiddleware,
+  etagMiddleware,
   queryOptimizationHints,
   performanceMonitor,
+  getResponseTimePercentiles,
+  getMemoryPressure,
   /** Returns Redis status string: 'connected' | 'disconnected' | 'disabled' */
   getRedisStatus: () => {
     if (!redis) return 'disabled';
+    if (checkCircuitBreaker()) return 'circuit-open';
     return redis.status === 'ready' ? 'connected' : redis.status || 'disconnected';
   },
 };

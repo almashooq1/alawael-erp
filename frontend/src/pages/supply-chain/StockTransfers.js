@@ -2,61 +2,69 @@
  * 🔄 تحويلات المخزون بين الفروع — Stock Transfers Between Branches
  * AlAwael ERP — Inter-Branch Transfer Management
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Paper,
-} from '@mui/material';
-
-import { useSnackbar } from 'contexts/SnackbarContext';
-import { gradients, surfaceColors } from 'theme/palette';
-import {
-  stockTransferService,
-  warehouseService,
-} from 'services/branchWarehouseService';
-import {
-  Avatar,
   Box,
-  Button,
+  Typography,
   Card,
   CardContent,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  FormControl,
   Grid,
-  IconButton,
-  InputAdornment,
-  InputLabel,
-  LinearProgress,
-  MenuItem,
-  Select,
-  Step,
-  StepLabel,
-  Stepper,
+  Tabs,
   Tab,
+  TextField,
+  InputAdornment,
+  Button,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Tabs,
-  TextField,
+  Paper,
+  Chip,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  LinearProgress,
+  Avatar,
+  Stepper,
+  Step,
+  StepLabel,
+  Divider,
+  Stack,
+  Alert,
   Tooltip,
-  Typography
 } from '@mui/material';
-import PendingIcon from '@mui/icons-material/Pending';
-import CheckIcon from '@mui/icons-material/Check';
-import CancelIcon from '@mui/icons-material/Cancel';
-import InventoryIcon from '@mui/icons-material/Inventory';
-import AddIcon from '@mui/icons-material/Add';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import SearchIcon from '@mui/icons-material/Search';
-import SendIcon from '@mui/icons-material/Send';
-import { ViewIcon } from 'utils/iconAliases';
+import {
+  Search as SearchIcon,
+  Add as AddIcon,
+  LocalShipping as ShippingIcon,
+  SwapHoriz as TransferIcon,
+  Inventory as InventoryIcon,
+  CheckCircle as CheckIcon,
+  Cancel as CancelIcon,
+  Schedule as PendingIcon,
+  Drafts as DraftIcon,
+  Refresh as RefreshIcon,
+  Visibility as ViewIcon,
+  Send as SendIcon,
+  CallReceived as ReceiveIcon,
+  ArrowForward as ArrowIcon,
+  AssignmentTurnedIn as CompleteIcon,
+} from '@mui/icons-material';
+import { useSnackbar } from 'contexts/SnackbarContext';
+import { gradients, statusColors, surfaceColors } from 'theme/palette';
+import {
+  stockTransferService,
+  warehouseService,
+  branchService,
+} from 'services/branchWarehouseService';
 
 const statusConfig = {
   draft: { label: 'مسودة', color: 'default', icon: <DraftIcon fontSize="small" /> },

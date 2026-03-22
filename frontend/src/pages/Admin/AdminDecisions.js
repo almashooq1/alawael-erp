@@ -1,49 +1,61 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import administrationService from '../../services/administration.service';
-
-import { useSnackbar } from '../../contexts/SnackbarContext';
-import { gradients } from '../../theme/palette';
 import {
-  Avatar,
   Box,
-  Button,
-  Chip,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControl,
-  IconButton,
-  InputAdornment,
-  InputLabel,
-  Menu,
-  MenuItem,
+  Typography,
   Paper,
-  Select,
+  Button,
+  Grid,
+  Card,
+  CardContent,
+  Chip,
+  IconButton,
+  TextField,
+  InputAdornment,
   Tab,
+  Tabs,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
-  TablePagination,
   TableRow,
-  Tabs,
-  TextField,
+  TablePagination,
+  Avatar,
+  CircularProgress,
   Tooltip,
-  Typography
+  Menu,
+  MenuItem,
+  Divider,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  FormControl,
+  InputLabel,
+  Select,
 } from '@mui/material';
-import ArrowBack from '@mui/icons-material/ArrowBack';
-import AddIcon from '@mui/icons-material/Add';
-import Search from '@mui/icons-material/Search';
-import Refresh from '@mui/icons-material/Refresh';
-import MoreVert from '@mui/icons-material/MoreVert';
-import Visibility from '@mui/icons-material/Visibility';
-import Send from '@mui/icons-material/Send';
-import CheckCircle from '@mui/icons-material/CheckCircle';
-import Cancel from '@mui/icons-material/Cancel';
+import {
+  Add as AddIcon,
+  Search,
+  Refresh,
+  Gavel,
+  MoreVert,
+  Visibility,
+  Edit,
+  Send,
+  CheckCircle,
+  Cancel,
+  PendingActions,
+  Archive,
+  Block,
+  ArrowBack,
+  Description,
+  Campaign,
+} from '@mui/icons-material';
+import { useSnackbar } from '../../contexts/SnackbarContext';
+import { gradients } from '../../theme/palette';
 
 /* ═══ Helpers ════════════════════════════════════════════════════════════════ */
 const docTypeLabels = {

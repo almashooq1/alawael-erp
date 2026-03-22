@@ -1,32 +1,31 @@
 import { useState, useEffect } from 'react';
-
-import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
 import {
   Box,
-  Button,
-  Card,
-  Chip,
-  CircularProgress,
   Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  IconButton,
-  MenuItem,
+  Card,
+  CardContent,
+  Typography,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
+  Chip,
+  CircularProgress,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   TextField,
+  MenuItem,
+  IconButton,
   Tooltip,
-  Typography
+  Divider,
 } from '@mui/material';
-import Add from '@mui/icons-material/Add';
-import Refresh from '@mui/icons-material/Refresh';
-import Delete from '@mui/icons-material/Delete';
+import { Add, CurrencyExchange, SwapHoriz, Delete, Refresh } from '@mui/icons-material';
+import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
 
 const API = process.env.REACT_APP_API_URL || '/api';
 

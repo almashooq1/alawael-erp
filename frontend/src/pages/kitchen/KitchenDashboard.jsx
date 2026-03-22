@@ -2,28 +2,19 @@
  * Kitchen Dashboard — لوحة معلومات المطبخ والتغذية
  */
 import { useState, useEffect } from 'react';
-
-import apiClient from '../../services/api';
 import {
-  Box,
-  Card,
-  CardContent,
-  Chip,
-  Grid,
-  LinearProgress,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Tooltip,
-  Typography
+  Box, Grid, Card, CardContent, Typography, Paper,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  Chip, LinearProgress
 } from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
-import InventoryIcon from '@mui/icons-material/Inventory';
-import PeopleIcon from '@mui/icons-material/People';
+import {
+  Restaurant as MealIcon,
+  MenuBook as MenuIcon,
+  Inventory as InventoryIcon,
+  People as PeopleIcon
+} from '@mui/icons-material';
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import apiClient from '../../services/api';
 
 const COLORS = ['#e65100', '#2e7d32', '#1565c0', '#6a1b9a', '#c62828', '#00838f'];
 

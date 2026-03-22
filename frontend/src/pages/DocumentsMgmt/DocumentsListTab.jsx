@@ -10,33 +10,35 @@
  * تبويب قائمة المستندات: شريط البحث والفلترة وعرض المستندات
  */
 
-
-import { getStatusColor } from 'utils/statusColors';
-import { formatFileSize } from './useDocumentsPage';
 import {
   Box,
-  Button,
-  Card,
-  CardActions,
-  CardContent,
-  Chip,
-  FormControl,
   Grid,
-  InputAdornment,
-  InputLabel,
-  LinearProgress,
-  MenuItem,
   Paper,
-  Select,
+  Typography,
+  Button,
   TextField,
+  Card,
+  CardContent,
+  CardActions,
+  Chip,
+  InputAdornment,
+  MenuItem,
+  LinearProgress,
+  Select,
+  FormControl,
+  InputLabel,
   Tooltip,
-  Typography
 } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import LockIcon from '@mui/icons-material/Lock';
-import DownloadIcon from '@mui/icons-material/Download';
-import ShareIcon from '@mui/icons-material/Share';
-import { ViewIcon } from 'utils/iconAliases';
+import {
+  Search as SearchIcon,
+  Description as DocumentIcon,
+  Download as DownloadIcon,
+  Share as ShareIcon,
+  Visibility as ViewIcon,
+  Lock as LockIcon,
+} from '@mui/icons-material';
+import { getStatusColor } from 'utils/statusColors';
+import { formatFileSize } from './useDocumentsPage';
 
 const DocumentsListTab = ({
   documents,

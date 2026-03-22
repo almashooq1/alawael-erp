@@ -1,37 +1,40 @@
 import { useState, useEffect, useCallback } from 'react';
-
-import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
 import {
   Box,
-  Button,
+  Container,
   Card,
   CardContent,
-  Chip,
-  CircularProgress,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  IconButton,
-  LinearProgress,
-  MenuItem,
-  Tab,
+  Typography,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Tabs,
+  CircularProgress,
+  Button,
+  Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   TextField,
+  MenuItem,
+  IconButton,
   Tooltip,
-  Typography
+  LinearProgress,
+  Tab,
+  Tabs,
 } from '@mui/material';
-import Refresh from '@mui/icons-material/Refresh';
-import Add from '@mui/icons-material/Add';
-import CheckCircle from '@mui/icons-material/CheckCircle';
-import Cancel from '@mui/icons-material/Cancel';
+import {
+  AccountBalanceWallet,
+  Add,
+  CheckCircle,
+  Cancel,
+  Receipt,
+  Refresh,
+} from '@mui/icons-material';
+import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
 
 const API = process.env.REACT_APP_API_URL || '/api';
 

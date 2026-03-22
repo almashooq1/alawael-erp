@@ -1,36 +1,49 @@
 import { useState, useEffect } from 'react';
 import { triggerBlobDownload } from 'utils/downloadHelper';
 import {
-  Paper,
-} from '@mui/material';
-
-import { getToken } from 'utils/tokenStorage';
-import logger from 'utils/logger';
-import { statusColors, neutralColors, chartColors } from '../../theme/palette';
-import {
-  Alert,
-  Box,
-  Button,
+  Container,
+  Grid,
   Card,
   CardContent,
-  Chip,
-  CircularProgress,
-  Container,
-  FormControl,
-  Grid,
-  InputLabel,
-  MenuItem,
+  Typography,
+  Box,
+  Button,
   Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Chip,
+  Alert,
+  CircularProgress,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Tooltip,
-  Typography
+  Paper,
 } from '@mui/material';
-import Download from '@mui/icons-material/Download';
+import { Compare, Timeline, Download, Insights } from '@mui/icons-material';
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  RadarChart,
+  Radar,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from 'recharts';
+import { getToken } from 'utils/tokenStorage';
+import logger from 'utils/logger';
+import { statusColors, neutralColors, chartColors } from '../../theme/palette';
 
 const AdvancedReports = () => {
   const [loading, setLoading] = useState(false);

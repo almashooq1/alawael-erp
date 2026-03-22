@@ -2,46 +2,32 @@
  * 🔔 NotificationCenter — مركز الإشعارات المتقدم
  * Professional notification management panel with categories, search, and actions
  */
-import { useState, useMemo, useCallback } from 'react';
-import { useTheme,
-} from '@mui/material';
-import { gradients, statusColors } from 'theme/palette';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
-  Avatar,
-  Badge,
-  Box,
-  Button,
-  Chip,
-  Collapse,
-  Divider,
-  IconButton,
-  InputAdornment,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  Paper,
-  Tab,
-  Tabs,
-  TextField,
-  Tooltip,
-  Typography
+  Box, Paper, Typography, IconButton, Badge, Chip, TextField, Tabs, Tab,
+  List, ListItem, ListItemAvatar, ListItemText, Avatar, Tooltip, Button,
+  Collapse, InputAdornment, Divider, useTheme, Switch, FormControlLabel,
 } from '@mui/material';
+import { motion, AnimatePresence } from 'framer-motion';
 import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
+import SearchIcon from '@mui/icons-material/Search';
+import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
+import DoneAllIcon from '@mui/icons-material/DoneAll';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import SecurityIcon from '@mui/icons-material/Security';
 import PaymentIcon from '@mui/icons-material/Payment';
 import GroupIcon from '@mui/icons-material/Group';
 import EventIcon from '@mui/icons-material/Event';
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
-import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import VolumeUpIcon from '@mui/icons-material/VolumeUp';
-import VolumeOffIcon from '@mui/icons-material/VolumeOff';
-import DoneAllIcon from '@mui/icons-material/DoneAll';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import SearchIcon from '@mui/icons-material/Search';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import CloseIcon from '@mui/icons-material/Close';
+import VolumeOffIcon from '@mui/icons-material/VolumeOff';
+import VolumeUpIcon from '@mui/icons-material/VolumeUp';
+import { gradients, statusColors, brandColors } from 'theme/palette';
 
 const CATEGORIES = [
   { id: 'all', label: 'الكل', icon: <NotificationsActiveIcon fontSize="small" /> },

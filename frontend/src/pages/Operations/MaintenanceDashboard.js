@@ -4,10 +4,66 @@
  */
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  Grid,
+  Chip,
+  Avatar,
+  Button,
+  IconButton,
+  Tooltip,
+  TextField,
+  MenuItem,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TablePagination,
   Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  LinearProgress,
+  InputAdornment,
+  Tabs,
+  Tab,
   useTheme,
 } from '@mui/material';
-
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Search as SearchIcon,
+  Refresh as RefreshIcon,
+  Build as BuildIcon,
+  Close as CloseIcon,
+  Visibility as ViewIcon,
+  CheckCircle as CompleteIcon,
+  Warning as UrgentIcon,
+  Schedule as ScheduleIcon,
+  LocationOn as LocationIcon,
+  Engineering as TechIcon,
+} from '@mui/icons-material';
+import {
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RTooltip,
+  ResponsiveContainer,
+  Legend,
+} from 'recharts';
 import {
   workOrdersService,
   preventiveService,
@@ -17,44 +73,6 @@ import {
   MOCK_MAINTENANCE_DASHBOARD,
 } from 'services/maintenanceService';
 import { useSnackbar } from 'contexts/SnackbarContext';
-import {
-  Avatar,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Grid,
-  IconButton,
-  InputAdornment,
-  LinearProgress,
-  MenuItem,
-  Tab,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TablePagination,
-  TableRow,
-  Tabs,
-  TextField,
-  Tooltip,
-  Typography
-} from '@mui/material';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import AddIcon from '@mui/icons-material/Add';
-import SearchIcon from '@mui/icons-material/Search';
-import BuildIcon from '@mui/icons-material/Build';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import ScheduleIcon from '@mui/icons-material/Schedule';
-import CloseIcon from '@mui/icons-material/Close';
-import { ViewIcon } from 'utils/iconAliases';
 
 const COLORS = ['#E53935', '#FB8C00', '#43A047', '#1E88E5', '#8E24AA', '#6D4C41'];
 const categories = [

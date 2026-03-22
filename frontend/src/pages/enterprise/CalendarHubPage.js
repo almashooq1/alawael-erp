@@ -5,52 +5,55 @@
  */
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
-  alpha,
-} from '@mui/material';
-
-import { useSnackbar } from '../../contexts/SnackbarContext';
-import enterpriseProService from '../../services/enterprisePro.service';
-import {
-  Avatar,
-  AvatarGroup,
-  Badge,
   Box,
-  Button,
+  Paper,
+  Typography,
+  Grid,
   Card,
   CardContent,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  FormControl,
-  Grid,
+  Button,
   IconButton,
-  LinearProgress,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
+  Chip,
+  TextField,
   MenuItem,
-  Paper,
   Select,
+  FormControl,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Divider,
+  LinearProgress,
   Tab,
   Tabs,
-  TextField,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemIcon,
+  Avatar,
+  AvatarGroup,
   Tooltip,
-  Typography
+  Badge,
+  alpha,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import TodayIcon from '@mui/icons-material/Today';
-import RoomIcon from '@mui/icons-material/Room';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import CircleIcon from '@mui/icons-material/Circle';
-import EventIcon from '@mui/icons-material/Event';
-import SaveIcon from '@mui/icons-material/Save';
-import { CalendarIcon } from 'utils/iconAliases';
+import {
+  Refresh as RefreshIcon,
+  CalendarMonth as CalendarIcon,
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  ChevronLeft as PrevIcon,
+  ChevronRight as NextIcon,
+  Today as TodayIcon,
+  Event as EventIcon,
+  MeetingRoom as RoomIcon,
+  AccessTime as TimeIcon,
+  Circle as CircleIcon,
+  Save as SaveIcon,
+  LocationOn as LocationIcon,
+} from '@mui/icons-material';
+import { useSnackbar } from '../../contexts/SnackbarContext';
+import enterpriseProService from '../../services/enterprisePro.service';
 
 const EVENT_TYPES = [
   { value: 'meeting', label: 'اجتماع', color: '#1565C0' },

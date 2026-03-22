@@ -1,42 +1,44 @@
 import { useState, useEffect } from 'react';
-
-import { parentService } from 'services/parentService';
-import documentService from 'services/documentService';
-import logger from 'utils/logger';
-import { gradients, statusColors, surfaceColors, brandColors, neutralColors } from 'theme/palette';
-import { useAuth } from 'contexts/AuthContext';
-import { useSnackbar } from '../../contexts/SnackbarContext';
 import {
   Box,
-  Button,
+  Container,
+  Grid,
   Card,
   CardContent,
   CardHeader,
-  Chip,
-  Container,
+  Typography,
+  Button,
   Dialog,
-  DialogActions,
-  DialogContent,
   DialogTitle,
-  Grid,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Tabs,
+  Tab,
+  Chip,
   IconButton,
   InputAdornment,
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
-  Tab,
-  Tabs,
-  TextField,
-  Typography
 } from '@mui/material';
-import ImageIcon from '@mui/icons-material/Image';
-import DescriptionIcon from '@mui/icons-material/Description';
-import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
-import FolderIcon from '@mui/icons-material/Folder';
-import SearchIcon from '@mui/icons-material/Search';
-import PreviewIcon from '@mui/icons-material/Preview';
-import GetAppIcon from '@mui/icons-material/GetApp';
+import {
+  CloudDownload as CloudDownloadIcon,
+  GetApp as GetAppIcon,
+  Preview as PreviewIcon,
+  PictureAsPdf as FilePdfIcon,
+  Image as ImageIcon,
+  Description as DescriptionIcon,
+  Search as SearchIcon,
+  Folder as FolderIcon,
+} from '@mui/icons-material';
+import { parentService } from 'services/parentService';
+import documentService from 'services/documentService';
+import logger from 'utils/logger';
+import { gradients, statusColors, surfaceColors, brandColors, neutralColors } from 'theme/palette';
+import { useAuth } from 'contexts/AuthContext';
+import { useSnackbar } from '../../contexts/SnackbarContext';
 
 const DocumentsReports = () => {
   const { currentUser } = useAuth();

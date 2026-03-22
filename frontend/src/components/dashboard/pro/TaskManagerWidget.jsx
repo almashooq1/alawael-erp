@@ -2,35 +2,28 @@
  * ✅ TaskManagerWidget — مدير المهام المتقدم
  * Professional task management with kanban-style view, priorities, and drag support
  */
-import { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
-  useTheme,
+  Box, Paper, Typography, Grid, Chip, IconButton, Tooltip,
+  TextField, Button, Avatar, AvatarGroup, LinearProgress,
+  useTheme, Divider, Badge, Menu, MenuItem, InputAdornment,
+  Dialog, DialogTitle, DialogContent, DialogActions,
 } from '@mui/material';
-import { gradients, statusColors, brandColors } from 'theme/palette';
-import {
-  Box,
-  Button,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  Grid,
-  IconButton,
-  InputAdornment,
-  LinearProgress,
-  Paper,
-  TextField,
-  Typography
-} from '@mui/material';
+import { motion, AnimatePresence } from 'framer-motion';
+import AddIcon from '@mui/icons-material/Add';
+import SearchIcon from '@mui/icons-material/Search';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import PersonIcon from '@mui/icons-material/Person';
+import FlagIcon from '@mui/icons-material/Flag';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import SearchIcon from '@mui/icons-material/Search';
-import AddIcon from '@mui/icons-material/Add';
+import PersonIcon from '@mui/icons-material/Person';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import EditIcon from '@mui/icons-material/Edit';
+import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
+import { gradients, statusColors, brandColors } from 'theme/palette';
 
 const PRIORITY_CONFIG = {
   urgent: { label: 'عاجل', color: statusColors.error, icon: '🔴' },

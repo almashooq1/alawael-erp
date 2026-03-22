@@ -10,6 +10,8 @@
  * صفحة إدارة المستندات — المنسق الرئيسي
  */
 
+import { Box, Container, Typography, Button, Paper, Tab, Tabs } from '@mui/material';
+import { CloudUpload as UploadIcon, Description as DocumentIcon } from '@mui/icons-material';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -24,16 +26,10 @@ import {
 } from 'chart.js';
 import { gradients } from '../../theme/palette';
 import useDocumentsPage from './useDocumentsPage';
-import {
-  Box,
-  Button,
-  Container,
-  Paper,
-  Tab,
-  Tabs,
-  Typography
-} from '@mui/material';
-import UploadIcon from '@mui/icons-material/Upload';
+import DashboardTab from './DashboardTab';
+import DocumentsListTab from './DocumentsListTab';
+import AnalyticsTab, { TemplatesTab } from './AnalyticsTab';
+import { UploadDialog, DetailsDialog } from './DocumentDialogs';
 
 // Register Chart.js components
 ChartJS.register(

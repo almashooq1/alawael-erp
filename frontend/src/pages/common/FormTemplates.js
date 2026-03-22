@@ -3,67 +3,77 @@
  * AlAwael ERP — Ready-made form templates for beneficiaries, HR, admin & finance
  * @created 2026-03-13
  */
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
-  Paper,
-} from '@mui/material';
-
-import { useSnackbar } from '../../contexts/SnackbarContext';
-import formTemplatesService from '../../services/formTemplatesService';
-import {
-  Alert,
-  Badge,
   Box,
-  Button,
-  Card,
-  CardActions,
-  CardContent,
-  Checkbox,
-  Chip,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  Fade,
-  FormControl,
-  FormControlLabel,
-  FormLabel,
+  Typography,
+  Paper,
   Grid,
+  Card,
+  CardContent,
+  CardActions,
+  Button,
   IconButton,
-  InputAdornment,
-  InputLabel,
+  Tooltip,
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Chip,
+  Alert,
+  CircularProgress,
+  Tabs,
+  Tab,
+  Divider,
   MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  FormControlLabel,
+  Checkbox,
   Radio,
   RadioGroup,
-  Select,
-  Step,
-  StepLabel,
-  Stepper,
-  Switch,
-  Tab,
+  FormLabel,
+  InputAdornment,
+  Badge,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Tabs,
-  TextField,
-  Tooltip,
-  Typography
+  Fade,
+  Switch,
+  Stepper,
+  Step,
+  StepLabel,
 } from '@mui/material';
-import PeopleIcon from '@mui/icons-material/People';
-import ArticleIcon from '@mui/icons-material/Article';
-import SendIcon from '@mui/icons-material/Send';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import PendingIcon from '@mui/icons-material/Pending';
-import SearchIcon from '@mui/icons-material/Search';
-import PrintIcon from '@mui/icons-material/Print';
-import CloseIcon from '@mui/icons-material/Close';
-import AddIcon from '@mui/icons-material/Add';
-import { ViewIcon } from 'utils/iconAliases';
+import {
+  Description as FormIcon,
+  Search as SearchIcon,
+  Send as SendIcon,
+  Visibility as ViewIcon,
+  Assignment as SubmissionIcon,
+  CheckCircle as ApprovedIcon,
+  Cancel as RejectedIcon,
+  HourglassEmpty as PendingIcon,
+  Dashboard as StatsIcon,
+  FilterList as FilterIcon,
+  Print as PrintIcon,
+  Close as CloseIcon,
+  ArrowBack as BackIcon,
+  TrendingUp as TrendIcon,
+  People as PeopleIcon,
+  Business as AdminIcon,
+  AttachMoney as FinanceIcon,
+  Accessibility as BeneficiaryIcon,
+  Article as ArticleIcon,
+  Add as AddIcon,
+  Refresh as RefreshIcon,
+} from '@mui/icons-material';
+import { useSnackbar } from '../../contexts/SnackbarContext';
+import formTemplatesService from '../../services/formTemplatesService';
 
 /* ═══ Category icon map ═══ */
 const CATEGORY_ICONS = {

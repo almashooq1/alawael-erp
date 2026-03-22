@@ -1,37 +1,44 @@
-import { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import eStampService from '../../services/eStamp.service';
-
-import { useSnackbar } from '../../contexts/SnackbarContext';
-import { gradients } from '../../theme/palette';
 import {
-  Avatar,
   Box,
-  Button,
-  Chip,
-  CircularProgress,
-  Divider,
-  FormControlLabel,
-  Grid,
-  IconButton,
-  MenuItem,
+  Typography,
   Paper,
-  Slider,
+  Button,
+  Grid,
+  TextField,
+  MenuItem,
+  Stepper,
   Step,
   StepLabel,
-  Stepper,
+  Card,
+  CardContent,
+  Chip,
+  Avatar,
+  FormControlLabel,
   Switch,
-  TextField,
+  IconButton,
+  Divider,
+  CircularProgress,
   ToggleButton,
   ToggleButtonGroup,
-  Typography
+  Slider,
 } from '@mui/material';
-import Verified from '@mui/icons-material/Verified';
-import ArrowBack from '@mui/icons-material/ArrowBack';
-import Delete from '@mui/icons-material/Delete';
-import ArrowForward from '@mui/icons-material/ArrowForward';
-import Save from '@mui/icons-material/Save';
-import Send from '@mui/icons-material/Send';
+import {
+  ArrowBack,
+  ArrowForward,
+  Save,
+  Send,
+  Delete,
+  Verified,
+  Circle,
+  Square,
+  Palette,
+  Add as AddIcon,
+} from '@mui/icons-material';
+import { useSnackbar } from '../../contexts/SnackbarContext';
+import { gradients } from '../../theme/palette';
 
 /* ═══ Constants ══════════════════════════════════════════════════════════════ */
 const stampTypes = [

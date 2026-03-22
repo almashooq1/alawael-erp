@@ -1,29 +1,14 @@
 /**
  * Risk Management Dashboard — لوحة إدارة المخاطر
  */
-import { useState, useEffect, useCallback } from 'react';
-import { useTheme, alpha,
-} from '@mui/material';
-import { getRiskDashboard } from '../../services/riskManagement.service';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Alert,
-  Box,
-  Chip,
-  CircularProgress,
-  Grid,
-  IconButton,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Tooltip,
-  Typography
+  Box, Paper, Typography, CircularProgress, IconButton, Tooltip, Alert, Chip, Grid, useTheme, alpha,
+  Table, TableHead, TableBody, TableRow, TableCell,
 } from '@mui/material';
-import Warning from '@mui/icons-material/Warning';
-import Assessment from '@mui/icons-material/Assessment';
-import Refresh from '@mui/icons-material/Refresh';
+import { Refresh, Warning, Shield, Assessment, GppBad } from '@mui/icons-material';
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RTooltip, ResponsiveContainer } from 'recharts';
+import { getRiskDashboard } from '../../services/riskManagement.service';
 
 const CAT_LABELS = { strategic: 'استراتيجي', operational: 'تشغيلي', financial: 'مالي', compliance: 'امتثال', reputational: 'سمعة', technology: 'تقنية', environmental: 'بيئي', safety: 'سلامة', legal: 'قانوني', other: 'أخرى' };
 const STATUS_LABELS = { identified: 'محددة', assessed: 'مقيّمة', mitigating: 'قيد التخفيف', monitoring: 'مراقبة', resolved: 'محلولة', accepted: 'مقبولة', closed: 'مغلقة' };

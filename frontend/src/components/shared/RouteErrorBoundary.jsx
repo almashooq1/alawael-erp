@@ -8,18 +8,12 @@
  */
 
 import { Component } from 'react';
-import logger from '../../utils/logger';
-import { gradients, statusColors, brandColors } from '../../theme/palette';
-import {
-  Box,
-  Button,
-  Paper,
-  Stack,
-  Typography
-} from '@mui/material';
+import { Box, Paper, Typography, Button, Stack } from '@mui/material';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import HomeIcon from '@mui/icons-material/Home';
+import logger from '../../utils/logger';
+import { gradients, statusColors, brandColors } from '../../theme/palette';
 
 class RouteErrorBoundary extends Component {
   constructor(props) {

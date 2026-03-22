@@ -11,9 +11,13 @@
  * - Keyboard navigation support
  * - Responsive (overlay on mobile, pinned on desktop)
  */
+import { Box, Drawer } from '@mui/material';
 import { SIDEBAR_WIDTH } from './sidebarConstants';
 import useSidebarNav from './useSidebarNav';
-import { Box, Drawer } from '@mui/material';
+import SidebarBrand from './SidebarBrand';
+import SidebarSearch from './SidebarSearch';
+import SidebarNavList from './SidebarNavList';
+import SidebarUserFooter from './SidebarUserFooter';
 
 const ProSidebar = ({ open, onClose, collapsed, onToggleCollapse }) => {
   const nav = useSidebarNav({ collapsed, onClose });

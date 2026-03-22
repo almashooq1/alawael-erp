@@ -4,41 +4,47 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import {
-  Paper,
-} from '@mui/material';
-
-import * as susService from '../../services/enterpriseUltra.service';
-import {
-  Alert,
   Box,
-  Button,
+  Typography,
+  Tabs,
+  Tab,
   Card,
   CardContent,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
   Grid,
-  IconButton,
-  LinearProgress,
-  MenuItem,
-  Stack,
-  Tab,
+  Button,
+  Chip,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Tabs,
+  Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   TextField,
-  Typography
+  MenuItem,
+  Alert,
+  LinearProgress,
+  Stack,
+  IconButton,
+  Divider,
 } from '@mui/material';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import NatureIcon from '@mui/icons-material/Nature';
-import AddIcon from '@mui/icons-material/Add';
+import {
+  EnergySavingsLeaf as EcoIcon,
+  Add as AddIcon,
+  ElectricBolt as EnergyIcon,
+  Cloud as CarbonIcon,
+  Delete as WasteIcon,
+  Assessment as ESGIcon,
+  Flag as GoalIcon,
+  Refresh as RefreshIcon,
+  TrendingDown as TrendDownIcon,
+  Nature as NatureIcon,
+} from '@mui/icons-material';
+import * as susService from '../../services/enterpriseUltra.service';
 
 const statusColors = {
   draft: 'default',

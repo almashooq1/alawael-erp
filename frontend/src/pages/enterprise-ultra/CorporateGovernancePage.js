@@ -4,44 +4,23 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import {
-  Paper,
+  Box, Typography, Tabs, Tab, Card, CardContent, Grid, Button, Chip,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  Paper, Dialog, DialogTitle, DialogContent, DialogActions, TextField,
+  MenuItem, Alert, LinearProgress, Stack, IconButton, Divider,
 } from '@mui/material';
-
-import * as govService from '../../services/enterpriseUltra.service';
 import {
-  Alert,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  Grid,
-  IconButton,
-  LinearProgress,
-  MenuItem,
-  Stack,
-  Tab,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Tabs,
-  TextField,
-  Typography
-} from '@mui/material';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import GroupsIcon from '@mui/icons-material/Groups';
-import PolicyIcon from '@mui/icons-material/Policy';
-import ReportIcon from '@mui/icons-material/Report';
-import AddIcon from '@mui/icons-material/Add';
-import CheckIcon from '@mui/icons-material/Check';
+  AccountBalance as GovernanceIcon,
+  Add as AddIcon,
+  Groups as GroupsIcon,
+  HowToVote as VoteIcon,
+  Policy as PolicyIcon,
+  Assessment as ReportIcon,
+  Refresh as RefreshIcon,
+  EventNote as MeetingIcon,
+  CheckCircle as CheckIcon,
+} from '@mui/icons-material';
+import * as govService from '../../services/enterpriseUltra.service';
 
 const statusColors = {
   scheduled: 'info', in_progress: 'warning', completed: 'success', cancelled: 'error',

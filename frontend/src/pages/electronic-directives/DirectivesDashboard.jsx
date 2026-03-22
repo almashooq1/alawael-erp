@@ -1,43 +1,54 @@
 /**
  * Electronic Directives Dashboard — لوحة تحكم التوجيهات الإلكترونية
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-
+import {
+  Box,
+  Typography,
+  Grid,
+  Card,
+  CardContent,
+  Paper,
+  Button,
+  Chip,
+  LinearProgress,
+  Divider,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemIcon,
+  ListItemSecondaryAction,
+  Avatar,
+  IconButton,
+  Tooltip,
+  Skeleton,
+  Alert,
+} from '@mui/material';
+import {
+  Campaign as CampaignIcon,
+  Gavel as DecisionIcon,
+  Description as MemoIcon,
+  NotificationsActive as UrgentIcon,
+  PolicyOutlined as PolicyIcon,
+  Rule as ProcedureIcon,
+  Assignment as InstructionIcon,
+  Add as AddIcon,
+  ArrowForward as ArrowForwardIcon,
+  TrendingUp as TrendingUpIcon,
+  Warning as WarningIcon,
+  CheckCircle as CheckCircleIcon,
+  AccessTime as AccessTimeIcon,
+  Visibility as ViewIcon,
+  Speed as SpeedIcon,
+  FiberNew as NewIcon,
+} from '@mui/icons-material';
 import electronicDirectivesService from '../../services/electronicDirectives.service';
 import {
   DIRECTIVE_TYPES,
   DIRECTIVE_PRIORITIES,
   DIRECTIVE_STATUS,
 } from './constants';
-import {
-  Alert,
-  Avatar,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Divider,
-  Grid,
-  IconButton,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemSecondaryAction,
-  ListItemText,
-  Paper,
-  Skeleton,
-  Typography
-} from '@mui/material';
-import CampaignIcon from '@mui/icons-material/Campaign';
-import PolicyIcon from '@mui/icons-material/Policy';
-import AddIcon from '@mui/icons-material/Add';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import WarningIcon from '@mui/icons-material/Warning';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import { ViewIcon } from 'utils/iconAliases';
 
 /* ═══ Stat Card ════════════════════════════════════════════════ */
 function StatCard({ title, value, icon, color, onClick, loading }) {

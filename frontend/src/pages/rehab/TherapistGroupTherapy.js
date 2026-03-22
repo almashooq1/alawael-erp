@@ -1,50 +1,54 @@
 import { useState, useEffect } from 'react';
-
-import { therapistService } from 'services/therapistService';
-import logger from 'utils/logger';
-import { useAuth } from 'contexts/AuthContext';
-import { useSnackbar } from '../../contexts/SnackbarContext';
 import {
-  Avatar,
   Box,
-  Button,
+  Container,
   Card,
   CardContent,
-  Chip,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  FormControl,
+  Typography,
   Grid,
+  Button,
+  TextField,
+  Chip,
   IconButton,
   InputAdornment,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Select,
+  MenuItem,
+  FormControl,
   InputLabel,
-  LinearProgress,
+  Tooltip,
+  Paper,
+  Avatar,
+  Divider,
   List,
   ListItem,
   ListItemAvatar,
   ListItemText,
-  MenuItem,
-  Paper,
-  Select,
-  TextField,
-  Tooltip,
-  Typography
+  LinearProgress,
 } from '@mui/material';
-import GroupIcon from '@mui/icons-material/Group';
-import SearchIcon from '@mui/icons-material/Search';
-import AddIcon from '@mui/icons-material/Add';
-import ScheduleIcon from '@mui/icons-material/Schedule';
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import InfoIcon from '@mui/icons-material/Info';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import CloseIcon from '@mui/icons-material/Close';
-import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
-import { ActiveIcon } from 'utils/iconAliases';
+import {
+  Add as AddIcon,
+  Search as SearchIcon,
+  Groups as GroupIcon,
+  Delete as DeleteIcon,
+  Close as CloseIcon,
+  Edit as EditIcon,
+  PersonAdd as PersonAddIcon,
+  PersonRemove as PersonRemoveIcon,
+  Schedule as ScheduleIcon,
+  EmojiPeople as ActivityIcon,
+  Info as InfoIcon,
+  PlayArrow as ActiveIcon,
+  Pause as PausedIcon,
+} from '@mui/icons-material';
+import { therapistService } from 'services/therapistService';
+import logger from 'utils/logger';
+import { useAuth } from 'contexts/AuthContext';
+import { useSnackbar } from '../../contexts/SnackbarContext';
+import { statusColors, neutralColors, surfaceColors } from '../../theme/palette';
 
 const GROUP_TYPES = [
   { value: 'social-skills', label: 'مهارات اجتماعية', color: '#8b5cf6', icon: '👥' },

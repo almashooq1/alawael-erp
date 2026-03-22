@@ -1,36 +1,40 @@
-import { useState, useEffect, useCallback } from 'react';
-
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Container, Typography, Grid, Paper, Box,
+  Chip, Table, TableBody, TableCell, TableContainer,
+  TableHead, TableRow, LinearProgress, Button,
+  Alert, CircularProgress, Divider, Tooltip,
+} from '@mui/material';
+import {
+  School as StudentIcon,
+  People as PeopleIcon,
+  PersonAdd as NewIcon,
+  CheckCircle as ActiveIcon,
+  Warning as WarningIcon,
+  TrendingUp as TrendUpIcon,
+  ArrowForward as ArrowForwardIcon,
+  Assessment as ReportsIcon,
+  Psychology as BehaviorIcon,
+  HealthAndSafety as HealthIcon,
+  Star as StarIcon,
+  Build as IEPIcon,
+  FileDownload as ExportIcon,
+  Speed as SpeedIcon,
+} from '@mui/icons-material';
+import {
+  BarChart, Bar, PieChart, Pie, Cell, AreaChart, Area,
+  RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
+  XAxis, YAxis, CartesianGrid, Tooltip as RTooltip,
+  ResponsiveContainer, Legend,
+} from 'recharts';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, chartColors, statusColors, neutralColors, severityColors, brandColors } from '../../theme/palette';
 import logger from '../../utils/logger';
 import studentManagementService from '../../services/studentManagementService';
 import { useNavigate } from 'react-router-dom';
-import {
-  Alert,
-  Box,
-  Button,
-  Chip,
-  CircularProgress,
-  Container,
-  Divider,
-  Grid,
-  LinearProgress,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Tooltip,
-  Typography
-} from '@mui/material';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import PeopleIcon from '@mui/icons-material/People';
-import WarningIcon from '@mui/icons-material/Warning';
-import SpeedIcon from '@mui/icons-material/Speed';
-import StarIcon from '@mui/icons-material/Star';
-import { ActiveIcon } from 'utils/iconAliases';
+import ModuleKPICard from '../../components/dashboard/shared/ModuleKPICard';
+import EmptyState from '../../components/dashboard/shared/EmptyState';
+import DashboardErrorBoundary from '../../components/dashboard/shared/DashboardErrorBoundary';
 
 /* ──────── ثوابت ──────── */
 const STATUS_MAP = {

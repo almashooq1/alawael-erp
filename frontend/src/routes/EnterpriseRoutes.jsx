@@ -3,6 +3,7 @@
  * مسارات الميزات المؤسسية الاحترافية
  * (التدقيق، التقارير، التقويم، CRM، المستودعات، المشاريع)
  */
+import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 // ─── Enterprise Pro Pages ───

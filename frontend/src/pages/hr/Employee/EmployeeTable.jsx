@@ -1,29 +1,19 @@
 /**
  * EmployeeTable – paginated table for employee list.
  */
-
-import { STATUS_MAP } from './employeeManagement.constants';
+import React from 'react';
 import {
-  Avatar,
-  Box,
-  Chip,
-  IconButton,
-  Paper,
-  Skeleton,
-  Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TablePagination,
-  TableRow,
-  Tooltip,
-  Typography
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  TablePagination, Paper, Avatar, Chip, IconButton, Tooltip,
+  Skeleton, Typography, Box, Stack,
 } from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { CopyIcon, ViewIcon } from 'utils/iconAliases';
+import {
+  Visibility as ViewIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  ContentCopy as CopyIcon,
+} from '@mui/icons-material';
+import { STATUS_MAP } from './employeeManagement.constants';
 
 /* ── helpers ── */
 const stringToColor = (str = '') => {

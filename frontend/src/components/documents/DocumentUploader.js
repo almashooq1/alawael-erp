@@ -4,30 +4,28 @@
  */
 
 import { useState, useRef } from 'react';
-
-import { statusColors, surfaceColors } from '../../theme/palette';
-import documentService from 'services/documentService';
 import {
-  Alert,
   Box,
   Button,
   Card,
-  Chip,
-  CircularProgress,
   Dialog,
-  DialogActions,
-  DialogContent,
   DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
   FormControl,
   InputLabel,
-  LinearProgress,
-  MenuItem,
   Select,
-  TextField,
-  Typography
+  MenuItem,
+  Chip,
+  Typography,
+  LinearProgress,
+  Alert,
+  CircularProgress,
 } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import { CloudUpload as CloudUploadIcon, Close as CloseIcon } from '@mui/icons-material';
+import { statusColors, surfaceColors } from '../../theme/palette';
+import documentService from 'services/documentService';
 
 const DocumentUploader = ({ onSuccess, onClose }) => {
   const fileInputRef = useRef(null);

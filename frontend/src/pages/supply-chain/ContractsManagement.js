@@ -1,40 +1,41 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import contractsService from '../../services/contracts.service';
 import {
-  Paper,
-} from '@mui/material';
-
-import { useSnackbar } from '../../contexts/SnackbarContext';
-import { gradients, statusColors } from '../../theme/palette';
-import { useConfirmDialog } from '../../components/common/ConfirmDialog';
-import {
   Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Grid,
-  IconButton,
-  MenuItem,
-  Tab,
+  Typography,
+  Paper,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Tabs,
+  Button,
+  Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   TextField,
+  MenuItem,
+  Grid,
+  Card,
+  CardContent,
+  IconButton,
+  Tabs,
+  Tab,
   Tooltip,
-  Typography
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Description as ContractIcon,
+  AutorenewOutlined as RenewIcon,
+} from '@mui/icons-material';
+import { useSnackbar } from '../../contexts/SnackbarContext';
+import { gradients, statusColors } from '../../theme/palette';
+import ConfirmDialog, { useConfirmDialog } from '../../components/common/ConfirmDialog';
 
 const demoData = [
   {

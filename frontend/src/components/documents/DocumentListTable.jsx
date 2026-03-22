@@ -4,33 +4,19 @@
  */
 
 import {
-  Paper,
+  Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  Paper, Checkbox, IconButton, Chip, Typography, Tooltip, CircularProgress, Stack,
 } from '@mui/material';
-
+import {
+  MoreVert as MoreVertIcon,
+  Edit as EditIcon,
+  Visibility as VisibilityIcon,
+  FolderOpen as FolderOpenIcon,
+  SelectAll as SelectAllIcon,
+} from '@mui/icons-material';
 import documentService from 'services/documentService';
 import { gradients, surfaceColors, brandColors, neutralColors } from 'theme/palette';
 import { getCategoryColor } from './documentListConstants';
-import {
-  Box,
-  Checkbox,
-  Chip,
-  CircularProgress,
-  IconButton,
-  Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Tooltip,
-  Typography
-} from '@mui/material';
-import SelectAllIcon from '@mui/icons-material/SelectAll';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import EditIcon from '@mui/icons-material/Edit';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
-import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 
 const DocumentListTable = ({
   paginatedDocs,

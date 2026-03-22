@@ -1,28 +1,15 @@
 /**
  * Legal Dashboard — لوحة الشؤون القانونية
  */
-import { useState, useEffect, useCallback } from 'react';
-import { useTheme, alpha,
-} from '@mui/material';
-import { getLegalDashboard } from '../../services/legalAffairs.service';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Alert,
-  Box,
-  Chip,
-  CircularProgress,
-  Grid,
-  IconButton,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Tooltip,
-  Typography
+  Box, Grid, Paper, Typography, CircularProgress, IconButton, Tooltip, Alert, Chip,
+  Table, TableHead, TableBody, TableRow, TableCell, useTheme, alpha,
 } from '@mui/material';
-import AttachMoney from '@mui/icons-material/AttachMoney';
-import Refresh from '@mui/icons-material/Refresh';
+import { Refresh, Gavel, EventNote, Balance, AttachMoney } from '@mui/icons-material';
+import { PieChart, Pie, Cell, BarChart, Bar, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip as RTooltip } from 'recharts';
+import { motion } from 'framer-motion';
+import { getLegalDashboard } from '../../services/legalAffairs.service';
 
 const TYPE_LABELS = { litigation: 'تقاضي', arbitration: 'تحكيم', labor: 'عمالية', commercial: 'تجارية', administrative: 'إدارية', regulatory: 'تنظيمية', other: 'أخرى' };
 const STATUS_LABELS = { open: 'مفتوحة', in_progress: 'جارية', pending_hearing: 'بانتظار جلسة', pending_judgment: 'بانتظار حكم', appealed: 'مستأنفة', closed: 'مغلقة', settled: 'تسوية', won: 'ربح', lost: 'خسارة' };

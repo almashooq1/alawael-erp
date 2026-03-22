@@ -1,25 +1,22 @@
 /**
  * لوحة تحكم مكتب المساعدة — Help Desk Dashboard
  */
-import { useState, useEffect } from 'react';
-
-import { getDashboard } from '../../services/helpdesk.service';
+import React, { useState, useEffect } from 'react';
 import {
-  Box,
-  Card,
-  CardContent,
-  Chip,
-  CircularProgress,
-  Grid,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Tooltip,
-  Typography
+  Box, Grid, Paper, Typography, Card, CardContent, Chip,
+  Table, TableHead, TableRow, TableCell, TableBody, CircularProgress,
 } from '@mui/material';
+import {
+  PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  Tooltip, ResponsiveContainer, Legend,
+} from 'recharts';
+import {
+  ConfirmationNumber as TicketIcon,
+  FiberNew as OpenIcon,
+  Autorenew as ProgressIcon,
+  CheckCircle as ResolvedIcon,
+} from '@mui/icons-material';
+import { getDashboard } from '../../services/helpdesk.service';
 
 const priorityColors = { low: '#4caf50', medium: '#2196f3', high: '#ff9800', critical: '#f44336' };
 const priorityLabels = { low: 'منخفض', medium: 'متوسط', high: 'مرتفع', critical: 'حرج' };

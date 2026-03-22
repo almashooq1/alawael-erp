@@ -1,42 +1,45 @@
 /**
  * Correspondence Templates Management — إدارة قوالب المراسلات
  */
-import { useState, useEffect, useCallback } from 'react';
-
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Box,
+  Typography,
+  Paper,
+  Grid,
+  Button,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  IconButton,
+  Chip,
+  Card,
+  CardContent,
+  CardActions,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Divider,
+  Tooltip,
+  Alert,
+  Snackbar,
+  Skeleton,
+  InputAdornment,
+} from '@mui/material';
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  ContentCopy as CopyIcon,
+  Delete as DeleteIcon,
+  Search as SearchIcon,
+  Description as TemplateIcon,
+  Visibility as PreviewIcon,
+} from '@mui/icons-material';
 import adminCommunicationsService from '../../services/adminCommunications.service';
 import { CORRESPONDENCE_TYPES } from './constants';
-import {
-  Alert,
-  Box,
-  Button,
-  Card,
-  CardActions,
-  CardContent,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  FormControl,
-  Grid,
-  IconButton,
-  InputAdornment,
-  InputLabel,
-  MenuItem,
-  Paper,
-  Select,
-  Skeleton,
-  Snackbar,
-  TextField,
-  Tooltip,
-  Typography
-} from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import SearchIcon from '@mui/icons-material/Search';
-import PreviewIcon from '@mui/icons-material/Preview';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { CopyIcon } from 'utils/iconAliases';
 
 export default function TemplatesManagement() {
   const [templates, setTemplates] = useState([]);

@@ -1,6 +1,7 @@
 /**
  * CRM Routes — مسارات إدارة علاقات العملاء
  */
+import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const CRMDashboard = lazyWithRetry(() => import('../pages/crm/CRMDashboard'));

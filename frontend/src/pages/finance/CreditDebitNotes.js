@@ -1,33 +1,32 @@
 import { useState, useEffect } from 'react';
-
-import { surfaceColors, neutralColors, brandColors, statusColors } from 'theme/palette';
 import {
   Box,
-  Button,
-  Card,
-  Chip,
-  CircularProgress,
   Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  IconButton,
-  MenuItem,
-  Tab,
+  Card,
+  CardContent,
+  Typography,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Tabs,
+  Chip,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   TextField,
+  MenuItem,
+  CircularProgress,
+  IconButton,
   Tooltip,
-  Typography
+  Tabs,
+  Tab,
 } from '@mui/material';
-import Visibility from '@mui/icons-material/Visibility';
-import Check from '@mui/icons-material/Check';
+import { Description, Add, Check, Visibility, NoteAdd } from '@mui/icons-material';
+import { surfaceColors, neutralColors, brandColors, statusColors } from 'theme/palette';
 
 const API = process.env.REACT_APP_API_URL || '/api';
 

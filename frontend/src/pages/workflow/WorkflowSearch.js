@@ -2,28 +2,21 @@
  * WorkflowSearch – البحث المتقدم
  * Global search across workflow instances, tasks, definitions, comments, and tags.
  */
-import { useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  alpha,
-} from '@mui/material';
-
-import { useSnackbar } from '../../contexts/SnackbarContext';
-import workflowService from '../../services/workflow.service';
-import {
   Box,
-  Button,
-  Chip,
-  Divider,
-  FormControl,
-  IconButton,
-  InputAdornment,
-  InputLabel,
-  MenuItem,
   Paper,
-  Select,
+  Typography,
+  Button,
+  IconButton,
+  Tooltip,
+  Chip,
+  TextField,
+  InputAdornment,
   Skeleton,
-  Tab,
+  alpha,
+  Avatar,
   Table,
   TableBody,
   TableCell,
@@ -31,16 +24,33 @@ import {
   TableHead,
   TableRow,
   Tabs,
-  TextField,
-  Tooltip,
-  Typography
+  Tab,
+  Divider,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Grid,
+  Card,
+  CardContent,
 } from '@mui/material';
-import Description from '@mui/icons-material/Description';
-import Assignment from '@mui/icons-material/Assignment';
-import TuneRounded from '@mui/icons-material/TuneRounded';
-import ArrowBack from '@mui/icons-material/ArrowBack';
-import Search from '@mui/icons-material/Search';
-import OpenInNew from '@mui/icons-material/OpenInNew';
+import {
+  ArrowBack,
+  Search,
+  Refresh,
+  Assignment,
+  Description,
+  Label,
+  Comment,
+  Person,
+  CalendarMonth,
+  Circle,
+  OpenInNew,
+  FilterList,
+  TuneRounded,
+} from '@mui/icons-material';
+import { useSnackbar } from '../../contexts/SnackbarContext';
+import workflowService from '../../services/workflow.service';
 
 const typeConfig = {
   instance: { label: 'سير العمل', color: '#6366f1', icon: <Description fontSize="small" /> },

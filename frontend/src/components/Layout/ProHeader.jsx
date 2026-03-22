@@ -16,50 +16,50 @@
 import { useState, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
+  AppBar,
+  Toolbar,
+  Box,
+  Typography,
+  IconButton,
+  Badge,
+  Avatar,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
+  Divider,
+  Breadcrumbs,
+  Link as MuiLink,
+  InputBase,
+  Tooltip,
+  Chip,
+  Popover,
+  List,
+  ListItem,
+  ListItemAvatar,
   useTheme,
   useMediaQuery,
   alpha,
 } from '@mui/material';
-
+import {
+  Menu as MenuIcon,
+  Search as SearchIcon,
+  Notifications as NotificationsIcon,
+  DarkMode as DarkModeIcon,
+  LightMode as LightModeIcon,
+  Person as PersonIcon,
+  Settings as SettingsIcon,
+  Logout as LogoutIcon,
+  Language as LanguageIcon,
+  NavigateNext as NavigateNextIcon,
+  Home as HomeIcon,
+  Fullscreen as FullscreenIcon,
+  FullscreenExit as FullscreenExitIcon,
+  Circle as CircleIcon,
+} from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 import { useThemeMode } from '../../contexts/ThemeContext';
 import { SIDEBAR_WIDTH, SIDEBAR_COLLAPSED } from './sidebar';
-import {
-  AppBar,
-  Avatar,
-  Badge,
-  Box,
-  Breadcrumbs,
-  Chip,
-  Divider,
-  IconButton,
-  InputBase,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemIcon,
-  ListItemText,
-  Menu,
-  MenuItem,
-  Popover,
-  Toolbar,
-  Tooltip,
-  Typography
-} from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
-import NavigateNextIcon from '@mui/icons-material/NavigateNext';
-import HomeIcon from '@mui/icons-material/Home';
-import SearchIcon from '@mui/icons-material/Search';
-import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
-import FullscreenIcon from '@mui/icons-material/Fullscreen';
-import LightModeIcon from '@mui/icons-material/LightMode';
-import DarkModeIcon from '@mui/icons-material/DarkMode';
-import LanguageIcon from '@mui/icons-material/Language';
-import NotificationsIcon from '@mui/icons-material/Notifications';
-import CircleIcon from '@mui/icons-material/Circle';
-import PersonIcon from '@mui/icons-material/Person';
-import SettingsIcon from '@mui/icons-material/Settings';
-import LogoutIcon from '@mui/icons-material/Logout';
 
 // ─── Breadcrumb Map ──────────────────────────────────────────────────────────
 const BREADCRUMB_MAP = {

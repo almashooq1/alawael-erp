@@ -1,27 +1,28 @@
-
-
-import { gradients } from '../../theme/palette';
 import {
   Box,
+  Typography,
   Button,
+  Grid,
   Card,
   CardContent,
-  Grid,
   Paper,
-  Stack,
   Tab,
   Tabs,
-  Typography
+  Stack,
 } from '@mui/material';
-import AssessmentIcon from '@mui/icons-material/Assessment';
-import AccessibilityIcon from '@mui/icons-material/Accessibility';
-import RecommendIcon from '@mui/icons-material/Recommend';
-import TimelineIcon from '@mui/icons-material/Timeline';
-import HistoryIcon from '@mui/icons-material/History';
-import PersonIcon from '@mui/icons-material/Person';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import BarChartIcon from '@mui/icons-material/BarChart';
-import AnalyticsIcon from '@mui/icons-material/Analytics';
+import {
+  Assessment as AssessmentIcon,
+  History as HistoryIcon,
+  Person as PersonIcon,
+  TrendingUp as TrendingUpIcon,
+  BarChart as BarChartIcon,
+  AccessibilityNew as AccessibilityIcon,
+  PlaylistAddCheck as BatchIcon,
+  Timeline as TimelineIcon,
+  Recommend as RecommendIcon,
+  Analytics as AnalyticsIcon,
+} from '@mui/icons-material';
+import { gradients } from '../../theme/palette';
 
 /**
  * Page header: gradient banner, title row with action buttons,

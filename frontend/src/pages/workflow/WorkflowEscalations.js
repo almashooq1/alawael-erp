@@ -4,54 +4,57 @@
  * Manage escalation rules (creation, editing, toggling) and
  * view escalation logs with resolution interface.
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Paper,
-  alpha,
-} from '@mui/material';
-
-import { useSnackbar } from '../../contexts/SnackbarContext';
-import workflowService from '../../services/workflow.service';
-import {
-  Badge,
   Box,
+  Paper,
+  Typography,
   Button,
+  Grid,
   Card,
   CardContent,
-  Chip,
+  TextField,
   Dialog,
-  DialogActions,
-  DialogContent,
   DialogTitle,
-  Divider,
-  FormControl,
-  Grid,
+  DialogContent,
+  DialogActions,
   IconButton,
-  InputLabel,
+  Chip,
+  Divider,
   MenuItem,
   Select,
-  Skeleton,
+  FormControl,
+  InputLabel,
   Switch,
+  Tooltip,
+  Tabs,
   Tab,
+  Badge,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Tabs,
-  TextField,
-  Tooltip,
-  Typography
+  alpha,
+  Skeleton,
 } from '@mui/material';
-import WarningIcon from '@mui/icons-material/Warning';
-import TimerIcon from '@mui/icons-material/Timer';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import SaveIcon from '@mui/icons-material/Save';
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Refresh as RefreshIcon,
+  ArrowBack as BackIcon,
+  Save as SaveIcon,
+  Warning as WarningIcon,
+  Notifications as NotifyIcon,
+  TrendingUp as EscalateIcon,
+  CheckCircle as ResolvedIcon,
+  Timer as TimerIcon,
+} from '@mui/icons-material';
+import { useSnackbar } from '../../contexts/SnackbarContext';
+import workflowService from '../../services/workflow.service';
 
 const TRIGGER_LABELS = {
   deadline_approaching: 'اقتراب الموعد النهائي',

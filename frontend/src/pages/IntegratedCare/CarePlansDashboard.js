@@ -1,38 +1,42 @@
 import { useState, useEffect, useCallback } from 'react';
-
-import { useNavigate } from 'react-router-dom';
-import apiClient from 'services/api.client';
-import { gradients } from '../../theme/palette';
-import { useSnackbar } from '../../contexts/SnackbarContext';
 import {
   Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  CircularProgress,
   Container,
-  Grid,
-  List,
-  ListItem,
-  ListItemText,
   Paper,
+  Typography,
+  Button,
+  Tabs,
   Tab,
+  Grid,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Tabs,
-  Typography
+  Chip,
+  CircularProgress,
+  Card,
+  CardContent,
+  List,
+  ListItem,
+  ListItemText,
 } from '@mui/material';
-import CheckIcon from '@mui/icons-material/Check';
-import PendingIcon from '@mui/icons-material/Pending';
-import PeopleIcon from '@mui/icons-material/People';
-import AddIcon from '@mui/icons-material/Add';
-import SchoolIcon from '@mui/icons-material/School';
-import GroupsIcon from '@mui/icons-material/Groups';
+import {
+  School as SchoolIcon,
+  Groups as GroupsIcon,
+  Add as AddIcon,
+  Assignment as PlanIcon,
+  EventNote as SessionIcon,
+  People as PeopleIcon,
+  CheckCircle as CheckIcon,
+  Schedule as PendingIcon,
+} from '@mui/icons-material';
+
+import { useNavigate } from 'react-router-dom';
+import apiClient from 'services/api.client';
+import { gradients } from '../../theme/palette';
+import { useSnackbar } from '../../contexts/SnackbarContext';
 
 // --- Sub-components with real API integration ---
 const IntegratedCareStats = ({ plans, sessions: _sessions }) => {

@@ -1,34 +1,14 @@
 /**
  * قائمة التذاكر — Tickets List
  */
-import { useState, useEffect, useCallback } from 'react';
-
-import { getTickets, createTicket, updateTicket, deleteTicket } from '../../services/helpdesk.service';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Box,
-  Button,
-  Chip,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  IconButton,
-  MenuItem,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TablePagination,
-  TableRow,
-  TextField,
-  Typography
+  Box, Typography, Paper, Table, TableHead, TableRow, TableCell, TableBody,
+  TablePagination, Button, Chip, IconButton, Dialog, DialogTitle, DialogContent,
+  DialogActions, TextField, MenuItem, CircularProgress,
 } from '@mui/material';
-import Refresh from '@mui/icons-material/Refresh';
-import Add from '@mui/icons-material/Add';
-import Edit from '@mui/icons-material/Edit';
-import Delete from '@mui/icons-material/Delete';
+import { Add, Edit, Delete, Refresh } from '@mui/icons-material';
+import { getTickets, createTicket, updateTicket, deleteTicket } from '../../services/helpdesk.service';
 
 const categoryOptions = [
   { value: 'hardware', label: 'أجهزة' }, { value: 'software', label: 'برمجيات' },

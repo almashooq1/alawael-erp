@@ -4,26 +4,18 @@
  */
 
 import React from 'react';
-import {
-  Box,
-  Chip,
-  Grid,
-  LinearProgress,
-  Paper,
-  Tooltip,
-  Typography,
-  useTheme
-} from '@mui/material';
+import { Box, Paper, Typography, Grid, useTheme, LinearProgress, Tooltip, Chip } from '@mui/material';
+import { motion } from 'framer-motion';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
+import BuildIcon from '@mui/icons-material/Build';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import PersonIcon from '@mui/icons-material/Person';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import InventoryIcon from '@mui/icons-material/Inventory';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import { formatNumber } from 'services/dashboardService';
 import { statusColors, brandColors, gradients } from '../../theme/palette';
-import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import InventoryIcon from '@mui/icons-material/Inventory';
-import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import AssignmentIcon from '@mui/icons-material/Assignment';
-import BuildIcon from '@mui/icons-material/Build';
-import PersonIcon from '@mui/icons-material/Person';
 
 const SectionHeader = React.memo(({ icon, title, subtitle, color }) => (
   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>

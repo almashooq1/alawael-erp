@@ -2,43 +2,51 @@
  * 📊 متابعة تقدم التأهيل — Rehab Progress Tracking
  * AlAwael ERP — Enrollment progress, session trends, goal outcomes, comparative analytics
  */
-import { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
-  Paper,
-  useTheme,
-  alpha,
-} from '@mui/material';
-import {
-  Alert,
-  Avatar,
   Box,
-  Button,
+  Typography,
+  Paper,
+  Grid,
   Card,
   CardContent,
+  Avatar,
   Chip,
-  FormControl,
-  Grid,
-  InputLabel,
-  LinearProgress,
-  MenuItem,
-  Select,
-  Stack,
+  Button,
+  Tabs,
   Tab,
+  Stack,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  useTheme,
+  alpha,
+  LinearProgress,
+  Alert,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Tabs,
-  Typography
 } from '@mui/material';
-import DoneIcon from '@mui/icons-material/Done';
-import TimelineIcon from '@mui/icons-material/Timeline';
-import GroupIcon from '@mui/icons-material/Group';
-import SpeedIcon from '@mui/icons-material/Speed';
-import StarIcon from '@mui/icons-material/Star';
-import { CalendarIcon, ChartIcon } from 'utils/iconAliases';
+import {
+  Timeline as TimelineIcon,
+  TrendingUp as TrendUpIcon,
+  TrendingDown as TrendDownIcon,
+  ShowChart as ChartIcon,
+  Assessment as AssessIcon,
+  CheckCircle as DoneIcon,
+  Speed as SpeedIcon,
+  EmojiEvents as TrophyIcon,
+  Group as GroupIcon,
+  Star as StarIcon,
+  CalendarToday as CalendarIcon,
+  ArrowUpward as ArrowUpIcon,
+  ArrowDownward as ArrowDownIcon,
+  Remove as FlatIcon,
+} from '@mui/icons-material';
 
 /* ── Demo enrollments ── */
 const DEMO_ENROLLMENTS = [

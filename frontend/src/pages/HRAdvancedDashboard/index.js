@@ -9,29 +9,39 @@
  *   BottomRow.jsx      – Leaves list + Reviews list
  *   index.js           – this file (layout + wiring)
  */
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-
-import { gradients } from '../../theme/palette';
-import useHRDashboard from './useHRDashboard';
 import {
-  Alert,
+  Container,
+  Typography,
+  Grid,
+  Paper,
   Box,
   Chip,
   CircularProgress,
-  Container,
-  Grid,
-  IconButton,
+  Alert,
   LinearProgress,
-  Paper,
+  IconButton,
   Tooltip,
-  Typography
 } from '@mui/material';
-import PeopleIcon from '@mui/icons-material/People';
-import WarningIcon from '@mui/icons-material/Warning';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import CancelIcon from '@mui/icons-material/Cancel';
-import ReportIcon from '@mui/icons-material/Report';
-import { LeaveIcon } from 'utils/iconAliases';
+import {
+  People as PeopleIcon,
+  EventAvailable as AttendanceIcon,
+  AccountBalanceWallet as PayrollIcon,
+  BeachAccess as LeaveIcon,
+  TrendingUp as PerformanceIcon,
+  PersonAdd as AddEmployeeIcon,
+  Assessment as ReportIcon,
+  Schedule as ClockIcon,
+  Cancel as CancelIcon,
+  Refresh as RefreshIcon,
+  Warning as WarningIcon,
+} from '@mui/icons-material';
+import { gradients } from '../../theme/palette';
+import useHRDashboard from './useHRDashboard';
+import { KPICard, QuickAction } from './KPICard';
+import ChartsRow from './ChartsRow';
+import BottomRow from './BottomRow';
 
 const HRAdvancedDashboard = () => {
   const navigate = useNavigate();

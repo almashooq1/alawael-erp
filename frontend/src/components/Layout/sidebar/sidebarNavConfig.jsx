@@ -16,23 +16,100 @@
  *  ⑩ الإدارة والنظام  — Admin, Security, Settings
  * ═══════════════════════════════════════════════════════════
  */
+import {
+  Dashboard as DashboardIcon,
+  People as PeopleIcon,
+  School as SchoolIcon,
+  Settings as SettingsIcon,
+  AccountBalance as FinanceIcon,
+  LocalHospital as RehabIcon,
+  CalendarMonth as ScheduleIcon,
+  Message as MessageIcon,
+  Description as DocumentIcon,
+  Security as SecurityIcon,
+  Analytics as AnalyticsIcon,
+  AdminPanelSettings as AdminIcon,
+  FolderSpecial as ProjectIcon,
+  SupervisorAccount as TherapistIcon,
+  FamilyRestroom as ParentIcon,
+  MonitorHeart as MonitorIcon,
+  Gavel as ContractsIcon,
+  NotificationsActive as SmartNotifIcon,
+  ConfirmationNumber as TicketIcon,
+  Receipt as InvoiceIcon,
+  EventNote as MeetingIcon,
+  Badge as VisitorIcon,
+  DriveFileRenameOutline as SignatureIcon,
+  Verified as StampIcon,
+  MenuBook as KnowledgeIcon,
+  Shield as RiskIcon,
+  AccountBalanceWallet as BudgetIcon,
+  Person as EmployeeIcon,
+  Speed as KPIChartIcon,
+  Handshake as CRMIcon,
+  ModelTraining as TrainingIcon,
+  WorkOutline as RecruitmentIcon,
+  Build as MaintenanceIcon,
+  Store as VendorIcon,
+  VolunteerActivism as DonationsIcon,
+  Feedback as ComplaintsIcon,
+  Assignment as TaskIcon,
+  Accessibility as SpecializedRehabIcon,
+  Business as AdministrationIcon,
+  AccountTree as AccountTreeIcon,
+  ListAlt as FormTemplateIcon,
+  PhotoLibrary as MediaLibraryIcon,
+  ContactMail as AdminCommIcon,
+  Campaign as CampaignIcon,
+  SwapHoriz as SwapHorizIcon,
+  AttachMoney as WageProtectionIcon,
+  Work as EmploymentIcon,
+  VerifiedUser as CBAHIIcon,
+  MedicalServices as PreAuthIcon,
+  SentimentSatisfiedAlt as SurveyIcon,
+  Policy as GovernmentIcon,
+  School as NoorIcon,
+  Security as GosiIcon,
+  Business as QiwaIcon,
+  ChildCare as EarlyInterventionIcon,
+  FollowTheSigns as PostRehabIcon,
+  SupervisedUserCircle as GuardianIcon,
+  Flag as StrategicIcon,
+  TrendingUp as SuccessionIcon,
+  MeetingRoom as FacilityRoomIcon,
+  // ─── Phase: 14 Additional Systems ───
+  MedicalInformation as MedicalFilesIcon,
+  Restaurant as KitchenIcon,
+  LocalLaundryService as LaundryIcon,
+  Groups as CommunityIcon,
+  Favorite as VolunteerIcon,
+  Psychology as MHPSSIcon,
+  Home as IndependentLivingIcon,
+  Science as ResearchIcon,
+  ShoppingCart as ECommerceIcon,
+  Article as CMSIcon,
+  HourglassBottom as WaitlistIcon,
+  GpsFixed as GPSTrackingIcon,
+  Sensors as IoTIcon,
+  VpnKey as SSOIcon,
+  // ─── Phase 10: Missing Sidebar Systems ───
+  Warehouse as WarehouseIcon,
+  LocalShipping as SupplyChainIcon,
+  HealthAndSafety as HSEIcon,
+  Warning as CrisisIcon,
+  Event as EventIcon,
+  RecordVoiceOver as PRIcon,
+  BarChart as BIDashboardIcon,
+  SupportAgent as HelpDeskIcon,
+  Balance as LegalIcon,
+  RecentActors as EmployeeAffairsIcon,
+  // ─── Phase: Advanced Systems (Blockchain, ICF, MDT, AR-Rehab) ───
+  Token as BlockchainIcon,
+  Assessment as ICFIcon,
+  GroupWork as MDTIcon,
+  ViewInAr as ARRehabIcon,
+} from '@mui/icons-material';
 
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import MonitorIcon from '@mui/icons-material/Monitor';
-import PeopleIcon from '@mui/icons-material/People';
-import ScheduleIcon from '@mui/icons-material/Schedule';
-import SchoolIcon from '@mui/icons-material/School';
-import AnalyticsIcon from '@mui/icons-material/Analytics';
-import SettingsIcon from '@mui/icons-material/Settings';
-import SecurityIcon from '@mui/icons-material/Security';
-import KitchenIcon from '@mui/icons-material/Kitchen';
-import WarehouseIcon from '@mui/icons-material/Warehouse';
-import MessageIcon from '@mui/icons-material/Message';
-import CampaignIcon from '@mui/icons-material/Campaign';
-import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
-import AccountTreeIcon from '@mui/icons-material/AccountTree';
-import TaskIcon from '@mui/icons-material/Task';
-import EventIcon from '@mui/icons-material/Event';
 const getNavigationItems = () => [
   // ═══════════════════════════════════════════════════════
   //  ① الرئيسية — Core Navigation

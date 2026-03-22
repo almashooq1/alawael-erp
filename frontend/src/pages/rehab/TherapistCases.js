@@ -1,35 +1,36 @@
 import { useState, useEffect } from 'react';
-
+import {
+  Box,
+  Container,
+  Card,
+  CardContent,
+  Typography,
+  Avatar,
+  Grid,
+  Button,
+  TextField,
+  Chip,
+  LinearProgress,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  InputAdornment,
+  Paper,
+} from '@mui/material';
+import {
+  ExpandMore as ExpandMoreIcon,
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Search as SearchIcon,
+  TrendingUp as TrendingUpIcon,
+} from '@mui/icons-material';
 import { therapistService } from 'services/therapistService';
 import { getStatusColor } from 'utils/statusColors';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, statusColors, neutralColors, surfaceColors } from '../../theme/palette';
-import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  Avatar,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Container,
-  Grid,
-  InputAdornment,
-  LinearProgress,
-  Paper,
-  TextField,
-  Typography
-} from '@mui/material';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import SearchIcon from '@mui/icons-material/Search';
-import AddIcon from '@mui/icons-material/Add';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
 
 const TherapistCases = () => {
   const { currentUser } = useAuth();

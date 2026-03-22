@@ -5,31 +5,49 @@
  * time range controls, trend lines, and predictions.
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
+  Box,
+  Grid,
+  Paper,
+  Typography,
+  CircularProgress,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  IconButton,
+  Tooltip,
+  Alert,
+  Chip,
   useTheme,
   alpha,
 } from '@mui/material';
-
-import { getTrends } from '../../services/biDashboard.service';
 import {
-  Alert,
-  Box,
-  Chip,
-  CircularProgress,
-  FormControl,
-  Grid,
-  IconButton,
-  InputLabel,
-  MenuItem,
-  Paper,
-  Select,
-  Tooltip,
-  Typography
-} from '@mui/material';
-import TrendingUp from '@mui/icons-material/TrendingUp';
-import TrendingDown from '@mui/icons-material/TrendingDown';
-import Refresh from '@mui/icons-material/Refresh';
+  TrendingUp,
+  TrendingDown,
+  TrendingFlat,
+  Refresh,
+  ShowChart,
+  Timeline,
+} from '@mui/icons-material';
+import {
+  AreaChart,
+  Area,
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RechartTooltip,
+  Legend,
+  ReferenceLine,
+} from 'recharts';
+import { motion } from 'framer-motion';
+import { getTrends } from '../../services/biDashboard.service';
 
 const METRICS = [
   { value: 'revenue', label: 'الإيرادات', color: '#4CAF50', icon: '💰' },

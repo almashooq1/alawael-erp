@@ -2,6 +2,7 @@
  * Blockchain Certificates Routes
  * مسارات شهادات البلوكتشين
  */
+import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const BlockchainDashboard = lazyWithRetry(

@@ -2,47 +2,53 @@
  * 📊 تقارير التأهيل الشاملة — Disability Rehabilitation Reports
  * AlAwael ERP — Program effectiveness, therapist performance, goal achievement, trends
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Paper,
-  useTheme,
-  alpha,
-} from '@mui/material';
-
-import { useSnackbar } from 'contexts/SnackbarContext';
-import {
-  rehabReportService,
-  rehabProgramService,
-} from 'services/disabilityRehabService';
-import {
-  Avatar,
   Box,
-  Button,
+  Typography,
+  Paper,
+  Grid,
   Card,
   CardContent,
   Chip,
-  CircularProgress,
-  Grid,
+  Avatar,
   LinearProgress,
-  Rating,
-  Stack,
+  Divider,
+  Button,
   Tab,
+  Tabs,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Tabs,
-  Typography
+  Stack,
+  CircularProgress,
+  useTheme,
+  alpha,
+  Rating,
 } from '@mui/material';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import DownloadIcon from '@mui/icons-material/Download';
-import PeopleIcon from '@mui/icons-material/People';
-import ReportIcon from '@mui/icons-material/Report';
-import CheckIcon from '@mui/icons-material/Check';
-import StarIcon from '@mui/icons-material/Star';
-import { TrendIcon } from 'utils/iconAliases';
+import {
+  Assessment as ReportIcon,
+  TrendingUp as TrendIcon,
+  People as PeopleIcon,
+  EmojiEvents as GoalIcon,
+  LocalHospital as TherapistIcon,
+  BarChart as ChartIcon,
+  Download as DownloadIcon,
+  Refresh as RefreshIcon,
+  Star as StarIcon,
+  CheckCircle as CheckIcon,
+  Speed as SpeedIcon,
+  Timeline as TimelineIcon,
+} from '@mui/icons-material';
+import { useSnackbar } from 'contexts/SnackbarContext';
+import {
+  rehabReportService,
+  rehabProgramService,
+  therapySessionService,
+} from 'services/disabilityRehabService';
 
 const fmtNum = n => (n ?? 0).toLocaleString('ar-SA');
 const pctColor = v => (v >= 80 ? 'success' : v >= 50 ? 'warning' : 'error');

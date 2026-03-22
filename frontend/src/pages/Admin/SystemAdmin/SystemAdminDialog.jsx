@@ -1,22 +1,22 @@
-
+import React from 'react';
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  TextField,
+  MenuItem,
+  Box,
+  Typography,
+  Divider,
+} from '@mui/material';
+import SaveIcon from '@mui/icons-material/Save';
+import CloseIcon from '@mui/icons-material/Close';
 
 /* ------------------------------------------------------------------ */
 /*  Status options (shared across tabs)                                */
 /* ------------------------------------------------------------------ */
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  MenuItem,
-  TextField,
-  Typography
-} from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
-import SaveIcon from '@mui/icons-material/Save';
 const STATUS_OPTIONS = ['متوفر', 'نشط', 'مفعّل', 'معتمد', 'سارية', 'فعّال', 'منخفض', 'معلّق', 'منتهي', 'قيد المراجعة'];
 
 /* ------------------------------------------------------------------ */

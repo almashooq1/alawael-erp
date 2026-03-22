@@ -4,36 +4,37 @@
  *
  * Contains: BulkEditDialog, PreviewDialog, EditDialog, DetailsDialog
  */
-
+import {
+  Box,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Typography,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Stack,
+  Paper,
+  Chip,
+  Divider,
+  Avatar,
+  Alert,
+} from '@mui/material';
+import {
+  Download as DownloadIcon,
+  Edit as EditIcon,
+  Visibility as VisibilityIcon,
+  Info as InfoIcon,
+  LocalOffer as LocalOfferIcon,
+  Category as CategoryIcon,
+} from '@mui/icons-material';
 import documentService from 'services/documentService';
 import { gradients, surfaceColors } from 'theme/palette';
 import { CATEGORIES, getCategoryColor } from './documentListConstants';
-import {
-  Alert,
-  Avatar,
-  Box,
-  Button,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Paper,
-  Select,
-  Stack,
-  TextField,
-  Typography
-} from '@mui/material';
-import LocalOfferIcon from '@mui/icons-material/LocalOffer';
-import CategoryIcon from '@mui/icons-material/Category';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import DownloadIcon from '@mui/icons-material/Download';
-import EditIcon from '@mui/icons-material/Edit';
-import InfoIcon from '@mui/icons-material/Info';
 
 // Filter out 'الكل' for dropdown usage
 const CATEGORY_OPTIONS = CATEGORIES.filter(c => c !== 'الكل');

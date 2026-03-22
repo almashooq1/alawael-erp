@@ -1,25 +1,18 @@
 /**
  * لوحة تحكم تقييمات ICF — ICF Assessment Dashboard
  */
-import { useState, useEffect } from 'react';
-
-import { assessmentsService, reportsService } from '../../services/icfAssessmentService';
+import React, { useState, useEffect } from 'react';
 import {
-  Box,
-  Card,
-  CardContent,
-  Chip,
-  CircularProgress,
-  Grid,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Typography
+  Box, Grid, Paper, Typography, Card, CardContent, Chip,
+  Table, TableHead, TableRow, TableCell, TableBody, CircularProgress,
 } from '@mui/material';
-import CompareIcon from '@mui/icons-material/Compare';
+import {
+  Assessment as AssessIcon,
+  Analytics as StatsIcon,
+  CompareArrows as CompareIcon,
+  AccountTree as TreeIcon,
+} from '@mui/icons-material';
+import { assessmentsService, reportsService } from '../../services/icfAssessmentService';
 
 const statusLabels = { draft: 'مسودة', in_progress: 'قيد التقييم', completed: 'مكتمل', reviewed: 'مراجع' };
 const statusColors = { draft: 'default', in_progress: 'warning', completed: 'success', reviewed: 'info' };

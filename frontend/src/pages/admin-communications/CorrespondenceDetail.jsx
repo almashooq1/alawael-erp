@@ -1,9 +1,70 @@
 /**
  * Correspondence Detail — عرض تفاصيل المراسلة
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-
+import {
+  Box,
+  Typography,
+  Paper,
+  Button,
+  Grid,
+  Card,
+  CardContent,
+  Chip,
+  Divider,
+  IconButton,
+  Avatar,
+  CircularProgress,
+  Tooltip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Stack,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemIcon,
+  ListItemSecondaryAction,
+  Tab,
+  Tabs,
+  Alert,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+} from '@mui/material';
+import {
+  ArrowBack,
+  Send as SendIcon,
+  Reply,
+  Forward,
+  Archive,
+  Print,
+  Download,
+  CheckCircle,
+  Cancel,
+  AttachFile,
+  InsertDriveFile,
+  History,
+  Person,
+  Business,
+  CalendarMonth,
+  Lock,
+  LockOpen,
+  Visibility,
+  Edit,
+  MoreVert,
+  CallReceived,
+  CallMade,
+  ThumbUp,
+  ThumbDown,
+  Share,
+  ContentCopy,
+  Directions,
+} from '@mui/icons-material';
 import { gradients } from '../../theme/palette';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import adminCommunicationsService from '../../services/adminCommunications.service';
@@ -14,51 +75,6 @@ import {
   CONFIDENTIALITY_LEVELS,
   DEPARTMENTS,
 } from './constants';
-import {
-  Alert,
-  Avatar,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  FormControl,
-  Grid,
-  IconButton,
-  InputLabel,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemSecondaryAction,
-  ListItemText,
-  MenuItem,
-  Paper,
-  Select,
-  Stack,
-  Tab,
-  Tabs,
-  TextField,
-  Tooltip,
-  Typography
-} from '@mui/material';
-import ThumbUp from '@mui/icons-material/ThumbUp';
-import ThumbDown from '@mui/icons-material/ThumbDown';
-import ArrowBack from '@mui/icons-material/ArrowBack';
-import CheckCircle from '@mui/icons-material/CheckCircle';
-import Print from '@mui/icons-material/Print';
-import AttachFile from '@mui/icons-material/AttachFile';
-import Download from '@mui/icons-material/Download';
-import History from '@mui/icons-material/History';
-import Share from '@mui/icons-material/Share';
-import Lock from '@mui/icons-material/Lock';
-import Person from '@mui/icons-material/Person';
-import Business from '@mui/icons-material/Business';
 
 /* ═══ Action Dialogs ═════════════════════════════════════════════════════ */
 function DirectiveDialog({ open, onClose, onSubmit }) {

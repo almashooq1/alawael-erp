@@ -1,43 +1,46 @@
 import { useState, useEffect, useCallback } from 'react';
-
-import accountingService from 'services/accountingService';
-import logger from 'utils/logger';
-import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';
-import { useSnackbar } from '../../contexts/SnackbarContext';
 import {
-  Avatar,
   Box,
-  Button,
+  Container,
   Card,
   CardContent,
+  Typography,
+  Avatar,
   Chip,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControl,
+  Button,
   Grid,
-  IconButton,
-  InputAdornment,
-  InputLabel,
-  LinearProgress,
-  MenuItem,
-  Select,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
+  LinearProgress,
   TextField,
+  InputAdornment,
+  IconButton,
   Tooltip,
-  Typography
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import CategoryIcon from '@mui/icons-material/Category';
-import SearchIcon from '@mui/icons-material/Search';
-import { ViewIcon } from 'utils/iconAliases';
+import {
+  AccountBalance as ExpenseIcon,
+  Search as SearchIcon,
+  Add as AddIcon,
+  Visibility as ViewIcon,
+  CheckCircle as ApproveIcon,
+  Category as CategoryIcon,
+} from '@mui/icons-material';
+import accountingService from 'services/accountingService';
+import logger from 'utils/logger';
+import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';
+import { useSnackbar } from '../../contexts/SnackbarContext';
 
 const ExpenseManagement = () => {
   const showSnackbar = useSnackbar();

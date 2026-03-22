@@ -1,50 +1,60 @@
 /**
  * Task Management — إدارة المهام والتكليفات
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
+  Box,
+  Typography,
   Paper,
+  Button,
+  Chip,
+  TextField,
+  MenuItem,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Grid,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TablePagination,
+  IconButton,
+  Tooltip,
+  Card,
+  CardContent,
+  Alert,
+  Snackbar,
+  CircularProgress,
+  LinearProgress,
+  Avatar,
+  Rating,
+  Tabs,
+  Tab,
 } from '@mui/material';
-
+import {
+  Add as AddIcon,
+  Visibility as ViewIcon,
+  Assignment as TaskIcon,
+  Flag as FlagIcon,
+  Comment as CommentIcon,
+  PersonAdd as DelegateIcon,
+  CheckCircle as DoneIcon,
+  Schedule as ClockIcon,
+} from '@mui/icons-material';
 import {
   getTasks,
   createTask,
   getTaskById,
   updateTaskStatus,
   addTaskComment,
+  delegateTask,
+  rateTask,
   getTaskStats,
 } from '../../services/hr/employeeAffairsPhase2Service';
-import {
-  Alert,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Grid,
-  IconButton,
-  LinearProgress,
-  MenuItem,
-  Snackbar,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TablePagination,
-  TableRow,
-  TextField,
-  Tooltip,
-  Typography
-} from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import FlagIcon from '@mui/icons-material/Flag';
-import { ViewIcon } from 'utils/iconAliases';
 
 const TYPES = ['مهمة عادية', 'تكليف رسمي', 'مشروع', 'مهمة عاجلة', 'متابعة', 'تحسين', 'بحث ودراسة'];
 const PRIORITIES = ['منخفضة', 'متوسطة', 'عالية', 'حرجة'];

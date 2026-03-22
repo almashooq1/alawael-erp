@@ -6,50 +6,53 @@
  * attendance, behavior, medical, AI insights — with print support.
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-
-import { gradients, brandColors } from 'theme/palette';
-import studentManagementService from 'services/studentManagementService';
-import logger from 'utils/logger';
 import {
-  Alert,
-  Avatar,
   Box,
-  Button,
+  Typography,
+  Grid,
   Card,
   CardContent,
-  Chip,
-  CircularProgress,
-  Divider,
-  Grid,
-  LinearProgress,
   Paper,
+  Chip,
   Stack,
+  Button,
+  Avatar,
+  Divider,
+  LinearProgress,
+  Alert,
+  CircularProgress,
   Table,
   TableBody,
   TableCell,
-  TableContainer,
   TableHead,
   TableRow,
-  Typography
+  TableContainer,
 } from '@mui/material';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import PrintIcon from '@mui/icons-material/Print';
-import EventNoteIcon from '@mui/icons-material/EventNote';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import SchoolIcon from '@mui/icons-material/School';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import WarningIcon from '@mui/icons-material/Warning';
-import PersonIcon from '@mui/icons-material/Person';
-import AccessibleIcon from '@mui/icons-material/Accessible';
-import AssignmentIcon from '@mui/icons-material/Assignment';
-import TimelineIcon from '@mui/icons-material/Timeline';
-import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
-import LightbulbIcon from '@mui/icons-material/Lightbulb';
-import PsychologyIcon from '@mui/icons-material/Psychology';
-import DescriptionIcon from '@mui/icons-material/Description';
-import PhoneIcon from '@mui/icons-material/Phone';
+import {
+  Print as PrintIcon,
+  ArrowBack as ArrowBackIcon,
+  Person as PersonIcon,
+  Accessible as AccessibleIcon,
+  School as SchoolIcon,
+  Assignment as AssignmentIcon,
+  EventNote as EventNoteIcon,
+  TrendingUp as TrendingUpIcon,
+  EmojiEvents as EmojiEventsIcon,
+  LocalHospital as MedicalIcon,
+  Psychology as PsychologyIcon,
+  Description as DescriptionIcon,
+  Phone as PhoneIcon,
+  Warning as WarningIcon,
+  CheckCircle as CheckCircleIcon,
+  Timeline as TimelineIcon,
+  FamilyRestroom as FamilyIcon,
+  Lightbulb as LightbulbIcon,
+} from '@mui/icons-material';
+import { gradients, brandColors } from 'theme/palette';
+import studentManagementService from 'services/studentManagementService';
+import logger from 'utils/logger';
 
 // ─── Section Header Component ────────────────────
 const SectionHeader = ({ icon, title, subtitle, gradient = gradients.primary }) => (

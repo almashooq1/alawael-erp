@@ -2,21 +2,20 @@
  * FleetFormDialog.jsx
  * نافذة إضافة/تعديل عناصر الأسطول
  */
-
-
+import React from 'react';
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  TextField,
+  MenuItem,
+  Grid,
+  Typography,
+} from '@mui/material';
 
 // ─── Field definitions per dialog type ──────────────────────
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Grid,
-  MenuItem,
-  TextField,
-  Typography
-} from '@mui/material';
 const FIELD_DEFS = {
   vehicles: [
     { key: 'name', label: 'اسم المركبة', type: 'text', required: true },

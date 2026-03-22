@@ -1,45 +1,49 @@
-import { useState, useEffect, useCallback } from 'react';
-
-import accountingService from 'services/accountingService';
-import logger from 'utils/logger';
-import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';
-import { useSnackbar } from '../../contexts/SnackbarContext';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Avatar,
   Box,
-  Button,
+  Container,
   Card,
   CardContent,
+  Typography,
+  Avatar,
   Chip,
-  Collapse,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControl,
+  Button,
   Grid,
-  IconButton,
-  InputAdornment,
-  InputLabel,
-  LinearProgress,
-  MenuItem,
-  Select,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
+  LinearProgress,
   TextField,
+  InputAdornment,
+  IconButton,
   Tooltip,
-  Typography
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Collapse,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import SearchIcon from '@mui/icons-material/Search';
-import ExpandLess from '@mui/icons-material/ExpandLess';
-import ExpandMore from '@mui/icons-material/ExpandMore';
-import { ViewIcon } from 'utils/iconAliases';
+import {
+  AccountTree as CostCenterIcon,
+  Search as SearchIcon,
+  Add as AddIcon,
+  Visibility as ViewIcon,
+  Edit as EditIcon,
+  ExpandMore,
+  ExpandLess,
+  TrendingUp as TrendUpIcon,
+} from '@mui/icons-material';
+import accountingService from 'services/accountingService';
+import logger from 'utils/logger';
+import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';
+import { useSnackbar } from '../../contexts/SnackbarContext';
 
 /* ─── mock data ─── */
 const mockCostCenters = [

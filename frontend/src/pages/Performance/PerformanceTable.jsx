@@ -2,29 +2,27 @@
  * PerformanceTable.jsx — Data table with cell renderer
  * Extracted from PerformanceEvaluation.js
  */
+import React from 'react';
 import {
+  Typography,
   Paper,
-} from '@mui/material';
-import { DEPT_COLORS } from '../../constants/departmentColors';
-import { statusColors, surfaceColors, neutralColors } from '../../theme/palette';
-import { STATUS_CONFIG, RATING_CONFIG, COL_MAP } from './performanceEvaluation.constants';
-import {
-  Avatar,
   Box,
   Chip,
-  IconButton,
-  LinearProgress,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
+  IconButton,
   Tooltip,
-  Typography
+  LinearProgress,
+  Avatar,
 } from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
+import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import { DEPT_COLORS } from '../../constants/departmentColors';
+import { statusColors, surfaceColors, neutralColors } from '../../theme/palette';
+import { STATUS_CONFIG, RATING_CONFIG, COL_MAP } from './performanceEvaluation.constants';
 
 /* ─── Cell Renderer ─── */
 const renderCell = (col, value, _row) => {

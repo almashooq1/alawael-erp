@@ -4,43 +4,47 @@
  * Main overview page with KPIs, recent tasks, recent instances,
  * quick-start actions, and category distribution.
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  alpha,
-} from '@mui/material';
-
-import { useSnackbar } from '../../contexts/SnackbarContext';
-import workflowService from '../../services/workflow.service';
-import {
-  Avatar,
   Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Divider,
   Grid,
-  IconButton,
   Paper,
-  Skeleton,
+  Typography,
+  Button,
+  Chip,
+  Avatar,
+  IconButton,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
+  Card,
+  CardContent,
   Tooltip,
-  Typography
+  Skeleton,
+  alpha,
+  Divider,
 } from '@mui/material';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import AddIcon from '@mui/icons-material/Add';
-import StartIcon from '@mui/icons-material/Start';
-import TaskIcon from '@mui/icons-material/Task';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import CategoryIcon from '@mui/icons-material/Category';
-import TimerIcon from '@mui/icons-material/Timer';
-import { TrendIcon } from 'utils/iconAliases';
+import {
+  AccountTree as WorkflowIcon,
+  Assignment as TaskIcon,
+  PlayArrow as StartIcon,
+  Warning as OverdueIcon,
+  CheckCircle as CompletedIcon,
+  TrendingUp as TrendIcon,
+  Speed as SLAIcon,
+  Refresh as RefreshIcon,
+  ArrowForward as ArrowIcon,
+  Add as AddIcon,
+  Dashboard as DashboardIcon,
+  Category as CategoryIcon,
+  Timer as TimerIcon,
+} from '@mui/icons-material';
+import { useSnackbar } from '../../contexts/SnackbarContext';
+import workflowService from '../../services/workflow.service';
 
 // ─── KPI Card ──────────────────────────────────────────────────────────────
 const KPICard = ({ title, value, icon, color, subtitle, onClick }) => (

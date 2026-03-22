@@ -1,11 +1,16 @@
 import { Chip, alpha } from '@mui/material';
-import CheckIcon from '@mui/icons-material/Check';
-import PendingIcon from '@mui/icons-material/Pending';
-import CancelIcon from '@mui/icons-material/Cancel';
-import DoneAllIcon from '@mui/icons-material/DoneAll';
-import WarningIcon from '@mui/icons-material/Warning';
-import DoneIcon from '@mui/icons-material/Done';
-import { ActiveIcon } from 'utils/iconAliases';
+import {
+  CheckCircle as CheckIcon,
+  Cancel as CancelIcon,
+  Schedule as PendingIcon,
+  PlayArrow as ActiveIcon,
+  Warning as WarningIcon,
+  HourglassEmpty as WaitingIcon,
+  Block as BlockedIcon,
+  Done as DoneIcon,
+  DoneAll as DoneAllIcon,
+  FiberManualRecord as DotIcon,
+} from '@mui/icons-material';
 
 /* ─── Status → { label, color, icon } map ─── */
 const STATUS_CONFIGS = {

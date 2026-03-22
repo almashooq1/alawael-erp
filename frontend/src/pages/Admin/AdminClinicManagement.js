@@ -1,48 +1,49 @@
 import { useState, useEffect } from 'react';
-
-import { adminService } from 'services/adminService';
-import api from 'services/api.client';
-import logger from 'utils/logger';
-import { gradients, brandColors, neutralColors, surfaceColors } from 'theme/palette';
-import { useAuth } from 'contexts/AuthContext';
-import { useConfirmDialog } from 'components/common/ConfirmDialog';
-import { useSnackbar } from '../../contexts/SnackbarContext';
 import {
   Box,
-  Button,
+  Container,
+  Grid,
   Card,
   CardContent,
   CardHeader,
-  Chip,
-  Container,
+  Typography,
+  TextField,
+  Button,
   Dialog,
-  DialogActions,
-  DialogContent,
   DialogTitle,
-  FormControl,
-  Grid,
-  IconButton,
-  InputLabel,
-  LinearProgress,
-  MenuItem,
-  Select,
+  DialogContent,
+  DialogActions,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  TextField,
+  Chip,
+  IconButton,
   Tooltip,
-  Typography
+  LinearProgress,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from '@mui/material';
-import BusinessIcon from '@mui/icons-material/Business';
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
-import PhoneIcon from '@mui/icons-material/Phone';
-import EmailIcon from '@mui/icons-material/Email';
+import {
+  Business as BusinessIcon,
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Phone as PhoneIcon,
+  Email as EmailIcon,
+  LocationOn as LocationOnIcon,
+} from '@mui/icons-material';
+import { adminService } from 'services/adminService';
+import api from 'services/api.client';
+import logger from 'utils/logger';
+import { gradients, brandColors, neutralColors, surfaceColors } from 'theme/palette';
+import { useAuth } from 'contexts/AuthContext';
+import ConfirmDialog, { useConfirmDialog } from 'components/common/ConfirmDialog';
+import { useSnackbar } from '../../contexts/SnackbarContext';
 
 const AdminClinicManagement = () => {
   const showSnackbar = useSnackbar();

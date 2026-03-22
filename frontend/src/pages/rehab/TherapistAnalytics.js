@@ -1,37 +1,40 @@
 import { useState, useEffect } from 'react';
-
+import {
+  Box,
+  Container,
+  Card,
+  CardContent,
+  Typography,
+  Grid,
+  Paper,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Chip,
+  Divider,
+  LinearProgress,
+} from '@mui/material';
+import {
+  Analytics as AnalyticsIcon,
+  TrendingUp as TrendingUpIcon,
+  BarChart as BarChartIcon,
+  PieChart as PieChartIcon,
+  Timeline as TimelineIcon,
+  Speed as SpeedIcon,
+  People as PeopleIcon,
+  CheckCircle as CheckIcon,
+  Cancel as CancelIcon,
+  Star as StarIcon,
+  Schedule as ScheduleIcon,
+  Description as DocIcon,
+  Flag as FlagIcon,
+} from '@mui/icons-material';
 import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import { statusColors, neutralColors, surfaceColors } from '../../theme/palette';
-import {
-  Box,
-  Card,
-  CardContent,
-  Chip,
-  Container,
-  Divider,
-  FormControl,
-  Grid,
-  LinearProgress,
-  MenuItem,
-  Paper,
-  Select,
-  Typography
-} from '@mui/material';
-import AnalyticsIcon from '@mui/icons-material/Analytics';
-import ScheduleIcon from '@mui/icons-material/Schedule';
-import CheckIcon from '@mui/icons-material/Check';
-import SpeedIcon from '@mui/icons-material/Speed';
-import StarIcon from '@mui/icons-material/Star';
-import PeopleIcon from '@mui/icons-material/People';
-import CancelIcon from '@mui/icons-material/Cancel';
-import TimelineIcon from '@mui/icons-material/Timeline';
-import PieChartIcon from '@mui/icons-material/PieChart';
-import FlagIcon from '@mui/icons-material/Flag';
-import BarChartIcon from '@mui/icons-material/BarChart';
-import { DocIcon } from 'utils/iconAliases';
+import { gradients, statusColors, neutralColors, surfaceColors } from '../../theme/palette';
 
 const TherapistAnalytics = () => {
   const { currentUser } = useAuth();

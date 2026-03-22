@@ -3,43 +3,45 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import {
-  Paper,
-} from '@mui/material';
-
-import meetingsService from '../../services/meetings.service';
-import {
-  Alert,
-  Avatar,
   Box,
-  Button,
+  Container,
+  Typography,
   Card,
   CardContent,
-  Chip,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
   Grid,
-  IconButton,
-  LinearProgress,
-  MenuItem,
-  Stack,
-  Tab,
+  Button,
+  Chip,
+  Avatar,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Tabs,
+  Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   TextField,
-  Typography
+  MenuItem,
+  LinearProgress,
+  Tabs,
+  Tab,
+  IconButton,
+  Stack,
+  Alert,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import EditIcon from '@mui/icons-material/Edit';
-import { CalendarIcon } from 'utils/iconAliases';
+import {
+  Groups as MeetingIcon,
+  Add as AddIcon,
+  Refresh as RefreshIcon,
+  Edit as EditIcon,
+  Description as MinutesIcon,
+  CheckCircle as RSVPIcon,
+  CalendarMonth as CalendarIcon,
+} from '@mui/icons-material';
+import meetingsService from '../../services/meetings.service';
 
 const DEMO_MEETINGS = [
   {

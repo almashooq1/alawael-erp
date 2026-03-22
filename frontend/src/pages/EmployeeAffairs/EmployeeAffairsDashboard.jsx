@@ -1,26 +1,22 @@
 /**
  * لوحة تحكم شؤون الموظفين — Employee Affairs Dashboard
  */
-import { useState, useEffect } from 'react';
-
-import apiClient from '../../services/api';
+import React, { useState, useEffect } from 'react';
 import {
-  Box,
-  Card,
-  CardContent,
-  Chip,
-  CircularProgress,
-  Grid,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Tooltip,
-  Typography
+  Box, Grid, Paper, Typography, Card, CardContent, CircularProgress, Chip,
+  Table, TableHead, TableRow, TableCell, TableBody,
 } from '@mui/material';
-import { DocIcon, LeaveIcon } from 'utils/iconAliases';
+import {
+  PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  Tooltip, ResponsiveContainer, Legend,
+} from 'recharts';
+import {
+  People as StaffIcon,
+  EventAvailable as LeaveIcon,
+  TrendingUp as PromoIcon,
+  Description as DocIcon,
+} from '@mui/icons-material';
+import apiClient from '../../services/api';
 
 const PIE_COLORS = ['#1976d2', '#4caf50', '#ff9800', '#f44336', '#9c27b0', '#00bcd4'];
 const leaveStatusLabels = { pending: 'قيد الانتظار', approved: 'معتمدة', rejected: 'مرفوضة' };

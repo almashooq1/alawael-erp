@@ -1,14 +1,8 @@
 /**
  * SidebarSearch — Search/filter input for navigation items.
  */
-import {
-  Box,
-  IconButton,
-  InputBase,
-  alpha
-} from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import CloseIcon from '@mui/icons-material/Close';
+import { Box, InputBase, IconButton, alpha } from '@mui/material';
+import { Search as SearchIcon, Close as CloseIcon } from '@mui/icons-material';
 
 const SidebarSearch = ({ collapsed, isMobile, searchQuery, onSearchChange, onClear, theme }) => {
   if (collapsed && !isMobile) return null;

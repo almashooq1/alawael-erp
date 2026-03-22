@@ -3,20 +3,24 @@
  * 8-tab admin page: Inventory, Ecommerce, Templates, Approvals, Notifications, RBAC, Civil Defense, Qiwa
  * Split into sub-components under pages/SystemAdmin/
  */
-import { useMemo } from 'react';
-
+import React, { useMemo } from 'react';
+import { Container, Typography, Paper, Tab, Tabs, LinearProgress } from '@mui/material';
+import {
+  Inventory as InventoryIcon,
+  ShoppingCart as EcommerceIcon,
+  Description as TemplatesIcon,
+  Approval as ApprovalIcon,
+  Notifications as NotifIcon,
+  Security as RBACIcon,
+  LocalFireDepartment as CivilDefenseIcon,
+  Work as QiwaIcon,
+} from '@mui/icons-material';
+import ConfirmDialog from '../../components/common/ConfirmDialog';
 import { getStats } from './SystemAdmin/systemAdmin.constants';
 import useSystemAdminData from './SystemAdmin/useSystemAdminData';
-import {
-  Container,
-  LinearProgress,
-  Paper,
-  Tab,
-  Tabs,
-  Typography
-} from '@mui/material';
-import InventoryIcon from '@mui/icons-material/Inventory';
-import ApprovalIcon from '@mui/icons-material/Approval';
+import SystemAdminHeader from './SystemAdmin/SystemAdminHeader';
+import SystemAdminTable from './SystemAdmin/SystemAdminTable';
+import SystemAdminDialog from './SystemAdmin/SystemAdminDialog';
 
 const SystemAdmin = () => {
   const {

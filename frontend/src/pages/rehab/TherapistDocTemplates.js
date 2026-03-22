@@ -1,40 +1,51 @@
 import { useState, useEffect } from 'react';
-
+import {
+  Box,
+  Container,
+  Card,
+  CardContent,
+  Typography,
+  Grid,
+  Button,
+  TextField,
+  Chip,
+  IconButton,
+  InputAdornment,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Tooltip,
+  Paper,
+  Divider,
+  CardActions,
+  Badge,
+  Tabs,
+  Tab,
+} from '@mui/material';
+import {
+  Add as AddIcon,
+  Search as SearchIcon,
+  Description as DocIcon,
+  Delete as DeleteIcon,
+  Close as CloseIcon,
+  Edit as EditIcon,
+  ContentCopy as CopyIcon,
+  FileCopy as TemplateIcon,
+  PlayArrow as UseIcon,
+  Visibility as ViewIcon,
+  Note as NoteIcon,
+  Assignment as AssignmentIcon,
+} from '@mui/icons-material';
 import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { statusColors, neutralColors, surfaceColors } from '../../theme/palette';
-import {
-  Box,
-  Button,
-  Card,
-  CardActions,
-  CardContent,
-  Chip,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControl,
-  Grid,
-  IconButton,
-  InputAdornment,
-  InputLabel,
-  MenuItem,
-  Paper,
-  Select,
-  TextField,
-  Tooltip,
-  Typography
-} from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import SearchIcon from '@mui/icons-material/Search';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import CloseIcon from '@mui/icons-material/Close';
-import { CopyIcon, DocIcon, ViewIcon } from 'utils/iconAliases';
 
 const TEMPLATE_TYPES = [
   { value: 'soap', label: 'ملاحظات SOAP', color: '#3b82f6', icon: '📋' },

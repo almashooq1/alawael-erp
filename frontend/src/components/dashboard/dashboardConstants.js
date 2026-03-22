@@ -3,16 +3,16 @@
  * ثوابت لوحة التحكم — إعدادات مشتركة للتنقل
  */
 
-import { brandColors } from 'theme/palette';
-import BoltIcon from '@mui/icons-material/Bolt';
-import TimelineIcon from '@mui/icons-material/Timeline';
-import BarChartIcon from '@mui/icons-material/BarChart';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import BarChartIcon from '@mui/icons-material/BarChart';
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import GroupsIcon from '@mui/icons-material/Groups';
 import BuildIcon from '@mui/icons-material/Build';
 import AppsIcon from '@mui/icons-material/Apps';
+import BoltIcon from '@mui/icons-material/Bolt';
+import TimelineIcon from '@mui/icons-material/Timeline';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import { brandColors } from 'theme/palette';
 
 /**
  * Dashboard Sections — ordered by user workflow priority:

@@ -1,25 +1,22 @@
 /**
  * لوحة تحكم الاجتماعات — Meetings Dashboard
  */
-import { useState, useEffect } from 'react';
-
-import apiClient from '../../services/api';
+import React, { useState, useEffect } from 'react';
 import {
-  Box,
-  Card,
-  CardContent,
-  Chip,
-  CircularProgress,
-  Grid,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Tooltip,
-  Typography
+  Box, Grid, Paper, Typography, Card, CardContent, CircularProgress, Chip,
+  Table, TableHead, TableRow, TableCell, TableBody,
 } from '@mui/material';
+import {
+  PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  Tooltip, ResponsiveContainer, Legend,
+} from 'recharts';
+import {
+  Groups as MeetingIcon,
+  EventAvailable as ScheduledIcon,
+  CheckCircle as CompletedIcon,
+  Assignment as MinutesIcon,
+} from '@mui/icons-material';
+import apiClient from '../../services/api';
 
 const PIE_COLORS = ['#1976d2', '#4caf50', '#ff9800', '#f44336', '#9c27b0', '#00bcd4'];
 const typeLabels = { department: 'إداري', board: 'مجلس إدارة', general: 'عام', emergency: 'طارئ', project: 'مشروع', training: 'تدريبي', review: 'مراجعة' };

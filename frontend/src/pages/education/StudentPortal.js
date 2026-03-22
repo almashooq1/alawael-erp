@@ -4,35 +4,38 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-
+import {
+  Box,
+  Grid,
+  Card,
+  CardContent,
+  Typography,
+  Avatar,
+  Button,
+  Chip,
+  LinearProgress,
+  Paper,
+  Divider,
+  Stack,
+  IconButton,
+  Alert,
+} from '@mui/material';
+import {
+  School as SchoolIcon,
+  Assessment as AssessmentIcon,
+  Assignment as AssignmentIcon,
+  EventAvailable as AttendanceIcon,
+  Announcement as AnnouncementIcon,
+  EmojiEvents as TrophyIcon,
+  ArrowForward as ArrowForwardIcon,
+  Notifications as NotificationsIcon,
+} from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import studentPortalService from 'services/studentPortalService';
 import logger from 'utils/logger';
 import { gradients } from 'theme/palette';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import {
-  Alert,
-  Avatar,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Divider,
-  Grid,
-  IconButton,
-  LinearProgress,
-  Paper,
-  Stack,
-  Typography
-} from '@mui/material';
-import SchoolIcon from '@mui/icons-material/School';
-import NotificationsIcon from '@mui/icons-material/Notifications';
-import AssignmentIcon from '@mui/icons-material/Assignment';
-import AssessmentIcon from '@mui/icons-material/Assessment';
-import AnnouncementIcon from '@mui/icons-material/Announcement';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 
 const StudentPortal = () => {
   const { currentUser } = useAuth();

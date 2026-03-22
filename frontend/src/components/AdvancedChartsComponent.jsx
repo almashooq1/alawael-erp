@@ -1,25 +1,47 @@
 import { useState } from 'react';
-
-import exportService from 'services/exportService';
-import logger from 'utils/logger';
-import { gradients, brandColors, surfaceColors } from 'theme/palette';
 import {
   Box,
-  Button,
   Card,
   CardContent,
   CardHeader,
-  Chip,
-  CircularProgress,
   Grid,
-  MenuItem,
   Paper,
+  Typography,
   Select,
-  Tooltip,
-  Typography
+  MenuItem,
+  Button,
+  CircularProgress,
+  Chip,
 } from '@mui/material';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import DownloadIcon from '@mui/icons-material/Download';
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  AreaChart,
+  Area,
+  PieChart,
+  Pie,
+  Cell,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  Radar,
+  ComposedChart,
+  Legend,
+  Tooltip,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  ResponsiveContainer,
+  ScatterChart,
+  Scatter,
+} from 'recharts';
+import { Download as DownloadIcon, Refresh as RefreshIcon } from '@mui/icons-material';
+import exportService from 'services/exportService';
+import logger from 'utils/logger';
+import { gradients, brandColors, surfaceColors } from 'theme/palette';
 
 /** Shared Recharts tooltip styles (DRY — used across all chart types) */
 const TOOLTIP_STYLES = {

@@ -11,62 +11,51 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-
+import {
+  Container, Typography, Grid, Paper, Box, Card, CardContent,
+  Avatar, Chip, IconButton, Button, LinearProgress, Tabs, Tab,
+  TextField, InputAdornment, Menu, MenuItem, Tooltip, Divider,
+  Pagination, Dialog, DialogTitle, DialogContent, DialogActions,
+  Select, FormControl, InputLabel, CircularProgress, Badge,
+  ToggleButtonGroup, ToggleButton, Skeleton,
+} from '@mui/material';
+import {
+  PhotoLibrary as MediaIcon,
+  CloudUpload as UploadIcon,
+  Image as ImageIcon,
+  Videocam as VideoIcon,
+  AudioFile as AudioIcon,
+  Description as DocIcon,
+  Archive as ArchiveIcon,
+  InsertDriveFile as FileIcon,
+  Search as SearchIcon,
+  FilterList as FilterIcon,
+  ViewModule as GridViewIcon,
+  ViewList as ListViewIcon,
+  Star as StarIcon,
+  StarBorder as StarBorderIcon,
+  Delete as DeleteIcon,
+  Download as DownloadIcon,
+  Edit as EditIcon,
+  Folder as FolderIcon,
+  CreateNewFolder as NewFolderIcon,
+  MoreVert as MoreIcon,
+  Close as CloseIcon,
+  Storage as StorageIcon,
+  TrendingUp as TrendUpIcon,
+  Visibility as ViewIcon,
+  DeleteSweep as TrashIcon,
+  Refresh as RefreshIcon,
+  PushPin as PinIcon,
+  Check as CheckIcon,
+  Fullscreen as PreviewIcon,
+  CloudDone as CloudIcon,
+} from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from '../../theme/palette';
+import { gradients, brandColors, statusColors, surfaceColors, neutralColors, chartColors } from '../../theme/palette';
 import logger from '../../utils/logger';
 import mediaService from '../../services/mediaService';
-import {
-  Avatar,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  FormControl,
-  Grid,
-  IconButton,
-  InputAdornment,
-  InputLabel,
-  LinearProgress,
-  Menu,
-  MenuItem,
-  Pagination,
-  Paper,
-  Select,
-  Tab,
-  Tabs,
-  TextField,
-  ToggleButton,
-  ToggleButtonGroup,
-  Tooltip,
-  Typography
-} from '@mui/material';
-import ImageIcon from '@mui/icons-material/Image';
-import ArchiveIcon from '@mui/icons-material/Archive';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import UploadIcon from '@mui/icons-material/Upload';
-import CloudIcon from '@mui/icons-material/Cloud';
-import StorageIcon from '@mui/icons-material/Storage';
-import FolderIcon from '@mui/icons-material/Folder';
-import SearchIcon from '@mui/icons-material/Search';
-import DeleteIcon from '@mui/icons-material/Delete';
-import GridViewIcon from '@mui/icons-material/GridView';
-import CheckIcon from '@mui/icons-material/Check';
-import StarIcon from '@mui/icons-material/Star';
-import StarBorderIcon from '@mui/icons-material/StarBorder';
-import MoreIcon from '@mui/icons-material/More';
-import PreviewIcon from '@mui/icons-material/Preview';
-import EditIcon from '@mui/icons-material/Edit';
-import DownloadIcon from '@mui/icons-material/Download';
-import CloseIcon from '@mui/icons-material/Close';
-import { AudioIcon, DocIcon, FileIcon, ListViewIcon, NewFolderIcon, VideoIcon } from 'utils/iconAliases';
+import ModuleKPICard from '../../components/dashboard/shared/ModuleKPICard';
 
 /* ─── Constants ────────────────────────────────────────────────────────────── */
 const TYPE_CONFIG = {

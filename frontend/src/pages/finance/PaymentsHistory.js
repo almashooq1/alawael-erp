@@ -1,44 +1,45 @@
 import { useState, useEffect } from 'react';
-
-import { parentService } from 'services/parentService';
-import { getStatusColor } from 'utils/statusColors';
-import logger from 'utils/logger';
-import { gradients, neutralColors, surfaceColors, brandColors } from 'theme/palette';
-import { useAuth } from 'contexts/AuthContext';
-import { useSnackbar } from '../../contexts/SnackbarContext';
 import {
   Box,
-  Button,
+  Container,
+  Grid,
   Card,
   CardContent,
   CardHeader,
-  Chip,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControl,
-  Grid,
-  InputAdornment,
-  InputLabel,
-  MenuItem,
-  Select,
-  Tab,
+  Typography,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Tabs,
+  Chip,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   TextField,
-  Typography
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Tab,
+  Tabs,
+  InputAdornment,
 } from '@mui/material';
-import PaymentIcon from '@mui/icons-material/Payment';
-import SearchIcon from '@mui/icons-material/Search';
-import PrintIcon from '@mui/icons-material/Print';
-import DownloadIcon from '@mui/icons-material/Download';
+import {
+  Payment as PaymentIcon,
+  Download as DownloadIcon,
+  Print as PrintIcon,
+  Search as SearchIcon,
+} from '@mui/icons-material';
+import { parentService } from 'services/parentService';
+import { getStatusColor } from 'utils/statusColors';
+import logger from 'utils/logger';
+import { gradients, neutralColors, surfaceColors, brandColors } from 'theme/palette';
+import { useAuth } from 'contexts/AuthContext';
+import { useSnackbar } from '../../contexts/SnackbarContext';
 
 const PaymentsHistory = () => {
   const { currentUser } = useAuth();

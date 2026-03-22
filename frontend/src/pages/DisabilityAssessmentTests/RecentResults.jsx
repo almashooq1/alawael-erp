@@ -1,19 +1,11 @@
 /**
  * RecentResults – Tab 1: Recent test results
  */
-
+import {
+  Box, Grid, Card, CardContent, Typography, Chip, LinearProgress, Alert,
+} from '@mui/material';
 import { surfaceColors } from '../../theme/palette';
 import { getLevelColor } from './constants';
-import {
-  Alert,
-  Box,
-  Card,
-  CardContent,
-  Chip,
-  Grid,
-  LinearProgress,
-  Typography
-} from '@mui/material';
 
 const RecentResults = ({ testResults, onOpenDetail }) => {
   if (testResults.length === 0) {

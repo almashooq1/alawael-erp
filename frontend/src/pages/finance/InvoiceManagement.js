@@ -1,45 +1,47 @@
 import { useState, useEffect, useCallback } from 'react';
-
-import accountingService from 'services/accountingService';
-import logger from 'utils/logger';
-import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';
-import { useSnackbar } from '../../contexts/SnackbarContext';
 import {
-  Avatar,
   Box,
-  Button,
+  Container,
   Card,
   CardContent,
+  Typography,
+  Avatar,
   Chip,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
+  Button,
   Grid,
-  IconButton,
-  InputAdornment,
-  LinearProgress,
-  Tab,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Tabs,
+  LinearProgress,
   TextField,
+  InputAdornment,
+  IconButton,
   Tooltip,
-  Typography
+  Tabs,
+  Tab,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Divider,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import SearchIcon from '@mui/icons-material/Search';
-import SendIcon from '@mui/icons-material/Send';
-import PrintIcon from '@mui/icons-material/Print';
-import MoneyIcon from '@mui/icons-material/Money';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { ViewIcon } from 'utils/iconAliases';
+import {
+  Receipt as InvoiceIcon,
+  Search as SearchIcon,
+  Add as AddIcon,
+  Visibility as ViewIcon,
+  Send as SendIcon,
+  Print as PrintIcon,
+  Delete as DeleteIcon,
+  AttachMoney as MoneyIcon,
+} from '@mui/icons-material';
+import accountingService from 'services/accountingService';
+import logger from 'utils/logger';
+import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';
+import { useSnackbar } from '../../contexts/SnackbarContext';
 
 const InvoiceManagement = () => {
   const showSnackbar = useSnackbar();

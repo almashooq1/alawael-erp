@@ -1,53 +1,58 @@
 /**
  * External Entities Management — إدارة الجهات الخارجية
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Paper,
-} from '@mui/material';
-
-import adminCommunicationsService from '../../services/adminCommunications.service';
-import {
-  Alert,
-  Avatar,
   Box,
-  Button,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControl,
-  FormControlLabel,
+  Typography,
+  Paper,
   Grid,
-  IconButton,
-  InputAdornment,
+  Button,
+  TextField,
+  FormControl,
   InputLabel,
-  MenuItem,
   Select,
-  Skeleton,
-  Snackbar,
-  Switch,
-  Tab,
+  MenuItem,
+  IconButton,
+  Chip,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Tabs,
-  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Divider,
   Tooltip,
-  Typography
+  Alert,
+  Snackbar,
+  Skeleton,
+  InputAdornment,
+  Avatar,
+  Switch,
+  FormControlLabel,
+  Tabs,
+  Tab,
 } from '@mui/material';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import AddIcon from '@mui/icons-material/Add';
-import SearchIcon from '@mui/icons-material/Search';
-import BusinessIcon from '@mui/icons-material/Business';
-import EditIcon from '@mui/icons-material/Edit';
-import PhoneIcon from '@mui/icons-material/Phone';
-import EmailIcon from '@mui/icons-material/Email';
-import WebIcon from '@mui/icons-material/Web';
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  Search as SearchIcon,
+  Business as BusinessIcon,
+  AccountBalance as GovIcon,
+  Store as PrivateIcon,
+  Public as InternationalIcon,
+  VolunteerActivism as NonProfitIcon,
+  Phone as PhoneIcon,
+  Email as EmailIcon,
+  Language as WebIcon,
+  LocationOn as LocationIcon,
+  Refresh as RefreshIcon,
+} from '@mui/icons-material';
+import adminCommunicationsService from '../../services/adminCommunications.service';
 
 const ENTITY_TYPES = {
   government: { label: 'حكومية', color: '#1976d2', icon: <GovIcon /> },

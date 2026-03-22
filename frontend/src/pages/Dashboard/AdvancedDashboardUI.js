@@ -1,45 +1,56 @@
 import { useState, useEffect } from 'react';
-
-import apiClient from 'services/api.client';
-import { gradients, statusColors, surfaceColors, neutralColors } from '../../theme/palette';
-import { useSnackbar } from '../../contexts/SnackbarContext';
 import {
-  AppBar,
-  Avatar,
-  Badge,
   Box,
-  Button,
+  Container,
+  Grid,
+  Typography,
   Card,
   CardContent,
-  Chip,
-  Container,
-  CssBaseline,
-  Divider,
-  Drawer,
-  Grid,
+  Button,
   IconButton,
+  Avatar,
+  Badge,
+  Menu,
+  MenuItem,
+  Tooltip,
+  Divider,
   LinearProgress,
+  Chip,
+  TextField,
+  AppBar,
+  Drawer,
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
-  Menu,
-  MenuItem,
-  TextField,
-  Tooltip,
-  Typography
+  CssBaseline,
 } from '@mui/material';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import AnalyticsIcon from '@mui/icons-material/Analytics';
-import ReportIcon from '@mui/icons-material/Report';
-import UploadIcon from '@mui/icons-material/Upload';
-import SettingsIcon from '@mui/icons-material/Settings';
-import HelpIcon from '@mui/icons-material/Help';
-import CloseIcon from '@mui/icons-material/Close';
-import MenuIcon from '@mui/icons-material/Menu';
-import SearchIcon from '@mui/icons-material/Search';
-import NotificationsIcon from '@mui/icons-material/Notifications';
-import StarIcon from '@mui/icons-material/Star';
+import {
+  Dashboard as DashboardIcon,
+  Settings as SettingsIcon,
+  Notifications as NotificationsIcon,
+  Menu as MenuIcon,
+  Close as CloseIcon,
+  Search as SearchIcon,
+  Analytics as AnalyticsIcon,
+  Assessment as ReportIcon,
+  Upload as UploadIcon,
+  Star as StarIcon,
+  Help as HelpIcon,
+} from '@mui/icons-material';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as ChartTooltip,
+  Legend,
+  ResponsiveContainer,
+} from 'recharts';
+import apiClient from 'services/api.client';
+import { gradients, statusColors, surfaceColors, neutralColors } from '../../theme/palette';
+import { useSnackbar } from '../../contexts/SnackbarContext';
 
 // Sample data (fallback)
 const dashboardData = {

@@ -3,42 +3,19 @@
  * Treatment Authorization / Insurance Pre-Auth Dashboard
  */
 import { useState, useEffect, useCallback } from 'react';
-
-import treatmentAuthorizationService from '../../services/treatmentAuthorization.service';
 import {
-  Alert,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  Grid,
-  IconButton,
-  LinearProgress,
-  Step,
-  StepLabel,
-  Stepper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Tooltip,
-  Typography
+  Box, Card, CardContent, Typography, Grid, Button, Chip, Table,
+  TableBody, TableCell, TableContainer, TableHead, TableRow,
+  CircularProgress, Alert, IconButton, Tooltip, Stepper, Step,
+  StepLabel, Dialog, DialogTitle, DialogContent, DialogActions,
+  TextField, MenuItem, Divider, LinearProgress,
 } from '@mui/material';
-import Refresh from '@mui/icons-material/Refresh';
-import WarningAmber from '@mui/icons-material/WarningAmber';
-import CheckCircle from '@mui/icons-material/CheckCircle';
-import Cancel from '@mui/icons-material/Cancel';
-import AttachMoney from '@mui/icons-material/AttachMoney';
-import Send from '@mui/icons-material/Send';
+import {
+  LocalHospital, Refresh, Add, CheckCircle, Cancel,
+  HourglassEmpty, Send, Gavel, AttachMoney, AccessTime,
+  WarningAmber,
+} from '@mui/icons-material';
+import treatmentAuthorizationService from '../../services/treatmentAuthorization.service';
 
 const statusLabels = {
   draft: 'مسودة', pending_review: 'قيد المراجعة الداخلية',

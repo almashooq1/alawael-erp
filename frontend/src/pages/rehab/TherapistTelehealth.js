@@ -1,46 +1,52 @@
 import { useState, useEffect } from 'react';
-
+import {
+  Box,
+  Container,
+  Card,
+  CardContent,
+  Typography,
+  Grid,
+  Button,
+  TextField,
+  Chip,
+  IconButton,
+  InputAdornment,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Tooltip,
+  Paper,
+  Avatar,
+  Divider,
+  LinearProgress,
+  Rating,
+} from '@mui/material';
+import {
+  Add as AddIcon,
+  Search as SearchIcon,
+  Videocam as VideoIcon,
+  Delete as DeleteIcon,
+  Close as CloseIcon,
+  Edit as EditIcon,
+  Phone as AudioIcon,
+  Chat as ChatIcon,
+  PlayArrow as StartIcon,
+  CheckCircle as CompleteIcon,
+  Cancel as CancelIcon,
+  Schedule as ScheduleIcon,
+  Link as LinkIcon,
+  Person as PatientIcon,
+} from '@mui/icons-material';
 import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import {
-  Avatar,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  FormControl,
-  Grid,
-  IconButton,
-  InputAdornment,
-  InputLabel,
-  MenuItem,
-  Paper,
-  Rating,
-  Select,
-  TextField,
-  Tooltip,
-  Typography
-} from '@mui/material';
-import ChatIcon from '@mui/icons-material/Chat';
-import SearchIcon from '@mui/icons-material/Search';
-import AddIcon from '@mui/icons-material/Add';
-import ScheduleIcon from '@mui/icons-material/Schedule';
-import LinkIcon from '@mui/icons-material/Link';
-import StartIcon from '@mui/icons-material/Start';
-import CancelIcon from '@mui/icons-material/Cancel';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import CloseIcon from '@mui/icons-material/Close';
-import { AudioIcon, VideoIcon } from 'utils/iconAliases';
+import { statusColors, neutralColors, surfaceColors } from '../../theme/palette';
 
 const PLATFORMS = [
   { value: 'zoom', label: 'Zoom', icon: '📹' },

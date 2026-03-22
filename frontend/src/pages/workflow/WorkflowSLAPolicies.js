@@ -3,36 +3,31 @@
  *
  * Manage SLA policies, track compliance, and view SLA dashboard.
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Paper,
-  alpha,
-} from '@mui/material';
-
-import { useSnackbar } from '../../contexts/SnackbarContext';
-import workflowService from '../../services/workflow.service';
-import {
-  Alert,
   Box,
+  Paper,
+  Typography,
   Button,
+  Grid,
   Card,
   CardContent,
-  Chip,
+  TextField,
   Dialog,
-  DialogActions,
-  DialogContent,
   DialogTitle,
-  Divider,
-  FormControl,
-  Grid,
+  DialogContent,
+  DialogActions,
   IconButton,
-  InputLabel,
-  LinearProgress,
+  Chip,
+  Divider,
   MenuItem,
   Select,
-  Skeleton,
+  FormControl,
+  InputLabel,
   Switch,
+  Tooltip,
+  Tabs,
   Tab,
   Table,
   TableBody,
@@ -40,22 +35,28 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Tabs,
-  TextField,
-  Tooltip,
-  Typography
+  LinearProgress,
+  alpha,
+  Skeleton,
+  Alert,
 } from '@mui/material';
-import SpeedIcon from '@mui/icons-material/Speed';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import AddIcon from '@mui/icons-material/Add';
-import CheckIcon from '@mui/icons-material/Check';
-import ErrorIcon from '@mui/icons-material/Error';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import TimerIcon from '@mui/icons-material/Timer';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import SaveIcon from '@mui/icons-material/Save';
-import { TrendIcon } from 'utils/iconAliases';
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  ContentCopy as CloneIcon,
+  Refresh as RefreshIcon,
+  ArrowBack as BackIcon,
+  Save as SaveIcon,
+  Speed as SpeedIcon,
+  Timer as TimerIcon,
+  CheckCircle as CheckIcon,
+  Error as ErrorIcon,
+  Dashboard as DashboardIcon,
+  TrendingUp as TrendIcon,
+} from '@mui/icons-material';
+import { useSnackbar } from '../../contexts/SnackbarContext';
+import workflowService from '../../services/workflow.service';
 
 const PRIORITY_MAP = { critical: 'حرج', high: 'عالي', medium: 'متوسط', low: 'منخفض' };
 const PRIORITY_COLORS = { critical: '#D32F2F', high: '#F57C00', medium: '#FFC107', low: '#4CAF50' };

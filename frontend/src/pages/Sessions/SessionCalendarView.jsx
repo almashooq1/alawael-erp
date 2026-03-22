@@ -12,44 +12,41 @@
  * @version 1.0.0
  */
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
-
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import {
+  Container, Typography, Grid, Paper, Box, Card, CardContent,
+  Chip, Button, IconButton, Tooltip, TextField, MenuItem,
+  LinearProgress, Dialog, DialogTitle, DialogContent, DialogActions,
+  Avatar, Stack, Divider, ToggleButton, ToggleButtonGroup,
+  Badge,
+} from '@mui/material';
+import {
+  CalendarMonth as CalendarIcon,
+  ChevronLeft as PrevIcon,
+  ChevronRight as NextIcon,
+  Today as TodayIcon,
+  ViewWeek as WeekIcon,
+  ViewModule as MonthIcon,
+  ViewDay as DayIcon,
+  FilterList as FilterIcon,
+  Close as CloseIcon,
+  Schedule as ScheduleIcon,
+  Person as PersonIcon,
+  MeetingRoom as RoomIcon,
+  LocalHospital as TypeIcon,
+  Info as InfoIcon,
+  CheckCircle,
+  Cancel,
+  HourglassEmpty,
+  PersonOff,
+  EventAvailable,
+} from '@mui/icons-material';
+import { motion } from 'framer-motion';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, chartColors, statusColors } from '../../theme/palette';
 import logger from '../../utils/logger';
 import { therapistService } from '../../services/therapistService';
-import {
-  Badge,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  Grid,
-  IconButton,
-  LinearProgress,
-  MenuItem,
-  Paper,
-  Stack,
-  TextField,
-  ToggleButton,
-  ToggleButtonGroup,
-  Typography
-} from '@mui/material';
-import CheckCircle from '@mui/icons-material/CheckCircle';
-import Cancel from '@mui/icons-material/Cancel';
-import TodayIcon from '@mui/icons-material/Today';
-import ScheduleIcon from '@mui/icons-material/Schedule';
-import CloseIcon from '@mui/icons-material/Close';
-import PersonIcon from '@mui/icons-material/Person';
-import RoomIcon from '@mui/icons-material/Room';
-import { CalendarIcon } from 'utils/iconAliases';
+import DashboardErrorBoundary from '../../components/dashboard/shared/DashboardErrorBoundary';
 
 /* ──────── Arabic locale data ──────── */
 const AR_MONTHS = [

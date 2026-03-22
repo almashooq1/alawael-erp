@@ -3,35 +3,37 @@
  */
 
 import { useState, useEffect } from 'react';
-
-import apiClient from 'services/api.client';
-import logger from 'utils/logger';
-import { gradients, statusColors } from '../../theme/palette';
 import {
-  Avatar,
   Box,
-  Button,
+  Typography,
   Card,
   CardContent,
-  Chip,
-  Divider,
   Grid,
-  LinearProgress,
+  Tabs,
+  Tab,
+  Chip,
+  Button,
+  Avatar,
   List,
   ListItem,
   ListItemAvatar,
   ListItemText,
-  Tab,
-  Tabs,
-  Typography
+  Divider,
+  LinearProgress,
 } from '@mui/material';
-import PeopleIcon from '@mui/icons-material/People';
-import SpeedIcon from '@mui/icons-material/Speed';
-import StorageIcon from '@mui/icons-material/Storage';
-import CloudIcon from '@mui/icons-material/Cloud';
-import SettingsIcon from '@mui/icons-material/Settings';
-import SecurityIcon from '@mui/icons-material/Security';
-import ReportIcon from '@mui/icons-material/Report';
+import {
+  People as PeopleIcon,
+  Settings as SettingsIcon,
+  Security as SecurityIcon,
+  Storage as StorageIcon,
+  Assessment as ReportIcon,
+  Notifications as NotifIcon,
+  Speed as SpeedIcon,
+  CloudDone as CloudIcon,
+} from '@mui/icons-material';
+import apiClient from 'services/api.client';
+import logger from 'utils/logger';
+import { gradients, statusColors } from '../../theme/palette';
 
 const systemStats = [
   { label: 'المستخدمون النشطون', value: '127', icon: <PeopleIcon />, color: statusColors.primaryBlue },

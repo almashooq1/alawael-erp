@@ -2,58 +2,69 @@
  * 🛒 مشتريات الفروع — Branch Purchasing Management
  * AlAwael ERP — Multi-Branch Purchase Requests, Receipts & Contracts
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Paper,
-} from '@mui/material';
-
-import { useSnackbar } from 'contexts/SnackbarContext';
-import { gradients, surfaceColors } from 'theme/palette';
-import {
-  purchaseRequestService,
-  purchaseReceiptService,
-  vendorContractService,
-  branchService,
-} from 'services/branchWarehouseService';
-import {
-  Avatar,
   Box,
-  Button,
+  Typography,
   Card,
   CardContent,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  FormControl,
   Grid,
-  IconButton,
-  InputAdornment,
-  InputLabel,
-  LinearProgress,
-  MenuItem,
-  Select,
+  Tabs,
   Tab,
+  TextField,
+  InputAdornment,
+  Button,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Tabs,
-  TextField,
+  Paper,
+  Chip,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  LinearProgress,
+  Avatar,
+  Divider,
+  Stack,
+  Alert,
   Tooltip,
-  Typography
 } from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
-import PendingIcon from '@mui/icons-material/Pending';
-import AddIcon from '@mui/icons-material/Add';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import ReceiptIcon from '@mui/icons-material/Receipt';
-import SearchIcon from '@mui/icons-material/Search';
-import { ViewIcon } from 'utils/iconAliases';
+import {
+  Search as SearchIcon,
+  Add as AddIcon,
+  ShoppingCart as PurchaseIcon,
+  Assignment as RequestIcon,
+  Receipt as ReceiptIcon,
+  Description as ContractIcon,
+  CheckCircle as ApproveIcon,
+  Cancel as RejectIcon,
+  Send as SubmitIcon,
+  Refresh as RefreshIcon,
+  Store as BranchIcon,
+  Visibility as ViewIcon,
+  Edit as EditIcon,
+  PriorityHigh as UrgentIcon,
+  Schedule as PendingIcon,
+  ThumbUp as ThumbUpIcon,
+  LocalShipping as OrderedIcon,
+} from '@mui/icons-material';
+import { useSnackbar } from 'contexts/SnackbarContext';
+import { gradients, statusColors, surfaceColors } from 'theme/palette';
+import {
+  purchaseRequestService,
+  purchaseReceiptService,
+  vendorContractService,
+  branchService,
+} from 'services/branchWarehouseService';
 
 const prStatusConfig = {
   draft: { label: 'مسودة', color: 'default' },

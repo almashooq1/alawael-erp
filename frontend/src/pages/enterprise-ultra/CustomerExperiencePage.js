@@ -4,44 +4,25 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import {
-  Paper,
+  Box, Typography, Tabs, Tab, Card, CardContent, Grid, Button, Chip,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  Paper, Dialog, DialogTitle, DialogContent, DialogActions, TextField,
+  MenuItem, Alert, LinearProgress, Stack, IconButton, Rating, Divider,
 } from '@mui/material';
-
-import * as cxService from '../../services/enterpriseUltra.service';
 import {
-  Alert,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  Grid,
-  IconButton,
-  LinearProgress,
-  MenuItem,
-  Rating,
-  Stack,
-  Tab,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Tabs,
-  TextField,
-  Typography
-} from '@mui/material';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import ThumbUpIcon from '@mui/icons-material/ThumbUp';
-import FeedbackIcon from '@mui/icons-material/Feedback';
-import AddIcon from '@mui/icons-material/Add';
-import ThumbDownIcon from '@mui/icons-material/ThumbDown';
+  SentimentSatisfiedAlt as CXIcon,
+  Add as AddIcon,
+  Poll as SurveyIcon,
+  Feedback as FeedbackIcon,
+  Report as ComplaintIcon,
+  Timeline as JourneyIcon,
+  Speed as BenchmarkIcon,
+  Refresh as RefreshIcon,
+  ThumbUp as ThumbUpIcon,
+  ThumbDown as ThumbDownIcon,
+  TrendingUp as TrendUpIcon,
+} from '@mui/icons-material';
+import * as cxService from '../../services/enterpriseUltra.service';
 
 const statusColors = {
   draft: 'default', active: 'success', paused: 'warning', completed: 'primary', archived: 'default',

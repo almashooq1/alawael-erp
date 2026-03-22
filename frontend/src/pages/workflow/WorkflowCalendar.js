@@ -2,52 +2,60 @@
  * WorkflowCalendar – تقويم سير العمل
  * Calendar view showing tasks, deadlines, and reminders grouped by date.
  */
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  alpha,
-} from '@mui/material';
-
-import { useSnackbar } from '../../contexts/SnackbarContext';
-import workflowService from '../../services/workflow.service';
-import {
-  Avatar,
-  Badge,
   Box,
+  Grid,
+  Paper,
+  Typography,
   Button,
+  IconButton,
+  Tooltip,
+  Chip,
   Card,
   CardContent,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
+  Skeleton,
+  Divider,
+  alpha,
+  Avatar,
+  Badge,
+  Select,
+  MenuItem,
   FormControl,
-  Grid,
-  IconButton,
   InputLabel,
+  Stack,
+  ToggleButton,
+  ToggleButtonGroup,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
-  MenuItem,
-  Paper,
-  Select,
-  Skeleton,
-  Stack,
-  Tooltip,
-  Typography
 } from '@mui/material';
-import Assignment from '@mui/icons-material/Assignment';
-import Flag from '@mui/icons-material/Flag';
-import ArrowBack from '@mui/icons-material/ArrowBack';
-import Today from '@mui/icons-material/Today';
-import Refresh from '@mui/icons-material/Refresh';
-import Event from '@mui/icons-material/Event';
-import ChevronRight from '@mui/icons-material/ChevronRight';
-import ChevronLeft from '@mui/icons-material/ChevronLeft';
-import PriorityHigh from '@mui/icons-material/PriorityHigh';
-import Person from '@mui/icons-material/Person';
+import {
+  CalendarMonth,
+  ChevronLeft,
+  ChevronRight,
+  Refresh,
+  Today,
+  Assignment,
+  AccessAlarm,
+  Flag,
+  Event,
+  Circle,
+  ArrowBack,
+  ViewWeek,
+  ViewModule,
+  PriorityHigh,
+  Timer,
+  Person,
+} from '@mui/icons-material';
+import { useSnackbar } from '../../contexts/SnackbarContext';
+import workflowService from '../../services/workflow.service';
 
 const DAYS_AR = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
 const MONTHS_AR = [

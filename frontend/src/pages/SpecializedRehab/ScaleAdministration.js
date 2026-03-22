@@ -2,55 +2,55 @@
  * 📝 تطبيق المقاييس المتخصصة — Scale Administration
  * AlAwael ERP — Administer a specialized scale, record results, view history
  */
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import {
-  Paper,
-  useTheme,
-  alpha,
-} from '@mui/material';
-
-import {
-  SPECIALIZED_SCALES_CATALOG,
-  SCALE_CATEGORY_LABELS,
-  specializedScalesService,
-} from 'services/specializedRehab.service';
-import { useSnackbar } from 'contexts/SnackbarContext';
-import {
-  Alert,
-  Avatar,
   Box,
-  Button,
+  Typography,
+  Paper,
+  Grid,
   Card,
   CardContent,
   Chip,
-  CircularProgress,
+  TextField,
+  Button,
+  Avatar,
+  Tabs,
+  Tab,
   Divider,
-  Grid,
-  InputAdornment,
-  LinearProgress,
-  Slider,
   Stack,
+  LinearProgress,
+  Stepper,
   Step,
   StepLabel,
-  Stepper,
-  Tab,
+  Slider,
+  Alert,
+  useTheme,
+  alpha,
+  InputAdornment,
+  CircularProgress,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Tabs,
-  TextField,
-  Typography
 } from '@mui/material';
-import AssessmentIcon from '@mui/icons-material/Assessment';
-import HistoryIcon from '@mui/icons-material/History';
-import TimerIcon from '@mui/icons-material/Timer';
-import PersonIcon from '@mui/icons-material/Person';
-import ForwardIcon from '@mui/icons-material/Forward';
-import SaveIcon from '@mui/icons-material/Save';
-import RefreshIcon from '@mui/icons-material/Refresh';
+import {
+  Save as SaveIcon,
+  Person as PersonIcon,
+  Assessment as AssessmentIcon,
+  History as HistoryIcon,
+  Timer as TimerIcon,
+  Refresh as RefreshIcon,
+  ArrowBack as BackIcon,
+  ArrowForward as ForwardIcon,
+} from '@mui/icons-material';
+import {
+  SPECIALIZED_SCALES_CATALOG,
+  SCALE_CATEGORY_LABELS,
+  specializedScalesService,
+} from 'services/specializedRehab.service';
+import { useSnackbar } from 'contexts/SnackbarContext';
 
 const SEVERITY_COLORS = {
   normal: '#4CAF50',

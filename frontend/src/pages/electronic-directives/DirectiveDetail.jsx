@@ -1,9 +1,67 @@
 /**
  * Directive Detail — تفاصيل التوجيه الإلكتروني
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-
+import {
+  Box,
+  Typography,
+  Paper,
+  Grid,
+  Chip,
+  Button,
+  Divider,
+  Avatar,
+  IconButton,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemIcon,
+  ListItemSecondaryAction,
+  LinearProgress,
+  Alert,
+  Snackbar,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Tooltip,
+  Skeleton,
+  Card,
+  CardContent,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+} from '@mui/material';
+import {
+  ArrowBack as BackIcon,
+  Campaign as CampaignIcon,
+  Gavel as DecisionIcon,
+  Description as MemoIcon,
+  NotificationsActive as UrgentIcon,
+  PolicyOutlined as PolicyIcon,
+  Rule as ProcedureIcon,
+  Assignment as InstructionIcon,
+  CheckCircle as CheckIcon,
+  Cancel as CancelIcon,
+  Send as IssueIcon,
+  Visibility as ReadIcon,
+  ThumbUp as AckIcon,
+  AttachFile as AttachIcon,
+  Download as DownloadIcon,
+  Delete as DeleteIcon,
+  Schedule as ScheduleIcon,
+  Person as PersonIcon,
+  Group as GroupIcon,
+  Warning as WarningIcon,
+  Done as DoneIcon,
+  PlayArrow as PlayIcon,
+  Edit as EditIcon,
+} from '@mui/icons-material';
 import electronicDirectivesService from '../../services/electronicDirectives.service';
 import {
   DIRECTIVE_TYPES,
@@ -13,49 +71,6 @@ import {
   RECIPIENT_TYPES,
   ACTION_STATUS,
 } from './constants';
-import {
-  Alert,
-  Avatar,
-  Box,
-  Button,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  Grid,
-  IconButton,
-  LinearProgress,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemSecondaryAction,
-  ListItemText,
-  Paper,
-  Skeleton,
-  Snackbar,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TextField,
-  Tooltip,
-  Typography
-} from '@mui/material';
-import CampaignIcon from '@mui/icons-material/Campaign';
-import PolicyIcon from '@mui/icons-material/Policy';
-import EditIcon from '@mui/icons-material/Edit';
-import CancelIcon from '@mui/icons-material/Cancel';
-import CheckIcon from '@mui/icons-material/Check';
-import DoneIcon from '@mui/icons-material/Done';
-import WarningIcon from '@mui/icons-material/Warning';
-import ScheduleIcon from '@mui/icons-material/Schedule';
-import DeleteIcon from '@mui/icons-material/Delete';
-import PersonIcon from '@mui/icons-material/Person';
-import { AttachIcon } from 'utils/iconAliases';
 
 const typeIcons = {
   instruction: <InstructionIcon />,

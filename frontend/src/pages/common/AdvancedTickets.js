@@ -1,41 +1,42 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import advancedTicketsService from '../../services/advancedTickets.service';
 import { useSocketEvent } from '../../contexts/SocketContext';
 import {
-  Paper,
-} from '@mui/material';
-
-import { useSnackbar } from '../../contexts/SnackbarContext';
-import { gradients, statusColors } from '../../theme/palette';
-import {
   Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Grid,
-  IconButton,
-  LinearProgress,
-  MenuItem,
-  Tab,
+  Typography,
+  Paper,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Tabs,
+  Button,
+  Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   TextField,
+  MenuItem,
+  Grid,
+  Card,
+  CardContent,
+  IconButton,
+  Tabs,
+  Tab,
   Tooltip,
-  Typography
+  LinearProgress,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import CommentIcon from '@mui/icons-material/Comment';
-import EditIcon from '@mui/icons-material/Edit';
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  ConfirmationNumber as TicketIcon,
+  ArrowUpward as EscalateIcon,
+  Comment as CommentIcon,
+} from '@mui/icons-material';
+import { useSnackbar } from '../../contexts/SnackbarContext';
+import { gradients, statusColors } from '../../theme/palette';
 
 const demoTickets = [
   {

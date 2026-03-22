@@ -1,23 +1,14 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import riskAssessmentService from '../../services/riskAssessment.service';
 import {
-  Paper,
-} from '@mui/material';
-
-import { useSnackbar } from '../../contexts/SnackbarContext';
-import { gradients, statusColors, surfaceColors } from '../../theme/palette';
-import {
   Box,
-  Button,
+  Typography,
+  Paper,
+  Grid,
   Card,
   CardContent,
+  Button,
   Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Grid,
-  Tab,
   Table,
   TableBody,
   TableCell,
@@ -25,13 +16,23 @@ import {
   TableHead,
   TableRow,
   Tabs,
+  Tab,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   TextField,
   Tooltip,
-  Typography
 } from '@mui/material';
-import WarningIcon from '@mui/icons-material/Warning';
-import ShieldIcon from '@mui/icons-material/Shield';
-import AddIcon from '@mui/icons-material/Add';
+import {
+  Add as AddIcon,
+  Warning as WarningIcon,
+  Shield as ShieldIcon,
+  TrendingDown as LowIcon,
+  TrendingUp as HighIcon,
+} from '@mui/icons-material';
+import { useSnackbar } from '../../contexts/SnackbarContext';
+import { gradients, statusColors, surfaceColors } from '../../theme/palette';
 
 const demoRisks = [
   {

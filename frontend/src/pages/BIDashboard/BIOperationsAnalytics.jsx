@@ -5,8 +5,19 @@
  * operational efficiency, and department comparison.
  */
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
+  Box,
+  Grid,
+  Paper,
+  Typography,
+  Card,
+  CardContent,
+  CircularProgress,
+  IconButton,
+  Tooltip,
+  Alert,
+  Divider,
   useTheme,
   alpha,
 } from '@mui/material';
@@ -15,24 +26,26 @@ import {
   ReportProblem,
   Build,
   DirectionsCar,
+  Refresh,
+  CheckCircle,
+  Pending,
+  Cancel,
 } from '@mui/icons-material';
-
-import { getOperationsAnalytics, getTrends } from '../../services/biDashboard.service';
 import {
-  Alert,
-  Box,
-  Card,
-  CardContent,
-  CircularProgress,
-  Divider,
-  Grid,
-  Icon,
-  IconButton,
-  Paper,
-  Tooltip,
-  Typography
-} from '@mui/material';
-import Refresh from '@mui/icons-material/Refresh';
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RechartTooltip,
+  Legend,
+} from 'recharts';
+import { motion } from 'framer-motion';
+import { getOperationsAnalytics, getTrends } from '../../services/biDashboard.service';
 
 const STATUS_COLORS = {
   completed: '#4CAF50',

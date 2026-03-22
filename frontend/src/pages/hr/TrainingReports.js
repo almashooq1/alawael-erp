@@ -4,9 +4,59 @@
  */
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  Grid,
+  Chip,
+  Button,
+  IconButton,
+  Tooltip,
+  TextField,
+  MenuItem,
+  Tabs,
+  Tab,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  LinearProgress,
   useTheme,
 } from '@mui/material';
-
+import {
+  Refresh as RefreshIcon,
+  Assessment as ReportIcon,
+  TrendingUp as TrendIcon,
+  Download as DownloadIcon,
+  School as SchoolIcon,
+  Group as GroupIcon,
+  EmojiEvents as TrophyIcon,
+  Assignment as CertIcon,
+} from '@mui/icons-material';
+import {
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RTooltip,
+  ResponsiveContainer,
+  Legend,
+  RadarChart,
+  Radar,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+} from 'recharts';
 import {
   trainingReportsService,
   MOCK_TRAINING_DASHBOARD,
@@ -14,29 +64,6 @@ import {
   MOCK_CERTIFICATIONS,
 } from 'services/trainingService';
 import { useSnackbar } from 'contexts/SnackbarContext';
-import {
-  Box,
-  Card,
-  CardContent,
-  Chip,
-  Grid,
-  IconButton,
-  LinearProgress,
-  Paper,
-  Tab,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Tabs,
-  Tooltip,
-  Typography
-} from '@mui/material';
-import SchoolIcon from '@mui/icons-material/School';
-import GroupIcon from '@mui/icons-material/Group';
-import RefreshIcon from '@mui/icons-material/Refresh';
 
 const COLORS = [
   '#0277BD',

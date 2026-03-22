@@ -3,39 +3,17 @@
  * Mudad Wage Protection Dashboard
  */
 import { useState, useEffect, useCallback } from 'react';
-
-import mudadService from '../../services/mudad.service';
 import {
-  Alert,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Grid,
-  IconButton,
-  LinearProgress,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TextField,
-  Tooltip,
-  Typography
+  Box, Card, CardContent, Typography, Grid, Button, Chip, Table,
+  TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
+  CircularProgress, Alert, LinearProgress, IconButton, Tooltip,
+  Dialog, DialogTitle, DialogContent, DialogActions, TextField,
 } from '@mui/material';
-import AttachMoney from '@mui/icons-material/AttachMoney';
-import Refresh from '@mui/icons-material/Refresh';
-import CheckCircle from '@mui/icons-material/CheckCircle';
-import PriorityHigh from '@mui/icons-material/PriorityHigh';
-import TrendingUp from '@mui/icons-material/TrendingUp';
-import CloudUpload from '@mui/icons-material/CloudUpload';
+import {
+  AccountBalance, AttachMoney, Warning, CheckCircle, Refresh,
+  CloudUpload, Assessment, TrendingUp, PriorityHigh,
+} from '@mui/icons-material';
+import mudadService from '../../services/mudad.service';
 
 const statusColors = {
   pending: 'warning',

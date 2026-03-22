@@ -1,25 +1,21 @@
 import { useState, useEffect } from 'react';
-
+import {
+  Box,
+  Container,
+  Grid,
+  Paper,
+  Typography,
+  Card,
+  CardContent,
+  Chip,
+  LinearProgress,
+  Divider,
+} from '@mui/material';
+import { TrendingUp, People, Dns, Warning, CheckCircle, Speed } from '@mui/icons-material';
 import analyticsService from 'services/analyticsService';
 import logger from 'utils/logger';
 import { gradients, surfaceColors } from '../../theme/palette';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import {
-  Box,
-  Card,
-  CardContent,
-  Chip,
-  Container,
-  Divider,
-  Grid,
-  LinearProgress,
-  Paper,
-  Typography
-} from '@mui/material';
-import Warning from '@mui/icons-material/Warning';
-import People from '@mui/icons-material/People';
-import TrendingUp from '@mui/icons-material/TrendingUp';
-import CheckCircle from '@mui/icons-material/CheckCircle';
 
 const MetricCard = ({ title, value, subtitle, icon, color = 'primary' }) => (
   <Card sx={{ height: '100%' }}>

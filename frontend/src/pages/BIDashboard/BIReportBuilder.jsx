@@ -4,49 +4,51 @@
  * List saved reports, create / edit / delete / export reports.
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
+  Box,
+  Grid,
+  Paper,
+  Typography,
+  CircularProgress,
+  Button,
+  IconButton,
+  Tooltip,
+  Alert,
+  Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Table,
+  TableHead,
+  TableBody,
   TableRow,
+  TableCell,
   useTheme,
   alpha,
 } from '@mui/material';
-
+import {
+  Add,
+  Refresh,
+  Edit,
+  Delete,
+  Visibility,
+  Description,
+  FilterList,
+} from '@mui/icons-material';
+import { motion } from 'framer-motion';
 import {
   getReports,
   createReport,
   updateReport,
   deleteReport,
 } from '../../services/biDashboard.service';
-import {
-  Alert,
-  Box,
-  Button,
-  Chip,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControl,
-  IconButton,
-  InputLabel,
-  MenuItem,
-  Paper,
-  Select,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TextField,
-  Tooltip,
-  Typography
-} from '@mui/material';
-import Refresh from '@mui/icons-material/Refresh';
-import Add from '@mui/icons-material/Add';
-import FilterList from '@mui/icons-material/FilterList';
-import Description from '@mui/icons-material/Description';
-import Edit from '@mui/icons-material/Edit';
-import Delete from '@mui/icons-material/Delete';
 
 const CATEGORIES = [
   { value: '', label: 'الكل' },

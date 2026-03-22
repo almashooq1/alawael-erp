@@ -1,6 +1,7 @@
 /**
  * E-Signature Routes — مسارات التوقيع الإلكتروني
  */
+import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const ESignatureDashboard = lazyWithRetry(() => import('../pages/e-signature/ESignatureDashboard'));

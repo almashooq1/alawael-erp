@@ -2,46 +2,47 @@
  * Knowledge Center Page — مركز المعرفة
  */
 import { useState, useEffect, useCallback } from 'react';
-
-import knowledgeCenterService from '../../services/knowledgeCenter.service';
 import {
-  Alert,
-  Avatar,
   Box,
-  Button,
-  Card,
-  CardActions,
-  CardContent,
-  Chip,
   Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
+  Typography,
+  Card,
+  CardContent,
   Grid,
-  IconButton,
-  InputAdornment,
-  LinearProgress,
-  MenuItem,
-  Rating,
-  Stack,
-  Tab,
-  Tabs,
+  Button,
+  Chip,
+  Avatar,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   TextField,
-  Typography
+  MenuItem,
+  LinearProgress,
+  Tabs,
+  Tab,
+  IconButton,
+  Stack,
+  Alert,
+  InputAdornment,
+  CardActions,
+  Rating,
+  Divider,
 } from '@mui/material';
-import BookIcon from '@mui/icons-material/Book';
-import AddIcon from '@mui/icons-material/Add';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import ArticleIcon from '@mui/icons-material/Article';
-import StarIcon from '@mui/icons-material/Star';
-import CategoryIcon from '@mui/icons-material/Category';
-import SearchIcon from '@mui/icons-material/Search';
-import BookmarkIcon from '@mui/icons-material/Bookmark';
-import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
-import SchoolIcon from '@mui/icons-material/School';
-import { ViewIcon } from 'utils/iconAliases';
+import {
+  MenuBook as BookIcon,
+  Add as AddIcon,
+  Refresh as RefreshIcon,
+  Search as SearchIcon,
+  Bookmark as BookmarkIcon,
+  BookmarkBorder as BookmarkBorderIcon,
+  Visibility as ViewIcon,
+  Category as CategoryIcon,
+  Star as StarIcon,
+  Article as ArticleIcon,
+  School as SchoolIcon,
+} from '@mui/icons-material';
+import knowledgeCenterService from '../../services/knowledgeCenter.service';
 
 const DEMO_ARTICLES = [
   {

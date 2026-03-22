@@ -2,19 +2,21 @@
  * SystemAdminHeader.jsx — Gradient header + secondary toolbar + stats cards
  * Extracted from SystemAdmin.js
  */
-
-import { gradients } from '../../theme/palette';
+import React from 'react';
 import {
+  Typography,
+  Grid,
   Box,
   Button,
   Card,
   CardContent,
-  Grid,
-  Typography
 } from '@mui/material';
-import SettingsIcon from '@mui/icons-material/Settings';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import AddIcon from '@mui/icons-material/Add';
+import {
+  Add as AddIcon,
+  Refresh as RefreshIcon,
+  Settings as SettingsIcon,
+} from '@mui/icons-material';
+import { gradients } from '../../theme/palette';
 
 const SystemAdminHeader = ({ stats, loadData, openCreate, activeTab, tabs }) => (
   <>

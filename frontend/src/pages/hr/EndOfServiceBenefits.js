@@ -1,38 +1,44 @@
-import { useState, useEffect, useCallback } from 'react';
-
-import payrollService from 'services/payrollService';
-import logger from 'utils/logger';
-import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';
-import { useSnackbar } from '../../contexts/SnackbarContext';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Avatar,
   Box,
-  Button,
+  Container,
   Card,
   CardContent,
-  Chip,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  FormControl,
+  Typography,
+  Avatar,
   Grid,
+  Button,
+  TextField,
   InputAdornment,
+  FormControl,
   InputLabel,
-  LinearProgress,
-  MenuItem,
   Select,
+  MenuItem,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  TextField,
-  Typography
+  Chip,
+  LinearProgress,
+  Divider,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
+import {
+  CardGiftcard as EOSIcon,
+  Calculate as CalcIcon,
+  Add as AddIcon,
+  Visibility as ViewIcon,
+  Print as PrintIcon,
+} from '@mui/icons-material';
+import payrollService from 'services/payrollService';
+import logger from 'utils/logger';
+import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';
+import { useSnackbar } from '../../contexts/SnackbarContext';
 
 const reasonLabels = {
   resignation: 'استقالة',

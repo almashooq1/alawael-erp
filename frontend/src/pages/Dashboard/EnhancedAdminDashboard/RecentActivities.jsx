@@ -1,20 +1,19 @@
-
-
-/** Recent activities feed card */
 import {
-  Avatar,
-  Box,
-  Button,
   Card,
   CardContent,
+  Typography,
+  Box,
+  Button,
   List,
   ListItem,
   ListItemAvatar,
   ListItemButton,
   ListItemText,
-  Typography
+  Avatar,
 } from '@mui/material';
-import ArrowForward from '@mui/icons-material/ArrowForward';
+import { ArrowForward } from '@mui/icons-material';
+
+/** Recent activities feed card */
 const RecentActivities = ({ recentActivities }) => (
   <Card elevation={3}>
     <CardContent>

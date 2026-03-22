@@ -1,29 +1,15 @@
 /**
  * Warehouse Dashboard — لوحة تحكم المستودعات
  */
-import { useState, useEffect, useCallback } from 'react';
-import { useTheme, alpha,
-} from '@mui/material';
-import { getWarehouseDashboard } from '../../services/warehouse.service';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Alert,
-  Box,
-  Chip,
-  CircularProgress,
-  Grid,
-  IconButton,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Tooltip,
-  Typography
+  Box, Grid, Paper, Typography, CircularProgress, IconButton, Tooltip, Alert, Chip,
+  Table, TableHead, TableBody, TableRow, TableCell, useTheme, alpha,
 } from '@mui/material';
-import WarehouseIcon from '@mui/icons-material/Warehouse';
-import Warning from '@mui/icons-material/Warning';
-import Refresh from '@mui/icons-material/Refresh';
+import { Refresh, Warehouse as WarehouseIcon, Inventory2, Warning, Receipt } from '@mui/icons-material';
+import { PieChart, Pie, Cell, BarChart, Bar, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip as RTooltip } from 'recharts';
+import { motion } from 'framer-motion';
+import { getWarehouseDashboard } from '../../services/warehouse.service';
 
 const CATEGORY_LABELS = {
   equipment: 'معدات', supplies: 'مستلزمات', medical: 'طبية', food: 'غذائية',

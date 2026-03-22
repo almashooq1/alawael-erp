@@ -3,7 +3,7 @@
  * Manages all state & handlers for the EmployeeManagement page.
  */
 import { useState, useMemo, useCallback, useEffect } from 'react';
-import { STATUS_MAP } from './employeeManagement.constants';
+import { DEPARTMENTS, STATUS_MAP } from './employeeManagement.constants';
 
 /* ───── demo seed data (Arabic) ───── */
 const DEMO_EMPLOYEES = [

@@ -1,41 +1,48 @@
-import { useState, useEffect, useCallback } from 'react';
-
-import { incidentService } from 'services/operationsService';
-import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';
-import { useSnackbar } from '../../contexts/SnackbarContext';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Avatar,
   Box,
-  Button,
+  Container,
   Card,
   CardContent,
-  Chip,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControl,
+  Typography,
+  Avatar,
   Grid,
-  IconButton,
+  Button,
+  TextField,
   InputAdornment,
-  InputLabel,
-  LinearProgress,
-  MenuItem,
-  Select,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  TextField,
+  Chip,
+  LinearProgress,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
   Tooltip,
-  Typography
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import SearchIcon from '@mui/icons-material/Search';
-import { ViewIcon } from 'utils/iconAliases';
+import {
+  ReportProblem as IncIcon,
+  Add as AddIcon,
+  Search as SearchIcon,
+  Visibility as ViewIcon,
+  PersonAdd as AssignIcon,
+  ArrowUpward as EscalateIcon,
+  CheckCircle as ResolveIcon,
+  Warning as CritIcon,
+} from '@mui/icons-material';
+import { incidentService } from 'services/operationsService';
+import logger from 'utils/logger';
+import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';
+import { useSnackbar } from '../../contexts/SnackbarContext';
 
 const severityConfig = {
   low: { label: 'منخفض', color: 'info' },

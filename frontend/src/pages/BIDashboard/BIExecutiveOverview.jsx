@@ -5,42 +5,57 @@
  * real-time metrics, and summary charts.
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
+  Box,
+  Grid,
+  Paper,
+  Typography,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  ToggleButtonGroup,
+  ToggleButton,
+  Tooltip,
+  IconButton,
+  Alert,
   useTheme,
   alpha,
 } from '@mui/material';
 import {
+  TrendingUp,
+  TrendingDown,
+  TrendingFlat,
   People,
   AccountBalance,
   EventNote,
   Accessibility,
   ReportProblem,
   HowToReg,
+  Refresh,
   Speed,
+  AccessTime,
+  Wifi,
+  Assignment,
 } from '@mui/icons-material';
-
-import { getOverview, getKPIs, getRealtime, getTrends } from '../../services/biDashboard.service';
 import {
-  Alert,
-  Box,
-  Card,
-  CardContent,
-  Chip,
-  CircularProgress,
-  Grid,
-  Icon,
-  IconButton,
-  Paper,
-  ToggleButton,
-  ToggleButtonGroup,
-  Tooltip,
-  Typography
-} from '@mui/material';
-import TrendingUp from '@mui/icons-material/TrendingUp';
-import TrendingDown from '@mui/icons-material/TrendingDown';
-import Assignment from '@mui/icons-material/Assignment';
-import Refresh from '@mui/icons-material/Refresh';
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RechartTooltip,
+  Legend,
+} from 'recharts';
+import { motion } from 'framer-motion';
+import { getOverview, getKPIs, getRealtime, getTrends } from '../../services/biDashboard.service';
 
 const PERIOD_OPTIONS = [
   { value: 'week', label: 'أسبوع' },

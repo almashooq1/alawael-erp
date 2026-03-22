@@ -10,27 +10,28 @@
  * حوارات رفع المستندات وعرض التفاصيل
  */
 
-
-import { getStatusColor } from 'utils/statusColors';
-import { formatFileSize } from './useDocumentsPage';
 import {
   Box,
+  Grid,
+  Typography,
   Button,
+  TextField,
   Chip,
   Dialog,
-  DialogActions,
-  DialogContent,
   DialogTitle,
-  FormControl,
-  Grid,
-  InputLabel,
+  DialogContent,
+  DialogActions,
   MenuItem,
   Select,
-  TextField,
-  Typography
+  FormControl,
+  InputLabel,
 } from '@mui/material';
-import UploadIcon from '@mui/icons-material/Upload';
-import DownloadIcon from '@mui/icons-material/Download';
+import {
+  CloudUpload as UploadIcon,
+  Download as DownloadIcon,
+} from '@mui/icons-material';
+import { getStatusColor } from 'utils/statusColors';
+import { formatFileSize } from './useDocumentsPage';
 
 export const UploadDialog = ({ open, onClose, categories, onSubmit }) => (
   <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>

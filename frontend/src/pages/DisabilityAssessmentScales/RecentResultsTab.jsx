@@ -1,16 +1,15 @@
-
-
-import { surfaceColors } from '../../theme/palette';
 import {
-  Alert,
   Box,
   Card,
   CardContent,
-  Chip,
+  Typography,
   Grid,
+  Chip,
   LinearProgress,
-  Typography
+  Alert,
 } from '@mui/material';
+import { surfaceColors } from '../../theme/palette';
+import { TabPanel } from './constants';
 
 /**
  * Tab 1 — shows the most recent assessment results with domain mini‑bars.

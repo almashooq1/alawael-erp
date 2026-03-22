@@ -4,24 +4,20 @@
  */
 
 import React, { useMemo } from 'react';
+import { Box, Paper, Typography, LinearProgress, Chip, useTheme, Tooltip } from '@mui/material';
+import { motion } from 'framer-motion';
 import {
-  Box,
-  Chip,
-  LinearProgress,
-  Paper,
-  Tooltip,
-  Typography,
-  useTheme
-} from '@mui/material';
-
+  BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, Tooltip as RechartsTooltip,
+} from 'recharts';
+import { ChartTooltip } from './shared/ChartTooltip';
 import { chartColors, brandColors, statusColors, neutralColors } from 'theme/palette';
 import BadgeIcon from '@mui/icons-material/Badge';
-import HowToRegIcon from '@mui/icons-material/HowToReg';
 import EventBusyIcon from '@mui/icons-material/EventBusy';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import PendingActionsIcon from '@mui/icons-material/PendingActions';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import StarRateIcon from '@mui/icons-material/StarRate';
+import HowToRegIcon from '@mui/icons-material/HowToReg';
 
 const MetricRow = ({ icon, label, value, badge, color, subtitle, index = 0 }) => (
   <motion.div

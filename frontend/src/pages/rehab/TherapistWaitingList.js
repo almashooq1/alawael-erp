@@ -1,40 +1,50 @@
 import { useState, useEffect } from 'react';
-
+import {
+  Box,
+  Container,
+  Card,
+  CardContent,
+  Typography,
+  Grid,
+  Button,
+  TextField,
+  Chip,
+  IconButton,
+  InputAdornment,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Tooltip,
+  Paper,
+  Avatar,
+  Divider,
+} from '@mui/material';
+import {
+  Add as AddIcon,
+  Search as SearchIcon,
+  HourglassTop as WaitIcon,
+  Delete as DeleteIcon,
+  Close as CloseIcon,
+  Edit as EditIcon,
+  Phone as PhoneIcon,
+  Person as PatientIcon,
+  CalendarToday as DateIcon,
+  ArrowUpward as HighIcon,
+  ArrowDownward as LowIcon,
+  DragHandle as MediumIcon,
+  CheckCircle as AdmittedIcon,
+  NotificationsActive as ContactedIcon,
+} from '@mui/icons-material';
 import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import {
-  Avatar,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  FormControl,
-  Grid,
-  IconButton,
-  InputAdornment,
-  InputLabel,
-  MenuItem,
-  Paper,
-  Select,
-  TextField,
-  Tooltip,
-  Typography
-} from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import AddIcon from '@mui/icons-material/Add';
-import PhoneIcon from '@mui/icons-material/Phone';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import CloseIcon from '@mui/icons-material/Close';
+import { statusColors, neutralColors, surfaceColors } from '../../theme/palette';
 
 const SERVICE_TYPES = [
   { value: 'speech-therapy', label: 'علاج نطق', icon: '🗣️' },

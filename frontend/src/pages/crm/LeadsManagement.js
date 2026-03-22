@@ -4,52 +4,56 @@
  */
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
-  Paper,
-  useTheme,
-} from '@mui/material';
-
-import { leadsService, MOCK_LEADS } from 'services/crmService';
-import { useSnackbar } from 'contexts/SnackbarContext';
-import {
   Box,
-  Button,
   Card,
   CardContent,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
+  Typography,
   Grid,
+  Chip,
+  Avatar,
+  Button,
   IconButton,
-  InputAdornment,
-  LinearProgress,
+  Tooltip,
+  TextField,
   MenuItem,
-  Slider,
-  Tab,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
-  TablePagination,
   TableRow,
+  TablePagination,
+  Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  LinearProgress,
+  Tab,
   Tabs,
-  TextField,
-  Tooltip,
-  Typography
+  InputAdornment,
+  Slider,
+  useTheme,
 } from '@mui/material';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import AddIcon from '@mui/icons-material/Add';
-import SearchIcon from '@mui/icons-material/Search';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import CloseIcon from '@mui/icons-material/Close';
-import PersonIcon from '@mui/icons-material/Person';
-import PhoneIcon from '@mui/icons-material/Phone';
-import EmailIcon from '@mui/icons-material/Email';
-import MoneyIcon from '@mui/icons-material/Money';
-import { TrendIcon, ViewIcon } from 'utils/iconAliases';
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Search as SearchIcon,
+  Refresh as RefreshIcon,
+  TrendingUp as TrendIcon,
+  SwapHoriz as ConvertIcon,
+  Close as CloseIcon,
+  Visibility as ViewIcon,
+  ArrowForward as ArrowIcon,
+  FiberManualRecord as DotIcon,
+  MonetizationOn as MoneyIcon,
+  Person as PersonIcon,
+  Phone as PhoneIcon,
+  Email as EmailIcon,
+} from '@mui/icons-material';
+import { leadsService, MOCK_LEADS } from 'services/crmService';
+import { useSnackbar } from 'contexts/SnackbarContext';
 
 const leadStages = ['جديد', 'اتصال أولي', 'عرض مقدم', 'تفاوض', 'مغلق - ربح', 'مغلق - خسارة'];
 const leadSources = ['موقع إلكتروني', 'إحالة', 'معرض', 'إعلان', 'شبكات اجتماعية', 'اتصال مباشر'];

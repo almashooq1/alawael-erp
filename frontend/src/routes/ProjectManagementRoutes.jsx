@@ -1,6 +1,7 @@
 /**
  * Project Management Routes — مسارات إدارة المشاريع
  */
+import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const ProjectDashboard = lazyWithRetry(() => import('../pages/Projects/ProjectDashboard'));

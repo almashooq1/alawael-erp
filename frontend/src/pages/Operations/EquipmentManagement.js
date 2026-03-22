@@ -1,42 +1,52 @@
-import { useState, useEffect, useCallback } from 'react';
-
-import { equipmentService } from 'services/operationsService';
-import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';
-import { useSnackbar } from '../../contexts/SnackbarContext';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Avatar,
   Box,
-  Button,
+  Container,
   Card,
   CardContent,
-  Chip,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControl,
+  Typography,
+  Avatar,
   Grid,
-  IconButton,
+  Button,
+  TextField,
   InputAdornment,
-  InputLabel,
-  LinearProgress,
-  MenuItem,
-  Select,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  TextField,
+  Chip,
+  LinearProgress,
+  Tabs,
+  Tab,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
   Tooltip,
-  Typography
+  Divider,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import SearchIcon from '@mui/icons-material/Search';
-import EditIcon from '@mui/icons-material/Edit';
-import { ViewIcon } from 'utils/iconAliases';
+import {
+  Build as EqIcon,
+  Add as AddIcon,
+  Search as SearchIcon,
+  Engineering as MaintIcon,
+  Visibility as ViewIcon,
+  Edit as EditIcon,
+  Warning as WarnIcon,
+  CheckCircle as OkIcon,
+  Pause as StandbyIcon,
+} from '@mui/icons-material';
+import { equipmentService } from 'services/operationsService';
+import logger from 'utils/logger';
+import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';
+import { useSnackbar } from '../../contexts/SnackbarContext';
 
 const statusConfig = {
   operational: { label: 'تشغيلي', color: 'success', icon: <OkIcon fontSize="small" /> },

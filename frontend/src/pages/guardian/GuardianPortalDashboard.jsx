@@ -4,44 +4,21 @@
  * Parent/guardian portal: beneficiary progress, attendance,
  * payments, messages, appointments, IEP tracking.
  */
-import { useState, useEffect, useCallback } from 'react';
-import { Paper,
-} from '@mui/material';
-
-import guardianApi from '../../services/guardianPortal.service';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Alert,
-  Avatar,
-  Badge,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  CircularProgress,
-  Divider,
-  Grid,
-  IconButton,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  Tab,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Tabs,
-  Typography
+  Box, Typography, Card, CardContent, Grid, Button, Table, TableBody,
+  TableCell, TableContainer, TableHead, TableRow, Paper, Chip, Tabs,
+  Tab, Alert, CircularProgress, LinearProgress, Avatar, List, ListItem,
+  ListItemAvatar, ListItemText, Divider, IconButton, Tooltip, Badge,
 } from '@mui/material';
-import PersonIcon from '@mui/icons-material/Person';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import MessageIcon from '@mui/icons-material/Message';
-import PaymentIcon from '@mui/icons-material/Payment';
-import StarIcon from '@mui/icons-material/Star';
-import { CalendarIcon } from 'utils/iconAliases';
+import {
+  Person as PersonIcon, School as SchoolIcon, TrendingUp as ProgressIcon,
+  EventNote as AttendanceIcon, Payment as PaymentIcon, Message as MessageIcon,
+  Notifications as NotifIcon, CalendarMonth as CalendarIcon,
+  Assessment as ReportIcon, Refresh as RefreshIcon, Description as IEPIcon,
+  ChildCare as ChildIcon, Star as StarIcon,
+} from '@mui/icons-material';
+import guardianApi from '../../services/guardianPortal.service';
 
 export default function GuardianPortalDashboard() {
   const [tab, setTab] = useState(0);

@@ -2,49 +2,58 @@
  * إدارة المواد الدراسية
  * Subject Management
  */
-import { useState, useEffect, useCallback } from 'react';
-
-import { useNavigate } from 'react-router-dom';
-import { gradients } from '../../theme/palette';
-import educationSystemService from '../../services/educationSystem.service';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Alert,
-  Avatar,
-  Box,
-  Button,
-  Chip,
   Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControl,
-  FormControlLabel,
   Grid,
-  IconButton,
-  InputAdornment,
-  InputLabel,
-  LinearProgress,
-  MenuItem,
   Paper,
-  Select,
-  Switch,
+  Box,
+  Typography,
+  Button,
+  Card,
+  CardContent,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
-  TablePagination,
   TableRow,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   TextField,
+  Chip,
+  IconButton,
   Tooltip,
-  Typography
+  LinearProgress,
+  Alert,
+  Tab,
+  Tabs,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormControl,
+  Switch,
+  FormControlLabel,
+  InputAdornment,
+  Avatar,
+  TablePagination,
 } from '@mui/material';
-import SubjectIcon from '@mui/icons-material/Subject';
-import AddIcon from '@mui/icons-material/Add';
-import SearchIcon from '@mui/icons-material/Search';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  MenuBook as SubjectIcon,
+  ArrowBack as BackIcon,
+  Search as SearchIcon,
+  FilterList as FilterIcon,
+  Visibility as ViewIcon,
+  VisibilityOff as HideIcon,
+} from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
+import { gradients } from '../../theme/palette';
+import educationSystemService from '../../services/educationSystem.service';
 
 const { subjectService } = educationSystemService;
 

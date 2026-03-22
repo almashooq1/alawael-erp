@@ -2,22 +2,18 @@
  * StepPassword — Step 1: Password with strength indicator
  */
 
-
-import { brandColors, surfaceColors } from 'theme/palette';
 import {
   Box,
+  Typography,
+  TextField,
+  InputAdornment,
+  IconButton,
+  LinearProgress,
   Chip,
   Fade,
-  IconButton,
-  InputAdornment,
-  LinearProgress,
-  TextField,
-  Typography
 } from '@mui/material';
-import Lock from '@mui/icons-material/Lock';
-import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import Visibility from '@mui/icons-material/Visibility';
-import CheckCircle from '@mui/icons-material/CheckCircle';
+import { Visibility, VisibilityOff, Lock, CheckCircle } from '@mui/icons-material';
+import { brandColors, surfaceColors } from 'theme/palette';
 
 const StepPassword = ({
   formData,

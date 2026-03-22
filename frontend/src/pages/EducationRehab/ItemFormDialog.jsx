@@ -2,22 +2,20 @@
  * ItemFormDialog – create / edit dialog for all EducationRehab entities.
  */
 import React from 'react';
-
-
-import { fieldSets, tabs } from './constants';
 import {
-  Box,
-  Button,
   Dialog,
-  DialogActions,
-  DialogContent,
   DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  TextField,
   FormControl,
   InputLabel,
-  MenuItem,
   Select,
-  TextField
+  MenuItem,
+  Box,
 } from '@mui/material';
+import { fieldSets, tabs } from './constants';
 
 const ItemFormDialog = ({ open, onClose, dialogType, editItem, form, setForm, onSave }) => (
   <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>

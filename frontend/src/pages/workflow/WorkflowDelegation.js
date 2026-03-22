@@ -2,50 +2,59 @@
  * WorkflowDelegation – إدارة التفويضات
  * Delegation & out-of-office management for workflow tasks.
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  alpha,
-} from '@mui/material';
-
-import { useSnackbar } from '../../contexts/SnackbarContext';
-import workflowService from '../../services/workflow.service';
-import {
-  Alert,
-  Avatar,
   Box,
+  Grid,
+  Paper,
+  Typography,
   Button,
+  IconButton,
+  Tooltip,
+  Chip,
   Card,
   CardContent,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControlLabel,
-  Grid,
-  IconButton,
-  Paper,
   Skeleton,
-  Stack,
-  Switch,
-  Tab,
+  Divider,
+  alpha,
+  Avatar,
+  Badge,
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
+  Switch,
+  FormControlLabel,
+  Stack,
+  Alert,
+  Tab,
   Tabs,
-  TextField,
-  Tooltip,
-  Typography
 } from '@mui/material';
-import ArrowBack from '@mui/icons-material/ArrowBack';
-import Add from '@mui/icons-material/Add';
-import Refresh from '@mui/icons-material/Refresh';
-import Check from '@mui/icons-material/Check';
-import Cancel from '@mui/icons-material/Cancel';
+import {
+  ArrowBack,
+  Refresh,
+  Add,
+  PersonOff,
+  SwapHoriz,
+  Delete,
+  Check,
+  Cancel,
+  AccessTime,
+  Person,
+  Category,
+  EventNote,
+  Autorenew,
+} from '@mui/icons-material';
+import { useSnackbar } from '../../contexts/SnackbarContext';
+import workflowService from '../../services/workflow.service';
 
 const statusConfig = {
   active: { label: 'نشط', color: 'success' },

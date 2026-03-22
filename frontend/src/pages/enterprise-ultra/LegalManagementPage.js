@@ -4,43 +4,22 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import {
-  Paper,
+  Box, Typography, Tabs, Tab, Card, CardContent, Grid, Button, Chip,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  Paper, Dialog, DialogTitle, DialogContent, DialogActions, TextField,
+  MenuItem, Alert, LinearProgress, Stack, IconButton,
 } from '@mui/material';
-
-import * as legalService from '../../services/enterpriseUltra.service';
 import {
-  Alert,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Grid,
-  IconButton,
-  LinearProgress,
-  MenuItem,
-  Stack,
-  Tab,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Tabs,
-  TextField,
-  Typography
-} from '@mui/material';
-import GavelIcon from '@mui/icons-material/Gavel';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import DescriptionIcon from '@mui/icons-material/Description';
-import EventIcon from '@mui/icons-material/Event';
-import AddIcon from '@mui/icons-material/Add';
-import WarningIcon from '@mui/icons-material/Warning';
+  Gavel as GavelIcon,
+  Add as AddIcon,
+  Event as EventIcon,
+  Description as DescriptionIcon,
+  Warning as WarningIcon,
+  AccountBalance as CourtIcon,
+  Assignment as FilingIcon,
+  Refresh as RefreshIcon,
+} from '@mui/icons-material';
+import * as legalService from '../../services/enterpriseUltra.service';
 
 const statusColors = {
   open: 'info', in_progress: 'warning', hearing_scheduled: 'secondary', won: 'success', lost: 'error', settled: 'default', closed: 'default',

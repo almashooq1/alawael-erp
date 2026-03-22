@@ -1,14 +1,15 @@
-
-
-import { statusColors } from 'theme/palette';
+import { Card, CardContent, Typography, Box, Stack, Chip } from '@mui/material';
 import {
-  Box,
-  Card,
-  CardContent,
-  Chip,
-  Stack,
-  Typography
-} from '@mui/material';
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as ChartTooltip,
+  Legend,
+  ResponsiveContainer,
+} from 'recharts';
+import { statusColors } from 'theme/palette';
 
 /** Revenue & expenses area chart with time-range chips */
 const RevenueChart = ({ revenueData, timeRange, setTimeRange }) => (

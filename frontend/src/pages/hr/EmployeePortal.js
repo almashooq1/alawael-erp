@@ -7,15 +7,34 @@
  *   - DocumentsTab.jsx, RequestsTab.jsx, EmployeePortalDialogs.jsx
  *   - (plus pre-existing ProfileTab, LeavesTab, PayslipsTab, employeePortalData)
  */
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { DEPT_COLORS } from '../../constants/departmentColors';
 import employeePortalService from '../../services/employeePortal.service';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-
+import { Box, Typography, Paper, Chip, Tabs, Tab, Avatar, Stack, Button } from '@mui/material';
+import {
+  Person as PersonIcon,
+  EventNote as LeaveIcon,
+  Receipt as PayslipIcon,
+  Folder as DocIcon,
+  Assignment as RequestIcon,
+  Print as PrintIcon,
+  Badge as BadgeIcon,
+  Business as DeptIcon,
+} from '@mui/icons-material';
 import { gradients, statusColors } from '../../theme/palette';
 
 /* Sub-components */
-
+import ProfileTab from './employee-portal/ProfileTab';
+import LeavesTab from './employee-portal/LeavesTab';
+import PayslipsTab from './employee-portal/PayslipsTab';
+import DocumentsTab from './employee-portal/DocumentsTab';
+import RequestsTab from './employee-portal/RequestsTab';
+import {
+  LeaveDialog,
+  RequestDialog,
+  PayslipDetailDialog,
+} from './employee-portal/EmployeePortalDialogs';
 import {
   demoProfile,
   demoBalances,
@@ -24,21 +43,6 @@ import {
   demoDocuments,
   demoRequests,
 } from './employee-portal/employeePortalData';
-import {
-  Avatar,
-  Box,
-  Button,
-  Chip,
-  Paper,
-  Stack,
-  Tab,
-  Tabs,
-  Typography
-} from '@mui/material';
-import PersonIcon from '@mui/icons-material/Person';
-import BadgeIcon from '@mui/icons-material/Badge';
-import PrintIcon from '@mui/icons-material/Print';
-import { DocIcon, LeaveIcon } from 'utils/iconAliases';
 
 /* ─── Component ─── */
 export default function EmployeePortal() {

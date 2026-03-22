@@ -1,26 +1,16 @@
 /**
  * DashboardOverlays — Scroll-to-top FAB, error/socket snackbars, shortcuts dialog
  */
-
-import { brandColors, gradients } from 'theme/palette';
-import { SECTIONS } from '../dashboardConstants';
+import React from 'react';
 import {
-  Alert,
-  Box,
-  Button,
-  Chip,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  Fab,
-  IconButton,
-  Snackbar,
-  Typography,
-  Zoom
+  Box, Typography, Fab, Zoom, Snackbar, Alert, Button,
+  Dialog, DialogTitle, DialogContent, IconButton, Chip,
 } from '@mui/material';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import KeyboardIcon from '@mui/icons-material/Keyboard';
 import CloseIcon from '@mui/icons-material/Close';
+import KeyboardIcon from '@mui/icons-material/Keyboard';
+import { brandColors, gradients } from 'theme/palette';
+import { SECTIONS } from '../dashboardConstants';
 
 const DashboardOverlays = ({
   showScrollTop, scrollToTop, error, dispatch, fetchData,

@@ -2,22 +2,19 @@
  * SidebarNavList — Main navigation list with collapsible children.
  */
 import {
-  alpha,
-} from '@mui/material';
-import {
-  Badge,
   Box,
-  Collapse,
-  Divider,
   List,
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  Collapse,
+  Typography,
   Tooltip,
-  Typography
+  Badge,
+  Divider,
+  alpha,
 } from '@mui/material';
-import ExpandLess from '@mui/icons-material/ExpandLess';
-import ExpandMore from '@mui/icons-material/ExpandMore';
+import { ExpandLess, ExpandMore } from '@mui/icons-material';
 
 const SidebarNavList = ({
   items,

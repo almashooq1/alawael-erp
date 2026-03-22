@@ -3,17 +3,13 @@
  * Manages all state, API fetching, and WebSocket connection.
  */
 import { useState, useEffect, useCallback } from 'react';
+import { People, CheckCircle, AttachMoney, Warning, Assessment } from '@mui/icons-material';
 import notificationService from 'services/notificationService';
 import dashboardService from 'services/dashboardService';
 import { WS_URL } from 'config/apiConfig';
 import logger from 'utils/logger';
 import { statusColors, chartColors } from 'theme/palette';
 import { useSnackbar } from '../../../contexts/SnackbarContext';
-import People from '@mui/icons-material/People';
-import CheckCircle from '@mui/icons-material/CheckCircle';
-import AttachMoney from '@mui/icons-material/AttachMoney';
-import Warning from '@mui/icons-material/Warning';
-import Assessment from '@mui/icons-material/Assessment';
 
 const useDashboardData = () => {
   const showSnackbar = useSnackbar();

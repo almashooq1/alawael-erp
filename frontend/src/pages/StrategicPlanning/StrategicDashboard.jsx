@@ -1,26 +1,22 @@
 /**
  * لوحة تحكم التخطيط الاستراتيجي — Strategic Planning Dashboard
  */
-import { useState, useEffect } from 'react';
-
-import apiClient from '../../services/api';
+import React, { useState, useEffect } from 'react';
 import {
-  Box,
-  Card,
-  CardContent,
-  Chip,
-  CircularProgress,
-  Grid,
-  LinearProgress,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Tooltip,
-  Typography
+  Box, Grid, Paper, Typography, Card, CardContent, CircularProgress, Chip,
+  Table, TableHead, TableRow, TableCell, TableBody, LinearProgress,
 } from '@mui/material';
+import {
+  PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  Tooltip, ResponsiveContainer, Legend,
+} from 'recharts';
+import {
+  Flag as GoalIcon,
+  Lightbulb as InitiativeIcon,
+  Speed as KPIIcon,
+  Timeline as ProgressIcon,
+} from '@mui/icons-material';
+import apiClient from '../../services/api';
 
 const PIE_COLORS = ['#1976d2', '#4caf50', '#ff9800', '#f44336'];
 const perspectiveLabels = { financial: 'المالية', customer: 'العملاء', internal_processes: 'العمليات الداخلية', learning_growth: 'التعلم والنمو' };

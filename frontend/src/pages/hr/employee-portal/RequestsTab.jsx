@@ -1,20 +1,18 @@
-import {
-  Paper,
-} from '@mui/material';
+import React from 'react';
 import {
   Box,
   Button,
   Chip,
+  Paper,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Typography
+  Typography,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import AssignmentIcon from '@mui/icons-material/Assignment';
+import { Add as AddIcon, Assignment as AssignmentIcon } from '@mui/icons-material';
 
 const TYPE_LABELS = {
   salary_certificate: 'شهادة راتب',

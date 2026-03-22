@@ -1,25 +1,22 @@
 /**
  * لوحة تحكم الحضور والانصراف — Attendance Dashboard
  */
-import { useState, useEffect } from 'react';
-
-import apiClient from '../../services/api';
+import React, { useState, useEffect } from 'react';
 import {
-  Box,
-  Card,
-  CardContent,
-  Chip,
-  CircularProgress,
-  Grid,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Tooltip,
-  Typography
+  Box, Grid, Paper, Typography, Card, CardContent, CircularProgress, Chip,
+  Table, TableHead, TableRow, TableCell, TableBody,
 } from '@mui/material';
+import {
+  PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  Tooltip, ResponsiveContainer, Legend,
+} from 'recharts';
+import {
+  Fingerprint as BiometricIcon,
+  CheckCircle as PresentIcon,
+  Cancel as AbsentIcon,
+  AccessTime as LateIcon,
+} from '@mui/icons-material';
+import apiClient from '../../services/api';
 
 const PIE_COLORS = ['#4caf50', '#f44336', '#ff9800', '#2196f3'];
 const statusLabels = { present: 'حاضر', absent: 'غائب', late: 'متأخر', early_departure: 'انصراف مبكر', on_leave: 'إجازة' };

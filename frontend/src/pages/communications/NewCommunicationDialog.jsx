@@ -2,22 +2,21 @@
  * NewCommunicationDialog — Create / send a communication
  */
 
-
-import { COMMUNICATION_TYPES, PRIORITY_LEVELS } from './communicationsConstants';
 import {
-  Button,
   Dialog,
-  DialogActions,
-  DialogContent,
   DialogTitle,
-  FormControl,
+  DialogContent,
+  DialogActions,
   Grid,
+  FormControl,
   InputLabel,
-  MenuItem,
   Select,
-  TextField
+  MenuItem,
+  TextField,
+  Button,
 } from '@mui/material';
-import SendIcon from '@mui/icons-material/Send';
+import { Send as SendIcon } from '@mui/icons-material';
+import { COMMUNICATION_TYPES, PRIORITY_LEVELS } from './communicationsConstants';
 
 const NewCommunicationDialog = ({ open, onClose, communication, setCommunication, onSubmit }) => (
   <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>

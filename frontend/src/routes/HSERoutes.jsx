@@ -1,6 +1,7 @@
 /**
  * HSE Routes — مسارات الصحة والسلامة المهنية
  */
+import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const HSEDashboard = lazyWithRetry(() => import('../pages/HSE/HSEDashboard'));

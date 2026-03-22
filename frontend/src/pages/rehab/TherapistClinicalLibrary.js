@@ -1,42 +1,54 @@
 import { useState, useEffect } from 'react';
-
+import {
+  Box,
+  Container,
+  Card,
+  CardContent,
+  Typography,
+  Grid,
+  Button,
+  TextField,
+  Chip,
+  IconButton,
+  InputAdornment,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Tooltip,
+  Paper,
+  CardMedia,
+  Tabs,
+  Tab,
+  Avatar,
+  CardActions,
+  Badge,
+} from '@mui/material';
+import {
+  Add as AddIcon,
+  Search as SearchIcon,
+  LibraryBooks as LibraryIcon,
+  Delete as DeleteIcon,
+  Close as CloseIcon,
+  BookmarkBorder as BookmarkIcon,
+  Category as CategoryIcon,
+  Star as StarIcon,
+  Download as DownloadIcon,
+  Visibility as ViewIcon,
+  Article as ArticleIcon,
+  Science as ScienceIcon,
+  MenuBook as GuideIcon,
+  Bookmark as BookmarkFilledIcon,
+} from '@mui/icons-material';
 import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { statusColors, neutralColors, surfaceColors } from '../../theme/palette';
-import {
-  Box,
-  Button,
-  Card,
-  CardActions,
-  CardContent,
-  Chip,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControl,
-  Grid,
-  IconButton,
-  InputAdornment,
-  InputLabel,
-  MenuItem,
-  Paper,
-  Select,
-  TextField,
-  Typography
-} from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import ArticleIcon from '@mui/icons-material/Article';
-import ScienceIcon from '@mui/icons-material/Science';
-import StarIcon from '@mui/icons-material/Star';
-import CategoryIcon from '@mui/icons-material/Category';
-import SearchIcon from '@mui/icons-material/Search';
-import DeleteIcon from '@mui/icons-material/Delete';
-import CloseIcon from '@mui/icons-material/Close';
-import { ViewIcon } from 'utils/iconAliases';
 
 const CATEGORIES = [
   { value: 'speech_therapy', label: 'علاج النطق', color: '#3b82f6', icon: '🗣️' },

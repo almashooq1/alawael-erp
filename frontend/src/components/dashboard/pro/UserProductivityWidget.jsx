@@ -2,31 +2,24 @@
  * 👤 UserProductivityWidget — ويدجت إنتاجية المستخدم
  * Professional user productivity tracker with goals, streaks, and achievements
  */
-import { useMemo } from 'react';
-import { useTheme,
+import React, { useState, useMemo } from 'react';
+import {
+  Box, Paper, Typography, Grid, LinearProgress, Chip, Avatar,
+  IconButton, Tooltip, useTheme, Divider, Badge,
 } from '@mui/material';
+import { motion } from 'framer-motion';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import WhatshotIcon from '@mui/icons-material/Whatshot';
+import StarIcon from '@mui/icons-material/Star';
+import TaskAltIcon from '@mui/icons-material/TaskAlt';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import AutoGraphIcon from '@mui/icons-material/AutoGraph';
+import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
+import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
 import { useAuth } from 'contexts/AuthContext';
 import { gradients, statusColors, brandColors, rankColors } from 'theme/palette';
-import {
-  Avatar,
-  Badge,
-  Box,
-  Chip,
-  Divider,
-  Grid,
-  LinearProgress,
-  Paper,
-  Tooltip,
-  Typography
-} from '@mui/material';
-import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
-import StarIcon from '@mui/icons-material/Star';
-import WhatshotIcon from '@mui/icons-material/Whatshot';
-import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
-import TaskAltIcon from '@mui/icons-material/TaskAlt';
-import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
-import AutoGraphIcon from '@mui/icons-material/AutoGraph';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
 
 const DAILY_GOALS = [
   { id: 'sessions', label: 'الجلسات المنجزة', current: 8, target: 10, icon: '📋', color: brandColors.primaryStart },

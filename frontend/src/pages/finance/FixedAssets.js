@@ -1,44 +1,48 @@
-import { useState, useEffect, useCallback } from 'react';
-
-import accountingService from 'services/accountingService';
-import logger from 'utils/logger';
-import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';
-import { useSnackbar } from '../../contexts/SnackbarContext';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Avatar,
   Box,
-  Button,
+  Container,
   Card,
   CardContent,
+  Typography,
+  Avatar,
   Chip,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControl,
+  Button,
   Grid,
-  IconButton,
-  InputAdornment,
-  InputLabel,
-  LinearProgress,
-  MenuItem,
-  Select,
-  Tab,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Tabs,
+  LinearProgress,
   TextField,
+  InputAdornment,
+  IconButton,
   Tooltip,
-  Typography
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Tabs,
+  Tab,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import SearchIcon from '@mui/icons-material/Search';
-import { ViewIcon } from 'utils/iconAliases';
+import {
+  Business as AssetIcon,
+  Search as SearchIcon,
+  Add as AddIcon,
+  Visibility as ViewIcon,
+  TrendingDown as DeprecIcon,
+  Category as CatIcon,
+} from '@mui/icons-material';
+import accountingService from 'services/accountingService';
+import logger from 'utils/logger';
+import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';
+import { useSnackbar } from '../../contexts/SnackbarContext';
 
 const categoryConfig = {
   land: { label: 'أراضي', icon: '🏞️' },

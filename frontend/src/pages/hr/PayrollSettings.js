@@ -1,31 +1,40 @@
-import { useState, useEffect, useCallback } from 'react';
-
-import payrollService from 'services/payrollService';
-import logger from 'utils/logger';
-import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';
-import { useSnackbar } from '../../contexts/SnackbarContext';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Alert,
-  Avatar,
   Box,
-  Button,
+  Container,
   Card,
   CardContent,
-  Chip,
-  Container,
-  Divider,
+  Typography,
+  Avatar,
   Grid,
+  Button,
+  TextField,
   InputAdornment,
+  Divider,
   LinearProgress,
+  Switch,
+  FormControlLabel,
   Table,
   TableBody,
   TableCell,
   TableRow,
-  TextField,
-  Typography
+  Chip,
+  Alert,
 } from '@mui/material';
-import SettingsIcon from '@mui/icons-material/Settings';
-import SaveIcon from '@mui/icons-material/Save';
+import {
+  Settings as SettingsIcon,
+  Save as SaveIcon,
+  AccountBalance as GOSIIcon,
+  LocalHospital as InsuranceIcon,
+  Receipt as TaxIcon,
+  AccessTime as OTIcon,
+  CalendarMonth as CalIcon,
+  MonetizationOn as CurrIcon,
+} from '@mui/icons-material';
+import payrollService from 'services/payrollService';
+import logger from 'utils/logger';
+import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';
+import { useSnackbar } from '../../contexts/SnackbarContext';
 
 const PayrollSettings = () => {
   const showSnackbar = useSnackbar();

@@ -1,44 +1,50 @@
 /**
  * LeaveManagement — Orchestrator
  */
-
-import { gradients, statusColors, assessmentColors } from '../../theme/palette';
-import { LEAVE_TYPES, EMPTY_FORM } from './constants';
-import { useLeaveManagement } from './useLeaveManagement';
 import {
-  Alert,
-  Avatar,
+  Container,
+  Typography,
+  Grid,
+  Paper,
   Box,
   Button,
+  TextField,
   Card,
   CardContent,
   Chip,
-  CircularProgress,
-  Container,
-  Divider,
-  Grid,
+  Avatar,
   IconButton,
   InputAdornment,
-  LinearProgress,
   MenuItem,
-  Paper,
+  Alert,
   Snackbar,
-  Tab,
-  Tabs,
-  TextField,
   Tooltip,
-  Typography
+  CircularProgress,
+  Divider,
+  Tabs,
+  Tab,
+  LinearProgress,
 } from '@mui/material';
-import WarningIcon from '@mui/icons-material/Warning';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import DownloadIcon from '@mui/icons-material/Download';
-import PrintIcon from '@mui/icons-material/Print';
-import AddIcon from '@mui/icons-material/Add';
-import PendingIcon from '@mui/icons-material/Pending';
-import BalanceIcon from '@mui/icons-material/Balance';
-import SearchIcon from '@mui/icons-material/Search';
-import FilterListIcon from '@mui/icons-material/FilterList';
-import { LeaveIcon } from 'utils/iconAliases';
+import {
+  Add as AddIcon,
+  Search as SearchIcon,
+  CheckCircle as ApproveIcon,
+  Cancel as RejectIcon,
+  EventNote as LeaveIcon,
+  PendingActions as PendingIcon,
+  Download as DownloadIcon,
+  Refresh as RefreshIcon,
+  Print as PrintIcon,
+  Warning as WarningIcon,
+  FilterList as FilterListIcon,
+  BeachAccess as VacationIcon,
+  AccountBalance as BalanceIcon,
+} from '@mui/icons-material';
+import { gradients, statusColors, assessmentColors } from '../../theme/palette';
+import { LEAVE_TYPES, EMPTY_FORM } from './constants';
+import { useLeaveManagement } from './useLeaveManagement';
+import LeaveTable from './LeaveTable';
+import { NewLeaveDialog, ViewDetailDialog, ActionDialog } from './LeaveDialogs';
 
 const LeaveManagement = () => {
   const {

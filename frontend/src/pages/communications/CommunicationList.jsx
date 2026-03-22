@@ -2,34 +2,36 @@
  * CommunicationList — Scrollable message list with actions
  */
 
-
+import { Fragment } from 'react';
+import {
+  Card,
+  Box,
+  Typography,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemAvatar,
+  Avatar,
+  Badge,
+  Chip,
+  Tooltip,
+  Divider,
+  IconButton,
+  LinearProgress,
+} from '@mui/material';
+import {
+  Star as StarIcon,
+  StarBorder as StarBorderIcon,
+  Archive as ArchiveIcon,
+  Delete as DeleteIcon,
+  Reply as ReplyIcon,
+  Email as EmailIcon,
+} from '@mui/icons-material';
 import {
   COMMUNICATION_TYPES,
   COMMUNICATION_STATUS,
   PRIORITY_LEVELS,
 } from './communicationsConstants';
-import {
-  Avatar,
-  Badge,
-  Box,
-  Card,
-  Chip,
-  Divider,
-  IconButton,
-  LinearProgress,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  Tooltip,
-  Typography
-} from '@mui/material';
-import EmailIcon from '@mui/icons-material/Email';
-import ReplyIcon from '@mui/icons-material/Reply';
-import StarIcon from '@mui/icons-material/Star';
-import StarBorderIcon from '@mui/icons-material/StarBorder';
-import ArchiveIcon from '@mui/icons-material/Archive';
-import DeleteIcon from '@mui/icons-material/Delete';
 
 const CommunicationList = ({
   communications,

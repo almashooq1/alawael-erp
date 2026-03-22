@@ -4,38 +4,38 @@
 
 import { useState } from 'react';
 import {
-  Paper,
-} from '@mui/material';
-
-import logger from 'utils/logger';
-import { statusColors } from '../../theme/palette';
-import {
   Box,
-  Button,
+  Typography,
   Card,
   CardContent,
-  Chip,
   Grid,
-  IconButton,
+  Chip,
+  Button,
+  TextField,
   InputAdornment,
-  LinearProgress,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  TextField,
+  Paper,
+  IconButton,
   Tooltip,
-  Typography
+  LinearProgress,
 } from '@mui/material';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import SearchIcon from '@mui/icons-material/Search';
-import FilterIcon from '@mui/icons-material/Filter';
-import DateRangeIcon from '@mui/icons-material/DateRange';
-import AssessmentIcon from '@mui/icons-material/Assessment';
-import DownloadIcon from '@mui/icons-material/Download';
-import { ExcelIcon, PdfIcon } from 'utils/iconAliases';
+import {
+  Assessment as AssessmentIcon,
+  Download as DownloadIcon,
+  Search as SearchIcon,
+  FilterList as FilterIcon,
+  DateRange as DateRangeIcon,
+  PictureAsPdf as PdfIcon,
+  TableChart as ExcelIcon,
+  Refresh as RefreshIcon,
+} from '@mui/icons-material';
+import logger from 'utils/logger';
+import { statusColors } from '../../theme/palette';
 
 const reportCategories = [
   { id: 'financial', label: 'التقارير المالية', count: 12, color: statusColors.primaryBlue },

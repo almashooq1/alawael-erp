@@ -2,42 +2,58 @@
  * سجل الدرجات
  * Gradebook Page
  */
-import { useState, useEffect, useCallback } from 'react';
-
-import { useNavigate } from 'react-router-dom';
-import { gradients } from '../../theme/palette';
-import educationSystemService from '../../services/educationSystem.service';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Alert,
-  Avatar,
+  Container,
+  Grid,
+  Paper,
   Box,
+  Typography,
   Button,
   Card,
   CardContent,
-  Chip,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  Grid,
-  IconButton,
-  LinearProgress,
-  Paper,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   TextField,
-  Typography
+  Chip,
+  IconButton,
+  Tooltip,
+  LinearProgress,
+  Alert,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormControl,
+  Avatar,
+  Tabs,
+  Tab,
+  Divider,
+  InputAdornment,
 } from '@mui/material';
-import GradeIcon from '@mui/icons-material/Grade';
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Grade as GradeIcon,
+  ArrowBack as BackIcon,
+  Search as SearchIcon,
+  Assessment as ReportIcon,
+  Lock as FinalizeIcon,
+  Person as StudentIcon,
+  TrendingUp as TrendIcon,
+  Download as ExportIcon,
+} from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
+import { gradients } from '../../theme/palette';
+import educationSystemService from '../../services/educationSystem.service';
 
 const { gradebookService } = educationSystemService;
 

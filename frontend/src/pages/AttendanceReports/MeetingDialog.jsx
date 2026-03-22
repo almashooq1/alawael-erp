@@ -1,17 +1,8 @@
 import React from 'react';
 import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  TextField
+  Dialog, DialogTitle, DialogContent, DialogActions,
+  Button, TextField, FormControl, InputLabel, Select, MenuItem,
 } from '@mui/material';
-
 
 const MeetingDialog = ({ open, onClose }) => (
   <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>

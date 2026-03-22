@@ -3,6 +3,7 @@
  * مسارات الميزات المؤسسية الاحترافية المتقدمة
  * (التوظيف، المرافق، الموردين، ITSM، السلامة، التخطيط الاستراتيجي)
  */
+import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 // ─── Enterprise Pro Plus Pages ───

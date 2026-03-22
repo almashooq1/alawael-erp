@@ -1,32 +1,34 @@
-
-
-/**
- * ProfileTab – Employee overview card with personal details and summary stats.
- */
+import React from 'react';
 import {
-  Avatar,
   Box,
   Card,
   CardContent,
+  Typography,
+  Grid,
+  Avatar,
   Chip,
   Divider,
-  Grid,
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
-  Typography
 } from '@mui/material';
-import BadgeIcon from '@mui/icons-material/Badge';
-import BusinessIcon from '@mui/icons-material/Business';
-import PersonIcon from '@mui/icons-material/Person';
-import PhoneIcon from '@mui/icons-material/Phone';
-import EmailIcon from '@mui/icons-material/Email';
-import EventAvailableIcon from '@mui/icons-material/EventAvailable';
-import AssignmentIcon from '@mui/icons-material/Assignment';
-import WalletIcon from '@mui/icons-material/Wallet';
-import FolderIcon from '@mui/icons-material/Folder';
-import { CalendarIcon } from 'utils/iconAliases';
+import {
+  Person as PersonIcon,
+  Badge as BadgeIcon,
+  Business as BusinessIcon,
+  Phone as PhoneIcon,
+  Email as EmailIcon,
+  CalendarMonth as CalendarIcon,
+  EventAvailable as EventAvailableIcon,
+  Assignment as AssignmentIcon,
+  AccountBalanceWallet as WalletIcon,
+  Folder as FolderIcon,
+} from '@mui/icons-material';
+
+/**
+ * ProfileTab – Employee overview card with personal details and summary stats.
+ */
 export default function ProfileTab({
   profile = {},
   leaveStats = {},

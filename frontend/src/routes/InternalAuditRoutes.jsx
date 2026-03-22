@@ -1,6 +1,7 @@
 /**
  * Internal Audit Routes — مسارات التدقيق الداخلي
  */
+import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const AuditDashboard = lazyWithRetry(() => import('../pages/InternalAudit/AuditDashboard'));

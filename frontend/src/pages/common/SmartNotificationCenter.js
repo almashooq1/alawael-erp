@@ -1,39 +1,44 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import smartNotificationsService from '../../services/smartNotifications.service';
 import { useRealTimeNotifications, useSocketEmit } from '../../contexts/SocketContext';
-
-import { useSnackbar } from '../../contexts/SnackbarContext';
-import { gradients, statusColors } from '../../theme/palette';
 import {
-  Badge,
   Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  FormControlLabel,
-  Grid,
-  IconButton,
+  Typography,
+  Paper,
   List,
   ListItem,
+  ListItemText,
   ListItemIcon,
   ListItemSecondaryAction,
-  ListItemText,
-  Paper,
-  Switch,
-  Tab,
+  IconButton,
+  Badge,
+  Chip,
   Tabs,
-  Typography
+  Tab,
+  Button,
+  Switch,
+  FormControlLabel,
+  Divider,
+  Card,
+  CardContent,
+  Grid,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
-import ApprovalIcon from '@mui/icons-material/Approval';
-import NotificationsActive from '@mui/icons-material/NotificationsActive';
-import SettingsIcon from '@mui/icons-material/Settings';
-import DeleteIcon from '@mui/icons-material/Delete';
+import {
+  Notifications as NotifIcon,
+  NotificationsActive,
+  MarkEmailRead,
+  Delete as DeleteIcon,
+  Settings as SettingsIcon,
+  Alarm as ReminderIcon,
+  CheckCircle as ApprovalIcon,
+  Info as SystemIcon,
+} from '@mui/icons-material';
+import { useSnackbar } from '../../contexts/SnackbarContext';
+import { gradients, statusColors } from '../../theme/palette';
 
 const demoNotifications = [
   {

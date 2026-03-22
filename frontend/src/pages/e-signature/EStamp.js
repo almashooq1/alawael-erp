@@ -1,44 +1,50 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import eStampService from '../../services/eStamp.service';
-
-import { useSnackbar } from '../../contexts/SnackbarContext';
-import { gradients } from '../../theme/palette';
 import {
-  Avatar,
   Box,
+  Typography,
+  Paper,
   Button,
+  Grid,
   Card,
   CardContent,
   Chip,
-  CircularProgress,
-  Grid,
   IconButton,
+  TextField,
   InputAdornment,
-  Menu,
-  MenuItem,
-  Paper,
   Tab,
+  Tabs,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
-  TablePagination,
   TableRow,
-  Tabs,
-  TextField,
+  TablePagination,
+  Avatar,
+  CircularProgress,
   Tooltip,
-  Typography
+  Menu,
+  MenuItem,
+  Divider,
 } from '@mui/material';
-import Verified from '@mui/icons-material/Verified';
-import CheckCircle from '@mui/icons-material/CheckCircle';
-import Cancel from '@mui/icons-material/Cancel';
-import AddIcon from '@mui/icons-material/Add';
-import Search from '@mui/icons-material/Search';
-import Refresh from '@mui/icons-material/Refresh';
-import MoreVert from '@mui/icons-material/MoreVert';
-import Visibility from '@mui/icons-material/Visibility';
+import {
+  Add as AddIcon,
+  Search,
+  Refresh,
+  Verified,
+  Block,
+  MoreVert,
+  Visibility,
+  CheckCircle,
+  Cancel,
+  PendingActions,
+  FilterList,
+  BarChart,
+} from '@mui/icons-material';
+import { useSnackbar } from '../../contexts/SnackbarContext';
+import { gradients } from '../../theme/palette';
 
 /* ═══ Helpers ════════════════════════════════════════════════════════════════ */
 const typeLabels = {

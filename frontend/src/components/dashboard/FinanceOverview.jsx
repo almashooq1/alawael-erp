@@ -4,24 +4,21 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
+import { Box, Paper, Typography, Grid, Chip, useTheme, Tooltip as MuiTooltip } from '@mui/material';
+import { motion } from 'framer-motion';
 import {
-  Box,
-  Chip,
-  Grid,
-  Paper,
-  Tooltip,
-  Typography,
-  useTheme
-} from '@mui/material';
-
-import { formatCurrency } from 'services/dashboardService';
-import { chartColors, brandColors, statusColors, gradients, neutralColors } from 'theme/palette';
+  AreaChart, Area, PieChart, Pie, Cell,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
+} from 'recharts';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
-import MoneyOffIcon from '@mui/icons-material/MoneyOff';
-import SavingsIcon from '@mui/icons-material/Savings';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
+import SavingsIcon from '@mui/icons-material/Savings';
+import MoneyOffIcon from '@mui/icons-material/MoneyOff';
+import { formatCurrency } from 'services/dashboardService';
+import { FinanceChartTooltip } from './shared/ChartTooltip';
+import { chartColors, brandColors, statusColors, gradients, neutralColors } from 'theme/palette';
 
 const EXPENSE_COLORS = chartColors.expense;
 

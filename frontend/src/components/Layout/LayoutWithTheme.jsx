@@ -5,30 +5,31 @@
 
 import { useState } from 'react';
 import {
-  useTheme,
-} from '@mui/material';
-
-import { Link, useLocation } from 'react-router-dom';
-import {
   AppBar,
   Box,
-  Drawer,
   IconButton,
+  Toolbar,
+  Typography,
+  useTheme,
+  Drawer,
   List,
   ListItem,
-  ListItemButton,
   ListItemIcon,
   ListItemText,
-  Toolbar,
-  Typography
+  ListItemButton,
 } from '@mui/material';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import AssessmentIcon from '@mui/icons-material/Assessment';
-import SchoolIcon from '@mui/icons-material/School';
-import AccessibilityIcon from '@mui/icons-material/Accessibility';
-import QuizIcon from '@mui/icons-material/Quiz';
-import SettingsIcon from '@mui/icons-material/Settings';
-import MenuIcon from '@mui/icons-material/Menu';
+import {
+  Menu as MenuIcon,
+  Dashboard as DashboardIcon,
+  School as SchoolIcon,
+  Assessment as AssessmentIcon,
+  Settings as SettingsIcon,
+  AccessibilityNew as AccessibilityIcon,
+  Quiz as QuizIcon,
+} from '@mui/icons-material';
+import { Link, useLocation } from 'react-router-dom';
+import ThemeToggle from 'components/ui/ThemeToggle';
+import { SkipLink } from 'components/ui/AccessibleComponents';
 
 const menuItems = [
   { text: 'لوحة التحكم', icon: <DashboardIcon />, path: '/dashboard' },

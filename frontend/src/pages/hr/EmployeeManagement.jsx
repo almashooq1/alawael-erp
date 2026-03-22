@@ -2,42 +2,23 @@
  * EmployeeManagement.jsx — Thin orchestrator
  * 880 → ~120 lines | Sub-files: Employee/
  */
-
+import {
+  Container, Typography, Grid, Paper, Box, Button, TextField, Card, CardContent,
+  Chip, Avatar, IconButton, Dialog, DialogTitle, DialogContent, DialogActions,
+  InputAdornment, MenuItem, Alert, Snackbar, Tooltip,
+} from '@mui/material';
+import {
+  Add as AddIcon, Search as SearchIcon, FilterList as FilterIcon,
+  PersonOff as InactiveIcon, CheckCircle as ActiveIcon, Download as DownloadIcon,
+  Delete as DeleteIcon, CalendarMonth as CalendarIcon,
+  Business as DeptIcon, Warning as WarningIcon, Refresh as RefreshIcon,
+  Groups as PeopleIcon,
+} from '@mui/icons-material';
 import { gradients } from '../../theme/palette';
 import { DEPARTMENTS, STATUS_MAP, STAT_CARDS } from './Employee/employeeManagement.constants';
 import useEmployeeManagement from './Employee/useEmployeeManagement';
-import {
-  Alert,
-  Avatar,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Grid,
-  IconButton,
-  InputAdornment,
-  MenuItem,
-  Paper,
-  Snackbar,
-  TextField,
-  Tooltip,
-  Typography
-} from '@mui/material';
-import PeopleIcon from '@mui/icons-material/People';
-import WarningIcon from '@mui/icons-material/Warning';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import DownloadIcon from '@mui/icons-material/Download';
-import AddIcon from '@mui/icons-material/Add';
-import SearchIcon from '@mui/icons-material/Search';
-import FilterIcon from '@mui/icons-material/Filter';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { ActiveIcon, CalendarIcon, InactiveIcon } from 'utils/iconAliases';
+import EmployeeTable from './Employee/EmployeeTable';
+import EmployeeFormDialog from './Employee/EmployeeFormDialog';
 
 /* ─── Icon map for stat cards ─── */
 const STAT_ICONS = [<PeopleIcon />, <ActiveIcon />, <CalendarIcon />, <InactiveIcon />, <DeptIcon />];

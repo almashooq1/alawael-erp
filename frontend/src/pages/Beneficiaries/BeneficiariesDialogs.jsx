@@ -3,31 +3,28 @@
  * BeneficiariesDialogs – filter dialog, export dialog, row-action menu, snackbar
  */
 
-
-// ─── Filter Dialog ────────────────────────────────────────
 import {
-  Alert,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  FormControl,
-  InputLabel,
-  ListItemIcon,
-  ListItemText,
   Menu,
   MenuItem,
+  ListItemIcon,
+  ListItemText,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  FormControl,
+  InputLabel,
   Select,
+  Stack,
+  Button,
+  Divider,
   Snackbar,
-  Stack
+  Alert,
 } from '@mui/material';
-import Download from '@mui/icons-material/Download';
-import Visibility from '@mui/icons-material/Visibility';
-import Edit from '@mui/icons-material/Edit';
-import Star from '@mui/icons-material/Star';
-import Delete from '@mui/icons-material/Delete';
+import { Delete, Download, Edit, Star, Visibility } from '@mui/icons-material';
+import ConfirmDialog from 'components/common/ConfirmDialog';
+
+// ─── Filter Dialog ────────────────────────────────────────
 export const FilterDialog = ({ open, onClose, filters, setFilters, applyFilters }) => (
   <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
     <DialogTitle>الفلاتر المتقدمة</DialogTitle>

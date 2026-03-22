@@ -1,36 +1,53 @@
 import { useState, useEffect } from 'react';
 // Statistics Cards Section
-
-import { adminService } from 'services/adminService';
-import exportService from 'services/exportService';
-import logger from 'utils/logger';
-import { useSnackbar } from 'contexts/SnackbarContext';
-import { gradients, brandColors, statusColors, surfaceColors } from 'theme/palette';
-import { useAuth } from 'contexts/AuthContext';
 import {
   Box,
-  Button,
+  Container,
+  Grid,
   Card,
   CardContent,
   CardHeader,
-  Container,
-  Grid,
-  LinearProgress,
+  Typography,
+  Button,
+  ToggleButton,
+  ToggleButtonGroup,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  ToggleButton,
-  ToggleButtonGroup,
-  Tooltip,
-  Typography
+  LinearProgress,
 } from '@mui/material';
-import QueryStatsIcon from '@mui/icons-material/QueryStats';
-import FileDownloadIcon from '@mui/icons-material/FileDownload';
-import PrintIcon from '@mui/icons-material/Print';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import {
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  ScatterChart,
+  Scatter,
+} from 'recharts';
+import {
+  QueryStats as QueryStatsIcon,
+  TrendingUp as TrendingUpIcon,
+  FileDownload as FileDownloadIcon,
+  Print as PrintIcon,
+} from '@mui/icons-material';
+import { adminService } from 'services/adminService';
+import exportService from 'services/exportService';
+import logger from 'utils/logger';
+import { useSnackbar } from 'contexts/SnackbarContext';
+import { gradients, brandColors, statusColors, surfaceColors } from 'theme/palette';
+import { useAuth } from 'contexts/AuthContext';
 
 const AdminReportsAnalytics = () => {
   const { currentUser } = useAuth();

@@ -2,13 +2,14 @@
  * fleetManagement.constants.js
  * ثوابت إدارة الأسطول — التبويبات وبطاقات الإحصائيات
  */
-
-// ─── Tab definitions ────────────────────────────────────────
+import React from 'react';
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import PersonIcon from '@mui/icons-material/Person';
 import BuildIcon from '@mui/icons-material/Build';
 import LocalGasStationIcon from '@mui/icons-material/LocalGasStation';
 import GpsFixedIcon from '@mui/icons-material/GpsFixed';
+
+// ─── Tab definitions ────────────────────────────────────────
 export const TABS = [
   { label: 'المركبات', icon: <DirectionsCarIcon />, key: 'vehicles' },
   { label: 'السائقون', icon: <PersonIcon />, key: 'drivers' },

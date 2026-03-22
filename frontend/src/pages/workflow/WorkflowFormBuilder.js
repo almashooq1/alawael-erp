@@ -5,52 +5,54 @@
  * Features: CRUD forms, drag-and-drop field ordering, field type catalog,
  * validation rules, conditional visibility, and form preview.
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  alpha,
-} from '@mui/material';
-
-import { useSnackbar } from '../../contexts/SnackbarContext';
-import workflowService from '../../services/workflow.service';
-import {
-  Alert,
   Box,
-  Button,
-  Card,
-  CardActions,
-  CardContent,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  FormControl,
-  FormControlLabel,
-  Grid,
-  IconButton,
-  InputLabel,
-  MenuItem,
   Paper,
+  Typography,
+  Button,
+  Grid,
+  Card,
+  CardContent,
+  CardActions,
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  IconButton,
+  Chip,
+  Divider,
+  MenuItem,
   Select,
-  Skeleton,
+  FormControl,
+  InputLabel,
   Switch,
+  FormControlLabel,
+  Tooltip,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  TextField,
-  Tooltip,
-  Typography
+  alpha,
+  Skeleton,
+  Alert,
 } from '@mui/material';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import SaveIcon from '@mui/icons-material/Save';
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  ContentCopy as CloneIcon,
+  Refresh as RefreshIcon,
+
+  ArrowBack as BackIcon,
+  Save as SaveIcon,
+} from '@mui/icons-material';
+import { useSnackbar } from '../../contexts/SnackbarContext';
+import workflowService from '../../services/workflow.service';
 
 const FIELD_TYPE_COLORS = {
   text: '#2196F3', textarea: '#1976D2', number: '#FF9800', email: '#4CAF50',

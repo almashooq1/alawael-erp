@@ -2,13 +2,17 @@
  * employeeManagement.constants.js — Constants, config, validation & helpers
  * الثوابت والتهيئة والتحقق
  */
-
+import {
+  CheckCircle as ActiveIcon,
+  PersonOff as InactiveIcon,
+  Male as MaleIcon,
+  Female as FemaleIcon,
+  Person as PersonIcon,
+  Work as WorkIcon,
+  ContactPhone as ContactIcon,
+  AccountBalance as BankIcon,
+} from '@mui/icons-material';
 import { statusColors } from '../../theme/palette';
-import MaleIcon from '@mui/icons-material/Male';
-import FemaleIcon from '@mui/icons-material/Female';
-import PersonIcon from '@mui/icons-material/Person';
-import WorkIcon from '@mui/icons-material/Work';
-import { ActiveIcon, InactiveIcon } from 'utils/iconAliases';
 
 export const DEPARTMENTS = [
   'تقنية المعلومات',

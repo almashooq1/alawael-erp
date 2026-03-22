@@ -1,31 +1,30 @@
 import {
-  Paper,
-} from '@mui/material';
-
-import { surfaceColors } from '../../theme/palette';
-import {
   Box,
-  Chip,
   Dialog,
-  DialogContent,
   DialogTitle,
-  FormControl,
+  DialogContent,
   Grid,
+  Chip,
+  Paper,
   IconButton,
-  InputLabel,
-  MenuItem,
-  Select,
+  Tooltip,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Tooltip
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from '@mui/material';
-import HistoryIcon from '@mui/icons-material/History';
-import CloseIcon from '@mui/icons-material/Close';
-import BarChartIcon from '@mui/icons-material/BarChart';
+import {
+  History as HistoryIcon,
+  Close as CloseIcon,
+  BarChart as BarChartIcon,
+} from '@mui/icons-material';
+import { surfaceColors } from '../../theme/palette';
 
 /**
  * Full‑screen dialog showing assessment history with

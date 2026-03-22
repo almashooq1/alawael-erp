@@ -1,36 +1,30 @@
 import { useState, useEffect, useCallback } from 'react';
-
-import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
 import {
   Box,
-  Button,
+  Container,
   Card,
   CardContent,
-  Chip,
-  CircularProgress,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  IconButton,
-  MenuItem,
+  Typography,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
+  CircularProgress,
+  Button,
+  Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   TextField,
+  MenuItem,
+  IconButton,
   Tooltip,
-  Typography
 } from '@mui/material';
-import Refresh from '@mui/icons-material/Refresh';
-import Add from '@mui/icons-material/Add';
-import Star from '@mui/icons-material/Star';
-import StarBorder from '@mui/icons-material/StarBorder';
-import Edit from '@mui/icons-material/Edit';
-import Delete from '@mui/icons-material/Delete';
+import { AccountBalance, Add, Edit, Delete, Star, StarBorder, Refresh } from '@mui/icons-material';
+import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
 
 const API = process.env.REACT_APP_API_URL || '/api';
 

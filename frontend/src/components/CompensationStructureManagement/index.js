@@ -1,30 +1,30 @@
 /**
  * CompensationStructureManagement — Orchestrator (index)
  */
-
-import { gradients, statusColors, neutralColors } from '../../theme/palette';
-import useCompensation from './useCompensation';
 import {
-  Avatar,
+  Container,
+  Typography,
+  Grid,
+  Paper,
   Box,
   Button,
   Card,
   CardContent,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Grid,
+  Avatar,
   IconButton,
-  LinearProgress,
-  Paper,
   Tooltip,
-  Typography
+  LinearProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import AddIcon from '@mui/icons-material/Add';
-import { ActiveIcon, AllowanceIcon, LeaveIcon, StructureIcon } from 'utils/iconAliases';
+import { Add as AddIcon, Refresh as RefreshIcon } from '@mui/icons-material';
+import { gradients, statusColors, neutralColors } from '../../theme/palette';
+import { ICONS } from './constants';
+import useCompensation from './useCompensation';
+import StructureCard from './StructureCard';
+import CompensationForm from './CompensationForm';
 
 const CompensationStructureManagement = () => {
   const {

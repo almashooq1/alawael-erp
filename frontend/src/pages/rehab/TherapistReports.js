@@ -1,31 +1,43 @@
 import { useState, useEffect } from 'react';
-
-import { therapistService } from 'services/therapistService';
-import exportService from 'services/exportService';
-import logger from 'utils/logger';
-import { gradients, brandColors, chartColors, statusColors, surfaceColors } from 'theme/palette';
-import { useAuth } from 'contexts/AuthContext';
-import { useSnackbar } from 'contexts/SnackbarContext';
 import {
   Box,
-  Button,
+  Container,
   Card,
   CardContent,
-  Container,
+  Typography,
   Grid,
+  Button,
+  ToggleButton,
+  ToggleButtonGroup,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  ToggleButton,
-  ToggleButtonGroup,
-  Tooltip,
-  Typography
 } from '@mui/material';
-import DownloadIcon from '@mui/icons-material/Download';
-import PrintIcon from '@mui/icons-material/Print';
+import { Download as DownloadIcon, Print as PrintIcon } from '@mui/icons-material';
+import {
+  LineChart as MuiLineChart,
+  Line,
+  BarChart as MuiBarChart,
+  Bar,
+  PieChart as MuiPieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from 'recharts';
+import { therapistService } from 'services/therapistService';
+import exportService from 'services/exportService';
+import logger from 'utils/logger';
+import { gradients, brandColors, chartColors, statusColors, surfaceColors } from 'theme/palette';
+import { useAuth } from 'contexts/AuthContext';
+import { useSnackbar } from 'contexts/SnackbarContext';
 
 const TherapistReports = () => {
   const { currentUser } = useAuth();

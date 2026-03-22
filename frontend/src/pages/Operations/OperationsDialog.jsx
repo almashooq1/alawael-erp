@@ -1,21 +1,12 @@
 /**
  * OperationsDialog — Create / Edit dialog for operations items
  */
-
-import { DIALOG_FIELDS } from './constants';
+import React from 'react';
 import {
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  TextField
+  Dialog, DialogTitle, DialogContent, DialogActions,
+  Box, TextField, Button, FormControl, InputLabel, Select, MenuItem,
 } from '@mui/material';
+import { DIALOG_FIELDS } from './constants';
 
 const OperationsDialog = ({
   open, onClose, dialogType, editItem, form, setForm, onSave, tabs,

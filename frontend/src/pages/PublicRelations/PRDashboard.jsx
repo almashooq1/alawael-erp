@@ -1,28 +1,14 @@
 /**
  * PR Dashboard — لوحة العلاقات العامة والإعلام
  */
-import { useState, useEffect, useCallback } from 'react';
-import { useTheme, alpha,
-} from '@mui/material';
-import { getPRDashboard } from '../../services/publicRelations.service';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Alert,
-  Box,
-  Chip,
-  CircularProgress,
-  Grid,
-  IconButton,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Tooltip,
-  Typography
+  Box, Paper, Typography, CircularProgress, IconButton, Tooltip, Alert, Chip, Grid, useTheme, alpha,
+  Table, TableHead, TableBody, TableRow, TableCell,
 } from '@mui/material';
-import ThumbUp from '@mui/icons-material/ThumbUp';
-import Refresh from '@mui/icons-material/Refresh';
+import { Refresh, Campaign, Newspaper, Handshake, ThumbUp } from '@mui/icons-material';
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RTooltip, ResponsiveContainer } from 'recharts';
+import { getPRDashboard } from '../../services/publicRelations.service';
 
 const SENTIMENT_LABELS = { positive: 'إيجابي', neutral: 'محايد', negative: 'سلبي' };
 const SENTIMENT_COLORS = { positive: '#4caf50', neutral: '#ff9800', negative: '#f44336' };

@@ -3,26 +3,27 @@
  * BeneficiariesToolbar – header banner + search / filter card
  */
 
-
+import {
+  Box,
+  Card,
+  CardContent,
+  TextField,
+  InputAdornment,
+  Button,
+  Chip,
+  Stack,
+  Typography,
+} from '@mui/material';
+import {
+  Search,
+  FilterList,
+  Download,
+  Upload,
+  PersonAdd,
+} from '@mui/icons-material';
 import { gradients } from '../../theme/palette';
 import { getStatusLabel, getCategoryLabel } from './beneficiariesLabelHelpers';
 import { DEFAULT_FILTERS } from './beneficiariesTableConstants';
-import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  InputAdornment,
-  Stack,
-  TextField,
-  Typography
-} from '@mui/material';
-import PersonAdd from '@mui/icons-material/PersonAdd';
-import Upload from '@mui/icons-material/Upload';
-import Download from '@mui/icons-material/Download';
-import Search from '@mui/icons-material/Search';
-import FilterList from '@mui/icons-material/FilterList';
 
 const BeneficiariesToolbar = ({
   searchQuery,

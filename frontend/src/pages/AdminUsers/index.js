@@ -3,34 +3,38 @@
  * صفحة إدارة المستخدمين — المنسق الرئيسي
  */
 
-
-import { gradients } from '../../theme/palette';
-import useAdminUsers from './useAdminUsers';
 import {
   Box,
-  Button,
+  Container,
+  Grid,
   Card,
   CardContent,
-  Container,
-  FormControl,
-  Grid,
-  InputAdornment,
-  InputLabel,
-  LinearProgress,
-  MenuItem,
-  Select,
+  Typography,
   TextField,
+  Button,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  InputAdornment,
   ToggleButton,
   ToggleButtonGroup,
-  Typography
+  LinearProgress,
 } from '@mui/material';
-import GroupIcon from '@mui/icons-material/Group';
+import {
+  Add as AddIcon,
+  Visibility as VisibilityIcon,
+  Group as GroupIcon,
+  ViewWeek as ViewWeekIcon,
+  ViewAgenda as ViewAgendaIcon,
+} from '@mui/icons-material';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
-import AddIcon from '@mui/icons-material/Add';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import ViewWeekIcon from '@mui/icons-material/ViewWeek';
-import ViewAgendaIcon from '@mui/icons-material/ViewAgenda';
+import { gradients } from '../../theme/palette';
+import ConfirmDialog from 'components/common/ConfirmDialog';
+import useAdminUsers from './useAdminUsers';
+import UsersTable from './UsersTable';
+import UserFormDialog from './UserFormDialog';
 
 const AdminUsersManagement = () => {
   const {

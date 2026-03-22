@@ -1,6 +1,7 @@
 /**
  * Document Management Routes — مسارات إدارة الوثائق
  */
+import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const DocumentsDashboard = lazyWithRetry(() => import('../pages/documents/DocumentsDashboard'));

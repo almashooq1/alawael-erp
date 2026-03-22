@@ -3,48 +3,52 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import {
-  Paper,
-} from '@mui/material';
-
-import { complaintsService } from '../../services/complaintsService';
-import {
-  Alert,
-  Avatar,
-  Badge,
   Box,
-  Button,
+  Container,
+  Typography,
   Card,
   CardContent,
-  Chip,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
   Grid,
-  IconButton,
-  LinearProgress,
-  MenuItem,
-  Stack,
-  Step,
-  StepLabel,
-  Stepper,
-  Tab,
+  Button,
+  Chip,
+  Avatar,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Tabs,
+  Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   TextField,
-  Typography
+  MenuItem,
+  LinearProgress,
+  Tabs,
+  Tab,
+  IconButton,
+  Stack,
+  Alert,
+  Badge,
+  Stepper,
+  Step,
+  StepLabel,
 } from '@mui/material';
-import PendingIcon from '@mui/icons-material/Pending';
-import AddIcon from '@mui/icons-material/Add';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import ChatIcon from '@mui/icons-material/Chat';
-import PersonIcon from '@mui/icons-material/Person';
+import {
+  ReportProblem as ComplaintIcon,
+  Add as AddIcon,
+  Refresh as RefreshIcon,
+  CheckCircle as ResolvedIcon,
+  HourglassTop as PendingIcon,
+  Cancel as RejectedIcon,
+  Assignment as AssignIcon,
+  Lightbulb as SuggestionIcon,
+  Chat as ChatIcon,
+  PersonOutline as PersonIcon,
+} from '@mui/icons-material';
+import { complaintsService } from '../../services/complaintsService';
 
 const DEMO_COMPLAINTS = [
   {

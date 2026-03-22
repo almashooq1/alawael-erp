@@ -3,44 +3,47 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import {
-  Paper,
-} from '@mui/material';
-
-import visitorsService from '../../services/visitors.service';
-import {
-  Alert,
-  Avatar,
-  Badge,
   Box,
-  Button,
+  Container,
+  Typography,
   Card,
   CardContent,
-  Chip,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
   Grid,
-  IconButton,
-  LinearProgress,
-  Stack,
-  Tab,
+  Button,
+  Chip,
+  Avatar,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Tabs,
+  Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   TextField,
-  Typography
+  LinearProgress,
+  Tabs,
+  Tab,
+  IconButton,
+  Stack,
+  Alert,
+  Badge,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import BadgeIcon from '@mui/icons-material/Badge';
-import TodayIcon from '@mui/icons-material/Today';
-import EditIcon from '@mui/icons-material/Edit';
+import {
+  People as VisitorIcon,
+  Add as AddIcon,
+  Refresh as RefreshIcon,
+  Login as CheckInIcon,
+  Logout as CheckOutIcon,
+  Edit as EditIcon,
+  Today as TodayIcon,
+  Badge as BadgeIcon,
+  DirectionsCar as CarIcon,
+} from '@mui/icons-material';
+import visitorsService from '../../services/visitors.service';
 
 const DEMO_VISITORS = [
   {

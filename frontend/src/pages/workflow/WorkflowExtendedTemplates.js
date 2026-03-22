@@ -2,51 +2,59 @@
  * WorkflowExtendedTemplates – قوالب سير العمل المتقدمة
  * Extended workflow templates: salary advance, maintenance, transfer, training, etc.
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Paper,
-  alpha,
-} from '@mui/material';
-
-import { useSnackbar } from '../../contexts/SnackbarContext';
-import workflowService from '../../services/workflow.service';
-import {
-  Alert,
-  Avatar,
   Box,
+  Grid,
+  Paper,
+  Typography,
   Button,
+  IconButton,
+  Tooltip,
+  Chip,
   Card,
   CardContent,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  Grid,
-  IconButton,
   Skeleton,
+  alpha,
+  Avatar,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
   Stack,
+  Divider,
+  Alert,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  TextField,
-  Tooltip,
-  Typography
 } from '@mui/material';
-import AttachMoney from '@mui/icons-material/AttachMoney';
-import School from '@mui/icons-material/School';
-import Description from '@mui/icons-material/Description';
-import Assessment from '@mui/icons-material/Assessment';
-import ArrowBack from '@mui/icons-material/ArrowBack';
-import Refresh from '@mui/icons-material/Refresh';
-import ListAlt from '@mui/icons-material/ListAlt';
-import Visibility from '@mui/icons-material/Visibility';
-import CheckCircle from '@mui/icons-material/CheckCircle';
+import {
+  ArrowBack,
+  Refresh,
+  FileCopy,
+  RocketLaunch,
+  Category,
+  AttachMoney,
+  Build,
+  SwapHoriz,
+  School,
+  Gavel,
+  Description,
+  ExitToApp,
+  FlightTakeoff,
+  Assessment,
+  ReportProblem,
+  Visibility,
+  CheckCircle,
+  ListAlt,
+} from '@mui/icons-material';
+import { useSnackbar } from '../../contexts/SnackbarContext';
+import workflowService from '../../services/workflow.service';
 
 const TEMPLATE_ICONS = {
   'salary-advance': <AttachMoney />,

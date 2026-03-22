@@ -4,37 +4,39 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-
-import studentPortalService from 'services/studentPortalService';
-import logger from 'utils/logger';
-import { gradients, progressColors, brandColors, surfaceColors } from 'theme/palette';
-import { useAuth } from 'contexts/AuthContext';
-import { useSnackbar } from '../../contexts/SnackbarContext';
 import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  Avatar,
   Box,
-  Card,
-  CardContent,
-  Chip,
-  Grid,
-  LinearProgress,
   Paper,
-  Stack,
+  Typography,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Typography
+  Card,
+  CardContent,
+  Grid,
+  LinearProgress,
+  Chip,
+  Stack,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Avatar,
 } from '@mui/material';
-import AssessmentIcon from '@mui/icons-material/Assessment';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { CalendarIcon } from 'utils/iconAliases';
+import {
+  ExpandMore as ExpandMoreIcon,
+  TrendingUp as TrendingUpIcon,
+  Assessment as AssessmentIcon,
+  EmojiEvents as TrophyIcon,
+  CalendarToday as CalendarIcon,
+} from '@mui/icons-material';
+import studentPortalService from 'services/studentPortalService';
+import logger from 'utils/logger';
+import { gradients, progressColors, brandColors, surfaceColors } from 'theme/palette';
+import { useAuth } from 'contexts/AuthContext';
+import { useSnackbar } from '../../contexts/SnackbarContext';
 
 const StudentGrades = () => {
   const { currentUser } = useAuth();

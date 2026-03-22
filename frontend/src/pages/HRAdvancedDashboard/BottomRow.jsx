@@ -2,17 +2,10 @@
  * BottomRow – Pending leaves list + Performance reviews list.
  */
 import React from 'react';
+import { Grid, Paper, Typography, Box, Button, Chip, Divider } from '@mui/material';
+import { ArrowForward as ArrowIcon } from '@mui/icons-material';
 import { statusColors } from '../../theme/palette';
 import { STATUS_MAP } from './constants';
-import {
-  Box,
-  Button,
-  Chip,
-  Divider,
-  Grid,
-  Paper,
-  Typography
-} from '@mui/material';
 
 const BottomRow = ({ leaves, reviews, navigate }) => (
   <Grid container spacing={3}>

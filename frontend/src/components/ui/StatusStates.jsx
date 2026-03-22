@@ -11,28 +11,29 @@
  */
 
 import {
-  useTheme,
-  alpha,
-} from '@mui/material';
-
-import { motion } from 'framer-motion';
-import {
-  Backdrop,
   Box,
+  Typography,
   Button,
   CircularProgress,
   Dialog,
-  DialogActions,
-  DialogContent,
   DialogTitle,
+  DialogContent,
+  DialogActions,
   IconButton,
-  Typography
+  useTheme,
+  alpha,
+  Backdrop,
 } from '@mui/material';
-import ErrorIcon from '@mui/icons-material/Error';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import DeleteIcon from '@mui/icons-material/Delete';
-import WarningIcon from '@mui/icons-material/Warning';
-import CloseIcon from '@mui/icons-material/Close';
+import {
+  InboxRounded as EmptyIcon,
+  ErrorOutline as ErrorIcon,
+  CheckCircleOutline as SuccessIcon,
+  Refresh as RefreshIcon,
+  Close as CloseIcon,
+  WarningAmber as WarningIcon,
+  DeleteForever as DeleteIcon,
+} from '@mui/icons-material';
+import { motion } from 'framer-motion';
 
 // ─── EMPTY STATE ─────────────────────────────────────────────────────────────
 export const EmptyState = ({

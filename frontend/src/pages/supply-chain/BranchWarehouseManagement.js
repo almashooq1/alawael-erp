@@ -2,56 +2,64 @@
  * 🏢 إدارة مخازن الفروع — Branch Warehouse Management
  * AlAwael ERP — Multi-Branch Inventory Overview
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Paper,
-} from '@mui/material';
-
-import { useSnackbar } from 'contexts/SnackbarContext';
-import { gradients, statusColors, surfaceColors } from 'theme/palette';
-import { branchService, warehouseService } from 'services/branchWarehouseService';
-import {
-  Alert,
-  Avatar,
   Box,
-  Button,
+  Typography,
   Card,
   CardContent,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  FormControl,
   Grid,
-  IconButton,
-  InputAdornment,
-  InputLabel,
-  LinearProgress,
-  MenuItem,
-  Select,
-  Stack,
+  Tabs,
   Tab,
+  TextField,
+  InputAdornment,
+  Button,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Tabs,
-  TextField,
-  Typography
+  Paper,
+  Chip,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  LinearProgress,
+  Tooltip,
+  Avatar,
+  Divider,
+  Stack,
+  Alert,
 } from '@mui/material';
-import StoreIcon from '@mui/icons-material/Store';
-import WarehouseIcon from '@mui/icons-material/Warehouse';
-import InventoryIcon from '@mui/icons-material/Inventory';
-import WarningIcon from '@mui/icons-material/Warning';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import SearchIcon from '@mui/icons-material/Search';
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import PersonIcon from '@mui/icons-material/Person';
+import {
+  Search as SearchIcon,
+  Add as AddIcon,
+  Edit as EditIcon,
+  Warehouse as WarehouseIcon,
+  Store as StoreIcon,
+  Inventory as InventoryIcon,
+  LocalShipping as ShippingIcon,
+  Assessment as ReportIcon,
+  LocationOn as LocationIcon,
+  Person as PersonIcon,
+  Phone as PhoneIcon,
+  Refresh as RefreshIcon,
+  FilterList as FilterIcon,
+  TrendingUp as TrendUpIcon,
+  TrendingDown as TrendDownIcon,
+  Warning as WarningIcon,
+  CheckCircle as CheckIcon,
+} from '@mui/icons-material';
+import { useSnackbar } from 'contexts/SnackbarContext';
+import { gradients, brandColors, statusColors, surfaceColors } from 'theme/palette';
+import { branchService, warehouseService } from 'services/branchWarehouseService';
 
 const BranchWarehouseManagement = () => {
   const { showSnackbar } = useSnackbar();

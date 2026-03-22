@@ -5,51 +5,52 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import {
-  alpha,
-} from '@mui/material';
-
-import { useSnackbar } from '../../contexts/SnackbarContext';
-import enterpriseProService from '../../services/enterprisePro.service';
-import {
   Box,
-  Button,
+  Paper,
+  Typography,
+  Grid,
   Card,
   CardContent,
-  Chip,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  FormControl,
-  Grid,
+  Button,
   IconButton,
-  LinearProgress,
-  MenuItem,
-  Paper,
-  Select,
-  Tab,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Tabs,
+  Chip,
   TextField,
-  Typography
+  MenuItem,
+  Select,
+  FormControl,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Divider,
+  LinearProgress,
+  Tab,
+  Tabs,
+  CircularProgress,
+  alpha,
 } from '@mui/material';
-import SecurityIcon from '@mui/icons-material/Security';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import HistoryIcon from '@mui/icons-material/History';
-import CheckIcon from '@mui/icons-material/Check';
-import WarningIcon from '@mui/icons-material/Warning';
-import SearchIcon from '@mui/icons-material/Search';
-import AddIcon from '@mui/icons-material/Add';
-import DeleteIcon from '@mui/icons-material/Delete';
-import ErrorIcon from '@mui/icons-material/Error';
-import { ViewIcon } from 'utils/iconAliases';
+import {
+  Refresh as RefreshIcon,
+  Security as SecurityIcon,
+  History as HistoryIcon,
+  CheckCircle as CheckIcon,
+  Warning as WarningIcon,
+  Error as ErrorIcon,
+  Search as SearchIcon,
+  Visibility as ViewIcon,
+  Add as AddIcon,
+  Delete as DeleteIcon,
+  DoneAll as ResolveIcon,
+  Assessment as StatsIcon,
+} from '@mui/icons-material';
+import { useSnackbar } from '../../contexts/SnackbarContext';
+import enterpriseProService from '../../services/enterprisePro.service';
 
 const SEVERITY_COLORS = { low: '#4CAF50', medium: '#FF9800', high: '#F44336', critical: '#9C27B0' };
 const ACTION_COLORS = {

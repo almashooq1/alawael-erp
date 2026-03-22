@@ -4,31 +4,20 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import { useTheme,
-} from '@mui/material';
-import { gradients, brandColors, statusColors, neutralColors } from '../../theme/palette';
 import {
-  Avatar,
-  Box,
-  Chip,
-  Divider,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  Paper,
-  Tab,
-  Tabs,
-  Typography
+  Box, Paper, Typography, List, ListItem, ListItemAvatar, ListItemText,
+  Avatar, Chip, Divider, useTheme, Tabs, Tab,
 } from '@mui/material';
-import AddCircleIcon from '@mui/icons-material/AddCircle';
+import { motion, AnimatePresence } from 'framer-motion';
+import PersonIcon from '@mui/icons-material/Person';
 import EditIcon from '@mui/icons-material/Edit';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
 import DeleteIcon from '@mui/icons-material/Delete';
 import LoginIcon from '@mui/icons-material/Login';
 import SecurityIcon from '@mui/icons-material/Security';
 import SettingsIcon from '@mui/icons-material/Settings';
-import PersonIcon from '@mui/icons-material/Person';
 import HistoryIcon from '@mui/icons-material/History';
+import { gradients, brandColors, statusColors, neutralColors } from '../../theme/palette';
 
 const ACTION_CONFIG = {
   create: { icon: <AddCircleIcon />, color: brandColors.accentGreen, label: 'إنشاء' },

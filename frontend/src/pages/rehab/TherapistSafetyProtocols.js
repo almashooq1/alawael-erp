@@ -1,48 +1,58 @@
 import { useState, useEffect } from 'react';
-
-import { therapistService } from 'services/therapistService';
-import logger from 'utils/logger';
-import { useAuth } from 'contexts/AuthContext';
-import { useSnackbar } from '../../contexts/SnackbarContext';
 import {
-  Avatar,
   Box,
-  Button,
+  Container,
   Card,
   CardContent,
-  Chip,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  FormControl,
+  Typography,
   Grid,
+  Button,
+  TextField,
+  Chip,
   IconButton,
   InputAdornment,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Select,
+  MenuItem,
+  FormControl,
   InputLabel,
+  Tooltip,
+  Paper,
+  Avatar,
+  Divider,
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
-  MenuItem,
-  Paper,
-  Select,
+  Stepper,
   Step,
   StepLabel,
-  Stepper,
-  TextField,
-  Tooltip,
-  Typography
+  StepContent,
 } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import AddIcon from '@mui/icons-material/Add';
-import InfoIcon from '@mui/icons-material/Info';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import CloseIcon from '@mui/icons-material/Close';
-import WarningIcon from '@mui/icons-material/Warning';
+import {
+  Add as AddIcon,
+  Search as SearchIcon,
+  Security as SafetyIcon,
+  Delete as DeleteIcon,
+  Close as CloseIcon,
+  Edit as EditIcon,
+  Warning as WarningIcon,
+  ReportProblem as IncidentIcon,
+  CheckCircle as ResolvedIcon,
+  Schedule as ReviewIcon,
+  Shield as ShieldIcon,
+  Gavel as RuleIcon,
+  ErrorOutline as CriticalIcon,
+  Info as InfoIcon,
+} from '@mui/icons-material';
+import { therapistService } from 'services/therapistService';
+import logger from 'utils/logger';
+import { useAuth } from 'contexts/AuthContext';
+import { useSnackbar } from '../../contexts/SnackbarContext';
+import { statusColors, neutralColors, surfaceColors } from '../../theme/palette';
 
 const CATEGORIES = [
   { id: 'fall-prevention', label: 'الوقاية من السقوط', color: '#3b82f6', icon: '🛡️' },

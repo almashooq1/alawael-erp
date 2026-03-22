@@ -4,32 +4,33 @@
  * Create and manage automation rules that trigger actions
  * based on workflow events. View execution logs and test rules.
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Alert,
-  Badge,
   Box,
-  Button,
-  Card,
-  CardActions,
-  CardContent,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  FormControl,
-  FormControlLabel,
-  Grid,
-  IconButton,
-  InputLabel,
-  MenuItem,
   Paper,
+  Typography,
+  Button,
+  Grid,
+  Card,
+  CardContent,
+  CardActions,
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  IconButton,
+  Chip,
+  Divider,
+  MenuItem,
   Select,
-  Skeleton,
+  FormControl,
+  InputLabel,
   Switch,
+  FormControlLabel,
+  Tooltip,
+  Tabs,
   Tab,
   Table,
   TableBody,
@@ -37,23 +38,29 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Tabs,
-  TextField,
-  Tooltip,
-  Typography,
-  alpha
+  Badge,
+  alpha,
+  Skeleton,
+  Alert,
 } from '@mui/material';
-
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Refresh as RefreshIcon,
+  ArrowBack as BackIcon,
+  Save as SaveIcon,
+  AutoFixHigh as AutoIcon,
+  PlayArrow as TestIcon,
+  FlashOn as TriggerIcon,
+  Settings as ActionIcon,
+  Rule as RuleIcon,
+  CheckCircle as SuccessIcon,
+  Error as ErrorIcon,
+  FilterList as FilterIcon,
+} from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import workflowService from '../../services/workflow.service';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import AddIcon from '@mui/icons-material/Add';
-import RuleIcon from '@mui/icons-material/Rule';
-import FilterIcon from '@mui/icons-material/Filter';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import ErrorIcon from '@mui/icons-material/Error';
-import SaveIcon from '@mui/icons-material/Save';
 
 const EVENT_LABELS = {
   task_created: 'إنشاء مهمة',
@@ -729,9 +736,7 @@ export default function WorkflowAutomations() {
                     onChange={e => {
                       try {
                         updateAction(idx, 'config', JSON.parse(e.target.value));
-                      } catch (_) {
-                        /* invalid JSON, ignore */
-                      }
+                      } catch {}
                     }}
                   />
                 </Grid>

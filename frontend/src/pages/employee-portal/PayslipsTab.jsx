@@ -1,28 +1,28 @@
 /**
  * PayslipsTab — بوابة الموظف: تبويب كشوف الرواتب
  */
-import {
-  Paper,
-} from '@mui/material';
-
-import { fmt } from './employeePortalData';
-import { gradients } from '../../theme/palette';
+import React from 'react';
 import {
   Box,
-  Button,
   Grid,
-  IconButton,
+  Typography,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
+  Button,
+  Paper,
+  IconButton,
   Tooltip,
-  Typography
 } from '@mui/material';
-import PrintIcon from '@mui/icons-material/Print';
-import { ViewIcon } from 'utils/iconAliases';
+import {
+  Print as PrintIcon,
+  Visibility as ViewIcon,
+} from '@mui/icons-material';
+import { fmt } from './employeePortalData';
+import { gradients } from '../../theme/palette';
 
 export default function PayslipsTab({
   payslips,

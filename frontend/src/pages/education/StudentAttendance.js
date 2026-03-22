@@ -4,37 +4,42 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-
-import studentPortalService from 'services/studentPortalService';
-import { getStatusHexColor } from 'utils/statusColors';
-import logger from 'utils/logger';
-import { gradients, statusColors, brandColors, surfaceColors } from 'theme/palette';
-import { useAuth } from 'contexts/AuthContext';
-import { useSnackbar } from '../../contexts/SnackbarContext';
 import {
-  Alert,
-  Avatar,
   Box,
+  Grid,
   Card,
   CardContent,
-  Chip,
-  Grid,
-  LinearProgress,
+  Typography,
   Paper,
-  Stack,
+  Chip,
+  LinearProgress,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
+  Alert,
+  Stack,
+  Avatar,
   Tooltip,
-  Typography
 } from '@mui/material';
-import InfoIcon from '@mui/icons-material/Info';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import WarningIcon from '@mui/icons-material/Warning';
-import { CalendarIcon } from 'utils/iconAliases';
+import {
+  CheckCircle as PresentIcon,
+  Cancel as AbsentIcon,
+  AccessTime as LateIcon,
+  EventAvailable as AttendanceIcon,
+  TrendingUp as TrendingUpIcon,
+  CalendarMonth as CalendarIcon,
+  Warning as WarningIcon,
+  Info as InfoIcon,
+} from '@mui/icons-material';
+import studentPortalService from 'services/studentPortalService';
+import { getStatusHexColor } from 'utils/statusColors';
+import logger from 'utils/logger';
+import { gradients, statusColors, brandColors, surfaceColors } from 'theme/palette';
+import { useAuth } from 'contexts/AuthContext';
+import { useSnackbar } from '../../contexts/SnackbarContext';
 
 const StudentAttendance = () => {
   const { currentUser } = useAuth();

@@ -4,42 +4,46 @@
  * List all workflow instances with status tabs, search,
  * pagination, and navigation to instance detail.
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  alpha,
-} from '@mui/material';
-
-import { useSnackbar } from '../../contexts/SnackbarContext';
-import workflowService from '../../services/workflow.service';
-import {
-  Avatar,
   Box,
+  Paper,
+  Typography,
   Button,
   Chip,
   IconButton,
-  InputAdornment,
-  LinearProgress,
-  Paper,
-  Tab,
+  TextField,
+  Tooltip,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
-  TablePagination,
   TableRow,
+  TablePagination,
   Tabs,
-  TextField,
-  Tooltip,
-  Typography
+  Tab,
+  LinearProgress,
+  InputAdornment,
+  alpha,
+  Avatar,
 } from '@mui/material';
-import CancelIcon from '@mui/icons-material/Cancel';
-import ErrorIcon from '@mui/icons-material/Error';
-import StartIcon from '@mui/icons-material/Start';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import SearchIcon from '@mui/icons-material/Search';
-import { ViewIcon } from 'utils/iconAliases';
+import {
+  ArrowBack as BackIcon,
+  Refresh as RefreshIcon,
+  Search as SearchIcon,
+  PlayArrow as RunningIcon,
+  CheckCircle as CompleteIcon,
+  Cancel as CancelIcon,
+  Pause as SuspendIcon,
+  Error as ErrorIcon,
+  Visibility as ViewIcon,
+  AddCircle as StartIcon,
+  AccountTree as WorkflowIcon,
+} from '@mui/icons-material';
+import { useSnackbar } from '../../contexts/SnackbarContext';
+import workflowService from '../../services/workflow.service';
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 const INSTANCE_STATUS = {

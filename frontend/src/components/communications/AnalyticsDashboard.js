@@ -1,21 +1,28 @@
-
-
-import { brandColors } from 'theme/palette';
+import { Box, Grid, Card, CardContent, Typography, LinearProgress } from '@mui/material';
 import {
-  Box,
-  Card,
-  CardContent,
-  Grid,
-  LinearProgress,
+  TrendingUp as TrendingUpIcon,
+  TrendingDown as TrendingDownIcon,
+  Message as MessageIcon,
+  Schedule as ScheduleIcon,
+  CheckCircle as CheckIcon,
+  SmartToy as BotIcon,
+} from '@mui/icons-material';
+import {
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
   Tooltip,
-  Typography
-} from '@mui/material';
-import CheckIcon from '@mui/icons-material/Check';
-import ScheduleIcon from '@mui/icons-material/Schedule';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import TrendingDownIcon from '@mui/icons-material/TrendingDown';
-import MessageIcon from '@mui/icons-material/Message';
-import { BotIcon } from 'utils/iconAliases';
+  Legend,
+  ResponsiveContainer,
+} from 'recharts';
+import { brandColors } from 'theme/palette';
 
 const AnalyticsDashboard = ({ stats }) => {
   // بيانات الرسوم البيانية

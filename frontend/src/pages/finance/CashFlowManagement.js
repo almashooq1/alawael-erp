@@ -1,33 +1,39 @@
-import { useState, useEffect, useCallback } from 'react';
-
-import accountingService from 'services/accountingService';
-import logger from 'utils/logger';
-import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';
-import { useSnackbar } from '../../contexts/SnackbarContext';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Avatar,
   Box,
-  Button,
+  Container,
   Card,
   CardContent,
+  Typography,
+  Avatar,
   Chip,
-  Container,
-  Divider,
-  FormControl,
+  Button,
   Grid,
-  InputLabel,
-  LinearProgress,
-  MenuItem,
-  Select,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Typography
+  LinearProgress,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Divider,
 } from '@mui/material';
-import PrintIcon from '@mui/icons-material/Print';
+import {
+  Waves as CashIcon,
+  TrendingUp as TUpIcon,
+  TrendingDown as TDownIcon,
+  Print as PrintIcon,
+  AccountBalance as BankIcon,
+} from '@mui/icons-material';
+import accountingService from 'services/accountingService';
+import logger from 'utils/logger';
+import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';
+import { useSnackbar } from '../../contexts/SnackbarContext';
 
 const mockCashFlowData = {
   period: '2026-Q1',

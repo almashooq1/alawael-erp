@@ -1,12 +1,48 @@
 /**
  * Directives List — قائمة التوجيهات الإلكترونية
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
+  Box,
+  Typography,
   Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TablePagination,
+  Chip,
+  IconButton,
+  Button,
+  TextField,
+  InputAdornment,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Tooltip,
+  Skeleton,
+  Alert,
+  Grid,
+  Avatar,
 } from '@mui/material';
-
+import {
+  Search as SearchIcon,
+  Add as AddIcon,
+  Visibility as ViewIcon,
+  Campaign as CampaignIcon,
+  Gavel as DecisionIcon,
+  Description as MemoIcon,
+  NotificationsActive as UrgentIcon,
+  PolicyOutlined as PolicyIcon,
+  Rule as ProcedureIcon,
+  Assignment as InstructionIcon,
+  FilterList as FilterIcon,
+  Refresh as RefreshIcon,
+} from '@mui/icons-material';
 import electronicDirectivesService from '../../services/electronicDirectives.service';
 import {
   DIRECTIVE_TYPES,
@@ -16,37 +52,6 @@ import {
   priorityOptions,
   statusOptions,
 } from './constants';
-import {
-  Alert,
-  Avatar,
-  Box,
-  Button,
-  Chip,
-  FormControl,
-  Grid,
-  IconButton,
-  InputAdornment,
-  InputLabel,
-  MenuItem,
-  Select,
-  Skeleton,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TablePagination,
-  TableRow,
-  TextField,
-  Tooltip,
-  Typography
-} from '@mui/material';
-import CampaignIcon from '@mui/icons-material/Campaign';
-import PolicyIcon from '@mui/icons-material/Policy';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import AddIcon from '@mui/icons-material/Add';
-import SearchIcon from '@mui/icons-material/Search';
-import { ViewIcon } from 'utils/iconAliases';
 
 const typeIcons = {
   instruction: <InstructionIcon fontSize="small" />,

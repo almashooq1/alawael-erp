@@ -1,44 +1,53 @@
 import { useState, useEffect } from 'react';
-
+import {
+  Box,
+  Container,
+  Card,
+  CardContent,
+  Typography,
+  Grid,
+  Button,
+  TextField,
+  Chip,
+  IconButton,
+  InputAdornment,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Tooltip,
+  Paper,
+  Avatar,
+  Tabs,
+  Tab,
+  Badge,
+  Divider,
+} from '@mui/material';
+import {
+  Add as AddIcon,
+  Search as SearchIcon,
+  People as PeopleIcon,
+  Delete as DeleteIcon,
+  Close as CloseIcon,
+  Send as SendIcon,
+  Message as MessageIcon,
+  MarkEmailRead as ReadIcon,
+  MarkEmailUnread as UnreadIcon,
+  Inbox as InboxIcon,
+  Outbox as OutboxIcon,
+  Reply as ReplyIcon,
+  FamilyRestroom as FamilyIcon,
+  Notifications as NotifIcon,
+} from '@mui/icons-material';
 import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import { statusColors, neutralColors } from '../../theme/palette';
-import {
-  Avatar,
-  Badge,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControl,
-  Grid,
-  IconButton,
-  InputAdornment,
-  InputLabel,
-  MenuItem,
-  Paper,
-  Select,
-  Tab,
-  Tabs,
-  TextField,
-  Tooltip,
-  Typography
-} from '@mui/material';
-import SendIcon from '@mui/icons-material/Send';
-import MessageIcon from '@mui/icons-material/Message';
-import InboxIcon from '@mui/icons-material/Inbox';
-import PeopleIcon from '@mui/icons-material/People';
-import SearchIcon from '@mui/icons-material/Search';
-import DeleteIcon from '@mui/icons-material/Delete';
-import CloseIcon from '@mui/icons-material/Close';
+import { statusColors, neutralColors, surfaceColors } from '../../theme/palette';
 
 const MESSAGE_TYPES = [
   { value: 'general', label: 'عام', color: '#3b82f6' },

@@ -4,42 +4,46 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-
+import {
+  Box,
+  Grid,
+  Card,
+  CardContent,
+  Typography,
+  Paper,
+  Chip,
+  LinearProgress,
+  Button,
+  Stack,
+  Avatar,
+  Divider,
+  IconButton,
+  Alert,
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Tab,
+  Tabs,
+} from '@mui/material';
+import {
+  Assignment as AssignmentIcon,
+  CheckCircle as CompletedIcon,
+  Schedule as PendingIcon,
+  Warning as OverdueIcon,
+  Upload as UploadIcon,
+  Download as DownloadIcon,
+  AttachFile as AttachFileIcon,
+  CalendarToday as CalendarIcon,
+  Person as TeacherIcon,
+} from '@mui/icons-material';
 import studentPortalService from 'services/studentPortalService';
 import { getStatusHexColor } from 'utils/statusColors';
 import logger from 'utils/logger';
 import { gradients, statusColors, neutralColors } from 'theme/palette';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import {
-  Alert,
-  Avatar,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  Grid,
-  IconButton,
-  LinearProgress,
-  Paper,
-  Stack,
-  Tab,
-  Tabs,
-  TextField,
-  Typography
-} from '@mui/material';
-import PendingIcon from '@mui/icons-material/Pending';
-import AssignmentIcon from '@mui/icons-material/Assignment';
-import UploadIcon from '@mui/icons-material/Upload';
-import DownloadIcon from '@mui/icons-material/Download';
-import AttachFileIcon from '@mui/icons-material/AttachFile';
-import { CalendarIcon } from 'utils/iconAliases';
 
 const StudentAssignments = () => {
   const { currentUser } = useAuth();

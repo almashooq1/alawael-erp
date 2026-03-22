@@ -1,27 +1,22 @@
 /**
  * لوحة تحكم إدارة الوثائق — Document Management Dashboard
  */
-import { useState, useEffect } from 'react';
-
-import apiClient from '../../services/api';
+import React, { useState, useEffect } from 'react';
 import {
-  Box,
-  Card,
-  CardContent,
-  Chip,
-  CircularProgress,
-  Grid,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Tooltip,
-  Typography
+  Box, Grid, Paper, Typography, Card, CardContent, CircularProgress,
+  Table, TableHead, TableRow, TableCell, TableBody, Chip,
 } from '@mui/material';
-import ApprovalIcon from '@mui/icons-material/Approval';
-import { DocIcon } from 'utils/iconAliases';
+import {
+  PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  Tooltip, ResponsiveContainer, Legend,
+} from 'recharts';
+import {
+  Description as DocIcon,
+  Approval as ApprovalIcon,
+  DeleteSweep as TrashIcon,
+  QrCode as QRIcon,
+} from '@mui/icons-material';
+import apiClient from '../../services/api';
 
 const PIE_COLORS = ['#1976d2', '#4caf50', '#ff9800', '#f44336', '#9c27b0', '#00bcd4'];
 

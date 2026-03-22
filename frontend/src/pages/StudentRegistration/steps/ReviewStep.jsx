@@ -2,25 +2,17 @@
  * Student Registration — Step 5: Review & Confirm
  */
 
-
+import React from 'react';
+import {
+  Box, Typography, Card, CardContent, Table, TableBody,
+  TableRow, TableCell, Chip, Alert, Fade,
+} from '@mui/material';
+import { CheckCircle } from '@mui/icons-material';
+import { SectionTitle } from '../StyledComponents';
 import {
   DISABILITY_TYPES, SEVERITY_LEVELS, PROGRAMS, SHIFTS, WEEK_DAYS,
 } from '../studentRegistrationConfig';
 import { gradients } from 'theme/palette';
-import {
-  Alert,
-  Box,
-  Card,
-  CardContent,
-  Chip,
-  Fade,
-  Table,
-  TableBody,
-  TableCell,
-  TableRow,
-  Typography
-} from '@mui/material';
-import CheckCircle from '@mui/icons-material/CheckCircle';
 
 const ReviewStep = ({ formData, submitError, calculatedAge }) => (
   <Fade in timeout={400}>

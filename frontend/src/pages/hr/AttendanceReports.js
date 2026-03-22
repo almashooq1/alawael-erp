@@ -1,54 +1,58 @@
 import { useState, useEffect } from 'react';
-
-import { parentService } from 'services/parentService';
-import logger from 'utils/logger';
-import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';
-import { useAuth } from 'contexts/AuthContext';
-import { useSnackbar } from '../../contexts/SnackbarContext';
 import {
-  Avatar,
   Box,
-  Button,
+  Container,
+  Grid,
   Card,
   CardContent,
   CardHeader,
-  Chip,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  Grid,
-  IconButton,
-  InputAdornment,
-  LinearProgress,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  Tab,
+  Typography,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
+  Chip,
   Tabs,
-  TextField,
+  Tab,
+  LinearProgress,
+  Avatar,
+  IconButton,
   Tooltip,
-  Typography
+  TextField,
+  InputAdornment,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Divider,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
 } from '@mui/material';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import CancelIcon from '@mui/icons-material/Cancel';
-import EventNoteIcon from '@mui/icons-material/EventNote';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import SearchIcon from '@mui/icons-material/Search';
-import PrintIcon from '@mui/icons-material/Print';
-import ThumbUpIcon from '@mui/icons-material/ThumbUp';
-import WarningIcon from '@mui/icons-material/Warning';
-import StarIcon from '@mui/icons-material/Star';
-import { CalendarIcon, ViewIcon } from 'utils/iconAliases';
+import {
+  EventNote as EventNoteIcon,
+  CheckCircle as CheckCircleIcon,
+  Cancel as CancelIcon,
+  AccessTime as LateIcon,
+  TrendingUp as TrendingUpIcon,
+  Search as SearchIcon,
+  Visibility as ViewIcon,
+  Print as PrintIcon,
+  CalendarMonth as CalendarIcon,
+  Psychology as BehaviorIcon,
+  Star as StarIcon,
+  ThumbUp as ThumbUpIcon,
+  Warning as WarningIcon,
+} from '@mui/icons-material';
+import { parentService } from 'services/parentService';
+import logger from 'utils/logger';
+import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';
+import { useAuth } from 'contexts/AuthContext';
+import { useSnackbar } from '../../contexts/SnackbarContext';
 
 const AttendanceReports = () => {
   const { currentUser } = useAuth();

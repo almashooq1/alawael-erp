@@ -2,15 +2,9 @@
  * PerformanceStatsCards.jsx — Stats cards grid
  * Extracted from PerformanceEvaluation.js
  */
+import React from 'react';
+import { Grid, Card, CardContent, Avatar, Box, Typography } from '@mui/material';
 
-import {
-  Avatar,
-  Box,
-  Card,
-  CardContent,
-  Grid,
-  Typography
-} from '@mui/material';
 const PerformanceStatsCards = ({ stats }) => (
   <Grid container spacing={2} sx={{ mb: 3 }}>
     {stats.map((s, i) => (

@@ -2,19 +2,14 @@
  * Student Registration — Step 4: Medical History
  */
 
-
-
+import React from 'react';
 import {
-  Alert,
-  Box,
-  Checkbox,
-  Divider,
-  Fade,
-  FormControlLabel,
-  FormGroup,
-  Grid,
-  TextField
+  Box, Grid, TextField, Alert, Divider, Checkbox,
+  FormControlLabel, FormGroup, Fade,
 } from '@mui/material';
+import { LocalHospital } from '@mui/icons-material';
+import { SectionTitle } from '../StyledComponents';
+
 const MedicalStep = ({ formData, handleChange, setFormData }) => (
   <Fade in timeout={400}>
     <Box>

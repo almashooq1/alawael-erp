@@ -1,16 +1,11 @@
 /**
  * DashboardStatusBanners — Offline, refresh flash, progress bar, print header
  */
-import {
-  Alert,
-  Box,
-  Chip,
-  LinearProgress,
-  Typography,
-  useTheme
-} from '@mui/material';
-import { brandColors, statusColors, chartColors, neutralColors } from 'theme/palette';
+import React from 'react';
+import { Box, Typography, Alert, Chip, LinearProgress, useTheme } from '@mui/material';
 import WifiOffIcon from '@mui/icons-material/WifiOff';
+import { motion } from 'framer-motion';
+import { brandColors, statusColors, chartColors, neutralColors } from 'theme/palette';
 
 const DashboardStatusBanners = ({ isOnline, refreshFlash, refreshProgress, refreshing: _refreshing }) => {
   const theme = useTheme();

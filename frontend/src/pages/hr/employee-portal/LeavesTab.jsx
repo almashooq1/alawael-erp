@@ -1,6 +1,4 @@
-import {
-  Paper,
-} from '@mui/material';
+import React from 'react';
 import {
   Box,
   Button,
@@ -15,9 +13,10 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Typography
+  Typography,
+  Paper,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
+import { Add as AddIcon } from '@mui/icons-material';
 
 const LEAVE_TYPE_LABELS = {
   annual: 'سنوية',

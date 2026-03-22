@@ -2,10 +2,15 @@
  * fleetManagement.constants.js — Status map, tab definitions, table config
  * ثوابت إدارة الأسطول
  */
-
+import {
+  DirectionsCar as CarIcon,
+  Person as PersonIcon,
+  Route as RouteIcon,
+  LocalShipping as TripIcon,
+  GpsFixed as GpsIcon,
+  Warning as AccidentIcon,
+} from '@mui/icons-material';
 import { statusColors as paletteStatus } from '../../theme/palette';
-import PersonIcon from '@mui/icons-material/Person';
-import RouteIcon from '@mui/icons-material/Route';
 
 /** Chip color map (MUI color prop) for entity statuses */
 export const STATUS_CHIP_COLORS = {

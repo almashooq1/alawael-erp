@@ -1,5 +1,5 @@
-
 import { Box } from '@mui/material';
+
 const Sparkline = ({ data = [], color = '#0f766e', height = 40, width = 100 }) => {
   if (!data || data.length === 0) return null;
 

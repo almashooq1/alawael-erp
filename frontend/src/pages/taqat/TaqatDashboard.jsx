@@ -3,34 +3,17 @@
  * Taqat Employment Platform Dashboard
  */
 import { useState, useEffect, useCallback } from 'react';
-
-import taqatService from '../../services/taqat.service';
 import {
-  Alert,
-  Avatar,
-  Box,
-  Card,
-  CardContent,
-  Chip,
-  CircularProgress,
-  Grid,
-  IconButton,
-  LinearProgress,
-  Tab,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Tabs,
-  Typography
+  Box, Card, CardContent, Typography, Grid, Button, Chip, Table,
+  TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
+  CircularProgress, Alert, Tabs, Tab, IconButton, Avatar, LinearProgress,
+  Dialog, DialogTitle, DialogContent, DialogActions, TextField, MenuItem,
 } from '@mui/material';
-import Refresh from '@mui/icons-material/Refresh';
-import Person from '@mui/icons-material/Person';
-import Work from '@mui/icons-material/Work';
-import CheckCircle from '@mui/icons-material/CheckCircle';
-import Assessment from '@mui/icons-material/Assessment';
+import {
+  Work, Person, School, TrendingUp, Refresh, Add,
+  Assessment, Search, CheckCircle, HourglassEmpty,
+} from '@mui/icons-material';
+import taqatService from '../../services/taqat.service';
 
 const applicationStatusLabels = {
   submitted: 'مقدّم', screening: 'فرز', shortlisted: 'قائمة قصيرة',

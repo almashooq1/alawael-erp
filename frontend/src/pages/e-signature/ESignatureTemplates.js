@@ -1,39 +1,50 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import eSignatureService from '../../services/eSignature.service';
-
-import { useSnackbar } from '../../contexts/SnackbarContext';
-import { gradients } from '../../theme/palette';
 import {
-  Avatar,
   Box,
+  Typography,
+  Paper,
   Button,
+  Grid,
   Card,
   CardContent,
   Chip,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  FormControlLabel,
-  Grid,
   IconButton,
-  MenuItem,
-  Paper,
-  Switch,
   TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  MenuItem,
+  Avatar,
+  Divider,
   Tooltip,
-  Typography
+  Alert,
+  CircularProgress,
+  Switch,
+  FormControlLabel,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
 } from '@mui/material';
-import Description from '@mui/icons-material/Description';
-import ArrowBack from '@mui/icons-material/ArrowBack';
-import AddIcon from '@mui/icons-material/Add';
-import Refresh from '@mui/icons-material/Refresh';
-import Edit from '@mui/icons-material/Edit';
-import ContentCopy from '@mui/icons-material/ContentCopy';
-import Delete from '@mui/icons-material/Delete';
+import {
+  Add as AddIcon,
+  Edit,
+  Delete,
+  Description,
+  ArrowBack,
+  ContentCopy,
+  Visibility,
+  Settings,
+  Category,
+  Refresh,
+} from '@mui/icons-material';
+import { useSnackbar } from '../../contexts/SnackbarContext';
+import { gradients } from '../../theme/palette';
 
 /* ═══ Categories ════════════════════════════════════════════════════════ */
 const categories = [

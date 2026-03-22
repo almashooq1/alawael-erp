@@ -1,24 +1,11 @@
 import React from 'react';
 import {
-  Paper,
+  Paper, Table, TableBody, TableCell, TableContainer,
+  TableHead, TableRow, Chip, Box, Typography,
+  LinearProgress, IconButton, Tooltip,
 } from '@mui/material';
+import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { statusColors } from './constants';
-import {
-  Box,
-  Chip,
-  IconButton,
-  LinearProgress,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Tooltip,
-  Typography
-} from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
 
 const DataTable = ({ items, cols, headers, onEdit, onDelete }) => (
   <TableContainer component={Paper} sx={{ mt: 2 }}>

@@ -2,52 +2,57 @@
  * إدارة الفصول الدراسية
  * Classroom Management
  */
-import { useState, useEffect, useCallback } from 'react';
-
-import { useNavigate } from 'react-router-dom';
-import { gradients } from '../../theme/palette';
-import educationSystemService from '../../services/educationSystem.service';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Alert,
-  Avatar,
-  Box,
-  Button,
-  Checkbox,
-  Chip,
   Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  FormControl,
-  FormControlLabel,
-  FormGroup,
   Grid,
-  IconButton,
-  InputAdornment,
-  InputLabel,
-  LinearProgress,
-  MenuItem,
   Paper,
-  Select,
-  Switch,
+  Box,
+  Typography,
+  Button,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
-  TablePagination,
   TableRow,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   TextField,
+  Chip,
+  IconButton,
   Tooltip,
-  Typography
+  LinearProgress,
+  Alert,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormControl,
+  Avatar,
+  TablePagination,
+  InputAdornment,
+  Switch,
+  FormControlLabel,
+  FormGroup,
+  Checkbox,
+  Divider,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import SearchIcon from '@mui/icons-material/Search';
-import PeopleIcon from '@mui/icons-material/People';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  MeetingRoom as ClassroomIcon,
+  ArrowBack as BackIcon,
+  Search as SearchIcon,
+  Accessible as AccessIcon,
+  People as PeopleIcon,
+  Tv as EquipIcon,
+} from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
+import { gradients } from '../../theme/palette';
+import educationSystemService from '../../services/educationSystem.service';
 
 const { classroomService } = educationSystemService;
 

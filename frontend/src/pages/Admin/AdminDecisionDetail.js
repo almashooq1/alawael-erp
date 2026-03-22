@@ -1,53 +1,61 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import DOMPurify from 'dompurify';
 import administrationService from '../../services/administration.service';
-
-import { useSnackbar } from '../../contexts/SnackbarContext';
 import {
-  Alert,
-  Avatar,
   Box,
+  Typography,
+  Paper,
   Button,
+  Grid,
   Card,
   CardContent,
   Chip,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  Grid,
   IconButton,
-  LinearProgress,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  Paper,
+  Avatar,
+  Divider,
+  Tooltip,
+  CircularProgress,
   Tab,
+  Tabs,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Tabs,
-  TextField,
-  Tooltip,
-  Typography
+  Alert,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  LinearProgress,
 } from '@mui/material';
-import ArrowBack from '@mui/icons-material/ArrowBack';
-import Send from '@mui/icons-material/Send';
-import CheckCircle from '@mui/icons-material/CheckCircle';
-import Cancel from '@mui/icons-material/Cancel';
-import Visibility from '@mui/icons-material/Visibility';
-import Refresh from '@mui/icons-material/Refresh';
-import Flag from '@mui/icons-material/Flag';
-import Lock from '@mui/icons-material/Lock';
-import People from '@mui/icons-material/People';
-import History from '@mui/icons-material/History';
+import {
+  ArrowBack,
+  Edit,
+  CheckCircle,
+  Cancel,
+  Block,
+  Refresh,
+  Gavel,
+  History,
+  People,
+  Send,
+  Archive,
+  Campaign,
+  Comment,
+  Visibility,
+  AccessTime,
+  Flag,
+  Lock,
+} from '@mui/icons-material';
+import { useSnackbar } from '../../contexts/SnackbarContext';
+import { gradients } from '../../theme/palette';
 
 /* ═══ Helpers ════════════════════════════════════════════════════════════════ */
 const docTypeLabels = {
@@ -486,7 +494,7 @@ export default function AdminDecisionDetail() {
             <Paper variant="outlined" sx={{ p: 2, mt: 1 }}>
               <Typography
                 sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.8 }}
-                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(decision.body) }}
+                dangerouslySetInnerHTML={{ __html: decision.body }}
               />
             </Paper>
           </Box>

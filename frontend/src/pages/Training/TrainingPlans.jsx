@@ -1,38 +1,14 @@
 /**
  * Training Plans — خطط التدريب السنوية
  */
-import { useState, useEffect, useCallback } from 'react';
-import { useTheme, alpha,
-} from '@mui/material';
-import { getPlans, createPlan, updatePlan } from '../../services/training.service';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Alert,
-  Box,
-  Button,
-  Chip,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControl,
-  IconButton,
-  InputLabel,
-  MenuItem,
-  Paper,
-  Select,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  TextField,
-  Tooltip,
-  Typography
+  Box, Paper, Typography, CircularProgress, IconButton, Tooltip, Alert, Chip, Button,
+  Table, TableHead, TableBody, TableRow, TableCell, Dialog, DialogTitle, DialogContent,
+  DialogActions, TextField, FormControl, InputLabel, Select, MenuItem, useTheme, alpha,
 } from '@mui/material';
-import Refresh from '@mui/icons-material/Refresh';
-import Add from '@mui/icons-material/Add';
-import Edit from '@mui/icons-material/Edit';
+import { Refresh, Add, Edit, EventNote } from '@mui/icons-material';
+import { getPlans, createPlan, updatePlan } from '../../services/training.service';
 
 const STATUS_LABELS = { draft: 'مسودة', pending_approval: 'بانتظار الاعتماد', approved: 'معتمدة', in_progress: 'قيد التنفيذ', completed: 'مكتملة' };
 const STATUS_COLORS = { draft: 'default', pending_approval: 'warning', approved: 'info', in_progress: 'success', completed: 'primary' };

@@ -1,6 +1,4 @@
-import {
-  Paper,
-} from '@mui/material';
+import React from 'react';
 import {
   Box,
   Card,
@@ -15,12 +13,16 @@ import {
   TableHead,
   TableRow,
   Tooltip,
-  Typography
+  Typography,
+  Paper,
 } from '@mui/material';
-import WalletIcon from '@mui/icons-material/Wallet';
-import ReceiptIcon from '@mui/icons-material/Receipt';
-import PrintIcon from '@mui/icons-material/Print';
-import { TrendIcon, ViewIcon } from 'utils/iconAliases';
+import {
+  Visibility as ViewIcon,
+  Print as PrintIcon,
+  AccountBalanceWallet as WalletIcon,
+  TrendingUp as TrendIcon,
+  Receipt as ReceiptIcon,
+} from '@mui/icons-material';
 
 const MONTH_NAMES = [
   '', 'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',

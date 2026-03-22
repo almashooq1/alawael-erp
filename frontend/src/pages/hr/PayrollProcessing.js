@@ -1,37 +1,44 @@
-import { useState, useCallback } from 'react';
-
-import payrollService from 'services/payrollService';
-import logger from 'utils/logger';
-import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';
-import { useSnackbar } from '../../contexts/SnackbarContext';
+import React, { useState, useCallback } from 'react';
 import {
-  Alert,
-  Avatar,
   Box,
-  Button,
+  Container,
   Card,
   CardContent,
-  Checkbox,
-  Chip,
-  Container,
-  FormControl,
+  Typography,
+  Avatar,
   Grid,
-  InputLabel,
-  LinearProgress,
-  MenuItem,
-  Select,
+  Button,
+  Stepper,
   Step,
   StepLabel,
-  Stepper,
+  Chip,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Typography
+  LinearProgress,
+  Checkbox,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Alert,
+  Divider,
 } from '@mui/material';
-import DoneIcon from '@mui/icons-material/Done';
+import {
+  PlayArrow as RunIcon,
+  CheckCircle as DoneIcon,
+  Sync as ProcessIcon,
+  Send as TransferIcon,
+  AccountBalanceWallet as PayIcon,
+  Description as SheetIcon,
+} from '@mui/icons-material';
+import payrollService from 'services/payrollService';
+import logger from 'utils/logger';
+import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';
+import { useSnackbar } from '../../contexts/SnackbarContext';
 
 const STEPS = ['اختيار الفترة', 'المراجعة والتحقق', 'الاعتماد', 'التحويل', 'التأكيد'];
 

@@ -1,6 +1,10 @@
+import {
+  VerifiedUser as QualityIcon,
+  FindInPage as AuditIcon,
+  Gavel as CaseIcon,
+  SupportAgent as SupportIcon,
+} from '@mui/icons-material';
 
-
-import SupportIcon from '@mui/icons-material/Support';
 export const statusColors = {
   open: 'warning',
   'in-progress': 'info',

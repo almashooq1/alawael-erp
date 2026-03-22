@@ -1,48 +1,54 @@
 /**
  * Employee Loans Management — إدارة السلف والقروض
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Paper,
-} from '@mui/material';
-
-import {
-  getLoans,
-  createLoan,
-  getLoanById,
-  approveLoanStep,
-  getLoanStats,
-} from '../../services/hr/employeeAffairsExpandedService';
-import {
-  Alert,
   Box,
+  Typography,
+  Paper,
   Button,
-  Card,
-  CardContent,
   Chip,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Grid,
-  IconButton,
-  LinearProgress,
+  TextField,
   MenuItem,
-  Snackbar,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Grid,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
-  TablePagination,
   TableRow,
-  TextField,
+  TablePagination,
+  IconButton,
   Tooltip,
-  Typography
+  Card,
+  CardContent,
+  Alert,
+  Snackbar,
+  CircularProgress,
+  LinearProgress,
+  Stepper,
+  Step,
+  StepLabel,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import { ViewIcon } from 'utils/iconAliases';
+import {
+  Add as AddIcon,
+  Visibility as ViewIcon,
+  AccountBalance as LoanIcon,
+  Payment as PaymentIcon,
+  ThumbUp as ApproveIcon,
+} from '@mui/icons-material';
+import {
+  getLoans,
+  createLoan,
+  getLoanById,
+  approveLoanStep,
+  payInstallment,
+  getLoanStats,
+} from '../../services/hr/employeeAffairsExpandedService';
 
 const LOAN_TYPES = ['سلفة راتب', 'قرض شخصي', 'سلفة طوارئ', 'قرض سكني', 'قرض تعليمي', 'قرض طبي'];
 

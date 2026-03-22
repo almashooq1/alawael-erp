@@ -1,8 +1,38 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
+  Box,
   Paper,
+  Typography,
+  Button,
+  TextField,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Chip,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Grid,
+  MenuItem,
+  Alert,
+  LinearProgress,
+  Card,
+  CardContent,
+  Tooltip,
 } from '@mui/material';
-
+import {
+  Add as AddIcon,
+  Refresh as RefreshIcon,
+  Warning as WarningIcon,
+  Gavel as IssueIcon,
+  ThumbUp as AckIcon,
+  AppRegistration as AppealIcon,
+} from '@mui/icons-material';
 import {
   fetchWarnings,
   createWarning,
@@ -11,34 +41,6 @@ import {
   appealWarning,
   fetchWarningStats,
 } from '../../services/hr/employeeAffairsPhase3Service';
-import {
-  Alert,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Grid,
-  IconButton,
-  LinearProgress,
-  MenuItem,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TextField,
-  Tooltip,
-  Typography
-} from '@mui/material';
-import WarningIcon from '@mui/icons-material/Warning';
-import AddIcon from '@mui/icons-material/Add';
-import RefreshIcon from '@mui/icons-material/Refresh';
 
 const statusColors = {
   مسودة: 'default',

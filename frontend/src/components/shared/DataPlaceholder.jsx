@@ -1,3 +1,5 @@
+import { Box, Typography, alpha } from '@mui/material';
+import { Warning as WarningIcon, SearchOff as EmptyIcon, ErrorOutline as ErrorIcon, CheckCircle as SuccessIcon } from '@mui/icons-material';
 
 /**
  * DataPlaceholder — Unified empty/error/loading/success state display.
@@ -9,8 +11,6 @@
  * @param {node}   [action]    — Action button
  * @param {object} [sx]        — Extra styles
  */
-import { Box, Typography } from '@mui/material';
-import ErrorIcon from '@mui/icons-material/Error';
 const DataPlaceholder = ({ type = 'empty', title, message, icon, action, sx = {} }) => {
   const configs = {
     empty: { icon: <EmptyIcon sx={{ fontSize: 64, color: '#9E9E9E' }} />, title: 'لا توجد بيانات', message: 'لم يتم العثور على بيانات لعرضها', color: '#9E9E9E' },

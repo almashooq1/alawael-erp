@@ -4,42 +4,20 @@
  * Children 0–3 years: screenings, developmental milestones,
  * IFSP (Individual Family Service Plan), referrals.
  */
-import { useState, useEffect, useCallback } from 'react';
-import { Paper,
-} from '@mui/material';
-
-import eisApi from '../../services/earlyIntervention.service';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Alert,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Grid,
-  IconButton,
-  LinearProgress,
-  MenuItem,
-  Tab,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Tabs,
-  TextField,
-  Tooltip,
-  Typography
+  Box, Typography, Card, CardContent, Grid, Button, Table, TableBody,
+  TableCell, TableContainer, TableHead, TableRow, Paper, Chip, TextField,
+  Dialog, DialogTitle, DialogContent, DialogActions, Alert, CircularProgress,
+  Tabs, Tab, IconButton, Tooltip, MenuItem, LinearProgress,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import { ViewIcon } from 'utils/iconAliases';
+import {
+  ChildCare as ChildIcon, Assessment as ScreenIcon, Timeline as MilestoneIcon,
+  Assignment as IFSPIcon, SwapHoriz as ReferralIcon, Dashboard as DashIcon,
+  Refresh as RefreshIcon, Add as AddIcon, Visibility as ViewIcon,
+  CheckCircle as CheckIcon, Warning as WarnIcon, Error as DelayIcon,
+} from '@mui/icons-material';
+import eisApi from '../../services/earlyIntervention.service';
 
 function TabPanel({ children, value, index }) {
   return value === index ? <Box py={2}>{children}</Box> : null;

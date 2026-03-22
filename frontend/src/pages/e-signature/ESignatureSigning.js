@@ -1,48 +1,65 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import eSignatureService from '../../services/eSignature.service';
-
-import { useSnackbar } from '../../contexts/SnackbarContext';
-import { gradients } from '../../theme/palette';
 import {
-  Alert,
-  Avatar,
   Box,
+  Typography,
+  Paper,
   Button,
+  Grid,
   Card,
   CardContent,
   Chip,
-  CircularProgress,
+  Tabs,
+  Tab,
+  TextField,
   Dialog,
-  DialogActions,
-  DialogContent,
   DialogTitle,
+  DialogContent,
+  DialogActions,
+  Avatar,
   Divider,
-  Grid,
+  IconButton,
+  Tooltip,
   LinearProgress,
+  Alert,
+  Timeline,
+  TimelineItem,
+  TimelineSeparator,
+  TimelineConnector,
+  TimelineContent,
+  TimelineDot,
+  CircularProgress,
   List,
   ListItem,
-  ListItemAvatar,
   ListItemText,
-  Paper,
+  ListItemAvatar,
+  Stepper,
   Step,
   StepLabel,
-  Stepper,
-  Tab,
-  Tabs,
-  TextField,
-  Typography
 } from '@mui/material';
-import DrawIcon from '@mui/icons-material/Draw';
-import Cancel from '@mui/icons-material/Cancel';
-import ArrowBack from '@mui/icons-material/ArrowBack';
-import Visibility from '@mui/icons-material/Visibility';
-import Person from '@mui/icons-material/Person';
-import History from '@mui/icons-material/History';
-import CommentIcon from '@mui/icons-material/Comment';
-import Refresh from '@mui/icons-material/Refresh';
-import CheckCircle from '@mui/icons-material/CheckCircle';
-import UploadIcon from '@mui/icons-material/Upload';
+import {
+  Draw as DrawIcon,
+  Keyboard,
+  Upload as UploadIcon,
+  CheckCircle,
+  Cancel,
+  ArrowBack,
+  Send,
+  History,
+  Comment as CommentIcon,
+  Person,
+  Schedule,
+  VerifiedUser,
+  Warning,
+  Refresh,
+  Download,
+  Visibility,
+  Share,
+  Print,
+} from '@mui/icons-material';
+import { useSnackbar } from '../../contexts/SnackbarContext';
+import { gradients, statusColors } from '../../theme/palette';
 
 /* ═══ Status Map ═════════════════════════════════════════════════════════ */
 const statusMap = {

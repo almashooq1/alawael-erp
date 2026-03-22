@@ -8,36 +8,40 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  alpha,
-} from '@mui/material';
-
-import { useSnackbar } from '../../contexts/SnackbarContext';
-import workflowService from '../../services/workflow.service';
-import {
-  Avatar,
   Box,
-  Card,
-  CardContent,
+  Paper,
+  Typography,
   Chip,
   Grid,
   IconButton,
+  Tooltip,
   LinearProgress,
-  Paper,
+  alpha,
+  Card,
+  CardContent,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Tooltip,
-  Typography
+  Avatar,
 } from '@mui/material';
-import AnalyticsIcon from '@mui/icons-material/Analytics';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import TimerIcon from '@mui/icons-material/Timer';
-import CategoryIcon from '@mui/icons-material/Category';
-import PersonIcon from '@mui/icons-material/Person';
-import { TrendIcon } from 'utils/iconAliases';
+import {
+  ArrowBack as BackIcon,
+  Refresh as RefreshIcon,
+  Analytics as AnalyticsIcon,
+  Speed as SLAIcon,
+  TrendingUp as TrendIcon,
+  Category as CategoryIcon,
+  EmojiEvents as TopIcon,
+  Warning as BottleneckIcon,
+  Timer as TimerIcon,
+  CheckCircle as CompleteIcon,
+  Person as PersonIcon,
+} from '@mui/icons-material';
+import { useSnackbar } from '../../contexts/SnackbarContext';
+import workflowService from '../../services/workflow.service';
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 const CATEGORY_LABELS = {

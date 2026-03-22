@@ -2,49 +2,51 @@
  * 🧠 إدارة السلوك — Behavior Management
  * AlAwael ERP — Behavior tracking, FBA management, intervention plans
  */
-import { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
-  Paper,
-  useTheme,
-  alpha,
-} from '@mui/material';
-
-import { useSnackbar } from 'contexts/SnackbarContext';
-import {
-  Alert,
-  Avatar,
   Box,
-  Button,
+  Typography,
+  Paper,
+  Grid,
   Card,
   CardContent,
   Chip,
+  TextField,
+  Button,
+  Avatar,
+  Tabs,
+  Tab,
   Dialog,
-  DialogActions,
-  DialogContent,
   DialogTitle,
-  FormControl,
-  Grid,
+  DialogContent,
+  DialogActions,
   IconButton,
-  InputLabel,
+  Stack,
   MenuItem,
   Select,
-  Stack,
-  Tab,
+  FormControl,
+  InputLabel,
+  Alert,
+  useTheme,
+  alpha,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Tabs,
-  TextField,
-  Typography
 } from '@mui/material';
-import WarningIcon from '@mui/icons-material/Warning';
-import SpeedIcon from '@mui/icons-material/Speed';
-import AddIcon from '@mui/icons-material/Add';
-import CloseIcon from '@mui/icons-material/Close';
-import SaveIcon from '@mui/icons-material/Save';
+import {
+  EmojiPeople as BehaviorIcon,
+  Add as AddIcon,
+  Warning as WarningIcon,
+  Save as SaveIcon,
+  Psychology as FBAIcon,
+  Assignment as PlanIcon,
+  Close as CloseIcon,
+  Speed as SpeedIcon,
+} from '@mui/icons-material';
+import { useSnackbar } from 'contexts/SnackbarContext';
 
 /* ── Behavior type catalogs ── */
 const BEHAVIOR_TYPES = [

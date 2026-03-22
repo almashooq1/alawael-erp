@@ -1,15 +1,19 @@
 /**
  * LeaveManagement — Constants & Configuration
  */
-
+import {
+  EventNote as LeaveIcon,
+  CheckCircle as ApproveIcon,
+  Cancel as RejectIcon,
+  PendingActions as PendingIcon,
+  BeachAccess as VacationIcon,
+  LocalHospital as SickIcon,
+  Timer as TimerIcon,
+  FlightTakeoff as FlightIcon,
+  AccountBalance as BalanceIcon,
+  Person as PersonIcon,
+} from '@mui/icons-material';
 import { leaveColors, statusColors } from '../../theme/palette';
-import SickIcon from '@mui/icons-material/Sick';
-import TimerIcon from '@mui/icons-material/Timer';
-import PersonIcon from '@mui/icons-material/Person';
-import BalanceIcon from '@mui/icons-material/Balance';
-import FlightIcon from '@mui/icons-material/Flight';
-import PendingIcon from '@mui/icons-material/Pending';
-import { LeaveIcon } from 'utils/iconAliases';
 
 export const LEAVE_TYPES = [
   {

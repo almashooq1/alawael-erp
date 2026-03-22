@@ -4,43 +4,33 @@
  * Manage multi-level approval chains, start approval processes,
  * review and decide on pending approvals, and view approval timeline.
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Paper,
-  alpha,
-} from '@mui/material';
-
-import { useSnackbar } from '../../contexts/SnackbarContext';
-import workflowService from '../../services/workflow.service';
-import {
-  Alert,
-  Avatar,
-  Badge,
   Box,
+  Paper,
+  Typography,
   Button,
-  Card,
-  CardActions,
-  CardContent,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  FormControl,
-  FormControlLabel,
   Grid,
+  Card,
+  CardContent,
+  CardActions,
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   IconButton,
-  InputLabel,
+  Chip,
+  Divider,
   MenuItem,
   Select,
-  Skeleton,
-  Step,
-  StepContent,
-  StepLabel,
-  Stepper,
+  FormControl,
+  InputLabel,
   Switch,
+  FormControlLabel,
+  Tooltip,
+  Tabs,
   Tab,
   Table,
   TableBody,
@@ -48,20 +38,34 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Tabs,
-  TextField,
-  Tooltip,
-  Typography
+  Avatar,
+  Badge,
+  Stepper,
+  Step,
+  StepLabel,
+  StepContent,
+  alpha,
+  Skeleton,
+  Alert,
 } from '@mui/material';
-import PendingIcon from '@mui/icons-material/Pending';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import ThumbUpIcon from '@mui/icons-material/ThumbUp';
-import ThumbDownIcon from '@mui/icons-material/ThumbDown';
-import TimelineIcon from '@mui/icons-material/Timeline';
-import SaveIcon from '@mui/icons-material/Save';
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  ContentCopy as CloneIcon,
+  Refresh as RefreshIcon,
+  ArrowBack as BackIcon,
+  Save as SaveIcon,
+  CheckCircle as ApproveIcon,
+  Cancel as RejectIcon,
+  AccountTree as ChainIcon,
+  Timeline as TimelineIcon,
+  Pending as PendingIcon,
+  ThumbUp as ThumbUpIcon,
+  ThumbDown as ThumbDownIcon,
+} from '@mui/icons-material';
+import { useSnackbar } from '../../contexts/SnackbarContext';
+import workflowService from '../../services/workflow.service';
 
 const STATUS_CONFIG = {
   pending: { label: 'في الانتظار', color: '#FF9800', icon: <PendingIcon /> },

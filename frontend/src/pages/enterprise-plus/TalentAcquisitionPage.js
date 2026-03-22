@@ -2,53 +2,56 @@
  * Talent Acquisition & ATS — التوظيف واستقطاب المواهب
  * Full ATS: Job Postings, Candidates, Applications Pipeline, Interviews
  */
-import { useState, useEffect, useCallback } from 'react';
-
-import { alpha } from '@mui/material/styles';
-
-import { useSnackbar } from '../../contexts/SnackbarContext';
-import * as svc from '../../services/enterpriseProPlus.service';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Avatar,
-  Badge,
   Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Grid,
-  IconButton,
-  InputAdornment,
-  LinearProgress,
-  MenuItem,
+  Typography,
   Paper,
-  Stack,
-  Tab,
+  Grid,
+  Button,
+  TextField,
+  IconButton,
+  Chip,
+  Avatar,
   Table,
-  TableBody,
-  TableCell,
   TableHead,
   TableRow,
+  TableCell,
+  TableBody,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  MenuItem,
+  Tab,
   Tabs,
-  TextField,
+  Card,
+  CardContent,
+  LinearProgress,
+  InputAdornment,
   Tooltip,
-  Typography
+  Badge,
+  Stack,
 } from '@mui/material';
-import WorkIcon from '@mui/icons-material/Work';
-import BusinessIcon from '@mui/icons-material/Business';
-import CheckIcon from '@mui/icons-material/Check';
-import AssessmentIcon from '@mui/icons-material/Assessment';
-import PersonIcon from '@mui/icons-material/Person';
-import ScheduleIcon from '@mui/icons-material/Schedule';
-import SearchIcon from '@mui/icons-material/Search';
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import CloseIcon from '@mui/icons-material/Close';
+import { alpha } from '@mui/material/styles';
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Search as SearchIcon,
+  Work as WorkIcon,
+  Person as PersonIcon,
+  Schedule as ScheduleIcon,
+  Assessment as AssessmentIcon,
+  Business as BusinessIcon,
+  ArrowForward as ArrowIcon,
+  Visibility as ViewIcon,
+  Close as CloseIcon,
+  CheckCircle as CheckIcon,
+  Cancel as RejectIcon,
+} from '@mui/icons-material';
+import { useSnackbar } from '../../contexts/SnackbarContext';
+import * as svc from '../../services/enterpriseProPlus.service';
 
 const JOB_TYPES = {
   full_time: 'دوام كامل',

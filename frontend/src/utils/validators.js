@@ -22,7 +22,7 @@ export const isValidSaudiId = id => {
  */
 export const isValidSaudiPhone = phone => {
   if (!phone) return false;
-  const cleaned = phone.replace(/[\s\-()]/g, '');
+  const cleaned = phone.replace(/[\s\-\(\)]/g, '');
   return /^(05\d{8}|9665\d{8}|\+9665\d{8})$/.test(cleaned);
 };
 

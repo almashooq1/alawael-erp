@@ -1,14 +1,5 @@
-import {
-  Avatar,
-  Box,
-  Chip,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  Typography,
-  alpha
-} from '@mui/material';
+import { Box, Typography, Avatar, List, ListItem, ListItemAvatar, ListItemText, Chip, alpha } from '@mui/material';
+import { FiberManualRecord as DotIcon } from '@mui/icons-material';
 
 /**
  * TimelineList — Vertical activity timeline.

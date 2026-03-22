@@ -1,12 +1,6 @@
-
-
-/* ------------------------------------------------------------------ */
-/*  Column definitions per tab key                                     */
-/* ------------------------------------------------------------------ */
+import React from 'react';
 import {
   Box,
-  Chip,
-  IconButton,
   Paper,
   Table,
   TableBody,
@@ -14,11 +8,17 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  IconButton,
   Tooltip,
-  Typography
+  Typography,
+  Chip,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+
+/* ------------------------------------------------------------------ */
+/*  Column definitions per tab key                                     */
+/* ------------------------------------------------------------------ */
 const COLUMNS = {
   inventory:     [
     { key: 'id', label: '#' },

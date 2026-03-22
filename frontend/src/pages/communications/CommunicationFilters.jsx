@@ -2,23 +2,13 @@
  * CommunicationFilters — Search bar + filter selects
  */
 
+import { Card, Grid, TextField, FormControl, InputLabel, Select, MenuItem, Chip } from '@mui/material';
+import { Search as SearchIcon, FilterList as FilterIcon } from '@mui/icons-material';
 import {
   COMMUNICATION_TYPES,
   COMMUNICATION_STATUS,
   PRIORITY_LEVELS,
 } from './communicationsConstants';
-import {
-  Card,
-  Chip,
-  FormControl,
-  Grid,
-  InputLabel,
-  MenuItem,
-  Select,
-  TextField
-} from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import FilterIcon from '@mui/icons-material/Filter';
 
 const CommunicationFilters = ({
   searchQuery,

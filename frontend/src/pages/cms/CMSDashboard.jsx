@@ -2,27 +2,19 @@
  * CMS Dashboard — لوحة إدارة المحتوى
  */
 import { useState, useEffect } from 'react';
-
-import apiClient from '../../services/api';
 import {
-  Box,
-  Card,
-  CardContent,
-  Chip,
-  Grid,
-  LinearProgress,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Tooltip,
-  Typography
+  Box, Grid, Card, CardContent, Typography, Paper,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  Chip, LinearProgress
 } from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
-import { ViewIcon } from 'utils/iconAliases';
+import {
+  Article as PageIcon,
+  RssFeed as BlogIcon,
+  Visibility as ViewIcon,
+  Create as EditIcon
+} from '@mui/icons-material';
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import apiClient from '../../services/api';
 
 const COLORS = ['#1565c0', '#2e7d32', '#e65100', '#6a1b9a', '#c62828'];
 

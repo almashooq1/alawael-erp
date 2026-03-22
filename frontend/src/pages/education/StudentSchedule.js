@@ -5,35 +5,35 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import {
-  Paper,
-} from '@mui/material';
-
-import studentPortalService from 'services/studentPortalService';
-import logger from 'utils/logger';
-import { gradients, surfaceColors, neutralColors } from 'theme/palette';
-import { useAuth } from 'contexts/AuthContext';
-import { useSnackbar } from '../../contexts/SnackbarContext';
-import {
-  Avatar,
   Box,
-  Card,
-  CardContent,
-  Chip,
-  Divider,
-  Grid,
-  LinearProgress,
-  Stack,
+  Paper,
+  Typography,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Typography
+  Chip,
+  Card,
+  CardContent,
+  Grid,
+  Stack,
+  Divider,
+  Avatar,
+  LinearProgress,
 } from '@mui/material';
-import ScheduleIcon from '@mui/icons-material/Schedule';
-import PersonIcon from '@mui/icons-material/Person';
-import RoomIcon from '@mui/icons-material/Room';
+import {
+  Schedule as ScheduleIcon,
+  Person as PersonIcon,
+  Room as RoomIcon,
+  AccessTime as TimeIcon,
+} from '@mui/icons-material';
+import studentPortalService from 'services/studentPortalService';
+import logger from 'utils/logger';
+import { gradients, surfaceColors, neutralColors } from 'theme/palette';
+import { useAuth } from 'contexts/AuthContext';
+import { useSnackbar } from '../../contexts/SnackbarContext';
 
 const StudentSchedule = () => {
   const { currentUser } = useAuth();

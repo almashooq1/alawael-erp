@@ -1,11 +1,44 @@
 /**
  * Housing & Transportation Management — إدارة السكن والمواصلات
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
+  Box,
+  Typography,
   Paper,
+  Button,
+  Chip,
+  TextField,
+  MenuItem,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Grid,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  IconButton,
+  Tooltip,
+  Card,
+  CardContent,
+  Alert,
+  Snackbar,
+  CircularProgress,
+  Tabs,
+  Tab,
+  Divider,
 } from '@mui/material';
-
+import {
+  Add as AddIcon,
+  Visibility as ViewIcon,
+  Home as HomeIcon,
+  DirectionsBus as BusIcon,
+  Person as PersonIcon,
+} from '@mui/icons-material';
 import {
   getHousingUnits,
   createHousingUnit,
@@ -13,35 +46,6 @@ import {
   getTransportationRoutes,
   createTransportationRoute,
 } from '../../services/hr/employeeAffairsPhase2Service';
-import {
-  Alert,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  Grid,
-  MenuItem,
-  Snackbar,
-  Tab,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Tabs,
-  TextField,
-  Typography
-} from '@mui/material';
-import HomeIcon from '@mui/icons-material/Home';
-import AddIcon from '@mui/icons-material/Add';
 
 const UNIT_TYPES = ['شقة', 'غرفة مشتركة', 'فيلا', 'سكن عمال', 'استوديو'];
 const UNIT_STATUSES = ['متاح', 'مشغول', 'صيانة', 'محجوز'];

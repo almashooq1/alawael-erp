@@ -10,14 +10,8 @@
  * تبويب لوحة التحكم: بطاقات الإحصائيات والتصنيفات
  */
 
+import { Box, Grid, Card, CardContent, Typography } from '@mui/material';
 import { statusColors } from '../../theme/palette';
-import {
-  Box,
-  Card,
-  CardContent,
-  Grid,
-  Typography
-} from '@mui/material';
 
 const DashboardTab = ({ stats, categories, setSelectedCategory, setActiveTab }) => (
   <Grid container spacing={3}>

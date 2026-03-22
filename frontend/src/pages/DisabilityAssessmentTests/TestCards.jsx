@@ -1,22 +1,15 @@
 /**
  * TestCards – Tab 0: Available test cards grid
  */
-
-import { TEST_ICONS } from './constants';
 import {
-  Avatar,
-  Box,
-  Button,
-  Card,
-  CardActions,
-  CardContent,
-  Chip,
-  Divider,
-  Grid,
-  Typography
+  Box, Grid, Card, CardContent, CardActions, Typography,
+  Button, Chip, Divider, Avatar,
 } from '@mui/material';
-import QuizIcon from '@mui/icons-material/Quiz';
-import AddIcon from '@mui/icons-material/Add';
+import {
+  Quiz as QuizIcon,
+  Add as AddIcon,
+} from '@mui/icons-material';
+import { TEST_ICONS } from './constants';
 
 const TestCards = ({ tests, onOpenTest }) => (
   <Grid container spacing={3}>

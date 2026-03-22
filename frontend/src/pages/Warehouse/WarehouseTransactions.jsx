@@ -1,31 +1,14 @@
 /**
  * Warehouse Transactions — حركات المستودع
  */
-import { useState, useEffect, useCallback } from 'react';
-import { useTheme, alpha,
-} from '@mui/material';
-import { getTransactions, approveTransaction, completeTransaction } from '../../services/warehouse.service';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Alert,
-  Box,
-  Chip,
-  CircularProgress,
-  FormControl,
-  IconButton,
-  InputLabel,
-  MenuItem,
-  Paper,
-  Select,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Tooltip,
-  Typography
+  Box, Paper, Typography, CircularProgress, IconButton, Tooltip, Alert, Chip, Button,
+  Table, TableHead, TableBody, TableRow, TableCell, FormControl, InputLabel, Select,
+  MenuItem, useTheme, alpha,
 } from '@mui/material';
-import Refresh from '@mui/icons-material/Refresh';
-import CheckCircle from '@mui/icons-material/CheckCircle';
+import { Refresh, Add, CheckCircle, HourglassTop } from '@mui/icons-material';
+import { getTransactions, approveTransaction, completeTransaction } from '../../services/warehouse.service';
 
 const TX_TYPE = { receive: 'استلام', issue: 'صرف', transfer: 'تحويل', return: 'إرجاع', adjustment: 'تسوية', disposal: 'إتلاف', count: 'جرد' };
 const TX_STATUS = { draft: 'مسودة', pending: 'معلق', approved: 'معتمد', completed: 'مكتمل', rejected: 'مرفوض', cancelled: 'ملغي' };

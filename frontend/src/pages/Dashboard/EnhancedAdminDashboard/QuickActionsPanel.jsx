@@ -1,19 +1,14 @@
-
-
-import { useNavigate } from 'react-router-dom';
-import { statusColors } from 'theme/palette';
 import {
-  Avatar,
   Card,
   CardContent,
+  Typography,
   Grid,
   Paper,
-  Typography
+  Avatar,
 } from '@mui/material';
-import People from '@mui/icons-material/People';
-import CalendarToday from '@mui/icons-material/CalendarToday';
-import Assessment from '@mui/icons-material/Assessment';
-import School from '@mui/icons-material/School';
+import { People, CalendarToday, Assessment, School } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
+import { statusColors } from 'theme/palette';
 
 const QUICK_ACTIONS = [
   { title: 'تسجيل مستفيد', icon: <People />, color: statusColors.info, path: '/student-registration' },

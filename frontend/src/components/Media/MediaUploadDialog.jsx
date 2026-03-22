@@ -10,35 +10,27 @@
  */
 
 import React, { useState, useCallback, useRef } from 'react';
-
-import { brandColors, statusColors, surfaceColors, neutralColors } from '../../theme/palette';
-import mediaService from '../../services/mediaService';
 import {
-  Avatar,
-  Box,
-  Button,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  FormControl,
-  IconButton,
-  InputLabel,
-  LinearProgress,
-  MenuItem,
-  Select,
-  TextField,
-  Typography
+  Dialog, DialogTitle, DialogContent, DialogActions,
+  Box, Typography, Button, IconButton, LinearProgress,
+  TextField, Select, MenuItem, FormControl, InputLabel,
+  Chip, Avatar, Divider,
 } from '@mui/material';
-import ImageIcon from '@mui/icons-material/Image';
-import ArchiveIcon from '@mui/icons-material/Archive';
-import UploadIcon from '@mui/icons-material/Upload';
-import CloseIcon from '@mui/icons-material/Close';
-import RemoveIcon from '@mui/icons-material/Remove';
-import ErrorIcon from '@mui/icons-material/Error';
-import { AudioIcon, DocIcon, FileIcon, VideoIcon } from 'utils/iconAliases';
+import {
+  CloudUpload as UploadIcon,
+  Close as CloseIcon,
+  CheckCircle as SuccessIcon,
+  Error as ErrorIcon,
+  Delete as RemoveIcon,
+  Image as ImageIcon,
+  Videocam as VideoIcon,
+  AudioFile as AudioIcon,
+  Description as DocIcon,
+  Archive as ArchiveIcon,
+  InsertDriveFile as FileIcon,
+} from '@mui/icons-material';
+import { brandColors, statusColors, surfaceColors, neutralColors, gradients } from '../../theme/palette';
+import mediaService from '../../services/mediaService';
 
 const MAX_FILES = 20;
 const MAX_SIZE = 100 * 1024 * 1024; // 100 MB per file

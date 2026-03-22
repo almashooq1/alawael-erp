@@ -1,24 +1,29 @@
-
-
-import { gradients } from '../../theme/palette';
-import useQualityCompliance from './useQualityCompliance';
-import { tabs, colMap } from './constants';
+import React from 'react';
 import {
+  Container,
+  Typography,
+  Grid,
+  Paper,
   Box,
   Button,
-  Card,
-  CardContent,
-  Container,
-  Grid,
-  LinearProgress,
-  Paper,
   Tab,
   Tabs,
-  Typography
+  Card,
+  CardContent,
+  LinearProgress,
 } from '@mui/material';
-import AssessmentIcon from '@mui/icons-material/Assessment';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import AddIcon from '@mui/icons-material/Add';
+import {
+  Add as AddIcon,
+  Refresh as RefreshIcon,
+  VerifiedUser as QualityIcon,
+  Assessment as AssessmentIcon,
+} from '@mui/icons-material';
+import { gradients } from '../../theme/palette';
+import ConfirmDialog from '../../components/common/ConfirmDialog';
+import useQualityCompliance from './useQualityCompliance';
+import { tabs, colMap } from './constants';
+import DataTable from './DataTable';
+import FormDialog from './FormDialog';
 
 const QualityCompliance = () => {
   const {

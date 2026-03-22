@@ -4,38 +4,20 @@
  * Case tracking, follow-up visits, impact measurement,
  * satisfaction surveys, re-enrollment requests.
  */
-import { useState, useEffect, useCallback } from 'react';
-import { Paper,
-} from '@mui/material';
-
-import postRehabApi from '../../services/postRehab.service';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Alert,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Grid,
-  MenuItem,
-  Tab,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Tabs,
-  TextField,
-  Typography
+  Box, Typography, Card, CardContent, Grid, Button, Table, TableBody,
+  TableCell, TableContainer, TableHead, TableRow, Paper, Chip, TextField,
+  Dialog, DialogTitle, DialogContent, DialogActions, Alert, CircularProgress,
+  Tabs, Tab, IconButton, Tooltip, MenuItem, LinearProgress,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import RefreshIcon from '@mui/icons-material/Refresh';
+import {
+  FollowTheSigns as FollowIcon, EventNote as VisitIcon, TrendingUp as ImpactIcon,
+  Quiz as SurveyIcon, ReplayCircleFilled as ReEnrollIcon, Dashboard as DashIcon,
+  Refresh as RefreshIcon, Add as AddIcon, CheckCircle as CompleteIcon,
+  Warning as OverdueIcon, Visibility as ViewIcon, EventBusy as MissedIcon,
+} from '@mui/icons-material';
+import postRehabApi from '../../services/postRehab.service';
 
 function TabPanel({ children, value, index }) {
   return value === index ? <Box py={2}>{children}</Box> : null;

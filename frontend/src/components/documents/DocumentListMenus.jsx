@@ -3,22 +3,17 @@
  * القوائم المنسدلة: السياق، التحديد، والأعمدة
  */
 
-
+import { Menu, MenuItem, Divider, Typography, Checkbox } from '@mui/material';
+import {
+  Visibility as VisibilityIcon,
+  Edit as EditIcon,
+  Download as DownloadIcon,
+  Share as ShareIcon,
+  Info as InfoIcon,
+  Delete as DeleteIcon,
+} from '@mui/icons-material';
 import { COLUMN_DEFINITIONS } from './documentListConstants';
 import { statusColors, surfaceColors, leaveColors } from 'theme/palette';
-import {
-  Checkbox,
-  Divider,
-  Menu,
-  MenuItem,
-  Typography
-} from '@mui/material';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import EditIcon from '@mui/icons-material/Edit';
-import DownloadIcon from '@mui/icons-material/Download';
-import ShareIcon from '@mui/icons-material/Share';
-import InfoIcon from '@mui/icons-material/Info';
-import DeleteIcon from '@mui/icons-material/Delete';
 
 /* ─── Context Menu ──────────────────────────────── */
 export const ContextMenu = ({ anchorEl, onClose, doc, actions, dialogs, onShare }) => {

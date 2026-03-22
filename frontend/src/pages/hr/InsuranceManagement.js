@@ -10,61 +10,79 @@
  * - Expiring/expired policy alerts
  * - Saudi SAMA-regulated company integration
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
-  Alert,
-  Avatar,
+  Container,
+  Typography,
+  Grid,
   Box,
   Button,
+  Tab,
+  Tabs,
   Card,
   CardContent,
   Chip,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  FormControl,
-  Grid,
-  IconButton,
-  InputAdornment,
-  InputLabel,
-  LinearProgress,
-  MenuItem,
   Paper,
+  TextField,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  FormControl,
+  InputLabel,
   Select,
-  Step,
-  StepLabel,
-  Stepper,
-  Tab,
+  MenuItem,
+  Tooltip,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
-  TablePagination,
   TableRow,
-  Tabs,
-  TextField,
-  Tooltip,
-  Typography
+  LinearProgress,
+  InputAdornment,
+  Alert,
+  Divider,
+  Avatar,
+  TablePagination,
+  Stepper,
+  Step,
+  StepLabel,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemIcon,
 } from '@mui/material';
-
+import {
+  Add as AddIcon,
+  Refresh as RefreshIcon,
+  Search as SearchIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Visibility as ViewIcon,
+  Close as CloseIcon,
+  WarningAmber as WarningIcon,
+  CheckCircle as CheckIcon,
+  Cancel as CancelIcon,
+  Shield as ShieldIcon,
+  Policy as PolicyIcon,
+  Assessment as StatsIcon,
+  Autorenew as RenewIcon,
+  Receipt as ClaimIcon,
+  RequestQuote as QuoteIcon,
+  DirectionsCar as CarIcon,
+  CalendarMonth as CalendarIcon,
+  MonetizationOn as MoneyIcon,
+  Business as CompanyIcon,
+  Gavel as ViolationIcon,
+  TimerOff as ExpiredIcon,
+  TrendingUp as TrendingUpIcon,
+  PersonOutline as PersonIcon,
+  NotificationsActive as AlertIcon,
+  Timer as TimerIcon,
+} from '@mui/icons-material';
 import insuranceService from '../../services/insurance.service';
-import PolicyIcon from '@mui/icons-material/Policy';
-import CheckIcon from '@mui/icons-material/Check';
-import WarningIcon from '@mui/icons-material/Warning';
-import MoneyIcon from '@mui/icons-material/Money';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import ShieldIcon from '@mui/icons-material/Shield';
-import SearchIcon from '@mui/icons-material/Search';
-import AddIcon from '@mui/icons-material/Add';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import CloseIcon from '@mui/icons-material/Close';
-import { ViewIcon } from 'utils/iconAliases';
 
 /* ─── Constants ──────────────────────────────────────────────────────── */
 const TABS = [
@@ -378,9 +396,7 @@ export default function InsuranceManagement() {
     try {
       const res = await insuranceService.getPolicyClaims(policy._id);
       setSelectedPolicy(prev => ({ ...prev, claimsData: res.data?.data }));
-    } catch (_) {
-      /* claims may not exist */
-    }
+    } catch {}
     setDetailDialog(true);
   };
 

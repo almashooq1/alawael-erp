@@ -2,28 +2,24 @@
  * CompensationStructureCard — Expandable structure card with details
  */
 
-
+import {
+  Card, CardContent, Grid, Paper, Box, Typography, Chip, IconButton, Tooltip,
+  Button, Divider, Collapse,
+} from '@mui/material';
+import {
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  ExpandMore as ExpandIcon,
+  ExpandLess as CollapseIcon,
+  ContentCopy as CopyIcon,
+  CheckCircle as ActiveIcon,
+  Cancel as InactiveIcon,
+  MonetizationOn as MoneyIcon,
+  LocalAtm as AllowanceIcon,
+  RemoveCircle as DeductionIcon,
+} from '@mui/icons-material';
 import { statusColors, neutralColors } from 'theme/palette';
 import { SCOPE_LABELS, INCENTIVE_LABELS } from './compensationConstants';
-import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Collapse,
-  Divider,
-  Grid,
-  IconButton,
-  Paper,
-  Tooltip,
-  Typography
-} from '@mui/material';
-import MoneyIcon from '@mui/icons-material/Money';
-import ExpandIcon from '@mui/icons-material/Expand';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { ActiveIcon, AllowanceIcon, CollapseIcon, CopyIcon, DeductionIcon, InactiveIcon } from 'utils/iconAliases';
 
 const CompensationStructureCard = ({
   structure,

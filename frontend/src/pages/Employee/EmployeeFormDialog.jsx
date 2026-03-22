@@ -2,48 +2,29 @@
  * EmployeeFormDialog.jsx — Add / Edit / View dialog with multi-step form
  * نموذج إضافة / تعديل الموظفين مع خطوات متعددة
  */
-
+import {
+  Typography, Grid, Box, Button, TextField, Avatar, IconButton,
+  Dialog, DialogTitle, DialogContent, DialogActions,
+  InputAdornment, MenuItem, Tooltip, CircularProgress, Divider,
+  Stepper, Step, StepLabel, Collapse, Chip, Paper, Stack,
+} from '@mui/material';
+import {
+  Close as CloseIcon, Person as PersonIcon,
+  Work as WorkIcon, Phone as PhoneIcon, Email as EmailIcon,
+  Badge as BadgeIcon, ContactPhone as ContactIcon,
+  AccountBalance as BankIcon,
+  NavigateNext as NextIcon, NavigateBefore as BackIcon,
+  Save as SaveIcon, CheckCircle as ActiveIcon,
+  CreditCard as IdIcon, Home as HomeIcon, LocationCity as CityIcon,
+  LocalHospital as EmergIcon, Refresh as RefreshIcon,
+} from '@mui/icons-material';
+import EmployeeProfileView, { SectionHeader } from './EmployeeProfileView';
 import {
   DEPARTMENTS, STATUS_MAP, CONTRACT_TYPES, GENDERS,
   MARITAL_STATUS, NATIONALITIES, BANKS, STEPS,
   generateEmpNumber,
 } from './employeeManagement.constants';
 import { DEPT_COLORS } from '../../constants/departmentColors';
-import {
-  Avatar,
-  Box,
-  Button,
-  Chip,
-  CircularProgress,
-  Collapse,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  Grid,
-  IconButton,
-  InputAdornment,
-  MenuItem,
-  Paper,
-  Stack,
-  Step,
-  StepLabel,
-  Stepper,
-  TextField,
-  Tooltip,
-  Typography
-} from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
-import PersonIcon from '@mui/icons-material/Person';
-import BadgeIcon from '@mui/icons-material/Badge';
-import WorkIcon from '@mui/icons-material/Work';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import PhoneIcon from '@mui/icons-material/Phone';
-import EmailIcon from '@mui/icons-material/Email';
-import HomeIcon from '@mui/icons-material/Home';
-import SaveIcon from '@mui/icons-material/Save';
-import { ActiveIcon } from 'utils/iconAliases';
 
 const EmployeeFormDialog = ({
   dialogOpen, setDialogOpen, dialogMode, setDialogMode,

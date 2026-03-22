@@ -1,29 +1,34 @@
 import { useState, useEffect } from 'react';
-
-import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
 import {
-  Alert,
   Box,
+  Container,
   Card,
   CardContent,
-  Chip,
-  CircularProgress,
-  Container,
-  IconButton,
-  MenuItem,
+  Typography,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
+  Chip,
   TextField,
+  MenuItem,
+  IconButton,
   Tooltip,
-  Typography
+  CircularProgress,
+  Alert,
+  Paper,
 } from '@mui/material';
-import Print from '@mui/icons-material/Print';
-import CheckCircle from '@mui/icons-material/CheckCircle';
-import ErrorIcon from '@mui/icons-material/Error';
+import {
+  Balance as BalanceIcon,
+  CheckCircle,
+  Error as ErrorIcon,
+  FileDownload,
+  Print,
+  FilterList,
+} from '@mui/icons-material';
+import { surfaceColors, neutralColors, statusColors, brandColors } from 'theme/palette';
 
 const API = process.env.REACT_APP_API_URL || '/api';
 

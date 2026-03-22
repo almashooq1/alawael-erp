@@ -2,18 +2,18 @@
  * Student Registration — Styled Components & Step Icons
  */
 
+import React from 'react';
+import { Box, Typography, StepConnector, Avatar } from '@mui/material';
 import {
-  Avatar,
-  Box,
-  StepConnector,
-  Typography
-} from '@mui/material';
-
+  Person,
+  Accessible,
+  FamilyRestroom,
+  LocalHospital,
+  CheckCircle,
+  School,
+} from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
 import { gradients, brandColors, surfaceColors } from 'theme/palette';
-import Person from '@mui/icons-material/Person';
-import School from '@mui/icons-material/School';
-import CheckCircle from '@mui/icons-material/CheckCircle';
 
 // ─── Styled Components ──────────────────────────
 export const GradientHeader = styled(Box)(() => ({

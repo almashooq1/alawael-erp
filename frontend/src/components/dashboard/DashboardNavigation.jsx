@@ -8,20 +8,19 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import {
+  Box,
+  Typography,
+  Divider,
+  Chip,
+  Tooltip,
   useTheme,
 } from '@mui/material';
-import { SECTIONS } from './dashboardConstants';
-import {
-  Box,
-  Chip,
-  Divider,
-  Tooltip,
-  Typography
-} from '@mui/material';
+import UnfoldLessIcon from '@mui/icons-material/UnfoldLess';
+import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
-import UnfoldLessIcon from '@mui/icons-material/UnfoldLess';
+import { motion } from 'framer-motion';
+import { SECTIONS } from './dashboardConstants';
 
 // ── Section Divider (memo'd, collapsible, IO-animated) ────────────
 export const SectionDivider = React.memo(({ label, id, collapsed, onToggle }) => {

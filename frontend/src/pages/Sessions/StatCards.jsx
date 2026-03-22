@@ -2,22 +2,13 @@
  * StatCards — Session statistics cards with gradient backgrounds
  * Updated with 6 cards matching backend stat keys
  */
-
-import { gradients } from '../../theme/palette';
+import React from 'react';
+import { Grid, Card, CardContent, Box, Typography, Avatar, Skeleton } from '@mui/material';
 import {
-  Avatar,
-  Box,
-  Card,
-  CardContent,
-  Grid,
-  Skeleton,
-  Typography
-} from '@mui/material';
-import Assignment from '@mui/icons-material/Assignment';
-import Schedule from '@mui/icons-material/Schedule';
-import ThumbUp from '@mui/icons-material/ThumbUp';
-import CheckCircle from '@mui/icons-material/CheckCircle';
-import Cancel from '@mui/icons-material/Cancel';
+  Assignment, Schedule, CheckCircle, Cancel, ThumbUp, PersonOff,
+} from '@mui/icons-material';
+import { motion } from 'framer-motion';
+import { gradients } from '../../theme/palette';
 
 const STAT_DEFS = [
   { key: 'total',     label: 'إجمالي الجلسات',   icon: <Assignment fontSize="large" />,  gradient: gradients.primary },

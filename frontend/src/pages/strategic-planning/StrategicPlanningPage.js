@@ -4,47 +4,67 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import {
-  Paper,
-} from '@mui/material';
-
-import strategicPlanningService from '../../services/strategicPlanning.service';
-import {
-  Alert,
-  Avatar,
   Box,
-  Button,
+  Container,
+  Typography,
   Card,
   CardContent,
-  Chip,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
   Grid,
-  IconButton,
-  LinearProgress,
-  MenuItem,
-  Stack,
-  Tab,
+  Button,
+  Chip,
+  Avatar,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Tabs,
+  Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   TextField,
-  Typography
+  MenuItem,
+  LinearProgress,
+  Tabs,
+  Tab,
+  IconButton,
+  Alert,
+  Stack,
 } from '@mui/material';
-import FlagIcon from '@mui/icons-material/Flag';
-import AddIcon from '@mui/icons-material/Add';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import CheckIcon from '@mui/icons-material/Check';
-import SpeedIcon from '@mui/icons-material/Speed';
-import TimelineIcon from '@mui/icons-material/Timeline';
-import EditIcon from '@mui/icons-material/Edit';
-import { ChartIcon } from 'utils/iconAliases';
+import {
+  Flag as FlagIcon,
+  Add as AddIcon,
+  TrendingUp as TrendingIcon,
+  Assessment as KPIIcon,
+  Lightbulb as InitiativeIcon,
+  Refresh as RefreshIcon,
+  Edit as EditIcon,
+  CheckCircle as CheckIcon,
+  Timeline as TimelineIcon,
+  Speed as SpeedIcon,
+  BarChart as ChartIcon,
+} from '@mui/icons-material';
+import {
+  RadarChart,
+  Radar,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RTooltip,
+  Legend,
+  PieChart,
+  Pie,
+  Cell,
+} from 'recharts';
+import strategicPlanningService from '../../services/strategicPlanning.service';
 
 /* ══════════════ بيانات تجريبية ══════════════ */
 const DEMO_GOALS = [

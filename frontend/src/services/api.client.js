@@ -35,6 +35,7 @@ apiClient.interceptors.request.use(
     return config;
   },
   error => {
+    console.error('Request Config Error:', error);
     return Promise.reject(error);
   }
 );
@@ -45,6 +46,8 @@ apiClient.interceptors.request.use(
  */
 apiClient.interceptors.response.use(
   response => {
+    // إذا كانت الاستجابة ناجحة
+    console.log('API Response Success:', response.config.url);
     return response.data;
   },
   error => {
@@ -68,14 +71,21 @@ apiClient.interceptors.response.use(
       }
     }
 
-    if (process.env.NODE_ENV === 'development') {
-      // Only log API errors in development
-      console.error('API Error:', {
-        status: error.response?.status,
-        message: errorData,
-        url: error.config?.url,
-      });
+    if (error.response?.status === 403) {
+      // ممنوع الوصول
+      console.error('Access Forbidden:', errorData);
     }
+
+    if (error.response?.status === 500) {
+      // خطأ في الخادم
+      console.error('Server Error:', errorData);
+    }
+
+    console.error('API Error:', {
+      status: error.response?.status,
+      message: errorData,
+      url: error.config?.url,
+    });
 
     return Promise.reject({
       status: error.response?.status,

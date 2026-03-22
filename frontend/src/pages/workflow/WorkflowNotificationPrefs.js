@@ -2,36 +2,44 @@
  * WorkflowNotificationPrefs – تفضيلات الإشعارات
  * Per-user notification preferences for workflow events.
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
+  Box,
+  Paper,
+  Typography,
+  Button,
+  IconButton,
+  Tooltip,
+  Chip,
+  Card,
+  CardContent,
   alpha,
+  Avatar,
+  Switch,
+  Skeleton,
+  Divider,
+  Grid,
+  Stack,
+  Alert,
 } from '@mui/material';
-
+import {
+  ArrowBack,
+  Refresh,
+  Notifications,
+  Save,
+  Email,
+  Sms,
+  DesktopWindows,
+  Assignment,
+  Description,
+  Flag,
+  AccessAlarm,
+  Comment,
+  Gavel,
+} from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import workflowService from '../../services/workflow.service';
-import {
-  Alert,
-  Avatar,
-  Box,
-  Button,
-  Divider,
-  IconButton,
-  Paper,
-  Skeleton,
-  Stack,
-  Switch,
-  Tooltip,
-  Typography
-} from '@mui/material';
-import Email from '@mui/icons-material/Email';
-import Assignment from '@mui/icons-material/Assignment';
-import Description from '@mui/icons-material/Description';
-import Flag from '@mui/icons-material/Flag';
-import ArrowBack from '@mui/icons-material/ArrowBack';
-import Notifications from '@mui/icons-material/Notifications';
-import Save from '@mui/icons-material/Save';
-import Refresh from '@mui/icons-material/Refresh';
 
 const CHANNELS = [
   { key: 'inApp', label: 'داخل التطبيق', icon: <DesktopWindows fontSize="small" /> },

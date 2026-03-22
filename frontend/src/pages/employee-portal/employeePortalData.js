@@ -2,11 +2,24 @@
  * EmployeePortal constants and demo data
  * بيانات تجريبية وثوابت بوابة الموظف
  */
-
+import {
+  CalendarMonth as CalendarIcon,
+  LocalHospital as MedicalIcon,
+  Warning as EmergencyIcon,
+  FlightTakeoff as HajjIcon,
+  ChildCare as MaternityIcon,
+  MoneyOff as UnpaidIcon,
+  School as StudyIcon,
+  Favorite as BereavementIcon,
+  CheckCircle as ApprovedIcon,
+  HourglassEmpty as PendingIcon,
+  Cancel as RejectedIcon,
+  AttachMoney as MoneyIcon,
+  Description as CertIcon,
+  Build as EquipIcon,
+  SwapHoriz as TransferIcon,
+} from '@mui/icons-material';
 import { leaveColors } from '../../theme/palette';
-import PendingIcon from '@mui/icons-material/Pending';
-import MoneyIcon from '@mui/icons-material/Money';
-import { CalendarIcon } from 'utils/iconAliases';
 
 /* ─── Leave Types ─── */
 export const LEAVE_TYPES = {

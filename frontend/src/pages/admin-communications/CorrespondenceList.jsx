@@ -1,9 +1,65 @@
 /**
  * Correspondence List — قائمة المراسلات (الوارد / الصادر / الكل)
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
-
+import {
+  Box,
+  Typography,
+  Paper,
+  Button,
+  Grid,
+  Chip,
+  IconButton,
+  TextField,
+  InputAdornment,
+  Tab,
+  Tabs,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TablePagination,
+  Avatar,
+  CircularProgress,
+  Tooltip,
+  Menu,
+  MenuItem,
+  Divider,
+  Badge,
+  FormControl,
+  InputLabel,
+  Select,
+  Stack,
+  Skeleton,
+} from '@mui/material';
+import {
+  Add as AddIcon,
+  Search,
+  Refresh,
+  MoreVert,
+  Visibility,
+  Forward,
+  CheckCircle,
+  Archive,
+  Reply,
+  Delete,
+  CallReceived,
+  CallMade,
+  DoneAll,
+  WarningAmber,
+  Mail,
+  MailOutline,
+  FilterList,
+  ArrowBack,
+  Download,
+  Print,
+  Send,
+  Drafts,
+  Swipe,
+} from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients } from '../../theme/palette';
 import adminCommunicationsService from '../../services/adminCommunications.service';
@@ -11,44 +67,8 @@ import {
   CORRESPONDENCE_TYPES,
   CORRESPONDENCE_STATUS,
   PRIORITY_LEVELS,
+  DEPARTMENTS,
 } from './constants';
-import {
-  Avatar,
-  Badge,
-  Box,
-  Button,
-  Chip,
-  Divider,
-  FormControl,
-  IconButton,
-  InputAdornment,
-  InputLabel,
-  Menu,
-  MenuItem,
-  Paper,
-  Select,
-  Skeleton,
-  Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TablePagination,
-  TableRow,
-  TextField,
-  Tooltip,
-  Typography
-} from '@mui/material';
-import Mail from '@mui/icons-material/Mail';
-import ArrowBack from '@mui/icons-material/ArrowBack';
-import Refresh from '@mui/icons-material/Refresh';
-import AddIcon from '@mui/icons-material/Add';
-import Search from '@mui/icons-material/Search';
-import MoreVert from '@mui/icons-material/MoreVert';
-import Visibility from '@mui/icons-material/Visibility';
-import DoneAll from '@mui/icons-material/DoneAll';
-import CheckCircle from '@mui/icons-material/CheckCircle';
 
 /* ═══ View Modes ═════════════════════════════════════════════════════════ */
 const VIEW_MODES = {

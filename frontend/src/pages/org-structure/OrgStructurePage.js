@@ -3,46 +3,48 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import {
-  Paper,
-} from '@mui/material';
-
-import orgStructureService from '../../services/orgStructure.service';
-import {
-  Alert,
-  Avatar,
   Box,
-  Button,
+  Container,
+  Typography,
   Card,
   CardContent,
-  Chip,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
   Grid,
-  IconButton,
-  LinearProgress,
-  MenuItem,
-  Stack,
-  Tab,
+  Button,
+  Chip,
+  Avatar,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Tabs,
+  Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   TextField,
-  Typography
+  MenuItem,
+  LinearProgress,
+  Tabs,
+  Tab,
+  IconButton,
+  Stack,
+  Alert,
 } from '@mui/material';
-import ExpandIcon from '@mui/icons-material/Expand';
-import EditIcon from '@mui/icons-material/Edit';
-import AddIcon from '@mui/icons-material/Add';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import GroupIcon from '@mui/icons-material/Group';
-import WorkIcon from '@mui/icons-material/Work';
-import { CollapseIcon } from 'utils/iconAliases';
+import {
+  AccountTree as OrgIcon,
+  Add as AddIcon,
+  Refresh as RefreshIcon,
+  Business as DeptIcon,
+  Edit as EditIcon,
+  ExpandMore as ExpandIcon,
+  ExpandLess as CollapseIcon,
+  Group as GroupIcon,
+  Badge as PositionIcon,
+  WorkOutline as WorkIcon,
+} from '@mui/icons-material';
+import orgStructureService from '../../services/orgStructure.service';
 
 const DEMO_DEPARTMENTS = [
   {

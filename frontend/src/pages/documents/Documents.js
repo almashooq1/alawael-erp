@@ -6,82 +6,103 @@
  */
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { alpha, useTheme } from '@mui/material';
-
+import {
+  Box,
+  Container,
+  Typography,
+  Button,
+  Card,
+  CardContent,
+  Grid,
+  TextField,
+  InputAdornment,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  CircularProgress,
+  Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Chip,
+  IconButton,
+  Tooltip,
+  Avatar,
+  Divider,
+  Tabs,
+  Tab,
+  LinearProgress,
+  Badge,
+  Breadcrumbs,
+  Link,
+  Fade,
+  Stack,
+  alpha,
+  useTheme,
+} from '@mui/material';
+import {
+  CloudUpload as CloudUploadIcon,
+  Search as SearchIcon,
+  FolderOpen as FolderOpenIcon,
+  Description as FileIcon,
+  Storage as StorageIcon,
+  PeopleAlt as SharedIcon,
+  HourglassEmpty as PendingIcon,
+  Refresh as RefreshIcon,
+  Scanner as ScannerIcon,
+  Home as HomeIcon,
+  ViewModule as GridViewIcon,
+  ViewList as ListViewIcon,
+  PictureAsPdf as PdfIcon,
+  Image as ImageIcon,
+  TableChart as ExcelIcon,
+  Slideshow as PptIcon,
+  TextSnippet as TextIcon,
+  VideoLibrary as VideoIcon,
+  AudioFile as AudioIcon,
+  Archive as ZipIcon,
+  Folder as FolderIcon,
+  TrendingUp as TrendIcon,
+  Assessment as AnalyticsIcon,
+  Schedule as RecentIcon,
+  Download as DownloadIcon,
+  Visibility as ViewIcon,
+  Share as ShareIcon,
+  BarChart as ChartIcon,
+  Speed as SpeedIcon,
+  CloudDone as CloudDoneIcon,
+  Security as SecurityIcon,
+  CreateNewFolder as NewFolderIcon,
+  FilePresent as FilePresentIcon,
+  Category as CategoryIcon,
+  DragIndicator as DragIcon,
+} from '@mui/icons-material';
+import {
+  PieChart,
+  Pie,
+  Cell,
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RTooltip,
+  ResponsiveContainer,
+  Legend,
+  Area,
+  AreaChart,
+} from 'recharts';
+import DocumentUploader from 'components/documents/DocumentUploader';
+import DocumentScanner from 'components/documents/DocumentScanner';
+import DocumentList from 'components/documents/DocumentList';
 import documentService from 'services/documentService';
 import logger from 'utils/logger';
 import { gradients, brandColors } from 'theme/palette';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import {
-  Avatar,
-  Badge,
-  Box,
-  Breadcrumbs,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  CircularProgress,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  Fade,
-  FormControl,
-  Grid,
-  IconButton,
-  InputAdornment,
-  InputLabel,
-  LinearProgress,
-  Link,
-  MenuItem,
-  Paper,
-  Select,
-  Stack,
-  Tab,
-  Tabs,
-  TextField,
-  Tooltip,
-  Typography,
-} from '@mui/material';
-import AnalyticsIcon from '@mui/icons-material/Analytics';
-import SecurityIcon from '@mui/icons-material/Security';
-import FilePresentIcon from '@mui/icons-material/FilePresent';
-import CloudDoneIcon from '@mui/icons-material/CloudDone';
-import FolderIcon from '@mui/icons-material/Folder';
-import ImageIcon from '@mui/icons-material/Image';
-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import HomeIcon from '@mui/icons-material/Home';
-import FolderOpenIcon from '@mui/icons-material/FolderOpen';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import ScannerIcon from '@mui/icons-material/Scanner';
-import StorageIcon from '@mui/icons-material/Storage';
-import PendingIcon from '@mui/icons-material/Pending';
-import DownloadIcon from '@mui/icons-material/Download';
-import SpeedIcon from '@mui/icons-material/Speed';
-import CategoryIcon from '@mui/icons-material/Category';
-import SearchIcon from '@mui/icons-material/Search';
-import GridViewIcon from '@mui/icons-material/GridView';
-import ShareIcon from '@mui/icons-material/Share';
-import {
-  AudioIcon,
-  ChartIcon,
-  ExcelIcon,
-  FileIcon,
-  ListViewIcon,
-  NewFolderIcon,
-  PdfIcon,
-  PptIcon,
-  RecentIcon,
-  SharedIcon,
-  TextIcon,
-  TrendIcon,
-  VideoIcon,
-  ViewIcon,
-  ZipIcon,
-} from 'utils/iconAliases';
 
 /* ──── Constants ──── */
 const CATEGORY_COLORS = {

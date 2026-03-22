@@ -4,40 +4,42 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-
+import {
+  Box,
+  Grid,
+  Card,
+  CardContent,
+  Typography,
+  Button,
+  Chip,
+  Stack,
+  Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  MenuItem,
+  LinearProgress,
+  Divider,
+  Tabs,
+  Tab,
+  Avatar,
+} from '@mui/material';
+import {
+  School as CertIcon,
+  Download as DownloadIcon,
+  Add as AddIcon,
+  Verified as VerifiedIcon,
+  Schedule as PendingIcon,
+  Close as CloseIcon,
+  Print as PrintIcon,
+  Description as DocIcon,
+} from '@mui/icons-material';
 import { gradients } from 'theme/palette';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import api from 'services/api';
-import {
-  Avatar,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  Grid,
-  LinearProgress,
-  MenuItem,
-  Paper,
-  Stack,
-  Tab,
-  Tabs,
-  TextField,
-  Typography
-} from '@mui/material';
-import PendingIcon from '@mui/icons-material/Pending';
-import VerifiedIcon from '@mui/icons-material/Verified';
-import PrintIcon from '@mui/icons-material/Print';
-import CloseIcon from '@mui/icons-material/Close';
-import AddIcon from '@mui/icons-material/Add';
-import DownloadIcon from '@mui/icons-material/Download';
-import { DocIcon } from 'utils/iconAliases';
 
 const statusConfig = {
   'قيد الطلب': { color: 'info', icon: <PendingIcon /> },

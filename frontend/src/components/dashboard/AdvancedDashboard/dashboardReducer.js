@@ -2,9 +2,9 @@
  * Dashboard reducer & initial state
  * Extracted from AdvancedDashboard monolith
  */
+import { Skeleton } from '@mui/material';
 
 /** Lightweight fallback while lazy chunks load */
-import { Skeleton } from '@mui/material';
 export const SectionSkeleton = ({ height = 200 }) => (
   <Skeleton variant="rounded" animation="wave" sx={{ borderRadius: 4, height, width: '100%' }} />
 );

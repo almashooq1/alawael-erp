@@ -4,41 +4,48 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-
+import {
+  Box,
+  Grid,
+  Card,
+  CardContent,
+  Typography,
+  Button,
+  Chip,
+  Stack,
+  Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  IconButton,
+  LinearProgress,
+  Tabs,
+  Tab,
+  TextField,
+  Rating,
+  Alert,
+} from '@mui/material';
+import {
+  Event as EventIcon,
+  CalendarMonth as CalendarIcon,
+  LocationOn as LocationIcon,
+  People as PeopleIcon,
+  AccessTime as TimeIcon,
+  CheckCircle as CheckIcon,
+  Close as CloseIcon,
+  Star as StarIcon,
+  EmojiEvents as TrophyIcon,
+  Celebration as CelebrationIcon,
+  SportsBasketball as SportsIcon,
+  School as AcademicIcon,
+  Palette as ArtIcon,
+  VolunteerActivism as VolunteerIcon,
+} from '@mui/icons-material';
 import { gradients } from 'theme/palette';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import api from 'services/api';
-import {
-  Alert,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Grid,
-  IconButton,
-  LinearProgress,
-  Paper,
-  Rating,
-  Stack,
-  Tab,
-  Tabs,
-  TextField,
-  Typography
-} from '@mui/material';
-import SportsIcon from '@mui/icons-material/Sports';
-import CelebrationIcon from '@mui/icons-material/Celebration';
-import EventIcon from '@mui/icons-material/Event';
-import StarIcon from '@mui/icons-material/Star';
-import CheckIcon from '@mui/icons-material/Check';
-import PeopleIcon from '@mui/icons-material/People';
-import CloseIcon from '@mui/icons-material/Close';
-import { CalendarIcon } from 'utils/iconAliases';
 
 const typeConfig = {
   رياضي: {

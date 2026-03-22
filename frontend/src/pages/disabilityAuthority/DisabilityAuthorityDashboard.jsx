@@ -3,37 +3,19 @@
  * Disability Authority Reports & CBAHI Compliance Dashboard
  */
 import { useState, useEffect, useCallback } from 'react';
-
-import disabilityAuthorityService from '../../services/disabilityAuthority.service';
 import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  Alert,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  CircularProgress,
-  Grid,
-  IconButton,
-  LinearProgress,
-  Tab,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Tabs,
-  Typography
+  Box, Card, CardContent, Typography, Grid, Button, Chip, Table,
+  TableBody, TableCell, TableContainer, TableHead, TableRow,
+  CircularProgress, Alert, Tabs, Tab, IconButton, LinearProgress,
+  Dialog, DialogTitle, DialogContent, DialogActions, Accordion,
+  AccordionSummary, AccordionDetails, Rating,
 } from '@mui/material';
-import Refresh from '@mui/icons-material/Refresh';
-import Assessment from '@mui/icons-material/Assessment';
-import Star from '@mui/icons-material/Star';
-import Add from '@mui/icons-material/Add';
-import ExpandMore from '@mui/icons-material/ExpandMore';
+import {
+  ExpandMore, Assessment, Gavel, Refresh, Add,
+  CheckCircle, Warning, Error as ErrorIcon, VerifiedUser,
+  LocalHospital, Star,
+} from '@mui/icons-material';
+import disabilityAuthorityService from '../../services/disabilityAuthority.service';
 
 const reportStatusLabels = {
   draft: 'مسودة', under_review: 'قيد المراجعة', approved: 'معتمد',

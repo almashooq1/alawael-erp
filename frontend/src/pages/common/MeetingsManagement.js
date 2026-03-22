@@ -1,40 +1,42 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import meetingsService from '../../services/meetings.service';
 import { useSocketEvent } from '../../contexts/SocketContext';
 import {
-  Paper,
-} from '@mui/material';
-
-import { useSnackbar } from '../../contexts/SnackbarContext';
-import { gradients, statusColors, neutralColors } from '../../theme/palette';
-import { useConfirmDialog } from '../../components/common/ConfirmDialog';
-import {
   Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Grid,
-  IconButton,
-  Tab,
+  Typography,
+  Paper,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Tabs,
+  Button,
+  Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   TextField,
+  Grid,
+  Card,
+  CardContent,
+  IconButton,
+  Tabs,
+  Tab,
   Tooltip,
-  Typography
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
+import {
+  Add as AddIcon,
+  Event as MeetingIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  NoteAdd as MinutesIcon,
+  People as AttendeesIcon,
+} from '@mui/icons-material';
+import { useSnackbar } from '../../contexts/SnackbarContext';
+import { gradients, statusColors, neutralColors } from '../../theme/palette';
+import ConfirmDialog, { useConfirmDialog } from '../../components/common/ConfirmDialog';
 
 const demoMeetings = [
   {

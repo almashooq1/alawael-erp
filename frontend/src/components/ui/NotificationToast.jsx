@@ -15,20 +15,22 @@
 
 import { createContext, useContext, useState, useCallback, useRef } from 'react';
 import {
+  Box,
+  Paper,
+  Typography,
+  IconButton,
+  Button,
+  LinearProgress,
   useTheme,
 } from '@mui/material';
 import {
-  Box,
-  Button,
-  IconButton,
-  LinearProgress,
-  Paper,
-  Typography
-} from '@mui/material';
-import ErrorIcon from '@mui/icons-material/Error';
-import WarningIcon from '@mui/icons-material/Warning';
-import InfoIcon from '@mui/icons-material/Info';
-import CloseIcon from '@mui/icons-material/Close';
+  CheckCircle as SuccessIcon,
+  ErrorOutline as ErrorIcon,
+  WarningAmber as WarningIcon,
+  InfoOutlined as InfoIcon,
+  Close as CloseIcon,
+} from '@mui/icons-material';
+import { AnimatePresence, motion } from 'framer-motion';
 
 // ─── Config ──────────────────────────────────────────────────────────────────
 const TOAST_DEFAULTS = {

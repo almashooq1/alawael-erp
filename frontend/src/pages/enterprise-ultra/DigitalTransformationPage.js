@@ -4,42 +4,24 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import {
-  Paper,
+  Box, Typography, Tabs, Tab, Card, CardContent, Grid, Button, Chip,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  Paper, Dialog, DialogTitle, DialogContent, DialogActions, TextField,
+  MenuItem, Alert, LinearProgress, Stack, IconButton, Divider,
 } from '@mui/material';
-
-import * as dtService from '../../services/enterpriseUltra.service';
 import {
-  Alert,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  Grid,
-  IconButton,
-  LinearProgress,
-  MenuItem,
-  Stack,
-  Tab,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Tabs,
-  TextField,
-  Typography
-} from '@mui/material';
-import RocketIcon from '@mui/icons-material/Rocket';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import RadarIcon from '@mui/icons-material/Radar';
-import AddIcon from '@mui/icons-material/Add';
+  Rocket as RocketIcon,
+  Add as AddIcon,
+  Assessment as MaturityIcon,
+  Lightbulb as IdeaIcon,
+  Science as ProjectIcon,
+  Radar as RadarIcon,
+  Speed as KPIIcon,
+  Refresh as RefreshIcon,
+  ThumbUp as VoteIcon,
+  TrendingUp as TrendUpIcon,
+} from '@mui/icons-material';
+import * as dtService from '../../services/enterpriseUltra.service';
 
 const statusColors = {
   draft: 'default', in_progress: 'warning', completed: 'success', archived: 'default',

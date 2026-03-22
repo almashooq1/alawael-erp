@@ -1,24 +1,14 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import budgetManagementService from '../../services/budgetManagement.service';
 import {
-  Paper,
-} from '@mui/material';
-
-import { useSnackbar } from '../../contexts/SnackbarContext';
-import { gradients, statusColors, surfaceColors } from '../../theme/palette';
-import {
   Box,
-  Button,
+  Typography,
+  Paper,
+  Grid,
   Card,
   CardContent,
+  Button,
   Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Grid,
-  LinearProgress,
-  Tab,
   Table,
   TableBody,
   TableCell,
@@ -26,11 +16,23 @@ import {
   TableHead,
   TableRow,
   Tabs,
+  Tab,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   TextField,
-  Typography
+  LinearProgress,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import ReportIcon from '@mui/icons-material/Report';
+import {
+  Add as AddIcon,
+  AccountBalance as BudgetIcon,
+  TrendingUp as TrendUpIcon,
+  TrendingDown as TrendDownIcon,
+  Assessment as ReportIcon,
+} from '@mui/icons-material';
+import { useSnackbar } from '../../contexts/SnackbarContext';
+import { gradients, statusColors, surfaceColors } from '../../theme/palette';
 
 const demoBudgets = [
   {

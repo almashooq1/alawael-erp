@@ -1,35 +1,18 @@
 /**
  * LeaveManagement — Dialogs (New Leave, View Detail, Approve/Reject)
  */
-
-import { LEAVE_TYPES, LEAVE_TYPE_MAP, STATUS_CONFIG } from './constants';
 import {
-  Alert,
-  Avatar,
-  Box,
-  Button,
-  Chip,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  Grid,
-  IconButton,
-  InputAdornment,
-  MenuItem,
-  Paper,
-  TextField,
-  Tooltip,
-  Typography
+  Box, Typography, Grid, Paper, Button, TextField, Dialog, DialogTitle,
+  DialogContent, DialogActions, MenuItem, Alert, IconButton, Chip,
+  Avatar, Tooltip, Divider, CircularProgress, InputAdornment,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import CloseIcon from '@mui/icons-material/Close';
-import PersonIcon from '@mui/icons-material/Person';
-import TimerIcon from '@mui/icons-material/Timer';
-import EditIcon from '@mui/icons-material/Edit';
-import { CalendarIcon } from 'utils/iconAliases';
+import {
+  Add as AddIcon, Close as CloseIcon,
+  CheckCircle as ApproveIcon, Cancel as RejectIcon,
+  CalendarMonth as CalendarIcon, Timer as TimerIcon,
+  Person as PersonIcon, Edit as EditIcon,
+} from '@mui/icons-material';
+import { LEAVE_TYPES, LEAVE_TYPE_MAP, STATUS_CONFIG } from './constants';
 
 /* ═══ New Leave Request Dialog ═══ */
 export const NewLeaveDialog = ({ open, onClose, form, setForm, saving, handleCreateLeave, getDaysDiff }) => (

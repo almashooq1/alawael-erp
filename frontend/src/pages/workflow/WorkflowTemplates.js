@@ -4,41 +4,46 @@
  * Gallery of pre-built templates with category filter,
  * preview dialog, and deploy-to-builder functionality.
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  alpha,
-} from '@mui/material';
-
-import { useSnackbar } from '../../contexts/SnackbarContext';
-import workflowService from '../../services/workflow.service';
-import {
   Box,
+  Paper,
+  Typography,
   Button,
-  Card,
-  CardActions,
-  CardContent,
   Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
   Grid,
   IconButton,
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   InputAdornment,
-  LinearProgress,
-  Paper,
+  Tooltip,
+  Stepper,
   Step,
   StepLabel,
-  Stepper,
-  TextField,
-  Tooltip,
-  Typography
+  LinearProgress,
+  alpha,
+  Card,
+  CardContent,
+  CardActions,
+  Divider,
 } from '@mui/material';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import SearchIcon from '@mui/icons-material/Search';
-import PreviewIcon from '@mui/icons-material/Preview';
+import {
+  ArrowBack as BackIcon,
+  Search as SearchIcon,
+  Refresh as RefreshIcon,
+  Rocket as DeployIcon,
+  Visibility as PreviewIcon,
+  Description as TemplateIcon,
+  AccessTime as TimeIcon,
+  ForkRight as StepsIcon,
+  AccountTree as WorkflowIcon,
+} from '@mui/icons-material';
+import { useSnackbar } from '../../contexts/SnackbarContext';
+import workflowService from '../../services/workflow.service';
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 const CATEGORY_CONFIG = {

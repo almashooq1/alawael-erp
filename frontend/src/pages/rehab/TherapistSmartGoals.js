@@ -1,46 +1,55 @@
 import { useState, useEffect } from 'react';
-
+import {
+  Box,
+  Container,
+  Card,
+  CardContent,
+  Typography,
+  Grid,
+  Button,
+  TextField,
+  Chip,
+  IconButton,
+  InputAdornment,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Tooltip,
+  Paper,
+  Avatar,
+  LinearProgress,
+  Checkbox,
+  Divider,
+  Stepper,
+  Step,
+  StepLabel,
+} from '@mui/material';
+import {
+  Add as AddIcon,
+  Search as SearchIcon,
+  TrackChanges as GoalIcon,
+  Delete as DeleteIcon,
+  Close as CloseIcon,
+  Edit as EditIcon,
+  CheckCircle as CheckIcon,
+  RadioButtonUnchecked as UncheckedIcon,
+  Flag as FlagIcon,
+  EmojiEvents as TrophyIcon,
+  Timeline as TimelineIcon,
+  Star as StarIcon,
+  TrendingUp as TrendIcon,
+  Category as DomainIcon,
+} from '@mui/icons-material';
 import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import { statusColors, neutralColors } from '../../theme/palette';
-import {
-  Avatar,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  FormControl,
-  Grid,
-  IconButton,
-  InputAdornment,
-  InputLabel,
-  LinearProgress,
-  MenuItem,
-  Paper,
-  Select,
-  TextField,
-  Tooltip,
-  Typography
-} from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import FlagIcon from '@mui/icons-material/Flag';
-import TimelineIcon from '@mui/icons-material/Timeline';
-import DomainIcon from '@mui/icons-material/Domain';
-import SearchIcon from '@mui/icons-material/Search';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import CheckIcon from '@mui/icons-material/Check';
-import CloseIcon from '@mui/icons-material/Close';
-import { TrendIcon } from 'utils/iconAliases';
+import { statusColors, neutralColors, surfaceColors } from '../../theme/palette';
 
 const DOMAINS = [
   { value: 'motor', label: 'حركي', color: '#3b82f6', icon: '🏃' },

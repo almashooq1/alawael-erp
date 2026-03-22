@@ -1,23 +1,25 @@
 import { useState, useEffect } from 'react';
-
+import {
+  Container,
+  Typography,
+  Paper,
+  Box,
+  Grid,
+  Avatar,
+  Chip,
+  Divider,
+  TextField,
+  Button,
+  CircularProgress,
+} from '@mui/material';
+import {
+  Person as PersonIcon,
+  Save as SaveIcon,
+  AccountCircle as AccountIcon,
+} from '@mui/icons-material';
 import { useAuth } from 'contexts/AuthContext';
 import apiClient from 'services/api.client';
 import { gradients } from 'theme/palette';
-import {
-  Avatar,
-  Box,
-  Button,
-  Chip,
-  CircularProgress,
-  Container,
-  Divider,
-  Grid,
-  Paper,
-  TextField,
-  Typography
-} from '@mui/material';
-import PersonIcon from '@mui/icons-material/Person';
-import SaveIcon from '@mui/icons-material/Save';
 
 function Profile() {
   const { currentUser } = useAuth();

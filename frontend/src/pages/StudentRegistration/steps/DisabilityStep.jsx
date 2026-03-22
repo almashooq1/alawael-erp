@@ -2,22 +2,15 @@
  * Student Registration — Step 1: Disability & Diagnosis
  */
 
-
+import React from 'react';
+import {
+  Box, Grid, TextField, Typography, FormControl, InputLabel,
+  Select, MenuItem, Chip, LinearProgress, Fade,
+} from '@mui/material';
+import { Accessible } from '@mui/icons-material';
+import { SectionTitle } from '../StyledComponents';
 import { DISABILITY_TYPES, SEVERITY_LEVELS } from '../studentRegistrationConfig';
 import { statusColors } from 'theme/palette';
-import {
-  Box,
-  Chip,
-  Fade,
-  FormControl,
-  Grid,
-  InputLabel,
-  LinearProgress,
-  MenuItem,
-  Select,
-  TextField,
-  Typography
-} from '@mui/material';
 
 const SEVERITY_BAR_COLORS = {
   mild: statusColors.success,

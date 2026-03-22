@@ -1,11 +1,42 @@
 /**
  * Employee Letters Management — إدارة الشهادات والخطابات الرسمية
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
+  Box,
+  Typography,
   Paper,
+  Button,
+  Chip,
+  TextField,
+  MenuItem,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Grid,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TablePagination,
+  IconButton,
+  Tooltip,
+  Card,
+  CardContent,
+  Alert,
+  Snackbar,
+  CircularProgress,
 } from '@mui/material';
-
+import {
+  Add as AddIcon,
+  Visibility as ViewIcon,
+  Description as LetterIcon,
+  Print as PrintIcon,
+  Download as DownloadIcon,
+} from '@mui/icons-material';
 import {
   getLetters,
   createLetterRequest,
@@ -13,36 +44,6 @@ import {
   updateLetterStatus,
   getLetterStats,
 } from '../../services/hr/employeeAffairsExpandedService';
-import {
-  Alert,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Grid,
-  IconButton,
-  MenuItem,
-  Snackbar,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TablePagination,
-  TableRow,
-  TextField,
-  Tooltip,
-  Typography
-} from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import PrintIcon from '@mui/icons-material/Print';
-import { ViewIcon } from 'utils/iconAliases';
 
 const LETTER_TYPES = [
   'تعريف بالراتب',

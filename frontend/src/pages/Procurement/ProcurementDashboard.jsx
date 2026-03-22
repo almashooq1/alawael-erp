@@ -1,19 +1,22 @@
 /**
  * لوحة تحكم المشتريات — Procurement Dashboard
  */
-import { useState, useEffect } from 'react';
-
-import { getDashboard } from '../../services/procurement.service';
+import React, { useState, useEffect } from 'react';
 import {
-  Box,
-  Card,
-  CardContent,
-  CircularProgress,
-  Grid,
-  Paper,
-  Tooltip,
-  Typography
+  Box, Grid, Paper, Typography, Card, CardContent, Chip,
+  Table, TableHead, TableRow, TableCell, TableBody, CircularProgress,
 } from '@mui/material';
+import {
+  PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  Tooltip, ResponsiveContainer, Legend,
+} from 'recharts';
+import {
+  ShoppingCart as OrderIcon,
+  Store as VendorIcon,
+  Assignment as RequestIcon,
+  AttachMoney as SpendIcon,
+} from '@mui/icons-material';
+import { getDashboard } from '../../services/procurement.service';
 
 const statusLabels = { draft: 'مسودة', submitted: 'مقدّم', approved: 'معتمد', ordered: 'تم الطلب', received: 'مستلم' };
 const PIE_COLORS = ['#607d8b', '#2196f3', '#4caf50', '#ff9800', '#1976d2'];

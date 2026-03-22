@@ -4,17 +4,14 @@
  * Provides real-time updates for KPIs, notifications, and alerts
  */
 
-import { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import io from 'socket.io-client';
-
-const isDev = process.env.NODE_ENV === 'development';
 
 // Create Socket Context
 const SocketContext = createContext(null);
 
 // Socket connection configuration
-const SOCKET_URL =
-  process.env.REACT_APP_SOCKET_URL || process.env.REACT_APP_WS_URL || 'http://localhost:3000';
+const SOCKET_URL = process.env.REACT_APP_SOCKET_URL || process.env.REACT_APP_WS_URL || 'http://localhost:3000';
 const SOCKET_OPTIONS = {
   reconnection: true,
   reconnectionDelay: 1000,
@@ -38,13 +35,13 @@ export const SocketProvider = ({ children }) => {
 
     // Connection event handlers
     newSocket.on('connect', () => {
-      if (isDev) console.log('✅ Socket connected:', newSocket.id);
+      console.log('✅ Socket connected:', newSocket.id);
       setConnected(true);
       setError(null);
     });
 
     newSocket.on('disconnect', () => {
-      if (isDev) console.log('❌ Socket disconnected');
+      console.log('❌ Socket disconnected');
       setConnected(false);
     });
 
@@ -123,7 +120,7 @@ export const useSocketEmit = () => {
         console.warn('Socket not connected. Event not sent:', eventName);
       }
     },
-    [socket]
+    [socket],
   );
 };
 
@@ -136,7 +133,7 @@ export const useRealTimeKPIs = moduleKey => {
   const [lastUpdate, setLastUpdate] = useState(null);
 
   useSocketEvent(`kpi:update:${moduleKey}`, data => {
-    if (isDev) console.log(`📊 KPI update for ${moduleKey}:`, data);
+    console.log(`📊 KPI update for ${moduleKey}:`, data);
     setKpis(data);
     setLastUpdate(new Date());
   });
@@ -153,7 +150,7 @@ export const useRealTimeNotifications = () => {
   const [unreadCount, setUnreadCount] = useState(0);
 
   useSocketEvent('notification:new', notification => {
-    if (isDev) console.log('🔔 New notification:', notification);
+    console.log('🔔 New notification:', notification);
     setNotifications(prev => [notification, ...prev]);
     setUnreadCount(prev => prev + 1);
   });
@@ -176,7 +173,7 @@ export const useRealtimeDashboard = () => {
   const [lastUpdate, setLastUpdate] = useState(null);
 
   useSocketEvent('dashboard:update', data => {
-    if (isDev) console.log('📈 Dashboard update:', data);
+    console.log('📈 Dashboard update:', data);
     if (data.summaryCards) setSummaryCards(data.summaryCards);
     if (data.topKPIs) setTopKPIs(data.topKPIs);
     setLastUpdate(new Date());
@@ -193,7 +190,7 @@ export const useSystemAlerts = () => {
   const [alerts, setAlerts] = useState([]);
 
   useSocketEvent('alert:new', alert => {
-    if (isDev) console.log('⚠️ New alert:', alert);
+    console.log('⚠️ New alert:', alert);
     setAlerts(prev => [alert, ...prev].slice(0, 10)); // Keep last 10 alerts
   });
 

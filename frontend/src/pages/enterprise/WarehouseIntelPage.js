@@ -5,49 +5,57 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import {
-  alpha,
-} from '@mui/material';
-
-import { useSnackbar } from '../../contexts/SnackbarContext';
-import enterpriseProService from '../../services/enterprisePro.service';
-import {
-  Alert,
   Box,
-  Button,
+  Paper,
+  Typography,
+  Grid,
   Card,
   CardContent,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  FormControl,
-  Grid,
+  Button,
   IconButton,
-  LinearProgress,
-  MenuItem,
-  Paper,
-  Select,
-  Step,
-  StepLabel,
-  Stepper,
-  Tab,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Tabs,
+  Chip,
   TextField,
-  Typography
+  MenuItem,
+  Select,
+  FormControl,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Divider,
+  LinearProgress,
+  Tab,
+  Tabs,
+  Alert,
+  Stepper,
+  Step,
+  StepLabel,
+  alpha,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import SaveIcon from '@mui/icons-material/Save';
+import {
+  Refresh as RefreshIcon,
+  Warehouse as WHIcon,
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Inventory as StockIcon,
+  Warning as AlertIcon,
+  LocalShipping as TransferIcon,
+  Dashboard as DashIcon,
+  CheckCircle as ApproveIcon,
+  Send as ShipIcon,
+  Archive as ReceiveIcon,
+  Save as SaveIcon,
+  GridView as BinIcon,
+} from '@mui/icons-material';
+import { useSnackbar } from '../../contexts/SnackbarContext';
+import enterpriseProService from '../../services/enterprisePro.service';
 
 const TRANSFER_STATUSES = {
   draft: { label: 'مسودة', color: '#757575', step: 0 },

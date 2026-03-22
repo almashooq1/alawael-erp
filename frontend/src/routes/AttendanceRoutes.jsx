@@ -1,6 +1,7 @@
 /**
  * Attendance Routes — مسارات الحضور والانصراف
  */
+import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const AttendanceDashboard = lazyWithRetry(() => import('../pages/Attendance/AttendanceDashboard'));

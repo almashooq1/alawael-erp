@@ -2,64 +2,74 @@
  * 📋 مكتبة برامج التأهيل — Rehabilitation Programs Library
  * AlAwael ERP — Browse, filter, and view rehabilitation program templates
  */
-import { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
+  Box,
+  Typography,
+  Paper,
+  Grid,
+  Card,
+  CardContent,
+  CardActions,
+  Chip,
+  TextField,
+  InputAdornment,
+  Button,
+  Avatar,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  IconButton,
+  Tooltip,
+  Divider,
+  Stack,
+  Collapse,
   useTheme,
   alpha,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemIcon,
+  Stepper,
+  Step,
+  StepLabel,
+  StepContent,
 } from '@mui/material';
-
+import {
+  Search as SearchIcon,
+  FitnessCenter as FitnessIcon,
+  Psychology as PsychologyIcon,
+  RecordVoiceOver as SpeechIcon,
+  ChildFriendly as EarlyIcon,
+  Memory as MemoryIcon,
+  Work as WorkIcon,
+  Home as HomeIcon,
+  Groups as GroupsIcon,
+  FamilyRestroom as FamilyIcon,
+  Public as PublicIcon,
+  Handyman as OccupationalIcon,
+  Devices as DevicesIcon,
+  FilterList as FilterIcon,
+  Info as InfoIcon,
+  Schedule as ClockIcon,
+  People as PeopleIcon,
+  ExpandMore as ExpandIcon,
+  ExpandLess as CollapseIcon,
+  Close as CloseIcon,
+  PlaylistAddCheck as PhaseIcon,
+  CheckCircle as CheckIcon,
+  ArrowForward as ArrowIcon,
+  CalendarToday as CalendarIcon,
+  Group as TeamIcon,
+  Flag as GoalIcon,
+  Speed as SpeedIcon,
+} from '@mui/icons-material';
 import {
   REHAB_PROGRAM_TEMPLATES_CATALOG,
   PROGRAM_CATEGORY_LABELS,
   DISABILITY_LABELS,
 } from 'services/specializedRehab.service';
-import {
-  Avatar,
-  Box,
-  Button,
-  Card,
-  CardActions,
-  CardContent,
-  Chip,
-  Collapse,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  Grid,
-  IconButton,
-  InputAdornment,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  Paper,
-  Stack,
-  Step,
-  StepContent,
-  StepLabel,
-  Stepper,
-  TextField,
-  Tooltip,
-  Typography
-} from '@mui/material';
-import PsychologyIcon from '@mui/icons-material/Psychology';
-import MemoryIcon from '@mui/icons-material/Memory';
-import WorkIcon from '@mui/icons-material/Work';
-import HomeIcon from '@mui/icons-material/Home';
-import GroupsIcon from '@mui/icons-material/Groups';
-import PublicIcon from '@mui/icons-material/Public';
-import DevicesIcon from '@mui/icons-material/Devices';
-import SearchIcon from '@mui/icons-material/Search';
-import FilterIcon from '@mui/icons-material/Filter';
-import SpeedIcon from '@mui/icons-material/Speed';
-import InfoIcon from '@mui/icons-material/Info';
-import CloseIcon from '@mui/icons-material/Close';
-import CheckIcon from '@mui/icons-material/Check';
-import PeopleIcon from '@mui/icons-material/People';
-import ExpandIcon from '@mui/icons-material/Expand';
-import { CalendarIcon, CollapseIcon } from 'utils/iconAliases';
 
 /* ───── helpers ───── */
 const CATEGORY_ICONS = {

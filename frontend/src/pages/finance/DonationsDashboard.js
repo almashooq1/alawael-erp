@@ -2,11 +2,66 @@
  * 💝 لوحة إدارة التبرعات والرعاية — Donations & Sponsorship Dashboard
  * AlAwael ERP
  */
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  Grid,
+  Chip,
+  Avatar,
+  Button,
+  IconButton,
+  Tooltip,
+  TextField,
+  MenuItem,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TablePagination,
   Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  LinearProgress,
+  InputAdornment,
+  Tabs,
+  Tab,
+  useTheme,
 } from '@mui/material';
-
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Search as SearchIcon,
+  Refresh as RefreshIcon,
+  Close as CloseIcon,
+  Visibility as ViewIcon,
+  VolunteerActivism as DonateIcon,
+  Campaign as CampaignIcon,
+  People as DonorsIcon,
+  Receipt as ReceiptIcon,
+} from '@mui/icons-material';
+import {
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RTooltip,
+  ResponsiveContainer,
+  Legend,
+} from 'recharts';
 import {
   campaignsService,
   donorsService,
@@ -18,41 +73,6 @@ import {
   MOCK_DONATIONS_DASHBOARD,
 } from 'services/donationsService';
 import { useSnackbar } from 'contexts/SnackbarContext';
-import {
-  Avatar,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Grid,
-  IconButton,
-  InputAdornment,
-  LinearProgress,
-  MenuItem,
-  Tab,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Tabs,
-  TextField,
-  Tooltip,
-  Typography
-} from '@mui/material';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import AddIcon from '@mui/icons-material/Add';
-import CampaignIcon from '@mui/icons-material/Campaign';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import SearchIcon from '@mui/icons-material/Search';
-import CloseIcon from '@mui/icons-material/Close';
 
 const COLORS = ['#E91E63', '#9C27B0', '#3F51B5', '#009688', '#FF9800', '#795548'];
 const formatCurrency = v =>

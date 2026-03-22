@@ -13,10 +13,26 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Box, Paper, Typography, TextField, Button, Alert,
-  Collapse, Fade, InputAdornment, IconButton, CircularProgress,
+  Box,
+  Paper,
+  Typography,
+  TextField,
+  Button,
+  Alert,
+  InputAdornment,
+  IconButton,
+  CircularProgress,
+  Avatar,
+  Fade,
+  Collapse,
 } from '@mui/material';
-import { Email, Lock, Visibility, VisibilityOff, Login as LoginIcon } from '@mui/icons-material';
+import {
+  Email,
+  Lock,
+  Visibility,
+  VisibilityOff,
+  Login as LoginIcon,
+} from '@mui/icons-material';
 import { useAuth } from 'contexts/AuthContext';
 import logger from 'utils/logger';
 import { useSnackbar } from 'contexts/SnackbarContext';

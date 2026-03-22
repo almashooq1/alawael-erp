@@ -2,56 +2,62 @@
  * WorkflowReports – التقارير المحفوظة
  * Create, manage, and generate workflow reports.
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  alpha,
-} from '@mui/material';
-
-import { useSnackbar } from '../../contexts/SnackbarContext';
-import workflowService from '../../services/workflow.service';
-import {
-  Avatar,
   Box,
+  Grid,
+  Paper,
+  Typography,
   Button,
+  IconButton,
+  Tooltip,
+  Chip,
   Card,
   CardContent,
-  Chip,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  FormControl,
-  Grid,
-  IconButton,
-  InputLabel,
-  MenuItem,
-  Paper,
-  Select,
   Skeleton,
+  alpha,
+  Avatar,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
   Stack,
+  MenuItem,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  TextField,
-  Tooltip,
-  Typography
+  Select,
+  FormControl,
+  InputLabel,
+  CircularProgress,
+  Tab,
+  Tabs,
+  Divider,
 } from '@mui/material';
-import TrendingUp from '@mui/icons-material/TrendingUp';
-import People from '@mui/icons-material/People';
-import ArrowBack from '@mui/icons-material/ArrowBack';
-import Assessment from '@mui/icons-material/Assessment';
-import Add from '@mui/icons-material/Add';
-import Refresh from '@mui/icons-material/Refresh';
-import Schedule from '@mui/icons-material/Schedule';
-import PlayArrow from '@mui/icons-material/PlayArrow';
-import Edit from '@mui/icons-material/Edit';
-import Delete from '@mui/icons-material/Delete';
+import {
+  ArrowBack,
+  Refresh,
+  Add,
+  Assessment,
+  TrendingUp,
+  BarChart,
+  PieChart,
+  Speed,
+  People,
+  Delete,
+  Edit,
+  PlayArrow,
+  Download,
+  Schedule,
+  Category,
+} from '@mui/icons-material';
+import { useSnackbar } from '../../contexts/SnackbarContext';
+import workflowService from '../../services/workflow.service';
 
 const REPORT_TYPES = [
   {

@@ -1,6 +1,7 @@
 /**
  * Student Management Routes — مسارات إدارة الطلاب
  */
+import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const StudentsDashboard = lazyWithRetry(() => import('../pages/StudentManagement/StudentsDashboard'));

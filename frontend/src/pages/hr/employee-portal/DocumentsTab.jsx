@@ -1,14 +1,19 @@
-
-
+import React from 'react';
 import {
   Box,
   Card,
   CardContent,
   Chip,
   Grid,
-  Typography
+  Typography,
 } from '@mui/material';
-import { FileIcon } from 'utils/iconAliases';
+import {
+  Description as ContractIcon,
+  VerifiedUser as CertIcon,
+  Badge as IdIcon,
+  InsertDriveFile as FileIcon,
+} from '@mui/icons-material';
+
 const TYPE_META = {
   contract: { icon: <ContractIcon fontSize="large" />, label: 'عقد', color: '#1565c0' },
   certificate: { icon: <CertIcon fontSize="large" />, label: 'شهادة', color: '#2e7d32' },

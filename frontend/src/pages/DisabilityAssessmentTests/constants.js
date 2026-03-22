@@ -1,15 +1,15 @@
 /**
  * DisabilityAssessmentTests – shared constants & helpers
  */
-
-
-import { assessmentColors } from '../../theme/palette';
+import {
+  Groups as GroupsIcon,
+  AccessibilityNew as AccessibilityIcon,
+  Psychology as PsychologyIcon,
+  Translate as TranslateIcon,
+  TouchApp as TouchAppIcon,
+} from '@mui/icons-material';
 import { Box } from '@mui/material';
-import GroupsIcon from '@mui/icons-material/Groups';
-import AccessibilityIcon from '@mui/icons-material/Accessibility';
-import PsychologyIcon from '@mui/icons-material/Psychology';
-import TranslateIcon from '@mui/icons-material/Translate';
-import TouchAppIcon from '@mui/icons-material/TouchApp';
+import { assessmentColors } from '../../theme/palette';
 
 /* ─── Icon map ─── */
 export const TEST_ICONS = {

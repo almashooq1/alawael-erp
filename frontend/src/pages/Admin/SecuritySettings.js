@@ -1,62 +1,80 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-
-import { useSnackbar } from '../../contexts/SnackbarContext';
-import { useConfirmDialog } from '../../components/common/ConfirmDialog';
-import { gradients } from '../../theme/palette';
-import securityService from '../../services/security.service';
 import {
-  Alert,
+  Container,
+  Typography,
+  Grid,
+  Paper,
   Box,
   Button,
-  Chip,
-  CircularProgress,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  FormControlLabel,
-  Grid,
-  IconButton,
-  InputAdornment,
-  LinearProgress,
   List,
   ListItem,
-  ListItemIcon,
   ListItemText,
-  Paper,
-  Slider,
-  Switch,
-  Tab,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Tabs,
+  ListItemIcon,
+  Divider,
+  Alert,
   TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Chip,
+  CircularProgress,
+  IconButton,
+  Tabs,
+  Tab,
+  Switch,
+  FormControlLabel,
+  LinearProgress,
   Tooltip,
-  Typography
+  Card,
+  CardContent,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+  InputAdornment,
+  Slider,
+  Collapse,
+  Badge,
 } from '@mui/material';
-import SecurityIcon from '@mui/icons-material/Security';
-import History from '@mui/icons-material/History';
-import Assessment from '@mui/icons-material/Assessment';
-import VpnKey from '@mui/icons-material/VpnKey';
-import CheckCircle from '@mui/icons-material/CheckCircle';
-import ErrorIcon from '@mui/icons-material/Error';
-import Refresh from '@mui/icons-material/Refresh';
-import Lock from '@mui/icons-material/Lock';
-import Logout from '@mui/icons-material/Logout';
-import Delete from '@mui/icons-material/Delete';
-import Settings from '@mui/icons-material/Settings';
-import Warning from '@mui/icons-material/Warning';
-import Add from '@mui/icons-material/Add';
-import Save from '@mui/icons-material/Save';
-import TrendingUp from '@mui/icons-material/TrendingUp';
-import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import Visibility from '@mui/icons-material/Visibility';
-import { CopyIcon } from 'utils/iconAliases';
+import {
+  Shield,
+  History,
+  Lock,
+  ContentCopy as CopyIcon,
+  Visibility,
+  VisibilityOff,
+  Security as SecurityIcon,
+  Devices,
+  VpnKey,
+  Delete,
+  Refresh,
+  ExpandMore,
+  ExpandLess,
+  Warning,
+  CheckCircle,
+  Error as ErrorIcon,
+  TrendingUp,
+  Block,
+  Settings,
+  Assessment,
+  Policy,
+  GppGood,
+  GppBad,
+  Laptop,
+  PhoneAndroid,
+  DesktopWindows,
+  Logout,
+  Add,
+  Remove,
+  Save,
+} from '@mui/icons-material';
+import { QRCodeSVG } from 'qrcode.react';
+import { useSnackbar } from '../../contexts/SnackbarContext';
+import ConfirmDialog, { useConfirmDialog } from '../../components/common/ConfirmDialog';
+import { gradients } from '../../theme/palette';
+import securityService from '../../services/security.service';
 
 /* ─── Tab Panel ─── */
 function TabPanel({ children, value, index, ...other }) {

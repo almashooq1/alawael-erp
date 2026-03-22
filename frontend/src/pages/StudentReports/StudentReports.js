@@ -5,26 +5,29 @@
  * with chart and insight sub-components.
  */
 
-
-import useStudentReport from './useStudentReport';
+import React from 'react';
 import {
-  Alert,
   Box,
-  Button,
+  Grid,
   Card,
   CardContent,
+  Typography,
+  Button,
+  Stack,
   Chip,
-  CircularProgress,
-  Grid,
   LinearProgress,
+  Alert,
+  TextField,
   MenuItem,
   Paper,
-  Stack,
-  TextField,
-  Typography
+  CircularProgress,
 } from '@mui/material';
-import DownloadIcon from '@mui/icons-material/Download';
-import AutoGraphIcon from '@mui/icons-material/AutoGraph';
+import { AutoGraph as AutoGraphIcon, Download as DownloadIcon } from '@mui/icons-material';
+import StudentReportsAdvancedOptions from 'components/StudentReportsAdvancedOptions';
+
+import useStudentReport from './useStudentReport';
+import StudentReportCharts from './StudentReportCharts';
+import StudentReportInsights from './StudentReportInsights';
 
 const StudentReports = () => {
   const {

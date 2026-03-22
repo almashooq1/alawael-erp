@@ -2,29 +2,15 @@
  * Supply Chain Dashboard — لوحة تحكم سلسلة الإمداد
  */
 import { useState, useEffect } from 'react';
-
+import {
+  Box, Grid, Card, CardContent, Typography, Table, TableBody, TableCell,
+  TableContainer, TableHead, TableRow, Paper, Chip, LinearProgress
+} from '@mui/material';
 import {
   LocalShipping, Inventory, Store, Assessment
 } from '@mui/icons-material';
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import apiClient from '../../services/api';
-import {
-  Box,
-  Card,
-  CardContent,
-  Chip,
-  Grid,
-  Icon,
-  LinearProgress,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Tooltip,
-  Typography
-} from '@mui/material';
 
 const COLORS = ['#1976d2', '#2e7d32', '#ed6c02', '#d32f2f', '#9c27b0', '#00bcd4'];
 

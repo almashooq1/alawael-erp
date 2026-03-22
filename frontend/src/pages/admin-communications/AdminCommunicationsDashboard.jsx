@@ -1,43 +1,52 @@
 /**
  * Administrative Communications Dashboard — لوحة تحكم الاتصالات الإدارية
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-import { gradients } from '../../theme/palette';
-import adminCommunicationsService from '../../services/adminCommunications.service';
 import {
-  Avatar,
   Box,
-  Button,
-  Card,
-  CardActionArea,
-  CardContent,
-  Chip,
-  Divider,
+  Typography,
   Grid,
+  Card,
+  CardContent,
+  CardActionArea,
+  Paper,
+  Button,
+  Chip,
+  LinearProgress,
+  Divider,
   List,
   ListItem,
+  ListItemText,
   ListItemIcon,
   ListItemSecondaryAction,
-  ListItemText,
-  Paper,
+  Avatar,
+  IconButton,
+  Tooltip,
   Skeleton,
-  Typography
 } from '@mui/material';
-import MailIcon from '@mui/icons-material/Mail';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import Assignment from '@mui/icons-material/Assignment';
-import WarningIcon from '@mui/icons-material/Warning';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import DraftsIcon from '@mui/icons-material/Drafts';
-import AddIcon from '@mui/icons-material/Add';
-import InboxIcon from '@mui/icons-material/Inbox';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import SendIcon from '@mui/icons-material/Send';
-import Notifications from '@mui/icons-material/Notifications';
-import ArchiveIcon from '@mui/icons-material/Archive';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import {
+  Mail as MailIcon,
+  Send as SendIcon,
+  Inbox as InboxIcon,
+  Drafts as DraftsIcon,
+  Archive as ArchiveIcon,
+  Warning as WarningIcon,
+  TrendingUp as TrendingUpIcon,
+  AccessTime as AccessTimeIcon,
+  CheckCircle as CheckCircleIcon,
+  Add as AddIcon,
+  ArrowForward as ArrowForwardIcon,
+  MailOutline,
+  CallReceived,
+  CallMade,
+  Notifications,
+  Assignment,
+  Speed,
+  FiberNew,
+} from '@mui/icons-material';
+import { gradients } from '../../theme/palette';
+import adminCommunicationsService from '../../services/adminCommunications.service';
 
 /* ═══ Stat Card Component ══════════════════════════════════════════════════ */
 function StatCard({ title, value, icon, color, gradient, onClick, subtitle, loading }) {

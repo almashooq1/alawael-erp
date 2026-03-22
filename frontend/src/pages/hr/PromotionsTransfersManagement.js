@@ -1,11 +1,46 @@
 /**
  * Promotions & Transfers Management — إدارة الترقيات والتنقلات
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
+  Box,
+  Typography,
   Paper,
+  Button,
+  Chip,
+  TextField,
+  MenuItem,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Grid,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TablePagination,
+  IconButton,
+  Tooltip,
+  Card,
+  CardContent,
+  Alert,
+  Snackbar,
+  CircularProgress,
+  Stepper,
+  Step,
+  StepLabel,
 } from '@mui/material';
-
+import {
+  Add as AddIcon,
+  Visibility as ViewIcon,
+  TrendingUp as PromoteIcon,
+  SwapHoriz as TransferIcon,
+  ThumbUp as ApproveIcon,
+  PlayArrow as ExecuteIcon,
+} from '@mui/icons-material';
 import {
   getPromotionTransfers,
   createPromotionTransfer,
@@ -13,36 +48,6 @@ import {
   approvePromotionTransferStep,
   executePromotionTransfer,
 } from '../../services/hr/employeeAffairsExpandedService';
-import {
-  Alert,
-  Box,
-  Button,
-  Chip,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Grid,
-  IconButton,
-  MenuItem,
-  Snackbar,
-  Step,
-  StepLabel,
-  Stepper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TablePagination,
-  TableRow,
-  TextField,
-  Tooltip,
-  Typography
-} from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import { ViewIcon } from 'utils/iconAliases';
 
 const REQUEST_TYPES = ['ترقية', 'نقل داخلي', 'نقل خارجي', 'انتداب', 'إعارة', 'تكليف'];
 

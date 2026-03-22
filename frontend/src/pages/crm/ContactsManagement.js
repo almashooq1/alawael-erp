@@ -4,49 +4,50 @@
  */
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
-  Paper,
-  useTheme,
-} from '@mui/material';
-
-import { contactsService, MOCK_CONTACTS } from 'services/crmService';
-import { useSnackbar } from 'contexts/SnackbarContext';
-import {
-  Avatar,
   Box,
-  Button,
   Card,
   CardContent,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
+  Typography,
   Grid,
+  Chip,
+  Avatar,
+  Button,
   IconButton,
-  InputAdornment,
-  LinearProgress,
+  Tooltip,
+  TextField,
   MenuItem,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
-  TablePagination,
   TableRow,
-  TextField,
-  Tooltip,
-  Typography
+  TablePagination,
+  Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  LinearProgress,
+  InputAdornment,
+  useTheme,
 } from '@mui/material';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import AddIcon from '@mui/icons-material/Add';
-import SearchIcon from '@mui/icons-material/Search';
-import BusinessIcon from '@mui/icons-material/Business';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import CloseIcon from '@mui/icons-material/Close';
-import PhoneIcon from '@mui/icons-material/Phone';
-import EmailIcon from '@mui/icons-material/Email';
-import { ViewIcon } from 'utils/iconAliases';
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Search as SearchIcon,
+  Refresh as RefreshIcon,
+  Business as BusinessIcon,
+  Phone as PhoneIcon,
+  Email as EmailIcon,
+  LocationOn as LocationIcon,
+  Visibility as ViewIcon,
+  Close as CloseIcon,
+  FilterList as FilterIcon,
+} from '@mui/icons-material';
+import { contactsService, MOCK_CONTACTS } from 'services/crmService';
+import { useSnackbar } from 'contexts/SnackbarContext';
 
 const contactTypes = ['شركة', 'فرد', 'جهة حكومية', 'مؤسسة تعليمية', 'منظمة غير ربحية'];
 const statuses = ['نشط', 'غير نشط', 'معلق'];

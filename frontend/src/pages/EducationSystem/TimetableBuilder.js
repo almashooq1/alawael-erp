@@ -2,41 +2,55 @@
  * الجدول الدراسي
  * Timetable Builder
  */
-import { useState, useEffect, useCallback } from 'react';
-
-import { useNavigate } from 'react-router-dom';
-import { gradients } from '../../theme/palette';
-import educationSystemService from '../../services/educationSystem.service';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Alert,
-  Box,
-  Button,
-  Chip,
   Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControl,
   Grid,
-  IconButton,
-  InputLabel,
-  LinearProgress,
-  MenuItem,
   Paper,
+  Box,
+  Typography,
+  Button,
+  Card,
+  CardContent,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Chip,
+  IconButton,
+  Tooltip,
+  LinearProgress,
+  Alert,
+  MenuItem,
   Select,
+  InputLabel,
+  FormControl,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  TextField,
-  Typography
+  Tabs,
+  Tab,
+  Avatar,
+  Divider,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import PublishIcon from '@mui/icons-material/Publish';
-import EditIcon from '@mui/icons-material/Edit';
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Schedule as TimetableIcon,
+  ArrowBack as BackIcon,
+  Publish as PublishIcon,
+  SwapHoriz as SwapIcon,
+  Today as DayIcon,
+  ViewWeek as WeekIcon,
+} from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
+import { gradients } from '../../theme/palette';
+import educationSystemService from '../../services/educationSystem.service';
 
 const { timetableService } = educationSystemService;
 

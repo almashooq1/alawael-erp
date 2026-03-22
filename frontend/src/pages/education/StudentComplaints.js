@@ -4,46 +4,51 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-
+import {
+  Box,
+  Grid,
+  Card,
+  CardContent,
+  Typography,
+  Button,
+  Chip,
+  Stack,
+  Paper,
+  TextField,
+  MenuItem,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  IconButton,
+  Alert,
+  LinearProgress,
+  Divider,
+  Rating,
+  Tabs,
+  Tab,
+  Badge as MuiBadge,
+  Avatar,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemAvatar,
+  Fade,
+} from '@mui/material';
+import {
+  Add as AddIcon,
+  Feedback as FeedbackIcon,
+  Lightbulb as SuggestionIcon,
+  BugReport as ComplaintIcon,
+  HelpOutline as InquiryIcon,
+  Send as SendIcon,
+  Star as StarIcon,
+  Close as CloseIcon,
+} from '@mui/icons-material';
 import { gradients } from 'theme/palette';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import api from 'services/api';
-import {
-  Alert,
-  Avatar,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  Fade,
-  Grid,
-  IconButton,
-  LinearProgress,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  MenuItem,
-  Paper,
-  Rating,
-  Stack,
-  Tab,
-  Tabs,
-  TextField,
-  Typography
-} from '@mui/material';
-import FeedbackIcon from '@mui/icons-material/Feedback';
-import AddIcon from '@mui/icons-material/Add';
-import StarIcon from '@mui/icons-material/Star';
-import CloseIcon from '@mui/icons-material/Close';
-import SendIcon from '@mui/icons-material/Send';
 
 const typeConfig = {
   شكوى: {

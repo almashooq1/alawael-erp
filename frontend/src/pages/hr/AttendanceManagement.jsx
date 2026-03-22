@@ -1,66 +1,34 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-
+import {
+  Container, Typography, Grid, Paper, Box, Button, TextField, Card, CardContent,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination,
+  Chip, Avatar, IconButton, Alert, Snackbar, Tooltip, CircularProgress, Divider,
+  InputAdornment, MenuItem, LinearProgress, Dialog, DialogTitle, DialogContent, DialogActions,
+  Tabs, Tab, Badge, Collapse,
+} from '@mui/material';
+import {
+  Login as CheckInIcon, Logout as CheckOutIcon, Search as SearchIcon,
+  CalendarMonth as CalendarIcon, AccessTime as TimeIcon,
+  PeopleAlt as PeopleIcon, CheckCircle as PresentIcon,
+  Cancel as AbsentIcon, EventBusy as LateIcon, Refresh as RefreshIcon,
+  Download as DownloadIcon, Print as PrintIcon, Warning as WarningIcon,
+  Visibility as ViewIcon, Close as CloseIcon, Timer as OvertimeIcon,
+  FilterList as FilterListIcon, Schedule as ScheduleIcon,
+  TrendingUp as TrendUpIcon, Timelapse as TimelapseIcon,
+  Fingerprint as FingerprintIcon, Sync as SyncIcon,
+  Edit as EditIcon, History as HistoryIcon,
+  Assessment as ReportIcon, BeachAccess as LeaveIcon,
+  Today as TodayIcon, DateRange as DateRangeIcon,
+  CheckCircleOutline as ApproveIcon, HighlightOff as RejectIcon,
+  BarChart as ChartIcon, Person as PersonIcon,
+  ArrowBack as BackIcon, Save as SaveIcon,
+  EventAvailable as EventAvailableIcon, EventBusy as EventBusyIcon,
+  ExpandMore as ExpandMoreIcon, ExpandLess as ExpandLessIcon,
+} from '@mui/icons-material';
 import hrService from 'services/hrService';
 import zktecoService from 'services/zktecoService';
 import { gradients, statusColors, neutralColors, surfaceColors, leaveColors } from '../../theme/palette';
 import { DEPT_COLORS } from '../../constants/departmentColors';
-import {
-  Alert,
-  Avatar,
-  Badge,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  CircularProgress,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  Grid,
-  IconButton,
-  InputAdornment,
-  LinearProgress,
-  MenuItem,
-  Paper,
-  Snackbar,
-  Tab,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TablePagination,
-  TableRow,
-  Tabs,
-  TextField,
-  Tooltip,
-  Typography
-} from '@mui/material';
-import TimelapseIcon from '@mui/icons-material/Timelapse';
-import TodayIcon from '@mui/icons-material/Today';
-import ReportIcon from '@mui/icons-material/Report';
-import WarningIcon from '@mui/icons-material/Warning';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import DownloadIcon from '@mui/icons-material/Download';
-import PrintIcon from '@mui/icons-material/Print';
-import FingerprintIcon from '@mui/icons-material/Fingerprint';
-import SyncIcon from '@mui/icons-material/Sync';
-import PeopleIcon from '@mui/icons-material/People';
-import SearchIcon from '@mui/icons-material/Search';
-import FilterListIcon from '@mui/icons-material/FilterList';
-import ScheduleIcon from '@mui/icons-material/Schedule';
-import EditIcon from '@mui/icons-material/Edit';
-import HistoryIcon from '@mui/icons-material/History';
-import DateRangeIcon from '@mui/icons-material/DateRange';
-import EventAvailableIcon from '@mui/icons-material/EventAvailable';
-import EventBusyIcon from '@mui/icons-material/EventBusy';
-import CloseIcon from '@mui/icons-material/Close';
-import SaveIcon from '@mui/icons-material/Save';
-import { CalendarIcon, ChartIcon, LeaveIcon, ViewIcon } from 'utils/iconAliases';
 
 /* ═══════════════════════════════════════════════
    Constants & Configuration

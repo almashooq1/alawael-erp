@@ -5,36 +5,40 @@
  * with Arabic level messages and friendly design.
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-
+import {
+  Box,
+  Grid,
+  Card,
+  CardContent,
+  Typography,
+  Button,
+  Stack,
+  Chip,
+  Paper,
+  Alert,
+  CircularProgress,
+  Divider,
+  LinearProgress,
+  Avatar,
+} from '@mui/material';
+import {
+  Print as PrintIcon,
+  ArrowBack as ArrowBackIcon,
+  Person as PersonIcon,
+  School as SchoolIcon,
+  EventAvailable as AttendanceIcon,
+  TrendingUp as TrendingUpIcon,
+  EmojiEvents as TrophyIcon,
+  CheckCircle as CheckCircleIcon,
+  Info as InfoIcon,
+  Favorite as FavoriteIcon,
+  StarBorder as StarIcon,
+} from '@mui/icons-material';
 import { gradients, brandColors } from 'theme/palette';
 import studentManagementService from 'services/studentManagementService';
 import logger from 'utils/logger';
-import {
-  Alert,
-  Avatar,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  CircularProgress,
-  Divider,
-  Grid,
-  LinearProgress,
-  Paper,
-  Stack,
-  Typography
-} from '@mui/material';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import PrintIcon from '@mui/icons-material/Print';
-import FavoriteIcon from '@mui/icons-material/Favorite';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import StarIcon from '@mui/icons-material/Star';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import SchoolIcon from '@mui/icons-material/School';
-import InfoIcon from '@mui/icons-material/Info';
 
 // Color for level badges
 const levelColor = (level) => {

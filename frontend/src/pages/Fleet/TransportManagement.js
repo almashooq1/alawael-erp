@@ -5,70 +5,111 @@
  */
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
-  Avatar,
-  Badge,
   Box,
-  Breadcrumbs,
+  Container,
+  Typography,
   Button,
   Card,
   CardContent,
-  Chip,
-  CircularProgress,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  Fade,
-  FormControl,
   Grid,
-  IconButton,
+  TextField,
   InputAdornment,
+  FormControl,
   InputLabel,
-  Link,
-  MenuItem,
-  Paper,
-  Rating,
   Select,
-  Stack,
+  MenuItem,
+  CircularProgress,
+  Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Chip,
+  IconButton,
+  Tooltip,
+  Avatar,
+  Divider,
+  Tabs,
   Tab,
+  LinearProgress,
+  Badge,
+  Breadcrumbs,
+  Link,
+  Fade,
+  Stack,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
-  TablePagination,
   TableRow,
-  Tabs,
-  TextField,
-  Tooltip,
-  Typography,
+  TablePagination,
+  Rating,
   alpha,
-  useTheme
+  useTheme,
 } from '@mui/material';
-
+import {
+  DirectionsBus as BusIcon,
+  Route as RouteIcon,
+  Person as DriverIcon,
+  LocalGasStation as FuelIcon,
+  Speed as SpeedIcon,
+  Search as SearchIcon,
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Refresh as RefreshIcon,
+  Home as HomeIcon,
+  TrendingUp as TrendIcon,
+  Assessment as AnalyticsIcon,
+  Schedule as ScheduleIcon,
+  LocationOn as LocationIcon,
+  Warning as WarningIcon,
+  CheckCircle as CheckIcon,
+  Cancel as CancelIcon,
+  PlayArrow as PlayIcon,
+  Pause as PauseIcon,
+  LocalShipping as VehicleIcon,
+  PeopleAlt as PassengerIcon,
+  Map as MapIcon,
+  Timer as TimerIcon,
+  Star as StarIcon,
+  CalendarMonth as CalendarIcon,
+  FilterList as FilterIcon,
+  Download as DownloadIcon,
+  BarChart as ChartIcon,
+  ReportProblem as AccidentIcon,
+  GpsFixed as GpsIcon,
+  EmojiTransportation as TransportIcon,
+  Visibility as ViewIcon,
+  Close as CloseIcon,
+  Save as SaveIcon,
+  Phone as PhoneIcon,
+  CreditCard as LicenseIcon,
+  LocalAtm as CostIcon,
+  EvStation as StationIcon,
+} from '@mui/icons-material';
+import {
+  PieChart,
+  Pie,
+  Cell,
+  BarChart,
+  Bar,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RTooltip,
+  ResponsiveContainer,
+  Legend,
+  LineChart,
+  Line,
+} from 'recharts';
 import transportService from 'services/transportService';
 import logger from 'utils/logger';
-import { gradients } from 'theme/palette';
+import { gradients, brandColors } from 'theme/palette';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import CheckIcon from '@mui/icons-material/Check';
-import WarningIcon from '@mui/icons-material/Warning';
-import CancelIcon from '@mui/icons-material/Cancel';
-import HomeIcon from '@mui/icons-material/Home';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import RouteIcon from '@mui/icons-material/Route';
-import SpeedIcon from '@mui/icons-material/Speed';
-import AnalyticsIcon from '@mui/icons-material/Analytics';
-import SearchIcon from '@mui/icons-material/Search';
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import PhoneIcon from '@mui/icons-material/Phone';
-import StarIcon from '@mui/icons-material/Star';
-import SaveIcon from '@mui/icons-material/Save';
-import CloseIcon from '@mui/icons-material/Close';
-import { TrendIcon, ViewIcon } from 'utils/iconAliases';
 
 /* ═══ Constants ═══ */
 const STATUS_MAP = {
@@ -609,7 +650,7 @@ const TransportManagement = () => {
             color: '#DD6B20',
           },
         ].map((s, i) => (
-          <Grid item xs={6} sm={4} md={2} lg key={i}>
+          <Grid item xs={6} sm={4} md={12 / 7 > 1.5 ? 2 : 2} lg key={i}>
             <StatCard {...s} />
           </Grid>
         ))}

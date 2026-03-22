@@ -2,55 +2,62 @@
  * 🦽 إدارة الأجهزة المساعدة — Assistive Devices Management
  * AlAwael ERP — Equipment inventory, assignment, maintenance, tracking
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  useTheme,
-  alpha,
-} from '@mui/material';
-
-import { useSnackbar } from 'contexts/SnackbarContext';
-import { assistiveDeviceService } from 'services/disabilityRehabService';
-import {
-  Avatar,
   Box,
-  Button,
+  Typography,
+  Paper,
+  Grid,
   Card,
   CardContent,
   Chip,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
+  Avatar,
+  LinearProgress,
   Divider,
-  Grid,
   IconButton,
-  InputAdornment,
-  MenuItem,
-  Paper,
-  Stack,
+  Tooltip,
+  Button,
   Tab,
+  Tabs,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Tabs,
   TextField,
-  Tooltip,
-  Typography
+  MenuItem,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Stack,
+  CircularProgress,
+  useTheme,
+  alpha,
+  InputAdornment,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import CheckIcon from '@mui/icons-material/Check';
-import WarningIcon from '@mui/icons-material/Warning';
-import CategoryIcon from '@mui/icons-material/Category';
-import SearchIcon from '@mui/icons-material/Search';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import SaveIcon from '@mui/icons-material/Save';
-import CloseIcon from '@mui/icons-material/Close';
-import { ViewIcon } from 'utils/iconAliases';
+import {
+  Devices as DeviceIcon,
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Search as SearchIcon,
+  Visibility as ViewIcon,
+  AssignmentInd as AssignIcon,
+  AssignmentReturn as ReturnIcon,
+  Build as MaintenanceIcon,
+  CheckCircle as CheckIcon,
+  Warning as WarningIcon,
+  Inventory as InventoryIcon,
+  AttachMoney as CostIcon,
+  Close as CloseIcon,
+  Save as SaveIcon,
+  Category as CategoryIcon,
+  CalendarToday as CalendarIcon,
+} from '@mui/icons-material';
+import { useSnackbar } from 'contexts/SnackbarContext';
+import { assistiveDeviceService } from 'services/disabilityRehabService';
 
 const DEVICE_CATEGORIES = ['تنقل', 'تواصل', 'سمعي', 'بصري', 'تقويم', 'تموضع'];
 const DEVICE_STATUSES = [

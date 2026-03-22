@@ -1,45 +1,56 @@
-import { useState, useCallback } from 'react';
-
-import payrollService from 'services/payrollService';
-import logger from 'utils/logger';
-import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';
-import { useSnackbar } from '../../contexts/SnackbarContext';
+import React, { useState, useCallback } from 'react';
 import {
-  Alert,
-  Avatar,
   Box,
-  Button,
+  Container,
   Card,
   CardContent,
-  Chip,
-  Collapse,
-  Container,
-  Divider,
-  FormControl,
+  Typography,
+  Avatar,
   Grid,
-  IconButton,
+  Button,
+  FormControl,
   InputLabel,
-  LinearProgress,
-  MenuItem,
-  Paper,
   Select,
-  Tab,
+  MenuItem,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
+  Chip,
+  LinearProgress,
+  Divider,
+  Alert,
   Tabs,
+  Tab,
   Tooltip,
-  Typography
+  Paper,
+  IconButton,
+  Collapse,
 } from '@mui/material';
-import ReportIcon from '@mui/icons-material/Report';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import PrintIcon from '@mui/icons-material/Print';
-import DownloadIcon from '@mui/icons-material/Download';
-import ExpandIcon from '@mui/icons-material/Expand';
-import { ChartIcon, CollapseIcon, ExcelIcon } from 'utils/iconAliases';
+import {
+  Assessment as ReportIcon,
+  Download as DownloadIcon,
+  AccountBalance as BankIcon,
+  Security as GOSIIcon,
+  Description as WPSIcon,
+  Print as PrintIcon,
+  BarChart as ChartIcon,
+  CompareArrows as VarianceIcon,
+  Business as DeptIcon,
+  CalendarMonth as AnnualIcon,
+  TrendingUp as TrendUpIcon,
+  TrendingDown as TrendDownIcon,
+  KeyboardArrowDown as ExpandIcon,
+  KeyboardArrowUp as CollapseIcon,
+  TableChart as ExcelIcon,
+  Refresh as RefreshIcon,
+} from '@mui/icons-material';
+import payrollService from 'services/payrollService';
+import logger from 'utils/logger';
+import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';
+import { useSnackbar } from '../../contexts/SnackbarContext';
 
 // ─── Report Type Definitions ───
 const REPORT_TYPES = [

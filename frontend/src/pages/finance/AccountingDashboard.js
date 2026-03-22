@@ -1,33 +1,39 @@
 import { useState, useEffect } from 'react';
-
-import { useNavigate } from 'react-router-dom';
-import accountingService from 'services/accountingService';
-import logger from 'utils/logger';
-import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';
-import { useSnackbar } from '../../contexts/SnackbarContext';
 import {
-  Avatar,
   Box,
+  Container,
+  Grid,
   Card,
   CardContent,
+  Typography,
+  Avatar,
   Chip,
-  Container,
-  Divider,
-  Grid,
-  LinearProgress,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Typography
+  LinearProgress,
+  Divider,
 } from '@mui/material';
-import TrendingUp from '@mui/icons-material/TrendingUp';
-import TrendingDown from '@mui/icons-material/TrendingDown';
-import WalletIcon from '@mui/icons-material/Wallet';
-import ReportIcon from '@mui/icons-material/Report';
-import WarningIcon from '@mui/icons-material/Warning';
+import {
+  AccountBalance as AccountIcon,
+  TrendingUp,
+  TrendingDown,
+  Receipt as InvoiceIcon,
+  MoneyOff as ExpenseIcon,
+  AccountBalanceWallet as WalletIcon,
+  Assessment as ReportIcon,
+  Warning as WarningIcon,
+  ArrowUpward,
+  ArrowDownward,
+} from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
+import accountingService from 'services/accountingService';
+import logger from 'utils/logger';
+import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';
+import { useSnackbar } from '../../contexts/SnackbarContext';
 
 const StatCard = ({ title, value, icon, color, subtitle, trend }) => (
   <Card

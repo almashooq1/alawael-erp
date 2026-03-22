@@ -4,65 +4,77 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-
-import documentService from 'services/documentService';
-import logger from 'utils/logger';
-import { gradients, brandColors } from 'theme/palette';
-import { useSnackbar } from '../../contexts/SnackbarContext';
 import {
-  Avatar,
   Box,
+  Container,
+  Typography,
   Button,
   Card,
   CardContent,
-  Chip,
-  CircularProgress,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControl,
   Grid,
-  IconButton,
+  TextField,
   InputAdornment,
+  FormControl,
   InputLabel,
-  LinearProgress,
-  MenuItem,
-  Paper,
   Select,
+  MenuItem,
+  CircularProgress,
+  Paper,
+  Tabs,
   Tab,
+  Chip,
+  IconButton,
+  Tooltip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   Table,
   TableBody,
   TableCell,
-  TableContainer,
   TableHead,
-  TablePagination,
   TableRow,
-  Tabs,
-  TextField,
-  Tooltip,
-  Typography,
+  TableContainer,
+  TablePagination,
+  LinearProgress,
+  Avatar,
 } from '@mui/material';
-import ImageIcon from '@mui/icons-material/Image';
-import AudioFileIcon from '@mui/icons-material/AudioFile';
-import VideoFileIcon from '@mui/icons-material/VideoFile';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import UploadIcon from '@mui/icons-material/Upload';
-import ScannerIcon from '@mui/icons-material/Scanner';
-import StorageIcon from '@mui/icons-material/Storage';
-import PendingIcon from '@mui/icons-material/Pending';
-import FolderIcon from '@mui/icons-material/Folder';
-import CategoryIcon from '@mui/icons-material/Category';
-import AnalyticsIcon from '@mui/icons-material/Analytics';
-import HistoryIcon from '@mui/icons-material/History';
-import SearchIcon from '@mui/icons-material/Search';
-import FolderOpenIcon from '@mui/icons-material/FolderOpen';
-import DownloadIcon from '@mui/icons-material/Download';
-import ShareIcon from '@mui/icons-material/Share';
-import RestoreIcon from '@mui/icons-material/Restore';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { ExcelIcon, FileIcon, PdfIcon, SharedIcon, ViewIcon, ZipIcon } from 'utils/iconAliases';
+import {
+  CloudUpload as UploadIcon,
+  Search as SearchIcon,
+  Folder as FolderIcon,
+  Description as FileIcon,
+  PictureAsPdf as PdfIcon,
+  Image as ImageIcon,
+  TableChart as ExcelIcon,
+  TextSnippet as TextIcon,
+  Slideshow as PptxIcon,
+  Archive as ZipIcon,
+  InsertDriveFile as OtherFileIcon,
+  Download as DownloadIcon,
+  Visibility as ViewIcon,
+  Delete as DeleteIcon,
+  Restore as RestoreIcon,
+  Share as ShareIcon,
+  Category as CategoryIcon,
+  Assessment as AnalyticsIcon,
+  History as HistoryIcon,
+  Refresh as RefreshIcon,
+  Storage as StorageIcon,
+  PeopleAlt as SharedIcon,
+  HourglassEmpty as PendingIcon,
+  FolderOpen as FolderOpenIcon,
+  Scanner as ScannerIcon,
+  AudioFile as AudioFileIcon,
+  VideoLibrary as VideoFileIcon,
+  DataObject as DataIcon,
+} from '@mui/icons-material';
+import documentService from 'services/documentService';
+import DocumentUploader from 'components/documents/DocumentUploader';
+import DocumentScanner from 'components/documents/DocumentScanner';
+import logger from 'utils/logger';
+import { gradients, brandColors } from 'theme/palette';
+import { useSnackbar } from '../../contexts/SnackbarContext';
 
 /* ──── helpers ──── */
 const formatFileSize = bytes => {

@@ -1,9 +1,10 @@
 /**
  * Debug test to find undefined JSX element in Documents.js
  */
+import React from 'react';
 import { render } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { SnackbarProvider } from 'contexts/SnackbarContext';
+import { SnackbarProvider } from '../../contexts/SnackbarContext';
 
 // Check MUI imports
 import * as MUI from '@mui/material';
@@ -119,11 +120,7 @@ test('Documents RENDERS without "Element type is invalid" error', () => {
   jest.spyOn(ds, 'getFolders').mockResolvedValue([]);
   jest.spyOn(ds, 'formatFileSize').mockReturnValue('0 B');
 
-  // This massive component has many deep dependencies (recharts, etc.)
-  // We verify it does NOT throw "Element type is invalid" (which means bad imports).
-  // Other errors (like missing recharts ResponsiveContainer) are acceptable here.
-  let error = null;
-  try {
+  expect(() => {
     render(
       <MemoryRouter>
         <SnackbarProvider>
@@ -131,14 +128,5 @@ test('Documents RENDERS without "Element type is invalid" error', () => {
         </SnackbarProvider>
       </MemoryRouter>
     );
-  } catch (e) {
-    error = e;
-  }
-
-  // The critical bug we're checking: no "Element type is invalid" (undefined component imports)
-  if (error) {
-    expect(error.message).not.toMatch(/Element type is invalid/);
-    // Also ensure no "is not defined" for MUI icons
-    expect(error.message).not.toMatch(/Icon is not defined/);
-  }
+  }).not.toThrow();
 });

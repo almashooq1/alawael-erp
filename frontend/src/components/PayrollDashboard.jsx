@@ -6,27 +6,14 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { hrService } from '../services/hrService';
 import { useSnackbar } from '../contexts/SnackbarContext';
 import {
-  Paper,
-} from '@mui/material';
-
-import { DEPT_COLORS } from '../constants/departmentColors';
-import { statusColors, neutralColors, surfaceColors } from '../theme/palette';
-import {
-  Avatar,
   Box,
-  Button,
+  Typography,
+  Paper,
+  Grid,
   Card,
   CardContent,
+  Button,
   Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  Grid,
-  IconButton,
-  LinearProgress,
-  MenuItem,
   Table,
   TableBody,
   TableCell,
@@ -34,18 +21,33 @@ import {
   TableHead,
   TableRow,
   TextField,
+  MenuItem,
+  LinearProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Divider,
+  Avatar,
+  IconButton,
   Tooltip,
-  Typography
 } from '@mui/material';
-import PendingIcon from '@mui/icons-material/Pending';
-import MoneyIcon from '@mui/icons-material/Money';
-import DownloadIcon from '@mui/icons-material/Download';
-import PrintIcon from '@mui/icons-material/Print';
-import WalletIcon from '@mui/icons-material/Wallet';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import GroupsIcon from '@mui/icons-material/Groups';
-import ReceiptIcon from '@mui/icons-material/Receipt';
-import { ChartIcon, TrendIcon, ViewIcon } from 'utils/iconAliases';
+import {
+  AttachMoney as MoneyIcon,
+  TrendingUp as TrendIcon,
+  Groups as GroupsIcon,
+  AccountBalanceWallet as WalletIcon,
+  Print as PrintIcon,
+  Refresh as RefreshIcon,
+  Visibility as ViewIcon,
+  CheckCircle as ApprovedIcon,
+  HourglassEmpty as PendingIcon,
+  Receipt as ReceiptIcon,
+  Download as DownloadIcon,
+  Assessment as ChartIcon,
+} from '@mui/icons-material';
+import { DEPT_COLORS } from '../constants/departmentColors';
+import { statusColors, neutralColors, surfaceColors } from '../theme/palette';
 
 /* ─── Constants ─── */
 

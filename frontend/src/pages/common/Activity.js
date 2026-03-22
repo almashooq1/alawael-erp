@@ -1,21 +1,24 @@
 import { useState, useEffect } from 'react';
-
-import apiClient from 'services/api.client';
-import { gradients } from 'theme/palette';
 import {
-  Box,
-  Chip,
-  CircularProgress,
   Container,
+  Typography,
+  Paper,
+  Box,
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
-  Paper,
-  Typography
+  Chip,
+  CircularProgress,
 } from '@mui/material';
-import DoneIcon from '@mui/icons-material/Done';
-import InfoIcon from '@mui/icons-material/Info';
+import {
+  Notifications as NotifIcon,
+  CheckCircle as DoneIcon,
+  Info as InfoIcon,
+  Warning as WarnIcon,
+} from '@mui/icons-material';
+import apiClient from 'services/api.client';
+import { gradients } from 'theme/palette';
 
 const iconMap = {
   success: <DoneIcon color="success" />,

@@ -7,42 +7,51 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-  alpha,
-} from '@mui/material';
-
-import { useSnackbar } from '../../contexts/SnackbarContext';
-import workflowService from '../../services/workflow.service';
-import {
-  Alert,
   Box,
+  Paper,
+  Typography,
   Button,
   Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Grid,
   IconButton,
+  Grid,
+  Stepper,
+  Step,
+  StepLabel,
+  StepContent,
+  Tooltip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
   LinearProgress,
+  alpha,
   List,
   ListItem,
-  ListItemIcon,
   ListItemText,
-  Paper,
-  Step,
-  StepContent,
-  StepLabel,
-  Stepper,
-  TextField,
-  Tooltip,
-  Typography
+  ListItemIcon,
+  Alert,
 } from '@mui/material';
-import CancelIcon from '@mui/icons-material/Cancel';
-import ErrorIcon from '@mui/icons-material/Error';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import PersonIcon from '@mui/icons-material/Person';
-import TaskIcon from '@mui/icons-material/Task';
-import PendingIcon from '@mui/icons-material/Pending';
+import {
+  ArrowBack as BackIcon,
+  Cancel as CancelIcon,
+  PauseCircle as SuspendIcon,
+  PlayCircle as ResumeIcon,
+  CheckCircle as CompleteIcon,
+  Error as ErrorIcon,
+  HourglassBottom as PendingIcon,
+  Assignment as TaskIcon,
+  Refresh as RefreshIcon,
+  AccessTime as TimeIcon,
+  Person as PersonIcon,
+  Description as DescIcon,
+  AccountTree as WorkflowIcon,
+  Circle as DotIcon,
+  Timeline as AuditIcon,
+  DataObject as VarIcon,
+} from '@mui/icons-material';
+import { useSnackbar } from '../../contexts/SnackbarContext';
+import workflowService from '../../services/workflow.service';
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 const INSTANCE_STATUS = {

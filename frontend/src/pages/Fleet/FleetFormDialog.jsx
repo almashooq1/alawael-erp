@@ -2,22 +2,11 @@
  * FleetFormDialog.jsx — Create / Edit dialog for all fleet entity types
  * حوار إضافة / تعديل كيانات الأسطول
  */
-
-
-import { TABS } from './fleetManagement.constants';
 import {
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  TextField
+  Box, Button, TextField, FormControl, InputLabel, Select, MenuItem,
+  Dialog, DialogTitle, DialogContent, DialogActions,
 } from '@mui/material';
+import { TABS } from './fleetManagement.constants';
 
 const FleetFormDialog = ({ dialogOpen, setDialogOpen, dialogType, editItem, form, setForm, handleSave }) => (
   <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>

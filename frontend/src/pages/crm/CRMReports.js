@@ -4,33 +4,51 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import {
-  useTheme,
-} from '@mui/material';
-
-import { crmReportsService, MOCK_CONVERSION_REPORT, MOCK_CRM_DASHBOARD } from 'services/crmService';
-import {
   Box,
   Card,
   CardContent,
-  Chip,
+  Typography,
   Grid,
-  IconButton,
-  LinearProgress,
+  Chip,
   Paper,
   Tab,
+  Tabs,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Tabs,
+  LinearProgress,
+  IconButton,
   Tooltip,
-  Typography
+  useTheme,
 } from '@mui/material';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import TimelineIcon from '@mui/icons-material/Timeline';
-import { TrendIcon } from 'utils/iconAliases';
+import {
+  Refresh as RefreshIcon,
+  TrendingUp as TrendIcon,
+  Assessment as AssessIcon,
+  PieChart as PieIcon,
+  Timeline as TimelineIcon,
+} from '@mui/icons-material';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as ReTooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  LineChart,
+  Line,
+  Legend,
+  AreaChart,
+  Area,
+} from 'recharts';
+import { crmReportsService, MOCK_CONVERSION_REPORT, MOCK_CRM_DASHBOARD } from 'services/crmService';
 
 const COLORS = ['#4FC3F7', '#81C784', '#FFB74D', '#E57373', '#BA68C8', '#4DB6AC'];
 

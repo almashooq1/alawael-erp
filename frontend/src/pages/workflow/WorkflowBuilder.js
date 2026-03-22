@@ -8,46 +8,55 @@
  * - Definition metadata (name, category, permissions)
  * - Save as draft / publish
  */
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
-  alpha,
-} from '@mui/material';
-
-import { useSnackbar } from '../../contexts/SnackbarContext';
-import workflowService from '../../services/workflow.service';
-import {
-  Alert,
-  Avatar,
   Box,
+  Grid,
+  Paper,
+  Typography,
   Button,
+  TextField,
+  MenuItem,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Chip,
+  Avatar,
   Card,
   CardContent,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  FormControlLabel,
-  Grid,
-  IconButton,
-  InputAdornment,
-  MenuItem,
-  Paper,
   Switch,
-  TextField,
+  FormControlLabel,
+  Divider,
   Tooltip,
-  Typography
+  Alert,
+  alpha,
+  InputAdornment,
 } from '@mui/material';
-import StartIcon from '@mui/icons-material/Start';
-import TaskIcon from '@mui/icons-material/Task';
-import ApprovalIcon from '@mui/icons-material/Approval';
-import SaveIcon from '@mui/icons-material/Save';
-import PublishIcon from '@mui/icons-material/Publish';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import AddIcon from '@mui/icons-material/Add';
+import {
+  Add as AddIcon,
+  Delete as DeleteIcon,
+  Edit as EditIcon,
+  Save as SaveIcon,
+  Publish as PublishIcon,
+  PlayArrow as StartIcon,
+  Stop as EndIcon,
+  Assignment as TaskIcon,
+  ThumbUp as ApprovalIcon,
+  Notifications as NotifIcon,
+  AccountTree as ConditionIcon,
+  CallSplit as ParallelIcon,
+  ArrowDownward as ArrowIcon,
+  ArrowUpward as ArrowUpIcon,
+  ArrowBack as BackIcon,
+  ContentCopy as CloneIcon,
+  Timer as SLAIcon,
+  Person as AssignIcon,
+} from '@mui/icons-material';
+import { useSnackbar } from '../../contexts/SnackbarContext';
+import workflowService from '../../services/workflow.service';
 
 // ─── Step type configuration ────────────────────────────────────────────────
 const STEP_TYPES = [

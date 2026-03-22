@@ -12,43 +12,40 @@
  */
 
 import React, { useState } from 'react';
-
-import { statusColors, surfaceColors, neutralColors } from '../../theme/palette';
-import mediaService from '../../services/mediaService';
 import {
-  Avatar,
-  Box,
-  Button,
-  Chip,
-  Dialog,
-  DialogContent,
-  Divider,
-  FormControl,
-  IconButton,
-  InputLabel,
-  MenuItem,
-  Select,
+  Dialog, DialogContent, Box, Typography, IconButton,
+  Avatar, Chip, Button, Divider, Grid, Tooltip,
+  TextField, Select, MenuItem, FormControl, InputLabel,
   Slide,
-  TextField,
-  Tooltip,
-  Typography
 } from '@mui/material';
-import ImageIcon from '@mui/icons-material/Image';
-import ArchiveIcon from '@mui/icons-material/Archive';
-import CloseIcon from '@mui/icons-material/Close';
-import StarIcon from '@mui/icons-material/Star';
-import StarBorderIcon from '@mui/icons-material/StarBorder';
-import DownloadIcon from '@mui/icons-material/Download';
-import CancelIcon from '@mui/icons-material/Cancel';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import SaveIcon from '@mui/icons-material/Save';
-import InfoIcon from '@mui/icons-material/Info';
-import FullscreenIcon from '@mui/icons-material/Fullscreen';
-import FolderIcon from '@mui/icons-material/Folder';
-import PersonIcon from '@mui/icons-material/Person';
-import TagIcon from '@mui/icons-material/Tag';
-import { AudioIcon, DocIcon, FileIcon, VideoIcon } from 'utils/iconAliases';
+import {
+  Close as CloseIcon,
+  Download as DownloadIcon,
+  Star as StarIcon,
+  StarBorder as StarBorderIcon,
+  Delete as DeleteIcon,
+  Edit as EditIcon,
+  Save as SaveIcon,
+  Cancel as CancelIcon,
+  Fullscreen as FullscreenIcon,
+  PushPin as PinIcon,
+  Share as ShareIcon,
+  Image as ImageIcon,
+  Videocam as VideoIcon,
+  AudioFile as AudioIcon,
+  Description as DocIcon,
+  Archive as ArchiveIcon,
+  InsertDriveFile as FileIcon,
+  Info as InfoIcon,
+  Label as TagIcon,
+  Visibility as ViewsIcon,
+  CalendarMonth as DateIcon,
+  Person as PersonIcon,
+  FolderOpen as FolderIcon,
+  Storage as SizeIcon,
+} from '@mui/icons-material';
+import { brandColors, statusColors, surfaceColors, neutralColors, gradients } from '../../theme/palette';
+import mediaService from '../../services/mediaService';
 
 const TYPE_CONFIG = {
   image: { label: 'صورة', icon: <ImageIcon />, color: '#2196f3' },

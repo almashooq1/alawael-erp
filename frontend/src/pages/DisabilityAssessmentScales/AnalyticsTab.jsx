@@ -3,36 +3,39 @@
  * Shows global analytics, comparison radar, and per-beneficiary profiles.
  */
 import { useState, useEffect, useCallback } from 'react';
-
-import assessmentService from 'services/assessmentService';
-import logger from 'utils/logger';
-import { SCALE_ICONS } from './constants';
 import {
-  Alert,
-  Avatar,
   Box,
+  Typography,
+  Grid,
   Card,
   CardContent,
   Chip,
-  Divider,
+  Avatar,
+  CircularProgress,
+  Alert,
   FormControl,
-  Grid,
   InputLabel,
-  LinearProgress,
-  MenuItem,
-  Paper,
   Select,
+  MenuItem,
+  Button,
+  Paper,
+  LinearProgress,
+  Divider,
   Tooltip,
-  Typography
 } from '@mui/material';
-import AnalyticsIcon from '@mui/icons-material/Analytics';
-import AssessmentIcon from '@mui/icons-material/Assessment';
-import CompareIcon from '@mui/icons-material/Compare';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import TrendingDownIcon from '@mui/icons-material/TrendingDown';
-import PersonIcon from '@mui/icons-material/Person';
-import StarIcon from '@mui/icons-material/Star';
-import WarningIcon from '@mui/icons-material/Warning';
+import {
+  Analytics as AnalyticsIcon,
+  CompareArrows as CompareIcon,
+  TrendingUp as TrendingUpIcon,
+  TrendingDown as TrendingDownIcon,
+  Assessment as AssessmentIcon,
+  Person as PersonIcon,
+  Star as StarIcon,
+  Warning as WarningIcon,
+} from '@mui/icons-material';
+import assessmentService from 'services/assessmentService';
+import logger from 'utils/logger';
+import { TabPanel, SCALE_ICONS } from './constants';
 
 /* ── Score bar with label ── */
 const ScoreBar = ({ label, score, maxScore, color }) => {

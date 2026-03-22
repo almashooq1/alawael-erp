@@ -1,42 +1,43 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-
+import {
+  Box,
+  Typography,
+  Paper,
+  Button,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemAvatar,
+  Avatar,
+  IconButton,
+  TextField,
+  InputAdornment,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  Chip,
+  Grid,
+  CircularProgress,
+} from '@mui/material';
+import {
+  Add as AddIcon,
+  Search as SearchIcon,
+  Group as GroupIcon,
+  PersonAdd as PersonAddIcon,
+  MoreVert as MoreVertIcon,
+  Close as CloseIcon,
+} from '@mui/icons-material';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from 'contexts/SnackbarContext';
 import groupsService from 'services/groupsService';
 import { gradients } from '../../theme/palette';
-import { useConfirmDialog } from '../../components/common/ConfirmDialog';
-import {
-  Avatar,
-  Box,
-  Button,
-  Chip,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControl,
-  Grid,
-  IconButton,
-  InputAdornment,
-  InputLabel,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  MenuItem,
-  Paper,
-  Select,
-  TextField,
-  Typography
-} from '@mui/material';
-import GroupIcon from '@mui/icons-material/Group';
-import AddIcon from '@mui/icons-material/Add';
-import SearchIcon from '@mui/icons-material/Search';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
-import CloseIcon from '@mui/icons-material/Close';
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import ConfirmDialog, { useConfirmDialog } from '../../components/common/ConfirmDialog';
 
 const Groups = () => {
   const showSnackbar = useSnackbar();

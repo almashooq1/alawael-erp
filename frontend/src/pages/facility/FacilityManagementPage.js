@@ -3,44 +3,47 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import {
-  Paper,
-} from '@mui/material';
-
-import facilityService from '../../services/facility.service';
-import {
-  Alert,
-  Avatar,
-  Badge,
   Box,
-  Button,
+  Container,
+  Typography,
   Card,
   CardContent,
-  Chip,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
   Grid,
-  IconButton,
-  LinearProgress,
-  MenuItem,
-  Stack,
-  Tab,
+  Button,
+  Chip,
+  Avatar,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Tabs,
+  Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   TextField,
-  Typography
+  MenuItem,
+  LinearProgress,
+  Tabs,
+  Tab,
+  IconButton,
+  Stack,
+  Alert,
+  Badge,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import RoomIcon from '@mui/icons-material/Room';
-import EditIcon from '@mui/icons-material/Edit';
+import {
+  Business as FacilityIcon,
+  Add as AddIcon,
+  Refresh as RefreshIcon,
+  MeetingRoom as RoomIcon,
+  Build as MaintenanceIcon,
+  Edit as EditIcon,
+  Event as BookingIcon,
+  CheckCircle as AvailableIcon,
+} from '@mui/icons-material';
+import facilityService from '../../services/facility.service';
 
 const DEMO_ROOMS = [
   {

@@ -1,63 +1,68 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import knowledgeCenterService from '../../services/knowledgeCenter.service';
-
-import { useSnackbar } from '../../contexts/SnackbarContext';
-import { gradients } from '../../theme/palette';
 import {
-  Alert,
-  Avatar,
-  Badge,
   Box,
-  Button,
-  Card,
-  CardActions,
-  CardContent,
-  Chip,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
+  Typography,
+  Paper,
   Grid,
-  IconButton,
+  Card,
+  CardContent,
+  CardActions,
+  Button,
+  Chip,
+  TextField,
   InputAdornment,
-  LinearProgress,
+  Tabs,
+  Tab,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Divider,
+  IconButton,
+  Avatar,
+  Rating,
+  Tooltip,
+  CircularProgress,
+  Pagination,
+  Badge,
   List,
   ListItem,
+  ListItemText,
   ListItemAvatar,
   ListItemSecondaryAction,
-  ListItemText,
   MenuItem,
-  Pagination,
-  Paper,
-  Rating,
+  LinearProgress,
+  Alert,
   Skeleton,
-  Tab,
-  Tabs,
-  TextField,
-  Tooltip,
-  Typography
 } from '@mui/material';
-import PendingIcon from '@mui/icons-material/Pending';
-import ArchiveIcon from '@mui/icons-material/Archive';
-import ArticleIcon from '@mui/icons-material/Article';
-import BookmarkIcon from '@mui/icons-material/Bookmark';
-import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
-import CommentIcon from '@mui/icons-material/Comment';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import SearchIcon from '@mui/icons-material/Search';
-import BookIcon from '@mui/icons-material/Book';
-import AddIcon from '@mui/icons-material/Add';
-import CategoryIcon from '@mui/icons-material/Category';
-import FilterIcon from '@mui/icons-material/Filter';
-import StarIcon from '@mui/icons-material/Star';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import AnalyticsIcon from '@mui/icons-material/Analytics';
-import CloseIcon from '@mui/icons-material/Close';
-import SendIcon from '@mui/icons-material/Send';
-import { ViewIcon } from 'utils/iconAliases';
+import {
+  Search as SearchIcon,
+  Add as AddIcon,
+  MenuBook as BookIcon,
+  Visibility as ViewIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Bookmark as BookmarkIcon,
+  BookmarkBorder as BookmarkBorderIcon,
+  Comment as CommentIcon,
+  Star as StarIcon,
+  TrendingUp as TrendingIcon,
+  Category as CategoryIcon,
+  Analytics as AnalyticsIcon,
+  Send as SendIcon,
+  Close as CloseIcon,
+  Article as ArticleIcon,
+  CheckCircle as ApprovedIcon,
+  HourglassEmpty as PendingIcon,
+  Drafts as DraftIcon,
+  Archive as ArchiveIcon,
+  Refresh as RefreshIcon,
+  Storage as SeedIcon,
+  FilterList as FilterIcon,
+} from '@mui/icons-material';
+import { useSnackbar } from '../../contexts/SnackbarContext';
+import { gradients } from '../../theme/palette';
 
 /* ── Constants ──────────────────────────────────────────────────────── */
 const STATUS_MAP = {

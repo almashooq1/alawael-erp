@@ -1,52 +1,52 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
-  Paper,
-} from '@mui/material';
-
-import { useSnackbar } from 'contexts/SnackbarContext';
-import { adminService } from 'services/adminService';
-import { gradients, surfaceColors } from '../../theme/palette';
-import { useConfirmDialog } from '../../components/common/ConfirmDialog';
-import {
-  Alert,
   Box,
-  Button,
+  Container,
+  Grid,
   Card,
   CardContent,
   CardHeader,
-  Chip,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  FormControl,
-  Grid,
-  IconButton,
-  InputLabel,
-  LinearProgress,
-  MenuItem,
-  Select,
+  Typography,
   Switch,
-  Tab,
+  Button,
+  TextField,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Divider,
+  Alert,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  IconButton,
+  Chip,
+  LinearProgress,
+  Paper,
+  Tab,
   Tabs,
-  TextField,
-  Typography
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import WarningIcon from '@mui/icons-material/Warning';
-import EditIcon from '@mui/icons-material/Edit';
-import BlockIcon from '@mui/icons-material/Block';
-import DeleteIcon from '@mui/icons-material/Delete';
-import SaveIcon from '@mui/icons-material/Save';
-import { ActiveIcon } from 'utils/iconAliases';
+import {
+  Save as SaveIcon,
+  Delete as DeleteIcon,
+  Edit as EditIcon,
+  Add as AddIcon,
+  Block as BlockIcon,
+  CheckCircle as ActiveIcon,
+  Warning as WarningIcon,
+  AdminPanelSettings as AdminPanelIcon,
+} from '@mui/icons-material';
+import { useSnackbar } from 'contexts/SnackbarContext';
+import { adminService } from 'services/adminService';
+import { gradients, surfaceColors } from '../../theme/palette';
+import ConfirmDialog, { useConfirmDialog } from '../../components/common/ConfirmDialog';
 
 const AdminPanel = () => {
   const showSnackbar = useSnackbar();

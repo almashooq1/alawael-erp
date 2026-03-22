@@ -2,48 +2,61 @@
  * إدارة الأعوام الدراسية
  * Academic Year Management
  */
-import { useState, useEffect, useCallback } from 'react';
-
-import { useNavigate } from 'react-router-dom';
-import { gradients } from '../../theme/palette';
-import educationSystemService from '../../services/educationSystem.service';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Alert,
-  Box,
-  Button,
-  Chip,
   Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  FormControl,
   Grid,
-  IconButton,
-  InputLabel,
-  LinearProgress,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  MenuItem,
   Paper,
-  Select,
+  Box,
+  Typography,
+  Button,
+  Card,
+  CardContent,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   TextField,
+  Chip,
+  IconButton,
   Tooltip,
-  Typography
+  LinearProgress,
+  Alert,
+  Tab,
+  Tabs,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemIcon,
+  Divider,
+  Switch,
+  FormControlLabel,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormControl,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { ActiveIcon, CalendarIcon, InactiveIcon } from 'utils/iconAliases';
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  CalendarMonth as CalendarIcon,
+  ArrowBack as BackIcon,
+  CheckCircle as ActiveIcon,
+  RadioButtonUnchecked as InactiveIcon,
+  DateRange as SemesterIcon,
+  Settings as SettingsIcon,
+  Refresh as RefreshIcon,
+} from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
+import { gradients } from '../../theme/palette';
+import educationSystemService from '../../services/educationSystem.service';
 
 const { academicYearService } = educationSystemService;
 

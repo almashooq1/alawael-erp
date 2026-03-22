@@ -1,22 +1,23 @@
-
-
-import { surfaceColors } from '../../theme/palette';
 import {
-  Alert,
   Box,
-  Chip,
-  Dialog,
-  DialogContent,
-  DialogTitle,
+  Typography,
   Grid,
-  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  Chip,
   LinearProgress,
+  Alert,
   Paper,
+  IconButton,
   Tooltip,
-  Typography
 } from '@mui/material';
-import PrintIcon from '@mui/icons-material/Print';
-import CloseIcon from '@mui/icons-material/Close';
+import { Print as PrintIcon, Close as CloseIcon } from '@mui/icons-material';
+import {
+  RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
+  ResponsiveContainer, Tooltip as RechartsTooltip,
+} from 'recharts';
+import { surfaceColors } from '../../theme/palette';
 
 /**
  * Dialog showing the full detail of a single assessment result:

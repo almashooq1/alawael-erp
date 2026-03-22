@@ -1,31 +1,32 @@
-
-
+import {
+  Box,
+  Typography,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Chip,
+  Slider,
+  Alert,
+  Paper,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  IconButton,
+  Collapse,
+} from '@mui/material';
+import {
+  Assessment as AssessmentIcon,
+  Close as CloseIcon,
+  BarChart as BarChartIcon,
+  TipsAndUpdates as TipsIcon,
+} from '@mui/icons-material';
 import { useState } from 'react';
 import assessmentService from 'services/assessmentService';
 import { SCALE_ICONS } from './constants';
-import {
-  Alert,
-  Box,
-  Button,
-  Chip,
-  Collapse,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControl,
-  IconButton,
-  InputLabel,
-  MenuItem,
-  Paper,
-  Select,
-  Slider,
-  TextField,
-  Typography
-} from '@mui/material';
-import AssessmentIcon from '@mui/icons-material/Assessment';
-import CloseIcon from '@mui/icons-material/Close';
-import BarChartIcon from '@mui/icons-material/BarChart';
 
 /* ── Auto-recommendation engine based on domain scores ── */
 const generateAutoRecommendations = (scale, domainScores) => {

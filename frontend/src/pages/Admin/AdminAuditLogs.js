@@ -1,43 +1,44 @@
 import { useState, useEffect } from 'react';
-
-import { adminService } from 'services/adminService';
-import exportService from 'services/exportService';
-import logger from 'utils/logger';
-import { useSnackbar } from 'contexts/SnackbarContext';
-import { gradients, brandColors, surfaceColors } from 'theme/palette';
-import { useAuth } from 'contexts/AuthContext';
 import {
   Box,
-  Button,
+  Container,
+  Grid,
   Card,
   CardContent,
   CardHeader,
-  Chip,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControl,
-  Grid,
-  InputAdornment,
-  InputLabel,
-  LinearProgress,
-  MenuItem,
-  Select,
+  Typography,
+  TextField,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  TextField,
-  Typography
+  Chip,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  InputAdornment,
+  LinearProgress,
 } from '@mui/material';
-import HistoryIcon from '@mui/icons-material/History';
-import DownloadIcon from '@mui/icons-material/Download';
-import FilterAltIcon from '@mui/icons-material/FilterAlt';
-import VisibilityIcon from '@mui/icons-material/Visibility';
+import {
+  History as HistoryIcon,
+  FilterAlt as FilterAltIcon,
+  Download as DownloadIcon,
+  Visibility as VisibilityIcon,
+} from '@mui/icons-material';
+import { adminService } from 'services/adminService';
+import exportService from 'services/exportService';
+import logger from 'utils/logger';
+import { useSnackbar } from 'contexts/SnackbarContext';
+import { gradients, brandColors, surfaceColors } from 'theme/palette';
+import { useAuth } from 'contexts/AuthContext';
 
 const AdminAuditLogs = () => {
   const { currentUser } = useAuth();

@@ -2,21 +2,13 @@
  * StudentReportInsights — Insights, Risk Signals, Recommendations & Comparison
  */
 
-
+import React from 'react';
 import {
-  Alert,
-  Box,
-  Card,
-  CardContent,
-  Chip,
-  Divider,
-  Grid,
-  LinearProgress,
-  Paper,
-  Stack,
-  Typography
+  Box, Grid, Card, CardContent, Typography, Stack,
+  Chip, Divider, LinearProgress, Alert, Paper,
 } from '@mui/material';
-import InsightsIcon from '@mui/icons-material/Insights';
+import { Insights as InsightsIcon } from '@mui/icons-material';
+
 const StudentReportInsights = ({
   safeInsights, safeRiskSignals, safeRecommendations,
   safeComparison, comparisonCurrentLabel, comparisonCurrentSummary,

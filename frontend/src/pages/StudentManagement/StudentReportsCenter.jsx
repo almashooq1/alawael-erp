@@ -2,70 +2,69 @@
  * Student Reports Center — مركز تقارير الطلاب الشاملة
  * لوحة مركزية لعرض وإدارة جميع أنواع التقارير المتاحة
  */
-import { useState, useEffect, useCallback } from 'react';
-
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Container, Typography, Grid, Paper, Box, Chip, Button,
+  LinearProgress, Tabs, Tab, Card, CardContent, CardActions,
+  Dialog, DialogTitle, DialogContent, DialogActions,
+  Checkbox, FormControlLabel, FormGroup, Alert,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  Divider, IconButton, Tooltip, CircularProgress,
+  TextField, MenuItem, Select, InputLabel, FormControl, Switch,
+  Collapse, Snackbar,
+} from '@mui/material';
+import {
+  Description as ReportIcon,
+  School as AcademicIcon,
+  Psychology as BehaviorIcon,
+  HealthAndSafety as HealthIcon,
+  FamilyRestroom as FamilyIcon,
+  SwapHoriz as TransitionIcon,
+  Analytics as AnalyticsIcon,
+  Build as CustomIcon,
+  FileDownload as ExportIcon,
+  Schedule as ScheduleIcon,
+  TrendingUp as TrendUpIcon,
+  Compare as CompareIcon,
+  EventAvailable as AttendanceIcon,
+  People as PeopleIcon,
+  Timeline as TimelineIcon,
+  DateRange as PeriodicIcon,
+  Assessment as AssessmentIcon,
+  Print as PrintIcon,
+  Refresh as RefreshIcon,
+  NewReleases as NewIcon,
+  Star as StarIcon,
+  ArrowBack as BackIcon,
+  Visibility as ViewIcon,
+  Email as EmailIcon,
+  WhatsApp as WhatsAppIcon,
+  Add as AddIcon,
+  Delete as DeleteIcon,
+  Pause as PauseIcon,
+  PlayArrow as PlayIcon,
+  Send as SendIcon,
+  History as HistoryIcon,
+  CheckCircle as SuccessIcon,
+  Error as ErrorIcon,
+  ExpandMore as ExpandIcon,
+  ExpandLess as CollapseIcon,
+  NotificationsActive as NotifIcon,
+  Close as CloseIcon,
+} from '@mui/icons-material';
+import {
+  BarChart, Bar, PieChart, Pie, Cell, LineChart, Line, RadarChart,
+  PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
+  XAxis, YAxis, CartesianGrid, Tooltip as RTooltip,
+  ResponsiveContainer, Legend, AreaChart, Area,
+} from 'recharts';
 import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import { gradients, chartColors, statusColors } from '../../theme/palette';
+import { gradients, chartColors, statusColors, brandColors } from '../../theme/palette';
 import logger from '../../utils/logger';
 import studentManagementService from '../../services/studentManagementService';
-import {
-  Alert,
-  Box,
-  Button,
-  Card,
-  CardActions,
-  CardContent,
-  Chip,
-  CircularProgress,
-  Collapse,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  FormControl,
-  Grid,
-  IconButton,
-  InputLabel,
-  LinearProgress,
-  MenuItem,
-  Paper,
-  Select,
-  Switch,
-  Tab,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Tabs,
-  TextField,
-  Tooltip,
-  Typography
-} from '@mui/material';
-import ReportIcon from '@mui/icons-material/Report';
-import CompareIcon from '@mui/icons-material/Compare';
-import PeopleIcon from '@mui/icons-material/People';
-import TimelineIcon from '@mui/icons-material/Timeline';
-import AnalyticsIcon from '@mui/icons-material/Analytics';
-import AssessmentIcon from '@mui/icons-material/Assessment';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import StarIcon from '@mui/icons-material/Star';
-import ScheduleIcon from '@mui/icons-material/Schedule';
-import EmailIcon from '@mui/icons-material/Email';
-import WhatsAppIcon from '@mui/icons-material/WhatsApp';
-import AddIcon from '@mui/icons-material/Add';
-import ExpandIcon from '@mui/icons-material/Expand';
-import PauseIcon from '@mui/icons-material/Pause';
-import SendIcon from '@mui/icons-material/Send';
-import HistoryIcon from '@mui/icons-material/History';
-import DeleteIcon from '@mui/icons-material/Delete';
-import PrintIcon from '@mui/icons-material/Print';
-import ErrorIcon from '@mui/icons-material/Error';
-import { CollapseIcon, ViewIcon } from 'utils/iconAliases';
+import DashboardErrorBoundary from '../../components/dashboard/shared/DashboardErrorBoundary';
+import EmptyState from '../../components/dashboard/shared/EmptyState';
 
 /* ──────── Helper Components ──────── */
 const SectionHeader = ({ icon, title, subtitle, action }) => (

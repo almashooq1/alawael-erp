@@ -1,43 +1,50 @@
-import { useState, useEffect, useCallback } from 'react';
-
-import { auditService } from 'services/operationsService';
-import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';
-import { useSnackbar } from '../../contexts/SnackbarContext';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Avatar,
   Box,
-  Button,
+  Container,
   Card,
   CardContent,
-  Chip,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControl,
+  Typography,
+  Avatar,
   Grid,
-  IconButton,
+  Button,
+  TextField,
   InputAdornment,
-  InputLabel,
-  LinearProgress,
-  MenuItem,
-  Select,
-  Tab,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
+  Chip,
+  LinearProgress,
   Tabs,
-  TextField,
+  Tab,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
   Tooltip,
-  Typography
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import SearchIcon from '@mui/icons-material/Search';
-import { ViewIcon } from 'utils/iconAliases';
+import {
+  FactCheck as AuditIcon,
+  Add as AddIcon,
+  Search as SearchIcon,
+  Assignment as PlanIcon,
+  ReportProblem as NCRIcon,
+  BugReport as CAPAIcon,
+  Visibility as ViewIcon,
+  CalendarMonth as CalIcon,
+} from '@mui/icons-material';
+import { auditService } from 'services/operationsService';
+import logger from 'utils/logger';
+import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';
+import { useSnackbar } from '../../contexts/SnackbarContext';
 
 const planStatusConfig = {
   draft: { label: 'مسودة', color: 'default' },

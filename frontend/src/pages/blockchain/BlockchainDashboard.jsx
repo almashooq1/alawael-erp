@@ -1,25 +1,19 @@
 /**
  * لوحة تحكم شهادات البلوكتشين — Blockchain Certificates Dashboard
  */
-import { useState, useEffect } from 'react';
-
-import { getDashboard, certificatesService, templatesService } from '../../services/blockchainService';
+import React, { useState, useEffect } from 'react';
 import {
-  Box,
-  Card,
-  CardContent,
-  Chip,
-  CircularProgress,
-  Grid,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Typography
+  Box, Grid, Paper, Typography, Card, CardContent, Chip, Button,
+  Table, TableHead, TableRow, TableCell, TableBody, CircularProgress,
+  Dialog, DialogTitle, DialogContent, DialogActions, TextField,
 } from '@mui/material';
-import DashboardIcon from '@mui/icons-material/Dashboard';
+import {
+  VerifiedUser as CertIcon,
+  Description as TemplateIcon,
+  Search as VerifyIcon,
+  Dashboard as DashboardIcon,
+} from '@mui/icons-material';
+import { getDashboard, certificatesService, templatesService } from '../../services/blockchainService';
 
 const statusLabels = { draft: 'مسودة', issued: 'مصدرة', signed: 'موقعة', revoked: 'ملغاة' };
 const statusColors = { draft: 'default', issued: 'info', signed: 'success', revoked: 'error' };

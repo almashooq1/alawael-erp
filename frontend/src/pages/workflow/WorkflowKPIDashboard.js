@@ -4,31 +4,23 @@
  * Real-time KPI analytics, bottleneck analysis, workload distribution,
  * completion trends, and category breakdowns.
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  alpha,
-} from '@mui/material';
-
-import { useSnackbar } from '../../contexts/SnackbarContext';
-import workflowService from '../../services/workflow.service';
-import {
-  Alert,
-  Avatar,
   Box,
+  Paper,
+  Typography,
   Button,
+  Grid,
   Card,
   CardContent,
+  IconButton,
   Chip,
   Divider,
-  FormControl,
-  Grid,
-  IconButton,
-  LinearProgress,
   MenuItem,
-  Paper,
   Select,
-  Skeleton,
+  FormControl,
+  Tabs,
   Tab,
   Table,
   TableBody,
@@ -36,17 +28,30 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Tabs,
-  Typography
+  Avatar,
+  LinearProgress,
+  alpha,
+  Skeleton,
+  Alert,
 } from '@mui/material';
-import AssessmentIcon from '@mui/icons-material/Assessment';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import CheckIcon from '@mui/icons-material/Check';
-import ScheduleIcon from '@mui/icons-material/Schedule';
-import WarningIcon from '@mui/icons-material/Warning';
-import TimerIcon from '@mui/icons-material/Timer';
-import GroupIcon from '@mui/icons-material/Group';
-import CategoryIcon from '@mui/icons-material/Category';
+import {
+  Refresh as RefreshIcon,
+  ArrowBack as BackIcon,
+  TrendingUp as TrendUpIcon,
+  TrendingDown as TrendDownIcon,
+  Assessment as AssessmentIcon,
+  Group as GroupIcon,
+  Warning as WarningIcon,
+  Timer as TimerIcon,
+  CheckCircle as CheckIcon,
+  Schedule as ScheduleIcon,
+  Category as CategoryIcon,
+  CameraAlt as SnapshotIcon,
+  BugReport as BottleneckIcon,
+  PieChart as PieIcon,
+} from '@mui/icons-material';
+import { useSnackbar } from '../../contexts/SnackbarContext';
+import workflowService from '../../services/workflow.service';
 
 function KPIStatCard({ title, value, subtitle, icon, color, trend }) {
   return (

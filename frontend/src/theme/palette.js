@@ -13,7 +13,6 @@
 // ──────────────────────────────────────────────
 //  Brand gradients (135deg, from → to)
 // ──────────────────────────────────────────────
-import { Box, Chip } from '@mui/material';
 export const gradients = {
   /** Main brand gradient – purple‑blue → purple */
   primary: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',

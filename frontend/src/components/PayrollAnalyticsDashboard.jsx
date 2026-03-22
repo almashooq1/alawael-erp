@@ -4,45 +4,28 @@
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-
+import {
+  Container, Typography, Grid, Paper, Box, Button, TextField, Card, CardContent,
+  Chip, Avatar, IconButton, Tooltip, CircularProgress, Divider,
+  MenuItem, LinearProgress, Table, TableBody, TableCell, TableContainer,
+  TableHead, TableRow,
+} from '@mui/material';
+import {
+  Refresh as RefreshIcon, Download as DownloadIcon, Print as PrintIcon,
+  Groups as GroupsIcon, AttachMoney as MoneyIcon,
+  TrendingUp as TrendIcon, TrendingDown as DownIcon,
+  Percent as PercentIcon, Assessment as AssessmentIcon,
+  EmojiEvents as TrophyIcon, Analytics as AnalyticsIcon,
+  CalendarMonth as CalendarIcon,
+} from '@mui/icons-material';
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer,
+  LineChart, Line, PieChart, Pie, Cell,
+} from 'recharts';
 import apiClient from 'services/api.client';
 import { useSnackbar } from 'contexts/SnackbarContext';
 import { DEPT_COLORS } from '../constants/departmentColors';
 import { statusColors, chartColors, neutralColors, surfaceColors, gradients, rankColors } from 'theme/palette';
-import {
-  Avatar,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  CircularProgress,
-  Container,
-  Divider,
-  Grid,
-  IconButton,
-  LinearProgress,
-  MenuItem,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TextField,
-  Tooltip,
-  Typography
-} from '@mui/material';
-import AnalyticsIcon from '@mui/icons-material/Analytics';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import DownloadIcon from '@mui/icons-material/Download';
-import PrintIcon from '@mui/icons-material/Print';
-import GroupsIcon from '@mui/icons-material/Groups';
-import MoneyIcon from '@mui/icons-material/Money';
-import PercentIcon from '@mui/icons-material/Percent';
-import AssessmentIcon from '@mui/icons-material/Assessment';
-import { CalendarIcon, TrendIcon } from 'utils/iconAliases';
 
 /* ─── Constants ─── */
 

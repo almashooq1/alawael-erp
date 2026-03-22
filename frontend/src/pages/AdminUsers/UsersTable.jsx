@@ -3,26 +3,24 @@
  * جدول المستخدمين مع الترقيم والإجراءات
  */
 
-
-import { brandColors, surfaceColors } from '../../theme/palette';
 import {
   Box,
-  Card,
-  CardHeader,
-  Chip,
-  IconButton,
+  Typography,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
-  TablePagination,
   TableRow,
+  TablePagination,
+  Chip,
+  Card,
+  CardHeader,
+  IconButton,
   Tooltip,
-  Typography
 } from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
+import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import { brandColors, surfaceColors } from '../../theme/palette';
 
 const UsersTable = ({
   filteredUsers,

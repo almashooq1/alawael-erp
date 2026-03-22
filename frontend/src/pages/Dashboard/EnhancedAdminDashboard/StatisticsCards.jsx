@@ -1,20 +1,22 @@
-
-
-import { gradients } from 'theme/palette';
 import {
-  Avatar,
-  Box,
+  Grid,
   Card,
   CardContent,
-  Grid,
+  Typography,
+  Box,
+  Avatar,
   Skeleton,
-  Typography
 } from '@mui/material';
-import People from '@mui/icons-material/People';
-import AttachMoney from '@mui/icons-material/AttachMoney';
-import CheckCircle from '@mui/icons-material/CheckCircle';
-import TrendingUp from '@mui/icons-material/TrendingUp';
-import TrendingDown from '@mui/icons-material/TrendingDown';
+import {
+  People,
+  EventNote,
+  AttachMoney,
+  CheckCircle,
+  TrendingUp,
+  TrendingDown,
+} from '@mui/icons-material';
+import { motion } from 'framer-motion';
+import { gradients } from 'theme/palette';
 
 const cardVariants = {
   hidden: { opacity: 0, y: 20 },

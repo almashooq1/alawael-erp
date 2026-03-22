@@ -1,6 +1,7 @@
 /**
  * Knowledge Center Routes — مسارات مركز المعرفة
  */
+import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const KnowledgeDashboard = lazyWithRetry(() => import('../pages/knowledge/KnowledgeDashboard'));

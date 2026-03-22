@@ -1,3 +1,4 @@
+import { Checkbox, FormControlLabel, FormGroup, Button, Box } from '@mui/material';
 
 /**
  * مكون اختيار الأعمدة المخصصة للجدول
@@ -6,13 +7,6 @@
  * @param {Function} onChange - دالة عند تغيير الأعمدة المختارة
  * @param {Function} onClose - دالة عند إغلاق نافذة الاختيار
  */
-import {
-  Box,
-  Button,
-  Checkbox,
-  FormControlLabel,
-  FormGroup
-} from '@mui/material';
 const CustomColumnSelector = ({ columns, selected, onChange, onClose }) => {
   const handleToggle = (id) => {
     if (selected.includes(id)) {

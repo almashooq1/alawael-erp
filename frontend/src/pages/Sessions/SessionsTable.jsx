@@ -2,47 +2,23 @@
  * SessionsTable — Search, filters, table, pagination, and quick actions
  * Now supports cancel / attendance / no-show + backend-aligned status & type fields
  */
-import { Paper,
+import React from 'react';
+import {
+  Card, CardContent, Stack, TextField, InputAdornment, Button, Collapse,
+  MenuItem, TableContainer, Paper, Table, TableHead, TableRow, TableCell,
+  TableBody, Skeleton, Typography, Box, Avatar, Chip, IconButton, Tooltip,
+  TablePagination,
 } from '@mui/material';
-
+import {
+  Search as SearchIcon, FilterList, Add as AddIcon,
+  Edit as EditIcon, Delete as DeleteIcon,
+  Event as EventIcon, CalendarToday, AccessTime, Person, LocalHospital,
+  CheckCircle as CheckCircleIcon, Cancel as CancelIcon, PersonOff as NoShowIcon,
+} from '@mui/icons-material';
 import {
   SESSION_TYPES, STATUS_MAP, STATUS_FILTER_OPTIONS,
   getTypeColor, getSessionType, formatDate, formatTime,
 } from './constants';
-import {
-  Avatar,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Collapse,
-  IconButton,
-  InputAdornment,
-  MenuItem,
-  Skeleton,
-  Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TablePagination,
-  TableRow,
-  TextField,
-  Tooltip,
-  Typography
-} from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import FilterList from '@mui/icons-material/FilterList';
-import EventIcon from '@mui/icons-material/Event';
-import AddIcon from '@mui/icons-material/Add';
-import CalendarToday from '@mui/icons-material/CalendarToday';
-import Person from '@mui/icons-material/Person';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import CancelIcon from '@mui/icons-material/Cancel';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
 
 const SessionsTable = ({
   filtered, loading, totalCount, search, setSearch,

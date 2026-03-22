@@ -1,7 +1,15 @@
-
-
-import { statusColors } from 'theme/palette';
 import { Card, CardContent, Typography } from '@mui/material';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as ChartTooltip,
+  Legend,
+  ResponsiveContainer,
+} from 'recharts';
+import { statusColors } from 'theme/palette';
 
 /** Weekly progress bar chart (scheduled vs completed) */
 const WeeklyProgressChart = ({ weeklyProgress }) => (

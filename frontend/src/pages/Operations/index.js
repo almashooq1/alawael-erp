@@ -2,25 +2,31 @@
  * OperationsManagement — Main orchestrator (split into sub-components)
  * Manages assets, equipment, maintenance, schedules, licenses, and branches.
  */
-
-import { gradients } from '../../theme/palette';
-
-import useOperationsManagement from './useOperationsManagement';
+import React from 'react';
 import {
+  Container,
+  Typography,
   Box,
-  Button,
+  Grid,
   Card,
   CardContent,
-  Container,
-  Grid,
-  LinearProgress,
   Paper,
-  Tab,
   Tabs,
-  Typography
+  Tab,
+  Button,
+  LinearProgress,
 } from '@mui/material';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import AddIcon from '@mui/icons-material/Add';
+import {
+  Add as AddIcon,
+  Refresh as RefreshIcon,
+  Engineering as MaintenanceIcon,
+} from '@mui/icons-material';
+import { gradients } from '../../theme/palette';
+import ConfirmDialog from '../../components/common/ConfirmDialog';
+
+import useOperationsManagement from './useOperationsManagement';
+import OperationsTable from './OperationsTable';
+import OperationsDialog from './OperationsDialog';
 
 const OperationsManagement = () => {
   const ctx = useOperationsManagement();

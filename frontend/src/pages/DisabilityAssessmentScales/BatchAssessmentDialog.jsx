@@ -3,37 +3,49 @@
  * Allows applying multiple scales in one session for a single beneficiary.
  */
 import { useState, useMemo } from 'react';
-
+import {
+  Box,
+  Typography,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Chip,
+  Slider,
+  Alert,
+  Paper,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  IconButton,
+  Checkbox,
+  FormControlLabel,
+  Stepper,
+  Step,
+  StepLabel,
+  StepContent,
+  LinearProgress,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Avatar,
+  Divider,
+} from '@mui/material';
+import {
+  Assessment as AssessmentIcon,
+  Close as CloseIcon,
+  PlaylistAddCheck as BatchIcon,
+  ExpandMore as ExpandMoreIcon,
+  NavigateNext as NextIcon,
+  NavigateBefore as BackIcon,
+  Save as SaveIcon,
+} from '@mui/icons-material';
 import assessmentService from 'services/assessmentService';
 import logger from 'utils/logger';
 import { SCALE_ICONS } from './constants';
-import {
-  Alert,
-  Avatar,
-  Box,
-  Button,
-  Checkbox,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  FormControl,
-  FormControlLabel,
-  IconButton,
-  InputLabel,
-  LinearProgress,
-  MenuItem,
-  Paper,
-  Select,
-  Slider,
-  TextField,
-  Typography
-} from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
-import AssessmentIcon from '@mui/icons-material/Assessment';
-import SaveIcon from '@mui/icons-material/Save';
 
 const BatchAssessmentDialog = ({
   open,

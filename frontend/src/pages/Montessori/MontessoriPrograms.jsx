@@ -12,49 +12,40 @@
  * @version 2.0.0
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { useTheme,
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import {
+  Container, Typography, Grid, Paper, Box, Avatar,
+  Chip, LinearProgress, Button, TextField, MenuItem, IconButton,
+  Tooltip, Dialog, DialogTitle, DialogContent, DialogActions,
+  Stack, InputAdornment, CardActions, CardContent, Card, useTheme, alpha,
 } from '@mui/material';
-
+import {
+  School as SchoolIcon,
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Search as SearchIcon,
+  Refresh as RefreshIcon,
+  ArrowBack as BackIcon,
+  People as PeopleIcon,
+  CalendarToday as CalendarIcon,
+  TrendingUp as TrendingIcon,
+  Download as DownloadIcon,
+} from '@mui/icons-material';
+import {
+  PieChart, Pie, Cell, Tooltip as RTooltip, ResponsiveContainer,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend,
+} from 'recharts';
+import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import { useConfirmDialog } from '../../components/common/ConfirmDialog';
+import ConfirmDialog, { useConfirmDialog } from '../../components/common/ConfirmDialog';
 import { gradients, statusColors } from '../../theme/palette';
+import { ChartTooltip } from '../../components/dashboard/shared/ChartTooltip';
+import EmptyState from '../../components/dashboard/shared/EmptyState';
+import DashboardErrorBoundary from '../../components/dashboard/shared/DashboardErrorBoundary';
 import logger from '../../utils/logger';
 import montessoriService from '../../services/montessoriService';
-import {
-  Avatar,
-  Box,
-  Button,
-  Card,
-  CardActions,
-  CardContent,
-  Chip,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Grid,
-  IconButton,
-  InputAdornment,
-  LinearProgress,
-  MenuItem,
-  Paper,
-  Stack,
-  TextField,
-  Tooltip,
-  Typography
-} from '@mui/material';
-import DownloadIcon from '@mui/icons-material/Download';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import AddIcon from '@mui/icons-material/Add';
-import SchoolIcon from '@mui/icons-material/School';
-import PeopleIcon from '@mui/icons-material/People';
-import SearchIcon from '@mui/icons-material/Search';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { CalendarIcon } from 'utils/iconAliases';
 
 /* ─── Animated counter ─── */
 const useAnimatedCounter = (endValue, duration = 1200) => {

@@ -4,33 +4,56 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import {
-  useTheme,
-} from '@mui/material';
-
-import { trainingReportsService, MOCK_TRAINING_DASHBOARD } from 'services/trainingService';
-import {
-  Avatar,
   Box,
   Card,
   CardContent,
-  Chip,
+  Typography,
   Grid,
-  IconButton,
-  LinearProgress,
-  List,
-  ListItem,
-  ListItemText,
+  Chip,
+  Avatar,
   Paper,
   Tab,
   Tabs,
+  LinearProgress,
+  IconButton,
   Tooltip,
-  Typography
+  List,
+  ListItem,
+  ListItemText,
+  useTheme,
 } from '@mui/material';
-import SchoolIcon from '@mui/icons-material/School';
-import PeopleIcon from '@mui/icons-material/People';
-import StarIcon from '@mui/icons-material/Star';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import { TrendIcon } from 'utils/iconAliases';
+import {
+  School as SchoolIcon,
+  People as PeopleIcon,
+  AccessTime as TimeIcon,
+  Star as StarIcon,
+  TrendingUp as TrendIcon,
+  AccountBalanceWallet as BudgetIcon,
+  Refresh as RefreshIcon,
+  CheckCircle as CheckIcon,
+  PlayCircle as PlayIcon,
+} from '@mui/icons-material';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as ReTooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  LineChart,
+  Line,
+  Legend,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  Radar,
+} from 'recharts';
+import { trainingReportsService, MOCK_TRAINING_DASHBOARD } from 'services/trainingService';
 
 const COLORS = ['#42A5F5', '#66BB6A', '#FFA726', '#EF5350', '#AB47BC', '#26A69A'];
 

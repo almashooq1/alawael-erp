@@ -2,56 +2,61 @@
  * 📊 مكتبة المقاييس المتخصصة — Specialized Assessment Scales Library
  * AlAwael ERP — Browse, filter, and manage specialized disability assessment scales
  */
-import { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
+  Box,
+  Typography,
+  Paper,
+  Grid,
+  Card,
+  CardContent,
+  CardActions,
+  Chip,
+  TextField,
+  InputAdornment,
+  Button,
+  Avatar,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  IconButton,
+  Divider,
+  Stack,
+  LinearProgress,
+  Collapse,
   useTheme,
   alpha,
-} from '@mui/material';
-
-import {
-  SPECIALIZED_SCALES_CATALOG,
-  SCALE_CATEGORY_LABELS,
-  DISABILITY_LABELS,
-} from 'services/specializedRehab.service';
-import {
-  Avatar,
-  Box,
-  Button,
-  Card,
-  CardActions,
-  CardContent,
-  Chip,
-  Collapse,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  Grid,
-  IconButton,
-  InputAdornment,
-  LinearProgress,
-  Paper,
-  Stack,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  TextField,
-  Typography
 } from '@mui/material';
-import PsychologyIcon from '@mui/icons-material/Psychology';
-import MemoryIcon from '@mui/icons-material/Memory';
-import AssignmentIcon from '@mui/icons-material/Assignment';
-import SearchIcon from '@mui/icons-material/Search';
-import FilterIcon from '@mui/icons-material/Filter';
-import InfoIcon from '@mui/icons-material/Info';
-import CloseIcon from '@mui/icons-material/Close';
-import ExpandIcon from '@mui/icons-material/Expand';
-import StarIcon from '@mui/icons-material/Star';
-import { CollapseIcon } from 'utils/iconAliases';
+import {
+  Search as SearchIcon,
+  Psychology as PsychologyIcon,
+  DirectionsRun as MotorIcon,
+  Memory as MemoryIcon,
+  RecordVoiceOver as SpeechIcon,
+  EmojiPeople as BehaviorIcon,
+  ChildCare as DevIcon,
+  AccessibilityNew as AdaptiveIcon,
+  FilterList as FilterIcon,
+  Info as InfoIcon,
+  Schedule as ClockIcon,
+  Star as StarIcon,
+  ExpandMore as ExpandIcon,
+  ExpandLess as CollapseIcon,
+  Assignment as AssignmentIcon,
+  Close as CloseIcon,
+} from '@mui/icons-material';
+import {
+  SPECIALIZED_SCALES_CATALOG,
+  SCALE_CATEGORY_LABELS,
+  DISABILITY_LABELS,
+} from 'services/specializedRehab.service';
 
 /* ───── icon lookup ───── */
 const CATEGORY_ICONS = {

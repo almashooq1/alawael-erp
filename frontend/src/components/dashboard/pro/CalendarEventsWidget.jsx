@@ -2,36 +2,25 @@
  * 📅 CalendarEventsWidget — ويدجت التقويم والأحداث
  * Professional calendar widget with upcoming events, hijri date, and quick scheduling
  */
-import { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
-  useTheme,
+  Box, Paper, Typography, Grid, Chip, IconButton, Tooltip,
+  useTheme, Divider, Button, Avatar, Badge, List, ListItem,
+  ListItemAvatar, ListItemText, ListItemSecondaryAction,
 } from '@mui/material';
-import { gradients, statusColors, brandColors } from 'theme/palette';
-import {
-  Avatar,
-  Box,
-  Chip,
-  Divider,
-  Grid,
-  IconButton,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  Paper,
-  Tooltip,
-  Typography
-} from '@mui/material';
-import GroupIcon from '@mui/icons-material/Group';
+import { motion } from 'framer-motion';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import EventIcon from '@mui/icons-material/Event';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import NotificationsIcon from '@mui/icons-material/Notifications';
-import VideoCallIcon from '@mui/icons-material/VideoCall';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import AddIcon from '@mui/icons-material/Add';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
+import GroupIcon from '@mui/icons-material/Group';
+import VideoCallIcon from '@mui/icons-material/VideoCall';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import TodayIcon from '@mui/icons-material/Today';
+import AddIcon from '@mui/icons-material/Add';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import { gradients, statusColors, brandColors, chartColors } from 'theme/palette';
 
 const DAYS_AR = ['أحد', 'اثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت'];
 const MONTHS_AR = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];

@@ -1,6 +1,7 @@
 /**
  * Integrated Care Routes — مسارات الرعاية المتكاملة
  */
+import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const CarePlansDashboard = lazyWithRetry(() => import('../pages/IntegratedCare/CarePlansDashboard'));

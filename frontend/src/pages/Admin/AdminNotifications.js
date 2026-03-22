@@ -1,47 +1,49 @@
 import { useState, useEffect } from 'react';
-
-import { adminService } from 'services/adminService';
-import api from 'services/api.client';
-import { getStatusColor } from 'utils/statusColors';
-import logger from 'utils/logger';
-import { gradients } from 'theme/palette';
-import { useAuth } from 'contexts/AuthContext';
-import { useConfirmDialog } from 'components/common/ConfirmDialog';
-import { useSnackbar } from '../../contexts/SnackbarContext';
 import {
   Box,
-  Button,
+  Container,
+  Grid,
   Card,
   CardContent,
   CardHeader,
-  Chip,
-  Container,
+  Typography,
+  TextField,
+  Button,
   Dialog,
-  DialogActions,
-  DialogContent,
   DialogTitle,
-  FormControl,
-  FormControlLabel,
-  Grid,
-  IconButton,
-  InputLabel,
-  LinearProgress,
-  MenuItem,
-  Select,
-  Switch,
+  DialogContent,
+  DialogActions,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  TextField,
+  Chip,
+  IconButton,
   Tooltip,
-  Typography
+  LinearProgress,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Switch,
+  FormControlLabel,
 } from '@mui/material';
-import NotificationsIcon from '@mui/icons-material/Notifications';
-import SendIcon from '@mui/icons-material/Send';
-import DeleteIcon from '@mui/icons-material/Delete';
+import {
+  Notifications as NotificationsIcon,
+  Delete as DeleteIcon,
+  Send as SendIcon,
+  Edit as EditNotificationIcon,
+} from '@mui/icons-material';
+import { adminService } from 'services/adminService';
+import api from 'services/api.client';
+import { getStatusColor } from 'utils/statusColors';
+import logger from 'utils/logger';
+import { gradients } from 'theme/palette';
+import { useAuth } from 'contexts/AuthContext';
+import ConfirmDialog, { useConfirmDialog } from 'components/common/ConfirmDialog';
+import { useSnackbar } from '../../contexts/SnackbarContext';
 
 const AdminNotifications = () => {
   const showSnackbar = useSnackbar();

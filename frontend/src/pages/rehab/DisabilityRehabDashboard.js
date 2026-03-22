@@ -2,12 +2,51 @@
  * ♿ لوحة تحكم تأهيل ذوي الإعاقة — Disability Rehabilitation Dashboard
  * AlAwael ERP — Unified overview: KPIs, distribution, trends, recent programs & sessions
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
+  Box,
+  Typography,
+  Paper,
+  Grid,
+  Card,
+  CardContent,
+  Chip,
+  Avatar,
+  LinearProgress,
+  Divider,
+  IconButton,
+  Tooltip,
+  Button,
+  Tab,
+  Tabs,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  CircularProgress,
+  Stack,
   useTheme,
   alpha,
 } from '@mui/material';
-
+import {
+  AccessibleForward as RehabIcon,
+  TrendingUp as TrendIcon,
+  People as PeopleIcon,
+  EventNote as SessionIcon,
+  EmojiEvents as GoalIcon,
+  Assessment as AssessmentIcon,
+  Devices as DevicesIcon,
+  LocalHospital as TherapistIcon,
+  CalendarToday as CalendarIcon,
+  ArrowForward as ArrowIcon,
+  Refresh as RefreshIcon,
+  Speed as SpeedIcon,
+  CheckCircle as CheckIcon,
+  Warning as WarningIcon,
+  Schedule as ScheduleIcon,
+} from '@mui/icons-material';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from 'contexts/SnackbarContext';
 import {
@@ -16,37 +55,6 @@ import {
   therapySessionService,
   assistiveDeviceService,
 } from 'services/disabilityRehabService';
-import {
-  Avatar,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  CircularProgress,
-  Divider,
-  Grid,
-  LinearProgress,
-  Paper,
-  Stack,
-  Tab,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Tabs,
-  Typography
-} from '@mui/material';
-import PeopleIcon from '@mui/icons-material/People';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import DevicesIcon from '@mui/icons-material/Devices';
-import CheckIcon from '@mui/icons-material/Check';
-import SpeedIcon from '@mui/icons-material/Speed';
-import WarningIcon from '@mui/icons-material/Warning';
-import ScheduleIcon from '@mui/icons-material/Schedule';
-import { TrendIcon } from 'utils/iconAliases';
 
 /* ───── helpers ───── */
 const fmtNum = n => (n ?? 0).toLocaleString('ar-SA');

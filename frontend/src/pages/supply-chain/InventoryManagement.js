@@ -1,45 +1,53 @@
-import { useState, useEffect, useCallback } from 'react';
-
-import { inventoryService } from 'services/operationsService';
-import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';
-import { useSnackbar } from '../../contexts/SnackbarContext';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Avatar,
   Box,
-  Button,
+  Container,
   Card,
   CardContent,
-  Chip,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControl,
+  Typography,
+  Avatar,
   Grid,
-  IconButton,
+  Button,
+  TextField,
   InputAdornment,
-  InputLabel,
-  LinearProgress,
-  MenuItem,
-  Select,
-  Tab,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
+  Chip,
+  LinearProgress,
   Tabs,
-  TextField,
+  Tab,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Alert,
   Tooltip,
-  Typography
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import SearchIcon from '@mui/icons-material/Search';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { TrendIcon } from 'utils/iconAliases';
+import {
+  Inventory as InvIcon,
+  Add as AddIcon,
+  Search as SearchIcon,
+  Warning as WarnIcon,
+  Warehouse as WhIcon,
+  Category as CatIcon,
+  TrendingUp as TrendIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  FilterList as FilterIcon,
+} from '@mui/icons-material';
+import { inventoryService } from 'services/operationsService';
+import logger from 'utils/logger';
+import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';
+import { useSnackbar } from '../../contexts/SnackbarContext';
 
 const units = ['قطعة', 'رزمة', 'كيلوغرام', 'لتر', 'صندوق', 'متر', 'طن'];
 

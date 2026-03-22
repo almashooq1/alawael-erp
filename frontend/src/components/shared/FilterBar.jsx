@@ -1,20 +1,30 @@
 import { useState, useCallback, useMemo } from 'react';
 import {
-  Badge,
   Box,
-  Button,
-  Chip,
-  Collapse,
-  FormControl,
-  IconButton,
-  InputAdornment,
-  InputLabel,
-  MenuItem,
-  Paper,
-  Select,
   TextField,
-  Tooltip
+  InputAdornment,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Chip,
+  Button,
+  IconButton,
+  Tooltip,
+  Collapse,
+  Paper,
+  Badge,
+  alpha,
 } from '@mui/material';
+import {
+  Search as SearchIcon,
+  FilterList as FilterIcon,
+  Clear as ClearIcon,
+  DateRange as DateIcon,
+  ExpandMore as ExpandIcon,
+  ExpandLess as CollapseIcon,
+} from '@mui/icons-material';
+import { useDebounce } from 'hooks';
 
 /**
  * FilterBar — Reusable search + filter bar with expandable advanced filters.
@@ -26,11 +36,6 @@ import {
  * @param {Array}    [props.filters]           — [{id,label,options:[{value,label}],value,multiple?}]
  * @param {function} [props.onFilterChange]    — (filterId, value) => void
  * @param {string}   [props.dateFrom]          — Start date value
-import SearchIcon from '@mui/icons-material/Search';
-import ClearIcon from '@mui/icons-material/Clear';
-import FilterIcon from '@mui/icons-material/Filter';
-import ExpandIcon from '@mui/icons-material/Expand';
-import { CollapseIcon } from 'utils/iconAliases';
  * @param {string}   [props.dateTo]            — End date value
  * @param {function} [props.onDateChange]      — (field, value) => void
  * @param {boolean}  [props.showDateFilter]    — Show date range

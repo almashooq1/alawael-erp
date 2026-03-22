@@ -12,82 +12,74 @@
  * - Module browser
  */
 
-import { useState, useEffect, useCallback } from 'react';
-
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Box, Paper, Typography, Grid, Card, CardContent, CardActions,
+  Button, IconButton, Tabs, Tab, Chip, TextField, MenuItem,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  Dialog, DialogTitle, DialogContent, DialogActions,
+  Stepper, Step, StepLabel, StepContent,
+  LinearProgress, CircularProgress, Alert, AlertTitle,
+  Tooltip, Divider, Badge, Avatar, Switch, FormControlLabel,
+  List, ListItem, ListItemIcon, ListItemText,
+  Accordion, AccordionSummary, AccordionDetails,
+  Fade, Collapse, InputAdornment, Select, FormControl, InputLabel,
+  Checkbox, Slider, Rating,
+} from '@mui/material';
+import {
+  CloudUpload as UploadIcon,
+  CloudDownload as DownloadIcon,
+  Description as FileIcon,
+  Assessment as StatsIcon,
+  History as HistoryIcon,
+  Settings as SettingsIcon,
+  Refresh as RefreshIcon,
+  Search as SearchIcon,
+  Delete as DeleteIcon,
+  Replay as RetryIcon,
+  Cancel as CancelIcon,
+  CheckCircle as SuccessIcon,
+  Error as ErrorIcon,
+  Warning as WarningIcon,
+  Info as InfoIcon,
+  ExpandMore as ExpandIcon,
+  FileCopy as TemplateIcon,
+  ViewModule as ModuleIcon,
+  GetApp as GetAppIcon,
+  Publish as PublishIcon,
+  TableChart as ExcelIcon,
+  PictureAsPdf as PdfIcon,
+  Code as JsonIcon,
+  TextSnippet as CsvIcon,
+  Archive as ZipIcon,
+  DataObject as XmlIcon,
+  Storage as DataIcon,
+  TrendingUp as TrendIcon,
+  Speed as SpeedIcon,
+  Visibility as PreviewIcon,
+  Map as MapIcon,
+  PlayArrow as RunIcon,
+  Stop as StopIcon,
+  DoneAll as DoneAllIcon,
+  FolderOpen as FolderIcon,
+  SwapHoriz as SwapIcon,
+  ArrowForward as ArrowIcon,
+  ArrowBack as BackIcon,
+  Schedule as ScheduleIcon,
+  BarChart as BarChartIcon,
+  HighQuality as QualityIcon,
+  Timer as TimerIcon,
+  PowerSettingsNew as ToggleOnIcon,
+  SelectAll as SelectAllIcon,
+  Transform as TransformIcon,
+  CheckBox as CheckBoxIcon,
+  CheckBoxOutlineBlank as CheckBoxBlankIcon,
+  DonutLarge as DonutIcon,
+  TrendingDown as TrendDownIcon,
+  AutoFixHigh as AutoFixIcon,
+} from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import importExportProService from '../../services/importExportPro.service';
-import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  Alert,
-  AlertTitle,
-  Avatar,
-  Badge,
-  Box,
-  Button,
-  Card,
-  CardActions,
-  CardContent,
-  Chip,
-  CircularProgress,
-  Collapse,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  FormControl,
-  FormControlLabel,
-  Grid,
-  IconButton,
-  InputAdornment,
-  InputLabel,
-  LinearProgress,
-  MenuItem,
-  Paper,
-  Select,
-  Step,
-  StepContent,
-  StepLabel,
-  Stepper,
-  Switch,
-  Tab,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Tabs,
-  TextField,
-  Tooltip,
-  Typography
-} from '@mui/material';
-import ErrorIcon from '@mui/icons-material/Error';
-import WarningIcon from '@mui/icons-material/Warning';
-import InfoIcon from '@mui/icons-material/Info';
-import CancelIcon from '@mui/icons-material/Cancel';
-import DownloadIcon from '@mui/icons-material/Download';
-import UploadIcon from '@mui/icons-material/Upload';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import SpeedIcon from '@mui/icons-material/Speed';
-import HistoryIcon from '@mui/icons-material/History';
-import ScheduleIcon from '@mui/icons-material/Schedule';
-import BarChartIcon from '@mui/icons-material/BarChart';
-import SearchIcon from '@mui/icons-material/Search';
-import FolderIcon from '@mui/icons-material/Folder';
-import DeleteIcon from '@mui/icons-material/Delete';
-import GetAppIcon from '@mui/icons-material/GetApp';
-import TimerIcon from '@mui/icons-material/Timer';
-import SelectAllIcon from '@mui/icons-material/SelectAll';
-import CheckBoxIcon from '@mui/icons-material/CheckBox';
-import MapIcon from '@mui/icons-material/Map';
-import ExpandIcon from '@mui/icons-material/Expand';
-import PreviewIcon from '@mui/icons-material/Preview';
-import SettingsIcon from '@mui/icons-material/Settings';
-import DoneAllIcon from '@mui/icons-material/DoneAll';
-import { ExcelIcon, FileIcon, PdfIcon, TrendIcon, ZipIcon } from 'utils/iconAliases';
 
 // ─────────────────────────────────────────────────
 // Constants

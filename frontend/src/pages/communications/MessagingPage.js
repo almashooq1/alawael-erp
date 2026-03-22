@@ -1,7 +1,8 @@
 // Messaging Page - Wrapper for Chat Component
+import ChatComponent from '../../components/messaging/ChatComponent';
+import { Container, Typography, Box } from '@mui/material';
+import { Forum as ForumIcon } from '@mui/icons-material';
 import { gradients } from 'theme/palette';
-import { Box, Container, Typography } from '@mui/material';
-import ForumIcon from '@mui/icons-material/Forum';
 
 const MessagingPage = () => {
   return (

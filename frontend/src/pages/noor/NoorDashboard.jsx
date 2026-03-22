@@ -7,45 +7,48 @@
  *  - Academic progress reports
  *  - Disability type & placement analytics
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Paper,
-} from '@mui/material';
-
-import noorService from '../../services/noor.service';
-import {
-  Alert,
   Box,
-  Button,
+  Typography,
   Card,
   CardContent,
-  Chip,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
   Grid,
-  IconButton,
-  LinearProgress,
-  MenuItem,
-  Tab,
+  Button,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Tabs,
+  Paper,
+  Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   TextField,
+  MenuItem,
+  Tabs,
+  Tab,
+  IconButton,
   Tooltip,
-  Typography
+  Alert,
+  LinearProgress,
+  CircularProgress,
 } from '@mui/material';
-import SchoolIcon from '@mui/icons-material/School';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import SyncIcon from '@mui/icons-material/Sync';
-import ReportIcon from '@mui/icons-material/Report';
-import AddIcon from '@mui/icons-material/Add';
+import {
+  School as SchoolIcon,
+  Sync as SyncIcon,
+  Description as IEPIcon,
+  Assessment as ReportIcon,
+  Add as AddIcon,
+  Refresh as RefreshIcon,
+  CloudUpload as SubmitIcon,
+  Person as StudentIcon,
+  TrendingUp as ProgressIcon,
+} from '@mui/icons-material';
+import noorService from '../../services/noor.service';
 
 /* ─── Status label maps ─── */
 const enrollmentStatusMap = {

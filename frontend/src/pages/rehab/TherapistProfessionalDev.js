@@ -1,45 +1,52 @@
 import { useState, useEffect } from 'react';
-
-import { therapistService } from 'services/therapistService';
-import logger from 'utils/logger';
-import { useAuth } from 'contexts/AuthContext';
-import { useSnackbar } from '../../contexts/SnackbarContext';
-import { statusColors, neutralColors, surfaceColors } from '../../theme/palette';
 import {
-  Avatar,
   Box,
-  Button,
+  Container,
   Card,
   CardContent,
-  Chip,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControl,
+  Typography,
   Grid,
+  Button,
+  Chip,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Select,
+  MenuItem,
+  FormControl,
   InputLabel,
+  Paper,
+  Tooltip,
   LinearProgress,
+  Divider,
+  Avatar,
   List,
   ListItem,
   ListItemAvatar,
   ListItemText,
-  MenuItem,
-  Paper,
-  Select,
-  TextField,
-  Typography
 } from '@mui/material';
-import SchoolIcon from '@mui/icons-material/School';
-import GroupsIcon from '@mui/icons-material/Groups';
-import BuildIcon from '@mui/icons-material/Build';
-import ScienceIcon from '@mui/icons-material/Science';
-import StarIcon from '@mui/icons-material/Star';
-import TimerIcon from '@mui/icons-material/Timer';
-import CheckIcon from '@mui/icons-material/Check';
-import AddIcon from '@mui/icons-material/Add';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import {
+  Add as AddIcon,
+  School as SchoolIcon,
+  EmojiEvents as TrophyIcon,
+  CardMembership as CertIcon,
+  Groups as GroupsIcon,
+  Science as ScienceIcon,
+  Build as BuildIcon,
+  TrendingUp as TrendingUpIcon,
+  CalendarToday as CalendarIcon,
+  Timer as TimerIcon,
+  Star as StarIcon,
+  CheckCircle as CheckIcon,
+} from '@mui/icons-material';
+import { therapistService } from 'services/therapistService';
+import logger from 'utils/logger';
+import { useAuth } from 'contexts/AuthContext';
+import { useSnackbar } from '../../contexts/SnackbarContext';
+import { gradients, statusColors, neutralColors, surfaceColors } from '../../theme/palette';
 
 const categoryIcons = {
   courses: <SchoolIcon />,

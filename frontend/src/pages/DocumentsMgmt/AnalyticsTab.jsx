@@ -10,23 +10,22 @@
  * تبويب التحليلات: بطاقات عامة، رسم بياني دائري وأكثر المستندات تحميلاً
  */
 
-
-
-import { chartColors } from '../../theme/palette';
 import {
-  Alert,
+  Grid,
   Card,
   CardContent,
-  Grid,
-  LinearProgress,
+  Typography,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Typography
+  LinearProgress,
+  Alert,
 } from '@mui/material';
+import { Pie } from 'react-chartjs-2';
+import { chartColors } from '../../theme/palette';
 
 export const TemplatesTab = () => (
   <Grid container spacing={3}>

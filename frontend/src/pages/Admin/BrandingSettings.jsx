@@ -9,67 +9,75 @@
  * - تعديل تذييل الصفحة
  * - معاينة التغييرات في الوقت الفعلي
  */
-import { useState, useCallback, useRef } from 'react';
-
-import { gradients } from 'theme/palette';
-import { useSnackbar } from 'contexts/SnackbarContext';
-import { useAuth } from 'contexts/AuthContext';
-import logger from 'utils/logger';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
-  Alert,
-  Avatar,
-  Badge,
   Box,
-  Button,
+  Container,
+  Grid,
   Card,
   CardContent,
   CardHeader,
-  Chip,
-  CircularProgress,
-  Collapse,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  Fade,
-  FormControl,
+  Typography,
+  TextField,
+  Button,
+  Switch,
   FormControlLabel,
-  Grid,
+  Divider,
+  Alert,
+  Avatar,
+  Chip,
+  Tabs,
+  Tab,
   IconButton,
-  InputLabel,
-  MenuItem,
+  Tooltip,
   Paper,
   Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
   Slider,
   Stack,
-  Switch,
-  Tab,
-  Tabs,
-  TextField,
-  Typography
+  Badge,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  CircularProgress,
+  Fade,
+  Collapse,
 } from '@mui/material';
-import ImageIcon from '@mui/icons-material/Image';
-import PaletteIcon from '@mui/icons-material/Palette';
-import TextFieldsIcon from '@mui/icons-material/TextFields';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import TuneIcon from '@mui/icons-material/Tune';
-import BrushIcon from '@mui/icons-material/Brush';
-import PreviewIcon from '@mui/icons-material/Preview';
-import SaveIcon from '@mui/icons-material/Save';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import CameraIcon from '@mui/icons-material/Camera';
-import UploadIcon from '@mui/icons-material/Upload';
-import DeleteIcon from '@mui/icons-material/Delete';
-import WallpaperIcon from '@mui/icons-material/Wallpaper';
-import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
-import CheckIcon from '@mui/icons-material/Check';
-import ColorLensIcon from '@mui/icons-material/ColorLens';
-import GradientIcon from '@mui/icons-material/Gradient';
-import DarkModeIcon from '@mui/icons-material/DarkMode';
-import SettingsIcon from '@mui/icons-material/Settings';
-import RefreshIcon from '@mui/icons-material/Refresh';
+import {
+  Palette as PaletteIcon,
+  Image as ImageIcon,
+  TextFields as TextFieldsIcon,
+  Save as SaveIcon,
+  Refresh as RefreshIcon,
+  Preview as PreviewIcon,
+  Upload as UploadIcon,
+  Delete as DeleteIcon,
+  Brush as BrushIcon,
+  FormatColorFill as ColorFillIcon,
+  Settings as SettingsIcon,
+  Dashboard as DashboardIcon,
+  PhotoCamera as CameraIcon,
+  Visibility as VisibilityIcon,
+  ColorLens as ColorLensIcon,
+  AutoAwesome as AutoAwesomeIcon,
+  TuneRounded as TuneIcon,
+  DesignServices as DesignIcon,
+  WbSunny as LightModeIcon,
+  DarkMode as DarkModeIcon,
+  Wallpaper as WallpaperIcon,
+  FormatSize as FontSizeIcon,
+  BorderStyle as BorderIcon,
+  RoundedCorner as RadiusIcon,
+  Gradient as GradientIcon,
+  CheckCircle as CheckIcon,
+} from '@mui/icons-material';
+import { gradients, brandColors } from 'theme/palette';
+import { useSnackbar } from 'contexts/SnackbarContext';
+import { useAuth } from 'contexts/AuthContext';
+import logger from 'utils/logger';
 
 // =================== تعريف الثيمات المُعدّة مسبقاً ===================
 const PRESET_THEMES = [

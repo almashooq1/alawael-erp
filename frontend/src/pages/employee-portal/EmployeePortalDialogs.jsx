@@ -2,23 +2,23 @@
  * EmployeePortalDialogs — Leave / Request / Payslip detail dialogs
  * Extracted from EmployeePortal.js for maintainability
  */
-
-import { LEAVE_TYPES, REQUEST_TYPES, fmt } from './employeePortalData';
+import React from 'react';
 import {
   Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
   Grid,
+  Typography,
+  Button,
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   MenuItem,
   Paper,
-  TextField,
-  Typography
+  Divider,
 } from '@mui/material';
-import DownloadIcon from '@mui/icons-material/Download';
+import { Download as DownloadIcon } from '@mui/icons-material';
+import { LEAVE_TYPES, REQUEST_TYPES, fmt } from './employeePortalData';
 
 /* ─── Leave Request Dialog ─── */
 export function LeaveDialog({

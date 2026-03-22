@@ -4,17 +4,10 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import {
-  Box,
-  ButtonBase,
-  Grid,
-  InputAdornment,
-  Paper,
-  TextField,
-  Typography,
-  useTheme
-} from '@mui/material';
+import { Box, Paper, Typography, Grid, ButtonBase, useTheme, TextField, InputAdornment } from '@mui/material';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import SearchIcon from '@mui/icons-material/Search';
 import PeopleIcon from '@mui/icons-material/People';
 import AccessibilityNewIcon from '@mui/icons-material/AccessibilityNew';
 import BadgeIcon from '@mui/icons-material/Badge';
@@ -29,7 +22,6 @@ import InventoryIcon from '@mui/icons-material/Inventory';
 
 import { formatNumber } from 'services/dashboardService';
 import { brandColors } from '../../theme/palette';
-import SearchIcon from '@mui/icons-material/Search';
 
 const ICON_MAP = {
   People: PeopleIcon,

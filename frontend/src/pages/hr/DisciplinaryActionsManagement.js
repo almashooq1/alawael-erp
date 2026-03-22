@@ -1,44 +1,50 @@
 /**
  * Disciplinary Actions Management — إدارة الإنذارات والإجراءات التأديبية
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Paper,
-} from '@mui/material';
-
-import {
-  getDisciplinaryActions,
-  createDisciplinaryAction,
-  getDisciplinaryActionById,
-  approveDisciplinaryAction,
-} from '../../services/hr/employeeAffairsExpandedService';
-import {
-  Alert,
   Box,
+  Typography,
+  Paper,
   Button,
   Chip,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Grid,
-  IconButton,
+  TextField,
   MenuItem,
-  Snackbar,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Grid,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
-  TablePagination,
   TableRow,
-  TextField,
+  TablePagination,
+  IconButton,
   Tooltip,
-  Typography
+  Card,
+  CardContent,
+  Alert,
+  Snackbar,
+  CircularProgress,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import { ViewIcon } from 'utils/iconAliases';
+import {
+  Add as AddIcon,
+  Visibility as ViewIcon,
+  Gavel as GavelIcon,
+  Warning as WarningIcon,
+  ThumbUp as ApproveIcon,
+  AppRegistration as AppealIcon,
+} from '@mui/icons-material';
+import {
+  getDisciplinaryActions,
+  createDisciplinaryAction,
+  getDisciplinaryActionById,
+  approveDisciplinaryAction,
+  fileDisciplinaryAppeal,
+} from '../../services/hr/employeeAffairsExpandedService';
 
 const ACTION_TYPES = [
   'تنبيه شفهي',

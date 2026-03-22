@@ -1,29 +1,30 @@
 import { useState, useEffect } from 'react';
-
-import { useNavigate, useLocation } from 'react-router-dom';
-import { modulesAPI, withMockFallback } from 'services/api';
-import moduleMocks from 'data/moduleMocks';
-import logger from 'utils/logger';
-import { gradients, statusColors, surfaceColors, chartColors } from '../../theme/palette';
-import { useSnackbar } from '../../contexts/SnackbarContext';
 import {
-  Alert,
   Box,
-  Button,
   Card,
   CardContent,
-  Chip,
+  Typography,
+  Button,
+  Stack,
   Divider,
   Grid,
+  Chip,
   List,
   ListItem,
   ListItemText,
   Skeleton,
-  Stack,
-  Typography
+  Alert,
 } from '@mui/material';
-import DashboardIcon from '@mui/icons-material/Dashboard';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { modulesAPI, withMockFallback } from 'services/api';
+import moduleMocks from 'data/moduleMocks';
+import Sparkline from 'components/Sparkline';
+import BarChart from 'components/BarChart';
+import logger from 'utils/logger';
+import { gradients, statusColors, surfaceColors, chartColors } from '../../theme/palette';
+import { useSnackbar } from '../../contexts/SnackbarContext';
 
 const ModulePage = ({ title, moduleKey = 'reports' }) => {
   const navigate = useNavigate();

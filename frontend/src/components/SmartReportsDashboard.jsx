@@ -1,37 +1,38 @@
 import { useState, useEffect } from 'react';
-
-import exportService from 'services/exportService';
-import logger from 'utils/logger';
-import { gradients, surfaceColors, neutralColors, brandColors } from 'theme/palette';
 import {
   Box,
-  Button,
   Card,
   CardContent,
   CardHeader,
-  Chip,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
   Grid,
-  LinearProgress,
-  MenuItem,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
   Select,
-  Tab,
+  MenuItem,
+  Chip,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableRow,
+  CircularProgress,
+  Tab,
   Tabs,
-  TextField
+  LinearProgress,
 } from '@mui/material';
-import DownloadIcon from '@mui/icons-material/Download';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import AddIcon from '@mui/icons-material/Add';
+import {
+  Download as DownloadIcon,
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+} from '@mui/icons-material';
+import exportService from 'services/exportService';
+import logger from 'utils/logger';
+import { gradients, surfaceColors, neutralColors, brandColors } from 'theme/palette';
 
 /**
  * مكون لوحة التقارير الذكية

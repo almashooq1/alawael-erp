@@ -15,53 +15,47 @@
  * @version 1.0.0
  */
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
-
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import {
+  Container, Typography, Grid, Paper, Box, Card, CardContent, Avatar,
+  Chip, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  LinearProgress, Button, Tab, Tabs, TextField, MenuItem, Skeleton,
+  IconButton, Tooltip, Divider, Alert, Stack,
+} from '@mui/material';
+import {
+  Analytics as AnalyticsIcon,
+  TrendingUp as TrendingUpIcon,
+  TrendingDown as TrendingDownIcon,
+  CheckCircle as CheckCircleIcon,
+  Cancel as CancelIcon,
+  PersonOff as NoShowIcon,
+  Schedule as ScheduleIcon,
+  AccessTime as AccessTimeIcon,
+  Groups as GroupsIcon,
+  MeetingRoom as RoomIcon,
+  AttachMoney as MoneyIcon,
+  TrackChanges as GoalIcon,
+  FileDownload as ExportIcon,
+  Refresh as RefreshIcon,
+  CalendarMonth as CalendarIcon,
+  EventBusy as CancelAnalysisIcon,
+  BarChart as BarChartIcon,
+  PieChart as PieChartIcon,
+} from '@mui/icons-material';
+import {
+  BarChart, Bar, PieChart, Pie, Cell, LineChart, Line, AreaChart, Area,
+  XAxis, YAxis, CartesianGrid, Tooltip as RTooltip,
+  ResponsiveContainer, Legend, RadarChart, Radar,
+  PolarGrid, PolarAngleAxis, PolarRadiusAxis,
+} from 'recharts';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, chartColors, statusColors } from '../../theme/palette';
 import logger from '../../utils/logger';
 import { therapistService } from '../../services/therapistService';
-import {
-  Alert,
-  Avatar,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Container,
-  Divider,
-  Grid,
-  IconButton,
-  LinearProgress,
-  MenuItem,
-  Paper,
-  Skeleton,
-  Stack,
-  Tab,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Tabs,
-  TextField,
-  Tooltip,
-  Typography
-} from '@mui/material';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import TrendingDownIcon from '@mui/icons-material/TrendingDown';
-import AnalyticsIcon from '@mui/icons-material/Analytics';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import ScheduleIcon from '@mui/icons-material/Schedule';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import CancelIcon from '@mui/icons-material/Cancel';
-import GroupsIcon from '@mui/icons-material/Groups';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import RoomIcon from '@mui/icons-material/Room';
-import BarChartIcon from '@mui/icons-material/BarChart';
-import MoneyIcon from '@mui/icons-material/Money';
+import ModuleKPICard from '../../components/dashboard/shared/ModuleKPICard';
+import EmptyState from '../../components/dashboard/shared/EmptyState';
+import DashboardErrorBoundary from '../../components/dashboard/shared/DashboardErrorBoundary';
 
 /* ──────────── Demo / fallback data ──────────── */
 

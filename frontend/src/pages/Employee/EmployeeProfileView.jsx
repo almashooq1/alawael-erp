@@ -2,33 +2,22 @@
  * EmployeeProfileView.jsx — Profile view mode + shared SectionHeader
  * عرض بيانات الموظف في وضع العرض
  */
-
+import {
+  Typography, Grid, Box, Chip, Avatar, IconButton, DialogTitle,
+  DialogContent, Tooltip, Divider,
+} from '@mui/material';
+import {
+  Edit as EditIcon, Close as CloseIcon, Person as PersonIcon,
+  Work as WorkIcon, Phone as PhoneIcon, Email as EmailIcon,
+  Badge as BadgeIcon, CalendarMonth as CalendarIcon,
+  Business as DeptIcon, Print as PrintIcon,
+  Cake as BirthIcon, Flag as NatIcon, CreditCard as IdIcon,
+  Home as HomeIcon, LocationCity as CityIcon, LocalHospital as EmergIcon,
+  AccountBalance as BankIcon,
+} from '@mui/icons-material';
 import { STATUS_MAP, CONTRACT_TYPES, GENDERS, MARITAL_STATUS } from './employeeManagement.constants';
 import { DEPT_COLORS } from '../../constants/departmentColors';
 import { statusColors } from '../../theme/palette';
-import {
-  Avatar,
-  Box,
-  Chip,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  Grid,
-  IconButton,
-  Tooltip,
-  Typography
-} from '@mui/material';
-import PrintIcon from '@mui/icons-material/Print';
-import EditIcon from '@mui/icons-material/Edit';
-import CloseIcon from '@mui/icons-material/Close';
-import PersonIcon from '@mui/icons-material/Person';
-import NatIcon from '@mui/icons-material/Nat';
-import WorkIcon from '@mui/icons-material/Work';
-import BadgeIcon from '@mui/icons-material/Badge';
-import PhoneIcon from '@mui/icons-material/Phone';
-import EmailIcon from '@mui/icons-material/Email';
-import HomeIcon from '@mui/icons-material/Home';
-import { CalendarIcon } from 'utils/iconAliases';
 
 /* ─── Shared section header ─── */
 export const SectionHeader = ({ icon, title, subtitle }) => (

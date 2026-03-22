@@ -2,33 +2,17 @@
  * SessionFormDialog — Create / Edit session dialog
  * Enhanced with date field, recurrence from constants, and status display
  */
-import { Fade,
-} from '@mui/material';
-
-import { SESSION_TYPES, RECURRENCE_OPTIONS, STATUS_MAP } from './constants';
+import React from 'react';
 import {
-  Alert,
-  Box,
-  Button,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  Grid,
-  IconButton,
-  InputAdornment,
-  MenuItem,
-  Stack,
-  TextField,
-  Typography
+  Dialog, DialogTitle, DialogContent, DialogActions, Divider,
+  Typography, IconButton, Alert, Stack, TextField, MenuItem,
+  Grid, InputAdornment, Button, Box, Fade, Chip,
 } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
-import CalendarToday from '@mui/icons-material/CalendarToday';
-import Person from '@mui/icons-material/Person';
-import EditIcon from '@mui/icons-material/Edit';
-import AddIcon from '@mui/icons-material/Add';
+import {
+  Close as CloseIcon, Edit as EditIcon, Add as AddIcon, Person,
+  CalendarToday,
+} from '@mui/icons-material';
+import { SESSION_TYPES, RECURRENCE_OPTIONS, STATUS_MAP } from './constants';
 
 const SessionFormDialog = ({
   open, onClose, editingSession, form, setForm, saving, formError, onSave,

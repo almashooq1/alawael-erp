@@ -3,13 +3,8 @@
  * مكون العجلة الدوارة للتحميل
  */
 
+import { Backdrop, CircularProgress, Typography, Box } from '@mui/material';
 
-import {
-  Backdrop,
-  Box,
-  CircularProgress,
-  Typography
-} from '@mui/material';
 const LoadingSpinner = ({ message = 'جاري التحميل...', open = true }) => {
   return (
     <Backdrop

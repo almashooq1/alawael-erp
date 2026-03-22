@@ -1,28 +1,30 @@
-
+import {
+  DirectionsRun as DirectionsRunIcon,
+  Home as HomeIcon,
+  RecordVoiceOver as RecordVoiceOverIcon,
+  Psychology as PsychologyIcon,
+  Favorite as FavoriteIcon,
+  Visibility as VisibilityIcon,
+  Lightbulb as LightbulbIcon,
+  AccountTree as AccountTreeIcon,
+  LocalHospital as LocalHospitalIcon,
+  ChildCare as ChildCareIcon,
+  School as SchoolIcon,
+  Devices as DevicesIcon,
+  VolunteerActivism as VolunteerActivismIcon,
+  Groups as GroupsIcon,
+  EmojiEmotions as EmojiEmotionsIcon,
+  People as PeopleIcon,
+  Work as WorkIcon,
+  FamilyRestroom as FamilyRestroomIcon,
+  Build as BuildIcon,
+  Accessibility as AccessibilityIcon,
+  SentimentVerySatisfied as SentimentIcon,
+} from '@mui/icons-material';
+import { Box } from '@mui/material';
 
 /* ─────────────── Icon Map ─────────────── */
 
-import { Box } from '@mui/material';
-import DirectionsRunIcon from '@mui/icons-material/DirectionsRun';
-import HomeIcon from '@mui/icons-material/Home';
-import RecordVoiceOverIcon from '@mui/icons-material/RecordVoiceOver';
-import PsychologyIcon from '@mui/icons-material/Psychology';
-import FavoriteIcon from '@mui/icons-material/Favorite';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import LightbulbIcon from '@mui/icons-material/Lightbulb';
-import AccountTreeIcon from '@mui/icons-material/AccountTree';
-import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
-import ChildCareIcon from '@mui/icons-material/ChildCare';
-import SchoolIcon from '@mui/icons-material/School';
-import DevicesIcon from '@mui/icons-material/Devices';
-import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
-import GroupsIcon from '@mui/icons-material/Groups';
-import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
-import PeopleIcon from '@mui/icons-material/People';
-import WorkIcon from '@mui/icons-material/Work';
-import FamilyRestroomIcon from '@mui/icons-material/FamilyRestroom';
-import BuildIcon from '@mui/icons-material/Build';
-import AccessibilityIcon from '@mui/icons-material/Accessibility';
 export const SCALE_ICONS = {
   DirectionsRun: <DirectionsRunIcon />,
   Home: <HomeIcon />,

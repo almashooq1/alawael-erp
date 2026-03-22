@@ -2,31 +2,23 @@
  * ♿ إدارة البرامج التأهيلية — Rehabilitation Program Management
  * AlAwael ERP — Full CRUD: programs, goals, sessions, assessments, progress tracking
  */
-import { useState, useEffect, useCallback } from 'react';
-import {
-  useTheme,
-  alpha,
-} from '@mui/material';
-
-import { useSnackbar } from 'contexts/SnackbarContext';
-import { rehabProgramService } from 'services/disabilityRehabService';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
-  Button,
-  Chip,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  Grid,
-  IconButton,
-  InputAdornment,
-  LinearProgress,
-  MenuItem,
+  Typography,
   Paper,
-  Stack,
+  Grid,
+  Card,
+  CardContent,
+  Chip,
+  Avatar,
+  LinearProgress,
+  Divider,
+  IconButton,
+  Tooltip,
+  Button,
+  Tab,
+  Tabs,
   Table,
   TableBody,
   TableCell,
@@ -34,17 +26,44 @@ import {
   TableHead,
   TableRow,
   TextField,
-  Tooltip,
-  Typography
+  MenuItem,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Stack,
+  CircularProgress,
+  useTheme,
+  alpha,
+  InputAdornment,
+  Collapse,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import SearchIcon from '@mui/icons-material/Search';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import SaveIcon from '@mui/icons-material/Save';
-import CloseIcon from '@mui/icons-material/Close';
-import PersonIcon from '@mui/icons-material/Person';
-import { CalendarIcon, TrendIcon, ViewIcon } from 'utils/iconAliases';
+import {
+  AccessibleForward as RehabIcon,
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Search as SearchIcon,
+  FilterList as FilterIcon,
+  Visibility as ViewIcon,
+  CheckCircle as CompleteIcon,
+  Flag as GoalIcon,
+  PlayCircle as SessionIcon,
+  Assessment as AssessIcon,
+  ExpandMore as ExpandIcon,
+  ExpandLess as CollapseIcon,
+  Person as PersonIcon,
+  CalendarToday as CalendarIcon,
+  TrendingUp as TrendIcon,
+  Close as CloseIcon,
+  Save as SaveIcon,
+} from '@mui/icons-material';
+import { useSnackbar } from 'contexts/SnackbarContext';
+import { rehabProgramService, specializedProgramService } from 'services/disabilityRehabService';
 
 const DISABILITY_TYPES = ['حركية', 'نطقية', 'سمعية', 'بصرية', 'ذهنية', 'توحد', 'متعددة'];
 const PROGRAM_TYPES = [

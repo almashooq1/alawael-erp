@@ -1,34 +1,32 @@
 import { useState, useEffect } from 'react';
-
-import { surfaceColors, neutralColors, brandColors, statusColors } from 'theme/palette';
 import {
   Box,
-  Button,
+  Container,
   Card,
   CardContent,
-  Chip,
-  CircularProgress,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  IconButton,
-  MenuItem,
+  Typography,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
+  Chip,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   TextField,
+  MenuItem,
+  CircularProgress,
+  IconButton,
   Tooltip,
-  Typography
+  Switch,
+  FormControlLabel,
 } from '@mui/material';
-import Add from '@mui/icons-material/Add';
-import PlayArrow from '@mui/icons-material/PlayArrow';
-import Schedule from '@mui/icons-material/Schedule';
-import Delete from '@mui/icons-material/Delete';
+import { Repeat, Add, Pause, PlayArrow, Delete, Edit, Schedule } from '@mui/icons-material';
+import { surfaceColors, neutralColors, brandColors, statusColors } from 'theme/palette';
 
 const API = process.env.REACT_APP_API_URL || '/api';
 

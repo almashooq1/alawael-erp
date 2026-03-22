@@ -2,45 +2,58 @@
  * 📊 تقارير الفروع — Branch Reports & Cross-Branch Analytics
  * AlAwael ERP — Multi-Branch Dashboard & Performance Comparison
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Paper,
-} from '@mui/material';
-
-import { useSnackbar } from 'contexts/SnackbarContext';
-import { gradients, brandColors, surfaceColors } from 'theme/palette';
-import {
-  branchService,
-  warehouseService,
-  stockTransferService,
-  purchaseRequestService,
-} from 'services/branchWarehouseService';
-import {
-  Avatar,
   Box,
-  Button,
+  Typography,
   Card,
   CardContent,
-  Chip,
-  Divider,
   Grid,
-  LinearProgress,
+  Tabs,
   Tab,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  LinearProgress,
+  Avatar,
+  Divider,
+  Stack,
+  Chip,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Tabs,
-  Typography
+  Paper,
+  Button,
+  Alert,
 } from '@mui/material';
-import InventoryIcon from '@mui/icons-material/Inventory';
-import WarehouseIcon from '@mui/icons-material/Warehouse';
-import WarningIcon from '@mui/icons-material/Warning';
-import ReportIcon from '@mui/icons-material/Report';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import CompareIcon from '@mui/icons-material/Compare';
+import {
+  Assessment as ReportIcon,
+  TrendingUp as TrendUpIcon,
+  TrendingDown as TrendDownIcon,
+  Store as BranchIcon,
+  Inventory as InventoryIcon,
+  ShoppingCart as PurchaseIcon,
+  SwapHoriz as TransferIcon,
+  Warehouse as WarehouseIcon,
+  Speed as KpiIcon,
+  Refresh as RefreshIcon,
+  EmojiEvents as TopIcon,
+  Warning as WarningIcon,
+  LocalShipping as ShippingIcon,
+  CompareArrows as CompareIcon,
+} from '@mui/icons-material';
+import { useSnackbar } from 'contexts/SnackbarContext';
+import { gradients, brandColors, surfaceColors, statusColors } from 'theme/palette';
+import {
+  branchService,
+  warehouseService,
+  stockTransferService,
+  purchaseRequestService,
+} from 'services/branchWarehouseService';
 
 const BranchReports = () => {
   const { showSnackbar } = useSnackbar();

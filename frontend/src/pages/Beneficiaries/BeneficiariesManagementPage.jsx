@@ -17,8 +17,50 @@
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-
+import {
+  Box,
+  Container,
+  Grid,
+  Card,
+  CardContent,
+  Typography,
+  Button,
+  TextField,
+  InputAdornment,
+  IconButton,
+  Chip,
+  Avatar,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  Stack,
+  Alert,
+  Snackbar,
+  Skeleton,
+  Fade,
+  Tooltip,
+  ToggleButton,
+  ToggleButtonGroup,
+  Pagination,
+} from '@mui/material';
+import {
+  Search,
+  Download,
+  Upload,
+  PersonAdd,
+  CheckCircle,
+  Pending,
+  TrendingUp as TrendingUpIcon,
+  GridView,
+  ViewList,
+  Refresh,
+  Assignment,
+  School,
+  Groups,
+} from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import { Line, Doughnut } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -35,45 +77,9 @@ import {
 import { useSnackbar } from 'contexts/SnackbarContext';
 import { gradients, brandColors, surfaceColors } from 'theme/palette';
 import beneficiaryService from 'services/beneficiaryService';
-import { PAGE_SIZE } from './beneficiariesConstants';
+import { PAGE_SIZE, GradientHeader, KpiCard } from './beneficiariesConstants';
 import { useBeneficiariesChartData } from './useBeneficiariesChartData';
-import {
-  Alert,
-  Avatar,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Container,
-  Fade,
-  FormControl,
-  Grid,
-  IconButton,
-  InputAdornment,
-  InputLabel,
-  MenuItem,
-  Pagination,
-  Select,
-  Skeleton,
-  Snackbar,
-  Stack,
-  TextField,
-  ToggleButton,
-  ToggleButtonGroup,
-  Tooltip,
-  Typography
-} from '@mui/material';
-import Groups from '@mui/icons-material/Groups';
-import PersonAdd from '@mui/icons-material/PersonAdd';
-import Refresh from '@mui/icons-material/Refresh';
-import Upload from '@mui/icons-material/Upload';
-import Download from '@mui/icons-material/Download';
-import CheckCircle from '@mui/icons-material/CheckCircle';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import Assignment from '@mui/icons-material/Assignment';
-import School from '@mui/icons-material/School';
-import Search from '@mui/icons-material/Search';
+import BeneficiaryCard from './BeneficiaryCard';
 
 // ── Register ChartJS ────────────────────────────
 ChartJS.register(

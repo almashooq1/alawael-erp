@@ -1,51 +1,56 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import eSignatureService from '../../services/eSignature.service';
 import {
-  Paper,
-} from '@mui/material';
-
-import { useSnackbar } from '../../contexts/SnackbarContext';
-import { gradients } from '../../theme/palette';
-import {
-  Avatar,
   Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Divider,
-  Grid,
-  IconButton,
-  InputAdornment,
-  LinearProgress,
-  Menu,
-  MenuItem,
-  Tab,
+  Typography,
+  Paper,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
-  TablePagination,
   TableRow,
+  Button,
+  Chip,
+  Grid,
+  Card,
+  CardContent,
+  IconButton,
   Tabs,
-  TextField,
+  Tab,
   Tooltip,
-  Typography
+  TextField,
+  InputAdornment,
+  LinearProgress,
+  CircularProgress,
+  Menu,
+  MenuItem,
+  Avatar,
+  Divider,
+  TablePagination,
 } from '@mui/material';
-import Assignment from '@mui/icons-material/Assignment';
-import CheckCircleOutline from '@mui/icons-material/CheckCircleOutline';
-import TrendingUp from '@mui/icons-material/TrendingUp';
-import CancelOutlined from '@mui/icons-material/CancelOutlined';
-import Schedule from '@mui/icons-material/Schedule';
-import AddIcon from '@mui/icons-material/Add';
-import SearchIcon from '@mui/icons-material/Search';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import FilterList from '@mui/icons-material/FilterList';
-import Visibility from '@mui/icons-material/Visibility';
-import MoreVert from '@mui/icons-material/MoreVert';
-import CancelIcon from '@mui/icons-material/Cancel';
+import {
+  Add as AddIcon,
+  Draw as SignIcon,
+  Verified as VerifyIcon,
+  Search as SearchIcon,
+  Refresh as RefreshIcon,
+  TrendingUp,
+  Assignment,
+  PendingActions,
+  CheckCircleOutline,
+  CancelOutlined,
+  Schedule,
+  Description as TemplateIcon,
+  MoreVert,
+  Visibility,
+  Send as RemindIcon,
+  Block as CancelIcon,
+  FilterList,
+} from '@mui/icons-material';
+import { useSnackbar } from '../../contexts/SnackbarContext';
+import { gradients, statusColors } from '../../theme/palette';
 
 /* ═══ Status & Type Mappings ═══════════════════════════════════════════════ */
 const statusMap = {

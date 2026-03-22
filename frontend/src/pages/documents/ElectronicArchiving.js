@@ -4,91 +4,117 @@
  * @created 2026-03-13
  */
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Paper, alpha, useTheme } from '@mui/material';
-
-import archivingService from 'services/archivingService';
-import logger from 'utils/logger';
-import { gradients } from 'theme/palette';
-import { useSnackbar } from '../../contexts/SnackbarContext';
 import {
-  Avatar,
-  Badge,
   Box,
-  Breadcrumbs,
+  Container,
+  Typography,
   Button,
   Card,
   CardContent,
-  Chip,
-  CircularProgress,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  Fade,
-  FormControl,
   Grid,
-  IconButton,
+  TextField,
   InputAdornment,
+  FormControl,
   InputLabel,
-  LinearProgress,
-  Link,
-  MenuItem,
   Select,
-  Stack,
+  MenuItem,
+  CircularProgress,
+  Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Chip,
+  IconButton,
+  Tooltip,
+  Avatar,
+  Divider,
+  Tabs,
   Tab,
+  LinearProgress,
+  Breadcrumbs,
+  Link,
+  Fade,
+  Stack,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
-  TablePagination,
   TableRow,
-  Tabs,
-  TextField,
-  Tooltip,
-  Typography,
+  TablePagination,
+  alpha,
+  useTheme,
+  Badge,
 } from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
-import CheckIcon from '@mui/icons-material/Check';
-import ArchiveIcon from '@mui/icons-material/Archive';
-import WarningIcon from '@mui/icons-material/Warning';
-import RestoreIcon from '@mui/icons-material/Restore';
-import DeleteIcon from '@mui/icons-material/Delete';
-import ImageIcon from '@mui/icons-material/Image';
-import LockIcon from '@mui/icons-material/Lock';
-import LockOpenIcon from '@mui/icons-material/LockOpen';
-import HomeIcon from '@mui/icons-material/Home';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import StorageIcon from '@mui/icons-material/Storage';
-import HistoryIcon from '@mui/icons-material/History';
-import CategoryIcon from '@mui/icons-material/Category';
-import SecurityIcon from '@mui/icons-material/Security';
-import AnalyticsIcon from '@mui/icons-material/Analytics';
-import UploadIcon from '@mui/icons-material/Upload';
-import FilterIcon from '@mui/icons-material/Filter';
-import SearchIcon from '@mui/icons-material/Search';
-import DownloadIcon from '@mui/icons-material/Download';
-import ShareIcon from '@mui/icons-material/Share';
-import PrintIcon from '@mui/icons-material/Print';
-import ShieldIcon from '@mui/icons-material/Shield';
-import TimerIcon from '@mui/icons-material/Timer';
-import PersonIcon from '@mui/icons-material/Person';
-import SaveIcon from '@mui/icons-material/Save';
-import CloseIcon from '@mui/icons-material/Close';
-import TagIcon from '@mui/icons-material/Tag';
-import FolderIcon from '@mui/icons-material/Folder';
 import {
-  DocIcon,
-  ExcelIcon,
-  FileIcon,
-  PdfIcon,
-  PptIcon,
-  TrendIcon,
-  ViewIcon,
-  ZipIcon,
-} from 'utils/iconAliases';
+  Archive as ArchiveIcon,
+  Description as DocIcon,
+  Search as SearchIcon,
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Refresh as RefreshIcon,
+  Home as HomeIcon,
+  TrendingUp as TrendIcon,
+  Assessment as AnalyticsIcon,
+  CloudUpload as UploadIcon,
+  CloudDownload as DownloadIcon,
+  Folder as FolderIcon,
+  FolderOpen as FolderOpenIcon,
+  History as HistoryIcon,
+  Lock as LockIcon,
+  LockOpen as LockOpenIcon,
+  Visibility as ViewIcon,
+  Close as CloseIcon,
+  Save as SaveIcon,
+  Storage as StorageIcon,
+  Category as CategoryIcon,
+  FilterList as FilterIcon,
+  Schedule as ScheduleIcon,
+  Person as PersonIcon,
+  Business as DeptIcon,
+  Label as TagIcon,
+  CheckCircle as CheckIcon,
+  Warning as WarningIcon,
+  Cancel as CancelIcon,
+  RestoreFromTrash as RestoreIcon,
+  ContentCopy as CopyIcon,
+  Share as ShareIcon,
+  Print as PrintIcon,
+  BarChart as ChartIcon,
+  InsertDriveFile as FileIcon,
+  PictureAsPdf as PdfIcon,
+  Image as ImageIcon,
+  TableChart as ExcelIcon,
+  Slideshow as PptIcon,
+  TextSnippet as TxtIcon,
+  FolderZip as ZipIcon,
+  Timer as TimerIcon,
+  Security as SecurityIcon,
+  GppGood as ShieldIcon,
+  Gavel as LegalIcon,
+  DataUsage as UsageIcon,
+} from '@mui/icons-material';
+import {
+  PieChart,
+  Pie,
+  Cell,
+  BarChart,
+  Bar,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RTooltip,
+  ResponsiveContainer,
+  Legend,
+} from 'recharts';
+import archivingService from 'services/archivingService';
+import logger from 'utils/logger';
+import { gradients } from 'theme/palette';
+import { useSnackbar } from '../../contexts/SnackbarContext';
 
 /* ═══ Helpers ═══ */
 const STATUS_MAP = {

@@ -3,33 +3,36 @@
  * BeneficiariesTableBody – table head, rows, and pagination
  */
 
-
-import { visuallyHidden } from '@mui/utils';
-import { getStatusColor } from 'utils/statusColors';
-import { columns } from './beneficiariesTableConstants';
-import { getStatusLabel, getCategoryLabel } from './beneficiariesLabelHelpers';
+import { Fragment } from 'react';
 import {
-  Avatar,
   Box,
   Card,
-  Checkbox,
-  Chip,
-  IconButton,
-  LinearProgress,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
-  TablePagination,
   TableRow,
+  TablePagination,
   TableSortLabel,
-  Typography
+  Checkbox,
+  Chip,
+  Avatar,
+  IconButton,
+  Typography,
+  LinearProgress,
 } from '@mui/material';
-import KeyboardArrowUp from '@mui/icons-material/KeyboardArrowUp';
-import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
-import Star from '@mui/icons-material/Star';
-import MoreVert from '@mui/icons-material/MoreVert';
+import {
+  MoreVert,
+  KeyboardArrowDown,
+  KeyboardArrowUp,
+  Star,
+} from '@mui/icons-material';
+import { visuallyHidden } from '@mui/utils';
+import { getStatusColor } from 'utils/statusColors';
+import { columns } from './beneficiariesTableConstants';
+import { getStatusLabel, getCategoryLabel } from './beneficiariesLabelHelpers';
+import BeneficiariesRowDetail from './BeneficiariesRowDetail';
 
 const BeneficiariesTableBody = ({
   sortedData,

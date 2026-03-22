@@ -1,10 +1,5 @@
+import { Container, Typography, Paper, Box } from '@mui/material';
 
-import {
-  Box,
-  Container,
-  Paper,
-  Typography
-} from '@mui/material';
 const ArchivingDashboard = () => {
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>

@@ -10,61 +10,70 @@
  * - Vehicle statistics & KPIs
  * - Export-ready data tables
  */
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
-  Paper,
-} from '@mui/material';
-
-import { gradients, statusColors, surfaceColors, chartColors } from '../../theme/palette';
-import { useSnackbar } from '../../contexts/SnackbarContext';
-import { useConfirmDialog } from '../../components/common/ConfirmDialog';
-import vehicleService from '../../services/vehicleManagement.service';
-import logger from '../../utils/logger';
-import {
-  Alert,
-  Avatar,
+  Container,
+  Typography,
+  Grid,
   Box,
   Button,
+  Tab,
+  Tabs,
   Card,
   CardContent,
   Chip,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  FormControl,
-  Grid,
+  Paper,
+  TextField,
   IconButton,
-  InputAdornment,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  FormControl,
   InputLabel,
-  LinearProgress,
-  MenuItem,
   Select,
-  Tab,
+  MenuItem,
+  Tooltip,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
-  TablePagination,
   TableRow,
-  Tabs,
-  TextField,
-  Tooltip,
-  Typography
+  LinearProgress,
+  InputAdornment,
+  Alert,
+  Divider,
+  Avatar,
+  TablePagination,
 } from '@mui/material';
-import CheckIcon from '@mui/icons-material/Check';
-import WarningIcon from '@mui/icons-material/Warning';
-import CancelIcon from '@mui/icons-material/Cancel';
-import SearchIcon from '@mui/icons-material/Search';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import SpeedIcon from '@mui/icons-material/Speed';
-import { ViewIcon } from 'utils/iconAliases';
+import {
+  Add as AddIcon,
+  Refresh as RefreshIcon,
+  Search as SearchIcon,
+  DirectionsCar as CarIcon,
+  Build as MaintenanceIcon,
+  LocalGasStation as FuelIcon,
+  Speed as SpeedIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Visibility as ViewIcon,
+  Warning as WarningIcon,
+  CheckCircle as CheckIcon,
+  Cancel as CancelIcon,
+  LocalShipping as TruckIcon,
+  TwoWheeler as BikeIcon,
+  AirportShuttle as BusIcon,
+  Assessment as StatsIcon,
+  GpsFixed as GpsIcon,
+} from '@mui/icons-material';
+import { gradients, statusColors, surfaceColors, chartColors } from '../../theme/palette';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RTooltip } from 'recharts';
+import { useSnackbar } from '../../contexts/SnackbarContext';
+import { useConfirmDialog } from '../../components/common/ConfirmDialog';
+import ConfirmDialog from '../../components/common/ConfirmDialog';
+import vehicleService from '../../services/vehicleManagement.service';
+import logger from '../../utils/logger';
 
 // ─── ثوابت ──────────────────────────────────────────────────────────────────
 const VEHICLE_STATUSES = [

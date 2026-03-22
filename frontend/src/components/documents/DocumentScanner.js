@@ -5,41 +5,46 @@
  */
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Typography,
+  Slider,
+  Alert,
+  CircularProgress,
+  IconButton,
+  Chip,
+  Tooltip,
+  Stack,
+  Divider,
+  Paper,
+} from '@mui/material';
+import {
+  CameraAlt as CameraIcon,
+  Close as CloseIcon,
+  Replay as RetakeIcon,
+  CloudUpload as UploadIcon,
+  Tune as FiltersIcon,
+  AutoFixHigh as EnhanceIcon,
+  FlipCameraAndroid as FlipIcon,
+  ZoomIn as ZoomInIcon,
+  ZoomOut as ZoomOutIcon,
+  PhotoCamera as SnapIcon,
+  Image as ImageIcon,
+  Scanner as ScannerIcon,
+} from '@mui/icons-material';
 import { statusColors, surfaceColors } from '../../theme/palette';
 import documentService from 'services/documentService';
 import logger from 'utils/logger';
-import {
-  Alert,
-  Box,
-  Button,
-  Chip,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  FormControl,
-  IconButton,
-  InputLabel,
-  MenuItem,
-  Paper,
-  Select,
-  Slider,
-  Stack,
-  TextField,
-  Tooltip,
-  Typography
-} from '@mui/material';
-import ScannerIcon from '@mui/icons-material/Scanner';
-import CloseIcon from '@mui/icons-material/Close';
-import CameraIcon from '@mui/icons-material/Camera';
-import FlipIcon from '@mui/icons-material/Flip';
-import ZoomOutIcon from '@mui/icons-material/ZoomOut';
-import ZoomInIcon from '@mui/icons-material/ZoomIn';
-import ImageIcon from '@mui/icons-material/Image';
-import UploadIcon from '@mui/icons-material/Upload';
 
 /* ─── Filter Presets ─── */
 const FILTER_PRESETS = [

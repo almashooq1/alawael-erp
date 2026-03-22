@@ -10,55 +10,57 @@
  * - Attendance & Progress reports
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-
+import {
+  Box,
+  Grid,
+  Card,
+  CardContent,
+  CardActionArea,
+  Typography,
+  Button,
+  Stack,
+  Chip,
+  Paper,
+  TextField,
+  Alert,
+  CircularProgress,
+  Avatar,
+  Divider,
+  InputAdornment,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  ListItemButton,
+  Autocomplete,
+} from '@mui/material';
+import {
+  Description as DescriptionIcon,
+  DateRange as DateRangeIcon,
+  Compare as CompareIcon,
+  FamilyRestroom as FamilyIcon,
+  Timeline as TimelineIcon,
+  EventAvailable as EventAvailableIcon,
+  TrendingUp as TrendingUpIcon,
+  Assessment as AssessmentIcon,
+  Search as SearchIcon,
+  Group as GroupIcon,
+  Warning as WarningIcon,
+  CheckCircle as CheckCircleIcon,
+  ArrowForward as ArrowForwardIcon,
+  Analytics as AnalyticsIcon,
+  Print as PrintIcon,
+} from '@mui/icons-material';
 import { gradients, brandColors } from 'theme/palette';
 import studentManagementService from 'services/studentManagementService';
 import { useAuth } from 'contexts/AuthContext';
 import logger from 'utils/logger';
-import {
-  Alert,
-  Autocomplete,
-  Avatar,
-  Box,
-  Button,
-  Card,
-  CardActionArea,
-  CardContent,
-  Chip,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  Grid,
-  InputAdornment,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemButton,
-  ListItemText,
-  Paper,
-  Stack,
-  TextField,
-  Typography
-} from '@mui/material';
-import DescriptionIcon from '@mui/icons-material/Description';
-import DateRangeIcon from '@mui/icons-material/DateRange';
-import CompareIcon from '@mui/icons-material/Compare';
-import TimelineIcon from '@mui/icons-material/Timeline';
-import EventAvailableIcon from '@mui/icons-material/EventAvailable';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import AnalyticsIcon from '@mui/icons-material/Analytics';
-import GroupIcon from '@mui/icons-material/Group';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import AssessmentIcon from '@mui/icons-material/Assessment';
-import WarningIcon from '@mui/icons-material/Warning';
-import SearchIcon from '@mui/icons-material/Search';
-import PrintIcon from '@mui/icons-material/Print';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 
 const iconMap = {
   description: <DescriptionIcon sx={{ fontSize: 40 }} />,

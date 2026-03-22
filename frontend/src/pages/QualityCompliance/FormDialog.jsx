@@ -1,19 +1,9 @@
 import React from 'react';
-
-import { fieldSets, tabs } from './constants';
 import {
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  TextField
+  Dialog, DialogTitle, DialogContent, DialogActions,
+  Button, TextField, Box, FormControl, InputLabel, Select, MenuItem,
 } from '@mui/material';
+import { fieldSets, tabs } from './constants';
 
 const FormDialog = ({ open, onClose, dialogType, editItem, form, setForm, onSave }) => (
   <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>

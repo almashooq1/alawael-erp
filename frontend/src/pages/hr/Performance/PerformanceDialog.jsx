@@ -2,22 +2,21 @@
  * PerformanceDialog.jsx — Create/Edit dialog
  * Extracted from PerformanceEvaluation.js
  */
-
-
-import { RATING_CONFIG, FIELD_SETS } from './performanceEvaluation.constants';
+import React from 'react';
 import {
   Box,
   Button,
   Dialog,
-  DialogActions,
-  DialogContent,
   DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
   FormControl,
   InputLabel,
-  MenuItem,
   Select,
-  TextField
+  MenuItem,
 } from '@mui/material';
+import { RATING_CONFIG, FIELD_SETS } from './performanceEvaluation.constants';
 
 const PerformanceDialog = ({
   dialogOpen,

@@ -1,70 +1,77 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import visitorsService from '../../services/visitors.service';
 import { useSocketEvent } from '../../contexts/SocketContext';
 import {
-  Paper,
-} from '@mui/material';
-
-import { useSnackbar } from '../../contexts/SnackbarContext';
-import { gradients, statusColors, neutralColors } from '../../theme/palette';
-import {
-  Alert,
-  Avatar,
   Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Collapse,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  FormControl,
-  Grid,
-  IconButton,
-  InputAdornment,
-  InputLabel,
-  LinearProgress,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  MenuItem,
-  Select,
-  Stack,
-  Tab,
+  Typography,
+  Paper,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
-  TablePagination,
   TableRow,
-  Tabs,
+  TablePagination,
+  Button,
+  Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   TextField,
+  Grid,
+  Card,
+  CardContent,
+  IconButton,
+  Tabs,
+  Tab,
   Tooltip,
-  Typography
+  MenuItem,
+  InputAdornment,
+  Divider,
+  Avatar,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  LinearProgress,
+  Alert,
+  Collapse,
+  Stack,
+  FormControl,
+  InputLabel,
+  Select,
 } from '@mui/material';
-import InfoIcon from '@mui/icons-material/Info';
-import CancelIcon from '@mui/icons-material/Cancel';
-import SearchIcon from '@mui/icons-material/Search';
-import FilterIcon from '@mui/icons-material/Filter';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import EditIcon from '@mui/icons-material/Edit';
-import AnalyticsIcon from '@mui/icons-material/Analytics';
-import PeopleIcon from '@mui/icons-material/People';
-import BusinessIcon from '@mui/icons-material/Business';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import BlockIcon from '@mui/icons-material/Block';
-import AddIcon from '@mui/icons-material/Add';
-import DeleteIcon from '@mui/icons-material/Delete';
-import HistoryIcon from '@mui/icons-material/History';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import TimelineIcon from '@mui/icons-material/Timeline';
-import WarningIcon from '@mui/icons-material/Warning';
-import { CollapseIcon, ViewIcon } from 'utils/iconAliases';
+import {
+  Add as AddIcon,
+  Badge as VisitorIcon,
+  Login as CheckInIcon,
+  Logout as CheckOutIcon,
+  Search as SearchIcon,
+  Edit as EditIcon,
+  Visibility as ViewIcon,
+  Block as BlockIcon,
+  Cancel as CancelIcon,
+  Analytics as AnalyticsIcon,
+  PersonOff as NoShowIcon,
+  Refresh as RefreshIcon,
+  DataSaverOn as SeedIcon,
+  Timeline as TimelineIcon,
+  TrendingUp as TrendingUpIcon,
+  People as PeopleIcon,
+  AccessTime as TimeIcon,
+  Business as BusinessIcon,
+  FilterList as FilterIcon,
+  ExpandMore as ExpandIcon,
+  ExpandLess as CollapseIcon,
+  History as HistoryIcon,
+  Warning as WarningIcon,
+  CheckCircle as CheckCircleIcon,
+  Info as InfoIcon,
+  Delete as DeleteIcon,
+} from '@mui/icons-material';
+import { useSnackbar } from '../../contexts/SnackbarContext';
+import { gradients, statusColors, neutralColors } from '../../theme/palette';
 
 /* ═══════════════ Constants ═══════════════ */
 const defaultStats = {

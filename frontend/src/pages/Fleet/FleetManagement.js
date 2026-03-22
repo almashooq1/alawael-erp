@@ -2,24 +2,26 @@
  * FleetManagement.js — Thin orchestrator (split from 725L original)
  * صفحة إدارة الأسطول — المنسق الرئيسي
  */
-
-import { gradients } from '../../theme/palette';
-import { TABS, STAT_CARDS } from './Fleet/fleetManagement.constants';
-import useFleetManagement from './Fleet/useFleetManagement';
+import React from 'react';
 import {
+  Container,
+  Typography,
+  Grid,
   Box,
   Button,
+  Tab,
+  Tabs,
   Card,
   CardContent,
   CircularProgress,
-  Container,
-  Grid,
-  Tab,
-  Tabs,
-  Typography
 } from '@mui/material';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import AddIcon from '@mui/icons-material/Add';
+import { Add as AddIcon, Refresh as RefreshIcon } from '@mui/icons-material';
+import { gradients } from '../../theme/palette';
+import ConfirmDialog from '../../components/common/ConfirmDialog';
+import { TABS, STAT_CARDS } from './Fleet/fleetManagement.constants';
+import useFleetManagement from './Fleet/useFleetManagement';
+import FleetTable from './Fleet/FleetTable';
+import FleetFormDialog from './Fleet/FleetFormDialog';
 
 const FleetManagement = () => {
   const {

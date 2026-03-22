@@ -2,27 +2,19 @@
  * Volunteer Dashboard — لوحة إدارة المتطوعين
  */
 import { useState, useEffect } from 'react';
-
-import apiClient from '../../services/api';
 import {
-  Box,
-  Card,
-  CardContent,
-  Chip,
-  Grid,
-  LinearProgress,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Tooltip,
-  Typography
+  Box, Grid, Card, CardContent, Typography, Paper,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  Chip, LinearProgress
 } from '@mui/material';
-import EventIcon from '@mui/icons-material/Event';
-import { TrendIcon } from 'utils/iconAliases';
+import {
+  VolunteerActivism as VolIcon,
+  Event as EventIcon,
+  AccessTime as HoursIcon,
+  TrendingUp as TrendIcon
+} from '@mui/icons-material';
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import apiClient from '../../services/api';
 
 const COLORS = ['#00897b', '#1976d2', '#f57c00', '#7b1fa2', '#c62828'];
 

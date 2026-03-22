@@ -2,43 +2,50 @@
  * Strategic Planning & OKR Management — التخطيط الاستراتيجي وإدارة الأهداف
  * Strategic Objectives, Key Results, Initiatives, Balanced Scorecard
  */
-import { useState, useEffect, useCallback } from 'react';
-
-import { alpha } from '@mui/material/styles';
-
-import { useSnackbar } from '../../contexts/SnackbarContext';
-import * as svc from '../../services/enterpriseProPlus.service';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Avatar,
   Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  Grid,
-  IconButton,
-  LinearProgress,
-  MenuItem,
+  Typography,
   Paper,
-  Stack,
-  Tab,
+  Grid,
+  Button,
+  TextField,
+  IconButton,
+  Chip,
+  Avatar,
   Table,
-  TableBody,
-  TableCell,
   TableHead,
   TableRow,
+  TableCell,
+  TableBody,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  MenuItem,
+  Tab,
   Tabs,
-  TextField,
+  Card,
+  CardContent,
+  LinearProgress,
+  Stack,
   Tooltip,
-  Typography
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import TimelineIcon from '@mui/icons-material/Timeline';
-import CloseIcon from '@mui/icons-material/Close';
+import { alpha } from '@mui/material/styles';
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  Close as CloseIcon,
+  Flag as ObjectiveIcon,
+  TrackChanges as KRIcon,
+  RocketLaunch as InitiativeIcon,
+  Dashboard as ScorecardIcon,
+  TrendingUp as TrendUpIcon,
+  TrendingDown as TrendDownIcon,
+  AccountTree as CascadeIcon,
+  Timeline as TimelineIcon,
+} from '@mui/icons-material';
+import { useSnackbar } from '../../contexts/SnackbarContext';
+import * as svc from '../../services/enterpriseProPlus.service';
 
 const PERSPECTIVES = {
   financial: { label: 'مالي', color: '#2e7d32' },

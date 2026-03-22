@@ -4,55 +4,57 @@
  */
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
-  Paper,
-  useTheme,
-} from '@mui/material';
-
-import { programsService, MOCK_PROGRAMS } from 'services/trainingService';
-import { useSnackbar } from 'contexts/SnackbarContext';
-import {
-  Avatar,
   Box,
-  Button,
   Card,
   CardContent,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
+  Typography,
   Grid,
+  Chip,
+  Avatar,
+  Button,
   IconButton,
-  InputAdornment,
-  LinearProgress,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
+  Tooltip,
+  TextField,
   MenuItem,
-  Rating,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
-  TablePagination,
   TableRow,
-  TextField,
-  Tooltip,
-  Typography
+  TablePagination,
+  Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  LinearProgress,
+  InputAdornment,
+  Rating,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemIcon,
+  useTheme,
 } from '@mui/material';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import AddIcon from '@mui/icons-material/Add';
-import SearchIcon from '@mui/icons-material/Search';
-import SchoolIcon from '@mui/icons-material/School';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import CloseIcon from '@mui/icons-material/Close';
-import GroupIcon from '@mui/icons-material/Group';
-import StarIcon from '@mui/icons-material/Star';
-import CheckIcon from '@mui/icons-material/Check';
-import { ViewIcon } from 'utils/iconAliases';
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Search as SearchIcon,
+  Refresh as RefreshIcon,
+  School as SchoolIcon,
+  Close as CloseIcon,
+  Visibility as ViewIcon,
+  PersonAdd as EnrollIcon,
+  CheckCircle as CheckIcon,
+  Schedule as ScheduleIcon,
+  Star as StarIcon,
+  Group as GroupIcon,
+  AccessTime as TimeIcon,
+} from '@mui/icons-material';
+import { programsService, MOCK_PROGRAMS } from 'services/trainingService';
+import { useSnackbar } from 'contexts/SnackbarContext';
 
 const categories = [
   'التطوير المهني',

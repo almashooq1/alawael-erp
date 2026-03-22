@@ -2,52 +2,64 @@
  * 🕒 إدارة الجلسات العلاجية (مستوى إداري) — Therapy Session Admin
  * AlAwael ERP — All sessions across therapists: schedule, documentation, filtering
  */
-import { useState, useEffect, useCallback } from 'react';
-import {
-  useTheme,
-  alpha,
-} from '@mui/material';
-
-import { useSnackbar } from 'contexts/SnackbarContext';
-import { therapySessionService } from 'services/disabilityRehabService';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
-  Button,
-  Chip,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  Grid,
-  IconButton,
-  InputAdornment,
-  MenuItem,
+  Typography,
   Paper,
-  Rating,
-  Stack,
+  Grid,
+  Card,
+  CardContent,
+  Chip,
+  Avatar,
+  LinearProgress,
+  Divider,
+  IconButton,
+  Tooltip,
+  Button,
   Tab,
+  Tabs,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Tabs,
   TextField,
-  Tooltip,
-  Typography
+  MenuItem,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Stack,
+  CircularProgress,
+  useTheme,
+  alpha,
+  InputAdornment,
+  Rating,
 } from '@mui/material';
-import TimerIcon from '@mui/icons-material/Timer';
-import CancelIcon from '@mui/icons-material/Cancel';
-import AddIcon from '@mui/icons-material/Add';
-import SearchIcon from '@mui/icons-material/Search';
-import ScheduleIcon from '@mui/icons-material/Schedule';
-import StartIcon from '@mui/icons-material/Start';
-import SaveIcon from '@mui/icons-material/Save';
-import CloseIcon from '@mui/icons-material/Close';
-import { CalendarIcon, ViewIcon } from 'utils/iconAliases';
+import {
+  Schedule as ScheduleIcon,
+  Add as AddIcon,
+  Edit as EditIcon,
+  Search as SearchIcon,
+  Visibility as ViewIcon,
+  CheckCircle as CompleteIcon,
+  PlayCircle as StartIcon,
+  Cancel as CancelIcon,
+  Person as PersonIcon,
+  CalendarToday as CalendarIcon,
+  MeetingRoom as RoomIcon,
+  Timer as TimerIcon,
+  Assessment as AssessIcon,
+  Close as CloseIcon,
+  Save as SaveIcon,
+  EventAvailable as EventIcon,
+  Groups as GroupIcon,
+  Star as StarIcon,
+} from '@mui/icons-material';
+import { useSnackbar } from 'contexts/SnackbarContext';
+import { therapySessionService, rehabProgramService } from 'services/disabilityRehabService';
 
 const SESSION_CATEGORIES = [
   'علاج طبيعي',

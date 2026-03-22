@@ -1,26 +1,24 @@
 import { useState, useEffect } from 'react';
-
-import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
 import {
   Box,
+  Container,
   Card,
   CardContent,
-  Chip,
-  CircularProgress,
-  Container,
-  LinearProgress,
-  MenuItem,
+  Typography,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
+  Chip,
+  CircularProgress,
+  LinearProgress,
   TextField,
-  Typography
+  MenuItem,
 } from '@mui/material';
-import TrendingUp from '@mui/icons-material/TrendingUp';
-import TrendingDown from '@mui/icons-material/TrendingDown';
+import { BarChart, TrendingUp, TrendingDown, RemoveCircle } from '@mui/icons-material';
+import { surfaceColors, neutralColors, brandColors, statusColors } from 'theme/palette';
 
 const API = process.env.REACT_APP_API_URL || '/api';
 

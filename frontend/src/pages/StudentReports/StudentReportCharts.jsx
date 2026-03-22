@@ -2,17 +2,14 @@
  * StudentReportCharts — Trends, Subjects & Skills charts
  */
 
-
-import { brandColors } from 'theme/palette';
+import React from 'react';
+import { Card, CardContent, Typography, Grid, Stack, Chip } from '@mui/material';
 import {
-  Card,
-  CardContent,
-  Chip,
-  Grid,
-  Stack,
-  Tooltip,
-  Typography
-} from '@mui/material';
+  LineChart, Line, BarChart, Bar, RadarChart, Radar,
+  PolarGrid, PolarAngleAxis, PolarRadiusAxis,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+} from 'recharts';
+import { brandColors } from 'theme/palette';
 
 const StudentReportCharts = ({
   safeTrends, hasGpaTrend, hasAttendanceTrend, safeSubjects, safeSkills,

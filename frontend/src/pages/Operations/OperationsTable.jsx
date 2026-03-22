@@ -1,22 +1,13 @@
 /**
  * OperationsTable — Renders the data table for the active tab
  */
-import { Paper,
-} from '@mui/material';
-import { OP_STATUS_COLORS, COL_MAP } from './constants';
+import React from 'react';
 import {
-  Chip,
-  IconButton,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Tooltip
+  TableContainer, Paper, Table, TableHead, TableRow, TableCell,
+  TableBody, Chip, IconButton, Tooltip,
 } from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
+import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import { OP_STATUS_COLORS, COL_MAP } from './constants';
 
 const OperationsTable = ({ activeTab, tabs, data, openEdit, handleDelete }) => {
   const key = tabs[activeTab]?.key;

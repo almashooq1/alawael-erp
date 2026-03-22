@@ -1,30 +1,33 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import computeStatusCounts from '../../utils/computeStatusCounts';
-
+import {
+  Container, Typography, Grid, Paper, Box,
+  Chip, Table, TableBody, TableCell, TableContainer,
+  TableHead, TableRow, LinearProgress, Button,
+} from '@mui/material';
+import {
+  DirectionsBus as FleetIcon,
+  LocalShipping as VehicleIcon,
+  Person as DriverIcon,
+  Route as RouteIcon,
+  Speed as SpeedIcon,
+  LocalGasStation as FuelIcon,
+  Build as MaintenanceIcon,
+  ArrowForward as ArrowForwardIcon,
+} from '@mui/icons-material';
+import {
+  BarChart, Bar, PieChart, Pie, Cell, Line,
+  XAxis, YAxis, CartesianGrid, Tooltip as RTooltip,
+  ResponsiveContainer, Legend,
+} from 'recharts';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, chartColors, statusColors } from '../../theme/palette';
 import logger from '../../utils/logger';
 import fleetService from '../../services/fleet.service';
 import { useNavigate } from 'react-router-dom';
-import {
-  Box,
-  Button,
-  Chip,
-  Container,
-  Grid,
-  LinearProgress,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography
-} from '@mui/material';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import RouteIcon from '@mui/icons-material/Route';
-import SpeedIcon from '@mui/icons-material/Speed';
+import ModuleKPICard from '../../components/dashboard/shared/ModuleKPICard';
+import EmptyState from '../../components/dashboard/shared/EmptyState';
+import DashboardErrorBoundary from '../../components/dashboard/shared/DashboardErrorBoundary';
 
 /* ──────── بيانات تجريبية ──────── */
 const DEMO_STATS = {

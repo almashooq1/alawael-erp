@@ -3,23 +3,20 @@
  */
 import React from 'react';
 import {
-  Paper,
-} from '@mui/material';
-import { surfaceColors } from '../../theme/palette';
-import { statusColors, colMap, tabs } from './constants';
-import {
-  Chip,
-  IconButton,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Tooltip
+  Paper,
+  Chip,
+  IconButton,
+  Tooltip,
 } from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
+import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import { surfaceColors } from '../../theme/palette';
+import { statusColors, colMap, tabs } from './constants';
 
 const DataTable = ({ data, activeTab, onEdit, onDelete }) => {
   const key = tabs[activeTab]?.key;

@@ -1,18 +1,14 @@
 /**
  * StatisticsCards – 4 KPI cards for assessment tests
  */
-
-import { gradients } from '../../theme/palette';
+import { Grid, Card, CardContent, Typography } from '@mui/material';
 import {
-  Card,
-  CardContent,
-  Grid,
-  Typography
-} from '@mui/material';
-import AssignmentIcon from '@mui/icons-material/Assignment';
-import PersonIcon from '@mui/icons-material/Person';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import BarChartIcon from '@mui/icons-material/BarChart';
+  Assignment as AssignmentIcon,
+  Person as PersonIcon,
+  TrendingUp as TrendingUpIcon,
+  BarChart as BarChartIcon,
+} from '@mui/icons-material';
+import { gradients } from '../../theme/palette';
 
 const StatisticsCards = ({ statistics }) => (
   <Grid container spacing={2} sx={{ mb: 4 }}>

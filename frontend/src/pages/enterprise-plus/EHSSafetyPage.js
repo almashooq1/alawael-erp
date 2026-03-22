@@ -2,42 +2,49 @@
  * EHS — Environmental, Health & Safety — السلامة والصحة المهنية والبيئة
  * Safety Incidents, Inspections, Hazard Reports, PPE, Training
  */
-import { useState, useEffect, useCallback } from 'react';
-
-import { alpha } from '@mui/material/styles';
-
-import { useSnackbar } from '../../contexts/SnackbarContext';
-import * as svc from '../../services/enterpriseProPlus.service';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Avatar,
   Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  Grid,
-  IconButton,
-  LinearProgress,
-  MenuItem,
+  Typography,
   Paper,
-  Stack,
-  Tab,
+  Grid,
+  Button,
+  TextField,
+  IconButton,
+  Chip,
+  Avatar,
   Table,
-  TableBody,
-  TableCell,
   TableHead,
   TableRow,
+  TableCell,
+  TableBody,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  MenuItem,
+  Tab,
   Tabs,
-  TextField,
-  Typography
+  Card,
+  CardContent,
+  LinearProgress,
+  Stack,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import WorkIcon from '@mui/icons-material/Work';
-import EditIcon from '@mui/icons-material/Edit';
-import CloseIcon from '@mui/icons-material/Close';
+import { alpha } from '@mui/material/styles';
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  Close as CloseIcon,
+  Inventory as InspectionIcon,
+  Warning as HazardIcon,
+  Shield as PPEIcon,
+  School as TrainingIcon,
+  ReportProblem as IncidentIcon,
+  CheckCircle as CompleteIcon,
+  LocalHospital as MedicalIcon,
+  Construction as WorkIcon,
+} from '@mui/icons-material';
+import { useSnackbar } from '../../contexts/SnackbarContext';
+import * as svc from '../../services/enterpriseProPlus.service';
 
 const INCIDENT_TYPES = {
   injury: 'إصابة',

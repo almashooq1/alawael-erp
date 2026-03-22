@@ -1,43 +1,54 @@
 import { useState, useEffect } from 'react';
-
+import {
+  Box,
+  Container,
+  Card,
+  CardContent,
+  Typography,
+  Grid,
+  Button,
+  TextField,
+  Chip,
+  IconButton,
+  InputAdornment,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Paper,
+  Tooltip,
+  Divider,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  ListItemSecondaryAction,
+} from '@mui/material';
+import {
+  Add as AddIcon,
+  Search as SearchIcon,
+  MedicalServices as PrescriptionIcon,
+  LocalHospital as HospitalIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Print as PrintIcon,
+  Visibility as ViewIcon,
+  Timer as TimerIcon,
+  CheckCircle as CheckIcon,
+  Warning as WarningIcon,
+  FitnessCenter as ExerciseIcon,
+  Psychology as PsychologyIcon,
+  Healing as HealingIcon,
+} from '@mui/icons-material';
 import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, statusColors, neutralColors, surfaceColors } from '../../theme/palette';
-import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControl,
-  Grid,
-  IconButton,
-  InputAdornment,
-  InputLabel,
-  MenuItem,
-  Paper,
-  Select,
-  TextField,
-  Tooltip,
-  Typography
-} from '@mui/material';
-import HealingIcon from '@mui/icons-material/Healing';
-import PsychologyIcon from '@mui/icons-material/Psychology';
-import CheckIcon from '@mui/icons-material/Check';
-import WarningIcon from '@mui/icons-material/Warning';
-import TimerIcon from '@mui/icons-material/Timer';
-import SearchIcon from '@mui/icons-material/Search';
-import AddIcon from '@mui/icons-material/Add';
-import PrintIcon from '@mui/icons-material/Print';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
 
 const prescriptionTypes = [
   { value: 'physical_therapy', label: 'علاج طبيعي', icon: <ExerciseIcon /> },

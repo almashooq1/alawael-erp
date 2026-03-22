@@ -4,58 +4,28 @@
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-
+import {
+  Container, Typography, Grid, Paper, Box, Button, TextField, Card, CardContent,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination,
+  Chip, Avatar, IconButton, Tooltip, CircularProgress, Divider,
+  MenuItem, Dialog, DialogTitle, DialogContent, DialogActions,
+  InputAdornment, LinearProgress, Tab, Tabs,
+} from '@mui/material';
+import {
+  Add as AddIcon, Search as SearchIcon,
+  Delete as DeleteIcon, CheckCircle as ApproveIcon,
+  Cancel as RejectIcon, Close as CloseIcon, Refresh as RefreshIcon,
+  Download as DownloadIcon, Print as PrintIcon,
+  EmojiEvents as TrophyIcon, Star as StarIcon,
+  AttachMoney as MoneyIcon, TrendingUp as TrendIcon,
+  Paid as PaidIcon, Assessment as AssessmentIcon,
+  Groups as GroupsIcon, CardGiftcard as GiftIcon,
+} from '@mui/icons-material';
 import apiClient from 'services/api.client';
 import { formatCurrency } from 'utils/formatters';
 import { useSnackbar } from 'contexts/SnackbarContext';
 import { DEPT_COLORS } from '../constants/departmentColors';
 import { statusColors, neutralColors, surfaceColors, gradients, leaveColors, chartColors } from 'theme/palette';
-import {
-  Avatar,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  CircularProgress,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  Grid,
-  IconButton,
-  InputAdornment,
-  LinearProgress,
-  MenuItem,
-  Paper,
-  Tab,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TablePagination,
-  TableRow,
-  Tabs,
-  TextField,
-  Tooltip,
-  Typography
-} from '@mui/material';
-import AssessmentIcon from '@mui/icons-material/Assessment';
-import StarIcon from '@mui/icons-material/Star';
-import GroupsIcon from '@mui/icons-material/Groups';
-import MoneyIcon from '@mui/icons-material/Money';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import DownloadIcon from '@mui/icons-material/Download';
-import PrintIcon from '@mui/icons-material/Print';
-import AddIcon from '@mui/icons-material/Add';
-import PaidIcon from '@mui/icons-material/Paid';
-import SearchIcon from '@mui/icons-material/Search';
-import DeleteIcon from '@mui/icons-material/Delete';
-import CloseIcon from '@mui/icons-material/Close';
-import { TrendIcon } from 'utils/iconAliases';
 
 /* ─── Constants ─── */
 

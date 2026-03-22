@@ -1,39 +1,44 @@
 import { useState, useEffect, useCallback } from 'react';
-
-import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
 import {
-  Alert,
   Box,
-  Button,
+  Container,
   Card,
   CardContent,
-  Chip,
-  CircularProgress,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Grid,
-  IconButton,
-  MenuItem,
-  Tab,
+  Typography,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Tabs,
+  CircularProgress,
+  Button,
+  Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   TextField,
+  MenuItem,
+  IconButton,
   Tooltip,
-  Typography
+  Grid,
+  Tabs,
+  Tab,
+  Alert,
 } from '@mui/material';
-import Refresh from '@mui/icons-material/Refresh';
-import Add from '@mui/icons-material/Add';
-import ShoppingCart from '@mui/icons-material/ShoppingCart';
-import TrendingUp from '@mui/icons-material/TrendingUp';
-import TrendingDown from '@mui/icons-material/TrendingDown';
+import {
+  ShowChart,
+  Refresh,
+  Add,
+  TrendingUp,
+  TrendingDown,
+  AccountBalance,
+  PieChart,
+  ShoppingCart,
+  MonetizationOn,
+} from '@mui/icons-material';
+import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
 
 const API = process.env.REACT_APP_API_URL || '/api';
 const fmt = v =>

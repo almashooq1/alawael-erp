@@ -2,10 +2,10 @@
  * LeaveManagement — Custom Hook (state, data, actions)
  */
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { EventNote as LeaveIcon } from '@mui/icons-material';
 import hrService from 'services/hrService';
 import { neutralColors } from '../../theme/palette';
 import { LEAVE_TYPE_MAP, LEAVE_BALANCES, STATUS_CONFIG, EMPTY_FORM } from './constants';
-import { LeaveIcon } from 'utils/iconAliases';
 
 export const useLeaveManagement = () => {
   const [leaves, setLeaves] = useState([]);

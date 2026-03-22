@@ -1,12 +1,13 @@
 import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { io } from 'socket.io-client';
 import apiClient from 'services/api.client';
+import Snackbar from '@mui/material/Snackbar';
+import Alert from '@mui/material/Alert';
 import { SOCKET_URL } from 'config/apiConfig';
 import logger from 'utils/logger';
 import { getNotificationPrefs, setNotificationPrefs } from 'utils/storageService';
 import { useAuth } from './AuthContext';
 import { getToken } from 'utils/tokenStorage';
-import { Alert, Snackbar } from '@mui/material';
 
 const NotificationContext = createContext();
 

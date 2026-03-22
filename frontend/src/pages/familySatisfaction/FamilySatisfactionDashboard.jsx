@@ -3,34 +3,18 @@
  * Family Satisfaction Surveys Dashboard
  */
 import { useState, useEffect, useCallback } from 'react';
-
-import familySatisfactionService from '../../services/familySatisfaction.service';
 import {
-  Alert,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  CircularProgress,
-  Divider,
-  Grid,
-  IconButton,
-  Tab,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Tabs,
-  Typography
+  Box, Card, CardContent, Typography, Grid, Button, Chip, Table,
+  TableBody, TableCell, TableContainer, TableHead, TableRow,
+  CircularProgress, Alert, IconButton, Tabs, Tab, LinearProgress,
+  Avatar, Divider,
 } from '@mui/material';
-import Add from '@mui/icons-material/Add';
-import Refresh from '@mui/icons-material/Refresh';
-import Star from '@mui/icons-material/Star';
-import TrendingUp from '@mui/icons-material/TrendingUp';
-import Assessment from '@mui/icons-material/Assessment';
+import {
+  Refresh, Add, SentimentVerySatisfied, SentimentSatisfied,
+  SentimentDissatisfied, ThumbUp, ThumbDown, Assessment,
+  QuestionAnswer, TrendingUp, Star,
+} from '@mui/icons-material';
+import familySatisfactionService from '../../services/familySatisfaction.service';
 
 const npsColors = { promoter: 'success', passive: 'warning', detractor: 'error' };
 const npsLabels = { promoter: 'مروّج', passive: 'محايد', detractor: 'منتقد' };

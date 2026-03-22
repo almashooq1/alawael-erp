@@ -3,36 +3,37 @@
  * Fetches recommended scales from the backend based on disability type.
  */
 import { useState } from 'react';
-
+import {
+  Box,
+  Typography,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  IconButton,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Alert,
+  LinearProgress,
+  Chip,
+  Grid,
+  Card,
+  CardContent,
+  CardActions,
+  Avatar,
+} from '@mui/material';
+import {
+  Close as CloseIcon,
+  Recommend as RecommendIcon,
+  Assessment as AssessmentIcon,
+  Add as AddIcon,
+} from '@mui/icons-material';
 import assessmentService from 'services/assessmentService';
 import logger from 'utils/logger';
 import { SCALE_ICONS } from './constants';
-import {
-  Alert,
-  Avatar,
-  Box,
-  Button,
-  Card,
-  CardActions,
-  CardContent,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControl,
-  Grid,
-  IconButton,
-  InputLabel,
-  LinearProgress,
-  MenuItem,
-  Select,
-  Typography
-} from '@mui/material';
-import RecommendIcon from '@mui/icons-material/Recommend';
-import CloseIcon from '@mui/icons-material/Close';
-import AssessmentIcon from '@mui/icons-material/Assessment';
-import AddIcon from '@mui/icons-material/Add';
 
 const DISABILITY_TYPE_OPTIONS = [
   { value: 'physical', label: 'إعاقة حركية' },

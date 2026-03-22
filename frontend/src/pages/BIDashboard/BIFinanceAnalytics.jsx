@@ -5,43 +5,55 @@
  * monthly comparisons, and financial KPIs.
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  useTheme,
-  alpha,
-} from '@mui/material';
-import {
-  AccountBalance,
-  Receipt,
-  MoneyOff,
-  AttachMoney,
-} from '@mui/icons-material';
-
-import { getFinanceAnalytics, getCashflow } from '../../services/biDashboard.service';
-import {
-  Alert,
   Box,
+  Grid,
+  Paper,
+  Typography,
   Card,
   CardContent,
   CircularProgress,
-  Grid,
-  Icon,
+  ToggleButtonGroup,
+  ToggleButton,
   IconButton,
-  Paper,
+  Tooltip,
+  Alert,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  ToggleButton,
-  ToggleButtonGroup,
-  Tooltip,
-  Typography
+  useTheme,
+  alpha,
 } from '@mui/material';
-import TrendingUp from '@mui/icons-material/TrendingUp';
-import TrendingDown from '@mui/icons-material/TrendingDown';
-import Refresh from '@mui/icons-material/Refresh';
+import {
+  TrendingUp,
+  TrendingDown,
+  AccountBalance,
+  Receipt,
+  MoneyOff,
+  Refresh,
+  AttachMoney,
+} from '@mui/icons-material';
+import {
+  BarChart,
+  Bar,
+  AreaChart,
+  Area,
+  LineChart,
+  Line,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RechartTooltip,
+  Legend,
+  ComposedChart,
+} from 'recharts';
+import { motion } from 'framer-motion';
+import { getFinanceAnalytics, getCashflow } from '../../services/biDashboard.service';
 
 function formatCurrency(amount) {
   return new Intl.NumberFormat('ar-SA', { style: 'currency', currency: 'SAR', maximumFractionDigits: 0 }).format(

@@ -6,7 +6,13 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { triggerBlobDownload } from 'utils/downloadHelper';
-
+import {
+  Assessment as AssessmentIcon,
+  TrendingUp as TrendingUpIcon,
+  Psychology as PsychologyIcon,
+  WarningAmber as WarningAmberIcon,
+  CheckCircle as CheckCircleIcon,
+} from '@mui/icons-material';
 import studentPortalService from 'services/studentPortalService';
 import apiClient from 'services/api.client';
 import { formatNumber } from 'utils/formatters';
@@ -21,11 +27,6 @@ import {
 import { gradients } from 'theme/palette';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from 'contexts/SnackbarContext';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import AssessmentIcon from '@mui/icons-material/Assessment';
-import PsychologyIcon from '@mui/icons-material/Psychology';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 
 export const DEFAULT_FILTERS = {
   dateFrom: '2025-09-01',
@@ -80,9 +81,8 @@ export default function useStudentReport() {
           : 'تعذر تحميل التقرير. الرجاء المحاولة لاحقًا.';
       setLoadError(errorMessage);
     } finally {
-      if (requestId === requestIdRef.current) {
-        setLoading(false);
-      }
+      if (requestId !== requestIdRef.current) return;
+      setLoading(false);
     }
   }, [filters, isDateRangeInvalid, userId, showSnackbar]);
 

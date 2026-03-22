@@ -3,42 +3,45 @@
  * صفحة الرسائل والمحادثات للطالب
  */
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
-
+import { useState, useEffect, useCallback, useMemo, Fragment } from 'react';
+import {
+  Box,
+  Grid,
+  Typography,
+  TextField,
+  InputAdornment,
+  Button,
+  Stack,
+  Avatar,
+  Paper,
+  List,
+  ListItemAvatar,
+  ListItemText,
+  ListItemButton,
+  Badge,
+  Divider,
+  IconButton,
+  LinearProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+} from '@mui/material';
+import {
+  Message as MessageIcon,
+  Search as SearchIcon,
+  Send as SendIcon,
+  AttachFile as AttachFileIcon,
+  MoreVert as MoreIcon,
+  StarBorder as StarIcon,
+  Star as StarFilledIcon,
+  People as GroupIcon,
+  Person as PersonIcon,
+  School as TeacherIcon,
+} from '@mui/icons-material';
 import { gradients, brandColors, surfaceColors, rankColors } from 'theme/palette';
 import messagesService from 'services/messagesService';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import {
-  Avatar,
-  Badge,
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  Grid,
-  IconButton,
-  InputAdornment,
-  LinearProgress,
-  List,
-  ListItemAvatar,
-  ListItemButton,
-  ListItemText,
-  Paper,
-  Stack,
-  TextField,
-  Typography
-} from '@mui/material';
-import GroupIcon from '@mui/icons-material/Group';
-import PersonIcon from '@mui/icons-material/Person';
-import MessageIcon from '@mui/icons-material/Message';
-import SendIcon from '@mui/icons-material/Send';
-import SearchIcon from '@mui/icons-material/Search';
-import StarIcon from '@mui/icons-material/Star';
-import MoreIcon from '@mui/icons-material/More';
-import AttachFileIcon from '@mui/icons-material/AttachFile';
 
 const StudentMessages = () => {
   const [loading, setLoading] = useState(true);

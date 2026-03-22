@@ -1,24 +1,15 @@
 /**
  * LeaveManagement — Table with leave rows + pagination
  */
-
-import { STATUS_CONFIG } from './constants';
 import {
-  Avatar,
-  Box,
-  Chip,
-  IconButton,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TablePagination,
-  TableRow,
-  Tooltip,
-  Typography
+  Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  TablePagination, Chip, Avatar, IconButton, Tooltip,
 } from '@mui/material';
-import { ViewIcon } from 'utils/iconAliases';
+import {
+  CheckCircle as ApproveIcon, Cancel as RejectIcon,
+  Visibility as ViewIcon, BeachAccess as VacationIcon,
+} from '@mui/icons-material';
+import { STATUS_CONFIG } from './constants';
 
 const LeaveTable = ({
   filtered, page, setPage, rowsPerPage, setRowsPerPage,

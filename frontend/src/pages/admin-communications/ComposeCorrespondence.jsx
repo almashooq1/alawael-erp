@@ -2,9 +2,49 @@
  * Compose Correspondence — إنشاء مراسلة جديدة
  * متطابق مع Backend Correspondence Schema
  */
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-
+import {
+  Box,
+  Typography,
+  Paper,
+  Button,
+  Grid,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Chip,
+  IconButton,
+  Stepper,
+  Step,
+  StepLabel,
+  Divider,
+  Card,
+  CardContent,
+  Stack,
+  Switch,
+  FormControlLabel,
+  Alert,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemIcon,
+  ListItemSecondaryAction,
+} from '@mui/material';
+import {
+  ArrowBack,
+  Send as SendIcon,
+  Save as SaveIcon,
+  AttachFile,
+  Delete as DeleteIcon,
+  Add as AddIcon,
+  InsertDriveFile,
+  Person,
+  Business,
+  PersonAdd,
+} from '@mui/icons-material';
 import { gradients } from '../../theme/palette';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import adminCommunicationsService from '../../services/adminCommunications.service';
@@ -15,44 +55,6 @@ import {
   SENDER_TYPES,
   DEPARTMENTS,
 } from './constants';
-import {
-  Alert,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Divider,
-  FormControl,
-  FormControlLabel,
-  Grid,
-  IconButton,
-  InputLabel,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemSecondaryAction,
-  ListItemText,
-  MenuItem,
-  Paper,
-  Select,
-  Stack,
-  Step,
-  StepLabel,
-  Stepper,
-  Switch,
-  TextField,
-  Typography
-} from '@mui/material';
-import Person from '@mui/icons-material/Person';
-import Business from '@mui/icons-material/Business';
-import PersonAdd from '@mui/icons-material/PersonAdd';
-import AddIcon from '@mui/icons-material/Add';
-import AttachFile from '@mui/icons-material/AttachFile';
-import DeleteIcon from '@mui/icons-material/Delete';
-import ArrowBack from '@mui/icons-material/ArrowBack';
-import SaveIcon from '@mui/icons-material/Save';
-import SendIcon from '@mui/icons-material/Send';
 
 const steps = ['بيانات المراسلة', 'المحتوى والمرفقات', 'المراجعة والإرسال'];
 

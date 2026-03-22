@@ -1,48 +1,57 @@
 import { useState, useEffect } from 'react';
-
+import {
+  Box,
+  Container,
+  Card,
+  CardContent,
+  Typography,
+  Grid,
+  Paper,
+  Button,
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Chip,
+  Avatar,
+  IconButton,
+  Tooltip,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Divider,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemAvatar,
+  ListItemSecondaryAction,
+  InputAdornment,
+} from '@mui/material';
+import {
+  Forum as ConsultIcon,
+  Add as AddIcon,
+  Search as SearchIcon,
+  Send as SendIcon,
+  Reply as ReplyIcon,
+  Delete as DeleteIcon,
+  CheckCircle as CheckIcon,
+  HourglassEmpty as PendingIcon,
+  Cancel as CancelIcon,
+  Person as PersonIcon,
+  LocalHospital as MedicalIcon,
+  SwapHoriz as ReferralIcon,
+  Assessment as AssessmentIcon,
+  QuestionAnswer as QAIcon,
+  Visibility as ViewIcon,
+  Close as CloseIcon,
+} from '@mui/icons-material';
 import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { statusColors, neutralColors, surfaceColors } from '../../theme/palette';
-import {
-  Avatar,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  FormControl,
-  Grid,
-  IconButton,
-  InputAdornment,
-  InputLabel,
-  List,
-  MenuItem,
-  Paper,
-  Select,
-  TextField,
-  Tooltip,
-  Typography
-} from '@mui/material';
-import AssessmentIcon from '@mui/icons-material/Assessment';
-import PendingIcon from '@mui/icons-material/Pending';
-import CheckIcon from '@mui/icons-material/Check';
-import CancelIcon from '@mui/icons-material/Cancel';
-import AddIcon from '@mui/icons-material/Add';
-import SearchIcon from '@mui/icons-material/Search';
-import PersonIcon from '@mui/icons-material/Person';
-import ReplyIcon from '@mui/icons-material/Reply';
-import DeleteIcon from '@mui/icons-material/Delete';
-import CloseIcon from '@mui/icons-material/Close';
-import SendIcon from '@mui/icons-material/Send';
-import { ViewIcon } from 'utils/iconAliases';
 
 const CONSULTATION_TYPES = [
   { value: 'medical_opinion', label: 'رأي طبي', icon: <MedicalIcon />, color: statusColors.info },

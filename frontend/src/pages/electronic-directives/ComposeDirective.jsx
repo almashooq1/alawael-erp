@@ -1,42 +1,47 @@
 /**
  * Compose Directive — إنشاء توجيه إلكتروني جديد
  */
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
+import {
+  Box,
+  Typography,
+  Paper,
+  Grid,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Button,
+  Chip,
+  IconButton,
+  Divider,
+  Switch,
+  FormControlLabel,
+  Alert,
+  Snackbar,
+  Card,
+  CardContent,
+  Autocomplete,
+} from '@mui/material';
+import {
+  Send as SendIcon,
+  Save as SaveIcon,
+  ArrowBack as BackIcon,
+  Add as AddIcon,
+  Delete as DeleteIcon,
+  AttachFile as AttachIcon,
+  Campaign as CampaignIcon,
+} from '@mui/icons-material';
 import electronicDirectivesService from '../../services/electronicDirectives.service';
 import {
   typeOptions,
   priorityOptions,
   issuerOptions,
   recipientTypeOptions,
+  DIRECTIVE_TYPES,
 } from './constants';
-import {
-  Alert,
-  Autocomplete,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  FormControl,
-  FormControlLabel,
-  Grid,
-  IconButton,
-  InputLabel,
-  MenuItem,
-  Paper,
-  Select,
-  Snackbar,
-  Switch,
-  TextField,
-  Typography
-} from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import DeleteIcon from '@mui/icons-material/Delete';
-import SaveIcon from '@mui/icons-material/Save';
-import SendIcon from '@mui/icons-material/Send';
-import { AttachIcon } from 'utils/iconAliases';
 
 export default function ComposeDirective() {
   const navigate = useNavigate();

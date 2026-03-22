@@ -2,6 +2,7 @@
  * Rehabilitation & Therapy Routes
  * مسارات التأهيل والعلاج
  */
+import { Route, Navigate } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 // Disability Assessment

@@ -4,44 +4,64 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import {
-  useTheme,
-} from '@mui/material';
-
-import { MOCK_CRM_DASHBOARD, crmReportsService, seedService } from 'services/crmService';
-import {
-  Alert,
-  Avatar,
   Box,
-  Button,
   Card,
   CardContent,
-  Chip,
-  Divider,
+  Typography,
   Grid,
-  IconButton,
-  LinearProgress,
+  Chip,
+  Avatar,
   List,
   ListItem,
   ListItemAvatar,
   ListItemText,
+  Divider,
   Paper,
-  Snackbar,
   Tab,
   Tabs,
+  LinearProgress,
+  IconButton,
   Tooltip,
-  Typography
+  useTheme,
+  Button,
+  Alert,
+  Snackbar,
 } from '@mui/material';
-import PeopleIcon from '@mui/icons-material/People';
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import HandshakeIcon from '@mui/icons-material/Handshake';
-import MoneyIcon from '@mui/icons-material/Money';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import CheckIcon from '@mui/icons-material/Check';
-import CancelIcon from '@mui/icons-material/Cancel';
-import PhoneIcon from '@mui/icons-material/Phone';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import WarningIcon from '@mui/icons-material/Warning';
-import { CalendarIcon } from 'utils/iconAliases';
+import {
+  People as PeopleIcon,
+  TrendingUp as TrendingUpIcon,
+  MonetizationOn as MoneyIcon,
+  Handshake as HandshakeIcon,
+  PersonAdd as PersonAddIcon,
+  PhoneCallback as PhoneIcon,
+  EmojiEvents as TrophyIcon,
+  Schedule as ScheduleIcon,
+  Refresh as RefreshIcon,
+  ArrowUpward as ArrowUpIcon,
+  ArrowDownward as ArrowDownIcon,
+  CheckCircle as CheckIcon,
+  Cancel as CancelIcon,
+  FiberNew as NewIcon,
+  Storage as SeedIcon,
+  Warning as WarningIcon,
+  CalendarMonth as CalendarIcon,
+} from '@mui/icons-material';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as ReTooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  LineChart,
+  Line,
+  Legend,
+} from 'recharts';
+import { MOCK_CRM_DASHBOARD, crmReportsService, seedService } from 'services/crmService';
 
 const COLORS = ['#4FC3F7', '#81C784', '#FFB74D', '#E57373', '#BA68C8', '#4DB6AC'];
 

@@ -1,42 +1,52 @@
 import { useState, useEffect } from 'react';
 import {
-  Paper,
-} from '@mui/material';
-
-import { therapistService } from 'services/therapistService';
-import logger from 'utils/logger';
-import { useAuth } from 'contexts/AuthContext';
-import { useSnackbar } from '../../contexts/SnackbarContext';
-import { gradients, statusColors, neutralColors, surfaceColors } from '../../theme/palette';
-import {
   Box,
-  Button,
+  Container,
   Card,
   CardContent,
-  Chip,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
+  Typography,
   Grid,
+  Button,
+  TextField,
+  Chip,
   IconButton,
-  Tab,
+  InputAdornment,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Paper,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Tabs,
-  TextField,
   Tooltip,
-  Typography
+  Rating,
+  Tabs,
+  Tab,
 } from '@mui/material';
-import AssessmentIcon from '@mui/icons-material/Assessment';
-import CategoryIcon from '@mui/icons-material/Category';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { ChartIcon } from 'utils/iconAliases';
+import {
+  Add as AddIcon,
+  Search as SearchIcon,
+  Assessment as AssessmentIcon,
+  Psychology as PsychologyIcon,
+  BarChart as ChartIcon,
+  Delete as DeleteIcon,
+  Visibility as ViewIcon,
+  Star as StarIcon,
+  Category as CategoryIcon,
+} from '@mui/icons-material';
+import { therapistService } from 'services/therapistService';
+import logger from 'utils/logger';
+import { useAuth } from 'contexts/AuthContext';
+import { useSnackbar } from '../../contexts/SnackbarContext';
+import { gradients, statusColors, neutralColors, surfaceColors } from '../../theme/palette';
 
 const TherapistAssessments = () => {
   const { currentUser } = useAuth();

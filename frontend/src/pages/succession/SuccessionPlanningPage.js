@@ -3,45 +3,48 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import {
-  Paper,
-} from '@mui/material';
-
-import successionPlanningService from '../../services/successionPlanning.service';
-import {
-  Alert,
-  Avatar,
   Box,
-  Button,
+  Container,
+  Typography,
   Card,
   CardContent,
-  Chip,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
   Grid,
-  IconButton,
-  LinearProgress,
-  MenuItem,
-  Stack,
-  Tab,
+  Button,
+  Chip,
+  Avatar,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Tabs,
+  Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   TextField,
-  Typography
+  MenuItem,
+  LinearProgress,
+  Tabs,
+  Tab,
+  IconButton,
+  Stack,
+  Alert,
+  LinearProgress as ProgressBar,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import GroupsIcon from '@mui/icons-material/Groups';
-import PersonIcon from '@mui/icons-material/Person';
-import TimelineIcon from '@mui/icons-material/Timeline';
-import EditIcon from '@mui/icons-material/Edit';
+import {
+  SwapHoriz as SuccessionIcon,
+  Add as AddIcon,
+  Refresh as RefreshIcon,
+  TrendingUp as ReadyIcon,
+  Person as PersonIcon,
+  Edit as EditIcon,
+  Schedule as TimelineIcon,
+  Assessment as AssessIcon,
+  Groups as GroupsIcon,
+} from '@mui/icons-material';
+import successionPlanningService from '../../services/successionPlanning.service';
 
 const DEMO_PLANS = [
   {

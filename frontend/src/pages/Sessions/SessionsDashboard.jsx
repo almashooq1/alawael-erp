@@ -1,36 +1,35 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import computeStatusCounts from '../../utils/computeStatusCounts';
-
+import {
+  Container, Typography, Grid, Paper, Box,
+  Chip, Table, TableBody, TableCell, TableContainer,
+  TableHead, TableRow, LinearProgress, Button,
+} from '@mui/material';
+import {
+  Schedule as ScheduleIcon,
+  CheckCircle as CheckCircleIcon,
+  Cancel as CancelIcon,
+  PersonOff as NoShowIcon,
+  TrendingUp as TrendingUpIcon,
+  Today as TodayIcon,
+  AccessTime as AccessTimeIcon,
+  Groups as GroupsIcon,
+  ArrowForward as ArrowForwardIcon,
+} from '@mui/icons-material';
+import {
+  BarChart, Bar, PieChart, Pie, Cell, LineChart, Line,
+  XAxis, YAxis, CartesianGrid, Tooltip as RTooltip,
+  ResponsiveContainer, Legend,
+} from 'recharts';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, chartColors, statusColors } from '../../theme/palette';
 import logger from '../../utils/logger';
 import therapySessionsService from '../../services/therapySessions.service';
+import ModuleKPICard from '../../components/dashboard/shared/ModuleKPICard';
+import EmptyState from '../../components/dashboard/shared/EmptyState';
+import DashboardErrorBoundary from '../../components/dashboard/shared/DashboardErrorBoundary';
 import { useNavigate } from 'react-router-dom';
 import { STATUS_MAP as CONST_STATUS_MAP, getSessionType } from './constants';
-import {
-  Box,
-  Button,
-  Chip,
-  Container,
-  Grid,
-  LinearProgress,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography
-} from '@mui/material';
-import ScheduleIcon from '@mui/icons-material/Schedule';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import TodayIcon from '@mui/icons-material/Today';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import CancelIcon from '@mui/icons-material/Cancel';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import GroupsIcon from '@mui/icons-material/Groups';
 
 /* ──────── بيانات تجريبية ──────── */
 const DEMO_STATS = {

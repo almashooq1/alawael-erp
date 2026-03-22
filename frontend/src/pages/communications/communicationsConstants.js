@@ -2,21 +2,21 @@
  * Communications Constants — تصنيفات وحالات المراسلات
  */
 
-
-
+import {
+  Send as SendIcon,
+  Drafts as DraftsIcon,
+  Archive as ArchiveIcon,
+  Reply as ReplyIcon,
+  CheckCircle as CheckCircleIcon,
+  Error as ErrorIcon,
+  Pending as PendingIcon,
+  Visibility as VisibilityIcon,
+  Business as BusinessIcon,
+  Email as EmailIcon,
+  Message as MessageIcon,
+} from '@mui/icons-material';
 
 // تصنيفات المراسلات
-import EmailIcon from '@mui/icons-material/Email';
-import SendIcon from '@mui/icons-material/Send';
-import MessageIcon from '@mui/icons-material/Message';
-import BusinessIcon from '@mui/icons-material/Business';
-import DraftsIcon from '@mui/icons-material/Drafts';
-import PendingIcon from '@mui/icons-material/Pending';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import ReplyIcon from '@mui/icons-material/Reply';
-import ArchiveIcon from '@mui/icons-material/Archive';
-import ErrorIcon from '@mui/icons-material/Error';
 export const COMMUNICATION_TYPES = {
   incoming: { label: 'وارد', color: 'primary', icon: <EmailIcon /> },
   outgoing: { label: 'صادر', color: 'success', icon: <SendIcon /> },

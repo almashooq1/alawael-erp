@@ -1,25 +1,22 @@
 /**
  * لوحة تحكم التوظيف — Recruitment Dashboard
  */
-import { useState, useEffect } from 'react';
-
-import { getDashboard } from '../../services/recruitment.service';
+import React, { useState, useEffect } from 'react';
 import {
-  Box,
-  Card,
-  CardContent,
-  Chip,
-  CircularProgress,
-  Grid,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Tooltip,
-  Typography
+  Box, Grid, Paper, Typography, Card, CardContent, Chip,
+  Table, TableHead, TableRow, TableCell, TableBody, CircularProgress,
 } from '@mui/material';
+import {
+  PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  Tooltip, ResponsiveContainer, Legend,
+} from 'recharts';
+import {
+  Work as JobIcon,
+  PersonAdd as ApplicantIcon,
+  EventAvailable as InterviewIcon,
+  LocalOffer as OfferIcon,
+} from '@mui/icons-material';
+import { getDashboard } from '../../services/recruitment.service';
 
 const stageLabels = {
   new: 'جديد', screening: 'فرز', shortlisted: 'مرشح', interview: 'مقابلة',

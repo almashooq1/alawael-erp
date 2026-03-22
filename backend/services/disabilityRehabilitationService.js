@@ -2,7 +2,7 @@
 const DisabilityProgram = require('../models/DisabilityProgram');
 const DisabilitySession = require('../models/DisabilitySession');
 const Goal = require('../models/Goal');
-const Assessment = require('../models/Assessment');
+const Assessment = require('../models/Assessment'); // ProgramAssessment model
 const logger = require('../utils/logger');
 const { escapeRegex } = require('../utils/sanitize');
 

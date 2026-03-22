@@ -530,15 +530,34 @@ router.get('/active/:beneficiaryId', async (req, res) => {
  */
 router.post('/quick-assessment/:beneficiaryId', async (req, res) => {
   try {
-    const assessment = new QuickAssessment({
+    // جلب آخر تقييم سريع سابق لحساب الفرق
+    const previousAssessment = await QuickAssessment.findOne({
+      beneficiaryId: req.params.beneficiaryId,
+      assessmentType: req.body.assessmentType,
+    }).sort({ date: -1 });
+
+    const assessmentData = {
       beneficiaryId: req.params.beneficiaryId,
       assessmentType: req.body.assessmentType,
       items: req.body.items,
       totalScore: req.body.totalScore,
+      maxScore: req.body.maxScore,
       level: req.body.level,
       performedBy: req.user._id,
-    });
+      duration: req.body.duration,
+      environment: req.body.environment,
+      observations: req.body.observations,
+    };
 
+    if (previousAssessment) {
+      assessmentData.previousScoreRef = {
+        assessmentId: previousAssessment._id,
+        score: previousAssessment.totalScore,
+        date: previousAssessment.date,
+      };
+    }
+
+    const assessment = new QuickAssessment(assessmentData);
     await assessment.save();
 
     res.status(201).json({
@@ -548,6 +567,215 @@ router.post('/quick-assessment/:beneficiaryId', async (req, res) => {
     });
   } catch (error) {
     res.status(400).json({ success: false, error: 'خطأ في البيانات المدخلة' });
+  }
+});
+
+// ============================
+// 8. مسارات لوحة المعلومات والتحليلات
+// ============================
+
+/**
+ * لوحة معلومات المقاييس
+ * GET /api/measurements/dashboard
+ */
+router.get('/dashboard', async (req, res) => {
+  try {
+    const filters = {};
+    if (req.query.beneficiaryId) filters.beneficiaryId = req.query.beneficiaryId;
+    if (req.query.status) filters.status = req.query.status;
+    if (req.query.fromDate) filters.fromDate = req.query.fromDate;
+
+    const stats = await MeasurementResult.getDashboardStats(filters);
+
+    res.json({ success: true, data: stats });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+  }
+});
+
+/**
+ * تحليل اتجاه المستفيد عبر الزمن
+ * GET /api/measurements/trend/:beneficiaryId/:typeId
+ */
+router.get('/trend/:beneficiaryId/:typeId', async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 10;
+    const trend = await MeasurementResult.getTrend(
+      req.params.beneficiaryId,
+      req.params.typeId,
+      limit
+    );
+
+    res.json({ success: true, data: trend });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+  }
+});
+
+/**
+ * إحصائيات التقييم السريع حسب النوع
+ * GET /api/measurements/quick-assessment/stats/:beneficiaryId
+ */
+router.get('/quick-assessment/stats/:beneficiaryId', async (req, res) => {
+  try {
+    const mongoose = require('mongoose');
+    const beneficiaryId = new mongoose.Types.ObjectId(req.params.beneficiaryId);
+    const stats = await QuickAssessment.getStatsByType(beneficiaryId);
+
+    res.json({ success: true, data: stats });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+  }
+});
+
+/**
+ * تحديث نوع مقياس
+ * PUT /api/measurements/types/:id
+ */
+router.put('/types/:id', async (req, res) => {
+  try {
+    const updated = await MeasurementType.findByIdAndUpdate(
+      req.params.id,
+      { ...req.body, updatedAt: new Date() },
+      { new: true, runValidators: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ success: false, error: 'نوع المقياس غير موجود' });
+    }
+
+    res.json({ success: true, message: 'تم تحديث نوع المقياس', data: updated });
+  } catch (error) {
+    res.status(400).json({ success: false, error: 'خطأ في البيانات المدخلة' });
+  }
+});
+
+/**
+ * حذف نوع مقياس (إلغاء تفعيل)
+ * DELETE /api/measurements/types/:id
+ */
+router.delete('/types/:id', async (req, res) => {
+  try {
+    const updated = await MeasurementType.findByIdAndUpdate(
+      req.params.id,
+      { isActive: false, updatedAt: new Date() },
+      { new: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ success: false, error: 'نوع المقياس غير موجود' });
+    }
+
+    res.json({ success: true, message: 'تم إلغاء تفعيل نوع المقياس' });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+  }
+});
+
+/**
+ * تحديث مقياس رئيسي
+ * PUT /api/measurements/masters/:id
+ */
+router.put('/masters/:id', async (req, res) => {
+  try {
+    const updated = await MeasurementMaster.findByIdAndUpdate(
+      req.params.id,
+      { ...req.body, updatedAt: new Date() },
+      { new: true, runValidators: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ success: false, error: 'المقياس غير موجود' });
+    }
+
+    res.json({ success: true, message: 'تم تحديث المقياس', data: updated });
+  } catch (error) {
+    res.status(400).json({ success: false, error: 'خطأ في البيانات المدخلة' });
+  }
+});
+
+/**
+ * حذف مقياس رئيسي (إلغاء تفعيل)
+ * DELETE /api/measurements/masters/:id
+ */
+router.delete('/masters/:id', async (req, res) => {
+  try {
+    const updated = await MeasurementMaster.findByIdAndUpdate(
+      req.params.id,
+      { isActive: false, updatedAt: new Date() },
+      { new: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ success: false, error: 'المقياس غير موجود' });
+    }
+
+    res.json({ success: true, message: 'تم إلغاء تفعيل المقياس' });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+  }
+});
+
+/**
+ * تقييم جماعي (Batch)
+ * POST /api/measurements/batch-assessment
+ */
+router.post('/batch-assessment', async (req, res) => {
+  try {
+    const { beneficiaryId, assessments } = req.body;
+    if (!beneficiaryId || !Array.isArray(assessments) || assessments.length === 0) {
+      return res.status(400).json({ success: false, error: 'بيانات غير صالحة' });
+    }
+
+    const results = [];
+    const errors = [];
+
+    for (const assessment of assessments) {
+      try {
+        const result = await measurementService.recordMeasurementResult(beneficiaryId, assessment);
+        results.push(result);
+      } catch (err) {
+        errors.push({ assessment: assessment.measurementId, error: err.message });
+      }
+    }
+
+    res.status(results.length > 0 ? 201 : 400).json({
+      success: results.length > 0,
+      message: `تم تسجيل ${results.length} من ${assessments.length} نتائج`,
+      data: results,
+      errors: errors.length > 0 ? errors : undefined,
+    });
+  } catch (error) {
+    res.status(400).json({ success: false, error: 'خطأ في البيانات المدخلة' });
+  }
+});
+
+/**
+ * ملخص تقدم خطة التأهيل
+ * GET /api/measurements/rehab-plan/:beneficiaryId/progress
+ */
+router.get('/rehab-plan/:beneficiaryId/progress', async (req, res) => {
+  try {
+    const plan = await measurementService.getIndividualRehabPlan(req.params.beneficiaryId);
+
+    if (!plan) {
+      return res.status(404).json({ success: false, error: 'لم يتم العثور على خطة التأهيل' });
+    }
+
+    const summary = plan.getProgressSummary();
+
+    res.json({
+      success: true,
+      data: {
+        planCode: plan.planCode,
+        status: plan.status,
+        progress: summary,
+        milestones: plan.milestones,
+        lastReview: plan.reviews?.length ? plan.reviews[plan.reviews.length - 1] : null,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
   }
 });
 

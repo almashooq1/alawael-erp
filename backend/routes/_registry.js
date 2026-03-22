@@ -148,6 +148,7 @@ const rbacAdminRoutes = require('../routes/rbac.admin.routes');
 const montessoriRoutes = require('../routes/montessori');
 const montessoriAuthRoutes = require('../routes/montessoriAuth');
 const measurementsRoutes = require('../routes/measurements.routes');
+const assessmentRoutes = require('../routes/assessment.routes');
 const successionPlanningRoutes = require('../routes/successionPlanning');
 const mobileAppRoutes = require('../routes/mobileApp.routes');
 const zktecoRoutes = require('../routes/zkteco.routes');
@@ -445,6 +446,8 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'montessori', montessoriRoutes);
   dualMount(app, 'montessori/auth', montessoriAuthRoutes);
   dualMount(app, 'measurements', measurementsRoutes);
+  dualMount(app, 'assessments', assessmentRoutes);
+  logger.info('Assessment CRUD+Workflow routes mounted (10 endpoints — create/read/update/delete, approve/reject/archive, statistics, search, pending)');
   dualMount(app, 'succession-planning', successionPlanningRoutes);
   dualMount(app, 'mobile', mobileAppRoutes);
   dualMount(app, 'zkteco', zktecoRoutes);

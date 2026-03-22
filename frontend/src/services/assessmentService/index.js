@@ -275,6 +275,137 @@ const assessmentService = {
       throw new Error('فشل مقارنة التقييمات');
     }
   },
+
+  /* ═══════════════════════════════════════════════════════════════════
+   *  NEW: Enhanced Measurement Endpoints (نقاط نهاية القياس المحسّنة)
+   * ═══════════════════════════════════════════════════════════════════ */
+
+  /* ── Dashboard Stats (إحصائيات لوحة المعلومات) ── */
+
+  async getDashboardStats(filters = {}) {
+    try {
+      const params = new URLSearchParams();
+      if (filters.beneficiaryId) params.append('beneficiaryId', filters.beneficiaryId);
+      if (filters.startDate) params.append('startDate', filters.startDate);
+      if (filters.endDate) params.append('endDate', filters.endDate);
+      const qs = params.toString();
+      const response = await apiClient.get(`/measurements/dashboard${qs ? `?${qs}` : ''}`);
+      return response;
+    } catch (err) {
+      logger.warn('Dashboard stats API error:', err?.message);
+      return { success: false, data: null };
+    }
+  },
+
+  /* ── Trend Analysis (تحليل الاتجاه) ── */
+
+  async getTrend(beneficiaryId, typeId, limit = 20) {
+    try {
+      const response = await apiClient.get(
+        `/measurements/trend/${beneficiaryId}/${typeId}?limit=${limit}`
+      );
+      return response;
+    } catch (err) {
+      logger.warn('Trend API error:', err?.message);
+      return { success: false, data: null };
+    }
+  },
+
+  /* ── Quick Assessment Stats (إحصائيات التقييم السريع) ── */
+
+  async getQuickAssessmentStats(beneficiaryId) {
+    try {
+      const response = await apiClient.get(
+        `/measurements/quick-assessment/stats/${beneficiaryId}`
+      );
+      return response;
+    } catch (err) {
+      logger.warn('Quick assessment stats API error:', err?.message);
+      return { success: false, data: [] };
+    }
+  },
+
+  /* ── Batch Assessment (تقييم جماعي للقياسات) ── */
+
+  async batchMeasurementAssessment(assessments) {
+    try {
+      const response = await apiClient.post('/measurements/batch-assessment', { assessments });
+      return response;
+    } catch (err) {
+      logger.error('Batch measurement assessment failed:', err?.message);
+      throw new Error('فشل التقييم الجماعي للقياسات');
+    }
+  },
+
+  /* ── Rehab Plan Progress (تقدم خطة التأهيل) ── */
+
+  async getRehabPlanProgress(beneficiaryId) {
+    try {
+      const response = await apiClient.get(
+        `/measurements/rehab-plan/${beneficiaryId}/progress`
+      );
+      return response;
+    } catch (err) {
+      logger.warn('Rehab plan progress API error:', err?.message);
+      return { success: false, data: null };
+    }
+  },
+
+  /* ── Scale & Test Search helpers ── */
+
+  searchScales(query) {
+    if (!query) return ASSESSMENT_SCALES;
+    const q = query.toLowerCase();
+    return ASSESSMENT_SCALES.filter(
+      s =>
+        s.name.toLowerCase().includes(q) ||
+        s.nameEn.toLowerCase().includes(q) ||
+        s.description.toLowerCase().includes(q)
+    );
+  },
+
+  searchTests(query) {
+    if (!query) return ASSESSMENT_TESTS;
+    const q = query.toLowerCase();
+    return ASSESSMENT_TESTS.filter(
+      t =>
+        t.name.toLowerCase().includes(q) ||
+        t.nameEn.toLowerCase().includes(q) ||
+        t.description.toLowerCase().includes(q)
+    );
+  },
+
+  /* ── Scale & Test statistics helpers ── */
+
+  getScalesSummary() {
+    return {
+      totalScales: ASSESSMENT_SCALES.length,
+      totalDomains: ASSESSMENT_SCALES.reduce((sum, s) => sum + (s.domains?.length || 0), 0),
+      maxPossibleScore: ASSESSMENT_SCALES.reduce((sum, s) => sum + (s.maxScore || 0), 0),
+      scales: ASSESSMENT_SCALES.map(s => ({
+        id: s.id,
+        name: s.name,
+        nameEn: s.nameEn,
+        maxScore: s.maxScore,
+        domainCount: s.domains?.length || 0,
+      })),
+    };
+  },
+
+  getTestsSummary() {
+    return {
+      totalTests: ASSESSMENT_TESTS.length,
+      totalSections: ASSESSMENT_TESTS.reduce((sum, t) => sum + (t.sections?.length || 0), 0),
+      maxPossibleScore: ASSESSMENT_TESTS.reduce((sum, t) => sum + (t.maxScore || 0), 0),
+      tests: ASSESSMENT_TESTS.map(t => ({
+        id: t.id,
+        name: t.name,
+        nameEn: t.nameEn,
+        maxScore: t.maxScore,
+        sectionCount: t.sections?.length || 0,
+      })),
+    };
+  },
 };
 
 export default assessmentService;

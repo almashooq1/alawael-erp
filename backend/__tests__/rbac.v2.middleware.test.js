@@ -104,11 +104,7 @@ describe('rbac.v2.middleware', () => {
       rbacConfig.hasPermission.mockReturnValue(false);
       const mw = requirePermission('users', 'update', { allowSelf: true });
       const next = jest.fn();
-      mw(
-        { user: { id: 'u1', role: 'user' }, params: { id: 'u1' }, body: {} },
-        mockRes(),
-        next
-      );
+      mw({ user: { id: 'u1', role: 'user' }, params: { id: 'u1' }, body: {} }, mockRes(), next);
       expect(next).toHaveBeenCalled();
     });
 

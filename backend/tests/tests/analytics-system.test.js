@@ -6,22 +6,13 @@
  * NOTE: Skipped - AnalyticsService exports singleton instead of classes
  */
 
-let AnalyticsService, AnalyticsMetric, DashboardTemplate, TrendAnalyzer, KPIAggregator;
-let _importOk = false;
-try {
-  AnalyticsService = require('../services/AnalyticsService');
-  AnalyticsMetric = AnalyticsService.AnalyticsMetric;
-  DashboardTemplate = AnalyticsService.DashboardTemplate;
-  TrendAnalyzer = AnalyticsService.TrendAnalyzer;
-  KPIAggregator = AnalyticsService.KPIAggregator;
-  _importOk = !!(AnalyticsMetric && DashboardTemplate && TrendAnalyzer && KPIAggregator);
-} catch (error) {
-  console.warn('⚠️  AnalyticsService import failed:', error.message);
-}
+const AnalyticsService = require('../../services/AnalyticsService');
+const AnalyticsMetric = AnalyticsService.AnalyticsMetric;
+const DashboardTemplate = AnalyticsService.DashboardTemplate;
+const TrendAnalyzer = AnalyticsService.TrendAnalyzer;
+const KPIAggregator = AnalyticsService.KPIAggregator;
 
-const _describe = _importOk ? describe : describe.skip;
-
-_describe('Analytics System - Comprehensive Tests', () => {
+describe('Analytics System - Comprehensive Tests', () => {
   let analyticsService;
 
   beforeEach(() => {
@@ -582,8 +573,8 @@ _describe('Analytics System - Comprehensive Tests', () => {
   });
 });
 
-// Skip this suite as AnalyticsService exports singleton
-_describe('Analytics Metrics and Calculations', () => {
+// Analytics Metrics and Calculations
+describe('Analytics Metrics and Calculations', () => {
   let service;
 
   beforeEach(() => {

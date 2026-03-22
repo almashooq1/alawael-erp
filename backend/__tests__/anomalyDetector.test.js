@@ -235,10 +235,7 @@ describe('AnomalyDetector', () => {
     });
 
     it('should calculate distance between two points', () => {
-      const d = detector.calculateDistance(
-        { lat: 0, lon: 0 },
-        { lat: 0, lon: 1 }
-      );
+      const d = detector.calculateDistance({ lat: 0, lon: 0 }, { lat: 0, lon: 1 });
       expect(d).toBeGreaterThan(0);
       expect(d).toBeLessThan(200); // ~111 km
     });

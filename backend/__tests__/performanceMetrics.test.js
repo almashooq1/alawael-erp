@@ -131,8 +131,9 @@ describe('performanceMetrics', () => {
   // ── normalizeEndpoint ────────────────────────────────────────────────────
   describe('normalizeEndpoint', () => {
     it('replaces MongoDB ObjectId with :id', () => {
-      expect(performanceMetrics.normalizeEndpoint('/api/users/507f1f77bcf86cd799439011'))
-        .toBe('/api/users/:id');
+      expect(performanceMetrics.normalizeEndpoint('/api/users/507f1f77bcf86cd799439011')).toBe(
+        '/api/users/:id'
+      );
     });
 
     it('replaces numeric IDs with :id', () => {

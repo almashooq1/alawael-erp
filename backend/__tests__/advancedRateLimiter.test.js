@@ -43,7 +43,12 @@ describe('advancedRateLimiter', () => {
   // ── SlidingWindowLimiter ─────────────────────────────────────────────────
   describe('SlidingWindowLimiter', () => {
     let limiter;
-    afterEach(() => { if (limiter) { limiter.destroy(); limiter = null; } });
+    afterEach(() => {
+      if (limiter) {
+        limiter.destroy();
+        limiter = null;
+      }
+    });
 
     it('uses default config when no options provided', () => {
       limiter = new SlidingWindowLimiter();
@@ -147,7 +152,12 @@ describe('advancedRateLimiter', () => {
   // ── IPReputationTracker ──────────────────────────────────────────────────
   describe('IPReputationTracker', () => {
     let tracker;
-    afterEach(() => { if (tracker) { tracker.destroy(); tracker = null; } });
+    afterEach(() => {
+      if (tracker) {
+        tracker.destroy();
+        tracker = null;
+      }
+    });
 
     it('starts with score 0 for unknown IP', () => {
       tracker = new IPReputationTracker();
@@ -291,10 +301,13 @@ describe('advancedRateLimiter', () => {
   // ── Pre-built limiters ──────────────────────────────────────────────────
   describe('Pre-built limiters', () => {
     it('exports all limiters as functions', () => {
-      [loginRateLimiter, passwordResetLimiter, uploadRateLimiter,
-       reportGenerationLimiter, dataExportLimiter].forEach(l =>
-        expect(typeof l).toBe('function')
-      );
+      [
+        loginRateLimiter,
+        passwordResetLimiter,
+        uploadRateLimiter,
+        reportGenerationLimiter,
+        dataExportLimiter,
+      ].forEach(l => expect(typeof l).toBe('function'));
     });
 
     it('loginRateLimiter skips in test env', () => {

@@ -386,6 +386,7 @@ beforeAll(async () => {
   Message = models.Message;
   Conversation = models.Conversation;
   Template = models.Template;
+  await Template.ensureIndexes();
   OTP = models.OTP;
   BulkMessage = models.BulkMessage;
   WebhookEvent = models.WebhookEvent;

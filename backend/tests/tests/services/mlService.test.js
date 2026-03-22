@@ -1,24 +1,15 @@
 /**
  * ML Service Tests
  * Comprehensive test suite for all ML models
- * NOTE: @tensorflow/tfjs now installed
+ * NOTE: @tensorflow/tfjs mocked — not needed at runtime
  */
 
-let MLService;
-let _importOk = false;
-try {
-  MLService = require('../../../services/MLService');
-  // Quick sanity: ensure the module actually exported something usable
-  if (MLService && typeof MLService.predictOrderDemand === 'function') {
-    _importOk = true;
-  }
-} catch (error) {
-  console.warn('⚠️  MLService import failed:', error.message);
-}
+jest.mock('@tensorflow/tfjs', () => ({}), { virtual: true });
+jest.mock('@tensorflow/tfjs-data', () => ({}), { virtual: true });
 
-const _describe = _importOk ? describe : describe.skip;
+const MLService = require('../../../services/MLService');
 
-_describe('MLService', () => {
+describe('MLService', () => {
   describe('predictOrderDemand', () => {
     it('should forecast order demand for specified days', async () => {
       const orders = [

@@ -51,10 +51,7 @@ describe('tokenBlacklist', () => {
       const decoded = { exp: Math.floor(Date.now() / 1000) + 3600 };
       await tokenBlacklist.add('fallback.token', decoded);
       // Should not throw
-      expect(logger.error).toHaveBeenCalledWith(
-        'Token blacklist add error:',
-        expect.any(Object)
-      );
+      expect(logger.error).toHaveBeenCalledWith('Token blacklist add error:', expect.any(Object));
     });
 
     it('should skip set if TTL <= 0 (already expired)', async () => {
@@ -91,10 +88,10 @@ describe('tokenBlacklist', () => {
   describe('DISABLE_REDIS', () => {
     it('should use in-memory fallback when DISABLE_REDIS=true', async () => {
       process.env.DISABLE_REDIS = 'true';
-      // Re-require fresh module to pick up env change? 
+      // Re-require fresh module to pick up env change?
       // Actually the env is checked each time getRedis() is called
       const decoded = { exp: Math.floor(Date.now() / 1000) + 3600 };
-      
+
       // This should fall through to in-memory since getRedis returns null
       await tokenBlacklist.add('disabled-redis.token', decoded);
       // Not a Redis call — went to fallback silently

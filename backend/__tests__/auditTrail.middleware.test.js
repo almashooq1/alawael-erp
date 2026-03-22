@@ -200,9 +200,7 @@ describe('auditTrail.middleware', () => {
       mockInsertMany.mockRejectedValueOnce(new Error('DB down'));
       recordAudit({ event: 'error.test' });
       await flushAuditBuffer();
-      expect(logger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to flush')
-      );
+      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Failed to flush'));
     });
   });
 

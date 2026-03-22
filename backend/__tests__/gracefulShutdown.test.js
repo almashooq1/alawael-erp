@@ -68,7 +68,11 @@ describe('gracefulShutdown', () => {
   it('calls next() when server is not shutting down', () => {
     const { shutdownMiddleware } = freshRequire();
     const next = jest.fn();
-    shutdownMiddleware({}, { set: jest.fn(), status: jest.fn().mockReturnThis(), json: jest.fn() }, next);
+    shutdownMiddleware(
+      {},
+      { set: jest.fn(), status: jest.fn().mockReturnThis(), json: jest.fn() },
+      next
+    );
     expect(next).toHaveBeenCalled();
   });
 

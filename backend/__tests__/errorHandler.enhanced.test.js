@@ -188,9 +188,7 @@ describe('errorHandler.enhanced', () => {
 
       errorHandler(err, req, res, mockNext);
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({ code: 'INVALID_ID' })
-      );
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ code: 'INVALID_ID' }));
     });
 
     it('should handle duplicate key error (code 11000)', () => {
@@ -202,9 +200,7 @@ describe('errorHandler.enhanced', () => {
 
       errorHandler(err, req, res, mockNext);
       expect(res.status).toHaveBeenCalledWith(409);
-      expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({ code: 'DUPLICATE_KEY' })
-      );
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ code: 'DUPLICATE_KEY' }));
     });
 
     it('should handle ValidationError', () => {
@@ -219,9 +215,7 @@ describe('errorHandler.enhanced', () => {
 
       errorHandler(err, req, res, mockNext);
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({ code: 'VALIDATION_ERROR' })
-      );
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ code: 'VALIDATION_ERROR' }));
     });
 
     it('should handle JsonWebTokenError', () => {
@@ -232,9 +226,7 @@ describe('errorHandler.enhanced', () => {
 
       errorHandler(err, req, res, mockNext);
       expect(res.status).toHaveBeenCalledWith(401);
-      expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({ code: 'INVALID_TOKEN' })
-      );
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ code: 'INVALID_TOKEN' }));
     });
 
     it('should handle TokenExpiredError', () => {
@@ -245,9 +237,7 @@ describe('errorHandler.enhanced', () => {
 
       errorHandler(err, req, res, mockNext);
       expect(res.status).toHaveBeenCalledWith(401);
-      expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({ code: 'TOKEN_EXPIRED' })
-      );
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ code: 'TOKEN_EXPIRED' }));
     });
   });
 

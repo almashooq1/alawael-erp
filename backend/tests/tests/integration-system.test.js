@@ -5,28 +5,14 @@
  * February 24, 2026
  */
 
-let IntegrationService,
-  WebhookEvent,
-  WebhookSubscription,
-  IntegrationConnector,
-  APIIntegrator,
-  APIIntegration;
-let _importOk = false;
-try {
-  IntegrationService = require('../services/integrationService');
-  WebhookEvent = IntegrationService.WebhookEvent;
-  WebhookSubscription = IntegrationService.WebhookSubscription;
-  IntegrationConnector = IntegrationService.IntegrationConnector;
-  APIIntegrator = IntegrationService.APIIntegrator;
-  APIIntegration = IntegrationService.APIIntegration || IntegrationService.APIIntegrator;
-  _importOk = !!(WebhookEvent && WebhookSubscription && IntegrationConnector && APIIntegrator);
-} catch (error) {
-  console.warn('⚠️  Integration services not available:', error.message);
-}
+const IntegrationService = require('../../services/integrationService');
+const WebhookEvent = IntegrationService.WebhookEvent;
+const WebhookSubscription = IntegrationService.WebhookSubscription;
+const IntegrationConnector = IntegrationService.IntegrationConnector;
+const APIIntegrator = IntegrationService.APIIntegrator;
+const APIIntegration = IntegrationService.APIIntegration;
 
-const _describe = _importOk ? describe : describe.skip;
-
-_describe('Integration System - Comprehensive Tests', () => {
+describe('Integration System - Comprehensive Tests', () => {
   let integrationService;
 
   beforeEach(() => {
@@ -508,9 +494,7 @@ _describe('Integration System - Comprehensive Tests', () => {
     test('throws error for non-registered endpoint', async () => {
       const api = integrationService.registerAPI('Test', 'https://api.test.com');
 
-      expect(() => {
-        api.call('nonexistent');
-      }).toThrow();
+      await expect(api.call('nonexistent')).rejects.toThrow('not registered');
     });
 
     test('throws error for non-existent transformation', () => {
@@ -528,7 +512,7 @@ _describe('Integration System - Comprehensive Tests', () => {
 });
 
 // Integration System - Advanced Scenarios
-_describe('Integration System - Advanced Scenarios', () => {
+describe('Integration System - Advanced Scenarios', () => {
   let service;
 
   beforeEach(() => {

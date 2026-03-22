@@ -500,9 +500,7 @@ export default function EStampEdit() {
                     label="الوسوم"
                     value={tagInput}
                     onChange={e => setTagInput(e.target.value)}
-                    onKeyDown={e =>
-                      e.key === 'Enter' && (e.preventDefault(), addTag())
-                    }
+                    onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addTag())}
                     disabled={isLocked}
                   />
                   <Button size="small" onClick={addTag} disabled={isLocked}>

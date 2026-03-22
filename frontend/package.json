@@ -69,18 +69,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "jest": {
-    "transformIgnorePatterns": [
-      "node_modules/(?!(axios|socket\\.io-client|engine\\.io-client|socket\\.io-parser|lucide-react|recharts)/)"
-    ],
-    "coverageThreshold": {
-      "global": {
-        "branches": 60,
-        "functions": 65,
-        "lines": 70,
-        "statements": 70
-      }
-    }
   }
 }

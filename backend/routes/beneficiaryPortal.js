@@ -621,17 +621,25 @@ router.post('/profile/change-password', authenticateBeneficiary, async (req, res
       return res.status(400).json({ success: false, message: 'Invalid password data' });
     }
 
-    const beneficiary = await Beneficiary.findById(req.beneficiaryId);
+    // Password strength validation
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passwordRegex.test(newPassword)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be at least 8 characters with uppercase, lowercase, number and special character',
+      });
+    }
 
-    // Verify current password
-    const currentHash = crypto.createHash('sha256').update(currentPassword).digest('hex');
-    if (beneficiary.password !== currentHash) {
+    const beneficiary = await Beneficiary.findById(req.beneficiaryId).select('+password');
+
+    // Verify current password using bcrypt
+    const isValid = await beneficiary.comparePassword(currentPassword);
+    if (!isValid) {
       return res.status(401).json({ success: false, message: 'Current password is incorrect' });
     }
 
-    // Update password
-    const newHash = crypto.createHash('sha256').update(newPassword).digest('hex');
-    beneficiary.password = newHash;
+    // Update password (pre-save hook will hash it)
+    beneficiary.password = newPassword;
     await beneficiary.save();
 
     res.json({

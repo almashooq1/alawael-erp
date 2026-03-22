@@ -109,7 +109,7 @@ const BeneficiariesManagementPage = () => {
     setLoading(true);
     try {
       const res = await beneficiaryService.getAll();
-      const data = res?.data || res?.beneficiaries || res || [];
+      const data = res?.data?.data || res?.data || res?.beneficiaries || res || [];
       if (Array.isArray(data)) setBeneficiaries(data);
     } catch {
       showSnackbar('خطأ في تحميل بيانات المستفيدين', 'error');
@@ -146,7 +146,14 @@ const BeneficiariesManagementPage = () => {
       const matchesSearch = !q
         || (b.name || '').toLowerCase().includes(q)
         || (b.nameEn || '').toLowerCase().includes(q)
-        || (b.nationalId || '').includes(q);
+        || (b.firstName_ar || '').toLowerCase().includes(q)
+        || (b.lastName_ar || '').toLowerCase().includes(q)
+        || (b.firstName || '').toLowerCase().includes(q)
+        || (b.lastName || '').toLowerCase().includes(q)
+        || (b.nationalId || '').includes(q)
+        || (b.mrn || '').includes(q)
+        || (b.contactInfo?.primaryPhone || b.phone || '').includes(q)
+        || (b.contactInfo?.email || b.email || '').toLowerCase().includes(q);
       const matchesStatus = selectedStatus === 'all' || b.status === selectedStatus;
       const matchesCategory = selectedCategory === 'all' || b.category === selectedCategory;
       return matchesSearch && matchesStatus && matchesCategory;
@@ -158,8 +165,8 @@ const BeneficiariesManagementPage = () => {
 
   // ── Handlers ──────────────────────────────────
   const handleAddBeneficiary = () => navigate('/student-registration');
-  const handleViewBeneficiary = (id) => navigate('/beneficiaries/manage', { state: { viewId: id } });
-  const handleEditBeneficiary = (id) => navigate('/beneficiaries/manage', { state: { editId: id } });
+  const handleViewBeneficiary = (id) => navigate(`/beneficiary-portal/${id}`);
+  const handleEditBeneficiary = (id) => navigate(`/beneficiary-portal/${id}`);
 
   const toggleFavorite = (id) => {
     setBeneficiaries(prev => prev.map(b => b.id === id ? { ...b, favorite: !b.favorite } : b));
@@ -168,16 +175,33 @@ const BeneficiariesManagementPage = () => {
 
   const handleExport = async () => {
     try {
-      const res = await beneficiaryService.getDocuments();
+      const res = await beneficiaryService.exportData('csv');
       const blob = res?.data || res;
       if (blob instanceof Blob) {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.href = url; a.download = 'beneficiaries-export.xlsx'; a.click();
+        a.href = url; a.download = `beneficiaries-${new Date().toISOString().slice(0,10)}.csv`; a.click();
         window.URL.revokeObjectURL(url);
       }
       showSnackbar('تم تصدير البيانات بنجاح', 'success');
-    } catch { showSnackbar('جاري تصدير البيانات...', 'info'); }
+    } catch { showSnackbar('فشل في تصدير البيانات', 'error'); }
+  };
+
+  const handleDeleteBeneficiary = async (id) => {
+    if (!window.confirm('هل أنت متأكد من أرشفة هذا المستفيد؟')) return;
+    try {
+      await beneficiaryService.remove(id, 'أرشفة من صفحة الإدارة');
+      showSnackbar('تم أرشفة المستفيد بنجاح', 'success');
+      loadData();
+    } catch { showSnackbar('فشل في أرشفة المستفيد', 'error'); }
+  };
+
+  const handleStatusChange = async (id, newStatus) => {
+    try {
+      await beneficiaryService.updateStatus(id, newStatus);
+      showSnackbar('تم تحديث حالة المستفيد', 'success');
+      loadData();
+    } catch { showSnackbar('فشل في تحديث الحالة', 'error'); }
   };
 
   // ── Loading Skeleton ──────────────────────────

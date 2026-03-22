@@ -108,114 +108,108 @@ export default function BeneficiariesDashboard() {
   const loadDashboard = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await beneficiaryService.getAll().catch(err => { logger.warn('Beneficiaries: list fetch', err); return null; });
-      const beneficiaries = res?.data || res || [];
+      /* ── Try server-aggregated statistics first ── */
+      const [statsRes, recentRes] = await Promise.allSettled([
+        beneficiaryService.getStatistics(),
+        beneficiaryService.getRecent(),
+      ]);
 
-      if (Array.isArray(beneficiaries) && beneficiaries.length > 0) {
-        const { active, pending, inactive } = computeStatusCounts(
-          beneficiaries, 'status', ['active', 'pending', 'inactive']
-        );
-        const now = new Date();
-        const thisMonth = beneficiaries.filter(b => {
-          const d = new Date(b.joinDate || b.createdAt);
-          return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-        }).length;
-        const avgProg = Math.round(beneficiaries.reduce((s, b) => s + (b.progress || 0), 0) / beneficiaries.length);
-        const avgSess = (beneficiaries.reduce((s, b) => s + (b.sessions || 0), 0) / beneficiaries.length).toFixed(1);
+      const sData = statsRes.status === 'fulfilled' ? (statsRes.value?.data?.data || statsRes.value?.data || null) : null;
+      const rData = recentRes.status === 'fulfilled' ? (recentRes.value?.data?.data || recentRes.value?.data || []) : null;
 
+      if (sData) {
+        /* Server returned aggregated stats — use them directly */
         setStats({
-          total: beneficiaries.length,
-          active, pending, inactive,
-          newThisMonth: thisMonth,
-          avgProgress: avgProg,
-          avgSessions: parseFloat(avgSess),
-          completionRate: Math.round((beneficiaries.filter(b => (b.progress || 0) >= 80).length / beneficiaries.length) * 100),
+          total: sData.total ?? DEMO_STATS.total,
+          active: sData.byStatus?.active ?? sData.active ?? DEMO_STATS.active,
+          pending: sData.byStatus?.pending ?? sData.pending ?? DEMO_STATS.pending,
+          inactive: sData.byStatus?.inactive ?? sData.inactive ?? DEMO_STATS.inactive,
+          newThisMonth: sData.newThisMonth ?? DEMO_STATS.newThisMonth,
+          avgProgress: sData.avgProgress ?? DEMO_STATS.avgProgress,
+          avgSessions: sData.avgSessions ?? DEMO_STATS.avgSessions,
+          completionRate: sData.completionRate ?? DEMO_STATS.completionRate,
         });
 
         /* by category */
-        const catMap = {};
-        beneficiaries.forEach(b => {
-          const c = b.category || 'other';
-          catMap[c] = (catMap[c] || 0) + 1;
-        });
-        const catArr = Object.entries(catMap).map(([k, v]) => ({
-          name: CATEGORY_LABELS[k] || k, value: v, color: CATEGORY_COLORS[k] || neutralColors.fallback,
-        }));
-        if (catArr.length > 0) setByCategory(catArr);
+        if (sData.byCategory && sData.byCategory.length > 0) {
+          setByCategory(sData.byCategory.map(c => ({
+            name: CATEGORY_LABELS[c._id || c.name] || c._id || c.name || 'أخرى',
+            value: c.count || c.value || 0,
+            color: CATEGORY_COLORS[c._id || c.name] || neutralColors.fallback,
+          })));
+        }
 
-        /* status dist */
-        const _sMap = { active, pending, inactive };
-        setStatusDist([
-          { name: 'نشط', value: active, color: statusColors.success },
-          { name: 'انتظار', value: pending, color: statusColors.warning },
-          { name: 'غير نشط', value: inactive, color: statusColors.error },
-        ]);
+        /* status distribution from byStatus */
+        if (sData.byStatus) {
+          setStatusDist([
+            { name: 'نشط', value: sData.byStatus.active || 0, color: statusColors.success },
+            { name: 'انتظار', value: sData.byStatus.pending || 0, color: statusColors.warning },
+            { name: 'غير نشط', value: sData.byStatus.inactive || 0, color: statusColors.error },
+          ]);
+        }
 
         /* monthly registrations */
-        const months = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
-        const regByMonth = {};
-        beneficiaries.forEach(b => {
-          const d = new Date(b.joinDate || b.createdAt);
-          if (d.getFullYear() === now.getFullYear() || (now.getMonth() < 5 && d.getFullYear() === now.getFullYear() - 1)) {
-            const key = months[d.getMonth()];
-            regByMonth[key] = (regByMonth[key] || 0) + 1;
-          }
-        });
-        const regArr = Object.entries(regByMonth).slice(-6).map(([month, registrations]) => ({
-          month, registrations, active: Math.round(registrations * 0.75),
-        }));
-        if (regArr.length > 0) setMonthlyReg(regArr);
+        if (sData.monthlyRegistrations && sData.monthlyRegistrations.length > 0) {
+          const months = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+          setMonthlyReg(sData.monthlyRegistrations.map(r => ({
+            month: months[(r._id?.month || r.month || 1) - 1] || r.month,
+            registrations: r.count || r.registrations || 0,
+            active: Math.round((r.count || r.registrations || 0) * 0.75),
+          })));
+        }
 
         /* progress distribution */
-        const pBuckets = [0, 0, 0, 0, 0];
-        beneficiaries.forEach(b => {
-          const p = b.progress || 0;
-          if (p <= 20) pBuckets[0]++;
-          else if (p <= 40) pBuckets[1]++;
-          else if (p <= 60) pBuckets[2]++;
-          else if (p <= 80) pBuckets[3]++;
-          else pBuckets[4]++;
-        });
-        setProgressDist([
-          { range: '0-20%', count: pBuckets[0] },
-          { range: '21-40%', count: pBuckets[1] },
-          { range: '41-60%', count: pBuckets[2] },
-          { range: '61-80%', count: pBuckets[3] },
-          { range: '81-100%', count: pBuckets[4] },
-        ]);
+        if (sData.progressDistribution && sData.progressDistribution.length > 0) {
+          const labels = ['0-20%', '21-40%', '41-60%', '61-80%', '81-100%'];
+          setProgressDist(sData.progressDistribution.map((p, i) => ({
+            range: labels[i] || p.range || `${p._id?.min || 0}-${p._id?.max || 100}%`,
+            count: p.count || 0,
+          })));
+        }
 
         /* age distribution */
-        const aBuckets = [0, 0, 0, 0, 0];
-        beneficiaries.forEach(b => {
-          const a = b.age || 0;
-          if (a <= 6) aBuckets[0]++;
-          else if (a <= 12) aBuckets[1]++;
-          else if (a <= 18) aBuckets[2]++;
-          else if (a <= 25) aBuckets[3]++;
-          else aBuckets[4]++;
-        });
-        setAgeDist([
-          { range: '3-6 سنوات', count: aBuckets[0] },
-          { range: '7-12 سنة', count: aBuckets[1] },
-          { range: '13-18 سنة', count: aBuckets[2] },
-          { range: '19-25 سنة', count: aBuckets[3] },
-          { range: '25+ سنة', count: aBuckets[4] },
-        ]);
+        if (sData.ageDistribution && sData.ageDistribution.length > 0) {
+          const ageLabels = { 0: '0-6 سنوات', 7: '7-12 سنة', 13: '13-18 سنة', 19: '19-25 سنة', 26: '25+ سنة' };
+          setAgeDist(sData.ageDistribution.map(a => ({
+            range: ageLabels[a._id?.min ?? a.min] || a.range || `${a._id?.min || 0}-${a._id?.max || 99}`,
+            count: a.count || 0,
+          })));
+        }
+      } else {
+        /* Fallback: compute stats client-side from getAll */
+        const res = await beneficiaryService.getAll().catch(err => { logger.warn('Beneficiaries: list fetch', err); return null; });
+        const beneficiaries = res?.data?.data || res?.data || res || [];
 
-        /* recent */
-        const recent = beneficiaries
-          .sort((a, b) => new Date(b.joinDate || b.createdAt) - new Date(a.joinDate || a.createdAt))
-          .slice(0, 5)
-          .map((b, i) => ({
-            id: b._id || b.id || i,
-            name: b.name || '-',
-            category: b.category || 'other',
-            status: b.status || 'active',
-            progress: b.progress || 0,
-            sessions: b.sessions || 0,
-            joinDate: (b.joinDate || b.createdAt || '').toString().slice(0, 10),
-          }));
-        setRecentList(recent);
+        if (Array.isArray(beneficiaries) && beneficiaries.length > 0) {
+          const { active, pending, inactive } = computeStatusCounts(beneficiaries, 'status', ['active', 'pending', 'inactive']);
+          const now = new Date();
+          const thisMonth = beneficiaries.filter(b => {
+            const d = new Date(b.joinDate || b.createdAt);
+            return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+          }).length;
+          const avgProg = Math.round(beneficiaries.reduce((s, b) => s + (b.progress || 0), 0) / beneficiaries.length);
+          const avgSess = (beneficiaries.reduce((s, b) => s + (b.sessions || 0), 0) / beneficiaries.length).toFixed(1);
+
+          setStats({
+            total: beneficiaries.length, active, pending, inactive,
+            newThisMonth: thisMonth, avgProgress: avgProg,
+            avgSessions: parseFloat(avgSess),
+            completionRate: Math.round((beneficiaries.filter(b => (b.progress || 0) >= 80).length / beneficiaries.length) * 100),
+          });
+        }
+      }
+
+      /* Recent beneficiaries from API or fallback */
+      if (Array.isArray(rData) && rData.length > 0) {
+        setRecentList(rData.map((b, i) => ({
+          id: b._id || b.id || i,
+          name: b.fullName || b.name || `${b.firstName_ar || b.firstName || ''} ${b.lastName_ar || b.lastName || ''}`.trim() || '—',
+          category: b.category || b.disability?.type || 'other',
+          status: b.status || 'active',
+          progress: b.progress || 0,
+          sessions: b.sessions || 0,
+          joinDate: (b.registrationDate || b.joinDate || b.createdAt || '').toString().slice(0, 10),
+        })));
       }
     } catch (err) {
       logger.warn('BeneficiariesDashboard: load error', err);
@@ -392,7 +386,7 @@ export default function BeneficiariesDashboard() {
             </TableHead>
             <TableBody>
               {recentList.map(b => (
-                <TableRow key={b.id} hover>
+                <TableRow key={b.id} hover sx={{ cursor: 'pointer' }} onClick={() => navigate(`/beneficiary-portal/${b.id}`)}>
                   <TableCell>{b.name}</TableCell>
                   <TableCell>
                     <Chip label={CATEGORY_LABELS[b.category] || b.category} size="small"

@@ -340,9 +340,7 @@ router.post('/:id/upload-image', stampImageUpload.single('stampImage'), async (r
    ═══════════════════════════════════════════════════════════════════════════ */
 router.get('/:id', async (req, res) => {
   try {
-    const stamp = await EStamp.findById(req.params.id)
-      .select('-verificationSecret')
-      .lean();
+    const stamp = await EStamp.findById(req.params.id).select('-verificationSecret').lean();
     if (!stamp) {
       return res.status(404).json({ success: false, message: 'الختم غير موجود' });
     }
@@ -555,9 +553,7 @@ router.post('/:id/apply', async (req, res) => {
     // Check authorization
     const userId = req.user?._id || req.user?.id;
     if (!stamp.isUserAuthorized(userId)) {
-      return res
-        .status(403)
-        .json({ success: false, message: 'غير مصرح لك باستخدام هذا الختم' });
+      return res.status(403).json({ success: false, message: 'غير مصرح لك باستخدام هذا الختم' });
     }
 
     // Check max usage

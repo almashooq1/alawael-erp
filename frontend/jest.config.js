@@ -4,7 +4,7 @@ module.exports = {
   transform: {
     '^.+\\.(js|jsx|ts|tsx)$': ['babel-jest'],
   },
-  transformIgnorePatterns: ['node_modules/(?!(axios|@testing-library)/)'],
+  transformIgnorePatterns: ['node_modules/(?!(axios|@testing-library|socket\\.io-client|engine\\.io-client|socket\\.io-parser|lucide-react|recharts)/)'],
   moduleFileExtensions: ['js', 'jsx', 'json', 'node'],
   testMatch: [
     '<rootDir>/src/**/__tests__/**/*.{js,jsx}',

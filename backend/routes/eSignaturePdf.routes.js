@@ -484,9 +484,7 @@ router.get('/stamped/:stampId', async (req, res) => {
       return res.status(404).json({ success: false, message: 'لم يتم ختم أي مستند بعد' });
     }
 
-    const files = fs
-      .readdirSync(stampedDir)
-      .filter(f => f.startsWith(`stamped-${stamp.stampId}-`));
+    const files = fs.readdirSync(stampedDir).filter(f => f.startsWith(`stamped-${stamp.stampId}-`));
     if (files.length === 0) {
       return res.status(404).json({ success: false, message: 'لم يتم ختم أي مستند بعد' });
     }

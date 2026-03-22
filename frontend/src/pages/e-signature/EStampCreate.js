@@ -627,106 +627,105 @@ export default function EStampCreate() {
               {/* ─── Auto Design Mode ─── */}
               {designMode === 'auto' && (
                 <>
+                  <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                    الشكل
+                  </Typography>
+                  <ToggleButtonGroup
+                    exclusive
+                    value={form.stampShape}
+                    onChange={(_, v) => v && setForm({ ...form, stampShape: v })}
+                    sx={{ mb: 3 }}
+                  >
+                    <ToggleButton value="circle">
+                      <Circle sx={{ ml: 1 }} /> دائري
+                    </ToggleButton>
+                    <ToggleButton value="oval">بيضاوي</ToggleButton>
+                    <ToggleButton value="rectangle">
+                      <Square sx={{ ml: 1 }} /> مستطيل
+                    </ToggleButton>
+                    <ToggleButton value="square">مربع</ToggleButton>
+                  </ToggleButtonGroup>
 
-              <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                الشكل
-              </Typography>
-              <ToggleButtonGroup
-                exclusive
-                value={form.stampShape}
-                onChange={(_, v) => v && setForm({ ...form, stampShape: v })}
-                sx={{ mb: 3 }}
-              >
-                <ToggleButton value="circle">
-                  <Circle sx={{ ml: 1 }} /> دائري
-                </ToggleButton>
-                <ToggleButton value="oval">بيضاوي</ToggleButton>
-                <ToggleButton value="rectangle">
-                  <Square sx={{ ml: 1 }} /> مستطيل
-                </ToggleButton>
-                <ToggleButton value="square">مربع</ToggleButton>
-              </ToggleButtonGroup>
-
-              <Typography variant="subtitle2" sx={{ mb: 1, mt: 2 }}>
-                الألوان
-              </Typography>
-              <Grid container spacing={2} sx={{ mb: 3 }}>
-                {[
-                  { key: 'primary', label: 'أساسي' },
-                  { key: 'secondary', label: 'ثانوي' },
-                  { key: 'text', label: 'نص' },
-                  { key: 'border', label: 'إطار' },
-                ].map(c => (
-                  <Grid item xs={3} key={c.key}>
-                    <Typography variant="caption">{c.label}</Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <input
-                        type="color"
-                        value={form.colorScheme[c.key]}
-                        onChange={e =>
-                          setForm({
-                            ...form,
-                            colorScheme: { ...form.colorScheme, [c.key]: e.target.value },
-                          })
-                        }
-                        style={{ width: 40, height: 32, border: 'none', cursor: 'pointer' }}
-                      />
-                      <Typography variant="caption" sx={{ fontFamily: 'monospace' }}>
-                        {form.colorScheme[c.key]}
-                      </Typography>
-                    </Box>
+                  <Typography variant="subtitle2" sx={{ mb: 1, mt: 2 }}>
+                    الألوان
+                  </Typography>
+                  <Grid container spacing={2} sx={{ mb: 3 }}>
+                    {[
+                      { key: 'primary', label: 'أساسي' },
+                      { key: 'secondary', label: 'ثانوي' },
+                      { key: 'text', label: 'نص' },
+                      { key: 'border', label: 'إطار' },
+                    ].map(c => (
+                      <Grid item xs={3} key={c.key}>
+                        <Typography variant="caption">{c.label}</Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <input
+                            type="color"
+                            value={form.colorScheme[c.key]}
+                            onChange={e =>
+                              setForm({
+                                ...form,
+                                colorScheme: { ...form.colorScheme, [c.key]: e.target.value },
+                              })
+                            }
+                            style={{ width: 40, height: 32, border: 'none', cursor: 'pointer' }}
+                          />
+                          <Typography variant="caption" sx={{ fontFamily: 'monospace' }}>
+                            {form.colorScheme[c.key]}
+                          </Typography>
+                        </Box>
+                      </Grid>
+                    ))}
                   </Grid>
-                ))}
-              </Grid>
 
-              <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                الحجم: {form.size.width} × {form.size.height}
-              </Typography>
-              <Slider
-                value={form.size.width}
-                min={80}
-                max={250}
-                step={10}
-                onChange={(_, v) => setForm({ ...form, size: { width: v, height: v } })}
-                sx={{ mb: 3 }}
-              />
+                  <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                    الحجم: {form.size.width} × {form.size.height}
+                  </Typography>
+                  <Slider
+                    value={form.size.width}
+                    min={80}
+                    max={250}
+                    step={10}
+                    onChange={(_, v) => setForm({ ...form, size: { width: v, height: v } })}
+                    sx={{ mb: 3 }}
+                  />
 
-              <Divider sx={{ my: 2 }} />
-              <Grid container spacing={2}>
-                <Grid item xs={4}>
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={form.includeDate}
-                        onChange={e => setForm({ ...form, includeDate: e.target.checked })}
+                  <Divider sx={{ my: 2 }} />
+                  <Grid container spacing={2}>
+                    <Grid item xs={4}>
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            checked={form.includeDate}
+                            onChange={e => setForm({ ...form, includeDate: e.target.checked })}
+                          />
+                        }
+                        label="تضمين التاريخ"
                       />
-                    }
-                    label="تضمين التاريخ"
-                  />
-                </Grid>
-                <Grid item xs={4}>
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={form.includeNumber}
-                        onChange={e => setForm({ ...form, includeNumber: e.target.checked })}
+                    </Grid>
+                    <Grid item xs={4}>
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            checked={form.includeNumber}
+                            onChange={e => setForm({ ...form, includeNumber: e.target.checked })}
+                          />
+                        }
+                        label="تضمين الرقم"
                       />
-                    }
-                    label="تضمين الرقم"
-                  />
-                </Grid>
-                <Grid item xs={4}>
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={form.includeQR}
-                        onChange={e => setForm({ ...form, includeQR: e.target.checked })}
+                    </Grid>
+                    <Grid item xs={4}>
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            checked={form.includeQR}
+                            onChange={e => setForm({ ...form, includeQR: e.target.checked })}
+                          />
+                        }
+                        label="تضمين QR"
                       />
-                    }
-                    label="تضمين QR"
-                  />
-                </Grid>
-              </Grid>
+                    </Grid>
+                  </Grid>
                 </>
               )}
             </Paper>
@@ -753,17 +752,17 @@ export default function EStampCreate() {
                   />
                 </Box>
               ) : (
-              <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
-                <canvas
-                  ref={canvasRef}
-                  style={{
-                    width: form.size.width,
-                    height: form.size.height,
-                    border: '1px dashed #ccc',
-                    borderRadius: 8,
-                  }}
-                />
-              </Box>
+                <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+                  <canvas
+                    ref={canvasRef}
+                    style={{
+                      width: form.size.width,
+                      height: form.size.height,
+                      border: '1px dashed #ccc',
+                      borderRadius: 8,
+                    }}
+                  />
+                </Box>
               )}
               <Typography variant="caption" color="text.secondary">
                 {designMode === 'upload'
@@ -774,69 +773,69 @@ export default function EStampCreate() {
 
             {/* Quick templates — only in auto mode */}
             {designMode === 'auto' && (
-            <Paper sx={{ p: 2, borderRadius: 2, mt: 2 }}>
-              <Typography variant="subtitle2" fontWeight="bold" sx={{ mb: 1 }}>
-                أنماط سريعة
-              </Typography>
-              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                {[
-                  {
-                    name: 'رسمي أزرق',
-                    primary: '#1a237e',
-                    secondary: '#c62828',
-                    text: '#1a237e',
-                    border: '#1a237e',
-                  },
-                  {
-                    name: 'أخضر رسمي',
-                    primary: '#1b5e20',
-                    secondary: '#1b5e20',
-                    text: '#1b5e20',
-                    border: '#1b5e20',
-                  },
-                  {
-                    name: 'أحمر رسمي',
-                    primary: '#b71c1c',
-                    secondary: '#b71c1c',
-                    text: '#b71c1c',
-                    border: '#b71c1c',
-                  },
-                  {
-                    name: 'ذهبي',
-                    primary: '#bf360c',
-                    secondary: '#f57f17',
-                    text: '#bf360c',
-                    border: '#bf360c',
-                  },
-                  {
-                    name: 'أسود',
-                    primary: '#212121',
-                    secondary: '#212121',
-                    text: '#212121',
-                    border: '#212121',
-                  },
-                ].map((preset, i) => (
-                  <Chip
-                    key={i}
-                    label={preset.name}
-                    size="small"
-                    clickable
-                    sx={{ borderRight: `4px solid ${preset.primary}` }}
-                    onClick={() =>
-                      setForm({
-                        ...form,
-                        colorScheme: {
-                          primary: preset.primary,
-                          secondary: preset.secondary,
-                          text: preset.text,
-                          border: preset.border,
-                        },
-                      })
-                    }
-                  />
-                ))}
-              </Box>
-            </Paper>
+              <Paper sx={{ p: 2, borderRadius: 2, mt: 2 }}>
+                <Typography variant="subtitle2" fontWeight="bold" sx={{ mb: 1 }}>
+                  أنماط سريعة
+                </Typography>
+                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                  {[
+                    {
+                      name: 'رسمي أزرق',
+                      primary: '#1a237e',
+                      secondary: '#c62828',
+                      text: '#1a237e',
+                      border: '#1a237e',
+                    },
+                    {
+                      name: 'أخضر رسمي',
+                      primary: '#1b5e20',
+                      secondary: '#1b5e20',
+                      text: '#1b5e20',
+                      border: '#1b5e20',
+                    },
+                    {
+                      name: 'أحمر رسمي',
+                      primary: '#b71c1c',
+                      secondary: '#b71c1c',
+                      text: '#b71c1c',
+                      border: '#b71c1c',
+                    },
+                    {
+                      name: 'ذهبي',
+                      primary: '#bf360c',
+                      secondary: '#f57f17',
+                      text: '#bf360c',
+                      border: '#bf360c',
+                    },
+                    {
+                      name: 'أسود',
+                      primary: '#212121',
+                      secondary: '#212121',
+                      text: '#212121',
+                      border: '#212121',
+                    },
+                  ].map((preset, i) => (
+                    <Chip
+                      key={i}
+                      label={preset.name}
+                      size="small"
+                      clickable
+                      sx={{ borderRight: `4px solid ${preset.primary}` }}
+                      onClick={() =>
+                        setForm({
+                          ...form,
+                          colorScheme: {
+                            primary: preset.primary,
+                            secondary: preset.secondary,
+                            text: preset.text,
+                            border: preset.border,
+                          },
+                        })
+                      }
+                    />
+                  ))}
+                </Box>
+              </Paper>
             )}
           </Grid>
         </Grid>

@@ -127,6 +127,7 @@ const predictionsRoutes = require('../routes/predictions.routes');
 const projectsRoutes = require('../routes/projects.routes');
 const branchesRoutes = require('../routes/branches.routes');
 const beneficiaryPortalRoutes = require('../routes/beneficiaryPortal');
+const beneficiariesAdminRoutes = require('../routes/beneficiaries');
 const communityIntegrationRoutes = require('../routes/communityIntegration.routes');
 const { studentRoutes: studentMgmtRoutes } = require('../students');
 
@@ -420,6 +421,7 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'projects', projectsRoutes);
   dualMount(app, 'branches', branchesRoutes);
   dualMount(app, 'beneficiary-portal', beneficiaryPortalRoutes);
+  dualMount(app, 'beneficiaries', beneficiariesAdminRoutes);
   dualMount(app, 'community-integration', communityIntegrationRoutes);
   dualMount(app, 'student-management', studentMgmtRoutes);
   logger.info(

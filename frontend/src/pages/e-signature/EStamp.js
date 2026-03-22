@@ -448,9 +448,7 @@ export default function EStamp() {
                   <TableRow sx={{ bgcolor: 'grey.50' }}>
                     <TableCell padding="checkbox">
                       <Checkbox
-                        indeterminate={
-                          selectedIds.length > 0 && selectedIds.length < stamps.length
-                        }
+                        indeterminate={selectedIds.length > 0 && selectedIds.length < stamps.length}
                         checked={stamps.length > 0 && selectedIds.length === stamps.length}
                         onChange={toggleSelectAll}
                       />
@@ -574,7 +572,12 @@ export default function EStamp() {
           <Visibility sx={{ ml: 1 }} /> عرض التفاصيل
         </MenuItem>
         {selectedStamp && ['draft', 'active', 'suspended'].includes(selectedStamp.status) && (
-          <MenuItem onClick={() => { closeMenu(); navigate(`/e-stamp/edit/${selectedStamp._id}`); }}>
+          <MenuItem
+            onClick={() => {
+              closeMenu();
+              navigate(`/e-stamp/edit/${selectedStamp._id}`);
+            }}
+          >
             <Edit sx={{ ml: 1 }} /> تعديل
           </MenuItem>
         )}

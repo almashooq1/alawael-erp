@@ -34,14 +34,11 @@ describe('E-Stamp Routes — Route Availability', () => {
     '%s %s should be mounted (not 404)',
     async (method, url) => {
       const fn = method === 'DELETE' ? 'delete' : method.toLowerCase();
-      const res = await request(app)
-        [fn](url)
-        .set('Accept', 'application/json')
-        .timeout(15000);
+      const res = await request(app)[fn](url).set('Accept', 'application/json').timeout(15000);
 
       expect(res.status).not.toBe(404);
     },
-    20000,
+    20000
   );
 
   // Routes with :id — may return 404 (resource not found) which is valid
@@ -68,17 +65,14 @@ describe('E-Stamp Routes — Route Availability', () => {
     '%s %s should respond with JSON (route exists)',
     async (method, url) => {
       const fn = method === 'DELETE' ? 'delete' : method.toLowerCase();
-      const res = await request(app)
-        [fn](url)
-        .set('Accept', 'application/json')
-        .timeout(15000);
+      const res = await request(app)[fn](url).set('Accept', 'application/json').timeout(15000);
 
       // Route handler responds — status can be anything valid including 404 (stamp not found)
       expect([200, 400, 401, 403, 404, 500].includes(res.status)).toBe(true);
       // The response should be JSON (our handler, not Express default)
       expect(res.headers['content-type']).toMatch(/json/);
     },
-    20000,
+    20000
   );
 });
 
@@ -105,7 +99,7 @@ describe('E-Stamp Routes — Role-Restricted Endpoints', () => {
       expect([200, 400, 401, 403, 404, 500].includes(res.status)).toBe(true);
       expect(res.headers['content-type']).toMatch(/json/);
     },
-    20000,
+    20000
   );
 });
 

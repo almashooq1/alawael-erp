@@ -13,8 +13,6 @@
 // parseCookies and generateToken are used internally.
 // We test them indirectly through the middleware's behaviour.
 
-const crypto = require('crypto');
-
 describe('csrfProtection middleware', () => {
   let csrfProtection;
   const originalEnv = { ...process.env };

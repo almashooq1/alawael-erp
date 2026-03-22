@@ -69,7 +69,7 @@ describe('RBAC data integrity', () => {
   });
 
   test('every ROLE_HIERARCHY entry has level, inherits, label, labelEn', () => {
-    Object.entries(ROLE_HIERARCHY).forEach(([role, meta]) => {
+    Object.entries(ROLE_HIERARCHY).forEach(([_role, meta]) => {
       expect(typeof meta.level).toBe('number');
       expect(Array.isArray(meta.inherits)).toBe(true);
       expect(typeof meta.label).toBe('string');

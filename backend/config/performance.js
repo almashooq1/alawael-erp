@@ -220,7 +220,7 @@ const compressionMiddleware = compression({
     // Don't compress server-sent events
     if (req.headers['accept'] === 'text/event-stream') return false;
     // Don't compress already-compressed formats
-    const contentType = res.getHeader('Content-Type') || '';
+
     if (/\.(gz|br|zip|png|jpg|jpeg|gif|webp|mp4|webm)$/i.test(req.url)) return false;
     return compression.filter(req, res);
   },

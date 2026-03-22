@@ -143,7 +143,7 @@ describe('formatDate', () => {
 
   test('long format English', () => {
     const s = formatDate(testDate, 'en', 'long');
-    expect(s).toContain('June') || expect(s).toContain('15');
+      expect(s.includes('June') || s.includes('15')).toBe(true);
   });
 
   test('full format includes weekday', () => {

@@ -9,7 +9,7 @@
 'use strict';
 
 const {
-  handleValidationErrors,
+  handleValidationErrors: _handleValidationErrors,
   commonValidations,
   authValidations,
   userValidations,

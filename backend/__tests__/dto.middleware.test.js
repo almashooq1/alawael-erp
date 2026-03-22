@@ -17,7 +17,7 @@ jest.mock('../utils/logger', () => ({
 
 const {
   ApiResponse,
-  validate,
+  validate: _validate,
   commonValidators,
   requestContext,
 } = require('../middleware/dto.middleware');

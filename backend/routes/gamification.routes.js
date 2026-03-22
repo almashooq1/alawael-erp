@@ -99,7 +99,7 @@ router.get('/wallets', requireAuth, async (req, res) => {
 /** GET /api/gamification/wallets/:beneficiaryId — get wallet by beneficiary */
 router.get('/wallets/:beneficiaryId', requireAuth, async (req, res) => {
   try {
-    let wallet = await BeneficiaryWallet.findOne({ beneficiary: req.params.beneficiaryId })
+    const wallet = await BeneficiaryWallet.findOne({ beneficiary: req.params.beneficiaryId })
       .populate('beneficiary', 'name fileNumber')
       .populate('badges.badge');
     if (!wallet) return res.status(404).json({ success: false, message: 'Wallet not found' });

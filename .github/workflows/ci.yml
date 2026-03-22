@@ -94,7 +94,9 @@ jobs:
 
       - name: Install dependencies
         working-directory: frontend
-        run: npm ci
+        run: |
+          npm install -g npm@latest
+          npm ci
 
       - name: Build production bundle
         working-directory: frontend
@@ -134,6 +136,7 @@ jobs:
       - name: Audit frontend (high + critical)
         working-directory: frontend
         run: |
+          npm install -g npm@latest
           npm ci
           npm audit --audit-level=high || true
 

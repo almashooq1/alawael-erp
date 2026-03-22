@@ -11,7 +11,8 @@ import io from 'socket.io-client';
 const SocketContext = createContext(null);
 
 // Socket connection configuration
-const SOCKET_URL = process.env.REACT_APP_SOCKET_URL || process.env.REACT_APP_WS_URL || 'http://localhost:3000';
+// Empty string = socket.io connects to same origin (works for any domain/IP)
+const SOCKET_URL = process.env.REACT_APP_SOCKET_URL || process.env.REACT_APP_WS_URL || '';
 const SOCKET_OPTIONS = {
   reconnection: true,
   reconnectionDelay: 1000,

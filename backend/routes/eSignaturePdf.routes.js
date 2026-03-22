@@ -247,10 +247,7 @@ router.post('/generate/:id', async (req, res) => {
       ['Priority', doc.priority],
       ['Created By', doc.createdByName || 'N/A'],
       ['Created At', doc.createdAt ? new Date(doc.createdAt).toLocaleString('en-GB') : 'N/A'],
-      [
-        'Completed At',
-        doc.completedAt ? new Date(doc.completedAt).toLocaleString('en-GB') : 'N/A',
-      ],
+      ['Completed At', doc.completedAt ? new Date(doc.completedAt).toLocaleString('en-GB') : 'N/A'],
       ['Verification Code', doc.verificationCode || 'N/A'],
       ['Document Hash', doc.documentHash ? doc.documentHash.slice(0, 32) + '...' : 'N/A'],
     ];
@@ -475,6 +472,36 @@ router.get('/download/:id', async (req, res) => {
 });
 
 /* ═══════════════════════════════════════════════════════════════════════════
+   Download Stamped PDF — download the latest stamped PDF for a stamp
+   ═══════════════════════════════════════════════════════════════════════════ */
+router.get('/stamped/:stampId', async (req, res) => {
+  try {
+    const stamp = await EStamp.findById(req.params.stampId).select('stampId name_ar').lean();
+    if (!stamp) return res.status(404).json({ success: false, message: 'الختم غير موجود' });
+
+    const stampedDir = path.join(__dirname, '..', 'uploads', 'signatures', 'stamped');
+    if (!fs.existsSync(stampedDir)) {
+      return res.status(404).json({ success: false, message: 'لم يتم ختم أي مستند بعد' });
+    }
+
+    const files = fs
+      .readdirSync(stampedDir)
+      .filter(f => f.startsWith(`stamped-${stamp.stampId}-`));
+    if (files.length === 0) {
+      return res.status(404).json({ success: false, message: 'لم يتم ختم أي مستند بعد' });
+    }
+
+    const latestFile = files.sort().pop();
+    const filePath = path.join(stampedDir, latestFile);
+
+    res.download(filePath, `${stamp.stampId}-stamped.pdf`);
+  } catch (error) {
+    logger.error('Stamped PDF download error:', error);
+    res.status(500).json({ success: false, message: 'خطأ في تنزيل المستند المختوم' });
+  }
+});
+
+/* ═══════════════════════════════════════════════════════════════════════════
    Stamp PDF — embed a stamp image into an existing PDF at given position
    ═══════════════════════════════════════════════════════════════════════════ */
 router.post('/stamp-pdf/:stampId', upload.single('document'), async (req, res) => {
@@ -487,7 +514,9 @@ router.post('/stamp-pdf/:stampId', upload.single('document'), async (req, res) =
 
     // Check usage limits
     if (stamp.maxUsageCount > 0 && stamp.usageCount >= stamp.maxUsageCount) {
-      return res.status(400).json({ success: false, message: 'تم تجاوز الحد الأقصى لاستخدام الختم' });
+      return res
+        .status(400)
+        .json({ success: false, message: 'تم تجاوز الحد الأقصى لاستخدام الختم' });
     }
 
     let pdfBytes;
@@ -604,7 +633,11 @@ router.post('/stamp-pdf/:stampId', upload.single('document'), async (req, res) =
     stamp.usageCount += 1;
     stamp.lastUsedAt = new Date();
     stamp.lastUsedBy = req.user?._id || req.user?.id;
-    stamp.addAuditEntry('applied', req.user, `تم ختم مستند PDF: ${req.body.documentTitle || 'PDF'}`);
+    stamp.addAuditEntry(
+      'applied',
+      req.user,
+      `تم ختم مستند PDF: ${req.body.documentTitle || 'PDF'}`
+    );
     await stamp.save();
 
     // Cleanup uploaded temp file

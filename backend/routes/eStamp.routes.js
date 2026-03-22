@@ -6,6 +6,7 @@
  *   GET    /stats                Dashboard statistics
  *   GET    /                     List stamps (filter/paginate)
  *   POST   /                     Create stamp
+ *   POST   /:id/upload-image     Upload custom stamp image
  *   GET    /:id                  Get single stamp
  *   PUT    /:id                  Update stamp
  *   POST   /:id/submit-approval  Submit for approval
@@ -26,12 +27,73 @@
  */
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
 const { authenticate, authorize } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const EStamp = require('../models/EStamp');
 const { escapeRegex } = require('../utils/sanitize');
 
+/* ─── Multer config for stamp image uploads (memory storage → base64) ───── */
+const stampImageUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 2 * 1024 * 1024 }, // 2 MB
+  fileFilter: (_req, file, cb) => {
+    if (/^image\/(png|jpeg|jpg|svg\+xml|webp)$/.test(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('نوع الملف غير مدعوم — يُسمح فقط بـ PNG, JPG, SVG, WebP'));
+    }
+  },
+});
+
 router.use(authenticate);
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Verify Stamp Application — MUST be before /:id to avoid route conflict
+   ═══════════════════════════════════════════════════════════════════════════ */
+router.get('/verify/:code', async (req, res) => {
+  try {
+    const code = req.params.code;
+    const stamp = await EStamp.findOne({
+      'usageHistory.verificationCode': code,
+    }).lean();
+
+    if (!stamp) {
+      return res.json({
+        success: true,
+        data: { valid: false, message: 'كود التحقق غير صالح' },
+      });
+    }
+
+    const usage = stamp.usageHistory.find(u => u.verificationCode === code);
+
+    res.json({
+      success: true,
+      data: {
+        valid: true,
+        stamp: {
+          stampId: stamp.stampId,
+          name_ar: stamp.name_ar,
+          stampType: stamp.stampType,
+          category: stamp.category,
+          department: stamp.department,
+          organization: stamp.organization,
+          status: stamp.status,
+          stampImage: stamp.stampImage,
+        },
+        application: {
+          documentTitle: usage?.documentTitle,
+          documentType: usage?.documentType,
+          appliedByName: usage?.appliedByName,
+          appliedAt: usage?.appliedAt,
+          verificationHash: usage?.verificationHash,
+        },
+      },
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'خطأ في التحقق' });
+  }
+});
 
 /* ═══════════════════════════════════════════════════════════════════════════
    Dashboard Statistics
@@ -242,11 +304,45 @@ router.post('/', async (req, res) => {
 });
 
 /* ═══════════════════════════════════════════════════════════════════════════
+   Upload Custom Stamp Image
+   ═══════════════════════════════════════════════════════════════════════════ */
+router.post('/:id/upload-image', stampImageUpload.single('stampImage'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'لم يتم رفع صورة' });
+    }
+    const stamp = await EStamp.findById(req.params.id);
+    if (!stamp) {
+      return res.status(404).json({ success: false, message: 'الختم غير موجود' });
+    }
+
+    // Convert buffer to base64 data URI
+    const mimeType = req.file.mimetype;
+    const base64 = req.file.buffer.toString('base64');
+    stamp.stampImage = `data:${mimeType};base64,${base64}`;
+    stamp.addAuditEntry('updated', req.user, 'تم رفع صورة مخصصة للختم');
+    await stamp.save();
+
+    logger.info('Stamp image uploaded for %s by %s', stamp.stampId, req.user?.name);
+    res.json({
+      success: true,
+      data: { stampImage: stamp.stampImage },
+      message: 'تم رفع صورة الختم بنجاح',
+    });
+  } catch (err) {
+    logger.error('Stamp image upload error: %s', err.message);
+    res.status(500).json({ success: false, message: err.message || 'خطأ في رفع الصورة' });
+  }
+});
+
+/* ═══════════════════════════════════════════════════════════════════════════
    Get Single Stamp
    ═══════════════════════════════════════════════════════════════════════════ */
 router.get('/:id', async (req, res) => {
   try {
-    const stamp = await EStamp.findById(req.params.id).lean();
+    const stamp = await EStamp.findById(req.params.id)
+      .select('-verificationSecret')
+      .lean();
     if (!stamp) {
       return res.status(404).json({ success: false, message: 'الختم غير موجود' });
     }
@@ -334,7 +430,7 @@ router.post('/:id/submit-approval', async (req, res) => {
 /* ═══════════════════════════════════════════════════════════════════════════
    Approve Stamp
    ═══════════════════════════════════════════════════════════════════════════ */
-router.post('/:id/approve', async (req, res) => {
+router.post('/:id/approve', authorize(['admin', 'manager', 'director']), async (req, res) => {
   try {
     const stamp = await EStamp.findById(req.params.id);
     if (!stamp) return res.status(404).json({ success: false, message: 'الختم غير موجود' });
@@ -358,7 +454,7 @@ router.post('/:id/approve', async (req, res) => {
 /* ═══════════════════════════════════════════════════════════════════════════
    Reject Stamp
    ═══════════════════════════════════════════════════════════════════════════ */
-router.post('/:id/reject', async (req, res) => {
+router.post('/:id/reject', authorize(['admin', 'manager', 'director']), async (req, res) => {
   try {
     const stamp = await EStamp.findById(req.params.id);
     if (!stamp) return res.status(404).json({ success: false, message: 'الختم غير موجود' });
@@ -406,7 +502,7 @@ router.post('/:id/deactivate', async (req, res) => {
   }
 });
 
-router.post('/:id/revoke', async (req, res) => {
+router.post('/:id/revoke', authorize(['admin', 'manager', 'director']), async (req, res) => {
   try {
     const stamp = await EStamp.findById(req.params.id);
     if (!stamp) return res.status(404).json({ success: false, message: 'الختم غير موجود' });
@@ -454,6 +550,14 @@ router.post('/:id/apply', async (req, res) => {
 
     if (stamp.status !== 'active') {
       return res.status(400).json({ success: false, message: 'الختم غير مفعّل' });
+    }
+
+    // Check authorization
+    const userId = req.user?._id || req.user?.id;
+    if (!stamp.isUserAuthorized(userId)) {
+      return res
+        .status(403)
+        .json({ success: false, message: 'غير مصرح لك باستخدام هذا الختم' });
     }
 
     // Check max usage
@@ -617,53 +721,6 @@ router.delete('/:id/authorize/:userId', async (req, res) => {
     res.json({ success: true, data: stamp, message: 'تم إزالة التفويض' });
   } catch (err) {
     res.status(500).json({ success: false, message: 'خطأ' });
-  }
-});
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   Verify Stamp Application
-   ═══════════════════════════════════════════════════════════════════════════ */
-router.get('/verify/:code', async (req, res) => {
-  try {
-    const code = req.params.code;
-    const stamp = await EStamp.findOne({
-      'usageHistory.verificationCode': code,
-    }).lean();
-
-    if (!stamp) {
-      return res.json({
-        success: true,
-        data: { valid: false, message: 'كود التحقق غير صالح' },
-      });
-    }
-
-    const usage = stamp.usageHistory.find(u => u.verificationCode === code);
-
-    res.json({
-      success: true,
-      data: {
-        valid: true,
-        stamp: {
-          stampId: stamp.stampId,
-          name_ar: stamp.name_ar,
-          stampType: stamp.stampType,
-          category: stamp.category,
-          department: stamp.department,
-          organization: stamp.organization,
-          status: stamp.status,
-          stampImage: stamp.stampImage,
-        },
-        application: {
-          documentTitle: usage?.documentTitle,
-          documentType: usage?.documentType,
-          appliedByName: usage?.appliedByName,
-          appliedAt: usage?.appliedAt,
-          verificationHash: usage?.verificationHash,
-        },
-      },
-    });
-  } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في التحقق' });
   }
 });
 

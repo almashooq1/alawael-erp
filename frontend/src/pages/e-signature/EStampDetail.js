@@ -355,6 +355,16 @@ export default function EStampDetail() {
                 تجديد
               </Button>
             )}
+            {['draft', 'active', 'suspended'].includes(stamp.status) && (
+              <Button
+                variant="outlined"
+                startIcon={<Edit />}
+                onClick={() => navigate(`/e-stamp/edit/${stamp._id}`)}
+                sx={{ color: 'white', borderColor: 'rgba(255,255,255,0.5)' }}
+              >
+                تعديل
+              </Button>
+            )}
           </Box>
         </Box>
       </Box>

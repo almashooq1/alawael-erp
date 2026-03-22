@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import eStampService from '../../services/eStamp.service';
 import {
@@ -28,6 +28,7 @@ import {
   Menu,
   MenuItem,
   Divider,
+  Checkbox,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -42,6 +43,8 @@ import {
   PendingActions,
   FilterList,
   BarChart,
+  Delete as DeleteIcon,
+  Edit,
 } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients } from '../../theme/palette';
@@ -103,10 +106,20 @@ export default function EStamp() {
   const [pagination, setPagination] = useState({ total: 0, page: 1, pages: 1 });
   const [statusFilter, setStatusFilter] = useState('');
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(15);
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedStamp, setSelectedStamp] = useState(null);
+  const [selectedIds, setSelectedIds] = useState([]);
+
+  /* ─── Debounced search ─────────────────────────────────────────────────── */
+  const debounceRef = useRef(null);
+  useEffect(() => {
+    clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => setDebouncedSearch(search), 400);
+    return () => clearTimeout(debounceRef.current);
+  }, [search]);
 
   /* ─── Load ──────────────────────────────────────────────────────────────── */
   const loadStats = useCallback(async () => {
@@ -123,7 +136,7 @@ export default function EStamp() {
     try {
       const params = { page: page + 1, limit: rowsPerPage };
       if (statusFilter) params.status = statusFilter;
-      if (search) params.search = search;
+      if (debouncedSearch) params.search = debouncedSearch;
       const res = await eStampService.getAll(params);
       if (res?.data?.data) {
         setStamps(res.data.data);
@@ -135,7 +148,7 @@ export default function EStamp() {
       setLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, rowsPerPage, statusFilter, search]);
+  }, [page, rowsPerPage, statusFilter, debouncedSearch]);
 
   useEffect(() => {
     loadStats();
@@ -191,6 +204,51 @@ export default function EStamp() {
     } catch {
       showSnackbar('خطأ في تنفيذ العملية', 'error');
     }
+  };
+
+  /* ─── Bulk selection helpers ────────────────────────────────────────────── */
+  const toggleSelect = id => {
+    setSelectedIds(prev => (prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]));
+  };
+  const toggleSelectAll = () => {
+    if (selectedIds.length === stamps.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(stamps.map(s => s._id));
+    }
+  };
+  const handleBulkDelete = async () => {
+    if (!selectedIds.length) return;
+    if (!window.confirm(`هل تريد حذف ${selectedIds.length} ختم؟`)) return;
+    let ok = 0;
+    for (const sid of selectedIds) {
+      try {
+        await eStampService.remove(sid);
+        ok++;
+      } catch {
+        /* skip */
+      }
+    }
+    showSnackbar(`تم حذف ${ok} من ${selectedIds.length} ختم`, 'success');
+    setSelectedIds([]);
+    loadStamps();
+    loadStats();
+  };
+  const handleBulkApprove = async () => {
+    if (!selectedIds.length) return;
+    let ok = 0;
+    for (const sid of selectedIds) {
+      try {
+        await eStampService.approve(sid);
+        ok++;
+      } catch {
+        /* skip */
+      }
+    }
+    showSnackbar(`تم اعتماد ${ok} من ${selectedIds.length} ختم`, 'success');
+    setSelectedIds([]);
+    loadStamps();
+    loadStats();
   };
 
   /* ─── KPI Cards ─────────────────────────────────────────────────────────── */
@@ -324,6 +382,36 @@ export default function EStamp() {
         </Box>
       </Paper>
 
+      {/* ─── Bulk Action Bar ─────────────────────────────────────────────── */}
+      {selectedIds.length > 0 && (
+        <Paper
+          sx={{
+            p: 1.5,
+            mb: 2,
+            borderRadius: 2,
+            bgcolor: 'primary.50',
+            border: '1px solid',
+            borderColor: 'primary.200',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2,
+          }}
+        >
+          <Typography variant="body2" fontWeight="bold" sx={{ ml: 1 }}>
+            تم تحديد {selectedIds.length} ختم
+          </Typography>
+          <Button size="small" variant="contained" color="success" onClick={handleBulkApprove}>
+            <CheckCircle sx={{ ml: 0.5, fontSize: 18 }} /> اعتماد المحدد
+          </Button>
+          <Button size="small" variant="contained" color="error" onClick={handleBulkDelete}>
+            <DeleteIcon sx={{ ml: 0.5, fontSize: 18 }} /> حذف المحدد
+          </Button>
+          <Button size="small" variant="outlined" onClick={() => setSelectedIds([])}>
+            إلغاء التحديد
+          </Button>
+        </Paper>
+      )}
+
       {/* ─── Status Tabs ─────────────────────────────────────────────────── */}
       <Paper sx={{ borderRadius: 2, mb: 3 }}>
         <Tabs
@@ -358,6 +446,15 @@ export default function EStamp() {
               <Table>
                 <TableHead>
                   <TableRow sx={{ bgcolor: 'grey.50' }}>
+                    <TableCell padding="checkbox">
+                      <Checkbox
+                        indeterminate={
+                          selectedIds.length > 0 && selectedIds.length < stamps.length
+                        }
+                        checked={stamps.length > 0 && selectedIds.length === stamps.length}
+                        onChange={toggleSelectAll}
+                      />
+                    </TableCell>
                     <TableCell sx={{ fontWeight: 'bold' }}>رقم الختم</TableCell>
                     <TableCell sx={{ fontWeight: 'bold' }}>الختم</TableCell>
                     <TableCell sx={{ fontWeight: 'bold' }}>الاسم</TableCell>
@@ -379,7 +476,14 @@ export default function EStamp() {
                         hover
                         sx={{ cursor: 'pointer' }}
                         onClick={() => navigate(`/e-stamp/${stamp._id}`)}
+                        selected={selectedIds.includes(stamp._id)}
                       >
+                        <TableCell padding="checkbox" onClick={e => e.stopPropagation()}>
+                          <Checkbox
+                            checked={selectedIds.includes(stamp._id)}
+                            onChange={() => toggleSelect(stamp._id)}
+                          />
+                        </TableCell>
                         <TableCell>
                           <Typography
                             variant="body2"
@@ -469,6 +573,11 @@ export default function EStamp() {
         <MenuItem onClick={() => handleAction('view')}>
           <Visibility sx={{ ml: 1 }} /> عرض التفاصيل
         </MenuItem>
+        {selectedStamp && ['draft', 'active', 'suspended'].includes(selectedStamp.status) && (
+          <MenuItem onClick={() => { closeMenu(); navigate(`/e-stamp/edit/${selectedStamp._id}`); }}>
+            <Edit sx={{ ml: 1 }} /> تعديل
+          </MenuItem>
+        )}
         {selectedStamp?.status === 'active' && (
           <MenuItem onClick={() => handleAction('apply')}>
             <Verified sx={{ ml: 1 }} /> تطبيق الختم

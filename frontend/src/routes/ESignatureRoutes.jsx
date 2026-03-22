@@ -15,6 +15,7 @@ const ESignatureSigning = lazyWithRetry(() => import('../pages/e-signature/ESign
 /* ─── E-Stamp Pages ──────────────────────────────────────────────────────── */
 const EStamp = lazyWithRetry(() => import('../pages/e-signature/EStamp'));
 const EStampCreate = lazyWithRetry(() => import('../pages/e-signature/EStampCreate'));
+const EStampEdit = lazyWithRetry(() => import('../pages/e-signature/EStampEdit'));
 const EStampDetail = lazyWithRetry(() => import('../pages/e-signature/EStampDetail'));
 const EStampApply = lazyWithRetry(() => import('../pages/e-signature/EStampApply'));
 const EStampVerify = lazyWithRetry(() => import('../pages/e-signature/EStampVerify'));
@@ -34,6 +35,7 @@ export default function ESignatureRoutes() {
       {/* ── الختم الإلكتروني ───────────────────────────────────── */}
       <Route path="e-stamp" element={<EStamp />} />
       <Route path="e-stamp/create" element={<EStampCreate />} />
+      <Route path="e-stamp/edit/:id" element={<EStampEdit />} />
       <Route path="e-stamp/:id" element={<EStampDetail />} />
       <Route path="e-stamp/apply/:id" element={<EStampApply />} />
       <Route path="e-stamp/verify" element={<EStampVerify />} />

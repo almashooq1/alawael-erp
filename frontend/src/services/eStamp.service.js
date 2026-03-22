@@ -40,10 +40,18 @@ const eStampService = {
   /* ─── Transfer ─────────────────────────────────────────────────── */
   transfer: (id, data) => api.post(`/e-stamp/${id}/transfer`, data),
 
+  /* ─── Upload Custom Stamp Image ────────────────────────────────── */
+  uploadImage: (id, file) => {
+    const fd = new FormData();
+    fd.append('stampImage', file);
+    return api.post(`/e-stamp/${id}/upload-image`, fd, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
+
   /* ─── Stamp PDF ────────────────────────────────────────────────── */
-  stampPdf: (stampId, data) =>
-    api.post(`/e-signature-pdf/stamp-pdf/${stampId}`, data),
-  downloadStampedPdf: (stampId) =>
+  stampPdf: (stampId, data) => api.post(`/e-signature-pdf/stamp-pdf/${stampId}`, data),
+  downloadStampedPdf: stampId =>
     api.get(`/e-signature-pdf/stamped/${stampId}`, { responseType: 'blob' }),
 };
 

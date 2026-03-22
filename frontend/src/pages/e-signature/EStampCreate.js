@@ -36,6 +36,8 @@ import {
   Square,
   Palette,
   Add as AddIcon,
+  CloudUpload,
+  DesignServices,
 } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients } from '../../theme/palette';
@@ -84,6 +86,9 @@ export default function EStampCreate() {
 
   const [activeStep, setActiveStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
+  const [designMode, setDesignMode] = useState('auto'); // 'auto' | 'upload'
+  const [customImageFile, setCustomImageFile] = useState(null);
+  const [customImagePreview, setCustomImagePreview] = useState('');
 
   const [form, setForm] = useState({
     name_ar: '',
@@ -201,11 +206,52 @@ export default function EStampCreate() {
     ctx.font = `${Math.max(10, r / 4)}px Arial`;
     ctx.fillText('★', cx, cy + (form.stampShape === 'circle' ? r - 22 : h - 32));
 
+    // Date rendering (bottom arc for circle, bottom line for rect)
+    if (form.includeDate) {
+      const dateStr = new Date().toLocaleDateString('ar-SA', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      });
+      ctx.fillStyle = form.colorScheme.text;
+      if (form.stampShape === 'circle') {
+        ctx.font = `${Math.max(7, r / 7)}px Cairo, Tajawal, Arial`;
+        // Bottom arc text
+        ctx.save();
+        const dateR = r - 18;
+        const dateStart = Math.PI / 2 + dateStr.length * 0.07;
+        for (let i = 0; i < dateStr.length; i++) {
+          const angle = dateStart - i * 0.14;
+          ctx.save();
+          ctx.translate(cx + dateR * Math.cos(angle), cy + dateR * Math.sin(angle));
+          ctx.rotate(angle - Math.PI / 2);
+          ctx.fillText(dateStr[i], 0, 0);
+          ctx.restore();
+        }
+        ctx.restore();
+      } else {
+        ctx.font = `${Math.max(7, w / 16)}px Cairo, Tajawal, Arial`;
+        ctx.fillText(dateStr, cx, h - 16);
+      }
+    }
+
+    // Number rendering
+    if (form.includeNumber) {
+      ctx.fillStyle = form.colorScheme.text;
+      ctx.font = `${Math.max(7, r / 7)}px Cairo, Tajawal, Arial`;
+      const numStr = 'رقم: ####';
+      if (form.stampShape === 'circle' || form.stampShape === 'oval') {
+        ctx.fillText(numStr, cx, cy - r / 3);
+      } else {
+        ctx.fillText(numStr, cx, cy - 18);
+      }
+    }
+
     return canvas.toDataURL('image/png');
   };
 
   useEffect(() => {
-    if (activeStep === 1 || activeStep === 3) {
+    if ((activeStep === 1 || activeStep === 3) && designMode === 'auto') {
       const timeout = setTimeout(() => {
         const img = drawStampPreview();
         if (img) setForm(prev => ({ ...prev, stampImage: img }));
@@ -215,13 +261,44 @@ export default function EStampCreate() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     activeStep,
+    designMode,
     form.name_ar,
     form.organization,
     form.department,
     form.stampShape,
     form.colorScheme,
     form.size,
+    form.includeDate,
+    form.includeNumber,
   ]);
+
+  /* ─── Custom Image Upload Handler ───────────────────────────────────────── */
+  const handleCustomImageSelect = e => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      showSnackbar('حجم الصورة يجب أن لا يتجاوز 2 ميجابايت', 'warning');
+      return;
+    }
+    if (!/^image\/(png|jpeg|jpg|svg\+xml|webp)$/.test(file.type)) {
+      showSnackbar('نوع الملف غير مدعوم — يُسمح بـ PNG, JPG, SVG, WebP', 'warning');
+      return;
+    }
+    setCustomImageFile(file);
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const dataUrl = ev.target.result;
+      setCustomImagePreview(dataUrl);
+      setForm(prev => ({ ...prev, stampImage: dataUrl }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const clearCustomImage = () => {
+    setCustomImageFile(null);
+    setCustomImagePreview('');
+    setForm(prev => ({ ...prev, stampImage: '' }));
+  };
 
   /* ─── Submit ────────────────────────────────────────────────────────────── */
   const handleSubmit = async (asDraft = false) => {
@@ -234,7 +311,17 @@ export default function EStampCreate() {
       const payload = { ...form };
       if (asDraft) payload.status = 'draft';
       const res = await eStampService.create(payload);
-      showSnackbar('تم إنشاء الختم بنجاح', 'success');
+      // If not draft, auto-submit for approval
+      if (!asDraft && res?.data?.data?._id) {
+        try {
+          await eStampService.submitForApproval(res.data.data._id);
+          showSnackbar('تم إنشاء الختم وتقديمه للاعتماد', 'success');
+        } catch {
+          showSnackbar('تم إنشاء الختم، لكن فشل تقديمه للاعتماد', 'warning');
+        }
+      } else {
+        showSnackbar('تم حفظ الختم كمسودة', 'success');
+      }
       navigate('/e-stamp');
     } catch (err) {
       showSnackbar(err?.response?.data?.message || 'خطأ في إنشاء الختم', 'error');
@@ -439,9 +526,107 @@ export default function EStampCreate() {
         <Grid container spacing={3}>
           <Grid item xs={12} md={7}>
             <Paper sx={{ p: 3, borderRadius: 2 }}>
-              <Typography variant="h6" fontWeight="bold" sx={{ mb: 3 }}>
+              <Typography variant="h6" fontWeight="bold" sx={{ mb: 2 }}>
                 تصميم الختم
               </Typography>
+
+              {/* ─── Design Mode Toggle ─── */}
+              <ToggleButtonGroup
+                exclusive
+                value={designMode}
+                onChange={(_, v) => {
+                  if (!v) return;
+                  setDesignMode(v);
+                  if (v === 'auto') {
+                    clearCustomImage();
+                  }
+                }}
+                sx={{ mb: 3, width: '100%' }}
+                fullWidth
+              >
+                <ToggleButton value="auto">
+                  <DesignServices sx={{ ml: 1 }} /> تصميم تلقائي
+                </ToggleButton>
+                <ToggleButton value="upload">
+                  <CloudUpload sx={{ ml: 1 }} /> رفع صورة مخصصة
+                </ToggleButton>
+              </ToggleButtonGroup>
+
+              {/* ─── Upload Mode ─── */}
+              {designMode === 'upload' && (
+                <Box>
+                  <Box
+                    sx={{
+                      border: '2px dashed',
+                      borderColor: customImagePreview ? 'success.main' : 'divider',
+                      borderRadius: 2,
+                      p: 4,
+                      textAlign: 'center',
+                      cursor: 'pointer',
+                      bgcolor: customImagePreview ? 'success.50' : 'action.hover',
+                      transition: 'all 0.2s',
+                      '&:hover': { borderColor: 'primary.main', bgcolor: 'primary.50' },
+                    }}
+                    onClick={() => document.getElementById('stamp-image-upload').click()}
+                  >
+                    <input
+                      id="stamp-image-upload"
+                      type="file"
+                      accept="image/png,image/jpeg,image/jpg,image/svg+xml,image/webp"
+                      hidden
+                      onChange={handleCustomImageSelect}
+                    />
+                    {customImagePreview ? (
+                      <Box>
+                        <Box
+                          component="img"
+                          src={customImagePreview}
+                          alt="معاينة الختم"
+                          sx={{
+                            maxWidth: 200,
+                            maxHeight: 200,
+                            borderRadius: 2,
+                            mb: 2,
+                            border: '1px solid',
+                            borderColor: 'divider',
+                          }}
+                        />
+                        <Typography variant="body2" color="success.main" fontWeight="bold">
+                          ✓ تم رفع الصورة — انقر لتغييرها
+                        </Typography>
+                        <Button
+                          size="small"
+                          color="error"
+                          onClick={e => {
+                            e.stopPropagation();
+                            clearCustomImage();
+                          }}
+                          sx={{ mt: 1 }}
+                        >
+                          <Delete sx={{ ml: 0.5 }} /> إزالة الصورة
+                        </Button>
+                      </Box>
+                    ) : (
+                      <Box>
+                        <CloudUpload sx={{ fontSize: 48, color: 'text.secondary', mb: 1 }} />
+                        <Typography variant="body1" fontWeight="bold">
+                          انقر لرفع صورة الختم
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary" display="block">
+                          PNG, JPG, SVG, WebP — الحد الأقصى 2 ميجابايت
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          يمكنك رفع ختم ممسوح ضوئياً أو تصميم جاهز
+                        </Typography>
+                      </Box>
+                    )}
+                  </Box>
+                </Box>
+              )}
+
+              {/* ─── Auto Design Mode ─── */}
+              {designMode === 'auto' && (
+                <>
 
               <Typography variant="subtitle2" sx={{ mb: 1 }}>
                 الشكل
@@ -542,6 +727,8 @@ export default function EStampCreate() {
                   />
                 </Grid>
               </Grid>
+                </>
+              )}
             </Paper>
           </Grid>
 
@@ -551,6 +738,21 @@ export default function EStampCreate() {
               <Typography variant="h6" fontWeight="bold" sx={{ mb: 3 }}>
                 معاينة
               </Typography>
+              {designMode === 'upload' && customImagePreview ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+                  <Box
+                    component="img"
+                    src={customImagePreview}
+                    alt="معاينة الختم المخصص"
+                    sx={{
+                      maxWidth: form.size.width,
+                      maxHeight: form.size.height,
+                      borderRadius: 2,
+                      border: '1px dashed #ccc',
+                    }}
+                  />
+                </Box>
+              ) : (
               <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
                 <canvas
                   ref={canvasRef}
@@ -562,12 +764,16 @@ export default function EStampCreate() {
                   }}
                 />
               </Box>
+              )}
               <Typography variant="caption" color="text.secondary">
-                هذه معاينة تقريبية — يمكن تعديل التصميم لاحقاً
+                {designMode === 'upload'
+                  ? 'صورة الختم المرفوعة — ستُستخدم مباشرة'
+                  : 'هذه معاينة تقريبية — يمكن تعديل التصميم لاحقاً'}
               </Typography>
             </Paper>
 
-            {/* Quick templates */}
+            {/* Quick templates — only in auto mode */}
+            {designMode === 'auto' && (
             <Paper sx={{ p: 2, borderRadius: 2, mt: 2 }}>
               <Typography variant="subtitle2" fontWeight="bold" sx={{ mb: 1 }}>
                 أنماط سريعة
@@ -631,6 +837,7 @@ export default function EStampCreate() {
                 ))}
               </Box>
             </Paper>
+            )}
           </Grid>
         </Grid>
       )}

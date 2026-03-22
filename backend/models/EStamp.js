@@ -288,9 +288,17 @@ eStampSchema.methods.isUserAuthorized = function (userId) {
 
 /* ─── Statics ────────────────────────────────────────────────────────────── */
 eStampSchema.statics.generateStampId = async function () {
-  const count = await this.countDocuments();
-  const seq = String(count + 1).padStart(5, '0');
-  return `STM-${new Date().getFullYear()}-${seq}`;
+  const year = new Date().getFullYear();
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const count = await this.countDocuments();
+    const seq = String(count + 1 + attempt).padStart(5, '0');
+    const id = `STM-${year}-${seq}`;
+    const exists = await this.findOne({ stampId: id }).select('_id').lean();
+    if (!exists) return id;
+  }
+  // Fallback: append random hex to guarantee uniqueness
+  const rnd = require('crypto').randomBytes(3).toString('hex');
+  return `STM-${year}-${rnd}`;
 };
 
 module.exports = mongoose.model('EStamp', eStampSchema);

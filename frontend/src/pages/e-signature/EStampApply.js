@@ -36,14 +36,19 @@ import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients } from '../../theme/palette';
 
 const documentTypes = [
-  { value: 'official_letter', label: 'خطاب رسمي' },
+  { value: 'letter', label: 'خطاب رسمي' },
   { value: 'contract', label: 'عقد' },
   { value: 'invoice', label: 'فاتورة' },
   { value: 'report', label: 'تقرير' },
   { value: 'certificate', label: 'شهادة' },
   { value: 'memo', label: 'مذكرة' },
-  { value: 'decision', label: 'قرار' },
-  { value: 'form', label: 'نموذج' },
+  { value: 'approval', label: 'قرار / موافقة' },
+  { value: 'authorization', label: 'تفويض' },
+  { value: 'policy', label: 'سياسة' },
+  { value: 'medical_report', label: 'تقرير طبي' },
+  { value: 'legal_document', label: 'وثيقة قانونية' },
+  { value: 'financial_document', label: 'وثيقة مالية' },
+  { value: 'hr_document', label: 'وثيقة موارد بشرية' },
   { value: 'other', label: 'أخرى' },
 ];
 
@@ -67,7 +72,7 @@ export default function EStampApply() {
   const [form, setForm] = useState({
     documentId: '',
     documentTitle: '',
-    documentType: 'official_letter',
+    documentType: 'letter',
     notes: '',
     position: { x: 50, y: 90, page: 1, scale: 1, rotation: 0 },
   });

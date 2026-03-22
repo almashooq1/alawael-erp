@@ -624,7 +624,13 @@ export default function ESignatureSigning() {
                     <Button
                       fullWidth
                       variant="contained"
-                      startIcon={downloadingPdf ? <CircularProgress size={18} color="inherit" /> : <Download />}
+                      startIcon={
+                        downloadingPdf ? (
+                          <CircularProgress size={18} color="inherit" />
+                        ) : (
+                          <Download />
+                        )
+                      }
                       sx={{ mb: 1, background: 'linear-gradient(45deg, #1a237e 30%, #1565c0 90%)' }}
                       onClick={handleDownloadPdf}
                       disabled={downloadingPdf}
@@ -920,7 +926,7 @@ export default function ESignatureSigning() {
           <SignaturePad
             width={560}
             height={200}
-            onSave={(data) => setSignaturePadData(data)}
+            onSave={data => setSignaturePadData(data)}
             disabled={signingInProgress}
           />
 
@@ -931,7 +937,14 @@ export default function ESignatureSigning() {
           )}
         </DialogContent>
         <DialogActions sx={{ px: 3, py: 2 }}>
-          <Button onClick={() => { setSignDialogOpen(false); setSignaturePadData(null); }}>إلغاء</Button>
+          <Button
+            onClick={() => {
+              setSignDialogOpen(false);
+              setSignaturePadData(null);
+            }}
+          >
+            إلغاء
+          </Button>
           <Button
             variant="contained"
             color="success"

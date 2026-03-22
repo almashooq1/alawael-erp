@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import eSignatureService from '../../services/eSignature.service';
+import eSignaturePdfService from '../../services/eSignaturePdf.service';
 import {
   Box,
   Typography,
@@ -57,9 +58,12 @@ import {
   Visibility,
   Share,
   Print,
+  PictureAsPdf,
+  QrCode2,
 } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, statusColors } from '../../theme/palette';
+import SignaturePad from '../../components/common/SignaturePad';
 
 /* ═══ Status Map ═════════════════════════════════════════════════════════ */
 const statusMap = {
@@ -123,6 +127,11 @@ export default function ESignatureSigning() {
   // Comment
   const [commentText, setCommentText] = useState('');
   const [commenting, setCommenting] = useState(false);
+
+  // PDF & Signature Pad
+  const [generatingPdf, setGeneratingPdf] = useState(false);
+  const [downloadingPdf, setDownloadingPdf] = useState(false);
+  const [signaturePadData, setSignaturePadData] = useState(null);
 
   /* ─── Load Data ────────────────────────────────────────────────────────── */
   const loadDoc = useCallback(async () => {
@@ -198,6 +207,29 @@ export default function ESignatureSigning() {
 
   /* ─── Handle Sign ──────────────────────────────────────────────────────── */
   const handleSign = async () => {
+    // Use new SignaturePad data if available, else fall back to legacy canvas
+    if (signaturePadData) {
+      setSigningInProgress(true);
+      try {
+        await eSignatureService.sign(id, {
+          signatureType: signaturePadData.type,
+          signatureImage: signaturePadData.image,
+          signatureText: signaturePadData.text,
+          signatureFont: signaturePadData.font,
+        });
+        showSnackbar('تم التوقيع بنجاح', 'success');
+        setSignDialogOpen(false);
+        setSignaturePadData(null);
+        loadDoc();
+      } catch {
+        showSnackbar('خطأ في التوقيع', 'error');
+      } finally {
+        setSigningInProgress(false);
+      }
+      return;
+    }
+
+    // Legacy fallback (should not normally reach here)
     setSigningInProgress(true);
     try {
       let signatureImage = null;
@@ -237,6 +269,54 @@ export default function ESignatureSigning() {
       showSnackbar('خطأ في التوقيع', 'error');
     } finally {
       setSigningInProgress(false);
+    }
+  };
+
+  /* ─── Handle Generate PDF ──────────────────────────────────────────────── */
+  const handleGeneratePdf = async () => {
+    setGeneratingPdf(true);
+    try {
+      await eSignaturePdfService.generatePdf(id);
+      showSnackbar('تم إنشاء شهادة PDF بنجاح', 'success');
+    } catch {
+      showSnackbar('خطأ في إنشاء ملف PDF', 'error');
+    } finally {
+      setGeneratingPdf(false);
+    }
+  };
+
+  const handleDownloadPdf = async () => {
+    setDownloadingPdf(true);
+    try {
+      const res = await eSignaturePdfService.downloadPdf(id);
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `${doc?.requestId || 'signed'}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      showSnackbar('تم تنزيل الملف', 'success');
+    } catch {
+      // If no generated PDF yet, try generating first
+      try {
+        await eSignaturePdfService.generatePdf(id);
+        const res = await eSignaturePdfService.downloadPdf(id);
+        const url = window.URL.createObjectURL(new Blob([res.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `${doc?.requestId || 'signed'}.pdf`);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+        showSnackbar('تم إنشاء وتنزيل الملف', 'success');
+      } catch {
+        showSnackbar('خطأ في تنزيل ملف PDF', 'error');
+      }
+    } finally {
+      setDownloadingPdf(false);
     }
   };
 
@@ -528,6 +608,46 @@ export default function ESignatureSigning() {
                 >
                   التحقق
                 </Button>
+                {doc.status === 'completed' && (
+                  <>
+                    <Button
+                      fullWidth
+                      variant="outlined"
+                      startIcon={generatingPdf ? <CircularProgress size={18} /> : <PictureAsPdf />}
+                      sx={{ mb: 1 }}
+                      onClick={handleGeneratePdf}
+                      disabled={generatingPdf}
+                      color="secondary"
+                    >
+                      {generatingPdf ? 'جاري الإنشاء...' : 'إنشاء شهادة PDF'}
+                    </Button>
+                    <Button
+                      fullWidth
+                      variant="contained"
+                      startIcon={downloadingPdf ? <CircularProgress size={18} color="inherit" /> : <Download />}
+                      sx={{ mb: 1, background: 'linear-gradient(45deg, #1a237e 30%, #1565c0 90%)' }}
+                      onClick={handleDownloadPdf}
+                      disabled={downloadingPdf}
+                    >
+                      {downloadingPdf ? 'جاري التنزيل...' : 'تنزيل PDF الموقّع'}
+                    </Button>
+                  </>
+                )}
+                {doc.verificationCode && (
+                  <Button
+                    fullWidth
+                    variant="outlined"
+                    startIcon={<QrCode2 />}
+                    sx={{ mb: 1 }}
+                    onClick={() => {
+                      const url = `${window.location.origin}/verify/${doc.verificationCode}`;
+                      navigator.clipboard.writeText(url);
+                      showSnackbar('تم نسخ رابط التحقق', 'success');
+                    }}
+                  >
+                    نسخ رابط التحقق
+                  </Button>
+                )}
                 <Button fullWidth variant="outlined" startIcon={<Refresh />} onClick={loadDoc}>
                   تحديث
                 </Button>
@@ -797,117 +917,26 @@ export default function ESignatureSigning() {
             اختر طريقة التوقيع المناسبة: الرسم باليد، الكتابة، أو رفع صورة التوقيع
           </Alert>
 
-          <Tabs value={signMethod} onChange={(_, v) => setSignMethod(v)} sx={{ mb: 3 }}>
-            <Tab label="رسم التوقيع" icon={<DrawIcon />} iconPosition="start" />
-            <Tab label="كتابة التوقيع" icon={<Keyboard />} iconPosition="start" />
-            <Tab label="رفع صورة" icon={<UploadIcon />} iconPosition="start" />
-          </Tabs>
+          <SignaturePad
+            width={560}
+            height={200}
+            onSave={(data) => setSignaturePadData(data)}
+            disabled={signingInProgress}
+          />
 
-          {/* Draw */}
-          {signMethod === 0 && (
-            <Box>
-              <Box
-                sx={{
-                  border: '2px dashed #1a237e',
-                  borderRadius: 2,
-                  mb: 2,
-                  position: 'relative',
-                  bgcolor: '#fafbfc',
-                }}
-              >
-                <canvas
-                  ref={canvasRef}
-                  width={600}
-                  height={200}
-                  style={{ width: '100%', height: 200, cursor: 'crosshair', touchAction: 'none' }}
-                  onMouseDown={startDraw}
-                  onMouseMove={draw}
-                  onMouseUp={stopDraw}
-                  onMouseLeave={stopDraw}
-                  onTouchStart={startDraw}
-                  onTouchMove={draw}
-                  onTouchEnd={stopDraw}
-                />
-              </Box>
-              <Button size="small" onClick={clearCanvas}>
-                مسح التوقيع
-              </Button>
-            </Box>
-          )}
-
-          {/* Type */}
-          {signMethod === 1 && (
-            <Box>
-              <TextField
-                fullWidth
-                label="اكتب توقيعك"
-                value={typedSignature}
-                onChange={e => setTypedSignature(e.target.value)}
-                sx={{ mb: 2 }}
-              />
-              <TextField
-                select
-                fullWidth
-                label="نمط الخط"
-                value={signatureFont}
-                onChange={e => setSignatureFont(e.target.value)}
-                sx={{ mb: 2 }}
-              >
-                {fonts.map(f => (
-                  <option key={f.value} value={f.value}>
-                    {f.label}
-                  </option>
-                ))}
-              </TextField>
-              {typedSignature && (
-                <Paper
-                  sx={{ p: 3, textAlign: 'center', border: '2px dashed #1a237e', borderRadius: 2 }}
-                >
-                  <Typography sx={{ fontFamily: signatureFont, fontSize: 36, color: '#1a237e' }}>
-                    {typedSignature}
-                  </Typography>
-                </Paper>
-              )}
-            </Box>
-          )}
-
-          {/* Upload */}
-          {signMethod === 2 && (
-            <Box>
-              <Button
-                variant="outlined"
-                component="label"
-                startIcon={<UploadIcon />}
-                fullWidth
-                sx={{ py: 4, border: '2px dashed', borderRadius: 2 }}
-              >
-                {uploadedSignature ? 'تم الرفع — اضغط لتغيير' : 'اسحب أو اضغط لرفع صورة التوقيع'}
-                <input type="file" hidden accept="image/*" onChange={handleUpload} />
-              </Button>
-              {uploadedSignature && (
-                <Box sx={{ mt: 2, textAlign: 'center' }}>
-                  <img
-                    src={uploadedSignature}
-                    alt="uploaded"
-                    style={{
-                      maxWidth: 300,
-                      maxHeight: 100,
-                      border: '1px solid #e0e0e0',
-                      borderRadius: 8,
-                    }}
-                  />
-                </Box>
-              )}
-            </Box>
+          {signaturePadData && (
+            <Alert severity="success" sx={{ mt: 2 }}>
+              تم اعتماد التوقيع بنجاح — اضغط &quot;تأكيد التوقيع&quot; أدناه لإرساله
+            </Alert>
           )}
         </DialogContent>
         <DialogActions sx={{ px: 3, py: 2 }}>
-          <Button onClick={() => setSignDialogOpen(false)}>إلغاء</Button>
+          <Button onClick={() => { setSignDialogOpen(false); setSignaturePadData(null); }}>إلغاء</Button>
           <Button
             variant="contained"
             color="success"
             onClick={handleSign}
-            disabled={signingInProgress}
+            disabled={signingInProgress || !signaturePadData}
             startIcon={<CheckCircle />}
           >
             {signingInProgress ? 'جاري التوقيع...' : 'تأكيد التوقيع'}

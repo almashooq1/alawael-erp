@@ -603,6 +603,9 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
     const eSignatureRoutes = require('../routes/eSignature.routes');
     dualMount(app, 'e-signature', eSignatureRoutes);
 
+    const eSignaturePdfRoutes = require('../routes/eSignaturePdf.routes');
+    dualMount(app, 'e-signature-pdf', eSignaturePdfRoutes);
+
     const eStampRoutes = require('../routes/eStamp.routes');
     dualMount(app, 'e-stamp', eStampRoutes);
 

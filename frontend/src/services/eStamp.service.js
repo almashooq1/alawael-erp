@@ -39,6 +39,12 @@ const eStampService = {
 
   /* ─── Transfer ─────────────────────────────────────────────────── */
   transfer: (id, data) => api.post(`/e-stamp/${id}/transfer`, data),
+
+  /* ─── Stamp PDF ────────────────────────────────────────────────── */
+  stampPdf: (stampId, data) =>
+    api.post(`/e-signature-pdf/stamp-pdf/${stampId}`, data),
+  downloadStampedPdf: (stampId) =>
+    api.get(`/e-signature-pdf/stamped/${stampId}`, { responseType: 'blob' }),
 };
 
 export default eStampService;

@@ -1000,6 +1000,10 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   safeMount(app, ['/api/api-keys', '/api/v1/api-keys'], '../routes/apiKey.routes');
   safeMount(app, ['/api/smart-irp', '/api/v1/smart-irp'], '../routes/smartIRP.routes');
   logger.info('Phase 11 mounted (4 modules: gamification, subscriptions, api-keys, smart-irp)');
+
+  // ── Phase 12: Telehealth — الطب عن بُعد ───
+  safeMount(app, ['/api/telehealth', '/api/v1/telehealth'], '../routes/telehealth.routes');
+  logger.info('Phase 12 mounted (1 module: telehealth)');
 };
 
 module.exports = { mountAllRoutes, dualMount, safeMount };

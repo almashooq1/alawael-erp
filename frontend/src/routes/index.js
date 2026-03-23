@@ -85,3 +85,6 @@ export { default as BlockchainRoutes } from './BlockchainRoutes';
 export { default as ICFAssessmentRoutes } from './ICFAssessmentRoutes';
 export { default as MDTCoordinationRoutes } from './MDTCoordinationRoutes';
 export { default as ARRehabRoutes } from './ARRehabRoutes';
+
+// === Phase: Telehealth (الطب عن بُعد) ===
+export { default as TelehealthRoutes } from './TelehealthRoutes';

@@ -98,6 +98,7 @@ import {
   ICFAssessmentRoutes,
   MDTCoordinationRoutes,
   ARRehabRoutes,
+  TelehealthRoutes,
 } from './routes';
 
 // Pages — Keep eagerly loaded (critical path / small)
@@ -316,6 +317,7 @@ function AppContent() {
                               {ICFAssessmentRoutes()}
                               {MDTCoordinationRoutes()}
                               {ARRehabRoutes()}
+                              {TelehealthRoutes()}
                               {/* === Shared / Cross-cutting Routes === */}
                               {/* AI & Analytics */}
                               <Route

@@ -108,6 +108,8 @@ import {
   Assessment as ICFIcon,
   GroupWork as MDTIcon,
   ViewInAr as ARRehabIcon,
+  // ─── Phase: Telehealth (الطب عن بُعد) ───
+  VideoCall as TelehealthIcon,
 } from '@mui/icons-material';
 
 const getNavigationItems = () => [
@@ -1073,6 +1075,21 @@ const getNavigationItems = () => [
     icon: <ARRehabIcon />,
     path: '/ar-rehab',
     roles: ['admin', 'super_admin', 'therapist', 'specialist'],
+  },
+  // ─── الطب عن بُعد (Telehealth) ───
+  {
+    id: 'telehealth',
+    label: 'الطب عن بُعد',
+    icon: <TelehealthIcon />,
+    path: '/telehealth',
+    roles: ['admin', 'super_admin', 'therapist', 'doctor', 'specialist', 'manager'],
+    children: [
+      { id: 'telehealth-dashboard', label: 'لوحة التحكم', path: '/telehealth' },
+      { id: 'telehealth-sessions', label: 'إدارة الجلسات', path: '/telehealth/sessions' },
+      { id: 'telehealth-waiting', label: 'غرفة الانتظار', path: '/telehealth/waiting-room' },
+      { id: 'telehealth-video', label: 'غرفة الفيديو', path: '/telehealth/video-room' },
+      { id: 'telehealth-recordings', label: 'التسجيلات والتقارير', path: '/telehealth/recordings' },
+    ],
   },
   {
     id: 'settings',

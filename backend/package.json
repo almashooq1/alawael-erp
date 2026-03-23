@@ -104,7 +104,7 @@
     "razorpay": "^2.9.6",
     "socket.io": "^4.7.2",
     "speakeasy": "^2.0.0",
-    "stripe": "^20.2.0",
+    "stripe": "^20.4.1",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
     "twilio": "^5.12.0",

@@ -20,12 +20,16 @@ const chatService = {
   deleteConversation: id => api.delete(`${BASE}/conversations/${id}`),
 
   // ── Participants ──
-  addParticipant: (convId, userId) => api.post(`${BASE}/conversations/${convId}/participants`, { userId }),
-  removeParticipant: (convId, userId) => api.delete(`${BASE}/conversations/${convId}/participants/${userId}`),
-  promoteToAdmin: (convId, userId) => api.post(`${BASE}/conversations/${convId}/admins`, { userId }),
+  addParticipant: (convId, userId) =>
+    api.post(`${BASE}/conversations/${convId}/participants`, { userId }),
+  removeParticipant: (convId, userId) =>
+    api.delete(`${BASE}/conversations/${convId}/participants/${userId}`),
+  promoteToAdmin: (convId, userId) =>
+    api.post(`${BASE}/conversations/${convId}/admins`, { userId }),
 
   // ── Messages ──
-  getMessages: (convId, params = {}) => api.get(`${BASE}/conversations/${convId}/messages`, { params }),
+  getMessages: (convId, params = {}) =>
+    api.get(`${BASE}/conversations/${convId}/messages`, { params }),
   sendMessage: (convId, data) => api.post(`${BASE}/conversations/${convId}/messages`, data),
   editMessage: (msgId, content) => api.put(`${BASE}/messages/${msgId}`, { content }),
   deleteMessage: msgId => api.delete(`${BASE}/messages/${msgId}`),
@@ -41,8 +45,10 @@ const chatService = {
 
   // ── Pinned Messages ──
   getPinnedMessages: convId => api.get(`${BASE}/conversations/${convId}/pinned`),
-  pinMessage: (convId, messageId) => api.post(`${BASE}/conversations/${convId}/pinned`, { messageId }),
-  unpinMessage: (convId, messageId) => api.delete(`${BASE}/conversations/${convId}/pinned/${messageId}`),
+  pinMessage: (convId, messageId) =>
+    api.post(`${BASE}/conversations/${convId}/pinned`, { messageId }),
+  unpinMessage: (convId, messageId) =>
+    api.delete(`${BASE}/conversations/${convId}/pinned/${messageId}`),
 
   // ── Attachments ──
   uploadAttachment: data => api.post(`${BASE}/attachments`, data),

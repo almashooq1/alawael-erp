@@ -1024,6 +1024,10 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   // ── Phase 16: Real-time Chat — الدردشة الفورية ───
   safeMount(app, ['/api/chat', '/api/v1/chat'], '../routes/chat.routes');
   logger.info('Phase 16 mounted (1 module: chat)');
+
+  // ── Phase 17: AI Diagnostic Intelligence — ذكاء اصطناعي للتشخيص ───
+  safeMount(app, ['/api/ai-diagnostic', '/api/v1/ai-diagnostic'], '../routes/aiDiagnostic.routes');
+  logger.info('Phase 17 mounted (1 module: aiDiagnostic)');
 };
 
 module.exports = { mountAllRoutes, dualMount, safeMount };

@@ -90,7 +90,9 @@ describe('Chat — Users', () => {
   });
 
   test('GET /users?department=التعليم الخاص → filter by department', async () => {
-    const res = await request(app).get('/api/chat/users?department=%D8%A7%D9%84%D8%AA%D8%B9%D9%84%D9%8A%D9%85%20%D8%A7%D9%84%D8%AE%D8%A7%D8%B5');
+    const res = await request(app).get(
+      '/api/chat/users?department=%D8%A7%D9%84%D8%AA%D8%B9%D9%84%D9%8A%D9%85%20%D8%A7%D9%84%D8%AE%D8%A7%D8%B5'
+    );
     expect(res.status).toBe(200);
     expect(res.body.data.length).toBeGreaterThanOrEqual(1);
   });
@@ -169,34 +171,26 @@ describe('Chat — Conversations (List & Direct)', () => {
   });
 
   test('POST /conversations/direct → create direct chat', async () => {
-    const res = await request(app)
-      .post('/api/chat/conversations/direct')
-      .send({ userId: 'u4' });
+    const res = await request(app).post('/api/chat/conversations/direct').send({ userId: 'u4' });
     expect(res.status).toBe(201);
     expect(res.body.success).toBe(true);
     expect(res.body.data.type).toBe('direct');
   });
 
   test('POST /conversations/direct → return existing if duplicate', async () => {
-    const res = await request(app)
-      .post('/api/chat/conversations/direct')
-      .send({ userId: 'u2' });
+    const res = await request(app).post('/api/chat/conversations/direct').send({ userId: 'u2' });
     expect(res.status).toBe(201);
     expect(res.body.data.id).toBe('100'); // existing conversation
   });
 
   test('POST /conversations/direct → reject self-chat', async () => {
-    const res = await request(app)
-      .post('/api/chat/conversations/direct')
-      .send({ userId: 'u1' });
+    const res = await request(app).post('/api/chat/conversations/direct').send({ userId: 'u1' });
     expect(res.status).toBe(400);
     expect(res.body.success).toBe(false);
   });
 
   test('POST /conversations/direct → missing userId', async () => {
-    const res = await request(app)
-      .post('/api/chat/conversations/direct')
-      .send({});
+    const res = await request(app).post('/api/chat/conversations/direct').send({});
     expect(res.status).toBe(400);
     expect(res.body.success).toBe(false);
   });
@@ -212,7 +206,11 @@ describe('Chat — Conversations (Group & Channel)', () => {
   test('POST /conversations/group → create group chat', async () => {
     const res = await request(app)
       .post('/api/chat/conversations/group')
-      .send({ name: 'فريق الاختبار', description: 'مجموعة للاختبار', participants: ['u2', 'u3', 'u5'] });
+      .send({
+        name: 'فريق الاختبار',
+        description: 'مجموعة للاختبار',
+        participants: ['u2', 'u3', 'u5'],
+      });
     expect(res.status).toBe(201);
     expect(res.body.success).toBe(true);
     expect(res.body.data.type).toBe('group');
@@ -254,9 +252,7 @@ describe('Chat — Conversations (Group & Channel)', () => {
   });
 
   test('PUT /conversations/:id → cannot update direct', async () => {
-    const res = await request(app)
-      .put('/api/chat/conversations/100')
-      .send({ name: 'test' });
+    const res = await request(app).put('/api/chat/conversations/100').send({ name: 'test' });
     expect(res.status).toBe(400);
   });
 
@@ -310,15 +306,13 @@ describe('Chat — Participants', () => {
   });
 
   test('DELETE /conversations/:id/participants/:userId → remove user', async () => {
-    const res = await request(app)
-      .delete('/api/chat/conversations/102/participants/u3');
+    const res = await request(app).delete('/api/chat/conversations/102/participants/u3');
     expect(res.status).toBe(200);
     expect(res.body.data.participants).not.toContain('u3');
   });
 
   test('DELETE /conversations/:id/participants/:userId → not found', async () => {
-    const res = await request(app)
-      .delete('/api/chat/conversations/102/participants/u3');
+    const res = await request(app).delete('/api/chat/conversations/102/participants/u3');
     expect(res.status).toBe(404);
   });
 
@@ -360,7 +354,9 @@ describe('Chat — Messages', () => {
   });
 
   test('GET /conversations/:id/messages → search within conversation', async () => {
-    const res = await request(app).get('/api/chat/conversations/100/messages?search=%D8%AA%D9%82%D8%B1%D9%8A%D8%B1');
+    const res = await request(app).get(
+      '/api/chat/conversations/100/messages?search=%D8%AA%D9%82%D8%B1%D9%8A%D8%B1'
+    );
     expect(res.status).toBe(200);
     expect(res.body.messages.length).toBeGreaterThanOrEqual(1);
   });
@@ -421,9 +417,7 @@ describe('Chat — Messages', () => {
   });
 
   test('POST /conversations/:id/messages → no content (400)', async () => {
-    const res = await request(app)
-      .post('/api/chat/conversations/100/messages')
-      .send({});
+    const res = await request(app).post('/api/chat/conversations/100/messages').send({});
     expect(res.status).toBe(400);
   });
 
@@ -436,17 +430,13 @@ describe('Chat — Messages', () => {
     expect(res.body.data.isEdited).toBe(true);
   });
 
-  test('PUT /messages/:id → cannot edit other\'s message', async () => {
-    const res = await request(app)
-      .put('/api/chat/messages/1001')
-      .send({ content: 'محاولة تعديل' });
+  test("PUT /messages/:id → cannot edit other's message", async () => {
+    const res = await request(app).put('/api/chat/messages/1001').send({ content: 'محاولة تعديل' });
     expect(res.status).toBe(403);
   });
 
   test('PUT /messages/:id → 404 for unknown', async () => {
-    const res = await request(app)
-      .put('/api/chat/messages/99999')
-      .send({ content: 'test' });
+    const res = await request(app).put('/api/chat/messages/99999').send({ content: 'test' });
     expect(res.status).toBe(404);
   });
 
@@ -467,7 +457,9 @@ describe('Chat — Messages', () => {
   });
 
   test('GET /messages/search?q=… → search across conversations', async () => {
-    const res = await request(app).get('/api/chat/messages/search?q=%D8%A7%D9%84%D8%A7%D8%AC%D8%AA%D9%85%D8%A7%D8%B9');
+    const res = await request(app).get(
+      '/api/chat/messages/search?q=%D8%A7%D9%84%D8%A7%D8%AC%D8%AA%D9%85%D8%A7%D8%B9'
+    );
     expect(res.status).toBe(200);
     expect(res.body.data).toBeInstanceOf(Array);
     expect(res.body.data.length).toBeGreaterThanOrEqual(1);
@@ -486,33 +478,25 @@ describe('Chat — Messages', () => {
 
 describe('Chat — Reactions', () => {
   test('POST /messages/:id/reactions → add reaction', async () => {
-    const res = await request(app)
-      .post('/api/chat/messages/1000/reactions')
-      .send({ emoji: '❤️' });
+    const res = await request(app).post('/api/chat/messages/1000/reactions').send({ emoji: '❤️' });
     expect(res.status).toBe(200);
     expect(res.body.data.added).toBe(true);
     expect(res.body.data.emoji).toBe('❤️');
   });
 
   test('POST /messages/:id/reactions → toggle off same reaction', async () => {
-    const res = await request(app)
-      .post('/api/chat/messages/1000/reactions')
-      .send({ emoji: '❤️' });
+    const res = await request(app).post('/api/chat/messages/1000/reactions').send({ emoji: '❤️' });
     expect(res.status).toBe(200);
     expect(res.body.data.removed).toBe(true);
   });
 
   test('POST /messages/:id/reactions → missing emoji', async () => {
-    const res = await request(app)
-      .post('/api/chat/messages/1000/reactions')
-      .send({});
+    const res = await request(app).post('/api/chat/messages/1000/reactions').send({});
     expect(res.status).toBe(400);
   });
 
   test('POST /messages/:id/reactions → 404 for unknown message', async () => {
-    const res = await request(app)
-      .post('/api/chat/messages/99999/reactions')
-      .send({ emoji: '👍' });
+    const res = await request(app).post('/api/chat/messages/99999/reactions').send({ emoji: '👍' });
     expect(res.status).toBe(404);
   });
 
@@ -591,22 +575,18 @@ describe('Chat — Pinned Messages', () => {
   });
 
   test('POST /conversations/:id/pinned → missing messageId', async () => {
-    const res = await request(app)
-      .post('/api/chat/conversations/100/pinned')
-      .send({});
+    const res = await request(app).post('/api/chat/conversations/100/pinned').send({});
     expect(res.status).toBe(400);
   });
 
   test('DELETE /conversations/:id/pinned/:msgId → unpin', async () => {
-    const res = await request(app)
-      .delete('/api/chat/conversations/100/pinned/1000');
+    const res = await request(app).delete('/api/chat/conversations/100/pinned/1000');
     expect(res.status).toBe(200);
     expect(res.body.data.unpinned).toBe(true);
   });
 
   test('DELETE /conversations/:id/pinned/:msgId → not pinned (404)', async () => {
-    const res = await request(app)
-      .delete('/api/chat/conversations/100/pinned/1000');
+    const res = await request(app).delete('/api/chat/conversations/100/pinned/1000');
     expect(res.status).toBe(404);
   });
 });
@@ -638,9 +618,7 @@ describe('Chat — Attachments', () => {
   });
 
   test('POST /attachments → missing mimeType', async () => {
-    const res = await request(app)
-      .post('/api/chat/attachments')
-      .send({ filename: 'test.pdf' });
+    const res = await request(app).post('/api/chat/attachments').send({ filename: 'test.pdf' });
     expect(res.status).toBe(400);
   });
 
@@ -692,17 +670,13 @@ describe('Chat — Typing Indicators', () => {
   });
 
   test('POST /conversations/:id/typing → missing isTyping', async () => {
-    const res = await request(app)
-      .post('/api/chat/conversations/100/typing')
-      .send({});
+    const res = await request(app).post('/api/chat/conversations/100/typing').send({});
     expect(res.status).toBe(400);
   });
 
   test('GET /conversations/:id/typing → get typing users', async () => {
     // Set typing first
-    await request(app)
-      .post('/api/chat/conversations/100/typing')
-      .send({ isTyping: true });
+    await request(app).post('/api/chat/conversations/100/typing').send({ isTyping: true });
     const res = await request(app).get('/api/chat/conversations/100/typing');
     expect(res.status).toBe(200);
     expect(res.body.data).toBeInstanceOf(Array);
@@ -722,31 +696,23 @@ describe('Chat — Blocked Users', () => {
   });
 
   test('POST /blocked → block a user', async () => {
-    const res = await request(app)
-      .post('/api/chat/blocked')
-      .send({ userId: 'u6' });
+    const res = await request(app).post('/api/chat/blocked').send({ userId: 'u6' });
     expect(res.status).toBe(200);
     expect(res.body.data.blocked).toBe(true);
   });
 
   test('POST /blocked → already blocked', async () => {
-    const res = await request(app)
-      .post('/api/chat/blocked')
-      .send({ userId: 'u6' });
+    const res = await request(app).post('/api/chat/blocked').send({ userId: 'u6' });
     expect(res.status).toBe(400);
   });
 
   test('POST /blocked → cannot block self', async () => {
-    const res = await request(app)
-      .post('/api/chat/blocked')
-      .send({ userId: 'u1' });
+    const res = await request(app).post('/api/chat/blocked').send({ userId: 'u1' });
     expect(res.status).toBe(400);
   });
 
   test('POST /blocked → missing userId', async () => {
-    const res = await request(app)
-      .post('/api/chat/blocked')
-      .send({});
+    const res = await request(app).post('/api/chat/blocked').send({});
     expect(res.status).toBe(400);
   });
 
@@ -852,8 +818,7 @@ describe('Chat — Full Workflow', () => {
 
   test('Step 5: Mark read → check unread', async () => {
     // Mark as read
-    const read = await request(app)
-      .post(`/api/chat/conversations/${wfGroupId}/read`);
+    const read = await request(app).post(`/api/chat/conversations/${wfGroupId}/read`);
     expect(read.body.data.markedRead).toBeGreaterThanOrEqual(0);
 
     // Check unread — wfGroupId should be 0
@@ -881,14 +846,10 @@ describe('Chat — Full Workflow', () => {
 
   test('Step 7: Typing → status → dashboard', async () => {
     // Set typing
-    await request(app)
-      .post(`/api/chat/conversations/${wfGroupId}/typing`)
-      .send({ isTyping: true });
+    await request(app).post(`/api/chat/conversations/${wfGroupId}/typing`).send({ isTyping: true });
 
     // Set user status
-    const status = await request(app)
-      .put('/api/chat/users/status')
-      .send({ status: 'away' });
+    const status = await request(app).put('/api/chat/users/status').send({ status: 'away' });
     expect(status.body.data.status).toBe('away');
 
     // Reset status
@@ -902,8 +863,7 @@ describe('Chat — Full Workflow', () => {
 
   test('Step 8: Remove member → update group → cleanup', async () => {
     // Remove u5
-    const rm = await request(app)
-      .delete(`/api/chat/conversations/${wfGroupId}/participants/u5`);
+    const rm = await request(app).delete(`/api/chat/conversations/${wfGroupId}/participants/u5`);
     expect(rm.body.data.participants).not.toContain('u5');
 
     // Update group name

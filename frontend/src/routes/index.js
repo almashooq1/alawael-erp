@@ -100,3 +100,6 @@ export { default as LibraryRoutes } from './LibraryRoutes';
 
 // === Phase 16: Real-time Chat (الدردشة الفورية) ===
 export { default as ChatRoutes } from './ChatRoutes';
+
+// === Phase 17: AI Diagnostic Intelligence (ذكاء اصطناعي للتشخيص) ===
+export { default as AIDiagnosticRoutes } from './AIDiagnosticRoutes';

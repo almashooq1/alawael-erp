@@ -38,12 +38,66 @@ class ChatService {
   _seed() {
     // Users — المستخدمون
     const users = [
-      { id: 'u1', name: 'أحمد الشهري', nameEn: 'Ahmed Al-Shahri', role: 'admin', department: 'الإدارة', avatar: null, email: 'ahmed@alawael.org', phone: '0501234567' },
-      { id: 'u2', name: 'نورة العتيبي', nameEn: 'Noura Al-Otaibi', role: 'therapist', department: 'العلاج الطبيعي', avatar: null, email: 'noura@alawael.org', phone: '0507654321' },
-      { id: 'u3', name: 'خالد المطيري', nameEn: 'Khalid Al-Mutairi', role: 'teacher', department: 'التعليم الخاص', avatar: null, email: 'khalid@alawael.org', phone: '0509876543' },
-      { id: 'u4', name: 'فاطمة السبيعي', nameEn: 'Fatima Al-Subai', role: 'specialist', department: 'العلاج الوظيفي', avatar: null, email: 'fatima@alawael.org', phone: '0503456789' },
-      { id: 'u5', name: 'محمد العنزي', nameEn: 'Mohammed Al-Anzi', role: 'manager', department: 'الموارد البشرية', avatar: null, email: 'mohammed@alawael.org', phone: '0504567890' },
-      { id: 'u6', name: 'سارة الحربي', nameEn: 'Sara Al-Harbi', role: 'nurse', department: 'التمريض', avatar: null, email: 'sara@alawael.org', phone: '0505678901' },
+      {
+        id: 'u1',
+        name: 'أحمد الشهري',
+        nameEn: 'Ahmed Al-Shahri',
+        role: 'admin',
+        department: 'الإدارة',
+        avatar: null,
+        email: 'ahmed@alawael.org',
+        phone: '0501234567',
+      },
+      {
+        id: 'u2',
+        name: 'نورة العتيبي',
+        nameEn: 'Noura Al-Otaibi',
+        role: 'therapist',
+        department: 'العلاج الطبيعي',
+        avatar: null,
+        email: 'noura@alawael.org',
+        phone: '0507654321',
+      },
+      {
+        id: 'u3',
+        name: 'خالد المطيري',
+        nameEn: 'Khalid Al-Mutairi',
+        role: 'teacher',
+        department: 'التعليم الخاص',
+        avatar: null,
+        email: 'khalid@alawael.org',
+        phone: '0509876543',
+      },
+      {
+        id: 'u4',
+        name: 'فاطمة السبيعي',
+        nameEn: 'Fatima Al-Subai',
+        role: 'specialist',
+        department: 'العلاج الوظيفي',
+        avatar: null,
+        email: 'fatima@alawael.org',
+        phone: '0503456789',
+      },
+      {
+        id: 'u5',
+        name: 'محمد العنزي',
+        nameEn: 'Mohammed Al-Anzi',
+        role: 'manager',
+        department: 'الموارد البشرية',
+        avatar: null,
+        email: 'mohammed@alawael.org',
+        phone: '0504567890',
+      },
+      {
+        id: 'u6',
+        name: 'سارة الحربي',
+        nameEn: 'Sara Al-Harbi',
+        role: 'nurse',
+        department: 'التمريض',
+        avatar: null,
+        email: 'sara@alawael.org',
+        phone: '0505678901',
+      },
     ];
     users.forEach(u => {
       u.status = 'online';
@@ -55,34 +109,74 @@ class ChatService {
     // Conversations — المحادثات
     const convs = [
       {
-        id: '100', type: 'direct', name: null, description: null,
-        participants: ['u1', 'u2'], admins: [],
-        createdBy: 'u1', avatar: null, isPinned: false, isMuted: false,
-        lastMessageId: '1002', unreadCount: { u1: 0, u2: 1 },
+        id: '100',
+        type: 'direct',
+        name: null,
+        description: null,
+        participants: ['u1', 'u2'],
+        admins: [],
+        createdBy: 'u1',
+        avatar: null,
+        isPinned: false,
+        isMuted: false,
+        lastMessageId: '1002',
+        unreadCount: { u1: 0, u2: 1 },
       },
       {
-        id: '101', type: 'direct', name: null, description: null,
-        participants: ['u1', 'u3'], admins: [],
-        createdBy: 'u1', avatar: null, isPinned: false, isMuted: false,
-        lastMessageId: '1004', unreadCount: { u1: 1, u3: 0 },
+        id: '101',
+        type: 'direct',
+        name: null,
+        description: null,
+        participants: ['u1', 'u3'],
+        admins: [],
+        createdBy: 'u1',
+        avatar: null,
+        isPinned: false,
+        isMuted: false,
+        lastMessageId: '1004',
+        unreadCount: { u1: 1, u3: 0 },
       },
       {
-        id: '102', type: 'group', name: 'فريق العلاج', description: 'مجموعة فريق العلاج الطبيعي والوظيفي',
-        participants: ['u1', 'u2', 'u4', 'u6'], admins: ['u1', 'u2'],
-        createdBy: 'u1', avatar: null, isPinned: true, isMuted: false,
-        lastMessageId: '1007', unreadCount: { u1: 0, u2: 0, u4: 2, u6: 1 },
+        id: '102',
+        type: 'group',
+        name: 'فريق العلاج',
+        description: 'مجموعة فريق العلاج الطبيعي والوظيفي',
+        participants: ['u1', 'u2', 'u4', 'u6'],
+        admins: ['u1', 'u2'],
+        createdBy: 'u1',
+        avatar: null,
+        isPinned: true,
+        isMuted: false,
+        lastMessageId: '1007',
+        unreadCount: { u1: 0, u2: 0, u4: 2, u6: 1 },
       },
       {
-        id: '103', type: 'group', name: 'الإدارة العامة', description: 'مجموعة الإدارة والمديرين',
-        participants: ['u1', 'u3', 'u5'], admins: ['u1', 'u5'],
-        createdBy: 'u5', avatar: null, isPinned: false, isMuted: false,
-        lastMessageId: '1009', unreadCount: { u1: 0, u3: 1, u5: 0 },
+        id: '103',
+        type: 'group',
+        name: 'الإدارة العامة',
+        description: 'مجموعة الإدارة والمديرين',
+        participants: ['u1', 'u3', 'u5'],
+        admins: ['u1', 'u5'],
+        createdBy: 'u5',
+        avatar: null,
+        isPinned: false,
+        isMuted: false,
+        lastMessageId: '1009',
+        unreadCount: { u1: 0, u3: 1, u5: 0 },
       },
       {
-        id: '104', type: 'channel', name: 'إعلانات المركز', description: 'قناة الإعلانات الرسمية لمركز الأوائل',
-        participants: ['u1', 'u2', 'u3', 'u4', 'u5', 'u6'], admins: ['u1', 'u5'],
-        createdBy: 'u1', avatar: null, isPinned: true, isMuted: false,
-        lastMessageId: '1011', unreadCount: { u1: 0, u2: 0, u3: 0, u4: 0, u5: 0, u6: 0 },
+        id: '104',
+        type: 'channel',
+        name: 'إعلانات المركز',
+        description: 'قناة الإعلانات الرسمية لمركز الأوائل',
+        participants: ['u1', 'u2', 'u3', 'u4', 'u5', 'u6'],
+        admins: ['u1', 'u5'],
+        createdBy: 'u1',
+        avatar: null,
+        isPinned: true,
+        isMuted: false,
+        lastMessageId: '1011',
+        unreadCount: { u1: 0, u2: 0, u3: 0, u4: 0, u5: 0, u6: 0 },
       },
     ];
     convs.forEach(c => {
@@ -94,22 +188,107 @@ class ChatService {
     // Messages — الرسائل
     const msgs = [
       // Direct u1↔u2
-      { id: '1000', conversationId: '100', senderId: 'u1', type: 'text', content: 'السلام عليكم نورة، كيف حال المريض أحمد؟', replyTo: null },
-      { id: '1001', conversationId: '100', senderId: 'u2', type: 'text', content: 'وعليكم السلام، الحالة تتحسن والحمد لله', replyTo: null },
-      { id: '1002', conversationId: '100', senderId: 'u1', type: 'text', content: 'ممتاز، أرسلي لي التقرير لو سمحتي', replyTo: null },
+      {
+        id: '1000',
+        conversationId: '100',
+        senderId: 'u1',
+        type: 'text',
+        content: 'السلام عليكم نورة، كيف حال المريض أحمد؟',
+        replyTo: null,
+      },
+      {
+        id: '1001',
+        conversationId: '100',
+        senderId: 'u2',
+        type: 'text',
+        content: 'وعليكم السلام، الحالة تتحسن والحمد لله',
+        replyTo: null,
+      },
+      {
+        id: '1002',
+        conversationId: '100',
+        senderId: 'u1',
+        type: 'text',
+        content: 'ممتاز، أرسلي لي التقرير لو سمحتي',
+        replyTo: null,
+      },
       // Direct u1↔u3
-      { id: '1003', conversationId: '101', senderId: 'u1', type: 'text', content: 'خالد، هل جاهز تقرير الطلاب؟', replyTo: null },
-      { id: '1004', conversationId: '101', senderId: 'u3', type: 'text', content: 'نعم سأرسله خلال ساعة إن شاء الله', replyTo: '1003' },
+      {
+        id: '1003',
+        conversationId: '101',
+        senderId: 'u1',
+        type: 'text',
+        content: 'خالد، هل جاهز تقرير الطلاب؟',
+        replyTo: null,
+      },
+      {
+        id: '1004',
+        conversationId: '101',
+        senderId: 'u3',
+        type: 'text',
+        content: 'نعم سأرسله خلال ساعة إن شاء الله',
+        replyTo: '1003',
+      },
       // Group: فريق العلاج
-      { id: '1005', conversationId: '102', senderId: 'u1', type: 'text', content: 'يا جماعة، الاجتماع غداً الساعة 10 صباحاً', replyTo: null },
-      { id: '1006', conversationId: '102', senderId: 'u2', type: 'text', content: 'تمام، سأكون موجودة', replyTo: '1005' },
-      { id: '1007', conversationId: '102', senderId: 'u4', type: 'file', content: 'تقرير_العلاج_الأسبوعي.pdf', replyTo: null, attachmentId: 'att-001' },
+      {
+        id: '1005',
+        conversationId: '102',
+        senderId: 'u1',
+        type: 'text',
+        content: 'يا جماعة، الاجتماع غداً الساعة 10 صباحاً',
+        replyTo: null,
+      },
+      {
+        id: '1006',
+        conversationId: '102',
+        senderId: 'u2',
+        type: 'text',
+        content: 'تمام، سأكون موجودة',
+        replyTo: '1005',
+      },
+      {
+        id: '1007',
+        conversationId: '102',
+        senderId: 'u4',
+        type: 'file',
+        content: 'تقرير_العلاج_الأسبوعي.pdf',
+        replyTo: null,
+        attachmentId: 'att-001',
+      },
       // Group: الإدارة
-      { id: '1008', conversationId: '103', senderId: 'u5', type: 'text', content: 'يرجى مراجعة الميزانية الشهرية المرفقة', replyTo: null },
-      { id: '1009', conversationId: '103', senderId: 'u3', type: 'text', content: 'تم المراجعة، لدي بعض الملاحظات', replyTo: '1008' },
+      {
+        id: '1008',
+        conversationId: '103',
+        senderId: 'u5',
+        type: 'text',
+        content: 'يرجى مراجعة الميزانية الشهرية المرفقة',
+        replyTo: null,
+      },
+      {
+        id: '1009',
+        conversationId: '103',
+        senderId: 'u3',
+        type: 'text',
+        content: 'تم المراجعة، لدي بعض الملاحظات',
+        replyTo: '1008',
+      },
       // Channel: إعلانات
-      { id: '1010', conversationId: '104', senderId: 'u1', type: 'text', content: 'إعلان: سيتم تحديث نظام الحضور يوم الأحد القادم', replyTo: null },
-      { id: '1011', conversationId: '104', senderId: 'u5', type: 'text', content: 'تذكير: موعد التدريب على السلامة يوم الثلاثاء', replyTo: null },
+      {
+        id: '1010',
+        conversationId: '104',
+        senderId: 'u1',
+        type: 'text',
+        content: 'إعلان: سيتم تحديث نظام الحضور يوم الأحد القادم',
+        replyTo: null,
+      },
+      {
+        id: '1011',
+        conversationId: '104',
+        senderId: 'u5',
+        type: 'text',
+        content: 'تذكير: موعد التدريب على السلامة يوم الثلاثاء',
+        replyTo: null,
+      },
     ];
     msgs.forEach(m => {
       m.status = 'delivered';
@@ -124,9 +303,33 @@ class ChatService {
 
     // Attachments — المرفقات
     const atts = [
-      { id: 'att-001', messageId: '1007', filename: 'تقرير_العلاج_الأسبوعي.pdf', originalName: 'تقرير_العلاج_الأسبوعي.pdf', mimeType: 'application/pdf', size: 245760, url: '/uploads/chat/att-001.pdf' },
-      { id: 'att-002', messageId: null, filename: 'صورة_المركز.jpg', originalName: 'صورة_المركز.jpg', mimeType: 'image/jpeg', size: 1048576, url: '/uploads/chat/att-002.jpg' },
-      { id: 'att-003', messageId: null, filename: 'خطة_التأهيل_2025.docx', originalName: 'خطة_التأهيل_2025.docx', mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', size: 524288, url: '/uploads/chat/att-003.docx' },
+      {
+        id: 'att-001',
+        messageId: '1007',
+        filename: 'تقرير_العلاج_الأسبوعي.pdf',
+        originalName: 'تقرير_العلاج_الأسبوعي.pdf',
+        mimeType: 'application/pdf',
+        size: 245760,
+        url: '/uploads/chat/att-001.pdf',
+      },
+      {
+        id: 'att-002',
+        messageId: null,
+        filename: 'صورة_المركز.jpg',
+        originalName: 'صورة_المركز.jpg',
+        mimeType: 'image/jpeg',
+        size: 1048576,
+        url: '/uploads/chat/att-002.jpg',
+      },
+      {
+        id: 'att-003',
+        messageId: null,
+        filename: 'خطة_التأهيل_2025.docx',
+        originalName: 'خطة_التأهيل_2025.docx',
+        mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        size: 524288,
+        url: '/uploads/chat/att-003.docx',
+      },
     ];
     atts.forEach(a => {
       a.uploadedBy = 'u4';
@@ -135,11 +338,29 @@ class ChatService {
     });
 
     // Reactions on message 1005
-    this.reactions.set('r-1', { id: 'r-1', messageId: '1005', userId: 'u2', emoji: '👍', createdAt: new Date('2025-03-20T10:05:00Z').toISOString() });
-    this.reactions.set('r-2', { id: 'r-2', messageId: '1005', userId: 'u4', emoji: '👍', createdAt: new Date('2025-03-20T10:06:00Z').toISOString() });
+    this.reactions.set('r-1', {
+      id: 'r-1',
+      messageId: '1005',
+      userId: 'u2',
+      emoji: '👍',
+      createdAt: new Date('2025-03-20T10:05:00Z').toISOString(),
+    });
+    this.reactions.set('r-2', {
+      id: 'r-2',
+      messageId: '1005',
+      userId: 'u4',
+      emoji: '👍',
+      createdAt: new Date('2025-03-20T10:06:00Z').toISOString(),
+    });
 
     // Pinned messages
-    this.pinnedMessages.set('pin-1', { id: 'pin-1', conversationId: '102', messageId: '1005', pinnedBy: 'u1', createdAt: new Date('2025-03-20').toISOString() });
+    this.pinnedMessages.set('pin-1', {
+      id: 'pin-1',
+      conversationId: '102',
+      messageId: '1005',
+      pinnedBy: 'u1',
+      createdAt: new Date('2025-03-20').toISOString(),
+    });
 
     logger.info('ChatService seeded: 6 users, 5 conversations, 12 messages, 3 attachments');
   }
@@ -151,10 +372,11 @@ class ChatService {
     let items = Array.from(this.users.values());
     if (filters.search) {
       const s = filters.search.toLowerCase();
-      items = items.filter(u =>
-        u.name.toLowerCase().includes(s) ||
-        (u.nameEn && u.nameEn.toLowerCase().includes(s)) ||
-        u.department.toLowerCase().includes(s)
+      items = items.filter(
+        u =>
+          u.name.toLowerCase().includes(s) ||
+          (u.nameEn && u.nameEn.toLowerCase().includes(s)) ||
+          u.department.toLowerCase().includes(s)
       );
     }
     if (filters.department) items = items.filter(u => u.department === filters.department);
@@ -242,20 +464,30 @@ class ChatService {
       throw Object.assign(new Error('لا يمكن إنشاء محادثة مع نفسك'), { statusCode: 400 });
     }
     // Check if direct conversation already exists
-    const existing = Array.from(this.conversations.values()).find(c =>
-      c.type === 'direct' &&
-      c.participants.includes(userId) &&
-      c.participants.includes(otherUserId)
+    const existing = Array.from(this.conversations.values()).find(
+      c =>
+        c.type === 'direct' &&
+        c.participants.includes(userId) &&
+        c.participants.includes(otherUserId)
     );
     if (existing) return this._enrichConversation(existing, userId);
 
     const id = String(this._nextConversationId++);
     const conv = {
-      id, type: 'direct', name: null, description: null,
-      participants: [userId, otherUserId], admins: [],
-      createdBy: userId, avatar: null, isPinned: false, isMuted: false,
-      lastMessageId: null, unreadCount: { [userId]: 0, [otherUserId]: 0 },
-      createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
+      id,
+      type: 'direct',
+      name: null,
+      description: null,
+      participants: [userId, otherUserId],
+      admins: [],
+      createdBy: userId,
+      avatar: null,
+      isPinned: false,
+      isMuted: false,
+      lastMessageId: null,
+      unreadCount: { [userId]: 0, [otherUserId]: 0 },
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
     this.conversations.set(id, conv);
     logger.info(`Direct conversation created: ${id} (${userId} ↔ ${otherUserId})`);
@@ -273,14 +505,20 @@ class ChatService {
 
     const id = String(this._nextConversationId++);
     const conv = {
-      id, type: data.type === 'channel' ? 'channel' : 'group',
-      name: data.name, description: data.description || '',
-      participants: allParticipants, admins: [userId],
-      createdBy: userId, avatar: data.avatar || null,
-      isPinned: false, isMuted: false,
+      id,
+      type: data.type === 'channel' ? 'channel' : 'group',
+      name: data.name,
+      description: data.description || '',
+      participants: allParticipants,
+      admins: [userId],
+      createdBy: userId,
+      avatar: data.avatar || null,
+      isPinned: false,
+      isMuted: false,
       lastMessageId: null,
       unreadCount: Object.fromEntries(allParticipants.map(p => [p, 0])),
-      createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
     this.conversations.set(id, conv);
     logger.info(`Group conversation created: ${data.name} (${id}) by ${userId}`);
@@ -391,8 +629,9 @@ class ChatService {
       throw Object.assign(new Error('غير مصرح بالوصول'), { statusCode: 403 });
     }
 
-    let msgs = Array.from(this.messages.values())
-      .filter(m => m.conversationId === String(convId) && !m.isDeleted);
+    let msgs = Array.from(this.messages.values()).filter(
+      m => m.conversationId === String(convId) && !m.isDeleted
+    );
 
     // Search within messages
     if (options.search) {
@@ -410,7 +649,10 @@ class ChatService {
     // Enrich with sender info
     const enriched = msgs.map(m => {
       const sender = this.users.get(m.senderId);
-      const result = { ...m, sender: sender ? { id: sender.id, name: sender.name, avatar: sender.avatar } : null };
+      const result = {
+        ...m,
+        sender: sender ? { id: sender.id, name: sender.name, avatar: sender.avatar } : null,
+      };
       // Include attachment info
       if (m.attachmentId) {
         const att = this.attachments.get(m.attachmentId);
@@ -422,8 +664,10 @@ class ChatService {
         if (replyMsg) {
           const replySender = this.users.get(replyMsg.senderId);
           result.replyToMessage = {
-            id: replyMsg.id, content: replyMsg.isDeleted ? 'تم حذف الرسالة' : replyMsg.content,
-            senderId: replyMsg.senderId, senderName: replySender ? replySender.name : 'غير معروف',
+            id: replyMsg.id,
+            content: replyMsg.isDeleted ? 'تم حذف الرسالة' : replyMsg.content,
+            senderId: replyMsg.senderId,
+            senderName: replySender ? replySender.name : 'غير معروف',
           };
         }
       }
@@ -431,7 +675,8 @@ class ChatService {
       const msgReactions = Array.from(this.reactions.values()).filter(r => r.messageId === m.id);
       if (msgReactions.length > 0) {
         result.reactions = msgReactions.map(r => ({
-          emoji: r.emoji, userId: r.userId,
+          emoji: r.emoji,
+          userId: r.userId,
           userName: this.users.get(r.userId)?.name || 'غير معروف',
         }));
       }
@@ -460,13 +705,20 @@ class ChatService {
 
     const id = String(this._nextMessageId++);
     const msg = {
-      id, conversationId: String(convId), senderId: userId,
-      type, content: data.content || '',
+      id,
+      conversationId: String(convId),
+      senderId: userId,
+      type,
+      content: data.content || '',
       replyTo: data.replyTo || null,
       attachmentId: data.attachmentId || null,
-      status: 'sent', isEdited: false, isDeleted: false,
-      reactions: [], readBy: [userId],
-      createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
+      status: 'sent',
+      isEdited: false,
+      isDeleted: false,
+      reactions: [],
+      readBy: [userId],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
     this.messages.set(id, msg);
 
@@ -482,7 +734,10 @@ class ChatService {
 
     // Enrich for response
     const sender = this.users.get(userId);
-    const enriched = { ...msg, sender: sender ? { id: sender.id, name: sender.name, avatar: sender.avatar } : null };
+    const enriched = {
+      ...msg,
+      sender: sender ? { id: sender.id, name: sender.name, avatar: sender.avatar } : null,
+    };
 
     logger.info(`Message sent: ${id} in conversation ${convId} by ${userId}`);
     return enriched;
@@ -528,17 +783,19 @@ class ChatService {
 
     const s = query.toLowerCase();
     const results = Array.from(this.messages.values())
-      .filter(m =>
-        userConvIds.includes(m.conversationId) &&
-        !m.isDeleted &&
-        m.content && m.content.toLowerCase().includes(s)
+      .filter(
+        m =>
+          userConvIds.includes(m.conversationId) &&
+          !m.isDeleted &&
+          m.content &&
+          m.content.toLowerCase().includes(s)
       )
       .map(m => {
         const conv = this.conversations.get(m.conversationId);
         const sender = this.users.get(m.senderId);
         return {
           ...m,
-          conversationName: conv ? (conv.name || 'محادثة خاصة') : null,
+          conversationName: conv ? conv.name || 'محادثة خاصة' : null,
           senderName: sender ? sender.name : 'غير معروف',
         };
       });
@@ -565,7 +822,10 @@ class ChatService {
 
     const id = `r-${this._nextReactionId++}`;
     this.reactions.set(id, {
-      id, messageId: String(messageId), userId, emoji,
+      id,
+      messageId: String(messageId),
+      userId,
+      emoji,
       createdAt: new Date().toISOString(),
     });
     return { added: true, emoji };
@@ -592,8 +852,9 @@ class ChatService {
     // Reset unread count
     if (conv.unreadCount) conv.unreadCount[userId] = 0;
     // Mark all messages as read by this user
-    const msgs = Array.from(this.messages.values())
-      .filter(m => m.conversationId === String(convId) && !m.readBy.includes(userId));
+    const msgs = Array.from(this.messages.values()).filter(
+      m => m.conversationId === String(convId) && !m.readBy.includes(userId)
+    );
     msgs.forEach(m => m.readBy.push(userId));
 
     return { conversationId: convId, markedRead: msgs.length };
@@ -632,8 +893,11 @@ class ChatService {
 
     const pinId = `pin-${Date.now()}`;
     this.pinnedMessages.set(pinId, {
-      id: pinId, conversationId: String(convId), messageId: String(messageId),
-      pinnedBy: userId, createdAt: new Date().toISOString(),
+      id: pinId,
+      conversationId: String(convId),
+      messageId: String(messageId),
+      pinnedBy: userId,
+      createdAt: new Date().toISOString(),
     });
     return { pinned: true, messageId };
   }
@@ -648,14 +912,23 @@ class ChatService {
   }
 
   getPinnedMessages(convId) {
-    const pins = Array.from(this.pinnedMessages.values())
-      .filter(p => p.conversationId === String(convId));
+    const pins = Array.from(this.pinnedMessages.values()).filter(
+      p => p.conversationId === String(convId)
+    );
     return pins.map(p => {
       const msg = this.messages.get(p.messageId);
       const sender = msg ? this.users.get(msg.senderId) : null;
       return {
         ...p,
-        message: msg ? { id: msg.id, content: msg.content, type: msg.type, senderId: msg.senderId, senderName: sender ? sender.name : null } : null,
+        message: msg
+          ? {
+              id: msg.id,
+              content: msg.content,
+              type: msg.type,
+              senderId: msg.senderId,
+              senderName: sender ? sender.name : null,
+            }
+          : null,
       };
     });
   }
@@ -674,7 +947,8 @@ class ChatService {
 
     const id = `att-${this._nextAttachmentId++}`;
     const att = {
-      id, messageId: null,
+      id,
+      messageId: null,
       filename: fileData.filename,
       originalName: fileData.originalName || fileData.filename,
       mimeType: fileData.mimeType,
@@ -791,8 +1065,8 @@ class ChatService {
 
     // Active conversations (those with messages in last 7 days)
     const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-    const activeConversations = conversations.filter(c =>
-      c.lastMessage && new Date(c.lastMessage.createdAt) > weekAgo
+    const activeConversations = conversations.filter(
+      c => c.lastMessage && new Date(c.lastMessage.createdAt) > weekAgo
     ).length;
 
     // Top participants by message count
@@ -822,7 +1096,12 @@ class ChatService {
         groupChats: conversations.filter(c => c.type === 'group' || c.type === 'channel').length,
       },
       recentConversations: conversations.slice(0, 5),
-      onlineUsers: onlineUsers.map(u => ({ id: u.id, name: u.name, department: u.department, avatar: u.avatar })),
+      onlineUsers: onlineUsers.map(u => ({
+        id: u.id,
+        name: u.name,
+        department: u.department,
+        avatar: u.avatar,
+      })),
       msgsByType,
       topParticipants,
       unreadByConversation: unread.byConversation,

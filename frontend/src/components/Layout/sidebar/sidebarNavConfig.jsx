@@ -151,6 +151,7 @@ const getNavigationItems = () => [
       { id: 'ben-reports-center', label: 'مركز تقارير الطلاب', path: '/student-reports-center' },
       { id: 'ben-periodic-report', label: 'التقرير الدوري', path: '/student-reports/periodic' },
       { id: 'ben-comparison-report', label: 'تقرير المقارنة', path: '/student-reports/comparison' },
+      { id: 'ben-print-templates', label: 'قوالب الطباعة', path: '/beneficiaries/templates' },
     ],
   },
   {

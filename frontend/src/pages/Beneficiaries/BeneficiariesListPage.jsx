@@ -427,6 +427,8 @@ const BeneficiariesListPage = () => {
               <Stack direction="row" spacing={1} justifyContent={{ xs: 'flex-start', md: 'flex-end' }} flexWrap="wrap">
                 <Tooltip title="تحديث"><IconButton onClick={loadData} sx={{ color: 'white', bgcolor: 'rgba(255,255,255,0.15)' }}><Refresh /></IconButton></Tooltip>
                 <Tooltip title="طباعة"><IconButton onClick={handlePrint} sx={{ color: 'white', bgcolor: 'rgba(255,255,255,0.15)' }}><Print /></IconButton></Tooltip>
+                <Button variant="outlined" startIcon={<Description />} onClick={() => navigate('/beneficiaries/templates')}
+                  sx={{ color: 'white', borderColor: 'rgba(255,255,255,0.5)', fontWeight: 'bold' }}>قوالب الطباعة</Button>
                 <Button variant="outlined" startIcon={<Download />} onClick={handleExport}
                   sx={{ color: 'white', borderColor: 'rgba(255,255,255,0.5)' }}>تصدير CSV</Button>
                 <Button variant="contained" startIcon={<PersonAdd />} onClick={handleAdd}

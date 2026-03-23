@@ -55,6 +55,9 @@ const EnhancedBeneficiariesTable = lazyWithRetry(
 const BeneficiariesListPage = lazyWithRetry(
   () => import('../pages/Beneficiaries/BeneficiariesListPage')
 );
+const BeneficiaryPrintTemplates = lazyWithRetry(
+  () => import('../pages/Beneficiaries/templates/BeneficiaryPrintTemplates')
+);
 const StudentRegistrationForm = lazyWithRetry(() => import('../pages/StudentRegistration'));
 const StudentsDashboard = lazyWithRetry(
   () => import('../pages/StudentManagement/StudentsDashboard')
@@ -111,6 +114,7 @@ export default function EducationRoutes() {
       <Route path="beneficiaries/manage" element={<BeneficiariesListPage />} />
       <Route path="beneficiaries/table" element={<BeneficiariesListPage />} />
       <Route path="beneficiaries/legacy" element={<BeneficiariesManagementPage />} />
+      <Route path="beneficiaries/templates" element={<BeneficiaryPrintTemplates />} />
 
       {/* Students */}
       <Route path="student-registration" element={<StudentRegistrationForm />} />

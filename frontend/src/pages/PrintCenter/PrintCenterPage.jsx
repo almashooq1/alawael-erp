@@ -43,6 +43,17 @@ import {
   Public as GovIcon,
   Store as EcomIcon,
   Dashboard as PortalsIcon,
+  /* Batch 4 Icons */
+  FolderShared as CaseMgmtIcon,
+  ReportProblem as ComplaintsIcon,
+  FamilyRestroom as FamilyIcon,
+  Accessibility as DisabilityIcon,
+  Description as DocMgmtIcon,
+  Shield as CrisisIcon,
+  Diversity3 as CommunityIcon,
+  Insights as BIIcon,
+  AutoStories as SpecialEdIcon,
+  CorporateFare as EnterpriseIcon,
 } from '@mui/icons-material';
 
 /* ─── Batch 1 Templates ─── */
@@ -76,6 +87,18 @@ import { KITCHEN_LIBRARY_TEMPLATES, KitchenLibraryTemplateRenderer } from './tem
 import { GOV_IOT_TEMPLATES, GovIoTTemplateRenderer } from './templates/GovIntegrationsPrintTemplates';
 import { ECOMMERCE_BLOCKCHAIN_TEMPLATES, EcommerceBlockchainTemplateRenderer } from './templates/EcommerceBlockchainPrintTemplates';
 import { PORTALS_DIRECTIVES_TEMPLATES, PortalsDirectivesTemplateRenderer } from './templates/PortalsDirectivesPrintTemplates';
+
+/* ─── Batch 4 Templates ─── */
+import { CASE_BENEFICIARY_TEMPLATES, CaseBeneficiaryTemplateRenderer } from './templates/CaseBeneficiaryPrintTemplates';
+import { COMPLAINTS_MEETINGS_TEMPLATES, ComplaintsMeetingsTemplateRenderer } from './templates/ComplaintsMeetingsPrintTemplates';
+import { FAMILY_SATISFACTION_TEMPLATES, FamilySatisfactionTemplateRenderer } from './templates/FamilySatisfactionPrintTemplates';
+import { DISABILITY_ASSESSMENT_TEMPLATES, DisabilityAssessmentTemplateRenderer } from './templates/DisabilityAssessmentPrintTemplates';
+import { DOCUMENT_MANAGEMENT_TEMPLATES, DocumentManagementTemplateRenderer } from './templates/DocumentManagementPrintTemplates';
+import { CRISIS_SAFETY_TEMPLATES, CrisisSafetyTemplateRenderer } from './templates/CrisisSafetyPrintTemplates';
+import { COMMUNITY_ORG_TEMPLATES, CommunityOrgTemplateRenderer } from './templates/CommunityOrgPrintTemplates';
+import { BI_EXECUTIVE_TEMPLATES, BIExecutiveTemplateRenderer } from './templates/BIExecutivePrintTemplates';
+import { SPECIAL_EDUCATION_TEMPLATES, SpecialEducationTemplateRenderer } from './templates/SpecialEducationPrintTemplates';
+import { ENTERPRISE_PLUS_TEMPLATES, EnterprisePlusTemplateRenderer } from './templates/EnterprisePlusPrintTemplates';
 
 /* ─── Module Groups ─── */
 const MODULE_GROUPS = [
@@ -236,6 +259,67 @@ const MODULE_GROUPS = [
     icon: <PortalsIcon />, color: '#880e4f',
     templates: PORTALS_DIRECTIVES_TEMPLATES,
     renderer: PortalsDirectivesTemplateRenderer,
+  },
+  /* ─── Batch 4 Modules ─── */
+  {
+    id: 'case-beneficiary', name: 'إدارة الحالات والمستفيدين', nameEn: 'Case Management & Beneficiaries',
+    icon: <CaseMgmtIcon />, color: '#0d47a1',
+    templates: CASE_BENEFICIARY_TEMPLATES,
+    renderer: CaseBeneficiaryTemplateRenderer,
+  },
+  {
+    id: 'complaints-meetings', name: 'الشكاوى والزوار والاجتماعات', nameEn: 'Complaints, Visitors & Meetings',
+    icon: <ComplaintsIcon />, color: '#b71c1c',
+    templates: COMPLAINTS_MEETINGS_TEMPLATES,
+    renderer: ComplaintsMeetingsTemplateRenderer,
+  },
+  {
+    id: 'family-satisfaction', name: 'رضا الأسرة والنتائج', nameEn: 'Family Satisfaction & Outcomes',
+    icon: <FamilyIcon />, color: '#4a148c',
+    templates: FAMILY_SATISFACTION_TEMPLATES,
+    renderer: FamilySatisfactionTemplateRenderer,
+  },
+  {
+    id: 'disability-assessment', name: 'الإعاقة والتقييم والرعاية', nameEn: 'Disability, Assessment & Care',
+    icon: <DisabilityIcon />, color: '#1b5e20',
+    templates: DISABILITY_ASSESSMENT_TEMPLATES,
+    renderer: DisabilityAssessmentTemplateRenderer,
+  },
+  {
+    id: 'document-management', name: 'إدارة الوثائق والوسائط', nameEn: 'Documents, E-Sign & Media',
+    icon: <DocMgmtIcon />, color: '#37474f',
+    templates: DOCUMENT_MANAGEMENT_TEMPLATES,
+    renderer: DocumentManagementTemplateRenderer,
+  },
+  {
+    id: 'crisis-safety', name: 'المخاطر والأزمات والدفاع المدني', nameEn: 'Crisis, Safety & Civil Defense',
+    icon: <CrisisIcon />, color: '#d50000',
+    templates: CRISIS_SAFETY_TEMPLATES,
+    renderer: CrisisSafetyTemplateRenderer,
+  },
+  {
+    id: 'community-org', name: 'المجتمع والتطوع والهيكل', nameEn: 'Community, Volunteers & Org',
+    icon: <CommunityIcon />, color: '#00695c',
+    templates: COMMUNITY_ORG_TEMPLATES,
+    renderer: CommunityOrgTemplateRenderer,
+  },
+  {
+    id: 'bi-executive', name: 'ذكاء الأعمال والتقارير التنفيذية', nameEn: 'BI & Executive Reports',
+    icon: <BIIcon />, color: '#1a237e',
+    templates: BI_EXECUTIVE_TEMPLATES,
+    renderer: BIExecutiveTemplateRenderer,
+  },
+  {
+    id: 'special-education', name: 'التربية الخاصة والتوظيف المدعوم', nameEn: 'Special Education & Employment',
+    icon: <SpecialEdIcon />, color: '#0277bd',
+    templates: SPECIAL_EDUCATION_TEMPLATES,
+    renderer: SpecialEducationTemplateRenderer,
+  },
+  {
+    id: 'enterprise-plus', name: 'المؤسسة المتقدمة', nameEn: 'Enterprise Plus & Governance',
+    icon: <EnterpriseIcon />, color: '#283593',
+    templates: ENTERPRISE_PLUS_TEMPLATES,
+    renderer: EnterprisePlusTemplateRenderer,
   },
 ];
 

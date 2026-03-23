@@ -107,6 +107,7 @@ import {
   OCRDocumentRoutes,
   CEODashboardRoutes,
   QualityManagementRoutes,
+  WorkforceAnalyticsRoutes,
 } from './routes';
 
 // Pages — Keep eagerly loaded (critical path / small)
@@ -334,6 +335,7 @@ function AppContent() {
                               {OCRDocumentRoutes()}
                               {CEODashboardRoutes()}
                               {QualityManagementRoutes()}
+                              {WorkforceAnalyticsRoutes()}
                               {/* === Shared / Cross-cutting Routes === */}
                               {/* AI & Analytics */}
                               <Route

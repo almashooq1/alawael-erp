@@ -112,3 +112,6 @@ export { default as CEODashboardRoutes } from './CEODashboardRoutes';
 
 // === Phase 20: Quality Management (إدارة الجودة — ISO/CBAHI) ===
 export { default as QualityManagementRoutes } from './QualityManagementRoutes';
+
+// === Phase 21: Workforce Analytics & Planning (تحليلات القوى العاملة) ===
+export { default as WorkforceAnalyticsRoutes } from './WorkforceAnalyticsRoutes';

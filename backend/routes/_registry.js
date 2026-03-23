@@ -1044,6 +1044,14 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
     '../routes/qualityManagement.routes'
   );
   logger.info('Phase 20 mounted (1 module: qualityManagement)');
+
+  // ── Phase 21: Workforce Analytics & Planning — تحليلات القوى العاملة ───
+  safeMount(
+    app,
+    ['/api/workforce-analytics', '/api/v1/workforce-analytics'],
+    '../routes/workforce-analytics.routes'
+  );
+  logger.info('Phase 21 mounted (1 module: workforce-analytics)');
 };
 
 module.exports = { mountAllRoutes, dualMount, safeMount };

@@ -255,6 +255,63 @@ router.get('/statistics', async (req, res) => {
 });
 
 /**
+ * GET /api/beneficiaries/at-risk
+ * Get beneficiaries at risk (low attendance, low progress, many absences)
+ */
+router.get('/at-risk', async (req, res) => {
+  try {
+    const { limit = 50 } = req.query;
+    const riskFilter = {
+      isArchived: { $ne: true },
+      status: 'active',
+      $or: [
+        { attendanceRate: { $lt: 75 } },
+        { progress: { $lt: 30 } },
+        { academicScore: { $lt: 50 } },
+        { behaviorRating: { $lt: 3 } },
+      ],
+    };
+
+    const data = await Beneficiary.find(riskFilter)
+      .select('firstName lastName firstName_ar lastName_ar name nationalId category status progress attendanceRate academicScore behaviorRating contactInfo phone sessions createdAt')
+      .sort({ attendanceRate: 1, progress: 1 })
+      .limit(parseInt(limit, 10))
+      .lean({ virtuals: true });
+
+    const riskData = data.map(b => {
+      const reasons = [];
+      if ((b.attendanceRate || 100) < 75) reasons.push('حضور منخفض');
+      if ((b.progress || 0) < 30) reasons.push('تقدم ضعيف');
+      if ((b.academicScore || 100) < 50) reasons.push('درجات منخفضة');
+      if ((b.behaviorRating || 5) < 3) reasons.push('سلوك يحتاج تحسين');
+      return { ...b, riskReasons: reasons, riskLevel: reasons.length >= 3 ? 'high' : reasons.length >= 2 ? 'medium' : 'low' };
+    });
+
+    res.json({ success: true, data: riskData, total: riskData.length });
+  } catch (error) {
+    logger.error('Beneficiaries at-risk error:', error);
+    res.status(500).json({ success: false, message: 'فشل في تحميل المستفيدين المعرضين للخطر' });
+  }
+});
+
+/**
+ * GET /api/beneficiaries/cities
+ * Get distinct cities for filter dropdown
+ */
+router.get('/cities', async (req, res) => {
+  try {
+    const cities = await Beneficiary.distinct('address.city', {
+      isArchived: { $ne: true },
+      'address.city': { $exists: true, $ne: null, $ne: '' },
+    });
+    res.json({ success: true, data: cities.filter(Boolean).sort() });
+  } catch (error) {
+    logger.error('Beneficiaries cities error:', error);
+    res.status(500).json({ success: false, message: 'فشل في تحميل المدن' });
+  }
+});
+
+/**
  * GET /api/beneficiaries/recent
  * Get recently registered beneficiaries
  */

@@ -25,6 +25,8 @@ const beneficiaryService = {
   // ==================== STATISTICS & REPORTS ====================
   getStatistics: async () => api.get('/beneficiaries/statistics'),
   getRecent: async (limit = 5) => api.get('/beneficiaries/recent', { params: { limit } }),
+  getAtRisk: async (limit = 50) => api.get('/beneficiaries/at-risk', { params: { limit } }),
+  getCities: async () => api.get('/beneficiaries/cities'),
   exportData: async (params = {}) =>
     api.get('/beneficiaries/export', { params, responseType: 'blob' }),
 

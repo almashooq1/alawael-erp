@@ -70,7 +70,11 @@ describe('Phase 24 — WAF Rules', () => {
 
   test('POST /waf-rules — should add a custom rule', async () => {
     const res = await request(app).post('/api/waf-ratelimit/waf-rules').send({
-      name: 'Test Custom Rule', category: 'custom', severity: 'high', pattern: 'test.*pattern', description: 'للاختبار',
+      name: 'Test Custom Rule',
+      category: 'custom',
+      severity: 'high',
+      pattern: 'test.*pattern',
+      description: 'للاختبار',
     });
     expect(res.status).toBe(201);
     expect(res.body.data).toHaveProperty('id');
@@ -85,7 +89,9 @@ describe('Phase 24 — WAF Rules', () => {
   test('PUT /waf-rules/:id/toggle — should toggle rule', async () => {
     const list = await request(app).get('/api/waf-ratelimit/waf-rules');
     const ruleId = list.body.rules[0].id;
-    const res = await request(app).put(`/api/waf-ratelimit/waf-rules/${ruleId}/toggle`).send({ enabled: false });
+    const res = await request(app)
+      .put(`/api/waf-ratelimit/waf-rules/${ruleId}/toggle`)
+      .send({ enabled: false });
     expect(res.status).toBe(200);
     expect(res.body.data.enabled).toBe(false);
     // re-enable
@@ -94,7 +100,9 @@ describe('Phase 24 — WAF Rules', () => {
 
   test('DELETE /waf-rules/:id — should delete a rule', async () => {
     const addRes = await request(app).post('/api/waf-ratelimit/waf-rules').send({
-      name: 'To Delete', category: 'custom', severity: 'low',
+      name: 'To Delete',
+      category: 'custom',
+      severity: 'low',
     });
     const id = addRes.body.data.id;
     const res = await request(app).delete(`/api/waf-ratelimit/waf-rules/${id}`);
@@ -120,7 +128,9 @@ describe('Phase 24 — IP Management', () => {
   });
 
   test('POST /blacklist — should add IP to blacklist', async () => {
-    const res = await request(app).post('/api/waf-ratelimit/blacklist').send({ ip: '10.0.0.1', reason: 'Test block' });
+    const res = await request(app)
+      .post('/api/waf-ratelimit/blacklist')
+      .send({ ip: '10.0.0.1', reason: 'Test block' });
     expect(res.status).toBe(201);
     expect(res.body.ip).toBe('10.0.0.1');
   });
@@ -131,7 +141,9 @@ describe('Phase 24 — IP Management', () => {
   });
 
   test('DELETE /blacklist/:ip — should remove from blacklist', async () => {
-    await request(app).post('/api/waf-ratelimit/blacklist').send({ ip: '10.0.0.2', reason: 'temp' });
+    await request(app)
+      .post('/api/waf-ratelimit/blacklist')
+      .send({ ip: '10.0.0.2', reason: 'temp' });
     const res = await request(app).delete('/api/waf-ratelimit/blacklist/10.0.0.2');
     expect(res.status).toBe(200);
   });
@@ -148,7 +160,9 @@ describe('Phase 24 — IP Management', () => {
   });
 
   test('POST /whitelist — should add IP to whitelist', async () => {
-    const res = await request(app).post('/api/waf-ratelimit/whitelist').send({ ip: '192.168.1.1', reason: 'Office' });
+    const res = await request(app)
+      .post('/api/waf-ratelimit/whitelist')
+      .send({ ip: '192.168.1.1', reason: 'Office' });
     expect(res.status).toBe(201);
     expect(res.body.action).toBe('whitelisted');
   });
@@ -179,23 +193,32 @@ describe('Phase 24 — Rate Limit Tiers', () => {
 
   test('POST /rate-limit-tiers — should create a new tier', async () => {
     const res = await request(app).post('/api/waf-ratelimit/rate-limit-tiers').send({
-      name: 'Custom Tier', scope: 'ip', limit: 50, windowMs: 30000,
+      name: 'Custom Tier',
+      scope: 'ip',
+      limit: 50,
+      windowMs: 30000,
     });
     expect(res.status).toBe(201);
     expect(res.body.data).toHaveProperty('id');
   });
 
   test('POST /rate-limit-tiers — should reject missing fields', async () => {
-    const res = await request(app).post('/api/waf-ratelimit/rate-limit-tiers').send({ name: 'No scope' });
+    const res = await request(app)
+      .post('/api/waf-ratelimit/rate-limit-tiers')
+      .send({ name: 'No scope' });
     expect(res.status).toBe(400);
   });
 
   test('PUT /rate-limit-tiers/:id/toggle — should toggle tier', async () => {
-    const res = await request(app).put('/api/waf-ratelimit/rate-limit-tiers/per-ip/toggle').send({ enabled: false });
+    const res = await request(app)
+      .put('/api/waf-ratelimit/rate-limit-tiers/per-ip/toggle')
+      .send({ enabled: false });
     expect(res.status).toBe(200);
     expect(res.body.data.enabled).toBe(false);
     // re-enable
-    await request(app).put('/api/waf-ratelimit/rate-limit-tiers/per-ip/toggle').send({ enabled: true });
+    await request(app)
+      .put('/api/waf-ratelimit/rate-limit-tiers/per-ip/toggle')
+      .send({ enabled: true });
   });
 });
 
@@ -212,7 +235,9 @@ describe('Phase 24 — Incidents', () => {
 
   test('POST /incidents — should create incident', async () => {
     const res = await request(app).post('/api/waf-ratelimit/incidents').send({
-      type: 'ddos', severity: 'critical', description: 'Test DDoS attack',
+      type: 'ddos',
+      severity: 'critical',
+      description: 'Test DDoS attack',
     });
     expect(res.status).toBe(201);
     expect(res.body.data.status).toBe('active');
@@ -220,10 +245,14 @@ describe('Phase 24 — Incidents', () => {
 
   test('PUT /incidents/:id/resolve — should resolve incident', async () => {
     const addRes = await request(app).post('/api/waf-ratelimit/incidents').send({
-      type: 'waf', severity: 'high', description: 'WAF test',
+      type: 'waf',
+      severity: 'high',
+      description: 'WAF test',
     });
     const id = addRes.body.data.id;
-    const res = await request(app).put(`/api/waf-ratelimit/incidents/${id}/resolve`).send({ resolution: 'Resolved' });
+    const res = await request(app)
+      .put(`/api/waf-ratelimit/incidents/${id}/resolve`)
+      .send({ resolution: 'Resolved' });
     expect(res.status).toBe(200);
     expect(res.body.data.status).toBe('resolved');
   });
@@ -265,7 +294,10 @@ describe('Phase 24 — Threat Intelligence', () => {
 
   test('POST /threat-intel — should add threat entry', async () => {
     const res = await request(app).post('/api/waf-ratelimit/threat-intel').send({
-      ip: '203.0.113.5', source: 'manual', type: 'scanner', confidence: 85,
+      ip: '203.0.113.5',
+      source: 'manual',
+      type: 'scanner',
+      confidence: 85,
     });
     expect(res.status).toBe(201);
     expect(res.body.data.ip).toBe('203.0.113.5');
@@ -273,7 +305,10 @@ describe('Phase 24 — Threat Intelligence', () => {
 
   test('POST /threat-intel — high confidence should auto-blacklist', async () => {
     await request(app).post('/api/waf-ratelimit/threat-intel').send({
-      ip: '198.51.100.9', source: 'feed', type: 'botnet', confidence: 95,
+      ip: '198.51.100.9',
+      source: 'feed',
+      type: 'botnet',
+      confidence: 95,
     });
     const bl = await request(app).get('/api/waf-ratelimit/blacklist');
     const found = bl.body.entries.find(e => e.ip === '198.51.100.9');
@@ -281,7 +316,9 @@ describe('Phase 24 — Threat Intelligence', () => {
   });
 
   test('POST /threat-intel — should reject without IP', async () => {
-    const res = await request(app).post('/api/waf-ratelimit/threat-intel').send({ source: 'manual' });
+    const res = await request(app)
+      .post('/api/waf-ratelimit/threat-intel')
+      .send({ source: 'manual' });
     expect(res.status).toBe(400);
   });
 });
@@ -292,21 +329,29 @@ describe('Phase 24 — Threat Intelligence', () => {
 
 describe('Phase 24 — Request Analysis', () => {
   test('POST /analyze — whitelisted IP should pass', async () => {
-    const res = await request(app).post('/api/waf-ratelimit/analyze').send({ ip: '127.0.0.1', path: '/', method: 'GET' });
+    const res = await request(app)
+      .post('/api/waf-ratelimit/analyze')
+      .send({ ip: '127.0.0.1', path: '/', method: 'GET' });
     expect(res.status).toBe(200);
     expect(res.body.data.allowed).toBe(true);
   });
 
   test('POST /analyze — blacklisted IP should be blocked', async () => {
-    await request(app).post('/api/waf-ratelimit/blacklist').send({ ip: '10.10.10.10', reason: 'test' });
-    const res = await request(app).post('/api/waf-ratelimit/analyze').send({ ip: '10.10.10.10', path: '/', method: 'GET' });
+    await request(app)
+      .post('/api/waf-ratelimit/blacklist')
+      .send({ ip: '10.10.10.10', reason: 'test' });
+    const res = await request(app)
+      .post('/api/waf-ratelimit/analyze')
+      .send({ ip: '10.10.10.10', path: '/', method: 'GET' });
     expect(res.body.data.allowed).toBe(false);
     expect(res.body.data.action).toBe('block');
   });
 
   test('POST /analyze — SQL injection payload should be blocked', async () => {
     const res = await request(app).post('/api/waf-ratelimit/analyze').send({
-      ip: '172.16.0.1', path: '/api/users', method: 'POST',
+      ip: '172.16.0.1',
+      path: '/api/users',
+      method: 'POST',
       body: "' OR 1=1 --",
     });
     expect(res.body.data.allowed).toBe(false);
@@ -315,7 +360,9 @@ describe('Phase 24 — Request Analysis', () => {
 
   test('POST /analyze — XSS payload should be blocked', async () => {
     const res = await request(app).post('/api/waf-ratelimit/analyze').send({
-      ip: '172.16.0.2', path: '/api/posts', method: 'POST',
+      ip: '172.16.0.2',
+      path: '/api/posts',
+      method: 'POST',
       body: '<script>alert("xss")</script>',
     });
     expect(res.body.data.allowed).toBe(false);
@@ -323,15 +370,22 @@ describe('Phase 24 — Request Analysis', () => {
 
   test('POST /analyze — path traversal should be blocked', async () => {
     const res = await request(app).post('/api/waf-ratelimit/analyze').send({
-      ip: '172.16.0.3', path: '/api/files/../../etc/passwd', method: 'GET',
+      ip: '172.16.0.3',
+      path: '/api/files/../../etc/passwd',
+      method: 'GET',
     });
     expect(res.body.data.allowed).toBe(false);
   });
 
   test('POST /analyze — clean request should pass', async () => {
-    const res = await request(app).post('/api/waf-ratelimit/analyze').send({
-      ip: '172.16.0.50', path: '/api/dashboard', method: 'GET', headers: { 'user-agent': 'Mozilla/5.0' },
-    });
+    const res = await request(app)
+      .post('/api/waf-ratelimit/analyze')
+      .send({
+        ip: '172.16.0.50',
+        path: '/api/dashboard',
+        method: 'GET',
+        headers: { 'user-agent': 'Mozilla/5.0' },
+      });
     expect(res.body.data.allowed).toBe(true);
   });
 });
@@ -349,16 +403,22 @@ describe('Phase 24 — Configuration', () => {
   });
 
   test('PUT /config — should update configuration', async () => {
-    const res = await request(app).put('/api/waf-ratelimit/config').send({ wafMode: 'detect', ipRateLimit: 200 });
+    const res = await request(app)
+      .put('/api/waf-ratelimit/config')
+      .send({ wafMode: 'detect', ipRateLimit: 200 });
     expect(res.status).toBe(200);
     expect(res.body.data.wafMode).toBe('detect');
     expect(res.body.data.ipRateLimit).toBe(200);
     // restore
-    await request(app).put('/api/waf-ratelimit/config').send({ wafMode: 'block', ipRateLimit: 100 });
+    await request(app)
+      .put('/api/waf-ratelimit/config')
+      .send({ wafMode: 'block', ipRateLimit: 100 });
   });
 
   test('PUT /config — should ignore disallowed keys', async () => {
-    const res = await request(app).put('/api/waf-ratelimit/config').send({ secret: 'bad', wafEnabled: false });
+    const res = await request(app)
+      .put('/api/waf-ratelimit/config')
+      .send({ secret: 'bad', wafEnabled: false });
     expect(res.status).toBe(200);
     expect(res.body.data).not.toHaveProperty('secret');
   });
@@ -370,7 +430,9 @@ describe('Phase 24 — Configuration', () => {
 
 describe('Phase 24 — RateLimitWafService Unit Tests', () => {
   let svc;
-  beforeEach(() => { svc = new RateLimitWafService(); });
+  beforeEach(() => {
+    svc = new RateLimitWafService();
+  });
 
   test('constructor sets defaults', () => {
     expect(svc.config.wafEnabled).toBe(true);
@@ -404,7 +466,11 @@ describe('Phase 24 — RateLimitWafService Unit Tests', () => {
   });
 
   test('expired blacklist entry is removed', () => {
-    svc.ipBlacklist.set('8.8.8.8', { reason: 'test', addedAt: new Date(), expiresAt: new Date(Date.now() - 1000) });
+    svc.ipBlacklist.set('8.8.8.8', {
+      reason: 'test',
+      addedAt: new Date(),
+      expiresAt: new Date(Date.now() - 1000),
+    });
     const r = svc.analyzeRequest({ ip: '8.8.8.8' });
     expect(r.allowed).toBe(true);
     expect(svc.ipBlacklist.has('8.8.8.8')).toBe(false);

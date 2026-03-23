@@ -23,18 +23,115 @@ const EventEmitter = require('events');
    WAF RULE DEFINITIONS
    ══════════════════════════════════════════════════════════════════════ */
 const DEFAULT_WAF_RULES = [
-  { id: 'sqli-01', name: 'SQL Injection — Basic', category: 'sqli', severity: 'critical', enabled: true, pattern: "(?:'|\\\")?\\s*(?:OR|AND)\\s+.*=", description: 'اكتشاف حقن SQL الأساسي' },
-  { id: 'sqli-02', name: 'SQL Injection — UNION', category: 'sqli', severity: 'critical', enabled: true, pattern: 'UNION\\s+(?:ALL\\s+)?SELECT', description: 'اكتشاف UNION SELECT' },
-  { id: 'sqli-03', name: 'SQL Injection — Comment', category: 'sqli', severity: 'high', enabled: true, pattern: '(?:--|#|/\\*)', description: 'اكتشاف تعليقات SQL' },
-  { id: 'xss-01', name: 'XSS — Script Tag', category: 'xss', severity: 'critical', enabled: true, pattern: '<script[^>]*>', description: 'اكتشاف وسم script' },
-  { id: 'xss-02', name: 'XSS — Event Handler', category: 'xss', severity: 'high', enabled: true, pattern: '\\bon\\w+\\s*=', description: 'اكتشاف معالج أحداث مضمّن' },
-  { id: 'xss-03', name: 'XSS — Javascript URI', category: 'xss', severity: 'high', enabled: true, pattern: 'javascript:', description: 'اكتشاف javascript: URI' },
-  { id: 'path-01', name: 'Path Traversal', category: 'traversal', severity: 'critical', enabled: true, pattern: '\\.\\./|\\.\\.\\\\', description: 'اكتشاف تجاوز المسار' },
-  { id: 'cmd-01', name: 'Command Injection', category: 'cmdi', severity: 'critical', enabled: true, pattern: '[;|&`$]\\s*(?:cat|ls|rm|wget|curl|bash|sh|nc)', description: 'اكتشاف حقن الأوامر' },
-  { id: 'rfi-01', name: 'Remote File Inclusion', category: 'rfi', severity: 'critical', enabled: true, pattern: '(?:https?|ftp)://.*\\?', description: 'اكتشاف تضمين ملف عن بُعد' },
-  { id: 'bot-01', name: 'Bad Bot User-Agent', category: 'bot', severity: 'medium', enabled: true, pattern: '(?:sqlmap|nikto|nmap|masscan|dirbuster|gobuster)', description: 'اكتشاف أدوات الفحص' },
-  { id: 'proto-01', name: 'Protocol Attack', category: 'protocol', severity: 'high', enabled: true, pattern: '(?:HTTP/0\\.9|CONNECT\\s)', description: 'هجمات البروتوكول' },
-  { id: 'size-01', name: 'Oversized Payload', category: 'size', severity: 'medium', enabled: true, pattern: null, maxBodySize: 10485760, description: 'حمولة تتجاوز 10MB' },
+  {
+    id: 'sqli-01',
+    name: 'SQL Injection — Basic',
+    category: 'sqli',
+    severity: 'critical',
+    enabled: true,
+    pattern: '(?:\'|\\")?\\s*(?:OR|AND)\\s+.*=',
+    description: 'اكتشاف حقن SQL الأساسي',
+  },
+  {
+    id: 'sqli-02',
+    name: 'SQL Injection — UNION',
+    category: 'sqli',
+    severity: 'critical',
+    enabled: true,
+    pattern: 'UNION\\s+(?:ALL\\s+)?SELECT',
+    description: 'اكتشاف UNION SELECT',
+  },
+  {
+    id: 'sqli-03',
+    name: 'SQL Injection — Comment',
+    category: 'sqli',
+    severity: 'high',
+    enabled: true,
+    pattern: '(?:--|#|/\\*)',
+    description: 'اكتشاف تعليقات SQL',
+  },
+  {
+    id: 'xss-01',
+    name: 'XSS — Script Tag',
+    category: 'xss',
+    severity: 'critical',
+    enabled: true,
+    pattern: '<script[^>]*>',
+    description: 'اكتشاف وسم script',
+  },
+  {
+    id: 'xss-02',
+    name: 'XSS — Event Handler',
+    category: 'xss',
+    severity: 'high',
+    enabled: true,
+    pattern: '\\bon\\w+\\s*=',
+    description: 'اكتشاف معالج أحداث مضمّن',
+  },
+  {
+    id: 'xss-03',
+    name: 'XSS — Javascript URI',
+    category: 'xss',
+    severity: 'high',
+    enabled: true,
+    pattern: 'javascript:',
+    description: 'اكتشاف javascript: URI',
+  },
+  {
+    id: 'path-01',
+    name: 'Path Traversal',
+    category: 'traversal',
+    severity: 'critical',
+    enabled: true,
+    pattern: '\\.\\./|\\.\\.\\\\',
+    description: 'اكتشاف تجاوز المسار',
+  },
+  {
+    id: 'cmd-01',
+    name: 'Command Injection',
+    category: 'cmdi',
+    severity: 'critical',
+    enabled: true,
+    pattern: '[;|&`$]\\s*(?:cat|ls|rm|wget|curl|bash|sh|nc)',
+    description: 'اكتشاف حقن الأوامر',
+  },
+  {
+    id: 'rfi-01',
+    name: 'Remote File Inclusion',
+    category: 'rfi',
+    severity: 'critical',
+    enabled: true,
+    pattern: '(?:https?|ftp)://.*\\?',
+    description: 'اكتشاف تضمين ملف عن بُعد',
+  },
+  {
+    id: 'bot-01',
+    name: 'Bad Bot User-Agent',
+    category: 'bot',
+    severity: 'medium',
+    enabled: true,
+    pattern: '(?:sqlmap|nikto|nmap|masscan|dirbuster|gobuster)',
+    description: 'اكتشاف أدوات الفحص',
+  },
+  {
+    id: 'proto-01',
+    name: 'Protocol Attack',
+    category: 'protocol',
+    severity: 'high',
+    enabled: true,
+    pattern: '(?:HTTP/0\\.9|CONNECT\\s)',
+    description: 'هجمات البروتوكول',
+  },
+  {
+    id: 'size-01',
+    name: 'Oversized Payload',
+    category: 'size',
+    severity: 'medium',
+    enabled: true,
+    pattern: null,
+    maxBodySize: 10485760,
+    description: 'حمولة تتجاوز 10MB',
+  },
 ];
 
 class RateLimitWafService extends EventEmitter {
@@ -43,21 +140,21 @@ class RateLimitWafService extends EventEmitter {
 
     this.config = {
       /* ── Rate Limiting ── */
-      globalRateLimit: config.globalRateLimit || 1000,         // req/min global
-      ipRateLimit: config.ipRateLimit || 100,                  // req/min per IP
-      userRateLimit: config.userRateLimit || 200,               // req/min per user
-      endpointRateLimit: config.endpointRateLimit || 60,        // req/min per endpoint
-      burstLimit: config.burstLimit || 50,                     // burst tolerance
-      windowMs: config.windowMs || 60000,                      // 1 minute window
+      globalRateLimit: config.globalRateLimit || 1000, // req/min global
+      ipRateLimit: config.ipRateLimit || 100, // req/min per IP
+      userRateLimit: config.userRateLimit || 200, // req/min per user
+      endpointRateLimit: config.endpointRateLimit || 60, // req/min per endpoint
+      burstLimit: config.burstLimit || 50, // burst tolerance
+      windowMs: config.windowMs || 60000, // 1 minute window
 
       /* ── DDoS Thresholds ── */
-      ddosConnectionFlood: config.ddosConnectionFlood || 500,   // simultaneous connections
-      ddosRequestFlood: config.ddosRequestFlood || 2000,        // req/min trigger
+      ddosConnectionFlood: config.ddosConnectionFlood || 500, // simultaneous connections
+      ddosRequestFlood: config.ddosRequestFlood || 2000, // req/min trigger
       ddosSlowlorisTimeout: config.ddosSlowlorisTimeout || 5000,
 
       /* ── WAF ── */
       wafEnabled: config.wafEnabled !== false,
-      wafMode: config.wafMode || 'block',   // block | detect | challenge
+      wafMode: config.wafMode || 'block', // block | detect | challenge
       challengeMode: config.challengeMode || 'captcha',
 
       /* ── Geo-blocking ── */
@@ -73,15 +170,20 @@ class RateLimitWafService extends EventEmitter {
     };
 
     /* ── In-memory stores ── */
-    this.ipBlacklist = new Map();     // ip → { reason, addedAt, expiresAt, addedBy }
-    this.ipWhitelist = new Map();     // ip → { reason, addedAt, addedBy }
-    this.ipGreylist = new Map();      // ip → { score, lastSeen, challengeRequired }
+    this.ipBlacklist = new Map(); // ip → { reason, addedAt, expiresAt, addedBy }
+    this.ipWhitelist = new Map(); // ip → { reason, addedAt, addedBy }
+    this.ipGreylist = new Map(); // ip → { score, lastSeen, challengeRequired }
     this.rateLimitCounters = new Map(); // key → { count, windowStart }
-    this.blockedRequests = [];         // last N blocked requests
-    this.incidents = [];               // DDoS/attack incidents
+    this.blockedRequests = []; // last N blocked requests
+    this.incidents = []; // DDoS/attack incidents
     this.wafRules = DEFAULT_WAF_RULES.map(r => ({ ...r }));
-    this.threatIntel = [];             // threat intelligence entries
-    this.analytics = { totalRequests: 0, blockedRequests: 0, challengedRequests: 0, passedRequests: 0 };
+    this.threatIntel = []; // threat intelligence entries
+    this.analytics = {
+      totalRequests: 0,
+      blockedRequests: 0,
+      challengedRequests: 0,
+      passedRequests: 0,
+    };
     this.rateLimitTiers = [];
     this.geoBlockLog = [];
 
@@ -95,18 +197,64 @@ class RateLimitWafService extends EventEmitter {
 
   _initDefaultTiers() {
     this.rateLimitTiers = [
-      { id: 'global', name: 'عام — جميع الطلبات', scope: 'global', limit: this.config.globalRateLimit, windowMs: this.config.windowMs, enabled: true },
-      { id: 'per-ip', name: 'لكل عنوان IP', scope: 'ip', limit: this.config.ipRateLimit, windowMs: this.config.windowMs, enabled: true },
-      { id: 'per-user', name: 'لكل مستخدم', scope: 'user', limit: this.config.userRateLimit, windowMs: this.config.windowMs, enabled: true },
-      { id: 'per-endpoint', name: 'لكل نقطة نهاية', scope: 'endpoint', limit: this.config.endpointRateLimit, windowMs: this.config.windowMs, enabled: true },
-      { id: 'auth', name: 'تسجيل الدخول / المصادقة', scope: 'endpoint', limit: 5, windowMs: 900000, enabled: true },
-      { id: 'burst', name: 'حماية الانفجار', scope: 'ip', limit: this.config.burstLimit, windowMs: 1000, enabled: true },
+      {
+        id: 'global',
+        name: 'عام — جميع الطلبات',
+        scope: 'global',
+        limit: this.config.globalRateLimit,
+        windowMs: this.config.windowMs,
+        enabled: true,
+      },
+      {
+        id: 'per-ip',
+        name: 'لكل عنوان IP',
+        scope: 'ip',
+        limit: this.config.ipRateLimit,
+        windowMs: this.config.windowMs,
+        enabled: true,
+      },
+      {
+        id: 'per-user',
+        name: 'لكل مستخدم',
+        scope: 'user',
+        limit: this.config.userRateLimit,
+        windowMs: this.config.windowMs,
+        enabled: true,
+      },
+      {
+        id: 'per-endpoint',
+        name: 'لكل نقطة نهاية',
+        scope: 'endpoint',
+        limit: this.config.endpointRateLimit,
+        windowMs: this.config.windowMs,
+        enabled: true,
+      },
+      {
+        id: 'auth',
+        name: 'تسجيل الدخول / المصادقة',
+        scope: 'endpoint',
+        limit: 5,
+        windowMs: 900000,
+        enabled: true,
+      },
+      {
+        id: 'burst',
+        name: 'حماية الانفجار',
+        scope: 'ip',
+        limit: this.config.burstLimit,
+        windowMs: 1000,
+        enabled: true,
+      },
     ];
   }
 
   _initDefaultWhitelist() {
     ['127.0.0.1', '::1', '72.60.84.56'].forEach(ip => {
-      this.ipWhitelist.set(ip, { reason: 'Default trusted', addedAt: new Date(), addedBy: 'system' });
+      this.ipWhitelist.set(ip, {
+        reason: 'Default trusted',
+        addedAt: new Date(),
+        addedBy: 'system',
+      });
     });
   }
 
@@ -144,7 +292,12 @@ class RateLimitWafService extends EventEmitter {
         if (!entry.expiresAt || new Date(entry.expiresAt) > new Date()) {
           this.analytics.blockedRequests++;
           this._logBlocked({ ip, method, path, reason: `Blacklisted: ${entry.reason}` });
-          return { allowed: false, action: 'block', reason: `IP blacklisted: ${entry.reason}`, details: entry };
+          return {
+            allowed: false,
+            action: 'block',
+            reason: `IP blacklisted: ${entry.reason}`,
+            details: entry,
+          };
         }
         this.ipBlacklist.delete(ip); // expired
       }
@@ -162,7 +315,13 @@ class RateLimitWafService extends EventEmitter {
         const wafResult = this._scanWafRules({ ip, method, path, headers, body });
         if (!wafResult.allowed) {
           this.analytics.blockedRequests++;
-          this._logBlocked({ ip, method, path, reason: wafResult.reason, ruleId: wafResult.ruleId });
+          this._logBlocked({
+            ip,
+            method,
+            path,
+            reason: wafResult.reason,
+            ruleId: wafResult.ruleId,
+          });
           return wafResult;
         }
       }
@@ -182,7 +341,12 @@ class RateLimitWafService extends EventEmitter {
         const grey = this.ipGreylist.get(ip);
         if (grey.score > 70) {
           this.analytics.challengedRequests++;
-          return { allowed: false, action: 'challenge', reason: 'Suspicious IP — challenge required', details: { score: grey.score, challengeType: this.config.challengeMode } };
+          return {
+            allowed: false,
+            action: 'challenge',
+            reason: 'Suspicious IP — challenge required',
+            details: { score: grey.score, challengeType: this.config.challengeMode },
+          };
         }
       }
 
@@ -257,8 +421,16 @@ class RateLimitWafService extends EventEmitter {
   }
 
   _wafAction(rule, ip) {
-    const action = this.config.wafMode === 'detect' ? 'log' : this.config.wafMode === 'challenge' ? 'challenge' : 'block';
-    this._incrementGreyScore(ip, rule.severity === 'critical' ? 30 : rule.severity === 'high' ? 20 : 10);
+    const action =
+      this.config.wafMode === 'detect'
+        ? 'log'
+        : this.config.wafMode === 'challenge'
+          ? 'challenge'
+          : 'block';
+    this._incrementGreyScore(
+      ip,
+      rule.severity === 'critical' ? 30 : rule.severity === 'high' ? 20 : 10
+    );
 
     return {
       allowed: action === 'log',
@@ -271,7 +443,10 @@ class RateLimitWafService extends EventEmitter {
 
   /* ── Geo-blocking ── */
   _checkGeoBlock(ip, country) {
-    if (this.config.allowedCountries.length > 0 && !this.config.allowedCountries.includes(country)) {
+    if (
+      this.config.allowedCountries.length > 0 &&
+      !this.config.allowedCountries.includes(country)
+    ) {
       return { allowed: false, action: 'geo-block', reason: `Country not allowed: ${country}` };
     }
     if (this.config.blockedCountries.includes(country)) {
@@ -282,7 +457,11 @@ class RateLimitWafService extends EventEmitter {
 
   /* ── Helpers ── */
   _incrementGreyScore(ip, points) {
-    const entry = this.ipGreylist.get(ip) || { score: 0, lastSeen: new Date(), challengeRequired: false };
+    const entry = this.ipGreylist.get(ip) || {
+      score: 0,
+      lastSeen: new Date(),
+      challengeRequired: false,
+    };
     entry.score = Math.min(100, entry.score + points);
     entry.lastSeen = new Date();
     if (entry.score > 70) entry.challengeRequired = true;
@@ -361,7 +540,10 @@ class RateLimitWafService extends EventEmitter {
   }
 
   getGreylist() {
-    return { total: this.ipGreylist.size, entries: [...this.ipGreylist.entries()].map(([ip, v]) => ({ ip, ...v })) };
+    return {
+      total: this.ipGreylist.size,
+      entries: [...this.ipGreylist.entries()].map(([ip, v]) => ({ ip, ...v })),
+    };
   }
 
   /* ══════════════════════════════════════════════════════════════════════
@@ -372,7 +554,8 @@ class RateLimitWafService extends EventEmitter {
     let rules = [...this.wafRules];
     if (filters.category) rules = rules.filter(r => r.category === filters.category);
     if (filters.severity) rules = rules.filter(r => r.severity === filters.severity);
-    if (typeof filters.enabled === 'boolean') rules = rules.filter(r => r.enabled === filters.enabled);
+    if (typeof filters.enabled === 'boolean')
+      rules = rules.filter(r => r.enabled === filters.enabled);
     return { total: rules.length, rules };
   }
 
@@ -439,7 +622,15 @@ class RateLimitWafService extends EventEmitter {
         return existing;
       }
 
-      const tier = { id: id || crypto.randomUUID(), name, scope, limit, windowMs: windowMs || 60000, enabled, createdAt: new Date() };
+      const tier = {
+        id: id || crypto.randomUUID(),
+        name,
+        scope,
+        limit,
+        windowMs: windowMs || 60000,
+        enabled,
+        createdAt: new Date(),
+      };
       this.rateLimitTiers.push(tier);
       return tier;
     } catch (error) {
@@ -599,19 +790,23 @@ class RateLimitWafService extends EventEmitter {
     try {
       const ddos = this.getDDoSStatus();
       const now = new Date();
-      const last1h = this.blockedRequests.filter(b => (now - new Date(b.timestamp)) < 3600000);
+      const last1h = this.blockedRequests.filter(b => now - new Date(b.timestamp) < 3600000);
 
       const topBlockedIPs = {};
-      this.blockedRequests.forEach(b => { topBlockedIPs[b.ip] = (topBlockedIPs[b.ip] || 0) + 1; });
+      this.blockedRequests.forEach(b => {
+        topBlockedIPs[b.ip] = (topBlockedIPs[b.ip] || 0) + 1;
+      });
       const topIPs = Object.entries(topBlockedIPs)
         .sort((a, b) => b[1] - a[1])
         .slice(0, 10)
         .map(([ip, count]) => ({ ip, count }));
 
       const ruleHits = {};
-      this.blockedRequests.filter(b => b.ruleId).forEach(b => {
-        ruleHits[b.ruleId] = (ruleHits[b.ruleId] || 0) + 1;
-      });
+      this.blockedRequests
+        .filter(b => b.ruleId)
+        .forEach(b => {
+          ruleHits[b.ruleId] = (ruleHits[b.ruleId] || 0) + 1;
+        });
       const topRules = Object.entries(ruleHits)
         .sort((a, b) => b[1] - a[1])
         .slice(0, 10)
@@ -651,11 +846,23 @@ class RateLimitWafService extends EventEmitter {
   updateConfig(updates) {
     try {
       const allowed = [
-        'globalRateLimit', 'ipRateLimit', 'userRateLimit', 'endpointRateLimit',
-        'burstLimit', 'windowMs', 'ddosConnectionFlood', 'ddosRequestFlood',
-        'ddosSlowlorisTimeout', 'wafEnabled', 'wafMode', 'challengeMode',
-        'geoBlockEnabled', 'blockedCountries', 'allowedCountries',
-        'alertOnBlock', 'alertThreshold',
+        'globalRateLimit',
+        'ipRateLimit',
+        'userRateLimit',
+        'endpointRateLimit',
+        'burstLimit',
+        'windowMs',
+        'ddosConnectionFlood',
+        'ddosRequestFlood',
+        'ddosSlowlorisTimeout',
+        'wafEnabled',
+        'wafMode',
+        'challengeMode',
+        'geoBlockEnabled',
+        'blockedCountries',
+        'allowedCountries',
+        'alertOnBlock',
+        'alertThreshold',
       ];
       for (const key of Object.keys(updates)) {
         if (allowed.includes(key)) this.config[key] = updates[key];
@@ -667,7 +874,12 @@ class RateLimitWafService extends EventEmitter {
   }
 
   resetAnalytics() {
-    this.analytics = { totalRequests: 0, blockedRequests: 0, challengedRequests: 0, passedRequests: 0 };
+    this.analytics = {
+      totalRequests: 0,
+      blockedRequests: 0,
+      challengedRequests: 0,
+      passedRequests: 0,
+    };
     return this.analytics;
   }
 }

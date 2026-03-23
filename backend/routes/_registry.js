@@ -1038,7 +1038,11 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   logger.info('Phase 19 mounted (1 module: ceoDashboard)');
 
   // ── Phase 20: Quality Management (ISO/CBAHI) — إدارة الجودة ───
-  safeMount(app, ['/api/quality-management', '/api/v1/quality-management'], '../routes/qualityManagement.routes');
+  safeMount(
+    app,
+    ['/api/quality-management', '/api/v1/quality-management'],
+    '../routes/qualityManagement.routes'
+  );
   logger.info('Phase 20 mounted (1 module: qualityManagement)');
 };
 

@@ -87,7 +87,7 @@ describe('Phase 20 — Quality Management (إدارة الجودة)', () => {
     it('GET /audits?standard=cbahi → filter by standard', async () => {
       const res = await request(app).get('/api/quality-management/audits?standard=cbahi');
       expect(res.status).toBe(200);
-      res.body.data.forEach((a) => expect(a.standard).toBe('cbahi'));
+      res.body.data.forEach(a => expect(a.standard).toBe('cbahi'));
     });
 
     it('GET /audits/:id → single audit', async () => {
@@ -105,25 +105,25 @@ describe('Phase 20 — Quality Management (إدارة الجودة)', () => {
 
     let createdAuditId;
     it('POST /audits → create new audit', async () => {
-      const res = await request(app)
-        .post('/api/quality-management/audits')
-        .send({
-          titleAr: 'تدقيق اختباري جديد',
-          titleEn: 'New Test Audit',
-          type: 'internal',
-          standard: 'iso9001',
-          department: 'quality',
-          scheduledDate: '2026-06-01',
-          leadAuditor: 'مدقق اختبار',
-          scope: 'نطاق الاختبار',
-        });
+      const res = await request(app).post('/api/quality-management/audits').send({
+        titleAr: 'تدقيق اختباري جديد',
+        titleEn: 'New Test Audit',
+        type: 'internal',
+        standard: 'iso9001',
+        department: 'quality',
+        scheduledDate: '2026-06-01',
+        leadAuditor: 'مدقق اختبار',
+        scope: 'نطاق الاختبار',
+      });
       expect(res.status).toBe(201);
       expect(res.body.data.titleAr).toBe('تدقيق اختباري جديد');
       createdAuditId = res.body.data.id;
     });
 
     it('POST /audits → 400 with missing fields', async () => {
-      const res = await request(app).post('/api/quality-management/audits').send({ titleAr: 'only title' });
+      const res = await request(app)
+        .post('/api/quality-management/audits')
+        .send({ titleAr: 'only title' });
       expect(res.status).toBe(400);
     });
 
@@ -154,7 +154,7 @@ describe('Phase 20 — Quality Management (إدارة الجودة)', () => {
     it('GET /findings?severity=critical → filter', async () => {
       const res = await request(app).get('/api/quality-management/findings?severity=critical');
       expect(res.status).toBe(200);
-      res.body.data.forEach((f) => expect(f.severity).toBe('critical'));
+      res.body.data.forEach(f => expect(f.severity).toBe('critical'));
     });
 
     it('GET /findings/:id → single finding', async () => {
@@ -169,22 +169,22 @@ describe('Phase 20 — Quality Management (إدارة الجودة)', () => {
     it('POST /findings → create new finding', async () => {
       const audits = await request(app).get('/api/quality-management/audits');
       const auditId = audits.body.data[0].id;
-      const res = await request(app)
-        .post('/api/quality-management/findings')
-        .send({
-          auditId,
-          titleAr: 'ملاحظة اختبارية',
-          titleEn: 'Test Finding',
-          severity: 'minor',
-          clauseRef: 'TEST-1',
-          description: 'وصف اختباري',
-        });
+      const res = await request(app).post('/api/quality-management/findings').send({
+        auditId,
+        titleAr: 'ملاحظة اختبارية',
+        titleEn: 'Test Finding',
+        severity: 'minor',
+        clauseRef: 'TEST-1',
+        description: 'وصف اختباري',
+      });
       expect(res.status).toBe(201);
       createdFindingId = res.body.data.id;
     });
 
     it('POST /findings → 400 with missing fields', async () => {
-      const res = await request(app).post('/api/quality-management/findings').send({ titleAr: 'only' });
+      const res = await request(app)
+        .post('/api/quality-management/findings')
+        .send({ titleAr: 'only' });
       expect(res.status).toBe(400);
     });
 
@@ -197,7 +197,9 @@ describe('Phase 20 — Quality Management (إدارة الجودة)', () => {
     });
 
     it('POST /findings/:id/close → close finding', async () => {
-      const res = await request(app).post(`/api/quality-management/findings/${createdFindingId}/close`);
+      const res = await request(app).post(
+        `/api/quality-management/findings/${createdFindingId}/close`
+      );
       expect(res.status).toBe(200);
       expect(res.body.data.status).toBe('closed');
     });
@@ -221,18 +223,16 @@ describe('Phase 20 — Quality Management (إدارة الجودة)', () => {
 
     let createdNCId;
     it('POST /non-conformances → create new NC', async () => {
-      const res = await request(app)
-        .post('/api/quality-management/non-conformances')
-        .send({
-          titleAr: 'عدم مطابقة اختبارية',
-          titleEn: 'Test NC',
-          standard: 'cbahi',
-          department: 'nursing',
-          severity: 'minor',
-          clauseRef: 'CBAHI-TEST-1',
-          description: 'وصف اختباري',
-          reportedBy: 'مختبر',
-        });
+      const res = await request(app).post('/api/quality-management/non-conformances').send({
+        titleAr: 'عدم مطابقة اختبارية',
+        titleEn: 'Test NC',
+        standard: 'cbahi',
+        department: 'nursing',
+        severity: 'minor',
+        clauseRef: 'CBAHI-TEST-1',
+        description: 'وصف اختباري',
+        reportedBy: 'مختبر',
+      });
       expect(res.status).toBe(201);
       createdNCId = res.body.data.id;
     });
@@ -246,9 +246,13 @@ describe('Phase 20 — Quality Management (إدارة الجودة)', () => {
     });
 
     it('DELETE /non-conformances/:id → delete NC', async () => {
-      const res = await request(app).delete(`/api/quality-management/non-conformances/${createdNCId}`);
+      const res = await request(app).delete(
+        `/api/quality-management/non-conformances/${createdNCId}`
+      );
       expect(res.status).toBe(200);
-      const check = await request(app).get(`/api/quality-management/non-conformances/${createdNCId}`);
+      const check = await request(app).get(
+        `/api/quality-management/non-conformances/${createdNCId}`
+      );
       expect(check.status).toBe(404);
     });
   });
@@ -273,23 +277,23 @@ describe('Phase 20 — Quality Management (إدارة الجودة)', () => {
     it('POST /capa → create new CAPA', async () => {
       const ncs = await request(app).get('/api/quality-management/non-conformances');
       const ncId = ncs.body.data[0].id;
-      const res = await request(app)
-        .post('/api/quality-management/capa')
-        .send({
-          ncId,
-          type: 'corrective',
-          titleAr: 'إجراء تصحيحي اختباري',
-          titleEn: 'Test Corrective Action',
-          responsiblePerson: 'مسؤول اختبار',
-          dueDate: '2026-06-15',
-          description: 'وصف إجراء',
-        });
+      const res = await request(app).post('/api/quality-management/capa').send({
+        ncId,
+        type: 'corrective',
+        titleAr: 'إجراء تصحيحي اختباري',
+        titleEn: 'Test Corrective Action',
+        responsiblePerson: 'مسؤول اختبار',
+        dueDate: '2026-06-15',
+        description: 'وصف إجراء',
+      });
       expect(res.status).toBe(201);
       createdCAPAId = res.body.data.id;
     });
 
     it('POST /capa → 400 with missing fields', async () => {
-      const res = await request(app).post('/api/quality-management/capa').send({ type: 'corrective' });
+      const res = await request(app)
+        .post('/api/quality-management/capa')
+        .send({ type: 'corrective' });
       expect(res.status).toBe(400);
     });
 
@@ -321,7 +325,7 @@ describe('Phase 20 — Quality Management (إدارة الجودة)', () => {
     it('GET /indicators?standard=cbahi → filter by standard', async () => {
       const res = await request(app).get('/api/quality-management/indicators?standard=cbahi');
       expect(res.status).toBe(200);
-      res.body.data.forEach((qi) => expect(qi.standard).toBe('cbahi'));
+      res.body.data.forEach(qi => expect(qi.standard).toBe('cbahi'));
     });
 
     it('GET /indicators/:id → single indicator', async () => {
@@ -365,7 +369,9 @@ describe('Phase 20 — Quality Management (إدارة الجودة)', () => {
     });
 
     it('DELETE /indicators/:id → delete indicator', async () => {
-      const res = await request(app).delete(`/api/quality-management/indicators/${createdIndicatorId}`);
+      const res = await request(app).delete(
+        `/api/quality-management/indicators/${createdIndicatorId}`
+      );
       expect(res.status).toBe(200);
     });
 
@@ -417,7 +423,7 @@ describe('Phase 20 — Quality Management (إدارة الجودة)', () => {
     it('GET /documents?type=sop → filter by type', async () => {
       const res = await request(app).get('/api/quality-management/documents?type=sop');
       expect(res.status).toBe(200);
-      res.body.data.forEach((d) => expect(d.type).toBe('sop'));
+      res.body.data.forEach(d => expect(d.type).toBe('sop'));
     });
 
     it('GET /documents/:id → single document', async () => {
@@ -430,17 +436,15 @@ describe('Phase 20 — Quality Management (إدارة الجودة)', () => {
 
     let createdDocId;
     it('POST /documents → create new document', async () => {
-      const res = await request(app)
-        .post('/api/quality-management/documents')
-        .send({
-          code: 'QMS-TEST-001',
-          titleAr: 'وثيقة اختبارية',
-          titleEn: 'Test Document',
-          type: 'policy',
-          standard: 'iso9001',
-          department: 'quality',
-          version: '1.0',
-        });
+      const res = await request(app).post('/api/quality-management/documents').send({
+        code: 'QMS-TEST-001',
+        titleAr: 'وثيقة اختبارية',
+        titleEn: 'Test Document',
+        type: 'policy',
+        standard: 'iso9001',
+        department: 'quality',
+        version: '1.0',
+      });
       expect(res.status).toBe(201);
       createdDocId = res.body.data.id;
       expect(res.body.data.status).toBe('draft');
@@ -455,7 +459,9 @@ describe('Phase 20 — Quality Management (إدارة الجودة)', () => {
     });
 
     it('POST /documents/:id/approve → approve document', async () => {
-      const res = await request(app).post(`/api/quality-management/documents/${createdDocId}/approve`);
+      const res = await request(app).post(
+        `/api/quality-management/documents/${createdDocId}/approve`
+      );
       expect(res.status).toBe(200);
       expect(res.body.data.status).toBe('approved');
       expect(res.body.data.approvedBy).toBeDefined();
@@ -492,18 +498,16 @@ describe('Phase 20 — Quality Management (إدارة الجودة)', () => {
 
     let createdRiskId;
     it('POST /risks → create new risk', async () => {
-      const res = await request(app)
-        .post('/api/quality-management/risks')
-        .send({
-          titleAr: 'خطر اختباري',
-          titleEn: 'Test Risk',
-          standard: 'iso9001',
-          department: 'quality',
-          likelihood: 3,
-          impact: 4,
-          mitigation: 'إجراء وقائي',
-          owner: 'مالك الخطر',
-        });
+      const res = await request(app).post('/api/quality-management/risks').send({
+        titleAr: 'خطر اختباري',
+        titleEn: 'Test Risk',
+        standard: 'iso9001',
+        department: 'quality',
+        likelihood: 3,
+        impact: 4,
+        mitigation: 'إجراء وقائي',
+        owner: 'مالك الخطر',
+      });
       expect(res.status).toBe(201);
       createdRiskId = res.body.data.id;
       expect(res.body.data.riskScore).toBe(12);
@@ -511,7 +515,9 @@ describe('Phase 20 — Quality Management (إدارة الجودة)', () => {
     });
 
     it('POST /risks → 400 with missing fields', async () => {
-      const res = await request(app).post('/api/quality-management/risks').send({ titleAr: 'only' });
+      const res = await request(app)
+        .post('/api/quality-management/risks')
+        .send({ titleAr: 'only' });
       expect(res.status).toBe(400);
     });
 
@@ -580,25 +586,33 @@ describe('Phase 20 — Quality Management (إدارة الجودة)', () => {
     });
 
     it('GET /accreditation-reports/:id → single report', async () => {
-      const res = await request(app).get(`/api/quality-management/accreditation-reports/${generatedReportId}`);
+      const res = await request(app).get(
+        `/api/quality-management/accreditation-reports/${generatedReportId}`
+      );
       expect(res.status).toBe(200);
       expect(res.body.data.id).toBe(generatedReportId);
     });
 
     it('GET /accreditation-reports/:id → 404 for missing', async () => {
-      const res = await request(app).get('/api/quality-management/accreditation-reports/nonexistent');
+      const res = await request(app).get(
+        '/api/quality-management/accreditation-reports/nonexistent'
+      );
       expect(res.status).toBe(404);
     });
 
     it('GET /accreditation-reports/:id/export?format=json → export JSON', async () => {
-      const res = await request(app).get(`/api/quality-management/accreditation-reports/${generatedReportId}/export?format=json`);
+      const res = await request(app).get(
+        `/api/quality-management/accreditation-reports/${generatedReportId}/export?format=json`
+      );
       expect(res.status).toBe(200);
       expect(res.body.data.format).toBe('json');
       expect(res.body.data.filename).toContain('cbahi');
     });
 
     it('GET /accreditation-reports/:id/export?format=csv → export CSV', async () => {
-      const res = await request(app).get(`/api/quality-management/accreditation-reports/${generatedReportId}/export?format=csv`);
+      const res = await request(app).get(
+        `/api/quality-management/accreditation-reports/${generatedReportId}/export?format=csv`
+      );
       expect(res.status).toBe(200);
       expect(res.body.data.format).toBe('csv');
       expect(res.body.data.content).toContain('Overall Compliance');
@@ -638,7 +652,7 @@ describe('Phase 20 — Quality Management (إدارة الجودة)', () => {
     it('GET /audit-log?entityType=system → filter by entity type', async () => {
       const res = await request(app).get('/api/quality-management/audit-log?entityType=system');
       expect(res.status).toBe(200);
-      res.body.data.forEach((l) => expect(l.entityType).toBe('system'));
+      res.body.data.forEach(l => expect(l.entityType).toBe('system'));
     });
   });
 });

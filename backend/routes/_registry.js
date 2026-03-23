@@ -1004,6 +1004,10 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   // ── Phase 12: Telehealth — الطب عن بُعد ───
   safeMount(app, ['/api/telehealth', '/api/v1/telehealth'], '../routes/telehealth.routes');
   logger.info('Phase 12 mounted (1 module: telehealth)');
+
+  // ── Phase 13: Bus Tracking — تتبع الحافلات بالوقت الفعلي ───
+  safeMount(app, ['/api/bus-tracking', '/api/v1/bus-tracking'], '../routes/busTracking.routes');
+  logger.info('Phase 13 mounted (1 module: bus-tracking)');
 };
 
 module.exports = { mountAllRoutes, dualMount, safeMount };

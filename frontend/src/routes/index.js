@@ -88,3 +88,6 @@ export { default as ARRehabRoutes } from './ARRehabRoutes';
 
 // === Phase: Telehealth (الطب عن بُعد) ===
 export { default as TelehealthRoutes } from './TelehealthRoutes';
+
+// === Phase: Bus Tracking (تتبع الحافلات) ===
+export { default as BusTrackingRoutes } from './BusTrackingRoutes';

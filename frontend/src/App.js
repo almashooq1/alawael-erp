@@ -99,6 +99,7 @@ import {
   MDTCoordinationRoutes,
   ARRehabRoutes,
   TelehealthRoutes,
+  BusTrackingRoutes,
 } from './routes';
 
 // Pages — Keep eagerly loaded (critical path / small)
@@ -318,6 +319,7 @@ function AppContent() {
                               {MDTCoordinationRoutes()}
                               {ARRehabRoutes()}
                               {TelehealthRoutes()}
+                              {BusTrackingRoutes()}
                               {/* === Shared / Cross-cutting Routes === */}
                               {/* AI & Analytics */}
                               <Route

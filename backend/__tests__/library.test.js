@@ -44,7 +44,8 @@ describe('Library — Dashboard', () => {
     const res = await request(app).get('/api/library/dashboard');
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
-    const { kpis, byType, byCategory, mostBorrowed, topRated, recentLoans, monthlyLoans } = res.body.data;
+    const { kpis, byType, byCategory, mostBorrowed, topRated, recentLoans, monthlyLoans } =
+      res.body.data;
     expect(kpis).toHaveProperty('totalResources');
     expect(kpis).toHaveProperty('totalQuantity');
     expect(kpis).toHaveProperty('availableQuantity');
@@ -272,33 +273,38 @@ describe('Library — Resources', () => {
 
   test('POST /resources → 400 missing name', async () => {
     const res = await request(app).post('/api/library/resources').send({
-      categoryId: '100', type: 'book',
+      categoryId: '100',
+      type: 'book',
     });
     expect(res.status).toBe(400);
   });
 
   test('POST /resources → 400 missing category', async () => {
     const res = await request(app).post('/api/library/resources').send({
-      name: 'Test', type: 'book',
+      name: 'Test',
+      type: 'book',
     });
     expect(res.status).toBe(400);
   });
 
   test('POST /resources → 400 missing type', async () => {
     const res = await request(app).post('/api/library/resources').send({
-      name: 'Test', categoryId: '100',
+      name: 'Test',
+      categoryId: '100',
     });
     expect(res.status).toBe(400);
   });
 
   test('POST /resources/bulk-import → import multiple resources', async () => {
-    const res = await request(app).post('/api/library/resources/bulk-import').send({
-      items: [
-        { name: 'Import 1', categoryId: '100', type: 'book' },
-        { name: 'Import 2', categoryId: '101', type: 'therapeutic_tool' },
-        { name: '', categoryId: '100', type: 'book' }, // should fail
-      ],
-    });
+    const res = await request(app)
+      .post('/api/library/resources/bulk-import')
+      .send({
+        items: [
+          { name: 'Import 1', categoryId: '100', type: 'book' },
+          { name: 'Import 2', categoryId: '101', type: 'therapeutic_tool' },
+          { name: '', categoryId: '100', type: 'book' }, // should fail
+        ],
+      });
     expect(res.status).toBe(200);
     expect(res.body.data.success).toBe(2);
     expect(res.body.data.failed).toBe(1);

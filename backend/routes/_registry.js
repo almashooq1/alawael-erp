@@ -1018,12 +1018,12 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   logger.info('Phase 14 mounted (1 module: report-builder)');
 
   // ── Phase 15: Library & Resources — المكتبة والموارد ───
-  safeMount(
-    app,
-    ['/api/library', '/api/v1/library'],
-    '../routes/library.routes'
-  );
+  safeMount(app, ['/api/library', '/api/v1/library'], '../routes/library.routes');
   logger.info('Phase 15 mounted (1 module: library)');
+
+  // ── Phase 16: Real-time Chat — الدردشة الفورية ───
+  safeMount(app, ['/api/chat', '/api/v1/chat'], '../routes/chat.routes');
+  logger.info('Phase 16 mounted (1 module: chat)');
 };
 
 module.exports = { mountAllRoutes, dualMount, safeMount };

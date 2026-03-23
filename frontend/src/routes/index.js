@@ -97,3 +97,6 @@ export { default as ReportBuilderRoutes } from './ReportBuilderRoutes';
 
 // === Phase 15: Library & Resources (المكتبة والموارد) ===
 export { default as LibraryRoutes } from './LibraryRoutes';
+
+// === Phase 16: Real-time Chat (الدردشة الفورية) ===
+export { default as ChatRoutes } from './ChatRoutes';

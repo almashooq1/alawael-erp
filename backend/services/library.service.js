@@ -37,14 +37,78 @@ class LibraryService {
   _seed() {
     // Categories — الفئات
     const cats = [
-      { id: '100', name: 'كتب علمية', nameEn: 'Scientific Books', type: 'book', icon: 'MenuBook', color: '#1976d2', description: 'كتب ومراجع علمية متخصصة' },
-      { id: '101', name: 'أدوات علاجية', nameEn: 'Therapeutic Tools', type: 'therapeutic_tool', icon: 'Healing', color: '#e91e63', description: 'أدوات وأجهزة العلاج الطبيعي والوظيفي' },
-      { id: '102', name: 'موارد تعليمية', nameEn: 'Educational Resources', type: 'educational', icon: 'School', color: '#4caf50', description: 'موارد ومواد تعليمية للمستفيدين' },
-      { id: '103', name: 'وسائل سمعية بصرية', nameEn: 'Audio-Visual', type: 'media', icon: 'VideoLibrary', color: '#ff9800', description: 'أفلام تعليمية وتسجيلات صوتية' },
-      { id: '104', name: 'أجهزة مساعدة', nameEn: 'Assistive Devices', type: 'assistive_device', icon: 'Accessibility', color: '#9c27b0', description: 'أجهزة مساعدة للأشخاص ذوي الإعاقة' },
-      { id: '105', name: 'ألعاب تطويرية', nameEn: 'Developmental Games', type: 'game', icon: 'SportsEsports', color: '#00bcd4', description: 'ألعاب لتنمية المهارات الحركية والذهنية' },
-      { id: '106', name: 'مجلات ودوريات', nameEn: 'Journals & Periodicals', type: 'periodical', icon: 'Article', color: '#795548', description: 'مجلات علمية ودوريات متخصصة في التأهيل' },
-      { id: '107', name: 'نماذج وقوالب', nameEn: 'Templates & Forms', type: 'template', icon: 'Description', color: '#607d8b', description: 'نماذج تقييم وقوالب مستخدمة في العلاج' },
+      {
+        id: '100',
+        name: 'كتب علمية',
+        nameEn: 'Scientific Books',
+        type: 'book',
+        icon: 'MenuBook',
+        color: '#1976d2',
+        description: 'كتب ومراجع علمية متخصصة',
+      },
+      {
+        id: '101',
+        name: 'أدوات علاجية',
+        nameEn: 'Therapeutic Tools',
+        type: 'therapeutic_tool',
+        icon: 'Healing',
+        color: '#e91e63',
+        description: 'أدوات وأجهزة العلاج الطبيعي والوظيفي',
+      },
+      {
+        id: '102',
+        name: 'موارد تعليمية',
+        nameEn: 'Educational Resources',
+        type: 'educational',
+        icon: 'School',
+        color: '#4caf50',
+        description: 'موارد ومواد تعليمية للمستفيدين',
+      },
+      {
+        id: '103',
+        name: 'وسائل سمعية بصرية',
+        nameEn: 'Audio-Visual',
+        type: 'media',
+        icon: 'VideoLibrary',
+        color: '#ff9800',
+        description: 'أفلام تعليمية وتسجيلات صوتية',
+      },
+      {
+        id: '104',
+        name: 'أجهزة مساعدة',
+        nameEn: 'Assistive Devices',
+        type: 'assistive_device',
+        icon: 'Accessibility',
+        color: '#9c27b0',
+        description: 'أجهزة مساعدة للأشخاص ذوي الإعاقة',
+      },
+      {
+        id: '105',
+        name: 'ألعاب تطويرية',
+        nameEn: 'Developmental Games',
+        type: 'game',
+        icon: 'SportsEsports',
+        color: '#00bcd4',
+        description: 'ألعاب لتنمية المهارات الحركية والذهنية',
+      },
+      {
+        id: '106',
+        name: 'مجلات ودوريات',
+        nameEn: 'Journals & Periodicals',
+        type: 'periodical',
+        icon: 'Article',
+        color: '#795548',
+        description: 'مجلات علمية ودوريات متخصصة في التأهيل',
+      },
+      {
+        id: '107',
+        name: 'نماذج وقوالب',
+        nameEn: 'Templates & Forms',
+        type: 'template',
+        icon: 'Description',
+        color: '#607d8b',
+        description: 'نماذج تقييم وقوالب مستخدمة في العلاج',
+      },
     ];
     cats.forEach(c => {
       c.resourceCount = 0;
@@ -55,94 +119,254 @@ class LibraryService {
     // Resources — الموارد
     const resources = [
       {
-        id: '1000', categoryId: '100', name: 'أساسيات العلاج الطبيعي', nameEn: 'Fundamentals of Physical Therapy',
-        type: 'book', isbn: '978-9953-87-123-4', author: 'د. أحمد الراشد', publisher: 'دار المعرفة',
-        publishYear: 2023, edition: '3', pages: 450, language: 'ar',
+        id: '1000',
+        categoryId: '100',
+        name: 'أساسيات العلاج الطبيعي',
+        nameEn: 'Fundamentals of Physical Therapy',
+        type: 'book',
+        isbn: '978-9953-87-123-4',
+        author: 'د. أحمد الراشد',
+        publisher: 'دار المعرفة',
+        publishYear: 2023,
+        edition: '3',
+        pages: 450,
+        language: 'ar',
         description: 'مرجع شامل في أساسيات العلاج الطبيعي وتطبيقاته في مراكز التأهيل',
-        location: 'رف A-01', barcode: 'LIB-001', quantity: 5, availableQty: 3,
-        condition: 'good', status: 'available', tags: ['علاج طبيعي', 'تأهيل', 'مرجع أساسي'],
-        coverImage: null, cost: 120, currency: 'SAR',
+        location: 'رف A-01',
+        barcode: 'LIB-001',
+        quantity: 5,
+        availableQty: 3,
+        condition: 'good',
+        status: 'available',
+        tags: ['علاج طبيعي', 'تأهيل', 'مرجع أساسي'],
+        coverImage: null,
+        cost: 120,
+        currency: 'SAR',
       },
       {
-        id: '1001', categoryId: '100', name: 'العلاج الوظيفي للأطفال', nameEn: 'Pediatric Occupational Therapy',
-        type: 'book', isbn: '978-9953-87-456-7', author: 'د. سارة المنصور', publisher: 'مكتبة الرشد',
-        publishYear: 2024, edition: '1', pages: 380, language: 'ar',
+        id: '1001',
+        categoryId: '100',
+        name: 'العلاج الوظيفي للأطفال',
+        nameEn: 'Pediatric Occupational Therapy',
+        type: 'book',
+        isbn: '978-9953-87-456-7',
+        author: 'د. سارة المنصور',
+        publisher: 'مكتبة الرشد',
+        publishYear: 2024,
+        edition: '1',
+        pages: 380,
+        language: 'ar',
         description: 'كتاب متخصص في العلاج الوظيفي للأطفال ذوي الاحتياجات الخاصة',
-        location: 'رف A-02', barcode: 'LIB-002', quantity: 3, availableQty: 2,
-        condition: 'new', status: 'available', tags: ['علاج وظيفي', 'أطفال', 'احتياجات خاصة'],
-        coverImage: null, cost: 95, currency: 'SAR',
+        location: 'رف A-02',
+        barcode: 'LIB-002',
+        quantity: 3,
+        availableQty: 2,
+        condition: 'new',
+        status: 'available',
+        tags: ['علاج وظيفي', 'أطفال', 'احتياجات خاصة'],
+        coverImage: null,
+        cost: 95,
+        currency: 'SAR',
       },
       {
-        id: '1002', categoryId: '101', name: 'كرات تمارين التوازن', nameEn: 'Balance Exercise Balls',
-        type: 'therapeutic_tool', isbn: null, author: null, publisher: 'PhysioEquip',
-        publishYear: null, edition: null, pages: null, language: null,
+        id: '1002',
+        categoryId: '101',
+        name: 'كرات تمارين التوازن',
+        nameEn: 'Balance Exercise Balls',
+        type: 'therapeutic_tool',
+        isbn: null,
+        author: null,
+        publisher: 'PhysioEquip',
+        publishYear: null,
+        edition: null,
+        pages: null,
+        language: null,
         description: 'مجموعة كرات بأحجام مختلفة لتمارين التوازن والتنسيق الحركي',
-        location: 'مخزن B-03', barcode: 'LIB-003', quantity: 10, availableQty: 7,
-        condition: 'good', status: 'available', tags: ['توازن', 'حركي', 'تمارين'],
-        coverImage: null, cost: 250, currency: 'SAR',
+        location: 'مخزن B-03',
+        barcode: 'LIB-003',
+        quantity: 10,
+        availableQty: 7,
+        condition: 'good',
+        status: 'available',
+        tags: ['توازن', 'حركي', 'تمارين'],
+        coverImage: null,
+        cost: 250,
+        currency: 'SAR',
       },
       {
-        id: '1003', categoryId: '101', name: 'جهاز تحفيز كهربائي TENS', nameEn: 'TENS Electrostimulation Device',
-        type: 'therapeutic_tool', isbn: null, author: null, publisher: 'MedTech',
-        publishYear: null, edition: null, pages: null, language: null,
+        id: '1003',
+        categoryId: '101',
+        name: 'جهاز تحفيز كهربائي TENS',
+        nameEn: 'TENS Electrostimulation Device',
+        type: 'therapeutic_tool',
+        isbn: null,
+        author: null,
+        publisher: 'MedTech',
+        publishYear: null,
+        edition: null,
+        pages: null,
+        language: null,
         description: 'جهاز تحفيز كهربائي عصبي عبر الجلد لتخفيف الألم وتحسين الدورة الدموية',
-        location: 'غرفة العلاج 2', barcode: 'LIB-004', quantity: 4, availableQty: 2,
-        condition: 'good', status: 'available', tags: ['كهربائي', 'تحفيز', 'ألم'],
-        coverImage: null, cost: 1200, currency: 'SAR',
+        location: 'غرفة العلاج 2',
+        barcode: 'LIB-004',
+        quantity: 4,
+        availableQty: 2,
+        condition: 'good',
+        status: 'available',
+        tags: ['كهربائي', 'تحفيز', 'ألم'],
+        coverImage: null,
+        cost: 1200,
+        currency: 'SAR',
       },
       {
-        id: '1004', categoryId: '102', name: 'بطاقات التواصل البصري (PECS)', nameEn: 'PECS Communication Cards',
-        type: 'educational', isbn: null, author: 'Dr. A. Bondy', publisher: 'Pyramid Educational',
-        publishYear: 2022, edition: '2', pages: null, language: 'ar-en',
+        id: '1004',
+        categoryId: '102',
+        name: 'بطاقات التواصل البصري (PECS)',
+        nameEn: 'PECS Communication Cards',
+        type: 'educational',
+        isbn: null,
+        author: 'Dr. A. Bondy',
+        publisher: 'Pyramid Educational',
+        publishYear: 2022,
+        edition: '2',
+        pages: null,
+        language: 'ar-en',
         description: 'نظام تبادل الصور للتواصل البديل والمعزز للأطفال غير الناطقين',
-        location: 'رف C-01', barcode: 'LIB-005', quantity: 8, availableQty: 5,
-        condition: 'good', status: 'available', tags: ['تواصل', 'PECS', 'تعليم بديل'],
-        coverImage: null, cost: 350, currency: 'SAR',
+        location: 'رف C-01',
+        barcode: 'LIB-005',
+        quantity: 8,
+        availableQty: 5,
+        condition: 'good',
+        status: 'available',
+        tags: ['تواصل', 'PECS', 'تعليم بديل'],
+        coverImage: null,
+        cost: 350,
+        currency: 'SAR',
       },
       {
-        id: '1005', categoryId: '102', name: 'منهج التدريب على المهارات الحياتية', nameEn: 'Life Skills Training Curriculum',
-        type: 'educational', isbn: null, author: 'فريق التأهيل', publisher: 'مركز الأوائل',
-        publishYear: 2024, edition: '1', pages: 200, language: 'ar',
+        id: '1005',
+        categoryId: '102',
+        name: 'منهج التدريب على المهارات الحياتية',
+        nameEn: 'Life Skills Training Curriculum',
+        type: 'educational',
+        isbn: null,
+        author: 'فريق التأهيل',
+        publisher: 'مركز الأوائل',
+        publishYear: 2024,
+        edition: '1',
+        pages: 200,
+        language: 'ar',
         description: 'منهج تدريبي شامل لتعليم المهارات الحياتية للمستفيدين',
-        location: 'رف C-02', barcode: 'LIB-006', quantity: 15, availableQty: 12,
-        condition: 'new', status: 'available', tags: ['مهارات حياتية', 'تدريب', 'استقلالية'],
-        coverImage: null, cost: 75, currency: 'SAR',
+        location: 'رف C-02',
+        barcode: 'LIB-006',
+        quantity: 15,
+        availableQty: 12,
+        condition: 'new',
+        status: 'available',
+        tags: ['مهارات حياتية', 'تدريب', 'استقلالية'],
+        coverImage: null,
+        cost: 75,
+        currency: 'SAR',
       },
       {
-        id: '1006', categoryId: '103', name: 'سلسلة فيديوهات تمارين النطق', nameEn: 'Speech Exercise Video Series',
-        type: 'media', isbn: null, author: 'مركز الأوائل', publisher: 'إنتاج داخلي',
-        publishYear: 2024, edition: null, pages: null, language: 'ar',
+        id: '1006',
+        categoryId: '103',
+        name: 'سلسلة فيديوهات تمارين النطق',
+        nameEn: 'Speech Exercise Video Series',
+        type: 'media',
+        isbn: null,
+        author: 'مركز الأوائل',
+        publisher: 'إنتاج داخلي',
+        publishYear: 2024,
+        edition: null,
+        pages: null,
+        language: 'ar',
         description: 'سلسلة فيديوهات تعليمية لتمارين النطق والكلام للأطفال',
-        location: 'أرشيف رقمي D-01', barcode: 'LIB-007', quantity: 1, availableQty: 1,
-        condition: 'new', status: 'available', tags: ['نطق', 'فيديو', 'تمارين'],
-        coverImage: null, cost: 0, currency: 'SAR',
+        location: 'أرشيف رقمي D-01',
+        barcode: 'LIB-007',
+        quantity: 1,
+        availableQty: 1,
+        condition: 'new',
+        status: 'available',
+        tags: ['نطق', 'فيديو', 'تمارين'],
+        coverImage: null,
+        cost: 0,
+        currency: 'SAR',
       },
       {
-        id: '1007', categoryId: '104', name: 'كرسي متحرك كهربائي للأطفال', nameEn: 'Electric Wheelchair for Children',
-        type: 'assistive_device', isbn: null, author: null, publisher: 'Sunrise Medical',
-        publishYear: null, edition: null, pages: null, language: null,
+        id: '1007',
+        categoryId: '104',
+        name: 'كرسي متحرك كهربائي للأطفال',
+        nameEn: 'Electric Wheelchair for Children',
+        type: 'assistive_device',
+        isbn: null,
+        author: null,
+        publisher: 'Sunrise Medical',
+        publishYear: null,
+        edition: null,
+        pages: null,
+        language: null,
         description: 'كرسي متحرك كهربائي مصمم خصيصاً للأطفال ذوي الإعاقة الحركية',
-        location: 'مخزن الأجهزة E-01', barcode: 'LIB-008', quantity: 3, availableQty: 1,
-        condition: 'good', status: 'available', tags: ['كرسي متحرك', 'أطفال', 'إعاقة حركية'],
-        coverImage: null, cost: 8500, currency: 'SAR',
+        location: 'مخزن الأجهزة E-01',
+        barcode: 'LIB-008',
+        quantity: 3,
+        availableQty: 1,
+        condition: 'good',
+        status: 'available',
+        tags: ['كرسي متحرك', 'أطفال', 'إعاقة حركية'],
+        coverImage: null,
+        cost: 8500,
+        currency: 'SAR',
       },
       {
-        id: '1008', categoryId: '105', name: 'مكعبات البناء التعليمية', nameEn: 'Educational Building Blocks',
-        type: 'game', isbn: null, author: null, publisher: 'LEGO Education',
-        publishYear: 2023, edition: null, pages: null, language: null,
+        id: '1008',
+        categoryId: '105',
+        name: 'مكعبات البناء التعليمية',
+        nameEn: 'Educational Building Blocks',
+        type: 'game',
+        isbn: null,
+        author: null,
+        publisher: 'LEGO Education',
+        publishYear: 2023,
+        edition: null,
+        pages: null,
+        language: null,
         description: 'مجموعة مكعبات بناء كبيرة لتنمية المهارات الحركية الدقيقة والإبداع',
-        location: 'غرفة الأنشطة F-01', barcode: 'LIB-009', quantity: 6, availableQty: 4,
-        condition: 'good', status: 'available', tags: ['مكعبات', 'حركة دقيقة', 'إبداع'],
-        coverImage: null, cost: 450, currency: 'SAR',
+        location: 'غرفة الأنشطة F-01',
+        barcode: 'LIB-009',
+        quantity: 6,
+        availableQty: 4,
+        condition: 'good',
+        status: 'available',
+        tags: ['مكعبات', 'حركة دقيقة', 'إبداع'],
+        coverImage: null,
+        cost: 450,
+        currency: 'SAR',
       },
       {
-        id: '1009', categoryId: '106', name: 'المجلة العربية للتربية الخاصة', nameEn: 'Arab Journal of Special Education',
-        type: 'periodical', isbn: 'ISSN-1234-5678', author: 'هيئة تحرير المجلة', publisher: 'الجامعة الأردنية',
-        publishYear: 2024, edition: 'العدد 45', pages: 150, language: 'ar',
+        id: '1009',
+        categoryId: '106',
+        name: 'المجلة العربية للتربية الخاصة',
+        nameEn: 'Arab Journal of Special Education',
+        type: 'periodical',
+        isbn: 'ISSN-1234-5678',
+        author: 'هيئة تحرير المجلة',
+        publisher: 'الجامعة الأردنية',
+        publishYear: 2024,
+        edition: 'العدد 45',
+        pages: 150,
+        language: 'ar',
         description: 'مجلة علمية محكّمة متخصصة في التربية الخاصة والتأهيل',
-        location: 'رف G-01', barcode: 'LIB-010', quantity: 2, availableQty: 2,
-        condition: 'good', status: 'available', tags: ['مجلة', 'تربية خاصة', 'بحث علمي'],
-        coverImage: null, cost: 45, currency: 'SAR',
+        location: 'رف G-01',
+        barcode: 'LIB-010',
+        quantity: 2,
+        availableQty: 2,
+        condition: 'good',
+        status: 'available',
+        tags: ['مجلة', 'تربية خاصة', 'بحث علمي'],
+        coverImage: null,
+        cost: 45,
+        currency: 'SAR',
       },
     ];
     resources.forEach(r => {
@@ -160,10 +384,54 @@ class LibraryService {
 
     // Members — الأعضاء
     const mbrs = [
-      { id: '2000', name: 'أحمد الشهري', role: 'therapist', department: 'العلاج الطبيعي', email: 'ahmed@alawael.org', phone: '0501234567', membershipType: 'staff', maxLoans: 5, activeLoans: 2, totalLoans: 15 },
-      { id: '2001', name: 'نورة العتيبي', role: 'teacher', department: 'التعليم الخاص', email: 'noura@alawael.org', phone: '0507654321', membershipType: 'staff', maxLoans: 5, activeLoans: 1, totalLoans: 8 },
-      { id: '2002', name: 'خالد المطيري', role: 'specialist', department: 'العلاج الوظيفي', email: 'khalid@alawael.org', phone: '0509876543', membershipType: 'staff', maxLoans: 5, activeLoans: 0, totalLoans: 22 },
-      { id: '2003', name: 'فاطمة السبيعي', role: 'researcher', department: 'البحث والتطوير', email: 'fatima@alawael.org', phone: '0503456789', membershipType: 'researcher', maxLoans: 10, activeLoans: 3, totalLoans: 45 },
+      {
+        id: '2000',
+        name: 'أحمد الشهري',
+        role: 'therapist',
+        department: 'العلاج الطبيعي',
+        email: 'ahmed@alawael.org',
+        phone: '0501234567',
+        membershipType: 'staff',
+        maxLoans: 5,
+        activeLoans: 2,
+        totalLoans: 15,
+      },
+      {
+        id: '2001',
+        name: 'نورة العتيبي',
+        role: 'teacher',
+        department: 'التعليم الخاص',
+        email: 'noura@alawael.org',
+        phone: '0507654321',
+        membershipType: 'staff',
+        maxLoans: 5,
+        activeLoans: 1,
+        totalLoans: 8,
+      },
+      {
+        id: '2002',
+        name: 'خالد المطيري',
+        role: 'specialist',
+        department: 'العلاج الوظيفي',
+        email: 'khalid@alawael.org',
+        phone: '0509876543',
+        membershipType: 'staff',
+        maxLoans: 5,
+        activeLoans: 0,
+        totalLoans: 22,
+      },
+      {
+        id: '2003',
+        name: 'فاطمة السبيعي',
+        role: 'researcher',
+        department: 'البحث والتطوير',
+        email: 'fatima@alawael.org',
+        phone: '0503456789',
+        membershipType: 'researcher',
+        maxLoans: 10,
+        activeLoans: 3,
+        totalLoans: 45,
+      },
     ];
     mbrs.forEach(m => {
       m.status = 'active';
@@ -174,13 +442,83 @@ class LibraryService {
 
     // Loans — الإعارات
     const loans = [
-      { id: '5000', resourceId: '1000', memberId: '2000', loanDate: '2025-03-01', dueDate: '2025-03-15', returnDate: null, status: 'active', renewals: 0, notes: '' },
-      { id: '5001', resourceId: '1001', memberId: '2001', loanDate: '2025-03-05', dueDate: '2025-03-19', returnDate: null, status: 'active', renewals: 0, notes: '' },
-      { id: '5002', resourceId: '1002', memberId: '2000', loanDate: '2025-02-15', dueDate: '2025-03-01', returnDate: '2025-02-28', status: 'returned', renewals: 0, notes: '' },
-      { id: '5003', resourceId: '1004', memberId: '2003', loanDate: '2025-03-10', dueDate: '2025-03-24', returnDate: null, status: 'active', renewals: 1, notes: 'تم التجديد مرة واحدة' },
-      { id: '5004', resourceId: '1003', memberId: '2002', loanDate: '2025-02-01', dueDate: '2025-02-15', returnDate: '2025-02-20', status: 'returned_late', renewals: 0, notes: 'تأخير 5 أيام' },
-      { id: '5005', resourceId: '1008', memberId: '2003', loanDate: '2025-03-12', dueDate: '2025-03-26', returnDate: null, status: 'active', renewals: 0, notes: '' },
-      { id: '5006', resourceId: '1005', memberId: '2003', loanDate: '2025-03-15', dueDate: '2025-03-29', returnDate: null, status: 'active', renewals: 0, notes: '' },
+      {
+        id: '5000',
+        resourceId: '1000',
+        memberId: '2000',
+        loanDate: '2025-03-01',
+        dueDate: '2025-03-15',
+        returnDate: null,
+        status: 'active',
+        renewals: 0,
+        notes: '',
+      },
+      {
+        id: '5001',
+        resourceId: '1001',
+        memberId: '2001',
+        loanDate: '2025-03-05',
+        dueDate: '2025-03-19',
+        returnDate: null,
+        status: 'active',
+        renewals: 0,
+        notes: '',
+      },
+      {
+        id: '5002',
+        resourceId: '1002',
+        memberId: '2000',
+        loanDate: '2025-02-15',
+        dueDate: '2025-03-01',
+        returnDate: '2025-02-28',
+        status: 'returned',
+        renewals: 0,
+        notes: '',
+      },
+      {
+        id: '5003',
+        resourceId: '1004',
+        memberId: '2003',
+        loanDate: '2025-03-10',
+        dueDate: '2025-03-24',
+        returnDate: null,
+        status: 'active',
+        renewals: 1,
+        notes: 'تم التجديد مرة واحدة',
+      },
+      {
+        id: '5004',
+        resourceId: '1003',
+        memberId: '2002',
+        loanDate: '2025-02-01',
+        dueDate: '2025-02-15',
+        returnDate: '2025-02-20',
+        status: 'returned_late',
+        renewals: 0,
+        notes: 'تأخير 5 أيام',
+      },
+      {
+        id: '5005',
+        resourceId: '1008',
+        memberId: '2003',
+        loanDate: '2025-03-12',
+        dueDate: '2025-03-26',
+        returnDate: null,
+        status: 'active',
+        renewals: 0,
+        notes: '',
+      },
+      {
+        id: '5006',
+        resourceId: '1005',
+        memberId: '2003',
+        loanDate: '2025-03-15',
+        dueDate: '2025-03-29',
+        returnDate: null,
+        status: 'active',
+        renewals: 0,
+        notes: '',
+      },
     ];
     loans.forEach(l => {
       l.createdAt = l.loanDate;
@@ -189,9 +527,33 @@ class LibraryService {
 
     // Suppliers — الموردون
     const sups = [
-      { id: '3000', name: 'دار المعرفة للنشر', contact: 'محمد العلي', email: 'info@marefah.com', phone: '0112345678', type: 'publisher', rating: 4.5 },
-      { id: '3001', name: 'PhysioEquip International', contact: 'John Smith', email: 'sales@physioequip.com', phone: '+44-123-456789', type: 'equipment', rating: 4.2 },
-      { id: '3002', name: 'Sunrise Medical Arabia', contact: 'عمر الحربي', email: 'omar@sunrise.sa', phone: '0118765432', type: 'assistive_devices', rating: 4.8 },
+      {
+        id: '3000',
+        name: 'دار المعرفة للنشر',
+        contact: 'محمد العلي',
+        email: 'info@marefah.com',
+        phone: '0112345678',
+        type: 'publisher',
+        rating: 4.5,
+      },
+      {
+        id: '3001',
+        name: 'PhysioEquip International',
+        contact: 'John Smith',
+        email: 'sales@physioequip.com',
+        phone: '+44-123-456789',
+        type: 'equipment',
+        rating: 4.2,
+      },
+      {
+        id: '3002',
+        name: 'Sunrise Medical Arabia',
+        contact: 'عمر الحربي',
+        email: 'omar@sunrise.sa',
+        phone: '0118765432',
+        type: 'assistive_devices',
+        rating: 4.8,
+      },
     ];
     sups.forEach(s => {
       s.status = 'active';
@@ -204,7 +566,9 @@ class LibraryService {
     this._nextMemberId = 2004;
     this._nextSupplierId = 3003;
 
-    logger.info('LibraryService seeded: 10 resources, 8 categories, 7 loans, 4 members, 3 suppliers');
+    logger.info(
+      'LibraryService seeded: 10 resources, 8 categories, 7 loans, 4 members, 3 suppliers'
+    );
   }
 
   // ═════════════════════════════════════════════════════════
@@ -220,7 +584,7 @@ class LibraryService {
     const totalResources = allResources.length;
     const totalQuantity = allResources.reduce((sum, r) => sum + r.quantity, 0);
     const availableQuantity = allResources.reduce((sum, r) => sum + r.availableQty, 0);
-    const totalValue = allResources.reduce((sum, r) => sum + (r.cost * r.quantity), 0);
+    const totalValue = allResources.reduce((sum, r) => sum + r.cost * r.quantity, 0);
 
     // Resources by type
     const byType = {};
@@ -283,9 +647,10 @@ class LibraryService {
         totalMembers: allMembers.length,
         activeMembers: allMembers.filter(m => m.status === 'active').length,
         totalValue,
-        averageRating: allResources.length > 0
-          ? +(allResources.reduce((s, r) => s + r.rating, 0) / allResources.length).toFixed(1)
-          : 0,
+        averageRating:
+          allResources.length > 0
+            ? +(allResources.reduce((s, r) => s + r.rating, 0) / allResources.length).toFixed(1)
+            : 0,
       },
       byType,
       byCategory,
@@ -342,7 +707,9 @@ class LibraryService {
 
   deleteCategory(id) {
     const cat = this.getCategoryById(id);
-    const resourcesInCat = Array.from(this.resources.values()).filter(r => r.categoryId === String(id));
+    const resourcesInCat = Array.from(this.resources.values()).filter(
+      r => r.categoryId === String(id)
+    );
     if (resourcesInCat.length > 0) {
       throw Object.assign(new Error('لا يمكن حذف فئة تحتوي على موارد'), { statusCode: 400 });
     }
@@ -362,12 +729,13 @@ class LibraryService {
     if (filters.status) items = items.filter(r => r.status === filters.status);
     if (filters.search) {
       const s = filters.search.toLowerCase();
-      items = items.filter(r =>
-        r.name.toLowerCase().includes(s) ||
-        (r.nameEn && r.nameEn.toLowerCase().includes(s)) ||
-        (r.author && r.author.toLowerCase().includes(s)) ||
-        (r.barcode && r.barcode.toLowerCase().includes(s)) ||
-        (r.tags && r.tags.some(t => t.toLowerCase().includes(s)))
+      items = items.filter(
+        r =>
+          r.name.toLowerCase().includes(s) ||
+          (r.nameEn && r.nameEn.toLowerCase().includes(s)) ||
+          (r.author && r.author.toLowerCase().includes(s)) ||
+          (r.barcode && r.barcode.toLowerCase().includes(s)) ||
+          (r.tags && r.tags.some(t => t.toLowerCase().includes(s)))
       );
     }
     if (filters.language) items = items.filter(r => r.language === filters.language);
@@ -452,10 +820,29 @@ class LibraryService {
     const r = this.resources.get(String(id));
     if (!r) throw Object.assign(new Error('المورد غير موجود'), { statusCode: 404 });
 
-    const fields = ['name', 'nameEn', 'type', 'isbn', 'author', 'publisher', 'publishYear',
-      'edition', 'pages', 'language', 'description', 'location', 'barcode',
-      'condition', 'tags', 'coverImage', 'cost', 'currency'];
-    fields.forEach(f => { if (data[f] !== undefined) r[f] = data[f]; });
+    const fields = [
+      'name',
+      'nameEn',
+      'type',
+      'isbn',
+      'author',
+      'publisher',
+      'publishYear',
+      'edition',
+      'pages',
+      'language',
+      'description',
+      'location',
+      'barcode',
+      'condition',
+      'tags',
+      'coverImage',
+      'cost',
+      'currency',
+    ];
+    fields.forEach(f => {
+      if (data[f] !== undefined) r[f] = data[f];
+    });
 
     if (data.quantity !== undefined) {
       const diff = data.quantity - r.quantity;
@@ -528,7 +915,13 @@ class LibraryService {
     const total = items.length;
     const start = (page - 1) * limit;
 
-    return { data: items.slice(start, start + limit), total, page, limit, totalPages: Math.ceil(total / limit) };
+    return {
+      data: items.slice(start, start + limit),
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 
   getLoanById(id) {
@@ -564,7 +957,10 @@ class LibraryService {
 
     // Check for existing active loan of same resource by same member
     const existingLoan = Array.from(this.loans.values()).find(
-      l => l.resourceId === String(data.resourceId) && l.memberId === String(data.memberId) && l.status === 'active'
+      l =>
+        l.resourceId === String(data.resourceId) &&
+        l.memberId === String(data.memberId) &&
+        l.status === 'active'
     );
     if (existingLoan) {
       throw Object.assign(new Error('العضو لديه إعارة نشطة لنفس المورد'), { statusCode: 400 });
@@ -572,7 +968,9 @@ class LibraryService {
 
     const loanDays = data.loanDays || 14;
     const loanDate = new Date().toISOString().split('T')[0];
-    const dueDate = new Date(Date.now() + loanDays * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    const dueDate = new Date(Date.now() + loanDays * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split('T')[0];
 
     const id = String(this._nextLoanId++);
     const loan = {
@@ -616,7 +1014,9 @@ class LibraryService {
 
     // Calculate fine if late
     if (isLate) {
-      const daysLate = Math.ceil((new Date(returnDate) - new Date(loan.dueDate)) / (24 * 60 * 60 * 1000));
+      const daysLate = Math.ceil(
+        (new Date(returnDate) - new Date(loan.dueDate)) / (24 * 60 * 60 * 1000)
+      );
       const finePerDay = 5; // 5 SAR per day
       loan.fine = daysLate * finePerDay;
       const member = this.members.get(loan.memberId);
@@ -652,7 +1052,9 @@ class LibraryService {
 
     // Check if overdue
     if (new Date(loan.dueDate) < new Date()) {
-      throw Object.assign(new Error('لا يمكن تجديد إعارة متأخرة. يرجى إرجاع المورد أولاً'), { statusCode: 400 });
+      throw Object.assign(new Error('لا يمكن تجديد إعارة متأخرة. يرجى إرجاع المورد أولاً'), {
+        statusCode: 400,
+      });
     }
 
     // Extend by 14 days
@@ -694,7 +1096,9 @@ class LibraryService {
 
     // Check if resource is available — if yes, no need to reserve
     if (resource.availableQty > 0) {
-      throw Object.assign(new Error('المورد متوفر حالياً. يمكنك استعارته مباشرة'), { statusCode: 400 });
+      throw Object.assign(new Error('المورد متوفر حالياً. يمكنك استعارته مباشرة'), {
+        statusCode: 400,
+      });
     }
 
     const id = String(this._nextReservationId++);
@@ -731,7 +1135,9 @@ class LibraryService {
     if (filters.department) items = items.filter(m => m.department === filters.department);
     if (filters.search) {
       const s = filters.search.toLowerCase();
-      items = items.filter(m => m.name.toLowerCase().includes(s) || m.email.toLowerCase().includes(s));
+      items = items.filter(
+        m => m.name.toLowerCase().includes(s) || m.email.toLowerCase().includes(s)
+      );
     }
     return items;
   }
@@ -755,7 +1161,8 @@ class LibraryService {
 
     // Check duplicate email
     const exists = Array.from(this.members.values()).find(m => m.email === data.email);
-    if (exists) throw Object.assign(new Error('البريد الإلكتروني مستخدم بالفعل'), { statusCode: 400 });
+    if (exists)
+      throw Object.assign(new Error('البريد الإلكتروني مستخدم بالفعل'), { statusCode: 400 });
 
     const id = String(this._nextMemberId++);
     const member = {
@@ -780,8 +1187,19 @@ class LibraryService {
 
   updateMember(id, data) {
     const m = this.getMemberById(id);
-    const fields = ['name', 'role', 'department', 'email', 'phone', 'membershipType', 'maxLoans', 'status'];
-    fields.forEach(f => { if (data[f] !== undefined) m[f] = data[f]; });
+    const fields = [
+      'name',
+      'role',
+      'department',
+      'email',
+      'phone',
+      'membershipType',
+      'maxLoans',
+      'status',
+    ];
+    fields.forEach(f => {
+      if (data[f] !== undefined) m[f] = data[f];
+    });
     return m;
   }
 
@@ -815,8 +1233,12 @@ class LibraryService {
     this.reviews.set(id, review);
 
     // Update resource rating
-    const allReviews = Array.from(this.reviews.values()).filter(r => r.resourceId === String(resourceId));
-    resource.rating = +(allReviews.reduce((s, r) => s + r.rating, 0) / allReviews.length).toFixed(1);
+    const allReviews = Array.from(this.reviews.values()).filter(
+      r => r.resourceId === String(resourceId)
+    );
+    resource.rating = +(allReviews.reduce((s, r) => s + r.rating, 0) / allReviews.length).toFixed(
+      1
+    );
     resource.reviewCount = allReviews.length;
 
     return review;
@@ -899,17 +1321,21 @@ class LibraryService {
     // Return rate
     const returnedLoans = allLoans.filter(l => ['returned', 'returned_late'].includes(l.status));
     const lateReturns = allLoans.filter(l => l.status === 'returned_late');
-    const onTimeRate = returnedLoans.length > 0
-      ? +((1 - lateReturns.length / returnedLoans.length) * 100).toFixed(1)
-      : 100;
+    const onTimeRate =
+      returnedLoans.length > 0
+        ? +((1 - lateReturns.length / returnedLoans.length) * 100).toFixed(1)
+        : 100;
 
     // Average loan duration
     const completedLoans = allLoans.filter(l => l.returnDate);
-    const avgDuration = completedLoans.length > 0
-      ? +(completedLoans.reduce((s, l) => {
-          return s + (new Date(l.returnDate) - new Date(l.loanDate)) / (24 * 60 * 60 * 1000);
-        }, 0) / completedLoans.length).toFixed(1)
-      : 0;
+    const avgDuration =
+      completedLoans.length > 0
+        ? +(
+            completedLoans.reduce((s, l) => {
+              return s + (new Date(l.returnDate) - new Date(l.loanDate)) / (24 * 60 * 60 * 1000);
+            }, 0) / completedLoans.length
+          ).toFixed(1)
+        : 0;
 
     // Top borrowers
     const borrowerCounts = {};
@@ -942,7 +1368,8 @@ class LibraryService {
       totalFines,
       totalLoans: allLoans.length,
       activeLoans: allLoans.filter(l => l.status === 'active').length,
-      overdueCount: allLoans.filter(l => l.status === 'active' && new Date(l.dueDate) < new Date()).length,
+      overdueCount: allLoans.filter(l => l.status === 'active' && new Date(l.dueDate) < new Date())
+        .length,
     };
   }
 
@@ -952,7 +1379,8 @@ class LibraryService {
   findByBarcode(barcode) {
     if (!barcode) throw Object.assign(new Error('الباركود مطلوب'), { statusCode: 400 });
     const resource = Array.from(this.resources.values()).find(r => r.barcode === barcode);
-    if (!resource) throw Object.assign(new Error('لا يوجد مورد بهذا الباركود'), { statusCode: 404 });
+    if (!resource)
+      throw Object.assign(new Error('لا يوجد مورد بهذا الباركود'), { statusCode: 404 });
     return resource;
   }
 
@@ -961,15 +1389,18 @@ class LibraryService {
       throw Object.assign(new Error('يجب إدخال حرفين على الأقل للبحث'), { statusCode: 400 });
     }
     const q = query.toLowerCase();
-    return Array.from(this.resources.values()).filter(r =>
-      r.name.toLowerCase().includes(q) ||
-      (r.nameEn && r.nameEn.toLowerCase().includes(q)) ||
-      (r.author && r.author.toLowerCase().includes(q)) ||
-      (r.isbn && r.isbn.includes(q)) ||
-      (r.barcode && r.barcode.toLowerCase().includes(q)) ||
-      (r.description && r.description.toLowerCase().includes(q)) ||
-      (r.tags && r.tags.some(t => t.toLowerCase().includes(q)))
-    ).slice(0, 20);
+    return Array.from(this.resources.values())
+      .filter(
+        r =>
+          r.name.toLowerCase().includes(q) ||
+          (r.nameEn && r.nameEn.toLowerCase().includes(q)) ||
+          (r.author && r.author.toLowerCase().includes(q)) ||
+          (r.isbn && r.isbn.includes(q)) ||
+          (r.barcode && r.barcode.toLowerCase().includes(q)) ||
+          (r.description && r.description.toLowerCase().includes(q)) ||
+          (r.tags && r.tags.some(t => t.toLowerCase().includes(q)))
+      )
+      .slice(0, 20);
   }
 
   // ═════════════════════════════════════════════════════════

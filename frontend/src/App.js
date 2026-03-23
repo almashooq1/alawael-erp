@@ -102,6 +102,7 @@ import {
   BusTrackingRoutes,
   ReportBuilderRoutes,
   LibraryRoutes,
+  ChatRoutes,
 } from './routes';
 
 // Pages — Keep eagerly loaded (critical path / small)
@@ -324,6 +325,7 @@ function AppContent() {
                               {BusTrackingRoutes()}
                               {ReportBuilderRoutes()}
                               {LibraryRoutes()}
+                              {ChatRoutes()}
                               {/* === Shared / Cross-cutting Routes === */}
                               {/* AI & Analytics */}
                               <Route

@@ -27,17 +27,21 @@ export const reportWebVitals = onPerfEntry => {
 };
 
 /**
- * Log performance metrics
+ * Log performance metrics using Navigation Timing Level 2 API
  */
 export const logPerformanceMetrics = () => {
   if (typeof window === 'undefined' || !window.performance) return;
 
-  const perfData = window.performance.timing;
-  const pageLoadTime = perfData.loadEventEnd - perfData.navigationStart;
-  const connectTime = perfData.responseEnd - perfData.requestStart;
-  const renderTime = perfData.domComplete - perfData.domLoading;
+  // Use modern Navigation Timing Level 2 API (performance.timing is deprecated)
+  const entries = performance.getEntriesByType('navigation');
+  if (entries && entries.length > 0) {
+    const nav = entries[0];
+    const pageLoadTime = Math.round(nav.loadEventEnd - nav.startTime);
+    const connectTime = Math.round(nav.responseEnd - nav.requestStart);
+    const renderTime = Math.round(nav.domComplete - nav.domInteractive);
 
-  logger.log(
-    `⚡ Performance — Page Load: ${pageLoadTime}ms | Server Response: ${connectTime}ms | DOM Render: ${renderTime}ms`
-  );
+    logger.log(
+      `⚡ Performance — Page Load: ${pageLoadTime}ms | Server Response: ${connectTime}ms | DOM Render: ${renderTime}ms`
+    );
+  }
 };

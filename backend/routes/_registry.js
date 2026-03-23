@@ -788,7 +788,7 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   );
 
   // Phase 29-33
-  safeMount(app, ['/phases-29-33', '/api/phases-29-33'], '../routes/phases-29-33.routes');
+  safeMount(app, ['/api/phases-29-33', '/api/v1/phases-29-33'], '../routes/phases-29-33.routes');
 
   // ── New Systems — Phase 4 (الأنظمة المضافة — المرحلة الرابعة) ─────────
   safeMount(app, ['/api/kitchen', '/api/v1/kitchen'], '../routes/kitchen.routes');

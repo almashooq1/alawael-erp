@@ -12,11 +12,15 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  const logout = useCallback(() => {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('refreshToken');
+    setCurrentUser(null);
+  }, []);
+
   const fetchUser = useCallback(async () => {
     try {
       const response = await api.get('/auth/me');
-      // Backend returns { success, data: { id, email, name, role, permissions, ... } }
-      // api.client.js response interceptor returns response.data, so response = { success, data }
       const userData = response?.data || response;
       if (userData) {
         setCurrentUser(userData);
@@ -29,12 +33,11 @@ export function AuthProvider({ children }) {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [logout]);
 
   useEffect(() => {
     const token = localStorage.getItem('authToken');
     if (token) {
-      // api.client.js request interceptor already reads authToken from localStorage
       fetchUser();
     } else {
       setLoading(false);
@@ -42,14 +45,12 @@ export function AuthProvider({ children }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const login = async (email, password) => {
+  const login = useCallback(async (email, password) => {
     try {
       setError('');
 
       const response = await api.post('/auth/login', { email, password });
 
-      // api.client.js interceptor returns response.data
-      // so response = { success, data: { token, refreshToken, user } }
       const data = response?.data || response;
 
       const accessToken = data?.accessToken || data?.token;
@@ -60,7 +61,6 @@ export function AuthProvider({ children }) {
         throw new Error('Missing access token from login response');
       }
 
-      // Store token with the key that api.client.js reads
       localStorage.setItem('authToken', accessToken);
       if (refreshToken) {
         localStorage.setItem('refreshToken', refreshToken);
@@ -76,7 +76,6 @@ export function AuthProvider({ children }) {
       if (!err?.status && (err?.message === 'Network Error' || err?.code === 'ERR_NETWORK')) {
         errorMessage = 'لا يمكن الاتصال بالخادم. تأكد من تشغيل الخادم وحاول مرة أخرى.';
       } else {
-        // err.data may be an object { message: '...' } or a plain string
         const dataMsg = typeof err?.data === 'object' ? err?.data?.message : err?.data;
         errorMessage =
           dataMsg || err?.response?.data?.message || 'فشل تسجيل الدخول. حاول مرة أخرى.';
@@ -85,9 +84,9 @@ export function AuthProvider({ children }) {
       setError(errorMessage);
       return { success: false, error: errorMessage };
     }
-  };
+  }, []);
 
-  const register = async (name, email, password) => {
+  const register = useCallback(async (name, email, password) => {
     try {
       setError('');
       await api.post('/auth/register', { fullName: name, email, password });
@@ -98,12 +97,6 @@ export function AuthProvider({ children }) {
       setError(errorMessage);
       return { success: false, error: errorMessage };
     }
-  };
-
-  const logout = useCallback(() => {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('refreshToken');
-    setCurrentUser(null);
   }, []);
 
   /**
@@ -142,7 +135,7 @@ export function AuthProvider({ children }) {
       can,
       fetchUser,
     }),
-    [currentUser, error, logout, hasPermission, can, fetchUser]
+    [currentUser, error, login, register, logout, hasPermission, can, fetchUser]
   );
 
   return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>;

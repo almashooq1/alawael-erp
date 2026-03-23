@@ -66,9 +66,11 @@ function createModelMock(defaultDoc = {}, overrides = {}) {
     created.populate = jest.fn().mockResolvedValue(created);
     return Promise.resolve(created);
   });
-  model.insertMany = jest.fn().mockImplementation(docs =>
-    Promise.resolve(docs.map((d, i) => ({ _id: `mock-id-${i}`, ...d }))),
-  );
+  model.insertMany = jest
+    .fn()
+    .mockImplementation(docs =>
+      Promise.resolve(docs.map((d, i) => ({ _id: `mock-id-${i}`, ...d })))
+    );
   model.aggregate = jest.fn().mockResolvedValue(overrides.aggregateResult || []);
   model.findByIdAndDelete = jest.fn().mockResolvedValue(overrides.findByIdResult || null);
 
@@ -91,7 +93,7 @@ describe('FiscalPeriodService', () => {
     // Set up FiscalPeriod mock
     FiscalPeriod = createModelMock(
       { _id: 'fp-1', name: 'Q1 2026', code: 'FP-2026-Q1', fiscalYear: 2026, status: 'open' },
-      { countResult: 0 },
+      { countResult: 0 }
     );
     jest.doMock('../models/FiscalPeriod', () => FiscalPeriod);
 
@@ -111,8 +113,9 @@ describe('FiscalPeriodService', () => {
   describe('createFiscalPeriod', () => {
     it('should create a new fiscal period successfully', async () => {
       // First findOne = code duplicate check → null, second = overlap check → null
-      FiscalPeriod.findOne = jest.fn()
-        .mockResolvedValueOnce(null)  // code check
+      FiscalPeriod.findOne = jest
+        .fn()
+        .mockResolvedValueOnce(null) // code check
         .mockResolvedValueOnce(null); // overlap check
 
       const result = await FiscalPeriodService.createFiscalPeriod({
@@ -142,15 +145,13 @@ describe('FiscalPeriodService', () => {
           fiscalYear: 2026,
           startDate: '2026-01-01',
           endDate: '2026-03-31',
-        }),
+        })
       ).rejects.toThrow('كود الفترة المحاسبية موجود بالفعل');
     });
 
     it('should reject if start date >= end date', async () => {
       // Both findOne calls return null (no duplicate, no overlap)
-      FiscalPeriod.findOne = jest.fn()
-        .mockResolvedValueOnce(null)
-        .mockResolvedValueOnce(null);
+      FiscalPeriod.findOne = jest.fn().mockResolvedValueOnce(null).mockResolvedValueOnce(null);
 
       await expect(
         FiscalPeriodService.createFiscalPeriod({
@@ -160,7 +161,7 @@ describe('FiscalPeriodService', () => {
           fiscalYear: 2026,
           startDate: '2026-03-31',
           endDate: '2026-01-01',
-        }),
+        })
       ).rejects.toThrow('تاريخ البداية يجب أن يكون قبل تاريخ النهاية');
     });
   });
@@ -202,9 +203,9 @@ describe('FiscalPeriodService', () => {
         lean: jest.fn().mockResolvedValue(null),
       }));
 
-      await expect(
-        FiscalPeriodService.getFiscalPeriodById('nonexistent'),
-      ).rejects.toThrow('الفترة المحاسبية غير موجودة');
+      await expect(FiscalPeriodService.getFiscalPeriodById('nonexistent')).rejects.toThrow(
+        'الفترة المحاسبية غير موجودة'
+      );
     });
   });
 
@@ -221,8 +222,9 @@ describe('FiscalPeriodService', () => {
       };
       FiscalPeriod.findOne = jest.fn().mockResolvedValue(mockPeriod);
       // First countDocuments = draft check (0), second = posted journal count (0)
-      JournalEntry.countDocuments = jest.fn()
-        .mockResolvedValueOnce(0)  // no drafts
+      JournalEntry.countDocuments = jest
+        .fn()
+        .mockResolvedValueOnce(0) // no drafts
         .mockResolvedValueOnce(0); // posted count
       Account.find = jest.fn(() => ({
         lean: jest.fn().mockResolvedValue([]),
@@ -241,9 +243,9 @@ describe('FiscalPeriodService', () => {
         status: 'closed',
       });
 
-      await expect(
-        FiscalPeriodService.closePeriod('fp-1', 'user-1'),
-      ).rejects.toThrow('لا يمكن إغلاق فترة غير مفتوحة');
+      await expect(FiscalPeriodService.closePeriod('fp-1', 'user-1')).rejects.toThrow(
+        'لا يمكن إغلاق فترة غير مفتوحة'
+      );
     });
 
     it('should reject if there are draft journal entries', async () => {
@@ -258,9 +260,9 @@ describe('FiscalPeriodService', () => {
       // Draft check returns 3
       JournalEntry.countDocuments = jest.fn().mockResolvedValueOnce(3);
 
-      await expect(
-        FiscalPeriodService.closePeriod('fp-1', 'user-1'),
-      ).rejects.toThrow(/3 قيد مسودة/);
+      await expect(FiscalPeriodService.closePeriod('fp-1', 'user-1')).rejects.toThrow(
+        /3 قيد مسودة/
+      );
     });
   });
 
@@ -285,9 +287,9 @@ describe('FiscalPeriodService', () => {
         status: 'open',
       });
 
-      await expect(
-        FiscalPeriodService.lockPeriod('fp-1', 'user-1'),
-      ).rejects.toThrow('يجب إغلاق الفترة قبل قفلها');
+      await expect(FiscalPeriodService.lockPeriod('fp-1', 'user-1')).rejects.toThrow(
+        'يجب إغلاق الفترة قبل قفلها'
+      );
     });
   });
 
@@ -312,9 +314,9 @@ describe('FiscalPeriodService', () => {
         status: 'locked',
       });
 
-      await expect(
-        FiscalPeriodService.reopenPeriod('fp-1', 'user-1', 'test'),
-      ).rejects.toThrow('لا يمكن إعادة فتح فترة مقفلة');
+      await expect(FiscalPeriodService.reopenPeriod('fp-1', 'user-1', 'test')).rejects.toThrow(
+        'لا يمكن إعادة فتح فترة مقفلة'
+      );
     });
   });
 
@@ -376,9 +378,9 @@ describe('FiscalPeriodService', () => {
         lean: jest.fn().mockResolvedValue(null),
       }));
 
-      await expect(
-        FiscalPeriodService.getCurrentPeriod(),
-      ).rejects.toThrow('لا توجد فترة محاسبية مفتوحة');
+      await expect(FiscalPeriodService.getCurrentPeriod()).rejects.toThrow(
+        'لا توجد فترة محاسبية مفتوحة'
+      );
     });
   });
 
@@ -394,7 +396,7 @@ describe('FiscalPeriodService', () => {
         expect.arrayContaining([
           expect.objectContaining({ code: 'FP-2026-M01' }),
           expect.objectContaining({ code: 'FP-2026-M12' }),
-        ]),
+        ])
       );
     });
 
@@ -408,7 +410,11 @@ describe('FiscalPeriodService', () => {
     it('should generate 2 semi-annual periods', async () => {
       FiscalPeriod.countDocuments = jest.fn().mockResolvedValue(0);
 
-      const result = await FiscalPeriodService.generatePeriodsForYear(2026, 'semi_annual', 'user-1');
+      const result = await FiscalPeriodService.generatePeriodsForYear(
+        2026,
+        'semi_annual',
+        'user-1'
+      );
       expect(result.periodsCreated).toBe(2);
     });
 
@@ -423,13 +429,13 @@ describe('FiscalPeriodService', () => {
       FiscalPeriod.countDocuments = jest.fn().mockResolvedValue(12);
 
       await expect(
-        FiscalPeriodService.generatePeriodsForYear(2026, 'month', 'user-1'),
+        FiscalPeriodService.generatePeriodsForYear(2026, 'month', 'user-1')
       ).rejects.toThrow(/توجد فترات/);
     });
 
     it('should reject unsupported period type', async () => {
       await expect(
-        FiscalPeriodService.generatePeriodsForYear(2026, 'weekly', 'user-1'),
+        FiscalPeriodService.generatePeriodsForYear(2026, 'weekly', 'user-1')
       ).rejects.toThrow('نوع الفترة غير مدعوم');
     });
   });
@@ -457,9 +463,9 @@ describe('FiscalPeriodService', () => {
         status: 'closed',
       });
 
-      await expect(
-        FiscalPeriodService.deleteFiscalPeriod('fp-1'),
-      ).rejects.toThrow('لا يمكن حذف فترة مغلقة أو مقفلة');
+      await expect(FiscalPeriodService.deleteFiscalPeriod('fp-1')).rejects.toThrow(
+        'لا يمكن حذف فترة مغلقة أو مقفلة'
+      );
     });
 
     it('should reject deleting period with posted entries', async () => {
@@ -472,9 +478,9 @@ describe('FiscalPeriodService', () => {
       FiscalPeriod.findOne = jest.fn().mockResolvedValue(mockPeriod);
       JournalEntry.countDocuments = jest.fn().mockResolvedValue(5);
 
-      await expect(
-        FiscalPeriodService.deleteFiscalPeriod('fp-1'),
-      ).rejects.toThrow('لا يمكن حذف فترة تحتوي على قيود مرحلة');
+      await expect(FiscalPeriodService.deleteFiscalPeriod('fp-1')).rejects.toThrow(
+        'لا يمكن حذف فترة تحتوي على قيود مرحلة'
+      );
     });
   });
 
@@ -508,7 +514,7 @@ describe('FiscalPeriodService', () => {
       }));
 
       await expect(
-        FiscalPeriodService.generateYearEndClosingEntries(2025, 'user-1'),
+        FiscalPeriodService.generateYearEndClosingEntries(2025, 'user-1')
       ).rejects.toThrow('لا توجد فترات محاسبية لهذه السنة');
     });
 
@@ -521,7 +527,7 @@ describe('FiscalPeriodService', () => {
       }));
 
       await expect(
-        FiscalPeriodService.generateYearEndClosingEntries(2025, 'user-1'),
+        FiscalPeriodService.generateYearEndClosingEntries(2025, 'user-1')
       ).rejects.toThrow(/1 فترة مفتوحة/);
     });
   });
@@ -572,7 +578,7 @@ describe('FinanceCoreService', () => {
         'JE-TEST-001',
         'Test entry',
         entries,
-        'user-1',
+        'user-1'
       );
 
       expect(result).toBeDefined();
@@ -589,7 +595,7 @@ describe('FinanceCoreService', () => {
       ];
 
       await expect(
-        FinanceCoreService.createJournalEntry('JE-TEST', 'Unbalanced', entries, 'user-1'),
+        FinanceCoreService.createJournalEntry('JE-TEST', 'Unbalanced', entries, 'user-1')
       ).rejects.toThrow(/Unbalanced/);
     });
 
@@ -597,7 +603,7 @@ describe('FinanceCoreService', () => {
       const entries = [{ accountId: 'acc-1', account: 'Cash', debit: 1000, credit: 0 }];
 
       await expect(
-        FinanceCoreService.createJournalEntry('JE-TEST', 'One line', entries, 'user-1'),
+        FinanceCoreService.createJournalEntry('JE-TEST', 'One line', entries, 'user-1')
       ).rejects.toThrow('Unbalanced Journal Entry');
     });
 
@@ -612,7 +618,7 @@ describe('FinanceCoreService', () => {
         'JE-MULTI',
         'Multi-line entry',
         entries,
-        'user-1',
+        'user-1'
       );
 
       expect(result.totalDebit).toBe(1000);
@@ -642,9 +648,9 @@ describe('FinanceCoreService', () => {
         status: 'posted',
       });
 
-      await expect(
-        FinanceCoreService.postJournalEntry('je-1', 'user-1'),
-      ).rejects.toThrow('already posted');
+      await expect(FinanceCoreService.postJournalEntry('je-1', 'user-1')).rejects.toThrow(
+        'already posted'
+      );
     });
 
     it('should reject posting a cancelled entry', async () => {
@@ -653,17 +659,17 @@ describe('FinanceCoreService', () => {
         status: 'cancelled',
       });
 
-      await expect(
-        FinanceCoreService.postJournalEntry('je-1', 'user-1'),
-      ).rejects.toThrow('Cannot post a cancelled');
+      await expect(FinanceCoreService.postJournalEntry('je-1', 'user-1')).rejects.toThrow(
+        'Cannot post a cancelled'
+      );
     });
 
     it('should throw if entry not found', async () => {
       JournalEntry.findById = jest.fn().mockResolvedValue(null);
 
-      await expect(
-        FinanceCoreService.postJournalEntry('nonexistent', 'user-1'),
-      ).rejects.toThrow('not found');
+      await expect(FinanceCoreService.postJournalEntry('nonexistent', 'user-1')).rejects.toThrow(
+        'not found'
+      );
     });
   });
 
@@ -694,7 +700,7 @@ describe('FinanceCoreService', () => {
       const result = await FinanceCoreService.analyzeServiceProfitability(
         'Speech Therapy',
         '2026-01-01',
-        '2026-03-31',
+        '2026-03-31'
       );
 
       expect(result.service).toBe('Speech Therapy');
@@ -765,10 +771,7 @@ describe('FinanceService — checkBudgetStatus Fix', () => {
   beforeEach(() => {
     jest.resetModules();
 
-    Transaction = createModelMock(
-      {},
-      { aggregateResult: [{ _id: null, total: 3500 }] },
-    );
+    Transaction = createModelMock({}, { aggregateResult: [{ _id: null, total: 3500 }] });
     jest.doMock('../models/Transaction', () => Transaction);
 
     Budget = createModelMock({
@@ -816,8 +819,10 @@ describe('FinanceService — checkBudgetStatus Fix', () => {
     expect(Transaction.aggregate).toHaveBeenCalledWith(
       expect.arrayContaining([
         expect.objectContaining({ $match: expect.any(Object) }),
-        expect.objectContaining({ $group: expect.objectContaining({ total: { $sum: '$amount' } }) }),
-      ]),
+        expect.objectContaining({
+          $group: expect.objectContaining({ total: { $sum: '$amount' } }),
+        }),
+      ])
     );
   });
 
@@ -892,9 +897,9 @@ describe('FinanceService — checkBudgetStatus Fix', () => {
   it('should throw when budget not found', async () => {
     Budget.findById = jest.fn().mockResolvedValue(null);
 
-    await expect(
-      FinanceService.checkBudgetStatus('nonexistent'),
-    ).rejects.toThrow('Budget not found');
+    await expect(FinanceService.checkBudgetStatus('nonexistent')).rejects.toThrow(
+      'Budget not found'
+    );
   });
 
   it('should handle budget with limit field (backward compat)', async () => {
@@ -991,7 +996,7 @@ describe('Finance Validators', () => {
 
   it('createJournalEntry validator should require at least 2 lines', () => {
     const lineValidator = validators.createJournalEntry.find(
-      v => v && v.builder && v.builder.fields && v.builder.fields.includes('lines'),
+      v => v && v.builder && v.builder.fields && v.builder.fields.includes('lines')
     );
     // Validator array exists and has rules for lines
     expect(validators.createJournalEntry.length).toBeGreaterThanOrEqual(3);
@@ -1122,9 +1127,9 @@ describe('AccountingService — Enhanced Cash Flow & Budget Monitoring', () => {
         lean: jest.fn().mockResolvedValue(null),
       }));
 
-      await expect(
-        accountingService.getBudgetVsActual('nonexistent'),
-      ).rejects.toThrow('الميزانية غير موجودة');
+      await expect(accountingService.getBudgetVsActual('nonexistent')).rejects.toThrow(
+        'الميزانية غير موجودة'
+      );
     });
   });
 
@@ -1133,20 +1138,21 @@ describe('AccountingService — Enhanced Cash Flow & Budget Monitoring', () => {
       // Mock _getAccountsByType (called internally by calculateFinancialRatiosReport)
       const origGetAccountsByType = accountingService._getAccountsByType.bind(accountingService);
 
-      accountingService._getAccountsByType = jest.fn()
-        .mockResolvedValueOnce([ // assets
+      accountingService._getAccountsByType = jest
+        .fn()
+        .mockResolvedValueOnce([
+          // assets
           { _id: 'a1', code: '1000', name: 'Cash', balance: 50000 },
           { _id: 'a2', code: '1100', name: 'Inventory', balance: 20000 },
         ])
-        .mockResolvedValueOnce([ // liabilities
+        .mockResolvedValueOnce([
+          // liabilities
           { _id: 'l1', code: '2000', name: 'Loan', balance: 30000 },
         ]);
 
       // Mock for current assets
       Account.find = jest.fn(() => ({
-        lean: jest.fn().mockResolvedValue([
-          { _id: 'a1', type: 'asset', category: 'cash' },
-        ]),
+        lean: jest.fn().mockResolvedValue([{ _id: 'a1', type: 'asset', category: 'cash' }]),
       }));
 
       // Mock getAccountBalance

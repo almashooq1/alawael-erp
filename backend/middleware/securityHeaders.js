@@ -85,8 +85,8 @@ const helmetMiddleware = helmet({
     policy: isProd ? 'strict-origin-when-cross-origin' : 'same-origin',
   },
 
-  // XSS Filter
-  xssFilter: true,
+  // XSS Filter — disabled (deprecated, modern browsers ignore it; can cause XSS in legacy IE)
+  xssFilter: false,
 });
 
 // Sensitive paths that should never be cached

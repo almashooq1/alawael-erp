@@ -996,9 +996,10 @@ class AccountingService {
     for (const account of operatingAccounts) {
       const totals = accountTotals[account._id.toString()];
       if (totals) {
-        const netFlow = account.type === 'revenue'
-          ? totals.credit - totals.debit
-          : -(totals.debit - totals.credit);
+        const netFlow =
+          account.type === 'revenue'
+            ? totals.credit - totals.debit
+            : -(totals.debit - totals.credit);
 
         if (Math.abs(netFlow) > 0.01) {
           items.push({
@@ -1198,9 +1199,8 @@ class AccountingService {
         budgeted: totalBudgeted,
         actual: totalActual,
         variance: totalBudgeted - totalActual,
-        utilization: totalBudgeted > 0
-          ? Math.round(((totalActual / totalBudgeted) * 100) * 100) / 100
-          : 0,
+        utilization:
+          totalBudgeted > 0 ? Math.round((totalActual / totalBudgeted) * 100 * 100) / 100 : 0,
       },
       generatedAt: new Date(),
     };
@@ -1249,17 +1249,13 @@ class AccountingService {
     }
 
     // حساب النسب
-    const currentRatio = totalCurrentLiabilities > 0
-      ? totalCurrentAssets / totalCurrentLiabilities
-      : 0;
+    const currentRatio =
+      totalCurrentLiabilities > 0 ? totalCurrentAssets / totalCurrentLiabilities : 0;
 
-    const debtToEquity = (totalAssets - totalLiabilities) > 0
-      ? totalLiabilities / (totalAssets - totalLiabilities)
-      : 0;
+    const debtToEquity =
+      totalAssets - totalLiabilities > 0 ? totalLiabilities / (totalAssets - totalLiabilities) : 0;
 
-    const debtRatio = totalAssets > 0
-      ? totalLiabilities / totalAssets
-      : 0;
+    const debtRatio = totalAssets > 0 ? totalLiabilities / totalAssets : 0;
 
     return {
       asOfDate: date,

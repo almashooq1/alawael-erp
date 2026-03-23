@@ -26,9 +26,7 @@ class FinanceCoreService {
     const totalCredit = entries.reduce((sum, e) => sum + (e.credit || 0), 0);
 
     if (Math.abs(totalDebit - totalCredit) > 0.01) {
-      throw new Error(
-        `Unbalanced Journal Entry. Debit: ${totalDebit}, Credit: ${totalCredit}`,
-      );
+      throw new Error(`Unbalanced Journal Entry. Debit: ${totalDebit}, Credit: ${totalCredit}`);
     }
 
     if (!entries || entries.length < 2) {
@@ -160,7 +158,7 @@ class FinanceCoreService {
         if (expenseAccountIds.some(id => id.toString() === (line.accountId || '').toString())) {
           const amount = (line.debit || 0) - (line.credit || 0);
           const account = expenseAccounts.find(
-            a => a._id.toString() === (line.accountId || '').toString(),
+            a => a._id.toString() === (line.accountId || '').toString()
           );
           if (account && account.category === 'operating_expense') {
             directCost += amount;

@@ -1,9 +1,9 @@
 # Finance & Accounting Module — Comprehensive Analysis
 
-**Date:** 2026-03-16  
-**Scope:** All finance-related files in `backend/`  
-**Total Files Analyzed:** 21 (14 originally listed + 7 discovered)  
-**Total Lines of Code:** ~14,300+  
+**Date:** 2026-03-16
+**Scope:** All finance-related files in `backend/`
+**Total Files Analyzed:** 21 (14 originally listed + 7 discovered)
+**Total Lines of Code:** ~14,300+
 
 ---
 
@@ -57,8 +57,8 @@ backend/
     └── finance.test.js             (12 lines — placeholder)
 ```
 
-**Stack:** Node.js / Express.js / MongoDB (Mongoose) / JWT auth / RBAC  
-**Language:** Bilingual Arabic/English (Arabic-primary ERP — "نظام الأوقاف")  
+**Stack:** Node.js / Express.js / MongoDB (Mongoose) / JWT auth / RBAC
+**Language:** Bilingual Arabic/English (Arabic-primary ERP — "نظام الأوقاف")
 **Route Loading:** Centralized in `routes/_registry.js` via `dualMount()` → mounts on both `/api/{path}` and `/api/v1/{path}`
 
 ---
@@ -459,7 +459,7 @@ if (Model) { /* real DB query */ } else { /* return hardcoded Arabic sample data
 
 **Problems:**
 1. System silently operates with fake data when models are missing
-2. No way to distinguish real data from demo data in API responses  
+2. No way to distinguish real data from demo data in API responses
 3. Hardcoded sample data is scattered across ~5,000+ lines
 4. Clients cannot tell if they're receiving real vs demo data
 
@@ -485,38 +485,38 @@ All routes apply `authenticateToken` but no RBAC middleware. Any authenticated u
 
 ### 🔴 Priority 1 — Critical (Do Immediately)
 
-1. **Fix `checkBudgetStatus` bug** — Replace `countDocuments` with `aggregate` sum  
-2. **Fix budget update route** — Create `updateBudget()` method in `FinanceService`  
-3. **Remove `Math.random()` from production responses** — Cash flow trend and forecast  
-4. **Add MongoDB sessions** for financial operations (journal entries, payments, reconciliation)  
-5. **Create missing Mongoose model schemas** or remove routes that reference them  
+1. **Fix `checkBudgetStatus` bug** — Replace `countDocuments` with `aggregate` sum
+2. **Fix budget update route** — Create `updateBudget()` method in `FinanceService`
+3. **Remove `Math.random()` from production responses** — Cash flow trend and forecast
+4. **Add MongoDB sessions** for financial operations (journal entries, payments, reconciliation)
+5. **Create missing Mongoose model schemas** or remove routes that reference them
 
 ### 🟠 Priority 2 — High (This Sprint)
 
-6. **Delete dead code** — Remove the 6 files in `backend/finance/`, `finance.routes.js`, `financeCore.service.js`, `finance.model.js`, and the placeholder test (saves 5,186 lines)  
-7. **Add input validation** to all route files — at minimum: amount > 0, required fields, date formats  
-8. **Add RBAC middleware** — separate roles for accountant, finance_manager, admin, auditor  
-9. **Implement real PDF generation** (pdfkit, puppeteer, or similar)  
-10. **Implement real audit trail** — Log all mutations to an AuditLog collection  
+6. **Delete dead code** — Remove the 6 files in `backend/finance/`, `finance.routes.js`, `financeCore.service.js`, `finance.model.js`, and the placeholder test (saves 5,186 lines)
+7. **Add input validation** to all route files — at minimum: amount > 0, required fields, date formats
+8. **Add RBAC middleware** — separate roles for accountant, finance_manager, admin, auditor
+9. **Implement real PDF generation** (pdfkit, puppeteer, or similar)
+10. **Implement real audit trail** — Log all mutations to an AuditLog collection
 
 ### 🟡 Priority 3 — Medium (Next Sprint)
 
-11. **Refactor route files** — Split each 1000+ line file into sub-routers by domain  
-12. **Remove hardcoded fallback data** — Return empty arrays with clear status when models are missing  
-13. **Add sequential numbering** with atomic counter (no race conditions)  
-14. **Add pagination** to all list endpoints  
-15. **Fix comprehensive test** to test correct route file  
-16. **Write meaningful tests** — Current coverage is minimal and partially testing wrong files  
+11. **Refactor route files** — Split each 1000+ line file into sub-routers by domain
+12. **Remove hardcoded fallback data** — Return empty arrays with clear status when models are missing
+13. **Add sequential numbering** with atomic counter (no race conditions)
+14. **Add pagination** to all list endpoints
+15. **Fix comprehensive test** to test correct route file
+16. **Write meaningful tests** — Current coverage is minimal and partially testing wrong files
 
 ### 🟢 Priority 4 — Low (Backlog)
 
-17. **Implement multi-currency journal entries**  
-18. **Add closed-period enforcement** (reject posts to closed fiscal periods)  
-19. **Implement recurring transaction scheduler** (cron job)  
-20. **Add OpenAPI documentation** for all finance endpoints  
-21. **Implement proper bank reconciliation** with matching algorithm  
-22. **Add idempotency keys** for financial write operations  
-23. **Consider extracting** useful logic from dead `backend/finance/` classes into services before deleting  
+17. **Implement multi-currency journal entries**
+18. **Add closed-period enforcement** (reject posts to closed fiscal periods)
+19. **Implement recurring transaction scheduler** (cron job)
+20. **Add OpenAPI documentation** for all finance endpoints
+21. **Implement proper bank reconciliation** with matching algorithm
+22. **Add idempotency keys** for financial write operations
+23. **Consider extracting** useful logic from dead `backend/finance/` classes into services before deleting
 
 ---
 

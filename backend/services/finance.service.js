@@ -374,7 +374,10 @@ class FinanceService {
         matchQuery.department = budget.department;
       }
 
-      const pipeline = [{ $match: matchQuery }, { $group: { _id: null, total: { $sum: '$amount' } } }];
+      const pipeline = [
+        { $match: matchQuery },
+        { $group: { _id: null, total: { $sum: '$amount' } } },
+      ];
 
       const result = await Transaction.aggregate(pipeline);
       const spent = result.length > 0 ? result[0].total : 0;

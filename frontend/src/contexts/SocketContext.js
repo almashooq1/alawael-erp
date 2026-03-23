@@ -23,7 +23,8 @@ const SOCKET_OPTIONS = {
 
 /**
  * Socket Provider Component
- * Wraps the application and provides real-time socket connection
+ * Wraps the application and provides real-time socket connection.
+ * Only connects when the user is authenticated (authToken exists).
  */
 export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
@@ -31,8 +32,17 @@ export const SocketProvider = ({ children }) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    // Only establish socket connection if user is authenticated
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      return;
+    }
+
     // Initialize socket connection
-    const newSocket = io(SOCKET_URL, SOCKET_OPTIONS);
+    const newSocket = io(SOCKET_URL, {
+      ...SOCKET_OPTIONS,
+      auth: { token },
+    });
 
     // Connection event handlers
     newSocket.on('connect', () => {

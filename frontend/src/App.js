@@ -1,4 +1,4 @@
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -132,7 +132,6 @@ const Documents = lazyWithRetry(() => import('./pages/documents/Documents'));
 const DocumentsPage = lazyWithRetry(() => import('./pages/documents/DocumentsMgmt'));
 const SmartDocumentsPage = lazyWithRetry(() => import('./pages/documents/SmartDocumentsPage'));
 const ArchivingDashboard = lazyWithRetry(() => import('./pages/documents/ElectronicArchiving'));
-const ElectronicArchiving = lazyWithRetry(() => import('./pages/documents/ElectronicArchiving'));
 const DocumentAdvancedPage = lazyWithRetry(() => import('./pages/documents/DocumentAdvancedPage'));
 const AIAnalyticsDashboard = lazyWithRetry(() => import('./pages/common/AIAnalyticsDashboard'));
 const MediaLibrary = lazyWithRetry(() => import('./pages/Media/MediaLibrary'));
@@ -144,10 +143,7 @@ const ExpenseManagement = lazyWithRetry(() => import('./pages/finance/ExpenseMan
 const ProtectedRoute = ({ children }) => {
   const { currentUser } = useAuth();
 
-  // Also check localStorage token to handle React state timing after login
-  const hasToken = !!localStorage.getItem('authToken');
-
-  if (!currentUser && !hasToken) {
+  if (!currentUser) {
     return <Navigate to="/login" replace />;
   }
 
@@ -171,13 +167,6 @@ const cacheRtl = createCache({
   stylisPlugins: [prefixer, rtlPlugin],
 });
 
-// Performance monitoring
-if (typeof window !== 'undefined') {
-  window.addEventListener('load', logPerformanceMetrics);
-  // Report Web Vitals in all environments (CLS, INP, FCP, LCP, TTFB)
-  reportWebVitals(logPerformanceMetrics);
-}
-
 function App() {
   return (
     <ThemeModeProvider>
@@ -188,6 +177,14 @@ function App() {
 
 function AppContent() {
   const { theme } = useThemeMode();
+
+  // Performance monitoring — runs once on mount (safe for HMR)
+  useEffect(() => {
+    const handleLoad = () => logPerformanceMetrics();
+    window.addEventListener('load', handleLoad);
+    reportWebVitals(logPerformanceMetrics);
+    return () => window.removeEventListener('load', handleLoad);
+  }, []);
 
   return (
     <CacheProvider value={cacheRtl}>
@@ -342,10 +339,7 @@ function AppContent() {
                               <Route path="documents-management" element={<DocumentsPage />} />
                               <Route path="smart-documents" element={<SmartDocumentsPage />} />
                               <Route path="archiving" element={<ArchivingDashboard />} />
-                              <Route
-                                path="electronic-archiving"
-                                element={<ElectronicArchiving />}
-                              />
+                              <Route path="electronic-archiving" element={<ArchivingDashboard />} />
                               <Route path="documents-advanced" element={<DocumentAdvancedPage />} />
                               <Route path="media-library" element={<MediaLibrary />} />
                               {/* Legacy pages kept for navigation completeness */}

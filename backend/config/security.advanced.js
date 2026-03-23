@@ -76,7 +76,11 @@ const ipWhitelist = (whitelist = []) => {
       return next();
     }
 
-    const clientIp = req.ip || req.connection.remoteAddress;
+    // Normalize IPv6-mapped IPv4 addresses (::ffff:127.0.0.1 → 127.0.0.1)
+    let clientIp = req.ip || req.connection.remoteAddress || '';
+    if (clientIp.startsWith('::ffff:')) {
+      clientIp = clientIp.slice(7);
+    }
 
     if (whitelist.includes(clientIp)) {
       return next();
@@ -99,12 +103,18 @@ const securityHeaders = (req, res, next) => {
   // Prevent MIME-sniffing
   res.setHeader('X-Content-Type-Options', 'nosniff');
 
-  // XSS Protection
-  res.setHeader('X-XSS-Protection', '1; mode=block');
+  // XSS Protection — disabled (deprecated, can introduce XSS in legacy IE)
+  res.setHeader('X-XSS-Protection', '0');
+
+  // Content-Security-Policy — baseline restrictive policy
+  res.setHeader(
+    'Content-Security-Policy',
+    "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' wss: ws:; frame-ancestors 'none'"
+  );
 
   // HSTS
   if (process.env.NODE_ENV === 'production') {
-    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
   }
 
   // Referrer Policy
@@ -112,6 +122,9 @@ const securityHeaders = (req, res, next) => {
 
   // Permissions Policy
   res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+
+  // Prevent cross-domain policy files (Flash/PDF)
+  res.setHeader('X-Permitted-Cross-Domain-Policies', 'none');
 
   next();
 };

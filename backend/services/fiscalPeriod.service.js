@@ -22,15 +22,7 @@ class FiscalPeriodService {
    * إنشاء فترة محاسبية جديدة
    */
   static async createFiscalPeriod(data) {
-    const {
-      name,
-      code,
-      periodType,
-      fiscalYear,
-      startDate,
-      endDate,
-      createdBy,
-    } = data;
+    const { name, code, periodType, fiscalYear, startDate, endDate, createdBy } = data;
 
     // التحقق من عدم وجود كود مكرر
     const existing = await FiscalPeriod.findOne({ code, isDeleted: false });
@@ -43,9 +35,7 @@ class FiscalPeriodService {
       fiscalYear,
       periodType,
       isDeleted: false,
-      $or: [
-        { startDate: { $lte: new Date(endDate) }, endDate: { $gte: new Date(startDate) } },
-      ],
+      $or: [{ startDate: { $lte: new Date(endDate) }, endDate: { $gte: new Date(startDate) } }],
     });
 
     if (overlap) {
@@ -649,7 +639,7 @@ class FiscalPeriodService {
           startDate: new Date(year, 6, 1),
           endDate: new Date(year, 11, 31, 23, 59, 59),
           createdBy,
-        },
+        }
       );
     } else if (periodType === 'annual') {
       periods.push({
@@ -738,11 +728,7 @@ class FiscalPeriodService {
     let totalExpenses = 0;
 
     for (const account of accounts) {
-      const balance = await this._getAccountBalance(
-        account._id,
-        period.startDate,
-        period.endDate,
-      );
+      const balance = await this._getAccountBalance(account._id, period.startDate, period.endDate);
 
       const absBalance = Math.abs(balance);
 

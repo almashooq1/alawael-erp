@@ -135,12 +135,8 @@ const createJournalEntry = [
   requiredString('description', 'الوصف', { max: 1000 }),
   optionalEnum('type', 'نوع القيد', ['manual', 'automatic', 'adjustment', 'closing', 'opening']),
   optionalDate('date', 'التاريخ'),
-  body('lines')
-    .isArray({ min: 2 })
-    .withMessage('القيد يجب أن يحتوي على سطرين على الأقل'),
-  body('lines.*.accountId')
-    .notEmpty()
-    .withMessage('معرف الحساب مطلوب لكل سطر'),
+  body('lines').isArray({ min: 2 }).withMessage('القيد يجب أن يحتوي على سطرين على الأقل'),
+  body('lines.*.accountId').notEmpty().withMessage('معرف الحساب مطلوب لكل سطر'),
   body('lines.*.debit')
     .optional()
     .isFloat({ min: 0 })
@@ -153,9 +149,7 @@ const createJournalEntry = [
 
 const postJournalEntry = [];
 
-const reverseJournalEntry = [
-  requiredString('reason', 'سبب العكس', { max: 500 }),
-];
+const reverseJournalEntry = [requiredString('reason', 'سبب العكس', { max: 500 })];
 
 const listJournalEntries = [
   ...paginationRules,
@@ -172,9 +166,19 @@ const createAccount = [
   optionalString('nameEn', 'الاسم بالإنجليزية', { max: 200 }),
   requiredEnum('type', 'نوع الحساب', ['asset', 'liability', 'equity', 'revenue', 'expense']),
   optionalEnum('category', 'التصنيف', [
-    'current_asset', 'fixed_asset', 'intangible_asset', 'cash', 'bank',
-    'accounts_receivable', 'inventory', 'current_liability', 'long_term_liability',
-    'accounts_payable', 'capital', 'retained_earnings', 'operating_revenue',
+    'current_asset',
+    'fixed_asset',
+    'intangible_asset',
+    'cash',
+    'bank',
+    'accounts_receivable',
+    'inventory',
+    'current_liability',
+    'long_term_liability',
+    'accounts_payable',
+    'capital',
+    'retained_earnings',
+    'operating_revenue',
     'operating_expense',
   ]),
   optionalString('parentId', 'الحساب الرئيسي', { max: 50 }),
@@ -189,9 +193,19 @@ const updateAccount = [
   optionalString('name', 'اسم الحساب', { max: 200 }),
   optionalString('nameEn', 'الاسم بالإنجليزية', { max: 200 }),
   optionalEnum('category', 'التصنيف', [
-    'current_asset', 'fixed_asset', 'intangible_asset', 'cash', 'bank',
-    'accounts_receivable', 'inventory', 'current_liability', 'long_term_liability',
-    'accounts_payable', 'capital', 'retained_earnings', 'operating_revenue',
+    'current_asset',
+    'fixed_asset',
+    'intangible_asset',
+    'cash',
+    'bank',
+    'accounts_receivable',
+    'inventory',
+    'current_liability',
+    'long_term_liability',
+    'accounts_payable',
+    'capital',
+    'retained_earnings',
+    'operating_revenue',
     'operating_expense',
   ]),
   body('isActive').optional().isBoolean().withMessage('حالة النشاط يجب أن تكون قيمة منطقية'),
@@ -237,7 +251,10 @@ const generateFiscalPeriods = [
 
 const listFiscalPeriods = [
   ...paginationRules,
-  body('fiscalYear').optional().isInt({ min: 2000, max: 2100 }).withMessage('السنة المالية غير صحيحة'),
+  body('fiscalYear')
+    .optional()
+    .isInt({ min: 2000, max: 2100 })
+    .withMessage('السنة المالية غير صحيحة'),
   queryEnum('periodType', 'نوع الفترة', ['month', 'quarter', 'semi_annual', 'annual']),
   queryEnum('status', 'الحالة', ['open', 'closing', 'closed', 'locked']),
 ];
@@ -251,7 +268,11 @@ const createExpense = [
   optionalDate('date', 'التاريخ'),
   optionalString('vendor', 'المورد', { max: 200 }),
   optionalEnum('paymentMethod', 'طريقة الدفع', [
-    'cash', 'bank_transfer', 'check', 'credit_card', 'debit_card',
+    'cash',
+    'bank_transfer',
+    'check',
+    'credit_card',
+    'debit_card',
   ]),
   body('isTaxable').optional().isBoolean().withMessage('خاضع للضريبة يجب أن تكون قيمة منطقية'),
   body('taxRate')
@@ -269,23 +290,15 @@ const updateExpense = [
   optionalEnum('status', 'الحالة', ['pending', 'approved', 'rejected', 'paid']),
 ];
 
-const approveExpense = [
-  optionalString('notes', 'ملاحظات', { max: 500 }),
-];
+const approveExpense = [optionalString('notes', 'ملاحظات', { max: 500 })];
 
-const rejectExpense = [
-  requiredString('rejectionReason', 'سبب الرفض', { max: 500 }),
-];
+const rejectExpense = [requiredString('rejectionReason', 'سبب الرفض', { max: 500 })];
 
 // ═══ FINANCIAL REPORTS ═══════════════════════════════════════════════════════
 
-const reportDateRange = [
-  ...dateRangeRules,
-];
+const reportDateRange = [...dateRangeRules];
 
-const reportAsOfDate = [
-  optionalDate('asOfDate', 'التاريخ'),
-];
+const reportAsOfDate = [optionalDate('asOfDate', 'التاريخ')];
 
 module.exports = {
   // Transactions

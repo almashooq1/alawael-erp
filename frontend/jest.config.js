@@ -17,9 +17,9 @@ module.exports = {
   moduleNameMapper: {
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
     '\\.(gif|ttf|eot|svg|png)$': '<rootDir>/tests/__mocks__/fileMock.js',
-    '^.+/utils/api(\\.js)?$': '<rootDir>/src/utils/api.js',
-    '^.+/services/api(\\.js)?$': '<rootDir>/src/utils/api.js',
-    '^.+/components/services/api(\\.js)?$': '<rootDir>/src/utils/api.js',
+    '^.+/utils/api(\\.js)?$': '<rootDir>/src/services/api.js',
+    '^.+/services/api(\\.js)?$': '<rootDir>/src/services/api.js',
+    '^.+/components/services/api(\\.js)?$': '<rootDir>/src/services/api.js',
   },
   collectCoverageFrom: ['src/**/*.{js,jsx}', '!src/index.js', '!src/reportWebVitals.js'],
 };

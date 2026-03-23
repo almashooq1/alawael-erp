@@ -21,8 +21,18 @@ const envSchema = Joi.object({
   // can mask misconfigurations that only surface under real load.
   MONGODB_URI:
     process.env.NODE_ENV === 'production'
-      ? Joi.string().uri().required()
-      : Joi.string().uri().optional(),
+      ? Joi.string()
+          .pattern(/^mongodb(\+srv)?:\/\/.+/)
+          .required()
+          .messages({
+            'string.pattern.base': 'MONGODB_URI must start with mongodb:// or mongodb+srv://',
+          })
+      : Joi.string()
+          .pattern(/^mongodb(\+srv)?:\/\/.+/)
+          .optional()
+          .messages({
+            'string.pattern.base': 'MONGODB_URI must start with mongodb:// or mongodb+srv://',
+          }),
   USE_MOCK_DB: Joi.string().valid('true', 'false').optional(),
 
   // ─── Authentication ────────────────────────────────────────────────────────
@@ -50,6 +60,9 @@ const envSchema = Joi.object({
   REDIS_URL: Joi.string().optional(),
   REDIS_HOST: Joi.string().optional(),
   REDIS_PORT: Joi.number().integer().min(1).max(65535).optional(),
+  REDIS_PASSWORD: Joi.string().optional().allow(''),
+  REDIS_DB: Joi.number().integer().min(0).max(15).optional(),
+  REDIS_ENABLED: Joi.string().valid('true', 'false').optional(),
   DISABLE_REDIS: Joi.string().valid('true', 'false').optional(),
 
   // ─── CORS ──────────────────────────────────────────────────────────────────

@@ -43,7 +43,7 @@ const {
   notFoundHandler,
   uncaughtExceptionHandler,
   unhandledRejectionHandler,
-} = require('./middleware/errorHandler.enhanced');
+} = require('./errors/errorHandler');
 const { sanitizeInput: requestValidationSanitize } = require('./middleware/requestValidation');
 
 // Security middleware

@@ -109,6 +109,7 @@ import {
   QualityManagementRoutes,
   WorkforceAnalyticsRoutes,
   LearningDevelopmentRoutes,
+  AutomatedBackupRoutes,
 } from './routes';
 
 // Pages — Keep eagerly loaded (critical path / small)
@@ -338,6 +339,7 @@ function AppContent() {
                               {QualityManagementRoutes()}
                               {WorkforceAnalyticsRoutes()}
                               {LearningDevelopmentRoutes()}
+                              {AutomatedBackupRoutes()}
                               {/* === Shared / Cross-cutting Routes === */}
                               {/* AI & Analytics */}
                               <Route

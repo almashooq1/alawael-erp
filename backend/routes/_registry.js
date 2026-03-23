@@ -1060,6 +1060,14 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
     '../routes/learning-development.routes'
   );
   logger.info('Phase 22 mounted (1 module: learning-development)');
+
+  // ── Phase 23: Automated Backup System — نظام النسخ الاحتياطي التلقائي ──────
+  safeMount(
+    app,
+    ['/api/automated-backup', '/api/v1/automated-backup'],
+    '../routes/automated-backup.routes'
+  );
+  logger.info('Phase 23 mounted (1 module: automated-backup)');
 };
 
 module.exports = { mountAllRoutes, dualMount, safeMount };

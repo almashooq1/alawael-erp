@@ -1,0 +1,248 @@
+/**
+ * AL-AWAEL ERP — AUTOMATED BACKUP ROUTES
+ * Phase 23 — نظام النسخ الاحتياطي التلقائي
+ *
+ * 20 endpoints for backup management, scheduling, storage targets,
+ * restore, health monitoring, analytics, and configuration.
+ */
+
+const express = require('express');
+const router = express.Router();
+const AutomatedBackupService = require('../services/automated-backup.service');
+
+const backupService = new AutomatedBackupService({
+  s3Bucket: process.env.AWS_S3_BUCKET || '',
+  s3Region: process.env.AWS_REGION || 'me-south-1',
+  retentionDays: parseInt(process.env.BACKUP_RETENTION_DAYS, 10) || 30,
+});
+
+/* ━━━ Middleware: auth check (graceful) ━━━ */
+let authenticate, authorize;
+try {
+  ({ authenticate, authorize } = require('../middleware/auth'));
+} catch {
+  authenticate = (_req, _res, next) => next();
+  authorize = () => (_req, _res, next) => next();
+}
+
+const guard = [authenticate, authorize(['admin', 'system_admin', 'super_admin'])];
+
+/* ══════════════════════════════════════════════════════════════════════
+   BACKUP OPERATIONS — عمليات النسخ الاحتياطي
+   ══════════════════════════════════════════════════════════════════════ */
+
+// 1. POST /  — Create a new backup
+router.post('/', guard, (req, res) => {
+  try {
+    const backup = backupService.createBackup(req.body);
+    res.status(201).json({ success: true, data: backup });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+
+// 2. GET /  — List all backups
+router.get('/', guard, (req, res) => {
+  try {
+    const result = backupService.listBackups(req.query);
+    res.json({ success: true, ...result });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+/* ── IMPORTANT: Named GET routes BEFORE /:id to avoid param capture ── */
+
+// 16. GET /health — System health status
+router.get('/health', guard, (_req, res) => {
+  try {
+    const health = backupService.getHealthStatus();
+    res.json({ success: true, data: health });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// 17. GET /analytics — Backup analytics
+router.get('/analytics', guard, (req, res) => {
+  try {
+    const analytics = backupService.getAnalytics(req.query);
+    res.json({ success: true, data: analytics });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// 19. GET /config — Get current configuration
+router.get('/config', guard, (_req, res) => {
+  try {
+    const config = backupService.getConfig();
+    res.json({ success: true, data: config });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// 20. PUT /config — Update configuration
+router.put('/config', guard, (req, res) => {
+  try {
+    const config = backupService.updateConfig(req.body);
+    res.json({ success: true, data: config });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+
+// 18. POST /cleanup — Run retention cleanup
+router.post('/cleanup', guard, (_req, res) => {
+  try {
+    const result = backupService.runRetentionCleanup();
+    res.json({ success: true, data: result });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// 3. GET /:id — Get single backup detail
+router.get('/:id', guard, (req, res) => {
+  try {
+    const backup = backupService.getBackup(req.params.id);
+    res.json({ success: true, data: backup });
+  } catch (error) {
+    res.status(404).json({ success: false, error: error.message });
+  }
+});
+
+// 4. DELETE /:id — Delete a backup
+router.delete('/:id', guard, (req, res) => {
+  try {
+    const result = backupService.deleteBackup(req.params.id);
+    res.json({ success: true, ...result });
+  } catch (error) {
+    res.status(404).json({ success: false, error: error.message });
+  }
+});
+
+// 5. POST /:id/verify — Verify backup integrity
+router.post('/:id/verify', guard, (req, res) => {
+  try {
+    const result = backupService.verifyBackup(req.params.id);
+    res.json({ success: true, data: result });
+  } catch (error) {
+    res.status(404).json({ success: false, error: error.message });
+  }
+});
+
+/* ══════════════════════════════════════════════════════════════════════
+   SCHEDULES — جداول النسخ الاحتياطي
+   ══════════════════════════════════════════════════════════════════════ */
+
+// 6. GET /schedules/list — List backup schedules
+router.get('/schedules/list', guard, (_req, res) => {
+  try {
+    const result = backupService.listSchedules();
+    res.json({ success: true, ...result });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// 7. POST /schedules — Create or update schedule
+router.post('/schedules', guard, (req, res) => {
+  try {
+    const schedule = backupService.upsertSchedule(req.body);
+    res.status(201).json({ success: true, data: schedule });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+
+// 8. PUT /schedules/:id/toggle — Toggle schedule enabled/disabled
+router.put('/schedules/:id/toggle', guard, (req, res) => {
+  try {
+    const schedule = backupService.toggleSchedule(req.params.id, req.body.enabled);
+    res.json({ success: true, data: schedule });
+  } catch (error) {
+    res.status(404).json({ success: false, error: error.message });
+  }
+});
+
+// 9. DELETE /schedules/:id — Delete a schedule
+router.delete('/schedules/:id', guard, (req, res) => {
+  try {
+    const result = backupService.deleteSchedule(req.params.id);
+    res.json({ success: true, ...result });
+  } catch (error) {
+    res.status(404).json({ success: false, error: error.message });
+  }
+});
+
+/* ══════════════════════════════════════════════════════════════════════
+   STORAGE TARGETS — أهداف التخزين (S3, GCS, SFTP…)
+   ══════════════════════════════════════════════════════════════════════ */
+
+// 10. GET /storage/targets — List storage targets
+router.get('/storage/targets', guard, (_req, res) => {
+  try {
+    const result = backupService.listStorageTargets();
+    res.json({ success: true, ...result });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// 11. POST /storage/targets — Add/update storage target
+router.post('/storage/targets', guard, (req, res) => {
+  try {
+    const target = backupService.upsertStorageTarget(req.body);
+    res.status(201).json({ success: true, data: target });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+
+// 12. POST /storage/targets/:id/test — Test target connectivity
+router.post('/storage/targets/:id/test', guard, (req, res) => {
+  try {
+    const result = backupService.testStorageTarget(req.params.id);
+    res.json({ success: true, data: result });
+  } catch (error) {
+    res.status(404).json({ success: false, error: error.message });
+  }
+});
+
+// 13. DELETE /storage/targets/:id — Remove storage target
+router.delete('/storage/targets/:id', guard, (req, res) => {
+  try {
+    const result = backupService.removeStorageTarget(req.params.id);
+    res.json({ success: true, ...result });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+});
+
+/* ══════════════════════════════════════════════════════════════════════
+   RESTORE — الاستعادة
+   ══════════════════════════════════════════════════════════════════════ */
+
+// 14. POST /restore/:id — Restore from a backup
+router.post('/restore/:id', guard, (req, res) => {
+  try {
+    const result = backupService.restoreBackup(req.params.id, req.body);
+    res.json({ success: true, data: result });
+  } catch (error) {
+    res.status(404).json({ success: false, error: error.message });
+  }
+});
+
+// 15. GET /restore/history — Restore history
+router.get('/restore/history', guard, (req, res) => {
+  try {
+    const result = backupService.listRestoreHistory(req.query);
+    res.json({ success: true, ...result });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+module.exports = router;

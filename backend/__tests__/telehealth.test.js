@@ -73,7 +73,7 @@ describe('Telehealth — Session CRUD', () => {
   test('GET /sessions?status=completed → filters by status', async () => {
     const res = await request(app).get('/api/telehealth/sessions?status=completed');
     expect(res.status).toBe(200);
-    res.body.data.forEach((s) => expect(s.status).toBe('completed'));
+    res.body.data.forEach(s => expect(s.status).toBe('completed'));
   });
 
   test('GET /sessions?search=... → filters by search term', async () => {
@@ -259,14 +259,12 @@ describe('Telehealth — AI & Reports', () => {
 
   beforeAll(async () => {
     // Create + complete a session
-    const create = await request(app)
-      .post('/api/telehealth/sessions')
-      .send({
-        title: 'جلسة تقرير',
-        patientName: 'مريض تقرير',
-        scheduledDate: new Date().toISOString(),
-        duration: 30,
-      });
+    const create = await request(app).post('/api/telehealth/sessions').send({
+      title: 'جلسة تقرير',
+      patientName: 'مريض تقرير',
+      scheduledDate: new Date().toISOString(),
+      duration: 30,
+    });
     completedId = create.body.data.id;
     // Start it
     await request(app).post(`/api/telehealth/sessions/${completedId}/start`);

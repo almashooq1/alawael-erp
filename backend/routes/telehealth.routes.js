@@ -182,10 +182,12 @@ router.get('/dashboard/overview', async (req, res) => {
       const d = new Date(s.scheduledDate);
       return d >= todayStart && d < new Date(todayStart.getTime() + 86400000);
     });
-    const upcomingWeek = all.filter(s => {
-      const d = new Date(s.scheduledDate);
-      return d >= now && d <= weekAhead && s.status === 'scheduled';
-    }).slice(0, 5);
+    const upcomingWeek = all
+      .filter(s => {
+        const d = new Date(s.scheduledDate);
+        return d >= now && d <= weekAhead && s.status === 'scheduled';
+      })
+      .slice(0, 5);
 
     const monthlySessions = all.filter(s => new Date(s.scheduledDate) >= monthStart).length;
 
@@ -268,7 +270,16 @@ router.get('/sessions', async (req, res) => {
     let sessions = Array.from(sessionStore.values());
 
     // Filters
-    const { status, platform, sessionType, priority, department, search, page = 1, limit = 20 } = req.query;
+    const {
+      status,
+      platform,
+      sessionType,
+      priority,
+      department,
+      search,
+      page = 1,
+      limit = 20,
+    } = req.query;
     if (status) sessions = sessions.filter(s => s.status === status);
     if (platform) sessions = sessions.filter(s => s.platform === platform);
     if (sessionType) sessions = sessions.filter(s => s.sessionType === sessionType);
@@ -397,7 +408,10 @@ router.put(
 router.patch(
   '/sessions/:id/status',
   authorize(['admin', 'manager', 'therapist', 'doctor']),
-  [param('id').isNumeric(), body('status').isIn(['scheduled', 'in-progress', 'completed', 'cancelled'])],
+  [
+    param('id').isNumeric(),
+    body('status').isIn(['scheduled', 'in-progress', 'completed', 'cancelled']),
+  ],
   async (req, res) => {
     try {
       const vErr = handleValidation(req, res);

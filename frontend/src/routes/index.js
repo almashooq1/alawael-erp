@@ -124,3 +124,6 @@ export { default as AutomatedBackupRoutes } from './AutomatedBackupRoutes';
 
 // === Phase 24: Rate Limiting + WAF (حماية متقدمة ضد هجمات DDoS) ===
 export { default as WafRateLimitRoutes } from './WafRateLimitRoutes';
+
+// === Print Center (مركز الطباعة — جميع قوالب الطباعة) ===
+export { default as PrintCenterRoutes } from './PrintCenterRoutes';

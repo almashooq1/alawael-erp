@@ -110,6 +110,8 @@ import {
   ViewInAr as ARRehabIcon,
   // ─── Phase: Telehealth (الطب عن بُعد) ───
   VideoCall as TelehealthIcon,
+  // ─── Print Center (مركز الطباعة) ───
+  LocalPrintshop as PrintCenterIcon,
 } from '@mui/icons-material';
 
 const getNavigationItems = () => [
@@ -676,6 +678,20 @@ const getNavigationItems = () => [
     icon: <CMSIcon />,
     path: '/cms',
     roles: ['admin', 'super_admin', 'manager', 'content_manager'],
+  },
+  {
+    id: 'print-center',
+    label: 'مركز الطباعة',
+    icon: <PrintCenterIcon />,
+    roles: ['*'],
+    children: [
+      { id: 'print-hub', label: 'جميع القوالب', path: '/print-center' },
+      { id: 'print-hr', label: 'قوالب الموارد البشرية', path: '/print-center/hr' },
+      { id: 'print-finance', label: 'قوالب المالية', path: '/print-center/finance' },
+      { id: 'print-therapy', label: 'قوالب العلاج والتأهيل', path: '/print-center/therapy' },
+      { id: 'print-admin', label: 'قوالب الإدارة', path: '/print-center/admin' },
+      { id: 'print-operations', label: 'قوالب العمليات', path: '/print-center/operations' },
+    ],
   },
 
   // ═══════════════════════════════════════════════════════

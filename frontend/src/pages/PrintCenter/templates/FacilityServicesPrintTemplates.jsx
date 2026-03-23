@@ -15,7 +15,7 @@ export const FACILITY_TEMPLATES = [
   { id: 'room-booking', name: 'حجز قاعة', nameEn: 'Room Booking Form', desc: 'نموذج حجز قاعة اجتماعات', color: '#5d4037' },
   { id: 'facility-inspection', name: 'تفتيش مرفق', nameEn: 'Facility Inspection', desc: 'نموذج تفتيش دوري للمبنى', color: '#6d4c41' },
   { id: 'space-allocation', name: 'تخصيص مساحة', nameEn: 'Space Allocation', desc: 'نموذج تخصيص مكتب أو مساحة', color: '#795548' },
-  // المطبخ والتغذية  
+  // المطبخ والتغذية
   { id: 'daily-menu', name: 'قائمة الطعام اليومية', nameEn: 'Daily Menu', desc: 'قائمة الوجبات اليومية', color: '#e65100' },
   { id: 'meal-plan', name: 'خطة الوجبات الأسبوعية', nameEn: 'Weekly Meal Plan', desc: 'خطة الوجبات الأسبوعية', color: '#ef6c00' },
   { id: 'nutrition-report', name: 'تقرير التغذية', nameEn: 'Nutrition Report', desc: 'تقرير القيمة الغذائية', color: '#f57c00' },

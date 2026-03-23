@@ -33,6 +33,16 @@ import {
   HomeWork as FacilityIcon,
   TrendingUp as BusinessIcon,
   Groups as StakeholderIcon,
+  Accessible as RehabIcon,
+  ChildCare as EarlyIcon,
+  Videocam as TelehealthIcon,
+  VolunteerActivism as DonationsIcon,
+  RocketLaunch as ProjectsIcon,
+  FactCheck as AuditIcon,
+  Restaurant as KitchenIcon,
+  Public as GovIcon,
+  Store as EcomIcon,
+  Dashboard as PortalsIcon,
 } from '@mui/icons-material';
 
 /* ─── Batch 1 Templates ─── */
@@ -54,6 +64,18 @@ import { COMMUNICATIONS_TEMPLATES, CommunicationsTemplateRenderer } from './temp
 import { FACILITY_TEMPLATES, FacilityTemplateRenderer } from './templates/FacilityServicesPrintTemplates';
 import { BUSINESS_TEMPLATES, BusinessTemplateRenderer } from './templates/BusinessCRMPrintTemplates';
 import { STAKEHOLDER_TEMPLATES, StakeholderTemplateRenderer } from './templates/StakeholderGovPrintTemplates';
+
+/* ─── Batch 3 Templates ─── */
+import { REHAB_SPECIALIZED_TEMPLATES, RehabSpecializedTemplateRenderer } from './templates/RehabSpecializedPrintTemplates';
+import { EARLY_MHPSS_TEMPLATES, EarlyMHPSSTemplateRenderer } from './templates/EarlyMHPSSPrintTemplates';
+import { TELEHEALTH_MONTESSORI_TEMPLATES, TelehealthMontessoriTemplateRenderer } from './templates/TelehealthMontessoriPrintTemplates';
+import { DONATIONS_HELPDESK_TEMPLATES, DonationsHelpDeskTemplateRenderer } from './templates/DonationsHelpDeskPrintTemplates';
+import { PROJECTS_STRATEGY_TEMPLATES, ProjectsStrategyTemplateRenderer } from './templates/ProjectsStrategyPrintTemplates';
+import { WORKFLOW_AUDIT_TEMPLATES, WorkflowAuditTemplateRenderer } from './templates/WorkflowAuditPrintTemplates';
+import { KITCHEN_LIBRARY_TEMPLATES, KitchenLibraryTemplateRenderer } from './templates/KitchenLibraryPrintTemplates';
+import { GOV_IOT_TEMPLATES, GovIoTTemplateRenderer } from './templates/GovIntegrationsPrintTemplates';
+import { ECOMMERCE_BLOCKCHAIN_TEMPLATES, EcommerceBlockchainTemplateRenderer } from './templates/EcommerceBlockchainPrintTemplates';
+import { PORTALS_DIRECTIVES_TEMPLATES, PortalsDirectivesTemplateRenderer } from './templates/PortalsDirectivesPrintTemplates';
 
 /* ─── Module Groups ─── */
 const MODULE_GROUPS = [
@@ -153,6 +175,67 @@ const MODULE_GROUPS = [
     icon: <StakeholderIcon />, color: '#0d47a1',
     templates: STAKEHOLDER_TEMPLATES,
     renderer: StakeholderTemplateRenderer,
+  },
+  /* ─── Batch 3 Modules ─── */
+  {
+    id: 'rehab-specialized', name: 'التأهيل المتخصص', nameEn: 'Specialized Rehabilitation',
+    icon: <RehabIcon />, color: '#00838f',
+    templates: REHAB_SPECIALIZED_TEMPLATES,
+    renderer: RehabSpecializedTemplateRenderer,
+  },
+  {
+    id: 'early-mhpss', name: 'التدخل المبكر والدعم النفسي', nameEn: 'Early Intervention & MHPSS',
+    icon: <EarlyIcon />, color: '#6a1b9a',
+    templates: EARLY_MHPSS_TEMPLATES,
+    renderer: EarlyMHPSSTemplateRenderer,
+  },
+  {
+    id: 'telehealth', name: 'الصحة عن بُعد ومنتسوري', nameEn: 'Telehealth & Montessori',
+    icon: <TelehealthIcon />, color: '#00695c',
+    templates: TELEHEALTH_MONTESSORI_TEMPLATES,
+    renderer: TelehealthMontessoriTemplateRenderer,
+  },
+  {
+    id: 'donations', name: 'التبرعات والدعم الفني', nameEn: 'Donations & Help Desk',
+    icon: <DonationsIcon />, color: '#c62828',
+    templates: DONATIONS_HELPDESK_TEMPLATES,
+    renderer: DonationsHelpDeskTemplateRenderer,
+  },
+  {
+    id: 'projects', name: 'المشاريع والاستراتيجية', nameEn: 'Projects & Strategy',
+    icon: <ProjectsIcon />, color: '#1565c0',
+    templates: PROJECTS_STRATEGY_TEMPLATES,
+    renderer: ProjectsStrategyTemplateRenderer,
+  },
+  {
+    id: 'workflow-audit', name: 'سير العمل والتدقيق', nameEn: 'Workflow & Audit',
+    icon: <AuditIcon />, color: '#4527a0',
+    templates: WORKFLOW_AUDIT_TEMPLATES,
+    renderer: WorkflowAuditTemplateRenderer,
+  },
+  {
+    id: 'kitchen-library', name: 'المطبخ والمكتبة والبحث', nameEn: 'Kitchen, Library & Research',
+    icon: <KitchenIcon />, color: '#bf360c',
+    templates: KITCHEN_LIBRARY_TEMPLATES,
+    renderer: KitchenLibraryTemplateRenderer,
+  },
+  {
+    id: 'gov-iot', name: 'التكامل الحكومي وإنترنت الأشياء', nameEn: 'Gov Integration & IoT',
+    icon: <GovIcon />, color: '#0d47a1',
+    templates: GOV_IOT_TEMPLATES,
+    renderer: GovIoTTemplateRenderer,
+  },
+  {
+    id: 'ecommerce', name: 'التجارة الإلكترونية والبلوكتشين', nameEn: 'E-Commerce & Blockchain',
+    icon: <EcomIcon />, color: '#e65100',
+    templates: ECOMMERCE_BLOCKCHAIN_TEMPLATES,
+    renderer: EcommerceBlockchainTemplateRenderer,
+  },
+  {
+    id: 'portals', name: 'البوابات والمستودعات والتدريب', nameEn: 'Portals, Warehouse & Training',
+    icon: <PortalsIcon />, color: '#880e4f',
+    templates: PORTALS_DIRECTIVES_TEMPLATES,
+    renderer: PortalsDirectivesTemplateRenderer,
   },
 ];
 

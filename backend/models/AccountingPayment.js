@@ -190,6 +190,6 @@ accountingPaymentSchema.methods.generateReceipt = async function () {
   };
 };
 
-const AccountingPayment = mongoose.model('AccountingPayment', accountingPaymentSchema);
+const AccountingPayment = mongoose.models.AccountingPayment || mongoose.model('AccountingPayment', accountingPaymentSchema);
 
 module.exports = AccountingPayment;

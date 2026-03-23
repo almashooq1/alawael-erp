@@ -287,4 +287,4 @@ MaintenanceIssueSchema.virtual('isOverdue').get(function () {
   return false;
 });
 
-module.exports = mongoose.model('MaintenanceIssue', MaintenanceIssueSchema);
+module.exports = mongoose.models.MaintenanceIssue || mongoose.model('MaintenanceIssue', MaintenanceIssueSchema);

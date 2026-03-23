@@ -171,4 +171,4 @@ performanceSchema.methods.processByHR = function () {
   return this.save();
 };
 
-module.exports = mongoose.model('Performance', performanceSchema);
+module.exports = mongoose.models.Performance || mongoose.model('Performance', performanceSchema);

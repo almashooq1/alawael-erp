@@ -649,8 +649,8 @@ ProgramProgressSchema.index({ overallStatus: 1 });
 // Exports
 // ============================
 module.exports = {
-  ProgramCategory: mongoose.model('ProgramCategory', ProgramCategorySchema),
-  RehabilitationProgram: mongoose.model('RehabilitationProgram', RehabilitationProgramSchema),
-  ProgramSession: mongoose.model('ProgramSession', ProgramSessionSchema),
-  ProgramProgress: mongoose.model('ProgramProgress', ProgramProgressSchema),
+  ProgramCategory: mongoose.models.ProgramCategory || mongoose.model('ProgramCategory', ProgramCategorySchema),
+  RehabilitationProgram: mongoose.models.RehabilitationProgram || mongoose.model('RehabilitationProgram', RehabilitationProgramSchema),
+  ProgramSession: mongoose.models.ProgramSession || mongoose.model('ProgramSession', ProgramSessionSchema),
+  ProgramProgress: mongoose.models.ProgramProgress || mongoose.model('ProgramProgress', ProgramProgressSchema),
 };

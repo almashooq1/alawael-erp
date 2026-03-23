@@ -63,4 +63,4 @@ exchangeRateSchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.model('ExchangeRate', exchangeRateSchema);
+module.exports = mongoose.models.ExchangeRate || mongoose.model('ExchangeRate', exchangeRateSchema);

@@ -53,4 +53,4 @@ const activitySchema = new mongoose.Schema(
 activitySchema.index({ programId: 1, date: -1 });
 activitySchema.index({ status: 1, date: -1 });
 
-module.exports = mongoose.model('Activity', activitySchema);
+module.exports = mongoose.models.Activity || mongoose.model('Activity', activitySchema);

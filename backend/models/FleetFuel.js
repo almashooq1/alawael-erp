@@ -150,4 +150,4 @@ fleetFuelSchema.index({ organization: 1, status: 1 });
 fleetFuelSchema.index({ 'anomaly.detected': 1 });
 fleetFuelSchema.index({ 'station.location': '2dsphere' });
 
-module.exports = mongoose.model('FleetFuel', fleetFuelSchema);
+module.exports = mongoose.models.FleetFuel || mongoose.model('FleetFuel', fleetFuelSchema);

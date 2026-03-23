@@ -107,4 +107,4 @@ ComplaintSchema.pre('save', async function (next) {
   next();
 });
 
-module.exports = mongoose.model('Complaint', ComplaintSchema);
+module.exports = mongoose.models.Complaint || mongoose.model('Complaint', ComplaintSchema);

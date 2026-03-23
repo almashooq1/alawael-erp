@@ -32,4 +32,4 @@ const approvalRequestSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
-module.exports = mongoose.model('ApprovalRequest', approvalRequestSchema);
+module.exports = mongoose.models.ApprovalRequest || mongoose.model('ApprovalRequest', approvalRequestSchema);

@@ -201,4 +201,4 @@ financialReportSchema.statics.getLatestReport = function (organizationId, report
   });
 };
 
-module.exports = mongoose.model('FinancialReport', financialReportSchema);
+module.exports = mongoose.models.FinancialReport || mongoose.model('FinancialReport', financialReportSchema);

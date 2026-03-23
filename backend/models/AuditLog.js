@@ -98,4 +98,4 @@ auditLogSchema.statics.getComplianceLog = function (organizationId) {
   return this.find({ organizationId, complianceRelevant: true }).sort({ timestamp: -1 });
 };
 
-module.exports = mongoose.model('AuditLog', auditLogSchema);
+module.exports = mongoose.models.AuditLog || mongoose.model('AuditLog', auditLogSchema);

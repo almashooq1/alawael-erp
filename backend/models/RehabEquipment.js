@@ -29,4 +29,4 @@ const rehabEquipmentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model('RehabEquipment', rehabEquipmentSchema);
+module.exports = mongoose.models.RehabEquipment || mongoose.model('RehabEquipment', rehabEquipmentSchema);

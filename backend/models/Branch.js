@@ -172,4 +172,4 @@ branchSchema.statics.findByCode = function (code) {
   return this.findOne({ code: code.toUpperCase(), deletedAt: null });
 };
 
-module.exports = mongoose.model('Branch', branchSchema);
+module.exports = mongoose.models.Branch || mongoose.model('Branch', branchSchema);

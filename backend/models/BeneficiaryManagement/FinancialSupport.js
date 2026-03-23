@@ -381,6 +381,6 @@ financialSupportSchema.statics.getMonthlyStats = function () {
   ]);
 };
 
-const FinancialSupport = mongoose.model('FinancialSupport', financialSupportSchema);
+const FinancialSupport = mongoose.models.FinancialSupport || mongoose.model('FinancialSupport', financialSupportSchema);
 
 module.exports = FinancialSupport;

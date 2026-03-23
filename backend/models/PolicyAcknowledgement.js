@@ -81,4 +81,4 @@ policyAcknowledgementSchema.index({ policyId: 1, employeeId: 1 });
 policyAcknowledgementSchema.index({ status: 1, dueDate: 1 });
 policyAcknowledgementSchema.index({ employeeId: 1 });
 
-module.exports = mongoose.model('PolicyAcknowledgement', policyAcknowledgementSchema);
+module.exports = mongoose.models.PolicyAcknowledgement || mongoose.model('PolicyAcknowledgement', policyAcknowledgementSchema);

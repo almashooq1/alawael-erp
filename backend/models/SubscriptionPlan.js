@@ -142,4 +142,4 @@ const subscriptionPlanSchema = new mongoose.Schema(
 
 subscriptionPlanSchema.index({ isActive: 1, price: 1 });
 
-module.exports = mongoose.model('SubscriptionPlan', subscriptionPlanSchema);
+module.exports = mongoose.models.SubscriptionPlan || mongoose.model('SubscriptionPlan', subscriptionPlanSchema);

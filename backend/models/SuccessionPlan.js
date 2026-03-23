@@ -249,4 +249,4 @@ SuccessionPlanSchema.methods.getBestCandidate = function () {
   })[0];
 };
 
-module.exports = mongoose.model('SuccessionPlan', SuccessionPlanSchema);
+module.exports = mongoose.models.SuccessionPlan || mongoose.model('SuccessionPlan', SuccessionPlanSchema);

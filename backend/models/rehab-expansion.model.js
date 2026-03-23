@@ -2325,14 +2325,14 @@ AdaptiveHousingSchema.index({ 'modifications.status': 1, 'modifications.priority
 // ═══════════════════════════════════════════════════════════════════════════════
 
 module.exports = {
-  AssistiveDevice: mongoose.model('AssistiveDevice', AssistiveDeviceSchema),
-  VocationalRehab: mongoose.model('VocationalRehab', VocationalRehabSchema),
-  DisabilityRights: mongoose.model('DisabilityRights', DisabilityRightsSchema),
-  IntegrativeHealthcare: mongoose.model('IntegrativeHealthcare', IntegrativeHealthcareSchema),
-  CommunityIntegration: mongoose.model('CommunityIntegration', CommunityIntegrationSchema),
-  CaregiverSupport: mongoose.model('CaregiverSupport', CaregiverSupportSchema),
-  AccessibilityAudit: mongoose.model('AccessibilityAudit', AccessibilityAuditSchema),
-  EarlyDetection: mongoose.model('EarlyDetection', EarlyDetectionSchema),
-  OutcomeMeasurement: mongoose.model('OutcomeMeasurement', OutcomeMeasurementSchema),
-  AdaptiveHousing: mongoose.model('AdaptiveHousing', AdaptiveHousingSchema),
+  AssistiveDevice: mongoose.models.AssistiveDevice || mongoose.model('AssistiveDevice', AssistiveDeviceSchema),
+  VocationalRehab: mongoose.models.VocationalRehab || mongoose.model('VocationalRehab', VocationalRehabSchema),
+  DisabilityRights: mongoose.models.DisabilityRights || mongoose.model('DisabilityRights', DisabilityRightsSchema),
+  IntegrativeHealthcare: mongoose.models.IntegrativeHealthcare || mongoose.model('IntegrativeHealthcare', IntegrativeHealthcareSchema),
+  CommunityIntegration: mongoose.models.CommunityIntegration || mongoose.model('CommunityIntegration', CommunityIntegrationSchema),
+  CaregiverSupport: mongoose.models.CaregiverSupport || mongoose.model('CaregiverSupport', CaregiverSupportSchema),
+  AccessibilityAudit: mongoose.models.AccessibilityAudit || mongoose.model('AccessibilityAudit', AccessibilityAuditSchema),
+  EarlyDetection: mongoose.models.EarlyDetection || mongoose.model('EarlyDetection', EarlyDetectionSchema),
+  OutcomeMeasurement: mongoose.models.OutcomeMeasurement || mongoose.model('OutcomeMeasurement', OutcomeMeasurementSchema),
+  AdaptiveHousing: mongoose.models.AdaptiveHousing || mongoose.model('AdaptiveHousing', AdaptiveHousingSchema),
 };

@@ -224,4 +224,4 @@ TripSchema.methods.calculateDrivingQuality = function () {
   return this.save();
 };
 
-module.exports = mongoose.model('Trip', TripSchema);
+module.exports = mongoose.models.Trip || mongoose.model('Trip', TripSchema);

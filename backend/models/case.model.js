@@ -789,6 +789,6 @@ caseSchema.methods.unarchive = function () {
   return this.save();
 };
 
-const Case = mongoose.model('Case', caseSchema);
+const Case = mongoose.models.Case || mongoose.model('Case', caseSchema);
 
 module.exports = Case;

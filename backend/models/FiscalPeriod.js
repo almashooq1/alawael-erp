@@ -98,4 +98,4 @@ const fiscalPeriodSchema = new mongoose.Schema(
 fiscalPeriodSchema.index({ fiscalYear: 1, periodType: 1 });
 fiscalPeriodSchema.index({ status: 1 });
 
-module.exports = mongoose.model('FiscalPeriod', fiscalPeriodSchema);
+module.exports = mongoose.models.FiscalPeriod || mongoose.model('FiscalPeriod', fiscalPeriodSchema);

@@ -36,4 +36,4 @@ const ProjectSchema = new mongoose.Schema({
   updatedAt: Date,
 });
 
-module.exports = mongoose.model('Project', ProjectSchema);
+module.exports = mongoose.models.Project || mongoose.model('Project', ProjectSchema);

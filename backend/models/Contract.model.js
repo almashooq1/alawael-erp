@@ -465,4 +465,4 @@ ContractSchema.statics = {
   },
 };
 
-module.exports = mongoose.model('Contract', ContractSchema);
+module.exports = mongoose.models.Contract || mongoose.model('Contract', ContractSchema);

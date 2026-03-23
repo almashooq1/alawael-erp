@@ -332,4 +332,4 @@ cameraSchema.statics.findByIp = function (ipAddress) {
   return this.findOne({ 'hikvision.ipAddress': ipAddress, deletedAt: null });
 };
 
-module.exports = mongoose.model('Camera', cameraSchema);
+module.exports = mongoose.models.Camera || mongoose.model('Camera', cameraSchema);

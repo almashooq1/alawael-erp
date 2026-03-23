@@ -151,4 +151,4 @@ expenseSchema.index({ date: -1 });
 expenseSchema.index({ category: 1 });
 expenseSchema.index({ status: 1 });
 
-module.exports = mongoose.model('Expense', expenseSchema);
+module.exports = mongoose.models.Expense || mongoose.model('Expense', expenseSchema);

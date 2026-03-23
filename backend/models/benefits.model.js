@@ -63,4 +63,4 @@ const benefitsSchema = new mongoose.Schema({
 benefitsSchema.index({ employeeId: 1, status: 1 });
 benefitsSchema.index({ type: 1 });
 
-module.exports = mongoose.model('Benefits', benefitsSchema);
+module.exports = mongoose.models.Benefits || mongoose.model('Benefits', benefitsSchema);

@@ -120,7 +120,7 @@ financialApprovalSchema.index({ organization: 1, overallStatus: 1 });
 financialApprovalSchema.index({ 'steps.approver': 1, 'steps.status': 1 });
 financialApprovalSchema.index({ documentType: 1, documentId: 1 });
 
-const ApprovalWorkflow = mongoose.model('ApprovalWorkflow', approvalWorkflowSchema);
-const FinancialApproval = mongoose.model('FinancialApproval', financialApprovalSchema);
+const ApprovalWorkflow = mongoose.models.ApprovalWorkflow || mongoose.model('ApprovalWorkflow', approvalWorkflowSchema);
+const FinancialApproval = mongoose.models.FinancialApproval || mongoose.model('FinancialApproval', financialApprovalSchema);
 
 module.exports = { ApprovalWorkflow, FinancialApproval };

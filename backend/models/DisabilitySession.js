@@ -90,4 +90,4 @@ disabilitySessionSchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.model('DisabilitySession', disabilitySessionSchema);
+module.exports = mongoose.models.DisabilitySession || mongoose.model('DisabilitySession', disabilitySessionSchema);

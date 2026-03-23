@@ -246,6 +246,6 @@ communicationSchema.pre('save', async function () {
   next();
 });
 
-const Communication = mongoose.model('Communication', communicationSchema);
+const Communication = mongoose.models.Communication || mongoose.model('Communication', communicationSchema);
 
 module.exports = Communication;

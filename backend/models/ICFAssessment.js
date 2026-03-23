@@ -704,8 +704,8 @@ icfBenchmarkSchema.index({ population: 1, code: 1 });
 
 /* ─── Export Models ────────────────────────────────────────────────────────── */
 
-const ICFAssessment = mongoose.model('ICFAssessment', icfAssessmentSchema);
-const ICFCodeReference = mongoose.model('ICFCodeReference', icfCodeReferenceSchema);
-const ICFBenchmark = mongoose.model('ICFBenchmark', icfBenchmarkSchema);
+const ICFAssessment = mongoose.models.ICFAssessment || mongoose.model('ICFAssessment', icfAssessmentSchema);
+const ICFCodeReference = mongoose.models.ICFCodeReference || mongoose.model('ICFCodeReference', icfCodeReferenceSchema);
+const ICFBenchmark = mongoose.models.ICFBenchmark || mongoose.model('ICFBenchmark', icfBenchmarkSchema);
 
 module.exports = { ICFAssessment, ICFCodeReference, ICFBenchmark };

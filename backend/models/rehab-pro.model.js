@@ -2633,16 +2633,16 @@ ARTherapySchema.index({ status: 1, 'protocol.therapyGoal': 1 });
 // ═══════════════════════════════════════════════════════════════════════════════
 
 module.exports = {
-  CardiacPulmonaryRehab: mongoose.model('CardiacPulmonaryRehab', CardiacPulmonaryRehabSchema),
-  StrokeRehab: mongoose.model('StrokeRehab', StrokeRehabSchema),
-  SpinalCordRehab: mongoose.model('SpinalCordRehab', SpinalCordRehabSchema),
-  PostSurgicalRehab: mongoose.model('PostSurgicalRehab', PostSurgicalRehabSchema),
-  GeriatricRehab: mongoose.model('GeriatricRehab', GeriatricRehabSchema),
-  AdvancedMentalHealth: mongoose.model('AdvancedMentalHealth', AdvancedMentalHealthSchema),
-  GeneticCounseling: mongoose.model('GeneticCounseling', GeneticCounselingSchema),
-  TherapyGamification: mongoose.model('TherapyGamification', TherapyGamificationSchema),
-  MedicalDeviceIoT: mongoose.model('MedicalDeviceIoT', MedicalDeviceIoTSchema),
-  InterCenterCollab: mongoose.model('InterCenterCollab', InterCenterCollabSchema),
-  PostDischargeTracking: mongoose.model('PostDischargeTracking', PostDischargeTrackingSchema),
-  ARTherapy: mongoose.model('ARTherapy', ARTherapySchema),
+  CardiacPulmonaryRehab: mongoose.models.CardiacPulmonaryRehab || mongoose.model('CardiacPulmonaryRehab', CardiacPulmonaryRehabSchema),
+  StrokeRehab: mongoose.models.StrokeRehab || mongoose.model('StrokeRehab', StrokeRehabSchema),
+  SpinalCordRehab: mongoose.models.SpinalCordRehab || mongoose.model('SpinalCordRehab', SpinalCordRehabSchema),
+  PostSurgicalRehab: mongoose.models.PostSurgicalRehab || mongoose.model('PostSurgicalRehab', PostSurgicalRehabSchema),
+  GeriatricRehab: mongoose.models.GeriatricRehab || mongoose.model('GeriatricRehab', GeriatricRehabSchema),
+  AdvancedMentalHealth: mongoose.models.AdvancedMentalHealth || mongoose.model('AdvancedMentalHealth', AdvancedMentalHealthSchema),
+  GeneticCounseling: mongoose.models.GeneticCounseling || mongoose.model('GeneticCounseling', GeneticCounselingSchema),
+  TherapyGamification: mongoose.models.TherapyGamification || mongoose.model('TherapyGamification', TherapyGamificationSchema),
+  MedicalDeviceIoT: mongoose.models.MedicalDeviceIoT || mongoose.model('MedicalDeviceIoT', MedicalDeviceIoTSchema),
+  InterCenterCollab: mongoose.models.InterCenterCollab || mongoose.model('InterCenterCollab', InterCenterCollabSchema),
+  PostDischargeTracking: mongoose.models.PostDischargeTracking || mongoose.model('PostDischargeTracking', PostDischargeTrackingSchema),
+  ARTherapy: mongoose.models.ARTherapy || mongoose.model('ARTherapy', ARTherapySchema),
 };

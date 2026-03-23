@@ -424,12 +424,12 @@ const mfaRecoveryLogSchema = new mongoose.Schema(
 );
 
 // Export Models
-const MFASettings = mongoose.model('MFASettings', mfaSettingsSchema);
-const MFASession = mongoose.model('MFASession', mfaSessionSchema);
-const OTPLog = mongoose.model('OTPLog', otpLogSchema);
-const MFAAuditLog = mongoose.model('MFAAuditLog', mfaAuditLogSchema);
-const TrustedDevice = mongoose.model('TrustedDevice', trustedDeviceSchema);
-const MFARecoveryLog = mongoose.model('MFARecoveryLog', mfaRecoveryLogSchema);
+const MFASettings = mongoose.models.MFASettings || mongoose.model('MFASettings', mfaSettingsSchema);
+const MFASession = mongoose.models.MFASession || mongoose.model('MFASession', mfaSessionSchema);
+const OTPLog = mongoose.models.OTPLog || mongoose.model('OTPLog', otpLogSchema);
+const MFAAuditLog = mongoose.models.MFAAuditLog || mongoose.model('MFAAuditLog', mfaAuditLogSchema);
+const TrustedDevice = mongoose.models.TrustedDevice || mongoose.model('TrustedDevice', trustedDeviceSchema);
+const MFARecoveryLog = mongoose.models.MFARecoveryLog || mongoose.model('MFARecoveryLog', mfaRecoveryLogSchema);
 
 module.exports = {
   MFASettings,

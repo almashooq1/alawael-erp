@@ -118,4 +118,4 @@ leaseSchema.pre('save', async function (next) {
   next();
 });
 
-module.exports = mongoose.model('LeaseContract', leaseSchema);
+module.exports = mongoose.models.LeaseContract || mongoose.model('LeaseContract', leaseSchema);

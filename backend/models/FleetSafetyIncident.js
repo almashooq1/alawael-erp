@@ -251,4 +251,4 @@ fleetSafetyIncidentSchema.pre('validate', async function (next) {
   next();
 });
 
-module.exports = mongoose.model('FleetSafetyIncident', fleetSafetyIncidentSchema);
+module.exports = mongoose.models.FleetSafetyIncident || mongoose.model('FleetSafetyIncident', fleetSafetyIncidentSchema);

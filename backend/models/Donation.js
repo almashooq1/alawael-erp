@@ -96,4 +96,4 @@ donationSchema.index({ type: 1, status: 1 });
 donationSchema.index({ donorName: 1 });
 donationSchema.index({ donationDate: -1 });
 
-module.exports = mongoose.model('Donation', donationSchema);
+module.exports = mongoose.models.Donation || mongoose.model('Donation', donationSchema);

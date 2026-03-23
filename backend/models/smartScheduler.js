@@ -361,6 +361,6 @@ smartSchedulerSchema.index({ status: 1 });
 smartSchedulerSchema.index({ planStartDate: 1, planEndDate: 1 });
 
 module.exports = {
-  model: mongoose.model('SmartScheduler', smartSchedulerSchema),
+  model: mongoose.models.SmartScheduler || mongoose.model('SmartScheduler', smartSchedulerSchema),
   schema: smartSchedulerSchema,
 };

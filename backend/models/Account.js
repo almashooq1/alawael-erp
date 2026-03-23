@@ -122,4 +122,4 @@ const accountSchema = new mongoose.Schema(
 accountSchema.index({ type: 1, isActive: 1 });
 accountSchema.index({ parentId: 1 });
 
-module.exports = mongoose.model('Account', accountSchema);
+module.exports = mongoose.models.Account || mongoose.model('Account', accountSchema);

@@ -28,4 +28,4 @@ const standardizedAssessmentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model('StandardizedAssessment', standardizedAssessmentSchema);
+module.exports = mongoose.models.StandardizedAssessment || mongoose.model('StandardizedAssessment', standardizedAssessmentSchema);

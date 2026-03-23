@@ -110,4 +110,4 @@ goalSchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.model('Goal', goalSchema);
+module.exports = mongoose.models.Goal || mongoose.model('Goal', goalSchema);

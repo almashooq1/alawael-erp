@@ -118,4 +118,4 @@ riskRegisterSchema.pre('save', async function () {
   this.riskScore = (likelihoodScore[this.likelihood] || 3) * (severityScore[this.severity] || 3);
 });
 
-module.exports = mongoose.model('RiskRegister', riskRegisterSchema);
+module.exports = mongoose.models.RiskRegister || mongoose.model('RiskRegister', riskRegisterSchema);

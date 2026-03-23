@@ -127,4 +127,4 @@ maintenanceSchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.model('Maintenance', maintenanceSchema);
+module.exports = mongoose.models.Maintenance || mongoose.model('Maintenance', maintenanceSchema);

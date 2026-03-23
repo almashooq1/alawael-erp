@@ -128,4 +128,4 @@ fleetAlertSchema.index({ severity: 1, status: 1 });
 fleetAlertSchema.index({ createdAt: -1 });
 fleetAlertSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
-module.exports = mongoose.model('FleetAlert', fleetAlertSchema);
+module.exports = mongoose.models.FleetAlert || mongoose.model('FleetAlert', fleetAlertSchema);

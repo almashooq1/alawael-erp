@@ -173,4 +173,4 @@ journalEntrySchema.index({ date: -1 });
 journalEntrySchema.index({ status: 1 });
 journalEntrySchema.index({ 'lines.accountId': 1 });
 
-module.exports = mongoose.model('JournalEntry', journalEntrySchema);
+module.exports = mongoose.models.JournalEntry || mongoose.model('JournalEntry', journalEntrySchema);

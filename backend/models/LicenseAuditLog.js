@@ -329,4 +329,4 @@ licenseAuditLogSchema.statics.getDailyActivityReport = async function (date) {
   ]);
 };
 
-module.exports = mongoose.model('LicenseAuditLog', licenseAuditLogSchema);
+module.exports = mongoose.models.LicenseAuditLog || mongoose.model('LicenseAuditLog', licenseAuditLogSchema);

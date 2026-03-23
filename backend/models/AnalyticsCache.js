@@ -28,4 +28,4 @@ const analyticsCacheSchema = new mongoose.Schema(
 // Auto-delete expired documents
 analyticsCacheSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
-module.exports = mongoose.model('AnalyticsCache', analyticsCacheSchema);
+module.exports = mongoose.models.AnalyticsCache || mongoose.model('AnalyticsCache', analyticsCacheSchema);

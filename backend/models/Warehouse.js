@@ -145,6 +145,6 @@ const WarehouseItem =
   mongoose.models.WarehouseItem || mongoose.model('WarehouseItem', warehouseItemSchema);
 const WarehouseTransaction =
   mongoose.models.WarehouseTransaction ||
-  mongoose.model('WarehouseTransaction', warehouseTransactionSchema);
+  mongoose.models.WarehouseTransaction || mongoose.model('WarehouseTransaction', warehouseTransactionSchema);
 
 module.exports = { Warehouse, WarehouseItem, WarehouseTransaction };

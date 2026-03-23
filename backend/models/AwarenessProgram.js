@@ -266,4 +266,4 @@ awarenessProgramSchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.model('AwarenessProgram', awarenessProgramSchema);
+module.exports = mongoose.models.AwarenessProgram || mongoose.model('AwarenessProgram', awarenessProgramSchema);

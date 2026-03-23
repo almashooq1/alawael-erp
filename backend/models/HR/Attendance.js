@@ -44,4 +44,4 @@ AttendanceSchema.index({ employeeId: 1, date: -1 });
 AttendanceSchema.index({ date: -1, status: 1 });
 AttendanceSchema.index({ employeeId: 1, checkInTime: -1 });
 
-module.exports = mongoose.model('Attendance', AttendanceSchema);
+module.exports = mongoose.models.Attendance || mongoose.model('Attendance', AttendanceSchema);

@@ -221,4 +221,4 @@ PerformanceEvaluationSchema.methods.calculateOverallScore = function () {
   return this.summary.overallScore;
 };
 
-module.exports = mongoose.model('PerformanceEvaluation', PerformanceEvaluationSchema);
+module.exports = mongoose.models.PerformanceEvaluation || mongoose.model('PerformanceEvaluation', PerformanceEvaluationSchema);

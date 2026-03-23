@@ -347,4 +347,4 @@ importExportJobSchema.statics.getDashboardStats = async function (userId, dateRa
   ]);
 };
 
-module.exports = mongoose.model('ImportExportJob', importExportJobSchema);
+module.exports = mongoose.models.ImportExportJob || mongoose.model('ImportExportJob', importExportJobSchema);

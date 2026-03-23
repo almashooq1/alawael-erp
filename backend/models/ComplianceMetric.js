@@ -110,4 +110,4 @@ complianceMetricSchema.statics.getLatestMetrics = function (organizationId) {
   return this.find({ organizationId }).sort({ 'period.endDate': -1 }).limit(12);
 };
 
-module.exports = mongoose.model('ComplianceMetric', complianceMetricSchema);
+module.exports = mongoose.models.ComplianceMetric || mongoose.model('ComplianceMetric', complianceMetricSchema);

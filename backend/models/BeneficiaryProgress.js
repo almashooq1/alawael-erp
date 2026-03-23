@@ -243,4 +243,4 @@ BeneficiaryProgressSchema.pre('save', async function () {
   this.updatedAt = new Date();
 });
 
-module.exports = mongoose.model('BeneficiaryProgress', BeneficiaryProgressSchema);
+module.exports = mongoose.models.BeneficiaryProgress || mongoose.model('BeneficiaryProgress', BeneficiaryProgressSchema);

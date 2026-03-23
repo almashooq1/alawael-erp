@@ -724,6 +724,6 @@ trafficAccidentReportSchema.statics.getSeverityDistribution = async function (fi
 };
 
 // Create the model
-const TrafficAccidentReport = mongoose.model('TrafficAccidentReport', trafficAccidentReportSchema);
+const TrafficAccidentReport = mongoose.models.TrafficAccidentReport || mongoose.model('TrafficAccidentReport', trafficAccidentReportSchema);
 
 module.exports = TrafficAccidentReport;

@@ -116,4 +116,4 @@ fleetParkingSchema.index({ 'spot.vehicle': 1 });
 fleetParkingSchema.index({ 'violation.vehicle': 1 });
 fleetParkingSchema.index({ status: 1 });
 
-module.exports = mongoose.model('FleetParking', fleetParkingSchema);
+module.exports = mongoose.models.FleetParking || mongoose.model('FleetParking', fleetParkingSchema);

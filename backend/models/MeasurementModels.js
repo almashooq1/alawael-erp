@@ -1025,9 +1025,9 @@ QuickAssessmentSchema.index({ performedBy: 1 });
 // Exports
 // ============================
 module.exports = {
-  MeasurementType: mongoose.model('MeasurementType', MeasurementTypeSchema),
-  MeasurementMaster: mongoose.model('MeasurementMaster', MeasurementMasterSchema),
-  MeasurementResult: mongoose.model('MeasurementResult', MeasurementResultSchema),
-  IndividualRehabPlan: mongoose.model('IndividualRehabPlan', IndividualRehabPlanSchema),
-  QuickAssessment: mongoose.model('QuickAssessment', QuickAssessmentSchema),
+  MeasurementType: mongoose.models.MeasurementType || mongoose.model('MeasurementType', MeasurementTypeSchema),
+  MeasurementMaster: mongoose.models.MeasurementMaster || mongoose.model('MeasurementMaster', MeasurementMasterSchema),
+  MeasurementResult: mongoose.models.MeasurementResult || mongoose.model('MeasurementResult', MeasurementResultSchema),
+  IndividualRehabPlan: mongoose.models.IndividualRehabPlan || mongoose.model('IndividualRehabPlan', IndividualRehabPlanSchema),
+  QuickAssessment: mongoose.models.QuickAssessment || mongoose.model('QuickAssessment', QuickAssessmentSchema),
 };

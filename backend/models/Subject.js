@@ -114,4 +114,4 @@ SubjectSchema.index({ name: 'text', nameEn: 'text', code: 'text' });
 SubjectSchema.index({ department: 1, isActive: 1 });
 SubjectSchema.index({ type: 1 });
 
-module.exports = mongoose.model('Subject', SubjectSchema);
+module.exports = mongoose.models.Subject || mongoose.model('Subject', SubjectSchema);

@@ -95,4 +95,4 @@ scheduleSchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.model('Schedule', scheduleSchema);
+module.exports = mongoose.models.Schedule || mongoose.model('Schedule', scheduleSchema);

@@ -156,4 +156,4 @@ vehicleInsuranceSchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.model('VehicleInsurance', vehicleInsuranceSchema);
+module.exports = mongoose.models.VehicleInsurance || mongoose.model('VehicleInsurance', vehicleInsuranceSchema);

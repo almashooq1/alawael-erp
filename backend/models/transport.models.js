@@ -736,16 +736,16 @@ const transportNotificationSchema = new mongoose.Schema({
 });
 
 // Create Models
-const Bus = mongoose.model('Bus', busSchema);
-const Driver = mongoose.model('Driver', driverSchema);
-const BusAssistant = mongoose.model('BusAssistant', busAssistantSchema);
-const Route = mongoose.model('Route', routeSchema);
-const StudentTransport = mongoose.model('StudentTransport', studentTransportSchema);
-const TransportAttendance = mongoose.model('TransportAttendance', transportAttendanceSchema);
-const TransportPayment = mongoose.model('TransportPayment', transportPaymentSchema);
-const TransportComplaint = mongoose.model('TransportComplaint', transportComplaintSchema);
-const TripReport = mongoose.model('TripReport', tripReportSchema);
-const TransportNotification = mongoose.model('TransportNotification', transportNotificationSchema);
+const Bus = mongoose.models.Bus || mongoose.model('Bus', busSchema);
+const Driver = mongoose.models.Driver || mongoose.model('Driver', driverSchema);
+const BusAssistant = mongoose.models.BusAssistant || mongoose.model('BusAssistant', busAssistantSchema);
+const Route = mongoose.models.Route || mongoose.model('Route', routeSchema);
+const StudentTransport = mongoose.models.StudentTransport || mongoose.model('StudentTransport', studentTransportSchema);
+const TransportAttendance = mongoose.models.TransportAttendance || mongoose.model('TransportAttendance', transportAttendanceSchema);
+const TransportPayment = mongoose.models.TransportPayment || mongoose.model('TransportPayment', transportPaymentSchema);
+const TransportComplaint = mongoose.models.TransportComplaint || mongoose.model('TransportComplaint', transportComplaintSchema);
+const TripReport = mongoose.models.TripReport || mongoose.model('TripReport', tripReportSchema);
+const TransportNotification = mongoose.models.TransportNotification || mongoose.model('TransportNotification', transportNotificationSchema);
 
 module.exports = {
   Bus,

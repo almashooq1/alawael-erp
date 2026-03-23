@@ -412,4 +412,4 @@ GuardianSchema.pre('save', function () {
   this.updatedAt = new Date();
 });
 
-module.exports = mongoose.model('Guardian', GuardianSchema);
+module.exports = mongoose.models.Guardian || mongoose.model('Guardian', GuardianSchema);

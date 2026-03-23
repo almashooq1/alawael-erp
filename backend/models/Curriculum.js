@@ -167,7 +167,7 @@ CurriculumSchema.index({ teacher: 1 });
 CurriculumSchema.index({ status: 1 });
 
 module.exports = {
-  Curriculum: mongoose.model('Curriculum', CurriculumSchema),
+  Curriculum: mongoose.models.Curriculum || mongoose.model('Curriculum', CurriculumSchema),
   CurriculumSchema,
   UnitSchema,
   LessonPlanSchema,

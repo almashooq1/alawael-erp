@@ -46,4 +46,4 @@ const therapeuticPlanSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model('TherapeuticPlan', therapeuticPlanSchema);
+module.exports = mongoose.models.TherapeuticPlan || mongoose.model('TherapeuticPlan', therapeuticPlanSchema);

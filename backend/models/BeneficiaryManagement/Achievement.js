@@ -202,6 +202,6 @@ achievementSchema.statics.calculateTotalPoints = function (beneficiaryId) {
   ]);
 };
 
-const Achievement = mongoose.model('Achievement', achievementSchema);
+const Achievement = mongoose.models.Achievement || mongoose.model('Achievement', achievementSchema);
 
 module.exports = Achievement;

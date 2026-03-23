@@ -218,4 +218,4 @@ digitalLibrarySchema.methods.addReview = function (userId, rating, comment) {
   return this.save();
 };
 
-module.exports = mongoose.model('DigitalLibrary', digitalLibrarySchema);
+module.exports = mongoose.models.DigitalLibrary || mongoose.model('DigitalLibrary', digitalLibrarySchema);

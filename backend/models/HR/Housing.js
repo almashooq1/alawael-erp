@@ -105,6 +105,6 @@ const HousingAssignment =
   mongoose.models.HousingAssignment || mongoose.model('HousingAssignment', HousingAssignmentSchema);
 const TransportationRoute =
   mongoose.models.TransportationRoute ||
-  mongoose.model('TransportationRoute', TransportationRouteSchema);
+  mongoose.models.TransportationRoute || mongoose.model('TransportationRoute', TransportationRouteSchema);
 
 module.exports = { HousingUnit, HousingAssignment, TransportationRoute };

@@ -126,4 +126,4 @@ fleetPartSchema.index({ organization: 1, category: 1 });
 fleetPartSchema.index({ sku: 1 });
 fleetPartSchema.index({ status: 1, quantityInStock: 1 });
 
-module.exports = mongoose.model('FleetPart', fleetPartSchema);
+module.exports = mongoose.models.FleetPart || mongoose.model('FleetPart', fleetPartSchema);

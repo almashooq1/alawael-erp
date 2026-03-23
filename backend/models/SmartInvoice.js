@@ -874,4 +874,4 @@ smartInvoiceSchema.statics.getStatistics = async function (filters = {}) {
 // MODEL EXPORT
 // ============================================================================
 
-module.exports = mongoose.model('SmartInvoice', smartInvoiceSchema);
+module.exports = mongoose.models.SmartInvoice || mongoose.model('SmartInvoice', smartInvoiceSchema);

@@ -447,7 +447,7 @@ ProgramEnrollmentSchema.virtual('completionRate').get(function () {
 
 /* ─── Export ───────────────────────────────────────────────────────────────── */
 
-const RehabProgramTemplate = mongoose.model('RehabProgramTemplate', RehabProgramTemplateSchema);
-const ProgramEnrollment = mongoose.model('ProgramEnrollment', ProgramEnrollmentSchema);
+const RehabProgramTemplate = mongoose.models.RehabProgramTemplate || mongoose.model('RehabProgramTemplate', RehabProgramTemplateSchema);
+const ProgramEnrollment = mongoose.models.ProgramEnrollment || mongoose.model('ProgramEnrollment', ProgramEnrollmentSchema);
 
 module.exports = { RehabProgramTemplate, ProgramEnrollment };

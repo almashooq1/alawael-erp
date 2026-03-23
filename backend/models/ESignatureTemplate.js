@@ -113,4 +113,4 @@ eSignatureTemplateSchema.index({ category: 1, isActive: 1 });
 
 module.exports =
   mongoose.models.ESignatureTemplate ||
-  mongoose.model('ESignatureTemplate', eSignatureTemplateSchema);
+  mongoose.models.ESignatureTemplate || mongoose.model('ESignatureTemplate', eSignatureTemplateSchema);

@@ -246,7 +246,7 @@ EmployeeBenefitSchema.pre('save', function (next) {
 EmployeeBenefitSchema.index({ employeeId: 1, status: 1 });
 EmployeeBenefitSchema.index({ packageId: 1 });
 
-const BenefitPackage = mongoose.model('BenefitPackage', BenefitPackageSchema);
-const EmployeeBenefit = mongoose.model('EmployeeBenefit', EmployeeBenefitSchema);
+const BenefitPackage = mongoose.models.BenefitPackage || mongoose.model('BenefitPackage', BenefitPackageSchema);
+const EmployeeBenefit = mongoose.models.EmployeeBenefit || mongoose.model('EmployeeBenefit', EmployeeBenefitSchema);
 
 module.exports = { BenefitPackage, EmployeeBenefit };

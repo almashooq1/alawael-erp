@@ -146,4 +146,4 @@ fleetComplianceSchema.pre('save', async function (next) {
   next();
 });
 
-module.exports = mongoose.model('FleetCompliance', fleetComplianceSchema);
+module.exports = mongoose.models.FleetCompliance || mongoose.model('FleetCompliance', fleetComplianceSchema);

@@ -88,7 +88,7 @@ revenueContractSchema.pre('save', async function (next) {
   next();
 });
 
-const RevenueContract = mongoose.model('RevenueContract', revenueContractSchema);
+const RevenueContract = mongoose.models.RevenueContract || mongoose.model('RevenueContract', revenueContractSchema);
 
 // Revenue Schedule Entry - جدول الاعتراف بالإيراد
 const revenueScheduleSchema = new mongoose.Schema(
@@ -111,6 +111,6 @@ const revenueScheduleSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const RevenueSchedule = mongoose.model('RevenueSchedule', revenueScheduleSchema);
+const RevenueSchedule = mongoose.models.RevenueSchedule || mongoose.model('RevenueSchedule', revenueScheduleSchema);
 
 module.exports = { RevenueContract, RevenueSchedule };

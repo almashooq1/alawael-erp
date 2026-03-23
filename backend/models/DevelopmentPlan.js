@@ -205,4 +205,4 @@ DevelopmentPlanSchema.methods.calculateProgress = function () {
   return this.progress.overallProgress;
 };
 
-module.exports = mongoose.model('DevelopmentPlan', DevelopmentPlanSchema);
+module.exports = mongoose.models.DevelopmentPlan || mongoose.model('DevelopmentPlan', DevelopmentPlanSchema);

@@ -246,4 +246,4 @@ EmployeeProfileSchema.index({ 'jobInfo.department': 1 });
 EmployeeProfileSchema.index({ 'jobInfo.position': 1 });
 EmployeeProfileSchema.index({ status: 1 });
 
-module.exports = mongoose.model('EmployeeProfile', EmployeeProfileSchema);
+module.exports = mongoose.models.EmployeeProfile || mongoose.model('EmployeeProfile', EmployeeProfileSchema);

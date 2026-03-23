@@ -117,4 +117,4 @@ reportSchema.index({ requestedBy: 1, createdAt: -1 });
 // TTL index to auto-delete expired reports after expiration date
 reportSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
-module.exports = mongoose.model('Report', reportSchema);
+module.exports = mongoose.models.Report || mongoose.model('Report', reportSchema);

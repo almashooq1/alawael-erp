@@ -258,4 +258,4 @@ fleetAccidentSchema.index({ organization: 1, severity: 1, status: 1 });
 fleetAccidentSchema.index({ 'insuranceClaim.claimStatus': 1 });
 fleetAccidentSchema.index({ location: '2dsphere' });
 
-module.exports = mongoose.model('FleetAccident', fleetAccidentSchema);
+module.exports = mongoose.models.FleetAccident || mongoose.model('FleetAccident', fleetAccidentSchema);

@@ -546,16 +546,16 @@ attendanceRecordSchema.methods.calculateOvertimeAmount = function () {
 // الإنشاء والتصدير
 // ============================================================================
 
-const AttendanceRecord = mongoose.model('AttendanceRecord', attendanceRecordSchema);
-const Schedule = mongoose.model('Schedule', scheduleSchema);
-const Leave = mongoose.model('Leave', leaveSchema);
-const LeaveBalance = mongoose.model('LeaveBalance', leaveBalanceSchema);
+const AttendanceRecord = mongoose.models.AttendanceRecord || mongoose.model('AttendanceRecord', attendanceRecordSchema);
+const Schedule = mongoose.models.Schedule || mongoose.model('Schedule', scheduleSchema);
+const Leave = mongoose.models.Leave || mongoose.model('Leave', leaveSchema);
+const LeaveBalance = mongoose.models.LeaveBalance || mongoose.model('LeaveBalance', leaveBalanceSchema);
 const EmployeeAttendanceProfile = mongoose.model(
   'EmployeeAttendanceProfile',
   employeeAttendanceProfileSchema
 );
-const Absence = mongoose.model('Absence', absenceSchema);
-const MonthlyReport = mongoose.model('MonthlyReport', monthlyReportSchema);
+const Absence = mongoose.models.Absence || mongoose.model('Absence', absenceSchema);
+const MonthlyReport = mongoose.models.MonthlyReport || mongoose.model('MonthlyReport', monthlyReportSchema);
 
 module.exports = {
   AttendanceRecord,

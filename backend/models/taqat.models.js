@@ -540,11 +540,11 @@ TaqatEmploymentStatsSchema.index({ period: 1, periodType: 1 }, { unique: true })
 // ============================================================
 // التصدير
 // ============================================================
-const TaqatJobSeeker = mongoose.model('TaqatJobSeeker', TaqatJobSeekerSchema);
-const TaqatJobOpportunity = mongoose.model('TaqatJobOpportunity', TaqatJobOpportunitySchema);
-const TaqatJobApplication = mongoose.model('TaqatJobApplication', TaqatJobApplicationSchema);
-const TaqatTrainingProgram = mongoose.model('TaqatTrainingProgram', TaqatTrainingProgramSchema);
-const TaqatEmploymentStats = mongoose.model('TaqatEmploymentStats', TaqatEmploymentStatsSchema);
+const TaqatJobSeeker = mongoose.models.TaqatJobSeeker || mongoose.model('TaqatJobSeeker', TaqatJobSeekerSchema);
+const TaqatJobOpportunity = mongoose.models.TaqatJobOpportunity || mongoose.model('TaqatJobOpportunity', TaqatJobOpportunitySchema);
+const TaqatJobApplication = mongoose.models.TaqatJobApplication || mongoose.model('TaqatJobApplication', TaqatJobApplicationSchema);
+const TaqatTrainingProgram = mongoose.models.TaqatTrainingProgram || mongoose.model('TaqatTrainingProgram', TaqatTrainingProgramSchema);
+const TaqatEmploymentStats = mongoose.models.TaqatEmploymentStats || mongoose.model('TaqatEmploymentStats', TaqatEmploymentStatsSchema);
 
 module.exports = {
   TaqatJobSeeker,

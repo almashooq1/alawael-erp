@@ -66,4 +66,4 @@ bankAccountSchema.index({ organization: 1, status: 1 });
 bankAccountSchema.index({ bankName: 1, accountNumber: 1 }, { unique: true });
 bankAccountSchema.index({ iban: 1 }, { sparse: true });
 
-module.exports = mongoose.model('BankAccount', bankAccountSchema);
+module.exports = mongoose.models.BankAccount || mongoose.model('BankAccount', bankAccountSchema);

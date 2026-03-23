@@ -86,7 +86,7 @@ pettyCashSchema.index({ organization: 1, status: 1 });
 pettyCashTransactionSchema.index({ fundId: 1, date: -1 });
 pettyCashTransactionSchema.index({ status: 1, type: 1 });
 
-const PettyCash = mongoose.model('PettyCash', pettyCashSchema);
-const PettyCashTransaction = mongoose.model('PettyCashTransaction', pettyCashTransactionSchema);
+const PettyCash = mongoose.models.PettyCash || mongoose.model('PettyCash', pettyCashSchema);
+const PettyCashTransaction = mongoose.models.PettyCashTransaction || mongoose.model('PettyCashTransaction', pettyCashTransactionSchema);
 
 module.exports = { PettyCash, PettyCashTransaction };

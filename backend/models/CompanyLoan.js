@@ -161,7 +161,7 @@ loanDrawdownSchema.pre('save', function (next) {
 
 loanDrawdownSchema.index({ loanId: 1, drawdownDate: -1 });
 
-const CompanyLoan = mongoose.model('CompanyLoan', companyLoanSchema);
-const LoanDrawdown = mongoose.model('LoanDrawdown', loanDrawdownSchema);
+const CompanyLoan = mongoose.models.CompanyLoan || mongoose.model('CompanyLoan', companyLoanSchema);
+const LoanDrawdown = mongoose.models.LoanDrawdown || mongoose.model('LoanDrawdown', loanDrawdownSchema);
 
 module.exports = { CompanyLoan, LoanDrawdown };

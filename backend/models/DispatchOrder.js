@@ -286,4 +286,4 @@ dispatchOrderSchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.model('DispatchOrder', dispatchOrderSchema);
+module.exports = mongoose.models.DispatchOrder || mongoose.model('DispatchOrder', dispatchOrderSchema);

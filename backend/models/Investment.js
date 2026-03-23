@@ -96,4 +96,4 @@ investmentSchema.pre('save', async function (next) {
   next();
 });
 
-module.exports = mongoose.model('Investment', investmentSchema);
+module.exports = mongoose.models.Investment || mongoose.model('Investment', investmentSchema);

@@ -810,4 +810,4 @@ disabilityAssessmentSchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.model('DisabilityAssessment', disabilityAssessmentSchema);
+module.exports = mongoose.models.DisabilityAssessment || mongoose.model('DisabilityAssessment', disabilityAssessmentSchema);

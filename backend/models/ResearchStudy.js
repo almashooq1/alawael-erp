@@ -247,4 +247,4 @@ researchStudySchema.virtual('dataCollections', {
   foreignField: 'studyId',
 });
 
-module.exports = mongoose.model('ResearchStudy', researchStudySchema);
+module.exports = mongoose.models.ResearchStudy || mongoose.model('ResearchStudy', researchStudySchema);

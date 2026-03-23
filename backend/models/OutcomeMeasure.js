@@ -181,4 +181,4 @@ outcomeMeasureSchema.index({ category: 1, internationallyRecognized: 1 });
 outcomeMeasureSchema.index({ abbreviation: 1 }, { unique: true });
 outcomeMeasureSchema.index({ name: 'text', description: 'text', abbreviation: 'text' });
 
-module.exports = mongoose.model('OutcomeMeasure', outcomeMeasureSchema);
+module.exports = mongoose.models.OutcomeMeasure || mongoose.model('OutcomeMeasure', outcomeMeasureSchema);

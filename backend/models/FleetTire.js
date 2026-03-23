@@ -166,4 +166,4 @@ fleetTireSchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.model('FleetTire', fleetTireSchema);
+module.exports = mongoose.models.FleetTire || mongoose.model('FleetTire', fleetTireSchema);

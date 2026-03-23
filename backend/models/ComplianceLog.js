@@ -23,4 +23,4 @@ const complianceLogSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model('ComplianceLog', complianceLogSchema);
+module.exports = mongoose.models.ComplianceLog || mongoose.model('ComplianceLog', complianceLogSchema);

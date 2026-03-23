@@ -157,4 +157,4 @@ researchDataExportSchema.index({ studyId: 1, status: 1 });
 researchDataExportSchema.index({ targetPlatform: 1 });
 researchDataExportSchema.index({ createdAt: -1 });
 
-module.exports = mongoose.model('ResearchDataExport', researchDataExportSchema);
+module.exports = mongoose.models.ResearchDataExport || mongoose.model('ResearchDataExport', researchDataExportSchema);

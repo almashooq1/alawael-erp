@@ -625,4 +625,4 @@ payrollSchema.statics.getMonthlyTotalPayroll = async function (month) {
   return results[0] || { totalGross: 0, totalDeductions: 0, totalNet: 0, employeeCount: 0 };
 };
 
-module.exports = mongoose.model('Payroll', payrollSchema);
+module.exports = mongoose.models.Payroll || mongoose.model('Payroll', payrollSchema);

@@ -76,4 +76,4 @@ const closingChecklistSchema = new mongoose.Schema(
 closingChecklistSchema.index({ organization: 1, fiscalPeriodId: 1 }, { unique: true });
 closingChecklistSchema.index({ status: 1, lockStatus: 1 });
 
-module.exports = mongoose.model('ClosingChecklist', closingChecklistSchema);
+module.exports = mongoose.models.ClosingChecklist || mongoose.model('ClosingChecklist', closingChecklistSchema);

@@ -70,4 +70,4 @@ groupSchema.index({ createdBy: 1 });
 groupSchema.index({ 'members.user': 1 });
 groupSchema.index({ status: 1 });
 
-module.exports = mongoose.model('Group', groupSchema);
+module.exports = mongoose.models.Group || mongoose.model('Group', groupSchema);

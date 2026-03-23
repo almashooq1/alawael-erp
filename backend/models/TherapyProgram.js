@@ -22,4 +22,4 @@ const therapyProgramSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model('TherapyProgram', therapyProgramSchema);
+module.exports = mongoose.models.TherapyProgram || mongoose.model('TherapyProgram', therapyProgramSchema);

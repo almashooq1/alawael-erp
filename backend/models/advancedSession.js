@@ -323,7 +323,7 @@ advancedSessionSchema.index({ 'beneficiaryAttendance.status': 1 });
 advancedSessionSchema.index({ scheduledDateTime: 1 });
 
 module.exports = {
-  model: mongoose.model('AdvancedSession', advancedSessionSchema),
+  model: mongoose.models.AdvancedSession || mongoose.model('AdvancedSession', advancedSessionSchema),
   schema: advancedSessionSchema,
   SESSION_STATUSES,
   ATTENDANCE_STATUS,

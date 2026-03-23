@@ -88,4 +88,4 @@ employeeLoanSchema.index({ organization: 1, status: 1 });
 employeeLoanSchema.index({ employeeId: 1, status: 1 });
 employeeLoanSchema.index({ type: 1, status: 1 });
 
-module.exports = mongoose.model('EmployeeLoan', employeeLoanSchema);
+module.exports = mongoose.models.EmployeeLoan || mongoose.model('EmployeeLoan', employeeLoanSchema);

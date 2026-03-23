@@ -331,9 +331,9 @@ attendanceSchema.index({ beneficiaryId: 1, 'dailyRecords.date': -1 });
 attendanceSchema.index({ 'dailyRecords.status': 1 });
 
 module.exports = {
-  TherapySession: mongoose.model('TherapySession', therapySessionSchema),
-  ProgressTracking: mongoose.model('ProgressTracking', progressTrackingSchema),
-  FamilyCommunication: mongoose.model('FamilyCommunication', familyCommunicationSchema),
-  MedicalRecords: mongoose.model('MedicalRecords', medicalRecordsSchema),
-  Attendance: mongoose.model('Attendance', attendanceSchema),
+  TherapySession: mongoose.models.TherapySession || mongoose.model('TherapySession', therapySessionSchema),
+  ProgressTracking: mongoose.models.ProgressTracking || mongoose.model('ProgressTracking', progressTrackingSchema),
+  FamilyCommunication: mongoose.models.FamilyCommunication || mongoose.model('FamilyCommunication', familyCommunicationSchema),
+  MedicalRecords: mongoose.models.MedicalRecords || mongoose.model('MedicalRecords', medicalRecordsSchema),
+  Attendance: mongoose.models.Attendance || mongoose.model('Attendance', attendanceSchema),
 };

@@ -433,4 +433,4 @@ PortalNotificationSchema.statics.createAndSend = async function (
   return notification.save();
 };
 
-module.exports = mongoose.model('PortalNotification', PortalNotificationSchema);
+module.exports = mongoose.models.PortalNotification || mongoose.model('PortalNotification', PortalNotificationSchema);

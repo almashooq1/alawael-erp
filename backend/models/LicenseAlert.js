@@ -489,4 +489,4 @@ licenseAlertSchema.statics.cleanupExpiredAlerts = async function () {
   });
 };
 
-module.exports = mongoose.model('LicenseAlert', licenseAlertSchema);
+module.exports = mongoose.models.LicenseAlert || mongoose.model('LicenseAlert', licenseAlertSchema);

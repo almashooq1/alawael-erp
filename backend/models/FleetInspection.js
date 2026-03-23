@@ -165,7 +165,7 @@ const inspectionTemplateSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const FleetInspection = mongoose.model('FleetInspection', fleetInspectionSchema);
-const FleetInspectionTemplate = mongoose.model('FleetInspectionTemplate', inspectionTemplateSchema);
+const FleetInspection = mongoose.models.FleetInspection || mongoose.model('FleetInspection', fleetInspectionSchema);
+const FleetInspectionTemplate = mongoose.models.FleetInspectionTemplate || mongoose.model('FleetInspectionTemplate', inspectionTemplateSchema);
 
 module.exports = { FleetInspection, FleetInspectionTemplate };

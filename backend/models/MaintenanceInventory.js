@@ -357,4 +357,4 @@ MaintenanceInventorySchema.virtual('turnoverRatio').get(function () {
   return 0;
 });
 
-module.exports = mongoose.model('MaintenanceInventory', MaintenanceInventorySchema);
+module.exports = mongoose.models.MaintenanceInventory || mongoose.model('MaintenanceInventory', MaintenanceInventorySchema);

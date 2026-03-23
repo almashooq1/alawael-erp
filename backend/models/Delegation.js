@@ -194,4 +194,4 @@ delegationSchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.model('Delegation', delegationSchema);
+module.exports = mongoose.models.Delegation || mongoose.model('Delegation', delegationSchema);

@@ -162,4 +162,4 @@ eventParticipationSchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.model('EventParticipation', eventParticipationSchema);
+module.exports = mongoose.models.EventParticipation || mongoose.model('EventParticipation', eventParticipationSchema);

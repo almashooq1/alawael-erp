@@ -67,7 +67,7 @@ creditProfileSchema.pre('save', function (next) {
   next();
 });
 
-const CreditProfile = mongoose.model('CreditProfile', creditProfileSchema);
+const CreditProfile = mongoose.models.CreditProfile || mongoose.model('CreditProfile', creditProfileSchema);
 
 // Credit Application - طلب ائتمان
 const creditApplicationSchema = new mongoose.Schema(
@@ -129,6 +129,6 @@ creditApplicationSchema.pre('save', async function (next) {
   next();
 });
 
-const CreditApplication = mongoose.model('CreditApplication', creditApplicationSchema);
+const CreditApplication = mongoose.models.CreditApplication || mongoose.model('CreditApplication', creditApplicationSchema);
 
 module.exports = { CreditProfile, CreditApplication };

@@ -922,8 +922,8 @@ const DevelopmentalMilestone = mongoose.model(
   'DevelopmentalMilestone',
   developmentalMilestoneSchema
 );
-const IFSP = mongoose.model('IFSP', ifspSchema);
-const EarlyReferral = mongoose.model('EarlyReferral', earlyReferralSchema);
+const IFSP = mongoose.models.IFSP || mongoose.model('IFSP', ifspSchema);
+const EarlyReferral = mongoose.models.EarlyReferral || mongoose.model('EarlyReferral', earlyReferralSchema);
 
 module.exports = {
   EarlyInterventionChild,

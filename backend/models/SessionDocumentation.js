@@ -143,4 +143,4 @@ sessionDocumentationSchema.index({ session: 1 });
 sessionDocumentationSchema.index({ beneficiary: 1, therapist: 1, createdAt: -1 });
 sessionDocumentationSchema.index({ 'quality.isComplete': 1 });
 
-module.exports = mongoose.model('SessionDocumentation', sessionDocumentationSchema);
+module.exports = mongoose.models.SessionDocumentation || mongoose.model('SessionDocumentation', sessionDocumentationSchema);

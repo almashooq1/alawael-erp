@@ -449,4 +449,4 @@ licenseDocumentSchema.statics.deleteOldDocuments = async function (daysOld = 365
   );
 };
 
-module.exports = mongoose.model('LicenseDocument', licenseDocumentSchema);
+module.exports = mongoose.models.LicenseDocument || mongoose.model('LicenseDocument', licenseDocumentSchema);

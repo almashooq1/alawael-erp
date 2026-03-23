@@ -124,4 +124,4 @@ const vatReturnSchema = new mongoose.Schema(
 vatReturnSchema.index({ 'period.startDate': 1, 'period.endDate': 1 });
 vatReturnSchema.index({ status: 1 });
 
-module.exports = mongoose.model('VATReturn', vatReturnSchema);
+module.exports = mongoose.models.VATReturn || mongoose.model('VATReturn', vatReturnSchema);

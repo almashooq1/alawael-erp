@@ -59,7 +59,7 @@ if (!useMock) {
     updatedAt: Date,
   });
 
-  module.exports = mongoose.model('Prediction', PredictionSchema);
+  module.exports = mongoose.models.Prediction || mongoose.model('Prediction', PredictionSchema);
 } else {
   const store = [];
 

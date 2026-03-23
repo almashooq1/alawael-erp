@@ -145,4 +145,4 @@ webhookSchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.model('Webhook', webhookSchema);
+module.exports = mongoose.models.Webhook || mongoose.model('Webhook', webhookSchema);

@@ -212,4 +212,4 @@ fleetPenaltySchema.index({ organization: 1, type: 1 });
 fleetPenaltySchema.index({ demeritPoints: 1 });
 fleetPenaltySchema.index({ location: '2dsphere' });
 
-module.exports = mongoose.model('FleetPenalty', fleetPenaltySchema);
+module.exports = mongoose.models.FleetPenalty || mongoose.model('FleetPenalty', fleetPenaltySchema);

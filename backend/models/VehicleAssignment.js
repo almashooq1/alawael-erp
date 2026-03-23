@@ -105,4 +105,4 @@ vehicleAssignmentSchema.index({ vehicle: 1, status: 1 });
 vehicleAssignmentSchema.index({ driver: 1, status: 1 });
 vehicleAssignmentSchema.index({ startDate: 1, endDate: 1 });
 
-module.exports = mongoose.model('VehicleAssignment', vehicleAssignmentSchema);
+module.exports = mongoose.models.VehicleAssignment || mongoose.model('VehicleAssignment', vehicleAssignmentSchema);

@@ -467,14 +467,14 @@ const WorkflowFavorite =
   mongoose.models.WorkflowFavorite || mongoose.model('WorkflowFavorite', WorkflowFavoriteSchema);
 const WorkflowDelegation =
   mongoose.models.WorkflowDelegation ||
-  mongoose.model('WorkflowDelegation', WorkflowDelegationSchema);
+  mongoose.models.WorkflowDelegation || mongoose.model('WorkflowDelegation', WorkflowDelegationSchema);
 const WorkflowReminder =
   mongoose.models.WorkflowReminder || mongoose.model('WorkflowReminder', WorkflowReminderSchema);
 const WorkflowWebhook =
   mongoose.models.WorkflowWebhook || mongoose.model('WorkflowWebhook', WorkflowWebhookSchema);
 const WorkflowSavedReport =
   mongoose.models.WorkflowSavedReport ||
-  mongoose.model('WorkflowSavedReport', WorkflowSavedReportSchema);
+  mongoose.models.WorkflowSavedReport || mongoose.model('WorkflowSavedReport', WorkflowSavedReportSchema);
 const WorkflowTag = mongoose.models.WorkflowTag || mongoose.model('WorkflowTag', WorkflowTagSchema);
 const WorkflowVersion =
   mongoose.models.WorkflowVersion || mongoose.model('WorkflowVersion', WorkflowVersionSchema);

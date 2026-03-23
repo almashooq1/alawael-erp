@@ -35,6 +35,6 @@ const notificationAnalyticsSchema = new mongoose.Schema({
 notificationAnalyticsSchema.index({ notificationId: 1, event: 1, channel: 1 });
 notificationAnalyticsSchema.index({ userId: 1, event: 1 });
 
-const NotificationAnalytics = mongoose.model('NotificationAnalytics', notificationAnalyticsSchema);
+const NotificationAnalytics = mongoose.models.NotificationAnalytics || mongoose.model('NotificationAnalytics', notificationAnalyticsSchema);
 
 module.exports = NotificationAnalytics;

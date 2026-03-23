@@ -249,4 +249,4 @@ integrationAssessmentSchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.model('IntegrationAssessment', integrationAssessmentSchema);
+module.exports = mongoose.models.IntegrationAssessment || mongoose.model('IntegrationAssessment', integrationAssessmentSchema);

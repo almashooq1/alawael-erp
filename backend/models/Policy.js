@@ -252,4 +252,4 @@ policySchema.statics.getPendingForApproval = function () {
   return this.find({ status: 'PENDING_APPROVAL' });
 };
 
-module.exports = mongoose.model('Policy', policySchema);
+module.exports = mongoose.models.Policy || mongoose.model('Policy', policySchema);

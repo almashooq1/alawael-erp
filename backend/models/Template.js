@@ -42,4 +42,4 @@ const TemplateSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
-module.exports = mongoose.model('Template', TemplateSchema);
+module.exports = mongoose.models.Template || mongoose.model('Template', TemplateSchema);

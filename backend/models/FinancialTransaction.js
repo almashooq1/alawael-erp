@@ -335,4 +335,4 @@ FinancialTransactionSchema.statics.getAccountTransactions = function (
   }).sort({ transactionDate: 1 });
 };
 
-module.exports = mongoose.model('FinancialTransaction', FinancialTransactionSchema);
+module.exports = mongoose.models.FinancialTransaction || mongoose.model('FinancialTransaction', FinancialTransactionSchema);

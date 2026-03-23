@@ -147,4 +147,4 @@ debtInstrumentSchema.pre('save', async function () {
   this.facility.availableAmount = this.facility.facilityAmount - this.facility.drawnAmount;
 });
 
-module.exports = mongoose.model('DebtInstrument', debtInstrumentSchema);
+module.exports = mongoose.models.DebtInstrument || mongoose.model('DebtInstrument', debtInstrumentSchema);

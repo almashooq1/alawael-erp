@@ -134,7 +134,7 @@ taxPenaltySchema.pre('save', function (next) {
 taxPenaltySchema.index({ organization: 1, filingId: 1 });
 taxPenaltySchema.index({ status: 1 });
 
-const TaxFiling = mongoose.model('TaxFiling', taxFilingSchema);
-const TaxPenalty = mongoose.model('TaxPenalty', taxPenaltySchema);
+const TaxFiling = mongoose.models.TaxFiling || mongoose.model('TaxFiling', taxFilingSchema);
+const TaxPenalty = mongoose.models.TaxPenalty || mongoose.model('TaxPenalty', taxPenaltySchema);
 
 module.exports = { TaxFiling, TaxPenalty };

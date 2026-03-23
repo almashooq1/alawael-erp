@@ -122,4 +122,4 @@ paymentVoucherSchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.model('PaymentVoucher', paymentVoucherSchema);
+module.exports = mongoose.models.PaymentVoucher || mongoose.model('PaymentVoucher', paymentVoucherSchema);

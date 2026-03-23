@@ -413,4 +413,4 @@ PurchaseRequestSchema.statics = {
   },
 };
 
-module.exports = mongoose.model('PurchaseRequest', PurchaseRequestSchema);
+module.exports = mongoose.models.PurchaseRequest || mongoose.model('PurchaseRequest', PurchaseRequestSchema);

@@ -134,5 +134,5 @@ module.exports = {
   Report: mongoose.models.MontessoriReport || mongoose.model('MontessoriReport', ReportSchema),
   MontessoriProgram:
     mongoose.models.MontessoriProgram ||
-    mongoose.model('MontessoriProgram', MontessoriProgramSchema),
+    mongoose.models.MontessoriProgram || mongoose.model('MontessoriProgram', MontessoriProgramSchema),
 };

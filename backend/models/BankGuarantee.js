@@ -119,7 +119,7 @@ const letterOfCreditSchema = new mongoose.Schema(
 letterOfCreditSchema.index({ organization: 1, status: 1 });
 letterOfCreditSchema.index({ expiryDate: 1 });
 
-const BankGuarantee = mongoose.model('BankGuarantee', bankGuaranteeSchema);
-const LetterOfCredit = mongoose.model('LetterOfCredit', letterOfCreditSchema);
+const BankGuarantee = mongoose.models.BankGuarantee || mongoose.model('BankGuarantee', bankGuaranteeSchema);
+const LetterOfCredit = mongoose.models.LetterOfCredit || mongoose.model('LetterOfCredit', letterOfCreditSchema);
 
 module.exports = { BankGuarantee, LetterOfCredit };

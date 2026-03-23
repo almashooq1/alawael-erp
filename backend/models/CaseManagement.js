@@ -403,6 +403,6 @@ CaseManagementSchema.methods.getStatistics = function () {
   };
 };
 
-const CaseManagement = mongoose.model('CaseManagement', CaseManagementSchema);
+const CaseManagement = mongoose.models.CaseManagement || mongoose.model('CaseManagement', CaseManagementSchema);
 
 module.exports = CaseManagement;

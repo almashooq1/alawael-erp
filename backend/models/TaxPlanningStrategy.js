@@ -147,4 +147,4 @@ taxPlanningStrategySchema.pre('save', async function () {
   }
 });
 
-module.exports = mongoose.model('TaxPlanningStrategy', taxPlanningStrategySchema);
+module.exports = mongoose.models.TaxPlanningStrategy || mongoose.model('TaxPlanningStrategy', taxPlanningStrategySchema);

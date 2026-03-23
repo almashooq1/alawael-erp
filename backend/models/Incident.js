@@ -587,6 +587,6 @@ incidentSchema.pre('save', function (next) {
   next();
 });
 
-const Incident = mongoose.model('Incident', incidentSchema);
+const Incident = mongoose.models.Incident || mongoose.model('Incident', incidentSchema);
 
 module.exports = Incident;

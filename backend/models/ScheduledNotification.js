@@ -49,6 +49,6 @@ const scheduledNotificationSchema = new mongoose.Schema(
 
 scheduledNotificationSchema.index({ sent: 1, scheduleTime: 1 });
 
-const ScheduledNotification = mongoose.model('ScheduledNotification', scheduledNotificationSchema);
+const ScheduledNotification = mongoose.models.ScheduledNotification || mongoose.model('ScheduledNotification', scheduledNotificationSchema);
 
 module.exports = ScheduledNotification;

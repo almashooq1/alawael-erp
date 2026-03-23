@@ -18,4 +18,4 @@ const goalProgressHistorySchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model('GoalProgressHistory', goalProgressHistorySchema);
+module.exports = mongoose.models.GoalProgressHistory || mongoose.model('GoalProgressHistory', goalProgressHistorySchema);

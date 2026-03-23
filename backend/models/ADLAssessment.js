@@ -467,4 +467,4 @@ adlAssessmentSchema.statics.getBeneficiaryADLProgress = async function (benefici
   };
 };
 
-module.exports = mongoose.model('ADLAssessment', adlAssessmentSchema);
+module.exports = mongoose.models.ADLAssessment || mongoose.model('ADLAssessment', adlAssessmentSchema);

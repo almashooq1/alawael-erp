@@ -206,4 +206,4 @@ assessmentSchema.statics.searchByType = function (type) {
   return this.find({ assessmentType: type, isArchived: false });
 };
 
-module.exports = mongoose.model('Assessment', assessmentSchema);
+module.exports = mongoose.models.Assessment || mongoose.model('Assessment', assessmentSchema);

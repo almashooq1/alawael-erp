@@ -48,4 +48,4 @@ const enrollmentSchema = new mongoose.Schema(
 // Compound index to ensure a student can enroll in a course only once
 enrollmentSchema.index({ student: 1, course: 1 }, { unique: true });
 
-module.exports = mongoose.model('Enrollment', enrollmentSchema);
+module.exports = mongoose.models.Enrollment || mongoose.model('Enrollment', enrollmentSchema);

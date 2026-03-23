@@ -279,6 +279,6 @@ scholarshipSchema.statics.findActiveScholarships = function () {
   return this.find({ applicationStatus: { $in: ['ACTIVE', 'APPROVED'] } });
 };
 
-const Scholarship = mongoose.model('Scholarship', scholarshipSchema);
+const Scholarship = mongoose.models.Scholarship || mongoose.model('Scholarship', scholarshipSchema);
 
 module.exports = Scholarship;

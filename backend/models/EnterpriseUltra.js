@@ -1570,13 +1570,13 @@ module.exports = {
   BCPPlan: mongoose.models.BCPPlan || mongoose.model('BCPPlan', BCPPlanSchema),
   BusinessImpactAnalysis:
     mongoose.models.BusinessImpactAnalysis ||
-    mongoose.model('BusinessImpactAnalysis', BusinessImpactAnalysisSchema),
+    mongoose.models.BusinessImpactAnalysis || mongoose.model('BusinessImpactAnalysis', BusinessImpactAnalysisSchema),
   CrisisIncident:
     mongoose.models.CrisisIncident || mongoose.model('CrisisIncident', CrisisIncidentSchema),
   BCDrill: mongoose.models.BCDrill || mongoose.model('BCDrill', BCDrillSchema),
   DisasterRecoveryPlan:
     mongoose.models.DisasterRecoveryPlan ||
-    mongoose.model('DisasterRecoveryPlan', DisasterRecoveryPlanSchema),
+    mongoose.models.DisasterRecoveryPlan || mongoose.model('DisasterRecoveryPlan', DisasterRecoveryPlanSchema),
 
   // 4. Customer Experience
   CXSurvey: mongoose.models.CXSurvey || mongoose.model('CXSurvey', CXSurveySchema),
@@ -1596,20 +1596,20 @@ module.exports = {
   ESGReport: mongoose.models.ESGReport || mongoose.model('ESGReport', ESGReportSchema),
   SustainabilityGoal:
     mongoose.models.SustainabilityGoal ||
-    mongoose.model('SustainabilityGoal', SustainabilityGoalSchema),
+    mongoose.models.SustainabilityGoal || mongoose.model('SustainabilityGoal', SustainabilityGoalSchema),
 
   // 6. Digital Transformation
   MaturityAssessment:
     mongoose.models.MaturityAssessment ||
-    mongoose.model('MaturityAssessment', MaturityAssessmentSchema),
+    mongoose.models.MaturityAssessment || mongoose.model('MaturityAssessment', MaturityAssessmentSchema),
   InnovationIdea:
     mongoose.models.InnovationIdea || mongoose.model('InnovationIdea', InnovationIdeaSchema),
   InnovationProject:
     mongoose.models.InnovationProject ||
-    mongoose.model('InnovationProject', InnovationProjectSchema),
+    mongoose.models.InnovationProject || mongoose.model('InnovationProject', InnovationProjectSchema),
   TechRadarEntry:
     mongoose.models.TechRadarEntry || mongoose.model('TechRadarEntry', TechRadarEntrySchema),
   TransformationKPI:
     mongoose.models.TransformationKPI ||
-    mongoose.model('TransformationKPI', TransformationKPISchema),
+    mongoose.models.TransformationKPI || mongoose.model('TransformationKPI', TransformationKPISchema),
 };

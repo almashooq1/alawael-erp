@@ -65,7 +65,7 @@ intercompanyInvoiceSchema.pre('save', async function (next) {
   next();
 });
 
-const IntercompanyInvoice = mongoose.model('IntercompanyInvoice', intercompanyInvoiceSchema);
+const IntercompanyInvoice = mongoose.models.IntercompanyInvoice || mongoose.model('IntercompanyInvoice', intercompanyInvoiceSchema);
 
 // Settlement Run - دورة التسوية
 const settlementRunSchema = new mongoose.Schema(
@@ -112,6 +112,6 @@ settlementRunSchema.pre('save', async function (next) {
   next();
 });
 
-const SettlementRun = mongoose.model('SettlementRun', settlementRunSchema);
+const SettlementRun = mongoose.models.SettlementRun || mongoose.model('SettlementRun', settlementRunSchema);
 
 module.exports = { IntercompanyInvoice, SettlementRun };

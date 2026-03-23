@@ -119,4 +119,4 @@ trainingSchema.methods.getCompletionRate = function () {
   return (completed / this.participants.length) * 100;
 };
 
-module.exports = mongoose.model('Training', trainingSchema);
+module.exports = mongoose.models.Training || mongoose.model('Training', trainingSchema);

@@ -207,4 +207,4 @@ virtualSessionSchema.statics.getByCategory = function (category) {
     .populate('instructor', 'name email');
 };
 
-module.exports = mongoose.model('VirtualSession', virtualSessionSchema);
+module.exports = mongoose.models.VirtualSession || mongoose.model('VirtualSession', virtualSessionSchema);

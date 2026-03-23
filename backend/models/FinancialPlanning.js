@@ -132,4 +132,4 @@ financialPlanSchema.pre('save', async function (next) {
   next();
 });
 
-module.exports = mongoose.model('FinancialPlan', financialPlanSchema);
+module.exports = mongoose.models.FinancialPlan || mongoose.model('FinancialPlan', financialPlanSchema);

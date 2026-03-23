@@ -121,7 +121,7 @@ treasuryTransferSchema.pre('save', function (next) {
 treasuryTransferSchema.index({ organization: 1, status: 1 });
 treasuryTransferSchema.index({ transferDate: -1 });
 
-const CashForecast = mongoose.model('CashForecast', cashForecastSchema);
-const TreasuryTransfer = mongoose.model('TreasuryTransfer', treasuryTransferSchema);
+const CashForecast = mongoose.models.CashForecast || mongoose.model('CashForecast', cashForecastSchema);
+const TreasuryTransfer = mongoose.models.TreasuryTransfer || mongoose.model('TreasuryTransfer', treasuryTransferSchema);
 
 module.exports = { CashForecast, TreasuryTransfer };

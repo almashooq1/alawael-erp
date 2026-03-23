@@ -148,4 +148,4 @@ cargoSchema.index({ vehicle: 1, status: 1 });
 cargoSchema.index({ driver: 1 });
 cargoSchema.index({ pickupDate: 1, expectedDeliveryDate: 1 });
 
-module.exports = mongoose.model('Cargo', cargoSchema);
+module.exports = mongoose.models.Cargo || mongoose.model('Cargo', cargoSchema);

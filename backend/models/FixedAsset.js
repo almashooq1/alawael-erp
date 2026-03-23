@@ -661,4 +661,4 @@ fixedAssetSchema.pre('save', function () {
 // MODEL CREATION
 // ===================================================================
 
-module.exports = mongoose.model('FixedAsset', fixedAssetSchema);
+module.exports = mongoose.models.FixedAsset || mongoose.model('FixedAsset', fixedAssetSchema);

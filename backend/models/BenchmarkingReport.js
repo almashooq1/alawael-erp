@@ -184,4 +184,4 @@ benchmarkingReportSchema.index({ reportType: 1, status: 1 });
 benchmarkingReportSchema.index({ 'period.from': 1, 'period.to': 1 });
 benchmarkingReportSchema.index({ createdAt: -1 });
 
-module.exports = mongoose.model('BenchmarkingReport', benchmarkingReportSchema);
+module.exports = mongoose.models.BenchmarkingReport || mongoose.model('BenchmarkingReport', benchmarkingReportSchema);

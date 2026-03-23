@@ -505,12 +505,12 @@ CertificateSchema.statics.generateVerificationCode = function () {
 // ============================================
 // Models Export
 // ============================================
-const Course = mongoose.model('Course', CourseSchema);
-const Lesson = mongoose.model('Lesson', LessonSchema);
-const Quiz = mongoose.model('Quiz', QuizSchema);
-const Enrollment = mongoose.model('Enrollment', EnrollmentSchema);
-const Certificate = mongoose.model('Certificate', CertificateSchema);
-const MediaLibrary = mongoose.model('MediaLibrary', MediaLibrarySchema);
+const Course = mongoose.models.Course || mongoose.model('Course', CourseSchema);
+const Lesson = mongoose.models.Lesson || mongoose.model('Lesson', LessonSchema);
+const Quiz = mongoose.models.Quiz || mongoose.model('Quiz', QuizSchema);
+const Enrollment = mongoose.models.Enrollment || mongoose.model('Enrollment', EnrollmentSchema);
+const Certificate = mongoose.models.Certificate || mongoose.model('Certificate', CertificateSchema);
+const MediaLibrary = mongoose.models.MediaLibrary || mongoose.model('MediaLibrary', MediaLibrarySchema);
 
 module.exports = {
   Course,

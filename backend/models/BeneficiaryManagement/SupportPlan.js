@@ -277,6 +277,6 @@ supportPlanSchema.statics.findPendingReviews = function () {
   });
 };
 
-const SupportPlan = mongoose.model('SupportPlan', supportPlanSchema);
+const SupportPlan = mongoose.models.SupportPlan || mongoose.model('SupportPlan', supportPlanSchema);
 
 module.exports = SupportPlan;

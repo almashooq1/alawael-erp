@@ -493,12 +493,12 @@ const civilDefenseDocumentsSchema = new mongoose.Schema(
 );
 
 // Create Models
-const SafetyCertificate = mongoose.model('SafetyCertificate', safetyCertificateSchema);
-const SafetyAudit = mongoose.model('SafetyAudit', safetyAuditSchema);
-const ComplianceStatus = mongoose.model('ComplianceStatus', complianceStatusSchema);
-const FireSafety = mongoose.model('FireSafety', fireSafetySchema);
-const EmergencyDrill = mongoose.model('EmergencyDrill', emergencyDrillSchema);
-const CivilDefenseDocuments = mongoose.model('CivilDefenseDocuments', civilDefenseDocumentsSchema);
+const SafetyCertificate = mongoose.models.SafetyCertificate || mongoose.model('SafetyCertificate', safetyCertificateSchema);
+const SafetyAudit = mongoose.models.SafetyAudit || mongoose.model('SafetyAudit', safetyAuditSchema);
+const ComplianceStatus = mongoose.models.ComplianceStatus || mongoose.model('ComplianceStatus', complianceStatusSchema);
+const FireSafety = mongoose.models.FireSafety || mongoose.model('FireSafety', fireSafetySchema);
+const EmergencyDrill = mongoose.models.EmergencyDrill || mongoose.model('EmergencyDrill', emergencyDrillSchema);
+const CivilDefenseDocuments = mongoose.models.CivilDefenseDocuments || mongoose.model('CivilDefenseDocuments', civilDefenseDocumentsSchema);
 
 module.exports = {
   SafetyCertificate,

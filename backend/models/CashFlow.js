@@ -307,4 +307,4 @@ cashFlowSchema.statics.getReportsPeriod = function (organizationId, startDate, e
   }).sort({ 'period.startDate': -1 });
 };
 
-module.exports = mongoose.model('CashFlow', cashFlowSchema);
+module.exports = mongoose.models.CashFlow || mongoose.model('CashFlow', cashFlowSchema);

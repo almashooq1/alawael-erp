@@ -237,6 +237,6 @@ accountingExpenseSchema.statics.getStats = async function (startDate, endDate) {
   };
 };
 
-const AccountingExpense = mongoose.model('AccountingExpense', accountingExpenseSchema);
+const AccountingExpense = mongoose.models.AccountingExpense || mongoose.model('AccountingExpense', accountingExpenseSchema);
 
 module.exports = AccountingExpense;

@@ -237,6 +237,6 @@ messageSchema.post('save', async function (doc) {
   // await notificationService.sendMessageNotification(doc);
 });
 
-const Message = mongoose.model('Message', messageSchema);
+const Message = mongoose.models.Message || mongoose.model('Message', messageSchema);
 
 module.exports = Message;

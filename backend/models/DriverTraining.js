@@ -200,7 +200,7 @@ driverCertificationSchema.pre('save', async function (next) {
   next();
 });
 
-const DriverTraining = mongoose.model('DriverTraining', driverTrainingSchema);
-const DriverCertification = mongoose.model('DriverCertification', driverCertificationSchema);
+const DriverTraining = mongoose.models.DriverTraining || mongoose.model('DriverTraining', driverTrainingSchema);
+const DriverCertification = mongoose.models.DriverCertification || mongoose.model('DriverCertification', driverCertificationSchema);
 
 module.exports = { DriverTraining, DriverCertification };

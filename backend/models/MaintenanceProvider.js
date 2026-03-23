@@ -312,4 +312,4 @@ MaintenanceProviderSchema.virtual('overallScore').get(function () {
   );
 });
 
-module.exports = mongoose.model('MaintenanceProvider', MaintenanceProviderSchema);
+module.exports = mongoose.models.MaintenanceProvider || mongoose.model('MaintenanceProvider', MaintenanceProviderSchema);

@@ -221,4 +221,4 @@ fleetDisposalSchema.index({ organization: 1, vehicle: 1 });
 fleetDisposalSchema.index({ organization: 1, type: 1 });
 fleetDisposalSchema.index({ 'timeline.completedDate': 1 });
 
-module.exports = mongoose.model('FleetDisposal', fleetDisposalSchema);
+module.exports = mongoose.models.FleetDisposal || mongoose.model('FleetDisposal', fleetDisposalSchema);

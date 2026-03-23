@@ -184,7 +184,7 @@ tollTransactionSchema.pre('save', async function (next) {
   next();
 });
 
-const TrafficFine = mongoose.model('TrafficFine', trafficFineSchema);
-const TollTransaction = mongoose.model('TollTransaction', tollTransactionSchema);
+const TrafficFine = mongoose.models.TrafficFine || mongoose.model('TrafficFine', trafficFineSchema);
+const TollTransaction = mongoose.models.TollTransaction || mongoose.model('TollTransaction', tollTransactionSchema);
 
 module.exports = { TrafficFine, TollTransaction };

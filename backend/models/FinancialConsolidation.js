@@ -92,4 +92,4 @@ consolidationSchema.pre('save', async function (next) {
   next();
 });
 
-module.exports = mongoose.model('FinancialConsolidation', consolidationSchema);
+module.exports = mongoose.models.FinancialConsolidation || mongoose.model('FinancialConsolidation', consolidationSchema);

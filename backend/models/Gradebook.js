@@ -263,8 +263,8 @@ const SemesterReportSchema = new mongoose.Schema(
 SemesterReportSchema.index({ student: 1, academicYear: 1, semester: 1 }, { unique: true });
 
 module.exports = {
-  Gradebook: mongoose.model('Gradebook', GradebookSchema),
-  SemesterReport: mongoose.model('SemesterReport', SemesterReportSchema),
+  Gradebook: mongoose.models.Gradebook || mongoose.model('Gradebook', GradebookSchema),
+  SemesterReport: mongoose.models.SemesterReport || mongoose.model('SemesterReport', SemesterReportSchema),
   GradebookSchema,
   SemesterReportSchema,
   GradeEntrySchema,

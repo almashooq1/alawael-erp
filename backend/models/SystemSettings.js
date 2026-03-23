@@ -186,4 +186,4 @@ SystemSettingsSchema.methods.recordChange = function (userId, section, changes) 
   }
 };
 
-module.exports = mongoose.model('SystemSettings', SystemSettingsSchema);
+module.exports = mongoose.models.SystemSettings || mongoose.model('SystemSettings', SystemSettingsSchema);

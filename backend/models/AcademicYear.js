@@ -98,7 +98,7 @@ AcademicYearSchema.pre('save', async function (next) {
 });
 
 module.exports = {
-  AcademicYear: mongoose.model('AcademicYear', AcademicYearSchema),
+  AcademicYear: mongoose.models.AcademicYear || mongoose.model('AcademicYear', AcademicYearSchema),
   AcademicYearSchema,
   SemesterSchema,
 };

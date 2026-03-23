@@ -168,4 +168,4 @@ fleetCommunicationSchema.index({ 'sos.location': '2dsphere' });
 fleetCommunicationSchema.index({ parentMessage: 1 });
 fleetCommunicationSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
-module.exports = mongoose.model('FleetCommunication', fleetCommunicationSchema);
+module.exports = mongoose.models.FleetCommunication || mongoose.model('FleetCommunication', fleetCommunicationSchema);

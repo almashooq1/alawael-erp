@@ -100,4 +100,4 @@ ClassroomSchema.index({ type: 1, status: 1 });
 ClassroomSchema.index({ building: 1, floor: 1 });
 ClassroomSchema.index({ academicYear: 1, assignedGrade: 1 });
 
-module.exports = mongoose.model('Classroom', ClassroomSchema);
+module.exports = mongoose.models.Classroom || mongoose.model('Classroom', ClassroomSchema);

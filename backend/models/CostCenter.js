@@ -707,4 +707,4 @@ costCenterSchema.post('save', async function (doc) {
 // MODEL CREATION
 // ===================================================================
 
-module.exports = mongoose.model('CostCenter', costCenterSchema);
+module.exports = mongoose.models.CostCenter || mongoose.model('CostCenter', costCenterSchema);

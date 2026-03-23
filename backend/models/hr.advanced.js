@@ -429,7 +429,7 @@ const EmployeeBenefits =
   mongoose.models.EmployeeBenefits || mongoose.model('EmployeeBenefits', employeeBenefitsSchema);
 const DisciplinaryAction =
   mongoose.models.DisciplinaryAction ||
-  mongoose.model('DisciplinaryAction', disciplinaryActionSchema);
+  mongoose.models.DisciplinaryAction || mongoose.model('DisciplinaryAction', disciplinaryActionSchema);
 const HRAnalytics = mongoose.models.HRAnalytics || mongoose.model('HRAnalytics', hrAnalyticsSchema);
 
 module.exports = {

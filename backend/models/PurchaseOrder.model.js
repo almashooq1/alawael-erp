@@ -485,4 +485,4 @@ PurchaseOrderSchema.statics = {
   },
 };
 
-module.exports = mongoose.model('PurchaseOrder', PurchaseOrderSchema);
+module.exports = mongoose.models.PurchaseOrder || mongoose.model('PurchaseOrder', PurchaseOrderSchema);

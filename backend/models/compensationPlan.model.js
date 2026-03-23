@@ -72,4 +72,4 @@ const compensationPlanSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model('CompensationPlan', compensationPlanSchema);
+module.exports = mongoose.models.CompensationPlan || mongoose.model('CompensationPlan', compensationPlanSchema);

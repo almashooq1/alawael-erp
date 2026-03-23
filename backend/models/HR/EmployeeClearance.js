@@ -213,4 +213,4 @@ EmployeeClearanceSchema.pre('save', function (next) {
 EmployeeClearanceSchema.index({ employeeId: 1 });
 EmployeeClearanceSchema.index({ status: 1 });
 
-module.exports = mongoose.model('EmployeeClearance', EmployeeClearanceSchema);
+module.exports = mongoose.models.EmployeeClearance || mongoose.model('EmployeeClearance', EmployeeClearanceSchema);

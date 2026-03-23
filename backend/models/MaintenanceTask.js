@@ -231,4 +231,4 @@ MaintenanceTaskSchema.virtual('durationOverrun').get(function () {
   return null;
 });
 
-module.exports = mongoose.model('MaintenanceTask', MaintenanceTaskSchema);
+module.exports = mongoose.models.MaintenanceTask || mongoose.model('MaintenanceTask', MaintenanceTaskSchema);

@@ -54,4 +54,4 @@ const programSchema = new mongoose.Schema(
 programSchema.index({ category: 1, status: 1 });
 programSchema.index({ createdBy: 1, createdAt: -1 });
 
-module.exports = mongoose.model('Program', programSchema);
+module.exports = mongoose.models.Program || mongoose.model('Program', programSchema);

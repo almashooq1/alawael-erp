@@ -105,4 +105,4 @@ OvertimeRequestSchema.pre('save', async function (next) {
   next();
 });
 
-module.exports = mongoose.model('OvertimeRequest', OvertimeRequestSchema);
+module.exports = mongoose.models.OvertimeRequest || mongoose.model('OvertimeRequest', OvertimeRequestSchema);

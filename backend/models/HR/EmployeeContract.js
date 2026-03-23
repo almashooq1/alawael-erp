@@ -211,4 +211,4 @@ EmployeeContractSchema.index({ employeeId: 1, status: 1 });
 EmployeeContractSchema.index({ endDate: 1, status: 1 });
 EmployeeContractSchema.index({ qiwaStatus: 1 });
 
-module.exports = mongoose.model('EmployeeContract', EmployeeContractSchema);
+module.exports = mongoose.models.EmployeeContract || mongoose.model('EmployeeContract', EmployeeContractSchema);

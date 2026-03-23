@@ -167,4 +167,4 @@ EmployeeWarningSchema.index({ employeeId: 1, status: 1 });
 EmployeeWarningSchema.index({ violationType: 1, warningLevel: 1 });
 EmployeeWarningSchema.index({ violationDate: -1 });
 
-module.exports = mongoose.model('EmployeeWarning', EmployeeWarningSchema);
+module.exports = mongoose.models.EmployeeWarning || mongoose.model('EmployeeWarning', EmployeeWarningSchema);

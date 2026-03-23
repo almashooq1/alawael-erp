@@ -289,13 +289,13 @@ SurveyAnalyticsSchema.index({ 'reportPeriod.startDate': -1, branch: 1 });
 // ============================================================
 const FamilySurveyTemplate =
   mongoose.models.FamilySurveyTemplate ||
-  mongoose.model('FamilySurveyTemplate', SurveyTemplateSchema);
+  mongoose.models.FamilySurveyTemplate || mongoose.model('FamilySurveyTemplate', SurveyTemplateSchema);
 const FamilySurveyResponse =
   mongoose.models.FamilySurveyResponse ||
-  mongoose.model('FamilySurveyResponse', SurveyResponseSchema);
+  mongoose.models.FamilySurveyResponse || mongoose.model('FamilySurveyResponse', SurveyResponseSchema);
 const FamilySurveyAnalytics =
   mongoose.models.FamilySurveyAnalytics ||
-  mongoose.model('FamilySurveyAnalytics', SurveyAnalyticsSchema);
+  mongoose.models.FamilySurveyAnalytics || mongoose.model('FamilySurveyAnalytics', SurveyAnalyticsSchema);
 
 module.exports = {
   SurveyTemplate: FamilySurveyTemplate,

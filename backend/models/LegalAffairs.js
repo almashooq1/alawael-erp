@@ -160,6 +160,6 @@ const LegalConsultation =
   mongoose.models.LegalConsultation || mongoose.model('LegalConsultation', legalConsultationSchema);
 const LegalContractTemplate =
   mongoose.models.LegalContractTemplate ||
-  mongoose.model('LegalContractTemplate', legalContractTemplateSchema);
+  mongoose.models.LegalContractTemplate || mongoose.model('LegalContractTemplate', legalContractTemplateSchema);
 
 module.exports = { LegalCase, LegalConsultation, LegalContractTemplate };

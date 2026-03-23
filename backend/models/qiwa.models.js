@@ -813,11 +813,11 @@ QiwaAuditLogSchema.index({
 // =====================================================
 
 module.exports = {
-  QiwaContract: mongoose.model('QiwaContract', QiwaContractSchema),
-  QiwaEmployee: mongoose.model('QiwaEmployee', QiwaEmployeeSchema),
-  QiwaWage: mongoose.model('QiwaWage', QiwaWageSchema),
-  QiwaWPSSubmission: mongoose.model('QiwaWPSSubmission', QiwaWPSSubmissionSchema),
-  QiwaNitaqat: mongoose.model('QiwaNitaqat', QiwaNitaqatSchema),
-  QiwaLaborRecord: mongoose.model('QiwaLaborRecord', QiwaLaborRecordSchema),
-  QiwaAuditLog: mongoose.model('QiwaAuditLog', QiwaAuditLogSchema),
+  QiwaContract: mongoose.models.QiwaContract || mongoose.model('QiwaContract', QiwaContractSchema),
+  QiwaEmployee: mongoose.models.QiwaEmployee || mongoose.model('QiwaEmployee', QiwaEmployeeSchema),
+  QiwaWage: mongoose.models.QiwaWage || mongoose.model('QiwaWage', QiwaWageSchema),
+  QiwaWPSSubmission: mongoose.models.QiwaWPSSubmission || mongoose.model('QiwaWPSSubmission', QiwaWPSSubmissionSchema),
+  QiwaNitaqat: mongoose.models.QiwaNitaqat || mongoose.model('QiwaNitaqat', QiwaNitaqatSchema),
+  QiwaLaborRecord: mongoose.models.QiwaLaborRecord || mongoose.model('QiwaLaborRecord', QiwaLaborRecordSchema),
+  QiwaAuditLog: mongoose.models.QiwaAuditLog || mongoose.model('QiwaAuditLog', QiwaAuditLogSchema),
 };

@@ -2658,4 +2658,4 @@ rehabCenterLicenseSchema.pre('save', function () {
   }
 });
 
-module.exports = mongoose.model('RehabCenterLicense', rehabCenterLicenseSchema);
+module.exports = mongoose.models.RehabCenterLicense || mongoose.model('RehabCenterLicense', rehabCenterLicenseSchema);

@@ -80,7 +80,7 @@ dunningHistorySchema.index({ organization: 1, customerId: 1 });
 dunningHistorySchema.index({ sentAt: -1 });
 dunningHistorySchema.index({ response: 1, promiseDate: 1 });
 
-const DunningProfile = mongoose.model('DunningProfile', dunningProfileSchema);
-const DunningHistory = mongoose.model('DunningHistory', dunningHistorySchema);
+const DunningProfile = mongoose.models.DunningProfile || mongoose.model('DunningProfile', dunningProfileSchema);
+const DunningHistory = mongoose.models.DunningHistory || mongoose.model('DunningHistory', dunningHistorySchema);
 
 module.exports = { DunningProfile, DunningHistory };

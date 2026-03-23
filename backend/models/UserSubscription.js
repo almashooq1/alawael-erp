@@ -207,4 +207,4 @@ userSubscriptionSchema.methods.cancelSubscription = function (reason) {
   return this.save();
 };
 
-module.exports = mongoose.model('UserSubscription', userSubscriptionSchema);
+module.exports = mongoose.models.UserSubscription || mongoose.model('UserSubscription', userSubscriptionSchema);

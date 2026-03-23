@@ -128,4 +128,4 @@ fleetTollSchema.index({ 'tag.tagId': 1 });
 fleetTollSchema.index({ 'gate.gateId': 1 });
 fleetTollSchema.index({ 'gate.location': '2dsphere' });
 
-module.exports = mongoose.model('FleetToll', fleetTollSchema);
+module.exports = mongoose.models.FleetToll || mongoose.model('FleetToll', fleetTollSchema);

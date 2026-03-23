@@ -144,4 +144,4 @@ VacationSettlementSchema.index({ employeeId: 1, status: 1 });
 VacationSettlementSchema.index({ type: 1, status: 1 });
 VacationSettlementSchema.index({ settlementYear: 1 });
 
-module.exports = mongoose.model('VacationSettlement', VacationSettlementSchema);
+module.exports = mongoose.models.VacationSettlement || mongoose.model('VacationSettlement', VacationSettlementSchema);

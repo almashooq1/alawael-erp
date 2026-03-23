@@ -99,4 +99,4 @@ const recurringTransactionSchema = new mongoose.Schema(
 recurringTransactionSchema.index({ status: 1, nextExecutionDate: 1 });
 recurringTransactionSchema.index({ createdBy: 1 });
 
-module.exports = mongoose.model('RecurringTransaction', recurringTransactionSchema);
+module.exports = mongoose.models.RecurringTransaction || mongoose.model('RecurringTransaction', recurringTransactionSchema);

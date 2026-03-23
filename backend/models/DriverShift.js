@@ -127,7 +127,7 @@ const shiftTemplateSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const DriverShift = mongoose.model('DriverShift', driverShiftSchema);
-const ShiftTemplate = mongoose.model('ShiftTemplate', shiftTemplateSchema);
+const DriverShift = mongoose.models.DriverShift || mongoose.model('DriverShift', driverShiftSchema);
+const ShiftTemplate = mongoose.models.ShiftTemplate || mongoose.model('ShiftTemplate', shiftTemplateSchema);
 
 module.exports = { DriverShift, ShiftTemplate };

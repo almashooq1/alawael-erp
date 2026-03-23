@@ -121,4 +121,4 @@ const bankReconciliationSchema = new mongoose.Schema(
 bankReconciliationSchema.index({ accountId: 1, periodEnd: -1 });
 bankReconciliationSchema.index({ status: 1 });
 
-module.exports = mongoose.model('BankReconciliation', bankReconciliationSchema);
+module.exports = mongoose.models.BankReconciliation || mongoose.model('BankReconciliation', bankReconciliationSchema);

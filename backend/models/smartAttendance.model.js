@@ -1026,17 +1026,17 @@ const AttendanceViaCameraSchema = new mongoose.Schema(
 );
 
 // Create models
-const SmartAttendanceRecord = mongoose.model('SmartAttendanceRecord', SmartAttendanceRecordSchema);
+const SmartAttendanceRecord = mongoose.models.SmartAttendanceRecord || mongoose.model('SmartAttendanceRecord', SmartAttendanceRecordSchema);
 const AttendanceBehaviorPattern = mongoose.model(
   'AttendanceBehaviorPattern',
   AttendanceBehaviorPatternSchema
 );
-const AttendanceAppeal = mongoose.model('AttendanceAppeal', AttendanceAppealSchema);
+const AttendanceAppeal = mongoose.models.AttendanceAppeal || mongoose.model('AttendanceAppeal', AttendanceAppealSchema);
 const ParentNotificationPreferences = mongoose.model(
   'ParentNotificationPreferences',
   ParentNotificationPreferencesSchema
 );
-const BiometricEnrollment = mongoose.model('BiometricEnrollment', BiometricEnrollmentSchema);
+const BiometricEnrollment = mongoose.models.BiometricEnrollment || mongoose.model('BiometricEnrollment', BiometricEnrollmentSchema);
 const AttendanceAnomalyAlert = mongoose.model(
   'AttendanceAnomalyAlert',
   AttendanceAnomalyAlertSchema
@@ -1045,11 +1045,11 @@ const AttendanceSummaryReport = mongoose.model(
   'AttendanceSummaryReport',
   AttendanceSummaryReportSchema
 );
-const CameraDevice = mongoose.model('CameraDevice', CameraDeviceSchema);
-const BiometricDevice = mongoose.model('BiometricDevice', BiometricDeviceSchema);
-const FaceRecognitionData = mongoose.model('FaceRecognitionData', FaceRecognitionDataSchema);
-const FingerprintData = mongoose.model('FingerprintData', FingerprintDataSchema);
-const AttendanceViaCamera = mongoose.model('AttendanceViaCamera', AttendanceViaCameraSchema);
+const CameraDevice = mongoose.models.CameraDevice || mongoose.model('CameraDevice', CameraDeviceSchema);
+const BiometricDevice = mongoose.models.BiometricDevice || mongoose.model('BiometricDevice', BiometricDeviceSchema);
+const FaceRecognitionData = mongoose.models.FaceRecognitionData || mongoose.model('FaceRecognitionData', FaceRecognitionDataSchema);
+const FingerprintData = mongoose.models.FingerprintData || mongoose.model('FingerprintData', FingerprintDataSchema);
+const AttendanceViaCamera = mongoose.models.AttendanceViaCamera || mongoose.model('AttendanceViaCamera', AttendanceViaCameraSchema);
 
 module.exports = {
   SmartAttendanceRecord,

@@ -347,9 +347,9 @@ const BackupSchema = new mongoose.Schema(
 // Export Models
 // ============================================
 module.exports = {
-  Organization: mongoose.model('Organization', OrganizationSchema),
-  Employee: mongoose.model('Employee', EmployeeSchema),
-  AIPrediction: mongoose.model('AIPrediction', AIPredictionSchema),
-  SystemLog: mongoose.model('SystemLog', SystemLogSchema),
-  Backup: mongoose.model('Backup', BackupSchema),
+  Organization: mongoose.models.Organization || mongoose.model('Organization', OrganizationSchema),
+  Employee: mongoose.models.Employee || mongoose.model('Employee', EmployeeSchema),
+  AIPrediction: mongoose.models.AIPrediction || mongoose.model('AIPrediction', AIPredictionSchema),
+  SystemLog: mongoose.models.SystemLog || mongoose.model('SystemLog', SystemLogSchema),
+  Backup: mongoose.models.Backup || mongoose.model('Backup', BackupSchema),
 };

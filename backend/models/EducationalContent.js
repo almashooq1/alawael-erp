@@ -155,4 +155,4 @@ educationalContentSchema.methods.incrementViews = function () {
   return this.save();
 };
 
-module.exports = mongoose.model('EducationalContent', educationalContentSchema);
+module.exports = mongoose.models.EducationalContent || mongoose.model('EducationalContent', educationalContentSchema);

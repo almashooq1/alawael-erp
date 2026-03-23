@@ -357,6 +357,6 @@ conversationSchema.pre('save', function (next) {
   next();
 });
 
-const Conversation = mongoose.model('Conversation', conversationSchema);
+const Conversation = mongoose.models.Conversation || mongoose.model('Conversation', conversationSchema);
 
 module.exports = Conversation;

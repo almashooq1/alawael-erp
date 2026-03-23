@@ -109,7 +109,7 @@ controlSchema.pre('save', async function (next) {
   next();
 });
 
-const InternalControl = mongoose.model('InternalControl', controlSchema);
+const InternalControl = mongoose.models.InternalControl || mongoose.model('InternalControl', controlSchema);
 
 // Compliance Item - بند الامتثال
 const complianceItemSchema = new mongoose.Schema(
@@ -160,6 +160,6 @@ complianceItemSchema.pre('save', async function (next) {
   next();
 });
 
-const ComplianceItem = mongoose.model('ComplianceItem', complianceItemSchema);
+const ComplianceItem = mongoose.models.ComplianceItem || mongoose.model('ComplianceItem', complianceItemSchema);
 
 module.exports = { InternalControl, ComplianceItem };

@@ -836,30 +836,30 @@ WorkflowKPISnapshotSchema.index({ period: 1, date: -1 }, { unique: true });
 
 const WorkflowFormTemplate =
   mongoose.models.WorkflowFormTemplate ||
-  mongoose.model('WorkflowFormTemplate', WorkflowFormTemplateSchema);
+  mongoose.models.WorkflowFormTemplate || mongoose.model('WorkflowFormTemplate', WorkflowFormTemplateSchema);
 const WorkflowEscalationRule =
   mongoose.models.WorkflowEscalationRule ||
-  mongoose.model('WorkflowEscalationRule', WorkflowEscalationRuleSchema);
+  mongoose.models.WorkflowEscalationRule || mongoose.model('WorkflowEscalationRule', WorkflowEscalationRuleSchema);
 const WorkflowEscalationLog =
   mongoose.models.WorkflowEscalationLog ||
-  mongoose.model('WorkflowEscalationLog', WorkflowEscalationLogSchema);
+  mongoose.models.WorkflowEscalationLog || mongoose.model('WorkflowEscalationLog', WorkflowEscalationLogSchema);
 const WorkflowSLAPolicy =
   mongoose.models.WorkflowSLAPolicy || mongoose.model('WorkflowSLAPolicy', WorkflowSLAPolicySchema);
 const WorkflowApprovalChain =
   mongoose.models.WorkflowApprovalChain ||
-  mongoose.model('WorkflowApprovalChain', WorkflowApprovalChainSchema);
+  mongoose.models.WorkflowApprovalChain || mongoose.model('WorkflowApprovalChain', WorkflowApprovalChainSchema);
 const WorkflowApprovalInstance =
   mongoose.models.WorkflowApprovalInstance ||
-  mongoose.model('WorkflowApprovalInstance', WorkflowApprovalInstanceSchema);
+  mongoose.models.WorkflowApprovalInstance || mongoose.model('WorkflowApprovalInstance', WorkflowApprovalInstanceSchema);
 const WorkflowAutomationRule =
   mongoose.models.WorkflowAutomationRule ||
-  mongoose.model('WorkflowAutomationRule', WorkflowAutomationRuleSchema);
+  mongoose.models.WorkflowAutomationRule || mongoose.model('WorkflowAutomationRule', WorkflowAutomationRuleSchema);
 const WorkflowAutomationLog =
   mongoose.models.WorkflowAutomationLog ||
-  mongoose.model('WorkflowAutomationLog', WorkflowAutomationLogSchema);
+  mongoose.models.WorkflowAutomationLog || mongoose.model('WorkflowAutomationLog', WorkflowAutomationLogSchema);
 const WorkflowKPISnapshot =
   mongoose.models.WorkflowKPISnapshot ||
-  mongoose.model('WorkflowKPISnapshot', WorkflowKPISnapshotSchema);
+  mongoose.models.WorkflowKPISnapshot || mongoose.model('WorkflowKPISnapshot', WorkflowKPISnapshotSchema);
 
 module.exports = {
   WorkflowFormTemplate,

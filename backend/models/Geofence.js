@@ -145,4 +145,4 @@ geofenceSchema.index({ geometry: '2dsphere' });
 geofenceSchema.index({ status: 1, category: 1 });
 geofenceSchema.index({ organization: 1 });
 
-module.exports = mongoose.model('Geofence', geofenceSchema);
+module.exports = mongoose.models.Geofence || mongoose.model('Geofence', geofenceSchema);

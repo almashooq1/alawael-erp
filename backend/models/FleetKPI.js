@@ -141,4 +141,4 @@ const fleetKPISchema = new mongoose.Schema(
 fleetKPISchema.index({ organization: 1, 'period.type': 1, 'period.startDate': -1 });
 fleetKPISchema.index({ generatedAt: -1 });
 
-module.exports = mongoose.model('FleetKPI', fleetKPISchema);
+module.exports = mongoose.models.FleetKPI || mongoose.model('FleetKPI', fleetKPISchema);

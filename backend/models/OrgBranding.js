@@ -85,4 +85,4 @@ const OrgBrandingSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model('OrgBranding', OrgBrandingSchema);
+module.exports = mongoose.models.OrgBranding || mongoose.model('OrgBranding', OrgBrandingSchema);

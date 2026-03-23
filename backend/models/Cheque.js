@@ -103,4 +103,4 @@ chequeSchema.index({ status: 1, dueDate: 1 });
 chequeSchema.index({ type: 1, status: 1 });
 chequeSchema.index({ organization: 1 });
 
-module.exports = mongoose.model('Cheque', chequeSchema);
+module.exports = mongoose.models.Cheque || mongoose.model('Cheque', chequeSchema);

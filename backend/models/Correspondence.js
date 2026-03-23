@@ -248,4 +248,4 @@ correspondenceSchema.statics.generateRefNumber = async function (direction) {
   return `${prefix}-${year}-${String(count + 1).padStart(5, '0')}`;
 };
 
-module.exports = mongoose.model('Correspondence', correspondenceSchema);
+module.exports = mongoose.models.Correspondence || mongoose.model('Correspondence', correspondenceSchema);

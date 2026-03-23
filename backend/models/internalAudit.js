@@ -867,14 +867,14 @@ const ClosureFollowUpSchema = new mongoose.Schema(
 AnnualAuditPlanSchema.index({ year: 1, status: 1 });
 
 // إنشاء النماذج
-const AnnualAuditPlan = mongoose.model('AnnualAuditPlan', AnnualAuditPlanSchema);
-const SurpriseAudit = mongoose.model('SurpriseAudit', SurpriseAuditSchema);
-const NonConformanceReport = mongoose.model('NonConformanceReport', NonConformanceReportSchema);
+const AnnualAuditPlan = mongoose.models.AnnualAuditPlan || mongoose.model('AnnualAuditPlan', AnnualAuditPlanSchema);
+const SurpriseAudit = mongoose.models.SurpriseAudit || mongoose.model('SurpriseAudit', SurpriseAuditSchema);
+const NonConformanceReport = mongoose.models.NonConformanceReport || mongoose.model('NonConformanceReport', NonConformanceReportSchema);
 const CorrectivePreventiveAction = mongoose.model(
   'CorrectivePreventiveAction',
   CorrectivePreventiveActionSchema
 );
-const ClosureFollowUp = mongoose.model('ClosureFollowUp', ClosureFollowUpSchema);
+const ClosureFollowUp = mongoose.models.ClosureFollowUp || mongoose.model('ClosureFollowUp', ClosureFollowUpSchema);
 
 module.exports = {
   AnnualAuditPlan,

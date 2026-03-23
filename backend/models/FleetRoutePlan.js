@@ -185,4 +185,4 @@ fleetRoutePlanSchema.index({ organization: 1, status: 1 });
 fleetRoutePlanSchema.index({ 'origin.location': '2dsphere' });
 fleetRoutePlanSchema.index({ 'destination.location': '2dsphere' });
 
-module.exports = mongoose.model('FleetRoutePlan', fleetRoutePlanSchema);
+module.exports = mongoose.models.FleetRoutePlan || mongoose.model('FleetRoutePlan', fleetRoutePlanSchema);

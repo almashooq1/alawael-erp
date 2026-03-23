@@ -322,4 +322,4 @@ SupplierSchema.statics = {
   },
 };
 
-module.exports = mongoose.model('Supplier', SupplierSchema);
+module.exports = mongoose.models.Supplier || mongoose.model('Supplier', SupplierSchema);

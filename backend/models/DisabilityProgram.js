@@ -81,4 +81,4 @@ disabilityProgramSchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.model('DisabilityProgram', disabilityProgramSchema);
+module.exports = mongoose.models.DisabilityProgram || mongoose.model('DisabilityProgram', disabilityProgramSchema);

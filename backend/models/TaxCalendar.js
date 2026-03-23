@@ -86,4 +86,4 @@ taxCalendarSchema.index({ dueDate: 1, status: 1 });
 taxCalendarSchema.index({ taxType: 1 });
 taxCalendarSchema.index({ organization: 1 });
 
-module.exports = mongoose.model('TaxCalendar', taxCalendarSchema);
+module.exports = mongoose.models.TaxCalendar || mongoose.model('TaxCalendar', taxCalendarSchema);

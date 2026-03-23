@@ -48,6 +48,6 @@ const beneficiaryWalletSchema = new mongoose.Schema(
 );
 
 module.exports = {
-  Badge: mongoose.model('Badge', badgeSchema),
-  BeneficiaryWallet: mongoose.model('BeneficiaryWallet', beneficiaryWalletSchema),
+  Badge: mongoose.models.Badge || mongoose.model('Badge', badgeSchema),
+  BeneficiaryWallet: mongoose.models.BeneficiaryWallet || mongoose.model('BeneficiaryWallet', beneficiaryWalletSchema),
 };

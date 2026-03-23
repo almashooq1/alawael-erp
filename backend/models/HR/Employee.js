@@ -56,4 +56,4 @@ EmployeeSchema.index({ 'jobInfo.department': 1 });
 EmployeeSchema.index({ 'jobInfo.position': 1 });
 EmployeeSchema.index({ status: 1 });
 
-module.exports = mongoose.model('Employee', EmployeeSchema);
+module.exports = mongoose.models.Employee || mongoose.model('Employee', EmployeeSchema);

@@ -17,5 +17,5 @@ const notificationTemplateSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const NotificationTemplate = mongoose.model('NotificationTemplate', notificationTemplateSchema);
+const NotificationTemplate = mongoose.models.NotificationTemplate || mongoose.model('NotificationTemplate', notificationTemplateSchema);
 module.exports = NotificationTemplate;

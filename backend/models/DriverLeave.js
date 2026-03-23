@@ -105,4 +105,4 @@ driverLeaveSchema.index({ driver: 1, startDate: 1, endDate: 1 });
 driverLeaveSchema.index({ substituteDriver: 1 });
 driverLeaveSchema.index({ type: 1, status: 1 });
 
-module.exports = mongoose.model('DriverLeave', driverLeaveSchema);
+module.exports = mongoose.models.DriverLeave || mongoose.model('DriverLeave', driverLeaveSchema);

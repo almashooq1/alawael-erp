@@ -127,4 +127,4 @@ treasuryOperationSchema.pre('save', async function () {
   }
 });
 
-module.exports = mongoose.model('TreasuryOperation', treasuryOperationSchema);
+module.exports = mongoose.models.TreasuryOperation || mongoose.model('TreasuryOperation', treasuryOperationSchema);

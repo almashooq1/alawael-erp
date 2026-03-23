@@ -412,4 +412,4 @@ smartLeaveSchema.methods.cancel = async function (cancelledBy, reason) {
   return await this.save();
 };
 
-module.exports = mongoose.model('SmartLeave', smartLeaveSchema);
+module.exports = mongoose.models.SmartLeave || mongoose.model('SmartLeave', smartLeaveSchema);

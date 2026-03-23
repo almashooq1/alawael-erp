@@ -485,10 +485,10 @@ zakatReminderSchema.index({ user_id: 1, sentDate: 1 });
 
 module.exports = {
   // Models
-  ZakatCalculation: mongoose.model('ZakatCalculation', zakatCalculationSchema),
-  ZakatPayment: mongoose.model('ZakatPayment', zakatPaymentSchema),
-  ZakatReminder: mongoose.model('ZakatReminder', zakatReminderSchema),
-  ZakatReport: mongoose.model('ZakatReport', zakatReportSchema),
+  ZakatCalculation: mongoose.models.ZakatCalculation || mongoose.model('ZakatCalculation', zakatCalculationSchema),
+  ZakatPayment: mongoose.models.ZakatPayment || mongoose.model('ZakatPayment', zakatPaymentSchema),
+  ZakatReminder: mongoose.models.ZakatReminder || mongoose.model('ZakatReminder', zakatReminderSchema),
+  ZakatReport: mongoose.models.ZakatReport || mongoose.model('ZakatReport', zakatReportSchema),
 
   // Configuration
   ZAKAT_CONFIG,

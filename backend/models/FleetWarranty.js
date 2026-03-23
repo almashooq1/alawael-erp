@@ -149,4 +149,4 @@ fleetWarrantySchema.index({ organization: 1, status: 1 });
 fleetWarrantySchema.index({ 'coverage.endDate': 1 });
 fleetWarrantySchema.index({ organization: 1, type: 1 });
 
-module.exports = mongoose.model('FleetWarranty', fleetWarrantySchema);
+module.exports = mongoose.models.FleetWarranty || mongoose.model('FleetWarranty', fleetWarrantySchema);

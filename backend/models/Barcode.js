@@ -284,4 +284,4 @@ BarcodeSchema.statics.getScanHistory = function (barcodeId) {
   return this.findById(barcodeId, 'scanHistory');
 };
 
-module.exports = mongoose.model('Barcode', BarcodeSchema);
+module.exports = mongoose.models.Barcode || mongoose.model('Barcode', BarcodeSchema);

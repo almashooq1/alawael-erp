@@ -636,8 +636,8 @@ compensationStructureSchema.statics.getActiveStructures = function () {
 
 // ========== التصدير ==========
 module.exports = {
-  CompensationStructure: mongoose.model('CompensationStructure', compensationStructureSchema),
-  IndividualIncentive: mongoose.model('IndividualIncentive', individualIncentiveSchema),
-  PerformancePenalty: mongoose.model('PerformancePenalty', performancePenaltySchema),
-  BenefitsSummary: mongoose.model('BenefitsSummary', benefitsSummarySchema),
+  CompensationStructure: mongoose.models.CompensationStructure || mongoose.model('CompensationStructure', compensationStructureSchema),
+  IndividualIncentive: mongoose.models.IndividualIncentive || mongoose.model('IndividualIncentive', individualIncentiveSchema),
+  PerformancePenalty: mongoose.models.PerformancePenalty || mongoose.model('PerformancePenalty', performancePenaltySchema),
+  BenefitsSummary: mongoose.models.BenefitsSummary || mongoose.model('BenefitsSummary', benefitsSummarySchema),
 };

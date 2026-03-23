@@ -35,4 +35,4 @@ const transportScheduleSchema = new mongoose.Schema(
 // Prevent dupes for same bus same time
 transportScheduleSchema.index({ date: 1, vehicle: 1, direction: 1 }, { unique: true });
 
-module.exports = mongoose.model('TransportSchedule', transportScheduleSchema);
+module.exports = mongoose.models.TransportSchedule || mongoose.model('TransportSchedule', transportScheduleSchema);

@@ -380,8 +380,8 @@ const DisabilityAuthorityReport = mongoose.model(
   'DisabilityAuthorityReport',
   DisabilityAuthorityReportSchema
 );
-const CBAHIStandard = mongoose.model('CBAHIStandard', CBAHIStandardSchema);
-const CBAHICompliance = mongoose.model('CBAHICompliance', CBAHIComplianceSchema);
+const CBAHIStandard = mongoose.models.CBAHIStandard || mongoose.model('CBAHIStandard', CBAHIStandardSchema);
+const CBAHICompliance = mongoose.models.CBAHICompliance || mongoose.model('CBAHICompliance', CBAHIComplianceSchema);
 
 module.exports = {
   DisabilityAuthorityReport,

@@ -128,4 +128,4 @@ budgetSchema.index({ fiscalYear: 1, period: 1 });
 budgetSchema.index({ status: 1 });
 budgetSchema.index({ startDate: 1, endDate: 1 });
 
-module.exports = mongoose.model('Budget', budgetSchema);
+module.exports = mongoose.models.Budget || mongoose.model('Budget', budgetSchema);

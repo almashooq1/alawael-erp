@@ -130,7 +130,7 @@ TimetableSchema.methods.hasConflict = function (newSlot) {
 };
 
 module.exports = {
-  Timetable: mongoose.model('Timetable', TimetableSchema),
+  Timetable: mongoose.models.Timetable || mongoose.model('Timetable', TimetableSchema),
   TimetableSchema,
   TimeSlotSchema,
   PeriodTemplateSchema,

@@ -407,4 +407,4 @@ transportRouteSchema.statics.findAvailable = function (date, type) {
   });
 };
 
-module.exports = mongoose.model('TransportRoute', transportRouteSchema);
+module.exports = mongoose.models.TransportRoute || mongoose.model('TransportRoute', transportRouteSchema);

@@ -158,4 +158,4 @@ TeacherSchema.index({ department: 1, status: 1 });
 TeacherSchema.index({ 'specialEdSkills.disabilityExpertise': 1 });
 TeacherSchema.index({ subjects: 1 });
 
-module.exports = mongoose.model('Teacher', TeacherSchema);
+module.exports = mongoose.models.Teacher || mongoose.model('Teacher', TeacherSchema);

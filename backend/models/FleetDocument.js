@@ -110,4 +110,4 @@ fleetDocumentSchema.index({ vehicle: 1, type: 1 });
 fleetDocumentSchema.index({ driver: 1, type: 1 });
 fleetDocumentSchema.index({ expiryDate: 1, status: 1 });
 
-module.exports = mongoose.model('FleetDocument', fleetDocumentSchema);
+module.exports = mongoose.models.FleetDocument || mongoose.model('FleetDocument', fleetDocumentSchema);

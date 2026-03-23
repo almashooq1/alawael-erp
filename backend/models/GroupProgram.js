@@ -44,4 +44,4 @@ const groupProgramSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model('GroupProgram', groupProgramSchema);
+module.exports = mongoose.models.GroupProgram || mongoose.model('GroupProgram', groupProgramSchema);

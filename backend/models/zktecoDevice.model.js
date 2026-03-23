@@ -305,4 +305,4 @@ zktecoDeviceSchema.virtual('connectionString').get(function () {
 zktecoDeviceSchema.set('toJSON', { virtuals: true });
 zktecoDeviceSchema.set('toObject', { virtuals: true });
 
-module.exports = mongoose.model('ZKTecoDevice', zktecoDeviceSchema);
+module.exports = mongoose.models.ZKTecoDevice || mongoose.model('ZKTecoDevice', zktecoDeviceSchema);

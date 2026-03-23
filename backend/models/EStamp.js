@@ -301,4 +301,4 @@ eStampSchema.statics.generateStampId = async function () {
   return `STM-${year}-${rnd}`;
 };
 
-module.exports = mongoose.model('EStamp', eStampSchema);
+module.exports = mongoose.models.EStamp || mongoose.model('EStamp', eStampSchema);

@@ -377,7 +377,7 @@ InsurancePolicySchema.statics.getActiveByVehicle = function (vehicleId) {
 };
 
 // ─── Export ──────────────────────────────────────────────────────────────────
-const InsurancePolicy = mongoose.model('InsurancePolicy', InsurancePolicySchema);
+const InsurancePolicy = mongoose.models.InsurancePolicy || mongoose.model('InsurancePolicy', InsurancePolicySchema);
 
 module.exports = InsurancePolicy;
 module.exports.SAUDI_INSURANCE_COMPANIES = SAUDI_INSURANCE_COMPANIES;

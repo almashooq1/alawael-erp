@@ -55,7 +55,7 @@ if (!useMock) {
     cancelledAt: Date,
   });
 
-  module.exports = mongoose.model('Subscription', SubscriptionSchema);
+  module.exports = mongoose.models.Subscription || mongoose.model('Subscription', SubscriptionSchema);
 } else {
   class MockSubscription {
     constructor(data) {

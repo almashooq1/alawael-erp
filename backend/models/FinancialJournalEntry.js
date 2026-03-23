@@ -358,4 +358,4 @@ journalEntrySchema.path('credit').validate(function (value) {
   return value >= 0;
 });
 
-module.exports = mongoose.model('FinancialJournalEntry', journalEntrySchema);
+module.exports = mongoose.models.FinancialJournalEntry || mongoose.model('FinancialJournalEntry', journalEntrySchema);

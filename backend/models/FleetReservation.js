@@ -91,4 +91,4 @@ fleetReservationSchema.index({ vehicle: 1, startDate: 1, endDate: 1 });
 fleetReservationSchema.index({ requestedBy: 1 });
 fleetReservationSchema.index({ startDate: 1, endDate: 1 });
 
-module.exports = mongoose.model('FleetReservation', fleetReservationSchema);
+module.exports = mongoose.models.FleetReservation || mongoose.model('FleetReservation', fleetReservationSchema);

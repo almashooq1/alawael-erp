@@ -131,4 +131,4 @@ gratuityAuditSchema.index({
   status: 1,
 });
 
-module.exports = mongoose.model('GratuityAudit', gratuityAuditSchema);
+module.exports = mongoose.models.GratuityAudit || mongoose.model('GratuityAudit', gratuityAuditSchema);

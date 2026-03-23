@@ -193,4 +193,4 @@ auditEngagementSchema.pre('save', async function () {
   }
 });
 
-module.exports = mongoose.model('AuditEngagement', auditEngagementSchema);
+module.exports = mongoose.models.AuditEngagement || mongoose.model('AuditEngagement', auditEngagementSchema);

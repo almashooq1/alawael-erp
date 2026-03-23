@@ -173,4 +173,4 @@ const accountingSettingsSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model('AccountingSettings', accountingSettingsSchema);
+module.exports = mongoose.models.AccountingSettings || mongoose.model('AccountingSettings', accountingSettingsSchema);

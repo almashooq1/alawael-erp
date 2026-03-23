@@ -643,9 +643,9 @@ equipmentLendingSchema.index({ borrowDate: -1 });
 
 // ============ MODELS ============
 module.exports = {
-  Equipment: mongoose.model('Equipment', equipmentSchema),
-  MaintenanceSchedule: mongoose.model('MaintenanceSchedule', maintenanceScheduleSchema),
-  EquipmentLending: mongoose.model('EquipmentLending', equipmentLendingSchema),
-  EquipmentFaultLog: mongoose.model('EquipmentFaultLog', equipmentFaultLogSchema),
-  EquipmentCalibration: mongoose.model('EquipmentCalibration', equipmentCalibrationSchema),
+  Equipment: mongoose.models.Equipment || mongoose.model('Equipment', equipmentSchema),
+  MaintenanceSchedule: mongoose.models.MaintenanceSchedule || mongoose.model('MaintenanceSchedule', maintenanceScheduleSchema),
+  EquipmentLending: mongoose.models.EquipmentLending || mongoose.model('EquipmentLending', equipmentLendingSchema),
+  EquipmentFaultLog: mongoose.models.EquipmentFaultLog || mongoose.model('EquipmentFaultLog', equipmentFaultLogSchema),
+  EquipmentCalibration: mongoose.models.EquipmentCalibration || mongoose.model('EquipmentCalibration', equipmentCalibrationSchema),
 };

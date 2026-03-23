@@ -79,4 +79,4 @@ analyticsSchema.index({ status: 1, timestamp: -1 });
 // TTL index: automatically delete records older than 90 days
 analyticsSchema.index({ timestamp: 1 }, { expireAfterSeconds: 7776000 });
 
-module.exports = mongoose.model('Analytics', analyticsSchema);
+module.exports = mongoose.models.Analytics || mongoose.model('Analytics', analyticsSchema);

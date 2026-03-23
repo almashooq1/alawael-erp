@@ -335,4 +335,4 @@ independentLivingPlanSchema.virtual('durationWeeks').get(function () {
   return 0;
 });
 
-module.exports = mongoose.model('IndependentLivingPlan', independentLivingPlanSchema);
+module.exports = mongoose.models.IndependentLivingPlan || mongoose.model('IndependentLivingPlan', independentLivingPlanSchema);

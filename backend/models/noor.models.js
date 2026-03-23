@@ -377,7 +377,7 @@ const NoorStudent = mongoose.models.NoorStudent || mongoose.model('NoorStudent',
 const NoorIEP = mongoose.models.NoorIEP || mongoose.model('NoorIEP', NoorIEPSchema);
 const NoorProgressReport =
   mongoose.models.NoorProgressReport ||
-  mongoose.model('NoorProgressReport', NoorProgressReportSchema);
+  mongoose.models.NoorProgressReport || mongoose.model('NoorProgressReport', NoorProgressReportSchema);
 const NoorConfig = mongoose.models.NoorConfig || mongoose.model('NoorConfig', NoorConfigSchema);
 
 module.exports = {

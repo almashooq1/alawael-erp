@@ -182,6 +182,6 @@ const FinancialWorkflow =
   mongoose.models.FinancialWorkflow || mongoose.model('FinancialWorkflow', financialWorkflowSchema);
 const FinancialWorkflowInstance =
   mongoose.models.FinancialWorkflowInstance ||
-  mongoose.model('FinancialWorkflowInstance', workflowInstanceSchema);
+  mongoose.models.FinancialWorkflowInstance || mongoose.model('FinancialWorkflowInstance', workflowInstanceSchema);
 
 module.exports = { FinancialWorkflow, WorkflowInstance: FinancialWorkflowInstance };

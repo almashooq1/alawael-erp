@@ -591,6 +591,6 @@ smartIRPSchema.pre('save', function (next) {
   next();
 });
 
-const SmartIRP = mongoose.model('SmartIRP', smartIRPSchema);
+const SmartIRP = mongoose.models.SmartIRP || mongoose.model('SmartIRP', smartIRPSchema);
 
 module.exports = SmartIRP;

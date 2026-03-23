@@ -31,7 +31,7 @@ const branchSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
-const Branch = mongoose.model('Branch', branchSchema);
+const Branch = mongoose.models.Branch || mongoose.model('Branch', branchSchema);
 
 // نموذج القسم
 const departmentSchema = new mongoose.Schema({
@@ -47,7 +47,7 @@ const departmentSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-const Department = mongoose.model('Department', departmentSchema);
+const Department = mongoose.models.Department || mongoose.model('Department', departmentSchema);
 
 // نموذج نوع الإعاقة
 const disabilityTypeSchema = new mongoose.Schema({
@@ -72,7 +72,7 @@ const disabilityTypeSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-const DisabilityType = mongoose.model('DisabilityType', disabilityTypeSchema);
+const DisabilityType = mongoose.models.DisabilityType || mongoose.model('DisabilityType', disabilityTypeSchema);
 
 // نموذج الخدمة
 const serviceSchema = new mongoose.Schema({
@@ -99,7 +99,7 @@ const serviceSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-const Service = mongoose.model('Service', serviceSchema);
+const Service = mongoose.models.Service || mongoose.model('Service', serviceSchema);
 
 // نموذج الخطة التأهيلية
 const rehabilitationPlanSchema = new mongoose.Schema({
@@ -163,7 +163,7 @@ const rehabilitationPlanSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
-const RehabilitationPlan = mongoose.model('RehabilitationPlan', rehabilitationPlanSchema);
+const RehabilitationPlan = mongoose.models.RehabilitationPlan || mongoose.model('RehabilitationPlan', rehabilitationPlanSchema);
 
 // نموذج الجلسة العلاجية
 const therapySessionSchema = new mongoose.Schema({
@@ -190,7 +190,7 @@ const therapySessionSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-const TherapySession = mongoose.model('TherapySession', therapySessionSchema);
+const TherapySession = mongoose.models.TherapySession || mongoose.model('TherapySession', therapySessionSchema);
 
 // نموذج غرفة العلاج
 const therapyRoomSchema = new mongoose.Schema({
@@ -212,7 +212,7 @@ const therapyRoomSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-const TherapyRoom = mongoose.model('TherapyRoom', therapyRoomSchema);
+const TherapyRoom = mongoose.models.TherapyRoom || mongoose.model('TherapyRoom', therapyRoomSchema);
 
 // نموذج المركبة
 const vehicleSchema = new mongoose.Schema({
@@ -242,7 +242,7 @@ const vehicleSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-const Vehicle = mongoose.model('Vehicle', vehicleSchema);
+const Vehicle = mongoose.models.Vehicle || mongoose.model('Vehicle', vehicleSchema);
 
 // نموذج الحضور
 const attendanceSchema = new mongoose.Schema({
@@ -269,7 +269,7 @@ const attendanceSchema = new mongoose.Schema({
 
 attendanceSchema.index({ employee: 1, date: 1 }, { unique: true });
 
-const Attendance = mongoose.model('Attendance', attendanceSchema);
+const Attendance = mongoose.models.Attendance || mongoose.model('Attendance', attendanceSchema);
 
 // نموذج الإجازة
 const leaveSchema = new mongoose.Schema({
@@ -291,7 +291,7 @@ const leaveSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-const Leave = mongoose.model('Leave', leaveSchema);
+const Leave = mongoose.models.Leave || mongoose.model('Leave', leaveSchema);
 
 // نموذج نوع الإجازة
 const leaveTypeSchema = new mongoose.Schema({
@@ -309,7 +309,7 @@ const leaveTypeSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-const LeaveType = mongoose.model('LeaveType', leaveTypeSchema);
+const LeaveType = mongoose.models.LeaveType || mongoose.model('LeaveType', leaveTypeSchema);
 
 // نموذج الراتب
 const salarySchema = new mongoose.Schema({
@@ -342,7 +342,7 @@ const salarySchema = new mongoose.Schema({
 
 salarySchema.index({ employee: 1, month: 1, year: 1 }, { unique: true });
 
-const Salary = mongoose.model('Salary', salarySchema);
+const Salary = mongoose.models.Salary || mongoose.model('Salary', salarySchema);
 
 // تصدير جميع النماذج
 module.exports = {

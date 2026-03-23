@@ -178,4 +178,4 @@ fleetFuelCardSchema.index({ status: 1 });
 fleetFuelCardSchema.index({ expiryDate: 1 });
 fleetFuelCardSchema.index({ organization: 1 });
 
-module.exports = mongoose.model('FleetFuelCard', fleetFuelCardSchema);
+module.exports = mongoose.models.FleetFuelCard || mongoose.model('FleetFuelCard', fleetFuelCardSchema);

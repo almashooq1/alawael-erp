@@ -1142,30 +1142,30 @@ clinicalNoteSchema.index({ beneficiary_id: 1, 'note_info.session_date': -1 });
 
 module.exports = {
   // النقل
-  Transportation: mongoose.model('Transportation', transportationSchema),
+  Transportation: mongoose.models.Transportation || mongoose.model('Transportation', transportationSchema),
 
   // التأمين والفوترة
-  InsuranceClaim: mongoose.model('InsuranceClaim', insuranceClaimSchema),
-  BillingRecord: mongoose.model('BillingRecord', billingRecordSchema),
+  InsuranceClaim: mongoose.models.InsuranceClaim || mongoose.model('InsuranceClaim', insuranceClaimSchema),
+  BillingRecord: mongoose.models.BillingRecord || mongoose.model('BillingRecord', billingRecordSchema),
 
   // المتطوعين
-  Volunteer: mongoose.model('Volunteer', volunteerSchema),
+  Volunteer: mongoose.models.Volunteer || mongoose.model('Volunteer', volunteerSchema),
 
   // التبرعات
-  Donation: mongoose.model('Donation', donationSchema),
+  Donation: mongoose.models.Donation || mongoose.model('Donation', donationSchema),
 
   // الإقامة
-  ResidentialUnit: mongoose.model('ResidentialUnit', residentialUnitSchema),
+  ResidentialUnit: mongoose.models.ResidentialUnit || mongoose.model('ResidentialUnit', residentialUnitSchema),
 
   // الأنشطة
-  Activity: mongoose.model('Activity', activitySchema),
+  Activity: mongoose.models.Activity || mongoose.model('Activity', activitySchema),
 
   // التوثيق
-  Document: mongoose.model('Document', documentSchema),
+  Document: mongoose.models.Document || mongoose.model('Document', documentSchema),
 
   // التقويم
-  Event: mongoose.model('Event', eventSchema),
+  Event: mongoose.models.Event || mongoose.model('Event', eventSchema),
 
   // الملاحظات السريرية
-  ClinicalNote: mongoose.model('ClinicalNote', clinicalNoteSchema),
+  ClinicalNote: mongoose.models.ClinicalNote || mongoose.model('ClinicalNote', clinicalNoteSchema),
 };

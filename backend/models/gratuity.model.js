@@ -249,4 +249,4 @@ gratuitySchema.index({
   createdAt: -1,
 });
 
-module.exports = mongoose.model('Gratuity', gratuitySchema);
+module.exports = mongoose.models.Gratuity || mongoose.model('Gratuity', gratuitySchema);

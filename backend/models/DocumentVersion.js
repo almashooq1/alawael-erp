@@ -190,6 +190,6 @@ DocumentVersionSchema.statics.getVersionHistory = function (documentId, limit = 
     .lean();
 };
 
-const DocumentVersion = mongoose.model('DocumentVersion', DocumentVersionSchema);
+const DocumentVersion = mongoose.models.DocumentVersion || mongoose.model('DocumentVersion', DocumentVersionSchema);
 
 module.exports = DocumentVersion;

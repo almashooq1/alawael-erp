@@ -715,4 +715,4 @@ licenseSchema.statics.getStatistics = async function () {
   );
 };
 
-module.exports = mongoose.model('License', licenseSchema);
+module.exports = mongoose.models.License || mongoose.model('License', licenseSchema);

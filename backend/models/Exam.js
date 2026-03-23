@@ -202,8 +202,8 @@ ExamSchema.pre('save', function (next) {
 });
 
 module.exports = {
-  Exam: mongoose.model('Exam', ExamSchema),
-  ExamSubmission: mongoose.model('ExamSubmission', ExamSubmissionSchema),
+  Exam: mongoose.models.Exam || mongoose.model('Exam', ExamSchema),
+  ExamSubmission: mongoose.models.ExamSubmission || mongoose.model('ExamSubmission', ExamSubmissionSchema),
   ExamSchema,
   ExamSubmissionSchema,
   QuestionSchema,

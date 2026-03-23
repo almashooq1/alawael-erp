@@ -43,4 +43,4 @@ apiKeySchema.statics.generateKey = function () {
   return 'sk_' + crypto.randomBytes(24).toString('hex');
 };
 
-module.exports = mongoose.model('ApiKey', apiKeySchema);
+module.exports = mongoose.models.ApiKey || mongoose.model('ApiKey', apiKeySchema);

@@ -272,6 +272,6 @@ userSchema.index({ createdAt: -1 }); // Admin listings sorted by newest
 userSchema.index({ lastLogin: -1 }); // Last-active reports
 userSchema.index({ role: 1, createdAt: -1 }); // Role-based admin listing
 
-const User = mongoose.model('User', userSchema);
+const User = mongoose.models.User || mongoose.model('User', userSchema);
 
 module.exports = User;

@@ -331,6 +331,6 @@ const SpecializedAssessmentScale = mongoose.model(
   'SpecializedAssessmentScale',
   SpecializedAssessmentScaleSchema
 );
-const SpecializedScaleResult = mongoose.model('SpecializedScaleResult', ScaleResultSchema);
+const SpecializedScaleResult = mongoose.models.SpecializedScaleResult || mongoose.model('SpecializedScaleResult', ScaleResultSchema);
 
 module.exports = { SpecializedAssessmentScale, SpecializedScaleResult };

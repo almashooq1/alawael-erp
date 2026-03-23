@@ -782,7 +782,7 @@ const PostRehabSurvey =
   mongoose.models.PostRehabSurvey || mongoose.model('PostRehabSurvey', postRehabSurveySchema);
 const ReEnrollmentRequest =
   mongoose.models.ReEnrollmentRequest ||
-  mongoose.model('ReEnrollmentRequest', reEnrollmentRequestSchema);
+  mongoose.models.ReEnrollmentRequest || mongoose.model('ReEnrollmentRequest', reEnrollmentRequestSchema);
 
 module.exports = {
   PostRehabCase,

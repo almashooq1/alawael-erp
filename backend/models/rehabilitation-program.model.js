@@ -544,4 +544,4 @@ rehabilitationProgramSchema.statics.getProgramOutcomes = async function (program
   };
 };
 
-module.exports = mongoose.model('RehabilitationProgram', rehabilitationProgramSchema);
+module.exports = mongoose.models.RehabilitationProgram || mongoose.model('RehabilitationProgram', rehabilitationProgramSchema);

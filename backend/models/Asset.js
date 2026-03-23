@@ -82,4 +82,4 @@ assetSchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.model('Asset', assetSchema);
+module.exports = mongoose.models.Asset || mongoose.model('Asset', assetSchema);

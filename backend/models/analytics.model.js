@@ -37,7 +37,7 @@ if (!useMock) {
     createdAt: { type: Date, default: Date.now },
   });
 
-  module.exports = mongoose.model('Analytics', AnalyticsSchema);
+  module.exports = mongoose.models.Analytics || mongoose.model('Analytics', AnalyticsSchema);
 } else {
   const store = [];
 

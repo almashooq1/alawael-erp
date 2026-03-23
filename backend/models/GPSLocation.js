@@ -431,4 +431,4 @@ GPSLocationSchema.pre('save', async function () {
   }
 });
 
-module.exports = mongoose.model('GPSLocation', GPSLocationSchema);
+module.exports = mongoose.models.GPSLocation || mongoose.model('GPSLocation', GPSLocationSchema);

@@ -30,4 +30,4 @@ const homeAssignmentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model('HomeAssignment', homeAssignmentSchema);
+module.exports = mongoose.models.HomeAssignment || mongoose.model('HomeAssignment', homeAssignmentSchema);

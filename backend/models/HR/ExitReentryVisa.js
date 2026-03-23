@@ -175,4 +175,4 @@ ExitReentryVisaSchema.index({ employeeId: 1, status: 1 });
 ExitReentryVisaSchema.index({ expiryDate: 1, status: 1 });
 ExitReentryVisaSchema.index({ 'returnTracking.returnStatus': 1 });
 
-module.exports = mongoose.model('ExitReentryVisa', ExitReentryVisaSchema);
+module.exports = mongoose.models.ExitReentryVisa || mongoose.model('ExitReentryVisa', ExitReentryVisaSchema);

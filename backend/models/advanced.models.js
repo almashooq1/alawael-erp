@@ -213,7 +213,7 @@ settingsSchema.index({ centerId: 1 });
 settingsSchema.index({ 'auditLogs.timestamp': -1 });
 
 module.exports = {
-  Financial: mongoose.model('Financial', financialSchema),
-  Reports: mongoose.model('Reports', reportsSchema),
-  Settings: mongoose.model('Settings', settingsSchema),
+  Financial: mongoose.models.Financial || mongoose.model('Financial', financialSchema),
+  Reports: mongoose.models.Reports || mongoose.model('Reports', reportsSchema),
+  Settings: mongoose.models.Settings || mongoose.model('Settings', settingsSchema),
 };

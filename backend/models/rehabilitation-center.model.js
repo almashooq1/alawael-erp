@@ -1668,35 +1668,35 @@ waitlistSchema.index({ requested_service: 1 });
 
 module.exports = {
   // نظام التقييم
-  AssessmentTool: mongoose.model('AssessmentTool', assessmentToolSchema),
-  BeneficiaryAssessment: mongoose.model('BeneficiaryAssessment', beneficiaryAssessmentSchema),
+  AssessmentTool: mongoose.models.AssessmentTool || mongoose.model('AssessmentTool', assessmentToolSchema),
+  BeneficiaryAssessment: mongoose.models.BeneficiaryAssessment || mongoose.model('BeneficiaryAssessment', beneficiaryAssessmentSchema),
 
   // الخطط العلاجية
-  IndividualizedPlan: mongoose.model('IndividualizedPlan', individualizedPlanSchema),
+  IndividualizedPlan: mongoose.models.IndividualizedPlan || mongoose.model('IndividualizedPlan', individualizedPlanSchema),
 
   // الجلسات الجماعية
-  GroupSession: mongoose.model('GroupSession', groupSessionSchema),
+  GroupSession: mongoose.models.GroupSession || mongoose.model('GroupSession', groupSessionSchema),
 
   // رضا المستفيدين
-  SatisfactionSurvey: mongoose.model('SatisfactionSurvey', satisfactionSurveySchema),
-  SurveyResponse: mongoose.model('SurveyResponse', surveyResponseSchema),
+  SatisfactionSurvey: mongoose.models.SatisfactionSurvey || mongoose.model('SatisfactionSurvey', satisfactionSurveySchema),
+  SurveyResponse: mongoose.models.SurveyResponse || mongoose.model('SurveyResponse', surveyResponseSchema),
 
   // التحويلات
-  Referral: mongoose.model('Referral', referralSchema),
+  Referral: mongoose.models.Referral || mongoose.model('Referral', referralSchema),
 
   // الجدولة
-  Schedule: mongoose.model('Schedule', scheduleSchema),
+  Schedule: mongoose.models.Schedule || mongoose.model('Schedule', scheduleSchema),
 
   // المعدات
-  AssistiveEquipment: mongoose.model('AssistiveEquipment', assistiveEquipmentSchema),
+  AssistiveEquipment: mongoose.models.AssistiveEquipment || mongoose.model('AssistiveEquipment', assistiveEquipmentSchema),
 
   // التواصل مع الأسرة
-  FamilyCommunication: mongoose.model('FamilyCommunication', familyCommunicationSchema),
+  FamilyCommunication: mongoose.models.FamilyCommunication || mongoose.model('FamilyCommunication', familyCommunicationSchema),
 
   // قائمة الانتظار
-  Waitlist: mongoose.model('Waitlist', waitlistSchema),
+  Waitlist: mongoose.models.Waitlist || mongoose.model('Waitlist', waitlistSchema),
 
   // التقارير
-  ReportTemplate: mongoose.model('ReportTemplate', reportTemplateSchema),
-  GeneratedReport: mongoose.model('GeneratedReport', generatedReportSchema),
+  ReportTemplate: mongoose.models.ReportTemplate || mongoose.model('ReportTemplate', reportTemplateSchema),
+  GeneratedReport: mongoose.models.GeneratedReport || mongoose.model('GeneratedReport', generatedReportSchema),
 };

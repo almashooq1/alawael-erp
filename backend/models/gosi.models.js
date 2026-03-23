@@ -196,7 +196,7 @@ gosiComplianceReportSchema.index({ organization: 1, 'period.startDate': -1 });
 
 const GOSIComplianceReport =
   mongoose.models.GOSIComplianceReport ||
-  mongoose.model('GOSIComplianceReport', gosiComplianceReportSchema);
+  mongoose.models.GOSIComplianceReport || mongoose.model('GOSIComplianceReport', gosiComplianceReportSchema);
 
 /* ═══════════════════════════════════════════════════════
  * 5) GOSINotification — إشعارات التأمينات

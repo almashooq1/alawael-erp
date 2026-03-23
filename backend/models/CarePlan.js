@@ -90,4 +90,4 @@ const carePlanSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model('CarePlan', carePlanSchema);
+module.exports = mongoose.models.CarePlan || mongoose.model('CarePlan', carePlanSchema);

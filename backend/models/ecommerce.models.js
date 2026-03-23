@@ -399,12 +399,12 @@ inventoryLogSchema.index({ productId: 1, createdAt: -1 });
 // ============================================
 
 module.exports = {
-  Product: mongoose.model('Product', productSchema),
-  Cart: mongoose.model('Cart', cartSchema),
-  Checkout: mongoose.model('Checkout', checkoutSchema),
-  Coupon: mongoose.model('Coupon', couponSchema),
-  Wishlist: mongoose.model('Wishlist', wishlistSchema),
-  InventoryLog: mongoose.model('InventoryLog', inventoryLogSchema),
+  Product: mongoose.models.Product || mongoose.model('Product', productSchema),
+  Cart: mongoose.models.Cart || mongoose.model('Cart', cartSchema),
+  Checkout: mongoose.models.Checkout || mongoose.model('Checkout', checkoutSchema),
+  Coupon: mongoose.models.Coupon || mongoose.model('Coupon', couponSchema),
+  Wishlist: mongoose.models.Wishlist || mongoose.model('Wishlist', wishlistSchema),
+  InventoryLog: mongoose.models.InventoryLog || mongoose.model('InventoryLog', inventoryLogSchema),
 
   // Schemas export for reference
   productSchema,

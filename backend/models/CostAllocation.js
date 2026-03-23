@@ -154,4 +154,4 @@ costAllocationSchema.pre('save', async function () {
   }
 });
 
-module.exports = mongoose.model('CostAllocation', costAllocationSchema);
+module.exports = mongoose.models.CostAllocation || mongoose.model('CostAllocation', costAllocationSchema);

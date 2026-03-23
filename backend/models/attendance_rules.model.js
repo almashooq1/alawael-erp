@@ -456,4 +456,4 @@ attendanceRulesSchema.methods.getWorkingHoursInfo = function () {
   };
 };
 
-module.exports = mongoose.model('AttendanceRules', attendanceRulesSchema);
+module.exports = mongoose.models.AttendanceRules || mongoose.model('AttendanceRules', attendanceRulesSchema);

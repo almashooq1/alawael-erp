@@ -14,4 +14,4 @@ const therapyRoomSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model('TherapyRoom', therapyRoomSchema);
+module.exports = mongoose.models.TherapyRoom || mongoose.model('TherapyRoom', therapyRoomSchema);

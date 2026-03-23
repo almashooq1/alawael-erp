@@ -669,14 +669,14 @@ notificationSchema.index({ recipient: 1, status: 1 });
 // ===================================================================
 // Export Models
 // ===================================================================
-const Student = mongoose.model('TransportStudent', studentSchema);
-const BusRoute = mongoose.model('TransportBusRoute', busRouteSchema);
-const Driver = mongoose.model('TransportDriver', driverSchema);
-const Vehicle = mongoose.model('TransportVehicle', vehicleSchema);
-const Attendance = mongoose.model('TransportAttendance', attendanceSchema);
-const Incident = mongoose.model('TransportIncident', incidentSchema);
-const Payment = mongoose.model('TransportPayment', paymentSchema);
-const Notification = mongoose.model('TransportNotification', notificationSchema);
+const Student = mongoose.models.TransportStudent || mongoose.model('TransportStudent', studentSchema);
+const BusRoute = mongoose.models.TransportBusRoute || mongoose.model('TransportBusRoute', busRouteSchema);
+const Driver = mongoose.models.TransportDriver || mongoose.model('TransportDriver', driverSchema);
+const Vehicle = mongoose.models.TransportVehicle || mongoose.model('TransportVehicle', vehicleSchema);
+const Attendance = mongoose.models.TransportAttendance || mongoose.model('TransportAttendance', attendanceSchema);
+const Incident = mongoose.models.TransportIncident || mongoose.model('TransportIncident', incidentSchema);
+const Payment = mongoose.models.TransportPayment || mongoose.model('TransportPayment', paymentSchema);
+const Notification = mongoose.models.TransportNotification || mongoose.model('TransportNotification', notificationSchema);
 
 module.exports = {
   Student,

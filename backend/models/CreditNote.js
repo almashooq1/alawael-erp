@@ -113,4 +113,4 @@ creditNoteSchema.index({ type: 1, status: 1 });
 creditNoteSchema.index({ partyType: 1, partyName: 1 });
 creditNoteSchema.index({ originalInvoiceId: 1 });
 
-module.exports = mongoose.model('CreditNote', creditNoteSchema);
+module.exports = mongoose.models.CreditNote || mongoose.model('CreditNote', creditNoteSchema);

@@ -33,4 +33,4 @@ const goalBankSchema = new mongoose.Schema(
 // Index for search suggestions
 goalBankSchema.index({ description: 'text', category: 'text' });
 
-module.exports = mongoose.model('GoalBank', goalBankSchema);
+module.exports = mongoose.models.GoalBank || mongoose.model('GoalBank', goalBankSchema);

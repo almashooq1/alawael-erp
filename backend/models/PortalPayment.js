@@ -366,4 +366,4 @@ PortalPaymentSchema.pre('save', function () {
   this.updatedAt = new Date();
 });
 
-module.exports = mongoose.model('PortalPayment', PortalPaymentSchema);
+module.exports = mongoose.models.PortalPayment || mongoose.model('PortalPayment', PortalPaymentSchema);

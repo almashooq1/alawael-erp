@@ -129,4 +129,4 @@ EmployeeLoanSchema.pre('save', async function (next) {
   next();
 });
 
-module.exports = mongoose.model('EmployeeLoan', EmployeeLoanSchema);
+module.exports = mongoose.models.EmployeeLoan || mongoose.model('EmployeeLoan', EmployeeLoanSchema);

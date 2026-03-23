@@ -251,7 +251,7 @@ specializedProgramSchema.index({ isActive: 1 });
 specializedProgramSchema.index({ 'sessionConfig.frequencyPerWeek': 1 });
 
 module.exports = {
-  model: mongoose.model('SpecializedProgram', specializedProgramSchema),
+  model: mongoose.models.SpecializedProgram || mongoose.model('SpecializedProgram', specializedProgramSchema),
   schema: specializedProgramSchema,
   DISABILITY_TYPES,
   SEVERITY_LEVELS,

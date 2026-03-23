@@ -125,4 +125,4 @@ dashboardConfigSchema.pre('save', async function () {
   }
 });
 
-module.exports = mongoose.model('DashboardConfig', dashboardConfigSchema);
+module.exports = mongoose.models.DashboardConfig || mongoose.model('DashboardConfig', dashboardConfigSchema);

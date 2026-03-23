@@ -62,4 +62,4 @@ const beneficiaryFileSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model('BeneficiaryFile', beneficiaryFileSchema);
+module.exports = mongoose.models.BeneficiaryFile || mongoose.model('BeneficiaryFile', beneficiaryFileSchema);

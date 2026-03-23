@@ -206,10 +206,10 @@ VerificationLogSchema.index({ certificate: 1, createdAt: -1 });
 
 const BlockchainCertificate =
   mongoose.models.BlockchainCertificate ||
-  mongoose.model('BlockchainCertificate', BlockchainCertificateSchema);
+  mongoose.models.BlockchainCertificate || mongoose.model('BlockchainCertificate', BlockchainCertificateSchema);
 const CertificateTemplate =
   mongoose.models.CertificateTemplate ||
-  mongoose.model('CertificateTemplate', CertificateTemplateSchema);
+  mongoose.models.CertificateTemplate || mongoose.model('CertificateTemplate', CertificateTemplateSchema);
 const VerificationLog =
   mongoose.models.VerificationLog || mongoose.model('VerificationLog', VerificationLogSchema);
 

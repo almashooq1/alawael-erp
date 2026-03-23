@@ -110,4 +110,4 @@ maintenancePredictionSchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.model('MaintenancePrediction', maintenancePredictionSchema);
+module.exports = mongoose.models.MaintenancePrediction || mongoose.model('MaintenancePrediction', maintenancePredictionSchema);

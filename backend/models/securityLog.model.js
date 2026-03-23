@@ -55,4 +55,4 @@ securityLogSchema.index({ ip: 1, timestamp: -1 });
 securityLogSchema.index({ eventType: 1, severity: 1 });
 securityLogSchema.index({ resolved: 1 });
 
-module.exports = mongoose.model('SecurityLog', securityLogSchema);
+module.exports = mongoose.models.SecurityLog || mongoose.model('SecurityLog', securityLogSchema);

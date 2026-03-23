@@ -152,4 +152,4 @@ fleetBudgetSchema.index({ 'period.year': 1, 'period.month': 1 });
 fleetBudgetSchema.index({ status: 1 });
 fleetBudgetSchema.index({ organization: 1 });
 
-module.exports = mongoose.model('FleetBudget', fleetBudgetSchema);
+module.exports = mongoose.models.FleetBudget || mongoose.model('FleetBudget', fleetBudgetSchema);

@@ -814,7 +814,7 @@ if (typeof disabilityCardSchema.set === 'function') {
 
 // ─── Export ───────────────────────────────────────────────────────────────────
 
-const DisabilityCard = mongoose.model('DisabilityCard', disabilityCardSchema);
+const DisabilityCard = mongoose.models.DisabilityCard || mongoose.model('DisabilityCard', disabilityCardSchema);
 const exported = DisabilityCard || { modelName: 'DisabilityCard' };
 
 // Attach statics & instance methods from schema when model mock is bare

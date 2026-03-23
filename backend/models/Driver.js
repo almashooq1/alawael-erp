@@ -246,4 +246,4 @@ DriverSchema.methods.getLicenseStatus = function () {
   return 'صحيحة';
 };
 
-module.exports = mongoose.model('Driver', DriverSchema);
+module.exports = mongoose.models.Driver || mongoose.model('Driver', DriverSchema);

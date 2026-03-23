@@ -30,4 +30,4 @@ const dailySessionSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model('DailySession', dailySessionSchema);
+module.exports = mongoose.models.DailySession || mongoose.model('DailySession', dailySessionSchema);

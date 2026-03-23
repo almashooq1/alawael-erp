@@ -138,12 +138,22 @@ describe('AttendanceEngine Service', () => {
   test('should export expected methods', () => {
     if (!AttendanceEngine) return;
     const expectedMethods = [
-      'checkIn', 'checkOut', 'getTodayStatus',
-      'getEmployeeRecords', 'getDailyDashboard',
-      'getMonthlyReport', 'getComprehensiveReport',
-      'updateRecord', 'approveRecord', 'rejectRecord',
+      'checkIn',
+      'checkOut',
+      'getTodayStatus',
+      'getEmployeeRecords',
+      'getDailyDashboard',
+      'getMonthlyReport',
+      'getComprehensiveReport',
+      'updateRecord',
+      'approveRecord',
+      'rejectRecord',
       'getPendingApprovals',
-      'getShifts', 'createShift', 'updateShift', 'assignShift', 'getEmployeeShift',
+      'getShifts',
+      'createShift',
+      'updateShift',
+      'assignShift',
+      'getEmployeeShift',
       'getQuickStats',
     ];
     expectedMethods.forEach(method => {
@@ -253,55 +263,73 @@ describe('HR-Attendance Routes', () => {
 
   test('should have POST check-in endpoint', () => {
     if (!router || !router.stack) return;
-    const checkInRoute = router.stack.find(l => l.route && l.route.path === '/check-in' && l.route.methods.post);
+    const checkInRoute = router.stack.find(
+      l => l.route && l.route.path === '/check-in' && l.route.methods.post
+    );
     expect(checkInRoute).toBeDefined();
   });
 
   test('should have POST check-out endpoint', () => {
     if (!router || !router.stack) return;
-    const checkOutRoute = router.stack.find(l => l.route && l.route.path === '/check-out' && l.route.methods.post);
+    const checkOutRoute = router.stack.find(
+      l => l.route && l.route.path === '/check-out' && l.route.methods.post
+    );
     expect(checkOutRoute).toBeDefined();
   });
 
   test('should have GET today endpoint', () => {
     if (!router || !router.stack) return;
-    const todayRoute = router.stack.find(l => l.route && l.route.path === '/today' && l.route.methods.get);
+    const todayRoute = router.stack.find(
+      l => l.route && l.route.path === '/today' && l.route.methods.get
+    );
     expect(todayRoute).toBeDefined();
   });
 
   test('should have GET dashboard endpoint', () => {
     if (!router || !router.stack) return;
-    const dashRoute = router.stack.find(l => l.route && l.route.path === '/dashboard' && l.route.methods.get);
+    const dashRoute = router.stack.find(
+      l => l.route && l.route.path === '/dashboard' && l.route.methods.get
+    );
     expect(dashRoute).toBeDefined();
   });
 
   test('should have GET shifts endpoint', () => {
     if (!router || !router.stack) return;
-    const shiftsRoute = router.stack.find(l => l.route && l.route.path === '/shifts' && l.route.methods.get);
+    const shiftsRoute = router.stack.find(
+      l => l.route && l.route.path === '/shifts' && l.route.methods.get
+    );
     expect(shiftsRoute).toBeDefined();
   });
 
   test('should have POST shifts endpoint', () => {
     if (!router || !router.stack) return;
-    const createShiftRoute = router.stack.find(l => l.route && l.route.path === '/shifts' && l.route.methods.post);
+    const createShiftRoute = router.stack.find(
+      l => l.route && l.route.path === '/shifts' && l.route.methods.post
+    );
     expect(createShiftRoute).toBeDefined();
   });
 
   test('should have GET quick-stats endpoint', () => {
     if (!router || !router.stack) return;
-    const statsRoute = router.stack.find(l => l.route && l.route.path === '/quick-stats' && l.route.methods.get);
+    const statsRoute = router.stack.find(
+      l => l.route && l.route.path === '/quick-stats' && l.route.methods.get
+    );
     expect(statsRoute).toBeDefined();
   });
 
   test('should have comprehensive report endpoint', () => {
     if (!router || !router.stack) return;
-    const reportRoute = router.stack.find(l => l.route && l.route.path === '/reports/comprehensive' && l.route.methods.get);
+    const reportRoute = router.stack.find(
+      l => l.route && l.route.path === '/reports/comprehensive' && l.route.methods.get
+    );
     expect(reportRoute).toBeDefined();
   });
 
   test('should have pending approvals endpoint', () => {
     if (!router || !router.stack) return;
-    const pendingRoute = router.stack.find(l => l.route && l.route.path === '/pending-approvals' && l.route.methods.get);
+    const pendingRoute = router.stack.find(
+      l => l.route && l.route.path === '/pending-approvals' && l.route.methods.get
+    );
     expect(pendingRoute).toBeDefined();
   });
 });
@@ -381,7 +409,9 @@ describe('ZKTeco Device Model', () => {
     if (!ZKTecoDevice || !ZKTecoDevice.schema) return;
     const paths = Object.keys(ZKTecoDevice.schema.paths);
     // Should track connectivity
-    expect(paths.some(p => p.includes('status') || p.includes('connected') || p.includes('lastSync'))).toBe(true);
+    expect(
+      paths.some(p => p.includes('status') || p.includes('connected') || p.includes('lastSync'))
+    ).toBe(true);
   });
 });
 
@@ -406,19 +436,25 @@ describe('ZKTeco Routes (Enhanced)', () => {
 
   test('should have health-check endpoint', () => {
     if (!zkRouter || !zkRouter.stack) return;
-    const healthRoute = zkRouter.stack.find(l => l.route && l.route.path === '/health-check' && l.route.methods.post);
+    const healthRoute = zkRouter.stack.find(
+      l => l.route && l.route.path === '/health-check' && l.route.methods.post
+    );
     expect(healthRoute).toBeDefined();
   });
 
   test('should have connections endpoint', () => {
     if (!zkRouter || !zkRouter.stack) return;
-    const connRoute = zkRouter.stack.find(l => l.route && l.route.path === '/connections' && l.route.methods.get);
+    const connRoute = zkRouter.stack.find(
+      l => l.route && l.route.path === '/connections' && l.route.methods.get
+    );
     expect(connRoute).toBeDefined();
   });
 
   test('should have detailed-stats endpoint', () => {
     if (!zkRouter || !zkRouter.stack) return;
-    const statsRoute = zkRouter.stack.find(l => l.route && l.route.path === '/detailed-stats' && l.route.methods.get);
+    const statsRoute = zkRouter.stack.find(
+      l => l.route && l.route.path === '/detailed-stats' && l.route.methods.get
+    );
     expect(statsRoute).toBeDefined();
   });
 });
@@ -525,7 +561,11 @@ describe('WorkShift Calculation Logic', () => {
     const intervals = this.latePolicy?.intervals || [];
     for (const interval of intervals) {
       if (lateMinutes >= interval.fromMinutes && lateMinutes < interval.toMinutes) {
-        deduction = { type: interval.deductionType, value: interval.deductionValue, label: interval.label };
+        deduction = {
+          type: interval.deductionType,
+          value: interval.deductionValue,
+          label: interval.label,
+        };
         break;
       }
     }
@@ -579,7 +619,13 @@ describe('WorkShift Calculation Logic', () => {
     totalWorkHours: 8,
     gracePeriod: { checkInMinutes: 15, checkOutMinutes: 10 },
     latePolicy: { maxLateMinutes: 120, intervals: [] },
-    overtimePolicy: { enabled: true, minOvertimeMinutes: 30, multiplier: 1.5, maxDailyHours: 4, requiresApproval: false },
+    overtimePolicy: {
+      enabled: true,
+      minOvertimeMinutes: 30,
+      multiplier: 1.5,
+      maxDailyHours: 4,
+      requiresApproval: false,
+    },
     workDays: ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday'],
     crossesMidnight: false,
     ...overrides,
@@ -630,8 +676,20 @@ describe('WorkShift Calculation Logic', () => {
       latePolicy: {
         maxLateMinutes: 120,
         intervals: [
-          { fromMinutes: 15, toMinutes: 30, deductionType: 'percentage', deductionValue: 5, label: 'تأخير بسيط' },
-          { fromMinutes: 30, toMinutes: 60, deductionType: 'percentage', deductionValue: 10, label: 'تأخير متوسط' },
+          {
+            fromMinutes: 15,
+            toMinutes: 30,
+            deductionType: 'percentage',
+            deductionValue: 5,
+            label: 'تأخير بسيط',
+          },
+          {
+            fromMinutes: 30,
+            toMinutes: 60,
+            deductionType: 'percentage',
+            deductionValue: 10,
+            label: 'تأخير متوسط',
+          },
         ],
       },
     });
@@ -662,7 +720,8 @@ describe('WorkShift Calculation Logic', () => {
   test('calculateOvertime should detect overtime hours', () => {
     const shift = mockShift();
     // Worked 10 hours (2 hours over an 8-hour shift)
-    const result = calculateOvertime.call(shift,
+    const result = calculateOvertime.call(
+      shift,
       new Date('2025-01-15T08:00:00'),
       new Date('2025-01-15T18:00:00')
     );
@@ -673,7 +732,8 @@ describe('WorkShift Calculation Logic', () => {
   test('calculateOvertime should return false when overtime is below minimum', () => {
     const shift = mockShift();
     // Only 20 min over — below 30 min threshold
-    const result = calculateOvertime.call(shift,
+    const result = calculateOvertime.call(
+      shift,
       new Date('2025-01-15T08:00:00'),
       new Date('2025-01-15T16:20:00')
     );
@@ -681,9 +741,12 @@ describe('WorkShift Calculation Logic', () => {
   });
 
   test('calculateOvertime should cap at maxDailyHours', () => {
-    const shift = mockShift({ overtimePolicy: { enabled: true, minOvertimeMinutes: 30, multiplier: 1.5, maxDailyHours: 2 } });
+    const shift = mockShift({
+      overtimePolicy: { enabled: true, minOvertimeMinutes: 30, multiplier: 1.5, maxDailyHours: 2 },
+    });
     // 5 hours over — should cap at 2 hours (120 min)
-    const result = calculateOvertime.call(shift,
+    const result = calculateOvertime.call(
+      shift,
       new Date('2025-01-15T08:00:00'),
       new Date('2025-01-15T21:00:00')
     );
@@ -694,7 +757,8 @@ describe('WorkShift Calculation Logic', () => {
 
   test('calculateOvertime should return false when disabled', () => {
     const shift = mockShift({ overtimePolicy: { enabled: false } });
-    const result = calculateOvertime.call(shift,
+    const result = calculateOvertime.call(
+      shift,
       new Date('2025-01-15T08:00:00'),
       new Date('2025-01-15T20:00:00')
     );
@@ -722,7 +786,12 @@ describe('WorkShift Calculation Logic', () => {
 
   // ───── Night/cross-midnight shift ────────────────────────────
   test('night shift data should set crossesMidnight flag', () => {
-    const shift = mockShift({ shiftType: 'night', startTime: '22:00', endTime: '06:00', crossesMidnight: true });
+    const shift = mockShift({
+      shiftType: 'night',
+      startTime: '22:00',
+      endTime: '06:00',
+      crossesMidnight: true,
+    });
     expect(shift.crossesMidnight).toBe(true);
     expect(shift.startTime).toBe('22:00');
     expect(shift.endTime).toBe('06:00');

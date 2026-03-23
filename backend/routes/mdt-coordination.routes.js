@@ -1414,6 +1414,84 @@ router.get('/action-items-tracker', authorize(['admin', 'manager']), async (req,
   }
 });
 
+// ─── Dashboard Overview (KPI summary) ────────────────────────────────────────
+router.get('/dashboard/overview', async (req, res) => {
+  try {
+    const now = new Date();
+    const thirtyDaysAgo = new Date(now - 30 * 24 * 60 * 60 * 1000);
+    const sevenDaysAhead = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+    const [
+      totalMeetings,
+      completedMeetings,
+      upcomingMeetings,
+      totalPlans,
+      activePlans,
+      avgProgress,
+      totalReferrals,
+      pendingReferrals,
+      overdueReviews,
+      overdueReferrals,
+      recentActivity,
+      monthlyMeetings,
+      monthlyReferrals,
+    ] = await Promise.all([
+      MDTMeeting.countDocuments(),
+      MDTMeeting.countDocuments({ status: 'COMPLETED' }),
+      MDTMeeting.find({ date: { $gte: now, $lte: sevenDaysAhead }, status: 'SCHEDULED' })
+        .sort({ date: 1 })
+        .limit(5)
+        .select('title date startTime type attendees')
+        .lean(),
+      UnifiedRehabPlan.countDocuments(),
+      UnifiedRehabPlan.countDocuments({ status: 'ACTIVE' }),
+      UnifiedRehabPlan.aggregate([
+        { $match: { status: 'ACTIVE' } },
+        { $group: { _id: null, avg: { $avg: '$overallProgress' } } },
+      ]),
+      ReferralTicket.countDocuments(),
+      ReferralTicket.countDocuments({ status: 'PENDING' }),
+      UnifiedRehabPlan.countDocuments({ reviewDate: { $lt: now }, status: 'ACTIVE' }),
+      ReferralTicket.countDocuments({ responseDeadline: { $lt: now }, status: 'PENDING' }),
+      MDTMeeting.find({ date: { $gte: thirtyDaysAgo } })
+        .sort({ date: -1 })
+        .limit(5)
+        .select('meetingNumber title date status type')
+        .lean(),
+      MDTMeeting.countDocuments({ date: { $gte: thirtyDaysAgo } }),
+      ReferralTicket.countDocuments({ createdAt: { $gte: thirtyDaysAgo } }),
+    ]);
+
+    const completionRate =
+      totalMeetings > 0 ? Math.round((completedMeetings / totalMeetings) * 100) : 0;
+
+    res.json({
+      success: true,
+      data: {
+        totalMeetings,
+        completedMeetings,
+        completionRate,
+        totalPlans,
+        activePlans,
+        averageProgress: Math.round(avgProgress[0]?.avg || 0),
+        totalReferrals,
+        pendingReferrals,
+        overdueItems: overdueReviews + overdueReferrals,
+        overdueReviews,
+        overdueReferrals,
+        upcomingMeetings,
+        recentActivity,
+        monthlyMeetings,
+        monthlyReferrals,
+      },
+      message: 'لوحة المتابعة الشاملة',
+    });
+  } catch (error) {
+    logger.error('Error fetching dashboard overview:', error);
+    res.status(500).json({ success: false, message: 'خطأ في جلب بيانات لوحة المتابعة' });
+  }
+});
+
 // ─── Comprehensive Coordination Stats ────────────────────────────────────────
 router.get('/stats', authorize(['admin', 'manager']), async (req, res) => {
   try {

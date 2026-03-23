@@ -383,8 +383,7 @@ class AttendanceEngine {
         onLeave: statusCounts.on_leave || 0,
         halfDay: statusCounts.half_day || 0,
         workFromHome: statusCounts.work_from_home || 0,
-        attendanceRate:
-          totalEmployees > 0 ? Math.round((presentCount / totalEmployees) * 100) : 0,
+        attendanceRate: totalEmployees > 0 ? Math.round((presentCount / totalEmployees) * 100) : 0,
       },
       lateStats: lateStats[0] || { count: 0, totalMinutes: 0, avgMinutes: 0 },
       checkInMethods: methodCounts,
@@ -492,7 +491,10 @@ class AttendanceEngine {
     to.setHours(23, 59, 59, 999);
 
     const matchStage = { date: { $gte: from, $lte: to }, isDeleted: false };
-    if (department) matchStage.departmentAtTimeOfAttendance = new (require('mongoose').Types.ObjectId)(department);
+    if (department)
+      matchStage.departmentAtTimeOfAttendance = new (require('mongoose').Types.ObjectId)(
+        department
+      );
 
     const [statusAgg, deptAgg, methodAgg, lateAgg, dailyAgg] = await Promise.all([
       // توزيع الحالات
@@ -649,7 +651,9 @@ class AttendanceEngine {
 
     await record.save();
 
-    logger.info(`Attendance: Record ${recordId} updated by user ${userId}: ${changes.length} changes`);
+    logger.info(
+      `Attendance: Record ${recordId} updated by user ${userId}: ${changes.length} changes`
+    );
 
     return {
       success: true,

@@ -389,4 +389,5 @@ smartAttendanceSchema.statics.getTodayRecord = async function (employeeId) {
   }).populate('employeeId', 'fullName email department position');
 };
 
-module.exports = mongoose.models.SmartAttendance || mongoose.model('SmartAttendance', smartAttendanceSchema);
+module.exports =
+  mongoose.models.SmartAttendance || mongoose.model('SmartAttendance', smartAttendanceSchema);

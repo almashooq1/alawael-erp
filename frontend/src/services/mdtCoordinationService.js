@@ -84,6 +84,11 @@ export const referralsService = {
 
 // ── Dashboard ──
 export const dashboardService = {
+  getOverview: () =>
+    api
+      .get(`${BASE}/dashboard/overview`)
+      .then(r => r.data)
+      .catch(() => ({ data: {} })),
   getBeneficiary: beneficiaryId =>
     api.get(`${BASE}/dashboard/beneficiary/${beneficiaryId}`).then(r => r.data),
   getTeamWorkload: () =>

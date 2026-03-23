@@ -85,18 +85,15 @@ router.get('/today', async (req, res) => {
  */
 router.get('/my-records', async (req, res) => {
   try {
-    const result = await AttendanceEngine.getEmployeeRecords(
-      req.user.employeeId || req.user.id,
-      {
-        startDate: req.query.startDate,
-        endDate: req.query.endDate,
-        month: req.query.month ? parseInt(req.query.month) : undefined,
-        year: req.query.year ? parseInt(req.query.year) : undefined,
-        limit: parseInt(req.query.limit) || 31,
-        page: parseInt(req.query.page) || 1,
-        status: req.query.status,
-      }
-    );
+    const result = await AttendanceEngine.getEmployeeRecords(req.user.employeeId || req.user.id, {
+      startDate: req.query.startDate,
+      endDate: req.query.endDate,
+      month: req.query.month ? parseInt(req.query.month) : undefined,
+      year: req.query.year ? parseInt(req.query.year) : undefined,
+      limit: parseInt(req.query.limit) || 31,
+      page: parseInt(req.query.page) || 1,
+      status: req.query.status,
+    });
 
     res.json({ success: true, data: result });
   } catch (error) {
@@ -212,11 +209,7 @@ router.get(
       const month = parseInt(req.query.month) || new Date().getMonth() + 1;
       const year = parseInt(req.query.year) || new Date().getFullYear();
 
-      const result = await AttendanceEngine.getMonthlyReport(
-        req.params.employeeId,
-        month,
-        year
-      );
+      const result = await AttendanceEngine.getMonthlyReport(req.params.employeeId, month, year);
 
       res.json({ success: true, data: result });
     } catch (error) {
@@ -437,37 +430,33 @@ router.put('/shifts/:shiftId', authorizeRole(['admin', 'hr_manager']), async (re
  * POST /shifts/:shiftId/assign
  * تعيين وردية لقسم أو موظف
  */
-router.post(
-  '/shifts/:shiftId/assign',
-  authorizeRole(['admin', 'hr_manager']),
-  async (req, res) => {
-    try {
-      const { targetType, targetId, targetName } = req.body;
-      if (!targetType || !targetId) {
-        return res.status(400).json({
-          success: false,
-          message: 'نوع الهدف ومعرفه مطلوبان',
-        });
-      }
-
-      const shift = await AttendanceEngine.assignShift(
-        req.params.shiftId,
-        targetType,
-        targetId,
-        targetName,
-        req.user.id
-      );
-
-      res.json({
-        success: true,
-        message: 'تم تعيين الوردية بنجاح',
-        data: shift,
+router.post('/shifts/:shiftId/assign', authorizeRole(['admin', 'hr_manager']), async (req, res) => {
+  try {
+    const { targetType, targetId, targetName } = req.body;
+    if (!targetType || !targetId) {
+      return res.status(400).json({
+        success: false,
+        message: 'نوع الهدف ومعرفه مطلوبان',
       });
-    } catch (error) {
-      res.status(400).json({ success: false, message: error.message });
     }
+
+    const shift = await AttendanceEngine.assignShift(
+      req.params.shiftId,
+      targetType,
+      targetId,
+      targetName,
+      req.user.id
+    );
+
+    res.json({
+      success: true,
+      message: 'تم تعيين الوردية بنجاح',
+      data: shift,
+    });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
   }
-);
+});
 
 /**
  * GET /my-shift

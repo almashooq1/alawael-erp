@@ -1,7 +1,7 @@
 /**
  * integration/database-service-integration.js
  * Integration Guide: Connecting Repository to Service Layer
- * 
+ *
  * This file explains how to integrate the database repository
  * with the existing supply chain service.
  */
@@ -10,7 +10,7 @@ const _logger = require('../config/logger');
 
 /**
  * INTEGRATION PATTERN
- * 
+ *
  * Before (Mock DB):
  * ┌─────────────┐
  * │   Routes    │
@@ -44,9 +44,9 @@ const _logger = require('../config/logger');
 
 /**
  * INTEGRATION STEP 1: UPDATE SERVICE LAYER
- * 
+ *
  * File: services/supplyChain.service.js
- * 
+ *
  * Add these imports at the top:
  */
 
@@ -58,7 +58,7 @@ const { USE_MOCK_DB } = process.env;
 
 /**
  * INTEGRATION STEP 2: UPDATE SUPPLIER OPERATIONS
- * 
+ *
  * Replace mock Map operations with repository calls
  */
 
@@ -126,7 +126,7 @@ class SupplyChainService {
 
 /**
  * INTEGRATION STEP 3: HANDLE PROMISES AND ASYNC/AWAIT
- * 
+ *
  * Repository methods return Promises
  * Update routes to handle async operations
  */
@@ -155,7 +155,7 @@ router.post('/suppliers', async (req, res) => {
 
 /**
  * INTEGRATION STEP 4: TRANSACTION SUPPORT
- * 
+ *
  * For multi-step operations, use MongoDB sessions
  */
 
@@ -172,7 +172,7 @@ async createPurchaseOrderWithShipment(orderData, shipmentData) {
   try {
     // Create order
     const order = await repository.createPurchaseOrder(orderData);
-    
+
     // Create associated shipment
     const shipment = await repository.createShipment({
       ...shipmentData,
@@ -203,7 +203,7 @@ async createPurchaseOrderWithShipment(orderData, shipmentData) {
 
 /**
  * INTEGRATION STEP 5: ERROR HANDLING
- * 
+ *
  * Repository throws Mongoose errors
  * Handle them appropriately
  */
@@ -219,8 +219,8 @@ router.post('/suppliers', async (req, res) => {
     // Handle specific Mongoose errors
     if (error.code === 11000) {
       // Duplicate key error (e.g., email already exists)
-      return res.status(409).json({ 
-        error: 'Supplier with this email already exists' 
+      return res.status(409).json({
+        error: 'Supplier with this email already exists'
       });
     }
 
@@ -233,9 +233,9 @@ router.post('/suppliers', async (req, res) => {
     }
 
     // Generic error
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Failed to create supplier',
-      message: error.message 
+      message: error.message
     });
   }
 });
@@ -243,7 +243,7 @@ router.post('/suppliers', async (req, res) => {
 
 /**
  * INTEGRATION STEP 6: CONNECTION INITIALIZATION
- * 
+ *
  * Update app.js to connect to database on startup
  */
 
@@ -292,7 +292,7 @@ startServer();
 
 /**
  * INTEGRATION STEP 7: MIGRATION CHECKLIST
- * 
+ *
  * Verify each step before proceeding
  */
 
@@ -349,7 +349,7 @@ const integrationChecklist = [
 
 /**
  * INTEGRATION TEST SCRIPT
- * 
+ *
  * Run this to verify integration
  */
 
@@ -395,7 +395,8 @@ echo "\\n✅ Integration tests completed!"
 const connectionStrings = {
   development_local: 'mongodb://localhost:27017/erp_system',
   development_docker: 'mongodb://mongodb:27017/erp_system',
-  production_atlas: 'mongodb+srv://<ATLAS_USER>:<ATLAS_PASS>@<cluster>.mongodb.net/erp_system?retryWrites=true&w=majority',
+  production_atlas:
+    'mongodb+srv://<ATLAS_USER>:<ATLAS_PASS>@<cluster>.mongodb.net/erp_system?retryWrites=true&w=majority',
   test: 'mongodb://localhost:27017/erp_test',
 };
 

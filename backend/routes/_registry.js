@@ -459,7 +459,9 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
 
   // ── HR Attendance Engine (محرك الحضور والورديات الموحد) ──────────────────
   dualMount(app, 'hr-attendance', hrAttendanceRoutes);
-  logger.info('HR Attendance Engine routes mounted (shifts, check-in/out, dashboard, reports — 20+ endpoints)');
+  logger.info(
+    'HR Attendance Engine routes mounted (shifts, check-in/out, dashboard, reports — 20+ endpoints)'
+  );
 
   // ── Education System Routes (نظام التعليم) ─────────────────────────────
   dualMount(app, 'academic-years', academicYearRoutes);

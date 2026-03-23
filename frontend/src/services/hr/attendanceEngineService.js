@@ -31,21 +31,20 @@ async function safeCall(fn, fallback = null) {
 // ════════════════════════════════════════════════════════════════════════════════
 
 /** تسجيل حضور */
-export const checkIn = (data = {}) =>
-  safeCall(() => apiClient.post(`${BASE}/check-in`, data));
+export const checkIn = (data = {}) => safeCall(() => apiClient.post(`${BASE}/check-in`, data));
 
 /** تسجيل انصراف */
-export const checkOut = (data = {}) =>
-  safeCall(() => apiClient.post(`${BASE}/check-out`, data));
+export const checkOut = (data = {}) => safeCall(() => apiClient.post(`${BASE}/check-out`, data));
 
 /** حالة اليوم */
-export const getTodayStatus = () =>
-  safeCall(() => apiClient.get(`${BASE}/today`), null);
+export const getTodayStatus = () => safeCall(() => apiClient.get(`${BASE}/today`), null);
 
 /** سجلاتي */
 export const getMyRecords = (params = {}) => {
   const qs = new URLSearchParams();
-  Object.entries(params).forEach(([k, v]) => { if (v) qs.set(k, v); });
+  Object.entries(params).forEach(([k, v]) => {
+    if (v) qs.set(k, v);
+  });
   return safeCall(() => apiClient.get(`${BASE}/my-records?${qs}`), { records: [], pagination: {} });
 };
 
@@ -64,7 +63,9 @@ export const getMyMonthlyReport = (month, year) => {
 /** لوحة التحكم اليومية */
 export const getDashboard = (params = {}) => {
   const qs = new URLSearchParams();
-  Object.entries(params).forEach(([k, v]) => { if (v) qs.set(k, String(v)); });
+  Object.entries(params).forEach(([k, v]) => {
+    if (v) qs.set(k, String(v));
+  });
   return safeCall(() => apiClient.get(`${BASE}/dashboard?${qs}`), {
     records: [],
     stats: {},
@@ -73,8 +74,7 @@ export const getDashboard = (params = {}) => {
 };
 
 /** إحصائيات سريعة */
-export const getQuickStats = () =>
-  safeCall(() => apiClient.get(`${BASE}/quick-stats`), {});
+export const getQuickStats = () => safeCall(() => apiClient.get(`${BASE}/quick-stats`), {});
 
 // ════════════════════════════════════════════════════════════════════════════════
 //  سجلات الموظفين
@@ -83,11 +83,13 @@ export const getQuickStats = () =>
 /** سجلات موظف */
 export const getEmployeeRecords = (employeeId, params = {}) => {
   const qs = new URLSearchParams();
-  Object.entries(params).forEach(([k, v]) => { if (v) qs.set(k, String(v)); });
-  return safeCall(
-    () => apiClient.get(`${BASE}/employee/${employeeId}/records?${qs}`),
-    { records: [], pagination: {} }
-  );
+  Object.entries(params).forEach(([k, v]) => {
+    if (v) qs.set(k, String(v));
+  });
+  return safeCall(() => apiClient.get(`${BASE}/employee/${employeeId}/records?${qs}`), {
+    records: [],
+    pagination: {},
+  });
 };
 
 /** تقرير شهري لموظف */
@@ -99,7 +101,7 @@ export const getEmployeeMonthlyReport = (employeeId, month, year) => {
 };
 
 /** وردية موظف */
-export const getEmployeeShift = (employeeId) =>
+export const getEmployeeShift = employeeId =>
   safeCall(() => apiClient.get(`${BASE}/employee/${employeeId}/shift`));
 
 /** تسجيل حضور يدوي لموظف */
@@ -138,11 +140,13 @@ export const rejectRecord = (recordId, reason) =>
 /** السجلات المعلقة */
 export const getPendingApprovals = (params = {}) => {
   const qs = new URLSearchParams();
-  Object.entries(params).forEach(([k, v]) => { if (v) qs.set(k, String(v)); });
-  return safeCall(
-    () => apiClient.get(`${BASE}/pending-approvals?${qs}`),
-    { records: [], pagination: {} }
-  );
+  Object.entries(params).forEach(([k, v]) => {
+    if (v) qs.set(k, String(v));
+  });
+  return safeCall(() => apiClient.get(`${BASE}/pending-approvals?${qs}`), {
+    records: [],
+    pagination: {},
+  });
 };
 
 // ════════════════════════════════════════════════════════════════════════════════
@@ -150,12 +154,10 @@ export const getPendingApprovals = (params = {}) => {
 // ════════════════════════════════════════════════════════════════════════════════
 
 /** جلب الورديات */
-export const getShifts = () =>
-  safeCall(() => apiClient.get(`${BASE}/shifts`), []);
+export const getShifts = () => safeCall(() => apiClient.get(`${BASE}/shifts`), []);
 
 /** إنشاء وردية */
-export const createShift = (data) =>
-  safeCall(() => apiClient.post(`${BASE}/shifts`, data));
+export const createShift = data => safeCall(() => apiClient.post(`${BASE}/shifts`, data));
 
 /** تعديل وردية */
 export const updateShift = (shiftId, data) =>
@@ -168,8 +170,7 @@ export const assignShift = (shiftId, targetType, targetId, targetName) =>
   );
 
 /** ورديتي */
-export const getMyShift = () =>
-  safeCall(() => apiClient.get(`${BASE}/my-shift`), null);
+export const getMyShift = () => safeCall(() => apiClient.get(`${BASE}/my-shift`), null);
 
 // ════════════════════════════════════════════════════════════════════════════════
 //  التصدير

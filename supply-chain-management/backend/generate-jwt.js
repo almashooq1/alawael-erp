@@ -49,7 +49,7 @@ function generateToken(userId, userRole) {
       role: user.role,
     },
     JWT_SECRET,
-    { expiresIn: TOKEN_EXPIRY }
+    { expiresIn: TOKEN_EXPIRY },
   );
 
   return token;

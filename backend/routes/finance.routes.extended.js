@@ -495,13 +495,11 @@ router.post(
       };
     }
 
-    res
-      .status(201)
-      .json({
-        success: true,
-        data: voucher,
-        message: `تم إنشاء ${type === 'receipt' ? 'سند قبض' : 'سند صرف'} بنجاح`,
-      });
+    res.status(201).json({
+      success: true,
+      data: voucher,
+      message: `تم إنشاء ${type === 'receipt' ? 'سند قبض' : 'سند صرف'} بنجاح`,
+    });
   })
 );
 

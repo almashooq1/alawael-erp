@@ -257,7 +257,13 @@ workShiftSchema.statics.getEmployeeShift = async function (employeeId, departmen
 /**
  * تعيين وردية لقسم أو موظف
  */
-workShiftSchema.statics.assignShift = async function (shiftId, targetType, targetId, targetName, userId) {
+workShiftSchema.statics.assignShift = async function (
+  shiftId,
+  targetType,
+  targetId,
+  targetName,
+  userId
+) {
   const shift = await this.findById(shiftId);
   if (!shift) throw new Error('الوردية غير موجودة');
 
@@ -359,10 +365,7 @@ workShiftSchema.methods.calculateOvertime = function (checkInTime, checkOutTime)
     return { hasOvertime: false, minutes: 0, pay: 0 };
   }
 
-  const cappedMinutes = Math.min(
-    overtimeMinutes,
-    (this.overtimePolicy.maxDailyHours || 4) * 60
-  );
+  const cappedMinutes = Math.min(overtimeMinutes, (this.overtimePolicy.maxDailyHours || 4) * 60);
 
   return {
     hasOvertime: true,

@@ -365,4 +365,5 @@ programAssessmentSchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.models.ProgramAssessment || mongoose.model('ProgramAssessment', programAssessmentSchema);
+module.exports =
+  mongoose.models.ProgramAssessment || mongoose.model('ProgramAssessment', programAssessmentSchema);

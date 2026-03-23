@@ -475,17 +475,15 @@ router.post(
       });
       return res.status(201).json({ success: true, data: account });
     }
-    res
-      .status(201)
-      .json({
-        success: true,
-        data: {
-          _id: `ba_${Date.now()}`,
-          ...req.body,
-          status: 'active',
-          currentBalance: req.body.openingBalance || 0,
-        },
-      });
+    res.status(201).json({
+      success: true,
+      data: {
+        _id: `ba_${Date.now()}`,
+        ...req.body,
+        status: 'active',
+        currentBalance: req.body.openingBalance || 0,
+      },
+    });
   })
 );
 
@@ -624,17 +622,15 @@ router.post(
       });
       return res.status(201).json({ success: true, data: fund });
     }
-    res
-      .status(201)
-      .json({
-        success: true,
-        data: {
-          _id: `pc_${Date.now()}`,
-          ...req.body,
-          currentBalance: req.body.fundLimit,
-          status: 'active',
-        },
-      });
+    res.status(201).json({
+      success: true,
+      data: {
+        _id: `pc_${Date.now()}`,
+        ...req.body,
+        currentBalance: req.body.fundLimit,
+        status: 'active',
+      },
+    });
   })
 );
 

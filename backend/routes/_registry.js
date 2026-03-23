@@ -1052,6 +1052,14 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
     '../routes/workforce-analytics.routes'
   );
   logger.info('Phase 21 mounted (1 module: workforce-analytics)');
+
+  // ── Phase 22: Learning & Development (LMS) — التدريب الإلكتروني للموظفين ───
+  safeMount(
+    app,
+    ['/api/learning-development', '/api/v1/learning-development'],
+    '../routes/learning-development.routes'
+  );
+  logger.info('Phase 22 mounted (1 module: learning-development)');
 };
 
 module.exports = { mountAllRoutes, dualMount, safeMount };

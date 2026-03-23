@@ -115,3 +115,6 @@ export { default as QualityManagementRoutes } from './QualityManagementRoutes';
 
 // === Phase 21: Workforce Analytics & Planning (تحليلات القوى العاملة) ===
 export { default as WorkforceAnalyticsRoutes } from './WorkforceAnalyticsRoutes';
+
+// === Phase 22: Learning & Development LMS (التدريب الإلكتروني للموظفين) ===
+export { default as LearningDevelopmentRoutes } from './LearningDevelopmentRoutes';

@@ -108,6 +108,7 @@ import {
   CEODashboardRoutes,
   QualityManagementRoutes,
   WorkforceAnalyticsRoutes,
+  LearningDevelopmentRoutes,
 } from './routes';
 
 // Pages — Keep eagerly loaded (critical path / small)
@@ -336,6 +337,7 @@ function AppContent() {
                               {CEODashboardRoutes()}
                               {QualityManagementRoutes()}
                               {WorkforceAnalyticsRoutes()}
+                              {LearningDevelopmentRoutes()}
                               {/* === Shared / Cross-cutting Routes === */}
                               {/* AI & Analytics */}
                               <Route

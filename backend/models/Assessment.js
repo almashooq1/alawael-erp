@@ -82,10 +82,10 @@ const programAssessmentSchema = new mongoose.Schema(
       max: 100,
       description: 'الدرجة الموزونة بناءً على أوزان الفئات',
     },
+    // فاصل الثقة 95% للدرجة
     confidenceInterval: {
       lower: Number,
       upper: Number,
-      description: 'فاصل الثقة 95% للدرجة',
     },
     standardError: {
       type: Number,

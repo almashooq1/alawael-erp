@@ -89,14 +89,11 @@ const ErrorTypes = {
   BadRequest: (message = 'Bad Request', errors = []) =>
     new ErrorResponse(message, 'BAD_REQUEST', errors, 400),
 
-  Unauthorized: (message = 'Unauthorized') =>
-    new ErrorResponse(message, 'UNAUTHORIZED', [], 401),
+  Unauthorized: (message = 'Unauthorized') => new ErrorResponse(message, 'UNAUTHORIZED', [], 401),
 
-  Forbidden: (message = 'Forbidden') =>
-    new ErrorResponse(message, 'FORBIDDEN', [], 403),
+  Forbidden: (message = 'Forbidden') => new ErrorResponse(message, 'FORBIDDEN', [], 403),
 
-  NotFound: (message = 'Resource not found') =>
-    new ErrorResponse(message, 'NOT_FOUND', [], 404),
+  NotFound: (message = 'Resource not found') => new ErrorResponse(message, 'NOT_FOUND', [], 404),
 
   Conflict: (message = 'Resource already exists') =>
     new ErrorResponse(message, 'CONFLICT', [], 409),
@@ -251,17 +248,13 @@ const enhanceResponse = (req, res, next) => {
   res.badRequest = (message = 'Bad Request', errors = []) =>
     ErrorTypes.BadRequest(message, errors).send(res);
 
-  res.unauthorized = (message = 'Unauthorized') =>
-    ErrorTypes.Unauthorized(message).send(res);
+  res.unauthorized = (message = 'Unauthorized') => ErrorTypes.Unauthorized(message).send(res);
 
-  res.forbidden = (message = 'Forbidden') =>
-    ErrorTypes.Forbidden(message).send(res);
+  res.forbidden = (message = 'Forbidden') => ErrorTypes.Forbidden(message).send(res);
 
-  res.notFound = (message = 'Resource not found') =>
-    ErrorTypes.NotFound(message).send(res);
+  res.notFound = (message = 'Resource not found') => ErrorTypes.NotFound(message).send(res);
 
-  res.conflict = (message = 'Resource already exists') =>
-    ErrorTypes.Conflict(message).send(res);
+  res.conflict = (message = 'Resource already exists') => ErrorTypes.Conflict(message).send(res);
 
   res.serverError = (message = 'Internal server error') =>
     ErrorTypes.ServerError(message).send(res);

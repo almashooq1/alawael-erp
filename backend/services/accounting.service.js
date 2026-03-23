@@ -18,10 +18,12 @@ const Budget = require('../models/Budget');
 const VATReturn = require('../models/VATReturn');
 const AccountingSettings = require('../models/AccountingSettings');
 const AuditLog = require('../models/AuditLog');
+const FiscalPeriod = require('../models/FiscalPeriod');
 const PDFGenerator = require('../utils/pdf-generator');
 const ExcelGenerator = require('../utils/excel-generator');
 const { sendEmail } = require('../utils/emailService');
 const { calculateVAT, calculateFinancialRatios } = require('../utils/financial-calculations');
+const logger = require('../utils/logger');
 
 class AccountingService {
   // ===================================================================
@@ -955,33 +957,361 @@ class AccountingService {
    * التدفقات التشغيلية
    */
   async _getOperatingCashFlows(startDate, endDate) {
-    // منطق حساب التدفقات التشغيلية
-    return {
-      items: [],
-      total: 0,
+    const query = {
+      status: 'posted',
+      date: {},
     };
+    if (startDate) query.date.$gte = new Date(startDate);
+    if (endDate) query.date.$lte = new Date(endDate);
+
+    // الحصول على حسابات الإيرادات والمصروفات التشغيلية
+    const operatingAccounts = await Account.find({
+      type: { $in: ['revenue', 'expense'] },
+      category: { $nin: ['capital_expenditure', 'investment_income', 'financing'] },
+      isActive: true,
+    }).lean();
+
+    const accountIds = operatingAccounts.map(a => a._id);
+
+    const entries = await JournalEntry.find({
+      ...query,
+      'lines.accountId': { $in: accountIds },
+    }).lean();
+
+    const items = [];
+    let total = 0;
+
+    const accountTotals = {};
+    entries.forEach(entry => {
+      entry.lines.forEach(line => {
+        if (accountIds.some(id => id.toString() === (line.accountId || '').toString())) {
+          const key = (line.accountId || '').toString();
+          if (!accountTotals[key]) accountTotals[key] = { debit: 0, credit: 0 };
+          accountTotals[key].debit += line.debit || 0;
+          accountTotals[key].credit += line.credit || 0;
+        }
+      });
+    });
+
+    for (const account of operatingAccounts) {
+      const totals = accountTotals[account._id.toString()];
+      if (totals) {
+        const netFlow = account.type === 'revenue'
+          ? totals.credit - totals.debit
+          : -(totals.debit - totals.credit);
+
+        if (Math.abs(netFlow) > 0.01) {
+          items.push({
+            account: account.name,
+            code: account.code,
+            type: account.type,
+            amount: netFlow,
+          });
+          total += netFlow;
+        }
+      }
+    }
+
+    return { items, total };
   }
 
   /**
    * التدفقات الاستثمارية
    */
   async _getInvestingCashFlows(startDate, endDate) {
-    // منطق حساب التدفقات الاستثمارية
-    return {
-      items: [],
-      total: 0,
+    const query = {
+      status: 'posted',
+      date: {},
     };
+    if (startDate) query.date.$gte = new Date(startDate);
+    if (endDate) query.date.$lte = new Date(endDate);
+
+    // حسابات الأصول الثابتة والاستثمارات
+    const investingAccounts = await Account.find({
+      type: 'asset',
+      category: { $in: ['fixed_asset', 'investment', 'intangible_asset'] },
+      isActive: true,
+    }).lean();
+
+    const accountIds = investingAccounts.map(a => a._id);
+
+    const entries = await JournalEntry.find({
+      ...query,
+      'lines.accountId': { $in: accountIds },
+    }).lean();
+
+    const items = [];
+    let total = 0;
+
+    const accountTotals = {};
+    entries.forEach(entry => {
+      entry.lines.forEach(line => {
+        if (accountIds.some(id => id.toString() === (line.accountId || '').toString())) {
+          const key = (line.accountId || '').toString();
+          if (!accountTotals[key]) accountTotals[key] = { debit: 0, credit: 0 };
+          accountTotals[key].debit += line.debit || 0;
+          accountTotals[key].credit += line.credit || 0;
+        }
+      });
+    });
+
+    for (const account of investingAccounts) {
+      const totals = accountTotals[account._id.toString()];
+      if (totals) {
+        // شراء أصول = تدفق سلبي، بيع أصول = تدفق إيجابي
+        const netFlow = totals.credit - totals.debit;
+
+        if (Math.abs(netFlow) > 0.01) {
+          items.push({
+            account: account.name,
+            code: account.code,
+            amount: netFlow,
+          });
+          total += netFlow;
+        }
+      }
+    }
+
+    return { items, total };
   }
 
   /**
    * التدفقات التمويلية
    */
   async _getFinancingCashFlows(startDate, endDate) {
-    // منطق حساب التدفقات التمويلية
-    return {
-      items: [],
-      total: 0,
+    const query = {
+      status: 'posted',
+      date: {},
     };
+    if (startDate) query.date.$gte = new Date(startDate);
+    if (endDate) query.date.$lte = new Date(endDate);
+
+    // حسابات القروض والتمويل ورأس المال
+    const financingAccounts = await Account.find({
+      $or: [
+        { type: 'liability', category: { $in: ['long_term_liability', 'loan'] } },
+        { type: 'equity', category: { $in: ['capital', 'share_capital', 'retained_earnings'] } },
+      ],
+      isActive: true,
+    }).lean();
+
+    const accountIds = financingAccounts.map(a => a._id);
+
+    const entries = await JournalEntry.find({
+      ...query,
+      'lines.accountId': { $in: accountIds },
+    }).lean();
+
+    const items = [];
+    let total = 0;
+
+    const accountTotals = {};
+    entries.forEach(entry => {
+      entry.lines.forEach(line => {
+        if (accountIds.some(id => id.toString() === (line.accountId || '').toString())) {
+          const key = (line.accountId || '').toString();
+          if (!accountTotals[key]) accountTotals[key] = { debit: 0, credit: 0 };
+          accountTotals[key].debit += line.debit || 0;
+          accountTotals[key].credit += line.credit || 0;
+        }
+      });
+    });
+
+    for (const account of financingAccounts) {
+      const totals = accountTotals[account._id.toString()];
+      if (totals) {
+        const netFlow = totals.credit - totals.debit;
+
+        if (Math.abs(netFlow) > 0.01) {
+          items.push({
+            account: account.name,
+            code: account.code,
+            amount: netFlow,
+          });
+          total += netFlow;
+        }
+      }
+    }
+
+    return { items, total };
+  }
+
+  // ===================================================================
+  // 7. مراقبة الميزانيات - Budget Monitoring
+  // ===================================================================
+
+  /**
+   * مقارنة الميزانية بالمصروفات الفعلية
+   */
+  async getBudgetVsActual(budgetId, options = {}) {
+    const budget = await Budget.findById(budgetId).lean();
+    if (!budget) throw new Error('الميزانية غير موجودة');
+
+    const query = {
+      status: 'posted',
+      date: {
+        $gte: new Date(budget.startDate),
+        $lte: new Date(budget.endDate),
+      },
+    };
+
+    const entries = await JournalEntry.find(query).lean();
+
+    const comparison = [];
+
+    for (const line of budget.lines || []) {
+      let actualSpent = 0;
+
+      entries.forEach(entry => {
+        entry.lines.forEach(jLine => {
+          if (
+            jLine.accountId &&
+            line.accountId &&
+            jLine.accountId.toString() === line.accountId.toString()
+          ) {
+            actualSpent += jLine.debit || 0;
+          }
+        });
+      });
+
+      const variance = (line.amount || 0) - actualSpent;
+      const utilization = line.amount > 0 ? (actualSpent / line.amount) * 100 : 0;
+
+      comparison.push({
+        accountId: line.accountId,
+        budgeted: line.amount || 0,
+        actual: actualSpent,
+        variance,
+        utilization: Math.round(utilization * 100) / 100,
+        status: utilization > 100 ? 'exceeded' : utilization > 80 ? 'warning' : 'on_track',
+      });
+    }
+
+    const totalBudgeted = comparison.reduce((s, c) => s + c.budgeted, 0);
+    const totalActual = comparison.reduce((s, c) => s + c.actual, 0);
+
+    return {
+      budget: { _id: budget._id, name: budget.name, fiscalYear: budget.fiscalYear },
+      period: { start: budget.startDate, end: budget.endDate },
+      lines: comparison,
+      totals: {
+        budgeted: totalBudgeted,
+        actual: totalActual,
+        variance: totalBudgeted - totalActual,
+        utilization: totalBudgeted > 0
+          ? Math.round(((totalActual / totalBudgeted) * 100) * 100) / 100
+          : 0,
+      },
+      generatedAt: new Date(),
+    };
+  }
+
+  // ===================================================================
+  // 8. النسب المالية - Financial Ratios
+  // ===================================================================
+
+  /**
+   * حساب النسب المالية الأساسية
+   */
+  async calculateFinancialRatiosReport(asOfDate) {
+    const date = asOfDate ? new Date(asOfDate) : new Date();
+
+    const assets = await this._getAccountsByType('asset', null, date);
+    const liabilities = await this._getAccountsByType('liability', null, date);
+
+    const totalAssets = assets.reduce((sum, a) => sum + a.balance, 0);
+    const totalLiabilities = liabilities.reduce((sum, a) => sum + a.balance, 0);
+
+    // الأصول المتداولة
+    const currentAssets = await Account.find({
+      type: 'asset',
+      category: { $in: ['current_asset', 'cash', 'bank', 'accounts_receivable'] },
+      isActive: true,
+    }).lean();
+
+    let totalCurrentAssets = 0;
+    for (const acc of currentAssets) {
+      const bal = await this.getAccountBalance(acc._id, null, date);
+      totalCurrentAssets += Math.abs(bal.balance);
+    }
+
+    // الخصوم المتداولة
+    const currentLiabilities = await Account.find({
+      type: 'liability',
+      category: { $in: ['current_liability', 'accounts_payable', 'short_term_loan'] },
+      isActive: true,
+    }).lean();
+
+    let totalCurrentLiabilities = 0;
+    for (const acc of currentLiabilities) {
+      const bal = await this.getAccountBalance(acc._id, null, date);
+      totalCurrentLiabilities += Math.abs(bal.balance);
+    }
+
+    // حساب النسب
+    const currentRatio = totalCurrentLiabilities > 0
+      ? totalCurrentAssets / totalCurrentLiabilities
+      : 0;
+
+    const debtToEquity = (totalAssets - totalLiabilities) > 0
+      ? totalLiabilities / (totalAssets - totalLiabilities)
+      : 0;
+
+    const debtRatio = totalAssets > 0
+      ? totalLiabilities / totalAssets
+      : 0;
+
+    return {
+      asOfDate: date,
+      ratios: {
+        currentRatio: Math.round(currentRatio * 100) / 100,
+        quickRatio: Math.round(currentRatio * 0.85 * 100) / 100, // تقريبي
+        debtToEquity: Math.round(debtToEquity * 100) / 100,
+        debtRatio: Math.round(debtRatio * 100) / 100,
+      },
+      components: {
+        totalAssets,
+        totalLiabilities,
+        totalEquity: totalAssets - totalLiabilities,
+        totalCurrentAssets,
+        totalCurrentLiabilities,
+      },
+      generatedAt: new Date(),
+    };
+  }
+
+  // ===================================================================
+  // 9. التحقق من الفترة المحاسبية - Fiscal Period Validation
+  // ===================================================================
+
+  /**
+   * التحقق من أن التاريخ ضمن فترة محاسبية مفتوحة قبل الترحيل
+   */
+  async validatePostingPeriod(date) {
+    const postingDate = new Date(date);
+
+    const period = await FiscalPeriod.findOne({
+      startDate: { $lte: postingDate },
+      endDate: { $gte: postingDate },
+      isDeleted: false,
+    }).lean();
+
+    if (!period) {
+      return {
+        valid: false,
+        reason: 'لا توجد فترة محاسبية لهذا التاريخ',
+      };
+    }
+
+    if (period.status !== 'open') {
+      return {
+        valid: false,
+        reason: `الفترة المحاسبية ${period.code} بحالة: ${period.status}`,
+        period,
+      };
+    }
+
+    return { valid: true, period };
   }
 }
 

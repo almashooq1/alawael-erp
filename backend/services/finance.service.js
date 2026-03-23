@@ -345,7 +345,8 @@ class FinanceService {
   }
 
   /**
-   * Check budget status
+   * Check budget status — حساب حالة الميزانية
+   * Uses aggregate $sum to calculate actual spent amounts (not document count)
    */
   static async checkBudgetStatus(budgetId) {
     try {
@@ -355,23 +356,45 @@ class FinanceService {
         throw new Error('Budget not found');
       }
 
-      // Calculate spent
-      const spent = await Transaction.countDocuments({
-        category: budget.category,
-        type: 'expense',
-        status: 'completed',
-      });
+      // Calculate actual spent amount using aggregate $sum
+      const budgetLimit = budget.totalBudgeted || budget.limit || 0;
+      const matchQuery = { type: 'expense', status: 'completed' };
 
-      const remaining = budget.limit - spent;
-      const percentage = (spent / budget.limit) * 100;
+      // Match by category if budget has one, or by date range
+      if (budget.category) {
+        matchQuery.category = budget.category;
+      }
+      if (budget.startDate && budget.endDate) {
+        matchQuery.date = {
+          $gte: new Date(budget.startDate),
+          $lte: new Date(budget.endDate),
+        };
+      }
+      if (budget.department) {
+        matchQuery.department = budget.department;
+      }
+
+      const pipeline = [{ $match: matchQuery }, { $group: { _id: null, total: { $sum: '$amount' } } }];
+
+      const result = await Transaction.aggregate(pipeline);
+      const spent = result.length > 0 ? result[0].total : 0;
+
+      const remaining = budgetLimit - spent;
+      const percentage = budgetLimit > 0 ? (spent / budgetLimit) * 100 : 0;
+
+      // Update budget document with latest spending data
+      budget.totalSpent = spent;
+      budget.totalRemaining = remaining;
+      budget.utilizationPercentage = Math.round(percentage * 100) / 100;
+      await budget.save();
 
       return {
         success: true,
         budgetId,
-        limit: budget.limit,
+        limit: budgetLimit,
         spent,
         remaining,
-        percentageUsed: percentage,
+        percentageUsed: Math.round(percentage * 100) / 100,
         status: percentage > 100 ? 'exceeded' : percentage > 80 ? 'warning' : 'ok',
       };
     } catch (error) {

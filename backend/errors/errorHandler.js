@@ -69,7 +69,11 @@ const classifyError = err => {
   // Mongoose ValidationError
   if (err.name === 'ValidationError' && err.errors) {
     const messages = Object.values(err.errors).map(e => e.message);
-    const appErr = new AppError(`Validation failed: ${messages.join('. ')}`, 400, 'VALIDATION_ERROR');
+    const appErr = new AppError(
+      `Validation failed: ${messages.join('. ')}`,
+      400,
+      'VALIDATION_ERROR'
+    );
     appErr.errors = messages;
     return appErr;
   }
@@ -127,9 +131,7 @@ const errorHandler = (err, req, res, _next) => {
 
   // Production: mask 5xx messages to prevent info leakage
   const safeMessage =
-    isProd && classified.statusCode >= 500
-      ? 'حدث خطأ داخلي في الخادم'
-      : classified.message;
+    isProd && classified.statusCode >= 500 ? 'حدث خطأ داخلي في الخادم' : classified.message;
 
   // Build response
   const response = {

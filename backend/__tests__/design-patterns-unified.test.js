@@ -761,7 +761,7 @@ describe('BaseService', () => {
     model.modelName = 'MockModel';
 
     // Chainable query mock
-    const chainable = (result) => {
+    const chainable = result => {
       const chain = {
         where: jest.fn(() => chain),
         populate: jest.fn(() => chain),
@@ -774,29 +774,45 @@ describe('BaseService', () => {
       return chain;
     };
 
-    model.findById = jest.fn((id) => chainable(overrides.findByIdResult !== undefined ? overrides.findByIdResult : { _id: id, name: 'Test' }));
-    model.findOne = jest.fn(() => chainable(overrides.findOneResult !== undefined ? overrides.findOneResult : { _id: '1', name: 'Test' }));
+    model.findById = jest.fn(id =>
+      chainable(
+        overrides.findByIdResult !== undefined
+          ? overrides.findByIdResult
+          : { _id: id, name: 'Test' }
+      )
+    );
+    model.findOne = jest.fn(() =>
+      chainable(
+        overrides.findOneResult !== undefined ? overrides.findOneResult : { _id: '1', name: 'Test' }
+      )
+    );
     model.find = jest.fn(() => chainable(overrides.findResult || [{ _id: '1' }, { _id: '2' }]));
     model.countDocuments = jest.fn().mockResolvedValue(overrides.countResult || 10);
-    model.findOneAndUpdate = jest.fn().mockResolvedValue(
-      overrides.findOneAndUpdateResult !== undefined
-        ? overrides.findOneAndUpdateResult
-        : { _id: '1', name: 'Updated', toObject: () => ({ _id: '1', name: 'Updated' }) }
-    );
-    model.findByIdAndDelete = jest.fn().mockResolvedValue(
-      overrides.findByIdAndDeleteResult !== undefined
-        ? overrides.findByIdAndDeleteResult
-        : { _id: '1' }
-    );
+    model.findOneAndUpdate = jest
+      .fn()
+      .mockResolvedValue(
+        overrides.findOneAndUpdateResult !== undefined
+          ? overrides.findOneAndUpdateResult
+          : { _id: '1', name: 'Updated', toObject: () => ({ _id: '1', name: 'Updated' }) }
+      );
+    model.findByIdAndDelete = jest
+      .fn()
+      .mockResolvedValue(
+        overrides.findByIdAndDeleteResult !== undefined
+          ? overrides.findByIdAndDeleteResult
+          : { _id: '1' }
+      );
     model.insertMany = jest.fn().mockResolvedValue(
       overrides.insertManyResult || [
         { _id: '1', toObject: () => ({ _id: '1' }) },
         { _id: '2', toObject: () => ({ _id: '2' }) },
       ]
     );
-    model.exists = jest.fn().mockResolvedValue(
-      overrides.existsResult !== undefined ? overrides.existsResult : { _id: '1' }
-    );
+    model.exists = jest
+      .fn()
+      .mockResolvedValue(
+        overrides.existsResult !== undefined ? overrides.existsResult : { _id: '1' }
+      );
 
     return model;
   };

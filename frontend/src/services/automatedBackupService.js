@@ -5,8 +5,7 @@
 
 import axios from 'axios';
 
-const API =
-  process.env.REACT_APP_API_URL || window.REACT_APP_API_URL || '';
+const API = process.env.REACT_APP_API_URL || window.REACT_APP_API_URL || '';
 const BASE = `${API}/api/automated-backup`;
 
 const headers = () => {
@@ -16,17 +15,13 @@ const headers = () => {
 
 const automatedBackupService = {
   /* ── Backups ── */
-  createBackup: data =>
-    axios.post(BASE, data, { headers: headers() }).then(r => r.data),
+  createBackup: data => axios.post(BASE, data, { headers: headers() }).then(r => r.data),
 
-  listBackups: (params = {}) =>
-    axios.get(BASE, { params, headers: headers() }).then(r => r.data),
+  listBackups: (params = {}) => axios.get(BASE, { params, headers: headers() }).then(r => r.data),
 
-  getBackup: id =>
-    axios.get(`${BASE}/${id}`, { headers: headers() }).then(r => r.data),
+  getBackup: id => axios.get(`${BASE}/${id}`, { headers: headers() }).then(r => r.data),
 
-  deleteBackup: id =>
-    axios.delete(`${BASE}/${id}`, { headers: headers() }).then(r => r.data),
+  deleteBackup: id => axios.delete(`${BASE}/${id}`, { headers: headers() }).then(r => r.data),
 
   verifyBackup: id =>
     axios.post(`${BASE}/${id}/verify`, {}, { headers: headers() }).then(r => r.data),
@@ -39,7 +34,9 @@ const automatedBackupService = {
     axios.post(`${BASE}/schedules`, data, { headers: headers() }).then(r => r.data),
 
   toggleSchedule: (id, enabled) =>
-    axios.put(`${BASE}/schedules/${id}/toggle`, { enabled }, { headers: headers() }).then(r => r.data),
+    axios
+      .put(`${BASE}/schedules/${id}/toggle`, { enabled }, { headers: headers() })
+      .then(r => r.data),
 
   deleteSchedule: id =>
     axios.delete(`${BASE}/schedules/${id}`, { headers: headers() }).then(r => r.data),
@@ -65,21 +62,17 @@ const automatedBackupService = {
     axios.get(`${BASE}/restore/history`, { params, headers: headers() }).then(r => r.data),
 
   /* ── Health & Analytics ── */
-  getHealth: () =>
-    axios.get(`${BASE}/health`, { headers: headers() }).then(r => r.data),
+  getHealth: () => axios.get(`${BASE}/health`, { headers: headers() }).then(r => r.data),
 
   getAnalytics: (params = {}) =>
     axios.get(`${BASE}/analytics`, { params, headers: headers() }).then(r => r.data),
 
-  runCleanup: () =>
-    axios.post(`${BASE}/cleanup`, {}, { headers: headers() }).then(r => r.data),
+  runCleanup: () => axios.post(`${BASE}/cleanup`, {}, { headers: headers() }).then(r => r.data),
 
   /* ── Configuration ── */
-  getConfig: () =>
-    axios.get(`${BASE}/config`, { headers: headers() }).then(r => r.data),
+  getConfig: () => axios.get(`${BASE}/config`, { headers: headers() }).then(r => r.data),
 
-  updateConfig: data =>
-    axios.put(`${BASE}/config`, data, { headers: headers() }).then(r => r.data),
+  updateConfig: data => axios.put(`${BASE}/config`, data, { headers: headers() }).then(r => r.data),
 };
 
 export default automatedBackupService;

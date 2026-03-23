@@ -121,3 +121,6 @@ export { default as LearningDevelopmentRoutes } from './LearningDevelopmentRoute
 
 // === Phase 23: Automated Backup System (نظام النسخ الاحتياطي التلقائي) ===
 export { default as AutomatedBackupRoutes } from './AutomatedBackupRoutes';
+
+// === Phase 24: Rate Limiting + WAF (حماية متقدمة ضد هجمات DDoS) ===
+export { default as WafRateLimitRoutes } from './WafRateLimitRoutes';

@@ -110,6 +110,7 @@ import {
   WorkforceAnalyticsRoutes,
   LearningDevelopmentRoutes,
   AutomatedBackupRoutes,
+  WafRateLimitRoutes,
 } from './routes';
 
 // Pages — Keep eagerly loaded (critical path / small)
@@ -340,6 +341,7 @@ function AppContent() {
                               {WorkforceAnalyticsRoutes()}
                               {LearningDevelopmentRoutes()}
                               {AutomatedBackupRoutes()}
+                              {WafRateLimitRoutes()}
                               {/* === Shared / Cross-cutting Routes === */}
                               {/* AI & Analytics */}
                               <Route

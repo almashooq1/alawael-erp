@@ -122,7 +122,12 @@ describe('Phase 23 — AutomatedBackupService', () => {
   });
 
   test('upsertSchedule updates existing schedule', () => {
-    const s = svc.upsertSchedule({ id: 'daily-mongo', name: 'Updated', type: 'mongodb', cron: '0 1 * * *' });
+    const s = svc.upsertSchedule({
+      id: 'daily-mongo',
+      name: 'Updated',
+      type: 'mongodb',
+      cron: '0 1 * * *',
+    });
     expect(s.name).toBe('Updated');
     expect(svc.schedules.length).toBe(3);
   });
@@ -380,9 +385,7 @@ describe('Phase 23 — Automated Backup API Routes', () => {
   });
 
   test('PUT /api/automated-backup/config updates config', async () => {
-    const res = await request(app)
-      .put('/api/automated-backup/config')
-      .send({ retentionDays: 90 });
+    const res = await request(app).put('/api/automated-backup/config').send({ retentionDays: 90 });
     expect(res.status).toBe(200);
     expect(res.body.data.retentionDays).toBe(90);
   });

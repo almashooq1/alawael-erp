@@ -160,9 +160,7 @@ class AutomatedBackupService extends EventEmitter {
         duration: Math.floor(Math.random() * 60000) + 5000,
         size: Math.floor(Math.random() * 500000000) + 10000000, // 10MB–500MB
         checksum: crypto.randomBytes(16).toString('hex'),
-        collections: includeMongoDB
-          ? Math.floor(Math.random() * 40) + 20
-          : 0,
+        collections: includeMongoDB ? Math.floor(Math.random() * 40) + 20 : 0,
         filesCount: includeFiles ? Math.floor(Math.random() * 200) + 50 : 0,
         storageResults: targets.map(t => ({
           target: t,
@@ -177,7 +175,7 @@ class AutomatedBackupService extends EventEmitter {
 
       // Update schedule lastRun
       const schedule = this.schedules.find(
-        s => s.type === type || (triggeredBy === 'schedule' && s.id.includes(type)),
+        s => s.type === type || (triggeredBy === 'schedule' && s.id.includes(type))
       );
       if (schedule) {
         schedule.lastRun = new Date();
@@ -219,7 +217,7 @@ class AutomatedBackupService extends EventEmitter {
       list.sort((a, b) =>
         order === 'desc'
           ? new Date(b[sort]) - new Date(a[sort])
-          : new Date(a[sort]) - new Date(b[sort]),
+          : new Date(a[sort]) - new Date(b[sort])
       );
 
       const total = list.length;
@@ -277,7 +275,14 @@ class AutomatedBackupService extends EventEmitter {
 
       const existing = this.schedules.find(s => s.id === id);
       if (existing) {
-        Object.assign(existing, { name, type, cron, enabled, retention, nextRun: this._nextCronRun(cron) });
+        Object.assign(existing, {
+          name,
+          type,
+          cron,
+          enabled,
+          retention,
+          nextRun: this._nextCronRun(cron),
+        });
         return existing;
       }
 
@@ -437,11 +442,7 @@ class AutomatedBackupService extends EventEmitter {
       const backup = this.backups.find(b => b.id === backupId);
       if (!backup) throw new Error('Backup not found');
 
-      const {
-        targetDatabase = 'alawael_erp',
-        restoreFiles = true,
-        dryRun = false,
-      } = options;
+      const { targetDatabase = 'alawael_erp', restoreFiles = true, dryRun = false } = options;
 
       const restore = {
         id: crypto.randomUUID(),
@@ -501,9 +502,7 @@ class AutomatedBackupService extends EventEmitter {
           : 0;
 
       const activeSchedules = this.schedules.filter(s => s.enabled).length;
-      const connectedTargets = this.storageTargets.filter(
-        t => t.status === 'connected',
-      ).length;
+      const connectedTargets = this.storageTargets.filter(t => t.status === 'connected').length;
 
       const healthScore =
         failedRecent.length === 0 && activeSchedules > 0 && connectedTargets > 0
@@ -515,9 +514,8 @@ class AutomatedBackupService extends EventEmitter {
       return {
         status: healthScore >= 80 ? 'healthy' : healthScore >= 50 ? 'warning' : 'critical',
         healthScore,
-        lastBackupAt: this.backups.length > 0
-          ? this.backups[this.backups.length - 1].createdAt
-          : null,
+        lastBackupAt:
+          this.backups.length > 0 ? this.backups[this.backups.length - 1].createdAt : null,
         totalBackups: this.backups.length,
         totalSize,
         totalSizeFormatted: this._formatSize(totalSize),
@@ -567,7 +565,8 @@ class AutomatedBackupService extends EventEmitter {
       const totalSize = periodBackups.reduce((sum, b) => sum + (b.size || 0), 0);
       const successRate =
         periodBackups.length > 0
-          ? ((periodBackups.filter(b => b.status === 'completed').length / periodBackups.length) * 100)
+          ? (periodBackups.filter(b => b.status === 'completed').length / periodBackups.length) *
+            100
           : 0;
 
       // Daily breakdown
@@ -576,7 +575,7 @@ class AutomatedBackupService extends EventEmitter {
         const day = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
         const dayStr = day.toISOString().split('T')[0];
         const dayBackups = periodBackups.filter(
-          b => new Date(b.createdAt).toISOString().split('T')[0] === dayStr,
+          b => new Date(b.createdAt).toISOString().split('T')[0] === dayStr
         );
         dailyBreakdown.push({
           date: dayStr,
@@ -596,13 +595,8 @@ class AutomatedBackupService extends EventEmitter {
         byStatus,
         byTarget,
         dailyBreakdown: dailyBreakdown.reverse(),
-        avgBackupSize:
-          periodBackups.length > 0
-            ? Math.floor(totalSize / periodBackups.length)
-            : 0,
-        restoreCount: this.restoreHistory.filter(
-          r => new Date(r.createdAt) >= since,
-        ).length,
+        avgBackupSize: periodBackups.length > 0 ? Math.floor(totalSize / periodBackups.length) : 0,
+        restoreCount: this.restoreHistory.filter(r => new Date(r.createdAt) >= since).length,
       };
     } catch (error) {
       throw new Error(error.message);
@@ -701,10 +695,19 @@ class AutomatedBackupService extends EventEmitter {
   updateConfig(updates) {
     try {
       const allowed = [
-        'retentionDays', 'maxBackups', 'dailySchedule', 'weeklySchedule',
-        'monthlySchedule', 'compressionEnabled', 'encryptionEnabled',
-        's3Enabled', 's3Bucket', 's3Region', 'notifyOnFailure',
-        'notifyOnSuccess', 'backupDir',
+        'retentionDays',
+        'maxBackups',
+        'dailySchedule',
+        'weeklySchedule',
+        'monthlySchedule',
+        'compressionEnabled',
+        'encryptionEnabled',
+        's3Enabled',
+        's3Bucket',
+        's3Region',
+        'notifyOnFailure',
+        'notifyOnSuccess',
+        'backupDir',
       ];
 
       for (const key of Object.keys(updates)) {

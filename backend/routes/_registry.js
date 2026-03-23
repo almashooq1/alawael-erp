@@ -1068,6 +1068,14 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
     '../routes/automated-backup.routes'
   );
   logger.info('Phase 23 mounted (1 module: automated-backup)');
+
+  // ── Phase 24: Rate Limiting + WAF — حماية متقدمة ضد هجمات DDoS ──────
+  safeMount(
+    app,
+    ['/api/waf-ratelimit', '/api/v1/waf-ratelimit'],
+    '../routes/rate-limit-waf.routes'
+  );
+  logger.info('Phase 24 mounted (1 module: rate-limit-waf)');
 };
 
 module.exports = { mountAllRoutes, dualMount, safeMount };

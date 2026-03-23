@@ -395,4 +395,47 @@ router.get('/devices/:id/raw-logs', async (req, res) => {
   }
 });
 
+// ════════════════════════════════════════════════════════════════════════════════
+//  مراقبة الصحة (Health Monitoring)
+// ════════════════════════════════════════════════════════════════════════════════
+
+/**
+ * فحص صحة الاتصالات النشطة
+ * POST /api/zkteco/health-check
+ */
+router.post('/health-check', roleMiddleware('admin', 'hr_manager'), async (req, res) => {
+  try {
+    const results = await ZKTecoService.healthCheck();
+    res.json({ success: true, data: results });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+/**
+ * حالة الاتصالات الحالية
+ * GET /api/zkteco/connections
+ */
+router.get('/connections', async (req, res) => {
+  try {
+    const status = ZKTecoService.getConnectionsStatus();
+    res.json({ success: true, data: status, count: status.length });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+/**
+ * إحصائيات مفصلة مع صحة الاتصالات
+ * GET /api/zkteco/detailed-stats
+ */
+router.get('/detailed-stats', async (req, res) => {
+  try {
+    const stats = await ZKTecoService.getDetailedStats();
+    res.json({ success: true, data: stats });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 module.exports = router;

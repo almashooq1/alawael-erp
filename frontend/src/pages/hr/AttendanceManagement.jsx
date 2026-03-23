@@ -27,6 +27,7 @@ import {
 } from '@mui/icons-material';
 import hrService from 'services/hrService';
 import zktecoService from 'services/zktecoService';
+import attendanceEngineService from '../../services/hr/attendanceEngineService';
 import { gradients, statusColors, neutralColors, surfaceColors, leaveColors } from '../../theme/palette';
 import { DEPT_COLORS } from '../../constants/departmentColors';
 
@@ -147,12 +148,40 @@ const AttendanceManagement = () => {
   const [historyRecords, setHistoryRecords] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
 
+  /* ─── Shifts Tab (الورديات) ─── */
+  const [shifts, setShifts] = useState([]);
+  const [shiftsLoading, setShiftsLoading] = useState(false);
+  const [shiftDialog, setShiftDialog] = useState(false);
+  const [shiftForm, setShiftForm] = useState({
+    shiftName: '', shiftCode: '', shiftType: 'morning',
+    startTime: '08:00', endTime: '16:00',
+    gracePeriod: { checkIn: 15, checkOut: 10 },
+  });
+  const [shiftSaving, setShiftSaving] = useState(false);
+
+  /* ─── ZKTeco Health ─── */
+  const [zktecoHealth, setZktecoHealth] = useState(null);
+
+  /* ─── Quick Stats ─── */
+  const [quickStats, setQuickStats] = useState(null);
+
   /* ═══════════════════════════════════════
      Data Loading
      ═══════════════════════════════════════ */
 
   const loadAttendance = useCallback(async () => {
     setLoading(true);
+    try {
+      // Try new unified engine first
+      const engineRes = await attendanceEngineService.getDashboard({ date: selectedDate });
+      if (engineRes.data && !engineRes.isDemo && (engineRes.data.records?.length > 0 || engineRes.data.stats)) {
+        setRecords(Array.isArray(engineRes.data.records) ? engineRes.data.records : []);
+        setIsDemo(false);
+        setLoading(false);
+        return;
+      }
+    } catch { /* fallback to old API */ }
+    // Fallback to original HR service
     const res = await hrService.getAttendance(selectedDate);
     setRecords(Array.isArray(res.data) ? res.data : []);
     setIsDemo(res.isDemo);
@@ -249,7 +278,30 @@ const AttendanceManagement = () => {
     setHistoryLoading(false);
   }, []);
 
-  useEffect(() => { loadAttendance(); loadZktecoStats(); }, [loadAttendance, loadZktecoStats]);
+  const loadShifts = useCallback(async () => {
+    setShiftsLoading(true);
+    try {
+      const res = await attendanceEngineService.getShifts();
+      setShifts(Array.isArray(res.data) ? res.data : []);
+    } catch { setShifts([]); }
+    setShiftsLoading(false);
+  }, []);
+
+  const loadQuickStats = useCallback(async () => {
+    try {
+      const res = await attendanceEngineService.getQuickStats();
+      if (res.data && !res.isDemo) setQuickStats(res.data);
+    } catch { /* silent */ }
+  }, []);
+
+  const loadZktecoHealth = useCallback(async () => {
+    try {
+      const res = await zktecoService.getConnections();
+      if (res.data && !res.isDemo) setZktecoHealth(res.data);
+    } catch { /* silent */ }
+  }, []);
+
+  useEffect(() => { loadAttendance(); loadZktecoStats(); loadQuickStats(); loadZktecoHealth(); }, [loadAttendance, loadZktecoStats, loadQuickStats, loadZktecoHealth]);
 
   useEffect(() => {
     if (activeTab === 1) loadReport();
@@ -258,6 +310,10 @@ const AttendanceManagement = () => {
   useEffect(() => {
     if (activeTab === 2) loadLeaves();
   }, [activeTab, loadLeaves]);
+
+  useEffect(() => {
+    if (activeTab === 3) loadShifts();
+  }, [activeTab, loadShifts]);
 
   /* ═══════════════════════════════════════
      Actions
@@ -395,8 +451,22 @@ const AttendanceManagement = () => {
           <TimeIcon sx={{ fontSize: 40 }} />
           <Box>
             <Typography variant="h4" sx={{ fontWeight: 'bold' }}>إدارة الحضور والانصراف</Typography>
-            <Typography variant="body2">تسجيل ومتابعة حضور الموظفين • التقارير والإحصائيات • الإجازات</Typography>
+            <Typography variant="body2">تسجيل ومتابعة حضور الموظفين • الورديات • التقارير والإحصائيات • أجهزة البصمة ZKTeco</Typography>
           </Box>
+          {quickStats && (
+            <Box sx={{ display: 'flex', gap: 2, opacity: 0.9 }}>
+              {[
+                { label: 'حاضر', v: quickStats.today?.present || 0, icon: <PresentIcon sx={{ fontSize: 16 }} /> },
+                { label: 'متأخر', v: quickStats.today?.late || 0, icon: <LateIcon sx={{ fontSize: 16 }} /> },
+                { label: 'غائب', v: quickStats.today?.absent || 0, icon: <AbsentIcon sx={{ fontSize: 16 }} /> },
+              ].map((s, i) => (
+                <Box key={i} sx={{ textAlign: 'center' }}>
+                  <Box sx={{ display: 'flex', gap: 0.3, alignItems: 'center' }}>{s.icon}<Typography variant="caption">{s.label}</Typography></Box>
+                  <Typography variant="h6" fontWeight={700}>{s.v}</Typography>
+                </Box>
+              ))}
+            </Box>
+          )}
         </Box>
       </Box>
 
@@ -408,6 +478,7 @@ const AttendanceManagement = () => {
           <Tab icon={<ReportIcon />} iconPosition="start" label="التقارير" />
           <Tab icon={<Badge badgeContent={pendingLeavesCount} color="error"><LeaveIcon /></Badge>}
             iconPosition="start" label="الإجازات" />
+          <Tab icon={<ScheduleIcon />} iconPosition="start" label="الورديات" />
         </Tabs>
       </Paper>
 
@@ -452,6 +523,9 @@ const AttendanceManagement = () => {
                     <Typography variant="subtitle2" fontWeight="bold">أجهزة البصمة ZKTeco</Typography>
                     <Typography variant="caption" color="text.secondary">
                       {zktecoStats.online} متصل من {zktecoStats.totalDevices} جهاز • {zktecoStats.todayBiometricCheckIns || 0} بصمة اليوم • {zktecoStats.totalMappedUsers || 0} موظف مربوط
+                      {zktecoHealth && zktecoHealth.connections && (
+                        <> • صحة الاتصال: {zktecoHealth.connections.filter(c => c.status === 'healthy').length}/{zktecoHealth.connections.length}</>
+                      )}
                     </Typography>
                   </Box>
                 </Box>
@@ -986,8 +1060,192 @@ const AttendanceManagement = () => {
       )}
 
       {/* ══════════════════════════════════════════════════════════
+          TAB 3: Shifts (الورديات)
+          ══════════════════════════════════════════════════════════ */}
+      {activeTab === 3 && (
+        <>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
+            <Box>
+              <Typography variant="h5" fontWeight={700}>إدارة الورديات</Typography>
+              <Typography variant="body2" color="text.secondary">تعريف ورديات العمل وتعيينها للموظفين والأقسام</Typography>
+            </Box>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <Tooltip title="تحديث"><IconButton onClick={loadShifts} disabled={shiftsLoading}><RefreshIcon /></IconButton></Tooltip>
+              <Button variant="contained" startIcon={<ScheduleIcon />}
+                onClick={() => { setShiftForm({ shiftName: '', shiftCode: '', shiftType: 'morning', startTime: '08:00', endTime: '16:00', gracePeriod: { checkIn: 15, checkOut: 10 } }); setShiftDialog(true); }}>
+                إضافة وردية
+              </Button>
+            </Box>
+          </Box>
+
+          {/* Shift Type Legend */}
+          <Paper elevation={0} sx={{ p: 2, mb: 3, borderRadius: 3, border: '1px solid', borderColor: 'divider' }}>
+            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', justifyContent: 'center' }}>
+              {[
+                { type: 'morning', label: 'صباحية', icon: '🌅', color: statusColors.warning },
+                { type: 'evening', label: 'مسائية', icon: '🌆', color: statusColors.info },
+                { type: 'night', label: 'ليلية', icon: '🌙', color: statusColors.purple },
+                { type: 'flexible', label: 'مرنة', icon: '⚡', color: statusColors.teal },
+                { type: 'split', label: 'منقسمة', icon: '✂️', color: statusColors.error },
+                { type: 'rotating', label: 'دورية', icon: '🔄', color: statusColors.primaryBlue },
+              ].map(st => (
+                <Chip key={st.type} label={`${st.icon} ${st.label}`} size="small" sx={{ bgcolor: `${st.color}12`, color: st.color, fontWeight: 600 }} />
+              ))}
+            </Box>
+          </Paper>
+
+          {shiftsLoading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}><CircularProgress /></Box>
+          ) : shifts.length === 0 ? (
+            <Paper elevation={0} sx={{ p: 6, borderRadius: 3, border: '1px solid', borderColor: 'divider', textAlign: 'center' }}>
+              <ScheduleIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
+              <Typography variant="h6" color="text.secondary">لم يتم تعريف ورديات بعد</Typography>
+              <Typography variant="body2" color="text.disabled" sx={{ mb: 2 }}>اضغط "إضافة وردية" لإنشاء الوردية الأولى</Typography>
+              <Button variant="contained" startIcon={<ScheduleIcon />}
+                onClick={() => { setShiftForm({ shiftName: 'وردية صباحية', shiftCode: 'MORNING-01', shiftType: 'morning', startTime: '08:00', endTime: '16:00', gracePeriod: { checkIn: 15, checkOut: 10 } }); setShiftDialog(true); }}>
+                إنشاء وردية صباحية
+              </Button>
+            </Paper>
+          ) : (
+            <Grid container spacing={2}>
+              {shifts.map(shift => {
+                const typeConfig = {
+                  morning: { label: 'صباحية', icon: '🌅', color: statusColors.warning },
+                  evening: { label: 'مسائية', icon: '🌆', color: statusColors.info },
+                  night: { label: 'ليلية', icon: '🌙', color: statusColors.purple },
+                  flexible: { label: 'مرنة', icon: '⚡', color: statusColors.teal },
+                  split: { label: 'منقسمة', icon: '✂️', color: statusColors.error },
+                  rotating: { label: 'دورية', icon: '🔄', color: statusColors.primaryBlue },
+                }[shift.shiftType] || { label: shift.shiftType, icon: '📋', color: neutralColors.fallback };
+                return (
+                  <Grid item xs={12} sm={6} md={4} key={shift._id}>
+                    <Card elevation={0} sx={{ borderRadius: 3, border: '2px solid', borderColor: shift.isDefault ? 'primary.main' : 'divider', transition: 'box-shadow 0.2s', '&:hover': { boxShadow: 4 } }}>
+                      <CardContent sx={{ p: 2.5 }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                          <Box>
+                            <Typography variant="h6" fontWeight={700}>{shift.shiftName}</Typography>
+                            <Chip label={`${typeConfig.icon} ${typeConfig.label}`} size="small" sx={{ bgcolor: `${typeConfig.color}12`, color: typeConfig.color, fontWeight: 600, mt: 0.5 }} />
+                          </Box>
+                          {shift.isDefault && <Chip label="افتراضية" size="small" color="primary" />}
+                        </Box>
+                        <Divider sx={{ my: 1.5 }} />
+                        <Grid container spacing={1}>
+                          <Grid item xs={6}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                              <CheckInIcon color="success" sx={{ fontSize: 16 }} />
+                              <Typography variant="caption" color="text.secondary">البداية</Typography>
+                            </Box>
+                            <Typography variant="body2" fontWeight={700}>{shift.startTime}</Typography>
+                          </Grid>
+                          <Grid item xs={6}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                              <CheckOutIcon color="error" sx={{ fontSize: 16 }} />
+                              <Typography variant="caption" color="text.secondary">النهاية</Typography>
+                            </Box>
+                            <Typography variant="body2" fontWeight={700}>{shift.endTime}</Typography>
+                          </Grid>
+                          <Grid item xs={6}>
+                            <Typography variant="caption" color="text.secondary">سماح الحضور</Typography>
+                            <Typography variant="body2" fontWeight={600}>{shift.gracePeriod?.checkIn || 0} دقيقة</Typography>
+                          </Grid>
+                          <Grid item xs={6}>
+                            <Typography variant="caption" color="text.secondary">سماح الانصراف</Typography>
+                            <Typography variant="body2" fontWeight={600}>{shift.gracePeriod?.checkOut || 0} دقيقة</Typography>
+                          </Grid>
+                        </Grid>
+                        {shift.assignments && shift.assignments.length > 0 && (
+                          <Box sx={{ mt: 1.5 }}>
+                            <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 0.5 }}>
+                              التعيينات ({shift.assignments.length})
+                            </Typography>
+                            <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+                              {shift.assignments.slice(0, 3).map((a, i) => (
+                                <Chip key={i} label={a.targetName || a.targetId} size="small" variant="outlined" sx={{ fontSize: '0.65rem' }} />
+                              ))}
+                              {shift.assignments.length > 3 && (
+                                <Chip label={`+${shift.assignments.length - 3}`} size="small" color="default" />
+                              )}
+                            </Box>
+                          </Box>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                );
+              })}
+            </Grid>
+          )}
+        </>
+      )}
+
+      {/* ══════════════════════════════════════════════════════════
           DIALOGS
           ══════════════════════════════════════════════════════════ */}
+
+      {/* Shift Create Dialog */}
+      <Dialog open={shiftDialog} onClose={() => setShiftDialog(false)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: 3 } }}>
+        <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <ScheduleIcon color="primary" /> إضافة وردية جديدة
+        </DialogTitle>
+        <DialogContent dividers>
+          <Grid container spacing={2} sx={{ mt: 0.5 }}>
+            <Grid item xs={6}>
+              <TextField fullWidth label="اسم الوردية" value={shiftForm.shiftName}
+                onChange={e => setShiftForm(f => ({ ...f, shiftName: e.target.value }))} placeholder="مثال: وردية صباحية" />
+            </Grid>
+            <Grid item xs={6}>
+              <TextField fullWidth label="كود الوردية" value={shiftForm.shiftCode}
+                onChange={e => setShiftForm(f => ({ ...f, shiftCode: e.target.value }))} placeholder="مثال: MORNING-01" />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField fullWidth select label="نوع الوردية" value={shiftForm.shiftType}
+                onChange={e => setShiftForm(f => ({ ...f, shiftType: e.target.value }))}>
+                <MenuItem value="morning">🌅 صباحية</MenuItem>
+                <MenuItem value="evening">🌆 مسائية</MenuItem>
+                <MenuItem value="night">🌙 ليلية</MenuItem>
+                <MenuItem value="flexible">⚡ مرنة</MenuItem>
+                <MenuItem value="split">✂️ منقسمة</MenuItem>
+                <MenuItem value="rotating">🔄 دورية</MenuItem>
+              </TextField>
+            </Grid>
+            <Grid item xs={6}>
+              <TextField fullWidth label="وقت البداية" type="time" value={shiftForm.startTime}
+                onChange={e => setShiftForm(f => ({ ...f, startTime: e.target.value }))} InputLabelProps={{ shrink: true }}
+                InputProps={{ startAdornment: <InputAdornment position="start"><CheckInIcon color="success" sx={{ fontSize: 18 }} /></InputAdornment> }} />
+            </Grid>
+            <Grid item xs={6}>
+              <TextField fullWidth label="وقت النهاية" type="time" value={shiftForm.endTime}
+                onChange={e => setShiftForm(f => ({ ...f, endTime: e.target.value }))} InputLabelProps={{ shrink: true }}
+                InputProps={{ startAdornment: <InputAdornment position="start"><CheckOutIcon color="error" sx={{ fontSize: 18 }} /></InputAdornment> }} />
+            </Grid>
+            <Grid item xs={6}>
+              <TextField fullWidth label="سماح الحضور (دقيقة)" type="number" value={shiftForm.gracePeriod.checkIn}
+                onChange={e => setShiftForm(f => ({ ...f, gracePeriod: { ...f.gracePeriod, checkIn: +e.target.value } }))} />
+            </Grid>
+            <Grid item xs={6}>
+              <TextField fullWidth label="سماح الانصراف (دقيقة)" type="number" value={shiftForm.gracePeriod.checkOut}
+                onChange={e => setShiftForm(f => ({ ...f, gracePeriod: { ...f.gracePeriod, checkOut: +e.target.value } }))} />
+            </Grid>
+          </Grid>
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={() => setShiftDialog(false)}>إلغاء</Button>
+          <Button variant="contained" disabled={shiftSaving || !shiftForm.shiftName || !shiftForm.shiftCode}
+            startIcon={shiftSaving ? <CircularProgress size={16} color="inherit" /> : <SaveIcon />}
+            onClick={async () => {
+              setShiftSaving(true);
+              try {
+                await attendanceEngineService.createShift(shiftForm);
+                setSnack({ open: true, message: 'تم إنشاء الوردية بنجاح', severity: 'success' });
+                setShiftDialog(false);
+                loadShifts();
+              } catch { setSnack({ open: true, message: 'فشل في إنشاء الوردية', severity: 'error' }); }
+              setShiftSaving(false);
+            }}>
+            حفظ الوردية
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* View Detail Dialog */}
       <Dialog open={!!viewItem} onClose={() => setViewItem(null)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: 3 } }}>

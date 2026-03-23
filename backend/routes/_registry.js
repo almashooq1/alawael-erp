@@ -153,6 +153,9 @@ const successionPlanningRoutes = require('../routes/successionPlanning');
 const mobileAppRoutes = require('../routes/mobileApp.routes');
 const zktecoRoutes = require('../routes/zkteco.routes');
 
+// HR Attendance Engine (محرك الحضور الموحد)
+const hrAttendanceRoutes = require('../routes/hr-attendance.routes');
+
 // Administrative Systems Routes (الأنظمة الإدارية)
 const strategicPlanningRoutes = require('../routes/strategicPlanning.routes');
 const complaintsRoutes = require('../routes/complaints.routes');
@@ -453,6 +456,10 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'succession-planning', successionPlanningRoutes);
   dualMount(app, 'mobile', mobileAppRoutes);
   dualMount(app, 'zkteco', zktecoRoutes);
+
+  // ── HR Attendance Engine (محرك الحضور والورديات الموحد) ──────────────────
+  dualMount(app, 'hr-attendance', hrAttendanceRoutes);
+  logger.info('HR Attendance Engine routes mounted (shifts, check-in/out, dashboard, reports — 20+ endpoints)');
 
   // ── Education System Routes (نظام التعليم) ─────────────────────────────
   dualMount(app, 'academic-years', academicYearRoutes);

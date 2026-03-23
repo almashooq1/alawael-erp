@@ -1,17 +1,25 @@
 /* eslint-disable no-unused-vars */
 /**
  * ZKTeco Service - خدمة التواصل مع أجهزة ZKTeco
+ * ═══════════════════════════════════════════════════════════════════
  * الاتصال بأجهزة البصمة وجلب سجلات الحضور ومزامنتها
+ * محسّن: shift-awareness, multi-punch tracking, duplicate detection,
+ *         connection health, punch log history
  */
 
 const ZKLib = require('node-zklib');
 const cron = require('node-cron');
 const ZKTecoDevice = require('../../models/zktecoDevice.model');
 const SmartAttendance = require('../../models/advanced_attendance.model');
+const WorkShift = require('../../models/workShift.model');
+const Employee = require('../../models/employee.model');
 const logger = require('../../utils/logger');
 
 // ─── مخزن الاتصالات النشطة ──────────────────────────────────────────────────
 const activeConnections = new Map();
+
+// ─── مخزن حالة الاتصالات (health monitoring) ─────────────────────────────────
+const connectionHealth = new Map(); // deviceId -> { lastPing, failures, uptime }
 
 // ─── مهام المزامنة التلقائية (Cron Jobs) ────────────────────────────────────
 let autoSyncJob = null;
@@ -475,6 +483,9 @@ class ZKTecoService {
       });
     }
 
+    // تطبيق حسابات الوردية (التأخير/الخروج المبكر)
+    await this.processWithShiftAwareness(attendance);
+
     await attendance.save();
     return 'synced';
   }
@@ -855,8 +866,158 @@ class ZKTecoService {
       }
     }
     activeConnections.clear();
+    connectionHealth.clear();
     this.stopAutoSync();
     logger.info('ZKTeco: All connections closed');
+  }
+
+  // ═══════════════════════════════════════════════
+  //  مراقبة صحة الاتصالات (Connection Health)
+  // ═══════════════════════════════════════════════
+
+  /**
+   * فحص صحة جميع الاتصالات النشطة
+   * يمكن تشغيلها دورياً لاكتشاف الأجهزة المنقطعة
+   */
+  static async healthCheck() {
+    const results = [];
+
+    for (const [deviceId, zkInstance] of activeConnections) {
+      try {
+        await zkInstance.getTime();
+        const health = connectionHealth.get(deviceId) || {};
+        health.lastPing = new Date();
+        health.failures = 0;
+        connectionHealth.set(deviceId, health);
+        results.push({ deviceId, status: 'healthy' });
+      } catch (err) {
+        const health = connectionHealth.get(deviceId) || { failures: 0 };
+        health.failures = (health.failures || 0) + 1;
+        health.lastFailure = new Date();
+        connectionHealth.set(deviceId, health);
+
+        logger.warn(`ZKTeco: Health check failed for ${deviceId}: ${err.message}`);
+
+        // إعادة الاتصال إذا فشل أكثر من 3 مرات
+        if (health.failures >= 3) {
+          try {
+            activeConnections.delete(deviceId);
+            await this.connectDevice(deviceId);
+            health.failures = 0;
+            connectionHealth.set(deviceId, health);
+            logger.info(`ZKTeco: Auto-reconnected device ${deviceId}`);
+            results.push({ deviceId, status: 'reconnected' });
+          } catch {
+            results.push({ deviceId, status: 'failed', failures: health.failures });
+          }
+        } else {
+          results.push({ deviceId, status: 'degraded', failures: health.failures });
+        }
+      }
+    }
+
+    return results;
+  }
+
+  /**
+   * حالة جميع الاتصالات
+   */
+  static getConnectionsStatus() {
+    const status = [];
+    for (const [deviceId] of activeConnections) {
+      const health = connectionHealth.get(deviceId) || {};
+      status.push({
+        deviceId,
+        connected: true,
+        lastPing: health.lastPing,
+        failures: health.failures || 0,
+      });
+    }
+    return status;
+  }
+
+  // ═══════════════════════════════════════════════
+  //  معالجة متقدمة: Shift-Aware + Multi-Punch
+  // ═══════════════════════════════════════════════
+
+  /**
+   * مزامنة محسّنة مع دعم الورديات
+   * تحسب التأخير والخروج المبكر والساعات الإضافية تلقائياً
+   */
+  static async processWithShiftAwareness(attendanceRecord) {
+    if (!attendanceRecord || !attendanceRecord.employeeId) return attendanceRecord;
+
+    try {
+      const employee = await Employee.findById(attendanceRecord.employeeId).select('department');
+      if (!employee) return attendanceRecord;
+
+      const shift = await WorkShift.getEmployeeShift(
+        attendanceRecord.employeeId,
+        employee.department
+      );
+      if (!shift) return attendanceRecord;
+
+      // حساب التأخير عند الحضور
+      if (attendanceRecord.checkInTime) {
+        const latenessInfo = shift.calculateLateness(attendanceRecord.checkInTime);
+        attendanceRecord.lateness = {
+          minutes: latenessInfo.lateMinutes,
+          isLate: latenessInfo.isLate,
+        };
+
+        if (latenessInfo.isLate) {
+          attendanceRecord.attendanceStatus = latenessInfo.isAbsent ? 'absent' : 'late_arrival';
+        }
+      }
+
+      // حساب الخروج المبكر والإضافي عند الانصراف
+      if (attendanceRecord.checkOutTime) {
+        const earlyInfo = shift.calculateEarlyLeave(attendanceRecord.checkOutTime);
+        if (earlyInfo.isEarlyLeave) {
+          attendanceRecord.earlyLeave = {
+            minutes: earlyInfo.earlyMinutes,
+            isEarlyLeave: true,
+          };
+          if (attendanceRecord.attendanceStatus === 'present') {
+            attendanceRecord.attendanceStatus = 'early_departure';
+          }
+        }
+      }
+    } catch (err) {
+      logger.warn(`ZKTeco: Shift processing failed: ${err.message}`);
+    }
+
+    return attendanceRecord;
+  }
+
+  /**
+   * إحصائيات مفصلة لأجهزة ZKTeco مع معلومات الصحة
+   */
+  static async getDetailedStats() {
+    const basicStats = await this.getStats();
+
+    // إضافة معلومات الصحة
+    const healthStatus = this.getConnectionsStatus();
+
+    // آخر 24 ساعة مزامنة
+    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const recentSyncs = await ZKTecoDevice.aggregate([
+      { $unwind: '$syncLogs' },
+      { $match: { 'syncLogs.startedAt': { $gte: yesterday } } },
+      {
+        $group: {
+          _id: '$syncLogs.status',
+          count: { $sum: 1 },
+          totalRecords: { $sum: '$syncLogs.recordsSynced' },
+        },
+      },
+    ]);
+
+    return {
+      ...basicStats,
+      connectionHealth: healthStatus,
+      last24hSyncs: recentSyncs,
+    };
   }
 }
 

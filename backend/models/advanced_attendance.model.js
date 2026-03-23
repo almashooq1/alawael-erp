@@ -251,6 +251,7 @@ const smartAttendanceSchema = new Schema(
           enum: ['pending', 'synced', 'failed'],
         },
         lastSyncTime: Date,
+        rawData: Schema.Types.Mixed,
       },
     ],
 
@@ -319,8 +320,6 @@ smartAttendanceSchema.pre('save', async function () {
       overtime: Math.max(0, totalHours - regularHours),
     };
   }
-
-  next();
 });
 
 // Static method لإنشاء سجل حضور جديد

@@ -106,6 +106,19 @@ export const getRawLogs = (id, fromDate, toDate) => {
 };
 
 // ════════════════════════════════════════════════════════════════════════════════
+//  مراقبة الصحة (Health Monitoring)
+// ════════════════════════════════════════════════════════════════════════════════
+
+/** فحص صحة الاتصالات */
+export const healthCheck = () => safeCall(() => apiClient.post(`${BASE}/health-check`));
+
+/** حالة الاتصالات الحالية */
+export const getConnections = () => safeCall(() => apiClient.get(`${BASE}/connections`), []);
+
+/** إحصائيات مفصلة */
+export const getDetailedStats = () => safeCall(() => apiClient.get(`${BASE}/detailed-stats`), {});
+
+// ════════════════════════════════════════════════════════════════════════════════
 //  التصدير
 // ════════════════════════════════════════════════════════════════════════════════
 
@@ -128,6 +141,9 @@ const zktecoService = {
   mapDeviceUser,
   unmapDeviceUser,
   getRawLogs,
+  healthCheck,
+  getConnections,
+  getDetailedStats,
 };
 
 export default zktecoService;

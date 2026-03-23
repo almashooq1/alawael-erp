@@ -570,6 +570,6 @@ beneficiarySchema.methods.unarchive = function () {
   return this.save();
 };
 
-const Beneficiary = mongoose.model('Beneficiary', beneficiarySchema);
+const Beneficiary = mongoose.models.Beneficiary || mongoose.model('Beneficiary', beneficiarySchema);
 
 module.exports = Beneficiary;

@@ -1028,6 +1028,10 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   // ── Phase 17: AI Diagnostic Intelligence — ذكاء اصطناعي للتشخيص ───
   safeMount(app, ['/api/ai-diagnostic', '/api/v1/ai-diagnostic'], '../routes/aiDiagnostic.routes');
   logger.info('Phase 17 mounted (1 module: aiDiagnostic)');
+
+  // ── Phase 18: OCR Document Processing — معالجة مستندات بالتعرف الضوئي ───
+  safeMount(app, ['/api/ocr-documents', '/api/v1/ocr-documents'], '../routes/ocrDocument.routes');
+  logger.info('Phase 18 mounted (1 module: ocrDocument)');
 };
 
 module.exports = { mountAllRoutes, dualMount, safeMount };

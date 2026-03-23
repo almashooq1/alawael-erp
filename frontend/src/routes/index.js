@@ -103,3 +103,6 @@ export { default as ChatRoutes } from './ChatRoutes';
 
 // === Phase 17: AI Diagnostic Intelligence (ذكاء اصطناعي للتشخيص) ===
 export { default as AIDiagnosticRoutes } from './AIDiagnosticRoutes';
+
+// === Phase 18: OCR Document Processing (معالجة مستندات بالتعرف الضوئي) ===
+export { default as OCRDocumentRoutes } from './OCRDocumentRoutes';

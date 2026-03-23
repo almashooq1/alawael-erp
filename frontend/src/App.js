@@ -104,6 +104,7 @@ import {
   LibraryRoutes,
   ChatRoutes,
   AIDiagnosticRoutes,
+  OCRDocumentRoutes,
 } from './routes';
 
 // Pages — Keep eagerly loaded (critical path / small)
@@ -328,6 +329,7 @@ function AppContent() {
                               {LibraryRoutes()}
                               {ChatRoutes()}
                               {AIDiagnosticRoutes()}
+                              {OCRDocumentRoutes()}
                               {/* === Shared / Cross-cutting Routes === */}
                               {/* AI & Analytics */}
                               <Route

@@ -136,7 +136,7 @@ describe('Phase 19 — CEO Executive Dashboard', () => {
       const res = await request(app).get('/api/ceo-dashboard/kpis?category=financial');
       expect(res.status).toBe(200);
       expect(res.body.data.length).toBeGreaterThanOrEqual(3);
-      res.body.data.forEach((k) => expect(k.category).toBe('financial'));
+      res.body.data.forEach(k => expect(k.category).toBe('financial'));
     });
 
     it('GET /kpis/:id returns a single KPI', async () => {
@@ -155,7 +155,14 @@ describe('Phase 19 — CEO Executive Dashboard', () => {
     it('POST /kpis creates a new KPI', async () => {
       const res = await request(app)
         .post('/api/ceo-dashboard/kpis')
-        .send({ code: 'TEST_KPI', nameAr: 'مؤشر اختبار', nameEn: 'Test KPI', target: 100, currentValue: 75, previousValue: 60 });
+        .send({
+          code: 'TEST_KPI',
+          nameAr: 'مؤشر اختبار',
+          nameEn: 'Test KPI',
+          target: 100,
+          currentValue: 75,
+          previousValue: 60,
+        });
       expect(res.status).toBe(201);
       expect(res.body.data.code).toBe('TEST_KPI');
       expect(res.body.data.changePercent).toBe(25);
@@ -163,9 +170,7 @@ describe('Phase 19 — CEO Executive Dashboard', () => {
     });
 
     it('POST /kpis rejects without required fields', async () => {
-      const res = await request(app)
-        .post('/api/ceo-dashboard/kpis')
-        .send({ nameAr: 'بدون رمز' });
+      const res = await request(app).post('/api/ceo-dashboard/kpis').send({ nameAr: 'بدون رمز' });
       expect(res.status).toBe(400);
       expect(res.body.success).toBe(false);
     });
@@ -180,7 +185,9 @@ describe('Phase 19 — CEO Executive Dashboard', () => {
     });
 
     it('PUT /kpis/:id returns 404 for non-existent', async () => {
-      const res = await request(app).put('/api/ceo-dashboard/kpis/kpi-99999').send({ currentValue: 99 });
+      const res = await request(app)
+        .put('/api/ceo-dashboard/kpis/kpi-99999')
+        .send({ currentValue: 99 });
       expect(res.status).toBe(404);
     });
 
@@ -214,7 +221,7 @@ describe('Phase 19 — CEO Executive Dashboard', () => {
     it('GET /kpis/:id/trend?period=2026-01 filters by period', async () => {
       const res = await request(app).get('/api/ceo-dashboard/kpis/kpi-501/trend?period=2026-01');
       expect(res.status).toBe(200);
-      res.body.data.forEach((s) => expect(s.period).toContain('2026-01'));
+      res.body.data.forEach(s => expect(s.period).toContain('2026-01'));
     });
 
     it('POST /kpis/:id/snapshots adds a snapshot', async () => {
@@ -249,13 +256,13 @@ describe('Phase 19 — CEO Executive Dashboard', () => {
     it('GET /alerts?severity=critical returns only critical alerts', async () => {
       const res = await request(app).get('/api/ceo-dashboard/alerts?severity=critical');
       expect(res.status).toBe(200);
-      res.body.data.forEach((a) => expect(a.severity).toBe('critical'));
+      res.body.data.forEach(a => expect(a.severity).toBe('critical'));
     });
 
     it('GET /alerts?isResolved=false returns only unresolved', async () => {
       const res = await request(app).get('/api/ceo-dashboard/alerts?isResolved=false');
       expect(res.status).toBe(200);
-      res.body.data.forEach((a) => expect(a.isResolved).toBe(false));
+      res.body.data.forEach(a => expect(a.isResolved).toBe(false));
     });
 
     it('GET /alerts/:id returns a single alert', async () => {
@@ -272,7 +279,12 @@ describe('Phase 19 — CEO Executive Dashboard', () => {
     it('POST /alerts creates a new alert', async () => {
       const res = await request(app)
         .post('/api/ceo-dashboard/alerts')
-        .send({ titleAr: 'تنبيه اختبار', titleEn: 'Test Alert', severity: 'warning', category: 'financial' });
+        .send({
+          titleAr: 'تنبيه اختبار',
+          titleEn: 'Test Alert',
+          severity: 'warning',
+          category: 'financial',
+        });
       expect(res.status).toBe(201);
       expect(res.body.data.titleAr).toBe('تنبيه اختبار');
       expect(res.body.data.isRead).toBe(false);
@@ -280,7 +292,9 @@ describe('Phase 19 — CEO Executive Dashboard', () => {
     });
 
     it('POST /alerts rejects without titleAr', async () => {
-      const res = await request(app).post('/api/ceo-dashboard/alerts').send({ titleEn: 'No Arabic' });
+      const res = await request(app)
+        .post('/api/ceo-dashboard/alerts')
+        .send({ titleEn: 'No Arabic' });
       expect(res.status).toBe(400);
     });
 
@@ -325,7 +339,7 @@ describe('Phase 19 — CEO Executive Dashboard', () => {
     it('GET /goals?status=on_track returns filtered goals', async () => {
       const res = await request(app).get('/api/ceo-dashboard/goals?status=on_track');
       expect(res.status).toBe(200);
-      res.body.data.forEach((g) => expect(g.status).toBe('on_track'));
+      res.body.data.forEach(g => expect(g.status).toBe('on_track'));
     });
 
     it('GET /goals/:id returns a single goal', async () => {
@@ -343,7 +357,13 @@ describe('Phase 19 — CEO Executive Dashboard', () => {
     it('POST /goals creates a new goal', async () => {
       const res = await request(app)
         .post('/api/ceo-dashboard/goals')
-        .send({ nameAr: 'هدف اختبار', nameEn: 'Test Goal', targetValue: 50, currentValue: 20, deadline: '2027-01-01' });
+        .send({
+          nameAr: 'هدف اختبار',
+          nameEn: 'Test Goal',
+          targetValue: 50,
+          currentValue: 20,
+          deadline: '2027-01-01',
+        });
       expect(res.status).toBe(201);
       expect(res.body.data.nameAr).toBe('هدف اختبار');
       expect(res.body.data.progress).toBe(40);
@@ -364,9 +384,7 @@ describe('Phase 19 — CEO Executive Dashboard', () => {
     });
 
     it('DELETE /goals/:id deletes a goal', async () => {
-      const created = await request(app)
-        .post('/api/ceo-dashboard/goals')
-        .send({ nameAr: 'سيحذف' });
+      const created = await request(app).post('/api/ceo-dashboard/goals').send({ nameAr: 'سيحذف' });
       const res = await request(app).delete(`/api/ceo-dashboard/goals/${created.body.data.id}`);
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
@@ -385,7 +403,9 @@ describe('Phase 19 — CEO Executive Dashboard', () => {
       expect(res.body.data[0]).toHaveProperty('nameAr');
       // Sorted descending
       for (let i = 1; i < res.body.data.length; i++) {
-        expect(res.body.data[i - 1].performance).toBeGreaterThanOrEqual(res.body.data[i].performance);
+        expect(res.body.data[i - 1].performance).toBeGreaterThanOrEqual(
+          res.body.data[i].performance
+        );
       }
     });
 
@@ -496,15 +516,15 @@ describe('Phase 19 — CEO Executive Dashboard', () => {
       const created = await request(app)
         .post('/api/ceo-dashboard/layouts')
         .send({ name: 'سيكون افتراضي' });
-      const res = await request(app).patch(`/api/ceo-dashboard/layouts/${created.body.data.id}/set-default`);
+      const res = await request(app).patch(
+        `/api/ceo-dashboard/layouts/${created.body.data.id}/set-default`
+      );
       expect(res.status).toBe(200);
       expect(res.body.data.isDefault).toBe(true);
     });
 
     it('DELETE /layouts/:id deletes a non-default layout', async () => {
-      const created = await request(app)
-        .post('/api/ceo-dashboard/layouts')
-        .send({ name: 'سيحذف' });
+      const created = await request(app).post('/api/ceo-dashboard/layouts').send({ name: 'سيحذف' });
       const res = await request(app).delete(`/api/ceo-dashboard/layouts/${created.body.data.id}`);
       expect(res.status).toBe(200);
     });
@@ -565,7 +585,9 @@ describe('Phase 19 — CEO Executive Dashboard', () => {
     });
 
     it('GET /reports/:id returns a single report', async () => {
-      const gen = await request(app).post('/api/ceo-dashboard/reports/generate').send({ type: 'monthly' });
+      const gen = await request(app)
+        .post('/api/ceo-dashboard/reports/generate')
+        .send({ type: 'monthly' });
       const res = await request(app).get(`/api/ceo-dashboard/reports/${gen.body.data.id}`);
       expect(res.status).toBe(200);
       expect(res.body.data.type).toBe('monthly');
@@ -578,7 +600,9 @@ describe('Phase 19 — CEO Executive Dashboard', () => {
 
     it('GET /reports/:id/export exports as JSON', async () => {
       const gen = await request(app).post('/api/ceo-dashboard/reports/generate').send({});
-      const res = await request(app).get(`/api/ceo-dashboard/reports/${gen.body.data.id}/export?format=json`);
+      const res = await request(app).get(
+        `/api/ceo-dashboard/reports/${gen.body.data.id}/export?format=json`
+      );
       expect(res.status).toBe(200);
       expect(res.body.data.format).toBe('json');
       expect(res.body.data.fileName).toContain('executive_report');
@@ -586,7 +610,9 @@ describe('Phase 19 — CEO Executive Dashboard', () => {
 
     it('GET /reports/:id/export exports as CSV', async () => {
       const gen = await request(app).post('/api/ceo-dashboard/reports/generate').send({});
-      const res = await request(app).get(`/api/ceo-dashboard/reports/${gen.body.data.id}/export?format=csv`);
+      const res = await request(app).get(
+        `/api/ceo-dashboard/reports/${gen.body.data.id}/export?format=csv`
+      );
       expect(res.status).toBe(200);
       expect(res.body.data.format).toBe('csv');
       expect(res.body.data.data).toContain('Section,Metric,Value');
@@ -598,7 +624,9 @@ describe('Phase 19 — CEO Executive Dashboard', () => {
      ════════════════════════════════════════════ */
   describe('Comparative Analytics', () => {
     it('GET /compare returns period comparison', async () => {
-      const res = await request(app).get('/api/ceo-dashboard/compare?period1=2026-01&period2=2026-03');
+      const res = await request(app).get(
+        '/api/ceo-dashboard/compare?period1=2026-01&period2=2026-03'
+      );
       expect(res.status).toBe(200);
       expect(res.body.data.period1).toBe('2026-01');
       expect(res.body.data.period2).toBe('2026-03');
@@ -651,11 +679,14 @@ describe('Phase 19 — CEO Executive Dashboard', () => {
       const all = svc.listKPIs();
       const fin = svc.listKPIs('financial');
       expect(all.length).toBeGreaterThan(fin.length);
-      fin.forEach((k) => expect(k.category).toBe('financial'));
+      fin.forEach(k => expect(k.category).toBe('financial'));
     });
 
     it('createKPI() and deleteKPI() lifecycle', () => {
-      const kpi = svc.createKPI({ code: 'LIFE', nameAr: 'دورة حياة', currentValue: 10, previousValue: 5 }, 'u1');
+      const kpi = svc.createKPI(
+        { code: 'LIFE', nameAr: 'دورة حياة', currentValue: 10, previousValue: 5 },
+        'u1'
+      );
       expect(kpi.id).toBeDefined();
       expect(svc.getKPI(kpi.id)).toBeTruthy();
       expect(svc.deleteKPI(kpi.id, 'u1')).toBe(true);
@@ -663,7 +694,10 @@ describe('Phase 19 — CEO Executive Dashboard', () => {
     });
 
     it('updateKPI() recalculates trend', () => {
-      const kpi = svc.createKPI({ code: 'TREND', nameAr: 'اتجاه', currentValue: 100, previousValue: 80 }, 'u1');
+      const kpi = svc.createKPI(
+        { code: 'TREND', nameAr: 'اتجاه', currentValue: 100, previousValue: 80 },
+        'u1'
+      );
       const updated = svc.updateKPI(kpi.id, { currentValue: 50 }, 'u1');
       expect(updated.trend).toBe('down');
       expect(updated.previousValue).toBe(100);
@@ -674,7 +708,7 @@ describe('Phase 19 — CEO Executive Dashboard', () => {
       const snap = svc.addKPISnapshot('kpi-501', 4800000, '2026-05', 'u1');
       expect(snap.kpiId).toBe('kpi-501');
       const trend = svc.getKPITrend('kpi-501', '2026-05');
-      expect(trend.some((s) => s.value === 4800000)).toBe(true);
+      expect(trend.some(s => s.value === 4800000)).toBe(true);
     });
 
     it('resolveAlert() sets resolution metadata', () => {
@@ -710,7 +744,7 @@ describe('Phase 19 — CEO Executive Dashboard', () => {
       const comp = svc.getComparativeAnalysis('2026-01', '2026-03');
       expect(comp.period1).toBe('2026-01');
       expect(comp.comparisons.length).toBeGreaterThan(0);
-      comp.comparisons.forEach((c) => {
+      comp.comparisons.forEach(c => {
         expect(c).toHaveProperty('change');
         expect(c).toHaveProperty('trend');
       });

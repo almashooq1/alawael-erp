@@ -15,8 +15,8 @@ const handleValidation = (req, res, next) => {
   if (!errors.isEmpty()) return res.status(400).json({ success: false, errors: errors.array() });
   next();
 };
-const getUserId = (req) => req.user?.id || req.user?.userId || 'u1';
-const wrap = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
+const getUserId = req => req.user?.id || req.user?.userId || 'u1';
+const wrap = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
 /* ════════════════════════════════════════════
    EXECUTIVE DASHBOARD — لوحة التحكم التنفيذية
@@ -27,19 +27,35 @@ router.get(
   wrap((req, res) => {
     const data = svc.getExecutiveDashboard();
     res.json({ success: true, data });
-  }),
+  })
 );
 
 /* ════════════════════════════════════════════
    REFERENCE DATA — البيانات المرجعية
    ════════════════════════════════════════════ */
-router.get('/departments-list', authenticate, (req, res) => res.json({ success: true, data: svc.getDepartmentList() }));
-router.get('/kpi-categories', authenticate, (req, res) => res.json({ success: true, data: svc.getKPICategories() }));
-router.get('/widget-types', authenticate, (req, res) => res.json({ success: true, data: svc.getWidgetTypes() }));
-router.get('/alert-severities', authenticate, (req, res) => res.json({ success: true, data: svc.getAlertSeverities() }));
-router.get('/periods', authenticate, (req, res) => res.json({ success: true, data: svc.getPeriods() }));
-router.get('/strategic-statuses', authenticate, (req, res) => res.json({ success: true, data: svc.getStrategicStatuses() }));
-router.get('/statistics', authenticate, wrap((req, res) => res.json({ success: true, data: svc.getStatistics() })));
+router.get('/departments-list', authenticate, (req, res) =>
+  res.json({ success: true, data: svc.getDepartmentList() })
+);
+router.get('/kpi-categories', authenticate, (req, res) =>
+  res.json({ success: true, data: svc.getKPICategories() })
+);
+router.get('/widget-types', authenticate, (req, res) =>
+  res.json({ success: true, data: svc.getWidgetTypes() })
+);
+router.get('/alert-severities', authenticate, (req, res) =>
+  res.json({ success: true, data: svc.getAlertSeverities() })
+);
+router.get('/periods', authenticate, (req, res) =>
+  res.json({ success: true, data: svc.getPeriods() })
+);
+router.get('/strategic-statuses', authenticate, (req, res) =>
+  res.json({ success: true, data: svc.getStrategicStatuses() })
+);
+router.get(
+  '/statistics',
+  authenticate,
+  wrap((req, res) => res.json({ success: true, data: svc.getStatistics() }))
+);
 
 /* ════════════════════════════════════════════
    KPIs — مؤشرات الأداء الرئيسية
@@ -50,7 +66,7 @@ router.get(
   wrap((req, res) => {
     const data = svc.listKPIs(req.query.category);
     res.json({ success: true, data });
-  }),
+  })
 );
 
 router.get(
@@ -62,7 +78,7 @@ router.get(
     const data = svc.getKPI(req.params.id);
     if (!data) return res.status(404).json({ success: false, message: 'مؤشر الأداء غير موجود' });
     res.json({ success: true, data });
-  }),
+  })
 );
 
 router.post(
@@ -77,7 +93,7 @@ router.post(
   wrap((req, res) => {
     const data = svc.createKPI(req.body, getUserId(req));
     res.status(201).json({ success: true, data });
-  }),
+  })
 );
 
 router.put(
@@ -90,7 +106,7 @@ router.put(
     const data = svc.updateKPI(req.params.id, req.body, getUserId(req));
     if (!data) return res.status(404).json({ success: false, message: 'مؤشر الأداء غير موجود' });
     res.json({ success: true, data });
-  }),
+  })
 );
 
 router.delete(
@@ -103,7 +119,7 @@ router.delete(
     const ok = svc.deleteKPI(req.params.id, getUserId(req));
     if (!ok) return res.status(404).json({ success: false, message: 'مؤشر الأداء غير موجود' });
     res.json({ success: true, message: 'تم حذف مؤشر الأداء بنجاح' });
-  }),
+  })
 );
 
 /* ── KPI Trends — اتجاهات المؤشرات ── */
@@ -115,7 +131,7 @@ router.get(
   wrap((req, res) => {
     const data = svc.getKPITrend(req.params.id, req.query.period);
     res.json({ success: true, data });
-  }),
+  })
 );
 
 router.post(
@@ -132,7 +148,7 @@ router.post(
     const data = svc.addKPISnapshot(req.params.id, req.body.value, req.body.period, getUserId(req));
     if (!data) return res.status(404).json({ success: false, message: 'مؤشر الأداء غير موجود' });
     res.status(201).json({ success: true, data });
-  }),
+  })
 );
 
 /* ════════════════════════════════════════════
@@ -150,7 +166,7 @@ router.get(
     if (unreadOnly) filters.unreadOnly = unreadOnly === 'true';
     const data = svc.listAlerts(filters);
     res.json({ success: true, data });
-  }),
+  })
 );
 
 router.get(
@@ -162,7 +178,7 @@ router.get(
     const data = svc.getAlert(req.params.id);
     if (!data) return res.status(404).json({ success: false, message: 'التنبيه غير موجود' });
     res.json({ success: true, data });
-  }),
+  })
 );
 
 router.post(
@@ -174,7 +190,7 @@ router.post(
   wrap((req, res) => {
     const data = svc.createAlert(req.body, getUserId(req));
     res.status(201).json({ success: true, data });
-  }),
+  })
 );
 
 router.patch(
@@ -186,7 +202,7 @@ router.patch(
     const data = svc.markAlertRead(req.params.id, getUserId(req));
     if (!data) return res.status(404).json({ success: false, message: 'التنبيه غير موجود' });
     res.json({ success: true, data });
-  }),
+  })
 );
 
 router.patch(
@@ -199,7 +215,7 @@ router.patch(
     const data = svc.resolveAlert(req.params.id, getUserId(req), req.body.resolution);
     if (!data) return res.status(404).json({ success: false, message: 'التنبيه غير موجود' });
     res.json({ success: true, data });
-  }),
+  })
 );
 
 router.delete(
@@ -212,7 +228,7 @@ router.delete(
     const ok = svc.dismissAlert(req.params.id, getUserId(req));
     if (!ok) return res.status(404).json({ success: false, message: 'التنبيه غير موجود' });
     res.json({ success: true, message: 'تم حذف التنبيه بنجاح' });
-  }),
+  })
 );
 
 /* ════════════════════════════════════════════
@@ -224,7 +240,7 @@ router.get(
   wrap((req, res) => {
     const data = svc.listGoals(req.query.status);
     res.json({ success: true, data });
-  }),
+  })
 );
 
 router.get(
@@ -236,21 +252,19 @@ router.get(
     const data = svc.getGoal(req.params.id);
     if (!data) return res.status(404).json({ success: false, message: 'الهدف غير موجود' });
     res.json({ success: true, data });
-  }),
+  })
 );
 
 router.post(
   '/goals',
   authenticate,
   authorize(['admin', 'ceo']),
-  [
-    body('nameAr').notEmpty().withMessage('اسم الهدف بالعربية مطلوب'),
-  ],
+  [body('nameAr').notEmpty().withMessage('اسم الهدف بالعربية مطلوب')],
   handleValidation,
   wrap((req, res) => {
     const data = svc.createGoal(req.body, getUserId(req));
     res.status(201).json({ success: true, data });
-  }),
+  })
 );
 
 router.put(
@@ -263,7 +277,7 @@ router.put(
     const data = svc.updateGoal(req.params.id, req.body, getUserId(req));
     if (!data) return res.status(404).json({ success: false, message: 'الهدف غير موجود' });
     res.json({ success: true, data });
-  }),
+  })
 );
 
 router.delete(
@@ -276,7 +290,7 @@ router.delete(
     const ok = svc.deleteGoal(req.params.id, getUserId(req));
     if (!ok) return res.status(404).json({ success: false, message: 'الهدف غير موجود' });
     res.json({ success: true, message: 'تم حذف الهدف بنجاح' });
-  }),
+  })
 );
 
 /* ════════════════════════════════════════════
@@ -288,7 +302,7 @@ router.get(
   wrap((req, res) => {
     const data = svc.listDepartments();
     res.json({ success: true, data });
-  }),
+  })
 );
 
 router.get(
@@ -297,7 +311,7 @@ router.get(
   wrap((req, res) => {
     const data = svc.getDepartmentComparison();
     res.json({ success: true, data });
-  }),
+  })
 );
 
 router.get(
@@ -309,7 +323,7 @@ router.get(
     const data = svc.getDepartment(req.params.id);
     if (!data) return res.status(404).json({ success: false, message: 'القسم غير موجود' });
     res.json({ success: true, data });
-  }),
+  })
 );
 
 router.put(
@@ -322,13 +336,17 @@ router.put(
     const data = svc.updateDepartment(req.params.id, req.body, getUserId(req));
     if (!data) return res.status(404).json({ success: false, message: 'القسم غير موجود' });
     res.json({ success: true, data });
-  }),
+  })
 );
 
 /* ════════════════════════════════════════════
    WIDGETS & LAYOUTS — الأدوات والتخطيطات
    ════════════════════════════════════════════ */
-router.get('/widgets', authenticate, wrap((req, res) => res.json({ success: true, data: svc.listWidgets() })));
+router.get(
+  '/widgets',
+  authenticate,
+  wrap((req, res) => res.json({ success: true, data: svc.listWidgets() }))
+);
 
 router.get(
   '/widgets/:id',
@@ -339,7 +357,7 @@ router.get(
     const data = svc.getWidget(req.params.id);
     if (!data) return res.status(404).json({ success: false, message: 'الأداة غير موجودة' });
     res.json({ success: true, data });
-  }),
+  })
 );
 
 router.post(
@@ -351,7 +369,7 @@ router.post(
   wrap((req, res) => {
     const data = svc.createWidget(req.body, getUserId(req));
     res.status(201).json({ success: true, data });
-  }),
+  })
 );
 
 router.put(
@@ -364,7 +382,7 @@ router.put(
     const data = svc.updateWidget(req.params.id, req.body, getUserId(req));
     if (!data) return res.status(404).json({ success: false, message: 'الأداة غير موجودة' });
     res.json({ success: true, data });
-  }),
+  })
 );
 
 router.delete(
@@ -377,11 +395,15 @@ router.delete(
     const ok = svc.deleteWidget(req.params.id, getUserId(req));
     if (!ok) return res.status(404).json({ success: false, message: 'الأداة غير موجودة' });
     res.json({ success: true, message: 'تم حذف الأداة بنجاح' });
-  }),
+  })
 );
 
 /* ── Layouts ── */
-router.get('/layouts', authenticate, wrap((req, res) => res.json({ success: true, data: svc.listLayouts() })));
+router.get(
+  '/layouts',
+  authenticate,
+  wrap((req, res) => res.json({ success: true, data: svc.listLayouts() }))
+);
 
 router.get(
   '/layouts/:id',
@@ -392,7 +414,7 @@ router.get(
     const data = svc.getLayout(req.params.id);
     if (!data) return res.status(404).json({ success: false, message: 'التخطيط غير موجود' });
     res.json({ success: true, data });
-  }),
+  })
 );
 
 router.post(
@@ -404,7 +426,7 @@ router.post(
   wrap((req, res) => {
     const data = svc.createLayout(req.body, getUserId(req));
     res.status(201).json({ success: true, data });
-  }),
+  })
 );
 
 router.patch(
@@ -417,7 +439,7 @@ router.patch(
     const data = svc.setDefaultLayout(req.params.id, getUserId(req));
     if (!data) return res.status(404).json({ success: false, message: 'التخطيط غير موجود' });
     res.json({ success: true, data });
-  }),
+  })
 );
 
 router.delete(
@@ -428,15 +450,22 @@ router.delete(
   handleValidation,
   wrap((req, res) => {
     const ok = svc.deleteLayout(req.params.id, getUserId(req));
-    if (!ok) return res.status(404).json({ success: false, message: 'لا يمكن حذف التخطيط (افتراضي أو غير موجود)' });
+    if (!ok)
+      return res
+        .status(404)
+        .json({ success: false, message: 'لا يمكن حذف التخطيط (افتراضي أو غير موجود)' });
     res.json({ success: true, message: 'تم حذف التخطيط بنجاح' });
-  }),
+  })
 );
 
 /* ════════════════════════════════════════════
    BENCHMARKS — المقارنة المعيارية
    ════════════════════════════════════════════ */
-router.get('/benchmarks', authenticate, wrap((req, res) => res.json({ success: true, data: svc.listBenchmarks() })));
+router.get(
+  '/benchmarks',
+  authenticate,
+  wrap((req, res) => res.json({ success: true, data: svc.listBenchmarks() }))
+);
 
 router.get(
   '/benchmarks/:kpiCode',
@@ -445,15 +474,22 @@ router.get(
   handleValidation,
   wrap((req, res) => {
     const data = svc.getBenchmarkForKPI(req.params.kpiCode);
-    if (!data) return res.status(404).json({ success: false, message: 'لا توجد مقارنة معيارية لهذا المؤشر' });
+    if (!data)
+      return res
+        .status(404)
+        .json({ success: false, message: 'لا توجد مقارنة معيارية لهذا المؤشر' });
     res.json({ success: true, data });
-  }),
+  })
 );
 
 /* ════════════════════════════════════════════
    EXECUTIVE REPORTS — التقارير التنفيذية
    ════════════════════════════════════════════ */
-router.get('/reports', authenticate, wrap((req, res) => res.json({ success: true, data: svc.listReports() })));
+router.get(
+  '/reports',
+  authenticate,
+  wrap((req, res) => res.json({ success: true, data: svc.listReports() }))
+);
 
 router.get(
   '/reports/:id',
@@ -464,7 +500,7 @@ router.get(
     const data = svc.getReport(req.params.id);
     if (!data) return res.status(404).json({ success: false, message: 'التقرير غير موجود' });
     res.json({ success: true, data });
-  }),
+  })
 );
 
 router.post(
@@ -474,7 +510,7 @@ router.post(
   wrap((req, res) => {
     const data = svc.generateReport(req.body.type, req.body.period, getUserId(req));
     res.status(201).json({ success: true, data });
-  }),
+  })
 );
 
 router.get(
@@ -486,7 +522,7 @@ router.get(
     const data = svc.exportReport(req.params.id, req.query.format || 'json');
     if (!data) return res.status(404).json({ success: false, message: 'التقرير غير موجود' });
     res.json({ success: true, data });
-  }),
+  })
 );
 
 /* ════════════════════════════════════════════
@@ -503,7 +539,7 @@ router.get(
   wrap((req, res) => {
     const data = svc.getComparativeAnalysis(req.query.period1, req.query.period2);
     res.json({ success: true, data });
-  }),
+  })
 );
 
 /* ════════════════════════════════════════════
@@ -517,7 +553,7 @@ router.get(
     const limit = req.query.limit ? parseInt(req.query.limit, 10) : undefined;
     const data = svc.getAuditLog(limit);
     res.json({ success: true, data });
-  }),
+  })
 );
 
 module.exports = router;

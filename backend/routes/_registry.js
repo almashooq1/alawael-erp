@@ -1036,6 +1036,10 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   // ── Phase 19: CEO Executive Dashboard — لوحة تحكم الإدارة التنفيذية ───
   safeMount(app, ['/api/ceo-dashboard', '/api/v1/ceo-dashboard'], '../routes/ceoDashboard.routes');
   logger.info('Phase 19 mounted (1 module: ceoDashboard)');
+
+  // ── Phase 20: Quality Management (ISO/CBAHI) — إدارة الجودة ───
+  safeMount(app, ['/api/quality-management', '/api/v1/quality-management'], '../routes/qualityManagement.routes');
+  logger.info('Phase 20 mounted (1 module: qualityManagement)');
 };
 
 module.exports = { mountAllRoutes, dualMount, safeMount };

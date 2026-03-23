@@ -109,3 +109,6 @@ export { default as OCRDocumentRoutes } from './OCRDocumentRoutes';
 
 // === Phase 19: CEO Executive Dashboard (لوحة تحكم الإدارة التنفيذية) ===
 export { default as CEODashboardRoutes } from './CEODashboardRoutes';
+
+// === Phase 20: Quality Management (إدارة الجودة — ISO/CBAHI) ===
+export { default as QualityManagementRoutes } from './QualityManagementRoutes';

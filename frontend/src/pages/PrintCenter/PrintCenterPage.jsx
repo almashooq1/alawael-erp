@@ -22,13 +22,38 @@ import {
   Business as AdminIcon,
   Build as OpsIcon,
   Home as HomeIcon,
+  School as EducationIcon,
+  ShoppingCart as ProcurementIcon,
+  Gavel as LegalIcon,
+  VerifiedUser as QualityIcon,
+  MedicalServices as MedicalIcon,
+  DirectionsCar as FleetIcon,
+  BadgeOutlined as RecruitmentIcon,
+  Campaign as CommsIcon,
+  HomeWork as FacilityIcon,
+  TrendingUp as BusinessIcon,
+  Groups as StakeholderIcon,
 } from '@mui/icons-material';
 
+/* ─── Batch 1 Templates ─── */
 import { HR_TEMPLATES, HRTemplateRenderer } from './templates/HRPrintTemplates';
 import { FINANCE_TEMPLATES, FinanceTemplateRenderer } from './templates/FinancePrintTemplates';
 import { THERAPY_TEMPLATES, TherapyTemplateRenderer } from './templates/TherapyPrintTemplates';
 import { ADMIN_TEMPLATES, AdminTemplateRenderer } from './templates/AdminPrintTemplates';
 import { OPERATIONS_TEMPLATES, OperationsTemplateRenderer } from './templates/OperationsPrintTemplates';
+
+/* ─── Batch 2 Templates ─── */
+import { EDUCATION_TEMPLATES, EducationTemplateRenderer } from './templates/EducationPrintTemplates';
+import { PROCUREMENT_TEMPLATES, ProcurementTemplateRenderer } from './templates/ProcurementSCMPrintTemplates';
+import { LEGAL_TEMPLATES, LegalTemplateRenderer } from './templates/LegalContractsPrintTemplates';
+import { QUALITY_HSE_TEMPLATES, QualityHSETemplateRenderer } from './templates/QualityHSEPrintTemplates';
+import { MEDICAL_TEMPLATES, MedicalTemplateRenderer } from './templates/MedicalClinicalPrintTemplates';
+import { FLEET_TEMPLATES, FleetTemplateRenderer } from './templates/FleetTransportPrintTemplates';
+import { HR_EXT_TEMPLATES, HRExtTemplateRenderer } from './templates/RecruitmentHRExtPrintTemplates';
+import { COMMUNICATIONS_TEMPLATES, CommunicationsTemplateRenderer } from './templates/CommunicationsEventsPrintTemplates';
+import { FACILITY_TEMPLATES, FacilityTemplateRenderer } from './templates/FacilityServicesPrintTemplates';
+import { BUSINESS_TEMPLATES, BusinessTemplateRenderer } from './templates/BusinessCRMPrintTemplates';
+import { STAKEHOLDER_TEMPLATES, StakeholderTemplateRenderer } from './templates/StakeholderGovPrintTemplates';
 
 /* ─── Module Groups ─── */
 const MODULE_GROUPS = [
@@ -61,6 +86,73 @@ const MODULE_GROUPS = [
     icon: <OpsIcon />, color: '#e65100',
     templates: OPERATIONS_TEMPLATES,
     renderer: OperationsTemplateRenderer,
+  },
+  /* ─── Batch 2 Modules ─── */
+  {
+    id: 'education', name: 'التعليم والطلاب', nameEn: 'Education & Students',
+    icon: <EducationIcon />, color: '#0277bd',
+    templates: EDUCATION_TEMPLATES,
+    renderer: EducationTemplateRenderer,
+  },
+  {
+    id: 'procurement', name: 'المشتريات وسلسلة الإمداد', nameEn: 'Procurement & SCM',
+    icon: <ProcurementIcon />, color: '#4527a0',
+    templates: PROCUREMENT_TEMPLATES,
+    renderer: ProcurementTemplateRenderer,
+  },
+  {
+    id: 'legal', name: 'الشؤون القانونية والعقود', nameEn: 'Legal & Contracts',
+    icon: <LegalIcon />, color: '#37474f',
+    templates: LEGAL_TEMPLATES,
+    renderer: LegalTemplateRenderer,
+  },
+  {
+    id: 'quality-hse', name: 'الجودة والسلامة', nameEn: 'Quality & HSE',
+    icon: <QualityIcon />, color: '#00695c',
+    templates: QUALITY_HSE_TEMPLATES,
+    renderer: QualityHSETemplateRenderer,
+  },
+  {
+    id: 'medical', name: 'الطبي والسريري', nameEn: 'Medical & Clinical',
+    icon: <MedicalIcon />, color: '#c62828',
+    templates: MEDICAL_TEMPLATES,
+    renderer: MedicalTemplateRenderer,
+  },
+  {
+    id: 'fleet', name: 'الأسطول والنقل', nameEn: 'Fleet & Transport',
+    icon: <FleetIcon />, color: '#ef6c00',
+    templates: FLEET_TEMPLATES,
+    renderer: FleetTemplateRenderer,
+  },
+  {
+    id: 'hr-ext', name: 'التوظيف والرواتب', nameEn: 'Recruitment & Payroll',
+    icon: <RecruitmentIcon />, color: '#ad1457',
+    templates: HR_EXT_TEMPLATES,
+    renderer: HRExtTemplateRenderer,
+  },
+  {
+    id: 'communications', name: 'الاتصالات والفعاليات', nameEn: 'Communications & Events',
+    icon: <CommsIcon />, color: '#1565c0',
+    templates: COMMUNICATIONS_TEMPLATES,
+    renderer: CommunicationsTemplateRenderer,
+  },
+  {
+    id: 'facility', name: 'المرافق والخدمات', nameEn: 'Facility & Services',
+    icon: <FacilityIcon />, color: '#795548',
+    templates: FACILITY_TEMPLATES,
+    renderer: FacilityTemplateRenderer,
+  },
+  {
+    id: 'business', name: 'الأعمال والمشاريع', nameEn: 'Business & CRM',
+    icon: <BusinessIcon />, color: '#2e7d32',
+    templates: BUSINESS_TEMPLATES,
+    renderer: BusinessTemplateRenderer,
+  },
+  {
+    id: 'stakeholder', name: 'أصحاب المصلحة والجهات', nameEn: 'Stakeholder & Government',
+    icon: <StakeholderIcon />, color: '#0d47a1',
+    templates: STAKEHOLDER_TEMPLATES,
+    renderer: StakeholderTemplateRenderer,
   },
 ];
 
@@ -159,7 +251,7 @@ const PrintCenterPage = () => {
       {/* Module Stats Cards */}
       <Grid container spacing={2} mb={3}>
         {MODULE_GROUPS.map(g => (
-          <Grid item xs={12} sm={6} md key={g.id}>
+          <Grid item xs={6} sm={4} md={3} lg={2} key={g.id}>
             <Card
               sx={{
                 cursor: 'pointer', borderTop: `4px solid ${g.color}`, borderRadius: 2,

@@ -273,7 +273,9 @@ router.get('/at-risk', async (req, res) => {
     };
 
     const data = await Beneficiary.find(riskFilter)
-      .select('firstName lastName firstName_ar lastName_ar name nationalId category status progress attendanceRate academicScore behaviorRating contactInfo phone sessions createdAt')
+      .select(
+        'firstName lastName firstName_ar lastName_ar name nationalId category status progress attendanceRate academicScore behaviorRating contactInfo phone sessions createdAt'
+      )
       .sort({ attendanceRate: 1, progress: 1 })
       .limit(parseInt(limit, 10))
       .lean({ virtuals: true });
@@ -284,7 +286,11 @@ router.get('/at-risk', async (req, res) => {
       if ((b.progress || 0) < 30) reasons.push('تقدم ضعيف');
       if ((b.academicScore || 100) < 50) reasons.push('درجات منخفضة');
       if ((b.behaviorRating || 5) < 3) reasons.push('سلوك يحتاج تحسين');
-      return { ...b, riskReasons: reasons, riskLevel: reasons.length >= 3 ? 'high' : reasons.length >= 2 ? 'medium' : 'low' };
+      return {
+        ...b,
+        riskReasons: reasons,
+        riskLevel: reasons.length >= 3 ? 'high' : reasons.length >= 2 ? 'medium' : 'low',
+      };
     });
 
     res.json({ success: true, data: riskData, total: riskData.length });

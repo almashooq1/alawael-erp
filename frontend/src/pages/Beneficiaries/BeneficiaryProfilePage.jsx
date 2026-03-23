@@ -20,7 +20,7 @@ import {
 } from '@mui/material';
 import {
   ArrowBack, Edit, Save, Cancel, Person, Phone, Email,
-  School, LocalHospital, Accessibility, Family,
+  School, LocalHospital, Accessibility, FamilyRestroom as Family,
   Assignment, TrendingUp, Description, History,
 } from '@mui/icons-material';
 import {

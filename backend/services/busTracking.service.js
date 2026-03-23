@@ -91,7 +91,7 @@ class BusTrackingService {
         b =>
           b.plateNumber.toLowerCase().includes(s) ||
           (b.driverName && b.driverName.toLowerCase().includes(s)) ||
-          b.model.toLowerCase().includes(s),
+          b.model.toLowerCase().includes(s)
       );
     }
 
@@ -186,7 +186,7 @@ class BusTrackingService {
     ['name', 'description', 'type', 'stops', 'distance', 'estimatedDuration', 'status'].forEach(
       k => {
         if (data[k] !== undefined) route[k] = data[k];
-      },
+      }
     );
     if (data.stops && Array.isArray(data.stops)) {
       route.stops = data.stops.map((s, i) => ({
@@ -248,7 +248,7 @@ class BusTrackingService {
 
   getStudentsByBus(busId) {
     return Array.from(this.students.values()).filter(
-      s => s.busId === parseInt(busId) && s.status === 'active',
+      s => s.busId === parseInt(busId) && s.status === 'active'
     );
   }
 
@@ -270,7 +270,7 @@ class BusTrackingService {
 
     // Check if bus already has active trip
     const active = Array.from(this.trips.values()).find(
-      t => t.busId === parseInt(data.busId) && t.status === 'in-progress',
+      t => t.busId === parseInt(data.busId) && t.status === 'in-progress'
     );
     if (active) throw new Error('الحافلة لديها رحلة نشطة بالفعل');
 
@@ -385,7 +385,7 @@ class BusTrackingService {
 
     // Update active trip location log
     const activeTrip = Array.from(this.trips.values()).find(
-      t => t.busId === parseInt(busId) && t.status === 'in-progress',
+      t => t.busId === parseInt(busId) && t.status === 'in-progress'
     );
     if (activeTrip) {
       activeTrip.locationLog.push(location);
@@ -474,8 +474,7 @@ class BusTrackingService {
   getBoardingHistory(filters = {}) {
     let result = [...this.boardingEvents];
     if (filters.tripId) result = result.filter(e => e.tripId === parseInt(filters.tripId));
-    if (filters.studentId)
-      result = result.filter(e => e.studentId === parseInt(filters.studentId));
+    if (filters.studentId) result = result.filter(e => e.studentId === parseInt(filters.studentId));
     if (filters.busId) result = result.filter(e => e.busId === parseInt(filters.busId));
     if (filters.type) result = result.filter(e => e.type === filters.type);
     return result;
@@ -503,7 +502,7 @@ class BusTrackingService {
       const bus = this.buses.get(s.busId);
       const location = this.locations.get(s.busId);
       const activeTrip = Array.from(this.trips.values()).find(
-        t => t.busId === s.busId && t.status === 'in-progress',
+        t => t.busId === s.busId && t.status === 'in-progress'
       );
 
       if (bus && activeTrip && !activeBuses.find(b => b.id === bus.id)) {
@@ -567,7 +566,7 @@ class BusTrackingService {
     const bus = this.getBusById(busId);
     const location = this.locations.get(parseInt(busId));
     const activeTrip = Array.from(this.trips.values()).find(
-      t => t.busId === parseInt(busId) && t.status === 'in-progress',
+      t => t.busId === parseInt(busId) && t.status === 'in-progress'
     );
     const route = bus.routeId ? this.routes.get(bus.routeId) : null;
 
@@ -776,7 +775,7 @@ class BusTrackingService {
     const allTrips = Array.from(this.trips.values());
     const activeTrips = allTrips.filter(t => t.status === 'in-progress');
     const todayTrips = allTrips.filter(
-      t => new Date(t.startedAt).toDateString() === new Date().toDateString(),
+      t => new Date(t.startedAt).toDateString() === new Date().toDateString()
     );
     const allStudents = Array.from(this.students.values()).filter(s => s.status === 'active');
 
@@ -792,7 +791,7 @@ class BusTrackingService {
         totalStudents: allStudents.length,
         studentsOnBoard: activeTrips.reduce((sum, t) => sum + t.studentsOnBoard, 0),
         totalBoardingToday: this.boardingEvents.filter(
-          e => new Date(e.timestamp).toDateString() === new Date().toDateString(),
+          e => new Date(e.timestamp).toDateString() === new Date().toDateString()
         ).length,
         activeAlerts: this.safetyAlerts.filter(a => !a.acknowledged).length,
         criticalAlerts: this.safetyAlerts.filter(a => a.severity === 'critical' && !a.acknowledged)
@@ -828,7 +827,7 @@ class BusTrackingService {
   getETAForStudent(studentId) {
     const student = this.getStudentById(studentId);
     const activeTrip = Array.from(this.trips.values()).find(
-      t => t.busId === student.busId && t.status === 'in-progress',
+      t => t.busId === student.busId && t.status === 'in-progress'
     );
 
     if (!activeTrip) {

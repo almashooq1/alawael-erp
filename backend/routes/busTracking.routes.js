@@ -50,21 +50,16 @@ router.get('/buses', authenticate, async (req, res) => {
 });
 
 // GET /buses/:id — Get bus details
-router.get(
-  '/buses/:id',
-  authenticate,
-  [param('id').isNumeric()],
-  async (req, res) => {
-    if (handleValidation(req, res)) return;
-    try {
-      const bus = busTracking.getBusById(req.params.id);
-      const students = busTracking.getStudentsByBus(req.params.id);
-      res.json({ success: true, data: { ...bus, students } });
-    } catch (err) {
-      res.status(404).json({ success: false, error: err.message });
-    }
-  },
-);
+router.get('/buses/:id', authenticate, [param('id').isNumeric()], async (req, res) => {
+  if (handleValidation(req, res)) return;
+  try {
+    const bus = busTracking.getBusById(req.params.id);
+    const students = busTracking.getStudentsByBus(req.params.id);
+    res.json({ success: true, data: { ...bus, students } });
+  } catch (err) {
+    res.status(404).json({ success: false, error: err.message });
+  }
+});
 
 // POST /buses — Create bus
 router.post(
@@ -80,7 +75,7 @@ router.post(
     } catch (err) {
       res.status(400).json({ success: false, error: err.message });
     }
-  },
+  }
 );
 
 // PUT /buses/:id — Update bus
@@ -97,7 +92,7 @@ router.put(
     } catch (err) {
       res.status(400).json({ success: false, error: err.message });
     }
-  },
+  }
 );
 
 // DELETE /buses/:id — Delete bus
@@ -114,7 +109,7 @@ router.delete(
     } catch (err) {
       res.status(400).json({ success: false, error: err.message });
     }
-  },
+  }
 );
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -132,20 +127,15 @@ router.get('/routes', authenticate, async (req, res) => {
 });
 
 // GET /routes/:id — Get route
-router.get(
-  '/routes/:id',
-  authenticate,
-  [param('id').isNumeric()],
-  async (req, res) => {
-    if (handleValidation(req, res)) return;
-    try {
-      const route = busTracking.getRouteById(req.params.id);
-      res.json({ success: true, data: route });
-    } catch (err) {
-      res.status(404).json({ success: false, error: err.message });
-    }
-  },
-);
+router.get('/routes/:id', authenticate, [param('id').isNumeric()], async (req, res) => {
+  if (handleValidation(req, res)) return;
+  try {
+    const route = busTracking.getRouteById(req.params.id);
+    res.json({ success: true, data: route });
+  } catch (err) {
+    res.status(404).json({ success: false, error: err.message });
+  }
+});
 
 // POST /routes — Create route
 router.post(
@@ -161,7 +151,7 @@ router.post(
     } catch (err) {
       res.status(400).json({ success: false, error: err.message });
     }
-  },
+  }
 );
 
 // PUT /routes/:id — Update route
@@ -178,7 +168,7 @@ router.put(
     } catch (err) {
       res.status(400).json({ success: false, error: err.message });
     }
-  },
+  }
 );
 
 // DELETE /routes/:id — Delete route
@@ -195,7 +185,7 @@ router.delete(
     } catch (err) {
       res.status(400).json({ success: false, error: err.message });
     }
-  },
+  }
 );
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -218,40 +208,30 @@ router.post(
     } catch (err) {
       res.status(400).json({ success: false, error: err.message });
     }
-  },
+  }
 );
 
 // GET /students/bus/:busId — Students on a bus
-router.get(
-  '/students/bus/:busId',
-  authenticate,
-  [param('busId').isNumeric()],
-  async (req, res) => {
-    if (handleValidation(req, res)) return;
-    try {
-      const students = busTracking.getStudentsByBus(req.params.busId);
-      res.json({ success: true, data: students, total: students.length });
-    } catch (err) {
-      res.status(400).json({ success: false, error: err.message });
-    }
-  },
-);
+router.get('/students/bus/:busId', authenticate, [param('busId').isNumeric()], async (req, res) => {
+  if (handleValidation(req, res)) return;
+  try {
+    const students = busTracking.getStudentsByBus(req.params.busId);
+    res.json({ success: true, data: students, total: students.length });
+  } catch (err) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
 
 // GET /students/:id — Get student
-router.get(
-  '/students/:id',
-  authenticate,
-  [param('id').isNumeric()],
-  async (req, res) => {
-    if (handleValidation(req, res)) return;
-    try {
-      const student = busTracking.getStudentById(req.params.id);
-      res.json({ success: true, data: student });
-    } catch (err) {
-      res.status(404).json({ success: false, error: err.message });
-    }
-  },
-);
+router.get('/students/:id', authenticate, [param('id').isNumeric()], async (req, res) => {
+  if (handleValidation(req, res)) return;
+  try {
+    const student = busTracking.getStudentById(req.params.id);
+    res.json({ success: true, data: student });
+  } catch (err) {
+    res.status(404).json({ success: false, error: err.message });
+  }
+});
 
 // ══════════════════════════════════════════════════════════════════════════════
 // TRIP LIFECYCLE — دورة حياة الرحلة
@@ -271,7 +251,7 @@ router.post(
     } catch (err) {
       res.status(400).json({ success: false, error: err.message });
     }
-  },
+  }
 );
 
 // POST /trips/:id/end — End a trip
@@ -288,7 +268,7 @@ router.post(
     } catch (err) {
       res.status(400).json({ success: false, error: err.message });
     }
-  },
+  }
 );
 
 // POST /trips/:id/arrive — Arrive at next stop
@@ -305,7 +285,7 @@ router.post(
     } catch (err) {
       res.status(400).json({ success: false, error: err.message });
     }
-  },
+  }
 );
 
 // GET /trips/active — Get active trips
@@ -329,20 +309,15 @@ router.get('/trips/history', authenticate, async (req, res) => {
 });
 
 // GET /trips/:id — Get trip details
-router.get(
-  '/trips/:id',
-  authenticate,
-  [param('id').isNumeric()],
-  async (req, res) => {
-    if (handleValidation(req, res)) return;
-    try {
-      const trip = busTracking.getTripById(req.params.id);
-      res.json({ success: true, data: trip });
-    } catch (err) {
-      res.status(404).json({ success: false, error: err.message });
-    }
-  },
-);
+router.get('/trips/:id', authenticate, [param('id').isNumeric()], async (req, res) => {
+  if (handleValidation(req, res)) return;
+  try {
+    const trip = busTracking.getTripById(req.params.id);
+    res.json({ success: true, data: trip });
+  } catch (err) {
+    res.status(404).json({ success: false, error: err.message });
+  }
+});
 
 // ══════════════════════════════════════════════════════════════════════════════
 // REAL-TIME TRACKING — التتبع بالوقت الفعلي
@@ -362,24 +337,19 @@ router.post(
     } catch (err) {
       res.status(400).json({ success: false, error: err.message });
     }
-  },
+  }
 );
 
 // GET /tracking/:busId — Get bus current location
-router.get(
-  '/tracking/:busId',
-  authenticate,
-  [param('busId').isNumeric()],
-  async (req, res) => {
-    if (handleValidation(req, res)) return;
-    try {
-      const location = busTracking.getBusLocation(req.params.busId);
-      res.json({ success: true, data: location });
-    } catch (err) {
-      res.status(404).json({ success: false, error: err.message });
-    }
-  },
-);
+router.get('/tracking/:busId', authenticate, [param('busId').isNumeric()], async (req, res) => {
+  if (handleValidation(req, res)) return;
+  try {
+    const location = busTracking.getBusLocation(req.params.busId);
+    res.json({ success: true, data: location });
+  } catch (err) {
+    res.status(404).json({ success: false, error: err.message });
+  }
+});
 
 // GET /tracking — All bus locations
 router.get('/tracking', authenticate, async (req, res) => {
@@ -409,7 +379,7 @@ router.post(
     } catch (err) {
       res.status(400).json({ success: false, error: err.message });
     }
-  },
+  }
 );
 
 // GET /boarding/history — Boarding history
@@ -427,20 +397,15 @@ router.get('/boarding/history', authenticate, async (req, res) => {
 // ══════════════════════════════════════════════════════════════════════════════
 
 // GET /parent/dashboard?phone=xxx — Parent dashboard
-router.get(
-  '/parent/dashboard',
-  authenticate,
-  [query('phone').notEmpty()],
-  async (req, res) => {
-    if (handleValidation(req, res)) return;
-    try {
-      const dashboard = busTracking.getParentDashboard(req.query.phone);
-      res.json({ success: true, data: dashboard });
-    } catch (err) {
-      res.status(400).json({ success: false, error: err.message });
-    }
-  },
-);
+router.get('/parent/dashboard', authenticate, [query('phone').notEmpty()], async (req, res) => {
+  if (handleValidation(req, res)) return;
+  try {
+    const dashboard = busTracking.getParentDashboard(req.query.phone);
+    res.json({ success: true, data: dashboard });
+  } catch (err) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
 
 // GET /parent/track/:busId?phone=xxx — Track specific bus
 router.get(
@@ -455,7 +420,7 @@ router.get(
     } catch (err) {
       res.status(403).json({ success: false, error: err.message });
     }
-  },
+  }
 );
 
 // GET /parent/eta/:studentId — ETA for student stop
@@ -471,7 +436,7 @@ router.get(
     } catch (err) {
       res.status(400).json({ success: false, error: err.message });
     }
-  },
+  }
 );
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -479,23 +444,18 @@ router.get(
 // ══════════════════════════════════════════════════════════════════════════════
 
 // GET /notifications?phone=xxx — Parent notifications
-router.get(
-  '/notifications',
-  authenticate,
-  [query('phone').notEmpty()],
-  async (req, res) => {
-    if (handleValidation(req, res)) return;
-    try {
-      const notifs = busTracking.getParentNotifications(req.query.phone, {
-        limit: parseInt(req.query.limit) || 50,
-        unreadOnly: req.query.unreadOnly === 'true',
-      });
-      res.json({ success: true, data: notifs, total: notifs.length });
-    } catch (err) {
-      res.status(500).json({ success: false, error: err.message });
-    }
-  },
-);
+router.get('/notifications', authenticate, [query('phone').notEmpty()], async (req, res) => {
+  if (handleValidation(req, res)) return;
+  try {
+    const notifs = busTracking.getParentNotifications(req.query.phone, {
+      limit: parseInt(req.query.limit) || 50,
+      unreadOnly: req.query.unreadOnly === 'true',
+    });
+    res.json({ success: true, data: notifs, total: notifs.length });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
 
 // PATCH /notifications/:id/read — Mark notification read
 router.patch(
@@ -510,7 +470,7 @@ router.patch(
     } catch (err) {
       res.status(404).json({ success: false, error: err.message });
     }
-  },
+  }
 );
 
 // POST /notifications/read-all — Mark all read
@@ -526,7 +486,7 @@ router.post(
     } catch (err) {
       res.status(400).json({ success: false, error: err.message });
     }
-  },
+  }
 );
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -544,20 +504,15 @@ router.get('/safety/alerts', authenticate, async (req, res) => {
 });
 
 // POST /safety/sos/:busId — Raise SOS
-router.post(
-  '/safety/sos/:busId',
-  authenticate,
-  [param('busId').isNumeric()],
-  async (req, res) => {
-    if (handleValidation(req, res)) return;
-    try {
-      const alert = busTracking.raiseSOS(req.params.busId, req.body);
-      res.status(201).json({ success: true, data: alert, message: 'تم إرسال إشارة الطوارئ' });
-    } catch (err) {
-      res.status(400).json({ success: false, error: err.message });
-    }
-  },
-);
+router.post('/safety/sos/:busId', authenticate, [param('busId').isNumeric()], async (req, res) => {
+  if (handleValidation(req, res)) return;
+  try {
+    const alert = busTracking.raiseSOS(req.params.busId, req.body);
+    res.status(201).json({ success: true, data: alert, message: 'تم إرسال إشارة الطوارئ' });
+  } catch (err) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
 
 // PATCH /safety/alerts/:id/acknowledge — Acknowledge alert
 router.patch(
@@ -573,7 +528,7 @@ router.patch(
     } catch (err) {
       res.status(404).json({ success: false, error: err.message });
     }
-  },
+  }
 );
 
 // ══════════════════════════════════════════════════════════════════════════════

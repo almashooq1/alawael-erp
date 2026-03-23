@@ -87,7 +87,7 @@ describe('Bus Tracking — Bus CRUD', () => {
 
   test('GET /buses?search=تويوتا → searches by model', async () => {
     const res = await request(app).get(
-      `/api/bus-tracking/buses?search=${encodeURIComponent('تويوتا')}`,
+      `/api/bus-tracking/buses?search=${encodeURIComponent('تويوتا')}`
     );
     expect(res.status).toBe(200);
     expect(res.body.data.length).toBeGreaterThanOrEqual(1);
@@ -238,15 +238,13 @@ describe('Bus Tracking — Students', () => {
 
   let newStudentId;
   test('POST /students → registers a new student', async () => {
-    const res = await request(app)
-      .post('/api/bus-tracking/students')
-      .send({
-        name: 'حسن محمود',
-        grade: 'الصف الثاني',
-        busId: seedBusId,
-        parentPhone: '0511111111',
-        stopName: 'حي النزهة - محطة 1',
-      });
+    const res = await request(app).post('/api/bus-tracking/students').send({
+      name: 'حسن محمود',
+      grade: 'الصف الثاني',
+      busId: seedBusId,
+      parentPhone: '0511111111',
+      stopName: 'حي النزهة - محطة 1',
+    });
     expect(res.status).toBe(201);
     expect(res.body.data.name).toBe('حسن محمود');
     expect(res.body.data.parentPhone).toBe('0511111111');
@@ -399,7 +397,7 @@ describe('Bus Tracking — GPS Tracking', () => {
     const alerts = await request(app).get('/api/bus-tracking/safety/alerts?type=overspeeding');
     expect(alerts.status).toBe(200);
     expect(alerts.body.data.some(a => a.busId === seedBusId2 && a.type === 'overspeeding')).toBe(
-      true,
+      true
     );
   });
 
@@ -489,9 +487,7 @@ describe('Bus Tracking — Parent Portal', () => {
   const seedBusId = 1000;
 
   test('GET /parent/dashboard?phone=... → returns parent dashboard', async () => {
-    const res = await request(app).get(
-      `/api/bus-tracking/parent/dashboard?phone=${parentPhone}`,
-    );
+    const res = await request(app).get(`/api/bus-tracking/parent/dashboard?phone=${parentPhone}`);
     expect(res.status).toBe(200);
     expect(res.body.data).toHaveProperty('students');
     expect(res.body.data).toHaveProperty('recentNotifications');
@@ -508,7 +504,7 @@ describe('Bus Tracking — Parent Portal', () => {
 
   test('GET /parent/track/:busId?phone=... → tracks bus for authorized parent', async () => {
     const res = await request(app).get(
-      `/api/bus-tracking/parent/track/${seedBusId}?phone=${parentPhone}`,
+      `/api/bus-tracking/parent/track/${seedBusId}?phone=${parentPhone}`
     );
     expect(res.status).toBe(200);
     expect(res.body.data).toHaveProperty('bus');
@@ -519,7 +515,7 @@ describe('Bus Tracking — Parent Portal', () => {
 
   test('GET /parent/track/:busId → 403 for unauthorized parent', async () => {
     const res = await request(app).get(
-      `/api/bus-tracking/parent/track/${seedBusId}?phone=0500000000`,
+      `/api/bus-tracking/parent/track/${seedBusId}?phone=0500000000`
     );
     expect(res.status).toBe(403);
   });
@@ -590,9 +586,7 @@ describe('Bus Tracking — Notifications', () => {
   const parentPhone = '0512345678';
 
   test('GET /notifications?phone=... → returns parent notifications', async () => {
-    const res = await request(app).get(
-      `/api/bus-tracking/notifications?phone=${parentPhone}`,
-    );
+    const res = await request(app).get(`/api/bus-tracking/notifications?phone=${parentPhone}`);
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body.data)).toBe(true);
     // Trip start notifications should exist from earlier tests
@@ -604,9 +598,7 @@ describe('Bus Tracking — Notifications', () => {
 
   test('PATCH /notifications/:id/read → marks notification read', async () => {
     // Grab first notification
-    const list = await request(app).get(
-      `/api/bus-tracking/notifications?phone=${parentPhone}`,
-    );
+    const list = await request(app).get(`/api/bus-tracking/notifications?phone=${parentPhone}`);
     const notifId = list.body.data[0].id;
 
     const res = await request(app).patch(`/api/bus-tracking/notifications/${notifId}/read`);
@@ -625,7 +617,7 @@ describe('Bus Tracking — Notifications', () => {
 
   test('GET /notifications?unreadOnly=true → returns 0 after mark-all-read', async () => {
     const res = await request(app).get(
-      `/api/bus-tracking/notifications?phone=${parentPhone}&unreadOnly=true`,
+      `/api/bus-tracking/notifications?phone=${parentPhone}&unreadOnly=true`
     );
     expect(res.status).toBe(200);
     expect(res.body.data.length).toBe(0);
@@ -723,9 +715,7 @@ describe('Bus Tracking — Full Trip Flow', () => {
     expect(board.status).toBe(201);
 
     // 5) Arrive at stop
-    const arrive = await request(app)
-      .post(`/api/bus-tracking/trips/${tripId}/arrive`)
-      .send({});
+    const arrive = await request(app).post(`/api/bus-tracking/trips/${tripId}/arrive`).send({});
     expect(arrive.status).toBe(200);
 
     // 6) Student alights
@@ -735,17 +725,13 @@ describe('Bus Tracking — Full Trip Flow', () => {
     expect(alight.status).toBe(201);
 
     // 7) End trip
-    const end = await request(app)
-      .post(`/api/bus-tracking/trips/${tripId}/end`)
-      .send({});
+    const end = await request(app).post(`/api/bus-tracking/trips/${tripId}/end`).send({});
     expect(end.status).toBe(200);
     expect(end.body.data.status).toBe('completed');
 
     // 8) Verify parent received notifications
     const parentPhone = '0556789012'; // عمر بدر's parent
-    const notifs = await request(app).get(
-      `/api/bus-tracking/notifications?phone=${parentPhone}`,
-    );
+    const notifs = await request(app).get(`/api/bus-tracking/notifications?phone=${parentPhone}`);
     expect(notifs.body.data.length).toBeGreaterThanOrEqual(4);
     // Should have: trip_started, student_boarded, bus_arriving/student_alighted, trip_completed
     const types = notifs.body.data.map(n => n.type);

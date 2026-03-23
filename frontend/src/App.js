@@ -100,6 +100,7 @@ import {
   ARRehabRoutes,
   TelehealthRoutes,
   BusTrackingRoutes,
+  ReportBuilderRoutes,
 } from './routes';
 
 // Pages — Keep eagerly loaded (critical path / small)
@@ -320,6 +321,7 @@ function AppContent() {
                               {ARRehabRoutes()}
                               {TelehealthRoutes()}
                               {BusTrackingRoutes()}
+                              {ReportBuilderRoutes()}
                               {/* === Shared / Cross-cutting Routes === */}
                               {/* AI & Analytics */}
                               <Route

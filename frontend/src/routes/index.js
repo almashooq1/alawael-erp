@@ -91,3 +91,6 @@ export { default as TelehealthRoutes } from './TelehealthRoutes';
 
 // === Phase: Bus Tracking (تتبع الحافلات) ===
 export { default as BusTrackingRoutes } from './BusTrackingRoutes';
+
+// === Phase: Report Builder (باني التقارير المخصصة) ===
+export { default as ReportBuilderRoutes } from './ReportBuilderRoutes';

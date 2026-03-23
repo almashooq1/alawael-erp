@@ -1008,6 +1008,10 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   // ── Phase 13: Bus Tracking — تتبع الحافلات بالوقت الفعلي ───
   safeMount(app, ['/api/bus-tracking', '/api/v1/bus-tracking'], '../routes/busTracking.routes');
   logger.info('Phase 13 mounted (1 module: bus-tracking)');
+
+  // ── Phase 14: Report Builder — باني التقارير المخصصة ───
+  safeMount(app, ['/api/report-builder', '/api/v1/report-builder'], '../routes/reportBuilder.routes');
+  logger.info('Phase 14 mounted (1 module: report-builder)');
 };
 
 module.exports = { mountAllRoutes, dualMount, safeMount };

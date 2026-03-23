@@ -257,7 +257,7 @@ if (false && process.env.NODE_ENV !== 'test') {
     if (!data.users || data.users.length === 0) {
       const bcrypt = require('bcryptjs');
       const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash('Admin@123456', salt);
+      const hashedPassword = await bcrypt.hash(process.env.ADMIN_INITIAL_PASS || 'Change_Me_On_First_Login!1', salt);
 
       await UserModel.create({
         email: 'admin@alawael.com',

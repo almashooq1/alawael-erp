@@ -395,7 +395,7 @@ echo "\\n✅ Integration tests completed!"
 const connectionStrings = {
   development_local: 'mongodb://localhost:27017/erp_system',
   development_docker: 'mongodb://mongodb:27017/erp_system',
-  production_atlas: 'mongodb+srv://username:password@cluster.mongodb.net/erp_system?retryWrites=true&w=majority',
+  production_atlas: 'mongodb+srv://<ATLAS_USER>:<ATLAS_PASS>@<cluster>.mongodb.net/erp_system?retryWrites=true&w=majority',
   test: 'mongodb://localhost:27017/erp_test',
 };
 

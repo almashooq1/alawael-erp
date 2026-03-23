@@ -13,7 +13,7 @@ const Appointment = require('../models/Appointment');
 const TherapistAvailability = require('../models/TherapistAvailability');
 const TherapyRoom = require('../models/TherapyRoom');
 const logger = require('../utils/logger');
-const { AppError } = require('../middleware/errorHandler.enhanced');
+const { AppError } = require('../errors/AppError');
 
 class AppointmentService {
   // ─── APPOINTMENT CRUD ───────────────────────────────────────────────

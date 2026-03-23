@@ -8,7 +8,8 @@ const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const appointmentService = require('../services/appointment.service');
-const { asyncHandler, AppError } = require('../middleware/errorHandler.enhanced');
+const { asyncHandler } = require('../errors/errorHandler');
+const { AppError } = require('../errors/AppError');
 
 // All routes require authentication
 router.use(authenticate);

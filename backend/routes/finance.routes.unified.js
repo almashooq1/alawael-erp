@@ -11,7 +11,8 @@ const { authenticateToken } = require('../middleware/auth');
 const { validate } = require('../middleware/validate');
 const finV = require('../middleware/validators/finance.validators');
 const logger = require('../utils/logger');
-const { asyncHandler, AppError } = require('../middleware/errorHandler.enhanced');
+const { asyncHandler } = require('../errors/errorHandler');
+const { AppError } = require('../errors/AppError');
 const { escapeRegex } = require('../utils/sanitize');
 const validateObjectId = require('../middleware/validateObjectId');
 

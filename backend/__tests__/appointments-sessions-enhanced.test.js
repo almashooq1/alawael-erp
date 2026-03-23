@@ -45,7 +45,7 @@ beforeAll(async () => {
 
   const appointmentRoutes = require('../routes/appointments.routes');
   const therapySessionRoutes = require('../routes/therapy-sessions.routes');
-  const { errorHandler: enhancedErrorHandler } = require('../middleware/errorHandler.enhanced');
+  const { errorHandler: enhancedErrorHandler } = require('../errors/errorHandler');
 
   app = express();
   app.use(express.json());

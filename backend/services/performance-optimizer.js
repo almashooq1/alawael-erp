@@ -50,8 +50,13 @@ class PerformanceOptimizer {
 
       this.getCache(key).then(cached => {
         if (cached) {
-          res.setHeader('X-Cache', 'HIT');
-          return res.json(JSON.parse(cached));
+          try {
+            const parsed = JSON.parse(cached);
+            res.setHeader('X-Cache', 'HIT');
+            return res.json(parsed);
+          } catch {
+            // Corrupt cache entry — treat as miss
+          }
         }
 
         res.setHeader('X-Cache', 'MISS');

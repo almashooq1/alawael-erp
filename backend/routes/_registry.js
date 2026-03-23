@@ -300,9 +300,9 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'integrations', integrationRoutes);
 
   // ── Dashboard (multiple sub-routers merged) ─────────────────────────────
-  app.use('/api/dashboard', dashboardRoutes);
-  app.use('/api/dashboard', require('../routes/dashboard.stats'));
-  app.use('/api/dashboard', dashboardExtrasRouter);
+  dualMount(app, 'dashboard', dashboardRoutes);
+  dualMount(app, 'dashboard', require('../routes/dashboard.stats'));
+  dualMount(app, 'dashboard', dashboardExtrasRouter);
 
   // Search adapter: frontend sends GET /api/search?q=X&type=Y
   app.get('/api/search', (req, res, next) => {
@@ -322,40 +322,40 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
     searchRoutes
   );
 
-  app.use('/api/validate', validateRoutes);
-  app.use('/api/lms', elearningRoutes);
-  app.use('/api/org-branding', orgBrandingRoutes);
-  app.use('/api/documents', documentsRoutes);
-  app.use('/api/analytics', analyticsExtraRouter);
+  dualMount(app, 'validate', validateRoutes);
+  dualMount(app, 'lms', elearningRoutes);
+  dualMount(app, 'org-branding', orgBrandingRoutes);
+  dualMount(app, 'documents', documentsRoutes);
+  dualMount(app, 'analytics', analyticsExtraRouter);
 
-  // ── Real Mongoose CRUD Routes (single-prefix /api/) ─────────────────────
-  app.use('/api/admin', adminRouter);
-  app.use('/api/account', accountRouter);
-  app.use('/api/payments', paymentsRouter);
-  app.use('/api/monitoring', monitoringRouter);
-  app.use('/api/ai-predictions', aiPredictionsRouter);
-  app.use('/api/hr-system', hrSystemRouter);
-  app.use('/api/integrated-care', integratedCareRouter);
-  app.use('/api/security', securityRouter);
-  app.use('/api/organization', organizationRouter);
-  app.use('/api/communications', communicationsRouter);
-  app.use('/api/ai-communications', aiCommRouter);
-  app.use('/api/export-import', exportImportRouter);
-  app.use('/api/exports', exportsRouter);
-  app.use('/api/student-reports', studentReportsRouter);
-  app.use('/api/rehabilitation-programs', rehabProgramsRouter);
-  app.use('/api/documents-smart', documentsSmartRouter);
+  // ── Real Mongoose CRUD Routes (dual-mounted /api + /api/v1) ─────────────
+  dualMount(app, 'admin', adminRouter);
+  dualMount(app, 'account', accountRouter);
+  dualMount(app, 'payments', paymentsRouter);
+  dualMount(app, 'monitoring', monitoringRouter);
+  dualMount(app, 'ai-predictions', aiPredictionsRouter);
+  dualMount(app, 'hr-system', hrSystemRouter);
+  dualMount(app, 'integrated-care', integratedCareRouter);
+  dualMount(app, 'security', securityRouter);
+  dualMount(app, 'organization', organizationRouter);
+  dualMount(app, 'communications', communicationsRouter);
+  dualMount(app, 'ai-communications', aiCommRouter);
+  dualMount(app, 'export-import', exportImportRouter);
+  dualMount(app, 'exports', exportsRouter);
+  dualMount(app, 'student-reports', studentReportsRouter);
+  dualMount(app, 'rehabilitation-programs', rehabProgramsRouter);
+  dualMount(app, 'documents-smart', documentsSmartRouter);
 
   // ── Document Advanced Services (خدمات المستندات المتقدمة) ───────────────
   dualMount(app, 'documents-advanced', documentAdvancedRoutes);
   logger.info('Document Advanced routes mounted (10 services, 60+ endpoints)');
 
-  app.use('/api/students', studentsRouter);
-  app.use('/api/compensation', compensationRouter);
-  app.use('/api/disability', disabilityRouter);
-  app.use('/api/pm', pmRouter);
-  app.use('/api/parents', parentsRouter);
-  app.use('/api/guardian', guardianPortalRouter);
+  dualMount(app, 'students', studentsRouter);
+  dualMount(app, 'compensation', compensationRouter);
+  dualMount(app, 'disability', disabilityRouter);
+  dualMount(app, 'pm', pmRouter);
+  dualMount(app, 'parents', parentsRouter);
+  dualMount(app, 'guardian', guardianPortalRouter);
 
   // ── Disability Card & Classification (بطاقة ذوي الإعاقة والتصنيف) ───────
   dualMount(app, 'disability-cards', disabilityCardRoutes);
@@ -535,11 +535,11 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
 
   logger.info('All frontend API routes mounted (existing + stubs + 23 + 16 = 39 CRUD routes)');
 
-  // ── Legacy single-mount routes ──────────────────────────────────────────
-  app.use('/api/assets', assetRoutes);
-  app.use('/api/maintenance', maintenanceRoutes);
-  app.use('/api/schedules', scheduleRoutes);
-  app.use('/api/medical-files', require('../routes/medicalFiles'));
+  // ── Previously single-mount routes (now dual-mounted) ───────────────────
+  dualMount(app, 'assets', assetRoutes);
+  dualMount(app, 'maintenance', maintenanceRoutes);
+  dualMount(app, 'schedules', scheduleRoutes);
+  dualMount(app, 'medical-files', require('../routes/medicalFiles'));
 
   // ── New API routes for frontend services ────────────────────────────────
   dualMount(app, 'support', require('../routes/supportTickets.routes'));
@@ -554,13 +554,12 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   logger.info('New frontend-backend integration routes mounted (8 new + 4 dual-mounted)');
 
   // ── Phase 2 Routes ──────────────────────────────────────────────────────
+  // disability-rehabilitation.js → /api/v1 only (different module from .routes.js)
   app.use('/api/v1/disability-rehabilitation', disabilityRehabilitationRoutes);
-  app.use('/api/v1/maintenance', maintenanceRoutes);
+  // maintenance, assets, schedules — already dual-mounted above
   dualMount(app, 'webhooks', webhooksRoutes);
-  app.use('/api/v1/assets', assetRoutes);
-  app.use('/api/v1/schedules', scheduleRoutes);
-  app.use('/api/v1/analytics', analyticsRoutes);
-  app.use('/api/v1/basic-reports', reportRoutes);
+  dualMount(app, 'basic-analytics', analyticsRoutes);
+  dualMount(app, 'basic-reports', reportRoutes);
   dualMount(app, 'therapist', require('../routes/therapist'));
   dualMount(app, 'therapist-extended', require('../routes/therapistExtended.routes'));
   dualMount(app, 'therapist-pro', require('../routes/therapistPro.routes'));
@@ -568,10 +567,10 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'therapist-elite', require('../routes/therapistElite.routes'));
 
   // Phase 4: Health Monitoring
-  safeMount(app, '/api/v1/health', '../routes/health.routes');
+  safeMount(app, ['/api/health', '/api/v1/health'], '../routes/health.routes');
 
   // Phase 21-28
-  safeMount(app, '/api/phases-21-28', '../routes/phases-21-28.routes');
+  safeMount(app, ['/api/phases-21-28', '/api/v1/phases-21-28'], '../routes/phases-21-28.routes');
 
   // Disability Rehabilitation (/api/ only; /api/v1/ already mounted above)
   safeMount(app, '/api/disability-rehabilitation', '../routes/disability-rehabilitation.routes');
@@ -583,15 +582,15 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   safeMount(app, '/api/disability-rehab', '../rehabilitation-services/rehabilitation-routes');
   safeMount(app, '/api/v1/disability-rehab', '../rehabilitation-services/rehabilitation-routes');
 
-  // Phase 17
+  // Phase 17 (namespaced to avoid collisions with analytics/integrations)
   if (process.env.SKIP_PHASE17 === 'true') {
     logger.warn('Phase 17 routes skipped (SKIP_PHASE17=true)');
   } else {
-    safeMount(app, '/api', '../routes/phase17-advanced.routes');
+    safeMount(app, ['/api/phase17', '/api/v1/phase17'], '../routes/phase17-advanced.routes');
   }
 
-  // Phases 18-20
-  safeMount(app, '/api', '../routes/phases-18-20.routes');
+  // Phases 18-20 (namespaced to avoid collisions with tenants/compliance)
+  safeMount(app, ['/api/phases-18-20', '/api/v1/phases-18-20'], '../routes/phases-18-20.routes');
 
   // ── Phase 21: New Feature Services ──────────────────────────────────────
   try {

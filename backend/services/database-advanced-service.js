@@ -72,7 +72,15 @@ class AdvancedDatabaseService extends EventEmitter {
       if (this.redis) {
         const cached = await this.redis.get(`cache:${key}`);
         if (cached) {
-          const data = JSON.parse(cached);
+          let data;
+          try {
+            data = JSON.parse(cached);
+          } catch {
+            // Corrupt cache entry — evict and treat as miss
+            await this.redis.del(`cache:${key}`).catch(() => {});
+            this.metrics.cacheMisses++;
+            return null;
+          }
           // تخزين في الذاكرة المحلية
           this.queryCache.set(key, {
             data,

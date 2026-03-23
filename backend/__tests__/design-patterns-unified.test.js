@@ -722,6 +722,13 @@ describe('Barrel Export & Legacy Smoke Tests', () => {
       expect(typeof mod.notFoundHandler).toBe('function');
     });
 
+    it('errors/errorHandler exports canonical core functions', () => {
+      const mod = require('../errors/errorHandler');
+      expect(typeof mod.errorHandler).toBe('function');
+      expect(typeof mod.notFoundHandler).toBe('function');
+      expect(typeof mod.asyncHandler).toBe('function');
+    });
+
     it('utils/response exports response helpers', () => {
       const mod = require('../utils/response');
       expect(typeof mod.successResponse).toBe('function');

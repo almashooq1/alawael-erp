@@ -4,7 +4,8 @@
  */
 const express = require('express');
 const router = express.Router();
-const { asyncHandler, AppError } = require('../middleware/errorHandler.enhanced');
+const { asyncHandler } = require('../errors/errorHandler');
+const { AppError } = require('../errors/AppError');
 const { body } = require('express-validator');
 const { validate } = require('../middleware/validate');
 const { escapeRegex } = require('../utils/sanitize');

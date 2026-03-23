@@ -9,7 +9,8 @@ const router = express.Router();
 const NotificationsService = require('../services/notifications.service');
 const { authenticateToken } = require('../middleware/auth');
 const logger = require('../utils/logger');
-const { asyncHandler, AppError } = require('../middleware/errorHandler.enhanced');
+const { asyncHandler } = require('../errors/errorHandler');
+const { AppError } = require('../errors/AppError');
 const validateObjectId = require('../middleware/validateObjectId');
 
 // RBAC Integration (Role-Based Access Control)

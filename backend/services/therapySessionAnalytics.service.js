@@ -1302,7 +1302,7 @@ class TherapySessionAnalyticsService {
     const Session = getSession();
     const session = await Session.findById(sessionId);
     if (!session) {
-      const { AppError } = require('../middleware/errorHandler.enhanced');
+      const { AppError } = require('../errors/AppError');
       throw new AppError('الجلسة غير موجودة', 404, 'NOT_FOUND');
     }
 

@@ -17,7 +17,6 @@ export default function Login({ onLogin }) {
     setError('');
     try {
       const res = await apiClient.post('/api/auth/login', form);
-      console.log('Login successful:', res.data);
       localStorage.setItem('token', res.data.token);
       if (onLogin) onLogin(res.data.user);
     } catch (err) {

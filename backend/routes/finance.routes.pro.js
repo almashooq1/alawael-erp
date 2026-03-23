@@ -19,7 +19,8 @@ const express = require('express');
 const router = express.Router();
 const { authenticateToken } = require('../middleware/auth');
 const logger = require('../utils/logger');
-const { asyncHandler, AppError } = require('../middleware/errorHandler.enhanced');
+const { asyncHandler } = require('../errors/errorHandler');
+const { AppError } = require('../errors/AppError');
 
 // ─── Models ──────────────────────────────────────────────────────────────────
 const safeRequire = (path, name) => {

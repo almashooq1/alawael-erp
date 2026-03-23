@@ -109,7 +109,9 @@ describe('Report Builder — Report CRUD', () => {
   });
 
   test('GET /reports?search=مالي → search by Arabic text', async () => {
-    const res = await request(app).get('/api/report-builder/reports?search=%D9%85%D8%A7%D9%84%D9%8A');
+    const res = await request(app).get(
+      '/api/report-builder/reports?search=%D9%85%D8%A7%D9%84%D9%8A'
+    );
     expect(res.status).toBe(200);
     expect(res.body.data.length).toBeGreaterThanOrEqual(1);
   });
@@ -117,7 +119,12 @@ describe('Report Builder — Report CRUD', () => {
   test('POST /reports → creates a new report', async () => {
     const res = await request(app)
       .post('/api/report-builder/reports')
-      .send({ name: 'Test Report', nameAr: 'تقرير اختبار', dataSourceId: '3000', category: 'test' });
+      .send({
+        name: 'Test Report',
+        nameAr: 'تقرير اختبار',
+        dataSourceId: '3000',
+        category: 'test',
+      });
     expect(res.status).toBe(201);
     expect(res.body.success).toBe(true);
     expect(res.body.data).toHaveProperty('id');
@@ -145,8 +152,7 @@ describe('Report Builder — Report CRUD', () => {
   });
 
   test('POST /reports/:id/duplicate → clones report', async () => {
-    const res = await request(app)
-      .post(`/api/report-builder/reports/${createdReportId}/duplicate`);
+    const res = await request(app).post(`/api/report-builder/reports/${createdReportId}/duplicate`);
     expect(res.status).toBe(201);
     expect(res.body.data.name).toContain('نسخة');
     expect(res.body.data.status).toBe('draft');
@@ -215,8 +221,9 @@ describe('Report Builder — Designer Columns', () => {
   });
 
   test('DELETE /reports/:id/columns/:fieldId → removes column', async () => {
-    const res = await request(app)
-      .delete(`/api/report-builder/reports/${createdReportId}/columns/b_age`);
+    const res = await request(app).delete(
+      `/api/report-builder/reports/${createdReportId}/columns/b_age`
+    );
     expect(res.status).toBe(200);
     expect(res.body.data.columns.some(c => c.fieldId === 'b_age')).toBe(false);
   });
@@ -261,8 +268,9 @@ describe('Report Builder — Filters', () => {
   });
 
   test('DELETE /reports/:id/filters/:filterId → removes filter', async () => {
-    const res = await request(app)
-      .delete(`/api/report-builder/reports/${createdReportId}/filters/${addedFilterId}`);
+    const res = await request(app).delete(
+      `/api/report-builder/reports/${createdReportId}/filters/${addedFilterId}`
+    );
     expect(res.status).toBe(200);
   });
 
@@ -282,7 +290,12 @@ describe('Report Builder — Sorting & Grouping', () => {
   test('PUT /reports/:id/sorting → sets sorting', async () => {
     const res = await request(app)
       .put(`/api/report-builder/reports/${createdReportId}/sorting`)
-      .send({ sorting: [{ fieldId: 'b_name', direction: 'asc' }, { fieldId: 'b_status', direction: 'desc' }] });
+      .send({
+        sorting: [
+          { fieldId: 'b_name', direction: 'asc' },
+          { fieldId: 'b_status', direction: 'desc' },
+        ],
+      });
     expect(res.status).toBe(200);
     expect(res.body.data.sorting.length).toBe(2);
     expect(res.body.data.sorting[0].direction).toBe('asc');
@@ -313,15 +326,21 @@ describe('Report Builder — Calculated Fields', () => {
 
     const res = await request(app)
       .post(`/api/report-builder/reports/${createdReportId}/calculated-fields`)
-      .send({ name: 'Tax Amount', nameAr: 'قيمة الضريبة', formula: '{f_amount} * 0.15', type: 'currency' });
+      .send({
+        name: 'Tax Amount',
+        nameAr: 'قيمة الضريبة',
+        formula: '{f_amount} * 0.15',
+        type: 'currency',
+      });
     expect(res.status).toBe(200);
     expect(res.body.data.calculatedFields.length).toBeGreaterThanOrEqual(1);
     calcFieldId = res.body.data.calculatedFields[0].id;
   });
 
   test('DELETE /reports/:id/calculated-fields/:fieldId → removes it', async () => {
-    const res = await request(app)
-      .delete(`/api/report-builder/reports/${createdReportId}/calculated-fields/${calcFieldId}`);
+    const res = await request(app).delete(
+      `/api/report-builder/reports/${createdReportId}/calculated-fields/${calcFieldId}`
+    );
     expect(res.status).toBe(200);
     expect(res.body.data.calculatedFields.length).toBe(0);
   });
@@ -404,17 +423,14 @@ describe('Report Builder — Execution', () => {
   });
 
   test('POST /reports/:id/execute → with grouping returns grouped data', async () => {
-    const res = await request(app)
-      .post('/api/report-builder/reports/1001/execute')
-      .send({});
+    const res = await request(app).post('/api/report-builder/reports/1001/execute').send({});
     expect(res.status).toBe(200);
     // Report 1001 (financial) has groupBy configured
     expect(res.body.data.grouped).toBeDefined();
   });
 
   test('POST /reports/:id/execute → 404 for non-existent', async () => {
-    const res = await request(app)
-      .post('/api/report-builder/reports/99999/execute');
+    const res = await request(app).post('/api/report-builder/reports/99999/execute');
     expect(res.status).toBe(404);
   });
 
@@ -693,7 +709,12 @@ describe('Report Builder — Full Workflow', () => {
     // 6. Schedule
     const schRes = await request(app)
       .post('/api/report-builder/schedules')
-      .send({ reportId: rptId, frequency: 'monthly', time: '07:00', recipients: ['boss@alawael.org'] });
+      .send({
+        reportId: rptId,
+        frequency: 'monthly',
+        time: '07:00',
+        recipients: ['boss@alawael.org'],
+      });
     expect(schRes.status).toBe(201);
 
     // 7. Share

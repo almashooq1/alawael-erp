@@ -94,3 +94,6 @@ export { default as BusTrackingRoutes } from './BusTrackingRoutes';
 
 // === Phase: Report Builder (باني التقارير المخصصة) ===
 export { default as ReportBuilderRoutes } from './ReportBuilderRoutes';
+
+// === Phase 15: Library & Resources (المكتبة والموارد) ===
+export { default as LibraryRoutes } from './LibraryRoutes';

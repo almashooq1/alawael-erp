@@ -1010,8 +1010,20 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   logger.info('Phase 13 mounted (1 module: bus-tracking)');
 
   // ── Phase 14: Report Builder — باني التقارير المخصصة ───
-  safeMount(app, ['/api/report-builder', '/api/v1/report-builder'], '../routes/reportBuilder.routes');
+  safeMount(
+    app,
+    ['/api/report-builder', '/api/v1/report-builder'],
+    '../routes/reportBuilder.routes'
+  );
   logger.info('Phase 14 mounted (1 module: report-builder)');
+
+  // ── Phase 15: Library & Resources — المكتبة والموارد ───
+  safeMount(
+    app,
+    ['/api/library', '/api/v1/library'],
+    '../routes/library.routes'
+  );
+  logger.info('Phase 15 mounted (1 module: library)');
 };
 
 module.exports = { mountAllRoutes, dualMount, safeMount };

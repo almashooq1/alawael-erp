@@ -28,7 +28,7 @@ class ReportBuilderService {
     this.dataSources = new Map();
     this.schedules = new Map();
     this.executions = new Map();
-    this.favorites = new Map();       // userId → Set<reportId>
+    this.favorites = new Map(); // userId → Set<reportId>
     this.shares = [];
     this.versions = [];
 
@@ -84,14 +84,14 @@ class ReportBuilderService {
       category: data.category || 'general',
 
       // ── Layout configuration ──
-      columns: data.columns || [],       // [{ fieldId, label, width, visible, order }]
-      filters: data.filters || [],       // [{ fieldId, operator, value, logic }]
-      sorting: data.sorting || [],       // [{ fieldId, direction }]
-      groupBy: data.groupBy || [],       // [{ fieldId, aggregation }]
-      calculatedFields: data.calculatedFields || [],  // [{ id, name, formula, type }]
+      columns: data.columns || [], // [{ fieldId, label, width, visible, order }]
+      filters: data.filters || [], // [{ fieldId, operator, value, logic }]
+      sorting: data.sorting || [], // [{ fieldId, direction }]
+      groupBy: data.groupBy || [], // [{ fieldId, aggregation }]
+      calculatedFields: data.calculatedFields || [], // [{ id, name, formula, type }]
 
       // ── Visualization ──
-      chartConfig: data.chartConfig || null,   // { type, xAxis, yAxis, series, colors }
+      chartConfig: data.chartConfig || null, // { type, xAxis, yAxis, series, colors }
       summaryRow: data.summaryRow || false,
       showRowNumbers: data.showRowNumbers !== false,
       pageSize: data.pageSize || 25,
@@ -154,9 +154,22 @@ class ReportBuilderService {
     if (!report) throw new Error('التقرير غير موجود');
 
     const updatable = [
-      'name', 'nameAr', 'description', 'category', 'isPublic', 'status',
-      'columns', 'filters', 'sorting', 'groupBy', 'calculatedFields',
-      'chartConfig', 'summaryRow', 'showRowNumbers', 'pageSize', 'tags',
+      'name',
+      'nameAr',
+      'description',
+      'category',
+      'isPublic',
+      'status',
+      'columns',
+      'filters',
+      'sorting',
+      'groupBy',
+      'calculatedFields',
+      'chartConfig',
+      'summaryRow',
+      'showRowNumbers',
+      'pageSize',
+      'tags',
     ];
 
     updatable.forEach(field => {
@@ -165,7 +178,11 @@ class ReportBuilderService {
 
     report.version += 1;
     report.updatedAt = new Date().toISOString();
-    this._createVersion(report.id, data.updatedBy || 'system', data.changeNote || 'تم تحديث التقرير');
+    this._createVersion(
+      report.id,
+      data.updatedBy || 'system',
+      data.changeNote || 'تم تحديث التقرير'
+    );
 
     return report;
   }
@@ -235,7 +252,9 @@ class ReportBuilderService {
     if (report.columns.length === beforeLen) throw new Error('العمود غير موجود');
 
     // Re-order
-    report.columns.forEach((c, i) => { c.order = i; });
+    report.columns.forEach((c, i) => {
+      c.order = i;
+    });
     report.updatedAt = new Date().toISOString();
     return report;
   }
@@ -269,10 +288,10 @@ class ReportBuilderService {
     const f = {
       id: `f_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
       fieldId: filter.fieldId,
-      operator: filter.operator,    // eq, ne, gt, lt, gte, lte, contains, startsWith, endsWith, in, between, isNull, isNotNull
+      operator: filter.operator, // eq, ne, gt, lt, gte, lte, contains, startsWith, endsWith, in, between, isNull, isNotNull
       value: filter.value ?? null,
       value2: filter.value2 ?? null, // for 'between'
-      logic: filter.logic || 'AND',  // AND / OR
+      logic: filter.logic || 'AND', // AND / OR
     };
 
     report.filters.push(f);
@@ -331,7 +350,7 @@ class ReportBuilderService {
     if (!report) throw new Error('التقرير غير موجود');
     report.groupBy = (groupBy || []).map(g => ({
       fieldId: g.fieldId,
-      aggregation: g.aggregation || 'count',  // count, sum, avg, min, max
+      aggregation: g.aggregation || 'count', // count, sum, avg, min, max
     }));
     report.updatedAt = new Date().toISOString();
     return report;
@@ -350,7 +369,7 @@ class ReportBuilderService {
       id: `calc_${Date.now()}`,
       name: field.name,
       nameAr: field.nameAr || field.name,
-      formula: field.formula,       // e.g. "{amount} * {quantity}"
+      formula: field.formula, // e.g. "{amount} * {quantity}"
       type: field.type || 'number', // number, string, date, boolean
       format: field.format || null,
     };
@@ -503,9 +522,7 @@ class ReportBuilderService {
     }
     if (query.search) {
       const s = query.search.toLowerCase();
-      templates = templates.filter(t =>
-        t.name.toLowerCase().includes(s) || t.nameAr.includes(s)
-      );
+      templates = templates.filter(t => t.name.toLowerCase().includes(s) || t.nameAr.includes(s));
     }
     return templates;
   }
@@ -580,9 +597,9 @@ class ReportBuilderService {
       reportId: String(data.reportId),
       frequency: data.frequency,
       time: data.time || '08:00',
-      dayOfWeek: data.dayOfWeek || null,       // for weekly
-      dayOfMonth: data.dayOfMonth || null,     // for monthly
-      recipients: data.recipients || [],       // email addresses
+      dayOfWeek: data.dayOfWeek || null, // for weekly
+      dayOfMonth: data.dayOfMonth || null, // for monthly
+      recipients: data.recipients || [], // email addresses
       format: data.format || 'pdf',
       enabled: true,
       createdBy: data.createdBy || 'system',
@@ -614,9 +631,11 @@ class ReportBuilderService {
     const sch = this.schedules.get(String(id));
     if (!sch) throw new Error('الجدولة غير موجودة');
 
-    ['frequency', 'time', 'dayOfWeek', 'dayOfMonth', 'recipients', 'format', 'enabled'].forEach(k => {
-      if (data[k] !== undefined) sch[k] = data[k];
-    });
+    ['frequency', 'time', 'dayOfWeek', 'dayOfMonth', 'recipients', 'format', 'enabled'].forEach(
+      k => {
+        if (data[k] !== undefined) sch[k] = data[k];
+      }
+    );
 
     if (data.frequency || data.time) {
       sch.nextRunAt = this._calculateNextRun(sch.frequency, sch.time);
@@ -664,7 +683,7 @@ class ReportBuilderService {
       reportId: String(reportId),
       userId: data.userId || null,
       role: data.role || null,
-      permission: data.permission || 'view',  // view, edit, admin
+      permission: data.permission || 'view', // view, edit, admin
       sharedBy: data.sharedBy || 'system',
       sharedAt: new Date().toISOString(),
     };
@@ -730,9 +749,7 @@ class ReportBuilderService {
   }
 
   getReportVersions(reportId) {
-    return this.versions
-      .filter(v => v.reportId === String(reportId))
-      .reverse();
+    return this.versions.filter(v => v.reportId === String(reportId)).reverse();
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -827,9 +844,13 @@ class ReportBuilderService {
       case 'status':
         return ['مكتمل', 'قيد التنفيذ', 'معلق', 'ملغي'][index % 4];
       case 'select':
-        return (field.options || ['خيار 1', 'خيار 2', 'خيار 3'])[index % (field.options || [1, 2, 3]).length];
+        return (field.options || ['خيار 1', 'خيار 2', 'خيار 3'])[
+          index % (field.options || [1, 2, 3]).length
+        ];
       default:
-        return (field.sampleValues || [`${field.labelAr || field.label} ${index + 1}`])[index % (field.sampleValues || [1]).length];
+        return (field.sampleValues || [`${field.labelAr || field.label} ${index + 1}`])[
+          index % (field.sampleValues || [1]).length
+        ];
     }
   }
 
@@ -858,19 +879,32 @@ class ReportBuilderService {
         const target = f.value;
 
         switch (f.operator) {
-          case 'eq': return val === target;
-          case 'ne': return val !== target;
-          case 'gt': return val > target;
-          case 'lt': return val < target;
-          case 'gte': return val >= target;
-          case 'lte': return val <= target;
-          case 'contains': return String(val).includes(String(target));
-          case 'startsWith': return String(val).startsWith(String(target));
-          case 'endsWith': return String(val).endsWith(String(target));
-          case 'isNull': return val == null;
-          case 'isNotNull': return val != null;
-          case 'between': return val >= target && val <= f.value2;
-          default: return true;
+          case 'eq':
+            return val === target;
+          case 'ne':
+            return val !== target;
+          case 'gt':
+            return val > target;
+          case 'lt':
+            return val < target;
+          case 'gte':
+            return val >= target;
+          case 'lte':
+            return val <= target;
+          case 'contains':
+            return String(val).includes(String(target));
+          case 'startsWith':
+            return String(val).startsWith(String(target));
+          case 'endsWith':
+            return String(val).endsWith(String(target));
+          case 'isNull':
+            return val == null;
+          case 'isNotNull':
+            return val != null;
+          case 'between':
+            return val >= target && val <= f.value2;
+          default:
+            return true;
         }
       });
     });
@@ -908,12 +942,23 @@ class ReportBuilderService {
       groupBy.forEach(g => {
         const values = group.rows.map(r => Number(r[g.fieldId]) || 0);
         switch (g.aggregation) {
-          case 'count': group.aggregates[g.fieldId] = group.rows.length; break;
-          case 'sum': group.aggregates[g.fieldId] = values.reduce((a, b) => a + b, 0); break;
-          case 'avg': group.aggregates[g.fieldId] = values.reduce((a, b) => a + b, 0) / values.length; break;
-          case 'min': group.aggregates[g.fieldId] = Math.min(...values); break;
-          case 'max': group.aggregates[g.fieldId] = Math.max(...values); break;
-          default: group.aggregates[g.fieldId] = group.rows.length;
+          case 'count':
+            group.aggregates[g.fieldId] = group.rows.length;
+            break;
+          case 'sum':
+            group.aggregates[g.fieldId] = values.reduce((a, b) => a + b, 0);
+            break;
+          case 'avg':
+            group.aggregates[g.fieldId] = values.reduce((a, b) => a + b, 0) / values.length;
+            break;
+          case 'min':
+            group.aggregates[g.fieldId] = Math.min(...values);
+            break;
+          case 'max':
+            group.aggregates[g.fieldId] = Math.max(...values);
+            break;
+          default:
+            group.aggregates[g.fieldId] = group.rows.length;
         }
       });
     });
@@ -925,7 +970,10 @@ class ReportBuilderService {
     const summary = {};
     columns.forEach(col => {
       const field = ds.fields.find(f => f.id === col.fieldId);
-      if (field && (field.type === 'number' || field.type === 'currency' || field.type === 'percentage')) {
+      if (
+        field &&
+        (field.type === 'number' || field.type === 'currency' || field.type === 'percentage')
+      ) {
         const values = rows.map(r => Number(r[col.fieldId]) || 0);
         summary[col.fieldId] = {
           sum: values.reduce((a, b) => a + b, 0),
@@ -950,7 +998,7 @@ class ReportBuilderService {
         if (next <= now) next.setDate(next.getDate() + 1);
         break;
       case 'weekly':
-        next.setDate(next.getDate() + (7 - next.getDay()) % 7 || 7);
+        next.setDate(next.getDate() + ((7 - next.getDay()) % 7) || 7);
         break;
       case 'monthly':
         next.setMonth(next.getMonth() + 1, 1);
@@ -977,13 +1025,37 @@ class ReportBuilderService {
         category: 'core',
         fields: [
           { id: 'b_id', label: 'ID', labelAr: 'المعرف', type: 'number' },
-          { id: 'b_name', label: 'Name', labelAr: 'الاسم', type: 'string', sampleValues: ['أحمد محمد', 'سارة علي', 'فاطمة حسن', 'خالد إبراهيم', 'نورة سعد'] },
+          {
+            id: 'b_name',
+            label: 'Name',
+            labelAr: 'الاسم',
+            type: 'string',
+            sampleValues: ['أحمد محمد', 'سارة علي', 'فاطمة حسن', 'خالد إبراهيم', 'نورة سعد'],
+          },
           { id: 'b_age', label: 'Age', labelAr: 'العمر', type: 'number' },
-          { id: 'b_gender', label: 'Gender', labelAr: 'الجنس', type: 'select', options: ['ذكر', 'أنثى'] },
+          {
+            id: 'b_gender',
+            label: 'Gender',
+            labelAr: 'الجنس',
+            type: 'select',
+            options: ['ذكر', 'أنثى'],
+          },
           { id: 'b_status', label: 'Status', labelAr: 'الحالة', type: 'status' },
           { id: 'b_admission', label: 'Admission Date', labelAr: 'تاريخ القبول', type: 'date' },
-          { id: 'b_program', label: 'Program', labelAr: 'البرنامج', type: 'string', sampleValues: ['تأهيل شامل', 'رعاية نهارية', 'تدخل مبكر', 'تأهيل مهني'] },
-          { id: 'b_disability', label: 'Disability Type', labelAr: 'نوع الإعاقة', type: 'string', sampleValues: ['حركية', 'ذهنية', 'سمعية', 'بصرية', 'متعددة'] },
+          {
+            id: 'b_program',
+            label: 'Program',
+            labelAr: 'البرنامج',
+            type: 'string',
+            sampleValues: ['تأهيل شامل', 'رعاية نهارية', 'تدخل مبكر', 'تأهيل مهني'],
+          },
+          {
+            id: 'b_disability',
+            label: 'Disability Type',
+            labelAr: 'نوع الإعاقة',
+            type: 'string',
+            sampleValues: ['حركية', 'ذهنية', 'سمعية', 'بصرية', 'متعددة'],
+          },
           { id: 'b_active', label: 'Active', labelAr: 'نشط', type: 'boolean' },
         ],
       },
@@ -995,9 +1067,27 @@ class ReportBuilderService {
         category: 'hr',
         fields: [
           { id: 'e_id', label: 'Employee ID', labelAr: 'رقم الموظف', type: 'number' },
-          { id: 'e_name', label: 'Name', labelAr: 'الاسم', type: 'string', sampleValues: ['محمد العتيبي', 'فهد القحطاني', 'عبدالله المالكي', 'سلمان الدوسري'] },
-          { id: 'e_dept', label: 'Department', labelAr: 'القسم', type: 'string', sampleValues: ['التأهيل', 'الإدارة', 'المالية', 'تقنية المعلومات', 'الموارد البشرية'] },
-          { id: 'e_position', label: 'Position', labelAr: 'المنصب', type: 'string', sampleValues: ['مدير', 'أخصائي', 'فني', 'موظف', 'مشرف'] },
+          {
+            id: 'e_name',
+            label: 'Name',
+            labelAr: 'الاسم',
+            type: 'string',
+            sampleValues: ['محمد العتيبي', 'فهد القحطاني', 'عبدالله المالكي', 'سلمان الدوسري'],
+          },
+          {
+            id: 'e_dept',
+            label: 'Department',
+            labelAr: 'القسم',
+            type: 'string',
+            sampleValues: ['التأهيل', 'الإدارة', 'المالية', 'تقنية المعلومات', 'الموارد البشرية'],
+          },
+          {
+            id: 'e_position',
+            label: 'Position',
+            labelAr: 'المنصب',
+            type: 'string',
+            sampleValues: ['مدير', 'أخصائي', 'فني', 'موظف', 'مشرف'],
+          },
           { id: 'e_salary', label: 'Salary', labelAr: 'الراتب', type: 'currency' },
           { id: 'e_joinDate', label: 'Join Date', labelAr: 'تاريخ الانضمام', type: 'date' },
           { id: 'e_status', label: 'Status', labelAr: 'الحالة', type: 'status' },
@@ -1013,10 +1103,28 @@ class ReportBuilderService {
         fields: [
           { id: 'f_id', label: 'Transaction ID', labelAr: 'رقم المعاملة', type: 'number' },
           { id: 'f_date', label: 'Date', labelAr: 'التاريخ', type: 'date' },
-          { id: 'f_type', label: 'Type', labelAr: 'النوع', type: 'select', options: ['إيراد', 'مصروف', 'تحويل'] },
-          { id: 'f_category', label: 'Category', labelAr: 'الفئة', type: 'string', sampleValues: ['رواتب', 'صيانة', 'مشتريات', 'تبرعات', 'دعم حكومي', 'إيجار'] },
+          {
+            id: 'f_type',
+            label: 'Type',
+            labelAr: 'النوع',
+            type: 'select',
+            options: ['إيراد', 'مصروف', 'تحويل'],
+          },
+          {
+            id: 'f_category',
+            label: 'Category',
+            labelAr: 'الفئة',
+            type: 'string',
+            sampleValues: ['رواتب', 'صيانة', 'مشتريات', 'تبرعات', 'دعم حكومي', 'إيجار'],
+          },
           { id: 'f_amount', label: 'Amount', labelAr: 'المبلغ', type: 'currency' },
-          { id: 'f_account', label: 'Account', labelAr: 'الحساب', type: 'string', sampleValues: ['الحساب الجاري', 'صندوق النثرية', 'حساب المشاريع'] },
+          {
+            id: 'f_account',
+            label: 'Account',
+            labelAr: 'الحساب',
+            type: 'string',
+            sampleValues: ['الحساب الجاري', 'صندوق النثرية', 'حساب المشاريع'],
+          },
           { id: 'f_status', label: 'Status', labelAr: 'الحالة', type: 'status' },
           { id: 'f_approved', label: 'Approved', labelAr: 'معتمد', type: 'boolean' },
         ],
@@ -1029,12 +1137,36 @@ class ReportBuilderService {
         category: 'hr',
         fields: [
           { id: 'a_id', label: 'Record ID', labelAr: 'رقم السجل', type: 'number' },
-          { id: 'a_employee', label: 'Employee', labelAr: 'الموظف', type: 'string', sampleValues: ['محمد العتيبي', 'فهد القحطاني', 'عبدالله المالكي'] },
+          {
+            id: 'a_employee',
+            label: 'Employee',
+            labelAr: 'الموظف',
+            type: 'string',
+            sampleValues: ['محمد العتيبي', 'فهد القحطاني', 'عبدالله المالكي'],
+          },
           { id: 'a_date', label: 'Date', labelAr: 'التاريخ', type: 'date' },
-          { id: 'a_checkIn', label: 'Check In', labelAr: 'وقت الدخول', type: 'string', sampleValues: ['07:30', '08:00', '08:15', '07:45'] },
-          { id: 'a_checkOut', label: 'Check Out', labelAr: 'وقت الخروج', type: 'string', sampleValues: ['15:30', '16:00', '15:45', '16:15'] },
+          {
+            id: 'a_checkIn',
+            label: 'Check In',
+            labelAr: 'وقت الدخول',
+            type: 'string',
+            sampleValues: ['07:30', '08:00', '08:15', '07:45'],
+          },
+          {
+            id: 'a_checkOut',
+            label: 'Check Out',
+            labelAr: 'وقت الخروج',
+            type: 'string',
+            sampleValues: ['15:30', '16:00', '15:45', '16:15'],
+          },
           { id: 'a_hours', label: 'Hours', labelAr: 'الساعات', type: 'number' },
-          { id: 'a_status', label: 'Status', labelAr: 'الحالة', type: 'select', options: ['حاضر', 'غائب', 'إجازة', 'مأذونية'] },
+          {
+            id: 'a_status',
+            label: 'Status',
+            labelAr: 'الحالة',
+            type: 'select',
+            options: ['حاضر', 'غائب', 'إجازة', 'مأذونية'],
+          },
           { id: 'a_overtime', label: 'Overtime', labelAr: 'إضافي', type: 'boolean' },
         ],
       },
@@ -1046,10 +1178,28 @@ class ReportBuilderService {
         category: 'medical',
         fields: [
           { id: 'm_id', label: 'Record ID', labelAr: 'رقم السجل', type: 'number' },
-          { id: 'm_patient', label: 'Patient', labelAr: 'المريض', type: 'string', sampleValues: ['أحمد محمد', 'سارة علي', 'فاطمة حسن'] },
+          {
+            id: 'm_patient',
+            label: 'Patient',
+            labelAr: 'المريض',
+            type: 'string',
+            sampleValues: ['أحمد محمد', 'سارة علي', 'فاطمة حسن'],
+          },
           { id: 'm_date', label: 'Visit Date', labelAr: 'تاريخ الزيارة', type: 'date' },
-          { id: 'm_doctor', label: 'Doctor', labelAr: 'الطبيب', type: 'string', sampleValues: ['د. عبدالرحمن', 'د. هند', 'د. سامي'] },
-          { id: 'm_diagnosis', label: 'Diagnosis', labelAr: 'التشخيص', type: 'string', sampleValues: ['فحص دوري', 'علاج طبيعي', 'استشارة نفسية', 'متابعة'] },
+          {
+            id: 'm_doctor',
+            label: 'Doctor',
+            labelAr: 'الطبيب',
+            type: 'string',
+            sampleValues: ['د. عبدالرحمن', 'د. هند', 'د. سامي'],
+          },
+          {
+            id: 'm_diagnosis',
+            label: 'Diagnosis',
+            labelAr: 'التشخيص',
+            type: 'string',
+            sampleValues: ['فحص دوري', 'علاج طبيعي', 'استشارة نفسية', 'متابعة'],
+          },
           { id: 'm_cost', label: 'Cost', labelAr: 'التكلفة', type: 'currency' },
           { id: 'm_status', label: 'Status', labelAr: 'الحالة', type: 'status' },
           { id: 'm_followUp', label: 'Follow-up', labelAr: 'متابعة', type: 'boolean' },
@@ -1063,8 +1213,20 @@ class ReportBuilderService {
         category: 'operations',
         fields: [
           { id: 'p_id', label: 'PO Number', labelAr: 'رقم الطلب', type: 'number' },
-          { id: 'p_supplier', label: 'Supplier', labelAr: 'المورد', type: 'string', sampleValues: ['شركة التوريدات', 'مؤسسة الإمداد', 'شركة المعدات الطبية'] },
-          { id: 'p_item', label: 'Item', labelAr: 'الصنف', type: 'string', sampleValues: ['أجهزة طبية', 'مستلزمات مكتبية', 'أثاث', 'مواد تنظيف', 'أغذية'] },
+          {
+            id: 'p_supplier',
+            label: 'Supplier',
+            labelAr: 'المورد',
+            type: 'string',
+            sampleValues: ['شركة التوريدات', 'مؤسسة الإمداد', 'شركة المعدات الطبية'],
+          },
+          {
+            id: 'p_item',
+            label: 'Item',
+            labelAr: 'الصنف',
+            type: 'string',
+            sampleValues: ['أجهزة طبية', 'مستلزمات مكتبية', 'أثاث', 'مواد تنظيف', 'أغذية'],
+          },
           { id: 'p_quantity', label: 'Quantity', labelAr: 'الكمية', type: 'number' },
           { id: 'p_unitPrice', label: 'Unit Price', labelAr: 'سعر الوحدة', type: 'currency' },
           { id: 'p_total', label: 'Total', labelAr: 'الإجمالي', type: 'currency' },
@@ -1095,7 +1257,17 @@ class ReportBuilderService {
         filters: [],
         sorting: [{ fieldId: 'b_name', direction: 'asc' }],
         groupBy: [],
-        chartConfig: { type: 'pie', xAxis: 'b_program', yAxis: null, series: [], colors: ['#1976d2', '#388e3c', '#f57c00', '#d32f2f'], title: 'توزيع المستفيدين حسب البرنامج', showLegend: true, showGrid: false, stacked: false },
+        chartConfig: {
+          type: 'pie',
+          xAxis: 'b_program',
+          yAxis: null,
+          series: [],
+          colors: ['#1976d2', '#388e3c', '#f57c00', '#d32f2f'],
+          title: 'توزيع المستفيدين حسب البرنامج',
+          showLegend: true,
+          showGrid: false,
+          stacked: false,
+        },
         summaryRow: false,
         pageSize: 25,
         createdBy: 'system',
@@ -1118,7 +1290,17 @@ class ReportBuilderService {
         filters: [],
         sorting: [{ fieldId: 'e_dept', direction: 'asc' }],
         groupBy: [{ fieldId: 'e_dept', aggregation: 'sum' }],
-        chartConfig: { type: 'bar', xAxis: 'e_dept', yAxis: 'e_salary', series: [], colors: ['#1976d2'], title: 'الرواتب حسب القسم', showLegend: false, showGrid: true, stacked: false },
+        chartConfig: {
+          type: 'bar',
+          xAxis: 'e_dept',
+          yAxis: 'e_salary',
+          series: [],
+          colors: ['#1976d2'],
+          title: 'الرواتب حسب القسم',
+          showLegend: false,
+          showGrid: true,
+          stacked: false,
+        },
         summaryRow: true,
         pageSize: 50,
         createdBy: 'system',
@@ -1143,7 +1325,17 @@ class ReportBuilderService {
         filters: [],
         sorting: [{ fieldId: 'f_date', direction: 'desc' }],
         groupBy: [{ fieldId: 'f_type', aggregation: 'sum' }],
-        chartConfig: { type: 'doughnut', xAxis: 'f_type', yAxis: 'f_amount', series: [], colors: ['#388e3c', '#d32f2f', '#1976d2'], title: 'توزيع المعاملات حسب النوع', showLegend: true, showGrid: false, stacked: false },
+        chartConfig: {
+          type: 'doughnut',
+          xAxis: 'f_type',
+          yAxis: 'f_amount',
+          series: [],
+          colors: ['#388e3c', '#d32f2f', '#1976d2'],
+          title: 'توزيع المعاملات حسب النوع',
+          showLegend: true,
+          showGrid: false,
+          stacked: false,
+        },
         summaryRow: true,
         pageSize: 25,
         createdBy: 'system',
@@ -1193,13 +1385,37 @@ class ReportBuilderService {
           { fieldId: 'b_name', label: 'الاسم', visible: true, order: 0, width: '200px' },
           { fieldId: 'b_program', label: 'البرنامج', visible: true, order: 1, width: '150px' },
           { fieldId: 'b_status', label: 'الحالة', visible: true, order: 2, width: '100px' },
-          { fieldId: 'b_disability', label: 'نوع الإعاقة', visible: true, order: 3, width: '120px' },
-          { fieldId: 'b_admission', label: 'تاريخ القبول', visible: true, order: 4, width: '120px' },
+          {
+            fieldId: 'b_disability',
+            label: 'نوع الإعاقة',
+            visible: true,
+            order: 3,
+            width: '120px',
+          },
+          {
+            fieldId: 'b_admission',
+            label: 'تاريخ القبول',
+            visible: true,
+            order: 4,
+            width: '120px',
+          },
         ],
-        filters: [{ id: 'f_seed1', fieldId: 'b_active', operator: 'eq', value: true, logic: 'AND' }],
+        filters: [
+          { id: 'f_seed1', fieldId: 'b_active', operator: 'eq', value: true, logic: 'AND' },
+        ],
         sorting: [{ fieldId: 'b_admission', direction: 'desc' }],
         groupBy: [],
-        chartConfig: { type: 'bar', xAxis: 'b_program', yAxis: null, series: [], colors: ['#1976d2', '#388e3c'], title: 'المستفيدين حسب البرنامج', showLegend: true, showGrid: true, stacked: false },
+        chartConfig: {
+          type: 'bar',
+          xAxis: 'b_program',
+          yAxis: null,
+          series: [],
+          colors: ['#1976d2', '#388e3c'],
+          title: 'المستفيدين حسب البرنامج',
+          showLegend: true,
+          showGrid: true,
+          stacked: false,
+        },
         summaryRow: false,
         tags: ['ربع سنوي', 'مستفيدين'],
       },
@@ -1221,7 +1437,17 @@ class ReportBuilderService {
         filters: [],
         sorting: [{ fieldId: 'f_date', direction: 'desc' }],
         groupBy: [{ fieldId: 'f_type', aggregation: 'sum' }],
-        chartConfig: { type: 'line', xAxis: 'f_date', yAxis: 'f_amount', series: [], colors: ['#388e3c', '#d32f2f'], title: 'حركة المعاملات المالية', showLegend: true, showGrid: true, stacked: false },
+        chartConfig: {
+          type: 'line',
+          xAxis: 'f_date',
+          yAxis: 'f_amount',
+          series: [],
+          colors: ['#388e3c', '#d32f2f'],
+          title: 'حركة المعاملات المالية',
+          showLegend: true,
+          showGrid: true,
+          stacked: false,
+        },
         summaryRow: true,
         tags: ['شهري', 'مالية'],
       },
@@ -1242,7 +1468,17 @@ class ReportBuilderService {
         filters: [],
         sorting: [{ fieldId: 'e_performance', direction: 'desc' }],
         groupBy: [{ fieldId: 'e_dept', aggregation: 'avg' }],
-        chartConfig: { type: 'bar', xAxis: 'e_dept', yAxis: 'e_performance', series: [], colors: ['#7b1fa2'], title: 'متوسط الأداء حسب القسم', showLegend: false, showGrid: true, stacked: false },
+        chartConfig: {
+          type: 'bar',
+          xAxis: 'e_dept',
+          yAxis: 'e_performance',
+          series: [],
+          colors: ['#7b1fa2'],
+          title: 'متوسط الأداء حسب القسم',
+          showLegend: false,
+          showGrid: true,
+          stacked: false,
+        },
         summaryRow: true,
         tags: ['أداء', 'موظفين'],
       },
@@ -1282,7 +1518,9 @@ class ReportBuilderService {
       nextRunAt: this._calculateNextRun('weekly', '08:00'),
     });
 
-    logger.info(`ReportBuilder seeded: ${this.dataSources.size} sources, ${this.templates.size} templates, ${this.reports.size} reports`);
+    logger.info(
+      `ReportBuilder seeded: ${this.dataSources.size} sources, ${this.templates.size} templates, ${this.reports.size} reports`
+    );
   }
 }
 

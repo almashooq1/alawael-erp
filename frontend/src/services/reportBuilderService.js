@@ -19,8 +19,7 @@ const reportBuilderService = {
 
   // ── Designer — Columns (Drag & Drop) ──
   addColumn: (reportId, data) => api.post(`${BASE}/reports/${reportId}/columns`, data),
-  removeColumn: (reportId, fieldId) =>
-    api.delete(`${BASE}/reports/${reportId}/columns/${fieldId}`),
+  removeColumn: (reportId, fieldId) => api.delete(`${BASE}/reports/${reportId}/columns/${fieldId}`),
   reorderColumns: (reportId, orderedFieldIds) =>
     api.put(`${BASE}/reports/${reportId}/columns/reorder`, { orderedFieldIds }),
 
@@ -32,10 +31,8 @@ const reportBuilderService = {
     api.put(`${BASE}/reports/${reportId}/filters/${filterId}`, data),
 
   // ── Designer — Sorting & Grouping ──
-  setSorting: (reportId, sorting) =>
-    api.put(`${BASE}/reports/${reportId}/sorting`, { sorting }),
-  setGroupBy: (reportId, groupBy) =>
-    api.put(`${BASE}/reports/${reportId}/group-by`, { groupBy }),
+  setSorting: (reportId, sorting) => api.put(`${BASE}/reports/${reportId}/sorting`, { sorting }),
+  setGroupBy: (reportId, groupBy) => api.put(`${BASE}/reports/${reportId}/group-by`, { groupBy }),
 
   // ── Designer — Calculated Fields ──
   addCalculatedField: (reportId, data) =>
@@ -48,22 +45,19 @@ const reportBuilderService = {
     api.put(`${BASE}/reports/${reportId}/chart`, { chartConfig }),
 
   // ── Execution ──
-  executeReport: (reportId, params = {}) =>
-    api.post(`${BASE}/reports/${reportId}/execute`, params),
+  executeReport: (reportId, params = {}) => api.post(`${BASE}/reports/${reportId}/execute`, params),
   getExecutionHistory: (reportId, params = {}) =>
     api.get(`${BASE}/reports/${reportId}/executions`, { params }),
 
   // ── Templates ──
   getTemplates: (params = {}) => api.get(`${BASE}/templates`, { params }),
   getTemplateById: id => api.get(`${BASE}/templates/${id}`),
-  createReportFromTemplate: templateId =>
-    api.post(`${BASE}/templates/${templateId}/create-report`),
+  createReportFromTemplate: templateId => api.post(`${BASE}/templates/${templateId}/create-report`),
   saveAsTemplate: (reportId, data) =>
     api.post(`${BASE}/reports/${reportId}/save-as-template`, data),
 
   // ── Export ──
-  exportReport: (reportId, format) =>
-    api.post(`${BASE}/reports/${reportId}/export`, { format }),
+  exportReport: (reportId, format) => api.post(`${BASE}/reports/${reportId}/export`, { format }),
 
   // ── Schedules ──
   getSchedules: (params = {}) => api.get(`${BASE}/schedules`, { params }),

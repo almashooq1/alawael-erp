@@ -1,0 +1,145 @@
+# ════════════════════════════════════════════════════════════════
+#  Al-Awael ERP — Release Automation
+#  أتمتة الإصدارات: وسم ← سجل التغييرات ← إصدار GitHub
+# ════════════════════════════════════════════════════════════════
+name: "📋 Release"
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "رقم الإصدار (مثل: 1.2.0)"
+        required: true
+        type: string
+      prerelease:
+        description: "إصدار تجريبي؟"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: "📋 Create Release"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine version
+        id: version
+        run: |
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            VERSION="v${{ github.event.inputs.version }}"
+          else
+            VERSION="${GITHUB_REF#refs/tags/}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "📦 Release version: $VERSION"
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+
+          # Find previous tag
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+
+          if [ -z "$PREV_TAG" ]; then
+            echo "📝 First release — using all commits"
+            RANGE="HEAD"
+          else
+            echo "📝 Changes since: $PREV_TAG"
+            RANGE="$PREV_TAG..HEAD"
+          fi
+
+          # Categorize commits
+          echo "## 📋 Changelog — $VERSION" > CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "**Release Date:** $(date -u '+%Y-%m-%d')" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+
+          # Features
+          FEATS=$(git log --pretty=format:"- %s (%h)" $RANGE --grep="^feat" 2>/dev/null || true)
+          if [ -n "$FEATS" ]; then
+            echo "### ✨ Features" >> CHANGELOG.md
+            echo "$FEATS" >> CHANGELOG.md
+            echo "" >> CHANGELOG.md
+          fi
+
+          # Fixes
+          FIXES=$(git log --pretty=format:"- %s (%h)" $RANGE --grep="^fix" 2>/dev/null || true)
+          if [ -n "$FIXES" ]; then
+            echo "### 🐛 Bug Fixes" >> CHANGELOG.md
+            echo "$FIXES" >> CHANGELOG.md
+            echo "" >> CHANGELOG.md
+          fi
+
+          # Performance
+          PERFS=$(git log --pretty=format:"- %s (%h)" $RANGE --grep="^perf" 2>/dev/null || true)
+          if [ -n "$PERFS" ]; then
+            echo "### ⚡ Performance" >> CHANGELOG.md
+            echo "$PERFS" >> CHANGELOG.md
+            echo "" >> CHANGELOG.md
+          fi
+
+          # Docs
+          DOCS=$(git log --pretty=format:"- %s (%h)" $RANGE --grep="^docs" 2>/dev/null || true)
+          if [ -n "$DOCS" ]; then
+            echo "### 📚 Documentation" >> CHANGELOG.md
+            echo "$DOCS" >> CHANGELOG.md
+            echo "" >> CHANGELOG.md
+          fi
+
+          # Other changes
+          OTHERS=$(git log --pretty=format:"- %s (%h)" $RANGE --grep="^chore\|^refactor\|^style\|^ci\|^build\|^test" 2>/dev/null || true)
+          if [ -n "$OTHERS" ]; then
+            echo "### 🔧 Maintenance" >> CHANGELOG.md
+            echo "$OTHERS" >> CHANGELOG.md
+            echo "" >> CHANGELOG.md
+          fi
+
+          # Stats
+          TOTAL=$(git rev-list --count $RANGE 2>/dev/null || echo "?")
+          AUTHORS=$(git log --pretty=format:"%an" $RANGE 2>/dev/null | sort -u | wc -l || echo "?")
+          echo "---" >> CHANGELOG.md
+          echo "**Commits:** $TOTAL | **Contributors:** $AUTHORS" >> CHANGELOG.md
+
+          cat CHANGELOG.md
+          echo "body_file=CHANGELOG.md" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub release
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const version = '${{ steps.version.outputs.version }}';
+            const body = fs.readFileSync('CHANGELOG.md', 'utf8');
+            const prerelease = ${{ github.event.inputs.prerelease || false }};
+
+            const release = await github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: version,
+              name: `Al-Awael ERP ${version}`,
+              body: body,
+              draft: false,
+              prerelease: prerelease,
+              generate_release_notes: true,
+            });
+
+            console.log(`✅ Release created: ${release.data.html_url}`);
+
+  # ─── Auto-deploy after release ──────────────────────────────────
+  deploy-release:
+    name: "🚀 Deploy Release"
+    needs: release
+    uses: ./.github/workflows/deploy-hostinger.yml
+    secrets: inherit

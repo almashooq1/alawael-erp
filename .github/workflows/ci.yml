@@ -1,12 +1,12 @@
 # ════════════════════════════════════════════════════════════════════
-#  Al-Awael ERP — Unified CI Pipeline
-#  يشمل: فحص الجودة ← اختبارات الباك-إند ← بناء الفرونت-إند ← تدقيق أمني
+#  Al-Awael ERP — Unified CI Pipeline (v2)
+#  اختبار ← فحص جودة ← بناء ← تدقيق أمني ← تقرير شامل
 # ════════════════════════════════════════════════════════════════════
-name: CI — Al-Awael ERP
+name: "CI — Al-Awael ERP"
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, develop, "release/**"]
   pull_request:
     branches: [main, develop]
   workflow_dispatch:
@@ -17,13 +17,20 @@ concurrency:
 
 env:
   NODE_VERSION: "22"
+  MINIMUM_TESTS: 8000
+  MINIMUM_SUITES: 270
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
 
 jobs:
   # ═══════════════════════════════════════════════════════════════════
   #  1. Lint & Code Quality
   # ═══════════════════════════════════════════════════════════════════
   lint:
-    name: Lint & Code Quality
+    name: "🔍 Lint & Quality"
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -35,13 +42,17 @@ jobs:
           cache: npm
           cache-dependency-path: backend/package-lock.json
 
-      - name: Install backend dependencies
+      - name: Install backend deps
         working-directory: backend
         run: npm ci
 
       - name: ESLint (0 errors, 0 warnings)
         working-directory: backend
         run: npm run lint -- --max-warnings 0
+
+      - name: Prettier format check
+        working-directory: backend
+        run: npx prettier --check "**/*.{js,json}" --ignore-path .gitignore || true
 
       - name: Mock-guard check
         working-directory: backend
@@ -51,10 +62,10 @@ jobs:
   #  2. Backend Tests (Jest + mongodb-memory-server)
   # ═══════════════════════════════════════════════════════════════════
   test-backend:
-    name: Backend Tests
+    name: "🧪 Backend Tests"
     runs-on: ubuntu-latest
     needs: lint
-    timeout-minutes: 20
+    timeout-minutes: 25
     env:
       NODE_ENV: test
       DISABLE_REDIS: "true"
@@ -71,15 +82,50 @@ jobs:
         working-directory: backend
         run: npm ci
 
-      - name: Run Jest tests
+      - name: Run all Jest tests
+        id: tests
         working-directory: backend
-        run: npm test -- --passWithNoTests --no-coverage --forceExit
+        run: |
+          set -o pipefail
+          npm test -- --passWithNoTests --no-coverage --forceExit --ci --runInBand 2>&1 | tee /tmp/test-output.txt
+
+      - name: Parse test results
+        if: always()
+        id: parse
+        run: |
+          OUTPUT=$(cat /tmp/test-output.txt 2>/dev/null || echo "")
+          SUITES=$(echo "$OUTPUT" | grep -oP 'Test Suites:\s+\K\d+(?=\s+passed)' || echo "0")
+          TESTS=$(echo "$OUTPUT" | grep -oP 'Tests:\s+\K\d+(?=\s+passed)' || echo "0")
+          TIME=$(echo "$OUTPUT" | grep -oP 'Time:\s+\K[\d.]+' || echo "0")
+          echo "suites=$SUITES" >> $GITHUB_OUTPUT
+          echo "tests=$TESTS" >> $GITHUB_OUTPUT
+          echo "time=$TIME" >> $GITHUB_OUTPUT
+          echo "📊 Results: $SUITES suites, $TESTS tests in ${TIME}s"
+
+      - name: Verify test count threshold
+        if: always() && steps.tests.outcome == 'success'
+        run: |
+          TESTS=${{ steps.parse.outputs.tests }}
+          SUITES=${{ steps.parse.outputs.suites }}
+          echo "📊 Tests: $TESTS (minimum: ${{ env.MINIMUM_TESTS }})"
+          echo "📊 Suites: $SUITES (minimum: ${{ env.MINIMUM_SUITES }})"
+          if [ "$TESTS" -lt "${{ env.MINIMUM_TESTS }}" ]; then
+            echo "❌ Test count dropped below threshold!"
+            echo "   Expected ≥ ${{ env.MINIMUM_TESTS }}, got $TESTS"
+            exit 1
+          fi
+          if [ "$SUITES" -lt "${{ env.MINIMUM_SUITES }}" ]; then
+            echo "❌ Suite count dropped below threshold!"
+            echo "   Expected ≥ ${{ env.MINIMUM_SUITES }}, got $SUITES"
+            exit 1
+          fi
+          echo "✅ Test counts verified!"
 
   # ═══════════════════════════════════════════════════════════════════
   #  3. Frontend Build
   # ═══════════════════════════════════════════════════════════════════
   build-frontend:
-    name: Build Frontend
+    name: "📦 Build Frontend"
     runs-on: ubuntu-latest
     needs: lint
     timeout-minutes: 15
@@ -106,18 +152,33 @@ jobs:
           GENERATE_SOURCEMAP: "false"
           REACT_APP_API_URL: /api
 
+      - name: Measure bundle size
+        id: bundle
+        working-directory: frontend
+        run: |
+          TOTAL=$(du -sb build/ | cut -f1)
+          TOTAL_MB=$(echo "scale=2; $TOTAL/1048576" | bc)
+          JS_SIZE=$(du -sb build/static/js/ 2>/dev/null | cut -f1 || echo "0")
+          JS_MB=$(echo "scale=2; $JS_SIZE/1048576" | bc)
+          CSS_SIZE=$(du -sb build/static/css/ 2>/dev/null | cut -f1 || echo "0")
+          CSS_KB=$(echo "scale=2; $CSS_SIZE/1024" | bc)
+          echo "total_mb=$TOTAL_MB" >> $GITHUB_OUTPUT
+          echo "js_mb=$JS_MB" >> $GITHUB_OUTPUT
+          echo "css_kb=$CSS_KB" >> $GITHUB_OUTPUT
+          echo "📦 Bundle: ${TOTAL_MB}MB total | JS: ${JS_MB}MB | CSS: ${CSS_KB}KB"
+
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: frontend-build
           path: frontend/build/
-          retention-days: 3
+          retention-days: 7
 
   # ═══════════════════════════════════════════════════════════════════
   #  4. Security Audit
   # ═══════════════════════════════════════════════════════════════════
   security:
-    name: Security Audit
+    name: "🔒 Security Audit"
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -140,30 +201,79 @@ jobs:
           npm ci
           npm audit --audit-level=high || true
 
+      - name: Check for secrets in code
+        run: |
+          echo "🔍 Scanning for leaked secrets..."
+          FOUND=0
+          grep -rn --include="*.js" --include="*.ts" --include="*.json" \
+            -E "(password|secret|api_key|apikey|token)\s*[:=]\s*['\"][^'\"]{8,}" \
+            backend/routes/ backend/controllers/ backend/services/ \
+            frontend/src/ 2>/dev/null | \
+            grep -v "node_modules" | \
+            grep -v "__tests__" | \
+            grep -v ".test." | \
+            grep -v "mock" | \
+            grep -v "example" | \
+            grep -v "placeholder" | \
+            grep -v "process.env" | \
+            head -20 && FOUND=1 || true
+          if [ "$FOUND" = "1" ]; then
+            echo "⚠️  Potential secrets found — please review above"
+          else
+            echo "✅ No obvious secrets in code"
+          fi
+
   # ═══════════════════════════════════════════════════════════════════
-  #  5. CI Summary
+  #  5. CI Summary + PR Comment
   # ═══════════════════════════════════════════════════════════════════
   summary:
-    name: CI Summary
+    name: "📋 CI Summary"
     runs-on: ubuntu-latest
     needs: [lint, test-backend, build-frontend, security]
     if: always()
     steps:
-      - name: Pipeline Result
+      - name: Build summary
         run: |
-          echo "## Al-Awael ERP CI Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Stage | Result |" >> $GITHUB_STEP_SUMMARY
-          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Lint | ${{ needs.lint.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Backend Tests | ${{ needs.test-backend.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Frontend Build | ${{ needs.build-frontend.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Security Audit | ${{ needs.security.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "**Triggered by:** ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          LINT="${{ needs.lint.result }}"
+          TESTS="${{ needs.test-backend.result }}"
+          BUILD="${{ needs.build-frontend.result }}"
+          SEC="${{ needs.security.result }}"
 
-      - name: Fail if critical stages failed
-        if: needs.lint.result == 'failure' || needs.test-backend.result == 'failure' || needs.build-frontend.result == 'failure'
-        run: exit 1
+          status_icon() {
+            case "$1" in
+              success) echo "✅" ;;
+              failure) echo "❌" ;;
+              cancelled) echo "⏹️" ;;
+              skipped) echo "⏭️" ;;
+              *) echo "❓" ;;
+            esac
+          }
+
+          echo "## 📋 Al-Awael ERP — CI Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Stage | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|:------|:------:|" >> $GITHUB_STEP_SUMMARY
+          echo "| 🔍 Lint & Quality | $(status_icon $LINT) $LINT |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🧪 Backend Tests | $(status_icon $TESTS) $TESTS |" >> $GITHUB_STEP_SUMMARY
+          echo "| 📦 Frontend Build | $(status_icon $BUILD) $BUILD |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🔒 Security Audit | $(status_icon $SEC) $SEC |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "| Detail | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|:-------|:------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Branch | \`${{ github.ref_name }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Commit | \`$(echo ${{ github.sha }} | cut -c1-8)\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Author | ${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Time | $(date -u '+%Y-%m-%d %H:%M UTC') |" >> $GITHUB_STEP_SUMMARY
+
+      - name: Fail pipeline if critical stages failed
+        if: |
+          needs.lint.result == 'failure' ||
+          needs.test-backend.result == 'failure' ||
+          needs.build-frontend.result == 'failure'
+        run: |
+          echo "❌ Critical pipeline stage(s) failed!"
+          echo "   Lint: ${{ needs.lint.result }}"
+          echo "   Tests: ${{ needs.test-backend.result }}"
+          echo "   Build: ${{ needs.build-frontend.result }}"
+          exit 1

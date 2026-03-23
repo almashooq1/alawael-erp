@@ -1,0 +1,97 @@
+# ════════════════════════════════════════════════════════════════
+#  Al-Awael ERP — Dependabot Configuration
+#  تحديث التبعيات تلقائياً: npm + GitHub Actions
+# ════════════════════════════════════════════════════════════════
+version: 2
+
+updates:
+  # ─── Backend npm dependencies ────────────────────────────────
+  - package-ecosystem: "npm"
+    directory: "/backend"
+    schedule:
+      interval: "weekly"
+      day: "saturday"
+      time: "06:00"
+      timezone: "Asia/Riyadh"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "almashooq1"
+    labels:
+      - "dependencies"
+      - "backend"
+    commit-message:
+      prefix: "chore(deps)"
+    groups:
+      express:
+        patterns:
+          - "express*"
+          - "body-parser"
+          - "cors"
+          - "helmet"
+          - "compression"
+      database:
+        patterns:
+          - "mongoose"
+          - "mongodb"
+          - "redis"
+          - "ioredis"
+      testing:
+        dependency-type: "development"
+        patterns:
+          - "jest*"
+          - "supertest"
+          - "@testing-library/*"
+      security:
+        patterns:
+          - "jsonwebtoken"
+          - "bcrypt*"
+          - "passport*"
+          - "express-rate-limit"
+
+  # ─── Frontend npm dependencies ───────────────────────────────
+  - package-ecosystem: "npm"
+    directory: "/frontend"
+    schedule:
+      interval: "weekly"
+      day: "saturday"
+      time: "06:00"
+      timezone: "Asia/Riyadh"
+    open-pull-requests-limit: 8
+    reviewers:
+      - "almashooq1"
+    labels:
+      - "dependencies"
+      - "frontend"
+    commit-message:
+      prefix: "chore(deps)"
+    groups:
+      react:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "react-router*"
+          - "react-scripts"
+      mui:
+        patterns:
+          - "@mui/*"
+          - "@emotion/*"
+      charts:
+        patterns:
+          - "recharts"
+          - "chart.js"
+          - "react-chartjs*"
+
+  # ─── GitHub Actions ──────────────────────────────────────────
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "saturday"
+      time: "06:00"
+      timezone: "Asia/Riyadh"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "ci"
+    commit-message:
+      prefix: "ci(deps)"

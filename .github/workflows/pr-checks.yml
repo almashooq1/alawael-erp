@@ -1,0 +1,159 @@
+# ════════════════════════════════════════════════════════════════
+#  Al-Awael ERP — PR Quality Checks
+#  فحص جودة طلبات الدمج: حجم ← تسمية ← مراجعة ← التزام
+# ════════════════════════════════════════════════════════════════
+name: "🔎 PR Checks"
+
+on:
+  pull_request:
+    types: [opened, synchronize, edited, labeled, unlabeled]
+    branches: [main, develop]
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+jobs:
+  # ─── PR Size & Labels ───────────────────────────────────────────
+  pr-quality:
+    name: "📏 PR Quality"
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check PR description
+        run: |
+          BODY_LEN=${#PR_BODY}
+          if [ "$BODY_LEN" -lt 20 ]; then
+            echo "⚠️ PR description is too short ($BODY_LEN chars)"
+            echo "Please add a meaningful description of your changes."
+            exit 1
+          fi
+          echo "✅ PR description is adequate ($BODY_LEN chars)"
+        env:
+          PR_BODY: ${{ github.event.pull_request.body || '' }}
+
+      - name: Check PR size
+        id: size
+        run: |
+          # Count changed lines
+          ADDITIONS=${{ github.event.pull_request.additions || 0 }}
+          DELETIONS=${{ github.event.pull_request.deletions || 0 }}
+          TOTAL=$((ADDITIONS + DELETIONS))
+          FILES=${{ github.event.pull_request.changed_files || 0 }}
+
+          echo "📊 Changes: +$ADDITIONS -$DELETIONS ($TOTAL total), $FILES files"
+
+          if [ "$TOTAL" -gt 1500 ]; then
+            SIZE="XL"
+            echo "⚠️ This PR is very large. Consider splitting it."
+          elif [ "$TOTAL" -gt 800 ]; then
+            SIZE="L"
+          elif [ "$TOTAL" -gt 300 ]; then
+            SIZE="M"
+          elif [ "$TOTAL" -gt 50 ]; then
+            SIZE="S"
+          else
+            SIZE="XS"
+          fi
+
+          echo "size=$SIZE" >> $GITHUB_OUTPUT
+          echo "📏 PR Size: $SIZE"
+
+      - name: Conventional commit title
+        run: |
+          TITLE="${{ github.event.pull_request.title }}"
+          PATTERN="^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\(.+\))?: .{5,}"
+
+          if echo "$TITLE" | grep -qE "$PATTERN"; then
+            echo "✅ PR title follows conventional commits: $TITLE"
+          else
+            echo "❌ PR title must follow: type(scope): description"
+            echo "   Examples: feat(auth): add SSO login"
+            echo "             fix(api): resolve timeout on bulk export"
+            echo "   Got: $TITLE"
+            exit 1
+          fi
+
+      - name: Comment PR summary
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const size = '${{ steps.size.outputs.size }}';
+            const additions = ${{ github.event.pull_request.additions || 0 }};
+            const deletions = ${{ github.event.pull_request.deletions || 0 }};
+            const files = ${{ github.event.pull_request.changed_files || 0 }};
+
+            const sizeEmoji = { XS: '🟢', S: '🟢', M: '🟡', L: '🟠', XL: '🔴' };
+
+            const body = `## ${sizeEmoji[size] || '⚪'} PR Size: **${size}**
+            | Metric | Value |
+            |:-------|------:|
+            | Files Changed | ${files} |
+            | Additions | +${additions} |
+            | Deletions | -${deletions} |
+            | Total | ${additions + deletions} |`;
+
+            // Find existing bot comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const existing = comments.find(c => 
+              c.user.type === 'Bot' && c.body.includes('PR Size:')
+            );
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
+
+  # ─── Test Changes ───────────────────────────────────────────────
+  test-changes:
+    name: "🧪 Test PR Changes"
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Lint
+        working-directory: backend
+        run: npm run lint -- --max-warnings 0
+
+      - name: Format check
+        working-directory: backend
+        run: npx prettier --check "src/**/*.{js,ts,json}" "routes/**/*.js" "models/**/*.js" 2>/dev/null || true
+
+      - name: Run tests
+        working-directory: backend
+        run: npm test -- --passWithNoTests --no-coverage --ci --runInBand --forceExit
+        env:
+          NODE_ENV: test
+          DISABLE_REDIS: "true"

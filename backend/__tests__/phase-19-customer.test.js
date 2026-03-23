@@ -242,8 +242,7 @@ describe('Phase 19: Customer Experience & Satisfaction Management', () => {
     });
 
     test('Should track NPS trend - improving', () => {
-      const now = new Date();
-      const pastDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+      const pastDate = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
 
       // First half: mostly detractors
       service.recordNPSScore({ customerId: 'c1', score: 3 });
@@ -253,6 +252,8 @@ describe('Phase 19: Customer Experience & Satisfaction Management', () => {
       service.recordNPSScore({ customerId: 'c3', score: 9 });
       service.recordNPSScore({ customerId: 'c4', score: 10 });
 
+      // Capture 'now' AFTER recording so all scores fall within range
+      const now = new Date(Date.now() + 1000);
       const nps = service.calculateNPS(pastDate, now);
       // Without temporal ordering of scores, trend may be 'stable' or 'improving'
       expect(['improving', 'stable']).toContain(nps.trend);

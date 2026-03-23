@@ -74,7 +74,7 @@ describe('SystemIntegrationBus', () => {
 
     it('should be retrievable via getRegisteredDomains', () => {
       bus.registerDomain('hr', { version: '2.0.0', events: ['employee.hired'] });
-      
+
       const domains = bus.getRegisteredDomains();
       expect(domains.hr).toBeDefined();
       expect(domains.hr.version).toBe('2.0.0');
@@ -143,11 +143,16 @@ describe('SystemIntegrationBus', () => {
       const handler = jest.fn();
       bus.subscribe('hr.employee.hired', handler);
 
-      await bus.publish('hr', 'employee.hired', { name: 'Z' }, {
-        correlationId: 'corr-123',
-        userId: 'user-456',
-        source: 'test',
-      });
+      await bus.publish(
+        'hr',
+        'employee.hired',
+        { name: 'Z' },
+        {
+          correlationId: 'corr-123',
+          userId: 'user-456',
+          source: 'test',
+        }
+      );
 
       await new Promise(r => setTimeout(r, 50));
 
@@ -214,7 +219,7 @@ describe('SystemIntegrationBus', () => {
 
   describe('middleware', () => {
     it('should run middleware before publishing', async () => {
-      const mw = jest.fn((event) => event);
+      const mw = jest.fn(event => event);
       bus.use(mw);
 
       const handler = jest.fn();
@@ -228,7 +233,7 @@ describe('SystemIntegrationBus', () => {
     });
 
     it('should allow middleware to modify events', async () => {
-      bus.use((event) => {
+      bus.use(event => {
         event.payload.enriched = true;
         return event;
       });
@@ -245,8 +250,14 @@ describe('SystemIntegrationBus', () => {
 
     it('should support multiple middleware in order', async () => {
       const order = [];
-      bus.use((event) => { order.push(1); return event; });
-      bus.use((event) => { order.push(2); return event; });
+      bus.use(event => {
+        order.push(1);
+        return event;
+      });
+      bus.use(event => {
+        order.push(2);
+        return event;
+      });
 
       bus.subscribe('test.event', jest.fn());
       await bus.publish('test', 'event', {});
@@ -297,10 +308,15 @@ describe('SystemIntegrationBus', () => {
     });
 
     it('should accept custom options', () => {
-      const envelope = createEventEnvelope('hr', 'test', {}, {
-        correlationId: 'c-1',
-        priority: PRIORITY.CRITICAL,
-      });
+      const envelope = createEventEnvelope(
+        'hr',
+        'test',
+        {},
+        {
+          correlationId: 'c-1',
+          priority: PRIORITY.CRITICAL,
+        }
+      );
       expect(envelope.metadata.correlationId).toBe('c-1');
       expect(envelope.priority).toBe(PRIORITY.CRITICAL);
     });

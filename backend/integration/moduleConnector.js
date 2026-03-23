@@ -24,16 +24,16 @@ const EventEmitter = require('events');
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const CIRCUIT_STATE = {
-  CLOSED: 'CLOSED',       // Normal — requests flow through
-  OPEN: 'OPEN',           // Tripped — all requests short-circuit
+  CLOSED: 'CLOSED', // Normal — requests flow through
+  OPEN: 'OPEN', // Tripped — all requests short-circuit
   HALF_OPEN: 'HALF_OPEN', // Probing — limited requests to test recovery
 };
 
 const DEFAULT_CIRCUIT_OPTIONS = {
-  failureThreshold: 5,      // Failures before opening circuit
-  successThreshold: 3,      // Successes in half-open to close
-  timeout: 30000,           // ms before half-open probe
-  resetTimeout: 60000,      // ms full reset window
+  failureThreshold: 5, // Failures before opening circuit
+  successThreshold: 3, // Successes in half-open to close
+  timeout: 30000, // ms before half-open probe
+  resetTimeout: 60000, // ms full reset window
 };
 
 const MODULE_STATUS = {
@@ -132,8 +132,8 @@ class CircuitBreaker {
 class ModuleConnector extends EventEmitter {
   constructor() {
     super();
-    this.modules = new Map();       // name → { metadata, services, healthFn, circuitBreaker }
-    this.services = new Map();      // global service name → handler
+    this.modules = new Map(); // name → { metadata, services, healthFn, circuitBreaker }
+    this.services = new Map(); // global service name → handler
     this.integrationBus = null;
     this.initialized = false;
   }
@@ -274,7 +274,7 @@ class ModuleConnector extends EventEmitter {
       }, timeout);
 
       // Listen for reply
-      const replyHandler = (event) => {
+      const replyHandler = event => {
         if (event.payload && event.payload._requestId === requestId) {
           clearTimeout(timer);
           resolve(event.payload.result);
@@ -284,13 +284,15 @@ class ModuleConnector extends EventEmitter {
       this.integrationBus.subscribe(`${targetModule}.reply.${action}`, replyHandler);
 
       // Publish request
-      this.integrationBus.publish(targetModule, `request.${action}`, {
-        _requestId: requestId,
-        ...payload,
-      }).catch(err => {
-        clearTimeout(timer);
-        reject(err);
-      });
+      this.integrationBus
+        .publish(targetModule, `request.${action}`, {
+          _requestId: requestId,
+          ...payload,
+        })
+        .catch(err => {
+          clearTimeout(timer);
+          reject(err);
+        });
     });
   }
 

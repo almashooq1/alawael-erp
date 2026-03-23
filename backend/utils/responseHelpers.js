@@ -1,3 +1,4 @@
+// @deprecated — Prefer importing from 'errors/responseSystem' for new code
 /**
  * Response Helpers — Unified response formatting utility
  * Used by: educationalContentController, digitalLibraryController, virtualSessionController

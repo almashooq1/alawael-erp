@@ -28,7 +28,15 @@ describe('DomainEventContracts', () => {
   describe('contract structure', () => {
     it('should define 7 domain groups', () => {
       expect(Object.keys(ALL_CONTRACTS)).toEqual(
-        expect.arrayContaining(['hr', 'finance', 'beneficiary', 'medical', 'attendance', 'notification', 'system'])
+        expect.arrayContaining([
+          'hr',
+          'finance',
+          'beneficiary',
+          'medical',
+          'attendance',
+          'notification',
+          'system',
+        ])
       );
     });
 

@@ -53,17 +53,12 @@ function clearContext(requestId) {
  * @param {boolean} options.propagateHeaders - Include trace headers in response
  */
 function createIntegrationContextMiddleware(options = {}) {
-  const {
-    integrationBus = null,
-    serviceName = 'alawael-erp',
-    propagateHeaders = true,
-  } = options;
+  const { integrationBus = null, serviceName = 'alawael-erp', propagateHeaders = true } = options;
 
   return function integrationContextMiddleware(req, res, next) {
     // ── Generate / Extract Trace IDs ──────────────────────────────────
-    const correlationId = req.headers['x-correlation-id']
-      || req.headers['x-request-id']
-      || uuidv4();
+    const correlationId =
+      req.headers['x-correlation-id'] || req.headers['x-request-id'] || uuidv4();
 
     const causationId = req.headers['x-causation-id'] || null;
     const requestId = uuidv4();
@@ -78,7 +73,7 @@ function createIntegrationContextMiddleware(options = {}) {
       causationId,
       sourceModule,
       serviceName,
-      userId: null,       // Will be populated by auth middleware later
+      userId: null, // Will be populated by auth middleware later
       sessionId: null,
       ip: req.ip || req.connection?.remoteAddress,
       method: req.method,
@@ -138,15 +133,22 @@ function createIntegrationContextMiddleware(options = {}) {
 
       // Emit request trace event for long requests
       if (integrationBus && duration > 5000) {
-        integrationBus.publish('system', 'request.slow', {
-          path: req.path,
-          method: req.method,
-          duration,
-          statusCode: res.statusCode,
-          correlationId,
-        }, {
-          metadata: { correlationId, source: sourceModule, requestId },
-        }).catch(() => {}); // fire-and-forget
+        integrationBus
+          .publish(
+            'system',
+            'request.slow',
+            {
+              path: req.path,
+              method: req.method,
+              duration,
+              statusCode: res.statusCode,
+              correlationId,
+            },
+            {
+              metadata: { correlationId, source: sourceModule, requestId },
+            }
+          )
+          .catch(() => {}); // fire-and-forget
       }
 
       clearContext(requestId);
@@ -170,47 +172,47 @@ function createIntegrationContextMiddleware(options = {}) {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const MODULE_PATH_MAP = {
-  'employee': 'hr',
-  'employees': 'hr',
-  'hr': 'hr',
-  'leave': 'hr',
-  'salary': 'hr',
-  'department': 'hr',
-  'payroll': 'finance',
-  'finance': 'finance',
-  'invoice': 'finance',
-  'payment': 'finance',
-  'expense': 'finance',
-  'budget': 'finance',
-  'accounting': 'finance',
-  'beneficiary': 'beneficiary',
-  'beneficiaries': 'beneficiary',
-  'assessment': 'beneficiary',
-  'disability': 'beneficiary',
-  'medical': 'medical',
-  'therapy': 'medical',
-  'prescription': 'medical',
-  'clinic': 'medical',
-  'health': 'medical',
-  'attendance': 'attendance',
-  'notification': 'notification',
-  'notifications': 'notification',
-  'auth': 'system',
-  'login': 'system',
-  'user': 'system',
-  'users': 'system',
-  'role': 'system',
-  'permission': 'system',
-  'dashboard': 'dashboard',
-  'report': 'reporting',
-  'reports': 'reporting',
-  'analytics': 'analytics',
-  'warehouse': 'supply-chain',
-  'inventory': 'supply-chain',
-  'supply': 'supply-chain',
-  'job': 'jobs',
-  'jobs': 'jobs',
-  'rehabilitation': 'rehabilitation',
+  employee: 'hr',
+  employees: 'hr',
+  hr: 'hr',
+  leave: 'hr',
+  salary: 'hr',
+  department: 'hr',
+  payroll: 'finance',
+  finance: 'finance',
+  invoice: 'finance',
+  payment: 'finance',
+  expense: 'finance',
+  budget: 'finance',
+  accounting: 'finance',
+  beneficiary: 'beneficiary',
+  beneficiaries: 'beneficiary',
+  assessment: 'beneficiary',
+  disability: 'beneficiary',
+  medical: 'medical',
+  therapy: 'medical',
+  prescription: 'medical',
+  clinic: 'medical',
+  health: 'medical',
+  attendance: 'attendance',
+  notification: 'notification',
+  notifications: 'notification',
+  auth: 'system',
+  login: 'system',
+  user: 'system',
+  users: 'system',
+  role: 'system',
+  permission: 'system',
+  dashboard: 'dashboard',
+  report: 'reporting',
+  reports: 'reporting',
+  analytics: 'analytics',
+  warehouse: 'supply-chain',
+  inventory: 'supply-chain',
+  supply: 'supply-chain',
+  job: 'jobs',
+  jobs: 'jobs',
+  rehabilitation: 'rehabilitation',
 };
 
 function extractModuleFromPath(path) {

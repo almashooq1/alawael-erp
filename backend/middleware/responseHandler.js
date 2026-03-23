@@ -1,3 +1,4 @@
+// @deprecated — Prefer importing from 'errors/responseSystem' (enhanceResponse) for new code
 // Response Handler Middleware
 // Provides standard response methods for all routes
 

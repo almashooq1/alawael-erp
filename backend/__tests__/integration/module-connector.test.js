@@ -58,9 +58,7 @@ describe('ModuleConnector', () => {
         services: { getEmployee: jest.fn() },
       });
 
-      expect(cb).toHaveBeenCalledWith(
-        expect.objectContaining({ name: 'hr' })
-      );
+      expect(cb).toHaveBeenCalledWith(expect.objectContaining({ name: 'hr' }));
     });
   });
 
@@ -80,8 +78,7 @@ describe('ModuleConnector', () => {
     });
 
     it('should throw for unknown service', async () => {
-      await expect(connector.invoke('unknown.service', {}))
-        .rejects.toThrow('not found');
+      await expect(connector.invoke('unknown.service', {})).rejects.toThrow('not found');
     });
 
     it('should retry on failure when retries configured', async () => {
@@ -103,17 +100,16 @@ describe('ModuleConnector', () => {
     });
 
     it('should timeout long-running services', async () => {
-      const slowHandler = jest.fn().mockImplementation(
-        () => new Promise(resolve => setTimeout(resolve, 5000))
-      );
+      const slowHandler = jest
+        .fn()
+        .mockImplementation(() => new Promise(resolve => setTimeout(resolve, 5000)));
 
       connector.registerModule('hr', {
         services: { slow: slowHandler },
         circuitOptions: { failureThreshold: 10 },
       });
 
-      await expect(connector.invoke('hr.slow', {}, { timeout: 50 }))
-        .rejects.toThrow('Timeout');
+      await expect(connector.invoke('hr.slow', {}, { timeout: 50 })).rejects.toThrow('Timeout');
     }, 10000);
   });
 
@@ -156,7 +152,9 @@ describe('ModuleConnector', () => {
     it('should report unhealthy when health function throws', async () => {
       connector.registerModule('hr', {
         services: { fn: jest.fn() },
-        healthFn: async () => { throw new Error('DB down'); },
+        healthFn: async () => {
+          throw new Error('DB down');
+        },
       });
 
       const result = await connector.healthCheck();
@@ -220,8 +218,7 @@ describe('CircuitBreaker', () => {
       await breaker.execute(() => Promise.reject(new Error('fail'))).catch(() => {});
     }
 
-    await expect(breaker.execute(() => Promise.resolve('ok')))
-      .rejects.toThrow('OPEN');
+    await expect(breaker.execute(() => Promise.resolve('ok'))).rejects.toThrow('OPEN');
   });
 
   it('should transition to HALF_OPEN after timeout', async () => {

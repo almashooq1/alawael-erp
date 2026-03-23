@@ -24,17 +24,17 @@ const logger = require('../utils/logger');
 // ─── Constants ───────────────────────────────────────────────────────────────
 
 const DELIVERY = {
-  PERSIST: 'persist',       // → EventStore (immutable log)
-  BROADCAST: 'broadcast',   // → MessageQueue (async delivery)
-  REALTIME: 'realtime',     // → Socket.IO (live push)
-  LOCAL: 'local',           // → EventEmitter (in-process)
+  PERSIST: 'persist', // → EventStore (immutable log)
+  BROADCAST: 'broadcast', // → MessageQueue (async delivery)
+  REALTIME: 'realtime', // → Socket.IO (live push)
+  LOCAL: 'local', // → EventEmitter (in-process)
 };
 
 const PRIORITY = {
-  CRITICAL: 'critical',     // Financial, medical, legal
-  HIGH: 'high',             // HR actions, auth events
-  NORMAL: 'normal',         // Standard domain events
-  LOW: 'low',               // Analytics, cache invalidation
+  CRITICAL: 'critical', // Financial, medical, legal
+  HIGH: 'high', // HR actions, auth events
+  NORMAL: 'normal', // Standard domain events
+  LOW: 'low', // Analytics, cache invalidation
 };
 
 // ─── Domain Event Envelope ───────────────────────────────────────────────────
@@ -78,8 +78,8 @@ class SystemIntegrationBus extends EventEmitter {
     this._messageQueue = null;
     this._socketEmitter = null;
 
-    this._subscribers = new Map();    // pattern → [handler]
-    this._middleware = [];             // pre-publish transforms
+    this._subscribers = new Map(); // pattern → [handler]
+    this._middleware = []; // pre-publish transforms
     this._deadLetters = [];
     this._stats = {
       published: 0,
@@ -91,7 +91,7 @@ class SystemIntegrationBus extends EventEmitter {
       lastEvent: null,
     };
     this._initialized = false;
-    this._domainRegistry = new Map();  // domain → { name, version, events[] }
+    this._domainRegistry = new Map(); // domain → { name, version, events[] }
   }
 
   // ── Initialization ─────────────────────────────────────────────────────
@@ -116,8 +116,10 @@ class SystemIntegrationBus extends EventEmitter {
     }
 
     this._initialized = true;
-    logger.info('[IntegrationBus] System Integration Bus initialized — ' +
-      `EventStore:${!!eventStore} MQ:${!!messageQueue} Socket:${!!socketEmitter}`);
+    logger.info(
+      '[IntegrationBus] System Integration Bus initialized — ' +
+        `EventStore:${!!eventStore} MQ:${!!messageQueue} Socket:${!!socketEmitter}`
+    );
     return this;
   }
 
@@ -135,7 +137,9 @@ class SystemIntegrationBus extends EventEmitter {
       events: config.events || [],
       registeredAt: new Date().toISOString(),
     });
-    logger.info(`[IntegrationBus] Domain registered: ${name} (${config.events?.length || 0} events)`);
+    logger.info(
+      `[IntegrationBus] Domain registered: ${name} (${config.events?.length || 0} events)`
+    );
     return this;
   }
 
@@ -186,11 +190,13 @@ class SystemIntegrationBus extends EventEmitter {
         await this._eventStore.appendEvents(
           enrichedEnvelope.aggregateType || domain,
           enrichedEnvelope.aggregateId || 'global',
-          [{
-            type: eventType,
-            payload: enrichedEnvelope.payload,
-            domain,
-          }],
+          [
+            {
+              type: eventType,
+              payload: enrichedEnvelope.payload,
+              domain,
+            },
+          ],
           enrichedEnvelope.metadata
         );
         results.persisted = true;
@@ -217,9 +223,10 @@ class SystemIntegrationBus extends EventEmitter {
     // 3. Push via Socket.IO (real-time to clients)
     if (deliveries.includes(DELIVERY.REALTIME) && this._socketEmitter) {
       try {
-        const io = typeof this._socketEmitter.getIO === 'function'
-          ? this._socketEmitter.getIO()
-          : this._socketEmitter;
+        const io =
+          typeof this._socketEmitter.getIO === 'function'
+            ? this._socketEmitter.getIO()
+            : this._socketEmitter;
         if (io) {
           const channel = `${domain}:${eventType}`;
           io.emit(channel, {
@@ -276,13 +283,15 @@ class SystemIntegrationBus extends EventEmitter {
 
     // Also subscribe to MessageQueue if available
     if (this._messageQueue?.connected && pattern !== '*') {
-      this._messageQueue.subscribe(pattern, (msg) => {
-        try {
-          handler(msg.data || msg);
-        } catch (err) {
-          logger.error(`[IntegrationBus] MQ subscriber error: ${err.message}`);
-        }
-      }).catch(() => {});
+      this._messageQueue
+        .subscribe(pattern, msg => {
+          try {
+            handler(msg.data || msg);
+          } catch (err) {
+            logger.error(`[IntegrationBus] MQ subscriber error: ${err.message}`);
+          }
+        })
+        .catch(() => {});
     }
 
     logger.debug(`[IntegrationBus] Subscriber added for pattern: ${pattern}`);
@@ -351,8 +360,10 @@ class SystemIntegrationBus extends EventEmitter {
       initialized: this._initialized,
       registeredDomains: this._domainRegistry.size,
       subscriberPatterns: this._subscribers.size,
-      totalSubscribers: Array.from(this._subscribers.values())
-        .reduce((sum, arr) => sum + arr.length, 0),
+      totalSubscribers: Array.from(this._subscribers.values()).reduce(
+        (sum, arr) => sum + arr.length,
+        0
+      ),
       middlewareCount: this._middleware.length,
       infrastructure: {
         eventStore: !!this._eventStore,
@@ -377,7 +388,9 @@ class SystemIntegrationBus extends EventEmitter {
       try {
         await this._eventStore.getStats();
         health.eventStore = true;
-      } catch { health.eventStore = false; }
+      } catch {
+        health.eventStore = false;
+      }
     }
 
     if (this._messageQueue) {
@@ -385,9 +398,10 @@ class SystemIntegrationBus extends EventEmitter {
     }
 
     if (this._socketEmitter) {
-      const io = typeof this._socketEmitter.getIO === 'function'
-        ? this._socketEmitter.getIO()
-        : this._socketEmitter;
+      const io =
+        typeof this._socketEmitter.getIO === 'function'
+          ? this._socketEmitter.getIO()
+          : this._socketEmitter;
       health.socketIO = !!io;
     }
 

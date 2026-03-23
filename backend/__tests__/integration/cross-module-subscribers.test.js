@@ -84,14 +84,19 @@ describe('CrossModuleSubscribers', () => {
       bus.subscribe('finance.settlement.requested', settlementHandler);
 
       // Publish the trigger event
-      await bus.publish('hr', 'employee.terminated', {
-        employeeId: 'emp-1',
-        reason: 'resignation',
-        effectiveDate: '2025-01-01',
-        settlementAmount: 50000,
-      }, {
-        metadata: { correlationId: 'test-corr-1' },
-      });
+      await bus.publish(
+        'hr',
+        'employee.terminated',
+        {
+          employeeId: 'emp-1',
+          reason: 'resignation',
+          effectiveDate: '2025-01-01',
+          settlementAmount: 50000,
+        },
+        {
+          metadata: { correlationId: 'test-corr-1' },
+        }
+      );
 
       // Wait for async propagation
       await new Promise(r => setTimeout(r, 50));

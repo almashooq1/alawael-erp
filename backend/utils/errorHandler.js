@@ -1,3 +1,4 @@
+// @deprecated — Prefer importing from 'errors/AppError' + 'errors/errorHandler' for new code
 /* eslint-disable no-unused-vars */
 // backend/utils/errorHandler.js
 const logger = require('./logger');

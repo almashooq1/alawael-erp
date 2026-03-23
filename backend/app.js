@@ -101,7 +101,10 @@ const { mountAllDomains, healthCheckAll: domainHealthCheck } = require('./domain
 // ─── Integration Layer (cross-module event-driven architecture) ──────────────
 const { integrationBus, mountIntegrationBusRoutes } = require('./integration/systemIntegrationBus');
 const { moduleConnector, mountModuleConnectorRoutes } = require('./integration/moduleConnector');
-const { createIntegrationContextMiddleware, mountIntegrationContextRoutes } = require('./middleware/integrationContext.middleware');
+const {
+  createIntegrationContextMiddleware,
+  mountIntegrationContextRoutes,
+} = require('./middleware/integrationContext.middleware');
 const { initializeCrossModuleSubscribers } = require('./integration/crossModuleSubscribers');
 const { ALL_CONTRACTS } = require('./events/contracts/domainEventContracts');
 
@@ -414,7 +417,11 @@ try {
   const { eventStore } = require('./infrastructure/eventStore');
   const { getMessageQueue } = require('./infrastructure/messageQueue');
   const socketEmitter = (() => {
-    try { return require('./utils/socketEmitter'); } catch { return null; }
+    try {
+      return require('./utils/socketEmitter');
+    } catch {
+      return null;
+    }
   })();
 
   integrationBus.initialize({

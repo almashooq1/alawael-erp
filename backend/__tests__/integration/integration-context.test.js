@@ -38,7 +38,7 @@ function createMockRes() {
       listeners[event] = handler;
     }),
     statusCode: 200,
-    _trigger: (event) => listeners[event]?.(),
+    _trigger: event => listeners[event]?.(),
   };
 }
 

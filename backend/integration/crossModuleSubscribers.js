@@ -53,7 +53,7 @@ function createSubscribers(integrationBus, moduleConnector) {
   subscribers.push({
     name: 'hr:hired → notification:welcome',
     pattern: 'hr.employee.hired',
-    handler: async (event) => {
+    handler: async event => {
       logger.info(`[CrossModule] New employee hired: ${event.payload.name} — sending welcome`);
       try {
         if (moduleConnector && moduleConnector.hasService('notification.send')) {
@@ -78,22 +78,29 @@ function createSubscribers(integrationBus, moduleConnector) {
   subscribers.push({
     name: 'hr:terminated → finance:settlement',
     pattern: 'hr.employee.terminated',
-    handler: async (event) => {
-      logger.info(`[CrossModule] Employee terminated: ${event.payload.employeeId} — initiating settlement`);
+    handler: async event => {
+      logger.info(
+        `[CrossModule] Employee terminated: ${event.payload.employeeId} — initiating settlement`
+      );
       try {
-        await integrationBus.publish('finance', 'settlement.requested', {
-          employeeId: event.payload.employeeId,
-          reason: event.payload.reason,
-          effectiveDate: event.payload.effectiveDate,
-          settlementAmount: event.payload.settlementAmount,
-          originEvent: event.id,
-        }, {
-          metadata: {
-            correlationId: event.metadata?.correlationId,
-            causationId: event.id,
-            source: 'cross-module-subscriber',
+        await integrationBus.publish(
+          'finance',
+          'settlement.requested',
+          {
+            employeeId: event.payload.employeeId,
+            reason: event.payload.reason,
+            effectiveDate: event.payload.effectiveDate,
+            settlementAmount: event.payload.settlementAmount,
+            originEvent: event.id,
           },
-        });
+          {
+            metadata: {
+              correlationId: event.metadata?.correlationId,
+              causationId: event.id,
+              source: 'cross-module-subscriber',
+            },
+          }
+        );
       } catch (err) {
         logger.warn(`[CrossModule] Failed to initiate settlement:`, err.message);
       }
@@ -104,7 +111,7 @@ function createSubscribers(integrationBus, moduleConnector) {
   subscribers.push({
     name: 'hr:transferred → attendance:sync',
     pattern: 'hr.department.transferred',
-    handler: async (event) => {
+    handler: async event => {
       logger.info(`[CrossModule] Department transfer: ${event.payload.employeeId}`);
       try {
         await integrationBus.publish('attendance', 'department.sync', {
@@ -123,8 +130,10 @@ function createSubscribers(integrationBus, moduleConnector) {
   subscribers.push({
     name: 'finance:payment → dashboard:kpi',
     pattern: 'finance.payment.received',
-    handler: async (event) => {
-      logger.info(`[CrossModule] Payment received: ${event.payload.paymentId} — updating dashboard`);
+    handler: async event => {
+      logger.info(
+        `[CrossModule] Payment received: ${event.payload.paymentId} — updating dashboard`
+      );
       try {
         await integrationBus.publish('dashboard', 'kpi.update', {
           module: 'finance',
@@ -142,7 +151,7 @@ function createSubscribers(integrationBus, moduleConnector) {
   subscribers.push({
     name: 'finance:budget → notification:alert',
     pattern: 'finance.budget.threshold_reached',
-    handler: async (event) => {
+    handler: async event => {
       logger.info(`[CrossModule] Budget threshold reached: ${event.payload.percentage}%`);
       try {
         if (moduleConnector && moduleConnector.hasService('notification.send')) {
@@ -168,7 +177,7 @@ function createSubscribers(integrationBus, moduleConnector) {
   subscribers.push({
     name: 'finance:invoice → audit:trail',
     pattern: 'finance.invoice.created',
-    handler: async (event) => {
+    handler: async event => {
       logger.info(`[CrossModule] Invoice created: ${event.payload.invoiceId} — audit trail`);
       try {
         await integrationBus.publish('system', 'audit.entry', {
@@ -193,7 +202,7 @@ function createSubscribers(integrationBus, moduleConnector) {
   subscribers.push({
     name: 'medical:therapy → dashboard:kpi',
     pattern: 'medical.therapy.session_completed',
-    handler: async (event) => {
+    handler: async event => {
       logger.info(`[CrossModule] Therapy session completed — updating KPI`);
       try {
         await integrationBus.publish('dashboard', 'kpi.update', {
@@ -214,8 +223,10 @@ function createSubscribers(integrationBus, moduleConnector) {
   subscribers.push({
     name: 'medical:risk → notification:urgent',
     pattern: 'medical.risk.alert_raised',
-    handler: async (event) => {
-      logger.info(`[CrossModule] MEDICAL RISK ALERT: ${event.payload.riskType} for ${event.payload.beneficiaryId}`);
+    handler: async event => {
+      logger.info(
+        `[CrossModule] MEDICAL RISK ALERT: ${event.payload.riskType} for ${event.payload.beneficiaryId}`
+      );
       try {
         if (moduleConnector && moduleConnector.hasService('notification.send')) {
           await moduleConnector.invoke('notification.send', {
@@ -240,8 +251,10 @@ function createSubscribers(integrationBus, moduleConnector) {
   subscribers.push({
     name: 'beneficiary:registered → medical:init',
     pattern: 'beneficiary.beneficiary.registered',
-    handler: async (event) => {
-      logger.info(`[CrossModule] New beneficiary registered: ${event.payload.beneficiaryId} — creating medical record`);
+    handler: async event => {
+      logger.info(
+        `[CrossModule] New beneficiary registered: ${event.payload.beneficiaryId} — creating medical record`
+      );
       try {
         await integrationBus.publish('medical', 'record.init_requested', {
           beneficiaryId: event.payload.beneficiaryId,
@@ -259,7 +272,7 @@ function createSubscribers(integrationBus, moduleConnector) {
   subscribers.push({
     name: 'beneficiary:status → notification:notify',
     pattern: 'beneficiary.beneficiary.status_changed',
-    handler: async (event) => {
+    handler: async event => {
       logger.info(`[CrossModule] Beneficiary status changed: ${event.payload.beneficiaryId}`);
       try {
         if (moduleConnector && moduleConnector.hasService('notification.send')) {
@@ -283,7 +296,7 @@ function createSubscribers(integrationBus, moduleConnector) {
   subscribers.push({
     name: 'beneficiary:assessment → dashboard:kpi',
     pattern: 'beneficiary.assessment.completed',
-    handler: async (event) => {
+    handler: async event => {
       logger.info(`[CrossModule] Assessment completed — updating dashboard`);
       try {
         await integrationBus.publish('dashboard', 'kpi.update', {
@@ -304,7 +317,7 @@ function createSubscribers(integrationBus, moduleConnector) {
   subscribers.push({
     name: 'attendance:absence → hr:flag',
     pattern: 'attendance.absence.detected',
-    handler: async (event) => {
+    handler: async event => {
       logger.info(`[CrossModule] Absence detected: ${event.payload.employeeId}`);
       try {
         await integrationBus.publish('hr', 'absence.flagged', {
@@ -323,7 +336,7 @@ function createSubscribers(integrationBus, moduleConnector) {
   subscribers.push({
     name: 'attendance:checkout → payroll:hours',
     pattern: 'attendance.employee.checked_out',
-    handler: async (event) => {
+    handler: async event => {
       try {
         await integrationBus.publish('finance', 'workhours.logged', {
           employeeId: event.payload.employeeId,
@@ -341,8 +354,10 @@ function createSubscribers(integrationBus, moduleConnector) {
   subscribers.push({
     name: 'system:denied → security:alert',
     pattern: 'system.auth.permission_denied',
-    handler: async (event) => {
-      logger.info(`[CrossModule] SECURITY: Permission denied for ${event.payload.userId} on ${event.payload.resource}`);
+    handler: async event => {
+      logger.info(
+        `[CrossModule] SECURITY: Permission denied for ${event.payload.userId} on ${event.payload.resource}`
+      );
       try {
         await integrationBus.publish('system', 'security.alert', {
           type: 'permission_denied',
@@ -362,8 +377,10 @@ function createSubscribers(integrationBus, moduleConnector) {
   subscribers.push({
     name: 'system:error → monitoring:aggregate',
     pattern: 'system.system.error',
-    handler: async (event) => {
-      logger.error(`[CrossModule] SYSTEM ERROR in ${event.payload.module}: ${event.payload.message}`);
+    handler: async event => {
+      logger.error(
+        `[CrossModule] SYSTEM ERROR in ${event.payload.module}: ${event.payload.message}`
+      );
       // Error events are already persisted via the integration bus
       // This subscriber can be extended to push to external monitoring
     },
@@ -373,7 +390,7 @@ function createSubscribers(integrationBus, moduleConnector) {
   subscribers.push({
     name: 'hr:leave → finance:deduct',
     pattern: 'hr.leave.approved',
-    handler: async (event) => {
+    handler: async event => {
       logger.info(`[CrossModule] Leave approved for ${event.payload.employeeId}`);
       try {
         await integrationBus.publish('finance', 'leave.deduction_check', {
@@ -393,7 +410,7 @@ function createSubscribers(integrationBus, moduleConnector) {
   subscribers.push({
     name: 'hr:salary → finance:budget',
     pattern: 'hr.salary.changed',
-    handler: async (event) => {
+    handler: async event => {
       logger.info(`[CrossModule] Salary changed for ${event.payload.employeeId}`);
       try {
         await integrationBus.publish('finance', 'salary.budget_impact', {
@@ -443,7 +460,9 @@ function initializeCrossModuleSubscribers(integrationBus, moduleConnector = null
     }
   }
 
-  logger.info(`[CrossModule] Initialized ${registered.length}/${subscribers.length} cross-module subscribers`);
+  logger.info(
+    `[CrossModule] Initialized ${registered.length}/${subscribers.length} cross-module subscribers`
+  );
 
   return {
     subscriberCount: registered.length,

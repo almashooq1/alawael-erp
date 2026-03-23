@@ -619,8 +619,11 @@ function validatePayload(domain, eventType, payload) {
       // Fields are recommended but not strictly required
       continue;
     }
-    const actualType = Array.isArray(payload[field]) ? 'array' :
-      payload[field] instanceof Date ? 'date' : typeof payload[field];
+    const actualType = Array.isArray(payload[field])
+      ? 'array'
+      : payload[field] instanceof Date
+        ? 'date'
+        : typeof payload[field];
     if (actualType !== expectedType && expectedType !== 'object') {
       errors.push(`Field "${field}" expected ${expectedType}, got ${actualType}`);
     }

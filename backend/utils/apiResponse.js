@@ -1,3 +1,4 @@
+// @deprecated — Prefer importing from 'errors/AppError' for ApiResponse & ApiError
 /* eslint-disable no-unused-vars */
 // backend/utils/apiResponse.js
 /**

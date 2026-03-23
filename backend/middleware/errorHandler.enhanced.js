@@ -1,3 +1,4 @@
+// @deprecated — Prefer importing from 'errors/errorHandler' for new code
 /**
  * Enhanced Error Handler Middleware
  * معالج الأخطاء المحسّن

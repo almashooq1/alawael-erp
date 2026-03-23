@@ -1032,6 +1032,10 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   // ── Phase 18: OCR Document Processing — معالجة مستندات بالتعرف الضوئي ───
   safeMount(app, ['/api/ocr-documents', '/api/v1/ocr-documents'], '../routes/ocrDocument.routes');
   logger.info('Phase 18 mounted (1 module: ocrDocument)');
+
+  // ── Phase 19: CEO Executive Dashboard — لوحة تحكم الإدارة التنفيذية ───
+  safeMount(app, ['/api/ceo-dashboard', '/api/v1/ceo-dashboard'], '../routes/ceoDashboard.routes');
+  logger.info('Phase 19 mounted (1 module: ceoDashboard)');
 };
 
 module.exports = { mountAllRoutes, dualMount, safeMount };

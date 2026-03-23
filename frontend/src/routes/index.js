@@ -106,3 +106,6 @@ export { default as AIDiagnosticRoutes } from './AIDiagnosticRoutes';
 
 // === Phase 18: OCR Document Processing (معالجة مستندات بالتعرف الضوئي) ===
 export { default as OCRDocumentRoutes } from './OCRDocumentRoutes';
+
+// === Phase 19: CEO Executive Dashboard (لوحة تحكم الإدارة التنفيذية) ===
+export { default as CEODashboardRoutes } from './CEODashboardRoutes';

@@ -243,19 +243,15 @@ class BackupRestoreService {
     // Daily backup at 2 AM
     schedule.scheduleJob('0 2 * * *', async () => {
       try {
-        // console.log('📦 Starting daily automatic backup...');
 
         // Create backup
         const backup = await this.createLocalBackup();
-        // console.log(`✅ Local backup created: ${backup.fileName}`);
 
         // Compress backup
         const compressedPath = await this.compressBackup(backup.backupPath);
-        // console.log(`✅ Backup compressed: ${compressedPath}`);
 
         // Upload to S3
         const s3Result = await this.uploadBackupToS3(compressedPath, path.basename(compressedPath));
-        // console.log(`✅ Backup uploaded to S3: ${s3Result.s3Url}`);
 
         // Cleanup old local backups (keep last 7 days)
         await this.cleanupOldBackups(7);
@@ -268,14 +264,12 @@ class BackupRestoreService {
     // Weekly full backup at Sunday 1 AM
     schedule.scheduleJob('0 1 * * 0', async () => {
       try {
-        // console.log('📦 Starting weekly full backup...');
         // Similar process with full backup flag
       } catch (error) {
         logger.error(`❌ Weekly backup failed: ${error.message}`);
       }
     });
 
-    // console.log('✅ Backup schedules configured');
   }
 
   /**
@@ -318,7 +312,6 @@ class BackupRestoreService {
 
         if (stats.mtime.getTime() < cutoffDate) {
           await fs.unlink(filePath);
-          // console.log(`🗑️  Deleted old backup: ${file}`);
         }
       }
 

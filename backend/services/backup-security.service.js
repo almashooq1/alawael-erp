@@ -47,7 +47,6 @@ class AdvancedSecurity extends EventEmitter {
       await fs.mkdir(this.keyPath, { recursive: true });
       await this.loadEncryptionKeys();
       await this.loadAccessControl();
-      // console.log('✅ Advanced security system initialized');
       this.startSecurityMonitoring();
     } catch (error) {
       logger.error('❌ Security initialization failed:', error.message);
@@ -569,8 +568,8 @@ class AdvancedSecurity extends EventEmitter {
           this.encryptionKeys.set(key.id, key);
         }
       }
-    } catch (error) {
-      // console.log('ℹ️  No existing encryption keys found');
+    } catch (_error) {
+      // Silently ignore — keys will be empty on first run
     }
   }
 

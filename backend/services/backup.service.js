@@ -53,7 +53,6 @@ class BackupService {
 
       mongodump.stderr.on('data', data => {
         // mongodump outputs progress to stderr
-        // console.log(`Backup: ${data}`);
       });
 
       mongodump.on('close', async code => {

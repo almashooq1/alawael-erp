@@ -212,9 +212,6 @@ function setupDefaults() {
     }
 
     rbacInitialized = true;
-    if (process.env.DEBUG_RBAC === 'true') {
-      // console.log('✅ RBAC Defaults initialized');
-    }
   } catch (error) {
     if (process.env.DEBUG_RBAC === 'true') {
       logger.warn('RBAC Initialization error:', error.message);

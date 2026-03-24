@@ -93,7 +93,6 @@ class BillingService {
       });
 
       // Emit event for claim submission
-      // console.log(`Insurance claim created: ${claim._id}`);
 
       return claim;
     } catch (error) {
@@ -228,7 +227,6 @@ class BillingService {
       const newStatus = amount >= invoice.amount ? 'paid' : 'partially_paid';
       await Invoice.findByIdAndUpdate(invoiceId, { status: newStatus });
 
-      // console.log(`Payment processed: ${payment._id}`);
       return payment;
     } catch (error) {
       logger.error('Failed to process payment:', error);
@@ -269,7 +267,6 @@ class BillingService {
         },
       });
 
-      // console.log(`Invoice sent to ${invoice.beneficiary.email}`);
     } catch (error) {
       logger.error('Failed to send invoice:', error);
     }

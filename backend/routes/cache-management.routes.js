@@ -19,9 +19,6 @@ router.use(authenticate);
 
 // Debug middleware to log all requests to this router
 router.use((_req, _res, next) => {
-  // console.log(
-  //   `[CACHE-ROUTER] ${req.method} ${req.path} | URL: ${req.originalUrl} | Base URL: ${req.baseUrl}`
-  // );
   next();
 });
 
@@ -32,9 +29,7 @@ router.use((_req, _res, next) => {
  */
 router.get('/cache-stats', (req, res) => {
   try {
-    // console.log('[CACHE-STATS] Endpoint hit - returning statistics');
     const stats = getCacheStats();
-    // console.log('[CACHE-STATS] Stats retrieved:', JSON.stringify(stats));
     res.json({
       success: true,
       caching: stats,
@@ -57,12 +52,10 @@ router.get('/cache-stats', (req, res) => {
  */
 router.post('/cache/clear', authorize(['admin', 'system_admin']), (req, res) => {
   try {
-    // console.log('[CACHE-CLEAR] Endpoint hit - clearing cache');
     const path = req.body?.path || null;
     clearCache(path);
 
     const stats = getCacheStats();
-    // console.log('[CACHE-CLEAR] Cache cleared successfully');
     res.json({
       success: true,
       message: path ? `Cache cleared for ${path}` : 'All cache cleared',

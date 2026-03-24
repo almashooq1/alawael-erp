@@ -48,7 +48,6 @@ class PerformanceOptimization extends EventEmitter {
   async initializeOptimization() {
     try {
       await fs.mkdir(this.dataPath, { recursive: true });
-      // console.log('✅ Performance optimization system initialized');
       this.startContinuousMonitoring();
     } catch (error) {
       logger.error('❌ Optimization initialization failed:', error.message);
@@ -216,7 +215,6 @@ class PerformanceOptimization extends EventEmitter {
 
       this.optimizationHistory.push(optimization);
       this.emit('performance:optimization-applied', optimization);
-      // console.log(`🔧 Performance optimization applied: ${optimization.actions.length} actions`);
 
       return optimization;
     } catch (error) {

@@ -45,7 +45,6 @@ class BackupSyncSystem extends EventEmitter {
     try {
       await fs.mkdir(this.syncPath, { recursive: true });
       await this.loadSyncMetadata();
-      // console.log('✅ Sync system initialized');
       this.startAutomaticSync();
     } catch (error) {
       logger.error('❌ Sync initialization failed:', error.message);
@@ -117,7 +116,6 @@ class BackupSyncSystem extends EventEmitter {
 
       this.activeSyncs.set(syncId, syncSession);
       this.emit('sync:started', syncSession);
-      // console.log(`🔄 Starting incremental sync [${syncId}]`);
 
       // Detect changes
       const changes = await this.detectChanges(source);
@@ -143,7 +141,6 @@ class BackupSyncSystem extends EventEmitter {
         const destFile = file.replace(source, destination);
         try {
           await fs.unlink(destFile);
-          // console.log(`🗑️  Deleted from destination: ${destFile}`);
         } catch (error) {
           logger.warn(`⚠️  Failed to delete ${destFile}: ${error.message}`);
         }
@@ -155,7 +152,6 @@ class BackupSyncSystem extends EventEmitter {
       this.activeSyncs.delete(syncId);
 
       this.emit('sync:completed', syncSession);
-      // console.log(`✅ Incremental sync completed [${syncId}]`);
 
       return syncSession;
     } catch (error) {
@@ -206,7 +202,6 @@ class BackupSyncSystem extends EventEmitter {
         readStream.pipe(require('fs').createWriteStream(destFile));
       });
 
-      // console.log(`✅ Synced: ${sourcePath}`);
     } catch (error) {
       logger.error(`❌ Failed to sync file: ${error.message}`);
       throw error;
@@ -255,7 +250,6 @@ class BackupSyncSystem extends EventEmitter {
       };
 
       this.emit('sync:conflict-resolved', resolution);
-      // console.log(`🔧 Conflict resolved for ${file}: ${winner} version kept`);
 
       return resolution;
     } catch (error) {
@@ -288,7 +282,6 @@ class BackupSyncSystem extends EventEmitter {
   startAutomaticSync() {
     setInterval(() => {
       this.emit('sync:auto-check');
-      // console.log('🔄 Automatic sync check triggered');
     }, this.syncInterval);
   }
 
@@ -364,8 +357,8 @@ class BackupSyncSystem extends EventEmitter {
 
       this.fileHashes = new Map(metadata.fileHashes || []);
       this.syncHistory = metadata.syncHistory || [];
-    } catch (error) {
-      // console.log('ℹ️  No sync metadata found, starting fresh');
+    } catch (_error) {
+      // Silently ignore — sync metadata will use defaults
     }
   }
 

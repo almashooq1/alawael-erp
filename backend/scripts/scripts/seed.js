@@ -2,10 +2,11 @@
 // سكريبت تعبئة قاعدة البيانات ببيانات تجريبية
 
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 const { connectDB } = require('../config/database');
 const { User, Page, Post, Media, Analytics: _Analytics } = require('../models/schemas');
 
-// Sample data
+// Sample data — passwords are hashed before insertion in seedDatabase()
 const sampleUsers = [
   {
     name: 'أحمد محمد',
@@ -90,9 +91,15 @@ async function seedDatabase() {
     await Media.deleteMany({});
     console.log('✅ Data cleared\n');
 
-    // Seed users
+    // Seed users (hash passwords first)
     console.log('👥 Seeding users...');
-    const users = await User.insertMany(sampleUsers);
+    const hashedUsers = await Promise.all(
+      sampleUsers.map(async user => ({
+        ...user,
+        password: await bcrypt.hash(user.password, 12),
+      }))
+    );
+    const users = await User.insertMany(hashedUsers);
     console.log(`✅ ${users.length} users created\n`);
 
     // Seed pages

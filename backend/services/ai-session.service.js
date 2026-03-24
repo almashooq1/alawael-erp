@@ -26,11 +26,9 @@ class AISessionService extends EventEmitter {
       const response = await axios.get(`${this.modelEndpoint}/health`);
       if (response.status === 200) {
         this.initialized = true;
-        // console.log('✅ AI Service initialized successfully');
         this.emit('ai:ready');
       }
     } catch (error) {
-      // console.log('⚠️ AI Service unavailable - continuing with fallback mode');
       this.initialized = false;
     }
   }

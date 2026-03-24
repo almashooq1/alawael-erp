@@ -19,12 +19,10 @@ const logger = require('../utils/logger');
 const User = require('../models/User');
 const { loginLimiter, sensitiveOperationLimiter } = require('../middleware/rateLimiter');
 
-// console.log('[SSO] Loading SSO Routes Module...');
 
 const ssoService = new SSOService();
 const oAuthService = new OAuthService();
 
-// console.log('[SSO] Creating /status route handler...');
 
 // ============================================
 // SSO Health & Status Endpoint
@@ -35,7 +33,6 @@ const oAuthService = new OAuthService();
  * Get SSO system status
  */
 router.get('/status', async (_req, res) => {
-  // console.log('[SSO-HANDLER] /status endpoint hit!');
   try {
     res.json({
       success: true,
@@ -74,8 +71,6 @@ router.get('/status', async (_req, res) => {
  * تسجيل دخول المستخدم وإنشاء جلسة SSO
  */
 router.post('/login', loginLimiter, async (req, res) => {
-  // console.log('[SSO-HANDLER] /login endpoint hit!');
-  // console.log('[SSO-HANDLER] Body:', req.body);
 
   try {
     const { email, password, deviceId, userAgent } = req.body;

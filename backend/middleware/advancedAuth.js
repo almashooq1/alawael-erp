@@ -342,7 +342,6 @@ const logActivity = action => {
           };
 
           // يمكن حفظ النشاط في قاعدة البيانات هنا
-          // console.log('📋 Activity Log:', JSON.stringify(activity));
         } catch (error) {
           logger.error('Error logging activity:', error);
         }

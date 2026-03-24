@@ -43,7 +43,6 @@ class BackupQueueSystem extends EventEmitter {
     try {
       await fs.mkdir(this.queuePath, { recursive: true });
       await this.loadPersistedQueue();
-      // console.log('✅ Queue system initialized');
     } catch (error) {
       logger.error('❌ Queue initialization failed:', error.message);
     }
@@ -120,7 +119,6 @@ class BackupQueueSystem extends EventEmitter {
       job.startedAt = new Date();
 
       this.emit('job:started', job);
-      // console.log(`🔄 Processing job [${job.id}] - Type: ${job.type}`);
 
       const timeoutPromise = new Promise((_, reject) =>
         setTimeout(() => reject(new Error('Job timeout')), job.timeout)
@@ -138,7 +136,6 @@ class BackupQueueSystem extends EventEmitter {
       this.processing.delete(job.id);
 
       this.emit('job:completed', job);
-      // console.log(`✅ Job completed [${job.id}]`);
 
       await this.persistQueue();
       this.processQueue();
@@ -319,8 +316,8 @@ class BackupQueueSystem extends EventEmitter {
       this.queue = state.queue || [];
       this.completed = state.completed || [];
       this.deadLetterQueue = state.deadLetterQueue || [];
-    } catch (error) {
-      // console.log('ℹ️  No persisted queue found, starting fresh');
+    } catch (_error) {
+      // Silently ignore — queue state will use defaults
     }
   }
 }

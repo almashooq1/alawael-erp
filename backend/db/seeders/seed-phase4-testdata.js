@@ -15,6 +15,7 @@
 
 const mongoose = require('mongoose');
 const path = require('path');
+const bcrypt = require('bcryptjs');
 require('dotenv').config({ path: path.join(__dirname, '../../.env') });
 
 // Import all models
@@ -51,34 +52,35 @@ const connectDB = async () => {
 // Seed data templates
 const seedUsers = async () => {
   console.log('\n📝 Seeding Users...');
+  const hashedPwd = await bcrypt.hash('TestUser123!', 12);
   const users = [
     {
       email: 'admin@test.com',
-      password: 'hashedPassword123',
+      password: hashedPwd,
       fullName: 'Admin User',
       role: 'admin',
     },
     {
       email: 'doctor@test.com',
-      password: 'hashedPassword123',
+      password: hashedPwd,
       fullName: 'Dr. Ahmed Hassan',
       role: 'doctor',
     },
     {
       email: 'therapist@test.com',
-      password: 'hashedPassword123',
+      password: hashedPwd,
       fullName: 'Fatima Mohamed',
       role: 'therapist',
     },
     {
       email: 'beneficiary@test.com',
-      password: 'hashedPassword123',
+      password: hashedPwd,
       fullName: 'Samir Ali',
       role: 'user',
     },
     {
       email: 'manager@test.com',
-      password: 'hashedPassword123',
+      password: hashedPwd,
       fullName: 'Noor Ibrahim',
       role: 'manager',
     },

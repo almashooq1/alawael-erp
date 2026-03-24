@@ -543,7 +543,6 @@ class AccountingService {
    */
   async _sendInvoiceEmail(invoice) {
     // سيتم تنفيذ هذه الوظيفة لاحقاً
-    // console.log(`Sending invoice ${invoice.invoiceNumber} to ${invoice.customerEmail}`);
   }
 
   /**

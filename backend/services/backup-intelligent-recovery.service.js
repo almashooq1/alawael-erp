@@ -36,7 +36,6 @@ class IntelligentRecovery extends EventEmitter {
   async initializeRecovery() {
     try {
       await fs.mkdir(this.dataPath, { recursive: true });
-      // console.log('✅ Intelligent recovery system initialized');
     } catch (error) {
       logger.error('❌ Recovery initialization failed:', error.message);
     }
@@ -427,7 +426,6 @@ class IntelligentRecovery extends EventEmitter {
       };
 
       this.emit('failover:initiated', failover);
-      // console.log('⚠️  Automated failover initiated');
 
       return failover;
     } catch (error) {

@@ -43,7 +43,6 @@ class AdvancedAnalytics extends EventEmitter {
     try {
       await fs.mkdir(this.dataPath, { recursive: true });
       await this.loadAnalyticsData();
-      // console.log('✅ Analytics system initialized');
       this.startContinuousAnalysis();
     } catch (error) {
       logger.error('❌ Analytics initialization failed:', error.message);
@@ -421,8 +420,8 @@ class AdvancedAnalytics extends EventEmitter {
       this.predictions = data.predictions || [];
       this.anomalies = data.anomalies || [];
       this.recommendations = data.recommendations || [];
-    } catch (error) {
-      // console.log('ℹ️  No analytics data found, starting fresh');
+    } catch (_error) {
+      // Silently ignore — analytics state will use defaults
     }
   }
 

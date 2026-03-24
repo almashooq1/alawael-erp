@@ -164,25 +164,18 @@ class AdvancedMessagingAlertSystem {
     // محاكاة الإرسال
     switch (channel) {
       case 'email':
-        // console.log(`📧 إرسال بريد إلى ${message.recipientId}: ${message.subject}`);
         return true; // محاكاة النجاح
 
       case 'sms':
-        // console.log(
-        //   `📱 إرسال رسالة نصية إلى ${message.recipientId}: ${message.body.substring(0, 50)}...`
-        // );
         return true;
 
       case 'push':
-        // console.log(`🔔 إرسال إشعار فوري إلى ${message.recipientId}`);
         return true;
 
       case 'inApp':
-        // console.log(`💬 إضافة رسالة داخل التطبيق`);
         return true;
 
       case 'webhook':
-        // console.log(`🔗 إرسال إلى webhook: ${message.metadata.webhookUrl}`);
         return true;
 
       default:
@@ -409,7 +402,6 @@ class AdvancedMessagingAlertSystem {
    * تصعيد المشكلة
    */
   async escalateIssue(rule, alert, workflows) {
-    // console.log(`🚨 تصعيد المشكلة: ${rule.name}`);
     // في تطبيق حقيقي، قد تصعد إلى مدير أعلى
     return { success: true, escalated: true };
   }
@@ -419,7 +411,6 @@ class AdvancedMessagingAlertSystem {
    */
   async pauseWorkflows(alert, workflows) {
     const affectedCount = workflows.length;
-    // console.log(`⏸️ إيقاف ${affectedCount} سير عمل`);
     return { success: true, pausedCount: affectedCount };
   }
 
@@ -428,7 +419,6 @@ class AdvancedMessagingAlertSystem {
    */
   async cancelWorkflows(alert, workflows) {
     const affectedCount = workflows.length;
-    // console.log(`❌ إلغاء ${affectedCount} سير عمل`);
     return { success: true, cancelledCount: affectedCount };
   }
 

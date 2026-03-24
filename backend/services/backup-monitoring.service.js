@@ -47,7 +47,6 @@ class BackupMonitoringService extends EventEmitter {
    */
   async initializeMonitoring() {
     try {
-      // console.log('🔍 Initializing backup monitoring system...');
 
       // Start periodic health checks
       this.startHealthCheck();
@@ -58,7 +57,6 @@ class BackupMonitoringService extends EventEmitter {
       // Start alert manager
       this.startAlertManager();
 
-      // console.log('✅ Monitoring system initialized');
     } catch (error) {
       logger.error('❌ Failed to initialize monitoring:', error.message);
     }
@@ -341,7 +339,6 @@ class BackupMonitoringService extends EventEmitter {
     }
 
     this.emit('alert:created', newAlert);
-    // console.log(`⚠️  Alert [${newAlert.level}]: ${newAlert.message}`);
 
     return newAlert;
   }
@@ -406,7 +403,6 @@ class BackupMonitoringService extends EventEmitter {
   async sendNotification(alert) {
     try {
       // This can be integrated with email, SMS, or push notification services
-      // console.log(`📢 Notification: [${alert.level}] ${alert.message}`);
       this.emit('notification:sent', {
         alertId: alert.id,
         message: alert.message,
@@ -558,7 +554,6 @@ class BackupMonitoringService extends EventEmitter {
   stop() {
     for (const [name, interval] of this.monitoringIntervals) {
       clearInterval(interval);
-      // console.log(`⏹️  Stopped monitoring: ${name}`);
     }
     this.monitoringIntervals.clear();
   }

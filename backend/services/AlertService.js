@@ -505,7 +505,6 @@ class AlertService extends EventEmitter {
             resolvedAt: { $lt: cutoffDate },
           });
 
-          // console.log(`🗑️  Cleaned up ${result.deletedCount} old alerts`);
         } catch (error) {
           logger.error(`❌ Alert cleanup failed: ${error.message}`);
         }
@@ -513,7 +512,6 @@ class AlertService extends EventEmitter {
       60 * 60 * 1000
     ); // Every hour
 
-    // console.log('✅ Auto alert cleanup configured');
   }
 }
 

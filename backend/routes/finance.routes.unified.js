@@ -59,7 +59,6 @@ let createRBACMiddleware;
 try {
   const rbacModule = require('../rbac');
   createRBACMiddleware = rbacModule.createRBACMiddleware;
-  // console.log('[Finance Routes] RBAC middleware loaded successfully');
 } catch (err) {
   logger.warn('[Finance Routes] RBAC module not available, using fallback');
   createRBACMiddleware = permission => (req, res, next) => {
@@ -301,8 +300,6 @@ router.post(
   validate(finV.createTransaction),
   asyncHandler(async (req, res) => {
     const { amount, type, description, category, date, tags, notes, receipts } = req.body;
-    // console.log('[Finance Routes] POST /transactions called with req.body:', req.body);
-    // console.log('[Finance Routes] req.user:', req.user);
 
     // Validation
     if (!amount || !type) {
@@ -325,13 +322,10 @@ router.post(
       receipts,
     });
 
-    // console.log('[Finance Routes] createTransaction returned:', typeof result, result);
-    // console.log('[Finance Routes] About to send response with status 201');
 
     // Ensure we're sending valid JSON
     const responseBody = result || { success: true, transaction: {} };
     res.status(201).json(responseBody);
-    // console.log('[Finance Routes] Response sent');
   })
 );
 

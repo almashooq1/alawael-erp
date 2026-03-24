@@ -860,14 +860,63 @@ class ReportBuilderService {
       Object.keys(row).forEach(key => {
         expr = expr.replace(new RegExp(`\\{${key}\\}`, 'g'), Number(row[key]) || 0);
       });
-      // Safe eval: only allow numbers and basic math
+      // Only allow numbers and basic math operators
       if (/^[\d\s+\-*/().]+$/.test(expr)) {
-        return parseFloat(eval(expr).toFixed(2)); // eslint-disable-line no-eval
+        return parseFloat(this._safeMathEval(expr).toFixed(2));
       }
       return 0;
     } catch {
       return 0;
     }
+  }
+
+  /**
+   * Safe math expression evaluator (replaces eval)
+   * Supports: +, -, *, /, (), decimals, unary minus
+   */
+  _safeMathEval(expr) {
+    const tokens = expr.match(/(\d+\.?\d*|[+\-*/()])/g);
+    if (!tokens) return 0;
+    let pos = 0;
+
+    const peek = () => tokens[pos];
+    const consume = () => tokens[pos++];
+
+    const parseExpr = () => {
+      let left = parseTerm();
+      while (peek() === '+' || peek() === '-') {
+        const op = consume();
+        const right = parseTerm();
+        left = op === '+' ? left + right : left - right;
+      }
+      return left;
+    };
+
+    const parseTerm = () => {
+      let left = parseFactor();
+      while (peek() === '*' || peek() === '/') {
+        const op = consume();
+        const right = parseFactor();
+        left = op === '*' ? left * right : right !== 0 ? left / right : 0;
+      }
+      return left;
+    };
+
+    const parseFactor = () => {
+      if (peek() === '(') {
+        consume();
+        const val = parseExpr();
+        if (peek() === ')') consume();
+        return val;
+      }
+      if (peek() === '-') {
+        consume();
+        return -parseFactor();
+      }
+      return parseFloat(consume()) || 0;
+    };
+
+    return parseExpr();
   }
 
   _applyFilters(rows, filters) {

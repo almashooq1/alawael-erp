@@ -32,7 +32,7 @@
     "test:phase3": "jest --no-coverage",
     "test:guard:maintenance-mocks": "node scripts/testing/check-maintenance-mocks-centralized.js",
     "quality:backend": "npm run test:guard:maintenance-mocks && npm test -- --passWithNoTests --no-coverage",
-    "quality:ci": "npm run test:guard:maintenance-mocks && npm test -- --passWithNoTests --no-coverage --ci --runInBand",
+    "quality:ci": "npm run test:guard:maintenance-mocks && npm test -- --passWithNoTests --ci --runInBand",
     "quality:push": "npm run test:guard:maintenance-mocks && npm run test:phase2 -- --ci --runInBand",
     "quality:quick": "npm run test:guard:maintenance-mocks && npm run test:phase3",
     "test:all": "jest --coverage",

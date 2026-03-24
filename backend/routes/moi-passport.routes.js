@@ -23,7 +23,6 @@ const passportService = new MOIPassportService();
  */
 const passportVerificationMiddleware = (req, res, next) => {
   try {
-    // console.log('[MOI-MIDDLEWARE] passportVerificationMiddleware called for:', req.path);
     req.passportService = passportService;
     next();
   } catch (error) {
@@ -64,7 +63,6 @@ const validateRequest = (req, res, next) => {
  * Health check endpoint
  */
 router.get('/health', (_req, res) => {
-  // console.log('[MOI-HEALTH] Health endpoint called');
   res.json({
     success: true,
     status: 'healthy',

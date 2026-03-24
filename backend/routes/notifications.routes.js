@@ -18,7 +18,6 @@ let createRBACMiddleware;
 try {
   const rbacModule = require('../rbac');
   createRBACMiddleware = rbacModule.createRBACMiddleware;
-  // console.log('[Notifications Routes] RBAC middleware loaded successfully');
 } catch (err) {
   logger.warn('[Notifications Routes] RBAC module not available, using fallback');
   createRBACMiddleware = permission => (req, res, next) => {

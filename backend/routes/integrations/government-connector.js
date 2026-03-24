@@ -292,7 +292,6 @@ class GovernmentConnector extends EventEmitter {
     }
 
     this.emit('audit-log', log);
-    // console.log('[GOV-CONNECTOR]', JSON.stringify(log));
   }
 
   /**

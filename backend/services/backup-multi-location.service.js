@@ -86,10 +86,6 @@ class MultiLocationBackupStorage {
       });
     }
 
-    // console.log(
-    //   '✅ Storage locations initialized:',
-    //   Array.from(this.storageLocations.keys()).join(', ')
-    // );
   }
 
   /**
@@ -141,7 +137,6 @@ class MultiLocationBackupStorage {
           data: result.value,
         });
 
-        // console.log(`✅ Backup stored in ${location.name}`);
       } else {
         results.push({
           location: location.name,
@@ -436,7 +431,6 @@ class MultiLocationBackupStorage {
           location: location.name,
           status: 'DELETED',
         });
-        // console.log(`✅ Deleted from ${location.name}`);
       } catch (error) {
         results.push({
           location: location.name,
@@ -571,7 +565,6 @@ class MultiLocationBackupStorage {
    * نسخ النسخة الاحتياطية إلى جميع المواقع
    */
   async replicateBackup(backupId, sourceLocation = null) {
-    // console.log(`🔄 Replicating backup [${backupId}]...`);
 
     try {
       // Retrieve from source
@@ -600,7 +593,6 @@ class MultiLocationBackupStorage {
         }
       }
 
-      // console.log(`✅ Replication completed`);
       return results;
     } catch (error) {
       logger.error(`❌ Replication failed:`, error.message);

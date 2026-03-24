@@ -15,8 +15,8 @@ const handleValidation = (req, res, next) => {
   if (!errors.isEmpty()) return res.status(400).json({ success: false, errors: errors.array() });
   next();
 };
-const _getUserId = (req) => req.user?.id || req.user?.userId || 'u1';
-const wrap = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
+const _getUserId = req => req.user?.id || req.user?.userId || 'u1';
+const wrap = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
 /* ────────────────────────────────────────────
    DASHBOARD — لوحة التحكم
@@ -27,16 +27,24 @@ router.get(
   wrap((req, res) => {
     const data = svc.getDashboard();
     res.json({ success: true, data });
-  }),
+  })
 );
 
 /* ────────────────────────────────────────────
    REFERENCE DATA — بيانات مرجعية
    ──────────────────────────────────────────── */
-router.get('/scales', authenticate, (req, res) => res.json({ success: true, data: svc.getClinicalScales() }));
-router.get('/disability-types', authenticate, (req, res) => res.json({ success: true, data: svc.getDisabilityTypes() }));
-router.get('/therapy-types', authenticate, (req, res) => res.json({ success: true, data: svc.getTherapyTypes() }));
-router.get('/ai-models', authenticate, (req, res) => res.json({ success: true, data: svc.getAIModels() }));
+router.get('/scales', authenticate, (req, res) =>
+  res.json({ success: true, data: svc.getClinicalScales() })
+);
+router.get('/disability-types', authenticate, (req, res) =>
+  res.json({ success: true, data: svc.getDisabilityTypes() })
+);
+router.get('/therapy-types', authenticate, (req, res) =>
+  res.json({ success: true, data: svc.getTherapyTypes() })
+);
+router.get('/ai-models', authenticate, (req, res) =>
+  res.json({ success: true, data: svc.getAIModels() })
+);
 
 /* ────────────────────────────────────────────
    BENEFICIARIES — المستفيدون
@@ -54,7 +62,7 @@ router.get(
       search,
     });
     res.json({ success: true, ...data });
-  }),
+  })
 );
 
 router.get(
@@ -65,7 +73,7 @@ router.get(
   wrap((req, res) => {
     const data = svc.getBeneficiary(req.params.id);
     res.json({ success: true, data });
-  }),
+  })
 );
 
 router.post(
@@ -81,7 +89,7 @@ router.post(
   wrap((req, res) => {
     const data = svc.createBeneficiary(req.body);
     res.status(201).json({ success: true, data });
-  }),
+  })
 );
 
 router.put(
@@ -93,7 +101,7 @@ router.put(
   wrap((req, res) => {
     const data = svc.updateBeneficiary(req.params.id, req.body);
     res.json({ success: true, data });
-  }),
+  })
 );
 
 /* ────────────────────────────────────────────
@@ -108,7 +116,7 @@ router.get(
     const { scale, domain } = req.query;
     const data = svc.listAssessments(req.params.beneficiaryId, { scale, domain });
     res.json({ success: true, data });
-  }),
+  })
 );
 
 router.get(
@@ -119,7 +127,7 @@ router.get(
   wrap((req, res) => {
     const data = svc.getAssessment(req.params.id);
     res.json({ success: true, data });
-  }),
+  })
 );
 
 router.post(
@@ -136,7 +144,7 @@ router.post(
   wrap((req, res) => {
     const data = svc.createAssessment({ ...req.body, beneficiaryId: req.params.beneficiaryId });
     res.status(201).json({ success: true, data });
-  }),
+  })
 );
 
 router.get(
@@ -151,7 +159,7 @@ router.get(
   wrap((req, res) => {
     const data = svc.compareAssessments(req.params.beneficiaryId, req.query.id1, req.query.id2);
     res.json({ success: true, data });
-  }),
+  })
 );
 
 /* ────────────────────────────────────────────
@@ -166,7 +174,7 @@ router.get(
     const { therapyType, status } = req.query;
     const data = svc.listSessions(req.params.beneficiaryId, { therapyType, status });
     res.json({ success: true, data });
-  }),
+  })
 );
 
 router.get(
@@ -177,7 +185,7 @@ router.get(
   wrap((req, res) => {
     const data = svc.getSession(req.params.id);
     res.json({ success: true, data });
-  }),
+  })
 );
 
 router.post(
@@ -193,7 +201,7 @@ router.post(
   wrap((req, res) => {
     const data = svc.createSession({ ...req.body, beneficiaryId: req.params.beneficiaryId });
     res.status(201).json({ success: true, data });
-  }),
+  })
 );
 
 router.put(
@@ -209,7 +217,7 @@ router.put(
   wrap((req, res) => {
     const data = svc.completeSession(req.params.id, req.body);
     res.json({ success: true, data });
-  }),
+  })
 );
 
 /* ────────────────────────────────────────────
@@ -224,7 +232,7 @@ router.get(
     const { category, status } = req.query;
     const data = svc.listGoals(req.params.beneficiaryId, { category, status });
     res.json({ success: true, data });
-  }),
+  })
 );
 
 router.get(
@@ -235,7 +243,7 @@ router.get(
   wrap((req, res) => {
     const data = svc.getGoal(req.params.id);
     res.json({ success: true, data });
-  }),
+  })
 );
 
 router.post(
@@ -252,7 +260,7 @@ router.post(
   wrap((req, res) => {
     const data = svc.createGoal({ ...req.body, beneficiaryId: req.params.beneficiaryId });
     res.status(201).json({ success: true, data });
-  }),
+  })
 );
 
 router.put(
@@ -264,7 +272,7 @@ router.put(
   wrap((req, res) => {
     const data = svc.updateGoalProgress(req.params.id, +req.body.progress, req.body.milestoneIndex);
     res.json({ success: true, data });
-  }),
+  })
 );
 
 /* ────────────────────────────────────────────
@@ -277,7 +285,7 @@ router.get(
     const { beneficiaryId, status } = req.query;
     const data = svc.listTreatmentPlans({ beneficiaryId, status });
     res.json({ success: true, data });
-  }),
+  })
 );
 
 router.get(
@@ -288,7 +296,7 @@ router.get(
   wrap((req, res) => {
     const data = svc.getTreatmentPlan(req.params.id);
     res.json({ success: true, data });
-  }),
+  })
 );
 
 router.post(
@@ -303,7 +311,7 @@ router.post(
   wrap((req, res) => {
     const data = svc.createTreatmentPlan(req.body);
     res.status(201).json({ success: true, data });
-  }),
+  })
 );
 
 router.put(
@@ -315,7 +323,7 @@ router.put(
   wrap((req, res) => {
     const data = svc.updateTreatmentPlan(req.params.id, req.body);
     res.json({ success: true, data });
-  }),
+  })
 );
 
 router.post(
@@ -327,7 +335,7 @@ router.post(
   wrap((req, res) => {
     const data = svc.optimizeTreatmentPlan(req.params.id);
     res.json({ success: true, data });
-  }),
+  })
 );
 
 /* ────────────────────────────────────────────
@@ -341,7 +349,7 @@ router.get(
   wrap((req, res) => {
     const data = svc.analyzeProgress(req.params.beneficiaryId);
     res.json({ success: true, data });
-  }),
+  })
 );
 
 router.get(
@@ -352,7 +360,7 @@ router.get(
   wrap((req, res) => {
     const data = svc.generateRecommendations(req.params.beneficiaryId);
     res.json({ success: true, data });
-  }),
+  })
 );
 
 router.get(
@@ -363,7 +371,7 @@ router.get(
   wrap((req, res) => {
     const data = svc.predictOutcome(req.params.beneficiaryId, req.params.goalId);
     res.json({ success: true, data });
-  }),
+  })
 );
 
 router.get(
@@ -374,7 +382,7 @@ router.get(
   wrap((req, res) => {
     const data = svc.detectPatterns(req.params.beneficiaryId);
     res.json({ success: true, data });
-  }),
+  })
 );
 
 router.get(
@@ -385,7 +393,7 @@ router.get(
   wrap((req, res) => {
     const data = svc.assessRisk(req.params.beneficiaryId);
     res.json({ success: true, data });
-  }),
+  })
 );
 
 router.get(
@@ -396,7 +404,7 @@ router.get(
   wrap((req, res) => {
     const data = svc.generateAIReport(req.params.beneficiaryId);
     res.json({ success: true, data });
-  }),
+  })
 );
 
 /* ────────────────────────────────────────────
@@ -411,7 +419,7 @@ router.get(
     const { type } = req.query;
     const data = svc.listBehaviorLogs(req.params.beneficiaryId, { type });
     res.json({ success: true, data });
-  }),
+  })
 );
 
 router.post(
@@ -428,7 +436,7 @@ router.post(
   wrap((req, res) => {
     const data = svc.createBehaviorLog({ ...req.body, beneficiaryId: req.params.beneficiaryId });
     res.status(201).json({ success: true, data });
-  }),
+  })
 );
 
 /* ────────────────────────────────────────────
@@ -445,7 +453,7 @@ router.get(
       severity,
     });
     res.json({ success: true, data });
-  }),
+  })
 );
 
 router.put(
@@ -457,7 +465,7 @@ router.put(
   wrap((req, res) => {
     const data = svc.resolveAlert(req.params.id);
     res.json({ success: true, data });
-  }),
+  })
 );
 
 module.exports = router;

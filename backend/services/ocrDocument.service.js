@@ -43,8 +43,14 @@ const OCR_ENGINES = [
 ];
 
 const PROCESSING_STATUSES = [
-  'queued', 'preprocessing', 'ocr_running', 'parsing', 'review_needed',
-  'completed', 'failed', 'archived',
+  'queued',
+  'preprocessing',
+  'ocr_running',
+  'parsing',
+  'review_needed',
+  'completed',
+  'failed',
+  'archived',
 ];
 
 const MEDICAL_FIELDS = {
@@ -58,7 +64,14 @@ const MEDICAL_FIELDS = {
   followUp: { nameAr: 'المتابعة', nameEn: 'Follow-up' },
 };
 
-const SUPPORTED_FORMATS = ['image/jpeg', 'image/png', 'image/tiff', 'image/bmp', 'image/webp', 'application/pdf'];
+const SUPPORTED_FORMATS = [
+  'image/jpeg',
+  'image/png',
+  'image/tiff',
+  'image/bmp',
+  'image/webp',
+  'application/pdf',
+];
 
 /* ══════════════════════════════════════════════════════════════════════
    SERVICE CLASS
@@ -99,14 +112,30 @@ class OCRDocumentService {
   }
 
   /* ── ID generators ── */
-  _nextDocId() { return `doc-${++this._docId}`; }
-  _nextExtractId() { return `ext-${++this._extractId}`; }
-  _nextBatchId() { return `batch-${++this._batchId}`; }
-  _nextCorrId() { return `corr-${++this._corrId}`; }
-  _nextExportId() { return `exp-${++this._exportId}`; }
-  _nextAuditId() { return `audit-${++this._auditId}`; }
-  _nextTemplateId() { return `tpl-${++this._templateId}`; }
-  _nextQueueId() { return `queue-${++this._queueId}`; }
+  _nextDocId() {
+    return `doc-${++this._docId}`;
+  }
+  _nextExtractId() {
+    return `ext-${++this._extractId}`;
+  }
+  _nextBatchId() {
+    return `batch-${++this._batchId}`;
+  }
+  _nextCorrId() {
+    return `corr-${++this._corrId}`;
+  }
+  _nextExportId() {
+    return `exp-${++this._exportId}`;
+  }
+  _nextAuditId() {
+    return `audit-${++this._auditId}`;
+  }
+  _nextTemplateId() {
+    return `tpl-${++this._templateId}`;
+  }
+  _nextQueueId() {
+    return `queue-${++this._queueId}`;
+  }
 
   /* ══════════════════════════════════════════════════════════════════
      SEED DATA
@@ -117,20 +146,39 @@ class OCRDocumentService {
     // Templates
     const tpls = [
       {
-        id: 'tpl-901', name: 'ملخص خروج عام', nameEn: 'General Discharge Summary',
-        documentType: 'discharge_summary', fields: ['patientName', 'admissionDate', 'dischargeDate', 'diagnoses', 'medications', 'followUp'],
-        patterns: { patientName: /اسم المريض[:\s]*(.*)/i, admissionDate: /تاريخ الدخول[:\s]*([\d/.-]+)/i },
+        id: 'tpl-901',
+        name: 'ملخص خروج عام',
+        nameEn: 'General Discharge Summary',
+        documentType: 'discharge_summary',
+        fields: [
+          'patientName',
+          'admissionDate',
+          'dischargeDate',
+          'diagnoses',
+          'medications',
+          'followUp',
+        ],
+        patterns: {
+          patientName: /اسم المريض[:\s]*(.*)/i,
+          admissionDate: /تاريخ الدخول[:\s]*([\d/.-]+)/i,
+        },
         createdAt: now,
       },
       {
-        id: 'tpl-902', name: 'تقرير مختبر شامل', nameEn: 'Comprehensive Lab Report',
-        documentType: 'lab_report', fields: ['patientName', 'testDate', 'labResults', 'referenceRanges', 'notes'],
+        id: 'tpl-902',
+        name: 'تقرير مختبر شامل',
+        nameEn: 'Comprehensive Lab Report',
+        documentType: 'lab_report',
+        fields: ['patientName', 'testDate', 'labResults', 'referenceRanges', 'notes'],
         patterns: { patientName: /Patient[:\s]*(.*)/i, testDate: /Date[:\s]*([\d/.-]+)/i },
         createdAt: now,
       },
       {
-        id: 'tpl-903', name: 'وصفة طبية', nameEn: 'Medical Prescription',
-        documentType: 'prescription', fields: ['patientName', 'medications', 'dosage', 'frequency', 'duration', 'doctorName'],
+        id: 'tpl-903',
+        name: 'وصفة طبية',
+        nameEn: 'Medical Prescription',
+        documentType: 'prescription',
+        fields: ['patientName', 'medications', 'dosage', 'frequency', 'duration', 'doctorName'],
         patterns: { patientName: /المريض[:\s]*(.*)/i, doctorName: /الطبيب[:\s]*(.*)/i },
         createdAt: now,
       },
@@ -140,43 +188,88 @@ class OCRDocumentService {
     // Documents
     const docs = [
       {
-        id: 'doc-301', beneficiaryId: 'ben-101', documentType: 'discharge_summary',
-        fileName: 'discharge_ahmed_2026.pdf', fileSize: 245760, mimeType: 'application/pdf',
-        pageCount: 3, language: 'ara+eng', ocrEngine: 'tesseract-mixed',
-        status: 'completed', confidenceScore: 0.89,
-        uploadedBy: 'u1', uploadedAt: '2026-03-20T10:00:00Z', processedAt: '2026-03-20T10:02:30Z',
+        id: 'doc-301',
+        beneficiaryId: 'ben-101',
+        documentType: 'discharge_summary',
+        fileName: 'discharge_ahmed_2026.pdf',
+        fileSize: 245760,
+        mimeType: 'application/pdf',
+        pageCount: 3,
+        language: 'ara+eng',
+        ocrEngine: 'tesseract-mixed',
+        status: 'completed',
+        confidenceScore: 0.89,
+        uploadedBy: 'u1',
+        uploadedAt: '2026-03-20T10:00:00Z',
+        processedAt: '2026-03-20T10:02:30Z',
         tags: ['خروج', 'أحمد', 'علاج_طبيعي'],
       },
       {
-        id: 'doc-302', beneficiaryId: 'ben-102', documentType: 'lab_report',
-        fileName: 'lab_results_sara.jpg', fileSize: 184320, mimeType: 'image/jpeg',
-        pageCount: 1, language: 'eng', ocrEngine: 'tesseract-en',
-        status: 'completed', confidenceScore: 0.93,
-        uploadedBy: 'u2', uploadedAt: '2026-03-21T09:00:00Z', processedAt: '2026-03-21T09:01:15Z',
+        id: 'doc-302',
+        beneficiaryId: 'ben-102',
+        documentType: 'lab_report',
+        fileName: 'lab_results_sara.jpg',
+        fileSize: 184320,
+        mimeType: 'image/jpeg',
+        pageCount: 1,
+        language: 'eng',
+        ocrEngine: 'tesseract-en',
+        status: 'completed',
+        confidenceScore: 0.93,
+        uploadedBy: 'u2',
+        uploadedAt: '2026-03-21T09:00:00Z',
+        processedAt: '2026-03-21T09:01:15Z',
         tags: ['مختبر', 'سارة', 'دم'],
       },
       {
-        id: 'doc-303', beneficiaryId: 'ben-103', documentType: 'prescription',
-        fileName: 'prescription_omar.png', fileSize: 98304, mimeType: 'image/png',
-        pageCount: 1, language: 'ara', ocrEngine: 'tesseract-ar',
-        status: 'completed', confidenceScore: 0.85,
-        uploadedBy: 'u1', uploadedAt: '2026-03-22T14:00:00Z', processedAt: '2026-03-22T14:01:00Z',
+        id: 'doc-303',
+        beneficiaryId: 'ben-103',
+        documentType: 'prescription',
+        fileName: 'prescription_omar.png',
+        fileSize: 98304,
+        mimeType: 'image/png',
+        pageCount: 1,
+        language: 'ara',
+        ocrEngine: 'tesseract-ar',
+        status: 'completed',
+        confidenceScore: 0.85,
+        uploadedBy: 'u1',
+        uploadedAt: '2026-03-22T14:00:00Z',
+        processedAt: '2026-03-22T14:01:00Z',
         tags: ['وصفة', 'عمر'],
       },
       {
-        id: 'doc-304', beneficiaryId: 'ben-101', documentType: 'therapy_report',
-        fileName: 'therapy_progress_ahmed.pdf', fileSize: 312000, mimeType: 'application/pdf',
-        pageCount: 5, language: 'ara', ocrEngine: 'google-vision',
-        status: 'review_needed', confidenceScore: 0.72,
-        uploadedBy: 'u3', uploadedAt: '2026-03-23T08:00:00Z', processedAt: '2026-03-23T08:05:00Z',
+        id: 'doc-304',
+        beneficiaryId: 'ben-101',
+        documentType: 'therapy_report',
+        fileName: 'therapy_progress_ahmed.pdf',
+        fileSize: 312000,
+        mimeType: 'application/pdf',
+        pageCount: 5,
+        language: 'ara',
+        ocrEngine: 'google-vision',
+        status: 'review_needed',
+        confidenceScore: 0.72,
+        uploadedBy: 'u3',
+        uploadedAt: '2026-03-23T08:00:00Z',
+        processedAt: '2026-03-23T08:05:00Z',
         tags: ['علاج_طبيعي', 'تقدم', 'أحمد'],
       },
       {
-        id: 'doc-305', beneficiaryId: 'ben-104', documentType: 'radiology_report',
-        fileName: 'xray_fatima.tiff', fileSize: 524288, mimeType: 'image/tiff',
-        pageCount: 2, language: 'eng', ocrEngine: 'azure-cognitive',
-        status: 'queued', confidenceScore: null,
-        uploadedBy: 'u2', uploadedAt: '2026-03-23T10:00:00Z', processedAt: null,
+        id: 'doc-305',
+        beneficiaryId: 'ben-104',
+        documentType: 'radiology_report',
+        fileName: 'xray_fatima.tiff',
+        fileSize: 524288,
+        mimeType: 'image/tiff',
+        pageCount: 2,
+        language: 'eng',
+        ocrEngine: 'azure-cognitive',
+        status: 'queued',
+        confidenceScore: null,
+        uploadedBy: 'u2',
+        uploadedAt: '2026-03-23T10:00:00Z',
+        processedAt: null,
         tags: ['أشعة', 'فاطمة'],
       },
     ];
@@ -190,30 +283,77 @@ class OCRDocumentService {
     // Extracted data
     const extractions = [
       {
-        id: 'ext-401', documentId: 'doc-301', templateId: 'tpl-901',
-        rawText: 'ملخص الخروج\nاسم المريض: أحمد محمد العلي\nتاريخ الدخول: 2026-03-10\nتاريخ الخروج: 2026-03-18\nالتشخيص: شلل دماغي تشنجي - G80.0\nالأدوية: باكلوفين 10 ملغ - ثلاث مرات يومياً\nالمتابعة: مراجعة بعد أسبوعين في عيادة العلاج الطبيعي',
+        id: 'ext-401',
+        documentId: 'doc-301',
+        templateId: 'tpl-901',
+        rawText:
+          'ملخص الخروج\nاسم المريض: أحمد محمد العلي\nتاريخ الدخول: 2026-03-10\nتاريخ الخروج: 2026-03-18\nالتشخيص: شلل دماغي تشنجي - G80.0\nالأدوية: باكلوفين 10 ملغ - ثلاث مرات يومياً\nالمتابعة: مراجعة بعد أسبوعين في عيادة العلاج الطبيعي',
         structuredData: {
           patientName: 'أحمد محمد العلي',
           admissionDate: '2026-03-10',
           dischargeDate: '2026-03-18',
-          diagnoses: [{ code: 'G80.0', description: 'شلل دماغي تشنجي', descriptionEn: 'Spastic cerebral palsy' }],
+          diagnoses: [
+            {
+              code: 'G80.0',
+              description: 'شلل دماغي تشنجي',
+              descriptionEn: 'Spastic cerebral palsy',
+            },
+          ],
           medications: [{ name: 'باكلوفين', dose: '10 ملغ', frequency: 'ثلاث مرات يومياً' }],
           followUp: { date: '2026-04-01', clinic: 'عيادة العلاج الطبيعي' },
         },
-        fieldConfidence: { patientName: 0.95, admissionDate: 0.92, dischargeDate: 0.90, diagnoses: 0.88, medications: 0.86, followUp: 0.84 },
+        fieldConfidence: {
+          patientName: 0.95,
+          admissionDate: 0.92,
+          dischargeDate: 0.9,
+          diagnoses: 0.88,
+          medications: 0.86,
+          followUp: 0.84,
+        },
         extractedAt: '2026-03-20T10:02:30Z',
       },
       {
-        id: 'ext-402', documentId: 'doc-302', templateId: 'tpl-902',
-        rawText: 'Lab Report\nPatient: Sara Al-Rashid\nDate: 2026-03-21\nCBC Results:\n  WBC: 7.2 x10^9/L (Normal: 4.5-11.0)\n  RBC: 4.8 x10^12/L (Normal: 4.2-5.4)\n  Hemoglobin: 13.5 g/dL (Normal: 12.0-16.0)\n  Platelets: 250 x10^9/L (Normal: 150-400)\nNotes: All values within normal range.',
+        id: 'ext-402',
+        documentId: 'doc-302',
+        templateId: 'tpl-902',
+        rawText:
+          'Lab Report\nPatient: Sara Al-Rashid\nDate: 2026-03-21\nCBC Results:\n  WBC: 7.2 x10^9/L (Normal: 4.5-11.0)\n  RBC: 4.8 x10^12/L (Normal: 4.2-5.4)\n  Hemoglobin: 13.5 g/dL (Normal: 12.0-16.0)\n  Platelets: 250 x10^9/L (Normal: 150-400)\nNotes: All values within normal range.',
         structuredData: {
           patientName: 'Sara Al-Rashid',
           testDate: '2026-03-21',
           labResults: [
-            { test: 'WBC', value: 7.2, unit: 'x10^9/L', refMin: 4.5, refMax: 11.0, status: 'normal' },
-            { test: 'RBC', value: 4.8, unit: 'x10^12/L', refMin: 4.2, refMax: 5.4, status: 'normal' },
-            { test: 'Hemoglobin', value: 13.5, unit: 'g/dL', refMin: 12.0, refMax: 16.0, status: 'normal' },
-            { test: 'Platelets', value: 250, unit: 'x10^9/L', refMin: 150, refMax: 400, status: 'normal' },
+            {
+              test: 'WBC',
+              value: 7.2,
+              unit: 'x10^9/L',
+              refMin: 4.5,
+              refMax: 11.0,
+              status: 'normal',
+            },
+            {
+              test: 'RBC',
+              value: 4.8,
+              unit: 'x10^12/L',
+              refMin: 4.2,
+              refMax: 5.4,
+              status: 'normal',
+            },
+            {
+              test: 'Hemoglobin',
+              value: 13.5,
+              unit: 'g/dL',
+              refMin: 12.0,
+              refMax: 16.0,
+              status: 'normal',
+            },
+            {
+              test: 'Platelets',
+              value: 250,
+              unit: 'x10^9/L',
+              refMin: 150,
+              refMax: 400,
+              status: 'normal',
+            },
           ],
           notes: 'All values within normal range.',
         },
@@ -221,8 +361,11 @@ class OCRDocumentService {
         extractedAt: '2026-03-21T09:01:15Z',
       },
       {
-        id: 'ext-403', documentId: 'doc-303', templateId: 'tpl-903',
-        rawText: 'وصفة طبية\nالمريض: عمر حسن الشمري\nالطبيب: د. سلمان المطيري\nالأدوية:\n1. ريتالين 10 ملغ - مرتين يومياً - لمدة شهر\n2. أوميغا 3 - حبة واحدة يومياً - مستمر',
+        id: 'ext-403',
+        documentId: 'doc-303',
+        templateId: 'tpl-903',
+        rawText:
+          'وصفة طبية\nالمريض: عمر حسن الشمري\nالطبيب: د. سلمان المطيري\nالأدوية:\n1. ريتالين 10 ملغ - مرتين يومياً - لمدة شهر\n2. أوميغا 3 - حبة واحدة يومياً - مستمر',
         structuredData: {
           patientName: 'عمر حسن الشمري',
           doctorName: 'د. سلمان المطيري',
@@ -231,7 +374,7 @@ class OCRDocumentService {
             { name: 'أوميغا 3', dose: 'حبة واحدة', frequency: 'يومياً', duration: 'مستمر' },
           ],
         },
-        fieldConfidence: { patientName: 0.90, doctorName: 0.88, medications: 0.82 },
+        fieldConfidence: { patientName: 0.9, doctorName: 0.88, medications: 0.82 },
         extractedAt: '2026-03-22T14:01:00Z',
       },
     ];
@@ -239,26 +382,46 @@ class OCRDocumentService {
 
     // Batch job
     this.batchJobs.set('batch-501', {
-      id: 'batch-501', name: 'دفعة مارس 2026', documentIds: ['doc-304', 'doc-305'],
-      status: 'processing', totalDocuments: 2, processedCount: 1, failedCount: 0,
-      createdBy: 'u1', createdAt: '2026-03-23T08:00:00Z',
+      id: 'batch-501',
+      name: 'دفعة مارس 2026',
+      documentIds: ['doc-304', 'doc-305'],
+      status: 'processing',
+      totalDocuments: 2,
+      processedCount: 1,
+      failedCount: 0,
+      createdBy: 'u1',
+      createdAt: '2026-03-23T08:00:00Z',
     });
 
     // Corrections
     this.corrections.set('corr-601', {
-      id: 'corr-601', documentId: 'doc-301', extractionId: 'ext-401',
-      field: 'medications[0].dose', oldValue: '10 مغ', newValue: '10 ملغ',
-      correctedBy: 'u1', correctedAt: '2026-03-20T11:00:00Z', reason: 'خطأ في OCR',
+      id: 'corr-601',
+      documentId: 'doc-301',
+      extractionId: 'ext-401',
+      field: 'medications[0].dose',
+      oldValue: '10 مغ',
+      newValue: '10 ملغ',
+      correctedBy: 'u1',
+      correctedAt: '2026-03-20T11:00:00Z',
+      reason: 'خطأ في OCR',
     });
 
     // Audit log
     this.auditLogs.set('audit-801', {
-      id: 'audit-801', documentId: 'doc-301', action: 'upload',
-      userId: 'u1', timestamp: '2026-03-20T10:00:00Z', details: 'تم رفع ملخص الخروج',
+      id: 'audit-801',
+      documentId: 'doc-301',
+      action: 'upload',
+      userId: 'u1',
+      timestamp: '2026-03-20T10:00:00Z',
+      details: 'تم رفع ملخص الخروج',
     });
     this.auditLogs.set('audit-802', {
-      id: 'audit-802', documentId: 'doc-301', action: 'ocr_complete',
-      userId: 'system', timestamp: '2026-03-20T10:02:30Z', details: 'اكتمل التعرف الضوئي بثقة 89%',
+      id: 'audit-802',
+      documentId: 'doc-301',
+      action: 'ocr_complete',
+      userId: 'system',
+      timestamp: '2026-03-20T10:02:30Z',
+      details: 'اكتمل التعرف الضوئي بثقة 89%',
     });
   }
 
@@ -273,15 +436,21 @@ class OCRDocumentService {
       : 0;
 
     const statusBreakdown = {};
-    PROCESSING_STATUSES.forEach(s => { statusBreakdown[s] = docs.filter(d => d.status === s).length; });
+    PROCESSING_STATUSES.forEach(s => {
+      statusBreakdown[s] = docs.filter(d => d.status === s).length;
+    });
 
     const typeBreakdown = {};
-    DOCUMENT_TYPES.forEach(t => { typeBreakdown[t.id] = docs.filter(d => d.documentType === t.id).length; });
+    DOCUMENT_TYPES.forEach(t => {
+      typeBreakdown[t.id] = docs.filter(d => d.documentType === t.id).length;
+    });
 
     const totalPages = docs.reduce((s, d) => s + (d.pageCount || 0), 0);
     const totalSize = docs.reduce((s, d) => s + (d.fileSize || 0), 0);
 
-    const recentDocs = docs.sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt)).slice(0, 5);
+    const recentDocs = docs
+      .sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt))
+      .slice(0, 5);
     const reviewNeeded = docs.filter(d => d.status === 'review_needed');
     const corrections = [...this.corrections.values()];
 
@@ -301,13 +470,20 @@ class OCRDocumentService {
       statusBreakdown,
       typeBreakdown,
       recentDocuments: recentDocs.map(d => ({
-        id: d.id, fileName: d.fileName, documentType: d.documentType,
-        status: d.status, confidenceScore: d.confidenceScore,
-        uploadedAt: d.uploadedAt, beneficiaryId: d.beneficiaryId,
+        id: d.id,
+        fileName: d.fileName,
+        documentType: d.documentType,
+        status: d.status,
+        confidenceScore: d.confidenceScore,
+        uploadedAt: d.uploadedAt,
+        beneficiaryId: d.beneficiaryId,
       })),
       reviewNeeded: reviewNeeded.map(d => ({
-        id: d.id, fileName: d.fileName, confidenceScore: d.confidenceScore,
-        documentType: d.documentType, beneficiaryId: d.beneficiaryId,
+        id: d.id,
+        fileName: d.fileName,
+        confidenceScore: d.confidenceScore,
+        documentType: d.documentType,
+        beneficiaryId: d.beneficiaryId,
       })),
     };
   }
@@ -315,11 +491,21 @@ class OCRDocumentService {
   /* ══════════════════════════════════════════════════════════════════
      REFERENCE DATA
      ══════════════════════════════════════════════════════════════════ */
-  getDocumentTypes() { return DOCUMENT_TYPES; }
-  getOCREngines() { return OCR_ENGINES; }
-  getProcessingStatuses() { return PROCESSING_STATUSES; }
-  getMedicalFields() { return MEDICAL_FIELDS; }
-  getSupportedFormats() { return SUPPORTED_FORMATS; }
+  getDocumentTypes() {
+    return DOCUMENT_TYPES;
+  }
+  getOCREngines() {
+    return OCR_ENGINES;
+  }
+  getProcessingStatuses() {
+    return PROCESSING_STATUSES;
+  }
+  getMedicalFields() {
+    return MEDICAL_FIELDS;
+  }
+  getSupportedFormats() {
+    return SUPPORTED_FORMATS;
+  }
 
   /* ══════════════════════════════════════════════════════════════════
      DOCUMENTS CRUD
@@ -332,9 +518,10 @@ class OCRDocumentService {
     if (filters.status) docs = docs.filter(d => d.status === filters.status);
     if (filters.search) {
       const q = filters.search.toLowerCase();
-      docs = docs.filter(d =>
-        d.fileName.toLowerCase().includes(q) ||
-        (d.tags || []).some(t => t.toLowerCase().includes(q))
+      docs = docs.filter(
+        d =>
+          d.fileName.toLowerCase().includes(q) ||
+          (d.tags || []).some(t => t.toLowerCase().includes(q))
       );
     }
     if (filters.fromDate) docs = docs.filter(d => d.uploadedAt >= filters.fromDate);
@@ -441,12 +628,16 @@ class OCRDocumentService {
     const extraction = this._parseOCRResult(doc, ocrResult);
 
     doc.confidenceScore = extraction.avgConfidence;
-    doc.status = extraction.avgConfidence >= 0.80 ? 'completed' : 'review_needed';
+    doc.status = extraction.avgConfidence >= 0.8 ? 'completed' : 'review_needed';
     doc.processedAt = new Date().toISOString();
     this.documents.set(docId, doc);
 
-    this._addAudit(docId, 'ocr_complete', 'system',
-      `اكتمل التعرف الضوئي بثقة ${Math.round(extraction.avgConfidence * 100)}%`);
+    this._addAudit(
+      docId,
+      'ocr_complete',
+      'system',
+      `اكتمل التعرف الضوئي بثقة ${Math.round(extraction.avgConfidence * 100)}%`
+    );
 
     return extraction;
   }
@@ -467,11 +658,11 @@ class OCRDocumentService {
 
     return {
       rawText: templates[doc.documentType] || templates.default,
-      confidence: baseConfidence - (Math.random() * 0.1),
+      confidence: baseConfidence - Math.random() * 0.1,
       pageResults: Array.from({ length: doc.pageCount || 1 }, (_, i) => ({
         page: i + 1,
         text: `صفحة ${i + 1} — ${templates[doc.documentType] || templates.default}`,
-        confidence: baseConfidence - (Math.random() * 0.08),
+        confidence: baseConfidence - Math.random() * 0.08,
         wordCount: 30 + Math.floor(Math.random() * 50),
       })),
     };
@@ -489,7 +680,10 @@ class OCRDocumentService {
     });
 
     const avgConfidence = Object.values(fieldConfidence).length
-      ? +(Object.values(fieldConfidence).reduce((s, v) => s + v, 0) / Object.values(fieldConfidence).length).toFixed(2)
+      ? +(
+          Object.values(fieldConfidence).reduce((s, v) => s + v, 0) /
+          Object.values(fieldConfidence).length
+        ).toFixed(2)
       : ocrResult.confidence;
 
     const extraction = {
@@ -636,7 +830,12 @@ class OCRDocumentService {
     // Apply correction to structured data
     this._applyCorrection(extraction, data.field, data.newValue);
 
-    this._addAudit(docId, 'correction', userId, `تصحيح ${data.field}: ${data.oldValue} → ${data.newValue}`);
+    this._addAudit(
+      docId,
+      'correction',
+      userId,
+      `تصحيح ${data.field}: ${data.oldValue} → ${data.newValue}`
+    );
     return correction;
   }
 
@@ -763,8 +962,12 @@ class OCRDocumentService {
       }
     }
 
-    batch.status = batch.failedCount === batch.totalDocuments ? 'failed'
-      : batch.failedCount > 0 ? 'partial' : 'completed';
+    batch.status =
+      batch.failedCount === batch.totalDocuments
+        ? 'failed'
+        : batch.failedCount > 0
+          ? 'partial'
+          : 'completed';
 
     this.batchJobs.set(batchId, batch);
     return batch;
@@ -778,7 +981,9 @@ class OCRDocumentService {
   }
 
   listBatches() {
-    return [...this.batchJobs.values()].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    return [...this.batchJobs.values()].sort(
+      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    );
   }
 
   /* ══════════════════════════════════════════════════════════════════
@@ -819,7 +1024,9 @@ class OCRDocumentService {
      ══════════════════════════════════════════════════════════════════ */
   getBeneficiaryDocuments(beneficiaryId) {
     const docIds = this.beneficiaryDocs.get(beneficiaryId) || [];
-    return docIds.map(id => this.documents.get(id)).filter(Boolean)
+    return docIds
+      .map(id => this.documents.get(id))
+      .filter(Boolean)
       .sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
   }
 
@@ -837,22 +1044,33 @@ class OCRDocumentService {
 
     for (const ext of extractions) {
       const sd = ext.structuredData;
-      if (sd.diagnoses) allDiagnoses.push(...(Array.isArray(sd.diagnoses) ? sd.diagnoses : [sd.diagnoses]));
-      if (sd.medications) allMedications.push(...(Array.isArray(sd.medications) ? sd.medications : [sd.medications]));
-      if (sd.labResults) allLabResults.push(...(Array.isArray(sd.labResults) ? sd.labResults : [sd.labResults]));
+      if (sd.diagnoses)
+        allDiagnoses.push(...(Array.isArray(sd.diagnoses) ? sd.diagnoses : [sd.diagnoses]));
+      if (sd.medications)
+        allMedications.push(...(Array.isArray(sd.medications) ? sd.medications : [sd.medications]));
+      if (sd.labResults)
+        allLabResults.push(...(Array.isArray(sd.labResults) ? sd.labResults : [sd.labResults]));
       if (sd.diagnosisCodes) allDiagnoses.push(...sd.diagnosisCodes.map(c => ({ code: c })));
     }
 
     return {
       beneficiaryId,
       documentCount: docs.length,
-      documents: docs.map(d => ({ id: d.id, fileName: d.fileName, documentType: d.documentType, uploadedAt: d.uploadedAt, status: d.status })),
+      documents: docs.map(d => ({
+        id: d.id,
+        fileName: d.fileName,
+        documentType: d.documentType,
+        uploadedAt: d.uploadedAt,
+        status: d.status,
+      })),
       medicalSummary: {
         diagnoses: allDiagnoses,
         medications: allMedications,
         labResults: allLabResults,
         procedures: allProcedures,
-        lastDocumentDate: docs.length ? docs.sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt))[0].uploadedAt : null,
+        lastDocumentDate: docs.length
+          ? docs.sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt))[0].uploadedAt
+          : null,
       },
     };
   }
@@ -873,9 +1091,7 @@ class OCRDocumentService {
       documentId: docId,
       format,
       status: 'completed',
-      data: format === 'json'
-        ? extraction.structuredData
-        : this._toCSV(extraction.structuredData),
+      data: format === 'json' ? extraction.structuredData : this._toCSV(extraction.structuredData),
       createdAt: new Date().toISOString(),
     };
 
@@ -905,8 +1121,12 @@ class OCRDocumentService {
   _addAudit(docId, action, userId, details) {
     const id = this._nextAuditId();
     this.auditLogs.set(id, {
-      id, documentId: docId, action, userId,
-      timestamp: new Date().toISOString(), details,
+      id,
+      documentId: docId,
+      action,
+      userId,
+      timestamp: new Date().toISOString(),
+      details,
     });
   }
 
@@ -916,8 +1136,9 @@ class OCRDocumentService {
         .filter(a => a.documentId === docId)
         .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
     }
-    return [...this.auditLogs.values()]
-      .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    return [...this.auditLogs.values()].sort(
+      (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
+    );
   }
 
   /* ══════════════════════════════════════════════════════════════════
@@ -939,23 +1160,31 @@ class OCRDocumentService {
 
     // Processing time (simulated)
     const avgProcessingTimeSec = completed.length
-      ? +(completed.reduce((s, d) => {
-          if (!d.processedAt || !d.uploadedAt) return s;
-          return s + (new Date(d.processedAt) - new Date(d.uploadedAt)) / 1000;
-        }, 0) / completed.length).toFixed(1)
+      ? +(
+          completed.reduce((s, d) => {
+            if (!d.processedAt || !d.uploadedAt) return s;
+            return s + (new Date(d.processedAt) - new Date(d.uploadedAt)) / 1000;
+          }, 0) / completed.length
+        ).toFixed(1)
       : 0;
 
     // Engine usage
     const engineUsage = {};
-    docs.forEach(d => { engineUsage[d.ocrEngine] = (engineUsage[d.ocrEngine] || 0) + 1; });
+    docs.forEach(d => {
+      engineUsage[d.ocrEngine] = (engineUsage[d.ocrEngine] || 0) + 1;
+    });
 
     // Type distribution
     const typeDistribution = {};
-    docs.forEach(d => { typeDistribution[d.documentType] = (typeDistribution[d.documentType] || 0) + 1; });
+    docs.forEach(d => {
+      typeDistribution[d.documentType] = (typeDistribution[d.documentType] || 0) + 1;
+    });
 
     // Language distribution
     const langDistribution = {};
-    docs.forEach(d => { langDistribution[d.language] = (langDistribution[d.language] || 0) + 1; });
+    docs.forEach(d => {
+      langDistribution[d.language] = (langDistribution[d.language] || 0) + 1;
+    });
 
     return {
       totalDocuments: docs.length,

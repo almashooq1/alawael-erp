@@ -21,7 +21,7 @@ const {
   UnauthorizedError,
   ValidationError,
   TooManyRequestsError,
-} = require('../middleware/errorHandler');
+} = require('../errors/AppError');
 const User = require('../models/User');
 
 // JWT Secret

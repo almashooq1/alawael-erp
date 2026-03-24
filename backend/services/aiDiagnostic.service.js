@@ -73,15 +73,32 @@ class AIDiagnosticService {
 
     // ═══ Disability Types ═══
     this._disabilityTypes = [
-      'physical', 'intellectual', 'autism', 'hearing', 'visual',
-      'speech', 'learning', 'multiple', 'psychiatric', 'neurological',
+      'physical',
+      'intellectual',
+      'autism',
+      'hearing',
+      'visual',
+      'speech',
+      'learning',
+      'multiple',
+      'psychiatric',
+      'neurological',
     ];
 
     // ═══ Therapy Types ═══
     this._therapyTypes = [
-      'physiotherapy', 'occupational', 'speech_therapy', 'behavioral',
-      'cognitive', 'psychotherapy', 'art_therapy', 'music_therapy',
-      'play_therapy', 'vocational', 'social_skills', 'sensory_integration',
+      'physiotherapy',
+      'occupational',
+      'speech_therapy',
+      'behavioral',
+      'cognitive',
+      'psychotherapy',
+      'art_therapy',
+      'music_therapy',
+      'play_therapy',
+      'vocational',
+      'social_skills',
+      'sensory_integration',
     ];
 
     this._seed();
@@ -94,174 +111,349 @@ class AIDiagnosticService {
     // ── Beneficiaries ──
     const beneficiaries = [
       {
-        id: 'ben-101', name: 'أحمد محمد الغامدي', nationalId: '1098765432',
-        dateOfBirth: '2012-05-15', gender: 'male', age: 13,
-        disabilityType: 'autism', disabilitySeverity: 'moderate',
-        enrollmentDate: '2025-06-01', status: 'active',
+        id: 'ben-101',
+        name: 'أحمد محمد الغامدي',
+        nationalId: '1098765432',
+        dateOfBirth: '2012-05-15',
+        gender: 'male',
+        age: 13,
+        disabilityType: 'autism',
+        disabilitySeverity: 'moderate',
+        enrollmentDate: '2025-06-01',
+        status: 'active',
         guardian: { name: 'محمد الغامدي', phone: '0501234567', relation: 'father' },
-        primaryTherapist: 'dr-01', team: ['dr-01', 'th-02', 'th-05'],
+        primaryTherapist: 'dr-01',
+        team: ['dr-01', 'th-02', 'th-05'],
       },
       {
-        id: 'ben-102', name: 'فاطمة عبدالله العتيبي', nationalId: '1087654321',
-        dateOfBirth: '2015-09-20', gender: 'female', age: 10,
-        disabilityType: 'intellectual', disabilitySeverity: 'mild',
-        enrollmentDate: '2025-08-15', status: 'active',
+        id: 'ben-102',
+        name: 'فاطمة عبدالله العتيبي',
+        nationalId: '1087654321',
+        dateOfBirth: '2015-09-20',
+        gender: 'female',
+        age: 10,
+        disabilityType: 'intellectual',
+        disabilitySeverity: 'mild',
+        enrollmentDate: '2025-08-15',
+        status: 'active',
         guardian: { name: 'عبدالله العتيبي', phone: '0559876543', relation: 'father' },
-        primaryTherapist: 'dr-02', team: ['dr-02', 'th-03'],
+        primaryTherapist: 'dr-02',
+        team: ['dr-02', 'th-03'],
       },
       {
-        id: 'ben-103', name: 'خالد سعد القحطاني', nationalId: '1076543210',
-        dateOfBirth: '2008-01-10', gender: 'male', age: 18,
-        disabilityType: 'physical', disabilitySeverity: 'severe',
-        enrollmentDate: '2024-11-01', status: 'active',
+        id: 'ben-103',
+        name: 'خالد سعد القحطاني',
+        nationalId: '1076543210',
+        dateOfBirth: '2008-01-10',
+        gender: 'male',
+        age: 18,
+        disabilityType: 'physical',
+        disabilitySeverity: 'severe',
+        enrollmentDate: '2024-11-01',
+        status: 'active',
         guardian: { name: 'سعد القحطاني', phone: '0567891234', relation: 'father' },
-        primaryTherapist: 'dr-03', team: ['dr-03', 'th-01', 'th-04'],
+        primaryTherapist: 'dr-03',
+        team: ['dr-03', 'th-01', 'th-04'],
       },
       {
-        id: 'ben-104', name: 'نورة إبراهيم الشمري', nationalId: '1065432109',
-        dateOfBirth: '2016-12-05', gender: 'female', age: 9,
-        disabilityType: 'speech', disabilitySeverity: 'moderate',
-        enrollmentDate: '2025-10-01', status: 'active',
+        id: 'ben-104',
+        name: 'نورة إبراهيم الشمري',
+        nationalId: '1065432109',
+        dateOfBirth: '2016-12-05',
+        gender: 'female',
+        age: 9,
+        disabilityType: 'speech',
+        disabilitySeverity: 'moderate',
+        enrollmentDate: '2025-10-01',
+        status: 'active',
         guardian: { name: 'إبراهيم الشمري', phone: '0543216789', relation: 'father' },
-        primaryTherapist: 'dr-01', team: ['dr-01', 'th-05'],
+        primaryTherapist: 'dr-01',
+        team: ['dr-01', 'th-05'],
       },
       {
-        id: 'ben-105', name: 'عمر يوسف المطيري', nationalId: '1054321098',
-        dateOfBirth: '2010-07-25', gender: 'male', age: 15,
-        disabilityType: 'multiple', disabilitySeverity: 'severe',
-        enrollmentDate: '2024-06-15', status: 'active',
+        id: 'ben-105',
+        name: 'عمر يوسف المطيري',
+        nationalId: '1054321098',
+        dateOfBirth: '2010-07-25',
+        gender: 'male',
+        age: 15,
+        disabilityType: 'multiple',
+        disabilitySeverity: 'severe',
+        enrollmentDate: '2024-06-15',
+        status: 'active',
         guardian: { name: 'يوسف المطيري', phone: '0578901234', relation: 'father' },
-        primaryTherapist: 'dr-02', team: ['dr-02', 'dr-03', 'th-01', 'th-02', 'th-03'],
+        primaryTherapist: 'dr-02',
+        team: ['dr-02', 'dr-03', 'th-01', 'th-02', 'th-03'],
       },
     ];
-    beneficiaries.forEach((b) => this.beneficiaries.set(b.id, b));
+    beneficiaries.forEach(b => this.beneficiaries.set(b.id, b));
 
     // ── Assessments ──
     const assessments = [
       {
-        id: 'asmt-101', beneficiaryId: 'ben-101', type: 'initial',
-        scale: 'icf', score: 42, maxScore: 100, date: '2025-06-05',
-        assessor: 'dr-01', domain: 'communication',
+        id: 'asmt-101',
+        beneficiaryId: 'ben-101',
+        type: 'initial',
+        scale: 'icf',
+        score: 42,
+        maxScore: 100,
+        date: '2025-06-05',
+        assessor: 'dr-01',
+        domain: 'communication',
         details: { subScores: { expression: 35, comprehension: 48, interaction: 43 } },
         notes: 'صعوبات واضحة في التواصل اللفظي وغير اللفظي',
       },
       {
-        id: 'asmt-102', beneficiaryId: 'ben-101', type: 'followup',
-        scale: 'icf', score: 55, maxScore: 100, date: '2025-09-05',
-        assessor: 'dr-01', domain: 'communication',
+        id: 'asmt-102',
+        beneficiaryId: 'ben-101',
+        type: 'followup',
+        scale: 'icf',
+        score: 55,
+        maxScore: 100,
+        date: '2025-09-05',
+        assessor: 'dr-01',
+        domain: 'communication',
         details: { subScores: { expression: 48, comprehension: 60, interaction: 57 } },
         notes: 'تحسن ملحوظ في الفهم والتفاعل الاجتماعي',
       },
       {
-        id: 'asmt-103', beneficiaryId: 'ben-101', type: 'followup',
-        scale: 'icf', score: 67, maxScore: 100, date: '2025-12-05',
-        assessor: 'dr-01', domain: 'communication',
+        id: 'asmt-103',
+        beneficiaryId: 'ben-101',
+        type: 'followup',
+        scale: 'icf',
+        score: 67,
+        maxScore: 100,
+        date: '2025-12-05',
+        assessor: 'dr-01',
+        domain: 'communication',
         details: { subScores: { expression: 62, comprehension: 72, interaction: 67 } },
         notes: 'تقدم مستمر — يمكنه التعبير عن احتياجاته بشكل أفضل',
       },
       {
-        id: 'asmt-104', beneficiaryId: 'ben-102', type: 'initial',
-        scale: 'fim', score: 78, maxScore: 126, date: '2025-08-20',
-        assessor: 'dr-02', domain: 'daily_living',
+        id: 'asmt-104',
+        beneficiaryId: 'ben-102',
+        type: 'initial',
+        scale: 'fim',
+        score: 78,
+        maxScore: 126,
+        date: '2025-08-20',
+        assessor: 'dr-02',
+        domain: 'daily_living',
         details: { subScores: { selfCare: 30, mobility: 28, cognition: 20 } },
         notes: 'مستوى استقلالية جيد مع حاجة لدعم في المهام المعقدة',
       },
       {
-        id: 'asmt-105', beneficiaryId: 'ben-102', type: 'followup',
-        scale: 'fim', score: 92, maxScore: 126, date: '2026-01-20',
-        assessor: 'dr-02', domain: 'daily_living',
+        id: 'asmt-105',
+        beneficiaryId: 'ben-102',
+        type: 'followup',
+        scale: 'fim',
+        score: 92,
+        maxScore: 126,
+        date: '2026-01-20',
+        assessor: 'dr-02',
+        domain: 'daily_living',
         details: { subScores: { selfCare: 38, mobility: 30, cognition: 24 } },
         notes: 'تحسن واضح في الرعاية الذاتية والقدرات المعرفية',
       },
       {
-        id: 'asmt-106', beneficiaryId: 'ben-103', type: 'initial',
-        scale: 'barthel', score: 35, maxScore: 100, date: '2024-11-10',
-        assessor: 'dr-03', domain: 'mobility',
-        details: { subScores: { feeding: 5, bathing: 0, grooming: 5, dressing: 5, bowels: 10, bladder: 10, toilet: 0, transfer: 0, mobility: 0, stairs: 0 } },
+        id: 'asmt-106',
+        beneficiaryId: 'ben-103',
+        type: 'initial',
+        scale: 'barthel',
+        score: 35,
+        maxScore: 100,
+        date: '2024-11-10',
+        assessor: 'dr-03',
+        domain: 'mobility',
+        details: {
+          subScores: {
+            feeding: 5,
+            bathing: 0,
+            grooming: 5,
+            dressing: 5,
+            bowels: 10,
+            bladder: 10,
+            toilet: 0,
+            transfer: 0,
+            mobility: 0,
+            stairs: 0,
+          },
+        },
         notes: 'إعاقة حركية شديدة تتطلب مساعدة في معظم الأنشطة',
       },
       {
-        id: 'asmt-107', beneficiaryId: 'ben-103', type: 'followup',
-        scale: 'barthel', score: 55, maxScore: 100, date: '2025-05-10',
-        assessor: 'dr-03', domain: 'mobility',
-        details: { subScores: { feeding: 10, bathing: 5, grooming: 5, dressing: 10, bowels: 10, bladder: 10, toilet: 5, transfer: 0, mobility: 0, stairs: 0 } },
+        id: 'asmt-107',
+        beneficiaryId: 'ben-103',
+        type: 'followup',
+        scale: 'barthel',
+        score: 55,
+        maxScore: 100,
+        date: '2025-05-10',
+        assessor: 'dr-03',
+        domain: 'mobility',
+        details: {
+          subScores: {
+            feeding: 10,
+            bathing: 5,
+            grooming: 5,
+            dressing: 10,
+            bowels: 10,
+            bladder: 10,
+            toilet: 5,
+            transfer: 0,
+            mobility: 0,
+            stairs: 0,
+          },
+        },
         notes: 'تحسن في الرعاية الذاتية العلوية مع بقاء صعوبات في التنقل',
       },
       {
-        id: 'asmt-108', beneficiaryId: 'ben-104', type: 'initial',
-        scale: 'icf', score: 38, maxScore: 100, date: '2025-10-05',
-        assessor: 'dr-01', domain: 'speech',
+        id: 'asmt-108',
+        beneficiaryId: 'ben-104',
+        type: 'initial',
+        scale: 'icf',
+        score: 38,
+        maxScore: 100,
+        date: '2025-10-05',
+        assessor: 'dr-01',
+        domain: 'speech',
         details: { subScores: { articulation: 30, fluency: 35, voice: 50 } },
         notes: 'تأخر واضح في النطق مع صعوبات في المخارج',
       },
       {
-        id: 'asmt-109', beneficiaryId: 'ben-105', type: 'initial',
-        scale: 'gaf', score: 30, maxScore: 100, date: '2024-06-20',
-        assessor: 'dr-02', domain: 'overall_function',
+        id: 'asmt-109',
+        beneficiaryId: 'ben-105',
+        type: 'initial',
+        scale: 'gaf',
+        score: 30,
+        maxScore: 100,
+        date: '2024-06-20',
+        assessor: 'dr-02',
+        domain: 'overall_function',
         details: { subScores: { social: 25, occupational: 20, selfCare: 40, cognitive: 35 } },
         notes: 'إعاقة متعددة تؤثر على معظم جوانب الحياة اليومية',
       },
       {
-        id: 'asmt-110', beneficiaryId: 'ben-105', type: 'followup',
-        scale: 'gaf', score: 45, maxScore: 100, date: '2025-06-20',
-        assessor: 'dr-02', domain: 'overall_function',
+        id: 'asmt-110',
+        beneficiaryId: 'ben-105',
+        type: 'followup',
+        scale: 'gaf',
+        score: 45,
+        maxScore: 100,
+        date: '2025-06-20',
+        assessor: 'dr-02',
+        domain: 'overall_function',
         details: { subScores: { social: 40, occupational: 35, selfCare: 55, cognitive: 50 } },
         notes: 'تحسن تدريجي على مدار السنة — الأفضل في الرعاية الذاتية',
       },
     ];
-    assessments.forEach((a) => this.assessments.set(a.id, a));
+    assessments.forEach(a => this.assessments.set(a.id, a));
 
     // ── Sessions ──
     const sessions = [
       {
-        id: 'sess-101', beneficiaryId: 'ben-101', therapistId: 'dr-01',
-        therapyType: 'behavioral', date: '2026-03-10', duration: 60,
-        status: 'completed', goals: ['goal-101', 'goal-102'],
+        id: 'sess-101',
+        beneficiaryId: 'ben-101',
+        therapistId: 'dr-01',
+        therapyType: 'behavioral',
+        date: '2026-03-10',
+        duration: 60,
+        status: 'completed',
+        goals: ['goal-101', 'goal-102'],
         notes: 'جلسة تطبيقية لتحسين مهارات التواصل — استجابة جيدة',
         outcomes: { engagement: 85, progressRating: 4, challenges: ['التركيز لفترات طويلة'] },
-        aiAnalysis: { sentimentScore: 0.78, engagementLevel: 'high', suggestedFollowUp: 'تكرار تمارين التواصل البصري' },
+        aiAnalysis: {
+          sentimentScore: 0.78,
+          engagementLevel: 'high',
+          suggestedFollowUp: 'تكرار تمارين التواصل البصري',
+        },
       },
       {
-        id: 'sess-102', beneficiaryId: 'ben-101', therapistId: 'th-02',
-        therapyType: 'speech_therapy', date: '2026-03-12', duration: 45,
-        status: 'completed', goals: ['goal-102'],
+        id: 'sess-102',
+        beneficiaryId: 'ben-101',
+        therapistId: 'th-02',
+        therapyType: 'speech_therapy',
+        date: '2026-03-12',
+        duration: 45,
+        status: 'completed',
+        goals: ['goal-102'],
         notes: 'تمرينات المخارج — تحسن في حروف (ر، ل، ث)',
         outcomes: { engagement: 72, progressRating: 3, challenges: ['صعوبة بعض المخارج'] },
-        aiAnalysis: { sentimentScore: 0.65, engagementLevel: 'medium', suggestedFollowUp: 'تكثيف تمارين حرف الراء' },
+        aiAnalysis: {
+          sentimentScore: 0.65,
+          engagementLevel: 'medium',
+          suggestedFollowUp: 'تكثيف تمارين حرف الراء',
+        },
       },
       {
-        id: 'sess-103', beneficiaryId: 'ben-102', therapistId: 'dr-02',
-        therapyType: 'cognitive', date: '2026-03-11', duration: 50,
-        status: 'completed', goals: ['goal-103'],
+        id: 'sess-103',
+        beneficiaryId: 'ben-102',
+        therapistId: 'dr-02',
+        therapyType: 'cognitive',
+        date: '2026-03-11',
+        duration: 50,
+        status: 'completed',
+        goals: ['goal-103'],
         notes: 'أنشطة التصنيف والتسلسل — أداء ممتاز',
         outcomes: { engagement: 90, progressRating: 5, challenges: [] },
-        aiAnalysis: { sentimentScore: 0.92, engagementLevel: 'high', suggestedFollowUp: 'الانتقال لمستوى أعلى من المهام المعرفية' },
+        aiAnalysis: {
+          sentimentScore: 0.92,
+          engagementLevel: 'high',
+          suggestedFollowUp: 'الانتقال لمستوى أعلى من المهام المعرفية',
+        },
       },
       {
-        id: 'sess-104', beneficiaryId: 'ben-103', therapistId: 'dr-03',
-        therapyType: 'physiotherapy', date: '2026-03-13', duration: 60,
-        status: 'completed', goals: ['goal-104'],
+        id: 'sess-104',
+        beneficiaryId: 'ben-103',
+        therapistId: 'dr-03',
+        therapyType: 'physiotherapy',
+        date: '2026-03-13',
+        duration: 60,
+        status: 'completed',
+        goals: ['goal-104'],
         notes: 'تمارين تقوية الأطراف السفلى — تحسن بسيط في نطاق الحركة',
-        outcomes: { engagement: 65, progressRating: 3, challenges: ['ألم أثناء بعض التمارين', 'إرهاق سريع'] },
-        aiAnalysis: { sentimentScore: 0.55, engagementLevel: 'medium', suggestedFollowUp: 'تعديل شدة التمارين وإضافة فترات راحة' },
+        outcomes: {
+          engagement: 65,
+          progressRating: 3,
+          challenges: ['ألم أثناء بعض التمارين', 'إرهاق سريع'],
+        },
+        aiAnalysis: {
+          sentimentScore: 0.55,
+          engagementLevel: 'medium',
+          suggestedFollowUp: 'تعديل شدة التمارين وإضافة فترات راحة',
+        },
       },
       {
-        id: 'sess-105', beneficiaryId: 'ben-105', therapistId: 'th-01',
-        therapyType: 'occupational', date: '2026-03-14', duration: 45,
-        status: 'completed', goals: ['goal-106'],
+        id: 'sess-105',
+        beneficiaryId: 'ben-105',
+        therapistId: 'th-01',
+        therapyType: 'occupational',
+        date: '2026-03-14',
+        duration: 45,
+        status: 'completed',
+        goals: ['goal-106'],
         notes: 'تدريب على ارتداء الملابس والعناية الشخصية',
         outcomes: { engagement: 75, progressRating: 4, challenges: ['بطء في التنفيذ'] },
-        aiAnalysis: { sentimentScore: 0.72, engagementLevel: 'medium', suggestedFollowUp: 'استمرار التدريب مع تقليل التوجيه تدريجياً' },
+        aiAnalysis: {
+          sentimentScore: 0.72,
+          engagementLevel: 'medium',
+          suggestedFollowUp: 'استمرار التدريب مع تقليل التوجيه تدريجياً',
+        },
       },
     ];
-    sessions.forEach((s) => this.sessions.set(s.id, s));
+    sessions.forEach(s => this.sessions.set(s.id, s));
 
     // ── Goals ──
     const goals = [
       {
-        id: 'goal-101', beneficiaryId: 'ben-101', category: 'communication',
-        title: 'التواصل البصري', description: 'الحفاظ على التواصل البصري لمدة 5 ثوان',
-        targetDate: '2026-06-01', progress: 72, status: 'in_progress',
+        id: 'goal-101',
+        beneficiaryId: 'ben-101',
+        category: 'communication',
+        title: 'التواصل البصري',
+        description: 'الحفاظ على التواصل البصري لمدة 5 ثوان',
+        targetDate: '2026-06-01',
+        progress: 72,
+        status: 'in_progress',
         milestones: [
           { label: '2 ثانية تواصل', achieved: true, date: '2025-09-15' },
           { label: '3 ثوان تواصل', achieved: true, date: '2025-12-01' },
@@ -269,9 +461,14 @@ class AIDiagnosticService {
         ],
       },
       {
-        id: 'goal-102', beneficiaryId: 'ben-101', category: 'speech',
-        title: 'نطق الحروف', description: 'نطق جميع الحروف العربية بشكل واضح',
-        targetDate: '2026-09-01', progress: 58, status: 'in_progress',
+        id: 'goal-102',
+        beneficiaryId: 'ben-101',
+        category: 'speech',
+        title: 'نطق الحروف',
+        description: 'نطق جميع الحروف العربية بشكل واضح',
+        targetDate: '2026-09-01',
+        progress: 58,
+        status: 'in_progress',
         milestones: [
           { label: '15 حرف صحيح', achieved: true, date: '2025-11-01' },
           { label: '22 حرف صحيح', achieved: true, date: '2026-02-01' },
@@ -279,9 +476,14 @@ class AIDiagnosticService {
         ],
       },
       {
-        id: 'goal-103', beneficiaryId: 'ben-102', category: 'cognitive',
-        title: 'المهارات المعرفية الأساسية', description: 'إتقان التصنيف والتسلسل والمقارنة',
-        targetDate: '2026-04-01', progress: 88, status: 'in_progress',
+        id: 'goal-103',
+        beneficiaryId: 'ben-102',
+        category: 'cognitive',
+        title: 'المهارات المعرفية الأساسية',
+        description: 'إتقان التصنيف والتسلسل والمقارنة',
+        targetDate: '2026-04-01',
+        progress: 88,
+        status: 'in_progress',
         milestones: [
           { label: 'تصنيف بسيط', achieved: true, date: '2025-10-15' },
           { label: 'تسلسل رقمي', achieved: true, date: '2025-12-20' },
@@ -290,9 +492,14 @@ class AIDiagnosticService {
         ],
       },
       {
-        id: 'goal-104', beneficiaryId: 'ben-103', category: 'mobility',
-        title: 'المشي المستقل', description: 'المشي بمساعدة مشاية لمسافة 50 متر',
-        targetDate: '2026-08-01', progress: 40, status: 'in_progress',
+        id: 'goal-104',
+        beneficiaryId: 'ben-103',
+        category: 'mobility',
+        title: 'المشي المستقل',
+        description: 'المشي بمساعدة مشاية لمسافة 50 متر',
+        targetDate: '2026-08-01',
+        progress: 40,
+        status: 'in_progress',
         milestones: [
           { label: 'الوقوف بمساعدة', achieved: true, date: '2025-03-01' },
           { label: '10 أمتار بمشاية', achieved: true, date: '2025-08-15' },
@@ -300,9 +507,14 @@ class AIDiagnosticService {
         ],
       },
       {
-        id: 'goal-105', beneficiaryId: 'ben-104', category: 'speech',
-        title: 'وضوح النطق', description: 'تحسين وضوح النطق بنسبة 80%',
-        targetDate: '2026-07-01', progress: 45, status: 'in_progress',
+        id: 'goal-105',
+        beneficiaryId: 'ben-104',
+        category: 'speech',
+        title: 'وضوح النطق',
+        description: 'تحسين وضوح النطق بنسبة 80%',
+        targetDate: '2026-07-01',
+        progress: 45,
+        status: 'in_progress',
         milestones: [
           { label: '50% وضوح', achieved: true, date: '2026-01-15' },
           { label: '65% وضوح', achieved: false, date: null },
@@ -310,9 +522,14 @@ class AIDiagnosticService {
         ],
       },
       {
-        id: 'goal-106', beneficiaryId: 'ben-105', category: 'daily_living',
-        title: 'الاستقلالية في الملبس', description: 'ارتداء الملابس بشكل مستقل',
-        targetDate: '2026-12-01', progress: 55, status: 'in_progress',
+        id: 'goal-106',
+        beneficiaryId: 'ben-105',
+        category: 'daily_living',
+        title: 'الاستقلالية في الملبس',
+        description: 'ارتداء الملابس بشكل مستقل',
+        targetDate: '2026-12-01',
+        progress: 55,
+        status: 'in_progress',
         milestones: [
           { label: 'خلع الملابس', achieved: true, date: '2025-09-01' },
           { label: 'ارتداء بسيط', achieved: true, date: '2026-01-01' },
@@ -320,13 +537,16 @@ class AIDiagnosticService {
         ],
       },
     ];
-    goals.forEach((g) => this.goals.set(g.id, g));
+    goals.forEach(g => this.goals.set(g.id, g));
 
     // ── Treatment Plans ──
     const plans = [
       {
-        id: 'plan-101', beneficiaryId: 'ben-101', status: 'active',
-        createdDate: '2025-06-05', updatedDate: '2026-03-01',
+        id: 'plan-101',
+        beneficiaryId: 'ben-101',
+        status: 'active',
+        createdDate: '2025-06-05',
+        updatedDate: '2026-03-01',
         diagnosis: 'اضطراب طيف التوحد — درجة متوسطة',
         primaryGoals: ['goal-101', 'goal-102'],
         therapies: [
@@ -341,8 +561,11 @@ class AIDiagnosticService {
         },
       },
       {
-        id: 'plan-102', beneficiaryId: 'ben-102', status: 'active',
-        createdDate: '2025-08-20', updatedDate: '2026-02-15',
+        id: 'plan-102',
+        beneficiaryId: 'ben-102',
+        status: 'active',
+        createdDate: '2025-08-20',
+        updatedDate: '2026-02-15',
         diagnosis: 'إعاقة ذهنية بسيطة',
         primaryGoals: ['goal-103'],
         therapies: [
@@ -356,8 +579,11 @@ class AIDiagnosticService {
         },
       },
       {
-        id: 'plan-103', beneficiaryId: 'ben-103', status: 'active',
-        createdDate: '2024-11-10', updatedDate: '2026-03-10',
+        id: 'plan-103',
+        beneficiaryId: 'ben-103',
+        status: 'active',
+        createdDate: '2024-11-10',
+        updatedDate: '2026-03-10',
         diagnosis: 'شلل نصفي سفلي بسبب إصابة نخاعية',
         primaryGoals: ['goal-104'],
         therapies: [
@@ -371,25 +597,84 @@ class AIDiagnosticService {
         },
       },
     ];
-    plans.forEach((p) => this.treatmentPlans.set(p.id, p));
+    plans.forEach(p => this.treatmentPlans.set(p.id, p));
 
     // ── Behavior Logs ──
     const behaviorLogs = [
-      { id: 'beh-101', beneficiaryId: 'ben-101', date: '2026-03-10', type: 'positive', behavior: 'تفاعل اجتماعي تلقائي', context: 'وقت اللعب', intensity: 'moderate', duration: 15, observer: 'th-02' },
-      { id: 'beh-102', beneficiaryId: 'ben-101', date: '2026-03-11', type: 'challenging', behavior: 'نوبة حسية', context: 'بيئة صاخبة', intensity: 'high', duration: 8, observer: 'dr-01', intervention: 'إزالة من المحفز + تقنية تهدئة' },
-      { id: 'beh-103', beneficiaryId: 'ben-103', date: '2026-03-13', type: 'positive', behavior: 'محاولة الوقوف ذاتياً', context: 'جلسة علاج طبيعي', intensity: 'low', duration: 5, observer: 'dr-03' },
-      { id: 'beh-104', beneficiaryId: 'ben-105', date: '2026-03-14', type: 'positive', behavior: 'إكمال مهمة مستقل', context: 'علاج وظيفي', intensity: 'moderate', duration: 20, observer: 'th-01' },
+      {
+        id: 'beh-101',
+        beneficiaryId: 'ben-101',
+        date: '2026-03-10',
+        type: 'positive',
+        behavior: 'تفاعل اجتماعي تلقائي',
+        context: 'وقت اللعب',
+        intensity: 'moderate',
+        duration: 15,
+        observer: 'th-02',
+      },
+      {
+        id: 'beh-102',
+        beneficiaryId: 'ben-101',
+        date: '2026-03-11',
+        type: 'challenging',
+        behavior: 'نوبة حسية',
+        context: 'بيئة صاخبة',
+        intensity: 'high',
+        duration: 8,
+        observer: 'dr-01',
+        intervention: 'إزالة من المحفز + تقنية تهدئة',
+      },
+      {
+        id: 'beh-103',
+        beneficiaryId: 'ben-103',
+        date: '2026-03-13',
+        type: 'positive',
+        behavior: 'محاولة الوقوف ذاتياً',
+        context: 'جلسة علاج طبيعي',
+        intensity: 'low',
+        duration: 5,
+        observer: 'dr-03',
+      },
+      {
+        id: 'beh-104',
+        beneficiaryId: 'ben-105',
+        date: '2026-03-14',
+        type: 'positive',
+        behavior: 'إكمال مهمة مستقل',
+        context: 'علاج وظيفي',
+        intensity: 'moderate',
+        duration: 20,
+        observer: 'th-01',
+      },
     ];
-    behaviorLogs.forEach((b) => this.behaviorLogs.set(b.id, b));
+    behaviorLogs.forEach(b => this.behaviorLogs.set(b.id, b));
 
     // ── Alerts ──
     const alerts = [
-      { id: 'alert-101', beneficiaryId: 'ben-103', type: 'plateau', severity: 'warning', message: 'لم يُلاحظ تقدم في هدف المشي خلال 6 أسابيع', createdDate: '2026-03-05', resolved: false },
-      { id: 'alert-102', beneficiaryId: 'ben-104', type: 'attendance', severity: 'info', message: 'تأخر في حضور 3 جلسات متتالية', createdDate: '2026-03-08', resolved: false },
+      {
+        id: 'alert-101',
+        beneficiaryId: 'ben-103',
+        type: 'plateau',
+        severity: 'warning',
+        message: 'لم يُلاحظ تقدم في هدف المشي خلال 6 أسابيع',
+        createdDate: '2026-03-05',
+        resolved: false,
+      },
+      {
+        id: 'alert-102',
+        beneficiaryId: 'ben-104',
+        type: 'attendance',
+        severity: 'info',
+        message: 'تأخر في حضور 3 جلسات متتالية',
+        createdDate: '2026-03-08',
+        resolved: false,
+      },
     ];
-    alerts.forEach((a) => this.alerts.set(a.id, a));
+    alerts.forEach(a => this.alerts.set(a.id, a));
 
-    logger.info('[AIDiagnostic] Seed data loaded — 5 beneficiaries, 10 assessments, 5 sessions, 6 goals, 3 plans');
+    logger.info(
+      '[AIDiagnostic] Seed data loaded — 5 beneficiaries, 10 assessments, 5 sessions, 6 goals, 3 plans'
+    );
   }
 
   // ═══════════════════════════════════════════════════════════
@@ -408,33 +693,40 @@ class AIDiagnosticService {
       : 0;
 
     const avgEngagement = allSessions.length
-      ? Math.round(allSessions.reduce((s, ses) => s + (ses.outcomes?.engagement || 0), 0) / allSessions.length)
+      ? Math.round(
+          allSessions.reduce((s, ses) => s + (ses.outcomes?.engagement || 0), 0) /
+            allSessions.length
+        )
       : 0;
 
-    const improvingCount = allBeneficiaries.filter((b) => {
-      const bAssessments = allAssessments.filter((a) => a.beneficiaryId === b.id).sort((a, b2) => a.date.localeCompare(b2.date));
+    const improvingCount = allBeneficiaries.filter(b => {
+      const bAssessments = allAssessments
+        .filter(a => a.beneficiaryId === b.id)
+        .sort((a, b2) => a.date.localeCompare(b2.date));
       if (bAssessments.length < 2) return false;
-      return bAssessments[bAssessments.length - 1].score > bAssessments[bAssessments.length - 2].score;
+      return (
+        bAssessments[bAssessments.length - 1].score > bAssessments[bAssessments.length - 2].score
+      );
     }).length;
 
     return {
-      totalBeneficiaries: allBeneficiaries.filter((b) => b.status === 'active').length,
+      totalBeneficiaries: allBeneficiaries.filter(b => b.status === 'active').length,
       totalSessions: allSessions.length,
       totalGoals: allGoals.length,
-      activeAlerts: allAlerts.filter((a) => !a.resolved).length,
+      activeAlerts: allAlerts.filter(a => !a.resolved).length,
       averageProgress: avgProgress,
       averageEngagement: avgEngagement,
       improvingBeneficiaries: improvingCount,
-      activePlans: allPlans.filter((p) => p.status === 'active').length,
+      activePlans: allPlans.filter(p => p.status === 'active').length,
       aiModelsActive: Object.keys(this._aiModels).length,
       recentSessions: allSessions.slice(-5).reverse(),
       alertsSummary: {
-        critical: allAlerts.filter((a) => a.severity === 'critical' && !a.resolved).length,
-        warning: allAlerts.filter((a) => a.severity === 'warning' && !a.resolved).length,
-        info: allAlerts.filter((a) => a.severity === 'info' && !a.resolved).length,
+        critical: allAlerts.filter(a => a.severity === 'critical' && !a.resolved).length,
+        warning: allAlerts.filter(a => a.severity === 'warning' && !a.resolved).length,
+        info: allAlerts.filter(a => a.severity === 'info' && !a.resolved).length,
       },
       disabilityDistribution: this._disabilityTypes.reduce((acc, type) => {
-        const count = allBeneficiaries.filter((b) => b.disabilityType === type).length;
+        const count = allBeneficiaries.filter(b => b.disabilityType === type).length;
         if (count > 0) acc[type] = count;
         return acc;
       }, {}),
@@ -446,11 +738,11 @@ class AIDiagnosticService {
   // ═══════════════════════════════════════════════════════════
   listBeneficiaries({ page = 1, limit = 20, status, disabilityType, search } = {}) {
     let items = [...this.beneficiaries.values()];
-    if (status) items = items.filter((b) => b.status === status);
-    if (disabilityType) items = items.filter((b) => b.disabilityType === disabilityType);
+    if (status) items = items.filter(b => b.status === status);
+    if (disabilityType) items = items.filter(b => b.disabilityType === disabilityType);
     if (search) {
       const q = search.toLowerCase();
-      items = items.filter((b) => b.name.toLowerCase().includes(q) || b.nationalId.includes(q));
+      items = items.filter(b => b.name.toLowerCase().includes(q) || b.nationalId.includes(q));
     }
     const total = items.length;
     const start = (page - 1) * limit;
@@ -496,9 +788,9 @@ class AIDiagnosticService {
   // ASSESSMENTS — التقييمات السريرية
   // ═══════════════════════════════════════════════════════════
   listAssessments(beneficiaryId, { scale, domain } = {}) {
-    let items = [...this.assessments.values()].filter((a) => a.beneficiaryId === beneficiaryId);
-    if (scale) items = items.filter((a) => a.scale === scale);
-    if (domain) items = items.filter((a) => a.domain === domain);
+    let items = [...this.assessments.values()].filter(a => a.beneficiaryId === beneficiaryId);
+    if (scale) items = items.filter(a => a.scale === scale);
+    if (domain) items = items.filter(a => a.domain === domain);
     return items.sort((a, b) => a.date.localeCompare(b.date));
   }
 
@@ -517,7 +809,7 @@ class AIDiagnosticService {
       type: data.type || 'followup',
       scale: data.scale,
       score: data.score,
-      maxScore: data.maxScore || (this._clinicalScales[data.scale]?.maxScore || 100),
+      maxScore: data.maxScore || this._clinicalScales[data.scale]?.maxScore || 100,
       date: data.date || new Date().toISOString().slice(0, 10),
       assessor: data.assessor,
       domain: data.domain,
@@ -535,9 +827,9 @@ class AIDiagnosticService {
   // SESSIONS — الجلسات العلاجية
   // ═══════════════════════════════════════════════════════════
   listSessions(beneficiaryId, { therapyType, status } = {}) {
-    let items = [...this.sessions.values()].filter((s) => s.beneficiaryId === beneficiaryId);
-    if (therapyType) items = items.filter((s) => s.therapyType === therapyType);
-    if (status) items = items.filter((s) => s.status === status);
+    let items = [...this.sessions.values()].filter(s => s.beneficiaryId === beneficiaryId);
+    if (therapyType) items = items.filter(s => s.therapyType === therapyType);
+    if (status) items = items.filter(s => s.status === status);
     return items.sort((a, b) => a.date.localeCompare(b.date));
   }
 
@@ -586,9 +878,9 @@ class AIDiagnosticService {
   // GOALS — الأهداف العلاجية
   // ═══════════════════════════════════════════════════════════
   listGoals(beneficiaryId, { category, status } = {}) {
-    let items = [...this.goals.values()].filter((g) => g.beneficiaryId === beneficiaryId);
-    if (category) items = items.filter((g) => g.category === category);
-    if (status) items = items.filter((g) => g.status === status);
+    let items = [...this.goals.values()].filter(g => g.beneficiaryId === beneficiaryId);
+    if (category) items = items.filter(g => g.category === category);
+    if (status) items = items.filter(g => g.status === status);
     return items;
   }
 
@@ -638,8 +930,8 @@ class AIDiagnosticService {
   // ═══════════════════════════════════════════════════════════
   listTreatmentPlans({ beneficiaryId, status } = {}) {
     let items = [...this.treatmentPlans.values()];
-    if (beneficiaryId) items = items.filter((p) => p.beneficiaryId === beneficiaryId);
-    if (status) items = items.filter((p) => p.status === status);
+    if (beneficiaryId) items = items.filter(p => p.beneficiaryId === beneficiaryId);
+    if (status) items = items.filter(p => p.status === status);
     return items;
   }
 
@@ -683,7 +975,9 @@ class AIDiagnosticService {
     const assessments = this.listAssessments(beneficiaryId);
     const sessions = this.listSessions(beneficiaryId);
     const goals = this.listGoals(beneficiaryId);
-    const behaviors = [...this.behaviorLogs.values()].filter((bl) => bl.beneficiaryId === beneficiaryId);
+    const behaviors = [...this.behaviorLogs.values()].filter(
+      bl => bl.beneficiaryId === beneficiaryId
+    );
 
     // Calculate progress trajectory
     const trajectory = this._calculateTrajectory(assessments);
@@ -694,21 +988,32 @@ class AIDiagnosticService {
     // Calculate goal completion rate
     const goalStats = {
       total: goals.length,
-      achieved: goals.filter((g) => g.status === 'achieved').length,
-      inProgress: goals.filter((g) => g.status === 'in_progress').length,
-      avgProgress: goals.length ? Math.round(goals.reduce((s, g) => s + g.progress, 0) / goals.length) : 0,
+      achieved: goals.filter(g => g.status === 'achieved').length,
+      inProgress: goals.filter(g => g.status === 'in_progress').length,
+      avgProgress: goals.length
+        ? Math.round(goals.reduce((s, g) => s + g.progress, 0) / goals.length)
+        : 0,
     };
 
     // Behavior analysis
     const behaviorAnalysis = {
       totalLogs: behaviors.length,
-      positive: behaviors.filter((bl) => bl.type === 'positive').length,
-      challenging: behaviors.filter((bl) => bl.type === 'challenging').length,
-      positiveRatio: behaviors.length ? Math.round((behaviors.filter((bl) => bl.type === 'positive').length / behaviors.length) * 100) : 0,
+      positive: behaviors.filter(bl => bl.type === 'positive').length,
+      challenging: behaviors.filter(bl => bl.type === 'challenging').length,
+      positiveRatio: behaviors.length
+        ? Math.round(
+            (behaviors.filter(bl => bl.type === 'positive').length / behaviors.length) * 100
+          )
+        : 0,
     };
 
     // AI score
-    const aiProgressScore = this._computeAIScore(trajectory, engagementTrend, goalStats, behaviorAnalysis);
+    const aiProgressScore = this._computeAIScore(
+      trajectory,
+      engagementTrend,
+      goalStats,
+      behaviorAnalysis
+    );
 
     const analysis = {
       beneficiaryId,
@@ -737,7 +1042,9 @@ class AIDiagnosticService {
   generateRecommendations(beneficiaryId) {
     const b = this.getBeneficiary(beneficiaryId);
     const analysis = this.analyzeProgress(beneficiaryId);
-    const plan = [...this.treatmentPlans.values()].find((p) => p.beneficiaryId === beneficiaryId && p.status === 'active');
+    const plan = [...this.treatmentPlans.values()].find(
+      p => p.beneficiaryId === beneficiaryId && p.status === 'active'
+    );
     const sessions = this.listSessions(beneficiaryId);
 
     const recommendations = [];
@@ -755,7 +1062,7 @@ class AIDiagnosticService {
     }
 
     // Goal-specific recommendations
-    analysis.areasForImprovement.forEach((area) => {
+    analysis.areasForImprovement.forEach(area => {
       recommendations.push({
         type: 'goal_modification',
         priority: 'medium',
@@ -767,14 +1074,14 @@ class AIDiagnosticService {
     });
 
     // Therapy type suggestions
-    if (b.disabilityType === 'autism' && !sessions.find((s) => s.therapyType === 'social_skills')) {
+    if (b.disabilityType === 'autism' && !sessions.find(s => s.therapyType === 'social_skills')) {
       recommendations.push({
         type: 'new_therapy',
         priority: 'medium',
         title: 'إضافة علاج المهارات الاجتماعية',
         description: 'بناءً على نوع الإعاقة، يُوصى بإضافة جلسات مهارات اجتماعية',
         rationale: 'أطفال التوحد يستفيدون بشكل كبير من تدريب المهارات الاجتماعية',
-        confidence: 0.90,
+        confidence: 0.9,
       });
     }
 
@@ -798,7 +1105,7 @@ class AIDiagnosticService {
         title: 'تعزيز الدعم السلوكي',
         description: 'تم رصد سلوكيات تحتاج متابعة — يُوصى بتعزيز خطة الدعم السلوكي',
         rationale: `نسبة السلوكيات الإيجابية: ${analysis.behaviorAnalysis.positiveRatio}%`,
-        confidence: 0.80,
+        confidence: 0.8,
       });
     }
 
@@ -839,19 +1146,25 @@ class AIDiagnosticService {
     const sessions = this.listSessions(beneficiaryId);
 
     const trajectory = this._calculateTrajectory(assessments);
-    const sessionsPerWeek = sessions.length > 0
-      ? Math.min(sessions.length / Math.max(1, this._weeksBetween(sessions[0].date, sessions[sessions.length - 1].date)), 5)
-      : 0;
+    const sessionsPerWeek =
+      sessions.length > 0
+        ? Math.min(
+            sessions.length /
+              Math.max(1, this._weeksBetween(sessions[0].date, sessions[sessions.length - 1].date)),
+            5
+          )
+        : 0;
 
     // Predict goal achievement probability
     const factors = {
       currentProgress: goal.progress,
       trajectoryRate: trajectory.rateOfChange,
-      engagement: sessions.length > 0
-        ? sessions.reduce((s, ses) => s + (ses.outcomes?.engagement || 50), 0) / sessions.length
-        : 50,
+      engagement:
+        sessions.length > 0
+          ? sessions.reduce((s, ses) => s + (ses.outcomes?.engagement || 50), 0) / sessions.length
+          : 50,
       sessionFrequency: sessionsPerWeek,
-      milestonesAchieved: goal.milestones.filter((m) => m.achieved).length,
+      milestonesAchieved: goal.milestones.filter(m => m.achieved).length,
       totalMilestones: goal.milestones.length,
     };
 
@@ -883,60 +1196,68 @@ class AIDiagnosticService {
   detectPatterns(beneficiaryId) {
     const b = this.getBeneficiary(beneficiaryId);
     const sessions = this.listSessions(beneficiaryId);
-    const behaviors = [...this.behaviorLogs.values()].filter((bl) => bl.beneficiaryId === beneficiaryId);
+    const behaviors = [...this.behaviorLogs.values()].filter(
+      bl => bl.beneficiaryId === beneficiaryId
+    );
     const assessments = this.listAssessments(beneficiaryId);
 
     const patterns = [];
 
     // Session engagement patterns
     if (sessions.length >= 2) {
-      const engagements = sessions.filter((s) => s.outcomes).map((s) => s.outcomes.engagement);
+      const engagements = sessions.filter(s => s.outcomes).map(s => s.outcomes.engagement);
       if (engagements.length >= 2) {
         const trend = this._detectTrend(engagements);
         patterns.push({
           type: 'engagement_trend',
           direction: trend,
-          description: trend === 'increasing'
-            ? 'مستوى المشاركة في الجلسات في ارتفاع مستمر'
-            : trend === 'decreasing'
-              ? 'مستوى المشاركة في الجلسات في انخفاض — يحتاج متابعة'
-              : 'مستوى المشاركة مستقر',
+          description:
+            trend === 'increasing'
+              ? 'مستوى المشاركة في الجلسات في ارتفاع مستمر'
+              : trend === 'decreasing'
+                ? 'مستوى المشاركة في الجلسات في انخفاض — يحتاج متابعة'
+                : 'مستوى المشاركة مستقر',
           dataPoints: engagements,
-          significance: Math.abs(engagements[engagements.length - 1] - engagements[0]) > 15 ? 'significant' : 'minor',
+          significance:
+            Math.abs(engagements[engagements.length - 1] - engagements[0]) > 15
+              ? 'significant'
+              : 'minor',
         });
       }
     }
 
     // Behavioral patterns
     if (behaviors.length >= 2) {
-      const positiveCount = behaviors.filter((bl) => bl.type === 'positive').length;
-      const challengingCount = behaviors.filter((bl) => bl.type === 'challenging').length;
+      const positiveCount = behaviors.filter(bl => bl.type === 'positive').length;
+      const challengingCount = behaviors.filter(bl => bl.type === 'challenging').length;
       patterns.push({
         type: 'behavior_ratio',
         positiveCount,
         challengingCount,
         ratio: positiveCount / Math.max(1, challengingCount),
-        description: positiveCount > challengingCount
-          ? 'غالبية السلوكيات المرصودة إيجابية — مؤشر جيد'
-          : 'السلوكيات التحدية أعلى من الإيجابية — يحتاج تدخل',
+        description:
+          positiveCount > challengingCount
+            ? 'غالبية السلوكيات المرصودة إيجابية — مؤشر جيد'
+            : 'السلوكيات التحدية أعلى من الإيجابية — يحتاج تدخل',
         significance: Math.abs(positiveCount - challengingCount) > 2 ? 'significant' : 'minor',
       });
     }
 
     // Assessment score patterns
     if (assessments.length >= 2) {
-      const scores = assessments.map((a) => ({ date: a.date, score: a.score, scale: a.scale }));
+      const scores = assessments.map(a => ({ date: a.date, score: a.score, scale: a.scale }));
       const latestTwo = scores.slice(-2);
       const change = latestTwo[1].score - latestTwo[0].score;
       patterns.push({
         type: 'assessment_trend',
         direction: change > 0 ? 'improving' : change < 0 ? 'declining' : 'stable',
         change,
-        description: change > 0
-          ? `تحسن في نتائج التقييم بمقدار ${change} نقطة`
-          : change < 0
-            ? `انخفاض في نتائج التقييم بمقدار ${Math.abs(change)} نقطة`
-            : 'نتائج التقييم مستقرة',
+        description:
+          change > 0
+            ? `تحسن في نتائج التقييم بمقدار ${change} نقطة`
+            : change < 0
+              ? `انخفاض في نتائج التقييم بمقدار ${Math.abs(change)} نقطة`
+              : 'نتائج التقييم مستقرة',
         dataPoints: scores,
         significance: Math.abs(change) > 10 ? 'significant' : 'minor',
       });
@@ -952,7 +1273,12 @@ class AIDiagnosticService {
       patterns.push({
         type: 'session_frequency',
         averageGapDays: Math.round(avgGap * 10) / 10,
-        description: avgGap <= 4 ? 'تردد جلسات ممتاز' : avgGap <= 7 ? 'تردد جلسات جيد' : 'تردد جلسات يحتاج تحسين',
+        description:
+          avgGap <= 4
+            ? 'تردد جلسات ممتاز'
+            : avgGap <= 7
+              ? 'تردد جلسات جيد'
+              : 'تردد جلسات يحتاج تحسين',
         significance: avgGap > 10 ? 'significant' : 'minor',
       });
     }
@@ -979,13 +1305,15 @@ class AIDiagnosticService {
     const analysis = this.analyzeProgress(beneficiaryId);
     const goals = this.listGoals(beneficiaryId);
     const sessions = this.listSessions(beneficiaryId);
-    const alerts = [...this.alerts.values()].filter((a) => a.beneficiaryId === beneficiaryId && !a.resolved);
+    const alerts = [...this.alerts.values()].filter(
+      a => a.beneficiaryId === beneficiaryId && !a.resolved
+    );
 
     const riskFactors = [];
     let riskScore = 0;
 
     // Stagnation risk
-    const stagnatingGoals = goals.filter((g) => g.status === 'in_progress' && g.progress < 30);
+    const stagnatingGoals = goals.filter(g => g.status === 'in_progress' && g.progress < 30);
     if (stagnatingGoals.length > 0) {
       riskScore += 20;
       riskFactors.push({
@@ -1024,7 +1352,7 @@ class AIDiagnosticService {
       riskScore += alerts.length * 10;
       riskFactors.push({
         factor: 'active_alerts',
-        severity: alerts.some((a) => a.severity === 'critical') ? 'critical' : 'medium',
+        severity: alerts.some(a => a.severity === 'critical') ? 'critical' : 'medium',
         description: `${alerts.length} تنبيه(ات) نشطة`,
       });
     }
@@ -1049,7 +1377,14 @@ class AIDiagnosticService {
       assessedAt: new Date().toISOString(),
       model: this._aiModels.riskAssessor,
       riskScore,
-      riskLevel: riskScore >= 70 ? 'critical' : riskScore >= 40 ? 'high' : riskScore >= 20 ? 'medium' : 'low',
+      riskLevel:
+        riskScore >= 70
+          ? 'critical'
+          : riskScore >= 40
+            ? 'high'
+            : riskScore >= 20
+              ? 'medium'
+              : 'low',
       riskFactors,
       mitigationSuggestions: this._generateMitigations(riskFactors),
       activeAlerts: alerts,
@@ -1071,7 +1406,7 @@ class AIDiagnosticService {
 
     // Check if therapy types are effective
     const therapyEffectiveness = {};
-    sessions.forEach((s) => {
+    sessions.forEach(s => {
       if (!therapyEffectiveness[s.therapyType]) {
         therapyEffectiveness[s.therapyType] = { total: 0, totalEngagement: 0, count: 0 };
       }
@@ -1100,9 +1435,9 @@ class AIDiagnosticService {
     });
 
     // Suggest new therapies based on gaps
-    const currentTherapies = plan.therapies.map((t) => t.type);
+    const currentTherapies = plan.therapies.map(t => t.type);
     const suggestedNew = this._suggestNewTherapies(b.disabilityType, currentTherapies);
-    suggestedNew.forEach((therapy) => {
+    suggestedNew.forEach(therapy => {
       optimizations.push({
         type: 'add_new',
         therapy,
@@ -1113,7 +1448,7 @@ class AIDiagnosticService {
     // Update plan with optimization
     plan.aiOptimization = {
       lastOptimized: new Date().toISOString().slice(0, 10),
-      suggestions: optimizations.map((o) => o.suggestion),
+      suggestions: optimizations.map(o => o.suggestion),
       confidence: this._aiModels.recommendationEngine.accuracy,
       details: optimizations,
     };
@@ -1134,8 +1469,8 @@ class AIDiagnosticService {
   // BEHAVIOR LOGS — سجل السلوكيات
   // ═══════════════════════════════════════════════════════════
   listBehaviorLogs(beneficiaryId, { type } = {}) {
-    let items = [...this.behaviorLogs.values()].filter((bl) => bl.beneficiaryId === beneficiaryId);
-    if (type) items = items.filter((bl) => bl.type === type);
+    let items = [...this.behaviorLogs.values()].filter(bl => bl.beneficiaryId === beneficiaryId);
+    if (type) items = items.filter(bl => bl.type === type);
     return items.sort((a, b) => a.date.localeCompare(b.date));
   }
 
@@ -1164,9 +1499,9 @@ class AIDiagnosticService {
   // ═══════════════════════════════════════════════════════════
   listAlerts({ beneficiaryId, resolved, severity } = {}) {
     let items = [...this.alerts.values()];
-    if (beneficiaryId) items = items.filter((a) => a.beneficiaryId === beneficiaryId);
-    if (resolved !== undefined) items = items.filter((a) => a.resolved === resolved);
-    if (severity) items = items.filter((a) => a.severity === severity);
+    if (beneficiaryId) items = items.filter(a => a.beneficiaryId === beneficiaryId);
+    if (resolved !== undefined) items = items.filter(a => a.resolved === resolved);
+    if (severity) items = items.filter(a => a.severity === severity);
     return items.sort((a, b) => b.createdDate.localeCompare(a.createdDate));
   }
 
@@ -1202,7 +1537,7 @@ class AIDiagnosticService {
         overallScore: analysis.overallScore,
         riskLevel: risk.riskLevel,
         totalGoals: goals.length,
-        achievedGoals: goals.filter((g) => g.status === 'achieved').length,
+        achievedGoals: goals.filter(g => g.status === 'achieved').length,
         avgProgress: analysis.goalStats.avgProgress,
         totalAssessments: assessments.length,
         totalSessions: analysis.engagementTrend.totalSessions,
@@ -1289,11 +1624,11 @@ class AIDiagnosticService {
   }
 
   _calculateEngagementTrend(sessions) {
-    const completed = sessions.filter((s) => s.outcomes);
+    const completed = sessions.filter(s => s.outcomes);
     if (completed.length === 0) {
       return { direction: 'no_data', avgEngagement: 0, totalSessions: sessions.length };
     }
-    const engagements = completed.map((s) => s.outcomes.engagement);
+    const engagements = completed.map(s => s.outcomes.engagement);
     const avg = Math.round(engagements.reduce((s, e) => s + e, 0) / engagements.length);
     const first = engagements[0];
     const last = engagements[engagements.length - 1];
@@ -1325,19 +1660,20 @@ class AIDiagnosticService {
 
   _identifyStrengths(assessments, sessions, goals) {
     const strengths = [];
-    const highProgressGoals = goals.filter((g) => g.progress >= 70);
-    if (highProgressGoals.length > 0) strengths.push(...highProgressGoals.map((g) => g.category));
-    const highEngagement = sessions.filter((s) => s.outcomes?.engagement >= 80);
+    const highProgressGoals = goals.filter(g => g.progress >= 70);
+    if (highProgressGoals.length > 0) strengths.push(...highProgressGoals.map(g => g.category));
+    const highEngagement = sessions.filter(s => s.outcomes?.engagement >= 80);
     if (highEngagement.length > 0) strengths.push('engagement');
     return [...new Set(strengths)];
   }
 
   _identifyWeaknesses(assessments, sessions, goals) {
     const weaknesses = [];
-    const lowProgressGoals = goals.filter((g) => g.progress < 40 && g.status === 'in_progress');
-    if (lowProgressGoals.length > 0) weaknesses.push(...lowProgressGoals.map((g) => g.category));
-    const lowEngagement = sessions.filter((s) => s.outcomes?.engagement < 50);
-    if (lowEngagement.length > sessions.length * 0.5 && sessions.length > 0) weaknesses.push('engagement');
+    const lowProgressGoals = goals.filter(g => g.progress < 40 && g.status === 'in_progress');
+    if (lowProgressGoals.length > 0) weaknesses.push(...lowProgressGoals.map(g => g.category));
+    const lowEngagement = sessions.filter(s => s.outcomes?.engagement < 50);
+    if (lowEngagement.length > sessions.length * 0.5 && sessions.length > 0)
+      weaknesses.push('engagement');
     return [...new Set(weaknesses)];
   }
 
@@ -1346,9 +1682,11 @@ class AIDiagnosticService {
     let prob = 0;
     prob += (factors.currentProgress / 100) * 0.35;
     prob += Math.max(0, Math.min(1, factors.trajectoryRate / 10)) * 0.25;
-    prob += (factors.engagement / 100) * 0.20;
-    prob += Math.min(1, factors.sessionFrequency / 3) * 0.10;
-    prob += (factors.totalMilestones > 0 ? factors.milestonesAchieved / factors.totalMilestones : 0.5) * 0.10;
+    prob += (factors.engagement / 100) * 0.2;
+    prob += Math.min(1, factors.sessionFrequency / 3) * 0.1;
+    prob +=
+      (factors.totalMilestones > 0 ? factors.milestonesAchieved / factors.totalMilestones : 0.5) *
+      0.1;
     return Math.max(0, Math.min(1, prob));
   }
 
@@ -1380,7 +1718,7 @@ class AIDiagnosticService {
 
   _generateMitigations(riskFactors) {
     const mitigations = [];
-    riskFactors.forEach((rf) => {
+    riskFactors.forEach(rf => {
       switch (rf.factor) {
         case 'goal_stagnation':
           mitigations.push('مراجعة الأهداف وتقسيمها لأهداف فرعية أصغر');
@@ -1406,7 +1744,13 @@ class AIDiagnosticService {
 
   _suggestNewTherapies(disabilityType, currentTherapies) {
     const suggestions = {
-      autism: ['behavioral', 'speech_therapy', 'social_skills', 'sensory_integration', 'play_therapy'],
+      autism: [
+        'behavioral',
+        'speech_therapy',
+        'social_skills',
+        'sensory_integration',
+        'play_therapy',
+      ],
       intellectual: ['cognitive', 'social_skills', 'vocational', 'speech_therapy'],
       physical: ['physiotherapy', 'occupational', 'vocational'],
       speech: ['speech_therapy', 'play_therapy', 'art_therapy'],
@@ -1418,22 +1762,25 @@ class AIDiagnosticService {
       neurological: ['physiotherapy', 'occupational', 'cognitive', 'speech_therapy'],
     };
     const recommended = suggestions[disabilityType] || [];
-    return recommended.filter((t) => !currentTherapies.includes(t)).slice(0, 2);
+    return recommended.filter(t => !currentTherapies.includes(t)).slice(0, 2);
   }
 
   _generateConclusion(analysis, _risk, _goals) {
     const score = analysis.overallScore;
-    if (score >= 70) return 'تقدم ممتاز — المستفيد يحرز تحسناً ملحوظاً في معظم المجالات. يُوصى بالاستمرار ورفع مستوى الأهداف.';
-    if (score >= 50) return 'تقدم جيد — المستفيد يتحسن بشكل مستقر. يحتاج لمتابعة بعض المجالات المتأخرة.';
-    if (score >= 30) return 'تقدم محدود — يحتاج المستفيد لمراجعة شاملة للخطة العلاجية وتعديل الأساليب.';
+    if (score >= 70)
+      return 'تقدم ممتاز — المستفيد يحرز تحسناً ملحوظاً في معظم المجالات. يُوصى بالاستمرار ورفع مستوى الأهداف.';
+    if (score >= 50)
+      return 'تقدم جيد — المستفيد يتحسن بشكل مستقر. يحتاج لمتابعة بعض المجالات المتأخرة.';
+    if (score >= 30)
+      return 'تقدم محدود — يحتاج المستفيد لمراجعة شاملة للخطة العلاجية وتعديل الأساليب.';
     return 'تقدم ضعيف — يُوصى بإعادة تقييم شاملة وتعديل جذري في الخطة العلاجية.';
   }
 
   _generateNextSteps(recommendations, risk) {
     const steps = [];
-    const highPriority = recommendations.filter((r) => r.priority === 'high');
+    const highPriority = recommendations.filter(r => r.priority === 'high');
     if (highPriority.length > 0) {
-      steps.push(...highPriority.map((r) => r.title));
+      steps.push(...highPriority.map(r => r.title));
     }
     if (risk.riskLevel === 'critical' || risk.riskLevel === 'high') {
       steps.push('اجتماع فريق عاجل لمراجعة الحالة');
@@ -1449,18 +1796,24 @@ class AIDiagnosticService {
     return {
       sentimentScore: Math.round(sentimentScore * 100) / 100,
       engagementLevel: engagement >= 75 ? 'high' : engagement >= 50 ? 'medium' : 'low',
-      suggestedFollowUp: engagement >= 75
-        ? 'الاستمرار في نفس النهج مع رفع التحدي تدريجياً'
-        : engagement >= 50
-          ? 'مراجعة أنشطة الجلسة وتنويع الأساليب'
-          : 'تغيير النهج العلاجي واستخدام أنشطة أكثر تحفيزاً',
+      suggestedFollowUp:
+        engagement >= 75
+          ? 'الاستمرار في نفس النهج مع رفع التحدي تدريجياً'
+          : engagement >= 50
+            ? 'مراجعة أنشطة الجلسة وتنويع الأساليب'
+            : 'تغيير النهج العلاجي واستخدام أنشطة أكثر تحفيزاً',
     };
   }
 
   _checkForAlerts(assessment) {
     // Check for declining scores
     const prevAssessments = [...this.assessments.values()]
-      .filter((a) => a.beneficiaryId === assessment.beneficiaryId && a.id !== assessment.id && a.scale === assessment.scale)
+      .filter(
+        a =>
+          a.beneficiaryId === assessment.beneficiaryId &&
+          a.id !== assessment.id &&
+          a.scale === assessment.scale
+      )
       .sort((a, b) => a.date.localeCompare(b.date));
 
     if (prevAssessments.length > 0) {
@@ -1493,10 +1846,15 @@ class AIDiagnosticService {
   _compareSubScores(sub1, sub2) {
     if (!sub1 || !sub2) return null;
     const comparison = {};
-    Object.keys(sub2).forEach((key) => {
+    Object.keys(sub2).forEach(key => {
       const v1 = sub1[key] || 0;
       const v2 = sub2[key] || 0;
-      comparison[key] = { before: v1, after: v2, change: v2 - v1, direction: v2 > v1 ? 'improved' : v2 < v1 ? 'declined' : 'stable' };
+      comparison[key] = {
+        before: v1,
+        after: v2,
+        change: v2 - v1,
+        direction: v2 > v1 ? 'improved' : v2 < v1 ? 'declined' : 'stable',
+      };
     });
     return comparison;
   }

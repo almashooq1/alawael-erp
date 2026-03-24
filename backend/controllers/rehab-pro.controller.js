@@ -18,6 +18,7 @@ const {
   PostDischargeTracking,
   ARTherapy,
 } = require('../models/rehab-pro.model');
+const logger = require('../utils/logger');
 
 // ─── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -25,7 +26,7 @@ function ok(res, data, msg = 'Success') {
   return res.json({ success: true, message: msg, data });
 }
 function fail(res, err, code = 500) {
-  console.error('[rehab-pro]', err);
+  logger.error('[rehab-pro]', { error: err.message || err });
   return res.status(code).json({ success: false, message: err.message || err });
 }
 

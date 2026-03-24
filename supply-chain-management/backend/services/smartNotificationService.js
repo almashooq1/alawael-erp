@@ -12,7 +12,6 @@ class SmartNotificationService extends EventEmitter {
   constructor() {
     super();
     this.name = 'SmartNotificationService';
-    // console.log(`[${this.name}] Initialized`);
   }
 
   /**
@@ -157,7 +156,6 @@ class SmartNotificationService extends EventEmitter {
    */
   async sendEmail(notification) {
     // Integration with email service (SendGrid, SES, etc.)
-    // console.log(`[Email] Sending to ${notification.recipientEmail}: ${notification.title}`);
     // Simulated email sending
     return true;
   }
@@ -167,9 +165,6 @@ class SmartNotificationService extends EventEmitter {
    */
   async sendSMS(notification) {
     // Integration with SMS service (Twilio, AWS SNS, etc.)
-    // console.log(
-    //   `[SMS] Sending to ${notification.recipientPhone}: ${notification.message.substring(0, 50)}`
-    // );
     // Simulated SMS sending
     return true;
   }
@@ -179,7 +174,6 @@ class SmartNotificationService extends EventEmitter {
    */
   async sendPush(notification) {
     // Integration with push service (FCM, APNs, etc.)
-    // console.log(`[Push] Sending: ${notification.title}`);
     // Simulated push sending
     return true;
   }
@@ -188,7 +182,6 @@ class SmartNotificationService extends EventEmitter {
    * Mark in-app notification as ready
    */
   async markInAppReady(notification) {
-    // console.log(`[In-App] Queued: ${notification.title}`);
     return true;
   }
 
@@ -197,7 +190,6 @@ class SmartNotificationService extends EventEmitter {
    */
   async sendSlack(notification) {
     // Integration with Slack API
-    // console.log(`[Slack] Sending: ${notification.message}`);
     return true;
   }
 
@@ -206,7 +198,6 @@ class SmartNotificationService extends EventEmitter {
    */
   async callWebhook(notification) {
     // Integration with webhooks
-    // console.log(`[Webhook] Calling webhook for ${notification.type}`);
     return true;
   }
 

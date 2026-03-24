@@ -20,7 +20,6 @@ class MessagingService extends EventEmitter {
    */
   registerConnection(userId, socket) {
     this.activeConnections.set(userId, socket);
-    // console.log(`✅ User ${userId} connected`);
 
     // Send queued messages
     this.deliverQueuedMessages(userId);
@@ -35,7 +34,6 @@ class MessagingService extends EventEmitter {
   removeConnection(userId) {
     this.activeConnections.delete(userId);
     this.typingIndicators.delete(userId);
-    // console.log(`❌ User ${userId} disconnected`);
 
     this.emit('user-offline', { userId, timestamp: new Date() });
   }

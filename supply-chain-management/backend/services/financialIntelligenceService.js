@@ -14,7 +14,6 @@ class FinancialIntelligenceService extends EventEmitter {
   constructor() {
     super();
     this.name = 'FinancialIntelligenceService';
-    // console.log(`[${this.name}] Initialized`);
   }
 
   // ==================== TRANSACTION METHODS ====================

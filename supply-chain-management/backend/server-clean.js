@@ -16,7 +16,7 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 4000;
 if (!process.env.JWT_SECRET) {
-  console.error('CRITICAL: JWT_SECRET environment variable is not set!');
+  process.stderr.write('CRITICAL: JWT_SECRET environment variable is not set!\n');
   process.exit(1);
 }
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -50,11 +50,11 @@ const connectDB = async () => {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
-    // console.log('✅ MongoDB connected successfully');
+    // console.log('MongoDB connected successfully');
     await seedDatabase();
   } catch (err) {
-    console.error('❌ MongoDB connection error:', err.message);
-    // console.log('⚠️ Running in fallback mode with in-memory data...');
+    process.stderr.write(`MongoDB connection error: ${err.message}\n`);
+    // console.log('Running in fallback mode with in-memory data...');
   }
 };
 
@@ -63,11 +63,11 @@ async function seedDatabase() {
   try {
     const supplierCount = await Supplier.countDocuments();
     if (supplierCount > 0) {
-      // console.log('✅ Database already seeded');
+      // console.log('Database already seeded');
       return;
     }
 
-    // console.log('🌱 Seeding database...');
+    // console.log('Seeding database...');
 
     const suppliers = await Supplier.insertMany([
       {

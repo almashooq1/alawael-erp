@@ -14,7 +14,7 @@ async function logAction({ user, action, entity, entityId, details }) {
     });
   } catch (err) {
     // يمكن تسجيل الخطأ في ملف لوج أو تجاهله
-    console.error('AuditLog error:', err);
+    process.stderr.write(`AuditLog error: ${err.message}\n`);
   }
 }
 

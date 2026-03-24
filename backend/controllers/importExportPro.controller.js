@@ -10,6 +10,7 @@
 const importExportService = require('../services/importExportPro.service');
 const ImportExportJob = require('../models/ImportExportJob');
 const ImportExportTemplate = require('../models/ImportExportTemplate');
+const logger = require('../utils/logger');
 
 // ─────────────────────────────────────────────────
 // EXPORT ENDPOINTS
@@ -51,7 +52,7 @@ const createExport = async (req, res) => {
 
     return res.send(result.buffer);
   } catch (error) {
-    console.error('[ImportExport] Export error:', error.message);
+    logger.error('[ImportExport] Export error:', { message: error.message });
     return res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -88,7 +89,7 @@ const previewExport = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('[ImportExport] Preview error:', error.message);
+    logger.error('[ImportExport] Preview error:', { message: error.message });
     return res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -117,7 +118,7 @@ const bulkExport = async (req, res) => {
 
     return res.send(result.buffer);
   } catch (error) {
-    console.error('[ImportExport] Bulk export error:', error.message);
+    logger.error('[ImportExport] Bulk export error:', { message: error.message });
     return res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -153,7 +154,7 @@ const parseImportFile = async (req, res) => {
       data: result,
     });
   } catch (error) {
-    console.error('[ImportExport] Parse error:', error.message);
+    logger.error('[ImportExport] Parse error:', { message: error.message });
     return res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -193,7 +194,7 @@ const executeImport = async (req, res) => {
       data: result,
     });
   } catch (error) {
-    console.error('[ImportExport] Execute import error:', error.message);
+    logger.error('[ImportExport] Execute import error:', { message: error.message });
     return res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -231,7 +232,7 @@ const validateImport = async (req, res) => {
       data: result,
     });
   } catch (error) {
-    console.error('[ImportExport] Validation error:', error.message);
+    logger.error('[ImportExport] Validation error:', { message: error.message });
     return res.status(500).json({ success: false, message: error.message });
   }
 };

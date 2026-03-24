@@ -28,8 +28,8 @@ app.use(express.json());
 // MongoDB Connection
 mongoose
   .connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.error('✅ MongoDB connected'))
-  .catch(err => console.error('❌ MongoDB connection error:', err));
+  .then(() => process.stderr.write('MongoDB connected\n'))
+  .catch(err => process.stderr.write(`MongoDB connection error: ${err.message}\n`));
 
 // Root health check
 app.get('/', (req, res) => {
@@ -46,12 +46,5 @@ app.use('/api/barcode', barcodeRouter);
 
 // Start server
 app.listen(PORT, () => {
-  // console.log(`\n✨ Barcode API Server running on http://localhost:${PORT}`);
-  // console.log(`📍 Health Check: http://localhost:${PORT}/api/barcode/health`);
-  // console.log(`\n🔌 Available Endpoints:`);
-  // console.log(`   POST   /api/barcode/qr-code      - Generate QR Code`);
-  // console.log(`   POST   /api/barcode/barcode      - Generate Barcode`);
-  // console.log(`   POST   /api/barcode/batch        - Batch Generation`);
-  // console.log(`   GET    /api/barcode/statistics   - Get Statistics`);
-  // console.log(`   GET    /api/barcode/health       - Health Check (Public)\n`);
+  // Server started
 });

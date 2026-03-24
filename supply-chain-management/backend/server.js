@@ -28,7 +28,7 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 if (!process.env.JWT_SECRET) {
-  console.error('CRITICAL: JWT_SECRET environment variable is not set!');
+  process.stderr.write('CRITICAL: JWT_SECRET environment variable is not set!\n');
   process.exit(1);
 }
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -53,7 +53,7 @@ const users = [
     password:
       process.env.SCM_ADMIN_HASH ||
       (() => {
-        console.error('WARNING: SCM_ADMIN_HASH not set, admin login disabled');
+        process.stderr.write('WARNING: SCM_ADMIN_HASH not set, admin login disabled\n');
         return '';
       })(),
     role: 'admin',
@@ -233,7 +233,7 @@ app.post('/api/auth/login', async (req, res) => {
       },
     });
   } catch (err) {
-    console.error('Login error:', err);
+    process.stderr.write(`Login error: ${err.message}\n`);
     return res.status(500).json({
       success: false,
       error: 'Server error',
@@ -288,7 +288,7 @@ app.post('/api/auth/register', async (req, res) => {
       },
     });
   } catch (err) {
-    console.error('Register error:', err);
+    process.stderr.write(`Register error: ${err.message}\n`);
     return res.status(500).json({
       success: false,
       error: 'Server error',
@@ -359,7 +359,7 @@ app.post('/api/barcode/qr-code', async (req, res) => {
       generatedAt: new Date().toISOString(),
     });
   } catch (err) {
-    console.error('QR Code error:', err);
+    process.stderr.write(`QR Code error: ${err.message}\n`);
     res.status(500).json({ error: 'Failed to generate QR code' });
   }
 });
@@ -402,7 +402,7 @@ app.post('/api/barcode/barcode', async (req, res) => {
       generatedAt: new Date().toISOString(),
     });
   } catch (err) {
-    console.error('Barcode error:', err);
+    process.stderr.write(`Barcode error: ${err.message}\n`);
     res.status(500).json({ error: 'Failed to generate barcode' });
   }
 });
@@ -474,7 +474,7 @@ app.post('/api/barcode/batch', async (req, res) => {
       generatedAt: new Date().toISOString(),
     });
   } catch (err) {
-    console.error('Batch generation error:', err);
+    process.stderr.write(`Batch generation error: ${err.message}\n`);
     res.status(500).json({ error: 'Failed to generate batch' });
   }
 });
@@ -812,6 +812,5 @@ app.get('*', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  // console.log(`\n✅ Supply Chain Backend Server running on http://localhost:${PORT}`);
-  // console.log(`\n📏 Demo Credentials:\n   Username: admin\n   Password: Admin@123456\n`);
+  // Server started
 });

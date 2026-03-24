@@ -17,11 +17,7 @@ const {
   sendRegisterOTP,
   verifyRegisterOTP,
 } = require('../auth/otp-service');
-const {
-  UnauthorizedError,
-  ValidationError,
-  TooManyRequestsError,
-} = require('../errors/AppError');
+const { UnauthorizedError, ValidationError, TooManyRequestsError } = require('../errors/AppError');
 const User = require('../models/User');
 
 // JWT Secret

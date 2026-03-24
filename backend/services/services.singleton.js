@@ -20,6 +20,7 @@ let oauth2ProviderInstance = null;
 let securityServiceInstance = null;
 let userServiceInstance = null;
 let permissionServiceInstance = null;
+const logger = require('../utils/logger');
 
 /**
  * Get singleton instance of AuthenticationService
@@ -33,7 +34,7 @@ function getAuthenticationService() {
       const AuthenticationService = require('./AuthenticationService');
       authenticationServiceInstance = new AuthenticationService();
     } catch (error) {
-      console.warn('AuthenticationService not found, using mock for testing');
+      logger.warn('AuthenticationService not found, using mock for testing');
       authenticationServiceInstance = {
         generateToken: _user => `token-${_user.id}`,
         verifyToken: _token => ({ id: 'user-123', role: 'user' }),
@@ -59,7 +60,7 @@ function getOAuth2Provider(authService = null) {
       const auth = authService || getAuthenticationService();
       oauth2ProviderInstance = new OAuth2Provider(auth);
     } catch (error) {
-      console.warn('OAuth2Provider not found, using mock for testing');
+      logger.warn('OAuth2Provider not found, using mock for testing');
       const _auth = authService || getAuthenticationService();
       oauth2ProviderInstance = {
         exchangeCodeForToken: async (_provider, _code) => ({
@@ -95,7 +96,7 @@ function getSecurityService() {
       const SecurityService = require('./SecurityService');
       securityServiceInstance = new SecurityService();
     } catch (error) {
-      console.warn('SecurityService not found, using mock for testing');
+      logger.warn('SecurityService not found, using mock for testing');
       securityServiceInstance = {
         verifyToken: (_token, _secret) => ({ valid: true, decoded: { id: 'user-123' } }),
         generateToken: (_payload, _secret) => `token-${Date.now()}`,
@@ -121,7 +122,7 @@ function getUserService() {
       const UserService = require('./UserService');
       userServiceInstance = new UserService();
     } catch (error) {
-      console.warn('UserService not found, using mock for testing');
+      logger.warn('UserService not found, using mock for testing');
       userServiceInstance = {
         findById: async _id => ({ id: _id, name: 'User', email: 'user@example.com' }),
         findByEmail: async _email => ({ id: 'user-123', email: _email, name: 'User' }),
@@ -147,7 +148,7 @@ function getPermissionService() {
       const PermissionService = require('./PermissionService');
       permissionServiceInstance = new PermissionService();
     } catch (error) {
-      console.warn('PermissionService not found, using mock for testing');
+      logger.warn('PermissionService not found, using mock for testing');
       permissionServiceInstance = {
         checkPermission: (_userId, _permission) => true,
         hasRole: (_userId, _role) => true,

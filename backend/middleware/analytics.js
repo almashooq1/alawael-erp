@@ -2,27 +2,28 @@
  * Analytics Middleware
  * Tracks request metrics and analytics
  */
+const logger = require('../utils/logger');
 
 module.exports = {
   trackRequest: (req, res, duration) => {
     // Minimal analytics tracking
     // In production, this would send data to analytics service
     if (process.env.NODE_ENV !== 'test') {
-      console.log(`[Analytics] ${req.method} ${req.path} - ${duration}ms`);
+      logger.info(`[Analytics] ${req.method} ${req.path} - ${duration}ms`);
     }
   },
 
   trackError: (error, _req) => {
     // Track error analytics
     if (process.env.NODE_ENV !== 'test') {
-      console.log(`[Analytics Error] ${error.message}`);
+      logger.error(`[Analytics Error] ${error.message}`);
     }
   },
 
   trackEvent: (eventName, data) => {
     // Track custom events
     if (process.env.NODE_ENV !== 'test') {
-      console.log(`[Analytics Event] ${eventName}`, data);
+      logger.info(`[Analytics Event] ${eventName}`, data);
     }
   },
 };

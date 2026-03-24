@@ -14,6 +14,7 @@
 
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
+const logger = require('../utils/logger');
 
 // ╔══════════════════════════════════════════════════════════════════════════════╗
 // ║  1. TALENT ACQUISITION & ATS — التوظيف واستقطاب المواهب                     ║
@@ -1051,4 +1052,4 @@ module.exports = {
   SWOTAnalysis,
 };
 
-console.log(`  ✅ EnterpriseProPlus: ${Object.keys(module.exports).length} models loaded`);
+logger.info(`  ✅ EnterpriseProPlus: ${Object.keys(module.exports).length} models loaded`);

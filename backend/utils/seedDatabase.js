@@ -2,6 +2,7 @@
 // backend/utils/seedDatabase.js
 const bcrypt = require('bcryptjs');
 const User = require('../models/User');
+const logger = require('./logger');
 
 const seedDatabase = async () => {
   try {
@@ -9,7 +10,7 @@ const seedDatabase = async () => {
     const adminExists = await User.findOne({ email: 'admin@alawael.com' });
 
     if (adminExists) {
-      console.log('✅ Admin user already exists');
+      logger.info('✅ Admin user already exists');
       return;
     }
 
@@ -27,11 +28,11 @@ const seedDatabase = async () => {
     });
 
     await adminUser.save();
-    console.log('✅ Admin user created: admin@alawael.com');
+    logger.info('✅ Admin user created: admin@alawael.com');
   } catch (error) {
     if (error.code !== 11000) {
       // Ignore duplicate key error
-      console.error('⚠️  Seeding warning:', error.message);
+      logger.error('⚠️  Seeding warning:', error.message);
     }
   }
 };

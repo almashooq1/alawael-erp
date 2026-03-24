@@ -14,6 +14,7 @@
 
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
+const logger = require('../utils/logger');
 
 // ╔══════════════════════════════════════════════════════════════════════════════╗
 // ║  1. AUDIT TRAIL & COMPLIANCE HUB — مركز التدقيق والامتثال                  ║
@@ -792,4 +793,4 @@ module.exports = {
   ProjectTimeLog: reg('ProjectTimeLog', ProjectTimeLogSchema),
 };
 
-console.log('EnterprisePro models loaded OK — 18 schemas across 6 modules');
+logger.info('EnterprisePro models loaded OK — 18 schemas across 6 modules');

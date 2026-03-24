@@ -16,6 +16,7 @@ const {
   getUnifiedJWTSecret,
   getUnifiedJWTRefreshSecret,
 } = require('../services/services.singleton');
+const logger = require('../utils/logger');
 
 /**
  * Main authentication middleware
@@ -417,7 +418,7 @@ const generateTokenHelper = (user, options = {}) => {
  * @param {Object} details - Additional details
  */
 const logActivity = (req, action, details = {}) => {
-  console.log(`[AUTH ACTIVITY] ${action}`, {
+  logger.info(`[AUTH ACTIVITY] ${action}`, {
     userId: req.user?.id,
     timestamp: new Date().toISOString(),
     ip: req.ip,

@@ -26,6 +26,7 @@ const _crypto = require('crypto');
 const path = require('path');
 const _fs = require('fs');
 const archiver = require('archiver');
+const logger = require('../utils/logger');
 
 const ImportExportJob = require('../models/ImportExportJob');
 const ImportExportTemplate = require('../models/ImportExportTemplate');
@@ -2186,7 +2187,7 @@ class ImportExportProService {
           });
           buffers.push({ name: result.fileName, buffer: result.buffer });
         } catch (err) {
-          console.error(`Bulk export: Failed to export ${mod}:`, err.message);
+          logger.error(`Bulk export: Failed to export ${mod}:`, err.message);
         }
       }
 

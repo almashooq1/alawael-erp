@@ -14,6 +14,7 @@ const {
   getPermissionService,
   getUserService,
 } = require('../services/services.singleton');
+const logger = require('../utils/logger');
 
 /**
  * Role-based authorization
@@ -427,7 +428,7 @@ const auditLog = (action) => {
         success: data?.success || false,
       };
 
-      console.log('[AUDIT]', JSON.stringify(logEntry));
+      logger.info('[AUDIT]', logEntry);
 
       return originalJson.call(this, data);
     };

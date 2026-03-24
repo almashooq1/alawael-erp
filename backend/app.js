@@ -185,7 +185,7 @@ const prodOrigins = prodOriginsRaw
 
 const isProd = process.env.NODE_ENV === 'production';
 if (isProd && !prodOrigins.length) {
-  console.warn(
+  logger.warn(
     '⚠️  WARNING: No CORS_ORIGINS or CORS_ORIGIN set in production. ' +
       'Falling back to FRONTEND_URL or rejecting cross-origin requests.'
   );

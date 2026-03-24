@@ -54,6 +54,22 @@ import {
   Insights as BIIcon,
   AutoStories as SpecialEdIcon,
   CorporateFare as EnterpriseIcon,
+  /* Batch 5 Icons */
+  Flag as SaudiGovIcon,
+  CalendarMonth as AcademicIcon,
+  ChildFriendly as StudentExtIcon,
+  AccountBalanceWallet as FinPlanIcon,
+  Psychology as AdvTherapyIcon,
+  GpsFixed as GpsBusIcon,
+  Paid as CompWorkIcon,
+  SmartToy as AIMLIcon,
+  AdminPanelSettings as SysAdminIcon,
+  Approval as SmartApprovalIcon,
+  MarkEmailRead as MessagingIcon,
+  LocalShipping as SCMExtIcon,
+  MenuBook as ElearningIcon,
+  WhatsApp as WhatsAppIcon,
+  Hub as MicroservicesIcon,
 } from '@mui/icons-material';
 
 /* ─── Batch 1 Templates ─── */
@@ -99,6 +115,23 @@ import { COMMUNITY_ORG_TEMPLATES, CommunityOrgTemplateRenderer } from './templat
 import { BI_EXECUTIVE_TEMPLATES, BIExecutiveTemplateRenderer } from './templates/BIExecutivePrintTemplates';
 import { SPECIAL_EDUCATION_TEMPLATES, SpecialEducationTemplateRenderer } from './templates/SpecialEducationPrintTemplates';
 import { ENTERPRISE_PLUS_TEMPLATES, EnterprisePlusTemplateRenderer } from './templates/EnterprisePlusPrintTemplates';
+
+/* ─── Batch 5 Templates ─── */
+import { SAUDI_GOV_TEMPLATES, SaudiGovTemplateRenderer } from './templates/SaudiGovPlatformsPrintTemplates';
+import { ACADEMIC_CURRICULUM_TEMPLATES, AcademicCurriculumTemplateRenderer } from './templates/AcademicCurriculumPrintTemplates';
+import { STUDENT_EXTENDED_TEMPLATES, StudentExtendedTemplateRenderer } from './templates/StudentExtendedPrintTemplates';
+import { FINANCIAL_PLANNING_TEMPLATES, FinancialPlanningTemplateRenderer } from './templates/FinancialPlanningPrintTemplates';
+import { ADVANCED_THERAPY_TEMPLATES, AdvancedTherapyTemplateRenderer } from './templates/AdvancedTherapyPrintTemplates';
+import { GPS_BUS_TRAFFIC_TEMPLATES, GpsBusTrafficTemplateRenderer } from './templates/GpsBusTrafficPrintTemplates';
+import { COMPENSATION_WORKFORCE_TEMPLATES, CompensationWorkforceTemplateRenderer } from './templates/CompensationWorkforcePrintTemplates';
+import { AI_ML_ANALYTICS_TEMPLATES, AIMLAnalyticsTemplateRenderer } from './templates/AIMLAnalyticsPrintTemplates';
+import { SYSTEM_ADMIN_SECURITY_TEMPLATES, SystemAdminSecurityTemplateRenderer } from './templates/SystemAdminSecurityPrintTemplates';
+import { SMART_FEATURES_APPROVALS_TEMPLATES, SmartFeaturesApprovalsTemplateRenderer } from './templates/SmartFeaturesApprovalsPrintTemplates';
+import { MESSAGING_CMS_CAMPAIGNS_TEMPLATES, MessagingCMSCampaignsTemplateRenderer } from './templates/MessagingCMSCampaignsPrintTemplates';
+import { SUPPLY_CHAIN_EXTENDED_TEMPLATES, SupplyChainExtendedTemplateRenderer } from './templates/SupplyChainExtendedPrintTemplates';
+import { ELEARNING_KNOWLEDGE_TEMPLATES, ElearningKnowledgeTemplateRenderer } from './templates/ElearningKnowledgePrintTemplates';
+import { WHATSAPP_MOBILE_TEMPLATES, WhatsAppMobileTemplateRenderer } from './templates/WhatsAppMobilePrintTemplates';
+import { MICROSERVICES_DASHBOARD_TEMPLATES, MicroservicesDashboardTemplateRenderer } from './templates/MicroservicesDashboardPrintTemplates';
 
 /* ─── Module Groups ─── */
 const MODULE_GROUPS = [
@@ -320,6 +353,97 @@ const MODULE_GROUPS = [
     icon: <EnterpriseIcon />, color: '#283593',
     templates: ENTERPRISE_PLUS_TEMPLATES,
     renderer: EnterprisePlusTemplateRenderer,
+  },
+  /* ─── Batch 5 Modules ─── */
+  {
+    id: 'saudi-gov', name: 'المنصات الحكومية السعودية', nameEn: 'Saudi Government Platforms',
+    icon: <SaudiGovIcon />, color: '#1b5e20',
+    templates: SAUDI_GOV_TEMPLATES,
+    renderer: SaudiGovTemplateRenderer,
+  },
+  {
+    id: 'academic', name: 'المناهج والجدولة الأكاديمية', nameEn: 'Academic Curriculum & Scheduling',
+    icon: <AcademicIcon />, color: '#0d47a1',
+    templates: ACADEMIC_CURRICULUM_TEMPLATES,
+    renderer: AcademicCurriculumTemplateRenderer,
+  },
+  {
+    id: 'student-ext', name: 'شؤون الطلاب الموسعة', nameEn: 'Extended Student Services',
+    icon: <StudentExtIcon />, color: '#4a148c',
+    templates: STUDENT_EXTENDED_TEMPLATES,
+    renderer: StudentExtendedTemplateRenderer,
+  },
+  {
+    id: 'fin-planning', name: 'التخطيط المالي والخزينة', nameEn: 'Financial Planning & Treasury',
+    icon: <FinPlanIcon />, color: '#1565c0',
+    templates: FINANCIAL_PLANNING_TEMPLATES,
+    renderer: FinancialPlanningTemplateRenderer,
+  },
+  {
+    id: 'adv-therapy', name: 'العلاج المتقدم والفريق متعدد التخصصات', nameEn: 'Advanced Therapy & MDT',
+    icon: <AdvTherapyIcon />, color: '#6a1b9a',
+    templates: ADVANCED_THERAPY_TEMPLATES,
+    renderer: AdvancedTherapyTemplateRenderer,
+  },
+  {
+    id: 'gps-bus', name: 'GPS والحافلات والمرور', nameEn: 'GPS, Bus & Traffic',
+    icon: <GpsBusIcon />, color: '#e65100',
+    templates: GPS_BUS_TRAFFIC_TEMPLATES,
+    renderer: GpsBusTrafficTemplateRenderer,
+  },
+  {
+    id: 'comp-workforce', name: 'التعويضات والقوى العاملة', nameEn: 'Compensation & Workforce',
+    icon: <CompWorkIcon />, color: '#2e7d32',
+    templates: COMPENSATION_WORKFORCE_TEMPLATES,
+    renderer: CompensationWorkforceTemplateRenderer,
+  },
+  {
+    id: 'ai-ml', name: 'الذكاء الاصطناعي والتحليلات', nameEn: 'AI, ML & Analytics',
+    icon: <AIMLIcon />, color: '#283593',
+    templates: AI_ML_ANALYTICS_TEMPLATES,
+    renderer: AIMLAnalyticsTemplateRenderer,
+  },
+  {
+    id: 'sys-admin', name: 'إدارة النظام والأمان', nameEn: 'System Admin & Security',
+    icon: <SysAdminIcon />, color: '#37474f',
+    templates: SYSTEM_ADMIN_SECURITY_TEMPLATES,
+    renderer: SystemAdminSecurityTemplateRenderer,
+  },
+  {
+    id: 'smart-approvals', name: 'الميزات الذكية والموافقات', nameEn: 'Smart Features & Approvals',
+    icon: <SmartApprovalIcon />, color: '#0277bd',
+    templates: SMART_FEATURES_APPROVALS_TEMPLATES,
+    renderer: SmartFeaturesApprovalsTemplateRenderer,
+  },
+  {
+    id: 'messaging-cms', name: 'المراسلات والمحتوى والحملات', nameEn: 'Messaging, CMS & Campaigns',
+    icon: <MessagingIcon />, color: '#ad1457',
+    templates: MESSAGING_CMS_CAMPAIGNS_TEMPLATES,
+    renderer: MessagingCMSCampaignsTemplateRenderer,
+  },
+  {
+    id: 'scm-extended', name: 'سلسلة التوريد الموسعة', nameEn: 'Supply Chain Extended',
+    icon: <SCMExtIcon />, color: '#4527a0',
+    templates: SUPPLY_CHAIN_EXTENDED_TEMPLATES,
+    renderer: SupplyChainExtendedTemplateRenderer,
+  },
+  {
+    id: 'elearning', name: 'التعلم الإلكتروني وإدارة المعرفة', nameEn: 'E-Learning & Knowledge',
+    icon: <ElearningIcon />, color: '#00695c',
+    templates: ELEARNING_KNOWLEDGE_TEMPLATES,
+    renderer: ElearningKnowledgeTemplateRenderer,
+  },
+  {
+    id: 'whatsapp-mobile', name: 'واتساب والجوال', nameEn: 'WhatsApp & Mobile',
+    icon: <WhatsAppIcon />, color: '#25d366',
+    templates: WHATSAPP_MOBILE_TEMPLATES,
+    renderer: WhatsAppMobileTemplateRenderer,
+  },
+  {
+    id: 'microservices', name: 'الخدمات المصغرة ولوحات المتابعة', nameEn: 'Microservices & Dashboard',
+    icon: <MicroservicesIcon />, color: '#455a64',
+    templates: MICROSERVICES_DASHBOARD_TEMPLATES,
+    renderer: MicroservicesDashboardTemplateRenderer,
   },
 ];
 

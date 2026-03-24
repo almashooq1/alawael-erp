@@ -9,7 +9,7 @@ const mongoose = require('mongoose');
 /* ── Shift Definition (template) ── */
 const ShiftDefinitionSchema = new mongoose.Schema(
   {
-    shiftCode: { type: String, unique: true, required: true },
+    shiftCode: { type: String, required: true },
     name: { type: String, required: true },
     nameEn: String,
     type: {

@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * attendance.routes.js - Attendance Management API Routes
  * Handles all attendance-related endpoints
@@ -9,12 +8,7 @@
 const express = require('express');
 const router = express.Router();
 const AttendanceService = require('../../../services/BeneficiaryManagement/AttendanceService');
-
-// Middleware
-const authenticate = (_req, _res, next) => {
-  // @todo [P1] Replace with real JWT auth middleware from middleware/auth.middleware.js
-  next();
-};
+const authenticate = require('../../../middleware/authMiddleware');
 
 // Initialize service
 let attendanceService;
@@ -22,7 +16,6 @@ let attendanceService;
 // Initialize service on first use
 router.use((req, res, next) => {
   if (!attendanceService) {
-    const { MongoClient } = require('mongodb');
     attendanceService = new AttendanceService(global.db);
   }
   next();

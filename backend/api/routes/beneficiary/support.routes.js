@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * support.routes.js - Beneficiary Support & Counseling API Routes
  * Handles support plans, counseling sessions, and psychosocial support
@@ -9,12 +8,7 @@
 const express = require('express');
 const router = express.Router();
 const SupportService = require('../../../services/BeneficiaryManagement/SupportService');
-
-// Middleware
-const authenticate = (_req, _res, next) => {
-  // @todo [P1] Replace with real JWT auth middleware from middleware/auth.middleware.js
-  next();
-};
+const authenticate = require('../../../middleware/authMiddleware');
 
 // Initialize service
 let supportService;

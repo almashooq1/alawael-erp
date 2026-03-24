@@ -620,23 +620,67 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
 
   // ── Phase 21: New Feature Services (individual safeMount for resilience) ──
   safeMount(app, ['/api/contracts', '/api/v1/contracts'], '../routes/contracts.routes');
-  safeMount(app, ['/api/smart-notifications', '/api/v1/smart-notifications'], '../routes/smartNotificationCenter.routes');
-  safeMount(app, ['/api/advanced-tickets', '/api/v1/advanced-tickets'], '../routes/advancedTickets.routes');
+  safeMount(
+    app,
+    ['/api/smart-notifications', '/api/v1/smart-notifications'],
+    '../routes/smartNotificationCenter.routes'
+  );
+  safeMount(
+    app,
+    ['/api/advanced-tickets', '/api/v1/advanced-tickets'],
+    '../routes/advancedTickets.routes'
+  );
   safeMount(app, ['/api/e-invoicing', '/api/v1/e-invoicing'], '../routes/eInvoicing.routes');
   safeMount(app, ['/api/e-signature', '/api/v1/e-signature'], '../routes/eSignature.routes');
-  safeMount(app, ['/api/e-signature-pdf', '/api/v1/e-signature-pdf'], '../routes/eSignaturePdf.routes');
+  safeMount(
+    app,
+    ['/api/e-signature-pdf', '/api/v1/e-signature-pdf'],
+    '../routes/eSignaturePdf.routes'
+  );
   safeMount(app, ['/api/e-stamp', '/api/v1/e-stamp'], '../routes/eStamp.routes');
-  safeMount(app, ['/api/risk-assessment', '/api/v1/risk-assessment'], '../routes/riskAssessment.routes');
-  safeMount(app, ['/api/budget-management', '/api/v1/budget-management'], '../routes/budgetManagement.routes');
-  safeMount(app, ['/api/employee-portal', '/api/v1/employee-portal'], '../routes/employeePortal.routes');
+  safeMount(
+    app,
+    ['/api/risk-assessment', '/api/v1/risk-assessment'],
+    '../routes/riskAssessment.routes'
+  );
+  safeMount(
+    app,
+    ['/api/budget-management', '/api/v1/budget-management'],
+    '../routes/budgetManagement.routes'
+  );
+  safeMount(
+    app,
+    ['/api/employee-portal', '/api/v1/employee-portal'],
+    '../routes/employeePortal.routes'
+  );
   safeMount(app, ['/api/kpi-dashboard', '/api/v1/kpi-dashboard'], '../routes/kpiDashboard.routes');
-  safeMount(app, ['/api/administration', '/api/v1/administration'], '../routes/administration.routes');
+  safeMount(
+    app,
+    ['/api/administration', '/api/v1/administration'],
+    '../routes/administration.routes'
+  );
   safeMount(app, ['/api/workflow', '/api/v1/workflow'], '../routes/workflow.routes');
-  safeMount(app, ['/api/workflow-enhanced', '/api/v1/workflow-enhanced'], '../routes/workflowEnhanced.routes');
+  safeMount(
+    app,
+    ['/api/workflow-enhanced', '/api/v1/workflow-enhanced'],
+    '../routes/workflowEnhanced.routes'
+  );
   safeMount(app, ['/api/workflow-pro', '/api/v1/workflow-pro'], '../routes/workflowPro.routes');
-  safeMount(app, ['/api/enterprise-pro', '/api/v1/enterprise-pro'], '../routes/enterprisePro.routes');
-  safeMount(app, ['/api/enterprise-pro-plus', '/api/v1/enterprise-pro-plus'], '../routes/enterpriseProPlus.routes');
-  safeMount(app, ['/api/enterprise-ultra', '/api/v1/enterprise-ultra'], '../routes/enterpriseUltra.routes');
+  safeMount(
+    app,
+    ['/api/enterprise-pro', '/api/v1/enterprise-pro'],
+    '../routes/enterprisePro.routes'
+  );
+  safeMount(
+    app,
+    ['/api/enterprise-pro-plus', '/api/v1/enterprise-pro-plus'],
+    '../routes/enterpriseProPlus.routes'
+  );
+  safeMount(
+    app,
+    ['/api/enterprise-ultra', '/api/v1/enterprise-ultra'],
+    '../routes/enterpriseUltra.routes'
+  );
   logger.info('Phase 21 new feature routes mounted (18 services via individual safeMount)');
 
   // ── Student Portal Extended Services (خدمات بوابة الطالب الموسّعة) ──────
@@ -1050,9 +1094,7 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   if (summary.failed === 0) {
     logger.info(`✅ All ${summary.total} route modules loaded successfully`);
   } else {
-    logger.warn(
-      `⚠️  Route loading: ${summary.ok}/${summary.total} OK, ${summary.failed} FAILED`
-    );
+    logger.warn(`⚠️  Route loading: ${summary.ok}/${summary.total} OK, ${summary.failed} FAILED`);
     summary.failedRoutes.forEach(f => {
       logger.warn(`   ✗ ${f.path} → ${f.error}`);
     });

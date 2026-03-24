@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * scholarships.routes.js - Scholarship Management API Routes
  * Handles scholarship applications, approvals, and disbursements
@@ -9,12 +8,7 @@
 const express = require('express');
 const router = express.Router();
 const ScholarshipService = require('../../../services/BeneficiaryManagement/ScholarshipService');
-
-// Middleware
-const authenticate = (_req, _res, next) => {
-  // @todo [P1] Replace with real JWT auth middleware from middleware/auth.middleware.js
-  next();
-};
+const authenticate = require('../../../middleware/authMiddleware');
 
 // Initialize service
 let scholarshipService;

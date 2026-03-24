@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * analytics.routes.js - Beneficiary Analytics & Reporting API Routes
  * Handles analytics, predictions, and comprehensive reporting
@@ -9,12 +8,7 @@
 const express = require('express');
 const router = express.Router();
 const AnalyticsService = require('../../../services/BeneficiaryManagement/AnalyticsService');
-
-// Middleware
-const authenticate = (_req, _res, next) => {
-  // @todo [P1] Replace with real JWT auth middleware from middleware/auth.middleware.js
-  next();
-};
+const authenticate = require('../../../middleware/authMiddleware');
 
 // Initialize service
 let analyticsService;

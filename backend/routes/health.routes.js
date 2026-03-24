@@ -195,7 +195,9 @@ router.get('/full', async (req, res) => {
           details: {
             connected: mongoConnected,
             collections: Object.keys(mongoose.connection.collections || {}).length,
-            responseTimeMs: req.startTime ? Number(process.hrtime.bigint() - req.startTime) / 1e6 : 0,
+            responseTimeMs: req.startTime
+              ? Number(process.hrtime.bigint() - req.startTime) / 1e6
+              : 0,
           },
         },
         models: {

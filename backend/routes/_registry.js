@@ -1089,6 +1089,41 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   );
   logger.info('Phase 24 mounted (1 module: rate-limit-waf)');
 
+  // ── Phase 25: Medical & Clinical Systems — الأنظمة الطبية والسريرية ──────
+  safeMount(
+    app,
+    ['/api/pharmacy', '/api/v1/pharmacy'],
+    '../routes/pharmacy.routes'
+  );
+  safeMount(
+    app,
+    ['/api/appointment-scheduling', '/api/v1/appointment-scheduling'],
+    '../routes/appointmentScheduling.routes'
+  );
+  safeMount(
+    app,
+    ['/api/insurance-claims', '/api/v1/insurance-claims'],
+    '../routes/insuranceClaims.routes'
+  );
+  safeMount(
+    app,
+    ['/api/medical-equipment', '/api/v1/medical-equipment'],
+    '../routes/medicalEquipment.routes'
+  );
+  safeMount(
+    app,
+    ['/api/medical-referrals', '/api/v1/medical-referrals'],
+    '../routes/medicalReferrals.routes'
+  );
+  safeMount(
+    app,
+    ['/api/emr', '/api/v1/emr'],
+    '../routes/emr.routes'
+  );
+  logger.info(
+    'Phase 25 mounted (6 modules: pharmacy, appointment-scheduling, insurance-claims, medical-equipment, medical-referrals, emr)'
+  );
+
   // ── Route Mount Summary ─────────────────────────────────────────────────
   const summary = routeHealth.summary;
   if (summary.failed === 0) {

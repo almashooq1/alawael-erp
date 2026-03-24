@@ -15,6 +15,7 @@ import {
  * @param {function} [onExportPDF]   — Handler for PDF export
  * @param {function} [onExportExcel] — Handler for Excel export
  * @param {function} [onExportCSV]   — Handler for CSV export
+ * @param {function} [onExportDOCX]  — Handler for DOCX export
  * @param {function} [onPrint]       — Handler for print
  * @param {function} [onExportImage] — Handler for image export
  * @param {boolean}  [loading]       — Show loading spinner
@@ -27,6 +28,7 @@ const ExportMenu = ({
   onExportPDF,
   onExportExcel,
   onExportCSV,
+  onExportDOCX,
   onPrint,
   onExportImage,
   loading = false,
@@ -47,6 +49,7 @@ const ExportMenu = ({
     { key: 'pdf', icon: <PdfIcon sx={{ color: '#E53935' }} />, label: 'PDF', handler: onExportPDF },
     { key: 'excel', icon: <ExcelIcon sx={{ color: '#43A047' }} />, label: 'Excel', handler: onExportExcel },
     { key: 'csv', icon: <CsvIcon sx={{ color: '#1E88E5' }} />, label: 'CSV', handler: onExportCSV },
+    { key: 'docx', icon: <CsvIcon sx={{ color: '#2B579A' }} />, label: 'Word (DOCX)', handler: onExportDOCX },
     { key: 'divider' },
     { key: 'image', icon: <ImageIcon sx={{ color: '#FF9800' }} />, label: 'صورة', handler: onExportImage },
     { key: 'print', icon: <PrintIcon sx={{ color: '#546E7A' }} />, label: 'طباعة', handler: onPrint },

@@ -26,6 +26,19 @@ const _crypto = require('crypto');
 const path = require('path');
 const _fs = require('fs');
 const archiver = require('archiver');
+const {
+  Document: DocxDocument,
+  Packer,
+  Paragraph,
+  Table: DocxTable,
+  TableRow: DocxTableRow,
+  TableCell: DocxTableCell,
+  WidthType,
+  HeadingLevel,
+  AlignmentType,
+  BorderStyle,
+  TextRun,
+} = require('docx');
 const logger = require('../utils/logger');
 
 const ImportExportJob = require('../models/ImportExportJob');
@@ -64,6 +77,30 @@ const MODULE_REGISTRY = {
   traffic_fines: { model: 'TrafficFine', label: 'المخالفات المرورية', labelEn: 'Traffic Fines' },
   payroll: { model: 'Payroll', label: 'الرواتب', labelEn: 'Payroll' },
   notifications: { model: 'Notification', label: 'الإشعارات', labelEn: 'Notifications' },
+
+  // ─── Phase 25: Medical Systems ───
+  pharmacy: { model: 'Pharmacy', label: 'الصيدلية', labelEn: 'Pharmacy' },
+  appointments: {
+    model: 'AppointmentScheduling',
+    label: 'جدولة المواعيد',
+    labelEn: 'Appointment Scheduling',
+  },
+  insurance_claims: {
+    model: 'InsuranceClaim',
+    label: 'مطالبات التأمين',
+    labelEn: 'Insurance Claims',
+  },
+  medical_equipment: {
+    model: 'MedicalEquipment',
+    label: 'المعدات الطبية',
+    labelEn: 'Medical Equipment',
+  },
+  medical_referrals: {
+    model: 'MedicalReferral',
+    label: 'التحويلات الطبية',
+    labelEn: 'Medical Referrals',
+  },
+  emr: { model: 'EMR', label: 'السجلات الطبية الإلكترونية', labelEn: 'Electronic Medical Records' },
 };
 
 // ──────────────────────────────────────────────────────
@@ -875,6 +912,95 @@ const SYSTEM_TEMPLATES = {
       options: ['draft', 'approved', 'paid', 'cancelled'],
     },
   ],
+
+  // ─── Phase 25: Medical Systems ───
+  pharmacy: [
+    { key: 'medicationName', name: 'Medication Name', nameAr: 'اسم الدواء', dataType: 'string', required: true },
+    { key: 'genericName', name: 'Generic Name', nameAr: 'الاسم العلمي', dataType: 'string' },
+    { key: 'dosageForm', name: 'Dosage Form', nameAr: 'الشكل الصيدلي', dataType: 'select', options: ['tablet', 'capsule', 'syrup', 'injection', 'cream', 'drops', 'inhaler'] },
+    { key: 'strength', name: 'Strength', nameAr: 'التركيز', dataType: 'string' },
+    { key: 'manufacturer', name: 'Manufacturer', nameAr: 'الشركة المصنعة', dataType: 'string' },
+    { key: 'batchNumber', name: 'Batch Number', nameAr: 'رقم التشغيلة', dataType: 'string' },
+    { key: 'expiryDate', name: 'Expiry Date', nameAr: 'تاريخ الانتهاء', dataType: 'date' },
+    { key: 'quantityInStock', name: 'Quantity in Stock', nameAr: 'الكمية المتوفرة', dataType: 'number', required: true },
+    { key: 'reorderLevel', name: 'Reorder Level', nameAr: 'حد إعادة الطلب', dataType: 'number' },
+    { key: 'unitPrice', name: 'Unit Price', nameAr: 'سعر الوحدة', dataType: 'currency' },
+    { key: 'category', name: 'Category', nameAr: 'التصنيف', dataType: 'select', options: ['prescription', 'otc', 'controlled', 'supplement'] },
+    { key: 'storageConditions', name: 'Storage Conditions', nameAr: 'ظروف التخزين', dataType: 'select', options: ['room_temperature', 'refrigerated', 'frozen'] },
+    { key: 'status', name: 'Status', nameAr: 'الحالة', dataType: 'select', options: ['available', 'low_stock', 'out_of_stock', 'expired', 'recalled'] },
+  ],
+  appointments: [
+    { key: 'appointmentId', name: 'Appointment ID', nameAr: 'رقم الموعد', dataType: 'string', required: true },
+    { key: 'patientName', name: 'Patient Name', nameAr: 'اسم المريض', dataType: 'string', required: true },
+    { key: 'doctorName', name: 'Doctor Name', nameAr: 'اسم الطبيب', dataType: 'string', required: true },
+    { key: 'department', name: 'Department', nameAr: 'القسم', dataType: 'string' },
+    { key: 'appointmentDate', name: 'Appointment Date', nameAr: 'تاريخ الموعد', dataType: 'date', required: true },
+    { key: 'timeSlot', name: 'Time Slot', nameAr: 'الفترة الزمنية', dataType: 'string', example: '09:00-09:30' },
+    { key: 'type', name: 'Type', nameAr: 'النوع', dataType: 'select', options: ['new_visit', 'follow_up', 'consultation', 'emergency', 'telemedicine'] },
+    { key: 'priority', name: 'Priority', nameAr: 'الأولوية', dataType: 'select', options: ['normal', 'urgent', 'emergency'] },
+    { key: 'reason', name: 'Reason', nameAr: 'سبب الزيارة', dataType: 'string' },
+    { key: 'status', name: 'Status', nameAr: 'الحالة', dataType: 'select', options: ['scheduled', 'confirmed', 'checked_in', 'in_progress', 'completed', 'cancelled', 'no_show'] },
+    { key: 'notes', name: 'Notes', nameAr: 'ملاحظات', dataType: 'string' },
+  ],
+  insurance_claims: [
+    { key: 'claimNumber', name: 'Claim Number', nameAr: 'رقم المطالبة', dataType: 'string', required: true },
+    { key: 'patientName', name: 'Patient Name', nameAr: 'اسم المريض', dataType: 'string', required: true },
+    { key: 'insuranceProvider', name: 'Insurance Provider', nameAr: 'شركة التأمين', dataType: 'string', required: true },
+    { key: 'policyNumber', name: 'Policy Number', nameAr: 'رقم الوثيقة', dataType: 'string' },
+    { key: 'claimDate', name: 'Claim Date', nameAr: 'تاريخ المطالبة', dataType: 'date', required: true },
+    { key: 'serviceDate', name: 'Service Date', nameAr: 'تاريخ الخدمة', dataType: 'date' },
+    { key: 'diagnosisCode', name: 'Diagnosis Code (ICD)', nameAr: 'رمز التشخيص', dataType: 'string' },
+    { key: 'procedureCode', name: 'Procedure Code (CPT)', nameAr: 'رمز الإجراء', dataType: 'string' },
+    { key: 'claimedAmount', name: 'Claimed Amount', nameAr: 'المبلغ المطالب', dataType: 'currency', required: true },
+    { key: 'approvedAmount', name: 'Approved Amount', nameAr: 'المبلغ المعتمد', dataType: 'currency' },
+    { key: 'patientShare', name: 'Patient Share', nameAr: 'حصة المريض', dataType: 'currency' },
+    { key: 'status', name: 'Status', nameAr: 'الحالة', dataType: 'select', options: ['submitted', 'under_review', 'approved', 'partially_approved', 'rejected', 'paid', 'appealed'] },
+    { key: 'rejectionReason', name: 'Rejection Reason', nameAr: 'سبب الرفض', dataType: 'string' },
+  ],
+  medical_equipment: [
+    { key: 'equipmentId', name: 'Equipment ID', nameAr: 'رقم المعدة', dataType: 'string', required: true },
+    { key: 'name', name: 'Equipment Name', nameAr: 'اسم المعدة', dataType: 'string', required: true },
+    { key: 'category', name: 'Category', nameAr: 'التصنيف', dataType: 'select', options: ['diagnostic', 'therapeutic', 'surgical', 'monitoring', 'laboratory', 'rehabilitation'] },
+    { key: 'manufacturer', name: 'Manufacturer', nameAr: 'الشركة المصنعة', dataType: 'string' },
+    { key: 'model', name: 'Model', nameAr: 'الموديل', dataType: 'string' },
+    { key: 'serialNumber', name: 'Serial Number', nameAr: 'الرقم التسلسلي', dataType: 'string' },
+    { key: 'purchaseDate', name: 'Purchase Date', nameAr: 'تاريخ الشراء', dataType: 'date' },
+    { key: 'warrantyExpiry', name: 'Warranty Expiry', nameAr: 'انتهاء الضمان', dataType: 'date' },
+    { key: 'lastMaintenanceDate', name: 'Last Maintenance', nameAr: 'آخر صيانة', dataType: 'date' },
+    { key: 'nextMaintenanceDate', name: 'Next Maintenance', nameAr: 'الصيانة القادمة', dataType: 'date' },
+    { key: 'location', name: 'Location', nameAr: 'الموقع', dataType: 'string' },
+    { key: 'status', name: 'Status', nameAr: 'الحالة', dataType: 'select', options: ['operational', 'maintenance', 'out_of_service', 'decommissioned'] },
+    { key: 'purchasePrice', name: 'Purchase Price', nameAr: 'سعر الشراء', dataType: 'currency' },
+  ],
+  medical_referrals: [
+    { key: 'referralId', name: 'Referral ID', nameAr: 'رقم التحويل', dataType: 'string', required: true },
+    { key: 'patientName', name: 'Patient Name', nameAr: 'اسم المريض', dataType: 'string', required: true },
+    { key: 'referringDoctor', name: 'Referring Doctor', nameAr: 'الطبيب المحيل', dataType: 'string', required: true },
+    { key: 'referredToDoctor', name: 'Referred To Doctor', nameAr: 'الطبيب المحال إليه', dataType: 'string' },
+    { key: 'referredToFacility', name: 'Referred To Facility', nameAr: 'المنشأة المحال إليها', dataType: 'string' },
+    { key: 'specialty', name: 'Specialty', nameAr: 'التخصص', dataType: 'string' },
+    { key: 'referralDate', name: 'Referral Date', nameAr: 'تاريخ التحويل', dataType: 'date', required: true },
+    { key: 'urgency', name: 'Urgency', nameAr: 'الأولوية', dataType: 'select', options: ['routine', 'urgent', 'emergency'] },
+    { key: 'reason', name: 'Reason', nameAr: 'سبب التحويل', dataType: 'string' },
+    { key: 'diagnosis', name: 'Diagnosis', nameAr: 'التشخيص', dataType: 'string' },
+    { key: 'status', name: 'Status', nameAr: 'الحالة', dataType: 'select', options: ['pending', 'accepted', 'scheduled', 'completed', 'cancelled', 'expired'] },
+    { key: 'appointmentDate', name: 'Appointment Date', nameAr: 'تاريخ الموعد', dataType: 'date' },
+  ],
+  emr: [
+    { key: 'recordId', name: 'Record ID', nameAr: 'رقم السجل', dataType: 'string', required: true },
+    { key: 'patientName', name: 'Patient Name', nameAr: 'اسم المريض', dataType: 'string', required: true },
+    { key: 'patientId', name: 'Patient ID', nameAr: 'رقم المريض', dataType: 'string', required: true },
+    { key: 'dateOfBirth', name: 'Date of Birth', nameAr: 'تاريخ الميلاد', dataType: 'date' },
+    { key: 'gender', name: 'Gender', nameAr: 'الجنس', dataType: 'select', options: ['male', 'female'] },
+    { key: 'bloodType', name: 'Blood Type', nameAr: 'فصيلة الدم', dataType: 'select', options: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] },
+    { key: 'allergies', name: 'Allergies', nameAr: 'الحساسية', dataType: 'string' },
+    { key: 'chronicConditions', name: 'Chronic Conditions', nameAr: 'الحالات المزمنة', dataType: 'string' },
+    { key: 'currentMedications', name: 'Current Medications', nameAr: 'الأدوية الحالية', dataType: 'string' },
+    { key: 'lastVisitDate', name: 'Last Visit Date', nameAr: 'تاريخ آخر زيارة', dataType: 'date' },
+    { key: 'primaryDoctor', name: 'Primary Doctor', nameAr: 'الطبيب الرئيسي', dataType: 'string' },
+    { key: 'status', name: 'Status', nameAr: 'الحالة', dataType: 'select', options: ['active', 'inactive', 'deceased', 'transferred'] },
+    { key: 'notes', name: 'Clinical Notes', nameAr: 'ملاحظات سريرية', dataType: 'string' },
+  ],
 };
 
 class ImportExportProService {
@@ -935,6 +1061,9 @@ class ImportExportProService {
           break;
         case 'xml':
           result = await this._exportToXML(data, fields, module, options);
+          break;
+        case 'docx':
+          result = await this._exportToDOCX(data, fields, module, options);
           break;
         default:
           throw new Error(`Unsupported format: ${format}`);
@@ -1358,6 +1487,119 @@ class ImportExportProService {
       buffer,
       fileName,
       mimeType: 'application/xml; charset=utf-8',
+      size: buffer.length,
+    };
+  }
+
+  /**
+   * Export to DOCX (Word Document)
+   */
+  async _exportToDOCX(data, fields, module, options = {}) {
+    const moduleInfo = MODULE_REGISTRY[module] || { label: module, labelEn: module };
+    const columns = this._resolveColumns(data, fields, module);
+
+    const titleText =
+      options.language === 'en'
+        ? `${moduleInfo.labelEn} Export Report`
+        : `تقرير تصدير ${moduleInfo.label}`;
+
+    // Build table header row
+    const headerCells = columns.map(
+      col =>
+        new DocxTableCell({
+          children: [
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: col.nameAr || col.name,
+                  bold: true,
+                  size: 20,
+                  color: 'FFFFFF',
+                }),
+              ],
+              alignment: AlignmentType.CENTER,
+            }),
+          ],
+          shading: { fill: '1B5E20' },
+          width: { size: Math.floor(9000 / columns.length), type: WidthType.DXA },
+        })
+    );
+    const headerRow = new DocxTableRow({ children: headerCells });
+
+    // Build data rows
+    const dataRows = data.slice(0, 5000).map(item => {
+      const cells = columns.map(col => {
+        let value = this._getNestedValue(item, col.key);
+        if (value instanceof Date) value = value.toISOString().split('T')[0];
+        if (typeof value === 'object' && value !== null) value = JSON.stringify(value);
+        return new DocxTableCell({
+          children: [
+            new Paragraph({
+              children: [new TextRun({ text: String(value ?? ''), size: 18 })],
+              alignment: AlignmentType.CENTER,
+            }),
+          ],
+          width: { size: Math.floor(9000 / columns.length), type: WidthType.DXA },
+          borders: {
+            top: { style: BorderStyle.SINGLE, size: 1, color: 'CCCCCC' },
+            bottom: { style: BorderStyle.SINGLE, size: 1, color: 'CCCCCC' },
+            left: { style: BorderStyle.SINGLE, size: 1, color: 'CCCCCC' },
+            right: { style: BorderStyle.SINGLE, size: 1, color: 'CCCCCC' },
+          },
+        });
+      });
+      return new DocxTableRow({ children: cells });
+    });
+
+    const doc = new DocxDocument({
+      sections: [
+        {
+          children: [
+            new Paragraph({
+              text: titleText,
+              heading: HeadingLevel.HEADING_1,
+              alignment: AlignmentType.CENTER,
+              spacing: { after: 200 },
+            }),
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: `التاريخ: ${new Date().toLocaleDateString('ar-SA')}  |  إجمالي السجلات: ${data.length}`,
+                  size: 20,
+                  color: '666666',
+                }),
+              ],
+              alignment: AlignmentType.CENTER,
+              spacing: { after: 400 },
+            }),
+            new DocxTable({
+              rows: [headerRow, ...dataRows],
+              width: { size: 9000, type: WidthType.DXA },
+            }),
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: `\nتم التصدير بواسطة نظام الأوائل - ${new Date().toISOString()}`,
+                  size: 16,
+                  color: '999999',
+                  italics: true,
+                }),
+              ],
+              spacing: { before: 400 },
+              alignment: AlignmentType.CENTER,
+            }),
+          ],
+        },
+      ],
+    });
+
+    const buffer = await Packer.toBuffer(doc);
+    const fileName = `${module}_export_${Date.now()}.docx`;
+
+    return {
+      buffer,
+      fileName,
+      mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
       size: buffer.length,
     };
   }

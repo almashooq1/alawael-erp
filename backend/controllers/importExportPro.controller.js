@@ -566,25 +566,27 @@ const getInfo = async (req, res) => {
       nameEn: 'Professional Import/Export System',
       version: '2.0.0',
       features: [
-        'تصدير متعدد الصيغ (Excel, CSV, JSON, PDF, XML)',
+        'تصدير متعدد الصيغ (Excel, CSV, JSON, PDF, XML, DOCX)',
         'استيراد مع المعاينة والتحقق',
         'ربط الأعمدة تلقائياً',
         'قوالب قابلة لإعادة الاستخدام',
         'تتبع المهام والتقدم',
         'تصدير شامل (ZIP)',
         'إحصائيات ولوحة معلومات',
+        'بث التقدم المباشر (SSE)',
       ],
       featuresEn: [
-        'Multi-format Export (Excel, CSV, JSON, PDF, XML)',
+        'Multi-format Export (Excel, CSV, JSON, PDF, XML, DOCX)',
         'Import with Preview & Validation',
         'Auto Column Mapping',
         'Reusable Templates',
         'Job Tracking & Progress',
         'Bulk Export (ZIP)',
         'Statistics & Dashboard',
+        'Live Progress Streaming (SSE)',
       ],
       supportedFormats: {
-        export: ['xlsx', 'csv', 'json', 'pdf', 'xml', 'zip'],
+        export: ['xlsx', 'csv', 'json', 'pdf', 'xml', 'docx', 'zip'],
         import: ['xlsx', 'xls', 'csv', 'json'],
       },
       endpoints: {
@@ -781,6 +783,80 @@ const listTransformRules = async (req, res) => {
   });
 };
 
+/**
+ * GET /progress/:jobId
+ * Server-Sent Events (SSE) for live progress tracking
+ */
+const streamProgress = async (req, res) => {
+  const { jobId } = req.params;
+
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    Connection: 'keep-alive',
+    'X-Accel-Buffering': 'no',
+  });
+
+  const sendEvent = (eventName, data) => {
+    res.write(`event: ${eventName}\n`);
+    res.write(`data: ${JSON.stringify(data)}\n\n`);
+  };
+
+  // Poll job status every 1s
+  let pollCount = 0;
+  const maxPolls = 300; // 5 minutes max
+
+  const interval = setInterval(async () => {
+    try {
+      pollCount++;
+      const job = await ImportExportJob.findOne({ jobId }).lean();
+
+      if (!job) {
+        sendEvent('error', { message: 'المهمة غير موجودة' });
+        clearInterval(interval);
+        return res.end();
+      }
+
+      sendEvent('progress', {
+        jobId: job.jobId,
+        status: job.status,
+        progress: job.progress,
+        processingDetails: {
+          startedAt: job.processingDetails?.startedAt,
+          duration: job.processingDetails?.duration,
+        },
+      });
+
+      // Done conditions
+      if (['completed', 'failed', 'cancelled'].includes(job.status) || pollCount >= maxPolls) {
+        sendEvent('done', {
+          jobId: job.jobId,
+          status: job.status,
+          file: job.file
+            ? {
+                originalName: job.file.originalName,
+                size: job.file.size,
+                downloadUrl: job.file.downloadUrl,
+              }
+            : null,
+          error: job.processingDetails?.errorMessage,
+        });
+        clearInterval(interval);
+        return res.end();
+      }
+    } catch (error) {
+      sendEvent('error', { message: error.message });
+      clearInterval(interval);
+      return res.end();
+    }
+  }, 1000);
+
+  // Client disconnect
+  req.on('close', () => {
+    clearInterval(interval);
+  });
+};
+
 module.exports = {
   createExport,
   previewExport,
@@ -811,4 +887,5 @@ module.exports = {
   toggleScheduledExport,
   generateQualityReport,
   listTransformRules,
+  streamProgress,
 };

@@ -1,16 +1,48 @@
-/* eslint-disable no-unused-vars */
+/**
+ * Generic Exports Route — Delegates to ImportExport Pro
+ * =====================================================
+ * Supports: GET /exports/:format?module=xxx
+ */
 const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
+const importExportService = require('../services/importExportPro.service');
 const logger = require('../utils/logger');
 
 router.use(authenticate);
 
-// GET /:format
+// GET /:format — Export a module in the given format
 router.get('/:format', async (req, res) => {
   try {
     const format = req.params.format;
-    res.json({ success: true, data: { format, status: 'ready', timestamp: new Date() }, message: 'جاهز للتصدير' });
+    const { module: mod, filters, fields } = req.query;
+
+    // If no module specified, return available modules & formats
+    if (!mod) {
+      const modules = importExportService.getAvailableModules();
+      return res.json({
+        success: true,
+        data: {
+          availableFormats: ['xlsx', 'csv', 'json', 'pdf', 'xml', 'docx'],
+          availableModules: modules,
+        },
+        message: 'حدد الوحدة (module) في query parameter',
+      });
+    }
+
+    const userId = req.user?.userId || req.user?._id || req.user?.id;
+    const result = await importExportService.createExport({
+      module: mod,
+      format: format || 'xlsx',
+      query: filters ? JSON.parse(filters) : {},
+      fields: fields ? fields.split(',') : undefined,
+      userId,
+    });
+
+    res.setHeader('Content-Type', result.mimeType);
+    res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(result.fileName)}"`);
+    res.setHeader('Content-Length', result.buffer.length);
+    return res.send(result.buffer);
   } catch (err) {
     logger.error('Export format error:', err);
     res.status(500).json({ success: false, message: 'خطأ في التصدير' });

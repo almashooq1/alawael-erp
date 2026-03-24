@@ -132,6 +132,45 @@ const importExportProService = {
     return response;
   },
 
+  // ─── SSE PROGRESS STREAMING ───
+  streamProgress: (jobId, { onProgress, onDone, onError } = {}) => {
+    const baseURL = apiClient.defaults?.baseURL || '';
+    const token = localStorage.getItem('token') || localStorage.getItem('authToken') || '';
+    const url = `${baseURL}${BASE}/progress/${jobId}?token=${encodeURIComponent(token)}`;
+
+    const eventSource = new EventSource(url);
+
+    eventSource.addEventListener('progress', event => {
+      try {
+        const data = JSON.parse(event.data);
+        if (onProgress) onProgress(data);
+      } catch { /* ignore parse errors */ }
+    });
+
+    eventSource.addEventListener('done', event => {
+      try {
+        const data = JSON.parse(event.data);
+        if (onDone) onDone(data);
+      } catch { /* ignore */ }
+      eventSource.close();
+    });
+
+    eventSource.addEventListener('error', event => {
+      try {
+        const data = event.data ? JSON.parse(event.data) : { message: 'Connection lost' };
+        if (onError) onError(data);
+      } catch { /* ignore */ }
+      eventSource.close();
+    });
+
+    eventSource.onerror = () => {
+      if (onError) onError({ message: 'SSE connection error' });
+      eventSource.close();
+    };
+
+    return eventSource; // caller can close() if needed
+  },
+
   // ─── UTILITY: Download blob ───
   triggerDownload: (blob, fileName) => {
     const url = window.URL.createObjectURL(new Blob([blob]));

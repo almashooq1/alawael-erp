@@ -28,8 +28,9 @@ const upload = multer({
       'application/json',
       'application/xml',
       'text/xml',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // docx
     ];
-    const allowedExtensions = ['.xlsx', '.xls', '.csv', '.json', '.xml'];
+    const allowedExtensions = ['.xlsx', '.xls', '.csv', '.json', '.xml', '.docx'];
     const ext = file.originalname.toLowerCase().substring(file.originalname.lastIndexOf('.'));
 
     if (allowedTypes.includes(file.mimetype) || allowedExtensions.includes(ext)) {
@@ -120,5 +121,10 @@ router.get('/statistics', controller.getStatistics);
 // FILE DOWNLOAD
 // ─────────────────────────────────────────────────
 router.get('/download/:jobId', controller.downloadFile);
+
+// ─────────────────────────────────────────────────
+// SSE — Live Progress Streaming
+// ─────────────────────────────────────────────────
+router.get('/progress/:jobId', controller.streamProgress);
 
 module.exports = router;

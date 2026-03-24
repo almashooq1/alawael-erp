@@ -4,7 +4,13 @@
  */
 
 import apiClient from './api.client';
-import { removeToken, getToken, getUserData, removeUserData, clearAuthData } from 'utils/tokenStorage';
+import {
+  removeToken,
+  getToken,
+  getUserData,
+  removeUserData,
+  clearAuthData,
+} from 'utils/tokenStorage';
 import { getPortal, removePortal } from 'utils/storageService';
 
 const authService = {

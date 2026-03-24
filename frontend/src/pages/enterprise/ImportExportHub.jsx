@@ -90,6 +90,7 @@ const FORMAT_CONFIG = {
   json: { label: 'JSON', icon: <JsonIcon />, color: '#607D8B' },
   pdf: { label: 'PDF', icon: <PdfIcon />, color: '#F44336' },
   xml: { label: 'XML', icon: <XmlIcon />, color: '#9C27B0' },
+  docx: { label: 'Word (DOCX)', icon: <FileIcon />, color: '#2B579A' },
   zip: { label: 'ZIP Bundle', icon: <ZipIcon />, color: '#795548' },
 };
 
@@ -137,6 +138,9 @@ export default function ImportExportHub() {
   // Data quality
   const [qualityReport, setQualityReport] = useState(null);
   const [qualityLoading, setQualityLoading] = useState(false);
+
+  // SSE Progress tracking
+  const [liveProgress, setLiveProgress] = useState(null);
 
   // Export wizard
   const [exportDialog, setExportDialog] = useState(false);
@@ -274,12 +278,26 @@ export default function ImportExportHub() {
         options: exportConfig.options,
       });
 
+      // Extract jobId from response headers for SSE progress
+      const jobId = res.headers?.['x-job-id'];
+      if (jobId) {
+        setLiveProgress({ status: 'processing', progress: { percentage: 0, processed: 0, total: 0 } });
+        importExportProService.streamProgress(jobId, {
+          onProgress: (data) => setLiveProgress(data),
+          onDone: (data) => {
+            setLiveProgress({ ...data, progress: { percentage: 100 } });
+            setTimeout(() => setLiveProgress(null), 5000);
+          },
+          onError: () => setLiveProgress(null),
+        });
+      }
+
       // Trigger download
       const ext = exportConfig.format;
       const fileName = `${exportConfig.module}_export.${ext}`;
       importExportProService.triggerDownload(res.data || res, fileName);
 
-      showSnackbar('تم التصدير بنجاح! ✅', 'success');
+      showSnackbar('تم التصدير بنجاح!', 'success');
       setExportDialog(false);
       setExportStep(0);
       loadJobs();
@@ -488,6 +506,37 @@ export default function ImportExportHub() {
           </Grid>
         ))}
       </Grid>
+
+      {/* Live Progress Banner */}
+      {liveProgress && (
+        <Fade in>
+          <Alert
+            severity={liveProgress.status === 'failed' ? 'error' : liveProgress.status === 'completed' ? 'success' : 'info'}
+            icon={liveProgress.status === 'processing' ? <CircularProgress size={20} /> : undefined}
+            onClose={() => setLiveProgress(null)}
+            sx={{ mb: 2, borderRadius: 2, '& .MuiAlert-message': { width: '100%' } }}
+          >
+            <AlertTitle>
+              {liveProgress.status === 'processing' ? 'جارٍ المعالجة...' : liveProgress.status === 'completed' ? 'اكتملت العملية' : 'فشلت العملية'}
+            </AlertTitle>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Box sx={{ flex: 1 }}>
+                <LinearProgress
+                  variant="determinate"
+                  value={liveProgress.progress?.percentage || 0}
+                  sx={{ height: 8, borderRadius: 4 }}
+                />
+              </Box>
+              <Typography variant="body2" fontWeight="bold">
+                {liveProgress.progress?.percentage || 0}%
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                ({liveProgress.progress?.processed || 0}/{liveProgress.progress?.total || 0})
+              </Typography>
+            </Box>
+          </Alert>
+        </Fade>
+      )}
 
       {/* Tabs */}
       <Paper sx={{ borderRadius: 2, mb: 2 }}>

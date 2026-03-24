@@ -49,17 +49,14 @@ class ExportImportController {
       // Export to Excel
       await exportImportService.exportToExcel(filters, filePath);
 
-      // Send file
+      // Send file and clean up after transfer completes
       res.download(filePath, filename, err => {
         if (err) {
           logger.error('Error sending file:', err);
         }
-        // Delete file after sending
-        setTimeout(() => {
-          if (fs.existsSync(filePath)) {
-            fs.unlinkSync(filePath);
-          }
-        }, 5000);
+      });
+      res.on('finish', () => {
+        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
       });
     } catch (error) {
       logger.error('Error exporting to Excel:', error);
@@ -93,17 +90,14 @@ class ExportImportController {
       // Export to PDF
       await exportImportService.exportProgramToPDF(id, filePath);
 
-      // Send file
+      // Send file and clean up after transfer completes
       res.download(filePath, filename, err => {
         if (err) {
           logger.error('Error sending file:', err);
         }
-        // Delete file after sending
-        setTimeout(() => {
-          if (fs.existsSync(filePath)) {
-            fs.unlinkSync(filePath);
-          }
-        }, 5000);
+      });
+      res.on('finish', () => {
+        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
       });
     } catch (error) {
       logger.error('Error exporting to PDF:', error);
@@ -182,17 +176,14 @@ class ExportImportController {
       // Generate template
       await exportImportService.generateImportTemplate(filePath);
 
-      // Send file
+      // Send file and clean up after transfer completes
       res.download(filePath, 'template_import_programs.xlsx', err => {
         if (err) {
           logger.error('Error sending template:', err);
         }
-        // Delete file after sending
-        setTimeout(() => {
-          if (fs.existsSync(filePath)) {
-            fs.unlinkSync(filePath);
-          }
-        }, 5000);
+      });
+      res.on('finish', () => {
+        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
       });
     } catch (error) {
       logger.error('Error generating template:', error);

@@ -142,11 +142,14 @@ const parseImportFile = async (req, res) => {
       return res.status(400).json({ success: false, message: 'الوحدة (module) مطلوبة' });
     }
 
+    let parsedOpts = {};
+    try { if (req.body.options) parsedOpts = JSON.parse(req.body.options); } catch { /* ignore */ }
+
     const result = await importExportService.parseImportFile({
       fileBuffer: req.file.buffer,
       fileName: req.file.originalname,
       module,
-      options: req.body.options ? JSON.parse(req.body.options) : {},
+      options: parsedOpts,
     });
 
     return res.json({
@@ -710,14 +713,7 @@ const generateQualityReport = async (req, res) => {
       return res.status(400).json({ success: false, message: 'الوحدة مطلوبة' });
     }
 
-    // Parse the file
-    const parseResult = await importExportService.parseImportFile({
-      fileBuffer: req.file.buffer,
-      fileName: req.file.originalname,
-      module,
-    });
-
-    // Get raw data for quality analysis
+    // Parse the file once — reuse raw data for both parse result and quality analysis
     const ext = require('path').extname(req.file.originalname).toLowerCase().replace('.', '');
     let rawData;
     switch (ext) {
@@ -735,9 +731,15 @@ const generateQualityReport = async (req, res) => {
         rawData = [];
     }
 
+    // Build parse info from raw data
+    const detectedColumns = rawData.length > 0 ? Object.keys(rawData[0]) : [];
+    const suggestedMappings = importExportService._suggestColumnMappings
+      ? importExportService._suggestColumnMappings(detectedColumns, module)
+      : [];
+
     const report = importExportService.generateDataQualityReport(
       rawData,
-      parseResult.suggestedMappings,
+      suggestedMappings,
       module
     );
 
@@ -746,9 +748,9 @@ const generateQualityReport = async (req, res) => {
       data: {
         ...report,
         parseInfo: {
-          totalRows: parseResult.totalRows,
-          detectedColumns: parseResult.detectedColumns,
-          format: parseResult.format,
+          totalRows: rawData.length,
+          detectedColumns,
+          format: ext,
         },
       },
     });

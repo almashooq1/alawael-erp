@@ -31,10 +31,21 @@ router.get('/:format', async (req, res) => {
     }
 
     const userId = req.user?.userId || req.user?._id || req.user?.id;
+
+    // Safely parse filters JSON
+    let parsedFilters = {};
+    if (filters) {
+      try {
+        parsedFilters = JSON.parse(filters);
+      } catch {
+        return res.status(400).json({ success: false, message: 'صيغة الفلتر غير صالحة (JSON غير صحيح)' });
+      }
+    }
+
     const result = await importExportService.createExport({
       module: mod,
       format: format || 'xlsx',
-      query: filters ? JSON.parse(filters) : {},
+      query: parsedFilters,
       fields: fields ? fields.split(',') : undefined,
       userId,
     });

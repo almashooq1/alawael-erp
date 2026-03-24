@@ -68,20 +68,17 @@ const MODULE_REGISTRY = {
   contracts: { model: 'Contract', label: 'العقود', labelEn: 'Contracts' },
   tasks: { model: 'Task', label: 'المهام', labelEn: 'Tasks' },
   reports: { model: 'Report', label: 'التقارير', labelEn: 'Reports' },
-  fleet_maintenance: {
-    model: 'FleetMaintenance',
-    label: 'صيانة الأسطول',
-    labelEn: 'Fleet Maintenance',
-  },
+  // fleet_maintenance: model removed — no FleetMaintenance Mongoose model exists
+  // Re-add when a fleet maintenance model is created
   fleet_fuel: { model: 'FleetFuel', label: 'وقود الأسطول', labelEn: 'Fleet Fuel' },
   traffic_fines: { model: 'TrafficFine', label: 'المخالفات المرورية', labelEn: 'Traffic Fines' },
   payroll: { model: 'Payroll', label: 'الرواتب', labelEn: 'Payroll' },
   notifications: { model: 'Notification', label: 'الإشعارات', labelEn: 'Notifications' },
 
   // ─── Phase 25: Medical Systems ───
-  pharmacy: { model: 'Pharmacy', label: 'الصيدلية', labelEn: 'Pharmacy' },
+  pharmacy: { model: 'PharmacyInventory', label: 'الصيدلية', labelEn: 'Pharmacy' },
   appointments: {
-    model: 'AppointmentScheduling',
+    model: 'ScheduleTemplate',
     label: 'جدولة المواعيد',
     labelEn: 'Appointment Scheduling',
   },
@@ -100,7 +97,7 @@ const MODULE_REGISTRY = {
     label: 'التحويلات الطبية',
     labelEn: 'Medical Referrals',
   },
-  emr: { model: 'EMR', label: 'السجلات الطبية الإلكترونية', labelEn: 'Electronic Medical Records' },
+  emr: { model: 'MedicalRecord', label: 'السجلات الطبية الإلكترونية', labelEn: 'Electronic Medical Records' },
 };
 
 // ──────────────────────────────────────────────────────
@@ -1074,10 +1071,19 @@ class ImportExportProService {
       job.progress.processed = data.length;
       job.progress.successful = data.length;
       job.progress.percentage = 100;
+
+      // Persist buffer to disk so /download/:jobId can serve it later
+      const fs = require('fs');
+      const exportsDir = path.join(__dirname, '../exports');
+      if (!fs.existsSync(exportsDir)) fs.mkdirSync(exportsDir, { recursive: true });
+      const storedName = `${job.jobId}_${result.fileName}`;
+      const filePath = path.join(exportsDir, storedName);
+      fs.writeFileSync(filePath, result.buffer);
+
       job.file = {
         originalName: result.fileName,
-        storedName: result.fileName,
-        path: result.filePath,
+        storedName,
+        path: filePath,
         size: result.size,
         mimeType: result.mimeType,
         downloadUrl: `/api/import-export-pro/download/${job.jobId}`,
@@ -1495,6 +1501,10 @@ class ImportExportProService {
    * Export to DOCX (Word Document)
    */
   async _exportToDOCX(data, fields, module, options = {}) {
+    if (!data || data.length === 0) {
+      throw new Error('لا توجد بيانات للتصدير في هذه الوحدة');
+    }
+
     const moduleInfo = MODULE_REGISTRY[module] || { label: module, labelEn: module };
     const columns = this._resolveColumns(data, fields, module);
 
@@ -2474,7 +2484,8 @@ class ImportExportProService {
     const Model = this._getModel(module);
 
     if (!Model) {
-      // Return empty array for modules without active models
+      // Warn instead of silently returning empty — helps diagnose missing model issues
+      logger.warn(`[ImportExportPro] Module "${module}" has no active Mongoose model — returning empty data`);
       return [];
     }
 

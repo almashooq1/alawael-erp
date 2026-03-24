@@ -136,39 +136,59 @@ const importExportProService = {
   streamProgress: (jobId, { onProgress, onDone, onError } = {}) => {
     const baseURL = apiClient.defaults?.baseURL || '';
     const token = localStorage.getItem('token') || localStorage.getItem('authToken') || '';
-    const url = `${baseURL}${BASE}/progress/${jobId}?token=${encodeURIComponent(token)}`;
+    const url = `${baseURL}${BASE}/progress/${jobId}`;
 
-    const eventSource = new EventSource(url);
+    // Use fetch with Authorization header instead of EventSource to avoid token in URL
+    const controller = new AbortController();
 
-    eventSource.addEventListener('progress', event => {
+    (async () => {
       try {
-        const data = JSON.parse(event.data);
-        if (onProgress) onProgress(data);
-      } catch { /* ignore parse errors */ }
-    });
+        const response = await fetch(url, {
+          headers: { Authorization: `Bearer ${token}`, Accept: 'text/event-stream' },
+          signal: controller.signal,
+        });
 
-    eventSource.addEventListener('done', event => {
-      try {
-        const data = JSON.parse(event.data);
-        if (onDone) onDone(data);
-      } catch { /* ignore */ }
-      eventSource.close();
-    });
+        if (!response.ok) {
+          if (onError) onError({ message: `HTTP ${response.status}` });
+          return;
+        }
 
-    eventSource.addEventListener('error', event => {
-      try {
-        const data = event.data ? JSON.parse(event.data) : { message: 'Connection lost' };
-        if (onError) onError(data);
-      } catch { /* ignore */ }
-      eventSource.close();
-    });
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
 
-    eventSource.onerror = () => {
-      if (onError) onError({ message: 'SSE connection error' });
-      eventSource.close();
-    };
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
 
-    return eventSource; // caller can close() if needed
+          // Parse SSE events from buffer
+          const parts = buffer.split('\n\n');
+          buffer = parts.pop(); // keep incomplete chunk
+
+          for (const part of parts) {
+            const eventMatch = part.match(/^event:\s*(.+)$/m);
+            const dataMatch = part.match(/^data:\s*(.+)$/m);
+            if (!dataMatch) continue;
+
+            const eventType = eventMatch ? eventMatch[1].trim() : 'message';
+            try {
+              const data = JSON.parse(dataMatch[1]);
+              if (eventType === 'progress' && onProgress) onProgress(data);
+              else if (eventType === 'done') { if (onDone) onDone(data); controller.abort(); }
+              else if (eventType === 'error') { if (onError) onError(data); controller.abort(); }
+            } catch { /* ignore parse errors */ }
+          }
+        }
+      } catch (err) {
+        if (err.name !== 'AbortError' && onError) {
+          onError({ message: 'SSE connection error' });
+        }
+      }
+    })();
+
+    // Return an object with close() for API compatibility with EventSource
+    return { close: () => controller.abort() };
   },
 
   // ─── UTILITY: Download blob ───

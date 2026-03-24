@@ -172,7 +172,9 @@ class ExportImportService {
     statsSheet.addRow(['الميزانية المصروفة', totalSpent]);
     statsSheet.addRow([
       'معدل النجاح',
-      `${((completedPrograms / totalPrograms) * 100).toFixed(2)}%`,
+      totalPrograms > 0
+        ? `${((completedPrograms / totalPrograms) * 100).toFixed(2)}%`
+        : '0.00%',
     ]);
 
     statsSheet.getRow(1).font = { bold: true, size: 14 };
@@ -303,7 +305,7 @@ class ExportImportService {
             id: `IMPORT_${Date.now()}_${rowNumber}`,
             name_ar: row.getCell(3).value,
             name_en: row.getCell(3).value,
-            date_of_birth: new Date('2000-01-01'), // Default, would need from import
+            date_of_birth: null, // Left empty — must be completed manually after import
           },
           disability_info: {
             primary_disability: this.reverseTranslateDisabilityType(row.getCell(4).value),

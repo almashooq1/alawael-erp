@@ -12,9 +12,20 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    // Call backend to blacklist the token (best-effort)
+    try {
+      const token = localStorage.getItem('authToken') || localStorage.getItem('token');
+      if (token) {
+        await api.post('/auth/logout').catch(() => {});
+      }
+    } catch {
+      // Ignore — clearing local state is enough
+    }
+    localStorage.removeItem('token');
     localStorage.removeItem('authToken');
     localStorage.removeItem('refreshToken');
+    localStorage.removeItem('user');
     setCurrentUser(null);
   }, []);
 
@@ -28,8 +39,15 @@ export function AuthProvider({ children }) {
         setCurrentUser(null);
       }
     } catch (err) {
-      console.error('Error fetching user:', err);
-      logout();
+      // Only logout on 401 (unauthorized). Network errors and server
+      // errors should NOT destroy the session — the token may still be
+      // valid once the server recovers.
+      const status = err?.status || err?.response?.status;
+      if (status === 401) {
+        logout();
+      } else {
+        console.warn('fetchUser failed (non-auth error, keeping session):', err?.message || err);
+      }
     } finally {
       setLoading(false);
     }

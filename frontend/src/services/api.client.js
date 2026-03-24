@@ -16,6 +16,34 @@ import axios from 'axios';
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
 const API_TIMEOUT = parseInt(process.env.REACT_APP_API_TIMEOUT, 10) || 30000;
 
+// ─── Token Refresh State (singleton) ────────────────────────────────────────
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach(({ resolve, reject }) => {
+    if (error) {
+      reject(error);
+    } else {
+      resolve(token);
+    }
+  });
+  failedQueue = [];
+};
+
+/**
+ * Force full logout — clear tokens, redirect to login.
+ */
+const forceLogout = () => {
+  localStorage.removeItem('token');
+  localStorage.removeItem('authToken');
+  localStorage.removeItem('refreshToken');
+  localStorage.removeItem('user');
+  if (window.location.pathname !== '/login') {
+    window.location.replace('/login');
+  }
+};
+
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -165,13 +193,67 @@ apiClient.interceptors.response.use(
       const isAuthRequest = /\/auth\/(login|register|refresh)/.test(requestUrl);
 
       if (!isAuthRequest) {
-        // انتهت جلسة العمل - حذف التوكن وإعادة التوجيه
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('user');
+        // ─── Try refreshing the token before forcing logout ──────────
+        const refreshToken = localStorage.getItem('refreshToken');
 
-        // Use React-safe redirect (avoid full page reload loop)
-        if (window.location.pathname !== '/login') {
-          window.location.replace('/login');
+        if (refreshToken && !config._isRetryAfterRefresh) {
+          if (isRefreshing) {
+            // Another request is already refreshing — queue this one
+            return new Promise((resolve, reject) => {
+              failedQueue.push({ resolve, reject });
+            })
+              .then(newToken => {
+                config.headers.Authorization = `Bearer ${newToken}`;
+                config._isRetryAfterRefresh = true;
+                return apiClient(config);
+              })
+              .catch(err => Promise.reject(err));
+          }
+
+          isRefreshing = true;
+
+          try {
+            // Call refresh endpoint directly with axios to avoid interceptor loop
+            const refreshResponse = await axios.post(
+              `${API_BASE_URL}/auth/refresh`,
+              { refreshToken },
+              { headers: { 'Content-Type': 'application/json' }, timeout: 10000 }
+            );
+
+            const data = refreshResponse.data?.data || refreshResponse.data;
+            const newAccessToken = data?.accessToken || data?.token;
+            const newRefreshToken = data?.refreshToken;
+
+            if (newAccessToken) {
+              // Save new tokens
+              localStorage.setItem('authToken', newAccessToken);
+              localStorage.setItem('token', newAccessToken);
+              if (newRefreshToken) {
+                localStorage.setItem('refreshToken', newRefreshToken);
+              }
+
+              // Process queued requests with new token
+              processQueue(null, newAccessToken);
+
+              // Retry the original request
+              config.headers.Authorization = `Bearer ${newAccessToken}`;
+              config._isRetryAfterRefresh = true;
+              return apiClient(config);
+            } else {
+              // Refresh succeeded but no token — force logout
+              processQueue(new Error('No token in refresh response'));
+              forceLogout();
+            }
+          } catch (refreshError) {
+            // Refresh failed — force logout
+            processQueue(refreshError);
+            forceLogout();
+          } finally {
+            isRefreshing = false;
+          }
+        } else {
+          // No refresh token or already retried — force logout
+          forceLogout();
         }
       }
     }

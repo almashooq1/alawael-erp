@@ -4,16 +4,24 @@
  */
 
 import apiClient from './api.client';
-import { removeToken, getToken, getUserData, removeUserData } from 'utils/tokenStorage';
+import { removeToken, getToken, getUserData, removeUserData, clearAuthData } from 'utils/tokenStorage';
 import { getPortal, removePortal } from 'utils/storageService';
 
 const authService = {
   // ==================== المصادقة ====================
   login: (email, password, portal) => apiClient.post('/auth/login', { email, password, portal }),
 
-  logout: () => {
-    removeToken();
-    removeUserData();
+  logout: async () => {
+    // Best-effort: tell backend to blacklist the current token
+    try {
+      const token = getToken();
+      if (token) {
+        await apiClient.post('/auth/logout').catch(() => {});
+      }
+    } catch {
+      // Ignore — clearing local state is enough
+    }
+    clearAuthData();
     removePortal();
     return Promise.resolve();
   },

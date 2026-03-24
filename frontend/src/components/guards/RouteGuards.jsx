@@ -135,12 +135,12 @@ export function GuestGuard({ children, redirectTo = '/dashboard' }) {
 /**
  * Monitors user activity and warns before session timeout.
  *
- * @param {number} timeoutMs - Session timeout in milliseconds (default: 30 min)
+ * @param {number} timeoutMs - Session timeout in milliseconds (default: 2 hours)
  * @param {number} warningMs - Warning before timeout (default: 5 min)
  */
 export function SessionTimeoutGuard({
   children,
-  timeoutMs = 30 * 60 * 1000,
+  timeoutMs = 2 * 60 * 60 * 1000,
   warningMs = 5 * 60 * 1000,
 }) {
   const { logout } = useAuth();

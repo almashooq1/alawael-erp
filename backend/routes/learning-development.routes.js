@@ -14,7 +14,7 @@
 
 const express = require('express');
 const router = express.Router();
-const { authenticate, authorize } = require('../middleware/authMiddleware');
+const { authenticate } = require('../middleware/authMiddleware');
 const logger = require('../utils/logger');
 
 // ── Service ──

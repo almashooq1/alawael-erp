@@ -1421,7 +1421,7 @@ class AIDiagnosticService {
     return recommended.filter((t) => !currentTherapies.includes(t)).slice(0, 2);
   }
 
-  _generateConclusion(analysis, risk, goals) {
+  _generateConclusion(analysis, _risk, _goals) {
     const score = analysis.overallScore;
     if (score >= 70) return 'تقدم ممتاز — المستفيد يحرز تحسناً ملحوظاً في معظم المجالات. يُوصى بالاستمرار ورفع مستوى الأهداف.';
     if (score >= 50) return 'تقدم جيد — المستفيد يتحسن بشكل مستقر. يحتاج لمتابعة بعض المجالات المتأخرة.';

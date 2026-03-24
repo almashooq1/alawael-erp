@@ -187,7 +187,7 @@ const uncaughtExceptionHandler = () => {
 };
 
 const unhandledRejectionHandler = () => {
-  process.on('unhandledRejection', (reason, promise) => {
+  process.on('unhandledRejection', (reason, _promise) => {
     logger.error('💥 UNHANDLED REJECTION:', {
       reason: reason?.message || reason,
       stack: reason?.stack,

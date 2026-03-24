@@ -12,7 +12,7 @@ const {
   extractModuleFromPath,
   MODULE_PATH_MAP,
   getContext,
-  clearContext,
+  clearContext: _clearContext,
 } = require('../../middleware/integrationContext.middleware');
 
 // ─── Mock request/response factory ──────────────────────────────────────────

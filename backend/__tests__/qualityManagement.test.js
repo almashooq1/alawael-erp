@@ -13,13 +13,13 @@ jest.mock('../middleware/authMiddleware', () => ({
     next();
   },
   authorize:
-    (...roles) =>
+    (..._roles) =>
     (req, _res, next) =>
       next(),
 }));
 
 const qualityRoutes = require('../routes/qualityManagement.routes');
-const svc = require('../services/qualityManagement.service');
+const _svc = require('../services/qualityManagement.service');
 
 /* ── Build test app ── */
 const app = express();

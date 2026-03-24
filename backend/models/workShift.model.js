@@ -303,7 +303,7 @@ workShiftSchema.methods.calculateLateness = function (checkInTime) {
   const checkH = checkInDate.getHours();
   const checkM = checkInDate.getMinutes();
 
-  let lateMinutes = (checkH - shiftH) * 60 + (checkM - shiftM);
+  const lateMinutes = (checkH - shiftH) * 60 + (checkM - shiftM);
 
   // السماح بفترة الحضور المسموحة
   if (lateMinutes <= this.gracePeriod.checkInMinutes) {
@@ -341,7 +341,7 @@ workShiftSchema.methods.calculateEarlyLeave = function (checkOutTime) {
   const outH = checkOutDate.getHours();
   const outM = checkOutDate.getMinutes();
 
-  let earlyMinutes = (shiftH - outH) * 60 + (shiftM - outM);
+  const earlyMinutes = (shiftH - outH) * 60 + (shiftM - outM);
 
   if (earlyMinutes <= this.gracePeriod.checkOutMinutes) {
     return { isEarlyLeave: false, earlyMinutes: 0 };

@@ -883,12 +883,18 @@ describe('MeasurementModels — Enhanced Features', () => {
     });
 
     it('should detect stable score', () => {
-      const direction = 80 - 80 > 0 ? 'improved' : 80 - 80 < 0 ? 'declined' : 'stable';
+      const current = 80;
+      const previous = 80;
+      const diff = current - previous;
+      const direction = diff > 0 ? 'improved' : diff < 0 ? 'declined' : 'stable';
       expect(direction).toBe('stable');
     });
 
     it('should detect declined score', () => {
-      const direction = 60 - 80 > 0 ? 'improved' : 60 - 80 < 0 ? 'declined' : 'stable';
+      const current = 60;
+      const previous = 80;
+      const diff = current - previous;
+      const direction = diff > 0 ? 'improved' : diff < 0 ? 'declined' : 'stable';
       expect(direction).toBe('declined');
     });
   });

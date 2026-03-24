@@ -550,7 +550,7 @@ describe('WorkShift Calculation Logic', () => {
     const checkInDate = new Date(checkInTime);
     const checkH = checkInDate.getHours();
     const checkM = checkInDate.getMinutes();
-    let lateMinutes = (checkH - shiftH) * 60 + (checkM - shiftM);
+    const lateMinutes = (checkH - shiftH) * 60 + (checkM - shiftM);
     if (lateMinutes <= this.gracePeriod.checkInMinutes) {
       return { isLate: false, lateMinutes: 0, deduction: null };
     }
@@ -577,7 +577,7 @@ describe('WorkShift Calculation Logic', () => {
     const checkOutDate = new Date(checkOutTime);
     const outH = checkOutDate.getHours();
     const outM = checkOutDate.getMinutes();
-    let earlyMinutes = (shiftH - outH) * 60 + (shiftM - outM);
+    const earlyMinutes = (shiftH - outH) * 60 + (shiftM - outM);
     if (earlyMinutes <= this.gracePeriod.checkOutMinutes) {
       return { isEarlyLeave: false, earlyMinutes: 0 };
     }

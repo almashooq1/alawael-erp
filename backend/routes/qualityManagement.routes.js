@@ -4,7 +4,7 @@
  */
 
 const express = require('express');
-const { body, param, query } = require('express-validator');
+const { body, param } = require('express-validator');
 const { authenticate, authorize } = require('../middleware/authMiddleware');
 const svc = require('../services/qualityManagement.service');
 

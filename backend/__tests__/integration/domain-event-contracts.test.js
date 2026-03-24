@@ -11,9 +11,9 @@ const {
   FINANCE_EVENTS,
   BENEFICIARY_EVENTS,
   MEDICAL_EVENTS,
-  ATTENDANCE_EVENTS,
-  NOTIFICATION_EVENTS,
-  SYSTEM_EVENTS,
+  ATTENDANCE_EVENTS: _ATTENDANCE_EVENTS,
+  NOTIFICATION_EVENTS: _NOTIFICATION_EVENTS,
+  SYSTEM_EVENTS: _SYSTEM_EVENTS,
   ALL_CONTRACTS,
   getContract,
   getDomainContracts,
@@ -42,7 +42,7 @@ describe('DomainEventContracts', () => {
 
     it('should have proper structure for each event contract', () => {
       for (const [domain, contracts] of Object.entries(ALL_CONTRACTS)) {
-        for (const [key, contract] of Object.entries(contracts)) {
+        for (const [_key, contract] of Object.entries(contracts)) {
           expect(contract).toHaveProperty('domain', domain);
           expect(contract).toHaveProperty('eventType');
           expect(contract).toHaveProperty('version');

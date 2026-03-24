@@ -13,12 +13,12 @@
 
 const express = require('express');
 const router = express.Router();
-const { body, param, query, validationResult } = require('express-validator');
+const { body, param, validationResult } = require('express-validator');
 const { authenticate, authorize } = require('../middleware/authMiddleware');
 const logger = require('../utils/logger');
 
 // ── Services ──
-let telehealthEngine, smartTelehealth, therapistEliteSvc;
+let telehealthEngine, smartTelehealth, _therapistEliteSvc;
 
 try {
   telehealthEngine = require('../services/telehealth.service');
@@ -32,7 +32,7 @@ try {
 }
 try {
   const TherapistElite = require('../services/therapistPortalElite.service');
-  therapistEliteSvc = typeof TherapistElite === 'function' ? new TherapistElite() : TherapistElite;
+  _therapistEliteSvc = typeof TherapistElite === 'function' ? new TherapistElite() : TherapistElite;
 } catch (e) {
   logger.warn('therapistPortalElite.service not available');
 }

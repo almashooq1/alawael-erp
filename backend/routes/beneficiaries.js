@@ -308,7 +308,7 @@ router.get('/cities', async (req, res) => {
   try {
     const cities = await Beneficiary.distinct('address.city', {
       isArchived: { $ne: true },
-      'address.city': { $exists: true, $ne: null, $ne: '' },
+      'address.city': { $exists: true, $nin: [null, ''] },
     });
     res.json({ success: true, data: cities.filter(Boolean).sort() });
   } catch (error) {

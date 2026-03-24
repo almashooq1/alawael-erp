@@ -422,7 +422,7 @@ class OCRDocumentService {
   /* ══════════════════════════════════════════════════════════════════
      OCR PROCESSING (SIMULATED)
      ══════════════════════════════════════════════════════════════════ */
-  _processDocument(docId, userId) {
+  _processDocument(docId, _userId) {
     const doc = this.documents.get(docId);
     if (!doc) return;
 

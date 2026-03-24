@@ -19,9 +19,9 @@
 
 const express = require('express');
 const router = express.Router();
-const { body, param, query, validationResult } = require('express-validator');
+const { body, param, validationResult } = require('express-validator');
 const { authenticate, authorize } = require('../middleware/authMiddleware');
-const logger = require('../utils/logger');
+const _logger = require('../utils/logger');
 
 // ── Service ──
 const reportBuilder = require('../services/reportBuilder.service');

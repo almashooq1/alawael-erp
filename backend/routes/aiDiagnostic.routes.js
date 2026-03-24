@@ -15,7 +15,7 @@ const handleValidation = (req, res, next) => {
   if (!errors.isEmpty()) return res.status(400).json({ success: false, errors: errors.array() });
   next();
 };
-const getUserId = (req) => req.user?.id || req.user?.userId || 'u1';
+const _getUserId = (req) => req.user?.id || req.user?.userId || 'u1';
 const wrap = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
 /* ────────────────────────────────────────────

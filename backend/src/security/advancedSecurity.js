@@ -10,6 +10,7 @@ const validator = require('validator');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const _axios = require('axios');
+const logger = require('../../utils/logger');
 
 // ====== 1. مكافحة DDoS والحد من المعدل ======
 
@@ -83,7 +84,7 @@ class DDoSProtection {
 
         // تنبيه إذا تجاوز الحد
         if (data.count > threshold) {
-          console.warn(`🚨 Potential DDoS attack from ${clientIp}`);
+          logger.warn(`Potential DDoS attack from ${clientIp}`);
           return {
             isAttack: true,
             ip: clientIp,
@@ -267,7 +268,7 @@ class JWTSecurity {
 
       return decoded;
     } catch (error) {
-      console.error('JWT verification failed:', error.message);
+      logger.error('JWT verification failed:', error.message);
       return null;
     }
   }
@@ -324,7 +325,7 @@ class JWTSecurity {
         role: decoded.role,
       });
     } catch (error) {
-      console.error('Refresh token failed:', error.message);
+      logger.error('Refresh token failed:', error.message);
       return null;
     }
   }
@@ -510,7 +511,7 @@ class SecurityAuiting {
     };
 
     // احفظ في قاعدة البيانات
-    console.log(`🔐 Security Event [${log.severity.toUpperCase()}]:`, JSON.stringify(log));
+    logger.info(`Security Event [${log.severity.toUpperCase()}]:`, JSON.stringify(log));
 
     // التنبيهات الفورية للأحداث الخطيرة
     if (log.severity === 'critical' || log.severity === 'high') {
@@ -523,7 +524,7 @@ class SecurityAuiting {
    */
   static sendSecurityAlert(log) {
     // أرسل بريد إلكتروني أو رسالة SMS
-    console.warn('🚨 CRITICAL SECURITY ALERT:', log);
+    logger.warn('CRITICAL SECURITY ALERT:', log);
 
     // يمكن إضافة Slack notification أو Email
     // this.sendEmail(log);
@@ -541,7 +542,7 @@ class SecurityAuiting {
     };
 
     // احفظ في قاعدة البيانات
-    console.log('👤 User Activity:', log);
+    logger.info('User Activity:', log);
   }
 
   /**
@@ -585,7 +586,7 @@ class SecurityTesting {
     // فحص npm dependencies
     const vulnerabilities = [];
 
-    console.log('🔍 Scanning for known vulnerabilities...');
+    logger.info('Scanning for known vulnerabilities...');
 
     // يمكن استخدام npm audit
     // npm audit --audit-level=moderate
@@ -669,6 +670,6 @@ module.exports = {
 
     RequestValidation.sanitizeInput(app);
 
-    console.log('✅ All security middleware configured');
+    logger.info('All security middleware configured');
   },
 };

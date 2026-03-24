@@ -7,6 +7,7 @@
 const tf = require('@tensorflow/tfjs');
 const fs = require('fs');
 const path = require('path');
+const logger = require('../../utils/logger');
 
 class AdvancedMLModels {
   constructor() {
@@ -31,7 +32,7 @@ class AdvancedMLModels {
      * - التعب (0-10)
      */
 
-    console.log('🤖 بناء نموذج التنبؤ بالحوادث...');
+    logger.info('بناء نموذج التنبؤ بالحوادث...');
 
     const model = tf.sequential({
       layers: [
@@ -86,7 +87,7 @@ class AdvancedMLModels {
      * - استهلاك الوقود غير الطبيعي (%)
      */
 
-    console.log('🤖 بناء نموذج التنبؤ بالصيانة...');
+    logger.info('بناء نموذج التنبؤ بالصيانة...');
 
     const model = tf.sequential({
       layers: [
@@ -142,7 +143,7 @@ class AdvancedMLModels {
      * - معدل الكبح (نسبة مئوية)
      */
 
-    console.log('🤖 بناء نموذج استهلاك الوقود...');
+    logger.info('بناء نموذج استهلاك الوقود...');
 
     const model = tf.sequential({
       layers: [
@@ -195,7 +196,7 @@ class AdvancedMLModels {
      * - احتقان المدينة (0-100)
      */
 
-    console.log('🤖 بناء نموذج تحسين المسارات...');
+    logger.info('بناء نموذج تحسين المسارات...');
 
     const model = tf.sequential({
       layers: [
@@ -240,7 +241,7 @@ class AdvancedMLModels {
       throw new Error(`النموذج ${modelName} غير متوفر`);
     }
 
-    console.log(`🎯 بدء تدريب النموذج: ${modelName}`);
+    logger.info(`بدء تدريب النموذج: ${modelName}`);
 
     const model = this.models[modelName];
     const { inputs, outputs } = this.normalizeData(trainingData);
@@ -256,14 +257,14 @@ class AdvancedMLModels {
         shuffle: true,
         callbacks: {
           onEpochEnd: (epoch, logs) => {
-            console.log(
+            logger.debug(
               `Epoch ${epoch + 1}/${epochs} - Loss: ${logs.loss.toFixed(4)}, Accuracy: ${logs.acc?.toFixed(4) || 'N/A'}`
             );
           },
         },
       });
 
-      console.log(`✅ تم التدريب بنجاح`);
+      logger.info('تم التدريب بنجاح');
     } finally {
       xs.dispose();
       ys.dispose();
@@ -573,7 +574,7 @@ class AdvancedMLModels {
     for (const [modelName, model] of Object.entries(this.models)) {
       const path_url = `file://${path.join(directory, modelName)}`;
       await model.save(path_url);
-      console.log(`✅ تم حفظ النموذج: ${modelName}`);
+      logger.info(`تم حفظ النموذج: ${modelName}`);
     }
   }
 
@@ -589,9 +590,9 @@ class AdvancedMLModels {
       try {
         const path_url = `file://${path.join(directory, modelName)}`;
         this.models[modelName] = await tf.loadLayersModel(`${path_url}/model.json`);
-        console.log(`✅ تم تحميل النموذج: ${modelName}`);
+        logger.info(`تم تحميل النموذج: ${modelName}`);
       } catch (error) {
-        console.error(`❌ خطأ في تحميل ${modelName}:`, error.message);
+        logger.error(`خطأ في تحميل ${modelName}:`, error.message);
       }
     }
   }

@@ -9,6 +9,7 @@ const twilio = require('twilio');
 const admin = require('firebase-admin');
 const mongoose = require('mongoose');
 const EventEmitter = require('events');
+const logger = require('../../utils/logger');
 
 class AdvancedNotificationService extends EventEmitter {
   constructor() {
@@ -187,7 +188,7 @@ class AdvancedNotificationService extends EventEmitter {
             break;
         }
       } catch (error) {
-        console.error(`خطأ في إرسال ${channel}:`, error);
+        logger.error(`خطأ في إرسال ${channel}:`, error);
         await this.addToRetryQueue(recipient, notificationData, channel);
       }
     }
@@ -211,7 +212,7 @@ class AdvancedNotificationService extends EventEmitter {
         to: this.formatPhoneNumber(phoneNumber)
       });
 
-      console.log(`✅ تم إرسال SMS برقم: ${result.sid}`);
+      logger.info(`تم إرسال SMS برقم: ${result.sid}`);
 
       return {
         status: 'sent',
@@ -220,7 +221,7 @@ class AdvancedNotificationService extends EventEmitter {
         timestamp: new Date()
       };
     } catch (error) {
-      console.error('خطأ في إرسال SMS:', error);
+      logger.error('خطأ في إرسال SMS:', error);
       throw error;
     }
   }
@@ -243,7 +244,7 @@ class AdvancedNotificationService extends EventEmitter {
         priority: notification.priority === 'high' ? 'high' : 'normal'
       });
 
-      console.log(`✅ تم إرسال البريد برقم: ${result.messageId}`);
+      logger.info(`تم إرسال البريد برقم: ${result.messageId}`);
 
       return {
         status: 'sent',
@@ -252,7 +253,7 @@ class AdvancedNotificationService extends EventEmitter {
         timestamp: new Date()
       };
     } catch (error) {
-      console.error('خطأ في إرسال البريد:', error);
+      logger.error('خطأ في إرسال البريد:', error);
       throw error;
     }
   }
@@ -300,7 +301,7 @@ class AdvancedNotificationService extends EventEmitter {
 
     try {
       const result = await admin.messaging().send(message);
-      console.log(`✅ تم إرسال Push برقم: ${result}`);
+      logger.info(`تم إرسال Push برقم: ${result}`);
 
       return {
         status: 'sent',
@@ -309,7 +310,7 @@ class AdvancedNotificationService extends EventEmitter {
         timestamp: new Date()
       };
     } catch (error) {
-      console.error('خطأ في إرسال Push:', error);
+      logger.error('خطأ في إرسال Push:', error);
       throw error;
     }
   }
@@ -342,7 +343,7 @@ class AdvancedNotificationService extends EventEmitter {
         timestamp: new Date()
       };
     } catch (error) {
-      console.error('خطأ في الإشعار داخل التطبيق:', error);
+      logger.error('خطأ في الإشعار داخل التطبيق:', error);
       throw error;
     }
   }
@@ -405,10 +406,10 @@ class AdvancedNotificationService extends EventEmitter {
       const ScheduleModel = mongoose.model('NotificationSchedule');
       await ScheduleModel.create(schedule_entry);
 
-      console.log(`✅ تم جدولة التقرير ${reportType}`);
+      logger.info(`تم جدولة التقرير ${reportType}`);
       return schedule_entry;
     } catch (error) {
-      console.error('خطأ في جدولة التقرير:', error);
+      logger.error('خطأ في جدولة التقرير:', error);
       throw error;
     }
   }
@@ -461,7 +462,7 @@ class AdvancedNotificationService extends EventEmitter {
         offset: options.offset || 0
       };
     } catch (error) {
-      console.error('خطأ في جلب الإشعارات:', error);
+      logger.error('خطأ في جلب الإشعارات:', error);
       throw error;
     }
   }
@@ -481,7 +482,7 @@ class AdvancedNotificationService extends EventEmitter {
 
       return { status: 'updated', notificationId };
     } catch (error) {
-      console.error('خطأ في تحديث الإشعار:', error);
+      logger.error('خطأ في تحديث الإشعار:', error);
       throw error;
     }
   }
@@ -497,9 +498,9 @@ class AdvancedNotificationService extends EventEmitter {
         }
       );
 
-      console.log(`✅ تم تحديث جميع إشعارات المستخدم ${userId}`);
+      logger.info(`تم تحديث جميع إشعارات المستخدم ${userId}`);
     } catch (error) {
-      console.error('خطأ:', error);
+      logger.error('خطأ:', error);
       throw error;
     }
   }
@@ -512,7 +513,7 @@ class AdvancedNotificationService extends EventEmitter {
       await NotificationModel.findByIdAndDelete(notificationId);
       return { status: 'deleted', notificationId };
     } catch (error) {
-      console.error('خطأ في حذف الإشعار:', error);
+      logger.error('خطأ في حذف الإشعار:', error);
       throw error;
     }
   }
@@ -527,10 +528,10 @@ class AdvancedNotificationService extends EventEmitter {
         timestamp: { $lt: cutoffDate }
       });
 
-      console.log(`✅ تم حذف ${result.deletedCount} إشعار قديم`);
+      logger.info(`تم حذف ${result.deletedCount} إشعار قديم`);
       return result;
     } catch (error) {
-      console.error('خطأ في حذف الإشعارات القديمة:', error);
+      logger.error('خطأ في حذف الإشعارات القديمة:', error);
       throw error;
     }
   }
@@ -555,7 +556,7 @@ class AdvancedNotificationService extends EventEmitter {
 
   async retryFailedNotification(queueItem) {
     if (queueItem.retryCount >= queueItem.maxRetries) {
-      console.log(`❌ تم تجاوز عدد محاولات الإرسال لـ ${queueItem.channel}`);
+      logger.warn(`تم تجاوز عدد محاولات الإرسال لـ ${queueItem.channel}`);
       return;
     }
 
@@ -574,7 +575,7 @@ class AdvancedNotificationService extends EventEmitter {
           break;
       }
 
-      console.log(`✅ نجحت المحاولة الثانية للإرسال عبر ${queueItem.channel}`);
+      logger.info(`نجحت المحاولة الثانية للإرسال عبر ${queueItem.channel}`);
     } catch (error) {
       if (queueItem.retryCount < queueItem.maxRetries) {
         setTimeout(() => this.retryFailedNotification(queueItem), 5 * 60 * 1000);
@@ -667,7 +668,7 @@ class AdvancedNotificationService extends EventEmitter {
         ...notification
       });
     } catch (error) {
-      console.error('خطأ في حفظ الإشعار:', error);
+      logger.error('خطأ في حفظ الإشعار:', error);
       throw error;
     }
   }

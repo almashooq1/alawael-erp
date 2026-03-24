@@ -8,6 +8,7 @@ const DailyRotateFile = require('winston-daily-rotate-file');
 const prometheus = require('prom-client');
 const elasticsearch = require('@elastic/elasticsearch');
 const StatsD = require('node-statsd').StatsD;
+const logger = require('../../utils/logger');
 
 // ====== 1. نظام logging متقدم ======
 
@@ -162,7 +163,7 @@ class LoggingSystem {
         document: logEntry
       });
     } catch (error) {
-      console.error('Elasticsearch logging failed:', error);
+      logger.error('Elasticsearch logging failed:', error);
     }
   }
 
@@ -256,7 +257,7 @@ class LoggingSystem {
    */
   async sendAlert(event, details) {
     // يمكن إرسال بريد أو رسالة Slack
-    console.error(`🚨 ALERT: ${event}`, details);
+    logger.warn(`ALERT: ${event}`, details);
   }
 
   /**
@@ -590,7 +591,7 @@ class AlertingSystem {
    */
   async sendNotification(alert) {
     // أرسل Slack message
-    console.log(`📢 Alert Notification: ${alert.ruleName}`);
+    logger.info(`Alert Notification: ${alert.ruleName}`);
 
     // أرسل بريد إلكتروني إذا كان الخطر عالياً
     if (alert.severity === 'critical') {

@@ -9,6 +9,7 @@ const compression = require('compression');
 const cluster = require('cluster');
 const os = require('os');
 const express = require('express');
+const logger = require('../../utils/logger');
 
 // ====== 1. نظام الذاكرة المؤقتة (Caching) ======
 
@@ -29,11 +30,11 @@ class CachingStrategy {
 
   initializeRedis() {
     this.redisClient.on('connect', () => {
-      console.log('✅ Redis connected');
+      logger.info('Redis connected');
     });
 
     this.redisClient.on('error', err => {
-      console.error('❌ Redis error:', err);
+      logger.error('Redis error:', err);
     });
   }
 
@@ -47,7 +48,7 @@ class CachingStrategy {
     // المحاولة الأولى: الذاكرة المحلية
     let data = this.memoryCache.get(key);
     if (data) {
-      console.log(`⚡ Cache hit (memory): ${key}`);
+      logger.debug(`Cache hit (memory): ${key}`);
       return data;
     }
 
@@ -57,21 +58,21 @@ class CachingStrategy {
       if (data) {
         data = JSON.parse(data);
         this.memoryCache.set(key, data, ttl);
-        console.log(`⚡ Cache hit (redis): ${key}`);
+        logger.debug(`Cache hit (redis): ${key}`);
         return data;
       }
     } catch (error) {
-      console.error('Redis retrieval error:', error);
+      logger.error('Redis retrieval error:', error);
     }
 
     // المحاولة الثالثة: قاعدة البيانات
-    console.log(`📊 Cache miss: ${key} - fetching from DB`);
+    logger.debug(`Cache miss: ${key} - fetching from DB`);
     data = await fetchFunction();
 
     // حفظ متعدد المستويات
     this.memoryCache.set(key, data, ttl);
     this.redisClient.setex(key, ttl, JSON.stringify(data), err => {
-      if (err) console.error('Redis cache error:', err);
+      if (err) logger.error('Redis cache error:', err);
     });
 
     return data;
@@ -94,7 +95,7 @@ class CachingStrategy {
       if (err) return;
       if (keys.length > 0) {
         this.redisClient.del(...keys, err => {
-          if (!err) console.log(`🔄 Cache invalidated: ${pattern}`);
+          if (!err) logger.info(`Cache invalidated: ${pattern}`);
         });
       }
     });
@@ -193,7 +194,7 @@ class DatabaseOptimization {
     Notification.collection.createIndex({ read: 1, timestamp: -1 });
     Notification.collection.createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
-    console.log('✅ Database indexes created');
+    logger.info('Database indexes created');
   }
 
   /**
@@ -207,7 +208,7 @@ class DatabaseOptimization {
       return this.lean().exec();
     };
 
-    console.log('✅ Query optimization enabled');
+    logger.info('Query optimization enabled');
   }
 
   /**
@@ -266,7 +267,7 @@ class DatabaseOptimization {
       'schedule.actualEnd': { $lt: cutoffDate },
     });
 
-    console.log(`📦 Archived ${archived.deletedCount} old trips`);
+    logger.info(`Archived ${archived.deletedCount} old trips`);
     return archived;
   }
 }
@@ -291,7 +292,7 @@ class ExpressOptimization {
       })
     );
 
-    console.log('✅ Response compression enabled');
+    logger.info('Response compression enabled');
   }
 
   /**
@@ -310,7 +311,7 @@ class ExpressOptimization {
       );
     });
 
-    console.log('✅ Request batching enabled');
+    logger.info('Request batching enabled');
   }
 
   /**
@@ -334,7 +335,7 @@ class ExpressOptimization {
    */
   static setupErrorHandling(app) {
     app.use((err, req, res, _next) => {
-      console.error('Error:', err);
+      logger.error('Error:', err);
 
       res.status(err.status || 500).json({
         status: 'error',
@@ -412,13 +413,11 @@ class MemoryOptimization {
     setInterval(() => {
       const used = process.memoryUsage();
 
-      console.log('📊 Memory Usage:');
-      console.log(`   Heap: ${Math.round(used.heapUsed / 1024 / 1024)} MB`);
-      console.log(`   External: ${Math.round(used.external / 1024 / 1024)} MB`);
+      logger.info(`Memory Usage — Heap: ${Math.round(used.heapUsed / 1024 / 1024)} MB, External: ${Math.round(used.external / 1024 / 1024)} MB`);
 
       // تنبيه عند تجاوز 500 MB
       if (used.heapUsed > 500 * 1024 * 1024) {
-        console.warn('⚠️ High memory usage detected');
+        logger.warn('High memory usage detected');
         // تنظيف الموارد القديمة
         global.gc?.();
       }
@@ -431,7 +430,7 @@ class MemoryOptimization {
   static optimizeStreams(response) {
     // استخدام Streams بدلاً من تحميل البيانات كاملة
     return response.pipe(err => {
-      if (err) console.error('Stream error:', err);
+      if (err) logger.error('Stream error:', err);
     });
   }
 
@@ -441,7 +440,7 @@ class MemoryOptimization {
   static cleanupResources() {
     if (global.gc) {
       global.gc();
-      console.log('🧹 Garbage collection triggered');
+      logger.info('Garbage collection triggered');
     }
   }
 }
@@ -456,7 +455,7 @@ class LoadBalancing {
     const numCPUs = os.cpus().length;
 
     if (cluster.isMaster) {
-      console.log(`🚀 Master process ${process.pid} starting`);
+      logger.info(`Master process ${process.pid} starting`);
 
       // إنشاء worker لكل CPU
       for (let i = 0; i < numCPUs; i++) {
@@ -465,14 +464,14 @@ class LoadBalancing {
 
       // إعادة إنشاء worker في حالة الفشل
       cluster.on('exit', (worker, _code, _signal) => {
-        console.log(`⚠️ Worker ${worker.process.pid} died`);
+        logger.warn(`Worker ${worker.process.pid} died`);
         cluster.fork();
       });
     } else {
       // شغّل التطبيق
       const port = process.env.PORT || 5000;
       app.listen(port, () => {
-        console.log(`✅ Worker process ${process.pid} listening on port ${port}`);
+        logger.info(`Worker process ${process.pid} listening on port ${port}`);
       });
     }
   }
@@ -513,7 +512,7 @@ class NetworkOptimization {
    */
   static enableHttp2(_app) {
     // تحقق من أن السيرفر يستخدم HTTPS مع HTTP/2
-    console.log('✅ HTTP/2 enabled');
+    logger.info('HTTP/2 enabled');
   }
 
   /**
@@ -522,7 +521,7 @@ class NetworkOptimization {
   static setupConnectionPooling(_mongoDB) {
     // يتم إعداده تلقائياً في Mongoose
     // minPoolSize = 10, maxPoolSize = 30
-    console.log('✅ Connection pooling configured');
+    logger.info('Connection pooling configured');
   }
 
   /**
@@ -549,7 +548,7 @@ class NetworkOptimization {
       })
     );
 
-    console.log('✅ CDN configured');
+    logger.info('CDN configured');
   }
 }
 
@@ -565,7 +564,7 @@ class PerformanceMonitoring {
     const end = process.hrtime.bigint();
     const duration = Number(end - start) / 1000000; // تحويل إلى ميلي ثانية
 
-    console.log(`⏱️ ${label}: ${duration.toFixed(2)}ms`);
+    logger.info(`${label}: ${duration.toFixed(2)}ms`);
     return result;
   }
 
@@ -574,7 +573,7 @@ class PerformanceMonitoring {
    */
   static trackSlowQueries(threshold = 100) {
     // يسجل الاستعلامات التي تستغرق أكثر من 100ms
-    console.log(`⚠️ Slow query threshold: ${threshold}ms`);
+    logger.warn(`Slow query threshold: ${threshold}ms`);
   }
 
   /**
@@ -607,7 +606,7 @@ class PerformanceMonitoring {
       res.json(this.getPerformanceStats());
     });
 
-    console.log('✅ Performance dashboard available at /api/performance/stats');
+    logger.info('Performance dashboard available at /api/performance/stats');
   }
 }
 

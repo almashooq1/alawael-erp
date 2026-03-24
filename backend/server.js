@@ -34,16 +34,18 @@ const io = isTestEnv
   ? null
   : socketIO(server, {
       cors: {
-        origin: (process.env.CORS_ORIGINS || process.env.CORS_ORIGIN || '')
-          .split(',')
-          .map(s => s.trim())
-          .filter(Boolean)
-          .concat(
-            // Always allow the explicit frontend URL
-            process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []
-          ) ||
-          // Fallback for local development only
-          ['http://localhost:3004', 'http://localhost:3000'],
+        origin: (() => {
+          const origins = (process.env.CORS_ORIGINS || process.env.CORS_ORIGIN || '')
+            .split(',')
+            .map(s => s.trim())
+            .filter(Boolean)
+            .concat(
+              process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []
+            );
+          return origins.length > 0
+            ? origins
+            : ['http://localhost:3001', 'http://localhost:3000'];
+        })(),
         methods: ['GET', 'POST'],
         credentials: true,
       },
@@ -106,7 +108,11 @@ const shouldSkipDBInit = isTestEnv && process.env.SMART_TEST_MODE === 'true';
       }
     }
   } catch (err) {
-    logger.info('Database connection failed, continuing...');
+    if (process.env.NODE_ENV === 'production') {
+      logger.error('FATAL: Database connection failed in production:', err.message);
+      process.exit(1);
+    }
+    logger.warn('Database connection failed, continuing in dev mode...');
   }
 
   // Initialize Redis

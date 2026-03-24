@@ -6,7 +6,7 @@
  * Import from here instead of defining these in each file.
  */
 
-export const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
+export const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
 
 // Auto-detect socket/WS URLs from current origin in production
 const _detectOrigin = () =>

@@ -44,8 +44,8 @@ module.exports = {
       // Merge logs from all instances
       merge_logs: true,
 
-      // Maximum memory before restart (500MB)
-      max_memory_restart: '500M',
+      // Maximum memory before restart (1GB — aligned with node_args heap)
+      max_memory_restart: '1G',
 
       // Don't watch files for changes in production
       watch: false,
@@ -86,8 +86,8 @@ module.exports = {
       // Application arguments
       args: '',
 
-      // Additional node arguments
-      node_args: '--max-old-space-size=1024',
+      // Additional node arguments (900MB heap < 1G PM2 limit → allows graceful GC)
+      node_args: '--max-old-space-size=900',
 
       // Ignore changes to these files when restarting
       ignore_files: ['.git', '.gitignore', 'README.md', '.env.example', 'package-lock.json'],

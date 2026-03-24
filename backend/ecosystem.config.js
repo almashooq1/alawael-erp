@@ -22,7 +22,7 @@ module.exports = {
       script: './server.js',
 
       // Number of instances (max = number of CPU cores)
-      instances: 'max',
+      instances: 2,
 
       // Execution mode (cluster for multi-process, fork for single)
       exec_mode: 'cluster',
@@ -30,13 +30,13 @@ module.exports = {
       // Environment variables
       env: {
         NODE_ENV: 'production',
-        PORT: 3001,
+        PORT: 5000,
       },
 
       // Log files
-      error_file: './logs/error.log',
-      out_file: './logs/out.log',
-      log_file: './logs/combined.log',
+      error_file: '/home/alawael/logs/api-error.log',
+      out_file: '/home/alawael/logs/api-out.log',
+      log_file: '/home/alawael/logs/api-combined.log',
 
       // Log timestamp format
       time_format: 'YYYY-MM-DD HH:mm:ss Z',

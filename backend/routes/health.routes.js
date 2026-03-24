@@ -42,7 +42,7 @@ router.get('/db', async (req, res) => {
       database: {
         ...dbStatus,
         healthCheck: dbStatus.connected ? 'passed' : 'failed',
-        responseTime: `${Date.now() - req.startTime}ms`,
+        responseTime: `${req.startTime ? Number(process.hrtime.bigint() - req.startTime) / 1e6 : 0}ms`,
       },
       mongoose: mongooseStatus,
       timestamp: new Date().toISOString(),
@@ -195,7 +195,7 @@ router.get('/full', async (req, res) => {
           details: {
             connected: mongoConnected,
             collections: Object.keys(mongoose.connection.collections || {}).length,
-            responseTimeMs: Date.now() - req.startTime,
+            responseTimeMs: req.startTime ? Number(process.hrtime.bigint() - req.startTime) / 1e6 : 0,
           },
         },
         models: {

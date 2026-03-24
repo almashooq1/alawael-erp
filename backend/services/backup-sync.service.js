@@ -201,7 +201,6 @@ class BackupSyncSystem extends EventEmitter {
         readStream.on('error', reject);
         readStream.pipe(require('fs').createWriteStream(destFile));
       });
-
     } catch (error) {
       logger.error(`❌ Failed to sync file: ${error.message}`);
       throw error;

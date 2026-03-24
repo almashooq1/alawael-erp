@@ -46,7 +46,13 @@ router.get('/medications', async (req, res) => {
       Medication.find(filter).sort({ 'name.ar': 1 }).limit(parseInt(limit)).skip(skip),
       Medication.countDocuments(filter),
     ]);
-    res.json({ success: true, data: medications, total, page: parseInt(page), limit: parseInt(limit) });
+    res.json({
+      success: true,
+      data: medications,
+      total,
+      page: parseInt(page),
+      limit: parseInt(limit),
+    });
   } catch (error) {
     logger.error('[Pharmacy] List medications error:', { message: error.message });
     res.status(500).json({ success: false, message: 'خطأ في جلب الأدوية', error: error.message });
@@ -93,7 +99,11 @@ router.put('/medications/:id', async (req, res) => {
 
 router.delete('/medications/:id', async (req, res) => {
   try {
-    const medication = await Medication.findByIdAndUpdate(req.params.id, { isDeleted: true }, { new: true });
+    const medication = await Medication.findByIdAndUpdate(
+      req.params.id,
+      { isDeleted: true },
+      { new: true }
+    );
     if (!medication) return res.status(404).json({ success: false, message: 'الدواء غير موجود' });
     res.json({ success: true, message: 'تم حذف الدواء بنجاح' });
   } catch (error) {
@@ -117,10 +127,21 @@ router.get('/prescriptions', async (req, res) => {
     if (type) filter.type = type;
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const [prescriptions, total] = await Promise.all([
-      Prescription.find(filter).populate('beneficiary', 'name').populate('prescriber', 'name').sort({ createdAt: -1 }).limit(parseInt(limit)).skip(skip),
+      Prescription.find(filter)
+        .populate('beneficiary', 'name')
+        .populate('prescriber', 'name')
+        .sort({ createdAt: -1 })
+        .limit(parseInt(limit))
+        .skip(skip),
       Prescription.countDocuments(filter),
     ]);
-    res.json({ success: true, data: prescriptions, total, page: parseInt(page), limit: parseInt(limit) });
+    res.json({
+      success: true,
+      data: prescriptions,
+      total,
+      page: parseInt(page),
+      limit: parseInt(limit),
+    });
   } catch (error) {
     logger.error('[Pharmacy] List prescriptions error:', { message: error.message });
     res.status(500).json({ success: false, message: 'خطأ في جلب الوصفات', error: error.message });
@@ -133,7 +154,8 @@ router.get('/prescriptions/:id', async (req, res) => {
       .populate('beneficiary')
       .populate('prescriber', 'name email')
       .populate('items.medication');
-    if (!prescription) return res.status(404).json({ success: false, message: 'الوصفة غير موجودة' });
+    if (!prescription)
+      return res.status(404).json({ success: false, message: 'الوصفة غير موجودة' });
     res.json({ success: true, data: prescription });
   } catch (error) {
     logger.error('[Pharmacy] Get prescription error:', { message: error.message });
@@ -155,8 +177,12 @@ router.post('/prescriptions', async (req, res) => {
 
 router.put('/prescriptions/:id', async (req, res) => {
   try {
-    const prescription = await Prescription.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
-    if (!prescription) return res.status(404).json({ success: false, message: 'الوصفة غير موجودة' });
+    const prescription = await Prescription.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
+    if (!prescription)
+      return res.status(404).json({ success: false, message: 'الوصفة غير موجودة' });
     res.json({ success: true, data: prescription });
   } catch (error) {
     logger.error('[Pharmacy] Update prescription error:', { message: error.message });
@@ -168,15 +194,23 @@ router.patch('/prescriptions/:id/verify', async (req, res) => {
   try {
     const prescription = await Prescription.findByIdAndUpdate(
       req.params.id,
-      { status: 'verified', verifiedBy: req.user?.id, verifiedAt: new Date(), pharmacistNotes: req.body.notes },
+      {
+        status: 'verified',
+        verifiedBy: req.user?.id,
+        verifiedAt: new Date(),
+        pharmacistNotes: req.body.notes,
+      },
       { new: true }
     );
-    if (!prescription) return res.status(404).json({ success: false, message: 'الوصفة غير موجودة' });
+    if (!prescription)
+      return res.status(404).json({ success: false, message: 'الوصفة غير موجودة' });
     logger.info(`[Pharmacy] Prescription verified: ${prescription.prescriptionNumber}`);
     res.json({ success: true, data: prescription });
   } catch (error) {
     logger.error('[Pharmacy] Verify prescription error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في التحقق من الوصفة', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في التحقق من الوصفة', error: error.message });
   }
 });
 
@@ -187,7 +221,8 @@ router.patch('/prescriptions/:id/cancel', async (req, res) => {
       { status: 'cancelled', notes: req.body.reason },
       { new: true }
     );
-    if (!prescription) return res.status(404).json({ success: false, message: 'الوصفة غير موجودة' });
+    if (!prescription)
+      return res.status(404).json({ success: false, message: 'الوصفة غير موجودة' });
     res.json({ success: true, data: prescription });
   } catch (error) {
     logger.error('[Pharmacy] Cancel prescription error:', { message: error.message });
@@ -209,19 +244,30 @@ router.get('/dispensing', async (req, res) => {
     if (prescription) filter.prescription = prescription;
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const [records, total] = await Promise.all([
-      Dispensing.find(filter).populate('prescription').populate('beneficiary', 'name').sort({ createdAt: -1 }).limit(parseInt(limit)).skip(skip),
+      Dispensing.find(filter)
+        .populate('prescription')
+        .populate('beneficiary', 'name')
+        .sort({ createdAt: -1 })
+        .limit(parseInt(limit))
+        .skip(skip),
       Dispensing.countDocuments(filter),
     ]);
     res.json({ success: true, data: records, total, page: parseInt(page), limit: parseInt(limit) });
   } catch (error) {
     logger.error('[Pharmacy] List dispensing error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب سجلات الصرف', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في جلب سجلات الصرف', error: error.message });
   }
 });
 
 router.post('/dispensing', async (req, res) => {
   try {
-    const dispensing = new Dispensing({ ...req.body, pharmacist: req.user?.id, createdBy: req.user?.id });
+    const dispensing = new Dispensing({
+      ...req.body,
+      pharmacist: req.user?.id,
+      createdBy: req.user?.id,
+    });
     await dispensing.save();
 
     // Update prescription status
@@ -236,7 +282,9 @@ router.post('/dispensing', async (req, res) => {
     // Deduct from inventory
     for (const item of dispensing.items) {
       if (item.batch) {
-        await PharmacyInventory.findByIdAndUpdate(item.batch, { $inc: { quantity: -item.quantityDispensed } });
+        await PharmacyInventory.findByIdAndUpdate(item.batch, {
+          $inc: { quantity: -item.quantityDispensed },
+        });
       }
     }
 
@@ -250,13 +298,20 @@ router.post('/dispensing', async (req, res) => {
 
 router.patch('/dispensing/:id/return', async (req, res) => {
   try {
-    const dispensing = await Dispensing.findByIdAndUpdate(req.params.id, { status: 'returned' }, { new: true });
-    if (!dispensing) return res.status(404).json({ success: false, message: 'سجل الصرف غير موجود' });
+    const dispensing = await Dispensing.findByIdAndUpdate(
+      req.params.id,
+      { status: 'returned' },
+      { new: true }
+    );
+    if (!dispensing)
+      return res.status(404).json({ success: false, message: 'سجل الصرف غير موجود' });
 
     // Restore inventory
     for (const item of dispensing.items) {
       if (item.batch) {
-        await PharmacyInventory.findByIdAndUpdate(item.batch, { $inc: { quantity: item.quantityDispensed } });
+        await PharmacyInventory.findByIdAndUpdate(item.batch, {
+          $inc: { quantity: item.quantityDispensed },
+        });
       }
     }
     res.json({ success: true, data: dispensing, message: 'تم إرجاع الأدوية بنجاح' });
@@ -283,7 +338,11 @@ router.get('/inventory', async (req, res) => {
     }
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const [batches, total] = await Promise.all([
-      PharmacyInventory.find(filter).populate('medication', 'name code category').sort({ expiryDate: 1 }).limit(parseInt(limit)).skip(skip),
+      PharmacyInventory.find(filter)
+        .populate('medication', 'name code category')
+        .sort({ expiryDate: 1 })
+        .limit(parseInt(limit))
+        .skip(skip),
       PharmacyInventory.countDocuments(filter),
     ]);
     res.json({ success: true, data: batches, total, page: parseInt(page), limit: parseInt(limit) });
@@ -307,7 +366,10 @@ router.post('/inventory', async (req, res) => {
 
 router.put('/inventory/:id', async (req, res) => {
   try {
-    const batch = await PharmacyInventory.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    const batch = await PharmacyInventory.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
     if (!batch) return res.status(404).json({ success: false, message: 'الدفعة غير موجودة' });
     res.json({ success: true, data: batch });
   } catch (error) {
@@ -323,10 +385,24 @@ router.get('/inventory/expiry-alerts', async (req, res) => {
     const threeMonths = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000);
 
     const [expired, expiringOneMonth, expiringThreeMonths, lowStock] = await Promise.all([
-      PharmacyInventory.find({ expiryDate: { $lte: now }, status: { $ne: 'depleted' }, isDeleted: { $ne: true } }).populate('medication', 'name code'),
-      PharmacyInventory.find({ expiryDate: { $gt: now, $lte: oneMonth }, isDeleted: { $ne: true } }).populate('medication', 'name code'),
-      PharmacyInventory.find({ expiryDate: { $gt: oneMonth, $lte: threeMonths }, isDeleted: { $ne: true } }).populate('medication', 'name code'),
-      PharmacyInventory.find({ quantity: { $lte: 10 }, status: { $ne: 'depleted' }, isDeleted: { $ne: true } }).populate('medication', 'name code reorderLevel'),
+      PharmacyInventory.find({
+        expiryDate: { $lte: now },
+        status: { $ne: 'depleted' },
+        isDeleted: { $ne: true },
+      }).populate('medication', 'name code'),
+      PharmacyInventory.find({
+        expiryDate: { $gt: now, $lte: oneMonth },
+        isDeleted: { $ne: true },
+      }).populate('medication', 'name code'),
+      PharmacyInventory.find({
+        expiryDate: { $gt: oneMonth, $lte: threeMonths },
+        isDeleted: { $ne: true },
+      }).populate('medication', 'name code'),
+      PharmacyInventory.find({
+        quantity: { $lte: 10 },
+        status: { $ne: 'depleted' },
+        isDeleted: { $ne: true },
+      }).populate('medication', 'name code reorderLevel'),
     ]);
 
     res.json({
@@ -340,7 +416,9 @@ router.get('/inventory/expiry-alerts', async (req, res) => {
     });
   } catch (error) {
     logger.error('[Pharmacy] Expiry alerts error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب تنبيهات الانتهاء', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في جلب تنبيهات الانتهاء', error: error.message });
   }
 });
 
@@ -355,7 +433,12 @@ router.get('/interactions', async (req, res) => {
     if (severity) filter.severity = severity;
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const [interactions, total] = await Promise.all([
-      DrugInteraction.find(filter).populate('drugA', 'name code').populate('drugB', 'name code').sort({ severity: 1 }).limit(parseInt(limit)).skip(skip),
+      DrugInteraction.find(filter)
+        .populate('drugA', 'name code')
+        .populate('drugB', 'name code')
+        .sort({ severity: 1 })
+        .limit(parseInt(limit))
+        .skip(skip),
       DrugInteraction.countDocuments(filter),
     ]);
     res.json({ success: true, data: interactions, total });
@@ -388,9 +471,13 @@ router.post('/interactions/check', async (req, res) => {
         { drugB: { $in: medicationIds }, drugA: { $in: medicationIds } },
       ],
       isActive: true,
-    }).populate('drugA', 'name code').populate('drugB', 'name code');
+    })
+      .populate('drugA', 'name code')
+      .populate('drugB', 'name code');
 
-    const hasMajor = interactions.some(i => i.severity === 'major' || i.severity === 'contraindicated');
+    const hasMajor = interactions.some(
+      i => i.severity === 'major' || i.severity === 'contraindicated'
+    );
     res.json({
       success: true,
       data: {
@@ -430,10 +517,24 @@ router.get('/dashboard', async (req, res) => {
       Medication.countDocuments({ isActive: true, isDeleted: { $ne: true } }),
       Prescription.countDocuments({ status: 'pending', isDeleted: { $ne: true } }),
       Dispensing.countDocuments({ createdAt: { $gte: today }, isDeleted: { $ne: true } }),
-      PharmacyInventory.countDocuments({ expiryDate: { $lte: now }, status: { $ne: 'depleted' }, isDeleted: { $ne: true } }),
-      PharmacyInventory.countDocuments({ expiryDate: { $gt: now, $lte: oneMonth }, isDeleted: { $ne: true } }),
-      PharmacyInventory.countDocuments({ quantity: { $lte: 10 }, status: { $ne: 'depleted' }, isDeleted: { $ne: true } }),
-      Prescription.countDocuments({ createdAt: { $gte: new Date(now.getFullYear(), now.getMonth(), 1) }, isDeleted: { $ne: true } }),
+      PharmacyInventory.countDocuments({
+        expiryDate: { $lte: now },
+        status: { $ne: 'depleted' },
+        isDeleted: { $ne: true },
+      }),
+      PharmacyInventory.countDocuments({
+        expiryDate: { $gt: now, $lte: oneMonth },
+        isDeleted: { $ne: true },
+      }),
+      PharmacyInventory.countDocuments({
+        quantity: { $lte: 10 },
+        status: { $ne: 'depleted' },
+        isDeleted: { $ne: true },
+      }),
+      Prescription.countDocuments({
+        createdAt: { $gte: new Date(now.getFullYear(), now.getMonth(), 1) },
+        isDeleted: { $ne: true },
+      }),
     ]);
 
     res.json({

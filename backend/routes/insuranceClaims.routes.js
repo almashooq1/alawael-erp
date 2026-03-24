@@ -75,7 +75,10 @@ router.post('/contracts', async (req, res) => {
 
 router.put('/contracts/:id', async (req, res) => {
   try {
-    const contract = await InsuranceContract.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    const contract = await InsuranceContract.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
     if (!contract) return res.status(404).json({ success: false, message: 'العقد غير موجود' });
     res.json({ success: true, data: contract });
   } catch (error) {
@@ -107,7 +110,9 @@ router.get('/contracts-expiring', async (req, res) => {
     res.json({ success: true, data: expiring, count: expiring.length });
   } catch (error) {
     logger.error('[InsuranceClaims] Expiring contracts error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب العقود المنتهية', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في جلب العقود المنتهية', error: error.message });
   }
 });
 
@@ -125,24 +130,36 @@ router.get('/pre-auth', async (req, res) => {
     if (urgency) filter.urgency = urgency;
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const [preAuths, total] = await Promise.all([
-      PreAuthorization.find(filter).populate('beneficiary', 'name').populate('contract', 'contractNumber name').sort({ createdAt: -1 }).limit(parseInt(limit)).skip(skip),
+      PreAuthorization.find(filter)
+        .populate('beneficiary', 'name')
+        .populate('contract', 'contractNumber name')
+        .sort({ createdAt: -1 })
+        .limit(parseInt(limit))
+        .skip(skip),
       PreAuthorization.countDocuments(filter),
     ]);
     res.json({ success: true, data: preAuths, total });
   } catch (error) {
     logger.error('[InsuranceClaims] List pre-auth error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب الموافقات المسبقة', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في جلب الموافقات المسبقة', error: error.message });
   }
 });
 
 router.get('/pre-auth/:id', async (req, res) => {
   try {
-    const preAuth = await PreAuthorization.findById(req.params.id).populate('beneficiary', 'name').populate('contract', 'contractNumber name');
-    if (!preAuth) return res.status(404).json({ success: false, message: 'الموافقة المسبقة غير موجودة' });
+    const preAuth = await PreAuthorization.findById(req.params.id)
+      .populate('beneficiary', 'name')
+      .populate('contract', 'contractNumber name');
+    if (!preAuth)
+      return res.status(404).json({ success: false, message: 'الموافقة المسبقة غير موجودة' });
     res.json({ success: true, data: preAuth });
   } catch (error) {
     logger.error('[InsuranceClaims] Get pre-auth error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب الموافقة المسبقة', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في جلب الموافقة المسبقة', error: error.message });
   }
 });
 
@@ -154,7 +171,9 @@ router.post('/pre-auth', async (req, res) => {
     res.status(201).json({ success: true, data: preAuth });
   } catch (error) {
     logger.error('[InsuranceClaims] Create pre-auth error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء الموافقة المسبقة', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في إنشاء الموافقة المسبقة', error: error.message });
   }
 });
 
@@ -171,7 +190,8 @@ router.patch('/pre-auth/:id/approve', async (req, res) => {
       },
       { new: true }
     );
-    if (!preAuth) return res.status(404).json({ success: false, message: 'الموافقة المسبقة غير موجودة' });
+    if (!preAuth)
+      return res.status(404).json({ success: false, message: 'الموافقة المسبقة غير موجودة' });
     logger.info(`[InsuranceClaims] Pre-auth approved: ${preAuth.preAuthNumber}`);
     res.json({ success: true, data: preAuth, message: 'تمت الموافقة بنجاح' });
   } catch (error) {
@@ -187,7 +207,8 @@ router.patch('/pre-auth/:id/deny', async (req, res) => {
       { status: 'denied', denialReason: req.body.reason },
       { new: true }
     );
-    if (!preAuth) return res.status(404).json({ success: false, message: 'الموافقة المسبقة غير موجودة' });
+    if (!preAuth)
+      return res.status(404).json({ success: false, message: 'الموافقة المسبقة غير موجودة' });
     logger.info(`[InsuranceClaims] Pre-auth denied: ${preAuth.preAuthNumber}`);
     res.json({ success: true, data: preAuth });
   } catch (error) {
@@ -202,7 +223,17 @@ router.patch('/pre-auth/:id/deny', async (req, res) => {
 
 router.get('/claims', async (req, res) => {
   try {
-    const { beneficiary, contract, status, claimType, dateFrom, dateTo, search, page = 1, limit = 20 } = req.query;
+    const {
+      beneficiary,
+      contract,
+      status,
+      claimType,
+      dateFrom,
+      dateTo,
+      search,
+      page = 1,
+      limit = 20,
+    } = req.query;
     const filter = { isDeleted: { $ne: true } };
     if (beneficiary) filter.beneficiary = beneficiary;
     if (contract) filter.contract = contract;
@@ -218,7 +249,12 @@ router.get('/claims', async (req, res) => {
     }
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const [claims, total] = await Promise.all([
-      InsuranceClaim.find(filter).populate('beneficiary', 'name').populate('contract', 'contractNumber name').sort({ createdAt: -1 }).limit(parseInt(limit)).skip(skip),
+      InsuranceClaim.find(filter)
+        .populate('beneficiary', 'name')
+        .populate('contract', 'contractNumber name')
+        .sort({ createdAt: -1 })
+        .limit(parseInt(limit))
+        .skip(skip),
       InsuranceClaim.countDocuments(filter),
     ]);
     res.json({ success: true, data: claims, total });
@@ -236,7 +272,9 @@ router.get('/claims/:id', async (req, res) => {
       .populate('preAuthorization', 'preAuthNumber status');
     if (!claim) return res.status(404).json({ success: false, message: 'المطالبة غير موجودة' });
 
-    const items = await ClaimItem.find({ claim: claim._id, isDeleted: { $ne: true } }).sort({ sequence: 1 });
+    const items = await ClaimItem.find({ claim: claim._id, isDeleted: { $ne: true } }).sort({
+      sequence: 1,
+    });
     res.json({ success: true, data: { ...claim.toObject(), items } });
   } catch (error) {
     logger.error('[InsuranceClaims] Get claim error:', { message: error.message });
@@ -256,7 +294,9 @@ router.post('/claims', async (req, res) => {
         ...item,
         claim: claim._id,
         sequence: idx + 1,
-        totalNet: item.totalNet || (item.unitPrice * item.quantity * (item.factor || 1)) - (item.discount || 0),
+        totalNet:
+          item.totalNet ||
+          item.unitPrice * item.quantity * (item.factor || 1) - (item.discount || 0),
       }));
       await ClaimItem.insertMany(claimItems);
     }
@@ -265,18 +305,25 @@ router.post('/claims', async (req, res) => {
     res.status(201).json({ success: true, data: claim });
   } catch (error) {
     logger.error('[InsuranceClaims] Create claim error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء المطالبة', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في إنشاء المطالبة', error: error.message });
   }
 });
 
 router.put('/claims/:id', async (req, res) => {
   try {
-    const claim = await InsuranceClaim.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    const claim = await InsuranceClaim.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
     if (!claim) return res.status(404).json({ success: false, message: 'المطالبة غير موجودة' });
     res.json({ success: true, data: claim });
   } catch (error) {
     logger.error('[InsuranceClaims] Update claim error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في تحديث المطالبة', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في تحديث المطالبة', error: error.message });
   }
 });
 
@@ -290,7 +337,10 @@ router.patch('/claims/:id/submit', async (req, res) => {
     }
 
     // Validate claim has items
-    const itemCount = await ClaimItem.countDocuments({ claim: claim._id, isDeleted: { $ne: true } });
+    const itemCount = await ClaimItem.countDocuments({
+      claim: claim._id,
+      isDeleted: { $ne: true },
+    });
     if (itemCount === 0) {
       return res.status(400).json({ success: false, message: 'المطالبة لا تحتوي على بنود' });
     }
@@ -304,7 +354,9 @@ router.patch('/claims/:id/submit', async (req, res) => {
     res.json({ success: true, data: claim, message: 'تم إرسال المطالبة بنجاح' });
   } catch (error) {
     logger.error('[InsuranceClaims] Submit claim error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في إرسال المطالبة', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في إرسال المطالبة', error: error.message });
   }
 });
 
@@ -338,7 +390,9 @@ router.patch('/claims/:id/adjudicate', async (req, res) => {
     res.json({ success: true, data: claim });
   } catch (error) {
     logger.error('[InsuranceClaims] Adjudicate claim error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في معالجة المطالبة', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في معالجة المطالبة', error: error.message });
   }
 });
 
@@ -348,11 +402,16 @@ router.patch('/claims/:id/adjudicate', async (req, res) => {
 
 router.get('/claim-items/:claimId', async (req, res) => {
   try {
-    const items = await ClaimItem.find({ claim: req.params.claimId, isDeleted: { $ne: true } }).sort({ sequence: 1 });
+    const items = await ClaimItem.find({
+      claim: req.params.claimId,
+      isDeleted: { $ne: true },
+    }).sort({ sequence: 1 });
     res.json({ success: true, data: items });
   } catch (error) {
     logger.error('[InsuranceClaims] List claim items error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب بنود المطالبة', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في جلب بنود المطالبة', error: error.message });
   }
 });
 
@@ -362,7 +421,10 @@ router.post('/claim-items', async (req, res) => {
     const item = new ClaimItem({
       ...req.body,
       sequence: count + 1,
-      totalNet: req.body.totalNet || (req.body.unitPrice * (req.body.quantity || 1) * (req.body.factor || 1)) - (req.body.discount || 0),
+      totalNet:
+        req.body.totalNet ||
+        req.body.unitPrice * (req.body.quantity || 1) * (req.body.factor || 1) -
+          (req.body.discount || 0),
     });
     await item.save();
 
@@ -385,7 +447,11 @@ router.post('/claim-items', async (req, res) => {
 
 router.delete('/claim-items/:id', async (req, res) => {
   try {
-    const item = await ClaimItem.findByIdAndUpdate(req.params.id, { isDeleted: true }, { new: true });
+    const item = await ClaimItem.findByIdAndUpdate(
+      req.params.id,
+      { isDeleted: true },
+      { new: true }
+    );
     if (!item) return res.status(404).json({ success: false, message: 'البند غير موجود' });
     res.json({ success: true, message: 'تم حذف البند بنجاح' });
   } catch (error) {
@@ -413,16 +479,27 @@ router.get('/dashboard', async (req, res) => {
       InsuranceClaim.countDocuments({ isDeleted: { $ne: true } }),
       InsuranceClaim.countDocuments({ status: 'draft', isDeleted: { $ne: true } }),
       InsuranceClaim.countDocuments({ status: 'submitted', isDeleted: { $ne: true } }),
-      InsuranceClaim.countDocuments({ status: { $in: ['approved', 'partially_approved'] }, isDeleted: { $ne: true } }),
+      InsuranceClaim.countDocuments({
+        status: { $in: ['approved', 'partially_approved'] },
+        isDeleted: { $ne: true },
+      }),
       InsuranceClaim.countDocuments({ status: 'denied', isDeleted: { $ne: true } }),
-      InsuranceClaim.countDocuments({ status: { $in: ['paid', 'partially_paid'] }, isDeleted: { $ne: true } }),
+      InsuranceClaim.countDocuments({
+        status: { $in: ['paid', 'partially_paid'] },
+        isDeleted: { $ne: true },
+      }),
       PreAuthorization.countDocuments({ status: 'pending', isDeleted: { $ne: true } }),
       InsuranceContract.countDocuments({ status: 'active', isDeleted: { $ne: true } }),
     ]);
 
     // Aggregate financials
     const financials = await InsuranceClaim.aggregate([
-      { $match: { isDeleted: { $ne: true }, status: { $in: ['approved', 'partially_approved', 'paid', 'partially_paid'] } } },
+      {
+        $match: {
+          isDeleted: { $ne: true },
+          status: { $in: ['approved', 'partially_approved', 'paid', 'partially_paid'] },
+        },
+      },
       {
         $group: {
           _id: null,
@@ -436,7 +513,14 @@ router.get('/dashboard', async (req, res) => {
     res.json({
       success: true,
       data: {
-        claims: { total: totalClaims, draft: draftClaims, submitted: submittedClaims, approved: approvedClaims, denied: deniedClaims, paid: paidClaims },
+        claims: {
+          total: totalClaims,
+          draft: draftClaims,
+          submitted: submittedClaims,
+          approved: approvedClaims,
+          denied: deniedClaims,
+          paid: paidClaims,
+        },
         preAuth: { pending: pendingPreAuths },
         contracts: { active: activeContracts },
         financials: financials[0] || { totalSubmitted: 0, totalApproved: 0, totalPaid: 0 },

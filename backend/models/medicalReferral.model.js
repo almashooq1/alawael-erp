@@ -19,15 +19,23 @@ const MedicalReferralSchema = new Schema(
       type: String,
       unique: true,
       default: function () {
-        return 'REF-' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substring(2, 6).toUpperCase();
+        return (
+          'REF-' +
+          Date.now().toString(36).toUpperCase() +
+          Math.random().toString(36).substring(2, 6).toUpperCase()
+        );
       },
     },
     beneficiary: { type: Schema.Types.ObjectId, ref: 'Beneficiary', required: true },
     referralType: {
       type: String,
       enum: [
-        'internal', 'external_outgoing', 'external_incoming',
-        'emergency', 'second_opinion', 'consultation',
+        'internal',
+        'external_outgoing',
+        'external_incoming',
+        'emergency',
+        'second_opinion',
+        'consultation',
       ],
       required: true,
     },
@@ -50,15 +58,39 @@ const MedicalReferralSchema = new Schema(
       specialty: {
         type: String,
         enum: [
-          'neurology', 'orthopedics', 'cardiology', 'pulmonology',
-          'gastroenterology', 'endocrinology', 'dermatology', 'ophthalmology',
-          'ent', 'urology', 'nephrology', 'hematology', 'oncology',
-          'psychiatry', 'psychology', 'pediatrics', 'geriatrics',
-          'physical_therapy', 'occupational_therapy', 'speech_therapy',
-          'audiology', 'dentistry', 'radiology', 'laboratory',
-          'nutrition', 'social_work', 'pain_management', 'general_surgery',
-          'plastic_surgery', 'rheumatology', 'allergy_immunology',
-          'infectious_disease', 'other',
+          'neurology',
+          'orthopedics',
+          'cardiology',
+          'pulmonology',
+          'gastroenterology',
+          'endocrinology',
+          'dermatology',
+          'ophthalmology',
+          'ent',
+          'urology',
+          'nephrology',
+          'hematology',
+          'oncology',
+          'psychiatry',
+          'psychology',
+          'pediatrics',
+          'geriatrics',
+          'physical_therapy',
+          'occupational_therapy',
+          'speech_therapy',
+          'audiology',
+          'dentistry',
+          'radiology',
+          'laboratory',
+          'nutrition',
+          'social_work',
+          'pain_management',
+          'general_surgery',
+          'plastic_surgery',
+          'rheumatology',
+          'allergy_immunology',
+          'infectious_disease',
+          'other',
         ],
       },
       facility: String,
@@ -94,7 +126,10 @@ const MedicalReferralSchema = new Schema(
     },
     // Service requested
     requestedService: {
-      type: { type: String, enum: ['evaluation', 'treatment', 'procedure', 'investigation', 'opinion'] },
+      type: {
+        type: String,
+        enum: ['evaluation', 'treatment', 'procedure', 'investigation', 'opinion'],
+      },
       description: { ar: String, en: String },
       estimatedSessions: Number,
     },
@@ -108,9 +143,18 @@ const MedicalReferralSchema = new Schema(
     status: {
       type: String,
       enum: [
-        'draft', 'pending_approval', 'approved', 'rejected',
-        'sent', 'accepted', 'declined', 'scheduled',
-        'in_progress', 'completed', 'cancelled', 'expired',
+        'draft',
+        'pending_approval',
+        'approved',
+        'rejected',
+        'sent',
+        'accepted',
+        'declined',
+        'scheduled',
+        'in_progress',
+        'completed',
+        'cancelled',
+        'expired',
         'returned_to_referrer',
       ],
       default: 'draft',
@@ -149,7 +193,18 @@ const MedicalReferralSchema = new Schema(
     attachments: [
       {
         name: String,
-        type: { type: String, enum: ['clinical_report', 'lab_result', 'imaging', 'prescription', 'referral_letter', 'response_letter', 'other'] },
+        type: {
+          type: String,
+          enum: [
+            'clinical_report',
+            'lab_result',
+            'imaging',
+            'prescription',
+            'referral_letter',
+            'response_letter',
+            'other',
+          ],
+        },
         path: String,
         uploadedAt: { type: Date, default: Date.now },
       },
@@ -170,7 +225,6 @@ const MedicalReferralSchema = new Schema(
   { timestamps: true }
 );
 
-MedicalReferralSchema.index({ referralNumber: 1 });
 MedicalReferralSchema.index({ beneficiary: 1, status: 1 });
 MedicalReferralSchema.index({ 'referringProvider.practitioner': 1 });
 MedicalReferralSchema.index({ 'referredTo.practitioner': 1 });
@@ -188,7 +242,14 @@ const ReferralFollowUpSchema = new Schema(
     date: { type: Date, required: true },
     type: {
       type: String,
-      enum: ['check_status', 'response_received', 'appointment_set', 'treatment_update', 'completion', 'escalation'],
+      enum: [
+        'check_status',
+        'response_received',
+        'appointment_set',
+        'treatment_update',
+        'completion',
+        'escalation',
+      ],
       required: true,
     },
     contactedVia: {

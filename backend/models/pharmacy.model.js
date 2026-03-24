@@ -74,7 +74,16 @@ const medicationSchema = new Schema(
     unit: { type: String, default: 'mg' },
     route: {
       type: String,
-      enum: ['oral', 'topical', 'injection', 'inhalation', 'rectal', 'sublingual', 'transdermal', 'other'],
+      enum: [
+        'oral',
+        'topical',
+        'injection',
+        'inhalation',
+        'rectal',
+        'sublingual',
+        'transdermal',
+        'other',
+      ],
     },
     controlledSubstance: { type: Boolean, default: false },
     controlSchedule: { type: String, enum: ['I', 'II', 'III', 'IV', 'V', 'none'], default: 'none' },
@@ -98,7 +107,6 @@ const medicationSchema = new Schema(
 
 medicationSchema.index({ 'name.ar': 'text', 'name.en': 'text', genericName: 'text' });
 medicationSchema.index({ category: 1, isActive: 1 });
-medicationSchema.index({ code: 1 });
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Prescription — الوصفة الطبية
@@ -111,9 +119,22 @@ const prescriptionItemSchema = new Schema({
   frequency: {
     type: String,
     required: true,
-    enum: ['once_daily', 'twice_daily', 'three_times', 'four_times', 'every_8h', 'every_12h', 'as_needed', 'weekly', 'other'],
+    enum: [
+      'once_daily',
+      'twice_daily',
+      'three_times',
+      'four_times',
+      'every_8h',
+      'every_12h',
+      'as_needed',
+      'weekly',
+      'other',
+    ],
   },
-  duration: { value: Number, unit: { type: String, enum: ['days', 'weeks', 'months'], default: 'days' } },
+  duration: {
+    value: Number,
+    unit: { type: String, enum: ['days', 'weeks', 'months'], default: 'days' },
+  },
   quantity: { type: Number, required: true },
   instructions: String,
   route: String,
@@ -136,7 +157,15 @@ const prescriptionSchema = new Schema(
     items: [prescriptionItemSchema],
     status: {
       type: String,
-      enum: ['pending', 'verified', 'dispensed', 'partially_dispensed', 'cancelled', 'expired', 'on_hold'],
+      enum: [
+        'pending',
+        'verified',
+        'dispensed',
+        'partially_dispensed',
+        'cancelled',
+        'expired',
+        'on_hold',
+      ],
       default: 'pending',
     },
     priority: {
@@ -166,7 +195,6 @@ const prescriptionSchema = new Schema(
 
 prescriptionSchema.index({ beneficiary: 1, status: 1 });
 prescriptionSchema.index({ prescriber: 1, createdAt: -1 });
-prescriptionSchema.index({ prescriptionNumber: 1 });
 prescriptionSchema.index({ status: 1, createdAt: -1 });
 
 prescriptionSchema.pre('save', function (next) {

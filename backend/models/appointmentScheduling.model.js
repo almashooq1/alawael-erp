@@ -34,7 +34,15 @@ const scheduleTemplateSchema = new Schema(
     providerName: String,
     providerType: {
       type: String,
-      enum: ['doctor', 'therapist', 'specialist', 'nurse', 'psychologist', 'social_worker', 'other'],
+      enum: [
+        'doctor',
+        'therapist',
+        'specialist',
+        'nurse',
+        'psychologist',
+        'social_worker',
+        'other',
+      ],
     },
     department: { type: Schema.Types.ObjectId, ref: 'Department' },
     room: String,
@@ -132,7 +140,14 @@ const appointmentReminderSchema = new Schema(
     },
     type: {
       type: String,
-      enum: ['reminder_24h', 'reminder_2h', 'confirmation', 'cancellation', 'reschedule', 'follow_up'],
+      enum: [
+        'reminder_24h',
+        'reminder_2h',
+        'confirmation',
+        'cancellation',
+        'reschedule',
+        'follow_up',
+      ],
       default: 'reminder_24h',
     },
     scheduledAt: { type: Date, required: true },

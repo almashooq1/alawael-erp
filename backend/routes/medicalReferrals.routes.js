@@ -18,7 +18,18 @@ const logger = require('../utils/logger');
 
 router.get('/', async (req, res) => {
   try {
-    const { beneficiary, status, referralType, priority, specialty, dateFrom, dateTo, search, page = 1, limit = 20 } = req.query;
+    const {
+      beneficiary,
+      status,
+      referralType,
+      priority,
+      specialty,
+      dateFrom,
+      dateTo,
+      search,
+      page = 1,
+      limit = 20,
+    } = req.query;
     const filter = { isDeleted: { $ne: true } };
     if (beneficiary) filter.beneficiary = beneficiary;
     if (status) filter.status = status;
@@ -67,7 +78,10 @@ router.get('/:id', async (req, res) => {
       .populate('communicationLog.by', 'name');
     if (!referral) return res.status(404).json({ success: false, message: 'الإحالة غير موجودة' });
 
-    const followUps = await ReferralFollowUp.find({ referral: referral._id, isDeleted: { $ne: true } })
+    const followUps = await ReferralFollowUp.find({
+      referral: referral._id,
+      isDeleted: { $ne: true },
+    })
       .populate('performedBy', 'name')
       .sort({ date: -1 });
 
@@ -96,7 +110,10 @@ router.post('/', async (req, res) => {
 
 router.put('/:id', async (req, res) => {
   try {
-    const referral = await MedicalReferral.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    const referral = await MedicalReferral.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
     if (!referral) return res.status(404).json({ success: false, message: 'الإحالة غير موجودة' });
     res.json({ success: true, data: referral });
   } catch (error) {
@@ -121,13 +138,19 @@ router.patch('/:id/approve', async (req, res) => {
     const referral = await MedicalReferral.findById(req.params.id);
     if (!referral) return res.status(404).json({ success: false, message: 'الإحالة غير موجودة' });
     referral.status = 'approved';
-    referral.statusHistory.push({ status: 'approved', changedBy: req.user?.id, reason: req.body.reason || 'تمت الموافقة' });
+    referral.statusHistory.push({
+      status: 'approved',
+      changedBy: req.user?.id,
+      reason: req.body.reason || 'تمت الموافقة',
+    });
     await referral.save();
     logger.info(`[Referrals] Referral approved: ${referral.referralNumber}`);
     res.json({ success: true, data: referral, message: 'تمت الموافقة على الإحالة' });
   } catch (error) {
     logger.error('[Referrals] Approve referral error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في الموافقة على الإحالة', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في الموافقة على الإحالة', error: error.message });
   }
 });
 
@@ -136,7 +159,11 @@ router.patch('/:id/reject', async (req, res) => {
     const referral = await MedicalReferral.findById(req.params.id);
     if (!referral) return res.status(404).json({ success: false, message: 'الإحالة غير موجودة' });
     referral.status = 'rejected';
-    referral.statusHistory.push({ status: 'rejected', changedBy: req.user?.id, reason: req.body.reason || 'تم الرفض' });
+    referral.statusHistory.push({
+      status: 'rejected',
+      changedBy: req.user?.id,
+      reason: req.body.reason || 'تم الرفض',
+    });
     await referral.save();
     logger.info(`[Referrals] Referral rejected: ${referral.referralNumber}`);
     res.json({ success: true, data: referral });
@@ -151,7 +178,11 @@ router.patch('/:id/send', async (req, res) => {
     const referral = await MedicalReferral.findById(req.params.id);
     if (!referral) return res.status(404).json({ success: false, message: 'الإحالة غير موجودة' });
     referral.status = 'sent';
-    referral.statusHistory.push({ status: 'sent', changedBy: req.user?.id, reason: 'تم إرسال الإحالة' });
+    referral.statusHistory.push({
+      status: 'sent',
+      changedBy: req.user?.id,
+      reason: 'تم إرسال الإحالة',
+    });
     await referral.save();
     res.json({ success: true, data: referral, message: 'تم إرسال الإحالة' });
   } catch (error) {
@@ -166,7 +197,11 @@ router.patch('/:id/complete', async (req, res) => {
     if (!referral) return res.status(404).json({ success: false, message: 'الإحالة غير موجودة' });
     referral.status = 'completed';
     referral.consultationResponse = { ...req.body, receivedDate: new Date() };
-    referral.statusHistory.push({ status: 'completed', changedBy: req.user?.id, reason: 'اكتملت الإحالة' });
+    referral.statusHistory.push({
+      status: 'completed',
+      changedBy: req.user?.id,
+      reason: 'اكتملت الإحالة',
+    });
     await referral.save();
     logger.info(`[Referrals] Referral completed: ${referral.referralNumber}`);
     res.json({ success: true, data: referral, message: 'تم إكمال الإحالة' });
@@ -191,10 +226,16 @@ router.get('/follow-ups/pending', async (req, res) => {
       .sort({ createdAt: 1 })
       .limit(50);
 
-    res.json({ success: true, data: referralsNeedingFollowUp, count: referralsNeedingFollowUp.length });
+    res.json({
+      success: true,
+      data: referralsNeedingFollowUp,
+      count: referralsNeedingFollowUp.length,
+    });
   } catch (error) {
     logger.error('[Referrals] Pending follow-ups error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب المتابعات المعلقة', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في جلب المتابعات المعلقة', error: error.message });
   }
 });
 
@@ -223,7 +264,9 @@ router.post('/follow-ups', async (req, res) => {
     res.status(201).json({ success: true, data: followUp });
   } catch (error) {
     logger.error('[Referrals] Create follow-up error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء المتابعة', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في إنشاء المتابعة', error: error.message });
   }
 });
 
@@ -271,7 +314,14 @@ router.get('/dashboard/stats', async (req, res) => {
     res.json({
       success: true,
       data: {
-        overview: { total: totalReferrals, pendingApproval, sent: sentReferrals, inProgress: inProgressReferrals, completed: completedReferrals, expired: expiredReferrals },
+        overview: {
+          total: totalReferrals,
+          pendingApproval,
+          sent: sentReferrals,
+          inProgress: inProgressReferrals,
+          completed: completedReferrals,
+          expired: expiredReferrals,
+        },
         thisMonth: thisMonthCreated,
         byType,
         topSpecialties: bySpecialty,

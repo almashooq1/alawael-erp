@@ -33,7 +33,12 @@ router.get('/templates', async (req, res) => {
     if (active !== undefined) filter.isActive = active === 'true';
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const [templates, total] = await Promise.all([
-      ScheduleTemplate.find(filter).populate('provider', 'name').populate('department', 'name').sort({ createdAt: -1 }).limit(parseInt(limit)).skip(skip),
+      ScheduleTemplate.find(filter)
+        .populate('provider', 'name')
+        .populate('department', 'name')
+        .sort({ createdAt: -1 })
+        .limit(parseInt(limit))
+        .skip(skip),
       ScheduleTemplate.countDocuments(filter),
     ]);
     res.json({ success: true, data: templates, total });
@@ -45,7 +50,9 @@ router.get('/templates', async (req, res) => {
 
 router.get('/templates/:id', async (req, res) => {
   try {
-    const template = await ScheduleTemplate.findById(req.params.id).populate('provider', 'name').populate('department', 'name');
+    const template = await ScheduleTemplate.findById(req.params.id)
+      .populate('provider', 'name')
+      .populate('department', 'name');
     if (!template) return res.status(404).json({ success: false, message: 'القالب غير موجود' });
     res.json({ success: true, data: template });
   } catch (error) {
@@ -68,7 +75,10 @@ router.post('/templates', async (req, res) => {
 
 router.put('/templates/:id', async (req, res) => {
   try {
-    const template = await ScheduleTemplate.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    const template = await ScheduleTemplate.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
     if (!template) return res.status(404).json({ success: false, message: 'القالب غير موجود' });
     res.json({ success: true, data: template });
   } catch (error) {
@@ -101,13 +111,17 @@ router.post('/templates/:id/generate-slots', async (req, res) => {
     for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
       const dayOfWeek = d.getDay();
       const daySlots = template.weeklySlots.filter(s => s.dayOfWeek === dayOfWeek && s.isActive);
-      const isException = template.exceptions.some(e => new Date(e.date).toDateString() === d.toDateString());
+      const isException = template.exceptions.some(
+        e => new Date(e.date).toDateString() === d.toDateString()
+      );
 
       if (isException) continue;
 
       for (const ws of daySlots) {
-        const slotStart = parseInt(ws.startTime.split(':')[0]) * 60 + parseInt(ws.startTime.split(':')[1]);
-        const slotEnd = parseInt(ws.endTime.split(':')[0]) * 60 + parseInt(ws.endTime.split(':')[1]);
+        const slotStart =
+          parseInt(ws.startTime.split(':')[0]) * 60 + parseInt(ws.startTime.split(':')[1]);
+        const slotEnd =
+          parseInt(ws.endTime.split(':')[0]) * 60 + parseInt(ws.endTime.split(':')[1]);
 
         for (let t = slotStart; t < slotEnd; t += ws.slotDuration) {
           const h1 = String(Math.floor(t / 60)).padStart(2, '0');
@@ -133,7 +147,13 @@ router.post('/templates/:id/generate-slots', async (req, res) => {
 
     const created = await TimeSlot.insertMany(slots);
     logger.info(`[Scheduling] Generated ${created.length} slots from template ${template._id}`);
-    res.status(201).json({ success: true, data: { generated: created.length }, message: `تم إنشاء ${created.length} فترة` });
+    res
+      .status(201)
+      .json({
+        success: true,
+        data: { generated: created.length },
+        message: `تم إنشاء ${created.length} فترة`,
+      });
   } catch (error) {
     logger.error('[Scheduling] Generate slots error:', { message: error.message });
     res.status(500).json({ success: false, message: 'خطأ في إنشاء الفترات', error: error.message });
@@ -146,14 +166,26 @@ router.post('/templates/:id/generate-slots', async (req, res) => {
 
 router.get('/slots', async (req, res) => {
   try {
-    const { provider, department, date, dateFrom, dateTo, status, page = 1, limit = 50 } = req.query;
+    const {
+      provider,
+      department,
+      date,
+      dateFrom,
+      dateTo,
+      status,
+      page = 1,
+      limit = 50,
+    } = req.query;
     const filter = { isDeleted: { $ne: true } };
     if (provider) filter.provider = provider;
     if (department) filter.department = department;
     if (status) filter.status = status;
     if (date) {
       const d = new Date(date);
-      filter.date = { $gte: new Date(d.getFullYear(), d.getMonth(), d.getDate()), $lt: new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1) };
+      filter.date = {
+        $gte: new Date(d.getFullYear(), d.getMonth(), d.getDate()),
+        $lt: new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1),
+      };
     } else if (dateFrom || dateTo) {
       filter.date = {};
       if (dateFrom) filter.date.$gte = new Date(dateFrom);
@@ -161,7 +193,12 @@ router.get('/slots', async (req, res) => {
     }
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const [slots, total] = await Promise.all([
-      TimeSlot.find(filter).populate('provider', 'name').populate('beneficiary', 'name').sort({ date: 1, startTime: 1 }).limit(parseInt(limit)).skip(skip),
+      TimeSlot.find(filter)
+        .populate('provider', 'name')
+        .populate('beneficiary', 'name')
+        .sort({ date: 1, startTime: 1 })
+        .limit(parseInt(limit))
+        .skip(skip),
       TimeSlot.countDocuments(filter),
     ]);
     res.json({ success: true, data: slots, total });
@@ -198,7 +235,13 @@ router.patch('/slots/:id/cancel', async (req, res) => {
   try {
     const slot = await TimeSlot.findByIdAndUpdate(
       req.params.id,
-      { status: 'available', beneficiary: null, appointment: null, currentPatients: 0, isOverbooked: false },
+      {
+        status: 'available',
+        beneficiary: null,
+        appointment: null,
+        currentPatients: 0,
+        isOverbooked: false,
+      },
       { new: true }
     );
     if (!slot) return res.status(404).json({ success: false, message: 'الفترة غير موجودة' });
@@ -211,7 +254,11 @@ router.patch('/slots/:id/cancel', async (req, res) => {
 
 router.patch('/slots/:id/block', async (req, res) => {
   try {
-    const slot = await TimeSlot.findByIdAndUpdate(req.params.id, { status: 'blocked', notes: req.body.reason }, { new: true });
+    const slot = await TimeSlot.findByIdAndUpdate(
+      req.params.id,
+      { status: 'blocked', notes: req.body.reason },
+      { new: true }
+    );
     if (!slot) return res.status(404).json({ success: false, message: 'الفترة غير موجودة' });
     res.json({ success: true, data: slot });
   } catch (error) {
@@ -266,7 +313,11 @@ router.get('/reminders', async (req, res) => {
     if (channel) filter.channel = channel;
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const [reminders, total] = await Promise.all([
-      AppointmentReminder.find(filter).populate('appointment').sort({ scheduledAt: -1 }).limit(parseInt(limit)).skip(skip),
+      AppointmentReminder.find(filter)
+        .populate('appointment')
+        .sort({ scheduledAt: -1 })
+        .limit(parseInt(limit))
+        .skip(skip),
       AppointmentReminder.countDocuments(filter),
     ]);
     res.json({ success: true, data: reminders, total });
@@ -294,11 +345,16 @@ router.get('/reminders/pending', async (req, res) => {
       status: 'pending',
       scheduledAt: { $lte: now },
       attempts: { $lt: 3 },
-    }).populate('appointment').sort({ scheduledAt: 1 }).limit(50);
+    })
+      .populate('appointment')
+      .sort({ scheduledAt: 1 })
+      .limit(50);
     res.json({ success: true, data: reminders, count: reminders.length });
   } catch (error) {
     logger.error('[Scheduling] Pending reminders error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب التذكيرات المعلقة', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في جلب التذكيرات المعلقة', error: error.message });
   }
 });
 
@@ -316,26 +372,38 @@ router.get('/waitlist', async (req, res) => {
     if (urgency) filter.urgency = urgency;
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const [entries, total] = await Promise.all([
-      WaitlistEntry.find(filter).populate('beneficiary', 'name').populate('requestedProvider', 'name').sort({ urgency: -1, createdAt: 1 }).limit(parseInt(limit)).skip(skip),
+      WaitlistEntry.find(filter)
+        .populate('beneficiary', 'name')
+        .populate('requestedProvider', 'name')
+        .sort({ urgency: -1, createdAt: 1 })
+        .limit(parseInt(limit))
+        .skip(skip),
       WaitlistEntry.countDocuments(filter),
     ]);
     res.json({ success: true, data: entries, total });
   } catch (error) {
     logger.error('[Scheduling] List waitlist error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب قائمة الانتظار', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في جلب قائمة الانتظار', error: error.message });
   }
 });
 
 router.post('/waitlist', async (req, res) => {
   try {
-    const count = await WaitlistEntry.countDocuments({ status: 'waiting', isDeleted: { $ne: true } });
+    const count = await WaitlistEntry.countDocuments({
+      status: 'waiting',
+      isDeleted: { $ne: true },
+    });
     const entry = new WaitlistEntry({ ...req.body, position: count + 1, createdBy: req.user?.id });
     await entry.save();
     logger.info(`[Scheduling] Waitlist entry added, position: ${entry.position}`);
     res.status(201).json({ success: true, data: entry });
   } catch (error) {
     logger.error('[Scheduling] Add waitlist error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في الإضافة لقائمة الانتظار', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في الإضافة لقائمة الانتظار', error: error.message });
   }
 });
 
@@ -361,12 +429,18 @@ router.patch('/waitlist/:id/offer', async (req, res) => {
 
 router.patch('/waitlist/:id/cancel', async (req, res) => {
   try {
-    const entry = await WaitlistEntry.findByIdAndUpdate(req.params.id, { status: 'cancelled' }, { new: true });
+    const entry = await WaitlistEntry.findByIdAndUpdate(
+      req.params.id,
+      { status: 'cancelled' },
+      { new: true }
+    );
     if (!entry) return res.status(404).json({ success: false, message: 'سجل الانتظار غير موجود' });
     res.json({ success: true, data: entry });
   } catch (error) {
     logger.error('[Scheduling] Cancel waitlist error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في إلغاء الانتظار', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في إلغاء الانتظار', error: error.message });
   }
 });
 
@@ -394,19 +468,44 @@ router.get('/dashboard', async (req, res) => {
       pendingReminders,
     ] = await Promise.all([
       TimeSlot.countDocuments({ date: { $gte: today, $lt: tomorrow }, isDeleted: { $ne: true } }),
-      TimeSlot.countDocuments({ date: { $gte: today, $lt: tomorrow }, status: 'booked', isDeleted: { $ne: true } }),
-      TimeSlot.countDocuments({ date: { $gte: today, $lt: tomorrow }, status: 'available', isDeleted: { $ne: true } }),
-      TimeSlot.countDocuments({ date: { $gte: today, $lt: weekEnd }, status: 'booked', isDeleted: { $ne: true } }),
-      TimeSlot.countDocuments({ date: { $gte: today, $lt: weekEnd }, status: 'available', isDeleted: { $ne: true } }),
+      TimeSlot.countDocuments({
+        date: { $gte: today, $lt: tomorrow },
+        status: 'booked',
+        isDeleted: { $ne: true },
+      }),
+      TimeSlot.countDocuments({
+        date: { $gte: today, $lt: tomorrow },
+        status: 'available',
+        isDeleted: { $ne: true },
+      }),
+      TimeSlot.countDocuments({
+        date: { $gte: today, $lt: weekEnd },
+        status: 'booked',
+        isDeleted: { $ne: true },
+      }),
+      TimeSlot.countDocuments({
+        date: { $gte: today, $lt: weekEnd },
+        status: 'available',
+        isDeleted: { $ne: true },
+      }),
       WaitlistEntry.countDocuments({ status: 'waiting', isDeleted: { $ne: true } }),
-      WaitlistEntry.countDocuments({ status: 'waiting', urgency: 'urgent', isDeleted: { $ne: true } }),
+      WaitlistEntry.countDocuments({
+        status: 'waiting',
+        urgency: 'urgent',
+        isDeleted: { $ne: true },
+      }),
       AppointmentReminder.countDocuments({ status: 'pending', scheduledAt: { $lte: new Date() } }),
     ]);
 
     res.json({
       success: true,
       data: {
-        today: { total: todayTotal, booked: todayBooked, available: todayAvailable, utilization: todayTotal > 0 ? Math.round((todayBooked / todayTotal) * 100) : 0 },
+        today: {
+          total: todayTotal,
+          booked: todayBooked,
+          available: todayAvailable,
+          utilization: todayTotal > 0 ? Math.round((todayBooked / todayTotal) * 100) : 0,
+        },
         week: { booked: weekBooked, available: weekAvailable },
         waitlist: { total: waitlistCount, urgent: urgentWaitlist },
         pendingReminders,

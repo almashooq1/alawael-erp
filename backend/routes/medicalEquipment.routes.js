@@ -42,7 +42,12 @@ router.get('/equipment', async (req, res) => {
     }
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const [equipment, total] = await Promise.all([
-      MedicalEquipment.find(filter).populate('location.department', 'name').populate('assignedTo', 'name').sort({ createdAt: -1 }).limit(parseInt(limit)).skip(skip),
+      MedicalEquipment.find(filter)
+        .populate('location.department', 'name')
+        .populate('assignedTo', 'name')
+        .sort({ createdAt: -1 })
+        .limit(parseInt(limit))
+        .skip(skip),
       MedicalEquipment.countDocuments(filter),
     ]);
     res.json({ success: true, data: equipment, total });
@@ -54,17 +59,28 @@ router.get('/equipment', async (req, res) => {
 
 router.get('/equipment/:id', async (req, res) => {
   try {
-    const eq = await MedicalEquipment.findById(req.params.id).populate('location.department', 'name').populate('assignedTo', 'name');
+    const eq = await MedicalEquipment.findById(req.params.id)
+      .populate('location.department', 'name')
+      .populate('assignedTo', 'name');
     if (!eq) return res.status(404).json({ success: false, message: 'المعدة غير موجودة' });
 
     // Fetch related records
     const [calibrations, maintenanceRecords, certificates] = await Promise.all([
-      CalibrationRecord.find({ equipment: eq._id, isDeleted: { $ne: true } }).sort({ calibrationDate: -1 }).limit(5),
-      EquipmentMaintenance.find({ equipment: eq._id, isDeleted: { $ne: true } }).sort({ reportedDate: -1 }).limit(5),
-      SafetyCertificate.find({ equipment: eq._id, isDeleted: { $ne: true } }).sort({ expiryDate: -1 }).limit(5),
+      CalibrationRecord.find({ equipment: eq._id, isDeleted: { $ne: true } })
+        .sort({ calibrationDate: -1 })
+        .limit(5),
+      EquipmentMaintenance.find({ equipment: eq._id, isDeleted: { $ne: true } })
+        .sort({ reportedDate: -1 })
+        .limit(5),
+      SafetyCertificate.find({ equipment: eq._id, isDeleted: { $ne: true } })
+        .sort({ expiryDate: -1 })
+        .limit(5),
     ]);
 
-    res.json({ success: true, data: { ...eq.toObject(), calibrations, maintenanceRecords, certificates } });
+    res.json({
+      success: true,
+      data: { ...eq.toObject(), calibrations, maintenanceRecords, certificates },
+    });
   } catch (error) {
     logger.error('[MedEquip] Get equipment error:', { message: error.message });
     res.status(500).json({ success: false, message: 'خطأ في جلب المعدة', error: error.message });
@@ -85,7 +101,10 @@ router.post('/equipment', async (req, res) => {
 
 router.put('/equipment/:id', async (req, res) => {
   try {
-    const eq = await MedicalEquipment.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    const eq = await MedicalEquipment.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
     if (!eq) return res.status(404).json({ success: false, message: 'المعدة غير موجودة' });
     res.json({ success: true, data: eq });
   } catch (error) {
@@ -117,13 +136,19 @@ router.get('/calibrations', async (req, res) => {
     if (type) filter.type = type;
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const [records, total] = await Promise.all([
-      CalibrationRecord.find(filter).populate('equipment', 'assetTag name').sort({ calibrationDate: -1 }).limit(parseInt(limit)).skip(skip),
+      CalibrationRecord.find(filter)
+        .populate('equipment', 'assetTag name')
+        .sort({ calibrationDate: -1 })
+        .limit(parseInt(limit))
+        .skip(skip),
       CalibrationRecord.countDocuments(filter),
     ]);
     res.json({ success: true, data: records, total });
   } catch (error) {
     logger.error('[MedEquip] List calibrations error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب سجلات المعايرة', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في جلب سجلات المعايرة', error: error.message });
   }
 });
 
@@ -145,7 +170,9 @@ router.post('/calibrations', async (req, res) => {
     res.status(201).json({ success: true, data: record });
   } catch (error) {
     logger.error('[MedEquip] Create calibration error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في تسجيل المعايرة', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في تسجيل المعايرة', error: error.message });
   }
 });
 
@@ -163,13 +190,20 @@ router.get('/maintenance', async (req, res) => {
     if (priority) filter.priority = priority;
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const [records, total] = await Promise.all([
-      EquipmentMaintenance.find(filter).populate('equipment', 'assetTag name').populate('reportedBy', 'name').sort({ reportedDate: -1 }).limit(parseInt(limit)).skip(skip),
+      EquipmentMaintenance.find(filter)
+        .populate('equipment', 'assetTag name')
+        .populate('reportedBy', 'name')
+        .sort({ reportedDate: -1 })
+        .limit(parseInt(limit))
+        .skip(skip),
       EquipmentMaintenance.countDocuments(filter),
     ]);
     res.json({ success: true, data: records, total });
   } catch (error) {
     logger.error('[MedEquip] List maintenance error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب سجلات الصيانة', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في جلب سجلات الصيانة', error: error.message });
   }
 });
 
@@ -187,7 +221,9 @@ router.post('/maintenance', async (req, res) => {
     res.status(201).json({ success: true, data: record });
   } catch (error) {
     logger.error('[MedEquip] Create maintenance error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء أمر الصيانة', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في إنشاء أمر الصيانة', error: error.message });
   }
 });
 
@@ -211,7 +247,8 @@ router.patch('/maintenance/:id/complete', async (req, res) => {
     if (!record) return res.status(404).json({ success: false, message: 'أمر الصيانة غير موجود' });
 
     // Restore equipment status
-    const newStatus = req.body.equipmentConditionAfter === 'out_of_service' ? 'out_of_service' : 'active';
+    const newStatus =
+      req.body.equipmentConditionAfter === 'out_of_service' ? 'out_of_service' : 'active';
     await MedicalEquipment.findByIdAndUpdate(record.equipment, {
       status: newStatus,
       'maintenance.lastMaintenanceDate': new Date(),
@@ -238,7 +275,11 @@ router.get('/certificates', async (req, res) => {
     if (type) filter.type = type;
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const [certs, total] = await Promise.all([
-      SafetyCertificate.find(filter).populate('equipment', 'assetTag name').sort({ expiryDate: 1 }).limit(parseInt(limit)).skip(skip),
+      SafetyCertificate.find(filter)
+        .populate('equipment', 'assetTag name')
+        .sort({ expiryDate: 1 })
+        .limit(parseInt(limit))
+        .skip(skip),
       SafetyCertificate.countDocuments(filter),
     ]);
     res.json({ success: true, data: certs, total });
@@ -278,12 +319,48 @@ router.get('/alerts', async (req, res) => {
       certExpired,
       outOfService,
     ] = await Promise.all([
-      MedicalEquipment.find({ 'calibration.requiresCalibration': true, 'calibration.nextCalibrationDate': { $lte: thirtyDays, $gte: now }, status: { $ne: 'retired' }, isDeleted: { $ne: true } }).select('assetTag name calibration.nextCalibrationDate').sort({ 'calibration.nextCalibrationDate': 1 }),
-      MedicalEquipment.find({ 'calibration.requiresCalibration': true, 'calibration.nextCalibrationDate': { $lt: now }, status: { $ne: 'retired' }, isDeleted: { $ne: true } }).select('assetTag name calibration.nextCalibrationDate').sort({ 'calibration.nextCalibrationDate': 1 }),
-      MedicalEquipment.find({ 'maintenance.nextMaintenanceDate': { $lte: thirtyDays }, status: { $nin: ['retired', 'disposed'] }, isDeleted: { $ne: true } }).select('assetTag name maintenance.nextMaintenanceDate').sort({ 'maintenance.nextMaintenanceDate': 1 }),
-      MedicalEquipment.find({ 'purchaseInfo.warrantyEnd': { $lte: thirtyDays, $gte: now }, isDeleted: { $ne: true } }).select('assetTag name purchaseInfo.warrantyEnd').sort({ 'purchaseInfo.warrantyEnd': 1 }),
-      SafetyCertificate.find({ expiryDate: { $lte: thirtyDays, $gte: now }, isDeleted: { $ne: true } }).populate('equipment', 'assetTag name').sort({ expiryDate: 1 }),
-      SafetyCertificate.find({ expiryDate: { $lt: now }, status: { $ne: 'revoked' }, isDeleted: { $ne: true } }).populate('equipment', 'assetTag name').sort({ expiryDate: 1 }),
+      MedicalEquipment.find({
+        'calibration.requiresCalibration': true,
+        'calibration.nextCalibrationDate': { $lte: thirtyDays, $gte: now },
+        status: { $ne: 'retired' },
+        isDeleted: { $ne: true },
+      })
+        .select('assetTag name calibration.nextCalibrationDate')
+        .sort({ 'calibration.nextCalibrationDate': 1 }),
+      MedicalEquipment.find({
+        'calibration.requiresCalibration': true,
+        'calibration.nextCalibrationDate': { $lt: now },
+        status: { $ne: 'retired' },
+        isDeleted: { $ne: true },
+      })
+        .select('assetTag name calibration.nextCalibrationDate')
+        .sort({ 'calibration.nextCalibrationDate': 1 }),
+      MedicalEquipment.find({
+        'maintenance.nextMaintenanceDate': { $lte: thirtyDays },
+        status: { $nin: ['retired', 'disposed'] },
+        isDeleted: { $ne: true },
+      })
+        .select('assetTag name maintenance.nextMaintenanceDate')
+        .sort({ 'maintenance.nextMaintenanceDate': 1 }),
+      MedicalEquipment.find({
+        'purchaseInfo.warrantyEnd': { $lte: thirtyDays, $gte: now },
+        isDeleted: { $ne: true },
+      })
+        .select('assetTag name purchaseInfo.warrantyEnd')
+        .sort({ 'purchaseInfo.warrantyEnd': 1 }),
+      SafetyCertificate.find({
+        expiryDate: { $lte: thirtyDays, $gte: now },
+        isDeleted: { $ne: true },
+      })
+        .populate('equipment', 'assetTag name')
+        .sort({ expiryDate: 1 }),
+      SafetyCertificate.find({
+        expiryDate: { $lt: now },
+        status: { $ne: 'revoked' },
+        isDeleted: { $ne: true },
+      })
+        .populate('equipment', 'assetTag name')
+        .sort({ expiryDate: 1 }),
       MedicalEquipment.countDocuments({ status: 'out_of_service', isDeleted: { $ne: true } }),
     ]);
 
@@ -297,7 +374,14 @@ router.get('/alerts', async (req, res) => {
         certExpiring: certExpiring.length,
         certExpired: certExpired.length,
         outOfService,
-        details: { calibrationDue, calibrationOverdue, maintenanceDue, warrantyExpiring, certExpiring, certExpired },
+        details: {
+          calibrationDue,
+          calibrationOverdue,
+          maintenanceDue,
+          warrantyExpiring,
+          certExpiring,
+          certExpired,
+        },
       },
     });
   } catch (error) {
@@ -325,8 +409,15 @@ router.get('/dashboard', async (req, res) => {
       MedicalEquipment.countDocuments({ status: 'active', isDeleted: { $ne: true } }),
       MedicalEquipment.countDocuments({ status: 'in_maintenance', isDeleted: { $ne: true } }),
       MedicalEquipment.countDocuments({ status: 'out_of_service', isDeleted: { $ne: true } }),
-      EquipmentMaintenance.countDocuments({ status: { $in: ['requested', 'scheduled', 'in_progress'] }, isDeleted: { $ne: true } }),
-      EquipmentMaintenance.countDocuments({ status: { $in: ['requested', 'scheduled', 'in_progress'] }, priority: 'critical', isDeleted: { $ne: true } }),
+      EquipmentMaintenance.countDocuments({
+        status: { $in: ['requested', 'scheduled', 'in_progress'] },
+        isDeleted: { $ne: true },
+      }),
+      EquipmentMaintenance.countDocuments({
+        status: { $in: ['requested', 'scheduled', 'in_progress'] },
+        priority: 'critical',
+        isDeleted: { $ne: true },
+      }),
       MedicalEquipment.aggregate([
         { $match: { isDeleted: { $ne: true } } },
         { $group: { _id: '$category', count: { $sum: 1 } } },
@@ -337,7 +428,13 @@ router.get('/dashboard', async (req, res) => {
     // Total asset value
     const valueAgg = await MedicalEquipment.aggregate([
       { $match: { isDeleted: { $ne: true } } },
-      { $group: { _id: null, totalPurchaseValue: { $sum: '$purchaseInfo.purchasePrice' }, totalCurrentValue: { $sum: '$depreciationInfo.currentBookValue' } } },
+      {
+        $group: {
+          _id: null,
+          totalPurchaseValue: { $sum: '$purchaseInfo.purchasePrice' },
+          totalCurrentValue: { $sum: '$depreciationInfo.currentBookValue' },
+        },
+      },
     ]);
 
     res.json({

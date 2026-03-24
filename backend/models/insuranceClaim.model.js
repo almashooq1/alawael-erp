@@ -52,17 +52,33 @@ const InsuranceContractSchema = new Schema(
       deductible: { type: Number, default: 0 },
       coPayPercentage: { type: Number, default: 20 },
       coPayMax: Number,
-      networkType: { type: String, enum: ['in_network', 'out_network', 'both'], default: 'in_network' },
+      networkType: {
+        type: String,
+        enum: ['in_network', 'out_network', 'both'],
+        default: 'in_network',
+      },
     },
     coveredServices: [
       {
         serviceCategory: {
           type: String,
           enum: [
-            'consultation', 'therapy_session', 'diagnostic', 'laboratory',
-            'radiology', 'pharmacy', 'surgical', 'rehabilitation',
-            'speech_therapy', 'occupational_therapy', 'physical_therapy',
-            'psychological', 'dental', 'optical', 'emergency', 'inpatient',
+            'consultation',
+            'therapy_session',
+            'diagnostic',
+            'laboratory',
+            'radiology',
+            'pharmacy',
+            'surgical',
+            'rehabilitation',
+            'speech_therapy',
+            'occupational_therapy',
+            'physical_therapy',
+            'psychological',
+            'dental',
+            'optical',
+            'emergency',
+            'inpatient',
           ],
         },
         coveragePercentage: { type: Number, default: 80 },
@@ -86,7 +102,6 @@ const InsuranceContractSchema = new Schema(
   { timestamps: true }
 );
 
-InsuranceContractSchema.index({ contractNumber: 1 });
 InsuranceContractSchema.index({ status: 1, endDate: 1 });
 InsuranceContractSchema.index({ 'insuranceCompany.code': 1 });
 
@@ -100,7 +115,11 @@ const PreAuthorizationSchema = new Schema(
       type: String,
       unique: true,
       default: function () {
-        return 'PA-' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substring(2, 6).toUpperCase();
+        return (
+          'PA-' +
+          Date.now().toString(36).toUpperCase() +
+          Math.random().toString(36).substring(2, 6).toUpperCase()
+        );
       },
     },
     beneficiary: { type: Schema.Types.ObjectId, ref: 'Beneficiary', required: true },
@@ -134,7 +153,15 @@ const PreAuthorizationSchema = new Schema(
     totalEstimatedCost: Number,
     status: {
       type: String,
-      enum: ['pending', 'under_review', 'approved', 'partially_approved', 'denied', 'expired', 'cancelled'],
+      enum: [
+        'pending',
+        'under_review',
+        'approved',
+        'partially_approved',
+        'denied',
+        'expired',
+        'cancelled',
+      ],
       default: 'pending',
     },
     approvalDetails: {
@@ -169,7 +196,6 @@ const PreAuthorizationSchema = new Schema(
   { timestamps: true }
 );
 
-PreAuthorizationSchema.index({ preAuthNumber: 1 });
 PreAuthorizationSchema.index({ beneficiary: 1, status: 1 });
 PreAuthorizationSchema.index({ contract: 1 });
 
@@ -183,7 +209,11 @@ const InsuranceClaimSchema = new Schema(
       type: String,
       unique: true,
       default: function () {
-        return 'CLM-' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substring(2, 6).toUpperCase();
+        return (
+          'CLM-' +
+          Date.now().toString(36).toUpperCase() +
+          Math.random().toString(36).substring(2, 6).toUpperCase()
+        );
       },
     },
     beneficiary: { type: Schema.Types.ObjectId, ref: 'Beneficiary', required: true },
@@ -231,9 +261,18 @@ const InsuranceClaimSchema = new Schema(
     status: {
       type: String,
       enum: [
-        'draft', 'submitted', 'acknowledged', 'under_review',
-        'approved', 'partially_approved', 'denied', 'appealed',
-        'paid', 'partially_paid', 'cancelled', 'voided',
+        'draft',
+        'submitted',
+        'acknowledged',
+        'under_review',
+        'approved',
+        'partially_approved',
+        'denied',
+        'appealed',
+        'paid',
+        'partially_paid',
+        'cancelled',
+        'voided',
       ],
       default: 'draft',
     },
@@ -290,7 +329,6 @@ const InsuranceClaimSchema = new Schema(
   { timestamps: true }
 );
 
-InsuranceClaimSchema.index({ claimNumber: 1 });
 InsuranceClaimSchema.index({ beneficiary: 1, status: 1 });
 InsuranceClaimSchema.index({ contract: 1 });
 InsuranceClaimSchema.index({ status: 1, submissionDate: -1 });
@@ -311,9 +349,16 @@ const ClaimItemSchema = new Schema(
     category: {
       type: String,
       enum: [
-        'consultation', 'therapy', 'diagnostic', 'laboratory',
-        'radiology', 'pharmacy', 'procedure', 'accommodation',
-        'supplies', 'other',
+        'consultation',
+        'therapy',
+        'diagnostic',
+        'laboratory',
+        'radiology',
+        'pharmacy',
+        'procedure',
+        'accommodation',
+        'supplies',
+        'other',
       ],
     },
     quantity: { type: Number, default: 1 },

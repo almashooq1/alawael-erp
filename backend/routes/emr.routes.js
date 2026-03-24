@@ -32,19 +32,24 @@ router.get('/records', async (req, res) => {
     const filter = { isDeleted: { $ne: true } };
     if (beneficiary) filter.beneficiary = beneficiary;
     if (search) {
-      filter.$or = [
-        { mrn: { $regex: search, $options: 'i' } },
-      ];
+      filter.$or = [{ mrn: { $regex: search, $options: 'i' } }];
     }
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const [records, total] = await Promise.all([
-      MedicalRecord.find(filter).populate('beneficiary', 'name').populate('primaryProvider', 'name').sort({ updatedAt: -1 }).limit(parseInt(limit)).skip(skip),
+      MedicalRecord.find(filter)
+        .populate('beneficiary', 'name')
+        .populate('primaryProvider', 'name')
+        .sort({ updatedAt: -1 })
+        .limit(parseInt(limit))
+        .skip(skip),
       MedicalRecord.countDocuments(filter),
     ]);
     res.json({ success: true, data: records, total });
   } catch (error) {
     logger.error('[EMR] List records error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب السجلات الطبية', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في جلب السجلات الطبية', error: error.message });
   }
 });
 
@@ -59,27 +64,40 @@ router.get('/records/:id', async (req, res) => {
     res.json({ success: true, data: record });
   } catch (error) {
     logger.error('[EMR] Get record error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب السجل الطبي', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في جلب السجل الطبي', error: error.message });
   }
 });
 
 // Get or create medical record by beneficiary
 router.get('/records/beneficiary/:beneficiaryId', async (req, res) => {
   try {
-    let record = await MedicalRecord.findOne({ beneficiary: req.params.beneficiaryId, isDeleted: { $ne: true } })
+    let record = await MedicalRecord.findOne({
+      beneficiary: req.params.beneficiaryId,
+      isDeleted: { $ne: true },
+    })
       .populate('beneficiary', 'name dateOfBirth gender')
       .populate('primaryProvider', 'name');
 
     if (!record) {
-      record = new MedicalRecord({ beneficiary: req.params.beneficiaryId, createdBy: req.user?.id });
+      record = new MedicalRecord({
+        beneficiary: req.params.beneficiaryId,
+        createdBy: req.user?.id,
+      });
       await record.save();
-      record = await MedicalRecord.findById(record._id).populate('beneficiary', 'name dateOfBirth gender');
+      record = await MedicalRecord.findById(record._id).populate(
+        'beneficiary',
+        'name dateOfBirth gender'
+      );
       logger.info(`[EMR] Auto-created medical record: ${record.mrn}`);
     }
     res.json({ success: true, data: record });
   } catch (error) {
     logger.error('[EMR] Get by beneficiary error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب السجل الطبي', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في جلب السجل الطبي', error: error.message });
   }
 });
 
@@ -91,18 +109,25 @@ router.post('/records', async (req, res) => {
     res.status(201).json({ success: true, data: record });
   } catch (error) {
     logger.error('[EMR] Create record error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء السجل الطبي', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في إنشاء السجل الطبي', error: error.message });
   }
 });
 
 router.put('/records/:id', async (req, res) => {
   try {
-    const record = await MedicalRecord.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    const record = await MedicalRecord.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
     if (!record) return res.status(404).json({ success: false, message: 'السجل الطبي غير موجود' });
     res.json({ success: true, data: record });
   } catch (error) {
     logger.error('[EMR] Update record error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في تحديث السجل الطبي', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في تحديث السجل الطبي', error: error.message });
   }
 });
 
@@ -122,25 +147,36 @@ router.get('/vitals', async (req, res) => {
     }
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const [vitals, total] = await Promise.all([
-      VitalSign.find(filter).populate('recordedBy', 'name').sort({ recordedAt: -1 }).limit(parseInt(limit)).skip(skip),
+      VitalSign.find(filter)
+        .populate('recordedBy', 'name')
+        .sort({ recordedAt: -1 })
+        .limit(parseInt(limit))
+        .skip(skip),
       VitalSign.countDocuments(filter),
     ]);
     res.json({ success: true, data: vitals, total });
   } catch (error) {
     logger.error('[EMR] List vitals error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب العلامات الحيوية', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في جلب العلامات الحيوية', error: error.message });
   }
 });
 
 router.get('/vitals/latest/:beneficiaryId', async (req, res) => {
   try {
-    const latest = await VitalSign.findOne({ beneficiary: req.params.beneficiaryId, isDeleted: { $ne: true } })
+    const latest = await VitalSign.findOne({
+      beneficiary: req.params.beneficiaryId,
+      isDeleted: { $ne: true },
+    })
       .populate('recordedBy', 'name')
       .sort({ recordedAt: -1 });
     res.json({ success: true, data: latest });
   } catch (error) {
     logger.error('[EMR] Latest vitals error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب آخر العلامات الحيوية', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في جلب آخر العلامات الحيوية', error: error.message });
   }
 });
 
@@ -157,7 +193,9 @@ router.post('/vitals', async (req, res) => {
     res.status(201).json({ success: true, data: vital });
   } catch (error) {
     logger.error('[EMR] Create vital error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في تسجيل العلامات الحيوية', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في تسجيل العلامات الحيوية', error: error.message });
   }
 });
 
@@ -170,11 +208,15 @@ router.get('/vitals/trend/:beneficiaryId', async (req, res) => {
       beneficiary: req.params.beneficiaryId,
       recordedAt: { $gte: since },
       isDeleted: { $ne: true },
-    }).select(`recordedAt ${parameter} weight.value height bmi`).sort({ recordedAt: 1 });
+    })
+      .select(`recordedAt ${parameter} weight.value height bmi`)
+      .sort({ recordedAt: 1 });
     res.json({ success: true, data: vitals });
   } catch (error) {
     logger.error('[EMR] Vitals trend error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب اتجاه العلامات الحيوية', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في جلب اتجاه العلامات الحيوية', error: error.message });
   }
 });
 
@@ -198,20 +240,30 @@ router.get('/lab-results', async (req, res) => {
     }
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const [results, total] = await Promise.all([
-      LabResult.find(filter).populate('beneficiary', 'name').populate('orderedBy', 'name').sort({ orderedDate: -1 }).limit(parseInt(limit)).skip(skip),
+      LabResult.find(filter)
+        .populate('beneficiary', 'name')
+        .populate('orderedBy', 'name')
+        .sort({ orderedDate: -1 })
+        .limit(parseInt(limit))
+        .skip(skip),
       LabResult.countDocuments(filter),
     ]);
     res.json({ success: true, data: results, total });
   } catch (error) {
     logger.error('[EMR] List lab results error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب نتائج المختبر', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في جلب نتائج المختبر', error: error.message });
   }
 });
 
 router.get('/lab-results/:id', async (req, res) => {
   try {
-    const result = await LabResult.findById(req.params.id).populate('beneficiary', 'name').populate('orderedBy', 'name');
-    if (!result) return res.status(404).json({ success: false, message: 'نتيجة المختبر غير موجودة' });
+    const result = await LabResult.findById(req.params.id)
+      .populate('beneficiary', 'name')
+      .populate('orderedBy', 'name');
+    if (!result)
+      return res.status(404).json({ success: false, message: 'نتيجة المختبر غير موجودة' });
     res.json({ success: true, data: result });
   } catch (error) {
     logger.error('[EMR] Get lab result error:', { message: error.message });
@@ -227,13 +279,18 @@ router.post('/lab-results', async (req, res) => {
     res.status(201).json({ success: true, data: result });
   } catch (error) {
     logger.error('[EMR] Create lab result error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء نتيجة المختبر', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في إنشاء نتيجة المختبر', error: error.message });
   }
 });
 
 router.put('/lab-results/:id', async (req, res) => {
   try {
-    const result = await LabResult.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    const result = await LabResult.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
     if (!result) return res.status(404).json({ success: false, message: 'النتيجة غير موجودة' });
     res.json({ success: true, data: result });
   } catch (error) {
@@ -249,11 +306,16 @@ router.get('/lab-results-critical', async (req, res) => {
       'criticalValues.hasCritical': true,
       'criticalValues.acknowledgedBy': { $exists: false },
       isDeleted: { $ne: true },
-    }).populate('beneficiary', 'name').populate('orderedBy', 'name').sort({ orderedDate: -1 });
+    })
+      .populate('beneficiary', 'name')
+      .populate('orderedBy', 'name')
+      .sort({ orderedDate: -1 });
     res.json({ success: true, data: results, count: results.length });
   } catch (error) {
     logger.error('[EMR] Critical results error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب النتائج الحرجة', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في جلب النتائج الحرجة', error: error.message });
   }
 });
 
@@ -271,13 +333,20 @@ router.get('/clinical-notes', async (req, res) => {
     if (status) filter.status = status;
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const [notes, total] = await Promise.all([
-      ClinicalNote.find(filter).populate('beneficiary', 'name').populate('author', 'name').sort({ createdAt: -1 }).limit(parseInt(limit)).skip(skip),
+      ClinicalNote.find(filter)
+        .populate('beneficiary', 'name')
+        .populate('author', 'name')
+        .sort({ createdAt: -1 })
+        .limit(parseInt(limit))
+        .skip(skip),
       ClinicalNote.countDocuments(filter),
     ]);
     res.json({ success: true, data: notes, total });
   } catch (error) {
     logger.error('[EMR] List clinical notes error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب الملاحظات السريرية', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في جلب الملاحظات السريرية', error: error.message });
   }
 });
 
@@ -288,7 +357,8 @@ router.get('/clinical-notes/:id', async (req, res) => {
       .populate('author', 'name')
       .populate('coSignedBy', 'name')
       .populate('objective.vitalSigns');
-    if (!note) return res.status(404).json({ success: false, message: 'الملاحظة السريرية غير موجودة' });
+    if (!note)
+      return res.status(404).json({ success: false, message: 'الملاحظة السريرية غير موجودة' });
     res.json({ success: true, data: note });
   } catch (error) {
     logger.error('[EMR] Get clinical note error:', { message: error.message });
@@ -310,7 +380,9 @@ router.post('/clinical-notes', async (req, res) => {
     res.status(201).json({ success: true, data: note });
   } catch (error) {
     logger.error('[EMR] Create clinical note error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء الملاحظة السريرية', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في إنشاء الملاحظة السريرية', error: error.message });
   }
 });
 
@@ -319,26 +391,36 @@ router.put('/clinical-notes/:id', async (req, res) => {
     const note = await ClinicalNote.findById(req.params.id);
     if (!note) return res.status(404).json({ success: false, message: 'الملاحظة غير موجودة' });
     if (note.status === 'final') {
-      return res.status(400).json({ success: false, message: 'لا يمكن تعديل ملاحظة نهائية، استخدم التعديل' });
+      return res
+        .status(400)
+        .json({ success: false, message: 'لا يمكن تعديل ملاحظة نهائية، استخدم التعديل' });
     }
     Object.assign(note, req.body);
     await note.save();
     res.json({ success: true, data: note });
   } catch (error) {
     logger.error('[EMR] Update clinical note error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في تحديث الملاحظة', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في تحديث الملاحظة', error: error.message });
   }
 });
 
 router.patch('/clinical-notes/:id/finalize', async (req, res) => {
   try {
-    const note = await ClinicalNote.findByIdAndUpdate(req.params.id, { status: 'final' }, { new: true });
+    const note = await ClinicalNote.findByIdAndUpdate(
+      req.params.id,
+      { status: 'final' },
+      { new: true }
+    );
     if (!note) return res.status(404).json({ success: false, message: 'الملاحظة غير موجودة' });
     logger.info(`[EMR] Clinical note finalized: ${note._id}`);
     res.json({ success: true, data: note, message: 'تم اعتماد الملاحظة' });
   } catch (error) {
     logger.error('[EMR] Finalize note error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في اعتماد الملاحظة', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في اعتماد الملاحظة', error: error.message });
   }
 });
 
@@ -357,7 +439,9 @@ router.patch('/clinical-notes/:id/amend', async (req, res) => {
     res.json({ success: true, data: note });
   } catch (error) {
     logger.error('[EMR] Amend note error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في تعديل الملاحظة', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في تعديل الملاحظة', error: error.message });
   }
 });
 
@@ -374,7 +458,12 @@ router.get('/allergies', async (req, res) => {
     if (clinicalStatus) filter.clinicalStatus = clinicalStatus;
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const [allergies, total] = await Promise.all([
-      Allergy.find(filter).populate('beneficiary', 'name').populate('recordedBy', 'name').sort({ createdAt: -1 }).limit(parseInt(limit)).skip(skip),
+      Allergy.find(filter)
+        .populate('beneficiary', 'name')
+        .populate('recordedBy', 'name')
+        .sort({ createdAt: -1 })
+        .limit(parseInt(limit))
+        .skip(skip),
       Allergy.countDocuments(filter),
     ]);
     res.json({ success: true, data: allergies, total });
@@ -394,7 +483,9 @@ router.get('/allergies/patient/:beneficiaryId', async (req, res) => {
     res.json({ success: true, data: allergies, count: allergies.length });
   } catch (error) {
     logger.error('[EMR] Patient allergies error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب حساسية المريض', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في جلب حساسية المريض', error: error.message });
   }
 });
 
@@ -406,18 +497,26 @@ router.post('/allergies', async (req, res) => {
     res.status(201).json({ success: true, data: allergy });
   } catch (error) {
     logger.error('[EMR] Create allergy error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في تسجيل الحساسية', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في تسجيل الحساسية', error: error.message });
   }
 });
 
 router.put('/allergies/:id', async (req, res) => {
   try {
-    const allergy = await Allergy.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
-    if (!allergy) return res.status(404).json({ success: false, message: 'سجل الحساسية غير موجود' });
+    const allergy = await Allergy.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
+    if (!allergy)
+      return res.status(404).json({ success: false, message: 'سجل الحساسية غير موجود' });
     res.json({ success: true, data: allergy });
   } catch (error) {
     logger.error('[EMR] Update allergy error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في تحديث الحساسية', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في تحديث الحساسية', error: error.message });
   }
 });
 
@@ -429,13 +528,27 @@ router.get('/patient-summary/:beneficiaryId', async (req, res) => {
   try {
     const beneficiaryId = req.params.beneficiaryId;
 
-    const [medicalRecord, latestVitals, activeAllergies, recentLabResults, recentNotes] = await Promise.all([
-      MedicalRecord.findOne({ beneficiary: beneficiaryId, isDeleted: { $ne: true } }).populate('beneficiary', 'name dateOfBirth gender').populate('primaryProvider', 'name'),
-      VitalSign.findOne({ beneficiary: beneficiaryId, isDeleted: { $ne: true } }).sort({ recordedAt: -1 }),
-      Allergy.find({ beneficiary: beneficiaryId, clinicalStatus: 'active', isDeleted: { $ne: true } }),
-      LabResult.find({ beneficiary: beneficiaryId, isDeleted: { $ne: true } }).sort({ orderedDate: -1 }).limit(5),
-      ClinicalNote.find({ beneficiary: beneficiaryId, isDeleted: { $ne: true } }).populate('author', 'name').sort({ createdAt: -1 }).limit(5),
-    ]);
+    const [medicalRecord, latestVitals, activeAllergies, recentLabResults, recentNotes] =
+      await Promise.all([
+        MedicalRecord.findOne({ beneficiary: beneficiaryId, isDeleted: { $ne: true } })
+          .populate('beneficiary', 'name dateOfBirth gender')
+          .populate('primaryProvider', 'name'),
+        VitalSign.findOne({ beneficiary: beneficiaryId, isDeleted: { $ne: true } }).sort({
+          recordedAt: -1,
+        }),
+        Allergy.find({
+          beneficiary: beneficiaryId,
+          clinicalStatus: 'active',
+          isDeleted: { $ne: true },
+        }),
+        LabResult.find({ beneficiary: beneficiaryId, isDeleted: { $ne: true } })
+          .sort({ orderedDate: -1 })
+          .limit(5),
+        ClinicalNote.find({ beneficiary: beneficiaryId, isDeleted: { $ne: true } })
+          .populate('author', 'name')
+          .sort({ createdAt: -1 })
+          .limit(5),
+      ]);
 
     res.json({
       success: true,
@@ -450,7 +563,9 @@ router.get('/patient-summary/:beneficiaryId', async (req, res) => {
     });
   } catch (error) {
     logger.error('[EMR] Patient summary error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب ملخص المريض', error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في جلب ملخص المريض', error: error.message });
   }
 });
 
@@ -475,10 +590,23 @@ router.get('/dashboard', async (req, res) => {
       activeAllergies,
     ] = await Promise.all([
       MedicalRecord.countDocuments({ isDeleted: { $ne: true } }),
-      VitalSign.countDocuments({ recordedAt: { $gte: today, $lt: tomorrow }, isDeleted: { $ne: true } }),
-      ClinicalNote.countDocuments({ createdAt: { $gte: today, $lt: tomorrow }, isDeleted: { $ne: true } }),
-      LabResult.countDocuments({ overallStatus: { $in: ['ordered', 'collected', 'processing'] }, isDeleted: { $ne: true } }),
-      LabResult.countDocuments({ 'criticalValues.hasCritical': true, 'criticalValues.acknowledgedBy': { $exists: false }, isDeleted: { $ne: true } }),
+      VitalSign.countDocuments({
+        recordedAt: { $gte: today, $lt: tomorrow },
+        isDeleted: { $ne: true },
+      }),
+      ClinicalNote.countDocuments({
+        createdAt: { $gte: today, $lt: tomorrow },
+        isDeleted: { $ne: true },
+      }),
+      LabResult.countDocuments({
+        overallStatus: { $in: ['ordered', 'collected', 'processing'] },
+        isDeleted: { $ne: true },
+      }),
+      LabResult.countDocuments({
+        'criticalValues.hasCritical': true,
+        'criticalValues.acknowledgedBy': { $exists: false },
+        isDeleted: { $ne: true },
+      }),
       ClinicalNote.countDocuments({ status: 'draft', isDeleted: { $ne: true } }),
       Allergy.countDocuments({ clinicalStatus: 'active', isDeleted: { $ne: true } }),
     ]);

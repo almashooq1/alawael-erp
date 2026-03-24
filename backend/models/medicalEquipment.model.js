@@ -25,11 +25,25 @@ const MedicalEquipmentSchema = new Schema(
     category: {
       type: String,
       enum: [
-        'diagnostic', 'therapeutic', 'rehabilitation', 'monitoring',
-        'surgical', 'laboratory', 'imaging', 'respiratory',
-        'mobility_aid', 'orthotic', 'prosthetic', 'assistive_device',
-        'speech_therapy', 'occupational_therapy', 'physical_therapy',
-        'dental', 'optical', 'sterilization', 'general',
+        'diagnostic',
+        'therapeutic',
+        'rehabilitation',
+        'monitoring',
+        'surgical',
+        'laboratory',
+        'imaging',
+        'respiratory',
+        'mobility_aid',
+        'orthotic',
+        'prosthetic',
+        'assistive_device',
+        'speech_therapy',
+        'occupational_therapy',
+        'physical_therapy',
+        'dental',
+        'optical',
+        'sterilization',
+        'general',
       ],
       required: true,
     },
@@ -58,9 +72,16 @@ const MedicalEquipmentSchema = new Schema(
     status: {
       type: String,
       enum: [
-        'active', 'in_maintenance', 'out_of_service', 'retired',
-        'pending_calibration', 'under_repair', 'loaned', 'in_storage',
-        'condemned', 'disposed',
+        'active',
+        'in_maintenance',
+        'out_of_service',
+        'retired',
+        'pending_calibration',
+        'under_repair',
+        'loaned',
+        'in_storage',
+        'condemned',
+        'disposed',
       ],
       default: 'active',
     },
@@ -102,7 +123,11 @@ const MedicalEquipmentSchema = new Schema(
       maxLifeCycles: Number,
     },
     depreciationInfo: {
-      method: { type: String, enum: ['straight_line', 'declining_balance', 'none'], default: 'straight_line' },
+      method: {
+        type: String,
+        enum: ['straight_line', 'declining_balance', 'none'],
+        default: 'straight_line',
+      },
       usefulLifeYears: Number,
       residualValue: Number,
       currentBookValue: Number,
@@ -110,7 +135,10 @@ const MedicalEquipmentSchema = new Schema(
     documents: [
       {
         name: String,
-        type: { type: String, enum: ['manual', 'datasheet', 'certificate', 'warranty', 'invoice', 'photo', 'other'] },
+        type: {
+          type: String,
+          enum: ['manual', 'datasheet', 'certificate', 'warranty', 'invoice', 'photo', 'other'],
+        },
         path: String,
         uploadedAt: { type: Date, default: Date.now },
       },
@@ -122,7 +150,6 @@ const MedicalEquipmentSchema = new Schema(
   { timestamps: true }
 );
 
-MedicalEquipmentSchema.index({ assetTag: 1 });
 MedicalEquipmentSchema.index({ category: 1, status: 1 });
 MedicalEquipmentSchema.index({ 'location.department': 1 });
 MedicalEquipmentSchema.index({ 'calibration.nextCalibrationDate': 1 });
@@ -139,7 +166,11 @@ const CalibrationRecordSchema = new Schema(
       type: String,
       unique: true,
       default: function () {
-        return 'CAL-' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substring(2, 6).toUpperCase();
+        return (
+          'CAL-' +
+          Date.now().toString(36).toUpperCase() +
+          Math.random().toString(36).substring(2, 6).toUpperCase()
+        );
       },
     },
     type: {
@@ -195,7 +226,11 @@ const EquipmentMaintenanceSchema = new Schema(
       type: String,
       unique: true,
       default: function () {
-        return 'WO-' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substring(2, 6).toUpperCase();
+        return (
+          'WO-' +
+          Date.now().toString(36).toUpperCase() +
+          Math.random().toString(36).substring(2, 6).toUpperCase()
+        );
       },
     },
     type: {
@@ -242,7 +277,12 @@ const EquipmentMaintenanceSchema = new Schema(
     recommendations: String,
     equipmentConditionAfter: {
       type: String,
-      enum: ['fully_operational', 'operational_with_limitations', 'requires_further_work', 'out_of_service'],
+      enum: [
+        'fully_operational',
+        'operational_with_limitations',
+        'requires_further_work',
+        'out_of_service',
+      ],
     },
     attachments: [
       {
@@ -272,9 +312,15 @@ const SafetyCertificateSchema = new Schema(
     type: {
       type: String,
       enum: [
-        'electrical_safety', 'radiation_safety', 'fire_safety',
-        'biocompatibility', 'electromagnetic_compatibility', 'performance_verification',
-        'environmental_safety', 'infection_control', 'general_safety',
+        'electrical_safety',
+        'radiation_safety',
+        'fire_safety',
+        'biocompatibility',
+        'electromagnetic_compatibility',
+        'performance_verification',
+        'environmental_safety',
+        'infection_control',
+        'general_safety',
       ],
       required: true,
     },

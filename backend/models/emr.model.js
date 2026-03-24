@@ -22,7 +22,11 @@ const MedicalRecordSchema = new Schema(
       type: String,
       unique: true,
       default: function () {
-        return 'MRN-' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substring(2, 6).toUpperCase();
+        return (
+          'MRN-' +
+          Date.now().toString(36).toUpperCase() +
+          Math.random().toString(36).substring(2, 6).toUpperCase()
+        );
       },
     },
     beneficiary: { type: Schema.Types.ObjectId, ref: 'Beneficiary', required: true, unique: true },
@@ -36,7 +40,11 @@ const MedicalRecordSchema = new Schema(
         description: { ar: String, en: String },
         diagnosedDate: Date,
         diagnosedBy: { type: Schema.Types.ObjectId, ref: 'User' },
-        status: { type: String, enum: ['active', 'resolved', 'chronic', 'recurrence'], default: 'active' },
+        status: {
+          type: String,
+          enum: ['active', 'resolved', 'chronic', 'recurrence'],
+          default: 'active',
+        },
       },
     ],
     chronicConditions: [
@@ -45,7 +53,10 @@ const MedicalRecordSchema = new Schema(
         code: String,
         onset: Date,
         managedBy: String,
-        controlStatus: { type: String, enum: ['well_controlled', 'partially_controlled', 'uncontrolled'] },
+        controlStatus: {
+          type: String,
+          enum: ['well_controlled', 'partially_controlled', 'uncontrolled'],
+        },
       },
     ],
     surgicalHistory: [
@@ -61,13 +72,24 @@ const MedicalRecordSchema = new Schema(
     familyHistory: [
       {
         condition: String,
-        relationship: { type: String, enum: ['father', 'mother', 'sibling', 'grandparent', 'uncle_aunt', 'other'] },
+        relationship: {
+          type: String,
+          enum: ['father', 'mother', 'sibling', 'grandparent', 'uncle_aunt', 'other'],
+        },
         notes: String,
       },
     ],
     socialHistory: {
-      smoking: { type: String, enum: ['never', 'former', 'current', 'unknown'], default: 'unknown' },
-      alcohol: { type: String, enum: ['never', 'former', 'current', 'unknown'], default: 'unknown' },
+      smoking: {
+        type: String,
+        enum: ['never', 'former', 'current', 'unknown'],
+        default: 'unknown',
+      },
+      alcohol: {
+        type: String,
+        enum: ['never', 'former', 'current', 'unknown'],
+        default: 'unknown',
+      },
       exercise: String,
       occupation: String,
       maritalStatus: String,
@@ -119,8 +141,7 @@ const MedicalRecordSchema = new Schema(
   { timestamps: true }
 );
 
-MedicalRecordSchema.index({ mrn: 1 });
-MedicalRecordSchema.index({ beneficiary: 1 });
+// mrn and beneficiary already have unique: true (auto-indexed)
 
 // ═══════════════════════════════════════════════════════════════════════════
 // VITAL SIGN — العلامات الحيوية
@@ -191,7 +212,8 @@ VitalSignSchema.pre('save', function (next) {
     this.bmi = Math.round((this.weight.value / (heightM * heightM)) * 10) / 10;
   }
   if (this.glasgowComaScale?.eye && this.glasgowComaScale?.verbal && this.glasgowComaScale?.motor) {
-    this.glasgowComaScale.total = this.glasgowComaScale.eye + this.glasgowComaScale.verbal + this.glasgowComaScale.motor;
+    this.glasgowComaScale.total =
+      this.glasgowComaScale.eye + this.glasgowComaScale.verbal + this.glasgowComaScale.motor;
   }
   next();
 });
@@ -208,7 +230,11 @@ const LabResultSchema = new Schema(
       type: String,
       unique: true,
       default: function () {
-        return 'LAB-' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substring(2, 6).toUpperCase();
+        return (
+          'LAB-' +
+          Date.now().toString(36).toUpperCase() +
+          Math.random().toString(36).substring(2, 6).toUpperCase()
+        );
       },
     },
     orderedBy: { type: Schema.Types.ObjectId, ref: 'User' },
@@ -218,9 +244,18 @@ const LabResultSchema = new Schema(
     category: {
       type: String,
       enum: [
-        'hematology', 'chemistry', 'microbiology', 'urinalysis',
-        'serology', 'immunology', 'endocrinology', 'coagulation',
-        'toxicology', 'genetic', 'pathology', 'other',
+        'hematology',
+        'chemistry',
+        'microbiology',
+        'urinalysis',
+        'serology',
+        'immunology',
+        'endocrinology',
+        'coagulation',
+        'toxicology',
+        'genetic',
+        'pathology',
+        'other',
       ],
       required: true,
     },
@@ -230,7 +265,10 @@ const LabResultSchema = new Schema(
     },
     loincCode: String,
     specimen: {
-      type: { type: String, enum: ['blood', 'urine', 'csf', 'stool', 'swab', 'tissue', 'sputum', 'other'] },
+      type: {
+        type: String,
+        enum: ['blood', 'urine', 'csf', 'stool', 'swab', 'tissue', 'sputum', 'other'],
+      },
       collectedAt: Date,
       collectedBy: String,
     },
@@ -240,7 +278,10 @@ const LabResultSchema = new Schema(
         value: String,
         unit: String,
         referenceRange: { low: String, high: String, text: String },
-        flag: { type: String, enum: ['normal', 'low', 'high', 'critical_low', 'critical_high', 'abnormal'] },
+        flag: {
+          type: String,
+          enum: ['normal', 'low', 'high', 'critical_low', 'critical_high', 'abnormal'],
+        },
       },
     ],
     overallStatus: {
@@ -271,7 +312,6 @@ const LabResultSchema = new Schema(
 );
 
 LabResultSchema.index({ beneficiary: 1, orderedDate: -1 });
-LabResultSchema.index({ labOrderNumber: 1 });
 LabResultSchema.index({ category: 1, overallStatus: 1 });
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -286,11 +326,21 @@ const ClinicalNoteSchema = new Schema(
     noteType: {
       type: String,
       enum: [
-        'progress_note', 'admission_note', 'discharge_summary',
-        'consultation_note', 'procedure_note', 'therapy_note',
-        'nursing_note', 'social_work_note', 'dietitian_note',
-        'psychology_note', 'iep_note', 'evaluation_note',
-        'daily_note', 'telephone_note', 'other',
+        'progress_note',
+        'admission_note',
+        'discharge_summary',
+        'consultation_note',
+        'procedure_note',
+        'therapy_note',
+        'nursing_note',
+        'social_work_note',
+        'dietitian_note',
+        'psychology_note',
+        'iep_note',
+        'evaluation_note',
+        'daily_note',
+        'telephone_note',
+        'other',
       ],
       required: true,
     },
@@ -332,7 +382,10 @@ const ClinicalNoteSchema = new Schema(
       ],
       orders: [
         {
-          type: { type: String, enum: ['lab', 'imaging', 'therapy', 'referral', 'procedure', 'other'] },
+          type: {
+            type: String,
+            enum: ['lab', 'imaging', 'therapy', 'referral', 'procedure', 'other'],
+          },
           description: String,
         },
       ],
@@ -350,7 +403,10 @@ const ClinicalNoteSchema = new Schema(
       goals: [
         {
           goal: { ar: String, en: String },
-          status: { type: String, enum: ['not_started', 'in_progress', 'achieved', 'modified', 'discontinued'] },
+          status: {
+            type: String,
+            enum: ['not_started', 'in_progress', 'achieved', 'modified', 'discontinued'],
+          },
           progress: String,
         },
       ],
@@ -423,9 +479,16 @@ const AllergySchema = new Schema(
       manifestation: {
         type: String,
         enum: [
-          'rash', 'hives', 'itching', 'swelling', 'anaphylaxis',
-          'respiratory', 'gastrointestinal', 'cardiovascular',
-          'neurological', 'other',
+          'rash',
+          'hives',
+          'itching',
+          'swelling',
+          'anaphylaxis',
+          'respiratory',
+          'gastrointestinal',
+          'cardiovascular',
+          'neurological',
+          'other',
         ],
       },
       severity: {

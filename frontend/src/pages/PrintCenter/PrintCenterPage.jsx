@@ -70,6 +70,17 @@ import {
   MenuBook as ElearningIcon,
   WhatsApp as WhatsAppIcon,
   Hub as MicroservicesIcon,
+  /* Batch 6 Icons */
+  Handshake as PartnershipsIcon,
+  HealthAndSafety as InsuranceIcon,
+  GppGood as RiskComplianceIcon,
+  Assessment as ReportBuilderIcon,
+  MedicalInformation as TreatmentWaitIcon,
+  Mosque as ZakatIcon,
+  TrendingUp as SuccessionIcon,
+  ThumbsUpDown as FeedbackIcon,
+  Biotech as IntegratedCareIcon,
+  SupportAgent as AgentChatIcon,
 } from '@mui/icons-material';
 
 /* ─── Batch 1 Templates ─── */
@@ -132,6 +143,18 @@ import { SUPPLY_CHAIN_EXTENDED_TEMPLATES, SupplyChainExtendedTemplateRenderer } 
 import { ELEARNING_KNOWLEDGE_TEMPLATES, ElearningKnowledgeTemplateRenderer } from './templates/ElearningKnowledgePrintTemplates';
 import { WHATSAPP_MOBILE_TEMPLATES, WhatsAppMobileTemplateRenderer } from './templates/WhatsAppMobilePrintTemplates';
 import { MICROSERVICES_DASHBOARD_TEMPLATES, MicroservicesDashboardTemplateRenderer } from './templates/MicroservicesDashboardPrintTemplates';
+
+/* ─── Batch 6 Templates ─── */
+import { PARTNERSHIPS_PR_TEMPLATES, PartnershipsPRTemplateRenderer } from './templates/PartnershipsPRPrintTemplates';
+import { INSURANCE_LEAVE_TEMPLATES, InsuranceLeaveTemplateRenderer } from './templates/InsuranceLeavePrintTemplates';
+import { RISK_COMPLIANCE_TEMPLATES, RiskComplianceTemplateRenderer } from './templates/RiskCompliancePrintTemplates';
+import { REPORT_BUILDER_TEMPLATES, ReportBuilderTemplateRenderer } from './templates/ReportBuilderPrintTemplates';
+import { TREATMENT_WAITLIST_TEMPLATES, TreatmentWaitlistTemplateRenderer } from './templates/TreatmentWaitlistPrintTemplates';
+import { ZAKAT_ISLAMIC_FINANCE_TEMPLATES, ZakatIslamicFinanceTemplateRenderer } from './templates/ZakatIslamicFinancePrintTemplates';
+import { SUCCESSION_PERFORMANCE_TEMPLATES, SuccessionPerformanceTemplateRenderer } from './templates/SuccessionPerformancePrintTemplates';
+import { FEEDBACK_GAMIFICATION_TEMPLATES, FeedbackGamificationTemplateRenderer } from './templates/FeedbackGamificationPrintTemplates';
+import { INTEGRATED_CARE_OCR_TEMPLATES, IntegratedCareOCRTemplateRenderer } from './templates/IntegratedCareOCRPrintTemplates';
+import { AGENT_CHAT_REALTIME_TEMPLATES, AgentChatRealtimeTemplateRenderer } from './templates/AgentChatRealtimePrintTemplates';
 
 /* ─── Module Groups ─── */
 const MODULE_GROUPS = [
@@ -444,6 +467,67 @@ const MODULE_GROUPS = [
     icon: <MicroservicesIcon />, color: '#455a64',
     templates: MICROSERVICES_DASHBOARD_TEMPLATES,
     renderer: MicroservicesDashboardTemplateRenderer,
+  },
+  /* ─── Batch 6 Modules ─── */
+  {
+    id: 'partnerships-pr', name: 'الشراكات والعلاقات العامة', nameEn: 'Partnerships & Public Relations',
+    icon: <PartnershipsIcon />, color: '#00695c',
+    templates: PARTNERSHIPS_PR_TEMPLATES,
+    renderer: PartnershipsPRTemplateRenderer,
+  },
+  {
+    id: 'insurance-leave', name: 'التأمين والإجازات', nameEn: 'Insurance & Leave Management',
+    icon: <InsuranceIcon />, color: '#1565c0',
+    templates: INSURANCE_LEAVE_TEMPLATES,
+    renderer: InsuranceLeaveTemplateRenderer,
+  },
+  {
+    id: 'risk-compliance', name: 'المخاطر والامتثال', nameEn: 'Risk & Compliance',
+    icon: <RiskComplianceIcon />, color: '#c62828',
+    templates: RISK_COMPLIANCE_TEMPLATES,
+    renderer: RiskComplianceTemplateRenderer,
+  },
+  {
+    id: 'report-builder', name: 'منشئ التقارير', nameEn: 'Report Builder & Analytics',
+    icon: <ReportBuilderIcon />, color: '#6a1b9a',
+    templates: REPORT_BUILDER_TEMPLATES,
+    renderer: ReportBuilderTemplateRenderer,
+  },
+  {
+    id: 'treatment-waitlist', name: 'تصاريح العلاج وقوائم الانتظار', nameEn: 'Treatment Auth & Waitlist',
+    icon: <TreatmentWaitIcon />, color: '#2e7d32',
+    templates: TREATMENT_WAITLIST_TEMPLATES,
+    renderer: TreatmentWaitlistTemplateRenderer,
+  },
+  {
+    id: 'zakat-islamic', name: 'الزكاة والمالية الإسلامية', nameEn: 'Zakat & Islamic Finance',
+    icon: <ZakatIcon />, color: '#1b5e20',
+    templates: ZAKAT_ISLAMIC_FINANCE_TEMPLATES,
+    renderer: ZakatIslamicFinanceTemplateRenderer,
+  },
+  {
+    id: 'succession-perf', name: 'التعاقب وتقييم الأداء', nameEn: 'Succession & Performance',
+    icon: <SuccessionIcon />, color: '#0d47a1',
+    templates: SUCCESSION_PERFORMANCE_TEMPLATES,
+    renderer: SuccessionPerformanceTemplateRenderer,
+  },
+  {
+    id: 'feedback-gamification', name: 'التغذية الراجعة والتلعيب', nameEn: 'Feedback & Gamification',
+    icon: <FeedbackIcon />, color: '#7b1fa2',
+    templates: FEEDBACK_GAMIFICATION_TEMPLATES,
+    renderer: FeedbackGamificationTemplateRenderer,
+  },
+  {
+    id: 'integrated-care-ocr', name: 'الرعاية المتكاملة و OCR', nameEn: 'Integrated Care & OCR',
+    icon: <IntegratedCareIcon />, color: '#00897b',
+    templates: INTEGRATED_CARE_OCR_TEMPLATES,
+    renderer: IntegratedCareOCRTemplateRenderer,
+  },
+  {
+    id: 'agent-chat-realtime', name: 'الوكيل الذكي والدردشة', nameEn: 'Agent, Chat & Realtime',
+    icon: <AgentChatIcon />, color: '#37474f',
+    templates: AGENT_CHAT_REALTIME_TEMPLATES,
+    renderer: AgentChatRealtimeTemplateRenderer,
   },
 ];
 

@@ -152,7 +152,7 @@ const PortalMessageSchema = new Schema(
 PortalMessageSchema.index({ fromId: 1, createdAt: -1 });
 PortalMessageSchema.index({ toId: 1, isRead: 1 });
 PortalMessageSchema.index({ relatedBeneficiaryId: 1 });
-PortalMessageSchema.index({ createdAt: -1 });
+// createdAt: removed — index:true creates implicit index
 
 // Virtual: Sender Info
 PortalMessageSchema.virtual('senderInfo', {

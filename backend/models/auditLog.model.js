@@ -288,7 +288,7 @@ const auditLogSchema = new mongoose.Schema(
 );
 
 // Indexes للبحث السريع
-auditLogSchema.index({ timestamp: -1 });
+// timestamp: removed — index:true creates implicit index
 auditLogSchema.index({ userId: 1, timestamp: -1 });
 auditLogSchema.index({ eventType: 1, timestamp: -1 });
 auditLogSchema.index({ severity: 1, timestamp: -1 });

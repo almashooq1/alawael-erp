@@ -114,7 +114,7 @@ const DisciplinaryActionSchema = new mongoose.Schema(
 );
 
 DisciplinaryActionSchema.index({ employeeId: 1, status: 1 });
-DisciplinaryActionSchema.index({ actionNumber: 1 });
+// actionNumber: removed — unique:true creates implicit index
 DisciplinaryActionSchema.index({ type: 1, status: 1 });
 
 DisciplinaryActionSchema.pre('save', async function (next) {

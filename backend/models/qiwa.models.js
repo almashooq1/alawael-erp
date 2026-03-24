@@ -212,7 +212,7 @@ QiwaContractSchema.index({
   establishmentId: 1,
   status: 1,
 });
-QiwaContractSchema.index({ createdAt: -1 });
+// createdAt: removed — index:true creates implicit index
 
 // =====================================================
 // QIWA EMPLOYEE MODEL

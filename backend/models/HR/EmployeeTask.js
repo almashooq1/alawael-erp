@@ -73,6 +73,6 @@ const EmployeeTaskSchema = new mongoose.Schema(
 EmployeeTaskSchema.index({ assignedTo: 1, status: 1 });
 EmployeeTaskSchema.index({ assignedBy: 1, status: 1 });
 EmployeeTaskSchema.index({ dueDate: 1, status: 1 });
-EmployeeTaskSchema.index({ taskNumber: 1 }, { unique: true });
+// taskNumber: removed — unique:true creates implicit index
 
 module.exports = mongoose.models.EmployeeTask || mongoose.model('EmployeeTask', EmployeeTaskSchema);

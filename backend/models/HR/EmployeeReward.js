@@ -87,7 +87,7 @@ const EmployeeRewardSchema = new mongoose.Schema(
 
 EmployeeRewardSchema.index({ employeeId: 1, type: 1 });
 EmployeeRewardSchema.index({ status: 1, type: 1 });
-EmployeeRewardSchema.index({ rewardNumber: 1 }, { unique: true });
+// rewardNumber: removed — unique:true creates implicit index
 EmployeeRewardSchema.index({ 'period.year': 1, 'period.month': 1 });
 
 module.exports =

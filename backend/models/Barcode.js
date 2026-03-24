@@ -216,7 +216,7 @@ const BarcodeSchema = new mongoose.Schema({
 // Note: code field has unique:true (creates automatic index), so no need for compound index with code
 // Note: status field has index:true in schema definition
 BarcodeSchema.index({ entityType: 1, entityId: 1 });
-BarcodeSchema.index({ createdAt: -1 });
+// createdAt: removed — index:true creates implicit index
 BarcodeSchema.index({ lastScannedAt: -1 });
 BarcodeSchema.index({ batchId: 1 });
 BarcodeSchema.index({ tags: 1 });

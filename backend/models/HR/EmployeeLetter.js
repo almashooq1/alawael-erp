@@ -93,7 +93,7 @@ const EmployeeLetterSchema = new mongoose.Schema(
 );
 
 EmployeeLetterSchema.index({ employeeId: 1, type: 1 });
-EmployeeLetterSchema.index({ letterNumber: 1 });
+// letterNumber: removed — unique:true creates implicit index
 EmployeeLetterSchema.index({ status: 1 });
 
 EmployeeLetterSchema.pre('save', async function (next) {

@@ -105,7 +105,7 @@ const PromotionTransferSchema = new mongoose.Schema(
 );
 
 PromotionTransferSchema.index({ employeeId: 1, type: 1, status: 1 });
-PromotionTransferSchema.index({ requestNumber: 1 });
+// requestNumber: removed — unique:true creates implicit index
 PromotionTransferSchema.index({ status: 1 });
 
 PromotionTransferSchema.pre('save', async function (next) {

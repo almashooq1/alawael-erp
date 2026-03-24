@@ -85,7 +85,7 @@ const OvertimeRequestSchema = new mongoose.Schema(
 );
 
 OvertimeRequestSchema.index({ employeeId: 1, date: -1 });
-OvertimeRequestSchema.index({ requestNumber: 1 });
+// requestNumber: removed — unique:true creates implicit index
 OvertimeRequestSchema.index({ status: 1, date: -1 });
 OvertimeRequestSchema.index({ department: 1, date: -1 });
 

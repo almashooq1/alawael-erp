@@ -89,7 +89,7 @@ const WorkPermitSchema = new mongoose.Schema(
 WorkPermitSchema.index({ employeeId: 1, documentType: 1 });
 WorkPermitSchema.index({ expiryDate: 1, status: 1 });
 WorkPermitSchema.index({ status: 1, documentType: 1 });
-WorkPermitSchema.index({ recordNumber: 1 }, { unique: true });
+// recordNumber: removed — unique:true creates implicit index
 
 // Virtual: days until expiry
 WorkPermitSchema.virtual('daysUntilExpiry').get(function () {

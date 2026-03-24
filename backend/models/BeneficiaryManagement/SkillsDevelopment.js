@@ -164,7 +164,7 @@ skillsDevelopmentSchema.index({ beneficiaryId: 1, skillCategory: 1 });
 skillsDevelopmentSchema.index({ skillName: 1 });
 skillsDevelopmentSchema.index({ currentLevel: -1 });
 skillsDevelopmentSchema.index({ endorsementCount: -1 });
-skillsDevelopmentSchema.index({ skillCategory: 1 });
+// skillCategory: removed — index:true creates implicit index
 
 // Pre-save middleware
 skillsDevelopmentSchema.pre('save', function (next) {

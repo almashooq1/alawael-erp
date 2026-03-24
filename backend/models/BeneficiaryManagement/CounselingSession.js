@@ -198,10 +198,10 @@ const counselingSessionSchema = new mongoose.Schema(
 );
 
 // Indexes
-counselingSessionSchema.index({ beneficiaryId: 1 });
+// beneficiaryId: removed — index:true creates implicit index
 counselingSessionSchema.index({ counselorId: 1 });
-counselingSessionSchema.index({ sessionStatus: 1 });
-counselingSessionSchema.index({ scheduledDate: 1 });
+// sessionStatus: removed — index:true creates implicit index
+// scheduledDate: removed — index:true creates implicit index
 counselingSessionSchema.index({ riskLevel: 1 });
 counselingSessionSchema.index({ createdAt: -1 });
 

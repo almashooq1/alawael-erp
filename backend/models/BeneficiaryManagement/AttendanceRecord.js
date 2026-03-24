@@ -110,7 +110,7 @@ const attendanceRecordSchema = new mongoose.Schema(
 attendanceRecordSchema.index({ beneficiaryId: 1, attendanceDate: -1 });
 attendanceRecordSchema.index({ courseId: 1 });
 attendanceRecordSchema.index({ status: 1 });
-attendanceRecordSchema.index({ attendanceDate: 1 });
+// attendanceDate: removed — index:true creates implicit index
 attendanceRecordSchema.index({ attendanceAlert: 1 });
 attendanceRecordSchema.index({ 'consecutiveAbsences.count': 1 });
 

@@ -228,7 +228,7 @@ const GuardianSchema = new Schema(
 // Indexes
 GuardianSchema.index({ beneficiaries: 1 });
 GuardianSchema.index({ accountStatus: 1 });
-GuardianSchema.index({ createdAt: -1 });
+// createdAt: removed — index:true creates implicit index
 
 // Virtuals
 GuardianSchema.virtual('fullName_ar').get(function () {

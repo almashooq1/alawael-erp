@@ -125,8 +125,8 @@ const achievementSchema = new mongoose.Schema(
 );
 
 // Indexes
-achievementSchema.index({ beneficiaryId: 1 });
-achievementSchema.index({ type: 1 });
+// beneficiaryId: removed — index:true creates implicit index
+// type: removed — index:true creates implicit index
 achievementSchema.index({ achievedDate: -1 });
 achievementSchema.index({ verificationStatus: 1 });
 achievementSchema.index({ pointsAwarded: 1 });

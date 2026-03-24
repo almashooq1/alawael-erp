@@ -6,6 +6,7 @@
  */
 
 const seedDatabase = require('../utils/seedDatabase');
+const logger = require('../utils/logger');
 
 // Mock User model - must match the path in seedDatabase.js
 jest.mock('../models/User', () => {
@@ -60,14 +61,14 @@ describe('Seed Database Utility', () => {
     jest.clearAllMocks();
     // Re-setup bcrypt mock after clearing
     bcrypt.hash.mockImplementation((password, rounds) => Promise.resolve(`hashed_${password}`));
-    // Suppress console logs during tests
-    jest.spyOn(console, 'log').mockImplementation(() => {});
-    jest.spyOn(console, 'error').mockImplementation(() => {});
+    // Spy on logger (seedDatabase uses logger, not console)
+    jest.spyOn(logger, 'info').mockImplementation(() => {});
+    jest.spyOn(logger, 'error').mockImplementation(() => {});
   });
 
   afterEach(() => {
-    console.log.mockRestore();
-    console.error.mockRestore();
+    logger.info.mockRestore();
+    logger.error.mockRestore();
   });
 
   test('should seed admin user when database is empty', async () => {
@@ -94,7 +95,7 @@ describe('Seed Database Utility', () => {
     const secondCount = User.getMockUsers().size;
 
     expect(firstCount).toBe(secondCount);
-    expect(console.log).toHaveBeenCalledWith('✅ Admin user already exists');
+    expect(logger.info).toHaveBeenCalledWith('✅ Admin user already exists');
   });
 
   test('should hash password before saving', async () => {
@@ -128,7 +129,7 @@ describe('Seed Database Utility', () => {
   test('should log success message after creating user', async () => {
     await seedDatabase();
 
-    expect(console.log).toHaveBeenCalledWith(expect.stringContaining('✅ Admin user created'));
+    expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('✅ Admin user created'));
   });
 
   test('should handle errors gracefully', async () => {
@@ -139,7 +140,7 @@ describe('Seed Database Utility', () => {
 
     await seedDatabase();
 
-    expect(console.error).toHaveBeenCalledWith('⚠️  Seeding warning:', 'Database error');
+    expect(logger.error).toHaveBeenCalledWith('⚠️  Seeding warning:', 'Database error');
   });
 
   test('should ignore duplicate key errors', async () => {
@@ -153,7 +154,7 @@ describe('Seed Database Utility', () => {
     await seedDatabase();
 
     // Should not log error for duplicate key
-    expect(console.error).not.toHaveBeenCalled();
+    expect(logger.error).not.toHaveBeenCalled();
   });
 
   test('should use correct bcrypt rounds', async () => {
@@ -170,13 +171,13 @@ describe('Seed Database Integration', () => {
 
   beforeEach(() => {
     User.clearMock();
-    jest.spyOn(console, 'log').mockImplementation(() => {});
-    jest.spyOn(console, 'error').mockImplementation(() => {});
+    jest.spyOn(logger, 'info').mockImplementation(() => {});
+    jest.spyOn(logger, 'error').mockImplementation(() => {});
   });
 
   afterEach(() => {
-    console.log.mockRestore();
-    console.error.mockRestore();
+    logger.info.mockRestore();
+    logger.error.mockRestore();
   });
 
   test('should work with async/await pattern', async () => {

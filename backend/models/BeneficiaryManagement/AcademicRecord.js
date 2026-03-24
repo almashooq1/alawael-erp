@@ -171,7 +171,7 @@ const academicRecordSchema = new mongoose.Schema(
 );
 
 // Indexes
-academicRecordSchema.index({ beneficiaryId: 1 });
+// beneficiaryId: removed — index:true creates implicit index
 academicRecordSchema.index({ enrollmentStatus: 1 });
 academicRecordSchema.index({ cumulativeGPA: -1 });
 academicRecordSchema.index({ academicStanding: 1 });

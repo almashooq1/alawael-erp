@@ -206,7 +206,7 @@ const communicationSchema = new mongoose.Schema(
 communicationSchema.index({ title: 'text', subject: 'text', description: 'text' });
 communicationSchema.index({ type: 1, status: 1 });
 communicationSchema.index({ priority: 1, dueDate: 1 });
-communicationSchema.index({ sentDate: -1 });
+// sentDate: removed — index:true creates implicit index
 communicationSchema.index({ isArchived: 1, isStarred: 1 });
 
 // دالة لتوليد رقم مرجعي تلقائي

@@ -224,9 +224,9 @@ const financialSupportSchema = new mongoose.Schema(
 );
 
 // Indexes
-financialSupportSchema.index({ beneficiaryId: 1 });
-financialSupportSchema.index({ supportType: 1 });
-financialSupportSchema.index({ requestStatus: 1 });
+// beneficiaryId: removed — index:true creates implicit index
+// supportType: removed — index:true creates implicit index
+// requestStatus: removed — index:true creates implicit index
 financialSupportSchema.index({ requestDate: -1 });
 financialSupportSchema.index({ urgencyLevel: 1 });
 financialSupportSchema.index({ eligibilityStatus: 1 });

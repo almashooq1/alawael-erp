@@ -82,7 +82,7 @@ const EmployeeCustodySchema = new mongoose.Schema(
 
 EmployeeCustodySchema.index({ employeeId: 1, status: 1 });
 EmployeeCustodySchema.index({ assetCategory: 1, status: 1 });
-EmployeeCustodySchema.index({ custodyNumber: 1 }, { unique: true });
+// custodyNumber: removed — unique:true creates implicit index
 
 module.exports =
   mongoose.models.EmployeeCustody || mongoose.model('EmployeeCustody', EmployeeCustodySchema);

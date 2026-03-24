@@ -387,7 +387,7 @@ const beneficiarySchema = new mongoose.Schema(
 beneficiarySchema.index({ status: 1, firstName: 1 });
 beneficiarySchema.index({ status: 1, name: 1 });
 beneficiarySchema.index({ 'contactInfo.primaryPhone': 1 });
-beneficiarySchema.index({ registrationDate: -1 });
+// registrationDate: removed — index:true creates implicit index
 beneficiarySchema.index({ email: 1 }, { sparse: true });
 beneficiarySchema.index({ phone: 1 }, { sparse: true });
 beneficiarySchema.index({ category: 1, status: 1 });

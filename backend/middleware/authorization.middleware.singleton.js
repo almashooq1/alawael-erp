@@ -2,7 +2,7 @@
  * Authorization Middleware with Singleton Pattern
  * Handles role-based access control, permissions, and advanced authorization
  * All operations use singleton service instances
- * 
+ *
  * Usage:
  * const authz = require('./authorization.middleware.singleton');
  * app.post('/admin/action', authz.authorize('admin'), handler);
@@ -19,7 +19,7 @@ const logger = require('../utils/logger');
 /**
  * Role-based authorization
  * User must have one of the specified roles
- * 
+ *
  * @param {...string} allowedRoles - Roles allowed to access
  * @returns {Function} Express middleware
  */
@@ -59,11 +59,11 @@ const authorize = (...allowedRoles) => {
 /**
  * Check specific permission
  * Uses permission service to validate access
- * 
+ *
  * @param {string} permission - Required permission
  * @returns {Function} Express middleware
  */
-const checkPermission = (permission) => {
+const checkPermission = permission => {
   return async (req, res, next) => {
     try {
       if (!req.user) {
@@ -101,7 +101,7 @@ const checkPermission = (permission) => {
 /**
  * Check resource ownership
  * Verifies user owns the resource or is admin
- * 
+ *
  * @param {string} paramName - URL parameter containing resource ID
  * @param {string} resourceType - Type of resource (e.g., 'post', 'comment')
  * @returns {Function} Express middleware
@@ -160,7 +160,7 @@ const checkOwnership = (paramName, resourceType = 'resource') => {
 /**
  * Require multi-factor authentication
  * Verifies user has MFA enabled
- * 
+ *
  * @param {Request} req - Express request
  * @param {Response} res - Express response
  * @param {Function} next - Express next middleware
@@ -207,7 +207,7 @@ const requireMFA = (req, res, next) => {
 /**
  * Require verified email
  * Ensures user has verified their email address
- * 
+ *
  * @param {Request} req - Express request
  * @param {Response} res - Express response
  * @param {Function} next - Express next middleware
@@ -244,7 +244,7 @@ const requireVerified = (req, res, next) => {
 /**
  * Check if user account is active
  * Prevents access from suspended or disabled accounts
- * 
+ *
  * @param {Request} req - Express request
  * @param {Response} res - Express response
  * @param {Function} next - Express next middleware
@@ -285,7 +285,7 @@ const checkActiveUser = async (req, res, next) => {
 /**
  * Detect and flag new devices
  * Logs device information for security monitoring
- * 
+ *
  * @param {Request} req - Express request
  * @param {Response} res - Express response
  * @param {Function} next - Express next middleware
@@ -318,7 +318,7 @@ const detectNewDevice = (req, res, next) => {
 /**
  * Require password change
  * Forces users with expired passwords to update
- * 
+ *
  * @param {Request} req - Express request
  * @param {Response} res - Express response
  * @param {Function} next - Express next middleware
@@ -356,7 +356,7 @@ const requirePasswordChange = (req, res, next) => {
 /**
  * Check branch/organization access
  * Verifies user has access to the specified branch
- * 
+ *
  * @param {string} paramName - URL parameter containing branch ID
  * @returns {Function} Express middleware
  */
@@ -408,15 +408,15 @@ const checkBranch = (paramName = 'branchId') => {
 /**
  * Audit logging middleware
  * Logs all access to sensitive endpoints
- * 
+ *
  * @param {string} action - Action being performed
  * @returns {Function} Express middleware
  */
-const auditLog = (action) => {
+const auditLog = action => {
   return (req, res, next) => {
     const originalJson = res.json;
 
-    res.json = function(data) {
+    res.json = function (data) {
       const logEntry = {
         timestamp: new Date().toISOString(),
         action,

@@ -101,7 +101,7 @@ const ShiftSwapRequestSchema = new mongoose.Schema(
 );
 
 ShiftSwapRequestSchema.index({ requesterId: 1, status: 1 });
-ShiftSwapRequestSchema.index({ requestNumber: 1 }, { unique: true });
+// requestNumber: removed — unique:true creates implicit index
 
 const ShiftDefinition =
   mongoose.models.ShiftDefinition || mongoose.model('ShiftDefinition', ShiftDefinitionSchema);

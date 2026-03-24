@@ -179,8 +179,8 @@ const supportPlanSchema = new mongoose.Schema(
 );
 
 // Indexes
-supportPlanSchema.index({ beneficiaryId: 1 });
-supportPlanSchema.index({ planStatus: 1 });
+// beneficiaryId: removed — index:true creates implicit index
+// planStatus: removed — index:true creates implicit index
 supportPlanSchema.index({ planType: 1 });
 supportPlanSchema.index({ 'reviewSchedule.nextReviewDate': 1 });
 supportPlanSchema.index({ coordinatorId: 1 });

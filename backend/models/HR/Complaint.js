@@ -96,7 +96,7 @@ const ComplaintSchema = new mongoose.Schema(
 );
 
 ComplaintSchema.index({ employeeId: 1, status: 1 });
-ComplaintSchema.index({ complaintNumber: 1 });
+// complaintNumber: removed — unique:true creates implicit index
 ComplaintSchema.index({ status: 1, priority: 1 });
 
 ComplaintSchema.pre('save', async function (next) {

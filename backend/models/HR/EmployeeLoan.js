@@ -112,7 +112,7 @@ const EmployeeLoanSchema = new mongoose.Schema(
 );
 
 EmployeeLoanSchema.index({ employeeId: 1, status: 1 });
-EmployeeLoanSchema.index({ loanNumber: 1 });
+// loanNumber: removed — unique:true creates implicit index
 EmployeeLoanSchema.index({ status: 1 });
 
 EmployeeLoanSchema.pre('save', async function (next) {

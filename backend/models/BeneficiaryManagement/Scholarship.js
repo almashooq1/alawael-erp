@@ -183,8 +183,8 @@ const scholarshipSchema = new mongoose.Schema(
 );
 
 // Indexes
-scholarshipSchema.index({ beneficiaryId: 1 });
-scholarshipSchema.index({ applicationStatus: 1 });
+// beneficiaryId: removed — index:true creates implicit index
+// applicationStatus: removed — index:true creates implicit index
 scholarshipSchema.index({ academicYear: 1 });
 scholarshipSchema.index({ applicationDate: -1 });
 scholarshipSchema.index({ approvalDate: -1 });

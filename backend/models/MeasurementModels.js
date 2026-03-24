@@ -1004,7 +1004,7 @@ MeasurementTypeSchema.index({ scoringMethod: 1 });
 
 MeasurementMasterSchema.index({ typeId: 1, isActive: 1 });
 MeasurementMasterSchema.index({ targetDisabilities: 1 });
-MeasurementMasterSchema.index({ code: 1 });
+// code: removed — unique:true creates implicit index
 
 MeasurementResultSchema.index({ beneficiaryId: 1, dateAdministrated: -1 });
 MeasurementResultSchema.index({ beneficiaryId: 1, typeId: 1 });
@@ -1015,7 +1015,7 @@ MeasurementResultSchema.index({ 'linkedPrograms.programId': 1 });
 IndividualRehabPlanSchema.index({ beneficiaryId: 1, status: 1 });
 IndividualRehabPlanSchema.index({ planPeriod: 1 });
 IndividualRehabPlanSchema.index({ 'activePrograms.programId': 1 });
-IndividualRehabPlanSchema.index({ planCode: 1 });
+// planCode: removed — unique:true creates implicit index
 
 QuickAssessmentSchema.index({ beneficiaryId: 1, date: -1 });
 QuickAssessmentSchema.index({ assessmentType: 1 });

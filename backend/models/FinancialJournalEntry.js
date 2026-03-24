@@ -209,7 +209,7 @@ const journalEntrySchema = new mongoose.Schema(
 
 // ===== INDEXES =====
 
-journalEntrySchema.index({ date: -1 });
+// date: removed — index:true creates implicit index
 
 journalEntrySchema.index({ 'account.accountCode': 1 });
 

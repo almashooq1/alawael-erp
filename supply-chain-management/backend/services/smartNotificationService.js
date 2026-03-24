@@ -88,9 +88,7 @@ class SmartNotificationService extends EventEmitter {
       notification.status = 'sending';
       await notification.save();
 
-      const deliveryPromises = notification.channels.map(channel =>
-        this.sendToChannel(notification, channel)
-      );
+      const deliveryPromises = notification.channels.map(channel => this.sendToChannel(notification, channel));
 
       await Promise.all(deliveryPromises);
 

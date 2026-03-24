@@ -23,16 +23,7 @@ class FinancialIntelligenceService extends EventEmitter {
    */
   async createPayment(paymentData) {
     try {
-      const {
-        amount,
-        customerId,
-        currency = 'USD',
-        paymentMethod,
-        paymentGateway,
-        description,
-        orderId,
-        invoiceId,
-      } = paymentData;
+      const { amount, customerId, currency = 'USD', paymentMethod, paymentGateway, description, orderId, invoiceId } = paymentData;
 
       // Generate unique transaction ID
       const transactionId = `TXN-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -198,10 +189,7 @@ class FinancialIntelligenceService extends EventEmitter {
       if (status) query.status = status;
 
       const total = await Transaction.countDocuments(query);
-      const transactions = await Transaction.find(query)
-        .sort({ createdAt: -1 })
-        .limit(limit)
-        .skip(skip);
+      const transactions = await Transaction.find(query).sort({ createdAt: -1 }).limit(limit).skip(skip);
 
       return { transactions, total, limit, skip };
     } catch (error) {
@@ -219,9 +207,7 @@ class FinancialIntelligenceService extends EventEmitter {
       let unmatched = [];
 
       for (const txn of pending) {
-        const statementEntry = bankStatement.find(
-          s => Math.abs(s.amount - txn.amount) < 0.01 && Math.abs(s.date - txn.processedAt) < 1
-        );
+        const statementEntry = bankStatement.find(s => Math.abs(s.amount - txn.amount) < 0.01 && Math.abs(s.date - txn.processedAt) < 1);
 
         if (statementEntry) {
           await txn.reconcile(statementEntry, options.notes);
@@ -245,23 +231,12 @@ class FinancialIntelligenceService extends EventEmitter {
    */
   async createInvoice(invoiceData) {
     try {
-      const {
-        customerId,
-        vendorId,
-        items = [],
-        paymentTerms = 'net30',
-        dueDate,
-        poNumber,
-      } = invoiceData;
+      const { customerId, vendorId, items = [], paymentTerms = 'net30', dueDate, poNumber } = invoiceData;
 
       // Calculate amounts
       const subtotal = items.reduce((sum, item) => sum + item.lineTotal, 0);
-      const taxAmount = items.reduce(
-        (sum, item) => sum + (item.lineTotal * (item.taxRate || 0)) / 100,
-        0
-      );
-      const totalAmount =
-        subtotal + taxAmount + (invoiceData.shippingCost || 0) - (invoiceData.discountAmount || 0);
+      const taxAmount = items.reduce((sum, item) => sum + (item.lineTotal * (item.taxRate || 0)) / 100, 0);
+      const totalAmount = subtotal + taxAmount + (invoiceData.shippingCost || 0) - (invoiceData.discountAmount || 0);
 
       // Generate invoice number
       const invoiceNumber = `INV-${moment().format('YYYYMMDD')}-${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
@@ -384,14 +359,7 @@ class FinancialIntelligenceService extends EventEmitter {
    */
   async createBudget(budgetData) {
     try {
-      const {
-        budgetName,
-        department,
-        fiscalYear,
-        categories = [],
-        startDate,
-        endDate,
-      } = budgetData;
+      const { budgetName, department, fiscalYear, categories = [], startDate, endDate } = budgetData;
 
       // Generate budget code
       const budgetCode = `BDG-${department.substring(0, 3).toUpperCase()}-${fiscalYear}-${Date.now() % 10000}`;
@@ -645,20 +613,14 @@ class FinancialIntelligenceService extends EventEmitter {
       const categories = budget.categories.map(cat => ({
         ...cat,
         variance: cat.allocatedAmount - cat.spent,
-        variancePercent:
-          cat.allocatedAmount > 0
-            ? ((cat.allocatedAmount - cat.spent) / cat.allocatedAmount) * 100
-            : 0,
+        variancePercent: cat.allocatedAmount > 0 ? ((cat.allocatedAmount - cat.spent) / cat.allocatedAmount) * 100 : 0,
       }));
 
       return {
         budget,
         categories,
         totalVariance: budget.totalAllocated - budget.totalSpent,
-        variancePercent:
-          budget.totalAllocated > 0
-            ? ((budget.totalAllocated - budget.totalSpent) / budget.totalAllocated) * 100
-            : 0,
+        variancePercent: budget.totalAllocated > 0 ? ((budget.totalAllocated - budget.totalSpent) / budget.totalAllocated) * 100 : 0,
       };
     } catch (error) {
       throw error;

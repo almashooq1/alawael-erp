@@ -339,9 +339,7 @@ class MessagingService extends EventEmitter {
    */
   deliverQueuedMessages(userId) {
     const userMessages = this.messageQueue.filter(
-      msg =>
-        msg.recipientId === userId ||
-        (msg.metadata.groupMembers && msg.metadata.groupMembers.includes(userId))
+      msg => msg.recipientId === userId || (msg.metadata.groupMembers && msg.metadata.groupMembers.includes(userId)),
     );
 
     const socket = this.activeConnections.get(userId);
@@ -381,10 +379,7 @@ class MessagingService extends EventEmitter {
       activeChats: this.activeChats.size,
       usersTyping: this.typingIndicators.size,
       queuedMessages: this.messageQueue.length,
-      totalMessages: Array.from(this.activeChats.values()).reduce(
-        (sum, chat) => sum + (chat.messageCount || 0),
-        0
-      ),
+      totalMessages: Array.from(this.activeChats.values()).reduce((sum, chat) => sum + (chat.messageCount || 0), 0),
     };
   }
 

@@ -24,10 +24,7 @@ class AdvancedNotificationService extends EventEmitter {
 
   setupProviders() {
     // إعداد Twilio للـ SMS
-    this.twilioClient = twilio(
-      process.env.TWILIO_ACCOUNT_SID,
-      process.env.TWILIO_AUTH_TOKEN
-    );
+    this.twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
     this.twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
 
     // إعداد Nodemailer للـ Email
@@ -37,16 +34,14 @@ class AdvancedNotificationService extends EventEmitter {
       secure: true,
       auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD
-      }
+        pass: process.env.EMAIL_PASSWORD,
+      },
     });
 
     // إعداد Firebase للـ Push Notifications
     if (!admin.apps.length) {
       admin.initializeApp({
-        credential: admin.credential.cert(
-          JSON.parse(process.env.FIREBASE_CREDENTIALS || '{}')
-        )
+        credential: admin.credential.cert(JSON.parse(process.env.FIREBASE_CREDENTIALS || '{}')),
       });
     }
   }
@@ -58,64 +53,60 @@ class AdvancedNotificationService extends EventEmitter {
       // قوالب تنبيهات الحوادث
       accidentAlert: {
         title: 'تنبيه حادث محتمل',
-        description: (data) => 
+        description: data =>
           `السائق ${data.driverName} قد يكون في خطر. درجة المخاطرة: ${data.riskScore}%`,
         priority: 'high',
-        icon: '⚠️'
+        icon: '⚠️',
       },
 
       // قوالب تنبيهات الصيانة
       maintenanceAlert: {
         title: 'صيانة مطلوبة',
-        description: (data) =>
+        description: data =>
           `المركبة ${data.vehicleNumber} تحتاج صيانة. متوقعة خلال ${data.days} أيام`,
         priority: 'medium',
-        icon: '🔧'
+        icon: '🔧',
       },
 
       // قوالب تنبيهات السلامة
       safetyAlert: {
         title: 'تنبيه سلامة',
-        description: (data) =>
-          `تم اكتشاف ${data.violationType} بواسطة ${data.driverName}`,
+        description: data => `تم اكتشاف ${data.violationType} بواسطة ${data.driverName}`,
         priority: 'high',
-        icon: '🚨'
+        icon: '🚨',
       },
 
       // قوالب تنبيهات الوقود
       fuelAlert: {
         title: 'تحذير الوقود',
-        description: (data) =>
-          `وقود المركبة ${data.vehicleNumber} منخفض: ${data.fuelLevel}%`,
+        description: data => `وقود المركبة ${data.vehicleNumber} منخفض: ${data.fuelLevel}%`,
         priority: 'medium',
-        icon: '⛽'
+        icon: '⛽',
       },
 
       // قوالب تنبيهات الموقع
       locationAlert: {
         title: 'تنبيه الموقع',
-        description: (data) =>
-          `المركبة ${data.vehicleNumber} خارج المسار المخطط`,
+        description: data => `المركبة ${data.vehicleNumber} خارج المسار المخطط`,
         priority: 'low',
-        icon: '📍'
+        icon: '📍',
       },
 
       // قوالب التقارير اليومية
       dailyReport: {
         title: 'التقرير اليومي',
-        description: (data) =>
-          `${data.vehiclesActive} مركبات نشطة، ${data.alerts} تنبيهات`,
+        description: data => `${data.vehiclesActive} مركبات نشطة، ${data.alerts} تنبيهات`,
         priority: 'low',
-        icon: '📊'
+        icon: '📊',
       },
 
       // قوالب التنبيهات المخصصة
       customAlert: {
-        title: (data) => data.customTitle,
-        description: (data) => data.customMessage,
+        title: data => data.customTitle,
+        description: data => data.customMessage,
         priority: 'medium',
-        icon: '📬'
-      }
+        icon: '📬',
+      },
     };
   }
 
@@ -152,24 +143,27 @@ class AdvancedNotificationService extends EventEmitter {
     const notificationData = {
       id: this.generateNotificationId(),
       type: notification.type,
-      title: typeof template.title === 'function' 
-        ? template.title(notification.data)
-        : template.title,
-      message: typeof template.description === 'function'
-        ? template.description(notification.data)
-        : template.description,
+      title:
+        typeof template.title === 'function' ? template.title(notification.data) : template.title,
+      message:
+        typeof template.description === 'function'
+          ? template.description(notification.data)
+          : template.description,
       priority: notification.priority || template.priority,
       timestamp: new Date(),
       read: false,
-      channels: notification.channels || []
+      channels: notification.channels || [],
     };
 
     // حفظ في قاعدة البيانات
     await this.saveNotification(recipient.userId, notificationData);
 
     // إرسال عبر القنوات المختارة
-    const channels = notification.channels || Object.keys(recipient.notificationPreferences)
-      .filter(key => recipient.notificationPreferences[key]);
+    const channels =
+      notification.channels ||
+      Object.keys(recipient.notificationPreferences).filter(
+        key => recipient.notificationPreferences[key]
+      );
 
     for (const channel of channels) {
       try {
@@ -209,7 +203,7 @@ class AdvancedNotificationService extends EventEmitter {
       const result = await this.twilioClient.messages.create({
         body: message,
         from: this.twilioPhoneNumber,
-        to: this.formatPhoneNumber(phoneNumber)
+        to: this.formatPhoneNumber(phoneNumber),
       });
 
       logger.info(`تم إرسال SMS برقم: ${result.sid}`);
@@ -218,7 +212,7 @@ class AdvancedNotificationService extends EventEmitter {
         status: 'sent',
         messageId: result.sid,
         channel: 'sms',
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     } catch (error) {
       logger.error('خطأ في إرسال SMS:', error);
@@ -241,7 +235,7 @@ class AdvancedNotificationService extends EventEmitter {
         to: email,
         subject: notification.title,
         html: htmlContent,
-        priority: notification.priority === 'high' ? 'high' : 'normal'
+        priority: notification.priority === 'high' ? 'high' : 'normal',
       });
 
       logger.info(`تم إرسال البريد برقم: ${result.messageId}`);
@@ -250,7 +244,7 @@ class AdvancedNotificationService extends EventEmitter {
         status: 'sent',
         messageId: result.messageId,
         channel: 'email',
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     } catch (error) {
       logger.error('خطأ في إرسال البريد:', error);
@@ -270,33 +264,33 @@ class AdvancedNotificationService extends EventEmitter {
       notification: {
         title: notification.title,
         body: notification.message,
-        imageUrl: this.getIconUrl(notification.priority)
+        imageUrl: this.getIconUrl(notification.priority),
       },
       data: {
         type: notification.type,
         priority: notification.priority,
         timestamp: notification.timestamp.toString(),
-        notificationId: notification.id
+        notificationId: notification.id,
       },
       android: {
         priority: notification.priority === 'high' ? 'high' : 'normal',
         notification: {
           sound: 'default',
-          channelId: 'fleet_alerts'
-        }
+          channelId: 'fleet_alerts',
+        },
       },
       apns: {
         payload: {
           aps: {
             alert: {
               title: notification.title,
-              body: notification.message
+              body: notification.message,
             },
             sound: 'default',
-            badge: 1
-          }
-        }
-      }
+            badge: 1,
+          },
+        },
+      },
     };
 
     try {
@@ -307,7 +301,7 @@ class AdvancedNotificationService extends EventEmitter {
         status: 'sent',
         messageId: result,
         channel: 'push',
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     } catch (error) {
       logger.error('خطأ في إرسال Push:', error);
@@ -323,7 +317,7 @@ class AdvancedNotificationService extends EventEmitter {
       userId,
       ...notification,
       delivered: true,
-      deliveredAt: new Date()
+      deliveredAt: new Date(),
     };
 
     // حفظ في قاعدة البيانات
@@ -334,13 +328,13 @@ class AdvancedNotificationService extends EventEmitter {
       // بث عبر WebSocket
       this.emit('in_app_notification', {
         userId,
-        notification: inAppNotification
+        notification: inAppNotification,
       });
 
       return {
         status: 'delivered',
         channel: 'inApp',
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     } catch (error) {
       logger.error('خطأ في الإشعار داخل التطبيق:', error);
@@ -365,19 +359,19 @@ class AdvancedNotificationService extends EventEmitter {
           type: 'customAlert',
           data: alertData,
           priority: 'high',
-          channels: ['sms', 'email', 'push', 'inApp']
+          channels: ['sms', 'email', 'push', 'inApp'],
         });
 
         alerts.push({
           recipient: recipient.userId,
           status: 'sent',
-          notificationId: alert.id
+          notificationId: alert.id,
         });
       } catch (error) {
         alerts.push({
           recipient: recipient.userId,
           status: 'failed',
-          error: error.message
+          error: error.message,
         });
       }
     }
@@ -399,7 +393,7 @@ class AdvancedNotificationService extends EventEmitter {
       schedule,
       enabled: true,
       createdAt: new Date(),
-      nextRun: this.calculateNextRun(schedule)
+      nextRun: this.calculateNextRun(schedule),
     };
 
     try {
@@ -446,8 +440,7 @@ class AdvancedNotificationService extends EventEmitter {
         if (options.endDate) query.timestamp.$lte = new Date(options.endDate);
       }
 
-      const notifications = await NotificationModel
-        .find(query)
+      const notifications = await NotificationModel.find(query)
         .sort({ timestamp: -1 })
         .limit(options.limit || 10)
         .skip(options.offset || 0)
@@ -459,7 +452,7 @@ class AdvancedNotificationService extends EventEmitter {
         notifications,
         total,
         limit: options.limit || 10,
-        offset: options.offset || 0
+        offset: options.offset || 0,
       };
     } catch (error) {
       logger.error('خطأ في جلب الإشعارات:', error);
@@ -472,13 +465,10 @@ class AdvancedNotificationService extends EventEmitter {
   async markAsRead(notificationId) {
     try {
       const NotificationModel = mongoose.model('Notification');
-      await NotificationModel.findByIdAndUpdate(
-        notificationId,
-        {
-          read: true,
-          readAt: new Date()
-        }
-      );
+      await NotificationModel.findByIdAndUpdate(notificationId, {
+        read: true,
+        readAt: new Date(),
+      });
 
       return { status: 'updated', notificationId };
     } catch (error) {
@@ -494,7 +484,7 @@ class AdvancedNotificationService extends EventEmitter {
         { userId, read: false },
         {
           read: true,
-          readAt: new Date()
+          readAt: new Date(),
         }
       );
 
@@ -525,7 +515,7 @@ class AdvancedNotificationService extends EventEmitter {
     try {
       const NotificationModel = mongoose.model('Notification');
       const result = await NotificationModel.deleteMany({
-        timestamp: { $lt: cutoffDate }
+        timestamp: { $lt: cutoffDate },
       });
 
       logger.info(`تم حذف ${result.deletedCount} إشعار قديم`);
@@ -545,7 +535,7 @@ class AdvancedNotificationService extends EventEmitter {
       channel,
       timestamp: new Date(),
       retryCount: 0,
-      maxRetries: 3
+      maxRetries: 3,
     };
 
     this.queue.push(queueItem);
@@ -562,7 +552,7 @@ class AdvancedNotificationService extends EventEmitter {
 
     try {
       queueItem.retryCount++;
-      
+
       switch (queueItem.channel) {
         case 'sms':
           await this.sendSMS(queueItem.recipient.phone, queueItem.notification);
@@ -630,18 +620,18 @@ class AdvancedNotificationService extends EventEmitter {
 
   getPriorityLabel(priority) {
     const labels = {
-      'high': 'عالية',
-      'medium': 'متوسطة',
-      'low': 'منخفضة'
+      high: 'عالية',
+      medium: 'متوسطة',
+      low: 'منخفضة',
     };
     return labels[priority] || priority;
   }
 
   getIconUrl(priority) {
     const icons = {
-      'high': 'https://cdn-icons-png.flaticon.com/512/1779/1779807.png',
-      'medium': 'https://cdn-icons-png.flaticon.com/512/929/929509.png',
-      'low': 'https://cdn-icons-png.flaticon.com/512/892/892617.png'
+      high: 'https://cdn-icons-png.flaticon.com/512/1779/1779807.png',
+      medium: 'https://cdn-icons-png.flaticon.com/512/929/929509.png',
+      low: 'https://cdn-icons-png.flaticon.com/512/892/892617.png',
     };
     return icons[priority] || icons.medium;
   }
@@ -649,7 +639,7 @@ class AdvancedNotificationService extends EventEmitter {
   calculateNextRun(schedule) {
     const now = new Date();
     const [hours, minutes] = schedule.time.split(':').map(Number);
-    
+
     const nextRun = new Date();
     nextRun.setHours(hours, minutes, 0, 0);
 
@@ -665,7 +655,7 @@ class AdvancedNotificationService extends EventEmitter {
       const NotificationModel = mongoose.model('Notification');
       return await NotificationModel.create({
         userId,
-        ...notification
+        ...notification,
       });
     } catch (error) {
       logger.error('خطأ في حفظ الإشعار:', error);

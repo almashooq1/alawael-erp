@@ -413,7 +413,9 @@ class MemoryOptimization {
     setInterval(() => {
       const used = process.memoryUsage();
 
-      logger.info(`Memory Usage — Heap: ${Math.round(used.heapUsed / 1024 / 1024)} MB, External: ${Math.round(used.external / 1024 / 1024)} MB`);
+      logger.info(
+        `Memory Usage — Heap: ${Math.round(used.heapUsed / 1024 / 1024)} MB, External: ${Math.round(used.external / 1024 / 1024)} MB`
+      );
 
       // تنبيه عند تجاوز 500 MB
       if (used.heapUsed > 500 * 1024 * 1024) {

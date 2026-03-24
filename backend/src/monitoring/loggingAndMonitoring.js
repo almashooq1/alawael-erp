@@ -29,7 +29,7 @@ class LoggingSystem {
       info: 2,
       http: 3,
       debug: 4,
-      trace: 5
+      trace: 5,
     };
 
     const colors = {
@@ -38,7 +38,7 @@ class LoggingSystem {
       info: 'green',
       http: 'magenta',
       debug: 'white',
-      trace: 'gray'
+      trace: 'gray',
     };
 
     winston.addColors(colors);
@@ -46,9 +46,7 @@ class LoggingSystem {
     const format = winston.format.combine(
       winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss:ms' }),
       winston.format.colorize({ all: true }),
-      winston.format.printf(
-        (info) => `${info.timestamp} ${info.level}: ${info.message}`
-      )
+      winston.format.printf(info => `${info.timestamp} ${info.level}: ${info.message}`)
     );
 
     // Transports
@@ -62,7 +60,7 @@ class LoggingSystem {
         datePattern: 'YYYY-MM-DD',
         maxSize: '20m',
         maxFiles: '14d',
-        level: 'error'
+        level: 'error',
       }),
 
       // Combined Logs
@@ -70,7 +68,7 @@ class LoggingSystem {
         filename: 'logs/combined/%DATE%.log',
         datePattern: 'YYYY-MM-DD',
         maxSize: '20m',
-        maxFiles: '30d'
+        maxFiles: '30d',
       }),
 
       // Performance Logs
@@ -79,9 +77,9 @@ class LoggingSystem {
         datePattern: 'YYYY-MM-DD',
         maxSize: '20m',
         maxFiles: '7d',
-        filter: (info) => {
+        filter: info => {
           return info.label === 'performance';
-        }
+        },
       }),
 
       // Security Logs
@@ -90,10 +88,10 @@ class LoggingSystem {
         datePattern: 'YYYY-MM-DD',
         maxSize: '20m',
         maxFiles: '30d',
-        filter: (info) => {
+        filter: info => {
           return info.label === 'security';
-        }
-      })
+        },
+      }),
     ];
 
     this.logger = winston.createLogger({
@@ -101,7 +99,7 @@ class LoggingSystem {
       levels,
       format,
       transports,
-      defaultMeta: { service: 'gps-fleet-api' }
+      defaultMeta: { service: 'gps-fleet-api' },
     });
   }
 
@@ -113,8 +111,8 @@ class LoggingSystem {
       node: process.env.ELASTICSEARCH_NODE || 'http://localhost:9200',
       auth: {
         username: process.env.ELASTICSEARCH_USER || 'elastic',
-        password: process.env.ELASTICSEARCH_PASSWORD || 'changeme'
-      }
+        password: process.env.ELASTICSEARCH_PASSWORD || 'changeme',
+      },
     });
   }
 
@@ -125,7 +123,7 @@ class LoggingSystem {
     this.statsd = new StatsD({
       host: process.env.STATSD_HOST || 'localhost',
       port: process.env.STATSD_PORT || 8125,
-      prefix: 'gps_fleet.'
+      prefix: 'gps_fleet.',
     });
   }
 
@@ -143,7 +141,7 @@ class LoggingSystem {
         message,
         metadata,
         label,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
     }
 
@@ -160,7 +158,7 @@ class LoggingSystem {
     try {
       await this.elasticClient.index({
         index: indexName,
-        document: logEntry
+        document: logEntry,
       });
     } catch (error) {
       logger.error('Elasticsearch logging failed:', error);
@@ -171,20 +169,30 @@ class LoggingSystem {
    * تسجيل الأخطاء
    */
   async logError(error, context = {}) {
-    await this.log('error', error.message, {
-      stack: error.stack,
-      ...context
-    }, 'error');
+    await this.log(
+      'error',
+      error.message,
+      {
+        stack: error.stack,
+        ...context,
+      },
+      'error'
+    );
   }
 
   /**
    * تسجيل الأداء
    */
   async logPerformance(operation, duration, success = true) {
-    await this.log('info', `${operation}`, {
-      duration: `${duration}ms`,
-      success
-    }, 'performance');
+    await this.log(
+      'info',
+      `${operation}`,
+      {
+        duration: `${duration}ms`,
+        success,
+      },
+      'performance'
+    );
 
     // تسجيل في StatsD
     this.statsd.timing(`${operation}.duration`, duration);
@@ -209,7 +217,7 @@ class LoggingSystem {
   async logUserActivity(userId, action, details) {
     await this.log('info', `User Activity: ${action}`, {
       userId,
-      ...details
+      ...details,
     });
   }
 
@@ -219,11 +227,16 @@ class LoggingSystem {
   async logDatabaseQuery(query, duration, success = true) {
     // تسجيل الاستعلامات البطيئة فقط
     if (duration > 100) {
-      await this.log('warn', 'Slow database query', {
-        query,
-        duration: `${duration}ms`,
-        success
-      }, 'performance');
+      await this.log(
+        'warn',
+        'Slow database query',
+        {
+          query,
+          duration: `${duration}ms`,
+          success,
+        },
+        'performance'
+      );
     }
 
     this.statsd.timing('database_query.duration', duration);
@@ -245,7 +258,7 @@ class LoggingSystem {
       duration: `${duration}ms`,
       clientIP,
       userAgent: req.get('user-agent'),
-      userId: req.user?.id
+      userId: req.user?.id,
     });
 
     this.statsd.timing(`api_request.duration`, duration);
@@ -295,50 +308,50 @@ class MonitoringSystem {
       name: 'gps_fleet_http_request_duration_seconds',
       help: 'Duration of HTTP requests in seconds',
       labelNames: ['method', 'route', 'status_code'],
-      buckets: [0.1, 0.5, 1, 2, 5, 10]
+      buckets: [0.1, 0.5, 1, 2, 5, 10],
     });
 
     this.activeConnections = new prometheus.Gauge({
       name: 'gps_fleet_active_connections',
       help: 'Number of active WebSocket connections',
-      labelNames: ['connection_type']
+      labelNames: ['connection_type'],
     });
 
     this.gpsLocationUpdates = new prometheus.Counter({
       name: 'gps_fleet_location_updates_total',
       help: 'Total number of GPS location updates',
-      labelNames: ['vehicle_type', 'status']
+      labelNames: ['vehicle_type', 'status'],
     });
 
     this.predictedAccidents = new prometheus.Counter({
       name: 'gps_fleet_predicted_accidents_total',
       help: 'Total predicted accidents',
-      labelNames: ['confidence_level']
+      labelNames: ['confidence_level'],
     });
 
     this.databaseQueryDuration = new prometheus.Histogram({
       name: 'gps_fleet_db_query_duration_seconds',
       help: 'Database query duration',
       labelNames: ['operation', 'collection'],
-      buckets: [0.01, 0.05, 0.1, 0.5, 1]
+      buckets: [0.01, 0.05, 0.1, 0.5, 1],
     });
 
     this.cacheHitRate = new prometheus.Gauge({
       name: 'gps_fleet_cache_hit_rate',
       help: 'Cache hit rate percentage',
-      labelNames: ['cache_type']
+      labelNames: ['cache_type'],
     });
 
     this.notificationsSent = new prometheus.Counter({
       name: 'gps_fleet_notifications_sent_total',
       help: 'Total notifications sent',
-      labelNames: ['channel', 'status']
+      labelNames: ['channel', 'status'],
     });
 
     this.systemErrors = new prometheus.Counter({
       name: 'gps_fleet_system_errors_total',
       help: 'Total system errors',
-      labelNames: ['error_type', 'severity']
+      labelNames: ['error_type', 'severity'],
     });
   }
 
@@ -353,9 +366,7 @@ class MonitoringSystem {
    * تسجيل طلب HTTP
    */
   recordHttpRequest(method, route, statusCode, duration) {
-    this.httpRequestDuration
-      .labels(method, route, statusCode)
-      .observe(duration / 1000);
+    this.httpRequestDuration.labels(method, route, statusCode).observe(duration / 1000);
   }
 
   /**
@@ -383,9 +394,7 @@ class MonitoringSystem {
    * تسجيل استعلام قاعدة البيانات
    */
   recordDatabaseQuery(operation, collection, duration) {
-    this.databaseQueryDuration
-      .labels(operation, collection)
-      .observe(duration / 1000);
+    this.databaseQueryDuration.labels(operation, collection).observe(duration / 1000);
   }
 
   /**
@@ -426,7 +435,7 @@ class DashboardMetrics {
       status: 'healthy',
       uptime: process.uptime(),
       memory: process.memoryUsage(),
-      cpu: process.cpuUsage()
+      cpu: process.cpuUsage(),
     };
   }
 
@@ -438,7 +447,7 @@ class DashboardMetrics {
       avgResponseTime: '150ms',
       requestsPerSecond: 1250,
       errorRate: '0.2%',
-      cacheHitRate: '85%'
+      cacheHitRate: '85%',
     };
   }
 
@@ -451,7 +460,7 @@ class DashboardMetrics {
       activeDrivers: 95,
       liveTrips: 45,
       totalUsers: 500,
-      activeConnections: 320
+      activeConnections: 320,
     };
   }
 
@@ -464,14 +473,14 @@ class DashboardMetrics {
         id: 1,
         severity: 'high',
         message: 'High CPU usage detected',
-        timestamp: new Date()
+        timestamp: new Date(),
       },
       {
         id: 2,
         severity: 'medium',
         message: 'MongoDB connection pool near capacity',
-        timestamp: new Date()
-      }
+        timestamp: new Date(),
+      },
     ];
   }
 
@@ -484,7 +493,7 @@ class DashboardMetrics {
       platform: process.platform,
       nodeVersion: process.version,
       uptime: `${Math.floor(process.uptime() / 60)} minutes`,
-      pid: process.pid
+      pid: process.pid,
     };
   }
 
@@ -500,8 +509,8 @@ class DashboardMetrics {
       collectionSizes: {
         vehicles: '2.5 MB',
         trips: '150 MB',
-        drivers: '1.2 MB'
-      }
+        drivers: '1.2 MB',
+      },
     };
   }
 }
@@ -524,28 +533,28 @@ class AlertingSystem {
       high_error_rate: {
         threshold: 5, // أكثر من 5 أخطاء في الدقيقة
         severity: 'high',
-        action: 'trigger_alert'
+        action: 'trigger_alert',
       },
       high_cpu: {
         threshold: 80,
         severity: 'medium',
-        action: 'trigger_alert'
+        action: 'trigger_alert',
       },
       high_memory: {
         threshold: 85,
         severity: 'medium',
-        action: 'trigger_alert'
+        action: 'trigger_alert',
       },
       database_slow: {
         threshold: 1000, // أكثر من 1 ثانية
         severity: 'low',
-        action: 'trigger_alert'
+        action: 'trigger_alert',
       },
       connection_pool_high: {
         threshold: 90,
         severity: 'medium',
-        action: 'trigger_alert'
-      }
+        action: 'trigger_alert',
+      },
     };
   }
 
@@ -570,7 +579,7 @@ class AlertingSystem {
       severity: rule.severity,
       value,
       timestamp: new Date(),
-      acknowledged: false
+      acknowledged: false,
     };
 
     this.alerts.set(alert.id, alert);
@@ -579,7 +588,7 @@ class AlertingSystem {
     await this.logger.log('warn', `Alert triggered: ${ruleName}`, {
       rule,
       value,
-      severity: rule.severity
+      severity: rule.severity,
     });
 
     // أرسل إشعار
@@ -626,7 +635,7 @@ module.exports = {
   AlertingSystem,
 
   // Helper function
-  createMiddleware: function(logging, monitoring) {
+  createMiddleware: function (logging, monitoring) {
     return (req, res, next) => {
       const start = Date.now();
 
@@ -634,18 +643,13 @@ module.exports = {
         const duration = Date.now() - start;
         logging.log('info', `${req.method} ${req.path}`, {
           statusCode: res.statusCode,
-          duration: `${duration}ms`
+          duration: `${duration}ms`,
         });
 
-        monitoring.recordHttpRequest(
-          req.method,
-          req.path,
-          res.statusCode,
-          duration
-        );
+        monitoring.recordHttpRequest(req.method, req.path, res.statusCode, duration);
       });
 
       next();
     };
-  }
+  },
 };

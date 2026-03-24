@@ -218,6 +218,7 @@ attendanceRecordSchema.statics.findAbsencesInPeriod = function (beneficiaryId, s
   }).sort({ attendanceDate: -1 });
 };
 
-const AttendanceRecord = mongoose.models.AttendanceRecord || mongoose.model('AttendanceRecord', attendanceRecordSchema);
+const AttendanceRecord =
+  mongoose.models.AttendanceRecord || mongoose.model('AttendanceRecord', attendanceRecordSchema);
 
 module.exports = AttendanceRecord;

@@ -253,6 +253,7 @@ academicRecordSchema.statics.findGraduates = function () {
   return this.find({ enrollmentStatus: 'graduated' });
 };
 
-const AcademicRecord = mongoose.models.AcademicRecord || mongoose.model('AcademicRecord', academicRecordSchema);
+const AcademicRecord =
+  mongoose.models.AcademicRecord || mongoose.model('AcademicRecord', academicRecordSchema);
 
 module.exports = AcademicRecord;

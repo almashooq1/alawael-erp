@@ -247,6 +247,7 @@ skillsDevelopmentSchema.statics.findTopEndorsed = function (beneficiaryId, limit
   return this.find({ beneficiaryId }).sort({ endorsementCount: -1 }).limit(limit);
 };
 
-const SkillsDevelopment = mongoose.models.SkillsDevelopment || mongoose.model('SkillsDevelopment', skillsDevelopmentSchema);
+const SkillsDevelopment =
+  mongoose.models.SkillsDevelopment || mongoose.model('SkillsDevelopment', skillsDevelopmentSchema);
 
 module.exports = SkillsDevelopment;

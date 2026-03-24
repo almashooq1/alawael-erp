@@ -105,4 +105,5 @@ EmployeeLetterSchema.pre('save', async function (next) {
   next();
 });
 
-module.exports = mongoose.models.EmployeeLetter || mongoose.model('EmployeeLetter', EmployeeLetterSchema);
+module.exports =
+  mongoose.models.EmployeeLetter || mongoose.model('EmployeeLetter', EmployeeLetterSchema);

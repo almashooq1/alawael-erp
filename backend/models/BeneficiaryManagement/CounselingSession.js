@@ -289,6 +289,7 @@ counselingSessionSchema.statics.findHighRiskSessions = function () {
   return this.find({ riskLevel: { $in: ['high', 'critical'] } });
 };
 
-const CounselingSession = mongoose.models.CounselingSession || mongoose.model('CounselingSession', counselingSessionSchema);
+const CounselingSession =
+  mongoose.models.CounselingSession || mongoose.model('CounselingSession', counselingSessionSchema);
 
 module.exports = CounselingSession;

@@ -117,4 +117,5 @@ PromotionTransferSchema.pre('save', async function (next) {
   next();
 });
 
-module.exports = mongoose.models.PromotionTransfer || mongoose.model('PromotionTransfer', PromotionTransferSchema);
+module.exports =
+  mongoose.models.PromotionTransfer || mongoose.model('PromotionTransfer', PromotionTransferSchema);

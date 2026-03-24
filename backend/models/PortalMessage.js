@@ -283,4 +283,5 @@ PortalMessageSchema.pre('save', function () {
   this.updatedAt = new Date();
 });
 
-module.exports = mongoose.models.PortalMessage || mongoose.model('PortalMessage', PortalMessageSchema);
+module.exports =
+  mongoose.models.PortalMessage || mongoose.model('PortalMessage', PortalMessageSchema);

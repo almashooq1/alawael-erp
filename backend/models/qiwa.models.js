@@ -816,8 +816,11 @@ module.exports = {
   QiwaContract: mongoose.models.QiwaContract || mongoose.model('QiwaContract', QiwaContractSchema),
   QiwaEmployee: mongoose.models.QiwaEmployee || mongoose.model('QiwaEmployee', QiwaEmployeeSchema),
   QiwaWage: mongoose.models.QiwaWage || mongoose.model('QiwaWage', QiwaWageSchema),
-  QiwaWPSSubmission: mongoose.models.QiwaWPSSubmission || mongoose.model('QiwaWPSSubmission', QiwaWPSSubmissionSchema),
+  QiwaWPSSubmission:
+    mongoose.models.QiwaWPSSubmission ||
+    mongoose.model('QiwaWPSSubmission', QiwaWPSSubmissionSchema),
   QiwaNitaqat: mongoose.models.QiwaNitaqat || mongoose.model('QiwaNitaqat', QiwaNitaqatSchema),
-  QiwaLaborRecord: mongoose.models.QiwaLaborRecord || mongoose.model('QiwaLaborRecord', QiwaLaborRecordSchema),
+  QiwaLaborRecord:
+    mongoose.models.QiwaLaborRecord || mongoose.model('QiwaLaborRecord', QiwaLaborRecordSchema),
   QiwaAuditLog: mongoose.models.QiwaAuditLog || mongoose.model('QiwaAuditLog', QiwaAuditLogSchema),
 };

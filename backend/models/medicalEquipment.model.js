@@ -369,5 +369,5 @@ module.exports = {
   MedicalEquipment: mongoose.model('MedicalEquipment', MedicalEquipmentSchema),
   CalibrationRecord: mongoose.model('CalibrationRecord', CalibrationRecordSchema),
   EquipmentMaintenance: mongoose.model('EquipmentMaintenance', EquipmentMaintenanceSchema),
-  SafetyCertificate: mongoose.model('SafetyCertificate', SafetyCertificateSchema),
+  SafetyCertificate: mongoose.model('EquipmentSafetyCert', SafetyCertificateSchema),
 };

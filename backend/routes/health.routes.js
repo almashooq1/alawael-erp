@@ -223,6 +223,14 @@ router.get('/full', async (req, res) => {
         redis: process.env.REDIS_ENABLED !== 'false' ? 'operational' : 'disabled',
         logger: 'operational',
       },
+      routes: (() => {
+        try {
+          const { routeHealth } = require('./_registry');
+          return routeHealth.summary;
+        } catch (_e) {
+          return { error: 'unavailable' };
+        }
+      })(),
     };
 
     res.status(overallStatus === 'healthy' ? 200 : 503).json(fullHealth);

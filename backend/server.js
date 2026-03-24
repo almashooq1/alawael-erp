@@ -39,12 +39,8 @@ const io = isTestEnv
             .split(',')
             .map(s => s.trim())
             .filter(Boolean)
-            .concat(
-              process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []
-            );
-          return origins.length > 0
-            ? origins
-            : ['http://localhost:3001', 'http://localhost:3000'];
+            .concat(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []);
+          return origins.length > 0 ? origins : ['http://localhost:3001', 'http://localhost:3000'];
         })(),
         methods: ['GET', 'POST'],
         credentials: true,

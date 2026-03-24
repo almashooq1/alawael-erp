@@ -11,6 +11,20 @@
 
 const logger = require('../utils/logger');
 
+// ─── Route Health Tracker ─────────────────────────────────────────────────────
+const routeHealth = {
+  mounted: [],
+  failed: [],
+  get summary() {
+    return {
+      total: this.mounted.length + this.failed.length,
+      ok: this.mounted.length,
+      failed: this.failed.length,
+      failedRoutes: this.failed.map(f => ({ path: f.path, module: f.module, error: f.error })),
+    };
+  },
+};
+
 // ─── Route Imports ───────────────────────────────────────────────────────────
 
 // Core API routes
@@ -252,6 +266,7 @@ const dualMount = (app, path, handler) => {
  * Safely require and mount a route module. Logs errors instead of crashing.
  */
 const safeMount = (app, paths, modulePath) => {
+  const pathLabel = Array.isArray(paths) ? paths[0] : paths;
   try {
     const handler = require(modulePath);
     if (Array.isArray(paths)) {
@@ -259,9 +274,11 @@ const safeMount = (app, paths, modulePath) => {
     } else {
       app.use(paths, handler);
     }
+    routeHealth.mounted.push({ path: pathLabel, module: modulePath });
     return true;
   } catch (err) {
-    logger.error(`Failed to mount route ${modulePath}: ${err.message}`);
+    routeHealth.failed.push({ path: pathLabel, module: modulePath, error: err.message });
+    logger.error(`[ROUTE FAIL] ${pathLabel} (${modulePath}): ${err.message}`);
     return false;
   }
 };
@@ -601,75 +618,26 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   // Phases 18-20 (namespaced to avoid collisions with tenants/compliance)
   safeMount(app, ['/api/phases-18-20', '/api/v1/phases-18-20'], '../routes/phases-18-20.routes');
 
-  // ── Phase 21: New Feature Services ──────────────────────────────────────
-  try {
-    const contractsRoutes = require('../routes/contracts.routes');
-    dualMount(app, 'contracts', contractsRoutes);
-
-    const smartNotificationRoutes = require('../routes/smartNotificationCenter.routes');
-    dualMount(app, 'smart-notifications', smartNotificationRoutes);
-
-    const advancedTicketsRoutes = require('../routes/advancedTickets.routes');
-    dualMount(app, 'advanced-tickets', advancedTicketsRoutes);
-
-    const eInvoicingRoutes = require('../routes/eInvoicing.routes');
-    dualMount(app, 'e-invoicing', eInvoicingRoutes);
-
-    const eSignatureRoutes = require('../routes/eSignature.routes');
-    dualMount(app, 'e-signature', eSignatureRoutes);
-
-    const eSignaturePdfRoutes = require('../routes/eSignaturePdf.routes');
-    dualMount(app, 'e-signature-pdf', eSignaturePdfRoutes);
-
-    const eStampRoutes = require('../routes/eStamp.routes');
-    dualMount(app, 'e-stamp', eStampRoutes);
-
-    const riskAssessmentRoutes = require('../routes/riskAssessment.routes');
-    dualMount(app, 'risk-assessment', riskAssessmentRoutes);
-
-    const budgetManagementRoutes = require('../routes/budgetManagement.routes');
-    dualMount(app, 'budget-management', budgetManagementRoutes);
-
-    const employeePortalRoutes = require('../routes/employeePortal.routes');
-    dualMount(app, 'employee-portal', employeePortalRoutes);
-
-    const kpiDashboardRoutes = require('../routes/kpiDashboard.routes');
-    dualMount(app, 'kpi-dashboard', kpiDashboardRoutes);
-
-    // Administration Management System
-    const administrationRoutes = require('../routes/administration.routes');
-    dualMount(app, 'administration', administrationRoutes);
-
-    // Workflow System (Intelligent Workflow Engine)
-    const workflowRoutes = require('../routes/workflow.routes');
-    dualMount(app, 'workflow', workflowRoutes);
-
-    // Workflow Enhanced Features (التعليقات، المفضلة، التفويض، التقويم، القوالب الإضافية)
-    const workflowEnhancedRoutes = require('../routes/workflowEnhanced.routes');
-    dualMount(app, 'workflow-enhanced', workflowEnhancedRoutes);
-
-    // Workflow Pro Features (النماذج، التصعيد، SLA، مؤشرات الأداء، الموافقات، الأتمتة)
-    const workflowProRoutes = require('../routes/workflowPro.routes');
-    dualMount(app, 'workflow-pro', workflowProRoutes);
-
-    // Enterprise Pro Features (التدقيق، التقارير، التقويم، CRM، المستودعات، المشاريع)
-    const enterpriseProRoutes = require('../routes/enterprisePro.routes');
-    dualMount(app, 'enterprise-pro', enterpriseProRoutes);
-
-    // Enterprise Pro Plus Features (التوظيف، المرافق، الموردين، ITSM، السلامة، التخطيط الاستراتيجي)
-    const enterpriseProPlusRoutes = require('../routes/enterpriseProPlus.routes');
-    dualMount(app, 'enterprise-pro-plus', enterpriseProPlusRoutes);
-
-    // Enterprise Ultra Features (القانونية، الحوكمة، استمرارية الأعمال، تجربة العملاء، الاستدامة، التحول الرقمي)
-    const enterpriseUltraRoutes = require('../routes/enterpriseUltra.routes');
-    dualMount(app, 'enterprise-ultra', enterpriseUltraRoutes);
-
-    logger.info(
-      'Phase 21 new feature routes mounted (14 services + workflow enhanced + workflow pro + enterprise pro + enterprise pro plus + enterprise ultra)'
-    );
-  } catch (error) {
-    logger.error('Phase 21 routes error: %s', error.message);
-  }
+  // ── Phase 21: New Feature Services (individual safeMount for resilience) ──
+  safeMount(app, ['/api/contracts', '/api/v1/contracts'], '../routes/contracts.routes');
+  safeMount(app, ['/api/smart-notifications', '/api/v1/smart-notifications'], '../routes/smartNotificationCenter.routes');
+  safeMount(app, ['/api/advanced-tickets', '/api/v1/advanced-tickets'], '../routes/advancedTickets.routes');
+  safeMount(app, ['/api/e-invoicing', '/api/v1/e-invoicing'], '../routes/eInvoicing.routes');
+  safeMount(app, ['/api/e-signature', '/api/v1/e-signature'], '../routes/eSignature.routes');
+  safeMount(app, ['/api/e-signature-pdf', '/api/v1/e-signature-pdf'], '../routes/eSignaturePdf.routes');
+  safeMount(app, ['/api/e-stamp', '/api/v1/e-stamp'], '../routes/eStamp.routes');
+  safeMount(app, ['/api/risk-assessment', '/api/v1/risk-assessment'], '../routes/riskAssessment.routes');
+  safeMount(app, ['/api/budget-management', '/api/v1/budget-management'], '../routes/budgetManagement.routes');
+  safeMount(app, ['/api/employee-portal', '/api/v1/employee-portal'], '../routes/employeePortal.routes');
+  safeMount(app, ['/api/kpi-dashboard', '/api/v1/kpi-dashboard'], '../routes/kpiDashboard.routes');
+  safeMount(app, ['/api/administration', '/api/v1/administration'], '../routes/administration.routes');
+  safeMount(app, ['/api/workflow', '/api/v1/workflow'], '../routes/workflow.routes');
+  safeMount(app, ['/api/workflow-enhanced', '/api/v1/workflow-enhanced'], '../routes/workflowEnhanced.routes');
+  safeMount(app, ['/api/workflow-pro', '/api/v1/workflow-pro'], '../routes/workflowPro.routes');
+  safeMount(app, ['/api/enterprise-pro', '/api/v1/enterprise-pro'], '../routes/enterprisePro.routes');
+  safeMount(app, ['/api/enterprise-pro-plus', '/api/v1/enterprise-pro-plus'], '../routes/enterpriseProPlus.routes');
+  safeMount(app, ['/api/enterprise-ultra', '/api/v1/enterprise-ultra'], '../routes/enterpriseUltra.routes');
+  logger.info('Phase 21 new feature routes mounted (18 services via individual safeMount)');
 
   // ── Student Portal Extended Services (خدمات بوابة الطالب الموسّعة) ──────
   dualMount(app, 'student-complaints', studentComplaintsRoutes);
@@ -1076,6 +1044,19 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
     '../routes/rate-limit-waf.routes'
   );
   logger.info('Phase 24 mounted (1 module: rate-limit-waf)');
+
+  // ── Route Mount Summary ─────────────────────────────────────────────────
+  const summary = routeHealth.summary;
+  if (summary.failed === 0) {
+    logger.info(`✅ All ${summary.total} route modules loaded successfully`);
+  } else {
+    logger.warn(
+      `⚠️  Route loading: ${summary.ok}/${summary.total} OK, ${summary.failed} FAILED`
+    );
+    summary.failedRoutes.forEach(f => {
+      logger.warn(`   ✗ ${f.path} → ${f.error}`);
+    });
+  }
 };
 
-module.exports = { mountAllRoutes, dualMount, safeMount };
+module.exports = { mountAllRoutes, dualMount, safeMount, routeHealth };

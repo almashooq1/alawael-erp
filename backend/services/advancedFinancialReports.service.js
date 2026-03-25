@@ -619,29 +619,36 @@ class AdvancedFinancialReportsService {
 
   static async getAccountBalance(accountId, endDate, startDate = null) {
     const JournalEntry = require('../models/JournalEntry');
+    const mongoose = require('mongoose');
 
-    const query = {
+    const matchStage = {
       status: 'posted',
       date: { $lte: endDate },
     };
 
     if (startDate) {
-      query.date.$gte = startDate;
+      matchStage.date.$gte = startDate;
     }
 
-    const entries = await JournalEntry.find(query).populate('lines.account');
+    const [result] = await JournalEntry.aggregate([
+      { $match: matchStage },
+      { $unwind: '$lines' },
+      {
+        $match: {
+          'lines.account': new mongoose.Types.ObjectId(accountId),
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          balance: {
+            $sum: { $subtract: [{ $ifNull: ['$lines.debit', 0] }, { $ifNull: ['$lines.credit', 0] }] },
+          },
+        },
+      },
+    ]);
 
-    let balance = 0;
-
-    for (const entry of entries) {
-      for (const line of entry.lines) {
-        if (line.account?._id?.toString() === accountId.toString()) {
-          balance += line.debit - line.credit;
-        }
-      }
-    }
-
-    return balance;
+    return result?.balance || 0;
   }
 
   static async calculateNetIncome(startDate, endDate) {

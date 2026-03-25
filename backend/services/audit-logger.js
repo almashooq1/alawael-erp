@@ -198,16 +198,20 @@ class AuditLogger {
   }
 
   /**
-   * Export audit logs for compliance
+   * Export audit logs for compliance (bounded to 50,000 records max)
    */
   static async exportLogs(userId, startDate, endDate) {
+    const MAX_EXPORT = 50000;
     const logs = await AuditLog.find({
       userId,
       timestamp: {
         $gte: startDate,
         $lte: endDate,
       },
-    }).sort({ timestamp: -1 });
+    })
+      .sort({ timestamp: -1 })
+      .limit(MAX_EXPORT)
+      .lean();
 
     return {
       userId,
@@ -260,15 +264,19 @@ class AuditLogger {
   }
 
   /**
-   * Create compliance export (GDPR - Right to be forgotten)
+   * Create compliance export (GDPR - Right to be forgotten, bounded to 50,000)
    */
   static async createComplianceExport(userId) {
-    const userLogs = await AuditLog.find({ userId }).lean();
+    const MAX_EXPORT = 50000;
+    const totalCount = await AuditLog.countDocuments({ userId });
+    const userLogs = await AuditLog.find({ userId }).limit(MAX_EXPORT).lean();
 
     return {
       dataExportDate: new Date().toISOString(),
       userId,
-      totalRecords: userLogs.length,
+      totalRecords: totalCount,
+      exportedRecords: userLogs.length,
+      truncated: totalCount > MAX_EXPORT,
       records: userLogs.map(log => ({
         timestamp: log.timestamp,
         action: log.action,
@@ -284,22 +292,14 @@ class AuditLogger {
    * Delete user's audit logs (GDPR - Right to erasure)
    */
   static async deleteUserLogs(userId) {
-    // Create archive before deletion for compliance
-    const userLogs = await AuditLog.find({ userId }).lean();
+    // Count before deletion for the archive record
+    const logCount = await AuditLog.countDocuments({ userId });
     const archiveRecord = {
       userId,
       deletedAt: new Date(),
-      logCount: userLogs.length,
+      logCount,
       reason: 'GDPR Right to Erasure',
     };
-
-    // Save archive
-    const archive = new mongoose.Schema({
-      userId: String,
-      deletedAt: Date,
-      logCount: Number,
-      reason: String,
-    });
 
     // Delete logs
     await AuditLog.deleteMany({ userId });

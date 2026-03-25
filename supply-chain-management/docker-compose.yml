@@ -32,7 +32,7 @@ services:
       NODE_ENV: production
       MONGODB_URI: mongodb://mongodb:27017/supply-chain
       PORT: 4000
-      JWT_SECRET: ${JWT_SECRET:-your-secret-key-change-in-production}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set}
     ports:
       - "4000:4000"
     depends_on:

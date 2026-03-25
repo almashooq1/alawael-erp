@@ -365,8 +365,14 @@ class EcommerceService {
       checkout.paymentStatus = 'processing';
       checkout.status = 'payment_pending';
 
-      // @todo [P1] Integrate payment gateway (Stripe, PayPal, HyperPay) for real transactions
-      // Currently simulates successful payment for development
+      if (process.env.NODE_ENV === 'production') {
+        // In production, do NOT auto-complete — require real gateway integration
+        throw new Error(
+          'بوابة الدفع غير مفعّلة حالياً. يرجى التواصل مع إدارة النظام. (Payment gateway not configured)'
+        );
+      }
+
+      // Development only: simulate successful payment
       checkout.paymentStatus = 'completed';
       checkout.status = 'confirmed';
 

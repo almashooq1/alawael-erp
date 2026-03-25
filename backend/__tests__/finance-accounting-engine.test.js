@@ -1099,16 +1099,10 @@ describe('AccountingService — Enhanced Cash Flow & Budget Monitoring', () => {
         }),
       }));
 
-      JournalEntry.find = jest.fn(() => ({
-        lean: jest.fn().mockResolvedValue([
-          {
-            lines: [
-              { accountId: 'acc-1', debit: 2500, credit: 0 },
-              { accountId: 'acc-2', debit: 3200, credit: 0 },
-            ],
-          },
-        ]),
-      }));
+      JournalEntry.aggregate = jest.fn().mockResolvedValue([
+        { _id: 'acc-1', totalDebit: 2500 },
+        { _id: 'acc-2', totalDebit: 3200 },
+      ]);
 
       const result = await accountingService.getBudgetVsActual('b-1');
 

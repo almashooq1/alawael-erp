@@ -142,36 +142,42 @@ class AccountingService {
   }
 
   /**
-   * الحصول على رصيد الحساب
+   * الحصول على رصيد الحساب (aggregation — لا يحمّل المستندات للذاكرة)
    */
   async getAccountBalance(accountId, startDate, endDate) {
     const account = await Account.findById(accountId);
     if (!account) throw new Error('الحساب غير موجود');
 
-    const query = {
+    const matchStage = {
       status: 'posted',
-      'lines.accountId': accountId,
+      'lines.accountId': account._id,
     };
 
     if (startDate || endDate) {
-      query.date = {};
-      if (startDate) query.date.$gte = new Date(startDate);
-      if (endDate) query.date.$lte = new Date(endDate);
+      matchStage.date = {};
+      if (startDate) matchStage.date.$gte = new Date(startDate);
+      if (endDate) matchStage.date.$lte = new Date(endDate);
     }
 
-    const entries = await JournalEntry.find(query).lean();
+    const [result] = await JournalEntry.aggregate([
+      { $match: matchStage },
+      { $unwind: '$lines' },
+      {
+        $match: {
+          'lines.accountId': account._id,
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalDebit: { $sum: { $ifNull: ['$lines.debit', 0] } },
+          totalCredit: { $sum: { $ifNull: ['$lines.credit', 0] } },
+        },
+      },
+    ]);
 
-    let totalDebit = 0;
-    let totalCredit = 0;
-
-    entries.forEach(entry => {
-      entry.lines.forEach(line => {
-        if (line.accountId.toString() === accountId.toString()) {
-          totalDebit += line.debit || 0;
-          totalCredit += line.credit || 0;
-        }
-      });
-    });
+    const totalDebit = result?.totalDebit || 0;
+    const totalCredit = result?.totalCredit || 0;
 
     // حساب الرصيد حسب نوع الحساب
     let balance = 0;
@@ -701,10 +707,10 @@ class AccountingService {
   }
 
   /**
-   * دفتر الأستاذ العام
+   * دفتر الأستاذ العام (مع حد أقصى لحماية الذاكرة)
    */
   async generateGeneralLedger(options = {}) {
-    const { accountId, startDate, endDate } = options;
+    const { accountId, startDate, endDate, page = 1, limit = 5000 } = options;
 
     const query = {
       status: 'posted',
@@ -718,9 +724,14 @@ class AccountingService {
       query['lines.accountId'] = accountId;
     }
 
+    const totalCount = await JournalEntry.countDocuments(query);
+    const skip = (page - 1) * limit;
+
     const entries = await JournalEntry.find(query)
       .populate('lines.accountId', 'code name')
       .sort({ date: 1 })
+      .skip(skip)
+      .limit(limit)
       .lean();
 
     const ledger = [];
@@ -750,6 +761,12 @@ class AccountingService {
       accountId,
       entries: ledger,
       finalBalance: runningBalance,
+      pagination: {
+        page,
+        limit,
+        total: totalCount,
+        totalPages: Math.ceil(totalCount / limit),
+      },
       generatedAt: new Date(),
     };
   }
@@ -1141,39 +1158,47 @@ class AccountingService {
   // ===================================================================
 
   /**
-   * مقارنة الميزانية بالمصروفات الفعلية
+   * مقارنة الميزانية بالمصروفات الفعلية (aggregation — لا يحمّل كل القيود للذاكرة)
    */
-  async getBudgetVsActual(budgetId, options = {}) {
+  async getBudgetVsActual(budgetId, _options = {}) {
     const budget = await Budget.findById(budgetId).lean();
     if (!budget) throw new Error('الميزانية غير موجودة');
 
-    const query = {
-      status: 'posted',
-      date: {
-        $gte: new Date(budget.startDate),
-        $lte: new Date(budget.endDate),
-      },
-    };
+    const budgetAccountIds = (budget.lines || [])
+      .filter(l => l.accountId)
+      .map(l => l.accountId);
 
-    const entries = await JournalEntry.find(query).lean();
+    // Single aggregation: sum debits per account in the budget period
+    const actuals = await JournalEntry.aggregate([
+      {
+        $match: {
+          status: 'posted',
+          date: {
+            $gte: new Date(budget.startDate),
+            $lte: new Date(budget.endDate),
+          },
+        },
+      },
+      { $unwind: '$lines' },
+      {
+        $match: {
+          'lines.accountId': { $in: budgetAccountIds },
+        },
+      },
+      {
+        $group: {
+          _id: '$lines.accountId',
+          totalDebit: { $sum: { $ifNull: ['$lines.debit', 0] } },
+        },
+      },
+    ]);
+
+    const actualMap = new Map(actuals.map(a => [a._id.toString(), a.totalDebit]));
 
     const comparison = [];
 
     for (const line of budget.lines || []) {
-      let actualSpent = 0;
-
-      entries.forEach(entry => {
-        entry.lines.forEach(jLine => {
-          if (
-            jLine.accountId &&
-            line.accountId &&
-            jLine.accountId.toString() === line.accountId.toString()
-          ) {
-            actualSpent += jLine.debit || 0;
-          }
-        });
-      });
-
+      const actualSpent = line.accountId ? actualMap.get(line.accountId.toString()) || 0 : 0;
       const variance = (line.amount || 0) - actualSpent;
       const utilization = line.amount > 0 ? (actualSpent / line.amount) * 100 : 0;
 

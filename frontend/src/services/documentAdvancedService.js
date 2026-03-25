@@ -4,43 +4,19 @@
  * Frontend API client for all advanced document management features:
  * Favorites, Audit, Watermarks, Approvals, Expiry, Trash,
  * Annotations, Comparison, Export/Import, QR Codes
+ *
+ * Uses the shared apiClient (axios) for consistent auth, retry,
+ * deduplication, and base URL configuration.
  */
 
-const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
-
-const getHeaders = () => ({
-  'Content-Type': 'application/json',
-  Authorization: `Bearer ${localStorage.getItem('authToken')}`,
-});
-
-const handleResponse = async response => {
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ message: 'خطأ في الخادم' }));
-    throw new Error(error.message || `HTTP ${response.status}`);
-  }
-  return response.json();
-};
+import apiClient from './api.client';
 
 const api = {
-  get: path => fetch(`${API_BASE}${path}`, { headers: getHeaders() }).then(handleResponse),
-  post: (path, body) =>
-    fetch(`${API_BASE}${path}`, {
-      method: 'POST',
-      headers: getHeaders(),
-      body: JSON.stringify(body),
-    }).then(handleResponse),
-  put: (path, body) =>
-    fetch(`${API_BASE}${path}`, {
-      method: 'PUT',
-      headers: getHeaders(),
-      body: JSON.stringify(body),
-    }).then(handleResponse),
+  get: path => apiClient.get(path).then(r => r.data),
+  post: (path, body) => apiClient.post(path, body).then(r => r.data),
+  put: (path, body) => apiClient.put(path, body).then(r => r.data),
   del: (path, body) =>
-    fetch(`${API_BASE}${path}`, {
-      method: 'DELETE',
-      headers: getHeaders(),
-      body: body ? JSON.stringify(body) : undefined,
-    }).then(handleResponse),
+    apiClient.delete(path, body ? { data: body } : undefined).then(r => r.data),
 };
 
 const documentAdvancedService = {

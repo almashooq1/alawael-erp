@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 // backend/routes/fcm.js
 const express = require('express');
 const router = express.Router();

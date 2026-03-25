@@ -280,7 +280,7 @@ describe('isPositiveNumber', () => {
 describe('isValidUrl', () => {
   test('accepts valid URLs', () => {
     expect(isValidUrl('https://example.com')).toBe(true);
-    expect(isValidUrl('http://localhost:3000')).toBe(true);
+    expect(isValidUrl('http://localhost:3001')).toBe(true);
   });
 
   test('rejects invalid URLs', () => {

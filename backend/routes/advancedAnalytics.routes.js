@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * مسارات التحليلات والتقارير المتقدم
  * Advanced Analytics Routes

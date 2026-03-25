@@ -1,4 +1,3 @@
-﻿/* eslint-disable no-unused-vars */
 /**
  * Conversations Routes
  * Handle conversation management endpoints

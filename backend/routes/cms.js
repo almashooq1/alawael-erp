@@ -1,4 +1,3 @@
-﻿/* eslint-disable no-unused-vars */
 // Content Management System (CMS) Routes
 // نقاط إدارة المحتوى
 

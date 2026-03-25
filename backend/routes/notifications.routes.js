@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Notifications Routes - Phase 2
  * Complete notification management API

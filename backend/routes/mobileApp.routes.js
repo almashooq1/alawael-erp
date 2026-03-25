@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Mobile App Backend Routes
  * مسارات تطبيق الهاتف المحمول

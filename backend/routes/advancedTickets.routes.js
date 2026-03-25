@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Advanced Tickets Routes
  * مسارات نظام التذاكر المتقدم

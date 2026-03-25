@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 const Transaction = require('../models/Transaction');
 const Invoice = require('../models/Invoice');
 const Budget = require('../models/Budget');

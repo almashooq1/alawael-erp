@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * MFA Routes
  * مسارات المصادقة متعددة العوامل

@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Executive Dashboard Routes
  * Advanced KPI monitoring, analytics, and AI insights

@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 const Notification = require('../models/Notification');
 const NotificationTemplate = require('../models/NotificationTemplate');
 const { EventEmitter } = require('events');

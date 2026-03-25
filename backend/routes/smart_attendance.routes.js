@@ -1,4 +1,3 @@
-﻿/* eslint-disable no-unused-vars */
 /**
  * Smart Attendance Routes - مسارات API الحضور والانصراف الذكية
  * مع جميع النقاط الطرفية الضرورية والميزات المتقدمة

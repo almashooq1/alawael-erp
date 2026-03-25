@@ -20,8 +20,9 @@ jest.mock('../utils/tokenBlacklist', () => ({
   add: jest.fn().mockResolvedValue(undefined),
 }));
 
-// Test JWT secret (matches the test environment secret)
-const JWT_SECRET = 'test-secret-key-for-testing-only';
+// Test-only JWT secret — MUST NEVER match a production secret.
+// (see process.env.JWT_SECRET in .env for real credentials)
+const JWT_SECRET = process.env.JWT_SECRET || 'test-secret-key-for-testing-only';
 process.env.NODE_ENV = 'test';
 process.env.JWT_SECRET = JWT_SECRET;
 

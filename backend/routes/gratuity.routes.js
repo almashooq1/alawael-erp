@@ -1,4 +1,3 @@
-﻿/* eslint-disable no-unused-vars */
 /**
  * Gratuity Routes - مسارات مكافأة نهاية الخدمة
  *

@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * KPI Dashboard Routes
  * مسارات لوحة مؤشرات الأداء

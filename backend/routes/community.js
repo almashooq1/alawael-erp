@@ -1,4 +1,3 @@
-﻿/* eslint-disable no-unused-vars */
 /**
  * Community Awareness Routes
  * Endpoints for educational content, virtual sessions, digital library, and subscriptions

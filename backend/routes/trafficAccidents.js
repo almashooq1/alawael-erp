@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Traffic Accident Routes - مسارات الحوادث المرورية
  * API endpoints لتقارير الحوادث المرورية الشاملة

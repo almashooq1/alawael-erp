@@ -450,7 +450,13 @@ class ReportScheduler {
 
       case 'weekly': {
         const weekly = new Date(now);
-        weekly.setDate(weekly.getDate() + 7); // @todo Handle specific day-of-week scheduling
+        const [wHours, wMinutes] = time.split(':').map(Number);
+        weekly.setHours(wHours, wMinutes, 0, 0);
+        // Support specific day-of-week (0=Sun, 1=Mon, ..., 6=Sat)
+        const targetDay = options?.dayOfWeek ?? weekly.getDay();
+        let daysUntil = (targetDay - weekly.getDay() + 7) % 7;
+        if (daysUntil === 0 && weekly <= now) daysUntil = 7;
+        weekly.setDate(weekly.getDate() + (daysUntil || 7));
         return weekly;
       }
 

@@ -389,8 +389,12 @@ ClaimItemSchema.index({ claim: 1, sequence: 1 });
 // ═══════════════════════════════════════════════════════════════════════════
 
 module.exports = {
-  InsuranceContract: mongoose.model('InsuranceContract', InsuranceContractSchema),
-  PreAuthorization: mongoose.model('PreAuthorization', PreAuthorizationSchema),
-  InsuranceClaim: mongoose.model('InsuranceClaim', InsuranceClaimSchema),
-  ClaimItem: mongoose.model('ClaimItem', ClaimItemSchema),
+  InsuranceContract:
+    mongoose.models.InsuranceContract ||
+    mongoose.model('InsuranceContract', InsuranceContractSchema),
+  PreAuthorization:
+    mongoose.models.PreAuthorization || mongoose.model('PreAuthorization', PreAuthorizationSchema),
+  InsuranceClaim:
+    mongoose.models.InsuranceClaim || mongoose.model('InsuranceClaim', InsuranceClaimSchema),
+  ClaimItem: mongoose.models.ClaimItem || mongoose.model('ClaimItem', ClaimItemSchema),
 };

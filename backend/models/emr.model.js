@@ -525,9 +525,10 @@ AllergySchema.index({ 'allergen.type': 1 });
 // ═══════════════════════════════════════════════════════════════════════════
 
 module.exports = {
-  MedicalRecord: mongoose.model('MedicalRecord', MedicalRecordSchema),
-  VitalSign: mongoose.model('VitalSign', VitalSignSchema),
-  LabResult: mongoose.model('LabResult', LabResultSchema),
-  ClinicalNote: mongoose.model('ClinicalNote', ClinicalNoteSchema),
-  Allergy: mongoose.model('Allergy', AllergySchema),
+  MedicalRecord:
+    mongoose.models.MedicalRecord || mongoose.model('MedicalRecord', MedicalRecordSchema),
+  VitalSign: mongoose.models.VitalSign || mongoose.model('VitalSign', VitalSignSchema),
+  LabResult: mongoose.models.LabResult || mongoose.model('LabResult', LabResultSchema),
+  ClinicalNote: mongoose.models.ClinicalNote || mongoose.model('ClinicalNote', ClinicalNoteSchema),
+  Allergy: mongoose.models.Allergy || mongoose.model('Allergy', AllergySchema),
 };

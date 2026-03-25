@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Core Middleware for Supply Chain Management System
  * - Authentication

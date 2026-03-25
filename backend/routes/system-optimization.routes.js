@@ -1,4 +1,3 @@
-﻿/* eslint-disable no-unused-vars */
 /**
  * System Optimization Routes
  * APIs for monitoring, testing, and optimizing system performance

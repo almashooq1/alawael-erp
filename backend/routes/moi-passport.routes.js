@@ -1,4 +1,3 @@
-﻿/* eslint-disable no-unused-vars */
 /**
  * MOI Passport Integration Routes - مسارات تكامل الجوازات
  * Express Routes for Passport Verification & Management

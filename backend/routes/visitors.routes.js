@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * 🏢 Visitor Registry Advanced Routes — مسارات سجل الزوار المتقدمة
  * AlAwael ERP — Full CRUD + Analytics + Blacklist + Audit

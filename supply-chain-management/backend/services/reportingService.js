@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 const EventEmitter = require('events');
 const Report = require('../models/Report');
 const Dashboard = require('../models/Dashboard');
@@ -9,6 +8,40 @@ class ReportingService extends EventEmitter {
     super();
     this.processingQueue = [];
     this.cacheMap = new Map();
+    this._schedulerTimer = null;
+  }
+
+  // ─── Scheduler ─────────────────────────────────────────────────────────────
+  // Starts a recurring timer that checks for and executes scheduled reports.
+  // Default interval: 5 minutes.  Call stopScheduler() for graceful shutdown.
+
+  startScheduler(intervalMs = 5 * 60 * 1000) {
+    if (this._schedulerTimer) {
+      return; // already running
+    }
+    this._schedulerTimer = setInterval(async () => {
+      try {
+        const count = await this.processScheduledReports();
+        if (count > 0) {
+          this.emit('scheduler-tick', { processed: count });
+        }
+      } catch (err) {
+        this.emit('scheduler-error', { error: err.message });
+      }
+    }, intervalMs);
+    // Allow Node to exit even if the timer is still active
+    if (this._schedulerTimer.unref) {
+      this._schedulerTimer.unref();
+    }
+    this.emit('scheduler-started', { intervalMs });
+  }
+
+  stopScheduler() {
+    if (this._schedulerTimer) {
+      clearInterval(this._schedulerTimer);
+      this._schedulerTimer = null;
+      this.emit('scheduler-stopped');
+    }
   }
 
   // Report Generation Methods
@@ -90,12 +123,7 @@ class ReportingService extends EventEmitter {
         labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
         datasets: metrics.slice(0, 2).map(m => ({
           label: m.label,
-          data: [
-            Math.random() * 100,
-            Math.random() * 100,
-            Math.random() * 100,
-            Math.random() * 100,
-          ],
+          data: [Math.random() * 100, Math.random() * 100, Math.random() * 100, Math.random() * 100],
         })),
       },
     }));
@@ -509,7 +537,7 @@ class ReportingService extends EventEmitter {
           createdAt: { $lt: oldDate },
           status: { $ne: 'archived' },
         },
-        { status: 'archived' }
+        { status: 'archived' },
       );
 
       this.emit('old-reports-archived', { count: result.modifiedCount });

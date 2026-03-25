@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Approval Requests Routes
  * مسارات طلبات الموافقة

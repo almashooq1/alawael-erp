@@ -441,7 +441,6 @@ describe('🔑 Password Management', () => {
       })
       .timeout(5000);
 
-    console.log('🔍 DEBUG - change-password response:', { status: res.status, body: res.body });
     expect([200, 400, 401, 404, 500].includes(res.status)).toBe(true);
   });
 
@@ -717,23 +716,5 @@ describe('🔥 Edge Cases', () => {
 // ============================================
 // ✅ Summary
 // ============================================
-
-console.log(`
-✅ Authentication System - Enhanced Test Suite Complete
-
-Test Categories:
-1. ✅ Login & Credentials
-2. ✅ Token Management
-3. ✅ Registration
-4. ✅ Logout
-5. ✅ Password Management
-6. ✅ Multi-Factor Authentication
-7. ✅ Social OAuth
-8. ✅ Session Management
-9. ✅ Security
-10. ✅ Edge Cases & Error Handling
-
-Total Tests: 60+
-Coverage: Comprehensive end-to-end
-Status: ✅ Production Ready
-`);
+// Authentication System - Enhanced Test Suite
+// 10 Categories | 60+ Tests | Comprehensive end-to-end

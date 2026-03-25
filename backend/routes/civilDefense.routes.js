@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Civil Defense Integration Routes
  * مسارات تكامل الدفاع المدني

@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Enhanced Executive Dashboard Routes
  * Integrates search, alerts, and performance monitoring

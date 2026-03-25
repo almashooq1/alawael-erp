@@ -1,4 +1,3 @@
-﻿/* eslint-disable no-unused-vars */
 /**
  * Traffic Accident Analytics Routes - مسارات تحليلات الحوادث المرورية
  */

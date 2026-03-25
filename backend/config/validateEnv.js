@@ -89,8 +89,31 @@ const envSchema = Joi.object({
   .options({ abortEarly: false });
 
 /**
+ * Strict schema for CI / production. Rejects undefined env vars that are
+ * required for a secure deployment. Enabled when STRICT_ENV_VALIDATION=true
+ * or automatically in CI environments.
+ */
+const strictOverrides = Joi.object({
+  MONGODB_URI: Joi.string()
+    .pattern(/^mongodb(\+srv)?:\/\/.+/)
+    .required()
+    .messages({
+      'string.pattern.base': 'MONGODB_URI must start with mongodb:// or mongodb+srv://',
+    }),
+  JWT_SECRET: Joi.string().min(32).required(),
+  JWT_REFRESH_SECRET: Joi.string().min(32).required(),
+  ENCRYPTION_KEY: Joi.string().min(32).required(),
+  SESSION_SECRET: Joi.string().min(16).required(),
+})
+  .unknown(true)
+  .options({ abortEarly: false });
+
+/**
  * Validate process.env and return the validated (with defaults) values.
  * Logs warnings in development, throws in production.
+ *
+ * When STRICT_ENV_VALIDATION=true or CI=true, an additional strict schema
+ * is applied that requires all security-critical variables.
  */
 function validateEnv() {
   const { error, value } = envSchema.validate(process.env);
@@ -105,6 +128,20 @@ function validateEnv() {
     // In dev/test just warn — don't block startup
     const logger = require('../utils/logger');
     logger.warn(`Environment validation warnings:\n${messages}`);
+  }
+
+  // Strict mode: enforce in production, CI, or when explicitly enabled
+  const isStrict =
+    process.env.STRICT_ENV_VALIDATION === 'true' ||
+    process.env.CI === 'true' ||
+    process.env.NODE_ENV === 'production';
+
+  if (isStrict) {
+    const { error: strictError } = strictOverrides.validate(process.env);
+    if (strictError) {
+      const msgs = strictError.details.map(d => `  • ${d.message}`).join('\n');
+      throw new Error(`❌ Strict environment validation failed:\n${msgs}`);
+    }
   }
 
   return value;

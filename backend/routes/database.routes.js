@@ -1,4 +1,3 @@
-﻿/* eslint-disable no-unused-vars, no-undef, no-empty, prefer-const, no-constant-condition, no-unused-expressions */
 /**
  * واجهة API لإدارة قاعدة البيانات - Database Management Routes
  * نظام الألوائل للتأهيل وإعادة التأهيل

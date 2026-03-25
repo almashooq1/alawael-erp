@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Risk Assessment Routes
  * مسارات تقييم المخاطر

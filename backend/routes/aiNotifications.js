@@ -1,4 +1,3 @@
-﻿/* eslint-disable no-unused-vars */
 // aiNotifications.js
 const express = require('express');
 const router = express.Router();

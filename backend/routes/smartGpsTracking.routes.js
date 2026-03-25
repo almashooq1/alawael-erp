@@ -1,4 +1,3 @@
-﻿/* eslint-disable no-unused-vars */
 /**
  * Smart GPS Tracking API Routes
  * مسارات API شاملة لنظام تتبع الحافلات الذكي

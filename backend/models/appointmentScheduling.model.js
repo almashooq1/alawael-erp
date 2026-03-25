@@ -220,10 +220,14 @@ waitlistEntrySchema.index({ requestedProvider: 1 });
 
 // ═══════════════════════════════════════════════════════════════════════════
 
-const ScheduleTemplate = mongoose.model('ScheduleTemplate', scheduleTemplateSchema);
-const TimeSlot = mongoose.model('TimeSlot', timeSlotSchema);
-const AppointmentReminder = mongoose.model('AppointmentReminder', appointmentReminderSchema);
-const WaitlistEntry = mongoose.model('WaitlistEntry', waitlistEntrySchema);
+const ScheduleTemplate =
+  mongoose.models.ScheduleTemplate || mongoose.model('ScheduleTemplate', scheduleTemplateSchema);
+const TimeSlot = mongoose.models.TimeSlot || mongoose.model('TimeSlot', timeSlotSchema);
+const AppointmentReminder =
+  mongoose.models.AppointmentReminder ||
+  mongoose.model('AppointmentReminder', appointmentReminderSchema);
+const WaitlistEntry =
+  mongoose.models.WaitlistEntry || mongoose.model('WaitlistEntry', waitlistEntrySchema);
 
 module.exports = {
   ScheduleTemplate,

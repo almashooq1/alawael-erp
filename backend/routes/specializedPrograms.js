@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * API البرامج المتخصصة - Specialized Programs API
  * يدير عمليات CRUD والتقارير الخاصة بالبرامج

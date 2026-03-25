@@ -329,11 +329,14 @@ drugInteractionSchema.index({ severity: 1 });
 
 // ═══════════════════════════════════════════════════════════════════════════
 
-const Medication = mongoose.model('Medication', medicationSchema);
-const Prescription = mongoose.model('Prescription', prescriptionSchema);
-const Dispensing = mongoose.model('Dispensing', dispensingSchema);
-const PharmacyInventory = mongoose.model('PharmacyInventory', pharmacyInventorySchema);
-const DrugInteraction = mongoose.model('DrugInteraction', drugInteractionSchema);
+const Medication = mongoose.models.Medication || mongoose.model('Medication', medicationSchema);
+const Prescription =
+  mongoose.models.Prescription || mongoose.model('Prescription', prescriptionSchema);
+const Dispensing = mongoose.models.Dispensing || mongoose.model('Dispensing', dispensingSchema);
+const PharmacyInventory =
+  mongoose.models.PharmacyInventory || mongoose.model('PharmacyInventory', pharmacyInventorySchema);
+const DrugInteraction =
+  mongoose.models.DrugInteraction || mongoose.model('DrugInteraction', drugInteractionSchema);
 
 module.exports = {
   Medication,

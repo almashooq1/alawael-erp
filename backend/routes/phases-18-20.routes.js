@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Phases 18-20: Enterprise Multi-Tenant, Integrations, Compliance
  * المؤسسات متعددة المستأجرين والتكاملات والامتثال

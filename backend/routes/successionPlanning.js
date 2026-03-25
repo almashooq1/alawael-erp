@@ -1,4 +1,3 @@
-﻿/* eslint-disable no-unused-vars */
 /**
  * مسارات تخطيط التعاقب الوظيفي
  * Succession Planning Routes

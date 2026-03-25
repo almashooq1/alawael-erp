@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Dashboard Widget Routes
  * مسارات لوحة معلومات الويدجت

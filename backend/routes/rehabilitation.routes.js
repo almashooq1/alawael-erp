@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Rehabilitation Routes
  * مسارات API لنظام التأهيل والعلاج

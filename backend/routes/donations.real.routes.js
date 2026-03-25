@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Donations Routes — عمليات التبرعات + لوحة التحكم
  * Handles: /api/donations

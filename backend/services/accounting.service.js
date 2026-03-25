@@ -1164,9 +1164,7 @@ class AccountingService {
     const budget = await Budget.findById(budgetId).lean();
     if (!budget) throw new Error('الميزانية غير موجودة');
 
-    const budgetAccountIds = (budget.lines || [])
-      .filter(l => l.accountId)
-      .map(l => l.accountId);
+    const budgetAccountIds = (budget.lines || []).filter(l => l.accountId).map(l => l.accountId);
 
     // Single aggregation: sum debits per account in the budget period
     const actuals = await JournalEntry.aggregate([

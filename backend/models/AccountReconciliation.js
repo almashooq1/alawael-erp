@@ -70,10 +70,11 @@ const intercompanyTransactionSchema = new mongoose.Schema(
 intercompanyTransactionSchema.index({ organization: 1, sourceBranch: 1, targetBranch: 1 });
 intercompanyTransactionSchema.index({ status: 1 });
 
-const AccountReconciliation = mongoose.models.AccountReconciliation || mongoose.model('AccountReconciliation', accountReconciliationSchema);
-const IntercompanyTransaction = mongoose.model(
-  'IntercompanyTransaction',
-  intercompanyTransactionSchema
-);
+const AccountReconciliation =
+  mongoose.models.AccountReconciliation ||
+  mongoose.model('AccountReconciliation', accountReconciliationSchema);
+const IntercompanyTransaction =
+  mongoose.models.IntercompanyTransaction ||
+  mongoose.model('IntercompanyTransaction', intercompanyTransactionSchema);
 
 module.exports = { AccountReconciliation, IntercompanyTransaction };

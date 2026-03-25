@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import jwt from 'jsonwebtoken';
 import logger from '../config/logger.js';
 

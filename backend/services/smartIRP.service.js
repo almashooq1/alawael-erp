@@ -2,6 +2,9 @@
 const SmartIRP = require('../models/SmartIRP');
 const mongoose = require('mongoose');
 const logger = require('../utils/logger');
+const NotificationService = require('./notificationService');
+const { sendEmail } = require('./emailService');
+const { generateNotificationPDF } = require('./pdfExportService');
 
 /**
  * Smart IRP Service
@@ -290,8 +293,23 @@ class SmartIRPService {
       // Send notifications to team members and alert recipients
       const recipients = [...irp.team.map(t => t.member), ...irp.autoReview.alertRecipients];
 
-      // @todo [P2] Integrate with NotificationService for alert delivery
-      // await NotificationService.sendBulk(recipients, alerts);
+      // Send notifications to each recipient via NotificationService
+      try {
+        const notifService = NotificationService.initialize();
+        for (const recipientId of recipients) {
+          for (const alert of alerts) {
+            await notifService.sendInAppNotification(
+              recipientId,
+              `تنبيه IRP: ${alert.type}`,
+              alert.message,
+              alert.severity === 'high' ? 'warning' : 'info',
+              { irpId: irp._id, alertType: alert.type }
+            );
+          }
+        }
+      } catch (notifError) {
+        logger.warn('IRP alert notification delivery failed:', notifError.message);
+      }
 
       return alerts;
     } catch (error) {
@@ -379,15 +397,49 @@ class SmartIRPService {
         },
       };
 
-      // @todo [P2] Generate PDF report via pdfkit/puppeteer
-      // reportData.url = await PDFService.generateReport(reportData);
-      reportData.url = `/reports/irp/${irp._id}/family-report-${Date.now()}.pdf`;
+      // Generate PDF report via pdfExportService
+      try {
+        const pdfResult = await generateNotificationPDF({
+          title: `تقرير تقدم العائلة - ${reportData.content.beneficiaryName}`,
+          body: [
+            `التقدم العام: ${reportData.content.overallProgress}%`,
+            `الأهداف المحققة: ${reportData.content.goalsAchieved}`,
+            `على المسار: ${reportData.content.goalsOnTrack}`,
+            `معرضة للخطر: ${reportData.content.goalsAtRisk}`,
+            '',
+            ...(reportData.content.goalsSummary || []).map(
+              g => `- ${g.title} (${g.category}): ${g.achievement}% [${g.status}]`
+            ),
+          ].join('\n'),
+          date: reportData.generatedDate,
+        });
+        reportData.url =
+          pdfResult?.filePath || `/reports/irp/${irp._id}/family-report-${Date.now()}.pdf`;
+      } catch (pdfError) {
+        logger.warn('IRP PDF generation failed, using placeholder URL:', pdfError.message);
+        reportData.url = `/reports/irp/${irp._id}/family-report-${Date.now()}.pdf`;
+      }
 
       irp.reports.push(reportData);
       await irp.save();
 
-      // @todo [P2] Send family progress report via EmailService
-      // await EmailService.sendFamilyReport(irp, reportData);
+      // Send family progress report via EmailService
+      try {
+        const familyEmails = (irp.team || [])
+          .filter(t => t.role === 'family' || t.role === 'guardian')
+          .map(t => t.email)
+          .filter(Boolean);
+
+        for (const email of familyEmails) {
+          await sendEmail(email, 'irp_family_report', {
+            beneficiaryName: reportData.content.beneficiaryName,
+            overallProgress: reportData.content.overallProgress,
+            reportUrl: reportData.url,
+          });
+        }
+      } catch (emailError) {
+        logger.warn('IRP family email delivery failed:', emailError.message);
+      }
 
       return reportData;
     } catch (error) {

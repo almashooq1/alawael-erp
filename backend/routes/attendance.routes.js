@@ -1,4 +1,3 @@
-﻿/* eslint-disable no-unused-vars */
 /**
  * Attendance Routes - مسارات الحضور والغياب
  */

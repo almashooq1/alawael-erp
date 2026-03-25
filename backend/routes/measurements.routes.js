@@ -1,5 +1,4 @@
-﻿/* eslint-disable no-unused-vars, no-undef, no-empty, prefer-const, no-constant-condition, no-unused-expressions */
-// Stub route - Measurements
+// Route - Measurements
 const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');

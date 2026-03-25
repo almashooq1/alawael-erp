@@ -1,4 +1,3 @@
-﻿/* eslint-disable no-unused-vars */
 /**
  * 📊 Dashboard Statistics API v2 — Comprehensive Real-Time Aggregation
  * نقاط نهاية لوحة التحكم الاحترافية — الإصدار الثاني

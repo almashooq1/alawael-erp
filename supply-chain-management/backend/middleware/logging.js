@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 // middleware/logging.js
 // Advanced Logging & Monitoring Middleware
 

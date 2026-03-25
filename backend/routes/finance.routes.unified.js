@@ -1,4 +1,3 @@
-﻿/* eslint-disable no-unused-vars */
 /**
  * Finance Routes - Phase 2
  * RESTful API for financial transaction and budget management

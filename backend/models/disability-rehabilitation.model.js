@@ -1649,9 +1649,8 @@ rehabilitationProgramSchema.pre('save', function (next) {
 // ============================================
 // MODEL EXPORT
 // ============================================
-const DisabilityRehabilitation = mongoose.model(
-  'DisabilityRehabilitation',
-  rehabilitationProgramSchema
-);
+const DisabilityRehabilitation =
+  mongoose.models.DisabilityRehabilitation ||
+  mongoose.model('DisabilityRehabilitation', rehabilitationProgramSchema);
 
 module.exports = DisabilityRehabilitation;

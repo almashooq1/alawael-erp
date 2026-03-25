@@ -1,4 +1,3 @@
-﻿/* eslint-disable no-unused-vars */
 /**
  * مسارات الاتصالات - نظام الأصول ERP
  * الإصدار 2.0.0

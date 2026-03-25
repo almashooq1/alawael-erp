@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * RBAC Routes
  * مسارات التحكم بالوصول القائم على الأدوار

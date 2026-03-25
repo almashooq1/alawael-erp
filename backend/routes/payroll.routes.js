@@ -1,4 +1,3 @@
-﻿/* eslint-disable no-unused-vars */
 /**
  * Payroll & Compensation API Routes
  * مسارات API الرواتب والحوافز

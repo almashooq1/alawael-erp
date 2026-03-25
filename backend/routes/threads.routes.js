@@ -1,4 +1,3 @@
-﻿/* eslint-disable no-unused-vars */
 /**
  * Threads Routes - Separate routing for /api/threads
  * To avoid conflicts with messaging.routes.js

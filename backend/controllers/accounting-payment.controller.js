@@ -8,6 +8,7 @@
 const AccountingPayment = require('../models/AccountingPayment');
 const logger = require('../utils/logger');
 const { escapeRegex } = require('../utils/sanitize');
+const PDFDocument = require('pdfkit');
 
 // @desc    Get all payments
 // @route   GET /api/accounting/payments
@@ -279,14 +280,44 @@ exports.downloadReceipt = async (req, res) => {
 
     const receiptData = await payment.generateReceipt();
 
-    // @todo [P2] Integrate PDF generation library (e.g. pdfkit) to produce downloadable receipt
-    logger.warn('Receipt PDF generation not yet implemented — returning raw data');
+    // Generate receipt PDF using PDFKit
+    const doc = new PDFDocument({ size: 'A4', margin: 50 });
 
-    res.json({
-      success: true,
-      message: 'Receipt PDF generation not implemented yet',
-      data: receiptData,
-    });
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="receipt-${payment.receiptNumber || payment._id}.pdf"`
+    );
+
+    doc.pipe(res);
+
+    // Header
+    doc.fontSize(20).text('إيصال دفع / Payment Receipt', { align: 'center' });
+    doc.moveDown();
+
+    // Receipt details
+    doc.fontSize(12);
+    doc.text(`رقم الإيصال: ${receiptData.receiptNumber || payment.receiptNumber || payment._id}`);
+    doc.text(
+      `التاريخ: ${new Date(payment.paymentDate || payment.createdAt).toLocaleDateString('ar-SA')}`
+    );
+    doc.text(`طريقة الدفع: ${payment.paymentMethod || 'غير محدد'}`);
+    if (payment.invoice) {
+      doc.text(`رقم الفاتورة: ${payment.invoice.invoiceNumber || payment.invoice._id}`);
+    }
+    doc.moveDown();
+
+    // Amount
+    doc.fontSize(16).text(`المبلغ المدفوع: ${payment.amount || 0} SAR`, { underline: true });
+    doc.moveDown();
+
+    // Status
+    doc.fontSize(10).text(`الحالة: ${payment.status || 'completed'}`, { align: 'right' });
+    if (receiptData.notes) {
+      doc.text(`ملاحظات: ${receiptData.notes}`);
+    }
+
+    doc.end();
   } catch (error) {
     logger.error('Error generating receipt:', error);
     res.status(500).json({

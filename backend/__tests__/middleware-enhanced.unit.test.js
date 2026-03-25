@@ -17,7 +17,8 @@ jest.mock('../utils/tokenBlacklist', () => ({
 
 const auth = require('../middleware/auth');
 
-const JWT_SECRET = 'test-secret-key-for-testing-only';
+// Test-only secret — MUST NEVER match a production secret
+const JWT_SECRET = process.env.JWT_SECRET || 'test-secret-key-for-testing-only';
 
 describe('Enhanced Auth Middleware Tests', () => {
   const createMockReq = (headers = {}, user = null) => ({

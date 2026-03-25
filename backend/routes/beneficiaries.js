@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Beneficiaries Admin Routes — مسارات إدارة المستفيدين
  *

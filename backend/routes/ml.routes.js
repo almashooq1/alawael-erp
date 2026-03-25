@@ -1,4 +1,3 @@
-﻿/* eslint-disable no-unused-vars */
 /**
  * AI/ML Analytics Routes
  * Provides ML predictions and insights

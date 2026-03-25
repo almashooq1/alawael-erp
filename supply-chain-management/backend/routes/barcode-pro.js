@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 const express = require('express');
 const BarcodeService = require('../services/BarcodeService');
 const { barcodeAuth, barcodeRateLimit } = require('../middleware/barcodeAuth');

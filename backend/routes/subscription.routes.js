@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Subscription Routes — مسارات الاشتراكات
  * Manage subscription plans and user subscriptions

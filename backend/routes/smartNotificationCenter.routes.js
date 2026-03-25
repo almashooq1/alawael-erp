@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Smart Notification Center Routes
  * مسارات مركز الإشعارات الذكي

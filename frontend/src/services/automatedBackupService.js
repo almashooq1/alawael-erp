@@ -37,15 +37,12 @@ const automatedBackupService = {
 
   upsertStorageTarget: data => apiClient.post(`${BASE}/storage/targets`, data).then(r => r.data),
 
-  testStorageTarget: id =>
-    apiClient.post(`${BASE}/storage/targets/${id}/test`).then(r => r.data),
+  testStorageTarget: id => apiClient.post(`${BASE}/storage/targets/${id}/test`).then(r => r.data),
 
-  removeStorageTarget: id =>
-    apiClient.delete(`${BASE}/storage/targets/${id}`).then(r => r.data),
+  removeStorageTarget: id => apiClient.delete(`${BASE}/storage/targets/${id}`).then(r => r.data),
 
   /* ── Restore ── */
-  restoreBackup: (id, data = {}) =>
-    apiClient.post(`${BASE}/restore/${id}`, data).then(r => r.data),
+  restoreBackup: (id, data = {}) => apiClient.post(`${BASE}/restore/${id}`, data).then(r => r.data),
 
   listRestoreHistory: (params = {}) =>
     apiClient.get(`${BASE}/restore/history`, { params }).then(r => r.data),
@@ -53,8 +50,7 @@ const automatedBackupService = {
   /* ── Health & Analytics ── */
   getHealth: () => apiClient.get(`${BASE}/health`).then(r => r.data),
 
-  getAnalytics: (params = {}) =>
-    apiClient.get(`${BASE}/analytics`, { params }).then(r => r.data),
+  getAnalytics: (params = {}) => apiClient.get(`${BASE}/analytics`, { params }).then(r => r.data),
 
   runCleanup: () => apiClient.post(`${BASE}/cleanup`).then(r => r.data),
 

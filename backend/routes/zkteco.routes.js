@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * ZKTeco Device Routes - مسارات API لإدارة أجهزة ZKTeco
  * إدارة الأجهزة، المزامنة، ربط المستخدمين

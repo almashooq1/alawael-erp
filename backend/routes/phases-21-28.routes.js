@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Phases 21-28: Advanced Enterprise Features
  * مسارات الأطوار المتقدمة للمؤسسات

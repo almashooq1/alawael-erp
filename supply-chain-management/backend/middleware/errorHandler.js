@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Global Error Handler Middleware
  * Centralizes error handling for all routes

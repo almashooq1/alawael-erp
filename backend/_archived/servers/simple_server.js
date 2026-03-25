@@ -34,7 +34,8 @@ const users = [];
 
 // Create default admin user
 const createAdminUser = async () => {
-  const hashedPassword = await bcrypt.hash('Admin@123', 10);
+  const adminPassword = process.env.ADMIN_DEFAULT_PASSWORD || 'change-me-immediately';
+  const hashedPassword = await bcrypt.hash(adminPassword, 10);
   users.push({
     id: '1',
     email: 'admin@example.com',
@@ -45,7 +46,7 @@ const createAdminUser = async () => {
   });
   console.log('✅ Default admin user created');
   console.log('   Email: admin@example.com');
-  console.log('   Password: Admin@123');
+  console.log('   Password: (set via ADMIN_DEFAULT_PASSWORD env var)');
 };
 
 // Initialize admin user
@@ -270,7 +271,7 @@ app.listen(PORT, () => {
   console.log('');
   console.log('  👤 Test Credentials:');
   console.log('     Email: admin@example.com');
-  console.log('     Password: Admin@123');
+  console.log('     Password: (set via ADMIN_DEFAULT_PASSWORD env var)');
   console.log('');
   console.log('  📝 Mode: In-Memory Database (Perfect for Testing!)');
   console.log('  ⚡ No MongoDB required!');

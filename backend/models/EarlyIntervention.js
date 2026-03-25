@@ -910,20 +910,18 @@ earlyReferralSchema.index({ organization: 1 });
 // EXPORTS
 // ═══════════════════════════════════════════════════════════════════════════════
 
-const EarlyInterventionChild = mongoose.model(
-  'EarlyInterventionChild',
-  earlyInterventionChildSchema
-);
-const DevelopmentalScreening = mongoose.model(
-  'DevelopmentalScreening',
-  developmentalScreeningSchema
-);
-const DevelopmentalMilestone = mongoose.model(
-  'DevelopmentalMilestone',
-  developmentalMilestoneSchema
-);
+const EarlyInterventionChild =
+  mongoose.models.EarlyInterventionChild ||
+  mongoose.model('EarlyInterventionChild', earlyInterventionChildSchema);
+const DevelopmentalScreening =
+  mongoose.models.DevelopmentalScreening ||
+  mongoose.model('DevelopmentalScreening', developmentalScreeningSchema);
+const DevelopmentalMilestone =
+  mongoose.models.DevelopmentalMilestone ||
+  mongoose.model('DevelopmentalMilestone', developmentalMilestoneSchema);
 const IFSP = mongoose.models.IFSP || mongoose.model('IFSP', ifspSchema);
-const EarlyReferral = mongoose.models.EarlyReferral || mongoose.model('EarlyReferral', earlyReferralSchema);
+const EarlyReferral =
+  mongoose.models.EarlyReferral || mongoose.model('EarlyReferral', earlyReferralSchema);
 
 module.exports = {
   EarlyInterventionChild,

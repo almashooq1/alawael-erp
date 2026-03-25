@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 // utils/pagination-helper.js
 // Pagination & Data Formatting Utilities
 

@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Insight Model - Phase 7
  * AI-generated insights and actionable recommendations

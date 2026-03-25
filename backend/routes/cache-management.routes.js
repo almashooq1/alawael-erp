@@ -1,4 +1,3 @@
-﻿/* eslint-disable no-unused-vars */
 /**
  * Cache Management Routes
  * Handles performance optimizer cache statistics and clearing

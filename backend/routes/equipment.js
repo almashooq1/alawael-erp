@@ -1,4 +1,3 @@
-﻿/* eslint-disable no-unused-vars */
 /**
  * Equipment Management Routes
  * مسارات إدارة المعدات - نظام احترافي متقدم

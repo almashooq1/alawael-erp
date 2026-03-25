@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 // approvalRequests.js
 const express = require('express');
 const router = express.Router();

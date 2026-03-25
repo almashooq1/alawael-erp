@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Supply Chain Management Routes
  * مسارات إدارة سلسلة التوريد

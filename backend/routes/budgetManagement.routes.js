@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Budget Management Routes
  * مسارات إدارة الميزانيات

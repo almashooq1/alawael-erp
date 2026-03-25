@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * ML & Advanced Analytics Routes - Phase 7
  * RESTful API endpoints for ML models, analytics, and insights

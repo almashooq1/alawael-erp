@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import ChangeLog from '../models/ChangeLog.js';
 import express from 'express';
 import Product from '../models/Product.js';

@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 const AuditLog = require('../models/AuditLog');
 
 // تسجيل حدث في السجل

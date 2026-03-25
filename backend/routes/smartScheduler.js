@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * API الجدولة الذكية - Smart Scheduler API
  * يدير جدولة الجلسات بشكل ذكي مع تجنب التعارضات

@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * 📚 Knowledge Center Advanced Routes — مسارات مركز المعرفة المتقدمة
  * AlAwael ERP — Full CRUD + Categories + Ratings + Comments + Bookmarks + Analytics

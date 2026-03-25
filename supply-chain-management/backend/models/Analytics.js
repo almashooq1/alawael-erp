@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Analytics Model - Phase 7
  * Advanced analytics and metrics tracking

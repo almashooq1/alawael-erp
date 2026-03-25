@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Notification Templates Routes
  * مسارات قوالب الإشعارات

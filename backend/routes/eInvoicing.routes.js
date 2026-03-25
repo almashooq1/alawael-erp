@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * E-Invoicing Routes (ZATCA Compliant)
  * مسارات الفواتير الإلكترونية

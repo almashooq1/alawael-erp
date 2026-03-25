@@ -1,4 +1,3 @@
-﻿/* eslint-disable no-unused-vars */
 /**
  * Messaging Routes - Phase 2
  * Simple message management API

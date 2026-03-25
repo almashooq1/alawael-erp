@@ -273,6 +273,8 @@ ReferralFollowUpSchema.index({ referral: 1, date: -1 });
 // ═══════════════════════════════════════════════════════════════════════════
 
 module.exports = {
-  MedicalReferral: mongoose.model('MedicalReferral', MedicalReferralSchema),
-  ReferralFollowUp: mongoose.model('ReferralFollowUp', ReferralFollowUpSchema),
+  MedicalReferral:
+    mongoose.models.MedicalReferral || mongoose.model('MedicalReferral', MedicalReferralSchema),
+  ReferralFollowUp:
+    mongoose.models.ReferralFollowUp || mongoose.model('ReferralFollowUp', ReferralFollowUpSchema),
 };

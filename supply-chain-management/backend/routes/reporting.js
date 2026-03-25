@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 const express = require('express');
 const reportingService = require('../services/reportingService');
 const Report = require('../models/Report');

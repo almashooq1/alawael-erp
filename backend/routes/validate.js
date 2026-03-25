@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Validation Routes
  * Data validation endpoints and schema management

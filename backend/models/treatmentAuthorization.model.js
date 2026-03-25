@@ -275,9 +275,8 @@ TreatmentAuthorizationSchema.index({ 'insurance.policyNumber': 1 });
 TreatmentAuthorizationSchema.index({ status: 1, 'workflow.expiresAt': 1 });
 TreatmentAuthorizationSchema.index({ branch: 1, createdAt: -1 });
 
-const TreatmentAuthorization = mongoose.model(
-  'TreatmentAuthorization',
-  TreatmentAuthorizationSchema
-);
+const TreatmentAuthorization =
+  mongoose.models.TreatmentAuthorization ||
+  mongoose.model('TreatmentAuthorization', TreatmentAuthorizationSchema);
 
 module.exports = { TreatmentAuthorization };

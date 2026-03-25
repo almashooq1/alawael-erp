@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Dashboard Routes
  * Handles all dashboard-related HTTP requests

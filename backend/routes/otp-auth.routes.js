@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * OTP Authentication Routes - مسارات المصادقة بواسطة OTP
  * نظام التسجيل والدخول عبر رمز التحقق

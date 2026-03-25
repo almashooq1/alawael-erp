@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Dashboard Routes
  * System monitoring, health checks, and metrics

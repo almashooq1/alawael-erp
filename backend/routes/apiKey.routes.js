@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * API Key Management Routes — مسارات إدارة مفاتيح API
  * Admin CRUD for API keys used by apiKey.middleware.js

@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * مسارات المواعيد - Appointment Routes
  * Full CRUD + booking + check-in + stats + conversion + availability

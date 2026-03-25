@@ -1,7 +1,7 @@
 # Al-Awael ERP — Comprehensive Code Audit Report
 
-**Date:** 2025-07-17  
-**Scope:** Full codebase audit across 8 categories  
+**Date:** 2025-07-17
+**Scope:** Full codebase audit across 8 categories
 **System:** Al-Awael (الأوائل) Rehabilitation Center Management ERP
 
 ---

@@ -1,3 +1,9 @@
+# ╔══════════════════════════════════════════════════════════════╗
+# ║  ⚠️  ARCHIVED — DO NOT USE IN PRODUCTION                    ║
+# ║  This file is superseded by the root docker-compose.yml.    ║
+# ║  See DOCKER_COMPOSE_GUIDE.md for the active config.         ║
+# ╚══════════════════════════════════════════════════════════════╝
+
 services:
   # MongoDB Database
   mongodb:
@@ -8,7 +14,7 @@ services:
       - "27017:27017"
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME:-admin}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-secure_password}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:?Set MONGO_PASSWORD in .env}
       MONGO_INITDB_DATABASE: ${MONGO_DB:-erp_system}
     volumes:
       - mongodb_data:/data/db
@@ -34,9 +40,9 @@ services:
     environment:
       NODE_ENV: ${NODE_ENV:-development}
       PORT: 3001
-      MONGODB_URI: mongodb://${MONGO_USERNAME:-admin}:${MONGO_PASSWORD:-secure_password}@mongodb:27017/${MONGO_DB:-erp_system}?authSource=admin
+      MONGODB_URI: mongodb://${MONGO_USERNAME:-admin}:${MONGO_PASSWORD:?Set MONGO_PASSWORD in .env}@mongodb:27017/${MONGO_DB:-erp_system}?authSource=admin
       MONGODB_USERNAME: ${MONGO_USERNAME:-admin}
-      MONGODB_PASSWORD: ${MONGO_PASSWORD:-secure_password}
+      MONGODB_PASSWORD: ${MONGO_PASSWORD:?Set MONGO_PASSWORD in .env}
       MONGODB_DB: ${MONGO_DB:-erp_system}
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set}
       JWT_EXPIRY: ${JWT_EXPIRY:-24h}
@@ -70,7 +76,7 @@ services:
       NODE_ENV: ${NODE_ENV:-development}
       PORT: 3002
       SERVICE_TYPE: sso
-      MONGODB_URI: mongodb://${MONGO_USERNAME:-admin}:${MONGO_PASSWORD:-secure_password}@mongodb:27017/${MONGO_DB:-erp_system}?authSource=admin
+      MONGODB_URI: mongodb://${MONGO_USERNAME:-admin}:${MONGO_PASSWORD:?Set MONGO_PASSWORD in .env}@mongodb:27017/${MONGO_DB:-erp_system}?authSource=admin
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set}
       JWT_EXPIRY: ${JWT_EXPIRY:-24h}
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}

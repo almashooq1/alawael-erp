@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 const QRCode = require('qrcode');
 const bwipjs = require('bwip-js');
 const canvas = require('canvas');

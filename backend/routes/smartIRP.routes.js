@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Smart IRP Routes — مسارات خطة التأهيل الفردية الذكية
  * Manage Individual Rehabilitation Plans using SMART goals

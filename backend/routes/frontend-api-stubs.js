@@ -12,43 +12,9 @@
 const express = require('express');
 
 // ════════════════════════════════════════════════════════════════════════════
-// Helper: lightweight optional auth — decode JWT if present, never block
+// Use the centralized auth middleware — no parallel JWT verification
 // ════════════════════════════════════════════════════════════════════════════
-const jwt = require('jsonwebtoken');
-const { jwtSecret: JWT_SECRET } = require('../config/secrets');
-
-const optionalAuth = (req, res, next) => {
-  try {
-    const authHeader = req.headers.authorization;
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      const decoded = jwt.verify(authHeader.slice(7), JWT_SECRET);
-      req.user = decoded;
-    }
-  } catch {
-    // token invalid — continue without user
-  }
-  next();
-};
-
-// ════════════════════════════════════════════════════════════════════════════
-// Helper: requireAuth — same as optionalAuth but rejects if no valid token
-// Used for write operations (POST/PUT/DELETE) to prevent unauthenticated access
-// ════════════════════════════════════════════════════════════════════════════
-const requireAuth = (req, res, next) => {
-  try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ success: false, message: 'يرجى تسجيل الدخول' });
-    }
-    const decoded = jwt.verify(authHeader.slice(7), JWT_SECRET);
-    req.user = decoded;
-    next();
-  } catch {
-    return res
-      .status(401)
-      .json({ success: false, message: 'انتهت صلاحية الجلسة، يرجى إعادة تسجيل الدخول' });
-  }
-};
+const { optionalAuth, requireAuth } = require('../middleware/auth');
 
 // ════════════════════════════════════════════════════════════════════════════
 //  /api/admin

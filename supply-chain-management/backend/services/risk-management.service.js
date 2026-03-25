@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Risk Management & Compliance Service
  * Phase 20: Risk Identification, Assessment, Compliance Tracking, Audit Management
@@ -248,9 +247,7 @@ class RiskManagementService {
     }
 
     const evidencePercentage =
-      control.evidenceRequired.length > 0
-        ? (control.evidenceProvided.length / control.evidenceRequired.length) * 100
-        : 0;
+      control.evidenceRequired.length > 0 ? (control.evidenceProvided.length / control.evidenceRequired.length) * 100 : 0;
 
     const openFindings = control.findings.filter(f => f.status === 'open').length;
     const totalFindings = control.findings.length;
@@ -412,10 +409,7 @@ class RiskManagementService {
       byStatus[risk.status] = (byStatus[risk.status] || 0) + 1;
     });
 
-    const avgScore =
-      risks.length > 0
-        ? (risks.reduce((sum, r) => sum + r.riskScore, 0) / risks.length).toFixed(2)
-        : 0;
+    const avgScore = risks.length > 0 ? (risks.reduce((sum, r) => sum + r.riskScore, 0) / risks.length).toFixed(2) : 0;
 
     return {
       totalRisks: risks.length,
@@ -428,9 +422,61 @@ class RiskManagementService {
     };
   }
 
-  trackRiskTrends(timeframe) {
-    // TODO: Implement trend tracking over time
-    return this.generateRiskReport();
+  trackRiskTrends(timeframe = '30d') {
+    const now = new Date();
+    const match = timeframe.match(/^(\d+)(d|w|m)$/);
+    const amount = match ? parseInt(match[1], 10) : 30;
+    const unit = match ? match[2] : 'd';
+
+    const msPerDay = 24 * 60 * 60 * 1000;
+    const unitMs = unit === 'w' ? 7 * msPerDay : unit === 'm' ? 30 * msPerDay : msPerDay;
+    const totalMs = amount * unitMs;
+
+    const bucketCount = Math.min(6, amount);
+    const bucketMs = totalMs / bucketCount;
+    const startTime = now.getTime() - totalMs;
+
+    const buckets = [];
+    for (let i = 0; i < bucketCount; i++) {
+      const bStart = new Date(startTime + i * bucketMs);
+      const bEnd = new Date(startTime + (i + 1) * bucketMs);
+
+      const risksInBucket = this.risks.filter(r => {
+        const t = new Date(r.createdAt).getTime();
+        return t >= bStart.getTime() && t < bEnd.getTime();
+      });
+
+      const avgScore = risksInBucket.length > 0 ? risksInBucket.reduce((sum, r) => sum + r.riskScore, 0) / risksInBucket.length : 0;
+
+      const byLevel = { critical: 0, high: 0, medium: 0, low: 0, minimal: 0 };
+      risksInBucket.forEach(r => {
+        byLevel[r.riskLevel] = (byLevel[r.riskLevel] || 0) + 1;
+      });
+
+      buckets.push({
+        period: bStart.toISOString().split('T')[0],
+        risksIdentified: risksInBucket.length,
+        avgRiskScore: parseFloat(avgScore.toFixed(2)),
+        byLevel,
+      });
+    }
+
+    // Compute overall trend direction
+    const scoredBuckets = buckets.filter(b => b.risksIdentified > 0);
+    let trendDirection = 'stable';
+    if (scoredBuckets.length >= 2) {
+      const first = scoredBuckets[0].avgRiskScore;
+      const last = scoredBuckets[scoredBuckets.length - 1].avgRiskScore;
+      if (last > first + 1) trendDirection = 'increasing';
+      else if (last < first - 1) trendDirection = 'decreasing';
+    }
+
+    return {
+      timeframe,
+      trendDirection,
+      buckets,
+      currentSnapshot: this.generateRiskReport(),
+    };
   }
 
   // ═══════════════════════════════════════════════════════════════════════════

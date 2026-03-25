@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Multidisciplinary Team Coordination Routes
  * مسارات نظام التنسيق متعدد التخصصات

@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Gamification Routes — مسارات اللعبية
  * Manage badges, wallets, and point awards

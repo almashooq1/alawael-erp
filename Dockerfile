@@ -67,7 +67,7 @@ USER nodejs
 
 # Health check — accepts both 200 (healthy) and degraded states
 HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=3 \
-    CMD curl -sf http://localhost:3001/health | node -e "const d=require('fs').readFileSync('/dev/stdin','utf8');const j=JSON.parse(d);process.exit(j.status==='unhealthy'?1:0)" || exit 1
+    CMD curl -sf http://localhost:3001/health || exit 1
 
 # Use tini as init system for proper signal handling
 ENTRYPOINT ["/sbin/tini", "--"]

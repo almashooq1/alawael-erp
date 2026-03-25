@@ -119,7 +119,7 @@ console.log(`
 
   4. Test Login:
      Email:    admin@alawael.com
-     Password: Admin@123456
+     Password: (see ADMIN_DEFAULT_PASSWORD in .env)
 
 📌 If you still have issues:
   - Check MongoDB connection: http://localhost:27017

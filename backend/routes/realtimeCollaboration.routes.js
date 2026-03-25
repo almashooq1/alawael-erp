@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * مسارات التعاون في الوقت الفعلي
  * Real-Time Collaboration Routes

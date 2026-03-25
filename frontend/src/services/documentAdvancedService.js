@@ -15,8 +15,7 @@ const api = {
   get: path => apiClient.get(path).then(r => r.data),
   post: (path, body) => apiClient.post(path, body).then(r => r.data),
   put: (path, body) => apiClient.put(path, body).then(r => r.data),
-  del: (path, body) =>
-    apiClient.delete(path, body ? { data: body } : undefined).then(r => r.data),
+  del: (path, body) => apiClient.delete(path, body ? { data: body } : undefined).then(r => r.data),
 };
 
 const documentAdvancedService = {

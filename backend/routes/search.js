@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Search Routes
  * Full-text search, fuzzy search, and advanced search operations

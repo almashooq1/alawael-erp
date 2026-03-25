@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Smart Scheduler Routes — مسارات الجدولة الذكية
  * Now a REAL implementation backed by SmartScheduler model + AppointmentService

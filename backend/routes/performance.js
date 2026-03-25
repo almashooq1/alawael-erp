@@ -1,4 +1,3 @@
-﻿/* eslint-disable no-unused-vars */
 // Performance Routes
 const express = require('express');
 const PerformanceService = require('../services/performanceService');

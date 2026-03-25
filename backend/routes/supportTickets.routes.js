@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Support Tickets Routes
  * مسارات تذاكر الدعم

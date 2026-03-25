@@ -642,7 +642,9 @@ class AdvancedFinancialReportsService {
         $group: {
           _id: null,
           balance: {
-            $sum: { $subtract: [{ $ifNull: ['$lines.debit', 0] }, { $ifNull: ['$lines.credit', 0] }] },
+            $sum: {
+              $subtract: [{ $ifNull: ['$lines.debit', 0] }, { $ifNull: ['$lines.credit', 0] }],
+            },
           },
         },
       },

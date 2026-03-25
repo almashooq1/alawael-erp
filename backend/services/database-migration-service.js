@@ -72,19 +72,44 @@ class DatabaseMigrationService {
 module.exports = {
   // وصف الترحيل
   description: '${options.description || name}',
-  
+
+  // إصدار المخطط المستهدف (زده مع كل ترحيل)
+  version: 1,
+
   // الترحيل للأمام
   async up(db) {
-    // TODO: أضف كود الترحيل هنا
-    // مثال:
-    // await db.collection('users').updateMany({}, { $set: { newField: 'default' } });
+    // ── أمثلة شائعة: ──────────────────────────────────────────────
+    // إضافة حقل جديد لجميع المستندات:
+    //   await db.collection('users').updateMany({}, { $set: { isActive: true } });
+    //
+    // إنشاء فهرس:
+    //   await db.collection('orders').createIndex({ createdAt: -1 });
+    //
+    // إعادة تسمية حقل:
+    //   await db.collection('employees').updateMany({}, { $rename: { 'fname': 'firstName' } });
+    //
+    // إضافة مجموعة جديدة مع بيانات أولية:
+    //   await db.createCollection('settings');
+    //   await db.collection('settings').insertOne({ key: 'version', value: '2.0' });
+    // ────────────────────────────────────────────────────────────────
+
+    throw new Error('Migration up() not implemented — replace this with your migration code');
   },
-  
+
   // التراجع عن الترحيل
   async down(db) {
-    // TODO: أضف كود التراجع هنا
-    // مثال:
-    // await db.collection('users').updateMany({}, { $unset: { newField: '' } });
+    // ── أمثلة شائعة: ──────────────────────────────────────────────
+    // إزالة حقل:
+    //   await db.collection('users').updateMany({}, { $unset: { isActive: '' } });
+    //
+    // حذف فهرس:
+    //   await db.collection('orders').dropIndex('createdAt_-1');
+    //
+    // التراجع عن إعادة التسمية:
+    //   await db.collection('employees').updateMany({}, { $rename: { 'firstName': 'fname' } });
+    // ────────────────────────────────────────────────────────────────
+
+    throw new Error('Migration down() not implemented — replace this with your rollback code');
   }
 };`;
 

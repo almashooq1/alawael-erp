@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Vendors Routes — إدارة الموردين
  * Handles: /api/vendors

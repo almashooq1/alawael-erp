@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Specialized Programs Routes
  * مسارات البرامج المتخصصة

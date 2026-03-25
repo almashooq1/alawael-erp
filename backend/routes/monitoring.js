@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 // Monitoring Routes
 const express = require('express');
 const MonitoringService = require('../services/monitoringService');

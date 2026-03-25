@@ -9,6 +9,8 @@ const AccountingInvoice = require('../models/AccountingInvoice');
 const AccountingPayment = require('../models/AccountingPayment');
 const logger = require('../utils/logger');
 const { escapeRegex } = require('../utils/sanitize');
+const { sendEmail } = require('../services/emailService');
+const PDFDocument = require('pdfkit');
 
 // @desc    Get all invoices
 // @route   GET /api/accounting/invoices
@@ -329,8 +331,21 @@ exports.sendInvoice = async (req, res) => {
 
     await invoice.save();
 
-    // @todo [P2] Integrate email service (e.g. nodemailer) to send invoice to customer
-    logger.warn('Invoice email sending not yet implemented — status updated only');
+    // Send invoice via email
+    const recipientEmail = invoice.sentTo;
+    if (recipientEmail) {
+      try {
+        await sendEmail(recipientEmail, 'invoice_sent', {
+          invoiceNumber: invoice.invoiceNumber || invoice._id,
+          customerName: invoice.customerName,
+          totalAmount: invoice.totalAmount,
+          dueDate: invoice.dueDate,
+        });
+        logger.info(`Invoice email sent to ${recipientEmail}`);
+      } catch (emailErr) {
+        logger.warn(`Invoice email failed for ${recipientEmail}: ${emailErr.message}`);
+      }
+    }
 
     res.json({
       success: true,
@@ -361,14 +376,55 @@ exports.downloadInvoicePDF = async (req, res) => {
       });
     }
 
-    // @todo [P2] Integrate pdfkit or puppeteer to generate downloadable invoice PDF
-    logger.warn('Invoice PDF generation not yet implemented — returning raw data');
+    // Generate invoice PDF using PDFKit
+    const doc = new PDFDocument({ size: 'A4', margin: 50 });
 
-    res.json({
-      success: true,
-      message: 'PDF generation not implemented yet',
-      data: invoice,
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="invoice-${invoice.invoiceNumber || invoice._id}.pdf"`
+    );
+
+    doc.pipe(res);
+
+    // Header
+    doc.fontSize(20).text('فاتورة / Invoice', { align: 'center' });
+    doc.moveDown();
+
+    // Invoice meta
+    doc.fontSize(12);
+    doc.text(`رقم الفاتورة: ${invoice.invoiceNumber || invoice._id}`);
+    doc.text(`التاريخ: ${new Date(invoice.createdAt || Date.now()).toLocaleDateString('ar-SA')}`);
+    if (invoice.dueDate) {
+      doc.text(`تاريخ الاستحقاق: ${new Date(invoice.dueDate).toLocaleDateString('ar-SA')}`);
+    }
+    doc.text(`العميل: ${invoice.customerName || 'غير محدد'}`);
+    doc.moveDown();
+
+    // Items table
+    if (invoice.items && invoice.items.length) {
+      doc.fontSize(10);
+      doc.text('البند | الكمية | السعر | الإجمالي', { underline: true });
+      invoice.items.forEach(item => {
+        const lineTotal = (item.quantity || 1) * (item.unitPrice || item.price || 0);
+        doc.text(
+          `${item.description || item.name || '-'} | ${item.quantity || 1} | ${item.unitPrice || item.price || 0} | ${lineTotal}`
+        );
+      });
+      doc.moveDown();
+    }
+
+    // Totals
+    doc.fontSize(12);
+    if (invoice.subtotal != null) doc.text(`المجموع الفرعي: ${invoice.subtotal}`);
+    if (invoice.tax != null) doc.text(`الضريبة: ${invoice.tax}`);
+    doc.fontSize(14).text(`الإجمالي: ${invoice.totalAmount || invoice.total || 0} SAR`, {
+      underline: true,
     });
+    doc.moveDown();
+    doc.fontSize(8).text(`الحالة: ${invoice.status}`, { align: 'right' });
+
+    doc.end();
   } catch (error) {
     logger.error('Error generating PDF:', error);
     res.status(500).json({

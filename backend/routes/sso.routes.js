@@ -1,4 +1,3 @@
-﻿/* eslint-disable no-unused-vars */
 /**
  * SSO Routes - Single Sign-On Endpoints
  * نقاط نهاية تسجيل الدخول الموحد

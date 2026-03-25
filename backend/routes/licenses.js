@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * License API Routes - مسارات واجهة برمجة تطبيقات الرخص
  * Advanced License Management API Endpoints

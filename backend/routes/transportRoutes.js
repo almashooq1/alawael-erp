@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Transport Route Routes - مسارات API لمسارات النقل
  */

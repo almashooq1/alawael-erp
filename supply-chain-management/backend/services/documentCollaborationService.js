@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 const DocumentVersion = require('../models/DocumentVersion');
 
 /**

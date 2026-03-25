@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Security & Utility Functions
  * Password hashing, email validation, JWT handling, etc.

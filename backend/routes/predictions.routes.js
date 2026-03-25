@@ -1,4 +1,3 @@
-﻿/* eslint-disable no-unused-vars */
 /**
  * Predictions Routes
  * Handles AI-powered predictions for performance, trends, and forecasting

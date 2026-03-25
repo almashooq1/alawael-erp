@@ -46,6 +46,8 @@ const next = jest.fn();
 
 beforeEach(() => {
   jest.clearAllMocks();
+  // Test-only secret — MUST NEVER match production.
+  // Explicit assignment (not ||) because tests assert this exact value.
   process.env.JWT_SECRET = 'test-secret';
 });
 

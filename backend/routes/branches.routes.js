@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * نظام الأصول ERP - مسار الفروع
  */

@@ -376,12 +376,13 @@ CBAHIComplianceSchema.index({ assessmentDate: -1, branch: 1 });
 // ============================================================
 // التصدير
 // ============================================================
-const DisabilityAuthorityReport = mongoose.model(
-  'DisabilityAuthorityReport',
-  DisabilityAuthorityReportSchema
-);
-const CBAHIStandard = mongoose.models.CBAHIStandard || mongoose.model('CBAHIStandard', CBAHIStandardSchema);
-const CBAHICompliance = mongoose.models.CBAHICompliance || mongoose.model('CBAHICompliance', CBAHIComplianceSchema);
+const DisabilityAuthorityReport =
+  mongoose.models.DisabilityAuthorityReport ||
+  mongoose.model('DisabilityAuthorityReport', DisabilityAuthorityReportSchema);
+const CBAHIStandard =
+  mongoose.models.CBAHIStandard || mongoose.model('CBAHIStandard', CBAHIStandardSchema);
+const CBAHICompliance =
+  mongoose.models.CBAHICompliance || mongoose.model('CBAHICompliance', CBAHIComplianceSchema);
 
 module.exports = {
   DisabilityAuthorityReport,

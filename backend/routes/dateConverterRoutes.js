@@ -1,4 +1,3 @@
-﻿/* eslint-disable no-unused-vars */
 // backend/routes/dateConverterRoutes.js
 /**
  * Date Converter Routes

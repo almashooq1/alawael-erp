@@ -1,4 +1,3 @@
-﻿/* eslint-disable no-unused-vars */
 /**
  * E-Commerce Routes
  * Product catalog, shopping cart, and checkout endpoints

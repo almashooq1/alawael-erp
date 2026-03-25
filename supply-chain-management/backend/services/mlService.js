@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Advanced Machine Learning Service - Phase 7
  * Handles ML models, predictions, anomaly detection, and insights

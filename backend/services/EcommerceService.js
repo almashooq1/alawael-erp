@@ -350,7 +350,9 @@ class EcommerceService {
 
   /**
    * UPDATE CHECKOUT PAYMENT
-   * Update payment method and process payment
+   * Update payment method and process payment.
+   * In production, delegates to a payment gateway (HyperPay / Stripe).
+   * Set PAYMENT_GATEWAY=hyperpay|stripe and corresponding API keys in env.
    */
   static async updateCheckoutPayment(sessionId, paymentData) {
     try {
@@ -365,26 +367,151 @@ class EcommerceService {
       checkout.paymentStatus = 'processing';
       checkout.status = 'payment_pending';
 
-      if (process.env.NODE_ENV === 'production') {
-        // In production, do NOT auto-complete — require real gateway integration
-        throw new Error(
-          'بوابة الدفع غير مفعّلة حالياً. يرجى التواصل مع إدارة النظام. (Payment gateway not configured)'
-        );
-      }
+      if (process.env.NODE_ENV === 'production' || process.env.PAYMENT_GATEWAY) {
+        // ── Real Payment Gateway Integration ──────────────────────
+        const gateway = (process.env.PAYMENT_GATEWAY || '').toLowerCase();
 
-      // Development only: simulate successful payment
-      checkout.paymentStatus = 'completed';
-      checkout.status = 'confirmed';
+        if (gateway === 'hyperpay') {
+          // HyperPay integration (Saudi Arabia preferred)
+          const result = await EcommerceService._processHyperPay(checkout, paymentData);
+          checkout.paymentStatus = result.success ? 'completed' : 'failed';
+          checkout.status = result.success ? 'confirmed' : 'payment_failed';
+          checkout.gatewayRef = result.transactionId;
+        } else if (gateway === 'stripe') {
+          // Stripe integration
+          const result = await EcommerceService._processStripe(checkout, paymentData);
+          checkout.paymentStatus = result.success ? 'completed' : 'failed';
+          checkout.status = result.success ? 'confirmed' : 'payment_failed';
+          checkout.gatewayRef = result.transactionId;
+        } else {
+          throw new Error(
+            'بوابة الدفع غير مهيأة. عيّن PAYMENT_GATEWAY=hyperpay أو stripe في متغيرات البيئة. (Set PAYMENT_GATEWAY env var)'
+          );
+        }
+      } else {
+        // Development only: simulate successful payment
+        checkout.paymentStatus = 'completed';
+        checkout.status = 'confirmed';
+      }
 
       await checkout.save();
 
       return {
-        success: true,
+        success: checkout.paymentStatus === 'completed',
         checkout,
-        message: 'Payment processed successfully',
+        message:
+          checkout.paymentStatus === 'completed' ? 'تمت عملية الدفع بنجاح' : 'فشلت عملية الدفع',
       };
     } catch (error) {
       throw new Error(`Failed to process payment: ${error.message}`);
+    }
+  }
+
+  /**
+   * HyperPay payment processing.
+   * Requires: HYPERPAY_ENTITY_ID, HYPERPAY_ACCESS_TOKEN, HYPERPAY_BASE_URL
+   */
+  static async _processHyperPay(checkout, paymentData) {
+    const entityId = process.env.HYPERPAY_ENTITY_ID;
+    const accessToken = process.env.HYPERPAY_ACCESS_TOKEN;
+    const baseUrl = process.env.HYPERPAY_BASE_URL || 'https://eu-test.oppwa.com/v1/payments';
+
+    if (!entityId || !accessToken) {
+      throw new Error('HYPERPAY_ENTITY_ID and HYPERPAY_ACCESS_TOKEN must be set');
+    }
+
+    const https = require('https');
+    const querystring = require('querystring');
+
+    const data = querystring.stringify({
+      entityId,
+      amount: checkout.totalAmount?.toFixed(2) || '0.00',
+      currency: 'SAR',
+      paymentBrand: paymentData.brand || 'MADA',
+      paymentType: 'DB', // Debit
+      'card.number': paymentData.cardNumber,
+      'card.holder': paymentData.cardHolder,
+      'card.expiryMonth': paymentData.expiryMonth,
+      'card.expiryYear': paymentData.expiryYear,
+      'card.cvv': paymentData.cvv,
+      merchantTransactionId: checkout.sessionId,
+    });
+
+    return new Promise((resolve, reject) => {
+      const url = new URL(baseUrl);
+      const options = {
+        hostname: url.hostname,
+        port: 443,
+        path: url.pathname,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Length': Buffer.byteLength(data),
+          Authorization: `Bearer ${accessToken}`,
+        },
+      };
+
+      const req = https.request(options, res => {
+        let body = '';
+        res.on('data', chunk => (body += chunk));
+        res.on('end', () => {
+          try {
+            const json = JSON.parse(body);
+            const code = json.result?.code || '';
+            // HyperPay success codes start with '000.'
+            const success = code.startsWith('000.');
+            resolve({
+              success,
+              transactionId: json.id || null,
+              code,
+              message: json.result?.description,
+            });
+          } catch {
+            reject(new Error('Invalid HyperPay response'));
+          }
+        });
+      });
+      req.on('error', reject);
+      req.write(data);
+      req.end();
+    });
+  }
+
+  /**
+   * Stripe payment processing.
+   * Requires: STRIPE_SECRET_KEY
+   */
+  static async _processStripe(checkout, paymentData) {
+    const secretKey = process.env.STRIPE_SECRET_KEY;
+    if (!secretKey) {
+      throw new Error('STRIPE_SECRET_KEY must be set');
+    }
+
+    try {
+      // Dynamically require stripe — only needed when gateway = stripe
+      const stripe = require('stripe')(secretKey);
+
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round((checkout.totalAmount || 0) * 100), // cents
+        currency: 'sar',
+        payment_method: paymentData.paymentMethodId,
+        confirm: true,
+        metadata: { sessionId: checkout.sessionId },
+        automatic_payment_methods: { enabled: true, allow_redirects: 'never' },
+      });
+
+      return {
+        success: paymentIntent.status === 'succeeded',
+        transactionId: paymentIntent.id,
+        code: paymentIntent.status,
+      };
+    } catch (err) {
+      return {
+        success: false,
+        transactionId: null,
+        code: err.code || 'stripe_error',
+        message: err.message,
+      };
     }
   }
 

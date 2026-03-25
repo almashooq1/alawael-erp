@@ -949,7 +949,9 @@ class EmployeeAffairsService {
     const cutoff = new Date(now.getTime() + daysThreshold * 24 * 60 * 60 * 1000);
 
     const employees = await Emp.find({ status: 'active' })
-      .select('employeeId firstName lastName mol.workPermitExpiry sponsorship.visaExpiry insurance.insuranceExpiry medicalCheckup.lastCheckupDate medicalCheckup.nextCheckupDate')
+      .select(
+        'employeeId firstName lastName mol.workPermitExpiry sponsorship.visaExpiry insurance.insuranceExpiry medicalCheckup.lastCheckupDate medicalCheckup.nextCheckupDate'
+      )
       .lean();
 
     const expiringItems = [];
@@ -1010,9 +1012,7 @@ class EmployeeAffairsService {
    */
   async getSaudizationReport() {
     const Emp = getEmployee();
-    const employees = await Emp.find({ status: 'active' })
-      .select('nationality department')
-      .lean();
+    const employees = await Emp.find({ status: 'active' }).select('nationality department').lean();
 
     const total = employees.length;
     const saudi = employees.filter(

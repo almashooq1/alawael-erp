@@ -10,9 +10,9 @@ export const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3
 
 // Auto-detect socket/WS URLs from current origin in production
 const _detectOrigin = () =>
-  typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
+  typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3001';
 const _detectWs = () => {
-  if (typeof window === 'undefined') return 'ws://localhost:3000';
+  if (typeof window === 'undefined') return 'ws://localhost:3001';
   const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
   return `${proto}//${window.location.host}`;
 };

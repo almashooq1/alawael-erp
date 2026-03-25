@@ -309,12 +309,12 @@ class SupportService extends EventEmitter {
         emergencyContacts: [
           {
             name: 'Crisis Hotline',
-            number: '1-800-XXX-XXXX',
+            number: process.env.CRISIS_HOTLINE_NUMBER || 'غير مهيأ',
             available: '24/7',
           },
           {
             name: 'Mental Health Support',
-            number: '1-800-YYY-YYYY',
+            number: process.env.MENTAL_HEALTH_NUMBER || 'غير مهيأ',
             available: 'Mon-Fri 9AM-5PM',
           },
         ],

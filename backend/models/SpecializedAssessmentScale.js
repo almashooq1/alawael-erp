@@ -327,10 +327,11 @@ ScaleResultSchema.index({ assessor: 1, assessmentDate: -1 });
 ScaleResultSchema.index({ scaleCode: 1, assessmentDate: -1 });
 ScaleResultSchema.index({ status: 1 });
 
-const SpecializedAssessmentScale = mongoose.model(
-  'SpecializedAssessmentScale',
-  SpecializedAssessmentScaleSchema
-);
-const SpecializedScaleResult = mongoose.models.SpecializedScaleResult || mongoose.model('SpecializedScaleResult', ScaleResultSchema);
+const SpecializedAssessmentScale =
+  mongoose.models.SpecializedAssessmentScale ||
+  mongoose.model('SpecializedAssessmentScale', SpecializedAssessmentScaleSchema);
+const SpecializedScaleResult =
+  mongoose.models.SpecializedScaleResult ||
+  mongoose.model('SpecializedScaleResult', ScaleResultSchema);
 
 module.exports = { SpecializedAssessmentScale, SpecializedScaleResult };

@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * AI Recommendations Routes
  * مسارات توصيات الذكاء الاصطناعي

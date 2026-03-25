@@ -12,8 +12,7 @@ const notificationTemplateAuditSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const NotificationTemplateAudit = mongoose.model(
-  'NotificationTemplateAudit',
-  notificationTemplateAuditSchema
-);
+const NotificationTemplateAudit =
+  mongoose.models.NotificationTemplateAudit ||
+  mongoose.model('NotificationTemplateAudit', notificationTemplateAuditSchema);
 module.exports = NotificationTemplateAudit;

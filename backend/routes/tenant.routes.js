@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Tenant Routes
  * مسارات الالتزام

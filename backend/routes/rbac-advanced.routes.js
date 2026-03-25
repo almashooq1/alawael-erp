@@ -1,4 +1,3 @@
-﻿/* eslint-disable no-unused-vars */
 /**
  * RBAC Advanced Routes
  * نقاط نهاية API متقدمة لنظام إدارة الصلاحيات الذكي

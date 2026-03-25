@@ -1,4 +1,3 @@
-﻿/* eslint-disable no-unused-vars */
 /**
  * Beneficiary Portal Routes
  * مسارات بوابة المستفيدين الآمنة

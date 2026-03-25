@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * مسارات الإشعارات الذكية
  * Smart Notifications Routes

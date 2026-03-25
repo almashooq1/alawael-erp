@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Performance Evaluations Routes
  * مسارات تقييم الأداء

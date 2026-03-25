@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Phase 17: Advanced AI & Automation
  * الذكاء الاصطناعي والأتمتة المتقدمة

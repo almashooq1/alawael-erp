@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * API الجلسات المتقدمة - Advanced Sessions API
  * يدير جميع عمليات الجلسات المتقدمة وتتبعها

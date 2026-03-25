@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Test Utilities Helper
  * Common utilities for testing supply chain management system

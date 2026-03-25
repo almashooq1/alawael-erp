@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Customer Experience & Satisfaction Management Service
  * Phase 19: Survey Management, NPS Tracking, Sentiment Analysis
@@ -123,6 +122,7 @@ class CustomerExperienceService {
       customerId,
       score,
       category,
+      segment: scoreData.segment || 'general',
       feedback: feedback || '',
       recordedAt: new Date(),
     };
@@ -171,8 +171,7 @@ class CustomerExperienceService {
       const secondHalfDetractors = secondHalf.filter(s => s.category === 'detractor').length;
 
       const firstHalfScore = ((firstHalfPromoters - firstHalfDetractors) / firstHalf.length) * 100;
-      const secondHalfScore =
-        ((secondHalfPromoters - secondHalfDetractors) / secondHalf.length) * 100;
+      const secondHalfScore = ((secondHalfPromoters - secondHalfDetractors) / secondHalf.length) * 100;
 
       if (secondHalfScore > firstHalfScore) {
         trend = 'improving';
@@ -192,14 +191,79 @@ class CustomerExperienceService {
   }
 
   getNPSBySegment(segment, startDate, endDate) {
-    // TODO: Implement segment filtering
-    return this.calculateNPS(startDate, endDate);
+    const now = new Date();
+    const start = startDate || new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+    const end = endDate || new Date(now.getTime() + 10 * 24 * 60 * 60 * 1000);
+
+    const filtered = this.npsScores.filter(s => {
+      const scoreDate = new Date(s.recordedAt);
+      const inRange = scoreDate >= start && scoreDate <= end;
+      const matchesSegment = !segment || s.segment === segment;
+      return inRange && matchesSegment;
+    });
+
+    if (filtered.length === 0) {
+      return { npsScore: '0.00', totalResponses: 0, promoters: 0, passives: 0, detractors: 0, segment: segment || 'all', trend: 'stable' };
+    }
+
+    const promoters = filtered.filter(s => s.category === 'promoter').length;
+    const detractors = filtered.filter(s => s.category === 'detractor').length;
+    const passives = filtered.filter(s => s.category === 'passive').length;
+    const npsScore = ((promoters - detractors) / filtered.length) * 100;
+
+    return {
+      npsScore: npsScore.toFixed(2),
+      totalResponses: filtered.length,
+      promoters,
+      passives,
+      detractors,
+      segment: segment || 'all',
+      trend: 'stable',
+    };
   }
 
-  getNPSTrend(timeframe) {
-    // TODO: Implement trend calculation
-    const trend = this.calculateNPS();
-    return trend;
+  getNPSTrend(timeframe = '30d') {
+    const now = new Date();
+    const match = timeframe.match(/^(\d+)(d|w|m)$/);
+    const amount = match ? parseInt(match[1], 10) : 30;
+    const unit = match ? match[2] : 'd';
+
+    const msPerDay = 24 * 60 * 60 * 1000;
+    const unitMs = unit === 'w' ? 7 * msPerDay : unit === 'm' ? 30 * msPerDay : msPerDay;
+    const totalMs = amount * unitMs;
+
+    // Divide into 6 buckets for a meaningful trend line
+    const bucketCount = Math.min(6, amount);
+    const bucketMs = totalMs / bucketCount;
+    const startTime = now.getTime() - totalMs;
+
+    const buckets = [];
+    for (let i = 0; i < bucketCount; i++) {
+      const bStart = new Date(startTime + i * bucketMs);
+      const bEnd = new Date(startTime + (i + 1) * bucketMs);
+      const scores = this.npsScores.filter(s => {
+        const t = new Date(s.recordedAt).getTime();
+        return t >= bStart.getTime() && t < bEnd.getTime();
+      });
+
+      const promoters = scores.filter(s => s.category === 'promoter').length;
+      const detractors = scores.filter(s => s.category === 'detractor').length;
+      const nps = scores.length > 0 ? ((promoters - detractors) / scores.length) * 100 : 0;
+
+      buckets.push({
+        period: bStart.toISOString().split('T')[0],
+        npsScore: parseFloat(nps.toFixed(2)),
+        responses: scores.length,
+      });
+    }
+
+    const overall = this.calculateNPS(new Date(startTime), now);
+
+    return {
+      timeframe,
+      buckets,
+      overall,
+    };
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -295,30 +359,8 @@ class CustomerExperienceService {
 
     const text_lower = text.toLowerCase();
 
-    const positiveWords = [
-      'excellent',
-      'great',
-      'good',
-      'amazing',
-      'wonderful',
-      'fantastic',
-      'perfect',
-      'love',
-      'thank',
-      'happy',
-    ];
-    const negativeWords = [
-      'bad',
-      'horrible',
-      'terrible',
-      'awful',
-      'poor',
-      'disappointed',
-      'angry',
-      'hate',
-      'issue',
-      'problem',
-    ];
+    const positiveWords = ['excellent', 'great', 'good', 'amazing', 'wonderful', 'fantastic', 'perfect', 'love', 'thank', 'happy'];
+    const negativeWords = ['bad', 'horrible', 'terrible', 'awful', 'poor', 'disappointed', 'angry', 'hate', 'issue', 'problem'];
 
     let positiveCount = 0;
     let negativeCount = 0;

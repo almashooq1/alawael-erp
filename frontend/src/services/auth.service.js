@@ -22,10 +22,12 @@ const authService = {
     try {
       const token = getToken();
       if (token) {
-        await apiClient.post('/auth/logout').catch(() => {});
+        await apiClient.post('/auth/logout').catch(err => {
+          console.warn('Logout API call failed, continuing with local cleanup:', err.message);
+        });
       }
-    } catch {
-      // Ignore — clearing local state is enough
+    } catch (err) {
+      console.warn('Logout error, clearing local state:', err.message);
     }
     clearAuthData();
     removePortal();

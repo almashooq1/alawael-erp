@@ -8,7 +8,7 @@ const db = {
       _id: '1',
       email: 'admin@alawael.com',
       fullName: 'مدير النظام',
-      password: '$2b$10$pIZzh3IQY6.XPy6bxeFTi.qkGCdGpWMz02H.FhcKYQrR7.Fk0iVCq', // Admin@123456 (bcrypted)
+      password: '$2b$10$pIZzh3IQY6.XPy6bxeFTi.qkGCdGpWMz02H.FhcKYQrR7.Fk0iVCq', // bcrypt hash — dev only
       role: 'admin',
       phone: '966501234567',
       department: 'إدارة',

@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * JWT Token Generator for Testing
  * الاستخدام: node generate-jwt.js

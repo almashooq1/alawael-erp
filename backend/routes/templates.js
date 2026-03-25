@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 // إرسال رسالة WhatsApp عبر Twilio (مبسط)
 async function sendWhatsApp(to, message) {
   try {

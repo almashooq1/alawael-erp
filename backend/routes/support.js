@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 // Support Routes
 const express = require('express');
 const SupportService = require('../services/supportService');

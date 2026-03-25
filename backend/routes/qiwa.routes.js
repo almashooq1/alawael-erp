@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * 🇸🇦 Qiwa Integration Routes
  * Ministry of Labor (MOL) API Endpoints

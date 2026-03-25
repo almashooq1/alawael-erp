@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * E-Stamp Routes — مسارات الختم الإلكتروني
  *

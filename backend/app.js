@@ -115,7 +115,7 @@ const PORT = process.env.PORT || 3001;
 // ═══════════════════════════════════════════════════════════════════════════
 // 🧪 DEV-ONLY TEST ENDPOINTS (BEFORE ALL MIDDLEWARE)
 // ═══════════════════════════════════════════════════════════════════════════
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV === 'development') {
   app.get('/test-first', (req, res) => {
     res.json({
       success: true,
@@ -134,7 +134,7 @@ if (process.env.NODE_ENV !== 'production') {
 // ═══════════════════════════════════════════════════════════════════════════
 // 🔓 DEV BYPASS: Skip auth/security for Phase 29-33 (public for testing)
 // ═══════════════════════════════════════════════════════════════════════════
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV === 'development') {
   app.use((req, res, next) => {
     if (req.path.startsWith('/api/phases-29-33')) {
       req.isPhase2933Public = true;
@@ -143,16 +143,22 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
-// Minimal service worker route
+// Service worker — served from static file
 app.get('/service-worker.js', (req, res) => {
-  res
-    .type('application/javascript')
-    .send(
-      `// Minimal placeholder service worker\nself.addEventListener('install', () => self.skipWaiting());\nself.addEventListener('activate', () => self.clients.claim());`
-    );
+  const swPath = require('path').join(__dirname, 'public', 'service-worker.js');
+  res.type('application/javascript').sendFile(swPath);
 });
 
 // ─── Trust proxy ─────────────────────────────────────────────────────────────
+// When behind a reverse proxy (Nginx, AWS ALB, Cloudflare, etc.), Express needs
+// to trust the X-Forwarded-* headers so that:
+//   • req.ip returns the real client IP (not the proxy's IP)
+//   • req.protocol reflects the original scheme (https)
+//   • Rate-limiters count per real client instead of per proxy
+//
+// Value of 1 means "trust the first hop" — correct for a single Nginx/ALB.
+// For multiple proxies set this to the hop count or use 'loopback' for local.
+// See: https://expressjs.com/en/guide/behind-proxies.html
 app.set('trust proxy', 1);
 
 // ─── Request ID (traceability — must be before everything else) ──────────────
@@ -282,7 +288,7 @@ if (isTestEnv) {
 // ─── Rate Limiting ───────────────────────────────────────────────────────────
 const apiLimiterWithPhase2933Skip = (req, res, next) => {
   if (
-    process.env.NODE_ENV !== 'production' &&
+    process.env.NODE_ENV === 'development' &&
     (req.path.startsWith('/phases-29-33') || req.path.startsWith('/api/phases-29-33'))
   ) {
     return next();
@@ -295,7 +301,7 @@ app.use('/api', apiLimiterWithPhase2933Skip);
 
 // ─── Swagger (consolidated via config/swagger.config.js) ─────────────────────
 const { setupSwagger } = require('./config/swagger.config');
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV === 'development') {
   setupSwagger(app);
 }
 

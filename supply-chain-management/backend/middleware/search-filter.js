@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 // middleware/search-filter.js
 // Advanced Search & Filter Middleware
 

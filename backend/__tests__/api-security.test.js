@@ -703,7 +703,8 @@ describe('🔒 Phase 10: Advanced API Security & Rate Limiting', () => {
 
     beforeEach(() => {
       tokenManager = new TokenManager({
-        secret: 'test-secret',
+        // Test-only secret — MUST NEVER match production
+        secret: process.env.JWT_SECRET || 'test-secret',
         expirationTime: 10000,
       });
     });

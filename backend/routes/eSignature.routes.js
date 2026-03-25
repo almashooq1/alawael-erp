@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * E-Signature Routes — Enhanced
  * مسارات التوقيع الإلكتروني — محسّنة

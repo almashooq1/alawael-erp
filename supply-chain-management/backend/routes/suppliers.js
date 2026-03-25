@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 const express = require('express');
 const ChangeLog = require('../models/ChangeLog');
 const { sendMail } = require('../utils/mailer');

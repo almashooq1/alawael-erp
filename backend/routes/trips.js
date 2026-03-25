@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Trip Routes - مسارات API للرحلات
  */

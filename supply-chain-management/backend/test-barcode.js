@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Simple test file for Barcode Service
  * Run: node test-barcode.js

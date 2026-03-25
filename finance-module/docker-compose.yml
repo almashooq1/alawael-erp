@@ -20,7 +20,7 @@ services:
       - PORT=3010
       - MONGODB_URI=mongodb://mongo:27017/finance_db
       - REDIS_URL=redis://redis:6379/0
-      - JWT_SECRET=${JWT_SECRET:-your-secret-key-change-in-prod}
+      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET must be set in .env}
       - JWT_EXPIRE=7d
       - LOG_LEVEL=info
     depends_on:
@@ -57,7 +57,7 @@ services:
     environment:
       - MONGO_INITDB_DATABASE=finance_db
       - MONGO_INITDB_ROOT_USERNAME=${DB_USER:-admin}
-      - MONGO_INITDB_ROOT_PASSWORD=${DB_PASSWORD:-changeme}
+      - MONGO_INITDB_ROOT_PASSWORD=${DB_PASSWORD:?DB_PASSWORD must be set in .env}
     volumes:
       - mongo-data:/data/db
       - mongo-config:/data/configdb
@@ -85,7 +85,7 @@ services:
     restart: unless-stopped
     ports:
       - "6379:6379"
-    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-changeme}
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:?REDIS_PASSWORD must be set in .env}
     volumes:
       - redis-data:/data
     networks:
@@ -169,7 +169,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:?GRAFANA_PASSWORD must be set in .env}
       - GF_INSTALL_PLUGINS=grafana-piechart-panel
     volumes:
       - grafana-data:/var/lib/grafana

@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * GPS Tracking Routes
  * مسارات تتبع GPS المتقدمة

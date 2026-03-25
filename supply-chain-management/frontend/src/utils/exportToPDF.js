@@ -8,14 +8,10 @@ let _amiriFontBase64 = null;
 async function loadArabicFont(doc) {
   try {
     if (!_amiriFontBase64) {
-      const resp = await fetch(
-        'https://fonts.gstatic.com/s/amiri/v27/J7aRnpd8CGxBHqUpvrIw74NL.ttf'
-      );
+      const resp = await fetch('https://fonts.gstatic.com/s/amiri/v27/J7aRnpd8CGxBHqUpvrIw74NL.ttf');
       if (!resp.ok) return false;
       const buf = await resp.arrayBuffer();
-      _amiriFontBase64 = btoa(
-        new Uint8Array(buf).reduce((s, b) => s + String.fromCharCode(b), '')
-      );
+      _amiriFontBase64 = btoa(new Uint8Array(buf).reduce((s, b) => s + String.fromCharCode(b), ''));
     }
     doc.addFileToVFS('Amiri-Regular.ttf', _amiriFontBase64);
     doc.addFont('Amiri-Regular.ttf', 'Amiri', 'normal');
@@ -45,7 +41,9 @@ export async function exportToPDF(data, columns, fileName = 'data.pdf') {
 
   // Date
   doc.setFontSize(10);
-  doc.text(`Date: ${new Date().toLocaleDateString('en-US')}  |  Records: ${data.length}`, doc.internal.pageSize.getWidth() / 2, 23, { align: 'center' });
+  doc.text(`Date: ${new Date().toLocaleDateString('en-US')}  |  Records: ${data.length}`, doc.internal.pageSize.getWidth() / 2, 23, {
+    align: 'center',
+  });
 
   // Table headers
   const headers = columns.map(col => col.label);
@@ -55,7 +53,7 @@ export async function exportToPDF(data, columns, fileName = 'data.pdf') {
     columns.map(col => {
       const val = typeof col.value === 'function' ? col.value(row) : row[col.value];
       return val != null ? String(val) : '';
-    })
+    }),
   );
 
   doc.autoTable({
@@ -81,16 +79,13 @@ export async function exportToPDF(data, columns, fileName = 'data.pdf') {
       fillColor: [245, 245, 245],
     },
     margin: { top: 28, left: 10, right: 10 },
-    didDrawPage: (hookData) => {
+    didDrawPage: hookData => {
       // Footer
       const pageCount = doc.internal.getNumberOfPages();
       doc.setFontSize(8);
-      doc.text(
-        `Page ${hookData.pageNumber} / ${pageCount}`,
-        doc.internal.pageSize.getWidth() / 2,
-        doc.internal.pageSize.getHeight() - 8,
-        { align: 'center' }
-      );
+      doc.text(`Page ${hookData.pageNumber} / ${pageCount}`, doc.internal.pageSize.getWidth() / 2, doc.internal.pageSize.getHeight() - 8, {
+        align: 'center',
+      });
     },
   });
 

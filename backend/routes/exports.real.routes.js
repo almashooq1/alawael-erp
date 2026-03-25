@@ -38,7 +38,9 @@ router.get('/:format', async (req, res) => {
       try {
         parsedFilters = JSON.parse(filters);
       } catch {
-        return res.status(400).json({ success: false, message: 'صيغة الفلتر غير صالحة (JSON غير صحيح)' });
+        return res
+          .status(400)
+          .json({ success: false, message: 'صيغة الفلتر غير صالحة (JSON غير صحيح)' });
       }
     }
 
@@ -51,7 +53,10 @@ router.get('/:format', async (req, res) => {
     });
 
     res.setHeader('Content-Type', result.mimeType);
-    res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(result.fileName)}"`);
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="${encodeURIComponent(result.fileName)}"`
+    );
     res.setHeader('Content-Length', result.buffer.length);
     return res.send(result.buffer);
   } catch (err) {

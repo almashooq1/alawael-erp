@@ -175,9 +175,16 @@ const importExportProService = {
             try {
               const data = JSON.parse(dataMatch[1]);
               if (eventType === 'progress' && onProgress) onProgress(data);
-              else if (eventType === 'done') { if (onDone) onDone(data); controller.abort(); }
-              else if (eventType === 'error') { if (onError) onError(data); controller.abort(); }
-            } catch { /* ignore parse errors */ }
+              else if (eventType === 'done') {
+                if (onDone) onDone(data);
+                controller.abort();
+              } else if (eventType === 'error') {
+                if (onError) onError(data);
+                controller.abort();
+              }
+            } catch {
+              /* ignore parse errors */
+            }
           }
         }
       } catch (err) {

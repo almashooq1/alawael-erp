@@ -28,7 +28,10 @@ router.get('/export/excel', async (req, res) => {
     });
 
     res.setHeader('Content-Type', result.mimeType);
-    res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(result.fileName)}"`);
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="${encodeURIComponent(result.fileName)}"`
+    );
     res.setHeader('Content-Length', result.buffer.length);
     return res.send(result.buffer);
   } catch (err) {
@@ -54,7 +57,10 @@ router.get('/export/pdf/:id', async (req, res) => {
     });
 
     res.setHeader('Content-Type', result.mimeType);
-    res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(result.fileName)}"`);
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="${encodeURIComponent(result.fileName)}"`
+    );
     res.setHeader('Content-Length', result.buffer.length);
     return res.send(result.buffer);
   } catch (err) {
@@ -79,7 +85,10 @@ router.post('/import/template', async (req, res) => {
     });
 
     res.setHeader('Content-Type', result.mimeType);
-    res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(result.fileName)}"`);
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="${encodeURIComponent(result.fileName)}"`
+    );
     res.setHeader('Content-Length', result.buffer.length);
     return res.send(result.buffer);
   } catch (err) {

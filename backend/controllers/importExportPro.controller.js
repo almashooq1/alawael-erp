@@ -143,7 +143,11 @@ const parseImportFile = async (req, res) => {
     }
 
     let parsedOpts = {};
-    try { if (req.body.options) parsedOpts = JSON.parse(req.body.options); } catch { /* ignore */ }
+    try {
+      if (req.body.options) parsedOpts = JSON.parse(req.body.options);
+    } catch {
+      /* ignore */
+    }
 
     const result = await importExportService.parseImportFile({
       fileBuffer: req.file.buffer,

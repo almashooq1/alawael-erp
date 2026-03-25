@@ -172,9 +172,7 @@ class ExportImportService {
     statsSheet.addRow(['الميزانية المصروفة', totalSpent]);
     statsSheet.addRow([
       'معدل النجاح',
-      totalPrograms > 0
-        ? `${((completedPrograms / totalPrograms) * 100).toFixed(2)}%`
-        : '0.00%',
+      totalPrograms > 0 ? `${((completedPrograms / totalPrograms) * 100).toFixed(2)}%` : '0.00%',
     ]);
 
     statsSheet.getRow(1).font = { bold: true, size: 14 };

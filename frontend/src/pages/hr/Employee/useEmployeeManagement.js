@@ -1,117 +1,16 @@
 /**
  * useEmployeeManagement – custom hook
  * Manages all state & handlers for the EmployeeManagement page.
+ * Wired to /api/hr-advanced/employees — falls back to demo data when API unavailable.
  */
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { DEPARTMENTS, STATUS_MAP } from './employeeManagement.constants';
-
-/* ───── demo seed data (Arabic) ───── */
-const DEMO_EMPLOYEES = [
-  {
-    _id: 'EMP-001',
-    empNumber: '1001',
-    firstName: 'أحمد',
-    lastName: 'الشمري',
-    department: 'تقنية المعلومات',
-    position: 'مهندس برمجيات',
-    status: 'active',
-    phone: '0501234567',
-    email: 'ahmed@alawael.sa',
-    joinDate: '2023-01-15',
-    nationalId: '1098765432',
-  },
-  {
-    _id: 'EMP-002',
-    empNumber: '1002',
-    firstName: 'فاطمة',
-    lastName: 'العتيبي',
-    department: 'الموارد البشرية',
-    position: 'أخصائية موارد بشرية',
-    status: 'active',
-    phone: '0559876543',
-    email: 'fatima@alawael.sa',
-    joinDate: '2023-03-20',
-    nationalId: '1087654321',
-  },
-  {
-    _id: 'EMP-003',
-    empNumber: '1003',
-    firstName: 'محمد',
-    lastName: 'القحطاني',
-    department: 'المالية',
-    position: 'محاسب أول',
-    status: 'onLeave',
-    phone: '0567891234',
-    email: 'mohammed@alawael.sa',
-    joinDate: '2022-06-10',
-    nationalId: '1076543210',
-  },
-  {
-    _id: 'EMP-004',
-    empNumber: '1004',
-    firstName: 'نورة',
-    lastName: 'الدوسري',
-    department: 'التعليم',
-    position: 'معلمة رياضيات',
-    status: 'active',
-    phone: '0543216789',
-    email: 'noura@alawael.sa',
-    joinDate: '2024-01-05',
-    nationalId: '1065432109',
-  },
-  {
-    _id: 'EMP-005',
-    empNumber: '1005',
-    firstName: 'خالد',
-    lastName: 'الحربي',
-    department: 'العمليات',
-    position: 'مدير عمليات',
-    status: 'inactive',
-    phone: '0534567890',
-    email: 'khaled@alawael.sa',
-    joinDate: '2021-09-01',
-    nationalId: '1054321098',
-  },
-  {
-    _id: 'EMP-006',
-    empNumber: '1006',
-    firstName: 'سارة',
-    lastName: 'الزهراني',
-    department: 'العلاج الطبيعي',
-    position: 'أخصائية علاج طبيعي',
-    status: 'active',
-    phone: '0512345678',
-    email: 'sara@alawael.sa',
-    joinDate: '2024-05-12',
-    nationalId: '1043210987',
-  },
-  {
-    _id: 'EMP-007',
-    empNumber: '1007',
-    firstName: 'عبدالله',
-    lastName: 'المالكي',
-    department: 'الإدارة',
-    position: 'مدير إداري',
-    status: 'probation',
-    phone: '0576543210',
-    email: 'abdullah@alawael.sa',
-    joinDate: '2025-11-01',
-    nationalId: '1032109876',
-  },
-  {
-    _id: 'EMP-008',
-    empNumber: '1008',
-    firstName: 'ريم',
-    lastName: 'السبيعي',
-    department: 'الخدمات',
-    position: 'منسقة خدمات',
-    status: 'active',
-    phone: '0598765432',
-    email: 'reem@alawael.sa',
-    joinDate: '2023-08-22',
-    nationalId: '1021098765',
-  },
-];
+import {
+  getEmployees,
+  createEmployee,
+  updateEmployee,
+  deleteEmployee as deleteEmployeeApi,
+} from '../../../services/hr/employeeService';
 
 const BLANK_FORM = {
   firstName: '',
@@ -149,7 +48,7 @@ export default function useEmployeeManagement() {
   const [deptFilter, setDeptFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [loading, setLoading] = useState(false);
-  const isDemo = true; // flip when API is wired
+  const [isDemo, setIsDemo] = useState(false);
 
   /* ── dialog state ── */
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -164,13 +63,19 @@ export default function useEmployeeManagement() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [snack, setSnack] = useState({ open: false, message: '', severity: 'success' });
 
-  /* ── load demo data ── */
-  const loadEmployees = useCallback(() => {
+  /* ── load employees from API (falls back to demo) ── */
+  const loadEmployees = useCallback(async () => {
     setLoading(true);
-    setTimeout(() => {
-      setEmployees(DEMO_EMPLOYEES);
+    try {
+      const { data, isDemo: demo } = await getEmployees();
+      setEmployees(Array.isArray(data) ? data : []);
+      setIsDemo(demo);
+    } catch {
+      setEmployees([]);
+      setIsDemo(true);
+    } finally {
       setLoading(false);
-    }, 400);
+    }
   }, []);
 
   useEffect(() => {
@@ -281,7 +186,7 @@ export default function useEmployeeManagement() {
   }, []);
 
   /* ── save ── */
-  const handleSave = useCallback(() => {
+  const handleSave = useCallback(async () => {
     const errs = validateStep(activeStep);
     if (Object.keys(errs).length) {
       setErrors(errs);
@@ -289,31 +194,55 @@ export default function useEmployeeManagement() {
     }
 
     setSaving(true);
-    setTimeout(() => {
+    try {
       if (dialogMode === 'add') {
-        const newEmp = {
-          ...form,
-          _id: `EMP-${String(employees.length + 1).padStart(3, '0')}`,
-          empNumber: String(1000 + employees.length + 1),
-        };
-        setEmployees(prev => [...prev, newEmp]);
+        const { data, isDemo: demo } = await createEmployee(form);
+        if (demo) {
+          // API unavailable — local-only add
+          const newEmp = {
+            ...form,
+            _id: `EMP-${String(employees.length + 1).padStart(3, '0')}`,
+            empNumber: String(1000 + employees.length + 1),
+          };
+          setEmployees(prev => [...prev, newEmp]);
+        } else {
+          await loadEmployees(); // reload from server
+        }
         setSnack({ open: true, message: 'تم إضافة الموظف بنجاح', severity: 'success' });
       } else {
-        setEmployees(prev => prev.map(e => (e._id === form._id ? { ...e, ...form } : e)));
+        const { isDemo: demo } = await updateEmployee(form._id, form);
+        if (demo) {
+          setEmployees(prev => prev.map(e => (e._id === form._id ? { ...e, ...form } : e)));
+        } else {
+          await loadEmployees();
+        }
         setSnack({ open: true, message: 'تم تحديث بيانات الموظف', severity: 'success' });
       }
-      setSaving(false);
       setDialogOpen(false);
-    }, 600);
-  }, [dialogMode, form, employees.length, activeStep, validateStep]);
+    } catch {
+      setSnack({ open: true, message: 'حدث خطأ أثناء الحفظ', severity: 'error' });
+    } finally {
+      setSaving(false);
+    }
+  }, [dialogMode, form, employees.length, activeStep, validateStep, loadEmployees]);
 
   /* ── delete ── */
-  const handleDelete = useCallback(() => {
+  const handleDelete = useCallback(async () => {
     if (!deleteTarget) return;
-    setEmployees(prev => prev.filter(e => e._id !== deleteTarget._id));
-    setDeleteTarget(null);
-    setSnack({ open: true, message: 'تم حذف الموظف', severity: 'info' });
-  }, [deleteTarget]);
+    try {
+      const { isDemo: demo } = await deleteEmployeeApi(deleteTarget._id);
+      if (demo) {
+        setEmployees(prev => prev.filter(e => e._id !== deleteTarget._id));
+      } else {
+        await loadEmployees();
+      }
+      setSnack({ open: true, message: 'تم حذف الموظف', severity: 'info' });
+    } catch {
+      setSnack({ open: true, message: 'حدث خطأ أثناء الحذف', severity: 'error' });
+    } finally {
+      setDeleteTarget(null);
+    }
+  }, [deleteTarget, loadEmployees]);
 
   /* ── export ── */
   const handleExport = useCallback(() => {

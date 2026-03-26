@@ -12,13 +12,24 @@ class OAuthService {
   constructor() {
     this.ssoService = new SSOService();
     const isProd = process.env.NODE_ENV === 'production';
-    this.OAUTH_CLIENT_SECRET =
-      process.env.OAUTH_CLIENT_SECRET ||
-      (isProd
-        ? (() => {
-            throw new Error('[SECURITY] OAUTH_CLIENT_SECRET required in production');
-          })()
-        : 'dev-only-oauth-secret');
+    this.OAUTH_CLIENT_SECRET = process.env.OAUTH_CLIENT_SECRET || null;
+
+    if (isProd && !this.OAUTH_CLIENT_SECRET) {
+      logger.warn('[SECURITY] OAUTH_CLIENT_SECRET not set — OAuth/SSO endpoints disabled');
+      this._disabled = true;
+    } else {
+      this.OAUTH_CLIENT_SECRET = this.OAUTH_CLIENT_SECRET || 'dev-only-oauth-secret';
+      this._disabled = false;
+    }
+  }
+
+  /** Guard: rejects calls when OAuth is not configured */
+  _ensureEnabled() {
+    if (this._disabled) {
+      const err = new Error('OAuth service is not configured');
+      err.status = 503;
+      throw err;
+    }
   }
 
   /**
@@ -26,6 +37,7 @@ class OAuthService {
    * إنشاء طلب تفويض جديد
    */
   async initiateAuthorizationCodeFlow(clientId, redirectUri, scope, state, nonce = null) {
+    this._ensureEnabled();
     try {
       // Validate OAuth request
       const validation = await this.ssoService.validateOAuthRequest(
@@ -76,6 +88,7 @@ class OAuthService {
    * تبديل رمز التفويض بالتوكنات
    */
   async exchangeAuthorizationCode(code, clientId, clientSecret, redirectUri) {
+    this._ensureEnabled();
     try {
       // Verify client credentials
       if (clientSecret !== this.OAUTH_CLIENT_SECRET) {
@@ -104,6 +117,7 @@ class OAuthService {
    * تدفق Implicit (للتطبيقات أحادية الصفحة)
    */
   async initiateImplicitFlow(clientId, redirectUri, scope, state, responseTypes = ['token']) {
+    this._ensureEnabled();
     try {
       const accessToken = crypto.randomBytes(32).toString('hex');
 
@@ -142,6 +156,7 @@ class OAuthService {
    * تدفق بيانات اعتماد العميل (للتطبيقات)
    */
   async initiateClientCredentialsFlow(clientId, clientSecret, scope) {
+    this._ensureEnabled();
     try {
       // Verify client credentials
       if (clientSecret !== this.OAUTH_CLIENT_SECRET) {
@@ -171,6 +186,7 @@ class OAuthService {
    * تدفق كلمة مرور مالك المورد
    */
   async initiateResourceOwnerPasswordFlow(username, password, scope, clientId) {
+    this._ensureEnabled();
     try {
       // This would typically validate against your user database
       // For security, this flow should only be used for trusted clients
@@ -204,6 +220,7 @@ class OAuthService {
    * إرجاع معلومات المستخدم
    */
   async getUserInfo(accessToken) {
+    this._ensureEnabled();
     try {
       // Verify token and get user information
       const introspection = await this.ssoService.introspectToken(accessToken);
@@ -238,6 +255,7 @@ class OAuthService {
    * نقطة نهاية التوكن
    */
   async getTokens(grantType, params) {
+    this._ensureEnabled();
     try {
       switch (grantType) {
         case 'authorization_code':
@@ -280,6 +298,7 @@ class OAuthService {
    * تحديث التوكن
    */
   async refreshTokenGrant(refreshToken, clientId) {
+    this._ensureEnabled();
     try {
       // This would parse the refresh token and generate new access token
       const newSession = await this.ssoService.refreshAccessToken(null, refreshToken);
@@ -358,6 +377,7 @@ class OAuthService {
    * دعم PKCE لحماية العملاء العامين
    */
   async verifyPKCE(codeVerifier, codeChallenge, method = 'S256') {
+    this._ensureEnabled();
     try {
       let computedChallenge;
 
@@ -387,6 +407,7 @@ class OAuthService {
    * إلغاء التوكن
    */
   async revokeToken(token, tokenTypeHint = 'access_token') {
+    this._ensureEnabled();
     try {
       // In production, would invalidate token in Redis
       logger.info(`Token revoked: type=${tokenTypeHint}`);
@@ -402,6 +423,7 @@ class OAuthService {
    * تسجيل عميل ديناميكي
    */
   async registerClient(clientMetadata) {
+    this._ensureEnabled();
     try {
       const clientId = crypto.randomBytes(16).toString('hex');
       const clientSecret = crypto.randomBytes(32).toString('hex');
@@ -431,6 +453,7 @@ class OAuthService {
    * فحص البيانات الوصفية للتوكن
    */
   async introspectToken(token, clientId) {
+    this._ensureEnabled();
     try {
       const introspection = await this.ssoService.introspectToken(token);
 

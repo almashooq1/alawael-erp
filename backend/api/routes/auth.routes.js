@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 
 const logger = require('../../utils/logger');
 
@@ -26,6 +27,25 @@ const { authenticateToken } = require('../../middleware/auth');
 const tokenBlacklist = require('../../utils/tokenBlacklist');
 const { jwtSecret, jwtRefreshSecret } = require('../../config/secrets');
 
+// Session model for concurrent-session tracking
+let Session;
+try {
+  Session = require('../../models/Session');
+} catch {
+  Session = null;
+}
+
+// Email service for password-reset flows
+let emailService;
+try {
+  emailService = require('../../services/emailService');
+} catch {
+  emailService = null;
+}
+
+// Max concurrent sessions per user (configurable via env)
+const MAX_CONCURRENT_SESSIONS = parseInt(process.env.MAX_CONCURRENT_SESSIONS, 10) || 5;
+
 // JWT
 const JWT_SECRET = jwtSecret;
 const JWT_REFRESH_SECRET = jwtRefreshSecret;
@@ -45,12 +65,12 @@ router.post('/register', createAccountLimiter, validateRegistration, async (req,
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       logSecurityEvent('REGISTRATION_ATTEMPT_EXISTING_EMAIL', {
-        email,
+        email: email.replace(/(.{2}).*(@.*)/, '$1***$2'),
         ip: getClientIP(req),
       });
       return res.status(400).json({
         success: false,
-        message: 'Email already registered',
+        message: 'Registration failed. Please check your details and try again.',
       });
     }
 
@@ -74,12 +94,12 @@ router.post('/register', createAccountLimiter, validateRegistration, async (req,
 
     // Generate tokens
     const accessToken = jwt.sign(
-      { userId: user.id, email: user.email, role: user.role },
+      { userId: user.id, email: user.email, role: user.role, jti: crypto.randomUUID() },
       JWT_SECRET,
       { expiresIn: ACCESS_TOKEN_EXPIRY }
     );
     const refreshToken = jwt.sign(
-      { userId: user.id, email: user.email, role: user.role, type: 'refresh' },
+      { userId: user.id, email: user.email, role: user.role, type: 'refresh', jti: crypto.randomUUID() },
       JWT_REFRESH_SECRET,
       { expiresIn: REFRESH_TOKEN_EXPIRY }
     );
@@ -127,7 +147,7 @@ router.post('/login', authLimiter, async (req, res) => {
     // Find user — must select password explicitly (field has select: false)
     const user = await User.findOne({ email }).select('+password +failedLoginAttempts +lockUntil');
     if (!user) {
-      logger.error('❌ Login failed: User not found for email:', email);
+      logger.error('❌ Login failed: User not found for email:', email.replace(/(.{2}).*(@.*)/, '$1***$2'));
       return res.status(401).json({
         success: false,
         message: 'Invalid email or password',
@@ -154,7 +174,7 @@ router.post('/login', authLimiter, async (req, res) => {
     if (!isPasswordValid) {
       // Increment failed attempts (may trigger lock)
       await user.incLoginAttempts();
-      logger.error('❌ Login failed: Invalid password for email:', email);
+      logger.error('❌ Login failed: Invalid password for email:', email.replace(/(.{2}).*(@.*)/, '$1***$2'));
       logSecurityEvent('FAILED_LOGIN', {
         email,
         ip: getClientIP(req),
@@ -171,21 +191,47 @@ router.post('/login', authLimiter, async (req, res) => {
       await user.resetLoginAttempts();
     }
 
-    // Generate token
+    // Generate token with unique jti for per-token revocation
+    const accessJti = crypto.randomUUID();
     const accessToken = jwt.sign(
-      { userId: user.id, email: user.email, role: user.role },
+      { userId: user.id, email: user.email, role: user.role, jti: accessJti },
       JWT_SECRET,
       {
         expiresIn: ACCESS_TOKEN_EXPIRY,
       }
     );
 
-    // Generate refresh token
+    // Generate refresh token with unique jti
+    const refreshJti = crypto.randomUUID();
     const refreshToken = jwt.sign(
-      { userId: user.id, email: user.email, role: user.role, type: 'refresh' },
+      { userId: user.id, email: user.email, role: user.role, type: 'refresh', jti: refreshJti },
       JWT_REFRESH_SECRET,
       { expiresIn: REFRESH_TOKEN_EXPIRY }
     );
+
+    // Track session in database (concurrent session management)
+    if (Session) {
+      try {
+        // Enforce concurrent session limit
+        const activeSessions = await Session.countDocuments({ userId: user._id, isActive: true });
+        if (activeSessions >= MAX_CONCURRENT_SESSIONS) {
+          // Deactivate oldest session
+          const oldest = await Session.findOne({ userId: user._id, isActive: true }).sort({ createdAt: 1 });
+          if (oldest) await oldest.terminate();
+        }
+        await Session.create({
+          userId: user._id,
+          token: accessJti,
+          refreshToken: refreshJti,
+          ipAddress: getClientIP(req),
+          userAgent: req.headers['user-agent'] || 'unknown',
+          isActive: true,
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+        });
+      } catch (sessionErr) {
+        logger.warn('Session tracking failed (non-blocking):', sessionErr.message);
+      }
+    }
 
     logSecurityEvent('LOGIN_SUCCESS', {
       email,
@@ -261,14 +307,14 @@ router.post('/refresh', async (req, res) => {
       await tokenBlacklist.add(refreshToken, oldTtl);
     }
 
-    // Generate new token pair
+    // Generate new token pair with unique jti claims
     const newAccessToken = jwt.sign(
-      { userId: user._id, email: user.email, role: user.role },
+      { userId: user._id, email: user.email, role: user.role, jti: crypto.randomUUID() },
       JWT_SECRET,
       { expiresIn: ACCESS_TOKEN_EXPIRY }
     );
     const newRefreshToken = jwt.sign(
-      { userId: user._id, email: user.email, role: user.role, type: 'refresh' },
+      { userId: user._id, email: user.email, role: user.role, type: 'refresh', jti: crypto.randomUUID() },
       JWT_REFRESH_SECRET,
       { expiresIn: REFRESH_TOKEN_EXPIRY }
     );
@@ -475,12 +521,12 @@ router.post(
 
       // Issue fresh tokens so the user stays logged in with the new password
       const newAccessToken = jwt.sign(
-        { userId: user.id, email: user.email, role: user.role },
+        { userId: user.id, email: user.email, role: user.role, jti: crypto.randomUUID() },
         JWT_SECRET,
         { expiresIn: ACCESS_TOKEN_EXPIRY }
       );
       const newRefreshToken = jwt.sign(
-        { userId: user.id, email: user.email, role: user.role, type: 'refresh' },
+        { userId: user.id, email: user.email, role: user.role, type: 'refresh', jti: crypto.randomUUID() },
         JWT_REFRESH_SECRET,
         { expiresIn: REFRESH_TOKEN_EXPIRY }
       );
@@ -503,5 +549,171 @@ router.post(
     }
   }
 );
+
+// ─── Forgot Password ────────────────────────────────────────────────────────
+/**
+ * @route   POST /api/auth/forgot-password
+ * @desc    Request password reset link
+ * @access  Public
+ */
+router.post('/forgot-password', passwordLimiter, async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ success: false, message: 'Email is required' });
+    }
+
+    // Always return the same response to prevent email enumeration
+    const genericMsg = 'If that email is registered, a reset link has been sent.';
+
+    const user = await User.findOne({ email }).select('+resetPasswordToken +resetPasswordExpires');
+    if (!user) {
+      logSecurityEvent('FORGOT_PASSWORD_UNKNOWN_EMAIL', { ip: getClientIP(req) });
+      return res.json({ success: true, message: genericMsg });
+    }
+
+    // Generate cryptographic reset token
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const resetTokenHash = crypto.createHash('sha256').update(resetToken).digest('hex');
+
+    user.resetPasswordToken = resetTokenHash;
+    user.resetPasswordExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+    await user.save();
+
+    // Send reset email (non-blocking — failure does NOT expose existence)
+    const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
+    if (emailService && emailService.sendEmail) {
+      emailService.sendEmail(user.email, 'passwordReset', { resetUrl, fullName: user.fullName }).catch(err => {
+        logger.error('Failed to send reset email:', err.message);
+      });
+    }
+
+    logSecurityEvent('FORGOT_PASSWORD_REQUESTED', {
+      userId: user.id,
+      ip: getClientIP(req),
+    });
+
+    return res.json({ success: true, message: genericMsg });
+  } catch (error) {
+    logger.error('Forgot password error:', error.message);
+    return res.status(500).json({ success: false, message: 'Internal error' });
+  }
+});
+
+/**
+ * @route   POST /api/auth/reset-password
+ * @desc    Reset password using token
+ * @access  Public
+ */
+router.post('/reset-password', passwordLimiter, async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+    if (!token || !newPassword) {
+      return res.status(400).json({ success: false, message: 'Token and new password are required' });
+    }
+
+    // Enforce password complexity (same rules as registration)
+    if (newPassword.length < 8) {
+      return res.status(400).json({ success: false, message: 'Password must be at least 8 characters' });
+    }
+    if (!/[A-Z]/.test(newPassword) || !/[a-z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
+      return res.status(400).json({ success: false, message: 'Password must contain uppercase, lowercase, and a number' });
+    }
+
+    // Hash the token and find user
+    const resetTokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    const user = await User.findOne({
+      resetPasswordToken: resetTokenHash,
+      resetPasswordExpires: { $gt: new Date() },
+    }).select('+password +resetPasswordToken +resetPasswordExpires');
+
+    if (!user) {
+      return res.status(400).json({ success: false, message: 'Invalid or expired reset token' });
+    }
+
+    // Hash and save new password
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    user.tokenVersion = (user.tokenVersion || 0) + 1;
+    user.passwordChangedAt = new Date();
+    await user.save();
+
+    // Terminate all existing sessions
+    if (Session) {
+      await Session.terminateAllForUser(user._id).catch(() => {});
+    }
+
+    logSecurityEvent('PASSWORD_RESET_SUCCESS', {
+      userId: user.id,
+      ip: getClientIP(req),
+    });
+
+    return res.json({ success: true, message: 'Password reset successful. Please log in.' });
+  } catch (error) {
+    logger.error('Reset password error:', error.message);
+    return res.status(500).json({ success: false, message: 'Internal error' });
+  }
+});
+
+// ─── Session Management ─────────────────────────────────────────────────────
+/**
+ * @route   GET /api/auth/sessions
+ * @desc    List current user's active sessions
+ * @access  Private
+ */
+router.get('/sessions', authenticateToken, async (req, res) => {
+  try {
+    if (!Session) {
+      return res.json({ success: true, data: [] });
+    }
+    const sessions = await Session.getActiveSessions(req.user.userId);
+    return res.json({
+      success: true,
+      data: sessions.map(s => ({
+        id: s._id,
+        ipAddress: s.ipAddress,
+        userAgent: s.userAgent,
+        lastActivity: s.lastActivity,
+        createdAt: s.createdAt,
+      })),
+    });
+  } catch (error) {
+    logger.error('List sessions error:', error.message);
+    return res.status(500).json({ success: false, message: 'Failed to list sessions' });
+  }
+});
+
+/**
+ * @route   DELETE /api/auth/sessions/:id
+ * @desc    Revoke a specific session
+ * @access  Private
+ */
+router.delete('/sessions/:id', authenticateToken, async (req, res) => {
+  try {
+    if (!Session) {
+      return res.json({ success: true, message: 'Session revoked' });
+    }
+    const session = await Session.findOne({ _id: req.params.id, userId: req.user.userId });
+    if (!session) {
+      return res.status(404).json({ success: false, message: 'Session not found' });
+    }
+    await session.terminate();
+    // Blacklist the token so it cannot be reused
+    if (session.token) {
+      await tokenBlacklist.add(`jti:${session.token}`, 86400).catch(() => {});
+    }
+    logSecurityEvent('SESSION_REVOKED', {
+      userId: req.user.userId,
+      sessionId: req.params.id,
+      ip: getClientIP(req),
+    });
+    return res.json({ success: true, message: 'Session revoked' });
+  } catch (error) {
+    logger.error('Revoke session error:', error.message);
+    return res.status(500).json({ success: false, message: 'Failed to revoke session' });
+  }
+});
 
 module.exports = router;

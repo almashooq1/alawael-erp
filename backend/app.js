@@ -317,7 +317,11 @@ app.use('/api', apiLimiterWithPhase2933Skip);
 
 // ─── Swagger (consolidated via config/swagger.config.js) ─────────────────────
 const { setupSwagger } = require('./config/swagger.config');
-if (process.env.NODE_ENV === 'development') {
+// Enable Swagger in all environments except test; controlled via ENABLE_SWAGGER env var
+const enableSwagger = process.env.ENABLE_SWAGGER
+  ? process.env.ENABLE_SWAGGER === 'true'
+  : process.env.NODE_ENV !== 'test';
+if (enableSwagger) {
   setupSwagger(app);
 }
 

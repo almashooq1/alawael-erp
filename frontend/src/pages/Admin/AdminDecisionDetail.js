@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import DOMPurify from 'dompurify';
 import administrationService from '../../services/administration.service';
 import {
   Box,
@@ -494,7 +495,7 @@ export default function AdminDecisionDetail() {
             <Paper variant="outlined" sx={{ p: 2, mt: 1 }}>
               <Typography
                 sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.8 }}
-                dangerouslySetInnerHTML={{ __html: decision.body }}
+                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(decision.body || '') }}
               />
             </Paper>
           </Box>

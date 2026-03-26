@@ -94,6 +94,34 @@ const createIndexes = async () => {
     await safeIndex('RefreshToken', { token: 1 }, { unique: true });
     await safeIndex('RefreshToken', { userId: 1, expiresAt: -1 });
 
+    // ────── Beneficiary (core business entity) ──────
+    await safeIndex('Beneficiary', { beneficiaryId: 1 }, { unique: true, sparse: true });
+    await safeIndex('Beneficiary', { status: 1, createdAt: -1 });
+    await safeIndex('Beneficiary', { guardianId: 1 });
+    await safeIndex('Beneficiary', { branch: 1, status: 1 });
+
+    // ────── TherapySession ──────
+    await safeIndex('TherapySession', { beneficiaryId: 1, sessionDate: -1 });
+    await safeIndex('TherapySession', { therapistId: 1, status: 1 });
+    await safeIndex('TherapySession', { sessionDate: -1 });
+
+    // ────── Attendance ──────
+    await safeIndex('Attendance', { employeeId: 1, date: -1 });
+    await safeIndex('Attendance', { studentId: 1, date: -1 });
+    await safeIndex('Attendance', { date: -1, status: 1 });
+
+    // ────── Leave ──────
+    await safeIndex('Leave', { employeeId: 1, status: 1, startDate: -1 });
+    await safeIndex('Leave', { status: 1, startDate: -1 });
+
+    // ────── Payroll ──────
+    await safeIndex('Payroll', { employeeId: 1, month: 1, year: 1 });
+    await safeIndex('Payroll', { status: 1, createdAt: -1 });
+
+    // ────── Assessment ──────
+    await safeIndex('Assessment', { beneficiaryId: 1, assessmentDate: -1 });
+    await safeIndex('Assessment', { assessorId: 1, status: 1 });
+
     logger.info('✅ Database indexes verified/created successfully');
   } catch (error) {
     logger.error('❌ Error creating indexes:', error.message);
